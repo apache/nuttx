@@ -129,6 +129,7 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
+	select ARCH_MINIMAL_VECTORTABLE
 	---help---
 		ESP32-C3 chip with a single RISC-V IMC core, no embedded Flash memory
 
@@ -162,6 +163,7 @@ config ARCH_CHIP_ESP32C6
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
+	select ARCH_MINIMAL_VECTORTABLE
 	---help---
 		Espressif ESP32-C6 (RV32IMAC).
 
@@ -194,6 +196,7 @@ config ARCH_CHIP_ESP32H2
 	select ARCH_HAVE_RAMFUNCS
 	select ONESHOT_COUNT if ONESHOT
 	select ONESHOT_FAST_DIVISION if ONESHOT
+	select ARCH_MINIMAL_VECTORTABLE
 	---help---
 		Espressif ESP32-H2 (RV32IMC).
 

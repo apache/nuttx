@@ -59,7 +59,7 @@
 #include "hal/i2c_ll.h"
 #include "soc/system_reg.h"
 #include "soc/gpio_sig_map.h"
-#include "soc/i2c_periph.h"
+#include "hal/i2c_periph.h"
 #include "esp_clk_tree.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32C6)
 #  include "soc/pcr_reg.h"
@@ -228,8 +228,6 @@ struct esp_i2c_priv_s
 
   uint32_t id;                 /* I2C instance */
 
-  periph_module_t module;      /* Peripheral module */
-
   /* Port configuration */
 
   struct esp_i2c_config_s *config;
@@ -355,7 +353,6 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
 {
   .ops        = &esp_i2c_ops,
   .id         = 0,
-  .module     = PERIPH_I2C0_MODULE,
   .config     = &esp_i2c0_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
@@ -397,7 +394,6 @@ static struct esp_i2c_priv_s esp_i2c1_priv =
 {
   .ops        = &esp_i2c_ops,
   .id         = 1,
-  .module     = PERIPH_I2C1_MODULE,
   .config     = &esp_i2c1_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
@@ -442,7 +438,6 @@ static struct esp_i2c_priv_s esp_lp_i2c0_priv =
 {
   .ops        = &esp_i2c_ops,
   .id         = LP_I2C_NUM_0,
-  .module     = PERIPH_LP_I2C0_MODULE,
   .config     = &esp_lp_i2c0_config,
   .refs       = 0,
   .lock       = NXMUTEX_INITIALIZER,
@@ -1715,25 +1710,13 @@ struct i2c_master_s *esp_i2cbus_initialize(int port)
 
   priv->cpuint = esp_setup_irq(i2c_periph_signal[priv->id].irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp_i2c_irq,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      priv->refs--;
-      nxmutex_unlock(&priv->lock);
-
-      return NULL;
-    }
-
-  ret = irq_attach(ESP_SOURCE2IRQ(i2c_periph_signal[priv->id].irq),
-                   esp_i2c_irq, priv);
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, free the allocated CPU interrupt */
-
-      esp_teardown_irq(i2c_periph_signal[priv->id].irq, priv->cpuint);
-      priv->cpuint = -ENOMEM;
       priv->refs--;
       nxmutex_unlock(&priv->lock);
 

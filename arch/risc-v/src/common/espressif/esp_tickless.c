@@ -431,15 +431,13 @@ void up_timer_initialize(void)
                                         true);
   systimer_hal_enable_counter(&systimer_hal, SYSTIMER_COUNTER_OS_TICK);
 
-  esp_setup_irq(SYSTIMER_TARGET0_EDGE_INTR_SOURCE,
+  esp_setup_irq(ETS_SYSTIMER_TARGET0_INTR_SOURCE,
                 ESP_IRQ_PRIORITY_DEFAULT,
-                SYSTIMER_TRIGGER_TYPE);
-
-  /* Attach the timer interrupt. */
-
-  irq_attach(ESP_IRQ_SYSTIMER_TARGET0_EDGE, (xcpt_t)esp_tickless_isr, NULL);
+                SYSTIMER_TRIGGER_TYPE,
+                esp_tickless_isr,
+                NULL);
 
   /* Enable the allocated CPU interrupt. */
 
-  up_enable_irq(ESP_IRQ_SYSTIMER_TARGET0_EDGE);
+  up_enable_irq(ESP_SOURCE2IRQ(ETS_SYSTIMER_TARGET0_INTR_SOURCE));
 }

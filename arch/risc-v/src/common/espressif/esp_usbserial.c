@@ -280,7 +280,6 @@ static void esp_rxint(struct uart_dev_s *dev, bool enable)
 static int esp_attach(struct uart_dev_s *dev)
 {
   struct esp_priv_s *priv = dev->priv;
-  int ret;
 
   DEBUGASSERT(priv->cpuint == -ENOMEM);
 
@@ -297,7 +296,9 @@ static int esp_attach(struct uart_dev_s *dev)
 
   priv->cpuint = esp_setup_irq(priv->source,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp_interrupt,
+                               dev);
   if (priv->cpuint < 0)
     {
       return priv->cpuint;
@@ -305,8 +306,7 @@ static int esp_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, esp_interrupt, dev);
-  if (ret == OK)
+  if (priv->cpuint >= 0)
     {
       up_enable_irq(priv->irq);
     }
@@ -315,7 +315,7 @@ static int esp_attach(struct uart_dev_s *dev)
       up_disable_irq(priv->irq);
     }
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

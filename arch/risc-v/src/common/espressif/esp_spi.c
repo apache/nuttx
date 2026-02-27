@@ -51,10 +51,6 @@
 #include "esp_irq.h"
 #include "esp_gpio.h"
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
-#include "esp_dma.h"
-#endif
-
 #include "riscv_internal.h"
 
 #include "esp_cache.h"
@@ -68,8 +64,9 @@
 #include "hal/hal_utils.h"
 #include "periph_ctrl.h"
 #include "esp_private/spi_share_hw_ctrl.h"
-#include "soc/gdma_periph.h"
+#include "hal/gdma_periph.h"
 #include "hal/gdma_ll.h"
+#include "hal/dma_types.h"
 #include "esp_memory_utils.h"
 
 #if SOC_GDMA_SUPPORTED
@@ -185,6 +182,10 @@ typedef dma_descriptor_align4_t spi_dma_desc_t;
 #define spi_dma_start(chan, addr)   gdma_start(chan, (intptr_t)(addr))
 #endif
 
+/* peripheral hardware limitation for clock source into peripheral */
+
+#define SPI_PERIPH_SRC_FREQ_MAX     (80*1000*1000)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -228,6 +229,11 @@ struct esp_spi_priv_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#if SPI_LL_SUPPORT_CLK_SRC_PRE_DIV
+static uint32_t spi_find_clock_src_pre_div(uint32_t src_freq,
+                                           uint32_t target_freq);
+#endif //SPI_LL_SUPPORT_CLK_SRC_PRE_DIV
 
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
 static uint32_t spi_common_dma_setup(int chan, bool tx,
@@ -401,6 +407,39 @@ static uint32_t blank_arr[SPI_BLANK_ARRAY_SIZE];
  * Private Functions
  ****************************************************************************/
 
+#if SPI_LL_SUPPORT_CLK_SRC_PRE_DIV
+static uint32_t spi_find_clock_src_pre_div(uint32_t src_freq,
+                                           uint32_t target_freq)
+{
+  /* pre division must be even and at least 2 */
+
+  uint32_t total_div;
+  uint32_t pre_div;
+  uint32_t min_div = ((src_freq / SPI_PERIPH_SRC_FREQ_MAX) + 1) & (~0x01ul);
+
+  min_div = min_div < 2 ? 2 : min_div;
+
+  total_div = src_freq / target_freq;
+
+  /* Loop the `div` to find a divisible value of `total_div` */
+
+  for (pre_div = min_div;
+       pre_div <= MIN(total_div, SPI_LL_SRC_PRE_DIV_MAX);
+       pre_div += 2)
+    {
+      if ((total_div % pre_div) ||
+          (total_div / pre_div) > SPI_LL_PERIPH_CLK_DIV_MAX)
+        {
+          continue;
+        }
+
+      return pre_div;
+    }
+
+  return min_div;
+}
+#endif //SPI_LL_SUPPORT_CLK_SRC_PRE_DIV
+
 /****************************************************************************
  * Name: spi_common_dma_setup
  *
@@ -443,7 +482,7 @@ static uint32_t spi_common_dma_setup(int chan, bool tx,
 
   for (i = 0; i < num; i++)
     {
-      data_len = MIN(bytes, ESPRESSIF_DMA_BUFLEN_MAX);
+      data_len = MIN(bytes, DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED);
 
       /* Buffer length must be rounded to next 32-bit boundary. */
 
@@ -614,24 +653,9 @@ static uint32_t esp_spi_setfrequency(struct spi_dev_s *dev,
     }
 
 #if SPI_LL_SUPPORT_CLK_SRC_PRE_DIV
-  if (clock_source_hz / 2 > (80 * 1000000))
-    {
-      /* clock_source_hz beyond peripheral HW limitation, calc pre-divider */
-
-      hal_utils_clk_info_t clk_cfg =
-        {
-          .src_freq_hz = clock_source_hz,
-          .exp_freq_hz = frequency * 2,  /* we have (hs_clk = 2*mst_clk), calc hs_clk first */
-          .round_opt = HAL_DIV_ROUND,
-          .min_integ = 1,
-          .max_integ = SPI_LL_CLK_SRC_PRE_DIV_MAX / 2,
-        };
-
-      hal_utils_calc_clk_div_integer(&clk_cfg, &clock_source_div);
-    }
-
-  clock_source_div *= 2;                /* convert to mst_clk function divider */
-  clock_source_hz /= clock_source_div;  /* actual freq enter to SPI peripheral */
+  clock_source_div = spi_find_clock_src_pre_div(clock_source_hz,
+                                                SPI_DEFAULT_FREQ);
+  clock_source_hz /= clock_source_div; /* actual freq enter to SPI peripheral */
 #endif
 
   priv->timing_param->clk_src_hz = clock_source_hz;
@@ -1308,24 +1332,21 @@ void esp_spi_dma_init(struct spi_dev_s *dev)
   struct esp_spi_priv_s *priv = (struct esp_spi_priv_s *)dev;
   gdma_channel_alloc_config_t tx_handle =
     {
-      .direction = GDMA_CHANNEL_DIRECTION_TX,
-      .flags.reserve_sibling = 1,
+      0
     };
 
   gdma_channel_alloc_config_t rx_handle =
     {
-      .direction = GDMA_CHANNEL_DIRECTION_RX,
+      0
     };
 
   /* Request a GDMA channel for SPI peripheral */
 
-  SPI_GDMA_NEW_CHANNEL(&tx_handle, &priv->dma_channel_tx);
+  SPI_GDMA_NEW_CHANNEL(&tx_handle, &priv->dma_channel_tx, NULL);
   gdma_connect(priv->dma_channel_tx,
                GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
 
-  rx_handle.sibling_chan = priv->dma_channel_tx;
-
-  SPI_GDMA_NEW_CHANNEL(&rx_handle, &priv->dma_channel_rx);
+  SPI_GDMA_NEW_CHANNEL(&rx_handle, NULL, &priv->dma_channel_rx);
   gdma_connect(priv->dma_channel_rx,
                GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
 }
@@ -1398,7 +1419,7 @@ static void esp_spi_init(struct spi_dev_s *dev)
                       spi_periph_signal[priv->id].spiclk_out, 0, 0);
 #endif
 
-  SPI_COMMON_RCC_CLOCK_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       spi_ll_enable_bus_clock(priv->id, true);
       spi_ll_reset_register(priv->id);
@@ -1464,7 +1485,7 @@ static void esp_spi_deinit(struct spi_dev_s *dev)
 #  endif
 #endif
 
-  SPI_COMMON_RCC_CLOCK_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       spi_ll_enable_bus_clock(priv->id, false);
     }
@@ -1557,24 +1578,14 @@ struct spi_dev_s *esp_spibus_initialize(int port)
 
   priv->cpuint = esp_setup_irq(spi_periph_signal[priv->id].irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp_spi_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
       nxmutex_unlock(&priv->lock);
-      return NULL;
-    }
-
-  if (irq_attach(ESP_SOURCE2IRQ(spi_periph_signal[priv->id].irq),
-                 esp_spi_interrupt, priv) != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp_teardown_irq(spi_periph_signal[priv->id].irq, priv->cpuint);
-      priv->cpuint = -ENOMEM;
-      nxmutex_unlock(&priv->lock);
-
       return NULL;
     }
 

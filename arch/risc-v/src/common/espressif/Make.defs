@@ -69,10 +69,6 @@ ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
 	CHIP_CSRCS += esp_hr_timer.c esp_ets_timer_legacy.c
 endif
 
-ifeq ($(CONFIG_ESPRESSIF_DMA),y)
-	CHIP_CSRCS += esp_dma.c
-endif
-
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 	CHIP_CSRCS += esp_efuse.c
 endif
@@ -150,7 +146,7 @@ ifeq ($(CONFIG_ESPRESSIF_SPIFLASH),y)
 	endif
 endif
 
-ifeq ($(CONFIG_ESP_WIRELESS),y)
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 	ifeq ($(CONFIG_ESPRESSIF_WIFI),y)
 		CHIP_CSRCS += esp_wifi_event_handler.c
 		CHIP_CSRCS += esp_wifi_api.c
@@ -207,7 +203,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = bb255ca422f4b4d60c9f4f74dbdf51316dc2b669
+	ESP_HAL_3RDPARTY_VERSION = a85ce2f1bad9f745090146eb30a18d91b8ddd309
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL
@@ -247,11 +243,14 @@ chip/$(ESP_HAL_3RDPARTY_REPO):
 	$(Q) echo "Cloning Espressif HAL for 3rd Party Platforms"
 	$(Q) $(call CLONE_ESP_HAL_3RDPARTY_REPO)
 ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
+	$(Q) echo "Espressif HAL for 3rd Party Platforms: cleaning current repository..."
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) clean -ffdx
+	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) reset --quiet --hard --recurse-submodules || true
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: ${ESP_HAL_3RDPARTY_VERSION}"
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) checkout --quiet $(ESP_HAL_3RDPARTY_VERSION)
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/mbedtls/mbedtls
 endif
-ifeq ($(CONFIG_ESP_WIRELESS),y)
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 ifneq ($(USE_NXTMPDIR_ESP_REPO_DIRECTLY),y)
 	$(Q) echo "Espressif HAL for 3rd Party Platforms: initializing submodules..."
 	$(Q) git -C chip/$(ESP_HAL_3RDPARTY_REPO) submodule --quiet update --init $(GIT_DEPTH_PARAMETER) components/esp_phy/lib components/esp_wifi/lib components/bt/controller/lib_esp32c3_family components/esp_coex/lib
@@ -265,7 +264,7 @@ include common$(DELIM)espressif$(DELIM)Bootloader.mk
 
 # Silent preprocessor warnings
 
-CFLAGS += -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion
+CFLAGS += -Wno-shadow -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion -Wno-deprecated-declarations
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 
@@ -273,7 +272,7 @@ CHIP_SERIES = $(patsubst "%",%,$(CONFIG_ESPRESSIF_CHIP_SERIES))
 
 include chip/hal_${CHIP_SERIES}.mk
 
-ifeq ($(CONFIG_ESP_WIRELESS),y)
+ifeq ($(CONFIG_ESPRESSIF_WIRELESS),y)
 	include common$(DELIM)espressif$(DELIM)Wireless.mk
 endif
 

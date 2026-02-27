@@ -52,6 +52,7 @@
 #include "periph_ctrl.h"
 #include "hal/twai_hal.h"
 #include "hal/twai_ll.h"
+#include "hal/twai_periph.h"
 #include "soc/gpio_sig_map.h"
 #include "soc/reg_base.h"
 
@@ -315,7 +316,7 @@ static int esp_twai_setup(struct can_dev_s *dev)
 
   twai_ll_get_and_clear_intrs(priv->ctx.dev); /* clear latched interrupts */
 
-  irq = twai_controller_periph_signals.controllers[priv->port].irq_id;
+  irq = twai_periph_signals[priv->port].irq_id;
 
   if (priv->cpuint != -ENOMEM)
     {
@@ -326,24 +327,14 @@ static int esp_twai_setup(struct can_dev_s *dev)
 
   priv->cpuint = esp_setup_irq(irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp_twai_interrupt,
+                               dev);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
       ret = priv->cpuint;
-      leave_critical_section(flags);
-
-      return ret;
-    }
-
-  ret = irq_attach(ESP_SOURCE2IRQ(irq), esp_twai_interrupt, dev);
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp_teardown_irq(irq, priv->cpuint);
-      priv->cpuint = -ENOMEM;
       leave_critical_section(flags);
 
       return ret;
@@ -385,15 +376,11 @@ static void esp_twai_shutdown(struct can_dev_s *dev)
     {
       int irq;
 
-      irq = twai_controller_periph_signals.controllers[priv->port].irq_id;
+      irq = twai_periph_signals[priv->port].irq_id;
 
       /* Disable cpu interrupt */
 
       up_disable_irq(ESP_SOURCE2IRQ(irq));
-
-      /* Dissociate the IRQ from the ISR */
-
-      irq_detach(ESP_SOURCE2IRQ(irq));
 
       /* Free cpu interrupt that is attached to this peripheral */
 
@@ -751,6 +738,8 @@ static int esp_twai_interrupt(int irq, void *context, void *arg)
 
   if ((regval & TWAI_LL_INTR_RI) != 0)
     {
+      twai_frame_header_t header;
+
       memset(&hdr, 0, sizeof(hdr));
       memset(data, 0, sizeof(data));
 
@@ -759,11 +748,13 @@ static int esp_twai_interrupt(int irq, void *context, void *arg)
       /* Release the receive buffer */
 
       twai_ll_set_cmd_release_rx_buffer(priv->ctx.dev);
-      twai_ll_parse_frame_buffer(&rx_frame, &id, &dlc, data,
-                                 TWAI_FRAME_MAX_LEN, &flags);
-      hdr.ch_id = id;
-      hdr.ch_dlc = dlc;
-      hdr.ch_rtr = (flags && TWAI_MSG_FLAG_RTR) ? 1 : 0;
+
+      twai_hal_parse_frame(&priv->ctx, &rx_frame, &header, data,
+                           TWAI_FRAME_MAX_LEN);
+
+      hdr.ch_id = header.id;
+      hdr.ch_dlc = header.dlc;
+      hdr.ch_rtr = (header.rtr && TWAI_MSG_FLAG_RTR) ? 1 : 0;
 
       can_receive(dev, &hdr, data);
     }
@@ -814,8 +805,8 @@ struct can_dev_s *esp_twaiinitialize(int port)
 #ifdef CONFIG_ESPRESSIF_TWAI0
   if (port == 0)
     {
-      int tx_sig = twai_controller_periph_signals.controllers[0].tx_sig;
-      int rx_sig = twai_controller_periph_signals.controllers[0].rx_sig;
+      int tx_sig = twai_periph_signals[0].tx_sig;
+      int rx_sig = twai_periph_signals[0].rx_sig;
 
       /* Configure CAN GPIO pins */
 
@@ -833,8 +824,8 @@ struct can_dev_s *esp_twaiinitialize(int port)
 #ifdef CONFIG_ESPRESSIF_TWAI1
   if (port == 1)
     {
-      int tx_sig = twai_controller_periph_signals.controllers[1].tx_sig;
-      int rx_sig = twai_controller_periph_signals.controllers[1].rx_sig;
+      int tx_sig = twai_periph_signals[1].tx_sig;
+      int rx_sig = twai_periph_signals[1].rx_sig;
 
       /* Configure CAN GPIO pins */
 

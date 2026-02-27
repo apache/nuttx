@@ -30,6 +30,26 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
+ * Name: sys_startup_fn
+ *
+ * Description:
+ *   Execute the system layer startup function for the current CPU core.
+ *   This function calls the appropriate startup function from the per-CPU
+ *   startup function array (g_startup_fn) based on the current core ID.
+ *   The SYS_STARTUP_FN() macro retrieves the core ID, indexes into the
+ *   g_startup_fn array, and invokes the corresponding startup function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sys_startup_fn(void);
+
+/****************************************************************************
  * Name: esp_board_initialize
  *
  * Description:

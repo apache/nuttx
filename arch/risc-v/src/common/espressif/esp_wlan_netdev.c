@@ -970,14 +970,14 @@ void IRAM_ATTR esp_wifi_tx_done_cb(uint8_t ifidx,
                                    bool txstatus)
 {
 #ifdef ESP_WLAN_HAS_STA
-  if (ifidx == ESP_IF_WIFI_STA)
+  if (ifidx == WIFI_IF_STA)
     {
       netdev_lower_txdone(&g_wlan_sta.dev);
     }
 #endif
 
 #ifdef ESP_WLAN_HAS_SOFTAP
-  if (ifidx == ESP_IF_WIFI_AP)
+  if (ifidx == WIFI_IF_AP)
     {
       netdev_lower_txdone(&g_wlan_softap.dev);
     }

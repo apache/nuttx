@@ -419,4 +419,3 @@ void esp32c3_gpioirqdisable(int irq)
   up_enable_irq(ESP32C3_IRQ_GPIO);
 }
 #endif
-

@@ -48,17 +48,16 @@
 #include "esp_lowputc.h"
 #include "esp_usbserial.h"
 #include "esp_private/critical_section.h"
-#include "esp_private/uart_share_hw_ctrl.h"
 
 #include "hal/uart_hal.h"
-#include "soc/uart_periph.h"
+#include "hal/uart_periph.h"
 #include "periph_ctrl.h"
 #include "soc/gpio_sig_map.h"
 #ifdef CONFIG_ESPRESSIF_LP_UART
 #  include "lp_core_uart.h"
 #  include "soc/uart_pins.h"
 #  include "hal/rtc_io_hal.h"
-#  include "soc/uart_periph.h"
+#  include "hal/uart_periph.h"
 #  include "driver/rtc_io.h"
 #  include "io_mux.h"
 #endif
@@ -330,19 +329,19 @@ bool esp_lowputc_uart_module_enable(const struct esp_uart_s *priv)
     {
       if (uart_num < SOC_UART_HP_NUM)
         {
-          HP_UART_BUS_CLK_ATOMIC()
+          PERIPH_RCC_ATOMIC()
             {
               uart_ll_enable_bus_clock(uart_num, true);
             }
 
           if (uart_num != CONFIG_ESP_CONSOLE_UART_NUM)
             {
-              HP_UART_BUS_CLK_ATOMIC()
+              PERIPH_RCC_ATOMIC()
                 {
                   uart_ll_reset_register(uart_num);
                 }
 
-              HP_UART_SRC_CLK_ATOMIC()
+              PERIPH_RCC_ATOMIC()
                 {
                   uart_ll_sclk_enable(g_uart_context[uart_num].hal.dev);
                 }
@@ -456,18 +455,21 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
     {
       esp_configgpio(priv->rxpin, INPUT | PULLUP);
       esp_gpio_matrix_in(priv->rxpin,
-                         UART_PERIPH_SIGNAL(priv->id, SOC_UART_RX_PIN_IDX),
+                         UART_PERIPH_SIGNAL(priv->id,
+                                            SOC_UART_PERIPH_SIGNAL_RX),
                          0);
 
       esp_configgpio(priv->txpin, OUTPUT);
       esp_gpio_matrix_out(priv->txpin,
-                          UART_PERIPH_SIGNAL(priv->id, SOC_UART_TX_PIN_IDX),
+                          UART_PERIPH_SIGNAL(priv->id,
+                                             SOC_UART_PERIPH_SIGNAL_TX),
                           0, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
         {
-          uint32_t sig = UART_PERIPH_SIGNAL(priv->id, SOC_UART_RTS_PIN_IDX);
+          uint32_t sig = UART_PERIPH_SIGNAL(priv->id,
+                                            SOC_UART_PERIPH_SIGNAL_RTS);
 
           esp_configgpio(priv->rtspin, OUTPUT);
           esp_gpio_matrix_out(priv->rtspin, sig, 0, 0);
@@ -477,7 +479,8 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
       if (priv->oflow)
         {
-          uint32_t sig = UART_PERIPH_SIGNAL(priv->id, SOC_UART_CTS_PIN_IDX);
+          uint32_t sig = UART_PERIPH_SIGNAL(priv->id,
+                                            SOC_UART_PERIPH_SIGNAL_CTS);
 
           esp_configgpio(priv->ctspin, INPUT | PULLUP);
           esp_gpio_matrix_in(priv->ctspin, sig, 0);

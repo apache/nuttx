@@ -39,6 +39,8 @@
 #include "esp_board_spiflash.h"
 #include "esp_board_i2c.h"
 
+#include "espressif/esp_start.h"
+
 #ifdef CONFIG_ESPRESSIF_ADC
 #  include "esp_board_adc.h"
 #endif
@@ -211,13 +213,13 @@ int esp_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP_RMT
-  ret = board_rmt_txinitialize(RMT_TXCHANNEL, RMT_OUTPUT_PIN);
+  ret = board_rmt_txinitialize(RMT_OUTPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);
     }
 
-  ret = board_rmt_rxinitialize(RMT_RXCHANNEL, RMT_INPUT_PIN);
+  ret = board_rmt_rxinitialize(RMT_INPUT_PIN);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_rmt_txinitialize() failed: %d\n", ret);

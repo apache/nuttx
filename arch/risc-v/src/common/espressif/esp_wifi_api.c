@@ -282,7 +282,16 @@ int esp_wifi_api_start(uint32_t start_mode)
       goto errout;
     }
 
-  wlinfo("Wi-Fi started with mode=%d\n", mode);
+  ret = esp_wifi_get_mode(&current_mode);
+  if (ret)
+    {
+      wlerr("Failed to get Wi-Fi mode ret=%d. Check if initialized\n",
+            ret);
+      ret = esp_wifi_to_errno(ret);
+      goto errout;
+    }
+
+  wlinfo("Wi-Fi started with mode=%d\n", current_mode);
 
 errout:
   esp_wifi_lock(false);

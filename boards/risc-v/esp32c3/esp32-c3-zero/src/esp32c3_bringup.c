@@ -38,6 +38,8 @@
 
 #include "esp_board_ledc.h"
 
+#include "espressif/esp_start.h"
+
 #ifdef CONFIG_ESPRESSIF_ADC
 #  include "esp_board_adc.h"
 #endif

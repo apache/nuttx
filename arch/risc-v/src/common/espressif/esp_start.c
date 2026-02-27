@@ -51,24 +51,30 @@
 #include "hal/cache_types.h"
 #include "hal/cache_ll.h"
 #include "hal/cache_hal.h"
+#include "hal/rwdt_ll.h"
 #include "soc/ext_mem_defs.h"
-#include "soc/extmem_reg.h"
-#include "soc/mmu.h"
 #include "soc/reg_base.h"
 #include "spi_flash_mmap.h"
 #include "rom/cache.h"
+#include "soc/soc.h"
+#include "soc/soc_caps.h"
 #include "soc/rtc.h"
 
 #include "bootloader_init.h"
+#include "bootloader_sha.h"
 
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
-#include "bootloader_flash_priv.h"
-#include "esp_rom_uart.h"
+#include "esp_rom_serial_output.h"
 #include "esp_app_format.h"
 #endif
 
+#include "bootloader_flash_priv.h"
 #include "esp_private/startup_internal.h"
 #include "esp_private/spi_flash_os.h"
+
+#if SOC_APM_SUPPORTED
+#  include "hal/apm_hal.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,31 +88,25 @@
 
 #if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
     defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
-#ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
-#  define PRIMARY_SLOT_OFFSET   CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
-#  define MMU_FLASH_MASK        (~(MMU_BLOCK_SIZE - 1))
-#else
-/* Force offset to the beginning of the whole image
- */
-
-#  define PRIMARY_SLOT_OFFSET   0
-#endif
+#  ifdef CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT
+#    define PRIMARY_SLOT_OFFSET   CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET
+#  else
+#    define PRIMARY_SLOT_OFFSET   0  /* Force offset to the beginning of the whole image */
+#  endif
 #  define HDR_ATTR              __attribute__((section(".entry_addr"))) \
-                                  __attribute__((used))
-#  define FLASH_MMU_TABLE       ((volatile uint32_t*) DR_REG_MMU_TABLE)
-#  define FLASH_MMU_TABLE_SIZE  (ICACHE_MMU_SIZE/sizeof(uint32_t))
-#  define MMU_BLOCK_SIZE        0x00010000  /* 64 KB */
-#  define CACHE_REG             EXTMEM_ICACHE_CTRL1_REG
-#  define CACHE_MASK            (EXTMEM_ICACHE_SHUT_IBUS_M | \
-                                 EXTMEM_ICACHE_SHUT_DBUS_M)
-
+                                __attribute__((used))
 #  define CHECKSUM_ALIGN        16
 #  define IS_PADD(addr) ((addr) == 0)
+#if defined(SOC_TCM_LOW) || defined(SOC_TCM_HIGH)
+#  define IS_TCM(addr)  ((addr) >= SOC_TCM_LOW && (addr) < SOC_TCM_HIGH)
+#else
+#  define IS_TCM(addr) false
+#endif
 #  define IS_DRAM(addr) ((addr) >= SOC_DRAM_LOW && (addr) < SOC_DRAM_HIGH)
 #  define IS_IRAM(addr) ((addr) >= SOC_IRAM_LOW && (addr) < SOC_IRAM_HIGH)
 #  define IS_IROM(addr) ((addr) >= SOC_IROM_LOW && (addr) < SOC_IROM_HIGH)
 #  define IS_DROM(addr) ((addr) >= SOC_DROM_LOW && (addr) < SOC_DROM_HIGH)
-#  define IS_SRAM(addr) (IS_IRAM(addr) || IS_DRAM(addr))
+#  define IS_SRAM(addr) (IS_TCM(addr) || IS_IRAM(addr) || IS_DRAM(addr))
 #  define IS_MMAP(addr) (IS_IROM(addr) || IS_DROM(addr))
 #  ifdef SOC_RTC_FAST_MEM_SUPPORTED
 #    define IS_RTC_FAST_IRAM(addr) \
@@ -129,6 +129,7 @@
 #  define IS_NONE(addr) (!IS_IROM(addr) \
                          && !IS_DROM(addr) \
                          && !IS_IRAM(addr) \
+                         && !IS_TCM(addr) \
                          && !IS_DRAM(addr) \
                          && !IS_RTC_FAST_IRAM(addr) \
                          && !IS_RTC_FAST_DRAM(addr) \
@@ -137,6 +138,8 @@
 
 #  define IS_MAPPING(addr) IS_IROM(addr) || IS_DROM(addr)
 #endif
+
+#define NAPOT_RWX   (PMPCFG_A_NAPOT | PMPCFG_RWX_MASK)
 
 /****************************************************************************
  * Private Types
@@ -151,6 +154,12 @@ extern uint8_t _image_irom_size[];
 extern uint8_t _image_drom_vma[];
 extern uint8_t _image_drom_lma[];
 extern uint8_t _image_drom_size[];
+#endif
+
+extern int _vector_table;
+
+#if SOC_INT_CLIC_SUPPORTED
+extern int _mtvt_table;
 #endif
 
 /****************************************************************************
@@ -194,30 +203,6 @@ extern uint8_t _rodata_reserved_end[];
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: calc_mmu_pages
- *
- * Description:
- *   Calculate the number of cache pages to map.
- *
- * Input Parameters:
- *   size  - Size of data to map
- *   vaddr - Virtual address where data will be mapped
- *
- * Returned Value:
- *   Number of cache MMU pages required to do the mapping.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
-    defined (CONFIG_ESPRESSIF_SIMPLE_BOOT)
-static inline uint32_t calc_mmu_pages(uint32_t size, uint32_t vaddr)
-{
-  return (size + (vaddr - (vaddr & MMU_FLASH_MASK)) + MMU_BLOCK_SIZE - 1) /
-    MMU_BLOCK_SIZE;
-}
-#endif
 
 /****************************************************************************
  * Name: map_rom_segments
@@ -307,7 +292,8 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
               IS_MMAP(segment_hdr.load_addr) ?
                 IS_IROM(segment_hdr.load_addr) ? "imap" : "dmap" :
                   IS_PADD(segment_hdr.load_addr) ? "padd" :
-                    IS_DRAM(segment_hdr.load_addr) ? "dram" : "iram",
+                    IS_TCM(segment_hdr.load_addr) ? "tcm" :
+                      IS_DRAM(segment_hdr.load_addr) ? "dram" : "iram",
           offset + sizeof(esp_image_segment_header_t),
           segment_hdr.load_addr, segment_hdr.data_len,
           segment_hdr.data_len);
@@ -383,6 +369,12 @@ static int map_rom_segments(uint32_t app_drom_start, uint32_t app_drom_vaddr,
   cache_ll_l1_enable_bus(1, bus_mask);
 #endif
 
+#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
+  cache_ll_invalidate_addr(CACHE_LL_LEVEL_ALL, CACHE_TYPE_ALL,
+                           CACHE_LL_ID_ALL, app_irom_vaddr_aligned,
+                           actual_mapped_len);
+#endif
+
   /* ------------------Enable Cache----------------------------------- */
 
   cache_hal_enable(CACHE_LL_LEVEL_EXT_MEM, CACHE_TYPE_ALL);
@@ -428,12 +420,66 @@ static void IRAM_ATTR NOINLINE_ATTR recalib_bbpll(void)
  * Public Functions
  ****************************************************************************/
 
+extern void esp_chip_revision_check(void);
+
+/****************************************************************************
+ * Name: riscv_soc_initialize
+ *
+ * Description:
+ *   Initialize SoC-specific initialization.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void weak_function riscv_soc_initialize(void)
+{
+  sys_startup_fn();
+}
+
+/****************************************************************************
+ * Name: sys_startup_fn
+ *
+ * Description:
+ *   Execute the system layer startup function for the current CPU core.
+ *   This function calls the appropriate startup function from the per-CPU
+ *   startup function array (g_startup_fn) based on the current core ID.
+ *   The SYS_STARTUP_FN() macro retrieves the core ID, indexes into the
+ *   g_startup_fn array, and invokes the corresponding startup function.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sys_startup_fn(void)
+{
+  SYS_STARTUP_FN();
+}
+
 /****************************************************************************
  * Name: __esp_start
  ****************************************************************************/
 
 void __esp_start(void)
 {
+  esp_cpu_intr_set_ivt_addr(&_vector_table);
+
+#if SOC_INT_CLIC_SUPPORTED
+  /* When hardware vectored interrupts are enabled in CLIC,
+   * the CPU jumps to this base address + 4 * interrupt_id.
+   */
+
+  esp_cpu_intr_set_mtvt_addr(&_mtvt_table);
+#endif
+
 #ifdef CONFIG_ESP_ROM_NEEDS_SET_CACHE_MMU_SIZE
   uint32_t _instruction_size;
   uint32_t cache_mmu_irom_size;
@@ -447,6 +493,11 @@ void __esp_start(void)
     }
 #else
   bootloader_clear_bss_section();
+#endif
+  /* Initialize the per CPU areas */
+
+#ifdef CONFIG_RISCV_PERCPU_SCRATCH
+  riscv_percpu_add_hart(0);
 #endif
 
 #if defined(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT) || \
@@ -552,12 +603,6 @@ void __esp_start(void)
   esp_board_initialize();
 
   showprogress("D");
-
-  SYS_STARTUP_FN();
-
-  showprogress("E");
-
-  /* Bring up NuttX */
 
   nx_start();
 

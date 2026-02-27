@@ -39,7 +39,7 @@
 #include "riscv_internal.h"
 #include "esp_irq.h"
 #include "esp_rtc_gpio.h"
-#include "soc/rtc_io_periph.h"
+#include "hal/rtc_io_periph.h"
 #include "hal/rtc_io_hal.h"
 #include "soc/rtc_cntl_periph.h"
 #include "soc/periph_defs.h"
@@ -55,6 +55,18 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* Structure to store RTC GPIO interrupt handlers */
+
+struct rtcio_handler_s
+{
+  xcpt_t        handler;  /* User interrupt handler */
+  void          *arg;     /* Argument for handler */
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -62,8 +74,8 @@
 #ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
 static int g_rtcio_cpuint;
 static uint32_t last_status;
+static struct rtcio_handler_s g_rtcio_handlers[ESP_NIRQ_RTCIO];
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C3
 static const int rtc_irq_reg_shift[ESP_NIRQ_RTCIO] =
 {
   RTC_CNTL_SLP_WAKEUP_INT_ENA_S,
@@ -77,7 +89,6 @@ static const int rtc_irq_reg_shift[ESP_NIRQ_RTCIO] =
   RTC_CNTL_BBPLL_CAL_INT_ENA_S
 };
 #define RTC_IRQ_REG_SHIFT(x)        rtc_irq_reg_shift[x]
-#endif /* CONFIG_ARCH_CHIP_ESP32C3 */
 #endif /* CONFIG_ESPRESSIF_RTCIO_IRQ */
 
 /****************************************************************************
@@ -100,7 +111,7 @@ static const int rtc_irq_reg_shift[ESP_NIRQ_RTCIO] =
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
-static void rtcio_dispatch(int irq, uint32_t *reg_status)
+static void rtcio_dispatch(int irq, void *context, uint32_t *reg_status)
 {
   uint32_t status = *reg_status;
   uint32_t mask;
@@ -115,11 +126,14 @@ static void rtcio_dispatch(int irq, uint32_t *reg_status)
       mask = (UINT32_C(1) << RTC_IRQ_REG_SHIFT(i));
       if ((status & mask) != 0)
         {
-          /* Yes... perform the second level dispatch. The IRQ context will
-           * contain the contents of the status register.
-           */
+          /* Call the registered handler if one exists */
 
-          irq_dispatch(irq + i, (void *)reg_status);
+          if (g_rtcio_handlers[i].handler != NULL)
+            {
+              g_rtcio_handlers[i].handler(irq,
+                                          (void *)reg_status,
+                                          g_rtcio_handlers[i].arg);
+            }
 
           /* Clear the bit in the status so that we might execute this loop
            * sooner.
@@ -155,7 +169,7 @@ static int rtcio_interrupt(int irq, void *context, void *arg)
 
   /* Dispatch pending interrupts in the RTC status register */
 
-  rtcio_dispatch(ESP_FIRST_RTCIOIRQ, &last_status);
+  rtcio_dispatch(ESP_FIRST_RTCIOIRQ, context, &last_status);
 
   return OK;
 }
@@ -183,16 +197,100 @@ static int rtcio_interrupt(int irq, void *context, void *arg)
 #ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
 void esp_rtcioirqinitialize(void)
 {
+  int i;
+
+  /* Initialize handler array */
+
+  for (i = 0; i < ESP_NIRQ_RTCIO; i++)
+    {
+      g_rtcio_handlers[i].handler = NULL;
+      g_rtcio_handlers[i].arg = NULL;
+    }
+
   /* Setup the RTCIO interrupt. */
 
   g_rtcio_cpuint = esp_setup_irq(ETS_RTC_CORE_INTR_SOURCE,
-                                 1, ESP_IRQ_TRIGGER_LEVEL);
+                                 1, ESP_IRQ_TRIGGER_LEVEL,
+                                 rtcio_interrupt, NULL);
   DEBUGASSERT(g_rtcio_cpuint >= 0);
 
-  /* Attach and enable the interrupt handler */
+  /* Enable the interrupt handler */
 
-  DEBUGVERIFY(irq_attach(ESP_IRQ_RTC_CORE, rtcio_interrupt, NULL));
   up_enable_irq(ESP_IRQ_RTC_CORE);
+}
+
+/****************************************************************************
+ * Name: esp_rtcioirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq     - RTC IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int esp_rtcioirqattach(int irq, xcpt_t handler, void *arg)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP_FIRST_RTCIOIRQ &&
+              irq <= ESP_LAST_RTCIOIRQ);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP_FIRST_RTCIOIRQ;
+
+  DEBUGASSERT(bit >= 0 && bit < ESP_NIRQ_RTCIO);
+
+  /* Store the handler and argument */
+
+  g_rtcio_handlers[bit].handler = handler;
+  g_rtcio_handlers[bit].arg = arg;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_rtcioirqdetach
+ *
+ * Description:
+ *   Detach an interrupt handler from a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq - RTC IRQ number to detach the handler from
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int esp_rtcioirqdetach(int irq)
+{
+  int bit;
+
+  DEBUGASSERT(irq >= ESP_FIRST_RTCIOIRQ &&
+              irq <= ESP_LAST_RTCIOIRQ);
+
+  /* Convert the IRQ number to the corresponding bit */
+
+  bit = irq - ESP_FIRST_RTCIOIRQ;
+
+  DEBUGASSERT(bit >= 0 && bit < ESP_NIRQ_RTCIO);
+
+  /* Clear the handler and argument */
+
+  g_rtcio_handlers[bit].handler = NULL;
+  g_rtcio_handlers[bit].arg = NULL;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -271,7 +369,6 @@ void esp_rtcioirqdisable(int irq)
 #endif /* CONFIG_ESPRESSIF_RTCIO_IRQ */
 #endif /* CONFIG_ARCH_CHIP_ESP32C3 */
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C6
 /****************************************************************************
  * Name: esp_rtcio_config_gpio
  *
@@ -287,6 +384,7 @@ void esp_rtcioirqdisable(int irq)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_CHIP_ESP32C6
 int esp_rtcio_config_gpio(int pin, enum esp_rtc_gpio_mode_e mode)
 {
   int ret = rtc_gpio_init(pin);

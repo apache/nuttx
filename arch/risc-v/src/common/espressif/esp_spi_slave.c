@@ -44,7 +44,6 @@
 
 #include <arch/board/board.h>
 
-#include "esp_dma.h"
 #include "esp_cache.h"
 #include "esp_heap_caps.h"
 #include "esp_private/esp_cache_private.h"
@@ -56,8 +55,9 @@
 #include "hal/spi_slave_hal.h"
 #include "periph_ctrl.h"
 #include "esp_private/spi_share_hw_ctrl.h"
-#include "soc/gdma_periph.h"
+#include "hal/gdma_periph.h"
 #include "hal/gdma_ll.h"
+#include "hal/dma_types.h"
 
 #if SOC_GDMA_SUPPORTED
 #  include "esp_private/gdma.h"
@@ -74,10 +74,10 @@
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
 /* SPI DMA RX/TX number of descriptors */
 
-#if (SPI_SLAVE_BUFSIZE % ESPRESSIF_DMA_DATALEN_MAX) > 0
-#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESPRESSIF_DMA_DATALEN_MAX + 1)
+#if (SPI_SLAVE_BUFSIZE % DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED) > 0
+#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED + 1)
 #else
-#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / ESPRESSIF_DMA_DATALEN_MAX)
+#  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED)
 #endif
 
 #endif /* CONFIG_ESPRESSIF_SPI2_DMA */
@@ -390,7 +390,7 @@ static uint32_t spi_slave_common_dma_setup(int chan, bool tx,
 
   for (i = 0; i < num; i++)
     {
-      data_len = MIN(bytes, ESPRESSIF_DMA_BUFLEN_MAX);
+      data_len = MIN(bytes, DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED);
 
       /* Buffer length must be rounded to next 32-bit boundary. */
 
@@ -894,24 +894,21 @@ static void spislave_dma_init(struct spislave_priv_s *priv)
 
   gdma_channel_alloc_config_t tx_handle =
     {
-      .direction = GDMA_CHANNEL_DIRECTION_TX,
-      .flags.reserve_sibling = 1,
+      0
     };
 
   gdma_channel_alloc_config_t rx_handle =
     {
-      .direction = GDMA_CHANNEL_DIRECTION_RX,
+      0
     };
 
   /* Request a GDMA channel for SPI peripheral */
 
-  SPI_GDMA_NEW_CHANNEL(&tx_handle, &priv->dma_channel_tx);
+  SPI_GDMA_NEW_CHANNEL(&tx_handle, &priv->dma_channel_tx, NULL);
   gdma_connect(priv->dma_channel_tx,
                GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
 
-  rx_handle.sibling_chan = priv->dma_channel_tx;
-
-  SPI_GDMA_NEW_CHANNEL(&rx_handle, &priv->dma_channel_rx);
+  SPI_GDMA_NEW_CHANNEL(&rx_handle, NULL, &priv->dma_channel_rx);
   gdma_connect(priv->dma_channel_rx,
                GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
 }
@@ -943,7 +940,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   esp_gpiowrite(config->miso_pin, 1);
   esp_gpiowrite(config->clk_pin, 1);
 
-  esp_configgpio(config->cs_pin, CS_PIN_FUNCTION);
+  esp_configgpio(config->cs_pin, CS_PIN_FUNCTION | RISING);
   esp_configgpio(config->mosi_pin, MOSI_PIN_FUNCTION);
   esp_configgpio(config->miso_pin, MISO_PIN_FUNCTION);
   esp_configgpio(config->clk_pin, CLK_PIN_FUNCTION);
@@ -964,7 +961,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
                      spi_periph_signal[priv->cfg.host_id].spiclk_in, 0);
 #endif
 
-  SPI_COMMON_RCC_CLOCK_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       spi_ll_enable_bus_clock(priv->cfg.host_id, true);
       spi_ll_reset_register(priv->cfg.host_id);
@@ -974,7 +971,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   spislave_dma_init(priv);
 #endif
 
-  esp_gpioirqenable(ESP_PIN2IRQ(config->cs_pin), RISING);
+  esp_gpioirqenable(config->cs_pin);
 
   priv->ctx.rx_lsbfirst = 0;
   priv->ctx.tx_lsbfirst = 0;
@@ -1412,9 +1409,9 @@ struct spi_slave_ctrlr_s *esp_spislave_ctrlr_initialize(int port)
 
   /* Attach IRQ for CS pin interrupt */
 
-  ret = irq_attach(ESP_PIN2IRQ(priv->config->cs_pin),
-                   spislave_cs_interrupt,
-                   priv);
+  ret = esp_gpio_irq(priv->config->cs_pin,
+                     spislave_cs_interrupt,
+                     priv);
   if (ret != OK)
     {
       /* Failed to attach IRQ for CS pin interrupt. */
@@ -1435,26 +1432,13 @@ struct spi_slave_ctrlr_s *esp_spislave_ctrlr_initialize(int port)
 
   priv->cpuint = esp_setup_irq(spi_periph_signal[priv->cfg.host_id].irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               spislave_periph_interrupt,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      leave_critical_section(flags);
-
-      return NULL;
-    }
-
-  ret = irq_attach(ESP_SOURCE2IRQ(spi_periph_signal[priv->cfg.host_id].irq),
-                   spislave_periph_interrupt, priv);
-
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, so CPU interrupt must be freed. */
-
-      esp_teardown_irq(spi_periph_signal[priv->cfg.host_id].irq,
-                       priv->cpuint);
-      priv->cpuint = -ENOMEM;
       leave_critical_section(flags);
 
       return NULL;
@@ -1513,7 +1497,7 @@ int esp_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
 
   spi_ll_disable_intr(priv->ctx.hw, SPI_LL_INTR_TRANS_DONE);
 
-  SPI_COMMON_RCC_CLOCK_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       spi_ll_enable_bus_clock(priv->cfg.host_id, false);
     }

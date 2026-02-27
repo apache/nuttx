@@ -42,9 +42,9 @@
 #include "esp_attr.h"
 #include "hal/timer_hal.h"
 #include "hal/timer_ll.h"
+#include "hal/timer_periph.h"
 #include "periph_ctrl.h"
 #include "soc/clk_tree_defs.h"
-#include "soc/timer_periph.h"
 #include "esp_private/esp_clk_tree_common.h"
 
 /****************************************************************************
@@ -196,17 +196,13 @@ static int esp_timer_start(struct timer_lowerhalf_s *lower)
       timer_ll_enable_clock(priv->group_id, hal->timer_id, true);
     }
 
-  /* Enable timer group module clock */
-
-  timer_ll_enable_clock(priv->group_id, hal->timer_id, true);
-
   /* Calculate the suitable prescaler according to the current APB
    * frequency to generate a period of 1 us.
    */
 
   esp_clk_tree_src_get_freq_hz((soc_module_clk_t)GPTIMER_CLK_SRC_DEFAULT,
-                           ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
-                           &counter_src_hz);
+                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
+                               &counter_src_hz);
   prescale = counter_src_hz / USEC_PER_SEC;
 
   /* Configure TIMER prescaler */
@@ -544,7 +540,7 @@ int esp_timer_initialize(int group_id)
   struct esp_timer_lowerhalf_s *lower = NULL;
   int timer_id = DEFAULT_TIMER_ID;
   char *devpath;
-  periph_module_t periph;
+  shared_periph_module_t periph;
   int irq;
 
   switch (group_id)
@@ -581,14 +577,14 @@ int esp_timer_initialize(int group_id)
   lower->callback = NULL;
   lower->started = false;
 
-  periph = timer_group_periph_signals.groups[group_id].module;
+  periph = soc_timg_gptimer_signals[group_id][timer_id].parent_module;
 
   PERIPH_RCC_ACQUIRE_ATOMIC(periph, ref_count)
     {
       if (ref_count == 0)
         {
-          timer_ll_enable_bus_clock(group_id, true);
-          timer_ll_reset_register(group_id);
+          timg_ll_enable_bus_clock(group_id, true);
+          timg_ll_reset_register(group_id);
         }
     }
 
@@ -615,15 +611,13 @@ int esp_timer_initialize(int group_id)
 
   lib_put_pathbuffer(devpath);
 
-  irq = timer_group_periph_signals.groups[group_id].timer_irq_id[timer_id];
+  irq = soc_timg_gptimer_signals[group_id][timer_id].irq_id;
 
   esp_setup_irq(irq,
                 ESP_IRQ_PRIORITY_DEFAULT,
-                ESP_IRQ_TRIGGER_LEVEL);
-
-  /* Attach the handler for the timer IRQ */
-
-  irq_attach(ESP_SOURCE2IRQ(irq), (xcpt_t)esp_timer_isr, lower);
+                ESP_IRQ_TRIGGER_LEVEL,
+                esp_timer_isr,
+                lower);
 
   /* Enable the allocated CPU interrupt */
 

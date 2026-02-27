@@ -47,15 +47,7 @@
 #include "esp_attr.h"
 #include "soc/rtc.h"
 
-/* Chip-dependent headers from esp-hal-3rdparty */
-
-#ifdef CONFIG_ARCH_CHIP_ESP32C3
-#include "esp32c3/rom/rtc.h"
-#elif defined(CONFIG_ARCH_CHIP_ESP32C6)
-#include "esp32c6/rom/rtc.h"
-#elif defined(CONFIG_ARCH_CHIP_ESP32H2)
-#include "esp32h2/rom/rtc.h"
-#endif
+#include "rom/rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -847,6 +839,91 @@ int up_rtc_initialize(void)
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: esp_set_time_from_rtc
+ *
+ * Description:
+ *   Update the offset between RTC timer and HR-Timer after light sleep
+ *   wake-up. This function is called by the ESP-HAL sleep_modes.c after
+ *   waking from light sleep to resynchronize the timers.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_ESPRESSIF_HR_TIMER)
+void esp_set_time_from_rtc(void)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
+
+  if (g_hr_timer_enabled)
+    {
+      /* Update offset between RTC and HR Timer */
+
+      g_rtc_save->offset = esp_rtc_get_time_us() - esp_hr_timer_time_us();
+    }
+
+  spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
+}
+#endif /* CONFIG_RTC_DRIVER && CONFIG_ESPRESSIF_HR_TIMER */
+
+/****************************************************************************
+ * Name: esp_sync_timekeeping_timers
+ *
+ * Description:
+ *   Synchronize the RTC timer and HR-Timer by recalculating and adjusting
+ *   the offset between them. This function can be called periodically to
+ *   compensate for any drift between the two time sources.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_ESPRESSIF_HR_TIMER)
+void esp_sync_timekeeping_timers(void)
+{
+  irqstate_t flags;
+  int64_t new_offset;
+  int64_t drift;
+
+  flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
+
+  if (g_hr_timer_enabled)
+    {
+      /* Recalculate the offset between RTC and HR Timer */
+
+      new_offset = esp_rtc_get_time_us() - esp_hr_timer_time_us();
+
+      /* Calculate the drift between the old and new offset */
+
+      drift = g_rtc_save->offset - new_offset;
+
+      /* Adjust the boot time to compensate for the drift.
+       * This ensures that the absolute time remains consistent
+       * across both time sources.
+       */
+
+      esp_rtc_set_boot_time(esp_rtc_get_boot_time() + drift);
+
+      /* Update the offset with the new value */
+
+      g_rtc_save->offset = new_offset;
+    }
+
+  spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
+}
+#endif /* CONFIG_RTC_DRIVER && CONFIG_ESPRESSIF_HR_TIMER */
 
 /****************************************************************************
  * Name: esp_rtc_driverinit

@@ -100,6 +100,8 @@ static struct esp_hr_timer_context_s g_hr_timer_context =
 };
 
 static bool g_hr_timer_initialized;
+static uint8_t g_hr_timer_lock_count;
+static irqstate_t g_hr_timer_lock_flags;
 
 /****************************************************************************
  * Private Functions
@@ -285,6 +287,7 @@ static int IRAM_ATTR esp_hr_timer_isr(int irq, void *context, void *arg)
       if (ret < 0)
         {
           tmrerr("Failed to post sem ret=%d\n", ret);
+          return ret;
         }
     }
 
@@ -723,6 +726,95 @@ void IRAM_ATTR esp_hr_timer_calibration(uint64_t time_us)
 }
 
 /****************************************************************************
+ * Name: esp_hr_timer_set
+ *
+ * Description:
+ *   Set the High Resolution Timer counter value to a specific timestamp.
+ *
+ * Input Parameters:
+ *   new_us        - New counter value in microseconds.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_hr_timer_set(uint64_t new_us)
+{
+  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+
+  irqstate_t flags = spin_lock_irqsave(&priv->lock);
+  systimer_counter_value_t new_count =
+    {
+      .val = priv->hal.us_to_ticks(new_us),
+    };
+
+  systimer_ll_set_counter_value(priv->hal.dev, SYSTIMER_COUNTER_ESPTIMER,
+                                new_count.val);
+  systimer_ll_apply_counter_value(priv->hal.dev, SYSTIMER_COUNTER_ESPTIMER);
+  spin_unlock_irqrestore(&priv->lock, flags);
+}
+
+/****************************************************************************
+ * Name: esp_hr_timer_lock
+ *
+ * Description:
+ *   Acquire the High Resolution Timer lock to protect access to hardware
+ *   registers. Must be paired with esp_hr_timer_unlock().
+ *   This function supports recursive locking.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_hr_timer_lock(void)
+{
+  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+  irqstate_t flags;
+
+  if (g_hr_timer_lock_count == 0)
+    {
+      flags = spin_lock_irqsave(&priv->lock);
+
+      g_hr_timer_lock_flags = flags;
+    }
+
+  g_hr_timer_lock_count++;
+}
+
+/****************************************************************************
+ * Name: esp_hr_timer_unlock
+ *
+ * Description:
+ *   Release the High Resolution Timer lock. Must be paired with
+ *   esp_hr_timer_lock().
+ *   This function supports recursive unlocking.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp_hr_timer_unlock(void)
+{
+  struct esp_hr_timer_context_s *priv = &g_hr_timer_context;
+
+  g_hr_timer_lock_count--;
+
+  if (g_hr_timer_lock_count == 0)
+    {
+      spin_unlock_irqrestore(&priv->lock, g_hr_timer_lock_flags);
+    }
+}
+
+/****************************************************************************
  * Name: esp_hr_timer_init
  *
  * Description:
@@ -813,12 +905,9 @@ int esp_hr_timer_init(void)
 
   esp_setup_irq(ETS_SYSTIMER_TARGET2_INTR_SOURCE,
                 ESP_IRQ_PRIORITY_DEFAULT,
-                SYSTIMER_TRIGGER_TYPE);
-
-  /* Attach the systimer interrupt */
-
-  irq_attach(ESP_SOURCE2IRQ(ETS_SYSTIMER_TARGET2_INTR_SOURCE),
-             (xcpt_t)esp_hr_timer_isr, NULL);
+                SYSTIMER_TRIGGER_TYPE,
+                esp_hr_timer_isr,
+                NULL);
 
   /* Enable the allocated CPU interrupt */
 
