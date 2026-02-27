@@ -921,9 +921,11 @@ static int swkey_context_init(FAR struct swkey_context_s *ctx)
 static void swkey_context_cleanup(FAR struct swkey_context_s *ctx)
 {
   FAR struct swkey_data_s *data;
+  FAR struct swkey_data_s *tmp;
 
-  TAILQ_FOREACH(data, &ctx->head, next)
+  TAILQ_FOREACH_SAFE(data, &ctx->head, next, tmp)
     {
+      TAILQ_REMOVE(&ctx->head, data, next);
       memset(data, 0, sizeof(struct swkey_data_s));
       kmm_free(data);
     }
