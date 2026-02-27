@@ -75,10 +75,54 @@ typedef enum esp_rtc_gpio_mode_e
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
+#if defined(CONFIG_ESPRESSIF_RTCIO_IRQ) && defined(CONFIG_ARCH_CHIP_ESP32C3)
 void esp_rtcioirqinitialize(void);
 #else
 #  define esp_rtcioirqinitialize()
+#endif
+
+/****************************************************************************
+ * Name: esp_rtcioirqattach
+ *
+ * Description:
+ *   Attach an interrupt handler to a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq     - RTC IRQ number to attach the handler to
+ *   handler - Interrupt handler function
+ *   arg     - Argument to pass to the handler
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
+int esp_rtcioirqattach(int irq, xcpt_t handler, void *arg);
+#else
+#  define esp_rtcioirqattach(irq, handler, arg) (-ENOSYS)
+#endif
+
+/****************************************************************************
+ * Name: esp_rtcioirqdetach
+ *
+ * Description:
+ *   Detach an interrupt handler from a specified RTC IRQ
+ *
+ * Input Parameters:
+ *   irq - RTC IRQ number to detach the handler from
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_RTCIO_IRQ
+int esp_rtcioirqdetach(int irq);
+#else
+#  define esp_rtcioirqdetach(irq) (-ENOSYS)
 #endif
 
 /****************************************************************************

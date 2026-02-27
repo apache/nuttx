@@ -34,6 +34,10 @@
 #include <nuttx/rmt/rmt.h>
 
 #include "hal/rmt_types.h"
+
+#include "esp_private/rmt.h"
+#include "driver/rmt_common.h"
+
 #include "soc/soc.h"
 
 #include "esp_rmt.h"
@@ -65,6 +69,21 @@ struct rgbw_led_s
         };
       uint32_t val;
     };
+};
+
+struct rmt_dev_lowerhalf_s
+{
+  /* The following block is part of the upper-half device struct */
+
+  const struct rmt_ops_s *ops;
+  struct circbuf_s       *circbuf;
+  sem_t                  *recvsem;
+  int                     minor;
+
+  /* The following is private to the ESP32 RMT driver */
+
+  rmt_channel_handle_t handle;
+  rmt_encoder_handle_t encoder;
 };
 
 struct esp_ws2812_dev_s
@@ -112,12 +131,6 @@ static int esp_write(struct file *filep, const char *data, size_t len);
  * Private Data
  ****************************************************************************/
 
-#if SOC_RMT_CHANNEL_CLK_INDEPENDENT
-extern uint32_t g_rmt_source_clock_hz[RMT_CHANNEL_MAX];
-#else
-extern uint32_t g_rmt_source_clock_hz;
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -151,15 +164,19 @@ static uint32_t map_byte_to_words(struct esp_ws2812_dev_s *dev,
   uint16_t t0l;
   uint16_t t1h;
   uint16_t t1l;
-  uint32_t clock_period_ps;
+  uint32_t resolution_hz;
   uint32_t rmt_period_ps;
+  esp_err_t ret;
+  struct rmt_dev_lowerhalf_s *priv = (struct rmt_dev_lowerhalf_s *)dev->rmt;
 
-#if SOC_RMT_CHANNEL_CLK_INDEPENDENT
-  clock_period_ps = 1000000000000 / g_rmt_source_clock_hz[dev->rmt->minor];
-#else
-  clock_period_ps = 1000000000000 / g_rmt_source_clock_hz;
-#endif
-  rmt_period_ps = clock_period_ps / RMT_DEFAULT_CLK_DIV;
+  ret = rmt_get_channel_resolution(priv->handle, &resolution_hz);
+  if (ret != ESP_OK)
+    {
+      lederr("esp_ws2812 map_byte_to_words failed: %d\n", ret);
+      return 0;
+    }
+
+  rmt_period_ps = 1000000000000 / resolution_hz;
 
   /* Calculate the RMT period to encode WS2812 frames */
 

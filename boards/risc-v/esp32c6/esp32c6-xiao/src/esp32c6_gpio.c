@@ -353,22 +353,26 @@ static int gpint_attach(struct gpio_dev_s *dev,
 {
   struct espgpint_dev_s *espgpint =
     (struct espgpint_dev_s *)dev;
-  int irq = ESP_PIN2IRQ(g_gpiointinputs[espgpint->espgpio.id]);
   int ret;
 
   gpioinfo("Attaching the callback\n");
 
   /* Make sure the interrupt is disabled */
 
-  esp_gpioirqdisable(irq);
-  ret = irq_attach(irq,
-                   espgpio_interrupt,
-                   &g_gpint[espgpint->espgpio.id]);
+  esp_gpioirqdisable(g_gpiointinputs[espgpint->espgpio.id]);
+
+  ret = esp_gpio_irq(g_gpiointinputs[espgpint->espgpio.id],
+                     espgpio_interrupt,
+                     &g_gpint[espgpint->espgpio.id]);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: gpint_attach() failed: %d\n", ret);
       return ret;
     }
+
+  /* Make sure the interrupt is disabled */
+
+  esp_gpioirqdisable(g_gpiointinputs[espgpint->espgpio.id]);
 
   gpioinfo("Attach %p\n", callback);
   espgpint->callback = callback;
@@ -393,7 +397,6 @@ static int gpint_attach(struct gpio_dev_s *dev,
 static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 {
   struct espgpint_dev_s *espgpint = (struct espgpint_dev_s *)dev;
-  int irq = ESP_PIN2IRQ(g_gpiointinputs[espgpint->espgpio.id]);
 
   if (enable)
     {
@@ -403,13 +406,13 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 
           /* Configure the interrupt for rising edge */
 
-          esp_gpioirqenable(irq, RISING);
+          esp_gpioirqenable(g_gpiointinputs[espgpint->espgpio.id]);
         }
     }
   else
     {
       gpioinfo("Disable the interrupt\n");
-      esp_gpioirqdisable(irq);
+      esp_gpioirqdisable(g_gpiointinputs[espgpint->espgpio.id]);
     }
 
   return OK;
@@ -442,11 +445,11 @@ static int gpint_setpintype(struct gpio_dev_s *dev,
     {
       case GPIO_INTERRUPT_HIGH_PIN:
         esp_configgpio(g_gpiointinputs[espgpint->espgpio.id],
-                       INPUT_PULLUP);
+                       INPUT_PULLUP | FALLING);
         break;
       case GPIO_INTERRUPT_LOW_PIN:
         esp_configgpio(g_gpiointinputs[espgpint->espgpio.id],
-                       INPUT_PULLDOWN);
+                       INPUT_PULLDOWN | RISING);
         break;
       default:
         return ERROR;
@@ -507,9 +510,12 @@ int esp_gpio_init(void)
       g_gpint[i].espgpio.id              = i;
       gpio_pin_register(&g_gpint[i].espgpio.gpio, pincount);
 
-      /* Configure the pins that will be used as interrupt input */
+      /* Configure the pins that will be used as interrupt input with
+       * falling edge.
+       */
 
-      esp_configgpio(g_gpiointinputs[i], INPUT_FUNCTION_2 | PULLDOWN);
+      esp_configgpio(g_gpiointinputs[i],
+                     INPUT_FUNCTION_2 | PULLUP | FALLING);
 
       pincount++;
     }

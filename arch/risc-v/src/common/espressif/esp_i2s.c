@@ -47,7 +47,7 @@
 
 #include "hal/i2s_hal.h"
 #include "hal/i2s_ll.h"
-#include "soc/i2s_periph.h"
+#include "hal/i2s_periph.h"
 #include "soc/i2s_reg.h"
 #include "hal/i2s_types.h"
 #include "soc/gpio_sig_map.h"
@@ -67,7 +67,7 @@
 #include "hal/clk_tree_ll.h"
 #include "clk_ctrl_os.h"
 #endif
-#include "soc/gdma_periph.h"
+#include "hal/gdma_periph.h"
 #include "hal/gdma_ll.h"
 
 #if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
@@ -168,18 +168,6 @@
     cfg.hp_cut_off_freq_hzx10 = 35.5,                         \
     cfg.sd_dither = 0,                                        \
     cfg.sd_dither2 = 1                                        \
-
-#if SOC_PERIPH_CLK_CTRL_SHARED
-#  define I2S_CLOCK_SRC_ATOMIC() PERIPH_RCC_ATOMIC()
-#else
-#  define I2S_CLOCK_SRC_ATOMIC()
-#endif
-
-#if !SOC_RCC_IS_INDEPENDENT
-#  define I2S_RCC_ATOMIC() PERIPH_RCC_ATOMIC()
-#else
-#  define I2S_RCC_ATOMIC()
-#endif
 
 #if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
 #  define I2S_DMA_BUFFER_MAX_SIZE   DMA_DESCRIPTOR_BUFFER_MAX_SIZE_64B_ALIGNED
@@ -1568,7 +1556,7 @@ static int i2s_configure(struct esp_i2s_s *priv)
   port = priv->config->port;
 
   i2s_hal_init(priv->config->ctx, port);
-  I2S_RCC_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       i2s_ll_enable_bus_clock(port, true);
       i2s_ll_reset_register(port);
@@ -1625,7 +1613,7 @@ static int i2s_configure(struct esp_i2s_s *priv)
       if (priv->config->tx_en && !priv->config->rx_en)
         {
 #if SOC_I2S_HW_VERSION_2
-          I2S_CLOCK_SRC_ATOMIC()
+          PERIPH_RCC_ATOMIC()
             {
               i2s_ll_mclk_bind_to_tx_clk(priv->config->ctx->dev);
             }
@@ -1680,7 +1668,7 @@ static int i2s_configure(struct esp_i2s_s *priv)
           /* For "rx + master" mode, select RX signal index for ws and bck */
 
 #if SOC_I2S_HW_VERSION_2
-          I2S_CLOCK_SRC_ATOMIC()
+          PERIPH_RCC_ATOMIC()
             {
               i2s_ll_mclk_bind_to_rx_clk(priv->config->ctx->dev);
             }
@@ -2007,6 +1995,13 @@ static uint32_t i2s_get_source_clk_freq(i2s_clock_src_t clk_src,
     }
 #endif
 
+#ifdef I2S_LL_DEFAULT_CLK_SRC
+  if (clk_src == I2S_CLK_SRC_DEFAULT)
+    {
+      clk_src = I2S_LL_DEFAULT_CLK_SRC;
+    }
+#endif
+
   esp_clk_tree_src_get_freq_hz(clk_src,
                                ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                                &clk_freq);
@@ -2195,7 +2190,7 @@ static int i2s_set_clock(struct esp_i2s_s *priv)
   priv->config->clk_info->mclk_div = mclk_div;
   priv->config->clk_info->sclk = sclk;
 
-  I2S_CLOCK_SRC_ATOMIC()
+  PERIPH_RCC_ATOMIC()
     {
       i2s_hal_set_tx_clock(priv->config->ctx,
                            priv->config->clk_info,
@@ -3255,26 +3250,26 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
   esp_err_t err;
   gdma_trigger_t trig =
     {
-      .periph = GDMA_TRIG_PERIPH_I2S
+      0
     };
 
   switch (priv->config->port)
     {
 #if SOC_I2S_NUM > 2
       case I2S_NUM_2:
-        trig.instance_id = SOC_GDMA_TRIG_PERIPH_I2S2;
+        trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 2);
         break;
 #endif
 
 #if SOC_I2S_NUM > 1
       case I2S_NUM_1:
-        trig.instance_id = SOC_GDMA_TRIG_PERIPH_I2S1;
-        break;
+      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 1);
+      break;
 #endif
 
       case I2S_NUM_0:
-        trig.instance_id = SOC_GDMA_TRIG_PERIPH_I2S0;
-        break;
+      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 0);
+      break;
 
       default:
         i2serr("Unsupported I2S port number");
@@ -3291,11 +3286,10 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
     {
       gdma_channel_alloc_config_t tx_handle =
         {
-          .direction = GDMA_CHANNEL_DIRECTION_TX,
-          .flags.reserve_sibling = 1,
+          0
         };
 
-      err = gdma_new_ahb_channel(&tx_handle, &priv->dma_channel_tx);
+      err = gdma_new_ahb_channel(&tx_handle, &priv->dma_channel_tx, NULL);
       if (err != ESP_OK)
         {
           i2serr("Failed to register tx dma channel: %d\n", err);
@@ -3334,11 +3328,10 @@ static int i2s_dma_setup(struct esp_i2s_s *priv)
     {
       gdma_channel_alloc_config_t rx_handle =
         {
-          .direction = GDMA_CHANNEL_DIRECTION_RX,
-          .flags.reserve_sibling = 1,
+          0
         };
 
-      err = gdma_new_ahb_channel(&rx_handle, &priv->dma_channel_rx);
+      err = gdma_new_ahb_channel(&rx_handle, NULL, &priv->dma_channel_rx);
       if (err != ESP_OK)
         {
           i2serr("Failed to register rx dma channel: %d\n", err);

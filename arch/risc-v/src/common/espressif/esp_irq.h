@@ -32,9 +32,13 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
+#include "esp_intr_types.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define IRQ_UNMAPPED      (intr_handle_t)NULL
 
 #ifndef __ASSEMBLY__
 
@@ -94,31 +98,25 @@ typedef enum irq_priority_e
   ESP_IRQ_PRIORITY_DEFAULT = ESP_IRQ_PRIORITY_1 /* Default Priority */
 } irq_priority_t;
 
+/* Adapter from NuttX to Espressif's interrupt handler */
+
+struct intr_adapter_from_nuttx
+{
+  int (*func)(int irq, void *context, void *arg); /* Interrupt callback function */
+  int irq;                                        /* Interrupt number */
+  void *context;                                  /* Interrupt context */
+  void *arg;                                      /* Interrupt private data */
+};
+
+struct intr_adapter_to_nuttx
+{
+  void (*handler)(void *arg);                     /* Interrupt handler */
+  void *arg;                                      /* Interrupt handler argument */
+};
+
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp_route_intr
- *
- * Description:
- *   Assign an interrupt source to a pre-allocated CPU interrupt.
- *
- * Input Parameters:
- *   source        - Interrupt source (see irq.h) to be assigned to a CPU
- *                   interrupt.
- *   cpuint        - Pre-allocated CPU interrupt to which the interrupt
- *                   source will be assigned.
- *   priority      - Interrupt priority.
- *   type          - Interrupt trigger type.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp_route_intr(int source, int cpuint, irq_priority_t priority,
-                    irq_trigger_t type);
 
 /****************************************************************************
  * Name: esp_setup_irq
@@ -138,7 +136,31 @@ void esp_route_intr(int source, int cpuint, irq_priority_t priority,
  *
  ****************************************************************************/
 
-int esp_setup_irq(int source, irq_priority_t priority, int type);
+int esp_setup_irq(int source,
+                  irq_priority_t priority,
+                  int type,
+                  xcpt_t handler,
+                  void *arg);
+
+int esp_setup_irq_with_flags(int source,
+                             int flags,
+                             xcpt_t handler,
+                             void *arg);
+
+int esp_setup_irq_intrstatus(int source,
+                             irq_priority_t priority,
+                             int type,
+                             uint32_t intrstatusreg,
+                             uint32_t intrstatusmask,
+                             xcpt_t handler,
+                             void *arg);
+
+int esp_setup_irq_with_flags_intrstatus(int source,
+                                        int flags,
+                                        uint32_t intrstatusreg,
+                                        uint32_t intrstatusmask,
+                                        xcpt_t handler,
+                                        void *arg);
 
 /****************************************************************************
  * Name: esp_teardown_irq
@@ -162,23 +184,7 @@ int esp_setup_irq(int source, irq_priority_t priority, int type);
 void esp_teardown_irq(int source, int cpuint);
 
 /****************************************************************************
- * Name: esp_intr_noniram_disable
- *
- * Description:
- *   Disable interrupts that aren't specifically marked as running from IRAM.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp_intr_noniram_disable(void);
-
-/****************************************************************************
- * Name: esp_intr_noniram_enable
+ * Name: esp_old_intr_noniram_enable
  *
  * Description:
  *   Enable interrupts that aren't specifically marked as running from IRAM.
@@ -191,94 +197,61 @@ void esp_intr_noniram_disable(void);
  *
  ****************************************************************************/
 
-void esp_intr_noniram_enable(void);
+void esp_old_intr_noniram_enable(void);
 
 /****************************************************************************
- * Name:  esp_get_irq
+ * Name:  esp_get_cpuint
  *
  * Description:
- *   This function returns the IRQ associated with a CPU interrupt
+ *   This function returns the CPU interrupt associated with an IRQ
  *
  * Input Parameters:
- *   cpuint - The CPU interrupt associated to the IRQ
+ *   cpu - The CPU associated with the IRQ
+ *   irq - The IRQ associated with a CPU interrupt
  *
  * Returned Value:
- *   The IRQ associated with such CPU interrupt or CPUINT_UNASSIGNED if
- *   IRQ is not yet assigned to a CPU interrupt.
+ *   The CPU interrupt associated with such IRQ or a negated errno value on
+ *   failure.
  *
  ****************************************************************************/
 
-int esp_get_irq(int cpuint);
+int esp_get_cpuint(int cpu, int irq);
 
 /****************************************************************************
- * Name:  esp_set_irq
+ * Name:  esp_set_handle
  *
  * Description:
- *   This function assigns a CPU interrupt to a specific IRQ number. It
- *   updates the mapping between IRQ numbers and CPU interrupts, allowing
- *   the system to correctly route hardware interrupts to the appropriate
- *   handlers. Please note that this function is intended to be used only
- *   when a CPU interrupt is already assigned to an IRQ number. Otherwise,
- *   please check esp_setup_irq.
+ *   This function sets the handle associated with an IRQ
  *
  * Input Parameters:
- *   irq    - The IRQ number to be associated with the CPU interrupt.
- *   cpuint - The CPU interrupt to be associated with the IRQ number.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_set_irq(int irq, int cpuint);
-
-/****************************************************************************
- * Name:  esp_irq_set_iram_isr
- *
- * Description:
- *   Set the ISR associated to an IRQ as a IRAM-enabled ISR.
- *
- * Input Parameters:
- *   irq - The associated IRQ to set
+ *   cpu - The CPU associated with the IRQ
+ *   irq - The IRQ associated with a CPU interrupt
+ *   handle - The handle to be associated with the IRQ
  *
  * Returned Value:
  *   OK on success; A negated errno value on failure.
  *
  ****************************************************************************/
 
-int esp_irq_set_iram_isr(int irq);
+int esp_set_handle(int cpu, int irq, intr_handle_t handle);
 
 /****************************************************************************
- * Name:  esp32s3_irq_unset_iram_isr
+ * Name:  esp_get_handle
  *
  * Description:
- *   Set the ISR associated to an IRQ as a non-IRAM ISR.
+ *   This function gets the handle associated with an IRQ
  *
  * Input Parameters:
- *   irq - The associated IRQ to set
+ *   cpu - The CPU associated with the IRQ
+ *   irq - The IRQ associated with a CPU interrupt
  *
  * Returned Value:
- *   OK on success; A negated errno value on failure.
+ *   The handle associated with the IRQ or IRQ_UNMAPPED if no handle is
+ *   associated with the IRQ.
  *
  ****************************************************************************/
 
-int esp_irq_unset_iram_isr(int irq);
-
-/****************************************************************************
- * Name:  esp_irq_noniram_status
- *
- * Description:
- *   Get the current status of non-IRAM interrupts on a specific CPU core
- *
- * Input Parameters:
- *   cpu - The CPU to check the non-IRAM interrupts state
- *
- * Returned Value:
- *   true if non-IRAM interrupts are enabled, false otherwise.
- *
- ****************************************************************************/
-
-bool esp_irq_noniram_status(int cpu);
+intr_handle_t esp_get_handle(int cpu, int irq);
 
 /****************************************************************************
  * Name:  esp_get_iram_interrupt_records
@@ -291,13 +264,35 @@ bool esp_irq_noniram_status(int cpu);
  *
  *   irq_count - A previously allocated pointer to store the counter of the
  *               interrupts that ran when non-IRAM interrupts were disabled.
+ *   cpu -       The CPU to retrieve the interrupt records for
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void esp_get_iram_interrupt_records(uint64_t *irq_count);
+#ifdef CONFIG_ESPRESSIF_IRAM_ISR_DEBUG
+void esp_get_iram_interrupt_records(uint64_t *irq_count, int cpu);
+#endif
+
+/****************************************************************************
+ * Name: esp_cpuint_to_irq
+ *
+ * Description:
+ *   Find an IRQ associated with a given CPU interrupt by searching through
+ *   g_handle_map. For shared interrupts, multiple IRQs may map to the same
+ *   CPU interrupt - this function returns the first one found.
+ *
+ * Input Parameters:
+ *   cpuint - The CPU interrupt number
+ *   cpu    - The CPU core
+ *
+ * Returned Value:
+ *   The IRQ number, or -1 if not found.
+ *
+ ****************************************************************************/
+
+int esp_cpuint_to_irq(int cpuint, int cpu);
 
 #undef EXTERN
 #if defined(__cplusplus)

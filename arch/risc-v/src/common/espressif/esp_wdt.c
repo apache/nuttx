@@ -40,6 +40,7 @@
 
 #include "hal/mwdt_ll.h"
 #include "hal/rwdt_ll.h"
+#include "hal/timer_ll.h"
 #ifdef CONFIG_ESPRESSIF_XTWDT
 #include "hal/xt_wdt_ll.h"
 #include "hal/xt_wdt_hal.h"
@@ -48,6 +49,7 @@
 #endif
 #include "hal/wdt_hal.h"
 #include "soc/rtc.h"
+#include "soc/system_intr.h"
 #include "periph_ctrl.h"
 
 /****************************************************************************
@@ -90,9 +92,11 @@
                                     wdt_hal_write_protect_enable(dev->ctx); \
                                 } while(0);
 
-/* Check whether the provided device is a XTAL32K Watchdog Timer */
+/* Check whether the provided device type is XTAL32K, MWDT or RWDT */
 
 #define IS_XTWDT(dev)    (((struct esp_wdt_lowerhalf_s *)dev)->peripheral == XTAL32K)
+#define IS_MWDT(dev)     (((struct esp_wdt_lowerhalf_s *)dev)->peripheral == TIMER)
+#define IS_RWDT(dev)     (((struct esp_wdt_lowerhalf_s *)dev)->peripheral == RTC)
 
 /* XTWDT clock period in nanoseconds */
 
@@ -106,14 +110,9 @@
 
 #define XT_WDT_CLK_CAL_CYCLES     (500)
 
-/* Helpers for converting from Q13.19 fixed-point format to float */
-
-#define N             19
-#define Q_TO_FLOAT(x) ((float)x/(float)(1<<N))
-
 #if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32H2)
-#define RTC_CORE_INTR_SOURCE  LP_WDT_INTR_SOURCE
-#define ESP_IRQ_RTC_CORE      ESP_IRQ_LP_WDT
+#  define RTC_CORE_INTR_SOURCE  ETS_LP_WDT_INTR_SOURCE
+#  define ESP_IRQ_RTC_CORE      ESP_SOURCE2IRQ(ETS_LP_WDT_INTR_SOURCE)
 #endif
 
 /****************************************************************************
@@ -134,17 +133,18 @@ typedef enum
 
 struct esp_wdt_lowerhalf_s
 {
-  const struct watchdog_ops_s *ops;        /* Lower half operations */
-  uint32_t                     timeout;    /* The current timeout */
-  wdt_stage_action_t           action;     /* The current action */
-  uint32_t                     lastreset;  /* The last reset time */
-  bool                         started;    /* True: Timer has been started */
-  wdt_peripherals_t            peripheral; /* Indicates if it is from RTC or Timer Module */
-  xcpt_t                       handler;    /* User Handler */
-  void                        *upper;      /* Pointer to watchdog_upperhalf_s */
-  uint8_t                      periph;     /* Peripheral ID */
-  uint8_t                      irq;        /* Interrupt ID */
-  wdt_hal_context_t           *ctx;        /* Watchdog HAL context */
+  const struct watchdog_ops_s *ops;           /* Lower half operations */
+  uint32_t                     timeout;       /* The current timeout */
+  uint32_t                     timeout_ticks; /* The current timeout in ticks */
+  wdt_stage_action_t           action;        /* The current action */
+  uint32_t                     lastreset;     /* The last reset time */
+  bool                         started;       /* True: Timer has been started */
+  wdt_peripherals_t            peripheral;    /* Indicates if it is from RTC or Timer Module */
+  xcpt_t                       handler;       /* User Handler */
+  void                        *upper;         /* Pointer to watchdog_upperhalf_s */
+  uint8_t                      periph;        /* Peripheral ID */
+  uint8_t                      irq;           /* Interrupt ID */
+  wdt_hal_context_t           *ctx;           /* Watchdog HAL context */
 };
 
 /****************************************************************************
@@ -196,9 +196,9 @@ static struct esp_wdt_lowerhalf_s g_esp_mwdt0_lowerhalf =
 {
   .ops = &g_esp_wdg_ops,
   .timeout = MWDT_MAX_TIMEOUT_MS,
-  .periph = TG0_WDT_LEVEL_INTR_SOURCE,
+  .periph = SYS_TG0_WDT_INTR_SOURCE,
   .peripheral = TIMER,
-  .irq = ESP_IRQ_TG0_WDT_LEVEL,
+  .irq = ESP_SOURCE2IRQ(SYS_TG0_WDT_INTR_SOURCE),
   .ctx = &mwdt0_hal_ctx
 };
 #endif
@@ -214,9 +214,9 @@ static struct esp_wdt_lowerhalf_s g_esp_mwdt1_lowerhalf =
 {
   .ops = &g_esp_wdg_ops,
   .timeout = MWDT_MAX_TIMEOUT_MS,
-  .periph = TG1_WDT_LEVEL_INTR_SOURCE,
+  .periph = SYS_TG1_WDT_INTR_SOURCE,
   .peripheral = TIMER,
-  .irq = ESP_IRQ_TG1_WDT_LEVEL,
+  .irq = ESP_SOURCE2IRQ(SYS_TG1_WDT_INTR_SOURCE),
   .ctx = &mwdt1_hal_ctx
 };
 #endif
@@ -234,7 +234,11 @@ static struct esp_wdt_lowerhalf_s g_esp_rwdt_lowerhalf =
   .timeout = RWDT_FULL_STAGE,
   .periph = RTC_CORE_INTR_SOURCE,
   .peripheral = RTC,
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
+  .irq  = ESP_IRQ_RTC_WDT,
+#else
   .irq  = ESP_IRQ_RTC_CORE,
+#endif
   .ctx = &rwdt_hal_ctx
 };
 #endif
@@ -314,17 +318,15 @@ static int wdt_start(struct watchdog_lowerhalf_s *lower)
           if (priv->peripheral == TIMER)
             {
               priv->action = WDT_STAGE_ACTION_RESET_SYSTEM;
-              timeout = MWDT_TIMEOUT_MS(priv->timeout);
             }
           else
             {
               priv->action = WDT_STAGE_ACTION_RESET_RTC;
-              timeout = RWDT_TIMEOUT_MS(priv->timeout);
             }
 
           wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
-                              timeout,
-                              priv->action);
+                               priv->timeout_ticks,
+                               priv->action);
         }
     }
   else
@@ -336,17 +338,15 @@ static int wdt_start(struct watchdog_lowerhalf_s *lower)
           if (priv->peripheral == TIMER)
             {
               priv->action = WDT_STAGE_ACTION_INT;
-              timeout = MWDT_TIMEOUT_MS(priv->timeout);
             }
           else
             {
               priv->action = WDT_STAGE_ACTION_INT;
-              timeout = RWDT_TIMEOUT_MS(priv->timeout);
             }
 
           wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
-                              timeout,
-                              priv->action);
+                               priv->timeout_ticks,
+                               priv->action);
 
           /* Enable interrupt */
 
@@ -582,14 +582,12 @@ static int wdt_settimeout(struct watchdog_lowerhalf_s *lower,
               return -ERANGE;
             }
 
-          timeout = MWDT_TIMEOUT_MS(priv->timeout);
+          priv->timeout_ticks = MWDT_TIMEOUT_MS(priv->timeout);
         }
       else if (priv->peripheral == RTC)
         {
-          uint32_t period_13q19 = esp_clk_slowclk_cal_get();
-          float period = Q_TO_FLOAT(period_13q19);
-          rtc_cycles = 1000.0f / period;
-          rtc_ms_max = (RWDT_FULL_STAGE / (uint32_t)rtc_cycles);
+          uint32_t freq_hz = rtc_clk_slow_freq_get_hz();
+          rtc_ms_max = ((uint64_t)RWDT_FULL_STAGE / freq_hz) * 1000;
 
           /* Is this timeout a valid value for RTC WDT? */
 
@@ -600,14 +598,15 @@ static int wdt_settimeout(struct watchdog_lowerhalf_s *lower,
               return -ERANGE;
             }
 
-          timeout = timeout * rtc_cycles;
+          priv->timeout_ticks =
+            (uint32_t)((uint64_t)timeout * freq_hz / 1000);
         }
 
-      wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
-                          timeout,
-                          priv->action);
-
       wdt_hal_feed(priv->ctx);
+
+      wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
+                           priv->timeout_ticks,
+                           priv->action);
 
       wdt_hal_write_protect_enable(priv->ctx);
     }
@@ -627,9 +626,9 @@ static int wdt_settimeout(struct watchdog_lowerhalf_s *lower,
           return -ERANGE;
         }
 
-      timeout = timeout * xtal32k_cycles;
+      priv->timeout_ticks = timeout * xtal32k_cycles;
       xt_wdt_ll_set_timeout(((xt_wdt_hal_context_t *)priv->ctx)->dev,
-                             timeout);
+                            priv->timeout_ticks);
       return OK;
     }
 #endif
@@ -695,20 +694,11 @@ static xcpt_t wdt_capture(struct watchdog_lowerhalf_s *lower, xcpt_t handler)
 
           if (IS_XTWDT(priv) != true)
             {
-              if (priv->peripheral == TIMER)
-                {
-                  timeout = MWDT_TIMEOUT_MS(priv->timeout);
-                }
-              else
-                {
-                  timeout = RWDT_TIMEOUT_MS(priv->timeout);
-                }
-
               priv->action = WDT_STAGE_ACTION_INT;
 
               wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
-                                  timeout,
-                                  priv->action);
+                                   priv->timeout_ticks,
+                                   priv->action);
             }
         }
 
@@ -732,12 +722,10 @@ static xcpt_t wdt_capture(struct watchdog_lowerhalf_s *lower, xcpt_t handler)
         {
           if (priv->peripheral == TIMER)
             {
-              timeout = MWDT_TIMEOUT_MS(priv->timeout);
               priv->action = WDT_STAGE_ACTION_RESET_SYSTEM;
             }
           else
             {
-              timeout = RWDT_TIMEOUT_MS(priv->timeout);
               priv->action = WDT_STAGE_ACTION_RESET_RTC;
             }
 
@@ -746,8 +734,8 @@ static xcpt_t wdt_capture(struct watchdog_lowerhalf_s *lower, xcpt_t handler)
           /* Then configure it to reset on WDT expiration */
 
           wdt_hal_config_stage(priv->ctx, WDT_STAGE0,
-                              timeout,
-                              priv->action);
+                               priv->timeout_ticks,
+                               priv->action);
         }
 #ifdef CONFIG_ESPRESSIF_XTWDT
       else
@@ -844,7 +832,7 @@ static int wdt_handler(int irq, void *context, void *arg)
 
   /* Run the user callback */
 
-  priv->handler(irq, context, priv->upper);
+  priv->handler(priv->irq, context, priv->upper);
 
   WDT_WP_DISABLE(priv);
 
@@ -856,6 +844,7 @@ static int wdt_handler(int irq, void *context, void *arg)
     }
 
   WDT_WP_ENABLE(priv);
+
   return OK;
 }
 
@@ -889,27 +878,41 @@ int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id)
 #ifdef CONFIG_ESPRESSIF_MWDT0
       case ESP_WDT_MWDT0:
         {
+          PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_TIMG0_MODULE, ref_count)
+            {
+              if (ref_count == 0)
+                {
+                  timg_ll_enable_bus_clock(0, true);
+                  timg_ll_reset_register(0);
+                }
+            }
+
           lower = &g_esp_mwdt0_lowerhalf;
-          periph_module_enable(PERIPH_TIMG0_MODULE);
           wdt_hal_init(lower->ctx, WDT_MWDT0,
                        MWDT_LL_DEFAULT_CLK_PRESCALER, true);
 
           break;
         }
-
 #endif
 
 #ifdef CONFIG_ESPRESSIF_MWDT1
       case ESP_WDT_MWDT1:
         {
+          PERIPH_RCC_ACQUIRE_ATOMIC(PERIPH_TIMG1_MODULE, ref_count)
+            {
+              if (ref_count == 0)
+                {
+                  timg_ll_enable_bus_clock(1, true);
+                  timg_ll_reset_register(1);
+                }
+            }
+
           lower = &g_esp_mwdt1_lowerhalf;
-          periph_module_enable(PERIPH_TIMG1_MODULE);
           wdt_hal_init(lower->ctx, WDT_MWDT1,
                        MWDT_LL_DEFAULT_CLK_PRESCALER, true);
 
           break;
         }
-
 #endif
 
 #ifdef CONFIG_ESPRESSIF_RWDT
@@ -917,7 +920,6 @@ int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id)
         {
           lower = &g_esp_rwdt_lowerhalf;
           wdt_hal_init(lower->ctx, WDT_RWDT, 0, true);
-          esp_rtcioirqenable(lower->irq);
           break;
         }
 #endif
@@ -926,7 +928,6 @@ int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id)
       case ESP_WDT_XTAL32K:
         {
           lower = &g_esp_xtwdt_lowerhalf;
-          esp_rtcioirqenable(lower->irq);
           xt_wdt_hal_init((xt_wdt_hal_context_t *)lower->ctx,
                           (xt_wdt_hal_config_t *)&cfg);
           if (cfg.auto_backup_clk_enable)
@@ -977,24 +978,51 @@ int esp_wdt_initialize(const char *devpath, enum esp_wdt_inst_e wdt_id)
       return -EEXIST;
     }
 
-  esp_setup_irq(lower->periph,
-                ESP_IRQ_PRIORITY_DEFAULT,
-                ESP_IRQ_TRIGGER_LEVEL);
-
-  /* Attach the handler for the timer IRQ */
-
-  irq_attach(lower->irq, (xcpt_t)wdt_handler, lower);
-
   /* Enable the allocated CPU interrupt */
 
-  if (IS_XTWDT(lower) != true)
+  if (IS_MWDT(lower) == true ||
+#ifndef CONFIG_ARCH_CHIP_ESP32C3
+      IS_RWDT(lower) == true
+#else
+      false
+#endif
+     )
     {
+      int cpuint = esp_setup_irq(lower->periph,
+                                 ESP_IRQ_PRIORITY_DEFAULT,
+                                 ESP_IRQ_TRIGGER_LEVEL,
+                                 wdt_handler,
+                                 lower);
+      if (cpuint < 0)
+        {
+          tmrerr("ERROR: Failed to allocate a CPU interrupt");
+          return -EINVAL;
+        }
+
       up_enable_irq(lower->irq);
     }
-  else
+
+#if defined(CONFIG_ESPRESSIF_XTWDT) || defined(CONFIG_ESPRESSIF_RWDT)
+  if (IS_XTWDT(lower) == true ||
+#ifdef CONFIG_ARCH_CHIP_ESP32C3
+      IS_RWDT(lower) == true
+#else
+      false
+#endif
+     )
     {
-      up_enable_irq(ESP_IRQ_RTC_CORE);
+      int ret = esp_rtcioirqattach(lower->irq, wdt_handler, lower);
+      if (ret != OK)
+        {
+          esp_rtcioirqdisable(lower->irq);
+          tmrerr("ERROR: Failed to associate an IRQ Number");
+          return -EINVAL;
+        }
+
+      esp_rtcioirqenable(lower->irq);
+      up_enable_irq(ESP_SOURCE2IRQ(ESP_IRQ_RTC_CORE));
     }
+#endif
 
   return OK;
 }

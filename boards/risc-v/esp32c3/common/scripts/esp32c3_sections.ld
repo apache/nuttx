@@ -183,6 +183,7 @@ SECTIONS
     *libarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
     *libarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
     *libarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
+    *libarch.a:*efuse_utility.*(.text .text.* .literal .literal.*)
     *libarch.a:*apm_hal.*(.text .text.* .literal .literal.*)
     *libarch.a:*log.*(.text .text.* .literal .literal.*)
     *libarch.a:*log_lock.*(.literal .literal.* .text .text.*)
@@ -205,8 +206,21 @@ SECTIONS
     *libarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
     *libarch.a:flash_brownout_hook.*(.literal .literal.* .text .text.*)
     *libarch.a:esp_cache.*(.literal .literal.* .text .text.*)
+    *libarch.a:esp_cache_utils.*(.literal .literal.* .text .text.*)
     *libarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
+    *libarch.a:critical_section.*(.literal .literal.* .text .text.*)
+    *libarch.a:os.*(.literal.nuttx_enter_critical .text.nuttx_enter_critical)
+    *libarch.a:os.*(.literal.nuttx_exit_critical .text.nuttx_exit_critical)
+    *libarch.a:*riscv_modifyreg32.*(.literal .literal.* .text .text.*)
+    *libarch.a:intr_alloc.*(.literal.esp_intr_get_intno .text.esp_intr_get_intno)
+    *libarch.a:intr_alloc.*(.literal.esp_intr_get_cpu .text.esp_intr_get_cpu)
+    *libarch.a:interrupt.*(.literal.intr_handler_get .text.intr_handler_get)
+    *libarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
+    *libarch.a:interrupt.*(.literal.intr_get_item .text.intr_get_item)
+    *libarch.a:interrupt.*(.literal.intr_handler_get_arg .text.intr_handler_get_arg)
+    *libarch.a:*sleep_modes.*(.literal.esp_sleep_pd_config* .text.esp_sleep_pd_config*)
+    *libarch.a:*sleep_modes.*(.literal.esp_sleep_sub_mode_force_disable* .text.esp_sleep_sub_mode_force_disable*)
 
     *libc.a:sq_remlast.*(.literal .text .literal.* .text.*)
 
@@ -324,6 +338,7 @@ SECTIONS
     *libarch.a:*esp_rom_sys.*(.rodata .rodata.*)
     *libarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
     *libarch.a:*efuse_hal.*(.rodata .rodata.*)
+    *libarch.a:*efuse_utility.*(.rodata .rodata.*)
     *libarch.a:*log.*(.rodata .rodata.*)
     *libarch.a:*log_noos.*(.rodata .rodata.*)
     *libarch.a:esp_spiflash.*(.rodata .rodata.*)
@@ -338,8 +353,15 @@ SECTIONS
     *libarch.a:spi_flash_os_func_app.*(.rodata .rodata.*)
     *libarch.a:flash_brownout_hook.*(.rodata .rodata.*)
     *libarch.a:esp_cache.*(.rodata .rodata.*)
+    *libarch.a:esp_cache_utils.*(.rodata .rodata.*)
     *libarch.a:cache_utils.*(.rodata .rodata.*)
+    *libarch.a:startup_funcs.*(.rodata .rodata.*)
     *libarch.a:memspi_host_driver.*(.rodata .rodata.*)
+    *libarch.a:critical_section.*(.rodata .rodata.*)
+    *libarch.a:os.*(.rodata.g_int_flags_count .rodata.g_int_flags)
+    *libarch.a:*sleep_modes.*(.rodata.esp_sleep_pd_config*)
+    *libarch.a:*sleep_modes.*(.rodata.esp_sleep_sub_mode_force_disable*)
+
     esp_head.*(.rodata .rodata.*)
     esp_start.*(.rodata .rodata.*)
 
@@ -587,6 +609,8 @@ SECTIONS
 
   .rtc.data :
   {
+    . = ALIGN(4);
+    *(.rtc.force_slow .rtc.force_slow.*)
     *(.rtc.data)
     *(.rtc.data.*)
     *(.rtc.rodata)

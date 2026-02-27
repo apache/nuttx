@@ -159,13 +159,9 @@ void up_timer_initialize(void)
 
   esp_setup_irq(CHIP_SYSTIMER_SOURCE,
                 ESP_IRQ_PRIORITY_DEFAULT,
-                SYSTIMER_TRIGGER_TYPE);
-
-  /* Attach the timer interrupt. */
-
-  irq_attach(ESP_SOURCE2IRQ(CHIP_SYSTIMER_SOURCE),
-             (xcpt_t)systimer_irq_handler,
-             NULL);
+                SYSTIMER_TRIGGER_TYPE,
+                systimer_irq_handler,
+                NULL);
 
   /* Enable the allocated CPU interrupt. */
 

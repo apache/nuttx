@@ -55,10 +55,9 @@
 #endif
 
 #include "esp_clk_tree.h"
-#include "esp_private/uart_share_hw_ctrl.h"
 #include "esp_private/esp_clk_tree_common.h"
 #include "hal/uart_hal.h"
-#include "soc/uart_periph.h"
+#include "hal/uart_periph.h"
 #include "soc/clk_tree_defs.h"
 #include "periph_ctrl.h"
 
@@ -465,6 +464,7 @@ static int esp_setup(uart_dev_t *dev)
   soc_module_clk_t src_clk;
   uint32_t sclk_freq;
   bool success = false;
+  irqstate_t flags;
 
   /* Enable the UART Clock */
 
@@ -476,7 +476,7 @@ static int esp_setup(uart_dev_t *dev)
                                ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                                &sclk_freq);
 
-  esp_os_enter_critical(&(g_uart_context[priv->id].spinlock));
+  flags = enter_critical_section();
 
   /* Initialize UART module */
 #ifdef CONFIG_ESPRESSIF_LP_UART
@@ -500,7 +500,7 @@ static int esp_setup(uart_dev_t *dev)
   if (priv->id < SOC_UART_HP_NUM)
     {
       esp_clk_tree_enable_src(UART_SCLK_XTAL, true);
-      HP_UART_SRC_CLK_ATOMIC()
+      PERIPH_RCC_ATOMIC()
         {
           uart_hal_set_sclk(priv->hal, UART_SCLK_XTAL);
           success = uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
@@ -567,7 +567,7 @@ static int esp_setup(uart_dev_t *dev)
   else
 #endif
 
-  esp_os_exit_critical(&(g_uart_context[priv->id].spinlock));
+  leave_critical_section(flags);
 
   if (success == false)
     {
@@ -643,18 +643,21 @@ static int esp_attach(uart_dev_t *dev)
   source = uart_periph_signal[priv->id].irq;
 
   priv->cpuint = esp_setup_irq(source, priv->int_pri,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               uart_handler,
+                               dev);
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(ESP_SOURCE2IRQ(source), uart_handler, dev);
-  if (ret == OK)
+  if (priv->cpuint >= 0)
     {
       up_enable_irq(ESP_SOURCE2IRQ(source));
+      ret = OK;
     }
   else
     {
       up_disable_irq(ESP_SOURCE2IRQ(source));
+      ret = -EINVAL;
     }
 
   return ret;

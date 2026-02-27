@@ -473,12 +473,6 @@ int board_spiflash_init(void)
 {
   int ret = OK;
 
-  ret = esp_spiflash_init();
-  if (ret != OK)
-    {
-      return ret;
-    }
-
 #ifdef CONFIG_ESPRESSIF_HAVE_OTA_PARTITION
   ret = init_ota_partitions();
   if (ret < 0)

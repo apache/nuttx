@@ -34,6 +34,52 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: esp_set_time_from_rtc
+ *
+ * Description:
+ *   Update the offset between RTC timer and HR-Timer after light sleep
+ *   wake-up. This function is called by the ESP-HAL sleep_modes.c after
+ *   waking from light sleep to resynchronize the timers.
+ *
+ *   Note: This function is only available when both CONFIG_RTC_DRIVER and
+ *   CONFIG_ESPRESSIF_HR_TIMER are enabled.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_ESPRESSIF_HR_TIMER)
+void esp_set_time_from_rtc(void);
+#endif
+
+/****************************************************************************
+ * Name: esp_sync_timekeeping_timers
+ *
+ * Description:
+ *   Synchronize the RTC timer and HR-Timer by recalculating and adjusting
+ *   the offset between them. This function can be called periodically to
+ *   compensate for any drift between the two time sources.
+ *
+ *   Note: This function is only available when both CONFIG_RTC_DRIVER and
+ *   CONFIG_ESPRESSIF_HR_TIMER are enabled.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_RTC_DRIVER) && defined(CONFIG_ESPRESSIF_HR_TIMER)
+void esp_sync_timekeeping_timers(void);
+#endif
+
+/****************************************************************************
  * Name: esp_rtc_driverinit
  *
  * Description:

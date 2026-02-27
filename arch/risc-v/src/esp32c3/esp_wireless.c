@@ -297,7 +297,11 @@ int esp_wireless_init(void)
       return OK;
     }
 
-  priv->cpuint = esp_setup_irq(SWI_PERIPH, ESP_IRQ_PRIORITY_DEFAULT, 0);
+  priv->cpuint = esp_setup_irq(SWI_PERIPH,
+                               ESP_IRQ_PRIORITY_DEFAULT,
+                               0,
+                               esp_swi_irq,
+                               NULL);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
@@ -305,16 +309,6 @@ int esp_wireless_init(void)
       wlerr("ERROR: Failed to attach IRQ ret=%d\n", ret);
       ret = priv->cpuint;
       leave_critical_section(flags);
-
-      return ret;
-    }
-
-  ret = irq_attach(SWI_IRQ, esp_swi_irq, NULL);
-  if (ret < 0)
-    {
-      esp_teardown_irq(SWI_PERIPH, priv->cpuint);
-      leave_critical_section(flags);
-      wlerr("ERROR: Failed to attach IRQ ret=%d\n", ret);
 
       return ret;
     }

@@ -38,7 +38,8 @@
 #include "riscv_internal.h"
 #include "esp_dedic_gpio.h"
 #include "esp_gpio.h"
-#include "soc/dedic_gpio_periph.h"
+#include "hal/dedic_gpio_periph.h"
+#include "hal/dedic_gpio_caps.h"
 #include "hal/dedic_gpio_cpu_ll.h"
 
 /****************************************************************************
@@ -259,9 +260,9 @@ struct file *esp_dedic_gpio_new_bundle(
       flags = spin_lock_irqsave(&dedic_gpio_common.spinlock);
 
       dedic_gpio_common.out_occupied_mask =
-        UINT32_MAX & ~((1 << SOC_DEDIC_GPIO_OUT_CHANNELS_NUM) - 1);
+        UINT32_MAX & ~((1 << DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU)) - 1);
       dedic_gpio_common.in_occupied_mask =
-        UINT32_MAX & ~((1 << SOC_DEDIC_GPIO_IN_CHANNELS_NUM) - 1);
+        UINT32_MAX & ~((1 << DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU)) - 1);
 
       spin_unlock_irqrestore(&dedic_gpio_common.spinlock, flags);
     }
@@ -278,11 +279,12 @@ struct file *esp_dedic_gpio_new_bundle(
       out_offset = 0;
       if (config->flags->output_enable)
         {
-          if (config->array_size > SOC_DEDIC_GPIO_OUT_CHANNELS_NUM)
+          if (config->array_size > DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU))
             {
               gpioerr("ERROR: array size(%d) exceeds maximum supported out\
                        channels(%d)\n",
-                       config->array_size, SOC_DEDIC_GPIO_OUT_CHANNELS_NUM);
+                       config->array_size,
+                        DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU));
               free(priv);
               return NULL;
             }
@@ -290,7 +292,8 @@ struct file *esp_dedic_gpio_new_bundle(
           flags = spin_lock_irqsave(&dedic_gpio_common.spinlock);
 
           for (int i = 0;
-                i <= SOC_DEDIC_GPIO_OUT_CHANNELS_NUM - config->array_size;
+                i <= DEDIC_GPIO_CAPS_GET(OUT_CHANS_PER_CPU) - \
+                  config->array_size;
                   i++)
             {
               if ((dedic_gpio_common.out_occupied_mask & (pattern << i))
@@ -322,11 +325,12 @@ struct file *esp_dedic_gpio_new_bundle(
 
       if (config->flags->input_enable)
         {
-          if (config->array_size > SOC_DEDIC_GPIO_IN_CHANNELS_NUM)
+          if (config->array_size > DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU))
             {
               gpioerr("ERROR: array size(%d) exceeds maximum supported in\
                        channels(%d)\n",
-                       config->array_size, SOC_DEDIC_GPIO_IN_CHANNELS_NUM);
+                       config->array_size,
+                       DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU));
               free(priv);
               return NULL;
             }
@@ -334,7 +338,8 @@ struct file *esp_dedic_gpio_new_bundle(
           flags = spin_lock_irqsave(&dedic_gpio_common.spinlock);
 
           for (int i = 0;
-                i <= SOC_DEDIC_GPIO_IN_CHANNELS_NUM - config->array_size;
+                i <= DEDIC_GPIO_CAPS_GET(IN_CHANS_PER_CPU) - \
+                config->array_size;
                   i++)
             {
               if ((dedic_gpio_common.in_occupied_mask & (pattern << i)) == 0)

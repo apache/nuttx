@@ -248,6 +248,56 @@ uint64_t esp_hr_timer_get_alarm(void);
 void esp_hr_timer_calibration(uint64_t time_us);
 
 /****************************************************************************
+ * Name: esp_hr_timer_set
+ *
+ * Description:
+ *   Set the High Resolution Timer counter value to a specific timestamp.
+ *
+ * Input Parameters:
+ *   new_us        - New counter value in microseconds.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_set(uint64_t new_us);
+
+/****************************************************************************
+ * Name: esp_hr_timer_lock
+ *
+ * Description:
+ *   Acquire the High Resolution Timer lock to protect access to hardware
+ *   registers. Must be paired with esp_hr_timer_unlock().
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_lock(void);
+
+/****************************************************************************
+ * Name: esp_hr_timer_unlock
+ *
+ * Description:
+ *   Release the High Resolution Timer lock. Must be paired with
+ *   esp_hr_timer_lock().
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp_hr_timer_unlock(void);
+
+/****************************************************************************
  * Name: esp_hr_timer_init
  *
  * Description:

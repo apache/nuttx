@@ -130,6 +130,63 @@ config ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	bool
 	default n
 
+menu "Espressif Log Level"
+	visible if DEBUG_FEATURES
+
+config ESPRESSIF_LOG_LEVEL_NONE
+	bool "NONE"
+	depends on !DEBUG_FEATURES && !DEBUG_ERROR && !DEBUG_WARN && !DEBUG_INFO
+	default y
+	---help---
+		No log output from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_ERROR
+	bool "ERROR"
+	depends on DEBUG_ERROR
+	default y
+	---help---
+		Display critical errors from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_WARN
+	bool "WARN"
+	depends on DEBUG_WARN
+	default y
+	---help---
+		Display warning messages from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_INFO
+	bool "INFO"
+	depends on DEBUG_INFO
+	default y
+	---help---
+		Display information messages from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_DEBUG
+	bool "DEBUG"
+	depends on DEBUG_INFO
+	default n
+	---help---
+		Display extra information from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL_VERBOSE
+	bool "VERBOSE"
+	depends on DEBUG_INFO
+	default n
+	---help---
+		Display bigger chunks of debugging information, or frequent messages
+		which can potentially flood the output from Espressif log messages.
+
+config ESPRESSIF_LOG_LEVEL
+	int
+	default 5 if ESPRESSIF_LOG_LEVEL_VERBOSE
+	default 4 if ESPRESSIF_LOG_LEVEL_DEBUG
+	default 3 if ESPRESSIF_LOG_LEVEL_INFO
+	default 2 if ESPRESSIF_LOG_LEVEL_WARN
+	default 1 if ESPRESSIF_LOG_LEVEL_ERROR
+	default 0 if ESPRESSIF_LOG_LEVEL_NONE
+
+endmenu # Espressif Log Level
+
 menu "Bootloader and Image Configuration"
 
 config ESPRESSIF_SIMPLE_BOOT
@@ -921,7 +978,7 @@ config ESPRESSIF_GPIO_IRQ
 config ESPRESSIF_RTCIO_IRQ
 	bool "RTC IO interrupts"
 	default n
-	depends on !ARCH_CHIP_ESP32H2 && !ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C3
 	---help---
 		Enable support for RTC peripherals interrupts.
 
@@ -1205,7 +1262,7 @@ config ESPRESSIF_TEMP
 	---help---
 		A built-in sensor used to measure the chip's internal temperature.
 
-config ESP_WIRELESS
+config ESPRESSIF_WIRELESS
 	bool
 	default n
 	select NET
@@ -1218,7 +1275,7 @@ config ESPRESSIF_WIFI
 	bool "Wi-Fi"
 	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
 	default n
-	select ESP_WIRELESS
+	select ESPRESSIF_WIRELESS
 	---help---
 		Enable Wi-Fi support
 
@@ -1226,7 +1283,7 @@ config ESPRESSIF_BLE
 	bool "BLE"
 	depends on ARCH_CHIP_ESP32C3
 	default n
-	select ESP_WIRELESS
+	select ESPRESSIF_WIRELESS
 	---help---
 		Enable BLE support
 

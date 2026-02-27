@@ -48,8 +48,8 @@
 #include "esp_attr.h"
 #include "hal/mcpwm_hal.h"
 #include "hal/mcpwm_ll.h"
-#include "soc/mcpwm_periph.h"
-#include "soc/ledc_periph.h"
+#include "hal/mcpwm_periph.h"
+#include "hal/ledc_periph.h"
 #include "periph_ctrl.h"
 #include "hal/clk_tree_hal.h"
 #include "esp_clk_tree.h"
@@ -1308,7 +1308,7 @@ static int esp_mcpwm_fault_gpio_config(struct mcpwm_motor_lowerhalf_s *lower,
   if (!enable)
     {
       esp_gpio_matrix_in(0x3a,
-        mcpwm_periph_signals.groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+        soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
         gpio_faults[lower->fault_id].fault_sig,
         false);
       return OK;
@@ -1323,7 +1323,7 @@ static int esp_mcpwm_fault_gpio_config(struct mcpwm_motor_lowerhalf_s *lower,
 
   esp_gpio_matrix_in(
     lower->fault_pin,
-    mcpwm_periph_signals.groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+    soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
     gpio_faults[lower->fault_id].fault_sig,
     false);
 
@@ -1385,13 +1385,13 @@ static int esp_mcpwm_motor_set_gpio(struct mcpwm_motor_lowerhalf_s *lower,
 
   esp_gpio_matrix_out(
     lower->generator_pins[MCPWM_GENERATOR_0],
-    mcpwm_periph_signals.groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+    soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
     operators[lower->channel_id].generators[MCPWM_GENERATOR_0].pwm_sig,
     false, false);
 
   esp_gpio_matrix_out(
     lower->generator_pins[MCPWM_GENERATOR_1],
-    mcpwm_periph_signals.groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+    soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
     operators[lower->channel_id].generators[MCPWM_GENERATOR_1].pwm_sig,
     false, false);
 
@@ -1399,14 +1399,12 @@ static int esp_mcpwm_motor_set_gpio(struct mcpwm_motor_lowerhalf_s *lower,
 
 #ifdef CONFIG_ESP_MCPWM_TEST_LOOPBACK
   esp_gpio_matrix_out(CONFIG_ESP_MCPWM_CAPTURE_CH0_GPIO,
-                      mcpwm_periph_signals.\
-                      groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+                      soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
                       operators[lower->channel_id].\
                       generators[MCPWM_GENERATOR_0].pwm_sig,
                       0, 0);
   esp_gpio_matrix_out(CONFIG_ESP_MCPWM_CAPTURE_CH1_GPIO,
-                      mcpwm_periph_signals.\
-                      groups[MCPWM_CAPTURE_DEFAULT_GROUP].\
+                      soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
                       operators[lower->channel_id].\
                       generators[MCPWM_GENERATOR_1].pwm_sig,
                       0, 0);
@@ -1691,7 +1689,8 @@ static int esp_mcpwm_capture_set_gpio(
     }
 
   esp_gpio_matrix_in(lower->gpio_pin,
-    mcpwm_periph_signals.groups[0].captures[lower->channel_id].cap_sig,
+    soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
+      captures[lower->channel_id].cap_sig,
     false);
 
   cpinfo("GPIO: %d configured for channel %d\n", lower->gpio_pin,
@@ -1717,32 +1716,25 @@ static int esp_mcpwm_capture_set_gpio(
  ****************************************************************************/
 
 #if defined(CONFIG_ESP_MCPWM_CAPTURE) || defined(ESP_MCPMW_MOTOR_FAULT)
-static int esp_mcpwm_isr_register(int (*fn)(int, void *, void *),
-                                          void *arg)
+static int esp_mcpwm_isr_register(int (*fn)(int, void *, void *), void *arg)
 {
   int cpuint;
   int ret;
 
-  cpuint = esp_setup_irq(mcpwm_periph_signals.groups[0].irq_id,
+  cpuint = esp_setup_irq(soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].\
+                         irq_id,
                          ESP_IRQ_PRIORITY_DEFAULT,
-                         ESP_IRQ_TRIGGER_LEVEL);
+                         ESP_IRQ_TRIGGER_LEVEL,
+                         fn,
+                         arg);
   if (cpuint < 0)
     {
       cperr("Failed to allocate a CPU interrupt.\n");
       return -ENOMEM;
     }
 
-  ret = irq_attach(ESP_SOURCE2IRQ(mcpwm_periph_signals.groups[0].irq_id),
-                   fn,
-                   &g_mcpwm_common);
-  if (ret < 0)
-    {
-      cperr("Couldn't attach IRQ to handler.\n");
-      esp_teardown_irq(mcpwm_periph_signals.groups[0].irq_id, cpuint);
-      return ret;
-    }
-
-  up_enable_irq(ESP_SOURCE2IRQ(mcpwm_periph_signals.groups[0].irq_id));
+  up_enable_irq(ESP_SOURCE2IRQ(
+                  soc_mcpwm_signals[MCPWM_CAPTURE_DEFAULT_GROUP].irq_id));
 
   return ret;
 }

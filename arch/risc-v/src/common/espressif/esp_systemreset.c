@@ -52,7 +52,7 @@ static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_register_shutdown_handler
+ * Name: esp_register_reset_handler
  *
  * Description:
  *   This function allows you to register a handler that gets invoked before
@@ -67,7 +67,7 @@ static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
  *
  ****************************************************************************/
 
-int esp_register_shutdown_handler(shutdown_handler_t handler)
+int esp_register_reset_handler(shutdown_handler_t handler)
 {
   for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
     {
@@ -86,11 +86,11 @@ int esp_register_shutdown_handler(shutdown_handler_t handler)
 }
 
 /****************************************************************************
- * Name: esp_unregister_shutdown_handler
+ * Name: esp_unregister_reset_handler
  *
  * Description:
  *   This function allows you to unregister a handler which was previously
- *   registered using esp_register_shutdown_handler function.
+ *   registered using esp_register_reset_handler function.
  *
  * Input Parameters:
  *   handler       - Function to execute on restart.
@@ -101,7 +101,7 @@ int esp_register_shutdown_handler(shutdown_handler_t handler)
  *
  ****************************************************************************/
 
-int esp_unregister_shutdown_handler(shutdown_handler_t handler)
+int esp_unregister_reset_handler(shutdown_handler_t handler)
 {
   for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
     {

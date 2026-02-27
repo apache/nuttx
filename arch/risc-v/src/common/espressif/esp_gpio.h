@@ -28,6 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/irq.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -40,9 +41,9 @@
 
 /* Encoded pin attributes used with esp_configgpio()
  *
- * 11 10 9  8  7  6  5  4  3  2  1  0
- * -- -- -- -- -- -- -- -- -- -- -- --
- * DR DR DR FN FN FN OD PD PU F  O  I
+ * 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+ * -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ * IT IT IT DR DR DR FN FN FN OD PD PU F  O  I
  */
 
 #define MODE_SHIFT          0
@@ -62,9 +63,6 @@
 #  define FUNCTION_1        (1 << FUNCTION_SHIFT)
 #  define FUNCTION_2        (2 << FUNCTION_SHIFT)
 #  define FUNCTION_3        (3 << FUNCTION_SHIFT)
-#  define FUNCTION_4        (4 << FUNCTION_SHIFT)
-#  define FUNCTION_5        (5 << FUNCTION_SHIFT)
-#  define FUNCTION_6        (6 << FUNCTION_SHIFT)
 
 #define DRIVE_SHIFT         9
 #define DRIVE_MASK          (7 << DRIVE_SHIFT)
@@ -72,6 +70,15 @@
 #  define DRIVE_1           (2 << DRIVE_SHIFT)
 #  define DRIVE_2           (3 << DRIVE_SHIFT)
 #  define DRIVE_3           (4 << DRIVE_SHIFT)
+
+#define INTR_TYPE_SHIFT     12
+#define INTR_TYPE_MASK      (7 << INTR_TYPE_SHIFT)
+#  define DISABLED          (0 << INTR_TYPE_SHIFT)
+#  define RISING            (1 << INTR_TYPE_SHIFT)
+#  define FALLING           (2 << INTR_TYPE_SHIFT)
+#  define CHANGE            (3 << INTR_TYPE_SHIFT)
+#  define ONLOW             (4 << INTR_TYPE_SHIFT)
+#  define ONHIGH            (5 << INTR_TYPE_SHIFT)
 
 #define INPUT_PULLUP        (INPUT | PULLUP)
 #define INPUT_PULLDOWN      (INPUT | PULLDOWN)
@@ -90,33 +97,6 @@
 #  define OUTPUT_FUNCTION_4 (OUTPUT_FUNCTION | FUNCTION_4)
 #  define OUTPUT_FUNCTION_5 (OUTPUT_FUNCTION | FUNCTION_5)
 #  define OUTPUT_FUNCTION_6 (OUTPUT_FUNCTION | FUNCTION_6)
-
-/* Interrupt type used with esp_gpioirqenable() */
-
-#define DISABLED          0x00
-#define RISING            0x01
-#define FALLING           0x02
-#define CHANGE            0x03
-#define ONLOW             0x04
-#define ONHIGH            0x05
-
-/* Check whether it is a valid GPIO number */
-
-#define GPIO_IS_VALID_GPIO(gpio_num)   ((gpio_num >= 0) && \
-                                        (((1ULL << (gpio_num)) & \
-                                         SOC_GPIO_VALID_GPIO_MASK) != 0))
-
-/* Check whether it can be a valid GPIO number of output mode */
-
-#define GPIO_IS_VALID_OUTPUT_GPIO(gpio_num) \
-  ((gpio_num >= 0) && \
-      (((1ULL << (gpio_num)) & SOC_GPIO_VALID_OUTPUT_GPIO_MASK) != 0))
-
-/* Check whether it can be a valid digital I/O pad */
-
-#define GPIO_IS_VALID_DIGITAL_IO_PAD(gpio_num) \
-  ((gpio_num >= 0) && \
-    (((1ULL << (gpio_num)) & SOC_GPIO_VALID_DIGITAL_IO_PAD_MASK) != 0))
 
 /****************************************************************************
  * Public Types
@@ -275,41 +255,65 @@ void esp_gpioirqinitialize(void);
  * Name: esp_gpioirqenable
  *
  * Description:
- *   Enable the interrupt for specified GPIO IRQ
+ *   Enable the interrupt for specified GPIO
  *
  * Input Parameters:
- *   irq           - GPIO IRQ number to be enabled.
- *   intrtype      - Interrupt type to be enabled.
+ *   id           - GPIO to be enabled.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_GPIO_IRQ
-void esp_gpioirqenable(int irq, gpio_intrtype_t intrtype);
+int esp_gpioirqenable(int id);
 #else
-#  define esp_gpioirqenable(irq,intrtype)
+#  define esp_gpioirqenable(id)
 #endif
 
 /****************************************************************************
  * Name: esp_gpioirqdisable
  *
  * Description:
- *   Disable the interrupt for specified GPIO IRQ
+ *   Disable the interrupt for specified GPIO
  *
  * Input Parameters:
- *   irq           - GPIO IRQ number to be disabled.
+ *   id           - GPIO to be disabled.
  *
  * Returned Value:
- *   None.
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_GPIO_IRQ
-void esp_gpioirqdisable(int irq);
+int esp_gpioirqdisable(int id);
 #else
-#  define esp_gpioirqdisable(irq)
+#  define esp_gpioirqdisable(id)
+#endif
+
+/****************************************************************************
+ * Name: esp_gpio_irq
+ *
+ * Description:
+ *   Register or unregister a button interrupt handler for the specified
+ *   button ID. Passing a non-NULL handler attaches and enables the ISR for
+ *   the button; passing NULL disables the interrupt and removes any
+ *   previously registered handler.
+ *
+ * Input Parameters:
+ *   id           - Identifies the button to be monitored.
+ *   irqhandler   - The handler to be called when the interrupt occurs.
+ *                  Set to NULL to disable the interrupt.
+ *   arg          - Pointer to the argument that will be provided to the
+ *                  interrupt handler.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_GPIO_IRQ
+int esp_gpio_irq(int id, xcpt_t irqhandler, void *arg);
 #endif
 
 #ifdef __cplusplus

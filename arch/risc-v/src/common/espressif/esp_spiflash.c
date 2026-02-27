@@ -37,7 +37,7 @@
 #include <inttypes.h>
 #include <sched/sched.h>
 
-#include "esp_flash_internal.h"
+#include "esp_private/esp_flash_internal.h"
 #include "esp_flash.h"
 #include "esp_flash_encrypt.h"
 #include "esp_private/cache_utils.h"
@@ -457,126 +457,6 @@ static bool aligned_flash_erase(size_t addr, size_t size)
 #endif /* CONFIG_ESP_FLASH_ENCRYPTION */
 
 /****************************************************************************
- * Name: spi_flash_op_block_task
- *
- * Description:
- *   Disable the non-IRAM interrupts on the other core (the one that isn't
- *   handling the SPI flash operation) and notify that the SPI flash
- *   operation can start. Wait on a busy loop until it's finished and then
- *   re-enable the non-IRAM interrupts.
- *
- * Input Parameters:
- *   argc          - Not used.
- *   argv          - Not used.
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A negated errno value is returned to
- *   indicate the nature of any failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-static int spi_flash_op_block_task(int argc, char *argv[])
-{
-  struct tcb_s *tcb = this_task();
-  int cpu = this_cpu();
-
-  for (; ; )
-    {
-      DEBUGASSERT((1 << cpu) & tcb->affinity);
-      /* Wait for a request from the other CPU to suspend interrupts
-       * and cache on this CPU.
-       */
-
-      nxsem_wait(&g_cpu_prepare_sem[cpu]);
-
-      sched_lock();
-      esp_intr_noniram_disable();
-
-      s_flash_op_complete = false;
-      s_flash_op_can_start = true;
-      while (!s_flash_op_complete)
-        {
-          /* Wait for a request to restore interrupts and cache on this CPU.
-           * This indicates SPI Flash operation is complete.
-           */
-        }
-
-      esp_intr_noniram_enable();
-      sched_unlock();
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: spiflash_init_spi_flash_op_block_task
- *
- * Description:
- *   Starts a kernel thread that waits for a semaphore indicating that a SPI
- *   flash operation is going to take place in the other CPU.
- *
- * Input Parameters:
- *   cpu - The CPU core that will run the created task to wait on a busy
- *         loop while the SPI flash operation finishes
- *
- * Returned Value:
- *   0 (OK) on success; A negated errno value on failure.
- *
- ****************************************************************************/
-
-static int spiflash_init_spi_flash_op_block_task(int cpu)
-{
-  FAR struct tcb_s *tcb;
-  int ret;
-  char *argv[2];
-  char arg1[32];
-  cpu_set_t cpuset;
-
-  snprintf(arg1, sizeof(arg1), "%p", &cpu);
-  argv[0] = arg1;
-  argv[1] = NULL;
-
-  /* Allocate a TCB for the new task. */
-
-  tcb = kmm_zalloc(sizeof(struct tcb_s));
-  if (!tcb)
-    {
-      serr("ERROR: Failed to allocate TCB\n");
-      return -ENOMEM;
-    }
-
-  /* Setup the task type */
-
-  tcb->flags = TCB_FLAG_TTYPE_KERNEL | TCB_FLAG_FREE_TCB;
-
-  /* Initialize the task */
-
-  ret = nxtask_init(tcb, "spiflash_op",
-                    SCHED_PRIORITY_MAX,
-                    NULL, SPIFLASH_OP_TASK_STACKSIZE,
-                    spi_flash_op_block_task, argv, environ, NULL);
-  if (ret < OK)
-    {
-      kmm_free(tcb);
-      return ret;
-    }
-
-  /* Set the affinity */
-
-  CPU_ZERO(&cpuset);
-  CPU_SET(cpu, &cpuset);
-  tcb->affinity = cpuset;
-
-  /* Activate the task */
-
-  nxtask_activate(tcb);
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -730,47 +610,6 @@ int esp_spiflash_erase(uint32_t address, uint32_t length)
       ferr("ERROR: erase failed: ret=%d", ret);
       ret = ERROR;
     }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: esp_spiflash_init
- *
- * Description:
- *   Initialize ESP SPI flash driver.
- *   SPI Flash actual chip initialization initial is done by esp_start on
- *   STARTUP_FN hook.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   OK if success or a negative value if fail.
- *
- ****************************************************************************/
-
-int esp_spiflash_init(void)
-{
-  int ret = OK;
-  int cpu;
-
-#ifdef CONFIG_SMP
-  sched_lock();
-
-  for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
-    {
-      ret = spiflash_init_spi_flash_op_block_task(cpu);
-      if (ret != OK)
-        {
-          return ret;
-        }
-    }
-
-  sched_unlock();
-#else
-  UNUSED(cpu);
-#endif
 
   return ret;
 }

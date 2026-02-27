@@ -53,7 +53,7 @@ typedef void (*shutdown_handler_t)(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp_register_shutdown_handler
+ * Name: esp_register_reset_handler
  *
  * Description:
  *   This function allows you to register a handler that gets invoked before
@@ -68,14 +68,14 @@ typedef void (*shutdown_handler_t)(void);
  *
  ****************************************************************************/
 
-int esp_register_shutdown_handler(shutdown_handler_t handler);
+int esp_register_reset_handler(shutdown_handler_t handler);
 
 /****************************************************************************
- * Name: esp_unregister_shutdown_handler
+ * Name: esp_unregister_reset_handler
  *
  * Description:
  *   This function allows you to unregister a handler which was previously
- *   registered using esp_register_shutdown_handler function.
+ *   registered using esp_register_reset_handler function.
  *
  * Input Parameters:
  *   handler       - Function to execute on restart.
@@ -86,7 +86,7 @@ int esp_register_shutdown_handler(shutdown_handler_t handler);
  *
  ****************************************************************************/
 
-int esp_unregister_shutdown_handler(shutdown_handler_t handler);
+int esp_unregister_reset_handler(shutdown_handler_t handler);
 
 /****************************************************************************
  * Name: up_shutdown_handler

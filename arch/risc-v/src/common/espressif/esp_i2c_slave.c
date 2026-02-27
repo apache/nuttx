@@ -61,7 +61,7 @@
 #include "hal/i2c_ll.h"
 #include "soc/system_reg.h"
 #include "soc/gpio_sig_map.h"
-#include "soc/i2c_periph.h"
+#include "hal/i2c_periph.h"
 #if defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
@@ -616,7 +616,7 @@ static void esp_i2c_slave_deinit(struct esp_i2c_priv_s *priv)
  *
  ****************************************************************************/
 #ifndef CONFIG_I2C_POLLED
-static int esp_i2c_slave_irq(int cpuint, void *context, void *arg)
+static int esp_i2c_slave_irq(void *arg)
 {
   struct esp_i2c_priv_s *priv = (struct esp_i2c_priv_s *)arg;
   uint32_t irq_status = 0;
@@ -873,25 +873,13 @@ struct i2c_slave_s *esp_i2cbus_slave_initialize(int port, int addr)
 
   priv->cpuint = esp_setup_irq(i2c_periph_signal[priv->id].irq,
                                ESP_IRQ_PRIORITY_DEFAULT,
-                               ESP_IRQ_TRIGGER_LEVEL);
+                               ESP_IRQ_TRIGGER_LEVEL,
+                               esp_i2c_slave_irq,
+                               priv);
   if (priv->cpuint < 0)
     {
       /* Failed to allocate a CPU interrupt of this type. */
 
-      priv->refs--;
-      nxmutex_unlock(&priv->lock);
-
-      return NULL;
-    }
-
-  ret = irq_attach(ESP_SOURCE2IRQ(i2c_periph_signal[priv->id].irq),
-                   esp_i2c_slave_irq, priv);
-  if (ret != OK)
-    {
-      /* Failed to attach IRQ, free the allocated CPU interrupt */
-
-      esp_teardown_irq(i2c_periph_signal[priv->id].irq, priv->cpuint);
-      priv->cpuint = -ENOMEM;
       priv->refs--;
       nxmutex_unlock(&priv->lock);
 

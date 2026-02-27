@@ -97,6 +97,7 @@ static int board_oa_tc6_attach(FAR const struct oa_tc6_config_s *config,
                                xcpt_t handler, FAR void *arg)
 {
   int pin;
+  int ret;
 
   switch (config->id)
     {
@@ -111,8 +112,16 @@ static int board_oa_tc6_attach(FAR const struct oa_tc6_config_s *config,
           return ERROR;
     }
 
-  esp_configgpio(pin, INPUT_FUNCTION_2 | PULLUP);
-  irq_attach(ESP_PIN2IRQ(pin), handler, arg);
+  esp_configgpio(pin, INPUT_FUNCTION_2 | PULLUP | FALLING);
+
+  ret = esp_gpio_irq(pin,
+                     handler,
+                     arg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_oa_tc6_attach() failed: %d\n", ret);
+      return ret;
+    }
 
   return OK;
 }
@@ -153,11 +162,11 @@ static int board_oa_tc6_enable(FAR const struct oa_tc6_config_s *config,
 
   if (enable)
     {
-      esp_gpioirqenable(ESP_PIN2IRQ(pin), FALLING);
+      esp_gpioirqenable(pin);
     }
   else
     {
-      esp_gpioirqdisable(ESP_PIN2IRQ(pin));
+      esp_gpioirqdisable(pin);
     }
 
   return OK;

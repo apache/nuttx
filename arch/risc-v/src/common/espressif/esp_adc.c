@@ -46,7 +46,7 @@
 #include "hal/adc_oneshot_hal.h"
 #include "hal/adc_ll.h"
 #include "hal/sar_ctrl_ll.h"
-#include "soc/adc_periph.h"
+#include "hal/adc_periph.h"
 #include "soc/periph_defs.h"
 #include "esp_clk_tree.h"
 
@@ -436,6 +436,7 @@ static int esp_adc_oneshot_read(struct adc_dev_s *dev)
           adc_set_hw_calibration_code(priv->unit, atten);
         }
 
+      adc_oneshot_ll_disable_all_unit();
       ret = adc_oneshot_hal_convert(hal, &raw_value);
       if (!ret)
         {
@@ -737,6 +738,9 @@ struct adc_dev_s *esp_adc_initialize(int adc_num,
 #ifdef CONFIG_ESPRESSIF_ADC_1
           dev = &g_adcdev1;
           priv = &g_adcpriv1;
+#  ifdef CONFIG_ARCH_CHIP_ESP32C3
+          adc_ll_enable_calibration_ref(ADC_UNIT_1, false);
+#  endif
           break;
 #endif
         }

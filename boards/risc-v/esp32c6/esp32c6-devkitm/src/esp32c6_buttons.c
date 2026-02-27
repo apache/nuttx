@@ -75,7 +75,7 @@
 
 uint32_t board_button_initialize(void)
 {
-  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_2 | PULLUP);
+  esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_2 | PULLUP | CHANGE);
   return 1;
 }
 
@@ -164,37 +164,6 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  int ret;
-  DEBUGASSERT(id == 0);
-
-  int irq = ESP_PIN2IRQ(BUTTON_BOOT);
-
-  if (NULL != irqhandler)
-    {
-      /* Make sure the interrupt is disabled */
-
-      esp_gpioirqdisable(irq);
-
-      gpioinfo("Attach %p\n", irqhandler);
-
-      ret = irq_attach(irq, irqhandler, arg);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: irq_attach() failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Configure the interrupt for rising and falling edges */
-
-      gpioinfo("Enabling the interrupt\n");
-      esp_gpioirqenable(irq, CHANGE);
-    }
-  else
-    {
-      gpioinfo("Disable the interrupt\n");
-      esp_gpioirqdisable(irq);
-    }
-
-  return OK;
+  return esp_gpio_irq(BUTTON_BOOT, irqhandler, arg);
 }
 #endif

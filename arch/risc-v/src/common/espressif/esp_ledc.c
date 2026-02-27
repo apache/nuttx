@@ -44,7 +44,7 @@
 #include "hal/ledc_hal.h"
 #include "hal/ledc_types.h"
 #include "soc/soc_caps.h"
-#include "soc/ledc_periph.h"
+#include "hal/ledc_periph.h"
 #include "clk_ctrl_os.h"
 #include "esp_clk_tree.h"
 #include "esp_private/esp_clk_tree_common.h"
@@ -1161,7 +1161,7 @@ static int ledc_channel_output_enable(ledc_channel_t channel)
     }
 
   ledc_hal_set_sig_out_en(&(p_ledc_obj->ledc_hal), channel, true);
-  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel, true);
+  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel);
 
   return OK;
 }
@@ -1196,7 +1196,7 @@ static int ledc_channel_output_disable(ledc_channel_t channel)
 
   ledc_hal_set_idle_level(&(p_ledc_obj->ledc_hal), channel, 0);
   ledc_hal_set_sig_out_en(&(p_ledc_obj->ledc_hal), channel, false);
-  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel, false);
+  ledc_hal_set_duty_start(&(p_ledc_obj->ledc_hal), channel);
 
   leave_critical_section(flags);
   return OK;

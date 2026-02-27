@@ -68,38 +68,36 @@ extern "C"
 #if defined(CONFIG_ESP_RMT)
 
 /****************************************************************************
- * Name: esp_rmt_tx_init
+ * Name: esp_rmt_rx_init
  *
  * Description:
  *   Initialize the selected RMT device in TX mode
  *
  * Input Parameters:
- *   ch   - The RMT's channel that will be used
- *   pin  - The pin used for the TX channel
+ *   tx_pin  - The pin used for the TX channel
  *
  * Returned Value:
  *   Valid RMT device structure reference on success; NULL, otherwise.
  *
  ****************************************************************************/
 
-struct rmt_dev_s *esp_rmt_tx_init(int ch, int pin);
+struct rmt_dev_s *esp_rmt_rx_init(int tx_pin);
 
 /****************************************************************************
- * Name: esp_rmt_rx_init
+ * Name: esp_rmt_tx_init
  *
  * Description:
- *   Initialize the selected RMT device in RC mode
+ *   Initialize the selected RMT device in RX mode
  *
  * Input Parameters:
- *   ch   - The RMT's channel that will be used
- *   pin  - The pin used for the RX channel
+ *   rx_pin  - The pin used for the RX channel
  *
  * Returned Value:
  *   Valid RMT device structure reference on success; NULL, otherwise.
  *
  ****************************************************************************/
 
-struct rmt_dev_s *esp_rmt_rx_init(int ch, int pin);
+struct rmt_dev_s *esp_rmt_tx_init(int rx_pin);
 
 #endif
 
