@@ -191,6 +191,18 @@ int stm32l4_pwm_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32l4_can_setup
+ *
+ * Description:
+ *   Initialize CAN and register the CAN device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN
+int stm32l4_can_setup(void);
+#endif
+
+/****************************************************************************
  * Name: stm32l4_adc_setup
  *
  * Description:

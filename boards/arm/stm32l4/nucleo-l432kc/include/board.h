@@ -177,6 +177,12 @@
 #  define GPIO_SPI1_SCK   GPIO_SPI1_SCK_1   /* PA5 */
 #endif
 
+/* CAN */
+#if defined(CONFIG_CAN)
+#define GPIO_CAN1_RX  GPIO_CAN1_RX_1 /* PA11 */
+#define GPIO_CAN1_TX  GPIO_CAN1_TX_1 /* PA12 */
+#endif
+
 /* LEDs
  *
  * The Nucleo l432kc board provides a single user LED, LD3.  LD3
