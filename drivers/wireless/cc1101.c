@@ -102,6 +102,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/wireless/ioctl.h>
 #include <nuttx/wireless/cc1101.h>
 
 /****************************************************************************
@@ -294,6 +295,8 @@ static ssize_t cc1101_file_write(FAR struct file *filep,
                                  size_t buflen);
 static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
+static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
+                             unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -306,7 +309,7 @@ static const struct file_operations g_cc1101ops =
   cc1101_file_read,  /* read */
   cc1101_file_write, /* write */
   NULL,              /* seek */
-  NULL,              /* ioctl */
+  cc1101_file_ioctl, /* ioctl */
   NULL,              /* mmap */
   NULL,              /* truncate */
   cc1101_file_poll   /* poll */
@@ -1573,4 +1576,349 @@ int cc1101_isr(int irq, FAR void *context, FAR void *arg)
 
   work_queue(HPWORK, &dev->irq_work, cc1101_isr_process, arg, 0);
   return 0;
+}
+
+/****************************************************************************
+ * Name: cc1101_file_ioctl
+ *
+ * Description:
+ * Standard driver ioctl method. Maps common RF IOCTLs to CC1101 registers.
+ *
+ ****************************************************************************/
+
+static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
+                             unsigned long arg)
+{
+  FAR struct inode *inode;
+  FAR struct cc1101_dev_s *dev;
+  int ret = OK;
+  const uint32_t f_xosc = 26000000; /* CC1101 typical XOSC is 26 MHz */
+
+  /* Pointer castings moved to the top of the function per coding style */
+
+  FAR uint32_t *ptr32 = (FAR uint32_t *)((uintptr_t)arg);
+  FAR int32_t *ptr32_s = (FAR int32_t *)((uintptr_t)arg);
+  FAR uint8_t *ptr8 = (FAR uint8_t *)((uintptr_t)arg);
+  FAR enum wlioc_modulation_e *mod =
+    (FAR enum wlioc_modulation_e *)((uintptr_t)arg);
+
+  wlinfo("cmd: %d arg: %ld\n", cmd, arg);
+  inode = filep->f_inode;
+
+  DEBUGASSERT(inode->i_private);
+  dev  = inode->i_private;
+
+  /* Get exclusive access to the driver data structure */
+
+  ret = nxmutex_lock(&dev->devlock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Process the IOCTL by command */
+
+  switch (cmd)
+    {
+      /* 1. Radio Frequency */
+
+      case WLIOC_SETRADIOFREQ:
+        {
+          uint64_t freq_word;
+          uint8_t regs[3];
+          uint8_t channr;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          freq_word = ((uint64_t)(*ptr32) << 16) / f_xosc;
+          regs[0] = (uint8_t)((freq_word >> 16) & 0xff);
+          regs[1] = (uint8_t)((freq_word >> 8) & 0xff);
+          regs[2] = (uint8_t)(freq_word & 0xff);
+
+          ret = cc1101_access(dev, CC1101_FREQ2, regs, -3);
+          if (ret >= 0)
+            {
+              channr = 0;
+              ret = cc1101_access(dev, CC1101_CHANNR, &channr, -1);
+              if (ret >= 0)
+                {
+                  ret = OK;
+                }
+            }
+        }
+        break;
+
+      case WLIOC_GETRADIOFREQ:
+        {
+          uint8_t regs[3];
+          uint32_t freq_word;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          ret = cc1101_access(dev, CC1101_FREQ2, regs, 3);
+          if (ret >= 0)
+            {
+              freq_word = (regs[0] << 16) | (regs[1] << 8) | regs[2];
+              *ptr32 = (uint32_t)(((uint64_t)freq_word * f_xosc) >> 16);
+              ret = OK;
+            }
+        }
+        break;
+
+      /* 2. Node Address */
+
+      case WLIOC_SETADDR:
+        {
+          DEBUGASSERT(ptr8 != NULL);
+
+          ret = cc1101_access(dev, CC1101_ADDR, ptr8, -1);
+          if (ret >= 0)
+            {
+              ret = OK;
+            }
+        }
+        break;
+
+      case WLIOC_GETADDR:
+        {
+          DEBUGASSERT(ptr8 != NULL);
+
+          ret = cc1101_access(dev, CC1101_ADDR, ptr8, 1);
+          if (ret >= 0)
+            {
+              ret = OK;
+            }
+        }
+        break;
+
+      /* 3. Output Power */
+
+      case WLIOC_SETTXPOWER:
+        {
+          DEBUGASSERT(ptr32_s != NULL);
+
+          cc1101_setpower(dev, (uint8_t)*ptr32_s);
+          ret = OK;
+        }
+        break;
+
+      case WLIOC_GETTXPOWER:
+        {
+          DEBUGASSERT(ptr32_s != NULL);
+
+          *ptr32_s = (int32_t)dev->power;
+          ret = OK;
+        }
+        break;
+
+      /* 4. Modulation Technology */
+
+      case WLIOC_SETMODU:
+        {
+          uint8_t mdmcfg2;
+
+          DEBUGASSERT(mod != NULL);
+
+          ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1);
+          if (ret >= 0)
+            {
+              mdmcfg2 &= ~0x70;
+              switch (*mod)
+                {
+                  case WLIOC_FSK:
+                    mdmcfg2 |= 0x00;
+                    break;
+                  case WLIOC_GFSK:
+                    mdmcfg2 |= 0x10;
+                    break;
+                  case WLIOC_OOK:
+                    mdmcfg2 |= 0x30;
+                    break;
+                  default:
+                    ret = -ENOTSUP;
+                    break;
+                }
+
+              if (ret >= 0)
+                {
+                  ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, -1);
+                  if (ret >= 0)
+                    {
+                      ret = OK;
+                    }
+                }
+            }
+        }
+        break;
+
+      case WLIOC_GETMODU:
+        {
+          uint8_t mdmcfg2;
+          uint8_t mod_format;
+
+          DEBUGASSERT(mod != NULL);
+
+          ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1);
+          if (ret >= 0)
+            {
+              mod_format = (mdmcfg2 & 0x70) >> 4;
+              switch (mod_format)
+                {
+                  case 0x00:
+                  case 0x04:
+                    *mod = WLIOC_FSK;
+                    break;
+                  case 0x01:
+                    *mod = WLIOC_GFSK;
+                    break;
+                  case 0x03:
+                    *mod = WLIOC_OOK;
+                    break;
+                  default:
+                    ret = -ENOTSUP;
+                    break;
+                }
+
+              if (ret >= 0)
+                {
+                  ret = OK;
+                }
+            }
+        }
+        break;
+
+      /* 5. Bitrate / Data Rate */
+
+      case WLIOC_FSK_SETBITRATE:
+      case WLIOC_OOK_SETBITRATE:
+        {
+          uint64_t w;
+          uint8_t e = 0;
+          uint8_t m;
+          uint8_t mdmcfg4;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          w = ((uint64_t)(*ptr32) << 28) / f_xosc;
+          while (w > 511 && e < 15)
+            {
+              w >>= 1;
+              e++;
+            }
+
+          if (w < 256)
+            {
+              w = 256;
+            }
+
+          m = (uint8_t)(w - 256);
+
+          ret = cc1101_access(dev, CC1101_MDMCFG4, &mdmcfg4, 1);
+          if (ret >= 0)
+            {
+              mdmcfg4 = (mdmcfg4 & 0xf0) | (e & 0x0f);
+              ret = cc1101_access(dev, CC1101_MDMCFG4, &mdmcfg4, -1);
+              if (ret >= 0)
+                {
+                  ret = cc1101_access(dev, CC1101_MDMCFG3, &m, -1);
+                  if (ret >= 0)
+                    {
+                      ret = OK;
+                    }
+                }
+            }
+        }
+        break;
+
+      case WLIOC_FSK_GETBITRATE:
+      case WLIOC_OOK_GETBITRATE:
+        {
+          uint8_t mdmcfg4;
+          uint8_t mdmcfg3;
+          uint8_t e;
+          uint8_t m;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          if (cc1101_access(dev, CC1101_MDMCFG4, &mdmcfg4, 1) >= 0 &&
+              cc1101_access(dev, CC1101_MDMCFG3, &mdmcfg3, 1) >= 0)
+            {
+              e = mdmcfg4 & 0x0f;
+              m = mdmcfg3;
+              *ptr32 = (uint32_t)((((uint64_t)(256 + m) << e) *
+                f_xosc) >> 28);
+              ret = OK;
+            }
+          else
+            {
+              ret = -EIO;
+            }
+        }
+        break;
+
+      /* 6. FSK Frequency Deviation */
+
+      case WLIOC_FSK_SETFDEV:
+        {
+          uint64_t w;
+          uint8_t e = 0;
+          uint8_t m;
+          uint8_t deviatn;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          w = ((uint64_t)(*ptr32) << 17) / f_xosc;
+          while (w > 15 && e < 7)
+            {
+              w >>= 1;
+              e++;
+            }
+
+          if (w < 8)
+            {
+              w = 8;
+            }
+
+          m = (uint8_t)(w - 8);
+
+          deviatn = (e << 4) | (m & 0x07);
+          ret = cc1101_access(dev, CC1101_DEVIATN, &deviatn, -1);
+          if (ret >= 0)
+            {
+              ret = OK;
+            }
+        }
+        break;
+
+      case WLIOC_FSK_GETFDEV:
+        {
+          uint8_t deviatn;
+          uint8_t e;
+          uint8_t m;
+
+          DEBUGASSERT(ptr32 != NULL);
+
+          ret = cc1101_access(dev, CC1101_DEVIATN, &deviatn, 1);
+          if (ret >= 0)
+            {
+              e = (deviatn >> 4) & 0x07;
+              m = deviatn & 0x07;
+              *ptr32 = (uint32_t)((((uint64_t)(8 + m) << e) * f_xosc) >> 17);
+              ret = OK;
+            }
+        }
+        break;
+
+      case WLIOC_SETFINEPOWER:
+      case WLIOC_GETFINEPOWER:
+        ret = -ENOSYS;
+        break;
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  nxmutex_unlock(&dev->devlock);
+  return ret;
 }
