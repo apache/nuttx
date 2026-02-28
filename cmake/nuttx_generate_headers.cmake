@@ -137,6 +137,17 @@ else()
   file(REMOVE ${CMAKE_BINARY_DIR}/include/setjmp.h)
 endif()
 
+# Target used to copy include/nuttx/lib/stdbit.h.  If CONFIG_ARCH_STDBIT_H or
+# CONFIG_LIBC_STDBIT_GENERIC is set, copy stdbit.h to include/ for C23 bit
+# utilities.
+
+if(CONFIG_ARCH_STDBIT_H OR CONFIG_LIBC_STDBIT_GENERIC)
+  nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/stdbit.h
+                       ${CMAKE_BINARY_DIR}/include/stdbit.h)
+else()
+  file(REMOVE ${CMAKE_BINARY_DIR}/include/stdbit.h)
+endif()
+
 # Add final context target that ties together all of the above The context
 # target is invoked on each target build to assure that NuttX is properly
 # configured.  The basic configuration steps include creation of the the
@@ -151,7 +162,10 @@ add_custom_target(
     $<$<BOOL:${CONFIG_ARCH_STDARG_H}>:${CMAKE_BINARY_DIR}/include/stdarg.h>
     $<$<BOOL:${NEED_MATH_H}>:${CMAKE_BINARY_DIR}/include/math.h>
     $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
-    $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>)
+    $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>
+    $<$<BOOL:${CONFIG_ARCH_STDBIT_H}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
+    $<$<BOOL:${CONFIG_LIBC_STDBIT_GENERIC}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
+)
 
 # apps_context is a PHONY target used as an intermediate process to control the
 # time order of context preparation actions of app building
