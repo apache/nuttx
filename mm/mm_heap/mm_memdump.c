@@ -223,6 +223,29 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
     }
 }
 
+#if CONFIG_MM_BACKTRACE >= 0
+struct memdump_tcb_arg_s
+{
+  FAR struct mm_heap_s *heap;
+  unsigned long seqmin;
+  unsigned long seqmax;
+};
+
+static void memdump_tcb_handler(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  struct mallinfo_task info;
+  struct malltask task;
+  FAR struct memdump_tcb_arg_s *tcb_arg = arg;
+
+  task.pid = tcb ? tcb->pid : PID_MM_LEAK;
+  task.seqmin = tcb_arg->seqmin;
+  task.seqmax = tcb_arg->seqmax;
+  info = mm_mallinfo_task(tcb_arg->heap, &task);
+  syslog(LOG_INFO, "pid:%5d, used:%10d, nused:%10d\n",
+        task.pid, info.uordblks, info.aordblks);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -301,6 +324,18 @@ void mm_memdump(FAR struct mm_heap_s *heap,
     {
       syslog(LOG_INFO, "Dump allocated orphan nodes\n");
     }
+#if CONFIG_MM_BACKTRACE >= 0
+  else if (pid == PID_MM_ALL_PID)
+    {
+      syslog(LOG_INFO, "Dump all pid memory allocated\n");
+      struct memdump_tcb_arg_s tcb_arg;
+      tcb_arg.heap = heap;
+      tcb_arg.seqmin = dump->seqmin;
+      tcb_arg.seqmax = dump->seqmax;
+      nxsched_foreach(memdump_tcb_handler, &tcb_arg);
+      return;
+    }
+#endif
 
 #if CONFIG_MM_BACKTRACE < 0
   syslog(LOG_INFO, "%12s%9s%*s\n", "Size", "Overhead",
