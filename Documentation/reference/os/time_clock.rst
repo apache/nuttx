@@ -648,12 +648,12 @@ which delivers true nanosecond-level precision. HRTimer primarily provides
 the following functional interfaces:
 
 **Set a timer in nanoseconds**: Configure a software timer to trigger at
-                                a specified nanosecond time.
+a specified nanosecond time.
 
 **Cancel a timer**: Cancel the software timer.
 
 **Handle timer timeout**: Execute timeout processing after the timer event
-                          is triggered.
+is triggered.
 
 A user can register an hrtimer callback to execute after a specified delay.
 The callback runs in the timer interrupt context, so only limited NuttX interfaces
