@@ -623,6 +623,46 @@ config ETC_FATMOUNTPT
 		will mount a FAT FS under /tmp. This is the location where the FAT
 		FS will be mounted.  Default is "/tmp".
 
+config ETC_ROMFS_GENPASSWD
+	bool "Auto-generate /etc/passwd at build time"
+	default n
+	---help---
+		Generate the /etc/passwd file at build time from a user-supplied
+		password.  This avoids shipping a hard-coded default password
+		(CWE-798).  When enabled, the build will fail if no password
+		is configured, forcing each build to set its own credentials.
+
+if ETC_ROMFS_GENPASSWD
+
+config ETC_ROMFS_PASSWD_USER
+	string "Admin username"
+	default "admin"
+	---help---
+		The username for the auto-generated /etc/passwd entry.
+
+config ETC_ROMFS_PASSWD_PASSWORD
+	string "Admin password (required)"
+	default ""
+	---help---
+		The plaintext password for the auto-generated /etc/passwd entry.
+		This value is hashed with TEA at build time; the plaintext is NOT
+		stored in the firmware image.  The build will fail if this is left
+		empty.  Set this via 'make menuconfig'.
+
+config ETC_ROMFS_PASSWD_UID
+	int "Admin user ID"
+	default 0
+
+config ETC_ROMFS_PASSWD_GID
+	int "Admin group ID"
+	default 0
+
+config ETC_ROMFS_PASSWD_HOME
+	string "Admin home directory"
+	default "/"
+
+endif # ETC_ROMFS_GENPASSWD
+
 endif # ETC_ROMFS
 
 config RR_INTERVAL
