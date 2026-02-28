@@ -463,10 +463,18 @@ clock_t up_perf_gettime(void)
 
   if (g_oneshot_lower != NULL)
     {
+#ifdef CONFIG_ONESHOT_COUNT
+      /* Fast path for perf_gettime if ONESHOT_COUNT enabled.
+       * Please note the potential overflow issue when clock_t is 32-bit.
+       */
+
+      ret = g_oneshot_lower->ops->current(g_oneshot_lower);
+#else
       struct timespec ts;
 
       ONESHOT_CURRENT(g_oneshot_lower, &ts);
       ret = clock_time2nsec(&ts);
+#endif
     }
 
   return ret;
@@ -474,11 +482,27 @@ clock_t up_perf_gettime(void)
 
 unsigned long up_perf_getfreq(void)
 {
+#ifdef CONFIG_ONESHOT_COUNT
+  return g_oneshot_lower != NULL ? g_oneshot_lower->frequency : -1;
+#else
   return NSEC_PER_SEC;
+#endif
 }
 
 void up_perf_convert(clock_t elapsed, FAR struct timespec *ts)
 {
+#ifdef CONFIG_ONESHOT_COUNT
+  if (g_oneshot_lower != NULL)
+    {
+      uint64_t sec  = oneshot_cnt2sec(g_oneshot_lower, elapsed);
+      uint32_t freq = g_oneshot_lower->frequency;
+
+      ts->tv_nsec   = oneshot_delta_cnt2nsec(g_oneshot_lower,
+                                             elapsed - sec * freq);
+      ts->tv_sec    = sec;
+    }
+#else
   clock_nsec2time(ts, elapsed);
+#endif
 }
 #endif /* CONFIG_ARCH_PERF_EVENTS */
