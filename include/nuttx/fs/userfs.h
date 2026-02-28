@@ -144,6 +144,13 @@ enum userfs_req_e
   USERFS_REQ_CHSTAT,
   USERFS_REQ_GETLK,
   USERFS_REQ_SETLK,
+  USERFS_REQ_SYNCFS,
+#ifdef CONFIG_FS_LINKS
+  USERFS_REQ_LINK,
+  USERFS_REQ_SYMLINK,
+  USERFS_REQ_READLINK,
+  USERFS_REQ_LSTAT,
+#endif
 #ifdef CONFIG_FS_NOTIFY
   USERFS_REQ_NOTIFY
 #endif
@@ -180,6 +187,13 @@ enum userfs_resp_e
   USERFS_RESP_CHSTAT,
   USERFS_RESP_GETLK,
   USERFS_RESP_SETLK,
+  USERFS_RESP_SYNCFS,
+#ifdef CONFIG_FS_LINKS
+  USERFS_RESP_LINK,
+  USERFS_RESP_SYMLINK,
+  USERFS_RESP_READLINK,
+  USERFS_RESP_LSTAT,
+#endif
 #ifdef CONFIG_FS_NOTIFY
   USERFS_RESP_NOTIFY
 #endif
@@ -242,6 +256,7 @@ struct userfs_operations_s
             FAR const struct stat *buf, int flags);
   /* Optional methods; NULL or -ENOSYS falls back to the OS defaults.
    * setlk is always non-blocking: return -EAGAIN and the VFS retries.
+   * Without lstat the OS uses stat.
    * notify reports the watch life cycle; events are injected back with
    * userfs_notify_event().
    */
@@ -250,6 +265,17 @@ struct userfs_operations_s
             FAR struct flock *fl);
   int     (*setlk)(FAR void *volinfo, FAR void *openinfo,
             FAR struct flock *fl);
+  int     (*syncfs)(FAR void *volinfo);
+#ifdef CONFIG_FS_LINKS
+  int     (*link)(FAR void *volinfo, FAR const char *relpath1,
+            FAR const char *relpath2);
+  int     (*symlink)(FAR void *volinfo, FAR const char *path1,
+            FAR const char *relpath2);
+  ssize_t (*readlink)(FAR void *volinfo, FAR const char *relpath,
+            FAR char *buf, size_t bufsize);
+  int     (*lstat)(FAR void *volinfo, FAR const char *relpath,
+            FAR struct stat *buf);
+#endif
 #ifdef CONFIG_FS_NOTIFY
   int     (*notify)(FAR void *volinfo, int wd, FAR const char *relpath,
             int action, uint32_t mask);
@@ -612,6 +638,82 @@ struct userfs_notify_response_s
   int ret;                  /* ADD: daemon watch handle or error */
 };
 #endif /* CONFIG_FS_NOTIFY */
+
+struct userfs_syncfs_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_SYNCFS */
+};
+
+struct userfs_syncfs_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_SYNCFS */
+  int ret;                  /* Result of the operation */
+};
+
+#ifdef CONFIG_FS_LINKS
+struct userfs_link_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_LINK */
+  uint16_t newoffset;       /* Offset from path1 to path2 */
+  char relpath1[1];         /* Source relative path */
+};
+
+#define SIZEOF_USERFS_LINK_REQUEST_S(o,n) (sizeof(struct userfs_link_request_s) + (o) + (n))
+
+struct userfs_link_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_LINK */
+  int ret;                  /* Result of the operation */
+};
+
+struct userfs_symlink_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_SYMLINK */
+  uint16_t newoffset;       /* Offset from path1 to relpath2 */
+  char path1[1];            /* Target path */
+};
+
+#define SIZEOF_USERFS_SYMLINK_REQUEST_S(o,n) (sizeof(struct userfs_symlink_request_s) + (o) + (n))
+
+struct userfs_symlink_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_SYMLINK */
+  int ret;                  /* Result of the operation */
+};
+
+struct userfs_readlink_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_READLINK */
+  size_t bufsize;           /* Maximum number of bytes to read */
+  char relpath[1];          /* Relative path to the symlink */
+};
+
+#define SIZEOF_USERFS_READLINK_REQUEST_S(n) (sizeof(struct userfs_readlink_request_s) + (n) - 1)
+
+struct userfs_readlink_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_READLINK */
+  ssize_t nread;            /* Result of the operation */
+  char rddata[1];           /* Link target data.  Actual size is nread */
+};
+
+#define SIZEOF_USERFS_READLINK_RESPONSE_S(n) (sizeof(struct userfs_readlink_response_s) + (n) - 1)
+
+struct userfs_lstat_request_s
+{
+  uint8_t req;              /* Must be USERFS_REQ_LSTAT */
+  char relpath[1];          /* Relative path to the entry to query */
+};
+
+#define SIZEOF_USERFS_LSTAT_REQUEST_S(n) (sizeof(struct userfs_lstat_request_s) + (n) - 1)
+
+struct userfs_lstat_response_s
+{
+  uint8_t resp;             /* Must be USERFS_RESP_LSTAT */
+  int ret;                  /* Result of the operation */
+  struct stat buf;          /* Returned status */
+};
+#endif /* CONFIG_FS_LINKS */
 
 /****************************************************************************
  * Public Function Prototypes
