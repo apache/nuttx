@@ -39,12 +39,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/can/can.h>
 
-#include "arm_internal.h"
-#include "chip.h"
 #include "stm32l4.h"
-#include "stm32l4_can.h"
 
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_CAN) && (defined(CONFIG_STM32L4_CAN1) || defined(CONFIG_STM32L4_CAN2))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -195,6 +192,29 @@ static struct can_dev_s g_can1dev =
 {
   .cd_ops           = &g_canops,
   .cd_priv          = &g_can1priv,
+};
+#endif
+
+#ifdef CONFIG_STM32L4_CAN2
+static struct stm32l4_can_s g_can2priv =
+{
+  .port             = 2,
+  .canrx            =
+  {
+                      STM32L4_IRQ_CAN2RX0,
+                      STM32L4_IRQ_CAN2RX1,
+  },
+  .cantx            = STM32L4_IRQ_CAN2TX,
+  .filter           = CAN_NFILTERS / 2,
+  .base             = STM32L4_CAN2_BASE,
+  .fbase            = STM32L4_CAN2_BASE,
+  .baud             = CONFIG_STM32L4_CAN2_BAUD,
+};
+
+static struct can_dev_s g_can2dev =
+{
+  .cd_ops           = &g_canops,
+  .cd_priv          = &g_can2priv,
 };
 #endif
 
@@ -532,6 +552,13 @@ static void stm32l4can_reset(struct can_dev_s *dev)
   if (priv->port == 1)
     {
       regbit = RCC_APB1RSTR1_CAN1RST;
+    }
+  else
+#endif
+#ifdef CONFIG_STM32L4_CAN2
+  if (priv->port == 2)
+    {
+      regbit = RCC_APB1RSTR1_CAN2RST;
     }
   else
 #endif
@@ -1394,7 +1421,13 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
   int npending;
   int ret;
 
+#ifdef CONFIG_STM32L4_CAN1
   dev = &g_can1dev;
+#endif
+
+#ifdef CONFIG_STM32L4_CAN2
+  dev = &g_can2dev;
+#endif
   priv = dev->cd_priv;
 
   /* Verify that a message is pending in the FIFO */
@@ -1548,7 +1581,14 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
   struct stm32l4_can_s *priv;
   uint32_t regval;
 
+#ifdef CONFIG_STM32L4_CAN1
   dev = &g_can1dev;
+#endif
+
+#ifdef CONFIG_STM32L4_CAN2
+  dev = &g_can2dev;
+#endif
+
   priv = dev->cd_priv;
 
   /* Get the transmit status */
@@ -2153,6 +2193,22 @@ struct can_dev_s *stm32l4can_initialize(int port)
 
       stm32l4_configgpio(GPIO_CAN1_RX);
       stm32l4_configgpio(GPIO_CAN1_TX);
+    }
+  else
+#endif
+#ifdef CONFIG_STM32L4_CAN2
+  if (port == 2)
+    {
+      /* Select the CAN2 device structure */
+
+      dev = &g_can2dev;
+
+      /* Configure CAN2 pins.  The ambiguous settings in the stm32*_pinmap.h
+       * file must have been disambiguated in the board.h file.
+       */
+
+      stm32l4_configgpio(GPIO_CAN2_RX);
+      stm32l4_configgpio(GPIO_CAN2_TX);
     }
   else
 #endif
