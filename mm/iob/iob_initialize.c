@@ -175,3 +175,20 @@ void iob_initialize(void)
     }
 #endif
 }
+
+#ifdef CONFIG_IOB_OWNER_TRACKING
+struct iob_s *iob_get_iob_by_index(unsigned int index)
+{
+  uintptr_t buf;
+
+  if (index > CONFIG_IOB_NBUFFERS)
+    {
+      return 0;
+    }
+
+  buf = ALIGN_UP((uintptr_t)g_iob_buffer + offsetof(struct iob_s, io_data),
+                CONFIG_IOB_ALIGNMENT) - offsetof(struct iob_s, io_data);
+
+  return (FAR struct iob_s *)(buf + index * IOB_ALIGN_SIZE);
+}
+#endif
