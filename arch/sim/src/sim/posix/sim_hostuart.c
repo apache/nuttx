@@ -111,6 +111,16 @@ void host_uart_start(void)
       host_uninterruptible_no_return(fcntl, 0, F_SETFL, flags | O_NONBLOCK);
     }
 
+  /* Set stdout to non-blocking to prevent write(1, ...) from blocking
+   * the entire sim process when the host pipe buffer is full.
+   */
+
+  flags = host_uninterruptible(fcntl, 1, F_GETFL, 0);
+  if (flags > 0)
+    {
+      host_uninterruptible_no_return(fcntl, 1, F_SETFL, flags | O_NONBLOCK);
+    }
+
   /* Restore the original terminal mode before exit */
 
   atexit(restoremode);
