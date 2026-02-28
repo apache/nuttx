@@ -625,7 +625,7 @@
 /* Indicate that a local variable is not used */
 
 #  ifndef UNUSED
-#    define UNUSED(a) ((void)(1 || &(a)))
+#    define UNUSED(a) (void)(a)
 #  endif
 
 #  if defined(__clang__)
