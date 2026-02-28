@@ -1017,6 +1017,273 @@ static inline int userfs_notify_dispatch(FAR struct userfs_info_s *info,
 }
 #endif /* CONFIG_FS_NOTIFY */
 
+static inline int userfs_syncfs_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_syncfs_request_s *req, size_t reqlen)
+{
+  struct userfs_syncfs_response_s resp;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen != sizeof(struct userfs_syncfs_request_s))
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  if (info->userops->syncfs == NULL)
+    {
+      resp.ret = -ENOSYS;
+    }
+  else
+    {
+      resp.ret = info->userops->syncfs(info->volinfo);
+    }
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_SYNCFS;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_syncfs_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+#ifdef CONFIG_FS_LINKS
+static inline int userfs_link_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_link_request_s *req, size_t reqlen)
+{
+  struct userfs_link_response_s resp;
+  FAR char *relpath2;
+  unsigned int newoffset;
+  int path1len;
+  int path2len;
+  size_t expected;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_LINK_REQUEST_S(0, 0))
+    {
+      return -EINVAL;
+    }
+
+  path1len  = strlen(req->relpath1);
+  newoffset = req->newoffset;
+
+  if (path1len >= newoffset)
+    {
+      return -EINVAL;
+    }
+
+  relpath2 = &req->relpath1[newoffset];
+  path2len = strlen(relpath2);
+
+  if ((path2len + newoffset) > info->mxwrite)
+    {
+      return -EINVAL;
+    }
+
+  expected = SIZEOF_USERFS_LINK_REQUEST_S(newoffset, path2len);
+  if (expected >= reqlen)
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  if (info->userops->link == NULL)
+    {
+      resp.ret = -ENOSYS;
+    }
+  else
+    {
+      resp.ret = info->userops->link(info->volinfo, req->relpath1, relpath2);
+    }
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_LINK;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_link_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+static inline int userfs_symlink_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_symlink_request_s *req, size_t reqlen)
+{
+  struct userfs_symlink_response_s resp;
+  FAR char *relpath2;
+  unsigned int newoffset;
+  int path1len;
+  int path2len;
+  size_t expected;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_SYMLINK_REQUEST_S(0, 0))
+    {
+      return -EINVAL;
+    }
+
+  path1len  = strlen(req->path1);
+  newoffset = req->newoffset;
+
+  if (path1len >= newoffset)
+    {
+      return -EINVAL;
+    }
+
+  relpath2 = &req->path1[newoffset];
+  path2len = strlen(relpath2);
+
+  if ((path2len + newoffset) > info->mxwrite)
+    {
+      return -EINVAL;
+    }
+
+  expected = SIZEOF_USERFS_SYMLINK_REQUEST_S(newoffset, path2len);
+  if (expected >= reqlen)
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  if (info->userops->symlink == NULL)
+    {
+      resp.ret = -ENOSYS;
+    }
+  else
+    {
+      resp.ret = info->userops->symlink(info->volinfo, req->path1, relpath2);
+    }
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_SYMLINK;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_symlink_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+static inline int userfs_readlink_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_readlink_request_s *req, size_t reqlen)
+{
+  FAR struct userfs_readlink_response_s *resp;
+  int pathlen;
+  size_t readlen;
+  size_t resplen;
+  size_t expected;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_READLINK_REQUEST_S(0))
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strlen(req->relpath);
+  if (pathlen > info->mxwrite)
+    {
+      return -EINVAL;
+    }
+
+  expected = SIZEOF_USERFS_READLINK_REQUEST_S(pathlen);
+  if (expected >= reqlen)
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  readlen = req->bufsize;
+  if (readlen > info->mxwrite)
+    {
+      readlen = info->mxwrite;
+    }
+
+  resp = (FAR struct userfs_readlink_response_s *)info->iobuffer;
+
+  if (info->userops->readlink == NULL)
+    {
+      resp->nread = -ENOSYS;
+    }
+  else
+    {
+      resp->nread = info->userops->readlink(info->volinfo, req->relpath,
+                                            resp->rddata, readlen);
+    }
+
+  /* Send the response */
+
+  resp->resp = USERFS_RESP_READLINK;
+  resplen    = SIZEOF_USERFS_READLINK_RESPONSE_S(
+                 resp->nread > 0 ? resp->nread : 0);
+  nsent      = sendto(info->sockfd, resp, resplen, 0,
+                      (FAR struct sockaddr *)&info->client,
+                      sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+
+static inline int userfs_lstat_dispatch(FAR struct userfs_info_s *info,
+                   FAR struct userfs_lstat_request_s *req, size_t reqlen)
+{
+  struct userfs_lstat_response_s resp;
+  int pathlen;
+  size_t expected;
+  ssize_t nsent;
+
+  /* Verify the request size */
+
+  if (reqlen < SIZEOF_USERFS_LSTAT_REQUEST_S(0))
+    {
+      return -EINVAL;
+    }
+
+  pathlen = strlen(req->relpath);
+  if (pathlen > info->mxwrite)
+    {
+      return -EINVAL;
+    }
+
+  expected = SIZEOF_USERFS_LSTAT_REQUEST_S(pathlen);
+  if (expected >= reqlen)
+    {
+      return -EINVAL;
+    }
+
+  /* Dispatch the request */
+
+  if (info->userops->lstat == NULL)
+    {
+      resp.ret = -ENOSYS;
+    }
+  else
+    {
+      resp.ret = info->userops->lstat(info->volinfo, req->relpath,
+                                      &resp.buf);
+    }
+
+  /* Send the response */
+
+  resp.resp = USERFS_RESP_LSTAT;
+  nsent     = sendto(info->sockfd, &resp,
+                     sizeof(struct userfs_lstat_response_s),
+                     0, (FAR struct sockaddr *)&info->client,
+                     sizeof(struct sockaddr_in));
+  return nsent < 0 ? nsent : OK;
+}
+#endif /* CONFIG_FS_LINKS */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1307,6 +1574,38 @@ int userfs_run(FAR const char *mountpt,
                    (FAR struct userfs_flock_request_s *)info->iobuffer,
                    nread);
             break;
+
+          case USERFS_REQ_SYNCFS:
+            ret = userfs_syncfs_dispatch(info,
+                   (FAR struct userfs_syncfs_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+#ifdef CONFIG_FS_LINKS
+          case USERFS_REQ_LINK:
+            ret = userfs_link_dispatch(info,
+                   (FAR struct userfs_link_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+          case USERFS_REQ_SYMLINK:
+            ret = userfs_symlink_dispatch(info,
+                   (FAR struct userfs_symlink_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+          case USERFS_REQ_READLINK:
+            ret = userfs_readlink_dispatch(info,
+                   (FAR struct userfs_readlink_request_s *)info->iobuffer,
+                   nread);
+            break;
+
+          case USERFS_REQ_LSTAT:
+            ret = userfs_lstat_dispatch(info,
+                   (FAR struct userfs_lstat_request_s *)info->iobuffer,
+                   nread);
+            break;
+#endif
 
 #ifdef CONFIG_FS_NOTIFY
           case USERFS_REQ_NOTIFY:

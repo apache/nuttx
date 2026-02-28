@@ -155,6 +155,17 @@ static int     userfs_fchstat(FAR const struct file *filep,
 static int     userfs_chstat(FAR struct inode *mountpt,
                  FAR const char *relpath,
                  FAR const struct stat *buf, int flags);
+static int     userfs_syncfs(FAR struct inode *mountpt);
+#ifdef CONFIG_FS_LINKS
+static int     userfs_link(FAR struct inode *mountpt,
+                 FAR const char *relpath1, FAR const char *relpath2);
+static int     userfs_symlink(FAR struct inode *mountpt,
+                 FAR const char *path1, FAR const char *relpath2);
+static ssize_t userfs_readlink(FAR struct inode *mountpt,
+                 FAR const char *relpath, FAR char *buf, size_t bufsize);
+static int     userfs_lstat(FAR struct inode *mountpt,
+                 FAR const char *relpath, FAR struct stat *buf);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -199,14 +210,14 @@ const struct mountpt_operations g_userfs_operations =
   userfs_rename,     /* rename */
   userfs_stat,       /* stat */
   userfs_chstat,     /* chstat */
-  NULL,              /* syncfs */
+  userfs_syncfs,     /* syncfs */
   NULL,              /* ioctldir */
   NULL,              /* permission */
 #ifdef CONFIG_FS_LINKS
-  NULL,              /* link */
-  NULL,              /* symlink */
-  NULL,              /* readlink */
-  NULL,              /* lstat */
+  userfs_link,       /* link */
+  userfs_symlink,    /* symlink */
+  userfs_readlink,   /* readlink */
+  userfs_lstat,      /* lstat */
 #endif
 #ifdef CONFIG_FS_NOTIFY
   userfs_notify,     /* notify */
@@ -2582,6 +2593,466 @@ static int userfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: userfs_syncfs
+ *
+ * Description:
+ *   Sync the file system
+ *
+ ****************************************************************************/
+
+static int userfs_syncfs(FAR struct inode *mountpt)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_syncfs_request_s *req;
+  FAR struct userfs_syncfs_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_syncfs_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_SYNCFS;
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       sizeof(struct userfs_syncfs_request_s), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_syncfs_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_syncfs_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_SYNCFS)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  return resp->ret;
+}
+
+#ifdef CONFIG_FS_LINKS
+
+/****************************************************************************
+ * Name: userfs_link
+ *
+ * Description:
+ *   Create a hard link
+ *
+ ****************************************************************************/
+
+static int userfs_link(FAR struct inode *mountpt,
+                       FAR const char *relpath1,
+                       FAR const char *relpath2)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_link_request_s *req;
+  FAR struct userfs_link_response_s *resp;
+  int path1len;
+  int path2len;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path lengths */
+
+  DEBUGASSERT(relpath1 != NULL && relpath2 != NULL);
+  path1len = strlen(relpath1) + 1;
+  path2len = strlen(relpath2) + 1;
+
+  if ((path1len + path2len) > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req            = (FAR struct userfs_link_request_s *)priv->iobuffer;
+  req->req       = USERFS_REQ_LINK;
+  req->newoffset = path1len;
+
+  strlcpy(req->relpath1, relpath1, path1len);
+  strlcpy(&req->relpath1[path1len], relpath2, path2len);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_LINK_REQUEST_S(path1len, path2len),
+                       0, (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_link_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_link_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_LINK)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  return resp->ret;
+}
+
+/****************************************************************************
+ * Name: userfs_symlink
+ *
+ * Description:
+ *   Create a symbolic link
+ *
+ ****************************************************************************/
+
+static int userfs_symlink(FAR struct inode *mountpt,
+                          FAR const char *path1,
+                          FAR const char *relpath2)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_symlink_request_s *req;
+  FAR struct userfs_symlink_response_s *resp;
+  int path1len;
+  int path2len;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path lengths */
+
+  DEBUGASSERT(path1 != NULL && relpath2 != NULL);
+  path1len = strlen(path1) + 1;
+  path2len = strlen(relpath2) + 1;
+
+  if ((path1len + path2len) > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req            = (FAR struct userfs_symlink_request_s *)priv->iobuffer;
+  req->req       = USERFS_REQ_SYMLINK;
+  req->newoffset = path1len;
+
+  strlcpy(req->path1, path1, path1len);
+  strlcpy(&req->path1[path1len], relpath2, path2len);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_SYMLINK_REQUEST_S(path1len, path2len),
+                       0, (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_symlink_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_symlink_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_SYMLINK)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  return resp->ret;
+}
+
+/****************************************************************************
+ * Name: userfs_readlink
+ *
+ * Description:
+ *   Read the target of a symbolic link
+ *
+ ****************************************************************************/
+
+static ssize_t userfs_readlink(FAR struct inode *mountpt,
+                               FAR const char *relpath,
+                               FAR char *buf, size_t bufsize)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_readlink_request_s *req;
+  FAR struct userfs_readlink_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int pathlen;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path length */
+
+  DEBUGASSERT(relpath != NULL);
+  pathlen = strlen(relpath);
+  if (pathlen > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req          = (FAR struct userfs_readlink_request_s *)priv->iobuffer;
+  req->req     = USERFS_REQ_READLINK;
+  req->bufsize = bufsize;
+
+  strlcpy(req->relpath, relpath, priv->mxwrite);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_READLINK_REQUEST_S(pathlen + 1), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return nrecvd;
+    }
+
+  if (nrecvd < SIZEOF_USERFS_READLINK_RESPONSE_S(0))
+    {
+      ferr("ERROR: Response too small: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_readlink_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_READLINK)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  if (resp->nread < 0)
+    {
+      return resp->nread;
+    }
+
+  if (resp->nread > bufsize)
+    {
+      ferr("ERROR: Response size too large: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  /* Copy the link target data to the user buffer */
+
+  memcpy(buf, resp->rddata, resp->nread);
+  return resp->nread;
+}
+
+/****************************************************************************
+ * Name: userfs_lstat
+ *
+ * Description:
+ *   Return information about a file or directory (not following symlinks)
+ *
+ ****************************************************************************/
+
+static int userfs_lstat(FAR struct inode *mountpt,
+                        FAR const char *relpath,
+                        FAR struct stat *buf)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_lstat_request_s *req;
+  FAR struct userfs_lstat_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int pathlen;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL &&
+              mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path length */
+
+  DEBUGASSERT(relpath != NULL);
+  pathlen = strlen(relpath);
+  if (pathlen > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req      = (FAR struct userfs_lstat_request_s *)priv->iobuffer;
+  req->req = USERFS_REQ_LSTAT;
+
+  strlcpy(req->relpath, relpath, priv->mxwrite);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_LSTAT_REQUEST_S(pathlen + 1), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(struct sockaddr_in));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return (int)nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return (int)nrecvd;
+    }
+
+  if (nrecvd != sizeof(struct userfs_lstat_response_s))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_lstat_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_LSTAT)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  /* A daemon without lstat answers -ENOSYS: use stat instead */
+
+  ret = resp->ret;
+  if (ret == -ENOSYS)
+    {
+      return userfs_stat(mountpt, relpath, buf);
+    }
+
+  DEBUGASSERT(buf != NULL);
+  memcpy(buf, &resp->buf, sizeof(struct stat));
+  return ret;
+}
+
+#endif /* CONFIG_FS_LINKS */
 
 /****************************************************************************
  * Public Functions
