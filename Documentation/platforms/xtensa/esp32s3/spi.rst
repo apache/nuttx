@@ -17,33 +17,32 @@ Here's what I did to get SPI working:
 
 1. **Enable SPI support**
    
-   Run `make menuconfig` and go to:
+   Run ``make menuconfig`` and go to:
    
-```Device Drivers -> SPI Support```
+    ```
+    Device Drivers -> SPI Driver Support
+    ```
 
-
-Enable `[*] SPI`
+    Enable ``[*] SPI``
 
 2. **Select the SPI peripheral**
 
-Go to:
-```System Type -> ESP32-S3 Peripheral Selection```
+    Go to:
 
-Enable `[*] SPI2`
+    ```
+    System Type -> ESP32-S3 Peripheral Selection
+    ```
 
-3. **Enable SPI Exchange**
+    Enable ``[*] SPI2``
 
-Back in:
-```Device Drivers -> SPI Support```
+3. **Enable Chip Select (optional)**
 
-Enable `[*] SPI Exchange`
+    In the System Type menu, go to SPI configuration and enable:
+    ```
+    [*] SPI Chip Select
+    ```
 
-4. **Enable Chip Select (optional)**
-
-In the same menu, enable:
-[*] SPI Chip Select
-
-You can change the CS pin from GPIO10 if needed.
+    You can change the CS pin from GPIO10 if needed.
 
 Pin Mapping
 -----------
@@ -54,39 +53,47 @@ Default pins for SPI2:
 - MISO → GPIO13
 - CS (Chip Select) → GPIO10
 
-If these pins conflict with your board, you can change them using the GPIO matrix.
+If these pins conflict with your board, these pins can be configured at ``System Type -> SPI configuration``.
 
 Chip Select Options
 -------------------
-ESP32-S3 gives you three ways to handle Chip Select:
+ESP32-S3 offers three ways to handle Chip Select:
 
-**1. Hardware CS (easiest)**
-- Just enable `CONFIG_ESP32S3_SPI2_CS_ENABLE=y`
-- Hardware handles everything automatically
-- Best for most projects
+**1. Hardware CS (default)**
+- Set ``(10) SPI2 CS Pin`` in ``System Type -> SPI configuration``
+- The SPI controller hardware automatically controls the CS pin
+- Best for most applications
 
-**2. Software CS**
-- You control CS through the SPI driver
-- More flexible if you need custom behavior
+**2. Software CS with GPIO matrix**
+- Enable ``[*] SPI software CS`` but leave ``[ ] User defined CS`` disabled
+- The SPI driver controls the CS pin through the GPIO matrix
+- Good for custom timing requirements
 
-**3. Manual GPIO**
-- You control CS yourself with gpio_write()
-- Maximum control but more code to write
-
-I'd suggest starting with option 1 (hardware CS) - it's simpler.
+**3. User-defined CS (most flexible)**
+- Enable both ``[*] SPI software CS`` and ``[*] User defined CS``
+- The ``esp32s3_spiX_select()`` function is called from board code
+- You control exactly which GPIO is used as CS
+- See ``boards/xtensa/esp32s3/lckfb-szpi-esp32s3/src/esp32s3_board_spi.c`` for example
+- This is the mode most similar to other MCUs
 
 Common Problems
 ---------------
 Issues I ran into:
 
 - **SPI options missing in menuconfig** → Enable DMA first
-Go to `Device Drivers -> DMA Support` and enable `[*] DMA`
+    Go to 
+
+    ```
+    Device Drivers -> DMA Support
+    ``` 
+
+    Enable ``[*] DMA``
 
 - **SPI not working** → Check if pins are used by something else
 Look at your board schematic to verify no conflicts
 
-- **Build errors** → Make sure CONFIG_SPI_EXCHANGE is enabled
-Check that you completed step 3 above
+- **Build errors** → Make sure ``CONFIG_SPI_EXCHANGE`` is enabled
+    This is enabled by default, but double-check if you're having issues.
 
 How to Test
 -----------
