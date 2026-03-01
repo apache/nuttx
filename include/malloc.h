@@ -35,6 +35,9 @@
 
 /* Special PID to query the info about alloc, free and mempool */
 
+#if CONFIG_MM_BACKTRACE >= 0
+#define PID_MM_ALL_PID ((pid_t)-7)
+#endif
 #define PID_MM_ORPHAN  ((pid_t)-6)
 #define PID_MM_BIGGEST ((pid_t)-5)
 #define PID_MM_FREE    ((pid_t)-4)
