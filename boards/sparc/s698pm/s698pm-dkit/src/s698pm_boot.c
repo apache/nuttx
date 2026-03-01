@@ -27,15 +27,19 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <sys/mount.h>
+#include <stdio.h>
+#include <syslog.h>
 
 #include <arch/board/board.h>
+#include <nuttx/board.h>
 
 #include "sparc_internal.h"
 #include "s698pm.h"
 #include "s698pm-dkit.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -65,3 +69,51 @@ void s698pm_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize(). board_late_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret;
+
+#ifdef CONFIG_S698PM_WDG
+  /* Initialize the watchdog timer */
+
+  s698pm_wdginitialize("/dev/watchdog0");
+#endif
+
+#ifdef CONFIG_S698PM_DKIT_WDG
+  /* Start WDG kicker thread */
+
+  ret = s698pm_dkit_watchdog_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, S698PM_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to mount procfs at %s: %d\n",
+             S698PM_PROCFS_MOUNTPOINT, ret);
+    }
+#endif
+}
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */

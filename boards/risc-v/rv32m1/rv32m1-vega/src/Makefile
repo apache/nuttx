@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = rv32m1_bringup.c rv32m1_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += rv32m1_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += rv32m1_autoleds.c
 endif

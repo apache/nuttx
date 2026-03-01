@@ -374,12 +374,6 @@ Configuration                        Description
  ``CONFIG_NSH_TELNET``               If ``CONFIG_NSH_TELNET`` is set to *y*, then a TELNET server
                                      front-end is selected. When this option is provided, you may log
                                      into NuttX remotely using telnet in order to access NSH.
-
- ``CONFIG_NSH_ARCHINIT``             Set ``CONFIG_NSH_ARCHINIT`` if your board provides architecture
-                                     specific initialization via the board-specific function
-                                     ``board_app_initialize()``. This function will be called early in
-                                     NSH initialization to allow board logic to do such things as
-                                     configure MMC/SD slots.
 ===================================  ==================================
 
 .. _nsh_vars_table:

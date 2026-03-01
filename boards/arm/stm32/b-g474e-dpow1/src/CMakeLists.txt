@@ -28,10 +28,6 @@ else()
   list(APPEND SRCS stm32_userleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_DRIVERS_SMPS)
   list(APPEND SRCS stm32_smps.c)
 endif()

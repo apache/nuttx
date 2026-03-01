@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = a527_boardinit.c a527_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += a527_appinit.c a527_power.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

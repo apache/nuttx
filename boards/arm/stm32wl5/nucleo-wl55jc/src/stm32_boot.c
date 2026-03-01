@@ -26,11 +26,19 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/fs/fs.h>
+#include <nuttx/leds/userled.h>
+#include <nuttx/input/buttons.h>
 
 #include <arch/board/board.h>
 
@@ -38,12 +46,22 @@
 #include <nuttx/video/fb.h>
 #endif
 
+#include <stm32wl5.h>
+#include <stm32wl5_uart.h>
+#include <stm32wl5_pwr.h>
+
 #include "arm_internal.h"
 #include "nucleo-wl55jc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Define proc mountpoint in case procfs is used but nsh is not */
+
+#ifndef CONFIG_NSH_PROC_MOUNTPOINT
+#define CONFIG_NSH_PROC_MOUNTPOINT "/proc"
+#endif
 
 /****************************************************************************
  * Private Data
@@ -87,9 +105,7 @@ void stm32wl5_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#if defined(CONFIG_VIDEO_FB)
   int ret;
-#endif
 
 #if defined(CONFIG_STM32WL5_SPI1) || defined(CONFIG_STM32WL5_SPI2S2)
   stm32wl5_spidev_initialize();
@@ -107,13 +123,86 @@ void board_late_initialize(void)
     }
 #endif
 
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in
-   * user-space but the initialization function must run in kernel space.
-   */
+#ifdef HAVE_PROC
+  /* Mount the proc filesystem */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  board_app_initialize(0);
+  syslog(LOG_INFO, "Mounting procfs to /proc\n");
+
+  ret = nx_mount(NULL, CONFIG_NSH_PROC_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount the PROC filesystem: %d\n",
+             ret);
+      return;
+    }
 #endif
+
+#if defined(CONFIG_USERLED_LOWER)
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_INPUT_BUTTONS_LOWER)
+  /* Register the Button driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_FLASH_MOUNT)
+  /* Register partition table for on-board FLASH memory */
+
+  ret = stm32wl5_flash_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32wl5_flash_init() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_IPCC)
+  /* Register IPCC driver */
+
+  ret = ipcc_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: ipcc_init() failed\n");
+    }
+#endif
+
+#if defined(CONFIG_ARCH_BOARD_ENABLE_CPU2)
+  /* Start second CPU */
+
+  stm32wl5_pwr_boot_c2();
+#endif
+
+  UNUSED(ret);
+}
+#endif
+
+#ifdef CONFIG_BOARDCTL_IOCTL
+int board_ioctl(unsigned int cmd, uintptr_t arg)
+{
+  return -ENOTTY;
+}
+#endif
+
+#if defined(CONFIG_BOARDCTL_UNIQUEID)
+int board_uniqueid(uint8_t *uniqueid)
+{
+  if (uniqueid == 0)
+    {
+      return -EINVAL;
+    }
+
+  stm32wl5_get_uniqueid(uniqueid);
+  return OK;
 }
 #endif

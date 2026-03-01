@@ -462,7 +462,6 @@ SD Card Support
       CONFIG_SCHED_HPWORK=y
 
     Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, and
       CONFIG_BOARDCTL=y                 : Or
       CONFIG_BOARD_LATE_INITIALIZE=y
 

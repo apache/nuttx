@@ -27,16 +27,42 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/mmcsd.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
 #include "mbed.h"
 
+#ifdef CONFIG_USERLED
+#include <nuttx/leds/userled.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* PORT and SLOT number probably depend on the board configuration */
+
+#ifdef CONFIG_ARCH_BOARD_MBED
+#  define NSH_HAVEUSBDEV 1
+#else
+#  error "Unrecognized board"
+#  undef NSH_HAVEUSBDEV
+#endif
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVEUSBDEV
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -66,3 +92,55 @@ void lpc17_40_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize(). board_late_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret;
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = mbed_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mbed_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = mbed_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: mbed_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
+}
+#endif

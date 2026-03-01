@@ -26,10 +26,15 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/signal.h>
+#include <nuttx/syslog/syslog.h>
 #include <arch/board/board.h>
 
 #include "clicker2-stm32.h"
@@ -101,8 +106,32 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board-specific initialization here if so configured */
+  int ret;
 
-  stm32_bringup();
+  ret = stm32_bringup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_bringup() failed: %d\n", ret);
+      return;
+    }
+
+#ifdef CONFIG_CLICKER2_STM32_SYSLOG_FILE
+
+  /* Delay some time for the automounter to finish mounting before
+   * bringing up file syslog.
+   */
+
+  nxsched_usleep(CONFIG_CLICKER2_STM32_SYSLOG_FILE_DELAY * 1000);
+
+  syslog_channel_t *channel;
+  channel = syslog_file_channel(CONFIG_CLICKER2_STM32_SYSLOG_FILE_PATH);
+  if (channel == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: syslog_file_channel() failed\n");
+      return;
+    }
+#endif
+
+  UNUSED(ret);
 }
 #endif

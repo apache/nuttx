@@ -22,10 +22,6 @@
 
 set(SRCS imx95_boardinit.c imx95_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imx95_appinit.c)
-endif()
-
 if(CONFIG_PWM)
   list(APPEND SRCS imx95_pwm.c)
 endif()

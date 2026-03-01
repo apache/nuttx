@@ -40,10 +40,6 @@ if(CONFIG_DK_TM4C129X_TIMER)
   list(APPEND SRCS tm4c_timer.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS tm4c_appinit.c)
-endif()
-
 if(CONFIG_TIVA_HCIUART)
   if(CONFIG_BLUETOOTH_UART)
     list(APPEND SRCS tm4c_hciuart.c)

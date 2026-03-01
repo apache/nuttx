@@ -5,7 +5,7 @@ Arduino Due
 This documentation discusses issues unique to NuttX configurations for the
 Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84 MHz.
 
-.. note:: 
+.. note::
 
    If found that newer Arduino Due board differ from the older boards mine:
    Mine has the 32.768 slow clock crystal and associated caps installed. The newer
@@ -25,83 +25,83 @@ Supported Shields
 PIO Pin Usage
 =============
 
-PORTA                         
------
-
-.. csv-table:: 
-   :header: PIO,SIGNAL,CONN,PIN
-
-   PA0,CANTX0,ADCH,8       
-   PA1,CANRX0,ACDH,7       
-   PA2,AD7,ADCL,8       
-   PA3,AD6,ADCL,7       
-   PA4,AD5,ADCL,6       
-   PA5,EEXTINT,ETH ,8       
-   PA6,AD4,ADCL,5       
-   PA7,PIN31,XIO ,12      
-   PA8,[U]RX,PWML,1       
-   PA9,[U]TX,PWML,2       
-   PA10,RXD2,COMM,6       
-   PA11,TXD2,COMM,5       
-   PA12,RXD1,COMM,4       
-   PA13,TXD1,COMM,3       
-   PA14,PIN23,XIO ,4       
-   PA15,PIN24,XIO ,5       
-   PA16,AD0,ADCL,1       
-   PA17,SDA1,PWMH,9       
-   PA18,SCL1,PWMH,10      
-   PA19,PIN42,XIO ,23      
-   PA20,PIN43,XIO ,24      
-   PA21,TXL,TX,YELLOW LED
-   PA22,AD3,ADCL,4       
-   PA23,AD2,ADCL,3       
-   PA24,AD1,ADCL,2       
-   PA25,MISO,SPI,1       
-   PA26,MOSI,SPI,4       
-   PA27,SPCK,SPI,3       
-   PA28,SS0/PWM10,(ETH) PWML,10
-   PA29,SS1/PWM4 ,(SD),        
-   PA30,N/A,N/A,        
-   PA31,N/A,N/A,        
-
-PORTB                          
+PORTA
 -----
 
 .. csv-table::
    :header: PIO,SIGNAL,CONN,PIN
 
-   PB0,ETX_CLK,ETH,1      
-   PB1,ETX_EN,ETH,3      
-   PB2,ETXD0,ETH,5      
-   PB3,ETXD1,ETH,7      
-   PB4,ERX_DV,ETH,10     
-   PB5,ERXD0,ETH,9      
-   PB6,ERXD1,ETH,11     
-   PB7,ERX_ER,ETH,13     
-   PB8,EMDC,ETH,14     
-   PB9,EMDIO,ETH,12     
+   PA0,CANTX0,ADCH,8
+   PA1,CANRX0,ACDH,7
+   PA2,AD7,ADCL,8
+   PA3,AD6,ADCL,7
+   PA4,AD5,ADCL,6
+   PA5,EEXTINT,ETH ,8
+   PA6,AD4,ADCL,5
+   PA7,PIN31,XIO ,12
+   PA8,[U]RX,PWML,1
+   PA9,[U]TX,PWML,2
+   PA10,RXD2,COMM,6
+   PA11,TXD2,COMM,5
+   PA12,RXD1,COMM,4
+   PA13,TXD1,COMM,3
+   PA14,PIN23,XIO ,4
+   PA15,PIN24,XIO ,5
+   PA16,AD0,ADCL,1
+   PA17,SDA1,PWMH,9
+   PA18,SCL1,PWMH,10
+   PA19,PIN42,XIO ,23
+   PA20,PIN43,XIO ,24
+   PA21,TXL,TX,YELLOW LED
+   PA22,AD3,ADCL,4
+   PA23,AD2,ADCL,3
+   PA24,AD1,ADCL,2
+   PA25,MISO,SPI,1
+   PA26,MOSI,SPI,4
+   PA27,SPCK,SPI,3
+   PA28,SS0/PWM10,(ETH) PWML,10
+   PA29,SS1/PWM4 ,(SD),
+   PA30,N/A,N/A,
+   PA31,N/A,N/A,
+
+PORTB
+-----
+
+.. csv-table::
+   :header: PIO,SIGNAL,CONN,PIN
+
+   PB0,ETX_CLK,ETH,1
+   PB1,ETX_EN,ETH,3
+   PB2,ETXD0,ETH,5
+   PB3,ETXD1,ETH,7
+   PB4,ERX_DV,ETH,10
+   PB5,ERXD0,ETH,9
+   PB6,ERXD1,ETH,11
+   PB7,ERX_ER,ETH,13
+   PB8,EMDC,ETH,14
+   PB9,EMDIO,ETH,12
    PB10,UOTGVBO,Vbus power,
-   PB11,UOTGID ,USB1,4      
-   PB12,SDA0-3 ,COMM,7      
-   PB13,SCL0-3 ,COMM,8      
-   PB14,CANTX1/IO   ,XIO ,34     
-   PB15,DAC0(CANRX1),ADCH,5      
-   PB16,DAC1,ADCH,6      
-   PB17,AD8,ADCH,1      
-   PB18,AD9,ADCH,2      
-   PB19,AD10,ADCH,3      
-   PB20,AD11(TXD3),ADCH,4      
-   PB21,AD14(RXD3),XIO,33     
-   PB22,N/C,N/A,       
-   PB23,SS3,???,       
-   PB24,N/C,N/A,       
-   PB25,PWM2,PWML,3      
-   PB26,PIN22,???,       
-   PB27,PWM13,PWMH,6      
-   PB28,JTAG_TCK,JTAG,4      
-   PB29,JTAG_TDI,JTAG,8      
-   PB30,JTAG_TDO,JTAG,6      
-   PB31,JTAG_TMS,JTAG,2      
+   PB11,UOTGID ,USB1,4
+   PB12,SDA0-3 ,COMM,7
+   PB13,SCL0-3 ,COMM,8
+   PB14,CANTX1/IO   ,XIO ,34
+   PB15,DAC0(CANRX1),ADCH,5
+   PB16,DAC1,ADCH,6
+   PB17,AD8,ADCH,1
+   PB18,AD9,ADCH,2
+   PB19,AD10,ADCH,3
+   PB20,AD11(TXD3),ADCH,4
+   PB21,AD14(RXD3),XIO,33
+   PB22,N/C,N/A,
+   PB23,SS3,???,
+   PB24,N/C,N/A,
+   PB25,PWM2,PWML,3
+   PB26,PIN22,???,
+   PB27,PWM13,PWMH,6
+   PB28,JTAG_TCK,JTAG,4
+   PB29,JTAG_TDI,JTAG,8
+   PB30,JTAG_TDO,JTAG,6
+   PB31,JTAG_TMS,JTAG,2
 
 PORTC
 -----
@@ -146,79 +146,79 @@ PORTD
 -----
 
 .. csv-table::
-   :header: PIO,SIGNAL,CONN,PIN      
+   :header: PIO,SIGNAL,CONN,PIN
 
-   PD0 , PIN25,      XIO ,6       
-   PD1 , PIN26,      XIO ,7       
-   PD2 , PIN27,      XIO ,8       
-   PD3 , PIN28,      XIO ,9       
-   PD4 , TXD0,       COMM,1       
-   PD5 , RXD0,       COMM,2       
-   PD6 , PIN29,      XIO ,10      
-   PD7 , PWM11,      PWMH,4       
-   PD8 , PWM12,      PWMH,5       
-   PD9 , PIN30,      XIO ,11      
-   PD10, PIN32,      XIO ,13      
-   PD11, N/A,        N/A ,        
-   PD12, N/A,        N/A ,        
-   PD13, N/A,        N/A ,        
-   PD14, N/A,        N/A ,        
-   PD15, N/A,        N/A ,        
-   PD16, N/A,        N/A ,        
-   PD17, N/A,        N/A ,        
-   PD18, N/A,        N/A ,        
-   PD19, N/A,        N/A ,        
-   PD20, N/A,        N/A ,        
-   PD21, N/A,        N/A ,        
-   PD22, N/A,        N/A ,        
-   PD23, N/A,        N/A ,        
-   PD24, N/A,        N/A ,        
-   PD25, N/A,        N/A ,        
-   PD26, N/A,        N/A ,        
-   PD27, N/A,        N/A ,        
-   PD28, N/A,        N/A ,        
-   PD29, N/A,        N/A ,        
-   PD30, N/A,        N/A ,        
-   PD31, N/A,        N/A ,        
+   PD0 , PIN25,      XIO ,6
+   PD1 , PIN26,      XIO ,7
+   PD2 , PIN27,      XIO ,8
+   PD3 , PIN28,      XIO ,9
+   PD4 , TXD0,       COMM,1
+   PD5 , RXD0,       COMM,2
+   PD6 , PIN29,      XIO ,10
+   PD7 , PWM11,      PWMH,4
+   PD8 , PWM12,      PWMH,5
+   PD9 , PIN30,      XIO ,11
+   PD10, PIN32,      XIO ,13
+   PD11, N/A,        N/A ,
+   PD12, N/A,        N/A ,
+   PD13, N/A,        N/A ,
+   PD14, N/A,        N/A ,
+   PD15, N/A,        N/A ,
+   PD16, N/A,        N/A ,
+   PD17, N/A,        N/A ,
+   PD18, N/A,        N/A ,
+   PD19, N/A,        N/A ,
+   PD20, N/A,        N/A ,
+   PD21, N/A,        N/A ,
+   PD22, N/A,        N/A ,
+   PD23, N/A,        N/A ,
+   PD24, N/A,        N/A ,
+   PD25, N/A,        N/A ,
+   PD26, N/A,        N/A ,
+   PD27, N/A,        N/A ,
+   PD28, N/A,        N/A ,
+   PD29, N/A,        N/A ,
+   PD30, N/A,        N/A ,
+   PD31, N/A,        N/A ,
 
-PORTE                          
+PORTE
 -----
 
 .. csv-table::
-   :header: PIO,SIGNAL,CONN,PIN    
+   :header: PIO,SIGNAL,CONN,PIN
 
-   PE0 ,N/A,N/A         
-   PE1 ,N/A,N/A         
-   PE2 ,N/A,N/A         
-   PE3 ,N/A,N/A         
-   PE4 ,N/A,N/A         
-   PE5 ,N/A,N/A         
-   PE6 ,N/A,N/A         
-   PE7 ,N/A,N/A         
-   PE8 ,N/A,N/A         
-   PE9 ,N/A,N/A         
-   PE10,N/A,N/A         
-   PE11,N/A,N/A         
-   PE12,N/A,N/A         
-   PE13,N/A,N/A         
-   PE14,N/A,N/A         
-   PE15,N/A,N/A         
-   PE16,N/A,N/A         
-   PE17,N/A,N/A         
-   PE18,N/A,N/A         
-   PE19,N/A,N/A         
-   PE20,N/A,N/A         
-   PE21,N/A,N/A         
-   PE22,N/A,N/A         
-   PE23,N/A,N/A         
-   PE24,N/A,N/A         
-   PE25,N/A,N/A         
-   PE26,N/A,N/A         
-   PE27,N/A,N/A         
-   PE28,N/A,N/A         
-   PE29,N/A,N/A         
-   PE30,N/A,N/A         
-   PE31,N/A,N/A         
+   PE0 ,N/A,N/A
+   PE1 ,N/A,N/A
+   PE2 ,N/A,N/A
+   PE3 ,N/A,N/A
+   PE4 ,N/A,N/A
+   PE5 ,N/A,N/A
+   PE6 ,N/A,N/A
+   PE7 ,N/A,N/A
+   PE8 ,N/A,N/A
+   PE9 ,N/A,N/A
+   PE10,N/A,N/A
+   PE11,N/A,N/A
+   PE12,N/A,N/A
+   PE13,N/A,N/A
+   PE14,N/A,N/A
+   PE15,N/A,N/A
+   PE16,N/A,N/A
+   PE17,N/A,N/A
+   PE18,N/A,N/A
+   PE19,N/A,N/A
+   PE20,N/A,N/A
+   PE21,N/A,N/A
+   PE22,N/A,N/A
+   PE23,N/A,N/A
+   PE24,N/A,N/A
+   PE25,N/A,N/A
+   PE26,N/A,N/A
+   PE27,N/A,N/A
+   PE28,N/A,N/A
+   PE29,N/A,N/A
+   PE30,N/A,N/A
+   PE31,N/A,N/A
 
 PORTF
 -----
@@ -362,7 +362,7 @@ Due PIN    GPIO FUNCTION               SIGNAL      ITHEAD PIN       ITHEAD SIGNA
       a bit-bang SPI interface is used.  This includes the touch controller
       a bit-bang SPI interface is used.  This includes the touch controller
       and the SD card.
-      
+
    2. UART0 cannot be used.  USARTs on the COMM connector should be available.
 
    3. Parallel data is not contiguous in the PIO register
@@ -381,27 +381,27 @@ SD Interface
 ------------
 
 ====== ========= ======== ========= ========
-SD PIN SD SIGNAL PIN      SIGNAL    GPIO    
+SD PIN SD SIGNAL PIN      SIGNAL    GPIO
 ====== ========= ======== ========= ========
-1      /CS       J2 pin 3 D10       PA28    
+1      /CS       J2 pin 3 D10       PA28
 2      DI        J2 pin 4 D11       PD7
-3      GND       ---      ---       ---     
+3      GND       ---      ---       ---
 4      VCC       ---      ---       ---
-5      CLK       J2 pin 6 D13       PB27    
+5      CLK       J2 pin 6 D13       PB27
 6      GND       ---      ---       ---
-7      DO        J2 pin 5 D12       PD8     
+7      DO        J2 pin 5 D12       PD8
 8      IRQ       N/C      ---       ---
-9      N/C       ---      ---       ---     
+9      N/C       ---      ---       ---
 10     SW        N/C      ---       ---
-11     WP        N/C      ---       ---     
+11     WP        N/C      ---       ---
 12     CD        N/C      ---       ---
-13     CD        N/C      ---       ---     
+13     CD        N/C      ---       ---
 14     GND       ---      ---       ---
-15     GND       ---      ---       ---     
+15     GND       ---      ---       ---
 16     GND       ---      ---       ---
 ====== ========= ======== ========= ========
 
-.. note:: 
+.. note::
 
   * The SD slot shares the pin with LED "L" so LED support must be disabled to
     use the MMC/SD card on the ITEAD shield.
@@ -412,27 +412,27 @@ Touch Controller Interface
 --------------------------
 
 =========== ============== ======== ========= ========
-XPT2046 PIN XPT2046 SIGNAL   PIN      SIGNAL    GPIO    
+XPT2046 PIN XPT2046 SIGNAL   PIN      SIGNAL    GPIO
 =========== ============== ======== ========= ========
-1           VCC            ---      ---       ---     
+1           VCC            ---      ---       ---
 2           X+             ---      ---       ---
-3           Y+             ---      ---       ---     
+3           Y+             ---      ---       ---
 4           X-             ---      ---       ---
-5           Y-             ---      ---       ---     
+5           Y-             ---      ---       ---
 6           GND            ---      ---       ---
-7           IN3            N/C      ---       ---     
+7           IN3            N/C      ---       ---
 8           IN4            N/C      ---       ---
-9           VREF           ---      ---       ---     
+9           VREF           ---      ---       ---
 10          VCC            ---      ---       ---
-11          IRQ            J2 pin 2 D9        PC21    
+11          IRQ            J2 pin 2 D9        PC21
 12          DOUT           J2 pin 1 D8        PC22
-13          BUSY           N/C      ---       ---     
+13          BUSY           N/C      ---       ---
 14          DIN            J1 pin 1 A0/D15    PA16
-15          /CS            ---      ---       ---     
+15          /CS            ---      ---       ---
 16          DCLK           J1 pin 2 A1/D15    PA24
 =========== ============== ======== ========= ========
 
-.. note:: 
+.. note::
 
    CS is connected to ground (XPT2046 is always selected)
 
@@ -465,7 +465,7 @@ defined. In that case, the usage by the board port is defined in
 ``include/board.h`` and ``src/sam_leds.c``. The LEDs are used to encode
 OS-related events as follows:
 
-.. csv-table:: 
+.. csv-table::
    :header: SYMBOL,MEANING,L,TX,RX
 
    ``LED_STARTED``         ,NuttX has been started    ,OFF     ,OFF     ,OFF
@@ -523,7 +523,7 @@ the case of UART0).
 Loading Code
 ============
 
-.. note:: 
+.. note::
 
    I believe that there have been significant changes to the more recent tool
    environment such that Bossac may no longer be usable.  I don't know that for
@@ -712,7 +712,7 @@ a. Write code to FLASH don't change boot mode and don't reset. This lets you
 b. Verify the FLASH contents (the bootloader must be running)
 
    .. code:: console
-   
+
       $ bossac.exe --port=COM26 --usb-port=false -v nuttx.bin
       Verify 64628 bytes of flash
       [==============================] 100% (253/253 pages)
@@ -721,7 +721,7 @@ b. Verify the FLASH contents (the bootloader must be running)
 c. Read from FLASH to a file  (the bootloader must be running):
 
    .. code:: console
-   
+
       $ bossac.exe --port=COM26 --usb-port=false --read=4096 nuttx.dump
       Read 4096 bytes from flash
       [==============================] 100% (16/16 pages)
@@ -729,10 +729,10 @@ c. Read from FLASH to a file  (the bootloader must be running):
 d. Change to boot from FLASH
 
    .. code:: console
-   
+
       $ bossac.exe --port=COM26 --usb-port=false --boot=1
       Set boot flash true
-   
+
 Uploading NuttX to the Due Using JTAG
 -------------------------------------
 
@@ -1012,7 +1012,7 @@ This configuration directory will build the NuttShell.
    support for the SD card slot can be enabled by making the following
    changes to the configuration:
 
-   .. note:: 
+   .. note::
 
       You cannot use UART0 or LEDs with this ITEAD module. You must switch
       to USART0 and disable LED support as described above.
@@ -1047,13 +1047,8 @@ This configuration directory will build the NuttShell.
 
    Board Selection -> Common Board Options
 
-   * ``CONFIG_NSH_ARCHINIT=y``: Initialize the MMC/SD slot when NSH starts
    * ``CONFIG_NSH_MMCSDSLOTNO=0``: Only one MMC/SD slot, slot 0
    * ``CONFIG_NSH_MMCSDSPIPORTNO=0``: (does not really matter in this case)
-
-   Application Configuration -> NSH Library
-
-   * ``CONFIG_NSH_ARCHINIT=y``: Board has architecture-specific initialization
 
    .. warning::
 
@@ -1065,7 +1060,7 @@ This configuration directory will build the NuttShell.
    an NSH built-in application.  You can enable the touchscreen and test
    by modifying the  default configuration in the following ways:
 
-   .. note:: 
+   .. note::
 
       You cannot use UART0 or LEDs with this ITEAD module.  You must switch
       to USART0 and disable LED support as described above.

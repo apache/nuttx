@@ -124,7 +124,7 @@ endchoice # GD25 serial FLASH configuration
 config GD32F450ZK_EVAL_AT24_TEST
 	bool "I2C0 EEPROM AT2402 write and read test"
 	default n
-	depends on NSH_ARCHINIT && GD32F4_I2C0 && MTD_AT24XX
+	depends on BOARD_LATE_INITIALIZE && GD32F4_I2C0 && MTD_AT24XX
 	---help---
 		Automatically initialize and test the AT24 I2C EEPROM driver when
 		NSH starts. After test the I2C0 will be released.

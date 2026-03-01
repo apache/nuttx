@@ -92,11 +92,8 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-  if(CONFIG_BOARDCTL_RESET)
-    list(APPEND SRCS stm32_reset.c)
-  endif()
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS stm32_reset.c)
 endif()
 
 if(CONFIG_ARCH_CUSTOM_PMINIT)

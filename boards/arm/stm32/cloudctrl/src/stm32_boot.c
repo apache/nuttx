@@ -26,17 +26,66 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
+#include "stm32.h"
 #include "cloudctrl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Configuration ************************************************************/
+
+/* Assume that we support everything until convinced otherwise */
+
+#define HAVE_USBDEV   1
+#define HAVE_USBHOST  1
+#define HAVE_W25      1
+
+/* Can't support the W25 device if it SPI1 or W25 support is not enabled */
+
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_W25)
+#  undef HAVE_W25
+#endif
+
+/* Can't support W25 features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_W25
+#endif
+
+/* Default W25 minor number */
+
+#if defined(HAVE_W25) && !defined(CONFIG_NSH_W25MINOR)
+#  define CONFIG_NSH_W25MINOR 0
+#endif
+
+/* Can't support USB host or device features if USB OTG FS is not enabled */
+
+#ifndef CONFIG_STM32_OTGFS
+#  undef HAVE_USBDEV
+#  undef HAVE_USBHOST
+#endif
+
+/* Can't support USB device is USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef HAVE_USBDEV
+#endif
+
+/* Can't support USB host is USB host is not enabled */
+
+#ifndef CONFIG_USBHOST
+#  undef HAVE_USBHOST
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -88,3 +137,62 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret;
+
+  /* Initialize and register the W25 FLASH file system. */
+
+#ifdef HAVE_W25
+  ret = stm32_w25initialize(CONFIG_NSH_W25MINOR);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize W25 minor %d: %d\n",
+             CONFIG_NSH_W25MINOR, ret);
+      return;
+    }
+#endif
+
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
+   * thread will monitor for USB connection and disconnection events.
+   */
+
+#ifdef HAVE_USBHOST
+  ret = stm32_usbhost_initialize();
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+      return;
+    }
+#endif
+
+#ifdef CONFIG_ADC
+  /* Initialize ADC and register the ADC driver. */
+
+  ret = stm32_adc_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+      return;
+    }
+#endif
+
+  UNUSED(ret);
+}
+#endif

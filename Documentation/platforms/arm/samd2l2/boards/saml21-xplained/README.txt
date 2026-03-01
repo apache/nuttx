@@ -797,9 +797,6 @@ Configuration sub-directories
          CONFIG_SAML21_XPLAINED_IOMODULE=y      : I/O1 module is connected
          CONFIG_SAML21_XPLAINED_IOMODULE_EXT2=y : I/O1 modules is in EXT2
 
-       Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
-
        NOTE: If you enable the I/O1 this configuration with SERCOM4 as the
        console and with the I/O1 module in EXT1, you *must* remove USART
        jumper.  Otherwise, you have lookback on SERCOM4 and NSH will *not*

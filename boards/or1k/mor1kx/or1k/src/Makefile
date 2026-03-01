@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = or1k_boot.c or1k_bringup.c or1k_autoled.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += or1k_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

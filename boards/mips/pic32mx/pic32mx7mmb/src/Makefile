@@ -28,10 +28,6 @@ ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 CSRCS += pic32_usbdev.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += pic32_appinit.c
-endif
-
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += pic32_usbmsc.c
 endif

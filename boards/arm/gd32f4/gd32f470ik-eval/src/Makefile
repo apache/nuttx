@@ -22,17 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = gd32f4xx_boot.c
-
-# ifeq ($(CONFIG_BOARDCTL),y)
-# CSRCS += gd32f4xx_appinit.c
-# endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += gd32f4xx_appinit.c gd32f4xx_bringup.c
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += gd32f4xx_bringup.c
-endif
+CSRCS = gd32f4xx_boot.c gd32f4xx_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += gd32f4xx_autoleds.c

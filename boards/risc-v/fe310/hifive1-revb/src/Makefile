@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = fe310_bringup.c fe310_boot.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += fe310_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += fe310_autoleds.c
 endif

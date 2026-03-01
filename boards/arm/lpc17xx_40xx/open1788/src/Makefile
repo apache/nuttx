@@ -42,10 +42,6 @@ ifeq ($(CONFIG_LPC17_40_LCD),y)
   CSRCS += lpc17_40_lcd.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += lpc17_40_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
   CSRCS += lpc17_40_autoleds.c
 else

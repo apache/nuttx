@@ -100,13 +100,6 @@ The NSH initialization function, ``nsh_initialize()``, be found in
      ``apps/nshlib/rc.sysinit.template``. The resulting ROMFS file system can be
      found in ``apps/nshlib/nsh_romfsimg.h``.
 
-  #. ``board_app_initialize()``: Next any architecture-specific NSH
-     initialization will be performed (if any). For the STM3240G-EVAL,
-     this architecture specific initialization can be found at
-     ``boards/arm/stm32/stm3240g-eval/src/stm32_appinit.c``. This it does
-     things like: (1) Initialize SPI devices, (2) Initialize SDIO, and (3)
-     mount any SD cards that may be inserted.
-
   #. ``nsh_netinit()``: The ``nsh_netinit()`` function can be found in
      ``apps/nshlib/nsh_netinit.c``.
 

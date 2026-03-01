@@ -498,8 +498,7 @@ To enable this feature, set the following configuration options:
    CONFIG_TIMER=y
    CONFIG_TIMER_WDOG=y
 
-Then call ``timer_wdog_initialize()`` from your board initialization code
-(typically in ``board_late_initialize()`` or ``board_app_initialize()``):
+Then call ``timer_wdog_initialize()`` from your board initialization code.
 
 .. code-block:: c
 

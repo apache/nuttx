@@ -24,12 +24,8 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = esp32c6_boot.c esp32c6_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += esp32c6_appinit.c
-
-  ifeq ($(CONFIG_BOARDCTL_RESET),y)
-    CSRCS += esp32c6_reset.c
-  endif
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+  CSRCS += esp32c6_reset.c
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)

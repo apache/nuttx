@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = nrf52_boot.c nrf52_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf52_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nrf52_autoleds.c
 else
@@ -84,6 +80,10 @@ endif
 
 ifeq ($(CONFIG_NRF52_QSPI),y)
 CSRCS += nrf52_mx25.c
+endif
+
+ifeq ($(CONFIG_NRF52_TIMER),y)
+CSRCS += nrf52_timer.c
 endif
 
 DEPPATH += --dep-path board

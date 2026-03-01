@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = nrf91_boot.c nrf91_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += nrf91_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += nrf91_autoleds.c
 else

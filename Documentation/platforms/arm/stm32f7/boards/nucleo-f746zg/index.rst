@@ -294,7 +294,7 @@ Since this board is so generic, having a quick way to set the SPI
 configuration seams in order. So the board provides a quick test
 that can be selected vi CONFIG_NUCLEO_SPI_TEST that will initialize
 the selected buses (SPI1-SPI3) and send some text on the bus at
-application initialization time board_app_initialize.
+application initialization time.
 
 SDIO
 ----

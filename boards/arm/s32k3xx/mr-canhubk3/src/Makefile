@@ -35,10 +35,6 @@ else
 CSRCS += s32k3xx_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += s32k3xx_appinit.c
-endif
-
 ifeq ($(CONFIG_FAT_DMAMEMORY),y)
 CSRCS += s32k3xx_dma_alloc.c
 endif

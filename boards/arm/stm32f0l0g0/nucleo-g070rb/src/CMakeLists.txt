@@ -36,10 +36,6 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS stm32_gpio.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()

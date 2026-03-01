@@ -617,7 +617,6 @@ Where <subdir> is one of the following:
        SD card support is built into this example by default:
 
          CONFIG_PIC32MX_SPI1=y
-         CONFIG_NSH_ARCHINIT=y
 
        The SD card can be mounted from the NSH command line as follows:
 

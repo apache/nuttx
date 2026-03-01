@@ -27,6 +27,9 @@
 #include <nuttx/config.h>
 
 #include <debug.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
 
 #include <nuttx/board.h>
 #include <arch/board/board.h>
@@ -34,13 +37,93 @@
 #include "arm_internal.h"
 #include "lpc4330-xplorer.h"
 
+#include "chip.h"
+
+#ifdef CONFIG_LPC43_SPIFI
+#  include <nuttx/mtd/mtd.h>
+#  include "lpc43_spifi.h"
+
+#  ifdef CONFIG_SPFI_NXFFS
+#    include <nuttx/fs/fs.h>
+#    include <nuttx/fs/nxffs.h>
+#  endif
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_SPIFI_DEVNO
+#  define CONFIG_SPIFI_DEVNO 0
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_spifi_initialize
+ *
+ * Description:
+ *   Make the SPIFI (or part of it) into a block driver that can hold a
+ *   file system.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPC43_SPIFI
+static int nsh_spifi_initialize(void)
+{
+  struct mtd_dev_s *mtd;
+  int ret;
+
+  /* Initialize the SPIFI interface and create the MTD driver instance */
+
+  mtd = lpc43_spifi_initialize();
+  if (!mtd)
+    {
+      ferr("ERROR: lpc43_spifi_initialize failed\n");
+      return -ENODEV;
+    }
+
+#ifndef CONFIG_SPFI_NXFFS
+  /* Register the MTD driver */
+
+  char path[32];
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", CONFIG_SPIFI_DEVNO);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+           path, ret);
+      return ret;
+    }
+#else
+  /* Initialize to provide NXFFS on the MTD interface */
+
+  ret = nxffs_initialize(mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: NXFFS initialization failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Mount the file system at /mnt/spifi */
+
+  ret = nx_mount(NULL, "/mnt/spifi", "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  return OK;
+}
+#else
+#  define nsh_spifi_initialize()
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -65,3 +148,26 @@ void lpc43_boardinitialize(void)
   board_autoled_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().
+ *   board_late_initialize() will be called immediately after up_initialize()
+ *   is called and just before the initial application is started.
+ *   This additional initialization phase may be used, for example, to
+ *   initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  /* Initialize the SPIFI block device */
+
+  nsh_spifi_initialize();
+}
+#endif

@@ -23,13 +23,15 @@
 include $(TOPDIR)/Make.defs
 
 CSRCS = avr32_boot.c
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += avr32_leds.c
 endif
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += avr32_buttons.c
 endif
-CSRCS += avr32_appinit.c
+
 CSRCS += avr32_bringup.c
 
 include $(TOPDIR)/boards/Board.mk

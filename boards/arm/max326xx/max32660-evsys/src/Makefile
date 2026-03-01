@@ -22,13 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = max326_boot.c
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += max326_appinit.c max326_bringup.c
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += max326_bringup.c
-endif
+CSRCS = max326_boot.c max326_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += max326_autoleds.c

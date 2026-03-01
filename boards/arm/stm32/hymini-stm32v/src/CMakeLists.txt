@@ -30,10 +30,6 @@ else()
   endif()
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_INPUT)
   list(APPEND SRCS stm32_ts.c)
 endif()

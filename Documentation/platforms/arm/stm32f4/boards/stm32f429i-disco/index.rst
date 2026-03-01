@@ -459,7 +459,6 @@ NOTES:
      CONFIG_USBDEV=y               : USB device support must be enabled
      CONFIG_CDCACM=y               : The CDC/ACM driver must be built
      CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-     CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
 8. Using the USB console.
 
@@ -482,7 +481,7 @@ NOTES:
     configuration will also create a NSH USB console but this version
     will use /dev/console.  Instead, it will use the normal /dev/ttyACM0
     USB serial device for the console::
-    
+
       CONFIG_STM32_OTGFS=y           : STM32 OTG FS support
       CONFIG_USART2_SERIAL_CONSOLE=y : Keep the USART2 console
       CONFIG_DEV_CONSOLE=y           : /dev/console exists (but NSH won't use it)
@@ -541,11 +540,7 @@ NOTES:
     CONFIG_FS_FAT=y          : Needed by the USB host mass storage class.
 
     Board Selection ->
-    CONFIG_BOARDCTL=y    : Needed for CONFIG_NSH_ARCHINIT
-
-    Application Configuration -> NSH Library
-    CONFIG_NSH_ARCHINIT=y    : Architecture specific USB initialization
-    : is needed for NSH
+    CONFIG_BOARDCTL=y
 
     With those changes, you can use NSH with a FLASH pen driver as shown
     belong.  Here NSH is started with nothing in the USB host slot:
@@ -617,7 +612,7 @@ NOTES:
 
 2. Stack usage make increase when USB hub support is enabled because
    the nesting depth of certain USB host class logic can increase.
-   
+
    STATUS:
    2015-04-30
    Appears to be fully functional.
@@ -638,7 +633,7 @@ UnitTest.
 NOTES:
 
 1. The NxWM window manager can be found here::
-   
+
          apps/graphics/NxWidgets/nxwm
 
    The NxWM unit test can be found at::

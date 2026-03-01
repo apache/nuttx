@@ -34,8 +34,4 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += pic32mz_buttons.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += pic32mz_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

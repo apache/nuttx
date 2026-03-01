@@ -22,10 +22,6 @@
 
 set(SRCS nrf52_boot.c nrf52_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS nrf52_appinit.c)
-endif()
-
 if(CONFIG_USBDEV)
   list(APPEND SRCS nrf52_usb.c)
 endif()

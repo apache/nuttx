@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS k66_boot.c k66_spi.c)
+set(SRCS k66_boot.c k66_spi.c k66_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS k66_autoleds.c)
@@ -32,13 +32,8 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS k66_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS k66_appinit.c k66_bringup.c)
-  if(CONFIG_BOARDCTL_RESET)
-    list(APPEND SRCS k66_reset.c)
-  endif()
-elseif(CONFIG_BOARD_LATE_INITIALIZE)
-  list(APPEND SRCS k66_bringup.c)
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS k66_reset.c)
 endif()
 
 if(CONFIG_KINETIS_SDHC)

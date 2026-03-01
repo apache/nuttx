@@ -22,10 +22,6 @@
 
 CSRCS  = mpfs_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += mpfs_appinit.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += mpfs_autoleds.c
 endif

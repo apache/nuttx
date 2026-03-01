@@ -42,10 +42,6 @@ if(CONFIG_FAT_DMAMEMORY)
   list(APPEND SRCS stm32_dma_alloc.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinitialize.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 if(NOT CONFIG_BUILD_FLAT)

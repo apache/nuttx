@@ -28,8 +28,4 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

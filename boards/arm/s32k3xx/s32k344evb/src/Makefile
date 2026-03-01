@@ -37,10 +37,6 @@ else
 CSRCS += s32k3xx_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += s32k3xx_appinit.c
-endif
-
 ifeq ($(CONFIG_S32K3XX_LPI2C),y)
 CSRCS += s32k3xx_i2c.c
 endif

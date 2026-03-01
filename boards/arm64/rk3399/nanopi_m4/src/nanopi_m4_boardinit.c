@@ -101,6 +101,5 @@ void rk3399_board_initialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-  /* Perform board initialization */
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

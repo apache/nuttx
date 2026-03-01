@@ -24,10 +24,6 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_spi.c stm32_dma_alloc.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinitialize.c
-endif
-
 ifeq ($(CONFIG_STM32F7_OTGFS),y)
 CSRCS += stm32_usb.c
 endif

@@ -22,11 +22,8 @@
 
 set(SRCS imx9_boardinit.c imx9_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS imx9_appinit.c)
-  if(CONFIG_BOARDCTL_RESET)
-    list(APPEND SRCS imx9_reset.c)
-  endif()
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS imx9_reset.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

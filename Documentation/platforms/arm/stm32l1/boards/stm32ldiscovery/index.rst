@@ -293,7 +293,7 @@ NOTES:
          CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
 
      System Type::
-       
+
          CONFIG_ARM_TOOLCHAIN_GNU_EABI=y      : GNU EABI toolchain for Windows
 
 4. SLCD.
@@ -318,7 +318,6 @@ NOTES:
    Application Configuration -> NSH Library::
 
          CONFIG_NSH_BUILTIN_APPS=y               : Enable builtin apps in NSH
-         CONFIG_NSH_ARCHINIT=y                   : Needed to initialize the SLCD
 
    Application Configuration -> Examples::
 

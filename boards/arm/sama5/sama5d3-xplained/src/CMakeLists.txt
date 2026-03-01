@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(SRCS sam_boot.c)
+set(SRCS sam_boot.c sam_bringup.c)
 
 if(CONFIG_SAMA5_SPI0)
   list(APPEND SRCS sam_spi.c)
@@ -66,11 +66,6 @@ else()
   if(CONFIG_SAMA5_GMAC)
     list(APPEND SRCS sam_ethernet.c)
   endif()
-endif()
-
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-  list(APPEND SRCS sam_bringup.c)
 endif()
 
 if(CONFIG_ADC)

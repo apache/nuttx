@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imx8_boardinit.c imx8_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += imx8_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

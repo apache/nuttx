@@ -31,10 +31,6 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 ifeq ($(CONFIG_DRIVERS_SMPS),y)
 CSRCS += stm32_smps.c
 endif

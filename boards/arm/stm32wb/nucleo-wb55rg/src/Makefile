@@ -30,8 +30,4 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk
