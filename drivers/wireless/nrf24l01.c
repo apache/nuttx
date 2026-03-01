@@ -1116,27 +1116,31 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
-      case WLIOC_SETRADIOFREQ:  /* Set radio frequency. Arg: Pointer to
-                                 * uint32_t frequency value */
+      /* --- Common Wireless IOCTLs --- */
+
+      case WLIOC_SETRADIOFREQ:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
 
-          nrf24l01_setradiofreq(dev, *ptr);
+          /* Convert Hz from ioctl to MHz for the underlying function */
+
+          nrf24l01_setradiofreq(dev, *ptr / 1000000);
         }
         break;
 
-      case WLIOC_GETRADIOFREQ:  /* Get current radio frequency. arg: Pointer
-                                 * to uint32_t frequency value */
+      case WLIOC_GETRADIOFREQ:
         {
           FAR uint32_t *ptr = (FAR uint32_t *)((uintptr_t)arg);
           DEBUGASSERT(ptr != NULL);
-          *ptr = nrf24l01_getradiofreq(dev);
+
+          /* Convert MHz from the underlying function to Hz for ioctl */
+
+          *ptr = nrf24l01_getradiofreq(dev) * 1000000;
         }
         break;
 
-      case NRF24L01IOC_SETTXADDR:  /* Set current TX addr. arg: Pointer to
-                                    * uint8_t array defining the address */
+      case WLIOC_SETADDR:
         {
           FAR const uint8_t *addr = (FAR const uint8_t *)(arg);
           DEBUGASSERT(addr != NULL);
@@ -1144,8 +1148,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case NRF24L01IOC_GETTXADDR:  /* Get current TX addr. arg: Pointer to
-                                    * uint8_t array defining the address */
+      case WLIOC_GETADDR:
         {
           FAR uint8_t *addr = (FAR uint8_t *)(arg);
           DEBUGASSERT(addr != NULL);
@@ -1153,8 +1156,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case WLIOC_SETTXPOWER:  /* Set current radio frequency. arg: Pointer
-                               * to int32_t, output power */
+      case WLIOC_SETTXPOWER:
         {
           FAR int32_t *ptr = (FAR int32_t *)(arg);
           DEBUGASSERT(ptr != NULL);
@@ -1162,8 +1164,7 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case WLIOC_GETTXPOWER:  /* Get current radio frequency. arg: Pointer
-                               * to int32_t, output power */
+      case WLIOC_GETTXPOWER:
         {
           FAR int32_t *ptr = (FAR int32_t *)(arg);
           DEBUGASSERT(ptr != NULL);
@@ -1171,8 +1172,55 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case NRF24L01IOC_SETRETRCFG:  /* Set retransmit params. arg: Pointer
-                                     * to nrf24l01_retrcfg_t */
+      case WLIOC_SETFINEPOWER:
+        {
+          FAR int32_t *ptr = (FAR int32_t *)(arg);
+          DEBUGASSERT(ptr != NULL);
+
+          /* Convert from 0.01 dBm to standard dBm */
+
+          nrf24l01_settxpower(dev, *ptr / 100);
+        }
+        break;
+
+      case WLIOC_GETFINEPOWER:
+        {
+          FAR int32_t *ptr = (FAR int32_t *)(arg);
+          DEBUGASSERT(ptr != NULL);
+
+          /* Convert from standard dBm to 0.01 dBm */
+
+          *ptr = nrf24l01_gettxpower(dev) * 100;
+        }
+        break;
+
+      case WLIOC_SETMODU:
+        {
+          FAR enum wlioc_modulation_e *ptr =
+            (FAR enum wlioc_modulation_e *)(arg);
+          DEBUGASSERT(ptr != NULL);
+
+          /* nRF24L01 only supports GFSK modulation natively */
+
+          if (*ptr != WLIOC_GFSK)
+            {
+              ret = -EINVAL;
+            }
+        }
+        break;
+
+      case WLIOC_GETMODU:
+        {
+          FAR enum wlioc_modulation_e *ptr =
+            (FAR enum wlioc_modulation_e *)(arg);
+          DEBUGASSERT(ptr != NULL);
+          *ptr = WLIOC_GFSK;
+        }
+        break;
+
+      /* --- nRF24L01 Specific IOCTLs --- */
+
+      case NRF24L01IOC_SETRETRCFG:
         {
           FAR nrf24l01_retrcfg_t *ptr = (FAR nrf24l01_retrcfg_t *)(arg);
           DEBUGASSERT(ptr != NULL);
@@ -1180,9 +1228,19 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case NRF24L01IOC_GETRETRCFG:  /* Get retransmit params. arg: Pointer
-                                     * to nrf24l01_retrcfg_t */
-        ret = -ENOSYS;              /* TODO */
+      case NRF24L01IOC_GETRETRCFG:
+        {
+          FAR nrf24l01_retrcfg_t *ptr = (FAR nrf24l01_retrcfg_t *)(arg);
+          uint8_t val;
+          DEBUGASSERT(ptr != NULL);
+
+          nrf24l01_lock(dev->spi);
+          val = nrf24l01_readregbyte(dev, NRF24L01_SETUP_RETR);
+          nrf24l01_unlock(dev->spi);
+
+          ptr->delay = (val >> NRF24L01_ARD_SHIFT) & 0x0f;
+          ptr->count = (val >> NRF24L01_ARC_SHIFT) & 0x0f;
+        }
         break;
 
       case NRF24L01IOC_SETPIPESCFG:
@@ -1251,14 +1309,34 @@ static int nrf24l01_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
            FAR nrf24l01_datarate_t *drp = (FAR nrf24l01_datarate_t *)(arg);
            DEBUGASSERT(drp != NULL);
-
            nrf24l01_setdatarate(dev, *drp);
            break;
         }
 
       case NRF24L01IOC_GETDATARATE:
-        ret = -ENOSYS;  /* TODO */
-        break;
+        {
+           FAR nrf24l01_datarate_t *drp = (FAR nrf24l01_datarate_t *)(arg);
+           uint8_t val;
+           DEBUGASSERT(drp != NULL);
+
+           nrf24l01_lock(dev->spi);
+           val = nrf24l01_readregbyte(dev, NRF24L01_RF_SETUP);
+           nrf24l01_unlock(dev->spi);
+
+           if (val & NRF24L01_RF_DR_LOW)
+             {
+               *drp = RATE_250kbps;
+             }
+           else if (val & NRF24L01_RF_DR_HIGH)
+             {
+               *drp = RATE_2Mbps;
+             }
+           else
+             {
+               *drp = RATE_1Mbps;
+             }
+           break;
+        }
 
       case NRF24L01IOC_SETADDRWIDTH:
         {
