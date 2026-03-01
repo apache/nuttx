@@ -1896,7 +1896,102 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
+
+#if defined(CONFIG_UART0_RS485CONTROL_RTSISGPIO)
+  if (&g_uart0priv == priv)
+    {
+      kinetis_gpiowrite(g_uart0priv.rts_gpio, 1);
+    }
+
+#endif
+#if defined(CONFIG_UART1_RS485CONTROL_RTSISGPIO)
+  if (&g_uart1priv == priv)
+    {
+      kinetis_gpiowrite(g_uart1priv.rts_gpio, 1);
+    }
+
+#endif
+#if defined(CONFIG_UART2_RS485CONTROL_RTSISGPIO)
+  if (&g_uart2priv == priv)
+    {
+      kinetis_gpiowrite(g_uart2priv.rts_gpio, 1);
+    }
+
+#endif
+#if defined(CONFIG_UART3_RS485CONTROL_RTSISGPIO)
+  if (&g_uart3priv == priv)
+    {
+      kinetis_gpiowrite(g_uart3priv.rts_gpio, 1);
+    }
+
+#endif
+#if defined(CONFIG_UART4_RS485CONTROL_RTSISGPIO)
+  if (&g_uart4priv == priv)
+    {
+      kinetis_gpiowrite(g_uart4priv.rts_gpio, 1);
+    }
+
+#endif
+#if defined(CONFIG_UART5_RS485CONTROL_RTSISGPIO)
+  if (&g_uart5priv == priv)
+    {
+      kinetis_gpiowrite(g_uart5priv.rts_gpio, 1);
+    }
+
+#endif
+
   up_serialout(priv, KINETIS_UART_D_OFFSET, (uint8_t)ch);
+
+#if defined(CONFIG_UART0_RS485CONTROL_RTSISGPIO)
+  if (&g_uart0priv == priv)
+    {
+      /* We need some time before RTS is set low. 150 us works for LTM2881. */
+
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart0priv.rts_gpio, 0);
+    }
+
+#endif
+#if defined(CONFIG_UART1_RS485CONTROL_RTSISGPIO)
+  if (&g_uart1priv == priv)
+    {
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart1priv.rts_gpio, 0);
+    }
+
+#endif
+#if defined(CONFIG_UART2_RS485CONTROL_RTSISGPIO)
+  if (&g_uart2priv == priv)
+    {
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart2priv.rts_gpio, 0);
+    }
+
+#endif
+#if defined(CONFIG_UART3_RS485CONTROL_RTSISGPIO)
+  if (&g_uart3priv == priv)
+    {
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart3priv.rts_gpio, 0);
+    }
+
+#endif
+#if defined(CONFIG_UART4_RS485CONTROL_RTSISGPIO)
+  if (&g_uart4priv == priv)
+    {
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart4priv.rts_gpio, 0);
+    }
+
+#endif
+#if defined(CONFIG_UART5_RS485CONTROL_RTSISGPIO)
+  if (&g_uart5priv == priv)
+    {
+      up_udelay(150);
+      kinetis_gpiowrite(g_uart5priv.rts_gpio, 0);
+    }
+
+#endif
 }
 
 /****************************************************************************
