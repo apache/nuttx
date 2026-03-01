@@ -1,0 +1,181 @@
+############################################################################
+# arch/tricore/src/tc4xx/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+CHIP_CSRCS += tc4xx_timerisr.c
+CHIP_CSRCS += tc4xx_serial.c
+
+VPATH += tc4xx
+
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+
+tc4xx_libc$(OBJEXT): tc4xx_libc.c
+	$(call COMPILE, $<, $@)
+
+libc_fpu$(LIBEXT): tc4xx_libc$(OBJEXT)
+	$(call ARCHIVE, $@, $<)
+
+EXTRA_LIBS += libc_fpu$(LIBEXT)
+
+else
+
+tc4xx_dummy$(OBJEXT): tc4xx_dummy.c
+	$(call COMPILE, $<, $@)
+
+libos$(LIBEXT): tc4xx_dummy$(OBJEXT)
+	$(call ARCHIVE, $@, $<)
+
+EXTRA_LIBS += libos$(LIBEXT)
+
+endif
+
+ILLD_UNPACK = illd/tc4xx
+ILLD_TARBALL = $(ILLD_UNPACK)/illd.tar.gz
+ILLD_UNPACK_NAME = illd_release_tc4x-main
+ILLD_SRC = $(ILLD_UNPACK)/$(ILLD_UNPACK_NAME)/src/Libraries
+ILLD_URL = https://github.com/Infineon/illd_release_tc4x/archive/refs/heads
+
+$(ILLD_TARBALL):
+	$(call DOWNLOAD,$(ILLD_URL),main.tar.gz,$(ILLD_TARBALL))
+
+$(ILLD_UNPACK)/.illd_unpack: $(ILLD_TARBALL)
+	$(Q) echo "Unpacking: ILLD"
+	$(Q) tar xzf $(ILLD_TARBALL) -C $(ILLD_UNPACK)
+	$(Q) mkdir -p $(ILLD_UNPACK)/Libraries/src/Libraries
+	$(Q) mv $(ILLD_SRC)/* $(ILLD_UNPACK)/Libraries/src/Libraries/
+	$(Q) rm -rf $(ILLD_UNPACK)/$(ILLD_UNPACK_NAME)
+	$(Q) touch $(ILLD_UNPACK)/.illd_unpack
+
+ifeq ($(wildcard $(ILLD_UNPACK)/.git),)
+context:: $(ILLD_UNPACK)/.illd_unpack
+
+distclean::
+	$(call DELFILE, $(ILLD_UNPACK)/.illd_unpack)
+	$(call DELFILE, $(ILLD_TARBALL))
+	$(call DELDIR, $(ILLD_UNPACK)/Libraries/src/Libraries)
+endif
+
+CONFIG_DIR = $(ILLD_UNPACK)/Configurations
+ILLD_DIR = $(ILLD_UNPACK)/Libraries/src
+PATCHES_DIR = $(ILLD_UNPACK)/patches
+
+PATCH_FILES = $(wildcard $(CURDIR)/$(PATCHES_DIR)/*.patch)
+
+apply_change_patches:
+	@if [ -n "$(PATCH_FILES)" ]; then \
+		for p in $(PATCH_FILES); do \
+			if git -C "$(CURDIR)" apply --reverse --check "$$p" >/dev/null 2>&1; then \
+				echo "-- Patch $$p already applied, skipping."; \
+			else \
+				if git -C "$(CURDIR)" apply --whitespace=nowarn "$$p" >/dev/null 2>&1; then \
+					echo "-- Successfully applied patch $$p."; \
+				else \
+					echo "-- Failed to apply patch $$p!"; \
+					exit 1; \
+				fi; \
+			fi; \
+		done; \
+	fi
+
+context:: apply_change_patches
+
+SDK_INCDIR += ${CONFIG_DIR}
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/ArcEV
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Asc
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Lin
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Atom
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Tom
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Fce/Crc
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Fce/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Scr
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_PinMap
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_PinMap/TC4Dx
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Can/Can
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Can/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Flash/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/I2c/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Pms/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Scu/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smu/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Src/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Stm/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Stm/Timer
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Vmt/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Wtu/Std
+SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Platform
+SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Sfr/TC4Dx
+SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore
+SDK_INCDIR += $(ILLD_DIR)/Libraries/Service/CpuGeneric
+SDK_INCDIR += $(ILLD_DIR)/Libraries/Infra/Platform/Compilers
+
+SDK_CSRCS += $(CONFIG_DIR)/Ifx_Cfg_Ssw.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxPort_cfg_TC4Dx.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx/IfxAsclin_PinMap_TC4Dx_BGA436_COM.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Std/IfxAsclin.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApApu.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApProt.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std/IfxClock.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std/IfxSrc.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Stm/Std/IfxStm.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmm.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmmRst.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Platform/Compilers/CompilerTasking.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c
+SDK_CSRCS += $(ILLD_DIR)/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c
+
+CFLAGS += $(addprefix ${INCDIR_PREFIX},$(SDK_INCDIR))
+CFLAGS += -DSRC_CPU_CPU0_SB=SRC_CPU0SB
+CFLAGS += -DSRC_GPSR00=SRC_GPSR0SR0
+CFLAGS += -DMODULE_STM0=MODULE_CPU0
+CFLAGS += -DSRC_STM0SR0=SRC_STMCPU0_SR2
+
+VPATH += $(dir $(SDK_CSRCS))
+
+HEAD_CSRC += $(notdir $(SDK_CSRCS))
+
+LIBPATHS += $(CURDIR)

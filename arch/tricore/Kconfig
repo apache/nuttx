@@ -22,30 +22,76 @@ config TRICORE_TOOLCHAIN_GNU
 
 endchoice # Tricore Toolchain Selection
 
-config ARCH_TC3XX
+config ARCH_TC1V6
 	bool
-	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_MPU
 	select ARCH_HAVE_IRQTRIGGER
-	select ARCH_MINIMAL_VECTORTABLE
-	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_TESTSET
+	default n
+
+config ARCH_TC1V8
+	bool
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_TESTSET
 	default n
 
 config ARCH_FAMILY
 	string
-	default "tc3xx"		if ARCH_TC3XX
+	default "tc1v6"		if ARCH_TC1V6
+	default "tc1v8"		if ARCH_TC1V8
 
-config ARCH_CHIP
-	string
-	default "tc397"		if ARCH_CHIP_TC397
-
-config ARCH_CHIP_TC397
-	bool "AURIX Family TC397"
-	select ARCH_TC3XX
+config ARCH_CHIP_TC3XX
+	bool
+	select ARCH_TC1V6
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_I2CRESET
+	select ARCH_MINIMAL_VECTORTABLE
+	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
 	select ALARM_ARCH
 	select ONESHOT
 	select ONESHOT_COUNT
 	---help---
-		AURIX TC39x family: TC397
+		Infineon aurix tc3xx (six cores)
+
+config ARCH_CHIP_TC4XX
+	bool
+	select ARCH_TC1V8
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_I2CRESET
+	select ARCH_MINIMAL_VECTORTABLE
+	select ARCH_MINIMAL_VECTORTABLE_DYNAMIC
+	select ALARM_ARCH
+	select ONESHOT
+	select ONESHOT_COUNT
+	select HAVE_SECURITY_CORE
+	---help---
+		Infineon aurix tc4xx (six cores and one security core)
+
+config ARCH_CHIP_TC397
+	bool "AURIX CHIP TC397"
+	select ARCH_CHIP_TC3XX
+
+config ARCH_CHIP_TC4DA
+	bool "AURIX CHIP TC4DA"
+	select ARCH_CHIP_TC4XX
+
+config ARCH_CHIP
+	string
+	default "tc397"		if ARCH_CHIP_TC397
+	default "tc4da"		if ARCH_CHIP_TC4DA
 
 config ARCH_DCACHE_ADDR
 	hex "AURIX Dcache base address"
@@ -72,11 +118,26 @@ config ARCH_MPU_CODE_NREGIONS
 	---help---
 		The code regions count
 
+config HAVE_SECURITY_CORE
+	bool
+	--help--
+		In addition to the 6 cores, tc4xx also has one more security core.
 
-if ARCH_TC3XX
+config CPU_COREID
+	int "TRICORE CPU CORE ID"
+	default 0
+	range 0 6
+
+if ARCH_CHIP_TC3XX
 source "arch/tricore/src/tc3xx/Kconfig"
 endif
-if ARCH_TC397
+if ARCH_CHIP_TC4XX
+source "arch/tricore/src/tc4xx/Kconfig"
+endif
+if ARCH_CHIP_TC397
 source "arch/tricore/src/tc397/Kconfig"
+endif
+if ARCH_CHIP_TC4DA
+source "arch/tricore/src/tc4da/Kconfig"
 endif
 endif # ARCH_TRICORE

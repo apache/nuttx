@@ -1,0 +1,217 @@
+# ##############################################################################
+# arch/tricore/src/tc4xx/CMakeLists.txt
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements.  See the NOTICE file distributed with this work for
+# additional information regarding copyright ownership.  The ASF licenses this
+# file to you under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations under
+# the License.
+#
+# ##############################################################################
+
+set(SRCS tc4xx_timerisr.c tc4xx_serial.c)
+
+target_sources(arch PRIVATE ${SRCS})
+
+if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+  nuttx_add_kernel_library(c_fpu)
+  target_sources(c_fpu PRIVATE tc4xx_libc.c)
+  target_link_options(
+    nuttx PRIVATE
+    --library-directory=${CMAKE_BINARY_DIR}/arch/tricore/src/exclude_chip)
+endif()
+
+set(ILLD_UNPACK "${CMAKE_CURRENT_SOURCE_DIR}/../illd/tc4xx")
+set(ILLD_TARBALL "${ILLD_UNPACK}/illd.tar.gz")
+set(ILLD_UNPACK_NAME "illd_release_tc4x-main")
+set(ILLD_SRC "${ILLD_UNPACK}/${ILLD_UNPACK_NAME}/src/Libraries")
+set(ILLD_URL
+    "https://github.com/Infineon/illd_release_tc4x/archive/refs/heads/main.tar.gz"
+)
+
+set(CONFIG_DIR "${ILLD_UNPACK}/Configurations")
+set(ILLD_DIR "${ILLD_UNPACK}/Libraries/src")
+set(PATCHES_DIR "${ILLD_UNPACK}/patches")
+
+if(NOT EXISTS "${ILLD_DIR}/Libraries")
+  file(MAKE_DIRECTORY "${ILLD_UNPACK}")
+  file(DOWNLOAD "${ILLD_URL}" "${ILLD_TARBALL}")
+
+  message(STATUS "Unpacking: ILLD for tc4xx")
+  execute_process(
+    COMMAND ${CMAKE_COMMAND} -E tar xzf "${ILLD_TARBALL}"
+    WORKING_DIRECTORY "${ILLD_UNPACK}"
+    RESULT_VARIABLE tar_result)
+  if(NOT tar_result EQUAL 0)
+    message(FATAL_ERROR "Failed to unpack ${ILLD_TARBALL}")
+  endif()
+
+  file(MAKE_DIRECTORY "${ILLD_DIR}/Libraries")
+
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${ILLD_SRC}/"
+                          "${ILLD_DIR}/Libraries/" RESULT_VARIABLE copy_result)
+  if(NOT copy_result EQUAL 0)
+    message(
+      FATAL_ERROR
+        "Failed to stage ILLD from ${ILLD_SRC} to ${ILLD_DIR}/Libraries")
+  endif()
+
+  file(REMOVE_RECURSE "${ILLD_UNPACK}/${ILLD_UNPACK_NAME}")
+endif()
+
+file(GLOB PATCH_FILES "${PATCHES_DIR}/*.patch")
+
+foreach(PATCH ${PATCH_FILES})
+  execute_process(
+    COMMAND git apply --reverse --check ${PATCH}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} # Patches are applied from the repo
+                                          # root
+    RESULT_VARIABLE PATCH_NEEDED
+    OUTPUT_QUIET ERROR_QUIET)
+
+  if(PATCH_NEEDED EQUAL 0)
+    message(STATUS "Patch ${PATCH} already applied, skipping.")
+  else()
+    execute_process(
+      COMMAND git apply --whitespace=nowarn ${PATCH}
+      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} # Patches are applied from the repo
+                                            # root
+      RESULT_VARIABLE APPLY_RESULT)
+    if(NOT APPLY_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to apply patch ${PATCH}!")
+    else()
+      message(STATUS "Successfully applied patch ${PATCH}.")
+    endif()
+  endif()
+endforeach()
+
+file(GLOB PATCH_FILES "${PATCHES_DIR}/*.patch")
+
+foreach(PATCH ${PATCH_FILES})
+  execute_process(
+    COMMAND git apply --reverse --check ${PATCH}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+    RESULT_VARIABLE PATCH_NEEDED
+    OUTPUT_QUIET ERROR_QUIET)
+
+  if(PATCH_NEEDED EQUAL 0)
+    message(STATUS "Patch ${PATCH} already applied, skipping.")
+  else()
+    execute_process(
+      COMMAND git apply --whitespace=nowarn ${PATCH}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+      RESULT_VARIABLE APPLY_RESULT)
+    if(NOT APPLY_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to apply patch ${PATCH}!")
+    else()
+      message(STATUS "Successfully applied patch ${PATCH}.")
+    endif()
+  endif()
+endforeach()
+
+set(SDK_INCDIR
+    "${CONFIG_DIR}"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/ArcEV"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Asc"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Lin"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Atom"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Egtm/Tom"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Fce/Crc"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Fce/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Scr"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_PinMap"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_PinMap/TC4Dx"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Can/Can"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Can/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Flash/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/I2c/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Pms/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Scu/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smu/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smm/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Src/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Stm/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Stm/Timer"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Vmt/Std"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std"
+    "${ILLD_DIR}/Libraries/Infra/Platform"
+    "${ILLD_DIR}/Libraries/Infra/Sfr/TC4Dx"
+    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore"
+    "${ILLD_DIR}/Libraries/Service/CpuGeneric"
+    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers")
+
+target_include_directories(arch PRIVATE ${SDK_INCDIR})
+target_include_directories(nuttx PRIVATE ${SDK_INCDIR})
+
+set_property(
+  TARGET nuttx
+  APPEND
+  PROPERTY NUTTX_INCLUDE_DIRECTORIES ${SDK_INCDIR})
+
+set(SDK_CSRCS
+    "${CONFIG_DIR}/Ifx_Cfg_Ssw.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxAp_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxDma_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_Impl/IfxPort_cfg_TC4Dx.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/_PinMap/TC4Dx/IfxAsclin_PinMap_TC4Dx_BGA436_COM.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Asclin/Std/IfxAsclin.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApApu.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Ap/Std/IfxApProt.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Clock/Std/IfxClock.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Dma/IfxDma_Dma.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Dma/Std/IfxDma.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Port/Std/IfxPort.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/CpuGeneric/Src/Std/IfxSrc.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxCpu_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/_Impl/IfxStm_cfg.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Std/IfxCpu.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Scu/Std/IfxScuEru.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Stm/Std/IfxStm.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmm.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smm/Std/IfxSmmRst.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Smu/Std/IfxSmu.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Vmt/Std/IfxVmt.c"
+    "${ILLD_DIR}/Libraries/iLLD/TC4xx/Tricore/Wtu/Std/IfxWtu.c"
+    "${ILLD_DIR}/Libraries/Infra/Platform/Compilers/CompilerTasking.c"
+    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Infra.c"
+    "${ILLD_DIR}/Libraries/Infra/Ssw/TC4xx/Tricore/Ifx_Ssw_Tc0.c")
+
+target_sources(nuttx PRIVATE ${SDK_CSRCS})
+
+if(NOT CONFIG_TRICORE_TOOLCHAIN_TASKING)
+  target_compile_options(nuttx PRIVATE -Wno-undef -Wno-strict-prototypes
+                                       -Wno-shadow)
+  target_compile_options(nuttx PRIVATE -fstrict-volatile-bitfields)
+  target_compile_options(nuttx PRIVATE -Wno-unused-parameter
+                                       -Wno-unused-but-set-parameter)
+  target_compile_options(nuttx PRIVATE -Wno-implicit-fallthrough)
+endif()
+
+target_compile_definitions(
+  arch PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0 -DSRC_CPU_CPU0_SB=SRC_CPU0SB
+               -DMODULE_STM0=MODULE_CPU0 -DSRC_STM0SR0=SRC_STMCPU0_SR2)

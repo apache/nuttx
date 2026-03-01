@@ -27,6 +27,7 @@
 #include <stdint.h>
 
 #include "tricore_internal.h"
+#include "IfxCpu_cfg.h"
 
 /****************************************************************************
  * Pre-processor Definitions
