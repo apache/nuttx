@@ -20,7 +20,7 @@ To render the Documentation locally, you should clone the NuttX main repository 
      project `site <https://github.com/pyenv/pyenv#installation>`_.
 
     .. code-block:: console
-      
+
       $ pip3 install pipenv
       $ cd Documentation/
       $ # install the dependencies into a virtual environment
@@ -28,7 +28,15 @@ To render the Documentation locally, you should clone the NuttX main repository 
       $ # activate the virtual environment
       $ pipenv shell
 
-  2. Build documentation:
+  2. `Install the PlantUML tool <https://www.javiljoen.net/n/installing-plantuml.html>`_
+     (used to render UML diagrams) and ensure it is on your ``PATH``.
+
+     .. code:: console
+
+        $ sudo apt install plantuml
+        $ plantuml -version
+
+  3. Build documentation:
 
     .. code-block:: console
 
