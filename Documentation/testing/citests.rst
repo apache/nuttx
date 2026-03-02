@@ -79,6 +79,8 @@ CI migration to NTFC is in progress. Configurations currently using NTFC:
 - risc-v/qemu-rv: ``rv-virt/citest``
 - sim/sim: ``sim/citest``
 - arm/imx6: ``sabre-6quad/citest``
+- arm64/qemu: ``qemu-armv8a/citest``
+- arm64/qemu: ``qemu-armv8a/citest_smp``
 
 NTFC exports test logs as CI artifacts. This allows test logs (including ``ostest``
 output) to be downloaded directly from the CI for all targets where the ``citest``
