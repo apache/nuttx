@@ -1,0 +1,16 @@
+config:
+  cwd: './'
+
+product:
+  name: "qemu-armv8a"
+  cores:
+    core0:
+      name: 'main'
+      device: 'qemu'
+      exec_path: 'qemu-system-aarch64'
+      exec_args: '-cpu cortex-a53 -nographic
+                 -machine virt,virtualization=on,gic-version=3
+                 -net none -chardev stdio,id=con,mux=on
+                 -serial chardev:con -mon chardev=con,mode=readline'
+      conf_path: './build/.config'
+      elf_path: './build/nuttx'
