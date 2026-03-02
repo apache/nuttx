@@ -47,7 +47,7 @@ jobs:
           pip3 install pipenv
           pipenv install
           pipenv run make html
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7.0.0
         with:
           name: sphinx-docs
           path: |
