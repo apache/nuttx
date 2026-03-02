@@ -61,6 +61,7 @@ usage() {
   echo "-b Enforce breaking change format when checking commit message (requires -m -g; use when PR has breaking change label)"
   echo "-g <commit list>"
   echo "  Use --stdin as the only argument with -m -g to read commit message from stdin (message-only check, no patch/diff)."
+  echo "  Use --stdin with -p to read patch content from stdin."
   echo "-f <file list>"
   echo "-x format supported files (only .py, requires: pip install black)"
   echo "-  read standard input mainly used by git pre-commit hook as below:"
@@ -442,9 +443,25 @@ while [ ! -z "$1" ]; do
 done
 
 for arg in $@; do
-  if [ "$arg" = "--stdin" ] && [ "$check" = "check_commit" ]; then
-    msg=$(cat)
-    check_msg <<< "$msg"
+  if [ "$arg" = "--stdin" ]; then
+    case "$check" in
+    check_commit)
+      msg=$(cat)
+      check_msg <<< "$msg"
+      ;;
+    check_patch)
+      tmp=$(mktemp)
+      trap "rm -f $tmp" EXIT
+      cat > "$tmp"
+      check_patch "$tmp"
+      rm -f "$tmp"
+      trap - EXIT
+      ;;
+    check_file|format_file)
+      echo "❌ --stdin is only supported with -g (commit message) or -p (patch)"
+      fail=1
+      ;;
+    esac
   else
     $check $arg
   fi
