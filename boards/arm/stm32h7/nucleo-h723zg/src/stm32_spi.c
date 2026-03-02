@@ -65,6 +65,13 @@ void stm32_spidev_initialize(void)
 
 #ifdef CONFIG_STM32H7_SPI3
   spiinfo("Configure GPIO for SPI3/CS\n");
+
+#  ifdef CONFIG_NET_OA_TC6
+  /* Configure the SPI-based chip select GPIO for OA_TC6 MAC-PHYs */
+
+  stm32_configgpio(GPIO_OA_TC6_CS);
+  stm32_gpiowrite(GPIO_OA_TC6_CS, true);
+#  endif
 #endif
 }
 
@@ -128,6 +135,12 @@ void stm32_spi3select(struct spi_dev_s *dev,
 {
   switch (devid)
     {
+#ifdef CONFIG_NET_OA_TC6
+      case SPIDEV_ETHERNET(0):
+        stm32_gpiowrite(GPIO_OA_TC6_CS, !selected);
+        break;
+#endif
+
       default:
         break;
     }

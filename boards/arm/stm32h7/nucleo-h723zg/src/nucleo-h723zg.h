@@ -170,6 +170,19 @@
                            GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN4)
 #define GPIO_INT1         (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTE | GPIO_PIN5)
 
+/* OA-TC6 SPI CS + INT signal mapping
+ * MOSI - PB5  (D22)
+ * CLK  - PB3  (D23)
+ * MISO - PB4  (D25)
+ * CS   - PD14 (D10)
+ * INT  - PF3  (D8)
+ */
+
+#define GPIO_OA_TC6_SPI_PORT 3
+#define GPIO_OA_TC6_CS  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
+                         GPIO_OUTPUT_SET | GPIO_PORTD | GPIO_PIN14)
+#define GPIO_OA_TC6_INT (GPIO_INPUT | GPIO_FLOAT | GPIO_PORTF | GPIO_PIN3)
+
 /* PWM */
 
 #define NUCLEOH723ZG_PWMTIMER 1
@@ -255,6 +268,18 @@ void weak_function stm32_usbinitialize(void);
 
 #ifdef CONFIG_PWM
 int stm32_pwm_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_oa_tc6_initialize
+ *
+ * Description:
+ *   Initialize OA-TC6 10BASE-T1S subsystem.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_OA_TC6
+int stm32_oa_tc6_initialize(void);
 #endif
 
 #endif /* __BOARDS_ARM_STM32H7_NUCLEO_H723ZG_SRC_NUCLEO_H723ZG_H */

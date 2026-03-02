@@ -216,5 +216,9 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NET_OA_TC6
+  stm32_oa_tc6_initialize();
+#endif
+
   return OK;
 }
