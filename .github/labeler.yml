@@ -182,11 +182,13 @@
       - any-glob-to-any-file: 'CMakeLists.txt'
       - any-glob-to-any-file: 'cmake/**'
       - any-glob-to-any-file: 'tools/*.mk'
+      - any-glob-to-any-file: 'tools/*.sh'
 
 "Area: CI":
   - changed-files:
       - any-glob-to-any-file: '.github/**'
       - any-glob-to-any-file: 'tools/ci/**'
+      - any-glob-to-any-file: 'tools/testbuild.sh'
 
 "Area: Crypto":
   - changed-files:
