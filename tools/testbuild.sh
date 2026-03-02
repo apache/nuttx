@@ -491,7 +491,7 @@ function refresh {
 }
 
 function run {
-  if [ ${RUN} -ne 0 ] && [ -z ${cmake} ]; then
+  if [ ${RUN} -ne 0 ]; then
     run_script="$path/run.sh"
     if [ -x $run_script ]; then
       echo "  Running NuttX..."
