@@ -44,9 +44,20 @@
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
+#if LDBL_MANT_DIG == DBL_MANT_DIG
+
+/* Cover case when double is the same as long double (64 bit ieee754). */
+
+long double truncl(long double x)
+{
+  return trunc(x);
+}
+
+#else
+
 static const long double toint = 1 / LDBL_EPSILON;
 
-/* FIXME This will only work if long double is 64 bit and little endian */
+/* FIXME This will only work if long double is 80 bit and little endian */
 
 union ldshape
 {
@@ -100,4 +111,5 @@ long double truncl(long double x)
   x += y;
   return s ? -x : x;
 }
+#endif
 #endif
