@@ -477,6 +477,112 @@ static int arm64_el1_exception_handler(uint64_t esr,
   return ret;
 }
 
+static void arm64_get_exception_info(uint64_t el, uint64_t *esr,
+                                     uint64_t *far, uint64_t *elr,
+                                     const char **el_str)
+{
+  switch (el)
+    {
+      case MODE_EL1:
+        {
+          if (el_str != NULL)
+            {
+              *el_str = "MODE_EL1";
+            }
+
+          if (esr != NULL)
+            {
+              *esr = read_sysreg(esr_el1);
+            }
+
+          if (far != NULL)
+            {
+              *far = read_sysreg(far_el1);
+            }
+
+          if (elr != NULL)
+            {
+              *elr = read_sysreg(elr_el1);
+            }
+          break;
+        }
+
+      case MODE_EL2:
+        {
+          if (el_str != NULL)
+            {
+              *el_str = "MODE_EL2";
+            }
+
+          if (esr != NULL)
+            {
+              *esr = read_sysreg(esr_el2);
+            }
+
+          if (far != NULL)
+            {
+              *far = read_sysreg(far_el2);
+            }
+
+          if (elr != NULL)
+            {
+              *elr = read_sysreg(elr_el2);
+            }
+          break;
+        }
+
+#ifdef CONFIG_ARCH_HAVE_EL3
+      case MODE_EL3:
+        {
+          if (el_str != NULL)
+            {
+              *el_str = "MODE_EL3";
+            }
+
+          if (esr != NULL)
+            {
+              *esr = read_sysreg(esr_el3);
+            }
+
+          if (far != NULL)
+            {
+              *far = read_sysreg(far_el3);
+            }
+
+          if (elr != NULL)
+            {
+              *elr = read_sysreg(elr_el3);
+            }
+          break;
+        }
+#endif
+
+      default:
+        {
+          if (el_str != NULL)
+            {
+              *el_str = "Unknown";
+            }
+
+          if (esr != NULL)
+            {
+              *esr = 0;
+            }
+
+          if (far != NULL)
+            {
+              *far = 0;
+            }
+
+          if (elr != NULL)
+            {
+              *elr = 0;
+            }
+          break;
+        }
+    }
+}
+
 static int arm64_exception_handler(uint64_t *regs)
 {
   uint64_t    el;
@@ -487,49 +593,12 @@ static int arm64_exception_handler(uint64_t *regs)
   int         ret = -EINVAL;
 
   el = arm64_current_el();
+  arm64_get_exception_info(el, &esr, &far, &elr, &el_str);
 
-  switch (el)
-  {
-    case MODE_EL1:
+  if (el == MODE_EL1)
     {
-      el_str = "MODE_EL1";
-      esr    = read_sysreg(esr_el1);
-      far    = read_sysreg(far_el1);
-      elr    = read_sysreg(elr_el1);
-      ret    = arm64_el1_exception_handler(esr, regs);
-      break;
+      ret = arm64_el1_exception_handler(esr, regs);
     }
-
-    case MODE_EL2:
-    {
-      el_str = "MODE_EL2";
-      esr    = read_sysreg(esr_el2);
-      far    = read_sysreg(far_el2);
-      elr    = read_sysreg(elr_el2);
-      break;
-    }
-
-#ifdef CONFIG_ARCH_HAVE_EL3
-    case MODE_EL3:
-    {
-      el_str = "MODE_EL3";
-      esr    = read_sysreg(esr_el3);
-      far    = read_sysreg(far_el3);
-      elr    = read_sysreg(elr_el3);
-      break;
-    }
-
-#endif
-    default:
-    {
-      el_str = "Unknown";
-
-      /* Just to keep the compiler happy */
-
-      esr = elr = far = 0;
-      break;
-    }
-  }
 
   if (ret != 0)
     {
@@ -567,9 +636,47 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
 
   if (ret != 0)
     {
-      /* The fatal is not handled, print error and hung */
+      if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
+          ((tcb->flags & TCB_FLAG_SYSCALL) == 0) &&
+          ((regs[REG_SPSR] & SPSR_MODE_MASK) == SPSR_MODE_EL0T))
+        {
+          uint64_t esr;
+          const char *reason;
+          const char *desc;
 
-      PANIC_WITH_REGS("panic", regs);
+          arm64_get_exception_info(arm64_current_el(), &esr, NULL,
+                                   NULL, NULL);
+
+          reason = esr_get_class_string(esr);
+          if (reason == NULL)
+            {
+              reason = "Unknown/Uncategorized";
+            }
+
+          desc = esr_get_desc_string(esr);
+          if (desc == NULL)
+            {
+              desc = "";
+            }
+
+          _alert("PANIC: Unhandled user exception in PID %d: %s\n",
+                 tcb->pid, get_task_name(tcb));
+          _alert("Reason: %s - %s\n", reason, desc);
+          up_dump_register(regs);
+
+          tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+
+          regs[REG_ELR] = (uint64_t) _exit;
+          regs[REG_X0] = SIGSEGV;
+          regs[REG_SPSR] &= ~SPSR_MODE_MASK;
+          regs[REG_SPSR] |= SPSR_MODE_EL1H;
+        }
+      else
+        {
+          /* The fatal is not handled, print error and hung */
+
+          PANIC_WITH_REGS("panic", regs);
+        }
     }
 
   /* Clear irq flag */
