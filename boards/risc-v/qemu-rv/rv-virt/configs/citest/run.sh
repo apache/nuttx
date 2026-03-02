@@ -51,7 +51,7 @@ deactivate
 # export test results
 artifacts=${ARTIFACTCONFDIR}/ntfc
 mkdir -p ${artifacts}
-mv pytest.debug.log ${artifacts}
+rm -f pytest.debug.log
 mv result ${artifacts}
 
 rm -f fatfs.img
