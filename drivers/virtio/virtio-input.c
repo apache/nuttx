@@ -88,6 +88,7 @@ struct virtio_input_priv
 
 static int virtio_input_probe(FAR struct virtio_device *vdev);
 static void virtio_input_remove(FAR struct virtio_device *vdev);
+static void virtio_input_dump(FAR struct virtio_device *vdev);
 
 /****************************************************************************
  * Private Data
@@ -95,9 +96,10 @@ static void virtio_input_remove(FAR struct virtio_device *vdev);
 
 static struct virtio_driver g_virtio_input_driver =
 {
-  .device = VIRTIO_ID_INPUT,                                /* device id */
-  .probe  = virtio_input_probe,                             /* probe */
-  .remove = virtio_input_remove,                            /* remove */
+  .device = VIRTIO_ID_INPUT,     /* device id */
+  .probe  = virtio_input_probe,  /* probe */
+  .remove = virtio_input_remove, /* remove */
+  .dump   = virtio_input_dump,   /* dump */
 };
 
 static int g_virtio_mouse_idx    = 0;
@@ -527,6 +529,32 @@ static void virtio_input_remove(FAR struct virtio_device *vdev)
   virtio_reset_device(vdev);
   virtio_delete_virtqueues(vdev);
   kmm_free(priv);
+}
+
+/****************************************************************************
+ * Name: virtio_input_dump
+ ****************************************************************************/
+
+static void virtio_input_dump(FAR struct virtio_device *vdev)
+{
+  FAR struct virtio_input_priv *priv = vdev->priv;
+  FAR const char *type = "unknown";
+
+  if (priv->eventhandler == virtio_input_send_keyboard_event)
+    {
+      type = "keyboard";
+    }
+  else if (priv->eventhandler == virtio_input_send_mouse_event)
+    {
+      type = "mouse";
+    }
+  else if (priv->eventhandler == virtio_input_send_touch_event)
+    {
+      type = "touch";
+    }
+
+  syslog(LOG_EMERG, "    name=%s, type=%s, evtnum=%zu\n",
+         priv->name, type, priv->evtnum);
 }
 
 /****************************************************************************
