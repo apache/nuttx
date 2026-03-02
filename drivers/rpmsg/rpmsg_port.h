@@ -67,37 +67,42 @@ struct rpmsg_port_list_s
   struct list_node head;          /* List head */
 };
 
+struct rpmsg_port_node_s
+{
+  struct list_node node;          /* List node for free/ready/retx queue */
+};
+
 struct rpmsg_port_s;
 
 struct rpmsg_port_queue_s
 {
   /* Pointer to the rpmsg port handler */
 
-  FAR struct rpmsg_port_s  *port;
+  FAR struct rpmsg_port_s      *port;
 
   /* Indicate buffers current queue managed is dynamic alloced */
 
-  bool                     alloced;
+  bool                         alloced;
 
   /* Buffer array's base address of current queue managed */
 
-  FAR void                 *buf;
+  FAR void                     *buf;
 
   /* Node related to buffer for buffer management */
 
-  FAR struct list_node     *node;
+  FAR struct rpmsg_port_node_s *node;
 
   /* Length of buffers current queue managed */
 
-  uint16_t                 len;
+  uint16_t                     len;
 
   /* Free list of buffers which have not been occupied data yet */
 
-  struct rpmsg_port_list_s free;
+  struct rpmsg_port_list_s     free;
 
   /* Ready list of buffers which have been occupied data already */
 
-  struct rpmsg_port_list_s ready;
+  struct rpmsg_port_list_s     ready;
 };
 
 typedef void (*rpmsg_port_rx_cb_t)(FAR struct rpmsg_port_s *port,
