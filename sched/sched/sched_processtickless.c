@@ -375,13 +375,17 @@ void nxsched_process_timer(void)
 {
 #ifdef CONFIG_HRTIMER
   uint64_t nsec = clock_systime_nsec();
+  clock_t ticks = NSEC2TICK(nsec);
+
+  clock_update_sched_ticks(ticks);
+
   hrtimer_process(nsec);
 
 #  if CONFIG_RR_INTERVAL > 0
   /* Workaround for SCHED_RR, see the note. */
 
   irqstate_t flags = enter_critical_section();
-  nxsched_process_event(div_const(nsec, (uint32_t)NSEC_PER_TICK), true);
+  nxsched_process_event(ticks, true);
   leave_critical_section(flags);
 #  endif
 
@@ -396,6 +400,10 @@ void nxsched_process_timer(void)
    */
 
   up_timer_gettick(&ticks);
+
+  /* Update sched ticks */
+
+  clock_update_sched_ticks(ticks);
 
 #if CONFIG_RR_INTERVAL > 0
   /* Workaround for SCHED_RR, see the note. */

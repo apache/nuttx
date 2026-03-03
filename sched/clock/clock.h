@@ -70,15 +70,88 @@ extern spinlock_t g_basetime_lock;
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: clock_basetime
+ *
+ * Description:
+ *   Get the initial time value from the best source available.
+ *
+ ****************************************************************************/
+
 int  clock_basetime(FAR struct timespec *tp);
+
+/****************************************************************************
+ * Name: clock_initialize
+ *
+ * Description:
+ *   Perform one-time initialization of the timing facilities.
+ *
+ ****************************************************************************/
 
 void clock_initialize(void);
 
+/****************************************************************************
+ * Name: clock_update_sched_ticks
+ *
+ * Description:
+ *   Update the scheduler tick counter to a specific value. This function
+ *   directly sets the system tick counter to the given value (rather than
+ *   incrementing it), typically used for synchronizing or resetting the
+ *   scheduler tick count to a known state.
+ *
+ * Input Parameters:
+ *   ticks - The new value to set for the scheduler tick counter
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void clock_update_sched_ticks(clock_t ticks);
+
+/****************************************************************************
+ * Name: clock_increase_sched_ticks
+ *
+ * Description:
+ *   Increment the scheduler tick counter. This function should be called
+ *   each time the real-time clock interrupt occurs, indicating the passage
+ *   of one or more scheduling ticks.
+ *
+ * Input Parameters:
+ *   ticks - The number of ticks to increment (typically 1)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 void clock_increase_sched_ticks(clock_t ticks);
+
+/****************************************************************************
+ * Name: clock_get_sched_ticks
+ *
+ * Description:
+ *   Return the current value of the scheduler tick counter. This counter
+ *   only increases while the scheduler is running, and is independent of
+ *   the real-time clock.
+ *
+ * Returned Value:
+ *   The current number of scheduler ticks.
+ *
+ ****************************************************************************/
 
 clock_t clock_get_sched_ticks(void);
 
 #ifdef CONFIG_SCHED_CPULOAD_SYSCLK
+
+/****************************************************************************
+ * Name: cpuload_init
+ *
+ * Description:
+ *   Initialize the CPU load measurement logic.
+ *
+ ****************************************************************************/
+
 void cpuload_init(void);
 #endif
 
