@@ -369,12 +369,10 @@ int uart_rpmsg_raw_init(FAR const char *cpuname, FAR const char *devname,
            UART_RPMSG_DEV_PREFIX, devname);
   uart_register(name, dev);
 
-#ifdef CONFIG_RPMSG_UART_RAW_CONSOLE
   if (dev->isconsole)
     {
       uart_register(UART_RPMSG_DEV_CONSOLE, dev);
     }
-#endif
 
   return 0;
 }
