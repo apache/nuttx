@@ -579,7 +579,7 @@ static int netdev_cell_ioctl(FAR struct socket *psock, int cmd,
   FAR struct net_driver_s *dev = NULL;
   int ret = -ENOTTY;
 
-  ninfo("cmd: %d\n", cmd);
+  ninfo("cmd: 0x%04x\n", cmd);
 
   if (_CELLIOCVALID(cmd))
     {
@@ -827,7 +827,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
   unsigned int idx = 0;
   int ret = OK;
 
-  ninfo("cmd: %d\n", cmd);
+  ninfo("cmd: 0x%04x\n", cmd);
 
   /* Execute commands that do not need ifr_name or lifr_name */
 
@@ -1378,7 +1378,7 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
   FAR struct net_driver_s *dev;
   int ret = -EINVAL;
 
-  ninfo("cmd: %d\n", cmd);
+  ninfo("cmd: 0x%04x\n", cmd);
 
   /* Execute the command */
 
