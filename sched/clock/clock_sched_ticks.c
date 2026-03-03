@@ -47,6 +47,34 @@ static seqcount_t g_system_tick_lock = SEQLOCK_INITIALIZER;
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: clock_update_sched_ticks
+ *
+ * Description:
+ *   Update the scheduler tick counter to a specific value. This function
+ *   directly sets the system tick counter to the given value (rather than
+ *   incrementing it), typically used for synchronizing or resetting the
+ *   scheduler tick count to a known state.
+ *
+ * Input Parameters:
+ *   ticks - The new value to set for the scheduler tick counter
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void clock_update_sched_ticks(clock_t ticks)
+{
+  irqstate_t flags;
+
+  /* Increment the per-tick scheduler counter */
+
+  flags = write_seqlock_irqsave(&g_system_tick_lock);
+  g_system_ticks = ticks;
+  write_sequnlock_irqrestore(&g_system_tick_lock, flags);
+}
+
+/****************************************************************************
  * Name: clock_increase_sched_ticks
  *
  * Description:
