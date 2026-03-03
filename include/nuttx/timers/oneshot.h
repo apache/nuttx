@@ -203,12 +203,26 @@ struct oneshot_operations_s
    * conversion, and the theoretical optimal timing accuracy.
    */
 
+  /* Get the current timer count. */
+
   CODE clkcnt_t (*current)(FAR struct oneshot_lowerhalf_s *lower);
+
+  /* Start a relative timer. */
+
   CODE void     (*start)(FAR struct oneshot_lowerhalf_s *lower,
                          clkcnt_t delay);
+
+  /* Start an absolute timer. */
+
   CODE void     (*start_absolute)(FAR struct oneshot_lowerhalf_s *lower,
                                   clkcnt_t cnt);
+
+  /* Cancel the timer event. */
+
   CODE void     (*cancel)(FAR struct oneshot_lowerhalf_s *lower);
+
+  /* Get the timer's maximum delay. */
+
   CODE clkcnt_t (*max_delay)(FAR struct oneshot_lowerhalf_s *lower);
 #else
   /* Deprecated interfaces, just for compatiable-usage. */
