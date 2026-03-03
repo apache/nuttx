@@ -284,16 +284,6 @@ uart_cmsdk_disableuartint(FAR struct uart_cmsdk_s *priv)
 }
 
 /****************************************************************************
- * Name: uart_cmsdk_restoreuartint
- ****************************************************************************/
-
-static inline void uart_cmsdk_restoreuartint(FAR struct uart_cmsdk_s *priv,
-                                             uint32_t ier)
-{
-  uart_cmsdk_serialmodify(priv, UART_CTRL_OFFSET, 0, ier & UART_CTRL_ALLIE);
-}
-
-/****************************************************************************
  * Name: uart_cmsdk_divisor
  *
  * Description:
