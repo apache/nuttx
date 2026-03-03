@@ -115,15 +115,12 @@ config IOB_ALLOC
 config IOB_DEBUG
 	bool "Force I/O buffer debug"
 	default n
-	depends on DEBUG_FEATURES && !SYSLOG_BUFFER
+	depends on DEBUG_FEATURES
 	---help---
 		This option will force debug output from I/O buffer logic.  This
 		is not normally something that would want to do but is convenient
 		if you are debugging the I/O buffer logic and do not want to get
 		overloaded with other un-related debug output.
-
-		NOTE that this selection is not available if IOBs are being used
-		to syslog buffering logic (CONFIG_SYSLOG_BUFFER=y)!
 
 endif # MM_IOB
 endmenu # Common I/O buffer support
