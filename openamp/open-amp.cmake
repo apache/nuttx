@@ -101,6 +101,9 @@ endif()
 
 add_compile_definitions(elf_load=remoteproc_elf_load)
 
+# avoid multiple definitions in other file
+add_compile_definitions(safe_strcpy=openamp_safe_strcpy)
+
 if(CONFIG_OPENAMP_VIRTIO_DEVICE_SUPPORT)
   add_compile_definitions(VIRTIO_DEVICE_SUPPORT=1)
 else()
