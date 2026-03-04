@@ -37,6 +37,7 @@ config ARCH_CHIP
 
 choice
 	prompt "Toolchain Selection"
+	default SIM_TOOLCHAIN_CLANG if HOST_MACOS
 	default SIM_TOOLCHAIN_GCC
 
 config SIM_TOOLCHAIN_GCC
