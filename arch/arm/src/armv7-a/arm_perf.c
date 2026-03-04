@@ -120,7 +120,7 @@ void up_perf_convert(clock_t elapsed, struct timespec *ts)
 }
 #endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
 
-clock_t up_perf_gettime(void)
+clock_t noinstrument_function up_perf_gettime(void)
 {
   return cp15_pmu_rdccr();
 }
