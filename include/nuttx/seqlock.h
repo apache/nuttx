@@ -149,7 +149,7 @@ uint32_t read_seqretry(FAR const seqcount_t *s, uint32_t start)
 static inline_function
 irqstate_t write_seqlock_irqsave(FAR seqcount_t *s)
 {
-  irqstate_t flags = up_irq_save();
+  irqstate_t flags = irq_save();
 
 #ifdef CONFIG_SMP
   for (; ; )
@@ -199,7 +199,7 @@ void write_sequnlock_irqrestore(FAR seqcount_t *s, irqstate_t flags)
 #ifdef CONFIG_SMP
   atomic_set_release((FAR atomic_t *)&s->sequence, s->sequence + 1u);
 #endif
-  up_irq_restore(flags);
+  irq_restore(flags);
 }
 
 #if defined(__cplusplus)

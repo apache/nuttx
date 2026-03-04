@@ -960,7 +960,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
   pl011_platform_setup((uint32_t)config->uart);
 #endif
 
-  i_flags = up_irq_save();
+  i_flags = irq_save();
 
   /* If working in SBSA mode, we assume that UART is already configured,
    * or does not require configuration at all (if UART is emulated by
@@ -980,7 +980,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
                                data->baud_rate);
       if (ret != 0)
         {
-          up_irq_restore(i_flags);
+          irq_restore(i_flags);
           return ret;
         }
 
@@ -1008,7 +1008,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
       config->uart->cr  |= PL011_CR_RXE | PL011_CR_TXE;
     }
 
-  up_irq_restore(i_flags);
+  irq_restore(i_flags);
   pl011_enable(sport);
 
   return 0;

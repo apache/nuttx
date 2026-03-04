@@ -199,7 +199,7 @@ static void mm_delayfree(struct mm_heap_s *heap, void *mem, bool delay);
 static irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 {
   UNUSED(heap);
-  return up_irq_save();
+  return irq_save();
 }
 
 /****************************************************************************
@@ -213,7 +213,7 @@ static irqstate_t mm_lock_irq(FAR struct mm_heap_s *heap)
 static void mm_unlock_irq(FAR struct mm_heap_s *heap, irqstate_t state)
 {
   UNUSED(heap);
-  up_irq_restore(state);
+  irq_restore(state);
 }
 
 #endif

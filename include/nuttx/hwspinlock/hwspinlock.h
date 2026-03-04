@@ -68,13 +68,13 @@ static inline bool hwspin_trylock(FAR struct hwspinlock_dev_s *dev)
 static inline bool hwspin_trylock_irqsave(FAR struct hwspinlock_dev_s *dev,
                                           FAR irqstate_t *flags)
 {
-  *flags = up_irq_save();
+  *flags = irq_save();
   if (hwspin_trylock(dev))
     {
       return true;
     }
 
-  up_irq_restore(*flags);
+  irq_restore(*flags);
   return false;
 }
 
@@ -92,7 +92,7 @@ static inline void hwspin_lock(FAR struct hwspinlock_dev_s *dev)
 static inline irqstate_t
 hwspin_lock_irqsave(FAR struct hwspinlock_dev_s *dev)
 {
-  irqstate_t flags = up_irq_save();
+  irqstate_t flags = irq_save();
   hwspin_lock(dev);
   return flags;
 }
@@ -106,7 +106,7 @@ static inline void hwspin_unlock_restore(FAR struct hwspinlock_dev_s *dev,
                                          irqstate_t flags)
 {
   hwspin_unlock(dev);
-  up_irq_restore(flags);
+  irq_restore(flags);
 }
 
 #ifdef __cplusplus
