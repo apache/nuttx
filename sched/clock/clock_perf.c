@@ -117,7 +117,7 @@ static void perf_update(wdparm_t arg)
  * perf_gettime
  ****************************************************************************/
 
-clock_t perf_gettime(void)
+clock_t noinstrument_function perf_gettime(void)
 {
   irqstate_t flags = up_irq_save();
   FAR struct perf_s *perf = &g_perf[this_cpu()];
@@ -155,7 +155,7 @@ clock_t perf_gettime(void)
  * perf_gettime
  ****************************************************************************/
 
-clock_t perf_gettime(void)
+clock_t noinstrument_function perf_gettime(void)
 {
   return up_perf_gettime();
 }
@@ -166,7 +166,7 @@ clock_t perf_gettime(void)
  * perf_gettime
  ****************************************************************************/
 
-clock_t perf_gettime(void)
+clock_t noinstrument_function perf_gettime(void)
 {
   return clock_systime_ticks();
 }
