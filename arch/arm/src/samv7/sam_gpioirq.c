@@ -71,7 +71,7 @@
 static inline uint32_t sam_gpiobase(gpio_pinset_t pinset)
 {
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  return SAM_PION_BASE(port >> GPIO_PORT_SHIFT);
+  return SAM_PION_BASE(port);
 }
 
 /****************************************************************************
