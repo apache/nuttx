@@ -74,6 +74,8 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
       ${CMAKE_CURRENT_LIST_DIR}/0017-lib-virtio-virtqueue-change-the-virtqueue-dump-log-l.patch
       && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
       ${CMAKE_CURRENT_LIST_DIR}/0018-lib-rpmsg-add-priority-support-for-rpmsg-endpoint.patch
+      && patch -p0 -d ${CMAKE_CURRENT_LIST_DIR} <
+      ${CMAKE_CURRENT_LIST_DIR}/0019-rpmsg-Add-VIRTIO_RPMSG_F_BUFADDR-to-support-specify-.patch
     DOWNLOAD_NO_PROGRESS true
     TIMEOUT 30)
 

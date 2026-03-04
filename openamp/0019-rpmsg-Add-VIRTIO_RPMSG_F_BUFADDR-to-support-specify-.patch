@@ -1,0 +1,55 @@
+From a01c2ad26ec50cc480933a2b92017a9287909af8 Mon Sep 17 00:00:00 2001
+From: yintao <yintao@xiaomi.com>
+Date: Fri, 11 Apr 2025 15:23:07 +0800
+Subject: [PATCH 19/19] rpmsg: Add VIRTIO_RPMSG_F_BUFADDR to support specify
+ the address
+
+add h2r_buf_addr and r2h_buf_addr at fw_rsc_config to support specify the address
+
+Signed-off-by: yintao <yintao@xiaomi.com>
+---
+ lib/include/openamp/remoteproc.h   | 8 +++++++-
+ lib/include/openamp/rpmsg_virtio.h | 1 +
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/lib/include/openamp/remoteproc.h open-amp/lib/include/openamp/remoteproc.h
+index ea2c39ecfe..62ae76a380 100644
+--- a/lib/include/openamp/remoteproc.h
++++ open-amp/lib/include/openamp/remoteproc.h
+@@ -372,6 +372,12 @@ struct fw_rsc_config {
+ 	/** The remote to host buffer size (if VIRTIO_RPMSG_F_BUFSZ) */
+ 	uint32_t r2h_buf_size;
+ 
++	/** The host physical address (if VIRTIO_RPMSG_F_BUFADDR) */
++	uint64_t h2r_buf_addr;
++
++	/** The remote physical address (if VIRTIO_RPMSG_F_BUFADDR) */
++	uint64_t r2h_buf_addr;
++
+ 	/* The host side cpu name (if VIRTIO_RPMSG_F_CPUNAME) */
+ 
+ 	uint8_t host_cpuname[VIRTIO_RPMSG_CPUNAME_SIZE];
+@@ -382,7 +388,7 @@ struct fw_rsc_config {
+ 
+ 	/* Reserve for the future use */
+ 
+-	uint32_t reserved[10];
++	uint32_t reserved[6];
+ 
+ 	/** Put the customize config here */
+ } METAL_PACKED_END;
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index 8d686f72f1..5eef8b7c6a 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -32,6 +32,7 @@ extern "C" {
+ #define VIRTIO_RPMSG_F_ACK	1 /* RP supports name service acknowledge */
+ #define VIRTIO_RPMSG_F_BUFSZ	2 /* RP supports get buffer size from config space */
+ #define VIRTIO_RPMSG_F_CPUNAME	3 /* RP supports get local and peer cpu name */
++#define VIRTIO_RPMSG_F_BUFADDR	4 /* RP supports get buffer address from config space */
+ 
+ #if defined(VIRTIO_USE_DCACHE)
+ #define BUFFER_FLUSH(x, s)		metal_cache_flush(x, s)
+-- 
+2.34.1
+
