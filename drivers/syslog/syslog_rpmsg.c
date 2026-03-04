@@ -232,7 +232,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
   irqstate_t flags;
   uint32_t tail;
 
-  if (len <= 0 || priv->header == NULL)
+  if (len == 0 || priv->header == NULL)
     {
       return;
     }
