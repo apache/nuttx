@@ -275,7 +275,7 @@ static inline_function void spin_lock(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function bool
+static inline_function noinstrument_function bool
 spin_trylock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
@@ -374,7 +374,7 @@ static inline_function bool spin_trylock(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function void
+static inline_function noinstrument_function void
 spin_unlock_notrace(FAR volatile spinlock_t *lock)
 {
 #ifdef CONFIG_TICKET_SPINLOCK
@@ -455,7 +455,7 @@ static inline_function void spin_unlock(FAR volatile spinlock_t *lock)
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function
+static inline_function noinstrument_function
 irqstate_t spin_lock_irqsave_notrace(FAR volatile spinlock_t *lock)
 {
   irqstate_t flags;
@@ -1000,7 +1000,7 @@ bool rspin_trylock(FAR rspinlock_t *lock);
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function
+static inline_function noinstrument_function
 void spin_unlock_irqrestore_notrace(FAR volatile spinlock_t *lock,
                                 irqstate_t flags)
 {
