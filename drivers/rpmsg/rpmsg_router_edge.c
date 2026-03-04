@@ -432,6 +432,7 @@ rpmsg_router_edge_send_offchannel_raw(FAR struct rpmsg_device *rdev,
       ept->priv = usr_ept;
       ept->ns_bound_cb = rpmsg_router_edge_bound;
       ept->release_cb = rpmsg_router_edge_release;
+      rpmsg_set_priority(ept, usr_ept->priority);
 
       /* Create endpoint (r:cpu:name) for real communication */
 
