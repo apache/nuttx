@@ -1,5 +1,6 @@
-parsetrace.py
-=============
+=================
+``parsetrace.py``
+=================
 
 `parsetrace.py` is a trace log parsing tool for the NuttX RTOS. It supports converting binary or text trace logs into a human-readable systrace format, and can resolve symbols and type information from ELF files. The tool also supports real-time trace data parsing via serial port.
 
