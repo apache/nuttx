@@ -1065,7 +1065,7 @@ int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
           break;
         }
 
-      if (abs(priority - wqueues[i].priority) <
+      if (i != idx && abs(priority - wqueues[i].priority) <
           abs(priority - wqueues[idx].priority))
         {
           idx = i;
