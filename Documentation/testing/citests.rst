@@ -1,11 +1,11 @@
 .. include:: /substitutions.rst
 .. _citests:
 
-=======================
-Running CI Test Locally
-=======================
+======================================
+Running CI Runtime Test Suites Locally
+======================================
 
-NuttX automatically runs continuous integration (CI) tests on 
+NuttX automatically runs continuous integration (CI) tests on
 `simulator <https://nuttx.apache.org/docs/latest/guides/simulator.html>`__
 and QEMU targets when a new pull request is submitted. To avoid the tests failing
 you can also run them locally on your computer prior to submitting a new pull request.
@@ -48,7 +48,7 @@ set of commands.
       $ cd ..
       $ cd script
 
-Now you have everything prepared to run CI tests. The tests themself are run
+Now you have everything prepared to run CI tests. The tests themselves are run
 by following command.
 
   .. code-block:: console
@@ -57,31 +57,3 @@ by following command.
 
 Where nuttx-path is an absolute path to NuttX root directory and log-path is
 a user defined directory to which tests log are saved.
-
-CI with NTFC
-============
-
-NTFC (NuttX Test Framework for Community) enables automated testing for NuttX
-across simulator, QEMU, and real hardware via serial interface. The framework
-automatically detects available applications in NuttX images and executes
-applicable tests using pytest-based test cases.
-
-The framework and official test cases are available at:
-
-- https://github.com/szafonimateusz-mi/nuttx-ntfc
-- https://github.com/szafonimateusz-mi/nuttx-testing
-
-Detailed documentation is available in the framework repository.
-
-CI migration to NTFC is in progress. Configurations currently using NTFC:
-
-- risc-v/qemu-rv: ``rv-virt/citest64``
-- risc-v/qemu-rv: ``rv-virt/citest``
-- sim/sim: ``sim/citest``
-- arm/imx6: ``sabre-6quad/citest``
-- arm64/qemu: ``qemu-armv8a/citest``
-- arm64/qemu: ``qemu-armv8a/citest_smp``
-
-NTFC exports test logs as CI artifacts. This allows test logs (including ``ostest``
-output) to be downloaded directly from the CI for all targets where the ``citest``
-configuration is enabled.
