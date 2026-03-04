@@ -454,7 +454,7 @@ static int hyt271_change_addr(FAR struct hyt271_dev_s *dev, uint8_t addr)
    * others.
    */
 
-  irq_flags = up_irq_save();
+  irq_flags = irq_save();
 
   /* Power on reset the bus.
    * Entering in command mode must be done within the next 10 ms after power
@@ -472,7 +472,7 @@ static int hyt271_change_addr(FAR struct hyt271_dev_s *dev, uint8_t addr)
 
   /* The chip should be in command mode now */
 
-  up_irq_restore(irq_flags);
+  irq_restore(irq_flags);
 
   if (ret < 0)
     {

@@ -519,10 +519,10 @@ int oneshot_start_absolute(FAR struct oneshot_lowerhalf_s *lower,
     {
       /* IRQ should be disable or the timer will be fired too late. */
 
-      irqstate_t flags = up_irq_save();
+      irqstate_t flags = irq_save();
       clkcnt_t   delay = expected - lower->ops->current(lower);
       lower->ops->start(lower, delay);
-      up_irq_restore(flags);
+      irq_restore(flags);
     }
 #else
   struct timespec curr =
@@ -656,10 +656,10 @@ int oneshot_tick_absolute(FAR struct oneshot_lowerhalf_s *lower,
     {
       /* IRQ should be disable or the timer will be fired too late. */
 
-      irqstate_t flags = up_irq_save();
+      irqstate_t flags = irq_save();
       clkcnt_t   delay = expected - lower->ops->current(lower);
       lower->ops->start(lower, delay);
-      up_irq_restore(flags);
+      irq_restore(flags);
     }
 #else
   struct timespec ts;

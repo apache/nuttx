@@ -381,7 +381,7 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
     }
   else
     {
-      flags = up_irq_save();
+      flags = irq_save();
     }
 
   if (ramlog_ratelimit(priv))
@@ -392,7 +392,7 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
         }
       else
         {
-          up_irq_restore(flags);
+          irq_restore(flags);
         }
 
       return len;
@@ -457,7 +457,7 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
     }
   else
     {
-      up_irq_restore(flags);
+      irq_restore(flags);
     }
 
   return len;

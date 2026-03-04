@@ -394,13 +394,13 @@ static void ajoy_disable(void)
 
   /* Disable each joystick interrupt */
 
-  flags = up_irq_save();
+  flags = irq_save();
   for (i = 0; i < AJOY_NGPIOS; i++)
     {
       stm32_gpiosetevent(g_joygpio[i], false, false, false, NULL, NULL);
     }
 
-  up_irq_restore(flags);
+  irq_restore(flags);
 
   /* Nullify the handler and argument */
 

@@ -543,7 +543,7 @@ int pg_worker(int argc, FAR char *argv[])
    */
 
   pginfo("Started\n");
-  up_irq_save();
+  irq_save();
   for (; ; )
     {
       /* Wait awhile.  We will wait here until either the configurable

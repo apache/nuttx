@@ -51,7 +51,7 @@ int irq_unexpected_isr(int irq, FAR void *context, FAR void *arg)
   UNUSED(context);
   UNUSED(arg);
 
-  up_irq_save();
+  irq_save();
   _err("ERROR irq: %d\n", irq);
   PANIC();
   return OK; /* Won't get here */

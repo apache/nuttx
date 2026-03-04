@@ -61,6 +61,6 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts (including the timer) */
 
-  up_irq_restore(Z80_C_FLAG);
+  irq_restore(Z80_C_FLAG);
 #endif
 }
