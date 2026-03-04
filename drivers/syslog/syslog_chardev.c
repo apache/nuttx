@@ -164,6 +164,10 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
                           channel->sc_state | SYSLOG_CHANNEL_DISABLE :
                           channel->sc_state & ~SYSLOG_CHANNEL_DISABLE;
     }
+  else
+    {
+      return -ENOTTY;
+    }
 
   return OK;
 }
