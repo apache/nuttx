@@ -38,6 +38,7 @@
 #include <nuttx/spinlock.h>
 
 #include "socket/socket.h"
+#include "utils/utils.h"
 #include "vsock/vsock.h"
 #include "vsock/vsock_virtio.h"
 
@@ -477,6 +478,7 @@ static void vsock_free(FAR struct vsock_conn_s *conn)
   vsockdbg("vsock free, conn=%p\n", conn);
   nxrmutex_destroy(&conn->rx_lock);
   nxrmutex_destroy(&conn->tx_lock);
+  conn_uninit(&conn->sconn);
   nxsem_destroy(&conn->rx_sem);
   nxsem_destroy(&conn->tx_sem);
   circbuf_uninit(&conn->rx_buf);
@@ -548,6 +550,7 @@ static FAR struct vsock_conn_s *vsock_alloc(void)
 
   nxrmutex_init(&conn->rx_lock);
   nxrmutex_init(&conn->tx_lock);
+  conn_init(&conn->sconn);
   spin_lock_init(&conn->poll_lock);
   spin_lock_init(&conn->cnt_lock);
   nxsem_init(&conn->rx_sem, 0, 0);
