@@ -5400,3 +5400,52 @@ config BOARD_MEMORY_RANGE
 		end: end address of memory range
 		flags: Executable 0x1, Writable 0x2, Readable 0x4
 		example:{0x1000,0x2000,0x4},{0x2000,0x3000,0x6},{0x3000,0x4000,0x7} ... {0x0,0x0,0x0}
+
+config BOARD_ETC_ROMFS_PASSWD_ENABLE
+	bool "Auto-generate /etc/passwd at build time"
+	default n
+	depends on ETC_ROMFS
+	---help---
+		Generate the /etc/passwd file at build time from a user-supplied
+		password.  This avoids shipping a hard-coded default password
+		(CWE-798).  When enabled, the build will fail if no password
+		is configured, forcing each build to set its own credentials.
+
+		The password is hashed at build time by the host tool
+		tools/mkpasswd (compiled from tools/mkpasswd.c) using the Tiny
+		Encryption Algorithm (TEA) — the same algorithm used at runtime
+		in libs/libc/misc/lib_tea_encrypt.c.  The plaintext password is
+		never stored in the firmware image.
+
+		See Documentation/components/passwd_autogen.rst for details.
+
+if BOARD_ETC_ROMFS_PASSWD_ENABLE
+
+config BOARD_ETC_ROMFS_PASSWD_USER
+	string "Admin username"
+	default "admin"
+	---help---
+		The username for the auto-generated /etc/passwd entry.
+
+config BOARD_ETC_ROMFS_PASSWD_PASSWORD
+	string "Admin password (required)"
+	default ""
+	---help---
+		The plaintext password for the auto-generated /etc/passwd entry.
+		This value is hashed with TEA at build time; the plaintext is NOT
+		stored in the firmware image.  The build will fail if this is left
+		empty.  Set this via 'make menuconfig'.
+
+config BOARD_ETC_ROMFS_PASSWD_UID
+	int "Admin user ID"
+	default 0
+
+config BOARD_ETC_ROMFS_PASSWD_GID
+	int "Admin group ID"
+	default 0
+
+config BOARD_ETC_ROMFS_PASSWD_HOME
+	string "Admin home directory"
+	default "/"
+
+endif # BOARD_ETC_ROMFS_PASSWD_ENABLE

@@ -77,7 +77,6 @@ if(CONFIG_ETC_ROMFS)
     etc/init.d/rc.sysinit
     RCRAWS
     etc/group
-    etc/passwd
     PATH
     ${CMAKE_CURRENT_BINARY_DIR}/etc)
 
