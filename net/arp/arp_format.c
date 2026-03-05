@@ -84,6 +84,7 @@ void arp_format(FAR struct net_driver_s *dev, in_addr_t ipaddr)
 
   if (netdev_iob_prepare(dev, false, 0) != OK)
     {
+      nwarn("WARNING: Failed to prepare IOB for ARP packet\n");
       return;
     }
 

@@ -273,6 +273,7 @@ static void arp_get_arpreq(FAR struct arpreq *output,
 static void arp_unreach_work(FAR void *param)
 {
   FAR struct arp_entry_s *tabptr = (FAR struct arp_entry_s *)param;
+
   iob_free_queue(&tabptr->at_queue);
 }
 #endif
@@ -349,6 +350,7 @@ int arp_update(FAR struct net_driver_s *dev, in_addr_t ipaddr,
 
   if ((tabptr->at_flags & ATF_PERM) != 0 && (flags & ATF_PERM) == 0)
     {
+      nwarn("WARNING: Cannot overwrite permanent ARP entry\n");
       return -ENOSPC;
     }
 
@@ -502,6 +504,7 @@ int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
                  sizeof(tabptr->at_ethaddr)) == 0)
         {
           clock_t elapsed;
+
           elapsed = clock_systime_ticks() - tabptr->at_time;
           if (elapsed <= ARP_INPROGRESS_TICK)
             {
@@ -588,9 +591,12 @@ int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev)
       /* Yes.. Set the IP address to zero to "delete" it */
 
       tabptr->at_ipaddr = 0;
+      ninfo("ARP entry deleted for IP %08lx\n", (unsigned long)ipaddr);
       return OK;
     }
 
+  nwarn("WARNING: ARP entry not found for deletion, IP %08lx\n",
+        (unsigned long)ipaddr);
   return -ENOENT;
 }
 
@@ -736,6 +742,7 @@ int arp_queue_iob(FAR struct net_driver_s *dev, in_addr_t ipaddr,
       return -ENOMEM;
     }
 
+  nwarn("WARNING: No in-progress ARP entry found for IOB queue\n");
   return -ENOENT;
 }
 #endif
