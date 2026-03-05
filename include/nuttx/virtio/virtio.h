@@ -69,9 +69,9 @@ virtqueue_add_buffer_lock(FAR struct virtqueue *vq,
   irqstate_t flags;
   int ret;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   ret = virtqueue_add_buffer(vq, buf_list, readable, writable, cookie);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   return ret;
 }
@@ -87,9 +87,9 @@ virtqueue_get_buffer_lock(FAR struct virtqueue *vq, FAR uint32_t *len,
   irqstate_t flags;
   FAR void *ret;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   ret = virtqueue_get_buffer(vq, len, idx);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   return ret;
 }
@@ -106,9 +106,9 @@ virtqueue_get_available_buffer_lock(FAR struct virtqueue *vq,
   irqstate_t flags;
   FAR void *ret;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   ret = virtqueue_get_first_avail_buffer(vq, avail_idx, len);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   return ret;
 }
@@ -125,9 +125,9 @@ virtqueue_add_consumed_buffer_lock(FAR struct virtqueue *vq,
   irqstate_t flags;
   int ret;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   ret = virtqueue_add_consumed_buffer(vq, head_idx, len);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   return ret;
 }
@@ -141,9 +141,9 @@ virtqueue_disable_cb_lock(FAR struct virtqueue *vq, FAR spinlock_t *lock)
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   virtqueue_disable_cb(vq);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 }
 
 /****************************************************************************
@@ -156,9 +156,9 @@ static inline_function int virtqueue_enable_cb_lock(FAR struct virtqueue *vq,
   irqstate_t flags;
   int ret;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   ret = virtqueue_enable_cb(vq);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 
   return ret;
 }
@@ -172,9 +172,9 @@ static inline_function void virtqueue_kick_lock(FAR struct virtqueue *vq,
 {
   irqstate_t flags;
 
-  flags = spin_lock_irqsave(lock);
+  flags = spin_lock_irqsave_notrace(lock);
   virtqueue_kick(vq);
-  spin_unlock_irqrestore(lock, flags);
+  spin_unlock_irqrestore_notrace(lock, flags);
 }
 
 static inline_function FAR void *
