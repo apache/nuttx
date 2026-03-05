@@ -49,6 +49,24 @@ config LIBC_GAISTRERROR_ERRNUM
 		for unknown errors like "Unknown error 11". Default enabled when
 		LIBC_GAISTRERROR is not selected.
 
+config NETDB_GETADDRINFO_A
+	bool "getaddrinfo_a() support"
+	default y
+	depends on LIBC_NETDB && !DISABLE_PTHREAD && CANCELLATION_POINTS && TLS_NCLEANUP > 3
+	---help---
+		Build getaddrinfo_a(), gai_suspend(), gai_error() and gai_cancel().
+		gai_cancel() cancels the worker thread, and the worker thread
+		cancelled in a DNS lookup uses up to four cleanup stack entries,
+		so CONFIG_TLS_NCLEANUP must be at least 4.
+
+config NETDB_GETADDRINFO_A_STACKSIZE
+	int "Worker thread stack size for getaddrinfo_a"
+	default DEFAULT_TASK_STACKSIZE
+	depends on NETDB_GETADDRINFO_A
+	---help---
+		Stack size (bytes) for the per-batch worker thread created by
+		getaddrinfo_a() in GAI_NOWAIT mode.
+
 config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
 	depends on LIBC_NETDB

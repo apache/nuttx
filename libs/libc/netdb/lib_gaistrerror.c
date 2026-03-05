@@ -76,6 +76,10 @@ static const struct errno_strmap_s g_gaierrnomap[] =
   { EAI_SOCKTYPE,        "EAI_SOCKTYPE"      },
   { EAI_SYSTEM,          "EAI_SYSTEM"        },
   { EAI_OVERFLOW,        "EAI_OVERFLOW"      },
+  { EAI_INPROGRESS,      "EAI_INPROGRESS"    },
+  { EAI_CANCELED,        "EAI_CANCELED"      },
+  { EAI_ALLDONE,         "EAI_ALLDONE"       },
+  { EAI_INTR,            "EAI_INTR"          },
 };
 
 #define NERRNO_STRS (sizeof(g_gaierrnomap) / sizeof(struct errno_strmap_s))
