@@ -301,11 +301,36 @@ const IOBJ uint8_t avrdx_usart_portmux_masks[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
+ * Name: avrdx_current_freq_main_prescaler
+ *
+ * Description:
+ *   Reduces given frequency by main clock prescaler.
+ *
+ * Input Parameters:
+ *   frequency - input frequency
+ *
+ * Return value: output frequency in Hz
+ */
+
+uint32_t avrdx_current_freq_main_prescaler(uint32_t frequency)
+{
+  uint8_t mclkctrlb;
+  uint8_t pdiv;
+
+  /* Read this once, no point in re-reading */
+
+  mclkctrlb = CLKCTRL.MCLKCTRLB;
+  if (mclkctrlb & CLKCTRL_PEN_bm)
+    {
+      pdiv = (mclkctrlb & CLKCTRL_PDIV_GM) >> CLKCTRL_PDIV_GP;
+      frequency /= avrdx_main_pdiv[pdiv];
+    }
+
+  return frequency;
+}
 
 /****************************************************************************
- * Name: avrdx_current_freq_per
+ * Name: avrdx_current_freq_per_oschf
  *
  * Description:
  *   Calculate and return current f_per (peripheral clock frequency)
@@ -315,15 +340,13 @@ const IOBJ uint8_t avrdx_usart_portmux_masks[] =
  *
  ****************************************************************************/
 
-uint32_t avrdx_current_freq_per()
+uint32_t avrdx_current_freq_per_oschf(void)
 {
   uint32_t f_per;
 
   /* Shortcut variables */
 
   uint8_t frqsel;
-  uint8_t pdiv;
-  uint8_t mclkctrlb;
 
   /* Calculate frequency in MHz, then divide it by main prescaler,
    * if set.
@@ -332,23 +355,73 @@ uint32_t avrdx_current_freq_per()
   frqsel = (CLKCTRL.OSCHFCTRLA & CLKCTRL_FRQSEL_GM) >> CLKCTRL_FRQSEL_GP;
   f_per = 1000000UL * avrdx_frqsel_mhz[frqsel];
 
-  /* Read this once, no point in re-reading */
+  return avrdx_current_freq_main_prescaler(f_per);
+}
 
-  mclkctrlb = CLKCTRL.MCLKCTRLB;
-  if (mclkctrlb & CLKCTRL_PEN_bm)
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: avrdx_current_freq_per
+ *
+ * Description:
+ *   Calculate and return current f_per (peripheral clock frequency)
+ *
+ * Returned Value: frequency in Hz.
+ *
+ * Assumptions/Limitations:
+ *   Main clock must not be driven by external clock.
+ *
+ ****************************************************************************/
+
+uint32_t avrdx_current_freq_per(void)
+{
+  uint8_t mclkctrla;
+
+  mclkctrla = CLKCTRL.MCLKCTRLA & CLKCTRL_CLKSEL_GM;
+
+  /* Using if - else to deal with the most likely case first */
+
+  if (mclkctrla == CLKCTRL_CLKSEL_OSCHF_GC)
     {
-      pdiv = (mclkctrlb & CLKCTRL_PDIV_GM) >> CLKCTRL_PDIV_GP;
-      f_per /= avrdx_main_pdiv[pdiv];
+      /* Internal high frequency oscillator */
+
+      return avrdx_current_freq_per_oschf();
+    }
+  else if ((mclkctrla == CLKCTRL_CLKSEL_OSC32K_GC) || \
+           (mclkctrla == CLKCTRL_CLKSEL_XOSC32K_GC))
+    {
+      /* 32768 oscillator or external oscillator/crystal.
+       * Only apply the prescaler.
+       */
+
+      return avrdx_current_freq_main_prescaler(32768);
     }
 
-  /* Currently, rest of the code only supports internal oscillator
-   * and its frequency is pre-set using Kconfig. Nevertheless, that
-   * can change at some point and this function accounts for some
-   * of that.
-   *
-   * It doesn't account for the chip being clocked by external source
-   * though, that's to be done.
+  /* External clock. This is not supported and we can not determine
+   * the frequency. This will likely cause a failure (unless the caller
+   * has this case handled using other means.)
    */
 
-  return f_per;
+  return 0;
+}
+
+/****************************************************************************
+ * Name: avrdx_current_freq_cpu
+ *
+ * Description:
+ *   Calculate and return current f_cpu (CPU frequency). Returns value
+ *   of avrdx_current_freq_per because both clocks are identical.
+ *
+ * Returned Value: frequency in Hz
+ *
+ * Assumptions/Limitations:
+ *   Main clock must not be driven by external clock.
+ *
+ ****************************************************************************/
+
+uint32_t avrdx_current_freq_cpu(void)
+{
+  return avrdx_current_freq_per();
 }
