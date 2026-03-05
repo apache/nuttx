@@ -35,9 +35,11 @@
  */
 
 #include <inttypes.h>
-
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <signal.h>
+#include <time.h>
+#include <pthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -132,6 +134,15 @@
 #define EAI_SOCKTYPE    8
 #define EAI_SYSTEM      9
 #define EAI_OVERFLOW    10
+#define EAI_INPROGRESS  11  /* Request in progress (getaddrinfo_a) */
+#define EAI_CANCELED    12  /* Request canceled (getaddrinfo_a) */
+#define EAI_ALLDONE     13  /* All requests done (getaddrinfo_a) */
+#define EAI_INTR        14  /* Interrupted by a signal (gai_suspend) */
+
+/* Modes for getaddrinfo_a() */
+
+#define GAI_WAIT        0   /* Synchronous: block until all lookups complete */
+#define GAI_NOWAIT      1   /* Asynchronous: return immediately */
 
 /* h_errno values that may be returned by gethosbyname(), gethostbyname_r(),
  * gethostbyaddr(), or gethostbyaddr_r()
@@ -253,6 +264,30 @@ struct addrinfo
   FAR struct addrinfo *ai_next;      /* Pointer to next in list. */
 };
 
+/* Asynchronous getaddrinfo (getaddrinfo_a) support.
+ * gaicb holds a single async lookup request.
+ */
+
+#ifdef CONFIG_NETDB_GETADDRINFO_A
+struct gaicb
+{
+  FAR const char            *ar_name;    /* Hostname to resolve              */
+  FAR const char            *ar_service; /* Service name or port string      */
+  FAR const struct addrinfo *ar_request; /* Hints (may be NULL)              */
+  FAR struct addrinfo       *ar_result;  /* Result filled in on completion   */
+
+  /* Completion status — read via gai_error(), do not access directly */
+
+  int                        ar_return;
+
+  /* Internal fields — must not be accessed by app. */
+
+  pthread_t                  ar_worker;       /* Worker thread id          */
+  pthread_mutex_t            ar_lock;         /* Protects mutable fields   */
+  pthread_cond_t             ar_cond;         /* Signalled on completion   */
+};
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -298,6 +333,47 @@ int                  getaddrinfo(FAR const char *nodename,
                                  FAR const char *servname,
                                  FAR const struct addrinfo *hints,
                                  FAR struct addrinfo **res);
+
+/* Asynchronous getaddrinfo — getaddrinfo_a() and helpers.
+ *
+ * Two modes of operation:
+ *
+ *   1. Synchronous (GAI_WAIT)
+ *      getaddrinfo_a(GAI_WAIT, list, n, NULL) resolves every entry in
+ *      list[] in the caller's thread and returns 0.  Each gaicb.ar_return
+ *      holds the per-request result (0 or an EAI_* error).  No worker
+ *      thread is created; gai_suspend / gai_cancel are not needed.
+ *
+ *   2. Asynchronous (GAI_NOWAIT)
+ *      getaddrinfo_a(GAI_NOWAIT, list, n, sevp) spawns a background
+ *      worker thread and returns immediately.  The optional sigevent
+ *      *sevp fires when the entire batch finishes.
+ *
+ *      Poll or wait for individual results with:
+ *        gai_error(req)   — returns EAI_INPROGRESS while pending,
+ *                           or the final EAI_* / 0 result.
+ *        gai_suspend()    — blocks until at least one request completes.
+ *        gai_cancel(req)  — attempts to cancel (cancels the whole batch).
+ *
+ *      IMPORTANT: The gaicb lifetime is owned by the caller.  Before
+ *      freeing or reusing a gaicb, the caller MUST confirm the request
+ *      has finished by calling gai_error() and observing a return value
+ *      other than EAI_INPROGRESS.  Only then is it safe to free the
+ *      gaicb, because the worker thread no longer references it.
+ *      Freeing a gaicb while gai_error() still returns EAI_INPROGRESS
+ *      is undefined behavior — the worker thread may still be writing
+ *      to it.
+ */
+
+#ifdef CONFIG_NETDB_GETADDRINFO_A
+int                  getaddrinfo_a(int mode, FAR struct gaicb *list[],
+                                   int n, FAR struct sigevent *sevp);
+int                  gai_suspend(FAR const struct gaicb * const list[],
+                                 int n, FAR const struct timespec *timeout);
+int                  gai_error(FAR struct gaicb *req);
+int                  gai_cancel(FAR struct gaicb *req);
+#endif
+
 int                  getnameinfo(FAR const struct sockaddr *sa,
                                  socklen_t salen, FAR char *node,
                                  socklen_t nodelen, FAR char *service,
