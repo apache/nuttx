@@ -67,16 +67,26 @@
     "new value to apache/nuttx."
 #endif
 
+#ifndef CONFIG_ARCH_HAVE_DYNAMIC_UDELAY
 static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
               "Configure BOARD_LOOPSPERMSEC to non-default value.");
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+/* If ARCH_HAVE_DYNAMIC_UDELAY is set, BOARD_LOOPSPERMSEC is unset,
+ * calculate these optionally. (Only used in udelay_coarse and
+ * that function is excluded from the build if these end up undefined.)
+ */
+
+#  define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#  define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#  define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifndef CONFIG_ARCH_HAVE_UDELAY
 
 static void udelay_coarse(useconds_t microseconds)
 {
@@ -125,6 +135,8 @@ static void udelay_coarse(useconds_t microseconds)
     }
 }
 
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -151,12 +163,37 @@ void weak_function up_mdelay(unsigned int milliseconds)
  *
  *   *** NOT multi-tasking friendly ***
  *
+ *   Note that this method is both marked weak and compiled optionally
+ *   based on ARCH_HAVE_UDELAY option. This is redundant but kept
+ *   as a temporary measure.
+ *
+ *   It was discovered that sometimes the weak attribute is not enough
+ *   to have the method replaced with other, non-weak implementation.
+ *   (Described in more detail in help text for the ARCH_HAVE_UDELAY
+ *   Kconfig option.) The ARCH_HAVE_UDELAY option is meant to remedy
+ *   this but the author of the change does not own all the hardware
+ *   that implements its own up_udelay and is affected by this problem.
+ *
+ *   Enabling ARCH_HAVE_UDELAY for every such chip is therefore impossible,
+ *   the change would be untested. Instead, the weak attribute is kept,
+ *   preserving previous behaviour of current code. If, at some future
+ *   time, the change is tested for other chips that implement up_udelay,
+ *   the weak attribute and this comment can be removed.
+ *
+ *   The same also applies to up_udelay implementations
+ *   in drivers/timers/arch_alarm.c and drivers/timers/arch_timer.c
+ *   and this comment is referenced there.
+ *
  ****************************************************************************/
+
+#ifndef CONFIG_ARCH_HAVE_UDELAY
 
 void weak_function up_udelay(useconds_t microseconds)
 {
   udelay_coarse(microseconds);
 }
+
+#endif
 
 /****************************************************************************
  * Name: up_ndelay
