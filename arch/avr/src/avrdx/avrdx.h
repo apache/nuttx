@@ -94,14 +94,32 @@ void up_clkinitialize(void);
  * Name: avrdx_current_freq_per
  *
  * Description:
- *   Calculate and return current f_per
+ *   Calculate and return current f_per (peripheral clock frequency)
  *
- * Assumptions:
- *   Main clock source is internal oscillator
+ * Returned Value: frequency in Hz.
+ *
+ * Assumptions/Limitations:
+ *   Main clock must not be driven by external clock.
  *
  ****************************************************************************/
 
 uint32_t avrdx_current_freq_per(void);
+
+/****************************************************************************
+ * Name: avrdx_current_freq_cpu
+ *
+ * Description:
+ *   Calculate and return current f_cpu (CPU frequency). Returns value
+ *   of avrdx_current_freq_per because both clocks are identical.
+ *
+ * Returned Value: frequency in Hz
+ *
+ * Assumptions/Limitations:
+ *   Main clock must not be driven by external clock.
+ *
+ ****************************************************************************/
+
+uint32_t avrdx_current_freq_cpu(void);
 
 /****************************************************************************
  * Name: up_consoleinit
