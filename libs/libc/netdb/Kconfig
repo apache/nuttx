@@ -49,6 +49,14 @@ config LIBC_GAISTRERROR_ERRNUM
 		for unknown errors like "Unknown error 11". Default enabled when
 		LIBC_GAISTRERROR is not selected.
 
+config NETDB_GETADDRINFO_A_STACKSIZE
+	int "Worker thread stack size for getaddrinfo_a"
+	default DEFAULT_TASK_STACKSIZE
+	depends on LIBC_NETDB && !DISABLE_PTHREAD && CANCELLATION_POINTS && TLS_NCLEANUP > 2
+	---help---
+		Stack size (bytes) for the per-batch worker thread created by
+		getaddrinfo_a() in GAI_NOWAIT mode.
+
 config NETDB_BUFSIZE
 	int "gethostbyname/gethostbyaddr buffer size"
 	depends on LIBC_NETDB

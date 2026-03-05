@@ -34,6 +34,16 @@ CSRCS += lib_gaistrerror.c lib_herror.c lib_freeaddrinfo.c lib_getaddrinfo.c
 CSRCS += lib_getnameinfo.c lib_rexec.c lib_dn.c lib_resmkquery.c
 CSRCS += lib_proto.c lib_protor.c
 
+# Add async getaddrinfo (getaddrinfo_a) support
+
+ifneq ($(CONFIG_DISABLE_PTHREAD),y)
+ifeq ($(CONFIG_CANCELLATION_POINTS),y)
+ifeq ($(filter 0 1 2,$(CONFIG_TLS_NCLEANUP)),)
+CSRCS += lib_getaddrinfo_a.c
+endif
+endif
+endif
+
 # Add host file support
 
 ifeq ($(CONFIG_NETDB_HOSTFILE),y)
