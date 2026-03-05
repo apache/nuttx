@@ -301,10 +301,45 @@ const IOBJ uint8_t avrdx_usart_portmux_masks[] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: avrdx_current_freq_per_oschf
+ *
+ * Description:
+ *   Calculate and return current f_per (peripheral clock frequency)
+ *
+ * Assumptions:
+ *   Main clock source is internal oscillator
+ *
+ ****************************************************************************/
+
+static uint32_t avrdx_current_freq_per_oschf(void)
+{
+  uint32_t f_per;
+
+  /* Shortcut variables */
+
+  uint8_t frqsel;
+
+  /* Calculate frequency in MHz, then divide it by main prescaler,
+   * if set.
+   */
+
+  frqsel = (CLKCTRL.OSCHFCTRLA & CLKCTRL_FRQSEL_GM) >> CLKCTRL_FRQSEL_GP;
+  f_per = 1000000UL * avrdx_frqsel_mhz[frqsel];
+
+  return avrdx_current_freq_main_prescaler(f_per);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: avrdx_current_freq_main_prescaler
  *
  * Description:
- *   Reduces given frequency by main clock prescaler.
+ *   Reduces given frequency by main clock prescaler. (Note - this is also
+ *   used for non-frequency values. Implementation of up_udelay uses this
+ *   function to reduce number of needed loops when external clock is used.)
  *
  * Input Parameters:
  *   frequency - input frequency
@@ -328,39 +363,6 @@ uint32_t avrdx_current_freq_main_prescaler(uint32_t frequency)
 
   return frequency;
 }
-
-/****************************************************************************
- * Name: avrdx_current_freq_per_oschf
- *
- * Description:
- *   Calculate and return current f_per (peripheral clock frequency)
- *
- * Assumptions:
- *   Main clock source is internal oscillator
- *
- ****************************************************************************/
-
-uint32_t avrdx_current_freq_per_oschf(void)
-{
-  uint32_t f_per;
-
-  /* Shortcut variables */
-
-  uint8_t frqsel;
-
-  /* Calculate frequency in MHz, then divide it by main prescaler,
-   * if set.
-   */
-
-  frqsel = (CLKCTRL.OSCHFCTRLA & CLKCTRL_FRQSEL_GM) >> CLKCTRL_FRQSEL_GP;
-  f_per = 1000000UL * avrdx_frqsel_mhz[frqsel];
-
-  return avrdx_current_freq_main_prescaler(f_per);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: avrdx_current_freq_per

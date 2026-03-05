@@ -91,6 +91,22 @@ extern "C"
 void up_clkinitialize(void);
 
 /****************************************************************************
+ * Name: avrdx_current_freq_main_prescaler
+ *
+ * Description:
+ *   Reduces given frequency by main clock prescaler. (Note - this is also
+ *   used for non-frequency values. Implementation of up_udelay uses this
+ *   function to reduce number of needed loops when external clock is used.)
+ *
+ * Input Parameters:
+ *   frequency - input frequency
+ *
+ * Return value: output frequency in Hz
+ */
+
+uint32_t avrdx_current_freq_main_prescaler(uint32_t frequency);
+
+/****************************************************************************
  * Name: avrdx_current_freq_per
  *
  * Description:
