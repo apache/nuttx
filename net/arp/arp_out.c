@@ -227,6 +227,7 @@ void arp_out(FAR struct net_driver_s *dev)
 
       if (ipaddr == INADDR_ANY)
         {
+          nwarn("WARNING: No valid router address for destination\n");
           dev->d_len = 0;
           return;
         }
