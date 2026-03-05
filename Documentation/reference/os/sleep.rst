@@ -100,7 +100,8 @@ Busy Sleep Interfaces
 ---------------------
 
 Spin in a loop for the requested duration and never yield the CPU. The delay accuracy depends on
-``CONFIG_BOARD_LOOPSPERMSEC``.
+``CONFIG_BOARD_LOOPSPERMSEC`` (unless the architecture/board code replaces these
+function(s) with an implementation that does not use the value.)
 
 .. c:function:: void up_mdelay(unsigned int milliseconds)
 
