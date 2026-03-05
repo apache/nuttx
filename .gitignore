@@ -9,6 +9,7 @@
 *.dSYM
 *.elf
 *.exe
+etctmp/
 *.gcno
 *.gcda
 *.hex

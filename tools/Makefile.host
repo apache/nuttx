@@ -35,8 +35,9 @@ endif
 all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
     configure$(HOSTEXEEXT) mkconfig$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
     mksymtab$(HOSTEXEEXT)  mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT) \
-    cnvwindeps$(HOSTEXEEXT) nxstyle$(HOSTEXEEXT) initialconfig$(HOSTEXEEXT) \
-    gencromfs$(HOSTEXEEXT) convert-comments$(HOSTEXEEXT) lowhex$(HOSTEXEEXT) \
+    mkpasswd$(HOSTEXEEXT) cnvwindeps$(HOSTEXEEXT) nxstyle$(HOSTEXEEXT) \
+    initialconfig$(HOSTEXEEXT) gencromfs$(HOSTEXEEXT) \
+    convert-comments$(HOSTEXEEXT) lowhex$(HOSTEXEEXT) \
     detab$(HOSTEXEEXT) rmcr$(HOSTEXEEXT) incdir$(HOSTEXEEXT) \
     jlink-nuttx$(HOSTDYNEXT)
 default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
@@ -44,8 +45,8 @@ default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
 
 ifdef HOSTEXEEXT
 .PHONY: b16 bdf-converter cmpconfig clean configure kconfig2html mkconfig \
-    mkdeps mksymtab mksyscall mkversion cnvwindeps nxstyle initialconfig \
-    gencromfs convert-comments lowhex detab rmcr incdir
+    mkdeps mksymtab mksyscall mkversion mkpasswd cnvwindeps nxstyle \
+    initialconfig gencromfs convert-comments lowhex detab rmcr incdir
 endif
 ifdef HOSTDYNEXT
 .PHONY: jlink-nuttx
@@ -104,6 +105,15 @@ mkversion$(HOSTEXEEXT): mkconfig.c cfgdefine.c
 
 ifdef HOSTEXEEXT
 mkversion: mkversion$(HOSTEXEEXT)
+endif
+
+# mkpasswd - Generate a NuttX /etc/passwd entry with TEA-encrypted password
+
+mkpasswd$(HOSTEXEEXT): mkpasswd.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mkpasswd$(HOSTEXEEXT) mkpasswd.c
+
+ifdef HOSTEXEEXT
+mkpasswd: mkpasswd$(HOSTEXEEXT)
 endif
 
 # mksyscall - Convert a CSV file into syscall stubs and proxies
@@ -268,6 +278,8 @@ clean:
 	$(call DELFILE, mksyscall.exe)
 	$(call DELFILE, mkversion)
 	$(call DELFILE, mkversion.exe)
+	$(call DELFILE, mkpasswd)
+	$(call DELFILE, mkpasswd.exe)
 	$(call DELFILE, nxstyle)
 	$(call DELFILE, nxstyle.exe)
 	$(call DELFILE, rmcr)

@@ -14,6 +14,7 @@
 /mksymtab
 /mksyscall
 /mkversion
+/mkpasswd
 /nxstyle
 /rmcr
 /incdir
