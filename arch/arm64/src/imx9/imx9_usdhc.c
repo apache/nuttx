@@ -3131,6 +3131,7 @@ static int imx9_dmapreflight(struct sdio_dev_s *dev,
    */
 
   if (buffer != priv->rxbuffer &&
+      buflen > sizeof(priv->rxbuffer) &&
       (((uintptr_t)buffer & (USDHC_DATABUF_ALIGN - 1)) != 0 ||
       ((uintptr_t)(buffer + buflen) & (USDHC_DATABUF_ALIGN - 1)) != 0))
     {
