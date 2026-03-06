@@ -70,7 +70,6 @@ struct devfreq_s
 
   uint32_t min;                     /* in kHz */
   uint32_t max;                     /* in kHz */
-  uint32_t cur;                     /* in kHz */
 
   bool suspended;
 

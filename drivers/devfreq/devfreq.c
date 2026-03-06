@@ -401,6 +401,7 @@ static int devfreq_driver_target(FAR struct devfreq_s *devfreq,
                                  int relation)
 {
   struct devfreq_notifier_s freq;
+  uint32_t cur_freq;
   ssize_t idx;
   int ret;
 
@@ -416,12 +417,18 @@ static int devfreq_driver_target(FAR struct devfreq_s *devfreq,
     }
 
   target_freq = devfreq->freq_table[idx];
-  if (target_freq == devfreq->cur)
+
+  /* Get current hardware frequency to check if transition is needed,
+   * and to record the old frequency for notifier chain.
+   */
+
+  cur_freq = devfreq_get_frequency(devfreq);
+  if (target_freq == cur_freq)
     {
       return 0;
     }
 
-  freq.old = devfreq->cur;
+  freq.old = cur_freq;
   freq.new = target_freq;
 
   blocking_notifier_call_chain(&devfreq->notifier_list,
@@ -431,8 +438,13 @@ static int devfreq_driver_target(FAR struct devfreq_s *devfreq,
                                DEVFREQ_POSTCHANGE, &freq);
   if (ret < 0)
     {
+      /* Frequency transition failed. Re-read the actual hardware frequency
+       * and send a compensating PRECHANGE/POSTCHANGE pair so that all
+       * notifier listeners stay in sync with the real hardware state.
+       */
+
       freq.old = target_freq;
-      freq.new = devfreq->cur;
+      freq.new = devfreq_get_frequency(devfreq);
       blocking_notifier_call_chain(&devfreq->notifier_list,
                                    DEVFREQ_PRECHANGE, &freq);
       blocking_notifier_call_chain(&devfreq->notifier_list,
@@ -440,7 +452,6 @@ static int devfreq_driver_target(FAR struct devfreq_s *devfreq,
       return ret;
     }
 
-  devfreq->cur = target_freq;
   return 0;
 }
 
@@ -496,7 +507,6 @@ FAR struct devfreq_s *devfreq_register(
   devfreq->freq_table = driver->get_table(devfreq);
   devfreq->min        = 0;
   devfreq->max        = UINT32_MAX;
-  devfreq->cur        = driver->get_frequency(devfreq);
   if (!devfreq->freq_table)
     {
       goto out;
