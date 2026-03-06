@@ -251,7 +251,7 @@ config ARCH_BOARD_ESP32_AUDIO_KIT
 	depends on ARCH_CHIP_ESP32_A1S
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The Ai-Thinker ESP32-Audio-Kit is a board with the ESP32-A1S module
 		powered by ESP32-D0WD-V3 with 16MB of SPI Flash and 8MB PSRAM, and an
@@ -263,7 +263,7 @@ config ARCH_BOARD_ESP32_DEVKITC
 	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The ESP32 is a dual-core system from Espressif with two Harvard
 		architecture Xtensa LX6 CPUs. All embedded memory, external memory
@@ -291,7 +291,7 @@ config ARCH_BOARD_ESP32_ETHERNETKIT
 	bool "Espressif ESP32 Ethernet Kit"
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		The ESP32-Ethernet-Kit is an Ethernet-to-Wi-Fi development board that enables
 		Ethernet devices to be interconnected over Wi-Fi. At the same time, to provide
@@ -303,7 +303,7 @@ config ARCH_BOARD_ESP32_LYRAT
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP32-LyraT is an open-source development board for Espressif Systems' Audio
 		Development Framework (ADF). It is designed for smart speakers and smart-home
@@ -313,7 +313,7 @@ config ARCH_BOARD_ESP32_PICO_KIT
 	bool "Espressif ESP32-PICO-KIT V4"
 	depends on ARCH_CHIP_ESP32PICOD4
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP32-PICO-KIT is an ESP32-based mini development board produced by Espressif.
 		The core of this board is ESP32-PICO-D4, a System-in-Package module with complete
@@ -328,7 +328,7 @@ config ARCH_BOARD_ESP32_SPARROWKIT
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP32-SPARROW-KIT is a custom-made board based on Espressif's ESP32WROVER chip
 		and built upon the ESP32-WROVERKIT board. It is designed for a university
@@ -345,7 +345,7 @@ config ARCH_BOARD_ESP32_WROVERKIT
 	depends on ARCH_CHIP_ESP32WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		ESP-WROVER-KIT is an ESP32-based development board produced by Espressif.
 		ESP-WROVER-KIT features the following integrated components:
@@ -364,7 +364,7 @@ config ARCH_BOARD_LILYGO_TBEAM_LORA_GPS
 	depends on ARCH_CHIP_ESP32WROOM32
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		LilyGO_TBeam_V1.1 LoRa/GPS is an ESP32 board with LoRa and GPS.
 		More info: https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series/
@@ -374,7 +374,7 @@ config ARCH_BOARD_TTGO_LORA_ESP32
 	depends on ARCH_CHIP_ESP32WROOM32
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		TTGO-LoRa-SX1276-ESP32 is an ESP32 board with LoRa. Usually it
 		comes with an OLED display, but there are options without
@@ -402,7 +402,7 @@ config ARCH_BOARD_TTGO_T_DISPLAY_ESP32
 	depends on ARCH_CHIP_ESP32WROOM32 || ARCH_CHIP_ESP32WROOM32_8MB || ARCH_CHIP_ESP32WROOM32_16MB || ARCH_CHIP_ESP32WROVER || ARCH_CHIP_ESP32SOLO1
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
 	---help---
 		TTGO-T-DISPLAY-ESP32 is an ESP32 with a TFT Display.
 		This port is for board version 1.1, more info:
@@ -461,7 +461,7 @@ config ARCH_BOARD_ESP32S2_KALUGA_1
 	depends on ARCH_CHIP_ESP32S2WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		This is the ESP32-S2-Kaluga-1 board
 
@@ -470,7 +470,7 @@ config ARCH_BOARD_ESP32S2_SAOLA_1
 	depends on ARCH_CHIP_ESP32S2WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		This is the ESP32-S2-Saola-1 board
 
@@ -479,7 +479,7 @@ config ARCH_BOARD_FRANZININHO_WIFI
 	depends on ARCH_CHIP_ESP32S2WROVER
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S2_GPIO_IRQ
 	---help---
 		Franzininho Wi-Fi is a development board to evaluate the ESP32-S2 SoC
 
@@ -488,7 +488,7 @@ config ARCH_BOARD_ESP32S3_DEVKIT
 	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM1N8R2 || ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3 DevKit features the ESP32-S3 CPU with dual Xtensa LX7 cores.
 		It comes in two flavors, the ESP32-S3-DevKitM-1 and the ESP32-S3-DevKitC-1.
@@ -500,7 +500,7 @@ config ARCH_BOARD_ESP32S3_8048S043
 	bool "ESP32-S3 8048S043"
 	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM1N8R2 || ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3 8048S043 features the ESP32-S3 CPU with dual Xtensa LX7 cores.
 
@@ -509,7 +509,7 @@ config ARCH_BOARD_ESP32S3_EYE
 	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3CUSTOM
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3-EYE is a small-sized AI development board produced by Espressif
 		featuring the ESP32-S3 CPU with a 2-Megapixel camera, an LCD display,
@@ -520,7 +520,7 @@ config ARCH_BOARD_ESP32S3_LCD_EV
 	depends on ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3WROOM1N16R16V || ARCH_CHIP_ESP32S3CUSTOM
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		ESP32-S3-LCD-EV is an ESP32-S3-based development board with a touchscreen.
 		Together with different subboards, ESP32-S3-LCD-EV-Board can drive LCDs with IIC,
@@ -537,7 +537,7 @@ config ARCH_BOARD_ESP32S3_LHCBIT
 	bool "ESP32-S3 LHCBit"
 	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3 LHCBit features the ESP32-S3 CPU with dual Xtensa LX7 cores.
 
@@ -546,7 +546,7 @@ config ARCH_BOARD_ESP32S3_XIAO
 	depends on ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The XIAO-ESP32S3 from Seeed Studio features the ESP32-S3 CPU with dual Xtensa LX7 cores,
 		with 8MiB Octal SPI PSRAM and 8MiB or 16MiB flash.
@@ -556,7 +556,7 @@ config ARCH_BOARD_ESP32S3_BOX
 	depends on ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP-BOX is an advanced AIoT, Edge AI, and IIoT applications development platform
 		released by Espressif Systems. The board is built on Espressif’s powerful ESP32-S3
@@ -570,7 +570,7 @@ config ARCH_BOARD_ESP32S3_KORVO_2
 	depends on ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM1N8R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3-Korvo-2 is a multimedia development board based on the ESP32-S3 chip.
 		It is equipped with a two-microphone array which is suitable for voice recognition
@@ -585,7 +585,7 @@ config ARCH_BOARD_ESP32S3_MEADOW
 	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3CUSTOM
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 	---help---
 		The ESP32-S3-Meadow is a small-sized board produced by WildernessLabs
 		featuring the ESP32-S3 CPU with 32MiB Octal SPI PSRAM and 64 MiB flash.
@@ -595,7 +595,7 @@ config ARCH_BOARD_ESP32S3_LCKFB_SZPI
 	depends on ARCH_CHIP_ESP32S3WROOM1N16R8
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	select ARCH_HAVE_IRQBUTTONS if ESP32S3_GPIO_IRQ
 
 config ARCH_BOARD_ESP32C6_DEVKITC
 	bool "Espressif ESP32-C6-DevKitC-1"
