@@ -39,6 +39,7 @@ list(APPEND SRCS arm64_perf.c arm64_tcbinfo.c)
 list(APPEND SRCS arm64_arch_timer.c arm64_cache.c)
 list(APPEND SRCS arm64_doirq.c arm64_fatal.c)
 list(APPEND SRCS arm64_syscall.c)
+list(APPEND SRCS arm64_modifyreg8.c arm64_modifyreg16.c arm64_modifyreg32.c)
 
 # Use common heap allocation for now (may need to be customized later)
 list(APPEND SRCS arm64_allocateheap.c)
