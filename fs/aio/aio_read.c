@@ -215,7 +215,7 @@ static void aio_read_worker(FAR void *arg)
  *
  ****************************************************************************/
 
-int aio_read(FAR struct aiocb *aiocbp)
+int aio_read_internal(FAR struct aiocb *aiocbp)
 {
   FAR struct aio_container_s *aioc;
   int ret;
@@ -265,6 +265,18 @@ int aio_read(FAR struct aiocb *aiocbp)
     }
 
   return OK;
+}
+
+int aio_read(FAR struct aiocb *aiocbp)
+{
+  if (aiocbp == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  list_initialize(&aiocbp->lio_link);
+  return aio_read_internal(aiocbp);
 }
 
 #endif /* CONFIG_FS_AIO */
