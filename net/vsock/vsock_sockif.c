@@ -1183,6 +1183,7 @@ static int vsock_reset_no_conn(FAR struct vsock_transport_s *t,
   ret = VSOCK_ALLOC_PKT(t, &reply, 0);
   if (ret < 0)
     {
+      nwarn("WARNING: Failed to allocate vsock RST reply packet: %d\n", ret);
       return ret;
     }
 
@@ -1221,6 +1222,8 @@ static int vsock_recv_listening(FAR struct vsock_conn_s *conn,
   newconn = vsock_alloc();
   if (newconn == NULL)
     {
+      nwarn("WARNING: Failed to allocate vsock connection for the incoming"
+           " request\n");
       ret = -ENOMEM;
       goto reset;
     }
@@ -1231,6 +1234,8 @@ static int vsock_recv_listening(FAR struct vsock_conn_s *conn,
   ret = circbuf_resize(&newconn->rx_buf, newconn->rx_buf_alloc);
   if (ret < 0)
     {
+      nwarn("WARNING: Failed to resize rx buffer for new vsock"
+           " connection: %d\n", ret);
       vsock_free(newconn);
       goto reset;
     }
@@ -1426,6 +1431,7 @@ static int vsock_setup(FAR struct socket *psock)
       conn = vsock_alloc();
       if (conn == NULL)
         {
+          nwarn("WARNING: Failed to allocate vsock connection\n");
           return -ENOMEM;
         }
 
@@ -1433,6 +1439,7 @@ static int vsock_setup(FAR struct socket *psock)
       return OK;
     }
 
+  nwarn("WARNING: Unsupported vsock socket type: %d\n", psock->s_type);
   return -ENOTSUP;
 }
 
@@ -1505,6 +1512,7 @@ static int vsock_bind(FAR struct socket *psock,
   ret = vsock_addr_is_valid(addr, addrlen);
   if (ret < 0)
     {
+      nerr("ERROR: Invalid vsock bind address: %d\n", ret);
       return ret;
     }
 
@@ -1617,11 +1625,13 @@ static int vsock_listen(FAR struct socket *psock, int backlog)
 
   if (psock->s_type != SOCK_STREAM)
     {
+      nerr("ERROR: vsock listen only supports SOCK_STREAM\n");
       return -ENOSYS;
     }
 
   if (!_SS_ISBOUND(conn->sconn.s_flags) || backlog <= 0)
     {
+      nerr("ERROR: vsock listen requires bound socket and backlog > 0\n");
       return -EINVAL;
     }
 
@@ -1658,6 +1668,7 @@ static int vsock_connect(FAR struct socket *psock,
 
   if (_SS_ISCONNECTED(conn->sconn.s_flags))
     {
+      nwarn("WARNING: vsock already connected\n");
       return -EISCONN;
     }
 
@@ -1666,6 +1677,7 @@ static int vsock_connect(FAR struct socket *psock,
   ret = vsock_addr_set(&conn->remote_addr, addr, addrlen);
   if (ret < 0)
     {
+      nerr("ERROR: Invalid vsock connect address: %d\n", ret);
       return ret;
     }
 
@@ -1677,6 +1689,7 @@ static int vsock_connect(FAR struct socket *psock,
   ret = vsock_bind_internal(conn, &vmaddr);
   if (ret < 0)
     {
+      nerr("ERROR: Failed to auto-bind vsock local port: %d\n", ret);
       goto out;
     }
 
@@ -1687,6 +1700,7 @@ static int vsock_connect(FAR struct socket *psock,
   ret = vsock_assgin_transport(conn);
   if (ret < 0)
     {
+      nerr("ERROR: Failed to assign vsock transport: %d\n", ret);
       goto err_with_bind;
     }
 
@@ -1695,6 +1709,7 @@ static int vsock_connect(FAR struct socket *psock,
   ret = vsock_send_pkt(conn, NULL, VIRTIO_VSOCK_OP_REQUEST, 0, 0, 0);
   if (ret < 0)
     {
+      nerr("ERROR: Failed to send vsock connect request: %d\n", ret);
       goto err_with_bind;
     }
 
@@ -1865,6 +1880,7 @@ static int vsock_poll(FAR struct socket *psock,
 
       if (i >= CONFIG_NET_VSOCK_NPOLLWAITERS)
         {
+          nwarn("WARNING: No available vsock poll slots\n");
           fds->priv = NULL;
           return -EBUSY;
         }
@@ -1979,6 +1995,7 @@ static ssize_t vsock_sendmsg(FAR struct socket *psock,
       ret = vsock_connect(psock, to, hdr->msg_namelen);
       if (ret < 0)
         {
+          nwarn("WARNING: Vsock auto-connect in sendmsg failed: %zd\n", ret);
           goto out;
         }
     }
