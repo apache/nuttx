@@ -327,9 +327,11 @@ static void imx9_reset(struct sdio_dev_s *dev);
 static sdio_capset_t imx9_capabilities(struct sdio_dev_s *dev);
 static sdio_statset_t imx9_status(struct sdio_dev_s *dev);
 static void imx9_widebus(struct sdio_dev_s *dev, bool enable);
+#ifndef CONFIG_IMX9_CLK_OVER_SCMI
 static bool imx9_sdcard_hs_mode(struct sdio_dev_s *dev, bool set);
 static uint32_t imx9_frequency(struct sdio_dev_s *dev,
                                unsigned long frequency);
+#endif
 
 static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate);
 static int  imx9_attach(struct sdio_dev_s *dev);
@@ -1648,7 +1650,20 @@ static void imx9_widebus(struct sdio_dev_s *dev, bool wide)
   regval &= ~USDHC_PROCTL_DTW_MASK;
   if (wide)
     {
-      regval |= USDHC_PROCTL_DTW_4BIT;
+      /* Only USDHC1 supports 8-bit data width. USDHC2 is limited to
+       * 4-bit according to chip spec.
+       */
+
+#ifdef CONFIG_IMX9_USDHC1_WIDTH_D1_D8
+      if (priv->addr == IMX9_USDHC1_BASE)
+        {
+          regval |= USDHC_PROCTL_DTW_8BIT;
+        }
+      else
+#endif
+        {
+          regval |= USDHC_PROCTL_DTW_4BIT;
+        }
     }
   else
     {
@@ -1657,6 +1672,8 @@ static void imx9_widebus(struct sdio_dev_s *dev, bool wide)
 
   putreg32(regval, priv->addr + IMX9_USDHC_PROCTL_OFFSET);
 }
+
+#ifndef CONFIG_IMX9_CLK_OVER_SCMI
 
 /****************************************************************************
  * Name: imx9_sdcard_hs_mode
@@ -1875,8 +1892,11 @@ static uint32_t imx9_frequency(struct sdio_dev_s *dev,
 
   /* Return the new divisor information */
 
-  return USDHC_SYSCTL_SDCLKFS_DIV(prescaler) | USDHC_SYSCTL_DVS_DIV(divisor);
+  return USDHC_SYSCTL_SDCLKFS_DIV(prescaler) |
+         USDHC_SYSCTL_DVS_DIV(divisor);
 }
+
+#endif /* !CONFIG_IMX9_CLK_OVER_SCMI */
 
 /****************************************************************************
  * Name: imx9_clock
@@ -1897,13 +1917,15 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   uint32_t regval;
+#ifndef CONFIG_IMX9_CLK_OVER_SCMI
   unsigned speed;
+#endif
 
   /* Clear the old prescaler and divisor values so that new ones can be
    * ORed in.
    */
 
-  regval = getreg32(priv->addr + IMX9_USDHC_SYSCTL_OFFSET);
+  regval  = getreg32(priv->addr + IMX9_USDHC_SYSCTL_OFFSET);
   regval &= ~(USDHC_SYSCTL_SDCLKFS_MASK | USDHC_SYSCTL_DVS_MASK);
 
   /* Select the new prescaler and divisor values based on the requested
@@ -1918,8 +1940,14 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
       {
         /* Clock is disabled */
 
-        mcinfo("DISABLED, SYSCTRL: %08" PRIx32 "\n", regval);
+        putreg32(regval, priv->addr + IMX9_USDHC_SYSCTL_OFFSET);
+        mcinfo("DISABLED, SYSCTRL: %08" PRIx32 "\n",
+               getreg32(priv->addr + IMX9_USDHC_SYSCTL_OFFSET));
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+        return;
+#else
         speed = 0;
+#endif
       }
       break;
 
@@ -1928,13 +1956,19 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
         /* Initial ID mode clocking (<400KHz) */
 
         mcinfo("IDMODE\n");
-        speed = BOARD_USDHC_IDMODE_SPEED;
 
         /* Put out an additional 80 clocks in case this is a power-up
          * sequence.
          */
 
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+        regval |= (BOARD_USDHC_IDMODE_PRESCALER |
+                   BOARD_USDHC_IDMODE_DIVISOR |
+                   USDHC_SYSCTL_INITA);
+#else
+        speed = BOARD_USDHC_IDMODE_SPEED;
         regval |= USDHC_SYSCTL_INITA;
+#endif
       }
       break;
 
@@ -1943,7 +1977,12 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
         /* MMC normal operation clocking */
 
         mcinfo("MMCTRANSFER\n");
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+        regval |= (BOARD_USDHC_MMCMODE_PRESCALER |
+                   BOARD_USDHC_MMCMODE_DIVISOR);
+#else
         speed = BOARD_USDHC_MMCMODE_SPEED;
+#endif
       }
       break;
 
@@ -1952,7 +1991,12 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
         /* SD normal operation clocking (narrow 1-bit mode) */
 
         mcinfo("1BITTRANSFER\n");
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+        regval |= (BOARD_USDHC_SD1MODE_PRESCALER |
+                   BOARD_USDHC_SD1MODE_DIVISOR);
+#else
         speed = BOARD_USDHC_SD1MODE_SPEED;
+#endif
       }
       break;
 
@@ -1960,6 +2004,11 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
       {
         /* SD normal operation clocking (wide 4-bit mode) */
 
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+        mcinfo("4BITTRANSFER\n");
+        regval |= (BOARD_USDHC_SD4MODE_PRESCALER |
+                   BOARD_USDHC_SD4MODE_DIVISOR);
+#else
         mcinfo("SDTRANSFER\n");
         speed = BOARD_USDHC_SDMODE_SPEED;
 
@@ -1979,14 +2028,17 @@ static void imx9_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
                   }
               }
           }
+#endif
       }
       break;
     }
 
+#ifndef CONFIG_IMX9_CLK_OVER_SCMI
   if (speed > 0)
     {
       regval |= imx9_frequency(dev, speed);
     }
+#endif
 
   putreg32(regval, priv->addr + IMX9_USDHC_SYSCTL_OFFSET);
 
@@ -3453,9 +3505,13 @@ struct sdio_dev_s *imx9_usdhc_initialize(int slotno)
 
       /* Enable clocks */
 
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+      imx9_configure_clock(USDHC1_DFS1 | CLOCK_DIV(4), true);
+#else
       imx9_ccm_configure_root_clock(CCM_CR_USDHC1, SYS_PLL1PFD1, 2);
       imx9_get_rootclock(CCM_CR_USDHC1, &priv->root_clock_freq);
       imx9_ccm_gate_on(CCM_LPCG_USDHC1, true);
+#endif
 
       break;
 #endif
@@ -3488,9 +3544,13 @@ struct sdio_dev_s *imx9_usdhc_initialize(int slotno)
 
       /* Enable clocks */
 
+#ifdef CONFIG_IMX9_CLK_OVER_SCMI
+      imx9_configure_clock(USDHC2_DFS1 | CLOCK_DIV(4), true);
+#else
       imx9_ccm_configure_root_clock(CCM_CR_USDHC2, SYS_PLL1PFD1, 2);
       imx9_get_rootclock(CCM_CR_USDHC2, &priv->root_clock_freq);
       imx9_ccm_gate_on(CCM_LPCG_USDHC2, true);
+#endif
 
       mcinfo("Enabled clocks\n");
 

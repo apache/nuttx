@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/hardware/imx93/imx93_pll.h
+ * arch/arm64/src/imx9/hardware/imx95/imx95_pll.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX93_IMX93_PLL_H
-#define __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX93_IMX93_PLL_H
+#ifndef __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX95_IMX95_PLL_H
+#define __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX95_IMX95_PLL_H
 
 /* All registers besides STATUS have SET, CLR, TGL and VAL shadow registers */
 
@@ -194,4 +194,4 @@
 #define PLL_DFS_STATUS_DFS_OK_MASK  (0x7 << PLL_DFS_STATUS_DFS_OK_SHIFT)
 #define PLL_DFS_STATUS_DFS_OK(n)    (((n) << PLL_DFS_STATUS_DFS_OK_SHIFT) & PLL_DFS_STATUS_DFS_OK_MASK)
 
-#endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX93_IMX93_PLL_H_*/
+#endif /* __ARCH_ARM64_SRC_IMX9_HARDWARE_IMX95_IMX95_PLL_H */
