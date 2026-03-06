@@ -2988,6 +2988,10 @@ config ITERABLE_SECTIONS_LINKER_INSERT
 		rwx region at a lower address first (e.g. ITCM at 0x0) must use
 		the common-rom.ld include instead.
 
+config DEBUG_LINK_ORPHAN_WARN
+	bool "Warn on orphan section handling"
+	default n
+
 config CCACHE
 	bool "Use ccache"
 	default n

@@ -162,3 +162,7 @@ endif()
 if(NOT CONFIG_CXX_RTTI)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
 endif()
+
+if(CONFIG_DEBUG_LINK_ORPHAN_WARN)
+  add_link_options(-Wl,--orphan-handling=warn)
+endif()
