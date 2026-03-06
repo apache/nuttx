@@ -193,13 +193,6 @@ ssize_t can_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
   bool nonblock;
   int ret = OK;
 
-  /* Verify that the sockfd corresponds to valid, allocated socket */
-
-  if (psock == NULL || psock->s_conn == NULL)
-    {
-      return -EBADF;
-    }
-
   /* Only SOCK_RAW is supported */
 
   if (psock->s_type != SOCK_RAW)
