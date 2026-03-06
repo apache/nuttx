@@ -202,6 +202,9 @@ choice
 	depends on IMX9_USDHC2
 	prompt "Bus width for USDHC2"
 	default IMX9_USDHC2_WIDTH_D1_D4
+	---help---
+		USDHC2 supports up to 4-bit data width only according to chip
+		spec. No 8-bit option is provided.
 
 config IMX9_USDHC2_WIDTH_D1_ONLY
 	bool "One bit"

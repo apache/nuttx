@@ -32,6 +32,7 @@
 #if defined(CONFIG_ARCH_CHIP_IMX93)
 #  include "hardware/imx93/imx93_pinmux.h"
 #elif defined(CONFIG_ARCH_CHIP_IMX95)
+#  include "hardware/imx95/imx95_pinmux.h"
 #else
 #  error Unrecognized i.MX9 architecture
 #endif

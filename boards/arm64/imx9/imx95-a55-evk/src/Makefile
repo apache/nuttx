@@ -31,4 +31,8 @@ CSRCS += imx9_reset.c
 endif
 endif
 
+ifeq ($(CONFIG_IMX9_USDHC),y)
+CSRCS += imx9_usdhc.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
