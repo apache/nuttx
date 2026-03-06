@@ -177,6 +177,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
   cb = udp_callback_alloc(info->dev, conn);
   if (cb == NULL)
     {
+      nwarn("WARNING: Failed to allocate UDP poll callback\n");
       ret = -EBUSY;
       goto errout_with_lock;
     }

@@ -1008,6 +1008,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
       portno = HTONS(udp_select_port(conn->domain, &conn->u));
       if (portno == 0)
         {
+          nwarn("WARNING: No available UDP port for auto-bind\n");
           ret         = -EADDRINUSE;
         }
       else
@@ -1042,6 +1043,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
         }
       else
         {
+          nwarn("WARNING: UDP port %d already in use\n", NTOHS(portno));
           ret         = -EADDRINUSE;
         }
     }
