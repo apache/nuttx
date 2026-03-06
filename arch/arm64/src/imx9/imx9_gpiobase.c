@@ -32,7 +32,7 @@
  * Public Data
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_IMX93)
+#if defined(CONFIG_ARCH_CHIP_IMX93) || defined(CONFIG_ARCH_CHIP_IMX95)
 /* Base address for the GPIO memory mapped registers */
 
 const uintptr_t g_gpio_base[] =
@@ -42,7 +42,6 @@ const uintptr_t g_gpio_base[] =
   IMX9_GPIO3_BASE,
   IMX9_GPIO4_BASE,
 };
-#elif defined(CONFIG_ARCH_CHIP_IMX95)
 #else
 #  error Unrecognized i.MX9 architecture
 #endif
