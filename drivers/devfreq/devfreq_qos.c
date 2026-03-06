@@ -191,12 +191,12 @@ uint32_t qos_get_value(FAR struct qos_constraints_s *constraints,
     {
       case QOS_REQ_MIN:
         {
-          return plist_first(&constraints->min_requests)->prio;
+          return plist_last(&constraints->min_requests)->prio;
         }
 
       case QOS_REQ_MAX:
         {
-          return plist_last(&constraints->max_requests)->prio;
+          return plist_first(&constraints->max_requests)->prio;
         }
     }
 
