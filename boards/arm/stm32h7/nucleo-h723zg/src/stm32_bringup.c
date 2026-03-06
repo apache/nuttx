@@ -34,10 +34,6 @@
 
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_USBMONITOR
-#  include <nuttx/usb/usbmonitor.h>
-#endif
-
 #ifdef CONFIG_CDCACM
 #  include <nuttx/usb/cdcacm.h>
 #endif
@@ -52,130 +48,11 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef HAVE_RTC_DRIVER
-#  include <nuttx/timers/rtc.h>
-#  include "stm32_rtc.h"
-#endif
-
-#ifdef CONFIG_STM32_ROMFS
-#  include "stm32_romfs.h"
-#endif
-
-#ifdef CONFIG_CAPTURE
-#  include <nuttx/timers/capture.h>
-#  include "stm32_capture.h"
-#endif
-
-#ifdef CONFIG_STM32H7_IWDG
-#  include "stm32_wdg.h"
-#endif
-
-#ifdef CONFIG_RNDIS
-#  include <nuttx/usb/rndis.h>
-#endif
-
-#include "stm32_gpio.h"
+#include "stm32.h"
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: stm32_capture_setup
- *
- * Description:
- *   Initialize and register capture drivers.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_CAPTURE
-static int stm32_capture_setup(void)
-{
-  int ret;
-  struct cap_lowerhalf_s *lower[] =
-    {
-#if defined(CONFIG_STM32H7_TIM1_CAP)
-      stm32_cap_initialize(1),
-#endif
-#if defined(CONFIG_STM32H7_TIM2_CAP)
-      stm32_cap_initialize(2),
-#endif
-#if defined(CONFIG_STM32H7_TIM3_CAP)
-      stm32_cap_initialize(3),
-#endif
-#if defined(CONFIG_STM32H7_TIM4_CAP)
-      stm32_cap_initialize(4),
-#endif
-#if defined(CONFIG_STM32H7_TIM5_CAP)
-      stm32_cap_initialize(5),
-#endif
-#if defined(CONFIG_STM32H7_TIM8_CAP)
-      stm32_cap_initialize(8),
-#endif
-#if defined(CONFIG_STM32H7_TIM12_CAP)
-      stm32_cap_initialize(12),
-#endif
-#if defined(CONFIG_STM32H7_TIM13_CAP)
-      stm32_cap_initialize(13),
-#endif
-#if defined(CONFIG_STM32H7_TIM14_CAP)
-      stm32_cap_initialize(14),
-#endif
-#if defined(CONFIG_STM32H7_TIM15_CAP)
-      stm32_cap_initialize(15),
-#endif
-#if defined(CONFIG_STM32H7_TIM16_CAP)
-      stm32_cap_initialize(16),
-#endif
-#if defined(CONFIG_STM32H7_TIM17_CAP)
-      stm32_cap_initialize(17),
-#endif
-      /* TODO: LPTIMy_CAP */
-    };
-
-  size_t count = sizeof(lower) / sizeof(lower[0]);
-
-  /* Nothing to do if no timers enabled */
-
-  if (count == 0)
-    {
-      return OK;
-    }
-
-  /* This will register “/dev/cap0” ... “/dev/cap<count-1>” */
-
-  ret = cap_register_multiple("/dev/cap", lower, count);
-  if (ret == EINVAL)
-    {
-      syslog(LOG_ERR,
-             "ERROR: cap_register_multiple path is invalid\n");
-    }
-  else if (ret == EEXIST)
-    {
-      syslog(LOG_ERR, "ERROR: cap_register_multiple an inode "
-             "already exists at this path\n");
-    }
-  else if (ret == ENOMEM)
-    {
-      syslog(LOG_ERR, "ERROR: cap_register_multiple not enough "
-             "memory to register capture drivers\n");
-    }
-  else if (ret < 0)
-    {
-      syslog(LOG_ERR,
-             "ERROR: cap_register_multiple failed: %d\n",
-             ret);
-    }
-
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: stm32_i2c_register
@@ -257,9 +134,6 @@ static void stm32_i2ctool(void)
 int stm32_bringup(void)
 {
   int ret = OK;
-#ifdef HAVE_RTC_DRIVER
-  struct rtc_lowerhalf_s *lower;
-#endif
 
   UNUSED(ret);
 
@@ -277,43 +151,6 @@ int stm32_bringup(void)
              "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
     }
 #endif /* CONFIG_FS_PROCFS */
-
-#ifdef CONFIG_STM32_ROMFS
-  /* Mount the romfs partition */
-
-  ret = stm32_romfs_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
-             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
-    }
-#endif
-
-#ifdef HAVE_RTC_DRIVER
-  /* Instantiate the STM32 lower-half RTC driver */
-
-  lower = stm32_rtc_lowerhalf();
-  if (!lower)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to instantiate the RTC lower-half driver\n");
-      return -ENOMEM;
-    }
-  else
-    {
-      /* Bind the lower half driver and register the combined RTC driver
-       * as /dev/rtc0
-       */
-
-      ret = rtc_initialize(0, lower);
-      if (ret < 0)
-        {
-          syslog(LOG_ERR,
-                 "ERROR: Failed to bind/register the RTC driver: %d\n", ret);
-          return ret;
-        }
-    }
-#endif
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
@@ -334,33 +171,6 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif /* CONFIG_USERLED */
-
-#ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32_usbhost_initialize()
-   * starts a thread will monitor for USB connection and
-   * disconnection events.
-   */
-
-  ret = stm32_usbhost_initialize();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to initialize USB host: %d\n",
-             ret);
-    }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start();
-  if (ret != OK)
-    {
-      syslog(LOG_ERR,
-             "ERROR: Failed to start USB monitor: %d\n",
-             ret);
-    }
-#endif
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
@@ -383,52 +193,6 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_LSM6DSL
-  ret = stm32_lsm6dsl_initialize("/dev/lsm6dsl0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize LSM6DSL driver: %d\n",
-             ret);
-    }
-#endif /* CONFIG_SENSORS_LSM6DSL */
-
-#ifdef CONFIG_SENSORS_LSM9DS1
-  ret = stm32_lsm9ds1_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize LSM9DS1 driver: %d\n",
-             ret);
-    }
-#endif /* CONFIG_SENSORS_LSM6DSL */
-
-#ifdef CONFIG_SENSORS_LSM303AGR
-  ret = stm32_lsm303agr_initialize("/dev/lsm303mag0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize LSM303AGR driver: %d\n",
-             ret);
-    }
-#endif /* CONFIG_SENSORS_LSM303AGR */
-
-#ifdef CONFIG_PCA9635PW
-  /* Initialize the PCA9635 chip */
-
-  ret = stm32_pca9635_initialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_pca9635_initialize failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_WL_NRF24L01
-  ret = stm32_wlinitialize();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize wireless driver: %d\n",
-             ret);
-    }
-#endif /* CONFIG_WL_NRF24L01 */
-
 #if defined(CONFIG_CDCACM) && !defined(CONFIG_CDCACM_CONSOLE) && \
     !defined(CONFIG_CDCACM_COMPOSITE)
   /* Initialize CDCACM */
@@ -442,28 +206,6 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_CDCACM & !CONFIG_CDCACM_CONSOLE */
 
-#if defined(CONFIG_RNDIS) && !defined(CONFIG_RNDIS_COMPOSITE)
-  uint8_t mac[6];
-  mac[0] = 0xa0; /* TODO */
-  mac[1] = (CONFIG_NETINIT_MACADDR_2 >> (8 * 0)) & 0xff;
-  mac[2] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 3)) & 0xff;
-  mac[3] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 2)) & 0xff;
-  mac[4] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 1)) & 0xff;
-  mac[5] = (CONFIG_NETINIT_MACADDR_1 >> (8 * 0)) & 0xff;
-  usbdev_rndis_initialize(mac);
-#endif
-
-#ifdef CONFIG_MMCSD_SPI
-  /* Initialize the MMC/SD SPI driver (SPI3 is used) */
-
-  ret = stm32_mmcsd_initialize(CONFIG_NSH_MMCSDMINOR);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n",
-             CONFIG_NSH_MMCSDMINOR, ret);
-    }
-#endif
-
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
@@ -472,32 +214,6 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
-#endif
-
-#ifdef CONFIG_CAPTURE
-  /* Initialize the capture driver */
-
-  ret = stm32_capture_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_capture_setup() failed: %d\\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MTD
-#ifdef HAVE_PROGMEM_CHARDEV
-  ret = stm32_progmem_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize MTD progmem: %d\n", ret);
-    }
-#endif /* HAVE_PROGMEM_CHARDEV */
-#endif /* CONFIG_MTD */
-
-#ifdef CONFIG_STM32H7_IWDG
-  /* Initialize the watchdog timer */
-
-  stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
 #endif
 
   return OK;
