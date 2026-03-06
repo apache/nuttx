@@ -31,7 +31,9 @@ endif
 CHIP_CSRCS  = imx9_boot.c
 
 ifeq ($(CONFIG_ARCH_CHIP_IMX93),y)
-CHIP_CSRCS  += imx9_ccm.c imx9_gpio.c
+CHIP_CSRCS  += imx9_ccm.c imx9_gpio.c imx9_gpiobase.c
+else ifeq ($(CONFIG_ARCH_CHIP_IMX95),y)
+CHIP_CSRCS  += imx9_gpio.c imx9_gpiobase.c
 endif
 
 CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c imx9_clockconfig.c
