@@ -24,7 +24,9 @@ set(SRCS imx9_boot.c imx9_clockconfig.c imx9_iomuxc.c imx9_lpuart.c
          imx9_lowputc.c)
 
 if(CONFIG_ARCH_CHIP_IMX93)
-  list(APPEND SRCS imx9_ccm.c imx9_gpio.c)
+  list(APPEND SRCS imx9_ccm.c imx9_gpio.c imx9_gpiobase.c)
+elseif(CONFIG_ARCH_CHIP_IMX95)
+  list(APPEND SRCS imx9_gpio.c imx9_gpiobase.c)
 endif()
 
 if(CONFIG_IMX9_GPIO_IRQ)
