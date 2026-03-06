@@ -184,7 +184,7 @@ static ssize_t devfreq_read(FAR struct file *filep,
                  " suspended:   %s\n",
                  devfreq->name,
                  devfreq->governor->name,
-                 devfreq->cur,
+                 devfreq_get_frequency(devfreq),
                  devfreq->suspended ? "True" : "False");
 
   if (devfreq->freq_table)

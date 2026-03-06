@@ -109,13 +109,14 @@ static void devfreq_ondemand_worker(FAR void *arg)
 
   if (cpuload > CONFIG_DEVFREQ_LOAD_THRESHOLD)
     {
-      if (dev->cur < dev->max)
+      uint32_t cur_freq = devfreq_get_frequency(dev);
+      if (cur_freq < dev->max)
         {
           data->target_freq = dev->max;
         }
       else
         {
-          data->target_freq = dev->cur;
+          data->target_freq = cur_freq;
         }
     }
   else
