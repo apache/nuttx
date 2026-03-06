@@ -34,6 +34,8 @@
 #  include "hardware/imx93/imx93_ccm.h"
 #  include "hardware/imx93/imx93_pll.h"
 #elif defined(CONFIG_ARCH_CHIP_IMX95)
+#  include "hardware/imx95/imx95_ccm.h"
+#  include "hardware/imx95/imx95_pll.h"
 #else
 #  error Unrecognized i.MX9 architecture
 #endif
