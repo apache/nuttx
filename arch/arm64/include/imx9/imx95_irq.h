@@ -109,8 +109,8 @@
 #define IMX9_IRQ_TMPSNS2_THR1    (IMX9_IRQ_EXT + 83)  /* CORTEXAMIX TempSensor non-secure interrupt from Threshold 1 */
 #define IMX9_IRQ_TMPSNS2_THR2    (IMX9_IRQ_EXT + 84)  /* CORTEXAMIX TempSensor non-secure interrupt from Threshold 2 */
 #define IMX9_IRQ_TMPSNS2_DRDY    (IMX9_IRQ_EXT + 85)  /* CORTEXAMIX TempSensor non-secure data ready interrupt */
-#define IMX9_IRQ_uSDHC1          (IMX9_IRQ_EXT + 86)  /* ultra Secure Digital Host Controller interrupt 1 */
-#define IMX9_IRQ_uSDHC2          (IMX9_IRQ_EXT + 87)  /* ultra Secure Digital Host Controller interrupt 2 */
+#define IMX9_IRQ_USDHC1          (IMX9_IRQ_EXT + 86)  /* ultra Secure Digital Host Controller interrupt 1 */
+#define IMX9_IRQ_USDHC2          (IMX9_IRQ_EXT + 87)  /* ultra Secure Digital Host Controller interrupt 2 */
 #define IMX9_IRQ_RESERVED104     (IMX9_IRQ_EXT + 88)  /* MEGAMIX TRDC transfer error interrupt */
 #define IMX9_IRQ_RESERVED105     (IMX9_IRQ_EXT + 89)  /* NIC_WRAPPER TRDC transfer error interrupt */
 #define IMX9_IRQ_RESERVED106     (IMX9_IRQ_EXT + 90)  /* NOCMIX TRDC transfer error interrupt */
@@ -214,7 +214,7 @@
 #define IMX9_IRQ_PDM_EVENT       (IMX9_IRQ_EXT + 188) /* PDM interrupt */
 #define IMX9_IRQ_RESERVED205     (IMX9_IRQ_EXT + 189) /* AUDIO XCVR interrupt */
 #define IMX9_IRQ_RESERVED206     (IMX9_IRQ_EXT + 190) /* AUDIO XCVR interrupt */
-#define IMX9_IRQ_uSDHC3          (IMX9_IRQ_EXT + 191) /* ultra Secure Digital Host Controller interrupt 3 */
+#define IMX9_IRQ_USDHC3          (IMX9_IRQ_EXT + 191) /* ultra Secure Digital Host Controller interrupt 3 */
 #define IMX9_IRQ_RESERVED208     (IMX9_IRQ_EXT + 192) /* OCRAM MECC interrupt */
 #define IMX9_IRQ_RESERVED209     (IMX9_IRQ_EXT + 193) /* OCRAM MECC interrupt */
 #define IMX9_IRQ_RESERVED210     (IMX9_IRQ_EXT + 194) /* CM33 MCM interrupt */
