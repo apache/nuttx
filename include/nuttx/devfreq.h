@@ -45,6 +45,11 @@
 #define DEVFREQ_RELATION_L    0   /* lowest frequency at or above target */
 #define DEVFREQ_RELATION_H    1   /* highest frequency below or at target */
 
+/* QoS conflict policy when min > max (no overlap between requests) */
+
+#define DEVFREQ_CONFLICT_PREFER_HIGH  0  /* clamp to min, choose higher freq */
+#define DEVFREQ_CONFLICT_PREFER_LOW   1  /* clamp to max, choose lower freq */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -90,6 +95,7 @@ struct devfreq_governor_s
 
 struct devfreq_driver_s
 {
+  int conflict_policy;              /* DEVFREQ_CONFLICT_PREFER_HIGH or LOW */
   CODE FAR const uint32_t *
            (*get_table)(FAR struct devfreq_s *devfreq);
   CODE int (*target_index)(FAR struct devfreq_s *devfreq,

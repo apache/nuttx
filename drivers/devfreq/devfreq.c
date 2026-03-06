@@ -355,7 +355,14 @@ static void devfreq_refresh_limit(FAR struct devfreq_s *devfreq)
 
   if (min > max)
     {
-      min = max;
+      if (devfreq->driver->conflict_policy == DEVFREQ_CONFLICT_PREFER_HIGH)
+        {
+          max = min;
+        }
+      else
+        {
+          min = max;
+        }
     }
 
   idx = devfreq_table_find_freq(devfreq, min, DEVFREQ_RELATION_L);
