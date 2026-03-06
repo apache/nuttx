@@ -27,13 +27,30 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdio.h>
 #include <syslog.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/partition.h>
 
 #include "imx9_dma_alloc.h"
 
 #include "imx95-evk.h"
+
+#if defined(CONFIG_GPT_PARTITION) || defined(CONFIG_MBR_PARTITION)
+static void mmcsd_partition_handler(FAR struct partition_s *part,
+                                    FAR void *arg)
+{
+  char devname[32];
+
+  snprintf(devname, sizeof(devname), "/dev/mmcsd0p%zu", part->index);
+  register_blockpartition(devname, 0660, "/dev/mmcsd0",
+                          part->firstblock, part->nblocks);
+  syslog(LOG_INFO, "Registered partition %s (start=%lu nblocks=%lu)\n",
+         devname, (unsigned long)part->firstblock,
+         (unsigned long)part->nblocks);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -78,6 +95,18 @@ int imx9_bringup(void)
     {
       syslog(LOG_ERR, "Failed to init MMCSD driver: %d\n", ret);
     }
+
+#if defined(CONFIG_GPT_PARTITION) || defined(CONFIG_MBR_PARTITION)
+  else
+    {
+      ret = parse_block_partition("/dev/mmcsd0",
+                                  mmcsd_partition_handler, NULL);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "Failed to parse partition table: %d\n", ret);
+        }
+    }
+#endif
 #endif
 
   UNUSED(ret);
