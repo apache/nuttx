@@ -835,6 +835,149 @@ config LCD_ST7796
 	---help---
 		Enable support for ST7796 LCD display driver.
 
+if LCD_ST7796
+
+config LCD_ST7796_XRES
+	int "ST7796 X Resolution (raw panel width)"
+	default 320
+	---help---
+		Raw horizontal resolution of the ST7796 panel in pixels.
+		For the ST7796S this is 320. Effective display width
+		depends on the selected orientation.
+
+config LCD_ST7796_YRES
+	int "ST7796 Y Resolution (raw panel height)"
+	default 480
+	---help---
+		Raw vertical resolution of the ST7796 panel in pixels.
+		For the ST7796S this is 480. Effective display height
+		depends on the selected orientation.
+
+choice
+	prompt "ST7796 Color Depth"
+	default LCD_ST7796_RGB565
+
+config LCD_ST7796_RGB444
+	bool "12-bit RGB444"
+	---help---
+		12-bit color depth (4096 colors).
+		Lower memory usage but reduced color quality.
+
+config LCD_ST7796_RGB565
+	bool "16-bit RGB565"
+	---help---
+		16-bit color depth (65536 colors).
+		Good balance between color quality and memory usage.
+
+config LCD_ST7796_RGB666
+	bool "18-bit RGB666"
+	---help---
+		18-bit color depth (262144 colors).
+		Higher quality but more memory and slower SPI transfers.
+
+endchoice
+
+config LCD_ST7796_BPP
+	int
+	default 12 if LCD_ST7796_RGB444
+	default 16 if LCD_ST7796_RGB565
+	default 18 if LCD_ST7796_RGB666
+
+config LCD_ST7796_FREQUENCY
+	int "ST7796 SPI Frequency (Hz)"
+	default 40000000
+	range 1000000 80000000
+	---help---
+		SPI bus frequency for ST7796 communication in Hz.
+		40 MHz is the recommended safe default.
+		Higher values require good signal integrity.
+
+config LCD_ST7796_SPIMODE
+	int "ST7796 SPI Mode"
+	default 0
+	---help---
+		SPI mode for ST7796 (CPOL/CPHA).
+		ST7796 uses Mode 0 (CPOL=0, CPHA=0).
+
+config LCD_ST7796_BGR
+	bool "ST7796 Use BGR color order instead of RGB"
+	default n
+	---help---
+		Enable if colors appear swapped (red shown as blue).
+		Sets the BGR bit in the MADCTL register.
+
+config LCD_ST7796_INVCOLOR
+	bool "ST7796 Invert display colors"
+	default n
+	---help---
+		Send INVON command during initialization to invert all
+		display colors. Disable to send INVOFF instead.
+
+choice
+	prompt "ST7796 Display Orientation"
+	default LCD_ST7796_PORTRAIT
+
+config LCD_ST7796_PORTRAIT
+	bool "Portrait (320x480)"
+	---help---
+		Natural portrait orientation: 320 pixels wide,
+		480 pixels tall.
+
+config LCD_ST7796_LANDSCAPE
+	bool "Landscape (480x320)"
+	---help---
+		Landscape orientation: 480 pixels wide, 320 pixels tall.
+
+config LCD_ST7796_RPORTRAIT
+	bool "Reverse Portrait (320x480)"
+	---help---
+		Reverse portrait: 320 wide, 480 tall, rotated 180 degrees
+		from normal portrait.
+
+config LCD_ST7796_RLANDSCAPE
+	bool "Reverse Landscape (480x320)"
+	---help---
+		Reverse landscape: 480 wide, 320 tall, rotated 270 degrees
+		from normal portrait.
+
+endchoice
+
+choice
+	prompt "ST7796 Display Rotation"
+	default LCD_ST7796_ROTATION_0
+
+config LCD_ST7796_ROTATION_0
+	bool "0 degrees (no additional flip)"
+	---help---
+		No additional rotation applied after base orientation.
+
+config LCD_ST7796_ROTATION_180
+	bool "180 degrees (flip)"
+	---help---
+		Additional 180-degree flip after the base orientation.
+		Use when the display is mounted upside down.
+
+endchoice
+
+config LCD_ST7796_ROTATION
+	int
+	default 0   if LCD_ST7796_ROTATION_0
+	default 180 if LCD_ST7796_ROTATION_180
+
+config LCD_ST7796_FB_SIZE
+	int "ST7796 Framebuffer size (KB)"
+	depends on VIDEO_FB
+	default 300
+	range 150 600
+	---help---
+		Framebuffer allocation size in kilobytes.
+		Full-screen requirements at 320x480:
+		  RGB444 (12-bit): 225 KB
+		  RGB565 (16-bit): 300 KB
+		  RGB666 (18-bit): 450 KB
+
+endif # LCD_ST7796
+
 config LCD_GC9A01
 	bool "Galaxycore GC9A01 TFT Controller"
 	default n
