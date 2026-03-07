@@ -88,14 +88,14 @@ the make, the nuttx binary will reside in an ELF file called, simply, nuttx.::
 Configuration Sub-directories
 =============================
 
-nsh:
-----
+nsh
+---
 
 This configuration provides a basic NuttShell configuration (NSH)
 for the Nucleo-H723ZG.  The default console is the VCOM on USART3.
 
-netnsh:
---------
+netnsh
+------
 
 This configuration enables support for the Ethernet and a set
 of networking functionalities.
@@ -110,3 +110,28 @@ of networking functionalities.
     this gets rounded up to the value of the tick time which is 10 ms!
     Therefore the time you will wait for the nsh console if the Ethernet
     is not plugged in is ``2 * 10 ms * 0x1998 = 130s``.
+
+oa_tc6
+------
+  This configuration features the network driver for 10BASE-T1S and 10BASE-T1L SPI MAC-PHYs
+  that follow the `OPEN Alliance 10BASE-T1x MAC-PHY Serial Interface` specification (OA-TC6).
+
+  Among such MAC-PHYs are e.g. Microchip LAN865x, Onsemi NCV7410 (NCN26010), Analog Devices ADIN1110.
+  See the build configuration utility (e.g. ``make menuconfig``) to find out which ones are currently supported.
+
+  The OA-TC6 defines a 5 signal connection between the MAC-PHY and the host MCU. These are 4 lines for the standard SPI and 1 line for the interrupt signal from the MAC-PHY to the MCU.
+
+  **Default pinout**
+
+  ============ ========== =========================================
+  Nucleo Pin   Function   Description
+  ============ ========== =========================================
+  PF3          INT        MAC-PHY interrupt signal
+  PB4          MISO       SPI Master In Slave Out
+  PB5          MOSI       SPI Master Out Slave In
+  PB3          CLK        SPI Clock
+  PD14         CS         SPI Chip Select
+  ============ ========== =========================================
+
+  The ``oa_tc6`` configuration is additionally equipped with the ``plcatool`` utility. This allows configuration of the Physical Layer Collision Avoidance (PLCA) functionality
+  in 10BASE-T1S PHYs.
