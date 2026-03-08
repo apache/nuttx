@@ -75,6 +75,8 @@
 
 #if defined(CONFIG_RPI4B_RAM_4GB) || defined(CONFIG_RPI4B_RAM_8GB)
 #define CONFIG_RAMBANK1_SIZE GB(4) - MB(64)
+#elif defined(CONFIG_RPI4B_RAM_2GB)
+#define CONFIG_RAMBANK1_SIZE GB(2) - MB(64)
 #endif /* defined(CONFIG_RPI4B_RAM_4GB) || defined(CONFIG_RPI4B_RAM_8GB) */
 
 /* The 8GB version begins to use a second RAM bank.
