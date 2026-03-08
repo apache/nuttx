@@ -54,6 +54,10 @@ struct rpmsg_port_config_s
 
   FAR void       *txbuf;
   FAR void       *rxbuf;
+
+#ifdef CONFIG_RPMSG_PORT_RETX
+  uint16_t       retx_max_retry;     /* Maximum retransmission attempts */
+#endif
 };
 
 #if defined(CONFIG_RPMSG_PORT_SPI) || defined(CONFIG_RPMSG_PORT_SPI_SLAVE)

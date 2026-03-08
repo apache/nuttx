@@ -192,7 +192,8 @@ static void rpmsg_port_spi_pm_callback(wdparm_t arg)
   count = pm_wakelock_staycount(&rpspi->wakelock);
   if (count > 0 && atomic_read(&rpspi->transferring) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.txq) == 0 &&
-      rpmsg_port_queue_nused(&rpspi->port.rxq) == 0)
+      rpmsg_port_queue_nused(&rpspi->port.rxq) == 0 &&
+      !rpmsg_port_retx_is_pending(&rpspi->port))
     {
       pm_wakelock_relax(&rpspi->wakelock);
     }
@@ -242,6 +243,9 @@ rpmsg_port_spi_pm_action(FAR struct rpmsg_port_spi_s *rpspi, bool stay)
 static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
   FAR struct rpmsg_port_header_s *txhdr;
+#ifdef CONFIG_RPMSG_PORT_RETX
+  FAR struct rpmsg_port_node_s *node;
+#endif
 
   if (atomic_add(&rpspi->transferring, 1))
     {
@@ -259,6 +263,14 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
     {
       txhdr->cmd = RPMSG_PORT_SPI_CMD_SHUTDOWN;
     }
+#ifdef CONFIG_RPMSG_PORT_RETX
+  else if (rpmsg_port_retx_is_pending(&rpspi->port))
+    {
+      node = rpmsg_port_retx_get(&rpspi->port);
+      node->retry_count++;
+      txhdr = RPMSG_PORT_NODE_TO_BUF(&rpspi->port.txq, node);
+    }
+#endif
   else if (rpspi->txavail > 0 &&
            rpmsg_port_queue_nused(&rpspi->port.txq) > 0)
     {
@@ -267,17 +279,26 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 
       txhdr->cmd = RPMSG_PORT_SPI_CMD_DATA;
       rpspi->txhdr = txhdr;
+      rpmsg_port_retx_add(&rpspi->port, txhdr);
     }
   else
     {
       txhdr->cmd = RPMSG_PORT_SPI_CMD_AVAIL;
     }
 
+  rpmsg_port_retx_tx_fill(&rpspi->port, txhdr);
   txhdr->avail = rpmsg_port_queue_navail(&rpspi->port.rxq);
   txhdr->avail = txhdr->avail > 1 ? txhdr->avail - 1 : 0;
   txhdr->crc = rpmsg_port_spi_crc16(txhdr);
 
+#ifdef CONFIG_RPMSG_PORT_RETX
+  rpmsginfo("%s cmd:%u avail:%u seq:%u ack:%u ackdup:%" PRId32 "\n",
+            rpmsg_port_retx_is_pending(&rpspi->port) ? "retx" : "send",
+            txhdr->cmd, txhdr->avail, txhdr->seqno, txhdr->ackno,
+            atomic_read(&rpspi->port.retx.ackdup_count));
+#else
   rpmsginfo("send cmd:%u avail:%u\n", txhdr->cmd, txhdr->avail);
+#endif
 
   rpmsg_port_spi_pm_action(rpspi, true);
   rpmsg_port_update_timestamp(&rpspi->port.txq, txhdr, true);
@@ -415,7 +436,6 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);
   if (rpspi->txhdr != NULL)
     {
-      rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
       rpspi->txhdr = NULL;
     }
   else if (rpspi->cmdhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
@@ -464,6 +484,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_CONNECT)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_RECONNECTING;
+          rpmsg_port_retx_reset(&rpspi->port);
 
           /* Drop all the unprocessed rxq buffer and pre-send txq buffer
            * when a reconnect request to be received.
@@ -482,9 +503,20 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_CONNECTING;
+          rpmsg_port_retx_reset(&rpspi->port);
         }
 
       goto unlock;
+    }
+
+  /* Process ACK only in CONNECTED state to avoid acting
+   * on stale ackno from CONNECT or SHUTDOWN frames.
+   */
+
+  if (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED)
+    {
+      rpmsg_port_retx_process_ack(&rpspi->port, rpspi->rxhdr->ackno,
+                                   rpspi->rxhdr->min_seq);
     }
 
   if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SUSPEND)
@@ -500,7 +532,15 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
       if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
         {
           rpspi->state = RPMSG_PORT_SPI_STATE_DISCONNECTING;
+          rpmsg_port_retx_reset(&rpspi->port);
           rpmsg_port_drop_packets(&rpspi->port, RPMSG_PORT_DROP_ALL);
+        }
+      else if (rpspi->rxhdr->cmd == RPMSG_PORT_SPI_CMD_DATA)
+        {
+          if (!rpmsg_port_retx_rx_valid(&rpspi->port, rpspi->rxhdr))
+            {
+              goto unlock;
+            }
         }
 
       rpmsg_port_queue_add_buffer(&rpspi->port.rxq, rpspi->rxhdr);
@@ -512,7 +552,8 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 unlock:
   spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
-  if (atomic_xchg(&rpspi->transferring, 0) > 1 ||
+  if (atomic_xchg(&rpspi->transferring, 0) ||
+      rpmsg_port_retx_is_pending(&rpspi->port) ||
       (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
     {
       rpmsg_port_spi_exchange(rpspi);

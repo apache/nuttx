@@ -29,6 +29,7 @@
 
 #include <stdbool.h>
 
+#include <nuttx/atomic.h>
 #include <nuttx/list.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -46,6 +47,12 @@
 #define RPMSG_PORT_DROP_RXQ     0x02
 #define RPMSG_PORT_DROP_ALL     0x03
 
+#define RPMSG_PORT_BUF_TO_NODE(q, b) \
+  ((q)->node + ((FAR void *)(b) - (q)->buf) / (q)->len)
+#define RPMSG_PORT_NODE_TO_BUF(q, n) \
+  ((q)->buf + (((n) - (q)->node)) * (q)->len)
+#define RPMSG_PORT_SEQ_LT(seq, ack)  ((int16_t)((seq) - (ack)) < 0)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -58,6 +65,12 @@ begin_packed_struct struct rpmsg_port_header_s
   uint16_t cmd;                   /* Reserved for uart/spi port driver */
   uint16_t avail;                 /* Available rx buffer of peer side */
   uint16_t len;                   /* Data frame length */
+#ifdef CONFIG_RPMSG_PORT_RETX
+  uint16_t seqno;
+  uint16_t ackno;
+  uint16_t min_seq;
+  uint16_t reserved;
+#endif
   uint8_t  buf[0];                /* Payload buffer */
 } end_packed_struct;
 
@@ -72,6 +85,9 @@ struct rpmsg_port_list_s
 struct rpmsg_port_node_s
 {
   struct list_node node;          /* List node for free/ready/retx queue */
+#ifdef CONFIG_RPMSG_PORT_RETX
+  uint16_t         retry_count;   /* Retry counter for retransmission */
+#endif
 };
 
 struct rpmsg_port_s;
@@ -137,6 +153,19 @@ struct rpmsg_port_ops_s
   CODE void (*dump)(FAR struct rpmsg_port_s *port, bool verbose);
 };
 
+#ifdef CONFIG_RPMSG_PORT_RETX
+struct rpmsg_port_retx_s
+{
+  struct list_node                  queue;
+  spinlock_t                        lock;
+  atomic_t                          ackdup_count;
+  uint16_t                          tx_next;
+  uint16_t                          rx_next;
+  uint16_t                          last_ackno;
+  uint16_t                          retx_max_retry;
+};
+#endif
+
 struct rpmsg_port_s
 {
   struct rpmsg_s                    rpmsg;
@@ -147,6 +176,12 @@ struct rpmsg_port_s
   /* Ops need implemented by drivers under port layer */
 
   const FAR struct rpmsg_port_ops_s *ops;
+
+#ifdef CONFIG_RPMSG_PORT_RETX
+  /* Retransmission mechanism for DATA frames */
+
+  struct rpmsg_port_retx_s          retx;
+#endif
 };
 
 #ifndef __ASSEMBLY__
@@ -303,6 +338,180 @@ void rpmsg_port_update_timestamp(FAR struct rpmsg_port_queue_s *queue,
  ****************************************************************************/
 
 void rpmsg_port_drop_packets(FAR struct rpmsg_port_s *rport, uint8_t type);
+
+#ifdef CONFIG_RPMSG_PORT_RETX
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_del
+ *
+ * Description:
+ *   Remove a node from the retransmission queue and return the buffer
+ *   to txq. Caller must hold port->retx.lock.
+ *
+ ****************************************************************************/
+
+static inline_function
+void rpmsg_port_retx_del(FAR struct rpmsg_port_s *port,
+                         FAR struct rpmsg_port_node_s *node)
+{
+  list_delete(&node->node);
+  rpmsg_port_queue_return_buffer(&port->txq,
+                                 RPMSG_PORT_NODE_TO_BUF(&port->txq, node));
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_add
+ *
+ * Description:
+ *   Add a DATA frame to the retransmission queue.
+ *
+ ****************************************************************************/
+
+static inline_function
+void rpmsg_port_retx_add(FAR struct rpmsg_port_s *port,
+                         FAR struct rpmsg_port_header_s *txhdr)
+{
+  FAR struct rpmsg_port_node_s *node;
+  irqstate_t flags;
+
+  node = RPMSG_PORT_BUF_TO_NODE(&port->txq, txhdr);
+  node->retry_count = 0;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+  txhdr->seqno = port->retx.tx_next++;
+  list_add_tail(&port->retx.queue, &node->node);
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_process_ack
+ *
+ * Description:
+ *   Process an ACK number, removing all acknowledged frames from the
+ *   retransmission queue. Trigger retransmission on duplicate ACK.
+ *   Also advance rx_next based on peer's min_seq to skip abandoned frames.
+ *
+ ****************************************************************************/
+
+void rpmsg_port_retx_process_ack(FAR struct rpmsg_port_s *port,
+                                  uint16_t ackno, uint16_t min_seq);
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_rx_valid
+ *
+ * Description:
+ *   Validate a received DATA frame's seqno and process its ackno.
+ *   Called from SPI complete_handler / slave_notify (interrupt context).
+ *
+ * Returned Value:
+ *   true  - frame is valid, caller should enqueue to rxq.ready
+ *   false - frame is invalid (duplicate/out-of-order), caller should drop
+ *
+ ****************************************************************************/
+
+bool rpmsg_port_retx_rx_valid(FAR struct rpmsg_port_s *port,
+                              FAR struct rpmsg_port_header_s *hdr);
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_reset
+ *
+ * Description:
+ *   Clear the retransmission queue.
+ *
+ ****************************************************************************/
+
+void rpmsg_port_retx_reset(FAR struct rpmsg_port_s *port);
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_get
+ *
+ * Description:
+ *   Get the head node of the retransmission queue.
+ *
+ * Returned Value:
+ *   Pointer to the head node, or NULL if the queue is empty.
+ *
+ ****************************************************************************/
+
+static inline_function FAR struct rpmsg_port_node_s *
+rpmsg_port_retx_get(FAR struct rpmsg_port_s *port)
+{
+  FAR struct rpmsg_port_node_s *node = NULL;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+  if (!list_is_empty(&port->retx.queue))
+    {
+      node = list_peek_head_type(&port->retx.queue,
+                                 struct rpmsg_port_node_s, node);
+    }
+
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+  return node;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_is_pending
+ *
+ * Description:
+ *   Check if retransmission is pending (dup-ack count reached threshold).
+ *
+ ****************************************************************************/
+
+static inline_function
+bool rpmsg_port_retx_is_pending(FAR struct rpmsg_port_s *port)
+{
+  return atomic_read(&port->retx.ackdup_count) >= 2;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_tx_fill
+ *
+ * Description:
+ *   Fill retransmission fields (ackno, min_seq, reserved) in the TX frame
+ *   header before sending.
+ *
+ ****************************************************************************/
+
+static inline_function
+void rpmsg_port_retx_tx_fill(FAR struct rpmsg_port_s *port,
+                             FAR struct rpmsg_port_header_s *txhdr)
+{
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+  txhdr->ackno = port->retx.rx_next;
+  txhdr->reserved = 0;
+
+  if (!list_is_empty(&port->retx.queue))
+    {
+      FAR struct rpmsg_port_node_s *head =
+        list_peek_head_type(&port->retx.queue,
+                            struct rpmsg_port_node_s, node);
+      FAR struct rpmsg_port_header_s *hdr =
+        RPMSG_PORT_NODE_TO_BUF(&port->txq, head);
+      txhdr->min_seq = hdr->seqno;
+    }
+  else
+    {
+      txhdr->min_seq = port->retx.tx_next;
+    }
+
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+}
+
+#else /* !CONFIG_RPMSG_PORT_RETX */
+
+#  define rpmsg_port_retx_add(port, txhdr)
+#  define rpmsg_port_retx_del(port, node)
+#  define rpmsg_port_retx_get(port)                         NULL
+#  define rpmsg_port_retx_is_pending(port)                  false
+#  define rpmsg_port_retx_tx_fill(port, txhdr)
+#  define rpmsg_port_retx_process_ack(port, ackno, min_seq)
+#  define rpmsg_port_retx_rx_valid(port, hdr)               true
+#  define rpmsg_port_retx_reset(port)
+
+#endif /* CONFIG_RPMSG_PORT_RETX */
 
 /****************************************************************************
  * Name: rpmsg_port_initialize
