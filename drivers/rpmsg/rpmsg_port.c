@@ -42,9 +42,6 @@
 
 #define RPMSG_PORT_TIMEOUT_MS       15000
 
-#define RPMSG_PORT_BUF_TO_NODE(q,b) ((q)->node + ((FAR void *)(b) - (q)->buf) / (q)->len)
-#define RPMSG_PORT_NODE_TO_BUF(q,n) ((q)->buf + (((n) - (q)->node)) * (q)->len)
-
 #define rpmsg_port_from_rdev(d) container_of(d, struct rpmsg_port_s, rdev)
 #define rpmsg_port_hdr_from_buf(r) \
   container_of(r, struct rpmsg_port_header_s, buf)
@@ -553,6 +550,13 @@ int rpmsg_port_initialize(FAR struct rpmsg_port_s *port,
   port->ops = ops;
   strlcpy(port->rpmsg.cpuname, cfg->remotecpu, RPMSG_NAME_SIZE);
 
+#ifdef CONFIG_RPMSG_PORT_RETX
+  list_initialize(&port->retx.queue);
+  spin_lock_init(&port->retx.lock);
+  port->retx.last_ackno = UINT16_MAX;
+  port->retx.retx_max_retry = cfg->retx_max_retry;
+#endif
+
   rdev = &port->rdev;
   memset(rdev, 0, sizeof(*rdev));
   metal_mutex_init(&rdev->lock);
@@ -734,6 +738,126 @@ void rpmsg_port_drop_packets(FAR struct rpmsg_port_s *rport, uint8_t type)
         }
     }
 }
+
+#ifdef CONFIG_RPMSG_PORT_RETX
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_process_ack
+ ****************************************************************************/
+
+void rpmsg_port_retx_process_ack(FAR struct rpmsg_port_s *port,
+                                  uint16_t ackno, uint16_t min_seq)
+{
+  FAR struct rpmsg_port_node_s *node;
+  FAR struct rpmsg_port_node_s *tmp;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+
+  /* Traverse and delete acknowledged or retry-exhausted nodes */
+
+  list_for_every_entry_safe(&port->retx.queue, node, tmp,
+                            struct rpmsg_port_node_s, node)
+    {
+      FAR struct rpmsg_port_header_s *hdr =
+        RPMSG_PORT_NODE_TO_BUF(&port->txq, node);
+      if (RPMSG_PORT_SEQ_LT(hdr->seqno, ackno) ||
+          node->retry_count >= port->retx.retx_max_retry)
+        {
+          if (node->retry_count >= port->retx.retx_max_retry)
+            {
+              rpmsgerr("Retransmission failed for seqno %u after %u retries "
+                       "ackno: %u\n",
+                       hdr->seqno, node->retry_count, ackno);
+            }
+
+          rpmsg_port_retx_del(port, node);
+        }
+    }
+
+  /* Duplicate ACK detection for fast retransmit */
+
+  if (!list_is_empty(&port->retx.queue) &&
+      (ackno == port->retx.last_ackno ||
+       atomic_read(&port->retx.ackdup_count) >= 2))
+    {
+      atomic_add(&port->retx.ackdup_count, 1);
+    }
+  else
+    {
+      atomic_set(&port->retx.ackdup_count, 0);
+    }
+
+  rpmsginfo("retx ack: ackno %u, last_ackno %u, ackdup %" PRId32 "\n",
+            ackno, port->retx.last_ackno,
+            atomic_read(&port->retx.ackdup_count));
+  port->retx.last_ackno = ackno;
+
+  /* Advance rx_next based on peer's min_seq to skip abandoned frames */
+
+  if (RPMSG_PORT_SEQ_LT(port->retx.rx_next, min_seq))
+    {
+      rpmsgerr("Peer abandoned seqno [%u, %u), advancing rx_next\n",
+               port->retx.rx_next, min_seq);
+      port->retx.rx_next = min_seq;
+    }
+
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_rx_valid
+ ****************************************************************************/
+
+bool rpmsg_port_retx_rx_valid(FAR struct rpmsg_port_s *port,
+                              FAR struct rpmsg_port_header_s *hdr)
+{
+  bool valid = false;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+  if (hdr->seqno == port->retx.rx_next)
+    {
+      port->retx.rx_next++;
+      valid = true;
+    }
+  else
+    {
+      rpmsgerr("rx_validate FAIL got seq:%u expect:%u cmd:%u\n",
+               hdr->seqno, port->retx.rx_next, hdr->cmd);
+    }
+
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+  return valid;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_retx_reset
+ ****************************************************************************/
+
+void rpmsg_port_retx_reset(FAR struct rpmsg_port_s *port)
+{
+  FAR struct rpmsg_port_node_s *node;
+  FAR struct rpmsg_port_node_s *tmp;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+
+  list_for_every_entry_safe(&port->retx.queue, node, tmp,
+                            struct rpmsg_port_node_s, node)
+    {
+      rpmsg_port_retx_del(port, node);
+    }
+
+  atomic_set(&port->retx.ackdup_count, 0);
+  port->retx.tx_next = 0;
+  port->retx.rx_next = 0;
+  port->retx.last_ackno = UINT16_MAX;
+
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+}
+
+#endif /* CONFIG_RPMSG_PORT_RETX */
 
 /****************************************************************************
  * Name: rpmsg_port_register
