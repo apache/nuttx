@@ -157,10 +157,17 @@ static int avrdx_gpio_isr_mux(int irq, void *context, FAR void *arg)
       PANIC(); /* IRQ is attached when this is allocated */
     }
 
-  /* Read pins which triggred the interrupt and clear their flags */
+  /* Read pins which triggered the interrupt. Do not clear their flags yet,
+   * level sense interrupt would trigger again right away (handler will
+   * presumably prevent that and then we clear the flags.)
+   *
+   * Unfortunately, this makes it possible to lose edge-triggered interrupts
+   * that came in quick succession on the same pin. That's an acceptable
+   * tradeoff though - level-triggered interrupts need to be supported
+   * as well.
+   */
 
   flags = AVRDX_PORT(port_index).INTFLAGS;
-  AVRDX_PORT(port_index).INTFLAGS = flags;
 
   for (i = 0; i < GPIO_MUX_MAX_CHANNELS; i++, port_isrs++)
     {
@@ -169,6 +176,10 @@ static int avrdx_gpio_isr_mux(int irq, void *context, FAR void *arg)
           port_isrs->handler(irq, context, port_isrs->arg);
         }
     }
+
+  /* Clear the flags now when everything was handled. */
+
+  AVRDX_PORT(port_index).INTFLAGS = flags;
 
   return OK;
 }
