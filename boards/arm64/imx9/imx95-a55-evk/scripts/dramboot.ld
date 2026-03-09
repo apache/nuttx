@@ -29,13 +29,13 @@ EXTERN(__start)
  * - Uboot reserved area is 0x00000000 - 0x00a00000
  * - NuttX is loaded to 0xa0100000, u-boot expects us here
  * - NuttX ROM and RAM are one continuous region, starting from 0xa0100000
-     with a size of 128MB
+      with a size of 512MB
  * - Heap memory is allocated from dram end to idlestack top
  */
 
 MEMORY
 {
-  dram (rwx) : ORIGIN = 0xa0100000, LENGTH = 128M
+  dram (rwx) : ORIGIN = 0xa0100000, LENGTH = 512M
 }
 
 PHDRS
