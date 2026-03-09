@@ -78,7 +78,7 @@ jobs:
         run: |
           df -h
       - name: Push Linux image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: tools/ci/docker/linux
           platforms: linux/amd64
