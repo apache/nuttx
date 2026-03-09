@@ -87,34 +87,11 @@
  * Public Functions
  ****************************************************************************/
 
-uint8_t mfs_arrhash(FAR const char *arr, ssize_t len)
-{
-  ssize_t  l    = 0;
-  ssize_t  r    = len - 1;
-  uint16_t hash = 0;
-
-  /* TODO: Change the array checksum to be 16 bit long. */
-
-  while (l <= r)
-    {
-      hash += arr[l] * arr[r] * (l + 1) * (r + 1);
-      l++;
-      r--;
-      hash %= (1 << 8);
-    }
-
-  finfo("Hash calculated for size %zd to be %d.", len, hash % (1 << 8));
-
-  return hash % (1 << 8);
-}
-
 uint16_t mfs_hash(FAR const char *arr, ssize_t len)
 {
   ssize_t  l    = 0;
   ssize_t  r    = len - 1;
   uint32_t hash = 0;
-
-  /* TODO: Change the array checksum to be 16 bit long. */
 
   while (l <= r)
     {
