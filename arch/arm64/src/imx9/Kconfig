@@ -627,6 +627,30 @@ endmenu # USB device controller driver (DCD) options
 
 endif # IMX9_USBDEV
 
+config IMX9_DWC3
+	bool "DWC3 USB 3.0 Device Controller"
+	default n
+	depends on ARCH_CHIP_IMX95
+	select USBDEV
+	---help---
+		Enable the Synopsys DWC3 USB 3.0 device controller driver
+		for i.MX95. This is mutually exclusive with the ChipIdea
+		USB device controller (IMX9_USBDEV_USBCx). Do not enable
+		both IMX9_DWC3 and IMX9_USBDEV_USBCx at the same time.
+
+if IMX9_DWC3
+
+config IMX9_DWC3_USB3
+	bool "Enable USB 3.0 SuperSpeed"
+	default n
+	---help---
+		Enable USB 3.0 SuperSpeed mode. If disabled, the controller
+		will operate in USB 2.0 High-Speed mode only.
+		Note: On i.MX95, USB 3.0 requires Type-C mux configuration
+		and PHY tuning parameters. Keep disabled until those are ready.
+
+endif # IMX9_DWC3
+
 config IMX9_ENET
 	bool "Ethernet"
 	default n

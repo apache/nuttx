@@ -57,6 +57,10 @@ if(CONFIG_IMX9_USBDEV)
   list(APPEND SRCS imx9_usbdev.c)
 endif()
 
+if(CONFIG_IMX9_DWC3)
+  list(APPEND SRCS imx9_dwc3dev.c)
+endif()
+
 if(CONFIG_IMX9_LPI2C)
   list(APPEND SRCS imx9_lpi2c.c)
 endif()
