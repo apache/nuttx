@@ -37,6 +37,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
+#include <nuttx/wireless/ioctl.h>
 
 /****************************************************************************
  * Pre-Processor Declarations
@@ -236,6 +237,11 @@
 #define CC1101_GDO_CLK_XOSC128                  0x3e
 #define CC1101_GDO_CLK_XOSC192                  0x3f
 
+#define CC1101_FIRST                            (GS2200M_FIRST + GS2200M_NCMDS)
+
+#define CC1101IOC_SETOPMODE                     _WLCIOC(CC1101_FIRST + 0)
+#define CC1101IOC_GETOPMODE                     _WLCIOC(CC1101_FIRST + 1)
+
 /****************************************************************************
  * Public Data Types
  ****************************************************************************/
@@ -271,6 +277,16 @@ enum cc1101_status
   CC1101_SXOFF
 };
 
+/* CC1101 Operation Mode Enumeration */
+
+enum cc1101_opmode_e
+{
+  CC1101_OPMODE_NORMAL = 0,      /* Default: Packet mode, enable address and CRC filtering */
+  CC1101_OPMODE_PROMISCUOUS,     /* Promiscuous: Packet mode, disable filtering, discard bad packets */
+  CC1101_OPMODE_SYNC_SERIAL,     /* Synchronous serial: Bypass FIFO, GDO0 outputs clock, GDO2 outputs data */
+  CC1101_OPMODE_ASYNC_SERIAL     /* Asynchronous serial: Bypass FIFO, GDO2 outputs async data */
+};
+
 struct cc1101_dev_s
 {
   const struct c1101_rfsettings_s *rfsettings;
@@ -294,7 +310,14 @@ struct cc1101_dev_s
   mutex_t lock_rx_buffer; /* Protect access to rx fifo */
   sem_t sem_rx;           /* Wait for availability of received data */
   sem_t sem_tx;           /* Wait for availability of send data */
-  FAR struct pollfd *pfd; /* Polled file descr  (or NULL if any) */
+
+  /* Polled file descr (or NULL if any) */
+
+  FAR struct pollfd *pfd;
+
+  /* Record the current operation mode */
+
+  enum cc1101_opmode_e opmode;
 };
 
 /* The RF Settings includes only those fields required to configure
@@ -534,6 +557,13 @@ uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power);
  ****************************************************************************/
 
 int cc1101_calc_rssi_dbm(int rssi);
+
+/****************************************************************************
+ * Convert RSSI as obtained from CC1101 to [dBm] x 100
+ *
+ ****************************************************************************/
+
+int cc1101_calc_rssi_dbm_x100(int rssi);
 
 /****************************************************************************
  * Enter receive mode and wait for a packet.
