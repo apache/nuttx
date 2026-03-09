@@ -298,7 +298,7 @@ static FAR struct rpmsg_socket_conn_s *rpmsg_socket_alloc(void)
 
   conn->recvsize = CONFIG_NET_RPMSG_RXBUF_SIZE;
   conn->crefs = 1;
-  conn->priority = RPMSG_PRIO_DEFAULT;
+  conn->priority = CONFIG_NET_RPMSG_EPT_PRIORITY;
   return conn;
 }
 
