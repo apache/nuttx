@@ -338,73 +338,129 @@ static mfs_t inline mfs_blkremsz(FAR const struct mfs_sb_s * const sb,
 static inline mfs_t mfs_ctz(const uint32_t x)
 {
   if (predict_false(x == 0))
-  {
-/* Special case, since we're using this for the CTZ skip list. The 0th
- * block has no pointers.
- */
+    {
+      /* Special case, since we're using this for the CTZ skip list. The 0th
+       * block has no pointers.
+       */
 
-    return 0;
-  }
-
+      return 0;
+    }
 #if defined(__GNUC__)
   return __builtin_ctz(x);
 #else
   uint32_t c;
 
-/* Credits:
- * http://graphics.stanford.edu/~seander/bithacks.html#ZerosOnRightBinSearch
- */
+  /* Credits:
+   * http://graphics.stanford.edu/~seander/bithacks.html
+   * #ZerosOnRightBinSearch
+   */
 
   if (x & 0x1)
-  {
-    /* special case for odd x (assumed to happen half of the time) */
+    {
+      /* special case for odd x (assumed to happen half of the time) */
 
-    c = 0;
-  }
+      c = 0;
+    }
   else
-  {
-    c = 1;
-    if ((x & 0xffff) == 0)
     {
-      x >>= 16;
-      c += 16;
+      c = 1;
+      if ((x & 0xffff) == 0)
+        {
+          x >>= 16;
+          c += 16;
+        }
+
+      if ((x & 0xff) == 0)
+        {
+          x >>= 8;
+          c += 8;
+        }
+
+      if ((x & 0xf) == 0)
+        {
+          x >>= 4;
+          c += 4;
+        }
+
+      if ((x & 0x3) == 0)
+        {
+          x >>= 2;
+          c += 2;
+        }
+
+      c -= x & 0x1;
     }
-    if ((x & 0xff) == 0)
-    {
-      x >>= 8;
-      c += 8;
-    }
-    if ((x & 0xf) == 0)
-    {
-      x >>= 4;
-      c += 4;
-    }
-    if ((x & 0x3) == 0)
-    {
-      x >>= 2;
-      c += 2;
-    }
-    c -= x & 0x1;
-  }
+
   return c;
 #endif
 }
 
+/****************************************************************************
+ * Name: mfs_clz
+ *
+ * Description:
+ *   Count Leading Zeros. Returns the number of leading zeros in a 32-bit
+ *   integer.
+ *
+ * Input Parameters:
+ *   x - 32-bit integer to check.
+ *
+ * Returned Value:
+ *   The number of leading zeros.
+ *
+ ****************************************************************************/
+
 static inline mfs_t mfs_clz(const uint32_t x)
 {
   if (predict_false(x == UINT32_MAX))
-  {
-/* Special case, since we're using this for the CTZ skip list. The 0th
- * block has no pointers.
- */
+    {
+      /* Special case, since we're using this for the CTZ skip list. The 0th
+       * block has no pointers.
+       */
 
-    return 0;
-  }
-
+      return 0;
+    }
 #if defined(__GNUC__)
   return __builtin_clz(x);
 #else
-  return 0; /* TODO */
+  uint32_t n = 0;
+  uint32_t x_tmp = x;
+
+  if (x_tmp == 0)
+    {
+      return 32;
+    }
+
+  if (x_tmp <= 0x0000ffff)
+    {
+      n += 16;
+      x_tmp <<= 16;
+    }
+
+  if (x_tmp <= 0x00ffffff)
+    {
+      n += 8;
+      x_tmp <<= 8;
+    }
+
+  if (x_tmp <= 0x0fffffff)
+    {
+      n += 4;
+      x_tmp <<= 4;
+    }
+
+  if (x_tmp <= 0x3fffffff)
+    {
+      n += 2;
+      x_tmp <<= 2;
+    }
+
+  if (x_tmp <= 0x7fffffff)
+    {
+      n += 1;
+    }
+
+  return n;
 #endif
 }
 
@@ -1040,10 +1096,6 @@ int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
  *   16-bit hash of the array.
  *
  ****************************************************************************/
-
-uint8_t mfs_arrhash(FAR const char *arr, ssize_t len);
-
-/* TODO: Put below in place of above. */
 
 uint16_t mfs_hash(FAR const char *arr, ssize_t len);
 
