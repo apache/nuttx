@@ -1414,3 +1414,66 @@ fail:
 
   return ret;
 }
+
+/****************************************************************************
+ * Name: rpmsgdev_unregister
+ *
+ * Description:
+ *   Rpmsg-device client uninitialize function, the client cpu should call
+ *   this function to unregister the rpmsg device.
+ *
+ * Parameters:
+ *   localpath  - the device path which bindded to the rpmsg device
+ *
+ * Returned Values:
+ *   OK on success; A negated errno value is returned on any failure.
+ *
+ ****************************************************************************/
+
+int rpmsgdev_unregister(FAR const char *localpath)
+{
+  FAR struct rpmsgdev_s *dev;
+  struct file file;
+  int ret;
+
+  if (localpath == NULL)
+    {
+      return -EINVAL;
+    }
+
+  /* Open the device to get the inode reference */
+
+  ret = file_open(&file, localpath, O_RDWR);
+  if (ret < 0)
+    {
+      rpmsgdeverr("Failed to open %s, ret=%d\n", localpath, ret);
+      return ret;
+    }
+
+  /* Get the private data from the inode */
+
+  dev = file.f_inode->i_private;
+  file_close(&file);
+
+  /* Unregister the driver */
+
+  ret = unregister_driver(localpath);
+  if (ret < 0)
+    {
+      rpmsgdeverr("unregister driver failed, ret=%d\n", ret);
+      return ret;
+    }
+
+  /* Unregister the rpmsg callback */
+
+  rpmsg_unregister_callback(dev,
+                            rpmsgdev_device_created,
+                            rpmsgdev_device_destroy,
+                            NULL,
+                            NULL);
+
+  nxsem_destroy(&dev->wait);
+  kmm_free(dev);
+  return ret;
+}
+

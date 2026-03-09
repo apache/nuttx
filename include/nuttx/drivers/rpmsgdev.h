@@ -101,6 +101,7 @@ int rpmsgdev_export_with_prefix(FAR const char *remotecpu,
 #ifdef CONFIG_DEV_RPMSG
 int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
                       FAR const char *localpath);
+int rpmsgdev_unregister(FAR const char *localpath);
 #endif
 
 #if defined(__cplusplus)
