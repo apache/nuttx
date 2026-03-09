@@ -1319,28 +1319,28 @@ static void rijndaeldecrypt(FAR const uint32_t *rk,
    */
 
   s0 =
-    (TD4[(t0 >> 24)] << 24) ^
+    ((uint32_t)TD4[(t0 >> 24)] << 24) ^
     (TD4[(t3 >> 16) & 0xff] << 16) ^
     (TD4[(t2 >> 8) & 0xff] << 8) ^
     (TD4[(t1) & 0xff]) ^
     rk[0];
   PUTU32(pt, s0);
   s1 =
-    (TD4[(t1 >> 24)] << 24) ^
+    ((uint32_t)TD4[(t1 >> 24)] << 24) ^
     (TD4[(t0 >> 16) & 0xff] << 16) ^
     (TD4[(t3 >> 8) & 0xff] << 8) ^
     (TD4[(t2) & 0xff]) ^
     rk[1];
   PUTU32(pt +  4, s1);
   s2 =
-    (TD4[(t2 >> 24)] << 24) ^
+    ((uint32_t)TD4[(t2 >> 24)] << 24) ^
     (TD4[(t1 >> 16) & 0xff] << 16) ^
     (TD4[(t0 >> 8) & 0xff] << 8) ^
     (TD4[(t3) & 0xff]) ^
     rk[2];
   PUTU32(pt +  8, s2);
   s3 =
-    (TD4[(t3 >> 24)] << 24) ^
+    ((uint32_t)TD4[(t3 >> 24)] << 24) ^
     (TD4[(t2 >> 16) & 0xff] << 16) ^
     (TD4[(t1 >> 8) & 0xff] << 8) ^
     (TD4[(t0) & 0xff]) ^
