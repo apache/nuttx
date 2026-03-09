@@ -530,8 +530,16 @@ no_data:
 static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen)
 {
+  uint8_t raw_buf[CC1101_PACKET_MAXTOTALLEN];
+  FAR struct wlioc_rx_hdr_s *hdr;
   FAR struct cc1101_dev_s *dev;
+  size_t actual_payload_len;
   FAR struct inode *inode;
+  size_t user_max_len;
+  size_t copy_len;
+  uint8_t lqi_crc;
+  uint8_t pktlen;
+  int raw_rssi;
   int ret;
 
   inode = filep->f_inode;
@@ -560,9 +568,72 @@ static ssize_t cc1101_file_read(FAR struct file *filep, FAR char *buffer,
       return ret;
     }
 
-  buflen = fifo_get(dev, (FAR uint8_t *)buffer, buflen);
+  /* If in serial mode, return not supported directly, because data does
+   * not go over SPI and FIFO.
+   */
+
+  if (dev->opmode == CC1101_OPMODE_SYNC_SERIAL ||
+      dev->opmode == CC1101_OPMODE_ASYNC_SERIAL)
+    {
+      nxmutex_unlock(&dev->devlock);
+      return -EOPNOTSUPP;
+    }
+
+  /* Verify if the user-passed buffer is a valid struct pointer. */
+
+  if (buflen != sizeof(struct wlioc_rx_hdr_s))
+    {
+      nxmutex_unlock(&dev->devlock);
+      return -EINVAL;
+    }
+
+  hdr = (FAR struct wlioc_rx_hdr_s *)buffer;
+
+  /* Get the user-provided max capacity of the receive buffer. */
+
+  user_max_len = hdr->payload_length;
+  if (hdr->payload_buffer == NULL)
+    {
+      nxmutex_unlock(&dev->devlock);
+      return -EINVAL;
+    }
+
+  pktlen = fifo_get(dev, raw_buf, sizeof(raw_buf));
+
+  if (pktlen == 0)
+    {
+      nxmutex_unlock(&dev->devlock);
+      return 0;
+    }
+
+  /* pktlen contains the payload plus 2 bytes of status. */
+
+  actual_payload_len = (size_t)(pktlen - 2);
+
+  /* Fill metadata (fixed index: subtract 2 and 1). */
+
+  raw_rssi = raw_buf[pktlen - 2];
+  lqi_crc = raw_buf[pktlen - 1];
+
+  hdr->rssi_dbm = cc1101_calc_rssi_dbm_x100(raw_rssi);
+  hdr->snr_db = (int32_t)(lqi_crc & CC1101_LQI_EST_BM) * 100;
+  hdr->error = (lqi_crc & CC1101_LQI_CRC_OK_BM) ? 0 : 1;
+
+  /* Copy the actual data to the user's payload_buffer (fixed starting
+   * point: raw_buf[0]).
+   */
+
+  copy_len = (actual_payload_len > user_max_len) ?
+             user_max_len : actual_payload_len;
+  memcpy(hdr->payload_buffer, &raw_buf[0], copy_len);
+
+  /* Update the length to the actual written length. */
+
+  hdr->payload_length = copy_len;
+
   nxmutex_unlock(&dev->devlock);
-  return buflen;
+
+  return sizeof(struct wlioc_rx_hdr_s);
 }
 
 /****************************************************************************
@@ -1304,6 +1375,25 @@ int cc1101_calc_rssi_dbm(int rssi)
 }
 
 /****************************************************************************
+ * Name: cc1101_calc_rssi_dbm_x100
+ *
+ * Description:
+ *
+ ****************************************************************************/
+
+int cc1101_calc_rssi_dbm_x100(int rssi)
+{
+  if (rssi >= 128)
+    {
+      rssi -= 256;
+    }
+
+  /* (rssi / 2 - 74) * 100  =>  rssi * 50 - 7400 */
+
+  return (rssi * 50) - 7400;
+}
+
+/****************************************************************************
  * Name: cc1101_receive
  *
  * Description:
@@ -1361,7 +1451,13 @@ int cc1101_read(FAR struct cc1101_dev_s *dev, FAR uint8_t *buf, size_t size)
   if (!(buf[nbytes] & 0x80))
     {
       wlwarn("RX CRC error\n");
-      nbytes = 0;
+
+      /* Only clear nbytes and discard packet in non-promiscuous mode. */
+
+      if (dev->opmode != CC1101_OPMODE_PROMISCUOUS)
+        {
+          nbytes = 0;
+        }
     }
 
 breakout:
@@ -1913,6 +2009,106 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
       case WLIOC_GETFINEPOWER:
         ret = -ENOSYS;
         break;
+
+      case CC1101IOC_SETOPMODE:
+        {
+          enum cc1101_opmode_e new_mode = (enum cc1101_opmode_e)arg;
+          uint8_t pktctrl0;
+          uint8_t pktctrl1;
+          uint8_t iocfg0;
+          uint8_t iocfg2;
+
+          /* 1. Restore baseline settings (read from rfsettings). */
+
+          /* Clear PKT_FORMAT bits. */
+
+          pktctrl0 = dev->rfsettings->PKTCTRL0 & ~0x30;
+          pktctrl1 = dev->rfsettings->PKTCTRL1;
+
+          /* 2. Modify registers depending on mode. */
+
+          switch (new_mode)
+            {
+              case CC1101_OPMODE_NORMAL:
+
+                /* Default behavior: Use FIFO, keep rfsettings filtering
+                 * rules.
+                 */
+
+                break;
+
+              case CC1101_OPMODE_PROMISCUOUS:
+
+                /* Promiscuous mode: Still use FIFO (PKT_FORMAT=0).
+                 * Disable address check (ADR_CHK=00), enable append status
+                 * (APPEND_STATUS=1). Disable CRC autoflush
+                 * (CRC_AUTOFLUSH=0).
+                 */
+
+                pktctrl1 = (pktctrl1 & ~0x0b) | 0x04;
+                break;
+
+              case CC1101_OPMODE_SYNC_SERIAL:
+
+                /* Synchronous serial: PKT_FORMAT=1.
+                 * Configure GDO pins to output clock and data.
+                 */
+
+                pktctrl0 |= 0x10;
+
+                /* GDO0 outputs synchronous clock. */
+
+                iocfg0 = CC1101_GDO_SSCLK;
+
+                /* GDO2 outputs synchronous data. */
+
+                iocfg2 = CC1101_GDO_SSDO;
+
+                cc1101_setgdo(dev, CC1101_PIN_GDO0, iocfg0);
+                cc1101_setgdo(dev, CC1101_PIN_GDO2, iocfg2);
+                break;
+
+              case CC1101_OPMODE_ASYNC_SERIAL:
+
+                /* Asynchronous serial: PKT_FORMAT=3. */
+
+                pktctrl0 |= 0x30;
+
+                /* GDO2 outputs asynchronous data. */
+
+                iocfg2 = CC1101_GDO_ASDO;
+
+                cc1101_setgdo(dev, CC1101_PIN_GDO2, iocfg2);
+                break;
+
+              default:
+                ret = -EINVAL;
+                goto ioctl_out;
+            }
+
+          /* 3. Pre-load configuration to registers. */
+
+          if (cc1101_access(dev, CC1101_PKTCTRL0, &pktctrl0, -1) >= 0 &&
+              cc1101_access(dev, CC1101_PKTCTRL1, &pktctrl1, -1) >= 0)
+            {
+              dev->opmode = new_mode;
+              ret = OK;
+            }
+          else
+            {
+              ret = -EIO;
+            }
+
+ioctl_out:
+          break;
+        }
+
+      case CC1101IOC_GETOPMODE:
+        {
+          FAR *(enum cc1101_opmode_e *)arg = dev->opmode;
+          ret = OK;
+          break;
+        }
 
       default:
         ret = -ENOTTY;

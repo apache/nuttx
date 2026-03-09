@@ -281,8 +281,13 @@
 
 /* See include/nuttx/wireless/gs2200m.h */
 
-#define GS2200M_FIRST       (SX127X_FIRST + SX127X_NCMDS)
+#define GS2200M_FIRST       (SX126X_FIRST + SX126X_NCMDS)
 #define GS2200M_NCMDS       9
+
+/* See include/nuttx/wireless/cc1101.h */
+
+#define CC1101_FIRST        (GS2200M_FIRST + GS2200M_NCMDS)
+#define CC1101_NCMDS        2
 
 /****************************************************************************
  * Public Types
