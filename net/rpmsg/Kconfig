@@ -48,6 +48,16 @@ config NET_RPMSG_NPOLLWAITERS
 	---help---
 		Socket RPMSG number of poll waiters
 
+config NET_RPMSG_EPT_PRIORITY
+	int "RPMSG socket endpoint priority"
+	default 127
+	range 0 254
+	---help---
+		Default priority of the rpmsg endpoint of every rpmsg socket.
+		SO_PRIORITY overrides it per socket.  255 (RPMSG_PRIO_RT) is
+		reserved and runs the endpoint callback in interrupt context,
+		which the socket code does not support.
+
 endif # NET_RPMSG
 
 endmenu # Rpmsg Domain Sockets
