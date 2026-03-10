@@ -73,6 +73,7 @@ struct vsock_virtio_priv_s
   spinlock_t                tx_lock;
   struct list_node          tx_buf_list;
   int                       tx_buf_num;
+  int                       tx_buf_total;
   FAR void                 *tx_buf_alloc;
   sem_t                     tx_sem;
 
@@ -93,6 +94,7 @@ struct vsock_virtio_priv_s
 
 static int vsock_virtio_probe(FAR struct virtio_device *vdev);
 static void vsock_virtio_remove(FAR struct virtio_device *vdev);
+static void vsock_virtio_dump(FAR struct virtio_device *vdev);
 
 static uint64_t vsock_virtio_get_localcid(FAR struct vsock_transport_s *t);
 static uint64_t vsock_virtio_get_remotecid(FAR struct vsock_transport_s *t);
@@ -112,6 +114,7 @@ static struct virtio_driver g_vsock_virtio_driver =
   VIRTIO_ID_VSOCK,                                /* device id */
   vsock_virtio_probe,                             /* probe */
   vsock_virtio_remove,                            /* remove */
+  vsock_virtio_dump,                              /* dump */
 };
 
 static const struct vsock_transport_ops_s g_vsock_virtio_transport_ops =
@@ -430,6 +433,7 @@ static int vsock_virtio_tx_buf_init(FAR struct vsock_virtio_priv_s *priv)
   vq = priv->vdev->vrings_info[VSOCK_VQ_TX].vq;
   size = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
   priv->tx_buf_num = MIN(vq->vq_nentries, CONFIG_NET_VSOCK_VQ_BUFCOUNT);
+  priv->tx_buf_total = priv->tx_buf_num;
   priv->tx_buf_alloc = virtio_malloc_buf(priv->vdev,
                                          size * priv->tx_buf_num, 16);
   if (priv->tx_buf_alloc == NULL)
@@ -594,6 +598,30 @@ static void vsock_virtio_remove(FAR struct virtio_device *vdev)
 
   vsock_virtio_uninit(priv);
   kmm_free(priv);
+}
+
+/****************************************************************************
+ * Name: vsock_virtio_dump
+ ****************************************************************************/
+
+static void vsock_virtio_dump(FAR struct virtio_device *vdev)
+{
+  FAR struct vsock_virtio_priv_s *priv = vdev->priv;
+  FAR struct virtqueue *rxvq = vdev->vrings_info[VSOCK_VQ_RX].vq;
+  FAR struct virtqueue *txvq = vdev->vrings_info[VSOCK_VQ_TX].vq;
+  int rx_buf_total = MIN(rxvq->vq_nentries, CONFIG_NET_VSOCK_VQ_BUFCOUNT);
+  size_t buf_size = VIRTIO_VSOCK_HDR_LEN + CONFIG_NET_VSOCK_PKT_BUFSIZE;
+
+  syslog(LOG_EMERG, "    guest_cid=%" PRIu64 ", host_cid=%" PRIu64
+         ", pkt_bufsize=%zu B (hdr=%zu + data=%d)\n",
+         priv->guest_cid, priv->host_cid,
+         buf_size, VIRTIO_VSOCK_HDR_LEN, CONFIG_NET_VSOCK_PKT_BUFSIZE);
+  syslog(LOG_EMERG, "    rx: entries=%d, bufs=%d (total %zu B)"
+         ", tx: entries=%d, buf_free=%d/%d\n",
+         rxvq->vq_nentries, rx_buf_total, rx_buf_total * buf_size,
+         txvq->vq_nentries, priv->tx_buf_num, priv->tx_buf_total);
+  syslog(LOG_EMERG, "  Vsock Connections:\n");
+  vsock_conn_dump(&priv->t);
 }
 
 /****************************************************************************
