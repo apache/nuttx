@@ -115,6 +115,8 @@ void vsock_recv_pkt(FAR struct vsock_transport_s *t,
 int vsock_queue_work(FAR struct work_s *work, worker_t worker, FAR void *arg,
                      clock_t delay);
 
+void vsock_conn_dump(FAR struct vsock_transport_s *t);
+
 /* Register vsock transport layer to the vsock interface layer, should be
  * called by the vsock transport layer only.
  */
