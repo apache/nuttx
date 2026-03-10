@@ -94,11 +94,19 @@ static uint32_t devfreq_gov_ondemand_cpuload(void)
 static void devfreq_ondemand_worker(FAR void *arg)
 {
   FAR struct devfreq_s *dev = arg;
-  FAR struct devfreq_ondemand_s *data = dev->governor_data;
+  FAR struct devfreq_ondemand_s *data;
+  FAR struct qos_request_s *req;
   uint32_t cpuload;
 
   cpuload = devfreq_gov_ondemand_cpuload();
   nxmutex_lock(&dev->lock);
+  data = dev->governor_data;
+  if (data == NULL)
+    {
+      nxmutex_unlock(&dev->lock);
+      return;
+    }
+
   if (cpuload > CONFIG_DEVFREQ_LOAD_THRESHOLD)
     {
       if (dev->cur < dev->max)
@@ -116,14 +124,21 @@ static void devfreq_ondemand_worker(FAR void *arg)
                           (dev->max - dev->min) / 100;
     }
 
-  nxmutex_unlock(&dev->lock);
+  /* Re-queue before releasing the lock so that exit/stop can
+   * reliably cancel the pending work after setting governor_data
+   * to NULL.  All accesses to 'data' must happen while holding
+   * the lock to avoid use-after-free.
+   */
 
-  devfreq_qos_update_request(dev, data->req, dev->min, dev->max);
+  req = data->req;
   work_queue(HPWORK,
              &data->work,
              devfreq_ondemand_worker,
              dev,
              data->sample_rate / USEC_PER_TICK);
+  nxmutex_unlock(&dev->lock);
+
+  devfreq_qos_update_request(dev, req, dev->min, dev->max);
 }
 
 static int devfreq_gov_ondemand_init(FAR struct devfreq_s *dev)
@@ -151,6 +166,19 @@ static int devfreq_gov_ondemand_exit(FAR struct devfreq_s *dev)
 
   devfreq_qos_remove_request(dev, data->req);
 
+  /* First, mark governor_data as NULL so that any in-flight worker
+   * will see it and bail out without re-queuing.
+   */
+
+  nxmutex_lock(&dev->lock);
+  dev->governor_data = NULL;
+  nxmutex_unlock(&dev->lock);
+
+  /* Cancel any pending work that was queued before we cleared
+   * governor_data, then it is safe to free.
+   */
+
+  work_cancel_sync(HPWORK, &data->work);
   kmm_free(data);
   return 0;
 }
