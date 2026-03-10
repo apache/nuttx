@@ -46,7 +46,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: neilberkman/tardigrade
-          ref: 819d143a56c83fd7860ccc8f76a414a717956d94
+          ref: b90b61f7aefa813aac8e565217172d936d70c4ba
           path: tardigrade
           persist-credentials: false
 
