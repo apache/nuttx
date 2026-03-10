@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <syslog.h>
 #include <errno.h>
 
@@ -103,6 +104,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  endif
 #endif
 
+  /* Save errno so that nx_vsyslog does not clobber it. The syslog
+   * formatting path calls libc functions (e.g. strftime -> tzset -> open)
+   * that may modify errno as a side effect.
+   */
+
+  int saved_errno = get_errno();
+
   /* Wrap the low-level output in a stream object and let lib_vsprintf
    * do the work.
    */
@@ -133,13 +141,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #  if defined(CONFIG_SYSLOG_TIMESTAMP_REALTIME)
       /* Use CLOCK_REALTIME if so configured */
 
-      clock_gettime(CLOCK_REALTIME, &ts);
+      nxclock_gettime(CLOCK_REALTIME, &ts);
 #  else
       /* Prefer monotonic when enabled, as it can be synchronized to
        * RTC with clock_resynchronize.
        */
 
-      clock_gettime(CLOCK_MONOTONIC, &ts);
+      nxclock_gettime(CLOCK_MONOTONIC, &ts);
 #  endif
 
       /* Prepend the message with the current time, if available */
@@ -311,5 +319,13 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
   /* Flush and destroy the syslog stream buffer */
 
   lib_syslograwstream_close(&stream);
+
+  /* Restore errno that may have been clobbered by libc calls
+   * (e.g. strftime -> tzset -> open sets ENOENT when timezone
+   * file is not found).
+   */
+
+  set_errno(saved_errno);
+
   return ret;
 }
