@@ -30,6 +30,12 @@ ifeq ($(CONFIG_STM32_APP_FORMAT_MCUBOOT),y)
   else
     LDSCRIPT = flash-mcuboot-app.ld
   endif
+else ifeq ($(CONFIG_STM32_APP_FORMAT_NXBOOT),y)
+  ifeq ($(CONFIG_NXBOOT_BOOTLOADER),y)
+    LDSCRIPT = flash-nxboot-loader.ld
+  else
+    LDSCRIPT = flash-nxboot-app.ld
+  endif
 else
   LDSCRIPT = flash.ld
 endif

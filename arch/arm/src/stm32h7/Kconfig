@@ -674,6 +674,16 @@ config STM32_APP_FORMAT_MCUBOOT
 comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
 	depends on !EXPERIMENTAL
 
+config STM32_APP_FORMAT_NXBOOT
+	bool "NuttX nxboot format"
+	select STM32_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+	---help---
+		The NuttX nxboot support of loading the firmware images.
+
+comment "nxboot support depends on CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
 endchoice # Application Image Format
 
 endmenu # Application Image Configuration
@@ -6593,29 +6603,44 @@ config STM32_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
 	default "/dev/ota1"
 
+config STM32_OTA_TERTIARY_SLOT_DEVPATH
+	string "Application image tertiary slot device path"
+	default "/dev/ota2"
+	depends on STM32_APP_FORMAT_NXBOOT
+
 config STM32_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
 	default "/dev/otascratch"
+	depends on STM32_APP_FORMAT_MCUBOOT
 
 config STM32_OTA_PRIMARY_SLOT_OFFSET
-	hex "MCUboot application image primary slot offset"
+	hex "Application image primary slot offset"
 	default "0x40000"
 
 config STM32_OTA_SECONDARY_SLOT_OFFSET
-	hex "MCUboot application image secondary slot offset"
+	hex "Application image secondary slot offset"
+	default "0xc0000" if STM32_APP_FORMAT_NXBOOT
 	default "0x100000"
+
+config STM32_OTA_TERTIARY_SLOT_OFFSET
+	hex "Application image tertiary slot offset"
+	default "0x140000"
+	depends on STM32_APP_FORMAT_NXBOOT
 
 config STM32_OTA_SCRATCH_OFFSET
 	hex "MCUboot scratch partition offset"
 	default "0x1c0000"
+	depends on STM32_APP_FORMAT_MCUBOOT
 
 config STM32_OTA_SLOT_SIZE
-	hex "MCUboot application image slot size (in bytes)"
+	hex "Application image slot size (in bytes)"
+	default "0x80000" if STM32_APP_FORMAT_NXBOOT
 	default "0xc0000"
 
 config STM32_OTA_SCRATCH_SIZE
 	hex "MCUboot scratch partition size (in bytes)"
 	default "0x40000"
+	depends on STM32_APP_FORMAT_MCUBOOT
 
 endif # STM32_PROGMEM_OTA_PARTITION
 endif # STM32_HAVE_OTA_PARTITION
