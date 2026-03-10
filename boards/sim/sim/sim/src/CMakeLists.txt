@@ -26,10 +26,6 @@ if(CONFIG_BOARD_LATE_INITIALIZE)
   list(APPEND SRCS sim_boot.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sim_appinit.c)
-endif()
-
 if(CONFIG_BOARD_LATE_INITIALIZE)
   list(APPEND SRCS sim_bringup.c)
   if(CONFIG_LIBC_ZONEINFO_ROMFS)

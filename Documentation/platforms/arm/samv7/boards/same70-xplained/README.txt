@@ -174,7 +174,6 @@ the SD slots can be enabled with the following settings:
     CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
 
   Application Configuration -> NSH Library
-    CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, OR
     CONFIG_BOARD_LATE_INITIALIZE=y
 
 Using the SD card

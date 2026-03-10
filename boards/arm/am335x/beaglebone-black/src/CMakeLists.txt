@@ -22,10 +22,6 @@
 
 set(SRCS am335x_boot.c am335x_bringup.c am335x_leds.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS am335x_appinit.c)
-endif()
-
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS am335x_buttons.c)
 endif()

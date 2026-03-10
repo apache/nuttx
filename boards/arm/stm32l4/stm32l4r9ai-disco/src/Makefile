@@ -59,11 +59,8 @@ ifeq ($(CONFIG_STM32L4_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += stm32_ioctl.c
-endif
 endif
 
 ifeq ($(CONFIG_ETC_ROMFS),y)

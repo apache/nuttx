@@ -24,8 +24,4 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = fvp_boardinit.c fvp_bringup.c
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += fvp_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

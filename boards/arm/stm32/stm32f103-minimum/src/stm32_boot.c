@@ -96,12 +96,6 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifndef CONFIG_BOARDCTL
-  /* Perform board initialization here instead of from the
-   * board_app_initialize().
-   */
-
   stm32_bringup();
-#endif
 }
 #endif

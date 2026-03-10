@@ -22,7 +22,6 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS  = tlsr8278_appinit.c
 CSRCS += tlsr8278_bringup.c tlsr8278_boot.c
 CSRCS += tlsr8278_gpio.c
 

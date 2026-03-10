@@ -29,10 +29,6 @@ if(CONFIG_STM32_FSMC)
   list(APPEND SRCS stm32_selectlcd.c stm32_deselectlcd.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()

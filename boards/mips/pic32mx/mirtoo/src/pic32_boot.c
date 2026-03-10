@@ -26,9 +26,20 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdio.h>
 #include <debug.h>
+#include <errno.h>
 
+#include <nuttx/board.h>
 #include <arch/board/board.h>
+#include <nuttx/fs/fs.h>
+
+#ifdef CONFIG_PIC32MX_SPI2
+#  include <nuttx/spi/spi.h>
+#  include <nuttx/mtd/mtd.h>
+#  include <nuttx/fs/nxffs.h>
+#endif
 
 #include "mips_internal.h"
 #include "pic32mx.h"
@@ -44,6 +55,33 @@
 
 #define GPIO_U2TX  (GPIO_OUTPUT|GPIO_PORTB|GPIO_PIN10)
 #define GPIO_U2RX  (GPIO_INPUT|GPIO_PORTB|GPIO_PIN11)
+
+/* Configuration ************************************************************/
+
+/* Can't support the SST25 device if it SPI2/SST25 support is not enabled */
+
+#define HAVE_SST25  1
+#if !defined(CONFIG_PIC32MX_SPI2) || !defined(CONFIG_MTD_SST25)
+#  undef HAVE_SST25
+#endif
+
+/* Can't support SST25 features if mountpoints are disabled */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#  undef HAVE_SST25
+#endif
+
+/* Use minor device number 0 is not is provided */
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Can't support both FAT and NXFFS */
+
+#if defined(CONFIG_FS_FAT) && defined(CONFIG_FS_NXFFS)
+#  warning "Can't support both FAT and NXFFS -- using FAT"
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -149,3 +187,78 @@ void pic32mx_boardinitialize(void)
   pic32mx_led_initialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize(). board_late_initialize() will be
+ *   called immediately after up_initialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+#ifdef HAVE_SST25
+  struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
+  int ret;
+
+  /* Get the SPI port */
+
+  spi = pic32mx_spibus_initialize(2);
+  if (!spi)
+    {
+      ferr("ERROR: Failed to initialize SPI port 2\n");
+      return;
+    }
+
+  /* Now bind the SPI interface to the SST 25 SPI FLASH driver */
+
+  mtd = sst25_initialize(spi);
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to bind SPI port 2 to the SST 25 FLASH driver\n");
+      return;
+    }
+
+#ifndef CONFIG_FS_NXFFS
+  /* Register the MTD driver */
+
+  char path[32];
+  snprintf(path, sizeof(path), "/dev/mtdblock%d", CONFIG_NSH_MMCSDMINOR);
+  ret = register_mtddriver(path, mtd, 0755, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register the MTD driver %s, ret %d\n",
+           path, ret);
+      return;
+    }
+#else
+  /* Initialize to provide NXFFS on the MTD interface */
+
+  ret = nxffs_initialize(mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: NXFFS initialization failed: %d\n", -ret);
+      return;
+    }
+
+  /* Mount the file system at /mnt/sst25 */
+
+  ret = nx_mount(NULL, "/mnt/sst25", "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to mount the NXFFS volume: %d\n", ret);
+      return;
+    }
+#endif
+#endif
+}
+
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */

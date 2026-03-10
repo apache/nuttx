@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_NSH_LIBRARY)
-  list(APPEND SRCS stm32_appinit.c)
-endif()
-
 if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()

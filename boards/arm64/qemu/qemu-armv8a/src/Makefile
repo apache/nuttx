@@ -25,7 +25,7 @@ include $(TOPDIR)/Make.defs
 CSRCS = qemu_boardinit.c qemu_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += qemu_appinit.c qemu_power.c
+CSRCS += qemu_power.c
 endif
 
 ifeq ($(CONFIG_LIBC_FDT),y)

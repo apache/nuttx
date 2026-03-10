@@ -1164,8 +1164,6 @@ static void adc12_handler(void)
  * Description:
  *   Initialize SMPS driver.
  *
- *   This function should be call by board_app_initialize().
- *
  * Returned Value:
  *   0 on success, a negated errno value on failure
  *

@@ -283,9 +283,6 @@ Configuration (STM32F103 only)
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
 
-    Application Configuration -> NSH Library
-      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
     Using the SD card
     -----------------
 
@@ -418,7 +415,6 @@ enabled support for the barometer::
     Drivers -> Sensors
       CONFIG_SENSORS=y
       CONFIG_SENSORS_MPL115A=y
-      CONFIG_NSH_ARCHINIT=y
 
 Note: this driver uses SPI3 then since PB3 pin is also use to JTAG TDO you
 need to disable JTAG support to get this driver working::
@@ -769,7 +765,6 @@ todo::
   support the MAX3421E:
 
     CONFIG_EXPERIMENTAL=y         # EXPERIMENTAL required for now (might change)
-    CONFIG_NSH_ARCHINIT=y         # Board level initialization required
     CONFIG_STM32_SPI1=y           # SPI for the MAX3421E (could use SPI2)
     CONFIG_USBHOST=y              # General USB host support
     CONFIG_USBHOST_ISOC_DISABLE=y # Does not support Isochronous endpoints

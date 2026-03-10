@@ -5214,8 +5214,7 @@ config BOARDCTL
 	bool "Enable boardctl() interface"
 	default n
 	---help---
-		Enables support for the boardctl() interface.  Architecture
-		specific logic must provide board_app_initialize() interface.
+		Enables support for the boardctl() interface.
 
 if BOARDCTL
 

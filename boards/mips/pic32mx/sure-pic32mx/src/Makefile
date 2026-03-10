@@ -45,8 +45,4 @@ ifeq ($(CONFIG_LCD_LCD1602),y)
 CSRCS += pic32mx_lcd1602.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += pic32mx_appinit.c
-endif
-
 include $(TOPDIR)/boards/Board.mk

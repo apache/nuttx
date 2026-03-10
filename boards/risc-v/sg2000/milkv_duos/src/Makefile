@@ -24,6 +24,6 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
 
-CSRCS = sg2000_appinit.c
+CSRCS = sg2000_boardinit.c
 
 include $(TOPDIR)/boards/Board.mk

@@ -29,6 +29,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#include "rp23xx_pico.h"
 #include "rp23xx_gpio.h"
 
 #ifdef CONFIG_RP23XX_RV_PSRAM
@@ -92,3 +93,30 @@ void rp23xx_boardinitialize(void)
 
   /* --- Place any board specific initialization here --- */
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  rp23xx_bringup();
+}
+#endif

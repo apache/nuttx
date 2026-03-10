@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c stm32_userleds.c
+CSRCS = stm32_boot.c stm32_spi.c stm32_userleds.c
 
 ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
@@ -34,10 +34,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += stm32_appinit.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

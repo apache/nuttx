@@ -25,10 +25,26 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
-#include <arch/board/board.h>
 
+#include <stdbool.h>
+#include <stdio.h>
+#include <syslog.h>
+#include <errno.h>
+
+#include <arch/board/board.h>
 #include <nuttx/board.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mmcsd.h>
+
+#ifdef CONFIG_USBMONITOR
+#  include <nuttx/usb/usbmonitor.h>
+#endif
+
+#ifdef CONFIG_USBDEV
+#  include "stm32_usbdev.h"
+#endif
+
+#include "stm32.h"
 #include "olimexino-stm32.h"
 
 /****************************************************************************
@@ -117,14 +133,29 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_BOARDCTL)
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-
-   * space but the initialization function must run in kernel space.
-   */
+  int ret = OK;
 
-  board_app_initialize(0);
+#ifdef CONFIG_USBMSC
+#if !defined(CONFIG_NSH_BUILTIN_APPS) && !defined(CONFIG_SYSTEM_USBMSC)
+  ret = board_usbmsc_initialize(0);
 #endif
+#endif
+
+#if !defined(CONFIG_NSH_BUILTIN_APPS) && defined(CONFIG_USBDEV_COMPOSITE)
+  ret = board_composite_initialize(0);
+#endif
+
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+  UNUSED(ret);
 
 #if defined(CONFIG_USBDEV)
   stm32_usb_set_pwr_callback(vbus_handler);

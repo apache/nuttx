@@ -26,10 +26,6 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS tm4c_autoleds.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS tm4c_appinit.c)
-endif()
-
 if(CONFIG_TIVA_TIMER)
   list(APPEND SRCS tm4c_timer.c)
 endif()

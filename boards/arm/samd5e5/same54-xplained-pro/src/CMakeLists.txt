@@ -22,10 +22,6 @@
 
 set(SRCS sam_boot.c sam_bringup.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS sam_autoleds.c)
 else()

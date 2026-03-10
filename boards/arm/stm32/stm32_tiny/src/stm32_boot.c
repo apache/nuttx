@@ -34,6 +34,10 @@
 #include "arm_internal.h"
 #include "stm32_tiny.h"
 
+#ifdef CONFIG_WL_NRF24L01
+#include "stm32_nrf24l01.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -82,3 +86,44 @@ void stm32_boardinitialize(void)
   stm32_usbinitialize();
 #endif
 }
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_late_initialize().  board_late_initialize() will
+ *   be called immediately after up_initialize() is called and just before
+ *   the initial application is started.  This additional initialization
+ *   phase may be used, for example, to initialize board-specific device
+ *   drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+  int ret = OK;
+
+#ifdef CONFIG_PWM
+  /* Initialize PWM and register the PWM device. */
+
+  ret = stm32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_WL_NRF24L01)
+  /* Initialize the NRF24L01 wireless module */
+
+  ret = board_nrf24l01_initialize(2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_nrf24l01_initialize failed: %d\n", ret);
+    }
+#endif
+}
+#endif

@@ -36,10 +36,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS sam_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_SAM34_LCDCA)
   if(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
     list(APPEND SRCS sam_slcd.c)

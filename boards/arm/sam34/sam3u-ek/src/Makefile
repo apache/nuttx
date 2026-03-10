@@ -28,10 +28,6 @@ ifeq ($(CONFIG_LCD),y)
 CSRCS += sam_lcd.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c
-endif
-
 ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += sam_mmcsd.c
 endif

@@ -22,10 +22,6 @@
 
 set(SRCS sam_boot.c sam_leds.c sam_buttons.c sam_udp.c)
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_SAM34_HSMCI)
   list(APPEND SRCS sam_hsmci.c)
 endif()

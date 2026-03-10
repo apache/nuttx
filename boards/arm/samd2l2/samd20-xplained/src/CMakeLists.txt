@@ -36,10 +36,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS sam_buttons.c)
 endif()
 
-if(CONFIG_BOARDCTL)
-  list(APPEND SRCS sam_appinit.c)
-endif()
-
 if(CONFIG_SAMD20_XPLAINED_IOMODULE)
   list(APPEND SRCS sam_mmcsd.c)
 endif()

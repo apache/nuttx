@@ -129,7 +129,7 @@ events as follows:
        LED_SIGNAL           In a signal handler[3]  N/C     ON      N/C     OFF
        LED_ASSERTION        An assertion failed     ON      ON      N/C     OFF
        LED_PANIC            The system has crashed  N/C     N/C     N/C     ON
-       LED_IDLE             STM32 is is sleep mode  
+       LED_IDLE             STM32 is is sleep mode
        ===================  ======================= ======= ======= ======= ======
 
        [1] If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
@@ -185,9 +185,6 @@ configuration options::
     Library
       CONFIG_LIBM=y
       CONFIG_LIBC_FLOATINGPOINT=y
-
-    Applications -> NSH Library
-      CONFIG_NSH_ARCHINIT=y
 
     Applications -> System Add-Ons
       CONFIG_SYSTEM_LM75=y

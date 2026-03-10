@@ -22,12 +22,8 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = qemu_boot.c qemu_bringup.c qemu_net.c
+CSRCS = qemu_boot.c qemu_bringup.c qemu_net.c qemu_boardinit.c
 CSRCS += $(if $(wildcard romfs_boot.c), romfs_boot.c, romfs_stub.c)
-
-ifeq ($(CONFIG_BOARDCTL),y)
-  CSRCS += qemu_appinit.c
-endif
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
   CSRCS += qemu_reset.c

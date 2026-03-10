@@ -107,10 +107,6 @@ Library Routines::
 
       CONFIG_SCHED_WORKQUEUE=y                 : Driver needs work queue support
 
-Application Configuration -> NSH Library::
-
-      CONFIG_NSH_ARCHINIT=y                    : NSH board-initialization
-
 Using the SD card
 -----------------
 
@@ -437,7 +433,7 @@ NOTES:
    reliable.
 
 2. Kernel Modules / Shared Libraries
-   
+
    I used this configuration for testing NuttX kernel modules in the
    FLAT build with the following configuration additions to the
    configuration file::

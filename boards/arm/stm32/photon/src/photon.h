@@ -80,16 +80,12 @@
  * Name: stm32_bringup
  *
  * Description:
- *   Called either by board_initialize() if CONFIG_BOARD_LATE_INITIALIZE or
- *   by board_app_initialize if CONFIG_BOARDCTL is selected.  This
- *   function initializes and configures all on-board features appropriate
- *   for the selected configuration.
+ *   This function initializes and configures all on-board features
+ *   appropriate for the selected configuration.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int stm32_bringup(void);
-#endif
 
 /****************************************************************************
  * Name: stm32_spidev_initialize
