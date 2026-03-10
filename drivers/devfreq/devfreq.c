@@ -173,7 +173,7 @@ static int devfreq_start_governor(FAR struct devfreq_s *devfreq)
 
 static void devfreq_stop_governor(FAR struct devfreq_s *devfreq)
 {
-  if (devfreq->suspended || !devfreq->governor)
+  if (!devfreq->governor)
     {
       return;
     }
@@ -587,21 +587,29 @@ int devfreq_unregister(FAR struct devfreq_s *devfreq)
 int devfreq_suspend(FAR struct devfreq_s *devfreq)
 {
   nxmutex_lock(&devfreq->lock);
+  devfreq->suspended = true;
+  nxmutex_unlock(&devfreq->lock);
 
   devfreq_stop_governor(devfreq);
 
   if (devfreq->driver->suspend)
     {
-      int ret = devfreq->driver->suspend(devfreq);
+      int ret;
+
+      nxmutex_lock(&devfreq->lock);
+      ret = devfreq->driver->suspend(devfreq);
+      nxmutex_unlock(&devfreq->lock);
+
       if (ret < 0)
         {
+          nxmutex_lock(&devfreq->lock);
+          devfreq->suspended = false;
           nxmutex_unlock(&devfreq->lock);
+          devfreq_start_governor(devfreq);
           return ret;
         }
     }
 
-  devfreq->suspended = true;
-  nxmutex_unlock(&devfreq->lock);
   return 0;
 }
 
@@ -621,22 +629,25 @@ int devfreq_suspend(FAR struct devfreq_s *devfreq)
 
 int devfreq_resume(struct devfreq_s *devfreq)
 {
-  nxmutex_lock(&devfreq->lock);
-
   if (devfreq->driver->resume)
     {
-      int ret = devfreq->driver->resume(devfreq);
+      int ret;
+
+      nxmutex_lock(&devfreq->lock);
+      ret = devfreq->driver->resume(devfreq);
+      nxmutex_unlock(&devfreq->lock);
+
       if (ret < 0)
         {
-          nxmutex_unlock(&devfreq->lock);
           return ret;
         }
     }
 
+  nxmutex_lock(&devfreq->lock);
   devfreq->suspended = false;
-  devfreq_start_governor(devfreq);
-
   nxmutex_unlock(&devfreq->lock);
+
+  devfreq_start_governor(devfreq);
   return 0;
 }
 
