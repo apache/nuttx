@@ -2452,6 +2452,49 @@ int vsock_queue_work(FAR struct work_s *work, worker_t worker, FAR void *arg,
 }
 
 /****************************************************************************
+ * Name: vsock_conn_dump
+ *
+ * Description:
+ *   Dump vsock connections owned by the specified transport.
+ *
+ ****************************************************************************/
+
+void vsock_conn_dump(FAR struct vsock_transport_s *t)
+{
+  FAR struct vsock_conn_s *conn;
+  irqstate_t flags;
+  int i = 0;
+
+  flags = spin_lock_irqsave(&g_vsock_conn_lock);
+  list_for_every_entry(&g_vsock_conn, conn, struct vsock_conn_s, node)
+    {
+      if (conn->transport != t)
+        {
+          continue;
+        }
+
+      syslog(LOG_EMERG, "    conn[%d]: %s, local=%u:%u"
+                        ", remote=%u:%u, flags=0x%x"
+                        ", rx=%zu/%zu, tx_credit=%zu\n",
+             i++,
+             _SS_ISLISTENING(conn->sconn.s_flags) ? "server" : "client",
+             conn->local_addr.svm_cid, conn->local_addr.svm_port,
+             conn->remote_addr.svm_cid, conn->remote_addr.svm_port,
+             conn->sconn.s_flags,
+             circbuf_used(&conn->rx_buf),
+             circbuf_size(&conn->rx_buf),
+             vsock_get_tx_credit(conn));
+    }
+
+  if (i == 0)
+    {
+      syslog(LOG_EMERG, "    (no connections)\n");
+    }
+
+  spin_unlock_irqrestore(&g_vsock_conn_lock, flags);
+}
+
+/****************************************************************************
  * Name: vsock_transport_register
  *
  * Description:
