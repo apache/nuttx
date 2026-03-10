@@ -583,7 +583,13 @@ static void rpmsg_virtio_rx_dispatch(FAR struct rpmsg_virtio_priv_s *priv)
               ns_msg = (FAR struct rpmsg_ns_msg *)RPMSG_LOCATE_DATA(hdr);
               ept_ = rpmsg_get_endpoint(rdev, ns_msg->name, RPMSG_ADDR_ANY,
                                         hdr->dst);
-              if (ept_)
+
+              /* Only inherit non-RT priority from the matched endpoint,
+               * ns_ept should not use RT priority to avoid overflow in
+               * priority calculation.
+               */
+
+              if (ept_ && ept_->priority != RPMSG_PRIO_RT)
                 {
                   priority = ept_->priority;
                 }
