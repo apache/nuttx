@@ -141,24 +141,15 @@ sim_hostfs.c: hostfs.h
 
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
-ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
-  # Note: sim_macho_init.c is not in CSRCS because it's picky about
-  # the place in the object list for linking. Namely, its constructor
-  # should be the first one in the executable.
-  HEADSRC = sim_macho_init.c
-
-  # sim_macho_init.c is not compatible with chained fixups.
-  # cf. https://github.com/apache/nuttx/issues/15208
-  ifeq ($(shell $(LD) -ld_classic -no_fixup_chains 2>&1 | grep "unknown option"),)
+  ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
     LDLINKFLAGS += -ld_classic -no_fixup_chains
     LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
   endif
-endif
 
-# Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
-# may resolve host libc references against NuttX's internal libc implementation
-# during process initialization, which can crash before main() runs.
-LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
+  # Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
+  # may resolve host libc references against NuttX's internal libc implementation
+  # during process initialization, which can crash before main() runs.
+  LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
 else
   STDLIBS += -lrt
 endif
@@ -521,6 +512,9 @@ else
 	$(Q) $(call LINK_ALLSYMS_KASAN)
 	$(Q) $(call LINK_ALLSYMS_KASAN)
 	$(Q) $(call LINK_ALLSYMS_KASAN)
+endif
+ifeq ($(CONFIG_HOST_MACOS)$(CONFIG_HAVE_CXXINITIALIZE),yy)
+	$(Q) python3 $(ARCH_SRCDIR)/patch_macho_initsection.py $(TOPDIR)/$@
 endif
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \

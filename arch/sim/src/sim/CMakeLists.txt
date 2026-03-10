@@ -150,14 +150,17 @@ list(
   sim_hosttime.c
   sim_hostuart.c)
 
-# Note: sim_macho_init.c is picky about the place in the object list for
-# linking. Namely, its constructor should be the first one in the executable.
-# For now, we are just assuming no other files in HOSTSRCS provide constructors.
-if(CONFIG_HOST_MACOS)
-  if(CONFIG_HAVE_CXXINITIALIZE)
-    list(APPEND HOSTSRCS sim_macho_init.c)
-    target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)
-  endif()
+if(CONFIG_HOST_MACOS AND CONFIG_HAVE_CXXINITIALIZE)
+  # Keep classic __mod_init_func format so post-link lief patching works
+  target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)
+  add_custom_command(
+    TARGET nuttx
+    POST_BUILD
+    COMMAND
+      ${Python3_EXECUTABLE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/../patch_macho_initsection.py
+      $<TARGET_FILE:nuttx>
+    COMMENT "Patching Mach-O init section type flags")
 endif()
 
 if(CONFIG_SIM_CAMERA_V4L2)
