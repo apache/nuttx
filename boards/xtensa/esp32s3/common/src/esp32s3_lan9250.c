@@ -188,8 +188,8 @@ static int lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
 {
   int fd;
   int ret;
-#ifndef CONFIG_ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
   int i;
+#ifndef CONFIG_ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
   uint8_t tmp;
 #endif
 
@@ -226,6 +226,11 @@ static int lan9250_getmac(const struct lan9250_lower_s *lower, uint8_t *mac)
     }
 
   close(fd);
+
+  for (i = 0; i < 6; i++)
+    {
+      mac[i] = mac[5 - i];
+    }
 
 #ifdef CONFIG_ESP32S3_UNIVERSAL_MAC_ADDRESSES_FOUR
   mac[5] += 3;
