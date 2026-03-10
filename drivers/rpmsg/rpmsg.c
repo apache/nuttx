@@ -306,11 +306,13 @@ static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
       if (wqueue->kwqueue == NULL)
         {
           rpmsgerr("rpmsg wqueue [%d] create failed\n", i);
+#if CONFIG_RPMSG_WQUEUE_NUMBER > 1
           while (--i >= 0)
             {
               work_queue_free(wqueues[i].kwqueue);
               wqueues[i].kwqueue = NULL;
             }
+#endif
 
           ret = -ENOMEM;
           break;
