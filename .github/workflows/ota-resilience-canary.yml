@@ -1,0 +1,171 @@
+name: OTA resilience canary
+
+on:
+  schedule:
+    - cron: "0 8 * * 0"
+  workflow_dispatch:
+    inputs:
+      fault_budget:
+        description: Number of fault points to test across the write range
+        required: true
+        default: "64"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nxboot-canary:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    env:
+      TOOLCHAIN_VERSION: 13.2.1-1.1
+      TOOLCHAIN_URL: https://github.com/xpack-dev-tools/arm-none-eabi-gcc-xpack/releases/download/v13.2.1-1.1/xpack-arm-none-eabi-gcc-13.2.1-1.1-linux-x64.tar.gz
+      TOOLCHAIN_SHA256: 1252a8cafe9237de27a765376697230368eec21db44dc3f1edeb8d838dabd530
+      RENODE_URL: https://builds.renode.io/renode-1.16.1.linux-dotnet.tar.gz
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout NuttX
+        uses: actions/checkout@v4
+        with:
+          path: nuttx
+
+      - name: Checkout NuttX apps
+        uses: actions/checkout@v4
+        with:
+          repository: apache/nuttx-apps
+          path: nuttx-apps
+
+      - name: Checkout tardigrade
+        uses: actions/checkout@v4
+        with:
+          repository: neilberkman/tardigrade
+          ref: 819d143a56c83fd7860ccc8f76a414a717956d94
+          path: tardigrade
+
+      - name: Install NuttX host dependencies
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y kconfig-frontends || sudo apt-get install -y kconfig-frontends-nox
+
+      - name: Install pinned Arm GNU toolchain
+        run: |
+          set -euxo pipefail
+          tarball="${RUNNER_TEMP}/arm-toolchain.tar.gz"
+          curl -L "${TOOLCHAIN_URL}" -o "${tarball}"
+          echo "${TOOLCHAIN_SHA256}  ${tarball}" | sha256sum -c -
+          tar -xzf "${tarball}" -C "${RUNNER_TEMP}"
+          echo "${RUNNER_TEMP}/xpack-arm-none-eabi-gcc-${TOOLCHAIN_VERSION}/bin" >> "${GITHUB_PATH}"
+
+      - name: Build nxboot bootloader and application
+        run: |
+          set -euo pipefail
+          python3 tardigrade/targets/nuttx_nxboot/build_public_target.py \
+            --nuttx-root nuttx \
+            --apps-root nuttx-apps \
+            --output-dir "${RUNNER_TEMP}/nxboot-build" \
+            --header-size 0x400 \
+            --jobs 4
+
+      - name: Generate runtime profile
+        run: |
+          python3 tardigrade/targets/nuttx_nxboot/generate_runtime_profile.py \
+            --build-dir "${RUNNER_TEMP}/nxboot-build" \
+            --output-profile "${RUNNER_TEMP}/nxboot-canary-profile.yaml" \
+            --fault-max-writes auto \
+            --boot-cycles 2 \
+            --name nuttx_nxboot_canary
+
+      - name: Install Renode portable
+        run: |
+          set -euxo pipefail
+          tarball="${RUNNER_TEMP}/renode-portable.tar.gz"
+          curl -L "${RENODE_URL}" -o "${tarball}"
+          mkdir -p "${RUNNER_TEMP}/renode"
+          tar -xzf "${tarball}" -C "${RUNNER_TEMP}/renode" --strip-components=1
+          python3 -m pip install --user -r "${RUNNER_TEMP}/renode/tests/requirements.txt"
+          echo "${RUNNER_TEMP}/renode" >> "${GITHUB_PATH}"
+
+      - name: Install Python dependencies
+        run: python3 -m pip install --user pyyaml
+
+      - name: Run OTA resilience sweep
+        env:
+          FAULT_BUDGET: ${{ inputs.fault_budget || '64' }}
+          OTA_RENODE_POINT_TIMEOUT_S: "900"
+        run: |
+          set -euo pipefail
+          budget="${FAULT_BUDGET}"
+          step_flag=""
+          if [ "$budget" -gt 0 ] 2>/dev/null; then
+            estimated_writes=196608
+            step=$(( (estimated_writes + budget - 1) / budget ))
+            if [ "$step" -gt 1 ]; then
+              step_flag="--fault-step $step"
+            fi
+          fi
+          cd tardigrade
+          python3 scripts/audit_bootloader.py \
+            --profile "${RUNNER_TEMP}/nxboot-canary-profile.yaml" \
+            --renode-test "${RUNNER_TEMP}/renode/renode-test" \
+            --workers 2 \
+            --max-batch-points 16 \
+            --robot-var "TEST_TIMEOUT:10 minutes" \
+            $step_flag \
+            --output "${RUNNER_TEMP}/nxboot-canary-results.json"
+
+      - name: Print summary
+        if: always()
+        env:
+          REPORT_PATH: ${{ runner.temp }}/nxboot-canary-results.json
+        run: |
+          if [ -f "${REPORT_PATH}" ]; then
+            python3 - <<'PY'
+          import json
+          import os
+          report = os.environ["REPORT_PATH"]
+          payload = json.load(open(report))
+          summary = payload.get("summary", {}).get("runtime_sweep", {})
+          control = summary.get("control", {})
+          issues = int(summary.get("issue_points") or 0)
+          bricks = int(summary.get("bricks") or 0)
+          cal = payload.get("calibration", {})
+          print("Profile:", payload.get("profile"))
+          print("Verdict:", payload.get("verdict"))
+          print("Calibrated writes:", cal.get("writes"))
+          print("Fault points:", summary.get("total_fault_points"))
+          print("Issues:", issues)
+          print("Bricks:", bricks)
+          print("Control outcome:", control.get("boot_outcome"))
+          mba = control.get("multi_boot_analysis") or {}
+          if mba:
+              print("Control multi-boot:", mba.get("status"), mba.get("final_slot"))
+          step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if step_summary:
+              with open(step_summary, "a") as fh:
+                  fh.write("## nxboot OTA resilience canary\n")
+                  fh.write(f"- Verdict: **{payload.get('verdict')}**\n")
+                  fh.write(f"- Calibrated writes: {cal.get('writes')}\n")
+                  fh.write(f"- Fault points tested: {summary.get('total_fault_points')}\n")
+                  fh.write(f"- Bricks: {bricks}\n")
+                  fh.write(f"- Issues: {issues}\n")
+          if bricks > 0 or issues > 0:
+              print(f"::error::OTA resilience canary found {bricks} bricks and {issues} issues")
+              raise SystemExit(1)
+          PY
+          fi
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ota-resilience-canary-results
+          if-no-files-found: ignore
+          path: |
+            ${{ runner.temp }}/nxboot-canary-results.json
+            ${{ runner.temp }}/nxboot-canary-profile.yaml
