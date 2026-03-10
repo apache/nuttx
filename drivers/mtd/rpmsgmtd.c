@@ -678,7 +678,7 @@ static int rpmsgmtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
 static FAR void *rpmsgmtd_get_tx_payload_buffer(FAR struct rpmsgmtd_s *priv,
                                                 FAR uint32_t *len)
 {
-  int sval;
+  int sval = 0;
 
   nxsem_get_value(&priv->wait, &sval);
   if (sval <= 0)
