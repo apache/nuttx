@@ -222,6 +222,21 @@
 
   /* Calculate USART BAUD rate divider */
 
+#  if defined(CONFIG_LPUART1_SERIAL_CONSOLE)
+
+  /* Baud rate for LPUART:
+   *
+   *   baud    = 256 * fCK / LPUARTDIV
+   *   LPUARTDIV = 256 * fCK / baud
+   *
+   * LPUARTDIV must be in range [0x300, 0xFFFFF].
+   */
+
+#  define STM32L5_BRR_VALUE \
+      ((((uint64_t)STM32L5_APBCLOCK << 8) + (STM32L5_CONSOLE_BAUD >> 1)) / STM32L5_CONSOLE_BAUD)
+
+#  else
+
   /* Baud rate for standard USART (SPI mode included):
    *
    * In case of oversampling by 16, the equation is:
@@ -248,6 +263,8 @@
 #    define STM32L5_BRR_VALUE \
       ((STM32L5_USARTDIV8 & 0xfff0) | ((STM32L5_USARTDIV8 & 0x000f) >> 1))
 #  endif
+
+#  endif /* CONFIG_LPUART1_SERIAL_CONSOLE */
 
 #endif /* HAVE_CONSOLE */
 

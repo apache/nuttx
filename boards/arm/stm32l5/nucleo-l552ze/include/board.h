@@ -173,6 +173,11 @@
 #define GPIO_USART3_RX   GPIO_USART3_RX_4    /* PD9 */
 #define GPIO_USART3_TX   GPIO_USART3_TX_4    /* PD8 */
 
+/* LPUART1: Connected to STLink VCP by default on Nucleo-L552ZE-Q */
+
+#define GPIO_LPUART1_RX  GPIO_LPUART1_RX_4   /* PG8 */
+#define GPIO_LPUART1_TX  GPIO_LPUART1_TX_4   /* PG7 */
+
 /* LED definitions **********************************************************/
 
 /* The Nucleo-144 board has numerous LEDs but only three, LD1 a Green LED,

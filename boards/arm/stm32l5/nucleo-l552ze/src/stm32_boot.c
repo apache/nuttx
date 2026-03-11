@@ -32,6 +32,8 @@
 
 #include "arm_internal.h"
 #include "nucleo-l552ze.h"
+#include "stm32l5_pwr.h"
+#include "stm32l5_gpio.h"
 
 #include <arch/board/board.h>
 
@@ -52,6 +54,18 @@
 
 void stm32l5_board_initialize(void)
 {
+  stm32l5_pwr_vddio2_valid(true);
+
+#if defined(CONFIG_STM32L5_LPUART1)
+  /* LPUART1 uses PG7/PG8 which are powered by VDDIO2. The GPIO config in
+   * stm32l5_lowsetup() runs before VDDIO2 is enabled, so GPIOG writes
+   * silently fail. Reconfigure here after VDDIO2 is valid.
+   */
+
+  stm32l5_configgpio(GPIO_LPUART1_TX);
+  stm32l5_configgpio(GPIO_LPUART1_RX);
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
