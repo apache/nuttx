@@ -311,8 +311,7 @@ AVR DA/DB implementation
 ========================
 
 Implementation of high priority interrupts allows the user to bypass the generic
-interrupt handling. There is, however, no mechanism described in the "Getting Back
-into the Game" section.
+interrupt handling.
 
 This AVR family only has one interrupt vector that can be declared as high-priority.
 Nevertheless, you can disable the generic handler for multiple vectors - they will
@@ -349,3 +348,16 @@ like in regular functions) and return using ``reti`` (return from interrupt) ins
 
 The function name always corresponds to interrupt name as specified in datasheet
 for the chip in question.
+
+Getting Back into the Game (AVR)
+--------------------------------
+
+Unlike the ARM Cortex-M described above, AVR DA/DB devices do not have a dedicated
+software interrupt mechanism. Instead, there is an emulated implementation
+that uses interrupts triggered by manual manipulation of an I/O pin. This is described
+in :doc:`/platforms/avr/avrdx/docs/software_interrupt`.
+
+Your implementation simply needs to request a software interrupt vector number
+during initialization and then pass it to ``avrdx_swint_raise`` function
+if it needs to trigger an interrupt that can be handled with access to the operating
+system interfaces.

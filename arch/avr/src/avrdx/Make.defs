@@ -73,3 +73,7 @@ endif
 ifeq ($(CONFIG_AVR_AVRDX_GPIO_ISR_MUX),y)
 CHIP_CSRCS += avrdx_gpio_isr_mux.c
 endif
+
+ifeq ($(CONFIG_AVR_AVRDX_SWINT),y)
+CHIP_CSRCS += avrdx_swint.c
+endif

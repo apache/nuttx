@@ -88,6 +88,7 @@
 #define PORT_ISC_GM ( PORT_ISC_0_bm | PORT_ISC_1_bm | PORT_ISC_2_bm )
 
 #define PORT_ISC_BOTHEDGES_GC ( PORT_ISC_0_bm )
+#define PORT_ISC_LEVEL_GC ( PORT_ISC_2_bm | PORT_ISC_0_bm )
 
 /* CLKCTRL.MCLKCTRLA */
 

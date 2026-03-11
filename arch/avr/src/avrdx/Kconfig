@@ -174,9 +174,11 @@ choice AVR_USART0_MUX
 
 config AVR_USART0_DEFAULT
 	bool "Default USART0 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 0) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART0_ALT
 	bool "Alternate USART0 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 0) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
@@ -206,10 +208,12 @@ choice AVR_USART1_MUX
 
 config AVR_USART1_DEFAULT
 	bool "Default USART1 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 2) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART1_ALT
-	depends on AVR_HAVE_USART1_ALT1
 	bool "Alternate USART1 pinout"
+	depends on AVR_HAVE_USART1_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 2) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
@@ -239,10 +243,12 @@ choice AVR_USART2_MUX
 
 config AVR_USART2_DEFAULT
 	bool "Default USART2 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 5) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART2_ALT
-	depends on AVR_HAVE_USART2_ALT1
 	bool "Alternate USART2 pinout"
+	depends on AVR_HAVE_USART2_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 5) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
@@ -272,9 +278,11 @@ choice AVR_USART3_MUX
 
 config AVR_USART3_DEFAULT
 	bool "Default USART3 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 1) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART3_ALT
 	depends on AVR_HAVE_USART3_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 1) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	bool "Alternate USART3 pinout"
 	---help---
 		Board is wired to use alternative I/O pins,
@@ -305,10 +313,12 @@ choice AVR_USART4_MUX
 
 config AVR_USART4_DEFAULT
 	bool "Default USART4 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 4) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART4_ALT
-	depends on AVR_HAVE_USART4_ALT1
 	bool "Alternate USART4 pinout"
+	depends on AVR_HAVE_USART4_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 4) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
@@ -338,10 +348,12 @@ choice AVR_USART5_MUX
 
 config AVR_USART5_DEFAULT
 	bool "Default USART5 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 6) && ((AVRDX_SWINT_PIN_NUM = 0) || (AVRDX_SWINT_PIN_NUM = 1)))
 
 config AVR_USART5_ALT
-	depends on AVR_HAVE_USART5_ALT1
 	bool "Alternate USART5 pinout"
+	depends on AVR_HAVE_USART5_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 6) && ((AVRDX_SWINT_PIN_NUM = 4) || (AVRDX_SWINT_PIN_NUM = 5)))
 	---help---
 		Board is wired to use alternative I/O pins,
 		4-5 instead of 0-1 for TxD/RxD
@@ -368,13 +380,18 @@ choice AVR_TWI0_ALT
 
 config AVR_TWI0_ALT0
 	bool "Default TWI0 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 0) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
+	# Note - not excluding dual mode pins since dual mode is
+	# currently unsupported.
 
 config AVR_TWI0_ALT1
 	bool "Alternate TWI0 pinout 1"
 	depends on AVR_HAVE_TWI0_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 0) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
 
 config AVR_TWI0_ALT2
 	bool "Alternate TWI0 pinout 2"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 2) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
 
 endchoice
 
@@ -436,13 +453,18 @@ choice AVR_TWI1_ALT
 
 config AVR_TWI1_ALT0
 	bool "Default TWI1 pinout"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 5) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
+	# Note - not excluding dual mode pins since dual mode is
+	# currently unsupported.
 
 config AVR_TWI1_ALT1
 	bool "Alternate TWI1 pinout 1"
 	depends on AVR_HAVE_TWI1_ALT1
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 5) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
 
 config AVR_TWI1_ALT2
 	bool "Alternate TWI1 pinout 2"
+	depends on (!AVR_AVRDX_SWINT) || !((AVRDX_SWINT_PORT_IDX = 1) && ((AVRDX_SWINT_PIN_NUM = 2) || (AVRDX_SWINT_PIN_NUM = 3)))
 
 endchoice
 
@@ -519,6 +541,69 @@ config AVR_TWI_FORBID_NOSTART
 endif
 
 endmenu # AVR DA/DB Peripheral Selections
+
+config AVR_AVRDX_SWINT
+	bool "Enable software interrupt emulation"
+	default false
+	---help---
+		AVR DA/DB chips do not have software interrupt functionality.
+		It can, however, be emulated using interrupt on I/O pin
+		(triggered by changing output logical level on that pin
+		from software.)
+
+		Do note that the pin will be actually configured as output,
+		nothing must be connected to it.
+
+		Some drivers depend on this.
+
+config AVRDX_SWINT_GPIO_MUX
+	bool "Use GPIO multiplexer"
+	default false
+	depends on AVR_AVRDX_SWINT
+	depends on AVR_AVRDX_GPIO_ISR_MUX
+	---help---
+		This chip only has single interrupt vector for all pins
+		on the port. If you are not using dedicated port for software
+		interrupt emulation and need different interrupt handlers
+		for different pin events, you need to use GPIO multiplexer
+
+		Say Y in that case.
+
+config AVRDX_SWINT_PORT_IDX
+	int "Software interrupt emulation I/O port"
+	default -1
+	range -1 6
+	depends on AVR_AVRDX_SWINT
+	---help---
+		Enter index of I/O port that will be used for software
+		interrupt emulation. Port A corresponds to index 0, port B
+		to 1 etc.
+
+config AVRDX_SWINT_PIN_NUM
+	int "Software interrupt emulation I/O pin"
+	default -1
+	range -1 7
+	depends on AVR_AVRDX_SWINT
+	---help---
+		Enter index of I/O pin on the port selected above that will
+		be used for software interrupt emulation. Pins are indexed
+		from 0.
+
+config AVRDX_SWINT_MAX_VECTORS
+	int "Software interrupt vector limit"
+	default 2
+	range 1 32
+	depends on AVR_AVRDX_SWINT
+	---help---
+		Enter maximum number of software interrupt emulation users.
+		Each user receives its own software interrupt vector and
+		can provide its own handler.
+
+		Memory for handler pointers is preallocated to this number
+		of slots. Variables holding vector number are configured
+		to size that fits all vectors.
+
+		At most 32 vectors may be provided.
 
 choice
 	prompt "Internal High-Frequency Oscillator clock speed"
