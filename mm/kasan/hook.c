@@ -386,6 +386,14 @@ void __sanitizer_annotate_contiguous_container(FAR const void *beg,
   /* Shut up compiler complaints */
 }
 
+void __sanitizer_annotate_double_ended_contiguous_container(
+  FAR const void *beg, FAR const void *end,
+  FAR const void *old_beg, FAR const void *old_end,
+  FAR const void *new_beg, FAR const void *new_end)
+{
+  /* Shut up compiler complaints */
+}
+
 void __asan_report_load_n_noabort(FAR void *addr, size_t size)
 {
   kasan_report(addr, size, false, return_address(0));
