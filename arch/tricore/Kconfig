@@ -120,7 +120,7 @@ config ARCH_MPU_CODE_NREGIONS
 
 config HAVE_SECURITY_CORE
 	bool
-	--help--
+	---help---
 		In addition to the 6 cores, tc4xx also has one more security core.
 
 config CPU_COREID
