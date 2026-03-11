@@ -185,7 +185,7 @@ static uint32_t pkt_recvfrom_eventhandler(FAR struct net_driver_s *dev,
     {
       /* If a new packet is available, then complete the read action. */
 
-#ifdef CONFIG_NET_TIMESTAMPING
+#ifdef CONFIG_NET_TIMESTAMP
       if ((flags & PKT_NEWDATA) != 0 && dev->d_iob->io_conn != NULL)
         {
           pstate->pr_cb->flags = 0;
@@ -346,7 +346,7 @@ static void append_timestamp(FAR struct pkt_recvfrom_s *pstate,
 #endif
 }
 
-#ifdef CONFIG_NET_TIMESTAMPING
+#ifdef CONFIG_NET_TIMESTAMP
 static void append_timestamping(FAR struct pkt_recvfrom_s *pstate,
                                 FAR struct iob_s *iob)
 {
@@ -502,7 +502,7 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   conn_dev_lock(&conn->sconn, dev);
 
-#ifdef CONFIG_NET_TIMESTAMPING
+#ifdef CONFIG_NET_TIMESTAMP
   if (flags & MSG_ERRQUEUE)
     {
       if (!IOB_QEMPTY(&conn->errahead))
