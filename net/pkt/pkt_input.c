@@ -184,6 +184,10 @@ static int pkt_in(FAR struct net_driver_s *dev)
 #endif
 
 #ifdef CONFIG_NET_TIMESTAMP
+      /* Storing reception timestamp provided by realtime
+       * if timestamp no provided by hardware.
+       */
+
       if ((dev->d_features & NETDEV_RX_STAMP) == 0)
         {
           /* Storing reception timestamp provided by realtime
