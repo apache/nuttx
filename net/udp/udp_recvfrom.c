@@ -207,13 +207,8 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
       DEBUGASSERT(recvlen == src_addr_size);
 
 #ifdef CONFIG_NET_TIMESTAMP
-      /* Unpack stored timestamp if SO_TIMESTAMP socket option is enabled */
-
-      if (conn->timestamp)
-        {
-          cmsg_store_timestamp(pstate->ir_msg, &iob->io_time,
-                               conn->sconn.s_options);
-        }
+      cmsg_store_timestamp(pstate->ir_msg, &iob->io_time,
+                           conn->sconn.s_options);
 #endif
 
       /* Copy to user */
@@ -451,11 +446,8 @@ static uint32_t udp_eventhandler(FAR struct net_driver_s *dev,
           /* Save packet timestamp, if requested */
 
 #ifdef CONFIG_NET_TIMESTAMP
-          if (pstate->ir_conn->timestamp)
-            {
-              cmsg_store_timestamp(pstate->ir_msg, &dev->d_iob->io_time,
-                                   pstate->ir_conn->sconn.s_options);
-            }
+          cmsg_store_timestamp(pstate->ir_msg, &dev->d_iob->io_time,
+                               pstate->ir_conn->sconn.s_options);
 #endif
 
           /* Save the sender's address in the caller's 'from' location */

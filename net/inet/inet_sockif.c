@@ -713,29 +713,6 @@ static int inet_get_socketlevel_option(FAR struct socket *psock, int option,
         }
 #endif
 
-#ifdef CONFIG_NET_TIMESTAMP
-      case SO_TIMESTAMP:
-        {
-          if (*value_len != sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-#  ifdef NET_UDP_HAVE_STACK
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              FAR struct udp_conn_s *conn = psock->s_conn;
-              *(FAR int *)value = (conn->timestamp != 0);
-            }
-          else
-#  endif
-            {
-              return -ENOPROTOOPT;
-            }
-        }
-        break;
-#endif
-
       default:
         return -ENOPROTOOPT;
     }
@@ -1016,38 +993,6 @@ static int inet_set_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 #endif
-
-#ifdef CONFIG_NET_TIMESTAMP
-      case SO_TIMESTAMP: /* Report receive timestamps as cmsg */
-        {
-          if (value_len < sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-#  ifdef NET_UDP_HAVE_STACK
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              conn_lock(psock->s_conn);
-
-              /* For now the timestamp enable is just boolean.
-               * If SO_TIMESTAMPING support is added in future, it can be
-               * expanded to flags field for rx/tx timestamps.
-               */
-
-              FAR struct udp_conn_s *conn = psock->s_conn;
-              conn->timestamp = (*((FAR int *)value) != 0);
-
-              conn_unlock(psock->s_conn);
-            }
-          else
-#  endif
-            {
-              return -ENOPROTOOPT;
-            }
-        }
-        break;
-  #endif
 
       default:
         return -ENOPROTOOPT;
