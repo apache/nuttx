@@ -131,7 +131,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           pstate->snd_sent          = pstate->snd_buflen;
           pstate->snd_conn->pendiob = dev->d_iob;
 
-#ifdef CONFIG_NET_TIMESTAMPING
+#ifdef CONFIG_NET_TIMESTAMP
           if (_SO_GETOPT(pstate->snd_conn->sconn.s_options,
                          SO_TIMESTAMPING))
             {
