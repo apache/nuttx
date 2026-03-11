@@ -114,17 +114,26 @@ Use make menuconfig to configure USART3 as the console::
     CONFIG_USART3_PARITY=0
     CONFIG_USART3_2STOP=0
 
-Virtual COM Port
-----------------
-Yet another option is to use LPUART1 and the USB virtual COM port.  This
-option may be more convenient for long term development, but is painful
-to use during board bring-up. However as LPUART peripheral has not been
-implemented for STM32L5, this cannot currently be used.
+LPUART1 - Virtual COM Port (Default)
+-------------------------------------
+The default nsh configuration uses LPUART1 on the ST-Link USB virtual COM
+port.  LPUART1 TX/RX are on PG7/PG8 which are powered by VDDIO2.
 
-Solder Bridges.  This configuration requires::
+Solder Bridges (active by default on Nucleo-L552ZE-Q)::
 
     PG7 LPUART1 TX SB127 ON and SB124 OFF (Default)
     PG8 LPUART1 RX SB129 ON and SB126 OFF (Default)
+
+Use make menuconfig to configure LPUART1 as the console::
+
+    CONFIG_STM32L5_LPUART1=y
+    CONFIG_LPUART1_SERIAL_CONSOLE=y
+    CONFIG_LPUART1_RXBUFSIZE=256
+    CONFIG_LPUART1_TXBUFSIZE=256
+    CONFIG_LPUART1_BAUD=115200
+    CONFIG_LPUART1_BITS=8
+    CONFIG_LPUART1_PARITY=0
+    CONFIG_LPUART1_2STOP=0
 
 You can also put USART3 on the virtual COM port by reworking the solder
 bridges as follows::
@@ -134,7 +143,7 @@ bridges as follows::
 
 Default
 -------
-As shipped, the virtual COM port is enabled.
+As shipped, the virtual COM port is connected to LPUART1.
 
 Configurations
 ==============
@@ -170,23 +179,9 @@ NOTES:
    b. Execute 'make menuconfig' in nuttx/ in order to start the
       reconfiguration process.
 
-2. Unless stated otherwise, all configurations generate console
-   output on USART3, as described above under "Serial Console".  The
-   elevant configuration settings are listed below::
-
-         CONFIG_STM32L5_USART3=y
-         CONFIG_STM32L5_USART3_SERIALDRIVER=y
-         CONFIG_STM32L5_USART=y
-
-         CONFIG_USART3_SERIALDRIVER=y
-         CONFIG_USART3_SERIAL_CONSOLE=y
-
-         CONFIG_USART3_RXBUFSIZE=256
-         CONFIG_USART3_TXBUFSIZE=256
-         CONFIG_USART3_BAUD=115200
-         CONFIG_USART3_BITS=8
-         CONFIG_USART3_PARITY=0
-         CONFIG_USART3_2STOP=0
+2. The default nsh configuration generates console output on LPUART1
+   via the ST-Link virtual COM port.  See "Serial Consoles" above for
+   details and alternative USART3 configuration.
 
 3. All of these configurations are set up to build under Linux using the
    "GNU Tools for ARM Embedded Processors" that is maintained by ARM

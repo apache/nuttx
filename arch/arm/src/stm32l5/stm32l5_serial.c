@@ -476,7 +476,7 @@ static struct stm32l5_serial_s g_lpuart1priv =
   .bits          = CONFIG_LPUART1_BITS,
   .stopbits2     = CONFIG_LPUART1_2STOP,
   .baud          = CONFIG_LPUART1_BAUD,
-  .apbclock      = STM32L5_PCLK2_FREQUENCY,
+  .apbclock      = STM32L5_PCLK1_FREQUENCY,
   .usartbase     = STM32L5_LPUART1_BASE,
   .tx_gpio       = GPIO_LPUART1_TX,
   .rx_gpio       = GPIO_LPUART1_RX,
@@ -1021,50 +1021,36 @@ static void stm32l5serial_setformat(struct uart_dev_s *dev)
   uint32_t cr1;
   uint32_t brr;
 
-  /* In case of oversampling by 8, the equation is:
-   *
-   *   baud      = 2 * fCK / usartdiv8
-   *   usartdiv8 = 2 * fCK / baud
-   */
-
-  usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
-
-  /* Baud rate for standard USART (SPI mode included):
-   *
-   * In case of oversampling by 16, the equation is:
-   *   baud       = fCK / usartdiv16
-   *   usartdiv16 = fCK / baud
-   *              = 2 * usartdiv8
-   */
-
-  /* Use oversamply by 8 only if the divisor is small.  But what is small? */
-
-  cr1 = stm32l5serial_getreg(priv, STM32L5_USART_CR1_OFFSET);
-  if (usartdiv8 > 2000)
+#ifdef CONFIG_STM32L5_LPUART1_SERIALDRIVER
+  if (priv->usartbase == STM32L5_LPUART1_BASE)
     {
-      /* Use usartdiv16 */
+      /* LPUART BRR = 256 * fCK / baud */
 
-      brr  = (usartdiv8 + 1) >> 1;
-
-      /* Clear oversampling by 8 to enable oversampling by 16 */
-
-      cr1 &= ~USART_CR1_OVER8;
+      brr = (((uint64_t)priv->apbclock << 8) +
+             (priv->baud >> 1)) / priv->baud;
+      stm32l5serial_putreg(priv, STM32L5_USART_BRR_OFFSET, brr);
     }
   else
+#endif
     {
-      DEBUGASSERT(usartdiv8 >= 8);
+      usartdiv8 = ((priv->apbclock << 1) + (priv->baud >> 1)) / priv->baud;
 
-      /* Perform mysterious operations on bits 0-3 */
+      cr1 = stm32l5serial_getreg(priv, STM32L5_USART_CR1_OFFSET);
+      if (usartdiv8 > 2000)
+        {
+          brr  = (usartdiv8 + 1) >> 1;
+          cr1 &= ~USART_CR1_OVER8;
+        }
+      else
+        {
+          DEBUGASSERT(usartdiv8 >= 8);
+          brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
+          cr1 |= USART_CR1_OVER8;
+        }
 
-      brr  = ((usartdiv8 & 0xfff0) | ((usartdiv8 & 0x000f) >> 1));
-
-      /* Set oversampling by 8 */
-
-      cr1 |= USART_CR1_OVER8;
+      stm32l5serial_putreg(priv, STM32L5_USART_CR1_OFFSET, cr1);
+      stm32l5serial_putreg(priv, STM32L5_USART_BRR_OFFSET, brr);
     }
-
-  stm32l5serial_putreg(priv, STM32L5_USART_CR1_OFFSET, cr1);
-  stm32l5serial_putreg(priv, STM32L5_USART_BRR_OFFSET, brr);
 
   /* Configure parity mode */
 
