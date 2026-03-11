@@ -300,7 +300,9 @@ enum wlioc_modulation_e
   WLIOC_LORA,
   WLIOC_FSK,
   WLIOC_GFSK,
-  WLIOC_OOK
+  WLIOC_OOK,
+  WLIOC_4FSK,
+  WLIOC_MSK
 };
 
 /* LoRa common types ********************************************************/
