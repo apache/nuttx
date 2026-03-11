@@ -298,6 +298,9 @@ static int cc1101_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
                              unsigned long arg);
 
+static int cc1101_ioctl_apply_power(FAR struct cc1101_dev_s *dev,
+                                    uint8_t pwr_idx);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -313,6 +316,26 @@ static const struct file_operations g_cc1101ops =
   NULL,              /* mmap */
   NULL,              /* truncate */
   cc1101_file_poll   /* poll */
+};
+
+/* Mapping of physical output power to hardware index (0-7) */
+
+static const int32_t g_cc1101_dbm_table[8] =
+{
+  -30, -20, -15, -10, -5, 0, 5, 10
+};
+
+/* PATABLE laboratory calibration matrix for four main bands
+ * Corresponding order: -30, -20, -15, -10, -5, 0, +5, +10 dBm
+ * Data source: TI DN013 (SWRA151A)
+ */
+
+static const uint8_t g_cc1101_pa_calibration[4][8] =
+{
+  { 0x12, 0x0d, 0x1c, 0x34, 0x69, 0x51, 0x85, 0xc2 }, /* Index 0: 315 MHz */
+  { 0x12, 0x0e, 0x1c, 0x34, 0x69, 0x60, 0x84, 0xc0 }, /* Index 1: 433 MHz (corrected) */
+  { 0x03, 0x0f, 0x1e, 0x27, 0x67, 0x50, 0x81, 0xc2 }, /* Index 2: 868 MHz */
+  { 0x03, 0x0e, 0x1e, 0x27, 0x39, 0x8e, 0xcd, 0xc0 }, /* Index 3: 915 MHz */
 };
 
 /****************************************************************************
@@ -1171,6 +1194,19 @@ int cc1101_deinit(FAR struct cc1101_dev_s *dev)
 int cc1101_powerup(FAR struct cc1101_dev_s *dev)
 {
   DEBUGASSERT(dev);
+  /* TODO: Execute underlying CSn pull-down wake sequence (if hardware
+   * requires it).
+   */
+
+  /* Core fix: Must rebuild volatile PATABLE memory and ramp curve after
+   * wake-up.
+   */
+
+  if (dev->status != CC1101_INIT)
+    {
+      cc1101_ioctl_apply_power(dev, dev->power);
+    }
+
   return 0;
 }
 
@@ -1355,6 +1391,95 @@ uint8_t cc1101_setpower(FAR struct cc1101_dev_s *dev, uint8_t power)
     }
 
   return dev->power;
+}
+
+/****************************************************************************
+ * Name: cc1101_ioctl_apply_power
+ *
+ * Description:
+ * Real-time generation of the PATABLE curve based on physical hardware
+ * state (FREQ2 for band matching, MDMCFG2 for modulation strategy).
+ ****************************************************************************/
+
+static int cc1101_ioctl_apply_power(FAR struct cc1101_dev_s *dev,
+                                    uint8_t pwr_idx)
+{
+  uint8_t freq2;
+  uint8_t mdmcfg2;
+  uint8_t frend0;
+  uint8_t band_idx;
+  uint8_t mod_format;
+  uint8_t patable[8];
+  int i;
+  int ret;
+
+  /* Fact detection 1: Read FREQ2 to get real band to select
+   * calibration table.
+   */
+
+  if (cc1101_access(dev, CC1101_FREQ2, &freq2, 1) < 0)
+    {
+      return -EIO;
+    }
+
+  if (freq2 < 0x10)       band_idx = 0; /* 315 MHz */
+  else if (freq2 < 0x20)  band_idx = 1; /* 433 MHz */
+  else if (freq2 < 0x22)  band_idx = 2; /* 868 MHz */
+  else                    band_idx = 3; /* 915 MHz */
+
+  /* Fact detection 2: Read modulation format to decide whether to
+   * keep ramp-up curve.
+   */
+
+  if (cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1) < 0)
+    {
+      return -EIO;
+    }
+
+  mod_format = (mdmcfg2 & 0x70) >> 4;
+
+  /* Dynamically generate physical PATABLE memory structure */
+
+  if (mod_format == 0x03) /* ASK / OOK */
+    {
+      /* Logic 0 must be silent (0x00), logic 1 is target output power */
+
+      patable[0] = 0x00;
+      patable[1] = g_cc1101_pa_calibration[band_idx][pwr_idx];
+
+      for (i = 2; i < 8; i++) patable[i] = 0x00; /* Eliminate memory residue */
+
+      /* Apply 8-byte burst write to cover the entire PATABLE space */
+
+      ret = cc1101_access(dev, CC1101_PATABLE, patable, -8);
+    }
+  else /* FSK series (including MSK / 4-FSK) */
+    {
+      /* Automatically synthesize smooth ramp-up curve using preset hex
+       * power values.
+       */
+
+      for (i = 0; i < 8; i++)
+        {
+          if (i <= pwr_idx)
+            patable[i] = g_cc1101_pa_calibration[band_idx][i];
+          else
+            patable[i] = g_cc1101_pa_calibration[band_idx][pwr_idx]; /* Stay flat (Plateau) after reaching target power */
+        }
+
+      ret = cc1101_access(dev, CC1101_PATABLE, patable, -8);
+    }
+
+  if (ret < 0) return -EIO;
+
+  /* Update FREND0.PA_POWER index, but must keep TX filter high bits */
+
+  if (cc1101_access(dev, CC1101_FREND0, &frend0, 1) < 0) return -EIO;
+
+  frend0 &= 0xf8; /* Clear bottom 3 control bits */
+  frend0 |= (mod_format == 0x03) ? 1 : 7;
+
+  return cc1101_access(dev, CC1101_FREND0, &frend0, -1);
 }
 
 /****************************************************************************
@@ -1724,22 +1849,31 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t regs[3];
           uint8_t channr;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           freq_word = ((uint64_t)(*ptr32) << 16) / f_xosc;
           regs[0] = (uint8_t)((freq_word >> 16) & 0xff);
           regs[1] = (uint8_t)((freq_word >> 8) & 0xff);
           regs[2] = (uint8_t)(freq_word & 0xff);
 
-          ret = cc1101_access(dev, CC1101_FREQ2, regs, -3);
-          if (ret >= 0)
+          if (cc1101_access(dev, CC1101_FREQ2, regs, -3) >= 0)
             {
-              channr = 0;
-              ret = cc1101_access(dev, CC1101_CHANNR, &channr, -1);
-              if (ret >= 0)
-                {
-                  ret = OK;
-                }
+              channr = 0; /* Clear logical channel bias to ensure absolute frequency accuracy */
+              cc1101_access(dev, CC1101_CHANNR, &channr, -1);
+
+              /* Frequency changed, immediately rebuild power table based
+               * on current band and target index.
+               */
+
+              ret = cc1101_ioctl_apply_power(dev, dev->power);
+            }
+          else
+            {
+              ret = -EIO;
             }
         }
         break;
@@ -1749,7 +1883,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t regs[3];
           uint32_t freq_word;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           ret = cc1101_access(dev, CC1101_FREQ2, regs, 3);
           if (ret >= 0)
@@ -1765,7 +1903,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
 
       case WLIOC_SETADDR:
         {
-          DEBUGASSERT(ptr8 != NULL);
+          if (ptr8 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           ret = cc1101_access(dev, CC1101_ADDR, ptr8, -1);
           if (ret >= 0)
@@ -1777,7 +1919,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
 
       case WLIOC_GETADDR:
         {
-          DEBUGASSERT(ptr8 != NULL);
+          if (ptr8 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           ret = cc1101_access(dev, CC1101_ADDR, ptr8, 1);
           if (ret >= 0)
@@ -1791,18 +1937,62 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
 
       case WLIOC_SETTXPOWER:
         {
-          DEBUGASSERT(ptr32_s != NULL);
+          int32_t req_dbm;
+          int32_t min_diff = INT32_MAX;
+          int32_t diff;
+          uint8_t best_idx = 0;
+          int i;
 
-          cc1101_setpower(dev, (uint8_t)*ptr32_s);
-          ret = OK;
+          if (ptr32_s == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
+
+          req_dbm = *ptr32_s;
+
+          /* Quantized nearest matching algorithm */
+
+          for (i = 0; i < 8; i++)
+            {
+              diff = req_dbm - g_cc1101_dbm_table[i];
+              if (diff < 0) diff = -diff;
+
+              if (diff < min_diff)
+                {
+                  min_diff = diff;
+                  best_idx = i;
+                }
+            }
+
+          /* Write the new absolute index into device state */
+
+          dev->power = best_idx;
+          ret = cc1101_ioctl_apply_power(dev, dev->power);
         }
         break;
 
       case WLIOC_GETTXPOWER:
         {
-          DEBUGASSERT(ptr32_s != NULL);
+          if (ptr32_s == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
-          *ptr32_s = (int32_t)dev->power;
+          /* Safely read physical dBm scale from newly defined state
+           * machine.
+           */
+
+          if (dev->power <= 7)
+            {
+              *ptr32_s = g_cc1101_dbm_table[dev->power];
+            }
+          else
+            {
+              *ptr32_s = g_cc1101_dbm_table[7];
+            }
+
           ret = OK;
         }
         break;
@@ -1812,36 +2002,110 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
       case WLIOC_SETMODU:
         {
           uint8_t mdmcfg2;
+          uint8_t mdmcfg4;
+          uint8_t mdmcfg3;
+          uint32_t current_baud;
+          uint8_t e;
+          uint8_t m;
 
-          DEBUGASSERT(mod != NULL);
+          if (mod == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
-          ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1);
+          /* Read the current modulation configuration */
+
+          if (cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1) < 0)
+            {
+              ret = -EIO;
+              break;
+            }
+
+          /* Hardware constraint 1: MSK modulation is only supported
+           * when data rate > 26 kBaud.
+           */
+
+          if (*mod == WLIOC_MSK)
+            {
+              if (cc1101_access(dev, CC1101_MDMCFG4, &mdmcfg4, 1) >= 0 &&
+                  cc1101_access(dev, CC1101_MDMCFG3, &mdmcfg3, 1) >= 0)
+                {
+                  e = mdmcfg4 & 0x0f;
+                  m = mdmcfg3;
+
+                  /* Use 64-bit unsigned integer to prevent shift
+                   * overflow.
+                   */
+
+                  current_baud = (uint32_t)((((uint64_t)(256 + m) << e) *
+                                             f_xosc) >> 28);
+
+                  if (current_baud <= 26000)
+                    {
+                      /* Baud rate non-compliant, refuse to switch
+                       * modulation format.
+                       */
+
+                      ret = -EINVAL;
+                      break;
+                    }
+                }
+              else
+                {
+                  ret = -EIO;
+                  break;
+                }
+            }
+
+          /* Clear existing MOD_FORMAT flag bits (bits 6:4) */
+
+          mdmcfg2 &= ~0x70;
+
+          /* Hardware constraint 2: Manchester encoding is incompatible
+           * with MSK and 4-FSK, force clear MANCHESTER_EN (bit 3).
+           */
+
+          if (*mod == WLIOC_MSK || *mod == WLIOC_4FSK)
+            {
+              mdmcfg2 &= ~0x08;
+            }
+
+          /* Apply new modulation format */
+
+          switch (*mod)
+            {
+              case WLIOC_FSK:
+                mdmcfg2 |= 0x00;
+                break;
+              case WLIOC_GFSK:
+                mdmcfg2 |= 0x10;
+                break;
+              case WLIOC_OOK:
+                mdmcfg2 |= 0x30;
+                break;
+              case WLIOC_4FSK:
+                mdmcfg2 |= 0x40; /* 100: 4-FSK */
+                break;
+              case WLIOC_MSK:
+                mdmcfg2 |= 0x70; /* 111: MSK */
+                break;
+              default:
+                ret = -ENOTSUP;
+                break;
+            }
+
           if (ret >= 0)
             {
-              mdmcfg2 &= ~0x70;
-              switch (*mod)
-                {
-                  case WLIOC_FSK:
-                    mdmcfg2 |= 0x00;
-                    break;
-                  case WLIOC_GFSK:
-                    mdmcfg2 |= 0x10;
-                    break;
-                  case WLIOC_OOK:
-                    mdmcfg2 |= 0x30;
-                    break;
-                  default:
-                    ret = -ENOTSUP;
-                    break;
-                }
-
+              ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, -1);
               if (ret >= 0)
                 {
-                  ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, -1);
-                  if (ret >= 0)
-                    {
-                      ret = OK;
-                    }
+                  /* Modulation format changed (e.g. from FSK to OOK)
+                   * Must immediately rearrange PATABLE 0x00 mapping or
+                   * ramping to prevent bus deadlock.
+                   */
+
+                  ret = cc1101_ioctl_apply_power(dev, dev->power);
                 }
             }
         }
@@ -1852,7 +2116,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t mdmcfg2;
           uint8_t mod_format;
 
-          DEBUGASSERT(mod != NULL);
+          if (mod == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           ret = cc1101_access(dev, CC1101_MDMCFG2, &mdmcfg2, 1);
           if (ret >= 0)
@@ -1861,7 +2129,6 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
               switch (mod_format)
                 {
                   case 0x00:
-                  case 0x04:
                     *mod = WLIOC_FSK;
                     break;
                   case 0x01:
@@ -1869,6 +2136,12 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
                     break;
                   case 0x03:
                     *mod = WLIOC_OOK;
+                    break;
+                  case 0x04:
+                    *mod = WLIOC_4FSK;
+                    break;
+                  case 0x07:
+                    *mod = WLIOC_MSK;
                     break;
                   default:
                     ret = -ENOTSUP;
@@ -1893,7 +2166,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t m;
           uint8_t mdmcfg4;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           w = ((uint64_t)(*ptr32) << 28) / f_xosc;
           while (w > 511 && e < 15)
@@ -1902,9 +2179,15 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
               e++;
             }
 
-          if (w < 256)
+          /* Anti-overflow clamping logic (Clamping) */
+
+          if (w > 511)
             {
-              w = 256;
+              w = 511; /* Limit to maximum possible mantissa */
+            }
+          else if (w < 256)
+            {
+              w = 256; /* Limit to minimum possible mantissa */
             }
 
           m = (uint8_t)(w - 256);
@@ -1934,7 +2217,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t e;
           uint8_t m;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           if (cc1101_access(dev, CC1101_MDMCFG4, &mdmcfg4, 1) >= 0 &&
               cc1101_access(dev, CC1101_MDMCFG3, &mdmcfg3, 1) >= 0)
@@ -1961,7 +2248,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t m;
           uint8_t deviatn;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           w = ((uint64_t)(*ptr32) << 17) / f_xosc;
           while (w > 15 && e < 7)
@@ -1970,7 +2261,13 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
               e++;
             }
 
-          if (w < 8)
+          /* Anti-overflow clamping logic (Clamping) */
+
+          if (w > 15)
+            {
+              w = 15;
+            }
+          else if (w < 8)
             {
               w = 8;
             }
@@ -1992,7 +2289,11 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
           uint8_t e;
           uint8_t m;
 
-          DEBUGASSERT(ptr32 != NULL);
+          if (ptr32 == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
 
           ret = cc1101_access(dev, CC1101_DEVIATN, &deviatn, 1);
           if (ret >= 0)
@@ -2012,11 +2313,21 @@ static int cc1101_file_ioctl(FAR struct file *filep, int cmd,
 
       case CC1101IOC_SETOPMODE:
         {
-          enum cc1101_opmode_e new_mode = (enum cc1101_opmode_e)arg;
+          FAR enum cc1101_opmode_e *mode_ptr =
+            (FAR enum cc1101_opmode_e *)((uintptr_t)arg);
+          enum cc1101_opmode_e new_mode;
           uint8_t pktctrl0;
           uint8_t pktctrl1;
           uint8_t iocfg0;
           uint8_t iocfg2;
+
+          if (mode_ptr == NULL)
+            {
+              ret = -EFAULT;
+              goto ioctl_out;
+            }
+
+          new_mode = *mode_ptr;
 
           /* 1. Restore baseline settings (read from rfsettings). */
 
@@ -2105,7 +2416,16 @@ ioctl_out:
 
       case CC1101IOC_GETOPMODE:
         {
-          FAR *(enum cc1101_opmode_e *)arg = dev->opmode;
+          FAR enum cc1101_opmode_e *mode_ptr =
+            (FAR enum cc1101_opmode_e *)((uintptr_t)arg);
+
+          if (mode_ptr == NULL)
+            {
+              ret = -EFAULT;
+              break;
+            }
+
+          *mode_ptr = dev->opmode;
           ret = OK;
           break;
         }
