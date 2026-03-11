@@ -78,18 +78,12 @@ config NET_SOLINGER
 		write buffer support.
 
 config NET_TIMESTAMP
-	bool "SO_TIMESTAMP socket option"
+	bool "SO_TIMESTAMP/SO_TIMESTAMPING socket option"
 	default n
 	---help---
-		Enable or disable support for the SO_TIMESTAMP socket option.
-		Supported on SocketCAN and Ethernet/UDP.
-
-config NET_TIMESTAMPING
-	bool "SO_TIMESTAMPING socket option"
-	default n
-	---help---
-		Enable or disable support for the SO_TIMESTAMPING socket option.
-		Supported on Ethernet/PKT.
+		Enable or disable support for the SO_TIMESTAMP,
+		SO_TIMESTAMPNS and SO_TIMESTAMPING socket options.
+		Supported on SocketCAN, Ethernet/UDP and Ethernet/PKT.
 
 config NET_BINDTODEVICE
 	bool "SO_BINDTODEVICE socket option Bind-to-device support"
