@@ -27,6 +27,10 @@
 #include <nuttx/config.h>
 #include "avrdx_gpio.h"
 
+#ifdef CONFIG_AVR_AVRDX_SWINT
+#  include "avrdx_swint.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -68,5 +72,13 @@ void avrdx_up_initialize(void)
 
 #ifdef CONFIG_AVR_AVRDX_GPIO_ISR_MUX
   avrdx_gpio_isr_mux_init();
+#endif
+
+  /* Initialize software interrupts - must be done after
+   * GPIO multiplexer because it (optionally) uses it.
+   */
+
+#ifdef CONFIG_AVR_AVRDX_SWINT
+  avrdx_swint_initialize();
 #endif
 }
