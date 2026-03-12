@@ -642,9 +642,10 @@
 #define RCC_APB1LENR_TIM5EN            (1 << 3)  /* Bit 3:  TIM5 clock enable */
 #define RCC_APB1LENR_TIM6EN            (1 << 4)  /* Bit 4:  TIM6 clock enable */
 #define RCC_APB1LENR_TIM7EN            (1 << 5)  /* Bit 5:  TIM7 clock enable */
-#define RCC_APB1LENR_TIM12EN           (1 << 6)  /* Bit 5:  TIM12 clock enable */
-#define RCC_APB1LENR_TIM13EN           (1 << 7)  /* Bit 5:  TIM13 clock enable */
-#define RCC_APB1LENR_TIM14EN           (1 << 8)  /* Bit 5:  TIM14 clock enable */
+#define RCC_APB1LENR_TIM12EN           (1 << 6)  /* Bit 6:  TIM12 clock enable */
+#define RCC_APB1LENR_TIM13EN           (1 << 7)  /* Bit 7:  TIM13 clock enable */
+#define RCC_APB1LENR_TIM14EN           (1 << 8)  /* Bit 8:  TIM14 clock enable */
+#define RCC_APB1LENR_WWDGEN            (1 << 11) /* Bit 11: WWDG clock enable */
 #define RCC_APB1LENR_SPI2EN            (1 << 14) /* Bit 14: SPI2 clock enable */
 #define RCC_APB1LENR_SPI3EN            (1 << 15) /* Bit 15: SPI3 clock enable */
 #define RCC_APB1LENR_USART2EN          (1 << 17) /* Bit 17: USART2 clock enable */
