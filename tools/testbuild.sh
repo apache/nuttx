@@ -516,6 +516,7 @@ function dotest {
     if [[ "${check}" =~ ${re:1}$ ]]; then
       echo "Skipping: $1"
       skip=1
+      break
     fi
   done
 
@@ -525,6 +526,7 @@ function dotest {
       if [[ "${config/\//:}" == "${l}" ]]; then
         echo "Cmake in present: $1"
         cmake=1
+        break
       fi
     done
   fi
