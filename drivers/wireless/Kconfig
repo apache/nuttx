@@ -26,6 +26,18 @@ config CC1101_SPIDEV
 		Selects the SPI bus number identifying that SPI interface that
 		connects the CC1101 to the MCU.
 
+config CC1101_SPIFREQ_BURST
+	int "SPI burst frequency"
+	default 6500000
+	---help---
+		SPI burst frequency (Hz, no delay) for CC1101.
+
+config CC1101_SPIFREQ_SINGLE
+	int "SPI single access frequency"
+	default 9000000
+	---help---
+		SPI single access frequency (Hz, single access only - no delay) for CC1101.
+
 endif
 
 config WL_CC1101_IGNORE_VERSION

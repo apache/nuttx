@@ -109,8 +109,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CC1101_SPIFREQ_BURST    6500000 /* Hz, no delay */
-#define CC1101_SPIFREQ_SINGLE   9000000 /* Hz, single access only - no delay */
+#ifndef CONFIG_CC1101_SPIFREQ_BURST
+#  define CONFIG_CC1101_SPIFREQ_BURST    6500000 /* Hz, no delay */
+#endif
+
+#ifndef CONFIG_CC1101_SPIFREQ_SINGLE
+#  define CONFIG_CC1101_SPIFREQ_SINGLE   9000000 /* Hz, single access only - no delay */
+#endif
+
+#define CC1101_SPIFREQ_BURST    CONFIG_CC1101_SPIFREQ_BURST
+#define CC1101_SPIFREQ_SINGLE   CONFIG_CC1101_SPIFREQ_SINGLE
 
 #define CC1101_MCSM0_VALUE      0x1c
 
