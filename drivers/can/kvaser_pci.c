@@ -1262,7 +1262,7 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
       kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_RELEASE_BUF);
 
-      netpkt_free(dev, pkt);
+      netpkt_free(dev, pkt, NETPKT_RX);
       return NULL;
 #endif
     }
