@@ -365,6 +365,12 @@ static inline void rcc_enableapb1l(void)
 
   regval = getreg32(STM32_RCC_APB1LENR);
 
+#ifdef CONFIG_STM32_WWDG
+  /* Bit 11: WWDG clock enable */
+
+  regval |= RCC_APB1LENR_WWDGEN;
+#endif
+
 #ifdef CONFIG_STM32_SPI2
   /* Bit 14: SPI2 clock enable */
 
@@ -424,7 +430,7 @@ static inline void rcc_enableapb1l(void)
     {
       /* Bit 24: CRS clock enable */
 
-  regval |= RCC_APB1LENR_CRSEN;
+      regval |= RCC_APB1LENR_CRSEN;
     }
 #endif
 
@@ -760,7 +766,7 @@ static inline void rcc_set_flash_latency(void)
         {
           regval = FLASH_ACR_LATENCY(3) | FLASH_ACR_WRHIGHFREQ(1);
         }
-       else
+      else
         {
           regval = FLASH_ACR_LATENCY(4) | FLASH_ACR_WRHIGHFREQ(2);
         }
