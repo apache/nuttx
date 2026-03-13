@@ -239,6 +239,10 @@ void arm64_boot_secondary_c_routine(void)
   arm64_mmu_init(false);
 #endif
 
+#ifndef CONFIG_ARM64_DCACHE_DISABLE
+  up_enable_dcache();
+#endif
+
   /* We need to confirm that current_task has been initialized. */
 
   while (!current_task(this_cpu()));

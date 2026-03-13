@@ -247,9 +247,6 @@ void arm64_mpu_enable(void)
 
   val = read_sysreg(sctlr_el1);
   val |= (SCTLR_M_BIT
-#ifndef CONFIG_ARM64_DCACHE_DISABLE
-          | SCTLR_C_BIT
-#endif
           | SCTLR_BR_BIT             /* Background region enable */
          );
   write_sysreg(val, sctlr_el1);
@@ -279,7 +276,7 @@ void arm64_mpu_disable(void)
   UP_DMB();
 
   val = read_sysreg(sctlr_el1);
-  val &= ~(SCTLR_M_BIT | SCTLR_C_BIT);
+  val &= ~(SCTLR_M_BIT);
   write_sysreg(val, sctlr_el1);
   UP_MB();
 }
