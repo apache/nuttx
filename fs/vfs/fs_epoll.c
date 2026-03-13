@@ -507,8 +507,13 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
   FAR epoll_node_t *tepn;
   FAR epoll_node_t *epn;
   int i = 0;
+  int ret;
 
-  nxrmutex_lock(&eph->lock);
+  ret = nxrmutex_lock(&eph->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   list_for_every_entry_safe(&eph->setup, epn, tepn, epoll_node_t, node)
     {
@@ -519,27 +524,54 @@ static int epoll_teardown(FAR epoll_head_t *eph, FAR struct epoll_event *evs,
           continue;
         }
 
-      /* Teradown all the notified fd */
+      /* Edge-triggered mode: do not teardown the poll registration.
+       * Keep the node in the setup list so only NEW events from the
+       * driver will trigger notification. Reset notified flag so
+       * epoll_wait won't report stale events.
+       */
 
-      file_poll(epn->filep, &epn->pfd, false);
-      list_delete(&epn->node);
-
-      if (epn->pfd.revents != 0 && i < maxevents)
+      if ((epn->pfd.events & EPOLLET) != 0)
         {
-          evs[i].data     = epn->data;
-          evs[i++].events = epn->pfd.revents;
-          if ((epn->pfd.events & EPOLLONESHOT) != 0)
+          if (epn->pfd.revents != 0 && i < maxevents)
             {
-              list_add_tail(&eph->oneshot, &epn->node);
+              evs[i].data      = epn->data;
+              evs[i++].events  = epn->pfd.revents;
+              epn->notified    = false;
+              epn->pfd.revents = 0;
+              if ((epn->pfd.events & EPOLLONESHOT) != 0)
+                {
+                  file_poll(epn->filep, &epn->pfd, false);
+                  list_delete(&epn->node);
+                  list_add_tail(&eph->oneshot, &epn->node);
+                }
+            }
+        }
+      else
+        {
+          /* Level-triggered mode: teardown the poll and move to
+           * teardown list. epoll_setup will re-register and re-check.
+           */
+
+          file_poll(epn->filep, &epn->pfd, false);
+          list_delete(&epn->node);
+
+          if (epn->pfd.revents != 0 && i < maxevents)
+            {
+              evs[i].data     = epn->data;
+              evs[i++].events = epn->pfd.revents;
+              if ((epn->pfd.events & EPOLLONESHOT) != 0)
+                {
+                  list_add_tail(&eph->oneshot, &epn->node);
+                }
+              else
+                {
+                  list_add_tail(&eph->teardown, &epn->node);
+                }
             }
           else
             {
               list_add_tail(&eph->teardown, &epn->node);
             }
-        }
-      else
-        {
-          list_add_tail(&eph->teardown, &epn->node);
         }
     }
 
