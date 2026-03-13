@@ -58,6 +58,10 @@ elseif(CONFIG_DRVR_READAHEAD)
   list(APPEND SRCS rwbuffer.c)
 endif()
 
+if(CONFIG_BLOCK_CACHE)
+  list(APPEND SRCS block_cache.c)
+endif()
+
 if(CONFIG_DEV_RPMSG)
   list(APPEND SRCS rpmsgdev.c)
 endif()
