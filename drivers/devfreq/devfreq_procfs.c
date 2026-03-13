@@ -169,8 +169,10 @@ static ssize_t devfreq_read(FAR struct file *filep,
   FAR struct devfreq_s *devfreq = devfreq_procfs->devfreq;
 #ifdef CONFIG_DEVFREQ_PROCFS_QOS
   FAR struct qos_request_s *qos;
-  void **stack;
+#if defined(CONFIG_LIBC_BACKTRACE_BUFFSIZE) && CONFIG_LIBC_BACKTRACE_BUFFSIZE > 0
+  FAR void **stack;
   int depth;
+#endif
 #endif
   off_t offset = filep->f_pos;
   size_t i;
@@ -209,14 +211,16 @@ static ssize_t devfreq_read(FAR struct file *filep,
                  " qos_list(min, max, backtrace):\n");
   plist_for_each_entry(qos, &devfreq->constraints.min_requests, min_req)
     {
-      stack = backtrace_get(qos->backtrace, &depth);
       procfs_sprintf(buffer, buflen, &offset,
                      " %"PRIu32", %"PRIu32",",
                      qos->min_req.prio, qos->max_req.prio);
+#if defined(CONFIG_LIBC_BACKTRACE_BUFFSIZE) && CONFIG_LIBC_BACKTRACE_BUFFSIZE > 0
+      stack = backtrace_get(qos->backtrace, &depth);
       for (i = 0; i < depth; i++)
         {
           procfs_sprintf(buffer, buflen, &offset, " %p", stack[i]);
         }
+#endif
 
       procfs_sprintf(buffer, buflen, &offset, "\n");
     }
