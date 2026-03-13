@@ -178,3 +178,5 @@ libs/libc/tre-mem.c
 #define RTPROT_RA                        9    /* RDISC/ND router advertisements */
   /* Followed by one or more ND options */
    *    message using the Neighbor Discovery (ND) protocol. It then listens
+#   AVR:      rcall, call           z80/z16:  call
+    r"|rcall"  # AVR
