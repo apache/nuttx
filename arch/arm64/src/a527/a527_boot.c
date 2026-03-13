@@ -25,21 +25,12 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
-#include <assert.h>
-#include <nuttx/debug.h>
 
 #include <nuttx/compiler.h>
-#include <nuttx/cache.h>
-#include <nuttx/syslog/syslog_rpmsg.h>
+#include <nuttx/debug.h>
 #include <arch/chip/chip.h>
 #include <arch/board/board_memorymap.h>
 
-#ifdef CONFIG_SMP
-#include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "a527_boot.h"
@@ -89,6 +80,7 @@ static void a527_copy_overlap(uint8_t *dest, const uint8_t *src,
 {
   uint8_t *d = dest + count - 1;
   const uint8_t *s = src + count - 1;
+  volatile uint8_t c;           /* Prevent compiler optimization */
 
   if (dest <= src)
     {
@@ -98,7 +90,7 @@ static void a527_copy_overlap(uint8_t *dest, const uint8_t *src,
 
   while (count--)
     {
-      volatile uint8_t c = *s;  /* Prevent compiler optimization */
+      c = *s;
       *d = c;
       d--;
       s--;
@@ -234,29 +226,11 @@ void arm64_chip_boot(void)
 
   a527_copy_ramdisk();
 
-  /* Map the RAM and I/O Memory, enable the MMU */
-
-  arm64_mmu_init(true);
-
-#if defined(CONFIG_ARM64_PSCI)
-  /* Init the Power State Coordination Interface */
-
-  arm64_psci_init("smc");
-#endif
-
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
   a527_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
-#endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);

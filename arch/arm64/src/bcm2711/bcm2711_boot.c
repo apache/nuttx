@@ -26,25 +26,15 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <nuttx/debug.h>
-#include <nuttx/cache.h>
-
 #include <arch/chip/chip.h>
 
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "bcm2711_boot.h"
-#include "bcm2711_serial.h"
 #include "bcm2711_mailbox.h"
 
 #ifdef CONFIG_SMP
 #include "bcm2711_cpustart.h"
-#endif
-
-#ifdef CONFIG_LEGACY_PAGING
-#include <nuttx/page.h>
 #endif
 
 /****************************************************************************
@@ -150,26 +140,9 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
-
-  arm64_mmu_init(true);
-
-#if defined(CONFIG_ARM64_PSCI)
-  arm64_psci_init("smc");
-
-#endif
-
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
   bcm2711_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
-#endif
 }

@@ -26,23 +26,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <debug.h>
-
-#include <nuttx/cache.h>
-
 #include <arch/chip/chip.h>
 
-#ifdef CONFIG_SMP
-#  include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "am62x_boot.h"
-#include "am62x_serial.h"
 
 /****************************************************************************
  * Private Data
@@ -123,24 +111,7 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
-#ifdef CONFIG_ARCH_USE_MMU
-  arm64_mmu_init(true);
-#endif
-
-#if defined(CONFIG_ARM64_PSCI) && defined(CONFIG_SMP)
-  /* Keep PSCI out of the initial UP bring-up path until the basic
-   * boot-to-NSH flow is stable on AM62x.  PSCI is still available for
-   * future SMP enablement.
-   */
-
-  arm64_psci_init("smc");
-#endif
-
   am62x_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  arm64_earlyserialinit();
-#endif
 }
 
 /****************************************************************************

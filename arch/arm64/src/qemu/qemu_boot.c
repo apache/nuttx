@@ -26,26 +26,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <nuttx/debug.h>
-
-#include <nuttx/cache.h>
-#ifdef CONFIG_LEGACY_PAGING
-#  include <nuttx/page.h>
-#endif
-
 #include <arch/chip/chip.h>
 
-#ifdef CONFIG_SMP
-#include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "qemu_boot.h"
-#include "qemu_serial.h"
 
 #ifdef CONFIG_DEVICE_TREE
 #  include <nuttx/fdt.h>
@@ -156,22 +141,8 @@ void arm64_el_init(void)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
-
-  arm64_mmu_init(true);
-
-#ifdef CONFIG_ARM64_MTE
-  arm64_mte_init();
-#endif
-
 #ifdef CONFIG_DEVICE_TREE
   fdt_register((const char *)0x40000000);
-#endif
-
-#if defined(CONFIG_ARCH_CHIP_QEMU_WITH_HV) && defined(CONFIG_ARM64_PSCI)
-  arm64_psci_init("hvc");
-#elif defined(CONFIG_ARM64_PSCI)
-  arm64_psci_init("smc");
 #endif
 
   /* Perform board-specific device initialization. This would include
@@ -180,14 +151,6 @@ void arm64_chip_boot(void)
 
 #ifndef CONFIG_ARCH_CHIP_CUSTOM
   qemu_board_initialize();
-#endif
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
 #endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS

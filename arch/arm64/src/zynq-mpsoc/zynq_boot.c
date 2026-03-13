@@ -26,27 +26,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <nuttx/debug.h>
-
-#include <nuttx/cache.h>
-#ifdef CONFIG_LEGACY_PAGING
-#  include <nuttx/page.h>
-#endif
-
 #include <arch/barriers.h>
 #include <arch/chip/chip.h>
 
-#ifdef CONFIG_SMP
-#include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "zynq_boot.h"
-#include "zynq_serial.h"
 #include "hardware/zynq_pll.h"
 
 /****************************************************************************
@@ -169,36 +154,11 @@ int arm64_get_cpuid(uint64_t mpid)
 
 void arm64_chip_boot(void)
 {
-  /* MAP IO and DRAM, enable MMU. */
-
-  arm64_mmu_init(true);
-
-#if defined(CONFIG_ARM64_PSCI)
-
-  /* Default exception level is EL1 for the NuttX OS. However, if we debug
-   * NuttX by JTAG, The XSCT of Vivado SDK will set the Zynq MPSoC
-   * to EL3. Other levels are not supported at the moment. And in this
-   * operating condition, we can't use SMC for there's no ATF support.
-   */
-
-#if CONFIG_ARCH_ARM64_EXCEPTION_LEVEL < 3
-  arm64_psci_init("smc");
-#endif
-#endif
-
   /* Perform board-specific device initialization. This would include
    * configuration of board specific resources such as GPIOs, LEDs, etc.
    */
 
   zynq_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
-#endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)mpsoc_clk_rate_get(acpu));

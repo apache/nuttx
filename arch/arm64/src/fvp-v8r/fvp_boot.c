@@ -26,19 +26,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
-#include <nuttx/debug.h>
 #include <nuttx/userspace.h>
 
 #include <arch/barriers.h>
 #include <arch/chip/chip.h>
 
-#ifdef CONFIG_SMP
-#include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mpu.h"
 #include "chip.h"
@@ -46,7 +38,6 @@
 #include "fvp_userspace.h"
 
 #include <arch/board/board_memorymap.h>
-#include <nuttx/serial/uart_pl011.h>
 
 /****************************************************************************
  * Private Data
@@ -123,14 +114,8 @@ int arm64_get_cpuid(uint64_t mpid)
 
 void arm64_chip_boot(void)
 {
-  arm64_mpu_init(true);
-
 #ifdef CONFIG_BUILD_PROTECTED
   fvp_userspace();
-#endif
-
-#if defined(CONFIG_ARM64_PSCI)
-  arm64_psci_init("smc");
 #endif
 
   /* Perform board-specific device initialization. This would include
@@ -138,14 +123,6 @@ void arm64_chip_boot(void)
    */
 
   fvp_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  /* Perform early serial initialization if we are going to use the serial
-   * driver.
-   */
-
-  arm64_earlyserialinit();
-#endif
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
   up_perf_init((void *)CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC);

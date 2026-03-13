@@ -28,11 +28,6 @@
 
 #include <arch/chip/chip.h>
 
-#ifdef CONFIG_SMP
-#  include "arm64_smp.h"
-#endif
-
-#include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "rk3588_boot.h"
@@ -79,19 +74,7 @@ void arm64_chip_boot(void)
 {
   rk3588_memory_initialize();
 
-  /* Map I/O and DRAM, then enable the MMU. */
-
-  arm64_mmu_init(true);
-
-#if defined(CONFIG_ARM64_PSCI)
-  arm64_psci_init("smc");
-#endif
-
   rk3588_board_initialize();
-
-#ifdef USE_EARLYSERIALINIT
-  arm64_earlyserialinit();
-#endif
 }
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
