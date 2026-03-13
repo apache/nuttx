@@ -58,6 +58,8 @@
 #define V4L2_CID_GAMMA                USER_CID(7)    /* Gamma value adjustment */
 #define V4L2_CID_GAMMA_CURVE          USER_CID(8)    /* Gamma curve adjustment */
 #define V4L2_CID_EXPOSURE             USER_CID(9)    /* Exposure value */
+#define V4L2_CID_AUTOGAIN             USER_CID(10)   /* Auto gain */
+#define V4L2_CID_GAIN                 USER_CID(11)   /* Gain value */
 
 /* Mirror horizontally(VIDEO) */
 
