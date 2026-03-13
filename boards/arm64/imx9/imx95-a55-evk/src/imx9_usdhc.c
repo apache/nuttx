@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm64/src/imx9/imx9_gpiobase.c
+ * boards/arm64/imx9/imx95-a55-evk/src/imx9_usdhc.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,26 +26,60 @@
 
 #include <nuttx/config.h>
 
-#include "imx9_gpio.h"
+#include <debug.h>
+#include <errno.h>
+#include <nuttx/mmcsd.h>
+
+#include "imx9_usdhc.h"
+#include "imx95-evk.h"
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_IMX93) || defined(CONFIG_ARCH_CHIP_IMX95)
-/* Base address for the GPIO memory mapped registers */
-
-const uintptr_t g_gpio_base[] =
-{
-  IMX9_GPIO1_BASE,
-  IMX9_GPIO2_BASE,
-  IMX9_GPIO3_BASE,
-  IMX9_GPIO4_BASE,
-};
-#else
-#  error Unrecognized i.MX9 architecture
-#endif
+static struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: imx9_usdhc_init
+ *
+ * Description:
+ *   Configure the uSDHC driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+int imx9_usdhc_init(void)
+{
+  int ret;
+
+  /* First, get an instance of the SDIO interface */
+
+  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+
+  g_sdio_dev = imx9_usdhc_initialize(SDIO_SLOTNO);
+  if (!g_sdio_dev)
+    {
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+
+  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
