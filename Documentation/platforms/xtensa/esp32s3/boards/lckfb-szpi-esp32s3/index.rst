@@ -486,3 +486,42 @@ Then test the IMU sensor::
   object_name:sensor_accel, object_instance:0
   sensor_gyro(now:113510000):timestamp:113510000,x:1.468750,y:1.562500,z:-0.093750,temperature:22.855469
   sensor_accel(now:113510000):timestamp:113510000,x:-0.810913,y:0.027343,z:0.571167,temperature:22.855469
+
+sdmmc
+-----
+
+Basic NuttShell configuration console and SD card enabled via SDMMC peripheral
+in 1-bit mode. The SD card pin mapping is as follows:
+
+===== ======
+Pin   GPIO
+===== ======
+CLK   GPIO47
+CMD   GPIO48
+D0    GPIO21
+===== ======
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:sdmmc
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then format and mount the SD card::
+
+  # Format the SD card with FAT32
+  nsh> mkfatfs -F 32 /dev/mmcsd1
+
+  # Create mount point and mount
+  nsh> mkdir -p /mnt/sd
+  nsh> mount -t vfat /dev/mmcsd1 /mnt/sd
+
+  # Verify
+  nsh> df
+    Block  Number
+    Size   Blocks     Used Available Mounted on
+       0        0        0         0 /proc
+     512 124702720        0 124702720 /mnt/sd
+
+  nsh> echo "hello" > /mnt/sd/test.txt
+  nsh> cat /mnt/sd/test.txt
+  hello
