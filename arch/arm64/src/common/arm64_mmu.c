@@ -623,11 +623,7 @@ static void enable_mmu_el3(unsigned int flags)
   /* Enable the MMU and data cache */
 
   value = read_sysreg(sctlr_el3);
-  write_sysreg((value | SCTLR_M_BIT
-#ifndef CONFIG_ARM64_DCACHE_DISABLE
-               | SCTLR_C_BIT
-#endif
-               ), sctlr_el3);
+  write_sysreg((value | SCTLR_M_BIT), sctlr_el3);
 
   /* Ensure the MMU enable takes effect immediately */
 
@@ -656,11 +652,7 @@ static void enable_mmu_el1(unsigned int flags)
   /* Enable the MMU and data cache */
 
   value = read_sysreg(sctlr_el1);
-  write_sysreg((value | SCTLR_M_BIT
-#ifndef CONFIG_ARM64_DCACHE_DISABLE
-               | SCTLR_C_BIT
-#endif
-               ), sctlr_el1);
+  write_sysreg((value | SCTLR_M_BIT), sctlr_el1);
 
   /* Ensure the MMU enable takes effect immediately */
 
