@@ -33,6 +33,8 @@
 
 #include "arm64_internal.h"
 #include "arm64_arch.h"
+#include "arm64_mpu.h"
+#include "arm64_mmu.h"
 
 /****************************************************************************
  * Public Data
@@ -238,6 +240,59 @@ void arm64_boot_el1_init(void)
 
 void arm64_boot_primary_c_routine(void)
 {
+#ifdef CONFIG_ARCH_HAVE_MPU
+  arm64_mpu_init(true);
+#endif
+
+#if defined(CONFIG_ARCH_HAVE_MMU)
+#  if defined(CONFIG_ARCH_CHIP_IMX9) && !defined(CONFIG_ARCH_USE_MMU)
+  /* i.MX9 BL2 bootloaders deliberately boot without the MMU: TF-A
+   * reconfigures it afterwards and the translation tables cost ~50 KB.
+   * MMU setup is only performed when CONFIG_ARCH_USE_MMU is selected.
+   */
+#  else
+  /* MAP IO and DRAM, enable MMU. */
+
+  arm64_mmu_init(true);
+#  endif
+#endif
+
+#ifdef CONFIG_ARM64_MTE
+  arm64_mte_init();
+#endif
+
+#ifdef CONFIG_PERCPU_SECTION
+  /* Copy the percpu data segment of cpu0 to the other CPUs. */
+
+  for (int cpu = 1; cpu < CONFIG_NCPUS; cpu++)
+    {
+      memcpy((void *)((uintptr_t)_sdata_percpu + PERCPU_OFFSET * cpu),
+             _ldata_percpu,
+             (uintptr_t)_edata_percpu - (uintptr_t)_sdata_percpu);
+    }
+#endif
+
+#ifdef CONFIG_ARM64_PSCI
+#  if defined(CONFIG_ARCH_CHIP_QEMU_WITH_HV)
+  arm64_psci_init("hvc");
+#  elif defined(CONFIG_ARCH_CHIP_AM62X) && !defined(CONFIG_SMP)
+  /* Keep PSCI out of the initial UP bring-up path until the basic
+   * boot-to-NSH flow is stable on AM62x.  PSCI is still available for
+   * future SMP enablement.
+   */
+#  elif CONFIG_ARCH_ARM64_EXCEPTION_LEVEL < 3
+  arm64_psci_init("smc");
+#  endif
+#endif
+
   arm64_chip_boot();
+
+#ifdef USE_EARLYSERIALINIT
+  /* Perform early serial initialization if we are going to use the serial
+   * driver.
+   */
+
+  arm64_earlyserialinit();
+#endif
   nx_start();
 }
