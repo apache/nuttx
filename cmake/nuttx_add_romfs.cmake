@@ -282,6 +282,75 @@ function(process_all_directory_romfs)
   list(PREPEND RCSRCS ${board_rcsrcs} ${dyn_rcsrcs})
   list(PREPEND RCRAWS ${board_rcraws} ${dyn_rcraws})
 
+  # Auto-generate /etc/passwd at build time if configured
+  if(CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE)
+    if("${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" STREQUAL "")
+      message(
+        FATAL_ERROR
+          "CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD must be set when"
+          " BOARD_ETC_ROMFS_PASSWD_ENABLE is enabled."
+          " Run 'make menuconfig' to set a password.")
+    endif()
+
+    # Determine host executable suffix (.exe on Windows, empty elsewhere)
+    if(CMAKE_HOST_WIN32)
+      set(HOST_EXE_SUFFIX .exe)
+    else()
+      set(HOST_EXE_SUFFIX "")
+    endif()
+
+    # Locate a host C compiler to build the mkpasswd tool
+    find_program(HOST_CC NAMES cc gcc clang REQUIRED)
+
+    # Build mkpasswd.c as a host binary in the CMake build directory and keep
+    # the source tree clean.
+    set(MKPASSWD_SRC ${NUTTX_DIR}/tools/mkpasswd.c)
+    set(MKPASSWD_BIN ${CMAKE_BINARY_DIR}/tools/mkpasswd${HOST_EXE_SUFFIX})
+
+    if(NOT TARGET build_host_mkpasswd)
+      add_custom_command(
+        OUTPUT ${MKPASSWD_BIN}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tools
+        COMMAND ${HOST_CC} -o ${MKPASSWD_BIN} ${MKPASSWD_SRC}
+        DEPENDS ${MKPASSWD_SRC}
+        COMMENT "Building host tool: mkpasswd")
+      add_custom_target(build_host_mkpasswd DEPENDS ${MKPASSWD_BIN})
+    endif()
+
+    # Pass TEA key overrides when the user has changed them from defaults
+    set(MKPASSWD_KEY_ARGS "")
+    if(CONFIG_FSUTILS_PASSWD_KEY1)
+      list(APPEND MKPASSWD_KEY_ARGS --key1 ${CONFIG_FSUTILS_PASSWD_KEY1})
+    endif()
+    if(CONFIG_FSUTILS_PASSWD_KEY2)
+      list(APPEND MKPASSWD_KEY_ARGS --key2 ${CONFIG_FSUTILS_PASSWD_KEY2})
+    endif()
+    if(CONFIG_FSUTILS_PASSWD_KEY3)
+      list(APPEND MKPASSWD_KEY_ARGS --key3 ${CONFIG_FSUTILS_PASSWD_KEY3})
+    endif()
+    if(CONFIG_FSUTILS_PASSWD_KEY4)
+      list(APPEND MKPASSWD_KEY_ARGS --key4 ${CONFIG_FSUTILS_PASSWD_KEY4})
+    endif()
+
+    set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
+    add_custom_command(
+      OUTPUT ${GENPASSWD_OUTPUT}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
+      COMMAND
+        ${MKPASSWD_BIN} --user "${CONFIG_BOARD_ETC_ROMFS_PASSWD_USER}"
+        --password "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" --uid
+        ${CONFIG_BOARD_ETC_ROMFS_PASSWD_UID} --gid
+        ${CONFIG_BOARD_ETC_ROMFS_PASSWD_GID} --home
+        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" ${MKPASSWD_KEY_ARGS} -o
+        ${GENPASSWD_OUTPUT}
+      DEPENDS ${MKPASSWD_BIN}
+      COMMENT "Generating /etc/passwd from Kconfig values")
+    add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
+    add_dependencies(generate_passwd build_host_mkpasswd)
+    list(APPEND RCRAWS ${GENPASSWD_OUTPUT})
+    list(APPEND dyn_deps generate_passwd)
+  endif()
+
   # init dynamic dependencies
 
   get_property(
