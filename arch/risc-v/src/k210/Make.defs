@@ -30,7 +30,7 @@ HEAD_ASRC = k210_head.S
 CHIP_CSRCS  = k210_allocateheap.c k210_clockconfig.c
 CHIP_CSRCS += k210_irq.c k210_irq_dispatch.c
 CHIP_CSRCS += k210_lowputc.c k210_serial.c k210_fpioa.c
-CHIP_CSRCS += k210_start.c k210_timerisr.c k210_gpiohs.c
+CHIP_CSRCS += k210_start.c k210_timerisr.c k210_gpiohs.c k210_sysctl.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += k210_userspace.c

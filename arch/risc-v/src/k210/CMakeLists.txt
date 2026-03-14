@@ -26,6 +26,8 @@ list(APPEND SRCS k210_timerisr.c k210_allocateheap.c k210_clockconfig.c)
 
 list(APPEND SRCS k210_lowputc.c k210_serial.c k210_fpioa.c k210_gpiohs.c)
 
+list(APPEND SRCS k210_sysctl.c)
+
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS k210_userspace.c)
 endif()
