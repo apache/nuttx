@@ -70,6 +70,8 @@ CPPSRCS += abort_message.cpp fallback_malloc.cpp
 
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CPPSRCS += cxa_exception.cpp cxa_personality.cpp cxa_exception_storage.cpp
+else
+CPPSRCS += cxa_noexception.cpp
 endif
 
 ifeq ($(CONFIG_CXX_RTTI),y)

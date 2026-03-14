@@ -88,6 +88,8 @@ if(CONFIG_LIBCXXABI)
   if(CONFIG_CXX_EXCEPTION)
     list(APPEND SRCS cxa_exception.cpp cxa_exception_storage.cpp
          cxa_personality.cpp)
+  else()
+    list(APPEND SRCS cxa_noexception.cpp)
   endif()
 
   if(CONFIG_CXX_RTTI)
