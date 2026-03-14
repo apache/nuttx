@@ -445,7 +445,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
                   "/on/off"
 #endif
 #if CONFIG_MM_BACKTRACE >= 0
-                 "/leak/pid> <seqmin> <seqmax"
+                 "/leak/pid/allpid> <seqmin> <seqmax"
 #endif
                  ">\n"
                  "used: dump all allocated node\n"
@@ -463,6 +463,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 #if CONFIG_MM_BACKTRACE >= 0
                  "leak: dump all leaked node\n"
                  "pid: dump pid allocated node\n"
+                 "allpid: dump all pid memory allocated\n"
 #  ifdef CONFIG_MM_BACKTRACE_SEQNO
                  "The current sequence number %lu\n",
                  g_mm_seqno
@@ -616,6 +617,11 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
         break;
 
 #if CONFIG_MM_BACKTRACE >= 0
+        case 'a':
+        dump.pid = PID_MM_ALL_PID;
+        p = (FAR char *)buffer + 6;
+        goto dump;
+
       default:
         if (!isdigit(buffer[0]))
           {
