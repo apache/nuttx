@@ -141,7 +141,7 @@ add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--c++=14>)
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--g++>)
 add_compile_options(
   $<$<COMPILE_LANGUAGE:CXX>:--language=+gcc,+volatile,-strings,-kanji>)
-add_compile_options(--pass-c++=-D__CTC__)
+add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--pass-c++=-D__CTC__>)
 
 function(get_tasking_ctc_root OUT_VAR)
   set(${OUT_VAR} "")
@@ -265,14 +265,15 @@ set(TASKING_CXX_WARNINGS
     68,161,940,1097,1105,1315,1858,2213,2496,2529,2964,3085)
 
 add_compile_options(--pass-c=--no-warnings=${TASKING_WARNINGS})
-add_compile_options(--pass-c++=--no-warnings=${TASKING_CXX_WARNINGS})
+add_compile_options(
+  $<$<COMPILE_LANGUAGE:CXX>:--pass-c++=--no-warnings=${TASKING_CXX_WARNINGS}>)
 
 if(NOT CONFIG_CXX_EXCEPTION)
-  add_compile_options(--pass-c++=--no-exceptions)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--pass-c++=--no-exceptions>)
 endif()
 
 if(CONFIG_CXX_RTTI)
-  add_compile_options(--pass-c++=--rtti)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:--pass-c++=--rtti>)
 endif()
 
 set(NUTTX_FIND_TOOLCHAIN_LIB_DEFINED true)
