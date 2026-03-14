@@ -35,6 +35,7 @@
 
 #include "riscv_internal.h"
 #include "k210_clockconfig.h"
+#include "k210_sysctl.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,7 +47,7 @@
  * Private Data
  ****************************************************************************/
 
-static uint32_t g_cpu_clock = 416000000;
+static uint32_t g_cpu_clock = CONFIG_K210_CPU_FREQ;
 
 /****************************************************************************
  * Public Functions
@@ -90,22 +91,43 @@ void k210_clockconfig(void)
 {
 #ifndef CONFIG_K210_WITH_QEMU
   uint32_t clksel0;
+  uint32_t div;
 
-  /* Obtain clock selector for ACLK */
+  /* Initialize sysctl driver */
 
-  clksel0 = getreg32(K210_SYSCTL_CLKSEL0);
+  k210_sysctl_init();
 
-  if (1 == CLKSEL0_ACLK_SEL(clksel0))
+  /* Wait for PLL0 to lock before configuring clocks */
+
+  while (!k210_sysctl_pll_is_locked(K210_SYSCTL_PLL0))
     {
-      /* PLL0 selected */
-
-      g_cpu_clock = k210_get_pll0clk() / 2;
+      up_mdelay(1);
     }
-  else
-    {
-      /* OSC selected */
 
-      g_cpu_clock = OSC_FREQ;
+  /* Enable essential system clocks */
+
+  k210_sysctl_clock_enable(K210_CLOCK_CPU);
+  k210_sysctl_clock_enable(K210_CLOCK_SRAM0);
+  k210_sysctl_clock_enable(K210_CLOCK_SRAM1);
+
+  /* Use new frequency API to update g_cpu_clock */
+
+  g_cpu_clock = k210_sysctl_clock_get_freq(K210_CLOCK_CPU);
+  if (g_cpu_clock == 0)
+    {
+      /* Fallback to PLL frequency calculation if new API fails */
+
+      clksel0 = getreg32(K210_SYSCTL_CLKSEL0);
+
+      if (1 == CLKSEL0_ACLK_SEL(clksel0))
+        {
+          div = (clksel0 & CLKSEL0_ACLK_DIV_MASK) >> CLKSEL0_ACLK_DIV_SHIFT;
+          g_cpu_clock = k210_get_pll0clk() / (2u << div);
+        }
+      else
+        {
+          g_cpu_clock = OSC_FREQ;
+        }
     }
 
   /* Workaround for stabilization */
