@@ -542,10 +542,10 @@ void mpu_dump_region(void)
       drbar = mpu_get_drbar();
       dracr = mpu_get_dracr();
       drsr = mpu_get_drsr();
-      _info("MPU-%d, base=0%08X l2size=%"PRIu32" bufferable=%u"
-            "cacheable=%u shareable=%u\n", i, drbar & MPU_RBAR_ADDR_MASK,
-            drsr & MPU_RASR_RSIZE_MASK, dracr & MPU_RACR_B,
-            dracr & MPU_RACR_C, dracr & MPU_RACR_S);
+      _info("MPU-%d, base=0%08"PRIX32" l2size=%"PRIu32" bufferable=%"PRIu32
+            " cacheable=%"PRIu32" shareable=%"PRIu32"\n", i,
+            drbar & MPU_RBAR_ADDR_MASK, drsr & MPU_RASR_RSIZE_MASK,
+            dracr & MPU_RACR_B, dracr & MPU_RACR_C, dracr & MPU_RACR_S);
       if (drsr & MPU_RASR_ENABLE)
         {
           count++;
