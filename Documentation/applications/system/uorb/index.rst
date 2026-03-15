@@ -1,3 +1,5 @@
+.. _uorb:
+
 ==========================================
 ``uorb`` uorb(micro object request broker)
 ==========================================
@@ -531,6 +533,8 @@ and management in an embedded system environment.
 
 **Tools**
 ^^^^^^^^^
+
+.. _uorb_listener:
 
 **uorb_listener**
 -----------------

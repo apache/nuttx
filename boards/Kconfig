@@ -597,6 +597,35 @@ config ARCH_BOARD_ESP32S3_LCKFB_SZPI
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
 
+config ARCH_BOARD_ESP32S3_WS_LCD128
+	bool "WaveShare ESP32-S3-(Touch)-LCD-1.28"
+	depends on ARCH_CHIP_ESP32S3CUSTOM
+	select ESP32S3_UART0
+	select ESP32S3_SPI2
+	select SPI_CMDDATA
+	select LCD
+	select LCD_DEV
+	select LCD_GC9A01
+	---help---
+		This board comes in two variants:
+		 1. Touch screen marked ESP32-S3-Touch-LCD-1.28 [1].
+		 2. No-Touch marked ESP32-S3-LCD-1.28 [2].
+
+		WaveShare ESP32-S3-(Touch)-LCD-1.28 board uses up to 240MHz dual core LX7
+		32-bit ESP32-S3R2 SoC with WiFi (802.11b/g/n) and Bluetooth 5 (LE) using
+		onboard antenna, 512KB SRAM, 384KB ROM, onboard 2MB PSRAM, external 16MB
+		NOR Flash (W25Q128JVSIQ). Flashing and console over CH434P UART-to-USB-C.
+		Board is equipped with round 240x240 GCA01 65K color SPI LCD, CST819 I2C
+		touch screen (touch variant), QMI8658 6-axis IMU, ETA6096 3.7V lithium
+		charger (MX1.25 connector), reset and boot buttons.
+
+		Touch variant provides 6 GPIO over SH-1.0 12 pin connector (goldpin ended
+		cable attached). Non-touch variant provides two 2x10 1.27mm female board
+		connectors.
+
+		[1] www.waveshare.com/esp32-s3-lcd-1.28.htm
+		[2] www.waveshare.com/esp32-s3-touch-lcd-1.28.htm
+
 config ARCH_BOARD_ESP32C6_DEVKITC
 	bool "Espressif ESP32-C6-DevKitC-1"
 	depends on ARCH_CHIP_ESP32C6WROOM1
@@ -3628,6 +3657,7 @@ config ARCH_BOARD
 	default "esp32s3-box"                  if ARCH_BOARD_ESP32S3_BOX
 	default "esp32s3-korvo-2"              if ARCH_BOARD_ESP32S3_KORVO_2
 	default "lckfb-szpi-esp32s3"           if ARCH_BOARD_ESP32S3_LCKFB_SZPI
+	default "esp32s3-ws-lcd128"            if ARCH_BOARD_ESP32S3_WS_LCD128
 	default "esp32c6-devkitc"              if ARCH_BOARD_ESP32C6_DEVKITC
 	default "esp32c6-devkitm"              if ARCH_BOARD_ESP32C6_DEVKITM
 	default "esp32c6-xiao"                 if ARCH_BOARD_ESP32C6_XIAO
@@ -4916,6 +4946,9 @@ source "boards/xtensa/esp32s3/esp32s3-lcd-ev/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_LHCBIT
 source "boards/xtensa/esp32s3/esp32s3-lhcbit/Kconfig"
+endif
+if ARCH_BOARD_ESP32S3_WS_LCD128
+source "boards/xtensa/esp32s3/esp32s3-ws-lcd128/Kconfig"
 endif
 if ARCH_BOARD_ESP32S3_XIAO
 source "boards/xtensa/esp32s3/esp32s3-xiao/Kconfig"

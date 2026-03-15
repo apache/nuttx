@@ -62,6 +62,12 @@ Reusable LCD drivers reside in the drivers/lcd directory:
 LCDs
 ----
 
+.. _gc9a01:
+
+- ``gc9a01.c``
+
+  GalaxyCore GC9A01 TFT LCD controller.
+
 - ``mio283qt2.c``
 
   This is a driver for the MI0283QT-2 LCD from Multi-Inno
