@@ -35,6 +35,7 @@
 #include <nuttx/fs/fs.h>
 
 #include "k210.h"
+#include "k210_wdt.h"
 #include "maix-bit.h"
 
 /****************************************************************************
@@ -65,6 +66,28 @@ int k210_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_K210_WDT0
+  ret = k210_wdt_initialize(CONFIG_WATCHDOG_DEVPATH, K210_WDT_DEVICE0);
+  if (ret < 0)
+    {
+      syslog(LOG_WARNING, "WARNING: Failed to initialize WDT0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_K210_WDT1
+  ret = k210_wdt_initialize(
+#ifdef CONFIG_K210_WDT0
+      "/dev/watchdog1",
+#else
+      CONFIG_WATCHDOG_DEVPATH,
+#endif
+      K210_WDT_DEVICE1);
+  if (ret < 0)
+    {
+      syslog(LOG_WARNING, "WARNING: Failed to initialize WDT1: %d\n", ret);
     }
 #endif
 

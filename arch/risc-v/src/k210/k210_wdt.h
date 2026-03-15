@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/hardware/k210_memorymap.h
+ * arch/risc-v/src/k210/k210_wdt.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,29 +20,41 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
-#define __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_K210_K210_WDT_H
+#define __ARCH_RISCV_SRC_K210_K210_WDT_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-/* Register Base Address ****************************************************/
+typedef enum
+{
+  K210_WDT_DEVICE0 = 0,
+  K210_WDT_DEVICE1,
+  K210_WDT_DEVICE_MAX
+} k210_wdt_id_t;
 
-#define K210_CLINT_BASE   0x02000000
-#define K210_PLIC_BASE    0x0c000000
+#ifndef __ASSEMBLY__
 
-#ifdef CONFIG_K210_WITH_QEMU
-#define K210_UART0_BASE   0x10010000
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#define K210_UART0_BASE   0x38000000
+#define EXTERN extern
 #endif
-#define K210_GPIOHS_BASE  0x38001000
-#define K210_FPIOA_BASE   0x502B0000
 
-#define K210_WDT0_BASE    0x50400000
-#define K210_WDT1_BASE    0x50410000
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#define K210_SYSCTL_BASE  0x50440000
+int k210_wdt_initialize(const char *devpath, k210_wdt_id_t id);
 
-#endif /* __ARCH_RISCV_SRC_K210_HARDWARE_K210_MEMORYMAP_H */
+#undef EXTERN
+
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_K210_K210_WDT_H */
