@@ -22,6 +22,20 @@ The driver supports querying clock frequencies for:
 CPU frequency can be configured at build time using the ``K210_CPU_FREQ``
 Kconfig option (default: 400 MHz, range: 40-600 MHz).
 
+Watchdog Timers
+===============
+
+The K210 has two independent watchdog timers (WDT0 and WDT1) for system
+reliability. Both are accessible as character drivers via the standard
+NuttX watchdog interface.
+
+* **WDT0**: Base address ``0x50400000``, IRQ 21
+* **WDT1**: Base address ``0x50410000``, IRQ 22
+* **Timeout range**: Programmable based on 16-bit counter
+
+Enable via Kconfig: ``CONFIG_K210_WDT`` (automatically selects
+``CONFIG_WATCHDOG``). Devices are ``/dev/watchdog0`` and ``/dev/watchdog1``.
+
 Supported Boards
 ================
 

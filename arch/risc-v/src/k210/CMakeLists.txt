@@ -32,4 +32,8 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS k210_userspace.c)
 endif()
 
+if(CONFIG_K210_WDT)
+  list(APPEND SRCS k210_wdt.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

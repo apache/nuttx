@@ -25,6 +25,20 @@ config K210_UART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select K210_UART
 
+config K210_WDT
+	bool
+	select WATCHDOG
+
+config K210_WDT0
+	bool "WDT0"
+	default n
+	select K210_WDT
+
+config K210_WDT1
+	bool "WDT1"
+	default n
+	select K210_WDT
+
 endmenu
 
 config K210_CPU_FREQ

@@ -36,6 +36,8 @@
 #ifdef CONFIG_K210_WITH_QEMU
 #define K210_IRQ_UART0    (RISCV_IRQ_MEXT + 4)
 #else
+#define K210_IRQ_WDT0     (RISCV_IRQ_MEXT + 21)
+#define K210_IRQ_WDT1     (RISCV_IRQ_MEXT + 22)
 #define K210_IRQ_UART0    (RISCV_IRQ_MEXT + 33)
 #endif
 
