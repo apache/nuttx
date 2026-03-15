@@ -1,0 +1,38 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_WS_LCD128
+
+choice
+	prompt "BOARD VARIANT"
+	default ARCH_BOARD_ESP32S3_WS_LCD128_NOTOUCH
+	---help---
+		There are two variants of the board with [1] and without [2] touch screen.
+		These boards also have slightly different signals and capabilities.
+		Non-touch variant has two connectors with many more GPIO available.
+
+		[1] https://www.waveshare.com/esp32-s3-touch-lcd-1.28.htm
+		[2] https://www.waveshare.com/esp32-s3-lcd-1.28.htm
+
+		NOTE: Touch screen driver is not yet implemented!
+
+config ARCH_BOARD_ESP32S3_WS_LCD128_NOTOUCH
+	bool "NO-TOUCH ESP32-S3-LCD-1.28"
+	select LCD
+	---help---
+		Mark this choice if your board has no touch screen module installed.
+		www.waveshare.com/esp32-s3-lcd-1.28.htm
+
+config ARCH_BOARD_ESP32S3_WS_LCD128_TOUCH
+	bool "TOUCH ESP32-S3-Touch-LCD-1.28"
+	---help---
+		Mark this choice if your board has touch screen module installed.
+		www.waveshare.com/esp32-s3-touch-lcd-1.28.htm
+
+		NOTE: Touch screen driver is not yet implemented!
+
+endchoice
+
+endif # ARCH_BOARD_ESP32S3_WS_LCD128
