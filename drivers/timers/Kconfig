@@ -470,6 +470,15 @@ config RTC_RPMSG_SYNC_BASETIME
 
 endif # RTC
 
+config TIMER_SP804
+	bool "SP804 Dual Timer Support"
+	default n
+	select ONESHOT_COUNT
+	---help---
+		Enables support for the ARM SP804 dual timer module.
+		This timer is commonly found on ARM Versatile, Integrator
+		and RealView platforms, including QEMU emulations.
+
 menuconfig WATCHDOG
 	bool "Watchdog Timer Support"
 	default n
