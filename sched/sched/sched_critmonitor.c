@@ -56,12 +56,12 @@
 #  define CHECK_PREEMPTION(pid, elapsed)
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION > 0
-#  define CHECK_CSECTION(pid, elapsed) \
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE > 0
+#  define CHECK_IRQDIS(pid, elapsed) \
      do \
        { \
          if (pid > 0 && \
-             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION) \
+             elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE) \
            { \
              CRITMONITOR_PANIC("PID %d disable interrupt too long " \
                                "%ju\n", pid, (uintmax_t)elapsed); \
@@ -69,7 +69,7 @@
        } \
      while (0)
 #else
-#  define CHECK_CSECTION(pid, elapsed)
+#  define CHECK_IRQDIS(pid, elapsed)
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT > 0
@@ -132,14 +132,14 @@ static clock_t g_thread_start[CONFIG_SMP_NCPUS];
  * Public Data
  ****************************************************************************/
 
-/* Maximum time with pre-emption disabled or within critical section. */
+/* Maximum time with pre-emption disabled or with IRQs disabled. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
 clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-clock_t g_crit_max[CONFIG_SMP_NCPUS];
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+clock_t g_irqdis_max[CONFIG_SMP_NCPUS];
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
@@ -197,7 +197,7 @@ static clock_t nxsched_critmon_account(FAR struct tcb_s *tcb, int cpu,
  *   Called when there is any change in pre-emptible state of a thread.
  *
  * Assumptions:
- *   - Called within a critical section.
+ *   - Called with IRQs disabled.
  *   - Never called from an interrupt handler
  *   - Caller is the address of the function that is changing the pre-emption
  *
@@ -248,7 +248,7 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0 */
 
 /****************************************************************************
- * Name: nxsched_critmon_csection
+ * Name: nxsched_critmon_irqdisable
  *
  * Description:
  *   Called by irq_save/irq_restore wrappers when a thread disables or
@@ -262,8 +262,8 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state,
  *
  ****************************************************************************/
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-void nxsched_critmon_csection(bool state, bool force, FAR void *caller)
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+void nxsched_critmon_irqdisable(bool state, bool force, FAR void *caller)
 {
   FAR struct tcb_s *tcb = running_task();
   clock_t current;
@@ -272,13 +272,13 @@ void nxsched_critmon_csection(bool state, bool force, FAR void *caller)
    * is recorded in nxtask_exit().
    */
 
-  if (tcb == NULL || (!force && state && tcb->crit_count++ != 0) ||
-      (!force && !state && --tcb->crit_count != 0))
+  if (tcb == NULL || (!force && state && tcb->irqdis_count++ != 0) ||
+      (!force && !state && --tcb->irqdis_count != 0))
     {
       return;
     }
 
-  /* Call perf_gettime only tcb->crit_count == 0 or 1, prevent recursion. */
+  /* Call perf_gettime only tcb->irqdis_count == 0 or 1, prevent recursion. */
 
   current = perf_gettime();
 
@@ -288,42 +288,42 @@ void nxsched_critmon_csection(bool state, bool force, FAR void *caller)
     {
       /* Disabling... Save the start time. */
 
-      tcb->crit_start  = current;
-      tcb->crit_caller = caller;
+      tcb->irqdis_start  = current;
+      tcb->irqdis_caller = caller;
     }
   else
     {
       /* Enabling.. Check for the max elapsed time */
 
-      clock_t elapsed = current - tcb->crit_start;
+      clock_t elapsed = current - tcb->irqdis_start;
       int cpu         = this_cpu();
 
-      if (elapsed > tcb->crit_max)
+      if (elapsed > tcb->irqdis_max)
         {
-          tcb->crit_max        = elapsed;
-          tcb->crit_max_caller = tcb->crit_caller;
-          CHECK_CSECTION(tcb->pid, elapsed);
+          tcb->irqdis_max        = elapsed;
+          tcb->irqdis_max_caller = tcb->irqdis_caller;
+          CHECK_IRQDIS(tcb->pid, elapsed);
         }
 
       /* Check for the global max elapsed time */
 
-      if (elapsed > g_crit_max[cpu])
+      if (elapsed > g_irqdis_max[cpu])
         {
-          g_crit_max[cpu] = elapsed;
+          g_irqdis_max[cpu] = elapsed;
         }
     }
 }
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0 */
 
 /****************************************************************************
  * Name: nxsched_critmon_busywait
  *
  * Description:
- *   Called when a thread try to enter critical section（get spinlock） or
- *   successfully entered cirtical section.
+ *   Called when a thread tries to acquire a spinlock (busy-waiting) or
+ *   has successfully acquired it.
  *
  * Assumptions:
- *   - Called before a critical section or within a critical section.
+ *   - Called before acquiring or immediately after acquiring a spinlock.
  *   - Might be called from an interrupt handler.
  *
  ****************************************************************************/
@@ -334,7 +334,7 @@ void nxsched_critmon_busywait(bool state, FAR void *caller)
   FAR struct tcb_s *tcb = this_task();
   clock_t current       = perf_gettime();
 
-  /* Are we busy waiting for critical section or spinlock? */
+  /* Are we busy waiting for a spinlock? */
 
   if (state)
     {
@@ -345,7 +345,7 @@ void nxsched_critmon_busywait(bool state, FAR void *caller)
     }
   else
     {
-      /* Entered critical section... Check for the max elapsed time */
+      /* Acquired spinlock... Check for the max elapsed time */
 
       clock_t elapsed = current - tcb->busywait_start;
       int cpu         = this_cpu();
@@ -462,7 +462,7 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
 
   /* Is this task in a critical section? */
 
@@ -472,23 +472,23 @@ void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 
       /* Possibly leaving .. Check for the max elapsed time */
 
-      elapsed = current - tcb->crit_start;
-      if (elapsed > tcb->crit_max)
+      elapsed = current - tcb->irqdis_start;
+      if (elapsed > tcb->irqdis_max)
         {
-          tcb->crit_max        = elapsed;
-          tcb->crit_max_caller = tcb->crit_caller;
-          CHECK_CSECTION(tcb->pid, elapsed);
+          tcb->irqdis_max        = elapsed;
+          tcb->irqdis_max_caller = tcb->irqdis_caller;
+          CHECK_IRQDIS(tcb->pid, elapsed);
         }
 
       /* Check for the global max elapsed time */
 
-      if (elapsed > g_crit_max[cpu])
+      if (elapsed > g_irqdis_max[cpu])
         {
-          g_crit_max[cpu] = elapsed;
+          g_irqdis_max[cpu] = elapsed;
         }
     }
 
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE */
 }
 
 /****************************************************************************
@@ -535,12 +535,12 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
     }
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
   if (tcb->irqcount > 0)
     {
-      tcb->crit_start = current;
+      tcb->irqdis_start = current;
     }
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE */
 }
 
 /****************************************************************************

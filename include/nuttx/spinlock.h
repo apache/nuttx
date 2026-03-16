@@ -1121,11 +1121,11 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
   else
     {
       /* Not last unlock, irq_restore is not called, but we need to
-       * balance the crit_count that was incremented by irq_save()
+       * balance the irqdis_count that was incremented by irq_save()
        * in the corresponding rspin_lock_irqsave().
        */
 
-      nxsched_critmon_csection(false, false, return_address(0));
+      nxsched_critmon_irqdisable(false, false, return_address(0));
     }
 }
 #else
@@ -1156,7 +1156,7 @@ uint16_t rspin_breaklock(FAR rspinlock_t *lock)
        * enabled interrupt.
        */
 
-      nxsched_critmon_csection(false, true, return_address(0));
+      nxsched_critmon_irqdisable(false, true, return_address(0));
 
       oldcount        = RSPINLOCK_COUNT(val);
       lock->local_val = RSPINLOCK_VALUE(owner, 1u);
@@ -1180,7 +1180,7 @@ void rspin_restorelock(FAR rspinlock_t *lock, uint16_t count)
        * disabled interrupt.
        */
 
-      nxsched_critmon_csection(true, true, return_address(0));
+      nxsched_critmon_irqdisable(true, true, return_address(0));
     }
 }
 #else

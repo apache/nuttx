@@ -786,12 +786,12 @@ struct tcb_s
   void   *preemp_max_caller;             /* Caller of max preemption        */
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-  clock_t crit_start;                    /* Time critical section entered   */
-  clock_t crit_max;                      /* Max time in critical section    */
-  int     crit_count;                    /* Nest count of critical section  */
-  void   *crit_caller;                   /* Caller of critical section      */
-  void   *crit_max_caller;               /* Caller of max critical section  */
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+  clock_t irqdis_start;                    /* Time IRQ disabled               */
+  clock_t irqdis_max;                      /* Max time IRQ disabled           */
+  int     irqdis_count;                    /* Nest count of IRQ disabled      */
+  void   *irqdis_caller;                   /* Caller of IRQ disable           */
+  void   *irqdis_max_caller;               /* Caller of max IRQ disable time  */
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
@@ -906,15 +906,15 @@ extern "C"
 {
 #endif
 
-/* Maximum time with pre-emption disabled or within critical section. */
+/* Maximum time with pre-emption disabled or with IRQs disabled. */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
 extern clock_t g_preemp_max[CONFIG_SMP_NCPUS];
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION  >= 0 */
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-extern clock_t g_crit_max[CONFIG_SMP_NCPUS];
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+extern clock_t g_irqdis_max[CONFIG_SMP_NCPUS];
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0 */
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
 extern clock_t g_busywait_max[CONFIG_SMP_NCPUS];

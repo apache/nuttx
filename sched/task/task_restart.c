@@ -281,12 +281,12 @@ static int nxtask_restart(pid_t pid)
   tcb->preemp_max_caller   = NULL;
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-  tcb->crit_start          = 0;
-  tcb->crit_max            = 0;
-  tcb->crit_count          = 0;
-  tcb->crit_caller         = NULL;
-  tcb->crit_max_caller     = NULL;
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+  tcb->irqdis_start        = 0;
+  tcb->irqdis_max          = 0;
+  tcb->irqdis_count        = 0;
+  tcb->irqdis_caller       = NULL;
+  tcb->irqdis_max_caller   = NULL;
 #endif
 
 #if CONFIG_SCHED_CRITMONITOR_MAXTIME_BUSYWAIT >= 0
