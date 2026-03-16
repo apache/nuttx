@@ -931,6 +931,14 @@ config ESP32S3_LCD
 	---help---
 		LCD controller that outputs parallel data and supports RGB interface.
 
+config ESP32S3_CAM
+	bool "Camera (DVP)"
+	default n
+	select ESP32S3_DMA
+	select DRIVERS_VIDEO
+	---help---
+		Camera controller that receives parallel DVP data from image sensors.
+
 config ESP32S3_AES_ACCELERATOR
 	bool "AES Accelerator"
 	default n
@@ -2680,6 +2688,59 @@ endmenu
 config ESP32S3_LCD_REGDEBUG
 	bool "LCD Debug Registers"
 	default n
+
+endmenu
+
+menu "Camera (DVP) Configuration"
+        depends on ESP32S3_CAM
+
+config ESP32S3_CAM_XCLK_PIN
+        int "CAM XCLK Output Pin"
+        default 5
+
+config ESP32S3_CAM_PCLK_PIN
+        int "CAM PCLK Input Pin"
+        default 7
+
+config ESP32S3_CAM_VSYNC_PIN
+        int "CAM VSYNC Input Pin"
+        default 3
+
+config ESP32S3_CAM_HREF_PIN
+        int "CAM HREF Input Pin"
+        default 46
+
+config ESP32S3_CAM_D0_PIN
+        int "CAM Data Bit-0 Pin"
+        default 16
+
+config ESP32S3_CAM_D1_PIN
+        int "CAM Data Bit-1 Pin"
+        default 18
+
+config ESP32S3_CAM_D2_PIN
+        int "CAM Data Bit-2 Pin"
+        default 8
+
+config ESP32S3_CAM_D3_PIN
+        int "CAM Data Bit-3 Pin"
+        default 17
+
+config ESP32S3_CAM_D4_PIN
+        int "CAM Data Bit-4 Pin"
+        default 15
+
+config ESP32S3_CAM_D5_PIN
+        int "CAM Data Bit-5 Pin"
+        default 6
+
+config ESP32S3_CAM_D6_PIN
+        int "CAM Data Bit-6 Pin"
+        default 4
+
+config ESP32S3_CAM_D7_PIN
+        int "CAM Data Bit-7 Pin"
+        default 9
 
 endmenu
 
