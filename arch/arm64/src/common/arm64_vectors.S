@@ -129,7 +129,7 @@ SECTION_FUNC(text, arm64_jump_to_user)
      * the last exception on this CPU, which can have IRQs masked.
      */
 
-#ifdef CONFIG_ARM64_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
     mov x0,  #SPSR_MODE_EL0T
 #else
     mov x0,  #(SPSR_MODE_EL0T | (1 << SPSR_DAIF_SHIFT)) /* FIQ masked */
@@ -525,7 +525,7 @@ SECTION_FUNC(text, arm64_fiq_handler)
     .cfi_return_column 32
     .cfi_offset 32, 8 * REG_ELR - 8 * XCPTCONTEXT_REGS
 
-#ifndef CONFIG_ARM64_DECODEFIQ
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 
     mov    x0, sp
     adrp   x5, arm64_fatal_handler
