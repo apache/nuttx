@@ -2631,7 +2631,7 @@ config STACK_USAGE
 	---help---
 		Generate an extra file that specifies the maximum amount of stack used,
 		on a per-function basis. Please use https://github.com/HBehrens/puncover
-		or tools/showstack.sh to generate the more useful report.
+		to generate the more useful report.
 
 config STACK_USAGE_WARNING
 	int "Detect use of large stack variables"
