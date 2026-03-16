@@ -526,6 +526,19 @@ Then format and mount the SD card::
   nsh> cat /mnt/sd/test.txt
   hello
 
+gc0308
+------
+
+Minimal NuttShell configuration with GC0308 DVP camera support only.
+Based on the nsh configuration, this adds only the GC0308 image sensor
+driver, ESP32-S3 CAM DVP controller, and the V4L2 video pipeline.
+Console is accessible over UART0 (serial).
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:gc0308
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
 camera
 ------
 
