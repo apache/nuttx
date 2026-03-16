@@ -852,10 +852,10 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Convert and generate output for maximum time in a critical section */
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
-  if (tcb->crit_max > 0)
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
+  if (tcb->irqdis_max > 0)
     {
-      perf_convert(tcb->crit_max, &maxtime);
+      perf_convert(tcb->irqdis_max, &maxtime);
     }
   else
     {
@@ -865,14 +865,14 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   /* Reset the maximum */
 
-  tcb->crit_max = 0;
+  tcb->irqdis_max = 0;
 
   /* Generate output for maximum time in a critical section */
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN, "%jd.%09ld %p,",
                              (intmax_t)maxtime.tv_sec,
                              maxtime.tv_nsec,
-                             tcb->crit_max_caller);
+                             tcb->irqdis_max_caller);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                            &offset);
 
@@ -884,7 +884,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
     {
       return totalsize;
     }
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0 */
+#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0 */
 
   /* Convert and generate output for max busywait time && all busywait time */
 

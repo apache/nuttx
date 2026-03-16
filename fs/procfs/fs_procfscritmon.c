@@ -250,12 +250,12 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
     }
 #endif
 
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION >= 0
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQDISABLE >= 0
   /* Convert and generate output for maximum time in a critical section */
 
-  if (g_crit_max[cpu] > 0)
+  if (g_irqdis_max[cpu] > 0)
     {
-      perf_convert(g_crit_max[cpu], &maxtime);
+      perf_convert(g_irqdis_max[cpu], &maxtime);
     }
   else
     {
@@ -265,7 +265,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Reset the maximum */
 
-  g_crit_max[cpu] = 0;
+  g_irqdis_max[cpu] = 0;
 
   /* Generate output for maximum time in a critical section */
 

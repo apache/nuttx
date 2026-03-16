@@ -421,7 +421,7 @@ static inline_function FAR struct tcb_s *this_task(void)
   irqstate_t flags;
 
   /* Use up_irq_save directly to avoid recursion when called from
-   * irq_save() -> nxsched_critmon_csection() -> running_task() path.
+   * irq_save() -> nxsched_critmon_irqdisable() -> running_task() path.
    */
 
   flags = up_irq_save();
