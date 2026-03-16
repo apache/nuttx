@@ -16,6 +16,7 @@ This page contains a collection of guides on how to debug problems with NuttX.
   coresight.rst
   stackcheck.rst
   stackrecord.rst
+  stackusage.rst
   disabling_stackdumpdebug.rst
   debuggingflash_nuttxonarm.rst
   cortexmhardfaults.rst
