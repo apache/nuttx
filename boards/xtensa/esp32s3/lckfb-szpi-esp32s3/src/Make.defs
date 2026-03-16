@@ -56,3 +56,7 @@ endif
 ifeq ($(CONFIG_SENSORS_QMI8658),y)
 CSRCS += esp32s3_qmi8658.c
 endif
+
+ifeq ($(CONFIG_ESP32S3_CAM),y)
+CSRCS += esp32s3_board_camera.c
+endif

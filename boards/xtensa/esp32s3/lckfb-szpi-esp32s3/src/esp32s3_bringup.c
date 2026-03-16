@@ -117,6 +117,10 @@
 #  include <nuttx/sensors/qmi8658.h>
 #endif
 
+#ifdef CONFIG_ESP32S3_CAM
+#  include <nuttx/video/v4l2_cap.h>
+#endif
+
 #ifdef CONFIG_ESP32S3_ADC
 #include "esp32s3_board_adc.h"
 #endif
@@ -453,6 +457,14 @@ int esp32s3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SDMMC: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_CAM
+  ret = esp32s3_camera_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize camera: %d\n", ret);
     }
 #endif
 

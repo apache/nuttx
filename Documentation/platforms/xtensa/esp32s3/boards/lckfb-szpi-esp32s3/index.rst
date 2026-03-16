@@ -525,3 +525,41 @@ Then format and mount the SD card::
   nsh> echo "hello" > /mnt/sd/test.txt
   nsh> cat /mnt/sd/test.txt
   hello
+
+camera
+------
+
+Basic NuttShell configuration console and DVP camera enabled via the
+ESP32-S3 CAM controller with a GC0308 VGA CMOS image sensor. The camera
+outputs RGB565X (big-endian RGB565) at QVGA (320x240) resolution by default.
+Console is accessible over USB ADB.
+
+The DVP camera pin mapping is as follows:
+
+======= ======
+Signal  GPIO
+======= ======
+XCLK    GPIO15
+PCLK    GPIO13
+VSYNC   GPIO6
+HREF    GPIO7
+D0      GPIO5
+D1      GPIO4
+D2      GPIO16
+D3      GPIO14
+D4      GPIO1
+D5      GPIO2
+D6      GPIO42
+D7      GPIO41
+PWDN    GPIO38 (active low, directly connected to PCA9557 I/O expander)
+======= ======
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:camera
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+Then use the camera example to capture a frame::
+
+  $ adb -s 1234 shell
+  nsh> camera
