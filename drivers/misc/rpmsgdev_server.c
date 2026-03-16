@@ -285,8 +285,6 @@ static void rpmsgdev_read_work(FAR void *arg)
       rpmsgdev_read_nonblock_handler(&server->ept, rsp,
                                      sizeof(*rsp), 0, NULL);
     }
-
-  memset(pend, 0, sizeof(*pend));
 }
 
 /****************************************************************************
@@ -330,7 +328,6 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
   if (rsp->header.result < 0)
     {
       rpmsg_send(ept, rsp, sizeof(*rsp) - 1);
-      memset(pend, 0, sizeof(*pend));
     }
 
   return 0;
