@@ -465,6 +465,13 @@ config OV2640_REGDEBUG
 
 endif # VIDEO_OV2640
 
+config VIDEO_GC0308
+	bool "GC0308 camera chip"
+	default n
+	select I2C
+	---help---
+		GC0308 VGA CMOS image sensor with DVP interface.
+
 config GOLDFISH_CAMERA
 	bool "Goldfish camera support"
 	depends on VIDEO
