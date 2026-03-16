@@ -398,11 +398,7 @@ static inline_function irqstate_t up_irq_save(void)
       "mrs %0, daif\n"
       "msr daifset, %1\n"
       : "=r" (flags)
-#if defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-      : "i" (FIQ_DAIF_MASK)
-#else
       : "i" (IRQ_DAIF_MASK)
-#endif
       : "memory"
     );
 
@@ -422,8 +418,6 @@ static inline_function irqstate_t up_irq_enable(void)
       : "=r" (flags)
 #if defined(CONFIG_ARCH_HIPRI_INTERRUPT)
       : "i" (IRQ_FIQ_DAIF_MASK)
-#elif defined(CONFIG_ARCH_TRUSTZONE_SECURE)
-      : "i" (FIQ_DAIF_MASK)
 #else
       : "i" (IRQ_DAIF_MASK)
 #endif
