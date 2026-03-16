@@ -195,6 +195,7 @@
 
 #define ICC_IGRPEN1_EL1             S3_0_C12_C12_7
 #define ICC_SGI1R                   S3_0_C12_C11_5
+#define ICC_ASGI1R                  S3_0_C12_C11_6
 #define ICC_SRE_EL1                 S3_0_C12_C12_5
 #define ICC_SRE_EL2                 S3_4_C12_C9_5
 #define ICC_SRE_EL3                 S3_6_C12_C12_5
@@ -283,6 +284,9 @@
 
 #define CNTV_CTL_ENABLE_BIT         BIT(0)
 #define CNTV_CTL_IMASK_BIT          BIT(1)
+
+#define CNTP_CTL_ENABLE_BIT         BIT(0)
+#define CNTP_CTL_IMASK_BIT          BIT(1)
 
 /*  Maximum numbers of translation tables
  *      This option specifies the maximum numbers of translation tables
