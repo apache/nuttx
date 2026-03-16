@@ -163,5 +163,9 @@ int esp32s3_ft5x06_initialize(void);
 int esp32s3_qmi8658_initialize(void);
 #endif
 
+#ifdef CONFIG_ESP32S3_CAM
+int esp32s3_camera_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_LCKFB_SZPI_ESP32S3_SRC_ESP32S3_DEVKIT_H */
