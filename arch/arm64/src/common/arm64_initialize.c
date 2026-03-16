@@ -62,7 +62,7 @@ INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_SMP_NCPUS,
 INIT_STACK_ARRAY_DEFINE(g_interrupt_stacks, CONFIG_SMP_NCPUS,
                           INTSTACK_SIZE);
 
-#ifdef CONFIG_ARM64_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
                           INTSTACK_SIZE);
 #endif
@@ -73,7 +73,7 @@ INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stacks, CONFIG_SMP_NCPUS,
 INIT_STACK_DEFINE(g_idle_stack, CONFIG_IDLETHREAD_STACKSIZE);
 INIT_STACK_DEFINE(g_interrupt_stack, INTSTACK_SIZE);
 
-#ifdef CONFIG_ARM64_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 INIT_STACK_DEFINE(g_interrupt_fiq_stack, INTSTACK_SIZE);
 #endif
 

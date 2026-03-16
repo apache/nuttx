@@ -78,7 +78,7 @@ uint64_t *const g_cpu_int_stacktop[CONFIG_SMP_NCPUS] =
 
 uint32_t g_smp_busy_wait_flag;
 
-#ifdef CONFIG_ARM64_DECODEFIQ
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
 uint64_t *const g_cpu_int_fiq_stacktop[CONFIG_SMP_NCPUS] =
 {
   (uint64_t *)(g_interrupt_fiq_stacks[0] + INTSTACK_SIZE),
