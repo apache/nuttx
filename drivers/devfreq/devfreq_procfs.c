@@ -239,11 +239,84 @@ static ssize_t devfreq_read(FAR struct file *filep,
 
 /****************************************************************************
  * Name: devfreq_write
+ *
+ * Description:
+ *   Handle write to devfreq procfs entry.
+ *   Format: "<min_freq> <max_freq>" in kHz.
+ *   This creates or updates a QoS request to constrain the frequency.
+ *   Write "0 0" to remove the QoS constraint.
+ *
  ****************************************************************************/
 
 static ssize_t devfreq_write(FAR struct file *filep,
                              FAR const char *buffer, size_t buflen)
 {
+  FAR struct devfreq_procfs_s *devfreq_procfs = filep->f_priv;
+  FAR struct devfreq_s *devfreq = devfreq_procfs->devfreq;
+  uint32_t min_freq;
+  uint32_t max_freq;
+  FAR char *endptr;
+  char tmp[32];
+  int ret;
+
+  if (buflen == 0 || buflen >= sizeof(tmp))
+    {
+      return -EINVAL;
+    }
+
+  memcpy(tmp, buffer, buflen);
+  tmp[buflen] = '\0';
+
+  min_freq = strtoul(tmp, &endptr, 10);
+  if (endptr == tmp)
+    {
+      return buflen;
+    }
+
+  if (*endptr == ',' || *endptr == ' ')
+    {
+      endptr++;
+    }
+
+  max_freq = strtoul(endptr, &endptr, 10);
+
+  /* Write "0 0" to remove the QoS constraint */
+
+  if (min_freq == 0 && max_freq == 0)
+    {
+      if (devfreq->procfs_qos)
+        {
+          devfreq_qos_remove_request(devfreq, devfreq->procfs_qos);
+          devfreq->procfs_qos = NULL;
+        }
+
+      return buflen;
+    }
+
+  if (min_freq > max_freq)
+    {
+      return -EINVAL;
+    }
+
+  if (devfreq->procfs_qos)
+    {
+      ret = devfreq_qos_update_request(devfreq, devfreq->procfs_qos,
+                                       min_freq, max_freq);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+  else
+    {
+      devfreq->procfs_qos = devfreq_qos_add_request(devfreq,
+                                                    min_freq, max_freq);
+      if (!devfreq->procfs_qos)
+        {
+          return -ENOMEM;
+        }
+    }
+
   return buflen;
 }
 
@@ -376,7 +449,8 @@ static int devfreq_stat(FAR const char *relpath, FAR struct stat *buf)
           return -ENOENT;
         }
 
-      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+      buf->st_mode = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR |
+                     S_IWOTH | S_IWGRP | S_IWUSR;
     }
 
   return 0;
