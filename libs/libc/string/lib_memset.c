@@ -50,7 +50,8 @@ FAR void *memset(FAR void *s, int c, size_t n)
    */
 
   uintptr_t addr  = (uintptr_t)s;
-  uint16_t  val16 = ((uint16_t)c << 8) | (uint16_t)c;
+  uint8_t   val8  = (uint8_t)c;
+  uint16_t  val16 = ((uint16_t)val8 << 8) | (uint16_t)val8;
   uint32_t  val32 = ((uint32_t)val16 << 16) | (uint32_t)val16;
 #ifdef CONFIG_LIBC_MEMSET_64BIT
   uint64_t  val64 = ((uint64_t)val32 << 32) | (uint64_t)val32;
