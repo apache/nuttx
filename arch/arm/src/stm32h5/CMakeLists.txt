@@ -68,6 +68,10 @@ if(CONFIG_STM32H5_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
 endif()
 
+if(CONFIG_STM32H5_RNG)
+  list(APPEND SRCS stm32_rng.c)
+endif()
+
 if(CONFIG_STM32H5_ICACHE)
   list(APPEND SRCS stm32_icache.c)
 endif()

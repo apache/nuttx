@@ -63,8 +63,15 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 /* Determine if board wants to use HSI48 as 48 MHz oscillator. */
 
 #if defined(CONFIG_STM32H5_HAVE_HSI48) && defined(STM32H5_USE_CLK48)
-#  if STM32H5_CLKUSB_SEL == RCC_CCIPR4_USBSEL_HSI48KERCK
-#    define STM32H5_USE_HSI48 1
+#  if defined(STM32H5_CLKUSB_SEL)
+#    if (STM32H5_CLKUSB_SEL == RCC_CCIPR4_USBSEL_HSI48KERCK)
+#      define STM32H5_USE_HSI48 1
+#    endif
+#  endif
+#  if defined(STM32H5_CLKRNG_SEL)
+#    if (STM32H5_CLKRNG_SEL == RCC_CCIPR5_RNGSEL_HSI48KERCK)
+#      define STM32H5_USE_HSI48 1
+#    endif
 #  endif
 #endif
 
@@ -1194,11 +1201,22 @@ void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_CCIPR3);
 #endif
 
+      /* Configure USB source clock */
+
 #if defined(STM32H5_CLKUSB_SEL)
       regval = getreg32(STM32_RCC_CCIPR4);
       regval &= ~RCC_CCIPR4_USBSEL_MASK;
       regval |= STM32H5_CLKUSB_SEL;
       putreg32(regval, STM32_RCC_CCIPR4);
+#endif
+
+      /* Configure RNG source clock */
+
+#if defined(STM32H5_CLKRNG_SEL)
+      regval = getreg32(STM32_RCC_CCIPR5);
+      regval &= ~RCC_CCIPR5_RNGSEL_MASK;
+      regval |= STM32H5_CLKRNG_SEL;
+      putreg32(regval, STM32_RCC_CCIPR5);
 #endif
     }
 }
