@@ -940,9 +940,11 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
-      syslog(LOG_EMERG, "FATAL: Panic by remote core: %s\n",
-             RPTUN_GET_CPUNAME(priv->dev));
-      PANIC();
+      char msg[64];
+
+      snprintf(msg, sizeof(msg), "Panic by remote core: %s",
+               RPTUN_GET_CPUNAME(priv->dev));
+      PANIC_WITH_MSG(msg);
     }
   else if(status != 0u)
     {
