@@ -38,15 +38,20 @@ Implementing an SDIO lower-half
 When implementing a new SDMMC controller driver (SDIO lower-half), it must
 provide the interface defined in ``struct sdio_dev_s``.
 
-Call-flow
----------
+Call-flow (simplified example)
+------------------------------
 
-The MMCSD upper-half (``drivers/mmcsd/mmcsd_sdio.c``) interacts with the
-lower-half by sending commands and receiving responses:
+The full SDIO/MMCSD call-flow for card identification and initialization
+is more complex and includes additional commands (e.g., CMD0, CMD8,
+ACMD41 / CMD1, CMD2, CMD3, error handling, retries, etc.).  For the
+purposes of documenting the R2/CID/CSD handling expected from the
+lower-half, a simplified interaction around CMD9 looks like this:
 
-1. ``SDIO_SENDCMD``: Send the command (e.g., CMD2, CMD9).
+1. ``SDIO_SENDCMD``: Send the command that yields an R2 response
+   (e.g., CMD2 for CID, CMD9 for CSD).
 2. ``SDIO_WAITRESPONSE``: Poll for the hardware to complete the command.
-3. ``SDIO_RECVRx``: Retrieve the response bits (e.g., ``SDIO_RECVR2`` for 136-bit).
+3. ``SDIO_RECVR2``: Retrieve the 136-bit response and provide the
+   decoded 128-bit CID/CSD payload to the MMCSD upper-half.
 
 R2 (136-bit) response and CSD/CID
 ---------------------------------
