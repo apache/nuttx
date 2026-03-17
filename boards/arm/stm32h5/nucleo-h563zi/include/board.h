@@ -161,6 +161,10 @@
 #  define STM32H5_HSI48_SYNCSRC   SYNCSRC_NONE
 #endif
 
+#if defined(CONFIG_STM32H5_RNG)
+#  define STM32H5_CLKRNG_SEL      RCC_CCIPR5_RNGSEL_HSI48KERCK
+#endif
+
 /* Enable LSE (for the RTC) */
 
 #define STM32_USE_LSE           1

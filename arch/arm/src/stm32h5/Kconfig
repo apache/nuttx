@@ -356,6 +356,11 @@ config STM32H5_ADC2
 	default n
 	select STM32H5_ADC
 
+config STM32H5_RNG
+	bool "RNG"
+	default n
+	select ARCH_HAVE_RNG
+
 config STM32H5_DMA1
 	bool "DMA1"
 	default n
