@@ -205,7 +205,6 @@ static void esp_ulp_register(void)
 int esp_ulp_load_bin(const char *buffer, size_t buflen)
 {
   int ret = ERROR;
-  ulp_lp_core_stop();
   ret = ulp_lp_core_load_binary((const uint8_t *)buffer, buflen);
   ulp_lp_core_run(&cfg);
   return ret;
@@ -228,5 +227,4 @@ int esp_ulp_load_bin(const char *buffer, size_t buflen)
 void esp_ulp_init(void)
 {
   esp_ulp_register();
-  ulp_lp_core_run(&cfg);
 }

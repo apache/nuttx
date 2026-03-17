@@ -431,7 +431,7 @@ menu "LP Core (Low-power core) Coprocessor Configuration"
 
 config ESPRESSIF_USE_LP_CORE
 	bool "Enable LP Coprocessor"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	---help---
 		Enable LP core (Low-power core) coprocessor
 

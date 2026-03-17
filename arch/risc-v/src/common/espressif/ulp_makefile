@@ -1,5 +1,5 @@
 ############################################################################
-# arch/risc-v/src/esp32p4/Make.defs
+# arch/risc-v/src/common/espressif/ulp_makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,12 +20,10 @@
 #
 ############################################################################
 
-include common/Make.defs
-include common/espressif/Make.defs
+ULP_APP_USE_TEST_BIN = y
 
-CHIP_CSRCS += esp_chip_rev.c
+ULP_APP_NAME = esp_ulp
+ULP_APP_FOLDER = $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)$(CHIP_SERIES)
+ULP_APP_BIN = $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)risc-v$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)ulp_blink.bin
 
-CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
-
-# TODO: Remove these flags once ulp/lp_core/lp_core.c is updated.
-CFLAGS += -Wno-array-bounds -Wno-stringop-overflow
+include $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
