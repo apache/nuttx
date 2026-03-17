@@ -47,6 +47,7 @@
 
 #ifndef NUTTX_NO_EXTENSIONS
 #undef PANIC        /* Unconditional abort */
+#undef PANIC_WITH_MSG /* Unconditional abort with a message */
 #undef ASSERT       /* Assert if the condition is not true */
 #undef VERIFY       /* Assert if a function returns a negative value */
 #undef DEBUGPANIC   /* Like PANIC, but only if CONFIG_DEBUG_ASSERTIONS is defined */
@@ -86,6 +87,7 @@
 
 #ifndef NUTTX_NO_EXTENSIONS
 #define PANIC() __assert(__ASSERT_FILE__, __ASSERT_LINE__, "panic")
+#define PANIC_WITH_MSG(msg) __assert(__ASSERT_FILE__, __ASSERT_LINE__, msg)
 #define PANIC_WITH_REGS(msg, regs) _assert(__ASSERT_FILE__, \
                                            __ASSERT_LINE__, msg, regs)
 #endif
