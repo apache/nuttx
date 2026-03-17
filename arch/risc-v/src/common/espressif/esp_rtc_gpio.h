@@ -165,7 +165,7 @@ void esp_rtcioirqdisable(int irq);
 #  define esp_rtcioirqdisable(irq)
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C6
+#if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32P4)
 /****************************************************************************
  * Name: esp_rtcio_config_gpio
  *
@@ -215,7 +215,7 @@ int esp_rtcio_read(int pin);
  ****************************************************************************/
 
 void esp_rtcio_write(int pin, bool value);
-#endif /* CONFIG_ARCH_CHIP_ESP32C6 */
+#endif /* CONFIG_ARCH_CHIP_ESP32C6 || CONFIG_ARCH_CHIP_ESP32P4 */
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_RTC_GPIO_H */
