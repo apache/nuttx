@@ -12,10 +12,18 @@ config ESP32S2_MERGE_BINS
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
 
+config ESP32S2_SPIFLASH_AUTO_BRINGUP
+	bool "Automatic mount of SPI Flash MTD"
+	default y
+	depends on ESP32S2_SPIFLASH
+	---help---
+		Auto bring-up the SPI Flash MTD on board bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
 choice ESP32S2_SPIFLASH_FS
-	prompt "Mount SPI Flash MTD on bring-up"
+	prompt "File system to mount on SPI Flash MTD"
 	default ESP32S2_SPIFLASH_SMARTFS
-	depends on ESPRESSIF_SPIFLASH
+	depends on ESP32S2_SPIFLASH_AUTO_BRINGUP
 	optional
 	---help---
 		Mount the SPI Flash MTD with the selected File System format on board
