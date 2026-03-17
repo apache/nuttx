@@ -53,6 +53,10 @@ lower-half, a simplified interaction around CMD9 looks like this:
 3. ``SDIO_RECVR2``: Retrieve the 136-bit response and provide the
    decoded 128-bit CID/CSD payload to the MMCSD upper-half.
 
+For the complete card initialization and command sequence, refer to the
+card initialization flowchart in the MMC/SD physical layer
+specification.
+
 R2 (136-bit) response and CSD/CID
 ---------------------------------
 
