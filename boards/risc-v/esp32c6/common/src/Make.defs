@@ -99,7 +99,7 @@ ifeq ($(CONFIG_ETC_ROMFS),y)
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN),y)
-  include $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)risc-v$(DELIM)esp32c6$(DELIM)boards$(DELIM)esp32c6-devkitc$(DELIM)ulp_makefile
+  include $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)ulp_makefile
 endif
 
 DEPPATH += --dep-path src
