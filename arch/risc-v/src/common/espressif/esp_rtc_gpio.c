@@ -43,7 +43,7 @@
 #include "hal/rtc_io_hal.h"
 #include "soc/rtc_cntl_periph.h"
 #include "soc/periph_defs.h"
-#ifdef CONFIG_ARCH_CHIP_ESP32C6
+#if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32P4)
 #include "driver/rtc_io.h"
 #include "hal/rtc_io_ll.h"
 #include "hal/rtc_io_hal.h"
@@ -384,7 +384,7 @@ void esp_rtcioirqdisable(int irq)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_ESP32C6
+#if defined(CONFIG_ARCH_CHIP_ESP32C6) || defined(CONFIG_ARCH_CHIP_ESP32P4)
 int esp_rtcio_config_gpio(int pin, enum esp_rtc_gpio_mode_e mode)
 {
   int ret = rtc_gpio_init(pin);
@@ -436,4 +436,4 @@ void esp_rtcio_write(int pin, bool value)
 {
   rtc_gpio_set_level(pin, value);
 }
-#endif /* CONFIG_ARCH_CHIP_ESP32C6 */
+#endif /* CONFIG_ARCH_CHIP_ESP32C6 || CONFIG_ARCH_CHIP_ESP32P4 */
