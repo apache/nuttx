@@ -455,6 +455,11 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
 
   dev = inode->i_private;
 #ifdef FTL_HAVE_RWBUFFER
+  if (dev->oflags & O_DIRECT)
+    {
+      return ftl_reload(dev, buffer, start_sector, nsectors);
+    }
+
   return rwb_read(&dev->rwb, start_sector, nsectors, buffer);
 #else
   return ftl_reload(dev, buffer, start_sector, nsectors);
@@ -759,6 +764,12 @@ static ssize_t ftl_write(FAR struct inode *inode,
   DEBUGASSERT(inode->i_private);
   dev = inode->i_private;
 #ifdef FTL_HAVE_RWBUFFER
+  if (dev->oflags & O_DIRECT)
+    {
+      ssize_t ret = ftl_flush(dev, buffer, start_sector, nsectors);
+      return ret < 0 ? ret : nsectors;
+    }
+
   return rwb_write(&dev->rwb, start_sector, nsectors, buffer);
 #else
   return ftl_flush(dev, buffer, start_sector, nsectors);
