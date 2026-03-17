@@ -49,10 +49,18 @@ config ESP32S3_STORAGE_MTD_SIZE
 	---help---
 		MTD size in SPI Flash.
 
-choice ESP32S3_SPIFLASH_FS
-	prompt "Mount SPI Flash MTD on bring-up"
-	default ESP32S3_SPIFLASH_SMARTFS
+config ESP32S3_SPIFLASH_AUTO_BRINGUP
+	bool "Automatic mount of SPI Flash MTD"
+	default y
 	depends on ESP32S3_MTD
+	---help---
+		Auto bring-up the SPI Flash MTD on board bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
+
+choice ESP32S3_SPIFLASH_FS
+	prompt "File system to mount on SPI Flash MTD"
+	default ESP32S3_SPIFLASH_SMARTFS
+	depends on ESP32S3_SPIFLASH_AUTO_BRINGUP
 	optional
 	---help---
 		Mount the SPI Flash MTD with the selected File System format on board
