@@ -72,6 +72,10 @@ struct devfreq_s
   mutex_t lock;
 
   FAR void *priv;
+
+#ifdef CONFIG_DEVFREQ_PROCFS
+  FAR struct qos_request_s *procfs_qos;
+#endif
 };
 
 struct devfreq_governor_s
