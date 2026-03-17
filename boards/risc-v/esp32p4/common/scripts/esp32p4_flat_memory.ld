@@ -51,12 +51,6 @@
 #define SRAM_HIGH_END      SRAM_HIGH_START + SRAM_HIGH_SIZE
 #endif
 
-#if CONFIG_P4_REV3_MSPI_CRASH_AFTER_POWER_UP_WORKAROUND
-#define MSPI_WORKAROUND_SIZE   CONFIG_P4_REV3_MSPI_WORKAROUND_SIZE
-#else
-#define MSPI_WORKAROUND_SIZE   0x0
-#endif
-
 #define IDROM_SEG_SIZE   (CONFIG_MMU_PAGE_SIZE << 10)
 
 #define LP_ROM_DRAM_START 0x5010fa80 // Value taken from ROM elf, includes LP ROM stack
@@ -114,10 +108,10 @@ MEMORY
    * lp ram memory (RWX). Persists over deep sleep. // TODO: IDF-5667
    */
 #if CONFIG_ULP_COPROC_ENABLED
-  lp_ram_seg(RW)  :                 org = 0x50108000 + RESERVE_RTC_MEM + CONFIG_ULP_COPROC_RESERVE_MEM,
+  lp_ram_seg(RW)  :                 org = 0x50108000 + MSPI_WORKAROUND_SIZE + RESERVE_RTC_MEM + CONFIG_ULP_COPROC_RESERVE_MEM,
                                     len = 0x8000 - CONFIG_ULP_COPROC_RESERVE_MEM - RESERVE_RTC_MEM - LP_ROM_DRAM_SIZE
 #else
-  lp_ram_seg(RW)  :                 org = 0x50108000 + RESERVE_RTC_MEM, len = 0x8000 - RESERVE_RTC_MEM
+  lp_ram_seg(RW)  :                 org = 0x50108000 + MSPI_WORKAROUND_SIZE + RESERVE_RTC_MEM, len = 0x8000 - RESERVE_RTC_MEM - MSPI_WORKAROUND_SIZE
 #endif // CONFIG_ULP_COPROC_ENABLED
 
   /* We reduced the size of lp_ram_seg by RESERVE_RTC_MEM value.
@@ -128,7 +122,7 @@ MEMORY
      The aim of this is to keep data that will not be moved around and have a fixed address.
      This segment is placed at the beginning of LP RAM, as the end of LP RAM is occupied by LP ROM stack/data
   */
-  lp_reserved_seg(RW) :        org = 0x50108000, len = RESERVE_RTC_MEM
+  lp_reserved_seg(RW) :        org = 0x50108000 + MSPI_WORKAROUND_SIZE, len = RESERVE_RTC_MEM
 
   /* PSRAM seg */
   extern_ram_seg(RWX) :        org = 0x48000000, len = IDROM_SEG_SIZE
