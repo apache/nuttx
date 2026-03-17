@@ -114,6 +114,8 @@ Where ``<port>`` is the serial/USB port connected to your board.
 
 Please check `Supported Boards`_ for the actual commands.
 
+.. _esp32p4_debug:
+
 Debugging
 =========
 
@@ -319,6 +321,341 @@ PMP/PMA            Mo
    and configuration. Consult the board documentation and the
    :file:`arch/risc-v/src/common/espressif/Kconfig` for feature flags and
    pin selections.
+
+.. _esp32p4_ulp:
+
+ULP LP Core Coprocessor
+=======================
+
+The ULP LP core (Low-power core) is a 32-bit RISC-V coprocessor integrated into the ESP32-P4 SoC.
+It is designed to run independently of the main high-performance (HP) core and is capable of executing lightweight tasks
+such as GPIO polling, simple peripheral control and I/O interactions.
+
+This coprocessor benefits to offload simple tasks from HP core (e.g., GPIO polling , I2C operations, basic control logic) and
+frees the main CPU for higher-level processing
+
+For more information about ULP LP Core Coprocessor `check here <https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/system/ulp-lp-core.html>`__.
+
+Features of the ULP LP-Core
+---------------------------
+
+* Processor Architecture
+   - RV32I RISC-V core with IMAC extensions—Integer (I), Multiplication/Division (M), Atomic (A), and Compressed (C) instructions
+   - Runs at 40 MHz
+* Memory
+   - Access to 16 KB of low-power ROM (LP-ROM) any time
+   - Access to 32 KB of low-power memory (LP-RAM) and LP-domain peripherals any time
+   - Access to 768 KB of L2 SRAM any time with latency
+   - Full access to all of the chip's memory and peripherals when the HP core is active
+* Debugging
+   - Built-in JTAG debug module for external debugging
+   - Supports LP UART for logging from the ULP itself
+   - Includes a panic handler capable of dumping register state via LP UART on exceptions
+* Peripheral support
+   - LP domain peripherals (LP GPIO, LP I2C, LP UART, LP SPI, LP Mailbox, LP Timer and more)
+   - Full access HP domain peripherals when when the HP core is active
+
+Loading Binary into ULP LP-Core
+-------------------------------
+
+There are two ways to load a binary into LP-Core:
+  - Using a prebuilt binary
+  - Using NuttX internal build system to build your own (bare-metal) application
+
+When using a prebuilt binary, the already compiled output for the ULP system whether built from NuttX
+or the ESP-IDF environment can be leveraged. However, whenever the ULP code needs to be modified, it must be rebuilt separately,
+and the resulting .bin file has to be integrated into NuttX. This workflow, while compatible, can become tedious.
+
+With NuttX internal build system, the ULP binary code can be built and flashed from a single location. It is more convenient but
+using build system has some dependencies on example side.
+
+Both methods requires ``CONFIG_ESPRESSIF_USE_LP_CORE`` variable to enable ULP core
+and it can be set using ``make menuconfig`` or ``kconfig-tweak`` commands.
+
+Additionally, a Makefile needs to be provided to specify the ULP application name,
+source path of the ULP application, and either the binary (for prebuilt) or the source files (for internal build).
+This Makefile must include the ULP makefile after the variable set process on ``arch/risc-v/src/common/espressif/esp_ulp.mk`` integration script.
+For more information please refer to :ref:`ulp example Makefile. <ulp_makefile>`
+
+Makefile Variables for ULP Core Build:
+--------------------------------------
+
+- ``ULP_APP_NAME``: Sets name for the ULP application. This variable also be used as prefix (e.g. ULP application bin variable name)
+- ``ULP_APP_FOLDER``: Specifies the directory containing the ULP application's source codes.
+- ``ULP_APP_BIN``: Defines the path of the prebuilt ULP binary.
+- ``ULP_APP_C_SRCS``: Lists all C source files (.c) that need to be compiled for the ULP application.
+- ``ULP_APP_ASM_SRCS``: Lists all assembly source files (.S or .s) to be assembled.
+- ``ULP_APP_INCLUDES``: Specifies additional include directories for the compiler and assembler.
+
+Here is an Makefile example when using prebuilt binary for ULP core:
+
+.. code-block:: console
+
+   ULP_APP_NAME = esp_ulp
+   ULP_APP_FOLDER = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)$(CHIP_SERIES)
+   ULP_APP_BIN = $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)ulp_riscv_blink.bin
+
+   include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
+
+
+Here is an example for enabling ULP and using the prebuilt test binary for ULP core::
+
+    make distclean
+    ./tools/configure.sh esp32p4-function-ev-board:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak -e CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+    make olddefconfig
+    make -j
+
+Creating an ULP LP-Core Application
+-----------------------------------
+
+To use NuttX's internal build system to compile the bare-metal LP binary, check the following instructions.
+
+First, create a folder for the ULP source and header files into your NuttX example.
+This folder is just for ULP project and it is an independent project. Therefore, the NuttX example guide should not be followed
+for ULP example (folder location is irrelevant. It can be the same of the `nuttx-apps` repository, for instance).
+To include the ULP folder in the build system, don't forget to include the ULP Makefile in the NuttX example Makefile. Lastly, configuration variables
+needed to enable ULP core instructions can be found above.
+
+NuttX's internal functions or POSIX calls are not supported.
+
+Here is an example:
+
+- ULP UART Snippet:
+
+.. code-block:: C
+
+  #include <stdint.h>
+  #include "ulp_lp_core_print.h"
+  #include "ulp_lp_core_utils.h"
+  #include "ulp_lp_core_uart.h"
+  #include "ulp_lp_core_gpio.h"
+
+  #define nop() __asm__ __volatile__ ("nop")
+
+  int main (void)
+  {
+    while(1)
+    {
+
+      lp_core_printf("Hello from the LP core!!\r\n");
+      for (int i = 0; i < 10000; i++)
+        {
+          nop();
+        }
+    }
+
+    return 0;
+  }
+
+For more information about ULP Core Coprocessor examples `check here <https://github.com/espressif/esp-idf/tree/master/examples/system/ulp/lp_core>`__.
+After these settings follow the same steps as for any other configuration to build NuttX. Build system checks ULP project path,
+adds every source and header file into project and builds it.
+
+To sum up, here is an example. ``ulp_example/ulp (../ulp_example/ulp)`` folder selected as example
+to create a subfolder for ULP but folder that includes ULP source code can be anywhere. For more information about
+custom apps, please follow NuttX `Custom Apps How-to <https://nuttx.apache.org/docs/latest/guides/customapps.html#custom-apps-how-to>`__ guide,
+this example will demonstrate how to add ULP code into a custom application:
+
+- Tree view:
+
+.. code-block:: text
+
+   nuttxspace/
+   ├── nuttx/
+   └── apps/
+   └── ulp_example/
+       └── Makefile
+       └── Kconfig
+       └── ulp_example.c
+       └── ulp/
+           └── Makefile
+           └── ulp_main.c
+
+
+- Contents in Makefile:
+
+.. code-block:: console
+
+   include $(APPDIR)/Make.defs
+
+   PROGNAME  = $(CONFIG_EXAMPLES_ULP_EXAMPLE_PROGNAME)
+   PRIORITY  = $(CONFIG_EXAMPLES_ULP_EXAMPLE_PRIORITY)
+   STACKSIZE = $(CONFIG_EXAMPLES_ULP_EXAMPLE_STACKSIZE)
+   MODULE    = $(CONFIG_EXAMPLES_ULP_EXAMPLE)
+
+   MAINSRC = ulp_example.c
+
+   include $(APPDIR)/Application.mk
+
+   include ulp/Makefile
+
+- Contents in Kconfig:
+
+.. code-block:: console
+
+   config EXAMPLES_ULP_EXAMPLE
+     bool "ULP Example"
+     default n
+
+- Contents in ulp_example.c:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <stdio.h>
+   #include <fcntl.h>
+   #include <unistd.h>
+   #include <sys/ioctl.h>
+   #include <inttypes.h>
+   #include <stdint.h>
+   #include <stdbool.h>
+
+   #include "ulp/ulp/ulp_main.h"
+   /* Files that holds ULP binary header */
+
+   #include "ulp/ulp/ulp_code.h"
+
+   int main (void)
+    {
+      int fd;
+      fd = open("/dev/ulp", O_WRONLY);
+      if (fd < 0)
+        {
+          printf("Failed to open ULP: %d\n", errno);
+          return -1;
+        }
+      /* ulp_example is the prefix which can be changed with ULP_APP_NAME makefile
+       * variable to access ULP binary code variable */
+      write(fd, ulp_example_bin, ulp_example_bin_len);
+      return 0;
+    }
+
+.. _ulp_makefile:
+
+- Contents in ulp/Makefile:
+
+.. code-block:: console
+
+  ULP_APP_NAME = ulp_example
+  ULP_APP_FOLDER = $(APPDIR)$(DELIM)ulp_example$(DELIM)ulp
+  ULP_APP_C_SRCS = ulp_main.c
+
+  include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
+
+- Contents in ulp_main.c:
+
+.. code-block:: C
+
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_lp_core_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_lp_core_gpio_set_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
+
+- Command to build::
+
+    make distclean
+    ./tools/configure.sh esp32p4-function-ev-board:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_GPIO_IRQ
+    kconfig-tweak -e CONFIG_DEV_GPIO
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak -e CONFIG_EXAMPLES_ULP_EXAMPLE
+    make olddefconfig
+    make -j
+
+Here is an example of a single ULP application. However, support is not limited to just
+one application. Multiple ULP applications are also supported.
+By following the same guideline, multiple ULP applications can be created and loaded using ``write`` POSIX call.
+Each NuttX application can build one ULP application. Therefore, to build multiple ULP applications, multiple NuttX
+applications are needed to create each ULP binary. This limitation only applies when using the NuttX build system to
+build multiple ULP applications; it does not affect the ability to load multiple ULP applications built by other means.
+
+ULP binary can be included in NuttX application by adding
+``#include "ulp/ulp/ulp_code.h"`` line. Then, the ULP binary is accessible by using the ULP application
+prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) with the ``bin`` keyword to
+access the binary data (e.g., if ``ULP_APP_NAME`` is ``ulp_test``, the binary variable will be ``ulp_test_bin``)
+and ``bin_len`` keyword to access its length (e.g., ``ulp_test_bin_len`` for ``ULP_APP_NAME`` is ``ulp_test``).
+
+Accessing the ULP LP-Core Program Variables
+-------------------------------------------
+
+Global symbols defined in the ULP application are available to the HP core through a shared memory region. To read or write ULP variables,
+direct reading/writing to such memory positions are not allowed. POSIX calls are needed instead. To access the ULP variable through the HP core,
+consider that its name is defined by the ULP application prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) + the ULP application variable.
+For example if HP core tries to access a ULP application variable named ``result`` and ``ULP_APP_NAME`` in the ULP application Makefile set as ``ulp_app``, required name for
+that variable will be ``ulp_app_result``.
+``FIONREAD`` or ``FIONWRITE`` ioctl calls are, then, performed with the address of a ``struct symtab_s`` previously defined with the name of the variable to be read or written.
+
+.. warning::
+  Ensure that the related ULP application is running. Otherwise, another ULP application may interfere by using the same memory space for a different variables.
+
+
+Here is a snippet for reading and writing to a ULP variable named ``var_test`` (assuming the ``ULP_APP_NAME`` is set to ``ulp``) through the HP core:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <stdio.h>
+   #include <fcntl.h>
+   #include <unistd.h>
+   #include <sys/ioctl.h>
+   #include "nuttx/symtab.h"
+
+   int main (void)
+    {
+      uint32_t ulp_var;
+      int fd;
+      struct symtab_s sym =
+      {
+        .sym_name = "ulp_var_test",
+        .sym_value = &ulp_var,
+      };
+      fd = open("/dev/ulp", O_RDWR);
+      ioctl(fd, FIONREAD, &sym);
+      if (ulp_var != 0)
+        {
+          ulp_var = 0;
+          ioctl(fd, FIONWRITE, &sym);
+        }
+
+      return OK;
+    }
+
+Debugging ULP LP-Core
+---------------------
+
+To debug ULP LP-Core please first refer to :ref:`Debugging section. <esp32p4_debug>`
+Debugging ULP core consist same steps with some small differences. First of all, configuration file
+needs to be changed from ``board/esp32p4-builtin.cfg`` or ``board/esp32p4-ftdi.cfg`` to
+``board/esp32p4-lpcore-builtin.cfg`` or ``board/esp32p4-lpcore-ftdi.cfg`` depending on preferred debug adapter.
+
+LP core supports limited set of HW exceptions, so, for example, writing at address
+0x0 will not cause a panic as it would be for the code running on HP core.
+This can be overcome to some extent by enabling undefined behavior sanitizer for LP core application,
+so ubsan can help to catch some errors. But note that it will increase code size significantly and
+it can happen that application won't fit into RTC RAM.
+To enable ubsan for ULP please add ``CONFIG_ESPRESSIF_ULP_ENABLE_UBSAN`` in menuconfig.
 
 Supported Boards
 ================

@@ -299,6 +299,44 @@ twai
 
 Enables the Two-Wire Automotive Interface (CAN/TWAI). Loopback testing is available via Kconfig.
 
+ulp
+---
+
+This configuration enables the support for the ULP LP core (Low-power core) coprocessor.
+To get more information about LP Core please check :ref:`ULP LP Core Coprocessor docs. <esp32p4_ulp>`
+
+Configuration uses a pre-built binary in ``Documentation/platforms/risc-v/esp32p4/boards/esp32p4-function-ev-board/ulp_blink.bin``
+which is a blink example for GPIO0. After flashing operation, GPIO0 pin will blink.
+
+Prebuild binary runs this code:
+
+.. code-block:: C
+
+   #include <stdint.h>
+   #include <stdbool.h>
+   #include "ulp_lp_core_gpio.h"
+
+   #define GPIO_PIN 0
+
+   #define nop() __asm__ __volatile__ ("nop")
+
+   bool gpio_level_previous = true;
+
+   int main (void)
+    {
+       while (1)
+           {
+           ulp_lp_core_gpio_set_level(GPIO_PIN, gpio_level_previous);
+           gpio_level_previous = !gpio_level_previous;
+           for (int i = 0; i < 10000; i++)
+             {
+               nop();
+             }
+           }
+
+       return 0;
+    }
+
 usbconsole
 ----------
 
