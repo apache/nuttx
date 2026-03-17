@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/hrtimer.h>
+#include <nuttx/list.h>
 #include <nuttx/seqlock.h>
 
 #include "sched/sched.h"
