@@ -113,6 +113,7 @@
 #define _1WIREBASE      (0x4500) /* 1WIRE ioctl commands */
 #define _EEPIOCBASE     (0x4600) /* EEPROM driver ioctl commands */
 #define _PTPBASE        (0x4700) /* PTP ioctl commands */
+#define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -806,6 +807,13 @@
 
 #define _PTPIOCVALID(c)       (_IOC_TYPE(c)==_PTPBASE)
 #define _PTPIOC(nr)           _IOC(_PTPBASE,nr)
+
+/* DSHOT ioctl definitions (see nuttx/timers/dshot.h) ***********************/
+
+/* see nuttx/include/timers/dshot.h */
+
+#define _DSHOTIOCVALID(c)   (_IOC_TYPE(c)==_DSHOTIOCBASE)
+#define _DSHOTIOC(nr)       _IOC(_DSHOTIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
