@@ -29,6 +29,9 @@ config ESPRESSIF_FLASH_8M
 config ESPRESSIF_FLASH_16M
 	bool "16 MB"
 
+config ESPRESSIF_FLASH_32M
+	bool "32 MB"
+
 endchoice # ESPRESSIF_FLASH
 
 config ESPRESSIF_IDF_ENV_FPGA
