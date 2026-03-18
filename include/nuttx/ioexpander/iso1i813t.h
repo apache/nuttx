@@ -49,9 +49,17 @@ struct iso1i813t_config_s
 {
   /* Device characterization */
 
-  uint8_t id;          /* ID if multiple devices used to select correct CS */
-  uint8_t mode;        /* SPI mode */
-  uint32_t frequency;  /* SPI frequency */
+  uint8_t id;           /* ID if multiple devices used to select correct CS */
+  uint8_t mode;         /* SPI mode */
+  uint8_t glerr_check;  /* Bits that are check in global error register
+                         * during read - read operation fails if these are
+                         * not zero.
+                         */
+  uint8_t interr_check; /* Bits that are check in internal error register
+                         * during read - read operation fails if these are
+                         * not zero.
+                         */
+  uint32_t frequency;   /* SPI frequency */
 };
 
 /****************************************************************************
