@@ -690,6 +690,10 @@ SECTIONS
  _bss_end_high = ABSOLUTE(.);
   } > sram_high
 
+  /* Heap region for sram_high: from end of bss to end of sram_high segment */
+  _sram_high_heap_start = _bss_end_high;
+  _sram_high_heap_end = ORIGIN(sram_high) + LENGTH(sram_high);
+
   /* DWARF 1 */
   .debug 0 : { *(.debug) }
   .line 0 : { *(.line) }

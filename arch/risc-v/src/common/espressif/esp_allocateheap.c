@@ -102,6 +102,21 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void riscv_addregion(void)
 {
+#if defined(CONFIG_ESP32P4_SELECTS_REV_LESS_V3)
+  /* ESP32-P4 rev < v3 has non-contiguous SRAM: sram_low + sram_high.
+   * The primary heap is in sram_low. Add sram_high as a second region.
+   */
+
+  extern uint8_t _sram_high_heap_start[];
+  extern uint8_t _sram_high_heap_end[];
+
+  size_t region_size = _sram_high_heap_end - _sram_high_heap_start;
+
+  if (region_size > 0)
+    {
+      kumm_addregion(_sram_high_heap_start, region_size);
+    }
+#endif
 }
 #endif
 
