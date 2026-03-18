@@ -31,7 +31,6 @@ choice ESP32_SPIFLASH_FS
 	prompt "File system to mount on SPI Flash MTD"
 	default ESP32_SPIFLASH_SMARTFS
 	depends on ESP32_SPIFLASH_AUTO_BRINGUP
-	optional
 	---help---
 		Mount the SPI Flash MTD with the selected File System format on board
 		bring-up.
