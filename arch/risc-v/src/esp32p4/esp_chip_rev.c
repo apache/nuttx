@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include "hal/efuse_hal.h"
 
 /****************************************************************************
@@ -65,21 +67,22 @@ void esp_chip_revision_check(void)
 
   if (chip_rev < ESP32P4_MIN_FULLY_SUPPORTED_VERSION)
     {
-#ifndef ESP32P4_IGNORE_CHIP_REVISION_CHECK
+#if !defined(CONFIG_ESP32P4_SELECTS_REV_LESS_V3)
       ets_printf("ERROR: NuttX supports ESP32-P4 chip revision > v%d.%01d"
                  " (chip revision is v%" PRIu32 ".%" PRIu32 ")\n",
                  ESP32P4_MIN_FULLY_SUPPORTED_VERSION / 100,
                  ESP32P4_MIN_FULLY_SUPPORTED_VERSION % 100,
                  chip_rev / 100, chip_rev % 100);
       PANIC();
-#endif
+#else
       ets_printf("WARNING: NuttX supports ESP32-P4 chip revision > v%d.%01d"
                  " (chip revision is v%" PRIu32 ".%" PRIu32 ").\n"
                  "Ignoring this error and continuing because "
-                 "`ESP32P4_IGNORE_CHIP_REVISION_CHECK` is set...\n"
+                 "`CONFIG_ESP32P4_SELECTS_REV_LESS_V3` is set...\n"
                  "THIS MAY NOT WORK! DON'T USE THIS CHIP IN PRODUCTION!\n",
                  ESP32P4_MIN_FULLY_SUPPORTED_VERSION / 100,
                  ESP32P4_MIN_FULLY_SUPPORTED_VERSION % 100,
                  chip_rev / 100, chip_rev % 100);
+#endif
     }
 }
