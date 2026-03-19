@@ -60,7 +60,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits);
 static int spi_hwfeatures(struct spi_dev_s *dev, spi_hwfeatures_t features);
 #endif
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void spi_exchange(struct spi_dev_s *dev,
+static int  spi_exchange(struct spi_dev_s *dev,
                          const void *txbuffer, void *rxbuffer, size_t nwords);
 #ifdef CONFIG_SPI_TRIGGER
 static int spi_trigger(struct spi_dev_s *dev);
@@ -636,11 +636,11 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ******************************************************************************/
 
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct mx8mp_spi_s *priv = (struct mx8mp_spi_s *)dev;
@@ -668,6 +668,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       transferred += ret;
     }
+
+  return 0;
 }
 
 /******************************************************************************

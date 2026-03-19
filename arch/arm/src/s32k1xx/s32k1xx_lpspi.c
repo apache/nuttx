@@ -223,7 +223,7 @@ static int s32k1xx_lpspi_hwfeatures(struct spi_dev_s *dev,
               s32k1xx_lpspi_hwfeatures_t features);
 #endif
 static uint32_t s32k1xx_lpspi_send(struct spi_dev_s *dev, uint32_t wd);
-static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
+static int s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
               const void *txbuffer, void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void s32k1xx_lpspi_sndblock(struct spi_dev_s *dev,
@@ -1361,17 +1361,17 @@ static uint32_t s32k1xx_lpspi_send_dword(struct spi_dev_s *dev,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_S32K1XX_LPSPI_DMA)
-static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
+static int  s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
                                    const void *txbuffer,
                                    void *rxbuffer,
                                    size_t nwords)
 #else
-static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
+static int  s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
                                          const void *txbuffer,
                                          void *rxbuffer, size_t nwords)
 #endif
@@ -1621,6 +1621,8 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
             }
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1640,12 +1642,12 @@ static void s32k1xx_lpspi_exchange_nodma(struct spi_dev_s *dev,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_S32K1XX_LPSPI_DMA
-static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
+static int  s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
                                    const void *txbuffer, void *rxbuffer,
                                    size_t nwords)
 {
@@ -1677,8 +1679,7 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
 #endif
       )
     {
-      s32k1xx_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
-      return;
+      return s32k1xx_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
 
   /* ERR050456 workaround: Reset FIFOs using CR[RST] bit */
@@ -1764,6 +1765,8 @@ static void s32k1xx_lpspi_exchange(struct spi_dev_s *dev,
 
   up_invalidate_dcache((uintptr_t)rxbuffer,
                        (uintptr_t)rxbuffer + nbytes);
+
+  return OK;
 }
 
 #endif /* CONFIG_S32K1XX_SPI_DMA */
@@ -1793,7 +1796,7 @@ static void s32k1xx_lpspi_sndblock(struct spi_dev_s *dev,
                                    const void *txbuffer, size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return s32k1xx_lpspi_exchange(dev, txbuffer, NULL, nwords);
+  s32k1xx_lpspi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -1823,7 +1826,7 @@ static void s32k1xx_lpspi_recvblock(struct spi_dev_s *dev,
                                     size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
-  return s32k1xx_lpspi_exchange(dev, NULL, rxbuffer, nwords);
+  s32k1xx_lpspi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 

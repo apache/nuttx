@@ -179,7 +179,7 @@ static void        spi_flash_setmode(FAR struct spi_dev_s *dev,
                                      enum spi_mode_e mode);
 static void        spi_flash_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint32_t    spi_flash_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void        spi_flash_exchange(FAR struct spi_dev_s *dev,
+static int         spi_flash_exchange(FAR struct spi_dev_s *dev,
                                       FAR const void *txbuffer, FAR void *rxbuffer,
                                       size_t nwords);
 static void        spi_flash_select(FAR struct spi_dev_s *dev, uint32_t devid,
@@ -516,11 +516,11 @@ static uint32_t spi_flash_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ************************************************************************************/
 
-static void spi_flash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+static int  spi_flash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                                FAR void *rxbuffer, size_t nwords)
 {
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%zu\n", txbuffer, rxbuffer, nwords);
@@ -555,6 +555,8 @@ static void spi_flash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuff
           *dest++ = word;
         }
     }
+
+  return OK;
 }
 
 /************************************************************************************
@@ -582,7 +584,7 @@ static void spi_flash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuff
                                size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return spi_flash_exchange(dev, txbuffer, NULL, nwords);
+  spi_flash_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -611,7 +613,7 @@ static void spi_flash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
                                 size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
-  return spi_flash_exchange(dev, NULL, rxbuffer, nwords);
+  spi_flash_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 

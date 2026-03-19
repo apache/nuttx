@@ -120,7 +120,7 @@ static int qspi_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
 static void qspi_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void qspi_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t qspi_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void qspi_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  qspi_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                               void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void     qspi_spi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -678,11 +678,11 @@ static uint32_t qspi_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void qspi_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  qspi_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                               void *rxbuffer, size_t nwords)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
@@ -790,6 +790,8 @@ static void qspi_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           *rxptr16++ = (uint16_t)data;
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************

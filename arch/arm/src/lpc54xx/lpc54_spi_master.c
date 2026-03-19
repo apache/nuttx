@@ -197,7 +197,7 @@ static void     lpc54_spi_setmode(struct spi_dev_s *dev,
 static void     lpc54_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t lpc54_spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void     lpc54_spi_exchange(struct spi_dev_s *dev,
+static int      lpc54_spi_exchange(struct spi_dev_s *dev,
                   const void *txbuffer, void *rxbuffer,
                   size_t nwords);
 #endif
@@ -1517,12 +1517,12 @@ static uint32_t lpc54_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void lpc54_spi_exchange(struct lpc54_spidev_s *priv,
+static int  lpc54_spi_exchange(struct lpc54_spidev_s *priv,
                                const void *txbuffer, void *rxbuffer,
                                size_t nwords)
 {
@@ -1565,6 +1565,8 @@ static void lpc54_spi_exchange(struct lpc54_spidev_s *priv,
     {
       lpc54_spi_exchange8(priv, txbuffer, rxbuffer, nwords);
     }
+
+  return OK;
 }
 #endif /* CONFIG_SPI_EXCHANGE */
 

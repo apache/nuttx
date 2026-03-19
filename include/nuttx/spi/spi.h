@@ -396,7 +396,7 @@
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
@@ -653,7 +653,7 @@ struct spi_ops_s
 #endif
   CODE uint32_t (*send)(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-  CODE void     (*exchange)(FAR struct spi_dev_s *dev,
+  CODE int      (*exchange)(FAR struct spi_dev_s *dev,
                   FAR const void *txbuffer, FAR void *rxbuffer,
                   size_t nwords);
   CODE int      (*exchangeseqs)(FAR struct spi_dev_s *dev,

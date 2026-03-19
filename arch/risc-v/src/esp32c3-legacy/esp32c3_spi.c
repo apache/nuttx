@@ -199,7 +199,7 @@ static int esp32c3_spi_hwfeatures(struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
 static uint32_t esp32c3_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void esp32c3_spi_exchange(struct spi_dev_s *dev,
+static int  esp32c3_spi_exchange(struct spi_dev_s *dev,
                                  const void *txbuffer,
                                  void *rxbuffer, size_t nwords);
 #ifdef CONFIG_ESP32C3_SPI2_DMA
@@ -1036,11 +1036,11 @@ static void esp32c3_spi_poll_exchange(struct esp32c3_spi_priv_s *priv,
  *              uint16_t's
  *
  * Returned Value:
- *   None.
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void esp32c3_spi_exchange(struct spi_dev_s *dev,
+static int  esp32c3_spi_exchange(struct spi_dev_s *dev,
                                  const void *txbuffer,
                                  void *rxbuffer,
                                  size_t nwords)
@@ -1059,6 +1059,8 @@ static void esp32c3_spi_exchange(struct spi_dev_s *dev,
     {
       esp32c3_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
     }
+
+  return OK;
 }
 
 #ifndef CONFIG_SPI_EXCHANGE

@@ -266,7 +266,7 @@ static void ssi_setbitsinternal(struct tiva_ssidev_s *priv, int nbits);
 static void ssi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t ssi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords);
 #else
 static void ssi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -1388,17 +1388,17 @@ static uint32_t ssi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  ssi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct tiva_ssidev_s *priv = (struct tiva_ssidev_s *)dev;
 
-  ssi_transfer(priv, txbuffer, rxbuffer, nwords);
+  return ssi_transfer(priv, txbuffer, rxbuffer, nwords);
 }
 #endif
 

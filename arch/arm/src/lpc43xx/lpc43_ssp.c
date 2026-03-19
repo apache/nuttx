@@ -91,7 +91,7 @@ static uint32_t ssp_setfrequency(struct spi_dev_s *dev,
 static void     ssp_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     ssp_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t ssp_send(struct spi_dev_s *dev, uint32_t wd);
-static void     ssp_exchange(struct spi_dev_s *dev,
+static int      ssp_exchange(struct spi_dev_s *dev,
                              const void *txbuffer, void *rxbuffer,
                              size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -515,11 +515,11 @@ static uint32_t ssp_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void ssp_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  ssp_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct lpc43_sspdev_s *priv = (struct lpc43_sspdev_s *)dev;
@@ -601,6 +601,8 @@ static void ssp_exchange(struct spi_dev_s *dev, const void *txbuffer,
           rxpending--;
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -627,7 +629,7 @@ static void ssp_exchange(struct spi_dev_s *dev, const void *txbuffer,
 static void ssp_sndblock(struct spi_dev_s *dev, const void *buffer,
                          size_t nwords)
 {
-  return ssp_exchange(dev, buffer, NULL, nwords);
+  ssp_exchange(dev, buffer, NULL, nwords);
 }
 
 /****************************************************************************
@@ -653,7 +655,7 @@ static void ssp_sndblock(struct spi_dev_s *dev, const void *buffer,
 static void ssp_recvblock(struct spi_dev_s *dev, void *buffer,
                           size_t nwords)
 {
-  return ssp_exchange(dev, NULL, buffer, nwords);
+  ssp_exchange(dev, NULL, buffer, nwords);
 }
 #endif /* !CONFIG_SPI_EXCHANGE */
 

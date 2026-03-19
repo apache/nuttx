@@ -214,7 +214,7 @@ static int         spi_hwfeatures(struct spi_dev_s *dev,
   spi_hwfeatures_t features);
 #endif
 static uint32_t    spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void        spi_exchange(struct spi_dev_s *dev,
+static int         spi_exchange(struct spi_dev_s *dev,
   const void *txbuffer,
   void *rxbuffer, size_t nwords);
 #ifdef CONFIG_SPI_TRIGGER
@@ -1389,17 +1389,17 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_AT32_SPI_DMA) || defined(CONFIG_AT32_DMACAPABLE) || \
      defined(CONFIG_AT32_SPI_DMATHRESHOLD)
 #if !defined(CONFIG_AT32_SPI_DMA)
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   void *rxbuffer, size_t nwords)
 #else
-static void spi_exchange_nodma(struct spi_dev_s *dev,
+static int spi_exchange_nodma(struct spi_dev_s *dev,
   const void *txbuffer,
   void *rxbuffer, size_t nwords)
 #endif
@@ -1478,6 +1478,8 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
             }
         }
     }
+
+  return OK;
 }
 #endif /* !CONFIG_AT32_SPI_DMA || CONFIG_AT32_DMACAPABLE || CONFIG_AT32_SPI_DMATHRESHOLD */
 
@@ -1498,12 +1500,12 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_AT32_SPI_DMA
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   void *rxbuffer, size_t nwords)
 {
   struct at32_spidev_s *priv = (struct at32_spidev_s *)dev;
@@ -1523,8 +1525,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   if (nbytes <= CONFIG_AT32_SPI_DMATHRESHOLD)
     {
-      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
-      return;
+      return spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
 #endif
 
@@ -1535,8 +1536,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * back to non-DMA method.
        */
 
-      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
-      return;
+      return spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
 
 #ifdef CONFIG_AT32_DMACAPABLE
@@ -1629,6 +1629,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       priv->trigarmed = false;
   #endif
     }
+
+  return OK;
 }
 #endif /* CONFIG_AT32_SPI_DMA */
 
@@ -1696,7 +1698,7 @@ static void spi_sndblock(struct spi_dev_s *dev,
   size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return spi_exchange(dev, txbuffer, NULL, nwords);
+  spi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -1725,7 +1727,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *rxbuffer,
   size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
-  return spi_exchange(dev, NULL, rxbuffer, nwords);
+  spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 

@@ -199,7 +199,7 @@ static int imx9_lpspi_hwfeatures(struct spi_dev_s *dev,
                                  imx9_lpspi_hwfeatures_t features);
 #endif
 static uint32_t imx9_lpspi_send(struct spi_dev_s *dev, uint32_t wd);
-static void imx9_lpspi_exchange(struct spi_dev_s *dev,
+static int  imx9_lpspi_exchange(struct spi_dev_s *dev,
                                 const void *txbuffer,
                                 void *rxbuffer,
                                 size_t nwords);
@@ -1191,17 +1191,17 @@ static uint32_t imx9_lpspi_send(struct spi_dev_s *dev, uint32_t wd)
  *              into uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #if !defined(CONFIG_IMX9_LPSPI_DMA)
-static void imx9_lpspi_exchange(struct spi_dev_s *dev,
+static int  imx9_lpspi_exchange(struct spi_dev_s *dev,
                                 const void *txbuffer,
                                 void *rxbuffer,
                                 size_t nwords)
 #else
-static void imx9_lpspi_exchange_nodma(struct spi_dev_s *dev,
+static int  imx9_lpspi_exchange_nodma(struct spi_dev_s *dev,
                                       const void *txbuffer,
                                       void *rxbuffer, size_t nwords)
 #endif
@@ -1281,6 +1281,8 @@ static void imx9_lpspi_exchange_nodma(struct spi_dev_s *dev,
             }
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1300,12 +1302,12 @@ static void imx9_lpspi_exchange_nodma(struct spi_dev_s *dev,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_IMX9_LPSPI_DMA
-static void imx9_lpspi_exchange(struct spi_dev_s *dev,
+static int  imx9_lpspi_exchange(struct spi_dev_s *dev,
                                 const void *txbuffer,
                                 void *rxbuffer, size_t nwords)
 {
@@ -1338,8 +1340,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 #endif
       )
     {
-      imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
-      return;
+      return imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
 
   /* Check if the transfer is too long */
@@ -1349,8 +1350,7 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
       /* Transfer is too long, revert to slow non-DMA method */
 
       spiwarn("frame %lu too long, fall back to no DMA transfer\n", nbytes);
-      imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
-      return;
+      return imx9_lpspi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
     }
 
   /* Disable SPI when we are configuring it */
@@ -1463,6 +1463,8 @@ static void imx9_lpspi_exchange(struct spi_dev_s *dev,
 
       memcpy(rxbuffer, priv->rxbuf, nbytes);
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_IMX9_SPI_DMA */
@@ -1492,7 +1494,7 @@ static void imx9_lpspi_sndblock(struct spi_dev_s *dev,
                                 const void *txbuffer, size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%lu\n", txbuffer, nwords);
-  return imx9_lpspi_exchange(dev, txbuffer, NULL, nwords);
+  imx9_lpspi_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -1521,7 +1523,7 @@ static void imx9_lpspi_recvblock(struct spi_dev_s *dev,
                                  void *rxbuffer, size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%lu\n", rxbuffer, nwords);
-  return imx9_lpspi_exchange(dev, NULL, rxbuffer, nwords);
+  imx9_lpspi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 

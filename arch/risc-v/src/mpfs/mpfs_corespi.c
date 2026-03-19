@@ -176,7 +176,7 @@ static int mpfs_spi_cmddata(struct spi_dev_s *dev,
                             uint32_t devid, bool cmd);
 #endif
 static uint32_t mpfs_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void mpfs_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  mpfs_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                               void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void mpfs_spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
@@ -1215,11 +1215,11 @@ static void mpfs_spi_poll_exchange(struct mpfs_spi_priv_s *priv,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void mpfs_spi_exchange(struct spi_dev_s *dev,
+static int  mpfs_spi_exchange(struct spi_dev_s *dev,
                               const void *txbuffer, void *rxbuffer,
                               size_t nwords)
 {
@@ -1233,6 +1233,8 @@ static void mpfs_spi_exchange(struct spi_dev_s *dev,
     {
       mpfs_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
     }
+
+  return OK;
 }
 
 #ifndef CONFIG_SPI_EXCHANGE

@@ -75,7 +75,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 static void   spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void   spi_exchange(FAR struct spi_dev_s *dev,
+static int    spi_exchange(FAR struct spi_dev_s *dev,
                 FAR const void *txbuffer, FAR void *rxbuffer,
                 size_t nwords);
 #else
@@ -435,12 +435,12 @@ static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void spi_exchange(FAR struct spi_dev_s *dev,
+static int  spi_exchange(FAR struct spi_dev_s *dev,
                          FAR const void *txbuffer, FAR void *rxbuffer,
                          size_t nwords)
 {
@@ -477,6 +477,8 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
           outptr++;
         }
     }
+
+  return OK;
 }
 #endif
 
