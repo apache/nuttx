@@ -1943,11 +1943,11 @@ static int rpmsg_socket_munmap(FAR struct task_group_s *group,
                                FAR struct mm_map_entry_s *mmap,
                                FAR void *start, size_t length)
 {
-  FAR struct rpmsg_socket_conn_s *conn = mmap->priv.p;
+  FAR struct rpmsg_device *rdev = mmap->priv.p;
   FAR void *addr = mmap->vaddr;
 
   mm_map_remove(get_current_mm(), mmap);
-  rpmsg_free_buf(conn->ept.rdev, addr);
+  rpmsg_free_buf(rdev, addr);
 
   return OK;
 }
@@ -1970,7 +1970,7 @@ static int rpmsg_socket_mmap(FAR struct socket *psock,
       else
         {
           mmap->vaddr = addr;
-          mmap->priv.p = conn;
+          mmap->priv.p = conn->ept.rdev;
           mmap->munmap = rpmsg_socket_munmap;
           mm_map_add(get_current_mm(), mmap);
         }
