@@ -833,5 +833,6 @@ int mempool_deinit(FAR struct mempool_s *pool)
       nxsem_destroy(&pool->waitsem);
     }
 
+  pool->init = false;
   return 0;
 }
