@@ -255,6 +255,7 @@ struct w25_dev_s
 
 /* Helpers */
 
+static inline void w25_purdid(FAR struct w25_dev_s *priv);
 static void w25_lock(FAR struct spi_dev_s *spi);
 static inline void w25_unlock(FAR struct spi_dev_s *spi);
 static inline int w25_readid(FAR struct w25_dev_s *priv);
@@ -327,6 +328,18 @@ static ssize_t w25_write(FAR struct mtd_dev_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: w25_purdid
+ ****************************************************************************/
+
+static inline void w25_purdid(FAR struct w25_dev_s *priv)
+{
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), true);
+  SPI_SEND(priv->spi, W25_PURDID);
+  SPI_SELECT(priv->spi, SPIDEV_FLASH(0), false);
+  nxsched_usleep(20);
+}
+
+/****************************************************************************
  * Name: w25_lock
  ****************************************************************************/
 
@@ -385,6 +398,10 @@ static inline int w25_readid(struct w25_dev_s *priv)
   /* Lock and configure the SPI bus */
 
   w25_lock(priv->spi);
+
+  /* Make sure the device is not in power down mode */
+
+  w25_purdid(priv);
 
   /* Wait for any preceding write or erase operation to complete. */
 
