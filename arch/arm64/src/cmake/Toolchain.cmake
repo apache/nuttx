@@ -25,6 +25,10 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_C_COMPILER_FORCED TRUE)
 set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
+# Set default LLVM arch/abi for all arm64 targets
+set(LLVM_ARCHTYPE aarch64)
+set(LLVM_ABITYPE aapcs64)
+
 if(CONFIG_ARCH_CORTEX_A53)
   add_compile_options(-mcpu=cortex-a53)
 elseif(CONFIG_ARCH_CORTEX_A55)
