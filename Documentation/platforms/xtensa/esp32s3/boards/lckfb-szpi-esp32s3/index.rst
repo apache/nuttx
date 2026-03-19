@@ -576,3 +576,50 @@ Then use the camera example to capture a frame::
 
   $ adb -s 1234 shell
   nsh> camera
+
+uvc
+---
+
+USB Video Class (UVC) webcam configuration. Streams YUYV frames from the
+GC0308 DVP camera to a USB host via the UVC gadget driver (Bulk transport).
+The application queries the sensor resolution at runtime and configures the
+UVC descriptors accordingly. Console is accessible over UART0 (serial).
+
+The UVC driver also supports composite USB device mode
+(``CONFIG_USBUVC_COMPOSITE``), allowing it to be combined with other USB
+class drivers (e.g., CDC/ACM) in a single composite device.
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:uvc
+  $ make flash -j$(nproc) ESPTOOL_PORT=/dev/ttyUSB0
+
+The application should work as follows:
+
+1. Create ``/dev/video0`` via ``capture_initialize()`` and open it.
+2. Query the sensor's native resolution with ``VIDIOC_ENUM_FRAMESIZES``
+   (pixel format ``V4L2_PIX_FMT_YUYV``), then ``VIDIOC_S_FMT`` to configure.
+3. Fill ``struct uvc_params_s`` with the queried width, height and fps,
+   pass it to ``boardctl(BOARDIOC_USBDEV_CONTROL)`` via ``ctrl.handle``
+   so the UVC gadget builds USB descriptors matching the actual sensor.
+4. Open ``/dev/uvc0``, use ``poll()`` with ``POLLOUT`` to wait for the
+   USB host to start streaming.
+5. Loop: ``VIDIOC_QBUF`` / ``VIDIOC_DQBUF`` to capture a YUYV frame,
+   then ``write()`` to ``/dev/uvc0``.
+
+On the host side, verify the device is recognized::
+
+  $ sudo dmesg
+  [32982831.662622] usb 1-9.3.3: new full-speed USB device number 72 using xhci_hcd
+  [32982831.752856] usb 1-9.3.3: New USB device found, idVendor=1d6b, idProduct=0102, bcdDevice= 1.00
+  [32982831.752860] usb 1-9.3.3: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+  [32982831.752861] usb 1-9.3.3: Product: NuttX UVC Camera
+  [32982831.752862] usb 1-9.3.3: Manufacturer: NuttX
+  [32982831.752863] usb 1-9.3.3: SerialNumber: 0001
+  [32982831.756625] usb 1-9.3.3: Found UVC 1.10 device NuttX UVC Camera (1d6b:0102)
+
+Then open the webcam with any UVC viewer (e.g. ``cheese``, ``guvcview``,
+or ``ffplay``)::
+
+  $ cheese
+
