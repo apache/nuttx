@@ -180,7 +180,7 @@ static int  spi_hwfeatures(struct spi_dev_s *dev,
               spi_hwfeatures_t features);
 #endif
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(struct spi_dev_s *dev, const void *txbuffer,
@@ -1185,11 +1185,11 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct max326_spidev_s *priv = (struct max326_spidev_s *)dev;
@@ -1319,6 +1319,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     }
   while ((regval & SPI_INT_MDONE) == 0);
 #endif
+
+  return OK;
 }
 
 /****************************************************************************

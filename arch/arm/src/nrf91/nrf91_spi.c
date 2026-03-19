@@ -93,7 +93,7 @@ static int nrf91_spi_hwfeatures(struct spi_dev_s *dev,
                                 spi_hwfeatures_t features);
 #endif
 static uint32_t nrf91_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void nrf91_spi_exchange(struct spi_dev_s *dev,
+static int  nrf91_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer,
                                void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -975,11 +975,11 @@ static uint32_t nrf91_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              selected for the SPI interface.
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void nrf91_spi_exchange(struct spi_dev_s *dev,
+static int  nrf91_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer,
                                void *rxbuffer, size_t nwords)
 {
@@ -1102,6 +1102,8 @@ static void nrf91_spi_exchange(struct spi_dev_s *dev,
       nrf91_spi_putreg(priv, NRF91_SPIM_RXDLIST_OFFSET, 0);
       nrf91_spi_putreg(priv, NRF91_SPIM_TXDLIST_OFFSET, 0);
     }
+
+  return OK;
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
@@ -1129,7 +1131,7 @@ static void nrf91_spi_sndblock(struct spi_dev_s *dev,
                                size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%zu\n", txbuffer, nwords);
-  return nrf91_spi_exchange(dev, txbuffer, NULL, nwords);
+  nrf91_spi_exchange(dev, txbuffer, NULL, nwords);
 }
 
 /****************************************************************************
@@ -1155,7 +1157,7 @@ static void nrf91_spi_recvblock(struct spi_dev_s *dev,
                                 size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%zu\n", rxbuffer, nwords);
-  return nrf91_spi_exchange(dev, NULL, rxbuffer, nwords);
+  nrf91_spi_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif /* CONFIG_SPI_EXCHANGE */
 

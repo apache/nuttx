@@ -165,7 +165,7 @@ static void   spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void   spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd);
 #ifdef CONFIG_SPI_EXCHANGE
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords);
 #else
 static void spi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -937,17 +937,19 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
 
   spi_transfer(priv, txbuffer, rxbuffer, nwords);
+
+  return OK;
 }
 #endif
 

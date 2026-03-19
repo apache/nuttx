@@ -118,7 +118,7 @@ static void serial_spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void serial_spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint8_t serial_spi_status(struct spi_dev_s *dev, uint32_t devid);
 static uint32_t serial_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                               void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void serial_spi_sndblock(struct spi_dev_s *dev, const void *buffer,
@@ -594,11 +594,11 @@ static uint32_t serial_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                                 void *rxbuffer, size_t nwords)
 {
   struct sam_spidev_s *spi = (struct sam_spidev_s *)dev;
@@ -664,6 +664,8 @@ static void serial_spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           *rxptr++ = (uint8_t)data;
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************

@@ -222,7 +222,7 @@ static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 #ifdef CONFIG_SPI_EXCHANGE
-static void   spi_exchange(struct spi_dev_s *dev,
+static int    spi_exchange(struct spi_dev_s *dev,
                            const void *txbuffer,
                            void *rxbuffer, size_t nwords);
 #else
@@ -1117,17 +1117,19 @@ static int spi_cmddata(struct spi_dev_s *dev, uint32_t devid,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_EXCHANGE
-static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+static int  spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
   struct imx_spidev_s *priv = (struct imx_spidev_s *)dev;
 
   spi_transfer(priv, txbuffer, rxbuffer, nwords);
+
+  return OK;
 }
 #endif
 

@@ -167,7 +167,7 @@ static int bl808_spi_cmddata(struct spi_dev_s *dev,
                               uint32_t devid, bool cmd);
 #endif
 static uint32_t bl808_spi_send(struct spi_dev_s *dev, uint32_t wd);
-static void bl808_spi_exchange(struct spi_dev_s *dev,
+static int  bl808_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer,
                                void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -990,11 +990,11 @@ static uint32_t bl808_spi_send(struct spi_dev_s *dev, uint32_t wd)
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void bl808_spi_poll_exchange(struct bl808_spi_priv_s *priv,
+static int  bl808_spi_poll_exchange(struct bl808_spi_priv_s *priv,
                                     const void *txbuffer,
                                     void *rxbuffer, size_t nwords)
 {
@@ -1030,6 +1030,8 @@ static void bl808_spi_poll_exchange(struct bl808_spi_priv_s *priv,
             }
         }
     }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1049,17 +1051,17 @@ static void bl808_spi_poll_exchange(struct bl808_spi_priv_s *priv,
  *              uint16_t's
  *
  * Returned Value:
- *   None
+ *   Returns zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void bl808_spi_exchange(struct spi_dev_s *dev,
+static int  bl808_spi_exchange(struct spi_dev_s *dev,
                                const void *txbuffer, void *rxbuffer,
                                size_t nwords)
 {
   struct bl808_spi_priv_s *priv = (struct bl808_spi_priv_s *)dev;
 
-  bl808_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
+  return bl808_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
