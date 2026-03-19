@@ -1122,6 +1122,7 @@ config ESP32S3_SPIRAM_USER_HEAP
 	depends on SCHED_LPWORK
 	select ESP32S3_SPI_FLASH_SUPPORT_PSRAM_STACK if ESP32S3_SPIFLASH
 	select MM_KERNEL_HEAP
+	select ESP32S3_DONT_USE_ROM_LIBC
 
 endchoice # ESP32S3_SPIRAM_HEAP
 
@@ -1129,6 +1130,16 @@ config ESP32S3_RTC_HEAP
 	bool "Use the RTC memory as a separate heap"
 	select ARCH_HAVE_EXTRA_HEAPS
 	default n
+
+config ESP32S3_DONT_USE_ROM_LIBC
+	bool "Don't use ROM libc functions"
+	default n
+	---help---
+		If enabled, NuttX libc will be used instead of ROM newlib
+		functions (strdup, strndup, atoi, etc.).
+
+		This is required when using flat build with USER_HEAP mode
+		to avoid heap allocation issues with ROM strdup.
 
 config ESP32S3_SPIRAM_MAP
 	bool "Remap the size and offset of SPIRAM virtual address"
