@@ -470,7 +470,7 @@ if PM
 
 config PM_EXT1_WAKEUP
 	bool "PM EXT1 Wakeup"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable EXT1 wakeup functionality.
@@ -754,42 +754,42 @@ config PM_GPIO_WAKEUP_GPIO21
 
 config PM_GPIO_WAKEUP_GPIO22
 	bool "GPIO22"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO22 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO23
 	bool "GPIO23"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO23 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO24
 	bool "GPIO24"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO24 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO25
 	bool "GPIO25"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO25 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO26
 	bool "GPIO26"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO26 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO27
 	bool "GPIO27"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	default n
 	---help---
 		Enable GPIO27 as an GPIO wakeup source.
@@ -858,23 +858,23 @@ endchoice # PM_UART_WAKEUP_UART_NUM
 
 choice PM_UART_WAKEUP_MODE
 	prompt "PM UART Wakeup Mode"
-	default PM_UART_WAKEUP_START_BIT_MODE if !ARCH_CHIP_ESP32C3_GENERIC
-	default PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE if ARCH_CHIP_ESP32C3_GENERIC
+	default PM_UART_WAKEUP_START_BIT_MODE if !ARCH_CHIP_ESP32C3
+	default PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE if ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_ACTIVE_EDGE_THRESHOLD_MODE
 	bool "Wake-up triggered by active edge threshold"
 
 config PM_UART_WAKEUP_FIFO_THRESHOLD_MODE
 	bool "Wake-up triggered by the number of bytes received in the RX FIFO"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_START_BIT_MODE
 	bool "Wake-up triggered by the detection of a start bit"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 
 config PM_UART_WAKEUP_CHAR_SEQ_MODE
 	bool "Wake-up triggered by detecting a specific character sequence"
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 
 endchoice # PM_UART_WAKEUP_MODE
 
@@ -2255,7 +2255,7 @@ config ESPRESSIF_UART1_RS485
 config ESPRESSIF_UART1_RS485_DIR_PIN
 	int "UART1 RS-485 DIR pin"
 	default 4
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -2997,7 +2997,7 @@ config ESPRESSIF_I2S0_SAMPLE_RATE
 config ESPRESSIF_I2S0_BCLKPIN
 	int "I2S0 BCLK pin"
 	default 4
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3005,7 +3005,7 @@ config ESPRESSIF_I2S0_BCLKPIN
 config ESPRESSIF_I2S0_WSPIN
 	int "I2S0 WS pin"
 	default 5
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3015,7 +3015,7 @@ config ESPRESSIF_I2S0_DINPIN
 	depends on ESPRESSIF_I2S0_RX
 	default 19 if !ARCH_CHIP_ESP32H2
 	default 11 if ARCH_CHIP_ESP32H2
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3025,7 +3025,7 @@ config ESPRESSIF_I2S0_DOUTPIN
 	depends on ESPRESSIF_I2S0_TX
 	default 18 if !ARCH_CHIP_ESP32H2
 	default 10 if ARCH_CHIP_ESP32H2
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3041,7 +3041,7 @@ config ESPRESSIF_I2S0_MCLKPIN
 	int "I2S MCLK pin"
 	depends on ESPRESSIF_I2S0_MCLK
 	default 0
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3083,7 +3083,7 @@ config ESPRESSIF_I2C0_SCLPIN
 	int "I2C0 SCL Pin"
 	default 6 if !ESPRESSIF_LPI2C
 	default 23 if ESPRESSIF_LPI2C
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3091,7 +3091,7 @@ config ESPRESSIF_I2C0_SCLPIN
 config ESPRESSIF_I2C0_SDAPIN
 	int "I2C0 SDA Pin"
 	default 5
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3120,7 +3120,7 @@ endchoice # ESPRESSIF_I2C1_MODE
 config ESPRESSIF_I2C1_SCLPIN
 	int "I2C1 SCL Pin"
 	default 2
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3128,7 +3128,7 @@ config ESPRESSIF_I2C1_SCLPIN
 config ESPRESSIF_I2C1_SDAPIN
 	int "I2C1 SDA Pin"
 	default 1
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3173,7 +3173,7 @@ endchoice # ESPRESSIF_I2C_BITBANG_MODE
 config ESPRESSIF_I2C_BITBANG_SCLPIN
 	int "I2C Bitbang SCL Pin"
 	default 0
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3181,7 +3181,7 @@ config ESPRESSIF_I2C_BITBANG_SCLPIN
 config ESPRESSIF_I2C_BITBANG_SDAPIN
 	int "I2C Bitbang SDA Pin"
 	default 1
-	range 0 21 if ARCH_CHIP_ESP32C3_GENERIC
+	range 0 21 if ARCH_CHIP_ESP32C3
 	range 0 30 if ARCH_CHIP_ESP32C6
 	range 0 27 if ARCH_CHIP_ESP32H2
 	range 0 54 if ARCH_CHIP_ESP32P4
@@ -3201,7 +3201,7 @@ config ESPRESSIF_I2CTIMEOMS
 config ESPRESSIF_I2C_TEST_MODE
 	bool "I2C driver loopback test mode (for testing only)"
 	default n
-	depends on !ARCH_CHIP_ESP32C3_GENERIC
+	depends on !ARCH_CHIP_ESP32C3
 	depends on (ESPRESSIF_I2C_PERIPH_MASTER_MODE && ESPRESSIF_I2C_PERIPH_SLAVE_MODE)
 	---help---
 		This enables a loopback test mode that attaches the master I2C peripheral
