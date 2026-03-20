@@ -81,9 +81,25 @@ You have four options:
 Option 1: load via u-boot from SD-card:
 ---------------------------------------
 
-1. Build nuttx, and move ``nuttx.bin`` to MMC
+1. Build nuttx
 
-2. Load from MMC and start nuttx payload
+2. In the u-boot console, expose the eMMC as a USB mass storage device:
+
+   .. code:: console
+
+      u-boot=> ums 0 mmc 0
+
+   The board will appear as a USB drive on the host PC.
+
+3. On the Linux host, copy ``nuttx.bin`` to the boot partition:
+
+   .. code:: console
+
+      $ cp nuttx.bin /media/`id -un`/boot
+
+4. Go back to the u-boot console and press ``Ctrl+C`` to stop UMS mode.
+
+5. Load from MMC and start nuttx payload:
 
    .. code:: console
 
