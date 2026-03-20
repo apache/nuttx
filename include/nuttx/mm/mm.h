@@ -505,9 +505,9 @@ void kmm_checkcorruption(void);
 /* Functions contained in fs_procfspressure.c *******************************/
 
 #ifdef CONFIG_FS_PROCFS_INCLUDE_PRESSURE
-void mm_notify_pressure(size_t remaining, size_t largest);
+void mm_notify_pressure(FAR struct mm_heap_s *heap);
 #else
-#  define mm_notify_pressure(remaining, largest)
+#  define mm_notify_pressure(heap)
 #endif
 
 #ifdef __cplusplus
