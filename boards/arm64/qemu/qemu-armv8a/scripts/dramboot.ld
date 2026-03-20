@@ -21,6 +21,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/chip/chip.h>
 
 OUTPUT_ARCH(aarch64)
 
@@ -33,7 +34,7 @@ PHDRS
 
 SECTIONS
 {
-  . = 0x40280000;  /* uboot load address */
+  . = CONFIG_LOAD_BASE;  /* load address derived from CONFIG_RAM_START */
 
   /* where the global variable out-of-bounds detection information located */
 
