@@ -58,8 +58,23 @@
 
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
+/* QEMU virt machine physical RAM always starts at 0x40000000.
+ * RAMBANK1 must cover from physical RAM base through the end of
+ * NuttX's configured RAM region (CONFIG_RAM_START + CONFIG_RAM_SIZE)
+ * so that the MMU mapping is large enough.
+ *
+ * When CONFIG_RAM_START > 0x40000000 (e.g. running under a hypervisor),
+ * the RAMBANK1 mapping still starts at 0x40000000 to keep the DTB
+ * accessible, and extends to cover CONFIG_RAM_END.
+ *
+ * The user must ensure QEMU is launched with enough RAM via -m option:
+ *   -m <size>  where size >=
+ *   (CONFIG_RAM_START - 0x40000000 + CONFIG_RAM_SIZE)
+ */
+
 #define CONFIG_RAMBANK1_ADDR       0x40000000
-#define CONFIG_RAMBANK1_SIZE       MB(128)
+#define CONFIG_RAMBANK1_SIZE       (CONFIG_RAM_START - CONFIG_RAMBANK1_ADDR + \
+                                    CONFIG_RAM_SIZE)
 
 #define CONFIG_DEVICEIO_BASEADDR   0x7000000
 #define CONFIG_DEVICEIO_SIZE       MB(512)
@@ -73,7 +88,9 @@
 #define CONFIG_PCI_IO_BASEADDR     0x3eff0000
 #define CONFIG_PCI_IO_SIZE         KB(64)
 
-#define CONFIG_LOAD_BASE           0x40280000
+/* Load base is 0x280000 (2.5MB) offset from CONFIG_RAM_START */
+
+#define CONFIG_LOAD_BASE           (CONFIG_RAM_START + 0x280000)
 
 #define MPID_TO_CLUSTER_ID(mpid)   ((mpid) & ~0xff)
 

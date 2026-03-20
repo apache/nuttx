@@ -20,6 +20,9 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <arch/chip/chip.h>
+
 OUTPUT_ARCH(aarch64)
 
 ENTRY(__start)
@@ -27,8 +30,8 @@ EXTERN(__start)
 
 MEMORY
 {
-  dram (rwx)  : ORIGIN = 0x40280000, LENGTH = 2M
-  pgram (rwx) : ORIGIN = 0x40800000, LENGTH = 4M   /* w/ cache */
+  dram (rwx)  : ORIGIN = CONFIG_LOAD_BASE, LENGTH = 2M
+  pgram (rwx) : ORIGIN = CONFIG_RAM_START + 0x800000, LENGTH = 4M
 }
 
 PHDRS
