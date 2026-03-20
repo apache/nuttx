@@ -24,6 +24,7 @@ nuttx=$WD/../nuttx
 
 progname=$0
 fail=0
+maxbuilds=8  # Retry 7 times on failure
 APPSDIR=$WD/../apps
 if [ -z $ARTIFACTDIR ]; then
   ARTIFACTDIR=$WD/../buildartifacts
@@ -580,6 +581,49 @@ function dotest {
   fi
 }
 
+# Build one entry from the test list file. Retry on failure.
+function retrytest {
+  # Remember the Fail Status and clear it for each build
+  local line=$1
+  local prevfail=$fail
+  local backoff=60  # Initial Exponential Backoff, in seconds
+
+  # Build and retry on failure, with Random Exponential Backoff
+  for ((i = 1; i <= $maxbuilds; i++)); do
+    echo "Build Attempt $i of $maxbuilds"
+    fail=0
+    dotest $line
+
+    # Don't retry if the build succeeded
+    if [ ${fail} -eq 0 ]; then
+      break
+    else
+      # Build Failed: Clean up any corrupted downloads, don't reuse
+      git -C $nuttx clean -fd
+      git -C $APPSDIR clean -fd
+      pushd $nuttx ; git status ; popd
+      pushd $APPSDIR ; git status ; popd
+    fi
+
+    # If this is Final Retry: Don't retry subsequent builds
+    if [ $i -eq $maxbuilds ]; then
+			maxbuilds=1
+      break
+    fi
+
+    # Wait for Random Exponential Backoff, then retry
+    delay=$(( (RANDOM % $backoff) + 1 ))
+    echo "Wait $delay seconds ($backoff backoff)"
+    backoff=$(($backoff * 2))
+    sleep $delay
+  done
+
+  # Return the Previous Fail Status, unless this build failed
+  if [ ${fail} -eq 0 ]; then
+    fail=$prevfail
+  fi
+}
+
 # Perform the build test for each entry in the test list file
 
 for line in $testlist; do
@@ -588,10 +632,10 @@ for line in $testlist; do
     dir=`echo $line | cut -d',' -f1`
     list=`find boards$dir -name defconfig | cut -d'/' -f4,6`
     for i in ${list}; do
-      dotest $i${line/"$dir"/}
+      retrytest $i${line/"$dir"/}
     done
   else
-    dotest $line
+    retrytest $line
   fi
 done
 
