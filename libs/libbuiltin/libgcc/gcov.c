@@ -514,7 +514,7 @@ void __gcov_dump(void)
 
       _NX_CLOSE(fd);
     }
-  else if(S_ISDIR(state.st_mode))
+  else if (S_ISDIR(state.st_mode))
     {
       args.mkdir = gcov_mkdir;
       args.strip = atoi(getenv("GCOV_PREFIX_STRIP"));
