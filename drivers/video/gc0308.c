@@ -154,6 +154,7 @@ struct gc0308_dev_s
   struct i2c_master_s *i2c;
   uint16_t width;
   uint16_t height;
+  uint32_t pixelformat;
   struct v4l2_frmsizeenum frmsizes;
   bool streaming;
 };
@@ -456,6 +457,10 @@ static const struct imgsensor_ops_s g_gc0308_ops =
 static const struct v4l2_fmtdesc g_gc0308_fmtdescs[] =
 {
   {
+    .pixelformat = V4L2_PIX_FMT_YUYV,
+    .description = "YUV 4:2:2 (YUYV)",
+  },
+  {
     .pixelformat = V4L2_PIX_FMT_RGB565,
     .description = "RGB565",
   },
@@ -648,7 +653,7 @@ static int gc0308_init(struct imgsensor_s *sensor)
 
   up_mdelay(80);
 
-  /* Set RGB565 output format: reg 0x24 bits[3:0] = 6 */
+  /* Set default RGB565 output format: reg 0x24 bits[3:0] = 6 */
 
   ret = gc0308_putreg(priv->i2c, GC0308_REG_RESET, 0x00);
   if (ret < 0)
@@ -657,6 +662,7 @@ static int gc0308_init(struct imgsensor_s *sensor)
     }
 
   ret = gc0308_modreg(priv->i2c, GC0308_REG_OUTPUT_FMT, 0x0f, 0x06);
+  priv->pixelformat = IMGSENSOR_PIX_FMT_RGB565;
   if (ret < 0)
     {
       return ret;
@@ -752,6 +758,8 @@ static int gc0308_validate_frame_setting(struct imgsensor_s *sensor,
     }
 
   if (datafmts[IMGSENSOR_FMT_MAIN].pixelformat !=
+      IMGSENSOR_PIX_FMT_YUYV &&
+      datafmts[IMGSENSOR_FMT_MAIN].pixelformat !=
       IMGSENSOR_PIX_FMT_RGB565)
     {
       return -EINVAL;
@@ -777,12 +785,32 @@ static int gc0308_start_capture(struct imgsensor_s *sensor,
                                 imgsensor_interval_t *interval)
 {
   struct gc0308_dev_s *priv = (struct gc0308_dev_s *)sensor;
+  uint8_t fmtval;
+  int ret;
 
   if (priv->streaming)
     {
       return -EBUSY;
     }
 
+  /* Configure output format register based on requested pixel format */
+
+  if (datafmts[IMGSENSOR_FMT_MAIN].pixelformat == IMGSENSOR_PIX_FMT_RGB565)
+    {
+      fmtval = 0x06;  /* RGB565 */
+    }
+  else
+    {
+      fmtval = 0x02;  /* YCbCr422 */
+    }
+
+  ret = gc0308_modreg(priv->i2c, GC0308_REG_OUTPUT_FMT, 0x0f, fmtval);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  priv->pixelformat = datafmts[IMGSENSOR_FMT_MAIN].pixelformat;
   priv->streaming = true;
   return OK;
 }
