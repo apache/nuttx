@@ -345,7 +345,7 @@ int spirit_gpio_clockoutput_initialize(
             (uint8_t)(clockoutput->rcoprescaler) |
             (uint8_t)(clockoutput->xtracycles));
 
-  /* Write to the the MCU_CLOCK register */
+  /* Write to the MCU_CLOCK register */
 
   return spirit_reg_write(spirit, MCU_CK_CONF_BASE, &regval, 1);
 }

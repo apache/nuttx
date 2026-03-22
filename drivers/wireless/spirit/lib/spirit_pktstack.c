@@ -854,7 +854,7 @@ uint16_t spirit_pktstack_get_rxpktlen(FAR struct spirit_library_s *spirit)
 
   spirit_reg_read(spirit, RX_PCKT_LEN1_BASE, regval, 2);
 
-  /* Rebuild and return the the length field */
+  /* Rebuild and return the length field */
 
   pktlen = ((((uint16_t) regval[0]) << 8) + (uint16_t) regval[1]);
 

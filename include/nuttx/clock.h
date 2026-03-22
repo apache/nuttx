@@ -387,7 +387,7 @@ extern "C"
  * NOTE that one is added to the delay.  This is correct and must not be
  * changed:  The contract for the use wdog_start is that the wdog will
  * delay FOR AT LEAST as long as requested, but may delay longer due to
- * variety of factors.  The wdog logic has no knowledge of the the phase
+ * variety of factors.  The wdog logic has no knowledge of the phase
  * of the system timer when it is started:  The next timer interrupt may
  * occur immediately or may be delayed for almost a full cycle. In order
  * to meet the contract requirement, the requested time is also always

@@ -728,7 +728,7 @@ struct mtd_dev_s *rp2040_flash_mtd_initialize(void)
 
   /* Instead of using the rom_function for flash_enable_xip, we use the one
    * from boot stage 2 loaded at the beginning of the XIP rom. We do this
-   * because the boot_rom version can result in slower access to the the
+   * because the boot_rom version can result in slower access to the
    * XIP memory.
    *
    * We need to make our own copy of this code in ram since we cannot use

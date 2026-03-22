@@ -46,7 +46,7 @@
  *    LocalHost UDP socket with the server portof 0x83nn where nn is the
  *    value that was provided when file system was created.
  * 3. The UserFs will receive system file system requests and forward them
- *    on the the MqUfsReqN to the user-space file system server
+ *    on the MqUfsReqN to the user-space file system server
  *    (userfs_run()). These requests may be accompanied by additional data in
  *    an provided request buffer that was provided when the UserFS was
  *    created.  This buffer would hold, for example, the data to be

@@ -199,7 +199,7 @@ See, for an example, ``apps/graphics/nxwm/src/cnxterm.cxx``.  In this case, the
 behavior will change, depending on the selection of ``CONFIG_NXTERM_NXKBDIN``:
 If ``CONFIG_NXTERM_NXKBDIN`` is not selected, then the behavior will be similar
 to ``apps/examples/nxterm``; stdin will not be redirected an keyboard input will
-come directly from the the system console.
+come directly from the system console.
 
 But is ``CONFIG_NXTERM_NXKBDIN`` is select, NSH's stdin will be re-redirected to
 the to the NxTerm character driver. Keyboard input will arrive on stdin from the

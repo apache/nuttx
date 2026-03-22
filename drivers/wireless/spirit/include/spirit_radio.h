@@ -2247,7 +2247,7 @@ int spirit_radio_set_refdiv(FAR struct spirit_library_s *spirit,
  * Name: spirit_radio_get_refdiv
  *
  * Description:
- *   Get the the synthesizer reference divider state.
+ *   Get the synthesizer reference divider state.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance
@@ -2282,7 +2282,7 @@ int spirit_radio_enable_digdivider(FAR struct spirit_library_s *spirit,
  * Name: spirit_radio_isenabled_digdivider
  *
  * Description:
- *   Get the the synthesizer reference divider state.
+ *   Get the synthesizer reference divider state.
  *
  * Input Parameters:
  *   spirit - Reference to a Spirit library state structure instance

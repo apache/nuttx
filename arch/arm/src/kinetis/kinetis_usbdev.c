@@ -3228,7 +3228,7 @@ static void khci_resume(struct khci_usbdev_s *priv)
   regval &= ~USB_INT_RESUME;
   khci_putreg(regval, KINETIS_USB0_INTEN);
 
-  /* Disable the the async resume interrupt */
+  /* Disable the async resume interrupt */
 
   regval = khci_getreg(KINETIS_USB0_USBTRC0);
   regval &= ~USB_USBTRC0_USBRESMEN;

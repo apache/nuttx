@@ -2425,7 +2425,7 @@ static struct usbdev_ep_s *lpc31_allocep(struct usbdev_s *dev,
 
       /* Convert the logical address to a physical OUT endpoint address and
        * remove all of the candidate endpoints from the bitset except for
-       * the the IN/OUT pair for this logical address.
+       * the IN/OUT pair for this logical address.
        */
 
       epset &= 3 << (eplog << 1);

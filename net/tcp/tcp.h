@@ -361,7 +361,7 @@ struct tcp_conn_s
   bool       zero_probe;   /* TCP zero window probe timer */
 
   /* connevents is a list of callbacks for each socket the uses this
-   * connection (there can be more that one in the event that the the socket
+   * connection (there can be more that one in the event that the socket
    * was dup'ed).  It is used with the network monitor to handle
    * asynchronous loss-of-connection events.
    */

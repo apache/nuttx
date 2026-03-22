@@ -5,7 +5,7 @@ CROMFS
 Overview
 ========
 
-This directory contains the the CROMFS file system.  This is an in-memory
+This directory contains the CROMFS file system.  This is an in-memory
 (meaning no block driver), read-only (meaning that can lie in FLASH) file
 system.  It uses LZF decompression on data only (meta data is not
 compressed).
@@ -140,7 +140,7 @@ system are presented by other types of nodes:  hard links, directories, and
 files.  These nodes are all described in fs/cromfs/cromfs.h.
 
 In addition to general volume information, the volume node provides an
-offset to the the "root directory".  The root directory, like all other
+offset to the "root directory".  The root directory, like all other
 CROMFS directories is simply a singly linked list of other nodes:  hard link
 nodes, directory nodes, and files.  This list is managed by "peer offsets":
 Each node in the directory contains an offset to its peer in the same

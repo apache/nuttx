@@ -102,7 +102,7 @@ For the upper half driver:
 
 And for the lower half driver:
 
-* The lower-half side of the interface to the the upper-half driver, and
+* The lower-half side of the interface to the upper-half driver, and
 
 * The low-level interface to the hardware that is managed by the lower half
   device driver.

@@ -290,7 +290,7 @@ must be is one of the following.
 dhtxx
 -----
 
-Configuration added by Abdelatif Guettouche for testing the the DHTxx
+Configuration added by Abdelatif Guettouche for testing the DHTxx
 sensor.  This configuration expects this setup::
 
       DHTXX_PIN_OUTPUT   PG9

@@ -68,6 +68,6 @@ The only way to avoid this header file inclusion trap is:
 
 * Never include architecture-specific header files in the ``board.h`` header file. 
   Instead,
-* Include the header files needed by the the ``board.h`` header file in the C file 
+* Include the header files needed by the ``board.h`` header file in the C file 
   that includes ``board.h``
 * Make sure that ``board.h`` is the last header file included.

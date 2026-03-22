@@ -126,7 +126,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
   if (tcb->task_state >= FIRST_BLOCKED_STATE &&
       tcb->task_state <= LAST_BLOCKED_STATE)
     {
-      /* Remove the TCB from the the blocked task list. */
+      /* Remove the TCB from the blocked task list. */
 
       nxsched_remove_blocked(tcb);
 

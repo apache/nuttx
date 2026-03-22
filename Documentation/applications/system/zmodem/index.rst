@@ -50,7 +50,7 @@ On NuttX you will have to use hardware flow control in most cases.
 
 The ``XON`` / ``XOFF`` controls built into ZModem could be used if you enabled
 software flow control in the host. But that would only work in one direction: If
-would prevent the host from overrunning the the target Rx buffering. So you
+would prevent the host from overrunning the target Rx buffering. So you
 should be able to do host-to-target software flow control. But there would still
 be no target-to-host flow control. That might not be an issue because the host
 is usually so much faster than the target.

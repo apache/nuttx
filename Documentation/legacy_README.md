@@ -273,7 +273,7 @@ Perhaps a minimum set would be those packages listed below for the
 Cygwin configuration:
 
    1. After starting the Cygwin installer, keep the recommended
-      packages that are pre-selected in the default configuration.
+      packages that are preselected in the default configuration.
 
    2. Using the installation tools, add the following packages:
 
@@ -1258,7 +1258,7 @@ settings, you should run the following after configuring:
 
     make olddefconfig
 
-That will restore the the missing defaulted values.
+That will restore the missing defaulted values.
 
 Using this command after configuring is generally a good practice anyway:
 Even if the `defconfig` files are not "compressed" in this fashion, the
@@ -1331,7 +1331,7 @@ damage your configuration (see
   <http://uvc.de/posts/linux-kernel-configuration-tool-kconfig-under-windows.html>
 
   The configuration steps of the most recent versions of NuttX require the
-  `kconfig-tweak` tool that is not not available in the the above.  However,
+  `kconfig-tweak` tool that is not not available in the above.  However,
   there has been an update to this `Kconfig` Windows tools that does include
   `kconfig-tweak`:  http://reclonelabs.com/more-kconfig-awesomeness-for-windows/
 

@@ -4770,7 +4770,7 @@ static int imxrt_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* We must have exclusive access to the EHCI hardware and data structures.
    * This will prevent servicing any transfer completion events while we
-   * perform the the cancellation, but will not prevent DMA-related race
+   * perform the cancellation, but will not prevent DMA-related race
    * conditions.
    *
    * REVISIT: This won't work.  This function must be callable from the

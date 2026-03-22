@@ -430,7 +430,7 @@ static void esp_mcpwm_group_start(void)
  * Description:
  *   Configures the MCPWM operator and generator, setting the PWM clock and
  *   output pins.
- *   If required, also configures fault detection. When done, sets the the
+ *   If required, also configures fault detection. When done, sets the
  *   motor state to IDLE.
  *
  * Input Parameters:

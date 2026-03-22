@@ -44,7 +44,7 @@ to filter those out and reduce the size to the number of
 supported interrupts.
 
 For example, if the actual number of interrupts used were 
-20, the the above requirement would go from 800 bytes to 
+20, the above requirement would go from 800 bytes to 
 160 bytes.
 
 Software IRQ Remapping

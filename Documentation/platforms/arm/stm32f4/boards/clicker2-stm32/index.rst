@@ -527,7 +527,7 @@ NOTES:
          nsh> telnetd
 
    Note the 'ifconfig' is executed to get the IP address of the node.
-   This is necessary because the IP address is assigned by the the
+   This is necessary because the IP address is assigned by the
    Coordinator and may not be known a priori.
 
 10. This configuration also includes the Telnet client program.  This

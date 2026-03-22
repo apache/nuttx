@@ -69,7 +69,7 @@
  * .bss in some RAM.  We refer to that RAM as the primary RAM.  It also
  * holds the IDLE threads stack and any remaining portion of the primary
  * OCRAM is automatically added to the heap.  The linker provided address,
- * ... .sbss, .ebss, .sdat, etc. ...  are expected to lie in the the region
+ * ... .sbss, .ebss, .sdat, etc. ...  are expected to lie in the region
  * defined by the OCRAM configuration settings.
  *
  * Other RAM regions must be selected use configuration options and the

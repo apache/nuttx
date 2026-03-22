@@ -2330,7 +2330,7 @@ errout:
  *
  * Description:
  *   Enable/disable of a set of SD card callback events.  This is part of
- *   the the SD card callback sequence.  The set of events is configured to
+ *   the SD card callback sequence.  The set of events is configured to
  *   enabled callbacks to the function provided in lpc54_registercallback.
  *
  *   Events are automatically disabled once the callback is performed and no

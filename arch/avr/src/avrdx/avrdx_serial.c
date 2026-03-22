@@ -339,7 +339,7 @@ static void avrdx_usart_shutdown(struct uart_dev_s *dev)
  * Description:
  *   Configure the USART to operate in interrupt driven mode.  This method
  *   is called when the serial port is opened.  Normally, this is just after
- *   the the setup() method is called, however, the serial console may
+ *   the setup() method is called, however, the serial console may
  *   operate in a non-interrupt driven mode during the boot phase.
  *
  *   RX and TX interrupts are not enabled when the attach method is executed

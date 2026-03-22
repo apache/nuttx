@@ -23,7 +23,7 @@ and for ON Semiconductor's **LC823450XGEVK board**:
    it is applicable to portable audio markets such as Wireless headsets
    and will show high performance.
 
-Further information about the LC823450XGEVK is available on from the the
+Further information about the LC823450XGEVK is available on from the
 `ON
 Semiconductor <http://www.onsemi.com/PowerSolutions/evalBoard.do?id=LC823450XGEVK>`__
 website as are LC823450 `related technical

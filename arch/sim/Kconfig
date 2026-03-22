@@ -312,7 +312,7 @@ config SIM_WIFIDEV_PSEUDO
 	bool "Use the Simulated Wi-Fi devices"
 	depends on DRIVERS_WIFI_SIM
 	---help---
-		Use the the Simulated Wi-Fi devices, which are supported by the bss file.
+		Use the Simulated Wi-Fi devices, which are supported by the bss file.
 endchoice
 
 endif

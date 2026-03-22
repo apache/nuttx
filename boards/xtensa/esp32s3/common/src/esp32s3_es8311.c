@@ -154,7 +154,7 @@ int esp32s3_es8311_initialize(struct i2c_master_s *i2c, uint8_t i2c_addr,
       ret = audio_register("pcm0", es8311);
 #else
       /* Now we can embed the ES8311/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the ES8311
+       * instance so that we will have a PCM front end for the ES8311
        * driver.
        */
 

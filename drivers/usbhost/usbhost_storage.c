@@ -1235,7 +1235,7 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       /* Send TESTUNITREADY to see if the unit is ready.  The most likely
        * error error that can occur here is a a stall which simply means
-       * that the the device is not yet able to respond.
+       * that the device is not yet able to respond.
        */
 
       ret = usbhost_testunitready(priv);

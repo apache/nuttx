@@ -653,7 +653,7 @@ void nxbe_move(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map (window coordinate frame).
+ *            receive the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -684,7 +684,7 @@ void nxbe_bitmap_dev(FAR struct nxbe_window_s *wnd,
  * Input Parameters:
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region on the display that will
- *            receive the the bit map (window coordinate frame).
+ *            receive the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however, origin
@@ -721,7 +721,7 @@ void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
  * Input Parameters (same as for nxbe_bitmap_dev):
  *   wnd    - The window that will receive the bitmap image
  *   dest   - Describes the rectangular region in the window that will
- *            receive the the bit map (window coordinate frame).
+ *            receive the bit map (window coordinate frame).
  *   src    - The start of the source image.
  *   origin - The origin of the upper, left-most corner of the full bitmap.
  *            Both dest and origin are in window coordinates, however,

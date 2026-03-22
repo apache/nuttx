@@ -79,7 +79,7 @@
  * Name: s32k1xx_get_pclkctrl
  *
  * Description:
- *   Given a clock name, this functions returns the address the the PCC
+ *   Given a clock name, this functions returns the address the PCC
  *   control register for the peripheral.
  *
  * Input Parameters:

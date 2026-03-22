@@ -330,7 +330,7 @@ int stm32_cs43l22_initialize(int minor)
         }
 
       /* No we can embed the CS43L22/I2C/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the CS43L22
+       * instance so that we will have a PCM front end for the CS43L22
        * driver.
        */
 

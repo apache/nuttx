@@ -104,7 +104,7 @@ Main Menu
   - Twm4Nx Icom Manager. De-iconify and/or raise the Icon Manager to the top of
     the display.
   - Calibration. Perform touchscreen re-calibration.
-  - Clock. Start and instance of clock in the window. The uses the the retro,
+  - Clock. Start and instance of clock in the window. The uses the retro,
     LCD emulation of ``apps/graphics/slcd``.
   - NuttShell. Start and instance of NSH running in an NxTerm.
 
@@ -340,7 +340,7 @@ The ``createWindow()`` method requires four parameters:
 
 1. The name of the window. This is the name that is show in the window toolbar
     and may be the same name as was used in the Main Menu entry.
-2. A reference to the the Icon image associated with the window. This is the
+2. A reference to the Icon image associated with the window. This is the
     image that is show on the desktop when the window is iconified. It is of
     type ``NXWidgets::SRlePaletteBitmap``.
 3. A pointer to the Icon Manager instance that this window belongs with. This

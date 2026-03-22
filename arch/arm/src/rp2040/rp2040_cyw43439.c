@@ -429,7 +429,7 @@ static int my_write(struct gspi_dev_s   *gspi,
    * any data.
    *
    * This is slightly magical.  The way we load the X is to first
-   * push the the number of bits to transmit onto the transmit fifo.
+   * push the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes
@@ -644,7 +644,7 @@ static int my_read(struct gspi_dev_s   *gspi,
    * pio program will be sure to autopush the final data to the output fifo.
    *
    * This is slightly magical.  The way we load the X is to first
-   * push the the number of bits to transmit onto the transmit fifo.
+   * push the number of bits to transmit onto the transmit fifo.
    * Then we force the PIO state machine to execute the instruction
    * "out x, 32" which transfers the word from the output shift
    * register (OSR) to the X register.  When this instruction executes

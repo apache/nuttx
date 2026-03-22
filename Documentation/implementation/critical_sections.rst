@@ -405,7 +405,7 @@ IRQ Monitor is beyond the scope of this page. Suffice it to say:
   interrupt handler until exit from the interrupt handler.
 
 From this information we can calculate the worst case response time from
-interrupt request until a task runs that can process the the interrupt.
+interrupt request until a task runs that can process the interrupt.
 That worst cast response time, ``Tresp``, is given by:
 
 * ``Tresp1 = Tcrit + Tintr + C1``

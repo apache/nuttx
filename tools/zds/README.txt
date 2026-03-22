@@ -9,7 +9,7 @@ tools/zds/zdsar.c:  This is a wrapper around the ZDS_II librarian.  It
 
 tools/zds/Config.mk:  This makefile fragment is include by ZDS-II Make.defs
   files after including tools/Config.mk.  The definitions in this file
-  override some of the the definitions in tools/Config.mk to customize the
+  override some of the definitions in tools/Config.mk to customize the
   build for use with the ZDS-II tools.
 
 These tools should work with all ZDS-II based platforms including z8, zNeo,

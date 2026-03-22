@@ -28,7 +28,7 @@ You can use AtmelStudio6.1 to load and debug code.
 LEDs
 ====
 
-The SAM3U-EK board has four LEDs labeled LD1, LD2, LD3 and LD4 on the the board.
+The SAM3U-EK board has four LEDs labeled LD1, LD2, LD3 and LD4 on the board.
 Usage of these LEDs is defined in ``include/board.h`` and ``src/up_leds.c``. They are
 encoded as follows:
 

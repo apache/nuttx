@@ -2519,7 +2519,7 @@ clock_t nxsched_get_next_expired(void);
  * Description:
  *   Collect data that can be used for CPU load measurements.  When
  *   CONFIG_SCHED_CPULOAD_EXTCLK is defined, this is an exported interface,
- *   use the the external clock logic.  Otherwise, it is an OS internal
+ *   use the external clock logic.  Otherwise, it is an OS internal
  *   interface.
  *
  * Input Parameters:

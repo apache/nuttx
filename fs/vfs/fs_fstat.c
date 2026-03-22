@@ -48,7 +48,7 @@
  *   Check for special cases where the character driver is really just a
  *   proxy for the real, underlying MTD or block driver.
  *
- *   NOTE:  This must be done here rather than in the the common
+ *   NOTE:  This must be done here rather than in the common
  *   inode_stat() function because the filep reference must be available
  *   in order to call the character driver ioctl method.
  *

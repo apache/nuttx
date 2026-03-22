@@ -500,7 +500,7 @@ static void mac802154_notify_worker(FAR void *arg)
  *    uses the various MAC attributes to update the beacon frame. It loads
  *    the inactive beacon frame structure and then notifies the radio layer
  *    new frame.  the provided tx descriptor in the indirect list and manages
- *    of the the scheduling for purging the transaction if it does not get
+ *    of the scheduling for purging the transaction if it does not get
  *    extracted in time.
  *
  * Assumptions:
