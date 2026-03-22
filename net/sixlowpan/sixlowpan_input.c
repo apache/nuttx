@@ -722,7 +722,7 @@ static int sixlowpan_dispatch(FAR struct radio_driver_s *radio)
  *               must apply to all of the frames in the list.
  *
  * Returned Value:
- *   Zero (OK) is returned if the the frame was consumed; Otherwise a negated
+ *   Zero (OK) is returned if the frame was consumed; Otherwise a negated
  *   errno value is returned.
  *
  ****************************************************************************/

@@ -1684,7 +1684,7 @@ static int mtdconfig_ioctl(FAR struct file *filep, int cmd,
 
       case CFGDIOC_FIRSTCONFIG:
 
-        /* Get the the first config item */
+        /* Get the first config item */
 
         pdata = (FAR struct config_data_s *)arg;
         ret = mtdconfig_firstconfig(dev, pdata);

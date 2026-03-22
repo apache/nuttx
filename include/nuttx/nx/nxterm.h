@@ -202,7 +202,7 @@
  * CONFIGURATION: CONFIG_NXTERM_NXKBDIN
  *
  * CMD:           NXTERMIOC_NXTERM_RESIZE
- * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
+ * DESCRIPTION:   Inform NxTerm keyboard the size of the window has
  *                changed
  * ARG:           A reference readable instance of struct nxtermioc_resize_s
  * CONFIGURATION: CONFIG_NXTERM

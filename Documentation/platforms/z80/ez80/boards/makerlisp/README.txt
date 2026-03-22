@@ -300,7 +300,7 @@ Configuration Subdirectories
        performance because of the zero wait state SRAM implementation.
 
     2. A serial console is provided on UART0.  This configuration should work
-       with or without the the VGA and Keyboard adapter boards.  Normal
+       with or without the VGA and Keyboard adapter boards.  Normal
        connectivity is via host serial console connected through the USB
        serial console.
 

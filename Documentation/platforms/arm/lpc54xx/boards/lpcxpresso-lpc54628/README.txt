@@ -541,7 +541,7 @@ Configurations
     are just some issues/topics unique to the LPCXpresso-LPC54628 and/or
     this configuration.
 
-    1. There is a responsive-ness issue the the FT5x06 touchscreen controller.
+    1. There is a responsive-ness issue the FT5x06 touchscreen controller.
        The pin selected by the board designers will not support interrupts.
        Therefore, a fall-back polled mode is use.  This polled mode has
        significant inherent delays that effect the user experience when

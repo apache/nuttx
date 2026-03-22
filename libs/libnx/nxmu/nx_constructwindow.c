@@ -46,7 +46,7 @@
  * Description:
  *   This function is the same a nx_openwindow EXCEPT that the client
  *   provides the window structure instance.  nx_constructwindow will
- *   initialize the the pre-allocated window structure for use by NX.
+ *   initialize the pre-allocated window structure for use by NX.
  *   This function is provided in addition to nx_openwindow in order
  *   to support a kind of inheritance:  The caller's window structure
  *   may include extensions that are not visible to NX.

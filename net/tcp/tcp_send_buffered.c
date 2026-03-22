@@ -1509,7 +1509,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * It makes sense to save the number of IOBs.)
            *
            * Also, for simplicity, do it only when we haven't sent anything
-           * from the the wrb yet.
+           * from the wrb yet.
            */
 
           max_wrb_size = tcp_max_wrb_size(conn);

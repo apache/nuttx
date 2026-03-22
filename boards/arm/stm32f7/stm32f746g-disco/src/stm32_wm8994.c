@@ -274,7 +274,7 @@ int stm32_wm8994_initialize(int minor)
         }
 
       /* No we can embed the WM8994/I2C/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the WM8994
+       * instance so that we will have a PCM front end for the WM8994
        * driver.
        */
 

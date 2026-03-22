@@ -185,7 +185,7 @@ struct sock_intf_s
 
 /* Each socket refers to a connection structure of type FAR void *.  Each
  * socket type will have a different connection structure type bound to its
- * sockets.  The fields at the the beginning of each connection type must
+ * sockets.  The fields at the beginning of each connection type must
  * begin the same content prologue as struct socket_conn_s and must be cast
  * compatible with struct socket_conn_s.  Connection-specific content may
  * then follow the common prologue fields.

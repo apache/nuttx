@@ -415,7 +415,7 @@ static void pmp_read(uintptr_t region, pmp_entry_t * entry)
  *   base - The base address of the region.
  *   size - The memory length of the region.
  *   For the NAPOT mode, the base address must aligned to the size boundary,
- *   and the size must be power-of-two according to the the PMP spec.
+ *   and the size must be power-of-two according to the PMP spec.
  *
  * Returned Value:
  *   0 on success; negated error on failure
@@ -593,7 +593,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
  *   base - The base address of the region.
  *   size - The memory length of the region.
  *   For the NAPOT mode, the base address must aligned to the size boundary,
- *   and the size must be power-of-two according to the the PMP spec.
+ *   and the size must be power-of-two according to the PMP spec.
  *
  * Returned Value:
  *   0 if access rights are not set at all

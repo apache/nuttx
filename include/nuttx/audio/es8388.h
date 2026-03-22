@@ -49,7 +49,7 @@
  *   worker thread.
  * CONFIG_ES8388_BUFFER_SIZE - Preferred buffer size
  * CONFIG_ES8388_NUM_BUFFERS - Preferred number of buffers
- * CONFIG_ES8388_WORKER_STACKSIZE - Stack size to use when creating the the
+ * CONFIG_ES8388_WORKER_STACKSIZE - Stack size to use when creating the
  *   ES8388 worker thread.
  * CONFIG_ES8388_REGDUMP - Enable logic to dump all ES8388 registers to
  *   the SYSLOG device.

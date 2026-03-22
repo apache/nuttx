@@ -122,7 +122,7 @@ start this daemon. There are two ways that this can be done:
 
 #. The NX server may be started in your board startup logic by simply
    calling the function ``nxmu_start()``. The board startup logic
-   usually resides the the ``boards/arch/chip/board/src`` directory. The
+   usually resides the ``boards/arch/chip/board/src`` directory. The
    board startup logic can run automatically during the early system if
    ``CONFIG_BOARD_LATE_INITIALIZE`` is defined in the configuration. Or,
    the board startup logic can execute under control of the application

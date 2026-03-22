@@ -86,7 +86,7 @@ static ssize_t smbus_sbd_write(struct file *filep, const char *buffer,
  * Private Data
  ****************************************************************************/
 
-/* Valid operations that can be performed on the the SMBus Smart Battery Data
+/* Valid operations that can be performed on the SMBus Smart Battery Data
  * slave character device:
  */
 

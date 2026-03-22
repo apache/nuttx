@@ -490,7 +490,7 @@ USB connection by means of the CP2102N bridge, at 115200 bps).
 nxrecorder
 ----------
 
-This configuration is used to record raw audio from the the ES8388 audio codec
+This configuration is used to record raw audio from the ES8388 audio codec
 through the I2S0 peripheral to a FAT32 SD Card. By default the audio is recorded from
 the on-board microphones.
 For the ESP32-LyraT, make sure the DIP switches 1 and 2 are turned to the ON position.

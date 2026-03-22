@@ -27,7 +27,7 @@ A context switch works just like setjmp (save a set of registers) and longjmp
 (restore a set of registers), except that more registers are saved and restored.
 
 
-For the the ARMv7-M, as an example, you can see the set of registers that are
+For the ARMv7-M, as an example, you can see the set of registers that are
 stored in ``arch/arm/include/armv7-m/irq.h``
 
 Among those registers are saved and restore are the register(s) that determine if

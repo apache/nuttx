@@ -172,7 +172,7 @@ void nxsched_process_taskload_ticks(FAR struct tcb_s *tcb, clock_t ticks)
  * Description:
  *   Collect data that can be used for CPU load measurements.  When
  *   CONFIG_SCHED_CPULOAD_EXTCLK is defined, this is an exported interface,
- *   use the the external clock logic.  Otherwise, it is an OS Internal
+ *   use the external clock logic.  Otherwise, it is an OS Internal
  *   interface.
  *
  * Input Parameters:

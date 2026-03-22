@@ -266,7 +266,7 @@
 /* LCD_CAM_CAM_VH_DE_MODE_EN : R/W; bitpos: [28]; default: 0;
  * 1: Input control signals are CAM_DE CAM_HSYNC and CAM_VSYNC is 1. 0:
  * Input control signals are CAM_DE and CAM_VSYNC. CAM_HSYNC and CAM_DE are
- * all 1 the the same time.
+ * all 1 the same time.
  */
 
 #define LCD_CAM_CAM_VH_DE_MODE_EN    (BIT(28))

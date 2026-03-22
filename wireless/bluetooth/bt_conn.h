@@ -368,7 +368,7 @@ int bt_conn_disconnect(FAR struct bt_conn_s *conn, uint8_t reason);
  *
  * Description:
  *  Allows initiate new LE link to remote peer using its address.
- *  Returns a new reference that the the caller is responsible for managing.
+ *  Returns a new reference that the caller is responsible for managing.
  *
  * Input Parameters:
  *   peer - Remote address.

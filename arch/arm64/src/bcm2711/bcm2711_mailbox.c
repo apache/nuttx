@@ -277,7 +277,7 @@ static int bcm2711_mbox_sendreq(FAR uint32_t *buf, uint8_t n)
       return res;
     }
 
-  /* The mailbox _MUST_ return the the same buffer address, it is
+  /* The mailbox _MUST_ return the same buffer address, it is
    * not possible for it to do otherwise (according to raspberrypi/firmware
    * docs).
    */

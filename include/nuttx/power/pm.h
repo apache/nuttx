@@ -795,7 +795,7 @@ int pm_wakelock_staycount(FAR struct pm_wakelock_s *wakelock);
  *
  *   These two steps are separated because the platform-specific IDLE loop
  *   may have additional situational information that is not available to
- *   the the PM sub-system.  For example, the IDLE loop may know that the
+ *   the PM sub-system.  For example, the IDLE loop may know that the
  *   battery charge level is very low and may force lower power states
  *   even if there is activity.
  *

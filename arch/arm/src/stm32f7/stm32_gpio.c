@@ -254,7 +254,7 @@ int stm32_configgpio(uint32_t cfgset)
   putreg32(regval, base + STM32_GPIO_PUPDR_OFFSET);
 
   /* Set the alternate function (Only alternate function pins)
-   * This is done after configuring the the pin's connection
+   * This is done after configuring the pin's connection
    * on a change away from an Alternate function.
    */
 

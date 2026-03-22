@@ -331,7 +331,7 @@ int imxrt_dmach_xfrsetup(DMACH_HANDLE handle,
  *   interrupts will be generated with the final being the DONE interrupt.
  *
  *   At the conclusion of the DMA, the DMA channel is reset, all TCDs are
- *   freed, and the callback function is called with the the success/fail
+ *   freed, and the callback function is called with the success/fail
  *   result of the DMA.
  *
  *   NOTE: On Rx DMAs (peripheral-to-memory or memory-to-memory), it is
@@ -377,7 +377,7 @@ void imxrt_dmach_stop(DMACH_HANDLE handle);
  *
  * Description:
  *   This function checks the TCD (Task Control Descriptor) status for a
- *   specified eDMA channel and returns the the number of major loop counts
+ *   specified eDMA channel and returns the number of major loop counts
  *   that have not finished.
  *
  *   NOTES:

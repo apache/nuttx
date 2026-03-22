@@ -41,7 +41,7 @@ a reserved space for a pointer to it.
 The image compatible with nxboot bootloader can be uploaded both directly
 to the primary area via physical programmer as STlink or JTAG and to the
 update partition via some external application (over Ethernet, USB, CAN, etc.).
-The update and recovery slots can be located in the the primary flash as
+The update and recovery slots can be located in the primary flash as
 well, but this halts the program execution during write operations, so it is
 not recommended if external flash can be used. The uploaded image is detected
 by the bootloader during the next boot and update occurs.

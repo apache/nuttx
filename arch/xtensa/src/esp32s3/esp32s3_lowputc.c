@@ -540,7 +540,7 @@ void esp32s3_lowputc_baud(const struct esp32s3_uart_s *priv)
   modifyreg32(UART_CLKDIV_REG(priv->id), UART_CLKDIV_FRAG_M,
               (frag_part & UART_CLKDIV_FRAG_V) << UART_CLKDIV_FRAG_S);
 
-  /* Set the the integral part of the frequency divider factor. */
+  /* Set the integral part of the frequency divider factor. */
 
   modifyreg32(UART_CLK_CONF_REG(priv->id), UART_SCLK_DIV_NUM_M,
               (sclk_div - 1) << UART_SCLK_DIV_NUM_S);

@@ -2783,7 +2783,7 @@ config STM32F7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 	default n
 	---help---
 		This will cycle through the values from low to high. To avoid
-		damaging the the crystal. We want to use the lowest setting that gets
+		damaging the crystal. We want to use the lowest setting that gets
 		the OSC running. See app note AN2867
 
 			0 = Low drive capability (default)

@@ -1255,7 +1255,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       size_t nbytes = priv->data16 ? nwords << 1 : nwords;
 
-      /* We will dual-purpose the the Rx buffer, initialized to zero */
+      /* We will dual-purpose the Rx buffer, initialized to zero */
 
       memset(priv->rxbuffer, 0, nbytes);
       priv->txbuffer = priv->rxbuffer;

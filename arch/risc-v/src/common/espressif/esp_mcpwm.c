@@ -417,7 +417,7 @@ static struct mcpwm_cap_channel_lowerhalf_s mcpwm_cap_ch2_lowerhalf =
  * Description:
  *   Configures the MCPWM operator and generator, setting the PWM clock and
  *   output pins.
- *   If required, also configures fault detection. When done, sets the the
+ *   If required, also configures fault detection. When done, sets the
  *   motor state to IDLE.
  *
  * Input Parameters:

@@ -639,7 +639,7 @@ Status
  Ubuntu PC rather than an Ubuntu at VMWare. For Physical Ubuntu PC, the ostest
  was run for 10 times at least but the crash was never seen again, but it's
  almost crashed every time running the ostest at Virtual Ubuntu in VMWare
- Checking for the the fail point. It's seem at signal routine to access another
+ Checking for the fail point. It's seem at signal routine to access another
  CPU's task context reg will get a NULL pointer, but watch the task context with
  GDB, shows everything as OK. So maybe this is a SMP cache synchronize issue?
  But synchronize operations have been done at thread switch. It is hard to

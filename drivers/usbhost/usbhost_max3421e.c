@@ -1640,7 +1640,7 @@ static void max3421e_send_continue(FAR struct max3421e_usbhost_s *priv)
     }
 
   /* If the number inflight is exactly the maxpacket size and the transfer
-   * is not yet finished, then the the transfer size must have been max
+   * is not yet finished, then the transfer size must have been max
    * packet size.
    */
 

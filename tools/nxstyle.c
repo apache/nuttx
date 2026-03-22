@@ -1026,7 +1026,7 @@ static int block_comment_width(char *line)
   if (strncmp(&line[b], "/***", 4) == 0 &&
       strncmp(&line[e - 2], "***", 3) == 0)
     {
-      /* Return the the length of the line up to the final '*' */
+      /* Return the length of the line up to the final '*' */
 
       return e + 1;
     }
@@ -1038,7 +1038,7 @@ static int block_comment_width(char *line)
   if (strncmp(&line[b], "***", 3) == 0 &&
       strncmp(&line[e - 3], "***/", 4) == 0)
     {
-      /* Return the the length of the line up to the final '*' */
+      /* Return the length of the line up to the final '*' */
 
       return e;
     }
@@ -1050,7 +1050,7 @@ static int block_comment_width(char *line)
   if (strncmp(&line[b], "/*", 2) == 0 &&
       strncmp(&line[e - 3], "***/", 4) == 0)
     {
-      /* Return the the length of the line up to the final '*' */
+      /* Return the length of the line up to the final '*' */
 
       return e;
     }
@@ -2550,7 +2550,7 @@ int main(int argc, char **argv, char **envp)
             }
 
           /* Check if the line is blank so far.  This is only used to
-           * to verify the the closing of a block comment is on a separate
+           * to verify the closing of a block comment is on a separate
            * line.  So we also need to treat '*' as a 'blank'.
            */
 

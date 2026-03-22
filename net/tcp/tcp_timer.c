@@ -74,7 +74,7 @@
  *
  * NOTE:  We only have 0.5 timing resolution here so the delay will be
  * between 0.5 and 1.0 seconds, and may be delayed further, depending on the
- * polling rate of the the driver (often 1 second).
+ * polling rate of the driver (often 1 second).
  */
 
 #define ACK_DELAY (1)

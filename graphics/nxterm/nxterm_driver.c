@@ -432,7 +432,7 @@ int nxterm_ioctl_tap(int cmd, uintptr_t arg)
          break;
 
       /* CMD:           NXTERMIOC_NXTERM_RESIZE
-       * DESCRIPTION:   Inform NxTerm keyboard the the size of the window has
+       * DESCRIPTION:   Inform NxTerm keyboard the size of the window has
        *                changed
        * ARG:           A reference readable instance of struct
        *                nxtermioc_resize_s

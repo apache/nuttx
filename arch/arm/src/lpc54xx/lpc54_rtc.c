@@ -202,7 +202,7 @@ int up_rtc_settime(const struct timespec *tp)
 
   flags = enter_critical_section();
 
-  /* Make sure the the RTC is out of reset, but not enabled. */
+  /* Make sure the RTC is out of reset, but not enabled. */
 
   regval  = getreg32(LPC54_RTC_CTRL);
   regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_RTCEN | RTC_CTRL_RTC1KHZEN |
@@ -262,7 +262,7 @@ int lpc54_rtc_setalarm(const struct timespec *tp, alarmcb_t callback)
 
       g_alarmcb = callback;
 
-      /* Make sure the the RTC is out of reset. */
+      /* Make sure the RTC is out of reset. */
 
       regval  = getreg32(LPC54_RTC_CTRL);
       regval &= ~(RTC_CTRL_SWRESET | RTC_CTRL_ALARMDPDEN |

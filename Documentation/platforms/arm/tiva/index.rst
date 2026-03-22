@@ -174,7 +174,7 @@ currently code complete (minus some ROM *DriverLib* hooks) but untested.
 
 **TI LaunchXL-CC1312R1**. Basic board support for the TI
 LaunchXL-CC1312R1 board is in place. Board bring-up, however, cannot be
-done until the the basic CC13x2 architecture support is complete,
+done until the basic CC13x2 architecture support is complete,
 hopefully in NuttX-7.29.
 
 TI/Stellaris LM4F120x

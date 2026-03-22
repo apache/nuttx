@@ -148,7 +148,7 @@ int mpfs_mpu_set(uintptr_t reg, uintptr_t perm, uintptr_t base,
   uintptr_t mode;
   uintptr_t napot;
 
-  /* Read the the permission and napot fields */
+  /* Read the permission and napot fields */
 
   MPFS_MPUCFG_DECODE(reg, &mode, &napot);
 
@@ -226,7 +226,7 @@ bool mpfs_mpu_access_ok(uintptr_t reg, uintptr_t perm, uintptr_t base,
   uintptr_t reg_base;
   uintptr_t reg_size;
 
-  /* Read the the permission and napot fields */
+  /* Read the permission and napot fields */
 
   MPFS_MPUCFG_DECODE(reg, &mode, &napot);
 

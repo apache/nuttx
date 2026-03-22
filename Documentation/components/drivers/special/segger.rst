@@ -24,7 +24,7 @@ Segger SystemView
 
    :menuselection:`CONFIG_ARCH_PERF_EVENTS=y`
 
-   In that case, the the architecture logic must initialize the perf counter
+   In that case, the architecture logic must initialize the perf counter
    with ``up_perf_init()``.
 
 #. Enable instrumentation support:

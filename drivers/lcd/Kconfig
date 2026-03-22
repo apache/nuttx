@@ -1618,7 +1618,7 @@ config LCD_ILI9341_IFACE0_HEIGHT
 	int "Height of the display"
 	default 320
 	---help---
-		Define the the height of the display.
+		Define the height of the display.
 
 choice
 	prompt "LCD Orientation"
@@ -1679,7 +1679,7 @@ config LCD_ILI9341_IFACE1_HEIGHT
 	int "Height of the display"
 	default 320
 	---help---
-		Define the the height of the display.
+		Define the height of the display.
 
 choice
 	prompt "LCD Orientation"

@@ -703,7 +703,7 @@ static inline int usbclass_recvpacket(FAR struct pl2303_dev_s *priv,
   uint16_t nbytes = 0;
 
   /* Get the next head index. During the time that RX interrupts are
-   * disabled, the the serial driver will be extracting data from the
+   * disabled, the serial driver will be extracting data from the
    * circular buffer and modifying recv.tail.  During this time, we should
    * avoid modifying recv.head; Instead we will use a shadow copy of the
    * index.  When interrupts are restored, the real recv.head will be updated

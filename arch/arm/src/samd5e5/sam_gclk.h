@@ -152,7 +152,7 @@ void sam_gclk_chan_disable(uint8_t channel);
  *   channel - Index of the GCLK channel to be checked
  *
  * Returned Value:
- *   True if the the wrtlock bit is set in the channel's PCHCTRL register.
+ *   True if the wrtlock bit is set in the channel's PCHCTRL register.
  *
  ****************************************************************************/
 

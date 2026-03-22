@@ -49,7 +49,7 @@
  *   worker thread.
  * CONFIG_ES8311_BUFFER_SIZE - Preferred buffer size
  * CONFIG_ES8311_NUM_BUFFERS - Preferred number of buffers
- * CONFIG_ES8311_WORKER_STACKSIZE - Stack size to use when creating the the
+ * CONFIG_ES8311_WORKER_STACKSIZE - Stack size to use when creating the
  *   ES8311 worker thread.
  * CONFIG_ES8311_REGDUMP - Enable logic to dump all ES8311 registers to
  *   the SYSLOG device.

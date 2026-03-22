@@ -27,7 +27,7 @@ STM32 Memory Aliasing
 The STMicro STM32 family of Cortex-M3/4 MCUs do things a little differently.
 FLASH is physically addressed at address 0x0800:0000; the STM32 vector table
 is then physically located at 0x0800:0000 instead of 0x0000:0000. If the STM32
-hardware is configured to boot from FLASH, then the the STM32 will remap the
+hardware is configured to boot from FLASH, then the STM32 will remap the
 FLASH memory so that is aliased at address 0x0000:00000. In that way, the STM32
 can boot from FLASH or external memory or any other memory region that it is
 capable of mapping.

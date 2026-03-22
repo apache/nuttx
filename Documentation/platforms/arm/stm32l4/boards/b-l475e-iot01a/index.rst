@@ -282,7 +282,7 @@ NOTES:
             nsh> ifconfig wpan0 hw 37
 
       Where 37 the address is an example.  It should be different for
-      each radio, but in the the range 1..ed and ef..fe (ee and ff are
+      each radio, but in the range 1..ed and ef..fe (ee and ff are
       the reserved for multicast and broadcast addresses, respectively.
       Zero is a valid address but not recommended).
 

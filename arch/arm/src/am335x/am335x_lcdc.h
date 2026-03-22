@@ -211,7 +211,7 @@ struct am335x_panel_info_s
  *
  * Returned value:
  *   Zero (OK) is returned on success; a negated errno value is returned in
- *   the the case of a failure.
+ *   the case of a failure.
  *
  ****************************************************************************/
 

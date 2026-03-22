@@ -711,7 +711,7 @@ static ssize_t gs2200m_read(FAR struct file *filep, FAR char *buffer,
   ret = nxmutex_lock(&dev->dev_lock);
   if (ret < 0)
     {
-      /* Return if a signal is received or if the the task was canceled
+      /* Return if a signal is received or if the task was canceled
        * while we were waiting.
        */
 

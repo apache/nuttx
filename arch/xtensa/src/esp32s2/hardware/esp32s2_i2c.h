@@ -1981,7 +1981,7 @@
 #define I2C_DATE_REG(i) (REG_I2C_BASE(i) + 0xf8)
 
 /* I2C_DATE : R/W; bitpos: [31:0]; default: 419766272;
- * This is the the version control register.
+ * This is the version control register.
  */
 
 #define I2C_DATE    0xffffffff

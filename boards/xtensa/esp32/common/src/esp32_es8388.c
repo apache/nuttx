@@ -153,7 +153,7 @@ int esp32_es8388_initialize(int i2c_port, uint8_t i2c_addr, int i2c_freq,
         }
 
       /* Now we can embed the ES8388/I2S conglomerate into a PCM decoder
-       * instance so that we will have a PCM front end for the the ES8388
+       * instance so that we will have a PCM front end for the ES8388
        * driver.
        */
 

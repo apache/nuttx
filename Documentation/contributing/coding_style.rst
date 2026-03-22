@@ -1996,7 +1996,7 @@ different.
    brace of the ``if``-``else`` must be followed by a blank line in most
    cases (the exception given below). This may be the final brace of the
    ``if`` compound statement if the ``else`` keyword is not present. Or
-   it may be the the final brace of the ``else`` compound statement if
+   it may be the final brace of the ``else`` compound statement if
    present. A blank line never follows the right brace closing the
    ``if`` compound statement if the ``else`` keyword is present. Use of
    braces must follow all other standard rules for `braces and

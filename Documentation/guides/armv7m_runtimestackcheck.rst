@@ -43,7 +43,7 @@ function call can then corrupt the memory below the stack bottom, restores the
 stack pointer and returns to the caller without actually overwriting the 
 coloring at the base of the stack.
 
-This brings us the the next method of stack checking.
+This brings us the next method of stack checking.
 
 
 Per function Call

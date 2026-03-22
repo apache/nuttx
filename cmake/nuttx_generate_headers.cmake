@@ -150,8 +150,8 @@ endif()
 
 # Add final context target that ties together all of the above The context
 # target is invoked on each target build to assure that NuttX is properly
-# configured.  The basic configuration steps include creation of the the
-# config.h and version.h header files in the include/nuttx directory and the
+# configured.  The basic configuration steps include creation of the config.h
+# and version.h header files in the include/nuttx directory and the
 # establishment of symbolic links to configured directories.
 
 add_custom_target(

@@ -91,7 +91,7 @@ STATUS
     study the XOSC32K problem.
 
     With that workaround (and a bunch of other fixes), the basic NSH
-    configuration appears fully function, indicating the the board bring-
+    configuration appears fully function, indicating the board bring-
     up is complete.
 
     There are additional drivers ported from SAML21 which has, in most cases,

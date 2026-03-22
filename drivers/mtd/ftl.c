@@ -58,7 +58,7 @@
 #endif
 
 /* The maximum length of the device name paths is the maximum length of a
- * name plus 5 for the the length of "/dev/" and a NUL terminator.
+ * name plus 5 for the length of "/dev/" and a NUL terminator.
  */
 
 #define DEV_NAME_MAX    (NAME_MAX + 5)

@@ -520,7 +520,7 @@ static void tlsr82_adc_config(struct adc_chan_s *priv)
  * Name: tlsr82_adc_pin_config
  *
  * Description:
- *   Configure the the input pin as adc function, this function should be
+ *   Configure the input pin as adc function, this function should be
  *   called before used this pin as adc.
  *
  * Input Parameters:
@@ -550,7 +550,7 @@ static void tlsr82_adc_pin_config(uint32_t pinset)
  * Name: tlsr82_adc_chan_config
  *
  * Description:
- *   Configure the the input pin as the adc channel input, tlsr82 only have
+ *   Configure the input pin as the adc channel input, tlsr82 only have
  *   one adc conversion channel.
  *
  * Input Parameters:

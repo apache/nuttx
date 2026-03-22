@@ -479,7 +479,7 @@ static void max326_set_clksrc(const struct clock_setup_s *clksetup)
  * Name: max326_set_fwsdefault
  *
  * Description:
- *   Set the the FLASH wait states to the default value (5)
+ *   Set the FLASH wait states to the default value (5)
  *
  ****************************************************************************/
 
@@ -590,7 +590,7 @@ static void max326_periph_reset(void)
 
 void max326_clockconfig(const struct clock_setup_s *clksetup)
 {
-  /* Set the the FLASH wait states to the default value (5) */
+  /* Set the FLASH wait states to the default value (5) */
 
   max326_set_fwsdefault();
 
