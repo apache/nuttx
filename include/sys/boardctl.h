@@ -373,6 +373,9 @@ enum boardioc_usbdev_identifier_e
 #ifdef CONFIG_USBMSC
   , BOARDIOC_USBDEV_MSC           /* Mass storage class */
 #endif
+#ifdef CONFIG_USBUVC
+  , BOARDIOC_USBDEV_UVC           /* USB Video Class */
+#endif
 #ifdef CONFIG_USBDEV_COMPOSITE
   , BOARDIOC_USBDEV_COMPOSITE     /* Composite device */
 #endif

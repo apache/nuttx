@@ -948,6 +948,51 @@ config USBADB_INTERFACESTR
 
 endif # USBADB
 
+menuconfig USBUVC
+	bool "USB Video Class (UVC) gadget support"
+	default n
+	depends on USBDEV
+	---help---
+		Enables USB Video Class (UVC) gadget device support.
+		The device appears as a USB webcam to the host.
+
+if USBUVC
+
+config USBUVC_COMPOSITE
+	bool "UVC composite support"
+	default n
+	depends on USBDEV_COMPOSITE
+	---help---
+		Configure the UVC driver as part of a composite USB device.
+		When enabled, the UVC gadget can be combined with other USB
+		class drivers (e.g., CDC/ACM) in a single composite device.
+
+if !USBUVC_COMPOSITE
+
+config USBUVC_EPBULKIN
+	int "Bulk IN endpoint number"
+	default 1
+
+config USBUVC_EP0MAXPACKET
+	int "Max packet size for EP0"
+	default 64
+
+endif # !USBUVC_COMPOSITE
+
+config USBUVC_EPBULKIN_FSSIZE
+	int "Bulk IN full-speed max packet size"
+	default 64
+
+config USBUVC_NWRREQS
+	int "Number of write requests"
+	default 4
+
+config USBUVC_NPOLLWAITERS
+	int "Number of poll waiters"
+	default 2
+
+endif # USBUVC
+
 menuconfig USBMSC
 	bool "USB Mass storage class device"
 	default n
