@@ -57,6 +57,10 @@
 #include "stm32_bmp280.h"
 #endif
 
+#ifdef CONFIG_USERLED
+#  include <nuttx/leds/userled.h>
+#endif
+
 #ifdef CONFIG_SENSORS_MPU9250
 #include "stm32_mpu9250.h"
 #endif
@@ -244,6 +248,16 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_USERLED
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 
