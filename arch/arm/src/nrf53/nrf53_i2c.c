@@ -195,7 +195,7 @@ static struct nrf53_i2c_priv_s g_nrf53_i2c2_priv =
 static struct nrf53_i2c_priv_s g_nrf53_i2c3_priv =
 {
   .ops     = &g_nrf53_i2c_ops,
-  .base    = NRF53_TWIM2_BASE,
+  .base    = NRF53_TWIM3_BASE,
   .scl_pin = BOARD_I2C3_SCL_PIN,
   .sda_pin = BOARD_I2C3_SDA_PIN,
   .refs    = 0,
