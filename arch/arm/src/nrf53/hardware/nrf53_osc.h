@@ -48,6 +48,9 @@
 
 /* Register bit definitions *************************************************/
 
+#define OSC_XOSC32MCAPS_CAPVALUE_MASK  (0x1f)
+#define OSC_XOSC32MCAPS_ENABLE         (1 << 8)
+
 #define OSC_XOSC32KI_INTCAP_SHIFT      (0)
 #define OSC_XOSC32KI_INTCAP_MASK       (0x3 << OSC_XOSC32KI_INTCAP_SHIFT)
 #  define OSC_XOSC32KI_INTCAP_EXT      (0x0 << OSC_XOSC32KI_INTCAP_SHIFT)

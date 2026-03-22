@@ -47,6 +47,7 @@
 #define NRF53_FICR_INFO_CODEPAGESIZE_OFFSET 0x220  /* Code memory page size in bytes */
 #define NRF53_FICR_INFO_CODESIZE_OFFSET     0x224  /* Code memory size  */
 #define NRF53_FICR_INFO_DEVICETYPE_OFFSET   0x228  /* Device type */
+#define NRF53_FICR_XOSC32MTRIM_OFFSET       0xc20  /* XOSC32M capacitor selection trim values */
                                                    /* TODO */
 
 /* FICR Register Addresses *************************************************/
@@ -62,7 +63,14 @@
 #define NRF53_FICR_INFO_CODEPAGESIZE        (NRF53_FICR_BASE + NRF53_FICR_INFO_CODEPAGESIZE_OFFSET)
 #define NRF53_FICR_INFO_CODESIZE            (NRF53_FICR_BASE + NRF53_FICR_INFO_CODESIZE_OFFSET)
 #define NRF53_FICR_INFO_DEVICETYPE          (NRF53_FICR_BASE + NRF53_FICR_INFO_DEVICETYPE_OFFSET)
+#define NRF53_FICR_XOSC32MTRIM              (NRF53_FICR_BASE + NRF53_FICR_XOSC32MTRIM_OFFSET)
 
 /* TODO */
+
+/* XOSC32M capacitor selection trim values */
+
+#define FICR_XOSC32MTRIM_OFFSET_MASK        (0x1f)
+#define FICR_XOSC32MTRIM_SLOPE_SHIFT        (5)
+#define FICR_XOSC32MTRIM_SLOPE_MASK         (0x1f << FICR_XOSC32MTRIM_SLOPE_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_NRF53_HARDWARE_NRF53_FICR_CPUAPP_H */
