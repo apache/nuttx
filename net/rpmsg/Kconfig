@@ -51,12 +51,11 @@ config NET_RPMSG_NPOLLWAITERS
 config NET_RPMSG_EPT_PRIORITY
 	int "RPMSG socket endpoint priority"
 	default 127
-	range 0 254
+	range 0 255
 	---help---
 		Default priority of the rpmsg endpoint of every rpmsg socket.
-		SO_PRIORITY overrides it per socket.  255 (RPMSG_PRIO_RT) is
-		reserved and runs the endpoint callback in interrupt context,
-		which the socket code does not support.
+		SO_PRIORITY overrides it per socket.  255 (RPMSG_PRIO_RT) runs
+		the endpoint callback directly in interrupt context.
 
 endif # NET_RPMSG
 
