@@ -66,7 +66,6 @@ uint32_t k210_get_cpuclk(void)
  * Name: k210_get_pll0clk
  ****************************************************************************/
 
-#ifndef CONFIG_K210_WITH_QEMU
 uint32_t k210_get_pll0clk(void)
 {
   uint32_t pll0;
@@ -81,7 +80,6 @@ uint32_t k210_get_pll0clk(void)
 
   return OSC_FREQ / nr * nf / od;
 }
-#endif
 
 /****************************************************************************
  * Name: k210_clockconfig
@@ -89,7 +87,6 @@ uint32_t k210_get_pll0clk(void)
 
 void k210_clockconfig(void)
 {
-#ifndef CONFIG_K210_WITH_QEMU
   uint32_t clksel0;
   uint32_t div;
 
@@ -133,5 +130,4 @@ void k210_clockconfig(void)
   /* Workaround for stabilization */
 
   up_udelay(1);
-#endif
 }

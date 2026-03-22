@@ -46,11 +46,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_K210_WITH_QEMU
-#define MTIMER_FREQ 1000000
-#else
 #define MTIMER_FREQ (k210_get_cpuclk() / 50)
-#endif
 
 /****************************************************************************
  * Public Functions

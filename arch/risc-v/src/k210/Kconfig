@@ -50,11 +50,3 @@ config K210_CPU_FREQ
 		Set the K210 CPU target frequency in Hz.
 		Default is 400000000 (400 MHz).
 		Valid range: 40000000-600000000 Hz (40-600 MHz).
-
-menu "K210 Others"
-
-config K210_WITH_QEMU
-	bool "qemu support"
-	default n
-
-endmenu
