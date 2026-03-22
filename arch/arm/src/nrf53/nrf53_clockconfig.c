@@ -36,6 +36,7 @@
 #include "nrf53_clockconfig.h"
 #include "hardware/nrf53_clock.h"
 #include "hardware/nrf53_power.h"
+#include "hardware/nrf53_regulators.h"
 #include "hardware/nrf53_gpio.h"
 
 #ifdef CONFIG_NRF53_APPCORE
@@ -129,5 +130,11 @@ void nrf53_clockconfig(void)
     {
       /* Wait for HFCLK192M to be running */
     }
+#endif
+
+#ifdef CONFIG_NRF53_DCDC
+  /* Enable DC/DC regulator */
+
+  putreg32(1, NRF53_REGULATORS_MAINDCDCEN);
 #endif
 }
