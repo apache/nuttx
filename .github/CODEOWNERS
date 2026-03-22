@@ -687,7 +687,6 @@ Documentation/platforms/risc-v/hpm6750/index.rst raiden00@railab.me
 Documentation/platforms/risc-v/index.rst matias@protobits.dev
 Documentation/platforms/risc-v/jh7110/boards/star64/index.rst luppy@appkaki.com
 Documentation/platforms/risc-v/jh7110/index.rst luppy@appkaki.com
-Documentation/platforms/risc-v/k210/boards/maix-bit/README-qemu.txt raiden00@railab.me
 Documentation/platforms/risc-v/k210/boards/maix-bit/README.txt raiden00@railab.me
 Documentation/platforms/risc-v/k210/boards/maix-bit/index.rst raiden00@railab.me
 Documentation/platforms/risc-v/k210/index.rst raiden00@railab.me

@@ -30,7 +30,7 @@ Features
 
 .. todo::
 
-   If you are intersted in using this board, please consider contributing
+   If you are interested in using this board, please consider contributing
    implementations for the above missing features.
 
 Installation
@@ -76,51 +76,6 @@ Write ``nuttx.bin`` to SPI-Flash:
 .. note::
 
    The ``kflash_gui`` is not recommended because it's unstable.
-
-QEMU Process
-============
-
-In order to run this board's version of NuttX on QEMU, make the following
-adjustments:
-
-QEMU Installation
------------------
-
-Installing and building QEMU can be done with:
-
-.. code:: console
-
-   $ git clone https://github.com/qemu/qemu
-   $ cd qemu
-   $ ./configure --target-list=riscv64-softmmu
-   $ make
-   $ sudo make install
-
-Building NuttX for QEMU
------------------------
-
-Building NuttX follows the same process, but you will need to modify your chosen
-configuration to include the option ``CONFIG_K210_WITH_QEMU=y``.
-
-Running on QEMU
----------------
-
-Run the following:
-
-.. code:: console
-
-   $ qemu-system-riscv64 -nographic -machine sifive_u -bios ./nuttx
-
-
-.. note::
-
-   To run Nuttx for kostest, ``gdb`` needs to be used to load both
-   ``nuttx_user.elf`` and ``nuttx``.
-
-   .. code:: console
-
-      $ qemu-system-riscv64 -nographic -machine sifive_u -s -S
-      $ riscv64-unknown-elf-gdb -ex 'target extended-remote:1234' -ex 'load nuttx_user.elf' -ex 'load nuttx' -ex 'c'
 
 Configurations
 ==============
