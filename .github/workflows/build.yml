@@ -97,8 +97,8 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v6
         with:
-          repository: apache/nuttx
-          ref: ${{ steps.gittargets.outputs.os_ref }}
+          repository: lupyuen13/nuttx
+          ref: retry-build
           path: sources/nuttx
           fetch-depth: 1
       - name: Checkout nuttx repo tags
