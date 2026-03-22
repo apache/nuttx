@@ -44,6 +44,7 @@ following section.
   syslog.rst
   sdio.rst
   usbdev.rst
+  uvc.rst
   usbhost.rst
   usbmisc.rst
   usbmonitor.rst

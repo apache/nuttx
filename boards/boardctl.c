@@ -56,6 +56,7 @@
 #  include <nuttx/usb/cdcacm.h>
 #  include <nuttx/usb/pl2303.h>
 #  include <nuttx/usb/usbmsc.h>
+#  include <nuttx/usb/uvc.h>
 #  include <nuttx/usb/composite.h>
 #endif
 
@@ -196,6 +197,44 @@ static inline int
               {
                 DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
                 usbmsc_uninitialize(*ctrl->handle);
+              }
+              break;
+
+            default:
+              ret = -EINVAL;
+              break;
+          }
+        break;
+#endif
+
+#if defined(CONFIG_USBUVC) && !defined(CONFIG_USBUVC_COMPOSITE)
+      case BOARDIOC_USBDEV_UVC:              /* UVC class */
+        switch (ctrl->action)
+          {
+            case BOARDIOC_USBDEV_INITIALIZE: /* Initialize UVC device */
+              break;
+
+            case BOARDIOC_USBDEV_CONNECT:    /* Connect the UVC device */
+              {
+                FAR const struct uvc_params_s *params;
+
+                DEBUGASSERT(ctrl->handle != NULL);
+
+                /* Application passes video params via *handle */
+
+                params = (FAR const struct uvc_params_s *)*ctrl->handle;
+                *ctrl->handle = usbdev_uvc_initialize(params);
+                if (*ctrl->handle == NULL)
+                  {
+                    ret = -EIO;
+                  }
+              }
+              break;
+
+            case BOARDIOC_USBDEV_DISCONNECT: /* Disconnect the UVC device */
+              {
+                DEBUGASSERT(ctrl->handle != NULL && *ctrl->handle != NULL);
+                usbdev_uvc_uninitialize(*ctrl->handle);
               }
               break;
 
