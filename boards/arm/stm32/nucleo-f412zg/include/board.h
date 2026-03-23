@@ -201,7 +201,7 @@ GPIO_SPEED_50MHz)
  *   LED_SIGNAL           In a signal handler
  *   LED_ASSERTION        An assertion failed
  *   LED_PANIC            The system has crashed
- *   LED_IDLE             MCU is is sleep mode
+ *   LED_IDLE             MCU is in sleep mode
  *
  * Thus if LD2, NuttX has successfully booted and is, apparently, running
  * normally.  If LD2 is flashing at approximately 2Hz, then a fatal error

@@ -147,7 +147,7 @@
 #define LED_SIGNAL         5 /* In a signal handler      GLOW   N/C  */
 #define LED_ASSERTION      6 /* An assertion failed      GLOW   N/C  */
 #define LED_PANIC          7 /* The system has crashed   Blink  OFF  */
-#define LED_IDLE           8 /* MCU is is sleep mode     N/C    ON   */
+#define LED_IDLE           8 /* MCU is in sleep mode     N/C    ON   */
 
 /* Thus if the Green LED is statically on, NuttX has successfully booted and
  * is, apparently, idleing.  If the Red LED is flashing at approximately 2Hz,

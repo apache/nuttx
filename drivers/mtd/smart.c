@@ -951,7 +951,7 @@ static ssize_t smart_write(FAR struct inode *inode,
 
   /* I think maybe we need to lock on a mutex here */
 
-  /* Get the aligned block.  Here is is assumed: (1) The number of R/W blocks
+  /* Get the aligned block.  Here it is assumed: (1) The number of R/W blocks
    * per erase block is a power of 2, and (2) the erase begins with that same
    * alignment.
    */
@@ -4150,7 +4150,7 @@ errout:
  * Name: smart_write_wearstatus
  *
  * Description:  Writes the wear leveling status bits to sector zero (and
- *               possibly others if it doesn't fit) such that is is persisted
+ *               possibly others if it doesn't fit) such that it is persisted
  *               across OS reboots.
  *
  ****************************************************************************/
@@ -4271,7 +4271,7 @@ errout:
  * Name: smart_read_wearstatus
  *
  * Description:  Reads the wear leveling status bits from sector zero (and
- *               possibly others if it doesn't fit) such that is is persisted
+ *               possibly others if it doesn't fit) such that it is persisted
  *               across OS reboots.
  *
  ****************************************************************************/

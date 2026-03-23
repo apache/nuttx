@@ -221,7 +221,7 @@
 #define LED_SIGNAL           2 /* In a signal handler       OFF             */
 #define LED_ASSERTION        4 /* An assertion failed       No change       */
 #define LED_PANIC            3 /* The system has crashed    Flash @ 250ms   */
-#define LED_IDLE             4 /* MCU is is sleep mode      Not used        */
+#define LED_IDLE             4 /* MCU is in sleep mode      Not used        */
 
 #define LED_D301_OFF true /* GPIO high for OFF */
 #define LED_D301_ON false /* GPIO low for ON */

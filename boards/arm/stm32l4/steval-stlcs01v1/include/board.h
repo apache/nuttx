@@ -315,7 +315,7 @@
  *   LED_SIGNAL           In a signal handler        No change
  *   LED_ASSERTION        An assertion failed        No change
  *   LED_PANIC            The system has crashed     Blinking
- *   LED_IDLE             MCU is is sleep mode       Not used
+ *   LED_IDLE             MCU is in sleep mode       Not used
  *
  * Thus if LD1, NuttX has successfully booted and is, apparently, running
  * normally.  If LD1 is flashing at approximately 2Hz, then a fatal error

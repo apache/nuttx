@@ -627,7 +627,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
             switch (ctrl->value[1])
               {
                 /* If the mass storage device is used in as part of a
-                 * composite device, then the device descriptor is is
+                 * composite device, then the device descriptor is
                  * provided by logic in the composite device implementation.
                  */
 

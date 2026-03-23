@@ -2250,7 +2250,7 @@ static void wm8904_audio_output(FAR struct wm8904_dev_s *priv)
    * This value sets TOCLK_RATE_DIV16=0, TOCLK_RATE_X4=0, and MCLK_DIV=0
    * while preserving the state of some undocumented bits (see wm8904.h).
    *
-   *   MCLK_DIV=0           : MCLK is is not divided by 2.
+   *   MCLK_DIV=0           : MCLK is not divided by 2.
    */
 
   wm8904_writereg(priv, WM8904_CLKRATE0, 0x845e);

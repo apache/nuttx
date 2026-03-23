@@ -198,7 +198,7 @@
  *   LED_SIGNAL           In a signal handler          No change
  *   LED_ASSERTION        An assertion failed          No change
  *   LED_PANIC            The system has crashed     OFF      Blinking
- *   LED_IDLE             STM32 is is sleep mode       Not used
+ *   LED_IDLE             STM32 is in sleep mode       Not used
  */
 
 #define LED_STARTED              0

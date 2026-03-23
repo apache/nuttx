@@ -51,7 +51,7 @@
 
 struct pcm_decode_s
 {
-  /* This is is our our appearance to the outside world.  This *MUST* be the
+  /* This is our appearance to the outside world.  This *MUST* be the
    * first element of the structure so that we can freely cast between types
    * struct audio_lowerhalf and struct pcm_decode_s.
    */

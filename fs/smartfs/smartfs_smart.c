@@ -258,7 +258,7 @@ static int smartfs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (ret == OK)
     {
-      /* The name exists -- but is is a file or a directory? */
+      /* The name exists -- but is it a file or a directory? */
 
       if (sf->entry.flags & SMARTFS_DIRENT_TYPE_DIR)
         {

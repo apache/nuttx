@@ -164,7 +164,7 @@
 #define LED_SIGNAL       2 /* In a signal handler     N/C      */
 #define LED_ASSERTION    2 /* An assertion failed     N/C      */
 #define LED_PANIC        3 /* The system has crashed  FLASH    */
-#undef  LED_IDLE           /* MCU is is sleep mode    Not used */
+#undef  LED_IDLE           /* MCU is in sleep mode    Not used */
 
 /* Thus if the white LED is statically on, NuttX has successfully  booted and
  * is, apparently, running normally.  If white LED is flashing at

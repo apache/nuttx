@@ -4518,7 +4518,7 @@ static int sam_pullup(struct usbdev_s *dev, bool enable)
            *     of the reset (USBHS_DEVISR.EORST = 1).
            *
            * The class implementation should not call this method with
-           * enable == true until is is fully initialized and ready to
+           * enable == true until it is fully initialized and ready to
            * accept connections.
            */
 

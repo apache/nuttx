@@ -1197,7 +1197,7 @@ int fdlist_open(FAR struct fdlist *list,
  * Name: nx_open
  *
  * Description:
- *   nx_open() is similar to the standard 'open' interface except that is is
+ *   nx_open() is similar to the standard 'open' interface except that it is
  *   not a cancellation point and it does not modify the errno variable.
  *
  *   nx_open() is an internal NuttX interface and should not be called
