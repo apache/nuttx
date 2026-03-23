@@ -82,10 +82,10 @@ ifeq ($(CONFIG_IMX9_LPI2C),y)
   CHIP_CSRCS += imx9_lpi2c.c
 endif
 
-ifeq ($(CONFIG_IMX9_LPSPI), y)
+ifeq ($(CONFIG_IMX9_LPSPI),y)
   CHIP_CSRCS += imx9_lpspi.c
 endif
 
-ifeq ($(CONFIG_IMX9_EDMA), y)
+ifeq ($(CONFIG_IMX9_EDMA),y)
   CHIP_CSRCS += imx9_edma.c
 endif

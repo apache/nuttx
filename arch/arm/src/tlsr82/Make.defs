@@ -34,7 +34,7 @@ endif
 
 ifeq ($(CONFIG_TLSR82_TIMER),y)
   CHIP_CSRCS += tlsr82_timer.c tlsr82_timer_lowerhalf.c
-  ifeq ($(CONFIG_TLSR82_WATCHDOG), y)
+  ifeq ($(CONFIG_TLSR82_WATCHDOG),y)
     CHIP_CSRCS += tlsr82_watchdog.c
   endif
 endif

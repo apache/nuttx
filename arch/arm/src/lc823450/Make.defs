@@ -36,28 +36,28 @@ ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += lc823450_wdt.c
 endif
 
-ifeq ($(CONFIG_LC823450_SPIFI), y)
+ifeq ($(CONFIG_LC823450_SPIFI),y)
 CHIP_CSRCS += lc823450_spifi2.c
 endif
 
-ifeq ($(CONFIG_LC823450_SDIF), y)
+ifeq ($(CONFIG_LC823450_SDIF),y)
 CHIP_CSRCS += lc823450_sdc.c
 CHIP_CSRCS += lc823450_sddrv_dep.c
 endif
 
-ifeq ($(CONFIG_PWM), y)
+ifeq ($(CONFIG_PWM),y)
 CHIP_CSRCS += lc823450_pwm.c
 endif
 
-ifeq ($(CONFIG_I2C), y)
+ifeq ($(CONFIG_I2C),y)
 CHIP_CSRCS += lc823450_i2c.c
 endif
 
-ifeq ($(CONFIG_SPI), y)
+ifeq ($(CONFIG_SPI),y)
 CHIP_CSRCS += lc823450_spi.c
 endif
 
-ifeq ($(CONFIG_ARCH_DMA), y)
+ifeq ($(CONFIG_ARCH_DMA),y)
 CHIP_CSRCS += lc823450_dma.c
 endif
 
@@ -91,7 +91,7 @@ CHIP_CSRCS += lc823450_pminitialize.c
 CHIP_CSRCS += lc823450_sleep.c
 endif
 
-ifeq ($(CONFIG_SMP), y)
+ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += lc823450_cpuidlestack.c
 CHIP_CSRCS += lc823450_smpcall.c
 CHIP_CSRCS += lc823450_cpustart.c
@@ -99,11 +99,11 @@ CHIP_CSRCS += lc823450_testset.c
 CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_MULTICPU), y)
+ifeq ($(CONFIG_ARCH_HAVE_MULTICPU),y)
 CHIP_CSRCS += lc823450_cpuindex.c
 endif
 
-ifeq ($(CONFIG_LC823450_SDRAM), y)
+ifeq ($(CONFIG_LC823450_SDRAM),y)
 CHIP_CSRCS += lc823450_sdram.c
 endif
 

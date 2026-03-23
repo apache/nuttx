@@ -88,7 +88,7 @@ ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CHIP_CSRCS += s32k1xx_pminitialize.c
 endif
 
-ifeq ($(CONFIG_S32K1XX_RESETCAUSE_PROCFS), y)
+ifeq ($(CONFIG_S32K1XX_RESETCAUSE_PROCFS),y)
 CHIP_CSRCS += s32k1xx_resetcause_procfs.c
 endif
 
