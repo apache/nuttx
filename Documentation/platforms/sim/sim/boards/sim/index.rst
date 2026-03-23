@@ -1984,6 +1984,19 @@ Requirement: ``cansequence`` tool from ``linux-can/can-utils``
       can0  002   [1]  11
       can0  002   [1]  12
 
+
+nxscope
+-------
+
+Configuration demonstrating NxScope stream over simulated UART interface.
+
+The simulated UART must be created on host before running NuttX::
+
+  socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
+
+See :doc:`/applications/examples/nxscope/index` and
+:doc:`/applications/logging/nxscope/index` for more details.
+
 ROMFS System-Init
 =================
 

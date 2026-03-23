@@ -2345,3 +2345,10 @@ Connect the HX711 to the STM32F4 board using the following pins:
     -4
 
 For more details, refer to the official `HX711 NuttX documentation <https://nuttx.apache.org/docs/latest/components/drivers/character/analog/adc/hx711/index.html>`_.
+
+nxscope_cdcacm
+--------------
+
+Configuration demonstrating NxScope stream over CDC-ACM interface.
+See :doc:`/applications/examples/nxscope/index` and
+:doc:`/applications/logging/nxscope/index` for more details.
