@@ -258,6 +258,29 @@ static bool rpmsg_rtc_device_ns_match(FAR struct rpmsg_device *rdev,
                                       FAR void *priv, FAR const char *name,
                                       uint32_t dest)
 {
+  FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
+
+  /* Already bound to a remote, reject further announcements.
+   * This prevents duplicate binding in multi-channel scenarios.
+   */
+
+  if (lower->ept.rdev)
+    {
+      return false;
+    }
+
+  /* If a specific server CPU is configured, match both endpoint
+   * name and CPU name. Otherwise accept any CPU that announces
+   * the rpmsg-rtc service (first come, first served).
+   */
+
+  if (CONFIG_RTC_RPMSG_SERVER_CPUNAME[0] != '\0')
+    {
+      return !strcmp(name, RPMSG_RTC_EPT_NAME) &&
+             !strcmp(rpmsg_get_cpuname(rdev),
+                     CONFIG_RTC_RPMSG_SERVER_CPUNAME);
+    }
+
   return !strcmp(name, RPMSG_RTC_EPT_NAME);
 }
 

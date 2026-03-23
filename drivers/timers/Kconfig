@@ -593,10 +593,20 @@ config RTC_RPMSG_SERVER
 	bool "The RTC RPMSG Role"
 	depends on RPMSG
 
+config RTC_RPMSG_SERVER_CPUNAME
+	string "RPMSG RTC Server CPU Name"
+	default ""
+	depends on RTC_RPMSG && !RTC_RPMSG_SERVER
+	---help---
+		Specify the CPU name of the RTC RPMSG server to connect to.
+		When set, the RTC client will only match the rpmsg-rtc service
+		from the specified CPU, avoiding conflicts when multiple rpmsg
+		channels are available. Leave empty to match any CPU.
+
 config RTC_RPMSG_SYNC_BASETIME
 	bool "Update g_basetime from rpmsg."
 	default n
-	depends on !RTC_RPMSG_SERVER && !CLOCK_TIMEKEEPING
+	depends on RTC_RPMSG && !RTC_RPMSG_SERVER && !CLOCK_TIMEKEEPING
 	---help---
 		Prevent g_basetime differences in multi-core situations.
 
