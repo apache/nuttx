@@ -169,6 +169,33 @@ config CS4344_WORKER_STACKSIZE
 
 endif # AUDIO_CS4344
 
+config AUDIO_ES7210
+	bool "ES7210 ADC codec chip"
+	default n
+	depends on AUDIO
+	---help---
+		Select to enable support for the ES7210 4-channel ADC codec by
+		Everest Semiconductor.
+
+		NOTE: This driver also depends on both I2C and I2S support although
+		that dependency is not explicit here.
+
+if AUDIO_ES7210
+
+config ES7210_INFLIGHT
+	int "ES7210 maximum in-flight audio buffers"
+	default 2
+
+config ES7210_BUFFER_SIZE
+	int "ES7210 preferred buffer size"
+	default 8192
+
+config ES7210_NUM_BUFFERS
+	int "ES7210 preferred number of buffers"
+	default 4
+
+endif # AUDIO_ES7210
+
 config AUDIO_ES8311
 	bool "ES8311 codec chip"
 	default n
