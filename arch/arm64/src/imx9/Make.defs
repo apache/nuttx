@@ -70,7 +70,7 @@ ifeq ($(CONFIG_IMX9_LPSPI),y)
   CHIP_CSRCS += imx9_lpspi.c
 endif
 
-ifeq ($(CONFIG_IMX9_EDMA), y)
+ifeq ($(CONFIG_IMX9_EDMA),y)
   CHIP_CSRCS += imx9_edma.c
 endif
 
@@ -86,25 +86,25 @@ ifeq ($(CONFIG_IMX9_USDHC),y)
   CHIP_CSRCS += imx9_usdhc.c
 endif
 
-ifeq ($(CONFIG_IMX9_FLEXSPI), y)
+ifeq ($(CONFIG_IMX9_FLEXSPI),y)
   CHIP_CSRCS += imx9_flexspi.c
 endif
 
-ifeq ($(CONFIG_IMX9_FLEXSPI_NOR), y)
+ifeq ($(CONFIG_IMX9_FLEXSPI_NOR),y)
   CHIP_CSRCS += imx9_flexspi_nor.c
 endif
 
-ifeq ($(CONFIG_IMX9_BOOTLOADER), y)
+ifeq ($(CONFIG_IMX9_BOOTLOADER),y)
   CHIP_CSRCS += imx9_system_ctl.c
   CHIP_CSRCS += imx9_trdc.c
   CHIP_CSRCS += imx9_ele.c
 endif
 
-ifeq ($(CONFIG_IMX9_ROMAPI), y)
+ifeq ($(CONFIG_IMX9_ROMAPI),y)
   CHIP_CSRCS += imx9_romapi.c
 endif
 
-ifeq ($(CONFIG_IMX9_AHAB_BOOT), y)
+ifeq ($(CONFIG_IMX9_AHAB_BOOT),y)
   CHIP_CSRCS += imx9_ahab.c
 endif
 
@@ -112,6 +112,6 @@ ifeq ($(CONFIG_IMX9_DDR_TRAINING),y)
   CHIP_CSRCS += $(DDR_CSRCS)
 endif
 
-ifeq ($(CONFIG_IMX9_FLEXCAN), y)
+ifeq ($(CONFIG_IMX9_FLEXCAN),y)
   CHIP_CSRCS += imx9_flexcan.c
 endif

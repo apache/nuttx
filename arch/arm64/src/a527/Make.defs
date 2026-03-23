@@ -33,6 +33,6 @@ ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
 CHIP_CSRCS += a527_textheap.c
 endif
 
-ifeq ($(CONFIG_PM), y)
+ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += a527_initialize.c
 endif
