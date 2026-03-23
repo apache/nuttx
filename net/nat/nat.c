@@ -118,6 +118,7 @@ int nat_enable(FAR struct net_driver_s *dev)
   if (IFF_IS_NAT(dev->d_flags))
     {
       nwarn("WARNING: NAT was already enabled for %s!\n", dev->d_ifname);
+      nat_unlock();
       return -EEXIST;
     }
 
