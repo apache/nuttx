@@ -122,7 +122,7 @@ endif
 ifeq ($(CONFIG_ARCH_MIPS_M5150),y)
   MIPS_MARCH = mips32r2
   MIPS_MPROCESSOR = elf32pic32mz
-else ifeq ($(CONFIG_ARCH_MIPS_MICROAPTIV), y)
+else ifeq ($(CONFIG_ARCH_MIPS_MICROAPTIV),y)
   MIPS_MARCH = mips32r2
   MIPS_MPROCESSOR = elf32pic32mz
 else
