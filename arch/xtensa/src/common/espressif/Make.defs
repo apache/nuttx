@@ -98,7 +98,7 @@ CHIP_CSRCS += esp_crypto.c
 endif
 endif
 
-ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE), y)
+ifeq ($(CONFIG_ESPRESSIF_USE_ULP_RISCV_CORE),y)
 CHIP_CSRCS += esp_ulp.c
 endif
 
@@ -114,7 +114,7 @@ CHIP_CSRCS += esp_wifi_event_handler.c
 CHIP_CSRCS += esp_wlan_netdev.c
 CHIP_CSRCS += esp_wifi_api.c
 endif
-ifeq ($(CONFIG_ESPRESSIF_ESPNOW_PKTRADIO), y)
+ifeq ($(CONFIG_ESPRESSIF_ESPNOW_PKTRADIO),y)
 CHIP_CSRCS += esp_espnow_pktradio.c
 EXTRA_LIBS += -lespnow
 endif
