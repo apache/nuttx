@@ -42,7 +42,7 @@
 
 struct audio_comp_priv_s
 {
-  /* This is is our appearance to the outside world. This *MUST* be the
+  /* This is our appearance to the outside world. This *MUST* be the
    * first element of the structure so that we can freely cast between
    * types struct audio_lowerhalf and struct audio_comp_dev_s.
    */

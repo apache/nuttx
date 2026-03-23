@@ -142,7 +142,7 @@
 #define LED_SIGNAL        2  /* In a signal handler          No change       */
 #define LED_ASSERTION     2  /* An assertion failed          No change       */
 #define LED_PANIC         3  /* The system has crashed     OFF      Blinking */
-#undef  LED_IDLE             /* MCU is is sleep mode         Not used        */
+#undef  LED_IDLE             /* MCU is in sleep mode         Not used        */
 
 /* Thus if the D0 and D9 are statically on, NuttX has successfully booted and
  * is, apparently, running normally.  If the red D9 LED is flashing at

@@ -1055,7 +1055,7 @@ static int tzload(FAR const char *name,
         }
     }
 
-  /* If type 0 is is unused in transitions, it's the type to use for early
+  /* If type 0 is unused in transitions, it's the type to use for early
    * times.
    */
 

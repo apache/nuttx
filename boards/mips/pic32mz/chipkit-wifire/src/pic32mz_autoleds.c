@@ -68,7 +68,7 @@
  * LED_SIGNAL        In a signal handler     ON  ON  ON  ON
  * LED_ASSERTION     An assertion failed     ON  ON  ON  ON
  * LED_PANIC         The system has crashed  ON  ON  ON  ON
- * LED_IDLE          MCU is is sleep mode    ---- Not used ----
+ * LED_IDLE          MCU is in sleep mode    ---- Not used ----
  */
 
 /* LED indices */

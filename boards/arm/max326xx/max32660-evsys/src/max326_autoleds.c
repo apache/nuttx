@@ -40,7 +40,7 @@
  *   LED_SIGNAL       2  In a signal handler     N/C
  *   LED_ASSERTION    2  An assertion failed     N/C
  *   LED_PANIC        3  The system has crashed  FLASH
- *   LED_IDLE            MCU is is sleep mode    Not used
+ *   LED_IDLE            MCU is in sleep mode    Not used
  *
  * Thus is LED is statically on, NuttX has successfully  booted and is,
  * apparently, running normally.  If LED is flashing at approximately

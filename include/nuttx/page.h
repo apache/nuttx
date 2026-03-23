@@ -412,7 +412,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage);
  *  but non-cacheable.  No special actions will be required of
  *  up_fillpage() in order to write into this allocated page.  If the
  *  virtual address maps to a text region, however, this function should
- *  remap the region so that is is read/execute only.  It should be made
+ *  remap the region so that it is read/execute only.  It should be made
  *  cache-able in any case.
  *
  * Input Parameters:

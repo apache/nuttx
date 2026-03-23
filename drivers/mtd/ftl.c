@@ -586,7 +586,7 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       return ftl_flush_direct(dev, buffer, startblock, nblocks);
     }
 
-  /* Get the aligned block.  Here is is assumed: (1) The number of R/W blocks
+  /* Get the aligned block.  Here it is assumed: (1) The number of R/W blocks
    * per erase block is a power of 2, and (2) the erase begins with that same
    * alignment.
    */

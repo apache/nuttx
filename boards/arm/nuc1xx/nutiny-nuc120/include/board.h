@@ -106,7 +106,7 @@
  *   LED_ASSERTION        An assertion failed      LED ON while handling the
  *                                                        assertion
  *   LED_PANIC            The system has crashed   LED Blinking at 2Hz
- *   LED_IDLE             NUC1XX is is sleep mode   (Optional, not used)
+ *   LED_IDLE             NUC1XX is in sleep mode   (Optional, not used)
  */
 
 #define LED_STARTED       0

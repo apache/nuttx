@@ -59,7 +59,7 @@
 #undef HAVE_EXTSRAM2_REGION  /* Assume no external SRAM at CS2 */
 #undef HAVE_EXTSRAM3_REGION  /* Assume no external SRAM at CS3 */
 
-/* Check if external SRAM is supported and, if so, it is is intended
+/* Check if external SRAM is supported and, if so, it is intended
  * to be used as heap.
  */
 

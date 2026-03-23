@@ -38,7 +38,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The Z80 stack does not need to be aligned.  Here is is aligned at word
+/* The Z80 stack does not need to be aligned.  Here it is aligned at word
  * (4 byte) boundary.
  */
 

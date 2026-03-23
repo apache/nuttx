@@ -91,7 +91,7 @@
 #define LED_SIGNAL        4  /* In a signal handler      N/C  N/C  N/C  GLOW  */
 #define LED_ASSERTION     4  /* An assertion failed      N/C  N/C  N/C  GLOW  */
 #define LED_PANIC         4  /* The system has crashed   N/C  N/C  N/C  FLASH */
-#undef  LED_IDLE             /* MCU is is sleep mode         Not used         */
+#undef  LED_IDLE             /* MCU is in sleep mode         Not used         */
 
 /* After booting, LED1-3 are not longer used by the system and can be used
  * for other purposes by the application (Of course, all LEDs are available

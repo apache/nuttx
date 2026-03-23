@@ -72,7 +72,7 @@
  *   the frequency of the PPA output clock, PLLACK
  *
  * Assumptions:
- *   PLLA is enabled.  If the PLL is is disabled, either at the input divider
+ *   PLLA is enabled.  If the PLL is disabled, either at the input divider
  *   or the output multiplier, the value zero is returned.
  *
  ****************************************************************************/

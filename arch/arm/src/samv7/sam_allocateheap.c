@@ -54,7 +54,7 @@
 #define HAVE_EXTSRAM2_REGION  0 /* Assume no external SRAM at CS2 */
 #define HAVE_EXTSRAM3_REGION  0 /* Assume no external SRAM at CS3 */
 
-/* Check if external SDRAM is supported and, if so, it is is intended
+/* Check if external SDRAM is supported and, if so, it is intended
  * to be used as heap.
  */
 

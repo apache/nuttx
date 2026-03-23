@@ -65,7 +65,7 @@
  *   LED_SIGNAL        In a signal handler      N/C  N/C  Soft glow
  *   LED_ASSERTION     An assertion failed      N/C  N/C  Soft glow
  *   LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
- *   LED_IDLE          MCU is is sleep mode         Not used
+ *   LED_IDLE          MCU is in sleep mode         Not used
  *
  * After booting, LED1 and 3 are not longer used by the system and can be
  * used for other purposes by the application (Of course, all LEDs are
@@ -108,7 +108,7 @@ void a1x_led_initialize(void)
  *   LED_SIGNAL          3   In a signal handler      N/C  N/C  Soft glow
  *   LED_ASSERTION       3   An assertion failed      N/C  N/C  Soft glow
  *   LED_PANIC           3   The system has crashed   N/C  N/C  2Hz Flashing
- *   LED_IDLE           ---  MCU is is sleep mode         Not used
+ *   LED_IDLE           ---  MCU is in sleep mode         Not used
  *
  *   LED1 is illuminated by driving the output pins to a high value
  *   LED3 and LED 4 are illuminated by taking the output to ground.
@@ -162,7 +162,7 @@ void board_autoled_on(int led)
  *   LED_SIGNAL          3   In a signal handler      N/C  N/C  Soft glow
  *   LED_ASSERTION       3   An assertion failed      N/C  N/C  Soft glow
  *   LED_PANIC           3   The system has crashed   N/C  N/C  2Hz Flashing
- *   LED_IDLE           ---  MCU is is sleep mode         Not used
+ *   LED_IDLE           ---  MCU is in sleep mode         Not used
  *
  *   LED1 is illuminated by driving the output pins to a high value
  *   LED3 and LED 4 are illuminated by taking the output to ground.

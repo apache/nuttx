@@ -76,7 +76,7 @@ void board_autoled_initialize(void)
  *   LED_SIGNAL         2  In a signal handler        N/C      N/C
  *   LED_ASSERTION      2  An assertion failed        N/C      N/C
  *   LED_PANIC          3  The system has crashed     N/C      Blinking
- *   LED_IDLE           -  MCU is is sleep mode         Not used
+ *   LED_IDLE           -  MCU is in sleep mode         Not used
  *
  ****************************************************************************/
 
@@ -122,7 +122,7 @@ void board_autoled_on(int led)
  *   LED_SIGNAL         2  In a signal handler        N/C      N/C
  *   LED_ASSERTION      2  An assertion failed        N/C      N/C
  *   LED_PANIC          3  The system has crashed     N/C      Blinking
- *   LED_IDLE           -  MCU is is sleep mode         Not used
+ *   LED_IDLE           -  MCU is in sleep mode         Not used
  *
  ****************************************************************************/
 

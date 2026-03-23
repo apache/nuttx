@@ -98,7 +98,7 @@ void board_autoled_on(int led)
         return;
     }
 
-  /* Set the new state of the GLED (unless is is N/C) */
+  /* Set the new state of the GLED (unless it is N/C) */
 
   if (gled_change)
     {

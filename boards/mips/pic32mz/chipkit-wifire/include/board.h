@@ -206,7 +206,7 @@
 #define LED_SIGNAL       4 /* In a signal handler     ON  ON  ON  ON  */
 #define LED_ASSERTION    4 /* An assertion failed     ON  ON  ON  ON  */
 #define LED_PANIC        4 /* The system has crashed  ON  ON  ON  ON  */
-#undef  LED_IDLE           /* MCU is is sleep mode    ---- Not used - */
+#undef  LED_IDLE           /* MCU is in sleep mode    ---- Not used - */
 
 /* Switch definitions *******************************************************/
 

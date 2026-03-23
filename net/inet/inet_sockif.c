@@ -253,8 +253,8 @@ static int inet_udp_alloc(FAR struct socket *psock)
 
 static int inet_setup(FAR struct socket *psock)
 {
-  /* Allocate the appropriate connection structure.  This reserves the
-   * the connection structure is is unallocated at this point.  It will
+  /* Allocate the appropriate connection structure.  This reserves
+   * the connection structure, which is unallocated at this point.  It will
    * not actually be initialized until the socket is connected.
    *
    * REVISIT:  Only SOCK_STREAM and SOCK_DGRAM are supported.

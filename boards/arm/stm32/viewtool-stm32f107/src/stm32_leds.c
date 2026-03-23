@@ -141,7 +141,7 @@ void stm32_led_initialize(void)
  *   LED_SIGNAL         4   In a signal handler       N/C  N/C  N/C  GLOW
  *   LED_ASSERTION      4   An assertion failed       N/C  N/C  N/C  GLOW
  *   LED_PANIC          4   The system has crashed    N/C  N/C  N/C  FLASH
- *   ED_IDLE                MCU is is sleep mode         Not used
+ *   ED_IDLE                MCU is in sleep mode         Not used
  *
  ****************************************************************************/
 
@@ -194,7 +194,7 @@ void board_autoled_on(int led)
  *   LED_SIGNAL         4   In a signal handler       N/C  N/C  N/C  GLOW
  *   LED_ASSERTION      4   An assertion failed       N/C  N/C  N/C  GLOW
  *   LED_PANIC          4   The system has crashed    N/C  N/C  N/C  FLASH
- *   ED_IDLE                MCU is is sleep mode         Not used
+ *   ED_IDLE                MCU is in sleep mode         Not used
  *
  ****************************************************************************/
 
