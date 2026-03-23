@@ -82,7 +82,7 @@ ifeq ($(CONFIG_SAMA5_FLEXCOM_USART),y)
 CHIP_CSRCS += sam_flexcom_serial.c
 endif
 
-ifeq ($(CONFIG_SAMA5_FLEXCOM_SPI), y)
+ifeq ($(CONFIG_SAMA5_FLEXCOM_SPI),y)
 CHIP_CSRCS += sam_flexcom_spi.c
 endif
 
@@ -103,7 +103,7 @@ CHIP_CSRCS += sam_qspi.c
 endif
 endif
 
-ifeq ($(CONFIG_SAMA5D2_CLASSD), y)
+ifeq ($(CONFIG_SAMA5D2_CLASSD),y)
 CHIP_CSRCS += sam_classd.c
 endif
 
@@ -231,7 +231,7 @@ CHIP_CSRCS += sam_tickless.c
 endif
 endif
 
-ifeq ($(CONFIG_SAMA5_SFC), y)
+ifeq ($(CONFIG_SAMA5_SFC),y)
 CHIP_CSRCS += sam_sfc.c
 endif
 
