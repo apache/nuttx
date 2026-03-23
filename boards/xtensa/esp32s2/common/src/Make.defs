@@ -86,7 +86,7 @@ ifeq ($(CONFIG_ESP_PCNT),y)
   CSRCS += esp32s2_board_pcnt.c
 endif
 
-ifeq ($(CONFIG_MMCSD_SPI), y)
+ifeq ($(CONFIG_MMCSD_SPI),y)
   CSRCS += esp32s2_board_sdmmc.c
 endif
 
