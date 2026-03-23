@@ -31,15 +31,15 @@
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC),y)
   CROSSDEV = xt-
 endif
 
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG),y)
   CROSSDEV = xt-
 endif
 
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP),y)
   CROSSDEV = xtensa-$(CONFIG_ARCH_CHIP)-elf-
 endif
 
@@ -176,13 +176,13 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 # Default toolchain
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC),y)
   ARCHCFLAGS += -Wno-atomic-alignment
   ARCHCXXFLAGS += -Wno-atomic-alignment
   CC = $(CROSSDEV)xcc
   CXX = $(CROSSDEV)xc++
   CPP = $(CROSSDEV)xcc -E -P -x c
-else ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
+else ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG),y)
   CC = $(CROSSDEV)clang
   CXX = $(CROSSDEV)clang++
   CPP = $(CROSSDEV)clang -E -P -x c
