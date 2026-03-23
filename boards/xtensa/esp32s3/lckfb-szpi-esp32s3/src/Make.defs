@@ -60,3 +60,7 @@ endif
 ifeq ($(CONFIG_ESP32S3_CAM),y)
 CSRCS += esp32s3_board_camera.c
 endif
+
+ifeq ($(CONFIG_AUDIO_ES7210),y)
+CSRCS += esp32s3_board_es7210.c
+endif

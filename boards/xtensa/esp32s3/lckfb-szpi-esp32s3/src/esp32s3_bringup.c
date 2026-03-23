@@ -173,7 +173,7 @@ int esp32s3_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_ESPRESSIF_I2S0) || defined(CONFIG_ESPRESSIF_I2S1)
+#ifdef CONFIG_ESPRESSIF_I2S1
   bool i2s_enable_tx;
   bool i2s_enable_rx;
 #endif
@@ -345,25 +345,20 @@ int esp32s3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESPRESSIF_I2S
-#ifdef CONFIG_ESPRESSIF_I2S0_TX
-  i2s_enable_tx = true;
-#else
-  i2s_enable_tx = false;
-#endif /* CONFIG_ESPRESSIF_I2S0_TX */
 
-#ifdef CONFIG_ESPRESSIF_I2S0_RX
-  i2s_enable_rx = true;
-#else
-  i2s_enable_rx = false;
-#endif /* CONFIG_ESPRESSIF_I2S0_RX */
+  /* On lckfb-szpi-esp32s3, I2S0 is wired to dedicated codec chips
+   * (ES7210 ADC + ES8311 DAC) which register their own audio devices.
+   * Generic audio_i2s is not used on I2S0 — skip board_i2sdev_initialize
+   * for port 0.
+   */
 
-  /* Configure I2S generic audio on I2S0 */
-
-  ret = board_i2sdev_initialize(ESP32S3_I2S0, i2s_enable_tx, i2s_enable_rx);
+#ifdef CONFIG_AUDIO_ES7210
+  ret = esp32s3_es7210_initialize(0, 0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize I2S0 driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize ES7210: %d\n", ret);
     }
+#endif
 
 #ifdef CONFIG_ESPRESSIF_I2S1
 

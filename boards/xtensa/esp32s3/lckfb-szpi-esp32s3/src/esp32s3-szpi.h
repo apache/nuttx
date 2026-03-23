@@ -49,6 +49,10 @@
 #define QMI8658_I2C_PORT    (0)
 #define QMI8658_I2C_ADDR    (0x6A)
 
+#define ES7210_I2C_ADDR     (0x41)
+#define ES7210_I2C_FREQ     (100000)
+#define ES7210_DEVPATH      "/dev/audio/pcm_in0"
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -165,6 +169,10 @@ int esp32s3_qmi8658_initialize(void);
 
 #ifdef CONFIG_ESP32S3_CAM
 int esp32s3_camera_initialize(void);
+#endif
+
+#ifdef CONFIG_AUDIO_ES7210
+int esp32s3_es7210_initialize(int i2c_port, int i2s_port);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -116,6 +116,43 @@ Then run the adb command::
   nsh> uname -a
   NuttX 0.0.0  Mar 21 2025 14:25:36 xtensa lckfb-szpi-esp32s3
 
+es7210
+------
+
+Basic NuttShell configuration with ES7210 4-channel ADC audio codec support
+over USB ADB. The ES7210 is connected via I2C0 (address 0x41) and I2S0 RX,
+enabling audio recording through the on-board microphones.
+
+The I2S0 RX pin mapping is as follows:
+
+======= ======
+Signal  GPIO
+======= ======
+BCLK    GPIO14
+DIN     GPIO12
+MCLK    GPIO38
+WS      GPIO13
+======= ======
+
+You can run the configuration and compilation procedure::
+
+  $ ./tools/configure.sh lckfb-szpi-esp32s3:es7210
+  $ make flash ESPTOOL_PORT=/dev/ttyUSB0 -j
+
+Then record audio using nxrecorder::
+
+  $ adb -s 1234 shell
+  nsh> nxrecorder
+  nxrecorder> device /dev/audio/pcm_in0
+  nxrecorder> recordraw /tmp/test.pcm 2 16 48000
+  nxrecorder> stop
+  nxrecorder> q
+
+Pull the recorded file to the host and convert to WAV::
+
+  $ adb -s 1234 pull /tmp/test.pcm .
+  $ ffmpeg -f s16le -ar 48000 -ac 2 -i test.pcm test.wav
+
 txtable
 -------
 
