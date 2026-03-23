@@ -117,20 +117,19 @@ static uint16_t
 rpmsg_virtio_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
-  bool is_host = rpmsg_virtio_get_role(rvdev) == RPMSG_HOST;
   uint16_t nused;
 
-  if (is_host)
+  if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.avail->idx);
     }
 
   nused = vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
-  if (is_host == rx)
+  if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev) == rx)
     {
       nused = vq->vq_nentries - nused;
     }
@@ -332,22 +331,20 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
                                      bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
-  unsigned int role;
   FAR void *addr;
-  uint16_t unretrieved;
+  uint16_t unretrieved = 0;
   uint16_t desc_idx;
   uint16_t num;
   uint16_t i;
 
-  role = rpmsg_virtio_get_role(rvdev);
   num = rpmsg_virtio_buffer_nused(rvdev, rx);
 
-  if (role == RPMSG_HOST)
+  if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
       unretrieved = vq->vq_ring.used->idx - vq->vq_used_cons_idx;
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.avail->idx);
       unretrieved = vq->vq_ring.avail->idx - vq->vq_available_idx;
@@ -370,7 +367,7 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
 
   for (i = 0u; i < num; i++)
     {
-      if ((role == RPMSG_HOST) ^ rx)
+      if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev) ^ rx)
         {
           RPMSG_VIRTIO_INVALIDATE(vq->vq_ring.used->idx);
           desc_idx = (vq->vq_ring.used->idx + i) & (vq->vq_nentries - 1u);
@@ -442,7 +439,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
         {
           syslog(LOG_EMERG,
                  "Dump rpmsg info between cpu (master: %s)%s <==> %s:\n",
-                 rpmsg_virtio_get_role(rvdev) == RPMSG_HOST ? "yes" : "no",
+                 VIRTIO_ROLE_IS_DRIVER(rvdev->vdev) ? "yes" : "no",
                  priv->rpmsg.local_cpuname, priv->rpmsg.cpuname);
 
           rpmsg_dump_epts(rdev);
@@ -473,10 +470,18 @@ static FAR void *rpmsg_virtio_alloc_buf(FAR struct rpmsg_s *rpmsg,
 {
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
+  FAR void *buf = NULL;
 
-  return priv->vdev->role == VIRTIO_DEV_DRIVER ?
-         virtio_malloc_buf(priv->vdev, size, align):
-         rpmsg_heap_alloc(&rpmsg->heap, size, align);
+  if (VIRTIO_ROLE_IS_DRIVER(priv->vdev))
+    {
+      buf = virtio_malloc_buf(priv->vdev, size, align);
+    }
+  else if (VIRTIO_ROLE_IS_DEVICE(priv->vdev))
+    {
+      buf = rpmsg_heap_alloc(&rpmsg->heap, size, align);
+    }
+
+  return buf;
 }
 
 /****************************************************************************
@@ -489,11 +494,11 @@ static void rpmsg_virtio_free_buf(FAR struct rpmsg_s *rpmsg,
   FAR struct rpmsg_virtio_priv_s *priv =
     (FAR struct rpmsg_virtio_priv_s *)rpmsg;
 
-  if (priv->vdev->role == VIRTIO_DEV_DRIVER)
+  if (VIRTIO_ROLE_IS_DRIVER(priv->vdev))
     {
       virtio_free_buf(priv->vdev, addr);
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(priv->vdev))
     {
       rpmsg_heap_free(&rpmsg->heap, addr);
     }
@@ -508,12 +513,12 @@ static void rpmsg_virtio_rx_update(FAR struct rpmsg_virtio_priv_s *priv,
 {
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
 
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+  if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(rvq->vq_ring.used->idx);
       priv->headrx = rvq->vq_ring.used->idx;
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(rvq->vq_ring.avail->idx);
       priv->headrx = rvq->vq_ring.avail->idx;
@@ -525,12 +530,12 @@ static void rpmsg_virtio_update_tx(FAR struct rpmsg_virtio_priv_s *priv)
   FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
   FAR struct virtqueue *svq = rvdev->svq;
 
-  if (rpmsg_virtio_get_role(rvdev) == RPMSG_HOST)
+  if (VIRTIO_ROLE_IS_DRIVER(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(svq->vq_ring.avail->idx);
       priv->headtx = svq->vq_ring.avail->idx;
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(rvdev->vdev))
     {
       RPMSG_VIRTIO_INVALIDATE(svq->vq_ring.used->idx);
       priv->headtx = svq->vq_ring.used->idx;
@@ -707,8 +712,8 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
       virtqueue_enable_cb(vq);
     }
 
-  if ((priv->vdev->role == VIRTIO_DEV_DRIVER && virtqueue_nused(vq) == 0) ||
-      (priv->vdev->role == VIRTIO_DEV_DEVICE && virtqueue_navail(vq) == 0))
+  if ((VIRTIO_ROLE_IS_DRIVER(priv->vdev) && virtqueue_nused(vq) == 0) ||
+      (VIRTIO_ROLE_IS_DEVICE(priv->vdev) && virtqueue_navail(vq) == 0))
     {
       metal_mutex_release(&rdev->lock);
       ret = rpmsg_tickwait(&priv->rvdev.rdev.ns_ept, &priv->semtx,
@@ -764,7 +769,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
   };
 
   char name[64];
-  uint16_t nrx;
+  uint16_t nrx = 0;
   int ret;
 
   if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFSZ))
@@ -775,7 +780,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
                                 &config.r2h_buf_size);
     }
 
-  if (vdev->role == VIRTIO_DEV_DRIVER)
+  if (VIRTIO_ROLE_IS_DRIVER(vdev))
     {
       atomic_or(&rpmsg->signals, RPMSG_SIGNAL_ALLOC_LOCAL);
       if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_BUFADDR))
@@ -810,7 +815,7 @@ static void rpmsg_virtio_start_worker(FAR void *arg)
 
       nrx = vdev->vrings_info[0].info.num_descs;
     }
-  else
+  else if (VIRTIO_ROLE_IS_DEVICE(vdev))
     {
       nrx = vdev->vrings_info[1].info.num_descs;
     }
@@ -865,7 +870,6 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
                                FAR const char *cpuname)
 {
   FAR struct rpmsg_virtio_priv_s *priv;
-  uint64_t features;
   uint8_t priority;
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   char name[64];
@@ -879,14 +883,16 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
       nxsem_init(&priv->semrx, 0, 0);
       nxsem_init(&priv->semtx, 0, 0);
 
-      if (vdev->role == VIRTIO_DEV_DRIVER)
+      if (VIRTIO_ROLE_IS_DRIVER(vdev))
         {
           virtio_set_status(vdev, VIRTIO_CONFIG_STATUS_DRIVER);
           virtio_negotiate_features(vdev, RPMSG_VIRTIO_FEATURES, NULL);
           virtio_set_status(vdev, VIRTIO_CONFIG_FEATURES_OK);
         }
-      else
+      else if (VIRTIO_ROLE_IS_DEVICE(vdev))
         {
+          uint64_t features;
+
           virtio_get_features(vdev, &features);
         }
 
@@ -894,7 +900,7 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
 
       if (virtio_has_feature(vdev, VIRTIO_RPMSG_F_CPUNAME))
         {
-          if (vdev->role == VIRTIO_DEV_DRIVER)
+          if (VIRTIO_ROLE_IS_DRIVER(vdev))
             {
               virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
                                                       host_cpuname),
@@ -905,7 +911,7 @@ int rpmsg_virtio_probe_cpuname(FAR struct virtio_device *vdev,
                                       priv->rpmsg.cpuname,
                                       VIRTIO_RPMSG_CPUNAME_SIZE);
             }
-          else
+          else if (VIRTIO_ROLE_IS_DEVICE(vdev))
             {
               virtio_read_config_bytes(vdev, offsetof(struct fw_rsc_config,
                                                       host_cpuname),
@@ -1005,7 +1011,7 @@ void rpmsg_virtio_remove(FAR struct virtio_device *vdev)
 
   /* Reset the rpmsg virtio device for driver */
 
-  if (vdev->role == VIRTIO_DEV_DRIVER)
+  if (VIRTIO_ROLE_IS_DRIVER(vdev))
     {
       virtio_reset_device(vdev);
     }
