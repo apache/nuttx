@@ -131,7 +131,7 @@ $(UBIN): $(UOBJS)
 	$(call ARCHIVE, $@, $(UOBJS))
 
 board$(DELIM)libboard$(LIBEXT):
-ifeq ($(CONFIG_ARCH_XC5), y)
+ifeq ($(CONFIG_ARCH_XC5),y)
 	$(Q) if [ ! -L "$(CROSSDEV)/cevaxccc-xdrv" ]; then \
 		ln -sf "$(CROSSDEV)/cevaxccc-drv"  "$(CROSSDEV)/cevaxccc-xdrv";\
 	fi
