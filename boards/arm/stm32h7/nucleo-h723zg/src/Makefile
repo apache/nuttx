@@ -66,7 +66,7 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += stm32_reset.c
 endif
 
-ifeq ($(CONFIG_NET_OA_TC6), y)
+ifeq ($(CONFIG_NET_OA_TC6),y)
 CSRCS += stm32_oa_tc6.c
 endif
 
