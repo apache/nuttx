@@ -59,7 +59,7 @@ ifeq ($(CONFIG_MM_PGALLOC),y)
 CHIP_CSRCS += intel64_pgalloc.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_TESTSET), y)
+ifeq ($(CONFIG_ARCH_HAVE_TESTSET),y)
 CHIP_ASRCS += intel64_testset.S
 endif
 
