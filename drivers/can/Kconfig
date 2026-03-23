@@ -347,6 +347,19 @@ config CAN_CTUCANFD_SOCKET
 
 endchoice # "CTU CAN FD PCI CAN device type"
 
+config CAN_CTUCANFD_CANID_MAP
+	string "CAN interface ID map per CPU"
+	default "{0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1}"
+	depends on CAN_CTUCANFD
+	---help---
+		Array indexed by host CAN number, value is CPU core index.
+		map[x]=y means canX runs on cpuY.
+		The QEMU startup script reads this config to assign each
+		CAN channel to the correct PCIe bus.
+		e.g., core0 owns can1,3,5,7,9 and core1 owns can0,2,4,
+		6,8,10-14:
+		"{1,0,1,0,1,0,1,0,1,0,1,1,1,1,1}"
+
 endif # CAN_CTUCANFD
 
 endmenu # CAN Driver Support

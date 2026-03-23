@@ -154,5 +154,85 @@ int fdt_pci_ecam_register(FAR const void *fdt)
         }
     }
 
-  return pci_ecam_register(&cfg, &io, &mem, &prefetch);
+  return pci_ecam_register(domain, &cfg, &io, &mem, &prefetch);
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: fdt_pci_ecam_register/_domain
+ *
+ * Description:
+ *   Register one or all ECAM instances
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   domain   - The specific domain id
+ *
+ * Returned Value:
+ *   Return 0 if success, nageative if failed
+ *
+ ****************************************************************************/
+
+int fdt_pci_ecam_register(FAR const void *fdt)
+{
+  int offset = -1;
+  int rc;
+
+  DEBUGASSERT(fdt);
+
+  for (; ; )
+    {
+      offset = fdt_node_offset_by_compatible(fdt, offset,
+                                             "pci-host-ecam-generic");
+      if (offset < 0)
+        {
+          break;
+        }
+
+      rc = fdt_pci_ecam_register_offset(fdt, offset);
+      if (rc < 0)
+        {
+          pcierr("Failed scaning: %d\n", rc);
+          return rc;
+        }
+    }
+
+  return 0;
+}
+
+int fdt_pci_ecam_register_domain(FAR const void *fdt, uint16_t domain)
+{
+  uint32_t d;
+  int offset = -1;
+  int rc;
+
+  DEBUGASSERT(fdt);
+
+  for (; ; )
+    {
+      offset = fdt_node_offset_by_compatible(fdt, offset,
+                                             "pci-host-ecam-generic");
+      if (offset < 0)
+        {
+          break;
+        }
+
+      rc = fdt_load_prop_u32(fdt, offset, "linux,pci-domain", 0, &d);
+      if (rc < 0)
+        {
+          pcierr("Failed loading domain: %d\n", rc);
+          return rc;
+        }
+
+      rc = fdt_pci_ecam_register_offset(fdt, offset);
+      if (rc < 0 && rc != -EEXIST)
+        {
+          return rc;
+        }
+    }
+
+  return OK;
 }

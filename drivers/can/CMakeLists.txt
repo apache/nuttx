@@ -40,6 +40,10 @@ endif()
 
 if(CONFIG_CAN_CTUCANFD)
   list(APPEND SRCS ctucanfd_pci.c)
+
+  set(CTUCANFD_DEFS
+      "#define CTUCANFD_CANID_MAP ${CONFIG_CAN_CTUCANFD_CANID_MAP}")
+  nuttx_target_compile_definitions_with_include(drivers CTUCANFD_DEFS)
 endif()
 
 target_sources(drivers PRIVATE ${SRCS})
