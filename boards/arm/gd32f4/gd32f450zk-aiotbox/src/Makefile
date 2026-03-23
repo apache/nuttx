@@ -56,7 +56,7 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += gd32f4xx_sdio.c
 endif
 
-ifeq ($(CONFIG_I2C), y)
+ifeq ($(CONFIG_I2C),y)
 CSRCS += gd32f4xx_i2c.c
 endif
 
