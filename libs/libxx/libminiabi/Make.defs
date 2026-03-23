@@ -25,7 +25,7 @@ CXXSRCS += libxx_delete.cxx libxx_deletea.cxx
 CXXSRCS += libxx_new.cxx libxx_newa.cxx
 CXXSRCS += libxx_dynamic_cast.cxx libxx_typeinfo.cxx
 
-ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+ifneq ($(CONFIG_XTENSA_TOOLCHAIN_XCC),y)
   CXXFLAGS += -Wno-missing-exception-spec
 endif
 
