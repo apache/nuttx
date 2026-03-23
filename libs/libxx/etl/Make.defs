@@ -35,11 +35,11 @@ endif
 
 $(TOPDIR)/include/etl: etl/etl
 	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/etl
-ifeq ($(CONFIG_ARCH_ARMV5M), y)
+ifeq ($(CONFIG_ARCH_ARMV5M),y)
 	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv5_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
-else ifeq ($(CONFIG_ARCH_ARMV6M), y)
+else ifeq ($(CONFIG_ARCH_ARMV6M),y)
 	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv6_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
-else ifeq ($(CONFIG_ARCH_ARMV7M), y)
+else ifeq ($(CONFIG_ARCH_ARMV7M),y)
 	$(Q) cp $(CURDIR)/$</include/etl/profiles/armv7_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h
 else
 	$(Q) cp $(CURDIR)/$</include/etl/profiles/gcc_generic_no_stl.h $(CURDIR)/etl/include/etl/etl_profile.h

@@ -47,7 +47,7 @@ ifeq ($(wildcard libcxxabi/libcxxabi/.git),)
 	$(call DELDIR, libcxxabi/libcxxabi)
 endif
 
-ifeq ($(CONFIG_LIBCXXABI), y)
+ifeq ($(CONFIG_LIBCXXABI),y)
 CXXFLAGS += ${DEFINE_PREFIX}LIBCXX_BUILDING_LIBCXXABI
 CXXFLAGS += -I $(TOPDIR)/libs/libxx/libcxxabi/libcxxabi/include
 
