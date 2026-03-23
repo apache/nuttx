@@ -179,7 +179,7 @@ ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 	CHIP_CSRCS += esp_crypto.c
 endif
 
-ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE), y)
+ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
 	CHIP_CSRCS += esp_ulp.c
 endif
 
