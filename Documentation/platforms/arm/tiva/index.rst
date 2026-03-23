@@ -188,3 +188,12 @@ Jose Pablo Carballo and I are doing this port.
 - TI/Tiva TM4C129E
 - TI/Tiva TM4C129X
 - TI/SimpleLink CC13x2
+
+Supported Boards
+================
+
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*
