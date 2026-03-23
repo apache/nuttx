@@ -3,11 +3,9 @@
 </p>
 
 ![POSIX Badge](https://img.shields.io/badge/POSIX-Compliant-brightgreen?style=flat&label=POSIX)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue
-)](https://nuttx.apache.org/docs/latest/introduction/licensing.html)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://nuttx.apache.org/docs/latest/introduction/licensing.html)
 ![Issues Tracking Badge](https://img.shields.io/badge/issue_track-github-blue?style=flat&label=Issue%20Tracking)
-[![Contributors](https://img.shields.io/github/contributors/apache/nuttx
-)](https://github.com/apache/nuttx/graphs/contributors)
+[![Contributors](https://img.shields.io/github/contributors/apache/nuttx)](https://github.com/apache/nuttx/graphs/contributors)
 [![GitHub Build Badge](https://github.com/apache/nuttx/workflows/Build/badge.svg)](https://github.com/apache/nuttx/actions/workflows/build.yml)
 [![Documentation Badge](https://github.com/apache/nuttx/workflows/Build%20Documentation/badge.svg)](https://nuttx.apache.org/docs/latest/index.html)
 

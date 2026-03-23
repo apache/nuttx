@@ -3,7 +3,7 @@
 Thank you for your interest in contributing to Apache NuttX RTOS :-)
 
 If you haven't yet read
-[The Inviolable Principles of NuttX]( https://github.com/apache/nuttx/blob/master/INVIOLABLES.md)
+[The Inviolable Principles of NuttX](https://github.com/apache/nuttx/blob/master/INVIOLABLES.md)
 please do so first.
 
 Apache NuttX RTOS supports over 15 different architectures, 360+ boards,
@@ -355,8 +355,8 @@ See: https://github.com/apache/nuttx/blob/master/INVIOLABLES.md
 2. Single company / organization commit, review, and merge is not allowed.
 3. Merge of PRs with unresolved discussions and "change request" marks
    is not allowed.
-3. Self committed code merge with or without review is not allowed.
-4. Direct push to master is not allowed.
+4. Self committed code merge with or without review is not allowed.
+5. Direct push to master is not allowed.
 
 Breaking these rules will be punished.
 
@@ -395,7 +395,7 @@ Add g_ prefix to can_dlc_to_len and len_to_can_dlc to
 follow NuttX coding style conventions for global symbols,
 improving code readability and maintainability.
 * you can also use bullet points.
-* to note different thing briefly.
+* to note different things briefly.
 
 Signed-off-by: AuthorName <Valid@EmailAddress>
 ```
