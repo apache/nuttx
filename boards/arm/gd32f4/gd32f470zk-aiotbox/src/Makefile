@@ -60,19 +60,19 @@ ifeq ($(CONFIG_MTD_GD25),y)
 CSRCS += gd32f4xx_gd25.c
 endif
 
-ifeq ($(CONFIG_MTD_AT24XX), y)
+ifeq ($(CONFIG_MTD_AT24XX),y)
 CSRCS += gd32f4xx_at24.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET), y)
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += gd32f4xx_reset.c
 endif
 
-ifeq ($(CONFIG_ETC_ROMFS), y)
+ifeq ($(CONFIG_ETC_ROMFS),y)
 CSRCS += etc_romfs.c
 endif
 
-ifeq ($(CONFIG_I2C), y)
+ifeq ($(CONFIG_I2C),y)
 CSRCS += gd32f4xx_i2c.c
 endif
 
