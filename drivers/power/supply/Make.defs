@@ -28,18 +28,18 @@ ifeq ($(CONFIG_DRIVERS_SMPS),y)
 CSRCS += smps.c
 endif
 
-ifeq ($(CONFIG_REGULATOR), y)
+ifeq ($(CONFIG_REGULATOR),y)
 CSRCS += regulator.c
 
-ifeq ($(CONFIG_REGULATOR_GPIO), y)
+ifeq ($(CONFIG_REGULATOR_GPIO),y)
 CSRCS += regulator_gpio.c
 endif
 
-ifeq ($(CONFIG_REGULATOR_RPMSG), y)
+ifeq ($(CONFIG_REGULATOR_RPMSG),y)
 CSRCS += regulator_rpmsg.c
 endif
 
-ifeq ($(CONFIG_REGULATOR_ACT8945A), y)
+ifeq ($(CONFIG_REGULATOR_ACT8945A),y)
 CSRCS += act8945a.c
 endif
 
