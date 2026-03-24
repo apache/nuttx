@@ -30,8 +30,8 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS k210_leds.c)
 endif()
 
-if(CONFIG_DEV_GPIO)
-  list(APPEND SRCS k210_gpio.c)
+if(CONFIG_USERLED_LOWER)
+  list(APPEND SRCS k210_userleds.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

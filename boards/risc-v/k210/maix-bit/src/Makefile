@@ -32,8 +32,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += k210_leds.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += k210_gpio.c
+ifeq ($(CONFIG_USERLED_LOWER),y)
+CSRCS += k210_userleds.c
 endif
 
 include $(TOPDIR)/boards/Board.mk
