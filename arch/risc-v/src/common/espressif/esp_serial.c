@@ -487,7 +487,7 @@ static int esp_setup(uart_dev_t *dev)
       LP_UART_SRC_CLK_ATOMIC()
         {
           lp_uart_ll_enable_bus_clock(0, true);
-          lp_uart_ll_set_source_clk(priv->hal->dev, sclk_freq);
+          lp_uart_ll_set_source_clk(priv->hal->dev, LP_UART_SCLK_DEFAULT);
           lp_uart_ll_sclk_enable(0);
         }
     }
@@ -506,6 +506,21 @@ static int esp_setup(uart_dev_t *dev)
           success = uart_hal_set_baudrate(priv->hal, priv->baud, sclk_freq);
         }
     }
+#ifdef CONFIG_ESPRESSIF_LP_UART
+  else
+    {
+      /* Override protocol parameters from the configuration */
+
+      if (!lp_uart_ll_set_baudrate(priv->hal->dev, priv->baud, sclk_freq))
+        {
+          /* Unachievable baud rate */
+
+          return ESP_FAIL;
+        }
+
+      success = true;
+    }
+#endif
 
   uart_hal_set_parity(priv->hal, priv->parity);
   set_data_length(priv);
@@ -691,7 +706,6 @@ static void esp_detach(uart_dev_t *dev)
   /* Disable and detach the CPU interrupt */
 
   up_disable_irq(ESP_SOURCE2IRQ(source));
-  irq_detach(ESP_SOURCE2IRQ(source));
 
   /* Disassociate the peripheral interrupt from the CPU interrupt */
 

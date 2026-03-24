@@ -60,6 +60,7 @@
 #  include "hal/uart_periph.h"
 #  include "driver/rtc_io.h"
 #  include "io_mux.h"
+#  include "driver/lp_io.h"
 #endif
 
 /****************************************************************************
@@ -209,10 +210,10 @@ struct esp_uart_s g_lp_uart0_config =
   .stop_b2 = CONFIG_LPUART0_2STOP,
   .bits = CONFIG_LPUART0_BITS,
   .parity = CONFIG_LPUART0_PARITY,
-  .txpin = LP_UART_DEFAULT_TX_GPIO_NUM,
-  .rxpin = LP_UART_DEFAULT_RX_GPIO_NUM,
+  .txpin = CONFIG_ESPRESSIF_LPUART0_TXPIN,
+  .rxpin = CONFIG_ESPRESSIF_LPUART0_RXPIN,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rtspin = LP_UART_DEFAULT_RTS_GPIO_NUM,
+  .rtspin = CONFIG_ESPRESSIF_LPUART0_RTSPIN,
 #ifdef CONFIG_LPUART0_IFLOWCONTROL
   .iflow  = true,    /* input flow control (RTS) enabled */
 #else
@@ -220,7 +221,7 @@ struct esp_uart_s g_lp_uart0_config =
 #endif
 #endif
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
-  .ctspin = LP_UART_DEFAULT_CTS_GPIO_NUM,
+  .ctspin = CONFIG_ESPRESSIF_LPUART0_CTSPIN,
 #ifdef CONFIG_LPUART0_OFLOWCONTROL
   .oflow  = true,    /* output flow control (CTS) enabled */
 #else
@@ -301,7 +302,24 @@ static void esp_lowputc_lp_uart_config_io(const struct esp_uart_s *priv,
 #if !SOC_LP_GPIO_MATRIX_SUPPORTED
   rtc_gpio_iomux_func_sel(pin, upin->iomux_func);
 #else
-  /* ToDo: Add LP UART for LP GPIO Matrix supported devices (e.g ESP32-P4) */
+
+  if (upin->default_gpio == pin)
+    {
+      rtc_gpio_iomux_func_sel(pin, upin->iomux_func);
+    }
+  else
+    {
+      rtc_gpio_iomux_func_sel(pin, 1);
+
+      if (direction == RTC_GPIO_MODE_OUTPUT_ONLY)
+        {
+          lp_gpio_connect_out_signal(pin, upin->signal, 0, 0);
+        }
+      else
+        {
+          lp_gpio_connect_in_signal(pin, upin->signal, 0);
+        }
+    }
 #endif /* SOC_LP_GPIO_MATRIX_SUPPORTED */
 
   spin_unlock_irqrestore(&priv->lock, flags);
@@ -502,12 +520,12 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
       esp_lowputc_lp_uart_config_io(priv,
                                     priv->rxpin,
                                     RTC_GPIO_MODE_INPUT_ONLY,
-                                    SOC_UART_RX_PIN_IDX);
+                                    SOC_UART_PERIPH_SIGNAL_RX);
 
       esp_lowputc_lp_uart_config_io(priv,
                                     priv->txpin,
                                     RTC_GPIO_MODE_OUTPUT_ONLY,
-                                    SOC_UART_TX_PIN_IDX);
+                                    SOC_UART_PERIPH_SIGNAL_TX);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
@@ -515,7 +533,7 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
           esp_lowputc_lp_uart_config_io(priv,
                                         priv->rtspin,
                                         RTC_GPIO_MODE_OUTPUT_ONLY,
-                                        SOC_UART_RTS_PIN_IDX);
+                                        SOC_UART_PERIPH_SIGNAL_RTS);
         }
 #endif
 
@@ -525,7 +543,7 @@ void esp_lowputc_config_pins(const struct esp_uart_s *priv)
           esp_lowputc_lp_uart_config_io(priv,
                                         priv->ctspin,
                                         RTC_GPIO_MODE_INPUT_ONLY,
-                                        SOC_UART_CTS_PIN_IDX);
+                                        SOC_UART_PERIPH_SIGNAL_CTS);
         }
 #endif
     }
@@ -612,7 +630,6 @@ void esp_lowsetup(void)
 #endif
 
 #ifdef CONFIG_ESPRESSIF_LP_UART0
-  esp_lowputc_enable_sysclk(&g_lp_uart0_config);
   esp_lowputc_config_pins(&g_lp_uart0_config);
 #endif
 
