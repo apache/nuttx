@@ -1069,7 +1069,10 @@ static void adc_oversample(struct adc_dev_s *dev)
                      (priv->ovsr << ADC_CFGR2_OVSR_SHIFT) |
                      (priv->ovss << ADC_CFGR2_OVSS_SHIFT);
 
-  setbits |= priv->trovs;
+  if (priv->trovs)
+    {
+      setbits |= ADC_CFGR2_TROVS;
+    }
 
   adc_modifyreg(priv, STM32_ADC_CFGR2_OFFSET, clrbits, setbits);
 }
@@ -1811,7 +1814,8 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           /* Set the watchdog threshold register */
 
-          regval = ((arg << ADC_TR1_HT1_SHIFT) & ADC_TR1_HT1_MASK);
+          regval &= ~ADC_TR1_HT1_MASK;
+          regval |= ((arg << ADC_TR1_HT1_SHIFT) & ADC_TR1_HT1_MASK);
           adc_putreg(priv, STM32_ADC_TR1_OFFSET, regval);
 
           /* Ensure analog watchdog is enabled */
@@ -1845,7 +1849,8 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           /* Set the watchdog threshold register */
 
-          regval = ((arg << ADC_TR1_LT1_SHIFT) & ADC_TR1_LT1_MASK);
+          regval &= ~ADC_TR1_LT1_MASK;
+          regval |= ((arg << ADC_TR1_LT1_SHIFT) & ADC_TR1_LT1_MASK);
           adc_putreg(priv, STM32_ADC_TR1_OFFSET, regval);
 
           /* Ensure analog watchdog is enabled */
