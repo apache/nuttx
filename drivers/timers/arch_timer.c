@@ -205,7 +205,7 @@ static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
   struct timer_status_s status;
   uint32_t temp_interval;
 
-  g_timer.timebase     += *next_interval;
+  g_timer.timebase     += USEC2TICK(*next_interval);
   temp_interval         = g_oneshot_maxticks;
   g_timer.next_interval = &temp_interval;
   nxsched_process_timer();
@@ -215,7 +215,7 @@ static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
   if (temp_interval != status.timeleft)
     {
       g_timer.timebase += status.timeout - status.timeleft;
-      *next_interval = temp_interval;
+      *next_interval = TICK2USEC(temp_interval);
     }
 #else
   g_timer.timebase++;
