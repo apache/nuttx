@@ -77,6 +77,10 @@ static const struct arm_mmu_region g_mmu_regions[] =
   MMU_REGION_FLAT_ENTRY("PCI_IO",
                         CONFIG_PCI_IO_BASEADDR, CONFIG_PCI_IO_SIZE,
                         MT_NORMAL | MT_RW | MT_SECURE),
+
+  MMU_REGION_FLAT_ENTRY("SHMEM",
+                        CONFIG_SHMEM_BASEADDR, CONFIG_SHMEM_SIZE,
+                        MT_NORMAL | MT_RW | MT_NS),
 };
 
 const struct arm_mmu_config g_mmu_config =
