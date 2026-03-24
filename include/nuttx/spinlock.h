@@ -698,7 +698,7 @@ uint16_t rspin_lock_count(FAR volatile rspinlock_t *lock)
 #ifdef CONFIG_SPINLOCK
 #  ifdef CONFIG_SPINLOCK_INLINE
 SPINLOCK_INLINE noinstrument_function
-void rspin_lock(FAR rspinlock_t *lock)
+void rspin_lock_notrace(FAR rspinlock_t *lock)
 {
   uint32_t new_val;
   uint32_t old_val;
@@ -716,12 +716,6 @@ void rspin_lock(FAR rspinlock_t *lock)
     }
   else
     {
-      /* Mark that we want to hold lock */
-
-      spinlock_mark_locking(&lock->info);
-
-      sched_note_spinlock_lock(lock);
-
       /* Try seize the ownership of the lock using CAS. */
 
       new_val = RSPINLOCK_VALUE(owner, 1u);
@@ -737,24 +731,47 @@ void rspin_lock(FAR rspinlock_t *lock)
           SPIN_WAIT();
         }
 
-      /* The local value shares the same memory location with the
-       * global atomic value. So if the atomic operation success,
-       * the local value should also change to the new_val.
-       */
-
       compiler_assume(lock->local_val == new_val);
+    }
+}
 
-      /* Mark locked only when the lock is acquired for the first time. */
+SPINLOCK_INLINE
+void rspin_lock(FAR rspinlock_t *lock)
+{
+  uint32_t old_val;
+  uint32_t owner = (uint32_t)this_cpu() + 1u;
 
+  old_val = atomic_read(&lock->val);
+
+  /* Only trace first-time lock acquisition, not recursive */
+
+  if (RSPINLOCK_OWNER(old_val) != owner)
+    {
+      spinlock_mark_locking(&lock->info);
+      sched_note_spinlock_lock(lock);
+    }
+
+  rspin_lock_notrace(lock);
+
+  if (RSPINLOCK_OWNER(old_val) != owner)
+    {
       spinlock_mark_locked(&lock->info);
-
       sched_note_spinlock_locked(lock);
     }
 }
 #  else
 noinstrument_function
+void rspin_lock_notrace(FAR rspinlock_t *lock);
 void rspin_lock(FAR rspinlock_t *lock);
 #  endif
+
+static inline_function noinstrument_function
+irqstate_t rspin_lock_irqsave_notrace(FAR rspinlock_t *lock)
+{
+  irqstate_t flags = irq_save();
+  rspin_lock_notrace(lock);
+  return flags;
+}
 
 static inline_function
 irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
@@ -764,7 +781,9 @@ irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
   return flags;
 }
 #else
+#  define rspin_lock_notrace(lock) ((void)(lock))
 #  define rspin_lock_irqsave(l) ((void)(l), irq_save())
+#  define rspin_lock_irqsave_notrace(l) rspin_lock_irqsave(l)
 #endif
 
 static inline_function
@@ -1091,8 +1110,8 @@ void spin_unlock_irqrestore_nopreempt(FAR volatile spinlock_t *lock,
  ****************************************************************************/
 
 #ifdef CONFIG_SPINLOCK
-static inline_function
-bool rspin_unlock(FAR rspinlock_t *lock)
+static inline_function noinstrument_function
+bool rspin_unlock_notrace(FAR rspinlock_t *lock)
 {
   bool     ret = false;
   uint32_t val = lock->local_val;
@@ -1102,8 +1121,6 @@ bool rspin_unlock(FAR rspinlock_t *lock)
 
   if (RSPINLOCK_COUNT(val) == 1u)
     {
-      sched_note_spinlock_unlock(lock);
-      spinlock_mark_unlocked(&lock->info);
       atomic_set_release(&lock->val, 0u);
       SPIN_KICK();
       ret = true;
@@ -1117,6 +1134,36 @@ bool rspin_unlock(FAR rspinlock_t *lock)
 }
 
 static inline_function
+bool rspin_unlock(FAR rspinlock_t *lock)
+{
+  uint32_t val = lock->local_val;
+
+  /* Only trace final unlock, not recursive */
+
+  if (RSPINLOCK_COUNT(val) == 1u)
+    {
+      sched_note_spinlock_unlock(lock);
+      spinlock_mark_unlocked(&lock->info);
+    }
+
+  return rspin_unlock_notrace(lock);
+}
+
+static inline_function noinstrument_function
+void rspin_unlock_irqrestore_notrace(FAR rspinlock_t *lock,
+                                     irqstate_t flags)
+{
+  if (rspin_unlock_notrace(lock))
+    {
+      irq_restore(flags);
+    }
+  else
+    {
+      nxsched_critmon_irqdisable(false, false, return_address(0));
+    }
+}
+
+static inline_function
 void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
 {
   if (rspin_unlock(lock))
@@ -1125,16 +1172,13 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
     }
   else
     {
-      /* Not last unlock, irq_restore is not called, but we need to
-       * balance the irqdis_count that was incremented by irq_save()
-       * in the corresponding rspin_lock_irqsave().
-       */
-
       nxsched_critmon_irqdisable(false, false, return_address(0));
     }
 }
 #else
+#  define rspin_unlock_notrace(lock) rspin_unlock(lock)
 #  define rspin_unlock_irqrestore(l, f) ((void)(l), irq_restore(f))
+#  define rspin_unlock_irqrestore_notrace(l, f) rspin_unlock_irqrestore(l, f)
 #endif
 
 static inline_function
