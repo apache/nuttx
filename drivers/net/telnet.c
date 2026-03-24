@@ -107,8 +107,8 @@ enum telnet_state_e
   STATE_DO,
   STATE_DONT,
   STATE_SB,
-  STATE_SB_NAWS,
-  STATE_SE
+  STATE_SB_DATA,
+  STATE_SB_NAWS
 };
 
 /* This structure describes the internal state of the driver */
@@ -118,6 +118,7 @@ struct telnet_dev_s
   uint8_t           td_state;     /* (See telnet_state_e) */
   uint8_t           td_crefs;     /* The number of open references to the session */
   uint8_t           td_minor;     /* Minor device number */
+  bool              td_sb_iac;    /* Saw IAC within sub-negotiation payload */
   uint16_t          td_offset;    /* Offset to the valid, pending bytes in the rxbuffer */
   uint16_t          td_pending;   /* Number of valid, pending bytes in the rxbuffer */
 #ifdef CONFIG_TELNET_SUPPORT_NAWS
@@ -372,16 +373,17 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                       priv->td_state = STATE_DONT;
                       break;
 
-#ifdef CONFIG_TELNET_SUPPORT_NAWS
                     case TELNET_SB:
                       priv->td_state = STATE_SB;
+                      priv->td_sb_iac = false;
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
                       priv->td_sb_count = 0;
+#endif
                       break;
 
                     case TELNET_SE:
                       priv->td_state = STATE_NORMAL;
                       break;
-#endif
 
                     default:
                       priv->td_state = STATE_NORMAL;
@@ -458,25 +460,58 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
               }
             break;
 
-#ifdef CONFIG_TELNET_SUPPORT_NAWS
-          /* Handle Telnet Sub negotiation request */
+          /* Handle Telnet sub-negotiation requests. */
 
           case STATE_SB:
             switch (ch)
               {
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
                 case TELNET_NAWS:
                   priv->td_state = STATE_SB_NAWS;
                   break;
+#endif
 
                 default:
-                  priv->td_state = STATE_NORMAL;
+                  priv->td_state = STATE_SB_DATA;
                   break;
               }
             break;
 
+          /* Ignore unsupported sub-negotiation payload until IAC SE. */
+
+          case STATE_SB_DATA:
+            if (priv->td_sb_iac)
+              {
+                priv->td_sb_iac = false;
+                if (ch == TELNET_SE)
+                  {
+                    priv->td_state = STATE_NORMAL;
+                  }
+              }
+            else if (ch == TELNET_IAC)
+              {
+                priv->td_sb_iac = true;
+              }
+            break;
+
+#ifdef CONFIG_TELNET_SUPPORT_NAWS
           /* Handle NAWS sub-option negotiation */
 
           case STATE_SB_NAWS:
+            if (priv->td_sb_iac)
+              {
+                priv->td_sb_iac = false;
+                if (ch == TELNET_SE)
+                  {
+                    priv->td_state = STATE_NORMAL;
+                    break;
+                  }
+              }
+            else if (ch == TELNET_IAC)
+              {
+                priv->td_sb_iac = true;
+                break;
+              }
 
             /* Update cols / rows based on received byte count */
 
@@ -500,11 +535,11 @@ static ssize_t telnet_receive(FAR struct telnet_dev_s *priv,
                   break;
               }
 
-            /* Increment SB count and switch to NORMAL when complete */
+            /* Increment SB count and keep discarding until IAC SE. */
 
             if (++priv->td_sb_count == 4)
               {
-                priv->td_state = STATE_NORMAL;
+                priv->td_state = STATE_SB_DATA;
               }
 
             break;
