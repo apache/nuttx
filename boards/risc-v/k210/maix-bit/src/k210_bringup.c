@@ -34,6 +34,10 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_USERLED_LOWER
+#  include <nuttx/leds/userled.h>
+#endif
+
 #include "k210.h"
 #include "k210_wdt.h"
 #include "maix-bit.h"
@@ -60,12 +64,11 @@ int k210_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_DEV_GPIO
-  ret = k210_gpio_init();
+#ifdef CONFIG_USERLED_LOWER
+  ret = userled_lower_initialize("/dev/userleds");
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
     }
 #endif
 
