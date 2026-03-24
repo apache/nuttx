@@ -45,18 +45,86 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CONFIG_ARM_TIMER_SECURE_IRQ         (GIC_PPI_INT_BASE + 13)
-#define CONFIG_ARM_TIMER_NON_SECURE_IRQ     (GIC_PPI_INT_BASE + 14)
-#define CONFIG_ARM_TIMER_VIRTUAL_IRQ        (GIC_PPI_INT_BASE + 11)
-#define CONFIG_ARM_TIMER_HYP_IRQ            (GIC_PPI_INT_BASE + 10)
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+/* Secure world (TEE): use Secure Physical Timer */
+#  define ARM_ARCH_TIMER_IRQ                GIC_IRQ_STM
+#elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+/* Non-Secure world (REE): use Non-Secure Physical Timer */
+#  define ARM_ARCH_TIMER_IRQ                GIC_IRQ_PTM
+#else
+/* Plain EL1 (no TrustZone): use Virtual Timer */
+#  define ARM_ARCH_TIMER_IRQ                GIC_IRQ_VTM
+#endif
 
-#define ARM_ARCH_TIMER_IRQ                  CONFIG_ARM_TIMER_VIRTUAL_IRQ
 #define ARM_ARCH_TIMER_PRIO                 IRQ_DEFAULT_PRIORITY
 #define ARM_ARCH_TIMER_FLAGS                IRQ_TYPE_LEVEL
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+/* Secure world: use Secure Physical Timer registers (cntps_* at S-EL1) */
+
+static inline void arm64_arch_timer_set_compare(uint64_t value)
+{
+  write_sysreg(value, cntps_cval_el1);
+}
+
+static inline void arm64_arch_timer_set_relative(uint64_t value)
+{
+  write_sysreg(value, cntps_tval_el1);
+}
+
+static inline void arm64_arch_timer_enable(bool enable)
+{
+  modify_sysreg(enable ? CNTP_CTL_ENABLE_BIT : 0u,
+                CNTP_CTL_ENABLE_BIT, cntps_ctl_el1);
+}
+
+static inline void arm64_arch_timer_set_irq_mask(bool mask)
+{
+  modify_sysreg(mask ? CNTP_CTL_IMASK_BIT : 0u,
+                CNTP_CTL_IMASK_BIT, cntps_ctl_el1);
+}
+
+static inline uint64_t arm64_arch_timer_count(void)
+{
+  return read_sysreg(cntpct_el0);
+}
+
+#elif defined(CONFIG_ARCH_TRUSTZONE_NONSECURE)
+/* Non-Secure world (REE): use Non-Secure Physical Timer registers */
+
+static inline void arm64_arch_timer_set_compare(uint64_t value)
+{
+  write_sysreg(value, cntp_cval_el0);
+}
+
+static inline void arm64_arch_timer_set_relative(uint64_t value)
+{
+  write_sysreg(value, cntp_tval_el0);
+}
+
+static inline void arm64_arch_timer_enable(bool enable)
+{
+  modify_sysreg(enable ? CNTP_CTL_ENABLE_BIT : 0u,
+                CNTP_CTL_ENABLE_BIT, cntp_ctl_el0);
+}
+
+static inline void arm64_arch_timer_set_irq_mask(bool mask)
+{
+  modify_sysreg(mask ? CNTP_CTL_IMASK_BIT : 0u,
+                CNTP_CTL_IMASK_BIT, cntp_ctl_el0);
+}
+
+static inline uint64_t arm64_arch_timer_count(void)
+{
+  return read_sysreg(cntpct_el0);
+}
+
+#else
+/* Plain EL1 (no TrustZone): use Virtual Timer (original default) */
 
 static inline void arm64_arch_timer_set_compare(uint64_t value)
 {
@@ -84,6 +152,8 @@ static inline uint64_t arm64_arch_timer_count(void)
 {
   return read_sysreg(cntvct_el0);
 }
+
+#endif /* CONFIG_ARCH_TRUSTZONE_SECURE */
 
 static inline uint64_t arm64_arch_timer_get_cntfrq(void)
 {
@@ -165,15 +235,27 @@ static void arm64_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
 
 static void arm64_oneshot_initialize_per_cpu(void)
 {
-  /* Enable int */
+  /* In secure world, mark the non-secure timer IRQ as non-secure
+   * so that normal world can receive it.  PPI security group is
+   * per-CPU, so this must run on every core.
+   */
 
-  up_enable_irq(ARM_ARCH_TIMER_IRQ);
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+  up_secure_irq(GIC_IRQ_PTM, false);
+#endif
 
+  /* First mask the timer interrupt and set compare to max
+   * to ensure no spurious interrupt fires before the oneshot
+   * framework is fully initialized.
+   */
+
+  arm64_arch_timer_set_irq_mask(true);
   arm64_arch_timer_set_compare(UINT64_MAX);
-
   arm64_arch_timer_enable(true);
 
-  arm64_arch_timer_set_irq_mask(false);
+  /* Now safe to enable the IRQ line in GIC */
+
+  up_enable_irq(ARM_ARCH_TIMER_IRQ);
 }
 
 /****************************************************************************
@@ -231,6 +313,12 @@ struct oneshot_lowerhalf_s *arm64_oneshot_initialize(void)
 
   oneshot_count_init(priv, (uint32_t)freq);
 
+  /* Now that oneshot is fully initialized, unmask the timer interrupt.
+   * This must happen after oneshot_count_init so the callback is ready.
+   */
+
+  arm64_arch_timer_set_irq_mask(false);
+
   tmrinfo("oneshot_initialize ok %p \n", priv);
 
   return priv;
@@ -244,4 +332,5 @@ void up_timer_initialize(void)
 void arm64_timer_secondary_init(void)
 {
   arm64_oneshot_initialize_per_cpu();
+  arm64_arch_timer_set_irq_mask(false);
 }
