@@ -264,6 +264,8 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_SHA2_384:
             case CRYPTO_SHA2_512:
             case CRYPTO_CRC32:
+            case CRYPTO_PBKDF2_HMAC_SHA1:
+            case CRYPTO_PBKDF2_HMAC_SHA256:
               thash = true;
               break;
             default:
@@ -468,6 +470,11 @@ static int cryptodev_op(FAR struct csession *cse,
   if (cop->mac)
     {
       crp.crp_mac = cop->mac;
+    }
+
+  if (cop->iterations)
+    {
+      crp.crp_iter = cop->iterations;
     }
 
   /* try the fast path first */

@@ -1156,6 +1156,9 @@ int swcr_authcompute(FAR struct cryptop *crp,
       case CRYPTO_SHA2_256_HMAC:
       case CRYPTO_SHA2_384_HMAC:
       case CRYPTO_SHA2_512_HMAC:
+      case CRYPTO_PBKDF2_HMAC_SHA1:
+      case CRYPTO_PBKDF2_HMAC_SHA256:
+
         if (sw->sw_octx == NULL)
           {
             return -EINVAL;
@@ -1656,12 +1659,14 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
             axf = &auth_hash_hmac_md5_96;
             goto authcommon;
           case CRYPTO_SHA1_HMAC:
+          case CRYPTO_PBKDF2_HMAC_SHA1:
             axf = &auth_hash_hmac_sha1_96;
             goto authcommon;
           case CRYPTO_RIPEMD160_HMAC:
             axf = &auth_hash_hmac_ripemd_160_96;
             goto authcommon;
           case CRYPTO_SHA2_256_HMAC:
+          case CRYPTO_PBKDF2_HMAC_SHA256:
             axf = &auth_hash_hmac_sha2_256_128;
             goto authcommon;
           case CRYPTO_SHA2_384_HMAC:
@@ -1892,6 +1897,8 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_SHA2_256_HMAC:
           case CRYPTO_SHA2_384_HMAC:
           case CRYPTO_SHA2_512_HMAC:
+          case CRYPTO_PBKDF2_HMAC_SHA1:
+          case CRYPTO_PBKDF2_HMAC_SHA256:
             axf = swd->sw_axf;
 
             if (swd->sw_ictx)
@@ -2047,7 +2054,11 @@ int swcr_process(struct cryptop *crp)
               }
 
             break;
+          case CRYPTO_PBKDF2_HMAC_SHA1:
+          case CRYPTO_PBKDF2_HMAC_SHA256:
+            swcr_pbkdf2(crp, crd, sw, crp->crp_buf);
 
+            break;
           case CRYPTO_MD5:
           case CRYPTO_POLY1305:
           case CRYPTO_RIPEMD160:
@@ -2087,6 +2098,73 @@ int swcr_process(struct cryptop *crp)
     }
 
 done:
+  return 0;
+}
+
+int swcr_pbkdf2(FAR struct cryptop *crp,
+                FAR struct cryptodesc *crd,
+                FAR struct swcr_data *swd,
+                caddr_t buf)
+{
+  uint8_t U[64];
+  uint8_t T[64];
+  uint8_t macbuf[64];
+  uint8_t ictx[256];
+  struct cryptop crp_dummy;
+  struct cryptodesc crd_dummy;
+
+  size_t generated = 0;
+  uint32_t blocknum;
+  uint32_t i;
+  uint32_t j;
+
+  crp_dummy.crp_mac = (caddr_t)macbuf;
+
+  for (blocknum = 1; generated < crp->crp_olen; blocknum++)
+    {
+      uint8_t saltblk[crp->crp_ilen + 4];
+
+      memcpy(saltblk, crp->crp_buf, crp->crp_ilen);
+      *(FAR uint32_t *)(saltblk + crp->crp_ilen) = htobe32(blocknum);
+
+      memcpy(ictx, swd->sw_ictx, swd->sw_axf->ctxsize);
+      memcpy(&swd->sw_ctx, ictx, swd->sw_axf->ctxsize);
+
+      crd_dummy.crd_skip = 0;
+      crd_dummy.crd_flags = 0;
+
+      /* U1 */
+
+      crd_dummy.crd_len = crp->crp_ilen + 4;
+      swcr_authcompute(&crp_dummy, &crd_dummy, swd, (caddr_t)saltblk);
+
+      memcpy(U, macbuf, swd->sw_axf->hashsize);
+      memcpy(T, U, swd->sw_axf->hashsize);
+
+      /* U2..Uc */
+
+      for (i = 1; i < crp->crp_iter; i++)
+        {
+          memcpy(&swd->sw_ctx, ictx, swd->sw_axf->ctxsize);
+
+          crd_dummy.crd_len = swd->sw_axf->hashsize;
+          swcr_authcompute(&crp_dummy, &crd_dummy, swd, (caddr_t)U);
+
+          memcpy(U, macbuf, swd->sw_axf->hashsize);
+
+          for (j = 0; j < swd->sw_axf->hashsize; j++)
+            {
+              T[j] ^= U[j];
+            }
+        }
+
+      size_t tocopy = MIN(crp->crp_olen - generated,
+                          swd->sw_axf->hashsize);
+
+      memcpy(crp->crp_mac + generated, T, tocopy);
+      generated += tocopy;
+    }
+
   return 0;
 }
 
@@ -2353,6 +2431,8 @@ void swcr_init(void)
   algs[CRYPTO_CRC32] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_128_CMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_PBKDF2_HMAC_SHA1] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_PBKDF2_HMAC_SHA256] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_ESN] = CRYPTO_ALG_FLAG_SUPPORTED;
 
   crypto_register(swcr_id, algs, swcr_newsession,

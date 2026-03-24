@@ -192,6 +192,12 @@ Key Management Operations
 
 The cryptodev module provides comprehensive key management interfaces:
 
+**Key Derivation**
+
+- PBKDF2:
+  - CRYPTO_PBKDF2_HMAC_SHA1
+  - CRYPTO_PBKDF2_HMAC_SHA256
+
 **Key Generation**
 
 - CRK_GENERATE_AES_KEY: Generate AES key data with specified key ID
