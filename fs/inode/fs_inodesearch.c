@@ -256,7 +256,7 @@ static int _inode_checkpath(const char *path)
 
   /* Check each segment of the path */
 
-  while (*path != '\0' && namelen < NAME_MAX && pathlen < PATH_MAX)
+  while (*path != '\0' && namelen <= NAME_MAX && pathlen < PATH_MAX)
     {
       if (*path == '/')
         {
