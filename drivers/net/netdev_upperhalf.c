@@ -1546,6 +1546,7 @@ int netdev_lower_register(FAR struct netdev_lowerhalf_s *dev,
       nerr("ERROR: Netdev_register failed: %d\n", ret);
       kmm_free(upper);
       dev->netdev.d_private = NULL;
+      return ret;
     }
 
   while (--cpu >= 0)
