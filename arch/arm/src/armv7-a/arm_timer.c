@@ -133,6 +133,15 @@ static void arm_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
 
 static void arm_timer_initialize_per_cpu(unsigned int freq)
 {
+  /* In secure world, mark the non-secure timer IRQ as non-secure
+   * so that normal world can receive it.  PPI security group is
+   * per-CPU, so this must run on every core.
+   */
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+  up_secure_irq(GIC_IRQ_PTM, false);
+#endif
+
   /* Enable timer */
 
   if (freq)
