@@ -135,8 +135,10 @@
 #define CRYPTO_CRC32            35
 #define CRYPTO_AES_CMAC         36
 #define CRYPTO_AES_128_CMAC     37
-#define CRYPTO_ESN              38 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    38 /* Keep updated */
+#define CRYPTO_PBKDF2_HMAC_SHA1 38
+#define CRYPTO_PBKDF2_HMAC_SHA256 39
+#define CRYPTO_ESN              40 /* Support for Extended Sequence Numbers */
+#define CRYPTO_ALGORITHM_MAX    40 /* Keep updated */
 
 /* Algorithm flags */
 
@@ -235,6 +237,7 @@ struct cryptop
   caddr_t crp_dst;
   caddr_t crp_iv;
   caddr_t crp_aad;
+  int crp_iter;
 };
 
 #define CRYPTO_BUF_IOV 0x1
@@ -408,6 +411,7 @@ struct crypt_op
  */
 
   uint16_t flags;
+  uint32_t iterations;
   unsigned len;
   unsigned olen;
   unsigned ivlen;

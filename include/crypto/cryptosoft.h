@@ -91,6 +91,8 @@ int swcr_authenc(FAR struct cryptop *);
 int swcr_compdec(FAR struct cryptodesc *, FAR struct swcr_data *,
                  caddr_t, int);
 int swcr_rsa_verify(FAR struct cryptkop *);
+int swcr_pbkdf2(FAR struct cryptop *, FAR struct cryptodesc *,
+                FAR struct swcr_data *, caddr_t);
 int swcr_process(FAR struct cryptop *);
 int swcr_kprocess(FAR struct cryptkop *);
 int swcr_newsession(FAR uint32_t *, FAR struct cryptoini *);
