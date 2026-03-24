@@ -142,6 +142,8 @@ if(CONFIG_FDCHECK)
   list(APPEND SRCS lib_fdcheck.c)
 endif()
 
+list(APPEND SRCS lib_tag.c)
+
 if(CONFIG_SCHED_INSTRUMENTATION_DUMP)
   list(APPEND SRCS lib_note.c)
 endif()
