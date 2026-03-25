@@ -1288,7 +1288,7 @@ static int up_interrupts(int irq, void *context, void *arg)
        * the TX data register.
        */
 
-      if ((s1 & UART_S1_TDRE) != 0)
+      if ((s1 & UART_S1_TDRE) != 0 && dev->xmit.head != dev->xmit.tail)
 #endif
         {
           /* Process outgoing bytes */
