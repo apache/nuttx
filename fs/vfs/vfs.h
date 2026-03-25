@@ -30,6 +30,11 @@
 #include <nuttx/fs/fs.h>
 #include <fcntl.h>
 
+#ifdef CONFIG_FS_PROFILER
+#include <nuttx/clock.h>
+#include <nuttx/atomic.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -122,5 +127,36 @@ void notify_rename(FAR const char *oldpath, bool oldisdir,
                    FAR const char *newpath, bool newisdir);
 void notify_initialize(void);
 #endif /* CONFIG_FS_NOTIFY */
+
+#ifdef CONFIG_FS_PROFILER
+
+struct fs_profile_s
+{
+  atomic_t   reads;
+  atomic_t   writes;
+  atomic_t   opens;
+  atomic_t   closes;
+  atomic64_t total_read_time;
+  atomic64_t total_write_time;
+  atomic64_t total_open_time;
+  atomic64_t total_close_time;
+};
+
+extern struct fs_profile_s g_fs_profile;
+
+void fs_profile_start(FAR clock_t *start);
+void fs_profile_stop(FAR clock_t *start, FAR atomic64_t *total,
+                      FAR atomic_t *count);
+
+#define FS_PROFILE_START(start_time) fs_profile_start(&start_time)
+#define FS_PROFILE_STOP(start_time, total_time, count) \
+  fs_profile_stop(&start_time, &total_time, &count)
+
+#else
+
+#define FS_PROFILE_START(start_time) ((void)(start_time))
+#define FS_PROFILE_STOP(start_time, total_time, count) ((void)(start_time))
+
+#endif /* CONFIG_FS_PROFILER */
 
 #endif /* __FS_VFS_VFS_H */
