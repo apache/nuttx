@@ -553,78 +553,86 @@ static void rpmsg_virtio_rx_dispatch(FAR struct rpmsg_virtio_priv_s *priv)
   FAR struct rpmsg_endpoint *ept;
   FAR struct rpmsg_hdr *hdr;
   bool release = false;
-  bool last = false;
+  bool last;
   uint32_t len;
   uint16_t idx;
   int status;
 
   metal_mutex_acquire(&rdev->lock);
-  while (!last)
+  do
     {
-      /* Process the received data from remote node */
-
-      hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx, &last);
-      if (hdr == NULL)
+      virtqueue_disable_cb(rvdev->rvq);
+      last = false;
+      while (!last)
         {
-          break;
-        }
+          /* Process the received data from remote node */
 
-      hdr->reserved = idx;
-
-      /* Drop a message whose length does not fit its buffer */
-
-      ept = len >= sizeof(*hdr) && hdr->len <= len - sizeof(*hdr) ?
-            rpmsg_get_ept_from_addr(rdev, hdr->dst) : NULL;
-      RPMSG_BUF_HELD_INC(hdr);
-
-      if (ept)
-        {
-          uint8_t priority = ept->priority;
-
-          if (ept == &rdev->ns_ept)
+          hdr = rpmsg_virtio_get_rx_buffer(rvdev, &len, &idx, &last);
+          if (hdr == NULL)
             {
-              FAR struct rpmsg_endpoint *ept_;
-              FAR struct rpmsg_ns_msg *ns_msg;
-
-              ns_msg = (FAR struct rpmsg_ns_msg *)RPMSG_LOCATE_DATA(hdr);
-              ept_ = rpmsg_get_endpoint(rdev, ns_msg->name, RPMSG_ADDR_ANY,
-                                        hdr->dst);
-
-              /* Only inherit non-RT priority from the matched endpoint,
-               * ns_ept should not use RT priority to avoid overflow in
-               * priority calculation.
-               */
-
-              if (ept_ && ept_->priority != RPMSG_PRIO_RT)
-                {
-                  priority = ept_->priority;
-                }
+              break;
             }
 
-          if (priority == RPMSG_PRIO_RT && ept != &rdev->ns_ept &&
-              ept->dest_addr != RPMSG_ADDR_ANY)
+          hdr->reserved = idx;
+
+          /* Drop a message whose length does not fit its buffer */
+
+          ept = len >= sizeof(*hdr) && hdr->len <= len - sizeof(*hdr) ?
+                rpmsg_get_ept_from_addr(rdev, hdr->dst) : NULL;
+          RPMSG_BUF_HELD_INC(hdr);
+
+          if (ept)
             {
-              status = rpmsg_virtio_process_rx_buffer(rdev, ept, hdr);
+              uint8_t priority = ept->priority;
+
+              if (ept == &rdev->ns_ept)
+                {
+                  FAR struct rpmsg_endpoint *ept_;
+                  FAR struct rpmsg_ns_msg *ns_msg;
+
+                  ns_msg =
+                    (FAR struct rpmsg_ns_msg *)RPMSG_LOCATE_DATA(hdr);
+                  ept_ = rpmsg_get_endpoint(rdev, ns_msg->name,
+                                            RPMSG_ADDR_ANY, hdr->dst);
+
+                  /* Only inherit non-RT priority from the matched endpoint,
+                   * ns_ept should not use RT priority to avoid overflow in
+                   * priority calculation.
+                   */
+
+                  if (ept_ && ept_->priority != RPMSG_PRIO_RT)
+                    {
+                      priority = ept_->priority;
+                    }
+                }
+
+              if (priority == RPMSG_PRIO_RT && ept != &rdev->ns_ept &&
+                  ept->dest_addr != RPMSG_ADDR_ANY)
+                {
+                  status = rpmsg_virtio_process_rx_buffer(rdev, ept,
+                                                          hdr);
+                }
+              else
+                {
+                  rpmsg_queue_rx_work(&priv->rpmsg, priority,
+                                      rpmsg_virtio_rx_worker, hdr);
+                  status = RPMSG_SUCCESS_BUFFER_RELEASED;
+                }
             }
           else
             {
-              rpmsg_queue_rx_work(&priv->rpmsg, priority,
-                                  rpmsg_virtio_rx_worker, hdr);
-              status = RPMSG_SUCCESS_BUFFER_RELEASED;
+              status = RPMSG_SUCCESS;
+            }
+
+          if (status != RPMSG_SUCCESS_BUFFER_RELEASED &&
+              rpmsg_virtio_buf_held_dec_test(hdr))
+            {
+              rpmsg_virtio_release_rx_buffer_nolock(rvdev, hdr);
+              release = true;
             }
         }
-      else
-        {
-          status = RPMSG_SUCCESS;
-        }
-
-      if (status != RPMSG_SUCCESS_BUFFER_RELEASED &&
-          rpmsg_virtio_buf_held_dec_test(hdr))
-        {
-          rpmsg_virtio_release_rx_buffer_nolock(rvdev, hdr);
-          release = true;
-        }
     }
+  while (virtqueue_enable_cb(rvdev->rvq));
 
   if (release)
     {
