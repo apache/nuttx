@@ -425,6 +425,22 @@ add_custom_command(
   VERBATIM)
 
 # ##############################################################################
+# Flash operation Usage: ESPTOOL_PORT=/dev/ttyUSBx cmake --build <build_dir>
+# --target flash
+# ##############################################################################
+
+add_custom_target(
+  flash
+  DEPENDS nuttx_post_build
+  COMMAND
+    ${CMAKE_COMMAND} -DBINARY_DIR=${CMAKE_BINARY_DIR}
+    -DSOURCE_DIR=${CMAKE_SOURCE_DIR} -DNUTTX_DIR=${NUTTX_DIR} -P
+    ${NUTTX_DIR}/tools/espressif/espressif_flash.cmake
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  COMMENT "Flashing firmware via esptool to $ENV{ESPTOOL_PORT}"
+  VERBATIM)
+
+# ##############################################################################
 # ULP Support (TODO)
 # ##############################################################################
 
