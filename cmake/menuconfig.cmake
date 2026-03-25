@@ -59,6 +59,17 @@ add_custom_target(
   WORKING_DIRECTORY ${NUTTX_DIR}
   USES_TERMINAL)
 
+# Refresh ${CMAKE_BINARY_DIR}/.config in place (set defaults, satisfy deps),
+# like "make olddefconfig". Use after hand-editing .config; does not copy from
+# board defconfig (see resetconfig for that).
+add_custom_target(
+  olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E env ${KCONFIG_ENV} olddefconfig
+  COMMAND ${CMAKE_COMMAND} -E remove -f
+          ${CMAKE_BINARY_DIR}/include/nuttx/config.h
+  COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
+  WORKING_DIRECTORY ${NUTTX_DIR})
+
 # utility target to restore .config from board's defconfig
 add_custom_target(
   resetconfig
@@ -68,6 +79,18 @@ add_custom_target(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
           ${CMAKE_BINARY_DIR}/.config.orig
   COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_PARENT_LIST_FILE}
+  WORKING_DIRECTORY ${NUTTX_DIR})
+
+# utility target to remove .config (and related) so next configure regenerates
+# from the current BOARD_CONFIG defconfig. Use when switching defconfigs after
+# "clean" so that the next "cmake -B build -DBOARD_CONFIG=board:newconfig"
+# recreates .config from the new defconfig.
+add_custom_target(
+  distcleanconfig
+  COMMAND
+    ${CMAKE_COMMAND} -E remove -f ${CMAKE_BINARY_DIR}/.config
+    ${CMAKE_BINARY_DIR}/.config.orig ${CMAKE_BINARY_DIR}/.config.prev
+    ${CMAKE_BINARY_DIR}/include/nuttx/config.h
   WORKING_DIRECTORY ${NUTTX_DIR})
 
 # utility target to refresh .config from board's defconfig for GITHUB
