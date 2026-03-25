@@ -3481,6 +3481,13 @@ config ARCH_BOARD_AT32F437_MINI
 	---help---
 		AT32F437-MINI board based on the Artery AT32F437VMT7 MCU.
 
+config ARCH_BOARD_ESK32
+	bool "ESK32 board"
+	depends on ARCH_CHIP_HT32F49163
+	select ARCH_HAVE_LEDS
+	---help---
+		ESK32 board based on the Holtek HT32F49163 MCU.
+
 config ARCH_BOARD_FRDM_MCXN236
 	bool "NXP MCXN236 CPU EVK board"
 	depends on ARCH_CHIP_N236
@@ -3927,6 +3934,7 @@ config ARCH_BOARD
 	default "hpm6360evk"                   if ARCH_BOARD_HPM6360EVK
 	default "hpm6750evk2"                  if ARCH_BOARD_HPM6750EVK2
 	default "at32f437-mini"                if ARCH_BOARD_AT32F437_MINI
+	default "esk32"                        if ARCH_BOARD_ESK32
 	default "csk6011a-nano"                if ARCH_BOARD_CSK6011A_NANO
 	default "frdm-mcxn236"                 if ARCH_BOARD_FRDM_MCXN236
 
@@ -5040,6 +5048,9 @@ source "boards/risc-v/hpm6750/hpm6750evk2/Kconfig"
 endif
 if ARCH_BOARD_AT32F437_MINI
 source "boards/arm/at32/at32f437-mini/Kconfig"
+endif
+if ARCH_BOARD_ESK32
+source "boards/arm/ht32f491x3/esk32/Kconfig"
 endif
 if ARCH_BOARD_CSK6011A_NANO
 source "boards/arm/csk6/csk6011a-nano/Kconfig"
