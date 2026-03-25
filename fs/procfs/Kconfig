@@ -148,6 +148,16 @@ config FS_PROCFS_EXCLUDE_VERSION
 	bool "Exclude version"
 	default DEFAULT_SMALL
 
+config FS_PROCFS_PROFILER
+	bool "Include fs/profile information"
+	depends on FS_PROFILER && !DEFAULT_SMALL
+	default n
+	---help---
+		Enable the VFS performance profiler procfs node at /proc/fs/profile.
+		This node provides real-time dynamic statistics (call counts, elapsed
+		time) for core VFS operations (read, write, open, close) to help
+		identify filesystem performance bottlenecks and regressions.
+
 config FS_PROCFS_INCLUDE_PRESSURE
 	bool "Include memory pressure notification"
 	default n

@@ -30,6 +30,10 @@
 #include <nuttx/fs/fs.h>
 #include <fcntl.h>
 
+#ifdef CONFIG_FS_PROFILER
+#include <nuttx/clock.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -122,5 +126,36 @@ void notify_rename(FAR const char *oldpath, bool oldisdir,
                    FAR const char *newpath, bool newisdir);
 void notify_initialize(void);
 #endif /* CONFIG_FS_NOTIFY */
+
+#ifdef CONFIG_FS_PROFILER
+
+struct vfs_profile_s
+{
+  uint32_t reads;
+  uint32_t writes;
+  uint32_t opens;
+  uint32_t closes;
+  uint64_t total_read_time;
+  uint64_t total_write_time;
+  uint64_t total_open_time;
+  uint64_t total_close_time;
+};
+
+extern struct vfs_profile_s g_vfs_profile;
+
+void vfs_profile_start(FAR clock_t *start);
+void vfs_profile_stop(FAR clock_t *start, FAR uint64_t *total,
+                      FAR uint32_t *count);
+
+#define VFS_PROFILE_START(start_time) vfs_profile_start(&start_time)
+#define VFS_PROFILE_STOP(start_time, total_time, count) \
+  vfs_profile_stop(&start_time, &total_time, &count)
+
+#else
+
+#define VFS_PROFILE_START(start_time) ((void)(start_time))
+#define VFS_PROFILE_STOP(start_time, total_time, count) ((void)(start_time))
+
+#endif /* CONFIG_FS_PROFILER */
 
 #endif /* __FS_VFS_VFS_H */

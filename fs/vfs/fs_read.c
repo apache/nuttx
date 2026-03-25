@@ -206,6 +206,10 @@ ssize_t file_readv(FAR struct file *filep,
 
   else if (inode != NULL && inode->u.i_ops)
     {
+      clock_t start_time;
+
+      VFS_PROFILE_START(start_time);
+
       if (inode->u.i_ops->readv)
         {
           struct uio uio;
@@ -220,6 +224,9 @@ ssize_t file_readv(FAR struct file *filep,
         {
           ret = file_readv_compat(filep, iov, iovcnt);
         }
+
+      VFS_PROFILE_STOP(start_time, g_vfs_profile.total_read_time,
+                       g_vfs_profile.reads);
     }
 
   /* Return the number of bytes read (or possibly an error code) */

@@ -119,9 +119,16 @@ int file_close(FAR struct file *filep)
 
       if (inode->u.i_ops && inode->u.i_ops->close)
         {
+          clock_t start_time;
+
+          VFS_PROFILE_START(start_time);
+
           /* Perform the close operation */
 
           ret = inode->u.i_ops->close(filep);
+
+          VFS_PROFILE_STOP(start_time, g_vfs_profile.total_close_time,
+                           g_vfs_profile.closes);
         }
 
       /* And release the inode */
