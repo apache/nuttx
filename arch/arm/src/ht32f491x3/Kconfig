@@ -1,0 +1,67 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "HT32F491x3 Configuration Options"
+
+choice
+	prompt "HT32F491x3 Chip Selection"
+	default ARCH_CHIP_HT32F49163
+	depends on ARCH_CHIP_HT32F491X3
+
+config ARCH_CHIP_HT32F49153
+	bool "HT32F49153"
+	select ARCH_HAVE_CUSTOM_VECTORS
+	---help---
+		128 KiB FLASH, 48 KiB SRAM.
+
+config ARCH_CHIP_HT32F49163
+	bool "HT32F49163"
+	select ARCH_HAVE_CUSTOM_VECTORS
+	---help---
+		256 KiB FLASH, 48 KiB SRAM.
+
+endchoice
+
+config HT32F491X3_SYSCLK_FREQUENCY
+	int "System clock frequency"
+	default 8000000
+	range 1 150000000
+	depends on ARCH_CHIP_HT32F491X3
+	---help---
+		The reset clock tree runs from the 8 MHz HICK oscillator. Adjust
+		this if board-specific CRM/PLL setup changes SYSCLK before the
+		generic timer or serial logic runs.
+
+config HT32F491X3_PCLK1_FREQUENCY
+	int "APB1 clock frequency"
+	default HT32F491X3_SYSCLK_FREQUENCY
+	range 1 150000000
+	depends on ARCH_CHIP_HT32F491X3
+	---help---
+		APB1 clock used by USART2 and USART3. The default matches the reset
+		configuration where APB1DIV does not divide HCLK.
+
+config HT32F491X3_PCLK2_FREQUENCY
+	int "APB2 clock frequency"
+	default HT32F491X3_SYSCLK_FREQUENCY
+	range 1 150000000
+	depends on ARCH_CHIP_HT32F491X3
+	---help---
+		APB2 clock used by USART1. The default matches the reset
+		configuration where APB2DIV does not divide HCLK.
+
+menu "Peripheral Support"
+
+config HT32F491X3_USART1_SERIALDRIVER
+	bool "USART1"
+	default y
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Enable the standard lower-half driver for USART1.
+
+comment "In this current version, only USART1 is exposed by the esk32 board support."
+
+endmenu # "Peripheral Support"

@@ -21,7 +21,16 @@
 ############################################################################
 
 include $(TOPDIR)/tools/Make.defs
+
+# Allow cleanup targets to run even if the configured chip dirlink is gone.
+CLEAN_GOALS = clean distclean
+ifeq ($(strip $(MAKECMDGOALS)),)
 include chip/Make.defs
+else ifeq ($(strip $(filter-out $(CLEAN_GOALS),$(MAKECMDGOALS))),)
+-include chip/Make.defs
+else
+include chip/Make.defs
+endif
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a
