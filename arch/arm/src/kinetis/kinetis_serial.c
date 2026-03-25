@@ -2022,12 +2022,6 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->ie |= UART_C2_TIE;
       priv->ie |= UART_C2_TCIE;
       up_setuartint(priv);
-
-      /* Fake a TX interrupt here by just calling uart_xmitchars() with
-       * interrupts disabled (note this may recurse).
-       */
-
-      uart_xmitchars(dev);
 #endif
     }
   else
