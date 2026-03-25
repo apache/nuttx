@@ -941,7 +941,11 @@ void cxd56_rxdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
                                CXD56_DMAC_BSIZE4, CXD56_DMAC_BSIZE4,   /* Dest / Src burst size (fixed) */
                                CXD56_DMAC_MAX_SIZE);
 
-      dst += CXD56_DMAC_MAX_SIZE;
+      if (di)
+        {
+          dst += CXD56_DMAC_MAX_SIZE;
+        }
+
       rest -= CXD56_DMAC_MAX_SIZE;
     }
 
@@ -1012,7 +1016,11 @@ void cxd56_txdmasetup(DMA_HANDLE handle, uintptr_t paddr, uintptr_t maddr,
                                    CXD56_DMAC_BSIZE1, CXD56_DMAC_BSIZE1,   /* Dest / Src burst size (fixed) */
                                    CXD56_DMAC_MAX_SIZE);
 
-      src += CXD56_DMAC_MAX_SIZE;
+      if (si)
+        {
+          src += CXD56_DMAC_MAX_SIZE;
+        }
+
       rest -= CXD56_DMAC_MAX_SIZE;
     }
 
