@@ -150,8 +150,8 @@
 #define STM32_IRQ_RESERVED80  (STM32_IRQ_FIRST + 80) /* 80: Reserved */
 #define STM32_IRQ_FPU         (STM32_IRQ_FIRST + 81) /* 81: FPU global interrupt */
 
-#define STM32_IRQ_NEXTINT     (82)
-#define NR_IRQS               (STM32_IRQ_FIRST + 82)
+#define STM32_IRQ_NEXTINTS    (82)
+#define NR_IRQS               (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types

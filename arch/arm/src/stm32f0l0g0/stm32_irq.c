@@ -69,25 +69,27 @@ static void stm32_dumpnvic(const char *msg, int irq)
   flags = enter_critical_section();
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
-  irqinfo("  ISER:       %08x ICER:   %08x\n",
+  irqinfo("  ISER:       %08" PRIx32 " ICER:   %08" PRIx32 "\n",
           getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
-  irqinfo("  ISPR:       %08x ICPR:   %08x\n",
+  irqinfo("  ISPR:       %08" PRIx32 " ICPR:   %08" PRIx32 "\n",
           getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
-  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
+  irqinfo("  IRQ PRIO:   %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 "\n",
           getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
           getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
-  irqinfo("              %08x %08x %08x %08x\n",
+  irqinfo("              %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 "\n",
           getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
           getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
 
   irqinfo("SYSCON:\n");
-  irqinfo("  CPUID:      %08x\n",
+  irqinfo("  CPUID:      %08" PRIx32 "\n",
           getreg32(ARMV6M_SYSCON_CPUID));
-  irqinfo("  ICSR:       %08x AIRCR:  %08x\n",
+  irqinfo("  ICSR:       %08" PRIx32 " AIRCR:  %08" PRIx32 "\n",
           getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
-  irqinfo("  SCR:        %08x CCR:    %08x\n",
+  irqinfo("  SCR:        %08" PRIx32 " CCR:    %08" PRIx32 "\n",
           getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
-  irqinfo("  SHPR2:      %08x SHPR3:  %08x\n",
+  irqinfo("  SHPR2:      %08" PRIx32 " SHPR3:  %08" PRIx32 "\n",
           getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
   leave_critical_section(flags);

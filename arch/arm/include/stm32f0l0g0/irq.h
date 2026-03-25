@@ -80,7 +80,7 @@
 #  error Unrecognized STM32 Cortex M0 family
 #endif
 
-#define NR_IRQS                 (STM32_IRQ_EXTINT + STM32_IRQ_NEXTINT)
+#define NR_IRQS                 (STM32_IRQ_EXTINT + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types

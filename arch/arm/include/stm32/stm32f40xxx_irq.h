@@ -306,24 +306,20 @@
 
 #if defined(CONFIG_STM32_STM32F401) || defined(CONFIG_STM32_STM32F411) || \
     defined(CONFIG_STM32_STM32F405) || defined(CONFIG_STM32_STM32F407)
-#  define STM32_IRQ_NEXTINT      (82)
-#  define NR_IRQS                (STM32_IRQ_FIRST+82)
+#  define STM32_IRQ_NEXTINTS     (82)
 #elif defined(CONFIG_STM32_STM32F410)
-#  define STM32_IRQ_NEXTINT      (98)
-#  define NR_IRQS                (STM32_IRQ_FIRST+98)
+#  define STM32_IRQ_NEXTINTS     (98)
 #elif defined(CONFIG_STM32_STM32F427)
-#  define STM32_IRQ_NEXTINT      (87)
-#  define NR_IRQS                (STM32_IRQ_FIRST+87)
+#  define STM32_IRQ_NEXTINTS     (87)
 #elif defined(CONFIG_STM32_STM32F429)
-#  define STM32_IRQ_NEXTINT      (91)
-#  define NR_IRQS                (STM32_IRQ_FIRST+91)
+#  define STM32_IRQ_NEXTINTS     (91)
 #elif defined(CONFIG_STM32_STM32F446) || defined(CONFIG_STM32_STM32F412)
-#  define STM32_IRQ_NEXTINT      (97)
-#  define NR_IRQS                (STM32_IRQ_FIRST+97)
+#  define STM32_IRQ_NEXTINTS     (97)
 #elif defined(CONFIG_STM32_STM32F469)
-#  define STM32_IRQ_NEXTINT      (93)
-#  define NR_IRQS                (STM32_IRQ_FIRST+93)
+#  define STM32_IRQ_NEXTINTS     (93)
 #endif
+
+#  define NR_IRQS                (STM32_IRQ_FIRST+STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types
