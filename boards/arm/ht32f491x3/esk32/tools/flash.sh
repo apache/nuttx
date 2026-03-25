@@ -27,7 +27,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TOPDIR="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
 DEFAULT_BIN="${TOPDIR}/nuttx.bin"
-OPENOCD_ROOT="/mnt/c/Program Files (x86)/Holtek HT32 Series/HT32-IDE/xPack/xpack-openocd-0.11.0-4"
+WINDOWS_SETUP="Windows 10 Pro with WSL2"
+HT32_IDE_VERSION="HT32-IDE 1.0.6 (Build Date: 2025/12/04)"
+HT32_IDE_ROOT="/mnt/c/Program Files (x86)/Holtek HT32 Series/HT32-IDE"
+OPENOCD_PACKAGE="xPack OpenOCD 0.11.0-4"
+OPENOCD_ROOT="${HT32_IDE_ROOT}/xPack/xpack-openocd-0.11.0-4"
 OPENOCD_EXE="${OPENOCD_ROOT}/bin/openocd.exe"
 SCRIPTS_DIR="${OPENOCD_ROOT}/scripts"
 FLASH_LOADER="${OPENOCD_ROOT}/FlashLoader/HT32F491x3_256.HLM"
@@ -38,6 +42,28 @@ SRAM_BASE="0x20000000"
 WORKAREA_SIZE="0xC000"
 BIN_PATH="${DEFAULT_BIN}"
 DRY_RUN=0
+
+print_assumptions() {
+  cat <<EOF
+############################################################################
+# Assumptions:
+#
+#   - ${WINDOWS_SETUP}; the Windows C: drive is available in WSL at /mnt/c
+#   - This is the WSL backend; use flash.py from the same directory for
+#     automatic backend selection, or run this script directly from WSL2
+#   - ${HT32_IDE_VERSION} installed at:
+#       ${HT32_IDE_ROOT}
+#   - ${OPENOCD_PACKAGE} available at:
+#       ${OPENOCD_ROOT}
+#   - Holtek HT-Link probe using interface/htlink.cfg
+#   - ESK32 board with ${DEVICE_NAME} and FlashLoader/HT32F491x3_256.HLM
+#
+# Update this script if any of the above are not true.
+#
+############################################################################
+
+EOF
+}
 
 usage() {
   cat <<EOF
@@ -53,9 +79,11 @@ Options:
 Examples:
   $0
   $0 --dry-run
-  $0 --device HT32F49163_64LQFP
+  $0 --device HT32F49163_100LQFP
 EOF
 }
+
+print_assumptions
 
 while (($# > 0)); do
   case "$1" in
