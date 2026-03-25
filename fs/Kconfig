@@ -5,6 +5,14 @@
 
 comment "File system configuration"
 
+config FS_PROFILER
+	bool "VFS Performance Profiler"
+	default n
+	---help---
+		Enable nanosecond/microsecond-level profiling for the Virtual File
+		System (VFS) operations (open, close, read, write). The profile stats
+		can be read via /proc/fs/profile if PROCFS is enabled.
+
 config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n

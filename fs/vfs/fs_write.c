@@ -188,6 +188,10 @@ ssize_t file_writev(FAR struct file *filep,
   inode = filep->f_inode;
   if (inode != NULL && inode->u.i_ops)
     {
+      clock_t start_time;
+
+      FS_PROFILE_START(start_time);
+
       if (inode->u.i_ops->writev)
         {
           struct uio uio;
@@ -202,6 +206,9 @@ ssize_t file_writev(FAR struct file *filep,
         {
           ret = file_writev_compat(filep, iov, iovcnt);
         }
+
+      FS_PROFILE_STOP(start_time, g_fs_profile.total_write_time,
+                      g_fs_profile.writes);
     }
 
 #ifdef CONFIG_FS_NOTIFY

@@ -65,6 +65,10 @@ ifeq ($(CONFIG_SIGNAL_FD),y)
 CSRCS += fs_signalfd.c
 endif
 
+ifeq ($(CONFIG_FS_PROFILER),y)
+CSRCS += fs_profile.c
+endif
+
 # Include vfs build support
 
 DEPPATH += --dep-path vfs

@@ -236,6 +236,10 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
    * because it may also be closed that many times.
    */
 
+  clock_t start_time;
+
+  FS_PROFILE_START(start_time);
+
   if (oflags & O_DIRECTORY)
     {
       ret = dir_allocate(filep, desc.relpath);
@@ -260,6 +264,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     {
       ret = -ENXIO;
     }
+
+  FS_PROFILE_STOP(start_time, g_fs_profile.total_open_time,
+                  g_fs_profile.opens);
 
   if (ret == -EISDIR && ((oflags & O_WRONLY) == 0))
     {
