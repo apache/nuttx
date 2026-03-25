@@ -163,7 +163,7 @@
 #  define STM32_IRQ_RNG        (STM32_IRQ_EXTINT + 31) /* 31: RNG */
 #endif
 
-#define STM32_IRQ_NEXTINT      (32)
+#define STM32_IRQ_NEXTINTS     (32)
 
 /****************************************************************************
  * Public Types

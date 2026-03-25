@@ -131,7 +131,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
     }
   else
     {
-      _info("  GPIO%c not enabled: APB2ENR: %08x\n",
+      _info("  GPIO%c not enabled: APB2ENR: %08" PRIx32 "\n",
           g_portchar[port], getreg32(STM32_RCC_APB2ENR));
     }
 

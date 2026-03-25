@@ -97,7 +97,7 @@
 #define STM32_IRQ_CAN           (STM32_IRQ_EXTINT + 30) /* 30: HDMI CAN */
 #define STM32_IRQ_USB           (STM32_IRQ_EXTINT + 31) /* 31: USB */
 
-#define STM32_IRQ_NEXTINT       (32) /* 32 external interrupts */
+#define STM32_IRQ_NEXTINTS      (32) /* 32 external interrupts */
 
 /****************************************************************************
  * Public Types

@@ -57,10 +57,6 @@ ifeq ($(CONFIG_STM32F0L0G0_GPIOIRQ),y)
 CHIP_CSRCS += stm32_gpioint.c
 endif
 
-ifeq ($(CONFIG_ARCH_IRQPRIO),y)
-CHIP_CSRCS += stm32_irqprio.c
-endif
-
 ifeq ($(CONFIG_STM32F0L0G0_HAVE_HSI48),y)
 CHIP_CSRCS += stm32_hsi48.c
 endif

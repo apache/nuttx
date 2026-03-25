@@ -116,8 +116,7 @@
 #  define STM32_IRQ_DMA2CH45    (75) /* 59: DMA2 Channel 4 and 5 global interrupt */
 #  define STM32_IRQ_DMA2CH5     (76) /* 60: DMA2 Channel 5 global interrupt */
 
-#  define STM32_IRQ_NEXTINT     (61)
-#  define NR_IRQS               (77)
+#  define STM32_IRQ_NEXTINTS    (61)
 
 /* Connectivity Line Devices */
 
@@ -191,8 +190,7 @@
 #  define STM32_IRQ_CAN2SCE     (82) /* 66: CAN2 SCE interrupt */
 #  define STM32_IRQ_OTGFS       (83) /* 67: USB On The Go FS global interrupt */
 
-#  define STM32_IRQ_NEXTINT     (68)
-#  define NR_IRQS               (84)
+#  define STM32_IRQ_NEXTINTS    (68)
 
 /* Medium and High Density Devices */
 
@@ -258,8 +256,7 @@
 #  define STM32_IRQ_DMA2CH3     (74) /* 58: DMA2 Channel 3 global interrupt */
 #  define STM32_IRQ_DMA2CH45    (75) /* 59: DMA2 Channel 4&5 global interrupt */
 
-#  define STM32_IRQ_NEXTINT     (60)
-#  define NR_IRQS               (76)
+#  define STM32_IRQ_NEXTINTS    (60)
 
 /* Convenience definitions for interrupts with multiple functions */
 
@@ -268,6 +265,8 @@
 #  define STM32_IRQ_USBLP       STM32_IRQ_USBLPCANRX0
 #  define STM32_IRQ_CAN1RX0     STM32_IRQ_USBLPCANRX0
 #endif
+
+#  define NR_IRQS               (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
 
 /****************************************************************************
  * Public Types

@@ -85,7 +85,7 @@
 #define STM32_IRQ_FDCAN1_0     (STM32_IRQ_EXTINT + 30) /* 30: FDCAN global interrupt 0 */
 #define STM32_IRQ_FDCAN1_1     (STM32_IRQ_EXTINT + 31) /* 31: FDCAN global interrupt 1 */
 
-#define STM32_IRQ_NEXTINT      (32)
+#define STM32_IRQ_NEXTINTS     (32)
 
 /****************************************************************************
  * Public Types

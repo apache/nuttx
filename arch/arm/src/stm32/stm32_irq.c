@@ -78,50 +78,90 @@
 static void stm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
+  unsigned int i;
+  unsigned int j;
+  unsigned int nregs;
+  unsigned int off;
+  unsigned int nintr;
+  unsigned int nreg_per_line = 4;
+  unsigned int nenable_per_reg = 32;
+  unsigned int nenable_per_line = nenable_per_reg * nreg_per_line;
+  unsigned int nprio_per_reg = 4;
+  unsigned int nprio_per_line = nprio_per_reg * nreg_per_line;
+  char buf[64];
 
   flags = enter_critical_section();
+  nintr = STM32_IRQ_NEXTINTS;
 
   irqinfo("NVIC (%s, irq=%d):\n", msg, irq);
-  irqinfo("  INTCTRL:    %08x VECTAB:  %08x\n",
+  irqinfo("  INTCTRL:    %08" PRIx32 " VECTAB:  %08" PRIx32 "\n",
           getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  irqinfo("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x "
-          "SYSTICK: %08x\n",
+  irqinfo("  SYSH ENABLE MEMFAULT: %08" PRIx32 " BUSFAULT: %08"
+          PRIx32 " USGFAULT: %08" PRIx32 " SYSTICK: %08" PRIx32 "\n",
           getreg32(NVIC_SYSHCON_MEMFAULTENA),
           getreg32(NVIC_SYSHCON_BUSFAULTENA),
           getreg32(NVIC_SYSHCON_USGFAULTENA),
           getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  irqinfo("  IRQ ENABLE: %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_31_ENABLE),
-          getreg32(NVIC_IRQ32_63_ENABLE),
-          getreg32(NVIC_IRQ64_95_ENABLE));
-  irqinfo("  SYSH_PRIO:  %08x %08x %08x\n",
+  for (i = 0; i < nintr; i += nenable_per_line)
+    {
+      if (!i)
+        {
+          off = snprintf(buf, sizeof(buf), "  IRQ ENAB 0:");
+        }
+      else
+        {
+          off = snprintf(buf, sizeof(buf), "         %3u:", i);
+        }
+
+      nregs = nintr - i;
+      if (nregs > nenable_per_line)
+        {
+          nregs = nenable_per_line;
+        }
+
+      for (j = 0; j < nregs; j += nenable_per_reg)
+        {
+          off += snprintf(&buf[off], sizeof(buf)-off, " %08" PRIx32,
+                          getreg32(NVIC_IRQ_ENABLE(i + j)));
+        }
+
+      irqinfo("%s\n", buf);
+    }
+
+  irqinfo("  SYSH_PRIO:  %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           getreg32(NVIC_SYSH4_7_PRIORITY),
           getreg32(NVIC_SYSH8_11_PRIORITY),
           getreg32(NVIC_SYSH12_15_PRIORITY));
-  irqinfo("  IRQ PRIO:   %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ0_3_PRIORITY),
-          getreg32(NVIC_IRQ4_7_PRIORITY),
-          getreg32(NVIC_IRQ8_11_PRIORITY),
-          getreg32(NVIC_IRQ12_15_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ16_19_PRIORITY),
-          getreg32(NVIC_IRQ20_23_PRIORITY),
-          getreg32(NVIC_IRQ24_27_PRIORITY),
-          getreg32(NVIC_IRQ28_31_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ32_35_PRIORITY),
-          getreg32(NVIC_IRQ36_39_PRIORITY),
-          getreg32(NVIC_IRQ40_43_PRIORITY),
-          getreg32(NVIC_IRQ44_47_PRIORITY));
-  irqinfo("              %08x %08x %08x %08x\n",
-          getreg32(NVIC_IRQ48_51_PRIORITY),
-          getreg32(NVIC_IRQ52_55_PRIORITY),
-          getreg32(NVIC_IRQ56_59_PRIORITY),
-          getreg32(NVIC_IRQ60_63_PRIORITY));
-  irqinfo("              %08x\n",
-          getreg32(NVIC_IRQ64_67_PRIORITY));
+
+  for (i = 0;
+       i < nintr;
+       i += nprio_per_line)
+    {
+      if (!i)
+        {
+          off = snprintf(buf, sizeof(buf), "  IRQ PRIO 0:");
+        }
+      else
+        {
+          off = snprintf(buf, sizeof(buf), "         %3u:", i);
+        }
+
+      nregs = nintr - i;
+      if (nregs > nprio_per_line)
+        {
+          nregs = nprio_per_line;
+        }
+
+      for (j = 0; j < nregs; j += nprio_per_reg)
+        {
+          off += snprintf(&buf[off], sizeof(buf)-off, " %08" PRIx32,
+                          getreg32(NVIC_IRQ_PRIORITY(i + j)));
+        }
+
+      irqinfo("%s\n", buf);
+    }
 
   leave_critical_section(flags);
 }
