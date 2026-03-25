@@ -209,9 +209,9 @@ static const struct file_operations g_factory_fops =
   factory_ioctl, /* ioctl */
 };
 
-/* This is an global data set of all of all active Telnet drivers.  This
- * additional logic in included to handle killing of task via control
- * characters received via Telenet (via Ctrl-C SIGINT, in particular).
+/* This is a global data set of all active Telnet drivers. This
+ * additional logic is included to handle killing tasks via control
+ * characters received via Telnet (via Ctrl-C SIGINT, in particular).
  */
 
 static struct telnet_dev_s *g_telnet_clients[CONFIG_TELNET_MAXLCLIENTS];
