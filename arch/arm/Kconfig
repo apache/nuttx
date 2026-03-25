@@ -779,6 +779,14 @@ config ARCH_CHIP_CXD32XX
 	---help---
 		Sony CXD32XX (ARM Cortex-M4) architectures
 
+config ARCH_CHIP_HT32F491X3
+	bool "Holtek HT32F491x3"
+	select ARCH_CORTEXM4
+	select ARCH_HAVE_FPU
+	select LIBC_ARCH_ATOMIC
+	---help---
+		Holtek HT32F491x3 (ARM Cortex-M4) architectures
+
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
 	select ARCH_CHIP_CUSTOM
@@ -1207,6 +1215,7 @@ config ARCH_CHIP
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
 	default "cxd32xx"	if ARCH_CHIP_CXD32XX
+	default "ht32f491x3"	if ARCH_CHIP_HT32F491X3
 	default "csk6"		if ARCH_CHIP_CSK6
 	default "mcx-nxxx"	if ARCH_CHIP_MCX_NXXX
 
@@ -1747,6 +1756,9 @@ source "arch/arm/src/at32/Kconfig"
 endif
 if ARCH_CHIP_CXD32XX
 source "arch/arm/src/cxd32xx/Kconfig"
+endif
+if ARCH_CHIP_HT32F491X3
+source "arch/arm/src/ht32f491x3/Kconfig"
 endif
 if ARCH_CHIP_MCX_NXXX
 source "arch/arm/src/mcx-nxxx/Kconfig"
