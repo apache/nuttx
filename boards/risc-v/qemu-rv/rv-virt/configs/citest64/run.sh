@@ -35,7 +35,7 @@ source ${NTFCDIR}/venv/bin/activate
 confpath=${CURRENTCONFDIR}/config.yaml
 jsonconf=${CURRENTCONFDIR}/session.json
 testpath=${NTFCDIR}/external/nuttx-testing
-python3 -m ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
+ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
 
 ret="$?"
 echo $ret
