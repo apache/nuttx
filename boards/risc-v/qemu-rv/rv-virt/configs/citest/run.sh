@@ -33,20 +33,14 @@ dd if=/dev/zero of=fatfs.img bs=512 count=128K
 mkfs.fat fatfs.img
 chmod 777 ./fatfs.img
 
-# enable venv
-source ${NTFCDIR}/venv/bin/activate
-
 # run NTFC
 confpath=${CURRENTCONFDIR}/config.yaml
 jsonconf=${CURRENTCONFDIR}/session.json
 testpath=${NTFCDIR}/external/nuttx-testing
-python3 -m ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
+ntfc test --testpath=${testpath} --confpath=${confpath} --jsonconf=${jsonconf}
 
 ret="$?"
 echo $ret
-
-# disable venv
-deactivate
 
 # export test results
 artifacts=${ARTIFACTCONFDIR}/ntfc
