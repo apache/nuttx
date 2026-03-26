@@ -351,7 +351,9 @@
 
 #define PIN_LCD_P40              (PIN_ANALOG | PIN_PORTD | PIN0)
 #define PIN_SPI0_PCS0_3          (PIN_ALT2   | PIN_PORTD | PIN0)
-#define PIN_UART2_RTS            (PIN_ALT3   | PIN_PORTD | PIN0)
+#if !defined(PIN_UART2_RTS)
+#  define PIN_UART2_RTS          (PIN_ALT3   | PIN_PORTD | PIN0)
+#endif
 #define PIN_LCD_P40F             (PIN_ALT7   | PIN_PORTD | PIN0)
 #define PIN_LCD_P41              (PIN_ANALOG | PIN_PORTD | PIN1)
 #define PIN_ADC0_SE5B            (PIN_ANALOG | PIN_PORTD | PIN1)

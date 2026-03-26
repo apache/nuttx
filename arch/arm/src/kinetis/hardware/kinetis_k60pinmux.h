@@ -346,7 +346,9 @@
 #define PIN_FB_TA                (PIN_ALT6   | PIN_PORTC | PIN19)
 
 #define PIN_SPI0_PCS0_3          (PIN_ALT2   | PIN_PORTD | PIN0)
-#define PIN_UART2_RTS            (PIN_ALT3   | PIN_PORTD | PIN0)
+#if !defined(PIN_UART2_RTS)
+#  define PIN_UART2_RTS          (PIN_ALT3   | PIN_PORTD | PIN0)
+#endif
 #define PIN_FTM3_CH0_2           (PIN_ALT4   | PIN_PORTD | PIN0)
 #define PIN_FB_ALE               (PIN_ALT5   | PIN_PORTD | PIN0)
 #define PIN_FB_CS1               (PIN_ALT5   | PIN_PORTD | PIN0)
