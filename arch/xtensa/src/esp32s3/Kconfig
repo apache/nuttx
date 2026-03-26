@@ -2344,7 +2344,7 @@ config ESPRESSIF_ADC_1_ATTEN_6
 config ESPRESSIF_ADC_1_ATTEN_12
 	bool "12 dB (4.4 V)"
 
-endchoice  # ESPRESSIF_ADC_1_ATTENUATION
+endchoice # ESPRESSIF_ADC_1_ATTENUATION
 
 config ESPRESSIF_ADC_1_ATTENUATION
 	int
@@ -2365,7 +2365,7 @@ config ESPRESSIF_ADC_1_MODE_ONE_SHOT
 config ESPRESSIF_ADC_1_MODE_CONTINUOUS
 	bool "Continuous Mode"
 
-endchoice  # ESPRESSIF_ADC_1_MODE
+endchoice # ESPRESSIF_ADC_1_MODE
 
 menu "ADC 1 Channel Selection"
 
@@ -2506,9 +2506,9 @@ config ESPRESSIF_ADC_2_CH9
 
 endmenu # ADC 2 Channel Selection
 
-endif  # ESPRESSIF_ADC_2
+endif # ESPRESSIF_ADC_2
 
-endmenu  # ADC Configuration
+endmenu # ADC Configuration
 
 menu "USB OTG Configuration"
 	depends on ESP32S3_OTG
@@ -2626,7 +2626,7 @@ config ESP32S3_LCD_DATA15_PIN
 	int "LCD Parallel Output Data Bit-15 Pin"
 	default 1
 
-endmenu
+endmenu # LCD Pin Configuration
 
 menu "LCD Display Configuration"
 	depends on ESP32S3_LCD
@@ -2687,66 +2687,66 @@ config ESP32S3_LCD_DATA_16BIT
 
 endchoice # LCD Data Width
 
-endmenu
+endmenu # LCD Display Configuration
 
 config ESP32S3_LCD_REGDEBUG
 	bool "LCD Debug Registers"
 	default n
 
-endmenu
+endmenu # LCD Controller Configuration
 
 menu "Camera (DVP) Configuration"
-        depends on ESP32S3_CAM
+	depends on ESP32S3_CAM
 
 config ESP32S3_CAM_XCLK_PIN
-        int "CAM XCLK Output Pin"
-        default 5
+	int "CAM XCLK Output Pin"
+	default 5
 
 config ESP32S3_CAM_PCLK_PIN
-        int "CAM PCLK Input Pin"
-        default 7
+	int "CAM PCLK Input Pin"
+	default 7
 
 config ESP32S3_CAM_VSYNC_PIN
-        int "CAM VSYNC Input Pin"
-        default 3
+	int "CAM VSYNC Input Pin"
+	default 3
 
 config ESP32S3_CAM_HREF_PIN
-        int "CAM HREF Input Pin"
-        default 46
+	int "CAM HREF Input Pin"
+	default 46
 
 config ESP32S3_CAM_D0_PIN
-        int "CAM Data Bit-0 Pin"
-        default 16
+	int "CAM Data Bit-0 Pin"
+	default 16
 
 config ESP32S3_CAM_D1_PIN
-        int "CAM Data Bit-1 Pin"
-        default 18
+	int "CAM Data Bit-1 Pin"
+	default 18
 
 config ESP32S3_CAM_D2_PIN
-        int "CAM Data Bit-2 Pin"
-        default 8
+	int "CAM Data Bit-2 Pin"
+	default 8
 
 config ESP32S3_CAM_D3_PIN
-        int "CAM Data Bit-3 Pin"
-        default 17
+	int "CAM Data Bit-3 Pin"
+	default 17
 
 config ESP32S3_CAM_D4_PIN
-        int "CAM Data Bit-4 Pin"
-        default 15
+	int "CAM Data Bit-4 Pin"
+	default 15
 
 config ESP32S3_CAM_D5_PIN
-        int "CAM Data Bit-5 Pin"
-        default 6
+	int "CAM Data Bit-5 Pin"
+	default 6
 
 config ESP32S3_CAM_D6_PIN
-        int "CAM Data Bit-6 Pin"
-        default 4
+	int "CAM Data Bit-6 Pin"
+	default 4
 
 config ESP32S3_CAM_D7_PIN
-        int "CAM Data Bit-7 Pin"
-        default 9
+	int "CAM Data Bit-7 Pin"
+	default 9
 
-endmenu
+endmenu # Camera (DVP) Configuration
 
 menu "SD/MMC Configuration"
 
@@ -2799,7 +2799,8 @@ config ESP32S3_SDMMC_D3
 	depends on ESP32S3_SDMMC
 	depends on !SDIO_WIDTH_D1_ONLY
 	default 42
-endmenu
+
+endmenu # SD/MMC Configuration
 
 menu "Bootloader and Image Configuration"
 
@@ -2849,7 +2850,7 @@ config ESP32S3_ESPTOOL_TARGET_SECONDARY
 		This is the choice most suitable for the development and verification
 		of a secure firmware update workflow.
 
-endchoice
+endchoice # Target slot for image flashing
 
 config ESP32S3_MCUBOOT_VERSION
 	string "MCUboot version"
