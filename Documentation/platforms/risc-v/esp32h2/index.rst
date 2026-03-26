@@ -134,11 +134,11 @@ where:
 Flashing NSH Example
 --------------------
 
-This example shows how to build and flash the ``nsh`` defconfig for the ESP32-H2-DevKitM-1 board::
+This example shows how to build and flash the ``nsh`` defconfig for the ESP32-H2-DevKit board::
 
     $ cd nuttx
     $ make distclean
-    $ ./tools/configure.sh esp32h2-devkitc:nsh
+    $ ./tools/configure.sh esp32h2-devkit:nsh
     $ make -j$(nproc)
 
 When the build is complete, the firmware can be flashed to the board using the command::
@@ -178,6 +178,76 @@ Now opening the serial port with a terminal emulator should show the NuttX conso
   NuttShell (NSH) NuttX-12.8.0
   nsh> uname -a
   NuttX 12.8.0 759d37b97c-dirty Mar  5 2025 20:16:34 risc-v esp32h2-devkit
+
+Building with CMake
+-------------------
+
+General CMake usage (out-of-tree build, ``menuconfig`` target, and so on) is described in
+:doc:`/quickstart/compiling_cmake`. The ESP32-H2 common arch enables post-build steps that
+produce ``nuttx.bin`` (and related images) under the **CMake binary directory**; the build
+log also prints suggested ``esptool.py`` command lines for your layout.
+
+Example (NuttX shell defconfig, Ninja generator)::
+
+  $ cd nuttx
+  $ cmake -B build -DBOARD_CONFIG=esp32h2-devkit:nsh -GNinja
+  $ cmake --build build
+
+To reconfigure the tree after changing options (same as other NuttX CMake boards)::
+
+  $ cmake --build build -t menuconfig
+  $ cmake --build build
+
+Persistent HAL cache (``NXTMPDIR``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Pass ``-DNXTMPDIR=ON`` at **configure** time to reuse a persistent clone of the
+``esp-hal-3rdparty`` repository under ``nuttx/../nxtmpdir/esp-hal-3rdparty``. CMake checks
+the expected revision; if it does not match, the cache directory is refreshed. This cuts
+repeat configure/build time when the HAL checkout would otherwise be re-fetched into the
+binary directory.
+
+Example::
+
+  $ cmake -B build -DBOARD_CONFIG=esp32h2-devkit:nsh -DNXTMPDIR=ON -GNinja
+  $ cmake --build build
+
+MCUBoot: building the 2nd-stage bootloader (``-t bootloader``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For configurations that use MCUboot, build the bootloader the same way as
+with Make, but via the CMake target::
+
+  $ cmake --build build -t bootloader
+
+The image is installed as ``mcuboot-esp32h2.bin`` in the NuttX **source** directory (not
+inside ``build/``).
+
+.. note::
+
+   Flashing paths differ from the pure-Make flow: the application image is under your CMake
+   build directory (for example ``build/nuttx.bin``), while MCUboot binaries live next to
+   ``nuttx`` sources. Use the ``esptool.py`` hints printed at the end of the build, or the
+   same offsets as documented for ``make flash`` with ``ESPTOOL_BINDIR``.
+
+Target flashing (``-t flash``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+After a successful CMake build, you can flash the chip with the ``flash`` custom target.
+This is the CMake-side equivalent of the Make ``FLASH`` logic in
+``tools/espressif/Config.mk``.
+
+**Serial port:** you must set ``ESPTOOL_PORT`` to a non-empty value (for example
+``/dev/ttyUSB0``). If it is unset or empty, the flash step fails.
+
+Example::
+
+  $ export ESPTOOL_PORT=/dev/ttyUSB0
+  $ cmake --build build -t flash
+
+Or for a single invocation::
+
+  $ ESPTOOL_PORT=/dev/ttyUSB0 cmake --build build -t flash
 
 Debugging
 =========
