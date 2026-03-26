@@ -222,9 +222,10 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
           break;
         }
 
-      ret = usrsock_iovec_get(buf, len, iov, iovcnt, pos, &done);
+      ret = (int)usrsock_iovec_get(buf, len, iov, iovcnt, pos, &done);
       if (ret < 0)
         {
+          rpmsg_release_tx_buffer(&priv->ept, buf);
           break;
         }
 
