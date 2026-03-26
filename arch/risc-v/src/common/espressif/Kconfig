@@ -1156,6 +1156,7 @@ config ESPRESSIF_DMA
 
 config ESPRESSIF_EFUSE
 	bool "E-Fuse support"
+	select EFUSE
 	default n
 	---help---
 		Enable efuse support.
