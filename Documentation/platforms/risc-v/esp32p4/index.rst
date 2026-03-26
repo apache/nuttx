@@ -284,7 +284,7 @@ Peripheral        Support NOTES
 LP SPI             No
 LP I2C             No
 LP I2S             No
-LP UART            No
+LP UART            Yes
 LP GPIO            No
 LP Timers          No
 LP ADC             No
