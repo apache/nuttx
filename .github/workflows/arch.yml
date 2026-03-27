@@ -33,7 +33,7 @@ jobs:
       # Get the Arch for the PR: arm, arm64, risc-v, xtensa, ...
       - name: Get arch
         id: get-arch
-        run: |        
+        run: |
 
           # If PR is Not Created or Modified: Build all targets
           pr=${{github.event.pull_request.number}}
@@ -193,7 +193,7 @@ jobs:
             # Fetch the board
             board=$( echo "$boards" | jq ".[$i]" )
             skip_build=0
-            
+
             # For "Arch / Board: arm": Build arm-01, arm-02, ...
             if [[ "$arch_contains_arm" == "1" || "$board_contains_arm" == "1" ]]; then
               if [[ "$board" != *"arm-"* ]]; then
@@ -211,7 +211,7 @@ jobs:
               if [[ "$board" != *"risc-v-"* ]]; then
                 skip_build=1
               fi
-  
+
             # For "Arch / Board: simulator": Build sim-01, sim-02
             elif [[ "$arch_contains_sim" == "1" || "$board_contains_sim" == "1" ]]; then
               if [[ "$board" != *"sim-"* ]]; then
@@ -223,24 +223,24 @@ jobs:
               if [[ "$board" != *"other"* ]]; then
                 skip_build=1
               fi
-  
+
             # For "Arch / Board: x86_64": Build x86_64-01
             elif [[ "$arch_contains_x86_64" == "1" || "$board_contains_x86_64" == "1" ]]; then
               if [[ "$board" != *"x86_64-"* ]]; then
                 skip_build=1
               fi
-  
-            # For "Arch / Board: xtensa": Build xtensa-01, xtensa-02
+
+            # For "Arch / Board: xtensa": Build xtensa-01, xtensa-02, xtensa-03
             elif [[ "$arch_contains_xtensa" == "1" || "$board_contains_xtensa" == "1" ]]; then
               if [[ "$board" != *"xtensa-"* ]]; then
                 skip_build=1
               fi
-  
+
             # For Other Arch: Allow the build
             else
               echo Build by default: $board
             fi
-  
+
             # Add the board to the selected builds
             if [[ "$skip_build" == "0" ]]; then
               echo Add $board to selected_builds
