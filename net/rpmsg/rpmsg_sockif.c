@@ -41,6 +41,7 @@
 #include <nuttx/rpmsg/rpmsg.h>
 #include <nuttx/mutex.h>
 #include <nuttx/poll.h>
+#include <nuttx/queue.h>
 #include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/ioctl.h>
@@ -130,6 +131,10 @@ struct rpmsg_socket_conn_s
 
   FAR struct rpmsg_socket_conn_s *pendlist;
   FAR struct rpmsg_socket_conn_s *pendnext;
+
+  /* Entry in g_rpmsg_socket_server while the socket is listening */
+
+  struct dq_entry_s              snode;
 
   /* server listen-scoket listening: backlog > 0;
    * others: backlog = 0;
@@ -246,6 +251,13 @@ const struct sock_intf_s g_rpmsg_sockif =
  ****************************************************************************/
 
 static uint32_t g_rpmsg_id;
+
+/* Listening sockets.  rpmsg_socket_ns_bind() holds the lock while it uses
+ * the server it found, so that close() cannot free that server meanwhile.
+ */
+
+static mutex_t g_rpmsg_socket_lock = NXMUTEX_INITIALIZER;
+static dq_queue_t g_rpmsg_socket_server;
 
 /****************************************************************************
  * Private Functions
@@ -696,31 +708,74 @@ static bool rpmsg_socket_ns_match(FAR struct rpmsg_device *rdev,
                                   FAR void *priv, FAR const char *name,
                                   uint32_t dest)
 {
-  FAR struct rpmsg_socket_conn_s *server = priv;
-  char namebuf[RPMSG_NAME_SIZE];
+  /* Only a stream client names its endpoint with a ":<id>" suffix.  The
+   * two ends of a datagram socket use the same name, and the first
+   * announcement has to wait in the rpmsg bind list until the other end
+   * creates its endpoint, so leave those alone.
+   */
 
-  rpmsg_socket_format_name(server, namebuf);
-  if (strncmp(name, namebuf, strlen(namebuf)))
-    {
-      return false;
-    }
-
-  if (server->rpaddr.rp_cpu[0] &&
-      strcmp(server->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev)))
-    {
-      /* Bind specific CPU, then only listen that CPU */
-
-      return false;
-    }
-
-  return true;
+  return strncmp(name, RPMSG_SOCKET_NAME_PREFIX,
+                 RPMSG_SOCKET_NAME_PREFIX_LEN) == 0 &&
+         strchr(name + RPMSG_SOCKET_NAME_PREFIX_LEN, ':') != NULL;
 }
 
-static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
-                                 FAR void *priv, FAR const char *name,
-                                 uint32_t dest)
+/****************************************************************************
+ * Name: rpmsg_socket_find_server
+ *
+ * Assumptions:
+ *   g_rpmsg_socket_lock is held by the caller.
+ *
+ ****************************************************************************/
+
+static FAR struct rpmsg_socket_conn_s *
+rpmsg_socket_find_server(FAR struct rpmsg_device *rdev,
+                         FAR const char *name)
 {
-  FAR struct rpmsg_socket_conn_s *server = priv;
+  FAR struct rpmsg_socket_conn_s *server;
+  char namebuf[RPMSG_NAME_SIZE];
+
+  dq_for_every_entry(&g_rpmsg_socket_server, server,
+                     struct rpmsg_socket_conn_s, snode)
+    {
+      rpmsg_socket_format_name(server, namebuf);
+      if (strncmp(name, namebuf, strlen(namebuf)))
+        {
+          continue;
+        }
+
+      if (server->rpaddr.rp_cpu[0] &&
+          strcmp(server->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev)))
+        {
+          /* Bind specific CPU, then only listen that CPU */
+
+          continue;
+        }
+
+      return server;
+    }
+
+  return NULL;
+}
+
+static void rpmsg_socket_ns_destroy(FAR struct rpmsg_device *rdev,
+                                    FAR const char *name,
+                                    uint32_t dest)
+{
+  struct rpmsg_ns_msg ns_msg;
+
+  strlcpy(ns_msg.name, name, RPMSG_NAME_SIZE);
+  ns_msg.addr  = dest;
+  ns_msg.flags = RPMSG_NS_DESTROY;
+
+  rpmsg_send_offchannel_raw(&rdev->ns_ept, rdev->ns_ept.addr,
+                            RPMSG_NS_EPT_ADDR, &ns_msg, sizeof(ns_msg),
+                            true);
+}
+
+static void rpmsg_socket_ns_accept(FAR struct rpmsg_socket_conn_s *server,
+                                   FAR struct rpmsg_device *rdev,
+                                   FAR const char *name, uint32_t dest)
+{
   FAR struct rpmsg_socket_conn_s *new;
   int ret;
 
@@ -822,6 +877,30 @@ errout_with_pending:
 
   nxmutex_unlock(&server->recvlock);
   rpmsg_socket_free(new);
+}
+
+static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
+                                 FAR void *priv, FAR const char *name,
+                                 uint32_t dest)
+{
+  FAR struct rpmsg_socket_conn_s *server;
+
+  nxmutex_lock(&g_rpmsg_socket_lock);
+  server = rpmsg_socket_find_server(rdev, name);
+  if (server != NULL)
+    {
+      rpmsg_socket_ns_accept(server, rdev, name, dest);
+    }
+  else
+    {
+      /* Nobody listens on this name:  refuse the connection, so that the
+       * client fails with ECONNREFUSED instead of waiting for a listener.
+       */
+
+      rpmsg_socket_ns_destroy(rdev, name, dest);
+    }
+
+  nxmutex_unlock(&g_rpmsg_socket_lock);
 }
 
 static int rpmsg_socket_getaddr(FAR struct rpmsg_socket_conn_s *conn,
@@ -936,12 +1015,15 @@ static int rpmsg_socket_listen(FAR struct socket *psock, int backlog)
       return -EINVAL;
     }
 
+  nxmutex_lock(&g_rpmsg_socket_lock);
+  if (server->backlog == 0)
+    {
+      dq_addlast(&server->snode, &g_rpmsg_socket_server);
+    }
+
   server->backlog = backlog;
-  return rpmsg_register_callback(server,
-                                 NULL,
-                                 NULL,
-                                 rpmsg_socket_ns_match,
-                                 rpmsg_socket_ns_bind);
+  nxmutex_unlock(&g_rpmsg_socket_lock);
+  return 0;
 }
 
 static int rpmsg_socket_connect_internal(FAR struct socket *psock)
@@ -1590,11 +1672,9 @@ static int rpmsg_socket_close(FAR struct socket *psock)
     {
       FAR struct rpmsg_socket_conn_s *pend;
 
-      rpmsg_unregister_callback(conn,
-                                NULL,
-                                NULL,
-                                rpmsg_socket_ns_match,
-                                rpmsg_socket_ns_bind);
+      nxmutex_lock(&g_rpmsg_socket_lock);
+      dq_rem(&conn->snode, &g_rpmsg_socket_server);
+      nxmutex_unlock(&g_rpmsg_socket_lock);
 
       /* Detach any connection still waiting for its SYNC: they hold a
        * pointer to this listening socket which is about to be freed.
@@ -1860,3 +1940,23 @@ static int rpmsg_socket_setsockopt(FAR struct socket *psock, int level,
 }
 
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rpmsg_socket_initialize
+ *
+ * Description:
+ *   Catch the name service announcements of all rpmsg socket clients, so
+ *   that a connection to a name nobody listens on is refused at once.
+ *
+ ****************************************************************************/
+
+void rpmsg_socket_initialize(void)
+{
+  rpmsg_register_callback(NULL, NULL, NULL,
+                          rpmsg_socket_ns_match,
+                          rpmsg_socket_ns_bind);
+}
