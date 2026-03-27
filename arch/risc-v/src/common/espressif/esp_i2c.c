@@ -70,6 +70,7 @@
 #  include "io_mux.h"
 #  include "lp_core_i2c.h"
 #  include "soc/i2c_struct.h"
+#  include "driver/lp_io.h"
 #endif
 
 /****************************************************************************
@@ -430,8 +431,8 @@ i2c_hal_context_t lp_i2c0_ctx =
 static struct esp_i2c_config_s esp_lp_i2c0_config =
 {
   .clk_freq   = I2C_CLK_FREQ_DEF,
-  .scl_pin    = 7,
-  .sda_pin    = 6,
+  .scl_pin    = CONFIG_ESPRESSIF_LPI2C0_SCLPIN,
+  .sda_pin    = CONFIG_ESPRESSIF_LPI2C0_SDAPIN,
 };
 
 static struct esp_i2c_priv_s esp_lp_i2c0_priv =
@@ -891,10 +892,12 @@ static void esp_i2c_init(struct esp_i2c_priv_s *priv)
       rtc_gpio_iomux_func_sel(config->sda_pin, p_i2c_pin->iomux_func);
       rtc_gpio_iomux_func_sel(config->scl_pin, p_i2c_pin->iomux_func);
 #else
-      /* ToDo: Add LP I2C for LP GPIO Matrix
-       * supported devices (e.g ESP32-P4)
-       */
-
+      lp_gpio_connect_out_signal(config->sda_pin, p_i2c_pin->sda_out_sig, 0,
+                                 0);
+      lp_gpio_connect_in_signal(config->sda_pin, p_i2c_pin->sda_in_sig, 0);
+      lp_gpio_connect_out_signal(config->scl_pin, p_i2c_pin->scl_out_sig, 0,
+                                 0);
+      lp_gpio_connect_in_signal(config->scl_pin, p_i2c_pin->scl_in_sig, 0);
 #endif /* SOC_LP_GPIO_MATRIX_SUPPORTED */
     }
 #endif
