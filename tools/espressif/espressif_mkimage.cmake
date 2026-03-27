@@ -188,6 +188,90 @@ endif()
 file(APPEND "${BINARY_DIR}/nuttx.manifest" "nuttx.bin\n")
 
 # ##############################################################################
+# Flash encryption (matches tools/espressif/Config.mk FLASH_ENC + ENC_APP)
+# ##############################################################################
+
+if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED)
+  message(STATUS "Flash Encryption is enabled!")
+  find_program(ESPSECURE espsecure espsecure.py)
+
+  if(CONFIG_ESPRESSIF_EFUSE_VIRTUAL)
+    message(WARNING "Virtual E-Fuses are enabled! E-Fuses will not be burned.")
+  endif()
+
+  if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_USE_HOST_KEY)
+    if(NOT EXISTS "${FLASH_ENC_KEY_PATH}")
+      message(
+        FATAL_ERROR
+          "FLASH ENCRYPTION error: Key file '${CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME}' not found.\n"
+          "Generate the encryption key using: espsecure.py generate_flash_encryption_key <key_name.bin>\n"
+          "Refer to the documentation on flash encryption before proceeding.")
+    endif()
+  endif()
+
+  if(CONFIG_ESPRESSIF_SPIFLASH)
+    message(STATUS "Applying encryption to user MTD partition on flash.")
+    if(NOT EXISTS "${FLASH_ENC_KEY_PATH}")
+      message(
+        FATAL_ERROR
+          "Flash encryption key is required for user MTD partition encryption. Key file: '${CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME}'\n"
+          "Make sure CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME is set or disable SPI Flash."
+      )
+    endif()
+    if(NOT ESPSECURE)
+      message(
+        FATAL_ERROR "espsecure.py not found - cannot encrypt MTD partition")
+    endif()
+    if(NOT DEFINED CONFIG_ESPRESSIF_STORAGE_MTD_SIZE)
+      message(
+        FATAL_ERROR
+          "CONFIG_ESPRESSIF_STORAGE_MTD_SIZE is required for SPI Flash + flash encryption"
+      )
+    endif()
+    if(NOT DEFINED CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET)
+      message(
+        FATAL_ERROR
+          "CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET is required for SPI Flash + flash encryption"
+      )
+    endif()
+
+    math(EXPR MTD_SIZE_INT "${CONFIG_ESPRESSIF_STORAGE_MTD_SIZE}")
+    message(
+      STATUS
+        "Encrypting user MTD partition offset: ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET}, size: ${CONFIG_ESPRESSIF_STORAGE_MTD_SIZE} (${MTD_SIZE_INT})"
+    )
+
+    execute_process(
+      COMMAND
+        ${CMAKE_COMMAND} -E env LC_ALL=C sh -c
+        "dd if=/dev/zero ibs=1 count=${MTD_SIZE_INT} 2>/dev/null | tr '\\000' '\\377' > blank_mtd.bin"
+      RESULT_VARIABLE BLANK_MTD_RESULT
+      WORKING_DIRECTORY ${BINARY_DIR})
+
+    if(NOT BLANK_MTD_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to create blank_mtd.bin for MTD encryption")
+    endif()
+
+    execute_process(
+      COMMAND
+        ${ESPSECURE} encrypt_flash_data --aes_xts --keyfile
+        ${FLASH_ENC_KEY_PATH} --address 0 --output ${BINARY_DIR}/enc_mtd.bin
+        ${BINARY_DIR}/blank_mtd.bin
+      RESULT_VARIABLE ENC_MTD_RESULT
+      WORKING_DIRECTORY ${BINARY_DIR})
+
+    if(NOT ENC_MTD_RESULT EQUAL 0)
+      file(REMOVE "${BINARY_DIR}/blank_mtd.bin")
+      message(FATAL_ERROR "espsecure.py encrypt_flash_data failed")
+    endif()
+
+    file(REMOVE "${BINARY_DIR}/blank_mtd.bin")
+
+    message(STATUS "Generated: enc_mtd.bin (encrypted user MTD placeholder)")
+  endif()
+endif()
+
+# ##############################################################################
 # Merge binaries (optional)
 # ##############################################################################
 
@@ -225,6 +309,15 @@ if(CONFIG_ESPRESSIF_MERGE_BINS)
     list(APPEND ESPTOOL_BINS ${MCUBOOT_APP_OFFSET} "${BINARY_DIR}/nuttx.bin")
     message(
       STATUS "Merge bin: ${MCUBOOT_APP_OFFSET} -> ${BINARY_DIR}/nuttx.bin")
+
+    if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED AND CONFIG_ESPRESSIF_SPIFLASH)
+      list(APPEND ESPTOOL_BINS ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET}
+           "${BINARY_DIR}/enc_mtd.bin")
+      message(
+        STATUS
+          "Merge bin: ${CONFIG_ESPRESSIF_STORAGE_MTD_OFFSET} -> ${BINARY_DIR}/enc_mtd.bin"
+      )
+    endif()
 
   elseif(CONFIG_ESPRESSIF_SIMPLE_BOOT)
     # Simple boot: same base offset as BL_OFFSET (0x2000 on ESP32-P4, else 0x0)

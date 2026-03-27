@@ -25,7 +25,8 @@
 # Shared Espressif + esptool layout and flash parameters for CMake scripts.
 #
 # Prerequisites (callers must do this first): - include(nuttx_kconfig.cmake) -
-# nuttx_export_kconfig(${BINARY_DIR}/.config)
+# nuttx_export_kconfig(${DOTCONFIG}) - BINARY_DIR and SOURCE_DIR set (for
+# FLASH_ENC_KEY_PATH)
 #
 # Defines set by including this file:
 #   CHIP_SERIES        - Chip string for esptool -c (from CONFIG_ESPRESSIF_CHIP_SERIES)
@@ -36,6 +37,8 @@
 #   FLASH_SIZE         - Flash size (e.g. 2MB, 4MB), for merge_bin/elf2image -fs
 #   FLASH_MODE         - Flash mode (dio, dout, qio, qout), for elf2image -fm only
 #   FLASH_FREQ         - Flash speed (e.g. 40m), for elf2image -ff/write_flash -ff
+#   FLASH_ENC_KEY_PATH - Resolved path to CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME
+#                        (empty if unset; relative paths checked vs BINARY_DIR then SOURCE_DIR)
 #
 # ##############################################################################
 # cmake-format: on
@@ -66,13 +69,15 @@ else()
 endif()
 set(EFUSE_OFFSET ${EFUSE_FLASH_OFFSET})
 
-# MCUboot application slot (Config.mk APP_OFFSET)
-if(CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY)
-  set(MCUBOOT_APP_OFFSET ${CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET})
-elseif(CONFIG_ESPRESSIF_ESPTOOL_TARGET_SECONDARY)
-  set(MCUBOOT_APP_OFFSET ${CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET})
-else()
-  message(FATAL_ERROR "Missing MCUBoot slot target: PRIMARY or SECONDARY")
+# MCUboot application slot (Config.mk APP_OFFSET); default when not MCUboot boot
+if(CONFIG_ESPRESSIF_BOOTLOADER_MCUBOOT)
+  if(CONFIG_ESPRESSIF_ESPTOOL_TARGET_PRIMARY)
+    set(MCUBOOT_APP_OFFSET ${CONFIG_ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET})
+  elseif(CONFIG_ESPRESSIF_ESPTOOL_TARGET_SECONDARY)
+    set(MCUBOOT_APP_OFFSET ${CONFIG_ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET})
+  else()
+    message(FATAL_ERROR "Missing MCUBoot slot target: PRIMARY or SECONDARY")
+  endif()
 endif()
 
 # Flash capacity (merge_bin --fill-flash-size, elf2image -fs)
@@ -108,4 +113,24 @@ if(DEFINED CONFIG_ESPRESSIF_FLASH_FREQ)
   string(REPLACE "\"" "" FLASH_FREQ "${CONFIG_ESPRESSIF_FLASH_FREQ}")
 else()
   set(FLASH_FREQ "40m")
+endif()
+
+# Host flash encryption key file (Config.mk / espressif_mkimage FLASH_ENC)
+if((NOT DEFINED BINARY_DIR) OR (NOT DEFINED SOURCE_DIR))
+  message(
+    FATAL_ERROR
+      "espressif_esptool_common.cmake: BINARY_DIR and SOURCE_DIR must be set before include()"
+  )
+endif()
+
+set(FLASH_ENC_KEY_PATH "")
+if(DEFINED CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME)
+  set(FLASH_ENC_KEY_PATH "${CONFIG_ESPRESSIF_SECURE_FLASH_ENC_HOST_KEY_NAME}")
+  if(NOT IS_ABSOLUTE "${FLASH_ENC_KEY_PATH}")
+    if(EXISTS "${BINARY_DIR}/${FLASH_ENC_KEY_PATH}")
+      set(FLASH_ENC_KEY_PATH "${BINARY_DIR}/${FLASH_ENC_KEY_PATH}")
+    elseif(EXISTS "${SOURCE_DIR}/${FLASH_ENC_KEY_PATH}")
+      set(FLASH_ENC_KEY_PATH "${SOURCE_DIR}/${FLASH_ENC_KEY_PATH}")
+    endif()
+  endif()
 endif()
