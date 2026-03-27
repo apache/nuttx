@@ -282,7 +282,7 @@ LP Peripherals
 Peripheral        Support NOTES
 ================= ======= ==================================
 LP SPI             No
-LP I2C             No
+LP I2C             Yes
 LP I2S             No
 LP UART            Yes
 LP GPIO            No
