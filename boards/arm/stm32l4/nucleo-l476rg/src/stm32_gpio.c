@@ -147,7 +147,7 @@ static int stm32gpio_interrupt(int irq, void *context, void *arg)
   gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
 
   stm32gpint->callback(&stm32gpint->stm32gpio.gpio,
-                       tm32gpint->stm32gpio.id);
+                       stm32gpint->stm32gpio.id);
   return OK;
 }
 
