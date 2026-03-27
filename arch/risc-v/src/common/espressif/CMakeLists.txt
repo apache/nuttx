@@ -65,12 +65,6 @@ if(CONFIG_ESPRESSIF_HR_TIMER)
 endif()
 
 if(CONFIG_ESPRESSIF_EFUSE)
-  if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED)
-    message(
-      WARNING
-        "Flash Encryption is not supported on CMake. Use Make to build the image instead."
-    )
-  endif()
   list(APPEND SRCS esp_efuse.c)
 endif()
 
@@ -423,6 +417,15 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "Generating ESP-compatible binary"
   VERBATIM)
+
+# Flash encryption: burn key to eFuses (similar to tools/espressif/Config.mk
+# BURN_EFUSES). Build: ESPTOOL_PORT=/dev/ttyUSB0 NOCHECK=1 cmake --build
+# <builddir> -t burn_enc_key (NOCHECK is required by burn_flash_enc_key.py; same
+# idea as make NOCHECK.)
+
+if(CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED)
+  include(${NUTTX_DIR}/tools/espressif/espressif_burn_enc_key.cmake)
+endif()
 
 # ##############################################################################
 # Flash operation Usage: ESPTOOL_PORT=/dev/ttyUSBx cmake --build <build_dir>
