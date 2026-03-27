@@ -90,13 +90,13 @@ static int sx127x_irq0_attach(xcpt_t isr, void *arg)
 
   /* Make sure the interrupt is disabled */
 
-  esp32_gpioirqdisable(irq);
+  esp_gpioirqdisable(irq);
 
   wlinfo("Attach DIO0 IRQ\n");
 
   /* Attach to IRQ on pin connected to DIO0 */
 
-  ret = irq_attach(irq, isr, arg);
+  ret = esp_gpio_irq(GPIO_SX127X_DIO0, isr, arg);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: gpint_attach() failed: %d\n", ret);
@@ -105,7 +105,7 @@ static int sx127x_irq0_attach(xcpt_t isr, void *arg)
 
   /* IRQ on rising edge */
 
-  esp32_gpioirqenable(irq, RISING);
+  esp_gpioirqenable(irq);
 
   return OK;
 }
@@ -125,7 +125,7 @@ static void sx127x_chip_reset(void)
 
   /* Set pin to zero */
 
-  esp32_gpiowrite(GPIO_SX127X_RESET, 0);
+  esp_gpiowrite(GPIO_SX127X_RESET, 0);
 
   /* Wait 1 ms */
 
@@ -133,7 +133,7 @@ static void sx127x_chip_reset(void)
 
   /* Set pin to high */
 
-  esp32_gpiowrite(GPIO_SX127X_RESET, 1);
+  esp_gpiowrite(GPIO_SX127X_RESET, 1);
 
   /* Wait 10 ms */
 
@@ -203,7 +203,7 @@ int esp32_lpwaninitialize(void)
 
   /* Setup DIO0 */
 
-  esp_configgpio(GPIO_SX127X_DIO0, INPUT_FUNCTION_3 | PULLDOWN);
+  esp_configgpio(GPIO_SX127X_DIO0, INPUT_FUNCTION_3 | PULLDOWN | RISING);
 
   /* Init SPI bus */
 
