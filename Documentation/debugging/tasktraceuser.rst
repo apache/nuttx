@@ -64,6 +64,14 @@ The following configurations are configurable parameters for trace.
   - If enabled, it will dump the data in the noteram buffer after a system crash.
     This function can help to view the behavior of the system before the crash
 
+- ``CONFIG_DRIVERS_NOTERAM_TEXT_DUMP``
+
+  - If enabled (default), reading the noteram device in the default read mode
+    returns the notes as human-readable text. If disabled, only the binary
+    read mode (``NOTERAM_MODE_READ_BINARY``) is available, which saves code
+    size. The text formatting code is still built when
+    ``CONFIG_DRIVERS_NOTERAM_CRASH_DUMP`` is enabled.
+
 After the configuration, rebuild the NuttX kernel and application.
 
 If the trace function is enabled, "``trace``" :doc:`../applications/nsh/builtin` will be available.

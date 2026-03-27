@@ -130,10 +130,13 @@ static int noteram_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
                         bool setup);
 static void noteram_add(FAR struct note_driver_s *drv,
                         FAR const void *note, size_t len);
+#if defined(CONFIG_DRIVERS_NOTERAM_TEXT_DUMP) || \
+    defined(CONFIG_DRIVERS_NOTERAM_CRASH_DUMP)
 static void
 noteram_dump_init_context(FAR struct noteram_dump_context_s *ctx);
 static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
                             FAR struct noteram_dump_context_s *ctx);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -459,7 +462,10 @@ static int noteram_open(FAR struct file *filep)
   drv->threshold = sizeof(struct note_common_s);
 
   filep->f_priv = ctx;
+#if defined(CONFIG_DRIVERS_NOTERAM_TEXT_DUMP) || \
+    defined(CONFIG_DRIVERS_NOTERAM_CRASH_DUMP)
   noteram_dump_init_context(ctx);
+#endif
   return OK;
 }
 
@@ -479,20 +485,26 @@ int noteram_close(FAR struct file *filep)
 static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
+#ifdef CONFIG_DRIVERS_NOTERAM_TEXT_DUMP
   FAR struct noteram_dump_context_s *ctx = filep->f_priv;
+#endif
   FAR struct noteram_driver_s *drv = filep->f_inode->i_private;
-  FAR struct lib_memoutstream_s stream;
   ssize_t ret;
   irqstate_t flags;
 
+#ifdef CONFIG_DRIVERS_NOTERAM_TEXT_DUMP
   if (ctx->mode == NOTERAM_MODE_READ_BINARY)
+#endif
     {
       flags = spin_lock_irqsave_notrace(&drv->lock);
       ret = noteram_get(drv, (FAR uint8_t *)buffer, buflen);
       spin_unlock_irqrestore_notrace(&drv->lock, flags);
     }
+#ifdef CONFIG_DRIVERS_NOTERAM_TEXT_DUMP
   else
     {
+      struct lib_memoutstream_s stream;
+
       lib_memoutstream(&stream, buffer, buflen);
 
       do
@@ -516,6 +528,7 @@ static ssize_t noteram_read(FAR struct file *filep, FAR char *buffer,
         }
       while (ret == 0);
     }
+#endif
 
   return ret;
 }
@@ -781,6 +794,9 @@ static void noteram_add(FAR struct note_driver_s *driver,
       poll_notify(&drv->pfd, 1, POLLIN);
     }
 }
+
+#if defined(CONFIG_DRIVERS_NOTERAM_TEXT_DUMP) || \
+    defined(CONFIG_DRIVERS_NOTERAM_CRASH_DUMP)
 
 /****************************************************************************
  * Name: noteram_dump_init_context
@@ -1292,6 +1308,8 @@ static int noteram_dump_one(FAR uint8_t *p, FAR struct lib_outstream_s *s,
 
   return ret;
 }
+
+#endif /* NOTERAM_TEXT_DUMP || NOTERAM_CRASH_DUMP */
 
 #ifdef CONFIG_DRIVERS_NOTERAM_CRASH_DUMP
 

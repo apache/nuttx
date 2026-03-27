@@ -112,6 +112,14 @@ config DRIVERS_NOTERAM_CRASH_DUMP
 	---help---
 		If this option is enabled, dump all contents when a crash occurs.
 
+config DRIVERS_NOTERAM_TEXT_DUMP
+	bool "Enable text format read mode"
+	default y
+	---help---
+		Enable human-readable text dump via read(). When disabled, only
+		binary mode (NOTERAM_MODE_READ_BINARY) is available, saving code
+		size.
+
 endif # DRIVERS_NOTERAM
 
 config DRIVERS_NOTE_STRIP_FORMAT
