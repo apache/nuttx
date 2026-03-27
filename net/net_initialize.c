@@ -48,6 +48,7 @@
 #include "route/route.h"
 #include "usrsock/usrsock.h"
 #include "vsock/vsock.h"
+#include "rpmsg/rpmsg.h"
 
 /****************************************************************************
  * Public Functions
@@ -112,6 +113,10 @@ void net_initialize(void)
 
 #ifdef CONFIG_NET_VSOCK
   vsock_initialize();
+#endif
+
+#ifdef CONFIG_NET_RPMSG
+  rpmsg_socket_initialize();
 #endif
 }
 

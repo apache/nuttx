@@ -43,6 +43,20 @@ extern "C"
 
 extern const struct sock_intf_s g_rpmsg_sockif;
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: rpmsg_socket_initialize
+ *
+ * Description:
+ *   Initialize the rpmsg socket support.  Called once by net_initialize().
+ *
+ ****************************************************************************/
+
+void rpmsg_socket_initialize(void);
+
 #ifdef __cplusplus
 }
 #endif
