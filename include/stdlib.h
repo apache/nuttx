@@ -87,8 +87,23 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* Structure type returned by the div() function. */
+/* Structure type returned by the div() function.
+ *
+ * When CONFIG_LIBCXXTOOLCHAIN is active the toolchain's <cstdlib> uses
+ * #include_next <stdlib.h> which bypasses this file and lands on the
+ * toolchain's own stdlib.h (e.g. newlib's _STDLIB_H_ guard).  That file
+ * defines div_t/ldiv_t/lldiv_t with an anonymous struct that GCC internally
+ * names struct div_t.  A subsequent inclusion of this file (through the
+ * cstdio -> stdio.h -> kmalloc.h chain) would then attempt to redefine the
+ * same typedef with a different struct tag, causing a "conflicting
+ * declaration" error.  Guard against that by skipping our own struct/typedef
+ * definitions when a toolchain stdlib.h has already been included.
+ *
+ * _STDLIB_H_  - newlib (ARM GNU Toolchain, picolibc, avr-libc, ...)
+ * _STDLIB_H   - glibc / musl (native host toolchains)
+ */
 
+#if !defined(_STDLIB_H_) && !defined(_STDLIB_H)
 struct div_s
 {
   int quot;     /* Quotient */
@@ -111,11 +126,12 @@ typedef struct ldiv_s ldiv_t;
 
 struct lldiv_s
 {
-  long quot;    /* Quotient */
-  long rem;     /* Remainder */
+  long long quot;    /* Quotient */
+  long long rem;     /* Remainder */
 };
 
 typedef struct lldiv_s lldiv_t;
+#endif /* !defined(_STDLIB_H_) && !defined(_STDLIB_H) */
 
 /****************************************************************************
  * Public Function Prototypes
