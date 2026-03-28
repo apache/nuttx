@@ -45,6 +45,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
+void qemu_rv_configure_mpu(void);
 void qemu_rv_userspace(void);
 #endif
 
