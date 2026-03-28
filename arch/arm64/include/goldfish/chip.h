@@ -57,28 +57,75 @@
  */
 
 #if CONFIG_ARM64_GIC_VERSION == 2
-#define CONFIG_GICD_BASE          0x8000000
-#define CONFIG_GICR_BASE          0x8010000
+#define CONFIG_GICD_BASE           0x8000000
+#define CONFIG_GICR_BASE           0x8010000
 #elif CONFIG_ARM64_GIC_VERSION == 3 || CONFIG_ARM64_GIC_VERSION == 4
-#define CONFIG_GICD_BASE          0x8000000
-#define CONFIG_GICR_BASE          0x80a0000
-#define CONFIG_GICR_OFFSET        0x20000
+#define CONFIG_GICD_BASE           0x8000000
+#define CONFIG_GICR_BASE           0x80a0000
+#define CONFIG_GICR_OFFSET         0x20000
 #else
 #error CONFIG_ARM64_GIC_VERSION should be 2, 3 or 4
 #endif /* CONFIG_ARM64_GIC_VERSION */
 
-#define CONFIG_FLASH_BASEADDR     0x7000000
-#define CONFIG_FLASH_SIZE         MB(128)
+#define CONFIG_FLASH_BASEADDR      0x7000000
+#define CONFIG_FLASH_SIZE          MB(128)
 
-#define CONFIG_DEVICEIO_BASEADDR  0x08000000
-#define CONFIG_DEVICEIO_SIZE      MB(512)
+#define CONFIG_QEMU_DRAM_BASE      0x40000000
 
-#define CONFIG_RAM_ADDR           0x40000000
-#define CONFIG_RAM_SIZE           MB(128)
+#define CONFIG_SECURE_MEM_BASEADDR 0x0e000000
+#define CONFIG_SECURE_MEM_SIZE     MB(16)
 
-#define CONFIG_LOAD_BASE          0x40280000
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define CONFIG_RAMBANK1_ADDR     CONFIG_SECURE_MEM_BASEADDR
+#  define CONFIG_RAMBANK1_SIZE     CONFIG_SECURE_MEM_SIZE
+#else
+/* QEMU virt machine physical RAM always starts at 0x40000000.
+ * RAMBANK1 must cover from physical RAM base through the end of
+ * NuttX's configured RAM region (CONFIG_RAM_START + CONFIG_RAM_SIZE)
+ * so that the MMU mapping is large enough.
+ *
+ * When CONFIG_RAM_START > 0x40000000 (e.g. running under a hypervisor),
+ * the RAMBANK1 mapping still starts at 0x40000000 to keep the DTB
+ * accessible, and extends to cover CONFIG_RAM_END.
+ *
+ * The user must ensure QEMU is launched with enough RAM via -m option:
+ *   -m <size>  where size >=
+ *   (CONFIG_RAM_START - 0x40000000 + CONFIG_RAM_SIZE)
+ */
 
-#define MPID_TO_CLUSTER_ID(mpid)  ((mpid) & ~0xff)
+#  define CONFIG_RAMBANK1_ADDR     CONFIG_QEMU_DRAM_BASE
+#  define CONFIG_RAMBANK1_SIZE     (CONFIG_RAM_START - CONFIG_RAMBANK1_ADDR + \
+                                    CONFIG_RAM_SIZE)
+#endif
+#define CONFIG_DEVICEIO_BASEADDR   0x08000000
+#define CONFIG_DEVICEIO_SIZE       MB(512)
+
+#define CONFIG_RAM_ADDR            0x40000000
+#define CONFIG_RAM_SIZE            MB(128)
+
+#define CONFIG_SHMEM_BASEADDR      0x45000000
+#define CONFIG_SHMEM_SIZE          MB(1)
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+/* When booting via TF-A (Trusted Firmware-A), BL2 and BL31 occupy the
+ * secure SRAM region starting at 0x0e000000:
+ *
+ *   0x0e000000 - 0x0e001000 : Shared RAM (mailbox)
+ *   0x0e05b000 - 0x0e090000 : BL2  (212KB)
+ *   0x0e090000 - 0x0e100000 : BL31 (448KB)
+ *
+ * BL31 remains resident at runtime, so NuttX must be placed above
+ * 0x0e100000 (secure DRAM) to avoid overwriting BL31 code and data.
+ */
+
+#  define CONFIG_LOAD_BASE         (CONFIG_SECURE_MEM_BASEADDR + 0x100000)
+#else
+/* Load base is 0x280000 (2.5MB) offset from CONFIG_RAM_START */
+
+#  define CONFIG_LOAD_BASE         (CONFIG_RAM_START + 0x280000)
+#endif
+
+#define MPID_TO_CLUSTER_ID(mpid)   ((mpid) & ~0xff)
 
 #endif
 
