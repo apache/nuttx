@@ -227,6 +227,9 @@ void qemu_rv_start(int mhartid, const char *dtb)
 cpux:
 
 #ifdef CONFIG_SMP
+#  ifdef CONFIG_BUILD_PROTECTED
+  qemu_rv_configure_mpu();
+#  endif
   riscv_cpu_boot(mhartid);
 #endif
 

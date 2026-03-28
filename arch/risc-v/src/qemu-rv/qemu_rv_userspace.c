@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: configure_mpu
+ * Name: qemu_rv_configure_mpu
  *
  * Description:
  *   This function configures the MPU for for kernel- / userspace separation.
@@ -63,7 +63,7 @@
  *
  ****************************************************************************/
 
-static void configure_mpu(void)
+void qemu_rv_configure_mpu(void)
 {
   int ret;
   ret = riscv_append_pmp_region(UFLASH_F, UFLASH_START, UFLASH_SIZE);
@@ -123,7 +123,7 @@ void qemu_rv_userspace(void)
 
   /* Configure MPU / PMP to grant access to the userspace */
 
-  configure_mpu();
+  qemu_rv_configure_mpu();
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
