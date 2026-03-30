@@ -85,7 +85,11 @@ struct netdev_upperhalf_s
 {
   FAR struct netdev_lowerhalf_s *lower;
 
-  /* TX queue for re-queueing replies */
+  /* TX queue for pending packets.  Packets are queued here when:
+   *   - eth_input / ip_input generates a reply (e.g. ARP, ICMP echo)
+   *   - A transient transmit error causes a packet to be re-queued
+   *     for later retry (head-inserted to preserve ordering).
+   */
 
   struct iob_queue_s txq;
 
@@ -331,13 +335,32 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 
   if (ret != OK)
     {
-      /* Stop polling on any error
-       * REVISIT: maybe store the pkt in upper half and retry later?
-       */
+      if (ret == NETDEV_TX_CONTINUE)
+        {
+          /* Permanent error -- drop the packet to avoid infinite retry.
+           * netpkt_put() restores quota and places pkt back into
+           * dev->d_iob so the caller can release it.
+           */
 
-      NETDEV_TXERRORS(dev);
-      nerr("ERROR: Transmit failed: %d\n", ret);
-      netpkt_put(dev, pkt, NETPKT_TX);
+          NETDEV_TXERRORS(dev);
+          nerr("ERROR: Packet too large, dropping\n");
+          netpkt_put(dev, pkt, NETPKT_TX);
+        }
+      else
+        {
+          /* Transient error -- re-queue to txq head for retry.
+           * Head-insert preserves packet ordering.  The retry will be
+           * driven by txdone callback from the lower half driver.
+           *
+           * Note: We manually restore quota instead of using netpkt_put()
+           * because the pkt is moved to txq, not back to dev->d_iob.
+           * After netpkt_get(), dev->d_iob is already NULL.
+           */
+
+          nwarn("WARNING: Transmit failed: %d, re-queue pkt\n", ret);
+          iob_add_queue_head(pkt, &upper->txq);
+          atomic_add(&upper->lower->quota_ptr[NETPKT_TX], 1);
+        }
 
       /* When the quota is not 0, lower half may also return a failure,
        * in which case the txdone process is required to trigger subsequent
@@ -373,13 +396,23 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 static int netdev_upper_tx(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+  int ret;
 
   if (!IOB_QEMPTY(&upper->txq))
     {
-      /* Put the packet back to the device */
-
       netdev_iob_replace_l2(dev, iob_remove_queue(&upper->txq));
-      return netdev_upper_txpoll(dev);
+      ret = netdev_upper_txpoll(dev);
+
+      /* Release dev->d_iob if txpoll left it non-NULL.
+       * This happens when txpoll drops an oversize packet via
+       * netpkt_put() -- the txq path does not go through devif_poll
+       * which would otherwise manage the iob lifecycle.
+       * For success / transient-error, dev->d_iob is already NULL,
+       * so this is a safe no-op.
+       */
+
+      netdev_iob_release(dev);
+      return ret;
     }
 
   /* No more TX packets in queue, poll the net stack to get more packets */
@@ -1460,6 +1493,10 @@ static int netdev_upper_ifup(FAR struct net_driver_s *dev)
 static int netdev_upper_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct netdev_upperhalf_s *upper = dev->d_private;
+
+  /* Drain the TX queue before tearing down the interface. */
+
+  iob_free_queue(&upper->txq);
 
   switch (upper->lower->rxtype)
     {
