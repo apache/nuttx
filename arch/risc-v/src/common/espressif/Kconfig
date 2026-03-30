@@ -3473,26 +3473,6 @@ config ESP_MCPWM_TEST_LOOPBACK
 
 endmenu # MCPWM Configuration
 
-menu "High Resolution Timer"
-	depends on ESPRESSIF_HR_TIMER
-
-config ESPRESSIF_HR_TIMER_TASK_NAME
-	string "High Resolution Timer task name"
-	default "hr_timer"
-
-config ESPRESSIF_HR_TIMER_TASK_PRIORITY
-	int "High Resolution Timer task priority"
-	default 223
-	---help---
-		Priority level of the High Resolution Timer task.
-		Must be lower than the SCHED_HPWORKPRIORITY.
-
-config ESPRESSIF_HR_TIMER_TASK_STACK_SIZE
-	int "High Resolution Timer task stack size"
-	default 2048
-
-endmenu # High Resolution Timer
-
 menu "Brownout Detector Configuration"
 	depends on ESPRESSIF_BROWNOUT_DET
 
