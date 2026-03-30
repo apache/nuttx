@@ -2282,17 +2282,11 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
           priv->sector++;
         }
 
-      /* Check if there is a request in the wrreqlist that we will be able to
-       * use for data transfer.
-       */
+      /* Dequeue a request under spinlock to ensure exclusive ownership */
 
-      privreq = (FAR struct usbmsc_req_s *)sq_peek(&priv->wrreqlist);
-
-      /* If there no request structures available, then just return an
-       * error.  This will cause us to remain in the CMDREAD state.  When a
-       * request is returned, the worker thread will be awakened in the
-       * USBMSC_STATE_CMDREAD and we will be called again.
-       */
+      flags = spin_lock_irqsave(&priv->spinlock);
+      privreq = (FAR struct usbmsc_req_s *)sq_remfirst(&priv->wrreqlist);
+      spin_unlock_irqrestore(&priv->spinlock, flags);
 
       if (!privreq)
         {
@@ -2329,15 +2323,7 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
       if (priv->nreqbytes >= priv->epbulkin->maxpacket ||
           (priv->u.xfrlen <= 0 && priv->nsectbytes <= 0))
         {
-          /* Remove the request that we just filled from wrreqlist (we've
-           * already checked that is it not NULL
-           */
-
-          flags = spin_lock_irqsave(&priv->spinlock);
-          privreq = (FAR struct usbmsc_req_s *)sq_remfirst(&priv->wrreqlist);
-          spin_unlock_irqrestore(&priv->spinlock, flags);
-
-          /* And submit the request to the bulk IN endpoint */
+          /* Submit the request to the bulk IN endpoint */
 
           req->len      = priv->nreqbytes;
           req->priv     = privreq;
@@ -2351,16 +2337,25 @@ static int usbmsc_cmdreadstate(FAR struct usbmsc_dev_s *priv)
                        (uint16_t)-ret);
               lun->sd     = SCSI_KCQME_UNRRE1;
               lun->sdinfo = priv->sector;
+
+              /* Return request to list on failure */
+
+              flags = spin_lock_irqsave(&priv->spinlock);
+              sq_addfirst((FAR sq_entry_t *)privreq, &priv->wrreqlist);
+              spin_unlock_irqrestore(&priv->spinlock, flags);
               break;
             }
 
-          /* Assume success... residue should probably really be decremented
-           * in wrcomplete when we know that the transfer completed
-           * successfully.
-           */
-
           priv->residue  -= priv->nreqbytes;
           priv->nreqbytes = 0;
+        }
+      else
+        {
+          /* Request not full yet, return it to the list */
+
+          flags = spin_lock_irqsave(&priv->spinlock);
+          sq_addfirst((FAR sq_entry_t *)privreq, &priv->wrreqlist);
+          spin_unlock_irqrestore(&priv->spinlock, flags);
         }
     }
 
@@ -2401,8 +2396,9 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
   FAR struct usbmsc_lun_s *lun = priv->lun;
   FAR struct usbmsc_req_s *privreq;
   FAR struct usbdev_req_s *req;
+  irqstate_t flags;
   ssize_t nwritten;
-  uint16_t xfrd;
+  uint32_t xfrd;
   FAR uint8_t *src;
   FAR uint8_t *dest;
   int nbytes;
@@ -2421,7 +2417,7 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
        * data to be written.
        */
 
-      irqstate_t flags = spin_lock_irqsave(&priv->spinlock);
+      flags = spin_lock_irqsave(&priv->spinlock);
       privreq = (FAR struct usbmsc_req_s *)sq_remfirst(&priv->rdreqlist);
       spin_unlock_irqrestore(&priv->spinlock, flags);
 
@@ -2546,11 +2542,14 @@ static int usbmsc_cmdwritestate(FAR struct usbmsc_dev_s *priv)
         {
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDWRITERDSUBMIT),
                    (uint16_t)-ret);
+          flags = spin_lock_irqsave(&priv->spinlock);
+          sq_addlast((FAR sq_entry_t *)privreq, &priv->rdreqlist);
+          spin_unlock_irqrestore(&priv->spinlock, flags);
         }
 
       /* Did the host decide to stop early? */
 
-      if (xfrd != priv->epbulkout->maxpacket)
+      if (xfrd < priv->epbulkout->maxpacket)
         {
           priv->shortpacket = 1;
           goto errout;
