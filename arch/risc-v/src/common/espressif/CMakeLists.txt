@@ -49,7 +49,7 @@ if(CONFIG_DEV_RANDOM OR CONFIG_DEV_URANDOM_ARCH)
 endif()
 
 if(CONFIG_TIMER)
-  list(APPEND SRCS esp_timer.c)
+  list(APPEND SRCS esp_gptimer.c)
 endif()
 
 if(CONFIG_ONESHOT)
@@ -61,7 +61,7 @@ if(CONFIG_RTC)
 endif()
 
 if(CONFIG_ESPRESSIF_HR_TIMER)
-  list(APPEND SRCS esp_hr_timer.c esp_ets_timer_legacy.c)
+  list(APPEND SRCS esp_timer_adapter.c esp_ets_timer_legacy.c)
 endif()
 
 if(CONFIG_ESPRESSIF_EFUSE)
@@ -199,7 +199,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      41b8c5f12063f6cce5796ce50b5eb4bd2ceeeb12
+      5d8324708f55d5a927329553cdceebf7eafbd8c6
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 
@@ -348,9 +348,7 @@ target_compile_options(
 # --undefined survives (otherwise ld sees the second symbol as an input file).
 set(_esp_startup_u_opts "SHELL:-u esp_system_include_startup_funcs")
 
-if(CONFIG_PM)
-  list(APPEND _esp_startup_u_opts "SHELL:-u esp_timer_init_include_func")
-endif()
+list(APPEND _esp_startup_u_opts "SHELL:-u esp_timer_init_include_func")
 
 if(CONFIG_ESPRESSIF_EFUSE)
   list(APPEND _esp_startup_u_opts "SHELL:-u esp_efuse_startup_include_func")

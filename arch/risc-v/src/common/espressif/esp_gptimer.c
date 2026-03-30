@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_timer.c
+ * arch/risc-v/src/common/espressif/esp_gptimer.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -36,7 +36,7 @@
 #include <nuttx/lib/lib.h>
 
 #include "esp_irq.h"
-#include "esp_timer.h"
+#include "espressif/esp_gptimer.h"
 
 #include "esp_clk_tree.h"
 #include "esp_attr.h"

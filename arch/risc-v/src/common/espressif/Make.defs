@@ -54,7 +54,7 @@ ifneq ($(CONFIG_DEV_RANDOM)$(CONFIG_DEV_URANDOM_ARCH),)
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-	CHIP_CSRCS += esp_timer.c
+	CHIP_CSRCS += esp_gptimer.c
 endif
 
 ifeq ($(CONFIG_ONESHOT),y)
@@ -66,7 +66,7 @@ ifeq ($(CONFIG_RTC),y)
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_HR_TIMER),y)
-	CHIP_CSRCS += esp_hr_timer.c esp_ets_timer_legacy.c
+	CHIP_CSRCS += esp_timer_adapter.c esp_ets_timer_legacy.c
 endif
 
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
@@ -191,12 +191,12 @@ ifeq ($(CONFIG_PM),y)
 		CHIP_CSRCS += esp_pm_initialize.c
 	endif
 	CHIP_CSRCS += esp_pm.c
-	LDFLAGS += -u esp_timer_init_include_func
 endif
 
 # Required for initialization hooks on common code
 
 LDFLAGS += -u esp_system_include_startup_funcs
+LDFLAGS += -u esp_timer_init_include_func
 
 ifeq ($(CONFIG_ESPRESSIF_EFUSE),y)
 	LDFLAGS += -u esp_efuse_startup_include_func
@@ -210,7 +210,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 41b8c5f12063f6cce5796ce50b5eb4bd2ceeeb12
+	ESP_HAL_3RDPARTY_VERSION = 5d8324708f55d5a927329553cdceebf7eafbd8c6
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

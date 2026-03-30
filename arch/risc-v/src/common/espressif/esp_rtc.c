@@ -445,6 +445,8 @@ static int esp_rtc_setalarm_nolock(struct rtc_lowerhalf_s *lower,
       cbinfo->index          = id;
       hr_timer_args.arg      = cbinfo;
       hr_timer_args.callback = rtc_hr_timer_cb;
+      hr_timer_args.name     = "rtc_alarm";
+      hr_timer_args.skip_unhandled_events = false;
 
       ret = esp_hr_timer_create(&hr_timer_args, &cbinfo->alarm_hdl);
       if (ret < 0)

@@ -128,6 +128,7 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/port/include/private
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/port/public_compat
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/private_include
     ${ESP_HAL_3RDPARTY_REPO}/components/hal/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/hal/include
     ${ESP_HAL_3RDPARTY_REPO}/components/hal/platform_port/include
@@ -342,6 +343,11 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/startup_funcs.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/startup.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/system_time.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_init.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_impl_systimer.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/system_time.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_impl_common.c
   ${ESP_HAL_3RDPARTY_REPO}/components/hal/${CHIP_SERIES}/efuse_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/hal/cache_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/hal/efuse_hal.c

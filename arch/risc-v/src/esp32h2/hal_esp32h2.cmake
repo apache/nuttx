@@ -333,6 +333,16 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/port/soc/${CHIP_SERIES}/system_internal.c
 )
 
+# ESP Timer
+list(
+  APPEND
+  HAL_SRCS
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_init.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_impl_systimer.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/system_time.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_timer/src/esp_timer_impl_common.c)
+
 # HAL components
 list(
   APPEND

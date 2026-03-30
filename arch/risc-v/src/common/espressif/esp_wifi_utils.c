@@ -35,7 +35,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wireless/wireless.h>
 
-#include "esp_timer.h"
 #include "esp_wifi_utils.h"
 #include "esp_wlan_netdev.h"
 

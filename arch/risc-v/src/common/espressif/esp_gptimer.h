@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_timer.h
+ * arch/risc-v/src/common/espressif/esp_gptimer.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TIMER_H
-#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TIMER_H
+#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_GPTIMER_H
+#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_GPTIMER_H
 
 /****************************************************************************
  * Included Files
@@ -52,4 +52,4 @@
 
 int esp_timer_initialize(int timer_id);
 
-#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TIMER_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_GPTIMER_H */

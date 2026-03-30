@@ -52,7 +52,7 @@
 #endif
 
 #ifdef CONFIG_TIMER
-#  include "espressif/esp_timer.h"
+#  include "espressif/esp_gptimer.h"
 #endif
 
 #ifdef CONFIG_ONESHOT
