@@ -427,6 +427,17 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 int iob_tryadd_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq);
 
 /****************************************************************************
+ * Name: iob_add_queue_head
+ *
+ * Description:
+ *   Add one I/O buffer chain to the head of a queue.
+ *
+ ****************************************************************************/
+
+void iob_add_queue_head(FAR struct iob_s *iob,
+                        FAR struct iob_queue_s *iobq);
+
+/****************************************************************************
  * Name: iob_concat_queue
  *
  * Description:

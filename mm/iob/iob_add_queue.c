@@ -167,3 +167,38 @@ int iob_concat_queue(FAR struct iob_queue_s *dest,
 
   return 0;
 }
+
+/****************************************************************************
+ * Name: iob_add_queue_head
+ *
+ * Description:
+ *   Add one I/O buffer chain to the head of a queue.  This is the
+ *   counterpart of iob_add_queue() which appends to the tail.
+ *
+ ****************************************************************************/
+
+void iob_add_queue_head(FAR struct iob_s *iob,
+                        FAR struct iob_queue_s *iobq)
+{
+  FAR struct iob_s *last;
+
+  DEBUGASSERT(iob != NULL && iobq != NULL);
+
+  /* Find the last IOB in this chain */
+
+  last = iob;
+  while (IOB_LINK_GET(last) != NULL)
+    {
+      last = IOB_LINK_GET(last);
+    }
+
+  /* Link this chain's tail to the current head (NULL if empty) */
+
+  IOB_FLAG_SET(last, iobq->qh_head, IOB_CHAIN_END);
+  iobq->qh_head = iob;
+
+  if (iobq->qh_tail == NULL)
+    {
+      iobq->qh_tail = last;
+    }
+}
