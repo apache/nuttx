@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/param.h>
+
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
@@ -287,8 +289,6 @@
 #else
 #  define I2S_RCC_ATOMIC()
 #endif
-
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 /****************************************************************************
  * Private Types
@@ -2012,7 +2012,7 @@ static int32_t i2s_check_mclkfrequency(struct esp_i2s_s *priv)
 {
   uint32_t mclk_freq;
   uint32_t mclk_multiple = priv->mclk_multiple;
-  uint32_t bclk = priv->rate * priv->config->total_slot * priv->data_width;
+  uint32_t bclk = priv->rate * MAX(priv->channels, 2) * priv->data_width;
   int i;
 
   /* If the master clock is divisible by both the sample rate and the bit
@@ -2146,7 +2146,7 @@ static void i2s_set_clock(struct esp_i2s_s *priv)
 
   if (priv->config->role == I2S_ROLE_MASTER)
     {
-      bclk = priv->rate * priv->config->total_slot *
+      bclk = priv->rate * MAX(priv->channels, 2) *
              priv->config->data_width;
       mclk = priv->mclk_freq;
       bclk_div = mclk / bclk;
@@ -2156,7 +2156,7 @@ static void i2s_set_clock(struct esp_i2s_s *priv)
       /* For slave mode, mclk >= bclk * 8, so fix bclk_div to 2 first */
 
       bclk_div = 8;
-      bclk = priv->rate * priv->config->total_slot *
+      bclk = priv->rate * MAX(priv->channels, 2) *
               priv->config->data_width;
       mclk = bclk * bclk_div;
     }
