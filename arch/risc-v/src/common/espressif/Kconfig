@@ -1288,12 +1288,23 @@ config ESPRESSIF_BROWNOUT_DET
 config ESP_RMT
 	bool "Remote Control Module (RMT)"
 	default n
-	depends on RMT
+	select DRIVERS_RC
 	---help---
 		The RMT (Remote Control Transceiver) peripheral was designed to act as
 		an infrared transceiver. However, due to the flexibility of its data
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
+
+if ESP_RMT
+
+config RMT_DEFAULT_RX_BUFFER_SIZE
+	int "Default RX buffer size"
+	default 100
+	---help---
+		The RMT RX default buffer size. This is the expected buffer size
+		that should be returned on a receive operation.
+
+endif # ESP_RMT
 
 config ESP_SDM
 	bool "Sigma-Delta Modulation (SDM) Module"

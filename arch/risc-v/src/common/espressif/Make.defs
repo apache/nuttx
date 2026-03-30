@@ -94,6 +94,9 @@ endif
 
 ifeq ($(CONFIG_ESP_RMT),y)
 	CHIP_CSRCS += esp_rmt.c
+	ifeq ($(CONFIG_DRIVERS_RC),y)
+		CHIP_CSRCS += esp_lirc.c
+	endif
 	ifeq ($(CONFIG_WS2812_NON_SPI_DRIVER),y)
 		CHIP_CSRCS += esp_ws2812.c
 	endif

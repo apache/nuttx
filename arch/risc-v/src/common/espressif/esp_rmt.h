@@ -29,6 +29,10 @@
 
 #include <nuttx/config.h>
 #include <semaphore.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <nuttx/circbuf.h>
 #include <nuttx/spinlock.h>
 
 /****************************************************************************
@@ -50,6 +54,34 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* The RMT peripheral vtable */
+
+struct rmt_dev_s;
+
+struct rmt_ops_s
+{
+  CODE int      (*open)(FAR struct rmt_dev_s *dev);
+  CODE int      (*close)(FAR struct rmt_dev_s *dev);
+  CODE ssize_t  (*write)(FAR struct rmt_dev_s *dev,
+                         FAR const char *buffer,
+                         size_t buflen);
+  CODE ssize_t  (*read)(FAR struct rmt_dev_s *dev,
+                        FAR char *buffer,
+                        size_t buflen);
+};
+
+/* RMT device structure — initial fields visible to upper-half drivers.
+ * The ESP lower-half extends this with hardware-specific fields.
+ */
+
+struct rmt_dev_s
+{
+  FAR const struct rmt_ops_s *ops;
+  FAR struct circbuf_s       *circbuf;
+  sem_t                      *recvsem;
+  int                         minor;
+};
 
 /****************************************************************************
  * Public Data

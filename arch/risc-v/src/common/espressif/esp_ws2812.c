@@ -31,7 +31,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/leds/ws2812.h>
-#include <nuttx/rmt/rmt.h>
 
 #include "hal/rmt_types.h"
 
