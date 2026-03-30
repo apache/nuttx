@@ -19,14 +19,3 @@
 # under the License.
 #
 ############################################################################
-
-ifeq ($(CONFIG_RMT),y)
-
-ifeq ($(CONFIG_RMTCHAR),y)
-CSRCS += rmtchar.c
-endif
-
-DEPPATH += --dep-path rmt
-VPATH += :rmt
-
-endif

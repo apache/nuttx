@@ -20,12 +20,4 @@
 #
 # ##############################################################################
 
-if(CONFIG_RMT)
-  set(SRCS)
-
-  if(CONFIG_RMTCHAR)
-    list(APPEND SRCS rmtchar.c)
-  endif()
-
-  target_sources(drivers PRIVATE ${SRCS})
-endif()
+# RMT character driver removed; RMT upper-half is now arch/espressif/esp_lirc.c

@@ -39,7 +39,6 @@
 #include <arch/board/board.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/rmt/rmt.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/circbuf.h>
 

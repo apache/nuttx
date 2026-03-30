@@ -33,7 +33,7 @@
 #include "xtensa.h"
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/rmt/rmtchar.h>
+#include "espressif/esp_lirc.h"
 #ifdef CONFIG_WS2812_NON_SPI_DRIVER
 #include <nuttx/leds/ws2812.h>
 
@@ -98,10 +98,10 @@ int board_rmt_rxinitialize(int pin)
       return -ENODEV;
     }
 
-  ret = rmtchar_register(rmt);
+  ret = esp_lirc_rx_initialize(0, rmt);
   if (ret < 0)
     {
-      rmterr("ERROR: rmtchar_register failed: %d\n", ret);
+      rmterr("ERROR: esp_lirc_rx_initialize failed: %d\n", ret);
       return ret;
     }
 
@@ -137,10 +137,10 @@ int board_rmt_txinitialize(int pin)
       return -ENODEV;
     }
 
-  ret = rmtchar_register(rmt);
+  ret = esp_lirc_tx_initialize(1, rmt);
   if (ret < 0)
     {
-      rmterr("ERROR: rmtchar_register failed: %d\n", ret);
+      rmterr("ERROR: esp_lirc_tx_initialize failed: %d\n", ret);
       return ret;
     }
 
