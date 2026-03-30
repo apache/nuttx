@@ -469,6 +469,22 @@ endmenu # LP Core (Low-power core) Coprocessor Configuration
 
 menu "PM Configuration"
 
+config ESPRESSIF_AUTO_SLEEP
+	bool "Auto-sleep"
+	default n
+	select PM
+	select ESPRESSIF_HR_TIMER
+	select ARCH_HAVE_EXTRA_HEAPS if ARCH_CHIP_ESP32C3
+	select ESPRESSIF_RETENTION_HEAP if ARCH_CHIP_ESP32C3
+	select SCHED_TICKLESS
+	---help---
+		Enable Auto-sleep
+
+config ESPRESSIF_RETENTION_HEAP
+	bool "Use retention memory as a separate heap"
+	depends on ARCH_CHIP_ESP32C3
+	default n
+
 if PM
 
 config PM_EXT1_WAKEUP
@@ -615,6 +631,7 @@ config PM_ULP_WAKEUP
 config PM_GPIO_WAKEUP
 	bool "PM GPIO Wakeup"
 	default n
+	depends on ARCH_CHIP_ESP32C3
 	---help---
 		Enable GPIO wakeup functionality.
 		This allows the system to wake up from PM_STANDBY

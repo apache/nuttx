@@ -34,9 +34,25 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/debug.h>
 #include <nuttx/arch.h>
+#include <sys/param.h>
 
 #include "riscv_internal.h"
 #include "esp_pm.h"
+
+#ifdef CONFIG_ESPRESSIF_HR_TIMER
+#include "esp_hr_timer.h"
+#endif
+
+#ifdef CONFIG_SCHED_TICKLESS
+#include "esp_tickless.h"
+#endif
+
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#include "esp_private/pm_impl.h"
+#include "platform/os.h"
+#endif
+
+#include "esp_sleep.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,6 +103,9 @@ static spinlock_t g_esp_idle_lock = SP_UNLOCKED;
 static void up_idlepm(void)
 {
   irqstate_t flags;
+#  ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+  esp_os_application_sleep();
+#  else
   static enum pm_state_e oldstate = PM_NORMAL;
   enum pm_state_e newstate;
   int ret;
@@ -169,16 +188,17 @@ static void up_idlepm(void)
     }
   else
     {
-#  ifdef CONFIG_WATCHDOG
+#    ifdef CONFIG_WATCHDOG
       /* Announce the power management state change to feed watchdog */
 
       pm_changestate(PM_IDLE_DOMAIN, PM_NORMAL);
-#  endif
+#    endif
     }
+#  endif /* CONFIG_ESPRESSIF_AUTO_SLEEP */
 }
 #else
 #  define up_idlepm()
-#endif
+#endif /* CONFIG_PM */
 
 /****************************************************************************
  * Public Functions
@@ -216,7 +236,12 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+  esp_pm_impl_idle_hook();
+  esp_pm_impl_waiti();
+#else
   asm("WFI");
+#endif
 
   /* Perform IDLE mode power management */
 
