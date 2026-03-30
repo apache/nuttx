@@ -410,9 +410,9 @@ struct usbmsc_dev_s
   uint8_t           cbwdir:2;         /* Direction from CBW. See USBMSC_FLAGS_DIR* definitions */
   uint8_t           cdblen;           /* Length of cdb[] from CBW */
   uint8_t           cbwlun;           /* LUN from the CBW */
-  uint16_t          nsectbytes;       /* Bytes buffered in iobuffer[] */
-  uint16_t          nreqbytes;        /* Bytes buffered in head write requests */
-  uint16_t          iosize;           /* Size of iobuffer[] */
+  uint32_t          nsectbytes;       /* Bytes buffered in iobuffer[] */
+  uint32_t          nreqbytes;        /* Bytes buffered in head write requests */
+  uint32_t          iosize;           /* Size of iobuffer[] */
   uint32_t          cbwlen;           /* Length of data from CBW */
   uint32_t          cbwtag;           /* Tag from the CBW */
   union

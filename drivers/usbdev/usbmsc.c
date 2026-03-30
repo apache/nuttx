@@ -1060,7 +1060,7 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
     {
       privreq       = &priv->rdreqs[i];
       req           = privreq->req;
-      req->len      = CONFIG_USBMSC_BULKOUTREQLEN;
+      req->len      = priv->epbulkout->maxpacket;
       req->priv     = privreq;
       req->callback = usbmsc_rdcomplete;
 
@@ -1547,10 +1547,10 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
 
   memset(lun, 0, sizeof(struct usbmsc_lun_s));
 
-  /* Allocate an I/O buffer big enough to hold one hardware sector.  SCSI
-   * commands are processed one at a time so all LUNs may share a single I/O
-   * buffer.  The I/O buffer will be allocated so that is it as large as the
-   * largest block device sector size
+  /* Allocate an I/O buffer big enough to hold one hardware sector.
+   * SCSI commands are processed one at a time so all LUNs may share
+   * a single I/O buffer.  The I/O buffer will be allocated so that
+   * it is as large as the largest block device sector size.
    */
 
   if (!priv->iobuffer)
