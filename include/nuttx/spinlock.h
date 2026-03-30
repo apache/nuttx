@@ -459,14 +459,14 @@ static inline_function
 irqstate_t spin_lock_irqsave_notrace(FAR volatile spinlock_t *lock)
 {
   irqstate_t flags;
-  flags = irq_save();
+  flags = up_irq_save();
 
   spin_lock_notrace(lock);
 
   return flags;
 }
 #else
-#  define spin_lock_irqsave_notrace(l) ((void)(l), irq_save())
+#  define spin_lock_irqsave_notrace(l) ((void)(l), up_irq_save())
 #endif
 
 /****************************************************************************
@@ -497,7 +497,7 @@ irqstate_t spin_lock_irqsave_notrace(FAR volatile spinlock_t *lock)
 static inline_function
 irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 {
-  irqstate_t flags;
+  irqstate_t flags = irq_save();
 
   /* Mark that we want to hold lock */
 
@@ -513,7 +513,7 @@ irqstate_t spin_lock_irqsave(FAR volatile spinlock_t *lock)
 
   /* Lock without trace note */
 
-  flags = spin_lock_irqsave_notrace(lock);
+  spin_lock_notrace(lock);
 
   /* Get the lock, end counting busy-waiting */
 
@@ -768,7 +768,7 @@ void rspin_lock(FAR rspinlock_t *lock);
 static inline_function noinstrument_function
 irqstate_t rspin_lock_irqsave_notrace(FAR rspinlock_t *lock)
 {
-  irqstate_t flags = irq_save();
+  irqstate_t flags = up_irq_save();
   rspin_lock_notrace(lock);
   return flags;
 }
@@ -781,9 +781,8 @@ irqstate_t rspin_lock_irqsave(FAR rspinlock_t *lock)
   return flags;
 }
 #else
-#  define rspin_lock_notrace(lock) ((void)(lock))
 #  define rspin_lock_irqsave(l) ((void)(l), irq_save())
-#  define rspin_lock_irqsave_notrace(l) rspin_lock_irqsave(l)
+#  define rspin_lock_irqsave_notrace(l) ((void)(l), up_irq_save())
 #endif
 
 static inline_function
@@ -914,15 +913,15 @@ bool rspin_trylock(FAR rspinlock_t *lock);
 #ifdef CONFIG_SPINLOCK
 #  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
-  f = irq_save(); \
+  f = up_irq_save(); \
   spin_trylock_notrace(l) ? \
-  true : ({ irq_restore(f); false; }); \
+  true : ({ up_irq_restore(f); false; }); \
 })
 #else
 #  define spin_trylock_irqsave_notrace(l, f) \
 ({ \
   (void)(l); \
-  f = irq_save(); \
+  f = up_irq_save(); \
   true; \
 })
 #endif /* CONFIG_SPINLOCK */
@@ -1002,10 +1001,10 @@ void spin_unlock_irqrestore_notrace(FAR volatile spinlock_t *lock,
 {
   spin_unlock_notrace(lock);
 
-  irq_restore(flags);
+  up_irq_restore(flags);
 }
 #else
-#  define spin_unlock_irqrestore_notrace(l, f) ((void)(l), irq_restore(f))
+#  define spin_unlock_irqrestore_notrace(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 /****************************************************************************
@@ -1155,7 +1154,7 @@ void rspin_unlock_irqrestore_notrace(FAR rspinlock_t *lock,
 {
   if (rspin_unlock_notrace(lock))
     {
-      irq_restore(flags);
+      up_irq_restore(flags);
     }
   else
     {
@@ -1176,9 +1175,8 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
     }
 }
 #else
-#  define rspin_unlock_notrace(lock) rspin_unlock(lock)
 #  define rspin_unlock_irqrestore(l, f) ((void)(l), irq_restore(f))
-#  define rspin_unlock_irqrestore_notrace(l, f) rspin_unlock_irqrestore(l, f)
+#  define rspin_unlock_irqrestore_notrace(l, f) ((void)(l), up_irq_restore(f))
 #endif
 
 static inline_function
