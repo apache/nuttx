@@ -36,10 +36,19 @@
 
 #include "riscv_internal.h"
 #include "rom/rom_layout.h"
+#ifdef CONFIG_ESPRESSIF_RETENTION_HEAP
+#  include "esp_retentionheap.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+uintptr_t _heap_start;
 
 /****************************************************************************
  * Public Functions
@@ -77,11 +86,22 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
    * Check boards/risc-v/espressif.
    */
 
+#ifdef CONFIG_ESPRESSIF_RETENTION_HEAP
+  uintptr_t rstart;
+  uintptr_t rend;
+#endif
+
   board_autoled_on(LED_HEAPALLOCATE);
 
   *heap_start = (void *)g_idle_topstack;
+#ifdef CONFIG_ESPRESSIF_RETENTION_HEAP
+  esp_retentionheap_find_region(&rstart, &rend);
+  *heap_size  = (uintptr_t) rstart - g_idle_topstack;
+#else
   *heap_size  = (uintptr_t)ets_rom_layout_p->dram0_rtos_reserved_start -
                            g_idle_topstack;
+#endif
+  _heap_start = g_idle_topstack;
 }
 
 /****************************************************************************

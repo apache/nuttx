@@ -34,6 +34,13 @@ list(APPEND SRCS esp_irq.c esp_gpio.c esp_rtc_gpio.c esp_libc_stubs.c)
 list(APPEND SRCS esp_lowputc.c esp_serial.c)
 list(APPEND SRCS esp_systemreset.c)
 
+if(CONFIG_ARCH_HAVE_EXTRA_HEAPS)
+  list(APPEND SRCS esp_extraheaps.c)
+  if(CONFIG_ESPRESSIF_RETENTION_HEAP)
+    list(APPEND SRCS esp_retentionheap.c)
+  endif()
+endif()
+
 if(CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS esp_tickless.c)
 else()
@@ -202,7 +209,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      5d8324708f55d5a927329553cdceebf7eafbd8c6
+      b7e51db97a3f9dc82d3b3524d2bad298ba1e2647
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 

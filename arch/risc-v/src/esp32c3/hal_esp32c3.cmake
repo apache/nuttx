@@ -64,6 +64,7 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/include
     # ESP HAL RMT (hal/rmt_hal.h)
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_rmt/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_rmt/${CHIP_SERIES}/include
@@ -89,6 +90,7 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/include
     # ESP PM
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/include
     # ESP ROM
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom
@@ -302,7 +304,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_mmu_map.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_cache_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/port/${CHIP_SERIES}/ext_mem_layout.c
-)
+  ${ESP_HAL_3RDPARTY_REPO}/components/heap/port/${CHIP_SERIES}/memory_layout.c)
 
 # ESP PHY sources
 list(
@@ -312,6 +314,10 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/phy_common.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/phy_init.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/${CHIP_SERIES}/phy_init_data.c)
+
+# ESP PM sources
+list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_locks.c
+     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_impl.c)
 
 # ESP ROM sources
 list(
@@ -408,7 +414,8 @@ list(
   HAL_SRCS
   ${ESP_HAL_3RDPARTY_REPO}/components/riscv/instruction_decode.c
   ${ESP_HAL_3RDPARTY_REPO}/components/riscv/interrupt.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/riscv/interrupt_intc.c)
+  ${ESP_HAL_3RDPARTY_REPO}/components/riscv/interrupt_intc.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/riscv/rv_utils.c)
 
 # SPI Flash sources
 list(
@@ -478,7 +485,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_encoder_copy.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_encoder_simple.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_rx.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c)
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/src/uart_wakeup.c)
 
 # Bootloader flash encrypt source
 list(APPEND HAL_SRCS

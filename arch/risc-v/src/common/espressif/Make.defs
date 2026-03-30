@@ -39,6 +39,13 @@ CHIP_CSRCS += esp_irq.c esp_gpio.c esp_rtc_gpio.c esp_libc_stubs.c
 CHIP_CSRCS += esp_lowputc.c esp_serial.c
 CHIP_CSRCS += esp_systemreset.c
 
+ifeq ($(CONFIG_ARCH_HAVE_EXTRA_HEAPS),y)
+	CHIP_CSRCS += esp_extraheaps.c
+	ifeq ($(CONFIG_ESPRESSIF_RETENTION_HEAP),y)
+		CHIP_CSRCS += esp_retentionheap.c
+	endif
+endif
+
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 	CHIP_CSRCS += esp_tickless.c
 else
@@ -210,7 +217,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 5d8324708f55d5a927329553cdceebf7eafbd8c6
+	ESP_HAL_3RDPARTY_VERSION = b7e51db97a3f9dc82d3b3524d2bad298ba1e2647
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

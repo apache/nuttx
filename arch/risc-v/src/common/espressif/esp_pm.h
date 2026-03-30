@@ -44,10 +44,31 @@ extern "C"
 #endif
 
 #ifdef CONFIG_PM
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+typedef bool (*skip_light_sleep_cb_t)(void);
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_pm_sleep_enable_timer_wakeup
+ *
+ * Description:
+ *   Configure wakeup interval
+ *
+ * Input Parameters:
+ *   time_in_us - Sleep duration in microseconds.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_sleep_enable_timer_wakeup(uint64_t time_in_us);
 
 /****************************************************************************
  * Name: esp_pm_light_sleep_start
@@ -113,6 +134,58 @@ void esp_pmstandby(uint64_t time_in_us);
  ****************************************************************************/
 
 void esp_pmsleep(uint64_t time_in_us);
+
+/****************************************************************************
+ * Name: esp_pmconfigure
+ *
+ * Description:
+ *   Configure power manager.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Returns OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+int esp_pmconfigure(void);
+#endif
+
+/****************************************************************************
+ * Name: esp_pm_wakeup_set_last_reason
+ *
+ * Description:
+ *   Store the sleep exit wakeup cause after light sleep.  Used with
+ *   esp_pm_wakeup_set_last_time() so the skip-light-sleep hook can
+ *   detect a recent UART wakeup.
+ *
+ * Input Parameters:
+ *   reason - Value from esp_sleep_get_wakeup_cause().
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_wakeup_set_last_reason(int32_t reason);
+
+/****************************************************************************
+ * Name: esp_pm_wakeup_set_last_time
+ *
+ * Description:
+ *   Store the high-resolution timestamp (microseconds) aligned with
+ *   the wakeup cause set by esp_pm_wakeup_set_last_reason().
+ *
+ * Input Parameters:
+ *   time_us - Time from esp_hr_timer_time_us() at exit from light sleep.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_pm_wakeup_set_last_time(uint64_t time_us);
 
 #endif /* CONFIG_PM */
 

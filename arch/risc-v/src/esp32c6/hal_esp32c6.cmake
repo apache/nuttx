@@ -112,6 +112,7 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/include
@@ -317,7 +318,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/${CHIP_SERIES}/phy_init_data.c)
 
 # ESP PM
-list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_impl.c)
+list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_locks.c
+     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_impl.c)
 
 # ESP ROM
 list(
@@ -497,7 +499,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_rx.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/gpio.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/rtc_io.c)
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/rtc_io.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/src/uart_wakeup.c)
 
 # Sleep ASM
 list(

@@ -116,6 +116,7 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/power_supply/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_libc/priv_include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/${CHIP_SERIES}
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/${CHIP_SERIES}/include

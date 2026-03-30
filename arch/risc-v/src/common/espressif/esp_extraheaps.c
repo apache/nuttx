@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/espressif/esp_tickless.h
+ * arch/risc-v/src/common/espressif/esp_extraheaps.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,52 +20,24 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TICKLESS_H
-#define __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TICKLESS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/arch.h>
 
-#include <stdint.h>
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_get_idletime
- *
- * Description:
- *   This function returns the idle time.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   The time in system ticks remaining for idle.
- *   Zero means that the system is in idle mode without any timer running.
- *
- ****************************************************************************/
-
-uint32_t up_get_idletime(void);
+#ifdef CONFIG_ESPRESSIF_RETENTION_HEAP
+#  include "esp_retentionheap.h"
+#endif
 
 /****************************************************************************
- * Name:  up_step_idletime
- *
- * Description:
- *   Add system time by idletime_us.
- *
- * Input Parameters:
- *   idletime_us   - Idle time in microseconds.
- *
- * Returned Value:
- *   None.
- *
+ * Public Functions
  ****************************************************************************/
 
-void up_step_idletime(uint32_t idletime_us);
-
-#endif /* __ARCH_RISCV_SRC_COMMON_ESPRESSIF_ESP_TICKLESS_H */
+void up_extraheaps_init(void)
+{
+#ifdef CONFIG_ESPRESSIF_RETENTION_HEAP
+  esp_retentionheap_initialize();
+#endif
+}
