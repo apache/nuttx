@@ -32,7 +32,6 @@ if(NOT CONFIG_DISABLE_ALL_SIGNALS)
     sig_queue.c
     sig_waitinfo.c
     sig_timedwait.c
-    sig_lowest.c
     sig_notification.c
     sig_dispatch.c
     sig_pause.c

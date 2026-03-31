@@ -35,42 +35,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxsig_cleanup
- *
- * Description:
- *   Deallocate all signal-related lists in a TCB.  This function is
- *   called only at task deletion time.  The caller is expected to have
- *   assured the critical section necessary to perform this action.
- *
- ****************************************************************************/
-
-void nxsig_cleanup(FAR struct tcb_s *stcb)
-{
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
-  FAR sigq_t *sigq;
-
-  /* Deallocate all entries in the list of pending signal actions */
-
-  while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpendactionq)) != NULL)
-    {
-      nxsig_release_pendingsigaction(sigq);
-    }
-
-  /* Deallocate all entries in the list of posted signal actions */
-
-  while ((sigq = (FAR sigq_t *)sq_remfirst(&stcb->sigpostedq)) != NULL)
-    {
-      nxsig_release_pendingsigaction(sigq);
-    }
-#endif
-
-  /* Misc. signal-related clean-up */
-
-  sigfillset(&stcb->sigprocmask);
-  sigemptyset(&stcb->sigwaitmask);
-}
-
-/****************************************************************************
  * Name: nxsig_discard_threadsignals
  *
  * Description:
