@@ -34,4 +34,8 @@ ifeq ($(CONFIG_USERLED),y)
 CSRCS += ht32_userleds.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += ht32_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

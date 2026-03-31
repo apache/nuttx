@@ -30,6 +30,10 @@ list(
   ht32f491x3_lowputc.c
   ht32f491x3_serial.c)
 
+if(CONFIG_PWM)
+  list(APPEND SRCS ht32f491x3_pwm.c)
+endif()
+
 if(CONFIG_ARCH_HAVE_CUSTOM_VECTORS)
   list(APPEND SRCS arm_vectors.c)
 endif()
