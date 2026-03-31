@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <nuttx/config.h>
 #include <nuttx/kthread.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/irq.h>
@@ -480,6 +481,18 @@ static int goldfish_gpu_fb_vsync_thread(int argc, FAR char** argv)
   return OK;
 }
 
+#ifdef CONFIG_FB_UPDATE
+/****************************************************************************
+ * Name: goldfish_gpu_fb_updatearea
+ ****************************************************************************/
+
+static int goldfish_gpu_fb_updatearea(FAR struct fb_vtable_s *vtable,
+                                      FAR const struct fb_area_s *area)
+{
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -575,6 +588,9 @@ int goldfish_gpu_fb_register(int display)
 
   fb->vtable.getplaneinfo = goldfish_gpu_fb_getplaneinfo;
   fb->vtable.getvideoinfo = goldfish_gpu_fb_getvideoinfo;
+#ifdef CONFIG_FB_UPDATE
+  fb->vtable.updatearea   = goldfish_gpu_fb_updatearea;
+#endif
 
   /* Clear goldfish_gpu_fb */
 
