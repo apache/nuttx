@@ -90,9 +90,9 @@ was contributed in part by Max Neklyudov.
 to NuttX by Masayuki Ishikawa in NuttX-7.19. The SAM4CM is a dual-CPU
 part and SMP was included for the ARMv7-M and SAM3/4 families. The
 SAM4CMP-DB board support includes an NSH configuration that operates in
-an SMP configuration. Refer to the NuttX board
-`README <https://github.com/apache/nuttx/blob/master/Documentation/platforms/arm/sam34/boards/sam4cmp-db/README.txt>`__
-file for further information.
+an SMP configuration. Refer to the
+:doc:`board documentation <boards/sam4cmp-db/index>` for further
+information.
 
 Microchip SAM4E
 ---------------
