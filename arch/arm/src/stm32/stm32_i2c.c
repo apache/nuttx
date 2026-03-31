@@ -96,11 +96,11 @@
  ****************************************************************************/
 
 #if STM32_PCLK1_FREQUENCY < 4000000
-#  warning STM32_I2C: Peripheral clock must be at least 4 MHz to support 400 kHz operation.
+#  warning "STM32_I2C: Periph clk must be at least 4MHz to support 400kHz."
 #endif
 
 #if STM32_PCLK1_FREQUENCY < 2000000
-#  error STM32_I2C: Peripheral clock must be at least 2 MHz to support 100 kHz operation.
+#  error "STM32_I2C: Periph clk must be at least 2MHz to support 100kHz."
 #endif
 
 /* Configuration ************************************************************/
@@ -832,7 +832,8 @@ static void stm32_i2c_tracedump(struct stm32_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-         "%2d. STATUS: %08x COUNT: %3d EVENT: %s(%2d) PARM: %08x TIME: %d\n",
+         "%2d. STATUS: %08" PRIx32 " COUNT: %3d EVENT: %s(%2d) PARM:"
+             " %08" PRIx32 " TIME: %d\n",
              i + 1, trace->status, trace->count, g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }

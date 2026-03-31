@@ -267,7 +267,7 @@ static uint32_t stm32l4can_vgetreg(uint32_t addr)
 
   /* Show the register value read */
 
-  caninfo("%08x->%08x\n", addr, val);
+  caninfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
   return val;
 }
 
@@ -318,7 +318,7 @@ static void stm32l4can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
 
-  caninfo("%08x<-%08x\n", addr, value);
+  caninfo("%08" PRIx32 "<-%08" PRIx32 "\n", addr, value);
 
   /* Write the value */
 
@@ -380,16 +380,16 @@ static void stm32l4can_dumpctrlregs(struct stm32l4_can_s *priv,
 
   /* CAN control and status registers */
 
-  caninfo("  MCR: %08x   MSR: %08x   TSR: %08x\n",
+  caninfo("  MCR: %08" PRIx32 "   MSR: %08" PRIx32 "   TSR: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_MCR_OFFSET),
           getreg32(priv->base + STM32L4_CAN_MSR_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TSR_OFFSET));
 
-  caninfo(" RF0R: %08x  RF1R: %08x\n",
+  caninfo(" RF0R: %08" PRIx32 "  RF1R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_RF0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RF1R_OFFSET));
 
-  caninfo("  IER: %08x   ESR: %08x   BTR: %08x\n",
+  caninfo("  IER: %08" PRIx32 "   ESR: %08" PRIx32 "   BTR: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_IER_OFFSET),
           getreg32(priv->base + STM32L4_CAN_ESR_OFFSET),
           getreg32(priv->base + STM32L4_CAN_BTR_OFFSET));
@@ -425,31 +425,36 @@ static void stm32l4can_dumpmbregs(struct stm32l4_can_s *priv,
 
   /* CAN mailbox registers (3 TX and 2 RX) */
 
-  caninfo(" TI0R: %08x TDT0R: %08x TDL0R: %08x TDH0R: %08x\n",
+  caninfo(" TI0R: %08" PRIx32 " TDT0R: %08" PRIx32
+          " TDL0R: %08" PRIx32 " TDH0R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_TI0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDT0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDL0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDH0R_OFFSET));
 
-  caninfo(" TI1R: %08x TDT1R: %08x TDL1R: %08x TDH1R: %08x\n",
+  caninfo(" TI1R: %08" PRIx32 " TDT1R: %08" PRIx32
+          " TDL1R: %08" PRIx32 " TDH1R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_TI1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDT1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDL1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDH1R_OFFSET));
 
-  caninfo(" TI2R: %08x TDT2R: %08x TDL2R: %08x TDH2R: %08x\n",
+  caninfo(" TI2R: %08" PRIx32 " TDT2R: %08" PRIx32
+          " TDL2R: %08" PRIx32 " TDH2R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_TI2R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDT2R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDL2R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_TDH2R_OFFSET));
 
-  caninfo(" RI0R: %08x RDT0R: %08x RDL0R: %08x RDH0R: %08x\n",
+  caninfo(" RI0R: %08" PRIx32 " RDT0R: %08" PRIx32
+          " RDL0R: %08" PRIx32 " RDH0R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_RI0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RDT0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RDL0R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RDH0R_OFFSET));
 
-  caninfo(" RI1R: %08x RDT1R: %08x RDL1R: %08x RDH1R: %08x\n",
+  caninfo(" RI1R: %08" PRIx32 " RDT1R: %08" PRIx32
+          " RDL1R: %08" PRIx32 " RDH1R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_RI1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RDT1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_RDL1R_OFFSET),
@@ -486,7 +491,9 @@ static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
       caninfo("Filter Registers:\n");
     }
 
-  caninfo(" FMR: %08x   FM1R: %08x  FS1R: %08x FFA1R: %08x  FA1R: %08x\n",
+  caninfo(" FMR: %08" PRIx32 "   FM1R: %08" PRIx32
+          "  FS1R: %08" PRIx32 " FFA1R: %08" PRIx32
+          "  FA1R: %08" PRIx32 "\n",
           getreg32(priv->base + STM32L4_CAN_FMR_OFFSET),
           getreg32(priv->base + STM32L4_CAN_FM1R_OFFSET),
           getreg32(priv->base + STM32L4_CAN_FS1R_OFFSET),
@@ -495,7 +502,7 @@ static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
 
   for (i = 0; i < CAN_NFILTERS; i++)
     {
-      caninfo(" F%dR1: %08x F%dR2: %08x\n",
+      caninfo(" F%dR1: %08" PRIx32 " F%dR2: %08" PRIx32 "\n",
               i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 1)),
               i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 2)));
     }
@@ -1332,7 +1339,7 @@ static bool stm32l4can_txready(struct can_dev_s *dev)
   /* Return true if any mailbox is available */
 
   regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return (regval & CAN_ALL_MAILBOXES) != 0;
 }
@@ -1363,7 +1370,7 @@ static bool stm32l4can_txempty(struct can_dev_s *dev)
   /* Return true if all mailboxes are available */
 
   regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
-  caninfo("CAN%d TSR: %08x\n", priv->port, regval);
+  caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return (regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES;
 }
@@ -1854,7 +1861,8 @@ static int stm32l4can_exitinitmode(struct stm32l4_can_s *priv)
 
   if (timeout < 1)
     {
-      canerr("ERROR: Timed out waiting to exit initialization mode: %08x\n",
+      canerr("ERROR: Timed out waiting to exit"
+             " initialization mode: %08" PRIx32 "\n",
              regval);
       return -ETIMEDOUT;
     }

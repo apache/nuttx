@@ -916,16 +916,18 @@ static void sdadc_reset(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("CR1:  0x%08x CR2:  0x%08x\n",
+  ainfo("CR1:  0x%08" PRIx32 " CR2:  0x%08" PRIx32 "\n",
         sdadc_getreg(priv, STM32_SDADC_CR1_OFFSET),
         sdadc_getreg(priv, STM32_SDADC_CR2_OFFSET));
 
-  ainfo("CONF0R: 0x%08x CONF1R: 0x%08x CONF3R: 0x%08x\n",
+  ainfo("CONF0R: 0x%08" PRIx32 " CONF1R: 0x%08" PRIx32
+        " CONF3R: 0x%08" PRIx32 "\n",
         sdadc_getreg(priv, STM32_SDADC_CONF0R_OFFSET),
         sdadc_getreg(priv, STM32_SDADC_CONF1R_OFFSET),
         sdadc_getreg(priv, STM32_SDADC_CONF2R_OFFSET));
 
-  ainfo("CONFCHR1: 0x%08x CONFCHR2: 0x%08x JCHGR: 0x%08x\n",
+  ainfo("CONFCHR1: 0x%08" PRIx32 " CONFCHR2: 0x%08" PRIx32
+        " JCHGR: 0x%08" PRIx32 "\n",
         sdadc_getreg(priv, STM32_SDADC_CONFCHR1_OFFSET),
         sdadc_getreg(priv, STM32_SDADC_CONFCHR2_OFFSET),
         sdadc_getreg(priv, STM32_SDADC_JCHGR_OFFSET));

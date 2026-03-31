@@ -943,7 +943,7 @@ static uint32_t stm32l4_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  uinfo("%08x->%08x\n", addr, val);
+  uinfo("%08" PRIx32 "->%08" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -961,7 +961,7 @@ static void stm32l4_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  uinfo("%08x<-%08x\n", addr, val);
+  uinfo("%08" PRIx32 "<-%08" PRIx32 "\n", addr, val);
 
   /* Write the value */
 

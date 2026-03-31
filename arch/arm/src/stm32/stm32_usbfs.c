@@ -662,7 +662,7 @@ static uint16_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  uinfo("%08x->%04x\n", addr, val);
+  uinfo("%08" PRIx32 "->%04" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -676,7 +676,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  uinfo("%08x<-%04x\n", addr, val);
+  uinfo("%08" PRIx32 "<-%04" PRIx32 "\n", addr, val);
 
   /* Write the value */
 
@@ -704,26 +704,26 @@ static void stm32_dumpep(int epno)
   /* Endpoint register */
 
   addr = STM32_USB_EPR(epno);
-  uinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
+  uinfo("EPR%d:   [%08" PRIx32 "] %04x\n", epno, addr, getreg16(addr));
 
   /* Endpoint descriptor */
 
   addr = STM32_USB_BTABLE_ADDR(epno, 0);
-  uinfo("DESC:   %08x\n", addr);
+  uinfo("DESC:   %08" PRIx32 "\n", addr);
 
   /* Endpoint buffer descriptor */
 
   addr = STM32_USB_ADDR_TX(epno);
-  uinfo("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  TX ADDR:  [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_TX(epno);
-  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_ADDR_RX(epno);
-  uinfo("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("  RX ADDR:  [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 
   addr = STM32_USB_COUNT_RX(epno);
-  uinfo("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  uinfo("     COUNT: [%08" PRIx32 "] %04x\n",  addr, getreg16(addr));
 }
 #endif
 
@@ -738,7 +738,8 @@ static void stm32_checksetup(void)
   uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR1);
   uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR1);
 
-  uinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n",
+  uinfo("CFGR: %08" PRIx32 " APB1RSTR: %08" PRIx32
+        " APB1ENR: %08" PRIx32 "\n",
          cfgr, apb1rstr, apb1enr);
 
   if ((apb1rstr & RCC_APB1RSTR1_USBRST) != 0 ||

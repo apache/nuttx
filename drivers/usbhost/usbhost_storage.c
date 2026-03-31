@@ -479,9 +479,9 @@ static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw)
   int i;
 
   uinfo("CBW:\n");
-  uinfo("  signature: %08x\n", usbhost_getle32(cbw->signature));
-  uinfo("  tag:       %08x\n", usbhost_getle32(cbw->tag));
-  uinfo("  datlen:    %08x\n", usbhost_getle32(cbw->datlen));
+  uinfo("  signature: %08" PRIx32 "\n", usbhost_getle32(cbw->signature));
+  uinfo("  tag:       %08" PRIx32 "\n", usbhost_getle32(cbw->tag));
+  uinfo("  datlen:    %08" PRIx32 "\n", usbhost_getle32(cbw->datlen));
   uinfo("  flags:     %02x\n", cbw->flags);
   uinfo("  lun:       %02x\n", cbw->lun);
   uinfo("  cdblen:    %02x\n", cbw->cdblen);
@@ -499,9 +499,9 @@ static void usbhost_dumpcbw(FAR struct usbmsc_cbw_s *cbw)
 static void usbhost_dumpcsw(FAR struct usbmsc_csw_s *csw)
 {
   uinfo("CSW:\n");
-  uinfo("  signature: %08x\n", usbhost_getle32(csw->signature));
-  uinfo("  tag:       %08x\n", usbhost_getle32(csw->tag));
-  uinfo("  residue:   %08x\n", usbhost_getle32(csw->residue));
+  uinfo("  signature: %08" PRIx32 "\n", usbhost_getle32(csw->signature));
+  uinfo("  tag:       %08" PRIx32 "\n", usbhost_getle32(csw->tag));
+  uinfo("  residue:   %08" PRIx32 "\n", usbhost_getle32(csw->residue));
   uinfo("  status:    %02x\n", csw->status);
 }
 #endif

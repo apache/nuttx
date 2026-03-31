@@ -744,17 +744,17 @@ void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
   uint32_t dmabase = DMA_BASE(dmach->base);
 
   dmainfo("DMA Registers: %s\n", msg);
-  dmainfo("    ISR[%08x]: %08x\n",
+  dmainfo("    ISR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmabase + STM32L4_DMA_ISR_OFFSET, regs->isr);
-  dmainfo("  CSELR[%08x]: %08x\n",
+  dmainfo("  CSELR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmabase + STM32L4_DMA_CSELR_OFFSET, regs->cselr);
-  dmainfo("    CCR[%08x]: %08x\n",
+  dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmach->base + STM32L4_DMACHAN_CCR_OFFSET, regs->ccr);
-  dmainfo("  CNDTR[%08x]: %08x\n",
+  dmainfo("  CNDTR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmach->base + STM32L4_DMACHAN_CNDTR_OFFSET, regs->cndtr);
-  dmainfo("   CPAR[%08x]: %08x\n",
+  dmainfo("   CPAR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmach->base + STM32L4_DMACHAN_CPAR_OFFSET, regs->cpar);
-  dmainfo("   CMAR[%08x]: %08x\n",
+  dmainfo("   CMAR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmach->base + STM32L4_DMACHAN_CMAR_OFFSET, regs->cmar);
 }
 #endif

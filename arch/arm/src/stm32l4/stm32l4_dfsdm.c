@@ -670,7 +670,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
    *   position.
    */
 
-  ainfo("Initializing timers extsel = 0x%08x\n", priv->extsel);
+  ainfo("Initializing timers extsel = 0x%08" PRIx32 "\n", priv->extsel);
 
   dfsdm_modifyreg(priv, FLTCR2_OFFSET(priv),
                 DFSDM_FLTCR1_JEXTEN_MASK | DFSDM_FLTCR1_JEXTSEL_MASK,
@@ -1241,7 +1241,8 @@ static int dfsdm_setup(struct adc_dev_s *dev)
 
   leave_critical_section(flags);
 
-  ainfo("ISR:   0x%08x FCR:    0x%08x CR1:  0x%08x CR2: 0x%08x\n",
+  ainfo("ISR:   0x%08" PRIx32 " FCR:    0x%08" PRIx32
+        " CR1:  0x%08" PRIx32 " CR2: 0x%08" PRIx32 "\n",
         dfsdm_getreg(priv, FLTISR_OFFSET(priv)),
         dfsdm_getreg(priv, FLTFCR_OFFSET(priv)),
         dfsdm_getreg(priv, FLTCR1_OFFSET(priv)),
