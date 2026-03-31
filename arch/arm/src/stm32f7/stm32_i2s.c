@@ -582,7 +582,7 @@ static inline uint16_t i2s_getreg(struct stm32_i2s_s *priv,
 #ifdef CONFIG_STM32F7_I2S_REGDEBUG
   if (i2s_checkreg(priv, false, regval, regaddr))
     {
-      i2sinfo("%08x->%04x\n", regaddr, regval);
+      i2sinfo("%08" PRIx32 "->%04x\n", regaddr, regval);
     }
 #endif
 
@@ -613,7 +613,7 @@ static inline void i2s_putreg(struct stm32_i2s_s *priv, uint8_t offset,
 #ifdef CONFIG_STM32F7_I2S_REGDEBUG
   if (i2s_checkreg(priv, true, regval, regaddr))
     {
-      i2sinfo("%08x<-%04x\n", regaddr, regval);
+      i2sinfo("%08" PRIx32 "<-%04x\n", regaddr, regval);
     }
 #endif
 
@@ -647,7 +647,7 @@ static void i2s_dump_regs(struct stm32_i2s_s *priv, const char *msg)
   i2sinfo("    I2SCFGR:%04x    I2SPR:%04x\n",
           i2s_getreg(priv, STM32_SPI_I2SCFGR_OFFSET),
           i2s_getreg(priv, STM32_SPI_I2SPR_OFFSET));
-  i2sinfo("    PLLI2SCFGR:%08x\n", getreg32(STM32_RCC_PLLI2SCFGR));
+  i2sinfo("    PLLI2SCFGR:%08" PRIx32 "\n", getreg32(STM32_RCC_PLLI2SCFGR));
 }
 #endif
 

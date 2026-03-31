@@ -2091,7 +2091,7 @@ static void adc_enable_vbat_channel(struct adc_dev_s *dev, bool enable)
       adccmn_modifyreg(priv, STM32_ADC_CCR_OFFSET, ADC_CCR_VBATEN, 0);
     }
 
-  ainfo("STM32_ADC_CCR value: 0x%08x\n",
+  ainfo("STM32_ADC_CCR value: 0x%08" PRIx32 "\n",
         adccmn_getreg(priv, STM32_ADC_CCR_OFFSET));
 }
 #endif

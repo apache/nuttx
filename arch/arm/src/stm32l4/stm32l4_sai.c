@@ -431,12 +431,13 @@ static void sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg)
   if (msg)
       i2sinfo("%s\n", msg);
 
-  i2sinfo("CR1:%08x CR2:%08x  FRCR:%08x SLOTR:%08x\n",
+  i2sinfo("CR1:%08" PRIx32 " CR2:%08" PRIx32
+          "  FRCR:%08" PRIx32 " SLOTR:%08" PRIx32 "\n",
           sai_getreg(priv, STM32L4_SAI_CR1_OFFSET),
           sai_getreg(priv, STM32L4_SAI_CR2_OFFSET),
           sai_getreg(priv, STM32L4_SAI_FRCR_OFFSET),
           sai_getreg(priv, STM32L4_SAI_SLOTR_OFFSET));
-  i2sinfo(" IM:%08x  SR:%08x CLRFR:%08x\n",
+  i2sinfo(" IM:%08" PRIx32 "  SR:%08" PRIx32 " CLRFR:%08" PRIx32 "\n",
           sai_getreg(priv, STM32L4_SAI_IM_OFFSET),
           sai_getreg(priv, STM32L4_SAI_SR_OFFSET),
           sai_getreg(priv, STM32L4_SAI_CLRFR_OFFSET));

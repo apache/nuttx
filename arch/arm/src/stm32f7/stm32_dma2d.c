@@ -307,13 +307,14 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits)
 {
   uint32_t   cr;
 
-  lcdinfo("setbits=%08x, clrbits=%08x\n", setbits, clrbits);
+  lcdinfo("setbits=%08" PRIx32 ", clrbits=%08" PRIx32 "\n",
+          setbits, clrbits);
 
   cr = getreg32(STM32_DMA2D_CR);
   cr &= ~clrbits;
   cr |= setbits;
 
-  lcdinfo("cr=%08x\n", cr);
+  lcdinfo("cr=%08" PRIx32 "\n", cr);
   putreg32(cr, STM32_DMA2D_CR);
 }
 
@@ -331,7 +332,7 @@ static int stm32_dma2dirq(int irq, void *context, void *arg)
   uint32_t regval = getreg32(STM32_DMA2D_ISR);
   struct stm32_interrupt_s *priv = &g_interrupt;
 
-  reginfo("irq = %d, regval = %08x\n", irq, regval);
+  reginfo("irq = %d, regval = %08" PRIx32 "\n", irq, regval);
 
   if (regval & DMA2D_ISR_TCIF)
     {
@@ -470,9 +471,9 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 
   regval  = getreg32(pfcreg);
   regval |= DMA2D_XGPFCCR_START;
-  reginfo("set regval=%08x\n", regval);
+  reginfo("set regval=%08" PRIx32 "\n", regval);
   putreg32(regval, pfcreg);
-  reginfo("configured regval=%08x\n", getreg32(pfcreg));
+  reginfo("configured regval=%08" PRIx32 "\n", getreg32(pfcreg));
 
   /* Wait until clut is finished */
 
@@ -607,7 +608,7 @@ static void stm32_dma2d_lfifo(struct stm32_dma2d_overlay_s *oinfo,
 
 static void stm32_dma2d_lcolor(int lid, uint32_t argb)
 {
-  lcdinfo("lid=%d, argb=%08x\n", lid, argb);
+  lcdinfo("lid=%d, argb=%08" PRIx32 "\n", lid, argb);
   putreg32(argb, stm32_color_layer_t[lid]);
 }
 
@@ -673,8 +674,8 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 {
   uint32_t   pfccrreg;
 
-  lcdinfo("lid=%d, blendmode=%08x, alpha=%02x, fmt=%d\n", lid, blendmode,
-          alpha, fmt);
+  lcdinfo("lid=%d, blendmode=%08" PRIx32 ", alpha=%02x, fmt=%d\n",
+          lid, blendmode, alpha, fmt);
 
   /* Set color format */
 
@@ -819,7 +820,7 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
   struct stm32_dma2d_s *priv = &g_dma2ddev;
   DEBUGASSERT(oinfo != NULL && oinfo->oinfo != NULL && area != NULL);
 
-  lcdinfo("oinfo=%p, argb=%08x\n", oinfo, argb);
+  lcdinfo("oinfo=%p, argb=%08" PRIx32 "\n", oinfo, argb);
 
 #ifdef CONFIG_STM32F7_FB_CMAP
   if (oinfo->fmt == DMA2D_PF_L8)

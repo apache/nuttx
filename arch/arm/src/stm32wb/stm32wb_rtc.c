@@ -139,24 +139,24 @@ static inline void rtc_enable_alarm(void);
 static void rtc_dumpregs(const char *msg)
 {
   rtcinfo("%s:\n", msg);
-  rtcinfo("      TR: %08x\n", getreg32(STM32WB_RTC_TR));
-  rtcinfo("      DR: %08x\n", getreg32(STM32WB_RTC_DR));
-  rtcinfo("      CR: %08x\n", getreg32(STM32WB_RTC_CR));
-  rtcinfo("     ISR: %08x\n", getreg32(STM32WB_RTC_ISR));
-  rtcinfo("    PRER: %08x\n", getreg32(STM32WB_RTC_PRER));
-  rtcinfo("    WUTR: %08x\n", getreg32(STM32WB_RTC_WUTR));
-  rtcinfo("  ALRMAR: %08x\n", getreg32(STM32WB_RTC_ALRMAR));
-  rtcinfo("  ALRMBR: %08x\n", getreg32(STM32WB_RTC_ALRMBR));
-  rtcinfo("  SHIFTR: %08x\n", getreg32(STM32WB_RTC_SHIFTR));
-  rtcinfo("    TSTR: %08x\n", getreg32(STM32WB_RTC_TSTR));
-  rtcinfo("    TSDR: %08x\n", getreg32(STM32WB_RTC_TSDR));
-  rtcinfo("   TSSSR: %08x\n", getreg32(STM32WB_RTC_TSSSR));
-  rtcinfo("    CALR: %08x\n", getreg32(STM32WB_RTC_CALR));
-  rtcinfo("  TAMPCR: %08x\n", getreg32(STM32WB_RTC_TAMPCR));
-  rtcinfo("ALRMASSR: %08x\n", getreg32(STM32WB_RTC_ALRMASSR));
-  rtcinfo("ALRMBSSR: %08x\n", getreg32(STM32WB_RTC_ALRMBSSR));
-  rtcinfo("      OR: %08x\n", getreg32(STM32WB_RTC_OR));
-  rtcinfo("MAGICREG: %08x\n", getreg32(RTC_MAGIC_REG));
+  rtcinfo("      TR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_TR));
+  rtcinfo("      DR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_DR));
+  rtcinfo("      CR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_CR));
+  rtcinfo("     ISR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_ISR));
+  rtcinfo("    PRER: %08" PRIx32 "\n", getreg32(STM32WB_RTC_PRER));
+  rtcinfo("    WUTR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_WUTR));
+  rtcinfo("  ALRMAR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_ALRMAR));
+  rtcinfo("  ALRMBR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_ALRMBR));
+  rtcinfo("  SHIFTR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_SHIFTR));
+  rtcinfo("    TSTR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_TSTR));
+  rtcinfo("    TSDR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_TSDR));
+  rtcinfo("   TSSSR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_TSSSR));
+  rtcinfo("    CALR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_CALR));
+  rtcinfo("  TAMPCR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_TAMPCR));
+  rtcinfo("ALRMASSR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_ALRMASSR));
+  rtcinfo("ALRMBSSR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_ALRMBSSR));
+  rtcinfo("      OR: %08" PRIx32 "\n", getreg32(STM32WB_RTC_OR));
+  rtcinfo("MAGICREG: %08" PRIx32 "\n", getreg32(RTC_MAGIC_REG));
 }
 #else
 #  define rtc_dumpregs(msg)

@@ -477,12 +477,14 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
       i2sinfo("%s\n", msg);
 
 #if 0
-  i2sinfo("CR1:%08x CR2:%08x  FRCR:%08x SLOTR:%08x\n",
+  i2sinfo("CR1:%08" PRIx32 " CR2:%08" PRIx32
+          "  FRCR:%08" PRIx32 " SLOTR:%08" PRIx32 "\n",
           sai_getreg(priv, STM32F7_SAI_CR1_OFFSET),
           sai_getreg(priv, STM32F7_SAI_CR2_OFFSET),
           sai_getreg(priv, STM32F7_SAI_FRCR_OFFSET),
           sai_getreg(priv, STM32F7_SAI_SLOTR_OFFSET));
-  i2sinfo(" IM:%08x  SR:%08x CLRFR:%08x\n",
+  i2sinfo(" IM:%08" PRIx32 "  SR:%08" PRIx32
+          " CLRFR:%08" PRIx32 "\n",
           sai_getreg(priv, STM32F7_SAI_IM_OFFSET),
           sai_getreg(priv, STM32F7_SAI_SR_OFFSET),
           sai_getreg(priv, STM32F7_SAI_CLRFR_OFFSET));
@@ -491,16 +493,16 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
 #ifdef CONFIG_STM32F7_SAI1
   uint32_t gcr = getreg32(STM32F7_SAI1_GCR);
-  i2sinfo("GCR: *%08x = %08x\n", STM32F7_SAI1_GCR, gcr);
+  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI1_GCR, gcr);
 #else
   uint32_t gcr = getreg32(STM32F7_SAI2_GCR);
-  i2sinfo("GCR: *%08x = %08x\n", STM32F7_SAI2_GCR, gcr);
+  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI2_GCR, gcr);
 #endif
 
   /* CR1 */
 
   uint32_t cr1 = sai_getreg(priv, STM32F7_SAI_CR1_OFFSET);
-  i2sinfo("CR1: *%08x = %08x\n", STM32F7_SAI_CR1_OFFSET, cr1);
+  i2sinfo("CR1: *%08" PRIx32 " = %08x\n", STM32F7_SAI_CR1_OFFSET, cr1);
 
   uint32_t mode = (cr1 & SAI_CR1_MODE_MASK) >> SAI_CR1_MODE_SHIFT;
   const char *mode_string[] =
@@ -583,7 +585,7 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
   /* CR2 */
 
   uint32_t cr2 = sai_getreg(priv, STM32F7_SAI_CR2_OFFSET);
-  i2sinfo("CR2: *%08x = %08x\n", STM32F7_SAI_CR2_OFFSET, cr2);
+  i2sinfo("CR2: *%08x = %08" PRIx32 "\n", STM32F7_SAI_CR2_OFFSET, cr2);
   uint32_t fth = (cr2 & SAI_CR2_FTH_MASK) >> SAI_CR2_FTH_SHIFT;
   const char *fth_string[] =
   { "FIFO empty",
@@ -637,7 +639,7 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
   /* FRCR */
 
   uint32_t frcr = sai_getreg(priv, STM32F7_SAI_FRCR_OFFSET);
-  i2sinfo("FRCR: *%08x = %08x\n", STM32F7_SAI_FRCR_OFFSET, frcr);
+  i2sinfo("FRCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI_FRCR_OFFSET, frcr);
 
   uint32_t frl = (frcr & SAI_FRCR_FRL_MASK) >> SAI_FRCR_FRL_SHIFT;
   i2sinfo("\t\tFRCR: FRL[7:0] = %d\n", frl);
@@ -661,7 +663,7 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
   /* SLOTR */
 
   uint32_t slotr = sai_getreg(priv, STM32F7_SAI_SLOTR_OFFSET);
-  i2sinfo("SLOTR: *%08x = %08x\n", STM32F7_SAI_SLOTR_OFFSET, slotr);
+  i2sinfo("SLOTR: *%08x = %08" PRIx32 "\n", STM32F7_SAI_SLOTR_OFFSET, slotr);
 
   uint32_t fboff = (slotr & SAI_SLOTR_FBOFF_MASK) >> SAI_SLOTR_FBOFF_SHIFT;
   i2sinfo("\t\tSLOTR: FBOFF[4:0] = %d\n", fboff);
@@ -683,7 +685,7 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   uint32_t sloten = (slotr & SAI_SLOTR_SLOTEN_MASK) >>
                       SAI_SLOTR_SLOTEN_SHIFT;
-  i2sinfo("\t\tSLOTR: SLOTEN[31:16] = %08x\n", sloten + 1);
+  i2sinfo("\t\tSLOTR: SLOTEN[31:16] = %08" PRIx32 "\n", sloten + 1);
 #endif
 }
 #endif

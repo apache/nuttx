@@ -1023,12 +1023,18 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
   mcinfo("  POWER[%08x]: %08x\n", STM32_SDMMC_POWER_OFFSET,   regs->power);
   mcinfo("  CLKCR[%08x]: %08x\n", STM32_SDMMC_CLKCR_OFFSET,   regs->clkcr);
   mcinfo("  DCTRL[%08x]: %08x\n", STM32_SDMMC_DCTRL_OFFSET,   regs->dctrl);
-  mcinfo(" DTIMER[%08x]: %08x\n", STM32_SDMMC_DTIMER_OFFSET,  regs->dtimer);
-  mcinfo("   DLEN[%08x]: %08x\n", STM32_SDMMC_DLEN_OFFSET,    regs->dlen);
-  mcinfo(" DCOUNT[%08x]: %08x\n", STM32_SDMMC_DCOUNT_OFFSET,  regs->dcount);
-  mcinfo("    STA[%08x]: %08x\n", STM32_SDMMC_STA_OFFSET,     regs->sta);
-  mcinfo("   MASK[%08x]: %08x\n", STM32_SDMMC_MASK_OFFSET,    regs->mask);
-  mcinfo("FIFOCNT[%08x]: %08x\n", STM32_SDMMC_FIFOCNT_OFFSET, regs->fifocnt);
+  mcinfo(" DTIMER[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_DTIMER_OFFSET,  regs->dtimer);
+  mcinfo("   DLEN[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_DLEN_OFFSET,    regs->dlen);
+  mcinfo(" DCOUNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_DCOUNT_OFFSET,  regs->dcount);
+  mcinfo("    STA[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_STA_OFFSET,     regs->sta);
+  mcinfo("   MASK[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_MASK_OFFSET,    regs->mask);
+  mcinfo("FIFOCNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDMMC_FIFOCNT_OFFSET, regs->fifocnt);
 }
 #endif
 

@@ -810,12 +810,18 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
   mcinfo("  POWER[%08x]: %08x\n", STM32_SDIO_POWER,   regs->power);
   mcinfo("  CLKCR[%08x]: %08x\n", STM32_SDIO_CLKCR,   regs->clkcr);
   mcinfo("  DCTRL[%08x]: %08x\n", STM32_SDIO_DCTRL,   regs->dctrl);
-  mcinfo(" DTIMER[%08x]: %08x\n", STM32_SDIO_DTIMER,  regs->dtimer);
-  mcinfo("   DLEN[%08x]: %08x\n", STM32_SDIO_DLEN,    regs->dlen);
-  mcinfo(" DCOUNT[%08x]: %08x\n", STM32_SDIO_DCOUNT,  regs->dcount);
-  mcinfo("    STA[%08x]: %08x\n", STM32_SDIO_STA,     regs->sta);
-  mcinfo("   MASK[%08x]: %08x\n", STM32_SDIO_MASK,    regs->mask);
-  mcinfo("FIFOCNT[%08x]: %08x\n", STM32_SDIO_FIFOCNT, regs->fifocnt);
+  mcinfo(" DTIMER[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DTIMER,  regs->dtimer);
+  mcinfo("   DLEN[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DLEN,    regs->dlen);
+  mcinfo(" DCOUNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_DCOUNT,  regs->dcount);
+  mcinfo("    STA[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_STA,     regs->sta);
+  mcinfo("   MASK[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_MASK,    regs->mask);
+  mcinfo("FIFOCNT[%08x]: %08" PRIx32 "\n",
+         STM32_SDIO_FIFOCNT, regs->fifocnt);
 }
 #endif
 
@@ -2250,7 +2256,7 @@ static int stm32_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R5_RESPONSE &&
            (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R6_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2315,7 +2321,7 @@ static int stm32_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
 
   if ((cmd & MMCSD_RESPONSE_MASK) != MMCSD_R2_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else
@@ -2372,7 +2378,7 @@ static int stm32_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R4_RESPONSE &&
       (cmd & MMCSD_RESPONSE_MASK) != MMCSD_R7_RESPONSE)
     {
-      mcerr("ERROR: Wrong response CMD=%08x\n", cmd);
+      mcerr("ERROR: Wrong response CMD=%08" PRIx32 "\n", cmd);
       ret = -EINVAL;
     }
   else

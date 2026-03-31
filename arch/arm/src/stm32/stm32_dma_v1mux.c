@@ -907,19 +907,19 @@ static void stm32_dma12_dump(DMA_HANDLE handle,
   dmainfo("DMA%d Registers: %s\n",
           dmachan->ctrl + 1,
           msg);
-  dmainfo("    ISR[%08x]: %08x\n",
+  dmainfo("    ISR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmabase + STM32_DMA_ISR_OFFSET,
           regs->isr);
-  dmainfo("    CCR[%08x]: %08x\n",
+  dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmachan->base + STM32_DMACHAN_CCR_OFFSET,
           regs->ccr);
-  dmainfo("  CNDTR[%08x]: %08x\n",
+  dmainfo("  CNDTR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmachan->base + STM32_DMACHAN_CNDTR_OFFSET,
           regs->cndtr);
-  dmainfo("   CPAR[%08x]: %08x\n",
+  dmainfo("   CPAR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmachan->base + STM32_DMACHAN_CPAR_OFFSET,
           regs->cpar);
-  dmainfo("   CMAR[%08x]: %08x\n",
+  dmainfo("   CMAR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmachan->base + STM32_DMACHAN_CMAR_OFFSET,
           regs->cmar);
 
@@ -958,20 +958,20 @@ static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
                               const struct stm32_dmaregs_s *regs)
 {
   dmainfo("DMAMUX%d CH=%d\n", dmamux->id, channel);
-  dmainfo("    CCR[%08x]: %08x\n",
+  dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_CXCR_OFFSET(channel),
           regs->dmamux.ccr);
-  dmainfo("    CSR[%08x]: %08x\n",
+  dmainfo("    CSR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_CSR_OFFSET, regs->dmamux.csr);
-  dmainfo("  RG0CR[%08x]: %08x\n",
+  dmainfo("  RG0CR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_RG0CR_OFFSET, regs->dmamux.rg0cr);
-  dmainfo("  RG1CR[%08x]: %08x\n",
+  dmainfo("  RG1CR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_RG1CR_OFFSET, regs->dmamux.rg1cr);
-  dmainfo("  RG2CR[%08x]: %08x\n",
+  dmainfo("  RG2CR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_RG2CR_OFFSET, regs->dmamux.rg2cr);
-  dmainfo("  RG3CR[%08x]: %08x\n",
+  dmainfo("  RG3CR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_RG3CR_OFFSET, regs->dmamux.rg3cr);
-  dmainfo("   RGSR[%08x]: %08x\n",
+  dmainfo("   RGSR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmamux->base + STM32_DMAMUX_RGSR_OFFSET, regs->dmamux.rgsr);
 };
 #endif

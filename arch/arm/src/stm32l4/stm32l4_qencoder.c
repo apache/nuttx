@@ -530,25 +530,27 @@ static void stm32l4_dumpregs(struct stm32l4_lowerhalf_s *priv,
                              const char *msg)
 {
   sninfo("%s:\n", msg);
-  sninfo("  CR1: %04x CR2:  %04x SMCR:  %08x DIER:  %04x\n",
+  sninfo("  CR1: %04x CR2:  %04x SMCR:  %08" PRIx32 " DIER:  %04x\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_CR2_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET));
-  sninfo("   SR: %04x EGR:  %04x CCMR1: %08x CCMR2: %08x\n",
+  sninfo("   SR: %04x EGR:  %04x CCMR1: %08" PRIx32
+         " CCMR2: %08" PRIx32 "\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_EGR_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCMR2_OFFSET));
-  sninfo(" CCER: %04x CNT:  %08x PSC:   %04x ARR:   %08x\n",
+  sninfo(" CCER: %04x CNT:  %08" PRIx32 " PSC:   %04x"
+         " ARR:   %08" PRIx32 "\n",
          stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET),
          stm32l4_getreg16(priv, STM32L4_GTIM_PSC_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_ARR_OFFSET));
-  sninfo(" CCR1: %08x CCR2: %08x\n",
+  sninfo(" CCR1: %08" PRIx32 " CCR2: %08" PRIx32 "\n",
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR1_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR2_OFFSET));
-  sninfo(" CCR3: %08x CCR4: %08x\n",
+  sninfo(" CCR3: %08" PRIx32 " CCR4: %08" PRIx32 "\n",
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR3_OFFSET),
          stm32l4_getreg32(priv, STM32L4_GTIM_CCR4_OFFSET));
 #if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM8_QE)
@@ -1001,7 +1003,8 @@ static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
   putreg32(regval, regaddr);
   leave_critical_section(flags);
 
-  sninfo("regaddr: %08x resetbit: %08x\n", regaddr, resetbit);
+  sninfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",
+         regaddr, resetbit);
   stm32l4_dumpregs(priv, "After stop");
 
   /* Put the TI1 GPIO pin back to its default state */

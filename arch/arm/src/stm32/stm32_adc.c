@@ -2144,7 +2144,7 @@ static void adc_power_down_delay(struct stm32_dev_s *priv, bool pdd_high)
 static void adc_dels_after_conversion(struct stm32_dev_s *priv,
                                       uint32_t delay)
 {
-  ainfo("Delay selected: 0x%08x\n", delay);
+  ainfo("Delay selected: 0x%08" PRIx32 "\n", delay);
 
   adc_modifyreg(priv, STM32_ADC_CR2_OFFSET, ADC_CR2_DELS_MASK, delay);
 }

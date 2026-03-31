@@ -908,7 +908,8 @@ int stm32l4_i2c_sem_waitdone(struct stm32l4_i2c_priv_s *priv)
 
   while (priv->intstate != INTSTATE_DONE && elapsed < timeout);
 
-  i2cinfo("intstate: %d elapsed: %ld threshold: %ld status: 0x%08x\n",
+  i2cinfo("intstate: %d elapsed: %ld threshold: %ld"
+          " status: 0x%08" PRIx32 "\n",
           priv->intstate, (long)elapsed, (long)timeout, priv->status);
 
   /* Set the interrupt state back to IDLE */
@@ -1175,7 +1176,8 @@ static void stm32l4_i2c_tracedump(struct stm32l4_i2c_priv_s *priv)
     {
       trace = &priv->trace[i];
       syslog(LOG_DEBUG,
-             "%2d. STATUS: %08x COUNT: %3d EVENT: %2d PARM: %08x TIME: %d\n",
+             "%2d. STATUS: %08" PRIx32 " COUNT: %3d EVENT: %2d"
+             " PARM: %08" PRIx32 " TIME: %d\n",
              i + 1, trace->status, trace->count,  trace->event, trace->parm,
              (int)(trace->time - priv->start_time));
     }

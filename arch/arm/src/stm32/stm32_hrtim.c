@@ -2023,24 +2023,27 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
     {
       case HRTIM_TIMER_MASTER:
         {
-          tmrinfo("\tCR:\t0x%08x\tISR:\t0x%08x\tICR:\t0x%08x\n",
+          tmrinfo("\tCR:\t0x%08" PRIx32 "\tISR:\t0x%08" PRIx32
+                  "\tICR:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_ISR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_ICR_OFFSET));
 
-          tmrinfo("\tDIER:\t0x%08x\tCNTR:\t0x%08x\tPER:\t0x%08x\n",
+          tmrinfo("\tDIER:\t0x%08" PRIx32 "\tCNTR:\t0x%08" PRIx32
+                  "\tPER:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_DIER_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CNTR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_PER_OFFSET));
 
-          tmrinfo("\tREP:\t0x%08x\tCMP1:\t0x%08x\tCMP2:\t0x%08x\n",
+          tmrinfo("\tREP:\t0x%08" PRIx32 "\tCMP1:\t0x%08" PRIx32
+                  "\tCMP2:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_REPR_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP1R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP2R_OFFSET));
 
-          tmrinfo("\tCMP3:\t0x%08x\tCMP4:\t0x%08x\n",
+          tmrinfo("\tCMP3:\t0x%08" PRIx32 "\tCMP4:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP3R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
@@ -2064,24 +2067,28 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
       case HRTIM_TIMER_TIME:
 #endif
         {
-          tmrinfo("\tCR:\t0x%08x\tISR:\t0x%08x\tICR:\t0x%08x\n",
+          tmrinfo("\tCR:\t0x%08" PRIx32 "\tISR:\t0x%08" PRIx32
+                  "\tICR:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_ISR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_ICR_OFFSET));
 
-          tmrinfo("\tDIER:\t0x%08x\tCNTR:\t0x%08x\tPER:\t0x%08x\n",
+          tmrinfo("\tDIER:\t0x%08" PRIx32 "\tCNTR:\t0x%08" PRIx32
+                  "\tPER:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_DIER_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CNTR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_PER_OFFSET));
 
-          tmrinfo("\tREP:\t0x%08x\tCMP1:\t0x%08x\tCMP1C:\t0x%08x\n",
+          tmrinfo("\tREP:\t0x%08" PRIx32 "\tCMP1:\t0x%08" PRIx32
+                  "\tCMP1C:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_REPR_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP1R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP1CR_OFFSET));
 
-          tmrinfo("\tCMP2:\t0x%08x\tCMP3:\t0x%08x\tCMP4:\t0x%08x\n",
+          tmrinfo("\tCMP2:\t0x%08" PRIx32 "\tCMP3:\t0x%08" PRIx32
+                  "\tCMP4:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP2R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
@@ -2089,14 +2096,16 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CMP4R_OFFSET));
 
-          tmrinfo("\tCPT1:\t0x%08x\tCPT2:\t0x%08x\tDTR:\t0x%08x\n",
+          tmrinfo("\tCPT1:\t0x%08" PRIx32 "\tCPT2:\t0x%08" PRIx32
+                  "\tDTR:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CPT1R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CPT2R_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_DTR_OFFSET));
 
-          tmrinfo("\tSET1:\t0x%08x\tRST1:\t0x%08x\tSET2:\t0x%08x\n",
+          tmrinfo("\tSET1:\t0x%08" PRIx32 "\tRST1:\t0x%08" PRIx32
+                  "\tSET2:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_SET1R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
@@ -2104,7 +2113,8 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_SET2R_OFFSET));
 
-          tmrinfo("\tRST2:\t0x%08x\tEEF1:\t0x%08x\tEEF2:\t0x%08x\n",
+          tmrinfo("\tRST2:\t0x%08" PRIx32 "\tEEF1:\t0x%08" PRIx32
+                  "\tEEF2:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_RST2R_OFFSET),
                   hrtim_tim_getreg(priv, timer,
@@ -2112,13 +2122,15 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_EEFR2_OFFSET));
 
-          tmrinfo("\tRSTR:\t0x%08x\tCHPR:\t0x%08x\tCPT1C:\t0x%08x\n",
+          tmrinfo("\tRSTR:\t0x%08" PRIx32 "\tCHPR:\t0x%08" PRIx32
+                  "\tCPT1C:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_RSTR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_CHPR_OFFSET),
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CPT1CR_OFFSET));
 
-          tmrinfo("\tCPT2C:\t0x%08x\tOUT:\t0x%08x\tFLT:\t0x%08x\n",
+          tmrinfo("\tCPT2C:\t0x%08" PRIx32 "\tOUT:\t0x%08" PRIx32
+                  "\tFLT:\t0x%08" PRIx32 "\n",
                   hrtim_tim_getreg(priv, timer,
                                    STM32_HRTIM_TIM_CPT2CR_OFFSET),
                   hrtim_tim_getreg(priv, timer, STM32_HRTIM_TIM_OUTR_OFFSET),
@@ -2130,47 +2142,55 @@ static void hrtim_dumpregs(struct stm32_hrtim_s *priv, uint8_t timer,
 
       case HRTIM_TIMER_COMMON:
         {
-          tmrinfo("\tCR1:\t0x%08x\tCR2:\t0x%08x\tISR:\t0x%08x\n",
+          tmrinfo("\tCR1:\t0x%08" PRIx32 "\tCR2:\t0x%08" PRIx32
+                  "\tISR:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_CR1_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_CR2_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ISR_OFFSET));
 
-          tmrinfo("\tICR:\t0x%08x\tIER:\t0x%08x\tOENR:\t0x%08x\n",
+          tmrinfo("\tICR:\t0x%08" PRIx32 "\tIER:\t0x%08" PRIx32
+                  "\tOENR:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ICR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_IER_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_OENR_OFFSET));
 
-          tmrinfo("\tODISR:\t0x%08x\tODSR:\t0x%08x\tBMCR:\t0x%08x\n",
+          tmrinfo("\tODISR:\t0x%08" PRIx32 "\tODSR:\t0x%08" PRIx32
+                  "\tBMCR:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ODISR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ODSR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BMCR_OFFSET));
 
-          tmrinfo("\tBMTRG:\t0x%08x\tBMCMPR:\t0x%08x\tBMPER:\t0x%08x\n",
+          tmrinfo("\tBMTRG:\t0x%08" PRIx32 "\tBMCMPR:\t0x%08" PRIx32
+                  "\tBMPER:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BMTRGR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BMCMPR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BMPER_OFFSET));
 
-          tmrinfo("\tADC1R:\t0x%08x\tADC2R:\t0x%08x\tADC3R:\t0x%08x\n",
+          tmrinfo("\tADC1R:\t0x%08" PRIx32 "\tADC2R:\t0x%08" PRIx32
+                  "\tADC3R:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ADC1R_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ADC2R_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ADC3R_OFFSET));
 
-          tmrinfo("\tADC4R:\t0x%08x\tDLLCR:\t0x%08x\tFLTIN1:\t0x%08x\n",
+          tmrinfo("\tADC4R:\t0x%08" PRIx32 "\tDLLCR:\t0x%08" PRIx32
+                  "\tFLTIN1:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_ADC4R_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_DLLCR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_FLTINR1_OFFSET));
 
-          tmrinfo("\tFLTIN2:\t0x%08x\tBDMUPD:\t0x%08x\tBDTAUP:\t0x%08x\n",
+          tmrinfo("\tFLTIN2:\t0x%08" PRIx32 "\tBDMUPD:\t0x%08" PRIx32
+                  "\tBDTAUP:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_FLTINR2_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDMUPDR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDTAUPR_OFFSET));
 
-          tmrinfo("\tBDTBUP: 0x%08x\tBDTCUP:\t0x%08x\tBDTDUP:\t0x%08x\n",
+          tmrinfo("\tBDTBUP: 0x%08" PRIx32 "\tBDTCUP:\t0x%08" PRIx32
+                  "\tBDTDUP:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDTBUPR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDTCUPR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDTDUPR_OFFSET));
 
-          tmrinfo("\tBDTEUP:\t0x%08x\tBDMAD:\t0x%08x\n",
+          tmrinfo("\tBDTEUP:\t0x%08" PRIx32 "\tBDMAD:\t0x%08" PRIx32 "\n",
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDTEUPR_OFFSET),
                   hrtim_cmn_getreg(priv, STM32_HRTIM_CMN_BDMADR_OFFSET));
 

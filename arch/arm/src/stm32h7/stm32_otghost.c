@@ -526,7 +526,7 @@ static struct usbhost_connection_s g_usbconn =
 #ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
-  uinfo("%08x%s%08x\n", addr, iswrite ? "<-" : "->", val);
+  uinfo("%08" PRIx32 "%s%08" PRIx32 "\n", addr, iswrite ? "<-" : "->", val);
 }
 #endif
 

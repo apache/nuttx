@@ -1069,21 +1069,21 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
   uint32_t dmabase = DMA_BASE(dmast->base);
 
   dmainfo("DMA Registers: %s\n", msg);
-  dmainfo("   LISR[%08x]: %08x\n",
+  dmainfo("   LISR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmabase + STM32_DMA_LISR_OFFSET, regs->lisr);
-  dmainfo("   HISR[%08x]: %08x\n",
+  dmainfo("   HISR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmabase + STM32_DMA_HISR_OFFSET, regs->hisr);
-  dmainfo("    SCR[%08x]: %08x\n",
+  dmainfo("    SCR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SCR_OFFSET, regs->scr);
-  dmainfo("  SNDTR[%08x]: %08x\n",
+  dmainfo("  SNDTR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SNDTR_OFFSET, regs->sndtr);
-  dmainfo("   SPAR[%08x]: %08x\n",
+  dmainfo("   SPAR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SPAR_OFFSET, regs->spar);
-  dmainfo("  SM0AR[%08x]: %08x\n",
+  dmainfo("  SM0AR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SM0AR_OFFSET, regs->sm0ar);
-  dmainfo("  SM1AR[%08x]: %08x\n",
+  dmainfo("  SM1AR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SM1AR_OFFSET, regs->sm1ar);
-  dmainfo("   SFCR[%08x]: %08x\n",
+  dmainfo("   SFCR[%08" PRIx32 "]: %08" PRIx32 "\n",
           dmast->base + STM32_DMA_SFCR_OFFSET, regs->sfcr);
 }
 #endif

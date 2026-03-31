@@ -659,7 +659,7 @@ static uint32_t stm32_getreg(uint32_t addr)
 
   /* Show the register value read */
 
-  uinfo("%08x->%04x\n", addr, val);
+  uinfo("%08" PRIx32 "->%04" PRIx32 "\n", addr, val);
   return val;
 }
 #endif
@@ -673,7 +673,7 @@ static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
 
-  uinfo("%08x<-%04x\n", addr, val);
+  uinfo("%08" PRIx32 "<-%04" PRIx32 "\n", addr, val);
 
   /* Write the value */
 
@@ -692,29 +692,30 @@ static void stm32_dumpep(int epno)
 
   /* Common registers */
 
-  uinfo("CNTR:   %04x\n", getreg32(STM32_USB_CNTR));
-  uinfo("ISTR:   %04x\n", getreg32(STM32_USB_ISTR));
-  uinfo("FNR:    %04x\n", getreg32(STM32_USB_FNR));
-  uinfo("DADDR:  %04x\n", getreg32(STM32_USB_DADDR));
-  uinfo("BTABLE: %04x\n", getreg32(STM32_USB_BTABLE));
+  uinfo("CNTR:   %04" PRIx32 "\n", getreg32(STM32_USB_CNTR));
+  uinfo("ISTR:   %04" PRIx32 "\n", getreg32(STM32_USB_ISTR));
+  uinfo("FNR:    %04" PRIx32 "\n", getreg32(STM32_USB_FNR));
+  uinfo("DADDR:  %04" PRIx32 "\n", getreg32(STM32_USB_DADDR));
+  uinfo("BTABLE: %04" PRIx32 "\n", getreg32(STM32_USB_BTABLE));
 
   /* Endpoint register */
 
   addr = STM32_USB_EPR(epno);
-  uinfo("EPR%d:   [%08x] %04x\n", epno, addr, getreg32(addr));
+  uinfo("EPR%d:   [%08" PRIx32 "] %04" PRIx32 "\n",
+        epno, addr, getreg32(addr));
 
   /* Endpoint descriptor */
 
   addr = STM32_USB_BTABLE_ADDR(epno, 0);
-  uinfo("DESC:   %08x\n", addr);
+  uinfo("DESC:   %08" PRIx32 "\n", addr);
 
   /* Endpoint buffer descriptor */
 
   addr = STM32_USB_TX(epno);
-  uinfo("  TX BUF:  [%08x] %04x\n",  addr, getreg32(addr));
+  uinfo("  TX BUF:  [%08" PRIx32 "] %04" PRIx32 "\n",  addr, getreg32(addr));
 
   addr = STM32_USB_RX(epno);
-  uinfo("  RX BUF:  [%08x] %04x\n",  addr, getreg32(addr));
+  uinfo("  RX BUF:  [%08" PRIx32 "] %04" PRIx32 "\n",  addr, getreg32(addr));
 }
 #endif
 
@@ -729,7 +730,8 @@ static void stm32_checksetup(void)
   uint32_t apb1rstr = getreg32(STM32_RCC_APB1RSTR1);
   uint32_t apb1enr  = getreg32(STM32_RCC_APB1ENR1);
 
-  uinfo("CFGR: %08x APB1RSTR: %08x APB1ENR: %08x\n",
+  uinfo("CFGR: %08" PRIx32 " APB1RSTR: %08" PRIx32
+        " APB1ENR: %08" PRIx32 "\n",
          cfgr, apb1rstr, apb1enr);
 
   if ((apb1rstr & RCC_APB1RSTR1_USBRST) != 0 ||

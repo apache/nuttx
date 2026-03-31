@@ -332,7 +332,7 @@ static int stm32_dma2dirq(int irq, void *context, void *arg)
   uint32_t regval = getreg32(STM32_DMA2D_ISR);
   struct stm32_interrupt_s *priv = &g_interrupt;
 
-  reginfo("irq = %d, regval = %08x\n", irq, regval);
+  reginfo("irq = %d, regval = %08" PRIx32 "\n", irq, regval);
 
   if (regval & DMA2D_ISR_TCIF)
     {
@@ -471,9 +471,9 @@ static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 
   regval  = getreg32(pfcreg);
   regval |= DMA2D_XGPFCCR_START;
-  reginfo("set regval=%08x\n", regval);
+  reginfo("set regval=%08" PRIx32 "\n", regval);
   putreg32(regval, pfcreg);
-  reginfo("configured regval=%08x\n", getreg32(pfcreg));
+  reginfo("configured regval=%08" PRIx32 "\n", getreg32(pfcreg));
 
   /* Wait until clut is finished */
 
