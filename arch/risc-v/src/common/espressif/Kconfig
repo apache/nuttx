@@ -1288,7 +1288,6 @@ config ESPRESSIF_BROWNOUT_DET
 config ESP_RMT
 	bool "Remote Control Module (RMT)"
 	default n
-	select DRIVERS_RC
 	---help---
 		The RMT (Remote Control Transceiver) peripheral was designed to act as
 		an infrared transceiver. However, due to the flexibility of its data

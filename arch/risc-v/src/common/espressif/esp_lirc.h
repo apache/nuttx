@@ -23,9 +23,17 @@
 #ifndef __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_LIRC_H
 #define __ARCH_RISC_V_SRC_COMMON_ESPRESSIF_ESP_LIRC_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include "esp_rmt.h"
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
