@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <time.h>
 #include <signal.h>
 
 #include <nuttx/wqueue.h>
@@ -624,8 +625,15 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
  *
  ****************************************************************************/
 
-int nxsig_nanosleep(FAR const struct timespec *rqtp,
-                    FAR struct timespec *rmtp);
+static inline int nxsig_nanosleep(FAR const struct timespec *rqtp,
+                                  FAR struct timespec *rmtp)
+{
+  int ret;
+
+  ret = nxsig_clockwait(CLOCK_REALTIME, 0, rqtp, rmtp);
+
+  return ret == -EAGAIN ? 0 : ret;
+}
 
 /****************************************************************************
  * Name: nxsig_sleep
