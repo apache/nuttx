@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/barriers.h>
 

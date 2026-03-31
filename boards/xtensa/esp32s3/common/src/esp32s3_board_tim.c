@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #ifdef CONFIG_ONESHOT
 #include <nuttx/timers/oneshot.h>

@@ -32,13 +32,13 @@
 #include <sched.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "debug.h"
+#include <nuttx/debug.h>
 #include "chip.h"
 #include "sam_port.h"
 #include "saml_periphclks.h"

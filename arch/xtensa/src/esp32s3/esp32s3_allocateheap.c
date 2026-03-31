@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/types.h>
 
 #include <nuttx/arch.h>

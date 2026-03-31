@@ -27,7 +27,7 @@
 #include "mx8mp_ccm.h"
 #include "hardware/mx8mp_rdc.h"
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "arm_internal.h"
 
 /****************************************************************************

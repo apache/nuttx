@@ -29,8 +29,8 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>

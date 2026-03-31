@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <string.h>
 #include <nuttx/fs/fs.h>

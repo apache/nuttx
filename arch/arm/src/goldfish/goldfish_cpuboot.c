@@ -33,7 +33,7 @@
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 #include <init/init.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "sctlr.h"

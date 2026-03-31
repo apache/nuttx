@@ -47,7 +47,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/netdev.h>

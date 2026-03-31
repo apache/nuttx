@@ -30,7 +30,7 @@
 
 #include <nuttx/irq.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "tlsr82_clock.h"
 #include "tlsr82_analog.h"

@@ -30,7 +30,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 #include <errno.h>
 #include <netinet/in.h>

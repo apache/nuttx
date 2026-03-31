@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"

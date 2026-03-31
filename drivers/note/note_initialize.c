@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/instrument.h>
 #include <nuttx/note/note_driver.h>

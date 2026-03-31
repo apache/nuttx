@@ -86,7 +86,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "xdr_subs.h"
 #include "nfs_proto.h"

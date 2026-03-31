@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "nrf_modem_at.h"
 #include "nrf91_modem.h"

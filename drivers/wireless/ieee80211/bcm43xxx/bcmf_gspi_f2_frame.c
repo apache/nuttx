@@ -28,7 +28,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/signal.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <assert.h>
 

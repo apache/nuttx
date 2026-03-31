@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <strings.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/bits.h>
 #include <nuttx/mm/gran.h>

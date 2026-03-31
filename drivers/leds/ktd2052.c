@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_KTD2052)
 

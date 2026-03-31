@@ -28,8 +28,8 @@
 
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #ifdef CONFIG_IOB_ALLOC

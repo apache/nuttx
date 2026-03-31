@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32_fdcan.h"
 #include "b-g431b-esc1.h"

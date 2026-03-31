@@ -33,7 +33,7 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <stdbool.h>
-#  include <debug.h>
+#  include <nuttx/debug.h>
 
 #  include "sctlr.h"
 #endif

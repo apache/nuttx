@@ -29,7 +29,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>

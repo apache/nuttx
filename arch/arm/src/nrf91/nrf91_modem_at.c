@@ -29,7 +29,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/serial.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 #include <semaphore.h>
 #include <string.h>

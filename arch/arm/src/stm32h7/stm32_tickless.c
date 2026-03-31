@@ -73,7 +73,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/timers/arch_timer.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <arch/board/board.h>
 
 #include "arm_internal.h"

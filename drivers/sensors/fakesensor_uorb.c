@@ -40,7 +40,7 @@
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/signal.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #ifdef CONFIG_SENSORS_GNSS
 #include <nuttx/sensors/gnss.h>

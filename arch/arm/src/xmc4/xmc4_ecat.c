@@ -32,7 +32,7 @@
 #include "arm_internal.h"
 #include "hardware/xmc4_pinmux.h"
 #include "hardware/xmc4_scu.h"
-#include "debug.h"
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Pre-processor Definitions

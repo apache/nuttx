@@ -30,7 +30,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/cancelpt.h>
 #include <nuttx/net/net.h>

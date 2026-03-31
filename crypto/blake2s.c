@@ -39,7 +39,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 #include <errno.h>
 

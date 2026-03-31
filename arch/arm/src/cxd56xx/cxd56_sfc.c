@@ -32,7 +32,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 /* Prototypes for Remote API */

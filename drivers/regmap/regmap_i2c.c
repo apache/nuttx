@@ -28,7 +28,7 @@
 #include <nuttx/regmap/regmap.h>
 #include <nuttx/kmalloc.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "internal.h"
 

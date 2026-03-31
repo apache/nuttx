@@ -28,7 +28,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_PKT)
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netdev.h>

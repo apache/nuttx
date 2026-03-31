@@ -29,7 +29,7 @@
 
 #include <string.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 /****************************************************************************

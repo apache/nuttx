@@ -50,7 +50,7 @@
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <netinet/in.h>
 #include <net/ethernet.h>

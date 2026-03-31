@@ -31,7 +31,7 @@
 #include <pthread.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "sched/sched.h"
 #include "group/group.h"

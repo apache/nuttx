@@ -30,7 +30,7 @@
 #include <sched.h>
 #include <nuttx/sched.h>
 #include <nuttx/kthread.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "cxd56_icc.h"
 #include "cxd56_cpu1signal.h"

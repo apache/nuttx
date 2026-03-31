@@ -27,7 +27,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <nuttx/wireless/bluetooth/bt_driver.h>

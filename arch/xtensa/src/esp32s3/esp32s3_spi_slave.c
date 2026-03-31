@@ -27,7 +27,7 @@
 #if defined(CONFIG_ESP32S3_SPI) && defined(CONFIG_SPI_SLAVE)
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>

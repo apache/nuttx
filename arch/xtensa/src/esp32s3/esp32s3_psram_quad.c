@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "esp_gpio.h"
 #include "esp32s3_psram.h"

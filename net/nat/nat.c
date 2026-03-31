@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "icmp/icmp.h"
 #include "icmpv6/icmpv6.h"

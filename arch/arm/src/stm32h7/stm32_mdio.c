@@ -47,7 +47,7 @@ static void stm32_checksetup(void);
 #include <nuttx/mutex.h>
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <inttypes.h>
 

@@ -38,7 +38,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/semaphore.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/chip/ge2d.h>
 #include <arch/chip/chip.h>

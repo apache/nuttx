@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <nuttx/net/ksz9477.h>
 #include "ksz9477_reg.h"

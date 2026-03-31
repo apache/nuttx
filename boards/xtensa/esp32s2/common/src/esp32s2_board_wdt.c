@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "esp32s2_board_wdt.h"
 #include "esp32s2_wdt_lowerhalf.h"

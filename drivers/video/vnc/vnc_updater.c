@@ -48,7 +48,7 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/queue.h>
 #ifdef VNCSERVER_SEM_DEBUG

@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "sam_adc.h"
 #include "sam_tsd.h"

@@ -32,7 +32,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>

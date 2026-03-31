@@ -32,7 +32,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <crypto/cryptodev.h>
 #include <nuttx/fs/fs.h>

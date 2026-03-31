@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/mutex.h>
 
 #include "riscv_internal.h"

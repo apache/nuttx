@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "mps_irq.h"

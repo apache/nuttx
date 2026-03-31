@@ -30,8 +30,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 #include <nuttx/spinlock.h>

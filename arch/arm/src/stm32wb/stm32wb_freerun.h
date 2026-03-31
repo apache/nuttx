@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32wb_tim.h"
 

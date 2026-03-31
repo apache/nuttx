@@ -31,7 +31,7 @@
 #include <nuttx/fs/smart.h>
 #include <nuttx/fs/fs.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include "nucleo-wl55jc.h"

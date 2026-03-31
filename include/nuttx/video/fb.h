@@ -32,7 +32,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
 #  include <nuttx/video/rgbcolors.h>
 #endif

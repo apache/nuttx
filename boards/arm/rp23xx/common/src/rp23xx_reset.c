@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 #include <nuttx/arch.h>
-#include "debug.h"
+#include <nuttx/debug.h>
 
 #include "rp23xx_rom.h"
 

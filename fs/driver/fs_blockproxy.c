@@ -36,7 +36,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/drivers/drivers.h>

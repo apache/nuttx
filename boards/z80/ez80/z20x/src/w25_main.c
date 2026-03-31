@@ -34,7 +34,7 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <hex2bin.h>
 
 #include <nuttx/streams.h>

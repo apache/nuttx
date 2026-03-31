@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <poll.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <time.h>
 #include <fcntl.h>
 

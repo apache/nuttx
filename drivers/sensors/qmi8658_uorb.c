@@ -36,7 +36,7 @@
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/sensors/ioctl.h>
 #include <nuttx/sensors/qmi8658.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 /****************************************************************************

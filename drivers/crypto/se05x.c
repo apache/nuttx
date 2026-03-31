@@ -28,7 +28,7 @@
 
 #include "pnt/pnt_se05x_api.h"
 #include "se05x_internal.h"
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/crypto/se05x.h>
 #include <nuttx/fs/fs.h>

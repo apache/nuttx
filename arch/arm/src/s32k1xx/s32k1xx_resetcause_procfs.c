@@ -36,7 +36,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "hardware/s32k1xx_rcm.h"

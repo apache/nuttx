@@ -32,7 +32,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

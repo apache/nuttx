@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "tiva_timer.h"
 #include "tm4c1294-launchpad.h"
 

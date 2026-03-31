@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <pthread.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 /****************************************************************************

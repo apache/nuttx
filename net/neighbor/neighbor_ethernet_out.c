@@ -28,7 +28,7 @@
 
 #include <string.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/net/ethernet.h>
 #include <nuttx/net/ip.h>

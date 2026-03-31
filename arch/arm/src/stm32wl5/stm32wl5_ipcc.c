@@ -31,7 +31,7 @@
 
 #include <arm_internal.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/stm32wl5/stm32wl5xxx_cpu1_irq.h>
 #include "hardware/stm32wl5_ipcc.h"

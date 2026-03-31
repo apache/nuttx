@@ -28,7 +28,7 @@
 #include <nuttx/nuttx.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
