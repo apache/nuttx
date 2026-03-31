@@ -374,6 +374,8 @@ void avrdx_usart_reset(struct avrdx_uart_priv_s *priv)
 
   AVRDX_USART_PORT(priv->usart_n).DIRCLR = \
     avrdx_usart_tx_pins[priv->usart_n];
+  AVRDX_USART_PORT(priv->usart_n).OUTCLR = \
+    avrdx_usart_tx_pins[priv->usart_n];
 
   usart->CTRLA = 0;
   usart->CTRLB = 0;
@@ -500,6 +502,19 @@ void avrdx_usart_configure(struct avrdx_uart_priv_s *priv)
     ) | \
     avrdx_usart_portmux_bits[priv->usart_n];
 
+  /* AVR128DA28/32/48/64 datasheet rev C, section 25.3.1 lists changing
+   * the pin direction before activating the device itself but that
+   * leads to short zero pulse. No problems were observed doing it like
+   * that - but that was only with PC on the other side of the connection
+   * and the receiver may be filtering the pulse out (if it even reaches
+   * the other side of the cable.)
+   *
+   * Nevertheless, we add additional step that sets the output value
+   * to UART idle level before switching the pin to output.
+   */
+
+  AVRDX_USART_PORT(priv->usart_n).OUTSET = \
+    avrdx_usart_tx_pins[priv->usart_n];
   AVRDX_USART_PORT(priv->usart_n).DIRSET = \
     avrdx_usart_tx_pins[priv->usart_n];
 
