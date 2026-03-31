@@ -224,6 +224,18 @@ static int goldfish_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
   return -EINVAL;
 }
 
+#ifdef CONFIG_FB_UPDATE
+/****************************************************************************
+ * Name: goldfish_fb_updatearea
+ ****************************************************************************/
+
+static int goldfish_fb_updatearea(FAR struct fb_vtable_s *vtable,
+                                  FAR const struct fb_area_s *area)
+{
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -290,6 +302,9 @@ int goldfish_fb_register(int display, FAR void *regs, int irq)
 
   fb->vtable.getplaneinfo = goldfish_getplaneinfo;
   fb->vtable.getvideoinfo = goldfish_getvideoinfo;
+#ifdef CONFIG_FB_UPDATE
+  fb->vtable.updatearea   = goldfish_fb_updatearea;
+#endif
 
   ret = irq_attach(fb->irq, goldfish_fb_interrupt, fb);
   if (ret < 0)
