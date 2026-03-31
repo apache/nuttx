@@ -25,7 +25,6 @@ target_sources(
   PRIVATE fs_files.c
           fs_foreachinode.c
           fs_inode.c
-          fs_inodeaddref.c
           fs_inodebasename.c
           fs_inodefind.c
           fs_inodefree.c
