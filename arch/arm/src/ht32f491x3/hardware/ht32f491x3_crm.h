@@ -189,10 +189,22 @@
 
 /* Peripheral reset registers ***********************************************/
 
-#define HT32_CRM_APB1RST_USART2RST      (1 << 17)
-#define HT32_CRM_APB1RST_USART3RST      (1 << 18)
+#define HT32_CRM_APB1RST_TMR2RST       (1 << 0)
+#define HT32_CRM_APB1RST_TMR3RST       (1 << 1)
+#define HT32_CRM_APB1RST_TMR4RST       (1 << 2)
+#define HT32_CRM_APB1RST_TMR6RST       (1 << 4)
+#define HT32_CRM_APB1RST_TMR7RST       (1 << 5)
+#define HT32_CRM_APB1RST_TMR12RST      (1 << 6)
+#define HT32_CRM_APB1RST_TMR13RST      (1 << 7)
+#define HT32_CRM_APB1RST_TMR14RST      (1 << 8)
+#define HT32_CRM_APB1RST_USART2RST     (1 << 17)
+#define HT32_CRM_APB1RST_USART3RST     (1 << 18)
 
-#define HT32_CRM_APB2RST_USART1RST      (1 << 4)
+#define HT32_CRM_APB2RST_TMR1RST       (1 << 0)
+#define HT32_CRM_APB2RST_USART1RST     (1 << 4)
+#define HT32_CRM_APB2RST_TMR9RST       (1 << 16)
+#define HT32_CRM_APB2RST_TMR10RST      (1 << 17)
+#define HT32_CRM_APB2RST_TMR11RST      (1 << 18)
 
 /* Clock enable registers ***************************************************/
 

@@ -54,6 +54,236 @@ config HT32F491X3_PCLK2_FREQUENCY
 
 menu "Peripheral Support"
 
+config HT32F491X3_TMR1
+	bool "TMR1"
+	default n
+	---help---
+		Enable support for the TMR1 peripheral.
+
+config HT32F491X3_TMR1_PWM
+	bool "TMR1 PWM output"
+	default n
+	depends on HT32F491X3_TMR1 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR1.
+
+config HT32F491X3_TMR1_CHANNEL
+	int "TMR1 PWM channel"
+	default 1
+	range 1 4
+	depends on HT32F491X3_TMR1_PWM
+	---help---
+		Select which TMR1 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR2
+	bool "TMR2"
+	default n
+	---help---
+		Enable support for the TMR2 peripheral.
+
+config HT32F491X3_TMR2_PWM
+	bool "TMR2 PWM output"
+	default n
+	depends on HT32F491X3_TMR2 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR2.
+
+config HT32F491X3_TMR2_CHANNEL
+	int "TMR2 PWM channel"
+	default 1
+	range 1 4
+	depends on HT32F491X3_TMR2_PWM
+	---help---
+		Select which TMR2 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR3
+	bool "TMR3"
+	default n
+	---help---
+		Enable support for the TMR3 peripheral.
+
+config HT32F491X3_TMR3_PWM
+	bool "TMR3 PWM output"
+	default n
+	depends on HT32F491X3_TMR3 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR3.
+
+config HT32F491X3_TMR3_CHANNEL
+	int "TMR3 PWM channel"
+	default 1
+	range 1 4
+	depends on HT32F491X3_TMR3_PWM
+	---help---
+		Select which TMR3 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR4
+	bool "TMR4"
+	default n
+	---help---
+		Enable support for the TMR4 peripheral.
+
+config HT32F491X3_TMR4_PWM
+	bool "TMR4 PWM output"
+	default n
+	depends on HT32F491X3_TMR4 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR4.
+
+config HT32F491X3_TMR4_CHANNEL
+	int "TMR4 PWM channel"
+	default 1
+	range 1 4
+	depends on HT32F491X3_TMR4_PWM
+	---help---
+		Select which TMR4 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR6
+	bool "TMR6"
+	default n
+	---help---
+		Enable support for the TMR6 peripheral. TMR6 is a basic timer and
+		does not provide PWM output channels.
+
+config HT32F491X3_TMR7
+	bool "TMR7"
+	default n
+	---help---
+		Enable support for the TMR7 peripheral. TMR7 is a basic timer and
+		does not provide PWM output channels.
+
+config HT32F491X3_TMR9
+	bool "TMR9"
+	default n
+	---help---
+		Enable support for the TMR9 peripheral.
+
+config HT32F491X3_TMR9_PWM
+	bool "TMR9 PWM output"
+	default n
+	depends on HT32F491X3_TMR9 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR9.
+
+config HT32F491X3_TMR9_CHANNEL
+	int "TMR9 PWM channel"
+	default 1
+	range 1 2
+	depends on HT32F491X3_TMR9_PWM
+	---help---
+		Select which TMR9 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR10
+	bool "TMR10"
+	default n
+	---help---
+		Enable support for the TMR10 peripheral.
+
+config HT32F491X3_TMR10_PWM
+	bool "TMR10 PWM output"
+	default n
+	depends on HT32F491X3_TMR10 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR10.
+
+config HT32F491X3_TMR10_CHANNEL
+	int "TMR10 PWM channel"
+	default 1
+	range 1 1
+	depends on HT32F491X3_TMR10_PWM
+	---help---
+		TMR10 exposes a single PWM channel.
+
+config HT32F491X3_TMR11
+	bool "TMR11"
+	default n
+	---help---
+		Enable support for the TMR11 peripheral.
+
+config HT32F491X3_TMR11_PWM
+	bool "TMR11 PWM output"
+	default n
+	depends on HT32F491X3_TMR11 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR11.
+
+config HT32F491X3_TMR11_CHANNEL
+	int "TMR11 PWM channel"
+	default 1
+	range 1 1
+	depends on HT32F491X3_TMR11_PWM
+	---help---
+		TMR11 exposes a single PWM channel.
+
+config HT32F491X3_TMR12
+	bool "TMR12"
+	default n
+	---help---
+		Enable support for the TMR12 peripheral.
+
+config HT32F491X3_TMR12_PWM
+	bool "TMR12 PWM output"
+	default n
+	depends on HT32F491X3_TMR12 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR12.
+
+config HT32F491X3_TMR12_CHANNEL
+	int "TMR12 PWM channel"
+	default 1
+	range 1 2
+	depends on HT32F491X3_TMR12_PWM
+	---help---
+		Select which TMR12 channel is exposed through the lower-half PWM
+		driver.
+
+config HT32F491X3_TMR13
+	bool "TMR13"
+	default n
+	---help---
+		Enable support for the TMR13 peripheral.
+
+config HT32F491X3_TMR13_PWM
+	bool "TMR13 PWM output"
+	default n
+	depends on HT32F491X3_TMR13 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR13.
+
+config HT32F491X3_TMR13_CHANNEL
+	int "TMR13 PWM channel"
+	default 1
+	range 1 1
+	depends on HT32F491X3_TMR13_PWM
+	---help---
+		TMR13 exposes a single PWM channel.
+
+config HT32F491X3_TMR14
+	bool "TMR14"
+	default n
+	---help---
+		Enable support for the TMR14 peripheral.
+
+config HT32F491X3_TMR14_PWM
+	bool "TMR14 PWM output"
+	default n
+	depends on HT32F491X3_TMR14 && PWM && !PWM_MULTICHAN
+	---help---
+		Enable lower-half PWM support on TMR14.
+
+config HT32F491X3_TMR14_CHANNEL
+	int "TMR14 PWM channel"
+	default 1
+	range 1 1
+	depends on HT32F491X3_TMR14_PWM
+	---help---
+		TMR14 exposes a single PWM channel.
+
 config HT32F491X3_USART1_SERIALDRIVER
 	bool "USART1"
 	default y
@@ -62,6 +292,10 @@ config HT32F491X3_USART1_SERIALDRIVER
 	---help---
 		Enable the standard lower-half driver for USART1.
 
-comment "In this current version, only USART1 is exposed by the esk32 board support."
+comment "In this current version, USART1 is the only serial peripheral exposed by the esk32 board support."
+
+comment "HT32F491x3 PWM-capable timers are TMR1-4 and TMR9-14; TMR6-7 are basic timers."
+
+comment "esk32 routes TMR3 channels PA6/PA7/PB0/PB1 to /dev/pwm0."
 
 endmenu # "Peripheral Support"

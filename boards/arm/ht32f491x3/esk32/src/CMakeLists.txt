@@ -30,6 +30,10 @@ if(CONFIG_USERLED)
   list(APPEND SRCS ht32_userleds.c)
 endif()
 
+if(CONFIG_PWM)
+  list(APPEND SRCS ht32_pwm.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")

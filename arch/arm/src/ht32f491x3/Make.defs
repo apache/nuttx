@@ -29,6 +29,10 @@ CHIP_CSRCS += ht32f491x3_timerisr.c ht32f491x3_gpio.c
 CHIP_CSRCS += ht32f491x3_lowputc.c
 CHIP_CSRCS += ht32f491x3_serial.c
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += ht32f491x3_pwm.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_CUSTOM_VECTORS),y)
 CHIP_CSRCS += arm_vectors.c
 endif

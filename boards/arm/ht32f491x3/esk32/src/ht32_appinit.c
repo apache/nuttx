@@ -57,6 +57,15 @@ static int ht32_bringup(void)
 #  endif
 #endif
 
+#ifdef CONFIG_PWM
+  tmp = ht32_pwm_setup();
+  if (tmp < 0 && tmp != -EEXIST)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register /dev/pwm0: %d\n", tmp);
+      ret = tmp;
+    }
+#endif
+
 #ifdef CONFIG_FS_BINFS
   tmp = nx_mount(NULL, "/bin", "binfs", 0, NULL);
   if (tmp < 0 && tmp != -EBUSY)

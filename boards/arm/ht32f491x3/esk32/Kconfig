@@ -5,6 +5,6 @@
 
 if ARCH_BOARD_ESK32
 
-comment "ESK32 note: only USART1 pin routing is available in the current board port."
+comment "ESK32 note: USART1 is routed on the board, and PWM is exposed as /dev/pwm0 through TMR3."
 
 endif # ARCH_BOARD_ESK32
