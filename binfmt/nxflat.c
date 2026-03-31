@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <nxflat.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <arpa/inet.h>

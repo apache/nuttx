@@ -68,7 +68,7 @@ There is also a ``misc/`` subdirectory that contains various internal functions
 and interfaces from header files that are too few to warrant their own sub-
 directory::
 
-  misc      - Nonstandard "glue" logic, debug.h, crc32.h, dirent.h
+  misc      - Nonstandard "glue" logic, nuttx/debug.h, crc32.h, dirent.h
 
 Library Database
 ================

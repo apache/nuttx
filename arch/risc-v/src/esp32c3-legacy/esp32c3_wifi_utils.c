@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <netinet/arp.h>
 #include <sys/param.h>
 

@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <inttypes.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <pthread.h>
 #include <clock/clock.h>
 #include <sys/time.h>

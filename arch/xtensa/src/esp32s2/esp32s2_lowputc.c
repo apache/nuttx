@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>

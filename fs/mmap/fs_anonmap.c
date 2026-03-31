@@ -29,7 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "sched/sched.h"
 #include "fs_heap.h"

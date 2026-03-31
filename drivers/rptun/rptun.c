@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>

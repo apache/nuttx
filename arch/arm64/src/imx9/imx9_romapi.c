@@ -27,7 +27,7 @@
 #include <arch/imx9/imx9_romapi.h>
 #include <nuttx/nuttx.h>
 #include <imx_container.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Private Types

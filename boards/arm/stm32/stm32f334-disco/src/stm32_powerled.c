@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>

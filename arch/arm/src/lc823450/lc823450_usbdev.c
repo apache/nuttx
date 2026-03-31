@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <stddef.h>
 #ifdef CONFIG_SYSTEM_PROPERTY

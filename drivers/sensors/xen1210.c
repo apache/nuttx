@@ -44,7 +44,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <inttypes.h>
 #include <stdio.h>
 

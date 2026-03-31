@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "lpc54_lcd.h"
 #include "lpc54_gpio.h"

@@ -29,8 +29,8 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 

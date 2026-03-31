@@ -32,7 +32,7 @@
 #include <stdio.h>
 #include <sys/wait.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #if defined(CONFIG_ARCH_HAVE_FORK)
 

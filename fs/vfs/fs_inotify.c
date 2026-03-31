@@ -35,7 +35,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <poll.h>
 #include <string.h>
 #include <search.h>

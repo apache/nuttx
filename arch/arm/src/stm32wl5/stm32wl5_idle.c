@@ -26,7 +26,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/config.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>

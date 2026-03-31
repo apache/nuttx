@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <stdlib.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 
 #include <nuttx/irq.h>

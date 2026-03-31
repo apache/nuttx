@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "chip.h"
 #include "arm_internal.h"

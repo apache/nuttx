@@ -31,7 +31,7 @@
 #include <nuttx/serial/uart_16550.h>
 #include <arch/board/board.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "riscv_internal.h"
 #include "riscv_sbi.h"
 #include "chip.h"

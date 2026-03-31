@@ -31,7 +31,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/queue.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Private Types

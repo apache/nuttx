@@ -26,7 +26,7 @@
 
 #include <nuttx/clk/clk_provider.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "clk.h"
 

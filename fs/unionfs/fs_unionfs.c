@@ -40,7 +40,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fixedmath.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/lib/lib.h>
 #include <nuttx/fs/fs.h>

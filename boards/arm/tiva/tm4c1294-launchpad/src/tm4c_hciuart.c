@@ -28,7 +28,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/wireless/bluetooth/bt_uart.h>

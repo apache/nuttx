@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/timer.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "nrf53_tim_lowerhalf.h"
 

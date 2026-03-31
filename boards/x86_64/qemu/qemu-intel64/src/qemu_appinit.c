@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/drivers/ramdisk.h>
 

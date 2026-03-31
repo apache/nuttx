@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include "bcmf_utils.h"

@@ -33,7 +33,7 @@
 #include <fcntl.h>
 #include <poll.h>
 #include <limits.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <net/if.h>
 
 #include <nuttx/kmalloc.h>

@@ -45,7 +45,7 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "vnc_server.h"
 

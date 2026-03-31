@@ -33,7 +33,7 @@
 
 #include <stdbool.h>
 #include <sys/param.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "nvic.h"

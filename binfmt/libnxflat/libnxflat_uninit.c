@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/binfmt/nxflat.h>

@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>

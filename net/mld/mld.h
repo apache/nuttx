@@ -93,7 +93,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/wqueue.h>

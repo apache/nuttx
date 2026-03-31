@@ -29,7 +29,7 @@
 #include <sched.h>
 #include <mqueue.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched.h>

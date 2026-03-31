@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <inttypes.h>
 
 #include <nuttx/arch.h>

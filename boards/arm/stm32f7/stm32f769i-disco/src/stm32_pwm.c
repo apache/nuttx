@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/types.h>
 
 #include <nuttx/timers/pwm.h>

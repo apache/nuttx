@@ -31,7 +31,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>

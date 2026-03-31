@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/signal.h>
 

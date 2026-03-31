@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/ipcc.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <stm32wl5_ipcc.h>
 

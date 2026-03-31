@@ -32,7 +32,7 @@
 #include <nuttx/nuttx.h>
 
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Private Types

@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>

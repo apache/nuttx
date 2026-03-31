@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/usb/usbdev_trace.h>
 

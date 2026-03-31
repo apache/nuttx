@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <stdio.h>
 #include <sys/param.h>

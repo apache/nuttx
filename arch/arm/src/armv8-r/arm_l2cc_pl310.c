@@ -35,8 +35,8 @@
 #include <stdint.h>
 #include <sys/param.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 #include <arch/barriers.h>

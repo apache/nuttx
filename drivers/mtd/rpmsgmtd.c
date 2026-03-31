@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>

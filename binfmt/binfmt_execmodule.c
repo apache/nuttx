@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sched.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/addrenv.h>

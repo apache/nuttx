@@ -55,7 +55,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
@@ -205,7 +205,7 @@
 /* Debug ********************************************************************/
 
 /* Check if SSC debug is enabled (non-standard.. no support in
- * include/debug.h
+ * include/nuttx/debug.h
  */
 
 #ifndef CONFIG_DEBUG_I2S_INFO

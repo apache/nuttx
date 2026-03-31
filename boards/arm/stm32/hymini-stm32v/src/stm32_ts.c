@@ -29,7 +29,7 @@
 #include <nuttx/arch.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/input/touchscreen.h>

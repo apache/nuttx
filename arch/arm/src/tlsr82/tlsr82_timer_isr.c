@@ -28,7 +28,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/board.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 #include <arch/board/board.h>
 

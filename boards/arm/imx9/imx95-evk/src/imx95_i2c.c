@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmm150.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <sys/types.h>
 

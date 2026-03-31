@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/kmalloc.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <lame/lame.h>
 #include <mad.h>

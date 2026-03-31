@@ -29,7 +29,7 @@
 #include "arm_internal.h"
 #include "hardware/imx9_memorymap.h"
 #include "hardware/imx9_mu.h"
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <sys/types.h>
 

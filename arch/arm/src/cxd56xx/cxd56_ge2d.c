@@ -35,7 +35,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include "arm_internal.h"

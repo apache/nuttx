@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "tiva_timer.h"
 #include "dk-tm4c129x.h"

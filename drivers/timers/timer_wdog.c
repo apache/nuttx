@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/time.h>
 
 #include <nuttx/atomic.h>

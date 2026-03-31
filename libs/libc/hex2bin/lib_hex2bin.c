@@ -39,7 +39,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <hex2bin.h>
 

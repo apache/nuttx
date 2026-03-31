@@ -30,7 +30,7 @@
 
 #include <nuttx/irq.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "hardware/tlsr82_register.h"
 #include "hardware/tlsr82_analog.h"

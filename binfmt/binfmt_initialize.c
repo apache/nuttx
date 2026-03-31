@@ -28,7 +28,7 @@
 
 #include <nuttx/binfmt/binfmt.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "binfmt.h"
 

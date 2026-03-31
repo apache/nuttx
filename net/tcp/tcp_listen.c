@@ -48,7 +48,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>

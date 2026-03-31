@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <libgen.h>
 
 #include <nuttx/nuttx.h>

@@ -44,7 +44,7 @@
 #include <string.h>
 #include <errno.h>
 #include <poll.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>

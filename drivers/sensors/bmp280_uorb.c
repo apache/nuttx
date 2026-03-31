@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <fixedmath.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>

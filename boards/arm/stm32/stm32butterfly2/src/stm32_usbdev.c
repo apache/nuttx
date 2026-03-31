@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdbool.h>
 #include <sys/boardctl.h>
 

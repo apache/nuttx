@@ -27,7 +27,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/analog/dac.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "esp32_dac.h"
 #include "esp32_rtc_gpio.h"
 #include "hardware/esp32_rtc_io.h"

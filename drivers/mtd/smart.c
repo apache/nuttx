@@ -39,7 +39,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/crc8.h>
 #include <nuttx/crc16.h>

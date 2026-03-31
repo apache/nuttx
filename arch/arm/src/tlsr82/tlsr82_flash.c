@@ -30,7 +30,7 @@
 #include <nuttx/arch.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "hardware/tlsr82_mspi.h"
 #include "hardware/tlsr82_irq.h"

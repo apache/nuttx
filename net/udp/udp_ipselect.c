@@ -28,7 +28,7 @@
 #ifdef CONFIG_NET
 
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <net/if.h>
 #include <nuttx/net/netdev.h>

@@ -32,7 +32,7 @@
 #include <semaphore.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/arch.h>
 #include <nuttx/serial/serial.h>

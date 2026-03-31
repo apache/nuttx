@@ -29,7 +29,7 @@
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/ioexpander/gpio.h>
 

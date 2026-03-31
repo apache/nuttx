@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <string.h>
 #include <stdbool.h>

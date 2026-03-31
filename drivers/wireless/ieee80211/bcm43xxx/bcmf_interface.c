@@ -29,7 +29,7 @@
 #include <nuttx/signal.h>
 
 #include "bcmf_interface.h"
-#include "debug.h"
+#include <nuttx/debug.h>
 #include "assert.h"
 
 /****************************************************************************

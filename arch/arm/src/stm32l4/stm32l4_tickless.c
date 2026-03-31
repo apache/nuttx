@@ -76,7 +76,7 @@
 
 #include <nuttx/arch.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32l4_oneshot.h"
 #include "stm32l4_freerun.h"

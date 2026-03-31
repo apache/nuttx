@@ -29,7 +29,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "libc.h"
 

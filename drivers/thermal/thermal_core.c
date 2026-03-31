@@ -29,7 +29,7 @@
 #include <nuttx/power/pm.h>
 #endif
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <sys/boardctl.h>
 

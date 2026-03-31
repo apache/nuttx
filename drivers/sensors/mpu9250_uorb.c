@@ -29,7 +29,7 @@
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 #include <limits.h>
 #include <nuttx/mutex.h>

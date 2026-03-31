@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/signal.h>

@@ -28,7 +28,7 @@
 
 #include <nuttx/kthread.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 #include <sys/param.h>
 #include <time.h>

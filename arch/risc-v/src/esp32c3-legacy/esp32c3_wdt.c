@@ -29,7 +29,7 @@
 #include <nuttx/irq.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_rtccntl.h"

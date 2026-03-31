@@ -32,7 +32,7 @@
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/mutex.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <semaphore.h>
 
 #include "hardware/tlsr82_aes.h"

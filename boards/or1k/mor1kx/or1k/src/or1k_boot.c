@@ -41,7 +41,7 @@
 #include <nuttx/config.h>
 #include <nuttx/board.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "mor1kx_start.h"
 #include "or1k.h"

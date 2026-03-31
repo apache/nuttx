@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/mmcsd.h>
 #include <stdint.h>

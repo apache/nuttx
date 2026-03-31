@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <sched.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/addrenv.h>
 #include <nuttx/irq.h>

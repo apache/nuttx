@@ -28,7 +28,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_CAN)
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>

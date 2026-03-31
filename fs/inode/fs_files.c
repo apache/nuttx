@@ -33,7 +33,7 @@
 #include <sched.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include <nuttx/fs/fs.h>

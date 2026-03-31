@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/analog/dac.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <esp32_dac.h>

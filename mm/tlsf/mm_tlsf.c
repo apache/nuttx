@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <execinfo.h>
 #include <sched.h>
 #include <stdio.h>

@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>

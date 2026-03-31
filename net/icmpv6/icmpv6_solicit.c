@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>

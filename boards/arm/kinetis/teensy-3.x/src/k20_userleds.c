@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "kinetis.h"
 #include "teensy-3x.h"
