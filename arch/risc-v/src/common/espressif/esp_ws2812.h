@@ -28,7 +28,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdbool.h>
 
 #include "esp_rmt.h"

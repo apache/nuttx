@@ -32,7 +32,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>

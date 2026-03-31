@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <endian.h>
 #include <sys/param.h>

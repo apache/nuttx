@@ -30,7 +30,7 @@
 #include <nuttx/spinlock.h>
 #include <sys/ioctl.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #ifdef CONFIG_FDCHECK

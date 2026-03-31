@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/himem/himem.h>
 #include <nuttx/spinlock.h>

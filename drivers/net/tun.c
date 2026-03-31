@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <poll.h>
 
 #include <arpa/inet.h>

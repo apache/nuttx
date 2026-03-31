@@ -28,7 +28,7 @@
 
 #include <pthread.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Public Functions

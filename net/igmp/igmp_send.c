@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <arpa/inet.h>
 
 #include <nuttx/net/netconfig.h>

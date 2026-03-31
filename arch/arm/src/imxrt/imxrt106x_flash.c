@@ -32,7 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/mutex.h>
 #include <arch/barriers.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <stdbool.h>
 #include <assert.h>

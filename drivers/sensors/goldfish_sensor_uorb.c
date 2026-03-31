@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nuttx.h>

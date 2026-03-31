@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/clock.h>
 #include <nuttx/config.h>
 #include <nuttx/ioexpander/gpio.h>

@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nxfonts.h>

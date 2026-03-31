@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "sam_periphclks.h"
 #include "hardware/sam_memorymap.h"

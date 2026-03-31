@@ -30,7 +30,7 @@
 #include <sys/mount.h>
 #include <sys/boardctl.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/drivers/ramdisk.h>

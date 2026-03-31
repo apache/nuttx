@@ -26,7 +26,7 @@
 
 #ifdef CONFIG_ESP32_I2S
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <inttypes.h>

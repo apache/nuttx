@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/timers/timer.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32l4_tim.h"
 #include "nucleo-l432kc.h"

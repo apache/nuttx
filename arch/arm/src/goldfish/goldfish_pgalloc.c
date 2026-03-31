@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #ifdef CONFIG_MM_PGALLOC
 

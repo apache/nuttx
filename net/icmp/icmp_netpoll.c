@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <poll.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/net/net.h>

@@ -32,7 +32,7 @@
 #include "hardware/mx8mp_memorymap.h"
 #include "hardware/mx8mp_ecspi.h"
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "arm_internal.h"
 
 /******************************************************************************

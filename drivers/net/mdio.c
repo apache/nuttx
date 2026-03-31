@@ -26,7 +26,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/net/mdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Private Defines

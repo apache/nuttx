@@ -28,7 +28,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "xtensa.h"
 #include "hardware/esp32s3_tim.h"

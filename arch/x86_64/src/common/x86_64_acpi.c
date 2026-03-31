@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdint.h>
 
 #include <arch/acpi.h>

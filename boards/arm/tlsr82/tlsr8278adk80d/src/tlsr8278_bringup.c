@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>

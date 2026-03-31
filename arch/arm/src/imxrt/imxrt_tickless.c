@@ -71,8 +71,8 @@
 #include <assert.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
-#include <debug.h>
 
 #include "arm_internal.h"
 #include "imxrt_periphclks.h"

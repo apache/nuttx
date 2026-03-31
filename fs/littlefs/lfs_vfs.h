@@ -27,5 +27,5 @@
 #undef LFS_CONFIG
 #undef LFS_UTIL_H
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "littlefs/lfs_util.h"

@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <poll.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>

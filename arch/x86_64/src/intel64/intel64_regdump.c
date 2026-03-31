@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <inttypes.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 
 #include "sched/sched.h"

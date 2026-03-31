@@ -31,7 +31,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/wireless/wireless.h>
 

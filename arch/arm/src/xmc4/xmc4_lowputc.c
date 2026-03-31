@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "xmc4_config.h"
 #include "hardware/xmc4_usic.h"

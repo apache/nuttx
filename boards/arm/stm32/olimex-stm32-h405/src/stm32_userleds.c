@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <arch/board/board.h>
 #include "stm32.h"
 #include "olimex-stm32-h405.h"

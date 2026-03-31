@@ -31,7 +31,7 @@
 #include <nuttx/fs/nxffs.h>
 
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <unistd.h>
 
 #include "sam_board.h"

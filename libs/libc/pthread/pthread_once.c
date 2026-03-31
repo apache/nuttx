@@ -31,7 +31,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <nuttx/mutex.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Public Functions

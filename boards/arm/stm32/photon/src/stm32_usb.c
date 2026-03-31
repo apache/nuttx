@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include "photon.h"
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <stdbool.h>
 #include <nuttx/usb/usbdev.h>

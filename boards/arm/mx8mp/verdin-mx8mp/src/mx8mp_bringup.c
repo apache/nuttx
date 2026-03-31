@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/leds/userled.h>
 #include <nuttx/input/buttons.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "verdin-mx8mp.h"
 #include "mx8mp_gpio.h"

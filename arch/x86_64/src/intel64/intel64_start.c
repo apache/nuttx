@@ -33,7 +33,7 @@
 
 #include <arch/acpi.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "x86_64_internal.h"
 

@@ -97,7 +97,7 @@ Debug Interfaces
 
 In NuttX, syslog output is really synonymous to debug output and,
 therefore, the debugging interface macros defined in the header
-file ``include/debug.h`` are also syslogging interfaces. Those
+file ``include/nuttx/debug.h`` are also syslogging interfaces. Those
 macros are simply wrappers around ``syslog()``. The debugging
 interfaces differ from the syslog interfaces in that:
 

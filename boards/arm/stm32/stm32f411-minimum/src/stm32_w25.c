@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #ifdef CONFIG_STM32_SPI1
 #  include <nuttx/spi/spi.h>

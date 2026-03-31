@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32_gpio.h"
 #include "stm32f769i-disco.h"

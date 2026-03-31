@@ -22,7 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>

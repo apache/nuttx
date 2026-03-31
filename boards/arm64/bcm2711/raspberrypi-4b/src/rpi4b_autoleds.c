@@ -50,7 +50,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 
 #include <arch/board/board.h>

@@ -30,7 +30,7 @@
 #include <sched.h>
 #include <spawn.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>

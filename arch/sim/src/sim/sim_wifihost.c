@@ -25,7 +25,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <netinet/if_ether.h>
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/net/netdev_lowerhalf.h>

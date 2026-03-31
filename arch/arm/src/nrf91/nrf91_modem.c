@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 
 #include "chip.h"

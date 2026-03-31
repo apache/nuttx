@@ -46,7 +46,7 @@
 #if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
 
 #include <crypto/md5.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdint.h>
 #include <stdlib.h>
 

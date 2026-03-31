@@ -27,7 +27,7 @@
 #ifdef CONFIG_ESPRESSIF_I2C_PERIPH_MASTER_MODE
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>

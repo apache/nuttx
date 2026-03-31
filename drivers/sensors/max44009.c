@@ -41,7 +41,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <poll.h>
 #include <stdio.h>
 

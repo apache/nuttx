@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "esp32c3_wdt_lowerhalf.h"
 #include "esp32c3_wdt.h"

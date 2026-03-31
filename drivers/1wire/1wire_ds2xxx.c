@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <inttypes.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
 
 #include <nuttx/kmalloc.h>

@@ -30,7 +30,7 @@
 #include <time.h>
 #include <sys/param.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #if CONFIG_RR_INTERVAL > 0
 #  include <sched.h>

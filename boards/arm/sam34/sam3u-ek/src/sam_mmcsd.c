@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "sam_gpio.h"
 #include "sam3u-ek.h"

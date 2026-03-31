@@ -28,7 +28,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 #include <chip.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "hardware/imx9_memorymap.h"

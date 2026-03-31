@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <sys/types.h>
 #include <stdio.h>

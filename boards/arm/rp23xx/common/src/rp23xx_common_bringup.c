@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stddef.h>
 #include <string.h>
 #include <sys/stat.h>

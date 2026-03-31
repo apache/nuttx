@@ -28,7 +28,7 @@
 #ifdef CONFIG_NET_TCP
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 
 #include <nuttx/semaphore.h>

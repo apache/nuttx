@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <net/if.h>

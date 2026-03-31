@@ -32,7 +32,7 @@
 #include <nuttx/list.h>
 #include <nuttx/mutex.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/stat.h>

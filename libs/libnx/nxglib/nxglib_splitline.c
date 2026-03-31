@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <stdlib.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/nx/nxglib.h>
 

@@ -30,7 +30,7 @@
 #include <arch/board/board.h>
 
 #include <stdbool.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32_gpio.h"
 #include "stm32f777zit6-meadow.h"

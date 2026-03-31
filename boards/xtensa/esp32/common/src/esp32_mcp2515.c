@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/can/mcp2515.h>

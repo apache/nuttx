@@ -48,7 +48,7 @@
 #include <nuttx/trace.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <execinfo.h>
 #include <stdio.h>
 #include <stdint.h>

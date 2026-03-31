@@ -36,7 +36,7 @@
 #include <arch/board/board.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <semaphore.h>
 #include <stdint.h>
 #include <stdlib.h>

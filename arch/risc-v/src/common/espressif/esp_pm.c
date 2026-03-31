@@ -28,7 +28,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/power/pm.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "esp_pm.h"
 #ifdef CONFIG_SCHED_TICKLESS

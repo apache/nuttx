@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>

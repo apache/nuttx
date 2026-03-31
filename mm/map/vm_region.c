@@ -28,7 +28,7 @@
 #include <nuttx/mm/map.h>
 #include <nuttx/mm/gran.h>
 #include <nuttx/pgalloc.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Public Functions

@@ -31,7 +31,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/signal.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "avrdx.h"
 #include "avrdx_twi.h"

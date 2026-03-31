@@ -28,7 +28,7 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include "cxd56_i2c_bitbang.h"

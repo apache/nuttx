@@ -33,7 +33,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/spinlock.h>
 #include <nuttx/fs/ioctl.h>

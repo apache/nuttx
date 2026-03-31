@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <nuttx/sdio.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Pre-processor Definitions

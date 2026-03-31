@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/chip/scu.h>
 

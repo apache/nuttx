@@ -28,8 +28,8 @@
 
 #include <sys/types.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include "arm_internal.h"
 #include "hardware/s32k1xx_gpio.h"
