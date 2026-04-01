@@ -54,6 +54,9 @@
 #include "hal/clk_tree_hal.h"
 #include "esp_clk_tree.h"
 #include "esp_private/esp_clk_tree_common.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 #ifdef CONFIG_ESP_MCPWM
 
@@ -162,6 +165,9 @@ struct mcpwm_dev_common_s
   bool initialized;          /* MCPWM periph. and HAL has been initialized */
   bool isr_initialized;      /* Shared ISR has been initialized */
   int group_prescale;
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;   /* Power management lock */
+#endif
 };
 
 #ifdef CONFIG_ESP_MCPWM_MOTOR
@@ -318,6 +324,9 @@ static struct mcpwm_dev_common_s g_mcpwm_common =
   .initialized         = false,
   .isr_initialized     = false,
   .group_prescale      = MCPWM_DEV_CLK_PRESCALE,
+#ifdef CONFIG_PM
+  .pm_lock             = NULL,
+#endif
 };
 
 /* Motor specific data structures */
@@ -537,6 +546,10 @@ static int esp_motor_shutdown(struct motor_lowerhalf_s *dev)
   esp_motor_fault_configure(priv, false);
 #endif
 
+#ifdef CONFIG_PM
+  esp_pm_lock_release(g_mcpwm_common.pm_lock);
+#endif
+
   spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
   return OK;
 }
@@ -641,6 +654,11 @@ static int esp_motor_start(struct motor_lowerhalf_s *dev)
   float duty;
 
   flags = spin_lock_irqsave(&g_mcpwm_common.mcpwm_spinlock);
+
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(g_mcpwm_common.pm_lock);
+#endif
+
   if (priv->state.state == MOTOR_STATE_RUN)
     {
       spin_unlock_irqrestore(&g_mcpwm_common.mcpwm_spinlock, flags);
@@ -1450,6 +1468,10 @@ static int esp_capture_start(struct cap_lowerhalf_s *lower)
   mcpwm_hal_context_t *hal = &priv->common->hal;
   flags = spin_lock_irqsave(&priv->common->mcpwm_spinlock);
 
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(g_mcpwm_common.pm_lock);
+#endif
+
   /* Enable channel and interruption for rising edge */
 
   mcpwm_ll_capture_enable_timer(g_mcpwm_common.hal.dev, true);
@@ -1511,6 +1533,10 @@ static int esp_capture_stop(struct cap_lowerhalf_s *lower)
                        MCPWM_LL_EVENT_CAPTURE(priv->channel_id),
                        false);
   priv->enabled = false;
+
+#ifdef CONFIG_PM
+  esp_pm_lock_release(g_mcpwm_common.pm_lock);
+#endif
 
   spin_unlock_irqrestore(&priv->common->mcpwm_spinlock, flags);
   cpinfo("Channel disabled: %d\n", priv->channel_id);
@@ -1955,6 +1981,16 @@ struct motor_lowerhalf_s *esp_motor_bdc_initialize(int channel,
 
   if (!g_mcpwm_common.initialized)
     {
+#ifdef CONFIG_PM
+      ret = esp_pm_lock_create(ESP_PM_APB_FREQ_MAX, 0,
+                               "mcpwm", &g_mcpwm_common.pm_lock);
+      if (ret != OK)
+        {
+          mtrerr("Failed to create MCPWM PM lock\n");
+          return NULL;
+        }
+#endif
+
       esp_mcpwm_group_start();
     }
 
@@ -2028,6 +2064,9 @@ struct cap_lowerhalf_s *esp_mcpwm_capture_initialize(int channel, int pin)
 {
   struct mcpwm_cap_channel_lowerhalf_s *lower = NULL;
   uint32_t group_clock;
+#ifdef CONFIG_PM
+  int ret;
+#endif
 
   /* Single time initialization for the entire MCPWM Peripheral
    * and MCPWM Capture group.
@@ -2035,6 +2074,16 @@ struct cap_lowerhalf_s *esp_mcpwm_capture_initialize(int channel, int pin)
 
   if (!g_mcpwm_common.initialized)
     {
+#ifdef CONFIG_PM
+      ret = esp_pm_lock_create(ESP_PM_APB_FREQ_MAX, 0,
+                               "mcpwm", &g_mcpwm_common.pm_lock);
+      if (ret != OK)
+        {
+          mtrerr("Failed to create MCPWM PM lock\n");
+          return NULL;
+        }
+#endif
+
       esp_mcpwm_group_start();
     }
 

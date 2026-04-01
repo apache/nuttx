@@ -305,6 +305,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/periph_ctrl.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu_asm.S
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu_static.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_clock.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/cpu_region_protect.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_clk_tree.c
@@ -341,6 +342,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_cache_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_mmu_map.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/port/${CHIP_SERIES}/ext_mem_layout.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_impl.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_pm/pm_locks.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_clic.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_crc.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_rom/patches/esp_rom_efuse.c

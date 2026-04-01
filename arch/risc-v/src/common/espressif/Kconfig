@@ -126,6 +126,11 @@ config ESPRESSIF_CPU_FREQ_MHZ
 	default 360 if ESPRESSIF_CPU_FREQ_360
 	default 400 if ESPRESSIF_CPU_FREQ_400
 
+config ESPRESSIF_DFS
+	bool "Enable DFS (Dynamic Frequency Scaling)"
+	select PM
+	default n
+
 config ESPRESSIF_REGION_PROTECTION
 	bool "Enable region protection"
 	default y
@@ -161,6 +166,93 @@ config ESPRESSIF_HAL_ASSERTIONS
 config ESPRESSIF_SOC_RTC_MEM_SUPPORTED
 	bool
 	default n
+
+menu "Espressif DFS Options"
+	depends on ESPRESSIF_DFS
+
+choice ESPRESSIF_MIN_CPU_FREQ
+	prompt "Minimum CPU frequency"
+	default ESPRESSIF_MIN_CPU_FREQ_40 if ARCH_CHIP_ESP32P4 && ESPRESSIF_IDF_ENV_FPGA
+	default ESPRESSIF_MIN_CPU_FREQ_96 if ARCH_CHIP_ESP32H2
+	default ESPRESSIF_MIN_CPU_FREQ_160 if ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	default ESPRESSIF_MIN_CPU_FREQ_360 if ARCH_CHIP_ESP32P4 && ESP32P4_SELECTS_REV_LESS_V3
+	default ESPRESSIF_MIN_CPU_FREQ_400 if ARCH_CHIP_ESP32P4 && !ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Minimum CPU frequency to be scale.
+
+config ESPRESSIF_MIN_CPU_FREQ_40
+	bool "40 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
+	---help---
+		Set the minimum CPU frequency to 40 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_48
+	bool "48 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 48 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_64
+	bool "64 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 64 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_80
+	bool "80 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	---help---
+		Set the minimum CPU frequency to 80 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_96
+	bool "96 MHz"
+	depends on ARCH_CHIP_ESP32H2
+	---help---
+		Set the minimum CPU frequency to 96 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_160
+	bool "160 MHz"
+	depends on ARCH_CHIP_ESP32C3 || ARCH_CHIP_ESP32C6
+	---help---
+		Set the minimum CPU frequency to 160 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_360
+	bool "360 MHz"
+	depends on ARCH_CHIP_ESP32P4 && ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Set the minimum CPU frequency to 360 MHz.
+
+config ESPRESSIF_MIN_CPU_FREQ_400
+	bool "400 MHz"
+	depends on ARCH_CHIP_ESP32P4 && !ESP32P4_SELECTS_REV_LESS_V3
+	---help---
+		Set the minimum CPU frequency to 400 MHz.
+
+endchoice # ESPRESSIF_MIN_CPU_FREQ
+
+config ESPRESSIF_MAX_CPU_FREQ_MHZ
+	int
+	default 40 if ESPRESSIF_MAX_CPU_FREQ_40
+	default 48 if ESPRESSIF_MAX_CPU_FREQ_48
+	default 64 if ESPRESSIF_MAX_CPU_FREQ_64
+	default 80 if ESPRESSIF_MAX_CPU_FREQ_80
+	default 96 if ESPRESSIF_MAX_CPU_FREQ_96
+	default 160 if ESPRESSIF_MAX_CPU_FREQ_160
+	default 360 if ESPRESSIF_MAX_CPU_FREQ_360
+	default 400 if ESPRESSIF_MAX_CPU_FREQ_400
+
+config ESPRESSIF_MIN_CPU_FREQ_MHZ
+	int
+	default 40 if ESPRESSIF_MIN_CPU_FREQ_40
+	default 48 if ESPRESSIF_MIN_CPU_FREQ_48
+	default 64 if ESPRESSIF_MIN_CPU_FREQ_64
+	default 80 if ESPRESSIF_MIN_CPU_FREQ_80
+	default 96 if ESPRESSIF_MIN_CPU_FREQ_96
+	default 160 if ESPRESSIF_MIN_CPU_FREQ_160
+	default 360 if ESPRESSIF_MIN_CPU_FREQ_360
+	default 400 if ESPRESSIF_MIN_CPU_FREQ_400
+
+endmenu #
 
 menu "Espressif Log Level"
 	visible if DEBUG_FEATURES

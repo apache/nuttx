@@ -64,19 +64,24 @@
 #include "soc/lldesc.h"
 #include "hal/dma_types.h"
 #if SOC_I2S_SUPPORTS_APLL
-#include "hal/clk_tree_ll.h"
-#include "clk_ctrl_os.h"
+#  include "hal/clk_tree_ll.h"
+#  include "clk_ctrl_os.h"
 #endif
 #include "hal/gdma_periph.h"
 #include "hal/gdma_ll.h"
 
 #if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-#include "hal/cache_hal.h"
-#include "hal/cache_ll.h"
+#  include "hal/cache_hal.h"
+#  include "hal/cache_ll.h"
 #endif
 
 #if SOC_GDMA_SUPPORTED
-#include "esp_private/gdma.h"
+#  include "esp_private/gdma.h"
+#endif
+
+#ifdef CONFIG_PM
+#  include "soc/soc_caps.h"
+#  include "include/esp_pm.h"
 #endif
 
 /****************************************************************************
@@ -235,6 +240,9 @@ struct esp_i2s_config_s
 
   i2s_hal_context_t *ctx;           /* Common layer struct */
   i2s_hal_clock_info_t *clk_info;   /* Common layer clock info struct */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;     /* Power management lock */
+#endif
 };
 
 struct esp_buffer_s
@@ -470,6 +478,9 @@ static struct esp_i2s_config_s esp_i2s0_config =
   .audio_std_mode   = I2S_TDM_PHILIPS,
   .ctx              = &ctx_i2s0,
   .clk_info         = &clk_info_i2s0,
+#ifdef CONFIG_PM
+  .pm_lock          = NULL,
+#endif
 };
 
 static struct esp_i2s_s esp_i2s0_priv =
@@ -2224,6 +2235,10 @@ static void i2s_tx_channel_start(struct esp_i2s_s *priv)
 {
   if (priv->config->tx_en)
     {
+#ifdef CONFIG_PM
+      esp_pm_lock_acquire(priv->config->pm_lock);
+#endif
+
       /* Reset the TX channel */
 
       i2s_hal_tx_reset(priv->config->ctx);
@@ -2262,6 +2277,10 @@ static void i2s_rx_channel_start(struct esp_i2s_s *priv)
 {
   if (priv->config->rx_en)
     {
+#ifdef CONFIG_PM
+      esp_pm_lock_acquire(priv->config->pm_lock);
+#endif
+
       /* Reset the RX channel */
 
       i2s_hal_rx_reset(priv->config->ctx);
@@ -2317,6 +2336,9 @@ static int i2s_tx_channel_stop(struct esp_i2s_s *priv)
         }
 
       priv->tx_started = false;
+#ifdef CONFIG_PM
+      esp_pm_lock_release(priv->config->pm_lock);
+#endif
 
       i2sinfo("Stopped TX channel of port %ld\n", priv->config->port);
     }
@@ -2363,6 +2385,9 @@ static int i2s_rx_channel_stop(struct esp_i2s_s *priv)
         }
 
       priv->rx_started = false;
+#ifdef CONFIG_PM
+      esp_pm_lock_release(priv->config->pm_lock);
+#endif
 
       i2sinfo("Stopped RX channel of port %ld\n", priv->config->port);
     }
@@ -3412,6 +3437,9 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
   int ret;
   struct esp_i2s_s *priv = NULL;
   irqstate_t flags;
+#ifdef CONFIG_PM
+  esp_pm_lock_type_t pm_type = ESP_PM_APB_FREQ_MAX;
+#endif
 
   i2sinfo("port: %d\n", port);
 
@@ -3437,6 +3465,30 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
     }
 
   flags = spin_lock_irqsave(&priv->slock);
+
+#ifdef CONFIG_PM
+#  if SOC_I2S_SUPPORTS_APLL && SOC_I2S_HW_VERSION_2
+  if (priv.tx_clk_src == I2S_CLK_SRC_APLL &&
+      priv.tx_clk_src == I2S_CLK_SRC_APLL)
+    {
+      pm_type = ESP_PM_NO_LIGHT_SLEEP;
+    }
+#  endif
+
+  if (priv->config->pm_lock == NULL)
+    {
+      esp_pm_lock_handle_t pm_lock = priv->config->pm_lock;
+      ret =  esp_pm_lock_create(pm_type,
+                                0,
+                                "i2s_driver",
+                                &pm_lock);
+      if (ret != OK)
+        {
+          i2serr("Failed to create I2S PM lock\n");
+          goto err;
+        }
+    }
+#endif
 
   ret = i2s_configure(priv);
   if (ret < 0)

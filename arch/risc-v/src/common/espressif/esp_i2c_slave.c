@@ -65,6 +65,9 @@
 #if defined(CONFIG_ARCH_CHIP_ESP32H2) || defined(CONFIG_ARCH_CHIP_ESP32C6)
 #  include "soc/pcr_reg.h"
 #endif
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -138,6 +141,9 @@ struct esp_i2c_priv_s
   uint8_t tx_buffer[I2C_SLAVE_BUFF_SIZE]; /* I2C Slave TX queue buffer */
   uint32_t rx_length;                     /* Location of next RX value */
   uint8_t rx_buffer[I2C_SLAVE_BUFF_SIZE]; /* I2C Slave RX queue buffer */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;           /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -225,6 +231,9 @@ static struct esp_i2c_priv_s esp_i2c0_priv =
   {
     0
   },
+#ifdef CONFIG_PM
+  .pm_lock    = NULL,
+#endif
 };
 #endif
 
@@ -274,6 +283,9 @@ static struct esp_i2c_priv_s esp_i2c1_priv =
   {
     0
   },
+#ifdef CONFIG_PM
+  .pm_lock    = NULL,
+#endif
 };
 #endif /* CONFIG_ESPRESSIF_I2C1 */
 
@@ -627,8 +639,14 @@ static int esp_i2c_slave_irq(int irq, void *context, void *arg)
       return OK;
     }
 
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(priv->pm_lock);
+#endif
   esp_i2c_process(priv , irq_status);
   i2c_ll_clear_intr_mask(priv->ctx->dev, irq_status);
+#ifdef CONFIG_PM
+  esp_pm_lock_release(priv->pm_lock);
+#endif
   return OK;
 }
 #endif
@@ -721,7 +739,13 @@ static int esp_i2c_slave_thread(int argc, char **argv)
   nxsched_usleep(1000);
   while (true)
     {
+#ifdef CONFIG_PM
+      esp_pm_lock_acquire(priv->pm_lock);
+#endif
       esp_i2c_slave_polling_waitdone(priv);
+#ifdef CONFIG_PM
+      esp_pm_lock_release(priv->pm_lock);
+#endif
 
       /* Sleeping thread before checking i2c peripheral */
 
@@ -833,6 +857,9 @@ struct i2c_slave_s *esp_i2cbus_slave_initialize(int port, int addr)
 {
   struct esp_i2c_priv_s *priv;
   int ret;
+#ifdef CONFIG_PM
+  esp_pm_lock_type_t pm_lock_type = ESP_PM_NO_LIGHT_SLEEP;
+#endif
 
   switch (port)
     {
@@ -861,6 +888,35 @@ struct i2c_slave_s *esp_i2cbus_slave_initialize(int port, int addr)
 
       return (struct i2c_slave_s *)priv;
     }
+
+#ifdef CONFIG_PM
+#  if SOC_I2C_SUPPORT_RTC
+  if (I2C_CLK_SRC_DEFAULT == I2C_CLK_SRC_RC_FAST)
+    {
+      pm_lock_type = ESP_PM_NO_LIGHT_SLEEP;
+    }
+#  endif
+
+#  if SOC_I2C_SUPPORT_APB
+  if (I2C_CLK_SRC_DEFAULT == I2C_CLK_SRC_APB)
+    {
+      pm_lock_type = ESP_PM_APB_FREQ_MAX;
+    }
+#  endif
+
+  ret = esp_pm_lock_create(pm_lock_type,
+                           0,
+                           i2c_periph_signal[priv->id].module_name,
+                           &priv->pm_lock);
+  if (ret != OK)
+    {
+      priv->refs--;
+      nxmutex_unlock(&priv->lock);
+      i2cerr("Failed to create I2C PM lock."
+             "Handler: %p\n", priv);
+      return NULL;
+    }
+#endif
 
 #ifndef CONFIG_I2C_POLLED
   if (priv->cpuint != -ENOMEM)
@@ -955,6 +1011,14 @@ int esp_i2cbus_slave_uninitialize(struct i2c_slave_s *dev)
       nxmutex_unlock(&priv->lock);
       return OK;
     }
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock != NULL)
+    {
+      esp_pm_lock_delete(priv->pm_lock);
+      priv->pm_lock = NULL;
+    }
+#endif
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(ESP_SOURCE2IRQ(i2c_periph_signal[priv->id].irq));
