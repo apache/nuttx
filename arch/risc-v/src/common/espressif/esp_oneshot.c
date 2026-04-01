@@ -47,6 +47,9 @@
 #include "periph_ctrl.h"
 #include "soc/clk_tree_defs.h"
 #include "esp_private/esp_clk_tree_common.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -81,6 +84,9 @@ struct esp_oneshot_lowerhalf_s
   struct oneshot_lowerhalf_s lh;          /* Lower half instance */
   timer_hal_context_t        hal;         /* HAL context */
   bool                       running;     /* True: the timer is running */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t      pm_lock;      /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -124,6 +130,9 @@ static struct esp_oneshot_lowerhalf_s g_oneshot_lowerhalf =
     {
       .ops = &g_oneshot_ops,
     },
+#ifdef CONFIG_PM
+  .pm_lock = NULL,
+#endif
 };
 
 /****************************************************************************
@@ -195,6 +204,13 @@ static void esp_oneshot_start(struct oneshot_lowerhalf_s *lower,
     }
 
   timer_hal_context_t *hal = &(priv->hal);
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock)
+    {
+      esp_pm_lock_acquire(priv->pm_lock);
+    }
+#endif
 
   /* Make sure the timer is stopped to avoid unpredictable behavior */
 
@@ -297,6 +313,13 @@ static void esp_oneshot_cancel(struct oneshot_lowerhalf_s *lower)
                            false);
       timer_ll_enable_counter(hal->dev, hal->timer_id, false);
     }
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock)
+    {
+      esp_pm_lock_release(priv->pm_lock);
+    }
+#endif
 
   priv->running = false;
 }
@@ -405,6 +428,10 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
   int ret = OK;
   shared_periph_module_t periph;
   int irq;
+#ifdef CONFIG_PM
+  bool need_pm_lock = true;
+  esp_pm_lock_type_t pm_lock_type = ESP_PM_NO_LIGHT_SLEEP;
+#endif
 
   UNUSED(chan);
 
@@ -454,6 +481,34 @@ struct oneshot_lowerhalf_s *oneshot_initialize(int chan, uint16_t resolution)
   /* Configure timer prescaler */
 
   timer_ll_set_clock_prescale(lower->hal.dev, lower->hal.timer_id, prescale);
+
+#ifdef CONFIG_PM
+#  if TIMER_LL_FUNC_CLOCK_SUPPORT_RC_FAST
+  if (GPTIMER_CLK_SRC_DEFAULT == GPTIMER_CLK_SRC_RC_FAST)
+    {
+      need_pm_lock = false;
+    }
+#  endif
+
+#  if TIMER_LL_FUNC_CLOCK_SUPPORT_APB
+  if (GPTIMER_CLK_SRC_DEFAULT == GPTIMER_CLK_SRC_APB)
+    {
+      pm_lock_type = ESP_PM_APB_FREQ_MAX;
+    }
+#  endif
+
+  if (need_pm_lock && lower->pm_lock == NULL)
+    {
+      ret = esp_pm_lock_create(pm_lock_type, 0,
+                              "ONESHOT",
+                              &lower->pm_lock);
+      if (ret != OK)
+        {
+          tmrerr("Failed to create oneshot PM lock\n");
+          return NULL;
+        }
+    }
+#endif
 
   irq = soc_timg_gptimer_signals[GROUP_ID][TIMER_ID].irq_id;
 

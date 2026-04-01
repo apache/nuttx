@@ -148,9 +148,8 @@ void esp_pmsleep(uint64_t time_in_us);
  *   Returns OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+
 int esp_pmconfigure(void);
-#endif
 
 /****************************************************************************
  * Name: esp_pm_wakeup_set_last_reason

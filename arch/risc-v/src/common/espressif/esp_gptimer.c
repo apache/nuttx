@@ -46,6 +46,9 @@
 #include "periph_ctrl.h"
 #include "soc/clk_tree_defs.h"
 #include "esp_private/esp_clk_tree_common.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,6 +80,9 @@ struct esp_timer_lowerhalf_s
   bool                      started;   /* True: Timer has been started */
   void                     *upper;     /* Pointer to timer_upperhalf_s */
   int                       group_id;  /* Timer group number */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t      pm_lock;   /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -122,7 +128,10 @@ static const struct timer_ops_s g_timer_ops =
 static struct esp_timer_lowerhalf_s g_timer0_lowerhalf =
 {
   .ops = &g_timer_ops,
-  .group_id = 0
+  .group_id = 0,
+#ifdef CONFIG_PM
+  .pm_lock = NULL,
+#endif
 };
 
 /* TIMER1 lower-half */
@@ -130,7 +139,10 @@ static struct esp_timer_lowerhalf_s g_timer0_lowerhalf =
 static struct esp_timer_lowerhalf_s g_timer1_lowerhalf =
 {
   .ops = &g_timer_ops,
-  .group_id = 1
+  .group_id = 1,
+#ifdef CONFIG_PM
+  .pm_lock = NULL,
+#endif
 };
 
 /****************************************************************************
@@ -170,6 +182,13 @@ static int esp_timer_start(struct timer_lowerhalf_s *lower)
     }
 
   timer_hal_context_t *hal = &(priv->hal);
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock != NULL)
+    {
+      esp_pm_lock_acquire(priv->pm_lock);
+    }
+#endif
 
   /* Make sure the timer is stopped to avoid unpredictable behavior */
 
@@ -281,6 +300,13 @@ static int esp_timer_stop(struct timer_lowerhalf_s *lower)
   timer_ll_enable_intr(hal->dev, TIMER_LL_EVENT_ALARM(hal->timer_id),
                        false);
   timer_ll_enable_counter(hal->dev, hal->timer_id, false);
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock != NULL)
+    {
+      esp_pm_lock_release(priv->pm_lock);
+    }
+#endif
 
   priv->started = false;
   priv->callback = NULL;
@@ -542,6 +568,11 @@ int esp_timer_initialize(int group_id)
   char *devpath;
   shared_periph_module_t periph;
   int irq;
+#ifdef CONFIG_PM
+  int ret;
+  bool need_pm_lock = true;
+  esp_pm_lock_type_t pm_lock_type = ESP_PM_NO_LIGHT_SLEEP;
+#endif
 
   switch (group_id)
     {
@@ -589,6 +620,34 @@ int esp_timer_initialize(int group_id)
     }
 
   timer_hal_init(&lower->hal, lower->group_id, lower->hal.timer_id);
+
+#ifdef CONFIG_PM
+#  if TIMER_LL_FUNC_CLOCK_SUPPORT_RC_FAST
+  if (GPTIMER_CLK_SRC_DEFAULT == GPTIMER_CLK_SRC_RC_FAST)
+    {
+      need_pm_lock = false;
+    }
+#  endif
+
+#  if TIMER_LL_FUNC_CLOCK_SUPPORT_APB
+  if (GPTIMER_CLK_SRC_DEFAULT == GPTIMER_CLK_SRC_APB)
+    {
+      pm_lock_type = ESP_PM_APB_FREQ_MAX;
+    }
+#  endif
+
+  if (need_pm_lock && lower->pm_lock == NULL)
+    {
+      ret = esp_pm_lock_create(pm_lock_type, 0,
+                               "TIMER",
+                               &lower->pm_lock);
+      if (ret != OK)
+        {
+          tmrerr("Failed to create GPTIMER PM lock\n");
+          return -ENOMEM;
+        }
+    }
+#endif
 
   /* Register the timer driver as /dev/timerX. If the registration goes
    * right the returned value from timer_register is a pointer to

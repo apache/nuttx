@@ -60,6 +60,9 @@
 #include "esp_clk.h"
 #include "esp_irq.h"
 #include "esp_attr.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -117,6 +120,9 @@ struct esp_pcnt_priv_s
   uint32_t accum_value;                                                 /* Accumulator value of overflowed PCNT unit */
   bool channels[PCNT_LL_GET(CHANS_PER_UNIT)];                           /* Channel information of PCNT unit */
   struct esp_pcnt_watch_point_priv_s watchers[PCNT_LL_WATCH_EVENT_MAX]; /* array of PCNT watchers */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;                                         /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -508,6 +514,10 @@ static int esp_pcnt_unit_enable(struct cap_lowerhalf_s *dev)
                           true);
     }
 
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(priv->pm_lock);
+#endif
+
   priv->state = PCNT_UNIT_ENABLE;
   return OK;
 }
@@ -547,6 +557,10 @@ static int esp_pcnt_unit_disable(struct cap_lowerhalf_s *dev)
       pcnt_ll_enable_intr(ctx.dev, PCNT_LL_UNIT_WATCH_EVENT(priv->unit_id),
                           false);
     }
+
+#ifdef CONFIG_PM
+  esp_pm_lock_release(priv->pm_lock);
+#endif
 
   priv->state = PCNT_UNIT_INIT;
   return OK;
@@ -818,6 +832,9 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
   int ret;
   int i;
   irqstate_t flags;
+#ifdef CONFIG_PM
+  esp_pm_lock_type_t pm_lock_type = ESP_PM_NO_LIGHT_SLEEP;
+#endif
 
   if (config == NULL)
     {
@@ -873,6 +890,25 @@ struct cap_lowerhalf_s *esp_pcnt_new_unit(
 
   spin_unlock_irqrestore(&g_pcnt_lock, flags);
   cpinfo("Allocated pcnt unit: %" PRId16 "\n", unit_id);
+
+#ifdef CONFIG_PM
+#  if PCNT_LL_CLOCK_SUPPORT_APB
+  if (PCNT_CLK_SRC_DEFAULT == PCNT_CLK_SRC_APB)
+    {
+      pm_lock_type = ESP_PM_APB_FREQ_MAX;
+    }
+
+#  endif
+  ret = esp_pm_lock_create(pm_lock_type,
+                           0,
+                           soc_pcnt_signals[unit_id].module_name,
+                           &pcnt_units[unit_id].pm_lock);
+  if (ret != OK)
+    {
+      cperr("Failed to create PCNT PM lock\n");
+      return NULL;
+    }
+#endif
 
   if (!g_pcnt_intr)
     {
@@ -986,6 +1022,11 @@ int esp_pcnt_del_unit(struct cap_lowerhalf_s *dev)
 
       esp_teardown_irq(soc_pcnt_signals[0].irq_id, -ENOMEM);
     }
+
+#ifdef CONFIG_PM
+  esp_pm_lock_delete(priv->pm_lock);
+  priv->pm_lock = NULL;
+#endif
 
   spin_unlock_irqrestore(&priv->lock, flags);
 

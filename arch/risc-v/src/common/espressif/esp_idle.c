@@ -47,8 +47,8 @@
 #include "esp_tickless.h"
 #endif
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
 #include "esp_private/pm_impl.h"
+#if defined(CONFIG_ESPRESSIF_AUTO_SLEEP) || defined(CONFIG_ESPRESSIF_DFS)
 #include "platform/os.h"
 #endif
 
@@ -236,12 +236,8 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
   esp_pm_impl_idle_hook();
   esp_pm_impl_waiti();
-#else
-  asm("WFI");
-#endif
 
   /* Perform IDLE mode power management */
 

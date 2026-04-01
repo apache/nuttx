@@ -73,6 +73,10 @@
 #  include "esp_private/gdma.h"
 #endif
 
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -224,6 +228,9 @@ struct esp_spi_priv_s
   spi_hal_context_t *ctx;               /* Context struct of common layer */
   spi_hal_dev_config_t *dev_cfg;        /* Device configuration struct of common layer */
   spi_hal_timing_param_t *timing_param; /* Timing struct of common layer */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;         /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -386,6 +393,9 @@ static struct esp_spi_priv_s esp_spi2_priv =
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
   .sem_isr      = SEM_INITIALIZER(0),
   .cpuint       = -ENOMEM,
+#endif
+#ifdef CONFIG_PM
+  .pm_lock      = NULL,
 #endif
 };
 #endif /* CONFIG_ESPRESSIF_SPI2 */
@@ -1086,8 +1096,17 @@ static uint32_t esp_spi_poll_send(struct esp_spi_priv_s *priv, uint32_t wd)
 static uint32_t esp_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
   struct esp_spi_priv_s *priv = (struct esp_spi_priv_s *)dev;
+  int ret;
 
-  return esp_spi_poll_send(priv, wd);
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(priv->pm_lock);
+#endif
+  ret = esp_spi_poll_send(priv, wd);
+#ifdef CONFIG_PM
+  esp_pm_lock_release(priv->pm_lock);
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1214,6 +1233,9 @@ static void esp_spi_exchange(struct spi_dev_s *dev,
 {
   struct esp_spi_priv_s *priv = (struct esp_spi_priv_s *)dev;
 
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(priv->pm_lock);
+#endif
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
   size_t thld = CONFIG_ESPRESSIF_SPI2_DMATHRESHOLD;
 
@@ -1226,6 +1248,10 @@ static void esp_spi_exchange(struct spi_dev_s *dev,
     {
       esp_spi_poll_exchange(priv, txbuffer, rxbuffer, nwords);
     }
+
+#ifdef CONFIG_PM
+  esp_pm_lock_release(priv->pm_lock);
+#endif
 }
 
 #ifndef CONFIG_SPI_EXCHANGE
@@ -1539,6 +1565,9 @@ struct spi_dev_s *esp_spibus_initialize(int port)
 {
   struct spi_dev_s *spi_dev;
   struct esp_spi_priv_s *priv;
+#ifdef CONFIG_PM
+  int ret;
+#endif
 
   switch (port)
     {
@@ -1560,6 +1589,20 @@ struct spi_dev_s *esp_spibus_initialize(int port)
       nxmutex_unlock(&priv->lock);
       return spi_dev;
     }
+
+#ifdef CONFIG_PM
+#  if CONFIG_ARCH_CHIP_ESP32P4
+  ret = esp_pm_lock_create(ESP_PM_CPU_FREQ_MAX, 0, "spi", &priv->pm_lock);
+#  else
+  ret = esp_pm_lock_create(ESP_PM_APB_FREQ_MAX, 0, "spi", &priv->pm_lock);
+#  endif
+  if (ret != OK)
+    {
+      nxmutex_unlock(&priv->lock);
+      spierr("Failed to create SPI PM lock for SPI:%" PRId8 "\n", priv->id);
+      return NULL;
+    }
+#endif
 
   /* Initialize the blank array */
 
@@ -1637,6 +1680,11 @@ int esp_spibus_uninitialize(struct spi_dev_s *dev)
   up_disable_irq(ESP_SOURCE2IRQ(spi_periph_signal[priv->id].irq));
   esp_teardown_irq(spi_periph_signal[priv->id].irq, priv->cpuint);
   priv->cpuint = -ENOMEM;
+#endif
+
+#ifdef CONFIG_PM
+  esp_pm_lock_delete(priv->pm_lock);
+  priv->pm_lock = NULL;
 #endif
 
   esp_spi_deinit(dev);

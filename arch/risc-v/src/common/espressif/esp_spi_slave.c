@@ -65,6 +65,10 @@
 
 #include "riscv_internal.h"
 
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -220,6 +224,9 @@ struct spislave_priv_s
   bool is_tx_enabled;
   spi_slave_hal_context_t ctx;  /* Context struct of the common layer */
   spi_slave_hal_config_t cfg;   /* Configuration struct of the common layer */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock; /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -1045,6 +1052,9 @@ static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
   DEBUGASSERT(nbits > 0);
 
   flags = enter_critical_section();
+#ifdef CONFIG_PM
+  esp_pm_lock_acquire(priv->pm_lock);
+#endif
 
   priv->dev = dev;
 
@@ -1172,6 +1182,9 @@ static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 #endif
 
   priv->dev = NULL;
+#ifdef CONFIG_PM
+  esp_pm_lock_release(priv->pm_lock);
+#endif
 
   leave_critical_section(flags);
 }
@@ -1407,6 +1420,22 @@ struct spi_slave_ctrlr_s *esp_spislave_ctrlr_initialize(int port)
       return spislave_dev;
     }
 
+#ifdef CONFIG_PM
+#  if CONFIG_ARCH_CHIP_ESP32P4
+  ret = esp_pm_lock_create(ESP_PM_CPU_FREQ_MAX, 0,
+                           "spi_slave", &priv->pm_lock);
+#  else
+  ret = esp_pm_lock_create(ESP_PM_APB_FREQ_MAX, 0,
+                           "spi_slave", &priv->pm_lock);
+#  endif
+  if (ret != OK)
+    {
+      spierr("Failed to create SPI PM lock for SPI slave driver\n");
+      leave_critical_section(flags);
+      return NULL;
+    }
+#endif
+
   /* Attach IRQ for CS pin interrupt */
 
   ret = esp_gpio_irq(priv->config->cs_pin,
@@ -1509,6 +1538,13 @@ int esp_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
   priv->rx_length = 0;
   priv->is_processing = false;
   priv->is_tx_enabled = false;
+#ifdef CONFIG_PM
+  if (priv->pm_lock != NULL)
+    {
+      esp_pm_lock_delete(priv->pm_lock);
+      priv->pm_lock = NULL;
+    }
+#endif
 
   leave_critical_section(flags);
 

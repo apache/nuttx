@@ -55,6 +55,9 @@
 #include "hal/twai_periph.h"
 #include "soc/gpio_sig_map.h"
 #include "soc/reg_base.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -142,6 +145,9 @@ struct esp_twai_dev_s
   int8_t cpuint;                  /* CPU interrupt assigned to this TWAI */
   twai_hal_context_t ctx;         /* Context struct of common layer */
   twai_timing_config_t t_config;  /* Timing struct of common layer */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;   /* Power management lock */
+#endif
 };
 
 /****************************************************************************
@@ -190,6 +196,9 @@ static struct esp_twai_dev_s g_twai0priv =
   .port             = 0,
   .cpuint           = -ENOMEM,
   .t_config         = TWAI0_TIMING_CONFIG,
+#ifdef CONFIG_PM
+  .pm_lock          = NULL,
+#endif
 };
 
 static struct can_dev_s g_twai0dev =
@@ -205,6 +214,9 @@ static struct esp_twai_dev_s g_twai1priv =
   .port             = 1,
   .cpuint           = -ENOMEM,
   .t_config         = TWAI1_TIMING_CONFIG,
+#ifdef CONFIG_PM
+  .pm_lock          = NULL,
+#endif
 };
 
 static struct can_dev_s g_twai1dev =
@@ -272,6 +284,13 @@ static void esp_twai_reset(struct can_dev_s *dev)
   ret = twai_hal_init(&priv->ctx, &hal_config);
   ASSERT(ret);
   twai_hal_configure(&priv->ctx, &priv->t_config, &f_config, 0);
+
+#ifdef CONFIG_PM
+  if (priv->pm_lock)
+    {
+      esp_pm_lock_acquire(priv->pm_lock);
+    }
+#endif
 
   /* Restart the TWAI */
 
@@ -799,6 +818,10 @@ struct can_dev_s *esp_twaiinitialize(int port)
 {
   struct can_dev_s *dev;
   irqstate_t flags;
+#ifdef CONFIG_PM
+  int ret;
+  struct esp_twai_dev_s *priv;
+#endif
 
   caninfo("TWAI%" PRIu8 "\n",  port);
 
@@ -847,6 +870,34 @@ struct can_dev_s *esp_twaiinitialize(int port)
       leave_critical_section(flags);
       return NULL;
     }
+
+#ifdef CONFIG_PM
+  priv = (struct esp_twai_dev_s *)dev->cd_priv;
+
+  if (priv->pm_lock == NULL)
+    {
+#  if TWAI_LL_SUPPORT(APB_CLK)
+      if (TWAI_CLK_SRC_DEFAULT == TWAI_CLK_SRC_APB)
+        {
+          ret = esp_pm_lock_create(ESP_PM_APB_FREQ_MAX,
+                                   0,
+                                   twai_periph_signals[port].module_name,
+                                   &priv->pm_lock);
+        }
+#  else
+      ret = esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP,
+                               0,
+                               twai_periph_signals[port].module_name,
+                               &priv->pm_lock);
+#  endif
+      if (ret != OK)
+        {
+          canerr("Failed to create TWAI%" PRIu8 "PM lock\n", port);
+          leave_critical_section(flags);
+          return NULL;
+        }
+    }
+#endif
 
   /* Then just perform a TWAI reset operation */
 

@@ -47,6 +47,9 @@
 #include "hal/sdm_periph.h"
 #include "hal/sdm_caps.h"
 #include "hal/gpio_ll.h"
+#ifdef CONFIG_PM
+#  include "include/esp_pm.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -73,6 +76,9 @@ struct esp_sdm_group_priv_s
   sdm_hal_context_t hal;                                                  /* Common layer context */
   soc_periph_sdm_clk_src_t clk_src;                                       /* Clock source */
   struct esp_sdm_channel_priv_s *channels[SDM_CAPS_GET(CHANS_PER_INST)];  /* Array of SDM channels */
+#ifdef CONFIG_PM
+  esp_pm_lock_handle_t pm_lock;                                           /* Power management lock */
+#endif
 };
 
 struct esp_sdm_priv_s
@@ -167,6 +173,13 @@ static int dac_setup(struct dac_dev_s *dev)
 {
   struct esp_sdm_group_priv_s *group =
     (struct esp_sdm_group_priv_s *) dev->ad_priv;
+#ifdef CONFIG_PM
+  if (group->pm_lock)
+    {
+      esp_pm_lock_acquire(group->pm_lock);
+    }
+#endif
+
   sdm_ll_enable_clock(group->hal.dev, true);
   return OK;
 }
@@ -189,6 +202,13 @@ static void dac_shutdown(struct dac_dev_s *dev)
 {
   struct esp_sdm_group_priv_s *group =
     (struct esp_sdm_group_priv_s *) dev->ad_priv;
+#ifdef CONFIG_PM
+  if (group->pm_lock)
+    {
+      esp_pm_lock_release(group->pm_lock);
+    }
+#endif
+
   sdm_ll_enable_clock(group->hal.dev, false);
 }
 
@@ -407,6 +427,10 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
   int group_id = 0;
   int chan_id = -1;
   irqstate_t flags;
+#ifdef CONFIG_PM
+  esp_pm_lock_type_t pm_type = ESP_PM_NO_LIGHT_SLEEP;
+  int res;
+#endif
 
   DEBUGASSERT(GPIO_IS_VALID_GPIO(config.gpio_num));
 
@@ -420,6 +444,7 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
           if (g_esp_sdm.groups[i] == NULL)
             {
               aerr("Error! No mem for group (%d)\n", i);
+              nxrmutex_unlock(&(g_esp_sdm.lock));
               return NULL;
             }
           else
@@ -435,6 +460,24 @@ static struct esp_sdm_group_priv_s *esp_sdm_init(
               sdm_hal_init(&g_esp_sdm.groups[i]->hal, &hal_config);
               sdm_ll_enable_clock(g_esp_sdm.groups[i]->hal.dev, true);
               ainfo("new group (%d) at %p\n", i, g_esp_sdm.groups[i]);
+#ifdef CONFIG_PM
+#  if SDM_CAPS_GET(FUNC_CLOCK_SUPPORT_APB)
+              if (clk_src == SDM_CLK_SRC_APB)
+                {
+                  pm_type = ESP_PM_APB_FREQ_MAX;
+                }
+#  endif
+
+              res = esp_pm_lock_create(pm_type, 0,
+                                       soc_sdm_signals[group_id].module_name,
+                                       &g_esp_sdm.groups[i]->pm_lock);
+              if (res != OK)
+                {
+                  aerr("Error! No mem to PM lock for group (%d)\n", i);
+                  nxrmutex_unlock(&(g_esp_sdm.lock));
+                  return NULL;
+                }
+#endif
               break;
             }
         }
