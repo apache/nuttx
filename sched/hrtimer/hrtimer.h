@@ -383,13 +383,13 @@ uint32_t hrtimer_read_32(FAR const uint32_t *ptr)
 }
 #endif
 
-/* Generic function to read the value in the queue atomically. */
+/* Generic function to read the pointer in the queue atomically. */
 
-#define hrtimer_read(ptr) \
-  (sizeof(*(ptr)) == 8u ? \
-   hrtimer_read_64((FAR const uint64_t *)(ptr)) : \
-   (sizeof(*(ptr)) == 4u ? \
-    hrtimer_read_32((FAR const uint32_t *)(ptr)) : 0u))
+#if UINTPTR_MAX <= UINT32_MAX
+#  define hrtimer_read_ptr(ptr) hrtimer_read_32((FAR const uint32_t *)(ptr))
+#else
+#  define hrtimer_read_ptr(ptr) hrtimer_read_64((FAR const uint64_t *)(ptr))
+#endif
 
 /****************************************************************************
  * Name: hrtimer_mark_running
@@ -434,7 +434,7 @@ uint32_t hrtimer_read_32(FAR const uint32_t *ptr)
 
 #ifdef CONFIG_SMP
 #  define hrtimer_is_running(timer, cpu) \
-  (hrtimer_read(&g_hrtimer_running[cpu]) == (uintptr_t)(timer))
+  (hrtimer_read_ptr(&g_hrtimer_running[cpu]) == (uintptr_t)(timer))
 #else
 #  define hrtimer_is_running(timer, cpu) (true)
 #endif
