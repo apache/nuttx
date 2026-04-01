@@ -65,6 +65,14 @@
 #define VIRTIO_NET_MAX_NIOB \
     ((VIRTIO_NET_MAX_PKT_SIZE + CONFIG_IOB_BUFSIZE - 1) / CONFIG_IOB_BUFSIZE)
 
+/* Ethernet header size: wider when 802.1Q VLAN tagging is enabled */
+
+#ifdef CONFIG_NET_VLAN
+#  define VIRTIO_NET_ETH_HDRSIZE  ETH_8021Q_HDRLEN
+#else
+#  define VIRTIO_NET_ETH_HDRSIZE  ETH_HDRLEN
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -131,10 +139,10 @@ struct virtio_net_priv_s
  * |               |<--------- datalen -------->|
  * ^base           ^data
  *
- * CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE + ETH_HDR_SIZE
- *                          = sizeof(uintptr) + 10 + 14
- *                          = 32 (64-Bit)
- *                          = 28 (32-Bit)
+ * CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE + VIRTIO_NET_ETH_HDRSIZE
+ *                          = sizeof(uintptr) + 10 + 14 or (18 for VLAN)
+ *                          = 32 or (36 for VLAN) (64-Bit)
+ *                          = 28 or (32 for VLAN) (32-Bit)
  */
 
 begin_packed_struct struct virtio_net_llhdr_s
@@ -143,9 +151,10 @@ begin_packed_struct struct virtio_net_llhdr_s
   struct virtio_net_hdr_s vhdr;        /* Virtio net header */
 } end_packed_struct;
 
-static_assert(CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE + ETH_HDRLEN,
-              "CONFIG_NET_LL_GUARDSIZE cannot be less than ETH_HDRLEN"
-              " + VIRTIO_NET_LLHDRSIZE");
+static_assert(CONFIG_NET_LL_GUARDSIZE >= VIRTIO_NET_LLHDRSIZE +
+              VIRTIO_NET_ETH_HDRSIZE,
+              "CONFIG_NET_LL_GUARDSIZE cannot be less than"
+              " VIRTIO_NET_ETH_HDRSIZE + VIRTIO_NET_LLHDRSIZE");
 
 /****************************************************************************
  * Private Function Prototypes
