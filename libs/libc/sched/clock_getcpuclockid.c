@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <time.h>
+#include <unistd.h>
 
 #include <nuttx/clock.h>
 #include <nuttx/sched.h>
