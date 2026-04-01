@@ -509,7 +509,7 @@ int esp_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#ifdef CONFIG_PM
   /* Configure PM */
 
   ret = esp_pmconfigure();

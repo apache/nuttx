@@ -461,7 +461,7 @@ int esp_bringup(void)
     }
 #endif /* CONFIG_ESPRESSIF_LEDC */
 
-#ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
+#ifdef CONFIG_PM
   /* Configure PM */
 
   ret = esp_pmconfigure();
