@@ -109,6 +109,10 @@
 #  include "esp_board_adc.h"
 #endif
 
+#ifdef CONFIG_PM
+#  include "espressif/esp_pm.h"
+#endif
+
 #ifdef CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL
 #  include "espressif/esp_nxdiag.h"
 #endif
@@ -420,6 +424,16 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_pcnt_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PM
+  /* Configure PM */
+
+  ret = esp_pmconfigure();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_pmconfigure failed: %d\n", ret);
     }
 #endif
 
