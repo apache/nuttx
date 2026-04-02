@@ -75,8 +75,18 @@ void NXGL_FUNCNAME(nxgl_copyrectangle, NXGLIB_SUFFIX)
   xoffset = dest->pt1.x - origin->x;
   sline = (FAR const uint8_t *)src + NXGL_SCALEX(xoffset) +
            (dest->pt1.y - origin->y) * srcstride;
+
 #if NXGLIB_BITSPERPIXEL < 8
   remainder = NXGL_REMAINDERX(xoffset);
+#else
+  if (pinfo->putarea != NULL)
+    {
+      pinfo->putarea(pinfo->dev,
+                     dest->pt1.y, dest->pt2.y,
+                     dest->pt1.x, dest->pt2.x,
+                     sline, srcstride);
+      return;
+    }
 #endif
 
   /* Copy the image, one row at a time */
