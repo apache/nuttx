@@ -35,6 +35,9 @@
 
 #ifdef CONFIG_LIBC_ATOMIC_ARCH
 #  include <arch/atomic.h>
+#elif defined(CONFIG_LIBC_ATOMIC_IRQ) || \
+      defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+#  include <nuttx/lib/arch_atomic.h>
 #endif
 
 /****************************************************************************
@@ -270,63 +273,6 @@ typedef __Atomic(int64_t) atomic64_t;
 typedef atomic64_t atomic_ptr_t;
 #else
 typedef atomic_t atomic_ptr_t;
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-#if !defined(CONFIG_LIBC_ATOMIC_TOOLCHAIN) && !defined(CONFIG_LIBC_ATOMIC_ARCH)
-void atomic_store_4(FAR volatile void *ptr, int32_t value, int memorder);
-void atomic_store_8(FAR volatile void *ptr, int64_t value, int memorder);
-int32_t atomic_load_4(FAR const volatile void *ptr, int memorder);
-int64_t atomic_load_8(FAR const volatile void *ptr, int memorder);
-int32_t atomic_exchange_4(FAR volatile void *ptr, int32_t value,
-                          int memorder);
-int64_t atomic_exchange_8(FAR volatile void *ptr, int64_t value,
-                          int memorder);
-bool atomic_compare_exchange_4(FAR volatile void *ptr,
-                               FAR volatile void *expect,
-                               int32_t desired, bool weak,
-                               int success, int failure);
-bool atomic_compare_exchange_8(FAR volatile void *ptr,
-                               FAR volatile void *expect,
-                               int64_t desired, bool weak,
-                               int success, int failure);
-int32_t atomic_fetch_add_4(FAR volatile void *ptr, int32_t value,
-                           int memorder);
-int64_t atomic_fetch_add_8(FAR volatile void *ptr, int64_t value,
-                           int memorder);
-int32_t atomic_fetch_sub_4(FAR volatile void *ptr, int32_t value,
-                           int memorder);
-int64_t atomic_fetch_sub_8(FAR volatile void *ptr, int64_t value,
-                           int memorder);
-int32_t atomic_fetch_and_4(FAR volatile void *ptr, int32_t value,
-                           int memorder);
-int64_t atomic_fetch_and_8(FAR volatile void *ptr, int64_t value,
-                           int memorder);
-int32_t atomic_fetch_or_4(FAR volatile void *ptr, int32_t value,
-                          int memorder);
-int64_t atomic_fetch_or_8(FAR volatile void *ptr, int64_t value,
-                          int memorder);
-int32_t atomic_fetch_xor_4(FAR volatile void *ptr, int32_t value,
-                           int memorder);
-int64_t atomic_fetch_xor_8(FAR volatile void *ptr, int64_t value,
-                           int memorder);
-#endif
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
 #endif
 
 #endif /* __INCLUDE_NUTTX_ATOMIC_H */
