@@ -279,6 +279,7 @@ include common$(DELIM)espressif$(DELIM)Bootloader.mk
 # Silent preprocessor warnings
 
 CFLAGS += -Wno-shadow -Wno-undef -Wno-unused-variable -fno-jump-tables -fno-tree-switch-conversion -Wno-deprecated-declarations
+AFLAGS += -Wno-undef
 
 # Remove quotes from CONFIG_ESPRESSIF_CHIP_SERIES configuration
 

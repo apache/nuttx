@@ -160,7 +160,8 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/include
-    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src)
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/include)
 
 if(CONFIG_ESP32P4_SELECTS_REV_LESS_V3)
   list(APPEND ESP32P4_INCLUDES
@@ -277,12 +278,15 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_pcnt/${CHIP_SERIES}/pcnt_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_pcnt/pcnt_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_pmu/brownout_hal.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_pmu/${CHIP_SERIES}/pau_hal.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_pmu/${CHIP_SERIES}/pmu_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_rmt/${CHIP_SERIES}/rmt_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_rmt/rmt_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_security/hmac_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_security/sha_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_timg/${CHIP_SERIES}/timer_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_timg/timer_hal.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_touch_sens/touch_sens_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_twai/${CHIP_SERIES}/twai_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_twai/twai_hal_v1.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_uart/${CHIP_SERIES}/uart_periph.c
@@ -291,6 +295,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_wdt/wdt_hal_iram.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/adc_share_hw_ctrl.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/clk_ctrl_os.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/clk_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/cpu.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/esp_clk.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/esp_gpio_reserve.c
@@ -300,6 +305,9 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mac_addr.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/mspi/mspi_timing_tuning/mspi_timing_tuning.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/periph_ctrl.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu_asm.S
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_cpu.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/lowpower/port/${CHIP_SERIES}/sleep_clock.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/cpu_region_protect.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_clk_tree.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_cpu_intr.c
@@ -308,17 +316,29 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_init.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_param.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_pvt.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_sleep.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/rtc_clk_init.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/rtc_clk.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/rtc_time.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/sar_periph_ctrl.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/systimer.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/esp_clk_tree_common.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/pau_regdma.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/regdma_link.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/power_supply/brownout.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/power_supply/vbat.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/regi2c_ctrl.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/rtc_module.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_console.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_event.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_gpio.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_modem.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_modes.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_mspi.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_retention.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_system_peripheral.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_uart.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/sleep_usb.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_cache_msync.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_cache_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_mm/esp_mmu_map.c
@@ -400,6 +420,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_encoder.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_rx.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/src/uart_wakeup.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/components/newlib/newlib/libc/misc/init.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/os.c)

@@ -273,97 +273,172 @@ static uint64_t IRAM_ATTR esp_pm_get_gpio_mask(void)
 {
   uint64_t io_mask = 0;
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO0
-  io_mask |= BIT(0);
+  io_mask |= BIT64(0);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO1
-  io_mask |= BIT(1);
+  io_mask |= BIT64(1);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO2
-  io_mask |= BIT(2);
+  io_mask |= BIT64(2);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO3
-  io_mask |= BIT(3);
+  io_mask |= BIT64(3);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO4
-  io_mask |= BIT(4);
+  io_mask |= BIT64(4);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO5
-  io_mask |= BIT(5);
+  io_mask |= BIT64(5);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO6
-  io_mask |= BIT(6);
+  io_mask |= BIT64(6);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO7
-  io_mask |= BIT(7);
+  io_mask |= BIT64(7);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO8
-  io_mask |= BIT(8);
+  io_mask |= BIT64(8);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO9
-  io_mask |= BIT(9);
+  io_mask |= BIT64(9);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO10
-  io_mask |= BIT(10);
+  io_mask |= BIT64(10);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO11
-  io_mask |= BIT(11);
+  io_mask |= BIT64(11);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO12
-  io_mask |= BIT(12);
+  io_mask |= BIT64(12);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO13
-  io_mask |= BIT(13);
+  io_mask |= BIT64(13);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO14
-  io_mask |= BIT(14);
+  io_mask |= BIT64(14);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO15
-  io_mask |= BIT(15);
+  io_mask |= BIT64(15);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO16
-  io_mask |= BIT(16);
+  io_mask |= BIT64(16);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO17
-  io_mask |= BIT(17);
+  io_mask |= BIT64(17);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO18
-  io_mask |= BIT(18);
+  io_mask |= BIT64(18);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO19
-  io_mask |= BIT(19);
+  io_mask |= BIT64(19);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO20
-  io_mask |= BIT(20);
+  io_mask |= BIT64(20);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO21
-  io_mask |= BIT(21);
+  io_mask |= BIT64(21);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO22
-  io_mask |= BIT(22);
+  io_mask |= BIT64(22);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO23
-  io_mask |= BIT(23);
+  io_mask |= BIT64(23);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO24
-  io_mask |= BIT(24);
+  io_mask |= BIT64(24);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO25
-  io_mask |= BIT(25);
+  io_mask |= BIT64(25);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO26
-  io_mask |= BIT(26);
+  io_mask |= BIT64(26);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO27
-  io_mask |= BIT(27);
+  io_mask |= BIT64(27);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO28
-  io_mask |= BIT(28);
+  io_mask |= BIT64(28);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO29
-  io_mask |= BIT(29);
+  io_mask |= BIT64(29);
 #endif
 #ifdef CONFIG_PM_GPIO_WAKEUP_GPIO30
-  io_mask |= BIT(30);
+  io_mask |= BIT64(30);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO31
+  io_mask |= BIT64(31);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO32
+  io_mask |= BIT64(32);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO33
+  io_mask |= BIT64(33);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO34
+  io_mask |= BIT64(34);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO35
+  io_mask |= BIT64(35);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO36
+  io_mask |= BIT64(36);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO37
+  io_mask |= BIT64(37);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO38
+  io_mask |= BIT64(38);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO39
+  io_mask |= BIT64(39);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO40
+  io_mask |= BIT64(40);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO41
+  io_mask |= BIT64(41);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO42
+  io_mask |= BIT64(42);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO43
+  io_mask |= BIT64(43);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO44
+  io_mask |= BIT64(44);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO45
+  io_mask |= BIT64(45);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO46
+  io_mask |= BIT64(46);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO47
+  io_mask |= BIT64(47);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO48
+  io_mask |= BIT64(48);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO49
+  io_mask |= BIT64(49);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO50
+  io_mask |= BIT64(50);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO51
+  io_mask |= BIT64(51);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO52
+  io_mask |= BIT64(52);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO53
+  io_mask |= BIT64(53);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO54
+  io_mask |= BIT64(54);
+#endif
+#ifdef CONFIG_PM_GPIO_WAKEUP_GPIO55
+  io_mask |= BIT64(55);
 #endif
 
   return io_mask;
@@ -386,7 +461,7 @@ static uint64_t IRAM_ATTR esp_pm_get_gpio_mask(void)
 static void IRAM_ATTR esp_pm_gpio_wakeup_prepare(void)
 {
   uint64_t mask_value = esp_pm_get_gpio_mask();
-  int pin_mask = 0;
+  uint64_t pin_mask = 0;
 #  ifdef CONFIG_PM_GPIO_WAKEUP_TRIGGER_ANY_LOW
   gpio_int_type_t level_mode = GPIO_INTR_LOW_LEVEL;
 #  else
@@ -395,10 +470,9 @@ static void IRAM_ATTR esp_pm_gpio_wakeup_prepare(void)
 
   for (int i = 0; i < CONFIG_SOC_GPIO_PIN_COUNT; i++)
     {
-      pin_mask = BIT(i);
+      pin_mask = BIT64(i);
       if ((mask_value & pin_mask) != 0)
         {
-          esp_configgpio(i, INPUT);
           gpio_wakeup_enable(i, level_mode);
         }
     }
@@ -455,6 +529,7 @@ static void IRAM_ATTR esp_pm_uart_wakeup_prepare(void)
 #endif
     };
 
+  esp_sleep_set_console_uart_handling_mode(ESP_SLEEP_ALWAYS_FLUSH_UART);
   uart_wakeup_setup(uart_num, &wake_up_cfg);
   esp_sleep_enable_uart_wakeup(uart_num);
 }

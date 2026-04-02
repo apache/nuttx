@@ -816,24 +816,199 @@ config PM_GPIO_WAKEUP_GPIO27
 
 config PM_GPIO_WAKEUP_GPIO28
 	bool "GPIO28"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable GPIO28 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO29
 	bool "GPIO29"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable GPIO29 as an GPIO wakeup source.
 
 config PM_GPIO_WAKEUP_GPIO30
 	bool "GPIO30"
-	depends on ARCH_CHIP_ESP32C6
+	depends on ARCH_CHIP_ESP32C6 || ARCH_CHIP_ESP32P4
 	default n
 	---help---
 		Enable GPIO30 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO31
+	bool "GPIO31"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO31 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO32
+	bool "GPIO32"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO32 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO33
+	bool "GPIO33"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO33 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO34
+	bool "GPIO34"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO34 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO35
+	bool "GPIO35"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO35 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO36
+	bool "GPIO36"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO36 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO37
+	bool "GPIO37"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO37 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO38
+	bool "GPIO38"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO38 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO39
+	bool "GPIO39"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO39 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO40
+	bool "GPIO40"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO40 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO41
+	bool "GPIO41"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO41 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO42
+	bool "GPIO42"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO42 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO43
+	bool "GPIO43"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO43 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO44
+	bool "GPIO44"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO44 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO45
+	bool "GPIO45"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO45 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO46
+	bool "GPIO46"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO46 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO47
+	bool "GPIO47"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO47 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO48
+	bool "GPIO48"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO48 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO49
+	bool "GPIO49"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO49 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO50
+	bool "GPIO50"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO50 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO51
+	bool "GPIO51"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO51 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO52
+	bool "GPIO52"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO52 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO53
+	bool "GPIO53"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+    Enable GPIO53 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO54
+	bool "GPIO54"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO54 as an GPIO wakeup source.
+
+config PM_GPIO_WAKEUP_GPIO55
+	bool "GPIO55"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable GPIO55 as an GPIO wakeup source.
 
 choice PM_GPIO_WAKEUP_TRIGGER_MODE
 	prompt "PM GPIO Wakeup Trigger Mode"
