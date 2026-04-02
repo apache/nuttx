@@ -129,7 +129,7 @@ where <config_name> is the name of board configuration you want to use, i.e.: ns
    * - Make
      - Yes
    * - CMake
-     - No
+     - Yes
 
 .. code:: console
 
