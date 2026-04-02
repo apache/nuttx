@@ -152,7 +152,6 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
 
       conn_lock(&conn->sconn);
       flags = devif_conn_event(dev, flags, conn->sconn.list);
-      conn_unlock(&conn->sconn);
 
       /* Either we did not get the lock or there is no application listening
        * If we did not get a lock we store the frame in the read-ahead buffer
@@ -164,6 +163,8 @@ uint32_t can_callback(FAR struct net_driver_s *dev,
 
           flags = can_data_event(dev, conn, flags);
         }
+
+      conn_unlock(&conn->sconn);
     }
 
   return flags;

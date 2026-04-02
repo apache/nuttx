@@ -319,7 +319,6 @@ uint32_t udp_callback(FAR struct net_driver_s *dev,
 
       conn_lock(&conn->sconn);
       flags = devif_conn_event(dev, flags, conn->sconn.list);
-      conn_unlock(&conn->sconn);
 
       if ((flags & UDP_NEWDATA) != 0)
         {
@@ -327,6 +326,8 @@ uint32_t udp_callback(FAR struct net_driver_s *dev,
 
           flags = net_dataevent(dev, conn, flags);
         }
+
+      conn_unlock(&conn->sconn);
     }
 
   return flags;
