@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <syslog.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/signal.h>
 

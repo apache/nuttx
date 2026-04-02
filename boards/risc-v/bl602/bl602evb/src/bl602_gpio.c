@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/ioexpander/gpio.h>

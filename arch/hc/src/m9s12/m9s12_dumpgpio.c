@@ -34,6 +34,7 @@
 #define CONFIG_DEBUG_INFO 1
 
 #include <stdint.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 

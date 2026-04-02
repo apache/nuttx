@@ -373,7 +373,7 @@ static int vs1053_setfrequency(FAR struct vs1053_struct_s *dev,
       factor = 10.0;
     }
 
-  /* Calculate the clock mulit register based on the factor */
+  /* Calculate the clock multi register based on the factor */
 
   if ((int)factor == 10)
     {

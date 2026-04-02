@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include <assert.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 

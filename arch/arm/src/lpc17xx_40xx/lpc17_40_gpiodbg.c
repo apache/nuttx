@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
 

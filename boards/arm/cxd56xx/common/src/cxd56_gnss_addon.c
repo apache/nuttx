@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/sensors/cxd5610_gnss.h>
 #include <nuttx/i2c/i2c_master.h>

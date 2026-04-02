@@ -129,7 +129,7 @@ struct tiva_adc_step_cfg_s
   uint8_t  adc;   /* Parent peripheral */
   uint8_t  sse;   /* Parent sample sequencer (SSE) */
   uint8_t  step;  /* Which step in the sequencer */
-  uint8_t  shold; /* Sample and hold time */
+  uint8_t  hold;  /* Sample and hold time */
   uint8_t  flags; /* Last step? Interrupt enabled?
                    * Internal temperature sensor? */
   uint8_t  ain;   /* Which analog input */
@@ -629,13 +629,13 @@ void tiva_adc_sse_differential(uint8_t adc, uint8_t sse, uint8_t chn,
  *   adc - peripheral state
  *   sse - sample sequencer
  *   chn - sample sequencer channel
- *   shold - sample and hold time
+ *   hold - sample and hold time
  *
  ****************************************************************************/
 
 #ifdef CONFIG_EXPERIMENTAL
 void tiva_adc_sse_sample_hold_time(uint8_t adc, uint8_t sse, uint8_t chn,
-                                   uint32_t shold);
+                                   uint32_t hold);
 #endif
 
 /****************************************************************************

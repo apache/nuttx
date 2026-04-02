@@ -68,7 +68,7 @@
 #define TIMTYPE_GENERAL16    1  /* General 16-bit timers (up, down, up/down)*/
 #define TIMTYPE_COUNTUP16    2  /* General 16-bit count-up timers */
 #define TIMTYPE_COUNTUP16_N  3  /* General 16-bit count-up timers with
-                                 * complementary outptus
+                                 * complementary outputs
                                  */
 #define TIMTYPE_GENERAL32    4  /* General 32-bit timers (up, down, up/down)*/
 #define TIMTYPE_ADVANCED     5  /* Advanced timers */
