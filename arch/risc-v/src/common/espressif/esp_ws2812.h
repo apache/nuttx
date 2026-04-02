@@ -31,6 +31,8 @@
 #include <debug.h>
 #include <stdbool.h>
 
+#include "esp_rmt.h"
+
 #ifndef __ASSEMBLY__
 #if defined(__cplusplus)
 #define EXTERN extern "C"
