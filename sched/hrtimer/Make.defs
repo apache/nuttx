@@ -22,10 +22,8 @@
 
 # Add hrtimer-related files to the build
 
-ifeq ($(CONFIG_HRTIMER),y)
-  CSRCS += hrtimer_cancel.c hrtimer_initialize.c hrtimer_start.c
-  CSRCS += hrtimer_gettime.c
-endif
+CSRCS += hrtimer_cancel.c hrtimer_initialize.c hrtimer_start.c
+CSRCS += hrtimer_gettime.c
 
 # Include hrtimer build support
 

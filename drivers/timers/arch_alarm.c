@@ -406,7 +406,7 @@ int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
+#ifdef CONFIG_SCHED_TICKLESS
 int weak_function up_alarm_start(FAR const struct timespec *ts)
 {
   int ret = -EAGAIN;

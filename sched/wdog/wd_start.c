@@ -309,9 +309,6 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 
       flags = enter_critical_section();
 
-      /* If the wdog is canceling, restarting the wdog is not allowed. */
-
-#if defined(CONFIG_SCHED_TICKLESS) || defined(CONFIG_HRTIMER)
       /* We need to reassess timer if the watchdog
        * list head has changed.
        */
@@ -334,18 +331,7 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
 
           wd_timer_start(wd_next_expire(), false);
         }
-#else
-      UNUSED(reassess);
 
-      /* Check if the watchdog has been started. If so, delete it. */
-
-      if (WDOG_ISACTIVE(wdog))
-        {
-          list_delete_fast(&wdog->node);
-        }
-
-      wd_insert(wdog, ticks, wdentry, arg);
-#endif
       leave_critical_section(flags);
       sched_note_wdog_start(wdentry,
                             (FAR void *)(uintptr_t)ticks);
@@ -380,23 +366,14 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_HRTIMER
-void wd_timer(clock_t ticks)
-{
-  /* Check if there are any active watchdogs to process */
-
-  wd_expiration(ticks);
-}
-#else
 uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired)
 {
   /* Check if there are any active watchdogs to process */
 
-  clock_t  tick = div_const(expired, NSEC_PER_TICK);
-  clock_t delay = wd_expiration(tick) - tick;
-  uint64_t nsec = delay <= HRTIMER_MAX_DELAY / NSEC_PER_TICK ?
-                  TICK2NSEC(delay) : HRTIMER_MAX_DELAY;
+  clock_t  tick  = div_const(expired, NSEC_PER_TICK);
+  uint64_t delay = wd_expiration(tick) - tick;
+  uint64_t nsec  = delay <= HRTIMER_MAX_DELAY / NSEC_PER_TICK ?
+                   TICK2NSEC(delay) : HRTIMER_MAX_DELAY;
 
   return nsec;
 }
-#endif

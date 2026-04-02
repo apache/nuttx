@@ -341,37 +341,22 @@ clock_t nxsched_process_scheduler(clock_t ticks, clock_t elapsed,
 
 void nxsched_process_timer(void)
 {
-#ifdef CONFIG_HRTIMER
-  uint64_t nsec = clock_systime_nsec();
-  clock_t ticks = NSEC2TICK(nsec);
+  uint64_t        nsec;
+  struct timespec ts;
 
-  clock_update_sched_ticks(ticks);
+  up_timer_gettime(&ts);
+  nsec = clock_time2nsec(&ts);
+
+  clock_update_sched_ticks(NSEC2TICK(nsec));
 
   hrtimer_process(nsec);
-#else
-  irqstate_t flags;
-  clock_t ticks;
 
-  flags = enter_critical_section();
+#if CONFIG_RR_INTERVAL > 0
+  /* Workaround for SCHED_RR, see the note. */
 
-#ifdef CONFIG_CLOCK_TIMEKEEPING
-  /* Process wall time */
+  irqstate_t flags = enter_critical_section();
 
-  clock_update_wall_time();
-#endif
-
-  /* Do not move the up_timer_gettick out of the critical section,
-   * it will violate the invariant that the g_timer_tick should be monotonic.
-   */
-
-  up_timer_gettick(&ticks);
-
-  /* Update sched ticks */
-
-  clock_update_sched_ticks(ticks);
-
-  wd_timer(ticks);
-
+  nxsched_process_event(div_const(nsec, (uint32_t)NSEC_PER_TICK), true);
   leave_critical_section(flags);
 #endif
 }

@@ -39,8 +39,6 @@
 
 #include "sched/sched.h"
 
-#ifdef CONFIG_HRTIMER
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -413,7 +411,7 @@ static inline_function void hrtimer_insert(FAR hrtimer_t *hrtimer)
     {
       /* Until curr->expired has not timed out relative to expired */
 
-      if (!clock_compare(curr->expired, expired))
+      if (!HRTIMER_TIME_BEFORE_EQ(curr->expired, expired))
         {
           break;
         }
@@ -775,5 +773,4 @@ static inline_function void hrtimer_process(uint64_t now)
   hrtimer_unlock(flags);
 }
 
-#endif /* CONFIG_HRTIMER */
 #endif /* __SCHED_HRTIMER_HRTIMER_H */
