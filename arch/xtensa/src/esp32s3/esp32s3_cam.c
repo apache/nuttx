@@ -94,6 +94,7 @@ struct esp32s3_cam_s
   uint8_t *fb;                    /* Frame buffer */
   uint32_t fb_size;               /* Frame buffer size */
   uint32_t fb_pos;                /* Current write position */
+  bool fb_allocated;              /* true if driver allocated fb */
   uint8_t vsync_cnt;              /* VSYNC counter for frame sync */
 
   imgdata_capture_t cb;           /* Capture done callback */
@@ -559,6 +560,7 @@ static int esp32s3_cam_uninit(struct imgdata_s *data)
 {
   struct esp32s3_cam_s *priv = (struct esp32s3_cam_s *)data;
   uint32_t regval;
+  irqstate_t flags;
 
   /* Stop capture */
 
@@ -566,19 +568,58 @@ static int esp32s3_cam_uninit(struct imgdata_s *data)
   regval &= ~LCD_CAM_CAM_START_M;
   putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
 
-  /* Disable interrupt */
+  /* Reset CAM module and AFIFO to stop all hardware activity */
 
-  up_disable_irq(ESP32S3_IRQ_LCD_CAM);
-  irq_detach(ESP32S3_IRQ_LCD_CAM);
-  esp_teardown_irq(ESP32S3_IRQ_LCD_CAM, priv->cpuint);
+  regval = getreg32(LCD_CAM_CAM_CTRL1_REG);
+  regval |= LCD_CAM_CAM_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+  regval &= ~LCD_CAM_CAM_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
 
-  /* Release DMA */
+  regval |= LCD_CAM_CAM_AFIFO_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+  regval &= ~LCD_CAM_CAM_AFIFO_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+
+  /* Keep XCLK running so the sensor stays accessible via I2C for
+   * subsequent re-initialization.  VSYNC generation is already
+   * stopped by the CAM_RESET above.  Disable only the CAM_START
+   * bit in CAM_CTRL to stop the capture engine while preserving
+   * the clock divider configuration.
+   */
+
+  regval = getreg32(LCD_CAM_CAM_CTRL_REG);
+  regval &= ~LCD_CAM_CAM_UPDATE_REG_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL_REG);
+
+  /* Stop and release DMA before tearing down the CPU-level IRQ.
+   * esp32s3_dma_release() detaches the GDMA channel interrupt;
+   * if DMA is still active it may fire after detach → irq_unexpected.
+   */
 
   if (priv->dma_channel >= 0)
     {
+      esp32s3_dma_reset_channel(priv->dma_channel, false);
       esp32s3_dma_release(priv->dma_channel);
       priv->dma_channel = -1;
     }
+
+  /* Mask CPU interrupts so no new peripheral interrupt can be
+   * delivered between clearing the pending flag and detaching
+   * the handler.  The sensor XCLK is already stopped above,
+   * but a VSYNC edge that arrived before the clock gate could
+   * still be latched in the interrupt controller.
+   */
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  putreg32(0, LCD_CAM_LC_DMA_INT_ENA_REG);
+  putreg32(0xffffffff, LCD_CAM_LC_DMA_INT_CLR_REG);
+
+  up_disable_irq(ESP32S3_IRQ_LCD_CAM);
+  esp_teardown_irq(ESP32S3_PERIPH_LCD_CAM, priv->cpuint);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Free DMA descriptors */
 
@@ -588,13 +629,15 @@ static int esp32s3_cam_uninit(struct imgdata_s *data)
       priv->dmadesc = NULL;
     }
 
-  /* Free frame buffer */
+  /* Free frame buffer only if driver allocated it */
 
-  if (priv->fb)
+  if (priv->fb && priv->fb_allocated)
     {
       kmm_free(priv->fb);
-      priv->fb = NULL;
     }
+
+  priv->fb = NULL;
+  priv->fb_allocated = false;
 
   priv->capturing = false;
 
@@ -622,6 +665,7 @@ static int esp32s3_cam_set_buf(struct imgdata_s *data,
     {
       priv->fb = addr;
       priv->fb_size = size;
+      priv->fb_allocated = false;
     }
   else
     {
@@ -636,6 +680,8 @@ static int esp32s3_cam_set_buf(struct imgdata_s *data,
           snerr("ERROR: Failed to allocate frame buffer\n");
           return -ENOMEM;
         }
+
+      priv->fb_allocated = true;
     }
 
   memset(priv->fb, 0, priv->fb_size);
@@ -768,20 +814,48 @@ static int esp32s3_cam_stop_capture(struct imgdata_s *data)
 {
   struct esp32s3_cam_s *priv = (struct esp32s3_cam_s *)data;
   uint32_t regval;
+  irqstate_t flags;
 
-  /* Stop capture */
+  flags = spin_lock_irqsave(&priv->lock);
+
+  /* Mark not capturing first so ISR won't process further VSYNCs */
+
+  priv->capturing = false;
+  priv->cb = NULL;
+  priv->cb_arg = NULL;
+
+  /* Stop capture engine */
 
   regval = getreg32(LCD_CAM_CAM_CTRL1_REG);
   regval &= ~LCD_CAM_CAM_START_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+
+  /* Reset CAM + AFIFO to fully quiesce hardware */
+
+  regval |= LCD_CAM_CAM_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+  regval &= ~LCD_CAM_CAM_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+
+  regval |= LCD_CAM_CAM_AFIFO_RESET_M;
+  putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
+  regval &= ~LCD_CAM_CAM_AFIFO_RESET_M;
   putreg32(regval, LCD_CAM_CAM_CTRL1_REG);
 
   regval = getreg32(LCD_CAM_CAM_CTRL_REG);
   regval |= LCD_CAM_CAM_UPDATE_REG_M;
   putreg32(regval, LCD_CAM_CAM_CTRL_REG);
 
-  priv->capturing = false;
-  priv->cb = NULL;
-  priv->cb_arg = NULL;
+  /* Reset DMA channel to abort any in-flight transfer */
+
+  esp32s3_dma_reset_channel(priv->dma_channel, false);
+
+  /* Clear any pending VSYNC interrupt */
+
+  putreg32(LCD_CAM_CAM_VSYNC_INT_CLR_M,
+           LCD_CAM_LC_DMA_INT_CLR_REG);
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
