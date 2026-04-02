@@ -257,6 +257,10 @@ struct socket_conn_s
   uint8_t       s_ttl;       /* Default time-to-live */
 #endif
 
+#ifdef CONFIG_NET_TIMESTAMP
+  struct iob_queue_s s_errahead; /* TX timestamp error queue */
+#endif
+
   /* Connection-specific content may follow */
 };
 

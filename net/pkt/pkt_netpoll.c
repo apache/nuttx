@@ -138,7 +138,7 @@ static uint32_t pkt_poll_eventhandler(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_TIMESTAMP
       /* Check for timestamping data */
 
-      if (!IOB_QEMPTY(&info->conn->errahead))
+      if (!IOB_QEMPTY(&info->conn->sconn.s_errahead))
         {
           eventset |= POLLPRI | POLLERR;
         }
@@ -281,7 +281,7 @@ int pkt_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
   /* Check for timestamping data */
 
 #ifdef CONFIG_NET_TIMESTAMP
-  if (!IOB_QEMPTY(&conn->errahead))
+  if (!IOB_QEMPTY(&conn->sconn.s_errahead))
     {
       eventset |= POLLPRI | POLLERR;
     }

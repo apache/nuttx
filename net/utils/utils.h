@@ -192,6 +192,12 @@ static inline_function void conn_uninit(FAR struct socket_conn_s *sconn)
 {
   DEBUGASSERT(sconn != NULL);
 
+#ifdef CONFIG_NET_TIMESTAMP
+  /* Release any error-ahead buffers attached to the connection */
+
+  iob_free_queue(&sconn->s_errahead);
+#endif
+
   /* Destroy the connection lock */
 
   nxrmutex_destroy(&sconn->s_lock);

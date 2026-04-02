@@ -169,7 +169,7 @@ static int pkt_in_(FAR struct net_driver_s *dev, bool loopback)
 
       if (dev->d_iob->io_conn == &conn->sconn)
         {
-          if (pkt_datahandler(dev, conn, &conn->errahead) > 0)
+          if (pkt_datahandler(dev, conn, &conn->sconn.s_errahead) > 0)
             {
               pkt_callback(dev, conn, PKT_NEWDATA);
             }
