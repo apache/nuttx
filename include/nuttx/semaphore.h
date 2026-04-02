@@ -103,13 +103,14 @@
 #  define NXSEM_RESTORE_UNINTERRUPTIBLE(tcb, flags) do { } while (0)
 #endif
 
-/* In user space, the atomics of LIBC_ATOMIC_IRQ are system calls.  There,
- * the semaphore operations skip the fast path: the slow path is one system
- * call.
+/* In user space, the atomics of LIBC_ATOMIC_IRQ and LIBC_ATOMIC_HWSPINLOCK
+ * are system calls.  There, the semaphore operations skip the fast path:
+ * the slow path is one system call.
  */
 
 #if !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__) && \
-    defined(CONFIG_LIBC_ATOMIC_IRQ)
+    (defined(CONFIG_LIBC_ATOMIC_IRQ) || \
+     defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK))
 #  define NXSEM_FASTPATH      false
 #else
 #  define NXSEM_FASTPATH      true
