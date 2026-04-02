@@ -224,6 +224,15 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
             }
 
           dev->d_len = dev->d_iob->io_pktlen;
+
+#ifdef CONFIG_NET_TIMESTAMP
+          if (_SO_GETOPT(pstate->st_conn->sconn.s_options,
+                         SO_TIMESTAMPING))
+            {
+              dev->d_iob->io_conn = &pstate->st_conn->sconn;
+            }
+#endif
+
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
