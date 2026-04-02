@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <inttypes.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/spi/spi.h>
 

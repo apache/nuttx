@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 #include <stdbool.h>
 #include <assert.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>

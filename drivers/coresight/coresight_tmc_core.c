@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/bits.h>
 #include <nuttx/kmalloc.h>

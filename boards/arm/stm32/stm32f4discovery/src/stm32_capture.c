@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/timers/capture.h>
 #include <arch/board/board.h>

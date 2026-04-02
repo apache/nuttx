@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <sched.h>
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
