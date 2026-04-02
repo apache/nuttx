@@ -28,6 +28,7 @@
 #include <nuttx/mm/mm.h>
 
 #include <sys/types.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 

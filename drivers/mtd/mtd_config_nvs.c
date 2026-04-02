@@ -784,7 +784,7 @@ static bool nvs_ate_valid(FAR struct nvs_fs *fs,
  * Description:
  *   Validates an block close ate:
  *   A valid block close ate:
- *   - Calid ate.
+ *   - Valid ate.
  *   - Len = 0 and id = 0xFFFFFFFF.
  *   - Offset points to location at ate multiple from block size.
  *   Return true if valid, false otherwise.

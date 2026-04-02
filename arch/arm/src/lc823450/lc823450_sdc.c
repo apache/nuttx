@@ -2,7 +2,8 @@
  * arch/arm/src/lc823450/lc823450_sdc.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
- * SPDX-FileCopyrightText: 2014,2015,2016,2017 Sony Video & Sound Products Inc.
+ * SPDX-FileCopyrightText: 2014,2015,2016,2017 Sony Video & Sound
+ * Products Inc.
  * SPDX-FileCopyrightText: 2014-2015 ON Semiconductor. All rights reserved.
  * SPDX-FileContributor: Masayuki Ishikawa <Masayuki.Ishikawa@jp.sony.com>
  * SPDX-FileContributor: Masatoshi Tateishi <Masatoshi.Tateishi@jp.sony.com>
@@ -45,6 +46,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>

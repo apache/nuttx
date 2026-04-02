@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/arch.h>
 

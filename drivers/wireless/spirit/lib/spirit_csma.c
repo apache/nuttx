@@ -168,11 +168,11 @@ int spirit_csma_getinfo(FAR struct spirit_library_s *spirit,
       return ret;
     }
 
-  /* Reads the bu counter seed */
+  /* Reads the backoff counter seed */
 
   csmainit->seed = (uint16_t)regval[1] | (uint16_t)regval[0] << 8;
 
-  /* Reads the bu prescaler */
+  /* Reads the backoff prescaler */
 
   csmainit->prescaler = regval[2] >> 2;
 

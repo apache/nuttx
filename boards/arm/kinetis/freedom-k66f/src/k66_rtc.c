@@ -28,6 +28,7 @@
 
 #include <syslog.h>
 #include <errno.h>
+
 #include <nuttx/debug.h>
 #include <nuttx/timers/rtc.h>
 
