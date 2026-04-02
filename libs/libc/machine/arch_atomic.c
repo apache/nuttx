@@ -26,253 +26,162 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <nuttx/irq.h>
-#include <nuttx/macro.h>
-#if defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
-#  include <nuttx/hwspinlock/hwspinlock.h>
-#endif
+#define ARCH_ATOMIC_SPECIFIER
 
-#include "arch_atomic.h"
+#include <nuttx/atomic.h>
+#include <nuttx/macro.h>
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_LIBC_ATOMIC_HWSPINLOCK)
-extern struct hwspinlock_dev_s g_atomic_hwspinlock;
+#define SYNC_ADD_FETCH(fn, n, type)                                   \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = *tmp + value;                                              \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
-static inline irqstate_t atomic_lock(void)
-{
-  return hwspin_lock_irqsave(&g_atomic_hwspinlock);
-}
+#define SYNC_SUB_FETCH(fn, n, type)                                   \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = *tmp - value;                                              \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
-static inline void atomic_unlock(irqstate_t flags)
-{
-  hwspin_unlock_restore(&g_atomic_hwspinlock, flags);
-}
-#elif !defined(CONFIG_BUILD_FLAT) && !defined(__KERNEL__)
-/* User code cannot disable the interrupts.  Lock the scheduler instead:
- * as with up_irq_save(), no other thread runs on this CPU meanwhile.
- */
+#define SYNC_OR_FETCH(fn, n, type)                                    \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = *tmp | value;                                              \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
-static inline irqstate_t atomic_lock(void)
-{
-  sched_lock();
-  return 0;
-}
+#define SYNC_AND_FETCH(fn, n, type)                                   \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = *tmp & value;                                              \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
-static inline void atomic_unlock(irqstate_t flags)
-{
-  sched_unlock();
-}
-#elif defined(CONFIG_LIBC_ATOMIC_IRQ)
-static inline irqstate_t atomic_lock(void)
-{
-  return up_irq_save();
-}
+#define SYNC_XOR_FETCH(fn, n, type)                                   \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = *tmp ^ value;                                              \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
-static inline void atomic_unlock(irqstate_t flags)
-{
-  up_irq_restore(flags);
-}
-#endif
+#define SYNC_NAND_FETCH(fn, n, type)                                  \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type value)                   \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret;                                                         \
+                                                                      \
+    *tmp = ~(*tmp & value);                                           \
+    ret = *tmp;                                                       \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
+
+#define SYNC_BOOL_CMP_SWAP(fn, n, type)                               \
+                                                                      \
+  bool weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type oldvalue,                \
+                                        type newvalue)                \
+  {                                                                   \
+    bool ret = false;                                                 \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+                                                                      \
+    if (*tmp == oldvalue)                                             \
+      {                                                               \
+        ret = true;                                                   \
+        *tmp = newvalue;                                              \
+      }                                                               \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
+
+#define SYNC_VAL_CMP_SWAP(fn, n, type)                                \
+                                                                      \
+  type weak_function CONCATENATE(fn, n)(FAR volatile void *ptr,       \
+                                        type oldvalue,                \
+                                        type newvalue)                \
+  {                                                                   \
+    irqstate_t irqstate = atomic_lock();                              \
+    FAR type *tmp = (FAR type *)ptr;                                  \
+    type ret = *tmp;                                                  \
+                                                                      \
+    if (*tmp == oldvalue)                                             \
+      {                                                               \
+        *tmp = newvalue;                                              \
+      }                                                               \
+                                                                      \
+    atomic_unlock(irqstate);                                          \
+    return ret;                                                       \
+  }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: __atomic_store_1
+ * Name: __atomic_*_{1,2,4,8}
  ****************************************************************************/
 
-STORE(__atomic_store_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_store_2
- ****************************************************************************/
-
-STORE(__atomic_store_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_store_4
- ****************************************************************************/
-
-STORE(__atomic_store_, 4, uint32_t)
-STORE(atomic_store_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_load_1
- ****************************************************************************/
-
-LOAD(__atomic_load_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_load_2
- ****************************************************************************/
-
-LOAD(__atomic_load_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_load_4
- ****************************************************************************/
-
-LOAD(__atomic_load_, 4, uint32_t)
-LOAD(atomic_load_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_exchange_1
- ****************************************************************************/
-
-EXCHANGE(__atomic_exchange_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_exchange_2
- ****************************************************************************/
-
-EXCHANGE(__atomic_exchange_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_exchange_4
- ****************************************************************************/
-
-EXCHANGE(__atomic_exchange_, 4, uint32_t)
-EXCHANGE(atomic_exchange_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_compare_exchange_1
- ****************************************************************************/
-
-CMP_EXCHANGE(__atomic_compare_exchange_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_compare_exchange_2
- ****************************************************************************/
-
-CMP_EXCHANGE(__atomic_compare_exchange_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_compare_exchange_4
- ****************************************************************************/
-
-CMP_EXCHANGE(__atomic_compare_exchange_, 4, uint32_t)
-CMP_EXCHANGE(atomic_compare_exchange_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_flag_test_and_set_1
- ****************************************************************************/
-
-FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_flag_test_and_set_2
- ****************************************************************************/
-
-FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_flag_test_and_set_4
- ****************************************************************************/
-
-FLAG_TEST_AND_SET(__atomic_flags_test_and_set_, 4, uint32_t)
-FLAG_TEST_AND_SET(atomic_flags_test_and_set_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_add_1
- ****************************************************************************/
-
-FETCH_ADD(__atomic_fetch_add_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_add_2
- ****************************************************************************/
-
-FETCH_ADD(__atomic_fetch_add_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_add_4
- ****************************************************************************/
-
-FETCH_ADD(__atomic_fetch_add_, 4, uint32_t)
-FETCH_ADD(atomic_fetch_add_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_sub_1
- ****************************************************************************/
-
-FETCH_SUB(__atomic_fetch_sub_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_sub_2
- ****************************************************************************/
-
-FETCH_SUB(__atomic_fetch_sub_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_sub_4
- ****************************************************************************/
-
-FETCH_SUB(__atomic_fetch_sub_, 4, uint32_t)
-FETCH_SUB(atomic_fetch_sub_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_and_1
- ****************************************************************************/
-
-FETCH_AND(__atomic_fetch_and_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_and_2
- ****************************************************************************/
-
-FETCH_AND(__atomic_fetch_and_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_and_4
- ****************************************************************************/
-
-FETCH_AND(__atomic_fetch_and_, 4, uint32_t)
-FETCH_AND(atomic_fetch_and_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_or_1
- ****************************************************************************/
-
-FETCH_OR(__atomic_fetch_or_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_or_2
- ****************************************************************************/
-
-FETCH_OR(__atomic_fetch_or_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_or_4
- ****************************************************************************/
-
-FETCH_OR(__atomic_fetch_or_, 4, uint32_t)
-FETCH_OR(atomic_fetch_or_, 4, int32_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_xor_1
- ****************************************************************************/
-
-FETCH_XOR(__atomic_fetch_xor_, 1, uint8_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_xor_2
- ****************************************************************************/
-
-FETCH_XOR(__atomic_fetch_xor_, 2, uint16_t)
-
-/****************************************************************************
- * Name: __atomic_fetch_xor_4
- ****************************************************************************/
-
-FETCH_XOR(__atomic_fetch_xor_, 4, uint32_t)
-FETCH_XOR(atomic_fetch_xor_, 4, int32_t)
+ARCH_ATOMIC_DEFINE(__atomic, uint8_t, 1)
+ARCH_ATOMIC_DEFINE(__atomic, uint16_t, 2)
+ARCH_ATOMIC_DEFINE(__atomic, uint32_t, 4)
+ARCH_ATOMIC_DEFINE(__atomic, uint64_t, 8)
 
 /* Clang define the __sync builtins, add #ifndef to avoid
  * redefined/redeclared problem.
@@ -299,6 +208,12 @@ SYNC_ADD_FETCH(__sync_add_and_fetch_, 2, uint16_t)
 SYNC_ADD_FETCH(__sync_add_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
+ * Name: __sync_add_and_fetch_8
+ ****************************************************************************/
+
+SYNC_ADD_FETCH(__sync_add_and_fetch_, 8, uint64_t)
+
+/****************************************************************************
  * Name: __sync_sub_and_fetch_1
  ****************************************************************************/
 
@@ -315,6 +230,12 @@ SYNC_SUB_FETCH(__sync_sub_and_fetch_, 2, uint16_t)
  ****************************************************************************/
 
 SYNC_SUB_FETCH(__sync_sub_and_fetch_, 4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_sub_and_fetch_8
+ ****************************************************************************/
+
+SYNC_SUB_FETCH(__sync_sub_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_or_and_fetch_1
@@ -335,6 +256,12 @@ SYNC_OR_FETCH(__sync_or_and_fetch_, 2, uint16_t)
 SYNC_OR_FETCH(__sync_or_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
+ * Name: __sync_or_and_fetch_8
+ ****************************************************************************/
+
+SYNC_OR_FETCH(__sync_or_and_fetch_, 8, uint64_t)
+
+/****************************************************************************
  * Name: __sync_and_and_fetch_1
  ****************************************************************************/
 
@@ -351,6 +278,12 @@ SYNC_AND_FETCH(__sync_and_and_fetch_, 2, uint16_t)
  ****************************************************************************/
 
 SYNC_AND_FETCH(__sync_and_and_fetch_, 4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_and_and_fetch_8
+ ****************************************************************************/
+
+SYNC_AND_FETCH(__sync_and_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_xor_and_fetch_1
@@ -371,6 +304,12 @@ SYNC_XOR_FETCH(__sync_xor_and_fetch_, 2, uint16_t)
 SYNC_XOR_FETCH(__sync_xor_and_fetch_, 4, uint32_t)
 
 /****************************************************************************
+ * Name: __sync_xor_and_fetch_8
+ ****************************************************************************/
+
+SYNC_XOR_FETCH(__sync_xor_and_fetch_, 8, uint64_t)
+
+/****************************************************************************
  * Name: __sync_nand_and_fetch_1
  ****************************************************************************/
 
@@ -387,6 +326,12 @@ SYNC_NAND_FETCH(__sync_nand_and_fetch_, 2, uint16_t)
  ****************************************************************************/
 
 SYNC_NAND_FETCH(__sync_nand_and_fetch_, 4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_nand_and_fetch_8
+ ****************************************************************************/
+
+SYNC_NAND_FETCH(__sync_nand_and_fetch_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_bool_compare_and_swap_1
@@ -407,6 +352,12 @@ SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 2, uint16_t)
 SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 4, uint32_t)
 
 /****************************************************************************
+ * Name: __sync_bool_compare_and_swap_8
+ ****************************************************************************/
+
+SYNC_BOOL_CMP_SWAP(__sync_bool_compare_and_swap_, 8, uint64_t)
+
+/****************************************************************************
  * Name: __sync_val_compare_and_swap_1
  ****************************************************************************/
 
@@ -423,6 +374,12 @@ SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 2, uint16_t)
  ****************************************************************************/
 
 SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 4, uint32_t)
+
+/****************************************************************************
+ * Name: __sync_val_compare_and_swap_8
+ ****************************************************************************/
+
+SYNC_VAL_CMP_SWAP(__sync_val_compare_and_swap_, 8, uint64_t)
 
 /****************************************************************************
  * Name: __sync_synchronize
