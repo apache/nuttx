@@ -589,9 +589,10 @@ ssize_t pkt_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_TIMESTAMP
   if (flags & MSG_ERRQUEUE)
     {
-      if (!IOB_QEMPTY(&conn->errahead))
+      if (!IOB_QEMPTY(&conn->sconn.s_errahead))
         {
-          ret = pkt_readdata(&state, &conn->errahead, append_timestamping);
+          ret = pkt_readdata(&state, &conn->sconn.s_errahead,
+                             append_timestamping);
         }
       else
         {
