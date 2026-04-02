@@ -431,6 +431,25 @@ static uint32_t udp_eventhandler(FAR struct net_driver_s *dev,
           udp_terminate(pstate, -ENETUNREACH);
         }
 
+#ifdef CONFIG_NET_TIMESTAMP
+      /* TX timestamp loopback packet: io_conn was set on the send
+       * path.  Data is already in s_errahead (queued by udp_input).
+       * Wake up MSG_ERRQUEUE waiter if present, otherwise ignore.
+       * Must be checked before normal UDP_NEWDATA handling.
+       */
+
+      else if ((flags & UDP_NEWDATA) != 0 &&
+               dev->d_iob->io_conn != NULL)
+        {
+          /* TX timestamp loopback packet: io_conn was set on the send
+           * path.  Blocking recvfrom does not handle MSG_ERRQUEUE,
+           * return -EAGAIN so the caller can retry.
+           */
+
+          udp_terminate(pstate, -EAGAIN);
+        }
+#endif
+
       /* If new data is available, then complete the read action. */
 
       else if ((flags & UDP_NEWDATA) != 0)
@@ -671,6 +690,43 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
 
   conn_dev_lock(&conn->sconn, dev);
 
+#ifdef CONFIG_NET_TIMESTAMP
+  if (flags & MSG_ERRQUEUE)
+    {
+      if (!IOB_QEMPTY(&conn->sconn.s_errahead))
+        {
+          FAR struct iob_s *iob;
+          struct timespec ts[3];
+
+          iob = iob_remove_queue(&conn->sconn.s_errahead);
+          DEBUGASSERT(iob != NULL);
+
+          state.ir_recvlen = iob_copyout(msg->msg_iov->iov_base, iob,
+                                         msg->msg_iov->iov_len, 0);
+
+          memset(&ts, 0, sizeof(ts));
+          ts[0].tv_sec  = iob->io_time.tv_sec;
+          ts[0].tv_nsec = iob->io_time.tv_nsec;
+          ts[2].tv_sec  = iob->io_time.tv_sec;
+          ts[2].tv_nsec = iob->io_time.tv_nsec;
+
+          cmsg_append(msg, SOL_SOCKET, SO_TIMESTAMPING, &ts, sizeof(ts));
+          msg->msg_flags |= MSG_ERRQUEUE;
+
+          iob_free_chain(iob);
+          ret = state.ir_recvlen;
+        }
+      else
+        {
+          /* MSG_ERRQUEUE only supports non-blocking mode */
+
+          ret = -EAGAIN;
+        }
+
+      goto errout_with_state;
+    }
+#endif
+
   /* Copy the read-ahead data from the packet */
 
   udp_readahead(&state);
@@ -756,6 +812,9 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
+#ifdef CONFIG_NET_TIMESTAMP
+errout_with_state:
+#endif
   conn_dev_unlock(&conn->sconn, dev);
   udp_notify_recvcpu(conn);
 

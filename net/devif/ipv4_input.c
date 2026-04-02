@@ -232,22 +232,39 @@ static int ipv4_in(FAR struct net_driver_s *dev)
   bool isfrag;
   int ret = OK;
 
-  /* Storing reception timestamp provided by realtime
-   * if timestamp no provided by hardware.
+  /* This is where the input processing starts.
+   *
+   * Get the size of the packet minus the size of link layer header,
+   * and make sure that all packet processing logic knows that there
+   * is an IPv4 packet in the device buffer.
    */
 
+  dev->d_len -= NET_LL_HDRLEN(dev);
+  IFF_SET_IPv4(dev->d_flags);
+
 #ifdef CONFIG_NET_TIMESTAMP
+#ifdef NET_UDP_HAVE_STACK
+  if (dev->d_iob->io_conn != NULL)
+    {
+      /* This is a TX timestamp clone looped back by the driver.
+       * Skip all validation (dest IP, checksum, etc.) and deliver
+       * it to the originating socket's error queue directly.
+       */
+
+      udp_ipv4_input(dev);
+      goto drop;
+    }
+#endif
+
   if ((dev->d_features & NETDEV_RX_STAMP) == 0)
     {
       clock_gettime(CLOCK_REALTIME, &dev->d_iob->io_time);
     }
-#endif /* CONFIG_NET_TIMESTAMP */
+#endif
 
   /* Handle ARP on input then give the IPv4 packet to the network layer */
 
   arp_ipin(dev);
-
-  /* This is where the input processing starts. */
 
 #ifdef CONFIG_NET_STATISTICS
   g_netstats.ipv4.recv++;
@@ -275,21 +292,11 @@ static int ipv4_in(FAR struct net_driver_s *dev)
       goto drop;
     }
 
-  /* Get the size of the packet minus the size of link layer header */
-
-  dev->d_len -= NET_LL_HDRLEN(dev);
-
   if (((ipv4->vhl & IPv4_HLMASK) << 2) > dev->d_len)
     {
       nwarn("WARNING: Packet shorter than IPv4 header\n");
       goto drop;
     }
-
-  /* Make sure that all packet processing logic knows that there is an IPv4
-   * packet in the device buffer.
-   */
-
-  IFF_SET_IPv4(dev->d_flags);
 
   /* Check the size of the packet.  If the size reported to us in d_len is
    * smaller the size reported in the IP header, we assume that the packet

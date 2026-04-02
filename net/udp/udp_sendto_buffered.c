@@ -466,6 +466,13 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       netdev_iob_replace(dev, wrb->wb_iob);
 
+#ifdef CONFIG_NET_TIMESTAMP
+      if (_SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPING))
+        {
+          dev->d_iob->io_conn = &conn->sconn;
+        }
+#endif
+
       /* Get the amount of data that we can send in the next packet.
        * We will send either the remaining data in the buffer I/O
        * buffer chain, or as much as will fit given the MSS and current

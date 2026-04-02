@@ -304,7 +304,11 @@ uint32_t udp_callback(FAR struct net_driver_s *dev,
       conn_lock(&conn->sconn);
       flags = devif_conn_event(dev, flags, conn->sconn.s_list);
 
-      if ((flags & UDP_NEWDATA) != 0)
+      if ((flags & UDP_NEWDATA) != 0
+#ifdef CONFIG_NET_TIMESTAMP
+          && dev->d_iob->io_conn == NULL
+#endif
+         )
         {
           /* Data was not handled.. dispose of it appropriately */
 
