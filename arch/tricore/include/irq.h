@@ -185,14 +185,6 @@ struct xcptcontext
 };
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* g_interrupt_context store irq status */
-
-extern volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -266,24 +258,6 @@ void up_irq_restore(irqstate_t flags)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_set_interrupt_context
- *
- * Description:
- *   Set the interrupt handler context.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline_function void up_set_interrupt_context(bool flag)
-{
-#ifdef CONFIG_SMP
-  g_interrupt_context[up_this_cpu()] = flag;
-#else
-  g_interrupt_context[0] = flag;
-#endif
-}
-
-/****************************************************************************
  * Name: up_interrupt_context
  *
  * Description:
@@ -295,16 +269,7 @@ static inline_function void up_set_interrupt_context(bool flag)
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  bool ret = g_interrupt_context[up_this_cpu()];
-
-  up_irq_restore(flags);
-
-  return ret;
-#else
-  return g_interrupt_context[0];
-#endif
+  return (tricore_mfcr(TRICORE_CPU_PSW) & PSW_IS) != 0;
 }
 
 /****************************************************************************

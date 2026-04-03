@@ -395,8 +395,6 @@ void tricore_trapcall(volatile void *trap)
   was_interrupt_context = up_interrupt_context();
   if (!was_interrupt_context)
     {
-      up_set_interrupt_context(true);
-
       /* Update the current task's regs */
 
       g_running_tasks[this_cpu()]->xcp.regs = regs;
@@ -405,7 +403,6 @@ void tricore_trapcall(volatile void *trap)
   if (tclass == IfxCpu_Trap_Class_nonMaskableInterrupt)
     {
       tricore_nmitrap(tid, regs, NULL);
-      up_set_interrupt_context(false);
       __jumpBackToLink();
     }
 
@@ -441,8 +438,6 @@ void tricore_trapcall(volatile void *trap)
 
           if (!was_interrupt_context)
             {
-              up_set_interrupt_context(false);
-
               /* g_running_tasks[]->xcp.regs is about to become invalid
                * and will be marked as NULL to avoid misusage.
                */
