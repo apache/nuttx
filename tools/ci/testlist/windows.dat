@@ -16,6 +16,8 @@
 
 /risc-v/qemu-rv/rv-virt/configs/nsh
 
+/risc-v/esp32c3/esp32-c3-zero/configs/nsh
+
 # The simulator currently builds only with Visual Studio 2022
 
 /sim/sim/sim/configs/windows
@@ -26,4 +28,5 @@ CMake,nucleo-l152re:nsh
 CMake,nucleo-f411re:nsh
 CMake,raspberrypi-pico:nsh
 CMake,rv-virt:nsh
+CMake,esp32-c3-zero:nsh
 CMake,sim:windows

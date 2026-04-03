@@ -139,7 +139,6 @@ function arm_gcc_toolchain() {
 
 function arm64_gcc_toolchain() {
   Write-Host "Check ARM64 GCC toolchain toolchain ..." -ForegroundColor Green
-
   try {
     if (run_command("aarch64-none-elf-gcc") -ne 0) {
       add_path "$NUTTXTOOLS\gcc-aarch64-none-elf\bin"
@@ -167,7 +166,7 @@ function cmake_tool {
   if (run_command("cmake") -ne 0) {
     add_path "$NUTTXTOOLS\cmake\bin"
     if ($null -eq (Get-Command cmake -ErrorAction SilentlyContinue)) {
-      Write-Host "Download: Ninja package" -ForegroundColor Green
+      Write-Host "Download: Cmake package" -ForegroundColor Green
       # Download the file
       $basefile = "cmake-3.31.6-windows-x86_64"
       Set-Location "$NUTTXTOOLS"
@@ -179,6 +178,25 @@ function cmake_tool {
     }
   }
   cmake --version
+}
+
+function esp_tool {
+  Write-Host "Check esptool ..." -ForegroundColor Green
+  if (run_command("esptool") -ne 0) {
+    add_path "$NUTTXTOOLS\esptool"
+    if ($null -eq (Get-Command esptool -ErrorAction SilentlyContinue)) {
+      Write-Host "Download: esptool package" -ForegroundColor Green
+      # Download the file
+      $basefile = "esptool-v5.2.0-windows-amd64"
+      Set-Location "$NUTTXTOOLS"
+      # Download tool esptool
+      Invoke-WebRequest -Uri "https://github.com/espressif/esptool/releases/download/v5.2.0/$basefile.zip" -OutFile "$NUTTXTOOLS\$basefile.zip" -ErrorAction Stop
+      Expand-Archive "$NUTTXTOOLS\$basefile.zip"
+      Move-Item -Path "$basefile\esptool-windows-amd64" -Destination "esptool"
+      Remove-Item "$basefile*" -Force
+    }
+  }
+  esptool version
 }
 
 function kconfig_frontends() {
@@ -337,7 +355,7 @@ function install_build_tools {
   if (-not (Test-Path -Path "$NUTTXTOOLS\env.ps1")) {
     add_envpath "$NUTTXTOOLS\env.ps1"
   }
-  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain pico_sdk pico_tool cmake_tool kconfig_frontends ninja_tool"
+  $install = "arm_clang_toolchain arm_gcc_toolchain arm64_gcc_toolchain riscv_gcc_toolchain pico_sdk pico_tool cmake_tool esp_tool kconfig_frontends ninja_tool"
 
   $splitArray = $install.Split(" ")
   $oldpath = Get-Location

@@ -423,6 +423,7 @@ function dotest {
   if ($NINJACMAKE -eq 1) {
     foreach ($l in $cmakelist) {
       if ("Cmake," + $config -replace '\\', ':' -eq "$l") {
+        Write-Host "Cmake in present: $config" -ForegroundColor Yellow
         $cmake = 1
       }
     }
