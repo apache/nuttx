@@ -1062,27 +1062,17 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
 #endif
 
   cookie->result = header->result;
-#if CONFIG_RPMSG_POOL_COUNT > 0
   if (cookie->result > 0)
     {
+#if CONFIG_RPMSG_POOL_COUNT > 0
       rpmsg_hold_rx_buffer(ept, data);
       cookie->data = data;
+#else
+      memcpy(cookie->data, rsp->buf, cookie->result);
+#endif
     }
 
   rpmsg_post(ept, &cookie->sem);
-#else
-  if (cookie->result > 0)
-    {
-      memcpy(cookie->data, rsp->buf, cookie->result);
-      cookie->data += cookie->result;
-    }
-
-  if (cookie->result <= 0 || cookie->result >= rsp->count)
-    {
-      rpmsg_post(ept, &cookie->sem);
-    }
-#endif
-
   return 0;
 }
 
