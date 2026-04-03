@@ -49,6 +49,7 @@ struct rpmsgfs_s
   struct rpmsg_endpoint ept;
   char                  cpuname[RPMSG_NAME_SIZE];
   sem_t                 wait;
+  bool                  connected;
 };
 
 struct rpmsgfs_cookie_s
@@ -291,9 +292,10 @@ static FAR void *rpmsgfs_get_tx_payload_buffer(FAR struct rpmsgfs_s *priv,
   return rpmsg_get_tx_payload_buffer(&priv->ept, len, true);
 }
 
-static void rpmsgfs_ns_bound(struct rpmsg_endpoint *ept)
+static void rpmsgfs_set_connected(struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsgfs_s *priv = ept->priv;
+  priv->connected = true;
   rpmsg_post(&priv->ept, &priv->wait);
 }
 
@@ -306,7 +308,7 @@ static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
       priv->ept.priv = priv;
-      priv->ept.ns_bound_cb = rpmsgfs_ns_bound;
+      priv->ept.ns_bound_cb = rpmsgfs_set_connected;
       snprintf(buf, sizeof(buf), "%s%p", RPMSGFS_NAME_PREFIX, priv);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
@@ -329,8 +331,14 @@ static int rpmsgfs_ept_cb(FAR struct rpmsg_endpoint *ept,
                           FAR void *data, size_t len, uint32_t src,
                           FAR void *priv)
 {
+  FAR struct rpmsgfs_s *ept_priv = ept->priv;
   FAR struct rpmsgfs_header_s *header = data;
   uint32_t command = header->command;
+
+  if (!ept_priv->connected)
+    {
+      rpmsgfs_set_connected(ept);
+    }
 
   if (command < nitems(g_rpmsgfs_handler))
     {
@@ -752,6 +760,7 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
       return -ENOMEM;
     }
 
+  priv->connected = false;
   nxsem_init(&priv->wait, 0, 0);
   strlcpy(priv->cpuname, cpuname, sizeof(priv->cpuname));
   ret = rpmsg_register_callback(priv,
