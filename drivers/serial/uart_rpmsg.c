@@ -185,13 +185,31 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
   FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
   FAR struct uart_rpmsg_write_s *msg;
-  size_t len = xfer->length + xfer->nlength;
+  size_t len;
   uint32_t space;
 
+  /* Release the lock before waiting for TX buffer to avoid recursive
+   * locking when rpmsg_tickwait dispatches RX work on the same thread.
+   */
+
+  nxmutex_unlock(&priv->lock);
+
   msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+
+  nxmutex_lock(&priv->lock);
+
   if (!msg)
     {
       dev->dmatx.length = 0;
+      return;
+    }
+
+  /* Re-read xfer after re-acquiring the lock, state may have changed */
+
+  len = xfer->length + xfer->nlength;
+  if (len == 0)
+    {
+      rpmsg_release_tx_buffer(&priv->ept, msg);
       return;
     }
 
