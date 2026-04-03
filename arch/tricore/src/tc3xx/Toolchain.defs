@@ -31,6 +31,7 @@ ifeq ($(CONFIG_ARCH_CHIP_TC39X),y)
 
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/iLLD/TC3xx/Tricore/Cpu/Std
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Platform
+  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Sfr/TC39xB
   ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Configurations
 endif
 
