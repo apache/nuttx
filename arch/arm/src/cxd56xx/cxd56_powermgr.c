@@ -34,7 +34,7 @@
 #include <nuttx/queue.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <sched.h>
 #include <fcntl.h>

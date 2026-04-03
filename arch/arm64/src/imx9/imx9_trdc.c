@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 

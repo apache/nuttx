@@ -32,7 +32,7 @@
 
 #include <nuttx/power/pm.h>
 #include <nuttx/spinlock.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/arch.h>
 
 #include "riscv_internal.h"

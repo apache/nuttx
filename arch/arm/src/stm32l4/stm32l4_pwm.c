@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/timers/pwm.h>
@@ -65,7 +65,7 @@
 #define TIMTYPE_GENERAL16    1  /* General 16-bit timers: TIM3,4 */
 #define TIMTYPE_COUNTUP16    2  /* General 16-bit count-up timers: TIM15-17 */
 #define TIMTYPE_COUNTUP16_N  3  /* General 16-bit count-up timers with
-                                 * complementary outptus
+                                 * complementary outputs
                                  */
 #define TIMTYPE_GENERAL32    4  /* General 32-bit timers: TIM2,5 */
 #define TIMTYPE_ADVANCED     5  /* Advanced timers:  TIM1,8 */

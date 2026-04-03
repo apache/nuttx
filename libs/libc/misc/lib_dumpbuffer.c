@@ -28,7 +28,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Public Functions

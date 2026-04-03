@@ -28,7 +28,7 @@
 
 #include <stdbool.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/bmp280.h>

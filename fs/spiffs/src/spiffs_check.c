@@ -64,7 +64,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "spiffs.h"
 #include "spiffs_core.h"

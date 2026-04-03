@@ -24,7 +24,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <assert.h>

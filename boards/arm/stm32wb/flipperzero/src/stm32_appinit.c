@@ -30,7 +30,7 @@
 #include <sys/mount.h>
 #include <stdio.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

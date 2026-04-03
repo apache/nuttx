@@ -30,7 +30,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "sam_gclk.h"

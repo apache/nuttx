@@ -32,7 +32,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/fs/fs.h>
 #ifdef CONFIG_MTD_AM29LV
 #  include <nuttx/mtd/mtd.h>

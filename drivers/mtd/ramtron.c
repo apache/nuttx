@@ -48,7 +48,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 
 #include <nuttx/kmalloc.h>
@@ -522,8 +522,8 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
     }
 
   memory   = SPI_SEND(priv->dev, RAMTRON_DUMMY);
-  capacity = SPI_SEND(priv->dev, RAMTRON_DUMMY);  /* fram.id1 */
-  part     = SPI_SEND(priv->dev, RAMTRON_DUMMY);  /* fram.id2 */
+  capacity = SPI_SEND(priv->dev, RAMTRON_DUMMY);  /* FRAM ID1 */
+  part     = SPI_SEND(priv->dev, RAMTRON_DUMMY);  /* FRAM ID2 */
 
   /* Deselect the FLASH and unlock the bus */
 

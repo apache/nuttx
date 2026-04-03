@@ -504,7 +504,7 @@ NOTES:
       for this.
 
     - /dev/console still exists and still refers to the serial port. So
-      you can still use certain kinds of debug output (see include/debug.h, all
+      you can still use certain kinds of debug output (see include/nuttx/debug.h, all
       debug output from interrupt handlers will be lost.
 
     - But don't enable USB debug output!  Since USB is console is used for

@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "pic32mz_timer.h"
 

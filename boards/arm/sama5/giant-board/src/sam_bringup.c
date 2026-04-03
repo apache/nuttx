@@ -29,7 +29,7 @@
 #include <sys/mount.h>
 #include <stdlib.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <nuttx/fs/fs.h>

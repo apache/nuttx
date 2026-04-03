@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/types.h>
 #include <nuttx/list.h>
 #include <nuttx/kmalloc.h>

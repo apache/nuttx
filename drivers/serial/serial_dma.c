@@ -29,7 +29,8 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <stdint.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/signal.h>
 
 #include <nuttx/serial/serial.h>

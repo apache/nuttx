@@ -29,7 +29,7 @@
 #include <sys/ioctl.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <inttypes.h>
 #include <string.h>

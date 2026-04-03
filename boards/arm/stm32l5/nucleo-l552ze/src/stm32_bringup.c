@@ -28,7 +28,7 @@
 
 #include <sys/mount.h>
 #include <sys/types.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/input/buttons.h>
 #include <nuttx/leds/userled.h>

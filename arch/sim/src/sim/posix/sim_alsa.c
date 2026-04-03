@@ -30,7 +30,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/wqueue.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/param.h>
 
 #include <alsa/asoundlib.h>

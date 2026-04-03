@@ -28,7 +28,7 @@
 
 #include <stdbool.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mmcsd.h>
 #include <nuttx/spi/spi.h>

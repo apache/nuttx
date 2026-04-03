@@ -29,7 +29,7 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/wdog.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 #include <unistd.h>
 

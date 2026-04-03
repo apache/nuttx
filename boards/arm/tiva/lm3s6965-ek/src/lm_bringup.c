@@ -30,7 +30,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>

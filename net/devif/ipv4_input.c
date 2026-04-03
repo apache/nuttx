@@ -84,7 +84,7 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <netinet/in.h>

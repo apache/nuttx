@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <fcntl.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 #include <sys/ioctl.h>
 

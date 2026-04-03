@@ -33,7 +33,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>

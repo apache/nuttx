@@ -28,7 +28,7 @@
 #include <nuttx/lib/math32.h>
 #include <nuttx/kmalloc.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "internal.h"
 

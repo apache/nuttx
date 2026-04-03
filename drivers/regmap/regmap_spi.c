@@ -29,7 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spi/spi.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "internal.h"
 

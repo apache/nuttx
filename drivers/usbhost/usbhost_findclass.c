@@ -29,8 +29,8 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>

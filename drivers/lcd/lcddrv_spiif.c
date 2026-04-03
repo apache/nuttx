@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <nuttx/kmalloc.h>

@@ -31,7 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/wqueue.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "irq/irq.h"
 #include "sched/sched.h"

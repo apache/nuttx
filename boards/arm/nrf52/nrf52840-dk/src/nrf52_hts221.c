@@ -28,7 +28,7 @@
 #include <nuttx/arch.h>
 
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include "nrf52_i2c.h"

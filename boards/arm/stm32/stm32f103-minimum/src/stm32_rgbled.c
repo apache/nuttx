@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/timers/pwm.h>
 #include <nuttx/leds/rgbled.h>

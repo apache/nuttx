@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "z16_internal.h"
 

@@ -28,7 +28,8 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/timers/arch_timer.h>
 #include <arch/board/board.h>

@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/wdog.h>

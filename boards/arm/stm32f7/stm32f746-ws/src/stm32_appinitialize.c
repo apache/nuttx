@@ -26,7 +26,8 @@
 
 #include <nuttx/config.h>
 #include <syslog.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/leds/userled.h>
 

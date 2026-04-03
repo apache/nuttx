@@ -28,7 +28,7 @@
 #include <sys/param.h>
 
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/coredump.h>
 #include <nuttx/elf.h>

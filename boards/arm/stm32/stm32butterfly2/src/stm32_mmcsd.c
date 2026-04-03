@@ -30,7 +30,7 @@
 #include <sched.h>
 #include <time.h>
 #include <unistd.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mmcsd.h>
 #include <nuttx/signal.h>

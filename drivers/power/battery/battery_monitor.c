@@ -31,7 +31,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <poll.h>
 #include <fcntl.h>
 

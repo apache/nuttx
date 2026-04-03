@@ -28,7 +28,8 @@
 
 #include <sched.h>
 #include <assert.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 

@@ -25,8 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
-#include <debug.h>
 
 #include <arch/board/board.h>
 #include <arch/chip/audio.h>

@@ -27,8 +27,8 @@
 #include <nuttx/config.h>
 
 #include <sched.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>

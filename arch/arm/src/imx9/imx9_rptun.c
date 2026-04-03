@@ -31,7 +31,7 @@
 #include "imx9_rsctable.h"
 #include "hardware/imx9_rptun.h"
 #include "hardware/imx9_rsctable.h"
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <nuttx/config.h>
 #include <nuttx/kthread.h>
 #include <nuttx/nuttx.h>

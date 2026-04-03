@@ -34,7 +34,7 @@
 #include <time.h>
 #include <string.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arpa/inet.h>
 #include <net/ethernet.h>
@@ -260,7 +260,7 @@
 #define MD_PHY_LSB_REG        0x03
 #define MD_PHY_CTRL_STAT_REG  0x17
 
-/*  Lucent LU3X31T-T64 transeiver ID */
+/*  Lucent LU3X31T-T64 transceiver ID */
 
 #define LU3X31_T64_PHYID      0x00437421
 
@@ -446,8 +446,8 @@ static inline void c5471_dumpbuffer(const char *msg, const uint8_t *buffer,
  *
  * Description:
  *   A helper routine used when serially communicating with the c547X's
- *   external ethernet transeiver device. GPIO pins are connected to the
- *   transeiver's MDCLK and MDIO pins and are used to accomplish the serial
+ *   external ethernet transceiver device. GPIO pins are connected to the
+ *   transceiver's MDCLK and MDIO pins and are used to accomplish the serial
  *   comm.
  *
  *   protocol:
@@ -513,8 +513,8 @@ static void c5471_mdtxbit (int bit_state)
  *
  * Description:
  *    A helper routine used when serially communicating with the c547X's
- *    external ethernet transeiver device. GPIO pins are connected to the
- *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
+ *    external ethernet transceiver device. GPIO pins are connected to the
+ *    transceiver's MDCLK and MDIO pins and are used to accomplish the serial
  *    comm.
  *
  *    protocol:
@@ -574,8 +574,8 @@ static int c5471_mdrxbit (void)
  *
  * Description:
  *    A helper routine used when serially communicating with the c547X's
- *    external ethernet transeiver device. GPIO pins are connected to the
- *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
+ *    external ethernet transceiver device. GPIO pins are connected to the
+ *    transceiver's MDCLK and MDIO pins and are used to accomplish the serial
  *    comm.
  *
  ****************************************************************************/
@@ -636,8 +636,8 @@ static void c5471_mdwrite (int adr, int reg, int data)
  *
  * Description:
  *    A helper routine used when serially communicating with the c547X's
- *    external ethernet transeiver device. GPIO pins are connected to the
- *    transeiver's MDCLK and MDIO pins and are used to accomplish the serial
+ *    external ethernet transceiver device. GPIO pins are connected to the
+ *    transceiver's MDCLK and MDIO pins and are used to accomplish the serial
  *    comm.
  *
  ****************************************************************************/
@@ -700,21 +700,21 @@ static int c5471_mdread (int adr, int reg)
  * Name: c5471_phyinit
  *
  * Description:
- *   The c547X EVM board uses a Lucent LU3X31T-T64 transeiver device to
+ *   The c547X EVM board uses a Lucent LU3X31T-T64 transceiver device to
  *   handle the physical layer (PHY). It's a h/w block that on the one end
  *   offers a Media Independent Interface (MII) which is connected to the
  *   Ethernet Interface Module (EIM) internal to the C547x and on the other
  *   end offers either the 10baseT or 100baseT electrical interface
- *   connecting to an RJ45 onboard network connector. The PHY transeiver has
+ *   connecting to an RJ45 onboard network connector. The PHY transceiver has
  *   several internal registers allowing host configuration and status
  *   access. These internal registers are accessible by clocking serial data
  *   in/out of the MDIO pin of the LU3X31T-T64 chip. For c547X, the MDC and
  *   the MDIO pins are connected to the C547x GPIO15 and GPIO14 pins
  *   respectively. Host software twiddles the GPIO pins appropriately to get
  *   data serially into and out of the chip. This is typically a one time
- *   operation at boot and normal operation of the transeiver involves
- *   EIM/Transeiver interaction at the other pins of the transeiver chip and
- *   doesn't require host intervention at the MDC and MDIO pins.
+ *   operation at boot and normal operation of the transceiver involves
+ *   EIM/Transceiver interaction at the other pins of the transceiver chip
+ *   and doesn't require host intervention at the MDC and MDIO pins.
  *
  ****************************************************************************/
 
@@ -724,7 +724,7 @@ static int c5471_phyinit (void)
   int phyid;
   int status;
 
-  /* Next, Setup GPIO pins to talk serially to the Lucent transeiver chip */
+  /* Next, Setup GPIO pins to talk serially to the Lucent transceiver chip */
 
   /* enable gpio bits 15,14 */
 
@@ -786,7 +786,7 @@ static int c5471_phyinit (void)
   int phyid;
   int status;
 
-  /* Next, Setup GPIO pins to talk serially to the Lucent transeiver chip */
+  /* Next, Setup GPIO pins to talk serially to the Lucent transceiver chip */
 
   putreg32((getreg32(GPIO_EN)  |  0x0000c000), GPIO_EN);  /* enable gpio bits 15,14 */
   putreg32((getreg32(GPIO_CIO) & ~0x00008000), GPIO_CIO); /* config gpio(15); out -> MDCLK */

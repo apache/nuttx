@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdbool.h>
 
 #include <nuttx/kmalloc.h>

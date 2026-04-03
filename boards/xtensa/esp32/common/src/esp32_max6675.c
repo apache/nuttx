@@ -29,7 +29,7 @@
 #include <nuttx/sensors/max6675.h>
 #include <nuttx/spi/spi.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include "esp32_spi.h"
 
 #ifdef CONFIG_SENSORS_MAX6675

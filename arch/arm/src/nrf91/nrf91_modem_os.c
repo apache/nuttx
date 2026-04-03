@@ -35,7 +35,7 @@
 
 #include <nuttx/mm/mm.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -28,7 +28,7 @@
 
 #include <errno.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 
 #include <nuttx/sensors/ina219.h>

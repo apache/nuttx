@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <syslog.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/drivers/ramdisk.h>

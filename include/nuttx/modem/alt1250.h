@@ -33,7 +33,8 @@
 #include <nuttx/queue.h>
 #include <nuttx/mutex.h>
 #include <semaphore.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <pthread.h>
 

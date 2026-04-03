@@ -26,7 +26,7 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>

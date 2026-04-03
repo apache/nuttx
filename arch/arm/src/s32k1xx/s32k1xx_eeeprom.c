@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "hardware/s32k1xx_ftfc.h"
 #include "hardware/s32k1xx_sim.h"

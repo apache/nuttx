@@ -27,7 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stddef.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/nx/nxglib.h>
 #include "nxbe.h"

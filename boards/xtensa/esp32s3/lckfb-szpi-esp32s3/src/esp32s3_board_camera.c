@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <sys/ioctl.h>
 
 #include <nuttx/arch.h>

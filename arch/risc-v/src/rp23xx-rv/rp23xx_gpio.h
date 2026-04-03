@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "riscv_internal.h"
 #include "hardware/rp23xx_sio.h"

@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stddef.h>
 
 #ifdef CONFIG_ARCH_BOARD_COMMON

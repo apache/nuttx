@@ -28,7 +28,8 @@
 #include <nuttx/mm/mm.h>
 
 #include <sys/types.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/kmalloc.h>
 
 #include "hardware/esp32s2_soc.h"

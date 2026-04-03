@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <syslog.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>

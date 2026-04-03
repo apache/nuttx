@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/mutex.h>
 #include <nuttx/i2c/i2c_master.h>

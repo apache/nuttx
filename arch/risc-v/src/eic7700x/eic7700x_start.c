@@ -29,7 +29,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/serial/uart_16550.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <arch/board/board.h>
 #include <arch/board/board_memorymap.h>

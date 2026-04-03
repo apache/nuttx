@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>

@@ -25,7 +25,7 @@
  ****************************************************************************/
 
 #include <ctype.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <endian.h>
 #include <inttypes.h>
 #include <sys/param.h>

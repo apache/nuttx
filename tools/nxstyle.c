@@ -725,6 +725,16 @@ static const char *g_white_files[] =
 
   "phy62xx/phyplus_wdt.c",
 
+  /* Skip Mixed case in vendor PHY62XX BLE/GPIO/timer/startup files
+   * and LPC43 SPIFI library glue.
+   */
+
+  "phy62xx/phy62xx_ble.c",
+  "phy62xx/phyplus_gpio.c",
+  "phy62xx/phyplus_tim.c",
+  "phy62xx/start.c",
+  "lpc4370-link2/src/lpc43_spifilib_init.c",
+
   /* Skip infineon illd files
    * Ref:
    * arch/tricore/src/illd

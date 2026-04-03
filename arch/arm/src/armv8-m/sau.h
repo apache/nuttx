@@ -32,7 +32,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
-#  include <debug.h>
+#  include <nuttx/debug.h>
 #endif
 
 /****************************************************************************

@@ -28,7 +28,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <assert.h>
 #include <netinet/in.h>
 #include <sys/param.h>

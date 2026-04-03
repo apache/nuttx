@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 #include <syslog.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "arm_internal.h"
 #include "gic.h"

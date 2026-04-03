@@ -31,7 +31,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <mqueue.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <fcntl.h>
 
 #include <nuttx/irq.h>

@@ -28,7 +28,7 @@
 
 #ifdef CONFIG_NET_VLAN
 
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdint.h>
 #include <stdio.h>
 

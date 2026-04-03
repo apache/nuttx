@@ -28,7 +28,7 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/video/videomode.h>
 

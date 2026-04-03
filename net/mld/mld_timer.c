@@ -28,7 +28,7 @@
 #include <nuttx/compiler.h>
 
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>

@@ -25,7 +25,8 @@
  ****************************************************************************/
 
 #include <inttypes.h>
-#include <debug.h>
+
+#include <nuttx/debug.h>
 #include <nuttx/spi/spi.h>
 
 #include "stm32_butterfly2.h"

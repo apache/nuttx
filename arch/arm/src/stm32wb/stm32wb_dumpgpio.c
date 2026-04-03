@@ -32,8 +32,8 @@
 #define CONFIG_DEBUG_INFO 1
 
 #include <sys/types.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 
 #include "arm_internal.h"

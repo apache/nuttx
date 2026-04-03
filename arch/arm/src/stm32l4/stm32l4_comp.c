@@ -40,7 +40,7 @@
 
 #include <nuttx/config.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <string.h>
 
 #include <nuttx/analog/comp.h>

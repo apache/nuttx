@@ -29,7 +29,7 @@
 #include <nuttx/compiler.h>
 #include <arch/board/board.h>
 #include <arch/stm32/chip.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "stm32_gpio.h"
 #include "stm32f401rc-rs485.h"

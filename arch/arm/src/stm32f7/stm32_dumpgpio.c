@@ -28,8 +28,8 @@
 
 #include <sys/types.h>
 #include <assert.h>
-#include <debug.h>
 
+#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 

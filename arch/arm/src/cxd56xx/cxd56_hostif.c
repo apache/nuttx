@@ -36,7 +36,7 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <errno.h>
 
 #include <arch/chip/hostif.h>

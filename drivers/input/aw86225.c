@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <stdio.h>
 #include <time.h>
 

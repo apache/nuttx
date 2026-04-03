@@ -28,7 +28,7 @@
 #include <nuttx/kmalloc.h>
 
 #include <semaphore.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_system.h"

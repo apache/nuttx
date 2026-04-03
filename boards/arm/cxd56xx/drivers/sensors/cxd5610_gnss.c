@@ -33,7 +33,7 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
-#include <debug.h>
+#include <nuttx/debug.h>
 #include <poll.h>
 #include <spawn.h>
 #include <nuttx/kmalloc.h>
