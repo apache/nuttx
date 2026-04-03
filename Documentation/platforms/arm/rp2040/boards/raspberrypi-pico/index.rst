@@ -356,9 +356,58 @@ ST7735 SPI LCD.
    * - AO(D/C)
      - GP12 (SPI1 RX) (Pin 16)
    * - BL
-     - GP11 (Pin 15)
+     - GP11 (Pin 15) [1]
    * - RESET
      - GP10 (Pin 14)
+
+1: At least in my LCD module I don't need to connect any wire to the backlight pin (BLK) since it is enabled by default.
+
+After compiling and flashing the firmware in our board, run fb command.
+
+.. code:: console
+
+    NuttShell (NSH) NuttX-12.13.0                                                     
+    nsh> ?                                                                            
+    help usage:  help [-v] [<cmd>]                                                    
+        .           cp          exit        mkrd        rmdir       true              
+        [           cmp         expr        mount       set         truncate          
+        ?           dirname     false       mv          kill        uname             
+        alias       date        fdinfo      pidof       pkill       umount            
+        unalias     df          free        printf      sleep       unset             
+        basename    dmesg       help        ps          usleep      uptime            
+        break       echo        hexdump     pwd         source      watch             
+        cat         env         ls          reboot      test        xd                
+        cd          exec        mkdir       rm          time        wait              
+    Builtin Apps:                                                                     
+        dd          getprime    nsh         nxdemo      nxlines     sh                
+        fb          hello       nx          nxhello     ostest                        
+    nsh> fb
+    VideoInfo:
+          fmt: 11
+         xres: 128
+         yres: 160
+      nplanes: 1
+    PlaneInfo (plane 0):
+        fbmem: 0x20003bf0
+        fblen: 40960
+       stride: 256
+      display: 0
+          bpp: 16                                                                     
+    Mapped FB: 0x20003bf0                                                             
+     0: (  0,  0) (128,160)                                                           
+     1: ( 11, 14) (106,132)                                                           
+     2: ( 22, 28) ( 84,104)                                                           
+     3: ( 33, 42) ( 62, 76)                                                           
+     4: ( 44, 56) ( 40, 48)                                                           
+     5: ( 55, 70) ( 18, 20)                                                           
+    Test finished                                                                     
+    nsh>
+
+
+You should see this image:
+
+.. figure:: st7735.png
+   :align: center
 
 tmp112
 ------
