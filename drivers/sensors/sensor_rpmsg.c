@@ -1675,6 +1675,16 @@ static void sensor_rpmsg_ept_release(FAR struct rpmsg_endpoint *ept)
 
   up_write(&g_ept_lock);
 
+  work_cancel_sync(HPWORK, &sre->bound_work);
+  work_cancel_sync(HPWORK, &sre->work);
+  nxrmutex_lock(&sre->lock);
+  if (sre->buffer)
+    {
+      rpmsg_release_tx_buffer(&sre->ept, sre->buffer);
+      sre->buffer = NULL;
+    }
+
+  nxrmutex_unlock(&sre->lock);
   nxrmutex_destroy(&sre->lock);
   kmm_free(sre);
 }
