@@ -104,6 +104,46 @@ static int dns_check_nameserver(FAR void *arg, FAR struct sockaddr *addr,
   return OK;
 }
 
+#ifdef CONFIG_NETDB_RESOLVCONF
+static int dns_is_valid_nameserver(FAR const struct sockaddr *addr)
+{
+#ifdef CONFIG_NET_IPv4
+  if (addr->sa_family == AF_INET)
+    {
+      FAR const struct sockaddr_in *in4 =
+        (FAR const struct sockaddr_in *)addr;
+
+      if (net_ipv4addr_cmp(in4->sin_addr.s_addr, INADDR_ANY) ||
+          net_ipv4addr_cmp(in4->sin_addr.s_addr, INADDR_BROADCAST) ||
+          IN_MULTICAST(NTOHL(in4->sin_addr.s_addr)))
+        {
+          return -EINVAL;
+        }
+
+      return OK;
+    }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+  if (addr->sa_family == AF_INET6)
+    {
+      FAR const struct sockaddr_in6 *in6 =
+        (FAR const struct sockaddr_in6 *)addr;
+
+      if (IN6_IS_ADDR_UNSPECIFIED(&in6->sin6_addr) ||
+          IN6_IS_ADDR_MULTICAST(&in6->sin6_addr))
+        {
+          return -EINVAL;
+        }
+
+      return OK;
+    }
+#endif
+
+  return -ENOSYS;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -119,7 +159,7 @@ static int dns_check_nameserver(FAR void *arg, FAR struct sockaddr *addr,
 #ifdef CONFIG_NETDB_RESOLVCONF
 int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 {
-  FAR FILE *stream;
+  FAR FILE *stream = NULL;
   char addrstr[DNS_MAX_ADDRSTR];
   union dns_addr_u dns_addr;
   FAR uint16_t *pport;
@@ -131,17 +171,10 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #endif
   int ret;
 
-  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "a+");
-  if (stream == NULL)
+  if (addr == NULL)
     {
-      ret = -get_errno();
-      nerr("ERROR: Failed to open %s: %d\n",
-           CONFIG_NETDB_RESOLVCONF_PATH, ret);
-      DEBUGASSERT(ret < 0);
-      return ret;
+      return -EINVAL;
     }
-
-  dns_lock();
 
 #ifdef CONFIG_NET_IPv4
   /* Check for an IPv4 address */
@@ -150,12 +183,17 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
     {
       if (addrlen < sizeof(struct sockaddr_in))
         {
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
       else
         {
           FAR struct sockaddr_in *in4 = (FAR struct sockaddr_in *)addr;
+
+          ret = dns_is_valid_nameserver(addr);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           copylen = sizeof(struct sockaddr_in);
           pport   = &dns_addr.ipv4.sin_port;
@@ -165,7 +203,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
               ret = -get_errno();
               nerr("ERROR: inet_ntop failed: %d\n", ret);
               DEBUGASSERT(ret < 0);
-              goto errout;
+              return ret;
             }
         }
     }
@@ -179,12 +217,17 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
     {
       if (addrlen < sizeof(struct sockaddr_in6))
         {
-          ret = -EINVAL;
-          goto errout;
+          return -EINVAL;
         }
       else
         {
           FAR struct sockaddr_in6 *in6 = (FAR struct sockaddr_in6 *)addr;
+
+          ret = dns_is_valid_nameserver(addr);
+          if (ret < 0)
+            {
+              return ret;
+            }
 
           copylen = sizeof(struct sockaddr_in6);
           pport   = &dns_addr.ipv6.sin6_port;
@@ -194,7 +237,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
               ret = -get_errno();
               nerr("ERROR: inet_ntop failed: %d\n", ret);
               DEBUGASSERT(ret < 0);
-              goto errout;
+              return ret;
             }
         }
     }
@@ -202,9 +245,20 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #endif
     {
       nerr("ERROR: Unsupported family: %d\n", addr->sa_family);
-      ret = -ENOSYS;
-      goto errout;
+      return -ENOSYS;
     }
+
+  stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "a+");
+  if (stream == NULL)
+    {
+      ret = -get_errno();
+      nerr("ERROR: Failed to open %s: %d\n",
+           CONFIG_NETDB_RESOLVCONF_PATH, ret);
+      DEBUGASSERT(ret < 0);
+      return ret;
+    }
+
+  dns_lock();
 
   memcpy(&dns_addr.addr, addr, copylen);
 
@@ -227,9 +281,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
           ret = OK;
         }
 
-      dns_unlock();
-      fclose(stream);
-      return ret;
+      goto errout;
     }
 
 #if CONFIG_NETDB_DNSSERVER_NAMESERVERS > 1
@@ -246,6 +298,14 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 
   fclose(stream);
   stream = fopen(CONFIG_NETDB_RESOLVCONF_PATH, "w");
+  if (stream == NULL)
+    {
+      ret = -get_errno();
+      nerr("ERROR: Failed to open %s: %d\n",
+           CONFIG_NETDB_RESOLVCONF_PATH, ret);
+      DEBUGASSERT(ret < 0);
+      goto errout;
+    }
 
   /* Write the new record to the head of the resolv.conf file. */
 
