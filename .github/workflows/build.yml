@@ -451,8 +451,6 @@ jobs:
         run: |
           pip install kconfiglib
 
-      - run: git config --global core.autocrlf false
-
       - name: Download Source Artifact
         uses: actions/download-artifact@v8
         with:
@@ -467,6 +465,8 @@ jobs:
       - name: Run Builds
         run: |
           "ARTIFACTDIR=${{github.workspace}}\sources\buildartifacts" >> $env:GITHUB_ENV
+          git config --global core.autocrlf false
+          git config --global core.longpaths true
           git config --global --add safe.directory ${{github.workspace}}\sources\nuttx
           git config --global --add safe.directory ${{github.workspace}}\sources\apps
           cd sources\nuttx\tools\ci
