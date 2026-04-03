@@ -73,14 +73,6 @@ void tricore_doirq(void)
 
   board_autoled_on(LED_INIRQ);
 
-  /* Nested interrupts are not supported */
-
-  DEBUGASSERT(!up_interrupt_context());
-
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-
   /* Deliver the IRQ */
 
   tricore_ack_irq(irq);
@@ -116,10 +108,6 @@ void tricore_doirq(void)
       tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       UP_ISB();
     }
-
-  /* Set irq flag */
-
-  up_set_interrupt_context(false);
 
   /* running_task->xcp.regs is about to become invalid
    * and will be marked as NULL to avoid misusage.
