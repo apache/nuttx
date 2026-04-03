@@ -34,6 +34,9 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/mm/kmap.h>
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#include <nuttx/signal.h>
+#endif
 
 #include "sched/sched.h"
 #include "semaphore/semaphore.h"
@@ -71,6 +74,9 @@
 
 int nxsem_wait_slow(FAR sem_t *sem)
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  sigset_t pendingset;
+#endif
   FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int ret = OK;
@@ -86,6 +92,22 @@ int nxsem_wait_slow(FAR sem_t *sem)
   flags = enter_critical_section();
 
   /* Make sure we were supplied with a valid semaphore. */
+
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
+  /* A signal can arrive before sem_wait transitions the task to
+   * TSTATE_WAIT_SEM. In that window, the wait cannot yet be aborted by
+   * sem_wait_irq(). If sem_wait then blocks without re-checking unmasked
+   * pending signals, it can sleep indefinitely and miss the interrupt.
+   */
+
+  pendingset = nxsig_pendingset(rtcb);
+  nxsig_nandset(&pendingset, &pendingset, &rtcb->sigprocmask);
+  if (!sigisemptyset(&pendingset))
+    {
+      leave_critical_section(flags);
+      return -EINTR;
+    }
+#endif
 
   /* Check if the lock is available */
 
