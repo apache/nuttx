@@ -66,7 +66,7 @@ struct bmi270_sensor_s
 {
   struct sensor_lowerhalf_s  lower;
   uint64_t                   last_update;
-  float                      scale;
+  sensor_data_t              scale;
   FAR void                  *dev;
   bool                       enabled;
 #ifdef CONFIG_SENSORS_BMI270_POLL
@@ -250,9 +250,9 @@ static int bmi270_fetch(FAR struct sensor_lowerhalf_s *lower,
                          (FAR uint8_t *)data, 6);
 
           accel.timestamp = sensor_get_timestamp();
-          accel.x         = data[0] * priv->scale;
-          accel.y         = data[1] * priv->scale;
-          accel.z         = data[2] * priv->scale;
+          accel.x         = sensor_data_muli(priv->scale, data[0]);
+          accel.y         = sensor_data_muli(priv->scale, data[1]);
+          accel.z         = sensor_data_muli(priv->scale, data[2]);
 
           memcpy(buffer, &accel, sizeof(accel));
           ret = sizeof(accel);
@@ -268,9 +268,9 @@ static int bmi270_fetch(FAR struct sensor_lowerhalf_s *lower,
                          (FAR uint8_t *)data, 6);
 
           gyro.timestamp = sensor_get_timestamp();
-          gyro.x         = data[0] * priv->scale;
-          gyro.y         = data[1] * priv->scale;
-          gyro.z         = data[2] * priv->scale;
+          gyro.x         = sensor_data_muli(priv->scale, data[0]);
+          gyro.y         = sensor_data_muli(priv->scale, data[1]);
+          gyro.z         = sensor_data_muli(priv->scale, data[2]);
 
           memcpy(buffer, &gyro, sizeof(gyro));
           ret = sizeof(gyro);
@@ -357,22 +357,22 @@ static int bmi270_accel_scale(FAR struct bmi270_sensor_s *priv,
   if (scale < bmi270_midpoint(2, 4))
     {
       bmi270_putreg8(&priv->base, BMI270_ACC_RANGE, ACCEL_RANGE_2G);
-      priv->scale = CONSTANTS_ONE_G / 16384.f;
+      priv->scale = sensor_data_ftof(CONSTANTS_ONE_G / 16384.f);
     }
   else if (scale < bmi270_midpoint(4, 8))
     {
       bmi270_putreg8(&priv->base, BMI270_ACC_RANGE, ACCEL_RANGE_4G);
-      priv->scale = CONSTANTS_ONE_G / 8192.f;
+      priv->scale = sensor_data_ftof(CONSTANTS_ONE_G / 8192.f);
     }
   else if (scale < bmi270_midpoint(8, 16))
     {
       bmi270_putreg8(&priv->base, BMI270_ACC_RANGE, ACCEL_RANGE_8G);
-      priv->scale = CONSTANTS_ONE_G / 4096.f;
+      priv->scale = sensor_data_ftof(CONSTANTS_ONE_G / 4096.f);
     }
   else
     {
       bmi270_putreg8(&priv->base, BMI270_ACC_RANGE, ACCEL_RANGE_16G);
-      priv->scale = CONSTANTS_ONE_G / 2048.f;
+      priv->scale = sensor_data_ftof(CONSTANTS_ONE_G / 2048.f);
     }
 
   return ret;
@@ -390,27 +390,27 @@ static int bmi270_gyro_scale(FAR struct bmi270_sensor_s *priv,
   if (scale < bmi270_midpoint(125, 250))
     {
       bmi270_putreg8(&priv->base, BMI270_GYR_RANGE, GYRO_RANGE_125);
-      priv->scale = (M_PI / 180.0f) * 125.f / 32768.f;
+      priv->scale = sensor_data_ftof((M_PI / 180.0f) * 125.f / 32768.f);
     }
   else if (scale < bmi270_midpoint(250, 500))
     {
       bmi270_putreg8(&priv->base, BMI270_GYR_RANGE, GYRO_RANGE_250);
-      priv->scale = (M_PI / 180.0f) * 250.f / 32768.f;
+      priv->scale = sensor_data_ftof((M_PI / 180.0f) * 250.f / 32768.f);
     }
   else if (scale < bmi270_midpoint(500, 1000))
     {
       bmi270_putreg8(&priv->base, BMI270_GYR_RANGE, GYRO_RANGE_500);
-      priv->scale = (M_PI / 180.0f) * 500.f / 32768.f;
+      priv->scale = sensor_data_ftof((M_PI / 180.0f) * 500.f / 32768.f);
     }
   else if (scale < bmi270_midpoint(1000, 2000))
     {
       bmi270_putreg8(&priv->base, BMI270_GYR_RANGE, GYRO_RANGE_1000);
-      priv->scale = (M_PI / 180.0f) * 1000.f / 32768.f;
+      priv->scale = sensor_data_ftof((M_PI / 180.0f) * 1000.f / 32768.f);
     }
   else
     {
       bmi270_putreg8(&priv->base, BMI270_GYR_RANGE, GYRO_RANGE_2000);
-      priv->scale = (M_PI / 180.0f) * 2000.f / 32768.f;
+      priv->scale = sensor_data_ftof((M_PI / 180.0f) * 2000.f / 32768.f);
     }
 
   return ret;
@@ -447,9 +447,9 @@ static void bmi270_accel_data(FAR struct bmi270_sensor_s *priv,
   priv->last_update = now;
 
   accel.timestamp   = now;
-  accel.x           = buf[0] * priv->scale;
-  accel.y           = buf[1] * priv->scale;
-  accel.z           = buf[2] * priv->scale;
+  accel.x           = sensor_data_muli(priv->scale, buf[0]);
+  accel.y           = sensor_data_muli(priv->scale, buf[1]);
+  accel.z           = sensor_data_muli(priv->scale, buf[2]);
   accel.temperature = 0;
 
   lower->push_event(lower->priv, &accel, sizeof(accel));
@@ -485,9 +485,9 @@ static void bmi270_gyro_data(FAR struct bmi270_sensor_s *priv,
   priv->last_update = now;
 
   gyro.timestamp   = now;
-  gyro.x           = buf[0] * priv->scale;
-  gyro.y           = buf[1] * priv->scale;
-  gyro.z           = buf[2] * priv->scale;
+  gyro.x           = sensor_data_muli(priv->scale, buf[0]);
+  gyro.y           = sensor_data_muli(priv->scale, buf[1]);
+  gyro.z           = sensor_data_muli(priv->scale, buf[2]);
   gyro.temperature = 0;
 
   lower->push_event(lower->priv, &gyro, sizeof(gyro));
