@@ -70,10 +70,6 @@ void tricore_svcall(volatile void *trap)
   plregs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
   puregs = tricore_csa2addr(plregs[REG_LPCXI]);
 
-  /* Set irq flag */
-
-  up_set_interrupt_context(true);
-
   cmd = puregs[REG_D8];
 
   if (cmd != SYS_restore_context)
@@ -102,10 +98,6 @@ void tricore_svcall(volatile void *trap)
         svcerr("ERROR: Bad SYS call: %d\n", (int)puregs[REG_D8]);
         break;
     }
-
-  /* Set irq flag */
-
-  up_set_interrupt_context(false);
 
   __jumpBackToLink();
 }
