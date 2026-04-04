@@ -23,7 +23,7 @@ option shows the usage:
      -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
      -t <topdir> provides the absolute path to top nuttx/ directory.  Default ../nuttx
      -p only print the list of configs without running any builds
-     -A store the build executable artifact in ARTIFACTDIR (defaults to ../buildartifacts
+     -A store the build executable artifact in ARTIFACTDIR (defaults to ../buildartifacts)
      -C Skip tree cleanness check.
      -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
         This option may speed up the builds. However, note that:
@@ -73,3 +73,12 @@ The prefix ``-`` can be used to skip a configuration::
 or skip a configuration on a specific host(e.g. Darwin)::
 
   -Darwin,sim:rpserver
+
+This script will rebuild each configuration, upon failure, up to 7 times.
+Each rebuild will be attempted after a randomised delay with exponential
+backoff, initially set to 60 seconds. The rebuilds will mitigate the
+effects of intermittent download failures that occur in GitHub Actions.
+
+If the build fails after 7 retries, subsequent configurations will not
+be allowed to rebuild upon failure.  This is to prevent cascading build
+failures from overloading GitHub Actions.
