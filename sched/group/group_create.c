@@ -131,6 +131,7 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
     {
       group = &g_kthread_group;
       tcb->group = group;
+      group->tg_flags |= GROUP_FLAG_STATIC;
       if (group->tg_info)
         {
           return OK;
