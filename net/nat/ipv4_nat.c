@@ -795,6 +795,7 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
         {
           /* Outbound entry creation failed, should have entry. */
 
+          nat_unlock();
           return -ENOENT;
         }
     }
