@@ -327,7 +327,7 @@ ST7735 SPI LCD.
    * - GND
      - GND (Pin 3 or 38 or ...)
    * - VCC
-     - 5V Vbus (Pin 40)
+     - 5V Vbus (Pin 40) or 3V3 (Pin 36), depending on the display
    * - SDA
      - GP15 (SPI1 TX) (Pin 20)
    * - SCK
