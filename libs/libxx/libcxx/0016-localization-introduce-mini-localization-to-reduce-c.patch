@@ -1,0 +1,381 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Wed, 8 Apr 2026 14:51:07 +0800
+Subject: [PATCH] localization: introduce mini localization to reduce code size
+
+When CXX_MINI_LOCALIZATION is enabled, strip dead locale code that is
+unreachable with only the classic "C" locale:
+- Guard *_byname facet implementations (collate, ctype, numpunct)
+- Guard functional facets (time_get/put, money_get/put, moneypunct, messages)
+- Guard explicit template instantiations for the above
+- Guard checked_string_to_* helper functions (LLVM 21 only)
+- Guard __install_ctor declaration to match its guarded definition
+- Provide no-op __locale namespace stubs and __locale_guard when
+  LIBC_LOCALE is disabled (LLVM 21 NuttX integration)
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__locale                              | 10 ++++++
+ include/__locale_dir/locale_base_api.h        | 11 ++++++
+ .../locale_base_api/bsd_locale_fallbacks.h    |  4 +++
+ src/locale.cpp                                | 36 +++++++++++++++++++
+ 4 files changed, 61 insertions(+)
+
+diff --git a/include/__locale b/include/__locale
+index 757a53951f..2d659756b7 100644
+--- a/include/__locale
++++ b/include/__locale
+@@ -65,6 +65,7 @@ public:
+   class _LIBCPP_EXPORTED_FROM_ABI facet;
+   class _LIBCPP_EXPORTED_FROM_ABI id;
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   typedef int category;
+ 
+   static const category // values assigned here are for exposition only
+@@ -72,10 +73,12 @@ public:
+       collate = _LIBCPP_COLLATE_MASK, ctype = _LIBCPP_CTYPE_MASK, monetary = _LIBCPP_MONETARY_MASK,
+       numeric = _LIBCPP_NUMERIC_MASK, time = _LIBCPP_TIME_MASK, messages = _LIBCPP_MESSAGES_MASK,
+       all = collate | ctype | monetary | numeric | time | messages;
++#endif
+ 
+   // construct/copy/destroy:
+   locale() _NOEXCEPT;
+   locale(const locale&) _NOEXCEPT;
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   explicit locale(const char*);
+   explicit locale(const string&);
+   locale(const locale&, const char*, category);
+@@ -83,11 +86,13 @@ public:
+   template <class _Facet>
+   _LIBCPP_HIDE_FROM_ABI locale(const locale&, _Facet*);
+   locale(const locale&, const locale&, category);
++#endif
+ 
+   ~locale();
+ 
+   const locale& operator=(const locale&) _NOEXCEPT;
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   template <class _Facet>
+   _LIBCPP_HIDE_FROM_ABI locale combine(const locale& __other) const {
+     if (!std::has_facet<_Facet>(__other))
+@@ -95,6 +100,7 @@ public:
+ 
+     return locale(*this, std::addressof(const_cast<_Facet&>(std::use_facet<_Facet>(__other))));
+   }
++#endif
+ 
+   // locale operations:
+   string name() const;
+@@ -121,7 +127,9 @@ private:
+   friend struct __no_destroy;
+   _LIBCPP_HIDE_FROM_ABI explicit locale(__private_constructor_tag, __imp* __loc) : __locale_(__loc) {}
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   void __install_ctor(const locale&, facet*, long);
++#endif
+   static locale& __global();
+   bool has_facet(id&) const;
+   const facet* use_facet(id&) const;
+@@ -163,10 +171,12 @@ public: // only needed for tests
+   friend class locale::__imp;
+ };
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ template <class _Facet>
+ inline _LIBCPP_HIDE_FROM_ABI locale::locale(const locale& __other, _Facet* __f) {
+   __install_ctor(__other, __f, __f ? __f->id.__get() : 0);
+ }
++#endif
+ 
+ template <class _Facet>
+ inline _LIBCPP_HIDE_FROM_ABI bool has_facet(const locale& __l) _NOEXCEPT {
+diff --git a/include/__locale_dir/locale_base_api.h b/include/__locale_dir/locale_base_api.h
+index 8dbc28e839..5f6d1a4947 100644
+--- a/include/__locale_dir/locale_base_api.h
++++ b/include/__locale_dir/locale_base_api.h
+@@ -137,6 +137,10 @@
+ #      include <__locale_dir/locale_base_api/musl.h>
+ #    endif
+ 
++#    if defined(_LIBCPP_HAS_MINI_LOCALIZATION)
++#      include <locale.h>
++#    endif
++
+ #    include <__locale_dir/locale_base_api/bsd_locale_fallbacks.h>
+ 
+ #    include <__cstddef/size_t.h>
+@@ -166,6 +170,12 @@ using __locale_t _LIBCPP_NODEBUG = locale_t;
+ #    if defined(_LIBCPP_BUILDING_LIBRARY)
+ using __lconv_t _LIBCPP_NODEBUG = lconv;
+ 
++#      if defined(_LIBCPP_HAS_MINI_LOCALIZATION)
++inline _LIBCPP_HIDE_FROM_ABI __locale_t __newlocale(int, const char*, __locale_t) { return 0; }
++inline _LIBCPP_HIDE_FROM_ABI char* __setlocale(int, char const*) { return const_cast<char*>("C"); }
++inline _LIBCPP_HIDE_FROM_ABI void __freelocale(__locale_t) {}
++inline _LIBCPP_HIDE_FROM_ABI __lconv_t* __localeconv(__locale_t&) { return 0; }
++#      else
+ inline _LIBCPP_HIDE_FROM_ABI __locale_t __newlocale(int __category_mask, const char* __name, __locale_t __loc) {
+   return newlocale(__category_mask, __name, __loc);
+ }
+@@ -177,6 +187,7 @@ inline _LIBCPP_HIDE_FROM_ABI char* __setlocale(int __category, char const* __loc
+ inline _LIBCPP_HIDE_FROM_ABI void __freelocale(__locale_t __loc) { freelocale(__loc); }
+ 
+ inline _LIBCPP_HIDE_FROM_ABI __lconv_t* __localeconv(__locale_t& __loc) { return __libcpp_localeconv_l(__loc); }
++#      endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ #    endif // _LIBCPP_BUILDING_LIBRARY
+ 
+ //
+diff --git a/include/__locale_dir/locale_base_api/bsd_locale_fallbacks.h b/include/__locale_dir/locale_base_api/bsd_locale_fallbacks.h
+index b62a1b737e..a9a7891b02 100644
+--- a/include/__locale_dir/locale_base_api/bsd_locale_fallbacks.h
++++ b/include/__locale_dir/locale_base_api/bsd_locale_fallbacks.h
+@@ -29,6 +29,9 @@
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
+ struct __locale_guard {
++#ifdef _LIBCPP_HAS_MINI_LOCALIZATION
++  _LIBCPP_HIDE_FROM_ABI __locale_guard(locale_t&) {}
++#else
+   _LIBCPP_HIDE_FROM_ABI __locale_guard(locale_t& __loc) : __old_loc_(::uselocale(__loc)) {}
+ 
+   _LIBCPP_HIDE_FROM_ABI ~__locale_guard() {
+@@ -37,6 +40,7 @@ struct __locale_guard {
+   }
+ 
+   locale_t __old_loc_;
++#endif
+ 
+   __locale_guard(__locale_guard const&)            = delete;
+   __locale_guard& operator=(__locale_guard const&) = delete;
+diff --git a/src/locale.cpp b/src/locale.cpp
+index da735865c3..624a2775bc 100644
+--- a/src/locale.cpp
++++ b/src/locale.cpp
+@@ -98,6 +98,7 @@ inline constexpr size_t countof(const T* const begin, const T* const end) {
+   return static_cast<size_t>(end - begin);
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ string build_name(const string& other, const string& one, locale::category c) {
+   if (other == "*" || one == "*")
+     return "*";
+@@ -108,9 +109,11 @@ string build_name(const string& other, const string& one, locale::category c) {
+   // different names for different categories.
+   return "*";
+ }
++#endif
+ 
+ } // namespace
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ const locale::category locale::none;
+ const locale::category locale::collate;
+ const locale::category locale::ctype;
+@@ -119,6 +122,7 @@ const locale::category locale::numeric;
+ const locale::category locale::time;
+ const locale::category locale::messages;
+ const locale::category locale::all;
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ class _LIBCPP_HIDDEN locale::__imp : public facet {
+   enum { N = 30 };
+@@ -127,11 +131,15 @@ class _LIBCPP_HIDDEN locale::__imp : public facet {
+ 
+ public:
+   explicit __imp(size_t refs = 0);
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   explicit __imp(const string& name, size_t refs = 0);
++#endif
+   __imp(const __imp&);
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   __imp(const __imp&, const string&, locale::category c);
+   __imp(const __imp& other, const __imp& one, locale::category c);
+   __imp(const __imp&, facet* f, long id);
++#endif
+   ~__imp();
+ 
+   const string& name() const { return name_; }
+@@ -148,8 +156,10 @@ private:
+   void install(F* f) {
+     install(f, f->id.__get());
+   }
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   template <class F>
+   void install_from(const __imp& other);
++#endif
+ };
+ 
+ locale::__imp::__imp(size_t refs) : facet(refs), facets_(N), name_("C") {
+@@ -186,6 +196,7 @@ locale::__imp::__imp(size_t refs) : facet(refs), facets_(N), name_("C") {
+ #if _LIBCPP_HAS_WIDE_CHARACTERS
+   install(&make<num_put<wchar_t> >(1u));
+ #endif
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+   install(&make<moneypunct<char, false> >(1u));
+   install(&make<moneypunct<char, true> >(1u));
+ #if _LIBCPP_HAS_WIDE_CHARACTERS
+@@ -212,8 +223,10 @@ locale::__imp::__imp(size_t refs) : facet(refs), facets_(N), name_("C") {
+ #if _LIBCPP_HAS_WIDE_CHARACTERS
+   install(&make<std::messages<wchar_t> >(1u));
+ #endif
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ locale::__imp::__imp(const string& name, size_t refs) : facet(refs), facets_(N), name_(name) {
+ #if _LIBCPP_HAS_EXCEPTIONS
+   try {
+@@ -273,6 +286,7 @@ locale::__imp::__imp(const string& name, size_t refs) : facet(refs), facets_(N),
+   }
+ #endif // _LIBCPP_HAS_EXCEPTIONS
+ }
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ locale::__imp::__imp(const __imp& other) : facets_(max<size_t>(N, other.facets_.size())), name_(other.name_) {
+   facets_ = other.facets_;
+@@ -281,6 +295,7 @@ locale::__imp::__imp(const __imp& other) : facets_(max<size_t>(N, other.facets_.
+       facets_[i]->__add_shared();
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ locale::__imp::__imp(const __imp& other, const string& name, locale::category c)
+     : facets_(N), name_(build_name(other.name_, name, c)) {
+   facets_ = other.facets_;
+@@ -459,6 +474,7 @@ locale::__imp::__imp(const __imp& other, facet* f, long id)
+       facets_[i]->__add_shared();
+   install(hold.get(), id);
+ }
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ locale::__imp::~__imp() {
+   for (unsigned i = 0; i < facets_.size(); ++i)
+@@ -529,6 +545,7 @@ const locale& locale::operator=(const locale& other) noexcept {
+   return *this;
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ locale::locale(const char* name)
+     : __locale_(name ? new __imp(name) : (__throw_runtime_error("locale constructed with null"), nullptr)) {
+   __locale_->acquire();
+@@ -550,9 +567,11 @@ locale::locale(const locale& other, const locale& one, category c)
+     : __locale_(new __imp(*other.__locale_, *one.__locale_, c)) {
+   __locale_->acquire();
+ }
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ string locale::name() const { return __locale_->name(); }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ void locale::__install_ctor(const locale& other, facet* f, long facet_id) {
+   if (f)
+     __locale_ = new __imp(*other.__locale_, f, facet_id);
+@@ -560,6 +579,7 @@ void locale::__install_ctor(const locale& other, facet* f, long facet_id) {
+     __locale_ = other.__locale_;
+   __locale_->acquire();
+ }
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ locale locale::global(const locale& loc) {
+   locale& g = __global();
+@@ -593,6 +613,8 @@ long locale::id::__get() {
+   return __id_ - 1;
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
++
+ // template <> class collate_byname<char>
+ 
+ collate_byname<char>::collate_byname(const char* n, size_t refs)
+@@ -681,6 +703,7 @@ collate_byname<wchar_t>::do_transform(const char_type* lo, const char_type* hi)
+   return out;
+ }
+ #endif // _LIBCPP_HAS_WIDE_CHARACTERS
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ const ctype_base::mask ctype_base::space;
+ const ctype_base::mask ctype_base::print;
+@@ -955,6 +978,8 @@ const ctype<char>::mask* ctype<char>::classic_table() noexcept {
+ }
+ #endif
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
++
+ // template <> class ctype_byname<char>
+ 
+ ctype_byname<char>::ctype_byname(const char* name, size_t refs)
+@@ -1195,6 +1220,7 @@ ctype_byname<wchar_t>::do_narrow(const char_type* low, const char_type* high, ch
+   return low;
+ }
+ #endif // _LIBCPP_HAS_WIDE_CHARACTERS
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ // template <> class codecvt<char, char, mbstate_t>
+ 
+@@ -3846,6 +3872,7 @@ __widen_from_utf8<16>::~__widen_from_utf8() {}
+ 
+ __widen_from_utf8<32>::~__widen_from_utf8() {}
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ #if _LIBCPP_HAS_WIDE_CHARACTERS
+ static bool checked_string_to_wchar_convert(wchar_t& dest, const char* ptr, __locale::__locale_t loc) {
+   if (*ptr == '\0')
+@@ -3914,6 +3941,7 @@ static bool checked_string_to_char_convert(char& dest, const char* ptr, __locale
+ #endif // _LIBCPP_HAS_WIDE_CHARACTERS
+   __libcpp_unreachable();
+ }
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ // numpunct<char> && numpunct<wchar_t>
+ 
+@@ -3959,6 +3987,8 @@ string numpunct< char >::do_falsename() const { return "false"; }
+ wstring numpunct<wchar_t>::do_falsename() const { return L"false"; }
+ #endif
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
++
+ // numpunct_byname<char>
+ 
+ numpunct_byname<char>::numpunct_byname(const char* nm, size_t refs) : numpunct<char>(refs) { __init(nm); }
+@@ -4017,6 +4047,7 @@ void numpunct_byname<wchar_t>::__init(const char* nm) {
+   }
+ }
+ #endif // _LIBCPP_HAS_WIDE_CHARACTERS
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ // num_get helpers
+ 
+@@ -4135,6 +4166,8 @@ char* __num_put_base::__identify_padding(char* __nb, char* __ne, const ios_base&
+   return __nb;
+ }
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
++
+ // time_get
+ 
+ static string* init_weeks() {
+@@ -5558,6 +5591,7 @@ void moneypunct_byname<wchar_t, true>::init(const char* nm) {
+ #  endif // !_LIBCPP_MSVCRT
+ }
+ #endif // _LIBCPP_HAS_WIDE_CHARACTERS
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ void __do_nothing(void*) {}
+ 
+@@ -5586,6 +5620,7 @@ _LIBCPP_IF_WIDE_CHARACTERS(template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_V
+ template struct _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS __num_put<char>;
+ _LIBCPP_IF_WIDE_CHARACTERS(template struct _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS __num_put<wchar_t>;)
+ 
++#ifndef _LIBCPP_HAS_MINI_LOCALIZATION
+ template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS time_get<char>;
+ _LIBCPP_IF_WIDE_CHARACTERS(template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS time_get<wchar_t>;)
+ 
+@@ -5637,6 +5672,7 @@ template class _LIBCPP_DEPRECATED_IN_CXX20 _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_
+ template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS codecvt_byname<char16_t, char8_t, mbstate_t>;
+ template class _LIBCPP_CLASS_TEMPLATE_INSTANTIATION_VIS codecvt_byname<char32_t, char8_t, mbstate_t>;
+ #endif
++#endif // _LIBCPP_HAS_MINI_LOCALIZATION
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 

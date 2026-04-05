@@ -1,0 +1,123 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 13 Nov 2026 12:11:39 +0800
+Subject: [PATCH] libcxx: let std::thread take a stack size
+
+NuttX tasks often need a stack size other than the default, which
+std::thread has no way to express. Add thread::attributes with a
+stack_size() setter, and a thread constructor that takes it.
+
+  __thread/support/pthread.h wraps pthread_attr_t and adds a
+  pthread_create overload that accepts it.
+  __thread/thread.h defines thread::attributes in the class, which Clang
+  needs, and keeps it out of the callable template through enable_if.
+  __type_traits/nat.h drops ~__nat() = delete. GCC instantiates the
+  template bodies during overload resolution, and the new constructor
+  makes it reach the destructor of __nat:
+
+    thread.h:159:16: error: use of deleted function
+    'std::__1::__nat::~__nat()'
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__thread/support/pthread.h | 21 +++++++++++++++++++++
+ include/__thread/thread.h          | 27 ++++++++++++++++++++++++++-
+ include/__type_traits/nat.h        |  2 +-
+ 3 files changed, 48 insertions(+), 2 deletions(-)
+
+diff --git a/include/__thread/support/pthread.h b/include/__thread/support/pthread.h
+index 14e92079da..0d1967476b 100644
+--- a/include/__thread/support/pthread.h
++++ b/include/__thread/support/pthread.h
+@@ -182,6 +182,27 @@ inline _LIBCPP_HIDE_FROM_ABI int __libcpp_thread_create(__libcpp_thread_t* __t,
+   return pthread_create(__t, nullptr, __func, __arg);
+ }
+ 
++// Thread attributes for controlling stack size etc.
++typedef pthread_attr_t __libcpp_thread_attr;
++
++inline _LIBCPP_HIDE_FROM_ABI void __libcpp_thread_attr_init(__libcpp_thread_attr* __attr) {
++  pthread_attr_init(__attr);
++}
++
++inline _LIBCPP_HIDE_FROM_ABI void __libcpp_thread_attr_destroy(__libcpp_thread_attr* __attr) {
++  pthread_attr_destroy(__attr);
++}
++
++inline _LIBCPP_HIDE_FROM_ABI void __libcpp_thread_attr_stack_size(__libcpp_thread_attr* __attr, size_t __size) {
++  pthread_attr_setstacksize(__attr, __size);
++}
++
++inline _LIBCPP_HIDE_FROM_ABI int
++__libcpp_thread_create(__libcpp_thread_t* __t, const __libcpp_thread_attr* __attr,
++                       void* (*__func)(void*), void* __arg) {
++  return pthread_create(__t, __attr, __func, __arg);
++}
++
+ inline _LIBCPP_HIDE_FROM_ABI __libcpp_thread_id __libcpp_thread_get_current_id() {
+   const __libcpp_thread_t __current_thread = pthread_self();
+   return __libcpp_thread_get_id(&__current_thread);
+diff --git a/include/__thread/thread.h b/include/__thread/thread.h
+index 1b51571ce3..954b7f2c8e 100644
+--- a/include/__thread/thread.h
++++ b/include/__thread/thread.h
+@@ -198,13 +198,25 @@ class _LIBCPP_EXPORTED_FROM_ABI thread {
+   thread& operator=(const thread&);
+ 
+ public:
++  class attributes {
++  public:
++    _LIBCPP_HIDE_FROM_ABI attributes() _NOEXCEPT { __libcpp_thread_attr_init(&__attr_); }
++    _LIBCPP_HIDE_FROM_ABI ~attributes() { __libcpp_thread_attr_destroy(&__attr_); }
++    _LIBCPP_HIDE_FROM_ABI attributes& stack_size(size_t __size) _NOEXCEPT {
++      __libcpp_thread_attr_stack_size(&__attr_, __size);
++      return *this;
++    }
++    __libcpp_thread_attr __attr_;
++  };
+   typedef __thread_id id;
+   typedef __libcpp_thread_t native_handle_type;
+ 
+   _LIBCPP_HIDE_FROM_ABI thread() _NOEXCEPT : __t_(_LIBCPP_NULL_THREAD) {}
+ 
+ #  ifndef _LIBCPP_CXX03_LANG
+-  template <class _Fp, class... _Args, __enable_if_t<!is_same<__remove_cvref_t<_Fp>, thread>::value, int> = 0>
++  template <class _Fp, class... _Args,
++            __enable_if_t<!is_same<__remove_cvref_t<_Fp>, thread>::value &&
++                          !is_same<__remove_cvref_t<_Fp>, attributes>::value, int> = 0>
+   _LIBCPP_HIDE_FROM_ABI explicit thread(_Fp&& __f, _Args&&... __args) {
+     typedef unique_ptr<__thread_struct> _TSPtr;
+     _TSPtr __tsp(new __thread_struct);
+@@ -216,6 +228,19 @@ public:
+     else
+       __throw_system_error(__ec, "thread constructor failed");
+   }
++
++  template <class _Fp, class... _Args, __enable_if_t<!is_same<__remove_cvref_t<_Fp>, thread>::value, int> = 0>
++  _LIBCPP_HIDE_FROM_ABI thread(const attributes& __attrs, _Fp&& __f, _Args&&... __args) {
++    typedef unique_ptr<__thread_struct> _TSPtr;
++    _TSPtr __tsp(new __thread_struct);
++    typedef tuple<_TSPtr, __decay_t<_Fp>, __decay_t<_Args>...> _Gp;
++    unique_ptr<_Gp> __p(new _Gp(std::move(__tsp), std::forward<_Fp>(__f), std::forward<_Args>(__args)...));
++    int __ec = std::__libcpp_thread_create(&__t_, &__attrs.__attr_, std::addressof(__thread_proxy<_Gp>), __p.get());
++    if (__ec == 0)
++      __p.release();
++    else
++      __throw_system_error(__ec, "thread constructor failed");
++  }
+ #  else // _LIBCPP_CXX03_LANG
+   template <class _Fp>
+   _LIBCPP_HIDE_FROM_ABI explicit thread(_Fp __f) {
+diff --git a/include/__type_traits/nat.h b/include/__type_traits/nat.h
+index 9f39b80681..b71bd9d06c 100644
+--- a/include/__type_traits/nat.h
++++ b/include/__type_traits/nat.h
+@@ -22,7 +22,7 @@ struct __nat {
+   __nat()                        = delete;
+   __nat(const __nat&)            = delete;
+   __nat& operator=(const __nat&) = delete;
+-  ~__nat()                       = delete;
++  // ~__nat()                       = delete;
+ #endif
+ };
+ 

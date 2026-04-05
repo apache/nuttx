@@ -24,6 +24,23 @@ if(CONFIG_LIBCXXABI)
 
     set(LIBCXXABI_VERSION ${CONFIG_LIBCXXABI_VERSION})
 
+    file(GLOB LIBCXXABI_PATCHES ${CMAKE_CURRENT_LIST_DIR}/*.patch)
+    list(SORT LIBCXXABI_PATCHES)
+    set(LIBCXXABI_PATCH_COMMAND)
+    foreach(patch ${LIBCXXABI_PATCHES})
+      list(
+        APPEND
+        LIBCXXABI_PATCH_COMMAND
+        COMMAND
+        patch
+        -p1
+        -d
+        ${CMAKE_CURRENT_LIST_DIR}/libcxxabi
+        <
+        ${patch})
+    endforeach()
+    list(REMOVE_AT LIBCXXABI_PATCH_COMMAND 0)
+
     FetchContent_Declare(
       libcxxabi
       DOWNLOAD_NAME "libcxxabi-${LIBCXXABI_VERSION}.src.tar.xz"
@@ -41,7 +58,7 @@ if(CONFIG_LIBCXXABI)
           ""
           TEST_COMMAND
           ""
-      PATCH_COMMAND ""
+      PATCH_COMMAND ${LIBCXXABI_PATCH_COMMAND}
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 
@@ -121,6 +138,15 @@ if(CONFIG_LIBCXXABI)
 
   target_compile_definitions(libcxxabi
                              PRIVATE LIBCXXABI_NON_DEMANGLING_TERMINATE)
+
+  # Map C++20 keyword constinit to compiler attribute(works for gcc&clang)
+  string(REGEX MATCH "[0-9]+$" CPP_STD_VER_ABI "${CONFIG_CXX_STANDARD}")
+  if(CPP_STD_VER_ABI LESS 20)
+    target_compile_definitions(
+      libcxxabi
+      PRIVATE "constinit=__attribute__((__require_constant_initialization__))")
+    target_compile_options(libcxxabi PRIVATE -Wno-c++20-compat)
+  endif()
 
   target_sources(libcxxabi PRIVATE ${TARGET_SRCS})
   target_include_directories(

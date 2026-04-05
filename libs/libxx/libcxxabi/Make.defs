@@ -30,8 +30,8 @@ libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz:
 libcxxabi/libcxxabi: libcxxabi-$(LIBCXXABI_VERSION).src.tar.xz
 	$(Q) tar -xf $<
 	$(Q) mv libcxxabi-$(LIBCXXABI_VERSION).src $@
-	$(Q) patch -p0 < libcxxabi/0001-libcxxabi-Fix-build-warnings-generated-by-CMake-comp.patch -d libcxxabi
-	$(Q) patch -p0 < libcxxabi/0002-libcxxabi-fix-compilation-errors.patch -d libcxxabi
+	$(Q) $(foreach PATCH_FILE,$(sort $(wildcard libcxxabi/*.patch)), \
+	       patch -p1 -d $@ < $(PATCH_FILE) &&) true
 endif
 
 $(TOPDIR)/include/libcxxabi: libcxxabi/libcxxabi
@@ -89,6 +89,13 @@ endif
 
 CXXFLAGS += -DLIBCXXABI_NON_DEMANGLING_TERMINATE
 CXXFLAGS += -DLIBCXXABI_BAREMETAL
+
+# Map C++20 keyword constinit to compiler attribute for C++17 builds
+CPP_STD_VER_ABI := $(shell echo $(CONFIG_CXX_STANDARD) | sed -E 's/.*\+\+([0-9]+)$$/\1/')
+ifeq ($(shell [ $(CPP_STD_VER_ABI) -lt 20 ] && echo true),true)
+  CXXFLAGS += ${DEFINE_PREFIX}constinit=__attribute__\(\(__require_constant_initialization__\)\)
+  CXXFLAGS += -Wno-c++20-compat
+endif
 
 DEPPATH += --dep-path libcxxabi/libcxxabi/src
 VPATH += libcxxabi/libcxxabi/src

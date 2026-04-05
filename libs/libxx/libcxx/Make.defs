@@ -31,20 +31,17 @@ libcxx/libcxx: libcxx-$(LIBCXX_VERSION).src.tar.xz
 	$(Q) tar -xf $< \
 	         --exclude libcxx-$(LIBCXX_VERSION).src/test/std/pstl
 	$(Q) mv libcxx-$(LIBCXX_VERSION).src $@
-	$(Q) patch -p0 < libcxx/0001_fix_stdatomic_h_miss_typedef.patch -d libcxx
-	$(Q) patch -p2 < libcxx/mbstate_t.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libcxx-remove-mach-time-h.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libcxx-fix-ld-errors.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-Fix-build-error-about-__GLIBC__.patch -d libcxx
-	$(Q) patch -p0 < libcxx/0001-libc-Fix-failures-with-GCC-14-92663.patch -d libcxx
+	$(Q) $(foreach PATCH_FILE,$(sort $(wildcard libcxx/*.patch)), \
+	       patch -p1 -d $@ < $(PATCH_FILE) &&) true
 
 endif
 
 $(TOPDIR)/include/libcxx: libcxx/libcxx
 	$(Q) $(DIRLINK) $(CURDIR)/$</include $(TOPDIR)/include/libcxx
-	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
 
 context:: $(TOPDIR)/include/libcxx
+	$(Q) cp $(CURDIR)/__config_site $(TOPDIR)/include/libcxx/__config_site
+	$(Q) cp $(CURDIR)/libcxx/libcxx/vendor/llvm/default_assertion_handler.in $(TOPDIR)/include/libcxx/__assertion_handler
 
 distclean::
 	$(Q) $(DIRUNLINK) $(TOPDIR)/include/libcxx
@@ -74,10 +71,21 @@ endif
 
 CPPSRCS += $(wildcard libcxx/libcxx/src/*.cpp)
 CPP_STD_VER := $(shell echo $(CONFIG_CXX_STANDARD) | sed -E 's/.*\+\+([0-9]+)$$/\1/')
-ifeq ($(shell [ $(CPP_STD_VER) -ge 20 ] && echo true),true)
-  CPPSRCS += $(wildcard libcxx/libcxx/src/experimental/*.cpp)
+
+# Filesystem and ryu sources for C++17+
+ifeq ($(shell [ $(CPP_STD_VER) -ge 17 ] && echo true),true)
   CPPSRCS += $(wildcard libcxx/libcxx/src/filesystem/*.cpp)
   CPPSRCS += $(wildcard libcxx/libcxx/src/ryu/*.cpp)
+endif
+
+# Exclude barrier.cpp/atomic.cpp for C++ < 20
+ifeq ($(shell [ $(CPP_STD_VER) -lt 20 ] && echo true),true)
+  CPPSRCS := $(filter-out libcxx/libcxx/src/barrier.cpp libcxx/libcxx/src/atomic.cpp, $(CPPSRCS))
+endif
+
+# Exclude expected.cpp for C++ < 23
+ifeq ($(shell [ $(CPP_STD_VER) -lt 23 ] && echo true),true)
+  CPPSRCS := $(filter-out libcxx/libcxx/src/expected.cpp, $(CPPSRCS))
 endif
 
 ifeq ($(shell [ $(CPP_STD_VER) -le 14 ] && echo true),true)
@@ -97,5 +105,13 @@ ifeq ($(CONFIG_CXX_NO_LOCALIZATION),y)
   LOCALE_CPPSRCS += libcxx/libcxx/src/locale.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/regex.cpp
   LOCALE_CPPSRCS += libcxx/libcxx/src/strstream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/ostream.cpp
+  LOCALE_CPPSRCS += libcxx/libcxx/src/fstream.cpp
   CPPSRCS := $(filter-out $(LOCALE_CPPSRCS), $(CPPSRCS))
+endif
+
+# Map C++20 keyword constinit to compiler attribute for C++17 builds
+ifeq ($(shell [ $(CPP_STD_VER) -lt 20 ] && echo true),true)
+  CXXFLAGS += ${DEFINE_PREFIX}constinit=__attribute__\(\(__require_constant_initialization__\)\)
+  CXXFLAGS += -Wno-c++20-compat
 endif

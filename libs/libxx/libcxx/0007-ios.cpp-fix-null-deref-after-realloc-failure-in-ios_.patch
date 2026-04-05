@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Tue, 7 Apr 2026 17:25:33 +0800
+Subject: [PATCH] ios.cpp: fix null deref after realloc failure in
+ ios_base::register_callback
+
+Add early return after setstate(badbit) when realloc fails in ios_base::register_callback(). Without the return, execution continues with __fn_ or __index_ set to null (from failed realloc), then __fn_[__event_size_] dereferences null causing a crash.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/ios.cpp | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/ios.cpp b/src/ios.cpp
+index 02ce484118..077389eafd 100644
+--- a/src/ios.cpp
++++ b/src/ios.cpp
+@@ -180,12 +180,16 @@ void ios_base::register_callback(event_callback fn, int index) {
+   if (req_size > __event_cap_) {
+     size_t newcap       = __ios_new_cap<event_callback>(req_size, __event_cap_);
+     event_callback* fns = static_cast<event_callback*>(realloc(__fn_, newcap * sizeof(event_callback)));
+-    if (fns == 0)
++    if (fns == 0) {
+       setstate(badbit);
++      return;
++    }
+     __fn_      = fns;
+     int* indxs = static_cast<int*>(realloc(__index_, newcap * sizeof(int)));
+-    if (indxs == 0)
++    if (indxs == 0) {
+       setstate(badbit);
++      return;
++    }
+     __index_     = indxs;
+     __event_cap_ = newcap;
+   }

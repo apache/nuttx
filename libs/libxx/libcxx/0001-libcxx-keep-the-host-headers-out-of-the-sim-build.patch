@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 13 Nov 2026 12:11:38 +0800
+Subject: [PATCH] libcxx: keep the host headers out of the sim build
+
+The sim build only passes -nostdinc++, so the host C library headers
+stay visible to libc++ and win over the NuttX ones in two places.
+
+__mbstate_t.h picks glibc's bits/types/mbstate_t.h before NuttX's
+wchar.h, and the two mbstate_t definitions conflict. Try include_next
+<wchar.h> first.
+
+random.cpp includes linux/random.h and sys/ioctl.h whenever they can be
+found. The host copies use a four argument _IOC while NuttX defines it
+with two, so the build fails with
+
+  macro "_IOC" requires 4 arguments, but only 2 given
+
+Include them only when __linux__ is defined.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__mbstate_t.h | 4 ++--
+ src/random.cpp        | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/include/__mbstate_t.h b/include/__mbstate_t.h
+index c23ea7113c..18c6dc5e88 100644
+--- a/include/__mbstate_t.h
++++ b/include/__mbstate_t.h
+@@ -39,12 +39,12 @@
+ #  define __NEED_mbstate_t
+ #  include <bits/alltypes.h>
+ #  undef __NEED_mbstate_t
++#elif __has_include_next(<wchar.h>)
++#  include_next <wchar.h> // use the C standard provider of mbstate_t if present
+ #elif __has_include(<bits/types/mbstate_t.h>)
+ #  include <bits/types/mbstate_t.h> // works on most Unixes
+ #elif __has_include(<sys/_types/_mbstate_t.h>)
+ #  include <sys/_types/_mbstate_t.h> // works on Darwin
+-#elif __has_include_next(<wchar.h>)
+-#  include_next <wchar.h> // use the C standard provider of mbstate_t if present
+ #elif __has_include_next(<uchar.h>)
+ #  include_next <uchar.h> // Try <uchar.h> in absence of <wchar.h> for mbstate_t
+ #else
+diff --git a/src/random.cpp b/src/random.cpp
+index 5c6644811b..9fcc802208 100644
+--- a/src/random.cpp
++++ b/src/random.cpp
+@@ -27,7 +27,7 @@
+ #elif defined(_LIBCPP_USING_DEV_RANDOM)
+ #  include <fcntl.h>
+ #  include <unistd.h>
+-#  if __has_include(<sys/ioctl.h>) && __has_include(<linux/random.h>)
++#  if __has_include(<sys/ioctl.h>) && __has_include(<linux/random.h>) && defined(__linux__)
+ #    include <linux/random.h>
+ #    include <sys/ioctl.h>
+ #  endif

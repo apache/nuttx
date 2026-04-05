@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Mon, 7 Sep 2026 11:58:43 +0800
+Subject: [PATCH] __memory: guard empty range relocate to avoid null memcpy
+ UBSan
+
+The trivially relocatable fast path in __uninitialized_allocator_relocate
+calls __builtin_memcpy unconditionally. When the source range is empty
+(for example growing an empty vector) the pointers can be null, and
+passing null to memcpy violates its nonnull argument attribute, which
+-fsanitize=undefined reports at runtime even though the copy size is
+zero. llvm17 used an element by element move loop that naturally did
+nothing for an empty range, so this only regressed after the llvm21
+upgrade. Skip the memcpy when the range is empty to match that behavior.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__memory/uninitialized_algorithms.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/__memory/uninitialized_algorithms.h b/include/__memory/uninitialized_algorithms.h
+index e802366400..1347cbedbd 100644
+--- a/include/__memory/uninitialized_algorithms.h
++++ b/include/__memory/uninitialized_algorithms.h
+@@ -633,7 +633,7 @@ _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 void __uninitialized_allocat
+     }
+     __guard.__complete();
+     std::__allocator_destroy(__alloc, __first, __last);
+-  } else {
++  } else if (__first != __last) {
+     // Casting to void* to suppress clang complaining that this is technically UB.
+     __builtin_memcpy(static_cast<void*>(std::__to_address(__result)),
+                      std::__to_address(__first),

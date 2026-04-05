@@ -1,0 +1,314 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 13 Nov 2026 12:11:38 +0800
+Subject: [PATCH] libcxx: provide what GCC 12 lacks from GCC 13
+
+llvm 21 relies on builtins and a language change that arrived in
+GCC 13, without a fallback. With GCC 12 the library fails to build:
+
+  remove_reference.h:37: #error "remove_reference not implemented!"
+  tuple:1547: 'remove_reference_t' was not declared in this scope
+  remove_cvref.h:23: expected type-specifier before '__remove_cvref'
+  is_convertible.h:35: '__is_convertible' was not declared in this scope
+  is_convertible.h:118: there are no arguments to
+    '__is_nothrow_convertible' that depend on a template parameter
+  reference_constructs_from_temporary.h:39: there are no arguments to
+    '__reference_binds_to_temporary' that depend on a template parameter
+  pointer_traits.h:57: static assertion failed: Cannot rebind pointer;
+    did you forget to add a rebind member to your pointer?
+
+remove_reference, remove_cvref, is_convertible and
+is_nothrow_convertible are built on __remove_reference, __remove_cvref,
+__is_convertible and __is_nothrow_convertible. Restore the portable
+implementations libc++ had before these builtins became mandatory,
+behind __has_builtin, so that a compiler providing them is unaffected.
+
+reference_constructs_from_temporary falls back to
+__reference_binds_to_temporary without checking for it. Detecting a
+temporary needs compiler support, so where neither builtin exists
+assume none is bound, which is what the only user of the trait, the
+dangling reference check of tuple, treated as the pass case before the
+trait existed.
+
+pointer_traits uses static_assert(false) inside a template, which GCC
+12 evaluates when parsing the template. Make the condition depend on
+the template parameter so that it is only evaluated on instantiation.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__memory/pointer_traits.h             |   4 +-
+ include/__type_traits/is_convertible.h        | 119 +++++++++++++++++-
+ include/__type_traits/is_unqualified.h        |   3 +-
+ .../reference_constructs_from_temporary.h     |   7 +-
+ include/__type_traits/remove_cvref.h          |  16 ++-
+ include/__type_traits/remove_reference.h      |  10 +-
+ 6 files changed, 151 insertions(+), 8 deletions(-)
+
+diff --git a/include/__memory/pointer_traits.h b/include/__memory/pointer_traits.h
+index 8c7f8dff1b..435591fff7 100644
+--- a/include/__memory/pointer_traits.h
++++ b/include/__memory/pointer_traits.h
+@@ -54,7 +54,9 @@ struct __pointer_traits_element_type<_Ptr, __void_t<typename _Ptr::element_type>
+ 
+ template <class _Tp, class _Up>
+ struct __pointer_traits_rebind_impl {
+-  static_assert(false, "Cannot rebind pointer; did you forget to add a rebind member to your pointer?");
++  // The condition is made dependent on purpose: static_assert(false) inside a
++  // template is only well-formed since C++23.
++  static_assert(sizeof(_Tp*) == 0, "Cannot rebind pointer; did you forget to add a rebind member to your pointer?");
+ };
+ 
+ template <template <class, class...> class _Sp, class _Tp, class... _Args, class _Up>
+diff --git a/include/__type_traits/is_convertible.h b/include/__type_traits/is_convertible.h
+index f0a859f9cc..0678862283 100644
+--- a/include/__type_traits/is_convertible.h
++++ b/include/__type_traits/is_convertible.h
+@@ -12,28 +12,143 @@
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
+ 
++#if !__has_builtin(__is_convertible)
++// No __is_convertible builtin; the headers below are needed by the fallback.
++#  include <__cstddef/size_t.h>
++#  include <__type_traits/is_array.h>
++#  include <__type_traits/is_function.h>
++#  include <__type_traits/is_void.h>
++#  include <__type_traits/remove_reference.h>
++#  include <__utility/declval.h>
++#endif
++
++#if _LIBCPP_STD_VER >= 20 && !__has_builtin(__is_nothrow_convertible)
++// No __is_nothrow_convertible builtin; the headers below are needed by the fallback.
++#  include <__type_traits/conjunction.h>
++#  include <__type_traits/disjunction.h>
++#  include <__type_traits/is_void.h>
++#  include <__type_traits/lazy.h>
++#  include <__utility/declval.h>
++#endif
++
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+ #endif
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if __has_builtin(__is_convertible)
+ template <class _T1, class _T2>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_convertible : integral_constant<bool, __is_convertible(_T1, _T2)> {};
+ 
+-#if _LIBCPP_STD_VER >= 17
++#  if _LIBCPP_STD_VER >= 17
+ template <class _From, class _To>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_convertible_v = __is_convertible(_From, _To);
+-#endif
++#  endif
++
++#else // !__has_builtin(__is_convertible)
++
++namespace __is_convertible_imp {
++template <class _Tp>
++void __test_convert(_Tp);
++
++template <class _From, class _To, class = void>
++struct __is_convertible_test : false_type {};
++
++template <class _From, class _To>
++struct __is_convertible_test<_From, _To, decltype(__is_convertible_imp::__test_convert<_To>(std::declval<_From>()))>
++    : true_type {};
++
++// clang-format off
++template <class _Tp,
++          bool _IsArray    = is_array<_Tp>::value,
++          bool _IsFunction = is_function<_Tp>::value,
++          bool _IsVoid     = is_void<_Tp>::value>
++                     struct __is_array_function_or_void                          { enum { value = 0 }; };
++template <class _Tp> struct __is_array_function_or_void<_Tp, true, false, false> { enum { value = 1 }; };
++template <class _Tp> struct __is_array_function_or_void<_Tp, false, true, false> { enum { value = 2 }; };
++template <class _Tp> struct __is_array_function_or_void<_Tp, false, false, true> { enum { value = 3 }; };
++// clang-format on
++} // namespace __is_convertible_imp
++
++template <class _Tp,
++          unsigned = __is_convertible_imp::__is_array_function_or_void<__libcpp_remove_reference_t<_Tp> >::value>
++struct __is_convertible_check {
++  static const size_t __v = 0;
++};
++
++template <class _Tp>
++struct __is_convertible_check<_Tp, 0> {
++  static const size_t __v = sizeof(_Tp);
++};
++
++// clang-format off
++template <class _T1,
++          class _T2,
++          unsigned _T1_is_array_function_or_void = __is_convertible_imp::__is_array_function_or_void<_T1>::value,
++          unsigned _T2_is_array_function_or_void = __is_convertible_imp::__is_array_function_or_void<_T2>::value>
++struct __is_convertible : integral_constant<bool, __is_convertible_imp::__is_convertible_test<_T1, _T2>::value> {};
++
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 0, 1> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 1, 1> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 2, 1> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 3, 1> : false_type {};
++
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 0, 2> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 1, 2> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 2, 2> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 3, 2> : false_type {};
++
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 0, 3> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 1, 3> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 2, 3> : false_type {};
++template <class _T1, class _T2> struct __is_convertible<_T1, _T2, 3, 3> : true_type {};
++// clang-format on
++
++template <class _T1, class _T2>
++struct is_convertible : __is_convertible<_T1, _T2> {
++  static const size_t __complete_check1 = __is_convertible_check<_T1>::__v;
++  static const size_t __complete_check2 = __is_convertible_check<_T2>::__v;
++};
++
++#  if _LIBCPP_STD_VER >= 17
++template <class _From, class _To>
++inline constexpr bool is_convertible_v = is_convertible<_From, _To>::value;
++#  endif
++
++#endif // __has_builtin(__is_convertible)
+ 
+ #if _LIBCPP_STD_VER >= 20
+ 
++#  if __has_builtin(__is_nothrow_convertible)
++
+ template <class _Tp, class _Up>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_nothrow_convertible : bool_constant<__is_nothrow_convertible(_Tp, _Up)> {};
+ 
+ template <class _Tp, class _Up>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_nothrow_convertible_v = __is_nothrow_convertible(_Tp, _Up);
+ 
++#  else // __has_builtin(__is_nothrow_convertible)
++
++template <typename _Tp>
++void __test_noexcept(_Tp) noexcept;
++
++template <typename _Fm, typename _To>
++bool_constant<noexcept(std::__test_noexcept<_To>(std::declval<_Fm>()))> __is_nothrow_convertible_test();
++
++template <typename _Fm, typename _To>
++struct __is_nothrow_convertible_helper : decltype(std::__is_nothrow_convertible_test<_Fm, _To>()) {};
++
++template <typename _Fm, typename _To>
++struct is_nothrow_convertible
++    : _Or<_And<is_void<_To>, is_void<_Fm>>,
++          _Lazy<_And, is_convertible<_Fm, _To>, __is_nothrow_convertible_helper<_Fm, _To> > >::type {};
++
++template <typename _Fm, typename _To>
++inline constexpr bool is_nothrow_convertible_v = is_nothrow_convertible<_Fm, _To>::value;
++
++#  endif // __has_builtin(__is_nothrow_convertible)
++
+ #endif // _LIBCPP_STD_VER >= 20
+ 
+ _LIBCPP_END_NAMESPACE_STD
+diff --git a/include/__type_traits/is_unqualified.h b/include/__type_traits/is_unqualified.h
+index 7970b36116..617a9b072b 100644
+--- a/include/__type_traits/is_unqualified.h
++++ b/include/__type_traits/is_unqualified.h
+@@ -10,6 +10,7 @@
+ #define _LIBCPP___TYPE_TRAITS_IS_UNQUALIFIED_H
+ 
+ #include <__config>
++#include <__type_traits/remove_cvref.h> // for __remove_cvref_t
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,7 +19,7 @@
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
+ template <class _Tp>
+-inline const bool __is_unqualified_v = __is_same(_Tp, __remove_cvref(_Tp));
++inline const bool __is_unqualified_v = __is_same(_Tp, __remove_cvref_t<_Tp>);
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/reference_constructs_from_temporary.h b/include/__type_traits/reference_constructs_from_temporary.h
+index 2ff549b4e1..61532a41d3 100644
+--- a/include/__type_traits/reference_constructs_from_temporary.h
++++ b/include/__type_traits/reference_constructs_from_temporary.h
+@@ -33,10 +33,15 @@ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool reference_constructs_from_tempo
+ #if __has_builtin(__reference_constructs_from_temporary)
+ template <class _Tp, class _Up>
+ inline const bool __reference_constructs_from_temporary_v = __reference_constructs_from_temporary(_Tp, _Up);
+-#else
++#elif __has_builtin(__reference_binds_to_temporary)
+ // TODO(LLVM 22): Remove this as all supported compilers should have __reference_constructs_from_temporary implemented.
+ template <class _Tp, class _Up>
+ inline const bool __reference_constructs_from_temporary_v = __reference_binds_to_temporary(_Tp, _Up);
++#else
++// Neither builtin is available, for example with the TASKING compiler. Only a
++// diagnostic is lost by assuming that no temporary is bound.
++template <class _Tp, class _Up>
++inline const bool __reference_constructs_from_temporary_v = false;
+ #endif
+ 
+ _LIBCPP_END_NAMESPACE_STD
+diff --git a/include/__type_traits/remove_cvref.h b/include/__type_traits/remove_cvref.h
+index c568e8df30..d99da622a1 100644
+--- a/include/__type_traits/remove_cvref.h
++++ b/include/__type_traits/remove_cvref.h
+@@ -11,13 +11,25 @@
+ 
+ #include <__config>
+ 
++#if !__has_builtin(__remove_cvref)
++// The trait is composed from __remove_cv and __remove_reference when the
++// builtin is absent.
++#  include <__type_traits/remove_cv.h>
++#  include <__type_traits/remove_reference.h>
++#endif
++
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+ #endif
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
+-#if defined(_LIBCPP_COMPILER_GCC)
++#if !__has_builtin(__remove_cvref)
++// Neither TASKING nor GCC before 14 has the builtin; compose the trait from
++// __remove_cv and __remove_reference instead.
++template <class _Tp>
++using __remove_cvref_t _LIBCPP_NODEBUG = __remove_cv_t<__libcpp_remove_reference_t<_Tp> >;
++#elif defined(_LIBCPP_COMPILER_GCC)
+ template <class _Tp>
+ struct __remove_cvref_gcc {
+   using type = __remove_cvref(_Tp);
+@@ -33,7 +45,7 @@ using __remove_cvref_t _LIBCPP_NODEBUG = __remove_cvref(_Tp);
+ #if _LIBCPP_STD_VER >= 20
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS remove_cvref {
+-  using type _LIBCPP_NODEBUG = __remove_cvref(_Tp);
++  using type _LIBCPP_NODEBUG = __remove_cvref_t<_Tp>;
+ };
+ 
+ template <class _Tp>
+diff --git a/include/__type_traits/remove_reference.h b/include/__type_traits/remove_reference.h
+index 7cc3ca1705..d66b2e8da2 100644
+--- a/include/__type_traits/remove_reference.h
++++ b/include/__type_traits/remove_reference.h
+@@ -34,7 +34,15 @@ struct remove_reference {
+ template <class _Tp>
+ using __libcpp_remove_reference_t = typename remove_reference<_Tp>::type;
+ #else
+-#  error "remove_reference not implemented!"
++// Neither builtin is available, for example with the TASKING compiler.
++// clang-format off
++template <class _Tp> struct remove_reference        {using type _LIBCPP_NODEBUG = _Tp;};
++template <class _Tp> struct remove_reference<_Tp&>  {using type _LIBCPP_NODEBUG = _Tp;};
++template <class _Tp> struct remove_reference<_Tp&&> {using type _LIBCPP_NODEBUG = _Tp;};
++// clang-format on
++
++template <class _Tp>
++using __libcpp_remove_reference_t _LIBCPP_NODEBUG = typename remove_reference<_Tp>::type;
+ #endif // __has_builtin(__remove_reference_t)
+ 
+ #if _LIBCPP_STD_VER >= 14

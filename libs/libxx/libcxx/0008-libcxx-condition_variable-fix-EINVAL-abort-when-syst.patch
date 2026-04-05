@@ -1,0 +1,33 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Mon, 15 Jun 2026 21:16:24 +0800
+Subject: [PATCH] libcxx/condition_variable: fix EINVAL abort when system clock
+ not synced
+
+When system_clock is not yet synchronized (e.g. device cold boot),
+condition_variable::wait_for() may compute a negative time_point.
+This causes NuttX pthread_cond_timedwait() to return EINVAL, and
+libc++ treats any error other than ETIMEDOUT as fatal, calling
+abort() and crashing the system.
+
+Fix by clamping the duration to zero when negative, right after
+the upper-bound check.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/condition_variable.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/condition_variable.cpp b/src/condition_variable.cpp
+index a87399d1b7..6bbc906ece 100644
+--- a/src/condition_variable.cpp
++++ b/src/condition_variable.cpp
+@@ -46,6 +46,8 @@ void condition_variable::__do_timed_wait(unique_lock<mutex>& lk,
+   nanoseconds d = tp.time_since_epoch();
+   if (d > nanoseconds(0x59682F000000E941))
+     d = nanoseconds(0x59682F000000E941);
++  else if (d < nanoseconds(0))
++    d = nanoseconds(0);
+   __libcpp_timespec_t ts;
+   seconds s = duration_cast<seconds>(d);
+   typedef decltype(ts.tv_sec) ts_sec;

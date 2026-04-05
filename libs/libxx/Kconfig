@@ -100,7 +100,7 @@ config LIBCXXABI_VERSION
 	string "Select libcxxabi version"
 	depends on LIBCXXABI
 	default LIBCXX_VERSION if LIBCXX
-	default "17.0.6" if !LIBCXX
+	default "21.1.8" if !LIBCXX
 
 config LIBSTDCXX_VERSION
 	string "Select libstdcxx version"
@@ -152,7 +152,7 @@ endif
 config LIBCXX_VERSION
 	string "Select libcxx version"
 	depends on LIBCXX
-	default "17.0.6"
+	default "21.1.8"
 
 config LIBCXX_TEST
 	bool "LLVM Libcxx Library Test"
