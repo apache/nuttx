@@ -93,4 +93,10 @@ if(CONFIG_SIGNAL_FD)
   list(APPEND SRCS fs_signalfd.c)
 endif()
 
+# Support for profiler
+
+if(CONFIG_FS_PROFILER)
+  list(APPEND SRCS fs_profile.c)
+endif()
+
 target_sources(fs PRIVATE ${SRCS})

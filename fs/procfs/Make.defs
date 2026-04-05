@@ -32,6 +32,10 @@ ifeq ($(CONFIG_FS_PROCFS_INCLUDE_PRESSURE),y)
 CSRCS += fs_procfspressure.c
 endif
 
+ifeq ($(CONFIG_FS_PROCFS_PROFILER),y)
+CSRCS += fs_procfsprofile.c
+endif
+
 # Include procfs build support
 
 DEPPATH += --dep-path procfs
