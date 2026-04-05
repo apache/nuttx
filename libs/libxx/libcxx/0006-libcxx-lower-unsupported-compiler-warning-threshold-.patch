@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Wed, 2 Sep 2026 14:42:31 +0800
+Subject: [PATCH] libcxx: lower unsupported-compiler warning threshold to GCC
+ 12
+
+llvm-21 libc++ emits #warning "Libc++ only supports GCC 14 and later"
+for GCC < 14, which -Werror=cpp turns into a build error.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__configuration/compiler.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/__configuration/compiler.h b/include/__configuration/compiler.h
+index 4b6c6cad35..27c4256b61 100644
+--- a/include/__configuration/compiler.h
++++ b/include/__configuration/compiler.h
+@@ -41,8 +41,8 @@
+ #      warning "Libc++ only supports AppleClang 15 and later"
+ #    endif
+ #  elif defined(_LIBCPP_GCC_VER)
+-#    if _LIBCPP_GCC_VER < 1400
+-#      warning "Libc++ only supports GCC 14 and later"
++#    if _LIBCPP_GCC_VER < 1200
++#      warning "Libc++ only supports GCC 12 and later"
+ #    endif
+ #  endif
+ 

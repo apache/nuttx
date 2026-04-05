@@ -1,0 +1,801 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 13 Nov 2026 12:11:38 +0800
+Subject: [PATCH] libcxx: provide what GCC 12 and 13 lack from GCC 14 and 15
+
+llvm 21 uses compiler builtins that GCC added in versions 14 and 15.
+Add fallbacks for them, keeping the original code for compilers that
+provide the builtins.
+
+The type trait builtins, such as __is_array, __is_const, __remove_cv
+and __decay, get template based implementations. The ones GCC added in
+14 are selected by _LIBCPP_GCC_VER < 1400. The ones it only added in
+15 are selected by __has_builtin, since GCC 14 lacks them as well.
+
+__builtin_clzg, __builtin_ctzg and __builtin_popcountg dispatch to the
+__builtin_clz, __builtin_ctz and __builtin_popcount variants.
+
+__type_pack_element gets a recursive template in tuple_element.h,
+make_tuple_types.h and variant.
+
+__builtin_operator_new and __builtin_operator_delete, which only Clang
+has, become ::operator new and ::operator delete.
+
+is_void.h and is_null_pointer.h use __remove_cv_t instead of calling
+the __remove_cv builtin.
+
+bitset silences a false -Wstringop-overflow in to_string() from GCC 13.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__bit/countl.h                     | 11 +++++++
+ include/__bit/countr.h                     | 11 +++++++
+ include/__bit/popcount.h                   |  9 ++++++
+ include/__new/allocate.h                   | 17 ++++++++++
+ include/__tuple/make_tuple_types.h         |  5 +++
+ include/__tuple/tuple_element.h            | 12 ++++++++
+ include/__type_traits/add_pointer.h        |  4 +--
+ include/__type_traits/add_reference.h      | 12 ++++++++
+ include/__type_traits/decay.h              | 22 +++++++++++++
+ include/__type_traits/is_array.h           |  9 ++++++
+ include/__type_traits/is_bounded_array.h   | 12 ++++++++
+ include/__type_traits/is_const.h           |  9 ++++++
+ include/__type_traits/is_function.h        | 12 ++++++++
+ include/__type_traits/is_member_pointer.h  | 36 ++++++++++++++++++++++
+ include/__type_traits/is_null_pointer.h    |  6 ++++
+ include/__type_traits/is_object.h          | 13 ++++++++
+ include/__type_traits/is_pointer.h         | 11 +++++++
+ include/__type_traits/is_reference.h       | 10 ++++++
+ include/__type_traits/is_void.h            | 10 ++++++
+ include/__type_traits/is_volatile.h        |  9 ++++++
+ include/__type_traits/remove_all_extents.h |  6 ++++
+ include/__type_traits/remove_cv.h          |  7 +++++
+ include/__type_traits/remove_extent.h      |  6 ++++
+ include/bitset                             |  6 +++-
+ include/variant                            |  7 +++++
+ 25 files changed, 269 insertions(+), 3 deletions(-)
+
+diff --git a/include/__bit/countl.h b/include/__bit/countl.h
+index 0759140208..d5ccc30260 100644
+--- a/include/__bit/countl.h
++++ b/include/__bit/countl.h
+@@ -25,7 +25,18 @@ _LIBCPP_BEGIN_NAMESPACE_STD
+ template <class _Tp>
+ _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 int __countl_zero(_Tp __t) _NOEXCEPT {
+   static_assert(__is_unsigned_integer_v<_Tp>, "__countl_zero requires an unsigned integer type");
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  if (__t == 0)
++    return numeric_limits<_Tp>::digits;
++  if constexpr (sizeof(_Tp) <= sizeof(unsigned int))
++    return __builtin_clz(static_cast<unsigned int>(__t)) - (numeric_limits<unsigned int>::digits - numeric_limits<_Tp>::digits);
++  else if constexpr (sizeof(_Tp) <= sizeof(unsigned long))
++    return __builtin_clzl(static_cast<unsigned long>(__t)) - (numeric_limits<unsigned long>::digits - numeric_limits<_Tp>::digits);
++  else
++    return __builtin_clzll(static_cast<unsigned long long>(__t)) - (numeric_limits<unsigned long long>::digits - numeric_limits<_Tp>::digits);
++#else
+   return __builtin_clzg(__t, numeric_limits<_Tp>::digits);
++#endif
+ }
+ 
+ #if _LIBCPP_STD_VER >= 20
+diff --git a/include/__bit/countr.h b/include/__bit/countr.h
+index f6c98695d3..b5f1852a7c 100644
+--- a/include/__bit/countr.h
++++ b/include/__bit/countr.h
+@@ -25,7 +25,18 @@ _LIBCPP_BEGIN_NAMESPACE_STD
+ template <class _Tp>
+ [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR int __countr_zero(_Tp __t) _NOEXCEPT {
+   static_assert(__is_unsigned_integer_v<_Tp>, "__countr_zero only works with unsigned types");
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  if (__t == 0)
++    return numeric_limits<_Tp>::digits;
++  if constexpr (sizeof(_Tp) <= sizeof(unsigned int))
++    return __builtin_ctz(static_cast<unsigned int>(__t));
++  else if constexpr (sizeof(_Tp) <= sizeof(unsigned long))
++    return __builtin_ctzl(static_cast<unsigned long>(__t));
++  else
++    return __builtin_ctzll(static_cast<unsigned long long>(__t));
++#else
+   return __builtin_ctzg(__t, numeric_limits<_Tp>::digits);
++#endif
+ }
+ 
+ #if _LIBCPP_STD_VER >= 20
+diff --git a/include/__bit/popcount.h b/include/__bit/popcount.h
+index 8d9ba09938..609dfd8365 100644
+--- a/include/__bit/popcount.h
++++ b/include/__bit/popcount.h
+@@ -24,7 +24,16 @@ _LIBCPP_BEGIN_NAMESPACE_STD
+ template <class _Tp>
+ [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR int __popcount(_Tp __t) _NOEXCEPT {
+   static_assert(__is_unsigned_integer_v<_Tp>, "__popcount only works with unsigned types");
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  if constexpr (sizeof(_Tp) <= sizeof(unsigned int))
++    return __builtin_popcount(static_cast<unsigned int>(__t));
++  else if constexpr (sizeof(_Tp) <= sizeof(unsigned long))
++    return __builtin_popcountl(static_cast<unsigned long>(__t));
++  else
++    return __builtin_popcountll(static_cast<unsigned long long>(__t));
++#else
+   return __builtin_popcountg(__t);
++#endif
+ }
+ 
+ #if _LIBCPP_STD_VER >= 20
+diff --git a/include/__new/allocate.h b/include/__new/allocate.h
+index 9bfe19aedb..7541dbb504 100644
+--- a/include/__new/allocate.h
++++ b/include/__new/allocate.h
+@@ -37,10 +37,18 @@ __libcpp_allocate(__element_count __n, [[__maybe_unused__]] size_t __align = _LI
+   size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+ #if _LIBCPP_HAS_ALIGNED_ALLOCATION
+   if (__is_overaligned_for_new(__align))
++#if defined(_LIBCPP_COMPILER_GCC)
++    return static_cast<_Tp*>(::operator new(__size, static_cast<align_val_t>(__align)));
++#else
+     return static_cast<_Tp*>(__builtin_operator_new(__size, static_cast<align_val_t>(__align)));
+ #endif
++#endif
+ 
++#if defined(_LIBCPP_COMPILER_GCC)
++  return static_cast<_Tp*>(::operator new(__size));
++#else
+   return static_cast<_Tp*>(__builtin_operator_new(__size));
++#endif
+ }
+ 
+ #if _LIBCPP_HAS_SIZED_DEALLOCATION
+@@ -57,10 +65,19 @@ __libcpp_deallocate(__type_identity_t<_Tp>* __ptr,
+   [[__maybe_unused__]] size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+ #if _LIBCPP_HAS_ALIGNED_ALLOCATION
+   if (__is_overaligned_for_new(__align))
++#if defined(_LIBCPP_COMPILER_GCC)
++    return ::operator delete(
++        __ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size), static_cast<align_val_t>(__align));
++#else
+     return __builtin_operator_delete(
+         __ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size), static_cast<align_val_t>(__align));
+ #endif
++#endif
++#if defined(_LIBCPP_COMPILER_GCC)
++  return ::operator delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
++#else
+   return __builtin_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
++#endif
+ }
+ 
+ #undef _LIBCPP_ONLY_IF_SIZED_DEALLOCATION
+diff --git a/include/__tuple/make_tuple_types.h b/include/__tuple/make_tuple_types.h
+index a5c9bcf23a..758a58cfc7 100644
+--- a/include/__tuple/make_tuple_types.h
++++ b/include/__tuple/make_tuple_types.h
+@@ -41,7 +41,12 @@ template <template <class...> class _Tuple, class... _Types, size_t... _Idx>
+ struct __make_tuple_types_flat<_Tuple<_Types...>, __tuple_indices<_Idx...>> {
+   // Specialization for pair, tuple, and __tuple_types
+   template <class _Tp>
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  using __apply_quals _LIBCPP_NODEBUG =
++      __tuple_types<__copy_cvref_t<_Tp, typename __type_pack_element_fallback<_Idx, _Types...>::type>...>;
++#else
+   using __apply_quals _LIBCPP_NODEBUG = __tuple_types<__copy_cvref_t<_Tp, __type_pack_element<_Idx, _Types...>>...>;
++#endif
+ };
+ 
+ template <class _Vt, size_t _Np, size_t... _Idx>
+diff --git a/include/__tuple/tuple_element.h b/include/__tuple/tuple_element.h
+index f67c867464..9f461733be 100644
+--- a/include/__tuple/tuple_element.h
++++ b/include/__tuple/tuple_element.h
+@@ -40,10 +40,22 @@ struct tuple_element<_Ip, const volatile _Tp> {
+ 
+ #ifndef _LIBCPP_CXX03_LANG
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <size_t _Ip, class... _Types> struct __type_pack_element_fallback;
++template <class _Head, class... _Tail>
++struct __type_pack_element_fallback<0, _Head, _Tail...> { using type = _Head; };
++template <size_t _Ip, class _Head, class... _Tail>
++struct __type_pack_element_fallback<_Ip, _Head, _Tail...> : __type_pack_element_fallback<_Ip - 1, _Tail...> {};
++#endif
++
+ template <size_t _Ip, class... _Types>
+ struct tuple_element<_Ip, __tuple_types<_Types...> > {
+   static_assert(_Ip < sizeof...(_Types), "tuple_element index out of range");
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  using type _LIBCPP_NODEBUG = typename __type_pack_element_fallback<_Ip, _Types...>::type;
++#else
+   using type _LIBCPP_NODEBUG = __type_pack_element<_Ip, _Types...>;
++#endif
+ };
+ 
+ #  if _LIBCPP_STD_VER >= 14
+diff --git a/include/__type_traits/add_pointer.h b/include/__type_traits/add_pointer.h
+index fa9376699a..c497f6c446 100644
+--- a/include/__type_traits/add_pointer.h
++++ b/include/__type_traits/add_pointer.h
+@@ -20,7 +20,7 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
+-#if !defined(_LIBCPP_WORKAROUND_OBJCXX_COMPILER_INTRINSICS)
++#if !defined(_LIBCPP_WORKAROUND_OBJCXX_COMPILER_INTRINSICS) && __has_builtin(__add_pointer)
+ 
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS add_pointer {
+@@ -53,7 +53,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS add_pointer {
+   using type _LIBCPP_NODEBUG = __add_pointer_t<_Tp>;
+ };
+ 
+-#endif // !defined(_LIBCPP_WORKAROUND_OBJCXX_COMPILER_INTRINSICS)
++#endif // !defined(_LIBCPP_WORKAROUND_OBJCXX_COMPILER_INTRINSICS) && __has_builtin(__add_pointer)
+ 
+ #if _LIBCPP_STD_VER >= 14
+ template <class _Tp>
+diff --git a/include/__type_traits/add_reference.h b/include/__type_traits/add_reference.h
+index c6f5d63d26..3014765803 100644
+--- a/include/__type_traits/add_reference.h
++++ b/include/__type_traits/add_reference.h
+@@ -17,10 +17,16 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__add_lvalue_reference)
++template <class _Tp, class = void> struct __add_lvalue_ref { using type = _Tp; };
++template <class _Tp> struct __add_lvalue_ref<_Tp, decltype(void(static_cast<_Tp&(*)()>(nullptr)))> { using type = _Tp&; };
++template <class _Tp> struct add_lvalue_reference : __add_lvalue_ref<_Tp> {};
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS add_lvalue_reference {
+   using type _LIBCPP_NODEBUG = __add_lvalue_reference(_Tp);
+ };
++#endif // !__has_builtin(__add_lvalue_reference)
+ 
+ #ifdef _LIBCPP_COMPILER_GCC
+ template <class _Tp>
+@@ -35,10 +41,16 @@ template <class _Tp>
+ using add_lvalue_reference_t = __add_lvalue_reference_t<_Tp>;
+ #endif
+ 
++#if !__has_builtin(__add_rvalue_reference)
++template <class _Tp, class = void> struct __add_rvalue_ref { using type = _Tp; };
++template <class _Tp> struct __add_rvalue_ref<_Tp, decltype(void(static_cast<_Tp&&(*)()>(nullptr)))> { using type = _Tp&&; };
++template <class _Tp> struct add_rvalue_reference : __add_rvalue_ref<_Tp> {};
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS add_rvalue_reference {
+   using type _LIBCPP_NODEBUG = __add_rvalue_reference(_Tp);
+ };
++#endif // !__has_builtin(__add_rvalue_reference)
+ 
+ #ifdef _LIBCPP_COMPILER_GCC
+ template <class _Tp>
+diff --git a/include/__type_traits/decay.h b/include/__type_traits/decay.h
+index 661fba53df..e12b5a73c6 100644
+--- a/include/__type_traits/decay.h
++++ b/include/__type_traits/decay.h
+@@ -10,6 +10,13 @@
+ #define _LIBCPP___TYPE_TRAITS_DECAY_H
+ 
+ #include <__config>
++#include <__type_traits/remove_reference.h>
++#include <__type_traits/remove_extent.h>
++#include <__type_traits/remove_cv.h>
++#include <__type_traits/is_function.h>
++#include <__type_traits/is_array.h>
++#include <__type_traits/conditional.h>
++#include <__type_traits/add_pointer.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -17,10 +24,25 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__decay)
++template <class _Tp>
++struct decay {
++private:
++  using _Up _LIBCPP_NODEBUG = typename remove_reference<_Tp>::type;
++public:
++  using type _LIBCPP_NODEBUG =
++      __conditional_t<is_array<_Up>::value,
++                      __add_pointer_t<typename remove_extent<_Up>::type>,
++                      __conditional_t<is_function<_Up>::value,
++                                      __add_pointer_t<_Up>,
++                                      typename remove_cv<_Up>::type>>;
++};
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS decay {
+   using type _LIBCPP_NODEBUG = __decay(_Tp);
+ };
++#endif // !__has_builtin(__decay)
+ 
+ #ifdef _LIBCPP_COMPILER_GCC
+ template <class _Tp>
+diff --git a/include/__type_traits/is_array.h b/include/__type_traits/is_array.h
+index e734d1a304..a92db971fd 100644
+--- a/include/__type_traits/is_array.h
++++ b/include/__type_traits/is_array.h
+@@ -18,6 +18,14 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp> struct is_array : false_type {};
++template <class _Tp> struct is_array<_Tp[]> : true_type {};
++template <class _Tp, __SIZE_TYPE__ _Np> struct is_array<_Tp[_Np]> : true_type {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp> inline constexpr bool is_array_v = is_array<_Tp>::value;
++#endif
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_array : _BoolConstant<__is_array(_Tp)> {};
+ 
+@@ -25,6 +33,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_array : _BoolConstant<__is_array(_Tp)> {};
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_array_v = __is_array(_Tp);
+ #endif
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_bounded_array.h b/include/__type_traits/is_bounded_array.h
+index 8a41e07aa0..c7385e4a22 100644
+--- a/include/__type_traits/is_bounded_array.h
++++ b/include/__type_traits/is_bounded_array.h
+@@ -18,16 +18,28 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp> inline const bool __is_bounded_array_v = false;
++template <class _Tp, __SIZE_TYPE__ _Np> inline const bool __is_bounded_array_v<_Tp[_Np]> = true;
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ inline const bool __is_bounded_array_v = __is_bounded_array(_Tp);
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ #if _LIBCPP_STD_VER >= 20
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp> struct is_bounded_array : false_type {};
++template <class _Tp, __SIZE_TYPE__ _Np> struct is_bounded_array<_Tp[_Np]> : true_type {};
++template <class _Tp>
++inline constexpr bool is_bounded_array_v = is_bounded_array<_Tp>::value;
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_bounded_array : bool_constant<__is_bounded_array(_Tp)> {};
+ 
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_bounded_array_v = __is_bounded_array(_Tp);
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ #endif
+ 
+diff --git a/include/__type_traits/is_const.h b/include/__type_traits/is_const.h
+index 85cc32bff1..7c717b0f90 100644
+--- a/include/__type_traits/is_const.h
++++ b/include/__type_traits/is_const.h
+@@ -18,6 +18,14 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__is_const)
++template <class _Tp> struct is_const : false_type {};
++template <class _Tp> struct is_const<_Tp const> : true_type {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp> inline constexpr bool is_const_v = false;
++template <class _Tp> inline constexpr bool is_const_v<const _Tp> = true;
++#endif
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_const : _BoolConstant<__is_const(_Tp)> {};
+ 
+@@ -25,6 +33,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_const : _BoolConstant<__is_const(_Tp)> {};
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_const_v = __is_const(_Tp);
+ #endif
++#endif // !__has_builtin(__is_const)
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_function.h b/include/__type_traits/is_function.h
+index 119892ee1a..afe801b226 100644
+--- a/include/__type_traits/is_function.h
++++ b/include/__type_traits/is_function.h
+@@ -11,6 +11,8 @@
+ 
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/is_const.h>
++#include <__type_traits/is_reference.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,6 +20,15 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp>
++struct is_function
++    : public integral_constant<bool, !(is_reference<_Tp>::value || is_const<const _Tp>::value)> {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp>
++inline constexpr bool is_function_v = is_function<_Tp>::value;
++#endif
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_function : integral_constant<bool, __is_function(_Tp)> {};
+ 
+@@ -25,6 +36,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_function : integral_constant<bool, __is_fun
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_function_v = __is_function(_Tp);
+ #endif
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_member_pointer.h b/include/__type_traits/is_member_pointer.h
+index e4fd9e0f26..e46aa004bb 100644
+--- a/include/__type_traits/is_member_pointer.h
++++ b/include/__type_traits/is_member_pointer.h
+@@ -11,6 +11,7 @@
+ 
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/remove_cv.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,6 +19,39 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++
++template <class _Tp> struct __libcpp_is_member_pointer : false_type {};
++template <class _Tp, class _Cl> struct __libcpp_is_member_pointer<_Tp _Cl::*> : true_type {};
++template <class _Tp> struct is_member_pointer : __libcpp_is_member_pointer<__remove_cv_t<_Tp>> {};
++
++template <class _Tp> struct __libcpp_is_member_fn_ptr : false_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...)> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) volatile> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const volatile> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...)&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) volatile&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const volatile&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...)&&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const&&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) volatile&&> : true_type {};
++template <class _Rp, class _Cl, class... _As> struct __libcpp_is_member_fn_ptr<_Rp (_Cl::*)(_As...) const volatile&&> : true_type {};
++template <class _Tp> struct is_member_function_pointer : __libcpp_is_member_fn_ptr<__remove_cv_t<_Tp>> {};
++
++template <class _Tp>
++struct is_member_object_pointer
++    : _BoolConstant<is_member_pointer<_Tp>::value && !is_member_function_pointer<_Tp>::value> {};
++
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp> inline constexpr bool is_member_pointer_v = is_member_pointer<_Tp>::value;
++template <class _Tp> inline constexpr bool is_member_object_pointer_v = is_member_object_pointer<_Tp>::value;
++template <class _Tp> inline constexpr bool is_member_function_pointer_v = is_member_function_pointer<_Tp>::value;
++#endif
++
++#else // GCC >= 14 or Clang
++
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_member_pointer : _BoolConstant<__is_member_pointer(_Tp)> {};
+ 
+@@ -38,6 +72,8 @@ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_member_function_pointer_v = __is_member_function_pointer(_Tp);
+ #endif
+ 
++#endif // _LIBCPP_GCC_VER < 1400
++
+ _LIBCPP_END_NAMESPACE_STD
+ 
+ #endif // _LIBCPP___TYPE_TRAITS_IS_MEMBER_POINTER_H
+diff --git a/include/__type_traits/is_null_pointer.h b/include/__type_traits/is_null_pointer.h
+index 63bfb7d4da..54fe9aa33c 100644
+--- a/include/__type_traits/is_null_pointer.h
++++ b/include/__type_traits/is_null_pointer.h
+@@ -12,6 +12,7 @@
+ #include <__config>
+ #include <__cstddef/nullptr_t.h>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/remove_cv.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -19,8 +20,13 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp>
++inline const bool __is_null_pointer_v = __is_same(__remove_cv_t<_Tp>, nullptr_t);
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ inline const bool __is_null_pointer_v = __is_same(__remove_cv(_Tp), nullptr_t);
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ #if _LIBCPP_STD_VER >= 14
+ template <class _Tp>
+diff --git a/include/__type_traits/is_object.h b/include/__type_traits/is_object.h
+index 6532835961..4395817045 100644
+--- a/include/__type_traits/is_object.h
++++ b/include/__type_traits/is_object.h
+@@ -11,6 +11,9 @@
+ 
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/is_function.h>
++#include <__type_traits/is_reference.h>
++#include <__type_traits/is_void.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,6 +21,15 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp>
++struct is_object
++    : _BoolConstant<!is_reference<_Tp>::value && !is_void<_Tp>::value && !is_function<_Tp>::value> {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp>
++inline constexpr bool is_object_v = is_object<_Tp>::value;
++#endif
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_object : _BoolConstant<__is_object(_Tp)> {};
+ 
+@@ -25,6 +37,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_object : _BoolConstant<__is_object(_Tp)> {}
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_object_v = __is_object(_Tp);
+ #endif
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_pointer.h b/include/__type_traits/is_pointer.h
+index 1c3a93d125..d929deb3fe 100644
+--- a/include/__type_traits/is_pointer.h
++++ b/include/__type_traits/is_pointer.h
+@@ -11,6 +11,7 @@
+ 
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/remove_cv.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,6 +19,15 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__is_pointer)
++template <class _Tp> struct __libcpp_is_pointer : false_type {};
++template <class _Tp> struct __libcpp_is_pointer<_Tp*> : true_type {};
++template <class _Tp> struct is_pointer : __libcpp_is_pointer<__remove_cv_t<_Tp>> {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp>
++inline constexpr bool is_pointer_v = is_pointer<_Tp>::value;
++#endif
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_pointer : _BoolConstant<__is_pointer(_Tp)> {};
+ 
+@@ -25,6 +35,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_pointer : _BoolConstant<__is_pointer(_Tp)>
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_pointer_v = __is_pointer(_Tp);
+ #  endif
++#endif // !__has_builtin(__is_pointer)
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_reference.h b/include/__type_traits/is_reference.h
+index 9c98c13fd1..9d1033ac12 100644
+--- a/include/__type_traits/is_reference.h
++++ b/include/__type_traits/is_reference.h
+@@ -18,6 +18,15 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp> struct is_reference : false_type {};
++template <class _Tp> struct is_reference<_Tp&> : true_type {};
++template <class _Tp> struct is_reference<_Tp&&> : true_type {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp>
++inline constexpr bool is_reference_v = is_reference<_Tp>::value;
++#endif
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_reference : _BoolConstant<__is_reference(_Tp)> {};
+ 
+@@ -25,6 +34,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_reference : _BoolConstant<__is_reference(_T
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_reference_v = __is_reference(_Tp);
+ #endif
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ #if __has_builtin(__is_lvalue_reference) && __has_builtin(__is_rvalue_reference)
+ 
+diff --git a/include/__type_traits/is_void.h b/include/__type_traits/is_void.h
+index f3af756863..674a627e99 100644
+--- a/include/__type_traits/is_void.h
++++ b/include/__type_traits/is_void.h
+@@ -11,6 +11,7 @@
+ 
+ #include <__config>
+ #include <__type_traits/integral_constant.h>
++#include <__type_traits/remove_cv.h>
+ 
+ #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+ #  pragma GCC system_header
+@@ -18,6 +19,14 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp>
++struct is_void : _BoolConstant<__is_same(__remove_cv_t<_Tp>, void)> {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp>
++inline constexpr bool is_void_v = __is_same(__remove_cv_t<_Tp>, void);
++#endif
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_void : _BoolConstant<__is_same(__remove_cv(_Tp), void)> {};
+ 
+@@ -25,6 +34,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_void : _BoolConstant<__is_same(__remove_cv(
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_void_v = __is_same(__remove_cv(_Tp), void);
+ #endif
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/is_volatile.h b/include/__type_traits/is_volatile.h
+index c654ebba92..9eb61b74c4 100644
+--- a/include/__type_traits/is_volatile.h
++++ b/include/__type_traits/is_volatile.h
+@@ -18,6 +18,14 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__is_volatile)
++template <class _Tp> struct is_volatile : false_type {};
++template <class _Tp> struct is_volatile<volatile _Tp> : true_type {};
++#if _LIBCPP_STD_VER >= 17
++template <class _Tp> inline constexpr bool is_volatile_v = false;
++template <class _Tp> inline constexpr bool is_volatile_v<volatile _Tp> = true;
++#endif
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS is_volatile : _BoolConstant<__is_volatile(_Tp)> {};
+ 
+@@ -25,6 +33,7 @@ struct _LIBCPP_NO_SPECIALIZATIONS is_volatile : _BoolConstant<__is_volatile(_Tp)
+ template <class _Tp>
+ _LIBCPP_NO_SPECIALIZATIONS inline constexpr bool is_volatile_v = __is_volatile(_Tp);
+ #endif
++#endif // !__has_builtin(__is_volatile)
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 
+diff --git a/include/__type_traits/remove_all_extents.h b/include/__type_traits/remove_all_extents.h
+index a9aaad4880..7e98369367 100644
+--- a/include/__type_traits/remove_all_extents.h
++++ b/include/__type_traits/remove_all_extents.h
+@@ -17,10 +17,16 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__remove_all_extents)
++template <class _Tp> struct remove_all_extents { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp> struct remove_all_extents<_Tp[]> : remove_all_extents<_Tp> {};
++template <class _Tp, __SIZE_TYPE__ _Np> struct remove_all_extents<_Tp[_Np]> : remove_all_extents<_Tp> {};
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS remove_all_extents {
+   using type _LIBCPP_NODEBUG = __remove_all_extents(_Tp);
+ };
++#endif // !__has_builtin(__remove_all_extents)
+ 
+ #ifdef _LIBCPP_COMPILER_GCC
+ template <class _Tp>
+diff --git a/include/__type_traits/remove_cv.h b/include/__type_traits/remove_cv.h
+index 0beaf3367e..0231c30b44 100644
+--- a/include/__type_traits/remove_cv.h
++++ b/include/__type_traits/remove_cv.h
+@@ -17,10 +17,17 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++template <class _Tp> struct remove_cv { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp> struct remove_cv<const _Tp> { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp> struct remove_cv<volatile _Tp> { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp> struct remove_cv<const volatile _Tp> { using type _LIBCPP_NODEBUG = _Tp; };
++#else // GCC >= 14 or Clang
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS remove_cv {
+   using type _LIBCPP_NODEBUG = __remove_cv(_Tp);
+ };
++#endif // _LIBCPP_GCC_VER < 1400
+ 
+ #if defined(_LIBCPP_COMPILER_GCC)
+ template <class _Tp>
+diff --git a/include/__type_traits/remove_extent.h b/include/__type_traits/remove_extent.h
+index 108b867bd0..a26a7770ee 100644
+--- a/include/__type_traits/remove_extent.h
++++ b/include/__type_traits/remove_extent.h
+@@ -17,10 +17,16 @@
+ 
+ _LIBCPP_BEGIN_NAMESPACE_STD
+ 
++#if !__has_builtin(__remove_extent)
++template <class _Tp> struct remove_extent { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp> struct remove_extent<_Tp[]> { using type _LIBCPP_NODEBUG = _Tp; };
++template <class _Tp, __SIZE_TYPE__ _Np> struct remove_extent<_Tp[_Np]> { using type _LIBCPP_NODEBUG = _Tp; };
++#else
+ template <class _Tp>
+ struct _LIBCPP_NO_SPECIALIZATIONS remove_extent {
+   using type _LIBCPP_NODEBUG = __remove_extent(_Tp);
+ };
++#endif // !__has_builtin(__remove_extent)
+ 
+ #ifdef _LIBCPP_COMPILER_GCC
+ template <class _Tp>
+diff --git a/include/bitset b/include/bitset
+index d109f27af5..cfa4a3acdd 100644
+--- a/include/bitset
++++ b/include/bitset
+@@ -277,8 +277,12 @@ protected:
+       __storage_type __word = std::__invert_if<!_Sparse>(__first_[__i]);
+       if (__i == _N_words - 1 && _Size - __bits < __bits_per_word)
+         __word &= (__storage_type(1) << (_Size - __bits)) - 1;
+-      for (; __word; __word &= (__word - 1))
++      for (; __word; __word &= (__word - 1)) {
++        _LIBCPP_DIAGNOSTIC_PUSH
++        _LIBCPP_GCC_DIAGNOSTIC_IGNORED("-Wstringop-overflow")
+         __r[_Size - 1 - (__bits + std::__countr_zero(__word))] = _Sparse ? __one : __zero;
++        _LIBCPP_DIAGNOSTIC_POP
++      }
+     }
+ 
+     return __r;
+diff --git a/include/variant b/include/variant
+index ede9f486ec..4f5969cba1 100644
+--- a/include/variant
++++ b/include/variant
+@@ -220,6 +220,7 @@ namespace std {
+ #  include <__compare/ordering.h>
+ #  include <__compare/three_way_comparable.h>
+ #  include <__config>
++#  include <__tuple/tuple_element.h>
+ #  include <__exception/exception.h>
+ #  include <__functional/hash.h>
+ #  include <__functional/operations.h>
+@@ -339,10 +340,16 @@ struct variant_alternative<_Ip, volatile _Tp> : add_volatile<variant_alternative
+ template <size_t _Ip, class _Tp>
+ struct variant_alternative<_Ip, const volatile _Tp> : add_cv<variant_alternative_t<_Ip, _Tp>> {};
+ 
++
++
+ template <size_t _Ip, class... _Types>
+ struct variant_alternative<_Ip, variant<_Types...>> {
+   static_assert(_Ip < sizeof...(_Types), "Index out of bounds in std::variant_alternative<>");
++#if defined(_LIBCPP_COMPILER_GCC) && _LIBCPP_GCC_VER < 1400
++  using type _LIBCPP_NODEBUG = typename __type_pack_element_fallback<_Ip, _Types...>::type;
++#else
+   using type _LIBCPP_NODEBUG = __type_pack_element<_Ip, _Types...>;
++#endif
+ };
+ 
+ template <size_t _NumAlternatives>

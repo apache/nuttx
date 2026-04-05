@@ -193,3 +193,7 @@ next trough with no gap in counting, matching the reload behavior of
 `CVE Numbering Authority (CNA) <https://www.cve.org/ProgramOrganization/CNAs>`_
 * [#16969](https://github.com/apache/nuttx/pull/16969) Revert "codespellrc: add ans to ignore words"
 * [#16966](https://github.com/apache/nuttx/pull/16966) codespellrc: add ans to ignore words
+--- a/include/__bit/countr.h
++++ b/include/__bit/countr.h
+diff --git a/include/__bit/countr.h b/include/__bit/countr.h
+ include/__bit/countr.h                     | 11 +++++++

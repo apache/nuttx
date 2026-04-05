@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Mon, 6 Apr 2026 15:58:53 +0800
+Subject: [PATCH] libcxx/__fwd/ios.h: fix streamoff type mismatch by removing
+ _NEWLIB_VERSION guard
+
+The original guard "#if defined(_NEWLIB_VERSION)" set streamoff to long int (matching newlib's off_t). However, _NEWLIB_VERSION leaks into NuttX builds through the toolchain's newlib headers via the include chain: libcxx/math.h -> toolchain math.h -> sys/reent.h -> sys/cdefs.h -> sys/features.h -> _newlib_version.h. This leak only affects source files that transitively include math.h, causing different libcxx .cpp files to see different streamoff types - iostream.cpp gets long int while ios.instantiations.cpp gets long long, resulting in a linker error due to mismatched mangled symbols for basic_streambuf::seekoff.
+NuttX uses its own libc (not newlib) with off_t = int64_t, so streamoff should always be long long. The upstream llvm is also moving away from _NEWLIB_VERSION detection toward an explicit _LIBCPP_LIBC_NEWLIB CMake-configured macro (targeting llvm-22+).
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__fwd/ios.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/include/__fwd/ios.h b/include/__fwd/ios.h
+index 831624f4b1..abcff9abd6 100644
+--- a/include/__fwd/ios.h
++++ b/include/__fwd/ios.h
+@@ -31,12 +31,7 @@ using wios = basic_ios<wchar_t>;
+ template <class _CharT, class _Traits>
+ class _LIBCPP_PREFERRED_NAME(ios) _LIBCPP_IF_WIDE_CHARACTERS(_LIBCPP_PREFERRED_NAME(wios)) basic_ios;
+ 
+-#if defined(_NEWLIB_VERSION)
+-// On newlib, off_t is 'long int'
+-using streamoff = long int; // for char_traits in <string>
+-#else
+ using streamoff = long long; // for char_traits in <string>
+-#endif
+ 
+ _LIBCPP_END_NAMESPACE_STD
+ 

@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Fri, 10 Apr 2026 17:04:42 +0800
+Subject: [PATCH] constexpr_c_functions.h: suppress GCC 15 false positives
+
+GCC 15 reports -Wstringop-overflow, -Wrestrict, and -Warray-bounds on the __builtin_memmove call in __constexpr_memmove when inlined into string operations at -O1+. These options are useful in applications that can not be suppressed.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ include/__string/constexpr_c_functions.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/include/__string/constexpr_c_functions.h b/include/__string/constexpr_c_functions.h
+index 119669e16b..f40b61c6b4 100644
+--- a/include/__string/constexpr_c_functions.h
++++ b/include/__string/constexpr_c_functions.h
+@@ -226,7 +226,13 @@ __constexpr_memmove(_Tp* __dest, _Up* __src, __element_count __n) {
+       }
+     }
+   } else if (__count > 0) {
++    // Suppress GCC 15 false positive when inlined into string operations at -O1+
++    _LIBCPP_DIAGNOSTIC_PUSH
++    _LIBCPP_GCC_DIAGNOSTIC_IGNORED("-Wstringop-overflow")
++    _LIBCPP_GCC_DIAGNOSTIC_IGNORED("-Wrestrict")
++    _LIBCPP_GCC_DIAGNOSTIC_IGNORED("-Warray-bounds")
+     ::__builtin_memmove(__dest, __src, (__count - 1) * sizeof(_Tp) + __datasizeof_v<_Tp>);
++    _LIBCPP_DIAGNOSTIC_POP
+   }
+   return __dest;
+ }

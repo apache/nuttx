@@ -1,0 +1,195 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Wed, 8 Apr 2026 14:58:59 +0800
+Subject: [PATCH] libcxx: fix C++20 features in source files for C++17
+ compatibility
+
+Upstream always builds the library with C++23, but NuttX needs to support C++17, 4 files are updated:
+- src/algorithm.cpp: replace ranges::less (C++20) with __less<> for C++17, guarded by _LIBCPP_STD_VER
+- src/include/from_chars_floating_point.h: replace floating_point concept (C++20) with class template parameter for C++17, guarded by _LIBCPP_STD_VER
+- src/include/to_chars_floating_point.h: replace std::bit_cast (C++20) with __bit_cast (internal, all standards), add __bit/bit_cast.h include
+- src/iostream.cpp: guard constexpr destructor (C++20) and replace std::construct_at (C++20) with placement new for C++17
+
+The CMake layer also adds -D"constinit=..." for C++17 and excludes barrier.cpp/atomic.cpp (C++20-only files).
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/algorithm.cpp                       |  7 +++++++
+ src/include/from_chars_floating_point.h | 20 ++++++++++++++++++++
+ src/include/to_chars_floating_point.h   | 11 ++++++-----
+ src/iostream.cpp                        | 10 +++++++++-
+ 4 files changed, 42 insertions(+), 6 deletions(-)
+
+diff --git a/src/algorithm.cpp b/src/algorithm.cpp
+index 8157be6f74..16807b94c1 100644
+--- a/src/algorithm.cpp
++++ b/src/algorithm.cpp
+@@ -21,10 +21,17 @@ void __sort(RandomAccessIterator first, RandomAccessIterator last, Comp comp) {
+   // Only use bitset partitioning for arithmetic types.  We should also check
+   // that the default comparator is in use so that we are sure that there are no
+   // branches in the comparator.
++#if _LIBCPP_STD_VER >= 20
+   std::__introsort<_ClassicAlgPolicy,
+                    ranges::less,
+                    RandomAccessIterator,
+                    __use_branchless_sort<ranges::less, RandomAccessIterator>>(first, last, ranges::less{}, depth_limit);
++#else
++  std::__introsort<_ClassicAlgPolicy,
++                   __less<>,
++                   RandomAccessIterator,
++                   __use_branchless_sort<__less<>, RandomAccessIterator>>(first, last, __less<>{}, depth_limit);
++#endif
+ }
+ 
+ // clang-format off
+diff --git a/src/include/from_chars_floating_point.h b/src/include/from_chars_floating_point.h
+index 9cbabcd106..313c7ea66d 100644
+--- a/src/include/from_chars_floating_point.h
++++ b/src/include/from_chars_floating_point.h
+@@ -41,7 +41,11 @@ _LIBCPP_BEGIN_NAMESPACE_STD
+ // - __ptr is the current position is the input string. This is points beyond
+ //   the initial I character.
+ // - __negative whether a valid string represents -inf or +inf.
++#if _LIBCPP_STD_VER >= 20
+ template <floating_point _Fp>
++#else
++template <class _Fp>
++#endif
+ __from_chars_result<_Fp>
+ __from_chars_floating_point_inf(const char* const __first, const char* __last, const char* __ptr, bool __negative) {
+   if (__last - __ptr < 2) [[unlikely]]
+@@ -85,7 +89,11 @@ __from_chars_floating_point_inf(const char* const __first, const char* __last, c
+ // - __ptr is the current position is the input string. This is points beyond
+ //   the initial N character.
+ // - __negative whether a valid string represents -nan or +nan.
++#if _LIBCPP_STD_VER >= 20
+ template <floating_point _Fp>
++#else
++template <class _Fp>
++#endif
+ __from_chars_result<_Fp>
+ __from_chars_floating_point_nan(const char* const __first, const char* __last, const char* __ptr, bool __negative) {
+   if (__last - __ptr < 2) [[unlikely]]
+@@ -279,7 +287,11 @@ __calculate_result(_Tp __mantissa, int __exponent, bool __negative, __from_chars
+ // This function and __from_chars_floating_point_decimal are similar. However
+ // the similar parts are all in helper functions. So the amount of code
+ // duplication is minimal.
++#if _LIBCPP_STD_VER >= 20
+ template <floating_point _Fp>
++#else
++template <class _Fp>
++#endif
+ __from_chars_result<_Fp>
+ __from_chars_floating_point_hex(const char* const __first, const char* __last, const char* __ptr, bool __negative) {
+   size_t __n         = __last - __first;
+@@ -358,7 +370,11 @@ __parse_fractional_decimal_constant(const char* __input, ptrdiff_t __n, ptrdiff_
+ // __fmt forwarded from from_chars
+ // __ptr the start of the buffer to parse. This is after the optional sign character.
+ // __negative should __value be set to a negative value?
++#if _LIBCPP_STD_VER >= 20
+ template <floating_point _Fp>
++#else
++template <class _Fp>
++#endif
+ __from_chars_result<_Fp> __from_chars_floating_point_decimal(
+     const char* const __first, const char* __last, chars_format __fmt, const char* __ptr, bool __negative) {
+   ptrdiff_t __n      = __last - __first;
+@@ -412,7 +428,11 @@ __from_chars_result<_Fp> __from_chars_floating_point_decimal(
+   return std::__calculate_result(__expanded_float.mantissa, __expanded_float.exponent, __negative, __result);
+ }
+ 
++#if _LIBCPP_STD_VER >= 20
+ template <floating_point _Fp>
++#else
++template <class _Fp>
++#endif
+ __from_chars_result<_Fp>
+ __from_chars_floating_point_impl(const char* const __first, const char* __last, chars_format __fmt) {
+   if (__first == __last) [[unlikely]]
+diff --git a/src/include/to_chars_floating_point.h b/src/include/to_chars_floating_point.h
+index 01c2618169..db87ddd241 100644
+--- a/src/include/to_chars_floating_point.h
++++ b/src/include/to_chars_floating_point.h
+@@ -21,6 +21,7 @@
+ #include <__algorithm/find_if.h>
+ #include <__algorithm/lower_bound.h>
+ #include <__algorithm/min.h>
++#include <__bit/bit_cast.h>
+ #include <__assert>
+ #include <__config>
+ #include <__functional/operations.h>
+@@ -119,7 +120,7 @@ to_chars_result _Floating_to_chars_hex_precision(
+     using _Traits    = _Floating_type_traits<_Floating>;
+     using _Uint_type = typename _Traits::_Uint_type;
+ 
+-    const _Uint_type _Uint_value    = std::bit_cast<_Uint_type>(_Value);
++    const _Uint_type _Uint_value    = __bit_cast<_Uint_type>(_Value);
+     const _Uint_type _Ieee_mantissa = _Uint_value & _Traits::_Denormal_mantissa_mask;
+     const int32_t _Ieee_exponent    = static_cast<int32_t>(_Uint_value >> _Traits::_Exponent_shift);
+ 
+@@ -347,7 +348,7 @@ to_chars_result _Floating_to_chars_hex_shortest(
+     using _Traits    = _Floating_type_traits<_Floating>;
+     using _Uint_type = typename _Traits::_Uint_type;
+ 
+-    const _Uint_type _Uint_value = std::bit_cast<_Uint_type>(_Value);
++    const _Uint_type _Uint_value = __bit_cast<_Uint_type>(_Value);
+ 
+     if (_Uint_value == 0) { // zero detected; write "0p+0" and return
+         // C11 7.21.6.1 "The fprintf function"/8: "If the value is zero, the exponent is zero."
+@@ -839,7 +840,7 @@ to_chars_result _Floating_to_chars_general_precision(
+     using _Traits    = _Floating_type_traits<_Floating>;
+     using _Uint_type = typename _Traits::_Uint_type;
+ 
+-    const _Uint_type _Uint_value = std::bit_cast<_Uint_type>(_Value);
++    const _Uint_type _Uint_value = __bit_cast<_Uint_type>(_Value);
+ 
+     if (_Uint_value == 0) { // zero detected; write "0" and return; _Precision is irrelevant due to zero-trimming
+         if (_First == _Last) {
+@@ -1002,7 +1003,7 @@ to_chars_result _Floating_to_chars(
+     using _Traits    = _Floating_type_traits<_Floating>;
+     using _Uint_type = typename _Traits::_Uint_type;
+ 
+-    _Uint_type _Uint_value = std::bit_cast<_Uint_type>(_Value);
++    _Uint_type _Uint_value = __bit_cast<_Uint_type>(_Value);
+ 
+     const bool _Was_negative = (_Uint_value & _Traits::_Shifted_sign_mask) != 0;
+ 
+@@ -1014,7 +1015,7 @@ to_chars_result _Floating_to_chars(
+         *_First++ = '-';
+ 
+         _Uint_value &= ~_Traits::_Shifted_sign_mask;
+-        _Value = std::bit_cast<_Floating>(_Uint_value);
++        _Value = __bit_cast<_Floating>(_Uint_value);
+     }
+ 
+     if ((_Uint_value & _Traits::_Shifted_exponent_mask) == _Traits::_Shifted_exponent_mask) {
+diff --git a/src/iostream.cpp b/src/iostream.cpp
+index 416725235c..8ec0db24a5 100644
+--- a/src/iostream.cpp
++++ b/src/iostream.cpp
+@@ -19,7 +19,10 @@ _LIBCPP_BEGIN_NAMESPACE_STD
+ template <class StreamT, class BufferT>
+ union stream_data {
+   constexpr stream_data() {}
+-  constexpr ~stream_data() {}
++#if _LIBCPP_STD_VER >= 20
++  constexpr
++#endif
++  ~stream_data() {}
+   struct {
+     // The stream has to be the first element, since that's referenced by the stream declarations in <iostream>
+     StreamT stream;
+@@ -29,8 +32,13 @@ union stream_data {
+ 
+   void init(FILE* stdstream) {
+     mb = {};
++#if _LIBCPP_STD_VER >= 20
+     std::construct_at(&buffer, stdstream, &mb);
+     std::construct_at(&stream, &buffer);
++#else
++    ::new (static_cast<void*>(&buffer)) BufferT(stdstream, &mb);
++    ::new (static_cast<void*>(&stream)) StreamT(&buffer);
++#endif
+   }
+ };
+ 

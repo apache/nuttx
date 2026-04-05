@@ -1,0 +1,69 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+Date: Tue, 7 Apr 2026 15:11:55 +0800
+Subject: [PATCH] thread.cpp: use task_info_s.ta_thread_local_data for
+ per-group __thread_local_data
+
+In NuttX flat build, the default __thread_local_data() uses a global static shared across all task groups, causing data corruption. Store __thread_specific_ptr in task_info_s.ta_thread_local_data for per-task-group isolation. Destructor registered for cleanup on task group exit.
+
+Signed-off-by: v-zhangxiaomeng5 <v-zhangxiaomeng5@xiaomi.com>
+---
+ src/thread.cpp | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/src/thread.cpp b/src/thread.cpp
+index 028d36e3bf..29f5f64e93 100644
+--- a/src/thread.cpp
++++ b/src/thread.cpp
+@@ -24,6 +24,10 @@
+ #  pragma weak pthread_create // Do not create libpthread dependency
+ #endif
+ 
++#if defined(__NuttX__) && !defined(CONFIG_BUILD_KERNEL)
++#  include <nuttx/tls.h>
++#endif
++
+ #if defined(_LIBCPP_WIN32API)
+ #  include <windows.h>
+ #endif
+@@ -99,6 +103,31 @@ void sleep_for(const chrono::nanoseconds& ns) {
+ 
+ } // namespace this_thread
+ 
++#if defined(__NuttX__) && !defined(CONFIG_BUILD_KERNEL)
++
++#include <nuttx/tls.h>
++
++static void __free_thread_local_data(void* data) {
++  __thread_specific_ptr<__thread_struct>* __p = static_cast<__thread_specific_ptr<__thread_struct>*>(data);
++  delete __p;
++}
++
++__thread_specific_ptr<__thread_struct>& __thread_local_data() {
++  FAR struct task_info_s *info = task_get_info();
++  __thread_specific_ptr<__thread_struct>* __p =
++      static_cast<__thread_specific_ptr<__thread_struct>*>(info->ta_thread_local_data);
++  if (__p == NULL) {
++    __p = new __thread_specific_ptr<__thread_struct>();
++    if (__p == NULL)
++      abort();
++    info->ta_thread_local_data = __p;
++    info->ta_thread_local_dtor = __free_thread_local_data;
++  }
++  return *__p;
++}
++
++#else
++
+ __thread_specific_ptr<__thread_struct>& __thread_local_data() {
+   // Even though __thread_specific_ptr's destructor doesn't actually destroy
+   // anything (see comments there), we can't call it at all because threads may
+@@ -109,6 +138,8 @@ __thread_specific_ptr<__thread_struct>& __thread_local_data() {
+   return *__p;
+ }
+ 
++#endif
++
+ // __thread_struct_imp
+ 
+ template <class T>
