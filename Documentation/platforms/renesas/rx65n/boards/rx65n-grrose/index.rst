@@ -491,21 +491,21 @@ mounted at /etc and will look like this at run-time:
    nsh>
 
 ``/etc/init.d/rc.sysinit`` is system init script; ``/etc/init.d/rcS`` is the
-start-up script; ``/etc/passwd`` is a the password file. It supports a single
-user:
+start-up script; ``/etc/passwd`` is the password file.
 
-.. code:: text
+The ``/etc/passwd`` file is auto-generated at build time when
+``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  Enable the option and set
+credentials via ``make menuconfig``:
 
-   USERNAME:  admin
-   PASSWORD:  Administrator
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``admin``)
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty)
 
-   nsh> cat /etc/passwd
-   admin:8Tv+Hbmr3pLVb5HHZgd26D:0:0:/
+The password is hashed with TEA at build time by the host tool
+``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
 
-The encrypted passwords in the provided passwd file are only valid if the TEA
-key is set to: 012345678 9abcdef0 012345678 9abcdef0. Changes to either the key
-or the password word will require regeneration of the ``nsh_romfimg.h`` header
-file.
+For the full description of the mechanism, TEA key configuration, file format,
+and verification steps, see :ref:`mkpasswd_autogen`.
 
 The format of the password file is:
 
