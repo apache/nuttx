@@ -2962,3 +2962,9 @@ config EXTERNALDIR
 	option env="EXTERNALDIR"
 
 source "$EXTERNALDIR/Kconfig"
+
+config EXTERNAL_APPSDIR
+	string
+	option env="EXTERNAL_APPSDIR"
+
+source "$EXTERNAL_APPSDIR/Kconfig"
