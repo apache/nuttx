@@ -39,7 +39,7 @@
  * Private Data
  ****************************************************************************/
 
-static volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
+volatile clock_t g_system_ticks = INITIAL_SYSTEM_TIMER_TICKS;
 static seqcount_t g_system_tick_lock = SEQLOCK_INITIALIZER;
 
 /****************************************************************************

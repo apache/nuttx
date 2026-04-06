@@ -106,6 +106,21 @@ if(NOT KCONFIGLIB)
   # cmake-format: on
 endif()
 
+# ---- Out-of-tree registry-based auto-discovery (optional) ----
+# Pass -DNUTTX_APPS_INSTANCE=<name> to discover NUTTX_APPS_DIR from registry
+# Pass -DEXTERNAL_NUTTX_APPS_DIR=<path> to specify external apps root
+# Pass -DEXTERNAL_NUTTX_DIR=<path>  to specify external extension root
+# Pass -DNUTTX_EXTRA_BOARD_DIRS=<path> to specify external board directories
+# Instances are registered via: python tools/register-nuttx.py <name> --kind ...
+
+if(NUTTX_APPS_INSTANCE AND NOT NUTTX_APPS_DIR)
+  find_package(${NUTTX_APPS_INSTANCE} QUIET CONFIG)
+  if(NUTTX_APPS_BASE)
+    set(NUTTX_APPS_DIR "${NUTTX_APPS_BASE}")
+    message(STATUS "Discovered NUTTX_APPS_DIR from registry [${NUTTX_APPS_INSTANCE}]: ${NUTTX_APPS_DIR}")
+  endif()
+endif()
+
 # BOARD CONFIG can be set to directory path, or <board-name>[/:]<config-name>
 # configuration pair
 
@@ -149,10 +164,24 @@ else()
   list(GET CONFIG_ARRAY 0 NUTTX_BOARD)
   list(GET CONFIG_ARRAY 1 NUTTX_CONFIG)
 
-  file(
-    GLOB NUTTX_BOARD_DIR
-    LIST_DIRECTORIES true
-    "${NUTTX_DIR}/boards/*/*/${NUTTX_BOARD}")
+  # Search registered external board directories FIRST (out-of-tree boards
+  # take priority over in-tree boards with the same name)
+  if(NUTTX_EXTRA_BOARD_DIRS)
+    foreach(_extra_bdir IN LISTS NUTTX_EXTRA_BOARD_DIRS)
+      if(IS_DIRECTORY "${_extra_bdir}/${NUTTX_BOARD}")
+        set(NUTTX_BOARD_DIR "${_extra_bdir}/${NUTTX_BOARD}")
+        break()
+      endif()
+    endforeach()
+  endif()
+
+  # Fallback: search standard NuttX boards tree
+  if(NOT NUTTX_BOARD_DIR)
+    file(
+      GLOB NUTTX_BOARD_DIR
+      LIST_DIRECTORIES true
+      "${NUTTX_DIR}/boards/*/*/${NUTTX_BOARD}")
+  endif()
 
   if(EXISTS ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
     set(NUTTX_DEFCONFIG ${NUTTX_BOARD_DIR}/configs/${NUTTX_CONFIG}/defconfig)
@@ -181,7 +210,13 @@ include(nuttx_process_config)
 include(nuttx_kconfig)
 nuttx_export_kconfig_by_value(${NUTTX_DEFCONFIG} "CONFIG_APPS_DIR")
 
-if((NOT NUTTX_APPS_DIR) AND (NOT CONFIG_APPS_DIR))
+if(NUTTX_APPS_DIR)
+  get_filename_component(NUTTX_APPS_DIR ${NUTTX_APPS_DIR} ABSOLUTE)
+  set(CONFIG_APPS_DIR)
+elseif(CONFIG_APPS_DIR)
+  set(NUTTX_APPS_DIR ${CONFIG_APPS_DIR})
+  set(CONFIG_APPS_DIR)
+else()
   if(EXISTS "${NUTTX_DIR}/../apps")
     set(NUTTX_APPS_DIR "${NUTTX_DIR}/../apps")
   elseif(EXISTS "${NUTTX_DIR}/../nuttx-apps")
@@ -192,18 +227,26 @@ if((NOT NUTTX_APPS_DIR) AND (NOT CONFIG_APPS_DIR))
         "apps/nuttx-apps directory is not found, use dummy directory instead")
     set(NUTTX_APPS_DIR "${NUTTX_DIR}/dummy")
   endif()
-else()
-  set(NUTTX_APPS_DIR ${CONFIG_APPS_DIR})
-  set(CONFIG_APPS_DIR)
 endif()
 
-if(NOT EXISTS "${NUTTX_APPS_DIR}")
-  message(FATAL_ERROR "Application directory ${NUTTX_APPS_DIR} is not found")
+#Under occasional special circumstances, CMAKE may detect that the ../apps directory does not exist. However, the issue disappears after converting the path to an absolute address.
+get_filename_component(NUTTX_APPS_DIR_ABS_PATH "${NUTTX_APPS_DIR}" ABSOLUTE)
+message(STATUS "NUTTX_APPS_DIR_ABS_PATH is: ${NUTTX_APPS_DIR_ABS_PATH}")
+
+if(NOT EXISTS "${NUTTX_APPS_DIR_ABS_PATH}")
+  message(FATAL_ERROR "Application directory ${NUTTX_APPS_DIR_ABS_PATH} is not found")
 endif()
 
 get_filename_component(NUTTX_APPS_DIR ${NUTTX_APPS_DIR} ABSOLUTE)
 get_filename_component(apps_dir ${NUTTX_APPS_DIR} NAME)
 set(NUTTX_APPS_BINDIR "${CMAKE_BINARY_DIR}/${apps_dir}")
+
+if(EXTERNAL_NUTTX_APPS_DIR)
+  get_filename_component(EXTERNAL_NUTTX_APPS_DIR ${EXTERNAL_NUTTX_APPS_DIR}
+                         ABSOLUTE)
+else()
+  set(EXTERNAL_NUTTX_APPS_DIR ${NUTTX_APPS_DIR})
+endif()
 
 # Support not having application directory
 
@@ -216,8 +259,47 @@ set(ENV{PYTHONPYCACHEPREFIX} ${CMAKE_BINARY_DIR})
 set(ENV{APPSDIR} ${NUTTX_APPS_DIR}) # TODO: support not having apps/
 set(ENV{APPSBINDIR} ${NUTTX_APPS_BINDIR}) # TODO: support not having apps/
 set(ENV{BINDIR} ${CMAKE_BINARY_DIR}) # TODO: support not having apps/
-set(ENV{EXTERNALDIR} dummy) # TODO
-set(ENV{DRIVERS_PLATFORM_DIR} dummy) # TODO
+
+# out-of-tree external/platform directories
+#
+# EXTERNALDIR      ← EXTERNAL_NUTTX_DIR      (extension root with Kconfig)
+# EXTERNAL_APPSDIR ← EXTERNAL_NUTTX_APPS_DIR  (user apps root with Kconfig)
+# Both are independent and both get sourced in nuttx/Kconfig.
+#
+if(EXTERNAL_NUTTX_DIR)
+  get_filename_component(EXTERNAL_NUTTX_DIR ${EXTERNAL_NUTTX_DIR} ABSOLUTE)
+  if(EXISTS "${EXTERNAL_NUTTX_DIR}/Kconfig")
+    set(NUTTX_EXTERNALDIR_ENV ${EXTERNAL_NUTTX_DIR})
+  else()
+    message(STATUS "EXTERNAL_NUTTX_DIR has no Kconfig, skipping: ${EXTERNAL_NUTTX_DIR}")
+    set(NUTTX_EXTERNALDIR_ENV dummy)
+  endif()
+else()
+  set(NUTTX_EXTERNALDIR_ENV dummy)
+endif()
+
+if(EXTERNAL_NUTTX_APPS_DIR AND NOT "${EXTERNAL_NUTTX_APPS_DIR}" STREQUAL "${NUTTX_APPS_DIR}")
+  if(EXISTS "${EXTERNAL_NUTTX_APPS_DIR}/Kconfig")
+    set(NUTTX_EXTERNAL_APPSDIR_ENV ${EXTERNAL_NUTTX_APPS_DIR})
+  else()
+    message(STATUS "EXTERNAL_NUTTX_APPS_DIR has no Kconfig, skipping: ${EXTERNAL_NUTTX_APPS_DIR}")
+    set(NUTTX_EXTERNAL_APPSDIR_ENV dummy)
+  endif()
+else()
+  set(NUTTX_EXTERNAL_APPSDIR_ENV dummy)
+endif()
+
+if(NUTTX_DRIVERS_PLATFORM_DIR)
+  get_filename_component(NUTTX_DRIVERS_PLATFORM_DIR ${NUTTX_DRIVERS_PLATFORM_DIR}
+                         ABSOLUTE)
+  set(NUTTX_DRIVERS_PLATFORM_ENV ${NUTTX_DRIVERS_PLATFORM_DIR})
+else()
+  set(NUTTX_DRIVERS_PLATFORM_ENV dummy)
+endif()
+
+set(ENV{EXTERNALDIR} ${NUTTX_EXTERNALDIR_ENV})
+set(ENV{EXTERNAL_APPSDIR} ${NUTTX_EXTERNAL_APPSDIR_ENV})
+set(ENV{DRIVERS_PLATFORM_DIR} ${NUTTX_DRIVERS_PLATFORM_ENV})
 
 set(ENV{HOST_LINUX} n)
 set(ENV{HOST_MACOS} n)
@@ -239,7 +321,10 @@ endif()
 
 nuttx_export_kconfig(${NUTTX_DEFCONFIG})
 
-if(CONFIG_ARCH_BOARD_CUSTOM)
+# When CONFIG_ARCH_BOARD_CUSTOM is set and defconfig supplies an explicit
+# CONFIG_ARCH_BOARD_CUSTOM_DIR, use it.  Otherwise keep the NUTTX_BOARD_DIR
+# that was already discovered via NUTTX_EXTRA_BOARD_DIRS / board tree search.
+if(CONFIG_ARCH_BOARD_CUSTOM AND NOT "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" STREQUAL "")
   get_filename_component(NUTTX_BOARD_DIR ${CONFIG_ARCH_BOARD_CUSTOM_DIR}
                          ABSOLUTE BASE_DIR ${NUTTX_DIR})
 endif()
@@ -256,16 +341,24 @@ endif()
 # Custom board ###################################################
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/boards/dummy)
-if(CONFIG_ARCH_BOARD_CUSTOM)
+if(CONFIG_ARCH_BOARD_CUSTOM AND NOT "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" STREQUAL "")
   get_filename_component(NUTTX_BOARD_ABS_DIR ${CONFIG_ARCH_BOARD_CUSTOM_DIR}
                          ABSOLUTE BASE_DIR ${NUTTX_DIR})
+elseif(CONFIG_ARCH_BOARD_CUSTOM)
+  # OOT board: CONFIG_ARCH_BOARD_CUSTOM_DIR not in defconfig,
+  # use NUTTX_BOARD_DIR discovered via NUTTX_EXTRA_BOARD_DIRS.
+  set(NUTTX_BOARD_ABS_DIR ${NUTTX_BOARD_DIR})
 else()
   set(NUTTX_BOARD_ABS_DIR ${NUTTX_BOARD_DIR})
 endif()
 
 # check if board custom dir points to NuttX upstream board. This is useful when
 # an out-of-tree configuration uses an upstream board directory
-string(FIND "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" "boards/" IS_NUTTX_BOARD)
+if(NOT "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" STREQUAL "")
+  string(FIND "${CONFIG_ARCH_BOARD_CUSTOM_DIR}" "boards/" IS_NUTTX_BOARD)
+else()
+  set(IS_NUTTX_BOARD -1)
+endif()
 
 # link dummy/Kconfig only if this is not upstream board otherwise the same
 # Kconfig file is included twice which cause CMake warnings
@@ -282,8 +375,13 @@ endif()
 
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/drivers)
 
-if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers
-   AND EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/Kconfig)
+if(NOT "${NUTTX_DRIVERS_PLATFORM_DIR}" STREQUAL ""
+  AND EXISTS "${NUTTX_DRIVERS_PLATFORM_DIR}"
+  AND EXISTS "${NUTTX_DRIVERS_PLATFORM_DIR}/Kconfig")
+  nuttx_create_symlink(${NUTTX_DRIVERS_PLATFORM_DIR}
+                       ${CMAKE_BINARY_DIR}/drivers/platform)
+elseif(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers
+       AND EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/Kconfig)
   nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/../drivers
                        ${CMAKE_BINARY_DIR}/drivers/platform)
 else()
@@ -340,6 +438,24 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   configure_file(${NUTTX_DEFCONFIG} defconfig COPYONLY)
   configure_file(${NUTTX_DEFCONFIG} .config.compressed COPYONLY)
 
+  # Inject CONFIG_ARCH_BOARD_CUSTOM_DIR from the dynamically discovered
+  # NUTTX_BOARD_DIR so that defconfig files stay machine-independent.
+  # The defconfig only needs CONFIG_ARCH_BOARD_CUSTOM=y; the directory
+  # is computed at configure time from NUTTX_EXTRA_BOARD_DIRS / board tree.
+  if(NUTTX_BOARD_DIR)
+    file(READ ${CMAKE_BINARY_DIR}/.config.compressed _defconfig_content)
+    if(_defconfig_content MATCHES "CONFIG_ARCH_BOARD_CUSTOM=y")
+      # Remove any existing CONFIG_ARCH_BOARD_CUSTOM_DIR line
+      string(REGEX REPLACE "CONFIG_ARCH_BOARD_CUSTOM_DIR=\"[^\"]*\"\n?" ""
+                           _defconfig_content "${_defconfig_content}")
+      # Append the correct path
+      string(APPEND _defconfig_content
+             "CONFIG_ARCH_BOARD_CUSTOM_DIR=\"${NUTTX_BOARD_DIR}\"\n")
+      file(WRITE ${CMAKE_BINARY_DIR}/.config.compressed "${_defconfig_content}")
+      message(STATUS "  Injected ARCH_BOARD_CUSTOM_DIR -> ${NUTTX_BOARD_DIR}")
+    endif()
+  endif()
+
   set(ENV{KCONFIG_CONFIG} ${CMAKE_BINARY_DIR}/.config.compressed)
 
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
@@ -391,6 +507,15 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   message(STATUS "  Board:  ${NUTTX_BOARD}")
   message(STATUS "  Config: ${NUTTX_CONFIG}")
   message(STATUS "  Appdir: ${NUTTX_APPS_DIR}")
+  message(STATUS "  Apps external root: ${EXTERNAL_NUTTX_APPS_DIR}")
+  message(STATUS "  EXTERNALDIR (Kconfig): ${NUTTX_EXTERNALDIR_ENV}")
+  message(STATUS "  EXTERNAL_APPSDIR (Kconfig): ${NUTTX_EXTERNAL_APPSDIR_ENV}")
+  if(EXTERNAL_NUTTX_DIR)
+    message(STATUS "  External root: ${EXTERNAL_NUTTX_DIR}")
+  endif()
+  if(NUTTX_DRIVERS_PLATFORM_DIR)
+    message(STATUS "  Platform drivers: ${NUTTX_DRIVERS_PLATFORM_DIR}")
+  endif()
 endif()
 
 # declare global custom targets at very beginning `nuttx_global` is used to hold
@@ -629,6 +754,17 @@ if(EXISTS ${NUTTX_APPS_DIR}/CMakeLists.txt)
 else()
   message(
     STATUS "Application directory not found at ${NUTTX_APPS_DIR}, skipping")
+endif()
+
+if(NOT "${EXTERNAL_NUTTX_DIR}" STREQUAL ""
+   AND EXISTS "${EXTERNAL_NUTTX_DIR}/CMakeLists.txt")
+  add_subdirectory(${EXTERNAL_NUTTX_DIR} external)
+endif()
+
+# Add external apps to the build (if different from NUTTX_APPS_DIR)
+if(NOT "${EXTERNAL_NUTTX_APPS_DIR}" STREQUAL "${NUTTX_APPS_DIR}"
+   AND EXISTS "${EXTERNAL_NUTTX_APPS_DIR}/CMakeLists.txt")
+  add_subdirectory(${EXTERNAL_NUTTX_APPS_DIR} external_apps)
 endif()
 
 # after we traverse all build directories unify all target dependencies and all
