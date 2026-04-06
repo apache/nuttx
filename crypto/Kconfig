@@ -43,11 +43,13 @@ config CRYPTO_CRYPTODEV
 config CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO
 	bool "cryptodev software cipher support"
 	depends on CRYPTO_CRYPTODEV && CRYPTO_SW_AES
+	select CRYPTO_CURVE25519
 	default n
 
 config CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
 	bool "cryptodev software key management support"
 	depends on CRYPTO_CRYPTODEV && !MTD_CONFIG_NONE
+	select CRYPTO_CURVE25519
 	default n
 
 if CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
@@ -89,6 +91,8 @@ config CRYPTO_SW_AES
 
 config CRYPTO_RANDOM_POOL
 	bool "Entropy pool and strong random number generator"
+	select CRYPTO_IDGEN
+	select CRYPTO_CURVE25519
 	default n
 	---help---
 		Entropy pool gathers environmental noise from device drivers,
@@ -98,6 +102,14 @@ config CRYPTO_RANDOM_POOL
 
 		NOTE: May not actually be cyptographically secure, if
 		not enough entropy is made available to the entropy pool.
+
+config CRYPTO_CURVE25519
+	bool
+	default n
+
+config CRYPTO_IDGEN
+	bool
+	default n
 
 if CRYPTO_RANDOM_POOL
 
