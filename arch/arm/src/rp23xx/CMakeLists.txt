@@ -85,4 +85,8 @@ if(CONFIG_WATCHDOG)
   list(APPEND SRCS rp23xx_wdt.c)
 endif()
 
+if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
+  list(APPEND SRCS rp23xx_crypto.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

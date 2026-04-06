@@ -48,7 +48,7 @@
 /* Register bit definitions *************************************************/
 
 #define RP23XX_SHA256_CSR_MASK               (0x00001317)
-#define RP23XX_SHA256_CSR_BSWAP              (1 << 18)
+#define RP23XX_SHA256_CSR_BSWAP              (1 << 12)
 #define RP23XX_SHA256_CSR_DMA_SIZE_MASK      (0x00000300)
 #define RP23XX_SHA256_CSR_ERR_WDATA_NOT_RDY  (1 << 4)
 #define RP23XX_SHA256_CSR_SUM_VLD            (1 << 2)

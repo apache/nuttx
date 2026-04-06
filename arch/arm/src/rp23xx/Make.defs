@@ -88,3 +88,7 @@ endif
 ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += rp23xx_wdt.c
 endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += rp23xx_crypto.c
+endif
