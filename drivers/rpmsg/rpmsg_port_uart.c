@@ -32,11 +32,11 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <nuttx/crc16.h>
 #include <nuttx/event.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/lib/xorsum.h>
 #include <nuttx/mutex.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/power/pm.h>
@@ -84,8 +84,8 @@
 #define RPMSG_PORT_UART_EVT_TX             (1 << 3) /* TX is ready or not */
 
 #ifdef CONFIG_RPMSG_PORT_UART_CRC
-#  define rpmsg_port_uart_crc16(hdr)       crc16ibm((FAR uint8_t *)&(hdr)->cmd, \
-                                                     (hdr)->len - sizeof((hdr)->crc))
+#  define rpmsg_port_uart_crc16(hdr)       xorsum16(&(hdr)->cmd, \
+                                                    (hdr)->len - sizeof((hdr)->crc))
 #else
 #  define rpmsg_port_uart_crc16(hdr)       0
 #endif
