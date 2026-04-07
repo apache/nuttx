@@ -1028,12 +1028,32 @@ config CONSOLE_NETDEV
 	bool "Console on netdev"
 	default n
 	depends on NETDEVICES && SCHED_LPWORK
+	depends on NET_UDP || NET_CAN_ISOTP
 	select SERIAL_RXDMA
 	select SERIAL_TXDMA
 	---help---
 		Use the netdev as a console device
 
 if CONSOLE_NETDEV
+
+config CONSOLE_NETDEV_UDP
+	bool "Netdev Console interface over UDP"
+	default y if NET_UDP
+	---help---
+		Network interface over UDP used for Console.
+
+config CONSOLE_NETDEV_CAN
+	bool "Netdev Console interface over CAN"
+	default y if NET_CAN_ISOTP
+	---help---
+		Network interface over CAN (ISO-TP) used for Console.
+
+config CONSOLE_NETDEV_INTF
+	string "Netdev Console CAN interface name"
+	default "can0"
+	depends on CONSOLE_NETDEV_CAN && NETDEV_IFINDEX
+	---help---
+		Name of the CAN interface used by the ISO-TP console.
 
 config CONSOLE_NETDEV_IPADDR
 	hex "CONSOLE netdev destination IP address"
@@ -1043,9 +1063,12 @@ config CONSOLE_NETDEV_IPADDR
 
 config CONSOLE_NETDEV_PORT
 	int "CONSOLE netdev port"
-	default 55000
+	default 55000 if CONSOLE_NETDEV_UDP
+	default 2000 if CONSOLE_NETDEV_CAN
 	---help---
-		UDP port for CONSOLE input/output.
+		For UDP: UDP port for CONSOLE input/output.
+		For CAN ISO-TP: TX CAN ID. The RX CAN ID is derived as
+		CONSOLE_NETDEV_PORT + 1.
 
 config CONSOLE_NETDEV_RXBUFSIZE
 	int "CONSOLE netdev receive buffer size"
