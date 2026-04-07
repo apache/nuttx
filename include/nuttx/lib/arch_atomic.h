@@ -183,9 +183,106 @@ static inline void atomic_unlock(irqstate_t flags)
   ARCH_ATOMIC_FETCH_OP(prefix ## _fetch_or_ ## n, t, |)                  \
   ARCH_ATOMIC_FETCH_OP(prefix ## _fetch_xor_ ## n, t, ^)
 
+#define ARCH_SYNC_OP_FETCH(func, t, op)                                  \
+  ARCH_ATOMIC_SPECIFIER                                                  \
+  t func(FAR volatile void *ptr, t value)                                \
+  {                                                                      \
+    irqstate_t irqstate = atomic_lock();                                 \
+    FAR t *tmp = (FAR t *)ptr;                                           \
+    t ret;                                                               \
+                                                                         \
+    *tmp = *tmp op value;                                                \
+    ret = *tmp;                                                          \
+                                                                         \
+    atomic_unlock(irqstate);                                             \
+    return ret;                                                          \
+  }
+
+#define ARCH_SYNC_NAND_FETCH(func, t)                                    \
+  ARCH_ATOMIC_SPECIFIER                                                  \
+  t func(FAR volatile void *ptr, t value)                                \
+  {                                                                      \
+    irqstate_t irqstate = atomic_lock();                                 \
+    FAR t *tmp = (FAR t *)ptr;                                           \
+    t ret;                                                               \
+                                                                         \
+    *tmp = ~(*tmp & value);                                              \
+    ret = *tmp;                                                          \
+                                                                         \
+    atomic_unlock(irqstate);                                             \
+    return ret;                                                          \
+  }
+
+#define ARCH_SYNC_BOOL_CMP_SWAP(func, t)                                 \
+  ARCH_ATOMIC_SPECIFIER                                                  \
+  bool func(FAR volatile void *ptr, t oldvalue, t newvalue)              \
+  {                                                                      \
+    bool ret = false;                                                    \
+    irqstate_t irqstate = atomic_lock();                                 \
+    FAR t *tmp = (FAR t *)ptr;                                           \
+                                                                         \
+    if (*tmp == oldvalue)                                                \
+      {                                                                  \
+        ret = true;                                                      \
+        *tmp = newvalue;                                                 \
+      }                                                                  \
+                                                                         \
+    atomic_unlock(irqstate);                                             \
+    return ret;                                                          \
+  }
+
+#define ARCH_SYNC_VAL_CMP_SWAP(func, t)                                  \
+  ARCH_ATOMIC_SPECIFIER                                                  \
+  t func(FAR volatile void *ptr, t oldvalue, t newvalue)                 \
+  {                                                                      \
+    irqstate_t irqstate = atomic_lock();                                 \
+    FAR t *tmp = (FAR t *)ptr;                                           \
+    t ret = *tmp;                                                        \
+                                                                         \
+    if (*tmp == oldvalue)                                                \
+      {                                                                  \
+        *tmp = newvalue;                                                 \
+      }                                                                  \
+                                                                         \
+    atomic_unlock(irqstate);                                             \
+    return ret;                                                          \
+  }
+
+#ifdef UP_DMB
+#  define ARCH_SYNC_BARRIER() UP_DMB()
+#else
+#  define ARCH_SYNC_BARRIER()
+#endif
+
+#define ARCH_SYNC_SYNCHRONIZE(prefix)                                    \
+  ARCH_ATOMIC_SPECIFIER                                                  \
+  void prefix ## _synchronize(void)                                      \
+  {                                                                      \
+    ARCH_SYNC_BARRIER();                                                 \
+  }
+
+#define ARCH_SYNC_DEFINE(prefix, t, n)                                   \
+  ARCH_SYNC_OP_FETCH(prefix ## _add_and_fetch_ ## n, t, +)               \
+  ARCH_SYNC_OP_FETCH(prefix ## _sub_and_fetch_ ## n, t, -)               \
+  ARCH_SYNC_OP_FETCH(prefix ## _or_and_fetch_ ## n, t, |)                \
+  ARCH_SYNC_OP_FETCH(prefix ## _and_and_fetch_ ## n, t, &)               \
+  ARCH_SYNC_OP_FETCH(prefix ## _xor_and_fetch_ ## n, t, ^)               \
+  ARCH_SYNC_NAND_FETCH(prefix ## _nand_and_fetch_ ## n, t)               \
+  ARCH_SYNC_BOOL_CMP_SWAP(prefix ## _bool_compare_and_swap_ ## n, t)     \
+  ARCH_SYNC_VAL_CMP_SWAP(prefix ## _val_compare_and_swap_ ## n, t)
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
 ARCH_ATOMIC_DEFINE(atomic, uint8_t, 1)
 ARCH_ATOMIC_DEFINE(atomic, uint16_t, 2)
 ARCH_ATOMIC_DEFINE(atomic, int32_t, 4)
 ARCH_ATOMIC_DEFINE(atomic, int64_t, 8)
+
+ARCH_SYNC_DEFINE(sync, uint8_t, 1)
+ARCH_SYNC_DEFINE(sync, uint16_t, 2)
+ARCH_SYNC_DEFINE(sync, uint32_t, 4)
+ARCH_SYNC_DEFINE(sync, uint64_t, 8)
 
 #endif /* __INCLUDE_NUTTX_LIB_ARCH_ATOMIC_H */
