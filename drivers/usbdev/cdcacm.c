@@ -431,7 +431,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
 #ifdef CONFIG_CDCACM_DISABLE_TXBUF
   FAR struct usbdev_ep_s *ep = priv->epbulkin;
   FAR struct uart_dev_s *dev = &priv->serdev;
-  FAR struct cdcacm_wrreq_s *wrcontainer;
+  FAR struct cdcacm_wrreq_s *wrcontainer = NULL;
   FAR struct usbdev_req_s *req;
   int ret;
 #endif
@@ -480,16 +480,45 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
     }
 
   flags = spin_lock_irqsave_nopreempt(&priv->lock);
-  priv->wrcontainer = NULL;
-  if (!sq_empty(&priv->txfree))
+
+  /* Check if wrcontainer has been modified by an interrupt-context
+   * call to cdcacm_wrcomplete -> cdcacm_sndpacket while we were
+   * outside the lock.  The local 'wrcontainer' holds a snapshot:
+   *   - If we entered the submit branch above, it equals the old
+   *     priv->wrcontainer that was just submitted.
+   *   - If we skipped submit (priv->wrcontainer was NULL), it
+   *     remains NULL (its initialized value).
+   *
+   * If priv->wrcontainer no longer matches our snapshot, an
+   * interrupt has already taken over (allocated a new container),
+   * so we must skip to avoid overwriting that assignment.
+   */
+
+  if (priv->wrcontainer == wrcontainer)
     {
-      priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
-                          sq_remfirst(&priv->txfree);
-      dev->xmit.buffer  = (FAR char *)priv->wrcontainer->req->buf;
-      priv->nwrq--;
-      dev->xmit.head = 0;
-      dev->xmit.tail = 0;
-      uart_datasent(dev);
+      priv->wrcontainer = NULL;
+      if (!sq_empty(&priv->txfree))
+        {
+          priv->wrcontainer = (FAR struct cdcacm_wrreq_s *)
+                              sq_remfirst(&priv->txfree);
+          dev->xmit.buffer  = (FAR char *)priv->wrcontainer->req->buf;
+          priv->nwrq--;
+          dev->xmit.head = 0;
+          dev->xmit.tail = 0;
+          uart_datasent(dev);
+        }
+      else
+        {
+          /* No free write requests available.  Set xmit.buffer to
+           * NULL so that the serial layer (uart_putxmitchar) treats
+           * the buffer as full and blocks or returns -EAGAIN,
+           * instead of writing into the already-submitted req->buf.
+           */
+
+          dev->xmit.buffer = NULL;
+          dev->xmit.head   = 0;
+          dev->xmit.tail   = 0;
+        }
     }
 
   spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
