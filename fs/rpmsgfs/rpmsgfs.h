@@ -38,6 +38,7 @@
 
 #define RPMSGFS_NAME_PREFIX     "rpmsgfs-"
 
+#define RPMSGFS_INIT            0 /* Only needed if NS announcements can't be used */
 #define RPMSGFS_OPEN            1
 #define RPMSGFS_CLOSE           2
 #define RPMSGFS_READ            3

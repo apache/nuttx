@@ -80,6 +80,9 @@ static int rpmsgfs_statfs_handler(FAR struct rpmsg_endpoint *ept,
 static int rpmsgfs_stat_handler(FAR struct rpmsg_endpoint *ept,
                                  FAR void *data, size_t len,
                                  uint32_t src, FAR void *priv);
+static int rpmsgfs_init_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv);
 static void rpmsgfs_device_created(struct rpmsg_device *rdev,
                                    FAR void *priv_);
 static void rpmsgfs_device_destroy(struct rpmsg_device *rdev,
@@ -98,6 +101,7 @@ static int rpmsgfs_send_recv(FAR struct rpmsgfs_s *priv,
 
 static const rpmsg_ept_cb g_rpmsgfs_handler[] =
 {
+  [RPMSGFS_INIT]      = rpmsgfs_init_handler,
   [RPMSGFS_OPEN]      = rpmsgfs_default_handler,
   [RPMSGFS_CLOSE]     = rpmsgfs_default_handler,
   [RPMSGFS_READ]      = rpmsgfs_read_handler,
@@ -273,6 +277,15 @@ static int rpmsgfs_stat_handler(FAR struct rpmsg_endpoint *ept,
 
   rpmsg_post(ept, &cookie->sem);
 
+  return 0;
+}
+
+static int rpmsgfs_init_handler(FAR struct rpmsg_endpoint *ept,
+                                   FAR void *data, size_t len,
+                                   uint32_t src, FAR void *priv)
+{
+  FAR struct rpmsgfs_s *ept_priv = ept->priv;
+  rpmsg_post(&ept_priv->ept, &ept_priv->wait);
   return 0;
 }
 
