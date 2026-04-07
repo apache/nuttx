@@ -78,9 +78,8 @@
 arm_dispatch_syscall:
 	.cfi_sections	.debug_frame
 	.cfi_startproc
-	mov r11, sp
-	.cfi_register sp, r11
 	sub	sp, sp, #32
+	.cfi_def_cfa_offset 32
 	str	r4, [sp, #0]
 	.cfi_offset r4, 0
 	str	r5, [sp, #4]
