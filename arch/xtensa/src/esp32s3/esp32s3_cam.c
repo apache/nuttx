@@ -75,6 +75,21 @@
 
 #define ESP32S3_CAM_VSYNC_FILTER  4
 
+/* GDMA external memory block size setting for PSRAM RX.
+ * Change this single macro to switch between 16B / 32B / 64B.
+ * ESP32S3_CAM_DMA_ALIGN is the byte alignment derived from it.
+ */
+
+#define ESP32S3_CAM_EXT_MEMBLK    ESP32S3_DMA_EXT_MEMBLK_64B
+
+#if ESP32S3_CAM_EXT_MEMBLK == ESP32S3_DMA_EXT_MEMBLK_64B
+#  define ESP32S3_CAM_DMA_ALIGN   64
+#elif ESP32S3_CAM_EXT_MEMBLK == ESP32S3_DMA_EXT_MEMBLK_32B
+#  define ESP32S3_CAM_DMA_ALIGN   32
+#else
+#  define ESP32S3_CAM_DMA_ALIGN   16
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -128,6 +143,9 @@ static int esp32s3_cam_start_capture(struct imgdata_s *data,
                                imgdata_capture_t callback,
                                void *arg);
 static int esp32s3_cam_stop_capture(struct imgdata_s *data);
+static void *esp32s3_cam_alloc(struct imgdata_s *data,
+                               uint32_t align_size, uint32_t size);
+static void esp32s3_cam_free(struct imgdata_s *data, void *addr);
 
 /****************************************************************************
  * Private Data
@@ -141,6 +159,8 @@ static const struct imgdata_ops_s g_cam_ops =
   .validate_frame_setting = esp32s3_cam_validate_frame_setting,
   .start_capture          = esp32s3_cam_start_capture,
   .stop_capture           = esp32s3_cam_stop_capture,
+  .alloc                  = esp32s3_cam_alloc,
+  .free                   = esp32s3_cam_free,
 };
 
 static struct esp32s3_cam_s g_cam_priv =
@@ -402,7 +422,7 @@ static int esp32s3_cam_dmasetup(struct esp32s3_cam_s *priv)
 
   esp32s3_dma_set_ext_memblk(priv->dma_channel,
                              false,
-                             ESP32S3_DMA_EXT_MEMBLK_64B);
+                             ESP32S3_CAM_EXT_MEMBLK);
 
   return OK;
 }
@@ -674,7 +694,7 @@ static int esp32s3_cam_set_buf(struct imgdata_s *data,
        */
 
       priv->fb_size = priv->width * priv->height * 2;
-      priv->fb = kmm_memalign(64, priv->fb_size);
+      priv->fb = kmm_memalign(ESP32S3_CAM_DMA_ALIGN, priv->fb_size);
       if (!priv->fb)
         {
           snerr("ERROR: Failed to allocate frame buffer\n");
@@ -696,6 +716,31 @@ static int esp32s3_cam_set_buf(struct imgdata_s *data,
                     priv->dma_channel);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp32s3_cam_alloc
+ *
+ * Description:
+ *   Allocate frame buffer memory with GDMA-required alignment.
+ *   GDMA with EXT_MEMBLK_64B needs 64-byte aligned addresses
+ *   for PSRAM access.
+ *
+ ****************************************************************************/
+
+static void *esp32s3_cam_alloc(struct imgdata_s *data,
+                               uint32_t align_size, uint32_t size)
+{
+  return kmm_memalign(ESP32S3_CAM_DMA_ALIGN, size);
+}
+
+/****************************************************************************
+ * Name: esp32s3_cam_free
+ ****************************************************************************/
+
+static void esp32s3_cam_free(struct imgdata_s *data, void *addr)
+{
+  kmm_free(addr);
 }
 
 /****************************************************************************
