@@ -29,9 +29,9 @@
 #include <stdio.h>
 
 #include <nuttx/atomic.h>
-#include <nuttx/crc16.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/lib/xorsum.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/irq.h>
@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_RPMSG_PORT_SPI_CRC
-#  define rpmsg_port_spi_crc16(hdr)     crc16ibm((FAR uint8_t *)&(hdr)->cmd, \
+#  define rpmsg_port_spi_crc16(hdr)     xorsum16(&(hdr)->cmd, \
                                                  (hdr)->len - sizeof((hdr)->crc))
 #else
 #  define rpmsg_port_spi_crc16(hdr)     0
