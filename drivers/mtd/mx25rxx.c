@@ -91,6 +91,8 @@
 #define MX25R_SBL_ALT     0x77  /* Set Burst Length         */
 #define MX25R_NOP         0x00  /* No Operation             */
 
+#define MX25R_EN4B        0xb7  /* Enter 4-byte mode        */
+
 /* MX25Rxx Registers */
 
 /* Read ID (RDID) register values */
@@ -110,28 +112,35 @@
 #define MX25R_JEDEC_MX25R6435F_CAPACITY  0x17  /* MX25R6435F memory capacity */
 #define MX25R_JEDEC_MX25R8035F_CAPACITY  0x14  /* MX25R8035F memory capacity */
 
+/* Parts larger than 128Mbit require 4-byte addressing */
+
+#define MX25R_ADDRESSBYTES_3        (3)
+#define MX25R_ADDRESSBYTES_4        (4)
+
 /* Supported chips parameters */
 
 /* MX25R6435F (64 MB) memory capacity */
 
 #define MX25R6435F_SECTOR_SIZE      (4*1024)
 #define MX25R6435F_SECTOR_SHIFT     (12)
+#define MX25R6435F_ADDRESS_BYTES    MX25R_ADDRESSBYTES_3
 #define MX25R6435F_SECTOR_COUNT     (2048)
 #define MX25R6435F_PAGE_SIZE        (256)
 
 /* MX25L25673G (256 MB) memory capacity */
 
-#define MX25L25673G_SECTOR_SIZE      (4*1024)
-#define MX25L25673G_SECTOR_SHIFT     (12)
-#define MX25L25673G_SECTOR_COUNT     (8192)
-#define MX25L25673G_PAGE_SIZE        (256)
+#define MX25L25673G_SECTOR_SIZE     (4*1024)
+#define MX25L25673G_SECTOR_SHIFT    (12)
+#define MX25L25673G_ADDRESS_BYTES   MX25R_ADDRESSBYTES_4
+#define MX25L25673G_SECTOR_COUNT    (8192)
+#define MX25L25673G_PAGE_SIZE       (256)
 
 #ifdef CONFIG_MX25RXX_PAGE128
-#  define MX25R6435F_PAGE_SHIFT      (7)
-#  define MX25L25673G_PAGE_SHIFT     (7)
+#  define MX25R6435F_PAGE_SHIFT     (7)
+#  define MX25L25673G_PAGE_SHIFT    (7)
 #else
-#  define MX25R6435F_PAGE_SHIFT      (8)
-#  define MX25L25673G_PAGE_SHIFT     (8)
+#  define MX25R6435F_PAGE_SHIFT     (8)
+#  define MX25L25673G_PAGE_SHIFT    (8)
 #endif
 
 /* Status register bit definitions */
@@ -181,19 +190,20 @@
 
 struct mx25rxx_dev_s
 {
-  struct mtd_dev_s       mtd;         /* MTD interface */
-  FAR struct qspi_dev_s *qspi;        /* QuadSPI interface */
+  struct mtd_dev_s       mtd;          /* MTD interface */
+  FAR struct qspi_dev_s *qspi;         /* QuadSPI interface */
 
-  FAR uint8_t           *cmdbuf;      /* Allocated command buffer */
+  FAR uint8_t           *cmdbuf;       /* Allocated command buffer */
 
-  uint8_t                sectorshift; /* Log2 of sector size */
-  uint8_t                pageshift;   /* Log2 of page size */
-  uint16_t               nsectors;    /* Number of erase sectors */
+  uint8_t                sectorshift;  /* Log2 of sector size */
+  uint8_t                pageshift;    /* Log2 of page size */
+  uint8_t                addressbytes; /* Number of address bytes required */
+  uint16_t               nsectors;     /* Number of erase sectors */
 
 #ifdef CONFIG_MX25RXX_SECTOR512
-  uint8_t                flags;       /* Buffered sector flags */
-  uint16_t               esectno;     /* Erase sector number in the cache */
-  FAR uint8_t           *sector;      /* Allocated sector data */
+  uint8_t                flags;        /* Buffered sector flags */
+  uint16_t               esectno;      /* Erase sector number in the cache */
+  FAR uint8_t           *sector;       /* Allocated sector data */
 #endif
 };
 
@@ -370,7 +380,7 @@ int mx25rxx_read_byte(FAR struct mx25rxx_dev_s *dev, FAR uint8_t *buffer,
   finfo("address: %08lx nbytes: %d\n", (long)address, (int)buflen);
 
   meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
-  meminfo.addrlen = 3;
+  meminfo.addrlen = dev->addressbytes;
 
   /* Ignore performance enhanced mode => 2+4 dummies */
 
@@ -403,7 +413,7 @@ int mx25rxx_write_page(FAR struct mx25rxx_dev_s *priv,
 
   meminfo.flags   = QSPIMEM_WRITE | QSPIMEM_QUADIO;
   meminfo.cmd     = MX25R_4PP;
-  meminfo.addrlen = 3;
+  meminfo.addrlen = priv->addressbytes;
   meminfo.buflen  = pagesize;
   meminfo.dummies = 0;
 
@@ -461,7 +471,7 @@ int mx25rxx_erase_sector(FAR struct mx25rxx_dev_s *priv, off_t sector)
   /* Send the sector erase command */
 
   mx25rxx_write_enable(priv, true);
-  mx25rxx_command_address(priv->qspi, MX25R_SE, address, 3);
+  mx25rxx_command_address(priv->qspi, MX25R_SE, address, priv->addressbytes);
 
   /* Wait for erasure to finish */
 
@@ -865,15 +875,17 @@ int mx25rxx_readid(FAR struct mx25rxx_dev_s *dev)
   switch (dev->cmdbuf[2])
     {
       case MX25R_JEDEC_MX25R6435F_CAPACITY:
-        dev->sectorshift = MX25R6435F_SECTOR_SHIFT;
-        dev->pageshift   = MX25R6435F_PAGE_SHIFT;
-        dev->nsectors    = MX25R6435F_SECTOR_COUNT;
+        dev->sectorshift  = MX25R6435F_SECTOR_SHIFT;
+        dev->pageshift    = MX25R6435F_PAGE_SHIFT;
+        dev->addressbytes = MX25R6435F_ADDRESS_BYTES;
+        dev->nsectors     = MX25R6435F_SECTOR_COUNT;
         break;
 
       case MX25R_JEDEC_MX25L25673G_CAPACITY:
-        dev->sectorshift = MX25L25673G_SECTOR_SHIFT;
-        dev->pageshift   = MX25L25673G_PAGE_SHIFT;
-        dev->nsectors    = MX25L25673G_SECTOR_COUNT;
+        dev->sectorshift  = MX25L25673G_SECTOR_SHIFT;
+        dev->pageshift    = MX25L25673G_PAGE_SHIFT;
+        dev->addressbytes = MX25L25673G_ADDRESS_BYTES;
+        dev->nsectors     = MX25L25673G_SECTOR_COUNT;
         break;
 
       default:
@@ -1186,6 +1198,13 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi,
 #endif
 
   mx25rxx_lock(dev->qspi, false);
+
+  /* Set MTD device in 4 byte address mode if required. */
+
+  if (dev->addressbytes == MX25R_ADDRESSBYTES_4)
+    {
+      mx25rxx_command(dev->qspi, MX25R_EN4B);
+    }
 
   /* Set MTD device in low power mode, with minimum dummy cycles */
 
