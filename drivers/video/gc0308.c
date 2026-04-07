@@ -134,9 +134,9 @@
 #define GC0308_NATIVE_WIDTH   640
 #define GC0308_NATIVE_HEIGHT  480
 
-/* Mirror/flip */
+/* Mirror/flip: register 0x14 (CISCTL_MODE1) bit[0] = horizontal mirror */
 
-#define GC0308_REG_CISCTL_MODE1_MIRROR  0x14
+#define GC0308_REG_CISCTL_MODE1_HMIRROR_BIT  (1 << 0)
 
 /****************************************************************************
  * Private Types
@@ -839,7 +839,20 @@ static int gc0308_get_supported_value(struct imgsensor_s *sensor,
                                       uint32_t id,
                                       imgsensor_supported_value_t *value)
 {
-  return -ENOTTY;
+  switch (id)
+    {
+      case IMGSENSOR_ID_HFLIP_VIDEO:
+      case IMGSENSOR_ID_HFLIP_STILL:
+        value->type = IMGSENSOR_CTRL_TYPE_BOOLEAN;
+        value->u.range.minimum       = 0;
+        value->u.range.maximum       = 1;
+        value->u.range.step          = 1;
+        value->u.range.default_value = 0;
+        return OK;
+
+      default:
+        return -ENOTTY;
+    }
 }
 
 /****************************************************************************
@@ -850,7 +863,27 @@ static int gc0308_get_value(struct imgsensor_s *sensor,
                             uint32_t id, uint32_t size,
                             imgsensor_value_t *value)
 {
-  return -ENOTTY;
+  struct gc0308_dev_s *priv = (struct gc0308_dev_s *)sensor;
+  uint8_t regval;
+  int ret;
+
+  switch (id)
+    {
+      case IMGSENSOR_ID_HFLIP_VIDEO:
+      case IMGSENSOR_ID_HFLIP_STILL:
+        ret = gc0308_getreg(priv->i2c, GC0308_REG_CISCTL_MODE1, &regval);
+        if (ret < 0)
+          {
+            return ret;
+          }
+
+        value->value32 =
+          (regval & GC0308_REG_CISCTL_MODE1_HMIRROR_BIT) ? 1 : 0;
+        return OK;
+
+      default:
+        return -ENOTTY;
+    }
 }
 
 /****************************************************************************
@@ -861,7 +894,20 @@ static int gc0308_set_value(struct imgsensor_s *sensor,
                             uint32_t id, uint32_t size,
                             imgsensor_value_t value)
 {
-  return -ENOTTY;
+  struct gc0308_dev_s *priv = (struct gc0308_dev_s *)sensor;
+
+  switch (id)
+    {
+      case IMGSENSOR_ID_HFLIP_VIDEO:
+      case IMGSENSOR_ID_HFLIP_STILL:
+        return gc0308_modreg(priv->i2c, GC0308_REG_CISCTL_MODE1,
+                             GC0308_REG_CISCTL_MODE1_HMIRROR_BIT,
+                             value.value32 ?
+                             GC0308_REG_CISCTL_MODE1_HMIRROR_BIT : 0);
+
+      default:
+        return -ENOTTY;
+    }
 }
 
 /****************************************************************************
