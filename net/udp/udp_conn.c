@@ -193,9 +193,10 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
 #endif
 
       /* If the port local port number assigned to the connections matches
-       * AND the IP address of the connection matches, then return a
-       * reference to the connection structure.  INADDR_ANY is a special
-       * case:  There can only be instance of a port number with INADDR_ANY.
+       * AND the IP address of the connection overlaps, then return a
+       * reference to the connection structure.  Addresses overlap when
+       * they are equal, or either is INADDR_ANY (wildcard).  Different
+       * specific addresses on the same port do not conflict.
        */
 
 #ifdef CONFIG_NET_IPv4
@@ -205,7 +206,8 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
         {
           if (conn->domain == PF_INET && conn->lport == portno &&
               (net_ipv4addr_cmp(conn->u.ipv4.laddr, ipaddr->ipv4.laddr) ||
-               net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY)))
+               net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ||
+               net_ipv4addr_cmp(ipaddr->ipv4.laddr, INADDR_ANY)))
             {
               break;
             }
@@ -219,7 +221,8 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
         {
           if (conn->domain == PF_INET6 && conn->lport == portno &&
               (net_ipv6addr_cmp(conn->u.ipv6.laddr, ipaddr->ipv6.laddr) ||
-               net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr)))
+               net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr) ||
+               net_ipv6addr_cmp(ipaddr->ipv6.laddr, g_ipv6_unspecaddr)))
             {
               break;
             }
