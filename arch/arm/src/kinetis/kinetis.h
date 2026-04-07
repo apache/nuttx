@@ -779,5 +779,9 @@ int kinetis_netinitialize(int intf);
 int kinetis_caninitialize(int intf);
 #endif
 
+#if defined(CONFIG_KINETIS_DAC0) || defined (CONFIG_KINETIS_DAC1)
+struct dac_dev_s *kinetis_dac_initialize(int which);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_H */

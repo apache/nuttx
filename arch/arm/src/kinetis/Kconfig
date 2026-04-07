@@ -604,12 +604,16 @@ config KINETIS_I2S
 config KINETIS_DAC0
 	bool "DAC0"
 	default n
+	select ANALOG
+	select DAC
 	---help---
 		Support DAC0
 
 config KINETIS_DAC1
 	bool "DAC1"
 	default n
+	select ANALOG
+	select DAC
 	---help---
 		Support DAC1
 
