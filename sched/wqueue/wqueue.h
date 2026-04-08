@@ -36,6 +36,7 @@
 #include <nuttx/list.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/hrtimer.h>
 
 #ifdef CONFIG_SCHED_WORKQUEUE
 
@@ -81,7 +82,7 @@ struct kwork_wqueue_s
   int              nthreads;  /* Number of worker threads */
   bool             exit;      /* A flag to request the thread to exit */
   bool             dynamic;   /* Dynamically allocated queue */
-  struct wdog_s    timer;     /* Timer to pending. */
+  struct hrtimer_s timer;     /* High-resolution timer to pending. */
 };
 
 /* This structure defines the state of one high-priority work queue.  This
@@ -281,7 +282,7 @@ bool work_remove(FAR struct kwork_wqueue_s *wqueue,
  *
  ****************************************************************************/
 
-void work_timer_expired(wdparm_t arg);
+uint64_t work_timer_expired(FAR const hrtimer_t *timer, uint64_t expired);
 
 /****************************************************************************
  * Name: work_timer_reset
@@ -306,13 +307,12 @@ void work_timer_reset(FAR struct kwork_wqueue_s *wqueue)
       FAR struct work_s *work;
 
       work = list_first_entry(&wqueue->pending, struct work_s, node);
-
-      wd_start_abstick(&wqueue->timer, work->qtime,
-                       work_timer_expired, (wdparm_t)wqueue);
+      hrtimer_start(&wqueue->timer, work_timer_expired,
+                    TICK2NSEC((uint64_t)work->qtime), HRTIMER_MODE_ABS);
     }
   else
     {
-      wd_cancel(&wqueue->timer);
+      hrtimer_cancel(&wqueue->timer);
     }
 }
 

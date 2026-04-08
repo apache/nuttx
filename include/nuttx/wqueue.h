@@ -36,10 +36,20 @@
 #include <nuttx/list_type.h>
 #include <nuttx/clock.h>
 #include <nuttx/wdog.h>
+#include <nuttx/hrtimer.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Wqueue uses clock_compare for sorting. To ensure the sorting correctness,
+ * we must limit WQUEUE_MAX_DELAY to
+ * min(WDOG_MAX_DELAY, HRTIMER_MAX_DELAY / NSEC_PER_TICK).
+ */
+
+#define WQUEUE_MAX_DELAY \
+  (WDOG_MAX_DELAY < HRTIMER_MAX_DELAY / NSEC_PER_TICK ? \
+   WDOG_MAX_DELAY : HRTIMER_MAX_DELAY / NSEC_PER_TICK)
 
 /* Configuration ************************************************************/
 
