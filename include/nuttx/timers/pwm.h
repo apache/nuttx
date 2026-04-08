@@ -119,6 +119,13 @@
 #define PWMIOC_STOP                    _PWMIOC(4)
 #define PWMIOC_FAULTS_FETCH_AND_CLEAR  _PWMIOC(5)
 
+#define PWMIOC_SETOUTPUTIDLE           _PWMIOC(6)
+#define PWMIOC_GETOUTPUTSTATE          _PWMIOC(7)
+#define PWMIOC_ENABLENOTIFY            _PWMIOC(8)
+#define PWMIOC_DISABLENOTIFY           _PWMIOC(9)
+#define PWMIOC_GETPOWERSTATE           _PWMIOC(10)
+#define PWMIOC_SETPOWERSTATE           _PWMIOC(11)
+
 /* PWM channel polarity *****************************************************/
 
 /* These are helper definitions for setting PWM channel output polarity to
@@ -143,9 +150,35 @@
 #define PWM_DCPOL_LOW            1   /* Logical zero */
 #define PWM_DCPOL_HIGH           2   /* Logical one  */
 
+/* Edge notification types */
+
+#define PWM_EDGE_RISING          0x00
+#define PWM_EDGE_FALLING         0x01
+#define PWM_EDGE_BOTH            0x02
+
+/* Power state definitions */
+
+#define PWM_FULL_POWER           0x00
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Output state query parameter */
+
+struct pwm_output_state_s
+{
+  int8_t channel;
+  bool state;                       /* Output: true=HIGH, false=LOW */
+};
+
+/* Edge notification parameter */
+
+struct pwm_notify_s
+{
+  int8_t channel;
+  uint8_t edge;                     /* PWM_EDGE_RISING/FALLING/BOTH */
+};
 
 /* If the PWM peripheral supports multiple output channels, then this
  * structure describes the output state on one channel.
@@ -164,7 +197,7 @@ struct pwm_chan_s
 #endif
   uint8_t cpol;
   uint8_t dcpol;
-  int8_t channel;
+  int8_t channel;                    /* Channel number: 1~N=active, 0=skip, -1=end */
 };
 
 /* This structure describes the characteristics of the pulsed output */
@@ -219,6 +252,36 @@ struct pwm_ops_s
 
   CODE int (*ioctl)(FAR struct pwm_lowerhalf_s *dev,
                     int cmd, unsigned long arg);
+
+  /* Set channel output to configured idle state immediately. */
+
+  CODE int (*set_output_idle)(FAR struct pwm_lowerhalf_s *dev,
+                              int channel);
+
+  /* Read channel output state (HIGH/LOW). */
+
+  CODE int (*get_output_state)(FAR struct pwm_lowerhalf_s *dev,
+                               int channel, FAR bool *state);
+
+  /* Enable edge notification, must cancel pending interrupts. */
+
+  CODE int (*enable_notify)(FAR struct pwm_lowerhalf_s *dev,
+                            int channel, uint8_t edge);
+
+  /* Disable edge notification. */
+
+  CODE int (*disable_notify)(FAR struct pwm_lowerhalf_s *dev,
+                             int channel);
+
+  /* Get current power state. */
+
+  CODE int (*get_power_state)(FAR struct pwm_lowerhalf_s *dev,
+                              FAR uint8_t *state);
+
+  /* Execute power state transition. */
+
+  CODE int (*set_power_state)(FAR struct pwm_lowerhalf_s *dev,
+                              uint8_t state);
 };
 
 /* This structure is the generic form of state structure used by lower half
