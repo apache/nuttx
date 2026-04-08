@@ -46,6 +46,7 @@ static void stm32_checksetup(void);
 
 #include <nuttx/mutex.h>
 #include <nuttx/config.h>
+#include <nuttx/nuttx.h>
 
 #include <nuttx/debug.h>
 #include <errno.h>
@@ -58,9 +59,9 @@ static void stm32_checksetup(void);
  * Private Types
  ****************************************************************************/
 
-struct stm32_mdio_bus_s
+struct stm32_mdio_lowerhalf_s
 {
-  struct mdio_lowerhalf_s *lower;
+  struct mdio_lowerhalf_s base;
 
   /* MDIO bus timeout in milliseconds */
 
@@ -88,14 +89,12 @@ const struct mdio_ops_s g_stm32_mdio_ops =
   .reset = NULL,
 };
 
-struct mdio_lowerhalf_s g_stm32_mdio_lowerhalf =
+struct stm32_mdio_lowerhalf_s g_stm32_mdio_lowerhalf =
 {
-  .ops = &g_stm32_mdio_ops
-};
-
-struct stm32_mdio_bus_s g_stm32_mdio_bus =
-{
-  .lower = &g_stm32_mdio_lowerhalf,
+  .base =
+    {
+      .ops = &g_stm32_mdio_ops
+    },
   .timeout = 10
 };
 
@@ -110,7 +109,8 @@ static int stm32_c22_read(struct mdio_lowerhalf_s *dev, uint8_t phydev,
   uint32_t regval;
 
   int retval = -ETIMEDOUT;
-  struct stm32_mdio_bus_s *priv = (struct stm32_mdio_bus_s *)dev;
+  struct stm32_mdio_lowerhalf_s *priv =
+         container_of(dev, struct stm32_mdio_lowerhalf_s, base);
 
   /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
    * bits
@@ -161,7 +161,8 @@ static int stm32_c22_write(struct mdio_lowerhalf_s *dev, uint8_t phydev,
   uint32_t regval;
 
   int retval = -ETIMEDOUT;
-  struct stm32_mdio_bus_s *priv = (struct stm32_mdio_bus_s *)dev;
+  struct stm32_mdio_lowerhalf_s *priv =
+         container_of(dev, struct stm32_mdio_lowerhalf_s, base);
 
   /* Configure the MACMDIOAR register, preserving CSR Clock Range CR[3:0]
    * bits
@@ -228,5 +229,5 @@ static int stm32_c22_write(struct mdio_lowerhalf_s *dev, uint8_t phydev,
 
 struct mdio_bus_s *stm32_mdio_bus_initialize(void)
 {
-  return mdio_register(&g_stm32_mdio_lowerhalf);
+  return mdio_register(&g_stm32_mdio_lowerhalf.base);
 }
