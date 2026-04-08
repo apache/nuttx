@@ -895,6 +895,7 @@ config ESP32_IRAM_HEAP
 	bool "Use the rest of IRAM as a separate heap"
 	select ARCH_HAVE_EXTRA_HEAPS
 	select LIBC_ARCH_ATOMIC
+	select ARCH_USE_TEXT_HEAP
 	default n
 
 endmenu # Memory Configuration
