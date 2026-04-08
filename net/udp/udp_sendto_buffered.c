@@ -895,9 +895,9 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
           conn_unlock(&conn->sconn);
           goto errout_with_wrb;
         }
-
-      conn_unlock(&conn->sconn);
     }
+
+  conn_unlock(&conn->sconn);
 
   /* Return the number of bytes that will be sent */
 
