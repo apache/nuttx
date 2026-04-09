@@ -463,19 +463,37 @@ list(
 list(
   APPEND
   HAL_SRCS
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_noos.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_app.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_chip_generic.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_chip_gd.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_chip_winbond.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/esp_flash_api.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/flash_ops.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_chip_drivers.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/memspi_host_driver.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/esp_flash_spi_init.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/flash_brownout_hook.c)
+
+# Cache (relates to SPI Flash)
+
+set(CACHE_SRCS)
+list(
+  APPEND
+  CACHE_SRCS
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/cache_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/flash_mmap.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/flash_brownout_hook.c
-  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/cache_utils.c)
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/flash_ops.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/esp_flash_api.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/esp_flash_spi_init.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_app.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_noos.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_wrap.c)
+
+list(APPEND HAL_SRCS ${CACHE_SRCS})
+
+# Avoid cache miss by unexpected inlineing when built by -Os
+set_source_files_properties(
+  ${CACHE_SRCS} DIRECTORY ../../../../
+  PROPERTIES
+    COMPILE_FLAGS
+    "-fno-inline-functions -fno-inline-small-functions -fno-inline-functions-called-once"
+)
 
 # ULP lp_core
 list(
