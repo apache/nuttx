@@ -1001,18 +1001,21 @@ static void usbhost_hub_event(FAR void *arg)
               connport = &priv->hport[PORT_INDX(port)];
               if (connport->devclass != NULL)
                 {
+                  /* For hubs, the usbhost_disconnect_event function
+                   * (triggered by the CLASS_DISCONNECTED call below)
+                   * will call usbhost_hport_deactivate for us. We
+                   * prevent a crash when a hub is unplugged by skipping
+                   * the second unnecessary usbhost_hport_deactivated
+                   * call here. Check before disconnecting because the class
+                   * will be cleared out after disconnected.
+                   */
+
+                  bool ishubclass =
+                    (connport->devclass->connect == usbhost_connect);
                   CLASS_DISCONNECTED(connport->devclass);
 
-                  if (connport->devclass->connect == usbhost_connect)
+                  if (ishubclass)
                     {
-                      /* For hubs, the usbhost_disconnect_event function
-                       * (triggered by the CLASS_DISCONNECTED call above)
-                       * will call usbhost_hport_deactivate for us. We
-                       * prevent a crash when a hub is unplugged by skipping
-                       * the second unnecessary usbhost_hport_deactivated
-                       * call here.
-                       */
-
                       connport->devclass = NULL;
                     }
                   else
