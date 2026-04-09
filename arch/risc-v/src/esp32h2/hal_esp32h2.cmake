@@ -179,31 +179,31 @@ set(ESP_RISCV_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/riscv/ld)
 set(ESP_WDT_LD_DIR
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_wdt/${CHIP_SERIES})
 
-target_link_options(
-  nuttx
-  PRIVATE
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
-  -T${ESP_WDT_LD_DIR}/rom.wdt.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.heap.ld
-  -T${ESP_RISCV_LD_DIR}/rom.api.ld
-  -T${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld)
+set(_esp32h2_rom_ld_files
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
+    ${ESP_WDT_LD_DIR}/rom.wdt.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.heap.ld
+    ${ESP_RISCV_LD_DIR}/rom.api.ld
+    ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld)
 
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  target_link_options(
-    nuttx PRIVATE
-    -T${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
+  list(APPEND _esp32h2_rom_ld_files
+       ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
 endif()
 
 if(CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE)
-  target_link_options(nuttx PRIVATE
-                      -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.spiflash.ld)
+  list(APPEND _esp32h2_rom_ld_files
+       ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.spiflash.ld)
 endif()
+
+# Add these files to the GLOBAL PROPERTY LD_SCRIPT
+set_property(GLOBAL APPEND PROPERTY LD_SCRIPT ${_esp32h2_rom_ld_files})
 
 # ##############################################################################
 # HAL Source Files (from hal_esp32h2.mk CHIP_CSRCS and CHIP_ASRCS)
@@ -582,6 +582,7 @@ function(nuttx_generate_preprocess_target)
     COMMAND
       ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
       -I${NUTTX_CHIP_ABS_DIR} ${LD_SCRIPT_HAL_INCLUDE}
-      ${LD_SCRIPT_ADDITIONAL_INCLUDE} ${SOURCE_FILE} > ${TARGET_FILE}
+      ${LD_SCRIPT_ADDITIONAL_INCLUDE} -D__NuttX__ ${SOURCE_FILE} >
+      ${TARGET_FILE}
     DEPENDS ${SOURCE_FILE} ${DEPENDS})
 endfunction()

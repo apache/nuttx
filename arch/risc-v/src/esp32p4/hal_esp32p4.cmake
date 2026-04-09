@@ -183,39 +183,37 @@ set(ESP_SOC_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/soc/${CHIP_SERIES}/ld)
 set(ESP_RISCV_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/riscv/ld)
 
 if(CONFIG_ESP32P4_REV_MIN_300)
-  target_link_options(
-    nuttx
-    PRIVATE
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libc.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libgcc.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.newlib.ld)
+  set(_esp32p4_rom_ld_files
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libc.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.libgcc.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco5.newlib.ld)
 else()
-  target_link_options(
-    nuttx
-    PRIVATE
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
-    -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld)
+  set(_esp32p4_rom_ld_files
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
+      ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld)
 endif()
 
-target_link_options(
-  nuttx
-  PRIVATE
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.systimer.ld
-  -T${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld
-  -T${ESP_RISCV_LD_DIR}/rom.api.ld)
+list(
+  APPEND
+  _esp32p4_rom_ld_files
+  ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
+  ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
+  ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
+  ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.systimer.ld
+  ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld
+  ${ESP_RISCV_LD_DIR}/rom.api.ld)
 
 # Review the path below when ULP core is implemented on CMake
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  target_link_options(
-    nuttx PRIVATE
-    -T${TOPDIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
+  list(APPEND _esp32p4_rom_ld_files
+       ${TOPDIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
 endif()
+
+# Add these files to the GLOBAL PROPERTY LD_SCRIPT
+set_property(GLOBAL APPEND PROPERTY LD_SCRIPT ${_esp32p4_rom_ld_files})
 
 # ##############################################################################
 # HAL Source Files (from hal_esp32p4.mk CHIP_CSRCS)
@@ -505,6 +503,7 @@ function(nuttx_generate_preprocess_target)
     COMMAND
       ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
       -I${NUTTX_CHIP_ABS_DIR} ${LD_SCRIPT_HAL_INCLUDE}
-      ${LD_SCRIPT_ADDITIONAL_INCLUDE} ${SOURCE_FILE} > ${TARGET_FILE}
+      ${LD_SCRIPT_ADDITIONAL_INCLUDE} -D__NuttX__ ${SOURCE_FILE} >
+      ${TARGET_FILE}
     DEPENDS ${SOURCE_FILE} ${DEPENDS})
 endfunction()
