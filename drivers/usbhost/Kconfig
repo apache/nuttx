@@ -304,6 +304,25 @@ config USBHOST_CDCACM_TXBUFSIZE
 
 endif # USBHOST_CDCACM
 
+config USBHOST_CDCECM
+	bool "CDC/ECM support"
+	default n
+	depends on USBHOST_HAVE_ASYNCH && !USBHOST_BULK_DISABLE && !USBHOST_INT_DISABLE
+	select USBHOST_ASYNCH
+	select NET_ETHERNET
+	---help---
+		Select this option to build in host support for CDC/ECM serial
+		devices.
+
+config USBHOST_CDCECM_PACKET_PRINT
+	bool "Print raw CDC/ECM packets"
+	default n
+	depends on DEBUG_USB_INFO
+	---help---
+		Print all raw RX and TX packets send and received in the CDC/ECM driver.
+		This can be useful for analysing with programs such as wireshark.
+
+
 config USBHOST_CDCMBIM
 	bool "CDC/MBIM support"
 	default n

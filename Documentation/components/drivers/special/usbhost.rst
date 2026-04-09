@@ -103,3 +103,37 @@ USB Host-Side Drivers
       **Examples**: See the call to ``register_blockdriver()`` in
       the function ``usbhost_initvolume()`` in the file
       ``drivers/usbhost/usbhost_storage.c``.
+
+CDC-ECM Host Class Driver
+=========================
+
+The CDC-ECM (Ethernet Control Model) host class driver
+(``drivers/usbhost/usbhost_cdcecm.c``) supports USB devices that expose
+a network interface using the USB Communications Device Class Ethernet
+Control Model. Common device types include:
+
+-  **USB-to-Ethernet adapters** that implement CDC-ECM, providing wired
+   Ethernet connectivity over a USB port.
+
+-  **Cellular modems and similar devices** that expose a CDC-ECM
+   interface for IP connectivity, such as LTE modems operating in USB
+   tethering mode.
+
+When a compatible device is connected and enumerated, the driver
+registers a standard NuttX Ethernet network interface — for example
+``eth0`` — and integrates with the NuttX networking stack in exactly the
+same way as any on-board Ethernet driver. Normal network configuration
+can then be applied to the interface using standard NSH commands::
+
+    ifup eth0
+    ifconfig eth0 192.168.1.10 netmask 255.255.255.0
+
+Or with DHCP via the ``netinit`` daemon when
+``CONFIG_NETINIT_DHCPC=y`` is selected.
+
+The driver is registered by calling ``usbhost_cdcecm_initialize()``
+during board initialization, before the USB host waiter thread begins
+enumerating devices.
+
+**Examples**: ``drivers/usbhost/usbhost_cdcecm.c``,
+``boards/arm/stm32h5/nucleo-h563zi/configs/nshusbnet/defconfig``.

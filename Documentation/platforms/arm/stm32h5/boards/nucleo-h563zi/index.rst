@@ -174,6 +174,75 @@ This configuration configures the digital temperature sensor (DTS)
 at /dev/uorb/sensor_temp0 and provides the test application 
 sensortest. E.g. sensortest -n 10 temp0
 
+usbmsc:
+--------
+
+This configuration enables USB Host support with the Mass Storage Class
+(MSC) driver.  It is intended to test USB Host operation by connecting a
+USB mass-storage device (e.g. a USB flash drive) to the board's USB-C
+connector.  Key options enabled:
+
+- ``CONFIG_STM32H5_USBFS_HOST`` — STM32H5 USB full-speed host controller
+- ``CONFIG_USBHOST_MSC`` — USB Mass Storage Class host driver
+- ``CONFIG_USBHOST_HUB`` — USB hub support
+- ``CONFIG_FS_FAT`` — FAT filesystem for mounting the storage device
+
+The serial console remains on USART3 (ST-Link VCOM).  NSH
+``ifup``/``ifdown`` commands are disabled because no network interface is
+configured in this build.
+
+.. note::
+
+   USB Host requires a stable 48 MHz clock.  HSI48 is not accurate enough
+   for reliable USB operation, so this configuration uses the external
+   high-speed oscillator (HSE) as the USB clock source
+   (``CONFIG_STM32H5_USE_HSE=y``).  On the Nucleo-H563ZI development board
+   HSE is not connected by default; to enable it you must:
+
+   - **Connect** solder bridges **SB3** and **SB4**
+   - **Disconnect** solder bridge **SB49**
+
+   The board also does not support software control of VBUS power.  To
+   supply power to the USB host port, fit a second jumper on the **PWR SEL**
+   header that bridges the **STLK** and **USB USER** pins together.
+
+nshusbnet:
+-----------
+
+This configuration is based on the standard ``nsh`` configuration but adds
+full networking support and the CDC-ECM USB Ethernet host driver.  It is
+intended to test USB Host operation with a USB-to-Ethernet adapter that
+uses the CDC-ECM (Ethernet Control Model) protocol.  Key options enabled:
+
+- ``CONFIG_STM32H5_USBFS_HOST`` — STM32H5 USB full-speed host controller
+- ``CONFIG_USBHOST_CDCECM`` — USB CDC-ECM Ethernet host driver
+- ``CONFIG_USBHOST_COMPOSITE`` — composite USB device support
+- ``CONFIG_USBHOST_HUB`` — USB hub support
+- ``CONFIG_NET``, ``CONFIG_NET_TCP``, ``CONFIG_NET_UDP`` — IPv4 networking stack
+- ``CONFIG_NETINIT_DHCPC`` / ``CONFIG_NETUTILS_DHCPC`` — DHCP client for automatic IP configuration
+- ``CONFIG_NETUTILS_TELNETD`` — Telnet daemon for remote NSH access
+- ``CONFIG_SYSTEM_PING`` — ping utility for connectivity testing
+
+Plug a CDC-ECM USB Ethernet adapter into the board's USB-C host port.
+NuttX will enumerate the device, assign it a network interface, and obtain
+an IP address via DHCP.  The ``ping`` application can then be used to
+verify network connectivity.
+
+.. note::
+
+   USB Host requires a stable 48 MHz clock.  HSI48 is not accurate enough
+   for reliable USB operation, so this configuration uses the external
+   high-speed oscillator (HSE) as the USB clock source
+   (``CONFIG_STM32H5_USE_HSE=y``).  On the Nucleo-H563ZI development board
+   HSE is not connected by default; to enable it you must:
+
+   - **Connect** solder bridges **SB3** and **SB4**
+   - **Disconnect** solder bridge **SB49**
+
+   The board also does not support software control of VBUS power.  To
+   supply power to the USB host port, fit a second jumper on the **PWR SEL**
+   header that bridges the **STLK** and **USB USER** pins together.
+
 References
 ===========
 

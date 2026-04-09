@@ -1141,6 +1141,27 @@ void usbhost_msc_notifier_signal(uint8_t event, char sdchar);
 int usbhost_cdcacm_initialize(void);
 #endif
 
+#ifdef CONFIG_USBHOST_CDCECM
+/****************************************************************************
+ * Name: usbhost_cdcacm_initialize
+ *
+ * Description:
+ *   Initialize the USB host CDC/ECM class.  This function should be called
+ *   by platform-specific code in order to initialize and register support
+ *   for the USB host CDC/ECM class.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+int usbhost_cdcecm_initialize(void);
+#endif
+
 #ifdef CONFIG_USBHOST_FT232R
 /****************************************************************************
  * Name: usbhost_ft232r_initialize

@@ -171,6 +171,17 @@ int stm32_usbhost_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST_CDCECM
+  /* Register the CDC-ECM class driver */
+
+  ret = usbhost_cdcecm_initialize();
+  if (ret < 0)
+    {
+      uerr("ERROR: Failed to register CDC-ACM class: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* Then get an instance of the USB host interface */
 
   uinfo("Initialize USB host\n");
