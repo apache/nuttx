@@ -53,6 +53,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/ip.h>
 #include <nuttx/net/dns.h>
+#include <nuttx/tls.h>
 
 #include "netdb/lib_dns.h"
 
@@ -101,6 +102,7 @@ struct dns_query_info_s
 
 struct dns_query_data_s
 {
+  int sd;                            /* Active DNS socket, -1 if none */
   struct dns_query_s query;
   struct dns_query_info_s qinfo;
   uint8_t buffer[QUERY_BUFFER_SIZE]; /* Buffer to hold request & response */
@@ -839,6 +841,29 @@ static void dns_query_error(FAR const char *prompt, int ret,
 }
 
 /****************************************************************************
+ * Name: dns_query_cleanup
+ *
+ * Description:
+ *   Cleanup handler of dns_query() for a cancelled thread.  Closes the
+ *   active DNS socket, if any, and frees the query data.
+ *
+ ****************************************************************************/
+
+#if CONFIG_TLS_NCLEANUP > 0
+static void dns_query_cleanup(FAR void *arg)
+{
+  FAR struct dns_query_data_s *qdata = arg;
+
+  if (qdata->sd >= 0)
+    {
+      close(qdata->sd);
+    }
+
+  lib_free(qdata);
+}
+#endif
+
+/****************************************************************************
  * Name: dns_query_callback
  *
  * Description:
@@ -892,6 +917,8 @@ try_stream:
               return 0;
             }
 
+          qdata->sd = sd;
+
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
                                DNS_RECTYPE_AAAA, &qdata->qinfo,
@@ -920,6 +947,7 @@ try_stream:
                 {
                   if (!stream && should_try_stream)
                     {
+                      qdata->sd = -1;
                       close(sd);  /* Close current socket before trying stream mode */
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
@@ -931,6 +959,7 @@ try_stream:
                 }
             }
 
+          qdata->sd = -1;
           close(sd);
         }
 #endif
@@ -946,6 +975,8 @@ try_stream:
               query->result = sd;
               return 0;
             }
+
+          qdata->sd = sd;
 
           ret = dns_send_query(sd, query->hostname,
                                (FAR union dns_addr_u *)addr,
@@ -980,6 +1011,7 @@ try_stream:
                 {
                   if (!stream && should_try_stream)
                     {
+                      qdata->sd = -1;
                       close(sd);  /* Close current socket before trying stream mode */
                       stream = true;
                       goto try_stream; /* Don't consume retry count */
@@ -991,6 +1023,7 @@ try_stream:
                 }
             }
 
+          qdata->sd = -1;
           close(sd);
         }
 #endif /* CONFIG_NET_IPv4 */
@@ -1053,6 +1086,11 @@ int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
       return -ENOMEM;
     }
 
+  qdata->sd = -1;
+#if CONFIG_TLS_NCLEANUP > 0
+  tls_cleanup_push(tls_get_info(), dns_query_cleanup, qdata);
+#endif
+
   /* Set up the query info structure */
 
   qdata->query.result   = -EADDRNOTAVAIL;
@@ -1081,6 +1119,9 @@ int dns_query(FAR const char *hostname, FAR union dns_addr_u *addr,
 
   /* Free the query data */
 
+#if CONFIG_TLS_NCLEANUP > 0
+  tls_cleanup_pop(tls_get_info(), 0);
+#endif
   lib_free(qdata);
 
   return ret;
