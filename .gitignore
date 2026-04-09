@@ -37,6 +37,10 @@ etctmp/
 *.pyc
 *.mapfile
 *.SystemMap
+*.ld.tmp
+*.script.tmp
+*.script.dfu.tmp
+*.linkcmd.tmp
 *~
 \#*\#
 .\#*

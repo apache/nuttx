@@ -266,11 +266,12 @@ tools/mkconfig$(HOSTEXEEXT): prebuild
 include/nuttx/config.h: $(TOPDIR)/.config tools/mkconfig$(HOSTEXEEXT)
 	$(Q) grep -v "CONFIG_BASE_DEFCONFIG" "$(TOPDIR)/.config" > "$(TOPDIR)/.config.tmp"
 	$(Q) if ! cmp -s "$(TOPDIR)/.config.tmp" "$(TOPDIR)/.config.orig" ; then \
-		sed -i.bak -e "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/; }" "$(TOPDIR)/.config" ; \
+		sed -e "/CONFIG_BASE_DEFCONFIG/ { /-dirty/! s/\"$$/-dirty\"/; }" "$(TOPDIR)/.config" > "$(TOPDIR)/.config.dirty" ; \
 	else \
-		sed -i.bak "s/-dirty//g" "$(TOPDIR)/.config"; \
+		sed "s/-dirty//g" "$(TOPDIR)/.config" > "$(TOPDIR)/.config.dirty"; \
 	fi
-	$(Q) rm -f "$(TOPDIR)/.config.tmp" "$(TOPDIR)/.config.bak"
+	$(Q) rm -f "$(TOPDIR)/.config.tmp"
+	$(Q) $(call TESTANDREPLACEFILE, $(TOPDIR)/.config.dirty, $(TOPDIR)/.config)
 	$(Q) tools/mkconfig $(TOPDIR) > $@.tmp
 	$(Q) $(call TESTANDREPLACEFILE, $@.tmp, $@)
 
