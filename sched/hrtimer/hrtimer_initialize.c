@@ -66,7 +66,7 @@ struct hrtimer_s g_hrtimer_guard =
   { &g_hrtimer_list, &g_hrtimer_list },
 #endif
   NULL,
-  INT64_MAX
+  HRTIMER_GUARD_DELAY
 };
 
 #ifdef CONFIG_HRTIMER_TREE

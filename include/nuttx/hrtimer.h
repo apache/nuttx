@@ -41,11 +41,22 @@
 
 /* The maximum delay tick should be INT64_MAX. However, if there are expired
  * hrtimer in the queue, HRTIMER_TIME_BEFORE/AFTER might be incorrect, so we
- * limited the delay to INT64_MAX >> 1, assuming all expired hrtimer can be
- * processed within HRTIMER_MAX_DELAY.
+ * limited the delay to (INT64_MAX >> 1) + 1u, assuming all expired hrtimer
+ * can be processed within HRTIMER_MAX_DELAY - 1u.
+ *
+ * g_hrtimer_guard.expired is set to now + HRTIMER_GUARD_DELAY in the
+ * hrtimer_process. The guard delay is intentionally set to
+ * INT64_MAX - (1ull << 48) rather than INT64_MAX for the following reason:
+ * In SMP configurations, each CPU core independently updates shared
+ * g_hrtimer_guard.expired. Due to interrupt and lock latency, the current
+ * time across cores are not perfectly synchronized and may exhibit small
+ * forward/backward drift.
+ * The (1ull << 48) headroom (~0.3 days in nanoseconds) accommodates
+ * this inter-core time desynchronization.
  */
 
-#define HRTIMER_MAX_DELAY              (INT64_MAX >> 1)
+#define HRTIMER_GUARD_DELAY ((uint64_t)INT64_MAX - (1ull << 48))
+#define HRTIMER_MAX_DELAY   (((uint64_t)INT64_MAX >> 1) + 1u)
 
 /****************************************************************************
  * Public Types
