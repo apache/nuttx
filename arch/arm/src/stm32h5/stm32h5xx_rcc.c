@@ -580,7 +580,7 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
-#ifdef CONFIG_STM32H5_USBFS
+#if defined(CONFIG_STM32H5_USBFS) || defined(CONFIG_STM32H5_USBFS_HOST)
   /* USB clock enable */
 
   regval |= RCC_APB2ENR_USBEN;

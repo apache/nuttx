@@ -36,6 +36,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_STM32H5_USBFS_HOST) && !defined(CONFIG_STM32H5_USE_HSE)
+    #error "This board config requires HSE to use the USB HOST."
+    "HSI48 is not stable enough to use as a host."
+    "To use HSE on the nucleo-H563ZI,"
+    "you need to connect SB3/SB4 and disconnect SB49"
+#endif
+
 /* Clocking *****************************************************************/
 
 /* The Nucleo-H563ZI-Q supports using a HSE crystal (X3). It is shipped with
@@ -82,7 +89,7 @@
                                    STM32_PLLCFG_PLL1Q | \
                                    STM32_PLLCFG_PLL1R)
 
-#define STM32_VC01_FRQ            ((STM32_HSE_FREQUENCY / 5) * 100)
+#define STM32_VCO1_FRQ            ((STM32_HSE_FREQUENCY / 5) * 100)
 #define STM32_PLL1P_FREQUENCY     (STM32_VCO1_FRQ / 2)
 #define STM32_PLL1Q_FREQUENCY     (STM32_VCO1_FRQ / 4)
 #define STM32_PLL1R_FREQUENCY     (STM32_VCO1_FRQ / 2)
@@ -100,6 +107,34 @@
 
 #define STM32_VCO2_FRQ            ((STM32_HSE_FREQUENCY / 5) * 60)
 #define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
+
+#if defined(CONFIG_STM32H5_USBFS_HOST)
+/* PLL3 config: Generate 48 MHz for USB from 25 MHz HSE.
+ * VCO input = 25 MHz / 5 = 5 MHz
+ * VCO output = 5 MHz * 96 = 480 MHz
+ * PLL3Q = 480 MHz / 10 = 48 MHz
+ */
+
+#define STM32_PLLCFG_PLL3CFG      (RCC_PLL3CFGR_PLL3SRC_HSE | \
+                                   RCC_PLL3CFGR_PLL3RGE_4_8M | \
+                                   RCC_PLL3CFGR_PLL3M(5) | \
+                                   RCC_PLL3CFGR_PLL3QEN)
+#define STM32_PLLCFG_PLL3N         RCC_PLL3DIVR_PLL3N(96)  /* VCO 480 MHz */
+#define STM32_PLLCFG_PLL3P         RCC_PLL3DIVR_PLL3P(2)   /* Not used */
+#define STM32_PLLCFG_PLL3Q         RCC_PLL3DIVR_PLL3Q(10)  /* 3Q 48 MHz */
+#define STM32_PLLCFG_PLL3R         RCC_PLL3DIVR_PLL3R(2)   /* Not used */
+#define STM32_PLLCFG_PLL3DIVR     (STM32_PLLCFG_PLL3N | \
+                                   STM32_PLLCFG_PLL3P | \
+                                   STM32_PLLCFG_PLL3Q | \
+                                   STM32_PLLCFG_PLL3R)
+
+#define STM32_VCO3_FRQ            ((STM32_HSE_FREQUENCY / 5) * 96)  /* 480 MHz */
+#define STM32_PLL3Q_FREQUENCY     (STM32_VCO3_FRQ / 10)             /* 48 MHz */
+
+/* Use PLL3Q (48 MHz) for USB - more stable than HSI48 */
+#define STM32H5_CLKUSB_SEL      RCC_CCIPR4_USBSEL_PLL3QCK
+
+#endif /* CONFIG_STM32H5_USBFS_HOST */
 
 #else
 

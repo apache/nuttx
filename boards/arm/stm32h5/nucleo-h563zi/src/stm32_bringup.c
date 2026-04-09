@@ -149,6 +149,15 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST
+  ret = stm32_usbhost_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

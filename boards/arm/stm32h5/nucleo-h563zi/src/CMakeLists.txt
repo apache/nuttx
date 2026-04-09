@@ -48,6 +48,10 @@ if(CONFIG_STM32H5_FDCAN)
   list(APPEND SRCS stm32_can.c)
 endif()
 
+if(CONFIG_STM32H5_USBFS_HOST)
+  list(APPEND SRCS stm32_usb.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")

@@ -92,6 +92,10 @@ ifeq ($(CONFIG_STM32H5_USBFS),y)
 CHIP_CSRCS += stm32_usbfs.c
 endif
 
+ifeq ($(CONFIG_STM32H5_USBFS_HOST),y)
+CHIP_CSRCS += stm32_usbdrdhost.c
+endif
+
 ifeq ($(CONFIG_STM32H5_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif

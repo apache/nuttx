@@ -55,4 +55,8 @@ ifeq ($(CONFIG_STM32H5_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_STM32H5_USBFS_HOST),y)
+CSRCS += stm32_usb.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

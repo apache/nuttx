@@ -49,7 +49,7 @@ OCTOSPI     Yes      Implemented as QSPI.
 PWR         Yes      Partial.
 SPI         Yes
 TIM         Yes
-USB_FS      Yes      USB Device Support.
+USB_FS      Yes      USB Device and Host Support.
 
 AES         No
 CEC         No
@@ -85,6 +85,26 @@ VREFBUF     No
 WWDG        No
 
 ==========  =======  =====
+
+USB FS Host
+-----------
+
+STM32 USB FS Host Driver Support. The STM32H5 is equipped with a Dual Role USB device
+capable of operating as a device or host. 
+
+Pre-requisites:
+
+- CONFIG_USBHOST         - Enable USB host support
+- CONFIG_STM32H5_USBFS_HOST  - Enable the STM32 USB OTG FS block in host mode
+
+USB host requires a stable 48MHz clock. This should come from a PLL driven by the HSE.
+HSI48 cannot be reliably used in host mode due to drift. It can only be used in device mode.
+
+Options:
+
+- STM32H5_USBDRD_NCHANNELS - Number of host channels. Default 8
+
+- STM32H5_USBDRD_DESCSIZE - Maximum size of a descriptor.  Default: 128
 
 References
 =================

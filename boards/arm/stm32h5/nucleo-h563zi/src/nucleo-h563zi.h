@@ -157,5 +157,9 @@ int stm32_can_setup(uint8_t port);
 int stm32_pwm_setup(void);
 #endif
 
+#ifdef CONFIG_USBHOST
+int stm32_usbhost_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_STM32H5_NUCLEO_H563ZI_SRC_NUCLEO_H563ZI_H */

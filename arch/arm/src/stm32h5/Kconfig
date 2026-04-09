@@ -651,11 +651,29 @@ config STM32H5_TIM17
 
 endmenu # STM32H5 Timer Selection
 
+choice STM32H5_USBFS_MODE
+	prompt "USB FS Mode"
+	depends on STM32H5_HAVE_USBFS
+	default STM32H5_USBFS_NONE
+	---help---
+	  Select the operating mode for the USB_DRD_FS peripheral.
+	  The hardware supports Device or Host, but not simultaneously.
+
+config STM32H5_USBFS_NONE
+	bool "Disabled"
+
 config STM32H5_USBFS
 	bool "USB Device"
-	default n
-	depends on STM32H5_HAVE_USBFS
 	select USBDEV
+
+config STM32H5_USBFS_HOST
+	bool "USB Host"
+	select USBHOST_HAVE_ASYNCH
+	select USBHOST
+	---help---
+	  Enable USB host mode for USB_DRD_FS peripheral.
+
+endchoice
 
 endmenu # STM32H5 Peripheral Selection
 
@@ -4473,7 +4491,7 @@ endmenu # Timer Configuration
 
 comment "USB Device Configuration"
 
-menu "USB Full Speed Debug Configuration"
+menu "USB Full Speed Device Configuration"
 	depends on STM32H5_USBFS
 
 config STM32H5_USBFS_REGDEBUG
@@ -4482,6 +4500,28 @@ config STM32H5_USBFS_REGDEBUG
 	depends on STM32H5_USBFS && DEBUG_USB_INFO
 	---help---
 		Enable very low-level register access debug.
+
+endmenu
+
+comment "USB Host Configuration"
+
+menu "USB Full Speed Host Configuration"
+	depends on STM32H5_USBFS_HOST
+
+config STM32H5_USBDRD_NCHANNELS
+	int "Number of host channels"
+	default 8
+	range 1 8
+	depends on STM32H5_USBFS_HOST
+	---help---
+		Number of USB host channels to use.
+
+config STM32H5_USBDRD_DESCSIZE
+	int "Descriptor buffer size"
+	default 128
+	depends on STM32H5_USBFS_HOST
+	---help---
+		Size of descriptor/request buffers.
 
 endmenu
 
