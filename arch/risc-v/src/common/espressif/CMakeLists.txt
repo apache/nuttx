@@ -364,6 +364,8 @@ if(CONFIG_ESPRESSIF_EFUSE)
   list(APPEND _esp_startup_u_opts "SHELL:-u esp_efuse_startup_include_func")
 endif()
 
+list(APPEND _esp_startup_u_opts "SHELL:-u esp_flash_spi_init_include_func")
+
 target_link_options(nuttx PRIVATE ${_esp_startup_u_opts})
 
 # ##############################################################################
