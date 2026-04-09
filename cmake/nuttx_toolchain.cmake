@@ -74,6 +74,7 @@ endif()
 if(NOT NUTTX_TOOLCHAIN_PREPROCESS_DEFINED)
   function(nuttx_generate_preprocess_target)
 
+    set(DEFINES -D__NuttX__)
     # parse arguments into variables
 
     nuttx_parse_function_args(
@@ -92,8 +93,10 @@ if(NOT NUTTX_TOOLCHAIN_PREPROCESS_DEFINED)
 
     add_custom_command(
       OUTPUT ${TARGET_FILE}
-      COMMAND ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
-              -I${NUTTX_CHIP_ABS_DIR} ${SOURCE_FILE} > ${TARGET_FILE}
+      COMMAND
+        ${PREPROCESS} ${DEFINES} -I${CMAKE_BINARY_DIR}/include
+        -I${NUTTX_DIR}/include -I${NUTTX_CHIP_ABS_DIR} ${SOURCE_FILE} >
+        ${TARGET_FILE}
       DEPENDS ${SOURCE_FILE} ${DEPENDS})
 
   endfunction()
