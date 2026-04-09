@@ -898,6 +898,16 @@ config ESP32_IRAM_HEAP
 	select ARCH_USE_TEXT_HEAP
 	default n
 
+config ESP32_DONT_USE_ROM_LIBC
+	bool "Don't use ROM libc functions"
+	default n
+	---help---
+		If enabled, NuttX libc will be used instead of ROM newlib
+		functions (strdup, strndup, atoi, etc.).
+
+		This is required when using flat build with USER_HEAP mode
+		to avoid heap allocation issues with ROM strdup.
+
 endmenu # Memory Configuration
 
 config ESP32_GPIO_IRQ
@@ -1929,6 +1939,7 @@ config ESP32_SPI_FLASH_SUPPORT_PSRAM_STACK
 	default n
 	depends on ESP32_SPIRAM
 	select SCHED_LPWORK
+	select ESP32_DONT_USE_ROM_LIBC
 	---help---
 		Enable this option, Tasks which use PSRAM as stack
 		can do SPI Flash read/write/erase/map/unmap.
