@@ -51,8 +51,7 @@
 
 uint64_t hrtimer_gettime(FAR hrtimer_t *timer)
 {
-  uint64_t expire = hrtimer_read_64(&timer->expired);
-  int64_t  remain = expire - clock_systime_nsec();
+  int64_t remain = hrtimer_read_64(&timer->expired) - clock_systime_nsec();
 
   return remain < 0 ? 0u : remain;
 }

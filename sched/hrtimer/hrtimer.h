@@ -81,11 +81,12 @@ RB_HEAD(hrtimer_tree_s, hrtimer_s);
 
 extern seqcount_t g_hrtimer_lock;
 
+extern struct hrtimer_s g_hrtimer_guard;
+
 #ifdef CONFIG_HRTIMER_TREE
 /* Red-Black tree containing all active high-resolution timers */
 
 extern struct hrtimer_tree_s g_hrtimer_tree;
-extern struct hrtimer_s      g_hrtimer_guard;
 extern struct FAR hrtimer_s *g_hrtimer_head;
 #else
 /* List containing all active high-resolution timers */
@@ -128,6 +129,25 @@ void hrtimer_process(uint64_t now);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: hrtimer_last_expired
+ *
+ * Description:
+ *   Return the last expired time of the hrtimer.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   The last expired time in nanoseconds.
+ *
+ ****************************************************************************/
+
+static inline_function uint64_t hrtimer_last_expired(void)
+{
+  return g_hrtimer_guard.expired - HRTIMER_GUARD_DELAY;
+}
+
+/****************************************************************************
  * Name: hrtimer_reprogram
  *
  * Description:
@@ -154,12 +174,22 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
    */
 
 #ifdef CONFIG_SCHED_TICKLESS
-  int ret = 0;
+  int             ret;
   struct timespec ts;
+  uint64_t        delay;
+  uint64_t        expired = hrtimer_last_expired();
 
-  clock_nsec2time(&ts, next_expired);
+  delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
+          next_expired - expired : 0u;
 
-#  ifdef CONFIG_ALARM_ARCH
+#  ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
+  delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
+          delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
+#  endif
+
+  clock_nsec2time(&ts, expired + delay);
+
+#  ifdef CONFIG_SCHED_TICKLESS_ALARM
   ret = up_alarm_start(&ts);
 #  else
   struct timespec current;

@@ -134,6 +134,10 @@ void hrtimer_process(uint64_t now)
 
   hrtimer_unmark_running(cpu);
 
+  /* Note that the g_hrtimer_guard.expired is not monotonic. */
+
+  g_hrtimer_guard.expired = now + HRTIMER_GUARD_DELAY;
+
   /* Schedule the next timer expiration */
 
   if (expired != now)
