@@ -63,4 +63,4 @@ else()
        "${BOARD_COMMON_DIR}/scripts/${CHIP_SERIES}_legacy_sections.ld")
 endif()
 
-set_property(GLOBAL PROPERTY LD_SCRIPT ${LDSCRIPTS})
+set_property(GLOBAL APPEND PROPERTY LD_SCRIPT ${LDSCRIPTS})
