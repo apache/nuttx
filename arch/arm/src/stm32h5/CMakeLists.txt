@@ -96,6 +96,10 @@ if(CONFIG_STM32H5_USBFS)
   list(APPEND SRCS stm32_usbfs.c)
 endif()
 
+if(CONFIG_STM32H5_USBFS_HOST)
+  list(APPEND SRCS stm32_usbdrdhost.c)
+endif()
+
 if(CONFIG_STM32H5_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
