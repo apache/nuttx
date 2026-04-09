@@ -201,21 +201,22 @@ set(ESP_ROM_LD_DIR
 set(ESP_SOC_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/soc/${CHIP_SERIES}/ld)
 set(ESP_RISCV_LD_DIR ${ESP_HAL_3RDPARTY_REPO}/components/riscv/ld)
 
-target_link_options(
-  nuttx
-  PRIVATE
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.bt_funcs.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco3_bt_funcs.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco3.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld
-  -T${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
-  -T${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld
-  -T${ESP_RISCV_LD_DIR}/rom.api.ld)
+set(_esp32c3_rom_ld_files
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.api.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.bt_funcs.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco3_bt_funcs.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.eco3.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libc-suboptimal_for_misaligned_mem.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.libgcc.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.newlib.ld
+    ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.version.ld
+    ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld
+    ${ESP_RISCV_LD_DIR}/rom.api.ld)
+
+# Add these files to the GLOBAL PROPERTY LD_SCRIPT
+set_property(GLOBAL APPEND PROPERTY LD_SCRIPT ${_esp32c3_rom_ld_files})
 
 # ##############################################################################
 # HAL Source Files
