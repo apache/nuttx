@@ -31,6 +31,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
@@ -86,24 +88,60 @@
 #define IMX_IRQ_IOMUXC           32  /* General Purpose Register 1 from IOMUXC */
 #define IMX_IRQ_DAP              33  /* Debug Access Port interrupt request */
 #define IMX_IRQ_SDMA             34  /* SDMA interrupt request from all channels */
-#define IMX_IRQ_VPU              35  /* JPEG codec interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED35       35  /* Reserved */
+#else
+#define IMX_IRQ_VPU_JPEG         35  /* JPEG codec interrupt request */
+#endif
 #define IMX_IRQ_SNVS             36  /* PMIC power off request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RNGB             37  /* Random Number Generator interrupt request */
+#define IMX_IRQ_RESERVED38       38  /* Reserved */
+#else
 #define IMX_IRQ_IPU              37  /* IPU error interrupt request */
 #define IMX_IRQ_IPU1             38  /* IPU1 sync interrupt request */
-#define IMX_IRQ_IPU2             39  /* IPU2 error interrupt request */
-#define IMX_IRQ_IPU2             40  /* IPU2 sync interrupt request */
+#endif
+#define IMX_IRQ_IPU2_ERR         39  /* IPU2 error interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
+#define IMX_IRQ_RESERVED40       40  /* Reserved */
+#else
+#define IMX_IRQ_IPU2_SYNC        40  /* IPU2 sync interrupt request */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED41       41  /* Reserved */
+#else
 #define IMX_IRQ_GPU3D            41  /* GPU3D interrupt request */
+#endif
 #define IMX_IRQ_R2D              42  /* GPU2D R2D GPU2D general interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6QUAD)
 #define IMX_IRQ_V2D              43  /* GPU2D V2D GPU2D(OpenVG) general interrupt request */
+#else
+#define IMX_IRQ_RESERVED43       43  /* Reserved */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED44       44  /* Reserved */
+#define IMX_IRQ_RESERVED45       45  /* Reserved */
+#else
 #define IMX_IRQ_VPU              44  /* VPU interrupt request */
 #define IMX_IRQ_APBHDMA          45  /* APBH-Bridge-DMA channels 0-3 interrupts */
+#endif
 #define IMX_IRQ_EIM              46  /* EIM interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED47       47  /* Reserved */
+#define IMX_IRQ_RESERVED48       48  /* Reserved */
+#define IMX_IRQ_RESERVED49       49  /* Reserved */
+#define IMX_IRQ_RESERVED50       50  /* Reserved */
+#else
 #define IMX_IRQ_BCH              47  /* BCH operation complete interrupt */
 #define IMX_IRQ_GPMI             48  /* GPMI operation timeout error interrupt */
 #define IMX_IRQ_DTCP             49  /* DTCP interrupt request */
 #define IMX_IRQ_VDOA             50  /* VDOA interrupt requests */
-#define IMX_IRQ_SNVS             51  /* SRTC consolidated interrupt */
-#define IMX_IRQ_SNVS             52  /* SRTC security interrupt */
+#endif
+#define IMX_IRQ_SNVS_CONS        51  /* SRTC consolidated interrupt */
+#define IMX_IRQ_SNVS_SECURITY    52  /* SRTC security interrupt */
 #define IMX_IRQ_CSU              53  /* CSU interrupt request 1 */
 #define IMX_IRQ_USDHC1           54  /* uSDHC1 interrupt request */
 #define IMX_IRQ_USDHC2           55  /* uSDHC2 interrupt request */
@@ -118,13 +156,31 @@
 #define IMX_IRQ_ECSPI2           64  /* eCSPI2 interrupt request */
 #define IMX_IRQ_ECSPI3           65  /* eCSPI3 interrupt request */
 #define IMX_IRQ_ECSPI4           66  /* eCSPI4 interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED67       67  /* Reserved */
+#elif defined(CONFIG_ARCH_CHIP_IMX6_6SOLO) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE)
+#define IMX_IRQ_I2C4             67  /* I2C4 interrupt request */
+#else
 #define IMX_IRQ_ECSPI5           67  /* eCSPI5 interrupt request */
+#endif
 #define IMX_IRQ_I2C1             68  /* I2C1 interrupt request */
 #define IMX_IRQ_I2C2             69  /* I2C2 interrupt request */
 #define IMX_IRQ_I2C3             70  /* I2C3 interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_LCDIF            71  /* LCDIF interrupt request */
+#elif defined(CONFIG_ARCH_CHIP_IMX6_6SOLO) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE)
+#define IMX_IRQ_RESERVED71       71  /* Reserved */
+#else
 #define IMX_IRQ_SATA             71  /* SATA interrupt request */
+#endif
 #define IMX_IRQ_USBHOST1         72  /* USB Host 1 interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED73       73  /* Reserved */
+#else
 #define IMX_IRQ_USBHOST2         73  /* USB Host 2 interrupt request */
+#endif
 #define IMX_IRQ_USBHOST3         74  /* USB Host 3 interrupt request */
 #define IMX_IRQ_USBOTG           75  /* USB OTG interrupt request */
 #define IMX_IRQ_USBPHY0          76  /* UTMI0 interrupt request */
@@ -133,10 +189,19 @@
 #define IMX_IRQ_SSI2             79  /* SSI2 interrupt request */
 #define IMX_IRQ_SSI3             80  /* SSI3 interrupt request */
 #define IMX_IRQ_TEMP             81  /* Temperature Sensor interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED82       82  /* Reserved */
+#define IMX_IRQ_RESERVED83       83  /* Reserved */
+#else
 #define IMX_IRQ_ASRC             82  /* ASRC interrupt request */
 #define IMX_IRQ_ESAI             83  /* ESAI interrupt request */
+#endif
 #define IMX_IRQ_SPDIF            84  /* SPDIF interrupt */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED85       85  /* Reserved */
+#else
 #define IMX_IRQ_MLB150ERR        85  /* MLB error interrupt request */
+#endif
 #define IMX_IRQ_PMUANREG         86  /* Brown out of analog regulators occurred */
 #define IMX_IRQ_GPT              87  /* GPT interrupt lines */
 #define IMX_IRQ_EPIT1            88  /* EPIT1 output compare interrupt */
@@ -159,10 +224,17 @@
 #define IMX_IRQ_GPIO4_INT_16_31 105  /* GPIO4 signals 16-31 */
 #define IMX_IRQ_GPIO5_INT_0_15  106  /* GPIO5 signals 0-15 */
 #define IMX_IRQ_GPIO5_INT_16_31 107  /* GPIO5 signals 16-31 */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED108     108  /* Reserved */
+#define IMX_IRQ_RESERVED109     109  /* Reserved */
+#define IMX_IRQ_RESERVED110     110  /* Reserved */
+#define IMX_IRQ_RESERVED111     111  /* Reserved */
+#else
 #define IMX_IRQ_GPIO6_INT_0_15  108  /* GPIO6 signals 0-15 */
 #define IMX_IRQ_GPIO6_INT_16_31 109  /* GPIO6 signals 16-31 */
 #define IMX_IRQ_GPIO7_INT_0_15  110  /* GPIO7 signals 0-15 */
 #define IMX_IRQ_GPIO7_INT_16_31 111  /* GPIO7 signals 16-31 */
+#endif
 #define IMX_IRQ_WDOG1           112  /* WDOG1 timer reset interrupt request */
 #define IMX_IRQ_WDOG2           113  /* WDOG2 timer reset interrupt request */
 #define IMX_IRQ_KPP             114  /* Key Pad interrupt request */
@@ -179,25 +251,80 @@
 #define IMX_IRQ_CPUPAR          125  /* Parity Check error interrupt request */
 #define IMX_IRQ_CPUPERF         126  /* Performance Unit interrupt */
 #define IMX_IRQ_CPUCTI          127  /* CTI trigger outputs interrupt */
-#define IMX_IRQ_SRC             128  /* CPU wdog interrupts (4x) out of SRC */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6SOLO)
+#define IMX_IRQ_WDOG_SRC        128  /* CPU WDOG interrupt out of SRC */
+#elif defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUAL)
+#define IMX_IRQ_WDOG_SRC        128  /* Combined CPU WDOG interrupts(x2) out of SRC */
+#else
+#define IMX_IRQ_WDOG_SRC        128  /* Combined CPU WDOG interrupts(x4) out of SRC */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6SOLO) \
+  || defined(CONFIG_ARCH_CHIP_IMX6_6DUALLITE)
+#define IMX_IRQ_EDPC            129  /* EDPC interrupt request */
+#define IMX_IRQ_PXP             130  /* PXP interrupt request */
+#else
 #define IMX_IRQ_RESERVED129     129  /* Reserved */
 #define IMX_IRQ_RESERVED130     130  /* Reserved */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_DCP_GENERAL     131  /* DCP general interrupt request */
+#define IMX_IRQ_DCP_CHAN0       132  /* DCP channel 0 interrupt request */
+#define IMX_IRQ_DCP_SECURE      133  /* DCP secure  interrupt request */
+#define IMX_IRQ_RESERVED134     134  /* Reserved */
+#define IMX_IRQ_RESERVED135     135  /* Reserved */
+#else
 #define IMX_IRQ_RESERVED131     131  /* Reserved */
 #define IMX_IRQ_MIPICSI1        132  /* CSI interrupt request 1 */
 #define IMX_IRQ_MIPICSI2        133  /* CSI interrupt request 2 */
 #define IMX_IRQ_MIPIDSI         134  /* DSI interrupt request */
 #define IMX_IRQ_MIPIHSI         135  /* HSI interrupt request */
+#endif
 #define IMX_IRQ_SJC             136  /* SJC interrupt from General Purpose register */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED137     137  /* Reserved */
+#define IMX_IRQ_RESERVED138     138  /* Reserved */
+#else
 #define IMX_IRQ_CAAM0           137  /* CAAM job ring 0 interrupt */
 #define IMX_IRQ_CAAM1           138  /* CAAM job ring 1 interrupt */
+#endif
 #define IMX_IRQ_RESERVED139     139  /* Reserved */
 #define IMX_IRQ_ASC1            140  /* ASC1 interrupt request */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED141     141  /* Reserved */
+#else
 #define IMX_IRQ_ASC2            141  /* ASC2 interrupt request */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED142     142  /* Reserved */
+#define IMX_IRQ_RESERVED143     143  /* Reserved */
+#else
 #define IMX_IRQ_FLEXCAN1        142  /* FLEXCAN1 interrupt request */
 #define IMX_IRQ_FLEXCAN2        143  /* FLEXCAN2 interrupt request */
+#endif
 #define IMX_IRQ_RESERVED144     144  /* Reserved */
 #define IMX_IRQ_RESERVED145     145  /* Reserved */
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_FEC             146  /* Fast Ethernet Controller interrupt request */
+#else
 #define IMX_IRQ_RESERVED146     146  /* Reserved */
+#endif
+#if defined(CONFIG_ARCH_CHIP_IMX6_6SOLOLITE)
+#define IMX_IRQ_RESERVED147     147  /* Reserved */
+#define IMX_IRQ_RESERVED148     148  /* Reserved */
+#define IMX_IRQ_RESERVED149     149  /* Reserved */
+#define IMX_IRQ_RESERVED150     150  /* Reserved */
+#define IMX_IRQ_RESERVED151     151  /* Reserved */
+#define IMX_IRQ_RESERVED152     152  /* Reserved */
+#define IMX_IRQ_RESERVED153     153  /* Reserved */
+#define IMX_IRQ_RESERVED154     154  /* Reserved */
+#define IMX_IRQ_RESERVED155     155  /* Reserved */
+#define IMX_IRQ_RESERVED156     156  /* Reserved */
+#define IMX_IRQ_RESERVED157     157  /* Reserved */
+#define IMX_IRQ_RESERVED158     158  /* Reserved */
+#else
 #define IMX_IRQ_HDMIMSTR        147  /* HDMI master interrupt request */
 #define IMX_IRQ_HDMICEC         148  /* HDMI CEC engine dedicated wake-up interrupt */
 #define IMX_IRQ_MLB150_0_31     149  /* Channels [31:0] interrupt requests */
@@ -210,6 +337,7 @@
 #define IMX_IRQ_DCIC1           156  /* DCIC1 interrupt requests */
 #define IMX_IRQ_DCIC2           157  /* DCIC2 interrupt requests */
 #define IMX_IRQ_MLB150_32_63    158  /* Channel[63:32] interrupt requests */
+#endif
 #define IMX_IRQ_PMUDIGREG       159  /* Brown out of digital regulators occurred */
 
 #define NR_IRQS                 160  /* Total number of interrupts */
