@@ -91,7 +91,8 @@ if(CONFIG_ESPRESSIF_WIFI)
     arch PRIVATE TF_PSA_CRYPTO_USER_CONFIG_FILE=\"mbedtls/esp_config.h\")
 
   # Ensure PSA crypto initialization is included in the build
-  target_link_options(arch PRIVATE -u mbedtls_psa_crypto_init_include_impl)
+  target_link_options(nuttx PRIVATE
+                      "SHELL:-u mbedtls_psa_crypto_init_include_impl")
 
   # mbedTLS sources: exact match to Wireless.mk (lines 59–103). All from
   # tf-psa-crypto/drivers/builtin/src (VPATH in mk).
