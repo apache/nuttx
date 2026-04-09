@@ -151,6 +151,16 @@ int stm32_usbhost_initialize(void)
 
   uinfo("Register class drivers\n");
 
+#ifdef CONFIG_USBHOST_HUB
+  /* Initialize USB hub class support */
+
+  ret = usbhost_hub_initialize();
+  if (ret < 0)
+    {
+      uerr("ERROR: usbhost_hub_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_USBHOST_MSC
   /* Register the USB mass storage class class */
 

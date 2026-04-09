@@ -217,6 +217,12 @@ struct stm32_usbhost_s
   sem_t             pscsem;    /* Port status change sem */
   struct stm32_ctrlinfo_s ep0; /* EP0 description */
 
+#ifdef CONFIG_USBHOST_HUB
+  /* Used to pass external hub port events */
+
+  volatile struct usbhost_hubport_s *hport;
+#endif
+
   struct usbhost_devaddr_s devgen;  /* Address generation data */
 
   /* Host channels */
@@ -1452,13 +1458,19 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
 
   if ((chepval & USB_CHEP_ERRRX) != 0)
     {
-      /* Clear error bit: write 0 to ERRRX to clear,
-       * write 1 to VTRX/VTTX to preserve
+      chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+      uerr("ERRRX chidx=%d chepval=0x%08x rx_status=%d nak=%d\n",
+           chidx, (unsigned int)chepval,
+           (int)((chepval & USB_CHEP_RX_STRX_MASK) >>
+           USB_CHEP_RX_STRX_SHIFT),
+           (int)((chepval & USB_CHEP_NAK) != 0));
+
+      /* Clear ERRRX (write 0) and VTRX (write 0) to acknowledge the CTR
+       * interrupt. Preserve VTTX by writing 1.
        */
 
-      chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
-      chepval = (chepval & USB_CHEP_REG_MASK & ~USB_CHEP_ERRRX) |
-                USB_CHEP_VTRX | USB_CHEP_VTTX;
+      chepval = (chepval & (0xffff7fff & USB_CHEP_REG_MASK) &
+                 ~USB_CHEP_ERRRX) | USB_CHEP_VTTX;
       stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
 
       chan->result = EIO;
@@ -1758,6 +1770,18 @@ static int stm32_usbdrd_interrupt(int irq, void *context, void *arg)
         }
       else
         {
+          /* STM32H562xx/563xx/573xx Errata:
+           * During OUT transfers, the correct transfer interrupt (CTR) is
+           * triggered a little before the last USB SRAM accesses have
+           * completed. If the software responds quickly to the interrupt,
+           * the full buffer contents may not be correct.
+           * Software should ensure that a small delay is included before
+           * accessing the SRAM contents. This delay should be 800 ns in
+           * Full Speed mode and 6.4 μs in Low Speed mode.
+           */
+
+          up_udelay(1);
+
           stm32_hc_out_irq(priv, chidx);
         }
     }
@@ -1833,8 +1857,30 @@ static int stm32_wait(struct usbhost_connection_s *conn,
           *hport = connport;
 
           leave_critical_section(flags);
+
+          uinfo("RHport Connected: %s\n",
+                connport->connected ? "YES" : "NO");
           return OK;
         }
+
+#ifdef CONFIG_USBHOST_HUB
+      /* Is a device connected to an external hub? */
+
+      if (priv->hport)
+        {
+          /* Yes.. return the external hub port */
+
+          connport = (struct usbhost_hubport_s *)priv->hport;
+          priv->hport = NULL;
+
+          *hport = connport;
+          leave_critical_section(flags);
+
+          uinfo("Hub port Connected: %s\n",
+                connport->connected ? "YES" : "NO");
+          return OK;
+        }
+#endif
 
       priv->pscwait = true;
       ret = nxsem_wait(&priv->pscsem);
@@ -1859,6 +1905,7 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
                                  struct usbhost_hubport_s *hport)
 {
   uint32_t istr;
+  int ret;
 
   DEBUGASSERT(hport != NULL && hport->port == 0);
 
@@ -1889,10 +1936,20 @@ static int stm32_rh_enumerate(struct stm32_usbhost_s *priv,
       hport->speed = USB_SPEED_FULL;
     }
 
+  /* Allocate control endpoint */
+
+  ret = stm32_ctrlchan_alloc(priv, 0, 0, hport->speed, &priv->ep0);
+  if (ret < 0)
+    {
+      uerr("ERROR: Failed to allocate EP0: %d\n", ret);
+      nxmutex_unlock(&priv->lock);
+      return ret;
+    }
+
   uinfo("Enumerated device at %s speed\n",
         hport->speed == USB_SPEED_LOW ? "low" : "full");
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1913,7 +1970,9 @@ static int stm32_enumerate(struct usbhost_connection_s *conn,
 
   /* If this is the root hub port */
 
-  if (hport->port == 0)
+#ifdef CONFIG_USBHOST_HUB
+  if (ROOTHUB(hport))
+#endif
     {
       ret = stm32_rh_enumerate(priv, conn, hport);
       if (ret < 0)
@@ -1921,26 +1980,6 @@ static int stm32_enumerate(struct usbhost_connection_s *conn,
           return ret;
         }
     }
-
-  /* Get exclusive access */
-
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Allocate control endpoint */
-
-  ret = stm32_ctrlchan_alloc(priv, 0, 0, hport->speed, &priv->ep0);
-  if (ret < 0)
-    {
-      uerr("ERROR: Failed to allocate EP0: %d\n", ret);
-      nxmutex_unlock(&priv->lock);
-      return ret;
-    }
-
-  nxmutex_unlock(&priv->lock);
 
   /* Perform standard enumeration */
 
@@ -2066,9 +2105,31 @@ static int stm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
       return ret;
     }
 
-  /* Free channel(s) */
+  /* A single channel is represent by an index in the range of 0 to
+   * STM32H5_NHOST_CHANNELS.  Otherwise, the ep must be a pointer to
+   * an allocated control endpoint structure.
+   */
 
-  stm32_chan_free(priv, (int)ep);
+  if ((uintptr_t)ep < STM32H5_NHOST_CHANNELS)
+    {
+      /* Halt the channel and mark the channel available */
+
+      stm32_chan_free(priv, (int)ep);
+    }
+  else
+    {
+      /* Halt both control channel and mark the channels available */
+
+      struct stm32_ctrlinfo_s *ctrlep =
+        (struct stm32_ctrlinfo_s *)ep;
+
+      stm32_chan_free(priv, ctrlep->inndx);
+      stm32_chan_free(priv, ctrlep->outndx);
+
+      /* And free the control endpoint container */
+
+      kmm_free(ctrlep);
+    }
 
   nxmutex_unlock(&priv->lock);
   return OK;
@@ -2452,9 +2513,16 @@ static int stm32_connect(struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv != NULL && hport != NULL);
 
-  flags = enter_critical_section();
-  priv->change = true;
+  /* Set the connected/disconnected flag */
 
+  hport->connected = connected;
+  uinfo("Hub port %d connected: %s\n",
+        hport->port, connected ? "YES" : "NO");
+
+  /* Report the connection event */
+
+  flags = enter_critical_section();
+  priv->hport = hport;
   if (priv->pscwait)
     {
       priv->pscwait = false;
