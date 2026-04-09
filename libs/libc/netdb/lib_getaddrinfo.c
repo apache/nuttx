@@ -37,6 +37,8 @@
 #include <sys/vm_sockets.h>
 #include <sys/un.h>
 
+#include <nuttx/tls.h>
+
 #include "libc.h"
 #include "lib_netdb.h"
 
@@ -75,6 +77,20 @@ struct transport_s
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: getaddrinfo_free
+ *
+ * Description:
+ *   Cleanup handler that frees the host buffer of a cancelled lookup.
+ *   lib_free() may be a macro, so it cannot be registered directly.
+ *
+ ****************************************************************************/
+
+static void getaddrinfo_free(FAR void *arg)
+{
+  lib_free(arg);
+}
 
 /****************************************************************************
  * Name: add_transports
@@ -476,9 +492,15 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       return EAI_MEMORY;
     }
 
+  /* The DNS lookup is a cancellation point: free the buffer if the
+   * thread is cancelled there.
+   */
+
+  tls_cleanup_push(tls_get_info(), getaddrinfo_free, hostbuffer);
   ret = gethostentbyname_r(hostname, &host,
                            hostbuffer, CONFIG_NETDB_BUFSIZE,
                            &herrno, flags);
+  tls_cleanup_pop(tls_get_info(), 0);
   if (ret != OK)
     {
       lib_free(hostbuffer);
