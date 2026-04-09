@@ -51,6 +51,17 @@ config USBHOST_ASYNCH
 		I/O transfer.  This may be required, for example, to receive
 		infrequent, asynchronous input from an interrupt pipe.
 
+config USBHOST_CONFIGURATION_SELECTION
+	bool "Per device configuration selection"
+	default n
+	---help---
+		Some devices have multiple USB configuration. By default the enumeration
+		selects the first configuration which may not be the desired configuration.
+		This features enables a board specific callback where it may choose which
+		configuration to apply based on the USB device descriptor. The callback may
+		choose by VID/PID or any other info it can acquire from a USB descriptor.
+		Board file must supply board_usbhost_select_configuration().
+
 config USBHOST_WAITER
 	bool "USB Host Waiter Support"
 	default n

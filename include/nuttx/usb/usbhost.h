@@ -44,7 +44,6 @@
 #ifdef CONFIG_USBHOST_MSC_NOTIFIER
 #  include <nuttx/wqueue.h>
 #endif
-
 #include <nuttx/usb/usbhost_devaddr.h>
 
 /****************************************************************************

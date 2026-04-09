@@ -226,10 +226,31 @@ void stm32h5_usbhost_vbusdrive(int port, bool enable)
   /* The Nucleo-h563zi doesn't have hardware for a vbus drive.
    * Instead to get host working, you need to put an extra jumper
    * on the "PWR SEL" to jump "STLK" and "USB USER".
-   * This effectively supplies 5V power form the STLink to the USB device.
-   * The power output is limited so only relatively low power
+   * This effectively supplies 5V power from the STLink to the USB device.
+   * The power output is limited, so only relatively low power
    * devices can work.
    */
+}
+#endif
+
+#ifdef CONFIG_USBHOST_CONFIGURATION_SELECTION
+int board_usbhost_select_configuration(FAR struct usbhost_hubport_s *hport,
+                                 FAR const struct usb_devdesc_s *devdesc,
+                                 FAR const struct usbhost_id_s *id)
+{
+  if (id->vid == 0x0bda && id->pid == 0x8153)
+    {
+      /* Use interface 1 (CDC-ECM) for this ethernet adapter.
+       * vid - Realtek Semiconductor Corp
+       * pid - RTL8153 Gigabit Ethernet Adapter
+       */
+
+      return 1;
+    }
+
+  /* All other USB deices use configurion 0 */
+
+  return 0;
 }
 #endif
 
