@@ -91,9 +91,9 @@ endif
 # To ensure uname information is newest,
 # add lib_utsname.o to phony target for force rebuild
 
-#if !defined(CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP)
+ifeq ($(CONFIG_LIBC_UNAME_DISABLE_TIMESTAMP),)
 .PHONY: bin$(DELIM)lib_utsname$(OBJEXT) kbin$(DELIM)lib_utsname$(OBJEXT)
-#endif
+endif
 
 # Add the misc directory to the build
 
