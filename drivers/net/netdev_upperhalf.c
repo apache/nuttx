@@ -322,7 +322,7 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
   if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
     {
       nerr("ERROR: Packet too long to send!\n");
-      ret = -EMSGSIZE;
+      ret = NETDEV_TX_CONTINUE;
     }
   else
     {
@@ -338,6 +338,13 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
       NETDEV_TXERRORS(dev);
       nerr("ERROR: Transmit failed: %d\n", ret);
       netpkt_put(dev, pkt, NETPKT_TX);
+
+      /* When the quota is not 0, lower half may also return a failure,
+       * in which case the txdone process is required to trigger subsequent
+       * packet transmissions.
+       */
+
+      lower->txdone = true;
       return ret;
     }
 
