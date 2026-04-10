@@ -44,6 +44,7 @@
 #include "xtensa.h"
 #include "esp_attr.h"
 #include "esp_irq.h"
+#include "esp_intr_alloc.h"
 #include "esp_cpu.h"
 #include "hardware/esp32s2_system.h"
 #include "soc/rtc_cntl_reg.h"
@@ -94,6 +95,12 @@ struct vector_desc_t
   shared_vector_desc_t *shared_vec_info;
   vector_desc_t *next;
 };
+
+/* From esp_hw_support/intr_alloc.c: returns a pointer to a HAL-owned
+ * vector descriptor for some intno and cpu.
+ */
+
+extern vector_desc_t *get_desc_for_int(int intno, int cpu);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1604,7 +1611,9 @@ static bool wifi_env_is_chip(void)
  * Name: set_intr_wrapper
  *
  * Description:
- *   Do nothing
+ *   Route the Wi-Fi interrupt source and attach a handle that uses the HAL
+ *   global vector descriptor list. Mark the CPU line as non-IRAM so
+ *   esp_intr_noniram_disable() masks it while SPI flash holds the cache off.
  *
  * Input Parameters:
  *     cpu_no      - The CPU which the interrupt number belongs.
@@ -1622,6 +1631,7 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
 {
   intr_handle_t handle;
   int irq = ESP_SOURCE2IRQ(intr_source);
+  esp_err_t err;
 
   wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
@@ -1636,24 +1646,26 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
       return;
     }
 
-  handle->vector_desc = kmm_calloc(1, sizeof(vector_desc_t));
+  handle->vector_desc = get_desc_for_int(intr_num, cpu_no);
   if (handle->vector_desc == NULL)
     {
-      wlerr("Failed to kmm_calloc\n");
+      wlerr("get_desc_for_int failed\n");
       kmm_free(handle);
       return;
     }
 
-  handle->vector_desc->intno = intr_num;
-  handle->vector_desc->cpu = cpu_no;
   handle->vector_desc->source = intr_source;
-  handle->vector_desc->shared_vec_info = NULL;
-  handle->vector_desc->next = NULL;
   handle->shared_vector_desc = NULL;
 
   /* Register the handle - it contains all needed information (cpuint, cpu) */
 
   esp_set_handle(cpu_no, irq, handle);
+
+  err = esp_intr_set_in_iram(handle, false);
+  if (err != OK)
+    {
+      wlerr("esp_intr_set_in_iram failed: %d\n", err);
+    }
 }
 
 /****************************************************************************

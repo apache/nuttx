@@ -44,6 +44,7 @@
 #include "xtensa.h"
 #include "esp_attr.h"
 #include "esp_irq.h"
+#include "esp_intr_alloc.h"
 #include "esp_cpu.h"
 #include "hardware/esp32s3_system.h"
 #include "soc/rtc_cntl_reg.h"
@@ -266,6 +267,10 @@ static int coex_schm_register_cb_wrapper(int type, int(*cb)(int));
 static int coex_schm_flexible_period_set_wrapper(uint8_t period);
 static uint8_t coex_schm_flexible_period_get_wrapper(void);
 static void * coex_schm_get_phase_by_idx_wrapper(int phase_idx);
+
+/* From esp_hw_support/intr_alloc.c: returns a pointer to a HAL-owned
+ * vector descriptor for some intno and cpu.
+ */
 
 extern vector_desc_t *get_desc_for_int(int intno, int cpu);
 
@@ -1738,7 +1743,9 @@ static bool wifi_env_is_chip(void)
  * Name: set_intr_wrapper
  *
  * Description:
- *   Do nothing
+ *   Route the Wi-Fi interrupt source and attach a handle that uses the HAL
+ *   global vector descriptor list. Mark the CPU line as non-IRAM so
+ *   esp_intr_noniram_disable() masks it while SPI flash holds the cache off.
  *
  * Input Parameters:
  *     cpu_no      - The CPU which the interrupt number belongs.
@@ -1756,6 +1763,7 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
 {
   intr_handle_t handle;
   int irq = ESP_SOURCE2IRQ(intr_source);
+  esp_err_t err;
 
   wlinfo("cpu_no=%" PRId32 ", intr_source=%" PRIu32
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
@@ -1771,12 +1779,25 @@ static void set_intr_wrapper(int32_t cpu_no, uint32_t intr_source,
     }
 
   handle->vector_desc = get_desc_for_int(intr_num, cpu_no);
+  if (handle->vector_desc == NULL)
+    {
+      wlerr("get_desc_for_int failed\n");
+      kmm_free(handle);
+      return;
+    }
 
   handle->vector_desc->source = intr_source;
+  handle->shared_vector_desc = NULL;
 
   /* Register the handle - it contains all needed information (cpuint, cpu) */
 
   esp_set_handle(cpu_no, irq, handle);
+
+  err = esp_intr_set_in_iram(handle, false);
+  if (err != OK)
+    {
+      wlerr("esp_intr_set_in_iram failed: %d\n", err);
+    }
 }
 
 /****************************************************************************
