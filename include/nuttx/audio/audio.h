@@ -123,6 +123,7 @@
 #define AUDIOIOC_RESETSTATUS        _AUDIOIOC(24)
 #define AUDIOIOC_DUMP               _AUDIOIOC(25)
 #define AUDIOIOC_RECEIVEMSG         _AUDIOIOC(26)
+#define AUDIOIOC_GETPARAMTER        _AUDIOIOC(27)
 
 #define AUDIO_MQ_KERNEL             ((mqd_t)-1)
 
