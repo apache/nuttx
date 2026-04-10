@@ -616,7 +616,7 @@ static void esp_i2c_slave_deinit(struct esp_i2c_priv_s *priv)
  *
  ****************************************************************************/
 #ifndef CONFIG_I2C_POLLED
-static int esp_i2c_slave_irq(void *arg)
+static int esp_i2c_slave_irq(int irq, void *context, void *arg)
 {
   struct esp_i2c_priv_s *priv = (struct esp_i2c_priv_s *)arg;
   uint32_t irq_status = 0;
