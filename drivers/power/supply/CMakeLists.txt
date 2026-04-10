@@ -51,4 +51,8 @@ if(CONFIG_REGULATOR)
 
 endif()
 
+if(CONFIG_USBPD_HUSB238)
+  list(APPEND SRCS husb238.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
