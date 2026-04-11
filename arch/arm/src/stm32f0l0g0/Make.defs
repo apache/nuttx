@@ -109,3 +109,7 @@ ifeq ($(CONFIG_STM32F0L0G0_FDCAN_SOCKET),y)
 CHIP_CSRCS += stm32_fdcan_sock.c
 endif
 endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CHIP_CSRCS += stm32_qencoder.c
+endif

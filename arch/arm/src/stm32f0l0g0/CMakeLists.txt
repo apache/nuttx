@@ -124,4 +124,8 @@ if(CONFIG_STM32F0L0G0_FDCAN)
   endif()
 endif()
 
+if(CONFIG_SENSORS_QENCODER)
+  list(APPEND SRCS stm32_qencoder.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
