@@ -215,5 +215,17 @@ int nrf52_mx25_initialize(void);
 int nrf52_gpioleds_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: nrf52_qencoder_initialize
+ *
+ * Description:
+ *   Initialize quadrature encoder driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_QENCODER
+int nrf52_qencoder_initialize(int devno);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_SRC_NRF52840_DK_H */
