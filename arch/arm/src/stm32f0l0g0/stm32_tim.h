@@ -58,6 +58,7 @@
 #define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
 #define STM32_TIM_GETPERIOD(d)          ((d)->ops->getperiod(d))
 #define STM32_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
+#define STM32_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
 #define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
 #define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
 #define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
@@ -170,6 +171,7 @@ struct stm32_tim_ops_s
   void (*setperiod)(struct stm32_tim_dev_s *dev, uint32_t period);
   uint32_t (*getperiod)(struct stm32_tim_dev_s *dev);
   uint32_t (*getcounter)(struct stm32_tim_dev_s *dev);
+  int  (*getwidth)(struct stm32_tim_dev_s *dev);
 
   /* General and Advanced Timers Adds */
 
