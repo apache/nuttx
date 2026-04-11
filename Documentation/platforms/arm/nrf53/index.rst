@@ -21,7 +21,7 @@ NFCT        No
 PDM         No
 DPPI        No
 PWM         Yes
-QDEC        No
+QDEC        Yes     Quadrature encoder
 QSPI        Yes
 RADIO       No
 RNG         No
@@ -101,6 +101,12 @@ PWM
 
 PWM is supported via standard driver. This means that more advanced features such as
 complex sequences or waveform modes are not yet supported.
+
+QDEC
+----
+
+The QDEC (Quadrature Decoder) peripheral is supported via the standard qencoder driver
+interface. The LED output is not supported now.
 
 QSPI
 ----

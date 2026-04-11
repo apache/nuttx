@@ -132,6 +132,10 @@ if(CONFIG_NRF52_SAADC)
   list(APPEND SRCS nrf52_adc.c)
 endif()
 
+if(CONFIG_NRF52_QDEC)
+  list(APPEND SRCS nrf52_qdec.c)
+endif()
+
 if(CONFIG_PM)
   list(APPEND SRCS nrf52_pminitialize.c)
 endif()

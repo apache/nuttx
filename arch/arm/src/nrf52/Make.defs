@@ -123,6 +123,10 @@ ifeq ($(CONFIG_NRF52_SAADC),y)
 CHIP_CSRCS += nrf52_adc.c
 endif
 
+ifeq ($(CONFIG_NRF52_QDEC),y)
+CHIP_CSRCS += nrf52_qdec.c
+endif
+
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += nrf52_pminitialize.c
 endif
