@@ -64,6 +64,10 @@ if(CONFIG_NRF53_QSPI)
   list(APPEND SRCS nrf53_mx25.c)
 endif()
 
+if(CONFIG_NRF53_QDEC)
+  list(APPEND SRCS nrf53_qencoder.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)

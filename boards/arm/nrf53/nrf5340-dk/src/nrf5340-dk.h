@@ -164,5 +164,17 @@ int nrf53_mx25_initialize(void);
 int nrf53_gpio_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: nrf53_qencoder_initialize
+ *
+ * Description:
+ *   Initialize and register the qencoder driver
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF53_QDEC
+int nrf53_qencoder_initialize(int devno);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_SRC_NRF5340_DK_H */

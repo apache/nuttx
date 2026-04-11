@@ -267,6 +267,14 @@ int nrf53_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NRF53_QDEC0
+  ret = nrf53_qencoder_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize qencoder: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_USBMONITOR
   /* Start the USB Monitor */
 

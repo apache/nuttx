@@ -66,6 +66,10 @@ ifeq ($(CONFIG_NRF53_QSPI),y)
 CSRCS += nrf53_mx25.c
 endif
 
+ifeq ($(CONFIG_NRF53_QDEC),y)
+CSRCS += nrf53_qencoder.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

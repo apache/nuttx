@@ -179,4 +179,9 @@
 #define NRF53_QSPI0_IO3_PIN (GPIO_MCUSEL_PERIP | GPIO_OUTPUT | \
                              GPIO_PORT0 | GPIO_PIN(16))
 
+/* QDEC Pins ****************************************************************/
+
+#define BOARD_QDEC0_A_PIN            (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(25))
+#define BOARD_QDEC0_B_PIN            (GPIO_MCUSEL_APP | GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(26))
+
 #endif /* __BOARDS_ARM_NRF53_NRF5340_DK_INCLUDE_BOARD_H */
