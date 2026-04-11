@@ -644,7 +644,7 @@ irqstate_t rspin_lock_irqsave_nopreempt(FAR rspinlock_t *lock)
 SPINLOCK_INLINE bool rspin_trylock(FAR rspinlock_t *lock)
 {
   uint32_t old_val;
-  bool         ret;
+  bool         ret = false;
   uint32_t   owner = (uint32_t)this_cpu() + 1u;
 
   /* Already owned this lock. */
