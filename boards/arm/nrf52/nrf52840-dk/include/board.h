@@ -185,4 +185,9 @@
 #define NRF52_QSPI0_IO2_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(22))
 #define NRF52_QSPI0_IO3_PIN (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(23))
 
+/* QDEC Pins ****************************************************************/
+
+#define BOARD_QDEC0_A_PIN            (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(30))
+#define BOARD_QDEC0_B_PIN            (GPIO_INPUT | GPIO_PORT0 | GPIO_PIN(31))
+
 #endif /* __BOARDS_ARM_NRF52_NRF52840_DK_INCLUDE_BOARD_H */

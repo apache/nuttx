@@ -333,6 +333,14 @@ int nrf52_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NRF52_QDEC0
+  ret = nrf52_qencoder_initialize(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize qencoder: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }
