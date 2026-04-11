@@ -26,5 +26,9 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS stm32_ssd1306.c)
   endif()
 
+  if(CONFIG_SENSORS_QENCODER)
+    list(APPEND SRCS stm32_qencoder.c)
+  endif()
+
 endif()
 target_sources(board PRIVATE ${SRCS})

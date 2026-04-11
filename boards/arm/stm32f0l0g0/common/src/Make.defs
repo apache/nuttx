@@ -26,6 +26,10 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
   CSRCS += stm32_ssd1306.c
 endif
 
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+  CSRCS += board_qencoder.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

@@ -162,6 +162,14 @@
 #define GPIO_USART2_RX      (GPIO_USART2_RX_1|GPIO_SPEED_HIGH)    /* PA3 */
 #define GPIO_USART2_TX      (GPIO_USART2_TX_1|GPIO_SPEED_HIGH)    /* PA2 */
 
+/* Qencoder on TIM3:
+ *   TIM3_CH1IN - PB4 (D5)
+ *   TIM3_CH2IN - PC7 (D3)
+ */
+
+#define GPIO_TIM3_CH1IN     (GPIO_TIM3_CH1IN_2|GPIO_SPEED_HIGH)
+#define GPIO_TIM3_CH2IN     (GPIO_TIM3_CH2IN_6|GPIO_SPEED_HIGH)
+
 /* DMA channels *************************************************************/
 
 /* ADC */

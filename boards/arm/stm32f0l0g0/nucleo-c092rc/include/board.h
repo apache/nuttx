@@ -172,6 +172,14 @@
 #define GPIO_FDCAN1_RX      (GPIO_FDCAN1_RX_8|GPIO_SPEED_HIGH)    /* PD0 */
 #define GPIO_FDCAN1_TX      (GPIO_FDCAN1_TX_9|GPIO_SPEED_HIGH)    /* PD1 */
 
+/* Qencoder on TIM3:
+ *   TIM3_CH1IN - PB4 (D5)
+ *   TIM3_CH2IN - PC7 (D3)
+ */
+
+#define GPIO_TIM3_CH1IN     (GPIO_TIM3_CH1IN_2|GPIO_SPEED_HIGH)
+#define GPIO_TIM3_CH2IN     (GPIO_TIM3_CH2IN_6|GPIO_SPEED_HIGH)
+
 /* DMA channels *************************************************************/
 
 /* ADC */
