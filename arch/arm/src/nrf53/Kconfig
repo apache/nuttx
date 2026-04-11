@@ -182,6 +182,10 @@ config NRF53_RTC
 	bool
 	default n
 
+config NRF53_QDEC
+	bool
+	default n
+
 menu "nRF53 Peripheral Selection"
 
 config NRF53_GPIOTE
@@ -713,6 +717,30 @@ config NRF53_QSPI_RXDELAY
 endif # NRF53_QSPI
 
 endmenu # QSPI Configuration
+
+config NRF53_QDEC0
+	bool "Qencoder 0 (QDEC0) support"
+	default n
+	select NRF53_QDEC
+	---help---
+		Enable Qencoder 0 support.
+
+config NRF53_QDEC1
+	bool "Qencoder 1 (QDEC1) support"
+	default n
+	select NRF53_QDEC
+	---help---
+		Enable Qencoder 1 support.
+
+config NRF53_QENCODER_INDEX
+	bool "Enable QDEC index pin support"
+	default n
+	depends on NRF53_GPIOTE && NRF53_QDEC
+	---help---
+		Enable index/Z channel support for quadrature encoder.
+		Uses a GPIO interrupt to detect index pulses and reset
+		position to configured index value. Requires one GPIOTE
+		channel for interrupt detection.
 
 menuconfig NRF53_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"

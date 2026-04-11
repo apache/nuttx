@@ -170,6 +170,10 @@ config NRF52_RTC
 	bool
 	default n
 
+config NRF52_QDEC
+	bool
+	default n
+
 menu "nRF52 Peripheral Selection"
 
 config NRF52_I2C0_MASTER
@@ -802,6 +806,23 @@ endmenu # QSPI Configuration
 menu "USBDEV Configuration"
 
 endmenu # USBDEV Configuration
+
+config NRF52_QDEC0
+	bool "Qencoder (QDEC) support"
+	default n
+	select NRF52_QDEC
+	---help---
+		Enable Qencoder support.
+
+config NRF52_QENCODER_INDEX
+	bool "Enable QDEC index pin support"
+	default n
+	depends on NRF52_GPIOTE && NRF52_QDEC
+	---help---
+		Enable index/Z channel support for quadrature encoder.
+		Uses a GPIO interrupt to detect index pulses and reset
+		position to configured index value. Requires one GPIOTE
+		channel for interrupt detection.
 
 menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"

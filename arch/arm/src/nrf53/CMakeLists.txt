@@ -107,6 +107,14 @@ if(CONFIG_NRF53_QSPI)
   list(APPEND SRCS nrf53_qspi.c)
 endif()
 
+if(CONFIG_NRF53_QDEC)
+  list(APPEND SRCS nrf53_qdec.c)
+endif()
+
+if(CONFIG_SENSORS_QENCODER)
+  list(APPEND SRCS nrf53_qdec.c)
+endif()
+
 if(CONFIG_NRF53_SOFTDEVICE_CONTROLLER)
 
   set(NRFXLIB_VER "2.3.0")
