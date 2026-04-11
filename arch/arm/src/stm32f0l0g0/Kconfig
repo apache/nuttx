@@ -2386,6 +2386,13 @@ endif # !STM32F0L0G0_PWM_MULTICHAN
 
 endif # STM32F0L0G0_TIM1_PWM
 
+config STM32F0L0G0_TIM1_QE
+	bool "TIM1 Quadrature Encoder"
+	default n
+	depends on STM32F0L0G0_TIM1
+	---help---
+		Reserve TIM1 for use by Quadrature Encoder.
+
 config STM32F0L0G0_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
@@ -2540,6 +2547,13 @@ endif # !STM32F0L0G0_PWM_MULTICHAN
 
 endif # STM32F0L0G0_TIM2_PWM
 
+config STM32F0L0G0_TIM2_QE
+	bool "TIM2 Quadrature Encoder"
+	default n
+	depends on STM32F0L0G0_TIM2
+	---help---
+		Reserve TIM2 for use by Quadrature Encoder.
+
 config STM32F0L0G0_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
@@ -2693,6 +2707,144 @@ config STM32F0L0G0_TIM3_CHMODE
 endif # !STM32F0L0G0_PWM_MULTICHAN
 
 endif # STM32F0L0G0_TIM3_PWM
+
+config STM32F0L0G0_TIM3_QE
+	bool "TIM3 Quadrature Encoder"
+	default n
+	depends on STM32F0L0G0_TIM3
+	---help---
+		Reserve TIM3 for use by Quadrature Encoder.
+
+config STM32F0L0G0_TIM4_QE
+	bool "TIM3 Quadrature Encoder"
+	default n
+	depends on STM32F0L0G0_TIM4
+	---help---
+		Reserve TIM4 for use by Quadrature Encoder.
+
+menu "STM32F0L0G0 QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on STM32F0L0G0_TIM1 || STM32F0L0G0_TIM2 || STM32F0L0G0_TIM3 || STM32F0L0G0_TIM4
+
+config STM32F0L0G0_TIM1_QEPSC
+	int "TIM1 QE pulse prescaler"
+	default 1
+	depends on STM32F0L0G0_TIM1_QE
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+config STM32F0L0G0_TIM2_QEPSC
+	int "TIM2 QE pulse prescaler"
+	default 1
+	depends on STM32F0L0G0_TIM2_QE
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+config STM32F0L0G0_TIM3_QEPSC
+	int "TIM3 QE pulse prescaler"
+	default 1
+	depends on STM32F0L0G0_TIM3_QE
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+config STM32F0L0G0_TIM4_QEPSC
+	int "TIM3 QE pulse prescaler"
+	default 1
+	depends on STM32F0L0G0_TIM4_QE
+	---help---
+		This prescaler divides the number of recorded encoder pulses,
+		limiting the count rate at the expense of resolution.
+
+config STM32F0L0G0_QENCODER_DISABLE_EXTEND16BTIMERS
+	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
+	default n
+	---help---
+		Disable the extension of 16-bit timers to 32-bit via interrupt-based
+		overflow tracking. When enabled, timers will use their native hardware
+		counter width (16-bit or 32-bit). This reduces interrupt overhead but
+		limits the position range for 16-bit timers.
+
+config STM32F0L0G0_QENCODER_INDEX_PIN
+	bool "Enable QEncoder timers support for index pin"
+	default n
+	---help---
+		Enable support for quadrature encoder index pin. The index pin can be
+		used to reset the encoder position to a known value when the index
+		pulse is detected.
+
+config STM32F0L0G0_QENCODER_FILTER
+	bool "Enable filtering on STM32F0L0G0 QEncoder input"
+	default y
+	---help---
+		Enable input filtering on quadrature encoder channels to reduce noise.
+
+choice
+	depends on STM32F0L0G0_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default STM32F0L0G0_QENCODER_SAMPLE_FDTS_4
+	---help---
+		Select the sampling frequency for the input filter.
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32F0L0G0_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32F0L0G0_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on STM32F0L0G0_QENCODER_FILTER
+	prompt "Input channel event count"
+	default STM32F0L0G0_QENCODER_SAMPLE_EVENT_6
+	---help---
+		Select the number of consecutive events required to validate a transition.
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_1
+	depends on STM32F0L0G0_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_2
+	depends on STM32F0L0G0_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_4
+	depends on STM32F0L0G0_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_5
+	depends on STM32F0L0G0_QENCODER_SAMPLE_FDTS_16 || STM32F0L0G0_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_6
+	depends on !STM32F0L0G0_QENCODER_SAMPLE_FDTS && !STM32F0L0G0_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config STM32F0L0G0_QENCODER_SAMPLE_EVENT_8
+	depends on !STM32F0L0G0_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
+
+endmenu # STM32F0L0G0 QEncoder Driver
 
 config STM32F0L0G0_TIM14_PWM
 	bool "TIM14 PWM"
