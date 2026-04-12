@@ -6212,7 +6212,6 @@ config STM32L4_TIM1_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM1." (CONFIG_TIM1_QECLKOUT).
 
 endif
 
@@ -6230,7 +6229,6 @@ config STM32L4_TIM2_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM2." (CONFIG_TIM2_QECLKOUT).
 
 endif
 
@@ -6248,7 +6246,6 @@ config STM32L4_TIM3_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM3." (CONFIG_TIM3_QECLKOUT).
 
 endif
 
@@ -6266,7 +6263,6 @@ config STM32L4_TIM4_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM4." (CONFIG_TIM4_QECLKOUT).
 
 endif
 
@@ -6284,7 +6280,6 @@ config STM32L4_TIM5_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM5." (CONFIG_TIM5_QECLKOUT).
 
 endif
 
@@ -6302,7 +6297,6 @@ config STM32L4_TIM8_QEPSC
 	default 1
 	---help---
 		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
-		Replaces the obscure "output clock of TIM8." (CONFIG_TIM8_QECLKOUT).
 
 endif
 
