@@ -74,34 +74,6 @@
 #undef CONFIG_STM32L4_TIM13_QE
 #undef CONFIG_STM32L4_TIM14_QE
 
-/* Clock out frequency.
- * This value is used to calculation the timer CLKIN in prescaler value.
- */
-
-#ifndef CONFIG_STM32L4_TIM1_QECLKOUT
-#  define CONFIG_STM32L4_TIM1_QECLKOUT 28000000
-#endif
-
-#ifndef CONFIG_STM32L4_TIM2_QECLKOUT
-#  define CONFIG_STM32L4_TIM2_QECLKOUT 28000000
-#endif
-
-#ifndef CONFIG_STM32L4_TIM3_QECLKOUT
-#  define CONFIG_STM32L4_TIM3_QECLKOUT 28000000
-#endif
-
-#ifndef CONFIG_STM32L4_TIM4_QECLKOUT
-#  define CONFIG_STM32L4_TIM4_QECLKOUT 28000000
-#endif
-
-#ifndef CONFIG_STM32L4_TIM5_QECLKOUT
-#  define CONFIG_STM32L4_TIM5_QECLKOUT 28000000
-#endif
-
-#ifndef CONFIG_STM32L4_TIM8_QECLKOUT
-#  define CONFIG_STM32L4_TIM8_QECLKOUT 28000000
-#endif
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
