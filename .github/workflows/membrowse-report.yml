@@ -1,0 +1,162 @@
+name: MemBrowse Memory Report
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - "releases/*"
+    tags:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # Detect whether any source files (i.e. non-doc/CODEOWNERS) changed.
+  # When only docs/CODEOWNERS change we skip the build and post an "identical"
+  # MemBrowse report instead.
+  changes-filter:
+    runs-on: ubuntu-latest
+    outputs:
+      source: ${{ steps.filter.outputs.source }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            source:
+              - '**'
+              - '!AUTHORS'
+              - '!CONTRIBUTING.md'
+              - '!**/CODEOWNERS'
+              - '!Documentation/**'
+              - '!tools/ci/docker/linux/**'
+              - '!tools/codeowners/*'
+
+  load-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: set-matrix
+        run: echo "matrix=$(jq -c '.' .github/membrowse-targets.json)" >> $GITHUB_OUTPUT
+
+  # Post an "identical" MemBrowse report when only docs/CODEOWNERS changed.
+  # Only runs on push events (master/releases/tags) to keep the baseline
+  # complete; PR events don't produce identical markers.
+  identical:
+    needs: [changes-filter, load-targets]
+    if: needs.changes-filter.outputs.source == 'false' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load-targets.outputs.matrix) }}
+    steps:
+      - name: Upload identical - ${{ matrix.target_name }}
+        uses: membrowse/membrowse-action@v1
+        with:
+          target_name: ${{ matrix.target_name }}
+          identical: true
+          api_key: ${{ secrets.MEMBROWSE_API_KEY }}
+          api_url: ${{ vars.MEMBROWSE_API_URL }}
+
+  # Build target with debug symbols + linker map, then upload MemBrowse report.
+  # Uses the NuttX CI Docker image so toolchains, kconfig-frontends, etc. are
+  # already installed.
+  analyze:
+    needs: [changes-filter, load-targets]
+    if: needs.changes-filter.outputs.source == 'true'
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: 1
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load-targets.outputs.matrix) }}
+    steps:
+      - name: Checkout nuttx repo
+        uses: actions/checkout@v6
+        with:
+          path: sources/nuttx
+          fetch-depth: 0
+
+      - name: Checkout nuttx-apps repo
+        uses: actions/checkout@v6
+        with:
+          repository: apache/nuttx-apps
+          path: sources/apps
+          fetch-depth: 1
+
+      - name: Docker Login
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker Pull
+        run: docker pull ghcr.io/apache/nuttx/apache-nuttx-ci-linux
+
+      - name: Build ${{ matrix.target_name }}
+        uses: ./sources/nuttx/.github/actions/ci-container
+        with:
+          run: |
+            git config --global --add safe.directory /github/workspace/sources/nuttx
+            git config --global --add safe.directory /github/workspace/sources/apps
+            cd /github/workspace/sources/nuttx
+            ./tools/configure.sh -l ${{ matrix.board_config }}
+            echo CONFIG_DEBUG_SYMBOLS=y >> .config
+            echo CONFIG_DEBUG_LINK_MAP=y >> .config
+            if [ -n "${{ matrix.config_overrides }}" ]; then
+              kconfig-tweak ${{ matrix.config_overrides }}
+            fi
+            make olddefconfig
+            # Preserve preprocessed linker scripts (.ld.tmp) so MemBrowse can
+            # read them. Arch Makefiles delete these immediately after linking.
+            find arch -name Makefile -exec sed -i '/DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT))/d' {} +
+            make -j$(nproc)
+
+      # MemBrowse action runs from $GITHUB_WORKSPACE and discovers git via CWD,
+      # but nuttx is checked out to sources/nuttx/ (so apps can sit beside it).
+      # Expose the repo's .git at the workspace root so git metadata resolves.
+      - name: Expose nuttx .git to workspace root
+        run: ln -sfn sources/nuttx/.git .git
+
+      - name: Prefix linker script paths
+        id: ld
+        run: |
+          prefixed=""
+          for p in ${{ matrix.ld }}; do
+            prefixed="$prefixed sources/nuttx/$p"
+          done
+          paths=$(echo $prefixed | xargs)
+          echo "paths=$paths" >> "$GITHUB_OUTPUT"
+          echo "Resolved ld paths: [$paths]"
+          for p in $paths; do
+            if [ -e "$p" ]; then
+              echo "  OK   $p ($(stat -c '%s bytes, owner=%U:%G' "$p" 2>/dev/null))"
+            else
+              echo "  MISS $p"
+              echo "  ls dir:"
+              ls -la "$(dirname "$p")" 2>&1 | head -30
+            fi
+          done
+
+      - name: MemBrowse analysis - ${{ matrix.target_name }}
+        uses: membrowse/membrowse-action@v1
+        with:
+          target_name: ${{ matrix.target_name }}
+          elf: sources/nuttx/${{ matrix.elf }}
+          ld: ${{ steps.ld.outputs.paths }}
+          map_file: ${{ matrix.map_file != '' && format('sources/nuttx/{0}', matrix.map_file) || '' }}
+          linker_vars: ${{ matrix.linker_vars }}
+          api_key: ${{ secrets.MEMBROWSE_API_KEY }}
+          api_url: ${{ vars.MEMBROWSE_API_URL }}
+          verbose: INFO

@@ -1,0 +1,83 @@
+[
+  {
+    "target_name": "stm32-nucleo-f103rb",
+    "board_config": "nucleo-f103rb:nsh",
+    "elf": "nuttx",
+    "ld": "boards/arm/stm32/nucleo-f103rb/scripts/ld.script",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "arduino-mega2560",
+    "board_config": "arduino-mega2560:nsh",
+    "elf": "nuttx.elf",
+    "ld": "boards/avr/atmega/arduino-mega2560/scripts/flash.ld",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "qemu-armv8a",
+    "board_config": "qemu-armv8a:nsh",
+    "elf": "nuttx",
+    "ld": "",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "mirtoo",
+    "board_config": "mirtoo:nsh",
+    "elf": "nuttx",
+    "ld": "boards/mips/pic32mx/mirtoo/scripts/pinguino-debug.ld",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": "-d MIPS32_TOOLCHAIN_GNU_ELF -e MIPS32_TOOLCHAIN_PINGUINOL"
+  },
+  {
+    "target_name": "hifive1-revb",
+    "board_config": "hifive1-revb:nsh",
+    "elf": "nuttx",
+    "ld": "boards/risc-v/fe310/hifive1-revb/scripts/ld.script",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "rx65n-rsk2mb",
+    "board_config": "rx65n-rsk2mb:nsh",
+    "elf": "nuttx",
+    "ld": "boards/renesas/rx65n/rx65n-rsk2mb/scripts/linker_script.ld",
+    "map_file": "",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "s698pm-dkit",
+    "board_config": "s698pm-dkit:nsh",
+    "elf": "nuttx",
+    "ld": "",
+    "map_file": "",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "qemu-intel64",
+    "board_config": "qemu-intel64:nsh",
+    "elf": "nuttx",
+    "ld": "",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  },
+  {
+    "target_name": "esp32-devkitc",
+    "board_config": "esp32-devkitc:nsh",
+    "elf": "nuttx",
+    "ld": "boards/xtensa/esp32/common/scripts/flat_memory.ld.tmp boards/xtensa/esp32/common/scripts/esp32_sections.ld.tmp",
+    "map_file": "nuttx.map",
+    "linker_vars": "",
+    "config_overrides": ""
+  }
+]

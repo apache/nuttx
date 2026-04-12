@@ -1,0 +1,67 @@
+name: Onboard to MemBrowse
+
+on:
+  workflow_dispatch:
+    inputs:
+      num_commits:
+        description: 'Number of commits to process'
+        required: true
+        default: '100'
+        type: string
+
+jobs:
+  load-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: set-matrix
+        run: echo "matrix=$(jq -c '.' .github/membrowse-targets.json)" >> $GITHUB_OUTPUT
+
+  onboard:
+    needs: load-targets
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/apache/nuttx/apache-nuttx-ci-linux
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load-targets.outputs.matrix) }}
+
+    steps:
+      - name: Checkout nuttx
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Clone nuttx-apps
+        run: |
+          git config --global --add safe.directory '*'
+          git clone --depth=1 https://github.com/apache/nuttx-apps.git ../apps
+
+      - name: Run MemBrowse Onboard Action
+        uses: membrowse/membrowse-action/onboard-action@v1
+        with:
+          target_name: ${{ matrix.target_name }}
+          num_commits: ${{ github.event.inputs.num_commits }}
+          build_script: |
+            make distclean 2>/dev/null || true
+            ./tools/configure.sh -l ${{ matrix.board_config }}
+            echo CONFIG_DEBUG_SYMBOLS=y >> .config
+            echo CONFIG_DEBUG_LINK_MAP=y >> .config
+            if [ -n "${{ matrix.config_overrides }}" ]; then
+              kconfig-tweak ${{ matrix.config_overrides }}
+            fi
+            make olddefconfig
+            make -j$(nproc)
+          elf: ${{ matrix.elf }}
+          ld: ${{ matrix.ld }}
+          map_file: ${{ matrix.map_file }}
+          linker_vars: ${{ matrix.linker_vars }}
+          binary_search: 'true'
+          api_key: ${{ secrets.MEMBROWSE_API_KEY }}
+          api_url: ${{ vars.MEMBROWSE_API_URL }}
