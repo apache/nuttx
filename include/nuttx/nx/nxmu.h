@@ -300,7 +300,7 @@ struct nxsvrmsg_curenable_s
 struct nxsvrmsg_curimage_s
 {
   uint32_t msgid;                    /* NX_SVRMSG_CURSOR_IMAGE */
-  struct nx_cursorimage_s image      /* Describes the cursor image */
+  struct nx_cursorimage_s image;     /* Describes the cursor image */
 };
 #endif
 
