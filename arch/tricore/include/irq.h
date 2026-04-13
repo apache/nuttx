@@ -139,6 +139,10 @@
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
   TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
 
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  #define TRICORE_IRQ_DISABLE_PRIORITY CONFIG_ARCH_IRQ_DISABLE_PRIORITY
+#endif
+
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
  */
@@ -229,27 +233,68 @@ noinstrument_function static inline_function uintptr_t up_getsp(void)
  * Name: up_irq_save
  *
  * Description:
- *   Disable interrupts and return the previous value of the mstatus register
+ *   Disable interrupts and return the previous interrupt state.
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, this raises ICR.CCPN
+ *   to TRICORE_IRQ_DISABLE_PRIORITY so that high-priority interrupts
+ *   (SRPN > TRICORE_IRQ_DISABLE_PRIORITY) remain unmasked. up_irq_save
+ *   only raises CCPN, up_irq_restore only lowers it. This prevents the
+ *   masking level from being accidentally lowered.
+ *
+ *   Otherwise, uses the hardware disable instruction (ICR.IE = 0)
+ *   for minimal overhead.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  Ifx_CPU_ICR icr;
+  irqstate_t ccpn;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  ccpn  = icr.B.CCPN;
+
+  if (TRICORE_IRQ_DISABLE_PRIORITY > ccpn)
+    {
+      icr.B.CCPN = TRICORE_IRQ_DISABLE_PRIORITY;
+      tricore_mtcr(CPU_ICR, icr.U);
+      UP_ISB();
+    }
+
+  return ccpn;
+#else
   return __disable_and_save();
+#endif
 }
 
 /****************************************************************************
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the value of the mstatus register
+ *   Restore the previous interrupt state saved by up_irq_save().
+ *
+ *   When CONFIG_ARCH_HIPRI_INTERRUPT is enabled, restores ICR.CCPN.
+ *   Otherwise, restores ICR.IE via the hardware restore instruction.
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  Ifx_CPU_ICR icr;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  if (flags < icr.B.CCPN)
+    {
+      icr.B.CCPN = flags;
+      tricore_mtcr(CPU_ICR, icr.U);
+      UP_ISB();
+    }
+#else
   __restore(flags);
+#endif
 }
 
 /****************************************************************************
