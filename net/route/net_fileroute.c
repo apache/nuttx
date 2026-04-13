@@ -475,7 +475,7 @@ ssize_t net_writeroute_ipv6(FAR struct file *filep,
   while (ntotal < sizeof(struct net_route_ipv6_s));
 
   net_unlockroute_ipv6();
-  return ret;
+  return ntotal;
 }
 #endif
 
