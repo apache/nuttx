@@ -325,7 +325,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   if (from != NULL)
     {
-      if (fromlen == NULL && *fromlen < sizeof(struct sockaddr_in6))
+      if (fromlen == NULL || *fromlen < sizeof(struct sockaddr_in6))
         {
           return -EINVAL;
         }
