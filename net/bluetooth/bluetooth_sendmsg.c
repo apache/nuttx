@@ -284,12 +284,12 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
       radio =
           (FAR struct radio_driver_s *)netdev_findbyindex(conn->bc_ldev + 1);
 
-      DEBUGASSERT(radio->r_dev.d_lltype == NET_LL_BLUETOOTH);
-
       if (radio == NULL)
         {
           return -ENODEV;
         }
+
+      DEBUGASSERT(radio->r_dev.d_lltype == NET_LL_BLUETOOTH);
     }
   else
     {
