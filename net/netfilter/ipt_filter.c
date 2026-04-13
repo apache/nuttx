@@ -251,7 +251,7 @@ convert_ipv4entry(FAR const struct ipt_entry *entry)
         break;
 
       case IPPROTO_UDP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
+        if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
           {
             FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
             convert_tcpudp(&filter->common, udp->spts, udp->dpts,
@@ -326,7 +326,7 @@ convert_ipv6entry(FAR const struct ip6t_entry *entry)
         break;
 
       case IPPROTO_UDP:
-        if (strcmp(match->u.user.name, XT_MATCH_NAME_TCP) == 0)
+        if (strcmp(match->u.user.name, XT_MATCH_NAME_UDP) == 0)
           {
             FAR struct xt_udp *udp = (FAR struct xt_udp *)(match + 1);
             convert_tcpudp(&filter->common, udp->spts, udp->dpts,
