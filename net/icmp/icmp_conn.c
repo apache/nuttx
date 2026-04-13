@@ -241,7 +241,7 @@ FAR struct icmp_conn_s *icmp_findconn(FAR struct net_driver_s *dev,
     {
       if (conn->id == id && conn->dev == dev)
         {
-          return conn;
+          break;
         }
     }
 
