@@ -694,6 +694,7 @@ netlink_get_neighbor(FAR const void *neigh, int domain, int type,
     {
       if (neigh == NULL)
         {
+          kmm_free(alloc);
           return NULL;
         }
 
