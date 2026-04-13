@@ -139,9 +139,14 @@
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
   TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
 
+/* TriCore interrupt priority range, higher value means higher priority. */
+
 #ifdef CONFIG_ARCH_HIPRI_INTERRUPT
   #define TRICORE_IRQ_DISABLE_PRIORITY CONFIG_ARCH_IRQ_DISABLE_PRIORITY
 #endif
+
+#define TRICORE_IRQ_MIN_PRIORITY 1
+#define TRICORE_IRQ_MAX_PRIORITY 255
 
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.

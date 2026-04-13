@@ -49,6 +49,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
   struct tcb_s *tcb = this_task();
+  int irq;
 
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
@@ -68,9 +69,9 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   /* Deliver the IRQ */
 
-  tricore_ack_irq(NDX_TO_IRQ(icr.B.CCPN));
-
-  irq_dispatch(NDX_TO_IRQ(icr.B.CCPN), regs);
+  irq = tricore_srpn_to_irq(icr.B.CCPN);
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
 
   /* Check for a context switch. */
 
