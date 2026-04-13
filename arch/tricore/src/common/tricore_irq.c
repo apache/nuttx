@@ -70,6 +70,7 @@ static inline void tricore_color_intstack(void)
  * Private Data
  ****************************************************************************/
 
+static int g_srpn_to_irq[TRICORE_IRQ_MAX_PRIORITY + 1];
 static spinlock_t g_irqlock = SP_UNLOCKED;
 static int g_irqmap_count = 1;
 
@@ -122,14 +123,15 @@ static void tricore_gpsrinitialize(void)
     {
       int irq = TRICORE_GPSR_IRQNUM(i, cpu);
 
-      tricore_src_init(TRICORE_IRQ2SRC(irq), tos, IRQ_TO_NDX(irq));
+      tricore_src_init(TRICORE_IRQ2SRC(irq), tos,
+                       tricore_irq_to_srpn(irq));
     }
 
   /* Cpucs gpsr init */
 
 #ifndef CONFIG_ARCH_CHIP_TC3X
   tricore_src_init(TRICORE_IRQ2SRC(TRICORE_GPSR_IRQNUM(6, cpu)), tos,
-                   IRQ_TO_NDX(TRICORE_GPSR_IRQNUM(6, cpu)));
+                   tricore_irq_to_srpn(TRICORE_GPSR_IRQNUM(6, cpu)));
 #endif
 }
 #endif
@@ -137,6 +139,80 @@ static void tricore_gpsrinitialize(void)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tricore_irq_to_srpn
+ *
+ * Description:
+ *   Get the SRPN for an IRQ. If not yet assigned, auto-allocate the lowest
+ *   available priority.
+ *
+ *   Lookup searches the full range [MIN, MAX].
+ *   Allocation range depends on CONFIG_ARCH_HIPRI_INTERRUPT:
+ *     - Disabled: [MIN, MAX]
+ *     - Enabled:  [MIN, DISABLE_PRIORITY], SRPNs above DISABLE_PRIORITY
+ *       are reserved for high-priority interrupts via up_prioritize_irq().
+ *
+ ****************************************************************************/
+
+int tricore_irq_to_srpn(int irq)
+{
+  irqstate_t flags;
+  int avail_srpn = 0;
+  int i;
+
+  flags = spin_lock_irqsave(&g_irqlock);
+
+  for (i = TRICORE_IRQ_MIN_PRIORITY; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
+    {
+      if (g_srpn_to_irq[i] == irq)
+        {
+          spin_unlock_irqrestore(&g_irqlock, flags);
+          return i;
+        }
+
+      /* Record first free slot within allocation range */
+
+      if (!avail_srpn && !g_srpn_to_irq[i]
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+          && i <= TRICORE_IRQ_DISABLE_PRIORITY
+#endif
+         )
+        {
+          avail_srpn = i;
+        }
+    }
+
+  if (avail_srpn)
+    {
+      g_srpn_to_irq[avail_srpn] = irq;
+      spin_unlock_irqrestore(&g_irqlock, flags);
+      return avail_srpn;
+    }
+
+  spin_unlock_irqrestore(&g_irqlock, flags);
+
+  /* Should never get here: SRPN pool exhausted */
+
+  DEBUGPANIC();
+  return 0;
+}
+
+/****************************************************************************
+ * Name: tricore_srpn_to_irq
+ *
+ * Description:
+ *   Convert SRPN to IRQ number using the mapping table.
+ *
+ ****************************************************************************/
+
+int tricore_srpn_to_irq(int srpn)
+{
+  DEBUGASSERT(srpn >= TRICORE_IRQ_MIN_PRIORITY &&
+              srpn <= TRICORE_IRQ_MAX_PRIORITY);
+
+  return g_srpn_to_irq[srpn];
+}
 
 /****************************************************************************
  * Name: up_irq_enable
@@ -183,9 +259,7 @@ void up_disable_irq(int irq)
 {
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
 
-  /* Disable and clear, keep SRPN */
-
-  *src = (*src & TRICORE_SRC_SRPN_MASK) | TRICORE_SRC_TOS_MASK;
+  *src = TRICORE_SRC_TOS_MASK;
 }
 
 /****************************************************************************
@@ -201,7 +275,7 @@ void up_enable_irq(int irq)
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
 
   tricore_src_init(src, TRICORE_SRC_TOS_CPU(up_cpu_index()),
-                   IRQ_TO_NDX(irq));
+                   tricore_irq_to_srpn(irq));
   *src |= TRICORE_SRC_SRE;
 }
 
@@ -216,6 +290,7 @@ void up_enable_irq(int irq)
 void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
   volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
+  int irq_prio = tricore_irq_to_srpn(irq);
 
   *src &= ~TRICORE_SRC_SRE;
 
@@ -224,7 +299,7 @@ void up_affinity_irq(int irq, cpu_set_t cpuset)
    */
 
   tricore_src_init(src, TRICORE_SRC_TOS_CPU(ffs(cpuset) - 1),
-                   *src & TRICORE_SRC_SRPN_MASK);
+                   irq_prio);
   *src |= TRICORE_SRC_SRE;
 }
 
@@ -254,6 +329,57 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
   *(volatile uint32_t *)(TRICORE_INT_SRB_BASE + up_cpu_index() * 4) =
     cpuset;
+}
+#endif
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   Set the priority (SRPN) of an IRQ. This is the only way to assign an
+ *   SRPN above TRICORE_IRQ_DISABLE_PRIORITY when
+ *   CONFIG_ARCH_HIPRI_INTERRUPT is enabled.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+int up_prioritize_irq(int irq, int priority)
+{
+  irqstate_t flags;
+  int i;
+
+  DEBUGASSERT(priority >= TRICORE_IRQ_MIN_PRIORITY &&
+              priority <= TRICORE_IRQ_MAX_PRIORITY);
+
+  flags = spin_lock_irqsave(&g_irqlock);
+
+  /* IRQ already mapped to the target SRPN, nothing to do */
+
+  if (g_srpn_to_irq[priority] == irq)
+    {
+      spin_unlock_irqrestore(&g_irqlock, flags);
+      return OK;
+    }
+
+  /* Check if target SRPN is already occupied by another IRQ */
+
+  DEBUGASSERT(!g_srpn_to_irq[priority]);
+
+  /* Clear old mapping if this IRQ had a different SRPN */
+
+  for (i = TRICORE_IRQ_MIN_PRIORITY; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
+    {
+      if (g_srpn_to_irq[i] == irq)
+        {
+          g_srpn_to_irq[i] = 0;
+          break;
+        }
+    }
+
+  g_srpn_to_irq[priority] = irq;
+  spin_unlock_irqrestore(&g_irqlock, flags);
+
+  return OK;
 }
 #endif
 
