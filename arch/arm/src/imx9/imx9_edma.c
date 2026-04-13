@@ -1001,7 +1001,8 @@ void weak_function arm_dma_initialize(void)
    * controller).
    */
 
-  for (i = 0; i < DMA4_IRQ_COUNT; i++)
+  for (i = CONFIG_IMX9_EDMA5_CHAN_OFFSET;
+       i < CONFIG_IMX9_EDMA5_CHAN_COUNT; i++)
     {
       up_enable_irq(IMX9_IRQ_DMA5_2_0_1 + i);
     }
