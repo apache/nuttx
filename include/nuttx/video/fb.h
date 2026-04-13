@@ -654,7 +654,7 @@ struct fb_cmap_s
 struct fb_cursorimage_s
 {
   fb_coord_t     width;    /* Width of the cursor image in pixels */
-  fb_coord_t     height    /* Height of the cursor image in pixels */
+  fb_coord_t     height;   /* Height of the cursor image in pixels */
   const uint8_t *image;    /* Pointer to image data */
 };
 #endif
