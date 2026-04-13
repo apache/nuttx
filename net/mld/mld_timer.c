@@ -128,7 +128,6 @@ static void mld_gendog_work(FAR void *arg)
        */
 
       fwarn("WARNING: No device associated with ifindex=%d\n", ifindex);
-      net_unlock();
       return;
     }
 
