@@ -62,8 +62,8 @@ void tricore_doirq(void)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  int irq = NDX_TO_IRQ(tricore_mfcr(TRICORE_CPU_ICR) &
-                       TRICORE_ICR_CCPN_MASK);
+  int irq = tricore_srpn_to_irq(tricore_mfcr(TRICORE_CPU_ICR) &
+                                TRICORE_ICR_CCPN_MASK);
   uintptr_t *regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
 
   if (*running_task != NULL)
