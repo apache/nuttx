@@ -368,9 +368,21 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
 
   if (cinfo->pid == INVALID_PROCESS_ID)
     {
+     FAR struct tcb_s *rtcb = running_task();
+
+      /* Emit the current (typically crashing) task first so that GDB's
+       * default thread selection shows the crashing backtrace on the initial
+       * `bt`.
+       */
+
+      if (rtcb != NULL)
+        {
+          elf_emit_tcb_note(cinfo, rtcb);
+        }
+
       for (i = 0; i < g_npidhash; i++)
         {
-          if (g_pidhash[i] != NULL)
+          if (g_pidhash[i] != NULL && g_pidhash[i] != rtcb)
             {
               elf_emit_tcb_note(cinfo, g_pidhash[i]);
             }
@@ -457,9 +469,16 @@ static void elf_emit_stack(FAR struct elf_dumpinfo_s *cinfo)
 
   if (cinfo->pid == INVALID_PROCESS_ID)
     {
+      FAR struct tcb_s *rtcb = running_task();
+
+      if (rtcb != NULL)
+        {
+          elf_emit_tcb_stack(cinfo, rtcb);
+        }
+
       for (i = 0; i < g_npidhash; i++)
         {
-          if (g_pidhash[i] != NULL)
+          if (g_pidhash[i] != NULL && g_pidhash[i] != rtcb)
             {
               elf_emit_tcb_stack(cinfo, g_pidhash[i]);
             }
@@ -640,9 +659,16 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
   phdr.p_align  = ELF_PAGESIZE;
   if (cinfo->pid == INVALID_PROCESS_ID)
     {
+      FAR struct tcb_s *rtcb = running_task();
+
+      if (rtcb != NULL)
+        {
+          elf_emit_tcb_phdr(cinfo, rtcb, &phdr, &offset);
+        }
+
       for (i = 0; i < g_npidhash; i++)
         {
-          if (g_pidhash[i] != NULL)
+          if (g_pidhash[i] != NULL && g_pidhash[i] != rtcb)
             {
               elf_emit_tcb_phdr(cinfo, g_pidhash[i], &phdr, &offset);
             }
