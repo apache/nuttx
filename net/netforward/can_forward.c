@@ -169,6 +169,50 @@ static inline_function int can_forward_filter(FAR struct can_filter *filter,
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: add_cangw_rule
+ *
+ * Description:
+ *   Add a CAN->CAN gateway rule to a dev gw rule list.
+ *
+ ****************************************************************************/
+
+void add_cangw_rule(FAR struct net_driver_s *dev,
+                    FAR struct cangw_rule_s *cgw_rules)
+{
+  DEBUGASSERT(dev && cgw_rules);
+
+  netdev_lock(dev);
+  sq_addlast(&cgw_rules->node, &dev->d_cangw_rules);
+  netdev_unlock(dev);
+}
+
+/****************************************************************************
+ * Name: remove_cangw_rule
+ *
+ * Description:
+ *   Remove a CAN->CAN gateway rule from device.
+ *
+ ****************************************************************************/
+
+void remove_cangw_rule(FAR struct net_driver_s *dev,
+                       FAR struct cangw_rule_s *cgw_rules,
+                       size_t size)
+{
+  size_t i;
+
+  DEBUGASSERT(dev && cgw_rules);
+
+  netdev_lock(dev);
+
+  for (i = 0; i < size; i++)
+    {
+      sq_rem(&cgw_rules[i].node, &dev->d_cangw_rules);
+    }
+
+  netdev_unlock(dev);
+}
+
+/****************************************************************************
  * Name: can_forward
  *
  * Description:

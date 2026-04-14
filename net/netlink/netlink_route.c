@@ -43,7 +43,9 @@
 #include <nuttx/net/ip.h>
 #include <nuttx/net/neighbor.h>
 #include <nuttx/net/netlink.h>
-
+#ifdef CONFIG_NET_CANFORWARD
+#include <nuttx/net/cangw.h>
+#endif
 #include "netdev/netdev.h"
 #include "arp/arp.h"
 #include "inet/inet.h"
@@ -210,6 +212,20 @@ struct getprefix_recvfrom_rsplist_s
   struct getprefix_recvfrom_response_s payload;
 };
 
+/* RTM_NEWROUTE:  response the ack of adding a new route */
+
+struct new_ccgw_rule_response_s
+{
+  struct nlmsghdr hdr;
+  struct nlmsgerr err;
+};
+
+struct new_ccgw_rule_resplist_s
+{
+  sq_entry_t flink;
+  struct new_ccgw_rule_response_s payload;
+};
+
 /* netdev_foreach() callback */
 
 struct nlroute_sendto_request_s
@@ -270,6 +286,87 @@ static_assert(nitems(g_ifa_ipv6_policy) ==
 #else
 #  define g_ifa_ipv4_policy NULL
 #  define g_ifa_ipv6_policy NULL
+#endif
+
+#if !defined(CONFIG_NETLINK_DISABLE_NEWROUTE) && \
+    defined(CONFIG_NET_CANFORWARD)
+const struct nla_policy g_cgw_policy[CGW_MAX + 1] =
+{
+  [CGW_MOD_AND] =
+    {
+      .len = sizeof(struct cgw_frame_mod)
+    },
+
+  [CGW_MOD_OR] =
+    {
+      .len = sizeof(struct cgw_frame_mod)
+    },
+
+  [CGW_MOD_XOR] =
+    {
+      .len = sizeof(struct cgw_frame_mod)
+    },
+
+  [CGW_MOD_SET] =
+    {
+      .len = sizeof(struct cgw_frame_mod)
+    },
+
+  [CGW_CS_XOR] =
+    {
+      .len = sizeof(struct cgw_csum_xor)
+    },
+
+  [CGW_CS_CRC8] =
+    {
+      .len = sizeof(struct cgw_csum_crc8)
+    },
+
+  [CGW_SRC_IF] =
+    {
+      .type = NLA_U32
+    },
+
+  [CGW_DST_IF] =
+    {
+      .type = NLA_U32
+    },
+
+  [CGW_FILTER] =
+    {
+      .len = sizeof(struct can_filter)
+    },
+
+  [CGW_LIM_HOPS] =
+    {
+      .type = NLA_U8
+    },
+
+  [CGW_MOD_UID] =
+    {
+      .type = NLA_U32
+    },
+
+  [CGW_FDMOD_AND] =
+    {
+      .len = sizeof(struct cgw_fdframe_mod)
+    },
+
+  [CGW_FDMOD_OR] =
+    {
+      .len = sizeof(struct cgw_fdframe_mod)
+    },
+
+  [CGW_FDMOD_XOR] =
+    {
+      .len = sizeof(struct cgw_fdframe_mod)
+    },
+
+  [CGW_FDMOD_SET] =
+    {
+      .len = sizeof(struct cgw_fdframe_mod)
+    },
+};
 #endif
 
 /****************************************************************************
@@ -1321,6 +1418,139 @@ netlink_fill_ipv6prefix(FAR struct net_driver_s *dev, int type,
 }
 #endif
 
+#if !defined(CONFIG_NETLINK_DISABLE_NEWROUTE) && \
+    defined(CONFIG_NET_CANFORWARD)
+
+static int netlink_add_cangw_rule(FAR struct rtcanmsg *rt_msg,
+                                  FAR struct nlattr *tb[])
+{
+  FAR struct cangw_rule_s *cgw_rule;
+  FAR struct net_driver_s *src_dev;
+  uint32_t src_if;
+  uint32_t dst_if;
+  int ret;
+
+  /* Allocate and zero-initialize cangw_rule structure */
+
+  cgw_rule = kmm_zalloc(sizeof(struct cangw_rule_s));
+  if (cgw_rule == NULL)
+    {
+      nwarn("Failed to allocate cangw_rule structure\n");
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  cgw_rule->gwtype = rt_msg->gwtype;
+  cgw_rule->flags  = rt_msg->flags;
+
+  /* check for can_filter in attributes */
+
+  if (tb[CGW_FILTER])
+    {
+      nla_memcpy(&cgw_rule->gw.ccgw.filter, tb[CGW_FILTER],
+                  sizeof(struct can_filter));
+    }
+
+  ret = -ENODEV;
+
+  /* specifying two interfaces is mandatory */
+
+  if (!tb[CGW_SRC_IF] || !tb[CGW_DST_IF])
+    {
+      goto errout_with_rule;
+    }
+
+  src_if = *(FAR uint32_t *)nla_data(tb[CGW_SRC_IF]);
+  dst_if = *(FAR uint32_t *)nla_data(tb[CGW_DST_IF]);
+
+  src_dev = netdev_findbyindex(src_if);
+  cgw_rule->dest_dev = netdev_findbyindex(dst_if);
+
+  if (src_dev == NULL || cgw_rule->dest_dev == NULL)
+    {
+      goto errout_with_rule;
+    }
+
+  add_cangw_rule(src_dev, cgw_rule);
+  return OK;
+
+errout_with_rule:
+  if (cgw_rule != NULL)
+    {
+      kmm_free(cgw_rule);
+    }
+
+errout:
+  return ret;
+}
+
+static int netlink_new_can_route(FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct nlattr *tb[CGW_MAX + 1];
+  FAR struct rtcanmsg *rt_msg = nlmsg_data(nlmsg);
+  int ret;
+
+  /* nlmsg boundary check */
+
+  if (nlmsg->nlmsg_len < nlmsg_msg_size(sizeof(struct rtcanmsg)))
+    {
+      return -EINVAL;
+    }
+
+  /* parse nlmsg and acquire tb. */
+
+  ret = nlmsg_parse(nlmsg, sizeof(struct rtcanmsg), tb, CGW_MAX,
+                    g_cgw_policy, NULL);
+  if (ret < 0)
+    {
+      nwarn("nlmsg_parse failed: %d\n", ret);
+      return ret;
+    }
+
+  /* get r->gwtype and switch r->gwtype */
+
+  switch (rt_msg->gwtype)
+    {
+      case CGW_TYPE_CAN_CAN:
+        return netlink_add_cangw_rule(rt_msg, tb);
+
+      default:
+        return -EAFNOSUPPORT;
+    }
+}
+
+static void netlink_can_ack(NETLINK_HANDLE handle,
+                            FAR const struct nlmsghdr *nlmsg,
+                            int err)
+{
+  FAR struct new_ccgw_rule_response_s *resp;
+  FAR struct new_ccgw_rule_resplist_s *alloc =
+             kmm_zalloc(sizeof(struct new_ccgw_rule_resplist_s));
+
+  if (alloc == NULL)
+    {
+      nerr("ERROR: Failed to allocate response buffer "
+           "about new ccgw rule.\n");
+      return;
+    }
+
+  resp = &alloc->payload;
+  resp->hdr.nlmsg_len   = sizeof(struct new_ccgw_rule_response_s);
+  resp->hdr.nlmsg_type  = NLMSG_ERROR;
+  resp->hdr.nlmsg_flags = nlmsg->nlmsg_flags;
+  resp->hdr.nlmsg_seq   = nlmsg->nlmsg_seq;
+  resp->hdr.nlmsg_pid   = nlmsg->nlmsg_pid;
+  resp->err.error       = err;
+  resp->err.msg         = *nlmsg;
+
+  /* Finally, add the response to the list of pending responses */
+
+  netlink_add_response(handle,
+                       (FAR struct netlink_response_s *)alloc);
+}
+
+#endif /* CONFIG_NETLINK_DISABLE_NEWROUTE && CONFIG_NET_CANFORWARD */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1724,7 +1954,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
         break;
 #endif
 #ifndef CONFIG_NETLINK_DISABLE_NEWROUTE
-      /* Add a route */
+      /* Add a route or a CAN gateway rule */
 
       case RTM_NEWROUTE:
 #ifdef CONFIG_NET_IPv4
@@ -1741,6 +1971,17 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
           }
         else
 #endif
+#ifdef CONFIG_NET_CANFORWARD
+        if (req->gen.rtgen_family == AF_CAN)
+          {
+            ret = netlink_new_can_route(nlmsg);
+            if (nlmsg->nlmsg_flags & NLM_F_ACK)
+              {
+                netlink_can_ack(handle, nlmsg, ret);
+              }
+          }
+        else
+#endif
           {
             ret = -EAFNOSUPPORT;
             nwarn("Unsupported address family %d\n",
@@ -1748,6 +1989,7 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
           }
         break;
 #endif
+
       default:
         ret = -ENOSYS;
         break;

@@ -32,6 +32,7 @@
 #include <sys/types.h>
 #include <poll.h>
 
+#include <netpacket/cangw.h>
 #include <netpacket/netlink.h>
 #include <nuttx/queue.h>
 #include <nuttx/net/icmpv6.h>
@@ -593,6 +594,18 @@ int nla_parse(FAR struct nlattr **tb, int maxtype,
               FAR const struct nlattr *head,
               int len, FAR const struct nla_policy *policy,
               FAR struct netlink_ext_ack *extack);
+
+/****************************************************************************
+ * nla_memcpy - Copy a netlink attribute into another memory area
+ *
+ * Note: The number of bytes copied is limited by the length of
+ *       attribute's payload. memcpy
+ *
+ * Returns the number of bytes copied.
+ ****************************************************************************/
+
+int nla_memcpy(FAR void *dest, FAR const struct nlattr *src, int count);
+
 #endif /* CONFIG_NETLINK_ROUTE */
 
 /****************************************************************************
