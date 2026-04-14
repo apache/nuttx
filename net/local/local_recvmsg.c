@@ -255,6 +255,7 @@ psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
   if (flags & MSG_DONTWAIT)
     {
       int data_len = 0;
+
       ret = file_ioctl(&conn->lc_infile, FIONREAD, &data_len);
       if (ret < 0)
         {
@@ -409,6 +410,26 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
           nerr("ERROR: Failed to open FIFO for %s: %d\n",
                conn->lc_path, ret);
           goto errout_with_halfduplex;
+        }
+    }
+  else if ((flags & MSG_DONTWAIT) != 0)
+    {
+      /* bind() opened the FIFO in the blocking mode of the socket, so a
+       * read would wait even though the caller asked not to.  Check for
+       * data first, as psock_stream_recvfrom() does.
+       */
+
+      int data_len = 0;
+
+      ret = file_ioctl(&conn->lc_infile, FIONREAD, &data_len);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      if (data_len == 0)
+        {
+          return -EAGAIN;
         }
     }
 

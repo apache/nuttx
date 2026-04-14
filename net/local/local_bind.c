@@ -54,6 +54,9 @@ int psock_local_bind(FAR struct socket *psock,
   FAR const struct sockaddr_un *unaddr =
     (FAR const struct sockaddr_un *)addr;
   int index;
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  int ret;
+#endif
 
   DEBUGASSERT(unaddr->sun_family == AF_LOCAL);
 
@@ -63,6 +66,16 @@ int psock_local_bind(FAR struct socket *psock,
     }
 
   conn = psock->s_conn;
+
+  /* A socket may only be bound once.  Rebinding a DGRAM socket would open
+   * a second receiver FIFO over the first one, leaking its reader.  An
+   * unbound socket has an empty lc_path.
+   */
+
+  if (conn->lc_path[0] != '\0')
+    {
+      return -EINVAL;
+    }
 
   /* Check if local address is already in use */
 
@@ -100,6 +113,35 @@ int psock_local_bind(FAR struct socket *psock,
 
   strlcpy(conn->lc_path, &unaddr->sun_path[index], sizeof(conn->lc_path));
 
+#ifdef CONFIG_NET_LOCAL_DGRAM
+  if (psock->s_type == SOCK_DGRAM)
+    {
+      ret = local_create_halfduplex(conn, conn->lc_path, conn->lc_rcvsize);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+
+      ret = local_open_receiver(conn,
+              _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+      if (ret < 0)
+        {
+          local_release_halfduplex(conn);
+          goto errout;
+        }
+    }
+#endif
+
   conn->lc_state = LOCAL_STATE_BOUND;
   return OK;
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+errout:
+
+  /* Leave the socket unbound so that it can be bound again. */
+
+  conn->lc_path[0] = '\0';
+  conn->lc_type    = LOCAL_TYPE_UNNAMED;
+  return ret;
+#endif
 }

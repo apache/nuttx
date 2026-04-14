@@ -161,7 +161,26 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
-      return -ENOSYS;
+      /* A datagram send opens its FIFO on demand and has no send buffer to
+       * wait for, so it is always possible to send.  Report POLLOUT
+       * immediately rather than polling lc_infile, which is read-only and
+       * would never become writable.
+       */
+
+      if ((fds->events & POLLOUT) != 0)
+        {
+          fds->revents |= POLLOUT;
+          poll_notify(&fds, 1, POLLOUT);
+        }
+
+      /* Only an bound socket has a receiver FIFO to watch for input. */
+
+      if ((fds->events & POLLIN) != 0 && conn->lc_infile.f_inode != NULL)
+        {
+          return file_poll(&conn->lc_infile, fds, true);
+        }
+
+      return OK;
     }
 
 #ifdef CONFIG_NET_LOCAL_STREAM
@@ -310,7 +329,14 @@ int local_pollteardown(FAR struct socket *psock, FAR struct pollfd_s *fds)
 
   if (conn->lc_proto == SOCK_DGRAM)
     {
-      return -ENOSYS;
+      /* Only a registered poll (fds->priv set by setup) needs teardown. */
+
+      if (fds->priv != NULL)
+        {
+          return file_poll(&conn->lc_infile, fds, false);
+        }
+
+      return OK;
     }
 
 #ifdef CONFIG_NET_LOCAL_STREAM
