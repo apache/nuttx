@@ -38,6 +38,8 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
+#include "inet/inet.h"
+#include "netdev/netdev.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
 
@@ -65,6 +67,51 @@ static void udp_path(FAR struct udp_conn_s *conn, FAR char *buf, size_t len)
   char local[INET6_ADDRSTRLEN];
   FAR void *laddr = net_ip_binding_laddr(&conn->u, domain);
   FAR void *raddr = net_ip_binding_raddr(&conn->u, domain);
+
+  /* If laddr is the wildcard address and socket is connected,
+   * resolve the actual local IP via routing lookup for display
+   * purposes only.
+   */
+
+  if (_UDP_ISCONNECTMODE(conn->flags))
+    {
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+      if (domain == PF_INET)
+#  endif
+        {
+          if (conn->u.ipv4.laddr == INADDR_ANY)
+            {
+              FAR struct net_driver_s *dev;
+
+              dev = udp_find_raddr_device(conn, NULL);
+              if (dev != NULL)
+                {
+                  laddr = &dev->d_ipaddr;
+                }
+            }
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+      else
+#  endif
+        {
+          if (net_ipv6addr_cmp(conn->u.ipv6.laddr, g_ipv6_unspecaddr))
+            {
+              FAR struct net_driver_s *dev;
+
+              dev = udp_find_raddr_device(conn, NULL);
+              if (dev != NULL)
+                {
+                  laddr = (FAR void *)netdev_ipv6_srcaddr(
+                                       dev, conn->u.ipv6.raddr);
+                }
+            }
+        }
+#endif
+    }
 
   snprintf(buf, len, "udp:["
            "%s:%" PRIu16 "<->%s:%" PRIu16
@@ -127,6 +174,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn, int cmd, unsigned long arg)
         if (iob)
           {
             uint16_t datalen;
+
             iob_copyout((FAR uint8_t *)&datalen, iob, sizeof(datalen), 0);
             *(FAR int *)((uintptr_t)arg) = datalen;
           }
