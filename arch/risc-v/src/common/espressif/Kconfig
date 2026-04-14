@@ -1156,10 +1156,8 @@ config ESPRESSIF_LP_UART0
 	select ARCH_HAVE_SERIAL_TERMIOS
 
 config ESPRESSIF_TWAI
-	bool "TWAI (CAN)"
+	bool
 	default n
-	select ARCH_HAVE_CAN_ERRORS
-	select CAN
 
 config ESPRESSIF_TWAI0
 	bool "TWAI0 (CAN)"
