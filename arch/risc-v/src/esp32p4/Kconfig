@@ -18,7 +18,7 @@ config ESP32P4_SELECTS_REV_LESS_V3
 
 choice ESP32P4_REV_MIN
 	prompt "Minimum Supported ESP32-P4 Revision"
-	default ESP32P4_REV_MIN_1
+	default ESP32P4_REV_MIN_301
 	---help---
 		Required minimum chip revision. ESP-IDF will check for it and
 		reject to boot if the chip revision fails the check.
@@ -43,6 +43,10 @@ config ESP32P4_REV_MIN_300
 	bool "Rev v3.0"
 	depends on !ESP32P4_SELECTS_REV_LESS_V3
 
+config ESP32P4_REV_MIN_301
+	bool "Rev v3.1"
+	depends on !ESP32P4_SELECTS_REV_LESS_V3
+
 endchoice # ESP32P4_REV_MIN
 
 config ESP32P4_REV_MIN_FULL
@@ -51,6 +55,7 @@ config ESP32P4_REV_MIN_FULL
 	default 1 if ESP32P4_REV_MIN_1
 	default 100 if ESP32P4_REV_MIN_100
 	default 300 if ESP32P4_REV_MIN_300
+	default 301 if ESP32P4_REV_MIN_301
 
 config ESP_REV_MIN_FULL
 	int
