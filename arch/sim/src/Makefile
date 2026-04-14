@@ -190,7 +190,13 @@ endif
 ifeq ($(CONFIG_SIM_X11FB),y)
   HOSTSRCS += sim_x11framebuffer.c
 ifeq ($(CONFIG_HOST_MACOS),y)
-  STDLIBS += -L/opt/X11/lib
+  ifneq ($(wildcard /opt/X11/include/X11/Xlib.h),)
+    HOSTCFLAGS += -I/opt/X11/include
+    STDLIBS += -L/opt/X11/lib
+  else ifneq ($(wildcard /usr/X11/include/X11/Xlib.h),)
+    HOSTCFLAGS += -I/usr/X11/include
+    STDLIBS += -L/usr/X11/lib
+  endif
 endif
   STDLIBS += -lX11 -lXext
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
