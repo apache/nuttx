@@ -136,7 +136,7 @@ struct stm32_dev_s
                          * block */
 #ifdef SDADC_HAVE_TIMER
   uint32_t tbase;       /* Base address of timer used by this SDADC block */
-  uint32_t jextsel      /* JEXTSEL value used by this SDADC block */
+  uint32_t jextsel;     /* JEXTSEL value used by this SDADC block */
   uint32_t pclck;       /* The PCLK frequency that drives this timer */
   uint32_t freq;        /* The desired frequency of conversions */
 #endif
