@@ -325,28 +325,20 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
 
   if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
     {
-      nerr("ERROR: Packet too long to send!\n");
-      ret = NETDEV_TX_CONTINUE;
+      nerr("ERROR: Packet too long to send!, dropping\n");
+
+      /* Permanent error -- drop the packet to avoid infinite retry.
+       * netpkt_put() restores quota and places pkt back into
+       * dev->d_iob so the caller can release it.
+       */
+
+      NETDEV_TXERRORS(dev);
+      netpkt_put(dev, pkt, NETPKT_TX);
     }
   else
     {
       ret = lower->ops->transmit(lower, pkt);
-    }
-
-  if (ret != OK)
-    {
-      if (ret == NETDEV_TX_CONTINUE)
-        {
-          /* Permanent error -- drop the packet to avoid infinite retry.
-           * netpkt_put() restores quota and places pkt back into
-           * dev->d_iob so the caller can release it.
-           */
-
-          NETDEV_TXERRORS(dev);
-          nerr("ERROR: Packet too large, dropping\n");
-          netpkt_put(dev, pkt, NETPKT_TX);
-        }
-      else
+      if (ret != OK)
         {
           /* Transient error -- re-queue to txq head for retry.
            * Head-insert preserves packet ordering.  The retry will be
@@ -360,15 +352,8 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
           nwarn("WARNING: Transmit failed: %d, re-queue pkt\n", ret);
           iob_add_queue_head(pkt, &upper->txq);
           atomic_add(&upper->lower->quota_ptr[NETPKT_TX], 1);
+          return ret;
         }
-
-      /* When the quota is not 0, lower half may also return a failure,
-       * in which case the txdone process is required to trigger subsequent
-       * packet transmissions.
-       */
-
-      lower->txdone = true;
-      return ret;
     }
 
   return NETDEV_TX_CONTINUE;
@@ -1878,17 +1863,11 @@ void netdev_lower_rxready(FAR struct netdev_lowerhalf_s *dev)
 
 void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 {
-  if (dev->txdone)
+  FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
+
+  if (dev->txdone || !IOB_QEMPTY(&upper->txq))
     {
-#if defined(CONFIG_NET_VLAN) || defined(CONFIG_NET_BRIDGE)
-      FAR struct netdev_upperhalf_s *upper = dev->netdev.d_private;
-#endif
-
       dev->txdone = false;
-
-#ifdef CONFIG_NET_VLAN
-      netdev_upper_vlan_foreach(upper, netdev_lower_txdone);
-#endif
 
 #ifdef CONFIG_NET_BRIDGE
       /* The bridge device may wait for room on its ports */
@@ -1901,6 +1880,9 @@ void netdev_lower_txdone(FAR struct netdev_lowerhalf_s *dev)
 
       if (dev->rxtype == NETDEV_RX_DIRECT)
         {
+#ifdef CONFIG_NET_VLAN
+          netdev_upper_vlan_foreach(upper, netdev_lower_txdone);
+#endif
           netdev_upper_txavail_work(dev->netdev.d_private);
         }
       else
