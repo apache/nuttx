@@ -1,0 +1,1285 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Board Clock Configuration"
+
+choice
+	prompt "HSE clock source"
+	default NUCLEO_H753ZI_HSE_8MHZ
+	help
+		Select the HSE clock source for the Nucleo-H753ZI board.
+		8 MHz: ST-LINK MCO (default, no hardware modification)
+		25 MHz: External crystal X3 (requires hardware modification)
+
+config NUCLEO_H753ZI_HSE_8MHZ
+	bool "8 MHz from ST-LINK MCO"
+	help
+		Default Nucleo-H753ZI configuration.
+		Uses 8 MHz clock from ST-LINK MCO output (PH0-OSC_IN).
+		Solder Bridge Configuration:
+		SB45=ON, SB44=OFF, SB46=OFF, SB3=OFF, SB4=OFF
+		This is the factory default - no hardware changes needed.
+		System clocks with 8 MHz HSE:
+		- SYSCLK: 400 MHz
+		- HCLK: 200 MHz
+		- APB1/2/3/4: 100 MHz
+		- FDCAN: 25 MHz (via PLL2Q)
+
+config NUCLEO_H753ZI_HSE_25MHZ
+	bool "25 MHz external crystal X3"
+	help
+		Uses 25 MHz external crystal on X3 footprint.
+		Solder Bridge Configuration:
+		SB3=ON, SB4=ON, SB45=OFF, SB44=OFF, SB46=OFF
+		WARNING: Requires hardware modification:
+		- Install 25 MHz crystal at X3 footprint
+		- Reconfigure solder bridges as indicated above
+		System clocks with 25 MHz HSE:
+		- SYSCLK: 400 MHz
+		- HCLK: 200 MHz
+		- APB1/2/3/4: 100 MHz
+		- FDCAN: 25 MHz (direct from HSE)
+
+endchoice
+
+config STM32H7_BOARD_HSE_FREQUENCY
+	int
+	default 8000000 if NUCLEO_H753ZI_HSE_8MHZ
+	default 25000000 if NUCLEO_H753ZI_HSE_25MHZ
+	depends on STM32H7_HSE
+
+endmenu
+
+config NUCLEO_H753ZI_GPIO_DRIVER
+	bool "Enable Nucleo H753ZI board GPIO driver"
+	default n
+	select DEV_GPIO
+	help
+		This option enables the low-level GPIO driver for the
+		Nucleo H753ZI board. Other features like buttons or LEDs
+		will depend on this driver.
+
+choice
+	prompt "LED Control Mode"
+	default NUCLEO_H753ZI_LEDS_AUTO
+	help
+		Select how the onboard LEDs should be controlled.
+
+config NUCLEO_H753ZI_LEDS_AUTO
+	bool "Automatic LEDs (Kernel controlled)"
+	help
+		LEDs are automatically controlled by the kernel to indicate
+		system status (boot stages, interrupts, panics, etc.).
+		The LEDs will show:
+		- GREEN: System ready, signals
+		- ORANGE: Heap allocation, IRQs
+		- RED: Assertions, panics, idle
+		NOTE: You still need to manually enable:
+		Board Selection -> Board LED Status support
+
+config NUCLEO_H753ZI_LEDS_USER
+	bool "User-controlled LEDs"
+	select USERLED
+	select USERLED_LOWER
+	select BOARD_LATE_INITIALIZE
+	help
+		LEDs are controlled by user applications via /dev/userleds.
+		Applications can turn individual LEDs on/off as needed.
+		Kernel status indication is disabled.
+		NOTE: You must manually disable:
+		Board Selection -> Board LED Status support (to avoid
+		conflicts)
+
+config NUCLEO_H753ZI_LEDS_DISABLED
+	bool "LEDs disabled"
+	help
+		LED functionality is completely disabled to save resources.
+		NOTE: You should manually disable:
+		Board Selection -> Board LED Status support
+
+endchoice
+
+menu "Button Configuration"
+
+config NUCLEO_H753ZI_BUTTON_SUPPORT
+	bool "Enable button support"
+	default n
+	select ARCH_BUTTONS
+	help
+		Enable GPIO button support for the Nucleo-H753ZI board.
+
+config NUCLEO_H753ZI_BUTTON_COUNT
+	int "Number of buttons"
+	depends on NUCLEO_H753ZI_BUTTON_SUPPORT
+	default 1
+	range 1 32
+	help
+		Total number of buttons to configure (1-32).
+		The STM32H7 button driver supports up to 32 buttons using
+		a 32-bit bitmask for button states.
+
+config NUCLEO_H753ZI_BUTTON_BUILTIN
+	bool "Include built-in user button (PC13)"
+	depends on NUCLEO_H753ZI_BUTTON_SUPPORT
+	default y
+	help
+		Include the built-in blue user button connected to PC13.
+		This button will always be assigned as button index 0.
+		If enabled, you need (BUTTON_COUNT - 1) additional pins.
+		If disabled, you need exactly BUTTON_COUNT pins.
+
+config NUCLEO_H753ZI_BUTTON_PINS
+	string "Button GPIO pin list"
+	depends on NUCLEO_H753ZI_BUTTON_SUPPORT
+	default ""
+	help
+		Comma-separated list of GPIO pins for buttons.
+		Format: PORT+PIN (e.g., "PF15,PG14,PG9,PE0,PA0,PB12")
+		Number of pins required:
+		- With built-in: (BUTTON_COUNT - 1) pins
+		- Without built-in: BUTTON_COUNT pins
+		Example for 5 buttons with built-in enabled:
+		"PF15,PG14,PG9,PE0"
+		Common Nucleo-H753ZI pins:
+		Arduino Headers: PF15(D2), PG14(D1), PG9(D0), PE0(D34)
+		Morpho Headers: PA0-PA15, PB0-PB15, PC0-PC15, PD0-PD15,
+		                PE0-PE15, PF0-PF15, PG0-PG15, PH0-PH1
+		Note: All buttons assume pull-down resistor configuration.
+
+config NUCLEO_H753ZI_BUTTON_VALIDATION
+	bool "Validate pin configuration at compile time"
+	depends on NUCLEO_H753ZI_BUTTON_SUPPORT
+	default y
+	help
+		Perform compile-time validation of GPIO pin assignments.
+
+endmenu
+
+menu "SPI Configuration"
+	depends on STM32H7_SPI
+
+comment "SPI interfaces now use per-sensor CS registration system"
+comment "No CS pins configured at SPI level - sensors register their own CS pins"
+
+if STM32H7_SPI1
+
+menu "SPI1 Configuration"
+
+config NUCLEO_H753ZI_SPI1_ENABLE
+	bool "Enable SPI1"
+	default n
+	help
+		Enable SPI1 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI1 Pin Set"
+	depends on NUCLEO_H753ZI_SPI1_ENABLE
+	default NUCLEO_H753ZI_SPI1_PINSET_1
+	help
+		Select which set of pins to use for SPI1.
+		Choose based on availability and board layout.
+
+config NUCLEO_H753ZI_SPI1_PINSET_1
+	bool "Pin Set 1: PA5(SCK), PA6(MISO), PA7(MOSI)"
+	help
+		SPI1 Pin Set 1 (Arduino SPI connector compatible):
+		- SCK: PA5 (D13 - Arduino SCK)
+		- MISO: PA6 (D12 - Arduino MISO)
+		- MOSI: PA7 (D11 - Arduino MOSI)
+		This is the standard Arduino SPI pinout.
+
+config NUCLEO_H753ZI_SPI1_PINSET_2
+	bool "Pin Set 2: PB3(SCK), PB4(MISO), PB5(MOSI)"
+	help
+		SPI1 Pin Set 2:
+		- SCK: PB3
+		- MISO: PB4
+		- MOSI: PB5
+
+config NUCLEO_H753ZI_SPI1_PINSET_3
+	bool "Pin Set 3: PG11(SCK), PG9(MISO), PD7(MOSI)"
+	help
+		SPI1 Pin Set 3:
+		- SCK: PG11
+		- MISO: PG9
+		- MOSI: PD7
+
+endchoice
+
+endmenu
+
+endif
+
+if STM32H7_SPI2
+
+menu "SPI2 Configuration"
+
+config NUCLEO_H753ZI_SPI2_ENABLE
+	bool "Enable SPI2"
+	default n
+	help
+		Enable SPI2 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI2 Pin Set"
+	depends on NUCLEO_H753ZI_SPI2_ENABLE
+	default NUCLEO_H753ZI_SPI2_PINSET_1
+	help
+		Select which set of pins to use for SPI2.
+
+config NUCLEO_H753ZI_SPI2_PINSET_1
+	bool "Pin Set 1: PB13(SCK), PB14(MISO), PB15(MOSI)"
+	help
+		SPI2 Pin Set 1:
+		- SCK: PB13
+		- MISO: PB14
+		- MOSI: PB15
+
+config NUCLEO_H753ZI_SPI2_PINSET_2
+	bool "Pin Set 2: PA12(SCK), PC2(MISO), PC1(MOSI)"
+	help
+		SPI2 Pin Set 2:
+		- SCK: PA12
+		- MISO: PC2
+		- MOSI: PC1
+
+config NUCLEO_H753ZI_SPI2_PINSET_3
+	bool "Pin Set 3: PD3(SCK), PC2(MISO), PC3(MOSI)"
+	help
+		SPI2 Pin Set 3:
+		- SCK: PD3
+		- MISO: PC2
+		- MOSI: PC3
+
+endchoice
+
+endmenu
+
+endif
+
+if STM32H7_SPI3
+
+menu "SPI3 Configuration"
+
+config NUCLEO_H753ZI_SPI3_ENABLE
+	bool "Enable SPI3"
+	default n
+	help
+		Enable SPI3 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI3 Pin Set"
+	depends on NUCLEO_H753ZI_SPI3_ENABLE
+	default NUCLEO_H753ZI_SPI3_PINSET_1
+	help
+		Select which set of pins to use for SPI3.
+
+config NUCLEO_H753ZI_SPI3_PINSET_1
+	bool "Pin Set 1: PC10(SCK), PC11(MISO), PC12(MOSI)"
+	help
+		SPI3 Pin Set 1:
+		- SCK: PC10
+		- MISO: PC11
+		- MOSI: PC12
+
+config NUCLEO_H753ZI_SPI3_PINSET_2
+	bool "Pin Set 2: PB3(SCK), PB4(MISO), PB5(MOSI)"
+	help
+		SPI3 Pin Set 2:
+		- SCK: PB3
+		- MISO: PB4
+		- MOSI: PB5
+
+endchoice
+
+endmenu
+
+endif
+
+if STM32H7_SPI4
+
+menu "SPI4 Configuration"
+
+config NUCLEO_H753ZI_SPI4_ENABLE
+	bool "Enable SPI4"
+	default n
+	help
+		Enable SPI4 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI4 Pin Set"
+	depends on NUCLEO_H753ZI_SPI4_ENABLE
+	default NUCLEO_H753ZI_SPI4_PINSET_1
+	help
+		Select which set of pins to use for SPI4.
+
+config NUCLEO_H753ZI_SPI4_PINSET_1
+	bool "Pin Set 1: PE12(SCK), PE13(MISO), PE14(MOSI)"
+	help
+		SPI4 Pin Set 1:
+		- SCK: PE12
+		- MISO: PE13
+		- MOSI: PE14
+
+config NUCLEO_H753ZI_SPI4_PINSET_2
+	bool "Pin Set 2: PE2(SCK), PE5(MISO), PE6(MOSI)"
+	help
+		SPI4 Pin Set 2:
+		- SCK: PE2
+		- MISO: PE5
+		- MOSI: PE6
+
+endchoice
+
+endmenu
+
+endif
+
+if STM32H7_SPI5
+
+menu "SPI5 Configuration"
+
+config NUCLEO_H753ZI_SPI5_ENABLE
+	bool "Enable SPI5"
+	default n
+	help
+		Enable SPI5 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI5 Pin Set"
+	depends on NUCLEO_H753ZI_SPI5_ENABLE
+	default NUCLEO_H753ZI_SPI5_PINSET_1
+	help
+		Select which set of pins to use for SPI5.
+
+config NUCLEO_H753ZI_SPI5_PINSET_1
+	bool "Pin Set 1: PF7(SCK), PF8(MISO), PF9(MOSI)"
+	help
+		SPI5 Pin Set 1:
+		- SCK: PF7
+		- MISO: PF8
+		- MOSI: PF9
+
+config NUCLEO_H753ZI_SPI5_PINSET_2
+	bool "Pin Set 2: PK0(SCK), PJ11(MISO), PJ10(MOSI)"
+	help
+		SPI5 Pin Set 2:
+		- SCK: PK0
+		- MISO: PJ11
+		- MOSI: PJ10
+
+endchoice
+
+endmenu
+
+endif
+
+if STM32H7_SPI6
+
+menu "SPI6 Configuration"
+
+config NUCLEO_H753ZI_SPI6_ENABLE
+	bool "Enable SPI6"
+	default n
+	help
+		Enable SPI6 with configurable pins.
+		CS pins are now registered per-sensor.
+
+choice
+	prompt "SPI6 Pin Set"
+	depends on NUCLEO_H753ZI_SPI6_ENABLE
+	default NUCLEO_H753ZI_SPI6_PINSET_1
+	help
+		Select which set of pins to use for SPI6.
+
+config NUCLEO_H753ZI_SPI6_PINSET_1
+	bool "Pin Set 1: PG13(SCK), PG12(MISO), PG14(MOSI)"
+	help
+		SPI6 Pin Set 1:
+		- SCK: PG13
+		- MISO: PG12
+		- MOSI: PG14
+
+config NUCLEO_H753ZI_SPI6_PINSET_2
+	bool "Pin Set 2: PA5(SCK), PA6(MISO), PA7(MOSI)"
+	help
+		SPI6 Pin Set 2:
+		- SCK: PA5
+		- MISO: PA6
+		- MOSI: PA7
+
+endchoice
+
+endmenu
+
+endif
+
+endmenu
+
+menu "I2C Configuration"
+	depends on STM32H7_I2C
+
+config NUCLEO_H753ZI_I2C1_ENABLE
+	bool "Enable I2C1"
+	default n
+	depends on STM32H7_I2C1
+	help
+		Enable I2C1 bus with configurable pinset selection.
+
+if NUCLEO_H753ZI_I2C1_ENABLE
+
+choice
+	prompt "I2C1 Pin Set"
+	default NUCLEO_H753ZI_I2C1_PINSET_1
+	help
+		Select which pins to use for I2C1 SCL/SDA signals.
+
+config NUCLEO_H753ZI_I2C1_PINSET_1
+	bool "Pin Set 1: PB6(SCL), PB7(SDA) - AF4"
+	help
+		I2C1 Pin Set 1 (Arduino D10/D9):
+		- SCL: PB6 (CN7-13, D10) - AF4
+		- SDA: PB7 (CN7-21, D9) - AF4
+		This is the default Arduino-compatible pinout.
+		WARNING: Conflicts with I2C4 Pinset 4 (same pins, AF6).
+
+config NUCLEO_H753ZI_I2C1_PINSET_2
+	bool "Pin Set 2: PB8(SCL), PB9(SDA) - AF4"
+	help
+		I2C1 Pin Set 2 (Morpho):
+		- SCL: PB8 (CN7-2) - AF4
+		- SDA: PB9 (CN7-4) - AF4
+		WARNING: Conflicts with I2C4 Pinset 5 (same pins, AF6).
+
+endchoice
+
+config NUCLEO_H753ZI_I2C1_DEFAULT_FREQUENCY
+	int "I2C1 Default Bus Frequency (Hz)"
+	default 100000
+	range 10000 1000000
+	help
+		Default I2C1 bus frequency.
+		Individual devices can override this.
+		Standard speeds:
+		- 100000 (100 kHz): Standard mode
+		- 400000 (400 kHz): Fast mode
+		- 1000000 (1 MHz): Fast mode plus
+
+endif
+
+config NUCLEO_H753ZI_I2C2_ENABLE
+	bool "Enable I2C2"
+	default n
+	depends on STM32H7_I2C2
+	help
+		Enable I2C2 bus with configurable pinset selection.
+
+if NUCLEO_H753ZI_I2C2_ENABLE
+
+choice
+	prompt "I2C2 Pin Set"
+	default NUCLEO_H753ZI_I2C2_PINSET_1
+	help
+		Select which pins to use for I2C2 SCL/SDA signals.
+
+config NUCLEO_H753ZI_I2C2_PINSET_1
+	bool "Pin Set 1: PB10(SCL), PB11(SDA) - AF4"
+	help
+		I2C2 Pin Set 1:
+		- SCL: PB10 - AF4
+		- SDA: PB11 - AF4
+
+config NUCLEO_H753ZI_I2C2_PINSET_2
+	bool "Pin Set 2: PF1(SCL), PF0(SDA) - AF4"
+	help
+		I2C2 Pin Set 2:
+		- SCL: PF1 - AF4
+		- SDA: PF0 - AF4
+
+config NUCLEO_H753ZI_I2C2_PINSET_3
+	bool "Pin Set 3: PH4(SCL), PH5(SDA) - AF4"
+	help
+		I2C2 Pin Set 3:
+		- SCL: PH4 - AF4
+		- SDA: PH5 - AF4
+
+endchoice
+
+config NUCLEO_H753ZI_I2C2_DEFAULT_FREQUENCY
+	int "I2C2 Default Bus Frequency (Hz)"
+	default 100000
+	range 10000 1000000
+
+endif
+
+config NUCLEO_H753ZI_I2C3_ENABLE
+	bool "Enable I2C3"
+	default n
+	depends on STM32H7_I2C3
+	help
+		Enable I2C3 bus with configurable pinset selection.
+
+if NUCLEO_H753ZI_I2C3_ENABLE
+
+choice
+	prompt "I2C3 Pin Set"
+	default NUCLEO_H753ZI_I2C3_PINSET_1
+	help
+		Select which pins to use for I2C3 SCL/SDA signals.
+
+config NUCLEO_H753ZI_I2C3_PINSET_1
+	bool "Pin Set 1: PA8(SCL), PC9(SDA) - AF4"
+	help
+		I2C3 Pin Set 1:
+		- SCL: PA8 - AF4
+		- SDA: PC9 - AF4
+
+config NUCLEO_H753ZI_I2C3_PINSET_2
+	bool "Pin Set 2: PH7(SCL), PH8(SDA) - AF4"
+	help
+		I2C3 Pin Set 2:
+		- SCL: PH7 - AF4
+		- SDA: PH8 - AF4
+
+endchoice
+
+config NUCLEO_H753ZI_I2C3_DEFAULT_FREQUENCY
+	int "I2C3 Default Bus Frequency (Hz)"
+	default 100000
+	range 10000 1000000
+
+endif
+
+config NUCLEO_H753ZI_I2C4_ENABLE
+	bool "Enable I2C4"
+	default n
+	depends on STM32H7_I2C4
+	help
+		Enable I2C4 bus with configurable pinset selection.
+
+if NUCLEO_H753ZI_I2C4_ENABLE
+
+choice
+	prompt "I2C4 Pin Set"
+	default NUCLEO_H753ZI_I2C4_PINSET_1
+	help
+		Select which pins to use for I2C4 SCL/SDA signals.
+
+config NUCLEO_H753ZI_I2C4_PINSET_1
+	bool "Pin Set 1: PD12(SCL), PD13(SDA) - AF4"
+	help
+		I2C4 Pin Set 1:
+		- SCL: PD12 - AF4
+		- SDA: PD13 - AF4
+
+config NUCLEO_H753ZI_I2C4_PINSET_2
+	bool "Pin Set 2: PF14(SCL), PF15(SDA) - AF4"
+	help
+		I2C4 Pin Set 2:
+		- SCL: PF14 - AF4
+		- SDA: PF15 - AF4
+
+config NUCLEO_H753ZI_I2C4_PINSET_3
+	bool "Pin Set 3: PH11(SCL), PH12(SDA) - AF4"
+	help
+		I2C4 Pin Set 3:
+		- SCL: PH11 - AF4
+		- SDA: PH12 - AF4
+
+config NUCLEO_H753ZI_I2C4_PINSET_4
+	bool "Pin Set 4: PB6(SCL), PB7(SDA) - AF6"
+	depends on !NUCLEO_H753ZI_I2C1_PINSET_1
+	help
+		I2C4 Pin Set 4 (Alternate Function 6):
+		- SCL: PB6 - AF6
+		- SDA: PB7 - AF6
+		WARNING: These are the same physical pins as I2C1 Pinset 1.
+		Cannot use both I2C1 Pinset 1 (AF4) and I2C4 Pinset 4 (AF6).
+		OK to use with I2C1 Pinset 2 (different pins).
+
+config NUCLEO_H753ZI_I2C4_PINSET_5
+	bool "Pin Set 5: PB8(SCL), PB9(SDA) - AF6"
+	depends on !NUCLEO_H753ZI_I2C1_PINSET_2
+	help
+		I2C4 Pin Set 5 (Alternate Function 6):
+		- SCL: PB8 - AF6
+		- SDA: PB9 - AF6
+		WARNING: These are the same physical pins as I2C1 Pinset 2.
+		Cannot use both I2C1 Pinset 2 (AF4) and I2C4 Pinset 5 (AF6).
+		OK to use with I2C1 Pinset 1 (different pins).
+
+endchoice
+
+config NUCLEO_H753ZI_I2C4_DEFAULT_FREQUENCY
+	int "I2C4 Default Bus Frequency (Hz)"
+	default 100000
+	range 10000 1000000
+
+endif
+
+endmenu
+
+menu "SPI MODULES"
+	depends on STM32H7_SPI
+
+menu "MFRC522 RFID Reader Configuration"
+	depends on CL_MFRC522
+
+config NUCLEO_H753ZI_MFRC522_ENABLE
+	bool "Enable MFRC522 RFID Reader"
+	default n
+	help
+		Enable MFRC522 13.56 MHz RFID reader with configurable SPI bus,
+		CS pin, and optional IRQ support.
+
+if NUCLEO_H753ZI_MFRC522_ENABLE
+
+choice
+	prompt "MFRC522 SPI Bus"
+	help
+		Select which SPI bus the MFRC522 is connected to.
+
+config NUCLEO_H753ZI_MFRC522_SPI1
+	bool "Use SPI1"
+	depends on NUCLEO_H753ZI_SPI1_ENABLE
+
+config NUCLEO_H753ZI_MFRC522_SPI2
+	bool "Use SPI2"
+	depends on NUCLEO_H753ZI_SPI2_ENABLE
+
+config NUCLEO_H753ZI_MFRC522_SPI3
+	bool "Use SPI3"
+	depends on NUCLEO_H753ZI_SPI3_ENABLE
+
+config NUCLEO_H753ZI_MFRC522_SPI4
+	bool "Use SPI4"
+	depends on NUCLEO_H753ZI_SPI4_ENABLE
+
+config NUCLEO_H753ZI_MFRC522_SPI5
+	bool "Use SPI5"
+	depends on NUCLEO_H753ZI_SPI5_ENABLE
+
+config NUCLEO_H753ZI_MFRC522_SPI6
+	bool "Use SPI6"
+	depends on NUCLEO_H753ZI_SPI6_ENABLE
+
+endchoice
+
+config NUCLEO_H753ZI_MFRC522_SPI_BUS
+	int
+	default 1 if NUCLEO_H753ZI_MFRC522_SPI1
+	default 2 if NUCLEO_H753ZI_MFRC522_SPI2
+	default 3 if NUCLEO_H753ZI_MFRC522_SPI3
+	default 4 if NUCLEO_H753ZI_MFRC522_SPI4
+	default 5 if NUCLEO_H753ZI_MFRC522_SPI5
+	default 6 if NUCLEO_H753ZI_MFRC522_SPI6
+
+config NUCLEO_H753ZI_MFRC522_DEVID
+	int "MFRC522 Device ID"
+	range 0 15
+	default 0
+	help
+		Device ID for MFRC522 within the selected SPI bus.
+		Range: 0-15 for each SPI bus.
+		This ID will be used to register the CS pin.
+
+config NUCLEO_H753ZI_MFRC522_CS_PIN
+	string "CS (Chip Select) GPIO Pin"
+	default "PA4"
+	help
+		GPIO pin for MFRC522 Chip Select.
+		Format: PORT+PIN (e.g., "PA4", "PB0", "PC5")
+		Common available pins:
+		- Arduino Headers: PF15(D2), PG14(D1), PG9(D0), PE0(D34)
+		- Morpho Headers: PA0-PA15, PB0-PB15, PC0-PC15, PD0-PD15,
+		                  PE0-PE15, PF0-PF15, PG0-PG15, PH0-PH1
+		Avoid pins already used by selected SPI MISO/MOSI/SCK.
+
+choice
+	prompt "CS Pin Active Level"
+	default NUCLEO_H753ZI_MFRC522_CS_ACTIVE_LOW
+	help
+		Select whether the CS pin is active low or active high.
+
+config NUCLEO_H753ZI_MFRC522_CS_ACTIVE_LOW
+	bool "Active Low (standard)"
+	help
+		CS pin is active low (0V = selected, 3.3V = deselected).
+		This is the standard for MFRC522.
+
+config NUCLEO_H753ZI_MFRC522_CS_ACTIVE_HIGH
+	bool "Active High"
+	help
+		CS pin is active high (3.3V = selected, 0V = deselected).
+		Use only if your hardware requires it.
+
+endchoice
+
+config NUCLEO_H753ZI_MFRC522_IRQ_ENABLE
+	bool "Enable IRQ support"
+	default n
+	help
+		Enable interrupt-driven operation for MFRC522.
+		Allows the reader to signal when a card is detected.
+
+config NUCLEO_H753ZI_MFRC522_IRQ_PIN
+	string "IRQ GPIO Pin"
+	depends on NUCLEO_H753ZI_MFRC522_IRQ_ENABLE
+	default "PF2"
+	help
+		GPIO pin for MFRC522 interrupt signal.
+		Format: PORT+PIN (e.g., "PF2", "PE1", "PA3")
+		This pin should be connected to the MFRC522's IRQ output.
+		Choose a pin that supports external interrupts.
+		Common interrupt-capable pins:
+		- Arduino Headers: PF15(D2), PG14(D1), PG9(D0)
+		- Morpho Headers: Most PA/PB/PC/PD/PE/PF/PG pins
+		Avoid pins already used by SPI or CS.
+
+choice
+	prompt "IRQ Trigger Type"
+	depends on NUCLEO_H753ZI_MFRC522_IRQ_ENABLE
+	default NUCLEO_H753ZI_MFRC522_IRQ_FALLING_EDGE
+	help
+		Select the interrupt trigger type for MFRC522.
+
+config NUCLEO_H753ZI_MFRC522_IRQ_FALLING_EDGE
+	bool "Falling Edge"
+	help
+		Trigger interrupt on falling edge (3.3V to 0V transition).
+		This is the default for MFRC522.
+
+config NUCLEO_H753ZI_MFRC522_IRQ_RISING_EDGE
+	bool "Rising Edge"
+	help
+		Trigger interrupt on rising edge (0V to 3.3V transition).
+
+config NUCLEO_H753ZI_MFRC522_IRQ_BOTH_EDGES
+	bool "Both Edges"
+	help
+		Trigger interrupt on both rising and falling edges.
+
+endchoice
+
+endif
+
+endmenu
+
+menu "ST7796 LCD Display Configuration"
+	depends on LCD_ST7796
+
+config NUCLEO_H753ZI_ST7796_ENABLE
+	bool "Enable ST7796 LCD Display"
+	default n
+	select SPI_CMDDATA
+	help
+		Enable ST7796 3.5" IPS LCD display (320x480) with configurable
+		SPI bus, CS pin, DC pin, RESET pin, and LED backlight pin.
+
+if NUCLEO_H753ZI_ST7796_ENABLE
+
+choice
+	prompt "ST7796 SPI Bus"
+	help
+		Select which SPI bus the ST7796 is connected to.
+
+config NUCLEO_H753ZI_ST7796_SPI1
+	bool "Use SPI1"
+	depends on NUCLEO_H753ZI_SPI1_ENABLE
+
+config NUCLEO_H753ZI_ST7796_SPI2
+	bool "Use SPI2"
+	depends on NUCLEO_H753ZI_SPI2_ENABLE
+
+config NUCLEO_H753ZI_ST7796_SPI3
+	bool "Use SPI3"
+	depends on NUCLEO_H753ZI_SPI3_ENABLE
+
+config NUCLEO_H753ZI_ST7796_SPI4
+	bool "Use SPI4"
+	depends on NUCLEO_H753ZI_SPI4_ENABLE
+
+config NUCLEO_H753ZI_ST7796_SPI5
+	bool "Use SPI5"
+	depends on NUCLEO_H753ZI_SPI5_ENABLE
+
+config NUCLEO_H753ZI_ST7796_SPI6
+	bool "Use SPI6"
+	depends on NUCLEO_H753ZI_SPI6_ENABLE
+
+endchoice
+
+config NUCLEO_H753ZI_ST7796_SPI_BUS
+	int
+	default 1 if NUCLEO_H753ZI_ST7796_SPI1
+	default 2 if NUCLEO_H753ZI_ST7796_SPI2
+	default 3 if NUCLEO_H753ZI_ST7796_SPI3
+	default 4 if NUCLEO_H753ZI_ST7796_SPI4
+	default 5 if NUCLEO_H753ZI_ST7796_SPI5
+	default 6 if NUCLEO_H753ZI_ST7796_SPI6
+
+config NUCLEO_H753ZI_ST7796_DEVID
+	int "ST7796 Device ID"
+	range 0 15
+	default 0
+	help
+		Device ID for ST7796 within the selected SPI bus.
+		Range: 0-15 for each SPI bus.
+		This ID will be used to register the CS pin.
+
+menu "ST7796 Pin Configuration"
+
+config NUCLEO_H753ZI_ST7796_CS_PIN
+	string "CS (Chip Select) GPIO Pin"
+	default "PA4"
+	help
+		GPIO pin for ST7796 Chip Select.
+		Format: PORT+PIN (e.g., "PA4", "PB0", "PC5")
+		Common available pins:
+		- Arduino Headers: PF15(D2), PG14(D1), PG9(D0), PE0(D34)
+		- Morpho Headers: PA0-PA15, PB0-PB15, PC0-PC15, PD0-PD15,
+		                  PE0-PE15, PF0-PF15, PG0-PG15, PH0-PH1
+		Avoid pins already used by selected SPI MISO/MOSI/SCK.
+
+choice
+	prompt "CS Pin Active Level"
+	default NUCLEO_H753ZI_ST7796_CS_ACTIVE_LOW
+	help
+		Select whether the CS pin is active low or active high.
+
+config NUCLEO_H753ZI_ST7796_CS_ACTIVE_LOW
+	bool "Active Low (most common)"
+	help
+		CS pin is active low (0V = selected, 3.3V = deselected).
+		This is the standard for most SPI displays including ST7796.
+
+config NUCLEO_H753ZI_ST7796_CS_ACTIVE_HIGH
+	bool "Active High"
+	help
+		CS pin is active high (3.3V = selected, 0V = deselected).
+		Less common, use only if your hardware requires it.
+
+endchoice
+
+config NUCLEO_H753ZI_ST7796_DC_PIN
+	string "DC (Data/Command) GPIO Pin"
+	default "PA3"
+	help
+		GPIO pin for ST7796 Data/Command selection.
+		Format: PORT+PIN (e.g., "PA3", "PB1", "PC4")
+		This pin controls whether data sent to the display is
+		interpreted as commands or display data.
+		DC=0: Command
+		DC=1: Data
+		Choose a pin not used by SPI or CS.
+
+config NUCLEO_H753ZI_ST7796_RESET_PIN
+	string "RESET GPIO Pin"
+	default "PA2"
+	help
+		GPIO pin for ST7796 hardware reset.
+		Format: PORT+PIN (e.g., "PA2", "PB2", "PC3")
+		This pin is used to perform a hardware reset of the display.
+		Active low reset (pull low to reset, high for normal
+		operation).
+		Choose a pin not used by SPI, CS, or DC.
+
+config NUCLEO_H753ZI_ST7796_LED_PIN
+	string "LED (Backlight) GPIO Pin"
+	default "PA1"
+	help
+		GPIO pin for ST7796 backlight control.
+		Format: PORT+PIN (e.g., "PA1", "PB3", "PC2")
+		This pin controls the LCD backlight LED.
+		High = backlight on, Low = backlight off.
+		Note: Currently configured for direct 3.3V connection
+		without PWM. For PWM brightness control, additional
+		configuration will be needed.
+		Choose a pin not used by SPI, CS, DC, or RESET.
+
+endmenu
+
+menu "ST7796 Display Settings"
+
+choice
+	prompt "Color Depth"
+	default NUCLEO_H753ZI_ST7796_RGB565
+	help
+		Select the color depth for the ST7796 display.
+
+config NUCLEO_H753ZI_ST7796_RGB444
+	bool "12-bit RGB444"
+	help
+		12-bit color depth (4096 colors).
+		Lower memory usage but reduced color quality.
+
+config NUCLEO_H753ZI_ST7796_RGB565
+	bool "16-bit RGB565 (recommended)"
+	help
+		16-bit color depth (65536 colors).
+		Good balance between color quality and memory usage.
+		This is the most common configuration.
+
+config NUCLEO_H753ZI_ST7796_RGB666
+	bool "18-bit RGB666"
+	help
+		18-bit color depth (262144 colors).
+		Higher color quality but increased memory usage and
+		slower SPI transfers.
+
+endchoice
+
+choice
+	prompt "Display Orientation"
+	default NUCLEO_H753ZI_ST7796_PORTRAIT
+	help
+		Select the display orientation.
+
+config NUCLEO_H753ZI_ST7796_PORTRAIT
+	bool "Portrait (320x480)"
+	help
+		Portrait orientation: 320 pixels wide, 480 pixels tall.
+		This is the natural orientation of the display.
+
+config NUCLEO_H753ZI_ST7796_LANDSCAPE
+	bool "Landscape (480x320)"
+	help
+		Landscape orientation: 480 pixels wide, 320 pixels tall.
+		90 degree rotation from portrait.
+
+config NUCLEO_H753ZI_ST7796_RPORTRAIT
+	bool "Reverse Portrait (320x480)"
+	help
+		Reverse portrait orientation: 320 pixels wide, 480 pixels
+		tall. 180 degree rotation from portrait.
+
+config NUCLEO_H753ZI_ST7796_RLANDSCAPE
+	bool "Reverse Landscape (480x320)"
+	help
+		Reverse landscape orientation: 480 pixels wide, 320 pixels
+		tall. 270 degree rotation from portrait (or 90 degrees from
+		landscape).
+
+endchoice
+
+config NUCLEO_H753ZI_ST7796_BGR
+	bool "Use BGR color order instead of RGB"
+	default y
+	help
+		Enable this if your display shows colors incorrectly
+		(e.g., red appears as blue and vice versa).
+		Most ST7796 displays use RGB order, but some use BGR.
+
+config NUCLEO_H753ZI_ST7796_FREQUENCY
+	int "SPI Frequency (Hz)"
+	default 40000000
+	range 1000000 80000000
+	help
+		SPI bus frequency for ST7796 communication.
+		Recommended values:
+		- 40000000 (40 MHz): Safe default, works with most displays
+		- 60000000 (60 MHz): Faster, may work depending on wiring
+		- 80000000 (80 MHz): Maximum, requires good signal integrity
+		Lower frequencies (10-20 MHz) can be used if you experience
+		display issues or have long/poor quality connections.
+
+endmenu
+
+menu "ST7796 Framebuffer Configuration"
+
+config NUCLEO_H753ZI_ST7796_FB_SUPPORT
+	bool "Enable framebuffer support"
+	default y
+	depends on VIDEO_FB
+	help
+		Enable framebuffer support for ST7796.
+		This allows the display to be used with LVGL and other
+		graphics libraries that use the framebuffer interface.
+
+if NUCLEO_H753ZI_ST7796_FB_SUPPORT
+
+config NUCLEO_H753ZI_ST7796_FB_SIZE
+	int "Framebuffer size (in KB)"
+	default 300
+	range 150 600
+	help
+		Size of the framebuffer in kilobytes.
+		Full resolution requirements:
+		- RGB444 (12-bit): 300 KB (320x480x1.5 bytes)
+		- RGB565 (16-bit): 300 KB (320x480x2 bytes)
+		- RGB666 (18-bit): 450 KB (320x480x3 bytes)
+		For memory-constrained systems, you can reduce this
+		and implement partial screen updates.
+
+endif
+
+endmenu
+
+menu "ST7796 Orientation"
+
+choice
+	prompt "Display Rotation"
+	default NUCLEO_H753ZI_ST7796_ROTATION_0
+	help
+		Select the display rotation angle. Use this if your display
+		is mounted upside down or needs rotation.
+		This rotation is applied AFTER the base orientation selected
+		in "Display Settings" above.
+
+config NUCLEO_H753ZI_ST7796_ROTATION_0
+	bool "0 degrees (Normal)"
+	help
+		No rotation. Display orientation as configured in Display
+		Settings (Portrait, Landscape, etc).
+		Use this if your display is mounted correctly.
+
+config NUCLEO_H753ZI_ST7796_ROTATION_180
+	bool "180 degrees (Flip)"
+	help
+		Rotate display 180 degrees. Use this if your display is
+		mounted upside down.
+		This flips both horizontal and vertical axes, effectively
+		rotating the entire display content 180 degrees.
+		Works with all orientation modes (Portrait, Landscape, etc).
+
+endchoice
+
+config NUCLEO_H753ZI_ST7796_ROTATION
+	int
+	default 0 if NUCLEO_H753ZI_ST7796_ROTATION_0
+	default 180 if NUCLEO_H753ZI_ST7796_ROTATION_180
+	help
+		Internal: Rotation angle in degrees.
+
+endmenu
+
+endif
+
+endmenu
+
+endmenu
+
+menu "I2C MODULES"
+	depends on STM32H7_I2C
+
+menu "SSD1306 OLED Display Configuration"
+	depends on LCD_SSD1306
+
+config NUCLEO_H753ZI_SSD1306_ENABLE
+	bool "Enable SSD1306 OLED Display (I2C)"
+	default n
+	help
+		Enable SSD1306 OLED display via I2C interface.
+		The SSD1306 is a monochrome OLED display controller
+		commonly used in 128x64 and 128x32 pixel displays.
+
+if NUCLEO_H753ZI_SSD1306_ENABLE
+
+choice
+	prompt "SSD1306 I2C Bus"
+	default NUCLEO_H753ZI_SSD1306_I2C1
+	help
+		Select which I2C bus the SSD1306 is connected to.
+
+config NUCLEO_H753ZI_SSD1306_I2C1
+	bool "I2C1"
+	depends on STM32H7_I2C1
+	select NUCLEO_H753ZI_I2C1_ENABLE
+	help
+		Use I2C1 bus for SSD1306 display.
+
+config NUCLEO_H753ZI_SSD1306_I2C2
+	bool "I2C2"
+	depends on STM32H7_I2C2
+	select NUCLEO_H753ZI_I2C2_ENABLE
+	help
+		Use I2C2 bus for SSD1306 display.
+
+config NUCLEO_H753ZI_SSD1306_I2C3
+	bool "I2C3"
+	depends on STM32H7_I2C3
+	select NUCLEO_H753ZI_I2C3_ENABLE
+	help
+		Use I2C3 bus for SSD1306 display.
+
+config NUCLEO_H753ZI_SSD1306_I2C4
+	bool "I2C4"
+	depends on STM32H7_I2C4
+	select NUCLEO_H753ZI_I2C4_ENABLE
+	help
+		Use I2C4 bus for SSD1306 display.
+
+endchoice
+
+config NUCLEO_H753ZI_SSD1306_I2C_BUS
+	int
+	default 1 if NUCLEO_H753ZI_SSD1306_I2C1
+	default 2 if NUCLEO_H753ZI_SSD1306_I2C2
+	default 3 if NUCLEO_H753ZI_SSD1306_I2C3
+	default 4 if NUCLEO_H753ZI_SSD1306_I2C4
+
+choice
+	prompt "SSD1306 I2C Address"
+	default NUCLEO_H753ZI_SSD1306_ADDR_3C
+	help
+		Select the I2C address of your SSD1306 module.
+		Check your hardware:
+		- Most modules use 0x3C (default)
+		- Some modules use 0x3D
+		- Address is determined by the SA0 pin state
+
+config NUCLEO_H753ZI_SSD1306_ADDR_3C
+	bool "0x3C (SA0 = GND) - Default"
+	help
+		I2C address 0x3C (60 decimal).
+		This is the most common address for SSD1306 modules.
+		Used when SA0 pin is connected to GND.
+
+config NUCLEO_H753ZI_SSD1306_ADDR_3D
+	bool "0x3D (SA0 = VDD)"
+	help
+		I2C address 0x3D (61 decimal).
+		Used when SA0 pin is connected to VDD.
+
+config NUCLEO_H753ZI_SSD1306_ADDR_CUSTOM
+	bool "Custom Address"
+	help
+		Specify a custom I2C address.
+
+endchoice
+
+config NUCLEO_H753ZI_SSD1306_ADDR_CUSTOM_VALUE
+	hex "Custom I2C Address"
+	depends on NUCLEO_H753ZI_SSD1306_ADDR_CUSTOM
+	default 0x3C
+	range 0x08 0x77
+	help
+		Enter custom I2C address in hexadecimal format.
+		Valid range: 0x08 to 0x77
+
+config NUCLEO_H753ZI_SSD1306_I2C_ADDR
+	hex
+	default 0x3C if NUCLEO_H753ZI_SSD1306_ADDR_3C
+	default 0x3D if NUCLEO_H753ZI_SSD1306_ADDR_3D
+	default NUCLEO_H753ZI_SSD1306_ADDR_CUSTOM_VALUE if NUCLEO_H753ZI_SSD1306_ADDR_CUSTOM
+
+config NUCLEO_H753ZI_SSD1306_I2C_FREQUENCY
+	int "I2C Bus Frequency (Hz)"
+	default 400000
+	range 10000 1000000
+	help
+		I2C bus frequency for SSD1306 communication.
+		Recommended speeds:
+		- 100000 (100 kHz): Standard mode (safer, slower)
+		- 400000 (400 kHz): Fast mode (recommended)
+		- 1000000 (1 MHz): Fast mode plus (if supported by module)
+		Higher frequencies provide faster screen updates.
+
+config NUCLEO_H753ZI_SSD1306_POWER_PERCENT
+	int "Display Power/Brightness (%)"
+	default 100
+	range 0 100
+	help
+		Display power/brightness level as percentage.
+		- 0%:   Display off
+		- 50%:  Half brightness
+		- 100%: Maximum brightness (recommended)
+		Note: This translates to the SSD1306 contrast setting.
+		Higher values = brighter display but more power consumption.
+
+config NUCLEO_H753ZI_SSD1306_POWER_LEVEL
+	int
+	default 0 if NUCLEO_H753ZI_SSD1306_POWER_PERCENT = 0
+	default 1 if NUCLEO_H753ZI_SSD1306_POWER_PERCENT <= 100
+	help
+		Internal: Converts percentage to NuttX power level.
+		- 0 = off
+		- 1 = on (brightness controlled by contrast)
+
+choice
+	prompt "Display Resolution"
+	default NUCLEO_H753ZI_SSD1306_128X64
+	help
+		Select your SSD1306 display resolution.
+
+config NUCLEO_H753ZI_SSD1306_128X64
+	bool "128x64 pixels"
+	help
+		Standard 0.96" OLED display (128x64 pixels).
+		This is the most common size.
+
+config NUCLEO_H753ZI_SSD1306_128X32
+	bool "128x32 pixels"
+	help
+		Smaller 0.91" OLED display (128x32 pixels).
+
+endchoice
+
+config NUCLEO_H753ZI_SSD1306_FB_SIZE
+	int
+	default 1024 if NUCLEO_H753ZI_SSD1306_128X64
+	default 512 if NUCLEO_H753ZI_SSD1306_128X32
+	help
+		Internal: Framebuffer size in bytes.
+		128x64 = 1024 bytes (128*64/8)
+		128x32 = 512 bytes (128*32/8)
+
+config NUCLEO_H753ZI_SSD1306_DEVPATH
+	string "Device Path"
+	default "/dev/lcd0"
+	help
+		Device node path for SSD1306 display.
+		For multiple displays use different paths:
+		- /dev/lcd0 (first display)
+		- /dev/lcd1 (second display)
+		- /dev/oled0, /dev/oled1 (alternative naming)
+		The path should match the device number below.
+
+config NUCLEO_H753ZI_SSD1306_DEVNO
+	int "Device Number"
+	default 0
+	range 0 7
+	help
+		LCD device number for registration.
+		This number is passed to the NuttX LCD driver and should
+		typically match the number in the device path:
+		- Device 0 -> /dev/lcd0
+		- Device 1 -> /dev/lcd1
+		- etc.
+		For multiple SSD1306 displays, use different numbers for each.
+
+endif
+
+endmenu
+
+endmenu
+
+config STM32_ROMFS
+	bool "Automount built-in ROMFS image"
+	default n
+	depends on FS_ROMFS
+	help
+		Select STM32_ROMFS_IMAGEFILE, STM32_ROMFS_DEV_MINOR,
+		STM32_ROMFS_MOUNTPOINT
+
+config STM32_ROMFS_DEV_MINOR
+	int "Minor number for the block device backing the data"
+	depends on STM32_ROMFS
+	default 64
+
+config STM32_ROMFS_MOUNTPOINT
+	string "Mount point of the custom ROMFS image"
+	depends on STM32_ROMFS
+	default "/rom"
+
+config STM32_ROMFS_IMAGEFILE
+	string "ROMFS image file to include in the build"
+	depends on STM32_ROMFS
+	default "../../../rom.img"
