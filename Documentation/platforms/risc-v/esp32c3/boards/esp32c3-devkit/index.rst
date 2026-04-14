@@ -447,6 +447,10 @@ Note: When normal mode COUNT is 0, it will switch to the next PM state where COU
 
 Note: During light sleep, overall current consumption of board should drop from 18mA (without any system load) to 1 mA on ESP32-C3 DevkitM-1.
 
+To save power without using sleep modes, lowering the clock speed is another approach. For dynamic frequency scaling
+``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
+With these options, the device scales the CPU clock according to workload.
+
 pwm
 ---
 
