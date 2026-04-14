@@ -32,12 +32,25 @@
 
 #include "sim_internal.h"
 
+#ifdef __APPLE__
+#  include <dispatch/dispatch.h>
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static uint64_t g_start;
-static timer_t  g_timer;
+#ifdef __APPLE__
+static dispatch_source_t g_timer;
+
+static void host_timer_handler(void *context)
+{
+  raise(SIGALRM);
+}
+#else
+static timer_t g_timer;
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -50,18 +63,34 @@ static timer_t  g_timer;
 int host_inittimer(void)
 {
   struct timespec tp;
+
+  clock_gettime(CLOCK_MONOTONIC, &tp);
+
+  g_start = 1000000000ull * tp.tv_sec + tp.tv_nsec;
+
+#ifdef __APPLE__
+  g_timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0,
+                                   dispatch_get_global_queue(
+                                     DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+  if (g_timer == NULL)
+    {
+      return -1;
+    }
+
+  dispatch_source_set_event_handler_f(g_timer, host_timer_handler);
+  dispatch_resume(g_timer);
+  return 0;
+#else
   struct sigevent sigev =
     {
       0
     };
 
-  clock_gettime(CLOCK_MONOTONIC, &tp);
-
-  g_start = 1000000000ull * tp.tv_sec + tp.tv_nsec;
   sigev.sigev_notify = SIGEV_SIGNAL;
   sigev.sigev_signo  = SIGALRM;
 
   return timer_create(CLOCK_MONOTONIC, &sigev, &g_timer);
+#endif
 }
 
 /****************************************************************************
@@ -119,19 +148,27 @@ void host_sleepuntil(uint64_t nsec)
 
 int host_settimer(uint64_t nsec)
 {
+  /* Convert to microseconds and set minimum timer to 1 microsecond. */
+
+  nsec += g_start;
+
+#ifdef __APPLE__
+  dispatch_time_t start;
+
+  start = dispatch_walltime(NULL, nsec - host_gettime(true));
+  dispatch_source_set_timer(g_timer, start, DISPATCH_TIME_FOREVER, 1000);
+  return 0;
+#else
   struct itimerspec tspec =
     {
       0
     };
 
-  /* Convert to microseconds and set minimum timer to 1 microsecond. */
-
-  nsec += g_start;
-
   tspec.it_value.tv_sec  = nsec / 1000000000;
   tspec.it_value.tv_nsec = nsec % 1000000000;
 
   return timer_settime(g_timer, TIMER_ABSTIME, &tspec, NULL);
+#endif
 }
 
 /****************************************************************************
