@@ -37,6 +37,7 @@ option(NUTTX_INCLUDE_INCDIR "Build incdir" OFF)
 option(NUTTX_INCLUDE_MKCONFIG "Build mkconfig" OFF)
 option(NUTTX_INCLUDE_MKDEPS "Build mkdeps" OFF)
 option(NUTTX_INCLUDE_MKSYMTAB "Build mksymtab" OFF)
+option(NUTTX_INCLUDE_MKPASSWD "Build mkpasswd" OFF)
 option(NUTTX_INCLUDE_MKSYSCALL "Build mksyscall" OFF)
 option(NUTTX_INCLUDE_MKVERSION "Build mkversion" OFF)
 option(NUTTX_INCLUDE_NXSTYLE "Build nxstyle" OFF)
@@ -136,6 +137,15 @@ endif()
 if(NUTTX_INCLUDE_ALL_TOOLS OR NUTTX_INCLUDE_MKDEPS)
   add_executable(mkdeps mkdeps.c cfgdefine.c)
   install(TARGETS mkdeps DESTINATION bin)
+endif()
+
+# ============================================================================
+# mkpasswd binaries Create the /etc/passwd entry
+# ============================================================================
+
+if(NUTTX_INCLUDE_ALL_TOOLS OR NUTTX_INCLUDE_MKPASSWD)
+  add_executable(mkpasswd mkpasswd.c)
+  install(TARGETS mkpasswd DESTINATION bin)
 endif()
 
 # ============================================================================
