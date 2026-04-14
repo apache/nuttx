@@ -34,23 +34,13 @@
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/can.h>
+#include <netpacket/cangw.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* CAN gateway types */
-
-enum
-{
-  CGW_TYPE_UNSPEC,
-  CGW_TYPE_CAN_CAN,     /* CAN->CAN routing */
-  CGW_TYPE_CAN_ETH1722, /* CAN->Ethernet routing */
-  CGW_TYPE_ETH1722_CAN, /* Ethernet->CAN routing */
-  __CGW_TYPE_MAX
-};
-
-#define CGW_TYPE_MAX (__CGW_TYPE_MAX - 1)
 
 /****************************************************************************
  * Public Type Definitions
@@ -106,6 +96,13 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+void add_cangw_rule(FAR struct net_driver_s *dev,
+                    FAR struct cangw_rule_s *cgw_rules);
+
+void remove_cangw_rule(FAR struct net_driver_s *dev,
+                       FAR struct cangw_rule_s *cgw_rules,
+                       size_t size);
 
 #ifdef __cplusplus
 }

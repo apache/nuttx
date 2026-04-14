@@ -110,7 +110,7 @@ config NETLINK_DISABLE_NEWROUTE
 	bool "Disable RTM_NEWROUTE support"
 	default n
 	---help---
-		RTM_NEWROUTE is used to add a route.
+		RTM_NEWROUTE is used to add a route or a gateway rule.
 
 config NETLINK_DISABLE_GETROUTE
 	bool "Disable RTM_GETROUTE support"

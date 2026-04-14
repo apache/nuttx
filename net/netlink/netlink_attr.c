@@ -332,3 +332,25 @@ int nla_parse(FAR struct nlattr **tb, int maxtype,
 errout:
   return err;
 }
+
+/****************************************************************************
+ * nla_memcpy - Copy a netlink attribute into another memory area
+ *
+ * Note: The number of bytes copied is limited by the length of
+ *       attribute's payload. memcpy
+ *
+ * Returns the number of bytes copied.
+ ****************************************************************************/
+
+int nla_memcpy(FAR void *dest, FAR const struct nlattr *src, int count)
+{
+  int minlen = MIN(count, nla_len(src));
+
+  memcpy(dest, nla_data(src), minlen);
+  if (count > minlen)
+    {
+      memset(dest + minlen, 0, count - minlen);
+    }
+
+  return minlen;
+}
