@@ -55,7 +55,10 @@ endif()
 
 # Find Python 3 interpreter
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter)
+find_package(
+  Python3 REQUIRED
+  COMPONENTS Interpreter
+  QUIET)
 if(NOT Python3_Interpreter_FOUND)
   message(FATAL_ERROR "Did NOT find Python interpreter.")
 endif()
