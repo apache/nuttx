@@ -511,6 +511,11 @@ list(
 list(APPEND HAL_SRCS
      ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/flash_encrypt.c)
 
+# Bootloader common
+list(
+  APPEND HAL_SRCS
+  ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_mem.c)
+
 # ##############################################################################
 # Simple Boot Sources
 # ##############################################################################
@@ -529,7 +534,6 @@ if(CONFIG_ESPRESSIF_SIMPLE_BOOT)
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/bootloader_flash/src/bootloader_flash_config_${CHIP_SERIES}.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/bootloader_flash/src/flash_qio_mode.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_clock_init.c
-    ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_mem.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_random.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/bootloader_random_${CHIP_SERIES}.c
     ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/esp_image_format.c

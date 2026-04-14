@@ -34,6 +34,92 @@ config ESPRESSIF_FLASH_32M
 
 endchoice # ESPRESSIF_FLASH
 
+config ESPRESSIF_DONT_USE_ROM_LIBC
+	bool "Don't use ROM libc functions"
+	default n
+	---help---
+		If enabled, NuttX libc will be used instead of ROM newlib
+		functions (strdup, strndup, atoi, etc.).
+
+		This prevents cross-heap allocation issues when ROM newlib
+		allocators are not mapped to the same heap as NuttX libc.
+
+menuconfig ESPRESSIF_SPIRAM
+	bool "External SPI RAM (SPIRAM)"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	---help---
+		Enable external PSRAM support through the ESP HAL component.
+
+if ESPRESSIF_SPIRAM
+
+config ESPRESSIF_SPIRAM_BOOT_INIT
+	bool "Initialize SPIRAM during early boot"
+	default y
+	---help---
+		Initialize and map external PSRAM before heap region registration.
+
+config ESPRESSIF_SPIRAM_IGNORE_NOTFOUND
+	bool "Ignore SPIRAM not found"
+	default n
+	---help---
+		Keep booting even if PSRAM detection fails.
+
+config ESPRESSIF_SPIRAM_MEMTEST
+	bool "Run SPIRAM memory test at boot"
+	default y
+	---help---
+		Run a basic memory test before adding PSRAM to the allocator.
+
+config ESPRESSIF_SPIRAM_USE_8LINE_MODE
+	bool "Use x8 line mode"
+	default n
+	---help---
+		Enable x8 line mode instead of x16 line mode.
+
+config ESPRESSIF_SPIRAM_ECC
+	bool "Enable SPIRAM ECC"
+	default n
+	---help---
+		Enable ECC for external PSRAM accesses.
+
+choice ESPRESSIF_SPIRAM_SPEED
+	prompt "SPIRAM speed"
+	default ESPRESSIF_SPIRAM_SPEED_200M if !ESP32P4_REV_MIN_0
+	default ESPRESSIF_SPIRAM_SPEED_80M
+
+config ESPRESSIF_SPIRAM_SPEED_20M
+	bool "20 MHz"
+
+config ESPRESSIF_SPIRAM_SPEED_80M
+	bool "80 MHz"
+
+config ESPRESSIF_SPIRAM_SPEED_200M
+	bool "200 MHz"
+	depends on !ESP32P4_REV_MIN_0
+
+config ESPRESSIF_SPIRAM_SPEED_250M
+	bool "250 MHz"
+	depends on !ESP32P4_REV_MIN_0
+
+endchoice # ESPRESSIF_SPIRAM_SPEED
+
+config ESPRESSIF_SPIRAM_SPEED
+	int
+	default 20 if ESPRESSIF_SPIRAM_SPEED_20M
+	default 80 if ESPRESSIF_SPIRAM_SPEED_80M
+	default 200 if ESPRESSIF_SPIRAM_SPEED_200M
+	default 250 if ESPRESSIF_SPIRAM_SPEED_250M
+
+config ESPRESSIF_SPIRAM_USER_HEAP
+	bool "Add SPIRAM to user heap"
+	default y
+	select ESPRESSIF_DONT_USE_ROM_LIBC
+	---help---
+		Add SPIRAM as an additional NuttX heap region.
+
+endif # ESPRESSIF_SPIRAM
+
 config ESPRESSIF_IDF_ENV_FPGA
 	bool "IDF FPGA Environment"
 	default n
