@@ -1541,10 +1541,14 @@ static int sensor_rpmsg_ioctl_handler(FAR struct rpmsg_endpoint *ept,
                 }
             }
 
-          break;
+          sensor_rpmsg_unlock(dev);
+          return 0;
         }
     }
 
+  snerr("ERROR: ioctl stub not found:%s, cmd:%" PRId32 ", cookie:%" PRIu64
+        ", %s\n", dev->path, msg->request, msg->cookie,
+        rpmsg_get_cpuname(ept->rdev));
   sensor_rpmsg_unlock(dev);
   return 0;
 }
