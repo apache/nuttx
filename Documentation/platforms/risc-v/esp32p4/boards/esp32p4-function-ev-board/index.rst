@@ -291,6 +291,10 @@ System switch to the PM sleep mode, you need to enter::
     nsh> pmconfig relax normal
     nsh> pmconfig relax normal
 
+To save power without using sleep modes, lowering the clock speed is another approach. For dynamic frequency scaling
+``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
+With these options, the device scales the CPU clock according to workload.
+
 pwm
 ---
 

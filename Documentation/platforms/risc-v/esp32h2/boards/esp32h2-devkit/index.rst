@@ -390,6 +390,10 @@ Note: When normal mode COUNT is 0, it will switch to the next PM state where COU
 Note: During light sleep, overall current consumption of board should drop from 14mA (without any system load) to 880 μA on ESP32-H2 DevkitM-1.
 During deep sleep, current consumption of module (ESP32-H2-MINI-1) should drop from 9mA (without any system load) to 8 μA.
 
+To save power without using sleep modes, lowering the clock speed is another approach. For dynamic frequency scaling
+``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
+With these options, the device scales the CPU clock according to workload.
+
 pwm
 ---
 
