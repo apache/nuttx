@@ -57,7 +57,7 @@
 
 #define RPTUN_RETRY_PERIOD_US    1000
 
-#define RPTUN_STATUS_CHECK(s, v) ((s) & (1u << (v))) != 0
+#define RPTUN_STATUS_CHECK(s, v) (((s) & (1u << (v))) != 0)
 #define RPTUN_STATUS_SET(s, v)   ((s) |= (1u << (v)))
 #define RPTUN_REASON_GET(s)      (ffs(s) - 1u)
 
@@ -65,6 +65,8 @@
   ((FAR struct rptun_status_s *)&((FAR struct resource_table *)(r))->reserved[0])
 
 #define rptunvbs(format, ...)    syslog(LOG_ALERT, format, ##__VA_ARGS__)
+
+#define RPTUN_STATUS_PAUSE       BOARDIOC_SOFTRESETCAUSE_MAX
 
 /****************************************************************************
  * Private Types
@@ -938,6 +940,20 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 
   status = rptun_get_peer_status(priv);
 
+  if (RPTUN_STATUS_CHECK(status, RPTUN_STATUS_PAUSE))
+    {
+      int timeout = CONFIG_RPTUN_STATUS_TIMEOUT_MS;
+
+      /* Wait for the crashing core to finish printing its log */
+
+      while (timeout-- > 0 &&
+             (!RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC)))
+        {
+          status = rptun_get_peer_status(priv);
+          up_udelay(1000);
+        }
+    }
+
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
       char msg[64];
@@ -1177,6 +1193,11 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
   if (ret == -ENOTSUP)
     {
       rptun_set_status(priv, val);
+
+      if (val == RPTUN_STATUS_PAUSE)
+        {
+          return OK;
+        }
 
       ret = -ETIMEDOUT;
       while (timeout-- > 0)
@@ -1448,6 +1469,11 @@ static int rptun_notifier(FAR struct notifier_block *block,
           rptun_ioctl_foreach(NULL, RPTUNIOC_DUMP, 0);
         }
 #endif
+    }
+  else if (action == PANIC_KERNEL)
+    {
+      rptun_ioctl_foreach(NULL, RPTUNIOC_RESET,
+                          (unsigned long)RPTUN_STATUS_PAUSE);
     }
 #ifdef CONFIG_RPTUN_AUTO_RESET_IN_PANIC_NOTIFIER
   else if (action == PANIC_KERNEL_FINAL)
