@@ -31,8 +31,9 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/mm/iob.h>
 #include <nuttx/can.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/mm/iob.h>
 #include <nuttx/net/can.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -187,29 +188,114 @@ void add_cangw_rule(FAR struct net_driver_s *dev,
 }
 
 /****************************************************************************
- * Name: remove_cangw_rule
+ * Name: cangw_rule_match
  *
  * Description:
- *   Remove a CAN->CAN gateway rule from device.
+ *   Check if a rule in the list matches the given criteria.
+ *
+ * Input Parameters:
+ *   rtrule - The rule in the device's rule list.
+ *   rule   - The match criteria provided by the caller.
+ *
+ * Returned Value:
+ *   true if the rule matches, false otherwise.
  *
  ****************************************************************************/
 
-void remove_cangw_rule(FAR struct net_driver_s *dev,
-                       FAR struct cangw_rule_s *cgw_rules,
-                       size_t size)
+static inline_function bool
+cangw_rule_match(FAR const struct cangw_rule_s *rtrule,
+                 FAR const struct cangw_rule_s *rule)
 {
-  size_t i;
+  /* Match filter if caller provided a non-zero filter */
 
-  DEBUGASSERT(dev && cgw_rules);
+  if (rule->gw.ccgw.filter.can_id != 0 ||
+      rule->gw.ccgw.filter.can_mask != 0)
+    {
+      if (rtrule->gw.ccgw.filter.can_id !=
+                                       rule->gw.ccgw.filter.can_id ||
+          rtrule->gw.ccgw.filter.can_mask !=
+                                       rule->gw.ccgw.filter.can_mask)
+        {
+          return false;
+        }
+    }
+
+  /* Match destination device if specified */
+
+  if (rule->dest_dev && rtrule->dest_dev != rule->dest_dev)
+    {
+      return false;
+    }
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: remove_cangw_rule
+ *
+ * Description:
+ *   Remove CAN->CAN gateway rules from a device's rule list.
+ *
+ * Input Parameters:
+ *   dev     - The network device whose rule list to modify.
+ *   rule    - Match criteria. If NULL, all rules on the device are removed.
+ *   removed - If non-NULL, removed nodes are collected into this queue
+ *             and the caller is responsible for freeing them.
+ *             If NULL, heap-allocated nodes are freed immediately;
+ *             non-heap nodes (e.g. embedded in a static config struct)
+ *             are only unlinked from the list.
+ *
+ * Returned Value:
+ *   The number of rules removed.
+ *
+ ****************************************************************************/
+
+int remove_cangw_rule(FAR struct net_driver_s *dev,
+                      FAR const struct cangw_rule_s *rule,
+                      FAR sq_queue_t *removed)
+{
+  FAR sq_entry_t *current;
+  FAR sq_entry_t *tmp;
+  int count = 0;
+
+  DEBUGASSERT(dev);
+
+  if (removed)
+    {
+      sq_init(removed);
+    }
 
   netdev_lock(dev);
 
-  for (i = 0; i < size; i++)
+  sq_for_every_safe(&dev->d_cangw_rules, current, tmp)
     {
-      sq_rem(&cgw_rules[i].node, &dev->d_cangw_rules);
+      FAR struct cangw_rule_s *rtrule =
+                              (FAR struct cangw_rule_s *)current;
+
+      /* If rule is NULL, remove all; otherwise match by criteria */
+
+      if (rule == NULL || cangw_rule_match(rtrule, rule))
+        {
+          sq_rem(current, &dev->d_cangw_rules);
+          if (removed)
+            {
+              /* Caller takes ownership — collect for deferred free */
+
+              sq_addlast(current, removed);
+            }
+          else if (kmm_heapmember(current))
+            {
+              /* Only free nodes that were individually heap-allocated */
+
+              kmm_free(current);
+            }
+
+          count++;
+        }
     }
 
   netdev_unlock(dev);
+  return count;
 }
 
 /****************************************************************************

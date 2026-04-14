@@ -288,7 +288,8 @@ static_assert(nitems(g_ifa_ipv6_policy) ==
 #  define g_ifa_ipv6_policy NULL
 #endif
 
-#if !defined(CONFIG_NETLINK_DISABLE_NEWROUTE) && \
+#if (!defined(CONFIG_NETLINK_DISABLE_NEWROUTE) || \
+     !defined(CONFIG_NETLINK_DISABLE_DELROUTE)) && \
     defined(CONFIG_NET_CANFORWARD)
 const struct nla_policy g_cgw_policy[CGW_MAX + 1] =
 {
@@ -1608,6 +1609,133 @@ static int netlink_new_can_route(FAR const struct nlmsghdr *nlmsg)
     }
 }
 
+#endif /* CONFIG_NET_CANFORWARD && !CONFIG_NETLINK_DISABLE_NEWROUTE */
+
+#if !defined(CONFIG_NETLINK_DISABLE_DELROUTE) && \
+    defined(CONFIG_NET_CANFORWARD)
+
+static int netlink_remove_cangw_rule(FAR struct rtcanmsg *rt_msg,
+                                     FAR struct nlattr *tb[])
+{
+  FAR struct net_driver_s *src_dev;
+  uint32_t src_if;
+  int count;
+
+  /* CGW_SRC_IF is mandatory — we need to know which device to operate on */
+
+  if (!tb[CGW_SRC_IF])
+    {
+      return -EINVAL;
+    }
+
+  src_if = *(FAR uint32_t *)nla_data(tb[CGW_SRC_IF]);
+  src_dev = netdev_findbyindex(src_if);
+
+  if (src_dev == NULL)
+    {
+      nerr("src_dev is not found\n");
+      return -ENODEV;
+    }
+
+  /* If filter or destination attributes are present, build a match rule
+   * and remove only matching entries. Otherwise pass NULL to remove all
+   * rules on the source device.
+   */
+
+  if (tb[CGW_FILTER] || tb[CGW_DST_IF])
+    {
+      struct cangw_rule_s rule;
+
+      memset(&rule, 0, sizeof(rule));
+
+      /* Populate filter criteria if provided */
+
+      if (tb[CGW_FILTER])
+        {
+          nla_memcpy(&rule.gw.ccgw.filter, tb[CGW_FILTER],
+                     sizeof(struct can_filter));
+        }
+
+      /* Resolve destination device if specified; dst_if == 0 means
+       * match any destination.
+       */
+
+      if (tb[CGW_DST_IF])
+        {
+          uint32_t dst_if = *(FAR uint32_t *)nla_data(tb[CGW_DST_IF]);
+
+          if (dst_if != 0)
+            {
+              rule.dest_dev = netdev_findbyindex(dst_if);
+              if (rule.dest_dev == NULL)
+                {
+                  return -ENODEV;
+                }
+            }
+        }
+
+      /* Pass NULL for removed — let remove_cangw_rule free heap nodes
+       * directly instead of collecting them.
+       */
+
+      count = remove_cangw_rule(src_dev, &rule, NULL);
+      if (count == 0)
+        {
+          nwarn("rule not found\n");
+          return -ENOENT;
+        }
+    }
+  else
+    {
+      /* No filter/dst specified — flush all rules on this device */
+
+      count = remove_cangw_rule(src_dev, NULL, NULL);
+    }
+
+  return OK;
+}
+
+static int netlink_del_can_route(FAR const struct nlmsghdr *nlmsg)
+{
+  FAR struct nlattr *tb[CGW_MAX + 1];
+  FAR struct rtcanmsg *rt_msg = nlmsg_data(nlmsg);
+  int ret;
+
+  /* nlmsg boundary check */
+
+  if (nlmsg->nlmsg_len < nlmsg_msg_size(sizeof(struct rtcanmsg)))
+    {
+      return -EINVAL;
+    }
+
+  /* parse nlmsg and acquire tb. */
+
+  ret = nlmsg_parse(nlmsg, sizeof(struct rtcanmsg), tb,
+                    CGW_MAX, g_cgw_policy, NULL);
+  if (ret < 0)
+    {
+      nwarn("nlmsg_parse failed: %d\n", ret);
+      return ret;
+    }
+
+  /* get r->gwtype and switch r->gwtype */
+
+  switch (rt_msg->gwtype)
+    {
+      case CGW_TYPE_CAN_CAN:
+        return netlink_remove_cangw_rule(rt_msg, tb);
+
+      default:
+        return -EAFNOSUPPORT;
+    }
+}
+
+#endif /* CONFIG_NET_CANFORWARD && !CONFIG_NETLINK_DISABLE_DELROUTE */
+
+#if (!defined(CONFIG_NETLINK_DISABLE_NEWROUTE) || \
+     !defined(CONFIG_NETLINK_DISABLE_DELROUTE)) && \
+    defined(CONFIG_NET_CANFORWARD)
+
 static void netlink_can_ack(NETLINK_HANDLE handle,
                             FAR const struct nlmsghdr *nlmsg,
                             int err)
@@ -1638,7 +1766,7 @@ static void netlink_can_ack(NETLINK_HANDLE handle,
                        (FAR struct netlink_response_s *)alloc);
 }
 
-#endif /* CONFIG_NETLINK_DISABLE_NEWROUTE && CONFIG_NET_CANFORWARD */
+#endif /* CONFIG_NET_CANFORWARD && !CONFIG_NETLINK_DISABLE_NEWROUTE/DELROUTE */
 
 /****************************************************************************
  * Public Functions
@@ -2024,7 +2152,26 @@ ssize_t netlink_route_sendto(NETLINK_HANDLE handle,
                   req->gen.rtgen_family);
           }
         break;
+#endif /* !CONFIG_NETLINK_DISABLE_NEWROUTE */
+
+#ifndef CONFIG_NETLINK_DISABLE_DELROUTE
+      case RTM_DELROUTE:
+#ifdef CONFIG_NET_CANFORWARD
+        if (req->gen.rtgen_family == AF_CAN)
+          {
+            ret = netlink_del_can_route(nlmsg);
+            if (nlmsg->nlmsg_flags & NLM_F_ACK)
+              {
+                netlink_can_ack(handle, nlmsg, ret);
+              }
+          }
+        else
 #endif
+          {
+            ret = -EAFNOSUPPORT;
+          }
+        break;
+#endif /* !CONFIG_NETLINK_DISABLE_DELROUTE */
 
       default:
         ret = -ENOSYS;
