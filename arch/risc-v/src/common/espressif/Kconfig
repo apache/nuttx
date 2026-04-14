@@ -1238,6 +1238,11 @@ config ESPRESSIF_ADC_1
 	default y
 	bool "Enable SAR ADC 1"
 
+config ESPRESSIF_ADC_1_USE_LP
+	depends on ESPRESSIF_ADC_1 && ARCH_CHIP_ESP32P4
+	default n
+	bool "Use ADC 1 as LP ADC"
+
 config ESPRESSIF_ADC_2
 	default n
 	depends on ARCH_CHIP_ESP32P4

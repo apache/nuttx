@@ -504,6 +504,7 @@ static int esp_adc_oneshot_new_unit(struct adc_dev_s *dev)
   adc_oneshot_hal_cfg_t config;
   irqstate_t flags;
   uint32_t clk_src_freq_hz = 0;
+  soc_module_clk_t clk_src = ADC_DIGI_CLK_SRC_DEFAULT;
 
   DEBUGASSERT(priv);
   DEBUGASSERT(priv->mode == ESP_ADC_MODE_ONE_SHOT);
@@ -516,20 +517,38 @@ static int esp_adc_oneshot_new_unit(struct adc_dev_s *dev)
 
   flags = spin_lock_irqsave(&g_adc_common.esp_adc_spinlock);
 
-  esp_clk_tree_src_get_freq_hz(ADC_DIGI_CLK_SRC_DEFAULT,
+#if SOC_LP_ADC_SUPPORTED && defined(CONFIG_ESPRESSIF_ADC_1_USE_LP)
+  if (priv->unit == ADC_UNIT_1)
+    {
+      clk_src = LP_ADC_CLK_SRC_LP_DYN_FAST;
+    }
+
+#endif
+  esp_clk_tree_src_get_freq_hz(clk_src,
                                ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
                                &clk_src_freq_hz);
-
   config.unit = priv->unit;
-  config.work_mode = ADC_HAL_SINGLE_READ_MODE;
-  config.clk_src = ADC_DIGI_CLK_SRC_DEFAULT;
+  config.clk_src = clk_src;
   config.clk_src_freq_hz = clk_src_freq_hz;
+#ifdef CONFIG_ESPRESSIF_ADC_1_USE_LP
+  if (priv->unit == ADC_UNIT_1)
+    {
+      config.work_mode = ADC_HAL_LP_MODE;
+    }
+  else
+#endif
+    {
+      config.work_mode = ADC_HAL_SINGLE_READ_MODE;
+    }
 
   adc_oneshot_hal_init(hal, &config);
 
   /* Enable peripheral and power ADC */
 
-  adc_apb_periph_claim();
+  if (ADC_LL_NEED_APB_PERIPH_CLAIM(priv->unit))
+    {
+      adc_apb_periph_claim();
+    }
 
   sar_periph_ctrl_adc_oneshot_power_acquire();
 
@@ -588,6 +607,13 @@ static int esp_adc_oneshot_config_channel(struct adc_dev_s *dev,
 
   flags = spin_lock_irqsave(&g_adc_common.esp_adc_spinlock);
   adc_oneshot_hal_channel_config(hal, &config, channel);
+#ifdef CONFIG_ESPRESSIF_ADC_1_USE_LP
+  if (priv->unit == ADC_UNIT_1)
+    {
+      adc_oneshot_hal_setup(hal, channel);
+    }
+
+#endif
   spin_unlock_irqrestore(&g_adc_common.esp_adc_spinlock, flags);
 
   ainfo("init adc unit %u, ch %u (gpio %d), atten %d, bitwidth %d",
