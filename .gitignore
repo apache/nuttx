@@ -56,6 +56,7 @@ etctmp/
 /_SAVED_APPS_config
 /cscope.*
 /defconfig
+/defconfig.tmp.bak
 /Make.defs
 /nuttx
 /nuttx32

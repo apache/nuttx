@@ -767,8 +767,8 @@ savedefconfig: apps_preconfig
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_SAVEDEFCONFIG}
 	$(Q) $(call kconfig_tweak_disable,defconfig.tmp,CONFIG_APPS_DIR)
 	$(Q) $(call kconfig_tweak_disable,defconfig.tmp,CONFIG_BASE_DEFCONFIG)
-	$(Q) sed -i -e '/^CONFIG_FSUTILS_PASSWD_KEY[0-9]/d' defconfig.tmp
-	$(Q) sed -i -e '/^CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD=/d' defconfig.tmp
+	$(Q) sed -i.bak -e '/^CONFIG_FSUTILS_PASSWD_KEY[0-9]/d' defconfig.tmp
+	$(Q) sed -i.bak -e '/^CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD=/d' defconfig.tmp
 	$(Q) grep "CONFIG_ARCH=" .config >> defconfig.tmp
 	$(Q) grep "^CONFIG_ARCH_CHIP_" .config >> defconfig.tmp; true
 	$(Q) grep "CONFIG_ARCH_CHIP=" .config >> defconfig.tmp; true
@@ -851,6 +851,7 @@ endif
 	$(Q) $(MAKE) -C tools -f Makefile.host clean
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
+	$(call DELFILE, defconfig.tmp.bak)
 	$(call DELFILE, .config)
 	$(call DELFILE, .config.old)
 	$(call DELFILE, .config.orig)
