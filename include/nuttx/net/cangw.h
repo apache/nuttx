@@ -100,9 +100,9 @@ extern "C"
 void add_cangw_rule(FAR struct net_driver_s *dev,
                     FAR struct cangw_rule_s *cgw_rules);
 
-void remove_cangw_rule(FAR struct net_driver_s *dev,
-                       FAR struct cangw_rule_s *cgw_rules,
-                       size_t size);
+int remove_cangw_rule(FAR struct net_driver_s *dev,
+                      FAR const struct cangw_rule_s *rule,
+                      FAR sq_queue_t *removed);
 
 #ifdef __cplusplus
 }

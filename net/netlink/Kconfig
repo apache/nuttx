@@ -112,6 +112,12 @@ config NETLINK_DISABLE_NEWROUTE
 	---help---
 		RTM_NEWROUTE is used to add a route or a gateway rule.
 
+config NETLINK_DISABLE_DELROUTE
+	bool "Disable RTM_DELROUTE support"
+	default n
+	---help---
+		RTM_DELROUTE is used to delete netdev route rule.
+
 config NETLINK_DISABLE_GETROUTE
 	bool "Disable RTM_GETROUTE support"
 	default n
