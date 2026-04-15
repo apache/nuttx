@@ -335,10 +335,20 @@ config ARCH_CHIP_STM32H755II
 	select STM32H7_IO_CONFIG_I
 	select STM32H7_HAVE_FDCAN1
 	select STM32H7_HAVE_FDCAN2
-	select STM32H7_HAVE_SMPS
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
+
+config ARCH_CHIP_STM32H755XI
+	bool "STM32H755XI"
+	select STM32H7_STM32H7X5XX
+	select STM32H7_FLASH_CONFIG_I
+	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_FDCAN1
+	select STM32H7_HAVE_FDCAN2
+	---help---
+		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
+		with cryptographic accelerator, TFBGA240
 
 endchoice # STM32 H7 Chip Selection
 

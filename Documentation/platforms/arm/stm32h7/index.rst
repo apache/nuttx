@@ -13,7 +13,7 @@ MCU          Support Note
 STM32H747    Partial Only STM32H747XI
 STM32H757    No
 STM32H745    Yes
-STM32H755    No
+STM32H755    Partial Only STM32H755II and STM32H755XI
 ===========  ======= ================
 
 Single-core lines:
