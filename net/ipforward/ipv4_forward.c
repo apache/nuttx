@@ -634,6 +634,18 @@ void ipv4_forward_broadcast(FAR struct net_driver_s *dev,
       return;
     }
 
+  /* Do not forward link-local multicast packets (224.0.0.0/24).
+   * Per RFC 3171, addresses in 224.0.0.0/24 are reserved for
+   * link-local scope and MUST NOT be forwarded by any router,
+   * regardless of TTL.
+   */
+
+  if ((net_ip4addr_conv32(ipv4->destipaddr) &
+       HTONL(0xffffff00)) == HTONL(0xe0000000))
+    {
+      return;
+    }
+
   /* Don't bother if the TTL would expire */
 
   if (ipv4->ttl > 1)
