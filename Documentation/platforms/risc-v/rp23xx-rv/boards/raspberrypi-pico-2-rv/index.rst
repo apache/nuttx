@@ -224,6 +224,6 @@ nsh
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
 usbnsh
----
+------
 
 Basic NuttShell configuration (console enabled via USB CDC/ACM).
