@@ -367,7 +367,7 @@ LP I2S             No
 LP UART            Yes
 LP GPIO            No
 LP Timers          No
-LP ADC             No
+LP ADC             Yes
 Temperature        Yes     Internal temperature sensor
 Touch Sensor       No
 eFuse              Yes     Virtual eFuses supported
