@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
+#include "espressif/esp_rtc_gpio.h"
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -72,11 +74,11 @@ int esp_ulp_load_bin(const char *buffer, size_t buflen);
  *   None
  *
  * Returned Value:
- *   None
+ *   Returns OK on success; a negated errno value on failure
  *
  ****************************************************************************/
 
-void esp_ulp_init(void);
+int esp_ulp_init(void);
 
 #ifdef __cplusplus
 }

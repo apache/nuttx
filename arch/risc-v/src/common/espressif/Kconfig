@@ -643,6 +643,271 @@ config ESPRESSIF_ULP_ENABLE_UBSAN
 		But note that it will increase code size significantly and it can happen that
 		application will not fit into RTC RAM
 
+choice ESPRESSIF_ULP_WAKEUP_SOURCE
+	prompt "LP Coprocessor wakeup source"
+	default ESPRESSIF_ULP_WAKEUP_HP_CPU
+
+config ESPRESSIF_ULP_WAKEUP_HP_CPU
+	bool "Wakeup by HP core"
+
+config ESPRESSIF_ULP_WAKEUP_LP_UART
+	depends on ESPRESSIF_LP_UART
+	bool "Wakeup by LP UART RX"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO
+	bool "Wakeup by LP IO interrupt"
+
+config ESPRESSIF_ULP_WAKEUP_LP_TIMER
+	bool "Wakeup by LP timer"
+
+endchoice # ESPRESSIF_ULP_WAKEUP_SOURCE
+
+menu "ULP Wakeup LP IO Sources"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_IO
+
+menu "GPIOs to wakeup ULP when low"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO0_LOW
+	bool "LP_IO0"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO0 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO1_LOW
+	bool "LP_IO1"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO1 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO2_LOW
+	bool "LP_IO2"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO2 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO3_LOW
+	bool "LP_IO3"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO3 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO4_LOW
+	bool "LP_IO4"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO4 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO5_LOW
+	bool "LP_IO5"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO5 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO6_LOW
+	bool "LP_IO6"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO6 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO7_LOW
+	bool "LP_IO7"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO7 is low.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO8_LOW
+	bool "LP_IO8"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO8 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO9_LOW
+	bool "LP_IO9"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO9 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO10_LOW
+	bool "LP_IO10"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO10 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO11_LOW
+	bool "LP_IO11"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO11 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO12_LOW
+	bool "LP_IO12"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO12 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO13_LOW
+	bool "LP_IO13"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO13 is low
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO14_LOW
+	bool "LP_IO14"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO14 is low
+
+endmenu # GPIOs to wakeup ULP when low
+
+menu "GPIOs to wakeup ULP when high"
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO0_HIGH
+	bool "LP_IO0"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO0 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO1_HIGH
+	bool "LP_IO1"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO1 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO2_HIGH
+	bool "LP_IO2"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO2 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO3_HIGH
+	bool "LP_IO3"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO3 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO4_HIGH
+	bool "LP_IO4"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO4 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO5_HIGH
+	bool "LP_IO5"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO5 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO6_HIGH
+	bool "LP_IO6"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO6 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO7_HIGH
+	bool "LP_IO7"
+	default n
+	---help---
+		Wakeup ULP when LP_GPIO7 is high.
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO8_HIGH
+	bool "LP_IO8"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO8 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO9_HIGH
+	bool "LP_IO9"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO9 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO10_HIGH
+	bool "LP_IO10"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO10 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO11_HIGH
+	bool "LP_IO11"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO11 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO12_HIGH
+	bool "LP_IO12"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO12 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO13_HIGH
+	bool "LP_IO13"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO13 is high
+
+config ESPRESSIF_ULP_WAKEUP_LP_IO14_HIGH
+	bool "LP_IO14"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		Wakeup ULP when LP_GPIO14 is high
+
+endmenu # GPIOs to wakeup ULP when high
+
+endmenu # ULP Wakeup LP IO Sources
+
+config ESPRESSIF_ULP_WAKEUP_SLEEP_DURATION_US
+	int "Sleep duration of LP Coprocessor in us"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_TIMER
+	default 1000000
+
+choice ESPRESSIF_ULP_WAKEUP_LPUART_MODE
+	prompt "LP Coprocessor UART Wakeup Mode"
+	depends on ESPRESSIF_ULP_WAKEUP_LP_UART
+	default ESPRESSIF_ULP_WAKEUP_LPUART_START_BIT_MODE
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD_MODE
+	bool "Wake-up triggered by active edge threshold"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD_MODE
+	bool "Wake-up triggered by the number of bytes received in the RX FIFO"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_START_BIT_MODE
+	bool "Wake-up triggered by the detection of a start bit"
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ_MODE
+	bool "Wake-up triggered by detecting a specific character sequence"
+
+endchoice # ESPRESSIF_ULP_WAKEUP_LPUART_MODE
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD
+	int "Number of RXD edge changes to to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_ACTIVE_EDGE_THRESHOLD_MODE
+	default 3
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD
+	int "Number of bytes needed to receive in the RX FIFO to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_FIFO_THRESHOLD_MODE
+	default 8
+
+config ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ
+	string "Character sequence to trigger wake-up"
+	depends on ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ_MODE
+	default "esp"
+
 endmenu # LP Core (Low-power core) Coprocessor Configuration
 
 menu "PM Configuration"
