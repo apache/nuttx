@@ -224,6 +224,65 @@ Testing / capturing TCP network traffic
 
 #. Observe TCP network traffic in Wireshark / tcpdump on Linux.
 
+Testing NxModbus RTU on simulator
+=================================
+
+#. Create a virtual UART pair on Linux:
+
+    .. code-block:: console
+
+       $ socat PTY,link=/tmp/ttyNXB0 PTY,link=/tmp/ttyNXB1 &
+       $ stty -F /tmp/ttyNXB0 raw
+       $ stty -F /tmp/ttyNXB1 raw
+
+#. Build NuttX with the NxModbus RTU simulator configuration:
+
+    .. code-block:: console
+
+       $ ./tools/configure.sh sim:nxmbrtu
+       $ make
+
+#. Start the server instance (slave):
+
+    .. code-block:: console
+
+       $ ./nuttx
+       nsh> nxmbserver -t rtu -d /tmp/ttyNXB0 -b 9600 -p none -u 1
+       Starting Modbus RTU server on /tmp/ttyNXB0 (baud=9600, unit=1)
+       Server running. Press Ctrl+C to stop.
+       Register map:
+       Coils:          1-100 (read/write)
+       Discrete:       1-100 (read-only)
+       Input regs:     1-100 (read-only, value=addr*10)
+       Holding regs:   1-100 (read/write, initial=addr*100)
+
+#. In another terminal, start a second simulator instance and run the client
+   command (master) against the server:
+
+    .. code-block:: console
+
+       $ ./nuttx
+       nsh> nxmbclient -t rtu -d /tmp/ttyNXB1 -b 9600 -p none -u 1 read-holding 0 10
+       0	0
+       1	100
+       2	200
+       3	300
+       4	400
+       5	500
+       6	600
+       7	700
+       8	800
+       9	900
+
+#. Optional write/read-back check:
+
+    .. code-block:: console
+
+       nsh> nxmbclient -t rtu -d /tmp/ttyNXB1 -b 9600 -p none -u 1 write-holding 0 123
+       OK
+       nsh> nxmbclient -t rtu -d /tmp/ttyNXB1 -b 9600 -p none -u 1 read-holding 0 1
+       0	123
+
 Stopping
 ========
 
