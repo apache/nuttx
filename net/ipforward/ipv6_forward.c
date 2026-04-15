@@ -810,6 +810,17 @@ void ipv6_forward_broadcast(FAR struct net_driver_s *dev,
       return;
     }
 
+  /* Do not forward reserved, interface-local, or link-local multicast
+   * destinations (ffx0::/16, ffx1::/16, ffx2::/16).
+   */
+
+  if (((ipv6->destipaddr[0] & HTONS(0xff0f)) == HTONS(0xff00)) ||
+      ((ipv6->destipaddr[0] & HTONS(0xff0f)) == HTONS(0xff01)) ||
+      ((ipv6->destipaddr[0] & HTONS(0xff0f)) == HTONS(0xff02)))
+    {
+      return;
+    }
+
   /* Don't bother if the TTL would expire */
 
   if (ipv6->ttl > 1)
