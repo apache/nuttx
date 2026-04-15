@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <arch/barriers.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -38,25 +40,61 @@
 #  define ARCH_ATOMIC_SPECIFIER static inline_function
 #endif
 
+#define ARCH_ATOMIC_PRE_BARRIER(memorder)                                \
+  do                                                                     \
+    {                                                                    \
+      if ((memorder) == __ATOMIC_RELEASE ||                              \
+          (memorder) == __ATOMIC_ACQ_REL ||                              \
+          (memorder) == __ATOMIC_SEQ_CST)                                \
+        {                                                                \
+          UP_DSB();                                                      \
+        }                                                                \
+    }                                                                    \
+  while (0)
+
+#define ARCH_ATOMIC_POST_BARRIER(memorder)                               \
+  do                                                                     \
+    {                                                                    \
+      if ((memorder) == __ATOMIC_ACQUIRE ||                              \
+          (memorder) == __ATOMIC_ACQ_REL ||                              \
+          (memorder) == __ATOMIC_SEQ_CST)                                \
+        {                                                                \
+          UP_DSB();                                                      \
+        }                                                                \
+    }                                                                    \
+  while (0)
+
 #define ARCH_ATOMIC_STORE(func, t)                                       \
   ARCH_ATOMIC_SPECIFIER                                                  \
   void func(volatile void *ptr, t value, int memorder)                   \
   {                                                                      \
+    ARCH_ATOMIC_PRE_BARRIER(memorder);                                   \
     tricore_atomic_swap(ptr, value);                                     \
+    ARCH_ATOMIC_POST_BARRIER(memorder);                                  \
   }
 
 #define ARCH_ATOMIC_LOAD(func, t)                                        \
   ARCH_ATOMIC_SPECIFIER                                                  \
   t func(const volatile void *ptr, int memorder)                         \
   {                                                                      \
-    return *(volatile t *)ptr;                                           \
+    t ret;                                                               \
+                                                                         \
+    ARCH_ATOMIC_PRE_BARRIER(memorder);                                   \
+    ret = *(volatile t *)ptr;                                            \
+    ARCH_ATOMIC_POST_BARRIER(memorder);                                  \
+    return ret;                                                          \
   }
 
 #define ARCH_ATOMIC_EXCHANGE(func, t)                                    \
   ARCH_ATOMIC_SPECIFIER                                                  \
   t func(volatile void *ptr, t value, int memorder)                      \
   {                                                                      \
-    return tricore_atomic_swap(ptr, value);                              \
+    t ret;                                                               \
+                                                                         \
+    ARCH_ATOMIC_PRE_BARRIER(memorder);                                   \
+    ret = tricore_atomic_swap(ptr, value);                               \
+    ARCH_ATOMIC_POST_BARRIER(memorder);                                  \
+    return ret;                                                          \
   }
 
 #define ARCH_ATOMIC_COMPARE_EXCHANGE(func, t)                            \
@@ -66,12 +104,15 @@
   {                                                                      \
     t old;                                                               \
                                                                          \
+    ARCH_ATOMIC_PRE_BARRIER(success);                                    \
     old = tricore_atomic_cmpswap(ptr, desired, *(t *)expect);            \
     if (old == *(t *)expect)                                             \
       {                                                                  \
+        ARCH_ATOMIC_POST_BARRIER(success);                               \
         return true;                                                     \
       }                                                                  \
                                                                          \
+    ARCH_ATOMIC_POST_BARRIER(failure);                                   \
     *(t *)expect = old;                                                  \
                                                                          \
     return false;                                                        \
@@ -81,7 +122,12 @@
   ARCH_ATOMIC_SPECIFIER                                                  \
   t func(volatile void *ptr, int memorder)                               \
   {                                                                      \
-    return tricore_atomic_swap(ptr, 1);                                  \
+    t ret;                                                               \
+                                                                         \
+    ARCH_ATOMIC_PRE_BARRIER(memorder);                                   \
+    ret = tricore_atomic_swap(ptr, 1);                                   \
+    ARCH_ATOMIC_POST_BARRIER(memorder);                                  \
+    return ret;                                                          \
   }
 
 #define ARCH_ATOMIC_FETCH_OP(func, t, n, op)                             \
@@ -90,12 +136,14 @@
   {                                                                      \
     t old_val;                                                           \
                                                                          \
+    ARCH_ATOMIC_PRE_BARRIER(memorder);                                   \
     do                                                                   \
       {                                                                  \
         old_val = atomic_load_ ## n(ptr, memorder);                      \
       }                                                                  \
     while (tricore_atomic_cmpswap(ptr, old_val op value, old_val)        \
            != old_val);                                                  \
+    ARCH_ATOMIC_POST_BARRIER(memorder);                                  \
                                                                          \
     return old_val;                                                      \
   }
