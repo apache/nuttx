@@ -468,7 +468,7 @@ config ESPRESSIF_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default 0x120000
+	default 0x170000
 
 config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -476,11 +476,11 @@ config ESPRESSIF_OTA_SECONDARY_SLOT_DEVPATH
 
 config ESPRESSIF_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default 0x100000
+	default 0x150000
 
 config ESPRESSIF_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default 0x220000
+	default 0x2C0000
 
 config ESPRESSIF_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
@@ -3142,7 +3142,7 @@ config ESPRESSIF_STORAGE_MTD_DEBUG
 config ESPRESSIF_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESPRESSIF_BOOTLOADER_MCUBOOT
-	default 0x260000 if ESPRESSIF_BOOTLOADER_MCUBOOT
+	default 0x300000 if ESPRESSIF_BOOTLOADER_MCUBOOT
 	depends on ESPRESSIF_MTD
 	---help---
 		MTD base address in SPI Flash.
