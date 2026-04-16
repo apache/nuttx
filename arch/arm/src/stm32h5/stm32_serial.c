@@ -3745,6 +3745,7 @@ static bool stm32serial_txready(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
+#ifdef SERIAL_HAVE_DMA
 static void stm32serial_dmarxcallback(DMA_HANDLE handle,
                                       uint8_t status,
                                       void *arg)
@@ -3779,6 +3780,7 @@ static void stm32serial_dmarxcallback(DMA_HANDLE handle,
                         USART_ICR_ORECF | USART_ICR_NCF | USART_ICR_FECF);
     }
 }
+#endif
 
 /****************************************************************************
  * Name: stm32serial_pmnotify
