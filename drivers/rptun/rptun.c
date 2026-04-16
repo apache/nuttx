@@ -77,6 +77,7 @@ struct rptun_carveout_s
   FAR struct mm_heap_s       *heap;
   FAR void                   *base;
   size_t                      size;
+  char                        name[RPROC_MAX_NAME_LEN];
 };
 
 struct rptun_priv_s
@@ -510,8 +511,10 @@ static int rptun_init_carveout(FAR struct rptun_priv_s *priv,
   carveout = kmm_zalloc(sizeof(*carveout));
   if (carveout != NULL)
     {
+      strlcpy(carveout->name, shmname, sizeof(carveout->name));
+
       memset(&config, 0, sizeof(config));
-      config.name      = shmname;
+      config.name      = carveout->name;
       config.start     = shmbase;
       config.size      = shmlen;
       config.nokasan   = true;
