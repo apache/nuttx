@@ -35,6 +35,7 @@ MAKE=make
 unset testfile
 unset HOPTION
 unset STORE
+unset NXTMPDIR
 unset JOPTION
 PRINTLISTONLY=0
 GITCLEAN=0
@@ -42,6 +43,7 @@ SAVEARTIFACTS=0
 CHECKCLEAN=1
 CODECHECKER=0
 NINJACMAKE=0
+STORECMAKE=0
 RUN=0
 
 case $(uname -s) in
@@ -150,6 +152,7 @@ while [ ! -z "$1" ]; do
     ;;
   -S )
     STORE+=" $1"
+    STORECMAKE=1
     ;;
   --codechecker )
     CODECHECKER=1
@@ -198,6 +201,14 @@ blacklist=`grep "^-" $testfile || true`
 
 if [ ${NINJACMAKE} -eq 1 ]; then
   cmakelist=`grep "^[C|c][M|m][A|a][K|k][E|e]" $testfile | cut -d',' -f2 || true`
+fi
+
+if [ ${STORECMAKE} -eq 1 ]; then
+  NXTMPDIR="ON"
+  echo "NXTMPDIR store is enabled"
+else
+  NXTMPDIR="OFF"
+  echo "NXTMPDIR store is disabled"
 fi
 
 cd $nuttx || { echo "ERROR: failed to CD to $nuttx"; exit 1; }
@@ -342,8 +353,8 @@ function configure_default {
 }
 
 function configure_cmake {
-  if ! cmake -B build -DBOARD_CONFIG=$config -GNinja 1>/dev/null; then
-    cmake -B build -DBOARD_CONFIG=$config -GNinja
+  if ! cmake -B build -DBOARD_CONFIG=$config -DNXTMPDIR="$NXTMPDIR" -GNinja 1>/dev/null; then
+    cmake -B build -DBOARD_CONFIG=$config -DNXTMPDIR="$NXTMPDIR" -GNinja
     fail=1
   fi
 
