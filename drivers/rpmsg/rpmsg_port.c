@@ -264,7 +264,7 @@ rpmsg_port_get_tx_payload_buffer(FAR struct rpmsg_device *rdev,
     }
 
   *len = hdr->len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
+         sizeof(struct rpmsg_hdr);
 
   return RPMSG_LOCATE_DATA(hdr->buf);
 }
@@ -384,7 +384,7 @@ static int rpmsg_port_get_tx_buffer_size(FAR struct rpmsg_device *rdev)
   FAR struct rpmsg_port_s *port = rpmsg_port_from_rdev(rdev);
 
   return port->txq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
+         sizeof(struct rpmsg_hdr);
 }
 
 /****************************************************************************
@@ -396,7 +396,7 @@ static int rpmsg_port_get_rx_buffer_size(FAR struct rpmsg_device *rdev)
   FAR struct rpmsg_port_s *port = rpmsg_port_from_rdev(rdev);
 
   return port->rxq.len - sizeof(struct rpmsg_port_header_s) -
-         sizeof(struct rpmsg_hdr) - sizeof(struct rpmsg_timestamp_s);
+         sizeof(struct rpmsg_hdr);
 }
 
 /****************************************************************************
@@ -407,20 +407,11 @@ static int rpmsg_port_get_timestamp(FAR struct rpmsg_s *rpmsg,
                                     FAR const void *data,
                                     FAR struct rpmsg_timestamp_s *ts)
 {
-  FAR struct rpmsg_port_s *port = (FAR struct rpmsg_port_s *)rpmsg;
   FAR const struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(data);
   FAR const struct rpmsg_port_header_s *hdr = rpmsg_port_hdr_from_buf(rphdr);
-  FAR const struct rpmsg_timestamp_s *rpts =
-    (FAR const struct rpmsg_timestamp_s *)((uint8_t *)hdr + port->rxq.len -
-                                           sizeof(struct rpmsg_timestamp_s));
 
-  if (hdr->len > port->rxq.len - sizeof(struct rpmsg_timestamp_s))
-    {
-      return -EINVAL;
-    }
-
-  ts->tx_nsec = rpts->tx_nsec;
-  ts->rx_nsec = rpts->rx_nsec;
+  ts->tx_nsec = hdr->tx_nsec;
+  ts->rx_nsec = hdr->rx_nsec;
 
   return RPMSG_SUCCESS;
 }
@@ -698,19 +689,16 @@ void rpmsg_port_update_timestamp(FAR struct rpmsg_port_queue_s *queue,
                                  FAR struct rpmsg_port_header_s *hdr,
                                  bool tx)
 {
-  FAR struct rpmsg_timestamp_s *rpts =
-    (FAR struct rpmsg_timestamp_s *)((uint8_t *)hdr + queue->len -
-                                     sizeof(struct rpmsg_timestamp_s));
   struct timespec ts;
 
   clock_gettime(CLOCK_MONOTONIC, &ts);
   if (tx)
     {
-      rpts->tx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
+      hdr->tx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
     }
-  else if (hdr->len <= queue->len - sizeof(struct rpmsg_timestamp_s))
+  else
     {
-      rpts->rx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
+      hdr->rx_nsec = 1000000000ull * ts.tv_sec + ts.tv_nsec;
     }
 }
 

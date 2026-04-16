@@ -330,6 +330,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
   rpmsg_port_retx_tx_fill(&rpspi->port, txhdr);
   txhdr->avail = rpmsg_port_queue_navail(&rpspi->port.rxq);
   txhdr->avail = txhdr->avail > 1 ? txhdr->avail - 1 : 0;
+  rpmsg_port_update_timestamp(&rpspi->port.txq, txhdr, true);
   txhdr->crc = rpmsg_port_spi_crc16(txhdr);
 
 #ifdef CONFIG_RPMSG_PORT_RETX
@@ -342,7 +343,6 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 #endif
 
   rpmsg_port_spi_pm_action(rpspi, true);
-  rpmsg_port_update_timestamp(&rpspi->port.txq, txhdr, true);
   SPI_SELECT(rpspi->spi, rpspi->devid, true);
   SPI_EXCHANGE(rpspi->spi, txhdr, rpspi->rxhdr,
                RPMSG_PORT_SPI_BYTES2WORDS(rpspi, rpspi->port.txq.len));
@@ -364,7 +364,6 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
   rpmsginfo("received cmd:%u avail:%u\n",
             rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
 
-  rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);
   if (rpspi->txhdr != NULL)
     {
       rpspi->txhdr = NULL;
@@ -393,6 +392,8 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
           goto out;
         }
     }
+
+  rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);
 
   /* Skip any data received when connection is not established until a
    * connect req data packet has been received.

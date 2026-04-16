@@ -65,6 +65,8 @@ begin_packed_struct struct rpmsg_port_header_s
   uint16_t cmd;                   /* Reserved for uart/spi port driver */
   uint16_t avail;                 /* Available rx buffer of peer side */
   uint16_t len;                   /* Data frame length */
+  uint64_t tx_nsec;               /* TX timestamp in nanoseconds */
+  uint64_t rx_nsec;               /* RX timestamp in nanoseconds */
 #ifdef CONFIG_RPMSG_PORT_RETX
   uint16_t seqno;
   uint16_t ackno;
