@@ -697,18 +697,18 @@ based on the default KConfig values:
      - 64KB
    * - Primary Application Slot (/dev/ota0)
      - 0x020000
-     - 1MB
+     - 1.4MB
    * - Secondary Application Slot (/dev/ota1)
-     - 0x120000
-     - 1MB
+     - 0x170000
+     - 1.4MB
    * - Scratch Partition (/dev/otascratch)
-     - 0x220000
+     - 0x2C0000
      - 256KB
    * - Storage MTD (optional)
-     - 0x260000
+     - 0x300000
      - 1MB
    * - Available Flash
-     - 0x360000+
+     - 0x400000+
      - Remaining
 
 .. raw:: html
@@ -737,27 +737,27 @@ virtual E-Fuses are later enabled.
     0x020000  ├─────────────────────────────┤
               │                             │
               │      Primary App Slot       │
-              │            (1MB)            │
+              │            (1.4MB)          │
               │          /dev/ota0          │
               │                             │
-    0x120000  ├─────────────────────────────┤
+    0x170000  ├─────────────────────────────┤
               │                             │
               │     Secondary App Slot      │
-              │            (1MB)            │
+              │            (1.4MB)          │
               │          /dev/ota1          │
               │                             │
-    0x220000  ├─────────────────────────────┤
+    0x2C0000  ├─────────────────────────────┤
               │                             │
               │      Scratch Partition      │
               │           (256KB)           │
               │       /dev/otascratch       │
               │                             │
-    0x260000  ├─────────────────────────────┤
+    0x300000  ├─────────────────────────────┤
               │                             │
-              │    Storage MTD (optional)   │
+              │   Storage MTD (optional)    │
               │            (1MB)            │
               │                             │
-    0x360000  ├─────────────────────────────┤
+    0x400000  ├─────────────────────────────┤
               │                             │
               │       Available Flash       │
               │         (Remaining)         │
@@ -767,11 +767,11 @@ virtual E-Fuses are later enabled.
 The key KConfig options that control this layout:
 
 - ``ESPRESSIF_OTA_PRIMARY_SLOT_OFFSET`` (default: 0x20000)
-- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x120000)
-- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x100000)
-- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x220000)
+- ``ESPRESSIF_OTA_SECONDARY_SLOT_OFFSET`` (default: 0x170000)
+- ``ESPRESSIF_OTA_SLOT_SIZE`` (default: 0x150000)
+- ``ESPRESSIF_OTA_SCRATCH_OFFSET`` (default: 0x2C0000)
 - ``ESPRESSIF_OTA_SCRATCH_SIZE`` (default: 0x40000)
-- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x260000 when MCUBoot enabled)
+- ``ESPRESSIF_STORAGE_MTD_OFFSET`` (default: 0x300000 when MCUBoot enabled)
 - ``ESPRESSIF_STORAGE_MTD_SIZE`` (default: 0x100000)
 
 For MCUBoot operation:
