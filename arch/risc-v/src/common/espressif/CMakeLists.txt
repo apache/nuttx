@@ -243,8 +243,6 @@ if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
   # NXTMPDIR contains a cached version of the esp-hal-3rdparty repository, which
   # is located on nuttx/../nxtmpdir/esp-hal-3rdparty if it exists.
   if(NXTMPDIR)
-    include(${NUTTX_DIR}/cmake/nuttx_3rdparty.cmake)
-    nuttx_make_nxtmpdir()
     set(ESP_HAL_NXTMPDIR_CACHE "${NXTMPDIR_PATH}/${ESP_HAL_3RDPARTY_REPO_NAME}")
     get_filename_component(ESP_HAL_NXTMPDIR_CACHE "${ESP_HAL_NXTMPDIR_CACHE}"
                            REALPATH)

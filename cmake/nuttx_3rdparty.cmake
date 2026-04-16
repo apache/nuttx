@@ -41,6 +41,21 @@ function(nuttx_make_nxtmpdir)
 endfunction()
 
 # ~~~
+# nuttx_remove_nxtmpdir
+#
+# Description:
+#   Remove the third-party cache directory under nuttx/../nxtmpdir
+#
+# ~~~
+
+function(nuttx_remove_nxtmpdir)
+  set(_nxtmpdir "${NUTTX_DIR}/../nxtmpdir")
+  if(EXISTS "${_nxtmpdir}")
+    file(REMOVE_RECURSE "${_nxtmpdir}")
+  endif()
+endfunction()
+
+# ~~~
 # nuttx_check_git_hash
 #
 # Description:

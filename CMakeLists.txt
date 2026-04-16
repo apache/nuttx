@@ -230,6 +230,16 @@ set(ENV{HOST_OTHER} n)
 
 include(nuttx_sethost)
 
+option(NXTMPDIR "Create the nxtmpdir folder for third-party packages." OFF)
+
+include(nuttx_3rdparty)
+
+if(NXTMPDIR)
+  nuttx_make_nxtmpdir()
+else()
+  nuttx_remove_nxtmpdir()
+endif()
+
 include(nuttx_parse_function_args)
 include(nuttx_add_subdirectory)
 include(nuttx_create_symlink)
