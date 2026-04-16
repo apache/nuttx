@@ -1,1 +1,11 @@
 /risc-v/esp32c[0-5]*
+
+# Boards build by CMake
+CMake,esp32c3-xiao:nimble
+CMake,esp32c3-xiao:gpio
+CMake,esp32c3-xiao:wifi
+CMake,esp32c3-xiao:usbnsh
+CMake,esp32-c3-zero:wifi
+CMake,esp32-c3-zero:jumbo
+CMake,esp32-c3-zero:sta_softap
+CMake,esp32-c3-zero:usbnsh
