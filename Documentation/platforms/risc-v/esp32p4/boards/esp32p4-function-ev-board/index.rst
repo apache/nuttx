@@ -295,6 +295,17 @@ To save power without using sleep modes, lowering the clock speed is another app
 ``CONFIG_ESPRESSIF_DFS`` option needs to enabled and minimum CPU frequency needs to set under ``CONFIG_ESPRESSIF_MIN_CPU_FREQ`` option.
 With these options, the device scales the CPU clock according to workload.
 
+psram_usrheap
+-------------
+
+This configuration enables allocating the userspace heap into SPIRAM and reserves the
+internal RAM for kernel heap. For instance, for a 32MB PSRAM::
+
+    nsh> free
+          total       used       free    maxused    maxfree  nused  nfree name
+        602004       6492     595512       6872     595512     36      1 Kmem
+      33554428       4276   33550152       4656   33550152      8      1 Umem
+
 pwm
 ---
 
