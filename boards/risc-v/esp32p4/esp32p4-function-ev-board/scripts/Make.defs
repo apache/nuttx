@@ -36,7 +36,7 @@ ARCHSCRIPT += $(BOARD_COMMON_DIR)/scripts/$(CHIP_SERIES)_aliases.ld
 
 ARCHSCRIPT += $(call FINDSCRIPT,$(CHIP_SERIES)_flat_memory.ld)
 
-ifeq ($(CONFIG_ESP32P4_REV_MIN_300),y)
+ifneq ($(CONFIG_ESP32P4_SELECTS_REV_LESS_V3),y)
   BOARD_REV = .rev3
 endif
 
