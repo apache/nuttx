@@ -89,6 +89,15 @@ void tls_destruct(void)
     {
       tls->tl_elem[candidate] = 0;
     }
+
+#if defined(CONFIG_CXX_EXCEPTION) && !defined(CONFIG_SCHED_THREAD_LOCAL)
+  if (tls->tl_eh_globals && tls->tl_eh_free)
+    {
+      tls->tl_eh_free(tls->tl_eh_globals);
+      tls->tl_eh_globals = NULL;
+      tls->tl_eh_free = NULL;
+    }
+#endif
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */

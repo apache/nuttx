@@ -164,6 +164,10 @@ struct task_info_s
 #if defined(CONFIG_TLS_NELEM) && CONFIG_TLS_NELEM > 0
   tls_dtor_t      ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
 #endif
+#if defined(CONFIG_LIBCXX) && !defined(CONFIG_DISABLE_PTHREAD)
+  FAR void       *ta_thread_local_data;  /* C++ thread local  */
+  void          (*ta_thread_local_dtor)(FAR void *);
+#endif
 #ifndef CONFIG_BUILD_KERNEL
   struct getopt_s ta_getopt; /* Globals used by getopt() */
 #  ifdef CONFIG_LIBC_LOCALE
@@ -287,6 +291,11 @@ struct tls_info_s
 
 #if !defined(CONFIG_DISABLE_PTHREAD) && !defined(CONFIG_PTHREAD_MUTEX_UNSAFE)
   FAR struct pthread_mutex_s *tl_mhead;   /* List of mutexes held by thread  */
+#endif
+
+#if defined(CONFIG_CXX_EXCEPTION) && !defined(CONFIG_SCHED_THREAD_LOCAL)
+  FAR void                   *tl_eh_globals;           /* __cxa_eh_globals */
+  void                      (*tl_eh_free)(FAR void *); /* Destructor       */
 #endif
 };
 
