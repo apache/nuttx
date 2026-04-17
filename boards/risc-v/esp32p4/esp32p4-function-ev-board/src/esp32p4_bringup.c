@@ -459,11 +459,17 @@ int esp_bringup(void)
    * peripherals to use supported peripherals properly on ULP core
    */
 
-  esp_ulp_init();
-
+  ret = esp_ulp_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_ulp_init failed: %d\n", ret);
+    }
+  else
+    {
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
-  esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
+      esp_ulp_load_bin((char *)esp_ulp_bin, esp_ulp_bin_len);
 #  endif
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but
