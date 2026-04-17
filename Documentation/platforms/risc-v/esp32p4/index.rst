@@ -676,6 +676,18 @@ prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile
 access the binary data (e.g., if ``ULP_APP_NAME`` is ``ulp_test``, the binary variable will be ``ulp_test_bin``)
 and ``bin_len`` keyword to access its length (e.g., ``ulp_test_bin_len`` for ``ULP_APP_NAME`` is ``ulp_test``).
 
+ULP LP-Core Wakeup Configuration
+--------------------------------
+
+By default, ULP LP-Core is woken up by HP core but other wakeup sources can be selected.
+
+The available wakeup sources are:
+
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_HP_CPU``: Wakeup by HP core
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_TIMER``: Wakeup by LP timer
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_UART``: Wakeup by LP UART activity
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_IO``: Wakeup by LP IO
+
 Accessing the ULP LP-Core Program Variables
 -------------------------------------------
 

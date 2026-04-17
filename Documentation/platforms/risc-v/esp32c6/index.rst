@@ -1099,6 +1099,18 @@ Here is a snippet for reading and writing to a ULP variable named ``var_test`` (
       return OK;
     }
 
+ULP LP-Core Wakeup Configuration
+--------------------------------
+
+By default, ULP LP-Core is woken up by HP core but other wakeup sources can be selected.
+
+The available wakeup sources are:
+
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_HP_CPU``: Wakeup by HP core
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_TIMER``: Wakeup by LP timer
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_UART``: Wakeup by LP UART activity
+* ``CONFIG_ESPRESSIF_ULP_WAKEUP_LP_IO``: Wakeup by LP IO
+
 Debugging ULP LP-Core
 ---------------------
 
