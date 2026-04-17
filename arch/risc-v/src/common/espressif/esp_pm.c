@@ -51,6 +51,7 @@
 #  include "driver/gpio.h"
 #  include "espressif/esp_gpio.h"
 #  include "hal/gpio_types.h"
+#  include "soc/soc_caps.h"
 #endif
 #ifdef CONFIG_PM_UART_WAKEUP
 #  include "driver/uart_wakeup.h"
@@ -827,7 +828,8 @@ void esp_pmstandby(uint64_t time_in_us)
     }
 #endif
 
-#ifdef CONFIG_PM_GPIO_WAKEUP
+#if defined(CONFIG_PM_GPIO_WAKEUP) && \
+    defined(SOC_GPIO_SUPPORT_HP_PERIPH_PD_SLEEP_WAKEUP)
   if (cause == ESP_SLEEP_WAKEUP_GPIO)
     {
       gpio_mask = esp_sleep_get_gpio_wakeup_status();
@@ -915,6 +917,9 @@ int esp_pmconfigure(void)
   esp_pm_gpio_wakeup_prepare();
 #endif
 #ifdef CONFIG_PM_UART_WAKEUP
+#  ifdef SOC_UART_SUPPORT_XTAL_CLK
+  esp_sleep_pd_config(ESP_PD_DOMAIN_XTAL, ESP_PD_OPTION_ON);
+#  endif
   esp_pm_uart_wakeup_prepare();
 #endif /* CONFIG_PM_UART_WAKEUP */
 
