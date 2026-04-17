@@ -685,8 +685,8 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
  * Name: tcp_send_txnotify
  *
  * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
+ *   Notify the appropriate device driver that we have data ready to
+ *   send (TCP)
  *
  * Input Parameters:
  *   psock - Socket state structure
@@ -700,6 +700,12 @@ void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 void tcp_send_txnotify(FAR struct socket *psock,
                        FAR struct tcp_conn_s *conn)
 {
+  if (conn->dev != NULL)
+    {
+      netdev_txnotify_dev(conn->dev, TCP_POLL);
+      return;
+    }
+
 #ifdef CONFIG_NET_IPv4
 #ifdef CONFIG_NET_IPv6
   /* If both IPv4 and IPv6 support are enabled, then we will need to select
