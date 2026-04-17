@@ -15,6 +15,8 @@ The ntpc example:
 
 - Connects to NTP servers (default: pool.ntp.org)
 
+- Supports NTP server configuration learned from DHCP option 42
+
 - Starts the NTP client in the background for continuous synchronization
 
 - Provides commands to check status and stop the NTP client
@@ -37,13 +39,18 @@ This example requires the following NuttX configuration options:
 - CONFIG_SYSTEM_NTPC: Enable this example
 
 Additional configuration options:
+
 - CONFIG_NETUTILS_NTPCLIENT_SERVER: NTP server hostname (default: "pool.ntp.org")
+- CONFIG_NETUTILS_DHCPC: Enable DHCP client support when NTP servers should be
+  learned dynamically from DHCP option 42
 
 Usage
 -----
 
 1. Configure your NuttX build with networking support
 2. Ensure network connectivity is established (e.g., via NSH network commands)
+   If DHCP provides NTP servers through option 42, ``ntpc`` can use that
+   server list automatically.
 3. Build and flash the image to your target board
 4. Run the commands:
    - ``ntpcstart``, ``ntpcstop``, ``ntpcstatus``
@@ -94,6 +101,27 @@ give the proper time and date.
     NTP client is now running in the background
     nsh> date
     Fri, Sep 05 18:49:37 2025
+
+DHCP-provided NTP servers
+-------------------------
+
+When ``CONFIG_NETUTILS_DHCPC`` is enabled, the DHCP client can pass NTP
+server IPv4 addresses learned from DHCP option 42 to ``ntpc``.
+
+This allows ``ntpc`` to run without a fixed server hostname in the
+configuration and to follow NTP server updates delivered by DHCP.
+
+One way to test DHCP-delivered NTP servers is with ``dnsmasq``:
+
+::
+
+   dnsmasq --no-daemon --log-dhcp --log-queries \
+     --interface=tap0 --bind-interfaces \
+     --dhcp-authoritative \
+     --dhcp-range=192.168.50.20,192.168.50.50,255.255.255.0 \
+     --dhcp-option=option:router,192.168.50.1 \
+     --dhcp-option=option:dns-server,1.1.1.1 \
+     --dhcp-option=option:ntp-server,162.159.200.123
 
 Notes
 -----
