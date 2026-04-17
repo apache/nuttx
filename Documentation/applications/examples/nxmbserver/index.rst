@@ -130,7 +130,7 @@ Configuration
 Enable the example in your NuttX configuration::
 
     CONFIG_EXAMPLES_NXMBSERVER=y
-    CONFIG_NXMODBUS=y
+    CONFIG_INDUSTRY_NXMODBUS=y
     CONFIG_NXMODBUS_RTU=y      # For RTU support
     CONFIG_NXMODBUS_ASCII=y    # For ASCII support
     CONFIG_NXMODBUS_TCP=y      # For TCP support

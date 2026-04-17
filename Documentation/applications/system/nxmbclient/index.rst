@@ -87,7 +87,7 @@ Configuration
 Enable the tool in your NuttX configuration::
 
     CONFIG_SYSTEM_NXMBCLIENT=y
-    CONFIG_NXMODBUS=y
+    CONFIG_INDUSTRY_NXMODBUS=y
     CONFIG_NXMODBUS_RTU=y      # For RTU support
     CONFIG_NXMODBUS_ASCII=y    # For ASCII support
     CONFIG_NXMODBUS_TCP=y      # For TCP support
@@ -95,7 +95,7 @@ Enable the tool in your NuttX configuration::
 Kconfig Options:
 
 - ``CONFIG_SYSTEM_NXMBCLIENT`` - Enable the nxmbclient tool
-- ``CONFIG_NXMBCLIENT_PROGNAME`` - Program name (default: "nxmbclient")
+- ``CONFIG_INDUSTRY_NXMBCLIENT_PROGNAME`` - Program name (default: "nxmbclient")
 - ``CONFIG_NXMBCLIENT_PRIORITY`` - Task priority (default: 100)
 - ``CONFIG_NXMBCLIENT_STACKSIZE`` - Stack size (default: DEFAULT_TASK_STACKSIZE)
 
