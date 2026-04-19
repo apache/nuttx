@@ -599,15 +599,15 @@ function retrytest {
       break
     else
       # Build Failed: Clean up any corrupted downloads, don't reuse
-      git -C $nuttx clean -fd
-      git -C $APPSDIR clean -fd
+      git -C $nuttx clean -xfdq
+      git -C $APPSDIR clean -xfdq
       pushd $nuttx ; git status ; popd
       pushd $APPSDIR ; git status ; popd
     fi
 
     # If this is Final Retry: Don't retry subsequent builds
     if [ $i -eq $maxbuilds ]; then
-			maxbuilds=1
+      maxbuilds=1
       break
     fi
 
