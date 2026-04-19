@@ -311,140 +311,100 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 
   destipaddr = net_ip4addr_conv32(ipv4->destipaddr);
 
-#if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
-  /* If IP broadcast support is configured, we check for a broadcast
-   * UDP packet, which may be destined to us (even if there is no IP
-   * address yet assigned to the device as is the case when we are
-   * negotiating over DHCP for an address).
+  /* Keep the common local-unicast case on the fast path, then classify
+   * non-local packets as broadcast, multicast, or forwardable unicast.
    */
 
-  if (ipv4->proto == IP_PROTO_UDP &&
-      net_ipv4addr_cmp(destipaddr, INADDR_BROADCAST))
+  if (net_ipv4addr_cmp(destipaddr, dev->d_ipaddr))
+    {
+#ifdef CONFIG_NET_ICMP
+      if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+        {
+          nwarn("WARNING: No IP address assigned\n");
+          goto drop;
+        }
+#endif
+    }
+  else if (net_ipv4addr_cmp(destipaddr, INADDR_BROADCAST) ||
+           (net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr,
+                                 dev->d_netmask) &&
+            net_ipv4addr_broadcast(destipaddr, dev->d_netmask)))
     {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
-      /* Forward broadcast packets */
-
       ipv4_forward_broadcast(dev, ipv4);
-
-      /* Process the incoming packet if not forwardable */
-
-      if (dev->d_len > 0)
 #endif
-        {
-          ret = udp_ipv4_input(dev);
-        }
 
-      goto done;
-    }
-  else
-#endif
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
-  /* The address is not the broadcast address and we have been assigned a
-   * address.  So there is also the possibility that the destination address
-   * is a sub-net broadcast address which we will need to handle just as for
-   * the broadcast address above.
-   */
-
-  if (ipv4->proto == IP_PROTO_UDP &&
-      net_ipv4addr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask) &&
-      net_ipv4addr_broadcast(destipaddr, dev->d_netmask))
-    {
-#ifdef CONFIG_NET_IPFORWARD_BROADCAST
-      /* Forward broadcast packets */
-
-      ipv4_forward_broadcast(dev, ipv4);
-
-      /* Process the incoming packet if not forwardable */
-
-      if (dev->d_len > 0)
-#endif
+      if (ipv4->proto == IP_PROTO_UDP)
         {
           ret = udp_ipv4_input(dev);
+          goto done;
         }
-
-      goto done;
-    }
-  else
 #endif
-  /* Check if the packet is destined for our IP address. */
 
-  if (!net_ipv4addr_cmp(destipaddr, dev->d_ipaddr))
+#ifdef CONFIG_NET_STATISTICS
+      g_netstats.ipv4.drop++;
+#endif
+      goto drop;
+    }
+  else if (IN_MULTICAST(NTOHL(destipaddr)))
     {
-      /* No.. This is not our IP address. Check for an IPv4 IGMP group
-       * address
-       */
-
 #ifdef CONFIG_NET_IGMP
-      in_addr_t destip = net_ip4addr_conv32(ipv4->destipaddr);
-      if (igmp_grpfind(dev, &destip) != NULL)
+      if (igmp_grpfind(dev, &destipaddr) != NULL)
         {
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
-          /* Forward multicast packets */
-
           ipv4_forward_broadcast(dev, ipv4);
-
-          /* Return success if the packet was forwarded. */
-
-          if (dev->d_len == 0)
-            {
-              goto done;
-            }
 #endif
         }
       else
 #endif
         {
-          /* No.. The packet is not destined for us. */
-
-#ifdef CONFIG_NET_IPFORWARD
-          /* Try to forward the packet */
-
-          if (ipv4_forward(dev, ipv4) >= 0)
-            {
-              /* The packet was forwarded.  Return success; d_len will
-               * be set appropriately by the forwarding logic:  Cleared
-               * if the packet is forward via anoother device or non-
-               * zero if it will be forwarded by the same device that
-               * it was received on.
-               */
-
-              goto done;
-            }
-          else
-#endif
-#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_BINDTODEVICE)
-          /* If the protocol specific socket option NET_BINDTODEVICE
-           * is selected, then we must forward all UDP packets to the bound
-           * socket.
-           */
-
-          if (ipv4->proto != IP_PROTO_UDP)
-#endif
-            {
-              /* Not destined for us and not forwardable... Drop the
-               * packet.
-               */
-
-              ninfo("WARNING: Not destined for us; not forwardable... "
-                    "Dropping!\n");
-
 #ifdef CONFIG_NET_STATISTICS
-              g_netstats.ipv4.drop++;
+          g_netstats.ipv4.drop++;
 #endif
-              goto drop;
-            }
+          goto drop;
         }
     }
-#ifdef CONFIG_NET_ICMP
-
-  /* In other cases, the device must be assigned a non-zero IP address. */
-
-  else if (net_ipv4addr_cmp(dev->d_ipaddr, INADDR_ANY))
+  else
     {
-      nwarn("WARNING: No IP address assigned\n");
-      goto drop;
-    }
+#ifdef CONFIG_NET_IPFORWARD
+      /* Try to forward the unicast packet. */
+
+      if (ipv4_forward(dev, ipv4) >= 0)
+        {
+          /* The packet was forwarded.  Return success; d_len will
+           * be set appropriately by the forwarding logic:  Cleared
+           * if the packet is forward via another device or non-zero
+           * if it will be forwarded by the same device that it was
+           * received on.
+           */
+
+          goto done;
+        }
+      else
 #endif
+#if defined(NET_UDP_HAVE_STACK) && defined(CONFIG_NET_BINDTODEVICE)
+      /* If the protocol specific socket option NET_BINDTODEVICE
+       * is selected, then we must forward all UDP packets to the bound
+       * socket.
+       */
+
+      if (ipv4->proto != IP_PROTO_UDP)
+#endif
+        {
+          /* Not destined for us and not forwardable... Drop the
+           * packet.
+           */
+
+          ninfo("WARNING: Not destined for us; not forwardable... "
+                "Dropping!\n");
+
+#ifdef CONFIG_NET_STATISTICS
+          g_netstats.ipv4.drop++;
+#endif
+          goto drop;
+        }
+    }
 
 #ifdef CONFIG_NET_IPV4_CHECKSUMS
   if (((dev->d_features & NETDEV_RX_CSUM) == 0)
