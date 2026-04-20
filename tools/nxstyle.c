@@ -908,6 +908,10 @@ static const char *g_white_files[] =
   "gd32vw55x/gdwifi/gdwifi_glue.c",
   "gd32vw55x/gdwifi/gdwifi_newlib_compat.c",
   "gd32vw55x/gdble/gd32_ble.c",
+
+  /* Skip libcxx support header (C++ file, not NuttX style) */
+
+  "from_chars_support.h",
   NULL
 };
 
