@@ -86,10 +86,10 @@ void x86_64_sigdeliver(void)
 
   x86_64_copystate(regs, rtcb->xcp.regs);
 
+retry:
 #ifdef CONFIG_SMP
-  /* In the SMP case, up_schedule_sigaction(0) will have incremented
-   * 'irqcount' in order to force us into a critical section.  Save the
-   * pre-incremented irqcount.
+  /* Save the pre-incremented irqcount so we can restore it before resuming
+   * the interrupted thread.
    */
 
   saved_irqcount = rtcb->irqcount;
@@ -125,10 +125,38 @@ void x86_64_sigdeliver(void)
   sinfo("Resuming\n");
 
 #ifdef CONFIG_SMP
-  enter_critical_section();
-#else
+  /* Restore the saved 'irqcount' plus one extra to enforce the critical
+   * section while we check for any newly queued signal actions and modify
+   * the saved regs. The extra is dropped below with a final
+   * leave_critical_section(), yielding net irqcount == saved_irqcount.
+   */
+
+  DEBUGASSERT(rtcb->irqcount == 0);
+  while (rtcb->irqcount < saved_irqcount + 1)
+    {
+      enter_critical_section();
+    }
+#endif
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_save();
 #endif
+
+  /* A new signal action may have been queued while we were returning from
+   * nxsig_deliver() (after its empty-queue check but before we re-entered
+   * the critical section). If so, re-run the delivery loop so the new
+   * sigq is not orphaned. Nested signal handling is not supported, so
+   * skip this if we are already delivering.
+   */
+
+  if (!sq_empty(&rtcb->sigpendactionq) &&
+      (rtcb->flags & TCB_FLAG_SIGNAL_ACTION) == 0)
+    {
+#ifdef CONFIG_SMP
+      leave_critical_section(up_irq_save());
+#endif
+      goto retry;
+    }
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is
@@ -146,19 +174,9 @@ void x86_64_sigdeliver(void)
   rtcb->sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
 #ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
-   *
-   * REVISIT:  irqcount should be one from the above call to
-   * enter_critical_section().  Could the saved_irqcount be zero?  That
-   * would be a problem.
-   */
+  /* We need to keep the IRQ lock until task switching */
 
-  DEBUGASSERT(rtcb->irqcount == 1);
-  while (rtcb->irqcount < saved_irqcount)
-    {
-      enter_critical_section();
-    }
+  leave_critical_section(up_irq_save());
 #endif
 
   /* Then restore the correct state for this thread of execution. */
