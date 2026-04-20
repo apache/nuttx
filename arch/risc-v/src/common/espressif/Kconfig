@@ -1662,6 +1662,15 @@ config ESP_RMT
 		format, RMT can be extended to a versatile and general-purpose
 		transceiver, transmitting or receiving many other types of signals.
 
+config RMT_LOOP_TEST_MODE
+	bool "Enable RMT loop test pin mapping"
+	default n
+	depends on ESP_RMT
+	---help---
+		Use a loop test pin mapping for RMT RX/TX.
+		When enabled, board pin definitions can route RX/TX to the same
+		GPIO for loopback testing without external wiring.
+
 if ESP_RMT
 
 config RMT_DEFAULT_RX_BUFFER_SIZE
