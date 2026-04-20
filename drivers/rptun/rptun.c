@@ -30,11 +30,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <sys/boardctl.h>
 #include <sys/param.h>
 #include <sys/wait.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/coredump.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/mm/mm.h>
@@ -999,6 +1001,61 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   return remoteproc_get_notification(&priv->rproc, vqid);
 }
 
+/****************************************************************************
+ * Name: rptun_update_coredump_regions
+ *
+ * Description:
+ *   Scan RSC_CARVEOUT entries with name prefix "coredump" and register
+ *   or unregister them from the system coredump list.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_COREDUMP
+static void rptun_update_coredump_regions(FAR struct rptun_priv_s *priv,
+                                          bool add)
+{
+  FAR char *rsc = priv->rproc.rsc_table;
+  FAR struct fw_rsc_carveout *carv;
+  size_t off;
+  uint32_t i;
+
+  if (!RPTUN_IS_MASTER(priv->dev) || rsc == NULL)
+    {
+      return;
+    }
+
+  for (i = 0; ; i++)
+    {
+      off = find_rsc(rsc, RSC_CARVEOUT, i);
+      if (off == 0u)
+        {
+          break;
+        }
+
+      carv = (FAR struct fw_rsc_carveout *)(rsc + off);
+      if (strncmp((FAR const char *)carv->name, "coredump", 8) == 0)
+        {
+          metal_phys_addr_t da = carv->da;
+          FAR void *va;
+
+          va = remoteproc_mmap(&priv->rproc, NULL, &da,
+                               carv->len, 0, NULL);
+          if (va != NULL)
+            {
+              if (add)
+                {
+                  coredump_add_memory_region(va, carv->len, carv->flags);
+                }
+              else
+                {
+                  coredump_remove_memory_region(va, carv->len);
+                }
+            }
+        }
+    }
+}
+#endif
+
 static int rptun_do_start(FAR struct remoteproc *rproc)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
@@ -1066,6 +1123,14 @@ static int rptun_do_start(FAR struct remoteproc *rproc)
                   priv->trace_va = remoteproc_mmap(rproc, NULL, &da,
                                                    trace->len, 0, NULL);
                 }
+
+#ifdef CONFIG_COREDUMP
+              /* Register dump regions after remote core is started,
+               * at which point the memory layout is determined.
+               */
+
+              rptun_update_coredump_regions(priv, true);
+#endif
 
               /* Register callback to mbox for receiving remote message */
 
@@ -1168,6 +1233,9 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
       RPTUN_UNREGISTER_CALLBACK(priv->dev);
       rptun_remove_devices(priv);
+#ifdef CONFIG_COREDUMP
+      rptun_update_coredump_regions(priv, false);
+#endif
       remoteproc_shutdown(rproc);
     }
 
