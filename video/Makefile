@@ -21,7 +21,14 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+
 include videomode/Make.defs
+
+# Add dummy.c to ensure that we have at least one object.
+# On some platforms like macOS, we can't create an empty archive.
+ifeq ($(strip $(ASRCS) $(CSRCS)),)
+  CSRCS = dummy.c
+endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
