@@ -540,7 +540,8 @@ static const capture_parameter_name_t g_capture_parameter_name[] =
 
 static FAR struct imgsensor_s **g_capture_registered_sensor = NULL;
 static size_t g_capture_registered_sensor_num;
-static FAR struct imgdata_s *g_capture_data = NULL;
+static FAR struct imgdata_s **g_capture_registered_data = NULL;
+static size_t g_capture_registered_data_num;
 
 /****************************************************************************
  * Private Functions
@@ -3775,10 +3776,30 @@ static int capture_unlink(FAR struct inode *inode)
 
 int capture_initialize(FAR const char *devpath)
 {
-  return capture_register(devpath,
-                          g_capture_data,
-                          g_capture_registered_sensor,
-                          g_capture_registered_sensor_num);
+  static size_t g_capture_initialize_index;
+  FAR struct imgdata_s *data;
+  FAR struct imgsensor_s *sensor;
+
+  if (g_capture_initialize_index >= g_capture_registered_data_num ||
+      g_capture_initialize_index >= g_capture_registered_sensor_num)
+    {
+      return -EINVAL;
+    }
+
+  data = g_capture_registered_data[g_capture_initialize_index];
+  sensor = g_capture_registered_sensor[g_capture_initialize_index];
+
+  vinfo("capture_initialize: idx=%zu data=%p sensor=%p devpath=%s\n",
+        g_capture_initialize_index, data, sensor,
+        devpath ? devpath : "(null)");
+
+  if (devpath == NULL || data == NULL || sensor == NULL)
+    {
+      return -EINVAL;
+    }
+
+  g_capture_initialize_index++;
+  return capture_register(devpath, data, &sensor, 1);
 }
 
 int capture_uninitialize(FAR const char *devpath)
@@ -3815,8 +3836,15 @@ int capture_register(FAR const char *devpath,
 
   cmng->imgdata   = data;
   cmng->imgsensor = get_connected_imgsensor(sensors, sensor_num);
+
+  /* This is useful for bring-up but too noisy for normal boot. */
+
+  vinfo("capture_register(%s): data=%p sensor_in=%p selected=%p\n",
+        devpath, data, sensors ? sensors[0] : NULL, cmng->imgsensor);
+
   if (cmng->imgsensor == NULL)
     {
+      verr("No available sensor for %s\n", devpath);
       kmm_free(cmng);
       return -EINVAL;
     }
@@ -3867,5 +3895,13 @@ int imgsensor_register(FAR struct imgsensor_s *sensor)
 
 void imgdata_register(FAR struct imgdata_s *data)
 {
-  g_capture_data = data;
+  FAR struct imgdata_s **new_addr;
+
+  new_addr = kmm_realloc(g_capture_registered_data, sizeof(data) *
+                         (g_capture_registered_data_num + 1));
+  if (new_addr != NULL)
+    {
+      new_addr[g_capture_registered_data_num++] = data;
+      g_capture_registered_data = new_addr;
+    }
 }
