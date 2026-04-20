@@ -414,12 +414,8 @@ config SIM_CAMERA_V4L2
 
 endchoice
 
-config HOST_CAMERA_DEV_PATH
-	string "Host camera device path"
-	default "/dev/video0"
-
 config SIM_CAMERA_DEV_PATH
-	string "NuttX video device path"
+	string "NuttX video device path prefix"
 	default "/dev/video"
 
 endif

@@ -25,8 +25,15 @@
  ****************************************************************************/
 
 #include <errno.h>
-#include <string.h>
+#include <inttypes.h>
+#include <stdio.h>
+#include <debug.h>
+
+#include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/wdog.h>
+#include <nuttx/video/v4l2_cap.h>
 #include <nuttx/video/imgsensor.h>
 #include <nuttx/video/imgdata.h>
 #include <nuttx/video/video.h>
@@ -44,18 +51,22 @@
  * Private Types
  ****************************************************************************/
 
-typedef struct
+typedef struct sim_camera_priv_s sim_camera_priv_t;
+
+struct sim_camera_priv_s
 {
   struct imgdata_s data;
   struct imgsensor_s sensor;
   imgdata_capture_t capture_cb;
   void *capture_arg;
   uint32_t buf_size;
-  uint8_t  *next_buf;
-  struct timeval *next_ts;
+  uint8_t *next_buf;
   struct host_video_dev_s *vdev;
   struct wdog_s wdog;
-} sim_camera_priv_t;
+  bool capture_started;
+  int index;
+  char devpath[32];
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -100,6 +111,7 @@ static int sim_camera_data_set_buf(struct imgdata_s *data,
                                    uint8_t nr_datafmts,
                                    imgdata_format_t *datafmts,
                                    uint8_t *addr, uint32_t size);
+static void sim_camera_interrupt(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -135,30 +147,6 @@ static const struct v4l2_frmsizeenum g_frmsizes[] =
       .width = 640,
       .height = 480,
     }
-  }
-};
-
-static struct v4l2_fmtdesc g_fmts[] =
-{
-  {
-    .pixelformat = V4L2_PIX_FMT_YUV420,
-    .description = "YUV420",
-  }
-};
-
-static sim_camera_priv_t g_sim_camera_priv =
-{
-  .data =
-  {
-    &g_sim_camera_data_ops
-  },
-  .sensor =
-  {
-    .ops = &g_sim_camera_ops,
-    .frmsizes_num = 1,
-    .frmsizes = g_frmsizes,
-    .fmtdescs_num = 1,
-    .fmtdescs = g_fmts,
   }
 };
 
@@ -215,7 +203,8 @@ static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
 
 static bool sim_camera_is_available(struct imgsensor_s *sensor)
 {
-  return true;
+  sim_camera_priv_t *priv = container_of(sensor, sim_camera_priv_t, sensor);
+  return host_video_is_available(priv->devpath);
 }
 
 static int sim_camera_init(struct imgsensor_s *sensor)
@@ -239,7 +228,25 @@ static int sim_camera_validate_frame_setting(struct imgsensor_s *sensor,
                                              imgsensor_format_t *fmt,
                                              imgsensor_interval_t *interval)
 {
-  return 0;
+  sim_camera_priv_t *priv = container_of(sensor, sim_camera_priv_t, sensor);
+  uint32_t v4l2_fmt;
+
+  if (nr_fmt > 1)
+    {
+      return -ENOTSUP;
+    }
+
+  v4l2_fmt = imgdata_fmt_to_v4l2(fmt[IMGSENSOR_FMT_MAIN].pixelformat);
+  if (v4l2_fmt == 0)
+    {
+      verr("sim_camera[%d]: unsupported sensor pixfmt=%" PRIu32 "\n",
+           priv->index, fmt[IMGSENSOR_FMT_MAIN].pixelformat);
+      return -EINVAL;
+    }
+
+  return host_video_try_fmt(priv->vdev, fmt[IMGSENSOR_FMT_MAIN].width,
+                            fmt[IMGSENSOR_FMT_MAIN].height, v4l2_fmt,
+                            interval->denominator, interval->numerator);
 }
 
 static int sim_camera_start_capture(struct imgsensor_s *sensor,
@@ -261,12 +268,15 @@ static int sim_camera_stop_capture(struct imgsensor_s *sensor,
 
 static int sim_camera_data_init(struct imgdata_s *data)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
 
-  priv->vdev = host_video_init(CONFIG_HOST_CAMERA_DEV_PATH);
   if (priv->vdev == NULL)
     {
-      return -ENODEV;
+      priv->vdev = host_video_init(priv->devpath);
+      if (priv->vdev == NULL)
+        {
+          return -ENODEV;
+        }
     }
 
   return 0;
@@ -274,9 +284,16 @@ static int sim_camera_data_init(struct imgdata_s *data)
 
 static int sim_camera_data_uninit(struct imgdata_s *data)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
+  int ret = 0;
 
-  return host_video_uninit(priv->vdev);
+  if (priv->vdev != NULL)
+    {
+      ret = host_video_uninit(priv->vdev);
+      priv->vdev = NULL;
+    }
+
+  return ret;
 }
 
 static int sim_camera_data_validate_buf(uint8_t *addr, uint32_t size)
@@ -294,7 +311,7 @@ static int sim_camera_data_set_buf(struct imgdata_s *data,
                                    imgdata_format_t *datafmts,
                                    uint8_t *addr, uint32_t size)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
 
   if (sim_camera_data_validate_buf(addr, size) < 0)
     {
@@ -311,7 +328,7 @@ static int sim_camera_data_validate_frame_setting(struct imgdata_s *data,
                                                   imgdata_format_t *datafmt,
                                                   imgdata_interval_t *interv)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
   uint32_t v4l2_fmt;
 
   if (nr_datafmt > 1)
@@ -320,6 +337,13 @@ static int sim_camera_data_validate_frame_setting(struct imgdata_s *data,
     }
 
   v4l2_fmt = imgdata_fmt_to_v4l2(datafmt->pixelformat);
+  if (v4l2_fmt == 0)
+    {
+      verr("sim_camera[%d]: unsupported data pixfmt=%" PRIu32 "\n",
+           priv->index, datafmt->pixelformat);
+      return -EINVAL;
+    }
+
   return host_video_try_fmt(priv->vdev, datafmt->width,
                             datafmt->height, v4l2_fmt, interv->denominator,
                             interv->numerator);
@@ -332,7 +356,7 @@ static int sim_camera_data_start_capture(struct imgdata_s *data,
                                          imgdata_capture_t callback,
                                          void *arg)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
   int ret;
 
   ret = host_video_set_fmt(priv->vdev,
@@ -348,14 +372,26 @@ static int sim_camera_data_start_capture(struct imgdata_s *data,
 
   priv->capture_cb = callback;
   priv->capture_arg = arg;
-  return host_video_start_capture(priv->vdev);
+
+  ret = host_video_start_capture(priv->vdev);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  priv->capture_started = true;
+  wd_start(&priv->wdog, SIM_CAMERA_PERIOD, sim_camera_interrupt,
+           (wdparm_t)priv);
+  return 0;
 }
 
 static int sim_camera_data_stop_capture(struct imgdata_s *data)
 {
-  sim_camera_priv_t *priv = (sim_camera_priv_t *)data;
+  sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
 
   priv->next_buf = NULL;
+  priv->capture_started = false;
+  wd_cancel(&priv->wdog);
   return host_video_stop_capture(priv->vdev);
 }
 
@@ -366,7 +402,12 @@ static void sim_camera_interrupt(wdparm_t arg)
   struct timeval tv;
   int ret;
 
-  if (priv->next_buf)
+  if (priv == NULL)
+    {
+      return;
+    }
+
+  if (priv->next_buf != NULL)
     {
       ret = host_video_dqbuf(priv->vdev, priv->next_buf, priv->buf_size);
       if (ret > 0)
@@ -377,7 +418,11 @@ static void sim_camera_interrupt(wdparm_t arg)
         }
     }
 
-  wd_start_next(&priv->wdog, SIM_CAMERA_PERIOD, sim_camera_interrupt, arg);
+  if (priv->capture_started && priv->next_buf != NULL)
+    {
+      wd_start(&priv->wdog, SIM_CAMERA_PERIOD, sim_camera_interrupt,
+               (wdparm_t)priv);
+    }
 }
 
 /****************************************************************************
@@ -386,11 +431,43 @@ static void sim_camera_interrupt(wdparm_t arg)
 
 int sim_camera_initialize(void)
 {
-  sim_camera_priv_t *priv = &g_sim_camera_priv;
+  sim_camera_priv_t *privs;
+  int count;
+  int first_error = 0;
 
-  imgsensor_register(&priv->sensor);
-  imgdata_register(&priv->data);
+  count = host_video_get_device_count();
+  if (count < 0)
+    {
+      return count;
+    }
 
-  wd_start(&priv->wdog, 0, sim_camera_interrupt, (wdparm_t)priv);
-  return 0;
+  privs = kmm_zalloc(sizeof(sim_camera_priv_t) * count);
+  if (privs == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  for (int i = 0; i < count; i++)
+    {
+      sim_camera_priv_t *priv = &privs[i];
+      FAR struct imgsensor_s *sensor;
+      int ret;
+
+      priv->data.ops = &g_sim_camera_data_ops;
+      priv->sensor.ops = &g_sim_camera_ops;
+      priv->sensor.frmsizes_num = 1;
+      priv->sensor.frmsizes = g_frmsizes;
+      sensor = &priv->sensor;
+      priv->index = i;
+      snprintf(priv->devpath, sizeof(priv->devpath), "%s%d",
+               CONFIG_SIM_CAMERA_DEV_PATH, i);
+
+      ret = capture_register(priv->devpath, &priv->data, &sensor, 1);
+      if (ret < 0 && first_error == 0)
+        {
+          first_error = ret;
+        }
+    }
+
+  return first_error;
 }

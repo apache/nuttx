@@ -40,6 +40,7 @@ struct host_video_dev_s;
  * Public Function Prototypes
  ****************************************************************************/
 
+int host_video_get_device_count(void);
 bool host_video_is_available(const char *host_video_dev_path);
 struct host_video_dev_s *host_video_init(const char *host_video_dev_path);
 int host_video_uninit(struct host_video_dev_s *vdev);
