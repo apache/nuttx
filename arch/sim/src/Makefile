@@ -110,11 +110,18 @@ CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
    -fvisibility=default
+HOSTMFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
+   -fvisibility=default
 
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
+
 ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
+ifeq ($(CONFIG_SIM_X11FB),y)
+  HOSTCFLAGS += -I/opt/X11/include
+endif
 endif
 
 ifeq ($(CONFIG_FS_LARGEFILE),y)
@@ -145,6 +152,11 @@ ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
     LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
   endif
 endif
+
+# Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
+# may resolve host libc references against NuttX's internal libc implementation
+# during process initialization, which can crash before main() runs.
+LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
 else
   STDLIBS += -lrt
 endif
@@ -313,6 +325,15 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   STDLIBS += -lv4l2
 endif
 
+ifeq ($(CONFIG_SIM_CAMERA_AVFOUNDATION),y)
+  HOSTMSRCS += sim/macos/sim_host_avfoundation_backend.m
+  CSRCS += sim_camera.c
+ifeq ($(CONFIG_HOST_MACOS),y)
+  STDLIBS += -framework AVFoundation -framework CoreMedia \
+             -framework CoreVideo -framework Foundation
+endif
+endif
+
 ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
   CSRCS += sim_decoder.c
   CSRCS += sim_openh264dec.c
@@ -325,12 +346,14 @@ ifeq ($(CONFIG_SIM_VIDEO_ENCODER),y)
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
+HOSTCOBJS = $(HOSTSRCS:.c=$(OBJEXT))
+HOSTMOBJS = $(HOSTMSRCS:.m=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
-HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
+HOSTOBJS = $(HOSTCOBJS) $(HOSTMOBJS)
 HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
+SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS) $(HOSTMSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
@@ -386,9 +409,14 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(HOSTOBJS) $(HEADOBJ): %$(OBJEXT): %.c
+$(HOSTCOBJS) $(HEADOBJ): %$(OBJEXT): %.c
 	$(Q) $(ECHO_BEGIN)"CC:  $<"
 	$(Q) "$(CC)" -c $(HOSTCFLAGS) $< -o $@
+	$(Q) $(ECHO_END)
+
+$(HOSTMOBJS): %$(OBJEXT): %.m
+	$(Q) $(ECHO_BEGIN)"CC:  $<"
+	$(Q) $(HOSTCC) -c $(HOSTMFLAGS) -x objective-c $< -o $@
 	$(Q) $(ECHO_END)
 
 # The architecture-specific library
@@ -505,6 +533,9 @@ export_startup: sim_head.o $(HOSTOBJS) nuttx-names.dat
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(HOSTSRCS:.c=.ddh)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
+
+$(HOSTSRCS:.c=.ddh): %.ddh: %.c
+	$(Q) $(MKDEP) --obj-path $(OBJPATH) --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(HOSTCFLAGS) -- $< > $@
 
 config.h: $(TOPDIR)/include/nuttx/config.h
 	@echo "CP:  $<"
