@@ -205,17 +205,19 @@ static void esp_evt_work_cb(void *arg)
             break;
 
           case WIFI_EVENT_STA_DISCONNECTED:
-            wifi_event_sta_disconnected_t *event =
-              (wifi_event_sta_disconnected_t *)evt_adpt->buf;
-            wifi_err_reason_t reason = event->reason;
+            {
+              wifi_event_sta_disconnected_t *event =
+                (wifi_event_sta_disconnected_t *)evt_adpt->buf;
+              wifi_err_reason_t reason = event->reason;
 
-            wlinfo("Wi-Fi station disconnected, reason: %u\n", reason);
-            esp_wlan_sta_disconnect_hook();
-            if (reason == WIFI_REASON_ASSOC_LEAVE)
-              {
-                work_queue(LPWORK, &g_wifi_evt_work, esp_reconnect_work_cb,
-                           NULL, 0);
-              }
+              wlinfo("Wi-Fi station disconnected, reason: %u\n", reason);
+              esp_wlan_sta_disconnect_hook();
+              if (reason == WIFI_REASON_ASSOC_LEAVE)
+                {
+                  work_queue(LPWORK, &g_wifi_evt_work, esp_reconnect_work_cb,
+                             NULL, 0);
+                }
+            }
 
             break;
 
