@@ -144,8 +144,9 @@ if(CONFIG_LIBCXX)
   nuttx_add_system_library(libcxx)
   target_sources(libcxx PRIVATE ${SRCS})
   target_compile_options(libcxx PRIVATE ${FLAGS})
-  target_include_directories(libcxx BEFORE
-                             PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
+  target_include_directories(
+    libcxx BEFORE PRIVATE ${CMAKE_CURRENT_LIST_DIR}/libcxx/src
+                          ${CMAKE_CURRENT_LIST_DIR})
 
   if(CONFIG_LIBCXX_TEST)
     list(
