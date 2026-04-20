@@ -115,11 +115,16 @@ HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)
 HOSTCFLAGS += ${INCDIR_PREFIX}$(ARCH_SRCDIR)$(DELIM)chip
 ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
+ifeq ($(CONFIG_SIM_X11FB),y)
+  HOSTCFLAGS += -I/opt/X11/include
+endif
 endif
 
 ifeq ($(CONFIG_FS_LARGEFILE),y)
   HOSTCFLAGS += -D_FILE_OFFSET_BITS=64
 endif
+
+HOST_OBJCFLAGS := $(filter-out -I$(TOPDIR)/include,$(HOSTCFLAGS))
 
 HOSTSRCS  = sim_hostirq.c sim_hostmemory.c sim_hostmisc.c sim_hosttime.c sim_hostuart.c
 HOSTSRCS += sim_hostfs.c sim_errno.c
@@ -145,6 +150,11 @@ ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
     LDFLAGS += -Wl,-ld_classic,-no_fixup_chains
   endif
 endif
+
+# Keep the simulator executable from exporting NuttX symbols. Otherwise dyld
+# may resolve host libc references against NuttX's internal libc implementation
+# during process initialization, which can crash before main() runs.
+LDFLAGS += -Wl,-exported_symbol,__mh_execute_header
 else
   STDLIBS += -lrt
 endif
@@ -313,6 +323,13 @@ ifeq ($(CONFIG_SIM_CAMERA_V4L2),y)
   STDLIBS += -lv4l2
 endif
 
+ifeq ($(CONFIG_SIM_CAMERA_AVFOUNDATION),y)
+  HOSTMSRCS += sim/macos/sim_host_avfoundation_backend.m
+  CSRCS += sim_camera.c
+  STDLIBS += -framework AVFoundation -framework CoreMedia \
+             -framework CoreVideo -framework Foundation
+endif
+
 ifeq ($(CONFIG_SIM_VIDEO_DECODER),y)
   CSRCS += sim_decoder.c
   CSRCS += sim_openh264dec.c
@@ -327,10 +344,10 @@ endif
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
-HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
+HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT)) $(HOSTMSRCS:.m=$(OBJEXT))
 HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
+SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS) $(HOSTMSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
@@ -386,9 +403,14 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(HOSTOBJS) $(HEADOBJ): %$(OBJEXT): %.c
+$(HOSTSRCS:.c=$(OBJEXT)) $(HEADOBJ): %$(OBJEXT): %.c
 	$(Q) $(ECHO_BEGIN)"CC:  $<"
 	$(Q) "$(CC)" -c $(HOSTCFLAGS) $< -o $@
+	$(Q) $(ECHO_END)
+
+$(HOSTMSRCS:.m=$(OBJEXT)): %$(OBJEXT): %.m
+	$(Q) $(ECHO_BEGIN)"CC:  $<"
+	$(Q) $(HOSTCC) -c $(HOST_OBJCFLAGS) -x objective-c $< -o $@
 	$(Q) $(ECHO_END)
 
 # The architecture-specific library
