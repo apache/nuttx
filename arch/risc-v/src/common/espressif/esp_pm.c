@@ -895,7 +895,7 @@ int esp_pmconfigure(void)
       .min_freq_mhz = CONFIG_ESPRESSIF_CPU_FREQ_MHZ,
 #endif
 #ifdef CONFIG_ESPRESSIF_AUTO_SLEEP
-      .light_sleep_enable = false
+      .light_sleep_enable = true
 #endif
     };
 
