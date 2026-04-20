@@ -1192,6 +1192,11 @@ static int local_socketpair(FAR struct socket *psocks[2])
       goto errout;
     }
 
+  /* Set up peer references so that getpeername() works correctly */
+
+  conns[0]->lc_peer = conns[1];
+  conns[1]->lc_peer = conns[0];
+
   conns[0]->lc_state = conns[1]->lc_state
                      = LOCAL_STATE_CONNECTED;
 
