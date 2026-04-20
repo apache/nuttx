@@ -388,8 +388,8 @@ static noreturn_function void __esp32_start(void)
 
   chip_rev = esp_efuse_hal_chip_revision();
 
-  _info("ESP32 chip revision is v%" PRId32 ".%01ld\n",
-        chip_rev / 100, chip_rev % 100);
+  ets_printf("ESP32 chip revision is v%" PRId32 ".%01ld\n",
+             chip_rev / 100, chip_rev % 100);
 
   if (chip_rev < 300)
     {
