@@ -460,6 +460,7 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 
 #ifdef CONFIG_SIM_CAMERA
 int sim_camera_initialize(void);
+int sim_camera_register_capture_devices(void);
 #endif
 
 #ifdef CONFIG_SIM_VIDEO_DECODER
