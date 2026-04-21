@@ -815,4 +815,20 @@ endif # INPUT_KMATRIX_I2C
 
 endif # INPUT_KMATRIX
 
+config INPUT_MPR121_KEYPAD
+	bool "MPR121 Touch Keypad Driver"
+	default n
+	select INPUT_KEYBOARD
+	---help---
+		Enable support for keypad matrix powered by MPR121.
+
+if INPUT_MPR121_KEYPAD
+
+config INPUT_MPR121_KEYPAD_BUFSIZE
+	int "Keyboard matrix buffer size"
+	default 64
+	---help---
+		Size of the keyboard event buffer for each open file descriptor.
+
+endif # INPUT_MPR121_KEYPAD
 endif # INPUT
