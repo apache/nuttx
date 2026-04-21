@@ -193,6 +193,54 @@
 #define ring_mpsc_dequeue_skip(r, count) \
   ring_sc_dequeue_skip(RING_BASE(r), count)
 
+#define ring_spsc_enqueue_start(r, count, elem_size, b) \
+  ring_sp_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_spsc_enqueue_finish(r, b) \
+  ring_sp_finish(RING_BASE(r), b)
+
+#define ring_spsc_dequeue_start(r, count, elem_size, b) \
+  ring_sc_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_spsc_dequeue_finish(r, b) \
+  ring_sc_finish(RING_BASE(r), b)
+
+#define ring_mpmc_enqueue_start(r, count, elem_size, b) \
+  ring_mp_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_mpmc_enqueue_finish(r, b) \
+  ring_mp_finish(RING_BASE(r), b)
+
+#define ring_mpmc_dequeue_start(r, count, elem_size, b) \
+  ring_mc_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_mpmc_dequeue_finish(r, b) \
+  ring_mc_finish(RING_BASE(r), b)
+
+#define ring_spmc_enqueue_start(r, count, elem_size, b) \
+  ring_sp_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_spmc_enqueue_finish(r, b) \
+  ring_sp_finish(RING_BASE(r), b)
+
+#define ring_spmc_dequeue_start(r, count, elem_size, b) \
+  ring_mc_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_spmc_dequeue_finish(r, b) \
+  ring_mc_finish(RING_BASE(r), b)
+
+#define ring_mpsc_enqueue_start(r, count, elem_size, b) \
+  ring_mp_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_mpsc_enqueue_finish(r, b) \
+  ring_mp_finish(RING_BASE(r), b)
+
+#define ring_mpsc_dequeue_start(r, count, elem_size, b) \
+  ring_sc_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_mpsc_dequeue_finish(r, b) \
+  ring_sc_finish(RING_BASE(r), b)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
