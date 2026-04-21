@@ -138,5 +138,9 @@ if(CONFIG_INPUT)
     list(APPEND SRCS goldfish_events.c)
   endif()
 
+  if(CONFIG_INPUT_MPR121_KEYPAD)
+    list(APPEND SRCS mpr121.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
