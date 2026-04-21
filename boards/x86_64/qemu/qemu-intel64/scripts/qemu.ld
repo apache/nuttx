@@ -113,6 +113,7 @@ SECTIONS
         _etdata = ABSOLUTE(.);
         _stbss = ABSOLUTE(.);
         *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        . = ALIGN(16);
         _etbss = ABSOLUTE(.);
     }
 
