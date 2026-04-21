@@ -138,6 +138,8 @@
   (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
 #define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
   TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
+#define TRICORE_SCHEDIRQ \
+  TRICORE_GPSR_IRQNUM(up_cpu_index(), up_cpu_index())
 
 /* TriCore interrupt priority range, higher value means higher priority. */
 

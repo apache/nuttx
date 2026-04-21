@@ -41,24 +41,68 @@
 
 #include "tricore_internal.h"
 
+#include "IfxCpu.h"
+
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
-IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+/****************************************************************************
+ * Name: tricore_irq_direct
+ *
+ * Description:
+ *   Fast interrupt path (analogous to ARM-M exception_direct).
+ *   Only dispatches the IRQ handler, no context switch.
+ *   If a context switch is needed, triggers the scheduling GPSR which
+ *   will execute after all higher-priority interrupts have returned.
+ *
+ ****************************************************************************/
+
+static void tricore_irq_direct(uintptr_t *regs, int ccpn)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb = this_task();
   int irq;
 
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  Ifx_CPU_ICR icr;
-  uintptr_t *regs;
+#ifdef CONFIG_ARCH_IRQPRIO
+  up_irq_enable();
+#endif
 
-  icr.U = tricore_mfcr(CPU_ICR);
-  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+  irq = tricore_srpn_to_irq(ccpn);
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+
+  if (*running_task != this_task())
+    {
+      cpu_set_t cpuset;
+
+      CPU_ZERO(&cpuset);
+      CPU_SET(up_cpu_index(), &cpuset);
+      up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
+    }
+}
+
+/****************************************************************************
+ * Name: tricore_irq_sched
+ *
+ * Description:
+ *   Scheduling GPSR path for context switch (analogous to arm_doirq).
+ *   This is triggered by tricore_irq_direct when it detects that a
+ *   context switch is needed.
+ *
+ *   Because the GPSR SRPN is the lowest priority, this only executes
+ *   after all normal interrupts have completed, guaranteeing safe
+ *   context switch without race conditions.
+ *
+ ****************************************************************************/
+
+static void tricore_irq_sched(uintptr_t *regs)
+{
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  struct tcb_s *tcb;
+
+#ifdef CONFIG_ARCH_IRQPRIO
+  up_irq_enable();
+#endif
 
   if (*running_task != NULL)
     {
@@ -67,11 +111,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   board_autoled_on(LED_INIRQ);
 
-  /* Deliver the IRQ */
-
-  irq = tricore_srpn_to_irq(icr.B.CCPN);
-  tricore_ack_irq(irq);
-  irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch. */
 
@@ -109,5 +149,26 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
   (*running_task)->xcp.regs = NULL;
   board_autoled_off(LED_INIRQ);
-#endif
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
+{
+  Ifx_CPU_ICR icr;
+  uintptr_t *regs;
+
+  icr.U = tricore_mfcr(CPU_ICR);
+  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
+
+  if (icr.B.CCPN == TRICORE_IRQ_MIN_PRIORITY)
+    {
+      tricore_irq_sched(regs);
+    }
+  else
+    {
+      tricore_irq_direct(regs, icr.B.CCPN);
+    }
 }

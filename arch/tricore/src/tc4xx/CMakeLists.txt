@@ -181,3 +181,4 @@ endif()
 target_compile_definitions(
   arch PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0 -DSRC_CPU_CPU0_SB=SRC_CPU0SB
                -DMODULE_STM0=MODULE_CPU0 -DSRC_STM0SR0=SRC_STMCPU0_SR2)
+target_compile_definitions(nuttx PRIVATE -DSRC_GPSR00=SRC_GPSR0SR0)
