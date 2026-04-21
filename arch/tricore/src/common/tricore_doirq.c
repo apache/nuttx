@@ -46,37 +46,80 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tricore_doirq
+ * Name: tricore_irq_direct
  *
  * Description:
- *   Common interrupt handler, entered from the interrupt vector in
- *   tricore_vectors.S/.asm with the lower context saved.
+ *   Fast interrupt path (analogous to ARM-M exception_direct).
+ *   Only dispatches the IRQ handler, no context switch.
+ *   If a context switch is needed, triggers the scheduling GPSR which
+ *   will execute after all higher-priority interrupts have returned.
  *
  ****************************************************************************/
 
-void tricore_doirq(void)
+void tricore_irq_direct(void)
 {
   struct tcb_s **running_task = &g_running_tasks[this_cpu()];
-  struct tcb_s *tcb = this_task();
-
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  int irq = tricore_irq_from_lasr();
   uintptr_t *regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
+  int irq = tricore_irq_from_lasr();
+
+  up_irq_enable();
+
+  tricore_ack_irq(irq);
+  irq_dispatch(irq, regs);
+
+  if (*running_task != this_task())
+    {
+      cpu_set_t cpuset;
+
+      CPU_ZERO(&cpuset);
+      CPU_SET(up_cpu_index(), &cpuset);
+      up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
+    }
+
+  tricore_jump_backto_link();
+}
+
+/****************************************************************************
+ * Name: tricore_irq_sched
+ *
+ * Description:
+ *   Scheduling GPSR path for context switch (analogous to arm_doirq).
+ *   This is triggered by tricore_irq_direct when it detects that a
+ *   context switch is needed.
+ *
+ *   Because the GPSR SRPN is the lowest priority, this only executes
+ *   after all normal interrupts have completed, guaranteeing safe
+ *   context switch without race conditions.
+ *
+ ****************************************************************************/
+
+void tricore_irq_sched(void)
+{
+  struct tcb_s **running_task = &g_running_tasks[this_cpu()];
+  uintptr_t *regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
+  struct tcb_s *tcb;
 
   if (*running_task != NULL)
     {
       (*running_task)->xcp.regs = regs;
+      tricore_store_pprs(*running_task);
+
+#ifdef CONFIG_ARCH_IRQPRIO
+      if ((*running_task)->sigdeliver && !(*running_task)->xcp.saved_regs)
+        {
+          up_schedule_sigaction(*running_task);
+        }
+#endif
     }
+
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  up_irq_save();
+  up_irq_enable();
+#endif
 
   board_autoled_on(LED_INIRQ);
 
-  /* Deliver the IRQ */
-
-  tricore_ack_irq(irq);
-
-  irq_dispatch(irq, regs);
+  tcb = this_task();
 
   /* Check for a context switch. */
 
@@ -97,21 +140,19 @@ void tricore_doirq(void)
       tcb = this_task();
 #endif
 
-      /* Updata PPRS register */
-
-      tricore_store_pprs(*running_task);
-      tricore_restore_pprs(tcb);
-
       /* Record the new "running" task when context switch occurred.
        * g_running_tasks[] is only used by assertion logic for reporting
        * crashes.
        */
 
       *running_task = tcb;
-
-      tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
-      UP_ISB();
     }
+
+  /* The saved context may also reference a signal-delivery CSA. */
+
+  tricore_restore_pprs(tcb);
+  tricore_mtcr(TRICORE_CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
+  UP_ISB();
 
   /* (*running_task)->xcp.regs is about to become invalid and
    * will be marked as NULL to avoid misusage. the same applies
@@ -122,7 +163,5 @@ void tricore_doirq(void)
   tricore_change_pprs(*running_task, UINT32_MAX);
 
   board_autoled_off(LED_INIRQ);
-#endif
-
   tricore_jump_backto_link();
 }

@@ -112,8 +112,8 @@ section_setup mpe:tc0:linear
 
 section_layout mpe:tc0:linear
 {
-  /* Reset entry, the trap table at +0x100 and the interrupt vector at
-   * +0x1fe0, which BIV points at with all priority bits set
+  /* Reset entry at +0, full BIV table at +0x20, trap table at +0x2000,
+   * and text at +0x2100.
    */
 
   group start (ordered, run_addr = PFLS_BASE)
@@ -121,17 +121,17 @@ section_layout mpe:tc0:linear
     select ".text.start";
   }
 
-  group traptab (ordered, run_addr = PFLS_BASE + 0x100)
+  group traptab (ordered, run_addr = PFLS_BASE + 0x2000)
   {
     select ".text.traptab";
   }
 
-  group intvec (ordered, run_addr = PFLS_BASE + 0x1fe0)
+  group intvec (ordered, run_addr = PFLS_BASE + 0x20)
   {
     select ".text.inttab";
   }
 
-  group text (run_addr = mem:mpe:pfls)
+  group text (ordered, run_addr = PFLS_BASE + 0x2100)
   {
     select ".text*";
     select ".rodata*";
@@ -180,7 +180,7 @@ section_layout mpe:tc0:linear
     reserved "csa" (size = CSA_SIZE);
   }
 
-  "__TRAPTAB_CPU0" := PFLS_BASE + 0x100;
+  "__TRAPTAB_CPU0" := PFLS_BASE + 0x2000;
   "__INTTAB_CPU0" := PFLS_BASE;
 
   "__a0_mem" := sizeof(group:a0) > 0 ? addressof(group:a0) + 0x8000 : 0;

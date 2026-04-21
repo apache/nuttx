@@ -76,8 +76,8 @@ PROVIDE(__start5 = 0x80f00000);
 
 SECTIONS
 {
-  /* Reset entry, the trap table at +0x100 and the interrupt vector at
-   * +0x1fe0, which BIV points at with all priority bits set
+  /* Reset entry at +0, full BIV table at +0x20, trap table at +0x2000,
+   * and text at +0x2100.
    */
 
   .start ORIGIN(pfls) :
@@ -85,19 +85,19 @@ SECTIONS
     KEEP(*(.start))
   } > pfls
 
-  .traptab ORIGIN(pfls) + 0x100 :
+  .traptab ORIGIN(pfls) + 0x2000 :
   {
     __TRAPTAB_CPU0 = .;
     KEEP(*(.traptab))
   } > pfls
 
-  .intvec ORIGIN(pfls) + 0x1fe0 :
+  .intvec ORIGIN(pfls) + 0x20 :
   {
     __INTTAB_CPU0 = ORIGIN(pfls);
     KEEP(*(.inttab))
   } > pfls
 
-  .text :
+  .text ORIGIN(pfls) + 0x2100 :
   {
     *(.text .text.*)
     *(.gnu.linkonce.t.*)

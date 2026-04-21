@@ -80,6 +80,19 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
+#ifdef CONFIG_ARCH_IRQPRIO
+  if (tcb == g_running_tasks[this_cpu()] &&
+      tricore_irq_from_lasr() != TRICORE_SCHEDIRQ)
+    {
+      cpu_set_t cpuset;
+
+      CPU_ZERO(&cpuset);
+      CPU_SET(up_cpu_index(), &cpuset);
+      up_trigger_irq(TRICORE_SCHEDIRQ, cpuset);
+      return;
+    }
+#endif
+
   /* Save the context registers.  These will be
    * restored by the signal trampoline after the signals have
    * been delivered.

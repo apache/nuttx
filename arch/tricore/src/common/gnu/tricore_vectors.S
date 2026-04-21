@@ -133,8 +133,10 @@ tricore_traptab:
 	.size	tricore_traptab, . - tricore_traptab
 
 /****************************************************************************
- * Interrupt vector table.  One entry serves all priorities; the startup
- * code sets the BIV priority bits accordingly.
+ * Interrupt vector table
+ *
+ *   SRPN 1 -> tricore_irq_sched (lowest priority, task switch only),
+ *   SRPN 2~MAX -> tricore_irq_direct (fast dispatch, nestable).
  ****************************************************************************/
 
 	.section .inttab, "ax", @progbits
@@ -142,5 +144,8 @@ tricore_traptab:
 	.global	tricore_inttab
 	.type	tricore_inttab, @function
 tricore_inttab:
-	INTSLOT	tricore_doirq
+	INTSLOT	tricore_irq_sched
+	.rept	TRICORE_IRQ_MAX_PRIORITY - 1
+	INTSLOT	tricore_irq_direct
+	.endr
 	.size	tricore_inttab, . - tricore_inttab
