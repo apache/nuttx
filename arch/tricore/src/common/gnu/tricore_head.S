@@ -32,7 +32,6 @@
  ****************************************************************************/
 
 #define TRICORE_PSW_RESET  0x980   /* Supervisor, call depth counting on */
-#define TRICORE_BIV_VECTOR 0x1fe0  /* Single interrupt vector at INTTAB + 0x1fe0 */
 
 #ifdef CONFIG_ARCH_CHIP_TC3X
 #  define TC3XX_WDTCPU0_CON0 0xf003624c  /* CPU0 watchdog CON0, 0xc apart per CPU */
@@ -156,7 +155,6 @@ tricore_head:
 
 	movh.a	%a15, hi:__INTTAB_CPU0
 	lea	%a15, [%a15]lo:__INTTAB_CPU0
-	lea	%a15, [%a15]TRICORE_BIV_VECTOR
 	mov.d	%d15, %a15
 	mtcr	TRICORE_CPU_BIV, %d15
 	isync
