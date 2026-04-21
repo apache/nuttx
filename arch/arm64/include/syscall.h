@@ -154,6 +154,25 @@
 
 #define ARM_SMCCC_RET_NOT_SUPPORTED     ((unsigned long)-1)
 
+/* NuttX SPD (Secure Payload Dispatcher) SMC function IDs.
+ * Used for BL32 <-> BL31 communication in TrustZone configurations.
+ *
+ * Yielding SMCs: world-switch / long-running ops, may be preempted.
+ * Fast SMCs: short atomic ops, non-preemptible.
+ */
+
+#define ARM64_SMCCC_NUTTX_SEND_SECURE_SGI \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL, ARM_SMCCC_SMC_64, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0000)
+
+#define ARM64_SMCCC_NUTTX_TEE_IDLE \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_STD_CALL, ARM_SMCCC_SMC_64, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0001)
+
+#define ARM64_SMCCC_NUTTX_REE_IDLE \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_STD_CALL, ARM_SMCCC_SMC_64, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0002)
+
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
