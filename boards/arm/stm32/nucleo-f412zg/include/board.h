@@ -125,6 +125,14 @@
 #  define GPIO_USART2_RX GPIO_USART2_RX_2
 #  define GPIO_USART2_TX GPIO_USART2_TX_2
 
+/* USART3 (ST-LINK Virtual COM Port):
+ *  RXD: PD9
+ *  TXD: PD8
+ */
+
+#  define GPIO_USART3_RX GPIO_USART3_RX_3
+#  define GPIO_USART3_TX GPIO_USART3_TX_3
+
 /* USART6:
  *  RXD: PG9    CN10 pin 16
  *  TXD: PG14   CN10 pin 14

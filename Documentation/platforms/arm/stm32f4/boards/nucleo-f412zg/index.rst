@@ -123,7 +123,8 @@ Pins and Connectors::
     TXD: PA2   CN9 pin 2(See SB13, 14, 62, 63). CN10 pin 35
          PD5
 
-    UART2 is the default in all of these configurations.
+USART2 is available on the board headers. It is not the default ``nsh``
+console path.
 
 TTL to RS-232 converter connection::
 
@@ -153,6 +154,30 @@ To configure USART2 as the console::
     CONFIG_USART2_PARITY=0
     CONFIG_USART2_2STOP=0
 
+USART3
+------
+
+Pins and Connectors::
+
+    RXD: PD9
+    TXD: PD8
+
+By default the board solder bridges connect USART3 to the on-board
+ST-LINK Virtual COM Port. This is the default ``nsh`` console path in
+NuttX.
+
+To configure USART3 as the console::
+
+    CONFIG_STM32_USART3=y
+    CONFIG_USART3_SERIALDRIVER=y
+    CONFIG_USART3_SERIAL_CONSOLE=y
+    CONFIG_USART3_RXBUFSIZE=256
+    CONFIG_USART3_TXBUFSIZE=256
+    CONFIG_USART3_BAUD=115200
+    CONFIG_USART3_BITS=8
+    CONFIG_USART3_PARITY=0
+    CONFIG_USART3_2STOP=0
+
 USART6
 ------
 
@@ -178,28 +203,10 @@ To configure USART6 as the console::
 Virtual COM Port
 ----------------
 
-Yet another option is to use UART2 and the USB virtual COM port.  This
-option may be more convenient for long term development, but is painful
-to use during board bring-up.
-
-Solder Bridges.  This configuration requires:
-
-- SB62 and SB63 Open: PA2 and PA3 on STM32 MCU are disconnected to D1
-  and D0 (pin 7 and pin 8) on Arduino connector CN9 and ST Morpho
-  connector CN10.
-
-- SB13 and SB14 Closed:  PA2 and PA3 on STM32F103C8T6 (ST-LINK MCU) are
-  connected to PA3 and PA2 on STM32 MCU to have USART communication
-  between them. Thus SB61, SB62 and SB63 should be OFF.
-
-Configuring USART2 is the same as given above.
-
-Question:  What BAUD should be configure to interface with the Virtual
-COM port?  115200 8N1?
-
-Default:
-As shipped, SB62 and SB63 are open and SB13 and SB14 closed, so the
-virtual COM port is enabled.
+The NUCLEO-F412ZG ST-LINK virtual COM port is connected to USART3 on
+PD8/PD9. As shipped, the default solder bridge configuration enables
+this routing, so the default ``nsh`` configuration uses USART3 for the
+console.
 
 Configurations
 ==============
@@ -208,8 +215,8 @@ nsh
 ---
 
 Configures the NuttShell (nsh) located at apps/examples/nsh for the
-Nucleo-F410RB board.  The Configuration enables the serial interfaces
-on UART2.  Support for builtin applications is enabled, but in the base
+Nucleo-F412ZG board.  The configuration enables the serial interfaces
+on USART3.  Support for builtin applications is enabled, but in the base
 configuration no builtin applications are selected (see NOTES below).
 
 NOTES:
