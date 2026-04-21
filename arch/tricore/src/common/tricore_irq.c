@@ -162,7 +162,18 @@ int tricore_irq_to_srpn(int irq)
   int avail_srpn = 0;
   int i;
 
-  for (i = TRICORE_IRQ_MIN_PRIORITY; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
+  /* Scheduling GPSR always gets the lowest priority */
+
+  if (irq == TRICORE_SCHEDIRQ)
+    {
+      g_srpn_to_irq[TRICORE_IRQ_MIN_PRIORITY] = irq;
+
+      return TRICORE_IRQ_MIN_PRIORITY;
+    }
+
+  /* Lookup: search the full SRPN range [MIN + 1, MAX] */
+
+  for (i = TRICORE_IRQ_MIN_PRIORITY + 1; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
     {
       if (g_srpn_to_irq[i] == irq)
         {
@@ -259,6 +270,7 @@ void up_irqinitialize(void)
 #endif
 
   tricore_color_intstack();
+  up_enable_irq(TRICORE_SCHEDIRQ);
   up_irq_enable();
 }
 
@@ -376,8 +388,9 @@ int up_prioritize_irq(int irq, int priority)
 {
   int i;
 
-  DEBUGASSERT(priority >= TRICORE_IRQ_MIN_PRIORITY &&
-              priority <= TRICORE_IRQ_MAX_PRIORITY);
+  DEBUGASSERT(priority > TRICORE_IRQ_MIN_PRIORITY &&
+              priority <= TRICORE_IRQ_MAX_PRIORITY &&
+              irq != TRICORE_SCHEDIRQ);
 
   /* IRQ already mapped to the target SRPN, nothing to do */
 
@@ -392,7 +405,7 @@ int up_prioritize_irq(int irq, int priority)
 
   /* Clear old mapping if this IRQ had a different SRPN */
 
-  for (i = TRICORE_IRQ_MIN_PRIORITY; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
+  for (i = TRICORE_IRQ_MIN_PRIORITY + 1; i <= TRICORE_IRQ_MAX_PRIORITY; i++)
     {
       if (g_srpn_to_irq[i] == irq)
         {
