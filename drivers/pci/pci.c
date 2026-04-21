@@ -2244,7 +2244,21 @@ int pci_register_device(FAR struct pci_device_s *dev)
 {
   FAR const struct pci_device_id_s *id;
   FAR struct pci_driver_s *drv;
+  uint16_t cmd;
   int ret;
+
+  /* Skip devices already initialized by another CPU. In BMP
+   * environments where multiple CPUs scan the same PCI bus,
+   * a device with IO or MEMORY enabled was probed by a prior
+   * CPU's driver (via pci_enable_device) - skip to avoid
+   * duplicate probe.
+   */
+
+  pci_read_config_word(dev, PCI_COMMAND, &cmd);
+  if (cmd & (PCI_COMMAND_IO | PCI_COMMAND_MEMORY))
+    {
+      return -EBUSY;
+    }
 
   ret = nxmutex_lock(&g_pci_lock);
   if (ret < 0)
