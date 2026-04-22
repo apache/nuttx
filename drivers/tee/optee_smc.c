@@ -40,14 +40,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ARM)
+#if defined(CONFIG_ARCH_ARM) || defined(CONFIG_ARCH_ARM64)
 #  define smccc_smc                  arm_smccc_smc
 #  define smccc_hvc                  arm_smccc_hvc
 #  define smccc_res_t                arm_smccc_res_t
-#elif defined(CONFIG_ARCH_ARM64)
-#  define smccc_smc                  arm64_smccc_smc
-#  define smccc_hvc                  arm64_smccc_hvc
-#  define smccc_res_t                arm64_smccc_res_t
 #else
 #  error "CONFIG_DEV_OPTEE_SMC is only supported on arm and arm64"
 #endif
