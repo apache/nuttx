@@ -1475,6 +1475,54 @@ because code cannot be executed from CCM memory.
 STATUS:
 2018-06-02: Configuration added by Alan Carvalho de Assis.
 
+mpr121_keypad
+-------------
+
+This board config enables the usage of an external MPR121 Capacitive
+Keypad connected to STM32F4Discovery board this way:
+
+================ =============
+STM32F4Discovery MPR121 Keypad
+================ =============
+GND              GND
+3V [1]           3V3
+I2C1 SDA (PB9)   SDA
+I2C1 SCL (PB6)   SCL
+PB0              IRQ
+================ =============
+
+1: You need to remove the diode D3 and short-circuit the PADs in the
+board to get 3.3V. Be aware: although my board works fine, it could
+damage something that expects 3V in our board (double check).
+
+After compiling and flashing the firmware in our board, run kbd command.
+
+.. code:: console
+
+   NuttShell (NSH) NuttX-12.13.0
+   nsh> ls /dev
+   /dev:
+    console
+    keypad0
+    null
+    ttyS0
+    zero
+   nsh> kbd
+   kbd_main: nsamples: 0
+   kbd_main: Opening /dev/keypad0
+   Sample  :
+      code : 48
+      type : 0
+   Sample  :
+      code : 48
+      type : 1
+   Sample  :
+      code : 49
+      type : 0
+   Sample  :
+      code : 49
+      type : 1
+
 netnsh
 ------
 
