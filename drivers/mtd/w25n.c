@@ -655,10 +655,14 @@ static void w25n_unprotect(FAR struct w25n_dev_s *priv)
  * Name: w25n_read_bbm_lut
  *
  * Description:
- *   Read all 20 entries of the hardware Bad Block Management Look-Up Table.
- *   Each entry is encoded as (lba_raw << 16) | pba_raw, where the high two
- *   LBA bits are status flags (Enable, Invalid).
+ *   Read all 20 entries of the hardware Bad Block Management Look-Up Table
+ *   into priv->bbm. Each entry is encoded as (lba_raw << 16) | pba_raw,
+ *   where the high two LBA bits are status flags (Enable, Invalid).
  *   See datasheet section 8.2.8.
+ *
+ * Input Parameters:
+ *   priv - W25N device instance; priv->bbm is overwritten with the chip's
+ *          current LUT contents.
  *
  ****************************************************************************/
 
@@ -695,6 +699,17 @@ static void w25n_read_bbm_lut(FAR struct w25n_dev_s *priv)
  * Description:
  *   Add an LBA->PBA link to the chip's non-volatile BBM LUT. Subsequent
  *   accesses to the LBA are transparently routed to the PBA by the chip.
+ *
+ * Input Parameters:
+ *   priv - W25N device instance.
+ *   lba  - Logical block that should be remapped. Must be within the user
+ *          area (< W25N_USER_BLOCKS).
+ *   pba  - Physical block in the spare pool to route the LBA to. Must be
+ *          in [W25N_USER_BLOCKS, W25N01GV_BLOCKS).
+ *
+ * Returned Value:
+ *   OK on success, -EINVAL if the LBA/PBA fall outside the allowed ranges,
+ *   or a negative errno propagated from w25n_waitready.
  *
  ****************************************************************************/
 
@@ -744,8 +759,15 @@ static int w25n_bbm_swap(FAR struct w25n_dev_s *priv,
  *
  * Description:
  *   Read byte 0 of the spare area of the first page of `block`. The factory
- *   marks bad blocks with a non-FFh value here. Returns the marker value
- *   (0..255), or 0x00 if the read failed (treated as bad).
+ *   marks bad blocks with a non-FFh value here.
+ *
+ * Input Parameters:
+ *   priv  - W25N device instance.
+ *   block - Block index to inspect (0..W25N01GV_BLOCKS - 1).
+ *
+ * Returned Value:
+ *   The marker byte (0..255), or 0x00 if the page read failed or hit an
+ *   uncorrectable ECC error (both cases are treated as bad).
  *
  ****************************************************************************/
 
@@ -787,8 +809,16 @@ static bool w25n_is_factory_bad(FAR struct w25n_dev_s *priv, uint16_t block)
  *
  * Description:
  *   Find an unused, non-factory-bad block in the spare pool that is not
- *   already a remap target in the LUT. Returns the block index, or
- *   0xffff if none is available.
+ *   already a remap target in the cached LUT (priv->bbm). Callers must
+ *   refresh priv->bbm via w25n_read_bbm_lut beforehand. As a proof of
+ *   life, the candidate is erased before being returned.
+ *
+ * Input Parameters:
+ *   priv - W25N device instance with a freshly read priv->bbm.
+ *
+ * Returned Value:
+ *   A usable spare block index in [W25N_USER_BLOCKS, W25N01GV_BLOCKS), or
+ *   0xffff if no candidate remains.
  *
  ****************************************************************************/
 
@@ -815,12 +845,7 @@ static uint16_t w25n_pick_free_spare(FAR struct w25n_dev_s *priv)
             }
         }
 
-      if (taken)
-        {
-          continue;
-        }
-
-      if (w25n_is_factory_bad(priv, b))
+      if (taken || w25n_is_factory_bad(priv, b))
         {
           continue;
         }
@@ -834,8 +859,7 @@ static uint16_t w25n_pick_free_spare(FAR struct w25n_dev_s *priv)
 
       if (w25n_block_erase(priv, b) != OK)
         {
-          syslog(LOG_WARNING,
-                 "[w25n] spare %u failed erase test, skipping\n", b);
+          fwarn("spare %u failed erase test, skipping\n", b);
           continue;
         }
 
@@ -849,9 +873,17 @@ static uint16_t w25n_pick_free_spare(FAR struct w25n_dev_s *priv)
  * Name: w25n_remap_bad_block
  *
  * Description:
- *   Allocate a spare and add a BBM LUT entry mapping `block` to it.
- *   Returns OK if the chip will now route accesses to `block` to a good
- *   spare, or a negative errno if no spare is available or the LUT is full.
+ *   Allocate a spare and add a BBM LUT entry mapping `block` to it. After
+ *   this returns OK the chip transparently routes accesses to `block` to
+ *   the allocated spare PBA.
+ *
+ * Input Parameters:
+ *   priv  - W25N device instance.
+ *   block - Bad user-area block that should be remapped.
+ *
+ * Returned Value:
+ *   OK on success, -ENOSPC if the BBM LUT is already full or no free
+ *   spare could be found, or a negative errno from w25n_bbm_swap.
  *
  ****************************************************************************/
 
@@ -874,7 +906,7 @@ static int w25n_remap_bad_block(FAR struct w25n_dev_s *priv, uint16_t block)
       return -ENOSPC;
     }
 
-  syslog(LOG_INFO, "[w25n] remap block %u -> spare %u\n", block, spare);
+  finfo("remap block %u -> spare %u\n", block, spare);
   return w25n_bbm_swap(priv, block, spare);
 }
 
@@ -886,6 +918,9 @@ static int w25n_remap_bad_block(FAR struct w25n_dev_s *priv, uint16_t block)
  *   blocks via the chip's BBM LUT. Idempotent across reboots: blocks that
  *   are already remapped (present in the LUT) are skipped, so repeated
  *   scans don't consume LUT slots. Takes ~200 ms (1024 OOB reads).
+ *
+ * Input Parameters:
+ *   priv - W25N device instance; priv->bbm is refreshed as a side effect.
  *
  ****************************************************************************/
 
@@ -932,14 +967,11 @@ static void w25n_scan_factory_bad(FAR struct w25n_dev_s *priv)
             }
         }
 
-      if (already_mapped)
-        {
-          /* Already remapped on a previous boot, the chip handles routing. */
+      /* Already-mapped: remapped on a previous boot, the chip handles
+       * routing. Not factory bad: nothing to do either.
+       */
 
-          continue;
-        }
-
-      if (!w25n_is_factory_bad(priv, block))
+      if (already_mapped || !w25n_is_factory_bad(priv, block))
         {
           continue;
         }
@@ -962,11 +994,10 @@ static void w25n_scan_factory_bad(FAR struct w25n_dev_s *priv)
         }
     }
 
-  syslog(LOG_INFO,
-         "[w25n] BBM: %d new bad blocks found (%d remapped, %d unremapped); "
-         "%d previously remapped; LUT %d/%d slots used\n",
-         factory_bad, remapped, unremapped, already_in_lut,
-         lut_used + remapped, W25N_BBM_LUT_ENTRIES);
+  finfo("BBM: %d new bad blocks found (%d remapped, %d unremapped); "
+        "%d previously remapped; LUT %d/%d slots used\n",
+        factory_bad, remapped, unremapped, already_in_lut,
+        lut_used + remapped, W25N_BBM_LUT_ENTRIES);
 }
 
 /****************************************************************************
@@ -999,6 +1030,15 @@ static int w25n_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       for (attempt = 0; attempt < 2; attempt++)
         {
           ret = w25n_block_erase(priv, block);
+
+          /* Only retry on -EIO, which w25n_block_erase returns on the
+           * chip's E-FAIL status (the block itself failed to erase).
+           * Other errors like -ETIMEDOUT from w25n_waitready_erase are
+           * SPI/comms faults, not block-level failures - remapping a
+           * block because of a transient bus issue would waste a
+           * non-recoverable BBM LUT slot.
+           */
+
           if (ret == OK || ret != -EIO)
             {
               break;
@@ -1009,9 +1049,8 @@ static int w25n_erase(FAR struct mtd_dev_s *dev, off_t startblock,
            * spare PBA transparently.
            */
 
-          syslog(LOG_WARNING,
-                 "[w25n] erase failed on block %lu, attempting remap\n",
-                 (unsigned long)block);
+          fwarn("erase failed on block %lu, attempting remap\n",
+                (unsigned long)block);
           if (w25n_remap_bad_block(priv, (uint16_t)block) != OK)
             {
               ret = -EIO;
@@ -1098,6 +1137,11 @@ static ssize_t w25n_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
           w25n_load_buffer(priv, 0, buf + (i * W25N_PAGE_SIZE),
                            W25N_PAGE_SIZE);
           ret = w25n_program_execute(priv, page);
+
+          /* As in w25n_erase, only retry on -EIO (chip P-FAIL); other
+           * errors indicate bus/comms faults rather than a bad block.
+           */
+
           if (ret == OK || ret != -EIO)
             {
               break;
@@ -1108,10 +1152,8 @@ static ssize_t w25n_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
            * data buffer is reloaded above on the retry pass.
            */
 
-          syslog(LOG_WARNING,
-                 "[w25n] program failed on page %lu, "
-                 "remapping block %lu\n",
-                 (unsigned long)page, (unsigned long)(page >> 6));
+          fwarn("program failed on page %lu, remapping block %lu\n",
+                (unsigned long)page, (unsigned long)(page >> 6));
           if (w25n_remap_bad_block(priv, (uint16_t)(page >> 6)) != OK)
             {
               ret = -EIO;
@@ -1359,13 +1401,12 @@ FAR struct mtd_dev_s *w25n_initialize(FAR struct spi_dev_s *spi,
         (unsigned long)CONFIG_W25N_SPIFREQUENCY,
         (unsigned long)actual_freq);
 
-  syslog(LOG_INFO,
-         "[w25n] W25N01GV ready: %u user blocks (%u spare), "
-         "%u bytes/block, %u total user MB, SPI %lu Hz\n",
-         (unsigned)priv->nblocks, (unsigned)W25N_SPARE_RESERVE,
-         (unsigned)W25N_BLOCK_SIZE,
-         (unsigned)(((uint32_t)priv->nblocks * W25N_BLOCK_SIZE) >> 20),
-         (unsigned long)actual_freq);
+  finfo("W25N01GV ready: %u user blocks (%u spare), "
+        "%u bytes/block, %u total user MB, SPI %lu Hz\n",
+        (unsigned)priv->nblocks, (unsigned)W25N_SPARE_RESERVE,
+        (unsigned)W25N_BLOCK_SIZE,
+        (unsigned)(((uint32_t)priv->nblocks * W25N_BLOCK_SIZE) >> 20),
+        (unsigned long)actual_freq);
 
   return &priv->mtd;
 }
