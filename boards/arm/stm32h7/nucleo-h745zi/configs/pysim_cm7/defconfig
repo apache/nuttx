@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_STANDARD_SERIAL is not set
-# CONFIG_STM32H7_USE_LEGACY_PINMAP is not set
 CONFIG_ADC=y
 CONFIG_ANALOG=y
 CONFIG_ARCH="arm"
