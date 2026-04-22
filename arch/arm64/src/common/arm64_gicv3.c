@@ -849,9 +849,9 @@ void up_trigger_irq(int irq, cpu_set_t cpuset)
 
       if (!(IGROUPR_SGI_SECURE_VAL & BIT(irq)))
         {
-          struct arm64_smccc_res res;
+          struct arm_smccc_res res;
 
-          arm64_smccc_smc(ARM64_SMCCC_NUTTX_SEND_SECURE_SGI,
+          arm_smccc_smc(ARM_SMCCC_NUTTX_SEND_SECURE_SGI,
                           irq, 0, 0, 0, 0, 0, 0, &res);
         }
       else

@@ -90,7 +90,7 @@ typedef unsigned long (*psci_fn)(unsigned long, unsigned long, unsigned long,
 
 struct psci_interface
 {
-  enum arm64_smccc_conduit conduit;
+  enum arm_smccc_conduit conduit;
   psci_fn invoke_psci_fn;
   uint32_t version;
 };

@@ -52,26 +52,26 @@ static int psci_to_dev_err(int ret)
 {
   switch (ret)
     {
-    case PSCI_RET_SUCCESS:
-      {
-        return 0;
-      }
+      case PSCI_RET_SUCCESS:
+        {
+          return 0;
+        }
 
-    case PSCI_RET_NOT_SUPPORTED:
-      {
-        return -ENOTSUP;
-      }
+      case PSCI_RET_NOT_SUPPORTED:
+        {
+          return -ENOTSUP;
+        }
 
-    case PSCI_RET_INVALID_PARAMS:
-    case PSCI_RET_INVALID_ADDRESS:
-      {
-        return -EINVAL;
-      }
+      case PSCI_RET_INVALID_PARAMS:
+      case PSCI_RET_INVALID_ADDRESS:
+        {
+          return -EINVAL;
+        }
 
-    case PSCI_RET_DENIED:
-      {
-        return -EPERM;
-      }
+      case PSCI_RET_DENIED:
+        {
+          return -EPERM;
+        }
     }
 
   return -EINVAL;
@@ -82,9 +82,9 @@ static unsigned long __invoke_psci_fn_hvc(unsigned long function_id,
                                           unsigned long arg1,
                                           unsigned long arg2)
 {
-  struct arm64_smccc_res res;
+  struct arm_smccc_res res;
 
-  arm64_smccc_hvc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+  arm_smccc_hvc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
   return res.a0;
 }
 
@@ -93,9 +93,9 @@ static unsigned long __invoke_psci_fn_smc(unsigned long function_id,
                                           unsigned long arg1,
                                           unsigned long arg2)
 {
-  struct arm64_smccc_res res;
+  struct arm_smccc_res res;
 
-  arm64_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
+  arm_smccc_smc(function_id, arg0, arg1, arg2, 0, 0, 0, 0, &res);
   return res.a0;
 }
 

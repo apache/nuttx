@@ -85,31 +85,6 @@
 #define PSCI_VERSION_MINOR(ver) \
   ((ver) & PSCI_VERSION_MINOR_MASK)
 
-/* Result from SMC/HVC call
- * a0-a7 result values from registers 0 to 7
- */
-
-struct arm_smccc_res
-{
-  unsigned long a0;
-  unsigned long a1;
-  unsigned long a2;
-  unsigned long a3;
-  unsigned long a4;
-  unsigned long a5;
-  unsigned long a6;
-  unsigned long a7;
-};
-
-typedef struct arm_smccc_res arm_smccc_res_t;
-
-enum arm_smccc_conduit
-{
-  SMCCC_CONDUIT_NONE,
-  SMCCC_CONDUIT_SMC,
-  SMCCC_CONDUIT_HVC,
-};
-
 typedef unsigned long (*psci_fn)(unsigned long, unsigned long, unsigned long,
                                  unsigned long);
 
@@ -123,32 +98,6 @@ struct psci_interface
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/* Make HVC calls
- *
- * param a0 function identifier
- * param a1-a7 parameters registers
- * param res results
- */
-
-void arm_smccc_hvc(unsigned long a0, unsigned long a1,
-                   unsigned long a2, unsigned long a3,
-                   unsigned long a4, unsigned long a5,
-                   unsigned long a6, unsigned long a7,
-                   struct arm_smccc_res *res);
-
-/* Make SMC calls
- *
- * param a0 function identifier
- * param a1-a7 parameters registers
- * param res results
- */
-
-void arm_smccc_smc(unsigned long a0, unsigned long a1,
-                   unsigned long a2, unsigned long a3,
-                   unsigned long a4, unsigned long a5,
-                   unsigned long a6, unsigned long a7,
-                   struct arm_smccc_res *res);
 
 uint32_t psci_version(void);
 int psci_cpu_off(void);

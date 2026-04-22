@@ -51,8 +51,8 @@
  * handled by Secure Monitor code running in EL3.
  */
 
-GTEXT(arm64_smccc_smc)
-SECTION_FUNC(text, arm64_smccc_smc)
+GTEXT(arm_smccc_smc)
+SECTION_FUNC(text, arm_smccc_smc)
     smc   #0
     ldr   x4, [sp]
     stp   x0, x1, [x4, #8 * ARM_SMCC_RES_A0]
@@ -65,8 +65,8 @@ SECTION_FUNC(text, arm64_smccc_smc)
  * handled by a hypervisor running in EL2.
  */
 
-GTEXT(arm64_smccc_hvc)
-SECTION_FUNC(text, arm64_smccc_hvc)
+GTEXT(arm_smccc_hvc)
+SECTION_FUNC(text, arm_smccc_hvc)
     hvc   #0
     ldr   x4, [sp]
     stp   x0, x1, [x4, #8 * ARM_SMCC_RES_A0]

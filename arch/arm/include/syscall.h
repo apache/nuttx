@@ -125,15 +125,112 @@
 #define SYS_signal_handler_return (7)
 #endif /* !CONFIG_BUILD_FLAT */
 
+#define ARM_SMCC_RES_A0           (0)
+#define ARM_SMCC_RES_A1           (1)
+#define ARM_SMCC_RES_A2           (2)
+#define ARM_SMCC_RES_A3           (3)
+#define ARM_SMCC_RES_A4           (4)
+#define ARM_SMCC_RES_A5           (5)
+#define ARM_SMCC_RES_A6           (6)
+#define ARM_SMCC_RES_A7           (7)
+
+#define ARM_SMCCC_STD_CALL        0UL
+#define ARM_SMCCC_FAST_CALL       1UL
+#define ARM_SMCCC_TYPE_SHIFT      31
+
+#define ARM_SMCCC_SMC_32          0
+#define ARM_SMCCC_SMC_64          1
+#define ARM_SMCCC_CALL_CONV_SHIFT 30
+
+#define ARM_SMCCC_OWNER_MASK      0x3F
+#define ARM_SMCCC_OWNER_SHIFT     24
+
+#define ARM_SMCCC_FUNC_MASK       0xFFFF
+
+#define ARM_SMCCC_IS_FAST_CALL(smc_val) \
+  ((smc_val) & (ARM_SMCCC_FAST_CALL << ARM_SMCCC_TYPE_SHIFT))
+#define ARM_SMCCC_IS_64(smc_val) \
+  ((smc_val) & (ARM_SMCCC_SMC_64 << ARM_SMCCC_CALL_CONV_SHIFT))
+#define ARM_SMCCC_FUNC_NUM(smc_val)  ((smc_val) & ARM_SMCCC_FUNC_MASK)
+#define ARM_SMCCC_OWNER_NUM(smc_val) \
+  (((smc_val) >> ARM_SMCCC_OWNER_SHIFT) & ARM_SMCCC_OWNER_MASK)
+
+#define ARM_SMCCC_CALL_VAL(type, calling_convention, owner, func_num) \
+  (((type) << ARM_SMCCC_TYPE_SHIFT) | \
+  ((calling_convention) << ARM_SMCCC_CALL_CONV_SHIFT) | \
+  (((owner) & ARM_SMCCC_OWNER_MASK) << ARM_SMCCC_OWNER_SHIFT) | \
+  ((func_num) & ARM_SMCCC_FUNC_MASK))
+
+#define ARM_SMCCC_OWNER_ARCH            0
+#define ARM_SMCCC_OWNER_CPU             1
+#define ARM_SMCCC_OWNER_SIP             2
+#define ARM_SMCCC_OWNER_OEM             3
+#define ARM_SMCCC_OWNER_STANDARD        4
+#define ARM_SMCCC_OWNER_TRUSTED_APP     48
+#define ARM_SMCCC_OWNER_TRUSTED_APP_END 49
+#define ARM_SMCCC_OWNER_TRUSTED_OS      50
+#define ARM_SMCCC_OWNER_TRUSTED_OS_END  63
+
+#define ARM_SMCCC_QUIRK_NONE            0
+#define ARM_SMCCC_QUIRK_QCOM_A6         1 /* Save/restore register a6 */
+
+#define ARM_SMCCC_ARCH_FEATURES         0x80000001
+
+#define ARM_SMCCC_RET_NOT_SUPPORTED     ((unsigned long)-1)
+
+/* NuttX SPD (Secure Payload Dispatcher) SMC function IDs.
+ * Used for BL32 <-> BL31 communication in TrustZone configurations.
+ *
+ * Yielding SMCs: world-switch / long-running ops, may be preempted.
+ * Fast SMCs: short atomic ops, non-preemptible.
+ */
+
+#define ARM_SMCCC_NUTTX_SEND_SECURE_SGI \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL, ARM_SMCCC_SMC_32, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0000)
+
+#define ARM_SMCCC_NUTTX_TEE_IDLE \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_STD_CALL, ARM_SMCCC_SMC_32, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0001)
+
+#define ARM_SMCCC_NUTTX_REE_IDLE \
+  ARM_SMCCC_CALL_VAL(ARM_SMCCC_STD_CALL, ARM_SMCCC_SMC_32, \
+                     ARM_SMCCC_OWNER_TRUSTED_OS_END, 0x0002)
+
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/* Result from SMC/HVC call
+ * a0-a7 result values from registers 0 to 7
+ */
+
+struct arm_smccc_res
+{
+  unsigned long a0;
+  unsigned long a1;
+  unsigned long a2;
+  unsigned long a3;
+  unsigned long a4;
+  unsigned long a5;
+  unsigned long a6;
+  unsigned long a7;
+};
+
+typedef struct arm_smccc_res arm_smccc_res_t;
+
+enum arm_smccc_conduit
+{
+  SMCCC_CONDUIT_NONE,
+  SMCCC_CONDUIT_SMC,
+  SMCCC_CONDUIT_HVC,
+};
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 /* A system call returns with R1-R3 and R12 changed (dispatch_syscall() calls
  * the stub function), so the macros give these registers to the compiler
@@ -499,6 +596,32 @@
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/* Make HVC calls
+ *
+ * param a0 function identifier
+ * param a1-a7 parameters registers
+ * param res results
+ */
+
+void arm_smccc_hvc(unsigned long a0, unsigned long a1,
+                   unsigned long a2, unsigned long a3,
+                   unsigned long a4, unsigned long a5,
+                   unsigned long a6, unsigned long a7,
+                   struct arm_smccc_res *res);
+
+/* Make SMC calls
+ *
+ * param a0 function identifier
+ * param a1-a7 parameters registers
+ * param res results
+ */
+
+void arm_smccc_smc(unsigned long a0, unsigned long a1,
+                   unsigned long a2, unsigned long a3,
+                   unsigned long a4, unsigned long a5,
+                   unsigned long a6, unsigned long a7,
+                   struct arm_smccc_res *res);
 
 #ifdef __cplusplus
 extern "C"
