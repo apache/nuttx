@@ -30,4 +30,8 @@ if(CONFIG_IMX9_USDHC)
   list(APPEND SRCS imx9_usdhc.c)
 endif()
 
+if(CONFIG_IMX9_USBHOST)
+  list(APPEND SRCS imx9_usbhost.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})

@@ -123,5 +123,17 @@ int imx9_spi_initialize(void);
 int imx9_usdhc_init(void);
 #endif
 
+/****************************************************************************
+ * Name: imx9_usbhost_initialize
+ *
+ * Description:
+ *   Initialize USB host functionality.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_IMX9_USBHOST)
+int imx9_usbhost_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM64_IMX9_IMX95_EVK_SRC_IMX95_EVK_H */
