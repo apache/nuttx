@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_LIBC_LONG_LONG is not set
-# CONFIG_STM32F0G0L0_USE_LEGACY_PINMAP is not set
 # CONFIG_SYSTEM_DD_STATS is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32l0538-disco"
