@@ -1156,10 +1156,6 @@ void rspin_unlock_irqrestore_notrace(FAR rspinlock_t *lock,
     {
       up_irq_restore(flags);
     }
-  else
-    {
-      nxsched_critmon_irqdisable(false, false, return_address(0));
-    }
 }
 
 static inline_function
@@ -1171,6 +1167,11 @@ void rspin_unlock_irqrestore(FAR rspinlock_t *lock, irqstate_t flags)
     }
   else
     {
+      /* Not last unlock, irq_restore is not called, but we need to
+       * balance the crit_count that was incremented by irq_save()
+       * in the corresponding rspin_lock_irqsave().
+       */
+
       nxsched_critmon_irqdisable(false, false, return_address(0));
     }
 }

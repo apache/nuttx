@@ -268,17 +268,20 @@ void nxsched_critmon_irqdisable(bool state, bool force, FAR void *caller)
   FAR struct tcb_s *tcb = running_task();
   clock_t current;
 
-  /* If tcb is NULL, this means the thread has exited, exited thread
+  /* IRQ duration is tracked in irqinfo;
+   * critmon records the interrupt-disable time in thread context only.
+   * If tcb is NULL, this means the thread has exited, exited thread
    * is recorded in nxtask_exit().
    */
 
-  if (tcb == NULL || (!force && state && tcb->irqdis_count++ != 0) ||
+  if (up_interrupt_context() || tcb == NULL ||
+      (!force && state && tcb->irqdis_count++ != 0) ||
       (!force && !state && --tcb->irqdis_count != 0))
     {
       return;
     }
 
-  /* Call perf_gettime only tcb->irqdis_count == 0 or 1, prevent recursion. */
+  /* Call perf_gettime only tcb->irqdis_count == 0, prevent recursion. */
 
   current = perf_gettime();
 
