@@ -109,6 +109,14 @@ int imx9_bringup(void)
 #endif
 #endif
 
+#ifdef CONFIG_IMX9_USBHOST
+  ret = imx9_usbhost_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: imx9_usbhost_initialize failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

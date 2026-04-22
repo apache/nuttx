@@ -32,4 +32,8 @@ ifeq ($(CONFIG_IMX9_USDHC),y)
 CSRCS += imx9_usdhc.c
 endif
 
+ifeq ($(CONFIG_IMX9_USBHOST),y)
+CSRCS += imx9_usbhost.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -474,6 +474,7 @@
 /* USB Mode register USBMODE -- Host Mode */
 
 #define USBHOST_USBMODE_SDIS                 (1 << 4)  /* Bit 4:  Stream disable mode */
+#define USBHOST_USBMODE_VBPS                 (1 << 5)  /* Bit 5:  VBUS power select */
 #define USBHOST_USBMODE_ES                   (1 << 2)  /* Bit 2:  Endian select */
 #define USBHOST_USBMODE_CM_SHIFT             (0)       /* Bits 0-1: Controller mode */
 #define USBHOST_USBMODE_CM_MASK              (0x3 << USBHOST_USBMODE_CM_SHIFT)

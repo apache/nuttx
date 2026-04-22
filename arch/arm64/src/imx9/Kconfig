@@ -651,6 +651,47 @@ config IMX9_DWC3_USB3
 
 endif # IMX9_DWC3
 
+config IMX9_USBHOST
+	bool "USB Host (EHCI)"
+	default n
+	depends on USBHOST
+	depends on ARCH_CHIP_IMX95
+	select USBHOST_HAVE_ASYNCH
+	---help---
+		Enable the USB 2.0 EHCI host controller driver for i.MX95.
+		This uses the ChipIdea USB2 controller in host mode.
+
+if IMX9_USBHOST
+
+config IMX9_EHCI_NQHS
+	int "Number of Queue Head structures"
+	default 2
+	---help---
+		Configurable number of Queue Head (QH) structures. The
+		default is one per root hub port plus one for EP0.
+
+config IMX9_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptors"
+	default 4
+	---help---
+		Configurable number of Queue Element Transfer Descriptor
+		(qTDs). The default is one per root hub plus three for EP0.
+
+config IMX9_EHCI_BUFSIZE
+	int "Request/Descriptor buffer size"
+	default 128
+	---help---
+		Configurable size of request/descriptor buffers.
+
+config IMX9_EHCI_REGDEBUG
+	bool "Register level debug"
+	default n
+	depends on DEBUG_USB_INFO
+	---help---
+		Output detailed register-level USB host debug information.
+
+endif # IMX9_USBHOST
+
 config IMX9_ENET
 	bool "Ethernet"
 	default n
