@@ -38,6 +38,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 #include <nuttx/atomic.h>
+#include <nuttx/irq.h>
 #include <nuttx/lib/lib.h>
 
 #include <assert.h>
@@ -75,6 +76,21 @@
 #  define CACHELINE_SIZE 64
 #endif
 
+/* Magic values for warm-restart detection.
+ *
+ * When a ring resides in memory that survives reboot (e.g. shared
+ * SRAM), ring_init() uses an atomic magic field to decide whether
+ * to perform a fresh initialization or recover the previous state.
+ *
+ * Three-state protocol (multi-core safe):
+ *   0                -> uninitialized (or garbage != READY/INIT)
+ *   RING_MAGIC_INIT  -> one core is initializing; others spin-wait
+ *   RING_MAGIC_READY -> init complete; ring is usable
+ */
+
+#define RING_MAGIC_INIT   ((int32_t)0x52494e49)   /* "RINI" */
+#define RING_MAGIC_READY  ((int32_t)0x52494e47)   /* "RING" */
+
 /* RING_INIT - static initialize a ring
  *
  * cap   - capacity (must be power-of-2)
@@ -85,7 +101,8 @@
 
 #define RING_INIT(cap)                                   \
   {                                                      \
-    .base.capacity  = cap,                               \
+    .base.magic    = RING_MAGIC_READY,                   \
+    .base.capacity = cap,                                \
   }
 
 /* RING_DECLARE - declare a ring variable (uninitialized).
@@ -142,13 +159,25 @@
     }                                                    \
   while (0)
 
-#define ring_init(r, cap)                                \
-  do                                                     \
-    {                                                    \
-      RING_BASE(r)->capacity = (cap);                    \
-      ring_reset(r);                                     \
-    }                                                    \
-  while (0)
+/* ring_init - runtime initialization with warm-restart recovery.
+ *
+ * If the ring resides in memory that survives reboot (shared SRAM,
+ * battery-backed RAM), ring_init detects prior initialization via
+ * an atomic magic field and attempts to recover the previous state
+ * instead of zeroing everything.
+ *
+ * Multi-core safe: concurrent ring_init calls from different cores
+ * are serialized via CAS on the magic field. Cores that lose the
+ * race spin-wait until the winner finishes, so no core can use the
+ * ring before initialization is complete.
+ *
+ * Protocol:
+ *   magic == 0 / garbage  -> fresh init (zero all indices)
+ *   magic == RING_MAGIC_INIT  -> another core is initializing; spin
+ *   magic == RING_MAGIC_READY -> warm restart; validate & recover
+ */
+
+#define ring_init(r, cap)   ring_init_magic(RING_BASE(r), cap)
 
 #define ring_count(r)                                    \
   ((RTS_IDX(atomic_read(&RING_BASE(r)->prod_tail)) -     \
@@ -247,21 +276,27 @@
 
 struct aligned_data(CACHELINE_SIZE) ring_s
 {
+  /* Read-only metadata - cache-line aligned */
+
+  atomic_t     magic;             /* Warm-restart detection */
+  uint32_t     capacity;          /* Power-of-2, max 16777215 */
+  uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) -
+                    sizeof(uint32_t) - sizeof(size_t)];
+
   /* Producer side - cache-line aligned */
 
   atomic_t     prod_head;         /* SP: unused; MP: RTS CAS */
   atomic_t     prod_tail;         /* SP: store_release; MP: RTS CAS */
-  uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) * 2];
+  uint8_t      pad1[CACHELINE_SIZE - sizeof(atomic_t) * 2];
 
   /* Consumer side - cache-line aligned */
 
   atomic_t     cons_head;         /* SC: unused; MC: RTS CAS */
   atomic_t     cons_tail;         /* SC: store_release; MC: RTS CAS */
-  uint8_t      pad1[CACHELINE_SIZE - sizeof(atomic_t) * 2];
+  uint8_t      pad2[CACHELINE_SIZE - sizeof(atomic_t) * 2];
 
-  /* Read-only metadata - cache-line aligned */
+  /* Flexible array for embedded buffer */
 
-  uint32_t     capacity;          /* Power-of-2, max 16777215 */
   char         ring[];            /* Flexible array for embedded buffer */
 };
 
@@ -278,6 +313,100 @@ struct ring_buf_s
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ring_init_magic
+ *
+ * Description:
+ *   Runtime initialization with warm-restart recovery and multi-core
+ *   safety.  Called by the ring_init() macro after capacity is set.
+ *
+ *   Three outcomes based on the magic field:
+ *     1. Uninitialized (magic != READY and != INIT):
+ *        Winner CAS to INIT, zeroes indices, sets READY.
+ *        Losers spin until READY.
+ *     2. Already READY (warm restart):
+ *        Winner CAS to INIT, validates/recovers indices, sets READY.
+ *        Losers spin until READY.
+ *     3. INIT in progress:
+ *        Another core is initializing; spin until READY.
+ *
+ ****************************************************************************/
+
+static inline_function void ring_init_magic(FAR struct ring_s *r,
+                                            uint32_t cap)
+{
+  irqstate_t flags;
+  int32_t old_magic;
+
+  flags = irq_save();
+
+  do
+    {
+      old_magic = atomic_read(&r->magic);
+
+      if (old_magic == RING_MAGIC_INIT)
+        {
+          irq_restore(flags);
+
+          /* Another core is initializing - spin until READY */
+
+          while (atomic_read_acquire(&r->magic) != RING_MAGIC_READY);
+
+          return;
+        }
+    }
+  while (!atomic_cmpxchg(&r->magic, &old_magic, RING_MAGIC_INIT));
+
+  r->capacity = cap;
+
+  if (old_magic == RING_MAGIC_READY)
+    {
+      /* Warm restart: validate indices.
+       *
+       * Invariant: count = (prod_idx - cons_idx) must be in
+       * [0, capacity].  If violated, the indices are corrupt
+       * and we fall back to a fresh reset.
+       */
+
+      uint32_t prod_index = RTS_IDX(atomic_read(&r->prod_tail));
+      uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
+      uint32_t count = (prod_index - cons_index) & RING_IDX_MASK;
+
+      if (count > r->capacity)
+        {
+          ring_reset(r);
+        }
+      else
+        {
+          /* Indices are valid - rebuild with cnt=0.
+           *
+           * A reboot mid-enqueue/dequeue can leave head.cnt != tail.cnt,
+           * which deadlocks the RTS commit (tail can never catch head).
+           * Reset cnt to 0 on all four atomics, keeping only the idx.
+           */
+
+          uint32_t prod_tail = RTS_PACK(0, prod_index);
+          uint32_t cons_tail = RTS_PACK(0, cons_index);
+
+          atomic_set(&r->prod_tail, prod_tail);
+          atomic_set(&r->prod_head, prod_tail);
+          atomic_set(&r->cons_tail, cons_tail);
+          atomic_set(&r->cons_head, cons_tail);
+        }
+    }
+  else
+    {
+      /* First-time init: zero everything */
+
+      ring_reset(r);
+    }
+
+  /* Publish: all stores above are visible before magic becomes READY */
+
+  atomic_set_release(&r->magic, RING_MAGIC_READY);
+  irq_restore(flags);
+}
 
 /****************************************************************************
  * Name: ring_alloc
