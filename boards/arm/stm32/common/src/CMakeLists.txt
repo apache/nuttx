@@ -166,4 +166,8 @@ if(CONFIG_INPUT_KMATRIX_I2C)
   list(APPEND SRCS stm32_kmatrix_i2c.c)
 endif()
 
+if(CONFIG_INPUT_MPR121_KEYPAD)
+  list(APPEND SRCS stm32_mpr121.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})

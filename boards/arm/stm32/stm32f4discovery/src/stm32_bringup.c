@@ -60,6 +60,10 @@
 #include "stm32_apds9960.h"
 #endif
 
+#ifdef CONFIG_INPUT_MPR121_KEYPAD
+#include "stm32_mpr121.h"
+#endif
+
 #ifdef CONFIG_CL_MFRC522
 #include "stm32_mfrc522.h"
 #endif
@@ -269,6 +273,16 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: max7219_leds_register failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_MPR121_KEYPAD
+  /* Initialize MPR121 using I2C1 bus to /dev/keypad0 */
+
+  ret = board_mpr121_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_mpr121_initialize failed: %d\n", ret);
     }
 #endif
 
