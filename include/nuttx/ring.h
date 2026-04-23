@@ -205,6 +205,16 @@ struct aligned_data(CACHELINE_SIZE) ring_s
   char         ring[];            /* Flexible array for embedded buffer */
 };
 
+struct ring_buf_s
+{
+  FAR void    *ptr1;              /* First contiguous segment */
+  uint32_t     len1;              /* Element count in first segment */
+  FAR void    *ptr2;              /* Second segment (wrap), NULL if none */
+  uint32_t     len2;              /* Element count in second segment */
+  uint32_t     idx;               /* Internal: start index */
+  uint32_t     cnt;               /* Internal: total slots reserved */
+};
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -251,63 +261,91 @@ static inline_function void ring_free(FAR struct ring_s *r)
 }
 
 /****************************************************************************
- * Name: ring_copy_from
+ * Name: ring_buf_init
  *
  * Description:
- *   Copy elements into the ring buffer, handling wrap-around.
+ *   Initialize a ring_buf_s with pointers to the ring buffer region
+ *   starting at idx for cnt elements, handling wrap-around.
+ *   Sets cnt to 0 if the requested count exceeds available/free space.
  *
  ****************************************************************************/
 
 static inline_function void
-ring_copy_from(FAR struct ring_s *r, uint32_t idx, FAR const void *items,
-               uint32_t n, size_t elem_size)
+ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
+              uint32_t idx, uint32_t count, size_t elem_size)
 {
-  FAR char *dst;
+  uint32_t first;
 
-  idx &= r->capacity - 1;
-  dst = (FAR char *)r->ring + idx * elem_size;
+  buf->cnt = count;
 
-  /* Fast path: single element. When elem_size is a compile-time
-   * constant, the compiler emits a single store.
-   */
+  if (count == 0)
+    {
+      return;
+    }
 
-  if (n == 1)
+  buf->idx = idx;
+
+  idx   = idx & (r->capacity - 1);
+  first = r->capacity - idx;
+
+  if (first >= count)
+    {
+      buf->ptr1 = (FAR char *)r->ring + idx * elem_size;
+      buf->len1 = count;
+      buf->ptr2 = NULL;
+      buf->len2 = 0;
+    }
+  else
+    {
+      buf->ptr1 = (FAR char *)r->ring + idx * elem_size;
+      buf->len1 = first;
+      buf->ptr2 = r->ring;
+      buf->len2 = count - first;
+    }
+}
+
+/****************************************************************************
+ * Name: ring_copy_from
+ *
+ * Description:
+ *   Copy elements from a linear buffer into ring_buf_s segments.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_copy_from(FAR struct ring_buf_s *buf, FAR const void *items,
+               size_t elem_size)
+{
+  if (buf->cnt == 1)
     {
       if (elem_size == sizeof(uint8_t))
         {
-          *(FAR uint8_t *)dst = *(FAR const uint8_t *)items;
+          *(FAR uint8_t *)buf->ptr1 = *(FAR const uint8_t *)items;
         }
       else if (elem_size == sizeof(uint16_t))
         {
-          *(FAR uint16_t *)dst = *(FAR const uint16_t *)items;
+          *(FAR uint16_t *)buf->ptr1 = *(FAR const uint16_t *)items;
         }
       else if (elem_size == sizeof(uint32_t))
         {
-          *(FAR uint32_t *)dst = *(FAR const uint32_t *)items;
+          *(FAR uint32_t *)buf->ptr1 = *(FAR const uint32_t *)items;
         }
       else if (elem_size == sizeof(uint64_t))
         {
-          *(FAR uint64_t *)dst = *(FAR const uint64_t *)items;
+          *(FAR uint64_t *)buf->ptr1 = *(FAR const uint64_t *)items;
         }
       else
         {
-          memcpy(dst, items, elem_size);
+          memcpy(buf->ptr1, items, elem_size);
         }
     }
   else
     {
-      uint32_t first = r->capacity - idx;
-
-      if (first > n)
+      memcpy(buf->ptr1, items, buf->len1 * elem_size);
+      if (buf->len2 != 0)
         {
-          first = n;
-        }
-
-      memcpy(dst, items, first * elem_size);
-      if (n > first)
-        {
-          memcpy(r->ring, (FAR const char *)items + first * elem_size,
-                 (n - first) * elem_size);
+          memcpy(buf->ptr2, (FAR const char *)items + buf->len1 * elem_size,
+                 buf->len2 * elem_size);
         }
     }
 }
@@ -316,73 +354,58 @@ ring_copy_from(FAR struct ring_s *r, uint32_t idx, FAR const void *items,
  * Name: ring_copy_to
  *
  * Description:
- *   Copy elements from the ring buffer to items, handling wrap-around.
+ *   Copy elements from ring_buf_s segments to a linear buffer.
  *
  ****************************************************************************/
 
 static inline_function void
-ring_copy_to(FAR struct ring_s *r, uint32_t idx, FAR void *items,
-             uint32_t n, size_t elem_size)
+ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items, size_t elem_size)
 {
-  FAR const char *src;
-
-  idx &= r->capacity - 1;
-  src = (FAR const char *)r->ring + idx * elem_size;
-
-  /* Fast path: single element copy */
-
-  if (n == 1)
+  if (buf->cnt == 1)
     {
       if (elem_size == sizeof(uint8_t))
         {
-          *(FAR uint8_t *)items = *(FAR const uint8_t *)src;
+          *(FAR uint8_t *)items = *(FAR const uint8_t *)buf->ptr1;
         }
       else if (elem_size == sizeof(uint16_t))
         {
-          *(FAR uint16_t *)items = *(FAR const uint16_t *)src;
+          *(FAR uint16_t *)items = *(FAR const uint16_t *)buf->ptr1;
         }
       else if (elem_size == sizeof(uint32_t))
         {
-          *(FAR uint32_t *)items = *(FAR const uint32_t *)src;
+          *(FAR uint32_t *)items = *(FAR const uint32_t *)buf->ptr1;
         }
       else if (elem_size == sizeof(uint64_t))
         {
-          *(FAR uint64_t *)items = *(FAR const uint64_t *)src;
+          *(FAR uint64_t *)items = *(FAR const uint64_t *)buf->ptr1;
         }
       else
         {
-          memcpy(items, src, elem_size);
+          memcpy(items, buf->ptr1, elem_size);
         }
     }
   else
     {
-      uint32_t first = r->capacity - idx;
-
-      if (first > n)
+      memcpy(items, buf->ptr1, buf->len1 * elem_size);
+      if (buf->len2 != 0)
         {
-          first = n;
-        }
-
-      memcpy(items, src, first * elem_size);
-      if (n > first)
-        {
-          memcpy((FAR char *)items + first * elem_size, r->ring,
-                 (n - first) * elem_size);
+          memcpy((FAR char *)items + buf->len1 * elem_size,
+                 buf->ptr2, buf->len2 * elem_size);
         }
     }
 }
 
 /****************************************************************************
- * Name: ring_sp_enqueue
+ * Name: ring_sp_start
  *
  * Description:
- *   Single-producer enqueue. No CAS, direct idx read/write.
+ *   Single-producer start. Calculate free space, initialize ring_buf_s.
  *
  ****************************************************************************/
 
-static inline_function uint32_t
-ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items, uint32_t count,
-                size_t elem_size)
+static inline_function void
+ring_sp_start(FAR struct ring_s *r, uint32_t count,
+              size_t elem_size, FAR struct ring_buf_s *buf)
 {
   uint32_t prod_index = RTS_IDX(atomic_read(&r->prod_tail));
   uint32_t cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
@@ -390,42 +413,25 @@ ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items, uint32_t count,
                         ((prod_index - cons_index) & RING_IDX_MASK);
   uint32_t n = count < free_space ? count : free_space;
 
-  if (n != 0)
-    {
-      ring_copy_from(r, prod_index, items, n, elem_size);
-
-      prod_index = (prod_index + n) & RING_IDX_MASK;
-      atomic_set_release(&r->prod_tail, RTS_PACK(0, prod_index));
-    }
-
-  return n;
+  ring_buf_init(buf, r, prod_index, n, elem_size);
 }
 
 /****************************************************************************
- * Name: ring_mp_enqueue
+ * Name: ring_mp_start
  *
  * Description:
- *   Multi-producer enqueue. Uses RTS CAS on prod_head + prod_tail.
- *
- *   cnt overflow note: cnt is 8-bit (0~255). A false-positive
- *   match requires 256 concurrent in-flight producers - impossible
- *   on systems with < 256 cores. uint8_t wraps naturally and
- *   symmetrically on both head and tail sides, so no special
- *   overflow handling is needed.
+ *   Multi-producer start. CAS on prod_head to reserve up to count
+ *   slots, initialize ring_buf_s.
  *
  ****************************************************************************/
 
-static inline_function uint32_t
-ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items, uint32_t count,
-                size_t elem_size)
+static inline_function void
+ring_mp_start(FAR struct ring_s *r, uint32_t count,
+              size_t elem_size, FAR struct ring_buf_s *buf)
 {
   uint32_t old_head;
   uint32_t new_head;
-  uint32_t old_tail;
-  uint32_t new_tail;
   uint32_t n;
-
-  /* RTS CAS on prod_head to reserve slots */
 
   old_head = atomic_read(&r->prod_head);
   do
@@ -437,21 +443,112 @@ ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items, uint32_t count,
       n = count < free_space ? count : free_space;
       if (n == 0)
         {
-          return 0;
+          break;
         }
 
       new_head = RTS_PACK(RTS_CNT(old_head) + 1, RTS_IDX(old_head) + n);
     }
   while (!atomic_cmpxchg_relaxed(&r->prod_head, &old_head, new_head));
 
-  ring_copy_from(r, RTS_IDX(old_head), items, n, elem_size);
+  ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
+}
 
-  /* RTS tail commit: increment cnt, and when tail.cnt catches
-   * up to the *current* head.cnt (all in-flight threads done),
-   * advance tail.idx to head.idx so consumers can see the
-   * committed data. Re-read prod_head each iteration - other
-   * threads may have reserved new slots since our CAS on head.
-   */
+/****************************************************************************
+ * Name: ring_sc_start
+ *
+ * Description:
+ *   Single-consumer start. Calculate available items, initialize
+ *   ring_buf_s.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_sc_start(FAR struct ring_s *r, uint32_t count,
+              size_t elem_size, FAR struct ring_buf_s *buf)
+{
+  uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
+  uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+  uint32_t available = (prod_index - cons_index) & RING_IDX_MASK;
+  uint32_t n = count < available ? count : available;
+
+  ring_buf_init(buf, r, cons_index, n, elem_size);
+}
+
+/****************************************************************************
+ * Name: ring_mc_start
+ *
+ * Description:
+ *   Multi-consumer start. CAS on cons_head to reserve up to count
+ *   slots, initialize ring_buf_s.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_mc_start(FAR struct ring_s *r, uint32_t count,
+              size_t elem_size, FAR struct ring_buf_s *buf)
+{
+  uint32_t old_head;
+  uint32_t new_head;
+  uint32_t n;
+
+  old_head = atomic_read(&r->cons_head);
+  do
+    {
+      uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+      uint32_t available =
+        (prod_index - RTS_IDX(old_head)) & RING_IDX_MASK;
+
+      n = count < available ? count : available;
+      if (n == 0)
+        {
+          break;
+        }
+
+      new_head = RTS_PACK(RTS_CNT(old_head) + 1, RTS_IDX(old_head) + n);
+    }
+  while (!atomic_cmpxchg_relaxed(&r->cons_head, &old_head, new_head));
+
+  ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
+}
+
+/****************************************************************************
+ * Name: ring_sp_finish
+ *
+ * Description:
+ *   Single-producer finish. Advance prod_tail from ring_buf_s state.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
+{
+  if (buf->cnt != 0)
+    {
+      uint32_t prod_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
+      atomic_set_release(&r->prod_tail, RTS_PACK(0, prod_index));
+    }
+}
+
+/****************************************************************************
+ * Name: ring_mp_finish
+ *
+ * Description:
+ *   Multi-producer tail finish. Increment cnt, and when tail.cnt
+ *   catches up to head.cnt, advance tail.idx to head.idx.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_mp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
+{
+  uint32_t old_tail;
+  uint32_t new_head;
+  uint32_t new_tail;
+
+  if (buf->cnt == 0)
+    {
+      return;
+    }
 
   old_tail = atomic_read_acquire(&r->prod_tail);
   do
@@ -469,82 +566,46 @@ ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items, uint32_t count,
     }
   while (!atomic_cmpxchg_release_acquire(&r->prod_tail, &old_tail,
                                          new_tail));
-
-  return n;
 }
 
 /****************************************************************************
- * Name: ring_sc_dequeue
+ * Name: ring_sc_finish
  *
  * Description:
- *   Single-consumer dequeue. No CAS, direct idx read/write.
+ *   Single-consumer finish. Advance cons_tail from ring_buf_s state.
  *
  ****************************************************************************/
 
-static inline_function uint32_t
-ring_sc_dequeue(FAR struct ring_s *r, FAR void *items, uint32_t count,
-                size_t elem_size)
+static inline_function void
+ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
-  uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
-  uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
-  uint32_t available = (prod_index - cons_index) & RING_IDX_MASK;
-  uint32_t n = count < available ? count : available;
-
-  if (n != 0)
+  if (buf->cnt != 0)
     {
-      ring_copy_to(r, cons_index, items, n, elem_size);
-
-      cons_index = (cons_index + n) & RING_IDX_MASK;
+      uint32_t cons_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
       atomic_set_release(&r->cons_tail, RTS_PACK(0, cons_index));
     }
-
-  return n;
 }
 
 /****************************************************************************
- * Name: ring_mc_dequeue
+ * Name: ring_mc_finish
  *
  * Description:
- *   Multi-consumer dequeue. Uses RTS CAS on cons_head + cons_tail.
- *
- *   cnt overflow note: same as ring_mp_enqueue - 8-bit cnt wraps
- *   naturally, safe as long as concurrent consumers < 256.
+ *   Multi-consumer tail finish. Symmetric to ring_mp_finish,
+ *   operating on cons_head/cons_tail.
  *
  ****************************************************************************/
 
-static inline_function uint32_t
-ring_mc_dequeue(FAR struct ring_s *r, FAR void *items, uint32_t count,
-                size_t elem_size)
+static inline_function void
+ring_mc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
-  uint32_t old_head;
-  uint32_t new_head;
   uint32_t old_tail;
+  uint32_t new_head;
   uint32_t new_tail;
-  uint32_t n;
 
-  /* RTS CAS on cons_head to reserve slots */
-
-  old_head = atomic_read(&r->cons_head);
-  do
+  if (buf->cnt == 0)
     {
-      uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
-      uint32_t available = (prod_index - RTS_IDX(old_head)) & RING_IDX_MASK;
-
-      n = count < available ? count : available;
-      if (n == 0)
-        {
-          return 0;
-        }
-
-      new_head = RTS_PACK(RTS_CNT(old_head) + 1, RTS_IDX(old_head) + n);
+      return;
     }
-  while (!atomic_cmpxchg_relaxed(&r->cons_head, &old_head, new_head));
-
-  ring_copy_to(r, RTS_IDX(old_head), items, n, elem_size);
-
-  /* RTS tail commit: symmetric to ring_mp_enqueue.
-   * Re-read cons_head each iteration.
-   */
 
   old_tail = atomic_read_acquire(&r->cons_tail);
   do
@@ -562,8 +623,99 @@ ring_mc_dequeue(FAR struct ring_s *r, FAR void *items, uint32_t count,
     }
   while (!atomic_cmpxchg_release_acquire(&r->cons_tail, &old_tail,
                                          new_tail));
+}
 
-  return n;
+/****************************************************************************
+ * Name: ring_sp_enqueue
+ *
+ * Description:
+ *   Single-producer enqueue. No CAS, direct idx read/write.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sp_enqueue(FAR struct ring_s *r, FAR const void *items,
+                uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_sp_start(r, count, elem_size, &buf);
+  ring_copy_from(&buf, items, elem_size);
+  ring_sp_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mp_enqueue
+ *
+ * Description:
+ *   Multi-producer enqueue. Uses RTS CAS on prod_head + prod_tail.
+ *
+ *   cnt overflow note: cnt is 8-bit (0~255). A false-positive
+ *   match requires 256 concurrent in-flight producers - impossible
+ *   on systems with < 256 cores. uint8_t wraps naturally and
+ *   symmetrically on both head and tail sides, so no special
+ *   overflow handling is needed.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mp_enqueue(FAR struct ring_s *r, FAR const void *items,
+                uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_mp_start(r, count, elem_size, &buf);
+  ring_copy_from(&buf, items, elem_size);
+  ring_mp_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_sc_dequeue
+ *
+ * Description:
+ *   Single-consumer dequeue. No CAS, direct idx read/write.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_dequeue(FAR struct ring_s *r, FAR void *items,
+                uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_sc_start(r, count, elem_size, &buf);
+  ring_copy_to(&buf, items, elem_size);
+  ring_sc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mc_dequeue
+ *
+ * Description:
+ *   Multi-consumer dequeue. Uses RTS CAS on cons_head + cons_tail.
+ *
+ *   cnt overflow note: same as ring_mp_enqueue - 8-bit cnt wraps
+ *   naturally, safe as long as concurrent consumers < 256.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
+                uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_mc_start(r, count, elem_size, &buf);
+  ring_copy_to(&buf, items, elem_size);
+  ring_mc_finish(r, &buf);
+
+  return buf.cnt;
 }
 
 #endif /* __INCLUDE_NUTTX_RING_H */
