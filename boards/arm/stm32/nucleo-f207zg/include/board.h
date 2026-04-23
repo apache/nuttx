@@ -186,19 +186,19 @@
 
 /* USART3 (Nucleo Virtual Console) */
 
-#define GPIO_USART3_RX     GPIO_USART3_RX_3  /* PD9 */
-#define GPIO_USART3_TX     GPIO_USART3_TX_3  /* PD8 */
+#define GPIO_USART3_RX    (GPIO_USART3_RX_3|GPIO_SPEED_100MHz) /* PD9 */
+#define GPIO_USART3_TX    (GPIO_USART3_TX_3|GPIO_SPEED_100MHz) /* PD8 */
 
 /* PWM configuration ********************************************************/
 
 /* TIM1 PWM */
 
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PE9 */
-#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3    /* PE8 */
-#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PE11 */
-#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_3    /* PE10 */
-#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PE13 */
-#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3    /* PE12 */
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_2|GPIO_SPEED_50MHz)  /* PE9 */
+#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3                       /* PE8 */
+#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_2|GPIO_SPEED_50MHz)  /* PE11 */
+#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_3                       /* PE10 */
+#define GPIO_TIM1_CH3OUT  (GPIO_TIM1_CH3OUT_2|GPIO_SPEED_50MHz)  /* PE13 */
+#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3                       /* PE12 */
 
 /* DMA channels *************************************************************/
 
