@@ -320,8 +320,8 @@
 
 /* TIM2 input ***************************************************************/
 
-#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_3 | GPIO_PULLUP) /* PA15 */
-#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP) /* PB3 */
+#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_3 | GPIO_PULLUP | GPIO_SPEED_50MHz) /* PA15 */
+#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP | GPIO_SPEED_50MHz) /* PB3 */
 
 /* USART2 (STLINK Virtual COM Port) */
 
@@ -332,18 +332,18 @@
 
 /* TIM1 PWM */
 
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1  /* PA8 */
-#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1NOUT_2 /* PA11 */
-#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_1  /* PA9 */
-#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2NOUT_1 /* PA12 */
-#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_1  /* PA10 */
-#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_1 /* PB1 */
-#define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PC3 */
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_1|GPIO_SPEED_50MHz)  /* PA8 */
+#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1NOUT_2|GPIO_SPEED_50MHz) /* PA11 */
+#define GPIO_TIM1_CH2OUT  (GPIO_TIM1_CH2OUT_1|GPIO_SPEED_50MHz)  /* PA9 */
+#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2NOUT_1|GPIO_SPEED_50MHz) /* PA12 */
+#define GPIO_TIM1_CH3OUT  (GPIO_TIM1_CH3OUT_1|GPIO_SPEED_50MHz)  /* PA10 */
+#define GPIO_TIM1_CH3NOUT (GPIO_TIM1_CH3NOUT_1|GPIO_SPEED_50MHz) /* PB1 */
+#define GPIO_TIM1_CH4OUT  (GPIO_TIM1_CH4OUT_2|GPIO_SPEED_50MHz)  /* PC3 */
 
 /* CAN configuration ********************************************************/
 
-#define GPIO_FDCAN1_RX GPIO_FDCAN1_RX_2 /* PB8 */
-#define GPIO_FDCAN1_TX GPIO_FDCAN1_TX_2 /* PB9 */
+#define GPIO_FDCAN1_RX (GPIO_FDCAN1_RX_2|GPIO_SPEED_50MHz) /* PB8 */
+#define GPIO_FDCAN1_TX (GPIO_FDCAN1_TX_2|GPIO_SPEED_50MHz) /* PB9 */
 
 /* DMA channels *************************************************************/
 
@@ -364,10 +364,10 @@
 
 /* TIM1 configuration *******************************************************/
 
-#  define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_1 /* TIM1 CH1  - PA8  - U high */
-#  define GPIO_TIM1_CH2OUT   GPIO_TIM1_CH2OUT_1 /* TIM1 CH2  - PA9  - V high */
-#  define GPIO_TIM1_CH3OUT   GPIO_TIM1_CH3OUT_1 /* TIM1 CH3  - PA10 - W high */
-#  define GPIO_TIM1_CH4OUT   0                  /* not used as output */
+#  define GPIO_TIM1_CH1OUT   (GPIO_TIM1_CH1OUT_1|GPIO_SPEED_50MHz) /* TIM1 CH1  - PA8  - U high */
+#  define GPIO_TIM1_CH2OUT   (GPIO_TIM1_CH2OUT_1|GPIO_SPEED_50MHz) /* TIM1 CH2  - PA9  - V high */
+#  define GPIO_TIM1_CH3OUT   (GPIO_TIM1_CH3OUT_1|GPIO_SPEED_50MHz) /* TIM1 CH3  - PA10 - W high */
+#  define GPIO_TIM1_CH4OUT   0                                     /* not used as output */
 
 /* UVW ENABLE */
 

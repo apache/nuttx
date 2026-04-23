@@ -102,17 +102,17 @@ static uint8_t g_adc1_chan[] =
 static uint32_t g_adc1_pins[] =
 {
 #ifdef CONFIG_BOARD_STM32_IHM16M1_VBUS
-  GPIO_ADC1_IN1,
+  GPIO_ADC1_IN1_0,
 #endif
 #ifdef CONFIG_BOARD_STM32_IHM16M1_POT
-  GPIO_ADC1_IN8,
+  GPIO_ADC1_IN8_0,
 #endif
-  GPIO_ADC1_IN2,
+  GPIO_ADC1_IN2_0,
 #if CONFIG_MOTOR_FOC_SHUNTS > 1
-  GPIO_ADC1_IN12,
+  GPIO_ADC1_IN12_0,
 #endif
 #if CONFIG_MOTOR_FOC_SHUNTS > 2
-  GPIO_ADC1_IN15,
+  GPIO_ADC1_IN15_0,
 #endif
 };
 
