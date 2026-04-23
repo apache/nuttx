@@ -248,25 +248,25 @@
 #if !defined(CONFIG_STM32_LCD)
 /* Select PA9 and PA10 if the LCD is not enabled */
 
-#  define GPIO_USART1_RX         GPIO_USART1_RX_1 /* PA10 */
-#  define GPIO_USART1_TX         GPIO_USART1_TX_1 /* PA9 */
+#  define GPIO_USART1_RX  (GPIO_USART1_RX_1|GPIO_SPEED_40MHz) /* PA10 */
+#  define GPIO_USART1_TX  (GPIO_USART1_TX_1|GPIO_SPEED_40MHz) /* PA9 */
 
 /* This there are no other options for USART1 on this part */
 
-#  define GPIO_USART2_RX         GPIO_USART2_RX_1 /* PA3 */
-#  define GPIO_USART2_TX         GPIO_USART2_TX_1 /* PA2 */
+#  define GPIO_USART2_RX  (GPIO_USART2_RX_1|GPIO_SPEED_40MHz) /* PA3 */
+#  define GPIO_USART2_TX  (GPIO_USART2_TX_1|GPIO_SPEED_40MHz) /* PA2 */
 
 /* Arbitrarily select PB10 and PB11 */
 
-#  define GPIO_USART3_RX         GPIO_USART3_RX_1 /* PB11 */
-#  define GPIO_USART3_TX         GPIO_USART3_TX_1 /* PB10 */
+#  define GPIO_USART3_RX  (GPIO_USART3_RX_1|GPIO_SPEED_40MHz) /* PB11 */
+#  define GPIO_USART3_TX  (GPIO_USART3_TX_1|GPIO_SPEED_40MHz) /* PB10 */
 
 #elif !defined(CONFIG_ARCH_LEDS)
 
 /* Select PB6 and PB7 if the LEDs are not enabled */
 
-#  define GPIO_USART1_RX         GPIO_USART1_RX_2 /* PB7 */
-#  define GPIO_USART1_TX         GPIO_USART1_TX_2 /* PB6 */
+#  define GPIO_USART1_RX  (GPIO_USART1_RX_2|GPIO_SPEED_40MHz) /* PB7 */
+#  define GPIO_USART1_TX  (GPIO_USART1_TX_2|GPIO_SPEED_40MHz) /* PB6 */
 
 #endif
 
