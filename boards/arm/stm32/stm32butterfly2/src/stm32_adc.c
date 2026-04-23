@@ -59,7 +59,7 @@ int stm32_adc_setup(void)
     }
 
   ainfo("INFO: Initializing ADC12_IN10\n");
-  stm32_configgpio(GPIO_ADC12_IN10);
+  stm32_configgpio(GPIO_ADC12_IN10_0);
   if ((adc = stm32_adcinitialize(1, channel, 1)) == NULL)
     {
       aerr("ERROR: Failed to get adc interface\n");
