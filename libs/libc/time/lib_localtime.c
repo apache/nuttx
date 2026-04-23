@@ -2859,6 +2859,7 @@ static int zoneinit(FAR const char *name)
 
 void tzset(void)
 {
+  char buf[MY_TZNAME_MAX + 1];
   FAR const char *name;
   int lcl;
 
@@ -2878,6 +2879,13 @@ void tzset(void)
     }
   else
     {
+      /* getenv() returns a pointer into the environment, which another
+       * thread may free with setenv() or unsetenv().  Work on a copy.
+       */
+
+      strlcpy(buf, name, sizeof(buf));
+      name = buf;
+
       if (g_lcl_isset > 0 && strcmp(g_lcl_tzname, name) == 0)
         {
           return;
