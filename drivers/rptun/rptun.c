@@ -1491,10 +1491,11 @@ static int rptun_ioctl_foreach(FAR const char *cpuname, int cmd,
     {
       if (!cpuname || !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
         {
-          ret = rptun_do_ioctl(priv, cmd, value);
-          if (ret < 0)
+          int ret1 = rptun_do_ioctl(priv, cmd, value);
+
+          if (ret1 < 0)
             {
-              break;
+              ret = ret1;
             }
         }
     }
