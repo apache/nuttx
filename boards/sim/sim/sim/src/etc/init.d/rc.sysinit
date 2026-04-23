@@ -26,13 +26,19 @@
 #define CONCAT(x, y)  CONCAT_(x, y)
 
 #ifdef CONFIG_ETC_ROMFS
-#ifdef CONFIG_FS_FAT
+#ifdef CONFIG_FS_TMPFS
 
-/* Create a RAMDISK and mount it at /tmp */
+/* Mount /tmp on TMPFS */
+
+mount -t tmpfs /tmp
+
+#elif defined(CONFIG_FS_FAT)
+
+/* Create a FAT RAMDISK and mount it at /tmp */
 
 mkrd -m CONFIG_ETC_FATDEVNO -s CONFIG_ETC_FATSECTSIZE CONFIG_ETC_FATNSECTORS
 mkfatfs CONCAT(/dev/ram, CONFIG_ETC_FATDEVNO)
 mount -t vfat CONCAT(/dev/ram, CONFIG_ETC_FATDEVNO) CONFIG_ETC_FATMOUNTPT
 
-#endif /* CONFIG_FS_FAT */
+#endif /* CONFIG_FS_TMPFS || CONFIG_FS_FAT */
 #endif /* CONFIG_ETC_ROMFS */
