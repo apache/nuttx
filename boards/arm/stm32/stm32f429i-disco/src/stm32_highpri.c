@@ -155,9 +155,9 @@ static const uint8_t g_chanlist1[DEV1_NCHANNELS] =
 
 static const uint32_t g_pinlist1[DEV1_NCHANNELS] =
 {
-  GPIO_ADC1_IN5,                 /* PA5 */
+  GPIO_ADC1_IN5_0,                 /* PA5 */
 #if INJ_NCHANNELS > 0
-  GPIO_ADC1_IN13,                /* PC3 */
+  GPIO_ADC1_IN13_0,                /* PC3 */
 #endif
 };
 
