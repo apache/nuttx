@@ -485,6 +485,9 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 
   if (rpspi->txhdr != NULL)
     {
+#ifndef CONFIG_RPMSG_PORT_RETX
+      rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
+#endif
       rpspi->txhdr = NULL;
     }
   else if (rpspi->cmdhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
@@ -603,7 +606,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 unlock:
   spin_unlock_irqrestore(&rpspi->lock, flags);
 out:
-  if (atomic_xchg(&rpspi->transferring, 0) ||
+  if (atomic_xchg(&rpspi->transferring, 0) > 1 ||
       rpmsg_port_retx_is_pending(&rpspi->port) ||
       (rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
     {

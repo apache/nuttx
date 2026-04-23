@@ -407,6 +407,9 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
 
   if (rpspi->txhdr != NULL)
     {
+#ifndef CONFIG_RPMSG_PORT_RETX
+      rpmsg_port_queue_return_buffer(&rpspi->port.txq, rpspi->txhdr);
+#endif
       rpspi->txhdr = NULL;
     }
   else if (rpspi->cmdhdr->cmd == RPMSG_PORT_SPI_CMD_SHUTDOWN)
