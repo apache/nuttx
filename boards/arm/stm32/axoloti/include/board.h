@@ -153,8 +153,8 @@
 
 /* USART1 - console on header pins */
 
-#define GPIO_USART1_RX GPIO_USART1_RX_2 /* AF7, PB7 */
-#define GPIO_USART1_TX GPIO_USART1_TX_2 /* AF7, PB6 */
+#define GPIO_USART1_RX (GPIO_USART1_RX_2|GPIO_SPEED_100MHz) /* AF7, PB7 */
+#define GPIO_USART1_TX (GPIO_USART1_TX_2|GPIO_SPEED_100MHz) /* AF7, PB6 */
 
 /* USART6 - midi in/out */
 
