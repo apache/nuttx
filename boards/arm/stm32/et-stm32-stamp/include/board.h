@@ -145,4 +145,11 @@
 #define LED_ASSERTION     6  /* LED1 + LED2 */
 #define LED_PANIC         7  /* LED1 / LED2 blinking */
 
+/* Alternate function pin selections (auto-aliased for new pinmap) */
+
+/* USART1 */
+
+#define GPIO_USART1_TX     GPIO_ADJUST_MODE(GPIO_USART1_TX_0, GPIO_MODE_50MHz)
+#define GPIO_USART1_RX     GPIO_USART1_RX_0
+
 #endif /* __BOARDS_ARM_STM32_ET_STM32_STAMP_INCLUDE_BOARD_H */
