@@ -118,7 +118,7 @@
 #define GROUP_FLAG_DELETED         (1 << 2)                      /* Bit 2: Group has been deleted but not yet freed */
 #define GROUP_FLAG_EXITING         (1 << 3)                      /* Bit 3: Group exit is in progress */
 #define GROUP_FLAG_FD_BACKTRACE    (1 << 4)                      /* Bit 4: Enable FD backtrace for the group */
-                                                                 /* Bits 3-7: Available */
+                                                                 /* Bits 5-7: Available */
 
 /* Values for struct child_status_s ch_flags */
 
