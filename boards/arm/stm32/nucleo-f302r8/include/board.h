@@ -193,8 +193,8 @@
 
 /* TIM2 input ***************************************************************/
 
-#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_2 | GPIO_PULLUP) /* PA15 */
-#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP) /* PB3 */
+#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_2 | GPIO_PULLUP | GPIO_SPEED_50MHz) /* PA15 */
+#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP | GPIO_SPEED_50MHz) /* PB3 */
 
 /* USART */
 
@@ -203,8 +203,8 @@
  * USART2_TX - PA2
  */
 
-#define GPIO_USART2_RX GPIO_USART2_RX_2 /* PA3 */
-#define GPIO_USART2_TX GPIO_USART2_TX_2 /* PA2 */
+#define GPIO_USART2_RX (GPIO_USART2_RX_2|GPIO_SPEED_50MHz) /* PA3 */
+#define GPIO_USART2_TX (GPIO_USART2_TX_2|GPIO_SPEED_50MHz) /* PA2 */
 
 /* USART1
  *
@@ -222,20 +222,20 @@
  */
 
 #ifdef CONFIG_NUCLEOF302R8_RS485_WAVESHARE
-#  define GPIO_USART1_RX GPIO_USART1_RX_1 /* PA10 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_1 /* PA9 */
+#  define GPIO_USART1_RX (GPIO_USART1_RX_1|GPIO_SPEED_50MHz) /* PA10 */
+#  define GPIO_USART1_TX (GPIO_USART1_TX_1|GPIO_SPEED_50MHz) /* PA9 */
 #  define GPIO_USART1_RS485_DIR (GPIO_OUTPUT | GPIO_PUSHPULL |          \
                                  GPIO_SPEED_50MHz | GPIO_OUTPUT_CLEAR | \
                                  GPIO_PORTA | GPIO_PIN8)
 #else
-#  define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
-#  define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
+#  define GPIO_USART1_RX (GPIO_USART1_RX_2|GPIO_SPEED_50MHz) /* PB7 */
+#  define GPIO_USART1_TX (GPIO_USART1_TX_2|GPIO_SPEED_50MHz) /* PB6 */
 #endif
 
 /* CAN */
 
-#define GPIO_CAN1_RX     GPIO_CAN_RX_3 /* PB8 */
-#define GPIO_CAN1_TX     GPIO_CAN_TX_3 /* PB9 */
+#define GPIO_CAN1_RX (GPIO_CAN_RX_3|GPIO_SPEED_50MHz) /* PB8 */
+#define GPIO_CAN1_TX (GPIO_CAN_TX_3|GPIO_SPEED_50MHz) /* PB9 */
 
 /* PWM configuration ********************************************************/
 
@@ -243,18 +243,18 @@
 
 #define STM32_TIM1_TRGO 0
 
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_2  /* PA8 */
-#define GPIO_TIM1_CH1NOUT GPIO_TIM1_CH1N_3    /* PA11 */
-#define GPIO_TIM1_CH2OUT  GPIO_TIM1_CH2OUT_2  /* PA9 */
-#define GPIO_TIM1_CH2NOUT GPIO_TIM1_CH2N_2    /* PA12 */
-#define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_2  /* PA10 */
-#define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3N_3    /* PB1 */
+#define GPIO_TIM1_CH1OUT (GPIO_TIM1_CH1OUT_2|GPIO_SPEED_50MHz)  /* PA8 */
+#define GPIO_TIM1_CH1NOUT (GPIO_TIM1_CH1N_3|GPIO_SPEED_50MHz)   /* PA11 */
+#define GPIO_TIM1_CH2OUT (GPIO_TIM1_CH2OUT_2|GPIO_SPEED_50MHz)  /* PA9 */
+#define GPIO_TIM1_CH2NOUT (GPIO_TIM1_CH2N_2|GPIO_SPEED_50MHz)   /* PA12 */
+#define GPIO_TIM1_CH3OUT (GPIO_TIM1_CH3OUT_2|GPIO_SPEED_50MHz)  /* PA10 */
+#define GPIO_TIM1_CH3NOUT (GPIO_TIM1_CH3N_3|GPIO_SPEED_50MHz)   /* PB1 */
 
 /* TIM2 PWM */
 
-#define GPIO_TIM2_CH1OUT  GPIO_TIM2_CH1_ETR_1 /* PA0 */
-#define GPIO_TIM2_CH2OUT  GPIO_TIM2_CH2OUT_1  /* PA1 */
-#define GPIO_TIM2_CH3OUT  GPIO_TIM2_CH3OUT_1  /* PA9 */
+#define GPIO_TIM2_CH1OUT (GPIO_TIM2_CH1_ETR_1|GPIO_SPEED_50MHz) /* PA0 */
+#define GPIO_TIM2_CH2OUT (GPIO_TIM2_CH2OUT_1|GPIO_SPEED_50MHz)  /* PA1 */
+#define GPIO_TIM2_CH3OUT (GPIO_TIM2_CH3OUT_1|GPIO_SPEED_50MHz)  /* PA9 */
 
 /* DMA channels *************************************************************/
 
@@ -270,10 +270,10 @@
 
 /* TIM1 configuration *******************************************************/
 
-#  define GPIO_TIM1_CH1OUT   GPIO_TIM1_CH1OUT_2 /* TIM1 CH1  - PA8  - U high */
-#  define GPIO_TIM1_CH2OUT   GPIO_TIM1_CH2OUT_2 /* TIM1 CH2  - PA9  - V high */
-#  define GPIO_TIM1_CH3OUT   GPIO_TIM1_CH3OUT_2 /* TIM1 CH3  - PA10 - W high */
-#  define GPIO_TIM1_CH4OUT   0                  /* not used as output */
+#  define GPIO_TIM1_CH1OUT (GPIO_TIM1_CH1OUT_2|GPIO_SPEED_50MHz) /* TIM1 CH1  - PA8  - U high */
+#  define GPIO_TIM1_CH2OUT (GPIO_TIM1_CH2OUT_2|GPIO_SPEED_50MHz) /* TIM1 CH2  - PA9  - V high */
+#  define GPIO_TIM1_CH3OUT (GPIO_TIM1_CH3OUT_2|GPIO_SPEED_50MHz) /* TIM1 CH3  - PA10 - W high */
+#  define GPIO_TIM1_CH4OUT 0                                     /* not used as output */
 
 /* UVW ENABLE */
 

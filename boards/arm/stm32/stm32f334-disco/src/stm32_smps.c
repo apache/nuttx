@@ -309,8 +309,8 @@ static const uint8_t g_adc1chan[ADC1_NCHANNELS] =
 
 static const uint32_t g_adc1pins[ADC1_NCHANNELS] =
 {
-  GPIO_ADC1_IN2,                /* PA1 - V_IN */
-  GPIO_ADC1_IN4,                /* PA3 - V_OUT */
+  GPIO_ADC1_IN2_0,                /* PA1 - V_IN */
+  GPIO_ADC1_IN4_0,                /* PA3 - V_OUT */
 };
 
 /****************************************************************************

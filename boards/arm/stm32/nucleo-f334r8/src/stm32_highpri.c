@@ -178,16 +178,16 @@ static const uint8_t g_chanlist1[DEV1_NCHANNELS] =
 
 static const uint32_t g_pinlist1[DEV1_NCHANNELS] =
 {
-  GPIO_ADC1_IN1,                /* PA0/A0 */
+  GPIO_ADC1_IN1_0,                /* PA0/A0 */
 #ifdef CONFIG_STM32_ADC1_DMA
-  GPIO_ADC1_IN2,                /* PA1/A1 */
-  GPIO_ADC1_IN11,               /* PB0/A3 */
+  GPIO_ADC1_IN2_0,                /* PA1/A1 */
+  GPIO_ADC1_IN11_0,               /* PB0/A3 */
 #endif
 #if INJ_NCHANNELS > 0
-  GPIO_ADC1_IN7,                /* PC1/A4 */
+  GPIO_ADC1_IN7_0,                /* PC1/A4 */
 #endif
 #if INJ_NCHANNELS > 1
-  GPIO_ADC1_IN6                 /* PC0/A5 */
+  GPIO_ADC1_IN6_0                 /* PC0/A5 */
 #endif
 };
 
