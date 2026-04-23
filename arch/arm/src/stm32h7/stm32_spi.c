@@ -2169,12 +2169,6 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           up_clean_dcache((uintptr_t)txbuffer, (uintptr_t)txbuffer + nbytes);
         }
 
-      if (rxbuffer)
-        {
-          up_invalidate_dcache((uintptr_t)rxbuffer,
-                               (uintptr_t)rxbuffer + nbytes);
-        }
-
       /* N.B. the H7 tri-states the clock output on SPI disable and
        * unfortunately the Chip Select (CS) is active.  So we keep
        * the device disabled for the minimum time, that meets the
@@ -2249,6 +2243,14 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       spi_modifyreg(priv, STM32_SPI_CFG1_OFFSET, SPI_CFG1_TXDMAEN |
                           SPI_CFG1_RXDMAEN, 0);
       spi_enable(priv, true);
+
+      /* Force RAM re-read */
+
+      if (rxbuffer)
+        {
+          up_invalidate_dcache((uintptr_t)rxbuffer,
+                               (uintptr_t)rxbuffer + nbytes);
+        }
 
       /* Second copy: Copy the DMA internal buffer to caller's buffer */
 
