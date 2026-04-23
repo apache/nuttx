@@ -25,6 +25,9 @@ get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${NUTTX_DIR}
 
 set(CMAKE_C_FLAG_ARGS)
 foreach(FLAG ${TOOLCHAIN_DIR_FLAGS})
+  if(FLAG IN_LIST COMPILE_ONLY_FLAGS)
+    continue()
+  endif()
   if(NOT FLAG MATCHES "^\\$<.*>$")
     list(APPEND CMAKE_C_FLAG_ARGS ${FLAG})
   else()
