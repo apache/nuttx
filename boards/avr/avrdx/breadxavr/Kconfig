@@ -13,4 +13,26 @@ config BREADXAVR_BUTTONS_DRIVER
 		If set, button driver registered as /dev/buttons
 		for PORT A and PORT C (pins 2 and 3 for both ports.)
 
+config BREADXAVR_TC74AX_SENSOR
+	bool "Enable initializing I2C TC74Ax sensor"
+	depends on AVR_TWI0 && SENSORS_TC74AX
+	select BOARD_LATE_INITIALIZE
+	default n
+	---help---
+		If set, the board will register driver for Microchip TC74Ax
+		thermal sensor.
+
+if BREADXAVR_TC74AX_SENSOR
+
+config BREADXAVR_TC74AX_SENSOR_VARIANT
+	int "TC74Ax variant"
+	default 0
+	range 0 7
+	---help---
+		Select specific part used on your (bread)board. Number chosen
+		here corresponds to the "x" in the part name (and also to I2C
+		address of the sensor.)
+
+endif
+
 endif
