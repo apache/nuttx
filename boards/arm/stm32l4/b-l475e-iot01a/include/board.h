@@ -130,8 +130,8 @@
 
 /* UART4: Connected to arduino compatible pins DO/D1 via PA0, PA1 */
 
-#define GPIO_UART4_RX GPIO_UART4_RX_1
-#define GPIO_UART4_TX GPIO_UART4_TX_1
+#define GPIO_UART4_RX  GPIO_UART4_RX_1
+#define GPIO_UART4_TX  GPIO_UART4_TX_1
 
 /* SPSGRF
  *
