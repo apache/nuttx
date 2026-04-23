@@ -59,10 +59,10 @@ static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
 
 static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
 {
-  GPIO_ADC1_IN6,                /* PC0 */
-  GPIO_ADC1_IN7,                /* PC1 */
-  GPIO_ADC1_IN8,                /* PC2 */
-  GPIO_ADC1_IN9,                /* PC3 */
+  GPIO_ADC1_IN6_0,                /* PC0 */
+  GPIO_ADC1_IN7_0,                /* PC1 */
+  GPIO_ADC1_IN8_0,                /* PC2 */
+  GPIO_ADC1_IN9_0,                /* PC3 */
 };
 
 /****************************************************************************
