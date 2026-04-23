@@ -28,6 +28,7 @@
 
 #include "stm32_gpio.h"
 
+#include <arch/board/board.h>
 #include "stm32_butterfly2.h"
 
 /****************************************************************************

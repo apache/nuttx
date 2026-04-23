@@ -132,4 +132,11 @@
 
 #define BUTTON_0_BIT       (1 << BUTTON_0)
 
+/* Alternate function pin selections ****************************************/
+
+/* USART1 */
+
+#define GPIO_USART1_TX     GPIO_ADJUST_MODE(GPIO_USART1_TX_0, GPIO_MODE_50MHz)
+#define GPIO_USART1_RX     GPIO_USART1_RX_0
+
 #endif /* __BOARDS_ARM_STM32_STM32VLDISCOVERY_INCLUDE_BOARD_H */

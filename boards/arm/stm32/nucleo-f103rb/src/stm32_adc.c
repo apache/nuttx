@@ -91,9 +91,9 @@ static const uint8_t g_chanlist1[3] =
 
 static const uint32_t g_pinlist1[3]  =
 {
-  GPIO_ADC123_IN0,                /* PA0/A0 */
-  GPIO_ADC123_IN1,                /* PA1/A1 */
-  GPIO_ADC12_IN4,                 /* PA4/A2 */
+  GPIO_ADC123_IN0_0,                /* PA0/A0 */
+  GPIO_ADC123_IN1_0,                /* PA1/A1 */
+  GPIO_ADC12_IN4_0,                 /* PA4/A2 */
 };
 
 #elif DEV1_PORT == 2
@@ -113,9 +113,9 @@ static const uint8_t g_chanlist1[3] =
 
 static const uint32_t g_pinlist1[3] =
 {
-  GPIO_ADC12_IN8,                /* PB0/A3 */
-  GPIO_ADC123_IN11,              /* PC1/A4 */
-  GPIO_ADC123_IN10,              /* PC0/A5 */
+  GPIO_ADC12_IN8_0,                /* PB0/A3 */
+  GPIO_ADC123_IN11_0,              /* PC1/A4 */
+  GPIO_ADC123_IN10_0,              /* PC0/A5 */
 };
 
 #endif /* DEV1_PORT == 1 */
@@ -141,9 +141,9 @@ static const uint8_t g_chanlist2[3] =
 
 static const uint32_t g_pinlist2[3] =
 {
-  GPIO_ADC12_IN8,                /* PB0/A3 */
-  GPIO_ADC123_IN11,              /* PC1/A4 */
-  GPIO_ADC123_IN10,              /* PC0/A5 */
+  GPIO_ADC12_IN8_0,                /* PB0/A3 */
+  GPIO_ADC123_IN11_0,              /* PC1/A4 */
+  GPIO_ADC123_IN10_0,              /* PC0/A5 */
 };
 
 #endif /* DEV2_PORT == 2 */
