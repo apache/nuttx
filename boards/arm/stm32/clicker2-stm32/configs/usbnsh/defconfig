@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DEV_CONSOLE is not set
-# CONFIG_STM32_USE_LEGACY_PINMAP is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="clicker2-stm32"
 CONFIG_ARCH_BOARD_CLICKER2_STM32=y

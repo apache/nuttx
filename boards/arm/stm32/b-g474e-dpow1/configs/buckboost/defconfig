@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_LEDS is not set
-# CONFIG_STM32_USE_LEGACY_PINMAP is not set
 CONFIG_ADC=y
 CONFIG_ANALOG=y
 CONFIG_ARCH="arm"
