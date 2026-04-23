@@ -181,6 +181,18 @@
 #define ring_mpsc_dequeue(r, items, count) \
   ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
 
+#define ring_spsc_dequeue_skip(r, count) \
+  ring_sc_dequeue_skip(RING_BASE(r), count)
+
+#define ring_mpmc_dequeue_skip(r, count) \
+  ring_mc_dequeue_skip(RING_BASE(r), count)
+
+#define ring_spmc_dequeue_skip(r, count) \
+  ring_mc_dequeue_skip(RING_BASE(r), count)
+
+#define ring_mpsc_dequeue_skip(r, count) \
+  ring_sc_dequeue_skip(RING_BASE(r), count)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -713,6 +725,46 @@ ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
 
   ring_mc_start(r, count, elem_size, &buf);
   ring_copy_to(&buf, items, elem_size);
+  ring_mc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_sc_dequeue_skip
+ *
+ * Description:
+ *   Single-consumer dequeue skip. Advance cons_tail by count without
+ *   reading data. Returns actual count skipped.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
+{
+  struct ring_buf_s buf;
+
+  ring_sc_start(r, count, 0, &buf);
+  ring_sc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mc_dequeue_skip
+ *
+ * Description:
+ *   Multi-consumer dequeue skip. Reserve and finish slots on
+ *   cons_head and cons_tail without reading data.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
+{
+  struct ring_buf_s buf;
+
+  ring_mc_start(r, count, 0, &buf);
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
