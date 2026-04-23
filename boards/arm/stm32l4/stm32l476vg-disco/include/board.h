@@ -76,8 +76,8 @@
  */
 
 #if 0
-#define GPIO_USART1_RX GPIO_USART1_RX_2    / * PB7  * /
-#define GPIO_USART1_TX GPIO_USART1_TX_2    / * PB6  * /
+#define GPIO_USART1_RX GPIO_USART1_RX_2    /* PB7 */
+#define GPIO_USART1_TX GPIO_USART1_TX_2    /* PB6 */
 #endif
 
 /* USART2: Connected to STLink Debug via PD5, PD6

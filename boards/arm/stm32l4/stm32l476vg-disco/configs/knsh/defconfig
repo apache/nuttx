@@ -8,6 +8,7 @@
 # CONFIG_ARCH_FPU is not set
 # CONFIG_NSH_ARGCAT is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
+# CONFIG_STM32L4_USE_LEGACY_PINMAP is not set
 # CONFIG_SYSTEM_DD is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32l476vg-disco"

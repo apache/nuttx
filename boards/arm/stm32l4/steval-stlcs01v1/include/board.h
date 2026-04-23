@@ -350,4 +350,11 @@
 #define GPIO_SPI2_MOSI GPIO_SPI2_MOSI_1 /* PB15 */
 #define GPIO_SPI2_MISO 0                /* Not used in half-duplex */
 
+/* USB OTG FS */
+
+#define GPIO_OTGFS_DM  GPIO_OTGFS_DM_0  /* PA11 */
+#define GPIO_OTGFS_DP  GPIO_OTGFS_DP_0  /* PA12 */
+#define GPIO_OTGFS_ID  GPIO_OTGFS_ID_0  /* PA10 */
+#define GPIO_OTGFS_SOF GPIO_OTGFS_SOF_0 /* PA8  */
+
 #endif /* __BOARDS_ARM_STM32L4_STEVAL_STLCS01V1_INCLUDE_BOARD_H */
