@@ -1602,6 +1602,17 @@ static void rptun_dump_carveout_rsc(FAR void *rsc, uint32_t index)
            car->da, car->pa, car->len, car->flags, car->reserved);
 }
 
+static void rptun_dump_trace_rsc(FAR void *rsc, uint32_t index)
+{
+  FAR struct fw_rsc_trace *trc = rsc;
+
+  rptunvbs("[trace] Rsc %" PRIu32 " %p\n", index, rsc);
+  rptunvbs("[trace] Trace %s\n", trc->name);
+  rptunvbs("[trace] da 0x%08" PRIx32 " len %" PRIu32
+           " reserved %" PRIu32 "\n",
+           trc->da, trc->len, trc->reserved);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -1663,6 +1674,12 @@ void rptun_dump_resource(FAR const struct resource_table *rsc)
   FAR struct fw_rsc_hdr *hdr;
   uint32_t i;
 
+  if (rsc == NULL)
+    {
+      rptunerr("Resource table is NULL\n");
+      return;
+    }
+
   rptunvbs("Dump resource table: %p num: %" PRIu32 "\n", rsc, rsc->num);
   for (i = 0; i < rsc->num; i++)
     {
@@ -1674,6 +1691,9 @@ void rptun_dump_resource(FAR const struct resource_table *rsc)
             break;
           case RSC_CARVEOUT:
             rptun_dump_carveout_rsc(hdr, i);
+            break;
+          case RSC_TRACE:
+            rptun_dump_trace_rsc(hdr, i);
             break;
           default:
             rptunerr("Not support rsc type: %" PRIu32 " %" PRIu32 "\n",
