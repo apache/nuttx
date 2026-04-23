@@ -99,3 +99,13 @@ config FS_BACKTRACE_SKIP
 	depends on FS_BACKTRACE > 0
 	---help---
 		Skip depth of backtrace.
+
+config FS_BACKTRACE_DEFAULT
+	bool "Enable the backtrace record by default"
+	default y
+	depends on FS_BACKTRACE > 0
+	---help---
+		Enable automatic backtrace capture for all file descriptor operations
+		globally. When disabled, backtrace capture is zero-cost by default
+		and must be explicitly enabled per task group by setting the
+		GROUP_FLAG_FD_BACKTRACE flag.

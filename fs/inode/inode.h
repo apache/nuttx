@@ -75,13 +75,22 @@
 #  define FS_ADD_BACKTRACE(fd) \
      do \
        { \
-          int n = sched_backtrace(_SCHED_GETTID(), \
-                                  (fd)->f_backtrace, \
-                                  CONFIG_FS_BACKTRACE, \
-                                  CONFIG_FS_BACKTRACE_SKIP); \
-          if (n < CONFIG_FS_BACKTRACE) \
+          FAR struct tcb_s *tcb = nxsched_get_tcb(nxsched_gettid()); \
+          if (tcb != NULL && tcb->group != NULL && \
+              (tcb->group->tg_flags & GROUP_FLAG_FD_BACKTRACE) != 0) \
             { \
-              (fd)->f_backtrace[n] = NULL; \
+              int n = sched_backtrace(tcb->pid, \
+                                      (fd)->f_backtrace, \
+                                      CONFIG_FS_BACKTRACE, \
+                                      CONFIG_FS_BACKTRACE_SKIP); \
+              if (n < CONFIG_FS_BACKTRACE) \
+                { \
+                  (fd)->f_backtrace[n] = NULL; \
+                } \
+            } \
+          else \
+            { \
+              (fd)->f_backtrace[0] = NULL; \
             } \
        } \
      while (0)
