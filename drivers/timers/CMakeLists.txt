@@ -120,6 +120,10 @@ if(CONFIG_CAPTURE)
   endif()
 endif()
 
+if(CONFIG_OCU)
+  list(APPEND SRCS ocu.c)
+endif()
+
 if(CONFIG_GOLDFISH_TIMER)
   list(APPEND SRCS goldfish_timer.c)
 endif()

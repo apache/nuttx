@@ -116,6 +116,7 @@
 #define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
 #define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
 #define _NPZEROIOCBASE  (0x4a00) /* nPZero power-saving IC ioctl commands */
+#define _OCUIOCBASE     (0x4b00) /* OCU (Output Compare Unit) ioctl commands */
 #define _RPTUNBASE      (0x5000) /* Remote processor tunneling ioctl commands */
 #define _VIRTIOBASE     (0x5100) /* VirtIO ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
@@ -868,6 +869,13 @@
 
 #define _NPZEROIOCVALID(c)     (_IOC_TYPE(c)==_NPZEROIOCBASE)
 #define _NPZEROIOC(nr)         _IOC(_NPZEROIOCBASE,nr)
+
+/* OCU (Output Compare Unit) ioctl definitions ******************************/
+
+/* see nuttx/include/nuttx/timers/ocu.h */
+
+#define _OCUIOCVALID(c)       (_IOC_TYPE(c)==_OCUIOCBASE)
+#define _OCUIOC(nr)           _IOC(_OCUIOCBASE,nr)
 
 /* Rptun drivers ************************************************************/
 
