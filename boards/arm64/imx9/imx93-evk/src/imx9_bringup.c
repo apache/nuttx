@@ -104,6 +104,16 @@ int imx9_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_DSHOT
+  /* Configure DSHOT outputs */
+
+  ret = imx9_dshot_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed initialize DShot outputs: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_I2C_DRIVER)
   /* Configure I2C peripheral interfaces */
 
