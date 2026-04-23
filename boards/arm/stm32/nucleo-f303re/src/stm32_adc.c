@@ -125,10 +125,10 @@ static const uint8_t g_chanlist1[4] =
 
 static const uint32_t g_pinlist1[4]  =
 {
-  GPIO_ADC1_IN1,
-  GPIO_ADC1_IN2,
-  GPIO_ADC1_IN6,
-  GPIO_ADC1_IN7
+  GPIO_ADC1_IN1_0,
+  GPIO_ADC1_IN2_0,
+  GPIO_ADC1_IN6_0,
+  GPIO_ADC1_IN7_0
 };
 
 #elif DEV1_PORT == 2
@@ -148,9 +148,9 @@ static const uint8_t g_chanlist1[3] =
 
 static const uint32_t g_pinlist1[3] =
 {
-  GPIO_ADC2_IN1,
-  GPIO_ADC2_IN3,
-  GPIO_ADC2_IN4
+  GPIO_ADC2_IN1_0,
+  GPIO_ADC2_IN3_0,
+  GPIO_ADC2_IN4_0
 };
 
 #elif DEV1_PORT == 3
@@ -170,9 +170,9 @@ static const uint8_t g_chanlist1[3] =
 
 static const uint32_t g_pinlist1[3] =
 {
-  GPIO_ADC3_IN1,
-  GPIO_ADC3_IN5,
-  GPIO_ADC3_IN12
+  GPIO_ADC3_IN1_0,
+  GPIO_ADC3_IN5_0,
+  GPIO_ADC3_IN12_0
 };
 
 #elif DEV1_PORT == 4
@@ -190,7 +190,7 @@ static const uint8_t g_chanlist1[1] =
 
 static const uint32_t g_pinlist1[1] =
 {
-  GPIO_ADC4_IN3
+  GPIO_ADC4_IN3_0
 };
 
 #endif
@@ -217,10 +217,10 @@ static const uint8_t g_chanlist2[4] =
 
 static const uint32_t g_pinlist2[4] =
 {
-  GPIO_ADC1_IN1,
-  GPIO_ADC1_IN2,
-  GPIO_ADC1_IN6,
-  GPIO_ADC1_IN7
+  GPIO_ADC1_IN1_0,
+  GPIO_ADC1_IN2_0,
+  GPIO_ADC1_IN6_0,
+  GPIO_ADC1_IN7_0
 };
 
 #elif DEV2_PORT == 2
@@ -240,9 +240,9 @@ static const uint8_t g_chanlist2[3] =
 
 static const uint32_t g_pinlist2[3] =
 {
-  GPIO_ADC2_IN1,
-  GPIO_ADC2_IN3,
-  GPIO_ADC2_IN4
+  GPIO_ADC2_IN1_0,
+  GPIO_ADC2_IN3_0,
+  GPIO_ADC2_IN4_0
 };
 
 #elif DEV2_PORT == 3
@@ -262,9 +262,9 @@ static const uint8_t g_chanlist2[3] =
 
 static const uint32_t g_pinlist2[3] =
 {
-  GPIO_ADC3_IN1,
-  GPIO_ADC3_IN5,
-  GPIO_ADC3_IN12
+  GPIO_ADC3_IN1_0,
+  GPIO_ADC3_IN5_0,
+  GPIO_ADC3_IN12_0
 };
 
 #elif DEV2_PORT == 4
@@ -282,7 +282,7 @@ static const uint8_t g_chanlist2[1] =
 
 static const uint32_t g_pinlist2[1] =
 {
-  GPIO_ADC4_IN3
+  GPIO_ADC4_IN3_0
 };
 
 #endif
