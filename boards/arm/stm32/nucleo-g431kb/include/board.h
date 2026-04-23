@@ -240,7 +240,7 @@
 
 /* TIM1 PWM */
 
-#define GPIO_TIM1_CH1OUT  GPIO_TIM1_CH1OUT_1  /* PA8 */
+#define GPIO_TIM1_CH1OUT  (GPIO_TIM1_CH1OUT_1|GPIO_SPEED_50MHz)  /* PA8 */
 
 /* Comparators configuration ************************************************/
 
