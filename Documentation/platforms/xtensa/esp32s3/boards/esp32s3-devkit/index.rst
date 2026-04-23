@@ -822,11 +822,16 @@ RMT symbol, which is represented by ``rmt_item32_t`` in the driver:
 .. figure:: rmt_symbol.png
    :align: center
 
-The example ``rmtchar`` can be used to test the RMT peripheral. Connecting
+The example ``irtest`` can be used to test the RMT peripheral. Connecting
 these pins externally to each other will make the transmitter send RMT items
 and demonstrates the usage of the RMT peripheral::
 
-    nsh> rmtchar
+    nsh> irtest
+    $open_device(/dev/lirc0)
+    $open_device(/dev/lirc1)
+    $write_data(1) 16777229 16 16777235 23
+    $read_data(0,4)
+    16777229, 16, 16777235, 23
 
 **WS2812 addressable RGB LEDs**
 

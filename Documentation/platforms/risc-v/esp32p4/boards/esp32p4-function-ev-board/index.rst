@@ -324,7 +324,7 @@ Demonstrates the hardware RNG.
 rmt
 ---
 
-Configures an RMT TX/RX pair and the ``rmtchar`` example. Also includes ``ws2812`` for addressable LEDs.
+Configures an RMT TX/RX pair and the ``irtest`` example. Also includes ``ws2812`` for addressable LEDs.
 
 rtc
 ---
