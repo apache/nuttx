@@ -8,6 +8,7 @@ Timers Drivers
   timer.rst
   oneshot.rst
   pwm.rst
+  ocu.rst
   pulsecount.rst
   watchdog.rst
   rtc.rst
