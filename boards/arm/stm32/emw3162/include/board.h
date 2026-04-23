@@ -153,9 +153,22 @@
 /* UART1 */
 
 #ifdef CONFIG_STM32_USART1
-#  define GPIO_USART1_RX GPIO_USART1_RX_1
-#  define GPIO_USART1_TX GPIO_USART1_TX_1
+#  define GPIO_USART1_RX (GPIO_USART1_RX_1|GPIO_SPEED_100MHz)
+#  define GPIO_USART1_TX (GPIO_USART1_TX_1|GPIO_SPEED_100MHz)
 #endif
+
+/* MCO1 */
+
+#define GPIO_MCO1            (GPIO_MCO1_0|GPIO_SPEED_100MHz)
+
+/* SDIO */
+
+#define GPIO_SDIO_CK         (GPIO_SDIO_CK_0|GPIO_SPEED_50MHz)
+#define GPIO_SDIO_CMD        (GPIO_SDIO_CMD_0|GPIO_SPEED_50MHz)
+#define GPIO_SDIO_D0         (GPIO_SDIO_D0_0|GPIO_SPEED_50MHz)
+#define GPIO_SDIO_D1         (GPIO_SDIO_D1_0|GPIO_SPEED_50MHz)
+#define GPIO_SDIO_D2         (GPIO_SDIO_D2_0|GPIO_SPEED_50MHz)
+#define GPIO_SDIO_D3         (GPIO_SDIO_D3_0|GPIO_SPEED_50MHz)
 
 /* SDIO definitions *********************************************************/
 
