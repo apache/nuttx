@@ -58,10 +58,13 @@ behave as follows at Nuttx start-up time:
               `-- rcS
               `-- rc.sysinit
 
-  -  By default, the contents of ``rc.sysinit`` script are::
+  -  By default, the contents of ``rc.sysinit`` script prefer TMPFS for
+     ``/tmp`` and fall back to FAT RAMDISK when TMPFS is not enabled::
 
-      # Create a RAMDISK and mount it at /tmp
+      # Mount /tmp on TMPFS
+      mount -t tmpfs /tmp
 
+      # Otherwise create a RAMDISK and mount it at /tmp
       mkrd -m 1 -s 512 1024
       mkfatfs /dev/ram1
       mount -t vfat /dev/ram1 /tmp
@@ -96,8 +99,8 @@ In most of these cases, the configuration sets up the *default*
 script is here: ``apps/nshlib/rc.sysinit.template`` and
 ``apps/nshlib/rcS.template``. (The funny values in the rc.sysinit.template
 like ``XXXMKRDMINORXXX`` get replaced via ``sed`` at build time). This
-default configuration creates a ramdisk and mounts it at ``/tmp`` as
-discussed above.
+default configuration mounts ``/tmp`` as TMPFS when enabled, otherwise
+it creates a RAMDISK and mounts FAT at ``/tmp`` as discussed above.
 
 Customizing Start up Scripts
 ============================

@@ -57,10 +57,13 @@ The NSH initialization function, ``nsh_initialize()``, be found in
      read-only, ROMFS file system is mounted by ``nsh_romfsetc()``.
 
      The ROMFS image is, itself, just built into the firmware. By default,
-     this ``rc.sysinit`` system init script contains the following logic::
+     this ``rc.sysinit`` system init script contains logic to prefer
+     TMPFS for ``/tmp`` and to fall back to FAT RAMDISK::
 
-        # Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
+        # Mount /tmp on TMPFS
+        mount -t tmpfs XXXRDMOUNTPOINTXXX
 
+        # Otherwise create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
         mkrd -m XXXMKRDMINORXXX -s XXMKRDSECTORSIZEXXX XXMKRDBLOCKSXXX
         mkfatfs /dev/ramXXXMKRDMINORXXX
         mount -t vfat /dev/ramXXXMKRDMINORXXX XXXRDMOUNTPOINTXXX
@@ -79,15 +82,20 @@ The NSH initialization function, ``nsh_initialize()``, be found in
      -  ``XXXRDMOUNTPOINTXXX`` will become the configured mount point.
         Default: ``/etc``
 
-     By default, the substituted values would yield an ``rc.sysinit`` file like::
+     By default, with FAT fallback values substituted, ``rc.sysinit``
+     can look like::
 
-        # Create a RAMDISK and mount it at /tmp
+        # Mount /tmp on TMPFS
+        mount -t tmpfs /tmp
 
+        # Otherwise create a RAMDISK and mount it at /tmp
         mkrd -m 1 -s 512 1024
         mkfatfs /dev/ram1
         mount -t vfat /dev/ram1 /tmp
 
-     This script will, then:
+     This script will:
+
+     -  Mount ``/tmp`` as TMPFS when available, or else:
 
      -  Create a RAMDISK of size 512*1024 bytes at ``/dev/ram1``,
 
