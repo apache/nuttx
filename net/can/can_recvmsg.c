@@ -154,7 +154,7 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
                                    FAR struct can_recvfrom_s *pstate)
 {
   unsigned int offset;
-  size_t recvlen;
+  ssize_t recvlen;
 
 #ifdef CONFIG_NET_TIMESTAMP
   cmsg_store_timestamp(pstate->pr_msg, &dev->d_iob->io_time,
@@ -174,6 +174,10 @@ static size_t can_recvfrom_newdata(FAR struct net_driver_s *dev,
 
   recvlen = iob_copyout(pstate->pr_msg->msg_iov->iov_base,
                         dev->d_iob, recvlen, offset);
+  if (recvlen <= 0)
+    {
+      return 0;
+    }
 
   /* Trim the copied buffers */
 
