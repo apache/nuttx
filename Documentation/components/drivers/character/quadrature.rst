@@ -78,6 +78,36 @@ This ioctl sets the index position of the encoder. An argument is an
 This ioctl gets the index position of the encoder. An argument is a
 pointer to ``qe_index_s`` structure.
 
+AS5047D Specific Interface
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The AS5047D magnetic rotary encoder is supported through the quadrature
+encoder upper-half driver by ``drivers/sensors/as5047d.c``.
+
+Include the AS5047D header for device-specific ioctls and bit definitions:
+
+.. code-block:: c
+
+  #include <nuttx/sensors/as5047d.h>
+
+The AS5047D implements additional ``ioctl`` commands:
+
+ * :c:macro:`QEIOC_AS5047D_DIAGNOSTICS`
+ * :c:macro:`QEIOC_AS5047D_MAGNITUDE`
+
+.. c:macro:: QEIOC_AS5047D_DIAGNOSTICS
+
+Reads the AS5047D ``DIAAGC`` register. The argument is a pointer to
+``uint16_t`` where the register value is returned.
+
+.. c:macro:: QEIOC_AS5047D_MAGNITUDE
+
+Reads the AS5047D ``MAG`` register. The argument is a pointer to
+``uint16_t`` where the register value is returned.
+
+The position value returned by :c:macro:`QEIOC_POSITION` is a 14-bit
+angle sample in the range ``0`` to ``16383``.
+
 .. c:struct:: qe_index_s
 .. code-block:: c
 
@@ -124,3 +154,8 @@ reader should refer to target documentation for target specific configuration.
 The ``CONFIG_SENSORS`` option has to be enabled in order to use the qencoder
 peripheral. The peripheral itself is enabled by ``CONFIG_SENSORS_QENCODER``
 option.
+
+For AS5047D, enable these options:
+
+- ``CONFIG_SPI``
+- ``CONFIG_SENSORS_AS5047D``

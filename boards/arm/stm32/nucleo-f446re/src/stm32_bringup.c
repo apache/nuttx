@@ -60,6 +60,10 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
+#ifdef CONFIG_SENSORS_AS5047D
+#include <nuttx/sensors/as5047d.h>
+#endif
+
 #include "stm32_romfs.h"
 #include "nucleo-f446re.h"
 
@@ -84,6 +88,10 @@
 int stm32_bringup(void)
 {
   int ret = OK;
+#if defined(CONFIG_SENSORS_QENCODER) && defined(CONFIG_SENSORS_AS5047D)
+  FAR struct spi_dev_s *spi;
+  FAR struct qe_lowerhalf_s *lower;
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -197,16 +205,45 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
-  /* Initialize and register the qencoder driver */
+#ifdef CONFIG_SENSORS_AS5047D
+  /* Initialize and register the AS5047D qencoder driver */
+
+  spi = stm32_spibus_initialize(3);
+  if (spi == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI3 for AS5047D\n");
+      return -ENODEV;
+    }
+
+#ifdef GPIO_SPI3_CS_USER
+  stm32_configgpio(GPIO_SPI3_CS_USER);
+#endif
+
+  lower = as5047d_initialize(spi, SPIDEV_USER(0));
+  if (lower == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: as5047d_initialize() failed\n");
+      return -ENODEV;
+    }
+
+  ret = qe_register("/dev/qe0", lower);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: qe_register(/dev/qe0) failed: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Initialize and register the STM32 timer qencoder driver */
 
   ret = board_qencoder_initialize(0, CONFIG_NUCLEO_F446RE_QETIMER);
   if (ret != OK)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to register the qencoder: %d\n",
+             "ERROR: Failed to register timer qencoder: %d\n",
              ret);
       return ret;
     }
+#  endif
 #endif
 
 #ifdef CONFIG_SENSORS_HALL3PHASE
