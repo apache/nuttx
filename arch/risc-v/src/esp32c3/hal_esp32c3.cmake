@@ -507,6 +507,10 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/src/uart_wakeup.c)
 
+if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
+  list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
+endif()
+
 # Bootloader flash encrypt source
 list(APPEND HAL_SRCS
      ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/flash_encrypt.c)

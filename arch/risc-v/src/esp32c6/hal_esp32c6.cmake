@@ -533,6 +533,10 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/components/newlib/newlib/libc/misc/init.c)
 
+if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
+  list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
+endif()
+
 # Bootloader flash encrypt
 list(APPEND HAL_SRCS
      ${ESP_HAL_3RDPARTY_REPO}/components/bootloader_support/src/flash_encrypt.c)

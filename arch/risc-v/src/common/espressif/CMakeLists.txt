@@ -164,6 +164,10 @@ if(CONFIG_ESP_MCPWM)
   list(APPEND SRCS esp_mcpwm.c)
 endif()
 
+if(CONFIG_ESPRESSIF_EMAC)
+  list(APPEND SRCS esp_emac.c)
+endif()
+
 if(CONFIG_SYSTEM_NXDIAG_ESPRESSIF_CHIP_WO_TOOL)
   list(APPEND SRCS esp_nxdiag.c)
 endif()
@@ -209,7 +213,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      8630b6b82cb84838f86332e00f39ab72a64cf186
+      c32f1ad13f4ce8312de494e8b79c88fda10fe9ed
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 

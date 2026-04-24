@@ -115,6 +115,7 @@ int esp_wifi_api_adapter_init(void)
   esp_wifi_lock(true);
 
   esp_evt_work_init();
+  esp_wifi_evt_work_init();
 
   wifi_cfg.nvs_enable = 0;
 

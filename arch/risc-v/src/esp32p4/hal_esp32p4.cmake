@@ -49,6 +49,7 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_app_format/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_blockdev/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_event/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_cam/${CHIP_SERIES}/include
@@ -435,6 +436,31 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/components/newlib/newlib/libc/misc/init.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/os.c)
+
+if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
+  list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
+endif()
+
+if(CONFIG_ESPRESSIF_EMAC)
+  list(
+    APPEND
+    HAL_SRCS
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_emac/emac_hal.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_emac/${CHIP_SERIES}/emac_periph.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/esp_eth.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp_dma.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/mac/esp_eth_mac_esp_gpio.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/phy/esp_eth_phy_802_3.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/src/phy/esp_eth_phy_generic.c
+    # log_buffers.c provides ESP_LOG_BUFFER_HEXDUMP used by esp_eth_mac_esp.c
+    # for its dump_hal_registers diagnostic helper; util.c supplies the hex
+    # conversion helper consumed by log_buffers.c.
+    ${ESP_HAL_3RDPARTY_REPO}/components/log/src/util.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/log/src/buffer/log_buffers.c)
+  target_include_directories(
+    arch PRIVATE ${ESP_HAL_3RDPARTY_REPO}/components/esp_eth/include)
+endif()
 
 # Bootloader common
 list(

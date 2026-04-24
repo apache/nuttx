@@ -51,6 +51,7 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_adc/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_blockdev/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_event/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_clock/${CHIP_SERIES}/include
@@ -491,6 +492,10 @@ list(
   APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/os.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/heap_caps.c
   ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/components/newlib/newlib/libc/misc/init.c)
+
+if(CONFIG_ESPRESSIF_WIFI OR CONFIG_ESPRESSIF_EMAC)
+  list(APPEND HAL_SRCS ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/esp_event.c)
+endif()
 
 # Bootloader flash encrypt
 list(APPEND HAL_SRCS
