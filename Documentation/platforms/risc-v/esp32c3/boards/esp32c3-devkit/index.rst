@@ -154,6 +154,9 @@ Get the list of BLE devices found around you::
            advertiser data: 10 09 4d 69 20 XX XX XX XX XX XX XX XX XX XX 20                      e
     nsh>
 
+To decrease power consumption, ``CONFIG_ESPRESSIF_AUTO_SLEEP`` needs to be enabled. This option
+makes the device automatically enter the low power consumption mode when in the idle state
+
 bmp180
 ------
 
