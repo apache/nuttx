@@ -93,7 +93,8 @@ void mm_foreach(FAR struct mm_heap_s *heap, mm_node_handler_t handler,
 
           handler(node, arg);
 
-          DEBUGASSERT(MM_PREVNODE_IS_ALLOC(node) ||
+          DEBUGASSERT(prev == NULL ||
+                      MM_PREVNODE_IS_ALLOC(node) ||
                       MM_SIZEOF_NODE(prev) == node->preceding);
           prev = node;
         }
