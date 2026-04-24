@@ -784,7 +784,11 @@ void file_closelk(FAR struct file *filep)
       return;
     }
 
-  ret = file_lock_get_path(filep, path);
+  /* No need for inode type and signal handler context (e.g. "kill") checking
+   * here, but just get path unconditionally.
+   */
+
+  ret = file_fcntl(filep, F_GETPATH, path);
   if (ret < 0)
     {
       /* It isn't an error if fs doesn't support F_GETPATH, so we just end
