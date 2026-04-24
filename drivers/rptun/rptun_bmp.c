@@ -63,7 +63,6 @@ FAR resource_table *rptun_bmp_get_resource(FAR struct rptun_dev_s *dev);
 static bool rptun_bmp_is_autostart(FAR struct rptun_dev_s *dev);
 static bool rptun_bmp_is_master(FAR struct rptun_dev_s *dev);
 static int rptun_bmp_start(FAR struct rptun_dev_s *dev);
-static int rptun_bmp_stop(FAR struct rptun_dev_s *dev);
 static int rptun_bmp_notify(FAR struct rptun_dev_s *dev,
                             uint32_t notifyid);
 static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
@@ -83,7 +82,6 @@ static const struct rptun_ops_s g_rptun_bmp_ops =
   .is_autostart      = rptun_bmp_is_autostart,
   .is_master         = rptun_bmp_is_master,
   .start             = rptun_bmp_start,
-  .stop              = rptun_bmp_stop,
   .notify            = rptun_bmp_notify,
   .register_callback = rptun_bmp_register_callback,
 };
@@ -135,11 +133,6 @@ static bool rptun_bmp_is_master(FAR struct rptun_dev_s *dev)
 }
 
 static int rptun_bmp_start(FAR struct rptun_dev_s *dev)
-{
-  return 0;
-}
-
-static int rptun_bmp_stop(FAR struct rptun_dev_s *dev)
 {
   return 0;
 }
