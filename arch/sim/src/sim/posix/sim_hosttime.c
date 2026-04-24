@@ -41,6 +41,13 @@
  ****************************************************************************/
 
 static uint64_t g_start;
+
+/* Ratio of simulated time to real time in percent.  100 means real-time
+ * (default).  Values > 100 speed up simulated time; values < 100 slow it
+ * down.  Overridable at runtime via --sim-rt-ratio=<percent>.
+ */
+
+static int g_time_ratio = CONFIG_SIM_WALLTIME_RATIO;
 #ifdef __APPLE__
 static dispatch_source_t g_timer;
 
@@ -105,7 +112,14 @@ uint64_t host_gettime(bool rtc)
   clock_gettime(rtc ? CLOCK_REALTIME : CLOCK_MONOTONIC, &tp);
   current = 1000000000ull * tp.tv_sec + tp.tv_nsec;
 
-  return rtc ? current : current - g_start;
+  if (rtc)
+    {
+      return current;
+    }
+
+  /* Apply time ratio: simulated_time = real_elapsed * ratio / 100 */
+
+  return ((current - g_start) * g_time_ratio) / 100;
 }
 
 /****************************************************************************
@@ -128,7 +142,31 @@ void host_sleepuntil(uint64_t nsec)
   now = host_gettime(false);
   if (nsec > now + 1000)
     {
-      usleep((nsec - now) / 1000);
+      /* nsec is in simulated time; convert back to real duration to sleep */
+
+      usleep((((nsec - now) * 100) / g_time_ratio) / 1000);
+    }
+}
+
+/****************************************************************************
+ * Name: host_set_timeratio
+ *
+ * Description:
+ *   Set the ratio of simulated time to real time in percent.  100 (default)
+ *   means simulated time advances at the same rate as real time.  Values
+ *   greater than 100 speed up simulated time; values less than 100 slow it
+ *   down.
+ *
+ * Input Parameters:
+ *   ratio - The new time ratio in percent (must be > 0)
+ *
+ ****************************************************************************/
+
+void host_set_timeratio(int ratio)
+{
+  if (ratio > 0)
+    {
+      g_time_ratio = ratio;
     }
 }
 
@@ -148,9 +186,9 @@ void host_sleepuntil(uint64_t nsec)
 
 int host_settimer(uint64_t nsec)
 {
-  /* Convert to microseconds and set minimum timer to 1 microsecond. */
+  /* nsec is in simulated time; convert back to real absolute time. */
 
-  nsec += g_start;
+  nsec = ((nsec * 100) / g_time_ratio) + g_start;
 
 #ifdef __APPLE__
   dispatch_time_t start;

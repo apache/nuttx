@@ -170,6 +170,16 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+config SIM_WALLTIME_RATIO
+	int "Simulated time ratio in percent relative to real time"
+	default 100
+	range 1 100000
+	---help---
+		Set the ratio of simulated time to real time in percent.
+		100 means real-time (default).  200 means simulated time advances
+		twice as fast as real time.  50 means half speed.
+		This can also be overridden at runtime with --sim-rt-ratio=<percent>.
+
 config SIM_LOOP_INTERVAL
 	int "loop interval in ms"
 	default 10
