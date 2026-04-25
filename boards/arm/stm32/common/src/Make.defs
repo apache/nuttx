@@ -95,7 +95,9 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
-  CSRCS += stm32_qencoder.c
+  ifeq ($(CONFIG_STM32_QE),y)
+    CSRCS += stm32_qencoder.c
+  endif
 endif
 
 ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)

@@ -476,7 +476,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SENSORS_QENCODER
+#if defined(CONFIG_STM32_QE) && defined(CONFIG_SENSORS_QENCODER)
   /* Initialize and register the qencoder driver */
 
   ret = board_qencoder_initialize(0, CONFIG_STM32F4DISCO_QETIMER);
