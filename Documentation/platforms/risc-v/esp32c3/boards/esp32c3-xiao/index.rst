@@ -248,3 +248,29 @@ make sure the ``bnep0`` interface is up.
    ifup bnep0...OK
    nsh> nimble &
 
+
+smartfs
+-------
+
+This configuration is identical to the ``nimble`` configuration, except that
+there is a 1MB :doc:`SMARTFS </components/filesystem/smartfs>` file system using
+the chip's on-board flash located at `/data` for storing files.
+
+.. note::
+
+   The first time you boot the device, the SMARTFS file system may fail to be
+   mounted. This is because the flash partition is not yet formatted, and is not
+   auto-formatted. Helpfully, you will be prompted to run
+
+   .. code:: console
+
+      nsh> mksmartfs /dev/smart0
+      nsh> reboot
+
+   Then everything should work as expected.
+
+.. note::
+
+   You can choose to mount other types of file systems to the flash partition,
+   too! :doc:`NXFFS </components/filesystem/nxffs>`, :doc:`littlefs
+   </components/filesystem/littlefs>`, etc.
