@@ -107,6 +107,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS ak09912.c)
     endif()
 
+    if(CONFIG_SENSORS_MT6816)
+      list(APPEND SRCS mt6816.c)
+    endif()
+
     if(CONFIG_SENSORS_AS5048B)
       list(APPEND SRCS as5048b.c)
     endif()

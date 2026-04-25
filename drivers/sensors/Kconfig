@@ -143,6 +143,15 @@ config SENSORS_AK09912
 	---help---
 		Enable driver for AK09911/AK09912 Compass sensor.
 
+config SENSORS_MT6816
+	bool "MagTek MT6816 Magnetic Angle Position support"
+	default n
+	select SPI
+	select SENSORS_QENCODER
+	---help---
+		Enable driver support for the MagTek MT6816 magnetic angle
+                position (magnetic rotary encoder).
+
 config SENSORS_AS5048B
 	bool "AMS AS5048B Magnetic Rotary Encoder support"
 	default n
