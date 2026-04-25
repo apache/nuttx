@@ -455,6 +455,11 @@
 
 #define BOARD_MPR121_GPIO_INT GPIO_MPR121_INT
 
+/* Pin for Magnetic Encoder MT6816 */
+
+#define GPIO_CS_MT6816      (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                             GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
+
 /* LIS3DSH */
 
 #define GPIO_LIS3DSH_EXT0 \
