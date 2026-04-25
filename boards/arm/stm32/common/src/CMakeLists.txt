@@ -87,7 +87,9 @@ if(CONFIG_SENSORS_ZEROCROSS)
 endif()
 
 if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
+  if(CONFIG_STM32_QE)
+    list(APPEND SRCS stm32_qencoder.c)
+  endif()
 endif()
 
 if(CONFIG_SENSORS_INA219)
