@@ -163,6 +163,12 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
   sq_init(&group->tg_members);
 #endif
 
+#ifdef CONFIG_FS_BACKTRACE_DEFAULT
+  /* Enable FD backtrace for the group by default */
+
+  group->tg_flags |= GROUP_FLAG_FD_BACKTRACE;
+#endif
+
   /* Attach the group to the TCB */
 
   tcb->group = group;
