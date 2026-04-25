@@ -193,7 +193,12 @@ int host_settimer(uint64_t nsec)
 #ifdef __APPLE__
   dispatch_time_t start;
 
-  start = dispatch_walltime(NULL, nsec - host_gettime(true));
+  struct timespec now;
+  uint64_t now_ns;
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  now_ns = 1000000000ull * now.tv_sec + now.tv_nsec;
+  start = dispatch_walltime(NULL, nsec - now_ns);
   dispatch_source_set_timer(g_timer, start, DISPATCH_TIME_FOREVER, 1000);
   return 0;
 #else
