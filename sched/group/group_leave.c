@@ -238,7 +238,8 @@ void group_drop(FAR struct task_group_s *group)
 
   /* Finally, if no one needs the group and it has been deleted, remove it */
 
-  if (group->tg_flags & GROUP_FLAG_DELETED)
+  if ((group->tg_flags & GROUP_FLAG_DELETED) &&
+      !(group->tg_flags & GROUP_FLAG_STATIC))
     {
       /* Release the group container itself */
 
