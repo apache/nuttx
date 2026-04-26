@@ -106,6 +106,8 @@ else
 endif
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
+vpath nuttx$(EXEEXT) $(TOPDIR)
+
 CFLAGS += -fvisibility=default
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ \
@@ -378,7 +380,7 @@ RELLIBS += -lboard
 
 all: sim_head$(OBJEXT) libarch$(LIBEXT)
 
-.PHONY: export_startup clean distclean cleanrel depend board/libboard$(LIBEXT)
+.PHONY: export_startup clean distclean cleanrel depend FORCE
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -400,8 +402,10 @@ libarch$(LIBEXT): $(NUTTXOBJS)
 # the simulation.  However, this is a good place to keep parts of the simulation
 # that are not hardware-related.
 
-board/libboard$(LIBEXT):
+board/libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+
+FORCE:
 
 # A partially linked object containing only NuttX code (no interface to host OS)
 # Change the names of most symbols that conflict with libc symbols.
