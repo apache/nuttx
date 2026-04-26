@@ -356,6 +356,93 @@ config IMX9_FLEXIO2_PWM_CHANNEL_PINS
 	hex "FlexIO outputs used for FLEXIO2 timers"
 	default 0x0000000000000000
 
+config IMX9_FLEXIO_DSHOT
+	bool
+	default n
+	select DSHOT
+
+choice
+	prompt "DShot timestamp source"
+	default IMX9_FLEXIO_DSHOT_TS_SYSTIME
+	depends on IMX9_FLEXIO_DSHOT
+
+config IMX9_FLEXIO_DSHOT_TS_SYSTIME
+	bool "Use clock_systime"
+	---help---
+		Use clock_systime for dshot response timestamping
+
+config IMX9_FLEXIO_DSHOT_TS_BOARDTIME
+	bool "Use board provided timestamping function"
+	---help---
+		Board-specific sources provide "board_systime_timespec"
+		function, which is called to get timestamp. This can be used
+		e.g. if some special time base is required for the timestamping.
+
+config IMX9_FLEXIO_DSHOT_TS_NONE
+	bool "Timestamping disabled"
+	---help---
+		No timestamping, timestamps stay at 0
+
+endchoice # DShot timestamp source
+
+config IMX9_FLEXIO1_DSHOT
+	bool "Enable FLEXIO1 based DShot"
+	default n
+	select IMX9_FLEXIO_DSHOT
+
+config IMX9_FLEXIO1_DSHOT_NCHANNELS
+	int "Number of channels for FLEXIO1 DShot"
+	depends on IMX9_FLEXIO1_DSHOT
+	default 4
+	range 1 8
+
+config IMX9_FLEXIO1_DSHOT_TX_TIMER
+	int "FlexIO timer to use for TX on all channels"
+	depends on IMX9_FLEXIO1_DSHOT
+	default 6
+	range -1 7
+	---help---
+		If set to -1, each DSHOT channel uses it's own individual timer.
+		When set to timer 0-7, all the DSHOT TX channels use this common
+		timer to clock out the TX messages. This reduces interrupt load
+		and synchronizes all the channels to send out messages simultaneously.
+
+config IMX9_FLEXIO1_DSHOT_CHANNEL_PINS
+	hex "FlexIO outputs used for FLEXIO1 DShot channels"
+	depends on IMX9_FLEXIO1_DSHOT
+	default 0x0000000007060504
+	---help---
+		Packed pin-index array: one byte per channel, byte 0 is channel 0.
+
+config IMX9_FLEXIO2_DSHOT
+	bool "Enable FLEXIO2 based DShot"
+	default n
+	select IMX9_FLEXIO_DSHOT
+
+config IMX9_FLEXIO2_DSHOT_NCHANNELS
+	int "Number of channels for FLEXIO2 DShot"
+	depends on IMX9_FLEXIO2_DSHOT
+	default 8
+	range 1 8
+
+config IMX9_FLEXIO2_DSHOT_CHANNEL_PINS
+	hex "FlexIO outputs used for FLEXIO2 DShot channels"
+	depends on IMX9_FLEXIO2_DSHOT
+	default 0x0000000007060504
+	---help---
+		Packed pin-index array: one byte per channel, byte 0 is channel 0.
+
+config IMX9_FLEXIO2_DSHOT_TX_TIMER
+	int "FlexIO timer to use for TX on all channels"
+	depends on IMX9_FLEXIO2_DSHOT
+	default 6
+	range -1 7
+	---help---
+		If set to -1, each DSHOT channel uses it's own individual timer.
+		When set to timer 0-7, all the DSHOT TX channels use this common
+		timer to clock out the TX messages. This reduces interrupt load
+		and synchronizes all the channels to send out messages simultaneously.
+
 config IMX9_TPM_PWM
 	bool
 	select PWM_MULTICHAN

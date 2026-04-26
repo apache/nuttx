@@ -88,6 +88,18 @@ int imx9_pwm_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: imx9_dshot_setup
+ *
+ * Description:
+ *   Initialize DShot outputs
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DSHOT)
+int imx9_dshot_setup(void);
+#endif
+
+/****************************************************************************
  * Name: imx9_i2c_setup
  *
  * Description:
