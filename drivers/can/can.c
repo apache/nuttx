@@ -89,6 +89,13 @@
 #define HALF_SECOND_MSEC 500
 #define HALF_SECOND_USEC 500000L
 
+/* can_close waits for SW queue and H/W TX to drain.  Without a second bus
+ * node (no ACK) bxCAN may retry indefinitely; dev_txempty() then never
+ * becomes true.  Bound the wait so close() does not hang forever.
+ */
+
+#define CAN_CLOSE_DRAIN_LOOPS 20u  /* 20 * 500 ms = 10 s per stage */
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -257,14 +264,22 @@ static int can_open(FAR struct file *filep)
 
       if (ret == OK)
         {
+          FAR struct can_reader_s *reader;
+
           dev->cd_crefs++;
 
-          /* Update the reader list only if driver was open for reading */
+          /* Per-file context (msgalign, optional ioctl FIFO).  Always
+           * allocated: write-only needs msgalign / CANIOC_* without O_RDOK.
+           * Receive path and poll() only use readers that are also queued
+           * on cd_readers (see below).
+           */
+
+          reader = init_can_reader(filep);
 
           if ((filep->f_oflags & O_RDOK) != 0)
             {
               list_add_head(&dev->cd_readers,
-                            (FAR struct list_node *)init_can_reader(filep));
+                            (FAR struct list_node *)reader);
             }
         }
 
@@ -287,11 +302,14 @@ errout:
 
 static int can_close(FAR struct file *filep)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct can_dev_s *dev   = inode->i_private;
-  irqstate_t            flags;
-  FAR struct list_node *node;
-  int                   ret;
+  FAR struct inode        *inode = filep->f_inode;
+  FAR struct can_dev_s    *dev   = inode->i_private;
+  irqstate_t              flags;
+  FAR struct list_node    *node;
+  FAR struct can_reader_s *priv  = (FAR struct can_reader_s *)filep->f_priv;
+  bool                    onlist = false;
+  int                     ret;
+  unsigned int            n;
 
 #ifdef  CONFIG_DEBUG_CAN_INFO
   caninfo("ocount: %u\n", dev->cd_crefs);
@@ -307,10 +325,10 @@ static int can_close(FAR struct file *filep)
 
   list_for_every(&dev->cd_readers, node)
     {
-      if (((FAR struct can_reader_s *)node) ==
-          ((FAR struct can_reader_s *)filep->f_priv))
+      if (((FAR struct can_reader_s *)node) == priv)
         {
-          FAR struct can_reader_s *reader = (FAR struct can_reader_s *)node;
+          FAR struct can_reader_s *reader =
+            (FAR struct can_reader_s *)node;
           FAR struct can_rxfifo_s *fifo   = &reader->fifo;
 
           /* Unlock the binary semaphore, waking up can_read if it
@@ -319,16 +337,24 @@ static int can_close(FAR struct file *filep)
 
           nxsem_post(&fifo->rx_sem);
 
-          /* Notify specific poll/select waiter that they can read from the
-           * cd_recv buffer
+          /* Notify specific poll/select waiter that they can read from
+           * the cd_recv buffer
            */
 
           poll_notify(&reader->cd_fds, 1, POLLHUP);
           reader->cd_fds = NULL;
           list_delete(node);
           kmm_free(node);
+          onlist = true;
           break;
         }
+    }
+
+  /* Write-only opens use init_can_reader() but are not on cd_readers */
+
+  if (!onlist && priv != NULL)
+    {
+      kmm_free(priv);
     }
 
   filep->f_priv = NULL;
@@ -347,16 +373,29 @@ static int can_close(FAR struct file *filep)
 
   /* Now we wait for the sender to clear */
 
-  while (!TX_EMPTY(&dev->cd_sender))
+  for (n = 0;
+       !TX_EMPTY(&dev->cd_sender) && n < CAN_CLOSE_DRAIN_LOOPS;
+       n++)
     {
       nxsched_usleep(HALF_SECOND_USEC);
     }
 
+  if (!TX_EMPTY(&dev->cd_sender))
+    {
+      canerr("CAN close: SW TX queue still not empty after timeout\n");
+    }
+
   /* And wait for the hardware sender to drain */
 
-  while (!dev_txempty(dev))
+  for (n = 0; !dev_txempty(dev) && n < CAN_CLOSE_DRAIN_LOOPS; n++)
     {
       nxsched_usleep(HALF_SECOND_USEC);
+    }
+
+  if (!dev_txempty(dev))
+    {
+      canerr("CAN close: H/W TX still busy after timeout "
+              "(no ACK / bus-off / stuck mailbox)\n");
     }
 
   /* Free the IRQ and disable the CAN device */
