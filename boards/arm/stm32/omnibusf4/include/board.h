@@ -160,8 +160,8 @@
 #if 0
 #define INVERTER_PIN_USART1     PC0            /* DYS F4 Pro, Omnibus F4 AIO 1st Gen only */
 #endif
-#define GPIO_USART1_RX  GPIO_USART1_RX_1       /* PA10 */
-#define GPIO_USART1_TX  GPIO_USART1_TX_1       /* PA9  */
+#define GPIO_USART1_RX  (GPIO_USART1_RX_1|GPIO_SPEED_100MHz)       /* PA10 */
+#define GPIO_USART1_TX  (GPIO_USART1_TX_1|GPIO_SPEED_100MHz)       /* PA9  */
 
 /* USART2:
  *
@@ -170,8 +170,8 @@
 
 /* USART3: */
 
-#define GPIO_USART3_TX    GPIO_USART3_TX_1     /* PB10 */
-#define GPIO_USART3_RX    GPIO_USART3_RX_1     /* PB11 */
+#define GPIO_USART3_TX    (GPIO_USART3_TX_1|GPIO_SPEED_100MHz)     /* PB10 */
+#define GPIO_USART3_RX    (GPIO_USART3_RX_1|GPIO_SPEED_100MHz)     /* PB11 */
 
 /* USART4: */
 
@@ -180,15 +180,15 @@
 #if 0
 #define INVERTER_PIN_UART6      PC8            /* Omnibus F4 V3 and later, EXUAVF4PRO */
 #endif
-#define GPIO_USART6_RX    GPIO_USART6_RX_1     /* PC7 */
-#define GPIO_USART6_TX    GPIO_USART6_TX_1     /* PC6 */
+#define GPIO_USART6_RX    (GPIO_USART6_RX_1|GPIO_SPEED_100MHz)     /* PC7 */
+#define GPIO_USART6_TX    (GPIO_USART6_TX_1|GPIO_SPEED_100MHz)     /* PC6 */
 
 /* PWM - motor outputs, etc. are on these pins: */
 
-#define GPIO_TIM3_CH3OUT  GPIO_TIM3_CH3OUT_1   /* S1_OUT  PB0 */
-#define GPIO_TIM3_CH4OUT  GPIO_TIM3_CH4OUT_1   /* S2_OUT  PB1 */
-#define GPIO_TIM2_CH4OUT  GPIO_TIM2_CH4OUT_1   /* S3_OUT  PA3 */
-#define GPIO_TIM2_CH3OUT  GPIO_TIM3_CH3OUT_1   /* S4_OUT  PA2 */
+#define GPIO_TIM3_CH3OUT  (GPIO_TIM3_CH3OUT_1|GPIO_SPEED_50MHz)    /* S1_OUT  PB0 */
+#define GPIO_TIM3_CH4OUT  (GPIO_TIM3_CH4OUT_1|GPIO_SPEED_50MHz)    /* S2_OUT  PB1 */
+#define GPIO_TIM2_CH4OUT  (GPIO_TIM2_CH4OUT_1|GPIO_SPEED_50MHz)    /* S3_OUT  PA3 */
+#define GPIO_TIM2_CH3OUT  (GPIO_TIM3_CH3OUT_1|GPIO_SPEED_50MHz)    /* S4_OUT  PA2 */
 
 /* SPI1 :
  *
@@ -204,11 +204,11 @@
  * #define ACC_1_ALIGN             CW270_DEG
  */
 
-#define GPIO_SPI1_MISO    GPIO_SPI1_MISO_1  /* PA6 */
-#define GPIO_SPI1_MOSI    GPIO_SPI1_MOSI_1  /* PA7 */
-#define GPIO_SPI1_SCK     GPIO_SPI1_SCK_1   /* PA5 */
+#define GPIO_SPI1_MISO    (GPIO_SPI1_MISO_1|GPIO_SPEED_50MHz)  /* PA6 */
+#define GPIO_SPI1_MOSI    (GPIO_SPI1_MOSI_1|GPIO_SPEED_50MHz)  /* PA7 */
+#define GPIO_SPI1_SCK     (GPIO_SPI1_SCK_1|GPIO_SPEED_50MHz)   /* PA5 */
 #if 0
-#define GPIO_SPI1_NSS     GPIO_SPI1_NSS_2   /* PA4 */
+#define GPIO_SPI1_NSS     (GPIO_SPI1_NSS_2|GPIO_SPEED_50MHz)   /* PA4 */
 #endif
 #define DMACHAN_SPI1_RX   DMAMAP_SPI1_RX_1  /* 2:0:3 */
 #define DMACHAN_SPI1_TX   DMAMAP_SPI1_TX_1  /* 2:3:3 */
@@ -218,13 +218,13 @@
  * Used for MMC/SD on OMNIBUSF4SD.
  */
 
-#define GPIO_SPI2_MISO    GPIO_SPI2_MISO_1  /* PB14 */
-#define GPIO_SPI2_MOSI    GPIO_SPI2_MOSI_1  /* PB15 */
+#define GPIO_SPI2_MISO    (GPIO_SPI2_MISO_1|GPIO_SPEED_50MHz)  /* PB14 */
+#define GPIO_SPI2_MOSI    (GPIO_SPI2_MOSI_1|GPIO_SPEED_50MHz)  /* PB15 */
 #define GPIO_SPI2_NSS     (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | \
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN12)
-#define GPIO_SPI2_SCK     GPIO_SPI2_SCK_2   /* PB13 */
-#define DMACHAN_SPI2_RX   DMAMAP_SPI2_RX    /* 1:3:0 */
-#define DMACHAN_SPI2_TX   DMAMAP_SPI2_TX    /* 1:4:0 */
+#define GPIO_SPI2_SCK     (GPIO_SPI2_SCK_2|GPIO_SPEED_50MHz)   /* PB13 */
+#define DMACHAN_SPI2_RX   DMAMAP_SPI2_RX                       /* 1:3:0 */
+#define DMACHAN_SPI2_TX   DMAMAP_SPI2_TX                       /* 1:4:0 */
 
 #define GPIO_MMCSD_NSS    GPIO_SPI2_NSS
 #define GPIO_MMCSD_NCD    (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | \
@@ -240,16 +240,23 @@
  * (OMNIBUSF4BASE targets appear to have a cyrf6936 device.)
  */
 
-#define GPIO_SPI3_MISO    GPIO_SPI3_MISO_2  /* PC11 */
-#define GPIO_SPI3_MOSI    GPIO_SPI3_MOSI_2  /* PC12 */
-#define GPIO_SPI3_NSS     GPIO_SPI3_NSS_1   /* PA15 */ /* TODO: doesn't work like a chip select */
-#define GPIO_SPI3_SCK     GPIO_SPI3_SCK_2   /* PC10 */
+#define GPIO_SPI3_MISO    (GPIO_SPI3_MISO_2|GPIO_SPEED_50MHz)  /* PC11 */
+#define GPIO_SPI3_MOSI    (GPIO_SPI3_MOSI_2|GPIO_SPEED_50MHz)  /* PC12 */
+#define GPIO_SPI3_NSS     (GPIO_SPI3_NSS_1|GPIO_SPEED_50MHz)   /* PA15 */ /* TODO: doesn't work like a chip select */
+#define GPIO_SPI3_SCK     (GPIO_SPI3_SCK_2|GPIO_SPEED_50MHz)   /* PC10 */
 
 #if 0
 /* I2C : */
 
-#define GPIO_I2C1_SCL     GPIO_I2C1_SCL_1
-#define GPIO_I2C1_SDA     GPIO_I2C1_SDA_2
+#define GPIO_I2C1_SCL     (GPIO_I2C1_SCL_1|GPIO_SPEED_50MHz)
+#define GPIO_I2C1_SDA     (GPIO_I2C1_SDA_2|GPIO_SPEED_50MHz)
 #endif
+
+/* USB OTG FS */
+
+#define GPIO_OTGFS_DM   (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_DP   (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_ID   (GPIO_OTGFS_ID_0|GPIO_SPEED_100MHz)
+#define GPIO_OTGFS_SOF  (GPIO_OTGFS_SOF_0|GPIO_SPEED_100MHz)
 
 #endif /* __BOARDS_ARM_STM32_OMNIBUSF4_INCLUDE_BOARD_H */

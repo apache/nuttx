@@ -32,6 +32,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32.h"
+#include <arch/board/board.h>
 #include "stm3240g-eval.h"
 
 #ifdef CONFIG_STM32_FSMC
