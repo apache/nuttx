@@ -39,6 +39,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/drivers/rpmsgdev.h>
 #include <nuttx/rpmsg/rpmsg.h>
+#include <nuttx/mtd/configdata.h>
 
 #include "rpmsgdev.h"
 
@@ -478,9 +479,19 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_ioctl_s *msg = data;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
 
-  msg->header.result = file_ioctl(filep, msg->request,
-                                  msg->arglen == 0 ? msg->arg :
-                                  (unsigned long)msg->buf);
+  if (msg->request >= CFGDIOC_GETCONFIG &&
+      msg->request <= CFGDIOC_NEXTCONFIG &&
+      msg->arglen != (sizeof(struct config_data_s) +
+      ((FAR struct config_data_s *)msg->buf)->len))
+    {
+      msg->header.result = -EMSGSIZE;
+    }
+  else
+    {
+      msg->header.result = file_ioctl(filep, msg->request,
+                                      msg->arglen == 0 ? msg->arg :
+                                      (unsigned long)(FAR void *)msg->buf);
+    }
 
   return rpmsg_send(ept, msg, len);
 }
