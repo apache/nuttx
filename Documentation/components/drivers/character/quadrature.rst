@@ -2,6 +2,16 @@
 Quadrature Encoder Drivers
 ==========================
 
+A Quadrature Encoder (QE) is a kind of sensor normally used to read
+angular rotation of a motor or other turning device.
+
+NuttX supports internal QE peripheral that exists in some microcontrollers
+like ESP32, iMXRT, STM32, nRF5x, TIVA, and others, and also supports
+Magnetic Rotary Encoders like AS5048, MT6816, etc.
+
+Internal Peripheral Quadrature Encoder
+======================================
+
 NuttX supports a low-level, two-part Quadrature Encoder driver.
 
 #. An "upper half", generic driver that provides the common
@@ -27,6 +37,46 @@ following locations:
    ``arch/<architecture>/src/<hardware>`` directory
    for the specific processor ``<architecture>`` and for the
    specific ``<chip>`` Quadrature Encoder peripheral devices.
+
+Magnetic Rotary Encoder
+=======================
+
+Although technically a Magnetic Rotary Encoder is not a Quadrature Encoder,
+usually uses the QE Lower Half driver to export a device compatible with
+quadrature encoder. This way an application using an ordinary QE encoder
+could use a Magnetic Rotary Encoder with any modification, just need to
+enable and initialize the Magnetic Rotary Encoder on their board.
+
+This is how a board powered by STM32 will initialize a MT6816 Magnetic
+Rotary Encoder:
+
+.. code-block:: c
+
+   /* Initialize the SPI bus connected to MT6816 */
+
+   spi = stm32_spibus_initialize(spi_busno);
+   if (spi == NULL)
+     {
+       return -ENODEV;
+     }
+
+   /* Initialize MT6816 using `spi` and a `device number` starting from 0 */
+
+   dev = mt6816_initialize(spi, (uint16_t) devno);
+   if (dev == NULL)
+     {
+       return -ENODEV;
+     }
+
+   /* Use the returned qe lower half to register /dev/qe# (# => devno) */
+
+   ret = qe_register(qe_path, dev);
+   if (ret < 0)
+     {
+       snerr("ERROR: Failed to register MT6816 qe%d driver: %d\n",
+             devno, ret);
+       ret = -ENODEV;
+     }
 
 Application Programming Interface
 =================================

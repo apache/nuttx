@@ -86,6 +86,10 @@ ifeq ($(CONFIG_SENSORS_APDS9960),y)
   CSRCS += stm32_apds9960.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MT6816),y)
+  CSRCS += stm32_mt6816.c
+endif
+
 ifeq ($(CONFIG_INPUT_MPR121_KEYPAD),y)
   CSRCS += stm32_mpr121.c
 endif
@@ -95,7 +99,9 @@ ifeq ($(CONFIG_SENSORS_ZEROCROSS),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
-  CSRCS += stm32_qencoder.c
+  ifeq ($(CONFIG_STM32_QE),y)
+    CSRCS += stm32_qencoder.c
+  endif
 endif
 
 ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)

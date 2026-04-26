@@ -12004,6 +12004,10 @@ config STM32_DMA2D_REGDEBUG
 endmenu
 endif # STM32_DMA2D
 
+config STM32_QE
+	bool
+	default n
+
 menu "STM32 QEncoder Driver"
 	depends on SENSORS_QENCODER
 	depends on STM32_TIM1 || STM32_TIM2 || STM32_TIM3 || STM32_TIM4 || STM32_TIM5 || STM32_TIM8
@@ -12020,6 +12024,7 @@ config STM32_TIM1_QE
 	bool "TIM1 QE"
 	default n
 	depends on STM32_TIM1
+	select STM32_QE
 	---help---
 		Reserve TIM1 for use by QEncoder.
 
@@ -12038,6 +12043,7 @@ config STM32_TIM2_QE
 	bool "TIM2 QE"
 	default n
 	depends on STM32_TIM2
+	select STM32_QE
 	---help---
 		Reserve TIM2 for use by QEncoder.
 
@@ -12056,6 +12062,7 @@ config STM32_TIM3_QE
 	bool "TIM3 QE"
 	default n
 	depends on STM32_TIM3
+	select STM32_QE
 	---help---
 		Reserve TIM3 for use by QEncoder.
 
@@ -12074,6 +12081,7 @@ config STM32_TIM4_QE
 	bool "TIM4 QE"
 	default n
 	depends on STM32_TIM4
+	select STM32_QE
 	---help---
 		Reserve TIM4 for use by QEncoder.
 
@@ -12092,6 +12100,7 @@ config STM32_TIM5_QE
 	bool "TIM5 QE"
 	default n
 	depends on STM32_TIM5
+	select STM32_QE
 	---help---
 		Reserve TIM5 for use by QEncoder.
 
@@ -12110,6 +12119,7 @@ config STM32_TIM8_QE
 	bool "TIM8 QE"
 	default n
 	depends on STM32_TIM8
+	select STM32_QE
 	---help---
 		Reserve TIM8 for use by QEncoder.
 
