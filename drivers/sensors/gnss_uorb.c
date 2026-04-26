@@ -43,6 +43,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #define GNSS_PATH_FMT          "/dev/ttyGNSS%d"
 
 #define GNSS_PARSE_BUFFERSIZE  256

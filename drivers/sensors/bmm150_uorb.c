@@ -160,12 +160,12 @@ static int bmm150_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
 /* Helpers */
 
-static float bmm150_getx(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data);
-static float bmm150_gety(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data);
-static float bmm150_getz(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data);
+static sensor_data_t bmm150_getx(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data);
+static sensor_data_t bmm150_gety(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data);
+static sensor_data_t bmm150_getz(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data);
 
 /****************************************************************************
  * Private Data
@@ -438,25 +438,68 @@ static int bmm150_activate(FAR struct sensor_lowerhalf_s *lower,
  * Name: bmm150_getx
  ****************************************************************************/
 
-static float bmm150_getx(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data)
+static sensor_data_t bmm150_getx(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data)
 {
-  float tmp = 0.0f;
-  float x0 = 0.0f;
-  float x1 = 0.0f;
-  float x2 = 0.0f;
-  float x3 = 0.0f;
-  float x4 = 0.0f;
+  sensor_data_t tmp;
+  sensor_data_t x0;
+  sensor_data_t x1;
+  sensor_data_t x2;
+  sensor_data_t x3;
+  sensor_data_t x4;
 
   /* TODO: check overflow */
 
-  x0 = dev->trim.xyz1 * 16384.0f / data[3];
-  tmp = x0 - 16384.0f;
-  x1 = dev->trim.xy2 * (tmp * tmp / 268435456.0f);
-  x2 = x1 + tmp * dev->trim.xy1 / 16384.0f;
-  x3 = dev->trim.x2 + 160.0f;
-  x4 = data[0] * (x2 + 256.0f) * x3;
-  tmp = ((x4 / 8192.0f) + dev->trim.x1 * 8.0f) / 16.0f;
+  /* x0 = xyz1 * 16384.0 / data[3]
+   *     = (xyz1 / data[3]) * 16384
+   */
+
+  x0 = sensor_data_muli(
+    sensor_data_div(sensor_data_itof(dev->trim.xyz1),
+      sensor_data_itof(data[3])),
+    16384);
+
+  /* tmp = x0 - 16384.0 */
+
+  tmp = sensor_data_subi(x0, 16384);
+
+  /* x1 = xy2 * (tmp * tmp / 268435456.0)
+   *     = xy2 * (tmp / 16384.0) * (tmp / 16384.0)
+   */
+
+  x1 = sensor_data_mul(sensor_data_itof(dev->trim.xy2),
+    sensor_data_mul(sensor_data_divi(tmp, 16384),
+      sensor_data_divi(tmp, 16384)));
+
+  /* x2 = x1 + tmp * xy1 / 16384.0
+   *     = x1 + (tmp / 16384.0) * xy1
+   */
+
+  x2 = sensor_data_add(x1,
+    sensor_data_muli(sensor_data_divi(tmp, 16384), dev->trim.xy1));
+
+  /* x3 = x2 + 160.0 */
+
+  x3 = sensor_data_add(sensor_data_itof(dev->trim.x2),
+    sensor_data_itof(160));
+
+  /* x4 = data[0] * (x2 + 256.0) * x3 / 8192.0
+   *     = ((x2 + 256.0) / 8192.0) * x3 * data[0]
+   */
+
+  x4 = sensor_data_mul(
+    sensor_data_mul(
+      sensor_data_divi(sensor_data_add(x2, sensor_data_itof(256)),
+        8192),
+      x3),
+    sensor_data_itof(data[0]));
+
+  /* tmp = (x4 + x1 * 8.0) / 16.0 */
+
+  tmp = sensor_data_divi(
+    sensor_data_add(x4,
+      sensor_data_muli(sensor_data_itof(dev->trim.x1), 8)),
+    16);
 
   return tmp;
 }
@@ -465,25 +508,68 @@ static float bmm150_getx(FAR struct bmm150_sensor_dev_s *dev,
  * Name: bmm150_gety
  ****************************************************************************/
 
-static float bmm150_gety(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data)
+static sensor_data_t bmm150_gety(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data)
 {
-  float tmp = 0.0f;
-  float y0 = 0.0f;
-  float y1 = 0.0f;
-  float y2 = 0.0f;
-  float y3 = 0.0f;
-  float y4 = 0.0f;
+  sensor_data_t tmp;
+  sensor_data_t y0;
+  sensor_data_t y1;
+  sensor_data_t y2;
+  sensor_data_t y3;
+  sensor_data_t y4;
 
   /* TODO: check overflow */
 
-  y0 = dev->trim.xyz1 * 16384.0f / data[3];
-  tmp = y0 - 16384.0f;
-  y1 = dev->trim.xy2 * (tmp * tmp / 268435456.0f);
-  y2 = y1 + tmp * dev->trim.xy1 / 16384.0f;
-  y3 = dev->trim.y2 + 160.0f;
-  y4 = data[1] * (y2 + 256.0f) * y3;
-  tmp = ((y4 / 8192.0f) + dev->trim.y1 * 8.0f) / 16.0f;
+  /* y0 = xyz1 * 16384.0 / data[3]
+   *     = (xyz1 / data[3]) * 16384
+   */
+
+  y0 = sensor_data_muli(
+    sensor_data_div(sensor_data_itof(dev->trim.xyz1),
+      sensor_data_itof(data[3])),
+    16384);
+
+  /* tmp = y0 - 16384.0 */
+
+  tmp = sensor_data_subi(y0, 16384);
+
+  /* y1 = xy2 * (tmp * tmp / 268435456.0)
+   *     = xy2 * (tmp / 16384.0) * (tmp / 16384.0)
+   */
+
+  y1 = sensor_data_mul(sensor_data_itof(dev->trim.xy2),
+    sensor_data_mul(sensor_data_divi(tmp, 16384),
+      sensor_data_divi(tmp, 16384)));
+
+  /* y2 = y1 + tmp * xy1 / 16384.0
+   *     = y1 + (tmp / 16384.0) * xy1
+   */
+
+  y2 = sensor_data_add(y1,
+    sensor_data_muli(sensor_data_divi(tmp, 16384), dev->trim.xy1));
+
+  /* y3 = y2 + 160.0 */
+
+  y3 = sensor_data_add(sensor_data_itof(dev->trim.y2),
+    sensor_data_itof(160));
+
+  /* y4 = data[1] * (y2 + 256.0) * y3 / 8192.0
+   *     = ((y2 + 256.0) / 8192.0) * y3 * data[1]
+   */
+
+  y4 = sensor_data_mul(
+    sensor_data_mul(
+      sensor_data_divi(sensor_data_add(y2, sensor_data_itof(256)),
+        8192),
+      y3),
+    sensor_data_itof(data[1]));
+
+  /* tmp = (y4 + y1 * 8.0) / 16.0 */
+
+  tmp = sensor_data_divi(
+    sensor_data_add(y4,
+      sensor_data_muli(sensor_data_itof(dev->trim.y1), 8)),
+    16);
 
   return tmp;
 }
@@ -492,26 +578,44 @@ static float bmm150_gety(FAR struct bmm150_sensor_dev_s *dev,
  * Name: bmm150_getz
  ****************************************************************************/
 
-static float bmm150_getz(FAR struct bmm150_sensor_dev_s *dev,
-                         FAR int16_t *data)
+static sensor_data_t bmm150_getz(FAR struct bmm150_sensor_dev_s *dev,
+                                 FAR int16_t *data)
 {
-  float tmp = 0.0f;
-  float z0 = 0.0f;
-  float z1 = 0.0f;
-  float z2 = 0.0f;
-  float z3 = 0.0f;
-  float z4 = 0.0f;
-  float z5 = 0.0f;
+  sensor_data_t tmp;
+  sensor_data_t z0;
+  sensor_data_t z1;
+  sensor_data_t z3;
+  sensor_data_t z4;
 
   /* TODO: check overflow */
 
-  z0 = data[2] - dev->trim.z4;
-  z1 = data[3] - dev->trim.xyz1;
-  z2 = dev->trim.z3 * z1;
-  z3 = dev->trim.z1 * data[3] / 32768.0f;
-  z4 = dev->trim.z2 + z3;
-  z5 = z0 * 121072.0f - z2;
-  tmp = (z5 / (z4 * 4.0f)) / 16.0f;
+  /* z0 = data[2] - z4_trim */
+
+  z0 = sensor_data_itof(data[2] - dev->trim.z4);
+
+  /* z1 = data[3] - xyz1 */
+
+  z1 = sensor_data_itof(data[3] - dev->trim.xyz1);
+
+  /* z3 = z1_trim * (data[3] / 32768.0) */
+
+  z3 = sensor_data_mul(sensor_data_itof(dev->trim.z1),
+    sensor_data_divi(sensor_data_itof(data[3]), 32768));
+
+  /* z4 = z2_trim + z3 */
+
+  z4 = sensor_data_add(sensor_data_itof(dev->trim.z2), z3);
+
+  /* tmp = (z0 * 121072.0 - z3_trim * z1) / (z4 * 4.0) / 16.0
+   *     = (z0 / z4) * 1891.75 - z3_trim * (z1 / z4) / 64.0
+   */
+
+  tmp = sensor_data_sub(
+    sensor_data_mul(sensor_data_div(z0, z4),
+      sensor_data_ftof(1891.75f)),
+    sensor_data_divi(
+      sensor_data_muli(sensor_data_div(z1, z4), dev->trim.z3),
+      64));
 
   return tmp;
 }

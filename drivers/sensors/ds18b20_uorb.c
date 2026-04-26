@@ -50,6 +50,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Only float data type supported now */
+
+#ifdef CONFIG_SENSORS_USE_B16
+#  error fixed-point data type not supported yet
+#endif
+
 #ifndef CONFIG_ENDIAN_BIG
 #  define ds18b20_leuint64(x) (x)
 #endif
