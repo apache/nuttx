@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/sim_hostvideo.h
+ * video/dummy.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,39 +20,12 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_SIM_SIM_HOSTVIDEO_H
-#define __ARCH_SIM_SRC_SIM_SIM_HOSTVIDEO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-struct host_video_dev_s;
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-int host_video_get_device_count(void);
-bool host_video_is_available(const char *host_video_dev_path);
-struct host_video_dev_s *host_video_init(const char *host_video_dev_path);
-int host_video_uninit(struct host_video_dev_s *vdev);
-int host_video_start_capture(struct host_video_dev_s *vdev);
-int host_video_stop_capture(struct host_video_dev_s *vdev);
-int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
-                     uint32_t size);
-int host_video_set_fmt(struct host_video_dev_s *vdev,
-                       uint16_t width, uint16_t height, uint32_t fmt,
-                       uint32_t denom, uint32_t numer);
-int host_video_try_fmt(struct host_video_dev_s *vdev,
-                       uint16_t width, uint16_t height, uint32_t fmt,
-                       uint32_t denom, uint32_t numer);
-
-#endif /* __ARCH_SIM_SRC_SIM_SIM_HOSTVIDEO_H */

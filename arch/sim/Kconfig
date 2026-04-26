@@ -416,20 +416,21 @@ if SIM_CAMERA
 
 choice
 	prompt "Simulated camera device type"
-	default SIM_CAMERA_V4L2
+	default SIM_CAMERA_V4L2 if HOST_LINUX
+	default SIM_CAMERA_AVFOUNDATION if HOST_MACOS
 
 config SIM_CAMERA_V4L2
 	bool "V4L2 camera support on sim"
 	depends on HOST_LINUX
 
+config SIM_CAMERA_AVFOUNDATION
+	bool "AVFoundation camera support on sim"
+	depends on HOST_MACOS
+
 endchoice
 
-config HOST_CAMERA_DEV_PATH
-	string "Host camera device path"
-	default "/dev/video0"
-
 config SIM_CAMERA_DEV_PATH
-	string "NuttX video device path"
+	string "NuttX video device path prefix"
 	default "/dev/video"
 
 endif

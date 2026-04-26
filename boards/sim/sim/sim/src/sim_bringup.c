@@ -33,6 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
@@ -76,6 +77,7 @@
 
 #include "sim_internal.h"
 #include "sim.h"
+#include "sim_hostvideo.h"
 
 /****************************************************************************
  * Public Functions
@@ -315,12 +317,20 @@ int sim_bringup(void)
 #ifdef CONFIG_SIM_CAMERA
   /* Initialize and register the simulated video driver */
 
-  sim_camera_initialize();
-
-  ret = capture_initialize(CONFIG_SIM_CAMERA_DEV_PATH);
+  ret = sim_camera_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: capture_initialize() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: sim_camera_initialize() failed: %d\n", ret);
+    }
+  else
+    {
+      ret = sim_camera_register_capture_devices();
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                 "ERROR: sim_camera_register_capture_devices() failed: %d\n",
+                 ret);
+        }
     }
 
 #endif
