@@ -355,6 +355,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev);
 void rptun_dump_resource(FAR const struct resource_table *rsc);
 int rptun_boot(FAR const char *cpuname);
 int rptun_poweroff(FAR const char *cpuname);
+int rptun_uninitialize(FAR const char *cpuname);
 int rptun_reset(FAR const char *cpuname, unsigned long value);
 
 #ifdef __cplusplus
