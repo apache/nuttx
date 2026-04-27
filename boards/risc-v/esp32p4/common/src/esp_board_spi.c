@@ -58,6 +58,17 @@ uint8_t esp_spi2_status(struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 /****************************************************************************
+ * Name: esp_spi2_select
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_SPI2) && defined(CONFIG_ESPRESSIF_SPI_UDCS)
+void esp_spi2_select(struct spi_dev_s *dev, uint32_t devid, bool select)
+{
+  esp_gpiowrite(CONFIG_ESPRESSIF_SPI2_CSPIN, !select);
+}
+#endif
+
+/****************************************************************************
  * Name: esp_spi2_cmddata
  ****************************************************************************/
 
@@ -72,6 +83,59 @@ int esp_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
        */
 
       esp_gpiowrite(CONFIG_ESPRESSIF_SPI2_MISOPIN, !cmd);
+
+      return OK;
+    }
+
+  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
+          "data");
+
+  return -ENODEV;
+}
+
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPI3
+
+/****************************************************************************
+ * Name: esp_spi3_status
+ ****************************************************************************/
+
+uint8_t esp_spi3_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
+
+  return status;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: esp_spi2_select
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_SPI3) && defined(CONFIG_ESPRESSIF_SPI_UDCS)
+void esp_spi3_select(struct spi_dev_s *dev, uint32_t devid, bool select)
+{
+  esp_gpiowrite(CONFIG_ESPRESSIF_SPI3_CSPIN, !select);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp_spi3_cmddata
+ ****************************************************************************/
+
+#if defined(CONFIG_ESPRESSIF_SPI3) && defined(CONFIG_SPI_CMDDATA)
+
+int esp_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      esp_gpiowrite(CONFIG_ESPRESSIF_SPI3_MISOPIN, !cmd);
 
       return OK;
     }

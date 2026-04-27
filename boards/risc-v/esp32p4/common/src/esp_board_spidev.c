@@ -122,6 +122,15 @@ static int spi_driver_init(int port)
       return -ENODEV;
     }
 
+#ifdef CONFIG_ESPRESSIF_LPSPI0
+  /* LP SPI cannot be used on HP core due to common layer driver */
+
+  if (port == ESPRESSIF_LPSPI0)
+    {
+      return OK;
+    }
+#endif
+
   ret = spi_register(spi, port);
   if (ret < 0)
     {
@@ -170,10 +179,34 @@ int board_spidev_initialize(int port)
         }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_SPI3
+      case ESPRESSIF_SPI3:
+        {
+          ret = spi_driver_init(ESPRESSIF_SPI3);
+          if (ret != OK)
+            {
+              return ret;
+            }
+          break;
+        }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_SPI_BITBANG
       case ESPRESSIF_SPI_BITBANG:
         {
           ret = spi_bitbang_driver_init(ESPRESSIF_SPI_BITBANG);
+          if (ret != OK)
+            {
+              return ret;
+            }
+          break;
+        }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_LPSPI0
+      case ESPRESSIF_LPSPI0:
+        {
+          ret = spi_driver_init(ESPRESSIF_LPSPI0);
           if (ret != OK)
             {
               return ret;
