@@ -329,7 +329,7 @@ HP Peripherals
 ================= ======= ==================================
 Peripheral        Support NOTES
 ================= ======= ==================================
-SPI                Yes     SPI2 master/slave; bitbang
+SPI                Yes     SPI2/SPI3 master/slave; bitbang
 I2C                Yes
 I2S                Yes
 ADC                Yes
@@ -371,7 +371,7 @@ LP Peripherals
 ================= ======= ==================================
 Peripheral        Support NOTES
 ================= ======= ==================================
-LP SPI             No
+LP SPI             Yes
 LP I2C             Yes
 LP I2S             No
 LP UART            Yes
