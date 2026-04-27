@@ -37,7 +37,9 @@ endif()
 # failure logs more deterministic and most importantly makes builds more
 # deterministic. Debuggers usually have a path mapping feature to ensure the
 # files are still found.
-if((NOT MSVC) AND (NOT CONFIG_ARCH_TOOLCHAIN_GHS))
+if((NOT MSVC)
+   AND (NOT CONFIG_ARCH_TOOLCHAIN_GHS)
+   AND (NOT CONFIG_ARCH_TOOLCHAIN_TASKING))
   if(CONFIG_OUTPUT_STRIP_PATHS)
     add_compile_options(-fmacro-prefix-map=${NUTTX_DIR}=)
     add_compile_options(-fmacro-prefix-map=${NUTTX_APPS_DIR}=)
