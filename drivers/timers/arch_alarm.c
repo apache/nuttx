@@ -281,17 +281,14 @@ void up_alarm_set_lowerhalf(FAR struct oneshot_lowerhalf_s *lower)
 
 void weak_function up_timer_getmask(FAR clock_t *mask)
 {
-  *mask = 0;
+  clock_t maxticks = 0;
 
-  if (g_oneshot_lower != NULL)
-    {
-      clock_t maxticks = 0;
+  DEBUGASSERT(g_oneshot_lower);
 
-      ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &maxticks);
+  ONESHOT_TICK_MAX_DELAY(g_oneshot_lower, &maxticks);
 
-      *mask = maxticks == 0 ? 0 :
-              UINT64_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
-    }
+  *mask = maxticks == 0 ? 0 :
+          UINT64_MAX >> (sizeof(clock_t) * 8u - flsx(maxticks));
 }
 
 int weak_function up_timer_gettick(FAR clock_t *ticks)
@@ -365,21 +362,6 @@ int weak_function up_alarm_cancel(FAR struct timespec *ts)
   return ret;
 }
 
-int weak_function up_alarm_tick_cancel(FAR clock_t *ticks)
-{
-  int ret = -EAGAIN;
-
-  if (g_oneshot_lower != NULL)
-    {
-      ret = ONESHOT_TICK_CANCEL(g_oneshot_lower, ticks);
-
-#ifndef CONFIG_ONESHOT_COUNT
-      ONESHOT_TICK_CURRENT(g_oneshot_lower, ticks);
-#endif
-    }
-
-  return ret;
-}
 #endif
 
 /****************************************************************************
@@ -414,18 +396,6 @@ int weak_function up_alarm_start(FAR const struct timespec *ts)
   if (g_oneshot_lower != NULL)
     {
       ret = ONESHOT_ABSOLUTE(g_oneshot_lower, ts);
-    }
-
-  return ret;
-}
-
-int weak_function up_alarm_tick_start(clock_t ticks)
-{
-  int ret = -EAGAIN;
-
-  if (g_oneshot_lower != NULL)
-    {
-      ret = ONESHOT_TICK_ABSOLUTE(g_oneshot_lower, ticks);
     }
 
   return ret;
