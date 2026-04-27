@@ -23,14 +23,8 @@
 # Add hrtimer-related files to the build
 set(CSRCS)
 if(CONFIG_HRTIMER)
-  list(
-    APPEND
-    CSRCS
-    hrtimer_cancel.c
-    hrtimer_initialize.c
-    hrtimer_process.c
-    hrtimer_start.c
-    hrtimer_gettime.c)
+  list(APPEND CSRCS hrtimer_cancel.c hrtimer_initialize.c hrtimer_start.c
+       hrtimer_gettime.c)
 endif()
 
 target_sources(sched PRIVATE ${CSRCS})

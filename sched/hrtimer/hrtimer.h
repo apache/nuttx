@@ -94,39 +94,67 @@ extern struct FAR hrtimer_s *g_hrtimer_head;
 extern struct list_node g_hrtimer_list;
 #endif
 
+#ifdef CONFIG_SMP
 /* Array of pointers to currently running high-resolution timers
  * for each CPU in SMP configurations. Index corresponds to CPU ID.
  */
 
-#ifdef CONFIG_SMP
 extern uintptr_t g_hrtimer_running[CONFIG_SMP_NCPUS];
 #endif
 
 /****************************************************************************
- * Public Function Prototypes
+ * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: hrtimer_process
+ * Name: hrtimer_lock
  *
  * Description:
- *   Called from the timer interrupt handler to process expired
- *   high-resolution timers. If a timer has expired, its callback
- *   function will be executed in the context of the timer interrupt.
+ *   Acquire the hrtimer queue lock. In SMP mode, this acquires the seqlock
+ *   and disables interrupts. In non-SMP mode, only interrupts are disabled
+ *   since no concurrent writers exist, saving the seqlock overhead.
  *
  * Input Parameters:
- *   now - The current time (nsecs).
+ *  None.
+ *
+ * Returned Value:
+ *   The saved interrupt state.
+ *
+ ****************************************************************************/
+
+static inline_function irqstate_t hrtimer_lock(void)
+{
+#ifdef CONFIG_SMP
+  return write_seqlock_irqsave(&g_hrtimer_lock);
+#else
+  return up_irq_save();
+#endif
+}
+
+/****************************************************************************
+ * Name: hrtimer_unlock
+ *
+ * Description:
+ *   Release the hrtimer queue lock. In SMP mode, this releases the seqlock
+ *   and restores interrupts. In non-SMP mode, only interrupts are restored.
+ *
+ * Input Parameters:
+ *   flags - The saved interrupt state from hrtimer_lock().
  *
  * Returned Value:
  *   None.
  *
  ****************************************************************************/
 
-void hrtimer_process(uint64_t now);
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
+static inline_function
+void hrtimer_unlock(irqstate_t flags)
+{
+#ifdef CONFIG_SMP
+  write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
+#else
+  up_irq_restore(flags);
+#endif
+}
 
 /****************************************************************************
  * Name: hrtimer_last_expired
@@ -371,46 +399,45 @@ static inline_function FAR hrtimer_t *hrtimer_get_first(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
+#  define DEFINE_HRTIMER_READ(suffix, type)                     \
+static inline_function type                                     \
+hrtimer_read_##suffix(FAR const type *ptr)                      \
+{                                                               \
+  type val;                                                     \
+  uint32_t seq;                                                 \
+  do                                                            \
+    {                                                           \
+      seq = read_seqbegin(&g_hrtimer_lock);                     \
+      val = *ptr;                                               \
+    }                                                           \
+  while (read_seqretry(&g_hrtimer_lock, seq));                  \
+  return val;                                                   \
+}
+#else
+#  define DEFINE_HRTIMER_READ(suffix, type)                     \
+static inline_function type                                     \
+hrtimer_read_##suffix(FAR const type *ptr)                      \
+{                                                               \
+  irqstate_t flags = up_irq_save();                                \
+  type val = *ptr;                                              \
+  up_irq_restore(flags);                                           \
+  return val;                                                   \
+}
+#endif
+
 #ifdef CONFIG_ARCH_64BIT
 /* On 64-bit architectures, read/write uint64_t is atomic. */
 #  define hrtimer_read_64(ptr) (*(FAR volatile uint64_t *)(ptr))
 #else
-static inline_function
-uint64_t hrtimer_read_64(FAR const uint64_t *ptr)
-{
-  uint64_t val;
-  uint32_t seq;
-
-  do
-    {
-      seq = read_seqbegin(&g_hrtimer_lock);
-      val = *ptr;
-    }
-  while (read_seqretry(&g_hrtimer_lock, seq));
-
-  return val;
-}
+DEFINE_HRTIMER_READ(64, uint64_t)
 #endif
 
 #if UINT_MAX >= UINT32_MAX
 /* On 32/64-bit architectures, read/write uint32_t is atomic. */
 #  define hrtimer_read_32(ptr) (*(FAR volatile uint32_t *)(ptr))
 #else
-static inline_function
-uint32_t hrtimer_read_32(FAR const uint32_t *ptr)
-{
-  uint32_t val;
-  uint32_t seq;
-
-  do
-    {
-      seq = read_seqbegin(&g_hrtimer_lock);
-      val = *ptr;
-    }
-  while (read_seqretry(&g_hrtimer_lock, seq));
-
-  return val;
-}
+DEFINE_HRTIMER_READ(32, uint32_t)
 #endif
 
 /* Generic function to read the pointer in the queue atomically. */
@@ -583,6 +610,107 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
 #else
 #  define hrtimer_wait(timer) /* Nothing to wait in non-SMP. */
 #endif
+
+/****************************************************************************
+ * Name: hrtimer_process
+ *
+ * Description:
+ *   Called from the timer interrupt handler to process expired
+ *   high-resolution timers. If a timer has expired, its callback
+ *   function will be executed in the context of the timer interrupt.
+ *
+ * Input Parameters:
+ *   now - The current time (nsecs).
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumption:
+ *   This function can only be called in interrupt context.
+ *
+ ****************************************************************************/
+
+static inline_function void hrtimer_process(uint64_t now)
+{
+  FAR hrtimer_t  *hrtimer;
+  hrtimer_entry_t    func;
+  uint64_t        expired;
+  uint64_t          delay;
+  int                 cpu = this_cpu();
+  irqstate_t        flags = hrtimer_lock();
+
+  /* Acquire the lock and seize the ownership of the hrtimer queue. */
+
+  for (; ; )
+    {
+      /* Fetch the earliest active timer */
+
+      hrtimer = hrtimer_get_first();
+      expired = hrtimer->expired;
+
+      /* Check if the timer has expired */
+
+      if (!HRTIMER_TIME_BEFORE_EQ(expired, now))
+        {
+          break;
+        }
+
+      /* Remove the expired timer from the timer queue */
+
+      func = hrtimer->func;
+      hrtimer_remove(hrtimer);
+
+      hrtimer_mark_running(hrtimer, cpu);
+
+      /* Leave critical section before invoking the callback */
+
+      hrtimer_unlock(flags);
+
+      /* Invoke the timer callback */
+
+      delay = func(hrtimer, expired);
+
+      /* Ensure the delay is valid. */
+
+      DEBUGASSERT(HRTIMER_TIME_BEFORE_EQ(expired + delay,
+                                         now + HRTIMER_MAX_DELAY));
+
+      /* Re-enter critical section to update timer state */
+
+      flags = hrtimer_lock();
+
+      /* If the timer is periodic and has not been rearmed or
+       * cancelled concurrently, calculate next expiration and
+       * re-insert into the timer queue.
+       */
+
+      if (delay != 0u && hrtimer_is_running(hrtimer, cpu))
+        {
+          hrtimer->expired = expired + delay;
+          hrtimer->func    = func;
+          hrtimer_insert(hrtimer);
+        }
+    }
+
+  hrtimer_unmark_running(cpu);
+
+  /* Note that the g_hrtimer_guard.expired is not monotonic. */
+
+  g_hrtimer_guard.expired = now + HRTIMER_GUARD_DELAY;
+
+  /* Schedule the next timer expiration */
+
+  if (expired != now)
+    {
+      /* Start timer for the next earliest expiration */
+
+      hrtimer_reprogram(expired);
+    }
+
+  /* Release the lock and give up the ownership of the hrtimer queue. */
+
+  hrtimer_unlock(flags);
+}
 
 #endif /* CONFIG_HRTIMER */
 #endif /* __SCHED_HRTIMER_HRTIMER_H */
