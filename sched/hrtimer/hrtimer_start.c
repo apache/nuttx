@@ -66,7 +66,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   /* Acquire the lock and seize the ownership of the hrtimer queue. */
 
-  flags = write_seqlock_irqsave(&g_hrtimer_lock);
+  flags = hrtimer_lock();
 
   /* Ensure no running core can write the hrtimer. */
 
@@ -93,7 +93,7 @@ int hrtimer_start_absolute(FAR hrtimer_t *hrtimer, hrtimer_entry_t func,
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
 
-  write_sequnlock_irqrestore(&g_hrtimer_lock, flags);
+  hrtimer_unlock(flags);
 
   return ret;
 }
