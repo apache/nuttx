@@ -151,6 +151,22 @@ int host_settimer(uint64_t nsec)
 }
 
 /****************************************************************************
+ * Name: host_set_timeratio
+ *
+ * Description:
+ *   Set the ratio of simulated time to real time in percent.
+ *   Not implemented on Windows.
+ *
+ * Input Parameters:
+ *   ratio - The new time ratio in percent
+ *
+ ****************************************************************************/
+
+void host_set_timeratio(int ratio)
+{
+}
+
+/****************************************************************************
  * Name: host_timerirq
  *
  * Description:
