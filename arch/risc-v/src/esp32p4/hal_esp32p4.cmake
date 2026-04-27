@@ -416,6 +416,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_app.c
   ${ESP_HAL_3RDPARTY_REPO}/components/spi_flash/spi_flash_os_func_noos.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_i2c.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_spi.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_memory_shared.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_lp_timer_shared.c
