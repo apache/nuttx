@@ -67,7 +67,8 @@ extern "C"
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ESPRESSIF_SPI2) || defined(CONFIG_ESPRESSIF_SPI_BITBANG)
+#if defined(CONFIG_ESPRESSIF_SPI2) || defined(CONFIG_ESPRESSIF_SPI_BITBANG) \
+    || defined(CONFIG_ESPRESSIF_SPI3) || defined(CONFIG_ESPRESSIF_LPSPI0)
 int board_spidev_initialize(int bus);
 #endif
 

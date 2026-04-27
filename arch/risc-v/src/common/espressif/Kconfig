@@ -1783,7 +1783,7 @@ config ESPRESSIF_SPI_SLAVE
 
 config ESPRESSIF_SPI_PERIPH
 	bool
-	depends on ESPRESSIF_SPI2
+	depends on ESPRESSIF_SPI2 || ESPRESSIF_SPI3 || ESPRESSIF_LPSPI0
 	default n
 
 config ESPRESSIF_SPI2
@@ -1802,7 +1802,7 @@ config ESPRESSIF_SPI3
 	select ESPRESSIF_SPI_PERIPH
 
 config ESPRESSIF_LPSPI0
-	bool "LP SPI"
+	bool "LP SPI0"
 	depends on ARCH_CHIP_ESP32P4
 	default n
 	select ESPRESSIF_SPI
