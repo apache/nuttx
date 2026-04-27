@@ -73,9 +73,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SPI_SLAVE_BUFSIZE (CONFIG_ESPRESSIF_SPI2_SLAVE_BUFSIZE)
+#if defined(CONFIG_ESPRESSIF_SPI2_DMA) || defined(CONFIG_ESPRESSIF_SPI3_DMA)
+#  define USE_DMA 1
+#endif
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef CONFIG_ESPRESSIF_SPI2_SLAVE
+#  define SPI_SLAVE_BUFSIZE CONFIG_ESPRESSIF_SPI2_SLAVE_BUFSIZE
+#else
+#  define SPI_SLAVE_BUFSIZE CONFIG_ESPRESSIF_SPI3_SLAVE_BUFSIZE
+#endif
+
+#ifdef USE_DMA
 /* SPI DMA RX/TX number of descriptors */
 
 #if (SPI_SLAVE_BUFSIZE % DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED) > 0
@@ -84,7 +92,7 @@
 #  define SPI_DMA_DESC_NUM (SPI_SLAVE_BUFSIZE / DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED)
 #endif
 
-#endif /* CONFIG_ESPRESSIF_SPI2_DMA */
+#endif /* USE_DMA */
 
 /* Verify whether SPI has been assigned IOMUX pins.
  * Otherwise, SPI signals will be routed via GPIO Matrix.
@@ -193,9 +201,11 @@ struct spislave_priv_s
   int refs;                     /* Reference count */
   int cpuint;                   /* SPI interrupt ID */
   enum spi_slave_mode_e mode;   /* Current SPI Slave hardware mode */
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
-  gdma_channel_handle_t dma_channel_tx; /* I2S DMA TX channel being used */
-  gdma_channel_handle_t dma_channel_rx; /* I2S DMA RX channel being used */
+#ifdef USE_DMA
+  gdma_channel_handle_t dma_channel_tx; /* SPI DMA TX channel being used */
+  gdma_channel_handle_t dma_channel_rx; /* SPI DMA RX channel being used */
+  spi_dma_desc_t *dma_rxdesc;           /* DMA RX description */
+  spi_dma_desc_t *dma_txdesc;           /* DMA TX description */
 #endif
   uint8_t nbits;                /* Current configured bit width */
   uint32_t tx_length;           /* Location of next TX value */
@@ -208,8 +218,9 @@ struct spislave_priv_s
   /* SPI Slave RX queue buffer */
 
   uint8_t rx_buffer[SPI_SLAVE_BUFSIZE];
+  uint32_t buf_size;           /* SPI DMA Buffer size in bytes */
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   /* SPI Slave DMA RX buffer - separate from user-accessible buffer */
 
   uint8_t *dma_rx_buffer;
@@ -235,14 +246,14 @@ struct spislave_priv_s
 
 /* SPI Slave controller buffer operations */
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static uint32_t spi_slave_common_dma_setup(int chan, bool tx,
                                            spi_dma_desc_t *dmadesc,
                                            uint32_t num, uint8_t *pbuf,
                                            uint32_t len);
 #endif
 
-#ifndef CONFIG_ESPRESSIF_SPI2_DMA
+#ifndef USE_DMA
 static inline void spislave_cpu_tx_fifo_reset(spi_dev_t *hw);
 #else
 static inline void spislave_dma_tx_fifo_reset(spi_dev_t *hw);
@@ -259,7 +270,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg);
 static void spislave_evict_sent_data(struct spislave_priv_s *priv,
                                      uint32_t sent_bytes);
 static inline void spislave_hal_store_result(spi_slave_hal_context_t *hal);
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static void spislave_setup_rx_dma(struct spislave_priv_s *priv);
 static void spislave_setup_tx_dma(struct spislave_priv_s *priv);
 static void spislave_prepare_next_tx(struct spislave_priv_s *priv);
@@ -286,6 +297,16 @@ static size_t spislave_qpoll(struct spi_slave_ctrlr_s *ctrlr);
  ****************************************************************************/
 
 #ifdef CONFIG_ESPRESSIF_SPI2
+
+#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+
+/* SPI DMA RX/TX description */
+
+static spi_dma_desc_t dma_rxdesc[SPI_DMA_DESC_NUM];
+static spi_dma_desc_t dma_txdesc[SPI_DMA_DESC_NUM];
+
+#endif
+
 static const struct spislave_config_s esp_spi2slave_config =
 {
   .width        = SPI_SLAVE_DEFAULT_WIDTH,
@@ -326,6 +347,8 @@ static struct spislave_priv_s esp_spi2slave_priv =
                     0
                   },
 #ifdef CONFIG_ESPRESSIF_SPI2_DMA
+  .dma_rxdesc    = dma_rxdesc,
+  .dma_txdesc    = dma_txdesc,
   .dma_rx_buffer = NULL,
 #endif
   .is_processing = false,
@@ -341,14 +364,73 @@ static struct spislave_priv_s esp_spi2slave_priv =
 };
 #endif /* CONFIG_ESPRESSIF_SPI2 */
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef CONFIG_ESPRESSIF_SPI3
+
+#ifdef CONFIG_ESPRESSIF_SPI3_DMA
 
 /* SPI DMA RX/TX description */
 
-static spi_dma_desc_t dma_rxdesc[SPI_DMA_DESC_NUM];
-static spi_dma_desc_t dma_txdesc[SPI_DMA_DESC_NUM];
+static spi_dma_desc_t spi3_dma_rxdesc[SPI_DMA_DESC_NUM];
+static spi_dma_desc_t spi3_dma_txdesc[SPI_DMA_DESC_NUM];
 
 #endif
+
+static const struct spislave_config_s esp_spi3slave_config =
+{
+  .width        = SPI_SLAVE_DEFAULT_WIDTH,
+  .mode         = SPI_SLAVE_DEFAULT_MODE,
+  .cs_pin       = CONFIG_ESPRESSIF_SPI3_CSPIN,
+  .mosi_pin     = CONFIG_ESPRESSIF_SPI3_MOSIPIN,
+  .miso_pin     = CONFIG_ESPRESSIF_SPI3_MISOPIN,
+  .clk_pin      = CONFIG_ESPRESSIF_SPI3_CLKPIN,
+};
+
+static const struct spi_slave_ctrlrops_s esp_spi3slave_ops =
+{
+  .bind     = spislave_bind,
+  .unbind   = spislave_unbind,
+  .enqueue  = spislave_enqueue,
+  .qfull    = spislave_qfull,
+  .qflush   = spislave_qflush,
+  .qpoll    = spislave_qpoll
+};
+
+static struct spislave_priv_s esp_spi3slave_priv =
+{
+  .ctrlr         =
+                  {
+                    .ops = &esp_spi3slave_ops
+                  },
+  .dev           = NULL,
+  .config        = &esp_spi3slave_config,
+  .refs          = 0,
+  .cpuint        = -ENOMEM,
+  .mode          = SPISLAVE_MODE0,
+  .nbits         = 0,
+  .tx_length     = 0,
+  .tx_buffer     = NULL,
+  .rx_length     = 0,
+  .rx_buffer     =
+                  {
+                    0
+                  },
+#ifdef CONFIG_ESPRESSIF_SPI3_DMA
+  .dma_rxdesc    = spi3_dma_rxdesc,
+  .dma_txdesc    = spi3_dma_txdesc,
+  .dma_rx_buffer = NULL,
+#endif
+  .is_processing = false,
+  .is_tx_enabled = false,
+  .ctx =
+          {
+            0
+          },
+  .cfg =
+          {
+            .host_id = SPI3_HOST,
+          }
+};
+#endif /* CONFIG_ESPRESSIF_SPI3 */
 
 /****************************************************************************
  * Private Functions
@@ -373,7 +455,7 @@ static spi_dma_desc_t dma_txdesc[SPI_DMA_DESC_NUM];
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static uint32_t spi_slave_common_dma_setup(int chan, bool tx,
                                            spi_dma_desc_t *dmadesc,
                                            uint32_t num, uint8_t *pbuf,
@@ -489,7 +571,7 @@ static inline void spislave_hal_store_result(spi_slave_hal_context_t *hal)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ESPRESSIF_SPI2_DMA
+#ifndef USE_DMA
 static inline void spislave_cpu_tx_fifo_reset(spi_dev_t *hw)
 {
   spi_ll_cpu_tx_fifo_reset(hw);
@@ -511,7 +593,7 @@ static inline void spislave_cpu_tx_fifo_reset(spi_dev_t *hw)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static inline void spislave_dma_tx_fifo_reset(spi_dev_t *hw)
 {
   spi_ll_dma_tx_fifo_reset(hw);
@@ -533,7 +615,7 @@ static inline void spislave_dma_tx_fifo_reset(spi_dev_t *hw)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static inline void spislave_dma_rx_fifo_reset(spi_dev_t *hw)
 {
   spi_ll_dma_rx_fifo_reset(hw);
@@ -622,7 +704,7 @@ static void spislave_evict_sent_data(struct spislave_priv_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
 {
   uint32_t length = SPI_SLAVE_BUFSIZE;
@@ -630,7 +712,7 @@ static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
 
   gdma_get_group_channel_id(priv->dma_channel_rx, NULL, &rx_dma_channel_id);
 
-  spi_slave_common_dma_setup(rx_dma_channel_id, false, dma_rxdesc,
+  spi_slave_common_dma_setup(rx_dma_channel_id, false, priv->dma_rxdesc,
                              SPI_DMA_DESC_NUM,
                              priv->dma_rx_buffer, length);
 
@@ -648,7 +730,7 @@ static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
 
   spi_ll_dma_rx_enable(priv->ctx.hw, true);
 
-  spi_dma_start(priv->dma_channel_rx, dma_rxdesc);
+  spi_dma_start(priv->dma_channel_rx, priv->dma_rxdesc);
 }
 #endif
 
@@ -667,7 +749,7 @@ static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 {
   int tx_dma_channel_id;
@@ -684,7 +766,7 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
       gdma_get_group_channel_id(priv->dma_channel_tx, NULL,
                                 &tx_dma_channel_id);
 
-      spi_slave_common_dma_setup(tx_dma_channel_id, true, dma_txdesc,
+      spi_slave_common_dma_setup(tx_dma_channel_id, true, priv->dma_txdesc,
                                  SPI_DMA_DESC_NUM,
                                  priv->tx_buffer, SPI_SLAVE_BUFSIZE);
 
@@ -702,7 +784,7 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 
       spi_ll_dma_tx_enable(priv->ctx.hw, true);
 
-      spi_dma_start(priv->dma_channel_tx, dma_txdesc);
+      spi_dma_start(priv->dma_channel_tx, priv->dma_txdesc);
     }
 }
 #endif
@@ -724,7 +806,7 @@ static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ESPRESSIF_SPI2_DMA
+#ifndef USE_DMA
 static inline void spi_slave_prepare_data(struct spislave_priv_s *priv,
                       ssize_t nbits_to_send)
 {
@@ -755,7 +837,7 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 
   if (priv->tx_length != 0 && priv->tx_buffer != NULL)
     {
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
       spislave_setup_tx_dma(priv);
 #else
       nbits_to_send = priv->nbits * priv->tx_length;
@@ -767,7 +849,7 @@ static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
     {
       spiwarn("TX buffer empty! Disabling TX for next transaction\n");
 
-#ifndef CONFIG_ESPRESSIF_SPI2_DMA
+#ifndef USE_DMA
       if (priv->tx_buffer != NULL)
         {
           memset(priv->tx_buffer, 0, SPI_SLAVE_BUFSIZE);
@@ -803,7 +885,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 {
   struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
   esp_err_t ret;
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   uint32_t received_bytes;
 #endif
 
@@ -817,7 +899,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   spislave_hal_store_result(&priv->ctx);
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 
   /* Copy received data from DMA buffer to user-accessible buffer */
 
@@ -843,7 +925,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
 
   SPIS_DEV_NOTIFY(priv->dev, SPISLAVE_RX_COMPLETE);
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
     {
       spislave_setup_rx_dma(priv);
@@ -894,7 +976,7 @@ static int spislave_periph_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
 static void spislave_dma_init(struct spislave_priv_s *priv)
 {
   /* Initialize GDMA controller */
@@ -909,15 +991,31 @@ static void spislave_dma_init(struct spislave_priv_s *priv)
       0
     };
 
+  gdma_trigger_t periph_trigger;
+
   /* Request a GDMA channel for SPI peripheral */
 
+  if (priv->cfg.host_id == SPI2_HOST)
+    {
+      periph_trigger = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2);
+    }
+#if defined(SOC_GDMA_TRIG_PERIPH_SPI3)
+  else if (priv->id == SPI3_HOST)
+    {
+      periph_trigger = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 3);
+    }
+#endif
+  else
+    {
+      DEBUGASSERT(0);
+      return;
+    }
+
   SPI_GDMA_NEW_CHANNEL(&tx_handle, &priv->dma_channel_tx, NULL);
-  gdma_connect(priv->dma_channel_tx,
-               GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
+  gdma_connect(priv->dma_channel_tx, periph_trigger);
 
   SPI_GDMA_NEW_CHANNEL(&rx_handle, NULL, &priv->dma_channel_rx);
-  gdma_connect(priv->dma_channel_rx,
-               GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_SPI, 2));
+  gdma_connect(priv->dma_channel_rx, periph_trigger);
 }
 #endif
 
@@ -974,7 +1072,7 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
       spi_ll_reset_register(priv->cfg.host_id);
     }
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   spislave_dma_init(priv);
 #endif
 
@@ -983,12 +1081,12 @@ static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
   priv->ctx.rx_lsbfirst = 0;
   priv->ctx.tx_lsbfirst = 0;
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   priv->ctx.dmadesc_n = SPI_DMA_DESC_NUM;
   priv->ctx.use_dma = 1;
 
-  priv->ctx.dmadesc_rx = dma_rxdesc;
-  priv->ctx.dmadesc_tx = dma_txdesc;
+  priv->ctx.dmadesc_rx = priv->dma_rxdesc;
+  priv->ctx.dmadesc_tx = priv->dma_txdesc;
 #else
   priv->ctx.dmadesc_n = 0;
   priv->ctx.use_dma = 0;
@@ -1039,7 +1137,7 @@ static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
   const void *data = NULL;
   irqstate_t flags;
   size_t num_words;
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   size_t alignment;
   size_t buffer_size;
 #endif
@@ -1069,7 +1167,7 @@ static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
   priv->ctx.mode = mode;
   priv->ctx.rcv_bitlen = 0;
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   /* Allocate DMA RX buffer with proper alignment */
 
 #if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
@@ -1163,7 +1261,7 @@ static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 
   esp_gpioirqdisable(ESP_PIN2IRQ(priv->config->cs_pin));
 
-#ifdef CONFIG_ESPRESSIF_SPI2_DMA
+#ifdef USE_DMA
   /* Free DMA RX buffer */
 
   if (priv->dma_rx_buffer != NULL)
@@ -1405,6 +1503,12 @@ struct spi_slave_ctrlr_s *esp_spislave_ctrlr_initialize(int port)
         priv = &esp_spi2slave_priv;
         break;
 #endif
+#ifdef CONFIG_ESPRESSIF_SPI3
+      case ESPRESSIF_SPI3:
+        priv = &esp_spi3slave_priv;
+        break;
+#endif
+
       default:
         return NULL;
     }

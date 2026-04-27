@@ -49,6 +49,8 @@ extern "C"
 #include <nuttx/spi/spi.h>
 
 #define ESPRESSIF_SPI2 2
+#define ESPRESSIF_SPI3 3
+#define ESPRESSIF_LPSPI0 0
 
 /****************************************************************************
  * Public Function Prototypes
@@ -71,25 +73,25 @@ extern "C"
 struct spi_dev_s *esp_spibus_initialize(int port);
 
 /****************************************************************************
- * Name:  esp_spi[2]_select and esp_spi[2]_status
+ * Name:  esp_spi[2|3]_select and esp_spi[2|3]_status
  *
  * Description:
- *   The external functions, esp_spi[2]_select,
- *   esp_spi[2]_status, and esp_spi[2]_cmddata must be provided
+ *   The external functions, esp_spi[2|3]_select,
+ *   esp_spi[2|3]_status, and esp_spi[2|3]_cmddata must be provided
  *   by board-specific logic.
  *   These are implementations of the select, status, and cmddata methods of
  *   the SPI interface defined by struct spi_ops_s (include/nuttx/spi/spi.h).
  *   All other methods (including esp_spibus_initialize()) are provided
- *   by common ESP32-S3 logic. To use this common SPI logic on your board:
+ *   by common ESP logic. To use this common SPI logic on your board:
  *
  *   1. Provide logic in esp_board_initialize() to configure SPI chip
  *      select pins.
- *   2. Provide esp_spi[2]_select() and esp_spi[2]_status()
+ *   2. Provide esp_spi[2|3]_select() and esp_spi[2|3]_status()
  *      functions in your board-specific logic. These functions will perform
  *      chip selection and status operations using GPIOs in the way your
  *      board is configured.
  *   3. If CONFIG_SPI_CMDDATA is defined in your NuttX configuration file,
- *      then provide esp_spi[2]_cmddata() functions in your
+ *      then provide esp_spi[2|3]_cmddata() functions in your
  *      board-specific logic. These functions will perform cmd/data selection
  *      operations using GPIOs in the way your board is configured.
  *   4. Add a call to esp_spibus_initialize() in your low level
@@ -108,6 +110,15 @@ uint8_t esp_spi2_status(struct spi_dev_s *dev, uint32_t devid);
 int esp_spi2_cmddata(struct spi_dev_s *dev,
                          uint32_t devid,
                          bool cmd);
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPI3
+void esp_spi3_select(struct spi_dev_s *dev, uint32_t devid,
+                     bool selected);
+uint8_t esp_spi3_status(struct spi_dev_s *dev, uint32_t devid);
+int esp_spi3_cmddata(struct spi_dev_s *dev,
+                     uint32_t devid,
+                     bool cmd);
 #endif
 
 /****************************************************************************

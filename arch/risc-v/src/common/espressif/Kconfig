@@ -1793,6 +1793,22 @@ config ESPRESSIF_SPI2
 	select SPI
 	select ESPRESSIF_SPI_PERIPH
 
+config ESPRESSIF_SPI3
+	bool "SPI 3"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
+config ESPRESSIF_LPSPI0
+	bool "LP SPI"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select ESPRESSIF_SPI
+	select SPI
+	select ESPRESSIF_SPI_PERIPH
+
 config ESPRESSIF_SPI_BITBANG
 	bool "SPI Bitbang"
 	default n
@@ -3387,6 +3403,104 @@ config ESPRESSIF_SPI2_MISOPIN
 	range 0 54 if ARCH_CHIP_ESP32P4
 
 endif # ESPRESSIF_SPI2
+
+if ESPRESSIF_SPI3
+
+config ESPRESSIF_SPI3_DMA
+	bool "SPI3 use GDMA"
+	default n
+	depends on ESPRESSIF_DMA
+	---help---
+		Enable support for transfers using the GDMA engine.
+
+config ESPRESSIF_SPI3_DMADESC_NUM
+	int "SPI3 Master GDMA maximum number of descriptors"
+	default 2
+	depends on ESPRESSIF_SPI3_DMA
+	---help---
+		Configure the maximum number of out-link/in-link descriptors to
+		be chained for a GDMA transfer.
+
+config ESPRESSIF_SPI3_DMATHRESHOLD
+	int "SPI3 GDMA threshold"
+	default 64
+	depends on ESPRESSIF_SPI3_DMA
+	---help---
+		When SPI GDMA is enabled, GDMA transfers whose size are below the
+		defined threshold will be performed by polling logic.
+
+choice ESPRESSIF_SPI3_MODE
+	prompt "SPI3 mode"
+	default ESPRESSIF_SPI3_MODE_MASTER
+
+config ESPRESSIF_SPI3_MODE_MASTER
+	bool "SPI3 Master mode"
+	depends on SPI_DRIVER
+	---help---
+		Configure SPI3 to operate in Master mode.
+
+config ESPRESSIF_SPI3_SLAVE
+	bool "SPI3 Slave mode"
+	depends on SPI_SLAVE
+	select ESPRESSIF_GPIO_IRQ
+	select ESPRESSIF_SPI_SLAVE
+	---help---
+		Configure SPI3 to operate in Slave mode.
+
+endchoice # ESPRESSIF_SPI3_MODE
+
+config ESPRESSIF_SPI3_SLAVE_BUFSIZE
+	int "SPI3 Slave buffer size"
+	default 2048
+	depends on ESPRESSIF_SPI3_SLAVE
+	---help---
+		Configure the size of SPI3 Slave controller's internal buffers.
+
+config ESPRESSIF_SPI3_CSPIN
+	int "SPI3 CS Pin"
+	default 20 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_CLKPIN
+	int "SPI3 CLK Pin"
+	default 22 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_MOSIPIN
+	int "SPI3 MOSI Pin"
+	default 21 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_SPI3_MISOPIN
+	int "SPI3 MISO Pin"
+	default 27 if ARCH_CHIP_ESP32P4
+	range 0 54 if ARCH_CHIP_ESP32P4
+
+endif # ESPRESSIF_SPI3
+
+if ESPRESSIF_LPSPI0
+
+config ESPRESSIF_LPSPI0_CSPIN
+	int "LP SPI CS Pin"
+	default 4 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_CLKPIN
+	int "LP SPI CLK Pin"
+	default 8 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_MOSIPIN
+	int "LP SPI MOSI Pin"
+	default 7 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+config ESPRESSIF_LPSPI0_MISOPIN
+	int "LP SPI MISO Pin"
+	default 6 if ARCH_CHIP_ESP32P4
+	range 0 15 if ARCH_CHIP_ESP32P4
+
+endif # ESPRESSIF_LPSPI0
 
 if ESPRESSIF_SPI_BITBANG
 
