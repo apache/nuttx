@@ -185,6 +185,7 @@
    RING_IDX_MASK)
 
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
+#define ring_space(r)       (ring_capacity(r) - ring_count(r))
 
 #define ring_spsc_enqueue(r, items, count) \
   ring_sp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
