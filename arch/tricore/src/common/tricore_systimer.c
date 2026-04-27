@@ -36,22 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Since the tricore hardware timer triggers an interrupt only when the
- * compare value is equal to the counter, setting a compare value that has
- * already timed out will not trigger an interrupt. To avoid missing
- * interrupts when setting the timer, we should set a minimum delay.
- * The minimum delay is calculated based on the CPU frequency and the timer
- * frequency. We assume that the worst-case execution time for setting the
- * timer does not exceed 40 CPU cycles, and calculate the minimum timer
- * delay accordingly.
- * 40 CPU cycles (100ns at 400Mhz) ~ 10 timer cycles (for 100 Mhz timer).
- */
-
-#define TRICORE_SYSTIMER_CPU_FREQUENCY 100000000
-
-#define TRICORE_SYSTIMER_MIN_DELAY \
-  (40ull * SCU_FREQUENCY / TRICORE_SYSTIMER_CPU_FREQUENCY)
-
 /* STM register of the timer */
 
 #define TRICORE_STM_REG(tbase, offset)  ((tbase) + (offset))
@@ -68,6 +52,7 @@
 struct tricore_systimer_lowerhalf_s
 {
   struct oneshot_lowerhalf_s lower;
+  int                       irq;
   uintptr_t                 tbase;
   uintptr_t                 freerun_tbase;
 };
@@ -147,16 +132,19 @@ static void tricore_systimer_update(struct oneshot_lowerhalf_s *lower,
                  tricore_systimer_get_time(priv->freerun_tbase);
     }
 
-  /* Mini_delay time processing */
-
-  expected = expected < current + TRICORE_SYSTIMER_MIN_DELAY ?
-             current + TRICORE_SYSTIMER_MIN_DELAY : expected;
-
   /* The comparator register is 32-bits. */
 
   DEBUGASSERT(expected <= current + UINT32_MAX);
 
   tricore_systimer_set_timecmp(priv->tbase, expected);
+
+  if (tricore_systimer_get_time(priv->tbase) > expected)
+    {
+      putreg32(TRICORE_STM_ISCR_CMP0IRR,
+               TRICORE_STM_REG(priv->tbase, TRICORE_STM_ISCR_OFFSET));
+      putreg32(getreg32(TRICORE_IRQ2SRC(priv->irq)) | TRICORE_SRC_SETR,
+               TRICORE_IRQ2SRC(priv->irq));
+    }
 
   up_irq_restore(flags);
 }
@@ -330,6 +318,7 @@ tricore_systimer_initialize(uintptr_t tbase, uintptr_t fr_tbase,
 
   priv->tbase = tbase;
   priv->freerun_tbase = fr_tbase;
+  priv->irq = irq;
 
   ASSERT(freq <= UINT32_MAX);
 

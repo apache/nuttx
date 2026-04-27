@@ -50,6 +50,7 @@
 #define TRICORE_SRC_TOS_SHIFT    11          /* Type of service (core) */
 #define TRICORE_SRC_TOS_MASK     (0x7 << TRICORE_SRC_TOS_SHIFT)
 #define TRICORE_SRC_CLRR         (1 << 25)   /* Clear request */
+#define TRICORE_SRC_SETR         (1 << 26)   /* Set request */
 
 /* TOS of a core: 0 is CPU0, 1 is the DMA, 2 to 6 are CPU1 to CPU5 */
 

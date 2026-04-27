@@ -52,6 +52,7 @@
 #define TRICORE_SRC_TOS_MASK     (0xf << TRICORE_SRC_TOS_SHIFT)
 #define TRICORE_SRC_SRE          (1 << 23)   /* Service request enable */
 #define TRICORE_SRC_CLRR         (1 << 25)   /* Clear request */
+#define TRICORE_SRC_SETR         (1 << 26)   /* Set request */
 
 /* TOS of a core: 0 to 5 are CPU0 to CPU5, 6 is the CSRM core */
 
