@@ -72,7 +72,6 @@ static inline void tricore_color_intstack(void)
 
 static int g_srpn_to_irq[TRICORE_IRQ_MAX_PRIORITY + 1];
 static spinlock_t g_irqlock = SP_UNLOCKED;
-static int g_irqmap_count = 1;
 
 /****************************************************************************
  * Private Functions
@@ -382,37 +381,3 @@ int up_prioritize_irq(int irq, int priority)
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Name: up_irq_to_ndx
- *
- * Description:
- *   Irq to ndx
- *
- ****************************************************************************/
-
-int up_irq_to_ndx(int irq)
-{
-  volatile uint32_t *src = TRICORE_IRQ2SRC(irq);
-  irqstate_t flags;
-  int ndx;
-
-  ndx = *src & TRICORE_SRC_SRPN_MASK;
-  if (ndx != 0)
-    {
-      return ndx;
-    }
-
-  flags = spin_lock_irqsave(&g_irqlock);
-  ndx = *src & TRICORE_SRC_SRPN_MASK;
-  if (ndx == 0)
-    {
-      ndx = g_irqmap_count++;
-      g_irqrevmap[ndx] = irq;
-      *src = (*src & ~TRICORE_SRC_SRPN_MASK) | ndx;
-    }
-
-  spin_unlock_irqrestore(&g_irqlock, flags);
-
-  return ndx;
-}
