@@ -411,6 +411,7 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
   FAR hash_node_t *tmp;
   uint16_t external_port;
   int32_t current_time = TICK2SEC(clock_systime_ticks());
+  int ret;
 
   ipv4_nat_reclaim_entry(current_time);
 
@@ -454,9 +455,10 @@ ipv4_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
         "proto=%" PRIu8 ", local=%" PRIx32 ":%" PRIu16 ", try create one.\n",
         protocol, local_ip, local_port);
 
-  external_port = nat_port_select(dev, PF_INET, protocol,
-                          (FAR union ip_addr_u *)&dev->d_ipaddr, local_port);
-  if (!external_port)
+  ret = nat_port_select(dev, PF_INET, protocol,
+                        (FAR union ip_addr_u *)&dev->d_ipaddr, local_port,
+                        &external_port);
+  if (ret < 0)
     {
       nwarn("WARNING: Failed to find an available port!\n");
       return NULL;

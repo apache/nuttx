@@ -256,21 +256,23 @@ bool nat_port_inuse(uint8_t domain, uint8_t protocol,
  *   Select an available port number for TCP/UDP protocol, or id for ICMP.
  *
  * Input Parameters:
- *   dev         - The device on which the packet will be sent.
- *   domain      - The domain of the packet.
- *   protocol    - The L4 protocol of the packet.
- *   external_ip - The external IP bind with the port.
- *   local_port  - The local port of the packet, as reference.
+ *   dev           - The device on which the packet will be sent.
+ *   domain        - The domain of the packet.
+ *   protocol      - The L4 protocol of the packet.
+ *   external_ip   - The external IP bind with the port.
+ *   local_port    - The local port of the packet, as reference.
+ *   external_port - The selected external port.
  *
  * Returned Value:
- *   External port number on success; 0 on failure
+ *   0 on success; a negated errno on failure.
  *
  ****************************************************************************/
 
-uint16_t nat_port_select(FAR struct net_driver_s *dev,
-                         uint8_t domain, uint8_t protocol,
-                         FAR const union ip_addr_u *external_ip,
-                         uint16_t local_port);
+int nat_port_select(FAR struct net_driver_s *dev,
+                    uint8_t domain, uint8_t protocol,
+                    FAR const union ip_addr_u *external_ip,
+                    uint16_t local_port,
+                    FAR uint16_t *external_port);
 
 /****************************************************************************
  * Name: nat_expire_time

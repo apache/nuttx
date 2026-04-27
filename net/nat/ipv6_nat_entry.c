@@ -411,6 +411,7 @@ ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
   FAR union ip_addr_u *external_ip;
   uint16_t external_port;
   int32_t current_time = TICK2SEC(clock_systime_ticks());
+  int ret;
 
   ipv6_nat_reclaim_entry(current_time);
 
@@ -457,10 +458,10 @@ ipv6_nat_outbound_entry_find(FAR struct net_driver_s *dev, uint8_t protocol,
         local_ip[4], local_ip[5], local_ip[6], local_ip[7], local_port);
 
   external_ip = (FAR union ip_addr_u *)netdev_ipv6_srcaddr(dev, peer_ip);
-  external_port = nat_port_select(dev, PF_INET6, protocol,
-                                  external_ip, local_port);
+  ret = nat_port_select(dev, PF_INET6, protocol, external_ip, local_port,
+                        &external_port);
 
-  if (!external_port)
+  if (ret < 0)
     {
       nwarn("WARNING: Failed to find an available port!\n");
       return NULL;
