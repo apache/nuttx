@@ -1670,6 +1670,7 @@ static int rpmsg_socket_close(FAR struct socket *psock)
 
   if (conn->backlog > 0)
     {
+      FAR struct rpmsg_socket_conn_s *child;
       FAR struct rpmsg_socket_conn_s *pend;
 
       nxmutex_lock(&g_rpmsg_socket_lock);
@@ -1703,7 +1704,23 @@ static int rpmsg_socket_close(FAR struct socket *psock)
           nxmutex_lock(&conn->recvlock);
         }
 
+      /* Drop the connections that completed the handshake but were never
+       * accepted.  Nothing else refers to them.
+       */
+
+      child = conn->next;
+      conn->next = NULL;
       nxmutex_unlock(&conn->recvlock);
+
+      while (child != NULL)
+        {
+          FAR struct rpmsg_socket_conn_s *next = child->next;
+
+          child->next  = NULL;
+          child->crefs = 0;
+          rpmsg_socket_destroy_ept(child);
+          child = next;
+        }
     }
   else
     {
