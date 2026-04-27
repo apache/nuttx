@@ -44,12 +44,39 @@ set(ASMEXT
     asm
     CACHE INTERNAL "")
 
-set(CMAKE_C_COMPILE_OBJECT
-    "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
-)
-set(CMAKE_CXX_COMPILE_OBJECT
-    "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
-)
+if(CONFIG_OUTPUT_STRIP_PATHS)
+  # TASKING cctc has no -fmacro-prefix-map. Convert absolute source paths to
+  # relative paths by cd-ing to code root before compilation, so __FILE__ embeds
+  # short relative paths instead of full absolute paths.
+  #
+  # CMake prepends CMAKE_C_COMPILER_LAUNCHER before the entire compile object
+  # template, which breaks shell commands that must run before the compiler.
+  # Save the launcher and place it manually after the cd.
+  #
+  # CMake's built-in Tasking support injects "--dep-file=<DEP_FILE>" with a
+  # build-dir-relative path; prefix it with the binary dir so it stays valid
+  # after the cd (absolute dep-file paths are left untouched).
+  get_filename_component(_TASKING_CODE_ROOT "${CMAKE_SOURCE_DIR}" DIRECTORY)
+
+  set(_TASKING_C_LAUNCHER "${CMAKE_C_COMPILER_LAUNCHER}")
+  set(_TASKING_CXX_LAUNCHER "${CMAKE_CXX_COMPILER_LAUNCHER}")
+  set(CMAKE_C_COMPILER_LAUNCHER "")
+  set(CMAKE_CXX_COMPILER_LAUNCHER "")
+
+  set(CMAKE_C_COMPILE_OBJECT
+      "_CMD='${_TASKING_C_LAUNCHER} <CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE>' && cd ${_TASKING_CODE_ROOT} && _CMD=$$(echo \"$$_CMD\" | sed -e 's|${_TASKING_CODE_ROOT}/||g' -e 's|--dep-file=\\([^/]\\)|--dep-file=${CMAKE_BINARY_DIR}/\\1|') && eval \"$$_CMD -o ${CMAKE_BINARY_DIR}/<OBJECT>\""
+  )
+  set(CMAKE_CXX_COMPILE_OBJECT
+      "_CMD='${_TASKING_CXX_LAUNCHER} <CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE>' && cd ${_TASKING_CODE_ROOT} && _CMD=$$(echo \"$$_CMD\" | sed -e 's|${_TASKING_CODE_ROOT}/||g' -e 's|--dep-file=\\([^/]\\)|--dep-file=${CMAKE_BINARY_DIR}/\\1|') && eval \"$$_CMD -o ${CMAKE_BINARY_DIR}/<OBJECT>\""
+  )
+else()
+  set(CMAKE_C_COMPILE_OBJECT
+      "<CMAKE_C_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
+  )
+  set(CMAKE_CXX_COMPILE_OBJECT
+      "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> --create <SOURCE> -o <OBJECT>"
+  )
+endif()
 
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(CMAKE_C_RESPONSE_FILE_FLAG "-f ${CMAKE_BINARY_DIR}/")
