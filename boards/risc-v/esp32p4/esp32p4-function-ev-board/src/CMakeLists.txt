@@ -36,6 +36,10 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS esp32p4_buttons.c)
 endif()
 
+if(CONFIG_ESPRESSIF_EMAC)
+  list(APPEND SRCS esp32p4_ethernet.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 # ##############################################################################

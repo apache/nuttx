@@ -102,6 +102,9 @@ int board_twai_setup(int port);
  * Description:
  *   Configure the GPIO driver.
  *
+ * Input Parameters:
+ *   None.
+ *
  * Returned Value:
  *   Zero (OK).
  *
@@ -109,6 +112,24 @@ int board_twai_setup(int port);
 
 #ifdef CONFIG_DEV_GPIO
 int esp_gpio_init(void);
+#endif
+
+/****************************************************************************
+ * Name: board_emac_init
+ *
+ * Description:
+ *   Bring up the ESP32-P4 Ethernet MAC driver (esp_eth backed).
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESPRESSIF_EMAC
+int board_emac_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

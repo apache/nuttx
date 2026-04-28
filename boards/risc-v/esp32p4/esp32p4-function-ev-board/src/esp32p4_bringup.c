@@ -447,6 +447,14 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_EMAC
+  ret = board_emac_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_emac_init failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 
   /* ULP initialization should be the handled later than
