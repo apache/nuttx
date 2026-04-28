@@ -210,6 +210,19 @@ efuse
 
 Enables the eFuse driver (supports virtual eFuses). Access via ``/dev/efuse``.
 
+ethernet
+--------
+
+Enables using the in-chip ethernet MAC controller attached to the board's PHY pins.
+This example enables the DHCP client and the ping tool to test the Ethernet connection, which
+should be working out of the box when the ethernet cable is connected to the board::
+
+    nsh> ifconfig
+    eth0	Link encap:Ethernet HWaddr 30:ed:a0:ec:f1:60 at RUNNING mtu 1500
+          inet addr:10.0.10.50 DRaddr:10.0.10.1 Mask:255.255.255.0
+
+It also provides the iperf tool to test the Ethernet connection.
+
 gpio
 ----
 

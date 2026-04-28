@@ -350,7 +350,7 @@ MIPI DSI           No
 Timers             Yes
 SPIRAM / PSRAM     Yes
 Watchdog           Yes     MWDT0/1 and RWDT
-Ethernet           No
+Ethernet           Yes
 Brownout           No
 Debug Probe        No
 ================= ======= ==================================
