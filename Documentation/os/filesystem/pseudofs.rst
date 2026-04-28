@@ -215,3 +215,11 @@ See also NxFileSystem in
 When ``CONFIG_FS_PERMISSION`` is enabled, pseudoFS directory modes also gate
 access into mounted volumes beneath them.  See
 :ref:`file-permission`.
+
+Pseudo-files can be made read-only with
+``CONFIG_PSEUDOFS_FILE_READONLY``.  This option depends on
+``CONFIG_PSEUDOFS_FILE`` and defaults to ``CONFIG_DEFAULT_SMALL``.  In
+read-only mode, opens requesting ``O_WRONLY`` or ``O_RDWR`` fail with
+``EACCES``.  Write and truncate operations are unavailable, and mappings
+requesting ``PROT_WRITE`` fail with ``EACCES``, including ``MAP_PRIVATE``
+mappings.  Read-only opens and mappings are unaffected.

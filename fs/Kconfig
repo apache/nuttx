@@ -234,6 +234,14 @@ config PSEUDOFS_FILE
 	---help---
 		Support to create a file on pseudo filesystem.
 
+config PSEUDOFS_FILE_READONLY
+	bool "Pseudo files are read-only"
+	default DEFAULT_SMALL
+	depends on PSEUDOFS_FILE
+	---help---
+		Reject write access to pseudo files and disable write, truncate,
+		and writable memory mapping operations.
+
 config SENDFILE_BUFSIZE
 	int "sendfile() buffer size"
 	default 512
