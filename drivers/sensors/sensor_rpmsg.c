@@ -1573,14 +1573,24 @@ static int sensor_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                                FAR void *priv)
 {
   FAR struct sensor_rpmsg_advsub_s *msg = data;
+  uint32_t command = msg->command;
 
-  if (msg->command < sizeof(g_sensor_rpmsg_handler) /
-                     sizeof(g_sensor_rpmsg_handler[0]))
+  /* For publish handler, use the original rx buffer directly to avoid
+   * extra copy. For all other handlers, copy data to a temporary stack
+   * buffer and release the rx buffer early.
+   */
+
+  if (command != SENSOR_RPMSG_PUBLISH)
     {
-      return g_sensor_rpmsg_handler[msg->command](ept, data, len, src, priv);
+      FAR void *tmp = alloca(len);
+
+      memcpy(tmp, data, len);
+      rpmsg_release_rx_buffer(ept, data);
+      g_sensor_rpmsg_handler[command](ept, tmp, len, src, priv);
+      return RPMSG_SUCCESS_BUFFER_RELEASED;
     }
 
-  return -EINVAL;
+  return g_sensor_rpmsg_handler[command](ept, data, len, src, priv);
 }
 
 static void sensor_rpmsg_bound_worker(FAR void *arg)
