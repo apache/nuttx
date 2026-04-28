@@ -397,6 +397,15 @@ FAR void *sbrk(intptr_t incr);
 int     pipe(int pipefd[2]);
 int     pipe2(int pipefd[2], int flags);
 
+/* Pipe-based process I/O.  These are not actually implemented in the OS.
+ * See apps/system/popen for implementation.
+ */
+
+#ifndef __KERNEL__
+int     dpopen(FAR const char *, int, FAR pid_t *);
+int     dpclose(int, pid_t);
+#endif
+
 /* Schedule an alarm */
 
 unsigned int alarm(unsigned int seconds);
