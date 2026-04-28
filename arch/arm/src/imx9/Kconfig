@@ -643,6 +643,11 @@ config IMX9_LPI2C5_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
 
+config IMX9_LPI2C5_DMA
+	bool "Enable DMA for I2C5"
+	default n
+	depends on IMX9_LPI2C_DMA
+
 config IMX9_LPI2C5_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
 	default 0
@@ -663,6 +668,11 @@ if IMX9_LPI2C6
 config IMX9_LPI2C6_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
+
+config IMX9_LPI2C6_DMA
+	bool "Enable DMA for I2C6"
+	default n
+	depends on IMX9_LPI2C_DMA
 
 config IMX9_LPI2C6_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
@@ -685,6 +695,11 @@ config IMX9_LPI2C7_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
 
+config IMX9_LPI2C7_DMA
+	bool "Enable DMA for I2C7"
+	default n
+	depends on IMX9_LPI2C_DMA
+
 config IMX9_LPI2C7_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
 	default 0
@@ -705,6 +720,11 @@ if IMX9_LPI2C8
 config IMX9_LPI2C8_BUSYIDLE
 	int "Bus idle timeout period in clock cycles"
 	default 0
+
+config IMX9_LPI2C8_DMA
+	bool "Enable DMA for I2C8"
+	default n
+	depends on IMX9_LPI2C_DMA
 
 config IMX9_LPI2C8_FILTSCL
 	int "I2C master digital glitch filters for SCL input in clock cycles"
