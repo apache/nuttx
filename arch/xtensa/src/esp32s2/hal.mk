@@ -331,6 +331,10 @@ CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELI
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)heap_caps.c
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)components$(DELIM)newlib$(DELIM)newlib$(DELIM)libc$(DELIM)misc$(DELIM)init.c
 
+ifneq ($(CONFIG_ESPRESSIF_WIFI),)
+  CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)esp_event.c
+endif
+
 # Interrupt allocator
 # NOTE: ESP-IDF's xtensa_intr_asm.S cannot be used because it conflicts with
 # NuttX's Xtensa core macro definitions. Instead, esp_xtensa_intr.c provides

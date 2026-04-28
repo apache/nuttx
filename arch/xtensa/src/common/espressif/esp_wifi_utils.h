@@ -99,7 +99,7 @@ int esp_freq_to_channel(uint16_t freq);
  * Name: esp_evt_work_init
  *
  * Description:
- *   Initialize the event work queue
+ *   Initialize the generic esp_event backend queue.
  *
  * Input Parameters:
  *   None
@@ -110,6 +110,22 @@ int esp_freq_to_channel(uint16_t freq);
  ****************************************************************************/
 
 void esp_evt_work_init(void);
+
+/****************************************************************************
+ * Name: esp_wifi_evt_work_init
+ *
+ * Description:
+ *   Initialize the event work queue
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_evt_work_init(void);
 
 /****************************************************************************
  * Name: esp_wifi_start_scan
@@ -211,39 +227,6 @@ wifi_mode_t esp_wifi_mode_translate(uint32_t wireless_mode);
  ****************************************************************************/
 
 int esp_wifi_lock(bool lock);
-
-/****************************************************************************
- * Name: esp_event_post
- *
- * Description:
- *   Posts an event to the event loop system. The event is queued in a FIFO
- *   and processed asynchronously in the low-priority work queue.
- *
- * Input Parameters:
- *   event_base      - Identifier for the event category (e.g. WIFI_EVENT)
- *   event_id        - Event ID within the event base category
- *   event_data      - Pointer to event data structure
- *   event_data_size - Size of event data structure
- *   ticks           - Number of ticks to wait (currently unused)
- *
- * Returned Value:
- *   0 on success
- *   -1 on failure with following error conditions:
- *      - Invalid event ID
- *      - Memory allocation failure
- *
- * Assumptions/Limitations:
- *   - Event data is copied into a new buffer, so the original can be freed
- *   - Events are processed in FIFO order in the low priority work queue
- *   - The function is thread-safe and can be called from interrupt context
- *
- ****************************************************************************/
-
-int esp_event_post(const char *event_base,
-                         int32_t event_id,
-                         void *event_data,
-                         size_t event_data_size,
-                         uint32_t ticks);
 
 #ifdef __cplusplus
 }

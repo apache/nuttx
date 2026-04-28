@@ -320,6 +320,10 @@ CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELI
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)heap_caps.c
 CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)components$(DELIM)newlib$(DELIM)newlib$(DELIM)libc$(DELIM)misc$(DELIM)init.c
 
+ifneq ($(CONFIG_ESPRESSIF_WIFI),)
+  CHIP_CSRCS += chip$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)nuttx$(DELIM)src$(DELIM)esp_event.c
+endif
+
 # Security components (for WiFi/crypto support)
 # Note: ESP32 doesn't support HMAC, so esp_security sources are excluded
 
