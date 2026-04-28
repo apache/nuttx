@@ -526,6 +526,10 @@ config IMX9_LPSPI
 	bool "LPSPI support"
 	default n
 
+config IMXRT_FLEXIO
+	bool "FLEXIO support"
+	default n
+
 menu "LPI2C Peripherals"
 
 menuconfig IMX9_LPI2C1
@@ -781,6 +785,20 @@ menuconfig IMX9_LPSPI8
 	select IMX9_LPSPI
 
 endmenu # LPSPI Peripherals
+
+menu "FlexIO Peripherals"
+
+config IMX9_FLEXIO1
+	bool "FLEXIO1"
+	default n
+	select IMX9_FLEXIO
+
+config IMX9_FLEXIO2
+	bool "FLEXIO2"
+	default n
+	select IMX9_FLEXIO
+
+endmenu # FlexIO Peripherals
 
 menu "eDMA Configuration"
 	depends on IMX9_EDMA
