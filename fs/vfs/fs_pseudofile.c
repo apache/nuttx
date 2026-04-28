@@ -33,6 +33,7 @@
 #include <limits.h>
 #include <fcntl.h>
 #include <sys/param.h>
+#include <sys/mman.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -62,8 +63,10 @@ struct fs_pseudofile_s
 
 static int     pseudofile_open(FAR struct file *filep);
 static int     pseudofile_close(FAR struct file *filep);
+#ifndef CONFIG_PSEUDOFS_FILE_READONLY
 static ssize_t pseudofile_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t buflen);
+#endif
 static ssize_t pseudofile_read(FAR struct file *filep, FAR char *buffer,
                                size_t buflen);
 static off_t   pseudofile_seek(FAR struct file *filep, off_t offset,
@@ -74,7 +77,9 @@ static int     pseudofile_munmap(FAR struct task_group_s *group,
                                  FAR struct mm_map_entry_s *map,
                                  FAR void *start,
                                  size_t length);
+#ifndef CONFIG_PSEUDOFS_FILE_READONLY
 static int     pseudofile_truncate(FAR struct file *filep, off_t length);
+#endif
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     pseudofile_unlink(FAR struct inode *inode);
 #endif
@@ -88,11 +93,19 @@ static const struct file_operations g_pseudofile_ops =
   pseudofile_open,     /* open */
   pseudofile_close,    /* close */
   pseudofile_read,     /* read */
+#ifdef CONFIG_PSEUDOFS_FILE_READONLY
+  NULL,                /* write */
+#else
   pseudofile_write,    /* write */
+#endif
   pseudofile_seek,     /* seek */
   NULL,                /* ioctl */
   pseudofile_mmap,     /* mmap */
+#ifdef CONFIG_PSEUDOFS_FILE_READONLY
+  NULL,                /* truncate */
+#else
   pseudofile_truncate, /* truncate */
+#endif
   NULL,                /* poll */
   NULL,                /* readv */
   NULL,                /* writev */
@@ -110,6 +123,13 @@ static int pseudofile_open(FAR struct file *filep)
   FAR struct inode *node = filep->f_inode;
   FAR struct fs_pseudofile_s *pf = node->i_private;
   int ret;
+
+#ifdef CONFIG_PSEUDOFS_FILE_READONLY
+  if ((filep->f_oflags & O_ACCMODE) != O_RDONLY)
+    {
+      return -EACCES;
+    }
+#endif
 
   ret = nxmutex_lock(&pf->lock);
   if (ret < 0)
@@ -171,6 +191,7 @@ static int pseudofile_close(FAR struct file *filep)
 
 /* Grow allocation by doubling until it covers the requested size. */
 
+#ifndef CONFIG_PSEUDOFS_FILE_READONLY
 static size_t pseudofile_buffersize(FAR struct fs_pseudofile_s *pf,
                                     size_t size)
 {
@@ -233,7 +254,9 @@ static int pseudofile_expand(FAR struct inode *node,
   node->i_size = size;
   return 0;
 }
+#endif
 
+#ifndef CONFIG_PSEUDOFS_FILE_READONLY
 static ssize_t pseudofile_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t buflen)
 {
@@ -289,6 +312,7 @@ static ssize_t pseudofile_write(FAR struct file *filep,
   nxmutex_unlock(&pf->lock);
   return buflen;
 }
+#endif
 
 static ssize_t pseudofile_read(FAR struct file *filep, FAR char *buffer,
                                size_t buflen)
@@ -338,19 +362,19 @@ static off_t pseudofile_seek(FAR struct file *filep, off_t offset,
   switch (whence)
     {
       case SEEK_SET:
-          break;
+        break;
 
       case SEEK_CUR:
-          offset += filep->f_pos;
-          break;
+        offset += filep->f_pos;
+        break;
 
       case SEEK_END:
-          offset += node->i_size;
-          break;
+        offset += node->i_size;
+        break;
 
       default:
-          nxmutex_unlock(&pf->lock);
-          return -EINVAL;
+        nxmutex_unlock(&pf->lock);
+        return -EINVAL;
     }
 
   if (offset < 0)
@@ -373,6 +397,13 @@ static int pseudofile_mmap(FAR struct file *filep,
   FAR struct inode *node = filep->f_inode;
   FAR struct fs_pseudofile_s *pf = node->i_private;
   int ret = -EINVAL;
+
+#ifdef CONFIG_PSEUDOFS_FILE_READONLY
+  if ((map->prot & PROT_WRITE) != 0)
+    {
+      return -EACCES;
+    }
+#endif
 
   /* Keep the inode when mmapped, increase refcount */
 
@@ -434,6 +465,7 @@ static int pseudofile_munmap(FAR struct task_group_s *group,
   return ret;
 }
 
+#ifndef CONFIG_PSEUDOFS_FILE_READONLY
 static int pseudofile_truncate(FAR struct file *filep, off_t length)
 {
   FAR struct inode *node = filep->f_inode;
@@ -483,6 +515,7 @@ out:
   nxmutex_unlock(&pf->lock);
   return ret;
 }
+#endif
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pseudofile_unlink(FAR struct inode *node)
