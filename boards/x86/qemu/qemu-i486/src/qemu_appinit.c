@@ -30,8 +30,10 @@
 
 #include <stdio.h>
 #include <nuttx/debug.h>
+#include <nuttx/video/fb.h>
 
 #include "x86_internal.h"
+#include "qemu_vga.h"
 
 /****************************************************************************
  * Public Functions
@@ -74,6 +76,24 @@ int board_app_initialize(uintptr_t arg)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_QEMU_VGA
+  ret = qemu_vga();
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize QEMU VGA: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      serr("ERROR: fb_register() failed: %d\n", ret);
     }
 #endif
 
