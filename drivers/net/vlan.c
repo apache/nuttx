@@ -144,12 +144,14 @@ static int vlan_transmit(FAR struct netdev_lowerhalf_s *dev,
   FAR struct eth_8021qhdr_s     *vlan_hdr;
   FAR uint8_t                   *base = netpkt_getbase(pkt);
   FAR uint8_t                   *data = netpkt_getdata(dev, pkt);
+  unsigned int                   reserved = data - base;
+  int                            ret;
 
   /* Check space for the VLAN tag, normally we want user to set bigger
    * CONFIG_NET_LL_GUARDSIZE to allow inserting VLAN tag in the headroom.
    */
 
-  if (data - base < 4)
+  if (reserved < 4)
     {
       /* TODO: Support backup path for too small CONFIG_NET_LL_GUARDSIZE */
 
@@ -161,7 +163,7 @@ static int vlan_transmit(FAR struct netdev_lowerhalf_s *dev,
   /* Move the data to make space for the VLAN tag */
 
   netpkt_copyin(dev, pkt, data, offsetof(struct eth_hdr_s, type), -4);
-  netpkt_reset_reserved(dev, pkt, data - base - 4);
+  netpkt_reset_reserved(dev, pkt, reserved - 4);
 
   /* Set value of the VLAN tag */
 
@@ -173,7 +175,20 @@ static int vlan_transmit(FAR struct netdev_lowerhalf_s *dev,
 
   /* TODO: Call pkt_input to allow tcpdump capture tx packet on real dev. */
 
-  return real->ops->transmit(real, pkt);
+  ret = real->ops->transmit(real, pkt);
+  if (ret != OK)
+    {
+      /* Undo VLAN encapsulation so the packet can be safely retransmitted
+       * through vlan_transmit again (e.g. after being re-queued to txq).
+       * Move DST+SRC back to original position and restore io_offset.
+       */
+
+      data = netpkt_getdata(dev, pkt);
+      netpkt_copyin(dev, pkt, data, offsetof(struct eth_hdr_s, type), 4);
+      netpkt_reset_reserved(dev, pkt, reserved);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
