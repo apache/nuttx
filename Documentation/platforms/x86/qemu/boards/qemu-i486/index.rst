@@ -47,3 +47,34 @@ After running the QEMU command above with nuttx.elf you will see::
    NuttShell (NSH) NuttX-12.13.0
    nsh>
 
+vga_fb
+------
+
+This board profile will initialize the QEMU i486 with VGA framebuffer support::
+
+   $ qemu-system-i386 -cpu 486 -m 1024 -kernel nuttx.elf -vga std -serial stdio
+
+   NuttShell (NSH) NuttX-12.13.0
+   nsh> fb
+   fb_ioctl: cmd: 10241 arg: 1589592
+   VideoInfo:
+         fmt: 6
+        xres: 320
+        yres: 240
+     nplanes: 1
+    fb_ioctl: cmd: 10242 arg: 1589600
+   PlaneInfo (plane 0):
+       fbmem: 0x170650
+       fblen: 76800
+      stride: 320
+     display: 0
+         bpp: 8
+   Mapped FB: 0x170650
+    0: (  0,  0) (320,240)
+    1: ( 29, 21) (262,198)
+    2: ( 58, 42) (204,156)
+    3: ( 87, 63) (146,114)
+    4: (116, 84) ( 88, 72)
+    5: (145,105) ( 30, 30)
+   Test finished
+   nsh>
