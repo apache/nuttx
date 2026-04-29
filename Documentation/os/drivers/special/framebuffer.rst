@@ -48,6 +48,19 @@ This example will walk through the path from userspace to hardware-specific deta
 
     #. ``include/nuttx/lcd/lcd.h`` provides structures and APIs needed to work with LCD screens, whereas using the framebuffer adapter or the :doc:`lcd`;
 
+Non-consecutive buffers
+-----------------------
+
+The character driver supports equal-sized, non-consecutive buffers in the
+primary plane. The driver's ``getplaneinfo()`` callback uses
+``fb_planeinfo_s.display`` as a zero-based buffer index and returns that
+buffer's ``fbmem`` and ``fblen``. Set ``yres_virtual`` to ``yres`` times the
+buffer count, excluding gaps. For consecutive buffers, return the same base
+address and total length for each index.
+
+The current address table holds at most four buffers and is cached during
+registration; changing buffer addresses afterward is not supported.
+
 VSYNC
 ======
 
@@ -110,12 +123,26 @@ NuttX Simulator
 By selecting the ``sim:lvgl_fb`` config, the ``lvgldemo`` example will be built with the framebuffer driver.
 
 * ``boards/sim/sim/sim/src/sim_bringup.c`` registers the framebuffer driver the same way :ref:`ttgotdisplayesp32_fb`;
-* ``arch/sim/src/sim/up_framebuffer.c`` and ``arch/sim/src/sim/up_x11framebuffer.c`` will be built as ``CONFIG_SIM_FRAMEBUFFER = y`` and ``CONFIG_SIM_X11FB = y`` are set, respectively;
+* ``arch/sim/src/sim/sim_framebuffer.c`` and ``arch/sim/src/sim/posix/sim_x11framebuffer.c`` will be built as ``CONFIG_SIM_FRAMEBUFFER = y`` and ``CONFIG_SIM_X11FB = y`` are set, respectively;
 
-   * ``up_framebuffer.c`` provides ``up_fbinitialize`` and,
-   * calls ``up_x11initialize`` from ``up_x11framebuffer.c`` that initializes a X11-based window as a framebuffer. This is the underlying "driver".
+  * ``sim_framebuffer.c`` provides ``up_fbinitialize``, which calls
+    ``sim_x11initialize`` from ``sim_x11framebuffer.c`` to create the
+    X11 framebuffer window.
 
-* The LVGL demo application (``lvgldemo``) makes use of the ``ioctl`` system call to trigger a ``FBIO_UPDATE`` request to the higher-level device driver in order to refresh the LCD screen with framebuffer data as usual;
+* The LVGL demo maps the framebuffer and uses ``FBIOPAN_DISPLAY`` to switch
+  between buffers.
+
+For two non-consecutive X11 framebuffers, use:
+
+.. code-block:: ini
+
+  CONFIG_SIM_FRAMEBUFFER_COUNT=2
+  CONFIG_SIM_FB_INTERVAL_LINE=17
+
+``CONFIG_SIM_FB_INTERVAL_LINE=0`` keeps buffers consecutive; a positive value
+adds that many rows between buffers. Applications pass logical pan offsets
+without these gaps; SIM adds them when selecting the displayed buffer. See
+:doc:`/os/graphics/framebuffer_char_driver` for file offsets and mapping rules.
 
 .. warning::
 
