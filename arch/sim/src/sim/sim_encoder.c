@@ -169,6 +169,7 @@ static int sim_encoder_close(void *priv)
 {
   sim_encoder_t *sim_encoder = priv;
 
+  work_cancel_sync(HPWORK, &sim_encoder->work);
   x264_wrapper_close(sim_encoder->encoder);
   kmm_free(sim_encoder);
 
@@ -487,6 +488,13 @@ static int sim_encoder_process(sim_encoder_t *sim_encoder,
 
   if (ret < 1)
     {
+      /* x264 accepted input but has no output yet (lookahead delay).
+       * Return dst_buf to DONE queue with bytesused=0 so DQBUF
+       * returns it and the application can re-QBUF it.
+       */
+
+      dst_buf->bytesused = 0;
+      codec_capture_put_buf(sim_encoder->cookie, dst_buf);
       return ret;
     }
 
