@@ -162,6 +162,7 @@ static int sim_decoder_close(void *priv)
 {
   sim_decoder_t *sim_decoder = priv;
 
+  work_cancel_sync(HPWORK, &sim_decoder->work);
   openh264_decoder_close(sim_decoder->decoder);
   kmm_free(sim_decoder);
 
@@ -419,6 +420,7 @@ static int sim_decoder_process(sim_decoder_t *sim_decoder,
 
   if (ret < 1)
     {
+      codec_capture_put_buf(sim_decoder->cookie, dst_buf);
       return ret;
     }
 
