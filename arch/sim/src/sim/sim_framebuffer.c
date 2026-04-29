@@ -192,6 +192,7 @@ static struct fb_vtable_s g_fbobject =
 static int sim_openwindow(struct fb_vtable_s *vtable)
 {
   int ret = OK;
+
   ginfo("vtable=%p\n", vtable);
 
 #ifdef CONFIG_SIM_X11FB
@@ -208,6 +209,7 @@ static int sim_openwindow(struct fb_vtable_s *vtable)
 static int sim_closewindow(struct fb_vtable_s *vtable)
 {
   int ret = OK;
+
   ginfo("vtable=%p\n", vtable);
 
 #ifdef CONFIG_SIM_X11FB
@@ -445,7 +447,12 @@ void sim_x11loop(void)
 
   if (fb_peek_paninfo(&g_fbobject, &info, FB_NO_OVERLAY) == OK)
     {
-      sim_x11setoffset(info.planeinfo.yoffset * info.planeinfo.stride);
+      uint32_t yoffset = info.planeinfo.yoffset;
+#if CONFIG_SIM_FB_INTERVAL_LINE > 0
+      yoffset += (yoffset / CONFIG_SIM_FBHEIGHT)
+                  * CONFIG_SIM_FB_INTERVAL_LINE;
+#endif
+      sim_x11setoffset(yoffset * info.planeinfo.stride);
     }
 
   sim_x11update();

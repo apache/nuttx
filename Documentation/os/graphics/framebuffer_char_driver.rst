@@ -120,6 +120,14 @@ from pixels to bytes is:
     start_byte = (start_pixel * bits_per_pixel) >> 3;
     end_byte   = (end_pixel * bits_per_pixel + 7) >> 3;
 
+For equal-sized buffers in the primary plane, file offsets form a
+continuous logical address space, even when the buffers are not consecutive
+in memory. Each frame occupies ``framesize = stride * yres`` bytes; frame
+``i`` starts at ``i * framesize``, counting from zero. Gaps between buffers
+do not contribute to file offsets. ``read()`` and ``write()`` can cross frame
+boundaries, and ``SEEK_END`` uses the logical total size, ``framesize`` times
+the number of buffers.
+
 While the framebuffer may be accessed with these POSIX interfaces, 
 a more typical way of interacting with the framebuffer from an 
 application would involve use of ``mmap()`` as described below.
@@ -261,6 +269,12 @@ IOCTL Commands
         struct nxgl_point_s pt2; /* Lower, right-hand corner */
     };
 
+* ``FBIOPAN_DISPLAY``. Pan the primary plane using a pointer to
+  ``struct fb_planeinfo_s``. For equal-sized buffers, ``yoffset`` is a
+  logical row offset: the second frame starts at ``yres``, not at the
+  difference between buffer addresses divided by ``stride``. Exclude any
+  gaps between buffers.
+
 * ``FBIOGET_PANINFOCNT``. Retrieves the current number of pan info 
   structures. This IOCTL command requires the overlay index as a parameter.
 
@@ -296,6 +310,11 @@ returned by the IOCTL commands. The address is a
 kernel memory address and may not be valid in all 
 build configurations. Hence, ``mmap()`` is the preferred, 
 portable way to get the framebuffer address.
+
+Map non-consecutive primary-plane buffers separately. ``mmap()`` uses the
+same logical byte offsets as file I/O: map the second frame with offset
+``framesize`` and length ``framesize``. A request crossing a physical frame
+boundary fails with ``MAP_FAILED`` and ``errno`` set to ``EINVAL``.
 
 Framebuffer vs. LCD Graphics Drivers
 ====================================
