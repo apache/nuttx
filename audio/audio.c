@@ -1444,6 +1444,12 @@ static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
     }
 
   flags = spin_lock_irqsave_nopreempt(&upper->spinlock);
+  if (upper->status == NULL)
+    {
+      spin_unlock_irqrestore_nopreempt(&upper->spinlock, flags);
+      return;
+    }
+
   upper->status->tail++;
   audio_try_enqueue(upper);
   for (priv = upper->head; priv != NULL; priv = priv->flink)
