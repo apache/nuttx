@@ -185,14 +185,14 @@
 #define CODEC_CAPTURE_TRY_MEMORY(codec, priv, mem) \
   ((codec)->ops->capture_try_memory ? \
    (codec)->ops->capture_try_memory(priv, mem) : \
-   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR) ? \
-    0 : -ENOTTY))
+   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR || \
+     mem == V4L2_MEMORY_DMABUF) ? 0 : -ENOTTY))
 
 #define CODEC_OUTPUT_TRY_MEMORY(codec, priv, mem) \
   ((codec)->ops->output_try_memory ? \
    (codec)->ops->output_try_memory(priv, mem) : \
-   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR) ? \
-    0 : -ENOTTY))
+   ((mem == V4L2_MEMORY_MMAP || mem == V4L2_MEMORY_USERPTR || \
+     mem == V4L2_MEMORY_DMABUF) ? 0 : -ENOTTY))
 
 /****************************************************************************
  * Public Types
