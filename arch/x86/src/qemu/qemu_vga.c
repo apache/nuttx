@@ -561,14 +561,17 @@ struct lcd_dev_s *qemu_vga_initialize(void)
   return &g_lcddev;
 }
 
-void qemu_vga(void)
+int qemu_vga(void)
 {
   int ret = init_graph_vga(VGA_XRES, VGA_YRES, 1);
   if (ret < 0)
     {
       gerr("ERROR: init_graph_vga returned %d\n", ret);
+      return ret;
     }
 
   memset(g_pscreen, g_bg_color, VGA_XRES * VGA_YRES);
   register_driver("/dev/lcd", &g_vgaops, 0666, NULL);
+
+  return OK;
 }

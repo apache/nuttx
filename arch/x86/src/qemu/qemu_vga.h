@@ -55,6 +55,6 @@
 
 struct lcd_dev_s *qemu_vga_initialize(void);
 
-void qemu_vga(void);
+int qemu_vga(void);
 
 #endif /* __ARCH_X86_SRC_QEMU_QEMU_VGA_H */
