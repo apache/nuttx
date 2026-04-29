@@ -746,22 +746,34 @@ olddefconfig:
 menuconfig:
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
+	$(Q) cp .config .config.tmp 2>/dev/null || true
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_MENUCONFIG}
+	$(Q) cmp -s .config .config.tmp || $(MAKE) clean
+	$(Q) rm -f .config.tmp
 
 nconfig: apps_preconfig
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
+	$(Q) cp .config .config.tmp
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_NCONFIG}
+	$(Q) cmp -s .config .config.tmp || $(MAKE) clean
+	$(Q) rm -f .config.tmp
 
 qconfig: apps_preconfig
 	$(Q) $(MAKE) clean_context
 	$(Q) $(MAKE) apps_preconfig
+	$(Q) cp .config .config.tmp
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_QCONFIG}
+	$(Q) cmp -s .config .config.tmp || $(MAKE) clean
+	$(Q) rm -f .config.tmp
 
 gconfig: apps_preconfig
-	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) clean_context1
 	$(Q) $(MAKE) apps_preconfig
+	$(Q) cp .config .config.tmp
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_GCONFIG}
+	$(Q) cmp -s .config .config.tmp || $(MAKE) clean
+	$(Q) rm -f .config.tmp
 
 savedefconfig: apps_preconfig
 	$(Q) ${KCONFIG_ENV} ${KCONFIG_SAVEDEFCONFIG}
