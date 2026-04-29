@@ -2,17 +2,35 @@
 Network Address Translation (NAT)
 =================================
 
-NuttX supports full cone or symmetric NAT logic, which currently supports
+Network Address Translation (NAT) modifies addresses, ports, or ICMP
+identifiers in forwarded packets so that traffic from one network can use
+the address of another interface.
 
-- TCP
+NuttX supports build-time selectable NAT modes for NAT44 and NAT66:
 
-- UDP
+``full-cone NAT``
+    Maps a local address and port, or ICMP identifier, to an external
+    address and port or identifier. The peer endpoint is not part of the NAT
+    entry key.
 
-- ICMP
+``symmetric NAT``
+    Maps a local endpoint to an external endpoint for a specific peer
+    endpoint. The peer endpoint is part of the NAT entry key, so traffic from
+    the same local endpoint to different peers may use different mappings.
 
-  - ECHO (REQUEST & REPLY)
+The Nuttx NAT implementation supports:
 
-  - Error Messages (DEST_UNREACHABLE & TIME_EXCEEDED & PARAMETER_PROBLEM)
+  * TCP
+  * UDP
+  * ICMP
+
+    * ECHO (REQUEST / REPLY)
+    * Error Messages (DEST_UNREACHABLE / TIME_EXCEEDED / PARAMETER_PROBLEM)
+
+  * ICMPv6
+
+    * ECHO (REQUEST / REPLY)
+    * Error Messages (DEST_UNREACHABLE / PACKET_TOO_BIG / TIME_EXCEEDED / PARAMETER_PROBLEM)
 
 Workflow
 ========
@@ -44,185 +62,283 @@ Configuration Options
 =====================
 
 ``CONFIG_NET_NAT``
-  Enable or disable Network Address Translation (NAT) function.
-  Depends on ``CONFIG_NET_IPFORWARD``.
-``CONFIG_NET_NAT44`` & ``CONFIG_NET_NAT66``
-  Enable or disable NAT on IPv4 / IPv6.
-  Depends on ``CONFIG_NET_NAT``.
-``CONFIG_NET_NAT44_FULL_CONE`` & ``CONFIG_NET_NAT66_FULL_CONE``
-  Enable Full Cone NAT logic. Full Cone NAT is easier to traverse than
-  Symmetric NAT, and uses less resources than Symmetric NAT.
-``CONFIG_NET_NAT44_SYMMETRIC`` & ``CONFIG_NET_NAT66_SYMMETRIC``
-  Enable Symmetric NAT logic. Symmetric NAT will be safer than Full Cone NAT,
-  be more difficult to traverse, and has more entries which may lead to heavier load.
+    Enable Network Address Translation. This option depends on
+    ``CONFIG_NET_IPFORWARD``.
+``CONFIG_NET_NAT44`` / ``CONFIG_NET_NAT66``
+    Enable IPv4-to-IPv4 / IPv6-to-IPv6 NAT. This option depends on
+    ``CONFIG_NET_NAT``.
+``CONFIG_NET_NAT44_FULL_CONE`` / ``CONFIG_NET_NAT66_FULL_CONE``
+    Select full-cone NAT mode for NAT44 / NAT66.
+``CONFIG_NET_NAT44_SYMMETRIC`` / ``CONFIG_NET_NAT66_SYMMETRIC``
+    Select symmetric NAT mode for NAT44 / NAT66.
 ``CONFIG_NET_NAT_HASH_BITS``
-  The bits of the hashtable of NAT entries, hashtable has (1 << bits) buckets.
+    Set the number of bits used for the NAT entry hash table. The hash
+    table has ``1 << CONFIG_NET_NAT_HASH_BITS`` buckets.
 ``CONFIG_NET_NAT_TCP_EXPIRE_SEC``
-  The expiration time for idle TCP entry in NAT.
-  The default value 86400 is suggested by RFC2663, Section 2.6,
-  Page 5. But we may set it to shorter time like 240s for better
-  performance.
+    Set the expiration time, in seconds, for idle TCP NAT entries. The
+    default value is 86400 seconds, as suggested by RFC 2663, Section 2.6,
+    Page 5. But we may set it to shorter time like 240s for better
+    performance.
 ``CONFIG_NET_NAT_UDP_EXPIRE_SEC``
-  The expiration time for idle UDP entry in NAT.
+    Set the expiration time, in seconds, for idle UDP NAT entries.
 ``CONFIG_NET_NAT_ICMP_EXPIRE_SEC``
-  The expiration time for idle ICMP entry in NAT.
+    Set the expiration time, in seconds, for idle ICMP NAT entries.
 ``CONFIG_NET_NAT_ICMPv6_EXPIRE_SEC``
-  The expiration time for idle ICMPv6 entry in NAT.
+    Set the expiration time, in seconds, for idle ICMPv6 NAT entries.
 ``CONFIG_NET_NAT_ENTRY_RECLAIM_SEC``
-  The time to auto reclaim all expired NAT entries. A value of zero will
-  disable auto reclaiming.
-  Expired entries will be automatically reclaimed when matching
-  inbound/outbound entries, so this config does not have significant
-  impact when NAT is normally used, but very useful when the hashtable
-  is big and there are only a few connections using NAT (which will
-  only trigger reclaiming on a few chains in hashtable).
+    Set the time to auto reclaim all expired NAT entries. A value of zero
+    will disable auto reclaiming.
+    Because expired entries will be automatically reclaimed when matching
+    inbound/outbound entries, so this config does not have significant
+    impact when NAT is normally used, but very useful when the hashtable
+    is big and there are only a few connections using NAT (which will
+    only trigger reclaiming on a few chains in hashtable).
 
 Usage
 =====
 
-  - :c:func:`nat_enable()`
-  - :c:func:`nat_disable()`
+- NAT can be enabled directly from C code:
 
-.. c:function:: int nat_enable(FAR struct net_driver_s *dev);
+  .. c:function:: int nat_enable(FAR struct net_driver_s *dev)
 
-  Enable NAT function on a network device, on which the outbound packets
-  will be masqueraded.
+   Enable NAT on a network device. Outbound packets forwarded through this
+   device may be translated.
 
-  :return: Zero is returned if NAT function is successfully enabled on
-    the device; A negated errno value is returned if failed.
+   :return: Zero is returned if NAT is successfully enabled on the device.
+     A negated errno value is returned on failure.
 
-.. c:function:: int nat_disable(FAR struct net_driver_s *dev);
+  .. c:function:: int nat_disable(FAR struct net_driver_s *dev)
 
-  Disable NAT function on a network device.
+   Disable NAT on a network device.
 
-  :return: Zero is returned if NAT function is successfully disabled on
-    the device; A negated errno value is returned if failed.
+   :return: Zero is returned if NAT is successfully disabled on the device.
+     A negated errno value is returned on failure.
+
+- NAT can also be enabled from the NSH with the ``iptables`` command.
+  The rule is added to the NAT table, and the output interface
+  passed to ``-o`` is the NuttX external interface:
+
+  .. code-block:: console
+
+    nsh> iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+
+  To remove the rule, use the same rule specification with ``-D``:
+
+  .. code-block:: console
+
+    nsh> iptables -t nat -D POSTROUTING -o eth1 -j MASQUERADE
+
+  .. note::
+
+   The commands above are NuttX ``iptables`` commands. They configure NAT
+   inside NuttX. They are separate from Linux host ``iptables`` commands.
 
 Validation
 ==========
 
-Validated on Ubuntu 22.04 x86_64 with NuttX SIM by following steps:
+The following setup validates NAT with the NuttX simulator on an Ubuntu
+22.04 x86_64 Linux host. IPv4 is used as the main example.
 
-1. Configure NuttX with >=2 TAP devices (host route mode) and NAT enabled:
+The test uses two Linux network namespaces:
 
-  ..  code-block:: Kconfig
+  * ``private`` represents a host behind NuttX NAT.
+  * ``public`` represents a host on the external side of NuttX NAT.
 
-      CONFIG_NET_IPFORWARD=y
-      CONFIG_NET_NAT=y
-      # CONFIG_SIM_NET_BRIDGE is not set
-      CONFIG_SIM_NETDEV_NUMBER=2
+This keeps the test local to the host and does not require Internet access.
 
-2. Call ``nat_enable`` on one dev on startup, or manually enable NAT
-   with ``iptables`` command (either may work).
+The topology is:
 
-  ..  code-block:: c
+::
 
-      /* arch/sim/src/sim/up_netdriver.c */
-      int netdriver_init(void)
-      {
-        ...
-        nat_enable(&g_sim_dev[0]);
-        ...
-      }
+  Private Namespace               NuttX simulator                 Public Namespace
+                         |----------------------------------|
+      tap0               | eth0: 192.168.0.2/24             |
+   192.168.0.1/24  ------|                                  |
+                         |                                  |
+                         |                eth1: 10.0.1.2/24 |------ 10.0.1.1/24
+                         |                    (NAT enabled) |        tap1
+                         |----------------------------------|
 
-  ..  code-block:: shell
+In this topology:
 
-      iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+  * ``eth0`` is the NuttX private-side interface.
+  * ``eth1`` is the NuttX external interface. NAT is enabled on ``eth1``.
+  * ``tap0`` is moved into the Linux ``private`` namespace and is the peer of
+    ``eth0``.
+  * ``tap1`` is moved into the Linux ``public`` namespace and is the peer of
+    ``eth1``.
 
-3. Set IP Address for NuttX on startup
+Step 1: Configure NuttX simulator
+---------------------------------
 
-  ..  code-block:: shell
+Configure NuttX simulator with at least two TAP devices, IP forwarding and NAT:
 
-    ifconfig eth0 10.0.1.2
-    ifup eth0
-    ifconfig eth1 10.0.10.2
-    ifup eth1
+.. code-block:: kconfig
 
-    # IPv6 if you need
-    ifconfig eth0 inet6 add fc00:1::2/64 gw fc00:1::1
-    ifconfig eth1 inet6 add fc00:10::2/64
+    CONFIG_NET_IPFORWARD=y
+    CONFIG_NET_NAT=y
+    CONFIG_NET_NAT44=y
+    CONFIG_simulator_NETDEV_NUMBER=2
 
-4. Configure IP & namespace & route on host side (maybe need to be root, then try ``sudo -i``)
+Step 2: Start NuttX simulator
+-----------------------------
 
-  ..  code-block:: bash
+Start the NuttX simulator and make sure it creates two TAP interfaces on the
+Linux host. Creating or configuring TAP interfaces may require root privileges
+or capabilities such as ``CAP_NET_ADMIN``. The interface names are assumed to
+be ``tap0`` and ``tap1`` in the commands below.
 
-    IF_HOST="enp1s0"
-    IF_0="tap0"
-    IP_HOST_0="10.0.1.1"
-    IF_1="tap1"
-    IP_HOST_1="10.0.10.1"
-    IP_NUTTX_1="10.0.10.2"
+Step 3: Configure Linux namespaces
+----------------------------------
 
-    # add net namespace LAN for $IF_1
-    ip netns add LAN
-    ip netns exec LAN sysctl -w net.ipv4.ip_forward=1
-    ip link set $IF_1 netns LAN
-    ip netns exec LAN ip link set $IF_1 up
-    ip netns exec LAN ip link set lo up
+Run the following commands on the Linux host:
 
-    # add address and set default route
-    ip addr add $IP_HOST_0/24 dev $IF_0
-    ip netns exec LAN ip addr add $IP_HOST_1/24 dev $IF_1
-    ip netns exec LAN ip route add default dev $IF_1 via $IP_NUTTX_1
+.. code-block:: bash
 
-    # nat to allow NuttX to access the internet
-    iptables -t nat -A POSTROUTING -o $IF_HOST -j MASQUERADE
-    iptables -A FORWARD -i $IF_HOST -o $IF_0 -j ACCEPT
-    iptables -A FORWARD -i $IF_0 -o $IF_HOST -j ACCEPT
-    sysctl -w net.ipv4.ip_forward=1
+    NS_PRIVATE="private"
+    NS_PUBLIC="public"
 
-    # IPv6 if you need
-    IP6_HOST_0="fc00:1::1"
-    IP6_HOST_1="fc00:10::1"
-    IP6_NUTTX_1="fc00:10::2"
+    IF_PRIVATE="tap0"
+    IP_PRIVATE="192.168.0.1"
+    IP_NUTTX_PRIVATE="192.168.0.2"
 
-    # add address and set default route
-    ip -6 addr add $IP6_HOST_0/64 dev $IF_0
-    ip netns exec LAN ip -6 addr add $IP6_HOST_1/64 dev $IF_1
-    ip netns exec LAN ip -6 route add default dev $IF_1 via $IP6_NUTTX_1
+    IF_PUBLIC="tap1"
+    IP_PUBLIC="10.0.1.1"
+    IP_NUTTX_PUBLIC="10.0.1.2"
 
-    # nat to allow NuttX to access the internet
-    ip6tables -t nat -A POSTROUTING -o $IF_HOST -j MASQUERADE
-    ip6tables -A FORWARD -i $IF_HOST -o $IF_0 -j ACCEPT
-    ip6tables -A FORWARD -i $IF_0 -o $IF_HOST -j ACCEPT
-    sysctl -w net.ipv6.conf.all.forwarding=1
+    sudo ip netns add "$NS_PRIVATE"
+    sudo ip netns add "$NS_PUBLIC"
 
-5. Do anything in the LAN namespace will go through NAT
+    sudo ip link set "$IF_PRIVATE" netns "$NS_PRIVATE"
+    sudo ip link set "$IF_PUBLIC" netns "$NS_PUBLIC"
 
-  ..  code-block:: shell
+    # Private namespace
+    sudo ip netns exec "$NS_PRIVATE" ip link set lo up
+    sudo ip netns exec "$NS_PRIVATE" ip link set "$IF_PRIVATE" up
+    sudo ip netns exec "$NS_PRIVATE" ip addr add "$IP_PRIVATE/24" dev "$IF_PRIVATE"
+    sudo ip netns exec "$NS_PRIVATE" ip route add default via "$IP_NUTTX_PRIVATE" dev "$IF_PRIVATE"
 
-    # Host side
-    iperf -B 10.0.1.1 -s -i 1
-    # LAN side
-    sudo ip netns exec LAN iperf -B 10.0.10.1 -c 10.0.1.1 -i 1
+    # Public namespace
+    sudo ip netns exec "$NS_PUBLIC" ip link set lo up
+    sudo ip netns exec "$NS_PUBLIC" ip link set "$IF_PUBLIC" up
+    sudo ip netns exec "$NS_PUBLIC" ip addr add "$IP_PUBLIC/24" dev "$IF_PUBLIC"
 
-  ..  code-block:: shell
+The ``public`` namespace does not need a route back to ``192.168.0.0/24`` for
+normal NAT validation, because return traffic is addressed to the translated
+external address ``10.0.1.2``.
 
-    # Host side
-    python3 -m http.server -b ::
-    # LAN side
-    for i in {1..20000}; do sudo ip netns exec LAN curl 'http://10.0.1.1:8000/' > /dev/null 2>1; done
-    for i in {1..20000}; do sudo ip netns exec LAN curl 'http://[fc00:1::1]:8000/' > /dev/null 2>1; done
+Step 4: Configure NuttX network interfaces
+------------------------------------------
 
-  ..  code-block:: shell
+Configure the NuttX interface addresses from NSH:
 
-    # LAN side
-    sudo ip netns exec LAN ping 8.8.8.8
-    sudo ip netns exec LAN ping 2001:4860:4860::8888
+.. code-block:: console
 
-  ..  code-block:: shell
+    nsh> ifconfig eth0 192.168.0.2
+    nsh> ifup eth0
+    nsh> ifconfig eth1 10.0.1.2
+    nsh> ifup eth1
+    nsh> addroute default 10.0.1.1 eth1
 
-    # LAN side
-    sudo ip netns exec LAN traceroute -n 8.8.8.8     # ICMP error msg of UDP
-    sudo ip netns exec LAN traceroute -n -T 8.8.8.8  # ICMP error msg of TCP
-    sudo ip netns exec LAN traceroute -n -I 8.8.8.8  # ICMP error msg of ICMP
-    sudo ip netns exec LAN traceroute -n 2001:4860:4860::8888
-    sudo ip netns exec LAN traceroute -n -T 2001:4860:4860::8888
-    sudo ip netns exec LAN traceroute -n -I 2001:4860:4860::8888
+Enable NAT on NuttX ``eth1``. Either call ``nat_enable()`` during network
+initialization or run this command from NSH:
 
-  ..  code-block:: shell
+.. code-block:: console
 
-    # Host side
-    tcpdump -nn -i tap0
-    # LAN side
-    sudo ip netns exec LAN tcpdump -nn -i tap1
+    nsh> iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+
+Step 5: Validate basic connectivity
+-----------------------------------
+
+Before testing NAT, verify that each direct link works.
+
+From NuttX, ping the private-side peer:
+
+.. code-block:: console
+
+    nsh> ping 192.168.0.1
+
+From NuttX, ping the public-side peer:
+
+.. code-block:: console
+
+    nsh> ping 10.0.1.1
+
+From the private namespace, ping the NuttX private-side interface:
+
+.. code-block:: bash
+
+    sudo ip netns exec private ping 192.168.0.2
+
+From the public namespace, ping the NuttX external interface:
+
+.. code-block:: bash
+
+    sudo ip netns exec public ping 10.0.1.2
+
+Step 6: Test TCP NAT
+--------------------
+
+Start an iperf server in the ``public`` namespace:
+
+.. code-block:: bash
+
+    sudo ip netns exec public iperf -B 10.0.1.1 -s -i 1
+
+Run the iperf client from the ``private`` namespace:
+
+.. code-block:: bash
+
+    sudo ip netns exec private iperf -B 192.168.0.1 -c 10.0.1.1 -i 1
+
+The server should see the connection as coming from the NuttX external
+address ``10.0.1.2``, not from the private address ``192.168.0.1``.
+
+Step 7: Test ICMP NAT
+---------------------
+
+Run ping from the ``private`` namespace to the ``public`` namespace:
+
+.. code-block:: bash
+
+    sudo ip netns exec private ping 10.0.1.1
+
+On the public side, the ICMP Echo Request should be translated to use the
+NuttX external address ``10.0.1.2`` as the source address.
+
+Step 8: Test HTTP NAT
+---------------------
+
+Start a simple HTTP server in the ``public`` namespace:
+
+.. code-block:: bash
+
+    sudo ip netns exec public python3 -m http.server 8000 -b 10.0.1.1
+
+Run HTTP requests from the ``private`` namespace:
+
+.. code-block:: bash
+
+    for i in $(seq 1 20000); do
+      sudo ip netns exec private curl -sS -o /dev/null 'http://10.0.1.1:8000/'
+    done
+
+Step 9: Capture packets
+-----------------------
+
+Capture on the private side:
+
+.. code-block:: bash
+
+    sudo ip netns exec private tcpdump -nn -i tap0
+
+Capture on the public side:
+
+.. code-block:: bash
+
+    sudo ip netns exec public tcpdump -nn -i tap1
+
+For outbound IPv4 traffic, ``tap0`` should show packets sourced from
+``192.168.0.1`` and ``tap1`` should show the same flow after translation,
+sourced from ``10.0.1.2``. The inbound return path should show the reverse
+translation.
