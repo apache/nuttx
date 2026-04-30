@@ -240,6 +240,7 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
   if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
     {
       rpmsg_release_tx_buffer(&priv->ept, msg);
+      dev->dmatx.length = 0;
     }
 }
 
