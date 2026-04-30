@@ -105,6 +105,15 @@ struct capture_wait_capture_s
 
 typedef struct capture_wait_capture_s capture_wait_capture_t;
 
+#ifdef CONFIG_DMA_SHARED_BUFFER
+struct capture_dmabuf_s
+{
+  FAR struct dma_buf            *dmabuf;
+  FAR struct dma_buf_attachment *attachment;
+  uintptr_t                      dmaaddr;
+};
+#endif
+
 struct capture_type_inf_s
 {
   mutex_t                lock_state;
@@ -119,6 +128,9 @@ struct capture_type_inf_s
   FAR uint8_t            *bufheap;   /* for V4L2_MEMORY_MMAP buffers */
   FAR struct pollfd_s    *fds;
   uint32_t               seqnum;
+#ifdef CONFIG_DMA_SHARED_BUFFER
+  struct capture_dmabuf_s dmabufinf[V4L2_REQBUFS_COUNT_MAX];
+#endif
 };
 
 typedef struct capture_type_inf_s capture_type_inf_t;
@@ -635,6 +647,35 @@ static void capture_dma_release(FAR struct dma_buf *dmabuf)
       dmabuf->priv = NULL;
     }
 }
+
+#ifdef CONFIG_DMA_SHARED_BUFFER
+static void capture_dmabuf_release(FAR capture_type_inf_t *type_inf,
+                                   uint32_t index)
+{
+  FAR struct capture_dmabuf_s *db = &type_inf->dmabufinf[index];
+
+  if (db->dmabuf != NULL && db->attachment != NULL)
+    {
+      dma_buf_end_cpu_access(db->dmabuf, DMA_BIDIRECTIONAL);
+      dma_buf_unmap_attachment(db->attachment, db->dmaaddr,
+                               DMA_BIDIRECTIONAL);
+      dma_buf_detach(db->dmabuf, db->attachment);
+      dma_buf_put(db->dmabuf);
+    }
+
+  memset(db, 0, sizeof(*db));
+}
+
+static void capture_dmabuf_clear(FAR capture_type_inf_t *type_inf)
+{
+  int i;
+
+  for (i = 0; i < V4L2_REQBUFS_COUNT_MAX; i++)
+    {
+      capture_dmabuf_release(type_inf, i);
+    }
+}
+#endif
 
 static int capture_dma_begin_cpu_access(FAR struct dma_buf *dmabuf,
                                         enum dma_data_direction direction)
@@ -1369,6 +1410,10 @@ static void cleanup_streamresources(FAR capture_type_inf_t *type_inf,
 
       type_inf->bufheap = NULL;
     }
+
+#ifdef CONFIG_DMA_SHARED_BUFFER
+  capture_dmabuf_clear(type_inf);
+#endif
 }
 
 static void cleanup_scene_parameter(FAR capture_scene_params_t **vsp)
@@ -2377,36 +2422,63 @@ static int capture_reqbufs(FAR struct file *filep,
       video_framebuff_change_mode(&type_inf->bufinf, reqbufs->mode);
       ret = video_framebuff_realloc_container(&type_inf->bufinf,
                                               reqbufs->count);
-      if (ret == OK && reqbufs->memory == V4L2_MEMORY_MMAP)
+      if (ret == OK)
         {
-          if (type_inf->bufheap != NULL)
+          if (reqbufs->memory == V4L2_MEMORY_MMAP)
             {
-              if (imgdata->ops->free)
+              if (type_inf->bufheap != NULL)
                 {
-                  imgdata->ops->free(imgdata, type_inf->bufheap);
+                  if (imgdata->ops->free)
+                    {
+                      imgdata->ops->free(imgdata, type_inf->bufheap);
+                    }
+                  else
+                    {
+                      kumm_free(type_inf->bufheap);
+                    }
+                }
+
+              if (imgdata->ops->alloc)
+                {
+                  type_inf->bufheap = imgdata->ops->alloc(imgdata, 32,
+                    reqbufs->count *
+                    get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
                 }
               else
                 {
-                  kumm_free(type_inf->bufheap);
+                  type_inf->bufheap = kumm_memalign(32, reqbufs->count *
+                    get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
+                }
+
+              if (type_inf->bufheap == NULL)
+                {
+                  ret = -ENOMEM;
                 }
             }
+#ifdef CONFIG_DMA_SHARED_BUFFER
+          else if (reqbufs->memory == V4L2_MEMORY_DMABUF)
+            {
+              /* For DMABUF import, no heap allocation needed.
+               * Buffers will be provided via fd in QBUF.
+               */
 
-          if (imgdata->ops->alloc)
-            {
-              type_inf->bufheap = imgdata->ops->alloc(imgdata, 32,
-                reqbufs->count *
-                get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
-            }
-          else
-            {
-              type_inf->bufheap = kumm_memalign(32, reqbufs->count *
-                get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]));
-            }
+              if (type_inf->bufheap != NULL)
+                {
+                  if (imgdata->ops->free)
+                    {
+                      imgdata->ops->free(imgdata, type_inf->bufheap);
+                    }
+                  else
+                    {
+                      kumm_free(type_inf->bufheap);
+                    }
 
-          if (type_inf->bufheap == NULL)
-            {
-              ret = -ENOMEM;
+                  type_inf->bufheap = NULL;
+                }
+
+              capture_dmabuf_clear(type_inf);
             }
+#endif
         }
     }
 
@@ -2485,11 +2557,7 @@ static int capture_qbuf(FAR struct file *filep,
     }
 
   memcpy(&container->buf, buf, sizeof(struct v4l2_buffer));
-#ifdef CONFIG_DMA_SHARED_BUFFER
-  if (buf->memory == V4L2_MEMORY_MMAP || buf->memory == V4L2_MEMORY_DMABUF)
-#else
   if (buf->memory == V4L2_MEMORY_MMAP)
-#endif
     {
       /* only use userptr inside the container */
 
@@ -2497,6 +2565,71 @@ static int capture_qbuf(FAR struct file *filep,
       container->buf.m.userptr = (unsigned long)(type_inf->bufheap +
                                  container->buf.length * buf->index);
     }
+#ifdef CONFIG_DMA_SHARED_BUFFER
+  else if (buf->memory == V4L2_MEMORY_DMABUF)
+    {
+      /* Import dmabuf: get buffer from fd, attach, and map */
+
+      FAR struct capture_dmabuf_s *dbinfo;
+
+      if (buf->index >= V4L2_REQBUFS_COUNT_MAX)
+        {
+          video_framebuff_free_container(&type_inf->bufinf, container);
+          return -EINVAL;
+        }
+
+      dbinfo = &type_inf->dmabufinf[buf->index];
+
+      /* Release previous import if any */
+
+      capture_dmabuf_release(type_inf, buf->index);
+
+      dbinfo->dmabuf = dma_buf_get(buf->m.fd);
+      if (dbinfo->dmabuf == NULL)
+        {
+          video_framebuff_free_container(&type_inf->bufinf, container);
+          return -EINVAL;
+        }
+
+      /* A dmabuf smaller than one frame would hand the lower half a target
+       * it may write past the end of.
+       */
+
+      if (dbinfo->dmabuf->size <
+          get_bufsize(&type_inf->fmt[CAPTURE_FMT_MAIN]))
+        {
+          dma_buf_put(dbinfo->dmabuf);
+          memset(dbinfo, 0, sizeof(*dbinfo));
+          video_framebuff_free_container(&type_inf->bufinf, container);
+          return -EINVAL;
+        }
+
+      dbinfo->attachment = dma_buf_attach(dbinfo->dmabuf);
+      if (dbinfo->attachment == NULL)
+        {
+          dma_buf_put(dbinfo->dmabuf);
+          memset(dbinfo, 0, sizeof(*dbinfo));
+          video_framebuff_free_container(&type_inf->bufinf, container);
+          return -ENOMEM;
+        }
+
+      dbinfo->dmaaddr = dma_buf_map_attachment(dbinfo->attachment,
+                                               DMA_BIDIRECTIONAL);
+      if (dbinfo->dmaaddr == 0)
+        {
+          dma_buf_detach(dbinfo->dmabuf, dbinfo->attachment);
+          dma_buf_put(dbinfo->dmabuf);
+          memset(dbinfo, 0, sizeof(*dbinfo));
+          video_framebuff_free_container(&type_inf->bufinf, container);
+          return -EFAULT;
+        }
+
+      dma_buf_begin_cpu_access(dbinfo->dmabuf, DMA_BIDIRECTIONAL);
+
+      container->buf.length = dbinfo->dmabuf->size;
+      container->buf.m.userptr = (unsigned long)dbinfo->dmaaddr;
+    }
+#endif
 
   video_framebuff_queue_container(&type_inf->bufinf, container);
 
