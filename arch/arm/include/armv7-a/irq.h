@@ -123,7 +123,7 @@
 #  define REG_D15           (30) /* D15 */
 #  define REG_S30           (30) /* S30 */
 #  define REG_S31           (31) /* S31 */
-#  ifdef CONFIG_ARM_HAVE_DPFPU32
+#  ifdef CONFIG_ARM_DPFPU32
 #    define REG_D16         (32) /* D16 */
 #    define REG_D17         (34) /* D17 */
 #    define REG_D18         (36) /* D18 */
