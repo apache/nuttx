@@ -326,36 +326,43 @@ static int netdev_upper_txpoll(FAR struct net_driver_s *dev)
   if (netpkt_getdatalen(lower, pkt) > NETDEV_PKTSIZE(dev))
     {
       nerr("ERROR: Packet too long to send!, dropping\n");
+      goto drop;
+    }
 
-      /* Permanent error -- drop the packet to avoid infinite retry.
-       * netpkt_put() restores quota and places pkt back into
-       * dev->d_iob so the caller can release it.
+  ret = lower->ops->transmit(lower, pkt);
+
+  if (ret == OK)
+    {
+      return NETDEV_TX_CONTINUE;
+    }
+
+  if (ret == -EBUSY)
+    {
+      /* Transient error -- re-queue to txq head for retry.  Head-insert
+       * preserves packet ordering.  The retry will be driven by the
+       * txdone callback from the lower half driver.
+       *
+       * Note: We manually restore quota instead of using netpkt_put()
+       * because the pkt is moved to txq, not back to dev->d_iob.
+       * After netpkt_get(), dev->d_iob is already NULL.
        */
 
-      NETDEV_TXERRORS(dev);
-      netpkt_put(dev, pkt, NETPKT_TX);
-    }
-  else
-    {
-      ret = lower->ops->transmit(lower, pkt);
-      if (ret != OK)
-        {
-          /* Transient error -- re-queue to txq head for retry.
-           * Head-insert preserves packet ordering.  The retry will be
-           * driven by txdone callback from the lower half driver.
-           *
-           * Note: We manually restore quota instead of using netpkt_put()
-           * because the pkt is moved to txq, not back to dev->d_iob.
-           * After netpkt_get(), dev->d_iob is already NULL.
-           */
-
-          nwarn("WARNING: Transmit failed: %d, re-queue pkt\n", ret);
-          iob_add_queue_head(pkt, &upper->txq);
-          atomic_add(&upper->lower->quota_ptr[NETPKT_TX], 1);
-          return ret;
-        }
+      nwarn("WARNING: Transmit busy (%d), re-queue pkt\n", ret);
+      iob_add_queue_head(pkt, &upper->txq);
+      atomic_add(&upper->lower->quota_ptr[NETPKT_TX], 1);
+      return ret;
     }
 
+  nerr("ERROR: Transmit failed: %d, dropping pkt\n", ret);
+
+  /* Permanent error -- drop the packet to avoid infinite retry.
+   * netpkt_put() restores quota and places pkt back into dev->d_iob so
+   * the caller can release it.
+   */
+
+drop:
+  NETDEV_TXERRORS(dev);
+  netpkt_put(dev, pkt, NETPKT_TX);
   return NETDEV_TX_CONTINUE;
 }
 
