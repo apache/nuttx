@@ -223,6 +223,34 @@
 #define ring_mpsc_dequeue_skip(r, count) \
   ring_sc_dequeue_skip(RING_BASE(r), count)
 
+/* Overwrite enqueue: when the ring is full, discard oldest data to
+ * make room.  The discard path acts as a virtual multi-consumer,
+ * so the dequeue side MUST use MC protocol (ring_spmc_dequeue or
+ * ring_mpmc_dequeue) regardless of the number of real consumers.
+ *
+ * Only available for MC queues (SPMC/MPMC). SC queues cannot
+ * support overwrite because the producer must CAS cons_head to
+ * discard, which conflicts with SC's plain-store protocol.
+ */
+
+#define ring_spmc_enqueue_overwrite(r, items, count) \
+  ring_sp_enqueue_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+
+#define ring_mpmc_enqueue_overwrite(r, items, count) \
+  ring_mp_enqueue_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+
+#define ring_spmc_enqueue_overwrite_start(r, count, elem_size, b) \
+  ring_sp_enqueue_overwrite_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_spmc_enqueue_overwrite_finish(r, b) \
+  ring_sp_finish(RING_BASE(r), b)
+
+#define ring_mpmc_enqueue_overwrite_start(r, count, elem_size, b) \
+  ring_mp_enqueue_overwrite_start(RING_BASE(r), count, elem_size, b)
+
+#define ring_mpmc_enqueue_overwrite_finish(r, b) \
+  ring_mp_finish(RING_BASE(r), b)
+
 #define ring_spsc_enqueue_start(r, count, elem_size, b) \
   ring_sp_start(RING_BASE(r), count, elem_size, b)
 
@@ -949,6 +977,183 @@ ring_mc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
 
   ring_mc_start(r, count, 0, &buf);
   ring_mc_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_sp_enqueue_overwrite_start
+ *
+ * Description:
+ *   Single-producer overwrite start. Discard oldest committed data
+ *   if needed, then initialize ring_buf_s for zero-copy write.
+ *   Caller writes data into buf, then calls ring_sp_finish.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_sp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
+                                size_t elem_size, FAR struct ring_buf_s *buf)
+{
+  uint32_t prod_idx;
+  uint32_t cons_idx;
+  uint32_t free_space;
+  uint32_t discard;
+  uint32_t old_cons;
+  uint32_t new_cons;
+
+  if (count > r->capacity)
+    {
+      count = r->capacity;
+    }
+
+  prod_idx = RTS_IDX(atomic_read(&r->prod_tail));
+
+  for (; ; )
+    {
+      old_cons = atomic_read_acquire(&r->cons_head);
+      cons_idx = RTS_IDX(old_cons);
+      free_space = r->capacity -
+                   ((prod_idx - cons_idx) & RING_IDX_MASK);
+
+      if (free_space >= count)
+        {
+          break;
+        }
+
+      discard = count - free_space;
+      new_cons = RTS_PACK(RTS_CNT(old_cons) + 1, cons_idx + discard);
+      if (atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
+        {
+          ring_buf_init(buf, r, cons_idx, discard, elem_size);
+          ring_mc_finish(r, buf);
+          break;
+        }
+    }
+
+  ring_buf_init(buf, r, prod_idx, count, elem_size);
+}
+
+/****************************************************************************
+ * Name: ring_sp_enqueue_overwrite
+ *
+ * Description:
+ *   Single-producer overwrite enqueue (copy variant).
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
+                          uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_sp_enqueue_overwrite_start(r, count, elem_size, &buf);
+  ring_copy_from(&buf,
+                 (FAR const char *)items + (count - buf.cnt) * elem_size,
+                 elem_size);
+  ring_sp_finish(r, &buf);
+
+  return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mp_enqueue_overwrite_start
+ *
+ * Description:
+ *   Multi-producer overwrite start. Discard oldest committed data
+ *   if needed, reserve producer slots via CAS, then initialize
+ *   ring_buf_s for zero-copy write. Caller writes data into buf,
+ *   then calls ring_mp_finish.
+ *
+ ****************************************************************************/
+
+static inline_function void
+ring_mp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
+                                size_t elem_size, FAR struct ring_buf_s *buf)
+{
+  uint32_t old_prod;
+  uint32_t new_prod;
+  uint32_t prod_idx;
+  uint32_t cons_idx;
+  uint32_t free_space;
+  uint32_t discard;
+  uint32_t old_cons;
+  uint32_t new_cons;
+
+  if (count > r->capacity)
+    {
+      count = r->capacity;
+    }
+
+  old_prod = atomic_read(&r->prod_head);
+  for (; ; )
+    {
+      uint32_t prod_tail_idx;
+
+      old_cons = atomic_read_acquire(&r->cons_head);
+      prod_tail_idx = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+      prod_idx = RTS_IDX(old_prod);
+      cons_idx = RTS_IDX(old_cons);
+
+      free_space = r->capacity -
+                   ((prod_idx - cons_idx) & RING_IDX_MASK);
+
+      if (free_space < count)
+        {
+          uint32_t committed;
+
+          committed = (prod_tail_idx - cons_idx) & RING_IDX_MASK;
+          discard = count - free_space;
+          if (discard > committed)
+            {
+              old_prod = atomic_read(&r->prod_head);
+              continue;
+            }
+
+          new_cons = RTS_PACK(RTS_CNT(old_cons) + 1, cons_idx + discard);
+          if (!atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
+            {
+              old_prod = atomic_read(&r->prod_head);
+              continue;
+            }
+
+          ring_buf_init(buf, r, cons_idx, discard, elem_size);
+          ring_mc_finish(r, buf);
+
+          old_prod = atomic_read(&r->prod_head);
+          prod_idx = RTS_IDX(old_prod);
+        }
+
+      new_prod = RTS_PACK(RTS_CNT(old_prod) + 1, prod_idx + count);
+      if (atomic_cmpxchg_relaxed(&r->prod_head, &old_prod, new_prod))
+        {
+          break;
+        }
+    }
+
+  ring_buf_init(buf, r, prod_idx, count, elem_size);
+}
+
+/****************************************************************************
+ * Name: ring_mp_enqueue_overwrite
+ *
+ * Description:
+ *   Multi-producer overwrite enqueue (copy variant).
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
+                          uint32_t count, size_t elem_size)
+{
+  struct ring_buf_s buf;
+
+  ring_mp_enqueue_overwrite_start(r, count, elem_size, &buf);
+  ring_copy_from(&buf,
+                 (FAR const char *)items + (count - buf.cnt) * elem_size,
+                 elem_size);
+  ring_mp_finish(r, &buf);
 
   return buf.cnt;
 }
