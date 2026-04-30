@@ -105,8 +105,12 @@ int video_framebuff_realloc_container(video_framebuff_t *fbuf, int sz)
   vbuf_container_t *vbuf;
 
   nxmutex_lock(&fbuf->lock_empty);
-  if (fbuf->container_size == sz)
+  if (fbuf->container_size == sz && sz > 0)
     {
+      /* Same count — reinitialize chain but skip realloc */
+
+      memset(fbuf->vbuf_alloced, 0, sizeof(vbuf_container_t) * sz);
+      init_buf_chain(fbuf);
       nxmutex_unlock(&fbuf->lock_empty);
       return OK;
     }
