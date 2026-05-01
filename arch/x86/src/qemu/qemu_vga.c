@@ -204,9 +204,6 @@ static const uint8_t height_600[]  =
   0x70, 0xf0, 0x60, 0x5b, 0x8c, 0x57, 0x58, 0x70
 };
 
-static const uint8_t g_bg_color    = 0x0f;
-static const uint8_t g_fg_color    = 0x01;
-
 static uint8_t g_runbuffer[VGA_XRES];
 static uint8_t *g_pscreen = (uint8_t *)(0xa0000);
 
@@ -237,6 +234,43 @@ static const struct file_operations g_vgaops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void vga_init_palette(void)
+{
+  uint8_t r3;
+  uint8_t g3;
+  uint8_t b2;
+
+  static const uint8_t r_levels[8] =
+  {
+    0,  9, 18, 27, 36, 45, 54, 63
+  };
+
+  static const uint8_t g_levels[8] =
+  {
+    0,  9, 18, 27, 36, 45, 54, 63
+  };
+
+  static const uint8_t b_levels[4] =
+  {
+    0, 21, 42, 63
+  };
+
+  outb(0x00, 0x3c8);
+
+  for (r3 = 0; r3 < 8; r3++)
+    {
+      for (g3 = 0; g3 < 8; g3++)
+        {
+          for (b2 = 0; b2 < 4; b2++)
+            {
+              outb(r_levels[r3], 0x3c9);
+              outb(g_levels[g3], 0x3c9);
+              outb(b_levels[b2], 0x3c9);
+            }
+        }
+    }
+}
 
 /* The chain4 parameter should be 1 for normal 13h-type mode, but
  * only allows 320x200 256x200, 256x240 and 256x256 because you
@@ -388,19 +422,9 @@ static int init_graph_vga(int width, int height, int chain4)
   outw(0x4005, 0x3ce); /* 256 color mode */
   outw(0x0106, 0x3ce); /* Extend graph mode & a000-bfff */
 
-  inb(0x3da);
-  outb(0x30, 0x3c0);
-  outb(0x41, 0x3c0);
-  outb(0x33, 0x3c0);
-  outb(0x00, 0x3c0);
+  /* Setup the palette to RGB332 used by NuttX, LVGL, etc */
 
-  for (a = 0; a < 16; a++)    /* ega pal */
-    {
-      outb((uint8_t)a, 0x3c0);
-      outb((uint8_t)a, 0x3c0);
-    }
-
-  outb(0x20, 0x3c0); /* enable video */
+  vga_init_palette();
 
   return 0;
 }
@@ -476,16 +500,15 @@ static ssize_t vga_write(struct file *filep, const char *buf,
                          size_t buflen)
 {
   int i;
-  int j;
 
   if (buf == NULL || buflen < 1)
     {
       return -EINVAL;
     }
 
-  for (j = 0; j < buflen && g_curpos < VGA_FBSIZE; j++)
+  for (i = 0; i < buflen && g_curpos < VGA_FBSIZE; i++)
     {
-      g_pscreen[g_curpos++] = (uint8_t)buf[j];
+      g_pscreen[g_curpos++] = (uint8_t)buf[i];
     }
 
   return buflen;
@@ -565,7 +588,6 @@ int qemu_vga(void)
       return ret;
     }
 
-  memset(g_pscreen, g_bg_color, VGA_XRES * VGA_YRES);
   register_driver("/dev/lcd", &g_vgaops, 0666, NULL);
 
   return OK;
