@@ -485,12 +485,7 @@ static ssize_t vga_write(struct file *filep, const char *buf,
 
   for (j = 0; j < buflen && g_curpos < VGA_FBSIZE; j++)
     {
-      uint8_t dots = buf[j];
-      for (i = 0; i < 8 && g_curpos < VGA_FBSIZE; i++)
-        {
-          g_pscreen[g_curpos++] = dots & 0x80 ? g_fg_color : g_bg_color;
-          dots <<= 1;
-        }
+      g_pscreen[g_curpos++] = (uint8_t)buf[j];
     }
 
   return buflen;
