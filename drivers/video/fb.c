@@ -2046,7 +2046,7 @@ int fb_register_device(int display, int plane,
       nxsched_sleep(SPLASH_SLEEP);
     }
 
-#  ifdef VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT
+#  ifdef CONFIG_VIDEO_FB_SPLASHSCREEN_CLR_ON_EXIT
   ret = fb_splash_fill(&vinfo, &pinfo, 0); /* Fill with black to clear LCD  */
   if (ret < 0)
     {
