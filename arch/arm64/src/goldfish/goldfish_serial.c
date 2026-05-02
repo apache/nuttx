@@ -57,7 +57,7 @@ void arm64_earlyserialinit(void)
    * when they are first opened.
    */
 
-  pl011_earlyserialinit();
+  #error "Not implemented"
 }
 
 /***************************************************************************
@@ -70,7 +70,7 @@ void arm64_earlyserialinit(void)
 
 void arm64_serialinit(void)
 {
-  pl011_serialinit();
+  #error "Not implemented"
 }
 
 #endif /* USE_SERIALDRIVER */
