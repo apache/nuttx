@@ -21,7 +21,7 @@ features:
 * **Multi-User Support** NX includes front-end logic to an NX server
   daemon that can serve multiple NX client threads. The NX sever
   thread/daemon serializes graphics operations from multiple clients.
-  
+
 * **Minimal Graphics Toolset** The actual implementation of the graphics
   operations is performed by common, back-end logic. This back-end supports
   only a primitive set of graphic and rendering operations.
@@ -124,16 +124,10 @@ start this daemon. There are two ways that this can be done:
    calling the function ``nxmu_start()``. The board startup logic
    usually resides the ``boards/arch/chip/board/src`` directory. The
    board startup logic can run automatically during the early system if
-   ``CONFIG_BOARD_LATE_INITIALIZE`` is defined in the configuration. Or,
-   the board startup logic can execute under control of the application
-   by calling :c:func:`boardctl` as:
+   ``CONFIG_BOARD_LATE_INITIALIZE`` is defined in the configuration.
 
-   .. code-block:: c
-
-     boardctl(BOARDIOC_INIT, arg)
-
-   The board initialization logic will run in either case and the simple
-   call to ``nxmu_start()`` will start the NX server.
+   The board initialization logic will run and the simple call to
+   ``nxmu_start()`` will start the NX server.
 
 #. The NX server may also be started later by the application via
    :c:func:`boardctl` as:

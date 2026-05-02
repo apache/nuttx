@@ -387,14 +387,6 @@ int boardctl(unsigned int cmd, uintptr_t arg)
 
   switch (cmd)
     {
-      case BOARDIOC_INIT:
-        {
-          /* WARNING: deprecated, will be removed */
-
-          ret = -ENOTTY;
-        }
-        break;
-
 #ifdef CONFIG_BOARDCTL_FINALINIT
       /* CMD:           BOARDIOC_FINALINIT
        * DESCRIPTION:   Perform one-time application initialization after
