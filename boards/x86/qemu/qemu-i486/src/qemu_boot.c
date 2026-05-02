@@ -87,16 +87,8 @@ void x86_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifdef CONFIG_FS_PROCFS
-  int ret = OK;
+  /* Perform board-specific initialization */
 
-  /* Mount the proc filesystem */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
+  qemu_bringup();
 }
 #endif /* CONFIG_BOARD_LATE_INITIALIZE */

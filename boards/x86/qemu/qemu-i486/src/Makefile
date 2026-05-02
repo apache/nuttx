@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = qemu_boot.c
+CSRCS = qemu_boot.c qemu_bringup.c
 
 ifeq ($(CONFIG_QEMU_VGA),y)
   CSRCS += qemu_vga_lcd.c

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/x86/qemu/qemu-i486/src/qemu_i486.h
+ * boards/x86/qemu/qemu-i486/src/qemu_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,34 +20,28 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_X86_QEMU_QEMU_I486_SRC_QEMU_I486_H
-#define __BOARDS_X86_QEMU_QEMU_I486_SRC_QEMU_I486_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include <errno.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <nuttx/debug.h>
+#include <nuttx/video/fb.h>
+#include <nuttx/fs/fs.h>
+
+#include "x86_internal.h"
+#include "qemu_vga.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
 
-/* GPIO Pin Definitions *****************************************************/
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Public Functions Definitions
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -59,9 +53,42 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
+ *     Called from the NSH library
+ *
  ****************************************************************************/
 
-int qemu_bringup(void);
+int qemu_bringup(void)
+{
+  int ret = OK;
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_X86_QEMU_QEMU_I486_SRC_QEMU_I486_H */
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the proc filesystem */
+
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_QEMU_VGA
+  ret = qemu_vga();
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to initialize QEMU VGA: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  /* Initialize and register the framebuffer driver */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      serr("ERROR: fb_register() failed: %d\n", ret);
+    }
+#endif
+
+  return ret;
+}
