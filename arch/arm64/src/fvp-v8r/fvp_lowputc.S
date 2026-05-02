@@ -62,7 +62,7 @@
 
 GTEXT(arm64_earlyprintinit)
 SECTION_FUNC(text, arm64_earlyprintinit)
-    ldr   x15, =CONFIG_UART0_BASE
+    ldr   x15, =0x9c090000
     mov   x0, #(7372800 / EARLY_UART_PL011_BAUD_RATE % 16)
     strh  w0, [x15, #0x28]      /* -> UARTFBRD (Baud divisor fraction) */
     mov   x0, #(7372800 / EARLY_UART_PL011_BAUD_RATE / 16)
@@ -100,7 +100,7 @@ SECTION_FUNC(text, arm64_earlyprintinit)
 
 GTEXT(arm64_lowputc)
 SECTION_FUNC(text, arm64_lowputc)
-    ldr   x15, =CONFIG_UART0_BASE
+    ldr   x15, =0x9c090000
     early_uart_ready x15, w2
     early_uart_transmit x15, w0
     ret

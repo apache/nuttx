@@ -59,7 +59,7 @@ void arm_earlyserialinit(void)
    * when they are first opened.
    */
 
-  pl011_earlyserialinit();
+  #error "Not implemented"
 }
 #endif
 
@@ -73,36 +73,7 @@ void arm_earlyserialinit(void)
 
 void arm_serialinit(void)
 {
-  pl011_serialinit();
+  #error "Not implemented"
 }
 
-#ifdef CONFIG_UART_PL011_PLATFORMIF
-/***************************************************************************
- * Name: pl011_platform interface
- *
- * Description:
- *   see drivers/serial/serial_pl011.c
- *        pl011_setup
- *        pl011_shutdown
- *
- ***************************************************************************/
-
-int pl011_platform_setup(uint32_t base)
-{
-  /* If needed, implement platform specific process such as enabling pl011
-   * to reduce power consumption.
-   */
-
-  return 0;
-}
-
-int pl011_platform_shutdown(uint32_t base)
-{
-  /* If needed, implement platform specific process such as disabling pl011
-   * to reduce power consumption.
-   */
-
-  return 0;
-}
-#endif /* CONFIG_UART_PL011_PLATFORMIF */
 #endif /* USE_SERIALDRIVER */

@@ -49,5 +49,30 @@ config ARCH_CHIP_QEMU_TRUSTZONE
 		The default is off. And this config can enable/disable
 		TrustZone in qemu chip.
 
+#####################################################################
+#  UART Configuration
+#####################################################################
+
+menu "QEMU ARMv7A Peripheral Selection"
+
+config QEMU_UART0
+	bool "UART0"
+	default y
+	select UART_PL011
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART0.
+
+config QEMU_UART1
+	bool "UART1"
+	default n
+	select UART_PL011
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART1.
+
+endmenu # QEMU ARMv7A Peripheral Selection
 
 endif # ARCH_CHIP_QEMU_ARM
