@@ -94,15 +94,13 @@
 #define b16tob8(b)      (b8_t)(((b)+0x0080)>>8)
 #define ub16toub8(b)    (ub8_t)(((b)+0x0080)>>8)
 
-#ifdef CONFIG_HAVE_LONG_LONG
-#  define b8tob32(b)    (((b32_t)(b)) << 24)
-#  define ub8toub32(b)  (((ub32_t)(b)) << 24)
-#  define b16tob32(b)   (((b32_t)(b)) << 16)
-#  define ub16toub32(b) (((ub32_t)(b)) << 16)
-#  define b32tob16(b)   (b16_t)(((b) + 0x0000000000008000)>>16)
-#  define ub32toub16(b) (ub16_t)(((b) + 0x0000000000008000)>>16)
-#  define b32tob8(b)    (b8_t)(((b) + 0x0000000000000080)>>8)
-#endif
+#define b8tob32(b)      (((b32_t)(b)) << 24)
+#define ub8toub32(b)    (((ub32_t)(b)) << 24)
+#define b16tob32(b)     (((b32_t)(b)) << 16)
+#define ub16toub32(b)   (((ub32_t)(b)) << 16)
+#define b32tob16(b)     (b16_t)(((b) + 0x0000000000008000)>>16)
+#define ub32toub16(b)   (ub16_t)(((b) + 0x0000000000008000)>>16)
+#define b32tob8(b)      (b8_t)(((b) + 0x0000000000000080)>>8)
 
 /* 16-bit values with 8 bits of precision ***********************************/
 
@@ -168,32 +166,27 @@
 #define b16abs(b)       ((b < 0) ? (-b) : (b))   /* Get the absolute value */
 #define b16sign(b)      ((b > 0) ? (b16ONE) : (-b16ONE))
 
-#ifdef CONFIG_HAVE_LONG_LONG
 /* Multiplication operators */
 
-#  define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b))
-#  define ub16mulub16(a,b) ub32toub16((ub32_t)(a)*(ub32_t)(b))
+#define b16mulb16(a,b)   b32tob16((b32_t)(a)*(b32_t)(b))
+#define ub16mulub16(a,b) ub32toub16((ub32_t)(a)*(ub32_t)(b))
 
 /* Square operators */
 
-#  define b16sqr(a)        b16mulb16(a,a)
-#  define ub16sqr(a)       ub16mulub16(a,a)
+#define b16sqr(a)        b16mulb16(a,a)
+#define ub16sqr(a)       ub16mulub16(a,a)
 
 /* Division operators */
 
-#  define b16divb16(a,b)   (b16_t)(b16tob32(a)/(b32_t)(b))
-#  define ub16divub16(a,b) (ub16_t)(ub16toub32(a)/(ub32_t)(b))
+#define b16divb16(a,b)   (b16_t)(b16tob32(a)/(b32_t)(b))
+#define ub16divub16(a,b) (ub16_t)(ub16toub32(a)/(ub32_t)(b))
 
 /* Square root operators */
 
-#  define ub16sqrtub16(a)  ub32sqrtub16(ub16toub32(a))
-#else
-#  define ub16sqrtub16(a)  ub8toub16(ub16sqrtub8(a))
-#endif
+#define ub16sqrtub16(a)  ub32sqrtub16(ub16toub32(a))
 
 /* 64-bit values with 32 bits of precision **********************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 /* Conversions */
 
 #define b32toi(a)       ((a) >> 32)                   /* Conversion to integer */
@@ -206,7 +199,6 @@
 #define b32frac(a)      ((a) & 0x00000000ffffffff)    /* Take fractional part */
 #define b32abs(b)       ((b < 0) ? (-b) : (b))        /* Get the absolute value */
 #define b32sign(b)      ((b > 0) ? (b32ONE) : (-b32ONE))
-#endif
 
 /****************************************************************************
  * Public Types
@@ -216,10 +208,8 @@ typedef int16_t  b8_t;
 typedef uint16_t ub8_t;
 typedef int32_t  b16_t;
 typedef uint32_t ub16_t;
-#ifdef CONFIG_HAVE_LONG_LONG
 typedef int64_t  b32_t;
 typedef uint64_t ub32_t;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -234,23 +224,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifndef CONFIG_HAVE_LONG_LONG
-/* Multiplication operators */
-
-b16_t  b16mulb16(b16_t m1, b16_t m2);
-ub16_t ub16mulub16(ub16_t m1, ub16_t m2);
-
-/* Square operators */
-
-b16_t  b16sqr(b16_t a);
-ub16_t ub16sqr(ub16_t a);
-
-/* Division operators */
-
-b16_t  b16divb16(b16_t num, b16_t denom);
-ub16_t ub16divub16(ub16_t num, ub16_t denom);
-#endif
-
 /* Trigonometric Functions */
 
 b16_t  b16sin(b16_t rad);
@@ -259,9 +232,7 @@ b16_t  b16atan2(b16_t y, b16_t x);
 
 /* Square root operators */
 
-#ifdef CONFIG_HAVE_LONG_LONG
 ub16_t ub32sqrtub16(ub32_t a);
-#endif
 ub8_t ub16sqrtub8(ub16_t a);
 
 #undef EXTERN

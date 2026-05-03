@@ -77,14 +77,6 @@
 #  define __HAVE_KERNEL_GLOBALS 1
 #endif
 
-/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
- * then a 64-bit system time will be used.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
-
 /* The following are the bit fields of the clockid_t
  * bit 0~2: the clock type
  * CLOCK_REALTIME           - 0

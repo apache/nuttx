@@ -45,8 +45,6 @@
 
 #include <stdlib.h>
 
-#if defined(CONFIG_HAVE_LONG_LONG)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -80,4 +78,3 @@ lldiv_t lldiv(long long numer, long long denom)
   return f;
 }
 
-#endif /* CONFIG_HAVE_LONG_LONG */

@@ -154,7 +154,6 @@ int       rand_r(FAR unsigned int *seedp);
 void      lcong48(FAR unsigned short int param[7]);
 FAR unsigned short int *seed48(FAR unsigned short int seed16v[3]);
 void      srand48(long int seedval);
-#ifdef CONFIG_HAVE_LONG_LONG
 long int  jrand48(FAR unsigned short int xsubi[3]);
 long int  lrand48(void);
 long int  mrand48(void);
@@ -163,7 +162,6 @@ long int  nrand48(FAR unsigned short int xsubi[3]);
 double    drand48(void);
 double    erand48(FAR unsigned short int xsubi[3]);
 #  endif
-#endif
 
 #define   srandom(s) srand(s)
 long      random(void);
@@ -209,11 +207,9 @@ FAR char *realpath(FAR const char *path, FAR char *resolved);
 
 long      strtol(FAR const char *nptr, FAR char **endptr, int base);
 unsigned long strtoul(FAR const char *nptr, FAR char **endptr, int base);
-#ifdef CONFIG_HAVE_LONG_LONG
 long long strtoll(FAR const char *nptr, FAR char **endptr, int base);
 unsigned long long strtoull(FAR const char *nptr, FAR char **endptr,
                             int base);
-#endif
 float     strtof(FAR const char *str, FAR char **endptr);
 #ifdef CONFIG_HAVE_DOUBLE
 double    strtod(FAR const char *str, FAR char **endptr);
@@ -224,9 +220,7 @@ long double strtold(FAR const char *str, FAR char **endptr);
 
 int       atoi(FAR const char *nptr);
 long      atol(FAR const char *nptr);
-#ifdef CONFIG_HAVE_LONG_LONG
 long long atoll(FAR const char *nptr);
-#endif
 #ifdef CONFIG_HAVE_DOUBLE
 double    atof(FAR const char *nptr);
 #endif
@@ -273,15 +267,11 @@ int       unlockpt(int fd);
 
 int       abs(int j);
 long int  labs(long int j);
-#ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j);
-#endif
 
 div_t     div(int number, int denom);
 ldiv_t    ldiv(long number, long denom);
-#ifdef CONFIG_HAVE_LONG_LONG
 lldiv_t   lldiv(long long number, long long denom);
-#endif
 
 /* Temporary files */
 

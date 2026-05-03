@@ -72,11 +72,7 @@
 
 typedef struct
 {
-#if defined(CONFIG_HAVE_LONG_LONG)
   long long max_align_i;
-#else
-  long max_align_i;
-#endif
 #if defined(CONFIG_HAVE_LONG_DOUBLE)
   long double max_align_f;
 #elif defined(CONFIG_HAVE_DOUBLE)

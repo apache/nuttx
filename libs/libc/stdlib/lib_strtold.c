@@ -76,13 +76,8 @@
 #  define ldbl_min_10_exp FLT_MIN_10_EXP
 #endif
 
-#ifdef CONFIG_HAVE_LONG_LONG
-#  define long_long long long
-#  define llong_min LLONG_MIN
-#else
-#  define long_long long
-#  define llong_min LONG_MIN
-#endif
+#define long_long long long
+#define llong_min LLONG_MIN
 
 #define shgetc(f) (*(f)++)
 #define shunget(f) ((f)--)

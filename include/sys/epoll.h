@@ -102,9 +102,7 @@ union epoll_data
   FAR void    *ptr;
   int          fd;
   uint32_t     u32;
-#ifdef CONFIG_HAVE_LONG_LONG
   uint64_t     u64;
-#endif
 };
 
 typedef union epoll_data epoll_data_t;

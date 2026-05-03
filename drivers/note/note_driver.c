@@ -1568,9 +1568,7 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
             {
               int i;
               long l;
-#ifdef CONFIG_HAVE_LONG_LONG
               long long ll;
-#endif
               intmax_t im;
               size_t sz;
               ptrdiff_t ptr;
@@ -1679,7 +1677,6 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           var->im = va_arg(*va, intmax_t);
                           next += sizeof(var->im);
                         }
-#ifdef CONFIG_HAVE_LONG_LONG
                       else if (*(p - 2) == 'l' && *(p - 3) == 'l')
                         {
                           if (next + sizeof(var->ll) > length)
@@ -1690,7 +1687,6 @@ void sched_note_vprintf_ip(uint32_t tag, uintptr_t ip, FAR const char *fmt,
                           var->ll = va_arg(*va, long long);
                           next += sizeof(var->ll);
                         }
-#endif
                       else if (*(p - 2) == 'l')
                         {
                           if (next + sizeof(var->l) > length)

@@ -710,9 +710,7 @@ struct audio_caps_s
     uint8_t  b[4];
     uint16_t hw[2];
     uint32_t w;
-#ifdef CONFIG_HAVE_LONG_LONG
     uint64_t qw;
-#endif
   } ac_controls;
 
   /* Codec info */

@@ -20,5 +20,4 @@
 #
 # ##############################################################################
 
-target_sources(c PRIVATE lib_fixedmath.c lib_b16sin.c lib_b16cos.c
-                         lib_b16atan2.c lib_ubsqrt.c)
+target_sources(c PRIVATE lib_b16sin.c lib_b16cos.c lib_b16atan2.c lib_ubsqrt.c)
