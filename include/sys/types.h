@@ -247,12 +247,13 @@ typedef uint16_t     sa_family_t;
 /* Used for system times in clock ticks. This type is the natural width of
  * the system timer.
  *
- * NOTE: The signed-ness of clock_t is not specified at OpenGroup.org.  An
- * unsigned type is used to support the full range of the internal clock.
+ * NOTE: The signed-ness of clock_t is not specified at OpenGroup.org, but
+ * a signed type is used to align with other OSes (Linux, BSD, etc.) and
+ * to allow expressing negative tick differences directly.
  */
 
-typedef uint64_t     clock_t;
-typedef uint64_t     time_t;         /* Holds time in seconds */
+typedef int64_t      clock_t;
+typedef int64_t      time_t;         /* Holds time in seconds */
 typedef int          clockid_t;      /* Identifies one time base source */
 typedef FAR void    *timer_t;        /* Represents one POSIX timer */
 

@@ -236,7 +236,7 @@
 #define TIMER_MAX      _POSIX_TIMER_MAX
 #define CLOCKRES_MIN   _POSIX_CLOCKRES_MIN
 
-#define CLOCK_MAX      UINT64_MAX
+#define CLOCK_MAX      INT64_MAX
 
 /* Other invariant values */
 

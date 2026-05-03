@@ -136,7 +136,7 @@ typedef int          nuttx_fsid_t[2];
 
 /* These must match the definition in include/time.h */
 
-typedef uint64_t     nuttx_time_t;
+typedef int64_t      nuttx_time_t;
 
 struct nuttx_timespec
 {
