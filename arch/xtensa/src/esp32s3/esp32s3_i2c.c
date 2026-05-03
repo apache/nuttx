@@ -1484,7 +1484,7 @@ static void i2c_traceevent(struct esp32s3_i2c_priv_s *priv,
 #ifdef CONFIG_I2C_TRACE
 static void i2c_tracedump(struct esp32s3_i2c_priv_s *priv)
 {
-  syslog(LOG_DEBUG, "Elapsed time: %" PRIu32 "\n",
+  syslog(LOG_DEBUG, "Elapsed time: %" PRId64 "\n",
          clock_systime_ticks() - priv->start_time);
 
   for (int i = 0; i < priv->tndx; i++)
@@ -1492,7 +1492,7 @@ static void i2c_tracedump(struct esp32s3_i2c_priv_s *priv)
       struct esp32s3_trace_s *trace = &priv->trace[i];
       syslog(LOG_DEBUG,
              "%2d. STATUS: %08" PRIx32 " COUNT: %3" PRIu32 " EVENT: %s(%2d)"
-             " PARM: %08" PRIx32 " TIME: %" PRIu32 "\n",
+             " PARM: %08" PRIx32 " TIME: %" PRId64 "\n",
              i + 1, trace->status, trace->count, g_trace_names[trace->event],
              trace->event, trace->parm, trace->time - priv->start_time);
     }

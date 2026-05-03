@@ -45,11 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SYSTEM_TIME64
-#  define WORK_DELAY_MAX UINT64_MAX
-#else
-#  define WORK_DELAY_MAX UINT32_MAX
-#endif
+#define WORK_DELAY_MAX UINT64_MAX
 
 /****************************************************************************
  * Private Types

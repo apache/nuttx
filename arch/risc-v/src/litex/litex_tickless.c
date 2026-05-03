@@ -302,8 +302,8 @@ int up_timer_start(const struct timespec *ts)
 
   litex_timer_cancel();
 
-  cpu_ticks = SEC_2_LITEX_TICK((uint64_t)ts->tv_sec) +
-              NSEC_2_LITEX_TICK((uint64_t)ts->tv_nsec);
+  cpu_ticks = SEC_2_LITEX_TICK(ts->tv_sec) +
+              NSEC_2_LITEX_TICK(ts->tv_nsec);
 
   DEBUGASSERT(cpu_ticks <= UINT32_MAX);
 

@@ -65,8 +65,8 @@ static void set_mic_boot_time(void)
 {
   struct timespec start;
   clock_systime_timespec(&start);
-  g_mic_boot_start_time = (uint64_t)start.tv_sec * 1000 +
-                          (uint64_t)start.tv_nsec / 1000000;
+  g_mic_boot_start_time = start.tv_sec * 1000 +
+                          start.tv_nsec / 1000000;
 }
 
 static void wait_mic_boot_finish(void)
@@ -75,9 +75,9 @@ static void wait_mic_boot_finish(void)
     {
       struct timespec end;
       clock_systime_timespec(&end);
-      uint64_t time = (uint64_t)end.tv_sec * 1000 +
-                      (uint64_t)end.tv_nsec / 1000000 -
-                       g_mic_boot_start_time;
+      uint64_t time = end.tv_sec * 1000 +
+                      end.tv_nsec / 1000000 -
+                      g_mic_boot_start_time;
 
       if (time < CXD56_AUDIO_MIC_BOOT_WAIT)
         {

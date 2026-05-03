@@ -2081,7 +2081,7 @@ static void wifi_clock_disable(void)
 
 int64_t esp32s2_timer_get_time(void)
 {
-  return (int64_t)esp_hr_timer_time_us();
+  return esp_hr_timer_time_us();
 }
 
 /****************************************************************************

@@ -114,7 +114,7 @@ static uint64_t current_usec(void)
     }
   while (timebase != g_timer.timebase);
 
-  return TICK2USEC((uint64_t)timebase) +
+  return TICK2USEC(timebase) +
          (status.timeout - status.timeleft);
 }
 

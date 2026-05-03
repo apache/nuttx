@@ -102,8 +102,8 @@ static int xtensa_oneshot_start(struct oneshot_lowerhalf_s *lower_,
 
   flags = spin_lock_irqsave(&lower->lock);
 
-  count = sec_to_count((uint64_t)ts->tv_sec, lower->freq) +
-          nsec_to_count((uint64_t)ts->tv_nsec, lower->freq);
+  count = sec_to_count(ts->tv_sec, lower->freq) +
+          nsec_to_count(ts->tv_nsec, lower->freq);
 
   count = xtensa_getcount() + count;
   xtensa_setcompare(count);

@@ -225,8 +225,7 @@
 
 #define NSEC2MSEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_MSEC)
 
-#if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
-    !defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_DEBUG_SCHED) && !defined(CONFIG_SCHED_TICKLESS)
 /* Initial system timer ticks value close to maximum 32-bit value, to test
  * 64-bit system-timer after going over 32-bit value. This is to make errors
  * of casting 64-bit system-timer to 32-bit variables more visible.
@@ -307,11 +306,7 @@ struct cpuload_s
  * should be used only within the OS proper and not by portable applications.
  */
 
-#ifdef CONFIG_SYSTEM_TIME64
 typedef int64_t sclock_t;
-#else
-typedef int32_t sclock_t;
-#endif
 
 /****************************************************************************
  * Public Data

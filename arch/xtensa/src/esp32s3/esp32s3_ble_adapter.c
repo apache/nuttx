@@ -1569,7 +1569,7 @@ static uint32_t IRAM_ATTR btdm_lpcycles_2_hus(uint32_t cycles,
   uint64_t local_error_corr;
   uint64_t res;
 
-  local_error_corr = (error_corr == NULL) ? 0 : (uint64_t)(*error_corr);
+  local_error_corr = (error_corr == NULL) ? 0 : (*error_corr);
   res = (uint64_t)g_btdm_lpcycle_us * cycles * 2;
 
   local_error_corr += res;
@@ -2967,7 +2967,7 @@ static void coex_bt_wakeup_request_end(void)
 
 static IRAM_ATTR int64_t get_time_us_wrapper(void)
 {
-  return (int64_t)esp_hr_timer_time_us();
+  return esp_hr_timer_time_us();
 }
 
 /****************************************************************************

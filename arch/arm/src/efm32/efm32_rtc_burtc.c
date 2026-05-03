@@ -466,7 +466,7 @@ int up_rtc_settime(const struct timespec *tp)
 
   /* Compute Burtc offset because we cannot reset counter */
 
-  val = (((uint64_t)tp->tv_sec) * CONFIG_RTC_FREQUENCY) + \
+  val = (tp->tv_sec * CONFIG_RTC_FREQUENCY) + \
         (tp->tv_nsec / (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY));
 
   if (val < cnt_reg)

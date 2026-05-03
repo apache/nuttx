@@ -302,10 +302,10 @@ int pic32mz_oneshot_start(struct pic32mz_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = ts->tv_sec * USEC_PER_SEC +
+         (ts->tv_nsec / NSEC_PER_USEC);
 
-  period = (usec * (uint64_t)oneshot->freq) / USEC_PER_SEC;
+  period = (usec * oneshot->freq) / USEC_PER_SEC;
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
   DEBUGASSERT(period <= ((1ull << oneshot->width) - 1ul));

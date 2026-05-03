@@ -296,7 +296,7 @@ static void stm32_rtc_breakout(const struct timespec *tp,
    * our use
    */
 
-  frac = ((uint64_t)tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
+  frac = (tp->tv_nsec * CONFIG_RTC_FREQUENCY) / 1000000000;
   cnt  = (tp->tv_sec << RTC_CLOCKS_SHIFT) |
          ((uint32_t)frac & (CONFIG_RTC_FREQUENCY - 1));
   ovf  = (tp->tv_sec >> (32 - RTC_CLOCKS_SHIFT));

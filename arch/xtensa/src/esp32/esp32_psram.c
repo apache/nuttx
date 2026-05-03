@@ -993,7 +993,7 @@ static void psram_read_id(uint64_t *dev_id)
   psram_cmd_recv_start(spi_num, ps_cmd.rx_data,
                        ps_cmd.rx_data_bit_len / 8, PSRAM_CMD_SPI);
   psram_cmd_end(spi_num);
-  *dev_id = (uint64_t)(((uint64_t)psram_id[1] << 32) | psram_id[0]);
+  *dev_id = (((uint64_t)psram_id[1] << 32) | psram_id[0]);
 }
 
 /* enter QPI mode */

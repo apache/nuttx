@@ -299,8 +299,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec *
-          USEC_PER_SEC + (uint64_t)(ts->tv_nsec /
+  usec = ts->tv_sec *
+          USEC_PER_SEC + (ts->tv_nsec /
           NSEC_PER_USEC);
 
   /* Get the timer counter frequency and determine the number of counts
@@ -311,7 +311,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
    *             = (usecs * frequency) / USEC_PER_SEC;
    */
 
-  regval = (usec * (uint64_t)sam_tc_divfreq(oneshot->tch)) / USEC_PER_SEC;
+  regval = (usec * sam_tc_divfreq(oneshot->tch)) / USEC_PER_SEC;
 
   tmrinfo("usec=%llu regval=%08llx\n", usec, regval);
   DEBUGASSERT(regval <= UINT32_MAX);

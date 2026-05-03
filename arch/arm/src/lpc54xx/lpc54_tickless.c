@@ -273,8 +273,8 @@ static void lpc54_ts_sub(const struct timespec *ts1,
 
 static inline uint64_t lpc54_ts2tick(const struct timespec *ts)
 {
-  return ((uint64_t)ts->tv_sec * LPC54_CCLK +
-          ((uint64_t)ts->tv_nsec / g_min_nsec * g_min_ticks));
+  return (ts->tv_sec * LPC54_CCLK +
+          (ts->tv_nsec / g_min_nsec * g_min_ticks));
 }
 
 static uint64_t lpc54_tick2ts(uint64_t ticks, struct timespec *ts,

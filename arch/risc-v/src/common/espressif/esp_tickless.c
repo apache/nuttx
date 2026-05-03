@@ -359,8 +359,8 @@ int IRAM_ATTR up_timer_start(const struct timespec *ts)
       up_timer_cancel(NULL);
     }
 
-  target_us = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-                (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  target_us = ts->tv_sec * USEC_PER_SEC +
+              (ts->tv_nsec / NSEC_PER_USEC);
 
   alarm_ticks  = systimer_hal_get_counter_value(&systimer_hal,
                                                 SYSTIMER_COUNTER_OS_TICK);

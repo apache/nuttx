@@ -81,7 +81,7 @@ static int lpc43_rit_isr(int irq, void *context, void *arg)
 
   putreg32(RIT_CTRL_INT, LPC43_RIT_CTRL);
 
-  g_internal_timer += (uint64_t)RIT_TIMER_RESOLUTION;
+  g_internal_timer += RIT_TIMER_RESOLUTION;
   if (g_alarm > 0 && g_internal_timer >= g_alarm)
     {
       /* handle expired alarm */
@@ -228,8 +228,7 @@ int up_alarm_start(const struct timespec *ts)
    * coded.
    */
 
-  g_alarm = (uint64_t)ts->tv_sec * (uint64_t)1000000000 +
-            (uint64_t)ts->tv_nsec;
+  g_alarm = ts->tv_sec * 1000000000 + ts->tv_nsec;
   return OK;
 }
 
@@ -252,8 +251,7 @@ int up_timer_start(const struct timespec *ts)
    */
 
   g_alarm = g_internal_timer;
-  g_alarm += (uint64_t)ts->tv_sec * (uint64_t)1000000000 +
-             (uint64_t)ts->tv_nsec;
+  g_alarm += ts->tv_sec * 1000000000 + ts->tv_nsec;
   return OK;
 }
 
