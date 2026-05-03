@@ -52,10 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_LIBC_LONG_LONG
-#error "CONFIG_LIBC_LONG_LONG must be enabled for this driver"
-#endif
-
 /* Duration of maximum MAC layer pause in milliseconds */
 
 #define MAC_PAUSE_DUR "4294967245"

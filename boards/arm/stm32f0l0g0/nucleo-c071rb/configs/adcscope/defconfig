@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DEV_CONSOLE is not set
-# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_SYSTEM_DD is not set
 CONFIG_ADC=y
 CONFIG_ANALOG=y

@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_DISABLE_MQUEUE_SYSV is not set
-# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_SAMV7_UART0 is not set
 # CONFIG_SAMV7_UART2 is not set
 # CONFIG_SAMV7_UART4 is not set

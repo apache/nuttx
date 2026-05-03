@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_LEDS is not set
-# CONFIG_LIBC_LONG_LONG is not set
 # CONFIG_NSH_ARGCAT is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm32g071b-disco"
