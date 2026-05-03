@@ -495,10 +495,10 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_6LOWPAN_COMPRESSION_HC06
-void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
-                                  FAR const void *metadata,
-                                  uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *fptr, FAR uint8_t *bptr);
+int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
+                                 FAR const void *metadata,
+                                 uint16_t iplen, FAR struct iob_s *iob,
+                                 FAR uint8_t *fptr, FAR uint8_t *bptr);
 #endif
 
 /****************************************************************************

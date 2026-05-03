@@ -86,6 +86,16 @@
 #define UNCOMPRESS_MACBASED (1 << 8)
 #define UNCOMPRESS_ZEROPAD  (1 << 9)
 
+#define HC06_CHECK(ptr, nbytes, endofframe)                  \
+  do {                                                       \
+    if ((ptr) + (nbytes) > endofframe)                       \
+      {                                                      \
+        nerr("ERROR: HC06 frame truncated at %s:%d\n",       \
+             __func__, __LINE__);                            \
+        return -EINVAL;                                      \
+      }                                                      \
+  } while (0)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1166,17 +1176,18 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
  *              FRAGN frames.
  *
  * Returned Value:
- *   None
+ *   On success returns 0 otherwise a negative error
  *
  ****************************************************************************/
 
-void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
-                                  FAR const void *metadata,
-                                  uint16_t iplen, FAR struct iob_s *iob,
-                                  FAR uint8_t *fptr, FAR uint8_t *bptr)
+int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
+                                 FAR const void *metadata,
+                                 uint16_t iplen, FAR struct iob_s *iob,
+                                 FAR uint8_t *fptr, FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
   struct netdev_varaddr_s addr;
+  FAR uint8_t *endofframe;
   FAR uint8_t *iphc;
   uint8_t iphc0;
   uint8_t iphc1;
@@ -1193,6 +1204,13 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
   g_hc06ptr = iphc + 2;
 
+  /* Compute the end of the IOB frame data. All g_hc06ptr accesses
+   * must stay strictly before this pointer. Used by HC06_CHECK()
+   * throughout this function to prevent OOB reads on crafted frames.
+   */
+
+  endofframe = fptr + iob->io_len;
+
   ninfo("fptr=%p g_frame_hdrlen=%u iphc=%02x:%02x:%02x g_hc06ptr=%p\n",
          fptr, g_frame_hdrlen, iphc[0], iphc[1], iphc[2], g_hc06ptr);
 
@@ -1201,6 +1219,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
   if ((iphc1 & SIXLOWPAN_IPHC_CID) != 0)
     {
       ninfo("CID flag set. Increase header by one\n");
+      HC06_CHECK(g_hc06ptr, 1, endofframe);
       g_hc06ptr++;
     }
 
@@ -1216,6 +1235,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           memcpy(&ipv6->tcf, g_hc06ptr + 1, 3);
           tmp        = *g_hc06ptr;
+          HC06_CHECK(g_hc06ptr, 4, endofframe);
           g_hc06ptr += 4;
 
           /* hc06 format of tc is ECN | DSCP , original is DSCP | ECN
@@ -1238,6 +1258,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           ipv6->tcf = (*g_hc06ptr & 0x0f) | ((*g_hc06ptr >> 2) & 0x30);
           memcpy(&ipv6->flow, g_hc06ptr + 1, 2);
+          HC06_CHECK(g_hc06ptr, 3, endofframe);
           g_hc06ptr  += 3;
         }
     }
@@ -1256,6 +1277,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           ipv6->tcf   = ((*g_hc06ptr << 6) & 0xc0) |
                         ((*g_hc06ptr >> 2) & 0x30);
           ipv6->flow  = 0;
+          HC06_CHECK(g_hc06ptr, 1, endofframe);
           g_hc06ptr  += 1;
         }
       else
@@ -1276,6 +1298,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
       ipv6->proto = *g_hc06ptr;
       ninfo("Next header inline: %d\n", ipv6->proto);
+      HC06_CHECK(g_hc06ptr, 1, endofframe);
       g_hc06ptr += 1;
     }
 
@@ -1288,6 +1311,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
   else
     {
       ipv6->ttl  = *g_hc06ptr;
+      HC06_CHECK(g_hc06ptr, 1, endofframe);
       g_hc06ptr += 1;
     }
 
@@ -1301,7 +1325,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-      return;
+      return ret;
     }
 
   if ((iphc1 & SIXLOWPAN_IPHC_SAC) != 0)
@@ -1319,7 +1343,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           if (addrcontext == NULL)
             {
               nerr("ERROR: Address context not found\n");
-              return;
+              return -ENOENT;
             }
         }
 
@@ -1329,6 +1353,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
        * REVISIT: Source address may not be the same size as the destination
        * address.
        */
+
+      /* Source address: worst case 16 bytes inline */
+
+      HC06_CHECK(g_hc06ptr, 16, endofframe);
 
       uncompress_addr(&addr,
                       tmp != 0 ? addrcontext->prefix : NULL,
@@ -1341,6 +1369,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
        * REVISIT: Source address may not be the same size as the destination
        * address.
        */
+
+      /* Destination address: worst case 16 bytes inline */
+
+      HC06_CHECK(g_hc06ptr, 16, endofframe);
 
       uncompress_addr(&addr, g_llprefix, g_unc_llconf[tmp],
                       ipv6->srcipaddr);
@@ -1359,7 +1391,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_extract_srcaddr failed: %d\n", ret);
-      return;
+      return ret;
     }
 
   if ((iphc1 & SIXLOWPAN_IPHC_M) != 0)
@@ -1388,6 +1420,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           if (tmp > 0 && tmp < 3)
             {
               prefix[1] = *g_hc06ptr;
+              HC06_CHECK(g_hc06ptr, 1, endofframe);
               g_hc06ptr++;
             }
 
@@ -1415,7 +1448,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
           if (addrcontext == NULL)
             {
               nerr("ERROR: Address context not found\n");
-              return;
+              return -ENOENT;
             }
 
           uncompress_addr(&addr, addrcontext->prefix, g_unc_ctxconf[tmp],
@@ -1456,6 +1489,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
             {
             case SIXLOWPAN_NHC_UDP_CS_P_00:
 
+              HC06_CHECK(g_hc06ptr, 5, endofframe);
+
               /* 1 byte for NHC, 4 byte for ports, 2 bytes chksum */
 
               memcpy(&udp->srcport, g_hc06ptr + 1, 2);
@@ -1468,6 +1503,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               break;
 
             case SIXLOWPAN_NHC_UDP_CS_P_01:
+
+              HC06_CHECK(g_hc06ptr, 4, endofframe);
 
               /* 1 byte for NHC + source 16bit inline, dest = 0xF0 + 8 bit
                * inline
@@ -1487,6 +1524,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
             case SIXLOWPAN_NHC_UDP_CS_P_10:
 
+              HC06_CHECK(g_hc06ptr, 4, endofframe);
+
               /* 1 byte for NHC + source = 0xF0 + 8bit inline, dest = 16 bit
                * inline
                */
@@ -1505,6 +1544,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
             case SIXLOWPAN_NHC_UDP_CS_P_11:
 
+              HC06_CHECK(g_hc06ptr, 2, endofframe);
+
               /* 1 byte for NHC, 1 byte for ports */
 
               udp->srcport =
@@ -1522,7 +1563,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
             default:
               nerr("ERROR: Error unsupported UDP compression\n");
-              return;
+              return -EINVAL;
             }
 
           if (!checksum_compressed)
@@ -1571,6 +1612,8 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
                           (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
       memcpy(&udp->udplen, &ipv6->len[0], 2);
     }
+
+  return OK;
 }
 
 #endif /* CONFIG_NET_6LOWPAN_COMPRESSION_HC06 */
