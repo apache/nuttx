@@ -128,7 +128,7 @@ int _stat_r(struct _reent *r, const char *pathname, struct stat *statbuf)
   return nx_stat(pathname, statbuf, 1);
 }
 
-clock_t _times_r(struct _reent *r, struct tms *buf)
+unsigned long _times_r(struct _reent *r, struct tms *buf)
 {
   return times(buf);
 }
@@ -374,7 +374,15 @@ static const struct syscall_stub_table g_stub_table =
   ._abort = &_abort,
   ._system_r = &_system_r,
   ._rename_r = &_rename_r,
-  ._times_r = &_times_r,
+
+  /* The vendor ROM header declares ._times_r as 'clock_t (*)(...)' while
+   * newlib's <reent.h> prototypes _times_r() as returning 'unsigned long'.
+   * Since clock_t is now int64_t in NuttX, the two no longer match.  Cast
+   * here to silence -Wincompatible-pointer-types; the ROM only ever reads
+   * the low bits, so the truncation is harmless.
+   */
+
+  ._times_r = (clock_t (*)(struct _reent *, struct tms *))&_times_r,
   ._gettimeofday_r = &_gettimeofday_r,
   ._raise_r = &_raise_r,
   ._unlink_r = &_unlink_r,

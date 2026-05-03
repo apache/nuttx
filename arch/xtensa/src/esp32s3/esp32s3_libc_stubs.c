@@ -116,7 +116,7 @@ int _stat_r(struct _reent *r, const char *pathname, struct stat *statbuf)
   return nx_stat(pathname, statbuf, 1);
 }
 
-clock_t _times_r(struct _reent *r, struct tms *buf)
+unsigned long _times_r(struct _reent *r, struct tms *buf)
 {
   return times(buf);
 }
