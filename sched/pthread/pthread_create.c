@@ -328,8 +328,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   if (policy == SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
-      sclock_t repl_ticks;
-      sclock_t budget_ticks;
+      clock_t repl_ticks;
+      clock_t budget_ticks;
 
       /* Convert timespec values to system clock ticks */
 

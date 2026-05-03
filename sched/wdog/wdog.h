@@ -127,11 +127,11 @@ uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired);
 #ifdef CONFIG_HRTIMER
 static inline_function void wd_timer_start(clock_t tick, bool in_expiration)
 {
-  DEBUGASSERT((uint64_t)tick <= UINT64_MAX / NSEC_PER_TICK);
+  DEBUGASSERT(tick <= INT64_MAX / NSEC_PER_TICK);
   if (!in_expiration)
     {
       hrtimer_start(&g_wdtimer, wd_timer,
-                    TICK2NSEC((uint64_t)tick), HRTIMER_MODE_ABS);
+                    TICK2NSEC(tick), HRTIMER_MODE_ABS);
     }
 }
 
@@ -214,7 +214,7 @@ static inline_function clock_t wd_get_next_expire(clock_t curr)
     }
 
   leave_critical_section(flags);
-  return (sclock_t)(next - curr) <= 0 ? 0u : next;
+  return next - curr <= 0 ? 0 : next;
 }
 
 #undef EXTERN

@@ -99,16 +99,16 @@ void icmpv4_add_pmtu_entry(in_addr_t destipaddr, int mtu)
 
   for (i = 0; i < CONFIG_NET_ICMP_PMTU_ENTRIES; i++)
     {
-      if ((g_icmp_pmtu_entry[i].pmtu == 0) ||
-          (sclock_t)(now - g_icmp_pmtu_entry[i].time) >=
+      if (g_icmp_pmtu_entry[i].pmtu == 0 ||
+          now - g_icmp_pmtu_entry[i].time >=
           SEC2TICK(CONFIG_NET_ICMP_PMTU_TIMEOUT * 60))
         {
           j = i;
           break;
         }
 
-      if ((sclock_t)(g_icmp_pmtu_entry[i].time -
-          g_icmp_pmtu_entry[j].time) < 0)
+      if (g_icmp_pmtu_entry[i].time -
+          g_icmp_pmtu_entry[j].time < 0)
         {
           j = i;
         }

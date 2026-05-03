@@ -80,5 +80,5 @@ time_t time(time_t *tloc)
       return ts.tv_sec;
     }
 
-  return (time_t)ERROR;
+  return ERROR;
 }

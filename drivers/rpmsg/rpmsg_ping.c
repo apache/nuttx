@@ -189,7 +189,7 @@ static void rpmsg_ping_logout(FAR const char *s, clock_t value)
 
   perf_convert(value, &ts);
 
-  syslog(LOG_EMERG, "%s: %" PRIu64 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
+  syslog(LOG_EMERG, "%s: %" PRId64 " s, %ld ns\n", s, ts.tv_sec, ts.tv_nsec);
 }
 
 static void rpmsg_ping_logout_rate(uint64_t len, clock_t avg)

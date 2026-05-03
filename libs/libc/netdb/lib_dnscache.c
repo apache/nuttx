@@ -145,7 +145,7 @@ void dns_save_answer(FAR const char *hostname,
   /* Get the current time */
 
   clock_gettime(CLOCK_MONOTONIC, &now);
-  entry->ctime = (time_t)now.tv_sec;
+  entry->ctime = now.tv_sec;
 #endif
 
   strlcpy(entry->name, hostname, CONFIG_NETDB_DNSCLIENT_NAMESIZE);
@@ -212,7 +212,7 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
   FAR struct dns_cache_s *entry;
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
   struct timespec now;
-  uint32_t elapsed;
+  time_t elapsed;
   int ret;
 #endif
   int next;
@@ -243,12 +243,9 @@ int dns_find_answer(FAR const char *hostname, FAR union dns_addr_u *addr,
         }
 
 #if CONFIG_NETDB_DNSCLIENT_LIFESEC > 0
-      /* Check if this entry has expired
-       * REVISIT: Does not this calculation assume that the sizeof(time_t)
-       * is equal to the sizeof(uint32_t)?
-       */
+      /* Check if this entry has expired */
 
-      elapsed = (uint32_t)now.tv_sec - (uint32_t)entry->ctime;
+      elapsed = now.tv_sec - entry->ctime;
       if (ret >= 0 &&
           (elapsed > CONFIG_NETDB_DNSCLIENT_LIFESEC || elapsed > entry->ttl))
         {

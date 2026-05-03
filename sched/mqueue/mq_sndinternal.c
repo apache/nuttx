@@ -126,7 +126,7 @@ static void nxmq_sndtimeout(wdparm_t arg)
 
 int nxmq_wait_send(FAR struct mqueue_inode_s *msgq,
                    FAR const struct timespec *abstime,
-                   sclock_t ticks)
+                   clock_t ticks)
 {
   FAR struct tcb_s *rtcb = this_task();
 

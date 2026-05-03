@@ -106,7 +106,7 @@ struct bcmf_dev_s
   struct work_s lp_work_ifdown; /* Ifdown work to work queue */
   struct work_s lp_work_dtim;   /* Low power work to work queue */
   int           lp_dtim;        /* Listen interval Delivery Traffic Indication Message */
-  sclock_t      lp_ticks;       /* Ticks of last tx time */
+  clock_t       lp_ticks;       /* Ticks of last tx time */
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_PTA_PRIORITY
   int pta_priority; /* Current priority of Packet Traffic Arbitration */

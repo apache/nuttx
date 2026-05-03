@@ -46,7 +46,7 @@
 
 static clock_t iob_allocwait_gettimeout(clock_t start, unsigned int timeout)
 {
-  sclock_t tick;
+  clock_t tick;
 
   tick = clock_systime_ticks() - start;
   if (tick >= MSEC2TICK(timeout))

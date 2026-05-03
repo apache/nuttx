@@ -47,7 +47,7 @@
 
 /* microseconds since midnight, January 1st, 0 AD nominal Gregorian. */
 
-#define SNOOP_EPOCH_USEC(tv) (((tv).tv_sec - 0x386d4380ll) * 1000000ll \
+#define SNOOP_EPOCH_USEC(tv) (((tv).tv_sec - 0x386d4380) * 1000000 \
                               + (tv).tv_usec + 0x00e03ab44a676000ll)
 
 /****************************************************************************

@@ -699,7 +699,7 @@ time_t up_rtc_time(void)
 
   spin_unlock_irqrestore(&g_rtc_lowerhalf.lock, flags);
 
-  return (time_t)(time_us / USEC_PER_SEC);
+  return time_us / USEC_PER_SEC;
 }
 #endif /* !CONFIG_RTC_HIRES */
 

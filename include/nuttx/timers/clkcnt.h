@@ -128,7 +128,7 @@ clock_t clkcnt_max_tick(clkcnt_t max_count, uint32_t freq)
   clkcnt_t cnt = max_count / freq * TICK_PER_SEC +
                  max_count % freq * TICK_PER_SEC / freq;
   cnt = cnt <= CLOCK_MAX ? cnt : CLOCK_MAX;
-  return (clock_t)cnt;
+  return cnt;
 }
 
 /****************************************************************************
@@ -427,7 +427,7 @@ clock_t clkcnt_delta_cnt2tick(clkcnt_t delta, uint32_t freq)
 
   DEBUGASSERT(tick <= CLOCK_MAX);
 
-  return (clock_t)tick;
+  return tick;
 }
 
 /****************************************************************************

@@ -392,7 +392,7 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   /* Get the broken out time */
 
-  newtime = (time_t)tp->tv_sec;
+  newtime = tp->tv_sec;
   if (tp->tv_nsec >= 500000000)
     {
       /* Round up */

@@ -463,7 +463,7 @@ static int imxrt_rdalarm(struct rtc_lowerhalf_s *lower,
 
       /* Get the current alarm setting in seconds */
 
-      alarm = (time_t)imxrt_hprtc_getalarm();
+      alarm = imxrt_hprtc_getalarm();
 
       /* Convert the one second epoch time to a struct tm */
 

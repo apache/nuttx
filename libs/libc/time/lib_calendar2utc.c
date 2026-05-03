@@ -168,7 +168,7 @@ time_t clock_calendar2utc(int year, int month, int day)
 
   /* Add in the days up to the beginning of this month. */
 
-  days += (time_t)clock_daysbeforemonth(month, clock_isleapyear(year));
+  days += clock_daysbeforemonth(month, clock_isleapyear(year));
 
   /* Add in the days since the beginning of this month (days are 1-based). */
 

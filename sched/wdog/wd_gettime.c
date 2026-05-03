@@ -52,12 +52,12 @@
  *
  ****************************************************************************/
 
-sclock_t wd_gettime(FAR struct wdog_s *wdog)
+clock_t wd_gettime(FAR struct wdog_s *wdog)
 {
   irqstate_t flags;
   clock_t    expired;
   bool       is_active;
-  sclock_t   delay = 0;
+  clock_t    delay = 0;
 
   if (wdog != NULL && WDOG_ISACTIVE(wdog))
     {
@@ -68,7 +68,7 @@ sclock_t wd_gettime(FAR struct wdog_s *wdog)
 
       if (is_active)
         {
-          delay = (sclock_t)(expired - clock_systime_ticks());
+          delay = expired - clock_systime_ticks();
           delay = delay >= 0 ? delay : 0;
         }
     }

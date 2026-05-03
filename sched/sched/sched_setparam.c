@@ -55,8 +55,8 @@ int set_sporadic_param(FAR const struct sched_param *param,
   if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       FAR struct sporadic_s *sporadic;
-      sclock_t repl_ticks;
-      sclock_t budget_ticks;
+      clock_t repl_ticks;
+      clock_t budget_ticks;
 
       if (param->sched_ss_max_repl >= 1 &&
           param->sched_ss_max_repl <= CONFIG_SCHED_SPORADIC_MAXREPL)

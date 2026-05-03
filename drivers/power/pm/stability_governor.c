@@ -115,7 +115,7 @@ static void stability_governor_statechanged(int domain,
     {
       if (WDOG_ISACTIVE(&g_stability_governor.domain[domain].wdog))
         {
-          sclock_t left;
+          clock_t left;
 
           /* The left tick from wdog, if >0 should be other irq source */
 

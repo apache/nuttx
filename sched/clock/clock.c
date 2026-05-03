@@ -54,13 +54,11 @@
  *   None
  *
  * Returned Value:
- *   The system time in units of clock ticks is returned.  If the processor
- *   time used is not available or its value cannot be represented, the
- *   function will return the value (clock_t)-1.
+ *   The system time in units of clock ticks is returned.
  *
  ****************************************************************************/
 
 clock_t clock(void)
 {
-  return (clock_t)clock_systime_ticks();
+  return clock_systime_ticks();
 }

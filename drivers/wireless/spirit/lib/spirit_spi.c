@@ -635,17 +635,9 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
   /* Convert the MSEC timedelay to clock ticks, making sure that the
    * resulting delay in ticks is greater than or equal to the requested time
    * in MSEC.
-   *
-   * REVISIT: If USEC_PER_TICK and 'msec' are large, then the second
-   * computation may overflow!
    */
 
-#if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-  ticks = (msec + (MSEC_PER_TICK - 1)) / MSEC_PER_TICK;
-#else
-  ticks = ((clock_t)msec * USEC_PER_MSEC + (USEC_PER_TICK - 1)) /
-           USEC_PER_TICK;
-#endif
+  ticks = MSEC2TICK(msec);
 
   /* The time that we started the wait */
 

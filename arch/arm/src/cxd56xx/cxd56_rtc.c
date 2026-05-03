@@ -394,7 +394,7 @@ time_t up_rtc_time(void)
   count += g_rtc_save->offset;
   count >>= 15; /* convert to 1sec resolution */
 
-  return (time_t)count / CONFIG_RTC_FREQUENCY;
+  return count / CONFIG_RTC_FREQUENCY;
 }
 #endif
 

@@ -694,7 +694,7 @@ static int esp_i2c_slave_polling_waitdone(struct esp_i2c_priv_s *priv)
   current = clock_systime_ticks();
   timeout = current + SEC2TICK(I2C_SLAVE_POLL_RATE);
 
-  while ((sclock_t)(current - timeout) < 0)
+  while (current - timeout < 0)
     {
       /* Check if any interrupt triggered, clear them
        * process the operation.

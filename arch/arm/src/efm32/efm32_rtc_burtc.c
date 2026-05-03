@@ -398,7 +398,7 @@ int up_rtc_initialize(void)
 #ifndef CONFIG_RTC_HIRES
 time_t up_rtc_time(void)
 {
-  return (time_t)efm32_get_burtc_tick() / CONFIG_RTC_FREQUENCY;
+  return efm32_get_burtc_tick() / CONFIG_RTC_FREQUENCY;
 }
 #endif
 
