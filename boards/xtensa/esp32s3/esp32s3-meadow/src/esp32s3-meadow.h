@@ -55,9 +55,6 @@
  * Description:
  *   Perform architecture-specific initialization
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
  ****************************************************************************/
 
 int esp32s3_bringup(void);

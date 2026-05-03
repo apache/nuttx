@@ -63,10 +63,8 @@ extern int phyplus_timer_initialize(const char *devpath, int timer);
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
- *     Called from the NSH library
- *
  ****************************************************************************/
+
 #define PPLUS_MTD_START_OFFSET  0x60000  /* start from 384k offset */
 #define PPLUS_MTD_SIZE          0x20000  /* mtd size is 128k bytes */
 
