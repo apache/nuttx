@@ -77,15 +77,7 @@
 #  define __HAVE_KERNEL_GLOBALS 1
 #endif
 
-/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
- * then a 64-bit system time will be used.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
-
-/* The following are the bit fields of the clockid_t
+/* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
  * bit 0~2: the clock type
  * CLOCK_REALTIME           - 0
  * CLOCK_MONOTONIC          - 1
@@ -233,8 +225,7 @@
 
 #define NSEC2MSEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_MSEC)
 
-#if defined(CONFIG_DEBUG_SCHED) && defined(CONFIG_SYSTEM_TIME64) && \
-    !defined(CONFIG_SCHED_TICKLESS)
+#if defined(CONFIG_DEBUG_SCHED) && !defined(CONFIG_SCHED_TICKLESS)
 /* Initial system timer ticks value close to maximum 32-bit value, to test
  * 64-bit system-timer after going over 32-bit value. This is to make errors
  * of casting 64-bit system-timer to 32-bit variables more visible.
@@ -315,11 +306,7 @@ struct cpuload_s
  * should be used only within the OS proper and not by portable applications.
  */
 
-#ifdef CONFIG_SYSTEM_TIME64
 typedef int64_t sclock_t;
-#else
-typedef int32_t sclock_t;
-#endif
 
 /****************************************************************************
  * Public Data

@@ -195,11 +195,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
   double now;
 #else
-#  if defined(CONFIG_SYSTEM_TIME64)
   uint64_t sec;
-#  else
-  uint32_t sec;
-#  endif
   unsigned int remainder;
   unsigned int csec;
 #endif
@@ -250,13 +246,8 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 
       /* Convert the seconds + hundredths of seconds to a string */
 
-#ifdef CONFIG_SYSTEM_TIME64
       linesize = procfs_snprintf(attr->line, UPTIME_LINELEN,
                                  "%7" PRIu64 ".%02u\n", sec, csec);
-#else
-      linesize = procfs_snprintf(attr->line, UPTIME_LINELEN,
-                                 "%7" PRIu32 ".%02u\n", sec, csec);
-#endif
 
 #endif
       /* Save the linesize in case we are re-entered with f_pos > 0 */

@@ -43,16 +43,6 @@
 
 #define TIMER_MASK32 0x00000000ffffffff
 
-/* Configuration ************************************************************/
-
-/* If CONFIG_SYSTEM_TIME64 is selected and the CPU supports long long types,
- * then a 64-bit system time will be used.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
