@@ -883,7 +883,17 @@ static void reset_board(void)
 {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
   board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
-#else
+
+  /* board_reset() is permitted to be asynchronous (e.g. it just requests an
+   * external reset via a GPIO pin and returns immediately).  Per the
+   * function contract documented above ("It should never return."), spin
+   * here so that we do not fall back into the caller while g_nx_initstate
+   * is already OSINIT_PANIC.  If we did return, any subsequent fault would
+   * re-enter _assert(), hit the recursive-assert fast path, and mask the
+   * original crash context.
+   */
+#endif
+
   for (; ; )
     {
 #ifdef CONFIG_ARCH_LEDS
@@ -895,7 +905,6 @@ static void reset_board(void)
 #endif
       up_mdelay(250);
     }
-#endif
 }
 
 /****************************************************************************
