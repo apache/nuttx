@@ -29,6 +29,10 @@
 
 #include <nuttx/compiler.h>
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#  include <nuttx/irq.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -41,12 +45,24 @@
  */
 
 #define errno *__errno()
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+#define set_errno(e) \
+  do \
+    { \
+      if (!up_interrupt_context()) \
+        { \
+          errno = (int)(e); \
+        } \
+    } \
+  while (0)
+#else
 #define set_errno(e) \
   do \
     { \
       errno = (int)(e); \
     } \
   while (0)
+#endif
 #define get_errno() errno
 
 /* Definitions of error numbers and the string that would be
