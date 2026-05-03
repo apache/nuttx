@@ -32,8 +32,6 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_HAVE_LONG_LONG
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -127,4 +125,3 @@ long long strtoll(FAR const char *nptr, FAR char **endptr, int base)
   return retval;
 }
 
-#endif

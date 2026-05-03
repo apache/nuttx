@@ -45,14 +45,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Can't support CONFIG_LIBC_MEMCPY_64BIT if the platform does not have
- * 64-bit integer types.
- */
-
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_MEMCPY_64BIT
-#endif
-
 /* Remove definitions when CONFIG_LIBC_MEMCPY_INDEXED_COPY is defined */
 
 #ifdef CONFIG_LIBC_MEMCPY_INDEXED_COPY
@@ -307,15 +299,31 @@ FAR void *memcpy(FAR void *dest, FAR const void *src, size_t count)
 
   switch ((((uintptr_t)src8) PRE_SWITCH_ADJUST) & (TYPE_WIDTH - 1))
     {
-    case 0: COPY_NO_SHIFT(); break;
-    case 1: COPY_SHIFT(1);   break;
-    case 2: COPY_SHIFT(2);   break;
-    case 3: COPY_SHIFT(3);   break;
+    case 0:
+      COPY_NO_SHIFT();
+      break;
+    case 1:
+      COPY_SHIFT(1);
+      break;
+    case 2:
+      COPY_SHIFT(2);
+      break;
+    case 3:
+      COPY_SHIFT(3);
+      break;
 #if TYPE_WIDTH > 4
-    case 4: COPY_SHIFT(4);   break;
-    case 5: COPY_SHIFT(5);   break;
-    case 6: COPY_SHIFT(6);   break;
-    case 7: COPY_SHIFT(7);   break;
+    case 4:
+      COPY_SHIFT(4);
+      break;
+    case 5:
+      COPY_SHIFT(5);
+      break;
+    case 6:
+      COPY_SHIFT(6);
+      break;
+    case 7:
+      COPY_SHIFT(7);
+      break;
 #endif
     }
 

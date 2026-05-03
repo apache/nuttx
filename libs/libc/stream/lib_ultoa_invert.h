@@ -50,10 +50,6 @@
  * support long long types.
  */
 
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_LONG_LONG
-#endif
-
 /* Next flags are to use with `base'. Unused fields are reserved. */
 
 #define XTOA_PREFIX  0x0100    /* Put prefix for octal or hex */

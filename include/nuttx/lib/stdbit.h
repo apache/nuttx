@@ -50,8 +50,7 @@
 #    error "Generic stdbit requires CONFIG_HAVE_BUILTIN_CLZ, CTZ, POPCOUNT"
 #  endif
 
-#  if defined(CONFIG_HAVE_LONG_LONG) && \
-      !defined(CONFIG_HAVE_BUILTIN_POPCOUNTLL)
+#  if !defined(CONFIG_HAVE_BUILTIN_POPCOUNTLL)
 #    error "Generic stdbit 64-bit requires CONFIG_HAVE_BUILTIN_POPCOUNTLL"
 #  endif
 

@@ -167,7 +167,6 @@ The NTP client requires:
 - **CONFIG_NET_UDP**: UDP protocol support
 - **CONFIG_NET_SOCKOPTS**: Socket options support
 - **CONFIG_LIBC_NETDB**: DNS resolution (recommended)
-- **CONFIG_HAVE_LONG_LONG**: 64-bit integer support
 
 For best results, ensure:
 - Stable network connectivity

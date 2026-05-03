@@ -122,11 +122,7 @@ struct spiffs_s
   FAR uint8_t *work;                /* Secondary work buffer, size of a logical page */
   FAR uint8_t *mtd_work;            /* MTD I/O buffer for read-modify-write */
   FAR void *cache;                  /* Cache memory */
-#ifdef CONFIG_HAVE_LONG_LONG
   off64_t media_size;               /* Physical size of the SPI flash */
-#else
-  off_t media_size;                 /* Physical size of the SPI flash */
-#endif
   int free_entry;                   /* Cursor for free blocks, entry index */
   int lu_entry;                     /* Cursor when searching, entry index */
   uint32_t total_pages;             /* Total number of pages on the media */

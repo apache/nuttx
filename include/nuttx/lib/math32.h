@@ -196,7 +196,6 @@ extern "C"
  * (It is unfortunate that gcc doesn't perform all this internally.)
  */
 
-#ifdef CONFIG_HAVE_LONG_LONG
 /* Default C implementation for umul64_const()
  *
  * Prototype: uint64_t umul64_const(uint64_t retval, uint64_t m,
@@ -319,9 +318,7 @@ extern "C"
       } \
     while (0)
 
-#endif
-
-#if defined(CONFIG_HAVE_LONG_LONG) && defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
+#if defined(CONFIG_HAVE_EXPRESSION_STATEMENT)
 #  define div64_const(n, base) \
     ({ \
       uint64_t __n = (n); \

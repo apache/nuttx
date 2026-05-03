@@ -32,8 +32,6 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_HAVE_LONG_LONG
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -139,4 +137,3 @@ unsigned long long strtoull(FAR const char *nptr,
   return accum;
 }
 
-#endif
