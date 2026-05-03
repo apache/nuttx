@@ -57,10 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
- * support long long types.
- */
-
 #define stream_putc(c,stream)  (total_len++, lib_stream_putc(stream, c))
 #define stream_puts(buf, len, stream) \
         (total_len += len, lib_stream_puts(stream, buf, len))
@@ -159,11 +155,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int prec;
   union
   {
-#if defined (CONFIG_LIBC_LONG_LONG) || (ULONG_MAX > 4294967295UL)
     char __buf[22]; /* Size for -1 in octal, without '\0' */
-#else
-    char __buf[11]; /* Size for -1 in octal, without '\0' */
-#endif
 #ifdef CONFIG_LIBC_FLOATINGPOINT
     struct dtoa_s __dtoa;
 #endif
@@ -1010,9 +1002,6 @@ str_lpad:
             }
           else
             {
-#if !defined(CONFIG_LIBC_LONG_LONG)
-              DEBUGASSERT(x >= 0 && x <= ULONG_MAX);
-#endif
               c = __ultoa_invert(x, buf, 10) - buf;
             }
         }
@@ -1192,9 +1181,6 @@ str_lpad:
             }
           else
             {
-#if !defined(CONFIG_LIBC_LONG_LONG)
-              DEBUGASSERT(x <= ULONG_MAX);
-#endif
               c = __ultoa_invert(x, buf, base) - buf;
             }
 
