@@ -30,9 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 long long atoll(FAR const char *nptr)
 {
   return strtoll(nptr, NULL, 10);
 }
-#endif

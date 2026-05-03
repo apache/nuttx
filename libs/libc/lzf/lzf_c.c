@@ -2,7 +2,8 @@
  * libs/libc/lzf/lzf_c.c
  *
  * SPDX-License-Identifier: BSD-2-Clause
- * SPDX-FileCopyrightText: 2000-2010 Marc Alexander Lehmann <schmorp@schmorp.de>
+ * SPDX-FileCopyrightText:
+ *  2000-2010 Marc Alexander Lehmann <schmorp@schmorp.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -146,11 +147,7 @@ size_t lzf_compress(FAR const void *const in_data,
    * special workaround for it.
    */
 
-#ifdef CONFIG_HAVE_LONG_LONG
   uint64_t off;  /* Workaround for missing POSIX compliance */
-#else
-  unsigned long off;
-#endif
   unsigned int hval;
   int lit;
 

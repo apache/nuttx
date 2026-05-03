@@ -55,9 +55,8 @@
  *   IRQ HANDLER  ARGUMENT    COUNT    RATE    TIME
  *   DDD XXXXXXXX XXXXXXXX DDDDDDDDDD DDDD.DDD DDDD
  *
- * NOTE:  This assumes that an address can be represented in 32-bits.  In
- * the typical configuration where CONFIG_HAVE_LONG_LONG=y, the COUNT field
- * may not be wide enough.
+ * NOTE:  This assumes that an address can be represented in 32-bits.  The
+ * COUNT field may not be wide enough.
  */
 
 #define HDR_FMT "IRQ HANDLER  ARGUMENT    COUNT    RATE    TIME\n"
@@ -201,7 +200,6 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
   elapsed = now - copy.start;
   perf_convert(copy.time, &delta);
 
-#ifdef CONFIG_HAVE_LONG_LONG
   /* elapsed = <current-time> - <start-time>, units=clock ticks
    * rate    = <interrupt-count> * TICKS_PER_SEC / elapsed
    */
@@ -230,9 +228,6 @@ static int irq_callback(int irq, FAR struct irq_info_s *info,
     {
       count = (unsigned long)copy.count;
     }
-#else
-#  error Missing logic
-#endif
 
   /* Output information about this interrupt */
 

@@ -72,10 +72,8 @@ namespace std
   using ::atol;
   using ::strtol;
   using ::strtoul;
-#ifdef CONFIG_HAVE_LONG_LONG
   using ::strtoll;
   using ::strtoull;
-#endif
   using ::strtof;
 #ifdef CONFIG_HAVE_DOUBLE
   using ::strtod;
@@ -114,15 +112,11 @@ namespace std
 
   using ::abs;
   using ::labs;
-#ifdef CONFIG_HAVE_LONG_LONG
   using ::llabs;
-#endif
 
   using ::div;
   using ::ldiv;
-#ifdef CONFIG_HAVE_LONG_LONG
   using ::lldiv;
-#endif
 
   // Temporary files
 
