@@ -199,7 +199,7 @@ static uint32_t pic32mz_usec2ticks(struct pic32mz_lowerhalf_s *priv,
 {
   uint64_t bigticks;
 
-  bigticks = ((uint64_t)usecs * (uint64_t)priv->freq) / 1000000;
+  bigticks = (usecs * priv->freq) / 1000000;
 
   if (bigticks > UINT32_MAX)
     {

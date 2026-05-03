@@ -774,7 +774,7 @@ int up_rtc_settime(const struct timespec *ts)
 
   flags = spin_lock_irqsave(&g_rtc_lowerhalf.lock);
 
-  now_us = ((uint64_t) ts->tv_sec) * USEC_PER_SEC +
+  now_us = ts->tv_sec * USEC_PER_SEC +
           ts->tv_nsec / NSEC_PER_USEC;
 
 #ifdef CONFIG_RTC_DRIVER

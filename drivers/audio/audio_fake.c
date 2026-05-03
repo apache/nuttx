@@ -422,8 +422,8 @@ static int audio_fake_process_buffer(FAR struct audio_lowerhalf_s *dev,
 
   frame_time = ((int64_t)apb->nbytes * 1000 * 1000) / priv->scaler;
 
-  diff_time = (int64_t)tv2.tv_sec * 1000000 + tv2.tv_usec -
-              ((int64_t)tv1.tv_sec * 1000000 + tv1.tv_usec);
+  diff_time = tv2.tv_sec * 1000000 + tv2.tv_usec -
+              (tv1.tv_sec * 1000000 + tv1.tv_usec);
 
   if (diff_time >= frame_time)
     {

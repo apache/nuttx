@@ -405,7 +405,7 @@ static int esp32s2_timer_settimeout(struct timer_lowerhalf_s *lower,
 
   /* Set the timeout */
 
-  ESP32S2_TIM_SETALRVL(priv->tim, (uint64_t)timeout);
+  ESP32S2_TIM_SETALRVL(priv->tim, timeout);
 
   return ret;
 }

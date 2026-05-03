@@ -481,7 +481,7 @@ int up_rtc_settime(const struct timespec *tp)
   /* Only save the difference from HW raw value */
 
   count = SEC_TO_CNT(tp->tv_sec) | NSEC_TO_PRECNT(tp->tv_nsec);
-  g_rtc_save->offset = (int64_t)count - (int64_t)cxd56_rtc_count();
+  g_rtc_save->offset = count - cxd56_rtc_count();
 #endif
 
   cxd56_update_basetime(&g_basetime);

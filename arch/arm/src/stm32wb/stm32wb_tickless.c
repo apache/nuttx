@@ -795,8 +795,8 @@ int up_timer_start(const struct timespec *ts)
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = ts->tv_sec * USEC_PER_SEC +
+         (ts->tv_nsec / NSEC_PER_USEC);
 
   /* Get the timer counter frequency and determine the number of counts need
    * to achieve the requested delay.

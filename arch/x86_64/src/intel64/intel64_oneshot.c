@@ -315,8 +315,8 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = ts->tv_sec * USEC_PER_SEC +
+         (ts->tv_nsec / NSEC_PER_USEC);
 
   /* HPET use free running up-counter and a comparators which generate events
    * only on a equal event. This can results in event miss if we set too
@@ -337,7 +337,7 @@ int intel64_oneshot_start(struct intel64_oneshot_s *oneshot,
    *             = (usecs * frequency) / USEC_PER_SEC;
    */
 
-  compare = (usec * (uint64_t)oneshot->frequency) / USEC_PER_SEC;
+  compare = (usec * oneshot->frequency) / USEC_PER_SEC;
 
 #ifndef CONFIG_INTEL64_HPET_FSB
   /* Set up to receive the callback when the interrupt occurs */

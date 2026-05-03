@@ -229,8 +229,8 @@ int bm3803_oneshot_start(struct bm3803_oneshot_s *oneshot,
 
   /* Express the delay in microseconds */
 
-  usec = (uint64_t)ts->tv_sec * USEC_PER_SEC +
-         (uint64_t)(ts->tv_nsec / NSEC_PER_USEC);
+  usec = ts->tv_sec * USEC_PER_SEC +
+         (ts->tv_nsec / NSEC_PER_USEC);
 
   /* Get the timer counter frequency and determine the number of counts need
    * to achieve the requested delay.
@@ -240,7 +240,7 @@ int bm3803_oneshot_start(struct bm3803_oneshot_s *oneshot,
    *             = (usecs * frequency) / USEC_PER_SEC;
    */
 
-  period = (usec * (uint64_t)oneshot->frequency) / USEC_PER_SEC;
+  period = (usec * oneshot->frequency) / USEC_PER_SEC;
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
   DEBUGASSERT(period <= UINT24_MAX);

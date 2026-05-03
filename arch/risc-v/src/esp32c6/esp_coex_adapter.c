@@ -114,7 +114,7 @@ coex_adapter_funcs_t g_coex_adapter_funcs =
 
 static IRAM_ATTR int64_t esp_coex_esp_timer_get_time_wrapper(void)
 {
-  return (int64_t)esp_hr_timer_time_us();
+  return esp_hr_timer_time_us();
 }
 
 /****************************************************************************

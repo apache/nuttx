@@ -2096,8 +2096,8 @@ static int cxd56_power_on_micbias(struct cxd56_dev_s *dev)
 
   clock_systime_timespec(&start);
 
-  dev->mic_boot_start = (uint64_t)start.tv_sec * 1000 +
-                        (uint64_t)start.tv_nsec / 1000000;
+  dev->mic_boot_start = start.tv_sec * 1000 +
+                        start.tv_nsec / 1000000;
 
   return OK;
 }
@@ -2951,8 +2951,8 @@ static int cxd56_start(struct audio_lowerhalf_s *lower)
 
           clock_systime_timespec(&end);
 
-          uint64_t time = (uint64_t)end.tv_sec * 1000 +
-                          (uint64_t)end.tv_nsec / 1000000 -
+          uint64_t time = end.tv_sec * 1000 +
+                          end.tv_nsec / 1000000 -
                            priv->mic_boot_start;
 
           if (time < CXD56_MIC_BOOT_WAIT)

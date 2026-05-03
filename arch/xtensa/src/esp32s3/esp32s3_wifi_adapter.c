@@ -2253,7 +2253,7 @@ static void wifi_rtc_disable_iso(void)
 
 int64_t esp32s3_timer_get_time(void)
 {
-  return (int64_t)esp_hr_timer_time_us();
+  return esp_hr_timer_time_us();
 }
 
 /****************************************************************************

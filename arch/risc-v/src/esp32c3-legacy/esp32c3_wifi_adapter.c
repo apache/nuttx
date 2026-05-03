@@ -2926,7 +2926,7 @@ static void wifi_rtc_disable_iso(void)
 
 int64_t esp_timer_get_time(void)
 {
-  return (int64_t)rt_timer_time_us();
+  return rt_timer_time_us();
 }
 
 /****************************************************************************

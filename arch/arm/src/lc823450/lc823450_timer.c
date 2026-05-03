@@ -706,7 +706,7 @@ int up_rtc_gettime(struct timespec *tp)
 
   /* Get the elapsed time */
 
-  elapsed = NSEC_PER_TICK * (uint64_t)clock_systime_ticks();
+  elapsed = NSEC_PER_TICK * clock_systime_ticks();
 
   /* Add the timer fraction in nanoseconds */
 

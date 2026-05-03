@@ -288,7 +288,7 @@ static uint64_t cisif_get_msec_time(void)
 
   clock_systime_timespec(&tp);
 
-  return (((uint64_t)tp.tv_sec) * 1000 + tp.tv_nsec / 1000000);
+  return tp.tv_sec * 1000 + tp.tv_nsec / 1000000;
 }
 
 static void cisif_trace_time_start(void)

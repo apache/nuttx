@@ -3136,7 +3136,7 @@ int up_rtc_settime(const struct timespec *ts)
   DEBUGASSERT(ts != NULL && ts->tv_nsec < NSEC_PER_SEC);
   flags = spin_lock_irqsave(&g_rtc_lock);
 
-  now_us = ((uint64_t) ts->tv_sec) * USEC_PER_SEC +
+  now_us = ts->tv_sec * USEC_PER_SEC +
           ts->tv_nsec / NSEC_PER_USEC;
   if (g_rt_timer_enabled == true)
     {

@@ -301,8 +301,7 @@ static void avrdx_check_alarm_expired(uint8_t context)
 
       /* Note about data types - struct timespec is defined
        * in include/time.h, tv_sec is of type time_t which is defined
-       * in include/sys/types.h as uint32_t or uint64_t based
-       * on CONFIG_SYSTEM_TIME64
+       * in include/sys/types.h as uint64_t.
        *
        * tv_nsec is defined as long, signed value
        */

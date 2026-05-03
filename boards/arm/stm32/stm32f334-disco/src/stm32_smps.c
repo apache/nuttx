@@ -447,7 +447,7 @@ static int smps_start(struct smps_dev_s *dev)
     {
       pwrerr("ERROR:  Can not achieve tima pwm "
              "freq=%" PRIu32 " if fclk=%" PRIu64 "\n",
-             (uint32_t)TIMA_PWM_FREQ, (uint64_t)fclk);
+             (uint32_t)TIMA_PWM_FREQ, fclk);
       ret = -EINVAL;
       goto errout;
     }
@@ -464,7 +464,7 @@ static int smps_start(struct smps_dev_s *dev)
     {
       pwrerr("ERROR:  Can not achieve timb pwm "
              "freq=%" PRIu32 " if fclk=%" PRIu64 "\n",
-             (uint32_t)TIMB_PWM_FREQ, (uint64_t)fclk);
+             (uint32_t)TIMB_PWM_FREQ, fclk);
       ret = -EINVAL;
       goto errout;
     }

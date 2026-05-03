@@ -91,7 +91,7 @@ void up_perf_convert(clock_t elapsed, struct timespec *ts)
 
   ts->tv_sec  = elapsed / g_cpu_freq;
   left        = elapsed - ts->tv_sec * g_cpu_freq;
-  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
+  ts->tv_nsec = NSEC_PER_SEC * left / g_cpu_freq;
 }
 #endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
 
