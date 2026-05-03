@@ -694,6 +694,19 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
           break;
         }
 
+      /* Verify that a complete answer header (10 bytes: type, class,
+       * ttl[2], len) is available before casting to dns_answer_s.
+       * Without this check, accessing ans->ttl and ans->type/class/len
+       * would be an OOB read if fewer than 10 bytes remain.
+       */
+
+      if (nameptr + sizeof(struct dns_answer_s) > endofbuffer)
+        {
+          ret = -EILSEQ;
+          nwarn("DNS answer header truncated\n");
+          break;
+        }
+
       ans = (FAR struct dns_answer_s *)nameptr;
 
       ninfo("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x\n",
