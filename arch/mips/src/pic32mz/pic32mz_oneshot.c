@@ -433,8 +433,8 @@ int pic32mz_oneshot_cancel(struct pic32mz_oneshot_s *oneshot,
           sec         = usec / USEC_PER_SEC;
           nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-          ts->tv_sec  = (time_t)sec;
-          ts->tv_nsec = (unsigned long)nsec;
+          ts->tv_sec  = sec;
+          ts->tv_nsec = nsec;
         }
 
       tmrinfo("remaining (%lu, %lu)\n",

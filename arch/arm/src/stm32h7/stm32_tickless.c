@@ -725,7 +725,7 @@ int up_timer_gettime(struct timespec *ts)
 
 int up_timer_gettick(clock_t *ticks)
 {
-  *ticks = (clock_t)STM32_TIM_GETCOUNTER(g_tickless.tch);
+  *ticks = STM32_TIM_GETCOUNTER(g_tickless.tch);
   return OK;
 }
 
@@ -885,8 +885,8 @@ int up_timer_cancel(struct timespec *ts)
       sec         = usec / USEC_PER_SEC;
       nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-      ts->tv_sec  = (time_t)sec;
-      ts->tv_nsec = (unsigned long)nsec;
+      ts->tv_sec  = sec;
+      ts->tv_nsec = nsec;
 
       tmrinfo("remaining (%lu, %lu)\n",
              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);

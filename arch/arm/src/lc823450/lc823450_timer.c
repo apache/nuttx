@@ -724,8 +724,8 @@ int up_rtc_gettime(struct timespec *tp)
 
   /* And return the result to the caller. */
 
-  tp->tv_sec  = (time_t)secs;
-  tp->tv_nsec = (long)nsecs;
+  tp->tv_sec  = secs;
+  tp->tv_nsec = nsecs;
 
   tmrinfo("Returning tp=(%d,%d)\n", (int)tp->tv_sec, (int)tp->tv_nsec);
   return OK;

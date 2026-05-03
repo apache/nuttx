@@ -177,11 +177,11 @@
 
 /* ?SEC2TIC rounds up */
 
-#define NSEC2TICK(nsec)       div_const_roundup(nsec, (uint32_t)NSEC_PER_TICK)
-#define USEC2TICK(usec)       div_const_roundup(usec, (uint32_t)USEC_PER_TICK)
+#define NSEC2TICK(nsec)       div_const_roundup(nsec, NSEC_PER_TICK)
+#define USEC2TICK(usec)       div_const_roundup(usec, USEC_PER_TICK)
 
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
-#  define MSEC2TICK(msec)     div_const_roundup(msec, (uint32_t)MSEC_PER_TICK)
+#  define MSEC2TICK(msec)     div_const_roundup(msec, MSEC_PER_TICK)
 #else
 #  define MSEC2TICK(msec)     USEC2TICK((msec) * USEC_PER_MSEC)
 #endif
@@ -196,34 +196,34 @@
 #if (MSEC_PER_TICK * USEC_PER_MSEC) == USEC_PER_TICK
 #  define TICK2MSEC(tick)     ((tick) * MSEC_PER_TICK)
 #else
-#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), (uint32_t)USEC_PER_MSEC)
+#  define TICK2MSEC(tick)     div_const(((tick) * USEC_PER_TICK), USEC_PER_MSEC)
 #endif
 
 /* TIC2?SEC rounds to nearest */
 
-#define TICK2DSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_DSEC)
-#define TICK2HSEC(tick)       div_const_roundnearest(tick, (uint32_t)TICK_PER_HSEC)
-#define TICK2SEC(tick)        div_const_roundnearest(tick, (uint32_t)TICK_PER_SEC)
+#define TICK2DSEC(tick)       div_const_roundnearest(tick, TICK_PER_DSEC)
+#define TICK2HSEC(tick)       div_const_roundnearest(tick, TICK_PER_HSEC)
+#define TICK2SEC(tick)        div_const_roundnearest(tick, TICK_PER_SEC)
 
 /* MSEC2SEC */
 
-#define MSEC2SEC(usec)        div_const(msec, (uint32_t)MSEC_PER_SEC)
+#define MSEC2SEC(msec)        div_const(msec, MSEC_PER_SEC)
 
 /* USEC2MSEC */
 
-#define USEC2MSEC(usec)       div_const(usec, (uint32_t)USEC_PER_MSEC)
+#define USEC2MSEC(usec)       div_const(usec, USEC_PER_MSEC)
 
 /* USEC2SEC */
 
-#define USEC2SEC(usec)        div_const(usec, (uint32_t)USEC_PER_SEC)
+#define USEC2SEC(usec)        div_const(usec, USEC_PER_SEC)
 
 /* NSEC2USEC */
 
-#define NSEC2USEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_USEC)
+#define NSEC2USEC(nsec)       div_const(nsec, NSEC_PER_USEC)
 
 /* NSEC2MSEC */
 
-#define NSEC2MSEC(nsec)       div_const(nsec, (uint32_t)NSEC_PER_MSEC)
+#define NSEC2MSEC(nsec)       div_const(nsec, NSEC_PER_MSEC)
 
 #if defined(CONFIG_DEBUG_SCHED) && !defined(CONFIG_SCHED_TICKLESS)
 /* Initial system timer ticks value close to maximum 32-bit value, to test
@@ -232,7 +232,7 @@
  */
 
 #  define INITIAL_SYSTEM_TIMER_TICKS \
-    ((uint64_t)(UINT32_MAX - (TICK_PER_SEC * 5)))
+    (UINT32_MAX - (TICK_PER_SEC * 5))
 #else
 #  define INITIAL_SYSTEM_TIMER_TICKS 0
 #endif
@@ -301,13 +301,6 @@ struct cpuload_s
 };
 #endif
 
-/* This non-standard type used to hold relative clock ticks that may take
- * negative values.  Because of its non-portable nature the type sclock_t
- * should be used only within the OS proper and not by portable applications.
- */
-
-typedef int64_t sclock_t;
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -327,47 +320,47 @@ extern "C"
 #define clock_ticks2time(ts, tick) \
   do \
     { \
-      clock_t _tick = tick; \
-      (ts)->tv_sec = (time_t)div_const(_tick, (uint32_t)TICK_PER_SEC); \
-      _tick -= (clock_t)((ts)->tv_sec * TICK_PER_SEC); \
-      (ts)->tv_nsec = (long)_tick * NSEC_PER_TICK; \
+      clock_t _tick = (tick); \
+      (ts)->tv_sec = div_const(_tick, TICK_PER_SEC); \
+      _tick -= (ts)->tv_sec * TICK_PER_SEC; \
+      (ts)->tv_nsec = _tick * NSEC_PER_TICK; \
     } \
   while (0)
 
 #define clock_time2ticks(ts) \
-  ((clock_t)((ts)->tv_sec * TICK_PER_SEC) + \
-   (clock_t)div_const_roundup((uint64_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
+  ((ts)->tv_sec * TICK_PER_SEC + \
+   div_const_roundup((ts)->tv_nsec, NSEC_PER_TICK))
 
 #define clock_time2ticks_floor(ts) \
-  ((clock_t)(ts)->tv_sec * TICK_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_TICK))
+  ((ts)->tv_sec * TICK_PER_SEC + \
+   div_const((ts)->tv_nsec, NSEC_PER_TICK))
 
 #define clock_usec2time(ts, usec) \
   do \
     { \
-      uint64_t _usec = (usec); \
-      (ts)->tv_sec = (time_t)div_const(_usec, (uint32_t)USEC_PER_SEC); \
-      _usec -= (uint64_t)(ts)->tv_sec * USEC_PER_SEC; \
-      (ts)->tv_nsec = (long)_usec * NSEC_PER_USEC; \
+      int64_t _usec = (usec); \
+      (ts)->tv_sec = div_const(_usec, USEC_PER_SEC); \
+      _usec -= (ts)->tv_sec * USEC_PER_SEC; \
+      (ts)->tv_nsec = _usec * NSEC_PER_USEC; \
     } \
   while (0)
 
 #define clock_time2usec(ts) \
-  ((uint64_t)(ts)->tv_sec * USEC_PER_SEC + \
-   div_const((uint32_t)(ts)->tv_nsec, (uint32_t)NSEC_PER_USEC))
+  ((ts)->tv_sec * USEC_PER_SEC + \
+   div_const((ts)->tv_nsec, NSEC_PER_USEC))
 
 #define clock_nsec2time(ts, nsec) \
   do \
     { \
-      uint64_t _nsec = (nsec); \
-      (ts)->tv_sec = (time_t)div_const(_nsec, (uint32_t)NSEC_PER_SEC); \
-      _nsec -= (uint64_t)(ts)->tv_sec * NSEC_PER_SEC; \
-      (ts)->tv_nsec = (long)_nsec; \
+      int64_t _nsec = (nsec); \
+      (ts)->tv_sec = div_const(_nsec, NSEC_PER_SEC); \
+      _nsec -= (ts)->tv_sec * NSEC_PER_SEC; \
+      (ts)->tv_nsec = _nsec; \
     } \
   while (0)
 
 #define clock_time2nsec(ts) \
-  ((uint64_t)(ts)->tv_sec * NSEC_PER_SEC + (uint64_t)(ts)->tv_nsec)
+  ((ts)->tv_sec * NSEC_PER_SEC + (ts)->tv_nsec)
 
 /* Calculate delay+1, forcing the delay into a range that we can handle.
  *
@@ -389,7 +382,7 @@ extern "C"
  * current_tick + 1, which is not enough for at least 1 tick.
  */
 
-#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1u)
+#define clock_delay2abstick(delay) (clock_systime_ticks() + (delay) + 1)
 
 /****************************************************************************
  * Name:  clock_timespec_add
@@ -447,7 +440,7 @@ extern "C"
           _nsec += NSEC_PER_SEC; \
           _sec--; \
         } \
-      if ((sclock_t)_sec < 0) \
+      if (_sec < 0) \
         { \
           _sec = 0; \
           _nsec = 0; \
@@ -540,7 +533,7 @@ int clock_realtime2absticks(FAR const struct timespec *reltime,
  *   false         - Otherwise.
  *
  * Assumptions:
- *   The type of delay value should be sclock_t.
+ *   The type of delay value should be clock_t.
  *
  ****************************************************************************/
 
@@ -554,16 +547,16 @@ int clock_realtime2absticks(FAR const struct timespec *reltime,
  *         it is considered not expired.
  *
  * For bit-63 as the sign bit, we can simplify this to:
- * (sclock_t)(tick2 - tick1) >= 0.
+ * (clock_t)(tick2 - tick1) >= 0.
  *
  * However, this function requires an assumption to work correctly:
- * Assumes the timer delay time does not exceed SCLOCK_MAX (2^63 - 1).
+ * Assumes the timer delay time does not exceed CLOCK_MAX (2^63 - 1).
  *
- * The range of the delay data type sclock_t being
- * [- (SCLOCK_MAX + 1), SCLOCK_MAX] ensures this assumption holds.
+ * The range of the delay data type clock_t being
+ * [- (CLOCK_MAX + 1), CLOCK_MAX] ensures this assumption holds.
  */
 
-#define clock_compare(tick1, tick2) ((sclock_t)((tick2) - (tick1)) >= 0)
+#define clock_compare(tick1, tick2) ((clock_t)((tick2) - (tick1)) >= 0)
 
 /****************************************************************************
  * Name:  clock_isleapyear

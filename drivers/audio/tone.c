@@ -377,8 +377,8 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
       sec = duration / USEC_PER_SEC;
       nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-      ts.tv_sec = (time_t) sec;
-      ts.tv_nsec = (unsigned long)nsec;
+      ts.tv_sec = sec;
+      ts.tv_nsec = nsec;
 
       ONESHOT_START(upper->oneshot, &ts);
 
@@ -511,8 +511,8 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
           sec = duration / USEC_PER_SEC;
           nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-          ts.tv_sec = (time_t) sec;
-          ts.tv_nsec = (unsigned long)nsec;
+          ts.tv_sec = sec;
+          ts.tv_nsec = nsec;
 
           ONESHOT_START(upper->oneshot, &ts);
           return;
@@ -554,8 +554,8 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
               sec = duration / USEC_PER_SEC;
               nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-              ts.tv_sec = (time_t) sec;
-              ts.tv_nsec = (unsigned long)nsec;
+              ts.tv_sec = sec;
+              ts.tv_nsec = nsec;
 
               ONESHOT_START(upper->oneshot, &ts);
 
@@ -636,8 +636,8 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
   sec = duration / USEC_PER_SEC;
   nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  ts.tv_sec = (time_t) sec;
-  ts.tv_nsec = (unsigned long)nsec;
+  ts.tv_sec = sec;
+  ts.tv_nsec = nsec;
 
   /* And arrange a callback when the note should stop */
 

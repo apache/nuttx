@@ -99,15 +99,15 @@ void icmpv6_add_pmtu_entry(net_ipv6addr_t destipaddr, int mtu)
   for (i = 0; i < CONFIG_NET_ICMPv6_PMTU_ENTRIES; i++)
     {
       if (g_icmpv6_pmtu_entry[i].pmtu == 0 ||
-          (sclock_t)(now - g_icmpv6_pmtu_entry[i].time) >=
+          now - g_icmpv6_pmtu_entry[i].time >=
           SEC2TICK(CONFIG_NET_ICMPv6_PMTU_TIMEOUT * 60))
         {
           j = i;
           break;
         }
 
-      if ((sclock_t)(g_icmpv6_pmtu_entry[i].time -
-          g_icmpv6_pmtu_entry[j].time) < 0)
+      if (g_icmpv6_pmtu_entry[i].time -
+          g_icmpv6_pmtu_entry[j].time < 0)
         {
           j = i;
         }

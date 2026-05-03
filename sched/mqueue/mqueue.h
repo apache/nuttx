@@ -128,14 +128,14 @@ void nxmq_wait_irq(FAR struct tcb_s *wtcb, int errcode);
 int nxmq_wait_receive(FAR struct mqueue_inode_s *msgq,
                       FAR struct mqueue_msg_s **rcvmsg,
                       FAR const struct timespec *abstime,
-                      sclock_t ticks);
+                      clock_t ticks);
 void nxmq_notify_receive(FAR struct mqueue_inode_s *msgq);
 
 /* mq_sndinternal.c *********************************************************/
 
 int nxmq_wait_send(FAR struct mqueue_inode_s *msgq,
                    FAR const struct timespec *abstime,
-                   sclock_t ticks);
+                   clock_t ticks);
 void nxmq_notify_send(FAR struct mqueue_inode_s *msgq);
 
 /* mq_recover.c *************************************************************/

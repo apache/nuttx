@@ -88,45 +88,9 @@ static inline void mld_check_v1compat(FAR struct net_driver_s *dev,
        * running, this will reset the timer.
        */
 
-      mld_start_v1timer(dev,
-                    MSEC2TICK(MLD_V1PRESENT_MSEC((clock_t)MLD_QUERY_MSEC)));
+      mld_start_v1timer(dev, MSEC2TICK(MLD_V1PRESENT_MSEC(MLD_QUERY_MSEC)));
     }
 }
-
-/****************************************************************************
- * Name: mld_mrc2mrd
- *
- * Description:
- *  Convert the MLD Maximum Response Code (MRC) to the Maximum Response
- *  Delay (MRD) in units of system clock ticks.
- *
- ****************************************************************************/
-
-#if 0 /* Not used */
-static clock_t mld_mrc2mrd(uint16_t mrc)
-{
-  uint32_t mrd;  /* Units of milliseconds */
-
-  /* If bit 15 is not set (i.e., mrc < 32768),
-   * then no conversion is required.
-   */
-
-  if (mrc < 32768)
-    {
-      mrd = mrc;
-    }
-  else
-    {
-      /* Conversion required */
-
-      mrd = MLD_MRD_VALUE(mrc);
-    }
-
-  /* Return the MRD in units of clock ticks */
-
-  return MSEC2TICK((clock_t)mrd);
-}
-#endif
 
 /****************************************************************************
  * Name: mld_cmpaddr

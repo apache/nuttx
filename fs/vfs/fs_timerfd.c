@@ -654,7 +654,7 @@ int timerfd_settime(int fd, int flags,
    * instead (assuming a repetitive timer).
    */
 
-  if ((sclock_t)delay <= 0)
+  if (delay <= 0)
     {
       delay = dev->delay;
     }
@@ -692,7 +692,7 @@ int timerfd_gettime(int fd, FAR struct itimerspec *curr_value)
 {
   FAR struct timerfd_priv_s *dev;
   FAR struct file *filep;
-  sclock_t ticks;
+  clock_t ticks;
   int ret;
 
   /* Some sanity checks */

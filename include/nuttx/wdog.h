@@ -188,7 +188,7 @@ int wd_start(FAR struct wdog_s *wdog, clock_t delay,
 
   /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay <= WDOG_MAX_DELAY)
+  if (delay >= 0 && delay <= WDOG_MAX_DELAY)
     {
       ret = wd_start_abstick(wdog, clock_delay2abstick(delay), wdentry, arg);
     }
@@ -331,7 +331,7 @@ int wd_start_next(FAR struct wdog_s *wdog, clock_t delay,
 {
   /* Ensure delay is within the range the wdog can handle. */
 
-  if (delay > WDOG_MAX_DELAY)
+  if (delay < 0 || delay > WDOG_MAX_DELAY)
     {
       return -EINVAL;
     }
@@ -374,7 +374,7 @@ int wd_cancel(FAR struct wdog_s *wdog);
  *
  ****************************************************************************/
 
-sclock_t wd_gettime(FAR struct wdog_s *wdog);
+clock_t wd_gettime(FAR struct wdog_s *wdog);
 
 #undef EXTERN
 #ifdef __cplusplus

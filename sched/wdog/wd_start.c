@@ -368,7 +368,7 @@ uint64_t wd_timer(const hrtimer_t *timer, uint64_t expired)
 
   clock_t  tick = div_const(expired, NSEC_PER_TICK);
   clock_t delay = wd_expiration(tick) - tick;
-  uint64_t nsec = TICK2NSEC((uint64_t)delay);
+  uint64_t nsec = TICK2NSEC(delay);
   return nsec <= HRTIMER_MAX_DELAY ? nsec : HRTIMER_MAX_DELAY;
 }
 #endif

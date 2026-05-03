@@ -278,7 +278,7 @@ struct tcp_conn_s
 #endif
   uint16_t flags;         /* Flags of TCP-specific options */
 #ifdef CONFIG_NET_SOLINGER
-  sclock_t ltimeout;      /* Linger timeout expiration */
+  clock_t ltimeout;       /* Linger timeout expiration */
 #endif
 #ifdef CONFIG_NETDEV_RSS
   int      rcvcpu;        /* Current cpu id */

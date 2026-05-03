@@ -233,7 +233,7 @@ static void tcp_xmit_probe(FAR struct net_driver_s *dev,
 
 void tcp_update_timer(FAR struct tcp_conn_s *conn)
 {
-  sclock_t timeout = tcp_get_timeout(conn);
+  clock_t timeout = tcp_get_timeout(conn);
 
   if (timeout > 0)
     {
@@ -242,7 +242,7 @@ void tcp_update_timer(FAR struct tcp_conn_s *conn)
 
       if (conn->ltimeout != 0)
         {
-          sclock_t ticks = conn->ltimeout - clock_systime_ticks();
+          clock_t ticks = conn->ltimeout - clock_systime_ticks();
 
           if (ticks <= 0)
             {
@@ -448,7 +448,7 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
   /* Send reset immediately if linger timeout */
 
   if (conn->ltimeout != 0 &&
-      ((sclock_t)(conn->ltimeout - clock_systime_ticks()) <= 0))
+      conn->ltimeout - clock_systime_ticks() <= 0)
     {
       conn->tcpstateflags = TCP_CLOSED;
       ninfo("TCP state: TCP_CLOSED\n");

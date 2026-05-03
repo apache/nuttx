@@ -138,7 +138,7 @@ static
 ssize_t file_mq_timedreceive_internal(FAR struct file *mq, FAR char *msg,
                                       size_t msglen, FAR unsigned int *prio,
                                       FAR const struct timespec *abstime,
-                                      sclock_t ticks)
+                                      clock_t ticks)
 {
   FAR struct mqueue_inode_s *msgq;
   FAR struct mqueue_msg_s *mqmsg;
@@ -325,7 +325,7 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
 
 ssize_t file_mq_tickreceive(FAR struct file *mq, FAR char *msg,
                             size_t msglen, FAR unsigned int *prio,
-                            sclock_t ticks)
+                            clock_t ticks)
 {
   return file_mq_timedreceive_internal(mq, msg, msglen, prio, NULL, ticks);
 }

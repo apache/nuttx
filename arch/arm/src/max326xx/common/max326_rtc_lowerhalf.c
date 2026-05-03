@@ -581,7 +581,7 @@ static int max326_rdalarm(struct rtc_lowerhalf_s *lower,
         {
           /* Extract integer seconds from the b32_t value */
 
-          time_t sec = (time_t)(b32toi(ftime));
+          time_t sec = b32toi(ftime);
 
           /* Convert to struct rtc_time (aka struct tm) */
 

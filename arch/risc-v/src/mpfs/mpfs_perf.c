@@ -90,7 +90,7 @@ void up_udelay(useconds_t microseconds)
 {
   clock_t start = up_perf_gettime();
   clock_t end = microseconds * up_perf_getfreq() / USEC_PER_SEC + start + 1;
-  while (((sclock_t)(up_perf_gettime() - end)) < 0)
+  while (up_perf_gettime() - end < 0)
     {
     }
 }

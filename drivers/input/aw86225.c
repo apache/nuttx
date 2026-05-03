@@ -2144,7 +2144,7 @@ static int aw86225_haptics_upload_effect(FAR struct ff_lowerhalf_s *lower,
   FAR struct aw86225 *aw86225 = (FAR struct aw86225 *)lower;
   FAR struct aw86225_hap_play_info *play = &aw86225->play;
   int16_t data[AW86225_CUSTOM_DATA_LEN];
-  sclock_t time_us;
+  clock_t time_us;
   int ret;
 
   time_us = wd_gettime(&aw86225->timer);

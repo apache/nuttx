@@ -634,7 +634,7 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
  ****************************************************************************/
 
 int file_mq_ticksend(FAR struct file *mq, FAR const char *msg,
-                     size_t msglen, unsigned int prio, sclock_t ticks);
+                     size_t msglen, unsigned int prio, clock_t ticks);
 
 /****************************************************************************
  * Name: file_mq_receive
@@ -740,7 +740,7 @@ ssize_t file_mq_timedreceive(FAR struct file *mq, FAR char *msg,
 
 ssize_t file_mq_tickreceive(FAR struct file *mq, FAR char *msg,
                             size_t msglen, FAR unsigned int *prio,
-                            sclock_t ticks);
+                            clock_t ticks);
 
 /****************************************************************************
  * Name:  file_mq_setattr

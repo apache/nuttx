@@ -49,8 +49,8 @@ int process_sporadic(FAR struct tcb_s *tcb,
                      FAR const struct sched_param *param)
 {
   FAR struct sporadic_s *sporadic;
-  sclock_t repl_ticks;
-  sclock_t budget_ticks;
+  clock_t repl_ticks;
+  clock_t budget_ticks;
   int ret = -EINVAL;
 
   if (param->sched_ss_max_repl >= 1 &&
