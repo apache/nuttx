@@ -49,10 +49,6 @@
  * 64-bit integer types.
  */
 
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_MEMCPY_64BIT
-#endif
-
 /* Remove definitions when CONFIG_LIBC_MEMCPY_INDEXED_COPY is defined */
 
 #ifdef CONFIG_LIBC_MEMCPY_INDEXED_COPY

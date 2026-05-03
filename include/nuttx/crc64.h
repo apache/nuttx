@@ -32,8 +32,6 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#ifdef CONFIG_HAVE_LONG_LONG
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -123,5 +121,4 @@ uint64_t crc64emac(FAR const uint8_t *src, size_t len);
 }
 #endif
 
-#endif /* CONFIG_HAVE_LONG_LONG */
 #endif /* __INCLUDE_NUTTX_CRC64_H */

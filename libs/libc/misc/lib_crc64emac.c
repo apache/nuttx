@@ -55,8 +55,6 @@
 
 #include <nuttx/crc64.h>
 
-#ifdef CONFIG_HAVE_LONG_LONG
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -289,4 +287,3 @@ uint64_t crc64emac(FAR const uint8_t *src, size_t len)
   return crc64emac_part(src, len, 0x0000000000000000ull);
 }
 
-#endif /* CONFIG_HAVE_LONG_LONG */

@@ -146,11 +146,7 @@ size_t lzf_compress(FAR const void *const in_data,
    * special workaround for it.
    */
 
-#ifdef CONFIG_HAVE_LONG_LONG
   uint64_t off;  /* Workaround for missing POSIX compliance */
-#else
-  unsigned long off;
-#endif
   unsigned int hval;
   int lit;
 

@@ -42,10 +42,6 @@
  * have 64-bit integer types.
  */
 
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_MEMSET_64BIT
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

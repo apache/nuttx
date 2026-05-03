@@ -37,8 +37,6 @@
  * available if long long types are supported.
  */
 
-#ifdef CONFIG_HAVE_LONG_LONG
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -113,4 +111,3 @@ intmax_t strtoimax(FAR const char *nptr, FAR char **endptr, int base)
   return (intmax_t)accum;
 }
 
-#endif /* CONFIG_HAVE_LONG_LONG */

@@ -33,11 +33,9 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long long llroundl(long double x)
 {
   return (long long)roundl(x);
 }
-#endif
 #endif

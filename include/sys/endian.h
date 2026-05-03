@@ -71,7 +71,6 @@
                ((((uint32_t)(n)) & 0xff000000UL) >> 24))
 #endif
 
-#ifdef CONFIG_HAVE_LONG_LONG
 #  ifdef CONFIG_HAVE_BUILTIN_BSWAP64
 #    define __swap_uint64(n) ((uint64_t)__builtin_bswap64(n))
 #  else
@@ -85,7 +84,6 @@
                    ((((uint64_t)(n)) & 0x00ff000000000000ULL) >> 40) | \
                    ((((uint64_t)(n)) & 0xff00000000000000ULL) >> 56))
 #  endif
-#endif
 
 /* Endian-specific definitions */
 
@@ -107,12 +105,10 @@
 #  define be32toh(n)          ((uint32_t)(n))
 #  define le32toh(n)          __swap_uint32(n)
 
-#  ifdef CONFIG_HAVE_LONG_LONG
 #    define htobe64(n)        ((uint64_t)(n))
 #    define htole64(n)        __swap_uint64(n)
 #    define be64toh(n)        ((uint64_t)(n))
 #    define le64toh(n)        __swap_uint64(n)
-#  endif
 
 #else
 /* Little-endian byte order */
@@ -132,12 +128,10 @@
 #  define be32toh(n)          __swap_uint32(n)
 #  define le32toh(n)          ((uint32_t)(n))
 
-#  ifdef CONFIG_HAVE_LONG_LONG
 #    define htobe64(n)        __swap_uint64(n)
 #    define htole64(n)        ((uint64_t)(n))
 #    define be64toh(n)        __swap_uint64(n)
 #    define le64toh(n)        ((uint64_t)(n))
-#  endif
 #endif
 
 /* OpenBSD style */
@@ -159,13 +153,11 @@
 #define lemtoh32(x)           letoh32(*(FAR uint32_t *)(x))
 #define htolem32(x, v)        (*(FAR uint32_t *)(x) = htole32(v))
 
-#ifdef CONFIG_HAVE_LONG_LONG
 #  define betoh64             be64toh
 #  define letoh64             le64toh
 #  define bemtoh64(x)         betoh64(*(FAR uint64_t *)(x))
 #  define htobem64(x, v)      (*(FAR uint64_t *)(x) = htobe64(v))
 #  define lemtoh64(x)         letoh64(*(FAR uint64_t *)(x))
 #  define htolem64(x, v)      (*(FAR uint64_t *)(x) = htole64(v))
-#endif
 
 #endif /* __INCLUDE_SYS_ENDIAN_H */

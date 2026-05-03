@@ -49,10 +49,6 @@
  * then a 64-bit system time will be used.
  */
 
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_SYSTEM_TIME64
-#endif
-
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

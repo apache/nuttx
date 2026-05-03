@@ -44,9 +44,7 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
       short int si;
       int i;
       long l;
-#ifdef CONFIG_HAVE_LONG_LONG
       long long ll;
-#endif
       intmax_t im;
       size_t sz;
       ptrdiff_t pd;
@@ -97,13 +95,11 @@ int lib_bsprintf(FAR struct lib_outstream_s *s, FAR const IPTR char *fmt,
               offset += sizeof(var->im);
               ret += lib_sprintf(s, fmtstr, var->im);
             }
-#ifdef CONFIG_HAVE_LONG_LONG
           else if (*(fmt - 2) == 'l' && *(fmt - 3) == 'l')
             {
               offset += sizeof(var->ll);
               ret += lib_sprintf(s, fmtstr, var->ll);
             }
-#endif
           else if (*(fmt - 2) == 'l')
             {
               offset += sizeof(var->l);

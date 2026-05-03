@@ -32,7 +32,6 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 long long int llabs(long long int j)
 {
   if (j < 0)
@@ -42,4 +41,3 @@ long long int llabs(long long int j)
 
   return j;
 }
-#endif

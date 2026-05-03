@@ -40,10 +40,6 @@
  * support long long types.
  */
 
-#ifndef CONFIG_HAVE_LONG_LONG
-#  undef CONFIG_LIBC_LONG_LONG
-#endif
-
 #ifdef CONFIG_LIBC_SCANSET
 #  define SCANSET_MODS "["
 #else
@@ -245,9 +241,7 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
   int base = 10;
   char tmp[MAXLN];
 
-#ifdef CONFIG_HAVE_LONG_LONG
   FAR unsigned long long *plonglong = NULL;
-#endif
   FAR unsigned long *plong = NULL;
   FAR unsigned int *pint = NULL;
   FAR unsigned short *pshort = NULL;
@@ -345,7 +339,7 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                     {
                       modifier = L_MOD;
                     }
-#if defined(CONFIG_HAVE_LONG_LONG) && ULLONG_MAX != ULONG_MAX
+#if ULLONG_MAX != ULONG_MAX
                   else if (sizeof(size_t) == sizeof(unsigned long long))
                     {
                       modifier = LL_MOD;
@@ -353,13 +347,9 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 #endif
                   else
                     {
-                      /* The only known cases that the default will be hit
-                       * are (1) the eZ80 which has sizeof(size_t) = 3 which
-                       * is the same as the sizeof(int).  And (2) if
-                       * CONFIG_HAVE_LONG_LONG
-                       * is not enabled and sizeof(size_t) is equal to
-                       * sizeof(unsigned long long).  This latter case is an
-                       * error.
+                      /* The only known case that the default will be hit
+                       * is the eZ80 which has sizeof(size_t) = 3 which is
+                       * the same as the sizeof(int).
                        * Treat as integer with no size qualifier.
                        */
 
@@ -369,11 +359,8 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
               else if (fmt_char(fmt) == 'j')
                 {
                   /* Same as long long if available. Otherwise, long. */
-#ifdef CONFIG_HAVE_LONG_LONG
+
                   modifier = LL_MOD;
-#else
-                  modifier = L_MOD;
-#endif
                 }
               else if (fmt_char(fmt) == 'h' || fmt_char(fmt) == 'H')
                 {
@@ -612,13 +599,11 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                       *plong = 0;
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
                     case LL_MOD:
                       plonglong = next_arg(varg, vabuf,
                                            FAR unsigned long long *);
                       *plonglong = 0;
                       break;
-#endif
                     }
                 }
 
@@ -640,9 +625,8 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                   bool stopconv;
                   int errsave;
                   unsigned long tmplong = 0;
-#ifdef CONFIG_HAVE_LONG_LONG
                   unsigned long long tmplonglong = 0;
-#endif
+
                   /* Copy the real string into a temporary working buffer. */
 
                   if (!width || width > sizeof(tmp) - 1)
@@ -858,9 +842,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 
                   switch (modifier)
                     {
-#ifndef CONFIG_HAVE_LONG_LONG
-                    case LL_MOD:
-#endif
                     case HH_MOD:
                     case H_MOD:
                     case NO_MOD:
@@ -875,7 +856,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                         }
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
                     case LL_MOD:
                       if (sign)
                         {
@@ -894,7 +874,6 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
 #  endif
                         }
                       break;
-#endif
                     }
 
                   /* Check if the number was successfully converted */
@@ -926,18 +905,13 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                           *pint = (unsigned int)tmplong;
                           break;
 
-#ifndef CONFIG_HAVE_LONG_LONG
-                        case L_MOD:
-#endif
                         default:
                           *plong = tmplong;
                           break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
                         case LL_MOD:
                           *plonglong = tmplonglong;
                           break;
-#endif
                         }
 
                       assigncount++;
@@ -1191,13 +1165,11 @@ static int vscanf_internal(FAR struct lib_instream_s *stream, FAR int *lastc,
                       *plong = (unsigned long)nchars;
                       break;
 
-#ifdef CONFIG_HAVE_LONG_LONG
                     case LL_MOD:
                       plonglong = next_arg(varg, vabuf,
                                            FAR unsigned long long *);
                       *plonglong = (unsigned long long)nchars;
                       break;
-#endif
                     }
                 }
 

@@ -179,14 +179,12 @@ long int    lround(double x);
 long int    lroundl(long double x);
 #endif
 
-#ifdef CONFIG_HAVE_LONG_LONG
 long long int llroundf(float x);
 #ifdef CONFIG_HAVE_DOUBLE
 long long int llround (double x);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long long int llroundl(long double x);
-#endif
 #endif
 
 float       rintf(float x);      /* Not implemented */
@@ -205,14 +203,12 @@ long int    lrint(double x);
 long int    lrintl(long double x);
 #endif
 
-#ifdef CONFIG_HAVE_LONG_LONG
 long long int llrintf(float x);
 #ifdef CONFIG_HAVE_DOUBLE
 long long int llrint(double x);
 #endif
 #ifdef CONFIG_HAVE_LONG_DOUBLE
 long long int llrintl(long double x);
-#endif
 #endif
 
 float       fabsf (float x);

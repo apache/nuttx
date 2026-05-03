@@ -50,7 +50,6 @@ static unsigned short int g_seed48[7] =
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 static uint64_t rand48_step(FAR unsigned short int *xi,
                             FAR unsigned short int *lc)
 {
@@ -66,7 +65,6 @@ static uint64_t rand48_step(FAR unsigned short int *xi,
   xi[2] = x >> 32;
   return x & 0xffffffffffffull;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -117,7 +115,6 @@ void lcong48(FAR unsigned short int p[7])
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HAVE_LONG_LONG
 long jrand48(FAR unsigned short int s[3])
 {
   return (long)(rand48_step(s, g_seed48 + 3) >> 16);
@@ -201,4 +198,3 @@ double drand48(void)
   return erand48(g_seed48);
 }
 #  endif
-#endif
