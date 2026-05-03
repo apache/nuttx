@@ -428,6 +428,15 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
            FAR struct icmpv6_generic_s *opt =
                                 (FAR struct icmpv6_generic_s *)&options[ndx];
 
+            /* RFC 4861 4.6: "The value 0 is invalid. Nodes MUST silently
+             * discard a packet that contains an option with length zero."
+             */
+
+            if (opt->optlen == 0)
+              {
+                goto icmpv6_drop_packet;
+              }
+
             switch (opt->opttype)
               {
                 case ICMPv6_OPT_SRCLLADDR:
