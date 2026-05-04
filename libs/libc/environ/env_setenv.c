@@ -100,7 +100,15 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
         }
     }
 
-  DEBUGASSERT(info != NULL);
+  /* Like getenv(), fail with EINVAL when the caller has no task_info_s
+   * instead of asserting.
+   */
+
+  if (info == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
 
   namelen = strlen(name);
   nxrmutex_lock(&info->ta_lock);
