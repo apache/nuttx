@@ -75,9 +75,53 @@ struct bluetooth_sendto_s
   ssize_t is_sent;                      /* The number of bytes sent (or error) */
 };
 
+/* Used by bluetooth_dev_byidx_callback to locate the bc_ldev-th BT device */
+
+struct bluetooth_findbyidx_s
+{
+  uint8_t                    bf_tgt;   /* Target index among BT devices (bc_ldev) */
+  uint8_t                    bf_cur;   /* Count of BT devices seen so far */
+  FAR struct radio_driver_s *bf_radio; /* Result */
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: bluetooth_dev_byidx_callback
+ *
+ * Description:
+ *   netdev_foreach callback that finds the bf_tgt-th NET_LL_BLUETOOTH device
+ *   (0-based index among BT devices only).
+ *
+ *   bluetooth_sendto() uses bc_ldev to identify the bound BT device, but
+ *   bc_ldev is a 0-based count among Bluetooth devices only — it bears no
+ *   fixed relationship to the global netdev interface index.  Walking all
+ *   netdevs and counting only NET_LL_BLUETOOTH entries makes the lookup
+ *   independent of what other netdevs are registered and in what order.
+ *
+ ****************************************************************************/
+
+static int bluetooth_dev_byidx_callback(FAR struct net_driver_s *dev,
+                                        FAR void *arg)
+{
+  FAR struct bluetooth_findbyidx_s *match =
+    (FAR struct bluetooth_findbyidx_s *)arg;
+
+  if (dev->d_lltype == NET_LL_BLUETOOTH)
+    {
+      if (match->bf_cur == match->bf_tgt)
+        {
+          match->bf_radio = (FAR struct radio_driver_s *)dev;
+          return 1;
+        }
+
+      match->bf_cur++;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Name: bluetooth_sendto_eventhandler
@@ -279,10 +323,13 @@ static ssize_t bluetooth_sendto(FAR struct socket *psock,
     }
   else if (psock->s_proto == BTPROTO_HCI)
     {
-      /* TODO: should actually look among BT devices */
+      struct bluetooth_findbyidx_s match;
+      match.bf_tgt   = conn->bc_ldev;
+      match.bf_cur   = 0;
+      match.bf_radio = NULL;
 
-      radio =
-          (FAR struct radio_driver_s *)netdev_findbyindex(conn->bc_ldev + 1);
+      netdev_foreach(bluetooth_dev_byidx_callback, &match);
+      radio = match.bf_radio;
 
       if (radio == NULL)
         {
