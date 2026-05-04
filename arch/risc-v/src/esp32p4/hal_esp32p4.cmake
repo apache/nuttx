@@ -50,6 +50,11 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_blockdev/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_event/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/common
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/hw_ver3
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/hw_ver3/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_cam/${CHIP_SERIES}/include
@@ -252,6 +257,9 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/temperature_sensor_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/adc_hal_common.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/adc_oneshot_hal.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/common/touch_sens_common.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/hw_ver3/touch_version_specific.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_touch_sens/${CHIP_SERIES}/touch_sensor_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_security/aes_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_clock/${CHIP_SERIES}/clk_tree_hal.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_dma/${CHIP_SERIES}/gdma_periph.c
