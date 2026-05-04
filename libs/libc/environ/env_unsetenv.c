@@ -61,7 +61,8 @@ int unsetenv(FAR const char *name)
 
   /* Check the incoming parameter */
 
-  if (name == NULL || *name == '\0' || strchr(name, '=') != NULL)
+  if (info == NULL || name == NULL || *name == '\0' ||
+      strchr(name, '=') != NULL)
     {
       set_errno(EINVAL);
       return ERROR;
