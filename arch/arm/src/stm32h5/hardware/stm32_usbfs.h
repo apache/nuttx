@@ -174,7 +174,7 @@
 #define USB_ISTR_PMAOVRN               (1 << 14) /* Bit 14: Packet Memory Area Over / Underrun */
 #define USB_ISTR_CTR                   (1 << 15) /* Bit 15: Correct Transfer */
 #define USB_ISTR_THR512                (1 << 16) /* Bit 16: 512byte threshold interrupt */
-#define USB_ISTR_DDISC                 (1 << 17) /* Bit 17: Device disconnection */
+#define USB_ISTR_DDISC                 (1 << 17) /* Bit 17: Device connection */
 #define USB_ISTR_DCON_STAT             (1 << 29) /* Bit 29: Device connection status */
 #define USB_ISTR_LS_DCONN              (1 << 30) /* Bit 30: Low-speed device connected */
 

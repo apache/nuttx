@@ -267,6 +267,10 @@ static int stm32_chan_wait(struct stm32_usbhost_s *priv,
                               int timeout_ms);
 static void stm32_chan_wakeup(struct stm32_usbhost_s *priv,
                                  struct stm32_chan_s *chan);
+static void stm32_set_chep_rx_status(struct stm32_usbhost_s *priv,
+                                     int chidx, uint32_t status);
+static void stm32_set_chep_tx_status(struct stm32_usbhost_s *priv,
+                                     int chidx, uint32_t status);
 
 /* Control endpoint helpers */
 
@@ -579,6 +583,7 @@ static int stm32_chan_alloc(struct stm32_usbhost_s *priv)
           priv->chan[chidx].inuse = true;
           priv->chan[chidx].pmabufno = (uint8_t)bufno;
           priv->chan[chidx].pmaaddr = STM32H5_PMA_BUFNO2ADDR(bufno);
+          uinfo("Channel allocated: chidx=%d\n", chidx);
           return chidx;
         }
     }
@@ -607,9 +612,12 @@ static inline void stm32_chan_free(struct stm32_usbhost_s *priv,
 
   if (chan->pmabufno != STM32H5_PMA_BUFFER_NONE)
     {
+      stm32_set_chep_rx_status(priv, chidx, USB_CHEP_RX_STRX_DIS);
+      stm32_set_chep_tx_status(priv, chidx, USB_CHEP_TX_STTX_DIS);
       stm32_pma_free_buffer(priv, chan->pmabufno);
       chan->pmabufno = STM32H5_PMA_BUFFER_NONE;
       chan->pmaaddr = 0;
+      uinfo("Channel freed: chidx=%d\n", chidx);
     }
 
   chan->inuse = false;
@@ -1534,9 +1542,19 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
 
       if (!transfer_complete && (chan->waiter || chan->callback))
         {
+          /* Clear VTRX by writing 0 to it
+           * (toggle bit, write 1 keeps, write 0 clears)
+           */
+
+          chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+          chepval = (chepval &
+                    (0xffff7fff & USB_CHEP_REG_MASK)) | USB_CHEP_VTTX;
+          stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+
           /* More data expected - reactivate channel for next packet */
 
           stm32_transfer_start(priv, chidx);
+          return;
         }
       else
         {
@@ -1737,7 +1755,10 @@ static int stm32_usbdrd_interrupt(int irq, void *context, void *arg)
 
   istr = stm32_getreg(STM32_USB_ISTR);
 
-  /* Device connection */
+  /* Device connection/Disconnection. The STM32H5 has both USB_ISTR_DDISC
+   * and USB_ISTR_RESET to detect a connected device. Use USB_ISTR_RESET
+   * since it is signaled after 22 cycles (debounced)
+   */
 
   if ((istr & USB_ISTR_RESET) != 0)
     {
@@ -1745,15 +1766,20 @@ static int stm32_usbdrd_interrupt(int irq, void *context, void *arg)
         {
           stm32_gint_connected(priv);
         }
+      else
+        {
+          stm32_gint_disconnected(priv);
+        }
 
       stm32_putreg(STM32_USB_ISTR, ~USB_ISTR_RESET);
     }
 
-  /* Device disconnection */
+  /* Device connection */
 
   if ((istr & USB_ISTR_DDISC) != 0)
     {
-      stm32_gint_disconnected(priv);
+      /* Not used. USB_ISTR_RESET used instead */
+
       stm32_putreg(STM32_USB_ISTR, ~USB_ISTR_DDISC);
     }
 
