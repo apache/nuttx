@@ -46,15 +46,11 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
-#include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 
 #include <nuttx/usb/cdc.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
-
-#ifdef CONFIG_NET_PKT
-  #include <nuttx/net/pkt.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -147,7 +143,6 @@ struct usbhost_cdcecm_s
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
   struct work_s           ntwork;       /* Notification work */
   struct work_s           bulk_rxwork;
-  struct work_s           txpollwork;
   struct work_s           destroywork;
   int16_t                 nnbytes;      /* Number of bytes received in notification */
   int16_t                 bulkinbytes;
@@ -167,11 +162,11 @@ struct usbhost_cdcecm_s
   uint8_t                 macstridx;     /* MAC address string index */
   uint8_t                 macaddr[6];    /* Device MAC address */
 
-  /* Network device members */
+  /* Network device lowerhalf members */
 
-  bool                    registered;   /* true if the device was registered */
+  netpkt_queue_t          rx_queue;     /* RX packet queue for lowerhalf */
   bool                    bifup;        /* true:ifup false:ifdown */
-  struct net_driver_s     netdev;       /* Interface understood by the network */
+  struct netdev_lowerhalf_s dev;        /* lower half network interface */
 };
 
 /****************************************************************************
@@ -220,17 +215,18 @@ static int usbhost_connect(FAR struct usbhost_class_s *usbclass,
                            FAR const uint8_t *configdesc, int desclen);
 static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
-/* NuttX network callback functions */
+/* Lowerhalf network device operations */
 
-static int cdcecm_ifup(struct net_driver_s *dev);
-static int cdcecm_ifdown(struct net_driver_s *dev);
-static int cdcecm_txavail(struct net_driver_s *dev);
-
-/* Network support functions */
-
-static void cdcecm_receive(struct usbhost_cdcecm_s *priv);
-
-static int cdcecm_txpoll(struct net_driver_s *dev);
+static int cdcecm_net_ifup(FAR struct netdev_lowerhalf_s *dev);
+static int cdcecm_net_ifdown(FAR struct netdev_lowerhalf_s *dev);
+static int cdcecm_net_transmit(FAR struct netdev_lowerhalf_s *dev,
+                               FAR netpkt_t *pkt);
+static FAR netpkt_t *cdcecm_net_receive(FAR struct netdev_lowerhalf_s *dev);
+#ifdef CONFIG_NETDEV_IOCTL
+static int cdcecm_net_ioctl(FAR struct netdev_lowerhalf_s *dev,
+                            int cmd, unsigned long arg);
+#endif
+static void cdcecm_net_reclaim(FAR struct netdev_lowerhalf_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -267,6 +263,20 @@ static struct usbhost_registry_s g_cdcecm =
   sizeof(g_cdcecm_id) /
     sizeof(g_cdcecm_id[0]),       /* nids */
   g_cdcecm_id                     /* id[] */
+};
+
+/* Netdev operations */
+
+static const struct netdev_ops_s g_cdcecm_netdev_ops =
+{
+    .ifup     = cdcecm_net_ifup,
+    .ifdown   = cdcecm_net_ifdown,
+    .transmit = cdcecm_net_transmit,
+    .receive  = cdcecm_net_receive,
+#ifdef CONFIG_NETDEV_IOCTL
+    .ioctl    = cdcecm_net_ioctl,
+#endif
+    .reclaim  = cdcecm_net_reclaim,
 };
 
 /****************************************************************************
@@ -402,18 +412,10 @@ static void usbhost_bulkin_work(FAR void *arg)
 {
   struct usbhost_cdcecm_s *priv;
   struct usbhost_hubport_s *hport;
-  struct iob_s *iob = NULL;
+  FAR netpkt_t *pkt = NULL;
 
   priv = (struct usbhost_cdcecm_s *)arg;
   DEBUGASSERT(priv);
-
-  /* We need net_lock and need priv->mutex.
-   * Since the TX path (cdcecm_txpoll) gets net_lock then priv->lock,
-   * we need to follow the same order to prevent a deadlock if there
-   * is more than 1 LPWORK thread
-   */
-
-  net_lock();
 
   nxmutex_lock(&priv->lock);
 
@@ -423,13 +425,10 @@ static void usbhost_bulkin_work(FAR void *arg)
   if (priv->disconnected || !priv->bifup)
     {
       nxmutex_unlock(&priv->lock);
-      net_unlock();
       return;
     }
 
-  /* Copy incoming data into IOB buffer and
-   * start a new RX as soon as possible
-   */
+  /* Process received data into netpkt and queue for upper half */
 
   if (priv->bulkinbytes > 0)
     {
@@ -439,31 +438,26 @@ static void usbhost_bulkin_work(FAR void *arg)
 
       /* ECM sends raw Ethernet frames - no additional framing */
 
-      if (priv->bulkinbytes <= iob_navail(true) * CONFIG_IOB_BUFSIZE)
+      pkt = netpkt_alloc(&priv->dev, NETPKT_RX);
+      if (pkt != NULL)
         {
-          iob = iob_tryalloc(true);
-          if (iob != NULL)
+          int ret = netpkt_copyin(&priv->dev, pkt,
+                                  priv->bulkinbuf,
+                                  priv->bulkinbytes, 0);
+          if (ret < 0)
             {
-              iob_reserve(iob, CONFIG_NET_LL_GUARDSIZE);
-              int ret = iob_trycopyin(iob, priv->bulkinbuf,
-                                      priv->bulkinbytes,
-                                      -NET_LL_HDRLEN(&priv->netdev), true);
-              if (ret != priv->bulkinbytes)
+              netpkt_free(&priv->dev, pkt, NETPKT_RX);
+              pkt = NULL;
+            }
+          else
+            {
+              ret = netpkt_tryadd_queue(pkt, &priv->rx_queue);
+              if (ret != 0)
                 {
-                  iob_free_chain(iob);
-                  iob = NULL;
+                  netpkt_free(&priv->dev, pkt, NETPKT_RX);
+                  pkt = NULL;
                 }
             }
-        }
-
-      if (iob == NULL)
-        {
-          NETDEV_RXDROPPED(&priv->netdev);
-        }
-      else
-        {
-          priv->netdev.d_iob = iob;
-          priv->netdev.d_len = priv->bulkinbytes;
         }
     }
   else if (priv->bulkinbytes < 0 && priv->bulkinbytes != -EAGAIN)
@@ -471,18 +465,20 @@ static void usbhost_bulkin_work(FAR void *arg)
       uerr("Bulk IN error: %d\n", priv->bulkinbytes);
     }
 
+  /* Restart async RX */
+
   DRVR_ASYNCH(hport->drvr, priv->bulkin,
               (uint8_t *)priv->bulkinbuf, CONFIG_USBHOST_CDCECM_RXBUFSIZE,
               usbhost_bulkin_callback, priv);
 
-  if (iob != NULL)
-    {
-      cdcecm_receive(priv);
-      netdev_iob_release(&priv->netdev);
-    }
-
   nxmutex_unlock(&priv->lock);
-  net_unlock();
+
+  /* Notify upper half after unlocking to avoid deadlock */
+
+  if (pkt != NULL)
+    {
+      netdev_lower_rxready(&priv->dev);
+    }
 }
 
 /****************************************************************************
@@ -496,9 +492,6 @@ static void usbhost_bulkin_work(FAR void *arg)
  *
  * Returned Value:
  *   None
- *
- * Assumptions:
- *   Probably called from an interrupt handler.
  *
  ****************************************************************************/
 
@@ -541,24 +534,28 @@ static void usbhost_notification_work(FAR void *arg)
                    */
 
                   if (inmsg->value[0] &&
-                      !IFF_IS_RUNNING(priv->netdev.d_flags))
+                      !IFF_IS_RUNNING(priv->dev.netdev.d_flags))
                   {
                     uinfo("Network connected\n");
-                    netdev_carrier_on(&priv->netdev);
+                    netdev_lower_carrier_on(&priv->dev);
                   }
                   else if (!inmsg->value[0] &&
-                           IFF_IS_RUNNING(priv->netdev.d_flags))
+                           IFF_IS_RUNNING(priv->dev.netdev.d_flags))
                   {
                     uinfo("Network disconnected\n");
-                    netdev_carrier_off(&priv->netdev);
+                    netdev_lower_carrier_off(&priv->dev);
                   }
                   break;
 
                 case ECM_SPEED_CHANGE:
 
-                  /* Connection speed changed - informational only */
+                  /* Connection speed changed - informational only.
+                   * Disabled print since some adapters send this very
+                   * frequently even if there is no change
+                   */
 
-                  uinfo("Speed change notification\n");
+                  /* uinfo("Speed change notification\n"); */
+
                   break;
 
                 default:
@@ -573,7 +570,7 @@ static void usbhost_notification_work(FAR void *arg)
 
       ret = DRVR_ASYNCH(hport->drvr, priv->intin,
                         (FAR uint8_t *)priv->notification,
-                        SIZEOF_NOTIFICATION_S(0),
+                        priv->maxintsize,
                         usbhost_notification_callback,
                         priv);
       if (ret < 0)
@@ -699,19 +696,13 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Unregister the network device */
 
-  if (priv->registered)
-    {
-      netdev_unregister(&priv->netdev);
-      priv->registered = false;
-    }
+  netdev_lower_unregister(&priv->dev);
 
   /* Cancel any pending work */
 
   work_cancel(LPWORK, &priv->ntwork);
 
   work_cancel(LPWORK, &priv->bulk_rxwork);
-
-  work_cancel(LPWORK, &priv->txpollwork);
 
   /* Free the endpoints */
 
@@ -1168,7 +1159,7 @@ static int usbhost_parse_mac_string(FAR const uint8_t * strdesc,
 static int usbhost_get_mac_address(FAR struct usbhost_cdcecm_s * priv)
 {
   int ret;
-  uint8_t strbuf[64];
+  uint8_t *strbuf;
 
   if (priv->macstridx == 0)
     {
@@ -1176,16 +1167,24 @@ static int usbhost_get_mac_address(FAR struct usbhost_cdcecm_s * priv)
       return -ENOENT;
     }
 
+  ret = DRVR_IOALLOC(priv->usbclass.hport->drvr, &strbuf, 64);
+  if (ret < 0)
+    {
+      uerr("ERROR: DRVR_IOALLOC of notification buf failed: %d (%d bytes)\n",
+           ret, priv->maxintsize);
+      return ret;
+    }
+
   ret = usbhost_ctrl_cmd(priv,
                          USB_REQ_DIR_IN | USB_REQ_TYPE_STANDARD |
                          USB_REQ_RECIPIENT_DEVICE,
                          USB_REQ_GETDESCRIPTOR,
                          (USB_DESC_TYPE_STRING << 8) | priv->macstridx,
-                         0x0409, strbuf, sizeof(strbuf));
+                         0x0409, strbuf, 64);
   if (ret < 0)
     {
       uerr("Failed to get MAC string descriptor: %d\n", ret);
-      return ret;
+      goto errout;
     }
 
   /* Parse MAC address from Unicode string */
@@ -1194,14 +1193,18 @@ static int usbhost_get_mac_address(FAR struct usbhost_cdcecm_s * priv)
   if (ret < 0)
     {
       uerr("Failed to parse MAC address: %d\n", ret);
-      return ret;
+      goto errout;
     }
 
   uinfo("Device MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         priv->macaddr[0], priv->macaddr[1], priv->macaddr[2],
         priv->macaddr[3], priv->macaddr[4], priv->macaddr[5]);
 
-  return OK;
+  ret = OK;
+
+errout:
+  (void)DRVR_IOFREE(priv->usbclass.hport->drvr, strbuf);
+  return ret;
 }
 
 /****************************************************************************
@@ -1282,6 +1285,22 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcecm_s *priv)
       priv->macaddr[5] = rand() & 0xff;
     }
 
+  /* Setup and register the lowerhalf network device */
+
+  FAR struct netdev_lowerhalf_s *dev = &priv->dev;
+
+  memset(dev, 0, sizeof(*dev));
+  memcpy(dev->netdev.d_mac.ether.ether_addr_octet,
+         priv->macaddr, sizeof(priv->macaddr));
+
+  dev->ops = &g_cdcecm_netdev_ops;
+  dev->quota[NETPKT_TX] = 1;
+  dev->quota[NETPKT_RX] = 1;
+  dev->rxtype           = NETDEV_RX_WORK;
+  dev->priority         = LPWORK;
+
+  netdev_lower_register(dev, NET_LL_ETHERNET);
+
   if (priv->intin)
     {
       /* Begin monitoring of message available events */
@@ -1289,7 +1308,7 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcecm_s *priv)
       uinfo("Start notification monitoring\n");
       ret = DRVR_ASYNCH(hport->drvr, priv->intin,
                         (FAR uint8_t *)priv->notification,
-                        SIZEOF_NOTIFICATION_S(0),
+                        priv->maxintsize,
                         usbhost_notification_callback,
                         priv);
       if (ret < 0)
@@ -1297,21 +1316,6 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcecm_s *priv)
           uerr("ERROR: DRVR_ASYNCH failed on intin: %d\n", ret);
         }
     }
-
-  /* Setup the network interface */
-
-  memset(&priv->netdev, 0, sizeof(struct net_driver_s));
-  priv->netdev.d_ifup    = cdcecm_ifup;
-  priv->netdev.d_ifdown  = cdcecm_ifdown;
-  priv->netdev.d_txavail = cdcecm_txavail;
-  priv->netdev.d_private = priv;
-  memcpy(priv->netdev.d_mac.ether.ether_addr_octet,
-         priv->macaddr, sizeof(priv->macaddr));
-
-  /* Register the network device */
-
-  netdev_register(&priv->netdev, NET_LL_ETHERNET);
-  priv->registered = true;
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the character
@@ -1343,8 +1347,9 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcecm_s *priv)
 
           uinfo("Successfully initialized\n");
           priv->crefs--;
-          nxmutex_unlock(&priv->lock);
         }
+
+      nxmutex_unlock(&priv->lock);
     }
 
   return ret;
@@ -1741,203 +1746,124 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
 }
 
 /****************************************************************************
- * Name: cdcecm_transmit
+ * Name: cdcecm_net_transmit
  *
  * Description:
- *   Start hardware transmission.  Called either from the txdone interrupt
- *   handling or from watchdog based polling.
+ *   Lowerhalf transmit callback. Copies packet data to USB bulk OUT buffer
+ *   and performs a blocking USB transfer.
  *
  * Input Parameters:
- *   priv - Reference to the driver state structure
+ *   dev - Reference to the lowerhalf driver structure
+ *   pkt - The packet to send (driver takes ownership and must free)
  *
  * Returned Value:
  *   OK on success; a negated errno on failure
  *
- * Assumptions:
- *   The network is locked.
- *
  ****************************************************************************/
 
-static int cdcecm_transmit(struct usbhost_cdcecm_s *priv)
+static int cdcecm_net_transmit(FAR struct netdev_lowerhalf_s *dev,
+                               FAR netpkt_t *pkt)
 {
-  struct usbhost_hubport_s *hport;
+  FAR struct usbhost_cdcecm_s *priv;
+  FAR struct usbhost_hubport_s *hport;
+  unsigned int datalen;
   ssize_t ret;
 
+  priv = container_of(dev, struct usbhost_cdcecm_s, dev);
   hport = priv->usbclass.hport;
 
-  uinfo("transmit packet: %d bytes\n", priv->netdev.d_len);
+  datalen = netpkt_getdatalen(dev, pkt);
+  uinfo("transmit packet: %u bytes\n", datalen);
 
-  /* Increment statistics */
-
-  NETDEV_TXPACKETS(&priv->netdev);
-
-  /* For ECM, we send raw Ethernet frames - no additional framing needed.
-   * Copy the frame to the TX buffer and send it.
-   */
-
-  if (priv->netdev.d_len > CONFIG_USBHOST_CDCECM_TXBUFSIZE)
+  if (datalen > CONFIG_USBHOST_CDCECM_TXBUFSIZE)
     {
-      NETDEV_TXERRORS(&priv->netdev);
+      netpkt_free(dev, pkt, NETPKT_TX);
       return -EMSGSIZE;
     }
 
-  iob_copyout(priv->bulkoutbuf, priv->netdev.d_iob, priv->netdev.d_len,
-    -NET_LL_HDRLEN(&priv->netdev));
-  cdcecm_print_packet("ECM TX Packet:",
-                      priv->bulkoutbuf, priv->netdev.d_len);
+  /* Copy packet data to USB bulk out buffer.
+   * ECM sends raw Ethernet frames - no additional framing needed.
+   */
 
-  ret = DRVR_TRANSFER(hport->drvr, priv->bulkout, priv->bulkoutbuf,
-    priv->netdev.d_len);
+  ret = netpkt_copyout(dev, priv->bulkoutbuf, pkt, datalen, 0);
+  netpkt_free(dev, pkt, NETPKT_TX);
+
   if (ret < 0)
     {
-      uerr("transfer returned error: %d\n", ret);
       return ret;
     }
 
-  NETDEV_TXDONE(&priv->netdev);
+  cdcecm_print_packet("ECM TX Packet:", priv->bulkoutbuf, datalen);
+
+  ret = DRVR_TRANSFER(hport->drvr, priv->bulkout,
+                      priv->bulkoutbuf, datalen);
+  if (ret < 0)
+    {
+      uerr("ERROR: DRVR_TRANSFER failed: %zd\n", ret);
+      return ret;
+    }
+
+  netdev_lower_txdone(dev);
   return OK;
 }
 
 /****************************************************************************
- * Name: cdcecm_receive
+ * Name: cdcecm_net_receive
  *
  * Description:
- *   Handle a received packet.
+ *   Lowerhalf receive callback. Dequeues a received packet from the RX
+ *   queue. Called by upper half after netdev_lower_rxready() notification.
  *
  * Input Parameters:
- *   priv - Reference to the driver state structure
+ *   dev - Reference to the lowerhalf driver structure
  *
  * Returned Value:
- *   OK on success; a negated errno on failure
+ *   A netpkt containing the received packet, or NULL if no more packets.
  *
- * Assumptions:
- *   The network is locked.
  ****************************************************************************/
 
-static void cdcecm_receive(struct usbhost_cdcecm_s *priv)
+static FAR netpkt_t *cdcecm_net_receive(FAR struct netdev_lowerhalf_s *dev)
 {
-  FAR struct eth_hdr_s * ethhdr;
+  FAR struct usbhost_cdcecm_s *priv;
 
-  NETDEV_RXPACKETS(&priv->netdev);
-
-  /* Validate frame length */
-
-  if (priv->netdev.d_len < ETH_HDRLEN ||
-      priv->netdev.d_len > priv->maxsegment)
-    {
-      NETDEV_RXERRORS(&priv->netdev);
-      nwarn("Invalid frame length: %zu\n", priv->netdev.d_len);
-      return;
-    }
-
-  ethhdr = (struct eth_hdr_s *)
-        &priv->netdev.d_iob->io_data[CONFIG_NET_LL_GUARDSIZE -
-                             NET_LL_HDRLEN(&priv->netdev)];
-
-  /* Check the Ethertype */
-
-#ifdef CONFIG_NET_IPv4
-  if (ethhdr->type == HTONS(ETHTYPE_IP))
-    {
-      NETDEV_RXIPV4(&priv->netdev);
-      ipv4_input(&priv->netdev);
-
-      if (priv->netdev.d_len > 0)
-        {
-          cdcecm_transmit(priv);
-        }
-    }
-  else
-#endif
-#ifdef CONFIG_NET_IPv6
-  if (ethhdr->type == HTONS(ETHTYPE_IP6))
-    {
-      NETDEV_RXIPV6(&priv->netdev);
-      ipv6_input(&priv->netdev);
-
-      if (priv->netdev.d_len > 0)
-        {
-          cdcecm_transmit(priv);
-        }
-    }
-  else
-#endif
-#ifdef CONFIG_NET_ARP
-  if (ethhdr->type == HTONS(ETHTYPE_ARP))
-    {
-      NETDEV_RXARP(&priv->netdev);
-      arp_input(&priv->netdev);
-
-      if (priv->netdev.d_len > 0)
-        {
-          cdcecm_transmit(priv);
-        }
-    }
-  else
-#endif
-#ifdef CONFIG_NET_PKT
-  if (1)
-    {
-      /* Forward raw packet to packet socket */
-
-      pkt_input(&priv->netdev);
-    }
-  else
-#endif
-    {
-      NETDEV_RXDROPPED(&priv->netdev);
-    }
+  priv = container_of(dev, struct usbhost_cdcecm_s, dev);
+  return netpkt_remove_queue(&priv->rx_queue);
 }
 
 /****************************************************************************
- * Name: cdcecm_txpoll
+ * Name: cdcecm_net_ioctl
  *
  * Description:
- *   The transmitter is available, check if the network has any outgoing
- *   packets ready to send.  This is a callback from devif_poll().
- *   devif_poll() may be called:
- *
- *   1. When the preceding TX packet send is complete,
- *   2. When the preceding TX packet send timesout and the interface is reset
- *   3. During normal TX polling
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   OK on success; a negated errno on failure
- *
- * Assumptions:
- *   The network is locked.
+ *   Lowerhalf ioctl callback.
  *
  ****************************************************************************/
 
-static int cdcecm_txpoll(struct net_driver_s *dev)
+#ifdef CONFIG_NETDEV_IOCTL
+static int cdcecm_net_ioctl(FAR struct netdev_lowerhalf_s *dev, int cmd,
+                            unsigned long arg)
 {
-  struct usbhost_cdcecm_s *priv = (struct usbhost_cdcecm_s *)
-                                   dev->d_private;
+  return -ENOTTY;
+}
+#endif
 
-  /* If the polling resulted in data that should be sent out on the network,
-   * the field d_len is set to a value > 0.
-   */
+/****************************************************************************
+ * Name: cdcecm_net_reclaim
+ *
+ * Description:
+ *   Lowerhalf reclaim callback. TX is synchronous via DRVR_TRANSFER
+ *   so there are no queued TX packets to reclaim.
+ *
+ ****************************************************************************/
 
-  nxmutex_lock(&priv->lock);
-
-  /* Send the packet */
-
-  cdcecm_transmit(priv);
-
-  nxmutex_unlock(&priv->lock);
-
-  return 0;
+static void cdcecm_net_reclaim(FAR struct netdev_lowerhalf_s *dev)
+{
 }
 
 /****************************************************************************
  * Name: cdcecm_ifup
  *
  * Description:
- *   NuttX Callback: Bring up the ECM interface when an IP address is
- *   provided
+ *   NuttX Callback: Bring up the ECM interface
  *
  * Input Parameters:
  *   dev - Reference to the NuttX driver state structure
@@ -1949,26 +1875,15 @@ static int cdcecm_txpoll(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int cdcecm_ifup(struct net_driver_s *dev)
+static int cdcecm_net_ifup(struct netdev_lowerhalf_s *dev)
 {
-  struct usbhost_cdcecm_s *priv = (struct usbhost_cdcecm_s *)
-                                   dev->d_private;
+  FAR struct usbhost_cdcecm_s *priv;
+
+  priv = container_of(dev, struct usbhost_cdcecm_s, dev);
   nxmutex_lock(&priv->lock);
 
   struct usbhost_hubport_s *hport = priv->usbclass.hport;
   int ret;
-
-#ifdef CONFIG_NET_IPv4
-  ninfo("Bringing up: %d.%d.%d.%d\n",
-        (int)(dev->d_ipaddr & 0xff), (int)((dev->d_ipaddr >> 8) & 0xff),
-        (int)((dev->d_ipaddr >> 16) & 0xff), (int)(dev->d_ipaddr >> 24));
-#endif
-#ifdef CONFIG_NET_IPv6
-  ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        dev->d_ipv6addr[0], dev->d_ipv6addr[1], dev->d_ipv6addr[2],
-        dev->d_ipv6addr[3], dev->d_ipv6addr[4], dev->d_ipv6addr[5],
-        dev->d_ipv6addr[6], dev->d_ipv6addr[7]);
-#endif
 
   /* Activate the data interface by setting alternate setting 1 */
 
@@ -2025,86 +1940,20 @@ static int cdcecm_ifup(struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int cdcecm_ifdown(struct net_driver_s *dev)
+static int cdcecm_net_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct usbhost_cdcecm_s *priv = (struct usbhost_cdcecm_s *)
-                                   dev->d_private;
+  struct usbhost_cdcecm_s *priv;
+
+  priv = container_of(dev, struct usbhost_cdcecm_s, dev);
   nxmutex_lock(&priv->lock);
 
   /* Deactivate the data interface */
 
   usbhost_setinterface(priv, priv->dataif, 0);
 
-  /* Mark the device "down" */
-
   priv->bifup = false;
 
   nxmutex_unlock(&priv->lock);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: cdcecm_txavail_work
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called in normal user mode
- *
- ****************************************************************************/
-
-static void cdcecm_txavail_work(void *arg)
-{
-  struct usbhost_cdcecm_s *priv = (struct usbhost_cdcecm_s *)arg;
-
-  net_lock();
-
-  if (priv->bifup)
-    {
-      devif_poll(&priv->netdev, cdcecm_txpoll);
-    }
-
-  net_unlock();
-}
-
-/****************************************************************************
- * Name: cdcecm_txavail
- *
- * Description:
- *   Driver callback invoked when new TX data is available.  This is a
- *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
- *   latency.
- *
- * Input Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called from the network stack with the network locked.
- *
- ****************************************************************************/
-
-static int cdcecm_txavail(struct net_driver_s *dev)
-{
-  struct usbhost_cdcecm_s *priv = (struct usbhost_cdcecm_s *)
-                                   dev->d_private;
-
-  if (work_available(&priv->txpollwork))
-    {
-      work_queue(LPWORK, &priv->txpollwork, cdcecm_txavail_work, priv, 0);
-    }
 
   return OK;
 }
