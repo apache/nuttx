@@ -175,6 +175,10 @@ void stm32_spi3select(struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
 
+#ifdef GPIO_SPI3_CS_USER
+      stm32_gpiowrite(GPIO_SPI3_CS_USER, !selected);
+#endif
+
 #ifdef HAVE_LCD
       stm32_gpiowrite(GPIO_LCD_CS, !selected);
 #endif

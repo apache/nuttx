@@ -304,9 +304,35 @@
 #define GPIO_SPI2_MOSI   GPIO_SPI2_MOSI_1
 #define GPIO_SPI2_SCK    GPIO_SPI2_SCK_2
 
-#define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1
-#define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_1
-#define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1
+/* SPI3 has two alternate pin mappings on this board:
+ *
+ * - LCD path uses PB3/PB4/PB5
+ * - AS5047D path uses PC10/PC11/PC12
+ *
+ * Select pinmux by feature so both use-cases are supported in-tree.
+ */
+
+#if defined(CONFIG_LCD_ILI9225) && defined(CONFIG_SENSORS_AS5047D)
+#  error "LCD (ILI9225) and AS5047D require different SPI3 pin mappings"
+#elif defined(CONFIG_SENSORS_AS5047D)
+#  define GPIO_SPI3_MISO   GPIO_SPI3_MISO_2
+#  define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_2
+#  define GPIO_SPI3_SCK    GPIO_SPI3_SCK_2
+#else
+#  define GPIO_SPI3_MISO   GPIO_SPI3_MISO_1
+#  define GPIO_SPI3_MOSI   GPIO_SPI3_MOSI_1
+#  define GPIO_SPI3_SCK    GPIO_SPI3_SCK_1
+#endif
+
+/* Encoder SPI CS from your reference:
+ *   #define ENC_CS GPIOA, GPIO_PIN_15
+ */
+
+#define ENC_CS_PORT      GPIO_PORTA
+#define ENC_CS_PIN       GPIO_PIN15
+#define GPIO_SPI3_CS_USER \
+  (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_50MHz | GPIO_OUTPUT_SET \
+   | ENC_CS_PORT | ENC_CS_PIN)
 
 /* CAN */
 

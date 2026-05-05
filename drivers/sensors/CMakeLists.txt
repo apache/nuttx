@@ -416,6 +416,10 @@ if(CONFIG_SENSORS)
       list(APPEND SRCS adt7320.c)
     endif()
 
+    if(CONFIG_SENSORS_AS5047D)
+      list(APPEND SRCS as5047d.c)
+    endif()
+    
     if(CONFIG_SENSORS_AS5048A)
       list(APPEND SRCS as5048a.c)
     endif()

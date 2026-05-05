@@ -407,6 +407,36 @@ testing purposes::
     PB_6 - GPIO_OUTPUT
     PC_7 - GPIO_INPUT_INTERRUPT
 
+as5047d
+-------
+
+This is basically an ``nsh`` configuration (see above) with added support
+for the AMS AS5047D magnetic rotary encoder using the quadrature encoder
+framework.
+
+Board bring-up initializes AS5047D on SPI3 and registers it as
+``/dev/qe0``.
+
+AS5047D connection (SPI3)::
+
+    AS5047D Signal   Nucleo-F446RE Pin
+    --------------   -----------------
+    SCK              PC10
+    MISO             PC11
+    MOSI             PC12
+    CS               PA15 (D8, GPIO_SPI3_CS_USER)
+
+Relevant configuration options::
+
+    CONFIG_SPI=y
+    CONFIG_STM32_SPI3=y
+    CONFIG_SENSORS=y
+    CONFIG_SENSORS_QENCODER=y
+    CONFIG_SENSORS_AS5047D=y
+
+You can verify encoder operation from NuttShell with the qencoder example
+application (``qe``), which reads position data from ``/dev/qe0``.
+
 ihm08m1_f32 and ihm08m1_b16
 ---------------------------
 
