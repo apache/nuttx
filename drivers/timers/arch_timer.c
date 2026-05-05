@@ -114,7 +114,8 @@ static uint64_t current_usec(void)
     }
   while (timebase != g_timer.timebase);
 
-  return TICK2USEC(timebase) + (status.timeout - status.timeleft);
+  return TICK2USEC((uint64_t)timebase) +
+         (status.timeout - status.timeleft);
 }
 
 static void udelay_accurate(useconds_t microseconds)
