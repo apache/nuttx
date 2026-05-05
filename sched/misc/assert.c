@@ -193,6 +193,7 @@ static void sp_out_of_range(uintptr_t sp)
  * Name: stack_dump
  ****************************************************************************/
 
+nosanitize_address
 static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
