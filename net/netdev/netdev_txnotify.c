@@ -113,6 +113,8 @@ void netdev_txnotify_dev(FAR struct net_driver_s *dev, uint32_t polltype)
 {
   if (dev != NULL && dev->d_txavail != NULL)
     {
+      ninfo("txnotify dev: %s\n", dev->d_ifname);
+
       /* Set the poll type flags */
 
       dev->d_polltype |= polltype;
