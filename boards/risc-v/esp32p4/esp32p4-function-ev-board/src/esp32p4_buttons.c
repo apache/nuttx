@@ -42,15 +42,135 @@
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
+#include <sys/param.h>
 
 /* Arch */
 
 #include "espressif/esp_gpio.h"
+#ifdef CONFIG_ESPRESSIF_TOUCH
+#  include "espressif/esp_touch.h"
+#endif
 
 /* Board */
 
 #include "esp32p4-function-ev-board.h"
 #include <arch/board/board.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct button_type_s
+{
+  bool is_touchpad;
+  union
+  {
+    int channel;
+    int gpio;
+  } input;
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct button_type_s g_buttons[] =
+{
+  {
+    .is_touchpad = false,
+    .input.gpio = BUTTON_BOOT
+  },
+#ifdef CONFIG_ESPRESSIF_TOUCH
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL1
+  {
+    .is_touchpad = true,
+    .input.channel = 1
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL2
+  {
+    .is_touchpad = true,
+    .input.channel = 2
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL3
+  {
+    .is_touchpad = true,
+    .input.channel = 3
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL4
+  {
+    .is_touchpad = true,
+    .input.channel = 4
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL5
+  {
+    .is_touchpad = true,
+    .input.channel = 5
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL6
+  {
+    .is_touchpad = true,
+    .input.channel = 6
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL7
+  {
+    .is_touchpad = true,
+    .input.channel = 7
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL8
+  {
+    .is_touchpad = true,
+    .input.channel = 8
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL9
+  {
+    .is_touchpad = true,
+    .input.channel = 9
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL10
+  {
+    .is_touchpad = true,
+    .input.channel = 10
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL11
+  {
+    .is_touchpad = true,
+    .input.channel = 11
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL12
+  {
+    .is_touchpad = true,
+    .input.channel = 12
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL13
+  {
+    .is_touchpad = true,
+    .input.channel = 13
+  },
+#  endif
+#  ifdef CONFIG_ESP_TOUCH_CHANNEL14
+  {
+    .is_touchpad = true,
+    .input.channel = 14
+  },
+#  endif
+#endif
+};
 
 /****************************************************************************
  * Public Functions
@@ -75,8 +195,17 @@
 
 uint32_t board_button_initialize(void)
 {
+  int button_num = 1;
+#ifdef CONFIG_ESPRESSIF_TOUCH
+  int ret = esp_configtouch(&button_num);
+  if (ret == OK)
+    {
+      button_num++;
+    }
+#endif
+
   esp_configgpio(BUTTON_BOOT, INPUT_FUNCTION_2 | PULLUP | CHANGE);
-  return 1;
+  return button_num;
 }
 
 /****************************************************************************
@@ -100,39 +229,59 @@ uint32_t board_buttons(void)
   uint8_t ret = 0;
   int i = 0;
   int n = 0;
+  bool b0;
+  bool b1;
 
-  bool b0 = esp_gpioread(BUTTON_BOOT);
-
-  for (i = 0; i < 10; i++)
+  for (uint8_t btn_id = 0; btn_id < nitems(g_buttons); btn_id++)
     {
-      up_mdelay(1); /* TODO */
+      iinfo("Reading button %d\n", btn_id);
 
-      bool b1 = esp_gpioread(BUTTON_BOOT);
+      const struct button_type_s button_info = g_buttons[btn_id];
 
-      if (b0 == b1)
+      n = 0;
+
+#ifdef CONFIG_ESPRESSIF_TOUCH
+      if (button_info.is_touchpad)
         {
-          n++;
+          b0 = esp_touchread(button_info.input.channel);
         }
       else
+#endif
         {
-          n = 0;
+          b0 = esp_gpioread(button_info.input.gpio);
+
+          for (i = 0; i < 10; i++)
+            {
+              up_mdelay(1);
+
+              b1 = esp_gpioread(button_info.input.gpio);
+
+              if (b0 == b1)
+                {
+                  n++;
+                }
+              else
+                {
+                  n = 0;
+                }
+
+              if (3 == n)
+                {
+                  break;
+                }
+
+              b0 = b1;
+            }
         }
 
-      if (3 == n)
+      iinfo("b=%d n=%d\n", b0, n);
+
+      /* Low value means that the button is pressed */
+
+      if (!b0)
         {
-          break;
+          ret |= (1 << btn_id);
         }
-
-      b0 = b1;
-    }
-
-  iinfo("b=%d n=%d\n", b0, n);
-
-  /* Low value means that the button is pressed */
-
-  if (!b0)
-    {
-      ret = 0x1;
     }
 
   return ret;
@@ -164,6 +313,36 @@ uint32_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 {
-  return esp_gpio_irq(BUTTON_BOOT, irqhandler, arg);
+  DEBUGASSERT(id < nitems(g_buttons));
+
+  int ret = OK;
+  struct button_type_s button_info = g_buttons[id];
+
+#  ifdef CONFIG_ESP_TOUCH_IRQ
+  if (button_info.is_touchpad)
+    {
+      int channel = button_info.input.channel;
+      if (NULL != irqhandler)
+        {
+          /* Make sure the interrupt is disabled */
+
+          ret = esp_touchirqattach(id, irqhandler, arg);
+          if (ret < 0)
+            {
+              ierr("ERROR: esp_touchirqattach() failed: %d\n",
+                   ret);
+              return ret;
+            }
+
+          iinfo("Attach %p to touch pad %d\n", irqhandler, channel);
+        }
+    }
+  else
+#  endif
+    {
+      ret = esp_gpio_irq(button_info.input.gpio, irqhandler, arg);
+    }
+
+  return ret;
 }
 #endif
