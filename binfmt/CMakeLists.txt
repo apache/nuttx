@@ -67,6 +67,10 @@ if(CONFIG_BUILTIN)
   list(APPEND SRCS builtin.c)
 endif()
 
+if(CONFIG_BINFMT_SCRIPT)
+  list(APPEND SRCS script.c)
+endif()
+
 target_sources(binfmt PRIVATE ${SRCS})
 target_include_directories(binfmt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(binfmt PRIVATE ${NUTTX_DIR}/sched)

@@ -264,6 +264,19 @@ int builtin_initialize(void);
 void builtin_uninitialize(void);
 #endif
 
+#ifdef CONFIG_BINFMT_SCRIPT
+/****************************************************************************
+ * Name: script_initialize / script_uninitialize
+ *
+ * Description:
+ *   Register/unregister the script (#!) binary format handler.
+ *
+ ****************************************************************************/
+
+int script_initialize(void);
+void script_uninitialize(void);
+#endif
+
 #ifdef CONFIG_ELF
 /****************************************************************************
  * Name: elf_initialize
