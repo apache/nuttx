@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_ARCH_FPU is not set
-# CONFIG_STM32_USE_LEGACY_PINMAP is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="stm3240g-eval"
 CONFIG_ARCH_BOARD_STM3240G_EVAL=y

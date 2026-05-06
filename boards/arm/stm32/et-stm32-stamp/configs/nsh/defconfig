@@ -5,7 +5,6 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
-# CONFIG_STM32_USE_LEGACY_PINMAP is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="et-stm32-stamp"
 CONFIG_ARCH_BOARD_ET_STM32_STAMP=y

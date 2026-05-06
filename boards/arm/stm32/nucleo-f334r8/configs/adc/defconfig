@@ -7,7 +7,6 @@
 #
 # CONFIG_ARCH_FPU is not set
 # CONFIG_LIBC_LONG_LONG is not set
-# CONFIG_STM32_USE_LEGACY_PINMAP is not set
 # CONFIG_SYSTEM_DD is not set
 CONFIG_ADC=y
 CONFIG_ANALOG=y
