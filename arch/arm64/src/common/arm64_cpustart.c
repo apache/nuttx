@@ -135,7 +135,7 @@ static void arm64_smp_init_top(void)
 
 static void arm64_start_cpu(int cpu_num)
 {
-#ifdef CONFIG_ARM64_PSCI
+#if defined(CONFIG_ARM64_PSCI) && !defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   uint64_t cpu_mpid = arm64_get_mpid(cpu_num);
 #endif
 
@@ -146,7 +146,7 @@ static void arm64_start_cpu(int cpu_num)
   sched_note_cpu_start(this_task(), cpu_num);
 #endif
 
-#ifdef CONFIG_ARM64_PSCI
+#if defined(CONFIG_ARM64_PSCI) && !defined(CONFIG_ARCH_TRUSTZONE_SECURE)
   if (psci_cpu_on(cpu_mpid, (uint64_t)__start))
     {
       serr("Failed to boot secondary CPU core %d (MPID:%#lx)\n", cpu_num,
