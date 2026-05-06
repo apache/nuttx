@@ -43,10 +43,12 @@ config LIBC_ATOMIC_HWSPINLOCK
 		arch_atomic by chip hwspinlock
 
 config LIBC_ATOMIC_IRQ
-	bool
+	bool "Implement libc atomic using IRQ disable/enable"
 	default n
 	---help---
-		atomic function by irq disable/enable
+		atomic function by irq disable/enable.  Required on targets whose
+		backing memory (e.g. external AXI RAM) does not implement the
+		ARM EXCLUSIVE bus extension, so LDREX/STREX always fails.
 
 config LIBC_ATOMIC_NOINLINE
 	bool "Do not inline the atomic functions"
