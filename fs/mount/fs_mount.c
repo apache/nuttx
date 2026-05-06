@@ -196,6 +196,9 @@ extern const struct mountpt_operations g_rpmsgfs_operations;
 #ifdef CONFIG_FS_ZIPFS
 extern const struct mountpt_operations g_zipfs_operations;
 #endif
+#ifdef CONFIG_FS_ZIPFS_WRITE
+extern const struct mountpt_operations g_wzipfs_operations;
+#endif
 #ifdef CONFIG_FS_V9FS
 extern const struct mountpt_operations g_v9fs_operations;
 #endif
@@ -234,6 +237,9 @@ static const struct fsmap_t g_nonbdfsmap[] =
 #endif
 #ifdef CONFIG_FS_ZIPFS
     { "zipfs", &g_zipfs_operations},
+#endif
+#ifdef CONFIG_FS_ZIPFS_WRITE
+    { "wzipfs", &g_wzipfs_operations},
 #endif
 #ifdef CONFIG_FS_V9FS
     { "v9fs", &g_v9fs_operations},
