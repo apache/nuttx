@@ -56,8 +56,6 @@
 #  define __ARM_ARCH 8
 #endif
 
-#define up_getsp()          (uintptr_t)__builtin_frame_address(0)
-
 /* MPIDR_EL1, Multiprocessor Affinity Register */
 
 #define MPIDR_AFFLVL_MASK   (0xff)
@@ -431,6 +429,13 @@ static inline_function irqstate_t up_irq_enable(void)
 static inline_function void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__("msr daif, %0" :: "r" (flags): "memory");
+}
+
+static inline_function uintptr_t up_getsp(void)
+{
+  register uintptr_t sp;
+  __asm__ __volatile__("mov %0, sp" : "=r"(sp));
+  return sp;
 }
 
 /****************************************************************************
