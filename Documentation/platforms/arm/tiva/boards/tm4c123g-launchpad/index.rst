@@ -125,12 +125,6 @@ Device Drivers -> Memory Technology Device (MTD) Support
     CONFIG_AT24XX_SIZE=512                : Specifies the AT 24C512 part
     CONFIG_AT24XX_ADDR=0x53               : AT24 I2C address
 
-Application Configuration -> NSH Library
-
-.. code-block:: console
-
-    CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
-
 File systems
 
 .. code-block:: console
