@@ -106,3 +106,33 @@ config FS_ZIPFS_FORMAT_XAR
 endif
 
 endif
+
+config FS_ZIPFS_WRITE
+	bool "wzipfs write-only streaming filesystem"
+	depends on UTILS_LIBARCHIVE
+	default n
+	---help---
+		Write-only streaming mount type "wzipfs". Independent of FS_ZIPFS;
+		a board may enable either, both, or neither.
+
+		Mount an empty file (or FIFO/socket) and writes to the mount point
+		are encoded as ZIP bytes directly into the backing target.
+		umount emits the central directory + EOCD.
+
+		Mount option: method=store (default) or method=deflate.
+
+		Fixed RAM overhead: ~69 KB baseline + ~100-160 B per written file.
+		Unsuitable for devices with < 128 KB heap.
+
+if FS_ZIPFS_WRITE
+
+config FS_ZIPFS_WRITE_DEFLATE
+	bool "wzipfs: DEFLATE compression"
+	default n
+	depends on LIB_ZLIB
+	---help---
+		Enable method=deflate mount option. Adds ~260 KB zlib workspace
+		when DEFLATE is selected at mount time.
+		Default method remains STORE (uncompressed) even when this is y.
+
+endif

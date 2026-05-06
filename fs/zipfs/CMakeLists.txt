@@ -14,16 +14,21 @@
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
 #
 # ##############################################################################
 if(NOT CONFIG_DISABLE_MOUNTPOINT)
-  if(CONFIG_FS_ZIPFS)
-
-    target_sources(fs PRIVATE zip_vfs.c)
-
+  if(CONFIG_FS_ZIPFS OR CONFIG_FS_ZIPFS_WRITE)
     target_include_directories(fs PRIVATE libarchive/libarchive/libarchive)
+  endif()
+
+  if(CONFIG_FS_ZIPFS)
+    target_sources(fs PRIVATE zip_vfs.c)
+  endif()
+
+  if(CONFIG_FS_ZIPFS_WRITE)
+    target_sources(fs PRIVATE wzip_vfs.c)
   endif()
 endif()

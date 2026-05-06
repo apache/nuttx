@@ -20,13 +20,14 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_FS_ZIPFS),y)
-
 CFLAGS += ${INCDIR_PREFIX}zipfs/libarchive/libarchive/libarchive
-
-CSRCS += zip_vfs.c
-
 DEPPATH += --dep-path zipfs
 VPATH += :zipfs
 
+ifeq ($(CONFIG_FS_ZIPFS),y)
+CSRCS += zip_vfs.c
+endif
+
+ifeq ($(CONFIG_FS_ZIPFS_WRITE),y)
+CSRCS += wzip_vfs.c
 endif
