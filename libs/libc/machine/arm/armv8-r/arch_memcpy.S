@@ -258,7 +258,7 @@ def_fn memcpy p2align=6
 	cmp	tmp1, tmp2
 	bne	.Lcpy_notaligned
 
-#ifdef USE_VFP
+#if defined(USE_VFP) && !defined(USE_NEON)
 	/* Magic dust alert!  Force VFP on Cortex-A9.  Experiments show
 	   that the FP pipeline is much better at streaming loads and
 	   stores.  This is outside the critical loop.  */
@@ -288,7 +288,40 @@ def_fn memcpy p2align=6
 	bge	.Lcpy_body_long
 
 .Lcpy_body_medium:			/* Count in tmp2.  */
-#ifdef USE_VFP
+#ifdef USE_NEON
+	/* Use NEON multi-register transfers with destination alignment
+	   hints for aligned copies.  */
+1:
+	vld1.8	{d0-d3}, [src]!
+	vld1.8	{d4-d7}, [src]!
+	pld	[src, #(prefetch_lines * 64)]
+	subs	tmp2, tmp2, #64
+	vst1.8	{d0-d3}, [ALIGN(dst, 64)]!
+	vst1.8	{d4-d7}, [ALIGN(dst, 64)]!
+	bge	1b
+	tst	tmp2, #0x3f
+	beq	.Ldone
+
+.Ltail63aligned:			/* Count in tmp2.  */
+	/* Use NEON 8-byte vld1/vst1 for the tail.  */
+	and	tmp1, tmp2, #0x38
+	rsb	tmp1, tmp1, #(56 - PC_OFFSET + INSN_SIZE)
+	add	pc, pc, tmp1
+	vld1.8	{d0}, [src]!	/* 14 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 12 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 10 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 8 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 6 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 4 words to go.  */
+	vst1.8	{d0}, [dst]!
+	vld1.8	{d0}, [src]!	/* 2 words to go.  */
+	vst1.8	{d0}, [dst]!
+#elif defined(USE_VFP)
 1:
 	vldr	d0, [src, #0]
 	subs	tmp2, tmp2, #64
@@ -409,7 +442,26 @@ def_fn memcpy p2align=6
 
 	/* Long copy.  We know that there's at least (prefetch_lines * 64)
 	   bytes to go.  */
-#ifdef USE_VFP
+#ifdef USE_NEON
+	/* Use NEON multi-register transfers with prefetching for long
+	   copies.  */
+	pld	[src, #0]
+	pld	[src, #64]
+	pld	[src, #128]
+	pld	[src, #192]
+	pld	[src, #256]
+1:
+	vld1.8	{d0-d3}, [src]!
+	vld1.8	{d4-d7}, [src]!
+	pld	[src, #(prefetch_lines * 64)]
+	subs	tmp2, tmp2, #64
+	vst1.8	{d0-d3}, [ALIGN(dst, 64)]!
+	vst1.8	{d4-d7}, [ALIGN(dst, 64)]!
+	bge	1b
+	tst	tmp2, #0x3f
+	beq	.Ldone
+	b	.Ltail63aligned
+#elif defined(USE_VFP)
 	/* Don't use PLD.  Instead, read some data in advance of the current
 	   copy position into a register.  This should act like a PLD
 	   operation but we won't have to repeat the transfer.  */
