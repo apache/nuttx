@@ -279,7 +279,13 @@ int exec_module(FAR struct binary_s *binp,
   stackaddr = binp->stackaddr;
 #endif
 
-  if (argv && argv[0])
+  /* If the binfmt handler requested argv preservation (e.g. script
+   * interpreter rewrites), use filename as the task name and forward the
+   * full argv.  Otherwise the conventional path consumes argv[0] as the
+   * task name and forwards argv[1..] as arguments.
+   */
+
+  if (argv && argv[0] && !binp->filename)
     {
       ret = nxtask_init(tcb, argv[0], binp->priority, stackaddr,
                         binp->stacksize, binp->entrypt, &argv[1],

@@ -46,6 +46,19 @@ if NXFLAT
 source "binfmt/libnxflat/Kconfig"
 endif
 
+config BINFMT_SCRIPT
+	bool "Enable script (#!) binary format"
+	default n
+	---help---
+		Enable support for executing files that start with a "#!"
+		(shebang) line.  When posix_spawn / exec targets such a file,
+		the shebang interpreter is loaded via the normal binfmt chain
+		and the original script path is forwarded to it at argv[1],
+		so the interpreter (sh, lua, python, ...) auto-executes it.
+
+		The interpreter itself must be loadable by another registered
+		binfmt handler (builtin, ELF, etc.).
+
 config ELF
 	bool "Enable the ELF Binary Format"
 	default n

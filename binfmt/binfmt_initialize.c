@@ -74,6 +74,14 @@ void binfmt_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_BINFMT_SCRIPT
+  ret = script_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: script_initialize failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
 }
 

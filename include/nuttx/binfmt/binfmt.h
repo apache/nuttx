@@ -30,6 +30,7 @@
 #include <nuttx/config.h>
 
 #include <spawn.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 #include <nuttx/sched.h>
@@ -110,6 +111,10 @@ struct binary_s
 #ifndef CONFIG_BUILD_KERNEL
   FAR void *stackaddr;                 /* Task stack address */
 #endif
+
+  bool filename;                       /* Use filename as task name instead
+                                        * of argv[0]; preserve full argv.
+                                        */
 
   /* Unload module callback */
 

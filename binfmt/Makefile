@@ -46,6 +46,12 @@ ifeq ($(CONFIG_BUILTIN),y)
 CSRCS += builtin.c
 endif
 
+# Script (#!) interpreter support
+
+ifeq ($(CONFIG_BINFMT_SCRIPT),y)
+CSRCS += script.c
+endif
+
 # ELF application interfaces
 
 ifeq ($(CONFIG_ELF),y)
