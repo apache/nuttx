@@ -145,6 +145,22 @@ static int rptun_bmp_notify(FAR struct rptun_dev_s *dev, uint32_t vqid)
   return 0;
 }
 
+static int rptun_bmp_set_irq(FAR void *arg)
+{
+  FAR struct rptun_bmp_dev_s *priv = arg;
+
+  if (priv->callback)
+    {
+      up_enable_irq(priv->irq_event);
+    }
+  else
+    {
+      up_disable_irq(priv->irq_event);
+    }
+
+  return 0;
+}
+
 static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
                                        rptun_callback_t callback,
                                        FAR void *arg)
@@ -154,14 +170,18 @@ static int rptun_bmp_register_callback(FAR struct rptun_dev_s *dev,
   priv->callback = callback;
   priv->arg      = arg;
 
-  if (callback)
-    {
-      up_enable_irq(priv->irq_event);
-    }
-  else
-    {
-      up_disable_irq(priv->irq_event);
-    }
+#ifdef CONFIG_SMP
+  /* The doorbell IRQ (SGI/PPI) is routed to CPU0. On ARM GIC,
+   * up_enable_irq/up_disable_irq for per-CPU interrupts only
+   * affects the local core's enable bit. We must ensure the
+   * operation executes on CPU0; use nxsched_cpu_call_single()
+   * to dispatch it if we are running on another core.
+   */
+
+  nxsched_cpu_call_single(0, rptun_bmp_set_irq, priv);
+#else
+  rptun_bmp_set_irq(priv);
+#endif
 
   return 0;
 }
