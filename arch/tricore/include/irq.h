@@ -334,6 +334,11 @@ static inline_function uintptr_t up_getusrsp(void *regs)
 {
   uintptr_t *csaregs = (uintptr_t *)regs;
 
+  if (csaregs == NULL)
+    {
+      return 0;
+    }
+
   if (csaregs[REG_LPCXI] & PCXI_UL)
     {
       csaregs = tricore_csa2addr(csaregs[REG_LPCXI]);
