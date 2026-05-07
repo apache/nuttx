@@ -35,6 +35,8 @@
  * Included Files
  *********************************************************************************/
 
+#include "libc.h"
+
 #define USE_AS_STRNCMP
-#define STRCMP		strncmp
+#define STRCMP		ARCH_LIBCFUN(strncmp)
 #include "arch_strcmp.S"

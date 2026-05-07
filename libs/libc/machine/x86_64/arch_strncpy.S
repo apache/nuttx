@@ -35,6 +35,8 @@
  * Included Files
  *********************************************************************************/
 
+#include "libc.h"
+
 #define USE_AS_STRNCPY
-#define STRCPY		strncpy
+#define STRCPY	ARCH_LIBCFUN(strncpy)
 #include "arch_strcpy.S"
