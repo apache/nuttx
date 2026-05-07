@@ -112,6 +112,7 @@ void imx9_sm_iomucx_configure(scmi_pinctrl_t *pinctrl)
       int32_t ret = imx9_scmi_set_pinctrl_config(
           channel, (mux_register - SCMI_PLATFORM_PINCTRL_MUXREG_OFF) / 4,
           attributes, configs);
+
       if (ret != 0)
         {
           assert("Unable to set iomux over SCMI");
@@ -133,7 +134,7 @@ int imx9_iomux_configure(iomux_cfg_t cfg)
   pinctrl.channel         = SCMI_PLATFORM_A2P;
   pinctrl.mux_register    = cfg.padcfg.ctlreg;
   pinctrl.mux_mode        = cfg.padcfg.mode;
-  pinctrl.input_register  = cfg.padcfg.dsy;
+  pinctrl.input_register  = cfg.padcfg.dsyreg;
   pinctrl.input_daisy     = cfg.padcfg.dsy;
   pinctrl.config_register = cfg.padcfg.padreg;
   pinctrl.config_value    = cfg.pad;
