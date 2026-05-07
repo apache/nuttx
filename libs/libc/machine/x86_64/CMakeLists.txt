@@ -70,6 +70,10 @@ if(CONFIG_X86_64_STRLEN)
   list(APPEND SRCS arch_strlen.S)
 endif()
 
+if(CONFIG_X86_64_STRNLEN)
+  list(APPEND SRCS arch_strnlen.S)
+endif()
+
 if(CONFIG_X86_64_STRNCPY)
   list(APPEND SRCS arch_strncpy.S)
 endif()

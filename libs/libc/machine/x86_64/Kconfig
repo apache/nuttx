@@ -99,6 +99,13 @@ config X86_64_STRLEN
 	---help---
 		Enable optimized X86_64 specific strlen() library function
 
+config X86_64_STRNLEN
+	bool "Enable optimized strnlen() for X86_64"
+	default n
+	select LIBC_ARCH_STRNLEN
+	---help---
+		Enable optimized X86_64 specific strnlen() library function
+
 config X86_64_STRNCPY
 	bool "Enable optimized strncpy() for X86_64"
 	default n
