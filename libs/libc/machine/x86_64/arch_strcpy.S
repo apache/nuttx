@@ -35,10 +35,12 @@
  * Pre-processor Definitions
  *********************************************************************************/
 
+#include "libc.h"
+
 #ifndef USE_AS_STRCAT
 
 # ifndef STRCPY
-#  define STRCPY	strcpy
+#  define STRCPY	ARCH_LIBCFUN(strcpy)
 # endif
 
 # ifndef L

@@ -36,6 +36,7 @@
  *********************************************************************************/
 
 #include "cache.h"
+#include "libc.h"
 
 /*********************************************************************************
  * Pre-processor Definitions
@@ -47,6 +48,10 @@
 
 #ifndef ALIGN
 # define ALIGN(n)	.p2align n
+#endif
+
+#ifndef MEMSET
+#  define MEMSET	ARCH_LIBCFUN(memset)
 #endif
 
 #define ENTRY(__f)         \
@@ -67,7 +72,7 @@ __f:                       \
 
 	.section .text.sse2,"ax",@progbits
 
-ENTRY(memset)
+ENTRY(MEMSET)
 	movq	%rdi, %rax
 	and	$0xff, %rsi
 	mov	$0x0101010101010101, %rcx
@@ -163,4 +168,4 @@ L(128bytesmore_nt):
 	sfence
 	ret
 
-END(memset)
+END(MEMSET)

@@ -35,6 +35,8 @@
  * Pre-processor Definitions
  *********************************************************************************/
 
+#include "libc.h"
+
 #ifdef USE_AS_STRNCMP
 /* Since the counter, %r11, is unsigned, we branch to strcmp_exitz
    if the new counter > the old one or is 0.  */
@@ -50,7 +52,7 @@
 #else
 #define UPDATE_STRNCMP_COUNTER
 #ifndef STRCMP
-#define STRCMP		strcmp
+#  define STRCMP	ARCH_LIBCFUN(strcmp)
 #endif
 #endif
 
