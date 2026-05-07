@@ -35,10 +35,12 @@
  * Pre-processor Definitions
  *********************************************************************************/
 
+#include "libc.h"
+
 #ifndef USE_AS_STRCAT
 
 #ifndef STRLEN
-# define STRLEN		strlen
+#  define STRLEN	ARCH_LIBCFUN(strlen)
 #endif
 
 #ifndef L

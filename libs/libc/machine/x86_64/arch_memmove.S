@@ -36,13 +36,14 @@
  *********************************************************************************/
 
 #include "cache.h"
+#include "libc.h"
 
 /*********************************************************************************
  * Pre-processor Definitions
  *********************************************************************************/
 
 #ifndef MEMMOVE
-# define MEMMOVE		memmove
+#  define MEMMOVE	ARCH_LIBCFUN(memmove)
 #endif
 
 #ifndef L
@@ -530,4 +531,4 @@ L(mm_large_page_loop_backward):
 
 END (MEMMOVE)
 
-ALIAS_SYMBOL(memcpy, MEMMOVE)
+ALIAS_SYMBOL(ARCH_LIBCFUN(memcpy), MEMMOVE)
