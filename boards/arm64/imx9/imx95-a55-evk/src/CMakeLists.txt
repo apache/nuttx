@@ -34,4 +34,9 @@ if(CONFIG_IMX9_USBHOST)
   list(APPEND SRCS imx9_usbhost.c)
 endif()
 
+if(CONFIG_ETC_ROMFS)
+  add_board_rcsrcs(${CMAKE_CURRENT_SOURCE_DIR}/etc/init.d/rcS
+                   ${CMAKE_CURRENT_SOURCE_DIR}/etc/init.d/rc.sysinit)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
