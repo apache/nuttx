@@ -24,6 +24,10 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = imx9_boardinit.c imx9_bringup.c
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
+endif
+
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += imx9_reset.c
 endif
