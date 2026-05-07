@@ -31,6 +31,10 @@
 #include <nuttx/net/mii.h>
 #include <nuttx/net/gmii.h>
 
+#ifdef CONFIG_ARCH_CHIP_IMX95
+#  include "hardware/imx95/imx95_pinmux.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -45,6 +49,35 @@
 
 #define MUX_LPUART1_RX       IOMUX_CFG(IOMUXC_PAD_UART1_RXD_LPUART1_RX, 0, IOMUXC_MUX_SION_ON)
 #define MUX_LPUART1_TX       IOMUX_CFG(IOMUXC_PAD_UART1_TXD_LPUART1_TX, IOMUXC_PAD_FSEL_SLOW | IOMUXC_PAD_DSE_X4, 0)
+
+/* LPUART5 on FRDM-IMX95 J19 header:
+ *   Pin27 = GPIO_IO00 = LPUART5_TX
+ *   Pin28 = GPIO_IO01 = LPUART5_RX
+ * Loopback test: short Pin27 <-> Pin28.
+ *
+ * NOTE: arm64 imx9 port of NuttX skips lowsetup pinmux on iMX95 (TRDC
+ * protects IOMUXC; only SCMI path is valid). This is configured later in
+ * imx9_bringup() — see imx9_bringup.c.
+ *
+ * Values from imx95 RM (offsets relative to IMX9_IOMUXC1_BASE=0x443c0000):
+ *   GPIO_IO00 MUX_CTL  = 0x10   PAD_CTL   = 0x214
+ *   GPIO_IO01 MUX_CTL  = 0x14   PAD_CTL   = 0x218
+ *   LPUART5 RXD daisy  = 0x570
+ *   LPUART5 TXD daisy  = 0x574
+ *   ALT mode for LPUART5 on GPIO_IO00/01 = 0x5
+ *
+ * PAD_CTL value 0x31e matches what Linux imx95-15x15-frdm-lpuart.dts uses
+ * for both LPUART5_TX and LPUART5_RX. RX with PAD_CTL=0 leaves input
+ * buffer/pull configuration in default state and does NOT conduct signal.
+ *
+ * IOMUX_PADCFG args:
+ *   (mux_ctl_addr, mux_mode, daisy_reg_addr, daisy_val, pad_ctl_addr)
+ */
+
+#define MUX_LPUART5_RX \
+  IOMUX_CFG(IOMUXC_PAD_GPIO_IO01_LPUART5_RX, 0x31e, 0)
+#define MUX_LPUART5_TX \
+  IOMUX_CFG(IOMUXC_PAD_GPIO_IO00_LPUART5_TX, 0x31e, 0)
 
 /* FLEXIO to PWM pin muxings */
 
