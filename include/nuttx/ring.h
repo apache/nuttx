@@ -470,6 +470,11 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
 
   if (count == 0)
     {
+      buf->ptr1 = NULL;
+      buf->len1 = 0;
+      buf->ptr2 = NULL;
+      buf->len2 = 0;
+      buf->idx  = 0;
       return;
     }
 
