@@ -280,9 +280,14 @@ void up_irqinitialize(void)
   arm_ramvec_initialize();
 #endif
 
-  /* Now set all of the interrupt lines to the default priority */
+  /* Set all of the interrupt lines to the default priority.
+   * NVIC_IRQ_PRIORITY(n) maps IRQ number n to its IPR register via
+   * (n >> 2); each 32-bit IPR covers four IRQs.  Step by four and bound
+   * the loop by RP23XX_IRQ_NEXTINT so that every IPR (covering IRQs
+   * 0..51) is written exactly once.
+   */
 
-  for (i = 0; i < 12; i++)
+  for (i = 0; i < RP23XX_IRQ_NEXTINT; i += 4)
     {
       regaddr = NVIC_IRQ_PRIORITY(i);
       putreg32(DEFPRIORITY32, regaddr);
