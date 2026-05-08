@@ -347,7 +347,7 @@ void rpmsg_initialize(void)
   rpmsg_procfs_initialize();
 #ifdef CONFIG_RPMSG_WQUEUE_GLOBAL
   DEBUGVERIFY(rpmsg_create_wqueues(g_rpmsg_wqueues, "glb",
-              CONFIG_RPMSG_WQUEUE_PRIORITY) == 0);
+              CONFIG_RPMSG_WQUEUE_PRIORITY));
 #endif
 }
 
