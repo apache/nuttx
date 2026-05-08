@@ -36,6 +36,16 @@ except ImportError:
     print("lzf module not found, execute `pip install python-lzf`")
 
 
+def detect_encoding(filepath):
+    with open(filepath, "rb") as f:
+        bom = f.read(4)
+    if bom[:2] == b"\xff\xfe":
+        return "utf-16-le"
+    if bom[:2] == b"\xfe\xff":
+        return "utf-16-be"
+    return "utf-8"
+
+
 def try_extract(filepath) -> io.BytesIO:
     """
     Parse log file lines, and try to extract coredump data text
@@ -46,7 +56,8 @@ def try_extract(filepath) -> io.BytesIO:
     in_coredump = False
     bas64 = False
     coredump = []
-    with open(filepath, "r", errors="ignore") as f:
+    encoding = detect_encoding(filepath)
+    with open(filepath, "r", encoding=encoding, errors="ignore") as f:
         for line in f.readlines():
             line = line.rstrip("\n\r")
             if "Start coredump" in line:
