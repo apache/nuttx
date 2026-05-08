@@ -941,8 +941,10 @@ static int local_connect(FAR struct socket *psock,
 #endif /* CONFIG_NET_LOCAL_DGRAM */
 
       default:
-        return -EBADF;
+        break;
     }
+
+  return -EBADF;
 }
 
 /****************************************************************************
