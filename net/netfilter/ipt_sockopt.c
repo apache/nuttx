@@ -89,6 +89,11 @@ static struct ipt_table_s g_tables[] =
 #endif
 };
 
+enum
+{
+  IPT_NTABLES = nitems(g_tables)
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -120,7 +125,8 @@ static void ipt_table_init(FAR struct ipt_table_s *table)
 static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 {
   int i;
-  for (i = 0; i < nitems(g_tables); i++)
+
+  for (i = 0; i < IPT_NTABLES; i++)
     {
       ipt_table_init(&g_tables[i]);
       if (g_tables[i].repl != NULL &&
@@ -144,6 +150,7 @@ static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 static FAR struct ipt_replace *ipt_table_repl(FAR const char *name)
 {
   FAR struct ipt_table_s *table = ipt_table(name);
+
   if (table)
     {
       return table->repl;

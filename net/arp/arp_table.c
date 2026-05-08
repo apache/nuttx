@@ -621,7 +621,7 @@ void arp_cleanup(FAR struct net_driver_s *dev)
           iob_free_queue(&g_arptable[i].at_queue);
 #endif
 
-          memset(&g_arptable[i], 0, sizeof(g_arptable[i]));
+          memset(&g_arptable[i], 0, sizeof(struct arp_entry_s));
         }
     }
 }
