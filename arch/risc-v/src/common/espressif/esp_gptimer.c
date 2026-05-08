@@ -601,7 +601,7 @@ int esp_timer_initialize(int group_id)
       return -ENOMEM;
     }
 
-  snprintf(devpath, PATH_MAX, "/dev/timer%" PRIu32, lower->hal.timer_id);
+  snprintf(devpath, PATH_MAX, "/dev/timer%d", group_id);
 
   /* Initialize the elements of lower half state structure */
 
