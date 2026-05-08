@@ -51,6 +51,10 @@
 #define IMGDATA_PIX_FMT_RGB565X          (9)
 #define IMGDATA_PIX_FMT_ENTROPY          (10)
 
+/* Flags for imgdata_s.caps */
+
+#define IMGDATA_CAP_DROP_FRAME           (1 << 0)
+
 /* Method access helper macros */
 
 #define IMGDATA_INIT(d) \
@@ -87,6 +91,19 @@ typedef struct imgdata_interval_s
   uint32_t denominator;
 } imgdata_interval_t;
 
+/* Callback invoked by imgdata driver when a frame capture completes.
+ *
+ * Parameters:
+ *   result - 0 on success, non-zero error code on failure
+ *   size   - Number of bytes captured. A driver that sets
+ *            IMGDATA_CAP_DROP_FRAME reports a dropped frame with 0: it
+ *            had no buffer (set_buf was called with addr=NULL) and
+ *            consumed the frame without storing data. The upper layer
+ *            re-supplies a buffer via set_buf when one becomes available.
+ *   ts     - Timestamp of the captured frame
+ *   arg    - Opaque argument passed to start_capture
+ */
+
 typedef int (*imgdata_capture_t)(uint8_t result, uint32_t size,
                                  FAR const struct timeval *ts,
                                  FAR void *arg);
@@ -98,6 +115,15 @@ struct imgdata_ops_s
 {
   CODE int (*init)(FAR struct imgdata_s *data);
   CODE int (*uninit)(FAR struct imgdata_s *data);
+
+  /* Set the buffer for the next frame capture.
+   *
+   * Only a driver that sets IMGDATA_CAP_DROP_FRAME gets addr NULL (size
+   * 0). It then enters drop-frame mode: it continues consuming frames
+   * from the hardware but invokes the capture callback with size=0 to
+   * signal that no data was stored. The upper layer will call set_buf
+   * again with a valid buffer once one becomes available.
+   */
 
   CODE int (*set_buf)(FAR struct imgdata_s *data,
                       uint8_t nr_datafmts,
@@ -133,6 +159,7 @@ struct imgdata_ops_s
 struct imgdata_s
 {
   FAR const struct imgdata_ops_s *ops;
+  uint32_t caps;
 };
 
 #ifdef __cplusplus

@@ -2208,6 +2208,16 @@ static int complete_capture(uint8_t err_code,
       return -EINVAL;
     }
 
+  /* Drop-frame callback (size=0): skip frame processing,
+   * go directly to set next buffer.
+   */
+
+  if (datasize == 0 &&
+      (cmng->imgdata->caps & IMGDATA_CAP_DROP_FRAME) != 0)
+    {
+      goto set_next_buf;
+    }
+
   poll_notify(&type_inf->fds, 1, POLLIN);
 
   if (err_code == 0)
@@ -2243,6 +2253,7 @@ static int complete_capture(uint8_t err_code,
       nxsem_post(&type_inf->wait_capture.dqbuf_wait_flg);
     }
 
+set_next_buf:
   if (type_inf->remaining_capnum == 0)
     {
       stop_capture(cmng, buf_type);
@@ -2261,7 +2272,8 @@ static int complete_capture(uint8_t err_code,
   else
     {
       container = video_framebuff_get_vacant_container(&type_inf->bufinf);
-      if (container == NULL)
+      if (container == NULL &&
+          (cmng->imgdata->caps & IMGDATA_CAP_DROP_FRAME) == 0)
         {
           stop_capture(cmng, buf_type);
           type_inf->state = CAPTURE_STATE_STREAMON;
@@ -2281,9 +2293,12 @@ static int complete_capture(uint8_t err_code,
           IMGDATA_SET_BUF(cmng->imgdata,
             type_inf->nr_fmt,
             df,
-            (FAR uint8_t *)container->buf.m.userptr,
-            container->buf.length);
-          container->buf.sequence = type_inf->seqnum++;
+            container ? (FAR uint8_t *)container->buf.m.userptr : NULL,
+            container ? container->buf.length : 0);
+          if (container != NULL)
+            {
+              container->buf.sequence = type_inf->seqnum++;
+            }
         }
     }
 
