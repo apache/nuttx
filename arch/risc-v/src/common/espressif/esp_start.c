@@ -497,14 +497,14 @@ void __esp_start(void)
   uint32_t cache_mmu_irom_size;
 #endif
 
+  bootloader_clear_bss_section();
+
 #ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
   if (bootloader_init() != 0)
     {
       ets_printf("Hardware init failed, aborting\n");
       while (true);
     }
-#else
-  bootloader_clear_bss_section();
 #endif
 
   /* Initialize the per CPU areas */
