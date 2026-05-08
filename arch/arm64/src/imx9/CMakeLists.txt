@@ -105,4 +105,8 @@ if(CONFIG_IMX9_FLEXCAN)
   list(APPEND SRCS imx9_flexcan.c)
 endif()
 
+if(CONFIG_IMX9_SAR_ADC)
+  list(APPEND SRCS imx9_sar_adc.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

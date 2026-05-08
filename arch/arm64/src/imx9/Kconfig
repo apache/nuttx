@@ -544,6 +544,11 @@ config IMX9_TPM6_PWM_CHMUX
 	hex "Channel mux for TPM6"
 	default 0x03020100
 
+config IMX9_SAR_ADC
+	bool "i.MX9 SAR ADC"
+	depends on ARCH_CHIP_IMX93
+	default n
+
 config IMX9_USBDEV
 	bool
 	default n
