@@ -159,6 +159,7 @@ static const struct v4l2_frmsizeenum g_frmsizes[] =
 static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
 {
   uint32_t fourcc;
+
   switch (pixelformat)
     {
       case IMGDATA_PIX_FMT_NV12:
@@ -204,6 +205,7 @@ static uint32_t imgdata_fmt_to_v4l2(uint32_t pixelformat)
 static bool sim_camera_is_available(struct imgsensor_s *sensor)
 {
   sim_camera_priv_t *priv = container_of(sensor, sim_camera_priv_t, sensor);
+
   return host_video_is_available(priv->devpath);
 }
 
@@ -298,7 +300,14 @@ static int sim_camera_data_uninit(struct imgdata_s *data)
 
 static int sim_camera_data_validate_buf(uint8_t *addr, uint32_t size)
 {
-  if (!addr || ((uintptr_t)(addr) & 0x1f))
+  /* NULL addr is valid: signals drop-frame mode (size must be 0) */
+
+  if (addr == NULL)
+    {
+      return size == 0 ? 0 : -EINVAL;
+    }
+
+  if ((uintptr_t)(addr) & 0x1f)
     {
       return -EINVAL;
     }
@@ -376,6 +385,8 @@ static int sim_camera_data_start_capture(struct imgdata_s *data,
   ret = host_video_start_capture(priv->vdev);
   if (ret < 0)
     {
+      priv->capture_cb = NULL;
+      priv->capture_arg = NULL;
       return ret;
     }
 
@@ -389,10 +400,15 @@ static int sim_camera_data_stop_capture(struct imgdata_s *data)
 {
   sim_camera_priv_t *priv = container_of(data, sim_camera_priv_t, data);
 
-  priv->next_buf = NULL;
   priv->capture_started = false;
   wd_cancel(&priv->wdog);
-  return host_video_stop_capture(priv->vdev);
+
+  priv->capture_cb = NULL;
+  priv->capture_arg = NULL;
+  priv->next_buf = NULL;
+  priv->buf_size = 0;
+  host_video_stop_capture(priv->vdev);
+  return 0;
 }
 
 static void sim_camera_interrupt(wdparm_t arg)
@@ -402,23 +418,21 @@ static void sim_camera_interrupt(wdparm_t arg)
   struct timeval tv;
   int ret;
 
-  if (priv == NULL)
+  if (priv == NULL || priv->capture_cb == NULL)
     {
       return;
     }
 
-  if (priv->next_buf != NULL)
+  ret = host_video_dqbuf(priv->vdev, priv->next_buf, priv->buf_size);
+  if (ret >= 0)
     {
-      ret = host_video_dqbuf(priv->vdev, priv->next_buf, priv->buf_size);
-      if (ret > 0)
-        {
-          clock_gettime(CLOCK_MONOTONIC, &ts);
-          TIMESPEC_TO_TIMEVAL(&tv, &ts);
-          priv->capture_cb(0, ret, &tv, priv->capture_arg);
-        }
+      clock_gettime(CLOCK_MONOTONIC, &ts);
+      TIMESPEC_TO_TIMEVAL(&tv, &ts);
+      priv->capture_cb(0, priv->next_buf ? ret : 0,
+                       &tv, priv->capture_arg);
     }
 
-  if (priv->capture_started && priv->next_buf != NULL)
+  if (priv->capture_started)
     {
       wd_start(&priv->wdog, SIM_CAMERA_PERIOD, sim_camera_interrupt,
                (wdparm_t)priv);
@@ -454,6 +468,7 @@ int sim_camera_initialize(void)
       int ret;
 
       priv->data.ops = &g_sim_camera_data_ops;
+      priv->data.caps = IMGDATA_CAP_DROP_FRAME;
       priv->sensor.ops = &g_sim_camera_ops;
       priv->sensor.frmsizes_num = 1;
       priv->sensor.frmsizes = g_frmsizes;

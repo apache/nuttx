@@ -352,7 +352,7 @@ int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
 
             /* No buffer in the outgoing queue */
 
-            return 0;
+            return -EAGAIN;
 
           default:
             perror("VIDIOC_DQBUF");
@@ -365,7 +365,11 @@ int host_video_dqbuf(struct host_video_dev_s *vdev, uint8_t *addr,
       size = buf.bytesused;
     }
 
-  memcpy(addr, vdev->addrs[buf.index], size);
+  if (addr != NULL)
+    {
+      memcpy(addr, vdev->addrs[buf.index], size);
+    }
+
   if (-1 == ioctl(vdev->fd, VIDIOC_QBUF, &buf))
     {
       perror("VIDIOC_QBUF");
@@ -480,9 +484,9 @@ int host_video_stop_capture(struct host_video_dev_s *vdev)
           break;
         }
 
-        munmap(vdev->addrs[i], vdev->buflen[i]);
-        vdev->addrs[i] = NULL;
-        vdev->buflen[i] = 0;
+      munmap(vdev->addrs[i], vdev->buflen[i]);
+      vdev->addrs[i] = NULL;
+      vdev->buflen[i] = 0;
     }
 
   return 0;
