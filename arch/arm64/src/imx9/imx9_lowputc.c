@@ -146,7 +146,6 @@ static const struct uart_config_s g_console_config =
 void imx9_lowsetup(void)
 {
 #ifndef CONFIG_SUPPRESS_LPUART_CONFIG
-#ifndef CONFIG_ARCH_CHIP_IMX95
 
 #ifdef CONFIG_IMX9_LPUART1
   /* Configure LPUART1 pins: RXD and TXD.  Also configure RTS and CTS if flow
@@ -280,7 +279,6 @@ void imx9_lowsetup(void)
 #if ((defined(CONFIG_SERIAL_RS485CONTROL) && defined(CONFIG_LPUART8_RS485RTSCONTROL)) || \
      (defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART8_IFLOWCONTROL)))
   imx9_iomux_configure(MUX_LPUART8_RTS);
-#endif
 #endif
 #endif
 
