@@ -142,8 +142,8 @@ static void get_actualparmtype(const char *arg, char *actual)
 
 static void get_fieldname(const char *arg, char *fieldname)
 {
-  char *pactual = strchr(arg, '|');
-  char *pstart;
+  const char *pactual = strchr(arg, '|');
+  const char *pstart;
 
   if (pactual)
     {
