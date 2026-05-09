@@ -147,15 +147,17 @@
 
 #define RING_BASE(ring)       ((FAR struct ring_s *)(ring))
 
+#define RING_FIELD(ptr)       (*(FAR volatile int32_t *)(ptr))
+
 /* Public API macros - accept RING_DECLARE/RING_DEFINE structs */
 
 #define ring_reset(r)                                    \
   do                                                     \
     {                                                    \
-      atomic_set(&RING_BASE(r)->prod_head, 0);           \
-      atomic_set(&RING_BASE(r)->prod_tail, 0);           \
-      atomic_set(&RING_BASE(r)->cons_head, 0);           \
-      atomic_set(&RING_BASE(r)->cons_tail, 0);           \
+      RING_FIELD(&RING_BASE(r)->prod_head) = 0;          \
+      RING_FIELD(&RING_BASE(r)->prod_tail) = 0;          \
+      RING_FIELD(&RING_BASE(r)->cons_head) = 0;          \
+      RING_FIELD(&RING_BASE(r)->cons_tail) = 0;          \
     }                                                    \
   while (0)
 
@@ -179,19 +181,61 @@
 
 #define ring_init(r, cap)   ring_init_magic(RING_BASE(r), cap)
 
+/* ring_spsc_init - lightweight initialization for SPSC mode.
+ *
+ * Unlike ring_init (which uses atomic CAS for multi-core safe
+ * concurrent initialization), ring_spsc_init uses only volatile
+ * writes. It can be called by either the producer or consumer
+ * side, but NOT concurrently from both — the caller must ensure
+ * only one side calls init. The other side polls
+ * ring_is_ready() before accessing the ring.
+ *
+ * Use ring_spsc_init for AMP/SHM scenarios where atomic
+ * instructions are unavailable on shared memory.
+ * Use ring_init for SMP/BMP scenarios where multiple cores may
+ * race to initialize the same ring.
+ */
+
+#define ring_spsc_init(r, cap)                           \
+  do                                                     \
+    {                                                    \
+      FAR struct ring_s *ring = RING_BASE(r);            \
+      irqstate_t flags = irq_save();                     \
+      if (RING_FIELD(&ring->magic) != RING_MAGIC_READY)  \
+        {                                                \
+          RING_FIELD(&ring->magic) = RING_MAGIC_INIT;    \
+          UP_WMB();                                      \
+          ring->capacity = (cap);                        \
+          ring_reset(r);                                 \
+          UP_WMB();                                      \
+          RING_FIELD(&ring->magic) = RING_MAGIC_READY;   \
+        }                                                \
+      irq_restore(flags);                                \
+    }                                                    \
+  while (0)
+
+#define ring_is_ready(r) \
+  (RING_FIELD(&RING_BASE(r)->magic) == RING_MAGIC_READY)
+
 #define ring_count(r)                                    \
-  ((RTS_IDX(atomic_read(&RING_BASE(r)->prod_tail)) -     \
-    RTS_IDX(atomic_read(&RING_BASE(r)->cons_tail))) &    \
+  ((RTS_IDX(RING_FIELD(&RING_BASE(r)->prod_tail)) -      \
+    RTS_IDX(RING_FIELD(&RING_BASE(r)->cons_tail))) &     \
    RING_IDX_MASK)
 
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
 #define ring_space(r)       (ring_capacity(r) - ring_count(r))
 
-#define ring_spsc_enqueue(r, items, count) \
-  ring_sp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
+#define ring_spsc_enqueue(r, items, count)               \
+  (ring_is_ready(r) ?                                    \
+   ring_sp_enqueue(RING_BASE(r), items, count, sizeof(*(items))) : 0)
 
-#define ring_spsc_dequeue(r, items, count) \
-  ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
+#define ring_spsc_dequeue(r, items, count)               \
+  (ring_is_ready(r) ?                                    \
+   ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items))) : 0)
+
+#define ring_spsc_dequeue_skip(r, count)                 \
+  (ring_is_ready(r) ?                                    \
+   ring_sc_dequeue_skip(RING_BASE(r), count) : 0)
 
 #define ring_mpmc_enqueue(r, items, count) \
   ring_mp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
@@ -210,9 +254,6 @@
 
 #define ring_mpsc_dequeue(r, items, count) \
   ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
-
-#define ring_spsc_dequeue_skip(r, count) \
-  ring_sc_dequeue_skip(RING_BASE(r), count)
 
 #define ring_mpmc_dequeue_skip(r, count) \
   ring_mc_dequeue_skip(RING_BASE(r), count)
@@ -630,11 +671,16 @@ static inline_function void
 ring_sp_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t prod_index = RTS_IDX(atomic_read(&r->prod_tail));
-  uint32_t cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
-  uint32_t free_space = r->capacity -
-                        ((prod_index - cons_index) & RING_IDX_MASK);
-  uint32_t n = count < free_space ? count : free_space;
+  uint32_t prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  uint32_t cons_index;
+  uint32_t free_space;
+  uint32_t n;
+
+  UP_RMB();
+  cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  free_space = r->capacity -
+               ((prod_index - cons_index) & RING_IDX_MASK);
+  n = count < free_space ? count : free_space;
 
   ring_buf_init(buf, r, prod_index, n, elem_size);
 }
@@ -689,10 +735,15 @@ static inline_function void
 ring_sc_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
-  uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
-  uint32_t available = (prod_index - cons_index) & RING_IDX_MASK;
-  uint32_t n = count < available ? count : available;
+  uint32_t cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  uint32_t prod_index;
+  uint32_t available;
+  uint32_t n;
+
+  UP_RMB();
+  prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  available = (prod_index - cons_index) & RING_IDX_MASK;
+  n = count < available ? count : available;
 
   ring_buf_init(buf, r, cons_index, n, elem_size);
 }
@@ -748,7 +799,9 @@ ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
   if (buf->cnt != 0)
     {
       uint32_t prod_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
-      atomic_set_release(&r->prod_tail, RTS_PACK(0, prod_index));
+
+      UP_WMB();
+      RING_FIELD(&r->prod_tail) = RTS_PACK(0, prod_index);
     }
 }
 
@@ -805,7 +858,9 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
   if (buf->cnt != 0)
     {
       uint32_t cons_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
-      atomic_set_release(&r->cons_tail, RTS_PACK(0, cons_index));
+
+      UP_WMB();
+      RING_FIELD(&r->cons_tail) = RTS_PACK(0, cons_index);
     }
 }
 
