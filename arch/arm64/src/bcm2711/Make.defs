@@ -27,6 +27,10 @@ CHIP_CSRCS += bcm2711_mailbox.c
 CHIP_CSRCS += bcm2711_serial.c
 CHIP_CSRCS += bcm2711_gpio.c
 
+ifeq ($(CONFIG_SMP),y)
+CHIP_CSRCS += bcm2711_cpustart.c
+endif
+
 # Early boot logging
 
 ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)

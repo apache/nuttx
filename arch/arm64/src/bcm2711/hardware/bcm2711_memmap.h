@@ -125,4 +125,10 @@
 
 #define BCM_VC_MBOX_BASEADDR (BCM_PERIPHERAL_BASEADDR + 0xb880)
 
+/* Spin table addresses
+ * https://huangweiliang.github.io/2026/02/03/QNX-Startup/
+ */
+
+#define BCM_SPINTBL_CPU(cpu) (0xd8L + (cpu) * 8)
+
 #endif /* __ARCH_ARM64_SRC_BCM2711_MM_H */

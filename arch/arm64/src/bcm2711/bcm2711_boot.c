@@ -26,19 +26,21 @@
 
 #include <assert.h>
 #include <nuttx/debug.h>
+#include <nuttx/cache.h>
+
+#include <arch/chip/chip.h>
 
 #include "arm64_arch.h"
 #include "arm64_internal.h"
 #include "arm64_mmu.h"
 #include "bcm2711_boot.h"
 #include "bcm2711_serial.h"
-#include <arch/chip/chip.h>
+#include "bcm2711_mailbox.h"
 
 #ifdef CONFIG_SMP
-#include "arm64_smp.h"
+#include "bcm2711_cpustart.h"
 #endif
 
-#include <nuttx/cache.h>
 #ifdef CONFIG_LEGACY_PAGING
 #include <nuttx/page.h>
 #endif
@@ -71,6 +73,10 @@ const struct arm_mmu_config g_mmu_config =
   .num_regions = nitems(g_mmu_regions),
   .mmu_regions = g_mmu_regions,
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
@@ -124,7 +130,12 @@ int arm64_get_cpuid(uint64_t mpid)
 
 void arm64_el_init(void)
 {
-  /* TODO: what goes here? */
+#ifdef CONFIG_SMP
+
+  /* This needs to be run at high EL or it does not work for some reason. */
+
+  bcm2711_cpustart();
+#endif
 }
 
 /****************************************************************************
