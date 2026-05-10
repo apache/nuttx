@@ -281,3 +281,11 @@ application. It renders a Game of Life simulation to the HDMI video output.
 Since this configuration also enables the frame buffer, it comes with the same
 limitations as those in ``fb``. However, the ``cgol`` application is double
 buffered, so it will not experience any rendering artifacts.
+
+smp
+---
+
+This configuration leverages all four A72 cores of the BCM2711. It comes with
+the standard NSH shell, :doc:`/applications/testing/getprime/index`,
+:doc:`/applications/testing/ostest/index`, and
+:doc:`/applications/testing/smp/index` tests.
