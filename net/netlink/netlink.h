@@ -205,30 +205,6 @@ struct netlink_conn_s
   sq_queue_t resplist;               /* Singly linked list of responses */
 };
 
-/* Standard attribute types to specify validation policy */
-
-enum
-{
-  NLA_UNSPEC,
-  NLA_U8,
-  NLA_U16,
-  NLA_U32,
-  NLA_U64,
-  NLA_STRING,
-  NLA_FLAG,
-  NLA_MSECS,
-  NLA_NESTED,
-  NLA_NESTED_COMPAT,
-  NLA_NUL_STRING,
-  NLA_BINARY,
-  NLA_S8,
-  NLA_S16,
-  NLA_S32,
-  NLA_S64,
-  NLA_BITFIELD32,
-  NLA_TYPE_MAX = NLA_BITFIELD32,
-};
-
 /* struct netlink_ext_ack - netlink extended ACK report struct
  * _msg: message string to report - don't access directly, use
  *  nl_set_err_msg_attr
