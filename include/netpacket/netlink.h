@@ -116,6 +116,7 @@
 
 /* Definitions for struct nlmsghdr ******************************************/
 
+#define NLMSG_ALIGNTO                    4
 #define NLMSG_MASK                       (sizeof(uint32_t) - 1)
 #define NLMSG_ALIGN(n)                   (((n) + NLMSG_MASK) & ~NLMSG_MASK)
 #define NLMSG_HDRLEN                     sizeof(struct nlmsghdr)
@@ -591,6 +592,30 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+/* Standard attribute types to specify validation policy */
+
+enum
+{
+  NLA_UNSPEC,
+  NLA_U8,
+  NLA_U16,
+  NLA_U32,
+  NLA_U64,
+  NLA_STRING,
+  NLA_FLAG,
+  NLA_MSECS,
+  NLA_NESTED,
+  NLA_NESTED_COMPAT,
+  NLA_NUL_STRING,
+  NLA_BINARY,
+  NLA_S8,
+  NLA_S16,
+  NLA_S32,
+  NLA_S64,
+  NLA_BITFIELD32,
+  NLA_TYPE_MAX = NLA_BITFIELD32,
+};
 
 /* Netlink socket address type. */
 
