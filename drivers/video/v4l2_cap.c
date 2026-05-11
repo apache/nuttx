@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <poll.h>
 
+#include <sys/param.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
 #include <nuttx/poll.h>
@@ -3394,6 +3395,7 @@ static int capture_queryctrl(FAR struct file *filep,
 
   /* Replace gotten value to VIDIOC_QUERYCTRL */
 
+  ctrl->id            = ext_ctrl.id;
   ctrl->type          = ext_ctrl.type;
   ctrl->minimum       = ext_ctrl.minimum;
   ctrl->maximum       = ext_ctrl.maximum;
@@ -3414,6 +3416,7 @@ static int capture_query_ext_ctrl(FAR struct file *filep,
   imgsensor_capability_range_t *range = &value.u.range;
   imgsensor_capability_discrete_t *disc = &value.u.discrete;
   imgsensor_capability_elems_t *elem = &value.u.elems;
+  uint32_t id;
   int ret;
 
   if (cmng == NULL || attr == NULL)
@@ -3422,6 +3425,57 @@ static int capture_query_ext_ctrl(FAR struct file *filep,
     }
 
   ASSERT(cmng->imgsensor);
+
+  id = attr->id;
+
+  /* Handle V4L2_CTRL_FLAG_NEXT_CTRL: find the next supported control
+   * after the given ID by iterating through known CID ranges.
+   */
+
+  if (id & (V4L2_CTRL_FLAG_NEXT_CTRL | V4L2_CTRL_FLAG_NEXT_COMPOUND))
+    {
+      static const uint16_t cid_ranges[][2] =
+        {
+          { V4L2_CTRL_CLASS_USER,   V4L2_CID_USER_LAST   },
+          { V4L2_CTRL_CLASS_CAMERA, V4L2_CID_CAMERA_LAST },
+          { V4L2_CTRL_CLASS_FLASH,  V4L2_CID_FLASH_LAST  },
+          { V4L2_CTRL_CLASS_JPEG,   V4L2_CID_JPEG_LAST   },
+        };
+
+      uint32_t start = (id & ~(V4L2_CTRL_FLAG_NEXT_CTRL |
+                              V4L2_CTRL_FLAG_NEXT_COMPOUND)) + 1;
+      size_t i;
+
+      for (i = 0; i < nitems(cid_ranges); i++)
+        {
+          uint32_t cid;
+          uint32_t range_start = cid_ranges[i][0];
+          uint32_t range_end   = cid_ranges[i][1];
+
+          cid = start > range_start ? start : range_start;
+          for (; cid <= range_end; cid++)
+            {
+              if (cid == V4L2_CID_SCENE_MODE)
+                {
+                  id = cid;
+                  goto found;
+                }
+
+              ret = IMGSENSOR_GET_SUPPORTED_VALUE(cmng->imgsensor,
+                                                  cid, &value);
+              if (ret == OK)
+                {
+                  id = cid;
+                  goto found;
+                }
+            }
+        }
+
+      return -EINVAL; /* No more controls */
+
+found:
+      attr->id = id;
+    }
 
   attr->flags      = 0;
   attr->elem_size  = 0;

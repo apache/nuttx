@@ -108,6 +108,8 @@ enum v4l2_colorfx
 
 #define V4L2_CID_LENS_SHADING_CORRECTION USER_CID(19) /* Lens shading correction */
 
+#define V4L2_CID_USER_LAST            V4L2_CID_GAIN
+
 /* Camera class control IDs */
 
 #define V4L2_CID_EXPOSURE_AUTO        CAMERA_CID(0)  /* Auto exposure */
@@ -242,9 +244,13 @@ enum v4l2_scene_mode
 
 #define V4L2_CID_EXPOSURE_METERING_SPOT_POSITION CAMERA_CID(22)
 
+#define V4L2_CID_CAMERA_LAST          V4L2_CID_EXPOSURE_METERING_SPOT_POSITION
+
 /* Flash and privacy (indicator) light controls */
 
 #define V4L2_CID_FLASH_LED_MODE       FLASH_CID(0)
+
+#define V4L2_CID_FLASH_LAST           V4L2_CID_FLASH_LED_MODE
 
 /* Enumeration for V4L2_CID_FLASH_LED_MODE */
 
@@ -258,6 +264,8 @@ enum v4l2_flash_led_mode
 /* JPEG-class control IDs */
 
 #define V4L2_CID_JPEG_COMPRESSION_QUALITY JPEG_CID(0) /* JPEG quality */
+
+#define V4L2_CID_JPEG_LAST            V4L2_CID_JPEG_COMPRESSION_QUALITY
 
 /* MPEG-class control IDs */
 
