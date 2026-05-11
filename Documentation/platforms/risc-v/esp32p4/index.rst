@@ -379,7 +379,7 @@ LP GPIO            No
 LP Timers          No
 LP ADC             Yes
 Temperature        Yes     Internal temperature sensor
-Touch Sensor       No
+Touch Sensor       Yes
 eFuse              Yes     Virtual eFuses supported
 ================= ======= ==================================
 
