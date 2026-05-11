@@ -1036,7 +1036,13 @@ static int block_comment_width(char *line)
   if (strncmp(&line[b], "/***", 4) == 0 &&
       strncmp(&line[e - 2], "***", 3) == 0)
     {
-      /* Return the length of the line up to the final '*' */
+      /* Return the length of the line up to the final '*'.
+       *
+       * Please note, that here we lie. We return the length of the line plus
+       * one--the leading '/' plus the number of '*' plus 1. The reason is to
+       * fit the length of the last line of a block--the leading space ' '
+       * plus the number of '*' plus closing '/'.
+       */
 
       return e + 1;
     }
