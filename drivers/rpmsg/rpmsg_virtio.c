@@ -503,7 +503,7 @@ static void rpmsg_virtio_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
             priv->rpmsg.local_cpuname, priv->rpmsg.cpuname, priv->headrx,
             priv->headtx);
 
-  if (!rvdev->vdev)
+  if (!rvdev->vdev || !rdev->ns_unbind_cb)
     {
       return;
     }
