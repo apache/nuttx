@@ -1699,6 +1699,28 @@ config ESPRESSIF_TOUCH
 	---help---
 		Enable touch sensor support.
 
+config ESPRESSIF_ANA_COMPR
+	bool
+	default n
+	select COMP
+	select ANALOG
+
+config ESPRESSIF_ANA_COMPR0
+	bool "Analog comparator 0"
+	default n
+	depends on ARCH_CHIP_ESP32H2 || ARCH_CHIP_ESP32P4
+	select ESPRESSIF_ANA_COMPR
+	---help---
+		Enable analog comparator unit 0.
+
+config ESPRESSIF_ANA_COMPR1
+	bool "Analog comparator 1"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	select ESPRESSIF_ANA_COMPR
+	---help---
+		Enable analog comparator unit 1.
+
 config ESPRESSIF_ADC
 	bool "Analog-to-digital converter (ADC)"
 	default n
@@ -2323,6 +2345,123 @@ endif # ESP_PCNT_U3
 endmenu # ESP_PCNT
 
 endmenu # Peripheral Support
+
+menu "Analog Comparator Configuration"
+	depends on ESPRESSIF_ANA_COMPR
+
+if ESPRESSIF_ANA_COMPR0
+
+choice ESPRESSIF_ANA_COMPR0_REF_SRC
+	prompt "Analog comparator0 reference source"
+	default ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	bool "Internal reference source"
+
+config ESPRESSIF_ANA_COMPR0_REF_SRC_EXTERNAL
+	bool "External reference source"
+
+endchoice  # ESPRESSIF_ANA_COMPR0_REF_SRC
+
+choice ESPRESSIF_ANA_COMPR0_REF_VOLT
+	prompt "Analog comparator0 reference voltage"
+	depends on ESPRESSIF_ANA_COMPR0_REF_SRC_INTERNAL
+	default ESPRESSIF_ANA_COMPR0_REF_VOLT_50_VDD
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_0_VDD
+	bool "Internal reference voltage equals to 0% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_10_VDD
+	bool "Internal reference voltage equals to 10% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_20_VDD
+	bool "Internal reference voltage equals to 20% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_30_VDD
+	bool "Internal reference voltage equals to 30% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_40_VDD
+	bool "Internal reference voltage equals to 40% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_50_VDD
+	bool "Internal reference voltage equals to 50% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_60_VDD
+	bool "Internal reference voltage equals to 60% VDD"
+
+config ESPRESSIF_ANA_COMPR0_REF_VOLT_70_VDD
+	bool "Internal reference voltage equals to 70% VDD"
+endchoice  # ESPRESSIF_ANA_COMPR0_REF_SRC
+
+config ESPRESSIF_ANA_COMPR0_DEBOUNCE
+	int "PM_SLEEP delay (milliseconds)"
+	default 100
+	---help---
+		The wait time to prevent frequent interrupts caused by signal noise or bouncing in milliseconds.
+
+endif # ESPRESSIF_ANA_COMPR0
+
+if ESPRESSIF_ANA_COMPR1
+
+choice ESPRESSIF_ANA_COMPR1_REF_SRC
+	prompt "Analog comparator0 reference source"
+	default ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	bool "Internal reference source"
+
+config ESPRESSIF_ANA_COMPR1_REF_SRC_EXTERNAL
+	bool "External reference source"
+
+endchoice  # ESPRESSIF_ANA_COMPR1_REF_SRC
+
+choice ESPRESSIF_ANA_COMPR1_REF_VOLT
+	prompt "Analog comparator0 reference voltage"
+	depends on ESPRESSIF_ANA_COMPR1_REF_SRC_INTERNAL
+	default ESPRESSIF_ANA_COMPR1_REF_VOLT_50_VDD
+	---help---
+		Select reference source for the analog comparator0 unit.
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_0_VDD
+	bool "Internal reference voltage equals to 0% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_10_VDD
+	bool "Internal reference voltage equals to 10% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_20_VDD
+	bool "Internal reference voltage equals to 20% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_30_VDD
+	bool "Internal reference voltage equals to 30% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_40_VDD
+	bool "Internal reference voltage equals to 40% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_50_VDD
+	bool "Internal reference voltage equals to 50% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_60_VDD
+	bool "Internal reference voltage equals to 60% VDD"
+
+config ESPRESSIF_ANA_COMPR1_REF_VOLT_70_VDD
+	bool "Internal reference voltage equals to 70% VDD"
+endchoice  # ESPRESSIF_ANA_COMPR1_REF_SRC
+
+config ESPRESSIF_ANA_COMPR1_DEBOUNCE
+	int "PM_SLEEP delay (milliseconds)"
+	default 100
+	---help---
+		The wait time to prevent frequent interrupts caused by signal noise or bouncing in milliseconds.
+
+endif # ESPRESSIF_ANA_COMPR1
+
+endmenu # Analog Comparator Configuration
 
 menu "ADC Configuration"
 	depends on ESPRESSIF_ADC

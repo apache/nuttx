@@ -181,6 +181,10 @@ ifeq ($(CONFIG_ESPRESSIF_ADC),y)
 CHIP_CSRCS += esp_adc.c
 endif
 
+ifeq ($(CONFIG_COMP),y)
+	CHIP_CSRCS += esp_ana_cmpr.c
+endif
+
 ifeq ($(CONFIG_ESPRESSIF_SHA_ACCELERATOR),y)
 	CHIP_CSRCS += esp_sha.c
 endif
