@@ -506,6 +506,7 @@ void __esp_start(void)
 #else
   bootloader_clear_bss_section();
 #endif
+
   /* Initialize the per CPU areas */
 
 #ifdef CONFIG_RISCV_PERCPU_SCRATCH
@@ -603,6 +604,10 @@ void __esp_start(void)
     {
       PANIC();
     }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+  esp_psram_bss_init();
 #endif
 
   /* Disable clock of unused peripherals */

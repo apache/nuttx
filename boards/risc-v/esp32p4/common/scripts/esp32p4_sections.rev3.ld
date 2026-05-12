@@ -20,6 +20,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -526,7 +528,9 @@ SECTIONS
     *(COMMON)
 
     *(.dynbss .dynsbss .gnu.linkonce.b .gnu.linkonce.b.* .gnu.linkonce.sb .gnu.linkonce.sb.* .gnu.linkonce.sb2 .gnu.linkonce.sb2.* .sbss .sbss.* .sbss2 .sbss2.* .scommon .share.mem)
+#ifndef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
     *(.ext_ram.bss .ext_ram.bss.*)
+#endif
 
     . = ALIGN(4);
     _ebss = ABSOLUTE(.);
@@ -537,6 +541,17 @@ SECTIONS
     . = ALIGN(4);
     _bss_end = ABSOLUTE(.);
   } > sram_seg
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+  /* This section holds .ext_ram.bss data and places it in external RAM. */
+  .ext_ram.bss (NOLOAD) :
+  {
+    _ext_ram_bss_start = ABSOLUTE(.);
+    *(.ext_ram.bss .ext_ram.bss.*)
+    . = ALIGN(4);
+    _ext_ram_bss_end = ABSOLUTE(.);
+  } > ext_ram_seg
+#endif
 
   .flash.text :
   {

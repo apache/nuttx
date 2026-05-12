@@ -20,6 +20,8 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 /* Default entry point: */
 
 ENTRY(__start);
@@ -683,12 +685,25 @@ SECTIONS
      */
     *(.bss .bss.*)
     *(.dynbss .dynsbss .gnu.linkonce.b .gnu.linkonce.b.* .gnu.linkonce.sb .gnu.linkonce.sb.* .gnu.linkonce.sb2 .gnu.linkonce.sb2.* .sbss .sbss.* .sbss2 .sbss2.* .scommon .share.mem)
+#ifndef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
     *(.ext_ram.bss .ext_ram.bss.*)
+#endif
     *(COMMON)
 
  . = ALIGN(4);
  _bss_end_high = ABSOLUTE(.);
   } > sram_high
+
+#ifdef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+  /* This section holds .ext_ram.bss data and places it in external RAM. */
+  .ext_ram.bss (NOLOAD) :
+  {
+    _ext_ram_bss_start = ABSOLUTE(.);
+    *(.ext_ram.bss .ext_ram.bss.*)
+    . = ALIGN(4);
+    _ext_ram_bss_end = ABSOLUTE(.);
+  } > ext_ram_seg
+#endif
 
   /* Heap region for sram_high: from end of bss to end of sram_high segment */
   _sram_high_heap_start = _bss_end_high;

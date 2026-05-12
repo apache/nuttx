@@ -61,6 +61,7 @@ config ESPRESSIF_SPIRAM_BOOT_INIT
 
 config ESPRESSIF_SPIRAM_IGNORE_NOTFOUND
 	bool "Ignore SPIRAM not found"
+	depends on !ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
 	default n
 	---help---
 		Keep booting even if PSRAM detection fails.
@@ -117,6 +118,19 @@ config ESPRESSIF_SPIRAM_USER_HEAP
 	select ESPRESSIF_DONT_USE_ROM_LIBC
 	---help---
 		Add SPIRAM as an additional NuttX heap region.
+
+config ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
+	bool "Allow .bss segment placed in external memory"
+	default n
+	---help---
+		If enabled, variables with EXT_RAM_BSS_ATTR attribute will be
+		placed in SPIRAM instead of internal DRAM.
+
+		BSS sections from esp-hal-3rdparty components can also be placed
+		in SPIRAM through linker fragment mappings when enabled.
+
+		Note that variables placed in SPIRAM this way are still
+		zero-initialized at startup.
 
 endif # ESPRESSIF_SPIRAM
 
