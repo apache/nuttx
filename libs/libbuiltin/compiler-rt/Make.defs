@@ -114,6 +114,10 @@ FLAGS += -fno-profile-instr-generate -fno-coverage-mapping
 FLAGS += -Wno-undef -Wno-strict-prototypes  -Wno-shadow
 FLAGS += -DCOMPILER_RT_HAS_UNAME
 
+ifeq ($(CONFIG_HOST_MACOS),y)
+FLAGS += -D__APPLE__
+endif
+
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.c)
 CPPSRCS += $(wildcard compiler-rt/compiler-rt/lib/profile/*.cpp)
 CSRCS += InstrProfilingPlatform.c

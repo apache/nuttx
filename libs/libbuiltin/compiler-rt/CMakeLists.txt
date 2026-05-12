@@ -137,6 +137,10 @@ if(CONFIG_COVERAGE_COMPILER_RT)
   target_compile_options(rt.profile PRIVATE -DCOMPILER_RT_HAS_UNAME -Wno-undef
                                             -Wno-strict-prototypes -Wno-shadow)
 
+  if(APPLE)
+    target_compile_options(rt.profile PRIVATE -D__APPLE__)
+  endif()
+
   set(SRCSTMP)
   set(RT_PROFILE_SRCS InstrProfilingPlatform.c)
 

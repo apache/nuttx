@@ -32,12 +32,27 @@
  * Public Data
  ****************************************************************************/
 
+#ifdef __APPLE__
+extern char __start__llvm_prf_names[]
+  __asm("section$start$__DATA$__llvm_prf_names");
+extern char __end__llvm_prf_names[]
+  __asm("section$end$__DATA$__llvm_prf_names");
+extern char __start__llvm_prf_data[]
+  __asm("section$start$__DATA$__llvm_prf_data");
+extern char __end__llvm_prf_data[]
+  __asm("section$end$__DATA$__llvm_prf_data");
+extern char __start__llvm_prf_cnts[]
+  __asm("section$start$__DATA$__llvm_prf_cnts");
+extern char __end__llvm_prf_cnts[]
+  __asm("section$end$__DATA$__llvm_prf_cnts");
+#else
 extern char __start__llvm_prf_names[];
 extern char __end__llvm_prf_names[];
 extern char __start__llvm_prf_data[];
 extern char __end__llvm_prf_data[];
 extern char __start__llvm_prf_cnts[];
 extern char __end__llvm_prf_cnts[];
+#endif
 
 COMPILER_RT_VISIBILITY ValueProfNode *CurrentVNode = 0;
 COMPILER_RT_VISIBILITY ValueProfNode *EndVNode = 0;
