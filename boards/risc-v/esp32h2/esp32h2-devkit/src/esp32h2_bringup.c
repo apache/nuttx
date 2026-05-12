@@ -125,6 +125,10 @@
 #  include "espressif/esp_aes.h"
 #endif
 
+#ifdef CONFIG_COMP
+#  include "espressif/esp_ana_cmpr.h"
+#endif
+
 #ifdef CONFIG_PM
 #  include "espressif/esp_pm.h"
 #endif
@@ -471,6 +475,15 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_ANA_COMPR0
+  ret = esp_cmprinitialize(ESPRESSIF_COMP0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp_cmprinitialize(%d) failed: %d\n",
+             ESPRESSIF_COMP0, ret);
     }
 #endif
 
