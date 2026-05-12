@@ -55,6 +55,8 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/hw_ver3
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/hw_ver3/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_touch_sens/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_cam/${CHIP_SERIES}/include
@@ -165,6 +167,8 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/include
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/ulp_common
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/ulp_common/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
@@ -253,6 +257,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_adc/${CHIP_SERIES}/curve_fitting_coefficients.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_adc/adc_cali_curve_fitting.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_adc/adc_cali.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/${CHIP_SERIES}/ana_cmpr_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/adc_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/temperature_sensor_periph.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/adc_hal_common.c
@@ -429,6 +434,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_memory_shared.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_lp_timer_shared.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/ana_cmpr.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src/esp_dma_utils.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src/gdma_link.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src/gdma.c

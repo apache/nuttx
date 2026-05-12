@@ -52,6 +52,8 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_blockdev/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_event/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_conv/include
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_clock/${CHIP_SERIES}/include
@@ -153,6 +155,8 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/include
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/ulp_common
     ${ESP_HAL_3RDPARTY_REPO}/components/ulp/ulp_common/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/${CHIP_SERIES}/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
@@ -250,6 +254,8 @@ list(APPEND HAL_SRCS
 list(
   APPEND
   HAL_SRCS
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_ana_cmpr/${CHIP_SERIES}/ana_cmpr_periph.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/ana_cmpr.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/adc_share_hw_ctrl.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/clk_ctrl_os.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/clk_utils.c
@@ -281,6 +287,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_clk_tree.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/esp_cpu_intr.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/cpu_region_protect.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/io_mux.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/peripheral_domain_pd.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_init.c
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_hw_support/port/${CHIP_SERIES}/pmu_param.c
