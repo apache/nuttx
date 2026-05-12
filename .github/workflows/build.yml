@@ -206,7 +206,18 @@ jobs:
             cd /github/workspace/nuttx-ntfc
             # get NTFC test cases
             cd external
-            git clone -b release-0.0.1 https://github.com/apache/nuttx-ntfc-testing
+            for i in 1 2 3 4 5; do
+              git clone -b release-0.0.1 https://github.com/apache/nuttx-ntfc-testing && break
+              if [ "$i" -eq 5 ]; then
+                echo "Failed to clone nuttx-ntfc-testing after $i attempts"
+                exit 1
+              fi
+
+              delay=$((i * 10))
+              echo "Clone attempt $i failed; retrying in ${delay}s..."
+              rm -rf nuttx-ntfc-testing
+              sleep "$delay"
+            done
             mv nuttx-ntfc-testing nuttx-testing
             export NTFCDIR=/github/workspace/nuttx-ntfc
 
