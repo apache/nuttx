@@ -156,6 +156,7 @@ list(
 if(CONFIG_HOST_MACOS)
   if(CONFIG_HAVE_CXXINITIALIZE)
     list(APPEND HOSTSRCS sim_macho_init.c)
+    target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)
   endif()
 endif()
 

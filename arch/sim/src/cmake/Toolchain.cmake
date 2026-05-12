@@ -21,8 +21,20 @@
 # ##############################################################################
 
 if(APPLE AND CONFIG_SIM_TOOLCHAIN_GCC)
-  find_program(CMAKE_C_ELF_COMPILER x86_64-elf-gcc)
-  find_program(CMAKE_CXX_ELF_COMPILER x86_64-elf-g++)
+  if(CONFIG_HOST_ARM64)
+    find_program(CMAKE_C_ELF_COMPILER aarch64-elf-gcc)
+    find_program(CMAKE_CXX_ELF_COMPILER aarch64-elf-g++)
+  else()
+    find_program(CMAKE_C_ELF_COMPILER x86_64-elf-gcc)
+    find_program(CMAKE_CXX_ELF_COMPILER x86_64-elf-g++)
+  endif()
+endif()
+
+# Ninja archives large object lists through response files. Use LLVM binutils
+# because macOS /usr/bin/ar does not understand the @rsp syntax.
+if(APPLE)
+  find_program(CMAKE_AR NAMES llvm-ar REQUIRED)
+  find_program(CMAKE_RANLIB NAMES llvm-ranlib REQUIRED)
 endif()
 
 if(WIN32)
