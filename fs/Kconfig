@@ -94,6 +94,27 @@ config PSEUDOFS_ATTRIBUTES
 		Enable support for attributes(e.g. mode, uid, gid and time)
 		in the pseudo file system.
 
+config FS_PERMISSION
+	bool "Enable UNIX Filesystem Permission Support"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	depends on SCHED_USER_IDENTITY
+	depends on PSEUDOFS_ATTRIBUTES
+
+	---help---
+		Enable filesystem ownership and permission metadata
+		support for pseudoFS inodes.
+
+		Requires SCHED_USER_IDENTITY and
+		PSEUDOFS_ATTRIBUTES for task credential tracking
+		and inode ownership/mode metadata support.
+
+		This option alone does not enforce runtime
+		permission checks.
+
+	comment "UNIX filesystem permission support requires SCHED_USER_IDENTITY=y, PSEUDOFS_ATTRIBUTES=y and DISABLE_PSEUDOFS_OPERATIONS=n"
+		depends on !SCHED_USER_IDENTITY || !PSEUDOFS_ATTRIBUTES || DISABLE_PSEUDOFS_OPERATIONS
+
 config PSEUDOFS_SOFTLINKS
 	bool "Pseudo-filesystem soft links"
 	default n
