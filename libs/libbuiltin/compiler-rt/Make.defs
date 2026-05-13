@@ -36,8 +36,11 @@ COMPILER_RT_OBJDIR = compiler-rt \
                      compiler-rt/compiler-rt \
                      compiler-rt/compiler-rt/lib \
                      compiler-rt/compiler-rt/lib/builtins \
-                     compiler-rt/compiler-rt/lib/builtins/$(ARCH) \
                      compiler-rt/compiler-rt/lib/profile
+
+ifneq ($(ARCH),)
+COMPILER_RT_OBJDIR += compiler-rt/compiler-rt/lib/builtins/$(ARCH)
+endif
 
 BIN_OBJDIR = $(addprefix $(BINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
 KBIN_OBJDIR = $(addprefix $(KBINDIR)$(DELIM),$(COMPILER_RT_OBJDIR))
@@ -80,13 +83,16 @@ endif
 ifeq ($(CONFIG_BUILTIN_COMPILER_RT),y)
 
 FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins
-FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
 
 FLAGS += -Wno-undef -Wno-macro-redefined
 
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/*.c)
+
+ifneq ($(ARCH),)
+FLAGS += ${INCDIR_PREFIX}$(CURDIR)/compiler-rt/compiler-rt/lib/builtins/${ARCH}
 ASRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.S)
 CSRCS += $(wildcard compiler-rt/compiler-rt/lib/builtins/$(ARCH)/*.c)
+endif
 
 ifeq ($(CONFIG_LIB_COMPILER_RT_HAS_BFLOAT16),)
   BFLOAT16_SRCS := compiler-rt/compiler-rt/lib/builtins/truncdfbf2.c
