@@ -363,6 +363,7 @@ Watchdog           Yes     MWDT0/1 and RWDT
 Ethernet           Yes
 Brownout           No
 Debug Probe        No
+Analog Comp        Yes     COMP0/1
 ================= ======= ==================================
 
 LP Peripherals
