@@ -52,15 +52,25 @@ Mount
 Syntax::
 
     mount -t wzipfs -o src=<backing>[,method=store|deflate] <mountpoint>
+    mount -t wzipfs -o fd=<N>[,method=store|deflate]        <mountpoint>
+
+Exactly one of ``src=`` or ``fd=`` must be supplied.
 
 Behavior:
 
-- If ``<backing>`` does not exist or has zero size, wzipfs streams a new
-  ZIP archive into it.
-- If ``<backing>`` is a regular file with ``st_size > 0``, mount fails with
-  ``-EEXIST``.  Remove or truncate the backing file before mounting to
-  start a fresh archive.
-- FIFO and socket targets are always accepted and stream from offset 0.
+- ``src=<backing>`` -- wzipfs opens the path.  If ``<backing>`` does not
+  exist or has zero size, a new ZIP archive is streamed into it.  If it
+  is a regular file with ``st_size > 0``, mount fails with ``-EEXIST``;
+  remove or truncate the backing file before mounting to start a fresh
+  archive.  FIFO and socket targets are always accepted.
+- ``fd=<N>`` -- wzipfs duplicates the caller-provided writable file
+  descriptor into its own backing.  The caller retains the original fd
+  and MUST keep it open until ``umount(2)`` returns, so that the final
+  close on that fd (after umount) releases any shared inode state
+  (e.g. pipe writer count, socket reference).  No stat/size check is
+  performed: callers are responsible for their own backing semantics
+  (pipe, socket, regular file).  Typical use cases are streaming to an
+  anonymous ``pipe(2)``, to a connected socket, or to ``stdout``.
 
 Compression
 -----------
@@ -138,6 +148,18 @@ Stream to a FIFO (pipe to another process)::
     mount -t wzipfs -o src=/dev/zipstream /mnt/zip
     echo data > /mnt/zip/data.txt
     umount /mnt/zip
+
+Stream to a caller-provided fd (anonymous pipe, socket, stdout)::
+
+    int pipefd[2];
+    char opts[32];
+
+    pipe(pipefd);
+    snprintf(opts, sizeof(opts), "fd=%d", pipefd[1]);
+    mount(NULL, "/mnt/zip", "wzipfs", 0, opts);
+    /* write entries through /mnt/zip/... while another task drains pipefd[0] */
+    umount("/mnt/zip");         /* closes wzipfs's own dup of the fd */
+    close(pipefd[1]);           /* final close: delivers EOF to pipefd[0] reader */
 
 DEFLATE compression::
 
