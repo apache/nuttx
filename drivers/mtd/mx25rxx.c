@@ -108,6 +108,7 @@
 #else
 #  define MX25R_JEDEC_MEMORY_TYPE          0x28  /* MX25Rx memory type */
 #endif
+#define MX25R_JEDEC_MX25L12873G_CAPACITY 0x18  /* MX25L12873G memory capacity */
 #define MX25R_JEDEC_MX25L25673G_CAPACITY 0x19  /* MX25L25673G memory capacity */
 #define MX25R_JEDEC_MX25R6435F_CAPACITY  0x17  /* MX25R6435F memory capacity */
 #define MX25R_JEDEC_MX25R8035F_CAPACITY  0x14  /* MX25R8035F memory capacity */
@@ -127,6 +128,14 @@
 #define MX25R6435F_SECTOR_COUNT     (2048)
 #define MX25R6435F_PAGE_SIZE        (256)
 
+/* MX25L12873G (128 MB) memory capacity */
+
+#define MX25L12873G_SECTOR_SIZE     (4*1024)
+#define MX25L12873G_SECTOR_SHIFT    (12)
+#define MX25L12873G_ADDRESS_BYTES   MX25R_ADDRESSBYTES_3
+#define MX25L12873G_SECTOR_COUNT    (4096)
+#define MX25L12873G_PAGE_SIZE       (256)
+
 /* MX25L25673G (256 MB) memory capacity */
 
 #define MX25L25673G_SECTOR_SIZE     (4*1024)
@@ -137,9 +146,11 @@
 
 #ifdef CONFIG_MX25RXX_PAGE128
 #  define MX25R6435F_PAGE_SHIFT     (7)
+#  define MX25L12873G_PAGE_SHIFT    (7)
 #  define MX25L25673G_PAGE_SHIFT    (7)
 #else
 #  define MX25R6435F_PAGE_SHIFT     (8)
+#  define MX25L12873G_PAGE_SHIFT    (8)
 #  define MX25L25673G_PAGE_SHIFT    (8)
 #endif
 
@@ -879,6 +890,13 @@ int mx25rxx_readid(FAR struct mx25rxx_dev_s *dev)
         dev->pageshift    = MX25R6435F_PAGE_SHIFT;
         dev->addressbytes = MX25R6435F_ADDRESS_BYTES;
         dev->nsectors     = MX25R6435F_SECTOR_COUNT;
+        break;
+
+      case MX25R_JEDEC_MX25L12873G_CAPACITY:
+        dev->sectorshift  = MX25L12873G_SECTOR_SHIFT;
+        dev->pageshift    = MX25L12873G_PAGE_SHIFT;
+        dev->addressbytes = MX25L12873G_ADDRESS_BYTES;
+        dev->nsectors     = MX25L12873G_SECTOR_COUNT;
         break;
 
       case MX25R_JEDEC_MX25L25673G_CAPACITY:
