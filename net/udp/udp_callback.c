@@ -327,6 +327,7 @@ void udp_callback_cleanup(FAR void *arg)
   nerr("ERROR: pthread is being canceled, need to cleanup cb\n");
 
   conn_dev_lock(&cb->conn->sconn, cb->dev);
+  udp_callback_free(cb->dev, cb->conn, cb->udp_cb);
   if (cb->sem)
     {
       nxsem_destroy(cb->sem);
