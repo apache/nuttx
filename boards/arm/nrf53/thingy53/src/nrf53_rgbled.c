@@ -84,13 +84,18 @@ int nrf53_rgbled_initialize(void)
 
       /* Define frequency and duty cycle */
 
+      memset(&info, 0, sizeof(info));
+
       ledg = ledr;
       ledb = ledr;
 
       info.frequency = 100;
       info.channels[0].duty = 0;
+      info.channels[0].channel = 1;
       info.channels[1].duty = 0;
+      info.channels[1].channel = 2;
       info.channels[2].duty = 0;
+      info.channels[2].channel = 3;
 
       /* Initialize LED R */
 
