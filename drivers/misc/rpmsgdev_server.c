@@ -263,46 +263,57 @@ static int rpmsgdev_read_nonblock_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_read_s *msg = data;
   FAR struct rpmsgdev_read_s *rsp;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
+  bool loop = true;
   size_t read = 0;
   uint32_t space;
-  ssize_t ret = 0;
+  ssize_t ret;
 
-  rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
-  if (rsp == NULL)
+  while (loop && read < msg->count)
     {
-      return -ENOMEM;
-    }
-
-  *rsp = *msg;
-
-  space -= sizeof(*msg) - 1;
-  if (space > msg->count)
-    {
-      space = msg->count;
-    }
-
-  /* Loop file_read to fill the single tx buffer */
-
-  while (read < space)
-    {
-      ret = file_read(filep, rsp->buf + read, space - read);
-      if (ret <= 0)
+      rsp = rpmsg_get_tx_payload_buffer(ept, &space, true);
+      if (rsp == NULL)
         {
-          break;
+          return -ENOMEM;
         }
 
-      read += ret;
+      *rsp = *msg;
+
+      space -= sizeof(*msg) - 1;
+      if (space >= msg->count)
+        {
+          loop = false;
+        }
+
+      space = MIN(space, msg->count - read);
+
+      ret = file_read(filep, rsp->buf, space);
+      if (ret == -EAGAIN && read == 0 &&
+          msg->header.command == RPMSGDEV_READ)
+        {
+          rpmsg_release_tx_buffer(ept, rsp);
+          return ret;
+        }
+
+      if (ret > 0)
+        {
+          read += ret;
+          rsp->count = loop ? msg->count - read : 0;
+        }
+      else
+        {
+          rsp->count = 0;
+          loop = false;
+        }
+
+      rsp->header.result = ret;
+      if (rpmsg_send_nocopy(ept, rsp,
+                            (ret < 0 ? 0 : ret) + sizeof(*rsp) - 1) < 0)
+        {
+          rpmsg_release_tx_buffer(ept, rsp);
+        }
     }
 
-  if (ret == -EAGAIN && read == 0 && msg->header.command == RPMSGDEV_READ)
-    {
-      rpmsg_release_tx_buffer(ept, rsp);
-      return ret;
-    }
-
-  rsp->header.result = read > 0 ? read : ret;
-  return rpmsg_send_nocopy(ept, rsp,
-                           (read > 0 ? read : 0) + sizeof(*rsp) - 1);
+  return 0;
 }
 
 /****************************************************************************
