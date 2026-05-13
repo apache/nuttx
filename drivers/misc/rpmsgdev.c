@@ -413,7 +413,6 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   FAR struct rpmsgdev_read_s *msg;
-  size_t readlen = 0;
   uint32_t command;
   uint32_t space;
   ssize_t ret;
@@ -442,61 +441,42 @@ static ssize_t rpmsgdev_read(FAR struct file *filep, FAR char *buffer,
       goto out;
     }
 
-  while (readlen < buflen)
+  msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
+  if (msg == NULL)
     {
-      msg = rpmsgdev_get_tx_payload_buffer(dev, &space);
-      if (msg == NULL)
-        {
-          ret = -ENOMEM;
-          break;
-        }
-
-      space -= sizeof(*msg) - 1;
-      if (space >= buflen - readlen)
-        {
-          space = buflen - readlen;
-        }
-
-      msg->filep = priv->filep;
-      msg->count = space;
-      ret = rpmsgdev_send_recv_with_cookie(dev, cookie, command, false,
-                                           &msg->header, sizeof(*msg) - 1,
-                                           buffer + readlen);
-      if (ret > 0)
-        {
-#if CONFIG_RPMSG_POOL_COUNT > 0
-          FAR struct rpmsgdev_read_s *rsp = cookie->data;
-
-          memcpy(buffer + readlen, rsp->buf, cookie->result);
-          rpmsg_release_rx_buffer(&dev->ept, cookie->data);
-#endif
-          readlen += ret;
-          continue;
-        }
-      else if (ret != -EAGAIN || priv->nonblock || readlen != 0)
-        {
-          break;
-        }
-
+      ret = -ENOMEM;
       nxmutex_unlock(&priv->lock);
-      ret = rpmsgdev_wait(filep, POLLIN);
-      if (ret < 0)
-        {
-          rpmsgdeverr("read wait failed, ret=%d\n", ret);
-          goto out;
-        }
-
-      ret = nxmutex_lock(&priv->lock);
-      if (ret < 0)
-        {
-          goto out;
-        }
+      goto out;
     }
+
+  space -= sizeof(*msg) - 1;
+  msg->filep = priv->filep;
+
+#if CONFIG_RPMSG_POOL_COUNT > 0
+  /* MPU mode: limit count to buffer space to ensure single response */
+
+  msg->count = MIN(space, buflen);
+#else
+  msg->count = buflen;
+#endif
+
+  ret = rpmsgdev_send_recv_with_cookie(dev, cookie, command, false,
+                                       &msg->header, sizeof(*msg) - 1,
+                                       buffer);
+#if CONFIG_RPMSG_POOL_COUNT > 0
+  if (ret >= 0 && cookie->result > 0)
+    {
+      FAR struct rpmsgdev_read_s *rsp = cookie->data;
+
+      memcpy(buffer, rsp->buf, cookie->result);
+      rpmsg_release_rx_buffer(&dev->ept, cookie->data);
+    }
+#endif
 
   nxmutex_unlock(&priv->lock);
 out:
   rpmsg_pool_free(cookie);
-  return readlen != 0 ? readlen : ret;
+  return ret;
 }
 
 /****************************************************************************
@@ -1057,22 +1037,30 @@ static int rpmsgdev_read_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgdev_header_s *header = data;
   FAR struct rpmsgdev_cookie_s *cookie =
       (FAR struct rpmsgdev_cookie_s *)(uintptr_t)header->cookie;
-#if CONFIG_RPMSG_POOL_COUNT <= 0
   FAR struct rpmsgdev_read_s *rsp = data;
-#endif
 
-  cookie->result = header->result;
-  if (cookie->result > 0)
+  if (header->result > 0)
     {
 #if CONFIG_RPMSG_POOL_COUNT > 0
+      cookie->result = header->result;
       rpmsg_hold_rx_buffer(ept, data);
       cookie->data = data;
 #else
-      memcpy(cookie->data, rsp->buf, cookie->result);
+      memcpy(cookie->data, rsp->buf, header->result);
+      cookie->data += header->result;
+      cookie->result += header->result;
 #endif
     }
+  else if (cookie->result == 0)
+    {
+      cookie->result = header->result;
+    }
 
-  rpmsg_post(ept, &cookie->sem);
+  if (rsp->count == 0 || header->result <= 0)
+    {
+      rpmsg_post(ept, &cookie->sem);
+    }
+
   return 0;
 }
 
