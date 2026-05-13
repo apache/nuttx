@@ -104,6 +104,10 @@ static int nrf53_appcore_bleinit(void)
     }
 
 #  ifdef CONFIG_DRIVERS_BLUETOOTH
+  /* Wait a moment to make sure the netcore initializes BLE */
+
+  nxsched_usleep(1000);
+
   ret = bt_driver_register(bt_dev);
   if (ret < 0)
     {
