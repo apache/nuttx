@@ -198,6 +198,51 @@ Also sets the previous working directory environment variable
 ``cd ..`` 	        sets the current working directory to the parent directory.
 ==================  =====================================
 
+.. _cmdchmod:
+
+``chmod`` Change File Permissions
+==================================
+
+**Command Syntax**::
+
+  chmod <octal-mode> <path>
+
+**Synopsis**. Change the permission bits of ``<path>``. Only numeric
+(octal) modes are supported.
+
+**Example**::
+
+  nsh> chmod 600 /tmp/secret
+  nsh> chmod 755 /usr/bin/app
+
+.. _cmdchown:
+
+``chown`` Change File Owner and Group
+======================================
+
+**Command Syntax**::
+
+  chown <uid>[:gid] <path>
+
+**Synopsis**. Change the owner and/or group of ``<path>``. Only
+numeric uid and gid values are accepted. Omitted uid or gid fields
+are left unchanged.
+
+**Forms:**
+
+===================  ===============================================================
+``chown uid:gid``    Sets owner to uid and group to gid.
+``chown uid``        Sets owner to uid; group is unchanged.
+``chown uid:``       Sets owner to uid; group is unchanged.
+``chown :gid``       Sets group to gid; owner is unchanged.
+===================  ===============================================================
+
+**Example**::
+
+  nsh> chown 1000:1000 /tmp/file
+  nsh> chown 0: /tmp/file
+  nsh> chown :100 /tmp/file
+
 .. _cmdcmp:
 
 ``cmp`` Compare Files
