@@ -454,7 +454,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
     }
 
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
-  buf->st_mode |= inode->i_mode;
+  buf->st_mode = (buf->st_mode & S_IFMT) | inode->i_mode;
   buf->st_uid   = inode->i_owner;
   buf->st_gid   = inode->i_group;
   buf->st_atim  = inode->i_atime;
