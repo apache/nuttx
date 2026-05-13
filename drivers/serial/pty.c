@@ -1238,6 +1238,11 @@ static int pty_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
   else
     {
       pollp = (FAR struct pty_poll_s *)fds->priv;
+      if (pollp == NULL)
+        {
+          ret = -EINVAL;
+          goto errout;
+        }
     }
 
   /* POLLIN: Data may be read without blocking. */
