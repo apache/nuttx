@@ -85,6 +85,8 @@ The application also selects:
 Useful runtime prerequisites for the current MVP are:
 
 - Dynamic ELF support enabled in the target configuration
+- ``CONFIG_FS_TMPFS`` if the validation target uses ``tmpfs``-backed ``/etc``
+  and ``/var`` mounts for the first local repository flow
 - a writable ``/etc`` mount for the local repository index
 - a writable ``/var`` mount for the package store/cache
 
@@ -183,7 +185,21 @@ The observed target-side result was::
   ... ELF test payloads completed and returned to nsh>
 
   nsh> source /mnt/elf/romfs/pkgtest.nsh
+  nxpkg: info: layout prepared
+  nxpkg: info: loading index from /etc/nxpkg/index.json
+  nxpkg: info: index read complete (213 bytes)
+  nxpkg: info: cJSON_Parse returned success
+  nxpkg: info: parsed manifest hello 1.0.0
+  nxpkg: info: selected hello version 1.0.0
+  nxpkg: info: artifact source /mnt/elf/romfs/hello
+  nxpkg: info: artifact copied to staging
+  nxpkg: info: sha256 verified
+  nxpkg: info: payload staged at /var/lib/nxpkg/pkgs/hello/1.0.0/hello
+  nxpkg: info: manifest written
+  nxpkg: info: compatibility check passed
+  nxpkg: info: installed metadata updated
   nxpkg: info: installed hello version 1.0.0
+  hello current=1.0.0 previous=- type=elf arch=xtensa compat=esp32s3-xiao versions=1.0.0
 
   nsh> nxpkg list
   hello current=1.0.0 previous=- type=elf arch=xtensa compat=esp32s3-xiao versions=1.0.0
