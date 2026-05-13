@@ -437,6 +437,7 @@ USB Serial       Yes
 Watchdog         Yes
 Wifi             No
 XTS              No
+Analog Comp      Yes
 ==============  ======= ====================
 
 Analog-to-digital converter (ADC)
