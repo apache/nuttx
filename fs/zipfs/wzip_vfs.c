@@ -155,20 +155,22 @@ static int wzipfs_convert_result(int ret)
  *
  * Description:
  *   Parse a NuttX mount "-o" options string.
- *   Accepted keys: src=<path>, method=store|deflate.
+ *   Accepted keys: src=<path>, fd=<N>, method=store|deflate.
  *   Legacy positional path (no '=' and no ',') is accepted as src.
+ *   src= and fd= are mutually exclusive.
  *
  * Returns 0 on success, negative errno on failure.
  ****************************************************************************/
 
 static int wzipfs_parse_options(FAR const void *data,
                                 FAR char *src, size_t len,
-                                FAR bool *deflate)
+                                FAR int *fd, FAR bool *deflate)
 {
   FAR const char *p = data;
   FAR const char *end;
 
   src[0]   = '\0';
+  *fd      = -1;
   *deflate = false;
 
   if (p == NULL || *p == '\0')
@@ -207,6 +209,20 @@ static int wzipfs_parse_options(FAR const void *data,
           memcpy(src, p + 4, pl);
           src[pl] = '\0';
         }
+      else if (end - p > 3 && memcmp(p, "fd=", 3) == 0)
+        {
+          FAR char *tail;
+          long      v;
+
+          v = strtol(p + 3, &tail, 0);
+          if (tail != end || v < 0 || v > INT_MAX)
+            {
+              ferr("wzipfs: invalid fd value\n");
+              return -EINVAL;
+            }
+
+          *fd = (int)v;
+        }
       else if (end - p > 7 && memcmp(p, "method=", 7) == 0)
         {
           FAR const char *val    = p + 7;
@@ -235,6 +251,17 @@ static int wzipfs_parse_options(FAR const void *data,
         }
 
       p = *end ? end + 1 : end;
+    }
+
+  if (*fd >= 0 && src[0] != '\0')
+    {
+      ferr("wzipfs: src= and fd= are mutually exclusive\n");
+      return -EINVAL;
+    }
+
+  if (*fd < 0 && src[0] == '\0')
+    {
+      return -ENODEV;
     }
 
   return 0;
@@ -523,11 +550,13 @@ static int wzipfs_bind(FAR struct inode *driver, FAR const void *data,
                        FAR void **handle)
 {
   FAR struct wzipfs_priv_s *priv;
+  FAR struct file *src_filep;
   char src[PATH_MAX];
   bool deflate;
   int ret;
+  int fd;
 
-  ret = wzipfs_parse_options(data, src, sizeof(src), &deflate);
+  ret = wzipfs_parse_options(data, src, sizeof(src), &fd, &deflate);
   if (ret < 0)
     {
       return ret;
@@ -541,7 +570,20 @@ static int wzipfs_bind(FAR struct inode *driver, FAR const void *data,
 
   nxsem_init(&priv->open_sem, 0, 1);
 
-  ret = wzipfs_create_backing(priv, src);
+  if (fd >= 0)
+    {
+      ret = file_get(fd, &src_filep);
+      if (ret >= 0)
+        {
+          ret = file_dup2(src_filep, &priv->backing);
+          file_put(src_filep);
+        }
+    }
+  else
+    {
+      ret = wzipfs_create_backing(priv, src);
+    }
+
   if (ret < 0)
     {
       goto err;
