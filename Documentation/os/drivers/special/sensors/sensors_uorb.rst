@@ -570,6 +570,7 @@ Implemented Drivers
 - :doc:`nau7802`
 - :doc:`qmi8658`
 - :doc:`sht4x`
+- :doc:`shtc3`
 - :doc:`tc74`
 - :doc:`tmp112`
 - :doc:`lsm6dso32`
