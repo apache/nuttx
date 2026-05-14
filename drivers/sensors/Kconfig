@@ -1904,6 +1904,24 @@ config SHT3X_DEBUG
 
 endif # SENSORS_SHT3X
 
+config SENSORS_SHTC3
+	bool "Sensirion SHTC3 Sensor"
+	depends on I2C
+	---help---
+		Enable driver support for the Sensirion SHTC3
+		temperature and humidity sensor.
+
+if SENSORS_SHTC3
+
+config SHTC3_I2C_FREQUENCY
+	int "SHTC3 I2C Frequency"
+	default 400000
+
+endif # SENSORS_SHTC3
+
+
+
+
 config SENSORS_SHT4X
 	bool "Sensirion SHT4x temperature and humidity sensor"
 	default n

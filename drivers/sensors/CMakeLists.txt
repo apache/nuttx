@@ -494,5 +494,10 @@ if(CONFIG_SENSORS)
     list(APPEND SRCS cxd5602pwbimu.c)
   endif()
 
+  # SENSIRON SHTC3
+  if(CONFIG_SENSORS_SHTC3)
+    list(APPEND SRCS shtc3_uorb.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
