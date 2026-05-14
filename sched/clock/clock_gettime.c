@@ -46,6 +46,20 @@
 #endif
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
+/* Rust code built for the macOS host uses Darwin's libc clock IDs.  When it
+ * is linked into the NuttX simulator, those values are passed to NuttX's
+ * clock_gettime() implementation instead of Darwin's one.
+ */
+
+#  define DARWIN_CLOCK_MONOTONIC 6
+#  define DARWIN_CLOCK_UPTIME_RAW 8
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -97,7 +111,12 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
       return -EINVAL;
     }
 
-  if (clock_id == CLOCK_MONOTONIC)
+  if (clock_id == CLOCK_MONOTONIC
+#if defined(CONFIG_ARCH_SIM) && defined(CONFIG_HOST_MACOS)
+      || clock_id == DARWIN_CLOCK_MONOTONIC
+      || clock_id == DARWIN_CLOCK_UPTIME_RAW
+#endif
+     )
     {
       /* The the time elapsed since the timer was initialized at power on
        * reset, excluding the time that the system is suspended.

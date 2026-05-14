@@ -27,6 +27,8 @@
 #include <sys/mman.h>
 
 #include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -78,11 +80,12 @@ static void save_and_replace_init_funcs(int argc, const char *argv[],
                                         const char *apple[])
 {
   init_func_t *fp;
+  bool found_self = false;
+  unsigned int i;
   unsigned int nfuncs = &mod_init_func_end - &mod_init_func_start;
 
   assert(nfuncs > 0);
-  g_num_saved_init_funcs = nfuncs - 1;
-  if (g_num_saved_init_funcs == 0)
+  if (nfuncs == 1)
     {
       /* This function is the only constructor in the binary.
        * no need to apply the following hack.
@@ -96,23 +99,28 @@ static void save_and_replace_init_funcs(int argc, const char *argv[],
   g_saved_envp = envp;
   g_saved_apple = apple;
 
-  g_saved_init_funcs = malloc(g_num_saved_init_funcs *
-                              sizeof(*g_saved_init_funcs));
+  g_saved_init_funcs = malloc((nfuncs - 1) * sizeof(*g_saved_init_funcs));
   allow_write(&mod_init_func_start, &mod_init_func_end);
-  int i = 0;
+  i = 0;
   for (fp = &mod_init_func_start; fp < &mod_init_func_end; fp++)
     {
       if (*fp == save_and_replace_init_funcs)
         {
-          assert(i == 0);
+          found_self = true;
+          continue;
         }
-      else
+
+      if (found_self)
         {
-          g_saved_init_funcs[i - 1] = *fp;
+          assert(i < nfuncs - 1);
+          g_saved_init_funcs[i] = *fp;
           *fp = noop;
+          i++;
         }
-      i++;
     }
+
+  assert(found_self);
+  g_num_saved_init_funcs = i;
 }
 
 /****************************************************************************
