@@ -127,6 +127,13 @@ static ssize_t devmem_read(FAR struct file *filep, FAR char *buffer,
               filep->f_pos += len;
               return len;
             }
+
+          /* f_pos maps to this region but read is not permitted or
+           * buflen is 0; further iterations cannot yield a valid
+           * mapping for the same f_pos, so stop scanning.
+           */
+
+          break;
         }
 
       /* Accumulate this region's size for next iteration */
@@ -174,6 +181,13 @@ static ssize_t devmem_write(FAR struct file *filep, FAR const char *buffer,
               filep->f_pos += len;
               return len;
             }
+
+          /* f_pos maps to this region but write is not permitted or
+           * buflen is 0; further iterations cannot yield a valid
+           * mapping for the same f_pos, so stop scanning.
+           */
+
+          break;
         }
 
       /* Accumulate this region's size for next iteration */
