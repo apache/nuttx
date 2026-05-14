@@ -547,7 +547,7 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
           /* Record the character can be echo */
 
-          if (!iscntrl(ch & 0xff) && n++ == 0)
+          if (!iscntrl((unsigned char)ch) && n++ == 0)
             {
               j = i;
             }
