@@ -57,6 +57,9 @@ static sockcaps_t can_sockcaps(FAR struct socket *psock);
 static void can_addref(FAR struct socket *psock);
 static int  can_bind(FAR struct socket *psock,
                      FAR const struct sockaddr *addr, socklen_t addrlen);
+static int  can_getsockname(FAR struct socket *psock,
+                            FAR struct sockaddr *addr,
+                            FAR socklen_t *addrlen);
 static int can_poll_local(FAR struct socket *psock, FAR struct pollfd_s *fds,
                           bool setup);
 static int can_close(FAR struct socket *psock);
@@ -71,7 +74,7 @@ const struct sock_intf_s g_can_sockif =
   can_sockcaps,     /* si_sockcaps */
   can_addref,       /* si_addref */
   can_bind,         /* si_bind */
-  NULL,             /* si_getsockname */
+  can_getsockname,  /* si_getsockname */
   NULL,             /* si_getpeername */
   NULL,             /* si_listen */
   NULL,             /* si_connect */
@@ -352,6 +355,75 @@ static int can_bind(FAR struct socket *psock,
 #endif
 
   return conn->dev == NULL && canaddr->can_ifindex != 0 ? -ENODEV : OK;
+}
+
+/****************************************************************************
+ * Name: can_getsockname
+ *
+ * Description:
+ *   The can_getsockname() function retrieves the locally-bound name of the
+ *   specified CAN socket, stores this address in the sockaddr structure
+ *   pointed to by the 'addr' argument, and stores the length of this
+ *   address in the object pointed to by the 'addrlen' argument.
+ *
+ * Input Parameters:
+ *   psock    Socket structure of the socket to be queried
+ *   addr     sockaddr structure to receive data [out]
+ *   addrlen  Length of sockaddr structure [in/out]
+ *
+ * Returned Value:
+ *   On success, 0 is returned.  Otherwise, a negated errno value is
+ *   returned.
+ *
+ ****************************************************************************/
+
+static int can_getsockname(FAR struct socket *psock,
+                           FAR struct sockaddr *addr,
+                           FAR socklen_t *addrlen)
+{
+  FAR struct sockaddr_can *canaddr;
+  FAR struct can_conn_s *conn;
+
+  /* Check if enough space has been provided for the full address */
+
+  if (*addrlen < sizeof(struct sockaddr_can))
+    {
+      /* This function is supposed to return the partial address if
+       * a smaller buffer has been provided.  This support has not
+       * been implemented.
+       */
+
+      return -EINVAL;
+    }
+
+  conn = psock->s_conn;
+
+  /* Return the address information in the address structure */
+
+  canaddr = (FAR struct sockaddr_can *)addr;
+  memset(canaddr, 0, sizeof(struct sockaddr_can));
+
+  canaddr->can_family = AF_CAN;
+
+  if (conn->dev != NULL)
+    {
+#ifdef CONFIG_NETDEV_IFINDEX
+      canaddr->can_ifindex = conn->dev->d_ifindex;
+#else
+      /* Reverse mapping: extract ifindex from device name "can<N>".
+       * This mirrors the bind logic which maps ifindex -> "can<N>".
+       */
+
+      canaddr->can_ifindex = conn->dev->d_ifname[3] - '0';
+#endif
+    }
+  else
+    {
+      canaddr->can_ifindex = 0;
+    }
+
+  *addrlen = sizeof(struct sockaddr_can);
+  return OK;
 }
 
 /****************************************************************************

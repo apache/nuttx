@@ -155,6 +155,15 @@ If the network device is not a loopback device, the stack loops the frame
 back itself after the driver accepted it.  Looped back frames are counted in
 the received CAN statistics.
 
+Socket Address
+--------------
+
+``getsockname()`` returns a ``struct sockaddr_can`` with ``can_family`` set
+to ``AF_CAN`` and ``can_ifindex`` set to the index of the interface the
+socket is bound to, or 0 if the socket is not bound to an interface.  The
+address buffer must be at least ``sizeof(struct sockaddr_can)`` bytes,
+otherwise ``EINVAL`` is returned.
+
 Features
 --------
 
