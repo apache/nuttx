@@ -31,12 +31,19 @@ descriptions.
 * Datasheet: `ESP32-P4 Datasheet (v1.3) <https://documentation.espressif.com/esp32-p4-chip-revision-v1.3_datasheet_en.pdf>`_
 * Technical Reference Manual: `ESP32-P4 TRM (v1.3) <https://documentation.espressif.com/esp32-p4-chip-revision-v1.3_technical_reference_manual_en.pdf>`_
 
+.. note:: NuttX by default supports ESP32-P4 chip revisions v3.0 and above.
+          If your build and flash works fine but firmware does not run as
+          expected (i.e. stuck in a boot loop) then additional tuning is
+          required, see `ESP32-P4 Chip Revisions`_ section for details.
+
+
 ESP32-P4 Toolchain
 ==================
 
-A generic RISC-V toolchain can be used to build ESP32-P4 projects. It's recommended
-to use the same toolchain version used by NuttX CI for RISC-V.
-Please refer to the Docker
+A generic RISC-V toolchain can be used to build ESP32-P4 projects.
+You can use standard ``riscv32-esp-elf-gcc`` provided by ESP IDF Tools.
+However, it is recommended to use the same toolchain version as used by
+the NuttX CI for RISC-V. Please refer to our CI Docker configuration
 `container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
 and check for the current compiler version being used. For instance:
 
@@ -74,6 +81,7 @@ Add the toolchain to your ``PATH``:
   $ echo "export PATH=/path/to/your/toolchain/riscv-none-elf-gcc/bin:$PATH" >> ~/.bashrc
 
 You can edit your shell's rc files if you don't use bash.
+
 
 Building and flashing NuttX
 ===========================
@@ -193,6 +201,7 @@ The following is **not** supported when building with CMake yet; use the Make-ba
 * **ULP / LP core** — Low-power coprocessor support (``CONFIG_ESPRESSIF_USE_LP_CORE``) is
   not wired up for CMake (ULP/LP integration is TODO).
 
+
 .. _esp32p4_debug:
 
 Debugging
@@ -306,6 +315,7 @@ possible to track the root cause of the crash. Saving this output to a file and 
   Backtrace for task 0:
   0x4000bb20: up_idle at esp_idle.c:76
 
+
 Peripheral Support
 ==================
 
@@ -373,7 +383,6 @@ Touch Sensor       No
 eFuse              Yes     Virtual eFuses supported
 ================= ======= ==================================
 
-
 Security
 --------
 
@@ -401,6 +410,7 @@ PMP/PMA            Mo
    and configuration. Consult the board documentation and the
    :file:`arch/risc-v/src/common/espressif/Kconfig` for feature flags and
    pin selections.
+
 
 .. _esp32p4_ulp:
 
@@ -749,6 +759,42 @@ so ubsan can help to catch some errors. But note that it will increase code size
 it can happen that application won't fit into RTC RAM.
 To enable ubsan for ULP please add ``CONFIG_ESPRESSIF_ULP_ENABLE_UBSAN`` in menuconfig.
 
+
+ESP32-P4 Chip Revisions
+=======================
+
+.. attention:: NuttX by default supports ESP32-P4 chip revisions starting
+               from v3.0. 
+
+Different ESP32-P4 chip revisions contain internal hardware breaking
+changes. Revisions 3.0 and higher are not compatible with 0.x and 1.x.
+Older chip revisions may work but require dedicated firmware builds.
+Compatibility is verified by the 2nd stage bootloader against following
+firmware build parameters: ``CONFIG_ESP32P4_SELECTS_REV_LESS_V3``,
+``CONFIG_ESP32P4_REV_*``, ``CONFIG_ESP_REV_*``,
+and ``CONFIG_ESP_EFUSE_BLOCK_REV_*``.
+These parameters are set with ``make menuconfig`` in the ``System Type`` menu:
+
+* ``Select ESP32-P4 revisions <3.0`` - enable if your chip is older than v3.0.
+* ``Minimum Supported ESP32-P4 Revision`` - select minimum chip revision
+  on which the firmware can boot, refuse to boot otherwise (boot loop).
+  Note that older chip revisions may contain bugs or have missing features.
+  Selecting wide range of supported revisions will increase firmware size.
+* ``Minimum Supported ESP32-P4 eFuse Block Revision`` - select minimum eFuse
+  block revision on which the firmware can boot, refuse to boot otherwise
+  (boot loop).
+
+You can check your chip revision with ``esptool`` utility that is used
+by ``make flash`` command, for instance::
+
+    esptool v5.2.0
+    Connected to ESP32-P4 on /dev/cuaU0:
+    Chip type:          ESP32-P4 (revision v1.3)
+    Features:           Dual Core + LP Core, 400MHz
+    Crystal frequency:  40MHz
+    MAC:                XXX
+
+
 Supported Boards
 ================
 
@@ -757,3 +803,13 @@ Supported Boards
   :maxdepth: 1
 
   boards/*/*
+
+Other Boards
+------------
+
+* `WaveShare ESP32-P4-Nano <https://www.waveshare.com/wiki/ESP32-P4-NANO>`_
+  is similar in design to
+  :ref:`ESP32-P4-Function-EV-Board <esp32p4-function-ev-board>`.
+  Aside from a few onboard component differences you can play around using
+  existing configurations for start. Note that it may contain ESP32-P4 v1.3 so
+  additional configuration tuning is required (see `ESP32-P4 Chip Revisions`_).

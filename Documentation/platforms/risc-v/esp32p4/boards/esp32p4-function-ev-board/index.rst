@@ -1,3 +1,5 @@
+.. _esp32p4-function-ev-board:
+
 ==========================
 ESP32-P4-Function-EV-Board
 ==========================
