@@ -148,6 +148,19 @@
 #  error "Unknown STM32 DMA"
 #endif
 
+/* Maximum number of data items per single DMA descriptor.
+ *
+ * Both the STM32 DMA IPv1 (CNDTR on F0/F1/F3/G4/L0/L1/L4) and IPv2 (SxNDTR
+ * on F2/F4/F7/H7) transfer-count registers are 16 bits wide, so each call
+ * to stm32_dmasetup() can program at most 65535 transfers.  spi_exchange()
+ * below chunks larger requests to stay within this limit; without it a
+ * single SPI_EXCHANGE() of >= 64 KiB silently programs NDTR to 0 (low 16
+ * bits of nwords) and the driver blocks forever waiting on a DMA-complete
+ * IRQ that never fires.
+ */
+
+#  define STM32_SPI_DMA_MAX_XFER  65535u
+
 #  define SPIDMA_BUFFER_MASK   (4 - 1)
 #  define SPIDMA_SIZE(b) (((b) + SPIDMA_BUFFER_MASK) & ~SPIDMA_BUFFER_MASK)
 #  define SPIDMA_BUF_ALIGN   aligned_data(4)
@@ -1871,14 +1884,17 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       static uint16_t rxdummy = 0xffff;
       static const uint16_t txdummy = 0xffff;
+      const size_t word_size = (priv->nbits > 8) ? 2u : 1u;
+      const uint8_t *txp;
+      uint8_t       *rxp;
 
-      spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n",
+      spiinfo("txbuffer=%p rxbuffer=%p nwords=%zu\n",
                txbuffer, rxbuffer, nwords);
       DEBUGASSERT(priv && priv->spibase);
 
       /* Setup DMAs */
 
-      /* If this bus uses a in driver buffers we will incur 2 copies,
+      /* If this bus uses an in-driver buffer we will incur 2 copies,
        * The copy cost is << less the non DMA transfer time and having
        * the buffer in the driver ensures DMA can be used. This is because
        * the API does not support passing the buffer extent so the only
@@ -1897,40 +1913,86 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
           memcpy(priv->txbuf, txbuffer, nbytes);
           txbuffer  = priv->txbuf;
           rxbuffer  = rxbuffer ? priv->rxbuf : rxbuffer;
+
+          /* Rescale nwords to match the (possibly clamped) nbytes. */
+
+          nwords = (priv->nbits > 8) ? nbytes >> 1 : nbytes;
         }
 
-      spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-      spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
+      txp = (const uint8_t *)txbuffer;
+      rxp = (uint8_t *)rxbuffer;
+      ret = OK;
+
+      /* Walk the request in chunks of at most STM32_SPI_DMA_MAX_XFER words.
+       * The STM32 DMA NDTR/CNDTR transfer-count register is only 16 bits
+       * wide; submitting more than 65535 transfers in a single descriptor
+       * silently programs NDTR to (nwords & 0xffff) and on most paths
+       * results in a stream that never raises transfer-complete, causing
+       * the SPI driver to block forever in spi_dmarxwait().  Splitting the
+       * request keeps each descriptor within the hardware limit and lets
+       * the W25/SD/etc. driver remain agnostic of this constraint.
+       */
+
+      while (nwords > 0)
+        {
+          size_t chunk = (nwords > STM32_SPI_DMA_MAX_XFER)
+                         ? STM32_SPI_DMA_MAX_XFER
+                         : nwords;
+
+          spi_dmarxsetup(priv, rxp, &rxdummy, chunk);
+          spi_dmatxsetup(priv, txp, &txdummy, chunk);
 
 #ifdef CONFIG_SPI_TRIGGER
-      /* Is deferred triggering in effect? */
+          /* Is deferred triggering in effect? */
 
-      if (!priv->defertrig)
-        {
-          /* No.. Start the DMAs */
+          if (!priv->defertrig)
+            {
+              /* No.. Start the DMAs */
+
+              spi_dmarxstart(priv);
+              spi_dmatxstart(priv);
+            }
+          else
+            {
+              /* Yes.. indicate that we are ready to be started.  Deferred
+               * triggering is only meaningful for the first (often only)
+               * chunk; subsequent chunks must run unconditionally or the
+               * caller would have to re-arm between chunks.
+               */
+
+              priv->trigarmed = true;
+            }
+#else
+          /* Start the DMAs */
 
           spi_dmarxstart(priv);
           spi_dmatxstart(priv);
-        }
-      else
-        {
-          /* Yes.. indicated that we are ready to be started */
-
-          priv->trigarmed = true;
-        }
-#else
-      /* Start the DMAs */
-
-      spi_dmarxstart(priv);
-      spi_dmatxstart(priv);
 #endif
 
-      /* Then wait for each to complete */
+          /* Then wait for each to complete */
 
-      ret = spi_dmarxwait(priv);
-      if (ret < 0)
-        {
-          ret = spi_dmatxwait(priv);
+          ret = spi_dmarxwait(priv);
+          if (ret < 0)
+            {
+              ret = spi_dmatxwait(priv);
+            }
+
+          if (ret < 0)
+            {
+              break;
+            }
+
+          if (txp != NULL)
+            {
+              txp += chunk * word_size;
+            }
+
+          if (rxp != NULL)
+            {
+              rxp += chunk * word_size;
+            }
+
+          nwords -= chunk;
         }
 
       if (rxbuffer != NULL && priv->rxbuf != NULL && ret >= 0)
