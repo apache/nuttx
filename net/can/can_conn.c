@@ -49,8 +49,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_CAN_MAX_CONNS
-#  define CONFIG_CAN_MAX_CONNS 0
+#ifndef CONFIG_NET_CAN_MAX_CONNS
+#  define CONFIG_NET_CAN_MAX_CONNS 0
 #endif
 
 /****************************************************************************
@@ -60,8 +60,9 @@
 /* The array containing all NetLink connections. */
 
 NET_BUFPOOL_DECLARE(g_can_connections, sizeof(struct can_conn_s),
-                    CONFIG_CAN_PREALLOC_CONNS, CONFIG_CAN_ALLOC_CONNS,
-                    CONFIG_CAN_MAX_CONNS);
+                    CONFIG_NET_CAN_PREALLOC_CONNS,
+                    CONFIG_NET_CAN_ALLOC_CONNS,
+                    CONFIG_NET_CAN_MAX_CONNS);
 
 /* A list of all allocated NetLink connections */
 

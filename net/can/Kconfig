@@ -41,7 +41,7 @@ config NET_CAN_WRITE_BUFFERS
 		You might want to disable CAN write buffering on a highly memory
 		memory constrained system where there are no performance issues.
 
-config CAN_PREALLOC_CONNS
+config NET_CAN_PREALLOC_CONNS
 	int "Preallocated CAN socket connections"
 	default 4
 	---help---
@@ -55,7 +55,7 @@ config CAN_PREALLOC_CONNS
 
 		Set to 0 to disable (and rely only on dynamic allocations).
 
-config CAN_ALLOC_CONNS
+config NET_CAN_ALLOC_CONNS
 	int "Dynamic CAN connections allocation"
 	default 0
 	---help---
@@ -71,12 +71,12 @@ config CAN_ALLOC_CONNS
 		connection is no longer needed, it will be returned to the
 		free connections pool, and it will never be deallocated!
 
-config CAN_MAX_CONNS
+config NET_CAN_MAX_CONNS
 	int "Maximum number of CAN connections"
 	default 0
-	depends on CAN_ALLOC_CONNS > 0
+	depends on NET_CAN_ALLOC_CONNS > 0
 	---help---
-		If dynamic connections allocation is selected (CAN_ALLOC_CONNS > 0)
+		If dynamic connections allocation is selected (NET_CAN_ALLOC_CONNS > 0)
 		this will limit the number of connections that can be allocated.
 
 		This is useful in case the system is under very heavy load (or
