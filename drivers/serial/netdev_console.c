@@ -199,6 +199,7 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
 #ifdef CONFIG_NET_CAN_CANFD
   struct can_isotp_ll_options  ll;
 #endif
+  struct can_isotp_options     opts;
   struct sockaddr_can          addr;
   int                          ret;
 
@@ -225,6 +226,20 @@ static int netdev_console_can_init(FAR struct uart_dev_s *dev)
     {
       psock_close(&priv->psock);
       nerr("ERROR: Failed to bind ISO-TP socket: %d\n", ret);
+      return ret;
+    }
+
+  /* Console write must be blocking */
+
+  memset(&opts, 0, sizeof(opts));
+  opts.flags = CAN_ISOTP_WAIT_TX_DONE;
+
+  ret = psock_setsockopt(&priv->psock, SOL_CAN_ISOTP, CAN_ISOTP_OPTS,
+                         &opts, sizeof(opts));
+  if (ret < 0)
+    {
+      psock_close(&priv->psock);
+      nerr("ERROR: Failed to configure ISO-TP socket: %d\n", ret);
       return ret;
     }
 

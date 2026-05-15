@@ -1010,7 +1010,7 @@ config CONSOLE_NETDEV
 	bool "Console on netdev"
 	default n
 	depends on NETDEVICES && SCHED_LPWORK
-	depends on NET_UDP || NET_CAN_ISOTP
+	depends on NET_UDP || (NET_CAN_ISOTP && NET_CAN_SOCK_OPTS)
 	select SERIAL_RXDMA
 	select SERIAL_TXDMA
 	---help---
@@ -1027,6 +1027,7 @@ config CONSOLE_NETDEV_UDP
 config CONSOLE_NETDEV_CAN
 	bool "Netdev Console interface over CAN"
 	default y if NET_CAN_ISOTP
+	depends on NET_CAN_ISOTP && NET_CAN_SOCK_OPTS
 	---help---
 		Network interface over CAN (ISO-TP) used for Console.
 
