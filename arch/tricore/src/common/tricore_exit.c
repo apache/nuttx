@@ -29,7 +29,7 @@
 #include <sched.h>
 #include <syscall.h>
 #include <assert.h>
-#include <nuttx/debug.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
@@ -56,9 +56,17 @@
 
 void up_exit(int status)
 {
+  struct tcb_s *tcb = this_task();
+
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
+
+  /* Now, perform the context switch to the new ready-to-run task at the
+   * head of the list.
+   */
+
+  tcb = this_task();
 
   /* Scheduler parameters will update inside syscall */
 
@@ -66,7 +74,7 @@ void up_exit(int status)
 
   /* Then switch contexts */
 
-  tricore_fullcontextrestore();
+  tricore_fullcontextrestore(tcb->xcp.regs);
 
   /* tricore_fullcontextrestore() should not return but could if the software
    * interrupts are disabled.

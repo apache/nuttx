@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_saveusercontext.c
+ * arch/tricore/include/tc3x/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,41 +20,19 @@
  *
  ****************************************************************************/
 
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_TRICORE_INCLUDE_TC3X_IRQ_H
+#define __ARCH_TRICORE_INCLUDE_TC3X_IRQ_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <string.h>
+#define NR_IRQS 2048
 
-#include <arch/arch.h>
-
-#include "tricore_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_saveusercontext
- *
- * Description:
- *   Save the current thread context
- *
- ****************************************************************************/
-
-int up_saveusercontext(void *saveregs)
-{
-  uintptr_t *regs;
-  uint32_t val;
-
-  TRICORE_MFCR(TRICORE_CPU_FCX, val);
-  regs = tricore_csa2addr(val);
-  memcpy(saveregs, regs, XCPTCONTEXT_SIZE);
-  return 0;
-}
+#endif /* __ARCH_TRICORE_INCLUDE_TC3X_IRQ_H */

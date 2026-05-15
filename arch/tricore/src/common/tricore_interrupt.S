@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_nputs.c
+ * arch/tricore/src/common/tricore_interrupt.S
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,35 +20,36 @@
  *
  ****************************************************************************/
 
-/****************************************************************************
- * Included Files
- ****************************************************************************/
+#include <arch/arch.h>
+	.section .ivtab, "ax", %progbits
+	.globl  biv_vector
+	.type   biv_vector, %object
+	.p2align 5
 
-#include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/compiler.h>
+biv_vector:
+	.set N, 255
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+	.rept N
+1:
+	svlcx
+	j _isr_wrapper
 
-void weak_function up_putc(int ch)
-{
-  (void)ch;
-}
+	.space (32 - (.-1b))
+	.endr
 
-/****************************************************************************
- * Name: up_nputs
- *
- * Description:
- *   This is a low-level helper function used to support debug.
- *
- ****************************************************************************/
+_isr_wrapper:
+	mov	%d14, lo:TRICORE_IR_LASR_ADDR
+	addih	%d14, %d14, hi:TRICORE_IR_LASR_ADDR
 
-void up_nputs(const char *str, size_t len)
-{
-  while (len-- > 0 && *str)
-    {
-      up_putc(*str++);
-    }
-}
+	mfcr	%d15, TRICORE_CPU_CORE_ID
+	extr.u	%d15, %d15, 0, 3
+	madd	%d14, %d14, %d15, TRICORE_IR_LASR_TOS_STRIDE
+
+	mov.a	%a2, %d14
+	ld.w	%d15, [%a2]
+	extr.u	%d15, %d15, 16, TRICORE_IR_LASR_PIPN_WIDTH
+
+	mov	%d4, %d15
+        movh.a  %a14, hi:tricore_isr_handler
+        lea     %a14, [%a14]lo:tricore_isr_handler
+	ji	%a14

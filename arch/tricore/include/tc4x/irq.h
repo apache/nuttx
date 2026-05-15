@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_allocateheap.c
+ * arch/tricore/include/tc4x/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,49 +20,26 @@
  *
  ****************************************************************************/
 
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H
+#define __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-
-#include "tricore_internal.h"
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+#define NR_IRQS 2048
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
- ****************************************************************************/
-
-void up_allocate_heap(void **heap_start, size_t *heap_size)
-{
-  *heap_start = (void *)_sheap;
-  *heap_size  = (size_t)((uint32_t)_eheap - (uint32_t)_sheap);
-}
+#endif /* __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H */

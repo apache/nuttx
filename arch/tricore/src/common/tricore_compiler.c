@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_saveusercontext.c
+ * arch/tricore/src/common/tricore_compiler.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,35 +26,30 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stddef.h>
 #include <string.h>
-
-#include <arch/arch.h>
-
-#include "tricore_internal.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_saveusercontext
- *
- * Description:
- *   Save the current thread context
- *
- ****************************************************************************/
-
-int up_saveusercontext(void *saveregs)
+void up_regs_memcpy(void *dest, void *src, size_t count)
 {
-  uintptr_t *regs;
-  uint32_t val;
-
-  TRICORE_MFCR(TRICORE_CPU_FCX, val);
-  regs = tricore_csa2addr(val);
-  memcpy(saveregs, regs, XCPTCONTEXT_SIZE);
-  return 0;
+  memcpy(dest, src, count);
 }
+
+#ifdef CONFIG_TRICORE_TOOLCHAIN_LLVM
+
+void __memcpy_assume_aligned(void *dst, const void *src, size_t n)
+{
+  if (n == 4)
+    {
+      *(uint32_t *)dst = *(uint32_t *)src;
+      return;
+    }
+
+  memcpy(dst, src, n);
+}
+
+#endif /* CONFIG_TRICORE_TOOLCHAIN_LLVM */

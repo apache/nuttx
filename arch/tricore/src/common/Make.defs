@@ -20,11 +20,17 @@
 #
 ############################################################################
 
+HEAD_ASRC += tricore_head.S
 HEAD_CSRC += tricore_doirq.c
+
+CMN_ASRCS += tricore_interrupt.S
+CMN_ASRCS += tricore_trap.S
+CMN_ASRCS += tricore_lib.S
 
 CMN_CSRCS += tricore_allocateheap.c
 CMN_CSRCS += tricore_backtrace.c
 CMN_CSRCS += tricore_checkstack.c
+CMN_CSRCS += tricore_compiler.c
 CMN_CSRCS += tricore_createstack.c
 CMN_CSRCS += tricore_csa.c
 CMN_CSRCS += tricore_exit.c
@@ -41,6 +47,7 @@ CMN_CSRCS += tricore_schedulesigaction.c
 CMN_CSRCS += tricore_sigdeliver.c
 CMN_CSRCS += tricore_stackframe.c
 CMN_CSRCS += tricore_svcall.c
+CMN_CSRCS += tricore_switchcontext.c
 CMN_CSRCS += tricore_tcbinfo.c
 CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_usestack.c

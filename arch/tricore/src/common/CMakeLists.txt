@@ -24,6 +24,7 @@ set(SRCS
     tricore_allocateheap.c
     tricore_backtrace.c
     tricore_checkstack.c
+    tricore_compiler.c
     tricore_createstack.c
     tricore_csa.c
     tricore_exit.c
@@ -36,26 +37,25 @@ set(SRCS
     tricore_registerdump.c
     tricore_releasestack.c
     tricore_saveusercontext.c
+    tricore_schedulesigaction.c
+    tricore_sigdeliver.c
     tricore_stackframe.c
+    tricore_stm.c
     tricore_svcall.c
+    tricore_switchcontext.c
     tricore_tcbinfo.c
     tricore_trapcall.c
-    tricore_usestack.c)
-
-if(CONFIG_ENABLE_ALL_SIGNALS)
-  list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)
-endif()
+    tricore_usestack.c
+    tricore_interrupt.S
+    tricore_trap.S
+    tricore_lib.S)
 
 if(CONFIG_SPINLOCK)
   list(APPEND SRCS tricore_testset.c)
 endif()
 
-set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
-
 target_sources(arch PRIVATE ${SRCS})
-target_sources(nuttx PRIVATE tricore_doirq.c)
-target_compile_options(arch PRIVATE ${IFXFLAGS})
-target_compile_options(nuttx PRIVATE ${IFXFLAGS})
+target_sources(nuttx PRIVATE tricore_doirq.c tricore_head.S)
 target_include_directories(
   nuttx SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
                        ${CMAKE_BINARY_DIR}/include_arch)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_allocateheap.c
+ * arch/tricore/src/tc4x/tc4x_watchdog.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,7 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/bits.h>
 
 #include "tricore_internal.h"
 
@@ -34,35 +37,56 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#define TC4X_WDTCPU0_BASE   0xf0000018
+#define TC4X_WDTSYS_BASE    0xf0000184
+#define TC4X_WDT_CPU_STRIDE 0x30
+#define TC4X_WDT_CTRLA_OFF  0x24
+#define TC4X_WDT_CTRLB_OFF  0x28
+#define TC4X_WDT_CTRLA_LCK  BIT(0)
+#define TC4X_WDT_CTRLA_PW   (0x7fu << 1)
+#define TC4X_WDT_CTRLB_DR   BIT(0)
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+static void tc4x_wdt_block_disable(uintptr_t ctrla, uintptr_t ctrlb)
+{
+  uint32_t v = getreg32(ctrla);
+
+  if (v & TC4X_WDT_CTRLA_LCK)
+    {
+      v &= ~TC4X_WDT_CTRLA_LCK;
+      v ^= TC4X_WDT_CTRLA_PW;
+      putreg32(v, ctrla);
+    }
+
+  putreg32(TC4X_WDT_CTRLB_DR, ctrlb);
+
+  v = getreg32(ctrla);
+  v |= TC4X_WDT_CTRLA_LCK;
+  putreg32(v, ctrla);
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_allocate_heap
- *
- * Description:
- *   This function will be called to dynamically set aside the heap region.
- *
- *   For the kernel build (CONFIG_BUILD_KERNEL=y) with both kernel- and
- *   user-space heaps (CONFIG_MM_KERNEL_HEAP=y), this function provides the
- *   size of the unprotected, user-space heap.
- *
- *   If a protected kernel-space heap is provided, the kernel heap must be
- *   allocated (and protected) by an analogous up_allocate_kheap().
- *
- ****************************************************************************/
-
-void up_allocate_heap(void **heap_start, size_t *heap_size)
+void tricore_wdt_disable(void)
 {
-  *heap_start = (void *)_sheap;
-  *heap_size  = (size_t)((uint32_t)_eheap - (uint32_t)_sheap);
+  uint32_t cpu_id;
+  uintptr_t base;
+
+  TRICORE_MFCR(TRICORE_CPU_CORE_ID, cpu_id);
+  cpu_id &= TRICORE_CPU_CORE_ID_MASK;
+
+  base = TC4X_WDTCPU0_BASE + cpu_id * TC4X_WDT_CPU_STRIDE;
+  tc4x_wdt_block_disable(base + TC4X_WDT_CTRLA_OFF,
+                          base + TC4X_WDT_CTRLB_OFF);
+
+  if (cpu_id == 0)
+    {
+      tc4x_wdt_block_disable(TC4X_WDTSYS_BASE + TC4X_WDT_CTRLA_OFF,
+                              TC4X_WDTSYS_BASE + TC4X_WDT_CTRLB_OFF);
+    }
 }

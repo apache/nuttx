@@ -29,12 +29,11 @@
 #include <stdint.h>
 #include <sched.h>
 #include <assert.h>
+#include <debug.h>
 
-#include <nuttx/debug.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "sched/sched.h"
 #include "tricore_internal.h"
@@ -116,6 +115,5 @@ retry:
 
   board_autoled_off(LED_SIGNAL);
 
-  rtcb->xcp.regs = regs;
-  tricore_fullcontextrestore();
+  tricore_fullcontextrestore(regs);
 }
