@@ -50,10 +50,12 @@ ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
   EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
 endif
 
-# The "head" object
+# The "head" objects
 
+HEAD_AOBJ = $(HEAD_ASRC:$(ASMEXT)=$(OBJEXT))
 HEAD_COBJ = $(HEAD_CSRC:.c=$(OBJEXT))
-STARTUP_OBJS ?= $(HEAD_COBJ)
+HEAD_OBJS = $(HEAD_AOBJ) $(HEAD_COBJ)
+STARTUP_OBJS ?= $(HEAD_OBJS)
 
 # Flat build or kernel-mode objects
 
@@ -132,11 +134,11 @@ endif
 VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
-all: $(HEAD_COBJ) $(BIN)
+all: $(HEAD_OBJS) $(BIN)
 
 .PHONY: board$(DELIM)libboard$(LIBEXT)
 
-$(AOBJS) $(UAOBJS): %$(OBJEXT): %$(ASMEXT)
+$(AOBJS) $(UAOBJS) $(HEAD_AOBJ): %$(OBJEXT): %$(ASMEXT)
 	$(call ASSEMBLE, $<, $@)
 
 $(COBJS) $(UCOBJS) $(HEAD_COBJ): %$(OBJEXT): %.c
@@ -160,7 +162,7 @@ define LINK_ALLSYMS
 	$(Q) $(TOPDIR)/tools/mkallsyms.py $(NUTTX) allsyms.tmp --orderbyname $(CONFIG_SYMTAB_ORDEREDBYNAME)
 	$(Q) $(call COMPILE, allsyms.tmp, allsyms$(OBJEXT), -x c)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
-		-o $(NUTTX) $(HEAD_COBJ) allsyms$(OBJEXT) $(EXTRA_OBJS) \
+		-o $(NUTTX) $(HEAD_OBJS) allsyms$(OBJEXT) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
@@ -168,12 +170,12 @@ endef
 $(addsuffix .tmp,$(ARCHSCRIPT)): $(ARCHSCRIPT)
 	$(call PREPROCESS, $(patsubst %.tmp,%,$@), $@)
 
-nuttx$(EXEEXT): $(HEAD_COBJ) board$(DELIM)libboard$(LIBEXT) $(EXTRA_LIBS) $(addsuffix .tmp,$(ARCHSCRIPT))
+nuttx$(EXEEXT): $(HEAD_OBJS) board$(DELIM)libboard$(LIBEXT) $(EXTRA_LIBS) $(addsuffix .tmp,$(ARCHSCRIPT))
 
 	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
-		-o $(NUTTX) $(HEAD_COBJ) $(EXTRA_OBJS) \
+		-o $(NUTTX) $(HEAD_OBJS) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 else
 	$(Q) # Link and generate default table

@@ -27,11 +27,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <nuttx/debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "tricore_internal.h"
 
@@ -68,6 +63,6 @@
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = _sheap;
-  *heap_size = (size_t)((uintptr_t)_eheap - (uintptr_t)_sheap);
+  *heap_start = (void *)_sheap;
+  *heap_size  = (size_t)((uint32_t)_eheap - (uint32_t)_sheap);
 }
