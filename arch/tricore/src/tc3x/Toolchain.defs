@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc4xx/Toolchain.defs
+# arch/tricore/src/tc3x/Toolchain.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,20 +20,21 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC4XX),y)
-  ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-    ARCHCPUFLAGS += --misrac-version=2004 --user-mode=hypervisor
-    ARCHCPUFLAGS += --default-near-size=0
-    LDFLAGS      += -Ctc4dx
-  else
-    ARCHCPUFLAGS += -mcpu=tc4DAx
-    ARCHCPUFLAGS += -mtc18
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_LLVM),y)
+ARCHCPUFLAGS += -march=tc162 -mcpu=tc3xx
+else ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+ifeq ($(CONFIG_TC3X_CHIP_TC375),y)
+ARCHCPUFLAGS += --cpu=tc37x
+else
+ARCHCPUFLAGS += --cpu=tc39x
 endif
 
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Std
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform/Compilers
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Configurations
+# The VX-toolset deviates from the EABI by default, half word aligned
+# int among others, which SmartCode and GCC do not.  Keep to the EABI.
+
+ARCHCPUFLAGS += --eabi=BCDFHILNSVW
+else
+ARCHCPUFLAGS += -mtc162
 endif
 
 include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs

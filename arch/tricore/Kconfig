@@ -78,7 +78,7 @@ choice
 
 config TRICORE_TOOLCHAIN_GNUC
 	bool "GNU GCC Toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		Build with the AURIX GNU GCC toolchain (tricore-elf-gcc).
 		The toolchain binaries must be reachable on $PATH.
@@ -93,6 +93,7 @@ config TRICORE_TOOLCHAIN_LLVM
 config TRICORE_TOOLCHAIN_TASKING
 	bool "TASKING TriCore Toolchain"
 	select ARCH_TOOLCHAIN_TASKING
+	select LIBC_ATOMIC_ARCH
 	---help---
 		Build with the TASKING TriCore toolset (cctc), SmartCode for
 		TC4x or the VX-toolset for TC3x, as SmartCode has no TC1.6.2
