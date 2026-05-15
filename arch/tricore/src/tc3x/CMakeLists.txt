@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/tricore/src/tc3xx/CMakeLists.txt
+# arch/tricore/src/tc3x/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,3 +19,7 @@
 # the License.
 #
 # ##############################################################################
+
+set(SRCS tc3x_clockconfig.c tc3x_watchdog.c)
+
+target_sources(arch PRIVATE ${SRCS})

@@ -20,6 +20,7 @@
 #
 ############################################################################
 
+CHIP_CSRCS += tc3x_clockconfig.c
 CHIP_CSRCS += tc3x_watchdog.c
 
 VPATH += tc3x
