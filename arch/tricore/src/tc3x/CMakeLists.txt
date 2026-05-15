@@ -20,6 +20,6 @@
 #
 # ##############################################################################
 
-set(SRCS tc3x_clockconfig.c tc3x_watchdog.c)
+set(SRCS tc3x_clockconfig.c tc3x_gpio.c tc3x_watchdog.c)
 
 target_sources(arch PRIVATE ${SRCS})

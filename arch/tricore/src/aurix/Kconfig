@@ -1,0 +1,16 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "AURIX peripheral selection"
+
+config TC4X_GPIO_ACCESS_GROUP
+	int "TC4X port access group"
+	default 0
+	range 0 7
+	depends on ARCH_CHIP_FAMILY_TC4X
+	---help---
+		Access group used to drive the per-port PORTPROT register.
+
+endmenu
