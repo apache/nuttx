@@ -152,15 +152,18 @@ is still the wrapper, not the actual upper half, as the upper half methods
 may call the other methods as well internally and we might want to log
 them as well*.
 
-Registering Device & Daemon
-===========================
+Registering Device & Background Task
+====================================
 
 This wrapper is then registered using ``register_mtddriver``, and this
-whole thing is converted to be a daemon, so that the device can keep running
-in the background.
+whole thing is launched as a background task, so that the device can keep
+running after the ``nand`` command returns to the shell.
 
-Making it a daemon is achieved by using ``fork()``, killing the parent, and
-using ``daemon()`` in child.
+The ``nand`` command starts a dedicated NuttX task with ``task_create()``,
+waits until the device registration finishes, and then returns control to
+the shell. This keeps the simulator alive in the background without relying
+on ``fork()``, whose post-fork execution model is not appropriate for this
+kind of long-running initialization in the flat build used by the simulator.
 
 Known Issues
 ============

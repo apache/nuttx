@@ -54,129 +54,503 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/param.h>
+#include <errno.h>
+#include <string.h>
 
 #include "mnemofs.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: mfs_rwbuf_check_page
+ *
+ * Description:
+ * Verify that page belongs to a good NAND block before it is accessed
+ * through the shared read/write buffer.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   page - The page number to validate.
+ *
+ * Returned Value:
+ * Zero (OK) is returned if page is valid and its block is not marked bad.
+ * A negated errno value is returned on invalid input or if the page maps
+ * to a bad block.
+ *
+ ****************************************************************************/
+
+static int mfs_rwbuf_check_page(FAR struct mfs_sb_s *sb, mfs_t page)
+{
+  mfs_t block;
+  int ret;
+
+  if (sb == NULL || sb->mtd == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (page >= MFS_PAGE_COUNT(sb))
+    {
+      return -EINVAL;
+    }
+
+  block = page / MFS_PAGES_PER_BLOCK(sb);
+
+  ret = mfs_is_bad_block(sb, block);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return ret == 0 ? OK : -EIO;
+}
+
+/****************************************************************************
+ * Name: mfs_rwbuf_load
+ *
+ * Description:
+ * Load one page into the shared read/write buffer, syncing any dirty
+ * contents already cached there first.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   page - The page number to load.
+ *
+ * Returned Value:
+ * Zero (OK) is returned on success. A negated errno value is returned if
+ * validation, syncing, or the underlying read fails.
+ *
+ ****************************************************************************/
+
+static int mfs_rwbuf_load(FAR struct mfs_sb_s *sb, mfs_t page)
+{
+  ssize_t nread;
+  int ret;
+
+  if (sb == NULL || sb->rwbuf == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (sb->rwvalid && sb->rwpage == page)
+    {
+      return OK;
+    }
+
+  ret = mfs_rwbuf_sync(sb);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = mfs_rwbuf_check_page(sb, page);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  nread = MTD_BREAD(sb->mtd, page, 1, sb->rwbuf);
+  if (nread < 0)
+    {
+      return (int)nread;
+    }
+
+  if (nread != 1)
+    {
+      return -EIO;
+    }
+
+  sb->rwpage = page;
+  sb->rwvalid = true;
+  sb->rwdirty = false;
+  return OK;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int mfs_isbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
+/****************************************************************************
+ * Name: mfs_is_bad_block
+ *
+ * Description:
+ * Query the backing MTD device to learn whether blk is marked bad.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   blk - The block number to test.
+ *
+ * Returned Value:
+ * Zero (OK) is returned if blk is usable. A positive non-zero value may
+ * be returned if the MTD reports blk as bad. A negated errno value is
+ * returned on invalid input or device failure.
+ *
+ ****************************************************************************/
+
+int mfs_is_bad_block(FAR const struct mfs_sb_s *sb, mfs_t blk)
 {
-  if (predict_false(blk > MFS_NBLKS(sb)))
+  int ret;
+
+  if (sb == NULL || sb->mtd == NULL)
     {
+      ferr("invalid args\n");
       return -EINVAL;
     }
 
-  return MTD_ISBAD(MFS_MTD(sb), blk);
+  if (blk >= MFS_BLOCK_COUNT(sb))
+    {
+      ferr("invalid block\n");
+      return -EINVAL;
+    }
+
+  ret = MTD_ISBAD(sb->mtd, blk);
+  if (ret < 0 && ret != -ENOSYS)
+    {
+      ferr("MTD_ISBAD failed: %d\n", ret);
+    }
+
+  return ret == -ENOSYS ? 0 : ret;
 }
 
-int mfs_markbadblk(FAR const struct mfs_sb_s * const sb, mfs_t blk)
+/****************************************************************************
+ * Name: mfs_rwbuf_sync
+ *
+ * Description:
+ * Flush dirty contents from the shared read/write buffer to its cached
+ * page.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *
+ * Returned Value:
+ * Zero (OK) is returned on success. A negated errno value is returned if
+ * the buffered page cannot be written back.
+ *
+ ****************************************************************************/
+
+int mfs_rwbuf_sync(FAR struct mfs_sb_s *sb)
 {
-  if (predict_false(blk > MFS_NBLKS(sb)))
+  ssize_t nwritten;
+
+  if (sb == NULL)
     {
+      ferr("invalid sb\n");
       return -EINVAL;
     }
 
-  return MTD_MARKBAD(MFS_MTD(sb), blk);
+  if (sb->rwbuf == NULL || !sb->rwvalid || !sb->rwdirty)
+    {
+      return OK;
+    }
+
+  nwritten = MTD_BWRITE(sb->mtd, sb->rwpage, 1, sb->rwbuf);
+  if (nwritten < 0)
+    {
+      ferr("MTD_BWRITE failed: %zd\n", nwritten);
+      return (int)nwritten;
+    }
+
+  if (nwritten != 1)
+    {
+      ferr("short write: %zd\n", nwritten);
+      return -EIO;
+    }
+
+  sb->rwdirty = false;
+  return OK;
 }
 
-/* NOTE: These functions do not update the block allocator's state nor do
- * they enforce it.
- */
+/****************************************************************************
+ * Name: mfs_rwbuf_invalidate
+ *
+ * Description:
+ * Drop any cached page association from the shared read/write buffer.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *
+ * Returned Value:
+ * None.
+ *
+ ****************************************************************************/
 
-ssize_t mfs_write_page(FAR const struct mfs_sb_s * const sb,
-                       FAR const char *data, const mfs_t datalen,
-                       const off_t page, const mfs_t pgoff)
+void mfs_rwbuf_invalidate(FAR struct mfs_sb_s *sb)
 {
-  int ret = OK;
-
-  if (predict_false(page > MFS_NPGS(sb) || pgoff >= MFS_PGSZ(sb)))
+  if (sb == NULL)
     {
+      return;
+    }
+
+  sb->rwpage = MFS_LOCATION_INVALID;
+  sb->rwvalid = false;
+  sb->rwdirty = false;
+}
+
+/****************************************************************************
+ * Name: mfs_rwbuf_prepare_write
+ *
+ * Description:
+ * Sync any dirty buffered page and then invalidate the cache so the next
+ * write starts from a clean state.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *
+ * Returned Value:
+ * Zero (OK) is returned on success. A negated errno value is returned if
+ * syncing the buffered page fails.
+ *
+ ****************************************************************************/
+
+int mfs_rwbuf_prepare_write(FAR struct mfs_sb_s *sb)
+{
+  int ret;
+
+  if (sb == NULL)
+    {
+      ferr("invalid sb\n");
       return -EINVAL;
     }
 
-  memcpy(MFS_RWBUF(sb) + pgoff, data, MIN(datalen, MFS_PGSZ(sb) - pgoff));
-
-  ret = MTD_BWRITE(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
-  if (predict_false(ret < 0))
+  ret = mfs_rwbuf_sync(sb);
+  if (ret < 0)
     {
-      goto errout_with_reset;
+      ferr("mfs_rwbuf_sync failed: %d\n", ret);
+      return ret;
     }
 
-errout_with_reset:
-  memset(MFS_RWBUF(sb), 0, MFS_PGSZ(sb));
+  mfs_rwbuf_invalidate(sb);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: mfs_rwbuf_discard_page
+ *
+ * Description:
+ * Invalidate the shared read/write buffer if it currently caches page.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   page - The page whose cached state should be discarded.
+ *
+ * Returned Value:
+ * None.
+ *
+ ****************************************************************************/
+
+void mfs_rwbuf_discard_page(FAR struct mfs_sb_s *sb, mfs_t page)
+{
+  if (sb == NULL || !sb->rwvalid)
+    {
+      return;
+    }
+
+  if (sb->rwpage == page)
+    {
+      mfs_rwbuf_invalidate(sb);
+    }
+}
+
+/****************************************************************************
+ * Name: mfs_rwbuf_discard_block
+ *
+ * Description:
+ * Invalidate the shared read/write buffer if it currently caches any page
+ * that belongs to block.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   block - The block whose cached state should be discarded.
+ *
+ * Returned Value:
+ * None.
+ *
+ ****************************************************************************/
+
+void mfs_rwbuf_discard_block(FAR struct mfs_sb_s *sb, mfs_t block)
+{
+  if (sb == NULL || block >= MFS_BLOCK_COUNT(sb) || !sb->rwvalid)
+    {
+      return;
+    }
+
+  if (sb->rwpage / MFS_PAGES_PER_BLOCK(sb) == block)
+    {
+      mfs_rwbuf_invalidate(sb);
+    }
+}
+
+/****************************************************************************
+ * Name: mfs_write_page
+ *
+ * Description:
+ * Stage one page for writing through the shared read/write buffer. The
+ * page becomes dirty and is written later by mfs_rwbuf_sync().
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   page - The page number to update.
+ *   buffer - The page-sized data to stage.
+ *
+ * Returned Value:
+ * One is returned on success. A negated errno value is returned if the
+ * inputs are invalid, the page cannot be cached, or an earlier dirty page
+ * cannot be synced.
+ *
+ ****************************************************************************/
+
+ssize_t mfs_write_page(FAR struct mfs_sb_s *sb, mfs_t page,
+                       FAR const uint8_t *buffer)
+{
+  int ret;
+
+  if (sb == NULL || sb->mtd == NULL || sb->rwbuf == NULL || buffer == NULL)
+    {
+      ferr("invalid args\n");
+      return -EINVAL;
+    }
+
+  if (page >= MFS_PAGE_COUNT(sb))
+    {
+      ferr("invalid page\n");
+      return -EINVAL;
+    }
+
+  if (!sb->rwvalid || sb->rwpage != page)
+    {
+      ret = mfs_rwbuf_sync(sb);
+      if (ret < 0)
+        {
+          ferr("mfs_rwbuf_sync failed: %d\n", ret);
+          return ret;
+        }
+
+      ret = mfs_rwbuf_check_page(sb, page);
+      if (ret < 0)
+        {
+          ferr("mfs_rwbuf_check_page failed: %d\n", ret);
+          return ret;
+        }
+
+      sb->rwpage = page;
+      sb->rwvalid = true;
+      sb->rwdirty = false;
+    }
+
+  if (buffer != sb->rwbuf)
+    {
+      memcpy(sb->rwbuf, buffer, MFS_PAGE_SIZE(sb));
+    }
+
+  sb->rwdirty = true;
+  return 1;
+}
+
+/****************************************************************************
+ * Name: mfs_read_page
+ *
+ * Description:
+ * Load one page through the shared read/write buffer and copy it to the
+ * caller if needed.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   page - The page number to read.
+ *   buffer - The page-sized buffer that receives the data.
+ *
+ * Returned Value:
+ * One is returned on success. A negated errno value is returned if the
+ * inputs are invalid or the page cannot be loaded.
+ *
+ ****************************************************************************/
+
+ssize_t mfs_read_page(FAR struct mfs_sb_s *sb, mfs_t page,
+                      FAR uint8_t *buffer)
+{
+  int ret;
+
+  if (sb == NULL || sb->mtd == NULL || sb->rwbuf == NULL || buffer == NULL)
+    {
+      ferr("invalid args\n");
+      return -EINVAL;
+    }
+
+  if (page >= MFS_PAGE_COUNT(sb))
+    {
+      ferr("invalid page\n");
+      return -EINVAL;
+    }
+
+  ret = mfs_rwbuf_load(sb, page);
+  if (ret < 0)
+    {
+      ferr("mfs_rwbuf_load failed: %d\n", ret);
+      return ret;
+    }
+
+  if (buffer != sb->rwbuf)
+    {
+      memcpy(buffer, sb->rwbuf, MFS_PAGE_SIZE(sb));
+    }
+
+  return 1;
+}
+
+/****************************************************************************
+ * Name: mfs_erase_blocks
+ *
+ * Description:
+ * Erase a contiguous range of blocks and discard any cached page that
+ * falls inside that range.
+ *
+ * Input Parameters:
+ *   sb - The mounted file system instance.
+ *   startblk - The first block to erase.
+ *   nblocks - The number of blocks to erase.
+ *
+ * Returned Value:
+ * The underlying MTD erase result is returned on success. A negated
+ * errno value is returned on invalid input.
+ *
+ ****************************************************************************/
+
+int mfs_erase_blocks(FAR struct mfs_sb_s *sb, mfs_t startblk,
+                     size_t nblocks)
+{
+  int ret;
+
+  if (sb == NULL || sb->mtd == NULL || nblocks == 0)
+    {
+      ferr("invalid args\n");
+      return -EINVAL;
+    }
+
+  if (startblk >= MFS_BLOCK_COUNT(sb) ||
+      nblocks > MFS_BLOCK_COUNT(sb) ||
+      startblk > MFS_BLOCK_COUNT(sb) - nblocks)
+    {
+      ferr("invalid erase range\n");
+      return -EINVAL;
+    }
+
+  if (sb->rwvalid)
+    {
+      mfs_t endblk = startblk + nblocks;
+      mfs_t curblk = sb->rwpage / MFS_PAGES_PER_BLOCK(sb);
+
+      if (curblk >= startblk && curblk < endblk)
+        {
+          mfs_rwbuf_invalidate(sb);
+        }
+    }
+
+  ret = MTD_ERASE(sb->mtd, startblk, nblocks);
+  if (ret < 0)
+    {
+      ferr("MTD_ERASE failed: %d\n", ret);
+    }
 
   return ret;
-}
-
-ssize_t mfs_read_page(FAR const struct mfs_sb_s * const sb,
-                      FAR char *data, const mfs_t datalen, const off_t page,
-                      const mfs_t pgoff)
-{
-  int ret = OK;
-
-  if (predict_false(page > MFS_NPGS(sb) || pgoff >= MFS_PGSZ(sb)))
-    {
-      return -EINVAL;
-    }
-
-  ret = MTD_BREAD(MFS_MTD(sb), page, 1, MFS_RWBUF(sb));
-  if (predict_false(ret < 0))
-    {
-      goto errout_with_reset;
-    }
-
-  memcpy(data, MFS_RWBUF(sb) + pgoff, MIN(datalen, MFS_PGSZ(sb) - pgoff));
-
-errout_with_reset:
-  memset(MFS_RWBUF(sb), 0, MFS_PGSZ(sb));
-
-  return ret;
-}
-
-int mfs_erase_blk(FAR const struct mfs_sb_s * const sb, const off_t blk)
-{
-  if (predict_false(blk > MFS_NBLKS(sb)))
-    {
-      return -EINVAL;
-    }
-
-  return MTD_ERASE(MFS_MTD(sb), blk, 1);
-}
-
-int mfs_erase_nblks(FAR const struct mfs_sb_s * const sb, const off_t blk,
-                    const size_t n)
-{
-  if (predict_false(blk + n > MFS_NBLKS(sb)))
-    {
-      return -EINVAL;
-    }
-
-  return MTD_ERASE(MFS_MTD(sb), blk, n);
 }

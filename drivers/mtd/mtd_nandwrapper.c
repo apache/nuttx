@@ -272,6 +272,7 @@ int nand_wrapper_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                        unsigned long arg)
 {
   int ret;
+  FAR uint8_t *erasestate;
   FAR struct nand_wrapper_dev_s *nand_dev;
 
   nand_dev = (struct nand_wrapper_dev_s *)dev;
@@ -282,7 +283,28 @@ int nand_wrapper_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                    ", Arg : %zu\n", nand_wrapper_ins_i, "ioctl", cmd, arg);
   DEBUGASSERT(nand_dev && nand_dev->under.mtd.ioctl);
 
-  ret = nand_dev->under.mtd.ioctl(dev, cmd, arg);
+  if (cmd == MTDIOC_ERASESTATE)
+    {
+      erasestate = (FAR uint8_t *)arg;
+      if (erasestate == NULL)
+        {
+          ret = -EINVAL;
+        }
+      else
+        {
+          /* The wrapped bread path exposes blank NAND pages as zero-filled
+           * buffers after ECC handling, so report the same visible erase
+           * state to higher layers.
+           */
+
+          *erasestate = 0x00;
+          ret = OK;
+        }
+    }
+  else
+    {
+      ret = nand_dev->under.mtd.ioctl(dev, cmd, arg);
+    }
 
   if (ret >= 0)
     {
