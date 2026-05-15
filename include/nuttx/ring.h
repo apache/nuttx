@@ -137,6 +137,10 @@
 
 #define RING_IDX_MASK    0xffffff
 
+/* Maximum ring capacity: must be power-of-2 and fit in 24-bit index space */
+
+#define RING_SIZE_MAX    (1u << 23)
+
 /* 32-bit RTS packed type: {cnt:8, idx:24} in a single atomic_t.
  *
  * Layout (little-endian and big-endian safe via shift/mask):
