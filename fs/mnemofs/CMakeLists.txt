@@ -49,15 +49,6 @@
 # ##############################################################################
 
 if(CONFIG_FS_MNEMOFS)
-  target_sources(
-    fs
-    PRIVATE mnemofs_blkalloc.c
-            mnemofs_ctz.c
-            mnemofs_fsobj.c
-            mnemofs_journal.c
-            mnemofs_lru.c
-            mnemofs_master.c
-            mnemofs_rw.c
-            mnemofs_util.c
-            mnemofs.c)
+  target_sources(fs PRIVATE mnemofs.c mnemofs_alloc.c mnemofs_ctz.c
+                            mnemofs_dirent.c mnemofs_file.c mnemofs_rw.c)
 endif()

@@ -332,12 +332,10 @@ int nand_ram_eraseblock(FAR struct nand_raw_s *raw, off_t block)
 int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
                       unsigned int page, FAR void *data, FAR void *spare)
 {
-  int                     ret;
   uint32_t                read_page;
   struct nand_ram_data_s  *read_page_data;
   struct nand_ram_spare_s *read_page_spare;
 
-  ret             = OK;
   read_page       = (block << NAND_RAM_LOG_PAGES_PER_BLOCK) + page;
   read_page_data  = nand_ram_flash_data + read_page;
   read_page_spare = nand_ram_flash_spare + read_page;
@@ -348,14 +346,6 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
   NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Page %" PRIi32 "\n",
               nand_ram_ins_i, "rawread", read_page);
   nand_ram_status();
-
-  if (nand_ram_flash_spare[read_page].bad != NAND_RAM_BLOCK_GOOD)
-    {
-      ret = -EFAULT;
-      NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Failed: %s\n",
-                    nand_ram_ins_i, "rawread", EFAULT_STR);
-      goto errout;
-    }
 
   nand_ram_flash_spare[read_page].n_read++;
 
@@ -378,11 +368,9 @@ int nand_ram_rawread(FAR struct nand_raw_s *raw, off_t block,
     }
 
   NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Done\n", nand_ram_ins_i, "rawread");
-
-errout:
   nxmutex_unlock(&nand_ram_dev_mut);
 
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -444,7 +432,7 @@ int nand_ram_rawwrite(FAR struct nand_raw_s *raw, off_t block,
 
   if (spare != NULL)
     {
-      memcpy((FAR void *)write_page_spare, data, NAND_RAM_SPARE_SIZE);
+      memcpy((FAR void *)write_page_spare, spare, NAND_RAM_SPARE_SIZE);
     }
 
   NAND_RAM_LOG("[LOWER %" PRIu64 " | %s] Done\n", nand_ram_ins_i,
