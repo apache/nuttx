@@ -1686,7 +1686,7 @@ static void fb_sem_reset(FAR struct fb_chardev_s *fb, int overlay)
 
   DEBUGASSERT(fb != NULL);
 
-  flags = spin_lock_irqsave(&fb->lock);
+  flags = spin_lock_irqsave_nopreempt(&fb->lock);
 
   for (priv = fb->head; priv; priv = priv->flink)
     {
@@ -1704,7 +1704,7 @@ static void fb_sem_reset(FAR struct fb_chardev_s *fb, int overlay)
         }
     }
 
-  spin_unlock_irqrestore(&fb->lock, flags);
+  spin_unlock_irqrestore_nopreempt(&fb->lock, flags);
 }
 #endif
 
