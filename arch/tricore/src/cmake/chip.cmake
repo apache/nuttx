@@ -19,3 +19,38 @@
 # the License.
 #
 # ##############################################################################
+
+set(PLATFORM_FLAGS)
+
+if(CONFIG_ARCH_CHIP_FAMILY_TC3X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc162 -mcpu=tc3xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
+  elseif(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    if(CONFIG_TC3X_CHIP_TC375)
+      list(APPEND PLATFORM_FLAGS --cpu=tc37x)
+    else()
+      list(APPEND PLATFORM_FLAGS --cpu=tc39x)
+    endif()
+    # The VX-toolset deviates from the EABI by default, keep to it
+    list(APPEND PLATFORM_FLAGS --eabi=BCDFHILNSVW)
+  else()
+    list(APPEND PLATFORM_FLAGS -mtc162)
+  endif()
+elseif(CONFIG_ARCH_CHIP_FAMILY_TC4X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc18 -mcpu=tc4xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
+  elseif(CONFIG_TRICORE_TOOLCHAIN_TASKING)
+    if(CONFIG_TC4X_CHIP_TC4D7)
+      list(APPEND PLATFORM_FLAGS --cpu=tc4dx --silicon-bug=all-tc4dx)
+    else()
+      list(APPEND PLATFORM_FLAGS --cpu=tc49x)
+    endif()
+  else()
+    list(APPEND PLATFORM_FLAGS -mtc18)
+  endif()
+endif()
+
+add_compile_options(${PLATFORM_FLAGS})
+add_link_options(${PLATFORM_FLAGS})

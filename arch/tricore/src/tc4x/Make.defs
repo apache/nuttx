@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc3xx/Toolchain.defs
+# arch/tricore/src/tc4x/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,18 +20,4 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC397),y)
-  ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-    ARCHCPUFLAGS += --cpu=tc39xb
-    LDFLAGS      += -Ctc39xb
-  else
-    ARCHCPUFLAGS += -mcpu=tc39xx
-    ARCHCPUFLAGS += -mtc162
-  endif
-
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/iLLD/TC3xx/Tricore/Cpu/Std
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Libraries/src/Libraries/Infra/Platform
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc3xx/Configurations
-endif
-
-include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs
+VPATH += tc4x

@@ -43,7 +43,7 @@ endif()
 
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 
-if(CONFIG_TRICORE_TOOLCHAIN_GNU)
+if(CONFIG_TRICORE_TOOLCHAIN_GNUC)
   nuttx_find_toolchain_lib()
   if(CONFIG_LIBM_TOOLCHAIN)
     nuttx_find_toolchain_lib(libm.a)
@@ -60,14 +60,27 @@ if(CONFIG_TRICORE_TOOLCHAIN_GNU)
   if(CONFIG_COVERAGE_TOOLCHAIN)
     nuttx_find_toolchain_lib(libgcov.a)
   endif()
-
-  set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 endif()
 
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  find_program(TASKING_COMPILER_PATH ctc)
-  get_filename_component(C_COMPILER_DIR ${TASKING_COMPILER_PATH} DIRECTORY)
-  set(PREPROCESS
-      ${TOOLCHAIN_PREFIX}ctc ${CMAKE_C_FLAG_ARGS} -E
-      -I${TOOLCHAIN_PREFIX}/../include.lsl -I${C_COMPILER_DIR}/../include.lsl)
+  find_program(TASKING_CTC ctc)
+  get_filename_component(TASKING_BIN_DIR ${TASKING_CTC} DIRECTORY)
+  set(PREPROCESS ${TASKING_CTC} -Ep -I${TASKING_BIN_DIR}/../include.lsl)
+
+  # astc has no C preprocessor, the .asm files go through ctc first for the
+  # headers and options.  rfh and the VCON0 write of the TC1.8 path need the
+  # hypervisor mode.
+
+  set(TASKING_AFLAGS -Wa--no-warnings=201)
+  if(CONFIG_TRICORE_TC18)
+    list(APPEND TASKING_AFLAGS -Wa--user-mode=hypervisor)
+  endif()
+
+  string(JOIN " " TASKING_ASM_FLAGS ${PLATFORM_FLAGS} ${TASKING_AFLAGS})
+  set(CMAKE_DEPFILE_FLAGS_ASM "")
+  set(CMAKE_ASM_COMPILE_OBJECT
+      "${TASKING_CTC} -Ep -D__ASSEMBLY__ <DEFINES> <INCLUDES> <SOURCE> -o <OBJECT>.src"
+      "<CMAKE_ASM_COMPILER> -c ${TASKING_ASM_FLAGS} <OBJECT>.src -o <OBJECT>")
+else()
+  set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 endif()
