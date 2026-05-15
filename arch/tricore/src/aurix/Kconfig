@@ -5,6 +5,131 @@
 
 menu "AURIX peripheral selection"
 
+config TRICORE_UART0
+	bool "ASCLIN UART0"
+	default n
+	select UART0_SERIALDRIVER
+	---help---
+		Build the ASCLIN0 channel as a serial UART instance (ttyS0).
+
+if TRICORE_UART0
+
+config TRICORE_UART0_TXIRQ
+	int "ASCLIN0 TX IRQ"
+	default 173 if ARCH_CHIP_FAMILY_TC4X
+	default 20  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN0 TX completion.
+		Defaults match the canonical mapping in the AURIX Interrupt
+		Router: 173 on TC4X and 20 on TC3X.
+
+config TRICORE_UART0_RXIRQ
+	int "ASCLIN0 RX IRQ"
+	default 172 if ARCH_CHIP_FAMILY_TC4X
+	default 21  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN0 RX events.
+		Defaults: 172 on TC4X, 21 on TC3X.
+
+config TRICORE_UART0_ERIRQ
+	int "ASCLIN0 ER IRQ"
+	default 174 if ARCH_CHIP_FAMILY_TC4X
+	default 22  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN0 framing/parity/overrun
+		errors. Defaults: 174 on TC4X, 22 on TC3X.
+
+endif
+
+config TRICORE_UART1
+	bool "ASCLIN UART1"
+	default n
+	select UART1_SERIALDRIVER
+	---help---
+		Build the ASCLIN1 channel as a serial UART instance (ttyS1).
+
+if TRICORE_UART1
+
+config TRICORE_UART1_TXIRQ
+	int "ASCLIN1 TX IRQ"
+	default 176 if ARCH_CHIP_FAMILY_TC4X
+	default 23  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN1 TX completion.
+		Defaults: 176 on TC4X, 23 on TC3X.
+
+config TRICORE_UART1_RXIRQ
+	int "ASCLIN1 RX IRQ"
+	default 175 if ARCH_CHIP_FAMILY_TC4X
+	default 24  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN1 RX events.
+		Defaults: 175 on TC4X, 24 on TC3X.
+
+config TRICORE_UART1_ERIRQ
+	int "ASCLIN1 ER IRQ"
+	default 177 if ARCH_CHIP_FAMILY_TC4X
+	default 25  if ARCH_CHIP_FAMILY_TC3X
+	---help---
+		Service Request Node (SRN) for ASCLIN1 framing/parity/overrun
+		errors. Defaults: 177 on TC4X, 25 on TC3X.
+
+endif
+
+config TRICORE_ASCLINF_FREQUENCY
+	int "ASCLIN fASCLIN clock frequency (Hz)"
+	default 200000000 if ARCH_CHIP_FAMILY_TC4X
+	default 100000000 if ARCH_CHIP_FAMILY_TC3X
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		ASCLIN baud generator source clock (fASCLIN), in Hz.
+
+config TRICORE_ASCLIN_PRESCALER
+	int "ASCLIN baud prescaler"
+	default 1
+	range 1 4096
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		Prescaler applied to fASCLIN before the BRG fractional divider.
+
+config TRICORE_ASCLIN_OVERSAMPLING
+	int "ASCLIN oversampling factor"
+	default 16
+	range 4 16
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		Number of fASCLIN ticks per UART bit. The Stern-Brocot baud
+		generator targets this divisor; 16 is the AURIX default.
+
+config TRICORE_ASCLIN_SAMPLEPOINT
+	int "ASCLIN sample point within bit time"
+	default 8
+	range 1 15
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		Oversample tick at which the receiver samples each RX bit.
+		Must be smaller than ASCLIN_OVERSAMPLING.
+
+config TRICORE_ASCLIN_MEDIAN_FILTER
+	int "ASCLIN 3-tap median filter on RX (0/1)"
+	default 1
+	range 0 1
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		Enable the 3-tap median filter on the RX bit slicer.  Use 1
+		for noise-rejection on long cable runs, 0 to disable.
+
+config TRICORE_ASCLIN_CLK_SRC
+	int "ASCLIN clock source selector"
+	default 2
+	range 0 4
+	depends on TRICORE_UART0 || TRICORE_UART1
+	---help---
+		ASCLIN CSR.CLKSEL value written to enable the module clock.
+		0 = NOCLK (clock off), 2 = FASCLINF (fast ASCLIN clock,
+		default for the on-board console), 4 = FASCLINS (slow ASCLIN
+		clock). Values 1 and 3 are reserved.
+
 config TC4X_GPIO_ACCESS_GROUP
 	int "TC4X port access group"
 	default 0
