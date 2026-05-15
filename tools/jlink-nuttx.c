@@ -363,21 +363,24 @@ static int update_pidhash(struct plugin_priv_s *priv)
 
   if (npidhash != priv->npidhash)
     {
-      priv->pidhash = REALLOC(priv->pidhash,
-                              npidhash * sizeof(uint32_t *));
-      if (!priv->pidhash)
+      void *tmp;
+      tmp = REALLOC(priv->pidhash, npidhash * sizeof(uint32_t *));
+      if (!tmp)
         {
           PERROR("error in malloc pidhash\n");
           return -ENOMEM;
         }
 
-      priv->regsaddr =
-        REALLOC(priv->regsaddr, npidhash * sizeof(uint32_t *));
-      if (!priv->regsaddr)
+      priv->pidhash = tmp;
+
+      tmp = REALLOC(priv->regsaddr, npidhash * sizeof(uint32_t *));
+      if (!tmp)
         {
           PERROR("error in malloc regsaddr\n");
           return -ENOMEM;
         }
+
+      priv->regsaddr = tmp;
 
       PLOG("npidhash change from %d to %d!\n", priv->npidhash, npidhash);
       priv->npidhash = npidhash;
