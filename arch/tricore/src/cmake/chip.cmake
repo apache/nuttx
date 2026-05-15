@@ -19,3 +19,24 @@
 # the License.
 #
 # ##############################################################################
+
+set(PLATFORM_FLAGS)
+
+if(CONFIG_ARCH_CHIP_FAMILY_TC3X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc162 -mcpu=tc3xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
+  else()
+    list(APPEND PLATFORM_FLAGS -mtc162)
+  endif()
+elseif(CONFIG_ARCH_CHIP_FAMILY_TC4X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc18 -mcpu=tc4xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
+  else()
+    list(APPEND PLATFORM_FLAGS -mtc18)
+  endif()
+endif()
+
+add_compile_options(${PLATFORM_FLAGS})
+add_link_options(${PLATFORM_FLAGS})

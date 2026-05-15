@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc3xx/Make.defs
+# arch/tricore/src/tc3x/Toolchain.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,4 +20,11 @@
 #
 ############################################################################
 
-VPATH += tc3xx
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_LLVM),y)
+ARCHCPUFLAGS += -march=tc162 -mcpu=tc3xx
+ARCHCPUFLAGS += -Wno-error=implicit-function-declaration
+else
+ARCHCPUFLAGS += -mtc162
+endif
+
+include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs

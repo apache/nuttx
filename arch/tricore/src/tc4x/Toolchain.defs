@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc4xx/Toolchain.defs
+# arch/tricore/src/tc4x/Toolchain.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,20 +20,11 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_ARCH_CHIP_TC4XX),y)
-  ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
-    ARCHCPUFLAGS += --misrac-version=2004 --user-mode=hypervisor
-    ARCHCPUFLAGS += --default-near-size=0
-    LDFLAGS      += -Ctc4dx
-  else
-    ARCHCPUFLAGS += -mcpu=tc4DAx
-    ARCHCPUFLAGS += -mtc18
-endif
-
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Std
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/Infra/Platform/Compilers
-  ARCHINCLUDES += ${INCDIR_PREFIX}$(TOPDIR)/arch/tricore/src/illd/tc4xx/Configurations
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_LLVM),y)
+ARCHCPUFLAGS += -march=tc18 -mcpu=tc4xx
+ARCHCPUFLAGS += -Wno-error=implicit-function-declaration
+else
+ARCHCPUFLAGS += -mtc18
 endif
 
 include $(TOPDIR)/arch/tricore/src/common/Toolchain.defs

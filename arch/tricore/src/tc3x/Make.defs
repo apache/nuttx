@@ -1,5 +1,5 @@
 ############################################################################
-# arch/tricore/src/tc4xx/Make.defs
+# arch/tricore/src/tc3x/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,4 +20,4 @@
 #
 ############################################################################
 
-VPATH += tc4xx
+VPATH += tc3x
