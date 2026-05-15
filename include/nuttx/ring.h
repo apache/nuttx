@@ -687,7 +687,7 @@ ring_copy_from(FAR struct ring_buf_s *buf, FAR const void *items,
           memcpy(buf->ptr1, items, elem_size);
         }
     }
-  else
+  else if (buf->cnt != 0)
     {
       memcpy(buf->ptr1, items, buf->len1 * elem_size);
       if (buf->len2 != 0)
@@ -732,7 +732,7 @@ ring_copy_to(FAR struct ring_buf_s *buf, FAR void *items, size_t elem_size)
           memcpy(items, buf->ptr1, elem_size);
         }
     }
-  else
+  else if (buf->cnt != 0)
     {
       memcpy(items, buf->ptr1, buf->len1 * elem_size);
       if (buf->len2 != 0)
