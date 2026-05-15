@@ -122,6 +122,8 @@ config TRICORE_TOOLCHAIN_TASKING
 
 endchoice
 
+source "arch/tricore/src/aurix/Kconfig"
+
 if ARCH_CHIP_FAMILY_TC3X
 source "arch/tricore/src/tc3x/Kconfig"
 endif
