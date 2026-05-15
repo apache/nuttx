@@ -50,6 +50,7 @@ set(SRCS
     tricore_schedulesigaction.c
     tricore_sigdeliver.c
     tricore_stackframe.c
+    tricore_stm.c
     tricore_svcall.c
     tricore_tcbinfo.c
     tricore_trapcall.c
