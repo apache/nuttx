@@ -26,6 +26,90 @@
  * algorithm packing {cnt:8, idx:24} into a single atomic_t for
  * multi-producer/multi-consumer coordination via single CAS,
  * eliminating tail-wait spin without disabling interrupts.
+ *
+ * Usage Guide:
+ *
+ * 1. Declaration and Initialization:
+ *
+ *   Static (compile-time):
+ *     RING_DEFINE(g_ring, uint32_t, 64);
+ *
+ *   Dynamic (runtime):
+ *     struct ring_s *r = ring_alloc(64, sizeof(uint32_t));
+ *     ring_free(r);
+ *
+ *   Multi-core safe init (SMP, uses atomic CAS):
+ *     ring_init(&g_ring, 64);
+ *
+ *   Single-side init (AMP/SPSC, no atomic needed):
+ *     ring_spsc_init(&g_ring, 64);
+ *     // Other side polls: while (!ring_is_ready(&g_ring));
+ *
+ * 2. Mode Selection:
+ *
+ *   SPSC - Single Producer, Single Consumer (volatile + barrier):
+ *     ring_spsc_enqueue(&g_ring, &val, 1);
+ *     ring_spsc_dequeue(&g_ring, &out, 1);
+ *
+ *   MPSC - Multiple Producers, Single Consumer:
+ *     ring_mpsc_enqueue(&g_ring, &val, 1);
+ *     ring_mpsc_dequeue(&g_ring, &out, 1);
+ *
+ *   SPMC - Single Producer, Multiple Consumers:
+ *     ring_spmc_enqueue(&g_ring, &val, 1);
+ *     ring_spmc_dequeue(&g_ring, &out, 1);
+ *
+ *   MPMC - Multiple Producers, Multiple Consumers:
+ *     ring_mpmc_enqueue(&g_ring, &val, 1);
+ *     ring_mpmc_dequeue(&g_ring, &out, 1);
+ *
+ * 3. Dequeue Skip (advance index without reading data):
+ *
+ *     ring_spsc_dequeue_skip(&g_ring, n);
+ *     ring_mpsc_dequeue_skip(&g_ring, n);
+ *     ring_spmc_dequeue_skip(&g_ring, n);
+ *     ring_mpmc_dequeue_skip(&g_ring, n);
+ *
+ * 4. Overwrite Mode (SPMC/MPMC only, discards oldest on full):
+ *
+ *     ring_spmc_enqueue_overwrite(&g_ring, &val, 1);
+ *     ring_mpmc_enqueue_overwrite(&g_ring, &val, 1);
+ *     // Consumer MUST use MC dequeue (ring_spmc/mpmc_dequeue)
+ *
+ * 5. Zero-copy enqueue/dequeue (start/finish pattern):
+ *
+ *     struct ring_buf_s buf;
+ *
+ *     // Enqueue (all modes: spsc/mpsc/spmc/mpmc):
+ *     ring_spsc_enqueue_start(&g_ring, count, elem_size, &buf);
+ *     memcpy(buf.ptr1, src, buf.len1 * elem_size);
+ *     if (buf.ptr2)
+ *       memcpy(buf.ptr2, src + buf.len1 * elem_size,
+ *              buf.len2 * elem_size);
+ *     ring_spsc_enqueue_finish(&g_ring, &buf);
+ *
+ *     // Dequeue (all modes):
+ *     ring_spsc_dequeue_start(&g_ring, count, elem_size, &buf);
+ *     // Read from buf.ptr1 (len1) and buf.ptr2 (len2)
+ *     ring_spsc_dequeue_finish(&g_ring, &buf);
+ *
+ * 6. Zero-copy overwrite enqueue (start/finish pattern):
+ *
+ *     struct ring_buf_s buf;
+ *     ring_spmc_enqueue_overwrite_start(&g_ring, count,
+ *                                       elem_size, &buf);
+ *     memcpy(buf.ptr1, src, buf.len1 * elem_size);
+ *     if (buf.ptr2)
+ *       memcpy(buf.ptr2, src + buf.len1 * elem_size,
+ *              buf.len2 * elem_size);
+ *     ring_spmc_enqueue_overwrite_finish(&g_ring, &buf);
+ *
+ * 7. Query:
+ *
+ *     ring_count(&g_ring);     // Elements currently in ring
+ *     ring_capacity(&g_ring);  // Max elements
+ *     ring_space(&g_ring);     // Free slots
+ *     ring_is_ready(&g_ring);  // true if initialized
  */
 
 #ifndef __INCLUDE_NUTTX_RING_H
