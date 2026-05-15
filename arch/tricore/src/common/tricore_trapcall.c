@@ -26,392 +26,178 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <assert.h>
-#include <nuttx/debug.h>
-#include <syscall.h>
+#include <debug.h>
 
-#include <arch/irq.h>
-#include <sched/sched.h>
-#include <nuttx/coredump.h>
-#include <nuttx/sched.h>
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
+#include <arch/arch.h>
 
 #include "tricore_internal.h"
 
-#include "IfxCpu_Trap.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+enum tricore_trap_class
+{
+  TRICORE_CLASS_MMU,
+  TRICORE_CLASS_IP,
+  TRICORE_CLASS_IE,
+  TRICORE_CLASS_CTX,
+  TRICORE_CLASS_BUS,
+  TRICORE_CLASS_ASSERT,
+  TRICORE_CLASS_SYSCALL,
+  TRICORE_CLASS_NMI
+};
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static IfxCpu_Trap g_trapinfo;
+/* Trap description tables indexed by trap class and TIN.
+ * For classes where TIN numbering starts at 1, index 0 is reserved.
+ */
+
+static const char * const g_trap_class0[] =
+{
+  "Virtual Address Fill",
+  "Virtual Address Protection",
+};
+
+static const char * const g_trap_class1[] =
+{
+  "Reserved",
+  "Privileged Instruction",
+  "Memory Protection Read",
+  "Memory Protection Write",
+  "Memory Protection Execute",
+  "Memory Protection Peripheral Access",
+  "Memory Protection Null Address",
+  "Global Register Write Protection",
+};
+
+static const char * const g_trap_class2[] =
+{
+  "Reserved",
+  "Illegal Opcode",
+  "Unimplemented Opcode",
+  "Invalid Operand specification",
+  "Data Address Alignment",
+  "Invalid Local Memory Address",
+};
+
+static const char * const g_trap_class3[] =
+{
+  "Reserved",
+  "Free Context List Depletion (FCX = LCX)",
+  "Call Depth Overflow",
+  "Call Depth Underflow",
+  "Free Context List Underflow (FCX = 0)",
+  "Call Stack Underflow (PCX = 0)",
+  "Context Type (PCXI.UL wrong)",
+  "Nesting Error: RFE with non-zero call depth",
+};
+
+static const char * const g_trap_class4[] =
+{
+  "Reserved",
+  "Program Fetch Synchronous Error",
+  "Data Access Synchronous Error",
+  "Data Access Asynchronous Error",
+  "Coprocessor Trap Asynchronous Error",
+  "Program Memory Integrity Error",
+  "Data Memory Integrity Error",
+  "Temporal Asynchronous Error",
+};
+
+static const char * const g_trap_class5[] =
+{
+  "Reserved",
+  "Arithmetic Overflow",
+  "Sticky Arithmetic Overflow",
+};
+
+static const char * const g_trap_class6[] =
+{
+  "System Call",
+};
+
+static const char * const g_trap_class7[] =
+{
+  "Non-Maskable Interrupt",
+};
+
+static const char * const * const g_trap_class_str[] =
+{
+  g_trap_class0, g_trap_class1, g_trap_class2, g_trap_class3,
+  g_trap_class4, g_trap_class5, g_trap_class6, g_trap_class7,
+};
+
+static const uint8_t g_trap_class_tin_count[] =
+{
+  sizeof(g_trap_class0) / sizeof(g_trap_class0[0]),
+  sizeof(g_trap_class1) / sizeof(g_trap_class1[0]),
+  sizeof(g_trap_class2) / sizeof(g_trap_class2[0]),
+  sizeof(g_trap_class3) / sizeof(g_trap_class3[0]),
+  sizeof(g_trap_class4) / sizeof(g_trap_class4[0]),
+  sizeof(g_trap_class5) / sizeof(g_trap_class5[0]),
+  sizeof(g_trap_class6) / sizeof(g_trap_class6[0]),
+  sizeof(g_trap_class7) / sizeof(g_trap_class7[0]),
+};
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void tricore_trapinfo(volatile void *trap)
+static const char *tricore_trap_cause_str(uint32_t tclass, uint32_t tin)
 {
-  IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
+  if (tclass >= sizeof(g_trap_class_str) / sizeof(g_trap_class_str[0]))
+    {
+      return "Unknown Trap Class";
+    }
 
-  g_trapinfo.tCpu   = ctrap->tCpu;
-  g_trapinfo.tClass = ctrap->tClass;
-  g_trapinfo.tId    = ctrap->tId;
-  g_trapinfo.tAddr  = ctrap->tAddr;
+  if (tin >= g_trap_class_tin_count[tclass])
+    {
+      return "Unknown TIN";
+    }
+
+  return g_trap_class_str[tclass][tin];
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! NMI Trap:\n");
-  _alert("\tClass %d TID: %d regs: %p\n",
-         IfxCpu_Trap_Class_nonMaskableInterrupt, tid, context);
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_mmutrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! MMU Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
-         IfxCpu_Trap_Class_memoryManagement,
-         tid, context);
-
-  _alert("MMU Trap Reason:\n");
-  if (tid == IfxCpu_Trap_MemoryManagement_Id_virtualAddressFill)
-    {
-      _alert("\tVirtual Address Fill\n");
-    }
-
-  if (tid == IfxCpu_Trap_MemoryManagement_Id_virtualAddressProtection)
-    {
-      _alert("\tVirtual Address Protection\n");
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_internalprotrape(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! Internal Protection Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
-        IfxCpu_Trap_Class_internalProtection, tid, context);
-
-  _alert("Internal Protection Reason:\n");
-  if (tid == IfxCpu_Trap_InternalProtection_Id_privilegeViolation)
-    {
-      _alert("\tPrivileged Instruction\n");
-    }
-
-  if (tid == IfxCpu_Trap_InternalProtection_Id_memoryProtectionRead)
-    {
-      _alert("\tMemory Protection Read\n");
-    }
-
-  if (tid == IfxCpu_Trap_InternalProtection_Id_memoryProtectionWrite)
-    {
-      _alert("\tMemory Proteciton Write\n");
-    }
-
-  if (tid == IfxCpu_Trap_InternalProtection_Id_memoryProtectionExecute)
-    {
-      _alert("\tMemory Protection Execution\n");
-    }
-
-  if (tid ==
-      IfxCpu_Trap_InternalProtection_Id_memoryProtectionPeripheralAccess)
-    {
-      _alert("\tMemory Protection Peripheral Access\n");
-    }
-
-  if (tid == IfxCpu_Trap_InternalProtection_Id_memoryProtectionNullAddress)
-    {
-      _alert("\tMemory Protection Null Address\n");
-    }
-
-  if (tid == IfxCpu_Trap_InternalProtection_Id_globalRegisterWriteProtection)
-    {
-      _alert("\tGlobal Register Write Protection\n");
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! Instruction Errors Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
-        IfxCpu_Trap_Class_instructionErrors, tid, context);
-
-  _alert("Instruction Errors Trap Reason:\n");
-  if (tid == IfxCpu_Trap_InstructionErrors_Id_illegalOpcode)
-    {
-      _alert("\tIllegal Opcode\n");
-    }
-
-  if (tid == IfxCpu_Trap_InstructionErrors_Id_unimplementedOpcode)
-    {
-      _alert("\tUnimplemented Opcode\n");
-    }
-
-  if (tid == IfxCpu_Trap_InstructionErrors_Id_invalidOperand)
-    {
-      _alert("\tInvalid Operand Specification\n");
-    }
-
-  if (tid == IfxCpu_Trap_InstructionErrors_Id_dataAddressAlignment)
-    {
-      _alert("\tData Address Alignment\n");
-    }
-
-  if (tid == IfxCpu_Trap_InstructionErrors_Id_invalidMemoryAddress)
-    {
-      _alert("\tInvalid Local Memory Address\n");
-    }
-
-#ifdef CONFIG_ARCH_TC1V8
-  if (tid ==
-      IfxCpu_Trap_InstructionErrors_Id_CoprocessorTrapSynchronousError)
-    {
-      _alert("\tCoprocessor Trap Synchronous Error\n");
-#  ifdef CONFIG_ARCH_HAVE_FPU
-      _alert("\tFPU_SYNC_TRAP:%" PRIX32 "\n\n",
-             (uint32_t)__mfcr(FPU_SYNC_TRAP_REG));
-      __mtcr(FPU_SYNC_TRAP_REG,
-             __mfcr(FPU_SYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
-#  endif
-    }
-#endif
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! Context Management Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
-        IfxCpu_Trap_Class_contextManagement, tid, context);
-
-  _alert("Context Management Reason:\n");
-  if (tid == IfxCpu_Trap_ContextManagement_Id_freeContextListDepletion)
-    {
-      _alert("\tFree Context List Depletion\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_callDepthOverflow)
-    {
-      _alert("\tCall Depth Overflow\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_callDepthUnderflow)
-    {
-      _alert("\tCall Depth Underflow\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_freeContextListUnderflow)
-    {
-      _alert("\tFree Context List Underflow\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_callStackUnderflow)
-    {
-      _alert("\tCall Stack Underflow\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_contextType)
-    {
-      _alert("\tContext Type\n");
-    }
-
-  if (tid == IfxCpu_Trap_ContextManagement_Id_nestingError)
-    {
-      _alert("\tNesting Error:RFE with non-zero call depth\n");
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_bustrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! System Bus Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n", IfxCpu_Trap_Class_bus,
-         tid, context);
-
-  _alert("System Bus Reason:\n");
-  if (tid == IfxCpu_Trap_Bus_Id_programFetchSynchronousError)
-    {
-      _alert("\tProgram Fetch Synchronous Error\n");
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_dataAccessSynchronousError)
-    {
-      _alert("\tData Access Synchronous Error\n");
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_dataAccessAsynchronousError)
-    {
-      _alert("\tData Access Asysnchronous Error\n");
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_CoprocessorTrapAsynchronousError)
-    {
-      _alert("\tCoprocessor Trap Asynchronous Error\n");
-#ifdef CONFIG_ARCH_HAVE_FPU
-      _alert("\tFPU_ASYNC_TRAP:%" PRIX32 "\n\n",
-             (uint32_t)__mfcr(FPU_ASYNC_TRAP_REG));
-      __mtcr(FPU_ASYNC_TRAP_REG,
-             __mfcr(FPU_ASYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
-#endif
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_programMemoryIntegrityError)
-    {
-      _alert("\tProgram Memory Integrity Error\n");
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_dataMemoryIntegrityError)
-    {
-      _alert("\tData Memory Integrity Error\n");
-    }
-
-  if (tid == IfxCpu_Trap_Bus_Id_temporalAsynchronousError)
-    {
-      _alert("\tTemporal Asynchronous Error\n");
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
-int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
-{
-  _alert("PANIC!!! Assertion Trap:\n");
-  _alert("\tClass %d TID: %" PRId32 " regs: %p\n",
-         IfxCpu_Trap_Class_assertion,
-         tid, context);
-
-  _alert("System Bus Reason:\n");
-  if (tid == IfxCpu_Trap_Assertion_Id_arithmeticOverflow)
-    {
-      _alert("\tArithmetic Overflow\n");
-    }
-
-  if (tid == IfxCpu_Trap_Assertion_Id_stickyArithmeticOverflow)
-    {
-      _alert("\tSticky Arithmetic Overflow\n");
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("panic", context);
-  return OK;
-}
-
 /****************************************************************************
- * Name: tricore_trapcall
+ * Name: tricore_trap_handler
  *
  * Description:
- *   This is Trap exception handler
+ *   This is the common Trap exception handler. It is invoked by the BTV
+ *   trap stubs in tricore_trap.S after svlcx has saved the lower context.
+ *   The current PCXI therefore points at the just-saved lower CSA whose
+ *   PCXI field chains back to the upper CSA pushed by hardware on trap
+ *   entry.
  *
  ****************************************************************************/
 
-void tricore_trapcall(volatile void *trap)
+void tricore_trap_handler(uint32_t tclass, uint32_t tin)
 {
   uintptr_t *regs;
   uintptr_t pcxi;
 
-  IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
-  IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
-  unsigned int tid = ctrap->tId;
+  if (tclass == TRICORE_CLASS_SYSCALL)
+    {
+      tricore_svcall(NULL);
+      return;
+    }
 
-  tricore_trapinfo(trap);
-
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
-  pcxi = regs[REG_UPCXI];
+  TRICORE_MFCR(TRICORE_CPU_PCXI, pcxi);
   regs = tricore_csa2addr(pcxi);
 
-  if (!up_interrupt_context())
-    {
-      /* Update the current task's regs */
-
-      g_running_tasks[this_cpu()]->xcp.regs = regs;
-    }
-
-  up_set_interrupt_context(true);
-
-  if (tclass == IfxCpu_Trap_Class_nonMaskableInterrupt)
-    {
-      tricore_nmitrap(tid, regs, NULL);
-      up_set_interrupt_context(false);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_memoryManagement)
-    {
-      tricore_mmutrap(tid, regs, NULL);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_internalProtection)
-    {
-      tricore_internalprotrape(tid, regs, NULL);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_instructionErrors)
-    {
-      tricore_insterrorstrap(tid, regs, NULL);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_contextManagement)
-    {
-      tricore_contexmnttrap(tid, regs, NULL);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_bus)
-    {
-      tricore_bustrap(tid, regs, NULL);
-      return;
-    }
-
-  if (tclass == IfxCpu_Trap_Class_assertion)
-    {
-      tricore_assertiontrap(tid, regs, NULL);
-      return;
-    }
-
-  up_irq_save();
-  PANIC_WITH_REGS("Trap", regs);
-}
-
-/****************************************************************************
- * Function:  tricore_trapinit
- *
- * Description:
- *   Trap init for tricore arch.
- *
- ****************************************************************************/
-
-void tricore_trapinit(void)
-{
-#ifdef CONFIG_COREDUMP
-  coredump_add_memory_region(&g_trapinfo, sizeof(g_trapinfo),
-                             PF_REGISTER);
-#endif
+  lowsyslog("TriCore Trap: Class %" PRIu32 " TIN %" PRIu32 " (%s)\n",
+            tclass, tin, tricore_trap_cause_str(tclass, tin));
+  up_dump_register(regs);
 }

@@ -20,12 +20,18 @@
 #
 ############################################################################
 
+HEAD_ASRC += tricore_head$(ASMEXT)
 HEAD_CSRC += tricore_doirq.c
+
+CMN_ASRCS += tricore_interrupt$(ASMEXT)
+CMN_ASRCS += tricore_trap$(ASMEXT)
+CMN_ASRCS += tricore_lib$(ASMEXT)
 
 CMN_CSRCS += tricore_allocateheap.c
 CMN_CSRCS += tricore_backtrace.c
 CMN_CSRCS += tricore_cache.c
 CMN_CSRCS += tricore_checkstack.c
+CMN_CSRCS += tricore_compiler.c
 CMN_CSRCS += tricore_createstack.c
 CMN_CSRCS += tricore_csa.c
 CMN_CSRCS += tricore_exit.c

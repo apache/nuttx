@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_switchcontext.c
+ * arch/tricore/include/tc4x/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,49 +20,26 @@
  *
  ****************************************************************************/
 
+/* This file should never be included directly but, rather,
+ * only indirectly through nuttx/irq.h
+ */
+
+#ifndef __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H
+#define __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <syscall.h>
-#include <assert.h>
-#include <nuttx/debug.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/sched.h>
-
-#include "sched/sched.h"
-#include "group/group.h"
-#include "clock/clock.h"
-#include "tricore_internal.h"
+/****************************************************************************
+ * Pre-processor Prototypes
+ ****************************************************************************/
+#define NR_IRQS 2048
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_switch_context
- *
- * Description:
- *   A task is currently in the ready-to-run list but has been prepped
- *   to execute. Restore its context, and start execution.
- *
- * Input Parameters:
- *   tcb: Refers to the head task of the ready-to-run list
- *     which will be executed.
- *   rtcb: Refers to the running task which will be blocked.
- *
- ****************************************************************************/
-
-void up_switch_context(struct tcb_s *tcb, struct tcb_s *rtcb)
-{
-  if (!up_interrupt_context())
-    {
-      /* Then switch contexts */
-
-      tricore_switchcontext(&rtcb->xcp.regs, tcb->xcp.regs);
-    }
-}
+#endif /* __ARCH_TRICORE_INCLUDE_TC4X_IRQ_H */
