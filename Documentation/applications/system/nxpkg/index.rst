@@ -27,6 +27,10 @@ ELF loading. The current implementation assumes that:
 - the repository index can be written under ``/etc/nxpkg``
 - the package store and cache live under a writable ``/var`` hierarchy
 
+There is no separate ``nxpkg.conf`` file in this initial MVP. The only file
+kept under ``/etc/nxpkg`` is the local repository index used by
+``nxpkg install``.
+
 The package lifecycle handled by the current MVP is intentionally simple:
 
 1. load ``index.json`` from the local repository
@@ -59,6 +63,10 @@ The current implementation uses the following default paths:
 - package payload store: ``/var/lib/nxpkg/pkgs``
 - temporary staging area: ``/var/cache/nxpkg/pkg``
 
+The temporary staging area is used for the artifact copy being verified and
+installed during the current ``install`` flow. In this MVP it is not a general
+package cache or unpack directory yet.
+
 Each manifest entry currently describes:
 
 - package name
@@ -69,7 +77,11 @@ Each manifest entry currently describes:
 - SHA-256 digest
 - payload type
 
-The first validated payload type is executable ELF content.
+The first validated payload type is executable ELF content. A single
+``index.json`` may contain multiple entries for the same package name and
+version as long as they target different runtime identities. ``nxpkg install``
+filters those entries by the current ``arch`` and ``compat`` values first, and
+then chooses the newest version among the matching entries.
 
 Configuration
 =============
@@ -125,6 +137,7 @@ exports a repository for the XIAO validation target::
 
   python3 apps/tools/export_pkg_repo.py /tmp/nxpkg-repo \
     --arch xtensa \
+    --chip esp32s3 \
     --compat esp32s3-xiao \
     --package hello:1.0.0:elf:apps/bin/hello
 
@@ -133,13 +146,17 @@ This produces a repository layout like::
   /tmp/nxpkg-repo/
   ├── index.json
   └── artifacts/
-      └── esp32s3-xiao/
-          └── hello/
-              └── 1.0.0/
+      └── xtensa
+          └── esp32s3
+              └── esp32s3-xiao
                   └── hello
+                      └── 1.0.0
+                          └── hello
 
 The generated ``index.json`` records the package metadata, payload type, and
-SHA-256 digest expected by the current ``nxpkg install`` path.
+SHA-256 digest expected by the current ``nxpkg install`` path. The artifact
+subtree mirrors the ``nuttx/boards`` hierarchy by keeping the
+``arch/chip/board`` levels ahead of the package path.
 
 If the repository is going to be served by a static transport later, such as
 FTP or HTTP, ``export_pkg_repo.py`` also supports ``--artifact-prefix`` so the
