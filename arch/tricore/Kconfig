@@ -6,19 +6,29 @@
 if ARCH_TRICORE
 comment "Tricore Options"
 
-config ARCH_TC1V6
+config TRICORE_TC18
 	bool
-	select ARCH_HAVE_IRQTRIGGER
-	select ARCH_HAVE_PERF_EVENTS
-	select ARCH_HAVE_POWEROFF
-	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
-	select ARCH_HAVE_SETJMP
-	select ARCH_HAVE_RESET
-	select ARCH_HAVE_TESTSET
 	default n
 
-config ARCH_TC1V8
-	bool
+choice
+	prompt "AURIX SoC Family"
+	default ARCH_CHIP_FAMILY_TC4X
+
+config ARCH_CHIP_FAMILY_TC3X
+	bool "AURIX Family TC3X"
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_TESTSET
+	---help---
+		AURIX TC3X family (TriCore 1.6.2P).
+
+config ARCH_CHIP_FAMILY_TC4X
+	bool "AURIX Family TC4X"
+	select TRICORE_TC18
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
@@ -26,16 +36,47 @@ config ARCH_TC1V8
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_TESTSET
-	default n
+	---help---
+		AURIX TC4X family (TriCore 1.8P).
+
+endchoice
+
+config ARCH_CHIP
+	string
+	default "tc3x"		if ARCH_CHIP_FAMILY_TC3X
+	default "tc4x"		if ARCH_CHIP_FAMILY_TC4X
 
 config ARCH_FAMILY
 	string
-	default "tc1v6"		if ARCH_TC1V6
-	default "tc1v8"		if ARCH_TC1V8
+	default "tc1v6"		if ARCH_CHIP_FAMILY_TC3X
+	default "tc1v8"		if ARCH_CHIP_FAMILY_TC4X
 
-config CPU_COREID
-	int "TRICORE CPU CORE ID"
-	default 0
-	range 0 6
+choice
+	prompt "Tricore Toolchain Selection"
+	default TRICORE_TOOLCHAIN_GNUC
+
+config TRICORE_TOOLCHAIN_GNUC
+	bool "GNU GCC Toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		Build with the AURIX GNU GCC toolchain (tricore-elf-gcc).
+		The toolchain binaries must be reachable on $PATH.
+
+config TRICORE_TOOLCHAIN_LLVM
+	bool "HighTec LLVM Toolchain"
+	---help---
+		Build with the HighTec LLVM/Clang toolchain (clang -target tricore).
+		The toolchain binaries must be reachable on $PATH and a valid
+		HighTec license must be reachable through $RLM_LICENSE.
+
+endchoice
+
+if ARCH_CHIP_FAMILY_TC3X
+source "arch/tricore/src/tc3x/Kconfig"
+endif
+
+if ARCH_CHIP_FAMILY_TC4X
+source "arch/tricore/src/tc4x/Kconfig"
+endif
 
 endif # ARCH_TRICORE
