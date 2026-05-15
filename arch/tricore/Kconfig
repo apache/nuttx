@@ -6,38 +6,66 @@
 if ARCH_TRICORE
 comment "Tricore Options"
 
+config TRICORE_TC18
+	bool
+	default n
+
 config ARCH_TC1V6
 	bool
-	select ARCH_HAVE_DEBUG
-	select ARCH_HAVE_MPU
-	select ARCH_HAVE_IRQTRIGGER
-	select ARCH_HAVE_PERF_EVENTS
-	select ARCH_HAVE_POWEROFF
-	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
-	select ARCH_HAVE_SETJMP
-	select ARCH_HAVE_RESET
-	select ARCH_SETJMP_H
 	default n
 
 config ARCH_TC1V8
 	bool
-	select ARCH_DCACHE
+	default n
+
+choice
+	prompt "AURIX SoC Family"
+	default ARCH_CHIP_FAMILY_TC4X
+
+config ARCH_CHIP_FAMILY_TC3X
+	bool "AURIX Family TC3X"
+	select ARCH_TC1V6
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_PERF_EVENTS
+	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
+	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_RESET
 	select ARCH_HAVE_DEBUG
-	select ARCH_ICACHE
 	select ARCH_HAVE_MPU
+	select ARCH_SETJMP_H
+	---help---
+		AURIX TC3X family (TriCore 1.6.2P).
+
+config ARCH_CHIP_FAMILY_TC4X
+	bool "AURIX Family TC4X"
+	select TRICORE_TC18
+	select ARCH_TC1V8
 	select ARCH_HAVE_IRQTRIGGER
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_PERF_EVENTS_USER_ACCESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_RESET
+	select ARCH_DCACHE
+	select ARCH_ICACHE
+	select ARCH_HAVE_DEBUG
+	select ARCH_HAVE_MPU
 	select ARCH_SETJMP_H
-	default n
+	---help---
+		AURIX TC4X family (TriCore 1.8P).
+
+endchoice
+
+config ARCH_CHIP
+	string
+	default "tc3x"		if ARCH_CHIP_FAMILY_TC3X
+	default "tc4x"		if ARCH_CHIP_FAMILY_TC4X
 
 config ARCH_FAMILY
 	string
-	default "tc1v6"		if ARCH_TC1V6
-	default "tc1v8"		if ARCH_TC1V8
+	default "tc1v6"		if ARCH_CHIP_FAMILY_TC3X
+	default "tc1v8"		if ARCH_CHIP_FAMILY_TC4X
 
 config ARCH_DCACHE_ADDR
 	hex "AURIX Dcache base address"
@@ -64,9 +92,41 @@ config ARCH_MPU_CODE_NREGIONS
 	---help---
 		The code regions count
 
-config CPU_COREID
-	int "TRICORE CPU CORE ID"
-	default 0
-	range 0 6
+choice
+	prompt "Tricore Toolchain Selection"
+	default TRICORE_TOOLCHAIN_GNUC
+
+config TRICORE_TOOLCHAIN_GNUC
+	bool "GNU GCC Toolchain"
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		Build with the AURIX GNU GCC toolchain (tricore-elf-gcc).
+		The toolchain binaries must be reachable on $PATH.
+
+config TRICORE_TOOLCHAIN_LLVM
+	bool "HighTec LLVM Toolchain"
+	---help---
+		Build with the HighTec LLVM/Clang toolchain (clang -target tricore).
+		The toolchain binaries must be reachable on $PATH and a valid
+		HighTec license must be reachable through $RLM_LICENSE.
+
+config TRICORE_TOOLCHAIN_TASKING
+	bool "TASKING TriCore Toolchain"
+	select ARCH_TOOLCHAIN_TASKING
+	---help---
+		Build with the TASKING TriCore toolset (cctc), SmartCode for
+		TC4x or the VX-toolset for TC3x, as SmartCode has no TC1.6.2
+		libraries.  The toolchain binaries must be reachable on $PATH
+		and the toolset must find its license options file.
+
+endchoice
+
+if ARCH_CHIP_FAMILY_TC3X
+source "arch/tricore/src/tc3x/Kconfig"
+endif
+
+if ARCH_CHIP_FAMILY_TC4X
+source "arch/tricore/src/tc4x/Kconfig"
+endif
 
 endif # ARCH_TRICORE
