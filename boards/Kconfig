@@ -1546,6 +1546,18 @@ config ARCH_BOARD_OLIMEX_STM32H407
 		toolchain* under Linux or Cygwin. See the http://www.olimex.com for
 		further information. This board features the STMicro STM32F407ZGT6 (144pins).
 
+config ARCH_BOARD_ALIENTEK_M144Z_M4
+	bool "ALIENTEK M144Z-M4 STM32F407 board"
+	depends on ARCH_CHIP_STM32F407ZG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		ALIENTEK M144Z-M4 (a.k.a. STM32F407 minimum system board) based on
+		the STMicro STM32F407ZGT6 (LQFP144).  The board ships with on-board
+		CH340 USB-UART, W25Q128 16 MiB SPI NOR flash, two user LEDs (PF9 /
+		PF10), two user buttons (PE4 / PA0) and a Type-C USB OTG-FS port.
+
 config ARCH_BOARD_OLIMEX_STM32E407
 	bool "Olimex STM32 E407 board"
 	depends on ARCH_CHIP_STM32F407ZG || ARCH_CHIP_STM32F407ZE
@@ -3797,6 +3809,7 @@ config ARCH_BOARD
 	default "olimex-lpc-h3131"             if ARCH_BOARD_OLIMEX_LPC_H3131
 	default "olimex-stm32-h405"            if ARCH_BOARD_OLIMEX_STM32H405
 	default "olimex-stm32-h407"            if ARCH_BOARD_OLIMEX_STM32H407
+	default "alientek-m144z-m4"            if ARCH_BOARD_ALIENTEK_M144Z_M4
 	default "olimex-stm32-e407"            if ARCH_BOARD_OLIMEX_STM32E407
 	default "olimex-stm32-p107"            if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"            if ARCH_BOARD_OLIMEX_STM32P207
@@ -4658,6 +4671,9 @@ source "boards/arm/stm32/nucleo-l152re/Kconfig"
 endif
 if ARCH_BOARD_ODRIVE36
 source "boards/arm/stm32/odrive36/Kconfig"
+endif
+if ARCH_BOARD_ALIENTEK_M144Z_M4
+source "boards/arm/stm32/alientek-m144z-m4/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32E407
 source "boards/arm/stm32/olimex-stm32-e407/Kconfig"
