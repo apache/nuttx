@@ -582,6 +582,19 @@ config ARCH_CHIP_STM32H5
 	---help---
 		STMicro STM32 H5 architectures (ARM Cortex-M33).
 
+config ARCH_CHIP_STM32N6
+	bool "STMicro STM32 N6"
+	select ARCH_CORTEXM55
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MPU
+	select ARM_HAVE_DSP
+	select ARM_HAVE_MPU_UNIFIED
+	select ARCH_HAVE_TRUSTZONE
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_HEAPCHECK
+	---help---
+		STMicro STM32N6 architectures (ARM Cortex-M55).
+
 config ARCH_CHIP_STM32L5
 	bool "STMicro STM32 L5"
 	select ARCH_CORTEXM33
@@ -1194,6 +1207,7 @@ config ARCH_CHIP
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "stm32h5"	if ARCH_CHIP_STM32H5
+	default "stm32n6"	if ARCH_CHIP_STM32N6
 	default "stm32l5"	if ARCH_CHIP_STM32L5
 	default "stm32u5"	if ARCH_CHIP_STM32U5
 	default "stm32wb"	if ARCH_CHIP_STM32WB
@@ -1703,6 +1717,9 @@ source "arch/arm/src/stm32l4/Kconfig"
 endif
 if ARCH_CHIP_STM32H5
 source "arch/arm/src/stm32h5/Kconfig"
+endif
+if ARCH_CHIP_STM32N6
+source "arch/arm/src/stm32n6/Kconfig"
 endif
 if ARCH_CHIP_STM32L5
 source "arch/arm/src/stm32l5/Kconfig"
