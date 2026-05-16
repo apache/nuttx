@@ -468,6 +468,23 @@ static void rpmsg_virtio_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
           desc_idx = vq->vq_ring.used->ring[desc_idx].id;
         }
 
+      /* Validate desc_idx that was just read from the ring contents.
+       * The ring is shared with the peer core and may contain stale or
+       * corrupted indices (for example when the peer panicked in the
+       * middle of an in-flight ring update).  Indexing vq_ring.desc[]
+       * out of bounds would land on the avail/used regions whose
+       * alignment is only 2 bytes; reading the 64-bit desc.addr field
+       * there trips UBSan's alignment check inside this panic-dump
+       * path.  Skip such invalid entries instead.
+       */
+
+      if (desc_idx >= vq->vq_nentries)
+        {
+          syslog(LOG_EMERG, "    %s buffer[%u] invalid desc_idx %u >= %u\n",
+                 rx ? "RX" : "TX", i, desc_idx, vq->vq_nentries);
+          continue;
+        }
+
       addr = metal_io_phys_to_virt(vq->shm_io,
                                    vq->vq_ring.desc[desc_idx].addr);
       if (addr)
