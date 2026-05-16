@@ -1,3 +1,5 @@
+.. _board-ioctl:
+
 ===========
 Board IOCTL
 ===========
