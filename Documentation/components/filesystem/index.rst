@@ -1,3 +1,5 @@
+.. _nuttx-filesystem:
+
 =================
 NuttX File System
 =================

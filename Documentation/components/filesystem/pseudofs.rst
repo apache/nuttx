@@ -1,3 +1,5 @@
+.. _nuttx-pseudofs:
+
 ==================
 Pseudo File System
 ==================

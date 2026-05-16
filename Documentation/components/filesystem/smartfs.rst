@@ -478,3 +478,637 @@ Things to Do
 - Add reporting of actual FLASH usage for directories (each directory
   occupies one or more physical sectors, yet the size is reported as
   zero for directories).
+
+
+
+
+Using SmartFS
+=============
+
+.. warning:: This section is a copy-paste from old wiki documentation.
+             It needs review and probably an update.
+
+What is SmartFS
+---------------
+
+SmartFS stands for **Sector Mapped Allocation for Really Tiny (SMART) flash**.
+It is a filesystem that has been designed to work primary with small,
+serial NOR type flash parts that are 1M byte to 16M byte in size
+(though this is not a limitation).
+The filesystem operates by segmenting the flash (or flash partition)
+into "logical sectors" of equal size and then managing them (allocating,
+mapping, chaining, releasing, etc.) to build files and directories.
+
+SmartFS Code Layering
+---------------------
+
+The system consists of two layers built on top of a standard NuttX MTD driver
+layer (with it's associated hardware abstraction layer).
+
+The code directly above the NuttX MTD driver is the SMART MTD layer.
+This interfaces with the MTD (flash driver) layer and handles low-level media
+operations such as logical sector allocation, freeing and management,
+erase block management, low-level formatting, wear leveling, etc.
+
+On top of the SMART MTD layer is the Smart Filesystem code.
+The SmartFS code uses the logical sector services of the SMART MTD layer
+to provide file and directory level management, such as creating new files,
+chaining logical sectors together to create files, creating directories
+and file / directory search and management routines.
+
++------------+------------------------------------+
+| Smart FS   | fs / smartfs / *                   |
++============+====================================+
+| SMART MTD  | ``drivers/mtd/smart.c``            |
++------------+---------+---------+---------+------+
+| MTD Driver | m25px   | sst25   | filemtd | etc. |
++------------+---------+---------+---------+------+
+| HW Driver  | spi dev | spi dev | VFS     | …    |
++------------+---------+---------+---------+------+
+
+Example SmartFS Device Setup
+----------------------------
+
+Setting up a device for use with SmartFS is typically done in the config
+specific source initialization files and would look something like::
+
+  int board_app_initialize(uintptr_t arg)
+  {
+    FAR struct spi_dev_s *spi;
+    FAR struct mtd_dev_s *mtd;
+    int minor = 0;
+
+    /* Initialize the SPI bus #3 with an M25P FLASH driver */
+
+    spi = stm32_spibus_initialize(3);
+    mtd = m25p_initialize(spi);
+
+    /* Initialize SMART MTD to work with M25P FLASH device */
+
+    smart_initialize(minor, mtd, NULL);
+  }
+
+Upon successful initialization of the code above,
+the NuttX Virtual File System (VFS) will contain a new entry
+called ``/dev/smart0`` to represent the SMART MTD device.
+Note that this is not a filesystem, but rather a raw block device
+(which may or may not already be formatted for use with SmartFS).
+
+To use the ``/dev/smart0`` as a filesystem, it must be initialized
+and mounted to the VFS as follows::
+
+  nsh> mksmartfs /dev/smart0
+  nsh> mount -t smartfs /dev/smart0 /mnt
+
+Details of Operation
+--------------------
+
+Pages, Blocks, Sectors and things that FLASH
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+There are a number of companies that manufacture FLASH parts, and typically
+they use varying terminology in their data sheets when referring
+to device geometry.
+All devices generally have different region sizes for programming, erasing
+and reading and usually use terms like page, erase block, sector
+and/or sub-sector.
+
+To avoid confusion, NuttX uses the following terminology:
+
+* **Page or Block:** The smallest area that a device can program
+  with a single command. This is typically 256 bytes.
+* **Erase Block:** The smallest area that a device can erase.
+  If multiple erase block sizes are supported (e.g. 4K, 32K and 64K), then
+  the smallest of those sizes, though for larger parts (8M Byte - 32M Byte),
+  sometimes it is better to use the larger erase block size to keep RAM usage
+  to a minimum.
+* **Sector:** Same as Erase Block.
+* **Logical Sector:** A size used by a specific filesystem for managing
+  a region independently from the actual device specified blocks / sectors.
+  SmartFS (for example) can use any power of 2 value from 256 through 32768.
+
+Given that each manufacturer and each part has varying geometry sizes,
+SmartFS uses a Logical Sector whose size is determined when the device
+is formatted (defaulting to ``CONFIG_MTD_SMART_SECTOR_SIZE``).
+The SmartFS code then performs all operations using logical sectors and maps
+physical accesses to the device based on it's reported geometry.
+This allows filesystem performance tuning (total sectors, minimum allocation
+size, overhead waste, etc.) independently from the device's erase block size,
+etc. Each logical sector contains a 10-byte header (5 for MTD layer,
+5 for FS layer) for format management.
+
+An example 128K Byte Flash with 32K and 4K Erase Block sizes and 256 byte page
+read/write sizes:
+
++---------------------+-----------------------------------------------------------------------------------------------------+
+| Bulk Erase          |  Entire Device                                                                                      |
++=====================+========================================+===============+===============+============================+
+| Sector Erase        | 32K                                    | 32K           | 32K           | 32K                        |
++---------------------+-----------------------------+-----+----+----+-----+----+----+-----+----+----+-----+-----------------+
+| Sector Erase        | 4K                          | ... | 4K | 4K | ... | 4K | 4K | ... | 4K | 4K | ... | 4K              |
++---------------------+-----+-----+-----+-----+-----+-----+----+----+-----+----+----+-----+----+----+-----+-----+-----+-----+
+| Page read/write     | 256 | 256 | ... | 256 | 256 | ...                                                 | 256 | ... | 256 |
++---------------------+-----+-----+-----+-----+-----+-----------------------------------------------------+-----+-----+-----+
+| Logical Sector (FS) | 512       | ... | 512       | ...                                                                   |
++---------------------+-----------+-----+-----------+-----------------------------------------------------------------------+
+
+
+In the example above, a SMART MTD logical sector size of 512 bytes was chosen.
+On the 128K Byte FLASH represented in the table above,
+this means there would be:
+
+* 128K / 512 = 256 Logical Sectors Total.
+* 4K / 512 = 8 Logical Sectors per Erase Block.
+* 512 / 256 = 2 MTD Read/Write Blocks per SMART Logical Sector.
+* 10 / 512 = 1.95% Overhead for logical sector headers.
+* A maximum of about 250 files / directories supported
+  (considering format overhead).
+* Allocations to files in 512 byte chunks
+  (a zero-length file consumes 512 bytes).
+
+Choosing a SMART Logical sector size of 256 bytes instead would give
+the following results:
+
+* 128K / 256 = 512 Logical Sectors Total.
+* 4K / 256 = 16 Logical Sectors per Erase Block.
+* 256 / 256 = 1 MTD Read/Write Block per SMART Logical Sector.
+* 10 / 256 = 3.9% Overhead for logical sector headers.
+* A maximum of about 506 files / directories supported
+  (considering format overhead).
+* Allocations to files in 256 byte chunks
+  (a zero-length file consumes 256 bytes).
+
+Checking Your MTD Geometry
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Most of the NuttX MTD drivers (in the ``drivers/mtd directory``) have been
+tested to work with SmartFS / SMART MTD layer and to report block / erase
+block sizes correctly.
+However there may be one or more drivers that have not been validated.
+When configuring SmartFS for the first time using a new / unknown MTD driver,
+validate the reported geometries are sane based on the description above.
+
+Additionally, care must be taken when selecting the SMART MTD logical sector
+size. The selected size is represented using 3 bits in the logical sector
+status byte and stored on each sector.
+This means valid values for the logical sector are:
+
+* 256, 512.
+* 1024, 2048.
+* 4096, 8192.
+* 16384, 32768.
+
+As shown in the table / example above, the logical sector size selection
+controls the maximum number of files and minimum file size on the volume.
+There are some limitations to the value selected imposed by the SMART MTD
+code. The logical sector size must be selected such that:
+
+* The total number of sectors on the device / partition fits in a 16-bit word.
+  This means 65536 or less total sectors (65536 is supported, though
+  the topmost 2 sectors will never be used).
+* The logical sector size cannot be smaller than the MTD device's
+  block/page size.
+* The logical sector size cannot be larger than the MTD devices's
+  reported erase block size.
+* The total RAM used by the SMART MTD layer is dependent on the logical
+  sector size (when not using Minimize RAM Config option).
+  The selected logical sector size must not create a RAM requirement greater
+  than the available RAM.
+* The number of logical sectors per MTD device erase block cannot be greater
+  than 256, and 4 - 128 is the best choice.
+* If wear-leveling is enabled, then the following condition must be met:
+
+  ``Total MTD Erase Blocks / 2 < (Logical Sector Size - 36) * 3``.
+
+Selecting a logical sector size that creates 256 logical sectors per erase
+block will create some wasted space on the device.
+The SMART MTD layer uses a 1-byte variable for the "free sector count"
+and the "released sector count".
+This means it can only track up to 255 logical sectors per erase block.
+When the sectPerEraseBlk == 256, the last logical sector in each erase
+block will never be used, thus causing wasted space on the device.
+
+RAM Usage Calculation
+^^^^^^^^^^^^^^^^^^^^^
+
+Efficient management of the filesystem requires building and maintaining RAM
+resident status information of the SMART MTD logical sector structure
+on the physical device.
+During the ``smart_initialize()`` function, the code performs a device scan
+(``smart_scan()`` routine) to perform this action.
+Tasks performed by the smart_scan are:
+
+* Detect if the format sector exists (logical sector zero with "SMRT" tag).
+* Determine the logical sector size that was used to format the device.
+* Locate the root directory logical sectors (logical sector 3-11).
+* Count the number of free sectors on the device and per erase block.
+* Count the number of released sectors on the device and per erase block.
+
+If ``CONFIG_MTD_SMART_MINIMIZE_RAM`` is **not** set:
+
+* Build a map of logical sector to physical sector numbers.
+
+If ``CONFIG_MTD_SMART_WEAR_LEVEL`` is set:
+
+* Allocate wear-level RAM and read leveling info from the format sector.
+
+The amount of RAM consumed is dependent on the config settings
+(``MINIMIZE_RAM``, ``WEAR_LEVEL``, etc.).
+Rough calculation details are presented for both settings
+of ``CONFIG_MTD_SMART_MINIMIZE_RAM``:
+
+When ``CONFIG_MTD_SMART_MINIMIZE_RAM`` is **not** set
+
++---------------------------+------------------------+-------------------+--------------------+
+| Item                      | RAM Requirement        | 1MB / 256 Logical | 8MB / 1024 Logical |
++===========================+========================+===================+====================+
+| dev struct                | 368-380 (approx)       | 376               | 376                |
++---------------------------+------------------------+-------------------+--------------------+
+| Logical sector map        | total_sectors * 2      | 8192              | 16384              |
++---------------------------+------------------------+-------------------+--------------------+
+| Erase block free count    | total erase blocks     | 16                | 128                |
++---------------------------+------------------------+-------------------+--------------------+
+| Erase block release count | total erase blocks     | 16                |  128               |
++---------------------------+------------------------+-------------------+--------------------+
+| Wear status               | total erase blocks / 2 | 8                 |  64                |
++---------------------------+------------------------+-------------------+--------------------+
+| MTD sector R/W buffer     | logical sector size    | 256               | 1024               |
++---------------------------+------------------------+-------------------+--------------------+
+| FS sector R/W buffer      | logical sector size    | 256               | 1024               |
++---------------------------+------------------------+-------------------+--------------------+
+| Total                                              | **9,176**         | **19,128**         |
++----------------------------------------------------+-------------------+--------------------+
+
+On larger volumes, the RAM requirement increases significantly because
+of the logical sector to physical sector mapping table.
+To help keep RAM requirement under control, setting
+the ``CONFIG_MTD_SMART_MINIMIZE_RAM`` option eliminates this sector-to-sector
+map and replaces it with a sector-to-sector cache.
+The cache size is user defined via the
+``CONFIG_MTD_SMART_SECTOR_CACHE_SIZE`` option.
+Using this RAM reduction mode trades off RAM usage for performance.
+
+The cache always contains the format and root-directory logical to physical
+mapping entries, and then stores additional mappings of recently used
+logical sectors. When a logical sector is requested that is not contained
+in the cache, then the MTD device is scanned front-to-back until
+it's physical location on the device is located.
+Additionally, if the number of logical sectors per erase block is 16 or less,
+then the "free count" and "release count" can be packed into a single byte
+per erase block.
+
+When ``CONFIG_MTD_SMART_MINIMIZE_RAM=y`` and
+``CONFIG_MTD_SMART_SECTOR_CACHE_SIZE=64``:
+
++---------------------------+-------------------------+-------------------+--------------------+
+| Item                      | RAM Requirement         | 1MB / 256 Logical | 8MB / 1024 Logical |
++===========================+=========================+===================+====================+
+| dev struct                | 368-400 (approx)        | 392               | 392                |
++---------------------------+-------------------------+-------------------+--------------------+
+| Logical sector            | cache cache entries * 6 | 384               | 384                |
++---------------------------+-------------------------+-------------------+--------------------+
+| Free sector bitmap        | total sectors / 8       | 512               | 1024               |
++---------------------------+-------------------------+-------------------+--------------------+
+| Erase block free count    | total erase blocks      | 16                | 128                |
++---------------------------+-------------------------+-------------------+--------------------+
+| Erase block release count | total erase blocks      | 16                | 128                |
++---------------------------+-------------------------+-------------------+--------------------+
+| Wear status               | total erase blocks / 2  | 8                 | 64                 |
++---------------------------+-------------------------+-------------------+--------------------+
+| MTD sector R/W buffer     | logical sector size     | 256               | 1024               |
++---------------------------+-------------------------+-------------------+--------------------+
+| FS sector R/W buffer      | logical sector size     | 256               | 1024               |
++---------------------------+-------------------------+-------------------+--------------------+
+| Total                                               | **1,832**         | **4,168**          |
++-----------------------------------------------------+-------------------+--------------------+
+
+Partitions and Mount Points
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Creating partitions on the MTD flash / media provides the benefits
+of physically isolating one filesystem from another, as well as a mechanism
+for creating multiple mount points within the VFS.
+There are some pros and cons to consider when deciding to use partitions
+with SmartFS:
+
+Partitions - PROS:
+
+* Physically separate filesystems ... possible errors in one
+  doesn't affect the other.
+* Smaller partitions on a large device can use smaller logical sector size
+  (good if files are small).
+* Partitions could be used for redundancy.
+* Multiple mount-points within the VFS can be performed if needed.
+
+Partitions - CONS:
+
+* Partition sizes must be understood ahead of time.
+* Directory structure / files cannot span across partitions.
+* Additional overhead is needed for sector management (one
+  erase block + 4 pages/blocks reserved per partition
+  vs. one+4 for entire device).
+* Wear leveling (if enabled) will be limited to operate only within
+  each partition and cannot span multiple partitions globally.
+
+When using partitions with SmartFS, a partition name should be specified
+during invocation of the ``smart_initialize()`` routine.
+Though not a rule, a suggested standard is to provide partition names
+like ``p1``, ``p2``, etc. Then the SMART MTD device entries
+in the ``/dev`` directory will take the form::
+
+  /dev/smart0p1
+  /dev/smart0p2
+  etc.
+
+Prior to the addition of partitions in NuttX, the SmartFS implementation
+had already implemented a feature which allows multiple VFS mount-points
+to a single SMART MTD device.
+This gives the appearance of multiple SmartFS filesystems, though in reality
+it simply is a single filesystem with multiple logical root-directories.
+Each of the root-directories on the filesystem will be logically isolated
+from the others, and after the 'mksmartfs' each will have it's own
+``/dev/smart*`` entry.
+
+Multi-Root Directory PROS:
+
+* Supports multiple mount points within the NuttX VFS.
+* Each mount-point "appears" to be it's own partition ... each directory
+  structure is isolated from the others.
+* Any mount-point / directory structure can occupy as little or as much
+  of the filesystem as needed.
+* Mount-points can be enabled within partitions.
+* Sector management overhead (reserved erase blocks, etc.) are shared
+  by all mount-points.
+* All mount points share RAM structures.
+* Wear leveling is performed evenly over all mount-points.
+
+Multi-Root Directory CONS:
+
+* The logical directories are not physically isolated.
+  Files, directories and individual sectors are all intermixed
+  on the physical device.
+* Any error in the filesystem can effect all mount-points / root directories.
+
+This feature must be enabled specifically using the
+``CONFIG_SMARTFS_MULTI_ROOT_DIRS=y`` option.
+Setting this option will cause the SMART MTD ``/dev`` entries to be appended
+with a directory number, such as ``d1``, ``d2``, etc.
+Prior to creating a SmartFS filesystem on the raw device,
+a single entry will be identified, such as::
+
+  /dev/smart0d1
+  /dev/smart1p1d1    (device with partitions and multi-root directories)
+
+Then after executing the ``mksmartfs`` command, additional entries
+will appear (each of which can be mounted to a different VFS location)::
+
+  nsh> ls /dev
+   ...
+   /dev/ram0
+   /dev/smart0d1
+   /dev/zero
+  nsh> mksmartfs /dev/smart0d1 3
+  nsh> ls /dev
+   ...
+   /dev/ram0
+   /dev/smart0d1
+   /dev/smart0d2
+   /dev/smart0d3
+   /dev/zero
+  nsh> mount -t smartfs /dev/smart0d1 /data
+  nsh> mount -t smartfs /dev/smart0d2 /apps
+  nsh> mount -t smartfs /dev/smart0d3 /recover
+
+The ProcFS Interface
+^^^^^^^^^^^^^^^^^^^^
+
+When the PROCFS interface is enabled, each mounted SmartFS device
+will appear under::
+
+  /proc/fs/smartfs/smart#
+
+The pseudo files reported for each entry will depend on the configured
+options. Entries that can currently appear are:
+
++-------------+-------------------------+---------------------------+
+| Entry       | ``CONFIG_MTD_SMART_*``  | Meaning                   |
++=============+=========================+===========================+
+| status      |                         | Report volume status      |
+|             |                         | including geometry.       |
++-------------+-------------------------+---------------------------+
+| debuglevel  |                         | Write ASCII '0' - '2'     |
+|             |                         | to set debug print level. |
++-------------+-------------------------+---------------------------+
+| erasemap    | WEAR_LEVEL=y            | Report map (A-N) of erase |
+|             |                         | block erasures.           |
++-------------+-------------------------+---------------------------+
+| mem         | ALLOC_DEBUG=y           | Print report of all SMART |
+|             |                         | MTD memory allocs.        |
++-------------+-------------------------+---------------------------+
+
+Example ``procfs`` usage::
+
+  nsh> mount -t smartfs /dev/smart0 /mnt
+  nsh> mount -t procfs /proc
+  nsh> cat /proc/fs/smartfs/smart0/status
+
+  Format version:    1
+  Name Len:          16
+  Total Sectors:     4096
+  Sector Size:       256
+  Format Sector:     0
+  Dir Sector:        256
+  Free Sectors:      4078
+  Released Sectors:  0
+  Unused Sectors:    0
+  Block Erases:      0
+  Sectors Per Block: 256
+  Sector Utilization:100%
+  Uneven Wear Count: 0
+
+  nsh> cat /proc/fs/smartfs/smart0/erasemap
+  BBACAACA
+  AABAAAAA
+
+  nsh> 
+
+When Things Don't Work
+^^^^^^^^^^^^^^^^^^^^^^
+
+The SmartFS code and MTD layer have been pretty well tested and used
+in production products. If things aren't working for you, there are
+a couple of places to start debugging first.
+
+Check FLASH MTD Driver
+~~~~~~~~~~~~~~~~~~~~~~
+
+Ensure the geometry of the FLASH MTD driver is following the NuttX standard
+for block / erase block geometry sizes. Most of them do, but via simple
+inspection of the code (as of version 7.16, July 12, 1016), the drivers
+that are likely to have improper Geometry reporting (and thus incompatible
+with SmartFS) are::
+
+    s25fl1.c
+    sst39vf.c
+
+When configuring to use SmartFS, check the reported geometry of the MTD
+driver you are using. If the ``geo.blocksize`` is reported to be the same
+as the ``geo.sectorsize``, then there is likely an issue with the MTD driver
+implementation.
+But it is likely to be a reporting problem of the ``geo.blocksize`` that
+is incorrect AND possibly the starting address calculations in the
+``_bwrite`` / ``_bread`` routines may be incorrect.
+These are BLOCK read / write operations and calculations need to be
+performed using the block size (typically 256), not the sector size
+(4K, 32K, etc.).
+
+Check CONFIG Options
+~~~~~~~~~~~~~~~~~~~~
+
+Double check all of the CONFIG options for both the MTD driver
+and the SMART MTD layer:
+
+* ``CONFIG_MTD_SMART_SECTOR_SIZE``: Ensure it's not smaller than the block
+  size or larger than erase block size.
+* ``CONFIG_MTD_BYTE_WRITE``: If enabled, ensure the FLASH actually supports
+  this mode (single byte programming).
+* ``CONFIG_MTD_XXX_SECTOR512``: Ensure this is not set. This should only
+  be use with FAT volumes.
+* ``CONFIG_MTD_XXX_MANUFACTURER``: Double check this with the data
+  sheet / MTD driver code.
+* ``CONFIG_MTD_XXX_MEMORY_TYPE``: Double check this with the data sheet.
+
+Check Writability to the Part
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ensure the FLASH can be written successfully.
+If the WP pin is pull active (i.e. the part is write protected),
+then the SMART MTD layer will not be able to write any data.
+Additionally validate there are no individual protected sectors on the device.
+
+
+SmartFS Internals
+=================
+
+.. warning:: This section is a copy-paste from old wiki documentation.
+             It needs review and probably an update.
+ 
+General Structure
+-----------------
+
+As described in Using SmartFS, the code is divided into a SMART MTD layer
+and a filesystem layer. The MTD layer divides the flash or partition into
+equal sized logical sectors, allocates, deallocates and moves them around
+as needed to fulfill requests from the filesystem layer.
+
+The filesystem layer uses the logical sectors to store directory and file
+information, and to create chains of logical sector numbers to build larger
+files (and directories).
+
+The diagram below depicts a portion of a SmartFS device showing the erase
+blocks, logical sectors and sector assignments. In the diagram, the top row
+of numbers is the absolute sector number within the device.
+The bottom row with numbers represents the logical sector number assigned
+to each absolute sector.
+Using 5 bytes from the header in each sector, the MTD layer manages
+the assignments of the logical sector numbers.
+
+The filesystem layer receives the logical sector numbers reported from MTD
+layer and assigns them to specific files and/or directories.
+As a file grows in size, additional logical sector numbers are requested
+and "chained" together. In the diagram, three files are depicted
+(files ``a``, ``b`` and ``c``) with varying lengths.
+The files shown are as follows:
+
+* File ``a``: Has data in 3 sectors, ``a0-a2``, logical sectors ``12-14``.
+* File ``b``: Has data in 4 sectors, ``b0-b3``, logical sectors ``15-18``.
+* File ``c``: Has data in a single sector, ``c0``, logical sector ``19``.
+
++----------------------------------------------------------------------------------------------------+
+| Device or partition                                                                                |
++===================+===================+===================+===================+====================+
+| EB                | EB                |  EB               | EB                | ...                |
++----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+
+| 0  | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | ... |
++----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+
+| LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | LS | ... |
++----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+
+| FS | b0 | -- | -- | RS | b1 | -- | -- | a0 | b2 | -- | -- | a1 | b3 | -- | -- | a2 | c0 | -- | ... |
++----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+
+| 0  | 15 |    |    | 3  | 16 |    |    | 12 | 17 |    |    | 13 | 18 |    |    | 14 | 19 |    |     |
++----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+-----+
+
+* EB = Erase Block.
+* LS = Logical Sector.
+* FS = Format Sector.
+* RS = Root-directory Sector.
+* -- = Free Sector.
+
+The filesystem layer uses last 5-bytes of each sector's header to save
+the logical sector number of the next logical sector in the chain.
+When a file is first created, it's name and beginning logical sector number
+are recorded in the Root-directory Sector (or a sub-directory
+sector as needed).
+
+The filesystem layer uses the recorded logical sector numbers
+in the directory sectors and header sector-chain information to perform
+logical sector allocate, read/write and sector release requests to carry out
+all typical file system operations.
+The SMART MTD layer then performs all the logical to physical mapping,
+wear-leveling, sector relocation and block erase operations, etc.
+When a sector needs to be physically relocated, it will retain
+it's logical sector number, preventing the need to update file sector-chain
+information, etc.
+The MTD layer will simply update the logical to physical map assignments.
+
+When things change
+^^^^^^^^^^^^^^^^^^
+
+Writing data to the filesystem and then reading it back is great.
+But at some point you might actually want to change or delete something.
+When this happens, the existing data on the flash has to be modified.
+As you probably already know, data on a flash can't simply be re-written,
+it must be erased in large chunks (erase blocks) that are typically 4K,
+32K or 64K in size. When erasing this large a chunk of the flash,
+it is highly likely that there will be data in that erase block
+which should NOT be erased.
+
+When data in a logical sector on the flash needs to be modified or deleted,
+SmartFS simply marks that logical sector as "released" without actually
+touching the data. This is done using the characteristic of NOR flash
+that allows multiple writes to a given address.
+This feature allows any bit of any byte to be changed from a ``1`` state
+to a ``0`` state, regardless of whether that byte had previously been written
+with other bits set to a ``0`` state.
+As long as there is no attempt to change any bits from a ``0`` to a ``1``,
+each address can be programmed multiple times.
+
+As shown in the diagrams below, the SMART MTD layer uses the 5th byte
+of the logical sector header as a status byte.
+The most significant bit of this status byte (``0x80``) indicates
+if the sector has been allocated (contains valid data) while the next bit
+(``0x40``) indicates if the sector has been "released" (contains data
+that is no longer valid). When a sector is first allocated, the
+``RELEASE`` bit is held at a ``1`` state, meaning the data
+has not been released.
+If the data in that sector needs to be changed, deleted or relocated,
+the SMART MTD code will simply re-program the status byte,
+changing the ``RELEASE`` bit to a ``0`` state.
+At that point, all data in that logical sector becomes invalid.
+
+Logical Sector MTD Header
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
++------------------------------------------------------------------------+------------+
+| MTD Header (5 bytes)                                                   |  FS Header |
++=======================+=======+=====+==================================+============+
+| Logical Sector Number | Seq # | CRC | Status                           | 5 Bytes    |
++----------+------------+-------+-----+----+----+----+---------+---------+------------+
+| LSB      | MSB        |       |     | CB | RB | CE | SS(2-0) | FV(1-0) |            |
++----------+------------+-------+-----+----+----+----+---------+---------+------------+
+
+* CB: Commit Bit.
+* RB: Release Bit.
+* CE: CRC Enable Bit.
+* SS: Sector Size Bits.
+* FV: Format Version Bits.
