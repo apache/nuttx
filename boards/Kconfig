@@ -3153,6 +3153,15 @@ config ARCH_BOARD_NUCLEO_H563ZI
 	---help---
 		STMicro Nucleo-H563ZI board based on the STMicro STM32H563ZI MCU.
 
+config ARCH_BOARD_NUCLEO_N657X0_Q
+	bool "NUCLEO_N657X0_Q"
+	depends on ARCH_CHIP_STM32N657X0
+	---help---
+		STMicro Nucleo-N657X0-Q development board based on the STMicro
+		STM32N657X0 MCU (Cortex-M55).  Boots in DEV mode by loading
+		code directly into SRAM via the on-board ST-Link V3EC, with
+		the NSH console on USART1 (ST-Link Virtual COM Port).
+
 config ARCH_BOARD_STM32L562E_DK
 	bool "STM32L562E-DK"
 	depends on ARCH_CHIP_STM32L562QE
@@ -3926,6 +3935,7 @@ config ARCH_BOARD
 	default "b-l475e-iot01a"               if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"               if ARCH_BOARD_B_U585I_IOT02A
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
+	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
 	default "nucleo-u5a5zj-q"              if ARCH_BOARD_NUCLEO_U5A5ZJ_Q
 	default "stm32l476vg-disco"            if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"                if ARCH_BOARD_STM32L476_MDK
@@ -4577,6 +4587,9 @@ source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H563ZI
 source "boards/arm/stm32h5/nucleo-h563zi/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_N657X0_Q
+source "boards/arm/stm32n6/nucleo-n657x0-q/Kconfig"
 endif
 if ARCH_BOARD_STM32L562E_DK
 source "boards/arm/stm32l5/stm32l562e-dk/Kconfig"
