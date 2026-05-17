@@ -1026,6 +1026,7 @@ static void rpmsgmtd_device_created(FAR struct rpmsg_device *rdev,
       priv->ept.ns_bound_cb = rpmsgmtd_ns_bound;
       snprintf(buf, sizeof(buf), "%s%s", RPMSGMTD_NAME_PREFIX,
                priv->remotepath);
+      rpmsg_set_priority(&priv->ept, RPMSG_PRIO_RT);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsgmtd_ept_cb, NULL);
