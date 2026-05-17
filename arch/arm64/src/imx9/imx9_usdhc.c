@@ -2441,7 +2441,7 @@ static int imx9_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
-  DEBUGASSERT(((uint64_t) buffer & 3) == 0);
+  DEBUGASSERT(((uint64_t)buffer & 3) == 0);
 
   /* Reset the DPSM configuration */
 
@@ -2492,7 +2492,7 @@ static int imx9_sendsetup(struct sdio_dev_s *dev,
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && nbytes > 0);
-  DEBUGASSERT(((uint64_t) buffer & 3) == 0);
+  DEBUGASSERT(((uint64_t)buffer & 3) == 0);
 
   /* Reset the DPSM configuration */
 
@@ -3230,12 +3230,12 @@ static int imx9_dmarecvsetup(struct sdio_dev_s *dev,
   imx9_configxfrints(priv, USDHC_DMADONE_INTS);
   if (priv->unaligned_rx)
     {
-      putreg32((uint64_t) priv->rxbuffer,
+      putreg32((uint64_t)priv->rxbuffer,
                priv->addr + IMX9_USDHC_DSADDR_OFFSET);
     }
   else
     {
-      putreg32((uint64_t) priv->buffer,
+      putreg32((uint64_t)priv->buffer,
                priv->addr + IMX9_USDHC_DSADDR_OFFSET);
     }
 
@@ -3271,7 +3271,7 @@ static int imx9_dmasendsetup(struct sdio_dev_s *dev,
 {
   struct imx9_dev_s *priv = (struct imx9_dev_s *)dev;
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
-  DEBUGASSERT(((uint64_t) buffer & 3) == 0);
+  DEBUGASSERT(((uint64_t)buffer & 3) == 0);
 
   /* Begin sampling register values */
 
@@ -3297,7 +3297,7 @@ static int imx9_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  putreg32((uint64_t) buffer, priv->addr + IMX9_USDHC_DSADDR_OFFSET);
+  putreg32((uint64_t)buffer, priv->addr + IMX9_USDHC_DSADDR_OFFSET);
 
   /* Sample the register state */
 

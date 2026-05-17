@@ -33,6 +33,7 @@
 #include <sys/types.h>
 
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <poll.h>
@@ -198,7 +199,8 @@ static void stm32_bbsram_dump(struct bbsramfh_s *bbf, char *op)
   _info("  fileno:%d\n", (int) bbf->fileno);
   _info("  dirty:%d\n", (int) bbf->dirty);
   _info("  length:%d\n", (int) bbf->len);
-  _info("  time:%ld:%ld\n", bbf->lastwrite.tv_sec, bbf->lastwrite.tv_nsec);
+  _info("  time:%jd:%ld\n", (intmax_t)bbf->lastwrite.tv_sec,
+        bbf->lastwrite.tv_nsec);
   _info("  data: 0x%2x 0x%2x 0x%2x 0x%2x 0x%2x\n",
        bbf->data[0], bbf->data[1], bbf->data[2], bbf->data[3], bbf->data[4]);
 }

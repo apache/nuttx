@@ -487,10 +487,10 @@ static void esp32s2_tim_getcounter(struct esp32s2_tim_dev_s *dev,
       /* Read value */
 
       value_32  = getreg32(SYSTIMER_VALUE_HI_REG); /* High 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32  = getreg32(SYSTIMER_VALUE_LO_REG); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
   else
     {
@@ -503,10 +503,10 @@ static void esp32s2_tim_getcounter(struct esp32s2_tim_dev_s *dev,
           /* Read value */
 
           value_32  = getreg32(TIMG_T0HI_REG(priv->gid)); /* High 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
           *value  <<= SHIFT_32;
           value_32  = getreg32(TIMG_T0LO_REG(priv->gid)); /* Low 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
         }
       else
         {
@@ -517,10 +517,10 @@ static void esp32s2_tim_getcounter(struct esp32s2_tim_dev_s *dev,
           /* Read value */
 
           value_32  = getreg32(TIMG_T1HI_REG(priv->gid)); /* High 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
           *value  <<= SHIFT_32;
           value_32  = getreg32(TIMG_T1LO_REG(priv->gid)); /* Low 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
         }
     }
 }
@@ -639,28 +639,28 @@ static void esp32s2_tim_getalarmvalue(struct esp32s2_tim_dev_s *dev,
   if (priv->tid == SYSTIMER_COMP0)
     {
       value_32  = getreg32(SYSTIMER_TARGET0_HI_REG); /* High 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32  = getreg32(SYSTIMER_TARGET0_LO_REG); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
   else
     {
       if (priv->tid == TIMER0)
         {
           value_32  = getreg32(TIMG_T0ALARMHI_REG(priv->gid)); /* High 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
           *value  <<= SHIFT_32;
           value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->gid)); /* Low 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
         }
       else
         {
           value_32  = getreg32(TIMG_T1ALARMHI_REG(priv->gid)); /* High 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
           *value  <<= SHIFT_32;
           value_32  = getreg32(TIMG_T1ALARMLO_REG(priv->gid)); /* Low 32 bits */
-          *value   |= (uint64_t)value_32;
+          *value   |= value_32;
         }
     }
 }

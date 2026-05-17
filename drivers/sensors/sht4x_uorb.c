@@ -523,12 +523,12 @@ static int sht4x_read(FAR struct sht4x_dev_s *priv,
 static bool has_time_passed(struct timespec curr, struct timespec start,
                             unsigned int secs_since_start)
 {
-  if ((long)((start.tv_sec + secs_since_start) - curr.tv_sec) == 0)
+  if ((start.tv_sec + secs_since_start) - curr.tv_sec == 0)
     {
       return start.tv_nsec <= curr.tv_nsec;
     }
 
-  return (long)((start.tv_sec + secs_since_start) - curr.tv_sec) <= 0;
+  return (start.tv_sec + secs_since_start) - curr.tv_sec <= 0;
 }
 
 /****************************************************************************

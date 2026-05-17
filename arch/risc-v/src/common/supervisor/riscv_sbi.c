@@ -131,7 +131,7 @@ uint64_t riscv_sbi_get_time(void)
     }
   while (hi != READ_CSR(CSR_TIMEH));
 
-  return (((uint64_t) hi) << 32) | lo;
+  return (((uint64_t)hi) << 32) | lo;
 #endif
 }
 

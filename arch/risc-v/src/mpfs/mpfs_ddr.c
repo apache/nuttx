@@ -2090,7 +2090,7 @@ static inline uint64_t rotl(uint64_t x, int k)
   return (x << k) | (x >> (-k & 0x3f));
 }
 
-static int mpfs_ddr_rand(void)
+static uint32_t mpfs_ddr_rand(void)
 {
   uint64_t s0 = prng_state[0];
   uint64_t s1 = prng_state[1];
@@ -2099,7 +2099,7 @@ static int mpfs_ddr_rand(void)
   prng_state[0] = s0 ^ rotl(s1, 29);
   prng_state[1] = s0 ^ (s1 << 9);
 
-  return (int)result;
+  return (uint32_t)result;
 }
 
 /****************************************************************************
@@ -2145,7 +2145,7 @@ static void mpfs_ddr_write(struct mpfs_ddr_priv_s *priv,
         break;
 
       case PATTERN_RANDOM:
-        data = (uint64_t)mpfs_ddr_rand();
+        data = mpfs_ddr_rand();
         break;
 
       case PATTERN_CCCCCCCC:
@@ -2212,7 +2212,7 @@ static void mpfs_ddr_write(struct mpfs_ddr_priv_s *priv,
             break;
 
           case PATTERN_RANDOM:
-            data = (uint64_t)mpfs_ddr_rand();
+            data = mpfs_ddr_rand();
             break;
 
           case PATTERN_CCCCCCCC:
@@ -2287,7 +2287,7 @@ uint32_t mpfs_ddr_read(struct mpfs_ddr_priv_s *priv,
         break;
 
       case PATTERN_RANDOM:
-        data = (uint64_t)mpfs_ddr_rand();
+        data = mpfs_ddr_rand();
         *ddr_word_ptr = data;
         *ddr_32_pt_t = (uint32_t)data;
         break;
@@ -2366,8 +2366,8 @@ uint32_t mpfs_ddr_read(struct mpfs_ddr_priv_s *priv,
               break;
 
             case PATTERN_RANDOM:
-                data = (uint64_t)mpfs_ddr_rand();
-                mpfs_ddr_rand_addr_offset = (uint32_t)(mpfs_ddr_rand() &
+                data = mpfs_ddr_rand();
+                mpfs_ddr_rand_addr_offset = (mpfs_ddr_rand() &
                                              0xffffc);
                 ddr_word_ptr = first_ddr_word_pt_t +
                                mpfs_ddr_rand_addr_offset;

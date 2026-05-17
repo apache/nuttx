@@ -232,8 +232,8 @@ int bm3803_freerun_counter(struct bm3803_freerun_s *freerun,
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%lld, %ld)\n",
-          usec, ts->tv_sec, ts->tv_nsec);
+  tmrinfo("usec=%llu ts=(%jd, %ld)\n",
+          usec, (intmax_t)ts->tv_sec, ts->tv_nsec);
 
   return OK;
 }

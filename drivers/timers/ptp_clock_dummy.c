@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 #include <nuttx/debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -116,8 +118,8 @@ static int ptp_clock_dummy_gettime(FAR struct ptp_lowerhalf_s *lower,
       sts->post_ts.tv_nsec = ts->tv_nsec;
     }
 
-  ptpinfo("ptp_clock_dummy_gettime sec:%ld, nsec:%ld\n", ts->tv_sec,
-          ts->tv_nsec);
+  ptpinfo("ptp_clock_dummy_gettime sec:%jd, nsec:%ld\n",
+          (intmax_t)ts->tv_sec, ts->tv_nsec);
   return 0;
 }
 
@@ -144,16 +146,16 @@ ptp_clock_dummy_getcrosststamp(FAR struct ptp_lowerhalf_s *lower,
   cts->monoraw.tv_sec = ts.tv_sec;
   cts->monoraw.tv_nsec = ts.tv_sec;
 
-  ptpinfo("ptp_clock_dummy_getcrosststamp sec:%ld, nsec:%ld\n",
-          (long)ts.tv_sec, ts.tv_nsec);
+  ptpinfo("ptp_clock_dummy_getcrosststamp sec:%jd, nsec:%ld\n",
+          (intmax_t)ts.tv_sec, ts.tv_nsec);
   return 0;
 }
 
 static int ptp_clock_dummy_settime(FAR struct ptp_lowerhalf_s *lower,
                                    FAR const struct timespec *ts)
 {
-  ptpinfo("ptp_clock_dummy_settime sec:%ld, nsec:%ld\n", (long)ts->tv_sec,
-          ts->tv_nsec);
+  ptpinfo("ptp_clock_dummy_settime sec:%jd, nsec:%ld\n",
+          (intmax_t)ts->tv_sec, ts->tv_nsec);
   return 0;
 }
 

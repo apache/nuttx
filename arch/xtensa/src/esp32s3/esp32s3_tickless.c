@@ -148,7 +148,7 @@ static inline uint64_t tickless_getcounter(void)
     }
   while (lo_start != lo);
 
-  counter = ((uint64_t) hi << 32) | lo;
+  counter = ((uint64_t)hi << 32) | lo;
 
   return counter;
 }
@@ -171,7 +171,7 @@ static inline uint64_t tickless_getalarmvalue(void)
 {
   uint32_t hi = getreg32(SYSTIMER_TARGET0_HI_REG);
   uint32_t lo = getreg32(SYSTIMER_TARGET0_LO_REG);
-  uint64_t ticks = ((uint64_t) hi << 32) | lo;
+  uint64_t ticks = ((uint64_t)hi << 32) | lo;
 
   return ticks;
 }

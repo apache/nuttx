@@ -247,7 +247,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%ju, %lu)\n",
+  tmrinfo("usec=%llu ts=(%jd, %ld)\n",
           usec, (intmax_t)ts->tv_sec, ts->tv_nsec);
 
   return OK;
@@ -257,7 +257,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 
 int stm32_freerun_counter(struct stm32_freerun_s *freerun, uint64_t *counter)
 {
-  *counter = (uint64_t)STM32_TIM_GETCOUNTER(freerun->tch);
+  *counter = STM32_TIM_GETCOUNTER(freerun->tch);
   return OK;
 }
 

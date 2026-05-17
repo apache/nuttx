@@ -191,7 +191,7 @@ static inline uint64_t up_tmr_getcounter(void)
 
 static inline uint64_t up_tmr_getalarmvalue(void)
 {
-  return ((uint64_t) getreg32(SYS_TIMER_SYSTIMER_TARGET0_HI_REG) << 32) \
+  return ((uint64_t)getreg32(SYS_TIMER_SYSTIMER_TARGET0_HI_REG) << 32) \
            | getreg32(SYS_TIMER_SYSTIMER_TARGET0_LO_REG);
 }
 

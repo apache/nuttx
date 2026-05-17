@@ -518,7 +518,7 @@ static unsigned int __div64_32(uint64_t *n, unsigned int base)
   if (high >= base)
     {
       high /= base;
-      res = (uint64_t) high << 32;
+      res = (uint64_t)high << 32;
       rem -= (uint64_t)(high * base) << 32;
     }
 

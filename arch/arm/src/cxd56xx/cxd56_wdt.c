@@ -391,7 +391,7 @@ static int cxd56_getstatus(struct watchdog_lowerhalf_s *lower,
 
   /* Get the time remaining until the watchdog expires (in milliseconds) */
 
-  remain           = (uint64_t)cxd56_getreg(CXD56_WDT_WDOGVALUE);
+  remain           = cxd56_getreg(CXD56_WDT_WDOGVALUE);
   status->timeleft = (uint32_t)(remain * 1000 / cxd56_get_cpu_baseclk());
   if (cxd56_getreg(CXD56_WDT_WDOGRIS) != WDOGRIS_RAWINT)
     {

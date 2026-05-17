@@ -666,7 +666,7 @@ uint64_t *arm64_fatal_handler(uint64_t *regs)
 
           tcb->flags |= TCB_FLAG_FORCED_CANCEL;
 
-          regs[REG_ELR] = (uint64_t) _exit;
+          regs[REG_ELR] = (uint64_t)_exit;
           regs[REG_X0] = SIGSEGV;
           regs[REG_SPSR] &= ~SPSR_MODE_MASK;
           regs[REG_SPSR] |= SPSR_MODE_EL1H;

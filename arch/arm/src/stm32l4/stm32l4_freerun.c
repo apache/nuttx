@@ -231,8 +231,8 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%u, %lu)\n",
-          usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("usec=%llu ts=(%jd, %ld)\n",
+          usec, (intmax_t)ts->tv_sec, ts->tv_nsec);
 
   return OK;
 }

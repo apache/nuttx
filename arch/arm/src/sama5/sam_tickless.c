@@ -265,7 +265,7 @@ void up_timer_initialize(void)
   /* Convert this to configured clock ticks for use by the OS timer logic */
 
   max_delay /= CONFIG_USEC_PER_TICK;
-  if (max_delay > (uint64_t)UINT32_MAX)
+  if (max_delay > UINT32_MAX)
     {
       g_oneshot_maxticks = UINT32_MAX;
     }

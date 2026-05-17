@@ -281,7 +281,7 @@ static int mpl115a_getpressure(FAR struct mpl115a_dev_s *priv)
   /* These code are from Freescale AN3785 */
 
   c12x2 = ((int32_t)priv->mpl115a_cal_c12 * tadc) >> 11;
-  a1 = (int32_t) (priv->mpl115a_cal_b1 + c12x2);
+  a1 = (int32_t)(priv->mpl115a_cal_b1 + c12x2);
   a1x1 = a1 * padc;
   y1 = (((int32_t)priv->mpl115a_cal_a0) << 10) + a1x1;
   a2x2 = (((int32_t)priv->mpl115a_cal_b2) * tadc) >> 1;

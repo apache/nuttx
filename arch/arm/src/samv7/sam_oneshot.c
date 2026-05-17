@@ -244,7 +244,7 @@ int sam_oneshot_max_delay(struct sam_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
   *usec = (0xffffull * USEC_PER_SEC) /
-          (uint64_t)sam_tc_divfreq(oneshot->tch);
+          sam_tc_divfreq(oneshot->tch);
   return OK;
 }
 
@@ -277,9 +277,8 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
   uint64_t regval;
   irqstate_t flags;
 
-  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-          handler, arg, (unsigned long)ts->tv_sec,
-          (unsigned long)ts->tv_nsec);
+  tmrinfo("handler=%p arg=%p, ts=(%jd, %ld)\n",
+          handler, arg, (intmax_t)ts->tv_sec, ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
 
   /* Was the oneshot already running? */
@@ -510,8 +509,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
           ts->tv_nsec = nsec;
         }
 
-      tmrinfo("remaining (%lu, %lu)\n",
-              (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+      tmrinfo("remaining (%jd, %ld)\n",
+              (intmax_t)ts->tv_sec, ts->tv_nsec);
     }
 
   return OK;

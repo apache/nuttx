@@ -168,9 +168,9 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #    endif
 #  else
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_MS)
-                             "[%5ju.%03ld] "
+                             "[%5jd.%03ld] "
 #    else
-                             "[%5ju.%06ld] "
+                             "[%5jd.%06ld] "
 #    endif
 #  endif
 #endif
@@ -216,10 +216,10 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #    endif
 #  else
 #    if defined(CONFIG_SYSLOG_TIMESTAMP_MS)
-                             , (uintmax_t)ts.tv_sec
+                             , (intmax_t)ts.tv_sec
                              , ts.tv_nsec / NSEC_PER_MSEC
 #    else
-                             , (uintmax_t)ts.tv_sec
+                             , (intmax_t)ts.tv_sec
                              , ts.tv_nsec / NSEC_PER_USEC
 #    endif
 #  endif

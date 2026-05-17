@@ -47,36 +47,36 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PUT_UINT32_BE(n,b,i)                      \
-{                                                 \
-  (b)[(i)] = (unsigned char) ((n) >> 24);         \
-  (b)[(i) + 1] = (unsigned char) ((n) >> 16);     \
-  (b)[(i) + 2] = (unsigned char) ((n) >>  8);     \
-  (b)[(i) + 3] = (unsigned char) ((n));           \
+#define PUT_UINT32_BE(n,b,i)                   \
+{                                              \
+  (b)[(i)] = (unsigned char)((n) >> 24);       \
+  (b)[(i) + 1] = (unsigned char)((n) >> 16);   \
+  (b)[(i) + 2] = (unsigned char)((n) >>  8);   \
+  (b)[(i) + 3] = (unsigned char)((n));         \
 }
 
-#define GET_UINT64_BE(n,b,i)                    \
-{                                               \
-  (n) = ((uint64_t) (b)[(i)] << 56)             \
-    | ((uint64_t) (b)[(i) + 1] << 48)           \
-    | ((uint64_t) (b)[(i) + 2] << 40)           \
-    | ((uint64_t) (b)[(i) + 3] << 32)           \
-    | ((uint64_t) (b)[(i) + 4] << 24)           \
-    | ((uint64_t) (b)[(i) + 5] << 16)           \
-    | ((uint64_t) (b)[(i) + 6] <<  8)           \
-    | ((uint64_t) (b)[(i) + 7]);                \
+#define GET_UINT64_BE(n,b,i)                   \
+{                                              \
+  (n) = ((uint64_t)(b)[(i)] << 56)             \
+    | ((uint64_t)(b)[(i) + 1] << 48)           \
+    | ((uint64_t)(b)[(i) + 2] << 40)           \
+    | ((uint64_t)(b)[(i) + 3] << 32)           \
+    | ((uint64_t)(b)[(i) + 4] << 24)           \
+    | ((uint64_t)(b)[(i) + 5] << 16)           \
+    | ((uint64_t)(b)[(i) + 6] <<  8)           \
+    | ((uint64_t)(b)[(i) + 7]);                \
 }
 
-#define PUT_UINT64_BE(n,b,i)                      \
-{                                                 \
-  (b)[(i)] = (uint8_t) ((n) >> 56);               \
-  (b)[(i) + 1] = (uint8_t) ((n) >> 48);           \
-  (b)[(i) + 2] = (uint8_t) ((n) >> 40);           \
-  (b)[(i) + 3] = (uint8_t) ((n) >> 32);           \
-  (b)[(i) + 4] = (uint8_t) ((n) >> 24);           \
-  (b)[(i) + 5] = (uint8_t) ((n) >> 16);           \
-  (b)[(i) + 6] = (uint8_t) ((n) >>  8);           \
-  (b)[(i) + 7] = (uint8_t) ((n));                 \
+#define PUT_UINT64_BE(n,b,i)                   \
+{                                              \
+  (b)[(i)] = (uint8_t)((n) >> 56);             \
+  (b)[(i) + 1] = (uint8_t)((n) >> 48);         \
+  (b)[(i) + 2] = (uint8_t)((n) >> 40);         \
+  (b)[(i) + 3] = (uint8_t)((n) >> 32);         \
+  (b)[(i) + 4] = (uint8_t)((n) >> 24);         \
+  (b)[(i) + 5] = (uint8_t)((n) >> 16);         \
+  (b)[(i) + 6] = (uint8_t)((n) >>  8);         \
+  (b)[(i) + 7] = (uint8_t)((n));               \
 }
 
 #define SHR(x,n)  ((x) >> (n))

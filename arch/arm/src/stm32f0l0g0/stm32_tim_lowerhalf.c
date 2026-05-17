@@ -417,7 +417,7 @@ static int stm32_getstatus(struct timer_lowerhalf_s *lower,
     }
   else
     {
-      timeout = ((uint64_t) period * 1000000) / clock;
+      timeout = ((uint64_t)period * 1000000) / clock;
     }
 
   status->timeout = timeout;
@@ -425,7 +425,7 @@ static int stm32_getstatus(struct timer_lowerhalf_s *lower,
   /* Get the time remaining until the timer expires (in microseconds) */
 
   counter    = STM32_TIM_GETCOUNTER(priv->tim);
-  status->timeleft = ((uint64_t) (timeout - counter) * clock) / 1000000;
+  status->timeleft = ((uint64_t)(timeout - counter) * clock) / 1000000;
   tmrinfo("timeout=%" PRIu32 " counter=%" PRIu32 "\n", timeout, counter);
   tmrinfo("timeleft=%" PRIu32 "\n", status->timeleft);
   return OK;

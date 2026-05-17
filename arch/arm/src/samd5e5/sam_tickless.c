@@ -263,7 +263,7 @@ void up_timer_initialize(void)
   /* Convert this to configured clock ticks for use by the OS timer logic */
 
   max_delay /= CONFIG_USEC_PER_TICK;
-  if (max_delay > (uint64_t)UINT32_MAX)
+  if (max_delay > UINT32_MAX)
     {
       g_oneshot_maxticks = UINT32_MAX;
     }
@@ -398,8 +398,7 @@ int up_timer_cancel(struct timespec *ts)
 
 int up_timer_start(const struct timespec *ts)
 {
-  tmrinfo("ts=(%lu, %lu)\n", (unsigned long)ts->tv_sec,
-                             (unsigned long)ts->tv_nsec);
+  tmrinfo("ts=(%jd, %ld)\n", (intmax_t)ts->tv_sec, ts->tv_nsec);
   return ONESHOT_INITIALIZED(&g_tickless.oneshot) ?
          sam_oneshot_start(&g_tickless.oneshot, &g_tickless.freerun,
          sam_oneshot_handler, NULL, ts) :

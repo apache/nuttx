@@ -431,7 +431,7 @@ int up_rtc_gettime(struct timespec *tp)
   tp->tv_nsec = (val % CONFIG_RTC_FREQUENCY) *
                 (NSEC_PER_SEC / CONFIG_RTC_FREQUENCY);
 
-  rtcinfo("Get RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
+  rtcinfo("Get RTC %jd.%09ld\n", (intmax_t)tp->tv_sec, tp->tv_nsec);
 
   return OK;
 }
@@ -481,8 +481,8 @@ int up_rtc_settime(const struct timespec *tp)
   cnt_carry = val / __CNT_TOP;
   cnt       = val % __CNT_TOP;
 
-  rtcinfo("Set RTC %u.%09u carry %u zero %u reg %u\n",
-           tp->tv_sec, tp->tv_nsec, cnt_carry, cnt, cnt_reg);
+  rtcinfo("Set RTC %jd.%09ld carry %u zero %u reg %u\n",
+           (intmax_t)tp->tv_sec, tp->tv_nsec, cnt_carry, cnt, cnt_reg);
 
   putreg32(cnt_carry, __CNT_CARRY_REG);
   putreg32(cnt      , __CNT_ZERO_REG);
