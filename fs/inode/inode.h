@@ -419,6 +419,36 @@ void inode_addref(FAR struct inode *inode);
 void inode_release(FAR struct inode *inode);
 
 /****************************************************************************
+ * Name: inode_checkperm
+ *
+ * Description:
+ *   Validate that 'inode' can be opened with the access described by
+ *   'oflags'.  Two sequential checks are performed:
+ *
+ *   1. Operation-support check (all inode types):
+ *      Ensures the driver exposes the read/write entry points required by
+ *      'oflags'.  Pseudo-directory inodes are exempted.
+ *
+ *   2. UNIX permission check (pseudo-filesystem inodes only):
+ *      Compares effective uid/gid against i_mode owner/group/other bits.
+ *      Mountpoint inodes and kernel threads are unconditionally exempted.
+ *      Active only when CONFIG_PSEUDOFS_ATTRIBUTES and
+ *      CONFIG_SCHED_USER_IDENTITY are both enabled.
+ *
+ * Input Parameters:
+ *   inode  - The inode to check
+ *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  Negated errno on failure:
+ *     -ENXIO   ops pointer is NULL
+ *     -EACCES  required operation not supported, or permission denied
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int oflags);
+
+/****************************************************************************
  * Name: foreach_inode
  *
  * Description:

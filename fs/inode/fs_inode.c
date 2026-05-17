@@ -24,8 +24,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/rwsem.h>
+#include <nuttx/sched.h>
 
 #include "inode/inode.h"
 
@@ -113,4 +118,128 @@ void inode_unlock(void)
 void inode_runlock(void)
 {
   up_read(&g_inode_lock);
+}
+
+/****************************************************************************
+ * Name: inode_checkperm
+ *
+ * Description:
+ *   Validate that 'inode' can be opened with the access described by
+ *   'oflags'.  Two sequential checks are performed:
+ *
+ *   1. Operation-support check (all inode types, unconditional):
+ *      Verifies the driver exposes the read/write entry points required by
+ *      'oflags'.  Returns -ENXIO when ops are NULL and -EACCES when the
+ *      required entry point is absent.  Pseudo-directory inodes
+ *      (INODE_IS_PSEUDODIR) are exempted from this step.
+ *
+ *   2. UNIX permission check (pseudo-filesystem inodes only):
+ *      Compares effective uid/gid against i_mode owner/group/other bits.
+ *      Mountpoint inodes and kernel threads are unconditionally exempted.
+ *      Requires CONFIG_PSEUDOFS_ATTRIBUTES and CONFIG_SCHED_USER_IDENTITY;
+ *      when either option is disabled this step is a no-op.
+ *
+ * Input Parameters:
+ *   inode  - The inode to check
+ *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
+ *
+ * Returned Value:
+ *   Zero (OK) on success.  Negated errno on failure:
+ *     -ENXIO   ops pointer is NULL
+ *     -EACCES  required operation not supported, or permission denied
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int oflags)
+{
+#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
+  FAR struct tcb_s *rtcb;
+  mode_t perm;
+  uid_t uid;
+  gid_t gid;
+#endif
+  FAR const struct file_operations *ops;
+
+  /* === Step 1: operation-support check === */
+
+  /* Pseudo-directories carry no ops and are always accessible */
+
+  if (INODE_IS_PSEUDODIR(inode))
+    {
+      return OK;
+    }
+
+  ops = inode->u.i_ops;
+  if (ops == NULL)
+    {
+      return -ENXIO;
+    }
+
+  if (((oflags & O_RDOK) != 0 &&
+       !ops->readv && !ops->read && !ops->ioctl) ||
+      ((oflags & O_WROK) != 0 &&
+       !ops->writev && !ops->write && !ops->ioctl))
+    {
+      return -EACCES;
+    }
+
+#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
+
+  /* === Step 2: UNIX permission check (pseudo-filesystem inodes only) === */
+
+  /* Mountpoints delegate permission enforcement to the underlying
+   * filesystem
+   */
+
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      return OK;
+    }
+
+  /* Kernel threads are always granted access */
+
+  rtcb = nxsched_self();
+  if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      return OK;
+    }
+
+  /* Use effective credentials */
+
+  DEBUGASSERT(rtcb->group != NULL);
+  uid = rtcb->group->tg_euid;
+  gid = rtcb->group->tg_egid;
+
+  /* Select the applicable permission-bit triplet */
+
+  if (uid == inode->i_owner)
+    {
+      perm = (inode->i_mode >> 6) & 7;
+    }
+  else if (gid == inode->i_group)
+    {
+      perm = (inode->i_mode >> 3) & 7;
+    }
+  else
+    {
+      perm = inode->i_mode & 7;
+    }
+
+  /* Bit 2 (value 4) = read permission */
+
+  if (((oflags & O_RDOK) != 0) && ((perm & 4) == 0))
+    {
+      return -EACCES;
+    }
+
+  /* Bit 1 (value 2) = write permission */
+
+  if (((oflags & O_WROK) != 0) && ((perm & 2) == 0))
+    {
+      return -EACCES;
+    }
+
+#endif /* CONFIG_PSEUDOFS_ATTRIBUTES && CONFIG_SCHED_USER_IDENTITY */
+
+  return OK;
 }
