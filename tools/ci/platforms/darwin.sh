@@ -62,6 +62,7 @@ arm_gcc_toolchain() {
     local basefile
     basefile=arm-gnu-toolchain-13.2.rel1-darwin-x86_64-arm-none-eabi
     cd "${NUTTXTOOLS}"
+    # Download the latest ARM GCC toolchain prebuilt by ARM
     curl -O -L -s https://developer.arm.com/-/media/Files/downloads/gnu/13.2.rel1/binrel/${basefile}.tar.xz
     xz -d ${basefile}.tar.xz
     tar xf ${basefile}.tar
@@ -214,7 +215,7 @@ kconfig_frontends() {
   add_path "${NUTTXTOOLS}"/kconfig-frontends/bin
 
   if [ ! -f "${NUTTXTOOLS}/kconfig-frontends/bin/kconfig-conf" ]; then
-    git clone --depth 1 https://bitbucket.org/nuttx/tools.git "${NUTTXTOOLS}"/nuttx-tools
+    git clone --depth 1 https://github.com/patacongo/tools.git "${NUTTXTOOLS}"/nuttx-tools
     cd "${NUTTXTOOLS}"/nuttx-tools/kconfig-frontends
     ./configure --prefix="${NUTTXTOOLS}"/kconfig-frontends \
       --disable-kconfig --disable-nconf --disable-qconf \
@@ -435,6 +436,8 @@ install_build_tools() {
   rm -f /usr/local/bin/python3-config || :
   # same for openssl
   rm -f /usr/local/bin/openssl || :
+
+  brew update
 
   oldpath=$(cd . && pwd -P)
   for func in ${install}; do
