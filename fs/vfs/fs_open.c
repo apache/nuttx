@@ -49,54 +49,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_checkflags
- *
- * Description:
- *   Check if the access described by 'oflags' is supported on 'inode'
- *
- *   inode_checkflags() is an internal NuttX interface and should not be
- *   called from applications.
- *
- * Input Parameters:
- *   inode  - The inode to check
- *   oflags - open flags.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  On failure, a negated errno value is
- *   returned.
- *
- ****************************************************************************/
-
-static int inode_checkflags(FAR struct inode *inode, int oflags)
-{
-  FAR const struct file_operations *ops = inode->u.i_ops;
-
-  if (INODE_IS_PSEUDODIR(inode))
-    {
-      return OK;
-    }
-
-  if (ops == NULL)
-    {
-      return -ENXIO;
-    }
-
-  if (((oflags & O_RDOK) != 0 && !ops->readv && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WROK) != 0 && !ops->writev && !ops->write && !ops->ioctl))
-    {
-      return -EACCES;
-    }
-  else
-    {
-      return OK;
-    }
-}
-
-/****************************************************************************
- * Name: file_vopen
- ****************************************************************************/
-
-/****************************************************************************
  * Name: file_vopen
  *
  * Description:
@@ -218,9 +170,9 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
     }
 #endif
 
-  /* Make sure that the inode supports the requested access */
+  /* Validate operation support and pseudo-filesystem permissions */
 
-  ret = inode_checkflags(inode, oflags);
+  ret = inode_checkperm(inode, oflags);
   if (ret < 0)
     {
       goto errout_with_inode;
