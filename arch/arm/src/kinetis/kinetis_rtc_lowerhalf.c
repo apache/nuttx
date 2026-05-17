@@ -515,8 +515,7 @@ static int kinetis_rdalarm(struct rtc_lowerhalf_s *lower,
       flags = enter_critical_section();
       ret = kinetis_rtc_rdalarm(&ts);
 
-      localtime_r((const time_t *)&ts.tv_sec,
-                  (struct tm *)alarminfo->time);
+      localtime_r(&ts.tv_sec, (struct tm *)alarminfo->time);
       leave_critical_section(flags);
     }
 

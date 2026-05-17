@@ -384,10 +384,10 @@ static void esp32c3_tim_getcounter(struct esp32c3_tim_dev_s *dev,
       /* Discard the top 12 bits */
 
       value_32 &= LOW_20_MASK;
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32 = getreg32(SYS_TIMER_SYSTIMER_UNIT1_VALUE_LO_REG);
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
   else
     {
@@ -402,10 +402,10 @@ static void esp32c3_tim_getcounter(struct esp32c3_tim_dev_s *dev,
       /* Discard the top 10 bits */
 
       value_32 &= LOW_22_MASK;
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32  = getreg32(TIMG_T0LO_REG(priv->id)); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
 }
 
@@ -521,10 +521,10 @@ static void esp32c3_tim_getalarmvalue(struct esp32c3_tim_dev_s *dev,
       /* Get only the 20 low bits. */
 
       value_32 &= LOW_20_MASK;
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32  = getreg32(SYS_TIMER_SYSTIMER_TARGET2_LO_REG); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
   else
     {
@@ -535,10 +535,10 @@ static void esp32c3_tim_getalarmvalue(struct esp32c3_tim_dev_s *dev,
       /* Get only the 22 low bits. */
 
       value_32 &= LOW_22_MASK;
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
       *value  <<= SHIFT_32;
       value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->id)); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      *value   |= value_32;
     }
 }
 

@@ -1399,7 +1399,7 @@ static uint32_t IRAM_ATTR btdm_lpcycles_2_hus(uint32_t cycles,
 static uint32_t IRAM_ATTR btdm_hus_2_lpcycles(uint32_t us)
 {
   uint64_t cycles;
-  cycles = ((uint64_t)(us) << g_btdm_lpcycle_us_frac) / g_btdm_lpcycle_us;
+  cycles = ((uint64_t)us << g_btdm_lpcycle_us_frac) / g_btdm_lpcycle_us;
   return (uint32_t)cycles;
 }
 

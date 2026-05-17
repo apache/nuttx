@@ -629,8 +629,7 @@ static int esp_rtc_rdalarm(struct rtc_lowerhalf_s *lower,
   ts.tv_nsec = ((esp_hr_timer_time_us() + g_rtc_save->offset +
               cbinfo->deadline_us) % USEC_PER_SEC) * NSEC_PER_USEC;
 
-  localtime_r((const time_t *)&ts.tv_sec,
-              (struct tm *)alarminfo->time);
+  localtime_r(&ts.tv_sec, (struct tm *)alarminfo->time);
 
   spin_unlock_irqrestore(&priv->lock, flags);
 

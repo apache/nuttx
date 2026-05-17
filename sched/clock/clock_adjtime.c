@@ -202,7 +202,7 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 
   if (delta)
     {
-      adjust_usec = (long long)delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
+      adjust_usec = delta->tv_sec * USEC_PER_SEC + delta->tv_usec;
       ret = adjtime_start(adjust_usec);
     }
 

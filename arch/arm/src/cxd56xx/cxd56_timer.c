@@ -336,7 +336,7 @@ static int cxd56_getstatus(struct timer_lowerhalf_s *lower,
 
   /* Get the time remaining until the timer expires (in microseconds). */
 
-  remaining = (uint64_t)getreg32(priv->base + CXD56_TIMER_VALUE);
+  remaining = getreg32(priv->base + CXD56_TIMER_VALUE);
   status->timeleft =
     (uint32_t)(remaining * 1000000ULL * TIMER_DIVIDER / priv->clkticks);
 

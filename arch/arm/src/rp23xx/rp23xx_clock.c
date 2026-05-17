@@ -124,7 +124,7 @@ bool rp23xx_clock_configure(int clk_index,
    * (left shift by 16)
    */
 
-  div = (uint32_t) (((uint64_t) src_freq << 16) / freq);
+  div = (uint32_t)(((uint64_t)src_freq << 16) / freq);
 
   /* If increasing divisor, set divisor before source. Otherwise set source
    * before divisor. This avoids a momentary overspeed when e.g. switching

@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -258,9 +259,8 @@ int esp32c3_oneshot_start(struct esp32c3_oneshot_s *oneshot,
   uint64_t timeout_us;
   int ret = OK;
 
-  tmrinfo("handler=%p arg=%p, ts=(%lu, %lu)\n",
-          handler, arg, (unsigned long)ts->tv_sec,
-          (unsigned long)ts->tv_nsec);
+  tmrinfo("handler=%p arg=%p, ts=(%jd, %ld)\n",
+          handler, arg, (intmax_t)ts->tv_sec, ts->tv_nsec);
   DEBUGASSERT(oneshot != NULL);
   DEBUGASSERT(handler != NULL);
   DEBUGASSERT(ts != NULL);

@@ -157,7 +157,7 @@ static int s32k3xx_wkpuinterrupt(int irq, void *context, void *arg)
   wisr_64 = getreg32(S32K3XX_WKPU_WISR_64);
   irer_64 = getreg32(S32K3XX_WKPU_IRER_64);
 
-  eif = (wisr & irer) | (((uint64_t) (wisr_64 & irer_64)) << 32);
+  eif = (wisr & irer) | (((uint64_t)(wisr_64 & irer_64)) << 32);
 
   /* Examine each WKPU source */
 

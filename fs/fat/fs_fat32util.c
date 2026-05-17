@@ -390,7 +390,7 @@ uint32_t fat_systime2fattime(void)
     {
       /* Break done the seconds in date and time units */
 
-      if (gmtime_r((FAR const time_t *)&ts.tv_sec, &tm) != NULL)
+      if (gmtime_r(&ts.tv_sec, &tm) != NULL)
         {
           /* FAT can only represent dates since 1980.  struct tm can
            * represent dates since 1900.

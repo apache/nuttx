@@ -75,7 +75,7 @@
 
 /* convert seconds to 64bit counter value running at 32kHz */
 
-#define SEC_TO_CNT(sec) ((uint64_t)(((uint64_t)(sec)) << 15))
+#define SEC_TO_CNT(sec) (((uint64_t)(sec)) << 15)
 
 /* convert nano-seconds to 32kHz counter less than 1 second */
 
@@ -157,7 +157,7 @@ static void rtc_dumptime(const struct timespec *tp, const char *msg)
   gmtime_r(&tp->tv_sec, &tm);
 
   rtcinfo("%s:\n", msg);
-  rtcinfo("RTC %u.%09u\n", tp->tv_sec, tp->tv_nsec);
+  rtcinfo("RTC %jd.%09ld\n", (intmax_t)tp->tv_sec, tp->tv_nsec);
   rtcinfo("%4d/%02d/%02d %02d:%02d:%02d\n",
           tm.tm_year, tm.tm_mon, tm.tm_mday,
           tm.tm_hour, tm.tm_min, tm.tm_sec);

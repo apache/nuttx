@@ -832,8 +832,8 @@ int stm32_rtc_rdalarm(FAR struct alm_rdalarm_s *alminfo)
           regvals.cnth = getreg16(STM32_RTC_ALRH);
           regvals.cntl = getreg16(STM32_RTC_ALRL);
           tp.tv_sec    = regvals.cnth << 16 | regvals.cntl;
-          memcpy(alminfo->ar_time, (FAR struct tm *)gmtime(&tp.tv_sec),
-                 sizeof(FAR struct tm));
+          memcpy(alminfo->ar_time, gmtime(&tp.tv_sec),
+                 sizeof(struct tm));
           ret = OK;
         }
         break;

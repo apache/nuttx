@@ -460,12 +460,12 @@ static bool has_time_passed(FAR struct timespec *curr,
                             FAR struct timespec *start,
                             unsigned int secs_since_start)
 {
-  if ((long)((start->tv_sec + secs_since_start) - curr->tv_sec) == 0)
+  if ((start->tv_sec + secs_since_start) - curr->tv_sec == 0)
     {
       return start->tv_nsec <= curr->tv_nsec;
     }
 
-  return (long)((start->tv_sec + secs_since_start) - curr->tv_sec) <= 0;
+  return (start->tv_sec + secs_since_start) - curr->tv_sec <= 0;
 }
 
 /****************************************************************************
@@ -485,7 +485,7 @@ static bool time_has_passed_ms(FAR struct timespec *curr,
 
   if (start->tv_sec < curr->tv_sec)
     {
-      curr_msec += 1000 * ((long)(curr->tv_sec - start->tv_sec));
+      curr_msec += 1000 * (curr->tv_sec - start->tv_sec);
     }
 
   return (start_msec + msecs_since_start) <= curr_msec;
@@ -773,7 +773,7 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
           ts_sleep.tv_nsec += NSEC_PER_SEC;
         }
 
-      if ((long)ts_sleep.tv_sec >= 0)
+      if (ts_sleep.tv_sec >= 0)
         {
           ret = nxsig_nanosleep(&ts_sleep, NULL);
           if (ret == -EINTR)

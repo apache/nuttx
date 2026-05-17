@@ -80,8 +80,8 @@ static void optee_rpc_cmd_get_time(FAR struct optee_msg_arg *arg)
       return;
     }
 
-  arg->params[0].u.value.a = (uint32_t)ts.tv_sec;   /* Seconds since epoch. */
-  arg->params[0].u.value.b = (uint32_t)ts.tv_nsec;  /* Nanoseconds.         */
+  arg->params[0].u.value.a = ts.tv_sec;  /* Seconds since epoch. */
+  arg->params[0].u.value.b = ts.tv_nsec; /* Nanoseconds.         */
 
   arg->ret = TEE_SUCCESS;
 }

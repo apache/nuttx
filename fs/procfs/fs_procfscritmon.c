@@ -235,9 +235,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for maximum time pre-emption disabled */
 
-  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%lu.%09lu",
-                             (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%jd.%09ld",
+                             (intmax_t)maxtime.tv_sec,
+                             maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
   totalsize += copysize;
@@ -269,9 +269,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for maximum time in a critical section */
 
-  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%lu.%09lu",
-                             (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%jd.%09ld",
+                             (intmax_t)maxtime.tv_sec,
+                             maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
   totalsize += copysize;
@@ -303,9 +303,9 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for max busywait time to enter csection(get spinlock) */
 
-  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%lu.%09lu",
-                             (unsigned long)maxtime.tv_sec,
-                             (unsigned long)maxtime.tv_nsec);
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%jd.%09ld",
+                             (intmax_t)maxtime.tv_sec,
+                             maxtime.tv_nsec);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 
   totalsize += copysize;
@@ -335,10 +335,10 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   /* Generate output for all busywait time to enter csection(get spinlock) */
 
-  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%lu.%09lu %2"
+  linesize = procfs_snprintf(attr->line, CRITMON_LINELEN, ",%jd.%09ld %2"
                              PRId32 ".%04" PRId32 "%%",
-                             (unsigned long)all_time.tv_sec,
-                             (unsigned long)all_time.tv_nsec,
+                             (intmax_t)all_time.tv_sec,
+                             all_time.tv_nsec,
                              rate / 10000, rate % 10000);
   copysize = procfs_memcpy(attr->line, linesize, buffer, buflen, offset);
 

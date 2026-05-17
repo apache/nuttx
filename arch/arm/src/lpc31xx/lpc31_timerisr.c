@@ -97,7 +97,7 @@ void up_timer_initialize(void)
    * of the timer0 module clock (in the AHB0APB1_BASE domain (2)).
    */
 
-  freq = (uint64_t)lpc31_clkfreq(CLKID_TIMER0PCLK, DOMAINID_AHB0APB1);
+  freq = lpc31_clkfreq(CLKID_TIMER0PCLK, DOMAINID_AHB0APB1);
 
   /* If the clock is >1MHz, use pre-dividers */
 

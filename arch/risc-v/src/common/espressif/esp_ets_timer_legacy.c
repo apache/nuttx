@@ -203,7 +203,7 @@ void IRAM_ATTR ets_timer_arm(ets_timer *ptimer,
                              uint32_t time_ms,
                              bool repeat_flag)
 {
-  uint64_t time_us = 1000LL * (uint64_t) time_ms;
+  uint64_t time_us = 1000LL * (uint64_t)time_ms;
 
   assert(timer_initialized(ptimer));
 

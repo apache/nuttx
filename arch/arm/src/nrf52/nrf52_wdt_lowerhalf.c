@@ -362,7 +362,7 @@ static int nrf52_settimeout(struct watchdog_lowerhalf_s *lower,
 
   nrf52_wdt_behaviour_set(priv->mode);
 
-  nrf52_wdt_reload_value_set(((uint64_t) timeout * 32768) / 1000);
+  nrf52_wdt_reload_value_set(((uint64_t)timeout * 32768) / 1000);
 
   up_enable_irq(NRF52_IRQ_WDT);
 

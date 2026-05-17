@@ -3582,7 +3582,7 @@ static int stm32_eth_ptp_adjust(long ppb)
 
   if (ppb != 0)
     {
-      addend += (int64_t)addend * ppb / NSEC_PER_SEC;
+      addend += addend * ppb / NSEC_PER_SEC;
     }
 
   /* Check for overflows */

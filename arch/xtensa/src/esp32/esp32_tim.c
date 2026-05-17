@@ -351,10 +351,10 @@ static void esp32_tim_getcounter(struct esp32_tim_dev_s *dev,
   /* Read value */
 
   value_32 = esp32_tim_getreg(dev, TIM_HI_OFFSET); /* High 32 bits */
-  *value |= (uint64_t)value_32;
+  *value |= value_32;
   *value <<= SHIFT_32;
   value_32 = esp32_tim_getreg(dev, TIM_LO_OFFSET); /* Low 32 bits */
-  *value |= (uint64_t)value_32;
+  *value |= value_32;
 }
 
 /****************************************************************************
@@ -420,10 +420,10 @@ static void esp32_tim_getalarmvalue(struct esp32_tim_dev_s *dev,
   /* Read value */
 
   value_32 = esp32_tim_getreg(dev, TIMG_ALARM_HI_OFFSET); /* High 32 bits */
-  *value |= (uint64_t)value_32;
+  *value |= value_32;
   *value <<= SHIFT_32;
   value_32 = esp32_tim_getreg(dev, TIMG_ALARM_LO_OFFSET); /* Low 32 bits */
-  *value |= (uint64_t)value_32;
+  *value |= value_32;
 }
 
 /****************************************************************************

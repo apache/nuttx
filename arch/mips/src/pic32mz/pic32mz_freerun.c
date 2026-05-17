@@ -260,8 +260,8 @@ int pic32mz_freerun_counter(struct pic32mz_freerun_s *freerun,
   ts->tv_sec  = sec;
   ts->tv_nsec = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-  tmrinfo("usec=%llu ts=(%u, %lu)\n",
-          usec, (unsigned long)ts->tv_sec, (unsigned long)ts->tv_nsec);
+  tmrinfo("usec=%llu ts=(%jd, %ld)\n",
+          usec, (intmax_t)ts->tv_sec, ts->tv_nsec);
 
   return OK;
 }
@@ -271,8 +271,8 @@ int pic32mz_freerun_counter(struct pic32mz_freerun_s *freerun,
 int pic32mz_freerun_counter(struct pic32mz_freerun_s *freerun,
                             uint64_t *counter)
 {
-  *counter = (uint64_t)PIC32MZ_TIMER_GETCOUNTER(freerun->timer) &
-              freerun->counter_mask;
+  *counter = PIC32MZ_TIMER_GETCOUNTER(freerun->timer) &
+             freerun->counter_mask;
   return OK;
 }
 

@@ -2420,11 +2420,11 @@ static int nfs_statfs(FAR struct inode *mountpt, FAR struct statfs *sbp)
   sfp                   = (FAR struct rpc_reply_fsstat *)nmp->nm_iobuffer;
   sbp->f_bsize          = NFS_FABLKSIZE;
   tquad                 = fxdr_hyper(&sfp->fsstat.sf_tbytes);
-  sbp->f_blocks         = tquad / (uint64_t) NFS_FABLKSIZE;
+  sbp->f_blocks         = tquad / NFS_FABLKSIZE;
   tquad                 = fxdr_hyper(&sfp->fsstat.sf_fbytes);
-  sbp->f_bfree          = tquad / (uint64_t) NFS_FABLKSIZE;
+  sbp->f_bfree          = tquad / NFS_FABLKSIZE;
   tquad                 = fxdr_hyper(&sfp->fsstat.sf_abytes);
-  sbp->f_bavail         = tquad / (uint64_t) NFS_FABLKSIZE;
+  sbp->f_bavail         = tquad / NFS_FABLKSIZE;
   tquad                 = fxdr_hyper(&sfp->fsstat.sf_tfiles);
   sbp->f_files          = tquad;
   tquad                 = fxdr_hyper(&sfp->fsstat.sf_ffiles);

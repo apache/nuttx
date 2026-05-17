@@ -49,5 +49,5 @@ hrtime_t gethrtime(void)
   struct timespec ts;
 
   clock_gettime(CLOCK_MONOTONIC, &ts);
-  return (hrtime_t)1000000000 * ts.tv_sec + ts.tv_nsec;
+  return 1000000000 * ts.tv_sec + ts.tv_nsec;
 }
