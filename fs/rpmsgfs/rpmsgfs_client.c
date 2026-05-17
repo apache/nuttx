@@ -370,6 +370,7 @@ static void rpmsgfs_device_created(FAR struct rpmsg_device *rdev,
       priv->ept.ns_bound_cb = rpmsgfs_ns_bound;
       priv->ept.release_cb = rpmsgfs_ept_release;
       snprintf(buf, sizeof(buf), "%s%p", RPMSGFS_NAME_PREFIX, priv);
+      rpmsg_set_priority(&priv->ept, RPMSG_PRIO_RT);
       rpmsg_create_ept(&priv->ept, rdev, buf,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsgfs_ept_cb, NULL);
