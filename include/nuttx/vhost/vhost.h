@@ -34,11 +34,19 @@
 #include <nuttx/queue.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
+#include <nuttx/virtio/virtio.h>
 #include <openamp/open_amp.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* VHost ioctl command definitions.  They carry the same values as the
+ * VirtIO ones, so one command number drives both /dev/virtio and
+ * /dev/vhost.
+ */
+
+#define VHOSTIOC_DUMP         VIRTIOIOC_DUMP
 
 /****************************************************************************
  * Public Type Definitions
@@ -70,6 +78,7 @@ struct vhost_driver
   uint32_t           device;   /* device id */
   CODE int         (*probe)(FAR struct vhost_device *hdev);
   CODE void        (*remove)(FAR struct vhost_device *hdev);
+  CODE void        (*dump)(FAR struct vhost_device *hdev);
   struct dq_entry_s  node;
 };
 
