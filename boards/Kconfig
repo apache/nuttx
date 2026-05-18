@@ -3165,6 +3165,7 @@ config ARCH_BOARD_NUCLEO_H563ZI
 config ARCH_BOARD_NUCLEO_N657X0_Q
 	bool "NUCLEO_N657X0_Q"
 	depends on ARCH_CHIP_STM32N657X0
+	select ARCH_HAVE_LEDS
 	---help---
 		STMicro Nucleo-N657X0-Q development board based on the STMicro
 		STM32N657X0 MCU (Cortex-M55).  Boots in DEV mode by loading

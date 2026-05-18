@@ -81,6 +81,57 @@
 #define BOARD_PWR_VDDIO  (PWR_SVMCR3_VDDIO2SV    | PWR_SVMCR3_VDDIO3SV | \
                           PWR_SVMCR3_VDDIO2VRSEL | PWR_SVMCR3_VDDIO3VRSEL)
 
+/* LED definitions **********************************************************/
+
+/* The Nucleo-N657X0-Q has three user LEDs (UM3417 silkscreen):
+ *
+ *   LD5  PG10  Red
+ *   LD6  PG0   Green
+ *   LD7  PG8   Blue
+ *
+ * They are not used by the board port unless CONFIG_ARCH_LEDS is defined.
+ * In that case the usage by the board port is defined in include/board.h
+ * and src/stm32_autoleds.c.  The LEDs are used to encode OS-related events
+ * as follows.
+ *
+ * The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED1        0
+#define BOARD_LED2        1
+#define BOARD_LED3        2
+#define BOARD_NLEDS       3
+
+#define BOARD_LED_RED     BOARD_LED1
+#define BOARD_LED_GREEN   BOARD_LED2
+#define BOARD_LED_BLUE    BOARD_LED3
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+#define BOARD_LED3_BIT    (1 << BOARD_LED3)
+
+/* If CONFIG_ARCH_LEDS is defined, the LEDs are used to encode OS-related
+ * events as follows:
+ *
+ *   SYMBOL                     Meaning                      LED state
+ *                                                        Red   Green Blue
+ *   ----------------------  --------------------------  ------ ------ ----
+ */
+
+#define LED_STARTED        0 /* NuttX has been started   OFF    OFF   OFF  */
+#define LED_HEAPALLOCATE   1 /* Heap has been allocated  OFF    OFF   ON   */
+#define LED_IRQSENABLED    2 /* Interrupts enabled       OFF    ON    OFF  */
+#define LED_STACKCREATED   3 /* Idle stack created       OFF    ON    ON   */
+#define LED_INIRQ          4 /* In an interrupt          N/C    N/C   GLOW */
+#define LED_SIGNAL         5 /* In a signal handler      N/C    GLOW  N/C  */
+#define LED_ASSERTION      6 /* An assertion failed      GLOW   N/C   GLOW */
+#define LED_PANIC          7 /* The system has crashed   Blink  OFF   N/C  */
+#define LED_IDLE           8 /* MCU is in sleep mode     ON     OFF   OFF  */
+
 /* Alternate function pin selections ****************************************/
 
 /* USART1 GPIOs *************************************************************/
