@@ -38,7 +38,7 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
 #  include <stm32_wdg.h>
 #endif
 
@@ -77,7 +77,7 @@ int stm32_bringup(void)
 {
   int ret;
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);

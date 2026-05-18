@@ -32,7 +32,7 @@
 
 #include "hardware/stm32_dma_v1.h"
 
-#ifdef CONFIG_STM32F0L0G0_HAVE_DMAMUX
+#ifdef CONFIG_STM32_HAVE_DMAMUX
 #  include "hardware/stm32_dmamux.h"
 #endif
 
@@ -238,7 +238,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
 #  define stm32_dmacapable(maddr, count, ccr) (true)

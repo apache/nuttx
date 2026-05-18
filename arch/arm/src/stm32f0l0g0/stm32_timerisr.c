@@ -47,9 +47,9 @@
  * (when CLKSOURCE = 0). ..."
  */
 
-#if defined(CONFIG_STM32F0L0G0_SYSTICK_CORECLK)
+#if defined(CONFIG_STM32_SYSTICK_CORECLK)
 #  define SYSTICK_CLOCK STM32_SYSCLK_FREQUENCY        /* Core clock */
-#elif defined(CONFIG_STM32F0L0G0_SYSTICK_CORECLK_DIV16)
+#elif defined(CONFIG_STM32_SYSTICK_CORECLK_DIV16)
 #  define SYSTICK_CLOCK (STM32_SYSCLK_FREQUENCY / 16) /* Core clock divided by 16 */
 #endif
 
@@ -137,7 +137,7 @@ void up_timer_initialize(void)
    * a divide-by-16 of the core clock (when CLKSOURCE = 0). ..."
    */
 
-#ifdef CONFIG_STM32F0L0G0_SYSTICK_CORECLK
+#ifdef CONFIG_STM32_SYSTICK_CORECLK
   putreg32((SYSTICK_CSR_CLKSOURCE |
             SYSTICK_CSR_TICKINT |
             SYSTICK_CSR_ENABLE),
