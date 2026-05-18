@@ -102,9 +102,9 @@ NOTES:
    output on USART3, as described above under "Serial Console".  The
    elevant configuration settings are listed below::
 
-         CONFIG_STM32L5_USART3=y
-         CONFIG_STM32L5_USART3_SERIALDRIVER=y
-         CONFIG_STM32L5_USART=y
+         CONFIG_STM32_USART3=y
+         CONFIG_STM32_USART3_SERIALDRIVER=y
+         CONFIG_STM32_USART=y
 
          CONFIG_USART3_SERIALDRIVER=y
          CONFIG_USART3_SERIAL_CONSOLE=y

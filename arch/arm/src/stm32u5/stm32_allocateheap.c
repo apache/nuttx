@@ -60,7 +60,7 @@
  * FSMC.  In order to use FSMC SRAM, the following additional things need to
  * be present in the NuttX configuration file:
  *
- * CONFIG_STM32U5_FSMC=y      : Enables the FSMC
+ * CONFIG_STM32_FSMC=y      : Enables the FSMC
  * CONFIG_STM32U5_FSMC_SRAM=y : Indicates that SRAM is available via the
  *                              FSMC (as opposed to an LCD or FLASH).
  * CONFIG_HEAP2_BASE          : The base address of the SRAM in the FSMC
@@ -71,7 +71,7 @@
  *                              include the additional regions.
  */
 
-#ifndef CONFIG_STM32U5_FSMC
+#ifndef CONFIG_STM32_FSMC
 #  undef CONFIG_STM32U5_FSMC_SRAM
 #endif
 
@@ -121,16 +121,16 @@
  * that we have been asked to add to the heap.
  */
 
-#if CONFIG_MM_REGIONS < defined(CONFIG_STM32U5_SRAM2_HEAP) + \
-                        defined(CONFIG_STM32U5_SRAM3_HEAP) + \
-                        defined(CONFIG_STM32U5_SRAM5_HEAP) + \
+#if CONFIG_MM_REGIONS < defined(CONFIG_STM32_SRAM2_HEAP) + \
+                        defined(CONFIG_STM32_SRAM3_HEAP) + \
+                        defined(CONFIG_STM32_SRAM5_HEAP) + \
                         defined(CONFIG_STM32U5_FSMC_SRAM_HEAP) + 1
 #  error "You need more memory manager regions to support selected heap components"
 #endif
 
-#if CONFIG_MM_REGIONS > defined(CONFIG_STM32U5_SRAM2_HEAP) + \
-                        defined(CONFIG_STM32U5_SRAM3_HEAP) + \
-                        defined(CONFIG_STM32U5_SRAM5_HEAP) + \
+#if CONFIG_MM_REGIONS > defined(CONFIG_STM32_SRAM2_HEAP) + \
+                        defined(CONFIG_STM32_SRAM3_HEAP) + \
+                        defined(CONFIG_STM32_SRAM5_HEAP) + \
                         defined(CONFIG_STM32U5_FSMC_SRAM_HEAP) + 1
 #  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
@@ -319,7 +319,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-#ifdef CONFIG_STM32U5_SRAM2_HEAP
+#ifdef CONFIG_STM32_SRAM2_HEAP
 
 #  if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
@@ -339,7 +339,7 @@ void arm_addregion(void)
 
 #endif /* SRAM2 */
 
-#ifdef CONFIG_STM32U5_SRAM3_HEAP
+#ifdef CONFIG_STM32_SRAM3_HEAP
 
 #  if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
@@ -359,7 +359,7 @@ void arm_addregion(void)
 
 #endif /* SRAM3 */
 
-#ifdef CONFIG_STM32U5_SRAM5_HEAP
+#ifdef CONFIG_STM32_SRAM5_HEAP
 
 #  if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
