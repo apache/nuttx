@@ -51,7 +51,7 @@
 #  define STM32_SRAM1_BASE        0x20000000  /* 0x20000000-0x2002ffff: 192k SRAM1 */
 #  define STM32_SRAM2_BASE        0x20030000  /* 0x20030000-0x2003ffff:  64k SRAM2 */
 
-#elif defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX)
+#elif defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX)
 
 #  define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
 #  define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */
@@ -60,7 +60,7 @@
 #  define STM32_SRAM3_BASE        0x20040000  /* 0x20040000-0x200bffff: 512k SRAM3 */
 
 #elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX) || \
-      defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+      defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
 
 #  define STM32_BOOT_BASE         0x00000000  /* 0x00000000-0x000fffff: Aliased boot memory */
 #  define STM32_FLASH_BASE        0x08000000  /* 0x08000000-0x081fffff: FLASH memory */

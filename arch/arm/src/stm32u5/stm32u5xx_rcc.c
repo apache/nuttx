@@ -60,7 +60,7 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 /* Determine if board wants to use HSI48 as 48 MHz oscillator. */
 
-#if defined(CONFIG_STM32U5_HAVE_HSI48) && defined(STM32_USE_CLK48)
+#if defined(CONFIG_STM32_HAVE_HSI48) && defined(STM32_USE_CLK48)
 #  if STM32_CLK48_SEL == RCC_CCIPR_CLK48SEL_HSI48
 #    define STM32_USE_HSI48
 #  endif
@@ -96,51 +96,51 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_GPDMA1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_CORDIC
+#ifdef CONFIG_STM32_CORDIC
   regval |= RCC_AHB1ENR_CORDIC;
 #endif
 
-#ifdef CONFIG_STM32U5_FMAC
+#ifdef CONFIG_STM32_FMAC
   regval |= RCC_AHB1ENR_FMACEN;
 #endif
 
-#ifdef CONFIG_STM32U5_MDF1
+#ifdef CONFIG_STM32_MDF1
   regval |= RCC_AHB1ENR_MDF1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_FLASH
+#ifdef CONFIG_STM32_FLASH
   regval |= RCC_AHB1ENR_FLASHEN;
 #endif
 
-#ifdef CONFIG_STM32U5_CRC
+#ifdef CONFIG_STM32_CRC
   regval |= RCC_AHB1ENR_CRCEN;
 #endif
 
-#ifdef CONFIG_STM32U5_TSC
+#ifdef CONFIG_STM32_TSC
   regval |= RCC_AHB1ENR_TSCEN;
 #endif
 
-#ifdef CONFIG_STM32U5_RAMCFG
+#ifdef CONFIG_STM32_RAMCFG
   regval |= RCC_AHB1ENR_RAMCFGEN;
 #endif
 
-#ifdef CONFIG_STM32U5_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   regval |= RCC_AHB1ENR_DMA2DEN;
 #endif
 
-#ifdef CONFIG_STM32U5_GTZC1
+#ifdef CONFIG_STM32_GTZC1
   regval |= RCC_AHB1ENR_GTZC1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_BKPSRAM
+#ifdef CONFIG_STM32_BKPSRAM
   regval |= RCC_AHB1ENR_BKPSRAMEN;
 #endif
 
-#ifdef CONFIG_STM32U5_DCACHE1
+#ifdef CONFIG_STM32_DCACHE1
   regval |= RCC_AHB1ENR_DCACHE1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM1
+#ifdef CONFIG_STM32_SRAM1
   regval |= RCC_AHB1ENR_SRAM1EN;
 #endif
 
@@ -194,51 +194,51 @@ static inline void rcc_enableahb2(void)
        );
 #endif
 
-#if defined(CONFIG_STM32U5_ADC1)
+#if defined(CONFIG_STM32_ADC1)
   regval |= RCC_AHB2ENR1_ADC1EN;
 #endif
 
-#if defined(CONFIG_STM32U5_DCMI_PSSI)
+#if defined(CONFIG_STM32_DCMI_PSSI)
   regval |= RCC_AHB2ENR1_DCMI_PSSIEN;
 #endif
 
-#ifdef CONFIG_STM32U5_OTGHS
+#ifdef CONFIG_STM32_OTGHS
   regval |= RCC_AHB2ENR1_OTGEN;
 #endif
 
-#ifdef CONFIG_STM32U5_OTGHS
+#ifdef CONFIG_STM32_OTGHS
   regval |= RCC_AHB2ENR1_OTGPHYEN;
 #endif
 
-#ifdef CONFIG_STM32U5_AES
+#ifdef CONFIG_STM32_AES
   regval |= RCC_AHB2ENR1_AESEN;
 #endif
 
-#ifdef CONFIG_STM32U5_HASH
+#ifdef CONFIG_STM32_HASH
   regval |= RCC_AHB2ENR1_HASHEN
 #endif
 
-#ifdef CONFIG_STM32U5_RNG
+#ifdef CONFIG_STM32_RNG
   regval |= RCC_AHB2ENR1_RNGEN;
 #endif
 
-#ifdef CONFIG_STM32U5_PKA
+#ifdef CONFIG_STM32_PKA
   regval |= RCC_AHB2ENR_PKAEN;
 #endif
 
-#ifdef CONFIG_STM32U5_SAES
+#ifdef CONFIG_STM32_SAES
   regval |= RCC_AHB2ENR1_SAES;
 #endif
 
-#ifdef CONFIG_STM32U5_OCTOSPIM
+#ifdef CONFIG_STM32_OCTOSPIM
   regval |= RCC_AHB2ENR1_OCTOSPIM;
 #endif
 
-#ifdef CONFIG_STM32U5_OTFDEC1
+#ifdef CONFIG_STM32_OTFDEC1
   regval |= RCC_AHB2ENR1_OTFDEC1;
 #endif
 
-#ifdef CONFIG_STM32U5_OTFDEC2
+#ifdef CONFIG_STM32_OTFDEC2
   regval |= RCC_AHB2ENR1_OTFDEC2;
 #endif
 
@@ -250,11 +250,11 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR1_SDMMC2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM2
+#ifdef CONFIG_STM32_SRAM2
   regval |= RCC_AHB2ENR1_SRAM2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM3
+#ifdef CONFIG_STM32_SRAM3
   regval |= RCC_AHB2ENR1_SRAM3EN;
 #endif
 
@@ -262,19 +262,19 @@ static inline void rcc_enableahb2(void)
 
   regval = getreg32(STM32_RCC_AHB2ENR2);
 
-#ifdef CONFIG_STM32U5_FSMC
+#ifdef CONFIG_STM32_FSMC
   regval |= RCC_AHB2ENR2_FSMCEN;
 #endif
 
-#ifdef CONFIG_STM32U5_OCTOSPI1
+#ifdef CONFIG_STM32_OCTOSPI1
   regval |= RCC_AHB2ENR2_OCTOSPI1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_OCTOSPI2
+#ifdef CONFIG_STM32_OCTOSPI2
   regval |= RCC_AHB2ENR2_OCTOSPI2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM5
+#ifdef CONFIG_STM32_SRAM5
   regval |= RCC_AHB2ENR2_SRAM5EN;
 #endif
 
@@ -299,31 +299,31 @@ static inline void rcc_enableahb3(void)
 
   regval = getreg32(STM32_RCC_AHB3ENR);
 
-#ifdef CONFIG_STM32U5_LPGPIO1
+#ifdef CONFIG_STM32_LPGPIO1
   regval |= RCC_AHB3ENR_LPGPIO1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_PWR
+#ifdef CONFIG_STM32_PWR
   regval |= RCC_AHB3ENR_PWREN;
 #endif
 
-#ifdef CONFIG_STM32U5_ADC4
+#ifdef CONFIG_STM32_ADC4
   regval |= RCC_AHB3ENR_ADC4EN;
 #endif
 
-#ifdef CONFIG_STM32U5_DAC1
+#ifdef CONFIG_STM32_DAC1
   regval |= RCC_AHB3ENR_DAC1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPDMA1
+#ifdef CONFIG_STM32_LPDMA1
   regval |= RCC_AHB3ENR_LPDMA1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_ADF1
+#ifdef CONFIG_STM32_ADF1
   regval |= RCC_AHB3ENR_ADF1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_GTZC2
+#ifdef CONFIG_STM32_GTZC2
   regval |= RCC_AHB3ENR_GTZC2EN;
 #endif
 
@@ -352,63 +352,63 @@ static inline void rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1ENR1);
 
-#ifdef CONFIG_STM32U5_TIM2
+#ifdef CONFIG_STM32_TIM2
   regval |= RCC_APB1ENR1_TIM2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM3
+#ifdef CONFIG_STM32_TIM3
   regval |= RCC_APB1ENR1_TIM3EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM4
+#ifdef CONFIG_STM32_TIM4
   regval |= RCC_APB1ENR1_TIM4EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM5
+#ifdef CONFIG_STM32_TIM5
   regval |= RCC_APB1ENR1_TIM5EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM6
+#ifdef CONFIG_STM32_TIM6
   regval |= RCC_APB1ENR1_TIM6EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM7
+#ifdef CONFIG_STM32_TIM7
   regval |= RCC_APB1ENR1_TIM7EN;
 #endif
 
-#ifdef CONFIG_STM32U5_WWDG
+#ifdef CONFIG_STM32_WWDG
   regval |= RCC_APB1ENR1_WWDGEN;
 #endif
 
-#ifdef CONFIG_STM32U5_SPI2
+#ifdef CONFIG_STM32_SPI2
   regval |= RCC_APB1ENR1_SPI2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_USART2
+#ifdef CONFIG_STM32_USART2
   regval |= RCC_APB1ENR1_USART2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_USART3
+#ifdef CONFIG_STM32_USART3
   regval |= RCC_APB1ENR1_USART3EN;
 #endif
 
-#ifdef CONFIG_STM32U5_UART4
+#ifdef CONFIG_STM32_UART4
   regval |= RCC_APB1ENR1_UART4EN;
 #endif
 
-#ifdef CONFIG_STM32U5_UART5
+#ifdef CONFIG_STM32_UART5
   regval |= RCC_APB1ENR1_UART5EN;
 #endif
 
-#ifdef CONFIG_STM32U5_I2C1
+#ifdef CONFIG_STM32_I2C1
   regval |= RCC_APB1ENR1_I2C1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_I2C2
+#ifdef CONFIG_STM32_I2C2
   regval |= RCC_APB1ENR1_I2C2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_CRS
+#ifdef CONFIG_STM32_CRS
   regval |= RCC_APB1ENR1_CRSEN;
 #endif
 
@@ -418,19 +418,19 @@ static inline void rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1ENR2);
 
-#ifdef CONFIG_STM32U5_I2C4
+#ifdef CONFIG_STM32_I2C4
   regval |= RCC_APB1ENR2_I2C4EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPTIM2
+#ifdef CONFIG_STM32_LPTIM2
   regval |= RCC_APB1ENR2_LPTIM2EN;
 #endif
 
-#ifdef CONFIG_STM32U5_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
   regval |= RCC_APB1ENR2_FDCAN1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_UCPD1
+#ifdef CONFIG_STM32_UCPD1
   regval |= RCC_APB1ENR2_UCPD1EN;
 #endif
 
@@ -455,39 +455,39 @@ static inline void rcc_enableapb2(void)
 
   regval = getreg32(STM32_RCC_APB2ENR);
 
-#ifdef CONFIG_STM32U5_TIM1
+#ifdef CONFIG_STM32_TIM1
   regval |= RCC_APB2ENR_TIM1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SPI1
+#ifdef CONFIG_STM32_SPI1
   regval |= RCC_APB2ENR_SPI1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM8
+#ifdef CONFIG_STM32_TIM8
   regval |= RCC_APB2ENR_TIM8EN;
 #endif
 
-#ifdef CONFIG_STM32U5_USART1
+#ifdef CONFIG_STM32_USART1
   regval |= RCC_APB2ENR_USART1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM15
+#ifdef CONFIG_STM32_TIM15
   regval |= RCC_APB2ENR_TIM15EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM16
+#ifdef CONFIG_STM32_TIM16
   regval |= RCC_APB2ENR_TIM16EN;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM17
+#ifdef CONFIG_STM32_TIM17
   regval |= RCC_APB2ENR_TIM17EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SAI1
+#ifdef CONFIG_STM32_SAI1
   regval |= RCC_APB2ENR_SAI1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_SAI2
+#ifdef CONFIG_STM32_SAI2
   regval |= RCC_APB2ENR_SAI2EN;
 #endif
 
@@ -512,15 +512,15 @@ static inline void rcc_enableapb3(void)
 
   regval = getreg32(STM32_RCC_APB3ENR);
 
-#ifdef CONFIG_STM32U5_SYSCFG
+#ifdef CONFIG_STM32_SYSCFG
   regval |= RCC_APB3ENR_SYSCFGEN;
 #endif
 
-#ifdef CONFIG_STM32U5_SPI3
+#ifdef CONFIG_STM32_SPI3
   regval |= RCC_APB3ENR_SPI3EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPUART1
+#ifdef CONFIG_STM32_LPUART1
   regval |= RCC_APB3ENR_LPUART1EN;
 #endif
 
@@ -528,31 +528,31 @@ static inline void rcc_enableapb3(void)
   regval |= RCC_APB3ENR_I2C3EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPTIM1
+#ifdef CONFIG_STM32_LPTIM1
   regval |= RCC_APB3ENR_LPTIM1EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPTIM3
+#ifdef CONFIG_STM32_LPTIM3
   regval |= RCC_APB3ENR_LPTIM3EN;
 #endif
 
-#ifdef CONFIG_STM32U5_LPTIM4
+#ifdef CONFIG_STM32_LPTIM4
   regval |= RCC_APB3ENR_LPTIM4EN;
 #endif
 
-#ifdef CONFIG_STM32U5_OPAMP
+#ifdef CONFIG_STM32_OPAMP
   regval |= RCC_APB3ENR_OPAMPEN;
 #endif
 
-#ifdef CONFIG_STM32U5_COMP
+#ifdef CONFIG_STM32_COMP
   regval |= RCC_APB3ENR_COMPEN;
 #endif
 
-#ifdef CONFIG_STM32U5_VREF
+#ifdef CONFIG_STM32_VREF
   regval |= RCC_APB3ENR_VREFEN;
 #endif
 
-#ifdef CONFIG_STM32U5_RTCAPB
+#ifdef CONFIG_STM32_RTCAPB
   regval |= RCC_APB3ENR_RTCAPBEN;
 #endif
 
@@ -604,7 +604,7 @@ void stm32_rcc_enableperipherals(void)
  *   power clocking modes!
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -742,9 +742,9 @@ void stm32_stdclockconfig(void)
       regval |= STM32_RCC_CFGR3_PPRE3;
       putreg32(regval, STM32_RCC_CFGR3);
 
-#ifdef CONFIG_STM32U5_RTC_HSECLOCK
+#ifdef CONFIG_STM32_RTC_HSECLOCK
 
-#  error stm32_stdclockconfig() currently doesn not support CONFIG_STM32U5_RTC_HSECLOCK
+#  error stm32_stdclockconfig() currently doesn not support CONFIG_STM32_RTC_HSECLOCK
 
 #endif
 
@@ -799,7 +799,7 @@ void stm32_stdclockconfig(void)
         {
         }
 
-#if defined(CONFIG_STM32U5_IWDG) || defined(CONFIG_STM32U5_RTC_LSICLOCK)
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
       stm32_rcc_enablelsi();
