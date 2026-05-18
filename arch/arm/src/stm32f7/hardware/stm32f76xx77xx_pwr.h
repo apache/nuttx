@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -143,5 +143,5 @@
 #define PWR_CSR2_EWUP5           (1 << 12) /* Bit 12: Enable wakeup pin for PI8 */
 #define PWR_CSR2_EWUP6           (1 << 13) /* Bit 13: Enable wakeup pin for PI11 */
 
-#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F76XX || CONFIG_STM32_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F76XX77XX_PWR_H */

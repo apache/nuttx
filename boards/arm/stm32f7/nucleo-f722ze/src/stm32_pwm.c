@@ -73,7 +73,7 @@ int stm32_pwm_setup(void)
     {
       /* Call stm32_pwminitialize() to get an instance of the PWM interface */
 
-#if defined(CONFIG_STM32F7_TIM1_PWM)
+#if defined(CONFIG_STM32_TIM1_PWM)
       pwm = stm32_pwminitialize(1);
       if (!pwm)
         {
@@ -89,7 +89,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32F7_TIM2_PWM)
+#if defined(CONFIG_STM32_TIM2_PWM)
       pwm = stm32_pwminitialize(2);
       if (!pwm)
         {
@@ -105,7 +105,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32F7_TIM3_PWM)
+#if defined(CONFIG_STM32_TIM3_PWM)
       pwm = stm32_pwminitialize(3);
       if (!pwm)
         {
@@ -121,7 +121,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32F7_TIM4_PWM)
+#if defined(CONFIG_STM32_TIM4_PWM)
       pwm = stm32_pwminitialize(4);
       if (!pwm)
         {

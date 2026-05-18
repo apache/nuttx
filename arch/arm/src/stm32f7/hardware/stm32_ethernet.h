@@ -33,8 +33,8 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
-    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) || \
+    defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -810,7 +810,7 @@ struct eth_txdesc_s
 
   /* Enhanced DMA descriptor words with time stamp */
 
-#ifdef CONFIG_STM32F7_ETH_ENHANCEDDESC
+#ifdef CONFIG_STM32_ETH_ENHANCEDDESC
   volatile uint32_t tdes4;   /* Reserved */
   volatile uint32_t tdes5;   /* Reserved */
   volatile uint32_t tdes6;   /* Time Stamp Low value for transmit and receive */
@@ -829,7 +829,7 @@ struct eth_rxdesc_s
 
   /* Enhanced DMA descriptor words with time stamp and PTP support */
 
-#ifdef CONFIG_STM32F7_ETH_ENHANCEDDESC
+#ifdef CONFIG_STM32_ETH_ENHANCEDDESC
   volatile uint32_t rdes4;   /* Extended status for PTP receive descriptor */
   volatile uint32_t rdes5;   /* Reserved */
   volatile uint32_t rdes6;   /* Time Stamp Low value for transmit and receive */
@@ -842,5 +842,5 @@ struct eth_rxdesc_s
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX || CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX || CONFIG_STM32_STM32F76XX || CONFIG_STM32_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_ETHERNET_H */

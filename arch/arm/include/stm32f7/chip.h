@@ -264,7 +264,7 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX)
 #    define STM32_SRAM1_SIZE            (176*1024)  /* 176Kb SRAM1 on AHB bus Matrix */
 #    define STM32_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)
@@ -277,7 +277,7 @@
 #  else
 #      define STM32_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
 #  endif
-#elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#elif defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX)
 #    define STM32_SRAM1_SIZE            (240*1024)  /* 240Kb SRAM1 on AHB bus Matrix */
 #    define STM32_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)
@@ -290,7 +290,7 @@
 #  else
 #      define STM32_ITCM_SRAM_SIZE      (0)         /* No ITCM SRAM on TCM interface */
 #  endif
-#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#elif defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 #    define STM32_SRAM1_SIZE            (368*1024)  /* 368Kb SRAM1 on AHB bus Matrix */
 #    define STM32_SRAM2_SIZE            (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
 #  if defined(CONFIG_ARMV7M_HAVE_DTCM)
@@ -309,7 +309,7 @@
 
 /* Common to all Advanced (vs Foundation) Family members */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX)
 #      define STM32_NSPDIFRX                 0   /* Not supported */
 #      define STM32_NGPIO                    9   /* 9 GPIO ports, GPIOA-I */
 #      define STM32_NI2C                     3   /* I2C1-3 */
@@ -350,75 +350,75 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32F7_HAVE_FMC)
+#if defined(CONFIG_STM32_HAVE_FMC)
 #  define STM32_NFMC                     1   /* Have FMC memory controller */
 #else
 #  define STM32_NFMC                     0   /* No FMC memory controller */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_ETHRNET)
+#if defined(CONFIG_STM32_HAVE_ETHRNET)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_RNG)
+#if defined(CONFIG_STM32_HAVE_RNG)
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #else
 #  define STM32_NRNG                     0   /* No Random number generator (RNG) */
 #endif
 
-#if defined(CONFIG_STM32F7_HAVE_SPI5) && defined(CONFIG_STM32F7_HAVE_SPI6)
+#if defined(CONFIG_STM32_HAVE_SPI5) && defined(CONFIG_STM32_HAVE_SPI6)
 #  define STM32_NSPI                     6   /* SPI1-6 (Advanced Family Except V series) */
-#elif defined(CONFIG_STM32F7_HAVE_SPI5)
+#elif defined(CONFIG_STM32_HAVE_SPI5)
 #  define STM32_NSPI                     5   /* SPI1-5 (Foundation Family Except V & R series) */
-#elif defined(CONFIG_STM32F7_HAVE_SPI4)
+#elif defined(CONFIG_STM32_HAVE_SPI4)
 #  define STM32_NSPI                     4   /* SPI1-4 V series */
 #else
 #  define STM32_NSPI                     3   /* SPI1-3 R series */
 #endif
 
-#if defined(CONFIG_STM32F7_HAVE_SDMMC2)
+#if defined(CONFIG_STM32_HAVE_SDMMC2)
 #  define STM32_NSDMMC                   2   /* 2 SDMMC interfaces */
 #else
 #  define STM32_NSDMMC                   1   /* 1 SDMMC interface */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_CAN3)
+#if defined(CONFIG_STM32_HAVE_CAN3)
 #  define STM32_NCAN                     3   /* CAN1-3 */
-#elif defined(CONFIG_STM32F7_HAVE_CAN2)
+#elif defined(CONFIG_STM32_HAVE_CAN2)
 #  define STM32_NCAN                     2   /* CAN1-2 */
 #else
 #  define STM32_NCAN                     1   /* CAN1 only */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_DCMI)
+#if defined(CONFIG_STM32_HAVE_DCMI)
 #  define STM32_NDCMI                    1   /* Digital camera interface (DCMI) */
 #else
 #  define STM32_NDCMI                    0   /* No Digital camera interface (DCMI) */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_DSIHOST)
+#if defined(CONFIG_STM32_HAVE_DSIHOST)
 #  define STM32_NDSIHOST                 1   /* Have MIPI DSI Host */
 #else
 #  define STM32_NDSIHOST                 0   /* No MIPI DSI Host */
 #endif
-#if defined (CONFIG_STM32F7_HAVE_LTDC)
+#if defined (CONFIG_STM32_HAVE_LTDC)
 #  define STM32_NLCDTFT                  1   /* One LCD-TFT */
 #else
 #  define STM32_NLCDTFT                  0   /* No LCD-TFT */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_DMA2D)         /* bf20171107 Swapped defines they were reversed. */
+#if defined(CONFIG_STM32_HAVE_DMA2D)         /* bf20171107 Swapped defines they were reversed. */
 #  define STM32_NDMA2D                   1   /* DChrom-ART Accelerator™ (DMA2D) */
 #else
 #  define STM32_NDMA2D                   0   /* No DChrom-ART Accelerator™ (DMA2D) */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_JPEG)
+#if defined(CONFIG_STM32_HAVE_JPEG)
 #define STM32_NJPEG                      1   /* One JPEG Converter */
 #else
 #define STM32_NJPEG                      0   /* No JPEG Converter */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_CRYP)
+#if defined(CONFIG_STM32_HAVE_CRYP)
 #define STM32_NCRYP                      1   /* One CRYP engine */
 #else
 #define STM32_NCRYP                      0   /* No  CRYP engine */
 #endif
-#if defined(CONFIG_STM32F7_HAVE_HASH)
+#if defined(CONFIG_STM32_HAVE_HASH)
 #define STM32_NHASH                      1   /* One HASH engine */
 #else
 #define STM32_NHASH                      0   /* No HASH engine */

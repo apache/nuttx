@@ -44,9 +44,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Private Data
@@ -144,5 +144,5 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */
 #endif /* CONFIG_DEBUG_GPIO_INFO */

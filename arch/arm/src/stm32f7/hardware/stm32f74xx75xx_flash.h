@@ -29,7 +29,7 @@
 
 /* Flash size is known from the chip selection:
  *
- *   When CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT is set the
+ *   When CONFIG_STM32_FLASH_OVERRIDE_DEFAULT is set the
  *   CONFIG_STM32F7_FLASH_CONFIG_x selects the default FLASH size based on
  *   the chip part number.
  *   This value can be overridden with CONFIG_STM32F7_FLASH_OVERRIDE_x
@@ -42,39 +42,39 @@
 
 #define _K(x) ((x)*1024)
 
-#if !defined(CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32F7_FLASH_OVERRIDE_E) && \
-    !defined(CONFIG_STM32F7_FLASH_OVERRIDE_G) && \
-    !defined(CONFIG_STM32F7_FLASH_CONFIG_E) && \
-    !defined(CONFIG_STM32F7_FLASH_CONFIG_G)
-#  define CONFIG_STM32F7_FLASH_OVERRIDE_E
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_G)
+#  define CONFIG_STM32_FLASH_OVERRIDE_E
 #  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
-#if !defined(CONFIG_STM32F7_FLASH_OVERRIDE_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
 
-#  undef CONFIG_STM32F7_FLASH_CONFIG_E
-#  undef CONFIG_STM32F7_FLASH_CONFIG_G
+#  undef CONFIG_STM32_FLASH_CONFIG_E
+#  undef CONFIG_STM32_FLASH_CONFIG_G
 
-#  if defined(CONFIG_STM32F7_FLASH_OVERRIDE_E)
+#  if defined(CONFIG_STM32_FLASH_OVERRIDE_E)
 
-#    define CONFIG_STM32F7_FLASH_CONFIG_E
+#    define CONFIG_STM32_FLASH_CONFIG_E
 
-#  elif defined(CONFIG_STM32F7_FLASH_OVERRIDE_G)
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_G)
 
-#    define CONFIG_STM32F7_FLASH_CONFIG_G
+#    define CONFIG_STM32_FLASH_CONFIG_G
 
 #  endif
 #endif
 
-#if defined(CONFIG_STM32F7_FLASH_CONFIG_E)
+#if defined(CONFIG_STM32_FLASH_CONFIG_E)
 
 #  define STM32_FLASH_NPAGES      6
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (1 * 256))
 #  define STM32_FLASH_SIZES       {_K(32), _K(32), _K(32), _K(32),  \
                                    _K(128), _K(256)}
 
-#elif defined(CONFIG_STM32F7_FLASH_CONFIG_G)
+#elif defined(CONFIG_STM32_FLASH_CONFIG_G)
 
 #  define STM32_FLASH_NPAGES      8
 #  define STM32_FLASH_SIZE        _K((4 * 32) + (1 * 128) + (3 * 256))

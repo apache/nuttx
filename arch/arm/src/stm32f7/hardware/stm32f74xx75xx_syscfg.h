@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -143,5 +143,5 @@
 #define SYSCFG_CMPCR_CMPPD            (1 << 0)  /* Bit 0: Compensation cell power-down */
 #define SYSCFG_CMPCR_READY            (1 << 8)  /* Bit 8: Compensation cell ready flag */
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX75XX_SYSCFG_H */
