@@ -51,7 +51,7 @@
  * the DMA requests for each channel.
  */
 
-#ifdef CONFIG_STM32F0L0G0_HAVE_DMAMUX
+#ifdef CONFIG_STM32_HAVE_DMAMUX
 #  error DMAMUX not supported here. Look at stm32_dma_v1mux.c
 #endif
 
@@ -628,7 +628,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size;

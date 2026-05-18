@@ -72,7 +72,7 @@
 #  define FDCAN_MSGRAM_WORDS         (212)
 #  define STM32_CANRAM1_BASE         (STM32_CANRAM_BASE + 0x0000)
 
-#  ifdef CONFIG_STM32F0L0G0_FDCAN1
+#  ifdef CONFIG_STM32_FDCAN1
 #    define FDCAN1_STDFILTER_SIZE    (28)
 #    define FDCAN1_EXTFILTER_SIZE    (8)
 #    define FDCAN1_RXFIFO0_SIZE      (3)
@@ -93,16 +93,16 @@
 
 /* FDCAN1 Configuration *****************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 
 /* Bit timing */
 
-#  define FDCAN1_NTSEG1  (CONFIG_STM32F0L0G0_FDCAN1_NTSEG1 - 1)
-#  define FDCAN1_NTSEG2  (CONFIG_STM32F0L0G0_FDCAN1_NTSEG2 - 1)
+#  define FDCAN1_NTSEG1  (CONFIG_STM32_FDCAN1_NTSEG1 - 1)
+#  define FDCAN1_NTSEG2  (CONFIG_STM32_FDCAN1_NTSEG2 - 1)
 #  define FDCAN1_NBRP    ((STM32_FDCANCLK_FREQUENCY /             \
                            ((FDCAN1_NTSEG1 + FDCAN1_NTSEG2 + 3) * \
-                            CONFIG_STM32F0L0G0_FDCAN1_BITRATE)) - 1)
-#  define FDCAN1_NSJW    (CONFIG_STM32F0L0G0_FDCAN1_NSJW - 1)
+                            CONFIG_STM32_FDCAN1_BITRATE)) - 1)
+#  define FDCAN1_NSJW    (CONFIG_STM32_FDCAN1_NSJW - 1)
 
 #  if FDCAN1_NTSEG1 > FDCAN_NBTP_NTSEG1_MAX
 #    error Invalid FDCAN1 NTSEG1
@@ -117,19 +117,19 @@
 #    error Invalid FDCAN1 NBRP
 #  endif
 
-#  ifdef CONFIG_STM32F0L0G0_FDCAN1_FD_BRS
-#    define FDCAN1_DTSEG1 (CONFIG_STM32F0L0G0_FDCAN1_DTSEG1 - 1)
-#    define FDCAN1_DTSEG2 (CONFIG_STM32F0L0G0_FDCAN1_DTSEG2 - 1)
+#  ifdef CONFIG_STM32_FDCAN1_FD_BRS
+#    define FDCAN1_DTSEG1 (CONFIG_STM32_FDCAN1_DTSEG1 - 1)
+#    define FDCAN1_DTSEG2 (CONFIG_STM32_FDCAN1_DTSEG2 - 1)
 #    define FDCAN1_DBRP   ((STM32_FDCANCLK_FREQUENCY /             \
                             ((FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
-                             CONFIG_STM32F0L0G0_FDCAN1_DBITRATE)) - 1)
-#    define FDCAN1_DSJW   (CONFIG_STM32F0L0G0_FDCAN1_DSJW - 1)
+                             CONFIG_STM32_FDCAN1_DBITRATE)) - 1)
+#    define FDCAN1_DSJW   (CONFIG_STM32_FDCAN1_DSJW - 1)
 #  else
 #    define FDCAN1_DTSEG1 1
 #    define FDCAN1_DTSEG2 1
 #    define FDCAN1_DBRP   1
 #    define FDCAN1_DSJW   1
-#  endif /* CONFIG_STM32F0L0G0_FDCAN1_FD_BRS */
+#  endif /* CONFIG_STM32_FDCAN1_FD_BRS */
 
 #  if FDCAN1_DTSEG1 > FDCAN_DBTP_DTSEG1_MAX
 #    error Invalid FDCAN1 DTSEG1
@@ -156,12 +156,12 @@
 #  define FDCAN1_TXFIFOQ_INDEX     (FDCAN1_TXEVENTFIFO_INDEX + FDCAN1_TXEVENTFIFO_WORDS)
 #  define FDCAN1_MSGRAM_WORDS      (FDCAN1_TXFIFOQ_INDEX + FDCAN1_TXFIFIOQ_WORDS)
 
-#endif /* CONFIG_STM32F0L0G0_FDCAN1 */
+#endif /* CONFIG_STM32_FDCAN1 */
 
 /* Loopback mode */
 
 #undef STM32_FDCAN_LOOPBACK
-#if defined(CONFIG_STM32F0L0G0_FDCAN1_LOOPBACK)
+#if defined(CONFIG_STM32_FDCAN1_LOOPBACK)
 #  define STM32_FDCAN_LOOPBACK 1
 #endif
 
@@ -243,7 +243,7 @@
 /* Debug configurations that may be enabled just for testing FDCAN */
 
 #ifndef CONFIG_DEBUG_CAN_INFO
-#  undef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#  undef CONFIG_STM32_FDCAN_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -348,7 +348,7 @@ struct stm32_fdcan_s
 #endif
   uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
   uint32_t regval;          /* Last value read from the register */
   unsigned int count;       /* Number of times that the value was read */
@@ -364,7 +364,7 @@ struct stm32_fdcan_s
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset);
 static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval);
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
                            const char *msg);
 static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
@@ -441,7 +441,7 @@ static const struct can_ops_s g_fdcanops =
   .co_txempty       = fdcan_txempty,
 };
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 /* Message RAM allocation */
 
 /* Constant configuration */
@@ -451,7 +451,7 @@ static const struct stm32_config_s g_fdcan1const =
   .rxpinset         = GPIO_FDCAN1_RX,
   .txpinset         = GPIO_FDCAN1_TX,
   .base             = STM32_FDCAN1_BASE,
-  .baud             = CONFIG_STM32F0L0G0_FDCAN1_BITRATE,
+  .baud             = CONFIG_STM32_FDCAN1_BITRATE,
   .nbtp             = FDCAN_NBTP_NBRP(FDCAN1_NBRP) |
                       FDCAN_NBTP_NTSEG1(FDCAN1_NTSEG1) |
                       FDCAN_NBTP_NTSEG2(FDCAN1_NTSEG2) |
@@ -463,14 +463,14 @@ static const struct stm32_config_s g_fdcan1const =
   .port             = 1,
   .irq0             = STM32_IRQ_FDCAN1_0,
   .irq1             = STM32_IRQ_FDCAN1_1,
-#if defined(CONFIG_STM32F0L0G0_FDCAN1_CLASSIC)
+#if defined(CONFIG_STM32_FDCAN1_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
-#elif defined(CONFIG_STM32F0L0G0_FDCAN1_FD)
+#elif defined(CONFIG_STM32_FDCAN1_FD)
   .mode             = FDCAN_FD_MODE,
 #else
   .mode             = FDCAN_FD_BRS_MODE,
 #endif
-#if defined(CONFIG_STM32F0L0G0_FDCAN1_NONISO_FORMAT)
+#if defined(CONFIG_STM32_FDCAN1_NONISO_FORMAT)
   .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
 #else
   .format           = FDCAN_ISO11898_1_FORMAT,
@@ -486,7 +486,7 @@ static const struct stm32_config_s g_fdcan1const =
   .txeventesize     = (FDCAN1_TXEVENTFIFO_WORDS / FDCAN1_TXEVENTFIFO_SIZE),
   .txbufferesize    = (FDCAN1_TXFIFIOQ_WORDS / FDCAN1_TXFIFIOQ_SIZE),
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN1_LOOPBACK
+#ifdef CONFIG_STM32_FDCAN1_LOOPBACK
   .loopback         = true,
 #endif
 
@@ -508,7 +508,7 @@ static const struct stm32_config_s g_fdcan1const =
 static struct stm32_fdcan_s g_fdcan1priv;
 static struct can_dev_s g_fdcan1dev;
 
-#endif /* CONFIG_STM32F0L0G0_FDCAN1 */
+#endif /* CONFIG_STM32_FDCAN1 */
 
 /****************************************************************************
  * Private Functions
@@ -528,7 +528,7 @@ static struct can_dev_s g_fdcan1dev;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
   const struct stm32_config_s *config  = priv->config;
@@ -608,7 +608,7 @@ static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
@@ -648,7 +648,7 @@ static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
                            const char *msg)
 {
@@ -694,7 +694,7 @@ static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
                              const char *msg)
 {
@@ -737,7 +737,7 @@ static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
                              const char *msg)
 {
@@ -786,7 +786,7 @@ static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpramlayout(struct stm32_fdcan_s *priv)
 {
   const struct stm32_config_s *config = priv->config;
@@ -3096,7 +3096,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   /* Enable FIFO/Queue mode */
 
   regval  = fdcan_getreg(priv, STM32_FDCAN_TXBC_OFFSET);
-#ifdef CONFIG_STM32F0L0G0_FDCAN_QUEUE_MODE
+#ifdef CONFIG_STM32_FDCAN_QUEUE_MODE
   regval |= FDCAN_TXBC_TFQM;
 #else
   regval &= ~FDCAN_TXBC_TFQM;
@@ -3185,7 +3185,7 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
 
   /* Select FDCAN peripheral to be initialized */
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
   if (port == FDCAN1)
     {
       /* Select the FDCAN1 device structure */

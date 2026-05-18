@@ -101,10 +101,10 @@ static void stm32_i2c_register(int bus)
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2ctool(void)
 {
-#ifdef CONFIG_STM32F0L0G0_I2C1
+#ifdef CONFIG_STM32_I2C1
   stm32_i2c_register(1);
 #endif
-#ifdef CONFIG_STM32F0L0G0_I2C2
+#ifdef CONFIG_STM32_I2C2
   stm32_i2c_register(2);
 #endif
 }
@@ -177,7 +177,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_TIMER
   /* Initialize basic timers */
 
-#if defined(CONFIG_STM32F0L0G0_TIM6)
+#if defined(CONFIG_STM32_TIM6)
   syslog(LOG_ERR, "Init timer\n");
   ret = stm32_timer_driver_setup("/dev/timer0", 6);
   if (ret < 0)
@@ -187,7 +187,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_STM32F0L0G0_TIM7)
+#if defined(CONFIG_STM32_TIM7)
   ret = stm32_timer_driver_setup("/dev/timer1", 7);
   if (ret < 0)
     {

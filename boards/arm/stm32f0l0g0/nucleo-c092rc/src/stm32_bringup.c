@@ -39,7 +39,7 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
 #  include <stm32_wdg.h>
 #endif
 
@@ -85,7 +85,7 @@ int stm32_bringup(void)
 #endif
   int ret;
 
-#ifdef CONFIG_STM32F0L0G0_IWDG
+#ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
@@ -150,7 +150,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 
   ret = stm32_can_setup();
@@ -160,7 +160,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_FDCAN_SOCKET
+#ifdef CONFIG_STM32_FDCAN_SOCKET
   /* Initialize CAN socket interface */
 
   ret = stm32_cansock_setup();

@@ -36,7 +36,7 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_ADC) && defined(CONFIG_STM32F0L0G0_ADC1)
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_ADC1)
 
 /****************************************************************************
  * Pre-processor Definitions

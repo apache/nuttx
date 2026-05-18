@@ -49,7 +49,7 @@
 
 /* Support for ADC clock prescaler */
 
-#if defined(CONFIG_STM32F0L0G0_STM32L0) || defined(CONFIG_STM32F0L0G0_STM32G0)
+#if defined(CONFIG_STM32_STM32L0) || defined(CONFIG_STM32_STM32G0)
 #  define HAVE_ADC_PRE
 #else
 #  undef HAVE_ADC_PRE
@@ -57,7 +57,7 @@
 
 /* Support for LCD voltage */
 
-#ifdef CONFIG_STM32F0L0G0_HAVE_LCD
+#ifdef CONFIG_STM32_HAVE_LCD
 #  define  HAVE_ADC_VLCD
 #else
 #  undef  HAVE_ADC_VLCD
@@ -65,7 +65,7 @@
 
 /* Support for Low frequency mode */
 
-#ifdef CONFIG_STM32F0L0G0_ENERGYLITE
+#ifdef CONFIG_STM32_ENERGYLITE
 #  define  HAVE_ADC_LFM
 #else
 #  undef  HAVE_ADC_LFM

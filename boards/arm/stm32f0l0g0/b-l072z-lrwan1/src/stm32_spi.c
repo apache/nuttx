@@ -41,7 +41,7 @@
 #include "b-l072z-lrwan1.h"
 #include <arch/board/board.h>
 
-#ifdef CONFIG_STM32F0L0G0_SPI
+#ifdef CONFIG_STM32_SPI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,7 +79,7 @@ void stm32_spidev_initialize(void)
    *       architecture.
    */
 
-#ifdef CONFIG_STM32F0L0G0_SPI1
+#ifdef CONFIG_STM32_SPI1
 #  ifdef CONFIG_LPWAN_SX127X
   /* Configure the SPI-based SX127X chip select GPIO */
 
@@ -117,7 +117,7 @@ void stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
@@ -168,9 +168,9 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 
   return status;
 }
-#endif /* CONFIG_STM32F0L0G0_SPI1 */
+#endif /* CONFIG_STM32_SPI1 */
 
-#ifdef CONFIG_STM32F0L0G0_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
@@ -182,6 +182,6 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
-#endif /* CONFIG_STM32F0L0G0_SPI2 */
+#endif /* CONFIG_STM32_SPI2 */
 
-#endif /* CONFIG_STM32F0L0G0_SPI */
+#endif /* CONFIG_STM32_SPI */

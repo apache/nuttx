@@ -37,7 +37,7 @@
 #include "arm_internal.h"
 #include "stm32_pwr.h"
 
-#if defined(CONFIG_STM32F0L0G0_PWR)
+#if defined(CONFIG_STM32_PWR)
 
 /****************************************************************************
  * Private Data
@@ -299,7 +299,7 @@ bool stm32_pwr_getwuf(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_ENERGYLITE
+#ifdef CONFIG_STM32_ENERGYLITE
 void stm32_pwr_setvos(uint16_t vos)
 {
   uint16_t regval;
@@ -391,6 +391,6 @@ void stm32_pwr_disablepvd(void)
   stm32_pwr_modifyreg32(STM32_PWR_CR_OFFSET, PWR_CR_PVDE, 0);
 }
 
-#endif /* CONFIG_STM32F0L0G0_ENERGYLITE */
+#endif /* CONFIG_STM32_ENERGYLITE */
 
-#endif /* CONFIG_STM32F0L0G0_PWR */
+#endif /* CONFIG_STM32_PWR */

@@ -27,9 +27,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_USART_V1)
+#if defined(CONFIG_STM32_HAVE_IP_USART_V1)
 #  include "stm32_lowputc_v1.c"
-#elif defined(CONFIG_STM32F0L0G0_HAVE_IP_USART_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_USART_V2)
 #  include "stm32_lowputc_v2.c"
 #else
 #  error "Unsupported STM32 M0 serial"
