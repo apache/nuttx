@@ -131,10 +131,10 @@
 
 #define STM32_PWR_CR3_BYPASS                (1 << 0)  /* Bit 0: Power management unit bypass */
 #define STM32_PWR_CR3_LDOEN                 (1 << 1)  /* Bit 1: Low drop-out regulator enable */
-#ifndef CONFIG_STM32H7_HAVE_SMPS
+#ifndef CONFIG_STM32_HAVE_SMPS
 #  define STM32_PWR_CR3_SCUEN               (1 << 2)  /* Bit 2: Supply configuration update enable */
 #endif
-#ifdef CONFIG_STM32H7_HAVE_SMPS
+#ifdef CONFIG_STM32_HAVE_SMPS
 #  define STM32_PWR_CR3_SDEN                (1 << 2)  /* Bit 2: SMPS step-down converter enable */
 #  define STM32_PWR_CR3_SMPSEXTHP           (1 << 3)  /* Bit 3: SMPS step-down converter external power delivery selection */
 #  define STM32_PWR_CR3_SMPSLEVEL_SHIFT     (4)       /* BitS 4-5: SMPS step-down converter voltage output level selection */

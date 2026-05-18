@@ -28,10 +28,10 @@
  * Pre-requisites
  *
  *  CONFIG_USBHOST        - Enable general USB host support
- *  CONFIG_STM32H7_OTGFS  - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
  *     or
- *  CONFIG_STM32H7_OTGHS  - Enable the STM32 USB OTG HS block
- *  CONFIG_STM32H7_SYSCFG - Needed
+ *  CONFIG_STM32_OTGHS  - Enable the STM32 USB OTG HS block
+ *  CONFIG_STM32_SYSCFG - Needed
  *
  * Options:
  *
@@ -44,7 +44,7 @@
  *  CONFIG_STM32H7_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *
- *  CONFIG_STM32H7_USBHOST_REGDEBUG - Enable very low-level register access
+ *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
  *    debug.  Depends on CONFIG_DEBUG_FEATURES.
  */
 
@@ -58,7 +58,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#if (defined(CONFIG_STM32H7_OTGFS) || defined(CONFIG_STM32H7_OTGHS)) && \
+#if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGHS)) && \
     defined(CONFIG_USBHOST)
 
 #ifdef HAVE_USBHOST_TRACE
@@ -190,5 +190,5 @@ void stm32_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* (CONFIG_STM32H7_OTGFS || CONFIG_STM32H7_OTGHS) && CONFIG_USBHOST */
+#endif /* (CONFIG_STM32_OTGFS || CONFIG_STM32_OTGHS) && CONFIG_USBHOST */
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_USBHOST_H */

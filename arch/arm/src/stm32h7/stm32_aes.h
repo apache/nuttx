@@ -37,7 +37,7 @@
  * variants include CRYP
  */
 
-#ifdef CONFIG_STM32H7_HAVE_CRYP
+#ifdef CONFIG_STM32_HAVE_CRYP
 #  include "hardware/stm32h7xxxx_cryp.h"
 #else
 #  error "Unknown chip for AES"

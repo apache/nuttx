@@ -51,7 +51,7 @@ extern "C"
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-    defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+    defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /****************************************************************************
  * Name: stm32_start_cm4

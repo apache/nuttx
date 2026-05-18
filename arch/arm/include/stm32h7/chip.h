@@ -91,10 +91,10 @@
 
 /* Size SRAM */
 
-#if defined(CONFIG_STM32H7_STM32H7X0XX) || defined(CONFIG_STM32H7_STM32H7X3XX) || defined(CONFIG_STM32H7_STM32H7X5XX)
+#if defined(CONFIG_STM32_STM32H7X0XX) || defined(CONFIG_STM32_STM32H7X3XX) || defined(CONFIG_STM32_STM32H7X5XX)
 /* Memory */
 
-#  ifdef CONFIG_STM32H7_STM32H72XXX_OR_STM32H73XXX
+#  ifdef CONFIG_STM32_STM32H72XXX_OR_STM32H73XXX
 #    define STM32_SRAM_SIZE             (320*1024)  /* 320Kb SRAM on AXI bus Matrix (D1) */
 #    define STM32_SRAM1_SIZE            (16*1024)   /*  16Kb SRAM1 on AHB bus Matrix (D2) */
 #    define STM32_SRAM2_SIZE            (16*1024)   /*  16Kb SRAM2 on AHB bus Matrix (D2) */
@@ -152,7 +152,7 @@
 #  define STM32_NSAI                    (4)         /* (4) SAI1-4*/
 #  define STM32_NCAN                    (2)         /* (2) CAN1-2 */
 #  define STM32_NSDIO                   (2)         /* (2) SDIO */
-#elif defined(CONFIG_STM32H7_STM32H7B3XX)
+#elif defined(CONFIG_STM32_STM32H7B3XX)
 /* Memory */
 
 #    define STM32_SRAM_SIZE             (1024*1024) /* 1024Kb SRAM on AXI bus Matrix (D1) */
@@ -206,7 +206,7 @@
 #  define STM32_NSAI                    (4)         /* (4) SAI1-4*/
 #  define STM32_NCAN                    (2)         /* (2) CAN1-2 */
 #  define STM32_NSDIO                   (2)         /* (2) SDIO */
-#elif defined(CONFIG_STM32H7_STM32H7X7XX)
+#elif defined(CONFIG_STM32_STM32H7X7XX)
 /* Memory */
 
 #    define STM32_SRAM_SIZE             (512*1024)  /* 512Kb SRAM on AXI bus Matrix (D1) */
@@ -259,13 +259,13 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32H7_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHERNET)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */
 #endif
 
-#if defined(CONFIG_STM32H7_HAVE_FMC)
+#if defined(CONFIG_STM32_HAVE_FMC)
 #  define STM32_NFMC                     1   /* Have FMC memory controller */
 #else
 #  define STM32_NFMC                     0   /* No FMC memory controller */

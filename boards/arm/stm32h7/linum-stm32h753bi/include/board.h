@@ -488,7 +488,7 @@
  * linum board routes only DQ[15:0] bits.
  */
 
-#if CONFIG_STM32H7_FMC
+#if CONFIG_STM32_FMC
 #  define FMC_SDCLK_FREQUENCY  (STM32_HCLK_FREQUENCY / 2)
 #  if FMC_SDCLK_FREQUENCY > 120000000
 #    error "FMC SDRAM settings need to be adjusted for a higher FMC_SDCLK frequency"
@@ -502,7 +502,7 @@
  * this value will need to be doubled.
  */
 
-#ifdef CONFIG_STM32H7_LTDC
+#ifdef CONFIG_STM32_LTDC
 #  define BOARD_SDRAM1_SIZE        (6*1024*1024)
 #else
 #  define BOARD_SDRAM1_SIZE        (8*1024*1024)

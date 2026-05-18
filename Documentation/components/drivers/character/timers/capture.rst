@@ -109,7 +109,7 @@ To enable the capture driver, enable the following configuration options:
 * ``CONFIG_CAPTURE`` - Enable the capture driver framework
 * ``CONFIG_CAPTURE_NOTIFY`` - Enable signal notification support for edge events
 * ``CONFIG_FAKE_CAPTURE`` - Enable fake capture driver for testing (generates 10Hz signal with 50% duty cycle)
-* ``CONFIG_STM32H7_TIM4_CAP`` (for STM32H7 Timer 4, platform-specific)
+* ``CONFIG_STM32_TIM4_CAP`` (for STM32H7 Timer 4, platform-specific)
 
 The ``CONFIG_CAPTURE`` option enables the lower-half driver and registers
 the ``/dev/capture`` device.

@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-    !defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+    !defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /* Configuration for M7 core when M4 core support disabled */
 
@@ -84,7 +84,7 @@
  * - Tightly Coupled Memory (TCM RAM), we can use Data TCM (DTCM) for system
  *      heap. Note that DTCM has a number of limitations, for example DMA
  *      transfers to/from DTCM are limited.
- *      Define CONFIG_STM32H7_DTCMEXCLUDE to exclude the DTCM from heap.
+ *      Define CONFIG_STM32_DTCMEXCLUDE to exclude the DTCM from heap.
  *      +1 to CONFIG_MM_REGIONS if you want to use DTCM.
  *
  * - External SDRAM can be connected to the FMC peripheral. Initialization
@@ -117,7 +117,7 @@
 #  define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
 
 #elif defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-      defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+      defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /* Configuration for M7 core when M4 core support enabled */
 
@@ -139,7 +139,7 @@
 #endif
 
 #undef HAVE_SRAM4
-#if !defined(CONFIG_STM32H7_SRAM4EXCLUDE)
+#if !defined(CONFIG_STM32_SRAM4EXCLUDE)
 #  define HAVE_SRAM4 1
 
 #  define SRAM4_START ((uint32_t)(STM32_SRAM4_BASE))
@@ -158,7 +158,7 @@
 
 /* DTCM to be excluded from the main heap. */
 
-#ifdef CONFIG_STM32H7_DTCMEXCLUDE
+#ifdef CONFIG_STM32_DTCMEXCLUDE
 #  undef HAVE_DTCM
 #endif
 
@@ -410,7 +410,7 @@ void arm_addregion(void)
     }
 #endif
 
-#ifdef CONFIG_STM32H7_FMC
+#ifdef CONFIG_STM32_FMC
   stm32_fmc_init();
 #endif
 

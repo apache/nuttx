@@ -34,7 +34,7 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_STM32H7_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 

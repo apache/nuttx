@@ -41,7 +41,7 @@
 #include "hardware/stm32_rng.h"
 #include "arm_internal.h"
 
-#if defined(CONFIG_STM32H7_RNG)
+#if defined(CONFIG_STM32_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
@@ -311,4 +311,4 @@ void devurandom_register(void)
 #endif
 
 #endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
-#endif /* CONFIG_STM32H7_RNG */
+#endif /* CONFIG_STM32_RNG */

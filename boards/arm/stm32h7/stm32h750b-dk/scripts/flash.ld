@@ -95,7 +95,7 @@
 
 #include <nuttx/config.h>
 
-#ifndef CONFIG_STM32H7_CORTEXM4_ENABLED
+#ifndef CONFIG_STM32_CORTEXM4_ENABLED
 MEMORY
 {
   itcm  (rwx) : ORIGIN = 0x00000000, LENGTH =   64K
@@ -114,7 +114,7 @@ MEMORY
 MEMORY
 {
   itcm  (rwx) : ORIGIN = 0x00000000, LENGTH = 64K
-  flash (rx)  : ORIGIN = 0x08000000, LENGTH = CONFIG_STM32H7_CORTEXM7_FLASH_SIZE
+  flash (rx)  : ORIGIN = 0x08000000, LENGTH = CONFIG_STM32_CORTEXM7_FLASH_SIZE
   dtcm1 (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
   dtcm2 (rwx) : ORIGIN = 0x20010000, LENGTH = 64K
   sram  (rwx) : ORIGIN = 0x24000000, LENGTH = 512K
@@ -191,7 +191,7 @@ SECTIONS
         _ebss = ABSOLUTE(.);
     } > sram
 
-#ifdef CONFIG_STM32H7_CORTEXM4_ENABLED
+#ifdef CONFIG_STM32_CORTEXM4_ENABLED
     .shmem (NOLOAD):
     {
         . = ALIGN(4);

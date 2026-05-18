@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_OTGFS_HOST) && defined(CONFIG_STM32H7_OTGHS_USBDEV)
+#if defined(CONFIG_STM32_OTGFS_HOST) && defined(CONFIG_STM32_OTGHS_USBDEV)
 #  ifndef CONFIG_OPENH743I_DISABLE_OTGFS_PWRON
 #    error PWRON must be disabled for this configuration
 #  endif
@@ -121,7 +121,7 @@ void stm32_usbinitialize(void)
    * Power On, and Overcurrent GPIOs
    */
 
-#ifdef CONFIG_STM32H7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   stm32_configgpio(GPIO_OTGFS_VBUS);
   stm32_configgpio(GPIO_OTGFS_PWRON);
   stm32_configgpio(GPIO_OTGFS_OVER);
@@ -307,7 +307,7 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
   uinfo("resume: %d\n", resume);
 }
 
-#ifdef CONFIG_STM32H7_OTGHS_EXTERNAL_ULPI
+#ifdef CONFIG_STM32_OTGHS_EXTERNAL_ULPI
 /****************************************************************************
  * Name:  stm32_usbulpireset
  *
