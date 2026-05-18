@@ -105,7 +105,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SDMMC
+#ifdef CONFIG_STM32_SDMMC
 int stm32_sdio_initialize(void);
 #endif
 
@@ -118,7 +118,7 @@ int stm32_sdio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 void weak_function stm32_usbinitialize(void);
 #endif
 

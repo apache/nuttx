@@ -721,7 +721,7 @@ After that check if your PC recognized the usb driver::
     [27221.266103] sd 0:0:0:0: [sda] Attached SCSI removable disk
     [27228.147377] FAT-fs (sda1): Volume was not properly unmounted. Some data may be corrupt. Please run fsck.
 
-**OBS:** This example disable the macro CONFIG_STM32H7_SDMMC_IDMA, for more information read the file: arch/arm/stm32h7/stm32_sdmmc.c
+**OBS:** This example disable the macro CONFIG_STM32_SDMMC_IDMA, for more information read the file: arch/arm/stm32h7/stm32_sdmmc.c
 
 netnsh
 ------

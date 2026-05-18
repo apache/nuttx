@@ -52,7 +52,7 @@
  ****************************************************************************/
 
 #if (defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) &&  \
-     defined(CONFIG_STM32H7_CORTEXM4_ENABLED)) || \
+     defined(CONFIG_STM32_CORTEXM4_ENABLED)) || \
     defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM4)
 
 /****************************************************************************
@@ -105,7 +105,7 @@ static void stm32_cpu2sem_wait(void)
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-    defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+    defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /****************************************************************************
  * Name: stm32_cm7_take_sem
@@ -134,7 +134,7 @@ static void stm32_cpu2sem_take(void)
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-    defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+    defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /****************************************************************************
  * Name: stm32_start_cm4
@@ -162,7 +162,7 @@ void stm32_start_cm4(void)
 
       stm32_cpu2sem_take();
     }
-#ifdef CONFIG_STM32H7_CORTEXM7_BOOTM4
+#ifdef CONFIG_STM32_CORTEXM7_BOOTM4
   else
     {
       /* CM4 not started at boot - force CM4 boot */

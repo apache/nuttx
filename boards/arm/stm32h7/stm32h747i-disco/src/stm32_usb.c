@@ -45,7 +45,7 @@
 #include "stm32_otg.h"
 #include "stm32h747i-disco.h"
 
-#ifdef CONFIG_STM32H7_OTGHS
+#ifdef CONFIG_STM32_OTGHS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,7 +54,7 @@
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32H7_OTGHS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  warning "CONFIG_STM32_OTGHS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
 #  undef HAVE_USB
 #endif
 
@@ -132,7 +132,7 @@ void stm32_usbinitialize(void)
 {
   /* Configure the Overcurrent GPIO */
 
-#ifdef CONFIG_STM32H7_OTGHS
+#ifdef CONFIG_STM32_OTGHS
   stm32_configgpio(GPIO_OTGHS_OVER);
 #endif
 }

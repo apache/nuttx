@@ -41,7 +41,7 @@
 #include "nucleo-h743zi.h"
 #include <arch/board/board.h>
 
-#ifdef CONFIG_STM32H7_SPI
+#ifdef CONFIG_STM32_SPI
 
 /****************************************************************************
  * Public Functions
@@ -63,7 +63,7 @@ void stm32_spidev_initialize(void)
    *       architecture.
    */
 
-#ifdef CONFIG_STM32H7_SPI3
+#ifdef CONFIG_STM32_SPI3
   spiinfo("Configure GPIO for SPI3/CS\n");
 
 #  ifdef CONFIG_WL_NRF24L01
@@ -108,7 +108,7 @@ void stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -122,7 +122,7 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -136,7 +136,7 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI3
+#ifdef CONFIG_STM32_SPI3
 void stm32_spi3select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -192,7 +192,7 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI4
+#ifdef CONFIG_STM32_SPI4
 void stm32_spi4select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -206,7 +206,7 @@ uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI5
+#ifdef CONFIG_STM32_SPI5
 void stm32_spi5select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -220,7 +220,7 @@ uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI6
+#ifdef CONFIG_STM32_SPI6
 void stm32_spi6select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -258,42 +258,42 @@ uint8_t stm32_spi6status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32H7_SPI1
+#ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI2
+#ifdef CONFIG_STM32_SPI2
 int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI3
+#ifdef CONFIG_STM32_SPI3
 int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI4
+#ifdef CONFIG_STM32_SPI4
 int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI5
+#ifdef CONFIG_STM32_SPI5
 int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
 }
 #endif
 
-#ifdef CONFIG_STM32H7_SPI6
+#ifdef CONFIG_STM32_SPI6
 int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
@@ -301,4 +301,4 @@ int stm32_spi5cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #endif /* CONFIG_SPI_CMDDATA */
-#endif /* CONFIG_STM32H7_SPI */
+#endif /* CONFIG_STM32_SPI */

@@ -119,7 +119,7 @@ nucleo-h743zi
 =============
 
 Renode doesn't support ``PWR_CSR1_ACTVOSRDY`` bit so we have to disable
-it with ``CONFIG_STM32H7_PWR_IGNORE_ACTVOSRDY=y``.
+it with ``CONFIG_STM32_PWR_IGNORE_ACTVOSRDY=y``.
 
 Renode script::
 

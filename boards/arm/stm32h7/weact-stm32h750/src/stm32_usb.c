@@ -45,7 +45,7 @@
 #include "stm32_otg.h"
 #include "weact-stm32h750.h"
 
-#ifdef CONFIG_STM32H7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -44,11 +44,11 @@
  * families
  */
 
-#if  defined(CONFIG_STM32H7_STM32H7X0XX) || \
-     defined(CONFIG_STM32H7_STM32H7X3XX) || \
-     defined(CONFIG_STM32H7_STM32H7B3XX) || \
-     defined(CONFIG_STM32H7_STM32H7X5XX) || \
-     defined(CONFIG_STM32H7_STM32H7X7XX)
+#if  defined(CONFIG_STM32_STM32H7X0XX) || \
+     defined(CONFIG_STM32_STM32H7X3XX) || \
+     defined(CONFIG_STM32_STM32H7B3XX) || \
+     defined(CONFIG_STM32_STM32H7X5XX) || \
+     defined(CONFIG_STM32_STM32H7X7XX)
 
 /****************************************************************************
  * Private Data
@@ -80,14 +80,14 @@ const uint32_t g_gpiobase[STM32_NGPIO] =
   STM32_GPIOE_BASE,
 #endif
 #if STM32_NGPIO > 5
-#  if defined(CONFIG_STM32H7_HAVE_GPIOF)
+#  if defined(CONFIG_STM32_HAVE_GPIOF)
   STM32_GPIOF_BASE,
 #  else
   0,
 #  endif
 #endif
 #if STM32_NGPIO > 6
-#  if defined(CONFIG_STM32H7_HAVE_GPIOG)
+#  if defined(CONFIG_STM32_HAVE_GPIOG)
   STM32_GPIOG_BASE,
 #  else
   0,
@@ -526,7 +526,7 @@ bool stm32_gpioread(uint32_t pinset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SYSCFG_IOCOMPENSATION
+#ifdef CONFIG_STM32_SYSCFG_IOCOMPENSATION
 void stm32_iocompensation(void)
 {
   /* Enable I/O Compensation.  Writing '1' to the CMPCR power-down bit
@@ -543,4 +543,4 @@ void stm32_iocompensation(void)
 }
 #endif
 
-#endif /* CONFIG_STM32H7_STM32H7X3XX || CONFIG_STM32H7_STM32H7X7XX || CONFIG_STM32H7_STM32H7B3XX */
+#endif /* CONFIG_STM32_STM32H7X3XX || CONFIG_STM32_STM32H7X7XX || CONFIG_STM32_STM32H7B3XX */
