@@ -26,9 +26,12 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <syslog.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
+#include <nuttx/leds/userled.h>
 
 #include "nucleo-n657x0-q.h"
 
@@ -54,5 +57,17 @@
 
 int stm32_bringup(void)
 {
+#if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)
+  int ret;
+
+  /* Register the LED driver */
+
+  ret = userled_lower_initialize("/dev/userleds");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: userled_lower_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }
