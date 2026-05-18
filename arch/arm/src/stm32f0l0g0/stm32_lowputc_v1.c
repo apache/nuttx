@@ -268,7 +268,7 @@ void stm32_lowsetup(void)
 
   /* Setup clocking and GPIO pins for all configured USARTs */
 
-#ifdef CONFIG_STM32F0L0G0_USART1
+#ifdef CONFIG_STM32_USART1
   /* Enable USART APB2 clock */
 
   modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_USART1EN);
@@ -284,7 +284,7 @@ void stm32_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART2
+#ifdef CONFIG_STM32_USART2
   /* Enable USART APB1 clock */
 
   modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_USART2EN);
@@ -300,7 +300,7 @@ void stm32_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART3
+#ifdef CONFIG_STM32_USART3
   /* Enable USART APB1 clock */
 
   modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_USART3EN);
@@ -316,7 +316,7 @@ void stm32_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART4
+#ifdef CONFIG_STM32_USART4
   /* Enable USART APB1 clock */
 
   modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_USART4EN);
@@ -332,7 +332,7 @@ void stm32_lowsetup(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART5
+#ifdef CONFIG_STM32_USART5
   /* Enable USART APB1 clock */
 
   modifyreg32(STM32_RCC_APB1ENR, 0, RCC_APB1ENR_USART5EN);

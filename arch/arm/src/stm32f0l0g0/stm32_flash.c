@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F0L0G0_STM32G0) || defined(CONFIG_STM32F0L0G0_STM32C0)
+#if defined(CONFIG_STM32_STM32G0) || defined(CONFIG_STM32_STM32C0)
 #  include "stm32g0c0_flash.c"
 #else
 #  error "Flash driver unsupported on selected chip."

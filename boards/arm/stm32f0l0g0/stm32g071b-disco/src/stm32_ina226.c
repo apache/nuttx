@@ -39,7 +39,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32F0L0G0_I2C1
+#ifndef CONFIG_STM32_I2C1
 #  error I2C1 must be enabled!
 #endif
 

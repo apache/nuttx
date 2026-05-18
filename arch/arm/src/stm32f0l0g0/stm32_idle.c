@@ -83,7 +83,7 @@ void up_idle(void)
  * disabled in order to save power."
  */
 
-#ifdef CONFIG_STM32F0L0G0_GPDMA
+#ifdef CONFIG_STM32_GPDMA
   if (g_dma_inprogress == 0)
 #endif
     {

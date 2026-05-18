@@ -44,7 +44,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V2)
+#if defined(CONFIG_STM32_HAVE_IP_EXTI_V2)
 #  define STM32_EXTI_FTSR             STM32_EXTI_FTSR1
 #  define STM32_EXTI_RTSR             STM32_EXTI_RTSR1
 #  define STM32_EXTI_IMR              STM32_EXTI_IMR1
@@ -77,7 +77,7 @@ static struct gpio_callback_s g_gpio_callbacks[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V1)
+#if defined(CONFIG_STM32_HAVE_IP_EXTI_V1)
 static int stm32_exti_multiisr(int irq, void *context, void *arg,
                                int first, int last)
 {
@@ -121,7 +121,7 @@ static int stm32_exti_multiisr(int irq, void *context, void *arg,
 
   return ret;
 }
-#elif defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_EXTI_V2)
 static int stm32_exti_multiisr(int irq, void *context, void *arg,
                                int first, int last)
 {

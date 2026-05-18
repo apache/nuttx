@@ -30,9 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_USART_V1)
+#if defined(CONFIG_STM32_HAVE_IP_USART_V1)
 #  include "hardware/stm32_uart_v1.h"
-#elif defined(CONFIG_STM32F0L0G0_HAVE_IP_USART_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_USART_V2)
 #  include "hardware/stm32_uart_v2.h"
 #else
 #  error "Unsupported STM32 M0 USART"

@@ -28,7 +28,7 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_DMAMUX)
+#if defined(CONFIG_STM32_HAVE_DMAMUX)
 #  include "stm32_dma_v1mux.c"
 #else
 #  include "stm32_dma_v1.c"

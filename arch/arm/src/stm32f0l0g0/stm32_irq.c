@@ -217,7 +217,7 @@ void up_irqinitialize(void)
    * configured pin interrupts.
    */
 
-#ifdef CONFIG_STM32F0L0G0_GPIOIRQ
+#ifdef CONFIG_STM32_GPIOIRQ
   stm32_gpioirqinitialize();
 #endif
 

@@ -68,8 +68,8 @@
 
 /* Power management definitions */
 
-#if defined(CONFIG_PM) && !defined(CONFIG_STM32F0L0G0_PM_SERIAL_ACTIVITY)
-#  define CONFIG_STM32F0L0G0_PM_SERIAL_ACTIVITY 10
+#if defined(CONFIG_PM) && !defined(CONFIG_STM32_PM_SERIAL_ACTIVITY)
+#  define CONFIG_STM32_PM_SERIAL_ACTIVITY 10
 #endif
 
 /* Keep track if a Break was set
@@ -83,7 +83,7 @@
  * See up_restoreusartint where the masking is done.
  */
 
-#ifdef CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
 #  define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
 #  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
 #endif
@@ -93,9 +93,9 @@
 
 /* Warnings for potentially unsafe configuration combinations. */
 
-#if defined(CONFIG_STM32F0L0G0_FLOWCONTROL_BROKEN) && \
+#if defined(CONFIG_STM32_FLOWCONTROL_BROKEN) && \
     !defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS)
-#  error "CONFIG_STM32F0L0G0_FLOWCONTROL_BROKEN requires \
+#  error "CONFIG_STM32_FLOWCONTROL_BROKEN requires \
           CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS to be enabled."
 #endif
 
@@ -216,29 +216,29 @@ static const struct uart_ops_s g_uart_ops =
 
 /* Receive/Transmit buffers */
 
-#ifdef CONFIG_STM32F0L0G0_USART1
+#ifdef CONFIG_STM32_USART1
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART2
+#ifdef CONFIG_STM32_USART2
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART3
+#ifdef CONFIG_STM32_USART3
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART4
+#ifdef CONFIG_STM32_USART4
 static char g_usart4rxbuffer[CONFIG_USART4_RXBUFSIZE];
 static char g_usart4txbuffer[CONFIG_USART4_TXBUFSIZE];
 #endif
 
 /* This describes the state of the STM32 USART1 ports. */
 
-#ifdef CONFIG_STM32F0L0G0_USART1
+#ifdef CONFIG_STM32_USART1
 static struct up_dev_s g_usart1priv =
 {
   .dev =
@@ -293,7 +293,7 @@ static struct up_dev_s g_usart1priv =
 
 /* This describes the state of the STM32 USART2 port. */
 
-#ifdef CONFIG_STM32F0L0G0_USART2
+#ifdef CONFIG_STM32_USART2
 static struct up_dev_s g_usart2priv =
 {
   .dev =
@@ -348,7 +348,7 @@ static struct up_dev_s g_usart2priv =
 
 /* This describes the state of the STM32 USART3 port. */
 
-#ifdef CONFIG_STM32F0L0G0_USART3
+#ifdef CONFIG_STM32_USART3
 static struct up_dev_s g_usart3priv =
 {
   .dev =
@@ -403,7 +403,7 @@ static struct up_dev_s g_usart3priv =
 
 /* This describes the state of the STM32 USART4 port. */
 
-#ifdef CONFIG_STM32F0L0G0_USART4
+#ifdef CONFIG_STM32_USART4
 static struct up_dev_s g_usart4priv =
 {
   .dev =
@@ -460,16 +460,16 @@ static struct up_dev_s g_usart4priv =
 
 static struct up_dev_s * const g_uart_devs[STM32_NSERIAL] =
 {
-#ifdef CONFIG_STM32F0L0G0_USART1
+#ifdef CONFIG_STM32_USART1
   [0] = &g_usart1priv,
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART2
+#ifdef CONFIG_STM32_USART2
   [1] = &g_usart2priv,
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART3
+#ifdef CONFIG_STM32_USART3
   [2] = &g_usart3priv,
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART4
+#ifdef CONFIG_STM32_USART4
   [3] = &g_usart4priv
 #endif
 };
@@ -738,7 +738,7 @@ static void up_set_format(struct uart_dev_s *dev)
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && \
-   !defined(CONFIG_STM32F0L0G0_FLOWCONTROL_BROKEN)
+   !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;
@@ -782,25 +782,25 @@ static void up_set_apb_clock(struct uart_dev_s *dev, bool on)
     {
     default:
       return;
-#ifdef CONFIG_STM32F0L0G0_USART1
+#ifdef CONFIG_STM32_USART1
     case STM32_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART2
+#ifdef CONFIG_STM32_USART2
     case STM32_USART2_BASE:
       rcc_en = RCC_APB1ENR_USART2EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART3
+#ifdef CONFIG_STM32_USART3
     case STM32_USART3_BASE:
       rcc_en = RCC_APB1ENR_USART3EN;
       regaddr = STM32_RCC_APB1ENR;
       break;
 #endif
-#ifdef CONFIG_STM32F0L0G0_USART4
+#ifdef CONFIG_STM32_USART4
     case STM32_USART4_BASE:
       rcc_en = RCC_APB1ENR_USART4EN;
       regaddr = STM32_RCC_APB1ENR;
@@ -865,7 +865,7 @@ static int up_setup(struct uart_dev_s *dev)
     {
       uint32_t config = priv->rts_gpio;
 
-#ifdef CONFIG_STM32F0L0G0_FLOWCONTROL_BROKEN
+#ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
       /* Instead of letting hw manage this pin, we will bitbang */
 
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
@@ -1093,8 +1093,8 @@ static int up_interrupt(int irq, void *context, void *arg)
 
   /* Report serial activity to the power management logic */
 
-#if defined(CONFIG_PM) && CONFIG_STM32F0L0G0_PM_SERIAL_ACTIVITY > 0
-  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32F0L0G0_PM_SERIAL_ACTIVITY);
+#if defined(CONFIG_PM) && CONFIG_STM32_PM_SERIAL_ACTIVITY > 0
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32_PM_SERIAL_ACTIVITY);
 #endif
 
   /* Loop until there are no characters to be transferred or,
@@ -1207,14 +1207,14 @@ static int up_interrupt(int irq, void *context, void *arg)
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT) \
-    || defined(CONFIG_STM32F0L0G0_USART_SINGLEWIRE) \
-    || defined(CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT)
+    || defined(CONFIG_STM32_USART_SINGLEWIRE) \
+    || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS) \
-    || defined(CONFIG_STM32F0L0G0_USART_SINGLEWIRE) \
-    || defined(CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT)
+    || defined(CONFIG_STM32_USART_SINGLEWIRE) \
+    || defined(CONFIG_STM32_SERIALBRK_BSDCOMPAT)
   struct up_dev_s   *priv  = (struct up_dev_s *)dev->priv;
 #endif
   int                ret   = OK;
@@ -1237,7 +1237,7 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USART_SINGLEWIRE
+#ifdef CONFIG_STM32_USART_SINGLEWIRE
     case TIOCSSINGLEWIRE:
       {
         uint32_t cr1;
@@ -1390,8 +1390,8 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-#ifdef CONFIG_STM32F0L0G0_USART_BREAKS
-#  ifdef CONFIG_STM32F0L0G0_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_USART_BREAKS
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags;
@@ -1590,7 +1590,7 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev,
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
-    defined(CONFIG_STM32F0L0G0_FLOWCONTROL_BROKEN)
+    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
@@ -1966,7 +1966,7 @@ void arm_serialinit(void)
 #if CONSOLE_USART > 0
   uart_register("/dev/console", &g_uart_devs[CONSOLE_USART - 1]->dev);
 
-#ifndef CONFIG_STM32F0L0G0_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
@@ -1990,7 +1990,7 @@ void arm_serialinit(void)
           continue;
         }
 
-#ifndef CONFIG_STM32F0L0G0_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
       if (g_uart_devs[i]->dev.isconsole)

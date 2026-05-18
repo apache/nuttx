@@ -42,13 +42,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_RNG
+#ifdef CONFIG_STM32_RNG
 #  ifndef STM32_USE_CLK48
 #    error RNG requires CLK48 enabled
 #  endif
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_USB
+#ifdef CONFIG_STM32_USB
 #  ifndef STM32_USE_CLK48
 #    error USB requires CLK48 enabled
 #  endif
@@ -103,7 +103,7 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_RTC) && defined(CONFIG_STM32F0L0G0_PWR)
+#if defined(CONFIG_STM32_RTC) && defined(CONFIG_STM32_PWR)
 static inline void rcc_resetbkp(void)
 {
   uint32_t regval;
@@ -144,7 +144,7 @@ static inline void rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -166,7 +166,7 @@ void stm32_clockconfig(void)
 
   rcc_resetbkp();
 
-#if defined(CONFIG_ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
   /* Invoke Board Custom Clock Configuration */
 
   stm32_board_clockconfig();
@@ -198,7 +198,7 @@ void stm32_clockconfig(void)
  *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -213,7 +213,7 @@ void stm32_clockconfig(void)
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
   /* Invoke Board Custom Clock Configuration */
 
   stm32_board_clockconfig();
