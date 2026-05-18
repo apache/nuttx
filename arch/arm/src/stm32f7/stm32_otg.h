@@ -34,7 +34,7 @@
 #include "chip.h"
 #include "hardware/stm32_otg.h"
 
-#if defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_OTGFSHS)
+#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_OTGFSHS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,7 +46,7 @@
 #  define CONFIG_OTG_PRI NVIC_SYSH_PRIORITY_DEFAULT
 #endif
 
-#if defined(CONFIG_STM32F7_OTGFS)
+#if defined(CONFIG_STM32_OTGFS)
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGFS
 #  define STM32_OTG_BASE        STM32_USBOTGFS_BASE
 #  define STM32_NENDPOINTS      (6)          /* ep0-5 x 2 for IN and OUT */
@@ -58,7 +58,7 @@
 #  define STM32_OTG_FIFO_SIZE   1280
 #endif
 
-#if defined(CONFIG_STM32F7_OTGFSHS)
+#if defined(CONFIG_STM32_OTGFSHS)
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGHS
 #  define STM32_OTG_BASE        STM32_USBOTGHS_BASE
 #  define STM32_NENDPOINTS      (7)          /* ep0-8 x 2 for IN and OUT but driver internals use byte to map + one bit for direction */
@@ -135,5 +135,5 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32F7_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_OTG_H */

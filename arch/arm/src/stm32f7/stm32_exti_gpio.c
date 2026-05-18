@@ -44,9 +44,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Private Types
@@ -376,4 +376,4 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   return OK;
 }
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */

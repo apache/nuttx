@@ -72,7 +72,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FOC
+#ifdef CONFIG_STM32_FOC
 int stm32_foc_setup(void);
 #endif
 

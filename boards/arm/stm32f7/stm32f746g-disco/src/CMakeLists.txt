@@ -40,11 +40,11 @@ if(CONFIG_SPORADIC_INSTRUMENTATION)
   list(APPEND SRCS stm32_sporadic.c)
 endif()
 
-if(CONFIG_STM32F7_LTDC)
+if(CONFIG_STM32_LTDC)
   list(APPEND SRCS stm32_lcd.c)
 endif()
 
-if(CONFIG_STM32F7_FMC)
+if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_extmem.c)
 endif()
 
@@ -56,13 +56,13 @@ if(CONFIG_MTD_N25QXXX)
   list(APPEND SRCS stm32_n25q.c)
 endif()
 
-if(CONFIG_STM32F7_OTGFS)
+if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
-elseif(CONFIG_STM32F7_OTGFSHS)
+elseif(CONFIG_STM32_OTGFSHS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
-if(CONFIG_STM32F7_SDMMC)
+if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 

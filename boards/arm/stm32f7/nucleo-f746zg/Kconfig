@@ -57,22 +57,22 @@ choice
 
 config NUCLEO_F746ZG_CONSOLE_ARDUINO
 	bool "Arduino Connector"
-	select STM32F7_USART6
+	select STM32_USART6
 	select USART6_SERIALDRIVER
 
 config NUCLEO_F746ZG_CONSOLE_VIRTUAL
 	bool "Virtual Comport"
-	select STM32F7_USART3
+	select STM32_USART3
 	select USART3_SERIALDRIVER
 
 config NUCLEO_F746ZG_CONSOLE_MORPHO
 	bool "Morpho Connector"
-	select STM32F7_UART8
+	select STM32_UART8
 	select UART8_SERIALDRIVER
 
 config NUCLEO_F746ZG_CONSOLE_MORPHO_UART4
 	bool "Morpho Connector UART4"
-	select STM32F7_UART4
+	select STM32_UART4
 	select UART4_SERIALDRIVER
 
 config NUCLEO_F746ZG_CONSOLE_NONE
@@ -83,7 +83,7 @@ endchoice # "Select Console wiring"
 choice
 	prompt "CAN1 pins selection"
 	default NUCLEO_F746ZG_CAN1_MAP_PD0PD1
-	depends on STM32F7_CAN1
+	depends on STM32_CAN1
 
 config NUCLEO_F746ZG_CAN1_MAP_D14D15
 	bool "CAN1_TX=D14 CAN1_RX=D15"

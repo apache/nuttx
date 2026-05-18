@@ -46,9 +46,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM33F75XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32F7_STM33F75XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -596,7 +596,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
           " ntransfers: %zu scr: %08" PRIx32 "\n",
           paddr, maddr, ntransfers, scr);
 
-#ifdef CONFIG_STM32F7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));
 #endif
 
@@ -895,7 +895,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size;
@@ -958,7 +958,7 @@ bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
       dmawarn("stm32_dmacapable:"
               " dcache unaligned maddr:0x%08" PRIxPTR " mend:0x%08"
               PRIx32 "\n", maddr, mend);
-#if !defined(CONFIG_STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
+#if !defined(CONFIG_STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
     }
@@ -1121,4 +1121,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */

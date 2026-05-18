@@ -48,8 +48,8 @@
 #  error "FT5x06 support requires CONFIG_INPUT"
 #endif
 
-#ifndef CONFIG_STM32F7_I2C3
-#  error "FT5x06 support requires CONFIG_STM32F7_I2C3"
+#ifndef CONFIG_STM32_I2C3
+#  error "FT5x06 support requires CONFIG_STM32_I2C3"
 #endif
 
 #ifndef CONFIG_FT5X06_I2CDEV

@@ -90,7 +90,7 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_OTGFS)
+#if defined(CONFIG_STM32_OTGFS)
 /* Highest SYSCLK with USB OTG FS clock = 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
@@ -107,7 +107,7 @@
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
-#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_RNG)
+#elif defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_RNG)
 /* Highest SYSCLK with USB OTG FS clock <= 48MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
@@ -528,7 +528,7 @@
 
 /* SAI2 pinset */
 
-#if defined(CONFIG_STM32F7_SAI2) && defined(CONFIG_STM32F7_SAI2_A)
+#if defined(CONFIG_STM32_SAI2) && defined(CONFIG_STM32_SAI2_A)
 #  define GPIO_SAI2_SD_A      (GPIO_SAI2_SD_A_2|GPIO_SPEED_100MHz)
 #  define GPIO_SAI2_FS_A      (GPIO_SAI2_FS_A_2|GPIO_SPEED_100MHz)
 #  define GPIO_SAI2_SCK_A     (GPIO_SAI2_SCK_A_2|GPIO_SPEED_100MHz)

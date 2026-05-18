@@ -44,15 +44,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
-    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) || \
+    defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 #  define STM32_BBSRAM_SIZE 4096
 #else
 #  error "No backup SRAM on this STM32 Device"
 #endif
 
-#if !defined(CONFIG_STM32F7_BBSRAM_FILES)
-#  define CONFIG_STM32F7_BBSRAM_FILES 4
+#if !defined(CONFIG_STM32_BBSRAM_FILES)
+#  define CONFIG_STM32_BBSRAM_FILES 4
 #endif
 
 /* REVISIT: What guarantees that STM32_BBSRAM_GETDESC_IOCTL has a unique
@@ -110,8 +110,8 @@ extern "C"
  *             the last entry should be 0
  *             A size of -1 will use all the remaining spaces
  *
- * If the length of sizes is greater then CONFIG_STM32F7_BBSRAM_FILES
- * CONFIG_STM32F7_BBSRAM_FILES will be returned.
+ * If the length of sizes is greater then CONFIG_STM32_BBSRAM_FILES
+ * CONFIG_STM32_BBSRAM_FILES will be returned.
  *
  * Returned Value:
  *   Number of files created on success; Negated errno on failure.
@@ -140,7 +140,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
+#if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length);
 #endif
 

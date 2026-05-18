@@ -22,11 +22,11 @@
 
 set(SRCS stm32_boot.c stm32_spi.c stm32_dma_alloc.c)
 
-if(CONFIG_STM32F7_OTGFS)
+if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
-if(CONFIG_STM32F7_SDMMC1)
+if(CONFIG_STM32_SDMMC1)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 

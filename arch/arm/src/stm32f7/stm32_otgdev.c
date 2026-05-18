@@ -52,8 +52,8 @@
 #include "stm32_rcc.h"
 #include "arm_internal.h"
 
-#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32F7_OTGFS) || \
-    defined(CONFIG_STM32F7_OTGFSHS))
+#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGFS) || \
+    defined(CONFIG_STM32_OTGFSHS))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -254,7 +254,7 @@
  * present
  */
 
-#  ifdef CONFIG_STM32F7_OTGFSHS
+#  ifdef CONFIG_STM32_OTGFSHS
 #    define OTG_GINT_RESERVED     OTG_GINT_RESERVED_HS
 #    define OTG_GINT_RC_W1        OTG_GINT_RC_W1_HS
 #  else
@@ -373,7 +373,7 @@
 
 /* Maximum packet sizes for full speed endpoints */
 
-#  ifdef CONFIG_STM32F7_OTGFSHS
+#  ifdef CONFIG_STM32_OTGFSHS
 #    define STM32_MAXPACKET              (512)  /* Max packet size (1-512) */
 #  else
 #    define STM32_MAXPACKET              (64)   /* Max packet size (1-64) */
@@ -573,7 +573,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#  if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#  if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 #  else
@@ -898,7 +898,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#  if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#  if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -961,7 +961,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#  if defined(CONFIG_STM32F7_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#  if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -2163,7 +2163,7 @@ static void stm32_usbreset(struct stm32_usbdev_s *priv)
 
   stm32_setaddress(priv, 0);
   priv->devstate = DEVSTATE_DEFAULT;
-#  if defined(CONFIG_STM32F7_INTERNAL_ULPI) ||  defined(CONFIG_STM32F7_EXTERNAL_ULPI)
+#  if defined(CONFIG_STM32_INTERNAL_ULPI) ||  defined(CONFIG_STM32_EXTERNAL_ULPI)
   priv->usbdev.speed = USB_SPEED_HIGH;
 #  else
   priv->usbdev.speed = USB_SPEED_FULL;
@@ -3461,7 +3461,7 @@ static inline void stm32_enuminterrupt(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_GUSBCFG);
   regval &= ~OTG_GUSBCFG_TRDT_MASK;
-#  ifdef CONFIG_STM32F7_OTGFSHS
+#  ifdef CONFIG_STM32_OTGFSHS
   regval |= OTG_GUSBCFG_TRDT(9);
 #  else
   regval |= OTG_GUSBCFG_TRDT(6);
@@ -5345,15 +5345,15 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   stm32_putreg(OTG_GAHBCFG_TXFELVL, STM32_OTG_GAHBCFG);
 
-#  ifdef CONFIG_STM32F7_OTGFSHS
+#  ifdef CONFIG_STM32_OTGFSHS
 
-#    ifdef CONFIG_STM32F7_NO_ULPI
+#    ifdef CONFIG_STM32_NO_ULPI
 
   regval = stm32_getreg(STM32_OTG_GUSBCFG);
   regval |= OTG_GUSBCFG_PHYSEL;
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
 
-#    else /* CONFIG_STM32F7_NO_ULPI */
+#    else /* CONFIG_STM32_NO_ULPI */
 
   /* Switch off FS transceiver */
 
@@ -5376,7 +5376,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   regval &= ~(OTG_GUSBCFG_ULPIEVBUSD | OTG_GUSBCFG_ULPIEVBUSI);
   stm32_putreg(regval, STM32_OTG_GUSBCFG);
 
-#      ifdef CONFIG_STM32F7_INTERNAL_ULPI
+#      ifdef CONFIG_STM32_INTERNAL_ULPI
 
   /* Select UTMI/ULPI Interface */
 
@@ -5421,9 +5421,9 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   up_udelay(2000);
 
-#      endif /* CONFIG_STM32F7_INTERNAL_ULPI */
-#    endif   /* CONFIG_STM32F7_NO_ULPI */
-#  endif     /* CONFIG_STM32F7_OTGFSHS */
+#      endif /* CONFIG_STM32_INTERNAL_ULPI */
+#    endif   /* CONFIG_STM32_NO_ULPI */
+#  endif     /* CONFIG_STM32_OTGFSHS */
 
   /* Common USB OTG core initialization */
 
@@ -5465,7 +5465,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_GCCFG);
 
-#  if (defined(CONFIG_STM32F7_OTGFS) || defined(CONFIG_STM32F7_NO_ULPI))
+#  if (defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_NO_ULPI))
   regval |= OTG_GCCFG_PWRDWN;
 #  endif
 
@@ -5509,7 +5509,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
 
   regval = stm32_getreg(STM32_OTG_DCFG);
   regval &= ~OTG_DCFG_DSPD_MASK;
-#  ifdef CONFIG_STM32F7_OTGFSHS
+#  ifdef CONFIG_STM32_OTGFSHS
   regval |= OTG_DCFG_DSPD_HS;
 #  else
   regval |= OTG_DCFG_DSPD_FS;
@@ -5652,7 +5652,7 @@ static void stm32_hwinitialize(struct stm32_usbdev_s *priv)
   regval &= OTG_GINT_RESERVED;
   stm32_putreg(regval | OTG_GINT_RC_W1, STM32_OTG_GINTSTS);
 
-#  if defined(CONFIG_STM32F7_OTGFSHS) && defined(CONFIG_STM32F7_NO_ULPI)
+#  if defined(CONFIG_STM32_OTGFSHS) && defined(CONFIG_STM32_NO_ULPI)
   /* Disable the ULPI Clock enable in RCC AHB1 Register.  This must be done
    * because if both the ULPI and the FS PHY clock enable bits are set at the
    * same time, the ARM never awakens from WFI due to some bug / errata in
@@ -5747,7 +5747,7 @@ void arm_usbinitialize(void)
 
   /* SOF output pin configuration is configurable. */
 
-#  ifdef CONFIG_STM32F7_OTG_SOFOUTPUT
+#  ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTG_SOF);
 #  endif
 
@@ -5919,7 +5919,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
        */
 
       stm32_pullup(&priv->usbdev, true);
-#  if defined(CONFIG_STM32F7_INTERNAL_ULPI) ||  defined(CONFIG_STM32F7_EXTERNAL_ULPI)
+#  if defined(CONFIG_STM32_INTERNAL_ULPI) ||  defined(CONFIG_STM32_EXTERNAL_ULPI)
       priv->usbdev.speed = USB_SPEED_HIGH;
 #  else
       priv->usbdev.speed = USB_SPEED_FULL;

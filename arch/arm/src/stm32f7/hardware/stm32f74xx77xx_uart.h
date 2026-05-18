@@ -29,8 +29,8 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) || \
-    defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) || \
+    defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -356,5 +356,5 @@
 #define USART_TDR_SHIFT           (0)       /* Bits 8:0: Transmit data value */
 #define USART_TDR_MASK            (0x1ff << USART_TDR_SHIFT)
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_UART_H */
