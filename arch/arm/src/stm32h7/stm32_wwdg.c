@@ -39,7 +39,7 @@
 #include "arm_internal.h"
 #include "stm32_wdg.h"
 
-#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32H7_WWDG)
+#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -783,9 +783,9 @@ void stm32_wwdginitialize(const char *devpath)
    * on the WWDG1 STOP configuration bit in DBG module.
    */
 
-#if defined(CONFIG_STM32H7_JTAG_FULL_ENABLE) || \
-    defined(CONFIG_STM32H7_JTAG_NOJNTRST_ENABLE) || \
-    defined(CONFIG_STM32H7_JTAG_SW_ENABLE)
+#if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
       uint32_t cr = getreg32(STM32_DBGMCU_APB3_FZ1);
       cr |= DBGMCU_APB3_WWDG1STOP;
@@ -794,4 +794,4 @@ void stm32_wwdginitialize(const char *devpath)
 #endif
 }
 
-#endif /* CONFIG_WATCHDOG && CONFIG_STM32H7_WWDG */
+#endif /* CONFIG_WATCHDOG && CONFIG_STM32_WWDG */

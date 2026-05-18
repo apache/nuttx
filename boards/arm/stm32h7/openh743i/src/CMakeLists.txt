@@ -22,7 +22,7 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_STM32H7_SDMMC)
+if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 

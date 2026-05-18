@@ -36,22 +36,22 @@
 
 #include "stm32_tim.h"
 
-#ifdef CONFIG_STM32H7_ONESHOT
+#ifdef CONFIG_STM32_ONESHOT
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32H7_ONESHOT_MAXTIMERS) || \
-    CONFIG_STM32H7_ONESHOT_MAXTIMERS < 1
-#  undef CONFIG_STM32H7_ONESHOT_MAXTIMERS
-#  define CONFIG_STM32H7_ONESHOT_MAXTIMERS 1
+#if !defined(CONFIG_STM32_ONESHOT_MAXTIMERS) || \
+    CONFIG_STM32_ONESHOT_MAXTIMERS < 1
+#  undef CONFIG_STM32_ONESHOT_MAXTIMERS
+#  define CONFIG_STM32_ONESHOT_MAXTIMERS 1
 #endif
 
-#if CONFIG_STM32H7_ONESHOT_MAXTIMERS > 8
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 8
 #  warning Additional logic required to handle more than 8 timers
-#  undef CONFIG_STM32H7_ONESHOT_MAXTIMERS
-#  define CONFIG_STM32H7_ONESHOT_MAXTIMERS 8
+#  undef CONFIG_STM32_ONESHOT_MAXTIMERS
+#  define CONFIG_STM32_ONESHOT_MAXTIMERS 8
 #endif
 
 /****************************************************************************
@@ -75,7 +75,7 @@ typedef void (*oneshot_handler_t)(void *arg);
 struct stm32_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
-#if CONFIG_STM32H7_ONESHOT_MAXTIMERS > 1
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
   uint8_t cbndx;                      /* Timer callback handler index */
 #endif
   volatile bool running;              /* True: the timer is running */
@@ -193,5 +193,5 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
 }
 #endif
 
-#endif /* CONFIG_STM32H7_ONESHOT */
+#endif /* CONFIG_STM32_ONESHOT */
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_ONESHOT_H */

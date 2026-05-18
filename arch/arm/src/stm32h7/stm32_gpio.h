@@ -199,10 +199,10 @@
 #if STM32_NGPIO > 4
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
 #endif
-#if (STM32_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
+#if (STM32_NGPIO > 5) && (defined(CONFIG_STM32_HAVE_GPIOF))
 #  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #endif
-#if (STM32_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
+#if (STM32_NGPIO > 6) && (defined(CONFIG_STM32_HAVE_GPIOG))
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #endif
 #if STM32_NGPIO > 7
@@ -350,7 +350,7 @@ bool stm32_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SYSCFG_IOCOMPENSATION
+#ifdef CONFIG_STM32_SYSCFG_IOCOMPENSATION
 void stm32_iocompensation(void);
 #endif
 

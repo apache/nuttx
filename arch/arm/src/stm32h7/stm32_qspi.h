@@ -35,7 +35,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_STM32H7_QSPI
+#ifdef CONFIG_STM32_QSPI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -127,5 +127,5 @@ void stm32_qspi_exit_memorymapped(struct qspi_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32H7_QSPI */
+#endif /* CONFIG_STM32_QSPI */
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_QSPI_H */

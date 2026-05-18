@@ -33,7 +33,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/usb/usbmonitor.h>
 
-#ifdef CONFIG_STM32H7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 #include "stm32_usbhost.h"
 #endif
 

@@ -44,7 +44,7 @@
 #  error "SD driver requires CONFIG_DISABLE_MOUNTPOINT to be disabled"
 #endif
 
-#ifndef CONFIG_STM32H7_SPI3
+#ifndef CONFIG_STM32_SPI3
 #  error "MMC/SD requires SPI3 enabled"
 #endif
 
