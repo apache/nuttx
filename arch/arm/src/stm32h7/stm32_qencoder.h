@@ -43,23 +43,23 @@
  * timer "n" is intended to be used for as a quadrature encoder.
  */
 
-#ifndef CONFIG_STM32H7_TIM1
-#  undef CONFIG_STM32H7_TIM1_QE
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_QE
 #endif
-#ifndef CONFIG_STM32H7_TIM2
-#  undef CONFIG_STM32H7_TIM2_QE
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_QE
 #endif
-#ifndef CONFIG_STM32H7_TIM3
-#  undef CONFIG_STM32H7_TIM3_QE
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_QE
 #endif
-#ifndef CONFIG_STM32H7_TIM4
-#  undef CONFIG_STM32H7_TIM4_QE
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_QE
 #endif
-#ifndef CONFIG_STM32H7_TIM5
-#  undef CONFIG_STM32H7_TIM5_QE
+#ifndef CONFIG_STM32_TIM5
+#  undef CONFIG_STM32_TIM5_QE
 #endif
-#ifndef CONFIG_STM32H7_TIM8
-#  undef CONFIG_STM32H7_TIM8_QE
+#ifndef CONFIG_STM32_TIM8
+#  undef CONFIG_STM32_TIM8_QE
 #endif
 
 /* Only timers 2-5, and 1 & 8 can be used as a quadrature encoder

@@ -343,7 +343,7 @@
 
 #define BOARD_FMC_CLK                   RCC_D1CCIPR_FMCSEL_HCLK
 
-#if CONFIG_STM32H7_FMC
+#if CONFIG_STM32_FMC
 #  define FMC_SDCLK_FREQUENCY  (STM32_HCLK_FREQUENCY / 2)
 #  if FMC_SDCLK_FREQUENCY > 100000000
 #    error "FMC SDRAM settings need to be adjusted for a higher FMC_SDCLK frequency"

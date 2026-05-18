@@ -45,13 +45,13 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32H7_SDMMC1
+#ifndef CONFIG_STM32_SDMMC1
 #  error SDMMC1 supported only
 #endif
 
 /* If IDMA is enabled, internal SRAM must be excluded from heap */
 
-#if CONFIG_MM_REGIONS > 1 && defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if CONFIG_MM_REGIONS > 1 && defined(CONFIG_STM32_SDMMC_IDMA)
 #  error SDMMC1 with IDMA does not work CONFIG_MM_REGIONS > 1
 #endif
 

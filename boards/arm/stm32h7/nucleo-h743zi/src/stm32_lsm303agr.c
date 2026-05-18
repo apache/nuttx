@@ -39,8 +39,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32H7_I2C1
-#  error "LSM303AGR driver requires CONFIG_STM32H7_I2C1 to be enabled"
+#ifndef CONFIG_STM32_I2C1
+#  error "LSM303AGR driver requires CONFIG_STM32_I2C1 to be enabled"
 #endif
 
 /****************************************************************************
@@ -62,7 +62,7 @@ int stm32_lsm303agr_initialize(char *devpath)
 
   sninfo("INFO: Initializing LMS303AGR sensor over I2C\n");
 
-#if defined(CONFIG_STM32H7_I2C1)
+#if defined(CONFIG_STM32_I2C1)
   i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {

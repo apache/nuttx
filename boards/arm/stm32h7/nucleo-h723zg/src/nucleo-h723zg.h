@@ -46,7 +46,7 @@
 
 /* Can't support USB host or device features if USB OTG HS is not enabled */
 
-#ifndef CONFIG_STM32H7_OTGHS
+#ifndef CONFIG_STM32_OTGHS
 #  undef HAVE_USBDEV
 #endif
 
@@ -74,7 +74,7 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-#if !defined(CONFIG_STM32H7_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
+#if !defined(CONFIG_STM32_PROGMEM) || !defined(CONFIG_MTD_PROGMEM)
 #  undef HAVE_PROGMEM_CHARDEV
 #endif
 
@@ -213,7 +213,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SPI
+#ifdef CONFIG_STM32_SPI
 void stm32_spidev_initialize(void);
 #endif
 
@@ -250,7 +250,7 @@ int stm32_gpio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_OTGHS
+#ifdef CONFIG_STM32_OTGHS
 void weak_function stm32_usbinitialize(void);
 #endif
 
