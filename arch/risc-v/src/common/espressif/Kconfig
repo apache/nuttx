@@ -4202,6 +4202,16 @@ endmenu # Touch Sensor Configuration
 menu "I2S Configuration"
 	depends on ESPRESSIF_I2S
 
+config ESPRESSIF_I2S_ASYNC_THREAD_STACKSIZE
+	int "I2S async I/O thread stack size"
+	default 3072
+	range 1024 8192
+	depends on ESPRESSIF_I2S
+	---help---
+		One dedicated pthread services both TX and RX job queues and may
+		block inside the Espressif I2S HAL (read/write).  Size the stack
+		accordingly.
+
 config ESPRESSIF_I2S_MAXINFLIGHT
 	int "I2S queue size"
 	default 4

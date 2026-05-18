@@ -27,61 +27,57 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
-#include <nuttx/debug.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <pthread.h>
+#include <sched.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
+#include <string.h>
 
-#include <nuttx/nuttx.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
+#include <nuttx/clock.h>
+#include <nuttx/debug.h>
+#include <nuttx/mm/mm.h>
+#include <nuttx/mutex.h>
+#include <nuttx/queue.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/spinlock.h>
-
-#include "riscv_internal.h"
-
-#include "esp_gpio.h"
-#include "esp_irq.h"
+#include <nuttx/wqueue.h>
 
 #include "esp_i2s.h"
 
-#include "hal/i2s_hal.h"
-#include "hal/i2s_ll.h"
-#include "hal/i2s_periph.h"
-#include "soc/i2s_reg.h"
-#include "hal/i2s_types.h"
-#include "soc/gpio_sig_map.h"
-#include "periph_ctrl.h"
-
 #include "esp_attr.h"
 #include "esp_cache.h"
-#include "esp_check.h"
-#include "esp_clk_tree.h"
-#include "esp_bit_defs.h"
-#include "esp_cpu.h"
-#include "esp_rom_sys.h"
-#include "riscv/interrupt.h"
-#include "soc/lldesc.h"
 #include "hal/dma_types.h"
-#if SOC_I2S_SUPPORTS_APLL
-#  include "hal/clk_tree_ll.h"
-#  include "clk_ctrl_os.h"
-#endif
-#include "hal/gdma_periph.h"
-#include "hal/gdma_ll.h"
 
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-#  include "hal/cache_hal.h"
-#  include "hal/cache_ll.h"
+#include "i2s_private.h"
+#include "driver/i2s_common.h"
+#include "driver/i2s_std.h"
+#if SOC_I2S_SUPPORTS_TDM
+#  include "driver/i2s_tdm.h"
 #endif
-
-#if SOC_GDMA_SUPPORTED
-#  include "esp_private/gdma.h"
+#if SOC_I2S_SUPPORTS_PDM_TX || SOC_I2S_SUPPORTS_PDM_RX
+#  include "driver/i2s_pdm.h"
 #endif
 
-#ifdef CONFIG_PM
-#  include "soc/soc_caps.h"
-#  include "include/esp_pm.h"
+#ifndef CONFIG_ESPRESSIF_I2S_DMA_DESC_NUM
+#  define CONFIG_ESPRESSIF_I2S_DMA_DESC_NUM  6
+#endif
+
+#ifndef CONFIG_ESPRESSIF_I2S_DMA_FRAME_NUM
+#  define CONFIG_ESPRESSIF_I2S_DMA_FRAME_NUM  240
+#endif
+
+/* Defer channel disable so the next i2s_send/i2s_receive can cancel it. */
+
+#define ESP_I2S_IDLE_SHUTDOWN_DELAY  0
+
+/* Stack size for the I/O thread that runs blocking HAL read/write. */
+
+#ifdef CONFIG_ESPRESSIF_I2S_ASYNC_THREAD_STACKSIZE
+#  define ESP_I2S_ASYNC_STACKSIZE CONFIG_ESPRESSIF_I2S_ASYNC_THREAD_STACKSIZE
+#else
+#  define ESP_I2S_ASYNC_STACKSIZE 3072
 #endif
 
 /****************************************************************************
@@ -101,10 +97,6 @@
 /* I2S DMA RX/TX description number */
 
 #define I2S_DMADESC_NUM                 (CONFIG_I2S_DMADESC_NUM)
-
-/* I2S DMA channel number */
-
-#define I2S_DMA_CHANNEL_MAX (2)
 
 #ifdef CONFIG_ESPRESSIF_I2S0_TX
 #  define I2S0_TX_ENABLED 1
@@ -126,53 +118,11 @@
 #  undef CONFIG_ESPRESSIF_I2S_DUMPBUFFERS
 #endif
 
-#define I2S_GPIO_UNUSED -1      /* For signals which are not used */
-
-#define I2S_TDM_AUTO_SLOT_NUM    (0)
-#define I2S_TDM_AUTO_WS_WIDTH    (0)
-#define I2S_TDM_AUTO_SLOT        (I2S_TDM_SLOT0 | I2S_TDM_SLOT1)
-
-#define I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(cfg, bits_per_sample, mask) \
-    cfg.slot_mask = (mask),                                             \
-    cfg.ws_width = I2S_TDM_AUTO_WS_WIDTH,                               \
-    cfg.ws_pol = false,                                                 \
-    cfg.bit_shift = true,                                               \
-    cfg.left_align = false,                                             \
-    cfg.big_endian = false,                                             \
-    cfg.bit_order_lsb = false,                                          \
-    cfg.skip_mask = false                                               \
-
-#define I2S_TDM_MSB_SLOT_DEFAULT_CONFIG(cfg, bits_per_sample, mask) \
-    cfg.slot_mask = (mask),                                         \
-    cfg.ws_width = I2S_TDM_AUTO_WS_WIDTH,                           \
-    cfg.ws_pol = false,                                             \
-    cfg.bit_shift = false,                                          \
-    cfg.left_align = false,                                         \
-    cfg.big_endian = false,                                         \
-    cfg.bit_order_lsb = false,                                      \
-    cfg.skip_mask = false                                           \
-
-#define I2S_TDM_PCM_SHORT_SLOT_DEFAULT_CONFIG(cfg, bits_per_sample, mask) \
-    cfg.slot_mask = (mask),                                               \
-    cfg.ws_width = 1,                                                     \
-    cfg.ws_pol = true,                                                    \
-    cfg.bit_shift = true,                                                 \
-    cfg.left_align = false,                                               \
-    cfg.big_endian = false,                                               \
-    cfg.bit_order_lsb = false,                                            \
-    cfg.skip_mask = false                                                 \
-
-#define I2S_PDM_TX_SLOT_DEFAULT_CONFIG(cfg)                   \
-    cfg.sd_prescale = 0,                                      \
-    cfg.sd_scale = I2S_PDM_SIG_SCALING_MUL_1,                 \
-    cfg.hp_scale = I2S_PDM_SIG_SCALING_DIV_2,                 \
-    cfg.lp_scale = I2S_PDM_SIG_SCALING_MUL_1,                 \
-    cfg.sinc_scale = I2S_PDM_SIG_SCALING_MUL_1,               \
-    cfg.line_mode = I2S_PDM_TX_ONE_LINE_CODEC,                \
-    cfg.hp_en = true,                                         \
-    cfg.hp_cut_off_freq_hzx10 = 35.5,                         \
-    cfg.sd_dither = 0,                                        \
-    cfg.sd_dither2 = 1                                        \
+#if SOC_I2S_SUPPORTS_TDM
+#  define I2S_TDM_AUTO_SLOT_NUM    (0)
+#  define I2S_TDM_AUTO_WS_WIDTH    (0)
+#  define I2S_TDM_AUTO_SLOT        (I2S_TDM_SLOT0 | I2S_TDM_SLOT1)
+#endif
 
 #if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
 #  define I2S_DMA_BUFFER_MAX_SIZE   DMA_DESCRIPTOR_BUFFER_MAX_SIZE_64B_ALIGNED
@@ -180,19 +130,13 @@
 #  define I2S_DMA_BUFFER_MAX_SIZE   DMA_DESCRIPTOR_BUFFER_MAX_SIZE_4B_ALIGNED
 #endif
 
+/* Partial frame bytes held between successive i2s_send calls */
+
+#define ESP_I2S_TX_CARRY_MAX  24
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* Multiplier of MCLK to sample rate */
-
-typedef enum
-{
-  I2S_MCLK_MULTIPLE_128 = 128,  /* mclk = sample_rate * 128 */
-  I2S_MCLK_MULTIPLE_256 = 256,  /* mclk = sample_rate * 256 */
-  I2S_MCLK_MULTIPLE_384 = 384,  /* mclk = sample_rate * 384 */
-  I2S_MCLK_MULTIPLE_512 = 512,  /* mclk = sample_rate * 512 */
-} i2s_mclk_multiple_t;
 
 /* I2S Audio Standard Mode */
 
@@ -208,18 +152,18 @@ typedef enum
 
 struct esp_i2s_config_s
 {
-  uint32_t port;                    /* I2S port */
-  uint32_t role;                    /* I2S port role (master or slave) */
-  uint8_t data_width;               /* I2S sample data width */
-  uint32_t rate;                    /* I2S sample-rate */
-  uint32_t total_slot;              /* Total slot number */
+  uint32_t port;              /* I2S port */
+  uint32_t role;              /* I2S port role (master or slave) */
+  uint8_t data_width;         /* I2S sample data width */
+  uint32_t rate;              /* I2S sample-rate */
+  uint32_t total_slot;        /* Total slot number */
 
-  bool tx_en;                       /* Is TX enabled? */
-  bool rx_en;                       /* Is RX enabled? */
-  int8_t mclk_pin;                  /* MCLK pin, output */
+  bool tx_en;                 /* Is TX enabled? */
+  bool rx_en;                 /* Is RX enabled? */
+  int8_t mclk_pin;            /* MCLK pin, output */
 
-  int tx_clk_src;                   /* Select the I2S TX source clock */
-  int rx_clk_src;                   /* Select the I2S TX source clock */
+  int tx_clk_src;             /* Select the I2S TX source clock */
+  int rx_clk_src;             /* Select the I2S RX source clock */
 
   /* BCLK pin, input in slave role, output in master role */
 
@@ -229,103 +173,124 @@ struct esp_i2s_config_s
 
   int8_t ws_pin;
 
-  int8_t dout_pin;                  /* DATA pin, output */
-  int8_t din_pin;                   /* DATA pin, input */
+  int8_t dout_pin;            /* DATA pin, output */
+  int8_t din_pin;             /* DATA pin, input */
 
-  uint8_t  audio_std_mode;          /* Select audio standard (i2s_audio_mode_t) */
+  uint8_t audio_std_mode;     /* Audio standard (i2s_audio_mode_t) */
 
   /* WS signal polarity, set true to enable high level first */
 
   bool ws_pol;
 
-  i2s_hal_context_t *ctx;           /* Common layer struct */
-  i2s_hal_clock_info_t *clk_info;   /* Common layer clock info struct */
 #ifdef CONFIG_PM
-  esp_pm_lock_handle_t pm_lock;     /* Power management lock */
+  esp_pm_lock_handle_t pm_lock; /* Power management lock */
 #endif
 };
 
-struct esp_buffer_s
-{
-  struct esp_buffer_s *flink; /* Supports a singly linked list */
-
-  /* The associated DMA in/outlink */
-
-  lldesc_t *dma_link[I2S_DMADESC_NUM];
-
-  i2s_callback_t callback;      /* DMA completion callback */
-  uint32_t timeout;             /* Timeout value of the DMA transfers */
-  void *arg;                    /* Callback's argument */
-  struct ap_buffer_s *apb;      /* The audio buffer */
-  uint8_t *buf;                 /* The DMA's descriptor buffer */
-  uint32_t nbytes;              /* The DMA's descriptor buffer size */
-  int result;                   /* The result of the transfer */
-};
-
-/* Internal buffer must be aligned to the bytes_per_frame. Sometimes,
- * however, the audio buffer is not aligned and additional bytes must
- * be copied to be inserted on the next buffer. This structure keeps
- * track of the bytes that were not written to the internal buffer yet.
- */
-
 struct esp_buffer_carry_s
 {
-  uint32_t value;
-  size_t bytes;
+  uint8_t data[ESP_I2S_TX_CARRY_MAX];
+  size_t  bytes;
 };
 
-/* This structure describes the state of one receiver or transmitter
- * transport.
- */
-
-struct esp_transport_s
+struct esp_i2s_tx_send_prep_s
 {
-  sq_queue_t pend;              /* A queue of pending transfers */
-  sq_queue_t act;               /* A queue of active transfers */
-  sq_queue_t done;              /* A queue of completed transfers */
-  struct work_s work;           /* Supports worker thread operations */
+  uint8_t *xfer;
+  size_t   send_len;
+  size_t   preloaded;
+  size_t   new_carry_len;
+  uint8_t  new_carry[ESP_I2S_TX_CARRY_MAX];
+};
 
-  /* Bytes to be written at the beginning of the next DMA buffer */
+struct esp_i2s_async_job_s
+{
+  sq_entry_t                    qe;
+  struct ap_buffer_s           *apb;
+  i2s_callback_t                cb;
+  void                         *cbarg;
+  uint32_t                      timeout;
+  struct esp_i2s_tx_send_prep_s prep;
+  bool                          prep_valid;
+  size_t                        send_quota;
+};
 
-  struct esp_buffer_carry_s carry;
+/* Async RX job (`i2s_receive`, drained by the I/O thread). */
+
+struct esp_i2s_rx_async_job_s
+{
+  sq_entry_t          qe;
+  struct ap_buffer_s *apb;
+  i2s_callback_t      cb;
+  void               *cbarg;
+  uint32_t            timeout;
+};
+
+struct esp_i2s_burst_rx_helper_s
+{
+  struct esp_i2s_s   *priv;
+  struct ap_buffer_s *apb;
+  uint32_t            timeout;
+  int                 result;
 };
 
 /* The state of the one I2S peripheral */
 
 struct esp_i2s_s
 {
-  struct i2s_dev_s  dev;        /* Externally visible I2S interface */
-  mutex_t           lock;       /* Ensures mutually exclusive access */
-  uint8_t           cpu;        /* CPU ID */
-  spinlock_t        slock;      /* Device specific lock. */
+  struct i2s_dev_s dev;         /* Externally visible I2S interface */
+  mutex_t          lock;        /* Ensures mutually exclusive access */
+  spinlock_t       slock;       /* Device specific lock. */
 
   /* Port configuration */
 
   const struct esp_i2s_config_s *config;
 
-  uint32_t               mclk_freq;      /* I2S actual master clock */
-  uint32_t               mclk_multiple;  /* The multiple of mclk to the sample rate */
-  uint32_t               channels;       /* Audio channels (1:mono or 2:stereo) */
-  uint32_t               rate;           /* I2S actual configured sample-rate */
-  uint32_t               data_width;     /* I2S actual configured data_width */
-  gdma_channel_handle_t  dma_channel_tx; /* I2S DMA TX channel being used */
-  gdma_channel_handle_t  dma_channel_rx; /* I2S DMA RX channel being used */
+  uint32_t mclk_freq;           /* I2S actual master clock */
+  uint32_t mclk_multiple;       /* Multiple of MCLK to sample rate */
+  uint32_t channels;            /* Audio channels (1:mono or 2:stereo) */
+  uint32_t rate;                /* I2S actual configured sample-rate */
+  uint32_t data_width;          /* I2S actual configured data_width */
 
-  struct esp_transport_s tx;  /* TX transport state */
+  i2s_chan_handle_t tx_handle;  /* TX handle */
 
-  bool tx_started;                /* TX channel started */
+  /* Partial frame tail between successive `i2s_send` calls */
 
-  struct esp_transport_s rx;  /* RX transport state */
+  struct esp_buffer_carry_s tx_carry;
 
-  bool rx_started;                /* RX channel started */
+  volatile bool tx_started;     /* TX channel started (read from ISR) */
 
-  bool streaming;                 /* Is I2S peripheral active? */
+  i2s_chan_handle_t rx_handle;  /* RX handle */
 
-  /* Pre-allocated pool of buffer containers */
+  bool rx_started;              /* RX channel started */
 
-  sem_t bufsem;                         /* Buffer wait semaphore */
-  struct esp_buffer_s *bf_freelist;     /* A list a free buffer containers */
-  struct esp_buffer_s containers[CONFIG_ESPRESSIF_I2S_MAXINFLIGHT];
+  volatile bool rx_busy;        /* RX HAL read in progress on I/O thread */
+  volatile bool tx_busy;        /* TX HAL write in progress on I/O thread */
+           bool session_active; /* AUDIOIOC_START stream session */
+
+  /* Async I/O: enqueue jobs guarded by `priv->lock`; the I/O thread
+   * dequeues and runs blocking HAL read/write outside the mutex.
+   */
+
+  sq_queue_t tx_jobs;
+  sq_queue_t rx_jobs;
+  sem_t      io_sem;
+  pthread_t  io_thread;
+  bool       io_thread_created;
+
+  /* TX `on_sent` tracking: count down DMA block completions for the current
+   * send operation.  When the count reaches zero the ISR clears `tx_start`,
+   * stops GDMA, and posts `tx_on_sent_done_sem`.  Streaming sessions queue
+   * an immediate idle-shutdown for `i2s_channel_disable()`.  Per-APB sends
+   * (no AUDIOIOC_START) also disable from the I/O thread after the semaphore
+   * is posted.
+   */
+
+  size_t            tx_dma_buf_size;
+  volatile uint32_t tx_on_sent_blocks_left;
+  sem_t             tx_on_sent_done_sem;
+
+  struct work_s tx_stop_work;
+  struct work_s rx_stop_work;
 };
 
 /****************************************************************************
@@ -335,74 +300,115 @@ struct esp_i2s_s
 /* Register helpers */
 
 #ifdef CONFIG_ESPRESSIF_I2S_DUMPBUFFERS
-#  define       i2s_dump_buffer(m,b,s) lib_dumpbuffer(m,b,s)
+#  define i2s_dump_buffer(m, b, s) lib_dumpbuffer(m, b, s)
 #else
-#  define       i2s_dump_buffer(m,b,s)
+#  define i2s_dump_buffer(m, b, s)
 #endif
 
-/* I2S configuration */
+/* I2S configuration and channel control */
 
 static int i2s_configure(struct esp_i2s_s *priv);
 
-/* Buffer container helpers */
+static void esp_i2s_tx_try_idle_shutdown_locked(struct esp_i2s_s *priv);
+static void esp_i2s_rx_try_idle_shutdown_locked(struct esp_i2s_s *priv);
+static void esp_i2s_tx_try_idle_shutdown(struct esp_i2s_s *priv);
+static void esp_i2s_rx_try_idle_shutdown(struct esp_i2s_s *priv);
+static void esp_i2s_tx_idle_shutdown_arm(struct esp_i2s_s *priv);
+static void esp_i2s_rx_idle_shutdown_arm(struct esp_i2s_s *priv);
+static void esp_i2s_tx_idle_shutdown_disarm(struct esp_i2s_s *priv);
+static void esp_i2s_rx_idle_shutdown_disarm(struct esp_i2s_s *priv);
+static int  esp_i2s_tx_channel_enable_locked(struct esp_i2s_s *priv,
+                                            bool with_rx);
+static int  esp_i2s_rx_channel_start_locked(struct esp_i2s_s *priv);
+static int  esp_i2s_tx_channel_start(struct esp_i2s_s *priv);
+static int  esp_i2s_rx_channel_start(struct esp_i2s_s *priv);
+static int  esp_i2s_channels_start(struct esp_i2s_s *priv);
+static void esp_i2s_tx_disable_locked(struct esp_i2s_s *priv);
+static void esp_i2s_rx_disable_locked(struct esp_i2s_s *priv);
+static void esp_i2s_burst_channels_down_locked(struct esp_i2s_s *priv,
+                                               bool with_rx);
+static void esp_i2s_burst_reset_channels_locked(struct esp_i2s_s *priv,
+                                                bool with_rx);
+static bool esp_i2s_burst_full_duplex(struct esp_i2s_s *priv);
+static bool esp_i2s_tx_in_flight_locked(struct esp_i2s_s *priv);
 
-static struct esp_buffer_s *
-                i2s_buf_allocate(struct esp_i2s_s *priv);
-static int      i2s_buf_free(struct esp_i2s_s *priv,
-                             struct esp_buffer_s *bfcontainer);
-static int      i2s_buf_initialize(struct esp_i2s_s *priv);
+/* Async I/O */
 
-/* I2S DMA setup function */
+static bool esp_i2s_io_run_tx_burst_job(struct esp_i2s_s *priv);
+static bool esp_i2s_io_run_burst_full_duplex_paired(struct esp_i2s_s *priv);
+static bool esp_i2s_io_run_rx_burst_job(struct esp_i2s_s *priv);
+static bool esp_i2s_io_run_rx_job(struct esp_i2s_s *priv);
+static void esp_i2s_io_dispatch(struct esp_i2s_s *priv);
+static void esp_i2s_io_wakeup(struct esp_i2s_s *priv);
+static void *esp_i2s_io_thread_entry(void *arg);
+static int  esp_i2s_io_thread_create(struct esp_i2s_s *priv);
+static int  esp_i2s_io_submit_job(struct esp_i2s_s *priv,
+                                  sq_queue_t *queue, sq_entry_t *job,
+                                  struct ap_buffer_s *apb, bool wake_io);
+static void esp_i2s_io_invoke_cb(struct i2s_dev_s *dev,
+                                 struct ap_buffer_s *apb,
+                                 i2s_callback_t cb, void *arg,
+                                 int result);
+static void esp_i2s_wake_queued_streams(struct esp_i2s_s *priv);
+static void esp_i2s_rx_finish_job(struct esp_i2s_s *priv);
+static void esp_i2s_rx_jobs_drain_cancel(struct esp_i2s_s *priv,
+                                          int result);
+static void esp_i2s_jobs_drain_cancel(struct esp_i2s_s *priv,
+                                        sq_queue_t *jobs,
+                                        int result);
 
-static uint32_t i2s_common_dma_setup(struct esp_buffer_s *bfcontainer,
-                                     bool tx, uint32_t len);
+/* TX/RX buffer transfer */
 
-/* DMA support */
+static int  esp_i2s_check_io_apb(struct esp_i2s_s *priv,
+                                 struct ap_buffer_s *apb);
+static int  esp_i2s_apb_span_end_excl(struct ap_buffer_s *apb,
+                                      apb_samp_t *span_end_excl_out);
+static int  esp_i2s_tx_prep_apb(struct esp_i2s_s *priv,
+                                struct ap_buffer_s *apb,
+                                struct esp_i2s_tx_send_prep_s *prep);
+static void esp_i2s_tx_prep_release(struct esp_i2s_tx_send_prep_s *prep);
+static void esp_i2s_tx_apply_carry_locked(struct esp_i2s_s *priv,
+       struct esp_i2s_tx_send_prep_s *prep);
+static int  esp_i2s_tx_preload(struct esp_i2s_s *priv,
+                               struct ap_buffer_s *apb,
+                               struct esp_i2s_tx_send_prep_s *prep);
+static int  esp_i2s_tx_run_job_locked(struct esp_i2s_s *priv,
+                                      struct ap_buffer_s *apb,
+                                      uint32_t timeout,
+                                      struct esp_i2s_tx_send_prep_s *prep);
+static int  esp_i2s_rx_run_job_locked(struct esp_i2s_s *priv,
+                                      struct ap_buffer_s *apb,
+                                      uint32_t timeout);
+static int  esp_i2s_tx_wait_on_sent_done(struct esp_i2s_s *priv,
+                                         uint32_t timeout);
+static int  esp_i2s_tx_job_send_quota(struct esp_i2s_s *priv,
+                                      struct ap_buffer_s *apb,
+                                      struct esp_i2s_tx_send_prep_s *prep,
+                                      bool prep_valid,
+                                      size_t *quota_out);
 
-static IRAM_ATTR int  i2s_txdma_setup(struct esp_i2s_s *priv,
-                                      struct esp_buffer_s *bfcontainer);
-static void           i2s_tx_worker(void *arg);
-static void           i2s_tx_schedule(struct esp_i2s_s *priv,
-                                      lldesc_t *outlink);
+/* TX event callbacks */
 
-static IRAM_ATTR int  i2s_rxdma_setup(struct esp_i2s_s *priv,
-                                      struct esp_buffer_s *bfcontainer);
-static void           i2s_rx_worker(void *arg);
-static void           i2s_rx_schedule(struct esp_i2s_s *priv,
-                                      lldesc_t *inlink);
+static bool IRAM_ATTR esp_i2s_tx_on_sent(i2s_chan_handle_t handle,
+                                          i2s_event_data_t *event,
+                                          void *user_ctx);
+static int  esp_i2s_tx_register_event_callbacks(struct esp_i2s_s *priv);
+static void esp_i2s_tx_on_sent_done_sem_drain(struct esp_i2s_s *priv);
+static void esp_i2s_tx_on_sent_disable_arm(struct esp_i2s_s *priv,
+                                            size_t send_len);
 
-/* I2S methods (and close friends) */
-#if SOC_I2S_SUPPORTS_APLL
-static uint32_t i2s_set_get_apll_freq(uint32_t mclk_freq_hz);
-#endif
-static uint32_t i2s_get_source_clk_freq(i2s_clock_src_t clk_src,
-                                        uint32_t mclk_freq_hz);
-static int32_t  i2s_check_mclkfrequency(struct esp_i2s_s *priv);
-static uint32_t i2s_set_datawidth(struct esp_i2s_s *priv);
-static int      i2s_set_clock(struct esp_i2s_s *priv);
+/* I2S lower-half methods */
+
 static uint32_t i2s_getmclkfrequency(struct i2s_dev_s *dev);
 static uint32_t i2s_setmclkfrequency(struct i2s_dev_s *dev,
                                      uint32_t frequency);
 static int      i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg);
-
-static void     i2s_tx_channel_start(struct esp_i2s_s *priv);
-static int      i2s_tx_channel_stop(struct esp_i2s_s *priv);
 static int      i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels);
 static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
 static int      i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                          i2s_callback_t callback, void *arg,
                          uint32_t timeout);
-
-static void     i2s_rx_channel_start(struct esp_i2s_s *priv);
-static int      i2s_rx_channel_stop(struct esp_i2s_s *priv);
-static bool     i2s_tx_error(gdma_channel_handle_t dma_chan,
-                             gdma_event_data_t *event_data,
-                             void *arg);
-static bool     i2s_rx_error(gdma_channel_handle_t dma_chan,
-                             gdma_event_data_t *event_data,
-                             void *arg);
-
 static int      i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels);
 static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
@@ -416,32 +422,22 @@ static int      i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
 static const struct i2s_ops_s g_i2sops =
 {
-  .i2s_txchannels     = i2s_txchannels,
-  .i2s_txsamplerate   = i2s_txsamplerate,
-  .i2s_txdatawidth    = i2s_txdatawidth,
-  .i2s_send           = i2s_send,
+  .i2s_txchannels   = i2s_txchannels,
+  .i2s_txsamplerate = i2s_txsamplerate,
+  .i2s_txdatawidth  = i2s_txdatawidth,
+  .i2s_send         = i2s_send,
 
-  .i2s_rxchannels     = i2s_rxchannels,
-  .i2s_rxsamplerate   = i2s_rxsamplerate,
-  .i2s_rxdatawidth    = i2s_rxdatawidth,
-  .i2s_receive        = i2s_receive,
+  .i2s_rxchannels   = i2s_rxchannels,
+  .i2s_rxsamplerate = i2s_rxsamplerate,
+  .i2s_rxdatawidth  = i2s_rxdatawidth,
+  .i2s_receive      = i2s_receive,
 
-  .i2s_ioctl             = i2s_ioctl,
-  .i2s_getmclkfrequency  = i2s_getmclkfrequency,
-  .i2s_setmclkfrequency  = i2s_setmclkfrequency,
+  .i2s_ioctl            = i2s_ioctl,
+  .i2s_getmclkfrequency = i2s_getmclkfrequency,
+  .i2s_setmclkfrequency = i2s_setmclkfrequency,
 };
 
 #ifdef CONFIG_ESPRESSIF_I2S0
-
-i2s_hal_context_t ctx_i2s0 =
-{
-  0
-};
-
-i2s_hal_clock_info_t clk_info_i2s0 =
-{
-  0
-};
 
 static struct esp_i2s_config_s esp_i2s0_config =
 {
@@ -476,8 +472,6 @@ static struct esp_i2s_config_s esp_i2s0_config =
   .din_pin          = I2S_GPIO_UNUSED,
 #endif /* CONFIG_ESPRESSIF_I2S0_DINPIN */
   .audio_std_mode   = I2S_TDM_PHILIPS,
-  .ctx              = &ctx_i2s0,
-  .clk_info         = &clk_info_i2s0,
 #ifdef CONFIG_PM
   .pm_lock          = NULL,
 #endif
@@ -492,158 +486,745 @@ static struct esp_i2s_s esp_i2s0_priv =
   .lock = NXMUTEX_INITIALIZER,
   .slock = SP_UNLOCKED,
   .config = &esp_i2s0_config,
-  .bufsem = SEM_INITIALIZER(0),
 };
 #endif /* CONFIG_ESPRESSIF_I2S0 */
 
 /****************************************************************************
- * Private Functions
+ * Private helpers - I2S channel setup
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2s_buf_allocate
+ * Name: i2s_map_esp_err
  *
  * Description:
- *   Allocate a buffer container by removing the one at the head of the
- *   free list
+ *   Map an Espressif `esp_err_t` value to a NuttX errno-style return code.
  *
  * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   A non-NULL pointer to the allocate buffer container on success; NULL if
- *   there are no available buffer containers.
- *
- * Assumptions:
- *   The caller does NOT have exclusive access to the I2S state structure.
- *   That would result in a deadlock!
- *
- ****************************************************************************/
-
-static struct esp_buffer_s *i2s_buf_allocate(struct esp_i2s_s *priv)
-{
-  struct esp_buffer_s *bfcontainer;
-  irqstate_t flags;
-  int ret;
-  int alignment;
-  int i;
-
-  /* Set aside a buffer container.  By doing this, we guarantee that we will
-   * have at least one free buffer container.
-   */
-
-  ret = nxsem_wait_uninterruptible(&priv->bufsem);
-  if (ret < 0)
-    {
-      return NULL;
-    }
-
-  /* Get the buffer from the head of the free list */
-
-  flags = spin_lock_irqsave(&priv->slock);
-  bfcontainer = priv->bf_freelist;
-  DEBUGASSERT(bfcontainer);
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  alignment = cache_hal_get_cache_line_size(CACHE_LL_LEVEL_INT_MEM,
-                                            CACHE_TYPE_DATA);
-#else
-  alignment = sizeof(uint32_t);
-#endif
-
-  for (i = 0; i < I2S_DMADESC_NUM; i++)
-    {
-      size_t size = ALIGN_UP(sizeof(lldesc_t), alignment);
-      bfcontainer->dma_link[i] = (lldesc_t *)kmm_memalign(alignment, size);
-    }
-
-  /* Unlink the buffer from the freelist */
-
-  priv->bf_freelist = bfcontainer->flink;
-  spin_unlock_irqrestore(&priv->slock, flags);
-  return bfcontainer;
-}
-
-/****************************************************************************
- * Name: i2s_buf_free
- *
- * Description:
- *   Free buffer container by adding it to the head of the free list
- *
- * Input Parameters:
- *   priv        - Initialized I2S device structure.
- *   bfcontainer - The buffer container to be freed
+ *   err - Espressif HAL error code
  *
  * Returned Value:
  *   OK on success; a negated errno value on failure.
  *
- * Assumptions:
- *   The caller has exclusive access to the I2S state structure
- *
  ****************************************************************************/
 
-static int i2s_buf_free(struct esp_i2s_s *priv,
-                        struct esp_buffer_s *bfcontainer)
+static int i2s_map_esp_err(esp_err_t err)
 {
-  irqstate_t flags;
-  int i;
-
-  /* Put the buffer container back on the free list (circbuf) */
-
-  flags = spin_lock_irqsave(&priv->slock);
-
-  for (i = 0; i < I2S_DMADESC_NUM; i++)
+  switch (err)
     {
-      kmm_free(bfcontainer->dma_link[i]);
-      bfcontainer->dma_link[i] = NULL;
+    case ESP_OK:
+      return OK;
+
+    case ESP_ERR_NO_MEM:
+      return -ENOMEM;
+
+    case ESP_ERR_INVALID_ARG:
+      return -EINVAL;
+
+    default:
+      return -EIO;
     }
-
-  bfcontainer->apb = NULL;
-  bfcontainer->buf = NULL;
-  bfcontainer->nbytes = 0;
-  bfcontainer->flink  = priv->bf_freelist;
-  priv->bf_freelist = bfcontainer;
-
-  spin_unlock_irqrestore(&priv->slock, flags);
-
-  /* Wake up any threads waiting for a buffer container */
-
-  return nxsem_post(&priv->bufsem);
 }
 
 /****************************************************************************
- * Name: i2s_buf_initialize
+ * Name: i2s_configure_del_channels
  *
  * Description:
- *   Initialize the buffer container allocator by adding all of the
- *   pre-allocated buffer containers to the free list
+ *   Delete any I2S TX/RX channel handles held in `priv`.
  *
  * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   OK on success; A negated errno value on failure.
- *
- * Assumptions:
- *   Called early in I2S initialization so that there are no issues with
- *   concurrency.
+ *   priv - I2S device structure
  *
  ****************************************************************************/
 
-static int i2s_buf_initialize(struct esp_i2s_s *priv)
+static void i2s_configure_del_channels(struct esp_i2s_s *priv)
 {
-  int ret;
-
-  priv->tx.carry.bytes = 0;
-  priv->tx.carry.value = 0;
-
-  priv->bf_freelist = NULL;
-  for (int i = 0; i < CONFIG_ESPRESSIF_I2S_MAXINFLIGHT; i++)
+  if (priv->rx_handle)
     {
-      ret = i2s_buf_free(priv, &priv->containers[i]);
-      if (ret < 0)
+      i2s_del_channel(priv->rx_handle);
+      priv->rx_handle = NULL;
+    }
+
+  if (priv->tx_handle)
+    {
+      i2s_del_channel(priv->tx_handle);
+      priv->tx_handle = NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_try_idle_shutdown_locked
+ *
+ * Description:
+ *   Disable the TX channel when no AUDIOIOC_START session is active and no
+ *   buffer is waiting to be transmitted.
+ *
+ *   Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_try_idle_shutdown_locked(struct esp_i2s_s *priv)
+{
+  if (priv->session_active)
+    {
+      return;
+    }
+
+  if (esp_i2s_tx_in_flight_locked(priv))
+    {
+      return;
+    }
+
+  esp_i2s_tx_disable_locked(priv);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_try_idle_shutdown_locked
+ *
+ * Description:
+ *   Disable the RX channel when no AUDIOIOC_START session is active and no
+ *   buffer is waiting to be received.
+ *
+ *   Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_try_idle_shutdown_locked(struct esp_i2s_s *priv)
+{
+  if (priv->session_active)
+    {
+      return;
+    }
+
+  if (priv->rx_busy || !sq_empty(&priv->rx_jobs))
+    {
+      return;
+    }
+
+  esp_i2s_rx_disable_locked(priv);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_try_idle_shutdown
+ *
+ * Description:
+ *   Thread/work-context wrapper for `esp_i2s_tx_try_idle_shutdown_locked()`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_try_idle_shutdown(struct esp_i2s_s *priv)
+{
+  nxmutex_lock(&priv->lock);
+  esp_i2s_tx_try_idle_shutdown_locked(priv);
+  nxmutex_unlock(&priv->lock);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_try_idle_shutdown
+ *
+ * Description:
+ *   Thread/work-context wrapper for `esp_i2s_rx_try_idle_shutdown_locked()`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_try_idle_shutdown(struct esp_i2s_s *priv)
+{
+  nxmutex_lock(&priv->lock);
+  esp_i2s_rx_try_idle_shutdown_locked(priv);
+  nxmutex_unlock(&priv->lock);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_idle_shutdown_worker
+ *
+ * Description:
+ *   HPWORK callback: stop the TX channel when it is idle.
+ *
+ * Input Parameters:
+ *   arg - I2S device structure cast from the work-queue argument
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_idle_shutdown_worker(FAR void *arg)
+{
+  esp_i2s_tx_try_idle_shutdown((struct esp_i2s_s *)arg);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_idle_shutdown_worker
+ *
+ * Description:
+ *   HPWORK callback: stop the RX channel when it is idle.
+ *
+ * Input Parameters:
+ *   arg - I2S device structure cast from the work-queue argument
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_idle_shutdown_worker(FAR void *arg)
+{
+  esp_i2s_rx_try_idle_shutdown((struct esp_i2s_s *)arg);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_idle_shutdown_disarm
+ *
+ * Description:
+ *   Cancel a pending TX idle-shutdown.  Called when a new send starts.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_idle_shutdown_disarm(struct esp_i2s_s *priv)
+{
+  work_cancel(HPWORK, &priv->tx_stop_work);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_idle_shutdown_disarm
+ *
+ * Description:
+ *   Cancel a pending RX idle-shutdown.  Called when a new receive starts.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_idle_shutdown_disarm(struct esp_i2s_s *priv)
+{
+  work_cancel(HPWORK, &priv->rx_stop_work);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_idle_shutdown_arm
+ *
+ * Description:
+ *   Schedule a deferred TX idle-shutdown check.  A subsequent `i2s_send()`
+ *   cancels this so multi-buffer TX streams stay clocked.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_idle_shutdown_arm(struct esp_i2s_s *priv)
+{
+  work_cancel(HPWORK, &priv->tx_stop_work);
+  work_queue(HPWORK, &priv->tx_stop_work, esp_i2s_tx_idle_shutdown_worker,
+             priv, ESP_I2S_IDLE_SHUTDOWN_DELAY);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_idle_shutdown_arm
+ *
+ * Description:
+ *   Schedule a deferred RX idle-shutdown check.  A subsequent
+ *   `i2s_receive()` cancels this so multi-buffer RX streams stay clocked.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_idle_shutdown_arm(struct esp_i2s_s *priv)
+{
+  work_cancel(HPWORK, &priv->rx_stop_work);
+  work_queue(HPWORK, &priv->rx_stop_work, esp_i2s_rx_idle_shutdown_worker,
+             priv, ESP_I2S_IDLE_SHUTDOWN_DELAY);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_on_sent_done_sem_drain
+ *
+ * Description:
+ *   Consume any posts left on `tx_on_sent_done_sem` from a prior send.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_on_sent_done_sem_drain(struct esp_i2s_s *priv)
+{
+  while (nxsem_trywait(&priv->tx_on_sent_done_sem) == OK)
+    {
+      /* Discard stale completion posts. */
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_on_sent_disable_arm
+ *
+ * Description:
+ *   Arm TX stop after `ceil(send_len / tx_dma_buf_size)` `on_sent` events.
+ *   Caller must hold `priv->lock`.  Must run before `i2s_channel_enable()`.
+ *
+ * Input Parameters:
+ *   priv     - I2S device structure
+ *   send_len - Number of bytes to be sent in the current operation
+ *
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_on_sent_disable_arm(struct esp_i2s_s *priv,
+                                           size_t send_len)
+{
+  size_t   blk;
+  uint32_t blocks;
+
+  esp_i2s_tx_on_sent_done_sem_drain(priv);
+
+  if (send_len == 0 || priv->tx_dma_buf_size == 0)
+    {
+      priv->tx_on_sent_blocks_left = 0;
+      return;
+    }
+
+  blk = priv->tx_dma_buf_size;
+  blocks = (uint32_t)((send_len + blk - 1) / blk);
+  priv->tx_on_sent_blocks_left = blocks;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_job_send_quota
+ *
+ * Description:
+ *   Compute the number of bytes that will be sent for one TX job, using an
+ *   existing prep when valid or building a temporary one from `apb`.
+ *
+ * Input Parameters:
+ *   priv       - I2S device structure
+ *   apb        - Audio buffer for the transfer
+ *   prep       - Optional prior TX prep result
+ *   prep_valid - True when `prep` is populated
+ *
+ * Output Parameters:
+ *   quota_out - Receives the send length in bytes
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_job_send_quota(struct esp_i2s_s *priv,
+                                     struct ap_buffer_s *apb,
+                                     struct esp_i2s_tx_send_prep_s *prep,
+                                     bool prep_valid,
+                                     size_t *quota_out)
+{
+  struct esp_i2s_tx_send_prep_s local;
+  int                           ret;
+
+  if (quota_out == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (prep_valid && prep != NULL)
+    {
+      *quota_out = prep->send_len;
+      return OK;
+    }
+
+  ret = esp_i2s_tx_prep_apb(priv, apb, &local);
+  if (ret < OK)
+    {
+      return ret;
+    }
+
+  *quota_out = local.send_len;
+  esp_i2s_tx_prep_release(&local);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_on_sent
+ *
+ * Description:
+ *   TX DMA EOF callback registered via
+ *   `i2s_channel_register_event_callback`.
+ *
+ * Input Parameters:
+ *   handle   - TX channel handle
+ *   event    - I2S event data from the HAL
+ *   user_ctx - I2S device structure (`priv`)
+ *
+ * Returned Value:
+ *   Always false (do not yield from the ISR callback).
+ *
+ ****************************************************************************/
+
+static bool IRAM_ATTR esp_i2s_tx_on_sent(i2s_chan_handle_t handle,
+                                               i2s_event_data_t *event,
+                                               void *user_ctx)
+{
+  struct esp_i2s_s *priv = (struct esp_i2s_s *)user_ctx;
+  uint32_t          left;
+
+  if (priv == NULL || event == NULL || !priv->tx_started ||
+      priv->tx_on_sent_blocks_left == 0)
+    {
+      return false;
+    }
+
+  left = --priv->tx_on_sent_blocks_left;
+
+  if (left == 0)
+    {
+      nxsem_post(&priv->tx_on_sent_done_sem);
+
+      if (priv->session_active)
         {
-          i2serr("Failed to free buffer container: %d\n", ret);
+          esp_i2s_tx_idle_shutdown_arm(priv);
+        }
+    }
+
+  return false;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_register_event_callbacks
+ *
+ * Description:
+ *   Register TX event callbacks before the channel is enabled.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_register_event_callbacks(struct esp_i2s_s *priv)
+{
+  i2s_event_callbacks_t cbs;
+  esp_err_t             err;
+
+  if (!priv->config->tx_en || priv->tx_handle == NULL)
+    {
+      return OK;
+    }
+
+  memset(&cbs, 0, sizeof(cbs));
+  cbs.on_sent = esp_i2s_tx_on_sent;
+
+  err = i2s_channel_register_event_callback(priv->tx_handle, &cbs, priv);
+  if (err != ESP_OK)
+    {
+      i2serr("I2S: register TX event callback failed: %d\n",
+             i2s_map_esp_err(err));
+      return i2s_map_esp_err(err);
+    }
+
+  priv->tx_on_sent_blocks_left = 0;
+  priv->tx_dma_buf_size = priv->tx_handle->dma.buf_size;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_burst_full_duplex
+ *
+ * Description:
+ *   True during per-APB burst I/O when TX and RX are both configured and no
+ *   AUDIOIOC_START session is active.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when burst full-duplex I/O is active.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_burst_full_duplex(struct esp_i2s_s *priv)
+{
+  return !priv->session_active &&
+         priv->config->tx_en && priv->config->rx_en;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_check_io_apb
+ *
+ * Description:
+ *   Common buffer validation for `i2s_send` and `i2s_receive`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *   apb  - Audio buffer to validate
+ *
+ * Returned Value:
+ *   OK when the buffer is valid; a negated errno value otherwise.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_check_io_apb(struct esp_i2s_s *priv,
+                                struct ap_buffer_s *apb)
+{
+  apb_samp_t span_end_excl_chk;
+
+  DEBUGASSERT(apb != NULL && apb->samp != NULL);
+
+  if (apb->nbytes > apb->nmaxbytes ||
+      priv->channels == 0 || priv->data_width == 0)
+    {
+      return -EINVAL;
+    }
+
+  if (esp_i2s_apb_span_end_excl(apb, &span_end_excl_chk) < OK)
+    {
+      return -EINVAL;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_invoke_cb
+ *
+ * Description:
+ *   Invoke a user-provided I2S completion callback when non-NULL.
+ *
+ * Input Parameters:
+ *   dev    - I2S device structure
+ *   apb    - Audio buffer associated with the transfer
+ *   cb     - User callback function
+ *   arg    - Opaque argument passed to the callback
+ *   result - Transfer result passed to the callback
+ *
+ ****************************************************************************/
+
+static void esp_i2s_io_invoke_cb(struct i2s_dev_s *dev,
+                                 struct ap_buffer_s *apb,
+                                 i2s_callback_t cb, void *arg, int result)
+{
+  if (cb != NULL)
+    {
+      cb(dev, apb, arg, result);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_submit_job
+ *
+ * Description:
+ *   Reference `apb`, enqueue `job` on `queue`, and optionally wake the I/O
+ *   thread.  On wakeup failure the job is removed and the APB reference is
+ *   dropped; the caller must free `job`.
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   queue   - Job queue on which to enqueue `job`
+ *   job     - Job entry to enqueue
+ *   apb     - Audio buffer referenced by the job
+ *   wake_io - True to post `io_sem` and wake the I/O thread
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_io_submit_job(struct esp_i2s_s *priv, sq_queue_t *queue,
+                                 sq_entry_t *job, struct ap_buffer_s *apb,
+                                 bool wake_io)
+{
+  int sret;
+
+  apb_reference(apb);
+
+  nxmutex_lock(&priv->lock);
+  sq_addlast(job, queue);
+  nxmutex_unlock(&priv->lock);
+
+  if (!wake_io || !priv->io_thread_created)
+    {
+      return OK;
+    }
+
+  sret = nxsem_post(&priv->io_sem);
+  if (sret != OK)
+    {
+      nxmutex_lock(&priv->lock);
+      sq_remfirst(queue);
+      nxmutex_unlock(&priv->lock);
+      apb_free(apb);
+    }
+
+  return sret;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_apply_carry_locked
+ *
+ * Description:
+ *   Store TX carry bytes from a prep with zero send length.  Caller must
+ *   hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *   prep - TX prep containing carry bytes to store
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_apply_carry_locked(struct esp_i2s_s *priv,
+       struct esp_i2s_tx_send_prep_s *prep)
+{
+  priv->tx_carry.bytes = prep->new_carry_len;
+  if (prep->new_carry_len != 0)
+    {
+      memcpy(priv->tx_carry.data, prep->new_carry, prep->new_carry_len);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_preload
+ *
+ * Description:
+ *   Prepare an APB for TX, cache-sync, and preload into the TX DMA buffer.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *   apb  - Audio buffer to preload
+ *   prep - TX prep structure to populate
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_preload(struct esp_i2s_s *priv,
+                              struct ap_buffer_s *apb,
+                              struct esp_i2s_tx_send_prep_s *prep)
+{
+  esp_err_t esp_ret;
+  size_t    bytes_loaded;
+  int       ret;
+
+  ret = esp_i2s_tx_prep_apb(priv, apb, prep);
+  if (ret < OK || prep->send_len == 0)
+    {
+      return ret;
+    }
+
+#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
+  esp_cache_msync(prep->xfer, prep->send_len, ESP_CACHE_MSYNC_FLAG_DIR_C2M);
+#endif
+
+  esp_ret = i2s_channel_preload_data(priv->tx_handle, prep->xfer,
+                                     prep->send_len, &bytes_loaded);
+  if (esp_ret != ESP_OK)
+    {
+      esp_i2s_tx_prep_release(prep);
+      return i2s_map_esp_err(esp_ret);
+    }
+
+  prep->preloaded = bytes_loaded;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_burst_channels_down_locked
+ *
+ * Description:
+ *   Disable both TX and RX channels during burst full duplex.  Caller must
+ *   hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   with_rx - True to disable RX as well as TX
+ *
+ ****************************************************************************/
+
+static void esp_i2s_burst_channels_down_locked(struct esp_i2s_s *priv,
+                                               bool with_rx)
+{
+  esp_i2s_tx_disable_locked(priv);
+  if (with_rx)
+    {
+      esp_i2s_rx_disable_locked(priv);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_burst_reset_channels_locked
+ *
+ * Description:
+ *   Disable stale TX (and optionally RX) channels before a burst job.
+ *   Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   with_rx - True to reset RX as well as TX when active
+ *
+ ****************************************************************************/
+
+static void esp_i2s_burst_reset_channels_locked(struct esp_i2s_s *priv,
+                                                bool with_rx)
+{
+  if (priv->tx_started)
+    {
+      esp_i2s_burst_channels_down_locked(priv, with_rx);
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_channel_enable_locked
+ *
+ * Description:
+ *   Enable the TX I2S channel when configured and not already started.
+ *   When `with_rx` is true during burst full duplex, RX is enabled as well
+ *   so shared BCLK/WS stay up for a subsequent burst `i2s_receive()`.
+ *   Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   with_rx - True to enable RX during burst full duplex
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_channel_enable_locked(struct esp_i2s_s *priv,
+                                            bool with_rx)
+{
+  esp_err_t err;
+  int       ret;
+
+  if (!priv->config->tx_en || priv->tx_handle == NULL || priv->tx_started)
+    {
+      return OK;
+    }
+
+  err = i2s_channel_enable(priv->tx_handle);
+  if (err != ESP_OK)
+    {
+      return i2s_map_esp_err(err);
+    }
+
+  priv->tx_started = true;
+
+  if (with_rx && esp_i2s_burst_full_duplex(priv))
+    {
+      ret = esp_i2s_rx_channel_start_locked(priv);
+      if (ret < OK)
+        {
+          i2s_channel_disable(priv->tx_handle);
+          priv->tx_started = false;
           return ret;
         }
     }
@@ -652,884 +1233,986 @@ static int i2s_buf_initialize(struct esp_i2s_s *priv)
 }
 
 /****************************************************************************
- * Name: i2s_common_dma_setup
+ * Name: esp_i2s_rx_channel_start_locked
  *
  * Description:
- *   Set up I2S DMA descriptors with given parameters using lldesc_t.
- *   This function is based on esp_dma_setup but adapted for I2S using
- *   lldesc_t descriptors and struct esp_buffer_s.
+ *   Enable the RX I2S channel via `i2s_channel_enable()` when configured and
+ *   not already started. Caller must hold `priv->lock`.
  *
  * Input Parameters:
- *   bfcontainer - Buffer container with DMA descriptors
- *   tx          - true: TX mode; false: RX mode
- *   len         - Buffer length by byte
+ *   priv - I2S device structure
  *
  * Returned Value:
- *   Number of bytes bound to descriptors
+ *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static uint32_t i2s_common_dma_setup(struct esp_buffer_s *bfcontainer,
-                                     bool tx, uint32_t len)
+static int esp_i2s_rx_channel_start_locked(struct esp_i2s_s *priv)
 {
-  int i;
-  uint32_t bytes = len;
-  uint8_t *pdata = bfcontainer->buf;
-  uint32_t data_len;
-  uint32_t buf_len;
-  lldesc_t *dma_desc;
-
-  DEBUGASSERT(bfcontainer != NULL);
-  DEBUGASSERT(bfcontainer->dma_link != NULL);
-  DEBUGASSERT(bfcontainer->buf != NULL);
-  DEBUGASSERT(len > 0);
-
-  for (i = 0; i < I2S_DMADESC_NUM; i++)
-    {
-      data_len = MIN(bytes, I2S_DMA_BUFFER_MAX_SIZE);
-
-      /* Buffer length must be rounded to next 32-bit boundary. */
-
-      buf_len = ALIGN_UP(data_len, sizeof(uintptr_t));
-
-      dma_desc = bfcontainer->dma_link[i];
-      dma_desc->size = buf_len;
-      dma_desc->length = tx ? data_len : 0;
-      dma_desc->owner = DMA_DESCRIPTOR_BUFFER_OWNER_DMA;
-      dma_desc->buf = pdata;
-      dma_desc->eof = 0;
-      dma_desc->sosf = 0;
-      dma_desc->offset = 0;
-
-      /* Link to the next descriptor */
-
-      if (i < (I2S_DMADESC_NUM - 1))
-        {
-          STAILQ_NEXT(dma_desc, qe) = bfcontainer->dma_link[i + 1];
-        }
-      else
-        {
-          STAILQ_NEXT(dma_desc, qe) = NULL;
-        }
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-      esp_cache_msync(dma_desc, sizeof(lldesc_t),
-                      ESP_CACHE_MSYNC_FLAG_DIR_C2M | \
-                      ESP_CACHE_MSYNC_FLAG_UNALIGNED);
-#endif
-
-      bytes -= data_len;
-      if (bytes == 0)
-        {
-          break;
-        }
-
-      pdata += data_len;
-    }
-
-  /* Set EOF flag on the last descriptor */
-
-  dma_desc->eof = tx ? 1 : 0;
-
-  /* Set the next pointer to NULL on the last descriptor */
-
-  STAILQ_NEXT(dma_desc, qe) = NULL;
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  esp_cache_msync(dma_desc, sizeof(lldesc_t),
-                  ESP_CACHE_MSYNC_FLAG_DIR_C2M | \
-                  ESP_CACHE_MSYNC_FLAG_UNALIGNED);
-#endif
-
-  return len - bytes;
-}
-
-/****************************************************************************
- * Name: i2s_txdma_start
- *
- * Description:
- *   Initiate the next TX DMA transfer. The DMA outlink was previously bound
- *   so it is safe to start the next DMA transfer at interrupt level.
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   OK on success; a negated errno value on failure
- *
- * Assumptions:
- *   Interrupts are disabled
- *
- ****************************************************************************/
-
-static int IRAM_ATTR i2s_txdma_start(struct esp_i2s_s *priv)
-{
-  struct esp_buffer_s *bfcontainer;
   esp_err_t err;
 
-  /* If there is already an active transmission in progress, then bail
-   * returning success.
-   */
-
-  if (!sq_empty(&priv->tx.act))
+  if (!priv->config->rx_en || priv->rx_handle == NULL || priv->rx_started)
     {
       return OK;
     }
 
-  /* If there are no pending transfer, then bail returning success */
-
-  if (sq_empty(&priv->tx.pend))
-    {
-      return OK;
-    }
-
-  i2s_hal_tx_reset(priv->config->ctx);
-
-  /* Reset the DMA operation */
-
-  err = gdma_reset(priv->dma_channel_tx);
+  err = i2s_channel_enable(priv->rx_handle);
   if (err != ESP_OK)
     {
-      i2serr("Failed to reset DMA channel: %d\n", err);
-      return -EINVAL;
+      return i2s_map_esp_err(err);
     }
-
-  /* Reset TX FIFO */
-
-  i2s_hal_tx_reset_fifo(priv->config->ctx);
-
-  /* Start transmission if no data is already being transmitted */
-
-  bfcontainer = (struct esp_buffer_s *)sq_remfirst(&priv->tx.pend);
-
-  err = gdma_start(priv->dma_channel_tx, (intptr_t)bfcontainer->dma_link[0]);
-  if (err != ESP_OK)
-    {
-      i2serr("Failed to start DMA channel: %d\n", err);
-      return -EINVAL;
-    }
-
-  i2s_hal_tx_start(priv->config->ctx);
-
-  priv->tx_started = true;
-
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.act);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: i2s_rxdma_start
- *
- * Description:
- *   Initiate the next RX DMA transfer. Assuming the DMA inlink is already
- *   bound, it's safe to start the next DMA transfer in an interrupt context.
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   OK on success; a negated errno value on failure
- *
- * Assumptions:
- *   Interrupts are disabled
- *
- ****************************************************************************/
-
-static int i2s_rxdma_start(struct esp_i2s_s *priv)
-{
-  struct esp_buffer_s *bfcontainer;
-  size_t eof_nbytes;
-  esp_err_t err;
-
-  /* If there is already an active transmission in progress, then bail
-   * returning success.
-   */
-
-  if (!sq_empty(&priv->rx.act))
-    {
-      return OK;
-    }
-
-  /* If there are no pending transfer, then bail returning success */
-
-  if (sq_empty(&priv->rx.pend))
-    {
-      return OK;
-    }
-
-  i2s_hal_rx_reset(priv->config->ctx);
-
-  /* Reset the DMA operation */
-
-  err = gdma_reset(priv->dma_channel_rx);
-  if (err != ESP_OK)
-    {
-      i2serr("Failed to reset DMA channel: %d\n", err);
-      return -EINVAL;
-    }
-
-  /* Reset RX FIFO */
-
-  i2s_hal_rx_reset_fifo(priv->config->ctx);
-
-  bfcontainer = (struct esp_buffer_s *)sq_remfirst(&priv->rx.pend);
-
-  eof_nbytes = MIN(bfcontainer->nbytes, I2S_DMA_BUFFER_MAX_SIZE);
-
-  i2s_ll_rx_set_eof_num(priv->config->ctx->dev, eof_nbytes);
-
-  /* If there isn't already an active transmission in progress,
-   * then start it.
-   */
-
-  err = gdma_start(priv->dma_channel_rx, (intptr_t)bfcontainer->dma_link[0]);
-  if (err != ESP_OK)
-    {
-      i2serr("Failed to start DMA channel: %d\n", err);
-      return -EINVAL;
-    }
-
-  i2s_hal_rx_start(priv->config->ctx);
 
   priv->rx_started = true;
-
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.act);
-
   return OK;
 }
 
 /****************************************************************************
- * Name: i2s_txdma_setup
+ * Name: esp_i2s_tx_in_flight_locked
  *
  * Description:
- *   Setup the next TX DMA transfer
+ *   True when a buffer is being transmitted (queued, in the daemon, or
+ *   draining in DMA).  Caller must hold `priv->lock`.
  *
  * Input Parameters:
- *   priv        - Initialized I2S device structure.
- *   bfcontainer - The buffer container to be set up
+ *   priv - I2S device structure
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure
- *
- * Assumptions:
- *   Interrupts are disabled
+ *   True when TX data is queued or still in DMA.
  *
  ****************************************************************************/
 
-static IRAM_ATTR int i2s_txdma_setup(struct esp_i2s_s *priv,
-                                     struct esp_buffer_s *bfcontainer)
+static bool esp_i2s_tx_in_flight_locked(struct esp_i2s_s *priv)
 {
-  int ret = OK;
-  size_t carry_size;
-  uint32_t bytes_queued;
-  uint32_t data_copied;
-  struct ap_buffer_s *apb;
-  apb_samp_t samp_size;
-  apb_samp_t bytes_per_sample;
-  uint16_t bytes_per_frame;
-  irqstate_t flags;
-  uint8_t *buf;
-  uint8_t padding;
-  uint8_t *samp;
-  uint32_t alignment;
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  uint32_t bufsize;
-#endif
+  return priv->tx_busy || !sq_empty(&priv->tx_jobs) ||
+         priv->tx_on_sent_blocks_left > 0;
+}
 
-  DEBUGASSERT(bfcontainer && bfcontainer->apb);
+/****************************************************************************
+ * Name: esp_i2s_tx_disable_locked
+ *
+ * Description:
+ *   Disable the TX channel.  Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
 
-  apb = bfcontainer->apb;
-
-  /* Get the transfer information, accounting for any data offset */
-
-  bytes_per_sample = (priv->data_width + 7) / 8;
-  bytes_per_frame = bytes_per_sample * priv->channels;
-
-  samp = &apb->samp[apb->curbyte];
-  samp_size = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  /* bufsize need to align with cache line size */
-
-  bufsize = samp_size;
-  alignment = cache_hal_get_cache_line_size(CACHE_LL_LEVEL_INT_MEM,
-                                            CACHE_TYPE_DATA);
-
-  /* First, calculate if the buffer contains a complete sample */
-
-  carry_size = samp_size % bytes_per_frame;
-
-  bufsize -= carry_size;
-
-  /* Now, the buffer contains complete samples */
-
-  uint32_t aligned_frame_num = bufsize / bytes_per_frame;
-
-  /* To make the buffer aligned with the cache line size, search for the ceil
-   * aligned size first. If the buffer size exceed the max DMA buffer size,
-   * toggle the sign to search for the floor aligned size.
-   */
-
-  for (; bufsize % alignment != 0; aligned_frame_num--)
+static void esp_i2s_tx_disable_locked(struct esp_i2s_s *priv)
+{
+  if (priv->tx_started && priv->tx_handle != NULL)
     {
-      bufsize = aligned_frame_num * bytes_per_frame;
-      carry_size += bytes_per_frame;
+      i2s_channel_disable(priv->tx_handle);
+      priv->tx_started = false;
     }
 
-  DEBUGASSERT((samp_size - carry_size) % alignment == 0);
+  priv->tx_on_sent_blocks_left = 0;
+}
 
-#else
-  alignment = sizeof(uint32_t);
-  carry_size = samp_size % bytes_per_frame;
-#endif
+/****************************************************************************
+ * Name: esp_i2s_rx_disable_locked
+ *
+ * Description:
+ *   Disable the RX channel.  Caller must hold `priv->lock`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
 
-  DEBUGASSERT((samp_size - carry_size) % bytes_per_frame == 0);
-
-  /* Allocate the current audio buffer considering the remaining bytes
-   * carried from the last upper half audio buffer.
-   */
-
-  bfcontainer->buf = kmm_memalign(alignment, bfcontainer->nbytes);
-  if (bfcontainer->buf == NULL)
+static void esp_i2s_rx_disable_locked(struct esp_i2s_s *priv)
+{
+  if (priv->rx_started && priv->rx_handle != NULL)
     {
-      i2serr("Failed to allocate the DMA internal buffer "
-             "[%" PRIu32 " bytes]", bfcontainer->nbytes);
-      return -ENOMEM;
+      i2s_channel_disable(priv->rx_handle);
+      priv->rx_started = false;
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_finish_job
+ *
+ * Description:
+ *   Mark the current receive transfer complete and stop the RX channel when
+ *   no session is active and no buffer is waiting to be received.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_finish_job(struct esp_i2s_s *priv)
+{
+  nxmutex_lock(&priv->lock);
+  priv->rx_busy = false;
+
+  if (!priv->session_active)
+    {
+      nxmutex_unlock(&priv->lock);
+      return;
     }
 
-  data_copied = 0;
-  buf = bfcontainer->buf;
+  nxmutex_unlock(&priv->lock);
 
-  /* Copy the remaining bytes from the last audio buffer to the current
-   * audio buffer. The remaining bytes are part of a sample that was split
-   * between the last and the current audio buffer. Also, copy the bytes
-   * from that split sample that are on the current buffer to the internal
-   * buffer.
-   */
+  esp_i2s_rx_idle_shutdown_arm(priv);
+}
 
-  if (priv->tx.carry.bytes)
-    {
-      memcpy(buf, &priv->tx.carry.value, priv->tx.carry.bytes);
-      buf += priv->tx.carry.bytes;
-      data_copied += priv->tx.carry.bytes;
-      memcpy(buf, samp, (bytes_per_frame - priv->tx.carry.bytes));
-      buf += (bytes_per_frame - priv->tx.carry.bytes);
-      samp += (bytes_per_frame - priv->tx.carry.bytes);
-      data_copied += (bytes_per_frame - priv->tx.carry.bytes);
-    }
+/****************************************************************************
+ * Name: esp_i2s_tx_channel_start
+ *
+ * Description:
+ *   Like `esp_i2s_tx_channel_enable_locked` but acquires `priv->lock`.
+ *   Called from `i2s_send`.  Enables TX, and RX too during burst full
+ *   duplex.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-  /* Copy the upper half buffer to the internal buffer considering that
-   * the current upper half buffer may not contain a complete sample at
-   * the end of the buffer (and those bytes needs to be carried to the
-   * next audio buffer).
-   */
+static int esp_i2s_tx_channel_start(struct esp_i2s_s *priv)
+{
+  int ret;
 
-  memcpy(buf, samp, samp_size - (data_copied + carry_size));
-  buf += samp_size - (data_copied + carry_size);
-  samp += samp_size - (data_copied + carry_size);
-  data_copied += samp_size - (data_copied + carry_size);
-
-  /* If the audio buffer's size is not a multiple of the sample size,
-   * it's necessary to carry the remaining bytes that are part of what
-   * would be the last sample on this buffer. These bytes will then be
-   * saved and inserted at the beginning of the next DMA buffer to
-   * rebuild the sample correctly.
-   */
-
-  priv->tx.carry.bytes = carry_size;
-  if (priv->tx.carry.bytes)
-    {
-      memcpy((uint8_t *)&priv->tx.carry.value, samp, priv->tx.carry.bytes);
-    }
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  esp_cache_msync((void *)bfcontainer->buf,
-                  bfcontainer->nbytes,
-                  ESP_CACHE_MSYNC_FLAG_DIR_C2M);
-#endif
-
-  /* Configure DMA stream */
-
-  bytes_queued = i2s_common_dma_setup(bfcontainer,
-                                      true,
-                                      bfcontainer->nbytes);
-
-  if (bytes_queued != bfcontainer->nbytes)
-    {
-      i2serr("Failed to enqueue I2S buffer "
-             "(%" PRIu32 " bytes of %" PRIu32 ")\n",
-             bytes_queued, bfcontainer->nbytes);
-      return -bytes_queued;
-    }
-
-  flags = spin_lock_irqsave(&priv->slock);
-
-  /* Add the buffer container to the end of the TX pending queue */
-
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
-
-  /* Trigger DMA transfer if no transmission is in progress */
-
-  ret = i2s_txdma_start(priv);
-
-  spin_unlock_irqrestore(&priv->slock, flags);
+  nxmutex_lock(&priv->lock);
+  ret = esp_i2s_tx_channel_enable_locked(priv, true);
+  nxmutex_unlock(&priv->lock);
 
   return ret;
 }
 
 /****************************************************************************
- * Name: i2s_rxdma_setup
+ * Name: esp_i2s_rx_channel_start
  *
  * Description:
- *   Setup the next RX DMA transfer
+ *   Like `esp_i2s_rx_channel_start_locked` but acquires `priv->lock`.
+ *   Called from `i2s_receive`.  Burst mode defers enable to the I/O thread.
  *
  * Input Parameters:
- *   priv - Initialized I2S device structure.
- *   bfcontainer - The buffer container to be set up
+ *   priv - I2S device structure
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure
- *
- * Assumptions:
- *   Interrupts are disabled
+ *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static IRAM_ATTR int i2s_rxdma_setup(struct esp_i2s_s *priv,
-                                     struct esp_buffer_s *bfcontainer)
+static int esp_i2s_rx_channel_start(struct esp_i2s_s *priv)
 {
-  int ret = OK;
-  uint32_t bytes_queued;
-  irqstate_t flags;
-  uint32_t alignment;
+  int ret;
 
-  DEBUGASSERT(bfcontainer && bfcontainer->apb);
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  /* bufsize need to align with cache line size */
-
-  alignment = cache_hal_get_cache_line_size(CACHE_LL_LEVEL_INT_MEM,
-                                            CACHE_TYPE_DATA);
-#else
-  alignment = sizeof(uint32_t);
-#endif
-
-  bfcontainer->buf = kmm_memalign(alignment, bfcontainer->nbytes);
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  esp_cache_msync((void *)bfcontainer,
-                  sizeof(struct esp_buffer_s),
-                  (ESP_CACHE_MSYNC_FLAG_DIR_C2M |
-                   ESP_CACHE_MSYNC_FLAG_UNALIGNED));
-#endif
-
-  /* Configure DMA stream */
-
-  bytes_queued = i2s_common_dma_setup(bfcontainer,
-                                      false,
-                                      bfcontainer->nbytes);
-
-  if (bytes_queued != bfcontainer->nbytes)
+  if (!priv->session_active)
     {
-      i2serr("Failed to enqueue I2S buffer "
-             "(%" PRIu32 " bytes of %" PRIu32 ")\n",
-             bytes_queued, bfcontainer->nbytes);
-      return -bytes_queued;
+      /* Burst mode: enable/disable per job on the I/O thread. */
+
+      return OK;
     }
 
-  flags = spin_lock_irqsave(&priv->slock);
-
-  /* Add the buffer container to the end of the RX pending queue */
-
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
-
-  /* Trigger DMA transfer if no transmission is in progress */
-
-  ret = i2s_rxdma_start(priv);
-
-  spin_unlock_irqrestore(&priv->slock, flags);
+  nxmutex_lock(&priv->lock);
+  ret = esp_i2s_rx_channel_start_locked(priv);
+  nxmutex_unlock(&priv->lock);
 
   return ret;
 }
 
 /****************************************************************************
- * Name: i2s_tx_schedule
+ * Name: esp_i2s_channels_start
  *
  * Description:
- *   An TX DMA completion has occurred.  Schedule processing on
- *   the working thread.
+ *   Enable TX then RX under one `priv->lock` critical section
+ *   (`AUDIOIOC_START`).  If RX enable fails after TX succeeded, both
+ *   channels are disabled again.  Call `esp_i2s_wake_queued_streams()` after
+ *   OK so queued jobs run.
  *
  * Input Parameters:
- *   priv - Initialized I2S device structure.
- *   outlink - DMA outlink descriptor that triggered the interrupt.
+ *   priv - I2S device structure
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   - Interrupts are disabled
+ *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static void IRAM_ATTR i2s_tx_schedule(struct esp_i2s_s *priv,
-                                      lldesc_t *outlink)
+static int esp_i2s_channels_start(struct esp_i2s_s *priv)
 {
-  struct esp_buffer_s *bfcontainer;
-  lldesc_t *bfdesc;
   int ret;
 
-  /* Upon entry, the transfer(s) that just completed are the ones in the
-   * priv->tx.act queue.
-   */
+  nxmutex_lock(&priv->lock);
 
-  /* Move all entries from the tx.act queue to the tx.done queue */
-
-  if (!sq_empty(&priv->tx.act))
+  ret = esp_i2s_tx_channel_enable_locked(priv, true);
+  if (ret == OK)
     {
-      /* Remove the next buffer container from the tx.act list */
+      ret = esp_i2s_rx_channel_start_locked(priv);
+    }
 
-      bfcontainer = (struct esp_buffer_s *)sq_peek(&priv->tx.act);
-
-      /* Check if the DMA descriptor that generated an EOF interrupt is the
-       * last descriptor of the current buffer container's DMA outlink.
-       * REVISIT: what to do if we miss synchronization and the descriptor
-       * that generated the interrupt is different from the expected (the
-       * oldest of the list containing active transmissions)?
-       */
-
-      bfdesc = bfcontainer->dma_link[0];
-
-      while (bfdesc->eof == 0 && bfdesc != NULL)
+  if (ret != OK)
+    {
+      if (priv->tx_started && priv->tx_handle != NULL)
         {
-          bfdesc = STAILQ_NEXT(bfdesc, qe);
+          i2s_channel_disable(priv->tx_handle);
+          priv->tx_started = false;
         }
 
-      if (bfdesc == outlink)
+      if (priv->rx_started && priv->rx_handle != NULL)
         {
-          sq_remfirst(&priv->tx.act);
-
-          /* Report the result of the transfer */
-
-          bfcontainer->result = OK;
-
-          /* Add the completed buffer container to the tail of the tx.done
-           * queue
-           */
-
-          sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.done);
-
-          /* Check if the DMA is IDLE */
-
-          if (sq_empty(&priv->tx.act))
-            {
-              /* Then start the next DMA. */
-
-              i2s_txdma_start(priv);
-            }
-        }
-
-      /* If the worker has completed running, then reschedule the working
-       * thread.
-       */
-
-      if (work_available(&priv->tx.work))
-        {
-          /* Schedule the TX DMA done processing to occur on the worker
-           * thread.
-           */
-
-          ret = work_queue(HPWORK, &priv->tx.work, i2s_tx_worker, priv, 0);
-          if (ret != 0)
-            {
-              i2serr("ERROR: Failed to queue TX work: %d\n", ret);
-            }
+          i2s_channel_disable(priv->rx_handle);
+          priv->rx_started = false;
         }
     }
+
+  nxmutex_unlock(&priv->lock);
+  return ret;
 }
 
 /****************************************************************************
- * Name: i2s_rx_schedule
+ * Name: esp_i2s_tx_wait_on_sent_done
  *
  * Description:
- *   An RX DMA completion has occurred.  Schedule processing on
- *   the working thread.
+ *   Block until `on_sent` has accounted for every DMA block in the current
+ *   send operation.  The last `on_sent` posts `tx_on_sent_done_sem`.
+ *   Used for per-APB TX when no AUDIOIOC_START session is active.
  *
  * Input Parameters:
- *   priv - Initialized I2S device structure.
- *   inlink - DMA inlink descriptor that triggered the interrupt.
+ *   priv    - I2S device structure
+ *   timeout - Wait timeout in system ticks (0 means wait forever)
  *
  * Returned Value:
- *   None
- *
- * Assumptions:
- *   - Interrupts are disabled
+ *   OK when all `on_sent` blocks completed; a negated errno on failure.
  *
  ****************************************************************************/
 
-static void i2s_rx_schedule(struct esp_i2s_s *priv,
-                            lldesc_t *inlink)
+static int esp_i2s_tx_wait_on_sent_done(struct esp_i2s_s *priv,
+                                        uint32_t timeout)
 {
-  struct esp_buffer_s *bfcontainer;
-  lldesc_t *bfdesc;
   int ret;
 
-  /* Upon entry, the transfer(s) that just completed are the ones in the
-   * priv->rx.act queue.
-   */
-
-  /* Move all entries from the rx.act queue to the rx.done queue */
-
-  if (!sq_empty(&priv->rx.act))
+  if (priv->tx_on_sent_blocks_left == 0)
     {
-      /* Remove the next buffer container from the rx.act list */
+      return OK;
+    }
 
-      bfcontainer = (struct esp_buffer_s *)sq_peek(&priv->rx.act);
+  if (timeout == 0)
+    {
+      ret = nxsem_wait_uninterruptible(&priv->tx_on_sent_done_sem);
+    }
+  else
+    {
+      ret = nxsem_tickwait_uninterruptible(&priv->tx_on_sent_done_sem,
+                                           timeout);
+    }
 
-      /* Find the last descriptor of the current buffer container */
+  return ret;
+}
 
-      bfdesc = bfcontainer->dma_link[0];
+/****************************************************************************
+ * Name: esp_i2s_burst_rx_helper_entry
+ *
+ * Description:
+ *   Helper thread that blocks in `i2s_channel_read()` until burst TX data
+ *   is on the wire.
+ *
+ * Input Parameters:
+ *   arg - Pointer to `struct esp_i2s_burst_rx_helper_s`
+ *
+ * Returned Value:
+ *   NULL
+ *
+ ****************************************************************************/
 
-      while (bfdesc->eof == 1 && STAILQ_NEXT(bfdesc, qe) != NULL)
+static void *esp_i2s_burst_rx_helper_entry(void *arg)
+{
+  struct esp_i2s_burst_rx_helper_s *ctx = arg;
+
+  ctx->result = esp_i2s_rx_run_job_locked(ctx->priv, ctx->apb,
+                                          ctx->timeout);
+  return NULL;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_run_burst_full_duplex_paired
+ *
+ * Description:
+ *   Run one queued TX and one queued RX APB together: preload TX, enable RX,
+ *   start a blocking RX read on a helper thread, enable TX (starting the
+ *   preloaded stream), complete any remaining TX write, wait for `on_sent`,
+ *   then disable both channels.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when a paired TX/RX burst job was executed.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_io_run_burst_full_duplex_paired(struct esp_i2s_s *priv)
+{
+  struct esp_i2s_async_job_s     *tx_job;
+  struct esp_i2s_rx_async_job_s  *rx_job;
+  struct ap_buffer_s             *tx_apb;
+  struct ap_buffer_s             *rx_apb;
+  i2s_callback_t                  tx_cb;
+  i2s_callback_t                  rx_cb;
+  void                           *tx_cba;
+  void                           *rx_cba;
+  uint32_t                        tx_tmo;
+  uint32_t                        rx_tmo;
+  struct esp_i2s_tx_send_prep_s   prep;
+  int                             result = OK;
+  int                             rx_result = OK;
+
+  nxmutex_lock(&priv->lock);
+
+  if (!priv->config->tx_en || sq_empty(&priv->tx_jobs) ||
+      sq_empty(&priv->rx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  esp_i2s_burst_reset_channels_locked(priv, true);
+
+  tx_job = (struct esp_i2s_async_job_s *)sq_remfirst(&priv->tx_jobs);
+  rx_job = (struct esp_i2s_rx_async_job_s *)sq_remfirst(&priv->rx_jobs);
+
+  tx_apb = tx_job->apb;
+  tx_tmo = tx_job->timeout;
+  tx_cb = tx_job->cb;
+  tx_cba = tx_job->cbarg;
+
+  rx_apb = rx_job->apb;
+  rx_tmo = rx_job->timeout;
+  rx_cb = rx_job->cb;
+  rx_cba = rx_job->cbarg;
+
+  kmm_free(tx_job);
+  kmm_free(rx_job);
+
+  priv->tx_busy = true;
+  nxmutex_unlock(&priv->lock);
+
+  result = esp_i2s_tx_preload(priv, tx_apb, &prep);
+  if (result < OK)
+    {
+      goto out_tx_busy;
+    }
+
+  if (prep.send_len == 0)
+    {
+      nxmutex_lock(&priv->lock);
+      esp_i2s_tx_apply_carry_locked(priv, &prep);
+      priv->tx_busy = false;
+      nxmutex_unlock(&priv->lock);
+
+      esp_i2s_io_invoke_cb(&priv->dev, tx_apb, tx_cb, tx_cba, OK);
+      esp_i2s_io_invoke_cb(&priv->dev, rx_apb, rx_cb, rx_cba, -ECANCELED);
+      return true;
+    }
+
+  nxmutex_lock(&priv->lock);
+  esp_i2s_tx_on_sent_disable_arm(priv, prep.send_len);
+  result = esp_i2s_rx_channel_start_locked(priv);
+  if (result == OK)
+    {
+      priv->rx_busy = true;
+    }
+
+  nxmutex_unlock(&priv->lock);
+
+  if (result < OK)
+    {
+      esp_i2s_tx_prep_release(&prep);
+      goto out_tx_busy;
+    }
+
+    {
+      struct esp_i2s_burst_rx_helper_s rx_helper;
+      pthread_t                       rx_thread;
+      pthread_attr_t                  attr;
+      int                             ret;
+
+      rx_helper.priv = priv;
+      rx_helper.apb = rx_apb;
+      rx_helper.timeout = rx_tmo;
+      rx_helper.result = -EIO;
+
+      pthread_attr_init(&attr);
+      pthread_attr_setstacksize(&attr, ESP_I2S_ASYNC_STACKSIZE);
+
+      ret = pthread_create(&rx_thread, &attr, esp_i2s_burst_rx_helper_entry,
+                           &rx_helper);
+      pthread_attr_destroy(&attr);
+
+      if (ret != OK)
         {
-          bfdesc = STAILQ_NEXT(bfdesc, qe);
+          esp_i2s_tx_prep_release(&prep);
+          rx_result = -ret;
+          goto out_disable;
         }
 
-      if (bfdesc == inlink)
+      nxmutex_lock(&priv->lock);
+      result = esp_i2s_tx_channel_enable_locked(priv, false);
+      nxmutex_unlock(&priv->lock);
+
+      if (result < OK)
         {
-          sq_remfirst(&priv->rx.act);
-
-          /* Report the result of the transfer */
-
-          bfcontainer->result = OK;
-
-          /* Add the completed buffer container to the tail of the rx.done
-           * queue
-           */
-
-          sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.done);
-
-          /* Check if the DMA is IDLE */
-
-          if (sq_empty(&priv->rx.act))
-            {
-              /* Then start the next DMA. */
-
-              i2s_rxdma_start(priv);
-            }
+          pthread_join(rx_thread, NULL);
+          esp_i2s_tx_prep_release(&prep);
+          rx_result = rx_helper.result;
+          goto out_disable;
         }
 
-      /* If the worker has completed running, then reschedule the working
-       * thread.
-       */
+      result = esp_i2s_tx_run_job_locked(priv, tx_apb, tx_tmo, &prep);
 
-      if (work_available(&priv->rx.work))
+      pthread_join(rx_thread, NULL);
+      rx_result = rx_helper.result;
+    }
+
+  if (result < OK)
+    {
+      goto out_disable;
+    }
+
+  result = esp_i2s_tx_wait_on_sent_done(priv, tx_tmo);
+
+out_disable:
+  nxmutex_lock(&priv->lock);
+  esp_i2s_burst_channels_down_locked(priv, true);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+
+  esp_i2s_rx_finish_job(priv);
+
+  esp_i2s_io_invoke_cb(&priv->dev, tx_apb, tx_cb, tx_cba, result);
+  esp_i2s_io_invoke_cb(&priv->dev, rx_apb, rx_cb, rx_cba, rx_result);
+
+  return true;
+
+out_tx_busy:
+  nxmutex_lock(&priv->lock);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+
+  esp_i2s_io_invoke_cb(&priv->dev, tx_apb, tx_cb, tx_cba, result);
+  esp_i2s_io_invoke_cb(&priv->dev, rx_apb, rx_cb, rx_cba, -ECANCELED);
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_run_tx_burst_job
+ *
+ * Description:
+ *   When no AUDIOIOC_START session is active, run one queued APB through a
+ *   full TX cycle: preload, enable, write, wait for `on_sent`, disable.
+ *   TX-only: enable/disable `tx_handle` per APB.  Full duplex with a queued
+ *   RX job: paired preload/enable/read/write cycle.  Full duplex TX-only
+ *   waits until an RX job is queued.  Otherwise preload, enable both, write,
+ *   wait for `on_sent`, disable both.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when a burst TX job was executed.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_io_run_tx_burst_job(struct esp_i2s_s *priv)
+{
+  struct esp_i2s_async_job_s     *job;
+  struct ap_buffer_s             *apb;
+  i2s_callback_t                  cb;
+  void                           *cba;
+  uint32_t                        tmo;
+  struct esp_i2s_tx_send_prep_s   prep;
+  int                             result = OK;
+  bool                            full_duplex;
+
+  nxmutex_lock(&priv->lock);
+
+  if (!priv->config->tx_en || sq_empty(&priv->tx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  full_duplex = esp_i2s_burst_full_duplex(priv);
+
+  if (full_duplex && sq_empty(&priv->rx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  if (full_duplex && !sq_empty(&priv->rx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return esp_i2s_io_run_burst_full_duplex_paired(priv);
+    }
+
+  esp_i2s_burst_reset_channels_locked(priv, false);
+
+  job = (struct esp_i2s_async_job_s *)sq_remfirst(&priv->tx_jobs);
+  apb = job->apb;
+  tmo = job->timeout;
+  cb = job->cb;
+  cba = job->cbarg;
+  kmm_free(job);
+  priv->tx_busy = true;
+  nxmutex_unlock(&priv->lock);
+
+  result = esp_i2s_tx_preload(priv, apb, &prep);
+  if (result < OK)
+    {
+      goto out_busy;
+    }
+
+  if (prep.send_len == 0)
+    {
+      nxmutex_lock(&priv->lock);
+      esp_i2s_tx_apply_carry_locked(priv, &prep);
+      priv->tx_busy = false;
+      nxmutex_unlock(&priv->lock);
+      goto out_cb;
+    }
+
+  nxmutex_lock(&priv->lock);
+  esp_i2s_tx_on_sent_disable_arm(priv, prep.send_len);
+  result = esp_i2s_tx_channel_enable_locked(priv, false);
+  nxmutex_unlock(&priv->lock);
+
+  if (result < OK)
+    {
+      esp_i2s_tx_prep_release(&prep);
+      goto out_disable;
+    }
+
+  result = esp_i2s_tx_run_job_locked(priv, apb, tmo, &prep);
+  if (result < OK)
+    {
+      goto out_disable;
+    }
+
+  result = esp_i2s_tx_wait_on_sent_done(priv, tmo);
+
+  nxmutex_lock(&priv->lock);
+  esp_i2s_burst_channels_down_locked(priv, false);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+  goto out_cb;
+
+out_disable:
+  nxmutex_lock(&priv->lock);
+  esp_i2s_burst_channels_down_locked(priv, false);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+
+out_cb:
+  esp_i2s_io_invoke_cb(&priv->dev, apb, cb, cba, result);
+  return true;
+
+out_busy:
+  nxmutex_lock(&priv->lock);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+  goto out_cb;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_run_tx_job
+ *
+ * Description:
+ *   Dequeue and run one TX job.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when a TX job was executed.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_io_run_tx_job(struct esp_i2s_s *priv)
+{
+  int                  result;
+  struct ap_buffer_s  *apb;
+  i2s_callback_t       cb;
+  void                *cba;
+  uint32_t             tmo;
+  size_t               send_quota;
+  struct esp_i2s_tx_send_prep_s prep_local;
+  struct esp_i2s_tx_send_prep_s *prep = NULL;
+
+  nxmutex_lock(&priv->lock);
+
+  if (!priv->config->tx_en || sq_empty(&priv->tx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  if (!priv->session_active)
+    {
+      nxmutex_unlock(&priv->lock);
+      return esp_i2s_io_run_tx_burst_job(priv);
+    }
+
+  if (!priv->tx_started)
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  struct esp_i2s_async_job_s *job =
+    (struct esp_i2s_async_job_s *)sq_remfirst(&priv->tx_jobs);
+
+  apb = job->apb;
+  tmo = job->timeout;
+  cb = job->cb;
+  cba = job->cbarg;
+  send_quota = job->send_quota;
+
+  if (job->prep_valid)
+    {
+      prep_local = job->prep;
+      prep = &prep_local;
+    }
+
+  kmm_free(job);
+
+  priv->tx_busy = true;
+  esp_i2s_tx_on_sent_disable_arm(priv, send_quota);
+
+  nxmutex_unlock(&priv->lock);
+
+  result = esp_i2s_tx_run_job_locked(priv, apb, tmo, prep);
+
+  nxmutex_lock(&priv->lock);
+  priv->tx_busy = false;
+  nxmutex_unlock(&priv->lock);
+
+  esp_i2s_io_invoke_cb(&priv->dev, apb, cb, cba, result);
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_run_rx_burst_job
+ *
+ * Description:
+ *   When no AUDIOIOC_START session is active, run one queued RX APB.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when a burst RX job was executed.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_io_run_rx_burst_job(struct esp_i2s_s *priv)
+{
+  int                  result;
+  struct ap_buffer_s  *apb;
+  i2s_callback_t       cb;
+  void                *cba;
+  uint32_t             tmo;
+  bool                 full_duplex;
+  bool                 rx_only;
+  int                  enret;
+
+  nxmutex_lock(&priv->lock);
+
+  if (!priv->config->rx_en || sq_empty(&priv->rx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  full_duplex = esp_i2s_burst_full_duplex(priv);
+  rx_only = priv->config->rx_en && !priv->config->tx_en;
+
+  if (full_duplex && !priv->rx_started)
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  struct esp_i2s_rx_async_job_s *job =
+    (struct esp_i2s_rx_async_job_s *)sq_remfirst(&priv->rx_jobs);
+
+  apb = job->apb;
+  tmo = job->timeout;
+  cb = job->cb;
+  cba = job->cbarg;
+
+  kmm_free(job);
+
+  if (rx_only)
+    {
+      enret = esp_i2s_rx_channel_start_locked(priv);
+      if (enret < OK)
         {
-          /* Schedule the RX DMA done processing to occur on the worker
-           * thread.
-           */
+          nxmutex_unlock(&priv->lock);
+          esp_i2s_io_invoke_cb(&priv->dev, apb, cb, cba, enret);
+          return true;
+        }
+    }
 
-          ret = work_queue(HPWORK, &priv->rx.work, i2s_rx_worker, priv, 0);
-          if (ret != 0)
-            {
-              i2serr("ERROR: Failed to queue RX work: %d\n", ret);
-            }
+  priv->rx_busy = true;
+  nxmutex_unlock(&priv->lock);
+
+  result = esp_i2s_rx_run_job_locked(priv, apb, tmo);
+
+  if (rx_only)
+    {
+      nxmutex_lock(&priv->lock);
+      esp_i2s_rx_disable_locked(priv);
+      nxmutex_unlock(&priv->lock);
+    }
+
+  esp_i2s_rx_finish_job(priv);
+  esp_i2s_io_invoke_cb(&priv->dev, apb, cb, cba, result);
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_run_rx_job
+ *
+ * Description:
+ *   Dequeue and run one RX job when the channel is started.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   True when an RX job was executed.
+ *
+ ****************************************************************************/
+
+static bool esp_i2s_io_run_rx_job(struct esp_i2s_s *priv)
+{
+  int                  result;
+  struct ap_buffer_s  *apb;
+  i2s_callback_t       cb;
+  void                *cba;
+  uint32_t             tmo;
+
+  if (!priv->session_active)
+    {
+      return esp_i2s_io_run_rx_burst_job(priv);
+    }
+
+  nxmutex_lock(&priv->lock);
+
+  if (!priv->config->rx_en || !priv->rx_started || sq_empty(&priv->rx_jobs))
+    {
+      nxmutex_unlock(&priv->lock);
+      return false;
+    }
+
+  struct esp_i2s_rx_async_job_s *job =
+    (struct esp_i2s_rx_async_job_s *)sq_remfirst(&priv->rx_jobs);
+
+  apb = job->apb;
+  tmo = job->timeout;
+  cb = job->cb;
+  cba = job->cbarg;
+
+  kmm_free(job);
+
+  priv->rx_busy = true;
+  nxmutex_unlock(&priv->lock);
+
+  result = esp_i2s_rx_run_job_locked(priv, apb, tmo);
+
+  esp_i2s_rx_finish_job(priv);
+  esp_i2s_io_invoke_cb(&priv->dev, apb, cb, cba, result);
+
+  return true;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_io_dispatch
+ *
+ * Description:
+ *   Drain queued TX/RX jobs on the I/O thread.  When both queues have work,
+ *   TX runs before RX so the master clock is up before a blocking read.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_io_dispatch(struct esp_i2s_s *priv)
+{
+  DEBUGASSERT(priv != NULL);
+
+  for (; ; )
+    {
+      bool tx_done;
+      bool rx_done;
+
+      tx_done = esp_i2s_io_run_tx_job(priv);
+      rx_done = esp_i2s_io_run_rx_job(priv);
+
+      if (!tx_done && !rx_done)
+        {
+          return;
         }
     }
 }
 
 /****************************************************************************
- * Name: i2s_tx_worker
+ * Name: esp_i2s_io_wakeup
  *
  * Description:
- *   TX transfer done worker
+ *   Post `io_sem` to wake the async I/O thread when it is running.
  *
  * Input Parameters:
- *   arg - the I2S device instance cast to void*
- *
- * Returned Value:
- *   None
+ *   priv - I2S device structure
  *
  ****************************************************************************/
 
-static void i2s_tx_worker(void *arg)
+static void esp_i2s_io_wakeup(struct esp_i2s_s *priv)
 {
-  struct esp_i2s_s *priv = (struct esp_i2s_s *)arg;
-  struct esp_buffer_s *bfcontainer;
-  irqstate_t flags;
-
-  DEBUGASSERT(priv);
-
-  /* When the transfer was started, the active buffer containers were removed
-   * from the tx.pend queue and saved in the tx.act queue.  We get here when
-   * the DMA is finished.
-   *
-   * In any case, the buffer containers in tx.act will be moved to the end
-   * of the tx.done queue and tx.act will be emptied before this worker is
-   * started.
-   *
-   */
-
-  i2sinfo("tx.act.head=%p tx.done.head=%p\n",
-          priv->tx.act.head, priv->tx.done.head);
-
-  /* Process each buffer in the tx.done queue */
-
-  while (sq_peek(&priv->tx.done) != NULL)
+  if (priv->io_thread_created && nxsem_post(&priv->io_sem) != OK)
     {
-      /* Remove the buffer container from the tx.done queue.  NOTE that
-       * interrupts must be disabled to do this because the tx.done queue is
-       * also modified from the interrupt level.
-       */
-
-      flags = spin_lock_irqsave(&priv->slock);
-      bfcontainer = (struct esp_buffer_s *)sq_remfirst(&priv->tx.done);
-      spin_unlock_irqrestore(&priv->slock, flags);
-
-      /* Perform the TX transfer done callback */
-
-      DEBUGASSERT(bfcontainer && bfcontainer->callback);
-      bfcontainer->callback(&priv->dev, bfcontainer->apb,
-                            bfcontainer->arg, bfcontainer->result);
-
-      /* Release the internal buffer used by the DMA outlink */
-
-      kmm_free(bfcontainer->buf);
-
-      /* And release the buffer container */
-
-      VERIFY(i2s_buf_free(priv, bfcontainer));
-    }
-
-  /* TX channel can only be stopped here if either 1) the RX channel is
-   * disabled or 2) the I2S is in slave role. If the I2S is in master role,
-   * the TX channel can only be stopped after the RX channel has finished
-   * because the WS and BCLK are shared with the RX.
-   */
-
-  if ((!priv->config->rx_en || priv->config->role == I2S_ROLE_SLAVE) &&
-      (sq_empty(&priv->tx.act) && sq_empty(&priv->tx.pend)))
-    {
-      i2s_tx_channel_stop(priv);
-
-      /* If the I2S is in slave role and RX is enabled, the TX's WS and
-       * BCLK are shared with the RX. Then, the RX channel can only be
-       * stopped after the TX channel has finished.
-       */
-
-      if ((priv->config->rx_en) &&
-          (sq_empty(&priv->rx.act) && sq_empty(&priv->rx.pend)))
-        {
-          i2s_rx_channel_stop(priv);
-        }
+      i2serr("I2S: I/O wakeup nxsem_post failed\n");
     }
 }
 
 /****************************************************************************
- * Name: i2s_rx_worker
+ * Name: esp_i2s_io_thread_entry
  *
  * Description:
- *   RX transfer done worker
+ *   Async I/O thread entry point.  Waits on `io_sem` and dispatches queued
+ *   TX/RX jobs.
  *
  * Input Parameters:
- *   arg - the I2S device instance cast to void*
+ *   arg - I2S device structure cast from the pthread argument
  *
  * Returned Value:
- *   None
+ *   NULL (unreachable)
  *
  ****************************************************************************/
 
-static void i2s_rx_worker(void *arg)
+static void *esp_i2s_io_thread_entry(void *arg)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)arg;
-  struct esp_buffer_s *bfcontainer;
-  lldesc_t *dmadesc;
-  irqstate_t flags;
 
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv != NULL);
 
-  /* When the transfer was started, the active buffer containers were removed
-   * from the rx.pend queue and saved in the rx.act queue. We get here when
-   * the DMA is finished.
-   *
-   * In any case, the buffer containers in rx.act will be moved to the end
-   * of the rx.done queue and rx.act will be emptied before this worker is
-   * started.
-   *
-   */
-
-  i2sinfo("rx.act.head=%p rx.done.head=%p\n",
-          priv->rx.act.head, priv->rx.done.head);
-
-  /* Process each buffer in the rx.done queue */
-
-  while (sq_peek(&priv->rx.done) != NULL)
+  for (; ; )
     {
-      /* Remove the buffer container from the rx.done queue.  NOTE that
-       * interrupts must be disabled to do this because the rx.done queue is
-       * also modified from the interrupt level.
-       */
-
-      flags = spin_lock_irqsave(&priv->slock);
-      bfcontainer = (struct esp_buffer_s *)sq_remfirst(&priv->rx.done);
-      spin_unlock_irqrestore(&priv->slock, flags);
-
-      bfcontainer->apb->nbytes = 0;
-
-      dmadesc = bfcontainer->dma_link[0];
-
-      do
+      nxsem_wait_uninterruptible(&priv->io_sem);
+      esp_i2s_io_dispatch(priv);
+      if (priv->session_active)
         {
-          memcpy(bfcontainer->apb->samp + bfcontainer->apb->nbytes,
-                 (const void *)dmadesc->buf,
-                 dmadesc->length);
-          bfcontainer->apb->nbytes += dmadesc->length;
-          dmadesc = STAILQ_NEXT(dmadesc, qe);
+          esp_i2s_tx_idle_shutdown_arm(priv);
+          esp_i2s_rx_idle_shutdown_arm(priv);
         }
-      while (dmadesc != NULL && dmadesc->eof == 1);
-
-      /* Perform the RX transfer done callback */
-
-      DEBUGASSERT(bfcontainer && bfcontainer->callback);
-
-      if (priv->streaming == false)
-        {
-          bfcontainer->apb->flags |= AUDIO_APB_FINAL;
-        }
-
-      bfcontainer->callback(&priv->dev, bfcontainer->apb,
-                            bfcontainer->arg, bfcontainer->result);
-
-      /* Release the internal buffer used by the DMA inlink */
-
-      kmm_free(bfcontainer->buf);
-
-      /* And release the buffer container */
-
-      VERIFY(i2s_buf_free(priv, bfcontainer));
     }
 
-  /* RX channel can only be stopped here if either 1) the TX channel is
-   * disabled or 2) the I2S is in master role. If the I2S is in slave role,
-   * the RX channel can only be stopped after the TX channel has finished
-   * because the WS and BCLK are shared with the TX.
-   */
+  return NULL; /* unreachable */
+}
 
-  if ((!priv->config->tx_en || priv->config->role == I2S_ROLE_MASTER) &&
-      (sq_empty(&priv->rx.act) && sq_empty(&priv->rx.pend)))
+/****************************************************************************
+ * Name: esp_i2s_io_thread_create
+ *
+ * Description:
+ *   Create the async I/O pthread and its semaphores when TX or RX is
+ *   enabled.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_io_thread_create(struct esp_i2s_s *priv)
+{
+  pthread_attr_t tattr;
+  struct sched_param sparam;
+  int                ret;
+  int                pthr;
+
+  priv->io_thread_created = false;
+
+  if (!priv->config->tx_en && !priv->config->rx_en)
     {
-      i2s_rx_channel_stop(priv);
+      return OK;
+    }
 
-      /* If the I2S is in master role and TX is enabled, the RX's WS and
-       * BCLK are shared with the TX. Then, the TX channel can only be
-       * stopped after the RX channel has finished.
-       */
+  ret = nxsem_init(&priv->io_sem, 0, 0);
+  if (ret != OK)
+    {
+      i2serr("I2S: I/O semaphore init failed: %d\n", ret);
+      return ret;
+    }
 
-      if ((priv->config->tx_en) &&
-          (sq_empty(&priv->tx.act) && sq_empty(&priv->tx.pend)))
-        {
-          i2s_tx_channel_stop(priv);
-        }
+  ret = nxsem_init(&priv->tx_on_sent_done_sem, 0, 0);
+  if (ret != OK)
+    {
+      i2serr("I2S: TX on_sent done semaphore init failed: %d\n", ret);
+      nxsem_destroy(&priv->io_sem);
+      return ret;
+    }
+
+  pthread_attr_init(&tattr);
+  sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
+  pthread_attr_setschedparam(&tattr, &sparam);
+  pthread_attr_setstacksize(&tattr, ESP_I2S_ASYNC_STACKSIZE);
+
+  pthr = pthread_create(&priv->io_thread, &tattr, esp_i2s_io_thread_entry,
+                        (void *)priv);
+  pthread_attr_destroy(&tattr);
+
+  if (pthr != 0)
+    {
+      i2serr("I2S: I/O pthread_create failed: %d\n", pthr);
+      nxsem_destroy(&priv->tx_on_sent_done_sem);
+      nxsem_destroy(&priv->io_sem);
+      return -pthr;
+    }
+
+  pthread_setname_np(priv->io_thread, "esp_i2s_io");
+  priv->io_thread_created = true;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_wake_queued_streams
+ *
+ * Description:
+ *   After TX/RX channels are started, poke the I/O thread so any jobs
+ *   already queued by `i2s_send` / `i2s_receive` execute.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *
+ ****************************************************************************/
+
+static void esp_i2s_wake_queued_streams(struct esp_i2s_s *priv)
+{
+  bool do_wakeup;
+
+  nxmutex_lock(&priv->lock);
+  do_wakeup = priv->io_thread_created &&
+              ((priv->config->tx_en && priv->tx_started &&
+                !sq_empty(&priv->tx_jobs)) ||
+               (priv->config->rx_en && priv->rx_started &&
+                !sq_empty(&priv->rx_jobs)));
+  nxmutex_unlock(&priv->lock);
+
+  if (do_wakeup)
+    {
+      esp_i2s_io_wakeup(priv);
     }
 }
 
@@ -1550,1004 +2233,330 @@ static void i2s_rx_worker(void *arg)
 
 static int i2s_configure(struct esp_i2s_s *priv)
 {
-  uint32_t tx_conf  = 0;
-  uint32_t rx_conf  = 0;
-  uint32_t port;
-  int ret;
-  i2s_hal_slot_config_t tx_slot_cfg =
+  esp_err_t error;
+  int       mfreq;
+  int       ret;
+
+  i2s_chan_config_t chan_cfg =
+  {
+    .id = priv->config->port,
+    .role = priv->config->role,
+    .dma_desc_num = CONFIG_ESPRESSIF_I2S_DMA_DESC_NUM,
+    .dma_frame_num = CONFIG_ESPRESSIF_I2S_DMA_FRAME_NUM,
+    .auto_clear_after_cb = true,
+    .auto_clear_before_cb = false,
+    .allow_pd = false,
+    .intr_priority = 0,
+  };
+
+  /* PDM TX only (matches legacy limitation). */
+
+  if (priv->config->audio_std_mode == I2S_PDM)
     {
-      0
-    };
+#if SOC_I2S_SUPPORTS_PDM_TX
+      const i2s_slot_mode_t pdm_slots =
+        (priv->config->total_slot <= 1) ?
+        I2S_SLOT_MODE_MONO : I2S_SLOT_MODE_STEREO;
 
-  i2s_hal_slot_config_t rx_slot_cfg =
-    {
-      0
-    };
+      i2s_pdm_tx_config_t pdm_cfg;
 
-  port = priv->config->port;
-
-  i2s_hal_init(priv->config->ctx, port);
-  PERIPH_RCC_ATOMIC()
-    {
-      i2s_ll_enable_bus_clock(port, true);
-      i2s_ll_reset_register(port);
-      i2s_ll_enable_core_clock(I2S_LL_GET_HW(port), true);
-    }
-
-  /* Configure multiplexed pins as connected on the board */
-
-  /* Enable TX channel */
-
-  if (priv->config->dout_pin != I2S_GPIO_UNUSED)
-    {
-      /* If TX channel is used, enable the clock source */
-
-      esp_gpiowrite(priv->config->dout_pin, 1);
-      esp_gpiowrite(priv->config->dout_pin, 0);
-      esp_gpiowrite(priv->config->dout_pin, 1);
-      esp_configgpio(priv->config->dout_pin, OUTPUT_FUNCTION_2);
-      esp_gpio_matrix_out(priv->config->dout_pin,
-                          i2s_periph_signal[port].data_out_sigs[0], 0, 0);
-    }
-
-  /* Enable RX channel */
-
-  if (priv->config->din_pin != I2S_GPIO_UNUSED)
-    {
-      /* If RX channel is used, enable the clock source */
-
-      /* Check for loopback mode */
-
-      if (priv->config->dout_pin != I2S_GPIO_UNUSED &&
-          priv->config->din_pin == priv->config->dout_pin)
+      if (priv->config->rx_en)
         {
-          esp_configgpio(priv->config->din_pin,
-                         INPUT_FUNCTION_2 | OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->din_pin,
-                             i2s_periph_signal[port].data_in_sig, 0);
-          esp_gpio_matrix_out(priv->config->din_pin,
-                              i2s_periph_signal[port].data_out_sigs[0],
-                              0, 0);
+          i2serr("esp_i2s: PDM RX is not available\n");
+          return -ENOTSUP;
         }
-      else
+
+      if (!priv->config->tx_en)
         {
-          esp_configgpio(priv->config->din_pin, INPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->din_pin,
-                             i2s_periph_signal[port].data_in_sig, 0);
+          return -ENODEV;
         }
-    }
 
-  if (priv->config->role == I2S_ROLE_SLAVE)
-    {
-      /* For "tx + slave" mode, select TX signal index for ws and bck */
-
-      if (priv->config->tx_en && !priv->config->rx_en)
+      error = i2s_new_channel(&chan_cfg, &priv->tx_handle, NULL);
+      if (error != ESP_OK)
         {
-#if SOC_I2S_HW_VERSION_2
-          PERIPH_RCC_ATOMIC()
-            {
-              i2s_ll_mclk_bind_to_tx_clk(priv->config->ctx->dev);
-            }
+          return i2s_map_esp_err(error);
+        }
+
+      priv->channels = priv->config->total_slot;
+      priv->data_width = (uint32_t)I2S_DATA_BIT_WIDTH_16BIT;
+      priv->rate = priv->config->rate;
+      priv->mclk_multiple = (uint32_t)I2S_MCLK_MULTIPLE_256;
+
+      mfreq = (int)i2s_setmclkfrequency((struct i2s_dev_s *)priv,
+                                        priv->config->rate *
+                                        priv->mclk_multiple);
+
+      if (mfreq <= 0)
+        {
+          i2s_configure_del_channels(priv);
+          i2serr("Failed to set PDM target MCLK: %d\n", mfreq);
+          return mfreq;
+        }
+
+      memset(&pdm_cfg, 0, sizeof(pdm_cfg));
+      pdm_cfg.clk_cfg =
+        (i2s_pdm_tx_clk_config_t)
+        I2S_PDM_TX_CLK_DEFAULT_CONFIG(priv->config->rate);
+      pdm_cfg.clk_cfg.clk_src =
+        (i2s_clock_src_t)priv->config->tx_clk_src;
+      pdm_cfg.slot_cfg =
+        (i2s_pdm_tx_slot_config_t)
+        I2S_PDM_TX_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT,
+                                        pdm_slots);
+      pdm_cfg.gpio_cfg.clk = priv->config->bclk_pin;
+      pdm_cfg.gpio_cfg.dout = priv->config->dout_pin;
+#if SOC_I2S_PDM_MAX_TX_LINES > 1
+      pdm_cfg.gpio_cfg.dout2 = I2S_GPIO_UNUSED;
 #endif
 
-          esp_gpiowrite(priv->config->ws_pin, 1);
-          esp_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->ws_pin,
-                             i2s_periph_signal[port].s_tx_ws_sig, 0);
-
-          esp_gpiowrite(priv->config->bclk_pin, 1);
-          esp_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->bclk_pin,
-                             i2s_periph_signal[port].s_tx_bck_sig, 0);
-        }
-      else
+      error = i2s_channel_init_pdm_tx_mode(priv->tx_handle, &pdm_cfg);
+      if (error != ESP_OK)
         {
-          /* For "tx + rx + slave" or "rx + slave" mode, select RX signal
-           * index for ws and bck.
-           */
-
-          esp_gpiowrite(priv->config->ws_pin, 1);
-          esp_configgpio(priv->config->ws_pin, INPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->ws_pin,
-                             i2s_periph_signal[port].s_rx_ws_sig, 0);
-
-          esp_gpiowrite(priv->config->bclk_pin, 1);
-          esp_configgpio(priv->config->bclk_pin, INPUT_FUNCTION_2);
-          esp_gpio_matrix_in(priv->config->bclk_pin,
-                             i2s_periph_signal[port].s_rx_bck_sig, 0);
+          i2s_configure_del_channels(priv);
+          return i2s_map_esp_err(error);
         }
+
+      goto sync_mclk;
+#else
+      return -ENOTSUP;
+#endif
+    }
+
+  if (!priv->config->tx_en && !priv->config->rx_en)
+    {
+      return -ENODEV;
+    }
+
+  if (priv->config->tx_en && priv->config->rx_en)
+    {
+      error = i2s_new_channel(&chan_cfg,
+                              &priv->tx_handle,
+                              &priv->rx_handle);
+    }
+  else if (priv->config->tx_en)
+    {
+      error = i2s_new_channel(&chan_cfg,
+                              &priv->tx_handle,
+                              NULL);
     }
   else
     {
-      /* Considering master role for the I2S port */
-
-      /* Set MCLK pin */
-
-      if (priv->config->mclk_pin != I2S_GPIO_UNUSED)
-        {
-          i2sinfo("Configuring GPIO%" PRIu8 " to output master clock\n",
-                  priv->config->mclk_pin);
-
-          esp_gpiowrite(priv->config->mclk_pin, 1);
-          esp_configgpio(priv->config->mclk_pin, OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_out(priv->config->mclk_pin,
-                              i2s_periph_signal[port].mck_out_sig, 0, 0);
-        }
-
-      if (priv->config->rx_en && !priv->config->tx_en)
-        {
-          /* For "rx + master" mode, select RX signal index for ws and bck */
-
-#if SOC_I2S_HW_VERSION_2
-          PERIPH_RCC_ATOMIC()
-            {
-              i2s_ll_mclk_bind_to_rx_clk(priv->config->ctx->dev);
-            }
-#endif
-
-          esp_gpiowrite(priv->config->ws_pin, 1);
-          esp_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_out(priv->config->ws_pin,
-                              i2s_periph_signal[port].m_rx_ws_sig, 0, 0);
-
-          esp_gpiowrite(priv->config->bclk_pin, 1);
-          esp_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_out(priv->config->bclk_pin,
-                              i2s_periph_signal[port].m_rx_bck_sig, 0, 0);
-        }
-      else
-        {
-          /* For "tx + rx + master" or "tx + master" mode, select TX signal
-           * index for ws and bck.
-           */
-
-          esp_gpiowrite(priv->config->ws_pin, 1);
-          esp_configgpio(priv->config->ws_pin, OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_out(priv->config->ws_pin,
-                              i2s_periph_signal[port].m_tx_ws_sig, 0, 0);
-
-          esp_gpiowrite(priv->config->bclk_pin, 1);
-          esp_configgpio(priv->config->bclk_pin, OUTPUT_FUNCTION_2);
-          esp_gpio_matrix_out(priv->config->bclk_pin,
-                              i2s_periph_signal[port].m_tx_bck_sig, 0, 0);
-        }
+      error = i2s_new_channel(&chan_cfg,
+                              NULL,
+                              &priv->rx_handle);
     }
 
-  /* Share BCLK and WS if in full-duplex mode */
+  if (error != ESP_OK)
+    {
+      i2s_configure_del_channels(priv);
+      return i2s_map_esp_err(error);
+    }
 
-  i2s_ll_share_bck_ws(priv->config->ctx->dev,
-                      priv->config->tx_en && priv->config->rx_en);
-
-  priv->data_width = priv->config->data_width;
   priv->channels = priv->config->total_slot;
+  priv->data_width = priv->config->data_width;
+  priv->rate = priv->config->rate;
 
-  /* Configure the TX module */
+  priv->mclk_multiple =
+    (uint32_t)(((i2s_data_bit_width_t)priv->config->data_width ==
+                I2S_DATA_BIT_WIDTH_24BIT) ?
+                 I2S_MCLK_MULTIPLE_384 :
+                 I2S_MCLK_MULTIPLE_256);
 
-  if (priv->config->tx_en)
+  mfreq = (int)i2s_setmclkfrequency((struct i2s_dev_s *)priv,
+                                    priv->config->rate *
+                                    priv->mclk_multiple);
+
+  if (mfreq <= 0)
     {
-      if (priv->channels == 1)
-        {
-          tx_slot_cfg.slot_mode = I2S_SLOT_MODE_MONO;
-        }
-      else
-        {
-          tx_slot_cfg.slot_mode = I2S_SLOT_MODE_STEREO;
-        }
+      i2s_configure_del_channels(priv);
+      i2serr("Failed to set MCLK frequency: %d\n", mfreq);
+      return mfreq;
+    }
 
-      tx_slot_cfg.data_bit_width = priv->config->data_width;
-      tx_slot_cfg.slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO;
+    {
+      const i2s_clock_src_t pcm_clk_src =
+        priv->config->tx_en ?
+        (i2s_clock_src_t)priv->config->tx_clk_src :
+        (i2s_clock_src_t)priv->config->rx_clk_src;
 
-      if (priv->config->audio_std_mode <= I2S_TDM_PCM)
+      const i2s_data_bit_width_t bits_pcm =
+        (i2s_data_bit_width_t)priv->config->data_width;
+
+      const i2s_slot_mode_t slot_mode_pcm =
+        (priv->config->total_slot <= 1) ?
+        I2S_SLOT_MODE_MONO : I2S_SLOT_MODE_STEREO;
+
+#if SOC_I2S_SUPPORTS_TDM
+      i2s_tdm_config_t tdm_cfg;
+
+      memset(&tdm_cfg, 0, sizeof(tdm_cfg));
+      tdm_cfg.gpio_cfg.mclk = priv->config->mclk_pin;
+      tdm_cfg.gpio_cfg.bclk = priv->config->bclk_pin;
+      tdm_cfg.gpio_cfg.ws = priv->config->ws_pin;
+      tdm_cfg.gpio_cfg.dout = priv->config->dout_pin;
+      tdm_cfg.gpio_cfg.din = priv->config->din_pin;
+
+      tdm_cfg.clk_cfg =
+        (i2s_tdm_clk_config_t)
+        I2S_TDM_CLK_DEFAULT_CONFIG(priv->config->rate);
+      tdm_cfg.clk_cfg.clk_src = pcm_clk_src;
+      tdm_cfg.clk_cfg.mclk_multiple =
+        (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+      switch (priv->config->audio_std_mode)
         {
-          if (priv->config->audio_std_mode == I2S_TDM_PHILIPS)
-            {
-              I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(tx_slot_cfg.tdm,
-                                                  priv->data_width,
+        case I2S_TDM_MSB:
+          tdm_cfg.slot_cfg =
+            (i2s_tdm_slot_config_t)
+            I2S_TDM_MSB_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                            slot_mode_pcm,
+                                            I2S_TDM_AUTO_SLOT);
+          break;
+
+        case I2S_TDM_PCM:
+          tdm_cfg.slot_cfg =
+            (i2s_tdm_slot_config_t)
+            I2S_TDM_PCM_SHORT_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                                  slot_mode_pcm,
                                                   I2S_TDM_AUTO_SLOT);
-            }
-          else if (priv->config->audio_std_mode == I2S_TDM_MSB)
-            {
-              I2S_TDM_MSB_SLOT_DEFAULT_CONFIG(tx_slot_cfg.tdm,
-                                              priv->data_width,
-                                              I2S_TDM_AUTO_SLOT);
-            }
-          else
-            {
-              I2S_TDM_PCM_SHORT_SLOT_DEFAULT_CONFIG(tx_slot_cfg.tdm,
-                                                    priv->data_width,
-                                                    I2S_TDM_AUTO_SLOT);
-            }
+          break;
 
-          i2s_hal_tdm_set_tx_slot(priv->config->ctx,
-                                  priv->config->role == I2S_ROLE_SLAVE,
-                                  &tx_slot_cfg);
+        default:
+          tdm_cfg.slot_cfg =
+            (i2s_tdm_slot_config_t)
+            I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                                slot_mode_pcm,
+                                                I2S_TDM_AUTO_SLOT);
+          break;
+        }
 
-          i2s_ll_tx_enable_tdm(priv->config->ctx->dev);
+      tdm_cfg.slot_cfg.ws_pol = priv->config->ws_pol;
+
+      if (priv->config->tx_en)
+        {
+          error = i2s_channel_init_tdm_mode(priv->tx_handle,
+                                            &tdm_cfg);
+          if (error != ESP_OK)
+            {
+              goto err;
+            }
+        }
+
+      /* TX init first aligns with ESP-IDF full-duplex pairing. */
+
+      if (priv->config->rx_en)
+        {
+          error = i2s_channel_init_tdm_mode(priv->rx_handle,
+                                            &tdm_cfg);
+          if (error != ESP_OK)
+            {
+              goto err;
+            }
+        }
+#else
+      i2s_std_config_t std_cfg;
+
+      memset(&std_cfg, 0, sizeof(std_cfg));
+
+      std_cfg.clk_cfg =
+        (i2s_std_clk_config_t)
+        I2S_STD_CLK_DEFAULT_CONFIG(priv->config->rate);
+      std_cfg.clk_cfg.clk_src = pcm_clk_src;
+      std_cfg.clk_cfg.mclk_multiple =
+        (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+      switch (priv->config->audio_std_mode)
+        {
+        case I2S_TDM_MSB:
+          std_cfg.slot_cfg =
+            (i2s_std_slot_config_t)
+            I2S_STD_MSB_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                            slot_mode_pcm);
+          break;
+
+        case I2S_TDM_PCM:
+          std_cfg.slot_cfg =
+            (i2s_std_slot_config_t)
+            I2S_STD_PCM_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                            slot_mode_pcm);
+          break;
+
+        default:
+          std_cfg.slot_cfg =
+            (i2s_std_slot_config_t)
+            I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(bits_pcm,
+                                                slot_mode_pcm);
+          break;
+        }
+
+      std_cfg.slot_cfg.ws_pol = priv->config->ws_pol;
+
+      std_cfg.gpio_cfg.mclk = priv->config->mclk_pin;
+      std_cfg.gpio_cfg.bclk = priv->config->bclk_pin;
+      std_cfg.gpio_cfg.ws = priv->config->ws_pin;
+      std_cfg.gpio_cfg.dout = priv->config->dout_pin;
+      std_cfg.gpio_cfg.din = priv->config->din_pin;
+
+      if (priv->config->tx_en)
+        {
+          error = i2s_channel_init_std_mode(priv->tx_handle,
+                                               &std_cfg);
+          if (error != ESP_OK)
+            {
+              goto err;
+            }
+        }
+
+      if (priv->config->rx_en)
+        {
+          error = i2s_channel_init_std_mode(priv->rx_handle,
+                                               &std_cfg);
+          if (error != ESP_OK)
+            {
+              goto err;
+            }
+        }
+#endif
+    }
+
+sync_mclk:
+    {
+      i2s_chan_info_t chan_info;
+
+      if (priv->tx_handle != NULL &&
+          i2s_channel_get_info(priv->tx_handle, &chan_info) == ESP_OK)
+        {
+          priv->mclk_freq = chan_info.mclk_hz;
+        }
+      else if (priv->rx_handle != NULL &&
+               i2s_channel_get_info(priv->rx_handle, &chan_info) == ESP_OK)
+        {
+          priv->mclk_freq = chan_info.mclk_hz;
         }
       else
         {
-          i2s_ll_tx_enable_pdm(priv->config->ctx->dev, true);
-          I2S_PDM_TX_SLOT_DEFAULT_CONFIG(tx_slot_cfg.pdm_tx);
-          i2s_hal_pdm_set_tx_slot(priv->config->ctx,
-                                  priv->config->role == I2S_ROLE_SLAVE,
-                                  &tx_slot_cfg);
-        }
-
-      /* The default value for the master clock frequency (MCLK frequency)
-       * can be set from the sample rate multiplied by a fixed value, known
-       * as MCLK multiplier. This multiplier, however, should be divisible
-       * by the number of bytes from a sample, i.e, for 24 bits, the
-       * multiplier should be divisible by 3. NOTE: the MCLK frequency can
-       * be adjusted on runtime, so this value remains valid only if the
-       * upper half does not implement the `i2s_setmclkfrequency` method.
-       */
-
-      if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
-        {
-          priv->mclk_multiple = I2S_MCLK_MULTIPLE_384;
-        }
-      else
-        {
-          priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
-        }
-
-      ret = i2s_setmclkfrequency((struct i2s_dev_s *)priv,
-                                 (priv->config->rate * priv->mclk_multiple));
-      if (ret <= 0)
-        {
-          i2serr("Failed to set MCLK frequency: %d\n", ret);
-          return ret;
-        }
-
-      priv->rate = priv->config->rate;
-      ret = i2s_set_clock(priv);
-      if (ret != OK)
-        {
-          i2serr("Failed to set clock: %d\n", ret);
-          return ret;
+          priv->mclk_freq = priv->config->rate *
+            (uint32_t)priv->mclk_multiple;
         }
     }
 
-  /* Configure the RX module */
-
-  if (priv->config->rx_en)
+  ret = esp_i2s_tx_register_event_callbacks(priv);
+  if (ret < OK)
     {
-      if (priv->channels == 1)
-        {
-          rx_slot_cfg.slot_mode = I2S_SLOT_MODE_MONO;
-        }
-      else
-        {
-          rx_slot_cfg.slot_mode = I2S_SLOT_MODE_STEREO;
-        }
-
-      rx_slot_cfg.data_bit_width = priv->config->data_width;
-      rx_slot_cfg.slot_bit_width = I2S_SLOT_BIT_WIDTH_AUTO;
-
-      if (priv->config->audio_std_mode <= I2S_TDM_PCM)
-        {
-          /* If the role is slave or master and tx is enabled, then the role
-           * is slave
-           */
-
-          bool is_slave = priv->config->role == I2S_ROLE_SLAVE || \
-                          (priv->config->role == I2S_ROLE_MASTER && \
-                           priv->config->tx_en);
-
-          if (priv->config->audio_std_mode == I2S_TDM_PHILIPS)
-            {
-              I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(rx_slot_cfg.tdm,
-                                                  priv->data_width,
-                                                  I2S_TDM_AUTO_SLOT);
-            }
-          else if (priv->config->audio_std_mode == I2S_TDM_MSB)
-            {
-              I2S_TDM_MSB_SLOT_DEFAULT_CONFIG(rx_slot_cfg.tdm,
-                                              priv->data_width,
-                                              I2S_TDM_AUTO_SLOT);
-            }
-          else
-            {
-              I2S_TDM_PCM_SHORT_SLOT_DEFAULT_CONFIG(tx_slot_cfg.tdm,
-                                                    priv->data_width,
-                                                    I2S_TDM_AUTO_SLOT);
-            }
-
-          i2s_hal_tdm_set_rx_slot(priv->config->ctx,
-                                  is_slave,
-                                  &rx_slot_cfg);
-
-          i2s_ll_rx_enable_tdm(priv->config->ctx->dev);
-        }
-      else
-        {
-          i2serr("Due to the lack of `PDM to PCM` module, \
-                  PDM RX is not available\n");
-        }
-
-      /* The default value for the master clock frequency (MCLK frequency)
-       * can be set from the sample rate multiplied by a fixed value, known
-       * as MCLK multiplier. This multiplier, however, should be divisible
-       * by the number of bytes from a sample, i.e, for 24 bits, the
-       * multiplier should be divisible by 3. NOTE: the MCLK frequency can
-       * be adjusted on runtime, so this value remains valid only if the
-       * upper half does not implement the `i2s_setmclkfrequency` method.
-       */
-
-      if (priv->config->data_width == I2S_DATA_BIT_WIDTH_24BIT)
-        {
-          priv->mclk_multiple = I2S_MCLK_MULTIPLE_384;
-        }
-      else
-        {
-          priv->mclk_multiple = I2S_MCLK_MULTIPLE_256;
-        }
-
-      ret = i2s_setmclkfrequency((struct i2s_dev_s *)priv,
-                                 (priv->config->rate * priv->mclk_multiple));
-      if (ret <= 0)
-        {
-          i2serr("Failed to set MCLK frequency: %d\n", ret);
-          return ret;
-        }
-
-      priv->rate = priv->config->rate;
-      ret = i2s_set_clock(priv);
-      if (ret != OK)
-        {
-          i2serr("Failed to set clock: %d\n", ret);
-          return ret;
-        }
+      i2s_configure_del_channels(priv);
+      return ret;
     }
 
   return OK;
+
+err:
+  i2s_configure_del_channels(priv);
+  return i2s_map_esp_err(error);
 }
 
 /****************************************************************************
- * Name: i2s_set_get_apll_freq
- *
- * Description:
- *   Calculates and sets the Audio Phase-Locked Loop (APLL) frequency
- *   required for a given master clock (MCLK) frequency. This function
- *   determines the appropriate divider to generate the expected APLL
- *   frequency, sets the hardware APLL to this frequency, and returns
- *   the actual frequency set.
- *   It also handles error conditions such as exceeding the maximum APLL
- *   frequency or invalid arguments, and logs relevant information and
- *   warnings.
- *
- * Input Parameters:
- *   mclk_freq_hz - The desired master clock frequency in Hz.
- *
- * Returned Value:
- *   The actual APLL frequency set in Hz, or 0 on failure.
- *
+ * Private Functions
  ****************************************************************************/
-
-#if SOC_I2S_SUPPORTS_APLL
-static uint32_t i2s_set_get_apll_freq(uint32_t mclk_freq_hz)
-{
-  int mclk_div = (int)((CLK_LL_APLL_MIN_HZ / mclk_freq_hz) + 1);
-  esp_err_t ret = ESP_OK;
-  uint32_t expt_freq;
-  uint32_t real_freq;
-
-  /* Calculate the expected APLL  */
-
-  /* apll_freq = mclk * div
-   * when div = 1, hardware will still divide 2
-   * when div = 0, the final mclk will be unpredictable
-   * So the div here should be at least 2
-   */
-
-  mclk_div = mclk_div < 2 ? 2 : mclk_div;
-  expt_freq = mclk_freq_hz * mclk_div;
-  if (expt_freq > CLK_LL_APLL_MAX_HZ)
-    {
-      i2serr("The required APLL frequency exceed its maximum value");
-      goto errout;
-    }
-
-  real_freq = 0;
-  ret = periph_rtc_apll_freq_set(expt_freq, &real_freq);
-
-  if (ret == ESP_ERR_INVALID_ARG)
-    {
-      i2serr("set APLL freq failed due to invalid argument");
-      goto errout;
-    }
-
-  if (ret == ESP_ERR_INVALID_STATE)
-    {
-      i2swarn("APLL is occupied already, it is working at %"PRIu32" Hz while"
-              " the expected frequency is %"PRIu32" Hz",
-              real_freq, expt_freq);
-      i2swarn("Trying to work at %"PRIu32" Hz...", real_freq);
-    }
-
-  i2sinfo("APLL expected frequency is %"PRIu32" Hz, real frequency is "
-          "%"PRIu32" Hz", expt_freq, real_freq);
-  return real_freq;
-
-errout:
-  UNUSED(real_freq);
-  UNUSED(ret);
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: i2s_get_source_clk_freq
- *
- * Description:
- *   Retrieve the frequency of the specified I2S clock source.
- *   If the clock source is APLL and supported, it returns the frequency
- *   calculated for the given master clock frequency. Otherwise, it queries
- *   the clock tree for the frequency of the specified source.
- *
- * Input Parameters:
- *   clk_src      - The I2S clock source to query.
- *   mclk_freq_hz - The desired master clock frequency in Hz (used for APLL).
- *
- * Returned Value:
- *   The frequency of the specified clock source in Hz.
- *
- ****************************************************************************/
-
-static uint32_t i2s_get_source_clk_freq(i2s_clock_src_t clk_src,
-                                        uint32_t mclk_freq_hz)
-{
-  uint32_t clk_freq = 0;
-
-#if SOC_I2S_SUPPORTS_APLL
-  if (clk_src == I2S_CLK_SRC_APLL)
-    {
-      return i2s_set_get_apll_freq(mclk_freq_hz);
-    }
-#endif
-
-#ifdef I2S_LL_DEFAULT_CLK_SRC
-  if (clk_src == I2S_CLK_SRC_DEFAULT)
-    {
-      clk_src = I2S_LL_DEFAULT_CLK_SRC;
-    }
-#endif
-
-  esp_clk_tree_src_get_freq_hz(clk_src,
-                               ESP_CLK_TREE_SRC_FREQ_PRECISION_CACHED,
-                               &clk_freq);
-  return clk_freq;
-}
-
-/****************************************************************************
- * Name: i2s_check_mclkfrequency
- *
- * Description:
- *   Check if MCLK frequency is compatible with the current data width and
- *   bits/sample set. Master clock should be multiple of the sample rate and
- *   bclk at the same time.
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   Returns the current master clock or a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int32_t i2s_check_mclkfrequency(struct esp_i2s_s *priv)
-{
-  uint32_t mclk_freq;
-  uint32_t mclk_multiple = priv->mclk_multiple;
-  uint32_t bclk = priv->rate * priv->config->total_slot * priv->data_width;
-  int i;
-
-  /* If the master clock is divisible by both the sample rate and the bit
-   * clock, everything is as expected and we can return the current master
-   * clock frequency.
-   */
-
-  if (priv->mclk_freq % priv->rate == 0 && priv->mclk_freq % bclk == 0)
-    {
-      priv->mclk_multiple = priv->mclk_freq / priv->rate;
-      return priv->mclk_freq;
-    }
-
-  /* Select the lowest multiplier for setting the master clock */
-
-  for (mclk_multiple = I2S_MCLK_MULTIPLE_128;
-       mclk_multiple <= I2S_MCLK_MULTIPLE_512;
-       mclk_multiple += I2S_MCLK_MULTIPLE_128)
-    {
-      mclk_freq = priv->rate * mclk_multiple;
-      if (mclk_freq % priv->rate == 0 && mclk_freq % bclk == 0)
-        {
-          priv->mclk_multiple = mclk_multiple;
-          mclk_freq = i2s_setmclkfrequency((struct i2s_dev_s *)priv,
-                                           mclk_freq);
-          if (mclk_freq <= 0)
-            {
-              i2serr("Failed to set MCLK frequency: %"PRIu32"\n", mclk_freq);
-              return -EINVAL;
-            }
-
-          return mclk_freq;
-        }
-    }
-
-  return -EINVAL;
-}
-
-/****************************************************************************
- * Name: i2s_set_datawidth
- *
- * Description:
- *   Set the I2S TX/RX data width.
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   Returns the resulting data width
- *
- ****************************************************************************/
-
-static uint32_t i2s_set_datawidth(struct esp_i2s_s *priv)
-{
-  int width;
-  if (priv->config->tx_en)
-    {
-      i2s_ll_tx_set_sample_bit(priv->config->ctx->dev,
-                               priv->data_width, priv->data_width);
-      i2s_ll_tx_set_half_sample_bit(priv->config->ctx->dev,
-                                    priv->data_width);
-
-      if (priv->config->audio_std_mode != I2S_TDM_PCM)
-        {
-          width = priv->data_width;
-        }
-      else
-        {
-          width = 1;
-        }
-
-      i2s_ll_tx_set_ws_width(priv->config->ctx->dev, width);
-    }
-
-  if (priv->config->rx_en)
-    {
-      i2s_ll_rx_set_sample_bit(priv->config->ctx->dev,
-                               priv->data_width, priv->data_width);
-      i2s_ll_rx_set_half_sample_bit(priv->config->ctx->dev,
-                                    priv->data_width);
-
-      if (priv->config->audio_std_mode != I2S_TDM_PCM)
-        {
-          width = priv->data_width;
-        }
-      else
-        {
-          width = 1;
-        }
-
-      i2s_ll_rx_set_ws_width(priv->config->ctx->dev, width);
-    }
-
-  return priv->data_width;
-}
-
-/****************************************************************************
- * Name: i2s_set_clock
- *
- * Description:
- *   Set the I2S TX sample rate by adjusting I2S clock.
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   Returns OK on success, a negative error code on failure
- *
- ****************************************************************************/
-
-static int i2s_set_clock(struct esp_i2s_s *priv)
-{
-  uint32_t bclk;
-  uint32_t mclk;
-  uint32_t sclk;
-  uint32_t mclk_div;
-  uint16_t bclk_div;
-
-  sclk = i2s_get_source_clk_freq(priv->config->tx_clk_src, priv->mclk_freq);
-
-  if (sclk <= 0)
-    {
-      i2serr("Invalid source clock frequency: %"PRIu32"\n", sclk);
-      return -EINVAL;
-    }
-
-  /* fmclk = bck_div * fbclk = fsclk / (mclk_div + b / a)
-   * mclk_div is the I2S clock divider's integral value
-   * b is the fraction clock divider's numerator value
-   * a is the fraction clock divider's denominator value
-   */
-
-  if (priv->config->role == I2S_ROLE_MASTER)
-    {
-      bclk = priv->rate * priv->config->total_slot * priv->data_width;
-      mclk = priv->mclk_freq;
-      bclk_div = mclk / bclk;
-    }
-  else
-    {
-      /* For slave mode, mclk >= bclk * 8, so fix bclk_div to 2 first */
-
-      bclk_div = 8;
-      bclk = priv->rate * priv->config->total_slot * priv->data_width;
-      mclk = bclk * bclk_div;
-    }
-
-  /* Calculate the nearest integer value of the I2S clock divider */
-
-  mclk_div = sclk / mclk;
-
-  i2sinfo("Clock division info: [sclk]%" PRIu32 " Hz [mdiv] %ld "
-          "[mclk] %" PRIu32 " Hz [bdiv] %d [bclk] %" PRIu32 " Hz\n",
-          sclk, mclk_div, mclk, bclk_div, bclk);
-
-  priv->config->clk_info->bclk = bclk;
-  priv->config->clk_info->bclk_div = bclk_div;
-  priv->config->clk_info->mclk = mclk;
-  priv->config->clk_info->mclk_div = mclk_div;
-  priv->config->clk_info->sclk = sclk;
-
-  PERIPH_RCC_ATOMIC()
-    {
-      i2s_hal_set_tx_clock(priv->config->ctx,
-                           priv->config->clk_info,
-                           priv->config->tx_clk_src,
-                           NULL);
-
-      i2s_hal_set_rx_clock(priv->config->ctx,
-                           priv->config->clk_info,
-                           priv->config->rx_clk_src,
-                           NULL);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: i2s_tx_channel_start
- *
- * Description:
- *   Start TX channel for the I2S port
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void i2s_tx_channel_start(struct esp_i2s_s *priv)
-{
-  if (priv->config->tx_en)
-    {
-#ifdef CONFIG_PM
-      esp_pm_lock_acquire(priv->config->pm_lock);
-#endif
-
-      /* Reset the TX channel */
-
-      i2s_hal_tx_reset(priv->config->ctx);
-
-      /* Reset TX FIFO */
-
-      i2s_hal_tx_reset_fifo(priv->config->ctx);
-
-      /* Set I2S_RX_UPDATE bit to update the configs.
-       * This bit is automatically cleared.
-       */
-
-      i2s_hal_tx_start(priv->config->ctx);
-
-      priv->tx_started = true;
-
-      i2sinfo("Started TX channel of port %ld\n", priv->config->port);
-    }
-}
-
-/****************************************************************************
- * Name: i2s_rx_channel_start
- *
- * Description:
- *   Start RX channel for the I2S port
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void i2s_rx_channel_start(struct esp_i2s_s *priv)
-{
-  if (priv->config->rx_en)
-    {
-#ifdef CONFIG_PM
-      esp_pm_lock_acquire(priv->config->pm_lock);
-#endif
-
-      /* Reset the RX channel */
-
-      i2s_hal_rx_reset(priv->config->ctx);
-
-      /* Reset RX FIFO */
-
-      i2s_hal_rx_reset_fifo(priv->config->ctx);
-
-      priv->rx_started = true;
-
-      i2sinfo("Started RX channel of port %ld\n", priv->config->port);
-    }
-}
-
-/****************************************************************************
- * Name: i2s_tx_channel_stop
- *
- * Description:
- *   Stop TX channel for the I2S port
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   OK on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int i2s_tx_channel_stop(struct esp_i2s_s *priv)
-{
-  if (priv->config->tx_en)
-    {
-      esp_err_t err;
-
-      if (!priv->tx_started)
-        {
-          i2swarn("TX channel of port %ld was previously stopped\n",
-                  priv->config->port);
-          return OK;
-        }
-
-      /* Stop TX channel */
-
-      i2s_hal_tx_stop(priv->config->ctx);
-
-      /* Stop outlink */
-
-      err = gdma_stop(priv->dma_channel_tx);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to stop DMA channel: %d\n", err);
-          return -EINVAL;
-        }
-
-      priv->tx_started = false;
-#ifdef CONFIG_PM
-      esp_pm_lock_release(priv->config->pm_lock);
-#endif
-
-      i2sinfo("Stopped TX channel of port %ld\n", priv->config->port);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: i2s_rx_channel_stop
- *
- * Description:
- *   Stop RX channel for the I2S port
- *
- * Input Parameters:
- *   priv - Initialized I2S device structure.
- *
- * Returned Value:
- *   OK on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int i2s_rx_channel_stop(struct esp_i2s_s *priv)
-{
-  if (priv->config->rx_en)
-    {
-      esp_err_t err;
-
-      if (!priv->rx_started)
-        {
-          i2swarn("RX channel of port %ld was previously stopped\n",
-                  priv->config->port);
-          return OK;
-        }
-
-      /* Stop RX channel */
-
-      i2s_hal_rx_stop(priv->config->ctx);
-
-      err = gdma_stop(priv->dma_channel_rx);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to stop DMA channel: %d\n", err);
-          return -EINVAL;
-        }
-
-      priv->rx_started = false;
-#ifdef CONFIG_PM
-      esp_pm_lock_release(priv->config->pm_lock);
-#endif
-
-      i2sinfo("Stopped RX channel of port %ld\n", priv->config->port);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: i2s_tx_interrupt
- *
- * Description:
- *   I2S TX DMA interrupt handler. This function is called when a DMA
- *   transmit event occurs. It checks if the current DMA descriptor is
- *   the last in the chain and, if so, schedules the next transfer.
- *
- * Input Parameters:
- *   dma_chan    - GDMA channel handle
- *   event_data  - Pointer to GDMA event data structure
- *   arg         - I2S controller private data
- *
- * Returned Value:
- *   Returns false. (No context switch required.)
- *
- ****************************************************************************/
-
-static bool IRAM_ATTR i2s_tx_interrupt(gdma_channel_handle_t dma_chan,
-                                       gdma_event_data_t *event_data,
-                                       void *arg)
-{
-  struct esp_i2s_s *priv = (struct esp_i2s_s *)arg;
-  lldesc_t *cur = NULL;
-
-  if (event_data->flags.normal_eof)
-    {
-      cur = (lldesc_t *)(event_data->tx_eof_desc_addr);
-
-      /* If the current descriptor is the last one, schedule the transfer */
-
-      if (STAILQ_NEXT(cur, qe) == NULL)
-        {
-          i2s_tx_schedule(priv, cur);
-        }
-    }
-
-  return false;
-}
-
-/****************************************************************************
- * Name: i2s_tx_error
- *
- * Description:
- *   I2S TX DMA error interrupt handler. This function is called when a
- *   transmit DMA error occurs. Currently, it triggers a system panic.
- *
- * Input Parameters:
- *   dma_chan    - GDMA channel handle
- *   event_data  - Pointer to GDMA event data structure
- *   arg         - I2S controller private data
- *
- * Returned Value:
- *   Returns false. (No context switch required.)
- *
- ****************************************************************************/
-
-static bool IRAM_ATTR i2s_tx_error(gdma_channel_handle_t dma_chan,
-                                   gdma_event_data_t *event_data,
-                                   void *arg)
-{
-  /* Just panic for now */
-
-  PANIC();
-  return false;
-}
-
-/****************************************************************************
- * Name: i2s_rx_error
- *
- * Description:
- *   I2S RX DMA error interrupt handler. This function is called when a
- *   receive DMA error occurs. Currently, it triggers a system panic.
- *
- * Input Parameters:
- *   dma_chan    - GDMA channel handle
- *   event_data  - Pointer to GDMA event data structure
- *   arg         - I2S controller private data
- *
- * Returned Value:
- *   Returns false. (No context switch required.)
- *
- ****************************************************************************/
-
-static bool IRAM_ATTR i2s_rx_error(gdma_channel_handle_t dma_chan,
-                                   gdma_event_data_t *event_data,
-                                   void *arg)
-{
-  /* Just panic for now */
-
-  PANIC();
-  return false;
-}
-
-/****************************************************************************
- * Name: i2s_rx_interrupt
- *
- * Description:
- *   I2S RX DMA interrupt handler. This function is called when a DMA
- *   transfer completes or an RX event occurs. It processes the DMA
- *   descriptor, synchronizes the buffer if needed, and schedules the
- *   next RX operation or updates the EOF number for the next descriptor.
- *
- * Input Parameters:
- *   dma_chan    - GDMA channel handle
- *   event_data  - Pointer to GDMA event data structure
- *   arg         - I2S controller private data
- *
- * Returned Value:
- *   Returns false. (No context switch required.)
- *
- ****************************************************************************/
-
-static bool IRAM_ATTR i2s_rx_interrupt(gdma_channel_handle_t dma_chan,
-                                       gdma_event_data_t *event_data,
-                                       void *arg)
-{
-  struct esp_i2s_s *priv = (struct esp_i2s_s *)arg;
-  lldesc_t *cur = NULL;
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-  int alignment = cache_hal_get_cache_line_size(CACHE_LL_LEVEL_INT_MEM,
-                                                CACHE_TYPE_DATA);
-#endif
-  if (event_data->flags.normal_eof)
-    {
-      cur = (lldesc_t *)(event_data->rx_eof_desc_addr);
-
-#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
-      esp_cache_msync(cur,
-                      ALIGN_UP(sizeof(lldesc_t), alignment),
-                      ESP_CACHE_MSYNC_FLAG_DIR_M2C);
-      esp_cache_msync((void *)cur->buf, cur->length,
-                      ESP_CACHE_MSYNC_FLAG_DIR_M2C);
-#endif
-
-      /* If the current descriptor is the last one, schedule the transfer */
-
-      if (STAILQ_NEXT(cur, qe) == NULL)
-        {
-          if (cur->eof == 1 && cur->owner == 0)
-            {
-              i2s_rx_schedule(priv, cur);
-            }
-        }
-      else
-        {
-          i2s_ll_rx_set_eof_num(priv->config->ctx->dev,
-                                STAILQ_NEXT(cur, qe)->size);
-        }
-    }
-
-  return false;
-}
 
 /****************************************************************************
  * Name: i2s_getmclkfrequency
@@ -2629,64 +2638,147 @@ static uint32_t i2s_setmclkfrequency(struct i2s_dev_s *dev,
 static int i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
-  uint32_t channels_mask;
-  bool is_mono = true;
+  esp_err_t err = ESP_OK;
+  i2s_chan_info_t info;
 
-  if (priv->config->tx_en)
+  memset(&info, 0, sizeof(info));
+
+  const i2s_slot_mode_t slot_mode = (channels == 1) ?
+                                    I2S_SLOT_MODE_MONO :
+                                    I2S_SLOT_MODE_STEREO;
+
+  if (!priv->config->tx_en)
     {
-      bool is_started = priv->tx_started;
+      return 0;
+    }
 
-      if (channels == 0)
-        {
-          return priv->channels;
-        }
-
-      if (channels != 1 && channels != 2)
-        {
-          return 0;
-        }
-
-      if (is_started)
-        {
-          i2s_tx_channel_stop(priv);
-        }
-
-      priv->channels = channels;
-
-      /* Always consider two channels. For mono (1-channel), we set the
-       * I2S_TX_TDM_CHAN1_EN to 0 and I2S_TX_CHAN_EQUAL to 1 to send out
-       * the data of the previous channel.
-       */
-
-      /* I2S_TX_TDM_TOT_CHAN_NUM = channels - 1 */
-
-      i2s_ll_tx_set_chan_num(priv->config->ctx->dev, 2);
-
-      channels_mask = I2S_TX_TDM_CHAN0_EN;
-      if (priv->channels > 1)
-        {
-          channels_mask |= I2S_TX_TDM_CHAN0_EN | I2S_TX_TDM_CHAN1_EN;
-          is_mono = false;
-        }
-
-      i2s_ll_tx_enable_mono_mode(priv->config->ctx->dev,
-                                 is_mono);
-
-      i2s_ll_tx_set_active_chan_mask(priv->config->ctx->dev, channels_mask);
-
-      /* Set I2S_TX_UPDATE bit to update the configs.
-       * This bit is automatically cleared.
-       */
-
-      if (is_started)
-        {
-          i2s_tx_channel_start(priv);
-        }
-
+  if (channels == 0)
+    {
       return priv->channels;
     }
 
-  return 0;
+  if (channels != 1 && channels != 2)
+    {
+      return 0;
+    }
+
+  if (priv->tx_handle == NULL)
+    {
+      return 0;
+    }
+
+  const bool was_tx_started = priv->tx_started;
+  const bool was_rx_started = (priv->rx_handle != NULL && priv->rx_started);
+
+  if (was_tx_started)
+    {
+      i2s_channel_disable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_disable(priv->rx_handle);
+    }
+
+  err = i2s_channel_get_info(priv->tx_handle, &info);
+  if (err != ESP_OK || info.mode_cfg == NULL)
+    {
+      err = ESP_ERR_INVALID_STATE;
+      goto out_enable;
+    }
+
+  switch (info.mode)
+    {
+    case I2S_COMM_MODE_STD:
+      {
+        const i2s_std_config_t *std_cfg =
+          (const i2s_std_config_t *)info.mode_cfg;
+        i2s_std_slot_config_t slot_cfg = std_cfg->slot_cfg;
+
+        slot_cfg.slot_mode = slot_mode;
+
+        err = i2s_channel_reconfig_std_slot(priv->tx_handle, &slot_cfg);
+        if (err != ESP_OK)
+          {
+            goto out_enable;
+          }
+
+        if (priv->rx_handle != NULL)
+          {
+            err = i2s_channel_reconfig_std_slot(priv->rx_handle, &slot_cfg);
+          }
+
+        break;
+      }
+
+#if SOC_I2S_SUPPORTS_TDM
+    case I2S_COMM_MODE_TDM:
+      {
+        const i2s_tdm_config_t *tdm_cfg =
+          (const i2s_tdm_config_t *)info.mode_cfg;
+        i2s_tdm_slot_config_t slot_cfg = tdm_cfg->slot_cfg;
+
+        slot_cfg.slot_mode = slot_mode;
+        slot_cfg.slot_mask = (channels == 1) ?
+                             I2S_TDM_SLOT0 :
+                             (i2s_tdm_slot_mask_t)(I2S_TDM_SLOT0 |
+                                                   I2S_TDM_SLOT1);
+
+        err = i2s_channel_reconfig_tdm_slot(priv->tx_handle, &slot_cfg);
+        if (err != ESP_OK)
+          {
+            goto out_enable;
+          }
+
+        if (priv->rx_handle != NULL)
+          {
+            err = i2s_channel_reconfig_tdm_slot(priv->rx_handle, &slot_cfg);
+          }
+
+        break;
+      }
+#endif
+
+#if SOC_I2S_SUPPORTS_PDM_TX
+    case I2S_COMM_MODE_PDM:
+      {
+        const i2s_pdm_tx_config_t *pdm_cfg =
+          (const i2s_pdm_tx_config_t *)info.mode_cfg;
+        i2s_pdm_tx_slot_config_t slot_cfg = pdm_cfg->slot_cfg;
+
+        slot_cfg.slot_mode = slot_mode;
+#if SOC_I2S_HW_VERSION_1
+        slot_cfg.slot_mask = (channels == 1) ?
+                             I2S_PDM_SLOT_LEFT : I2S_PDM_SLOT_BOTH;
+#endif
+
+        err = i2s_channel_reconfig_pdm_tx_slot(priv->tx_handle, &slot_cfg);
+        break;
+      }
+#endif
+
+    default:
+      err = ESP_ERR_NOT_SUPPORTED;
+      break;
+    }
+
+  if (err == ESP_OK)
+    {
+      priv->channels = channels;
+    }
+
+out_enable:
+  if (was_tx_started)
+    {
+      i2s_channel_enable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_enable(priv->rx_handle);
+    }
+
+  return (err == ESP_OK) ? (int)priv->channels : 0;
 }
 
 /****************************************************************************
@@ -2729,21 +2821,287 @@ static int i2s_rxchannels(struct i2s_dev_s *dev, uint8_t channels)
 }
 
 /****************************************************************************
+ * Name: i2s_samplerate_refresh_mclk
+ *
+ * Description:
+ *   Update stored MCLK frequency from the hardware after a successful clock
+ *   reconfiguration. Prefer the primary channel handle, then the secondary.
+ *
+ * Input Parameters:
+ *   priv      - I2S device structure
+ *   primary   - Preferred channel handle for MCLK query
+ *   secondary - Fallback channel handle for MCLK query
+ *
+ ****************************************************************************/
+
+static void i2s_samplerate_refresh_mclk(struct esp_i2s_s *priv,
+                                        i2s_chan_handle_t primary,
+                                        i2s_chan_handle_t secondary)
+{
+  i2s_chan_info_t info;
+
+  memset(&info, 0, sizeof(info));
+
+  if (primary != NULL && i2s_channel_get_info(primary, &info) == ESP_OK)
+    {
+      priv->mclk_freq = info.mclk_hz;
+    }
+  else if (secondary != NULL &&
+           i2s_channel_get_info(secondary, &info) == ESP_OK)
+    {
+      priv->mclk_freq = info.mclk_hz;
+    }
+  else
+    {
+      priv->mclk_freq = priv->rate * (uint32_t)priv->mclk_multiple;
+    }
+}
+
+/****************************************************************************
+ * Name: i2s_reconfig_samplerate_clk
+ *
+ * Description:
+ *   Apply sample rate / MCLK multiple to I2S clock using the comm mode
+ *   reported for info_handle.
+ *
+ * Input Parameters:
+ *   priv        - I2S device structure
+ *   info_handle - Channel handle used to probe comm mode
+ *   is_tx_path  - True when reconfiguring the TX PDM path
+ *
+ * Returned Value:
+ *   ESP_OK on success; an Espressif error code on failure.
+ *
+ ****************************************************************************/
+
+static esp_err_t i2s_reconfig_samplerate_clk(struct esp_i2s_s *priv,
+                                             i2s_chan_handle_t info_handle,
+                                             bool is_tx_path)
+{
+  esp_err_t err;
+  i2s_chan_info_t info;
+
+  memset(&info, 0, sizeof(info));
+
+#if !(SOC_I2S_SUPPORTS_PDM_TX || SOC_I2S_SUPPORTS_PDM_RX)
+  UNUSED(is_tx_path);
+#endif
+
+  err = i2s_channel_get_info(info_handle, &info);
+  if (err != ESP_OK || info.mode_cfg == NULL)
+    {
+      return ESP_ERR_INVALID_STATE;
+    }
+
+  switch (info.mode)
+    {
+    case I2S_COMM_MODE_STD:
+      {
+        const i2s_std_config_t *std_cfg =
+          (const i2s_std_config_t *)info.mode_cfg;
+        i2s_std_clk_config_t clk_cfg = std_cfg->clk_cfg;
+
+        clk_cfg.sample_rate_hz = priv->rate;
+        clk_cfg.mclk_multiple = (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+        if (priv->tx_handle != NULL)
+          {
+            err = i2s_channel_reconfig_std_clock(priv->tx_handle, &clk_cfg);
+            if (err == ESP_OK && priv->rx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_std_clock(priv->rx_handle, &clk_cfg);
+              }
+          }
+        else
+          {
+            err = i2s_channel_reconfig_std_clock(priv->rx_handle, &clk_cfg);
+          }
+
+        break;
+      }
+
+#if SOC_I2S_SUPPORTS_TDM
+    case I2S_COMM_MODE_TDM:
+      {
+        const i2s_tdm_config_t *tdm_cfg =
+          (const i2s_tdm_config_t *)info.mode_cfg;
+        i2s_tdm_clk_config_t clk_cfg = tdm_cfg->clk_cfg;
+
+        clk_cfg.sample_rate_hz = priv->rate;
+        clk_cfg.mclk_multiple = (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+        if (priv->tx_handle != NULL)
+          {
+            err = i2s_channel_reconfig_tdm_clock(priv->tx_handle, &clk_cfg);
+            if (err == ESP_OK && priv->rx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_tdm_clock(priv->rx_handle, &clk_cfg);
+              }
+          }
+        else
+          {
+            err = i2s_channel_reconfig_tdm_clock(priv->rx_handle, &clk_cfg);
+          }
+
+        break;
+      }
+#endif
+
+#if SOC_I2S_SUPPORTS_PDM_TX || SOC_I2S_SUPPORTS_PDM_RX
+    case I2S_COMM_MODE_PDM:
+      {
+        if (is_tx_path)
+          {
+#if SOC_I2S_SUPPORTS_PDM_TX
+            const i2s_pdm_tx_config_t *pdm_cfg =
+              (const i2s_pdm_tx_config_t *)info.mode_cfg;
+            i2s_pdm_tx_clk_config_t clk_cfg = pdm_cfg->clk_cfg;
+
+            clk_cfg.sample_rate_hz = priv->rate;
+            clk_cfg.mclk_multiple =
+              (i2s_mclk_multiple_t)priv->mclk_multiple;
+            clk_cfg.clk_src =
+              (i2s_clock_src_t)priv->config->tx_clk_src;
+
+            err =
+              i2s_channel_reconfig_pdm_tx_clock(priv->tx_handle, &clk_cfg);
+#else
+            err = ESP_ERR_NOT_SUPPORTED;
+#endif
+          }
+        else
+          {
+#if SOC_I2S_SUPPORTS_PDM_RX
+            const i2s_pdm_rx_config_t *pdm_cfg =
+              (const i2s_pdm_rx_config_t *)info.mode_cfg;
+            i2s_pdm_rx_clk_config_t clk_cfg = pdm_cfg->clk_cfg;
+
+            clk_cfg.sample_rate_hz = priv->rate;
+            clk_cfg.mclk_multiple =
+              (i2s_mclk_multiple_t)priv->mclk_multiple;
+            clk_cfg.clk_src =
+              (i2s_clock_src_t)priv->config->rx_clk_src;
+
+            err =
+              i2s_channel_reconfig_pdm_rx_clock(priv->rx_handle, &clk_cfg);
+#else
+            err = ESP_ERR_NOT_SUPPORTED;
+#endif
+          }
+
+        break;
+      }
+#endif
+
+    default:
+      err = ESP_ERR_NOT_SUPPORTED;
+      break;
+    }
+
+  return err;
+}
+
+/****************************************************************************
+ * Name: i2s_apply_samplerate
+ *
+ * Description:
+ *   Shared sample-rate change: pause active channels, update rate and MCLK
+ *   multiple, reconfigure clock from info_handle, refresh mclk_freq, resume.
+ *
+ * Input Parameters:
+ *   priv        - I2S device structure
+ *   rate        - New sample rate in Hz (0 returns current rate)
+ *   info_handle - Channel handle used to probe comm mode
+ *   is_tx_path  - True when applying through the TX PDM path
+ *
+ * Returned Value:
+ *   Resulting sample rate on success; 0 on failure.
+ *
+ ****************************************************************************/
+
+static uint32_t i2s_apply_samplerate(struct esp_i2s_s *priv,
+                                     uint32_t rate,
+                                     i2s_chan_handle_t info_handle,
+                                     bool is_tx_path)
+{
+  esp_err_t err;
+  const bool was_tx_started = (priv->tx_handle != NULL && priv->tx_started);
+  const bool was_rx_started = (priv->rx_handle != NULL && priv->rx_started);
+
+  if (was_tx_started)
+    {
+      i2s_channel_disable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_disable(priv->rx_handle);
+    }
+
+  priv->rate = rate;
+
+  priv->mclk_multiple =
+    (uint32_t)(((i2s_data_bit_width_t)priv->data_width ==
+                I2S_DATA_BIT_WIDTH_24BIT) ?
+                 I2S_MCLK_MULTIPLE_384 :
+                 I2S_MCLK_MULTIPLE_256);
+
+  err = i2s_reconfig_samplerate_clk(priv, info_handle, is_tx_path);
+
+  if (err == ESP_OK)
+    {
+      if (is_tx_path)
+        {
+          i2s_samplerate_refresh_mclk(priv,
+                                      priv->tx_handle,
+                                      priv->rx_handle);
+        }
+      else
+        {
+          i2s_samplerate_refresh_mclk(priv,
+                                      priv->rx_handle,
+                                      priv->tx_handle);
+        }
+    }
+  else
+    {
+      i2serr("Failed to reconfigure I2S %s clock: %d\n",
+             is_tx_path ? "TX" : "RX", err);
+    }
+
+  if (was_tx_started)
+    {
+      i2s_channel_enable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_enable(priv->rx_handle);
+    }
+
+  if (err != ESP_OK)
+    {
+      return (uint32_t)ERROR;
+    }
+
+  return priv->rate;
+}
+
+/****************************************************************************
  * Name: i2s_txsamplerate
  *
  * Description:
- *   Set the I2S TX sample rate.  NOTE:  This will have no effect if (1) the
- *   driver does not support an I2S transmitter or if (2) the sample rate is
- *   driven by the I2S frame clock.  This may also have unexpected side-
- *   effects of the TX sample is coupled with the RX sample rate.
- *   If rate is 0, the current sample rate is returned.
+ *   Set the I2S TX sample rate.
+ *   If sample rate is 0, the current sample rate is returned.
  *
  * Input Parameters:
  *   dev  - Device-specific state data
- *   rate - The I2S sample rate in samples (not bits) per second
+ *   rate - The I2S TX sample rate in Hz
  *
  * Returned Value:
- *   OK on success, ERROR on fail
+ *   Returns the resulting sample rate or 0 on failure.
  *
  ****************************************************************************/
 
@@ -2751,42 +3109,26 @@ static uint32_t i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
 
-  if (priv->config->tx_en)
+  if (!priv->config->tx_en)
     {
-      bool is_started = priv->tx_started;
+      return 0;
+    }
 
-      if (rate == 0)
-        {
-          return priv->rate;
-        }
-
-      if (is_started)
-        {
-          i2s_tx_channel_stop(priv);
-        }
-
-      priv->rate = rate;
-
-      if (i2s_check_mclkfrequency(priv) < 0)
-        {
-          return 0;
-        }
-
-      if (i2s_set_clock(priv) != OK)
-        {
-          i2serr("Failed to set clock\n");
-          return ERROR;
-        }
-
-      if (is_started)
-        {
-          i2s_tx_channel_start(priv);
-        }
-
+  if (rate == 0)
+    {
       return priv->rate;
     }
 
-  return 0;
+  if (priv->tx_handle == NULL)
+    {
+      return 0;
+    }
+
+  /* Match i2s_txchannels: stop before reconfiguration; duplex shares a port
+   * clock.
+   */
+
+  return i2s_apply_samplerate(priv, rate, priv->tx_handle, true);
 }
 
 /****************************************************************************
@@ -2809,42 +3151,421 @@ static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
 
-  if (priv->config->rx_en)
+  if (!priv->config->rx_en)
     {
-      bool is_started = priv->rx_started;
+      return 0;
+    }
 
-      if (rate == 0)
-        {
-          return priv->rate;
-        }
-
-      if (is_started)
-        {
-          i2s_rx_channel_stop(priv);
-        }
-
-      priv->rate = rate;
-
-      if (i2s_check_mclkfrequency(priv) < 0)
-        {
-          return 0;
-        }
-
-      if (i2s_set_clock(priv) != OK)
-        {
-          i2serr("Failed to set clock\n");
-          return ERROR;
-        }
-
-      if (is_started)
-        {
-          i2s_rx_channel_start(priv);
-        }
-
+  if (rate == 0)
+    {
       return priv->rate;
     }
 
-  return 0;
+  if (priv->rx_handle == NULL)
+    {
+      return 0;
+    }
+
+  /* Duplex shares one port clock; match i2s_txsamplerate / i2s_txchannels. */
+
+  return i2s_apply_samplerate(priv, rate, priv->rx_handle, false);
+}
+
+/****************************************************************************
+ * Name: i2s_pcm_bits_to_hal
+ *
+ * Description:
+ *   Convert a PCM bit width in bits to the corresponding HAL enum value.
+ *
+ * Input Parameters:
+ *   bits - PCM data width in bits (8, 16, 24, or 32)
+ *
+ * Output Parameters:
+ *   bits_hal_out - Receives the HAL data bit width on success
+ *
+ * Returned Value:
+ *   True when `bits` is supported; false otherwise.
+ *
+ ****************************************************************************/
+
+static bool i2s_pcm_bits_to_hal(int bits, i2s_data_bit_width_t *bits_hal_out)
+{
+  switch (bits)
+    {
+    case 8:
+      *bits_hal_out = I2S_DATA_BIT_WIDTH_8BIT;
+      return true;
+
+    case 16:
+      *bits_hal_out = I2S_DATA_BIT_WIDTH_16BIT;
+      return true;
+
+    case 24:
+      *bits_hal_out = I2S_DATA_BIT_WIDTH_24BIT;
+      return true;
+
+    case 32:
+      *bits_hal_out = I2S_DATA_BIT_WIDTH_32BIT;
+      return true;
+
+    default:
+      return false;
+    }
+}
+
+/****************************************************************************
+ * Name: i2s_apply_datawidth
+ *
+ * Description:
+ *   Shared I2S data-width change path for TX or RX (`is_rx_path`).  Uses the
+ *   path channel handle to probe comm mode and applies duplex-safe STD/TDM
+ *   slot/clock updates; PDM is split TX vs RX.
+ *
+ * Input Parameters:
+ *   priv       - I2S device structure
+ *   bits       - New PCM data width in bits (0 returns current width)
+ *   bits_hal   - HAL data bit width corresponding to `bits`
+ *   is_rx_path - True when applying through the RX channel
+ *
+ * Returned Value:
+ *   Resulting data width in bits on success; 0 on failure.
+ *
+ ****************************************************************************/
+
+static uint32_t i2s_apply_datawidth(struct esp_i2s_s *priv,
+                                    int bits,
+                                    i2s_data_bit_width_t bits_hal,
+                                    bool is_rx_path)
+{
+  esp_err_t err = ESP_OK;
+  i2s_chan_info_t info;
+
+  memset(&info, 0, sizeof(info));
+
+  const i2s_chan_handle_t path_handle =
+    is_rx_path ? priv->rx_handle : priv->tx_handle;
+  const i2s_chan_handle_t pair_handle =
+    is_rx_path ? priv->tx_handle : priv->rx_handle;
+  DEBUGASSERT(path_handle != NULL);
+
+  /* Duplex shares the port clock; symmetric start/stop like samplerate
+   * paths.
+   */
+
+  const bool was_tx_started = (priv->tx_handle != NULL && priv->tx_started);
+  const bool was_rx_started = (priv->rx_handle != NULL && priv->rx_started);
+
+  if (was_tx_started)
+    {
+      i2s_channel_disable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_disable(priv->rx_handle);
+    }
+
+  priv->data_width = (uint32_t)bits;
+  priv->mclk_multiple =
+    (uint32_t)((bits_hal == I2S_DATA_BIT_WIDTH_24BIT) ?
+               I2S_MCLK_MULTIPLE_384 :
+               I2S_MCLK_MULTIPLE_256);
+
+  const i2s_slot_mode_t slot_mode_pcm =
+    (priv->channels <= 1) ? I2S_SLOT_MODE_MONO : I2S_SLOT_MODE_STEREO;
+
+  err = i2s_channel_get_info(path_handle, &info);
+  if (err != ESP_OK || info.mode_cfg == NULL)
+    {
+      err = ESP_ERR_INVALID_STATE;
+      goto out_enable;
+    }
+
+  switch (info.mode)
+    {
+    case I2S_COMM_MODE_STD:
+      {
+        i2s_std_slot_config_t slot_cfg;
+
+        switch (priv->config->audio_std_mode)
+          {
+          case I2S_TDM_MSB:
+            slot_cfg =
+              (i2s_std_slot_config_t)
+              I2S_STD_MSB_SLOT_DEFAULT_CONFIG(bits_hal, slot_mode_pcm);
+            break;
+
+          case I2S_TDM_PCM:
+            slot_cfg =
+              (i2s_std_slot_config_t)
+              I2S_STD_PCM_SLOT_DEFAULT_CONFIG(bits_hal, slot_mode_pcm);
+            break;
+
+          default:
+            slot_cfg =
+              (i2s_std_slot_config_t)
+              I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(bits_hal, slot_mode_pcm);
+            break;
+          }
+
+        slot_cfg.ws_pol = priv->config->ws_pol;
+
+        if (priv->tx_handle != NULL)
+          {
+            err =
+              i2s_channel_reconfig_std_slot(priv->tx_handle,
+                                            &slot_cfg);
+            if (err == ESP_OK && priv->rx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_std_slot(priv->rx_handle,
+                                                &slot_cfg);
+              }
+          }
+        else
+          {
+            err =
+              i2s_channel_reconfig_std_slot(priv->rx_handle,
+                                            &slot_cfg);
+          }
+
+        if (err == ESP_OK)
+          {
+            err = i2s_channel_get_info(path_handle, &info);
+            if (err == ESP_OK && info.mode_cfg == NULL)
+              {
+                err = ESP_ERR_INVALID_STATE;
+              }
+          }
+
+        if (err == ESP_OK && info.mode_cfg != NULL)
+          {
+            const i2s_std_config_t *std_cfg =
+              (const i2s_std_config_t *)info.mode_cfg;
+            i2s_std_clk_config_t clk_cfg = std_cfg->clk_cfg;
+
+            clk_cfg.sample_rate_hz = priv->rate;
+            clk_cfg.mclk_multiple =
+              (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+            if (priv->tx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_std_clock(priv->tx_handle,
+                                                 &clk_cfg);
+                if (err == ESP_OK && priv->rx_handle != NULL)
+                  {
+                    err =
+                      i2s_channel_reconfig_std_clock(priv->rx_handle,
+                                                     &clk_cfg);
+                  }
+              }
+            else
+              {
+                err =
+                  i2s_channel_reconfig_std_clock(priv->rx_handle,
+                                                 &clk_cfg);
+              }
+          }
+
+        break;
+      }
+
+#if SOC_I2S_SUPPORTS_TDM
+    case I2S_COMM_MODE_TDM:
+      {
+        i2s_tdm_slot_config_t slot_cfg;
+
+        switch (priv->config->audio_std_mode)
+          {
+          case I2S_TDM_MSB:
+            slot_cfg =
+              (i2s_tdm_slot_config_t)
+              I2S_TDM_MSB_SLOT_DEFAULT_CONFIG(bits_hal,
+                                              slot_mode_pcm,
+                                              I2S_TDM_AUTO_SLOT);
+            break;
+
+          case I2S_TDM_PCM:
+            slot_cfg =
+              (i2s_tdm_slot_config_t)
+              I2S_TDM_PCM_SHORT_SLOT_DEFAULT_CONFIG(bits_hal,
+                                                     slot_mode_pcm,
+                                                     I2S_TDM_AUTO_SLOT);
+            break;
+
+          default:
+            slot_cfg =
+              (i2s_tdm_slot_config_t)
+              I2S_TDM_PHILIPS_SLOT_DEFAULT_CONFIG(bits_hal,
+                                                   slot_mode_pcm,
+                                                   I2S_TDM_AUTO_SLOT);
+            break;
+          }
+
+        slot_cfg.ws_pol = priv->config->ws_pol;
+
+        if (priv->tx_handle != NULL)
+          {
+            err =
+              i2s_channel_reconfig_tdm_slot(priv->tx_handle,
+                                            &slot_cfg);
+            if (err == ESP_OK && priv->rx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_tdm_slot(priv->rx_handle,
+                                                 &slot_cfg);
+              }
+          }
+        else
+          {
+            err =
+              i2s_channel_reconfig_tdm_slot(priv->rx_handle,
+                                              &slot_cfg);
+          }
+
+        if (err == ESP_OK)
+          {
+            err = i2s_channel_get_info(path_handle, &info);
+            if (err == ESP_OK && info.mode_cfg == NULL)
+              {
+                err = ESP_ERR_INVALID_STATE;
+              }
+          }
+
+        if (err == ESP_OK && info.mode_cfg != NULL)
+          {
+            const i2s_tdm_config_t *tdm_cfg =
+              (const i2s_tdm_config_t *)info.mode_cfg;
+            i2s_tdm_clk_config_t clk_cfg = tdm_cfg->clk_cfg;
+
+            clk_cfg.sample_rate_hz = priv->rate;
+            clk_cfg.mclk_multiple =
+              (i2s_mclk_multiple_t)priv->mclk_multiple;
+
+            if (priv->tx_handle != NULL)
+              {
+                err =
+                  i2s_channel_reconfig_tdm_clock(priv->tx_handle,
+                                                 &clk_cfg);
+                if (err == ESP_OK && priv->rx_handle != NULL)
+                  {
+                    err =
+                      i2s_channel_reconfig_tdm_clock(priv->rx_handle,
+                                                      &clk_cfg);
+                  }
+              }
+            else
+              {
+                err =
+                  i2s_channel_reconfig_tdm_clock(priv->rx_handle,
+                                                   &clk_cfg);
+              }
+          }
+
+        break;
+      }
+#endif /* SOC_I2S_SUPPORTS_TDM */
+
+#if SOC_I2S_SUPPORTS_PDM_TX || SOC_I2S_SUPPORTS_PDM_RX
+    case I2S_COMM_MODE_PDM:
+      if (bits_hal != I2S_DATA_BIT_WIDTH_16BIT)
+        {
+          err = ESP_ERR_NOT_SUPPORTED;
+          break;
+        }
+
+      if (is_rx_path)
+        {
+#if SOC_I2S_SUPPORTS_PDM_RX
+          i2s_pdm_rx_slot_config_t slot_cfg =
+            (i2s_pdm_rx_slot_config_t)
+            I2S_PDM_RX_SLOT_DEFAULT_CONFIG(bits_hal,
+                                           slot_mode_pcm);
+
+#  if SOC_I2S_HW_VERSION_1
+          slot_cfg.slot_mask = (priv->channels <= 1) ?
+                               I2S_PDM_SLOT_LEFT :
+                               I2S_PDM_SLOT_BOTH;
+#  endif
+
+          err =
+            i2s_channel_reconfig_pdm_rx_slot(priv->rx_handle,
+                                               &slot_cfg);
+#else
+          err = ESP_ERR_NOT_SUPPORTED;
+#endif
+        }
+      else
+        {
+#if SOC_I2S_SUPPORTS_PDM_TX
+          i2s_pdm_tx_slot_config_t slot_cfg =
+            (i2s_pdm_tx_slot_config_t)
+            I2S_PDM_TX_SLOT_DEFAULT_CONFIG(bits_hal,
+                                           slot_mode_pcm);
+
+#  if SOC_I2S_HW_VERSION_1
+          slot_cfg.slot_mask = (priv->channels <= 1) ?
+                               I2S_PDM_SLOT_LEFT :
+                               I2S_PDM_SLOT_BOTH;
+#  endif
+
+          err =
+            i2s_channel_reconfig_pdm_tx_slot(priv->tx_handle,
+                                               &slot_cfg);
+#else
+          err = ESP_ERR_NOT_SUPPORTED;
+#endif
+        }
+
+      break;
+#endif /* PDM TX || RX */
+
+    default:
+      err = ESP_ERR_NOT_SUPPORTED;
+      break;
+    }
+
+  if (err == ESP_OK)
+    {
+      if (i2s_channel_get_info(path_handle, &info) == ESP_OK)
+        {
+          priv->mclk_freq = info.mclk_hz;
+        }
+      else if (pair_handle != NULL &&
+               i2s_channel_get_info(pair_handle, &info) == ESP_OK)
+        {
+          priv->mclk_freq = info.mclk_hz;
+        }
+      else
+        {
+          priv->mclk_freq =
+            priv->rate * (uint32_t)priv->mclk_multiple;
+        }
+    }
+  else
+    {
+      i2serr("Failed to set I2S %s data width: %d\n",
+             is_rx_path ? "RX" : "TX", err);
+    }
+
+out_enable:
+  if (was_tx_started)
+    {
+      i2s_channel_enable(priv->tx_handle);
+    }
+
+  if (was_rx_started)
+    {
+      i2s_channel_enable(priv->rx_handle);
+    }
+
+  if (err != ESP_OK)
+    {
+      return 0;
+    }
+
+  return (uint32_t)bits;
 }
 
 /****************************************************************************
@@ -2856,45 +3577,40 @@ static uint32_t i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *   If width is 0, the current data width is returned.
  *
  * Input Parameters:
- *   dev   - Device-specific state data
- *   width - The I2S data with in bits.
+ *   dev  - Device-specific state data
+ *   bits - The I2S data width in bits.
  *
  * Returned Value:
- *   Returns the resulting data width
+ *   Returns the resulting data width or 0 on failure.
  *
  ****************************************************************************/
 
 static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  i2s_data_bit_width_t bits_hal;
 
-  if (priv->config->tx_en)
+  if (!priv->config->tx_en)
     {
-      bool is_started = priv->tx_started;
-
-      if (bits == 0)
-        {
-          return priv->data_width;
-        }
-
-      if (is_started)
-        {
-          i2s_tx_channel_stop(priv);
-        }
-
-      priv->data_width = bits;
-
-      i2s_set_datawidth(priv);
-
-      if (is_started)
-        {
-          i2s_tx_channel_start(priv);
-        }
-
-      return bits;
+      return 0;
     }
 
-  return 0;
+  if (bits == 0)
+    {
+      return priv->data_width;
+    }
+
+  if (!i2s_pcm_bits_to_hal(bits, &bits_hal))
+    {
+      return 0;
+    }
+
+  if (priv->tx_handle == NULL)
+    {
+      return 0;
+    }
+
+  return i2s_apply_datawidth(priv, bits, bits_hal, false);
 }
 
 /****************************************************************************
@@ -2906,45 +3622,506 @@ static uint32_t i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
  *   If width is 0, the current data width is returned.
  *
  * Input Parameters:
- *   dev   - Device-specific state data
- *   width - The I2S data with in bits.
+ *   dev  - Device-specific state data
+ *   bits - The I2S data width in bits.
  *
  * Returned Value:
- *   Returns the resulting data width
+ *   Returns the resulting data width or 0 on failure.
  *
  ****************************************************************************/
 
 static uint32_t i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  i2s_data_bit_width_t bits_hal;
 
-  if (priv->config->rx_en)
+  if (!priv->config->rx_en)
     {
-      bool is_started = priv->rx_started;
-
-      if (bits == 0)
-        {
-          return priv->data_width;
-        }
-
-      if (is_started)
-        {
-          i2s_rx_channel_stop(priv);
-        }
-
-      priv->data_width = bits;
-
-      i2s_set_datawidth(priv);
-
-      if (is_started)
-        {
-          i2s_rx_channel_start(priv);
-        }
-
-      return bits;
+      return 0;
     }
 
-  return 0;
+  if (bits == 0)
+    {
+      return priv->data_width;
+    }
+
+  if (!i2s_pcm_bits_to_hal(bits, &bits_hal))
+    {
+      return 0;
+    }
+
+  if (priv->rx_handle == NULL)
+    {
+      return 0;
+    }
+
+  return i2s_apply_datawidth(priv, bits, bits_hal, true);
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_prep_release
+ *
+ * Description:
+ *   Free the aligned TX transfer buffer allocated by
+ *   `esp_i2s_tx_prep_apb()`.
+ *
+ * Input Parameters:
+ *   prep - TX prep structure whose `xfer` buffer should be released
+ *
+ ****************************************************************************/
+
+static void esp_i2s_tx_prep_release(struct esp_i2s_tx_send_prep_s *prep)
+{
+  if (prep != NULL && prep->xfer != NULL)
+    {
+      kmm_free(prep->xfer);
+      prep->xfer = NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_prep_apb
+ *
+ * Description:
+ *   Build an aligned TX block from an APB (merging `tx_carry`).  On success,
+ *   `prep->xfer` is allocated when `prep->send_len > 0`.
+ *
+ * Input Parameters:
+ *   priv - I2S device structure
+ *   apb  - Source audio buffer
+ *   prep - TX prep structure to populate
+ *
+ * Output Parameters:
+ *   prep - Receives aligned transfer data and carry state on success
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_prep_apb(struct esp_i2s_s *priv,
+                               struct ap_buffer_s *apb,
+                               struct esp_i2s_tx_send_prep_s *prep)
+{
+  uint16_t           bytes_per_sample;
+  uint16_t           bytes_per_frame;
+  uint8_t           *buf;
+  uint8_t           *samp_run;
+  apb_samp_t         samp_size;
+  apb_samp_t         carry_size;
+  apb_samp_t         send_len;
+  size_t             data_copied;
+  size_t             carry_in_bytes;
+  uint8_t            carry_in_buf[ESP_I2S_TX_CARRY_MAX];
+  apb_samp_t         span_end_excl;
+  int                span_rc;
+
+  DEBUGASSERT(priv != NULL && apb != NULL && apb->samp != NULL &&
+              prep != NULL);
+
+  memset(prep, 0, sizeof(*prep));
+
+  if (priv->channels == 0 || priv->data_width == 0)
+    {
+      return -EINVAL;
+    }
+
+  span_rc = esp_i2s_apb_span_end_excl(apb, &span_end_excl);
+  if (span_rc < OK)
+    {
+      return span_rc;
+    }
+
+  bytes_per_sample = (uint16_t)((priv->data_width + 7u) / 8u);
+  bytes_per_frame = (uint16_t)((uint32_t)bytes_per_sample * priv->channels);
+
+  if (bytes_per_frame == 0 || bytes_per_frame > ESP_I2S_TX_CARRY_MAX)
+    {
+      return -EINVAL;
+    }
+
+  carry_in_bytes = priv->tx_carry.bytes;
+
+  if (carry_in_bytes != 0)
+    {
+      if (carry_in_bytes > ESP_I2S_TX_CARRY_MAX)
+        {
+          return -EINVAL;
+        }
+
+      memcpy(carry_in_buf, priv->tx_carry.data, carry_in_bytes);
+    }
+
+  samp_run = apb->samp + apb->curbyte;
+  samp_size = (apb_samp_t)carry_in_bytes + (span_end_excl - apb->curbyte);
+  carry_size = samp_size % bytes_per_frame;
+  send_len = samp_size - carry_size;
+
+  if ((uint32_t)send_len >
+      (uint32_t)I2S_DMA_BUFFER_MAX_SIZE * (uint32_t)I2S_DMADESC_NUM)
+    {
+      i2serr("I2S TX block (%" PRIu32 " bytes) exceeds DMA link limit\n",
+             (uint32_t)send_len);
+      return -EFBIG;
+    }
+
+  if (send_len == 0)
+    {
+      uint8_t tmp[ESP_I2S_TX_CARRY_MAX];
+
+      if ((size_t)samp_size > ESP_I2S_TX_CARRY_MAX)
+        {
+          return -EINVAL;
+        }
+
+      if (carry_in_bytes != 0)
+        {
+          memcpy(tmp, carry_in_buf, carry_in_bytes);
+        }
+
+      memcpy(tmp + carry_in_bytes, samp_run,
+             (size_t)(span_end_excl - apb->curbyte));
+
+      prep->new_carry_len = (size_t)samp_size;
+      memcpy(prep->new_carry, tmp, prep->new_carry_len);
+      return OK;
+    }
+
+  prep->xfer = kmm_malloc((size_t)send_len);
+  if (prep->xfer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  buf = prep->xfer;
+  data_copied = 0;
+
+  if (carry_in_bytes != 0)
+    {
+      memcpy(buf, carry_in_buf, carry_in_bytes);
+      buf += carry_in_bytes;
+      data_copied += carry_in_bytes;
+      memcpy(buf, samp_run, (size_t)(bytes_per_frame - carry_in_bytes));
+      buf += (size_t)(bytes_per_frame - carry_in_bytes);
+      samp_run += (size_t)(bytes_per_frame - carry_in_bytes);
+      data_copied += (size_t)(bytes_per_frame - carry_in_bytes);
+    }
+
+  memcpy(buf, samp_run,
+         (size_t)(samp_size - (apb_samp_t)(data_copied + carry_size)));
+  samp_run += (size_t)(samp_size - (apb_samp_t)(data_copied + carry_size));
+
+  prep->new_carry_len = (size_t)carry_size;
+  if (prep->new_carry_len != 0)
+    {
+      memcpy(prep->new_carry, samp_run, prep->new_carry_len);
+    }
+
+  prep->send_len = (size_t)send_len;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_tx_run_job_locked
+ *
+ * Description:
+ *   Transmit one APB worth of PCM (plus TX carry merge).
+ *   `priv->lock` must NOT be held during this call: TX may block inside
+ *   `i2s_channel_write()`.
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   apb     - Audio buffer to transmit
+ *   timeout - Write timeout in system ticks (0 means wait forever)
+ *   prep    - Optional prior TX prep result
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_tx_run_job_locked(struct esp_i2s_s *priv,
+                                     struct ap_buffer_s *apb,
+                                     uint32_t timeout,
+                                     struct esp_i2s_tx_send_prep_s *prep)
+{
+  esp_err_t                       esp_ret;
+  struct esp_i2s_tx_send_prep_s   local;
+  struct esp_i2s_tx_send_prep_s  *active;
+  size_t                          bytes_written;
+  uint32_t                        timeout_ms;
+  int                             ret;
+
+  DEBUGASSERT(priv != NULL && apb != NULL && apb->samp != NULL);
+
+  if (priv->tx_handle == NULL || !priv->tx_started)
+    {
+      return -EAGAIN;
+    }
+
+  if (prep != NULL)
+    {
+      active = prep;
+    }
+  else
+    {
+      ret = esp_i2s_tx_prep_apb(priv, apb, &local);
+      if (ret < OK)
+        {
+          return ret;
+        }
+
+      active = &local;
+    }
+
+  if (active->send_len == 0)
+    {
+      priv->tx_carry.bytes = active->new_carry_len;
+      if (active->new_carry_len != 0)
+        {
+          memcpy(priv->tx_carry.data, active->new_carry,
+                 active->new_carry_len);
+        }
+
+      esp_i2s_tx_prep_release(active);
+      return OK;
+    }
+
+#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
+  esp_cache_msync(active->xfer, active->send_len,
+                  ESP_CACHE_MSYNC_FLAG_DIR_C2M);
+#endif
+
+  if (active->preloaded >= active->send_len)
+    {
+      priv->tx_carry.bytes = active->new_carry_len;
+      if (active->new_carry_len != 0)
+        {
+          memcpy(priv->tx_carry.data, active->new_carry,
+                 active->new_carry_len);
+        }
+
+      esp_i2s_tx_prep_release(active);
+      return OK;
+    }
+
+  if (timeout == 0)
+    {
+      timeout_ms = UINT32_MAX;
+    }
+  else
+    {
+      timeout_ms = TICK2MSEC(timeout);
+      if (timeout_ms == 0)
+        {
+          timeout_ms = 1;
+        }
+    }
+
+  esp_ret = i2s_channel_write(priv->tx_handle,
+                              active->xfer + active->preloaded,
+                              active->send_len - active->preloaded,
+                              &bytes_written, timeout_ms);
+
+  if (esp_ret != ESP_OK ||
+      bytes_written != active->send_len - active->preloaded)
+    {
+      esp_i2s_tx_prep_release(active);
+
+      if (esp_ret == ESP_ERR_TIMEOUT)
+        {
+          return -ETIMEDOUT;
+        }
+
+      return (esp_ret != ESP_OK) ? i2s_map_esp_err(esp_ret) : -EIO;
+    }
+
+  priv->tx_carry.bytes = active->new_carry_len;
+  if (active->new_carry_len != 0)
+    {
+      memcpy(priv->tx_carry.data, active->new_carry,
+             active->new_carry_len);
+    }
+
+  esp_i2s_tx_prep_release(active);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_apb_span_end_excl
+ *
+ * Description:
+ *   Computes `span_end_excl`, the exclusive end byte offset for the APB
+ *   payload slice `[apb->curbyte, span_end_excl)`.
+ *
+ * Input Parameters:
+ *   apb - Audio buffer whose payload span is computed
+ *
+ * Output Parameters:
+ *   span_end_excl_out - Receives the exclusive end byte offset
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_apb_span_end_excl(struct ap_buffer_s *apb,
+                                     apb_samp_t *span_end_excl_out)
+{
+  apb_samp_t span_end_excl;
+
+  if (apb->nbytes > apb->curbyte)
+    {
+      span_end_excl = apb->nbytes;
+    }
+  else if (apb->curbyte == 0 && apb->nbytes == 0 && apb->nmaxbytes > 0)
+    {
+      span_end_excl = apb->nmaxbytes;
+    }
+  else
+    {
+      return -EINVAL;
+    }
+
+  if (span_end_excl > apb->nmaxbytes)
+    {
+      return -EINVAL;
+    }
+
+  *span_end_excl_out = span_end_excl;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_run_job_locked
+ *
+ * Description:
+ *   Receive one aligned PCM chunk into APB via `i2s_channel_read()`.
+ *   `priv->lock` must NOT be held during this call: RX may block for an
+ *   unbounded time when `timeout` is zero (converted to limitless wait).
+ *
+ * Input Parameters:
+ *   priv    - I2S device structure
+ *   apb     - Audio buffer to receive into
+ *   timeout - Read timeout in system ticks (0 means wait forever)
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int esp_i2s_rx_run_job_locked(struct esp_i2s_s *priv,
+                                     struct ap_buffer_s *apb,
+                                     uint32_t timeout)
+{
+  esp_err_t          esp_ret;
+  uint16_t           bytes_per_sample;
+  uint16_t           bytes_per_frame;
+  apb_samp_t         recv_len;
+  size_t             bytes_read;
+  uint32_t           timeout_ms;
+  uint8_t           *dest;
+  apb_samp_t         span_end_excl;
+  int                span_rc;
+
+  DEBUGASSERT(priv != NULL && apb != NULL && apb->samp != NULL);
+
+  if (priv->channels == 0 || priv->data_width == 0)
+    {
+      return -EINVAL;
+    }
+
+  span_rc = esp_i2s_apb_span_end_excl(apb, &span_end_excl);
+  if (span_rc < OK)
+    {
+      return span_rc;
+    }
+
+  if (priv->rx_handle == NULL || !priv->rx_started)
+    {
+      return -EAGAIN;
+    }
+
+  bytes_per_sample = (uint16_t)((priv->data_width + 7u) / 8u);
+  bytes_per_frame = (uint16_t)((uint32_t)bytes_per_sample * priv->channels);
+
+  if (bytes_per_frame == 0 || bytes_per_frame > ESP_I2S_TX_CARRY_MAX)
+    {
+      return -EINVAL;
+    }
+
+  recv_len = span_end_excl - apb->curbyte;
+  recv_len = (apb_samp_t)((uint32_t)recv_len -
+                          ((uint32_t)recv_len % (uint32_t)bytes_per_frame));
+
+  if ((uint32_t)recv_len == 0)
+    {
+      return -EINVAL;
+    }
+
+  if ((uint32_t)recv_len >
+      (uint32_t)priv->rx_handle->dma.buf_size *
+      (uint32_t)priv->rx_handle->dma.desc_num)
+    {
+      i2serr("I2S RX block (%" PRIu32 " bytes) exceeds DMA link limit\n",
+             (uint32_t)recv_len);
+      return -EFBIG;
+    }
+
+  dest = apb->samp + apb->curbyte;
+
+  if (timeout == 0)
+    {
+      timeout_ms = UINT32_MAX;
+    }
+  else
+    {
+      timeout_ms = TICK2MSEC(timeout);
+      if (timeout_ms == 0)
+        {
+          timeout_ms = 1;
+        }
+    }
+
+  bytes_read = 0;
+  while (bytes_read < (size_t)recv_len)
+    {
+      size_t chunk;
+      size_t chunk_read = 0;
+
+      chunk = (size_t)recv_len - bytes_read;
+      if (chunk > priv->rx_handle->dma.buf_size)
+        {
+          chunk = priv->rx_handle->dma.buf_size;
+        }
+
+      esp_ret = i2s_channel_read(priv->rx_handle, dest + bytes_read, chunk,
+                                 &chunk_read, timeout_ms);
+
+      if (esp_ret != ESP_OK || chunk_read != chunk)
+        {
+          if (esp_ret == ESP_ERR_TIMEOUT)
+            {
+              return -ETIMEDOUT;
+            }
+
+          i2serr("I2S RX read failed: esp=%d chunk=%zu/%zu "
+                 "total=%zu/%zu\n",
+                 (int)esp_ret, chunk_read, chunk, bytes_read,
+                 (size_t)recv_len);
+          return (esp_ret != ESP_OK) ? i2s_map_esp_err(esp_ret) : -EIO;
+        }
+
+      bytes_read += chunk_read;
+    }
+
+#if SOC_CACHE_INTERNAL_MEM_VIA_L1CACHE
+  esp_cache_msync(dest, (size_t)recv_len, ESP_CACHE_MSYNC_FLAG_DIR_M2C);
+#endif
+
+  apb->nbytes = apb->curbyte + recv_len;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -2974,88 +4151,147 @@ static int i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                     i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  int               ret = OK;
+  struct esp_i2s_async_job_s *job;
+  bool              preload_done = false;
+  struct esp_i2s_tx_send_prep_s preload_prep;
 
-  if (priv->config->tx_en)
+  if (!priv->config->tx_en)
     {
-      struct esp_buffer_s *bfcontainer;
-      int ret = OK;
-      uint32_t nbytes;
-      uint32_t nsamp;
+      return -ENOTTY;
+    }
 
-      /* Check audio buffer data size from the upper half. If the buffer
-       * size is not a multiple of the data width, the remaining bytes
-       * must be sent along with the next audio buffer.
-       */
+  if (priv->tx_handle == NULL)
+    {
+      return -EAGAIN;
+    }
 
-      nbytes = (apb->nbytes - apb->curbyte) + priv->tx.carry.bytes;
+  ret = esp_i2s_check_io_apb(priv, apb);
+  if (ret < OK)
+    {
+      return ret;
+    }
 
-      nbytes -= (nbytes % (priv->data_width / 8));
+  job = kmm_malloc(sizeof(*job));
+  if (job == NULL)
+    {
+      return -ENOMEM;
+    }
 
-      if (nbytes > (I2S_DMA_BUFFER_MAX_SIZE * I2S_DMADESC_NUM))
+  memset(job, 0, sizeof(*job));
+  job->apb = apb;
+  job->cb = callback;
+  job->cbarg = arg;
+  job->timeout = timeout;
+
+  if (!priv->session_active)
+    {
+      ret = esp_i2s_io_submit_job(priv, &priv->tx_jobs, (sq_entry_t *)job,
+                                  apb, true);
+      if (ret < OK)
         {
-          i2serr("Required buffer size can't fit into DMA outlink "
-                 "(exceeds in %" PRIu32 " bytes). Try to increase the "
-                 "number of the DMA descriptors (CONFIG_I2S_DMADESC_NUM).",
-                 nbytes - (I2S_DMA_BUFFER_MAX_SIZE * I2S_DMADESC_NUM));
-          return -EFBIG;
-        }
-
-      /* Allocate a buffer container in advance */
-
-      bfcontainer = i2s_buf_allocate(priv);
-      if (bfcontainer == NULL)
-        {
-          i2serr("Failed to allocate the buffer container");
-          return -ENOMEM;
-        }
-
-      /* Get exclusive access to the I2S driver data */
-
-      ret = nxmutex_lock(&priv->lock);
-      if (ret < 0)
-        {
-          goto errout_with_buf;
-        }
-
-      /* Add a reference to the audio buffer */
-
-      apb_reference(apb);
-
-      /* Initialize the buffer container structure */
-
-      bfcontainer->callback = callback;
-      bfcontainer->timeout  = timeout;
-      bfcontainer->arg      = arg;
-      bfcontainer->apb      = apb;
-      bfcontainer->nbytes   = nbytes;
-      bfcontainer->result   = -EBUSY;
-
-      ret = i2s_txdma_setup(priv, bfcontainer);
-
-      if (ret != OK)
-        {
-          goto errout_with_buf;
-        }
-
-      i2sinfo("Queued %d bytes into DMA buffers\n", apb->nbytes);
-      i2s_dump_buffer("Audio pipeline buffer:", &apb->samp[apb->curbyte],
-                      apb->nbytes - apb->curbyte);
-
-      nxmutex_unlock(&priv->lock);
-
-      return OK;
-
-errout_with_buf:
-      nxmutex_unlock(&priv->lock);
-      if (i2s_buf_free(priv, bfcontainer) != OK)
-        {
-          i2serr("Failed to free buffer container\n");
+          kmm_free(job);
         }
 
       return ret;
     }
 
-  return -ENOTTY;
+  memset(&preload_prep, 0, sizeof(preload_prep));
+  esp_i2s_tx_idle_shutdown_disarm(priv);
+
+  nxmutex_lock(&priv->lock);
+  if (!priv->tx_started)
+    {
+      size_t bytes_loaded;
+      esp_err_t esp_ret;
+
+      ret = esp_i2s_tx_prep_apb(priv, apb, &preload_prep);
+      if (ret == OK && preload_prep.send_len > 0)
+        {
+          esp_ret = i2s_channel_preload_data(priv->tx_handle,
+                                             preload_prep.xfer,
+                                             preload_prep.send_len,
+                                             &bytes_loaded);
+          if (esp_ret != ESP_OK)
+            {
+              esp_i2s_tx_prep_release(&preload_prep);
+              ret = i2s_map_esp_err(esp_ret);
+            }
+          else
+            {
+              preload_prep.preloaded = bytes_loaded;
+              preload_done = true;
+            }
+        }
+      else if (ret == OK)
+        {
+          preload_done = true;
+        }
+    }
+
+  nxmutex_unlock(&priv->lock);
+
+  if (ret < OK)
+    {
+      kmm_free(job);
+      return ret;
+    }
+
+  if (preload_done)
+    {
+      job->prep = preload_prep;
+      job->prep_valid = true;
+      memset(&preload_prep, 0, sizeof(preload_prep));
+    }
+
+  ret = esp_i2s_tx_job_send_quota(priv, apb,
+                                  job->prep_valid ? &job->prep : NULL,
+                                  job->prep_valid, &job->send_quota);
+  if (ret < OK)
+    {
+      if (job->prep_valid)
+        {
+          esp_i2s_tx_prep_release(&job->prep);
+        }
+
+      kmm_free(job);
+      return ret;
+    }
+
+  ret = esp_i2s_tx_channel_start(priv);
+  if (ret < OK)
+    {
+      if (job->prep_valid)
+        {
+          esp_i2s_tx_prep_release(&job->prep);
+        }
+
+      kmm_free(job);
+      return ret;
+    }
+
+    {
+      bool wake_io;
+
+      nxmutex_lock(&priv->lock);
+      wake_io = priv->tx_started;
+      nxmutex_unlock(&priv->lock);
+
+      ret = esp_i2s_io_submit_job(priv, &priv->tx_jobs, (sq_entry_t *)job,
+                                  apb, wake_io);
+    }
+
+  if (ret < OK)
+    {
+      if (job->prep_valid)
+        {
+          esp_i2s_tx_prep_release(&job->prep);
+        }
+
+      kmm_free(job);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -3085,79 +4321,140 @@ static int i2s_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                        i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct esp_i2s_s *priv = (struct esp_i2s_s *)dev;
+  struct esp_i2s_rx_async_job_s *job;
+  int               ret;
 
-  if (priv->config->rx_en)
+  if (!priv->config->rx_en)
     {
-      struct esp_buffer_s *bfcontainer;
-      int ret = OK;
-      uint32_t nbytes;
-      uint32_t nsamp;
+      return -ENOTTY;
+    }
 
-      /* Check max audio buffer data size from the upper half and align the
-       * receiving buffer according to the data width.
-       */
+  if (priv->rx_handle == NULL)
+    {
+      return -EAGAIN;
+    }
 
-      nbytes = apb->nmaxbytes;
-
-      nbytes -= (nbytes % (priv->data_width / 8));
-
-      /* Allocate a buffer container in advance */
-
-      bfcontainer = i2s_buf_allocate(priv);
-      if (bfcontainer == NULL)
-        {
-          i2serr("Failed to allocate the buffer container");
-          return -ENOMEM;
-        }
-
-      /* Get exclusive access to the I2S driver data */
-
-      ret = nxmutex_lock(&priv->lock);
-      if (ret < 0)
-        {
-          goto errout_with_buf;
-        }
-
-      /* Add a reference to the audio buffer */
-
-      apb_reference(apb);
-
-      /* Initialize the buffer container structure */
-
-      bfcontainer->callback = callback;
-      bfcontainer->timeout  = timeout;
-      bfcontainer->arg      = arg;
-      bfcontainer->apb      = apb;
-      bfcontainer->nbytes   = nbytes;
-      bfcontainer->result   = -EBUSY;
-
-      ret = i2s_rxdma_setup(priv, bfcontainer);
-
-      if (ret != OK)
-        {
-          goto errout_with_buf;
-        }
-
-      i2sinfo("Prepared %d bytes to receive DMA buffers\n", apb->nmaxbytes);
-      i2s_dump_buffer("Received Audio pipeline buffer:",
-                      &apb->samp[apb->curbyte],
-                      apb->nbytes - apb->curbyte);
-
-      nxmutex_unlock(&priv->lock);
-
-      return OK;
-
-errout_with_buf:
-      nxmutex_unlock(&priv->lock);
-      if (i2s_buf_free(priv, bfcontainer) != OK)
-        {
-          i2serr("Failed to free buffer container\n");
-        }
-
+  ret = esp_i2s_check_io_apb(priv, apb);
+  if (ret < OK)
+    {
       return ret;
     }
 
-  return -ENOTTY;
+  job = kmm_malloc(sizeof(*job));
+  if (job == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memset(job, 0, sizeof(*job));
+  job->apb = apb;
+  job->cb = callback;
+  job->cbarg = arg;
+  job->timeout = timeout;
+
+  if (priv->session_active)
+    {
+      esp_i2s_rx_idle_shutdown_disarm(priv);
+
+      ret = esp_i2s_rx_channel_start(priv);
+      if (ret < OK)
+        {
+          kmm_free(job);
+          return ret;
+        }
+    }
+
+  ret = esp_i2s_io_submit_job(priv, &priv->rx_jobs, (sq_entry_t *)job, apb,
+                              true);
+  if (ret < OK)
+    {
+      kmm_free(job);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp_i2s_rx_jobs_drain_cancel
+ *
+ * Description:
+ *   Drain the RX job queue and invoke each callback with `result`.
+ *
+ * Input Parameters:
+ *   priv   - I2S device structure
+ *   result - Result code passed to each drained callback
+ *
+ ****************************************************************************/
+
+static void esp_i2s_rx_jobs_drain_cancel(struct esp_i2s_s *priv, int result)
+{
+  for (; ; )
+    {
+      struct esp_i2s_rx_async_job_s *job;
+
+      nxmutex_lock(&priv->lock);
+      job = (struct esp_i2s_rx_async_job_s *)sq_remfirst(&priv->rx_jobs);
+      nxmutex_unlock(&priv->lock);
+
+      if (job == NULL)
+        {
+          return;
+        }
+
+      struct ap_buffer_s *apb = job->apb;
+      i2s_callback_t      cb = job->cb;
+      void               *cba = job->cbarg;
+
+      kmm_free(job);
+
+      if (cb != NULL)
+        {
+          cb(&priv->dev, apb, cba, result);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: esp_i2s_jobs_drain_cancel
+ *
+ * Description:
+ *   Drain a TX or RX job queue and invoke each callback with `result`.
+ *
+ * Input Parameters:
+ *   priv   - I2S device structure
+ *   jobs   - Job queue to drain
+ *   result - Result code passed to each drained callback
+ *
+ ****************************************************************************/
+
+static void esp_i2s_jobs_drain_cancel(struct esp_i2s_s *priv,
+                                      sq_queue_t *jobs,
+                                      int result)
+{
+  for (; ; )
+    {
+      struct esp_i2s_async_job_s *job;
+
+      nxmutex_lock(&priv->lock);
+      job = (struct esp_i2s_async_job_s *)sq_remfirst(jobs);
+      nxmutex_unlock(&priv->lock);
+
+      if (job == NULL)
+        {
+          return;
+        }
+
+      struct ap_buffer_s *apb = job->apb;
+      i2s_callback_t      cb = job->cb;
+      void               *cba = job->cbarg;
+
+      kmm_free(job);
+
+      if (cb != NULL)
+        {
+          cb(&priv->dev, apb, cba, result);
+        }
+    }
 }
 
 /****************************************************************************
@@ -3166,7 +4463,7 @@ errout_with_buf:
  * Description:
  *   Implement the lower-half logic ioctl commands
  *
- * Input parameters:
+ * Input Parameters:
  *   dev - A reference to the lower-half I2S driver device
  *   cmd - The ioctl command
  *   arg - The argument accompanying the ioctl command
@@ -3193,9 +4490,14 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
         {
           i2sinfo("AUDIOIOC_START\n");
 
-          priv->streaming = true;
-
-          ret = OK;
+          ret = esp_i2s_channels_start(priv);
+          if (ret == OK)
+            {
+              nxmutex_lock(&priv->lock);
+              priv->session_active = true;
+              nxmutex_unlock(&priv->lock);
+              esp_i2s_wake_queued_streams(priv);
+            }
         }
         break;
 
@@ -3209,7 +4511,32 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
         {
           i2sinfo("AUDIOIOC_STOP\n");
 
-          priv->streaming = false;
+          esp_i2s_jobs_drain_cancel(priv, &priv->tx_jobs, -ECANCELED);
+          esp_i2s_rx_jobs_drain_cancel(priv, -ECANCELED);
+
+          esp_i2s_tx_idle_shutdown_disarm(priv);
+          esp_i2s_rx_idle_shutdown_disarm(priv);
+
+          nxmutex_lock(&priv->lock);
+
+          if (priv->tx_started && priv->tx_handle != NULL)
+            {
+              i2s_channel_disable(priv->tx_handle);
+              priv->tx_started = false;
+            }
+
+          priv->tx_on_sent_blocks_left = 0;
+          priv->rx_busy = false;
+          priv->tx_busy = false;
+          priv->session_active = false;
+
+          if (priv->rx_started && priv->rx_handle != NULL)
+            {
+              i2s_channel_disable(priv->rx_handle);
+              priv->rx_started = false;
+            }
+
+          nxmutex_unlock(&priv->lock);
 
           ret = OK;
         }
@@ -3254,171 +4581,6 @@ static int i2s_ioctl(struct i2s_dev_s *dev, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: i2s_dma_setup
- *
- * Description:
- *   Configure the DMA for the I2S peripheral
- *
- * Input Parameters:
- *   priv - Partially initialized I2S device structure. This function
- *          will complete the I2S specific portions of the initialization
- *          regarding the DMA operation.
- *
- * Returned Value:
- *   OK on success; A negated errno value on failure.
- *
- ****************************************************************************/
-
-static int i2s_dma_setup(struct esp_i2s_s *priv)
-{
-  int ret = OK;
-  esp_err_t err;
-  gdma_trigger_t trig =
-    {
-      0
-    };
-
-  switch (priv->config->port)
-    {
-#if SOC_I2S_NUM > 2
-      case I2S_NUM_2:
-        trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 2);
-        break;
-#endif
-
-#if SOC_I2S_NUM > 1
-      case I2S_NUM_1:
-      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 1);
-      break;
-#endif
-
-      case I2S_NUM_0:
-      trig = GDMA_MAKE_TRIGGER(GDMA_TRIG_PERIPH_I2S, 0);
-      break;
-
-      default:
-        i2serr("Unsupported I2S port number");
-        return ESP_ERR_NOT_SUPPORTED;
-    }
-
-  /* Set up to receive GDMA interrupts on the current CPU. Each TX/RX channel
-   * will be assigned to a different CPU interrupt.
-   */
-
-  priv->cpu = this_cpu();
-
-  if (priv->config->tx_en)
-    {
-      gdma_channel_alloc_config_t tx_handle =
-        {
-          0
-        };
-
-      err = gdma_new_ahb_channel(&tx_handle, &priv->dma_channel_tx, NULL);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to register tx dma channel: %d\n", err);
-          return -EINVAL;
-        }
-
-      err = gdma_connect(priv->dma_channel_tx, trig);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to connect tx dma channel: %d\n", err);
-          ret = -EINVAL;
-          goto err1;
-        }
-
-      gdma_tx_event_callbacks_t cb_tx =
-        {
-          .on_trans_eof = i2s_tx_interrupt,
-          .on_descr_err = i2s_tx_error,
-        };
-
-      /* Set callback function for GDMA, the interrupt is triggered by GDMA,
-       * then the GDMA ISR will call the callback function.
-       */
-
-      err = gdma_register_tx_event_callbacks(priv->dma_channel_tx,
-                                             &cb_tx, priv);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to register tx callback: %d\n", err);
-          ret = -EINVAL;
-          goto err2;
-        }
-    }
-
-  if (priv->config->rx_en)
-    {
-      gdma_channel_alloc_config_t rx_handle =
-        {
-          0
-        };
-
-      err = gdma_new_ahb_channel(&rx_handle, NULL, &priv->dma_channel_rx);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to register rx dma channel: %d\n", err);
-          return -EINVAL;
-        }
-
-      err = gdma_connect(priv->dma_channel_rx, trig);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to connect rx dma channel: %d\n", err);
-          ret = -EINVAL;
-          goto err1;
-        }
-
-      gdma_rx_event_callbacks_t cb_rx =
-        {
-          .on_recv_eof = i2s_rx_interrupt,
-          .on_descr_err = i2s_rx_error,
-        };
-
-      /* Set callback function for GDMA, the interrupt is triggered by GDMA,
-       * then the GDMA ISR will call the callback function.
-       */
-
-      err = gdma_register_rx_event_callbacks(priv->dma_channel_rx,
-                                             &cb_rx, priv);
-      if (err != ESP_OK)
-        {
-          i2serr("Failed to register rx callback: %d\n", err);
-          ret = -EINVAL;
-          goto err2;
-        }
-    }
-
-  return OK;
-
-err2:
-  if (priv->config->tx_en)
-    {
-      gdma_disconnect(priv->dma_channel_tx);
-    }
-
-  if (priv->config->rx_en)
-    {
-      gdma_disconnect(priv->dma_channel_rx);
-    }
-
-err1:
-  if (priv->config->tx_en)
-    {
-      gdma_del_channel(priv->dma_channel_tx);
-    }
-
-  if (priv->config->rx_en)
-    {
-      gdma_del_channel(priv->dma_channel_rx);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: esp_i2sbus_initialize
  *
  * Description:
@@ -3456,20 +4618,15 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
         return NULL;
     }
 
-  /* Allocate buffer containers */
-
-  ret = i2s_buf_initialize(priv);
-  if (ret < 0)
-    {
-      return NULL;
-    }
+  sq_init(&priv->tx_jobs);
+  sq_init(&priv->rx_jobs);
 
   flags = spin_lock_irqsave(&priv->slock);
 
 #ifdef CONFIG_PM
 #  if SOC_I2S_SUPPORTS_APLL && SOC_I2S_HW_VERSION_2
-  if (priv.tx_clk_src == I2S_CLK_SRC_APLL &&
-      priv.tx_clk_src == I2S_CLK_SRC_APLL)
+  if (priv->config->tx_clk_src == (int)I2S_CLK_SRC_APLL ||
+      priv->config->rx_clk_src == (int)I2S_CLK_SRC_APLL)
     {
       pm_type = ESP_PM_NO_LIGHT_SLEEP;
     }
@@ -3496,27 +4653,24 @@ struct i2s_dev_s *esp_i2sbus_initialize(int port)
       goto err;
     }
 
-  ret = i2s_dma_setup(priv);
-  if (ret < 0)
-    {
-      goto err;
-    }
-
-  /* Start TX channel */
-
-  if (priv->config->tx_en)
-    {
-      priv->tx_started = false;
-    }
-
-  /* Start RX channel */
-
-  if (priv->config->rx_en)
-    {
-      priv->rx_started = false;
-    }
+  priv->tx_started = false;
+  priv->rx_started = false;
 
   spin_unlock_irqrestore(&priv->slock, flags);
+
+  ret = esp_i2s_io_thread_create(priv);
+  if (ret != OK)
+    {
+      irqstate_t f2;
+
+      i2serr("I2S: I/O thread create: %d\n", ret);
+
+      f2 = spin_lock_irqsave(&priv->slock);
+      i2s_configure_del_channels(priv);
+      spin_unlock_irqrestore(&priv->slock, f2);
+
+      return NULL;
+    }
 
   /* Success exit */
 

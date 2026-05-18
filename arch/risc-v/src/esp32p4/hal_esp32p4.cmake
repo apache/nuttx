@@ -172,6 +172,8 @@ set(ESP32P4_INCLUDES
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/include)
@@ -440,6 +442,12 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src/gdma.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/gpio.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/rtc_io.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_common.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_etm.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_pdm.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_platform.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_std.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_tdm.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_common.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_encoder_bytes.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_encoder_copy.c
