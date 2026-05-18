@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _alert, _err, _warn, and _info
+ * Name: _emerg, _alert, _err, _warn, and _info
  *
  * Description:
  *  If the cross-compiler's pre-processor does not support variable
@@ -46,13 +46,22 @@
  *
  ****************************************************************************/
 
+void _emerg(FAR const char *format, ...)
+{
+  va_list ap;
+
+  va_start(ap, format);
+  vsyslog(LOG_EMERG, format, ap);
+  va_end(ap);
+}
+
 #ifdef CONFIG_DEBUG_ALERT
 void _alert(FAR const char *format, ...)
 {
   va_list ap;
 
   va_start(ap, format);
-  vsyslog(LOG_EMERG, format, ap);
+  vsyslog(LOG_ALERT, format, ap);
   va_end(ap);
 }
 #endif /* CONFIG_DEBUG_ALERT */
