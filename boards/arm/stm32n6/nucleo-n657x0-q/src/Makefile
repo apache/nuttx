@@ -25,4 +25,8 @@
 ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c
 
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

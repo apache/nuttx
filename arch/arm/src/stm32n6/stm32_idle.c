@@ -29,6 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
+#include <arch/board/board.h>
+
 #include "nvic.h"
 #include "arm_internal.h"
 
