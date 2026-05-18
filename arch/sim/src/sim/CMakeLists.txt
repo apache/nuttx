@@ -153,14 +153,15 @@ list(
 if(CONFIG_HOST_MACOS AND CONFIG_HAVE_CXXINITIALIZE)
   # Keep classic __mod_init_func format so post-link lief patching works
   target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)
-  add_custom_command(
-    TARGET nuttx
-    POST_BUILD
+  add_custom_target(
+    sim_patch_macho_initsection ALL
     COMMAND
       ${Python3_EXECUTABLE}
       ${CMAKE_CURRENT_SOURCE_DIR}/../patch_macho_initsection.py
       $<TARGET_FILE:nuttx>
+    DEPENDS nuttx
     COMMENT "Patching Mach-O init section type flags")
+  add_dependencies(nuttx_post sim_patch_macho_initsection)
 endif()
 
 if(CONFIG_SIM_CAMERA_V4L2)
