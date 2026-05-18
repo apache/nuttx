@@ -47,13 +47,13 @@ ifeq ($(CONFIG_SPORADIC_INSTRUMENTATION),y)
 CSRCS += stm32_sporadic.c
 endif
 
-ifeq ($(CONFIG_STM32F7_FMC),y)
+ifeq ($(CONFIG_STM32_FMC),y)
 CSRCS += stm32_extmem.c
 endif
 
-ifeq ($(CONFIG_STM32F7_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
-else ifeq ($(CONFIG_STM32F7_OTGFSHS),y)
+else ifeq ($(CONFIG_STM32_OTGFSHS),y)
 CSRCS += stm32_usb.c
 endif
 
@@ -65,7 +65,7 @@ ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += stm32_idle.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SDMMC2),y)
+ifeq ($(CONFIG_STM32_SDMMC2),y)
 CSRCS += stm32_sdmmc.c
 endif
 

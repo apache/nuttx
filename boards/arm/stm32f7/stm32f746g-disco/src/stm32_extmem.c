@@ -57,7 +57,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32F7_FMC
+#ifndef CONFIG_STM32_FMC
 #  warning "FMC is not enabled"
 #endif
 

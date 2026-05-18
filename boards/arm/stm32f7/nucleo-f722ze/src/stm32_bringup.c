@@ -40,19 +40,19 @@
 
 #include "stm32_i2c.h"
 
-#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
 #  include "stm32_can_setup.h"
 #endif
 
-#ifdef CONFIG_STM32F7_CAN_SOCKET
+#ifdef CONFIG_STM32_CAN_SOCKET
 #  include "stm32_cansock_setup.h"
 #endif
 
-#ifdef CONFIG_STM32F7_ROMFS
+#ifdef CONFIG_STM32_ROMFS
 #  include "stm32_romfs.h"
 #endif
 
-#ifdef CONFIG_STM32F7_SPI_TEST
+#ifdef CONFIG_STM32_SPI_TEST
 #  include "stm32_spitest.h"
 #endif
 
@@ -97,14 +97,14 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_ROMFS
+#ifdef CONFIG_STM32_ROMFS
   /* Mount the romfs partition */
 
   ret = stm32_romfs_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount romfs at %s: %d\n",
-             CONFIG_STM32F7_ROMFS_MOUNTPOINT, ret);
+             CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
     }
 #endif
 
@@ -139,7 +139,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
   /* Initialize battery-backed RAM */
 
   stm32_bbsram_int();
@@ -152,7 +152,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_SPI_TEST
+#ifdef CONFIG_STM32_SPI_TEST
   /* Create SPI interfaces */
 
   ret = stm32_spidev_bus_test();
@@ -188,7 +188,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_SENSORS_QENCODER
   char buf[9];
 
-#ifdef CONFIG_STM32F7_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
   snprintf(buf, sizeof(buf), "/dev/qe0");
   ret = stm32_qencoder_initialize(buf, 1);
   if (ret < 0)
@@ -200,7 +200,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
   snprintf(buf, sizeof(buf), "/dev/qe2");
   ret = stm32_qencoder_initialize(buf, 3);
   if (ret < 0)
@@ -212,7 +212,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
   snprintf(buf, sizeof(buf), "/dev/qe3");
   ret = stm32_qencoder_initialize(buf, 4);
   if (ret < 0)
@@ -224,7 +224,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
   snprintf(buf, sizeof(buf), "/dev/qe4");
   ret = stm32_qencoder_initialize(buf, 8);
   if (ret < 0)
@@ -238,7 +238,7 @@ int stm32_bringup(void)
 
 #endif
 
-#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
   ret = stm32_can_setup();
   if (ret < 0)
     {
@@ -247,7 +247,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_CAN_SOCKET
+#ifdef CONFIG_STM32_CAN_SOCKET
   ret = stm32_cansock_setup();
   if (ret < 0)
     {
@@ -255,7 +255,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#if defined(CONFIG_I2C) && defined(CONFIG_STM32F7_I2C1)
+#if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1)
   i2c_bus = 1;
   i2c = stm32_i2cbus_initialize(i2c_bus);
   if (i2c == NULL)

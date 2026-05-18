@@ -43,7 +43,7 @@
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
-#ifndef CONFIG_STM32F7_OTGFS
+#ifndef CONFIG_STM32_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #endif
@@ -84,7 +84,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32F7_SDMMC
+#ifdef CONFIG_STM32_SDMMC
 #define HAVE_SDIO
 #else
 #undef HAVE_SDIO
@@ -212,7 +212,7 @@ void arch_sporadic_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_enablefmc(void);
 #endif
 
@@ -224,7 +224,7 @@ void stm32_enablefmc(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_disablefmc(void);
 #endif
 
