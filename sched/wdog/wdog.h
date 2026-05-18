@@ -113,7 +113,8 @@ static inline_function void wd_timer_start(clock_t tick, bool in_expiration)
       uint64_t nsec  = delay <= HRTIMER_MAX_DELAY / NSEC_PER_TICK ?
                        TICK2NSEC(g_wdexpired + delay) :
                        TICK2NSEC((uint64_t)g_wdexpired) + HRTIMER_MAX_DELAY;
-      hrtimer_start(&g_wdtimer, wd_timer, nsec, HRTIMER_MODE_ABS);
+      DEBUGVERIFY(hrtimer_start(&g_wdtimer, wd_timer, nsec,
+                                HRTIMER_MODE_ABS));
     }
 }
 
