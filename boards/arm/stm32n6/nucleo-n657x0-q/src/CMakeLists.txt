@@ -24,6 +24,8 @@ set(SRCS stm32_boot.c stm32_bringup.c)
 
 if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS stm32_autoleds.c)
+else()
+  list(APPEND SRCS stm32_userleds.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})
