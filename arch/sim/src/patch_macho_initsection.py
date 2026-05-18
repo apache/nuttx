@@ -32,6 +32,7 @@ Requires: pip install lief
 """
 
 import argparse
+import subprocess
 import sys
 
 try:
@@ -64,6 +65,16 @@ def main():
 
     if patched:
         fat.write(args.binary)
+
+        if sys.platform == "darwin":
+            subprocess.run(
+                ["codesign", "--force", "--sign", "-", args.binary],
+                check=True,
+            )
+            subprocess.run(
+                ["codesign", "--verify", "--verbose", args.binary],
+                check=True,
+            )
 
     return 0
 
