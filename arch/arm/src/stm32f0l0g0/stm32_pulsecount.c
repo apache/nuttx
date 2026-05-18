@@ -45,7 +45,7 @@
 
 /* This module only supports pulse count on advanced timers. */
 
-#ifdef CONFIG_STM32F0L0G0_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,13 +68,13 @@
 #  define PULSECOUNT_TIM1_CLKIN STM32_APB1_TIM1_CLKIN
 #endif
 
-#if CONFIG_STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL == 1
+#if CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 1
 #  define PULSECOUNT_TIM1_CHCFG GPIO_TIM1_CH1OUT
-#elif CONFIG_STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL == 2
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 2
 #  define PULSECOUNT_TIM1_CHCFG GPIO_TIM1_CH2OUT
-#elif CONFIG_STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL == 3
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 3
 #  define PULSECOUNT_TIM1_CHCFG GPIO_TIM1_CH3OUT
-#elif CONFIG_STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL == 4
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 4
 #  define PULSECOUNT_TIM1_CHCFG GPIO_TIM1_CH4OUT
 #else
 #  error Unsupported TIM1 pulse count channel
@@ -180,14 +180,14 @@ static const struct pulsecount_ops_s g_pulsecountops =
   .ioctl       = stm32pulsecount_ioctl,
 };
 
-#ifdef CONFIG_STM32F0L0G0_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
 static struct stm32_pulsecounttimer_s g_pulsecount1dev =
 {
   .ops         = &g_pulsecountops,
   .timid       = 1,
   .channel     =
   {
-    .channel   = CONFIG_STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL,
+    .channel   = CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL,
     .pincfg    = PULSECOUNT_TIM1_CHCFG,
   },
   .timtype     = TIMTYPE_TIM1,
@@ -958,7 +958,7 @@ static void stm32pulsecount_setapbclock(
 
   switch (priv->timid)
     {
-#ifdef CONFIG_STM32F0L0G0_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
       case 1:
         regaddr  = STM32_RCC_APB2ENR;
         en_bit   = RCC_APB2ENR_TIM1EN;
@@ -1166,7 +1166,7 @@ static int stm32pulsecount_stop(struct pulsecount_lowerhalf_s *dev)
 
   switch (priv->timid)
     {
-#ifdef CONFIG_STM32F0L0G0_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
       case 1:
         regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM1RST;
@@ -1255,7 +1255,7 @@ struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32F0L0G0_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
       case 1:
         lower = &g_pulsecount1dev;
 
@@ -1274,4 +1274,4 @@ struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
   return (struct pulsecount_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_STM32F0L0G0_TIMx_PULSECOUNT */
+#endif /* CONFIG_STM32_TIMx_PULSECOUNT */

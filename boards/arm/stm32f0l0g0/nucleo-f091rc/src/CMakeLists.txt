@@ -32,7 +32,7 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_STM32F0L0G0_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 

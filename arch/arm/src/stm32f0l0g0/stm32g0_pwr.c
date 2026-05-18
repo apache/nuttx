@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "stm32_pwr.h"
 
-#if defined(CONFIG_STM32F0L0G0_PWR)
+#if defined(CONFIG_STM32_PWR)
 
 /****************************************************************************
  * Private Functions
@@ -93,4 +93,4 @@ void stm32_pwr_setvos(uint16_t vos)
 
 /* TODO Other stm32_pwr_* functions need to be implemented */
 
-#endif /* CONFIG_STM32F0L0G0_PWR */
+#endif /* CONFIG_STM32_PWR */

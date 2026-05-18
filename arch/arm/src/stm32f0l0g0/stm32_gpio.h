@@ -188,7 +188,7 @@
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
 #  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
-#if defined (CONFIG_STM32F0L0G0_STM32F03X)
+#if defined (CONFIG_STM32_STM32F03X)
 #  define GPIO_PORTF                  (4 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #else
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */

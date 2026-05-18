@@ -40,9 +40,9 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V1)
+#if defined(CONFIG_STM32_HAVE_IP_EXTI_V1)
 #  include "hardware/stm32_syscfg.h"
-#elif defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_EXTI_V2)
 #  include "hardware/stm32_exti.h"
 #endif
 
@@ -317,7 +317,7 @@ int stm32_configgpio(uint32_t cfgset)
       uint32_t regaddr;
       int shift;
 
-#if defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V1)
+#if defined(CONFIG_STM32_HAVE_IP_EXTI_V1)
       /* Set the bits in the SYSCFG EXTICR register */
 
       regaddr = STM32_SYSCFG_EXTICR(pin);
@@ -327,7 +327,7 @@ int stm32_configgpio(uint32_t cfgset)
       regval |= (((uint32_t)port) << shift);
 
       putreg32(regval, regaddr);
-#elif defined(CONFIG_STM32F0L0G0_HAVE_IP_EXTI_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_EXTI_V2)
       /* Set the bits in the EXTI EXTICR register */
 
       regaddr = STM32_EXTI_EXTICR(pin);

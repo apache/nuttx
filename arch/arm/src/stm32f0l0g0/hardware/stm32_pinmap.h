@@ -30,13 +30,13 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32F0L0G0_STM32F03X)
+#if defined(CONFIG_STM32_STM32F03X)
 #  include "hardware/stm32f03x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F05X)
+#elif defined(CONFIG_STM32_STM32F05X)
 #  include "hardware/stm32f05x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F07X)
+#elif defined(CONFIG_STM32_STM32F07X)
 #  include "hardware/stm32f07x_pinmap.h"
-#elif defined(CONFIG_STM32F0L0G0_STM32F09X)
+#elif defined(CONFIG_STM32_STM32F09X)
 #  include "hardware/stm32f09x_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32L0)
 #  include "hardware/stm32l0_pinmap.h"

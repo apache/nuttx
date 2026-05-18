@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#ifdef CONFIG_STM32F0L0G0_HAVE_USBDEV
+#ifdef CONFIG_STM32_HAVE_USBDEV
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -251,5 +251,5 @@
 #define USB_COUNT_RX_SHIFT             (0)       /* Bits 9-0: Reception Byte Count */
 #define USB_COUNT_RX_MASK              (0x03ff << USB_COUNT_RX_SHIFT)
 
-#endif /* CONFIG_STM32F0L0G0_HAVE_USBDEV */
+#endif /* CONFIG_STM32_HAVE_USBDEV */
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_USBDEV_H */

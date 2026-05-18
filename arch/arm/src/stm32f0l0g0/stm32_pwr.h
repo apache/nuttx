@@ -34,7 +34,7 @@
 #include "chip.h"
 #include "hardware/stm32_pwr.h"
 
-#ifdef CONFIG_STM32F0L0G0_PWR
+#ifdef CONFIG_STM32_PWR
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -172,9 +172,9 @@ bool stm32_pwr_getwuf(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_ENERGYLITE) || defined(CONFIG_STM32F0L0G0_STM32G0)
+#if defined(CONFIG_STM32_ENERGYLITE) || defined(CONFIG_STM32_STM32G0)
 void stm32_pwr_setvos(uint16_t vos);
-#endif /* CONFIG_STM32F0L0G0_ENERGYLITE || CONFIG_STM32F0L0G0_STM32G0 */
+#endif /* CONFIG_STM32_ENERGYLITE || CONFIG_STM32_STM32G0 */
 
 /****************************************************************************
  * Name: stm32_pwr_setpvd
@@ -193,7 +193,7 @@ void stm32_pwr_setvos(uint16_t vos);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F0L0G0_ENERGYLITE)
+#if defined(CONFIG_STM32_ENERGYLITE)
 void stm32_pwr_setpvd(uint16_t pls);
 
 /****************************************************************************
@@ -216,7 +216,7 @@ void stm32_pwr_enablepvd(void);
 
 void stm32_pwr_disablepvd(void);
 
-#endif /* CONFIG_STM32F0L0G0_ENERGYLITE */
+#endif /* CONFIG_STM32_ENERGYLITE */
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -224,5 +224,5 @@ void stm32_pwr_disablepvd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32F0L0G0_PWR */
+#endif /* CONFIG_STM32_PWR */
 #endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_PWR_H */

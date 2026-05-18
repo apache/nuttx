@@ -140,7 +140,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F0L0G0_SPI
+#ifdef CONFIG_STM32_SPI
 void stm32_spidev_initialize(void);
 #endif
 

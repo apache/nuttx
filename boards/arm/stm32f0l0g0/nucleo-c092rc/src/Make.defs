@@ -38,11 +38,11 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_STM32F0L0G0_FDCAN),y)
-ifeq ($(CONFIG_STM32F0L0G0_FDCAN_CHARDRIVER),y)
+ifeq ($(CONFIG_STM32_FDCAN),y)
+ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
 CSRCS += stm32_can.c
 endif
-ifeq ($(CONFIG_STM32F0L0G0_FDCAN_SOCKET),y)
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
 CSRCS += stm32_cansock.c
 endif
 endif

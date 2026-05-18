@@ -38,23 +38,23 @@
  ****************************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * as a quadrature encoder input device.  If CONFIG_STM32F0L0G0_TIMn is
- * defined then the CONFIG_STM32F0L0G0_TIMn_QE must also be defined to
+ * as a quadrature encoder input device.  If CONFIG_STM32_TIMn is
+ * defined then the CONFIG_STM32_TIMn_QE must also be defined to
  * indicate that timer "n" is intended to be used for as a quadrature
  * encoder.
  */
 
-#ifndef CONFIG_STM32F0L0G0_TIM1
-#  undef CONFIG_STM32F0L0G0_TIM1_QE
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_QE
 #endif
-#ifndef CONFIG_STM32F0L0G0_TIM2
-#  undef CONFIG_STM32F0L0G0_TIM2_QE
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_QE
 #endif
-#ifndef CONFIG_STM32F0L0G0_TIM3
-#  undef CONFIG_STM32F0L0G0_TIM3_QE
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_QE
 #endif
-#ifndef CONFIG_STM32F0L0G0_TIM4
-#  undef CONFIG_STM32F0L0G0_TIM4_QE
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_QE
 #endif
 
 /* Only timers 1-4 can be used as a quadrature encoder (timers with
@@ -63,12 +63,12 @@
  * capability.
  */
 
-#undef CONFIG_STM32F0L0G0_TIM6_QE
-#undef CONFIG_STM32F0L0G0_TIM7_QE
-#undef CONFIG_STM32F0L0G0_TIM14_QE
-#undef CONFIG_STM32F0L0G0_TIM15_QE
-#undef CONFIG_STM32F0L0G0_TIM16_QE
-#undef CONFIG_STM32F0L0G0_TIM17_QE
+#undef CONFIG_STM32_TIM6_QE
+#undef CONFIG_STM32_TIM7_QE
+#undef CONFIG_STM32_TIM14_QE
+#undef CONFIG_STM32_TIM15_QE
+#undef CONFIG_STM32_TIM16_QE
+#undef CONFIG_STM32_TIM17_QE
 
 /****************************************************************************
  * Public Function Prototypes
@@ -93,7 +93,7 @@
 
 int stm32_qeinitialize(const char *devpath, int tim);
 
-#ifdef CONFIG_STM32F0L0G0_QENCODER_INDEX_PIN
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
 /****************************************************************************
  * Name: stm32_qe_index_init
  *
