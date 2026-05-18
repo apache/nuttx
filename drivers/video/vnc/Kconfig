@@ -137,7 +137,7 @@ config VNCSERVER_KBDENCODE
 	depends on LIBC_KBDCODEC
 	---help---
 		Use a special encoding of keyboard characters as defined in
-		include/nuttx/input/kbd_coded.h.
+		include/nuttx/input/kbd_codec.h.
 
 config VNCSERVER_TOUCH
 	bool "Enable touch input"
