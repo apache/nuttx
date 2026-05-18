@@ -62,7 +62,7 @@ extern "C"
  *
  * Description:
  *   Called to create the defined SPI buses and test them by initializing
- *   them and sending the CONFIG_STM32F7_SPI_TEST_MESSAGE (no chip select).
+ *   them and sending the CONFIG_STM32_SPI_TEST_MESSAGE (no chip select).
  *
  ****************************************************************************/
 

@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_FMC)
+#if defined(CONFIG_STM32_FMC)
 
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -234,4 +234,4 @@ void stm32_fmc_sdram_command(uint32_t cmd)
   putreg32(val, STM32_FMC_SDCMR);
 }
 
-#endif /* CONFIG_STM32F7_FMC */
+#endif /* CONFIG_STM32_FMC */

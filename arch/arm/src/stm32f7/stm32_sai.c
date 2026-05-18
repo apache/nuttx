@@ -68,7 +68,7 @@
 #include "stm32_sai.h"
 #include "stm32_pwr.h"
 
-#ifdef CONFIG_STM32F7_SAI
+#ifdef CONFIG_STM32_SAI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,11 +86,11 @@
 #  error CONFIG_I2S required by this driver
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_POLLING
+#ifdef CONFIG_STM32_SAI_POLLING
 #  error "Polling SAI not yet supported"
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_INTERRUPTS
+#ifdef CONFIG_STM32_SAI_INTERRUPTS
 #  error "Interrupt driven SAI not yet supported"
 #endif
 
@@ -106,19 +106,19 @@
 #  define CONFIG_STM32F7_SAI_MAXINFLIGHT         (16)
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1
+#ifdef CONFIG_STM32_SAI1
 #ifndef STM32_SAI1_FREQUENCY
 #  error "Please define STM32_SAI1_FREQUENCY in board.h"
 #endif
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2
+#ifdef CONFIG_STM32_SAI2
 #ifndef STM32_SAI2_FREQUENCY
 #  error "Please define STM32_SAI1_FREQUENCY in board.h"
 #endif
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 /* SAI DMA priority */
 
 #  if defined(CONFIG_STM32F7_SAI_DMAPRIO)
@@ -194,7 +194,7 @@ struct stm32f7_sai_s
   mutex_t lock;                /* Assures mutually exclusive access to SAI */
   uint32_t frequency;          /* SAI clock frequency */
   uint32_t syncen;             /* Synchronization setting */
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   uint16_t dma_ch;             /* DMA channel number */
   DMA_HANDLE dma;              /* DMA channel handle */
   uint32_t dma_ccr;            /* DMA control register */
@@ -236,7 +236,7 @@ static void     sai_buf_initialize(struct stm32f7_sai_s *priv);
 
 /* DMA support */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static void     sai_schedule(struct stm32f7_sai_s *priv, int result);
 static void     sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
@@ -274,19 +274,19 @@ static const struct i2s_ops_s g_i2sops =
 
 /* SAI1 state */
 
-#ifdef CONFIG_STM32F7_SAI1_A
+#ifdef CONFIG_STM32_SAI1_A
 static struct stm32f7_sai_s g_sai1a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI1_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32_SAI1_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI1_A_SYNC_WITH_B
+#ifdef CONFIG_STM32_SAI1_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_A,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -295,19 +295,19 @@ static struct stm32f7_sai_s g_sai1a_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1_B
+#ifdef CONFIG_STM32_SAI1_B
 static struct stm32f7_sai_s g_sai1b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI1_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32_SAI1_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI1_B_SYNC_WITH_A
+#ifdef CONFIG_STM32_SAI1_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_B,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -318,19 +318,19 @@ static struct stm32f7_sai_s g_sai1b_priv =
 
 /* SAI2 state */
 
-#ifdef CONFIG_STM32F7_SAI2_A
+#ifdef CONFIG_STM32_SAI2_A
 static struct stm32f7_sai_s g_sai2a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI2_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32_SAI2_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI2_A_SYNC_WITH_B
+#ifdef CONFIG_STM32_SAI2_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_A,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -339,19 +339,19 @@ static struct stm32f7_sai_s g_sai2a_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_B
+#ifdef CONFIG_STM32_SAI2_B
 static struct stm32f7_sai_s g_sai2b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI2_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
   .frequency   = STM32_SAI2_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI2_B_SYNC_WITH_A
+#ifdef CONFIG_STM32_SAI2_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_B,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -491,7 +491,7 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 #else
   /* GCR */
 
-#ifdef CONFIG_STM32F7_SAI1
+#ifdef CONFIG_STM32_SAI1
   uint32_t gcr = getreg32(STM32_SAI1_GCR);
   i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32_SAI1_GCR, gcr);
 #else
@@ -757,7 +757,7 @@ static void sai_timeout(wdparm_t arg)
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   /* Cancel the DMA */
 
   stm32_dmastop(priv->dma);
@@ -787,7 +787,7 @@ static void sai_timeout(wdparm_t arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static int sai_dma_setup(struct stm32f7_sai_s *priv)
 {
   struct sai_buffer_s *bfcontainer;
@@ -959,7 +959,7 @@ static void sai_worker(void *arg)
        */
 
       flags = enter_critical_section();
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
       sai_dma_setup(priv);
 #endif
       leave_critical_section(flags);
@@ -1071,7 +1071,7 @@ static void sai_schedule(struct stm32f7_sai_s *priv, int result)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
@@ -1268,7 +1268,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    * progress, then this will do nothing.
    */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   ret = sai_dma_setup(priv);
 #endif
   DEBUGASSERT(ret == OK);
@@ -1368,7 +1368,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    * progress, then this will do nothing.
    */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   ret = sai_dma_setup(priv);
 #endif
   DEBUGASSERT(ret == OK);
@@ -1522,7 +1522,7 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
   sai_datawidth((struct i2s_dev_s *)priv,
                 CONFIG_STM32F7_SAI_DEFAULT_DATALEN);
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   /* Get DMA channel */
 
   priv->dma = stm32_dmachannel(priv->dma_ch);
@@ -1581,7 +1581,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
 
   switch (intf)
     {
-#ifdef CONFIG_STM32F7_SAI1_A
+#ifdef CONFIG_STM32_SAI1_A
       case SAI1_BLOCK_A:
         {
           i2sinfo("SAI1 Block A Selected\n");
@@ -1589,7 +1589,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_A);
-#  ifndef CONFIG_STM32F7_SAI1_A_SYNC_WITH_B
+#  ifndef CONFIG_STM32_SAI1_A_SYNC_WITH_B
           stm32_configgpio(GPIO_SAI1_FS_A);
           stm32_configgpio(GPIO_SAI1_SCK_A);
           stm32_configgpio(GPIO_SAI1_MCLK_A);
@@ -1598,7 +1598,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1_B
+#ifdef CONFIG_STM32_SAI1_B
       case SAI1_BLOCK_B:
         {
           i2sinfo("SAI1 Block B Selected\n");
@@ -1606,7 +1606,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_B);
-#  ifndef CONFIG_STM32F7_SAI1_B_SYNC_WITH_A
+#  ifndef CONFIG_STM32_SAI1_B_SYNC_WITH_A
           stm32_configgpio(GPIO_SAI1_FS_B);
           stm32_configgpio(GPIO_SAI1_SCK_B);
           stm32_configgpio(GPIO_SAI1_MCLK_B);
@@ -1615,7 +1615,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_A
+#ifdef CONFIG_STM32_SAI2_A
       case SAI2_BLOCK_A:
         {
           i2sinfo("SAI2 Block A Selected\n");
@@ -1623,7 +1623,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_A);
-#  ifndef CONFIG_STM32F7_SAI2_A_SYNC_WITH_B
+#  ifndef CONFIG_STM32_SAI2_A_SYNC_WITH_B
           stm32_configgpio(GPIO_SAI2_FS_A);
           stm32_configgpio(GPIO_SAI2_SCK_A);
           stm32_configgpio(GPIO_SAI2_MCLK_A);
@@ -1632,7 +1632,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_B
+#ifdef CONFIG_STM32_SAI2_B
       case SAI2_BLOCK_B:
         {
           i2sinfo("SAI2 Block B Selected\n");
@@ -1640,7 +1640,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_B);
-#  ifndef CONFIG_STM32F7_SAI2_B_SYNC_WITH_A
+#  ifndef CONFIG_STM32_SAI2_B_SYNC_WITH_A
           stm32_configgpio(GPIO_SAI2_FS_B);
           stm32_configgpio(GPIO_SAI2_SCK_B);
           stm32_configgpio(GPIO_SAI2_MCLK_B);

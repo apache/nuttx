@@ -44,9 +44,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Private Data
@@ -502,4 +502,4 @@ void stm32_iocompensation(void)
     }
 }
 
-#endif /* CONFIG_STM32F7_STM32F72XX || ... || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F72XX || ... || CONFIG_STM32_STM32F77XX */

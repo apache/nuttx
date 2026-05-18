@@ -123,7 +123,7 @@
 
 /* Register Addresses *******************************************************/
 
-#if defined(CONFIG_STM32F7_CAN1)
+#if defined(CONFIG_STM32_CAN1)
 #  define STM32_CAN1_MCR          (STM32_CAN1_BASE+STM32_CAN_MCR_OFFSET)
 #  define STM32_CAN1_MSR          (STM32_CAN1_BASE+STM32_CAN_MSR_OFFSET)
 #  define STM32_CAN1_TSR          (STM32_CAN1_BASE+STM32_CAN_TSR_OFFSET)
@@ -177,7 +177,7 @@
 #  define STM32_CAN1_FIR(b,i)     (STM32_CAN1_BASE+STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
-#if defined(CONFIG_STM32F7_CAN2)
+#if defined(CONFIG_STM32_CAN2)
 #  define STM32_CAN2_MCR          (STM32_CAN2_BASE+STM32_CAN_MCR_OFFSET)
 #  define STM32_CAN2_MSR          (STM32_CAN2_BASE+STM32_CAN_MSR_OFFSET)
 #  define STM32_CAN2_TSR          (STM32_CAN2_BASE+STM32_CAN_TSR_OFFSET)
@@ -231,7 +231,7 @@
 #  define STM32_CAN2_FIR(b,i)     (STM32_CAN2_BASE+STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
-#if defined(CONFIG_STM32F7_CAN3)
+#if defined(CONFIG_STM32_CAN3)
 #  define STM32_CAN3_MCR          (STM32_CAN3_BASE+STM32_CAN_MCR_OFFSET)
 #  define STM32_CAN3_MSR          (STM32_CAN3_BASE+STM32_CAN_MSR_OFFSET)
 #  define STM32_CAN3_TSR          (STM32_CAN3_BASE+STM32_CAN_TSR_OFFSET)

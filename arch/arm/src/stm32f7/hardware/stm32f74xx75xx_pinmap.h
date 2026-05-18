@@ -31,7 +31,7 @@
 
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -808,7 +808,7 @@
  *
  * Note that the below configures GPIO_SPEED_50MHz I/O, that means for using
  * the SDIO that you must enable I/O Compensation via the configuration
- * option CONFIG_STM32F7_SYSCFG_IOCOMPENSATION=y.
+ * option CONFIG_STM32_SYSCFG_IOCOMPENSATION=y.
  */
 
 #define GPIO_SDMMC1_CK_0      (GPIO_ALT|GPIO_AF12|GPIO_PORTC|GPIO_PIN12)
@@ -1171,5 +1171,5 @@
 #define GPIO_UART8_RX_0       (GPIO_ALT|GPIO_AF8|GPIO_PULLUP|GPIO_PUSHPULL|GPIO_PORTE|GPIO_PIN0)
 #define GPIO_UART8_TX_0       (GPIO_ALT|GPIO_AF8|GPIO_PULLUP|GPIO_PUSHPULL|GPIO_PORTE|GPIO_PIN1)
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX75XX_PINMAP_H */

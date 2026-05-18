@@ -43,42 +43,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_SPI1_TEST)
-#  if defined(CONFIG_STM32F7_SPI1_TEST_MODE0)
+#if defined(CONFIG_STM32_SPI1_TEST)
+#  if defined(CONFIG_STM32_SPI1_TEST_MODE0)
 #    define CONFIG_STM32F7_SPI1_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_STM32F7_SPI1_TEST_MODE1)
+#  elif defined(CONFIG_STM32_SPI1_TEST_MODE1)
 #    define CONFIG_STM32F7_SPI1_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_STM32F7_SPI1_TEST_MODE2)
+#  elif defined(CONFIG_STM32_SPI1_TEST_MODE2)
 #    define CONFIG_STM32F7_SPI1_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_STM32F7_SPI1_TEST_MODE3)
+#  elif defined(CONFIG_STM32_SPI1_TEST_MODE3)
 #    define CONFIG_STM32F7_SPI1_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_STM32F7_SPI1_TEST_MODEx defined"
 #  endif
 #endif
 
-#if defined(CONFIG_STM32F7_SPI2_TEST)
-#  if defined(CONFIG_STM32F7_SPI2_TEST_MODE0)
+#if defined(CONFIG_STM32_SPI2_TEST)
+#  if defined(CONFIG_STM32_SPI2_TEST_MODE0)
 #    define CONFIG_STM32F7_SPI2_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_STM32F7_SPI2_TEST_MODE1)
+#  elif defined(CONFIG_STM32_SPI2_TEST_MODE1)
 #    define CONFIG_STM32F7_SPI2_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_STM32F7_SPI2_TEST_MODE2)
+#  elif defined(CONFIG_STM32_SPI2_TEST_MODE2)
 #    define CONFIG_STM32F7_SPI2_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_STM32F7_SPI2_TEST_MODE3)
+#  elif defined(CONFIG_STM32_SPI2_TEST_MODE3)
 #    define CONFIG_STM32F7_SPI2_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_STM32F7_SPI2_TEST_MODEx defined"
 #  endif
 #endif
 
-#if defined(CONFIG_STM32F7_SPI3_TEST)
-#  if defined(CONFIG_STM32F7_SPI3_TEST_MODE0)
+#if defined(CONFIG_STM32_SPI3_TEST)
+#  if defined(CONFIG_STM32_SPI3_TEST_MODE0)
 #    define CONFIG_STM32F7_SPI3_TEST_MODE SPIDEV_MODE0
-#  elif defined(CONFIG_STM32F7_SPI3_TEST_MODE1)
+#  elif defined(CONFIG_STM32_SPI3_TEST_MODE1)
 #    define CONFIG_STM32F7_SPI3_TEST_MODE SPIDEV_MODE1
-#  elif defined(CONFIG_STM32F7_SPI3_TEST_MODE2)
+#  elif defined(CONFIG_STM32_SPI3_TEST_MODE2)
 #    define CONFIG_STM32F7_SPI3_TEST_MODE SPIDEV_MODE2
-#  elif defined(CONFIG_STM32F7_SPI3_TEST_MODE3)
+#  elif defined(CONFIG_STM32_SPI3_TEST_MODE3)
 #    define CONFIG_STM32F7_SPI3_TEST_MODE SPIDEV_MODE3
 #  else
 #    error "No CONFIG_STM32F7_SPI3_TEST_MODEx defined"
@@ -89,13 +89,13 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_SPI1)
+#if defined(CONFIG_STM32_SPI1)
 struct spi_dev_s *g_spi1;
 #endif
-#if defined(CONFIG_STM32F7_SPI2)
+#if defined(CONFIG_STM32_SPI2)
 struct spi_dev_s *g_spi2;
 #endif
-#if defined(CONFIG_STM32F7_SPI3)
+#if defined(CONFIG_STM32_SPI3)
 struct spi_dev_s *g_spi3;
 #endif
 
@@ -108,7 +108,7 @@ struct spi_dev_s *g_spi3;
  *
  * Description:
  *   Called to create the defined SPI buses and test them by initializing
- *   them and sending the CONFIG_STM32F7_SPI_TEST_MESSAGE (no chip select).
+ *   them and sending the CONFIG_STM32_SPI_TEST_MESSAGE (no chip select).
  *
  ****************************************************************************/
 
@@ -116,9 +116,9 @@ int stm32_spidev_bus_test(void)
 {
   /* Configure and test SPI- */
 
-  uint8_t *tx = (uint8_t *)CONFIG_STM32F7_SPI_TEST_MESSAGE;
+  uint8_t *tx = (uint8_t *)CONFIG_STM32_SPI_TEST_MESSAGE;
 
-#if defined(CONFIG_STM32F7_SPI1_TEST)
+#if defined(CONFIG_STM32_SPI1_TEST)
   g_spi1 = stm32_spibus_initialize(1);
 
   if (!g_spi1)
@@ -129,14 +129,14 @@ int stm32_spidev_bus_test(void)
 
   /* Default SPI1 to STM32_SPI1_FREQ and mode */
 
-  SPI_SETFREQUENCY(g_spi1, CONFIG_STM32F7_SPI1_TEST_FREQ);
-  SPI_SETBITS(g_spi1, CONFIG_STM32F7_SPI1_TEST_BITS);
+  SPI_SETFREQUENCY(g_spi1, CONFIG_STM32_SPI1_TEST_FREQ);
+  SPI_SETBITS(g_spi1, CONFIG_STM32_SPI1_TEST_BITS);
   SPI_SETMODE(g_spi1, CONFIG_STM32F7_SPI1_TEST_MODE);
   SPI_EXCHANGE(g_spi1, tx, NULL,
-               nitems(CONFIG_STM32F7_SPI_TEST_MESSAGE));
+               nitems(CONFIG_STM32_SPI_TEST_MESSAGE));
 #endif
 
-#if defined(CONFIG_STM32F7_SPI2_TEST)
+#if defined(CONFIG_STM32_SPI2_TEST)
   g_spi2 = stm32_spibus_initialize(2);
 
   if (!g_spi2)
@@ -147,14 +147,14 @@ int stm32_spidev_bus_test(void)
 
   /* Default SPI2 to STM32_SPI2_FREQ and mode */
 
-  SPI_SETFREQUENCY(g_spi2, CONFIG_STM32F7_SPI2_TEST_FREQ);
-  SPI_SETBITS(g_spi2, CONFIG_STM32F7_SPI2_TEST_BITS);
+  SPI_SETFREQUENCY(g_spi2, CONFIG_STM32_SPI2_TEST_FREQ);
+  SPI_SETBITS(g_spi2, CONFIG_STM32_SPI2_TEST_BITS);
   SPI_SETMODE(g_spi2, CONFIG_STM32F7_SPI2_TEST_MODE);
   SPI_EXCHANGE(g_spi2, tx, NULL,
-               nitems(CONFIG_STM32F7_SPI_TEST_MESSAGE));
+               nitems(CONFIG_STM32_SPI_TEST_MESSAGE));
 #endif
 
-#if defined(CONFIG_STM32F7_SPI3_TEST)
+#if defined(CONFIG_STM32_SPI3_TEST)
   g_spi3 = stm32_spibus_initialize(3);
 
   if (!g_spi3)
@@ -165,11 +165,11 @@ int stm32_spidev_bus_test(void)
 
   /* Default SPI3 to STM32_SPI3_FREQ and mode */
 
-  SPI_SETFREQUENCY(g_spi3, CONFIG_STM32F7_SPI3_TEST_FREQ);
-  SPI_SETBITS(g_spi3, CONFIG_STM32F7_SPI3_TEST_BITS);
+  SPI_SETFREQUENCY(g_spi3, CONFIG_STM32_SPI3_TEST_FREQ);
+  SPI_SETBITS(g_spi3, CONFIG_STM32_SPI3_TEST_BITS);
   SPI_SETMODE(g_spi3, CONFIG_STM32F7_SPI3_TEST_MODE);
   SPI_EXCHANGE(g_spi3, tx, NULL,
-               nitems(CONFIG_STM32F7_SPI_TEST_MESSAGE));
+               nitems(CONFIG_STM32_SPI_TEST_MESSAGE));
 #endif
 
   return OK;

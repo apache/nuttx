@@ -86,9 +86,9 @@ static void stm32_i2ctool(void)
 
 void stm32_boardinitialize(void)
 {
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5) || defined(CONFIG_STM32F7_SPI6)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI4) || \
+    defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI6)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
    * function stm32_spidev_initialize() has been brought into the link.
    */
@@ -127,7 +127,7 @@ void board_late_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_SDMMC1
+#ifdef CONFIG_STM32_SDMMC1
   /* Initialize the SDIO block driver */
 
   int ret = OK;

@@ -158,7 +158,7 @@ void arch_sporadic_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_sdram_initialize(void);
 #endif
 

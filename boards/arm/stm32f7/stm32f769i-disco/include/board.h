@@ -88,7 +88,7 @@
  * 2 <= PLLQ <= 15
  */
 
-#if defined(CONFIG_STM32F7_OTGFS)
+#if defined(CONFIG_STM32_OTGFS)
 /* USB OTG FS clock (= SDMMCCLK = RNGCLK) must be 48 MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 384 = 384 MHz
@@ -107,7 +107,7 @@
 #define STM32_SYSCLK_FREQUENCY  (STM32_VCO_FREQUENCY / 2)
 #define STM32_OTGFS_FREQUENCY   (STM32_VCO_FREQUENCY / 8)
 
-#elif defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2) || defined(CONFIG_STM32F7_RNG)
+#elif defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2) || defined(CONFIG_STM32_RNG)
 /* SDMMCCLK (= USB OTG FS clock = RNGCLK) should be <= 48MHz
  *
  * PLL_VCO = (25,000,000 / 25) * 432 = 432 MHz
