@@ -26,8 +26,14 @@
 
 #include <nuttx/debug.h>
 
+#include <string.h>
+#include <strings.h>
+#include <syslog.h>
+
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/queue.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
@@ -73,8 +79,25 @@ struct vhost_device_item_s
 };
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int vhost_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg);
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static const struct file_operations g_vhost_dev_ops =
+{
+  NULL,             /* open */
+  NULL,             /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  vhost_dev_ioctl,  /* ioctl */
+};
 
 static struct vhost_bus_s g_vhost_bus =
 {
@@ -84,6 +107,110 @@ static struct vhost_bus_s g_vhost_bus =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: vhost_dump_device
+ ****************************************************************************/
+
+static int vhost_dump_device(FAR struct vhost_device_item_s *item,
+                             FAR const char *name)
+{
+  FAR struct vhost_device *hdev = item->device;
+  FAR const char *dev_name;
+  unsigned int i;
+
+  dev_name = virtio_dev_name(hdev->id.device);
+  dev_name = dev_name == NULL ? "unknown" : dev_name;
+
+  /* Apply type filter if specified, "all" means no filter */
+
+  if (strcasecmp(name, "all") != 0 && strcasecmp(dev_name, name) != 0)
+    {
+      return 0;
+    }
+
+  syslog(LOG_EMERG, "  [%s] id=%" PRIu32 " hdev=%p driver=%p priv=%p\n",
+         dev_name, hdev->id.device, hdev, item->driver, hdev->priv);
+
+  /* Call driver-specific dump if available */
+
+  if (item->driver && item->driver->dump)
+    {
+      item->driver->dump(hdev);
+    }
+
+  /* Dump virtqueue information */
+
+  for (i = 0; i < hdev->vrings_num; i++)
+    {
+      virtqueue_dump(hdev->vrings_info[i].vq);
+    }
+
+  return 1;
+}
+
+/****************************************************************************
+ * Name: vhost_dump
+ ****************************************************************************/
+
+static void vhost_dump(FAR const char *name)
+{
+  FAR struct vhost_device_item_s *item;
+  int count = 0;
+  int ret;
+
+  syslog(LOG_EMERG, "VHost devices:\n");
+
+  name = name == NULL ? "all" : name;
+  ret = nxmutex_lock(&g_vhost_bus.lock);
+  if (ret < 0)
+    {
+      syslog(LOG_EMERG, "  Failed to acquire lock\n");
+      return;
+    }
+
+  dq_for_every_entry(&g_vhost_bus.device, item,
+                     struct vhost_device_item_s, node)
+    {
+      count += vhost_dump_device(item, name);
+    }
+
+  dq_for_every_entry(&g_vhost_bus.defered_device, item,
+                     struct vhost_device_item_s, node)
+    {
+      count += vhost_dump_device(item, name);
+    }
+
+  if (count == 0)
+    {
+      syslog(LOG_EMERG, "  No devices of type '%s' found\n", name);
+    }
+
+  nxmutex_unlock(&g_vhost_bus.lock);
+}
+
+/****************************************************************************
+ * Name: vhost_dev_ioctl
+ ****************************************************************************/
+
+static int vhost_dev_ioctl(FAR struct file *filep, int cmd,
+                           unsigned long arg)
+{
+  int ret = -ENOTTY;
+
+  switch (cmd)
+    {
+      case VHOSTIOC_DUMP:
+        vhost_dump((FAR const char *)(uintptr_t)arg);
+        ret = OK;
+        break;
+
+      default:
+        break;
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: vhost_status_driver_ok
@@ -521,6 +648,14 @@ void vhost_register_drivers(void)
       vhosterr("vhost_register_net_driver failed, ret=%d\n", ret);
     }
 #endif
+
+  /* Register vhost character device */
+
+  ret = register_driver("/dev/vhost", &g_vhost_dev_ops, 0200, NULL);
+  if (ret < 0)
+    {
+      vhosterr("register_driver /dev/vhost failed, ret=%d\n", ret);
+    }
 
 #ifdef CONFIG_DRIVERS_VHOST_BLK
   ret = vhost_register_blk_driver();
