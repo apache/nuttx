@@ -282,17 +282,22 @@ static void netdev_console_shutdown(FAR struct uart_dev_s *dev)
 static int netdev_console_attach(FAR struct uart_dev_s *dev)
 {
   FAR struct netdev_consol_s *priv = (FAR struct netdev_consol_s *)dev;
+  int ret = -EINVAL;
 
   priv->rxdgram_off = 0;
   priv->rxdgram_len = 0;
 
-#ifdef CONFIG_CONSOLE_NETDEV_UDP
-  return netdev_console_udp_init(dev);
-#endif
-
 #ifdef CONFIG_CONSOLE_NETDEV_CAN
-  return netdev_console_can_init(dev);
+  ret = netdev_console_can_init(dev);
+  if (ret < 0)
 #endif
+    {
+#ifdef CONFIG_CONSOLE_NETDEV_UDP
+      ret = netdev_console_udp_init(dev);
+#endif
+    }
+
+  return ret;
 }
 
 /****************************************************************************
