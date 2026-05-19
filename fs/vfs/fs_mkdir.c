@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -136,6 +137,18 @@ int mkdir(const char *pathname, mode_t mode)
 
   else
     {
+      /* Verify write+search permission on the parent directory before
+       * adding a new name to the pseudo-filesystem tree.  POSIX requires
+       * both W_OK and X_OK to create a directory entry.
+       */
+
+      ret = inode_checkdirperm(desc.parent, W_OK | X_OK);
+      if (ret < 0)
+        {
+          errcode = -ret;
+          goto errout_with_search;
+        }
+
       /* Create an inode in the pseudo-filesystem at this path.
        * NOTE that the new inode will be created with a reference
        * count of zero.

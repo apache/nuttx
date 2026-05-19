@@ -422,31 +422,38 @@ void inode_release(FAR struct inode *inode);
  * Name: inode_checkperm
  *
  * Description:
- *   Validate that 'inode' can be opened with the access described by
- *   'oflags'.  Two sequential checks are performed:
- *
- *   1. Operation-support check (all inode types):
- *      Ensures the driver exposes the read/write entry points required by
- *      'oflags'.  Pseudo-directory inodes are exempted.
- *
- *   2. UNIX permission check (pseudo-filesystem inodes only):
- *      Compares effective uid/gid against i_mode owner/group/other bits.
- *      Mountpoint inodes and kernel threads are unconditionally exempted.
- *      Active only when CONFIG_PSEUDOFS_ATTRIBUTES and
- *      CONFIG_SCHED_USER_IDENTITY are both enabled.
+ *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
+ *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
+ *   are exempt from mode checks.
  *
  * Input Parameters:
  *   inode  - The inode to check
  *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
  *
  * Returned Value:
- *   Zero (OK) on success.  Negated errno on failure:
- *     -ENXIO   ops pointer is NULL
- *     -EACCES  required operation not supported, or permission denied
+ *   Zero (OK) on success, or a negated errno on failure.
  *
  ****************************************************************************/
 
 int inode_checkperm(FAR struct inode *inode, int oflags);
+
+/****************************************************************************
+ * Name: inode_checkdirperm
+ *
+ * Description:
+ *   Check parent directory 'dir' for 'amode' access on pseudo-filesystem
+ *   inodes.  NULL 'dir' (root) and mountpoints are exempt.
+ *
+ * Input Parameters:
+ *   dir   - Parent directory inode, or NULL for a root-level path
+ *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -EACCES if permission is denied.
+ *
+ ****************************************************************************/
+
+int inode_checkdirperm(FAR struct inode *dir, int amode);
 
 /****************************************************************************
  * Name: foreach_inode
