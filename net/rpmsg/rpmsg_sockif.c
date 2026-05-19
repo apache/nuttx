@@ -901,6 +901,12 @@ static void rpmsg_socket_ns_accept(FAR struct rpmsg_socket_conn_s *server,
   new->ept.priv = new;
   new->ept.release_cb = rpmsg_socket_ept_release;
 
+  new->rpaddr.rp_family = AF_RPMSG;
+  strlcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev),
+          sizeof(new->rpaddr.rp_cpu));
+  strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
+          sizeof(new->rpaddr.rp_name));
+
   /* Take the backlog slot and join the listener's pending list before the
    * endpoint exists.  rpmsg_create_ept() sends the NS ack, after which the
    * remote may answer with its SYNC at once;  the handler must already be
@@ -958,12 +964,6 @@ static void rpmsg_socket_ns_accept(FAR struct rpmsg_socket_conn_s *server,
     {
       goto errout_with_pending;
     }
-
-  new->rpaddr.rp_family = AF_RPMSG;
-  strlcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev),
-          sizeof(new->rpaddr.rp_cpu));
-  strlcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN,
-          sizeof(new->rpaddr.rp_name));
 
   rpmsg_socket_ns_bound(&new->ept);
   return;
