@@ -88,6 +88,8 @@ static int wzipfs_statfs(FAR struct inode *mountpt,
                          FAR struct statfs *buf);
 static int wzipfs_mkdir(FAR struct inode *mountpt,
                         FAR const char *relpath, mode_t mode);
+static int wzipfs_stat(FAR struct inode *mountpt,
+                       FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
  * Private Data
@@ -124,7 +126,7 @@ const struct mountpt_operations g_wzipfs_operations =
   wzipfs_mkdir,          /* mkdir */
   NULL,                  /* rmdir */
   NULL,                  /* rename */
-  NULL,                  /* stat   -- write-only FS */
+  wzipfs_stat,           /* stat */
   NULL                   /* chstat */
 };
 
@@ -694,3 +696,19 @@ static int wzipfs_mkdir(FAR struct inode *mountpt,
   return ret;
 }
 
+/****************************************************************************
+ * Name: wzipfs_stat
+ *
+ * Description:
+ *   Minimal stat for wzipfs. Always reports path as a writable directory
+ *   so that rpmsgfs can verify the mount root without blocking.
+ *
+ ****************************************************************************/
+
+static int wzipfs_stat(FAR struct inode *mountpt,
+                       FAR const char *relpath, FAR struct stat *buf)
+{
+  memset(buf, 0, sizeof(*buf));
+  buf->st_mode = S_IFDIR | 0755;
+  return 0;
+}
