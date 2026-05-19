@@ -213,6 +213,7 @@ static int bat_monitor_close(FAR struct file *filep)
 
   list_delete(&priv->node);
   nxmutex_unlock(&dev->batlock);
+  work_cancel_sync(LPWORK, &priv->work);
   nxmutex_destroy(&priv->lock);
   nxsem_destroy(&priv->wait);
   kmm_free(priv);
