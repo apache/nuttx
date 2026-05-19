@@ -40,19 +40,17 @@ Features
 
    This is the initial NuttX port for the STM32N6 family. The supported
    peripheral set is intentionally minimal: USART1 (the ST-LINK VCOM
-   console), GPIO, RCC, PWR, and the SysTick-based timer. Other on-chip
-   peripherals and on-board features (XSPI flash boot, networking,
-   user LEDs/buttons, USB, MIPI, NPU, etc) are not yet wired up. The CPU is
-   currently clocked at 200 MHz from PLL1. Raising it to the standard
-   600 / 800 MHz operating points is deferred to a follow-up change.
+   console), GPIO, RCC, PWR, the SysTick-based timer, and the three
+   on-board user LEDs. Other on-chip peripherals and on-board features
+   (XSPI flash boot, networking, user button, USB, MIPI, NPU, etc) are
+   not yet wired up. The CPU is currently clocked at 200 MHz from PLL1.
+   Raising it to the standard 600 / 800 MHz operating points is deferred
+   to a follow-up change.
 
 Buttons and LEDs
 ================
 
-The board exposes three user LEDs and a user pushbutton, but the
-initial NuttX port does not yet ship ``userleds`` or ``buttons``
-drivers. The hardware wiring is summarised here so a follow-up
-driver can be written against an authoritative pin map:
+The board exposes three user LEDs and a user pushbutton:
 
 ===== ======= ======== ======================================
 ID    Color   GPIO     Notes
@@ -62,6 +60,23 @@ LD6   Green   PG0      Active low
 LD7   Blue    PG8      Active low
 B1    Blue    PC13     Active high, external pull-down
 ===== ======= ======== ======================================
+
+The LEDs are supported via two mutually-exclusive paths:
+
+* ``CONFIG_ARCH_LEDS=y`` (default when the board is selected) lets
+  NuttX drive the LEDs to indicate OS state (boot stages, idle,
+  interrupt activity, assertion, panic).  See
+  ``boards/arm/stm32n6/nucleo-n657x0-q/include/board.h`` for the
+  state-to-LED mapping.
+
+* ``CONFIG_ARCH_LEDS=n`` plus ``CONFIG_USERLED=y`` and
+  ``CONFIG_USERLED_LOWER=y`` hands the LEDs to userspace via the
+  ``/dev/userleds`` character device.  The ``nucleo-n657x0-q:leds``
+  configuration bundles this with ``apps/examples/leds`` so the
+  ``leds`` NSH command can cycle the LEDs as a quick smoke test.
+
+The user pushbutton is not yet wired up; a polled or EXTI-based
+driver is deferred to a follow-up change.
 
 Pin Mapping
 ===========
@@ -158,6 +173,15 @@ Builds the NSH configuration with :doc:`apps/testing/ostest
 NSH prompt to exercise the core RTOS primitives (tasks, mutexes,
 semaphores, signals, message queues, POSIX timers, condition
 variables, scheduling). Used as the smoke test.
+
+leds
+----
+
+Builds the NSH configuration with ``CONFIG_ARCH_LEDS`` disabled and
+the userled lower-half driver and ``apps/examples/leds`` enabled, so
+the three on-board LEDs are exposed at ``/dev/userleds`` and can be
+exercised from userspace.  Run ``leds`` from the NSH prompt to spawn
+the daemon that cycles through the LEDs.
 
 License Exceptions
 ==================
