@@ -345,6 +345,7 @@ add_custom_command(
 add_custom_target(copy_esp3rdparty_headers DEPENDS ${_gpio_sig_map} ${_irq})
 
 add_dependencies(arch copy_esp3rdparty_headers)
+add_dependencies(nuttx_context copy_esp3rdparty_headers)
 
 # ##############################################################################
 # Compiler and Linker Flags
