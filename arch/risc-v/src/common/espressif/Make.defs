@@ -205,6 +205,10 @@ ifeq ($(CONFIG_ESPRESSIF_USE_LP_CORE),y)
 	CHIP_CSRCS += esp_ulp.c
 endif
 
+ifeq ($(CONFIG_ESPRESSIF_LP_MAILBOX),y)
+	CHIP_CSRCS += esp_lp_mailbox.c
+endif
+
 ifeq ($(CONFIG_PM),y)
 	ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 		CHIP_CSRCS += esp_pm_initialize.c
@@ -229,7 +233,7 @@ endif
 
 ESP_HAL_3RDPARTY_REPO   = esp-hal-3rdparty
 ifndef ESP_HAL_3RDPARTY_VERSION
-	ESP_HAL_3RDPARTY_VERSION = 91d8aa6e82c74cc73eeb3df7e4005739fab8c322
+	ESP_HAL_3RDPARTY_VERSION = e8d8638febf5310bf5b8f9bd04cf7fab9e9a4cb0
 endif
 
 ifndef ESP_HAL_3RDPARTY_URL

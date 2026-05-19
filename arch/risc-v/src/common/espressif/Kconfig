@@ -630,9 +630,10 @@ config ESPRESSIF_USE_LP_CORE
 	---help---
 		Enable LP core (Low-power core) coprocessor
 
+if ESPRESSIF_USE_LP_CORE
+
 config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
 	int "RTC slow memory reserved for coprocessor"
-	depends on ESPRESSIF_USE_LP_CORE
 	default 4096
 	range 32 16352
 	---help---
@@ -641,14 +642,12 @@ config ESPRESSIF_ULP_COPROC_RESERVE_MEM_SIZE
 
 config ESPRESSIF_ULP_SHARED_MEM_SIZE
 	int "Size of the shared memory for ULP core"
-	depends on ESPRESSIF_USE_LP_CORE
 	default 16
 	---help---
 		Size of the shared memory defined in bytes.
 
 config ESPRESSIF_ULP_ENABLE_UBSAN
 	bool "Enable UBSan (undefined behavior sanitizer) for LP core application"
-	depends on ESPRESSIF_USE_LP_CORE
 	depends on DEBUG_SYMBOLS
 	default n
 	---help---
@@ -922,6 +921,7 @@ config ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ
 	depends on ESPRESSIF_ULP_WAKEUP_LPUART_CHAR_SEQ_MODE
 	default "esp"
 
+endif # ESPRESSIF_USE_LP_CORE
 endmenu # LP Core (Low-power core) Coprocessor Configuration
 
 menu "PM Configuration"
@@ -1720,6 +1720,13 @@ config ESPRESSIF_ANA_COMPR1
 	select ESPRESSIF_ANA_COMPR
 	---help---
 		Enable analog comparator unit 1.
+
+config ESPRESSIF_LP_MAILBOX
+	bool "LP Mailbox"
+	default n
+	depends on ARCH_CHIP_ESP32P4 && ESPRESSIF_USE_LP_CORE
+	---help---
+		Enable lp mailbox support for data passing between cores.
 
 config ESPRESSIF_ADC
 	bool "Analog-to-digital converter (ADC)"
