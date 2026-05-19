@@ -130,6 +130,9 @@
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
 #    include "ulp/ulp_code.h"
 #  endif
+#  ifdef CONFIG_ESPRESSIF_LP_MAILBOX
+#    include "espressif/esp_lp_mailbox.h"
+#  endif
 #endif
 
 #include "esp32p4-function-ev-board.h"
@@ -501,6 +504,9 @@ int esp_bringup(void)
 #endif
 
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
+#  ifdef CONFIG_ESPRESSIF_LP_MAILBOX
+  esp_lp_mailbox_init();
+#  endif
 
   /* ULP initialization should be the handled later than
    * peripherals to use supported peripherals properly on ULP core
