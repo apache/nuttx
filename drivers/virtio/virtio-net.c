@@ -555,6 +555,7 @@ static void virtio_net_txdone(FAR struct virtqueue *vq)
   FAR struct virtio_net_priv_s *priv = vq->vq_dev->priv;
 
   virtqueue_disable_cb_lock(vq, &priv->lock[VIRTIO_NET_TX]);
+  virtio_net_txfree((FAR struct netdev_lowerhalf_s *)priv);
   netdev_lower_txdone((FAR struct netdev_lowerhalf_s *)priv);
 }
 
