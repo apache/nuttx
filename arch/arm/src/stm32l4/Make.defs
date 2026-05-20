@@ -157,6 +157,10 @@ ifeq ($(CONFIG_STM32L4_PWM),y)
 CHIP_CSRCS += stm32l4_pwm.c
 endif
 
+ifeq ($(CONFIG_STM32L4_PULSECOUNT),y)
+CHIP_CSRCS += stm32l4_pulsecount.c
+endif
+
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32l4_qencoder.c
 endif
