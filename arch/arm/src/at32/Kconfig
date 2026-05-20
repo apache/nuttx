@@ -1052,7 +1052,6 @@ config AT32_TIM
 config AT32_PWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_PULSECOUNT
 
 config AT32_CAP
 	bool
@@ -1107,7 +1106,6 @@ config ARCH_BOARD_AT32_CUSTOM_CLOCKCONFIG
 	default n
 	---help---
 		Enables special, board-specific AT32 clock configuration.
-
 
 config AT32_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
@@ -3662,6 +3660,113 @@ config AT32_PWM_TRGO
 	---help---
 		Enable TRGO support for PWM driver
 
+config AT32_PULSECOUNT
+	bool
+	default n
+	select ARCH_HAVE_PULSECOUNT
+	select PULSECOUNT
+
+config AT32_TIM1_PULSECOUNT
+	bool "TIM1 pulse count"
+	default n
+	depends on AT32_TIM1
+	select AT32_PULSECOUNT
+	---help---
+		Reserve timer 1 for pulse count output.
+
+if AT32_TIM1_PULSECOUNT
+
+config AT32_TIM1_PULSECOUNT_TDTS
+	int "TIM1 pulse count clock division"
+	default 0
+	range 0 2
+
+config AT32_TIM1_PULSECOUNT_CHANNEL
+	int "TIM1 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+config AT32_TIM1_PULSECOUNT_POL
+	int "TIM1 pulse count output polarity"
+	default 0
+	range 0 1
+
+config AT32_TIM1_PULSECOUNT_IDLE
+	int "TIM1 pulse count idle state"
+	default 0
+	range 0 1
+
+endif # AT32_TIM1_PULSECOUNT
+
+config AT32_TIM8_PULSECOUNT
+	bool "TIM8 pulse count"
+	default n
+	depends on AT32_TIM8
+	select AT32_PULSECOUNT
+	---help---
+		Reserve timer 8 for pulse count output.
+
+if AT32_TIM8_PULSECOUNT
+
+config AT32_TIM8_PULSECOUNT_TDTS
+	int "TIM8 pulse count clock division"
+	default 0
+	range 0 2
+
+config AT32_TIM8_PULSECOUNT_CHANNEL
+	int "TIM8 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+config AT32_TIM8_PULSECOUNT_POL
+	int "TIM8 pulse count output polarity"
+	default 0
+	range 0 1
+
+config AT32_TIM8_PULSECOUNT_IDLE
+	int "TIM8 pulse count idle state"
+	default 0
+	range 0 1
+
+endif # AT32_TIM8_PULSECOUNT
+
+config AT32_TIM20_PULSECOUNT
+	bool "TIM20 pulse count"
+	default n
+	depends on AT32_TIM20
+	select AT32_PULSECOUNT
+	---help---
+		Reserve timer 20 for pulse count output.
+
+if AT32_TIM20_PULSECOUNT
+
+config AT32_TIM20_PULSECOUNT_TDTS
+	int "TIM20 pulse count clock division"
+	default 0
+	range 0 2
+
+config AT32_TIM20_PULSECOUNT_CHANNEL
+	int "TIM20 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+config AT32_TIM20_PULSECOUNT_POL
+	int "TIM20 pulse count output polarity"
+	default 0
+	range 0 1
+
+config AT32_TIM20_PULSECOUNT_IDLE
+	int "TIM20 pulse count idle state"
+	default 0
+	range 0 1
+
+endif # AT32_TIM20_PULSECOUNT
 config AT32_TIM1_ADC
 	bool "TIM1 ADC"
 	default n
@@ -6008,7 +6113,6 @@ config AT32_ADC5_JEXTSEL
 
 endmenu
 
-
 config AT32_USART
 	bool
 	default n
@@ -6807,7 +6911,6 @@ config AT32_HCIUART_RXDMAPRIO
 	---help---
 		Select HCI UART DMA priority.
 
-
 config AT32_HCIUART_SW_RXFLOW
 	bool "Use Software UART RTS flow control"
 	default n
@@ -6940,7 +7043,6 @@ config AT32_SPI4_DMA_BUFFER
 
 endmenu # SPI Configuration
 
-
 menu "I2C Configuration"
 	depends on AT32_I2C
 
@@ -7027,7 +7129,6 @@ config AT32_SDIO_DMAPRIO
 		For AT32 , options are: 0x00000000 low, 0x00001000 medium,
 		0x00002000 high, 0x00003000 very high.  Default: medium.
 
-
 config AT32_SDIO_WIDTH_D1_ONLY
 	bool "Use D1 only"
 	default n
@@ -7035,7 +7136,6 @@ config AT32_SDIO_WIDTH_D1_ONLY
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 endmenu
-
 
 config AT32_HAVE_RTC_COUNTER
 	bool
@@ -7433,7 +7533,6 @@ config OTG_ID_GPIO_DISABLE
 
 endmenu
 
-
 menu "CAN driver configuration"
 	depends on AT32_CAN
 
@@ -7487,7 +7586,6 @@ config AT32_CAN_REGDEBUG
 		Requires also CONFIG_DEBUG_CAN_INFO.
 
 endmenu # "CAN driver configuration"
-
 
 menu "AT32 QEncoder Driver"
 	depends on SENSORS_QENCODER
