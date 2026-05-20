@@ -258,7 +258,6 @@ menuconfig TLSR82_USB
 menuconfig TLSR82_PWM
 	bool "PWM Configuration"
 	default n
-	select PWM
 
 if TLSR82_PWM
 
@@ -267,42 +266,48 @@ if TLSR82_PWM
 config TLSR82_PWM0
 	bool "TLSR82 PWM0 Enable"
 	default n
+	select PWM
 
 config TLSR82_PWM0_PULSECOUNT
 	bool "TLSR82 PWM0 PulseCount Enable"
 	default n
-	depends on TLSR82_PWM0
-	select PWM_PULSECOUNT
+	select ARCH_HAVE_PULSECOUNT
+	select PULSECOUNT
 
 # PWM1 configuration
 
 config TLSR82_PWM1
 	bool "TLSR82 PWM1 Enable"
 	default n
+	select PWM
 
 # PWM2 configuration
 
 config TLSR82_PWM2
 	bool "TLSR82 PWM2 Enable"
 	default n
+	select PWM
 
 # PWM3 configuration
 
 config TLSR82_PWM3
 	bool "TLSR82 PWM3 Enable"
 	default n
+	select PWM
 
 # PWM4 configuration
 
 config TLSR82_PWM4
 	bool "TLSR82 PWM4 Enable"
 	default n
+	select PWM
 
 # PWM5 configuration
 
 config TLSR82_PWM5
 	bool "TLSR82 PWM5 Enable"
 	default n
+	select PWM
 
 endif
 

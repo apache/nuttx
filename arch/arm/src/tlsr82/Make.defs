@@ -43,6 +43,10 @@ ifeq ($(CONFIG_TLSR82_PWM),y)
   CHIP_CSRCS += tlsr82_pwm.c
 endif
 
+ifeq ($(CONFIG_PULSECOUNT),y)
+  CHIP_CSRCS += tlsr82_pulsecount.c
+endif
+
 ifeq ($(CONFIG_TLSR82_ADC),y)
   CHIP_CSRCS += tlsr82_adc.c
 endif

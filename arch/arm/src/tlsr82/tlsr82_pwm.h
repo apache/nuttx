@@ -75,7 +75,9 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_PWM
 int tlsr82_pwminitialize(const char *devpath, int minor);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

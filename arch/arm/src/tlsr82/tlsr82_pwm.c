@@ -62,22 +62,10 @@
 #define PWM_MAX_FREQ          (g_pwmclk / 100)
 #define PWM_MIN_FREQ          (g_pwmclk / UINT16_MAX + 1)
 
-/* PWM max pulse count number, bit 0 ~ 13 */
-
-#define PWM_MAX_COUNT         (0x3fff)
-
-/* PWM simple operation definition */
-
 #define PWM_INT_PEND(id)      BM_IS_SET(PWM_IRQ_STA_REG, 1 << ((id) + 2))
 #define PWM_INT_CLEAR(id)     BM_CLR(PWM_IRQ_STA_REG, 1 << ((id) + 2))
 #define PWM_INT_ENABLE(id)    BM_SET(PWM_IRQ_CTRL_REG, 1 << ((id) + 2))
 #define PWM_INT_DISABLE(id)   BM_CLR(PWM_IRQ_CTRL_REG, 1 << ((id) + 2))
-
-#define PWM0_PNUM_INT_PEND()      BM_IS_SET(PWM_IRQ_STA_REG, 1 << 0)
-#define PWM0_PNUM_INT_CLEAR()     BM_CLR(PWM_IRQ_STA_REG, 1 << 0)
-#define PWM0_PNUM_INT_ENABLE()    BM_SET(PWM_IRQ_CTRL_REG, 1 << 0)
-#define PWM0_PNUM_INT_ISENABLE()  BM_IS_SET(PWM_IRQ_CTRL_REG, 1 << 0)
-#define PWM0_PNUM_INT_DISABLE()   BM_CLR(PWM_IRQ_CTRL_REG, 1 << 0)
 
 /****************************************************************************
  * Private Types
@@ -92,16 +80,9 @@ struct tlsr82_pwmtimer_s
   uint8_t id;                    /* PWM hardware id */
   bool invert;                   /* PWM output is inverted or not */
   bool started;                  /* PWM output has started or not */
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  uint8_t irq;                   /* Timer update IRQ */
-  uint32_t count;                /* Remaining pulse count */
-#endif
   uint32_t frequency;            /* Current frequency setting */
   uint16_t max;
   uint16_t cmp;
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  void *handle;                  /* Handle used for upper-half callback */
-#endif
 };
 
 /****************************************************************************
@@ -123,23 +104,13 @@ static int pwm_cfg_check(struct tlsr82_pwmtimer_s *priv);
 static int pwm_config(struct tlsr82_pwmtimer_s *priv,
                       const struct pwm_info_s *info);
 
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-static int pwm_interrupt(int irq, void *context, void *arg);
-#endif
-
 /* PWM driver methods */
 
 static int pwm_setup(struct pwm_lowerhalf_s *dev);
 static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
 
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-static int pwm_start(struct pwm_lowerhalf_s *dev,
-                     const struct pwm_info_s *info,
-                     void *handle);
-#else
 static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info);
-#endif
 
 static int pwm_stop(struct pwm_lowerhalf_s *dev);
 static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
@@ -172,9 +143,6 @@ static struct tlsr82_pwmtimer_s g_pwm0dev =
   .id          = 0,
   .invert      = false,
   .started     = false,
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  .irq         = NR_SW_PWM_IRQ,
-#endif
 };
 #endif
 
@@ -343,20 +311,6 @@ static int pwm_config(struct tlsr82_pwmtimer_s *priv,
   PWM_MAX_REG(priv->id) = priv->max;
   PWM_CMP_REG(priv->id) = priv->cmp;
 
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  if (priv->count > 0)
-    {
-      PWM_MODE0_REG = PWM_MODE0_COUNT;
-      PWM_PLUSE_NUM_REG = priv->count;
-      PWM0_PNUM_INT_ENABLE();
-      up_enable_irq(priv->irq);
-    }
-  else
-    {
-      PWM_MODE0_REG = PWM_MODE0_NORMAL;
-    }
-#endif
-
   pwm_enable(priv, true);
 
   return OK;
@@ -375,33 +329,6 @@ static int pwm_config(struct tlsr82_pwmtimer_s *priv,
  *   Zero on success; a negated errno value on failure
  *
  ****************************************************************************/
-
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-static int pwm_interrupt(int irq, void *context, void *arg)
-{
-  struct tlsr82_pwmtimer_s *priv = (struct tlsr82_pwmtimer_s *)arg;
-
-  if (PWM0_PNUM_INT_PEND() && PWM0_PNUM_INT_ISENABLE())
-    {
-      /* Disable first interrupts, stop and reset the timer */
-
-      pwm_enable(priv, false);
-
-      /* Disable PWMn interrupt and clear interrupt flag */
-
-      PWM_INT_DISABLE(priv->id);
-      PWM_INT_CLEAR(priv->id);
-
-      /* Then perform the callback into the upper half driver */
-
-      pwm_expired(priv->handle);
-
-      priv->handle = NULL;
-    }
-
-  return OK;
-}
-#endif
 
 /****************************************************************************
  * Name: pwm_enable
@@ -537,19 +464,6 @@ static int pwm_setup(struct pwm_lowerhalf_s *dev)
       BM_SET(PWM_N_INVERT_REG, 1 << priv->id);
     }
 
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  if (priv->id == 0)
-    {
-      ret = irq_attach(priv->irq, pwm_interrupt, dev);
-      if (ret < 0)
-        {
-          pwmerr("ERROR: PWM0 plusecount interrupt attach failed, ret=%d\n",
-                  ret);
-          return ret;
-        }
-    }
-#endif
-
   tlsr82_gpioconfig(pincfg);
 
   return ret;
@@ -601,48 +515,11 @@ static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(struct pwm_lowerhalf_s *dev,
-                     const struct pwm_info_s *info,
-                     void *handle)
-#else
 static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
-#endif
 {
   int ret = OK;
   struct tlsr82_pwmtimer_s *priv = (struct tlsr82_pwmtimer_s *)dev;
-
-#ifdef CONFIG_PWM_PULSECOUNT
-
-  /* Check if a pulsecount has been selected */
-
-  if (info->channels[0].count > 0)
-    {
-      /* Only the PWM0 support the pulse counting */
-
-      if (priv->id != 0)
-        {
-          pwmerr("ERROR: PWM%d cannot support pulse count: %lu\n",
-                 priv->id, info->channels[0].count);
-          return -EPERM;
-        }
-
-      if (info->channels[0].count > PWM_MAX_COUNT)
-        {
-          pwmerr("ERROR: PWM0 count out of range, count: %lu, max: %d",
-                info->channels[0].count, PWM_MAX_COUNT);
-          return -EINVAL;
-        }
-
-      priv->count = info->channels[0].count;
-    }
-
-  /* Save the handle */
-
-  priv->handle = handle;
-
-#endif
 
   /* Config the PWM */
 
@@ -698,18 +575,6 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
 
   PWM_INT_DISABLE(priv->id);
   PWM_INT_CLEAR(priv->id);
-
-#ifdef CONFIG_TLSR82_PWM0_PULSECOUNT
-  /* Disable and clear PWM0 count interrupt flag */
-
-  if (priv->count > 0)
-    {
-      priv->count = 0;
-      up_disable_irq(priv->irq);
-      PWM0_PNUM_INT_DISABLE();
-      PWM0_PNUM_INT_CLEAR();
-    }
-#endif
 
   leave_critical_section(flags);
 
