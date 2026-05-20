@@ -124,16 +124,14 @@ static void syslog_rpmsg_init_buffer(FAR struct syslog_rpmsg_s *priv)
   DEBUGASSERT(priv->header != NULL);
 
   flags = spin_lock_irqsave(&priv->lock);
+#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
+  header->size = CONFIG_SYSLOG_RPMSG_BUFSIZE -
+                 sizeof(struct syslog_rpmsg_buffer_header_s);
+#endif
   if (header->magic != SYSLOG_RPMSG_MAGIC_NUMBER)
     {
       header->head = 0;
       header->tail = 0;
-
-#if CONFIG_SYSLOG_RPMSG_BUFSIZE > 0
-      header->size = CONFIG_SYSLOG_RPMSG_BUFSIZE -
-                     sizeof(struct syslog_rpmsg_buffer_header_s);
-#endif
-
       header->magic = SYSLOG_RPMSG_MAGIC_NUMBER;
     }
 
