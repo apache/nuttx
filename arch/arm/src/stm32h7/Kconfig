@@ -834,7 +834,6 @@ config STM32H7_PWR
 config STM32H7_PWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32H7_USART
 	bool
@@ -979,7 +978,6 @@ config STM32H7_WWDG
 	bool "WWDG"
 	default n
 	select WATCHDOG
-
 
 menu "STM32H7 FDCAN Selection"
 
@@ -4316,6 +4314,79 @@ config STM32H7_PWM_MULTICHAN
 		Specifies that the PWM driver supports multiple output
 		channels per timer.
 
+config STM32H7_PULSECOUNT
+	bool
+	default n
+	select ARCH_HAVE_PULSECOUNT
+	select PULSECOUNT
+
+config STM32H7_TIM1_PULSECOUNT
+	bool "TIM1 pulse count"
+	default n
+	depends on STM32H7_TIM1
+	select STM32H7_PULSECOUNT
+	---help---
+		Reserve timer 1 for pulse count output.
+
+if STM32H7_TIM1_PULSECOUNT
+
+config STM32H7_TIM1_PULSECOUNT_TDTS
+	int "TIM1 pulse count clock division"
+	default 0
+	range 0 2
+
+config STM32H7_TIM1_PULSECOUNT_CHANNEL
+	int "TIM1 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+config STM32H7_TIM1_PULSECOUNT_POL
+	int "TIM1 pulse count output polarity"
+	default 0
+	range 0 1
+
+config STM32H7_TIM1_PULSECOUNT_IDLE
+	int "TIM1 pulse count idle state"
+	default 0
+	range 0 1
+
+endif # STM32H7_TIM1_PULSECOUNT
+
+config STM32H7_TIM8_PULSECOUNT
+	bool "TIM8 pulse count"
+	default n
+	depends on STM32H7_TIM8
+	select STM32H7_PULSECOUNT
+	---help---
+		Reserve timer 8 for pulse count output.
+
+if STM32H7_TIM8_PULSECOUNT
+
+config STM32H7_TIM8_PULSECOUNT_TDTS
+	int "TIM8 pulse count clock division"
+	default 0
+	range 0 2
+
+config STM32H7_TIM8_PULSECOUNT_CHANNEL
+	int "TIM8 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+config STM32H7_TIM8_PULSECOUNT_POL
+	int "TIM8 pulse count output polarity"
+	default 0
+	range 0 1
+
+config STM32H7_TIM8_PULSECOUNT_IDLE
+	int "TIM8 pulse count idle state"
+	default 0
+	range 0 1
+
+endif # STM32H7_TIM8_PULSECOUNT
 config STM32H7_TIM1_ADC
 	bool "TIM1 ADC"
 	default n
@@ -6557,7 +6628,6 @@ config STM32H7_FDCAN_HPWORK
 endchoice # FDCAN WorkQueue Selection
 
 endmenu # FDCAN Driver
-
 
 menu "Progmem MTD configuration"
 
