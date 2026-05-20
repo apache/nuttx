@@ -179,6 +179,20 @@ int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
       _alert("\tInvalid Local Memory Address\n");
     }
 
+#ifdef CONFIG_ARCH_TC1V8
+  if (tid ==
+      IfxCpu_Trap_InstructionErrors_Id_CoprocessorTrapSynchronousError)
+    {
+      _alert("\tCoprocessor Trap Synchronous Error\n");
+#  ifdef CONFIG_ARCH_HAVE_FPU
+      _alert("\tFPU_SYNC_TRAP:%" PRIX32 "\n\n",
+             (uint32_t)__mfcr(FPU_SYNC_TRAP_REG));
+      __mtcr(FPU_SYNC_TRAP_REG,
+             __mfcr(FPU_SYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
+#  endif
+    }
+#endif
+
   up_irq_save();
   PANIC_WITH_REGS("panic", context);
   return OK;
@@ -256,6 +270,12 @@ int tricore_bustrap(uint32_t tid, void *context, void *arg)
   if (tid == IfxCpu_Trap_Bus_Id_CoprocessorTrapAsynchronousError)
     {
       _alert("\tCoprocessor Trap Asynchronous Error\n");
+#ifdef CONFIG_ARCH_HAVE_FPU
+      _alert("\tFPU_ASYNC_TRAP:%" PRIX32 "\n\n",
+             (uint32_t)__mfcr(FPU_ASYNC_TRAP_REG));
+      __mtcr(FPU_ASYNC_TRAP_REG,
+             __mfcr(FPU_ASYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
+#endif
     }
 
   if (tid == IfxCpu_Trap_Bus_Id_programMemoryIntegrityError)

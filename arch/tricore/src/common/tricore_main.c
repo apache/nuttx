@@ -44,6 +44,10 @@ static void core_main(void)
 {
   static IfxCpu_syncEvent g_sync_event = 0;
 
+#ifdef CONFIG_ARCH_HAVE_FPU
+  tricore_fpuinit();
+#endif
+
   /* !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
    * Enable the watchdogs and service them periodically if it is required
    */

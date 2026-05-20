@@ -206,6 +206,12 @@ void tricore_serialinit(void);
 void tricore_earlyserialinit(void);
 #endif
 
+/* FPU **********************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FPU
+void tricore_fpuinit(void);
+#endif
+
 /* System Timer *************************************************************/
 
 struct oneshot_lowerhalf_s *
