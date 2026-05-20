@@ -309,6 +309,8 @@ tricore_systimer_initialize(volatile void *tbase, int irq, uint64_t freq)
 
   oneshot_count_init(&priv->lower, (uint32_t)freq);
 
+  IfxStm_setSuspendMode(priv->tbase, IfxStm_SuspendMode_hard);
+
   IfxStm_setCompareControl(tbase,
       IfxStm_Comparator_0,
       IfxStm_ComparatorOffset_0,
