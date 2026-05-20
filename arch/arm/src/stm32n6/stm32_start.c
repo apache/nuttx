@@ -205,7 +205,7 @@ void __start_c(void)
            STM32_RCC_BUSLPENSR);
   putreg32(RCC_MEMLPENR_ALLAXISRAM | RCC_MEMLPENR_CACHEAXIRAMLPEN,
            STM32_RCC_MEMLPENSR);
-#ifdef CONFIG_STM32N6_USART1
+#ifdef CONFIG_STM32_USART1
   putreg32(RCC_APB2LPENR_USART1LPEN, STM32_RCC_APB2LPENSR);
 #endif
 
@@ -233,7 +233,7 @@ void __start_c(void)
 
   (void)getreg32(STM32_SYSCFG_VDDCCCR);
 
-#ifdef CONFIG_STM32N6_USART1
+#ifdef CONFIG_STM32_USART1
   /* Route USART1's kernel clock to HSI so the BRR computation is
    * independent of any later SYSCLK changes.
    */

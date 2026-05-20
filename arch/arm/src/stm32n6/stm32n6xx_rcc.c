@@ -93,7 +93,7 @@ static inline void rcc_enableapb2(void)
 {
   uint32_t regval = 0;
 
-#ifdef CONFIG_STM32N6_USART1
+#ifdef CONFIG_STM32_USART1
   regval |= RCC_APB2ENR_USART1EN;
 #endif
 

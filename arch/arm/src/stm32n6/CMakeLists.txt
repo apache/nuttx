@@ -39,13 +39,13 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
 endif()
 
-if(CONFIG_STM32N6_USART)
+if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
 endif()
 
 # Chip-specific RCC
 
-if(CONFIG_STM32N6_STM32N6XXXX)
+if(CONFIG_STM32_STM32N6XXXX)
   list(APPEND SRCS stm32n6xx_rcc.c)
 endif()
 
