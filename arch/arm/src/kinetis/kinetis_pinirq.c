@@ -282,12 +282,15 @@ int kinetis_pinirqattach(uint32_t pinset, xcpt_t pinisr, void *arg)
   unsigned int port;
   unsigned int pin;
 
-  /* It only makes sense to call this function for input pins that are
-   * configured as interrupts.
+  /* It makes sense to call this function for input pins that are configured
+   * as interrupts.
+   *
+   * In rare cases, for example when a GPIO pin is used in both directions, it
+   * also make sense to call this function for output pins.  However, the pins
+   * must be configured for interrupts in all cases.
    */
 
   DEBUGASSERT((pinset & _PIN_INTDMA_MASK) == _PIN_INTERRUPT);
-  DEBUGASSERT((pinset & _PIN_IO_MASK) == _PIN_INPUT);
 
   /* Get the port number and pin number */
 
