@@ -97,14 +97,8 @@ static int nrf52_pwm_freq(struct nrf52_pwm_s *priv, uint32_t freq);
 
 static int nrf52_pwm_setup(struct pwm_lowerhalf_s *dev);
 static int nrf52_pwm_shutdown(struct pwm_lowerhalf_s *dev);
-#ifdef CONFIG_PWM_PULSECOUNT
-static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
-                           const struct pwm_info_s *info,
-                           void *handle);
-#else
 static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
                            const struct pwm_info_s *info);
-#endif
 static int nrf52_pwm_stop(struct pwm_lowerhalf_s *dev);
 static int nrf52_pwm_ioctl(struct pwm_lowerhalf_s *dev,
                            int cmd, unsigned long arg);
@@ -540,14 +534,6 @@ static int nrf52_pwm_shutdown(struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_PULSECOUNT
-static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
-                           const struct pwm_info_s *info,
-                           void *handle)
-{
-#error Not supported
-}
-#else
 static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
                            const struct pwm_info_s *info)
 {
@@ -600,7 +586,6 @@ static int nrf52_pwm_start(struct pwm_lowerhalf_s *dev,
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: nrf52_pwm_stop
