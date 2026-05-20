@@ -26,6 +26,23 @@ choice
 	prompt "ARM64 chip selection"
 	default ARCH_CHIP_QEMU
 
+config ARCH_CHIP_AM62X
+	bool "TI AM62x"
+	select ARCH_CORTEX_A53
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_USE_MMU
+	select ARMV8A_HAVE_GICv3
+	select ARM64_HAVE_PSCI
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_LOWPUTC
+	---help---
+		Texas Instruments AM62x family (AM6232, AM6252, AM6254).
+		Quad Cortex-A53 @ up to 1.4 GHz.  Supported boards:
+		PocketBeagle 2, BeaglePlay.
+
 config ARCH_CHIP_A64
 	bool "Allwinner A64"
 	select ARCH_CORTEX_A53
@@ -362,6 +379,7 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
+	default "am62x"     if ARCH_CHIP_AM62X
 	default "a64"       if ARCH_CHIP_A64
 	default "a527"      if ARCH_CHIP_SUNXI_A527
 	default "rk3399"    if ARCH_CHIP_RK3399
@@ -501,6 +519,10 @@ config ARM64_PA_BITS
 		Choose the maximum physical address range that the kernel will support.
 
 		The choice could be: 32, 36, 42, 48
+
+if ARCH_CHIP_AM62X
+source "arch/arm64/src/am62x/Kconfig"
+endif
 
 if ARCH_CHIP_A64
 source "arch/arm64/src/a64/Kconfig"
