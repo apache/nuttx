@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
 #include "tricore_internal.h"
 
 /****************************************************************************
@@ -42,4 +44,17 @@ void tricore_fpuinit(void)
 
   __mtcr(FPU_SYNC_TRAP_REG,
          __mfcr(FPU_SYNC_TRAP_REG) | (1U << FPU_TRAP_FZE_SHIFT));
+}
+
+/****************************************************************************
+ * Name: up_fpucmp
+ ****************************************************************************/
+
+bool up_fpucmp(const void *saveregs1, const void *saveregs2)
+{
+  const uintptr_t *regs1 = saveregs1;
+  const uintptr_t *regs2 = saveregs2;
+
+  return memcmp(&regs1[REG_D8], &regs2[REG_D8],
+                8 * sizeof(uintptr_t)) == 0;
 }
