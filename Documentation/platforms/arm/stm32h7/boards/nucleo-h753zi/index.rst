@@ -232,7 +232,7 @@ Some highlights:
    nsh> cat /mnet/lfs/afile
    nsh: cat: open failed: 2
    nsh> mount -t vfat /dev/sda /mnt/sda
-   nsh> echo "Thos will stay on the USB drive" > /mnt/sda/afile
+   nsh> echo "This will stay on the USB drive" > /mnt/sda/afile
    nsh> ls /mnt/sda
    /mnt/sda:
     GARMIN/
@@ -253,7 +253,7 @@ Some highlights:
    nsh> cat /mnt/sda/afail
    nsh: cat: open failed: 2
    nsh> cat /mnt/sda/afile
-   Thos will stay on the USB drive
+   This will stay on the USB drive
    nsh> buttons
    buttons_main: Starting the button_daemon
    buttons_main: button_daemon started
