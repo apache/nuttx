@@ -807,11 +807,6 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
       return -EPERM;
     }
 
-  /* Clear fifos */
-
-  u16550_serialout(priv, UART_FCR_OFFSET,
-                   (UART_FCR_RXRST | UART_FCR_TXRST));
-
   /* Set up the IER */
 
   priv->ier = u16550_serialin(priv, UART_IER_OFFSET);
@@ -892,10 +887,16 @@ static int u16550_setup(FAR struct uart_dev_s *dev)
 
   /* Configure the FIFOs */
 
+  /* Some 16550-compatible UARTs, including the AM62x console block, need
+   * FIFO enable, reset, and trigger configuration as separate writes.
+   */
+
+  u16550_serialout(priv, UART_FCR_OFFSET, UART_FCR_FIFOEN);
   u16550_serialout(priv, UART_FCR_OFFSET,
-                   (priv->rxtrigger << UART_FCR_RXTRIGGER_SHIFT |
-                    UART_FCR_TXRST | UART_FCR_RXRST |
-                    UART_FCR_FIFOEN));
+                   UART_FCR_FIFOEN | UART_FCR_TXRST | UART_FCR_RXRST);
+  u16550_serialout(priv, UART_FCR_OFFSET,
+                   UART_FCR_FIFOEN |
+                   (priv->rxtrigger << UART_FCR_RXTRIGGER_SHIFT));
 
 #ifdef CONFIG_16550_SET_MCR_OUT2
   /* Set OUT2 bit in MCR register */
@@ -1616,7 +1617,14 @@ static void u16550_txint(struct uart_dev_s *dev, bool enable)
 #ifdef CONFIG_16550_POLLING
       /* In polling mode, we loop until the buffer is empty */
 
-      uart_xmitchars(dev);
+      while (dev->xmit.head != dev->xmit.tail)
+        {
+          while (!u16550_txready(dev))
+            {
+            }
+
+          uart_xmitchars(dev);
+        }
 #else
       flags = enter_critical_section();
       priv->ier |= UART_IER_ETBEI;
@@ -1690,7 +1698,8 @@ void u16550_earlyserialinit(void)
 
 #ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
-#ifndef CONFIG_16550_SUPRESS_INITIAL_CONFIG
+#if !defined(CONFIG_16550_SUPRESS_INITIAL_CONFIG) && \
+    !defined(CONFIG_16550_SUPRESS_CONFIG)
   u16550_setup(&CONSOLE_DEV);
 #endif
 #endif
