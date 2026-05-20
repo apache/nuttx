@@ -391,6 +391,10 @@
 
 #define GPIO_TIM3_CH1OUT (GPIO_TIM3_CH1OUT_1|GPIO_SPEED_50MHz)
 
+/* TIM8 configuration *******************************************************/
+
+#define GPIO_TIM8_CH1OUT (GPIO_TIM8_CH1OUT_1|GPIO_SPEED_50MHz) /* PC6 */
+
 #ifdef CONFIG_BOARD_STM32_IHM08M1
 
 /* Configuration specific to the X-NUCLEO-IHM08M1 expansion board with
