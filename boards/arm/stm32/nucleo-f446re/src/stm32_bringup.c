@@ -40,6 +40,10 @@
 
 #include <arch/board/board.h>
 
+#ifdef CONFIG_PULSECOUNT
+#  include "stm32_pulsecount.h"
+#endif
+
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
 #endif
@@ -80,6 +84,9 @@
 
 int stm32_bringup(void)
 {
+#ifdef CONFIG_PULSECOUNT
+  struct pulsecount_lowerhalf_s *pulsecount;
+#endif
   int ret = OK;
 
 #ifdef CONFIG_FS_PROCFS
@@ -160,6 +167,24 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_PULSECOUNT
+  /* Initialize and register the pulse count driver. */
+
+  pulsecount = stm32_pulsecountinitialize(8);
+  if (pulsecount == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pulsecountinitialize failed\n");
+      return -ENODEV;
+    }
+
+  ret = pulsecount_register("/dev/pulsecount0", pulsecount);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pulsecount_register failed: %d\n", ret);
+      return ret;
     }
 #endif
 
