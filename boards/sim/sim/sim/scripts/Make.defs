@@ -340,6 +340,10 @@ else ifeq ($(CONFIG_HOST_MACOS)$(CONFIG_HOST_ARM64),)
 endif
 
 ifeq ($(CONFIG_HOST_LINUX),y)
+  # Resolve PLT entries at load time so early host calls made with
+  # simulated interrupts masked do not fault inside the lazy binder.
+  LDFLAGS += -Wl,-z,now
+
   define POSTBUILD
   	$(Q)echo "Pac SIM with dynamic libs..";
   	@ rm -rf sim-pac;
