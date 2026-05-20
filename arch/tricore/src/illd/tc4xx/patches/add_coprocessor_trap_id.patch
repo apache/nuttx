@@ -1,0 +1,11 @@
+diff --git a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.h b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.h
+--- a/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.h
++++ b/arch/tricore/src/illd/tc4xx/Libraries/src/Libraries/iLLD/TC4xx/Tricore/Cpu/Trap/IfxCpu_Trap.h
+@@ -99,6 +99,7 @@
+     IfxCpu_Trap_InstructionErrors_Id_invalidOperand       = 3U,
+     IfxCpu_Trap_InstructionErrors_Id_dataAddressAlignment = 4U,
+     IfxCpu_Trap_InstructionErrors_Id_invalidMemoryAddress = 5U,
++    IfxCpu_Trap_InstructionErrors_Id_CoprocessorTrapSynchronousError = 6U,
+ } IfxCpu_Trap_InstructionErrors_Id;
+
+ /** \brief Enum for available Identification numbers under Context Management Trap.

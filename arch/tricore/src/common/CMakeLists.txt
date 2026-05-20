@@ -56,6 +56,10 @@ if(CONFIG_ARCH_USE_MPU)
   list(APPEND SRCS tricore_mpu.c)
 endif()
 
+if(CONFIG_ARCH_HAVE_FPU)
+  list(APPEND SRCS tricore_fpu.c)
+endif()
+
 set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
 
 target_sources(arch PRIVATE ${SRCS})
