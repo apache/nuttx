@@ -601,6 +601,7 @@ config ARCH_CHIP_STM32H5
 
 config ARCH_CHIP_STM32N6
 	bool "STMicro STM32 N6"
+	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM55
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MPU
