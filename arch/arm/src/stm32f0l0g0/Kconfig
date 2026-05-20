@@ -2167,7 +2167,6 @@ config STM32F0L0G0_CAN
 config STM32F0L0G0_PWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32F0L0G0_USART
 	bool
@@ -2191,17 +2190,30 @@ config STM32F0L0G0_1WIREDRIVER
 
 menu "Timer Configuration"
 
+config STM32F0L0G0_TIM1_PULSECOUNT
+	bool "TIM1 pulse count"
+	default n
+	depends on STM32F0L0G0_TIM1
+	select ARCH_HAVE_PULSECOUNT
+	select PULSECOUNT
+	---help---
+		Reserve timer 1 for use by the pulse count driver.
+
+		Timer devices may be used for different purposes.  If STM32F0L0G0_TIM1
+		is defined then this option may also be defined to indicate that TIM1 is
+		intended to generate a fixed number of output pulses.
+
 config STM32F0L0G0_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
-	depends on STM32F0L0G0_TIM1
+	depends on STM32F0L0G0_TIM1 && !STM32F0L0G0_TIM1_PULSECOUNT
 	select STM32F0L0G0_PWM
 	---help---
 		Reserve timer 1 for use by PWM
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to generate modulated outputs for such things as motor control.  If
-		STM32F0L0G0_TIM1 is defined then THIS option may also be defined to
+		STM32F0L0G0_TIM1 is defined then this option may also be defined to
 		indicate that the timer is intended to be used for pulsed output modulation.
 
 		Valid channel modes:
@@ -2243,7 +2255,7 @@ config STM32F0L0G0_TIM1_CH1MODE
 	default 0
 	range 0 5
 	---help---
-		Specifies the channel mode. See STM32F0L0G0_TIM1_PWM description for available modes.
+		Specifies the channel mode.
 
 config STM32F0L0G0_TIM1_CH1OUT
 	bool "TIM1 Channel 1 Output"
@@ -2273,7 +2285,7 @@ config STM32F0L0G0_TIM1_CH2MODE
 	default 0
 	range 0 5
 	---help---
-		Specifies the channel mode. See STM32F0L0G0_TIM1_PWM description for available modes.
+		Specifies the channel mode.
 
 config STM32F0L0G0_TIM1_CH2OUT
 	bool "TIM1 Channel 2 Output"
@@ -2303,7 +2315,7 @@ config STM32F0L0G0_TIM1_CH3MODE
 	default 0
 	range 0 5
 	---help---
-		Specifies the channel mode. See STM32F0L0G0_TIM1_PWM description for available modes.
+		Specifies the channel mode.
 
 config STM32F0L0G0_TIM1_CH3OUT
 	bool "TIM1 Channel 3 Output"
@@ -2333,7 +2345,7 @@ config STM32F0L0G0_TIM1_CH4MODE
 	default 0
 	range 0 5
 	---help---
-		Specifies the channel mode. See STM32F0L0G0_TIM1_PWM description for available modes.
+		Specifies the channel mode.
 
 config STM32F0L0G0_TIM1_CH4OUT
 	bool "TIM1 Channel 4 Output"
@@ -2352,7 +2364,7 @@ config STM32F0L0G0_TIM1_CHANNEL
 	default 1
 	range 1 4
 	---help---
-		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		If TIM1 is enabled for output usage, you also need specifies the timer output
 		channel {1,..,4}
 
 config STM32F0L0G0_TIM1_CHMODE
@@ -2360,11 +2372,22 @@ config STM32F0L0G0_TIM1_CHMODE
 	default 0
 	range 0 5
 	---help---
-		Specifies the channel mode. See STM32F0L0G0_TIM1_PWM description for available modes.
+		Specifies the channel mode.
 
 endif # !STM32F0L0G0_PWM_MULTICHAN
 
 endif # STM32F0L0G0_TIM1_PWM
+
+if STM32F0L0G0_TIM1_PULSECOUNT
+
+config STM32F0L0G0_TIM1_PULSECOUNT_CHANNEL
+	int "TIM1 pulse count channel"
+	default 1
+	range 1 4
+	---help---
+		Specifies the timer channel {1,..,4}.
+
+endif # STM32F0L0G0_TIM1_PULSECOUNT
 
 config STM32F0L0G0_TIM1_QE
 	bool "TIM1 Quadrature Encoder"

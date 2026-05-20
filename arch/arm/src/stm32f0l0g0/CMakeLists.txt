@@ -91,6 +91,10 @@ if(CONFIG_STM32F0L0G0_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_PULSECOUNT AND CONFIG_STM32F0L0G0_TIM1_PULSECOUNT)
+  list(APPEND SRCS stm32_pulsecount.c)
+endif()
+
 if(CONFIG_STM32F0L0G0_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
