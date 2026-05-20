@@ -478,11 +478,23 @@ static int rpmsgdev_ioctl_handler(FAR struct rpmsg_endpoint *ept,
 {
   FAR struct rpmsgdev_ioctl_s *msg = data;
   FAR struct file *filep = (FAR struct file *)(uintptr_t)msg->filep;
+  bool   is_cfg = (msg->request >= CFGDIOC_GETCONFIG &&
+                   msg->request <= CFGDIOC_NEXTCONFIG);
+  size_t cfglen = 0;
 
-  if (msg->request >= CFGDIOC_GETCONFIG &&
-      msg->request <= CFGDIOC_NEXTCONFIG &&
-      msg->arglen != (sizeof(struct config_data_s) +
-      ((FAR struct config_data_s *)msg->buf)->len))
+  if (is_cfg)
+    {
+      /* msg->buf is a char[] inside a packed wire struct and may be
+       * unaligned; use memcpy to read config_data_s::len safely instead
+       * of casting to (struct config_data_s *).
+       */
+
+      memcpy(&cfglen,
+             msg->buf + offsetof(struct config_data_s, len),
+             sizeof(cfglen));
+    }
+
+  if (is_cfg && msg->arglen != sizeof(struct config_data_s) + cfglen)
     {
       msg->header.result = -EMSGSIZE;
     }
