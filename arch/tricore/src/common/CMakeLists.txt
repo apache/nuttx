@@ -34,6 +34,7 @@ set(SRCS
     tricore_irq.c
     tricore_main.c
     tricore_nputs.c
+    tricore_perf.c
     tricore_registerdump.c
     tricore_releasestack.c
     tricore_saveusercontext.c
