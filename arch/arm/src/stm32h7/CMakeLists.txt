@@ -181,6 +181,10 @@ if(CONFIG_STM32H7_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_PULSECOUNT)
+  list(APPEND SRCS stm32_pulsecount.c)
+endif()
+
 if(CONFIG_STM32H7_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
