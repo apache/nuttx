@@ -241,8 +241,6 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
 
   if (SYSLOG_RPMSG_SPACE(header) < len)
     {
-      bool ret = false;
-
       if (!up_interrupt_context() && !sched_idletask())
         {
           /* Unlock before entering syslog_rpmsg_transfer,
@@ -250,11 +248,11 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
            */
 
           spin_unlock_irqrestore(&priv->lock, flags);
-          ret = syslog_rpmsg_transfer(priv, true);
+          syslog_rpmsg_transfer(priv, true);
           flags = spin_lock_irqsave(&priv->lock);
         }
 
-      if (!ret)
+      if (SYSLOG_RPMSG_SPACE(header) < len)
         {
           overwritten = true;
         }
