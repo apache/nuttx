@@ -164,6 +164,10 @@ if(CONFIG_STM32L4_PWM)
   list(APPEND SRCS stm32l4_pwm.c)
 endif()
 
+if(CONFIG_PULSECOUNT)
+  list(APPEND SRCS stm32l4_pulsecount.c)
+endif()
+
 if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32l4_qencoder.c)
 endif()
