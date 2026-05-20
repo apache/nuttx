@@ -41,11 +41,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/timers/pwm.h>
-
-#include <nuttx/irq.h>
 
 #ifdef CONFIG_PWM
 
@@ -61,15 +58,7 @@ struct pwm_upperhalf_s
                                      * been opened */
   volatile bool     started;        /* True: pulsed output is being
                                      * generated */
-#ifdef CONFIG_PWM_PULSECOUNT
-  volatile bool     waiting;        /* True: Caller is waiting for the pulse
-                                     * count to expire */
-#endif
   mutex_t           lock;           /* Supports mutual exclusion */
-#ifdef CONFIG_PWM_PULSECOUNT
-  sem_t             waitsem;        /* Used to wait for the pulse count to
-                                     * expire */
-#endif
   struct pwm_info_s info;           /* Pulsed output characteristics */
   FAR struct pwm_lowerhalf_s *dev;  /* lower-half state */
 };
@@ -125,10 +114,6 @@ static void pwm_dump(FAR const char *msg, FAR const struct pwm_info_s *info,
       pwminfo(" channel: %d duty: %08" PRIx32 "\n",
               info->channels[i].channel, info->channels[i].duty);
     }
-
-#ifdef CONFIG_PWM_PULSECOUNT
-  pwminfo(" count: %" PRIx32 "\n", info->channels[0].count);
-#endif
 
   pwminfo(" started: %d\n", started);
 }
@@ -295,79 +280,12 @@ static ssize_t pwm_write(FAR struct file *filep, FAR const char *buffer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
-{
-  FAR struct pwm_lowerhalf_s *lower;
-  irqstate_t flags;
-  int ret = OK;
-
-  DEBUGASSERT(upper != NULL);
-  lower = upper->dev;
-  DEBUGASSERT(lower != NULL && lower->ops->start != NULL);
-
-  /* Verify that the PWM is not already running */
-
-  if (!upper->started)
-    {
-      /* Indicate that if will be waiting for the pulse count to complete.
-       * Note that we will only wait if a non-zero pulse count is specified
-       * and if the PWM driver was opened in normal, blocking mode.  Also
-       * assume for now that the pulse train will be successfully started.
-       *
-       * We do these things before starting the PWM to avoid race conditions.
-       */
-
-      upper->waiting = (upper->info.channels[0].count > 0) &&
-                       ((oflags & O_NONBLOCK) == 0);
-      upper->started = true;
-
-      /* Invoke the bottom half method to start the pulse train */
-
-      ret = lower->ops->start(lower, &upper->info, upper);
-
-      /* A return value of zero means that the pulse train was started
-       * successfully.
-       */
-
-      if (ret == OK)
-        {
-          /* Should we wait for the pulse output to complete?  Loop in
-           * in case the wakeup form nxsem_wait() is a false alarm.
-           */
-
-          while (upper->waiting)
-            {
-              /* Wait until we are awakened by pwm_expired().  When
-               * pwm_expired is called, it will post the waitsem and
-               * clear the waiting flag.
-               */
-
-              ret = nxsem_wait_uninterruptible(&upper->waitsem);
-              if (ret < 0)
-                {
-                  upper->started = false;
-                  upper->waiting = false;
-                }
-            }
-        }
-      else
-        {
-          /* Looks like we won't be waiting after all */
-
-          pwminfo("start failed: %d\n", ret);
-          upper->started = false;
-          upper->waiting = false;
-        }
-    }
-
-  return ret;
-}
-#else
 static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 {
   FAR struct pwm_lowerhalf_s *lower;
   int ret = OK;
+
+  UNUSED(oflags);
 
   DEBUGASSERT(upper != NULL);
   lower = upper->dev;
@@ -395,7 +313,6 @@ static int pwm_start(FAR struct pwm_upperhalf_s *upper, unsigned int oflags)
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: pwm_ioctl
@@ -453,11 +370,7 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (upper->started)
             {
-#ifdef CONFIG_PWM_PULSECOUNT
-              ret = lower->ops->start(lower, &upper->info, upper);
-#else
               ret = lower->ops->start(lower, &upper->info);
-#endif
             }
         }
         break;
@@ -513,12 +426,6 @@ static int pwm_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = lower->ops->stop(lower);
               upper->started = false;
-#ifdef CONFIG_PWM_PULSECOUNT
-              if (upper->waiting)
-                {
-                  upper->waiting = false;
-                }
-#endif
             }
         }
         break;
@@ -588,9 +495,6 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
    */
 
   nxmutex_init(&upper->lock);
-#ifdef CONFIG_PWM_PULSECOUNT
-  nxsem_init(&upper->waitsem, 0, 0);
-#endif
 
   upper->dev = dev;
 
@@ -599,70 +503,5 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
   pwminfo("Registering %s\n", path);
   return register_driver(path, &g_pwmops, 0666, upper);
 }
-
-/****************************************************************************
- * Name: pwm_expired
- *
- * Description:
- *   If CONFIG_PWM_PULSECOUNT is defined and the pulse count was configured
- *   to a non-zero value, then the "upper half" driver will wait for the
- *   pulse count to expire.  The sequence of expected events is as follows:
- *
- *   1. The upper half driver calls the start method, providing the lower
- *      half driver with the pulse train characteristics.  If a fixed
- *      number of pulses is required, the 'count' value will be nonzero.
- *   2. The lower half driver's start() method must verify that it can
- *      support the request pulse train (frequency, duty, AND pulse count).
- *      If it cannot, it should return an error.  If the pulse count is
- *      non-zero, it should set up the hardware for that number of pulses
- *      and return success.  NOTE:  That is CONFIG_PWM_PULSECOUNT is
- *      defined, the start() method receives an additional parameter
- *      that must be used in this callback.
- *   3. When the start() method returns success, the upper half driver
- *      will "sleep" until the pwm_expired method is called.
- *   4. When the lower half detects that the pulse count has expired
- *      (probably through an interrupt), it must call the pwm_expired
- *      interface using the handle that was previously passed to the
- *      start() method
- *
- * Input Parameters:
- *   handle - This is the handle that was provided to the lower-half
- *     start() method.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PWM_PULSECOUNT
-void pwm_expired(FAR void *handle)
-{
-  FAR struct pwm_upperhalf_s *upper = (FAR struct pwm_upperhalf_s *)handle;
-
-  pwminfo("started: %d waiting: %d\n", upper->started, upper->waiting);
-
-  /* Make sure that the PWM is started */
-
-  if (upper->started)
-    {
-      /* Is there a thread waiting for the pulse train to complete? */
-
-      if (upper->waiting)
-        {
-          /* Yes.. clear the waiting flag and awakened the waiting thread */
-
-          upper->waiting = false;
-          nxsem_post(&upper->waitsem);
-        }
-
-      /* The PWM is now stopped */
-
-      upper->started = false;
-    }
-}
-#endif
 
 #endif /* CONFIG_PWM */

@@ -5,8 +5,8 @@ PWM Drivers
 For the purposes of this driver, a PWM device is any device that
 generates periodic output pulses of controlled frequency and pulse
 width. Such a device might be used, for example, to perform
-pulse-width modulated output or frequency/pulse-count modulated
-output (such as might be needed to control a stepper motor).
+pulse-width modulated output. Finite pulse-count output is provided
+through the separate pulsecount driver interface.
 
 The NuttX PWM driver is split into two parts:
 
@@ -209,3 +209,7 @@ wait for an end of cycle.
 
 The ``CONFIG_PWM_DEADTIME`` option brings the possibility to introduce
 dead time values between complementary PWM outputs.
+
+Finite pulse trains are not configured through ``pwm_info_s``. Use the
+:doc:`pulsecount <pulsecount>` driver for hardware that supports a fixed pulse
+count.

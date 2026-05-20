@@ -24,10 +24,9 @@
 #define __INCLUDE_NUTTX_TIMERS_PWM_H
 
 /* For the purposes of this driver, a PWM device is any device that generates
- * periodic output pulses s of controlled frequency and pulse width.  Such a
- * device might be used, for example, to perform pulse-width modulated output
- * or frequency/pulse-count modulated output (such as might be needed to
- * control a stepper motor).
+ * periodic output pulses of controlled frequency and pulse width. Such a
+ * device might be used, for example, to perform pulse-width modulated
+ * output.
  *
  * The PWM driver is split into two parts:
  *
@@ -59,10 +58,6 @@
 /* Configuration ************************************************************/
 
 /* CONFIG_PWM - Enables because PWM driver support
- * CONFIG_PWM_PULSECOUNT - Some hardware will support generation of a fixed
- *   number of pulses.  This might be used, for example to support a stepper
- *   motor.  If the hardware will support a fixed pulse count, then this
- *   configuration should be set to enable the capability.
  * CONFIG_DEBUG_PWM_INFO - This will generate output that can be use to
  *   debug the PWM driver.
  */
@@ -98,11 +93,7 @@
  *  characteristics of the pulsed output.
  *
  * PWMIOC_START - Start the pulsed output.  The PWMIOC_SETCHARACTERISTICS
- *  command must have previously been sent. If CONFIG_PWM_PULSECOUNT is
- *  defined and the pulse count was configured to a non-zero value, then
- *  this ioctl call will, by default, block until the programmed pulse count
- *  completes.  That default blocking behavior can be overridden by using
- *  the O_NONBLOCK flag when the PWM driver is opened.
+ *  command must have previously been sent.
  *
  *  ioctl argument:  None
  *
@@ -174,11 +165,6 @@ struct pwm_chan_s
   uint8_t cpol;
   uint8_t dcpol;
   int8_t channel;
-
-#ifdef CONFIG_PWM_PULSECOUNT
-  uint32_t           count;     /* The number of pulse to generate.  0 means to
-                                 * generate an indefinite number of pulses */
-#endif
 };
 
 /* This structure describes the characteristics of the pulsed output */
@@ -219,17 +205,11 @@ struct pwm_ops_s
 
   /* (Re-)initialize the timer resources and start the pulsed output. The
    * start method should return an error if it cannot start the timer with
-   * the given parameter (frequency, duty, or optionally pulse count)
+   * the given parameter (frequency or duty)
    */
 
-#ifdef CONFIG_PWM_PULSECOUNT
-  CODE int (*start)(FAR struct pwm_lowerhalf_s *dev,
-                    FAR const struct pwm_info_s *info,
-                    FAR void *handle);
-#else
   CODE int (*start)(FAR struct pwm_lowerhalf_s *dev,
                     FAR const struct pwm_info_s *info);
-#endif
 
   /* Stop the pulsed output and reset the timer resources */
 
@@ -312,47 +292,6 @@ extern "C"
  ****************************************************************************/
 
 int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev);
-
-/****************************************************************************
- * Name: pwm_expired
- *
- * Description:
- *   If CONFIG_PWM_PULSECOUNT is defined and the pulse count was configured
- *   to a non-zero value, then the "upper half" driver will wait for the
- *   pulse count to expire.  The sequence of expected events is as follows:
- *
- *   1. The upper half driver calls the start method, providing the lower
- *      half driver with the pulse train characteristics.  If a fixed
- *      number of pulses is required, the 'count' value will be nonzero.
- *   2. The lower half driver's start() method must verify that it can
- *      support the request pulse train (frequency, duty, AND pulse count).
- *      If it cannot, it should return an error.  If the pulse count is
- *      non-zero, it should set up the hardware for that number of pulses
- *      and return success.  NOTE:  That is CONFIG_PWM_PULSECOUNT is
- *      defined, the start() method receives an additional parameter
- *      that must be used in this callback.
- *   3. When the start() method returns success, the upper half driver
- *      will "sleep" until the pwm_expired method is called.
- *   4. When the lower half detects that the pulse count has expired
- *      (probably through an interrupt), it must call the pwm_expired
- *      interface using the handle that was previously passed to the
- *      start() method
- *
- * Input Parameters:
- *   handle - This is the handle that was provided to the lower-half
- *     start() method.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_PWM_PULSECOUNT
-void pwm_expired(FAR void *handle);
-#endif
 
 /****************************************************************************
  * Platform-Independent "Lower-Half" PWM Driver Interfaces
