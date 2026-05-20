@@ -30,6 +30,10 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += board_qencoder.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+  CSRCS += board_pwm.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src
