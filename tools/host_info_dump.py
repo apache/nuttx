@@ -475,7 +475,9 @@ def generate_header(args):
             arch_chip_key
         )[-1]
         if "esp" in arch_chip:
-            vendor_specific_module_path = os.path.abspath("./tools/espressif")
+            vendor_specific_module_path = os.path.abspath(
+                args.nuttx_path + "/tools/espressif"
+            )
             sys.path.append(os.path.abspath(vendor_specific_module_path))
             vendor_specific_module = importlib.import_module("chip_info")
             get_vendor_info = getattr(vendor_specific_module, "get_vendor_info")
@@ -525,6 +527,16 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("nuttx_path", help="NuttX source directory path.")
+    parser.add_argument(
+        "-b",
+        "--build_path",
+        help=(
+            "Build path. Required if using CMake build system.\n"
+            "If not provided, the current working directory will be used."
+        ),
+        action="store",
+        default=None,
+    )
     parser.add_argument(
         "-h",
         "--help",
@@ -584,6 +596,10 @@ if __name__ == "__main__":
         sys.exit(1)
 
     args = parser.parse_args()
-    os.chdir(args.nuttx_path)
+
+    if args.build_path is None:
+        args.build_path = args.nuttx_path
+
+    os.chdir(args.build_path)
     header = generate_header(args)
     print(header)
