@@ -5,7 +5,7 @@
 
 menu "Timer Driver Support"
 
-config ARCH_HAVE_PWM_PULSECOUNT
+config ARCH_HAVE_PULSECOUNT
 	bool
 	default n
 
@@ -24,17 +24,17 @@ config PWM
 		This selection enables building of the "upper-half" PWM driver.
 		See include/nuttx/timers/pwm.h for further PWM driver information.
 
-if PWM
-
-config PWM_PULSECOUNT
-	bool "PWM Pulse Count Support"
+config PULSECOUNT
+	bool "Pulse Count Support"
 	default n
-	depends on ARCH_HAVE_PWM_PULSECOUNT
+	depends on ARCH_HAVE_PULSECOUNT
 	---help---
 		Some hardware will support generation of a fixed number of pulses.
 		This might be used, for example to support a stepper motor.  If the
 		hardware will support a fixed pulse count, then this configuration
 		should be set to enable the capability.
+
+if PWM
 
 config PWM_OVERWRITE
 	bool "PWM Overwrite Support"

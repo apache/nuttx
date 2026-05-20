@@ -114,6 +114,7 @@
 #define _EEPIOCBASE     (0x4600) /* EEPROM driver ioctl commands */
 #define _PTPBASE        (0x4700) /* PTP ioctl commands */
 #define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
+#define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -814,6 +815,11 @@
 
 #define _DSHOTIOCVALID(c)   (_IOC_TYPE(c)==_DSHOTIOCBASE)
 #define _DSHOTIOC(nr)       _IOC(_DSHOTIOCBASE,nr)
+
+/* Pulse count driver ioctl definitions *************************************/
+
+#define _PULSECOUNTIOCVALID(c) (_IOC_TYPE(c)==_PULSECOUNTBASE)
+#define _PULSECOUNTIOC(nr)     _IOC(_PULSECOUNTBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions
