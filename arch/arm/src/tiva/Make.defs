@@ -77,6 +77,12 @@ ifeq ($(CONFIG_TIVA_PWM),y)
   CHIP_CSRCS += tiva_pwm.c
 endif
 
+ifeq ($(CONFIG_TIVA_PULSECOUNT),y)
+ifeq ($(CONFIG_PULSECOUNT),y)
+  CHIP_CSRCS += tiva_pulsecount.c
+endif
+endif
+
 ifeq ($(CONFIG_TIVA_QEI),y)
   CHIP_CSRCS += tiva_qencoder.c
 endif

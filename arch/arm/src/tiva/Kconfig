@@ -593,6 +593,18 @@ config TIVA_TIMER
 	bool
 	default n
 
+config TIVA_PWM
+	bool
+	default n
+
+config TIVA_PULSECOUNT
+	bool "PWM pulse count"
+	default n
+	select ARCH_HAVE_PULSECOUNT
+	select PULSECOUNT
+	---help---
+		Enables the Tiva PWM peripheral pulse count lower-half driver.
+
 # Peripheral Selections
 
 config TIVA_ADC0
@@ -605,6 +617,42 @@ config TIVA_ADC1
 	default n
 	depends on TIVA_HAVE_ADC0
 	select TIVA_ADC
+
+if TIVA_PULSECOUNT
+
+config TIVA_PULSECOUNT0_CHAN0
+	bool "Pulse count 0 channel 0"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN1
+	bool "Pulse count 0 channel 1"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN2
+	bool "Pulse count 0 channel 2"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN3
+	bool "Pulse count 0 channel 3"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN4
+	bool "Pulse count 0 channel 4"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN5
+	bool "Pulse count 0 channel 5"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN6
+	bool "Pulse count 0 channel 6"
+	default n
+
+config TIVA_PULSECOUNT0_CHAN7
+	bool "Pulse count 0 channel 7"
+	default n
+
+endif # TIVA_PULSECOUNT
 
 config TIVA_CAN0
 	bool "CAN0"
