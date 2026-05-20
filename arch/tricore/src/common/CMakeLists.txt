@@ -22,7 +22,6 @@
 
 set(SRCS
     tricore_allocateheap.c
-    tricore_backtrace.c
     tricore_cache.c
     tricore_checkstack.c
     tricore_createstack.c
@@ -44,6 +43,10 @@ set(SRCS
     tricore_trapcall.c
     tricore_systimer.c
     tricore_usestack.c)
+
+if(CONFIG_SCHED_BACKTRACE)
+  list(APPEND SRCS tricore_backtrace.c)
+endif()
 
 if(CONFIG_ENABLE_ALL_SIGNALS)
   list(APPEND SRCS tricore_schedulesigaction.c tricore_sigdeliver.c)

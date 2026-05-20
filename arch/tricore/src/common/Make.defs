@@ -23,7 +23,6 @@
 HEAD_CSRC += tricore_doirq.c
 
 CMN_CSRCS += tricore_allocateheap.c
-CMN_CSRCS += tricore_backtrace.c
 CMN_CSRCS += tricore_cache.c
 CMN_CSRCS += tricore_checkstack.c
 CMN_CSRCS += tricore_createstack.c
@@ -45,6 +44,10 @@ CMN_CSRCS += tricore_tcbinfo.c
 CMN_CSRCS += tricore_trapcall.c
 CMN_CSRCS += tricore_systimer.c
 CMN_CSRCS += tricore_usestack.c
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+  CMN_CSRCS += tricore_backtrace.c
+endif
 
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += tricore_schedulesigaction.c tricore_sigdeliver.c
