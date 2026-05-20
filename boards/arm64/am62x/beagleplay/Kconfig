@@ -1,0 +1,9 @@
+#
+# boards/arm64/am62x/beagleplay/Kconfig
+#
+
+if ARCH_BOARD_BEAGLEPLAY
+
+comment "BeaglePlay Configuration"
+
+endif # ARCH_BOARD_BEAGLEPLAY

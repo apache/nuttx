@@ -2501,6 +2501,24 @@ config ARCH_BOARD_PINEPHONE
 		This options selects support for NuttX on PINE64 PinePhone based
 		on Allwinner A64 SoC with ARM Cortex-A53.
 
+config ARCH_BOARD_POCKETBEAGLE2
+	bool "BeagleBoard.org PocketBeagle 2"
+	depends on ARCH_CHIP_AM62X
+	select ARCH_HAVE_LEDS
+	---help---
+		BeagleBoard.org PocketBeagle 2 based on TI AM6254 SoC.
+		Quad Cortex-A53, 512 MB DDR4, USB-UART console on UART0.
+		https://docs.beagleboard.org/boards/pocketbeagle-2/
+
+config ARCH_BOARD_BEAGLEPLAY
+	bool "BeagleBoard.org BeaglePlay"
+	depends on ARCH_CHIP_AM62X
+	select ARCH_HAVE_LEDS
+	---help---
+		BeagleBoard.org BeaglePlay based on TI AM6254 SoC.
+		Quad Cortex-A53, 2 GB LPDDR4, GbE, WiFi/BT, mikro-BUS.
+		https://docs.beagleboard.org/boards/beagleplay/
+
 config ARCH_BOARD_PINEPHONE_PRO
 	bool "PINE64 PinePhonePro"
 	depends on ARCH_CHIP_RK3399
@@ -3887,6 +3905,8 @@ config ARCH_BOARD
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
 	default "pinephonepro"                 if ARCH_BOARD_PINEPHONE_PRO
+	default "pocketbeagle2"                if ARCH_BOARD_POCKETBEAGLE2
+	default "beagleplay"                   if ARCH_BOARD_BEAGLEPLAY
 	default "nanopi_m4"                    if ARCH_BOARD_NANOPI_M4
 	default "fvp-armv8r"                   if ARCH_BOARD_FVP_ARMV8R
 	default "fvp-armv8r-aarch32"           if ARCH_BOARD_FVP_ARMV8R_AARCH32
@@ -4125,6 +4145,12 @@ source "boards/arm64/a64/pinephone/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE_PRO
 source "boards/arm64/rk3399/pinephonepro/Kconfig"
+endif
+if ARCH_BOARD_POCKETBEAGLE2
+source "boards/arm64/am62x/pocketbeagle2/Kconfig"
+endif
+if ARCH_BOARD_BEAGLEPLAY
+source "boards/arm64/am62x/beagleplay/Kconfig"
 endif
 if ARCH_BOARD_FVP_ARMV8R
 source "boards/arm64/fvp-v8r/fvp-armv8r/Kconfig"
