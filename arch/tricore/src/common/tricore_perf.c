@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/tricore/src/common/tricore_initialize.c
+ * arch/tricore/src/common/tricore_perf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,60 +25,45 @@
  ****************************************************************************/
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <nuttx/cache.h>
-#include <arch/board/board.h>
+#include <nuttx/clock.h>
 
 #include "tricore_internal.h"
 
+#ifdef CONFIG_ARCH_PERF_EVENTS
+
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-/* g_interrupt_context store irq status */
-
-volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+static unsigned long g_cpu_freq = ULONG_MAX;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_initialize
- *
- * Description:
- *   up_initialize will be called once during OS initialization after the
- *   basic OS services have been initialized.  The architecture specific
- *   details of initializing the OS will be handled here.  Such things as
- *   setting up interrupt service routines, starting the clock, and
- *   registering device drivers are some of the things that are different
- *   for each processor and hardware platform.
- *
- *   up_initialize is called after the OS initialized but before the user
- *   initialization logic has been started and before the libraries have
- *   been initialized.  OS services and driver services are available.
- *
- ****************************************************************************/
-
-void up_initialize(void)
+void up_perf_init(void *arg)
 {
-#ifdef CONFIG_ARCH_PERF_EVENTS
-  up_perf_init((void *)IFX_CFG_CPU_CLOCK_FREQUENCY);
-#endif
+  g_cpu_freq = (unsigned long)(uintptr_t)arg;
 
-  tricore_trapinit();
-
-#ifdef CONFIG_ARCH_ICACHE
-  up_enable_icache();
-#endif
-
-#ifdef CONFIG_ARCH_DCACHE
-  up_enable_dcache();
-#endif
-
-  /* Initialize the serial device driver */
-
-#ifdef USE_SERIALDRIVER
-  tricore_serialinit();
-#endif
+  IfxCpu_resetAndStartCounters(IfxCpu_CounterMode_normal);
 }
+
+unsigned long up_perf_getfreq(void)
+{
+  return g_cpu_freq;
+}
+
+clock_t up_perf_gettime(void)
+{
+  return (clock_t)IfxCpu_getClockCounter();
+}
+
+void up_perf_convert(clock_t elapsed, struct timespec *ts)
+{
+  clock_t left;
+
+  ts->tv_sec  = elapsed / g_cpu_freq;
+  left        = elapsed - ts->tv_sec * g_cpu_freq;
+  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
+}
+#endif
