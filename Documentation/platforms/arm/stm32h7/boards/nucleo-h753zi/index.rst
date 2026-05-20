@@ -4,6 +4,9 @@ ST Nucleo H753ZI
 
 .. tags:: chip:stm32, chip:stm32h7, chip:stm32h753
 
+.. figure:: nucleo-h753zi.jpg
+   :align: center
+
 This page discusses issues unique to NuttX configurations for the
 STMicro NUCLEO-H753ZI development board featuring the STM32H753ZI
 MCU. The STM32H753ZI is a 400MHz Cortex-M7 operation with 2MBytes Flash
