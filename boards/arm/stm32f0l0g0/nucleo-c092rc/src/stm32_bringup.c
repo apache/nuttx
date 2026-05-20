@@ -28,6 +28,7 @@
 
 #include <nuttx/debug.h>
 
+#include <errno.h>
 #include <sys/types.h>
 
 #ifdef CONFIG_INPUT_BUTTONS
@@ -40,6 +41,10 @@
 
 #ifdef CONFIG_STM32F0L0G0_IWDG
 #  include <stm32_wdg.h>
+#endif
+
+#ifdef CONFIG_PULSECOUNT
+#  include "stm32_pulsecount.h"
 #endif
 
 #ifdef CONFIG_SENSORS_QENCODER
@@ -75,12 +80,33 @@
 
 int stm32_bringup(void)
 {
+#ifdef CONFIG_PULSECOUNT
+  struct pulsecount_lowerhalf_s *pulsecount;
+#endif
   int ret;
 
 #ifdef CONFIG_STM32F0L0G0_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);
+#endif
+
+#ifdef CONFIG_PULSECOUNT
+  /* Initialize and register the pulse count driver. */
+
+  pulsecount = stm32_pulsecountinitialize(1);
+  if (pulsecount == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_pulsecountinitialize failed\n");
+      return -ENODEV;
+    }
+
+  ret = pulsecount_register("/dev/pulsecount0", pulsecount);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: pulsecount_register failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #if !defined(CONFIG_ARCH_LEDS) && defined(CONFIG_USERLED_LOWER)

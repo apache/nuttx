@@ -187,6 +187,12 @@
 
 #define GPIO_TIM14_CH1OUT   (GPIO_TIM14_CH1OUT_2|GPIO_SPEED_HIGH)
 
+/* Pulse count on TIM1:
+ *   TIM1_CH1OUT - PA8 (D7)
+ */
+
+#define GPIO_TIM1_CH1OUT    (GPIO_TIM1_CH1OUT_3|GPIO_SPEED_HIGH)
+
 /* DMA channels *************************************************************/
 
 /* ADC */
