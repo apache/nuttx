@@ -1,0 +1,12 @@
+#
+# arch/arm64/src/am62x/Kconfig
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_AM62X
+
+comment "AM62x peripheral selection is provided by board defconfig for now."
+
+endif # ARCH_CHIP_AM62X

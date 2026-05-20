@@ -1,0 +1,39 @@
+############################################################################
+# arch/arm64/src/am62x/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Pull in arch/arm64/src/common/Make.defs which contributes the shared
+# AArch64 C and assembly sources (head.S, mmu, gic, arch_timer, etc.)
+
+include common/Make.defs
+
+# AM62x SoC-specific C sources (always compiled)
+
+CHIP_CSRCS  = am62x_boot.c
+CHIP_CSRCS += am62x_16550serial.c
+
+# Early UART assembly (only when CONFIG_ARCH_EARLY_PRINT is set, which
+# is selected automatically when CONFIG_ARCH_HAVE_LOWPUTC is enabled
+# and the common arch layer needs early console output).
+
+ifeq ($(CONFIG_ARCH_EARLY_PRINT),y)
+CHIP_ASRCS  = am62x_lowputc.S
+endif
