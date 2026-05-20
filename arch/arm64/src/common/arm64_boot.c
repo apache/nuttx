@@ -152,6 +152,17 @@ void arm64_boot_el2_init(void)
 
   write_sysreg(reg, hcr_el2);
 
+#if CONFIG_ARM64_GIC_VERSION > 2
+  /* Enable EL1 access to the GICv3 system register interface. */
+
+  reg = read_sysreg(ICC_SRE_EL2);
+  reg |= (ICC_SRE_ELX_DFB_BIT |   /* Disable FIQ bypass */
+          ICC_SRE_ELX_DIB_BIT |   /* Disable IRQ bypass */
+          ICC_SRE_ELX_SRE_BIT |   /* System register interface is used */
+          ICC_SRE_ELX_EN_BIT);    /* Enable lower EL access */
+  write_sysreg(reg, ICC_SRE_EL2);
+#endif
+
   reg = 0U;                   /* RES0 */
   reg |= CPTR_EL2_RES1;       /* RES1 */
   reg &= ~(CPTR_TFP_BIT |     /* Do not trap SVE, SIMD and FP */
