@@ -77,6 +77,12 @@ ifeq ($(CONFIG_STM32F0L0G0_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_PULSECOUNT),y)
+ifeq ($(CONFIG_STM32F0L0G0_TIM1_PULSECOUNT),y)
+CHIP_CSRCS += stm32_pulsecount.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32F0L0G0_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
