@@ -27,7 +27,11 @@ if(CONFIG_ARCH_BOARD_COMMON)
   endif()
 
   if(CONFIG_SENSORS_QENCODER)
-    list(APPEND SRCS stm32_qencoder.c)
+    list(APPEND SRCS board_qencoder.c)
+  endif()
+
+  if(CONFIG_PWM)
+    list(APPEND SRCS board_pwm.c)
   endif()
 
 endif()
