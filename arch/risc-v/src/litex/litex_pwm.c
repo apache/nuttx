@@ -43,10 +43,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_PULSECOUNT
-#  error PWM pulsecount not supported for Litex.
-#endif
-
 #if CONFIG_PWM_NCHANNELS > 1
 #  error PWM multiple channels not supported for Litex.
 #endif

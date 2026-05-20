@@ -215,7 +215,6 @@ config STM32U5_SPI
 config STM32U5_PWM
 	bool
 	default n
-	select ARCH_HAVE_PWM_PULSECOUNT
 
 config STM32U5_USART
 	bool

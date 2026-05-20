@@ -499,7 +499,6 @@ config EFM32_TIMER0_PWM
 	bool "TIMER0 PWM"
 	default n
 	depends on EFM32_TIMER0
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 0 for use by PWM
 
@@ -527,7 +526,6 @@ config EFM32_TIMER1_PWM
 	bool "TIMER1 PWM"
 	default n
 	depends on EFM32_TIMER1
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 0 for use by PWM
 
@@ -555,7 +553,6 @@ config EFM32_TIMER2_PWM
 	bool "TIMER2 PWM"
 	default n
 	depends on EFM32_TIMER2
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 0 for use by PWM
 
@@ -583,7 +580,6 @@ config EFM32_TIMER3_PWM
 	bool "TIMER3 PWM"
 	default n
 	depends on EFM32_TIMER3
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 0 for use by PWM
 

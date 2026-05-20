@@ -782,7 +782,6 @@ config GD32F4_TIMER0_PWM
 	bool "TIMER0 PWM"
 	default n
 	depends on GD32F4_TIMER0
-	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 0 for use by PWM
 

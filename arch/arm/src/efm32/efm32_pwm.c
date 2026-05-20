@@ -81,19 +81,10 @@ struct efm32_pwmtimer_s
   uint8_t                 timid;   /* Timer ID {1,...,14} */
   uint8_t                 channel; /* Timer output channel: {1,..4} */
   uint8_t                 pinloc;  /* Timer output channel pin location */
-#ifdef CONFIG_PWM_PULSECOUNT
-  uint8_t                 irq;     /* Timer update IRQ */
-  uint8_t                 prev;    /* The previous value of the RCR (pre-loaded) */
-  uint8_t                 curr;    /* The current value of the RCR (pre-loaded) */
-  uint32_t                count;   /* Remaining pulse count */
-#endif
   uint32_t                base;    /* The base address of the timer */
   uint32_t                pincfg;  /* Output pin configuration */
   uint32_t                pclk;    /* The frequency of the peripheral clock
                                     * that drives the timer module. */
-#ifdef CONFIG_PWM_PULSECOUNT
-  void                   *handle;  /* Handle used for upper-half callback */
-#endif
 };
 
 /****************************************************************************
@@ -117,29 +108,13 @@ static void pwm_dumpregs(struct efm32_pwmtimer_s *priv, const char *msg);
 static int pwm_timer(struct efm32_pwmtimer_s *priv,
                      const struct pwm_info_s *info);
 
-#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_EFM32_TIMER0_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER1_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER2_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER3_PWM) \
-                                       )
-static int pwm_interrupt(int irq, void *context, void *arg);
-static uint8_t pwm_pulsecount(uint32_t count);
-
-#endif
-
 /* PWM driver methods */
 
 static int pwm_setup(struct pwm_lowerhalf_s *dev);
 static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
 
-#ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(struct pwm_lowerhalf_s *dev,
-                     const struct pwm_info_s *info,
-                     void *handle);
-#else
 static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info);
-#endif
 
 static int pwm_stop(struct pwm_lowerhalf_s *dev);
 static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
@@ -168,9 +143,6 @@ static struct efm32_pwmtimer_s g_pwm0dev =
   .ops        = &g_pwmops,
   .timid      = 0,
   .channel    = CONFIG_EFM32_TIMER0_CHANNEL,
-#ifdef CONFIG_PWM_PULSECOUNT
-  .irq        = EFM32_IRQ_TIMER0,
-#endif
   .base       = EFM32_TIMER0_BASE,
   .pincfg     = BOARD_PWM_TIMER0_PINCFG,
   .pinloc     = BOARD_PWM_TIMER0_PINLOC,
@@ -184,9 +156,6 @@ static struct efm32_pwmtimer_s g_pwm1dev =
   .ops        = &g_pwmops,
   .timid      = 0,
   .channel    = CONFIG_EFM32_TIMER1_CHANNEL,
-#ifdef CONFIG_PWM_PULSECOUNT
-  .irq        = EFM32_IRQ_TIMER1,
-#endif
   .base       = EFM32_TIMER1_BASE,
   .pincfg     = BOARD_PWM_TIMER1_PINCFG,
   .pinloc     = BOARD_PWM_TIMER1_PINLOC,
@@ -200,9 +169,6 @@ static struct efm32_pwmtimer_s g_pwm2dev =
   .ops        = &g_pwmops,
   .timid      = 0,
   .channel    = CONFIG_EFM32_TIMER2_CHANNEL,
-#ifdef CONFIG_PWM_PULSECOUNT
-  .irq        = EFM32_IRQ_TIMER2,
-#endif
   .base       = EFM32_TIMER2_BASE,
   .pincfg     = BOARD_PWM_TIMER2_PINCFG,
   .pinloc     = BOARD_PWM_TIMER2_PINLOC,
@@ -216,9 +182,6 @@ static struct efm32_pwmtimer_s g_pwm3dev =
   .ops        = &g_pwmops,
   .timid      = 0,
   .channel    = CONFIG_EFM32_TIMER3_CHANNEL,
-#ifdef CONFIG_PWM_PULSECOUNT
-  .irq        = EFM32_IRQ_TIMER3,
-#endif
   .base       = EFM32_TIMER3_BASE,
   .pincfg     = BOARD_PWM_TIMER3_PINCFG,
   .pinloc     = BOARD_PWM_TIMER3_PINLOC,
@@ -357,23 +320,13 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
 
   DEBUGASSERT(priv != NULL && info != NULL);
 
-#ifdef CONFIG_PWM_PULSECOUNT
-  pwminfo("TIMER%d channel: %d frequency: %d duty: %08x count: %d\n",
-          priv->timid, priv->channel, info->frequency,
-          info->channels[0].duty, info->channels[0].count);
-#else
   pwminfo("TIMER%d channel: %d frequency: %d duty: %08x\n",
           priv->timid, priv->channel, info->frequency,
           info->channels[0].duty);
-#endif
   DEBUGASSERT(info->frequency > 0 && info->channels[0].duty >= 0 &&
               info->channels[0].duty < uitoub16(100));
 
   efm32_timer_reset(priv->base);
-
-#ifdef CONFIG_PWM_PULSECOUNT
-#error "Not implemented ! Sorry"
-#endif
 
   if (efm32_timer_set_freq(priv->base, priv->pclk, info->frequency) < 0)
     {
@@ -436,141 +389,6 @@ static int pwm_timer(struct efm32_pwmtimer_s *priv,
  *   Zero on success; a negated errno value on failure
  *
  ****************************************************************************/
-
-#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_EFM32_TIMER0_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER1_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER2_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER3_PWM) \
-                                       )
-#warning "not yet implemented"
-static int pwm_interrupt(int irq, void *context, void *arg)
-{
-  /* TODO pwm_interrupt */
-#if 0
-  struct efm32_pwmtimer_s *priv = (struct efm32_pwmtimer_s *)arg;
-  uint32_t regval;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Verify that this is an update interrupt.  Nothing else is expected. */
-
-  regval = pwm_getreg(priv, STM32_ATIM_SR_OFFSET);
-  DEBUGASSERT((regval & ATIM_SR_UIF) != 0);
-
-  /* Clear the UIF interrupt bit */
-
-  pwm_putreg(priv, STM32_ATIM_SR_OFFSET, regval & ~ATIM_SR_UIF);
-
-  /* Calculate the new count by subtracting the number of pulses
-   * since the last interrupt.
-   */
-
-  if (priv->count <= priv->prev)
-    {
-      /* We are finished.  Turn off the mast output to stop the output as
-       * quickly as possible.
-       */
-
-      regval  = pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET);
-      regval &= ~ATIM_BDTR_MOE;
-      pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
-
-      /* Disable first interrupts, stop and reset the timer */
-
-      pwm_stop((struct pwm_lowerhalf_s *)priv);
-
-      /* Then perform the callback into the upper half driver */
-
-      pwm_expired(priv->handle);
-
-      priv->handle = NULL;
-      priv->count  = 0;
-      priv->prev   = 0;
-      priv->curr   = 0;
-    }
-  else
-    {
-      /* Decrement the count of pulses remaining using the number of
-       * pulses generated since the last interrupt.
-       */
-
-      priv->count -= priv->prev;
-
-      /* Set up the next RCR.  Set 'prev' to the value of the RCR that
-       * was loaded when the update occurred (just before this interrupt)
-       * and set 'curr' to the current value of the RCR register (which
-       * will bet loaded on the next update event).
-       */
-
-      priv->prev = priv->curr;
-      priv->curr = pwm_pulsecount(priv->count - priv->prev);
-      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, (uint32_t)priv->curr - 1);
-    }
-
-  /* Now all of the time critical stuff is done so we can do some debug
-   * output
-   */
-
-  pwminfo("Update interrupt SR: %04x prev: %d curr: %d count: %d\n",
-          regval, priv->prev, priv->curr, priv->count);
-
-  return OK;
-#else
-  return -ENODEV;
-#endif
-}
-#endif
-
-/****************************************************************************
- * Name: pwm_pulsecount
- *
- * Description:
- *   Pick an optimal pulse count to program the RCR.
- *
- * Input Parameters:
- *   count - The total count remaining
- *
- * Returned Value:
- *   The recommended pulse count
- *
- ****************************************************************************/
-
-#if defined(CONFIG_PWM_PULSECOUNT) && (defined(CONFIG_EFM32_TIMER0_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER1_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER2_PWM) || \
-                                       defined(CONFIG_EFM32_TIMER3_PWM) \
-                                       )
-static uint8_t pwm_pulsecount(uint32_t count)
-{
-  /* The the remaining pulse count is less than or equal to the maximum, the
-   * just return the count.
-   */
-
-  if (count <= ATIM_RCR_REP_MAX)
-    {
-      return count;
-    }
-
-  /* Otherwise, we have to be careful.  We do not want a small number of
-   * counts at the end because we might have trouble responding fast enough.
-   * If the remaining count is less than 150% of the maximum, then return
-   * half of the maximum.  In this case the final sequence will be between 64
-   * and 128.
-   */
-
-  else if (count < (3 * ATIM_RCR_REP_MAX / 2))
-    {
-      return (ATIM_RCR_REP_MAX + 1) >> 1;
-    }
-
-  /* Otherwise, return the maximum.  The final count will be 64 or more */
-
-  else
-    {
-      return ATIM_RCR_REP_MAX;
-    }
-}
-#endif
 
 /****************************************************************************
  * Name: pwm_setup
@@ -684,29 +502,12 @@ static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PWM_PULSECOUNT
-static int pwm_start(struct pwm_lowerhalf_s *dev,
-                     const struct pwm_info_s *info,
-                     void *handle)
-{
-  struct efm32_pwmtimer_s *priv = (struct efm32_pwmtimer_s *)dev;
-
-  /* Save the handle */
-
-  priv->handle = handle;
-
-  /* Start the time */
-
-  return pwm_timer(priv, info);
-}
-#else
 static int pwm_start(struct pwm_lowerhalf_s *dev,
                      const struct pwm_info_s *info)
 {
   struct efm32_pwmtimer_s *priv = (struct efm32_pwmtimer_s *)dev;
   return pwm_timer(priv, info);
 }
-#endif
 
 /****************************************************************************
  * Name: pwm_stop
@@ -838,11 +639,6 @@ struct pwm_lowerhalf_s *efm32_pwminitialize(int timer)
     }
 
   /* Attach but disable the timer update interrupt */
-
-#ifdef CONFIG_PWM_PULSECOUNT
-  irq_attach(lower->irq, pwm_interrupt, lower);
-  up_disable_irq(lower->irq);
-#endif
 
   return (struct pwm_lowerhalf_s *)lower;
 }
