@@ -102,11 +102,14 @@ static inline_function void syslog_rpmsg_dump(FAR const void *buffer)
   uint32_t tail = header->tail;
   uint32_t size = header->size;
 
+  _alert("Dump syslog rpmsg header:%p head:%" PRIu32 " tail:%" PRIu32
+         " size:%" PRIu32 "\n", header, head, tail, size);
+
   if (head > tail)
     {
       _alert("%.*s\n", (int)(head - tail), &header->buffer[tail]);
     }
-  else if (head < tail)
+  else
     {
       _alert("%.*s%.*s\n", (int)(size - tail), &header->buffer[tail],
              (int)head, &header->buffer[0]);
