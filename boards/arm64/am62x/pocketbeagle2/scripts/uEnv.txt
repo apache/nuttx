@@ -1,0 +1,10 @@
+# uEnv.txt -- NuttX boot script for PocketBeagle 2
+#
+# Copy this file and nuttx.bin to the root of a FAT32-formatted microSD card.
+# U-Boot reads uEnv.txt automatically on boot; no manual commands are needed.
+#
+# Load address 0x82000000 matches the NuttX linker script origin and
+# CONFIG_LOAD_BASE in arch/arm64/include/am62x/chip.h.
+# 0x82000000 avoids U-Boot's reserved region at the DDR base.
+
+uenvcmd=fatload mmc 1:1 0x82000000 nuttx.bin; go 0x82000000
