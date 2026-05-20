@@ -25,7 +25,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/arch.h>
+
 #include "sched/sched.h"
 #include "tricore_internal.h"
 
@@ -42,29 +44,34 @@
  ****************************************************************************/
 
 nosanitize_address
-static int backtrace(uintptr_t pcxi, void **buffer, int size, int *skip)
+static int backtrace(uintptr_t pcxi, void **buffer,
+                     int size, int *skip)
 {
+  uintptr_t *csa;
   int i = 0;
 
-  for (; ((pcxi & FCX_FREE) != 0U) && (i < size); )
+  for (; i < size && (pcxi & FCX_FREE) != 0; )
     {
-      uintptr_t *csa;
-
       csa = tricore_csa2addr(pcxi);
       if (csa == NULL)
         {
           break;
         }
 
-      if ((pcxi & PCXI_UL) != 0U)
+      if ((pcxi & PCXI_UL) != 0)
         {
+          if (csa[REG_UA11] == 0)
+            {
+              break;
+            }
+
           if ((*skip)-- <= 0)
             {
               buffer[i++] = (void *)csa[REG_UA11];
             }
         }
 
-      pcxi = csa[0];
+      pcxi = csa[REG_UPCXI];
     }
 
   return i;
@@ -107,10 +114,11 @@ static int backtrace(uintptr_t pcxi, void **buffer, int size, int *skip)
  *
  ****************************************************************************/
 
-int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
+int up_backtrace(struct tcb_s *tcb,
+                 void **buffer, int size, int skip)
 {
   struct tcb_s *rtcb = running_task();
-  int ret;
+  int ret = 0;
 
   if (size <= 0 || !buffer)
     {
@@ -119,13 +127,12 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
 
   if (tcb == NULL || tcb == rtcb)
     {
-      ret = backtrace((uintptr_t)__mfcr(CPU_PCXI),
-                      buffer, size, &skip);
+      ret = backtrace(__mfcr(CPU_PCXI), buffer, size, &skip);
     }
   else
     {
-      ret = backtrace(tricore_addr2csa(tcb->xcp.regs),
-                      buffer, size, &skip);
+      uintptr_t *regs = tcb->xcp.regs;
+      ret = backtrace(regs[REG_LPCXI], buffer, size, &skip);
     }
 
   return ret;
