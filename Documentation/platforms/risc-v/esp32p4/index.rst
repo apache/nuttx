@@ -379,6 +379,7 @@ LP UART            Yes
 LP GPIO            No
 LP Timers          No
 LP ADC             Yes
+LP Mailbox         Yes
 Temperature        Yes     Internal temperature sensor
 Touch Sensor       Yes
 eFuse              Yes     Virtual eFuses supported
@@ -703,6 +704,14 @@ The available wakeup sources are:
 Accessing the ULP LP-Core Program Variables
 -------------------------------------------
 
+The HP core can exchange data with a running ULP LP-Core application in two ways:
+
+* **Global symbols** — read and write ULP variables exported to shared memory through ``/dev/ulp``.
+* **LP Mailbox** — send and receive messages through the hardware mailbox using ``/dev/lp_mailbox``.
+
+Global Symbols
+^^^^^^^^^^^^^^
+
 Global symbols defined in the ULP application are available to the HP core through a shared memory region. To read or write ULP variables,
 direct reading/writing to such memory positions are not allowed. POSIX calls are needed instead. To access the ULP variable through the HP core,
 consider that its name is defined by the ULP application prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) + the ULP application variable.
@@ -744,6 +753,136 @@ Here is a snippet for reading and writing to a ULP variable named ``var_test`` (
 
       return OK;
     }
+
+LP Mailbox
+^^^^^^^^^^
+
+The ESP32-P4 LP Mailbox provides inter-core communication between the LP and HP cores.
+It exposes sixteen 32-bit message registers that both cores can read and write.
+
+To enable peripheral ``CONFIG_ESPRESSIF_LP_MAILBOX`` option needed to register the driver at boot.
+In NuttX, the LP Mailbox is exposed as ``/dev/lp_mailbox``. The HP core uses ``read()`` and
+``write()`` to exchange byte-sized messages or ``ioctl(fd, FIOC_NOTIFY, handler)``
+for interrupt callback when a message arrives to communicate with the LP core.
+On the LP side, use `ulp_lp_core_mailbox.h <https://github.com/espressif/esp-hal-3rdparty/blob/e8d8638febf5310bf5b8f9bd04cf7fab9e9a4cb0/components/ulp/lp_core/lp_core/include/ulp_lp_core_mailbox.h>`__
+API calls (e.g. ``lp_core_mailbox_receive()`` / ``lp_core_mailbox_send()``).
+
+The following example loads a ULP binary, then exchanges messages with the LP core through
+the mailbox. The LP application receives a byte, increments it, and sends it back; the HP
+application verifies the reply.
+
+- Tree view:
+
+.. code-block:: text
+
+   nuttxspace/
+   ├── nuttx/
+   └── apps/
+   └── ulp_mailbox/
+       └── Makefile
+       └── Kconfig
+       └── ulp_mailbox.c
+       └── ulp/
+           └── Makefile
+           └── ulp_main.c
+
+
+- Contents in Makefile:
+
+.. code-block:: console
+
+   include $(APPDIR)/Make.defs
+
+   PROGNAME  = $(CONFIG_EXAMPLES_ULP_MAILBOX_PROGNAME)
+   PRIORITY  = $(CONFIG_EXAMPLES_ULP_MAILBOX_PRIORITY)
+   STACKSIZE = $(CONFIG_EXAMPLES_ULP_MAILBOX_STACKSIZE)
+   MODULE    = $(CONFIG_EXAMPLES_ULP_MAILBOX)
+
+   MAINSRC = ulp_mailbox.c
+
+   include $(APPDIR)/Application.mk
+
+   include ulp/Makefile
+
+- Contents in Kconfig:
+
+.. code-block:: console
+
+   config EXAMPLES_ULP_MAILBOX
+     bool "ULP Mailbox Example"
+     default n
+
+- Contents in ulp_mailbox.c:
+
+.. code-block:: C
+
+   #include <nuttx/config.h>
+   #include <fcntl.h>
+   #include <stdio.h>
+   #include <unistd.h>
+
+   #include "ulp/ulp/ulp_code.h"
+
+   int main(int argc, char *argv[])
+   {
+     int fd;
+     int mailbox;
+     uint8_t data = 0;
+
+     fd = open("/dev/ulp", O_WRONLY);
+     write(fd, ulp_mailbox_bin, ulp_mailbox_bin_len);
+
+     mailbox = open("/dev/lp_mailbox", O_RDWR);
+
+     write(mailbox, &data, 1);
+     read(mailbox, &data, 1);
+
+     printf("LP mailbox reply: %u\n", data);
+
+     return 0;
+   }
+
+- Contents in ulp/Makefile:
+
+.. code-block:: console
+
+  ULP_APP_NAME = ulp_mailbox
+  ULP_APP_FOLDER = $(APPDIR)$(DELIM)ulp_mailbox$(DELIM)ulp
+  ULP_APP_C_SRCS = ulp_main.c
+
+  include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)ulp_makefile.mk
+
+- Contents in ulp_main.c:
+
+.. code-block:: C
+
+   #include <stdint.h>
+   #include "ulp_lp_core_mailbox.h"
+
+   static lp_mailbox_t mailbox;
+
+   int main(void)
+   {
+     lp_message_t message;
+
+     lp_core_mailbox_init(&mailbox, NULL);
+     if (lp_core_mailbox_receive(mailbox, &message, UINT32_MAX) != ESP_OK)
+      {
+        return -1;
+      }
+
+     lp_core_mailbox_send(mailbox, message + 1, UINT32_MAX);
+     return 0;
+   }
+
+- Command to build::
+
+    make distclean
+    ./tools/configure.sh esp32p4-function-ev-board:nsh
+    kconfig-tweak -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak -e CONFIG_EXAMPLES_ULP_MAILBOX
+    make olddefconfig
+    make -j
 
 Debugging ULP LP-Core
 ---------------------
