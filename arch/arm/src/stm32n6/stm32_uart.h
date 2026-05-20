@@ -40,20 +40,20 @@
 
 /* Sanity checks */
 
-#if !defined(CONFIG_STM32N6_USART1)
-#  undef CONFIG_STM32N6_USART1_SERIALDRIVER
-#  undef CONFIG_STM32N6_USART1_1WIREDRIVER
+#if !defined(CONFIG_STM32_USART1)
+#  undef CONFIG_STM32_USART1_SERIALDRIVER
+#  undef CONFIG_STM32_USART1_1WIREDRIVER
 #endif
 
 /* Is there a USART enabled? */
 
-#if defined(CONFIG_STM32N6_USART1)
+#if defined(CONFIG_STM32_USART1)
 #  define HAVE_UART 1
 #endif
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32N6_USART1_SERIALDRIVER)
+#if defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1_SERIALDRIVER)
 #  define CONSOLE_UART 1
 #  define HAVE_CONSOLE 1
 #else
