@@ -700,12 +700,7 @@ static inline_function void hrtimer_process(uint64_t now)
 
   /* Schedule the next timer expiration */
 
-  if (expired != now)
-    {
-      /* Start timer for the next earliest expiration */
-
-      hrtimer_reprogram(expired);
-    }
+  hrtimer_reprogram(expired);
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
 
