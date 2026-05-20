@@ -1004,13 +1004,12 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
        */
 
       priv->rproc.rsc_table = NULL;
-      syslog(LOG_EMERG, "Stop by remote core: %s\n",
-             RPTUN_GET_CPUNAME(priv->dev));
+      _emerg("Stop by remote core: %s\n", RPTUN_GET_CPUNAME(priv->dev));
       work_queue(HPWORK, &priv->work, rptun_stop_work, priv, 0);
     }
   else if(status != 0u)
     {
-      syslog(LOG_EMERG, "FATAL: Reset by remote core: %s reason: %u\n",
+      _emerg("FATAL: Reset by remote core: %s reason: %u\n",
              RPTUN_GET_CPUNAME(priv->dev), RPTUN_REASON_GET(status));
       if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_POWEROFF))
         {
@@ -1303,10 +1302,10 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 
   if (priv->dev->ops->reset)
     {
-      syslog(LOG_EMERG, "Rptun driver reset remote %s reason: %lu\n",
+      _emerg("Rptun driver reset remote %s reason: %lu\n",
              RPTUN_GET_CPUNAME(priv->dev), val);
       ret = priv->dev->ops->reset(priv->dev, val);
-      syslog(LOG_EMERG, "Rptun driver reset remote %s ret %d\n",
+      _emerg("Rptun driver reset remote %s ret %d\n",
              RPTUN_GET_CPUNAME(priv->dev), ret);
     }
 
@@ -1328,6 +1327,12 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
               break;
             }
 
+          if (timeout % 1000 == 0)
+            {
+              _emerg("Waiting %s reset, timeout left %d ms\n",
+                     RPTUN_GET_CPUNAME(priv->dev), timeout);
+            }
+
           if (up_interrupt_context())
             {
               up_udelay(1000);
@@ -1347,6 +1352,7 @@ static void rptun_dev_dump(FAR struct rptun_priv_s *priv)
 {
   if (priv->trace_va != NULL)
     {
+      _emerg("Dump %s's trace\n", RPTUN_GET_CPUNAME(priv->dev));
       syslog_rpmsg_dump(priv->trace_va);
     }
 }
