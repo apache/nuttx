@@ -200,6 +200,10 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
+if(CONFIG_PULSECOUNT)
+  list(APPEND SRCS stm32_pulsecount.c)
+endif()
+
 if(CONFIG_STM32_CAP)
   list(APPEND SRCS stm32_capture_lowerhalf.c)
 endif()

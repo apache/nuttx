@@ -184,6 +184,10 @@ ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
+ifeq ($(CONFIG_STM32_PULSECOUNT),y)
+CHIP_CSRCS += stm32_pulsecount.c
+endif
+
 ifeq ($(CONFIG_STM32_CAP),y)
 CHIP_CSRCS += stm32_capture_lowerhalf.c
 endif
