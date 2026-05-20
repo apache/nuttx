@@ -336,7 +336,7 @@ else ifeq ($(CONFIG_HOST_MACOS)$(CONFIG_HOST_ARM64),)
   # which works correctly on aarch64 hosts.
   ARCHCFLAGS += -no-pie
   ARCHPICFLAGS += -no-pie
-  LDFLAGS += -Wl,-no-pie
+  LDFLAGS += -no-pie
 endif
 
 ifeq ($(CONFIG_HOST_LINUX),y)
