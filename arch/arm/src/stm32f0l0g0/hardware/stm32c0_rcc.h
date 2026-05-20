@@ -259,10 +259,10 @@
 #define RCC_APB2RSTR_SPI1RST        (1 << 12) /* Bit 12: SPI1 reset */
                                               /* Bit 13: Reserved */
 #define RCC_APB2RSTR_USART1RST      (1 << 14) /* Bit 14: USART1 reset */
-#define RCC_APB2RSTR_TIM14RST       (1 << 14) /* Bit 14: TIM14 reset */
-#define RCC_APB2RSTR_TIM15RST       (1 << 15) /* Bit 15: TIM15 reset */
-#define RCC_APB2RSTR_TIM16RST       (1 << 16) /* Bit 16: TIM16 reset */
-#define RCC_APB2RSTR_TIM17RST       (1 << 17) /* Bit 17: TIM17 reset */
+#define RCC_APB2RSTR_TIM14RST       (1 << 15) /* Bit 15: TIM14 reset */
+#define RCC_APB2RSTR_TIM15RST       (1 << 16) /* Bit 16: TIM15 reset */
+#define RCC_APB2RSTR_TIM16RST       (1 << 17) /* Bit 17: TIM16 reset */
+#define RCC_APB2RSTR_TIM17RST       (1 << 18) /* Bit 18: TIM17 reset */
                                               /* Bit 19: Reserved */
 #define RCC_APB2RSTR_ADC1RST        (1 << 20) /* Bit 20: ADC reset */
                                               /* Bits 21-31: Reserved */
@@ -312,10 +312,10 @@
 #define RCC_APB2ENR_SPI1EN          (1 << 12) /* Bit 12: SPI1 clock enable */
                                               /* Bit 13: Reserved */
 #define RCC_APB2ENR_USART1EN        (1 << 14) /* Bit 14: USART1 clock enable */
-#define RCC_APB2ENR_TIM14EN         (1 << 14) /* Bit 14: TIM14 clock enable */
-#define RCC_APB2ENR_TIM15EN         (1 << 15) /* Bit 15: TIM15 clock enable */
-#define RCC_APB2ENR_TIM16EN         (1 << 16) /* Bit 16: TIM16 clock enable */
-#define RCC_APB2ENR_TIM17EN         (1 << 17) /* Bit 17: TIM17 clock enable */
+#define RCC_APB2ENR_TIM14EN         (1 << 15) /* Bit 15: TIM14 clock enable */
+#define RCC_APB2ENR_TIM15EN         (1 << 16) /* Bit 16: TIM15 clock enable */
+#define RCC_APB2ENR_TIM16EN         (1 << 17) /* Bit 17: TIM16 clock enable */
+#define RCC_APB2ENR_TIM17EN         (1 << 18) /* Bit 18: TIM17 clock enable */
                                               /* Bit 19: Reserved */
 #define RCC_APB2ENR_ADC1EN          (1 << 20) /* Bit 20: ADC clock enable */
                                               /* Bits 21-31: Reserved */
