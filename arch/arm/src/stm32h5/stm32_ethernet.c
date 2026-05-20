@@ -174,8 +174,6 @@
 #  warning "CONFIG_STM32H5_ETH_PTP is not yet supported"
 #endif
 
-#undef CONFIG_STM32H5_ETH_HWCHECKSUM
-
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
  * be an even multiple of 4, 8, or 16 bytes (depending on buswidth).  We
@@ -497,12 +495,6 @@
 
 #define MTLRXQOMR_SET_MASK                                      \
   ((0x7 << ETH_MTLRXQOMR_RQS_SHIFT) | ETH_MTLRXQOMR_RTC_64)
-
-#ifdef CONFIG_STM32H5_ETH_HWCHECKSUM
-/* TODO */
-
-#  error CONFIG_STM32H5_ETH_HWCHECKSUM not supported
-#endif
 
 /* Clear the DMAMR bits that will be setup during MAC initialization (or that
  * are cleared unconditionally).  Per the reference manual, all reserved bits
@@ -1116,9 +1108,16 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
 
       ninfo("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
-      /* Set the first segment bit in the first TX descriptor */
+      /* Set the first segment bit in the first TX descriptor.
+       * If hardware checksum is enabled, IP header + payload +
+       * pseudo-header checksum will be computed.
+       */
 
+#ifdef CONFIG_STM32H5_ETH_HWCHECKSUM
+      txdesc->des3 = ETH_TDES3_RD_FD | ETH_TDES3_RD_CIC_ALL;
+#else
       txdesc->des3 = ETH_TDES3_RD_FD;
+#endif
 
       /* Set up all but the last TX descriptor */
 
@@ -1204,10 +1203,16 @@ static int stm32_transmit(struct stm32_ethmac_s *priv)
       /* The single descriptor is both the first and last segment. */
 
       /* Set OWN bit of the TX descriptor des3.  This gives the buffer to
-       * Ethernet DMA
+       * Ethernet DMA. If hardware checksum is enabled, IP header + payload +
+       * pseudo-header checksum will be computed.
        */
 
+#ifdef CONFIG_STM32H5_ETH_HWCHECKSUM
+      txdesc->des3 = (ETH_TDES3_RD_OWN | ETH_TDES3_RD_LD | ETH_TDES3_RD_FD |
+                      ETH_TDES3_RD_CIC_ALL);
+#else
       txdesc->des3 = (ETH_TDES3_RD_OWN | ETH_TDES3_RD_LD | ETH_TDES3_RD_FD);
+#endif
 
       /* Flush the contents of the modified TX descriptor into physical
        * memory.
@@ -1702,6 +1707,7 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
 
           else
             {
+              bool err = ((rxdesc->des3 & ETH_RDES3_WB_ES) != 0);
               priv->segments++;
 
               /* Check if there is only one segment in the frame */
@@ -1718,9 +1724,27 @@ static int stm32_recvframe(struct stm32_ethmac_s *priv)
               ninfo("rxhead: %p rxcurr: %p segments: %d\n",
                     priv->rxhead, priv->rxcurr, priv->segments);
 
-              /* Check if any errors are reported in the frame */
+#ifdef CONFIG_STM32H5_ETH_HWCHECKSUM
+              /* Check if any errors are reported in the frame.
+               * If hardware checksum is enabled, check if:
+               * - RDES1 is valid
+               * - IP checksum was not bypassed
+               * - IP hdr checksum error or IP payload checksum error is set
+               *
+               * By the previous checks the Last Descriptor is set.
+               * RS1V is valid.
+               */
 
-              if ((rxdesc->des3 & ETH_RDES3_WB_ES) == 0)
+              if (!err && (rxdesc->des3 & ETH_RDES3_WB_RS1V) != 0 &&
+                  (rxdesc->des1 & ETH_RDES1_WB_IPCB) == 0 &&
+                  (rxdesc->des1 & (ETH_RDES1_WB_IPHE |
+                                   ETH_RDES1_WB_IPCE)) != 0)
+                {
+                  err = true;
+                }
+#endif
+
+              if (!err)
                 {
                   struct net_driver_s *dev = &priv->dev;
 
