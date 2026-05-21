@@ -215,6 +215,7 @@ static int netprocfs_linklayer(FAR struct netprocfs_file_s *netfile)
       case NET_LL_IEEE80211:
         {
           char hwaddr[20];
+
           len += snprintf(&netfile->line[len], NET_LINELEN - len,
                           "%s\tLink encap:Ethernet HWaddr %s",
                           dev->d_ifname,
@@ -300,6 +301,13 @@ static int netprocfs_inet4addresses(FAR struct netprocfs_file_s *netfile)
     {
       len += snprintf(&netfile->line[len], NET_LINELEN - len,
                       "(conflict!) ");
+    }
+  else if (dev->d_acd.state == ARP_ACD_STATE_ANNOUNCING ||
+           (dev->d_acd.state == ARP_ACD_STATE_INIT &&
+            dev->d_acd.need_announce))
+    {
+      len += snprintf(&netfile->line[len], NET_LINELEN - len,
+                      "(acd:ann) ");
     }
 #endif
 
