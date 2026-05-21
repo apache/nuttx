@@ -69,12 +69,14 @@ and subscribers is achieved through ioctl operations.
 ^^^^^^^^^^^^^^^^^
 
 The directory apps/system/uorb contains the uORB wrapper, unit tests, physical
-sensor topic definitions, and the uorb_listener tool.
+sensor topic definitions, and the ``uorb_listener`` and ``uorb_generator``
+tools.
 
 ::
 
   ├── Kconfig
-  ├── listener.c   // Implementation of uorb_listener.c
+  ├── generator.c  // Implementation of the uorb_generator command
+  ├── listener.c   // Implementation of the uorb_listener command
   ├── Make.defs
   ├── Makefile
   ├── sensor       // Definitions for physical sensor topics
@@ -534,6 +536,12 @@ and management in an embedded system environment.
 **Tools**
 ^^^^^^^^^
 
+To use these tools, enable ``CONFIG_UORB`` and the corresponding command
+options in ``apps/system/uorb/Kconfig``:
+
+- ``CONFIG_UORB_LISTENER`` for ``uorb_listener``
+- ``CONFIG_UORB_GENERATOR`` for ``uorb_generator``
+
 .. _uorb_listener:
 
 **uorb_listener**
@@ -547,25 +555,30 @@ Below are some commonly used cases:
 
 ::
 
-  listener <command> [arguments...]
+  uorb_listener <command> [arguments...]
    Commands:
           <topics_name> Topic name. Multi name are separated by ','
           [-h       ]  Listener commands help
-          [-f       ]  Record uorb data to file
+          [-s       ]  Record uorb data to file
           [-n <val> ]  Number of messages, default: 0
           [-r <val> ]  Subscription rate (unlimited if 0), default: 0
           [-b <val> ]  Subscription maximum report latency in us(unlimited if 0), default: 0
           [-t <val> ]  Time of listener, in seconds, default: 5
+          [-f       ]  Flush sensor driver data
           [-T       ]  Top, continuously print updating objects
           [-l       ]  Top only execute once.
+          [-i       ]  Print topic state information
+          [-u       ]  Use non-wakeup mode when available
         
 
 ``uorb_listener`` continuously prints information for all topics at the frequency of topic publications.
 
-``uorb_listener -f`` continuously saves information for all topics to /data/uorb/***/***.csv at the frequency of
+``uorb_listener -s`` continuously saves information for all topics to /data/uorb/***/***.csv at the frequency of
 topic publications. If the -f flag is used and the file cannot be created, the data will be output to the terminal instead.
 
-``uorb_listener -f sensor_accel0`` continuously saves information for the specified topic to a file at the frequency of topic publications.
+``uorb_listener -s sensor_accel0`` continuously saves information for the specified topic to a file at the frequency of topic publications.
+
+``uorb_listener -f`` requests a flush for physical sensor topics that support FIFO flush operations.
 
 ``uorb_listener n 1`` prints a snapshot of the current information for all topics.
 
@@ -608,9 +621,9 @@ By following these instructions, users can effectively utilize the Generator deb
 ::
 
   The tool publishes topic data via uorb.
-  Notice:LINE_MAX must be set to 128 or more.
+  Notice:NSH_LINELEN must be set to 128 or more.
   
-  generator <command> [arguments...]
+  uorb_generator <command> [arguments...]
     Commands:
       <topics_name> The playback topic name.
       [-h       ]  Listener commands help.
