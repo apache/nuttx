@@ -188,6 +188,14 @@ if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
   list(APPEND SRCS esp_crypto.c)
 endif()
 
+if(CONFIG_ESPRESSIF_TOUCH)
+  list(APPEND SRCS esp_touch.c)
+endif()
+
+if(CONFIG_COMP)
+  list(APPEND SRCS esp_ana_cmpr.c)
+endif()
+
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
   message(
     WARNING
