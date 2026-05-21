@@ -890,6 +890,12 @@ config SCHED_DUMP_ON_EXIT
 	---help---
 		Dump all tasks state on exit()
 
+config SCHED_DUMP_FDLIST
+	bool "Dump fd list on assert"
+	default n
+	---help---
+		Dump all tasks fd list when assert is triggered.
+
 config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n

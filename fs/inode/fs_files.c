@@ -399,7 +399,7 @@ void fdlist_init(FAR struct fdlist *list)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_FDLIST
 void fdlist_dump(FAR struct fdlist *list)
 {
   FAR char *path;
