@@ -1204,11 +1204,11 @@ static void stm32_i2c_setclock(struct stm32_i2c_priv_s *priv,
   uint32_t t_presc_ns;
   uint32_t tsync1;
   uint32_t tsync2;
-  uint8_t scl_delay;
+  uint8_t scl_delay = 0;
   int32_t sda_delay_min;
-  uint8_t sda_delay;
-  uint16_t scl_h_period;
-  uint16_t scl_l_period;
+  uint8_t sda_delay = 0;
+  uint16_t scl_h_period = 0;
+  uint16_t scl_l_period = 0;
   uint8_t fmp = 0;
   uint8_t anfoff;
   uint8_t dnf;
