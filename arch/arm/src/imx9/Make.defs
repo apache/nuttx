@@ -58,6 +58,10 @@ ifeq ($(CONFIG_IMX9_FLEXCAN),y)
   CHIP_CSRCS += imx9_flexcan.c
 endif
 
+ifeq ($(CONFIG_IMX9_SAR_ADC),y)
+  CHIP_CSRCS += imx9_sar_adc.c
+endif
+
 ifeq ($(CONFIG_IMX9_LPUART),y)
   CHIP_CSRCS += imx9_lpuart.c imx9_lowputc.c
 endif
