@@ -861,6 +861,18 @@ static int rptun_create_devices(FAR struct rptun_priv_s *priv)
   return ret;
 }
 
+static inline_function uint32_t
+rptun_get_peer_status(FAR struct rptun_priv_s *priv)
+{
+  FAR struct rptun_status_s *status =
+    RPTUN_RSC2STATUS(priv->rproc.rsc_table);
+
+  RPTUN_INVALIDATE(status, sizeof(*status));
+
+  return RPTUN_IS_MASTER(priv->dev) ?
+         status->slave : status->master;
+}
+
 static void rptun_set_status(FAR struct rptun_priv_s *priv,
                              unsigned long reason)
 {
@@ -882,12 +894,13 @@ static void rptun_set_status(FAR struct rptun_priv_s *priv,
       RPTUN_STATUS_SET(status->slave, reason);
     }
 
+  RPTUN_FLUSH(status, sizeof(*status));
+
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
 static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
 {
-  FAR struct rptun_status_s *rsc_status;
   uint32_t status;
 
   if (priv->rproc.rsc_table == NULL)
@@ -895,9 +908,7 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
       return;
     }
 
-  rsc_status = RPTUN_RSC2STATUS(priv->rproc.rsc_table);
-  status = RPTUN_IS_MASTER(priv->dev)? rsc_status->slave :
-           rsc_status->master;
+  status = rptun_get_peer_status(priv);
 
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
     {
