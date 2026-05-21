@@ -310,6 +310,10 @@ config FLEXCAN5_DATA_SAMPLEP
 
 endmenu # IMX9_FLEXCAN5
 
+config IMX9_SAR_ADC
+	bool "SAR ADC"
+	default n
+
 menu "LPUART"
 
 config IMX9_LPUART
