@@ -88,6 +88,7 @@ struct rpmsg_virtio_priv_s
   struct pm_wakelock_s            wakelock;
   struct wdog_s                   wdog;
 #endif
+  bool                            init;
 };
 
 /****************************************************************************
@@ -642,8 +643,13 @@ static void rpmsg_virtio_rx_callback(FAR struct virtqueue *vq)
   FAR struct rpmsg_virtio_priv_s *priv =
     metal_container_of(vq->vq_dev->priv, struct rpmsg_virtio_priv_s, rvdev);
 
-  rpmsg_virtio_rx_update(priv, vq);
-  rpmsg_virtio_rx_dispatch(priv);
+  if (priv->init)
+    {
+      /* Start response interrupt when rpmsg virtio initialized */
+
+      rpmsg_virtio_rx_update(priv, vq);
+      rpmsg_virtio_rx_dispatch(priv);
+    }
 }
 
 /****************************************************************************
@@ -806,6 +812,7 @@ static int rpmsg_virtio_start(FAR struct rpmsg_virtio_priv_s *priv)
 
   rpmsg_virtio_rx_update(priv, priv->rvdev.rvq);
   rpmsg_virtio_rx_dispatch(priv);
+  priv->init = true;
 
   /* Open tx buffer return callback before the services created below can
    * wait for a tx buffer.
