@@ -491,7 +491,7 @@ static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: dump_filelist
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_FDLIST
 static void dump_fdlist(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct fdlist *list = &tcb->group->tg_fdlist;
@@ -584,7 +584,7 @@ static void dump_tasks(void)
   nxsched_foreach(dump_backtrace, NULL);
 #endif
 
-#ifdef CONFIG_SCHED_DUMP_ON_EXIT
+#ifdef CONFIG_SCHED_DUMP_FDLIST
   nxsched_foreach(dump_fdlist, NULL);
 #endif
 }
