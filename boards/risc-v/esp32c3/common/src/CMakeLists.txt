@@ -76,6 +76,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS esp_board_bmp280.c)
   endif()
 
+  if(CONFIG_DEV_RNG90)
+    list(APPEND SRCS esp_board_rng90.c)
+  endif()
+
   if(CONFIG_MMCSD_SPI)
     list(APPEND SRCS esp_board_mmcsd.c)
   endif()
