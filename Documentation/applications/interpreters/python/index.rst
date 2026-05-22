@@ -104,3 +104,32 @@ You will see the NuttShell (NSH) prompt. Run the following commands:
    Python 3.13.0 (main, Dec  4 2024, 17:00:42) [GCC 13.2.0] on nuttx
    Type "help", "copyright", "credits" or "license" for more information.
    >>>
+
+ESP32-P4
+--------
+
+For this example, we will use the ESP32-P4-Function-EV-Board.
+Use the ``esp32p4-function-ev-board:python`` config to build
+Python for NuttX.
+
+Build and flash the ESP32-P4 board with the following commands:
+
+.. code:: console
+
+   $ make distclean
+   $ ./tools/configure.sh -S esp32p4-function-ev-board:python
+   $ make flash ESPTOOL_PORT=/dev/ttyACM0 -s -j$(nproc)
+   $ picocom -b 115200 /dev/ttyUSB1
+
+To run Python on ESP32-P4, just open a serial terminal to connect to the board.
+You will see the NuttShell (NSH) prompt. Run the following commands:
+
+.. code:: console
+
+   nsh> python
+   Python 3.13.0 (main, May 22 2026, 15:27:11) [GCC 14.2.0] on nuttx
+   Type "help", "copyright", "credits" or "license" for more information.
+   >>>
+
+.. warning:: Note that Python for ESP32-P4 supports `pip` to install local
+   pure-python packages. It also supports the `ctypes` module.

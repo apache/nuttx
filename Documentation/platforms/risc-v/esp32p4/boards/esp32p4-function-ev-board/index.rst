@@ -366,6 +366,12 @@ pwm
 
 Demonstrates PWM via LEDC. The ``pwm`` app toggles output with default frequency/duty.
 
+python
+------
+
+This configuration enables the Python for ESP32-P4.
+Please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
 qencoder
 --------
 
