@@ -1,2 +1,3 @@
 /risc-v/esp32c[6-z]*
 /risc-v/esp32[d-z]*
+-esp32p4-function-ev-board:python
