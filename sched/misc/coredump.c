@@ -794,10 +794,10 @@ static void coredump_dump_syslog(pid_t pid)
   coredump(g_regions, stream, pid);
 
 #  ifdef CONFIG_BOARD_COREDUMP_COMPRESSION
-  _alert("Finish coredump (Compression Enabled). %s formatted\n",
+  _alert("Coredump finish (Compression Enabled). %s formatted\n",
          streamname);
 #  else
-  _alert("Finish coredump. %s formatted\n", streamname);
+  _alert("Coredump finish. %s formatted\n", streamname);
 #  endif
 
   setlogmask(logmask);
@@ -836,7 +836,7 @@ static void coredump_dump_dev(pid_t pid)
       return;
     }
 
-  _alert("Finish coredump, write %" PRIdOFF " bytes to %s\n",
+  _alert("Coredump finish, write %" PRIdOFF " bytes to %s\n",
          g_devstream.common.nput, CONFIG_BOARD_COREDUMP_DEVPATH);
 }
 #endif
