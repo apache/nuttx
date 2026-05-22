@@ -31,3 +31,4 @@ case, you can head to the :doc:`reference <../reference/index>`.
    video.rst
    crypto.rst
    wireless.rst
+   microros/index.rst
