@@ -253,23 +253,49 @@ static int backtrace_expand(FAR struct backtrace_pool_s *bp)
  * Name: backtrace_exist
  ****************************************************************************/
 
+nosanitize_address
 static FAR struct backtrace_entry_s *
 backtrace_find(FAR struct backtrace_pool_s *bp, uint32_t slot,
                FAR const void *stack, int depth)
 {
   FAR struct backtrace_entry_s *entry = bp->bucket[slot];
+  FAR const uintptr_t *s1 = (FAR const uintptr_t *)stack;
+  int i;
 
   while (entry != NULL)
     {
-      if (entry->depth == depth &&
-          memcmp(stack, entry->stack, depth * sizeof(FAR void *)) == 0)
+      if (entry->depth == depth)
         {
-          /* If the backtrace record already exists, just increase the
-           * reference count
+          FAR const uintptr_t *s2 = (FAR const uintptr_t *)entry->stack;
+
+          /* Inline word-by-word compare to avoid the per-byte KASAN shadow
+           * checks inside memcmp().  This function is on the hot path of
+           * every recorded allocation when CONFIG_MM_RECORD_STACK is on; on
+           * KASAN-enabled debug builds the per-byte instrumentation in
+           * memcmp() multiplies the cost of each lookup and can stretch
+           * heavy allocation phases (e.g. romfs_cachenode during mount of a
+           * large partition) past the test framework's busy-loop threshold.
+           * The stack array stores word-aligned function pointers, so word
+           * comparison is semantically equivalent to memcmp().
            */
 
-          entry->ref++;
-          return entry;
+          for (i = 0; i < depth; i++)
+            {
+              if (s1[i] != s2[i])
+                {
+                  break;
+                }
+            }
+
+          if (i == depth)
+            {
+              /* If the backtrace record already exists, just increase the
+               * reference count
+               */
+
+              entry->ref++;
+              return entry;
+            }
         }
 
       entry = entry->next;
