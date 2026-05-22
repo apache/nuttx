@@ -231,9 +231,25 @@ function(nuttx_olddefconfig)
 endfunction()
 
 function(nuttx_setconfig)
-  set(ENV{KCONFIG_CONFIG} ${CMAKE_BINARY_DIR}/.config)
+  cmake_parse_arguments(SETCONFIG "" "CONFIG_FILE" "SETTINGS" ${ARGN})
+
+  if(SETCONFIG_UNPARSED_ARGUMENTS)
+    message(
+      FATAL_ERROR
+        "nuttx_setconfig: unknown arguments: ${SETCONFIG_UNPARSED_ARGUMENTS}")
+  endif()
+
+  if(NOT SETCONFIG_SETTINGS)
+    message(FATAL_ERROR "nuttx_setconfig: SETTINGS is required")
+  endif()
+
+  if(NOT SETCONFIG_CONFIG_FILE)
+    set(SETCONFIG_CONFIG_FILE ${CMAKE_BINARY_DIR}/.config)
+  endif()
+
+  set(ENV{KCONFIG_CONFIG} ${SETCONFIG_CONFIG_FILE})
   execute_process(
-    COMMAND setconfig ${ARGN} --kconfig ${NUTTX_DIR}/Kconfig
+    COMMAND setconfig ${SETCONFIG_SETTINGS} --kconfig ${NUTTX_DIR}/Kconfig
     ERROR_VARIABLE KCONFIG_ERROR
     OUTPUT_VARIABLE KCONFIG_OUTPUT
     RESULT_VARIABLE KCONFIG_STATUS

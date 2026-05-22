@@ -23,6 +23,18 @@
 include(nuttx_kconfig)
 
 function(nuttx_sethost)
+  set(config_file ${CMAKE_BINARY_DIR}/.config)
+  cmake_parse_arguments(SETHOST "" "CONFIG_FILE" "" ${ARGN})
+
+  if(SETHOST_UNPARSED_ARGUMENTS)
+    message(
+      FATAL_ERROR
+        "nuttx_sethost: unknown arguments: ${SETHOST_UNPARSED_ARGUMENTS}")
+  endif()
+
+  if(SETHOST_CONFIG_FILE)
+    set(config_file ${SETHOST_CONFIG_FILE})
+  endif()
 
   if(CMAKE_HOST_WIN32)
     # https://learn.microsoft.com/en-us/windows/win32/winprog64/wow64-implementation-details
@@ -104,5 +116,5 @@ function(nuttx_sethost)
     endif()
   endif()
   # message("  nuttx_setconfig: ${NUTTX_SYSTEM_SETHOST}")
-  nuttx_setconfig("${NUTTX_SYSTEM_SETHOST}")
+  nuttx_setconfig(CONFIG_FILE ${config_file} SETTINGS ${NUTTX_SYSTEM_SETHOST})
 endfunction()
