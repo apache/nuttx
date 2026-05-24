@@ -32,6 +32,7 @@
 #include <string.h>
 
 #include <nuttx/input/keyboard.h>
+#include <nuttx/input/kbd_codec.h>
 
 #include "sim_internal.h"
 
@@ -60,6 +61,152 @@ struct sim_dev_s
  */
 
 static struct sim_dev_s g_simkeyboard;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: translate_x11_key
+ *
+ * Description:
+ *   Translate X11 key codes into the NuttX keyboard codec so that
+ *   applications can actually rely on the output of the keyboard driver.
+ *   Some X11 key codes do not need translation.
+ *
+ * Returns: The translated key code.
+ ****************************************************************************/
+
+static uint32_t translate_x11_key(uint32_t code)
+{
+  switch (code)
+    {
+    case XK_Delete:
+      return KEYCODE_FWDDEL;
+    case XK_BackSpace:
+      return KEYCODE_BACKDEL;
+
+      /* Cursor movement */
+
+    case XK_Home:
+      return KEYCODE_HOME;
+    case XK_End:
+      return KEYCODE_END;
+    case XK_Left:
+      return KEYCODE_LEFT;
+    case XK_Right:
+      return KEYCODE_RIGHT;
+    case XK_Up:
+      return KEYCODE_UP;
+    case XK_Down:
+      return KEYCODE_DOWN;
+    case XK_Page_Up:
+      return KEYCODE_PAGEUP;
+    case XK_Page_Down:
+      return KEYCODE_PAGEDOWN;
+
+      /* Edit commands */
+
+    case XK_Insert:
+      return KEYCODE_INSERT;
+    case XK_Undo:
+      return KEYCODE_UNDO;
+    case XK_Redo:
+      return KEYCODE_REDO;
+    case XK_Find:
+      return KEYCODE_FIND;
+
+      /* Selection codes */
+
+    case XK_Return:
+    case XK_KP_Enter:
+      return KEYCODE_ENTER;
+    case XK_Select:
+      return KEYCODE_SELECT;
+    case XK_Execute:
+      return KEYCODE_EXECUTE;
+
+      /* Keyboard modes */
+
+    case XK_Caps_Lock:
+      return KEYCODE_CAPSLOCK;
+    case XK_Scroll_Lock:
+      return KEYCODE_SCROLLLOCK;
+    case XK_Num_Lock:
+      return KEYCODE_NUMLOCK;
+
+      /* Misc control codes */
+
+    case XK_Help:
+      return KEYCODE_HELP;
+    case XK_Menu:
+      return KEYCODE_MENU;
+    case XK_Pause:
+      return KEYCODE_PAUSE;
+    case XK_Break:
+      return KEYCODE_BREAK;
+    case XK_Cancel:
+      return KEYCODE_CANCEL;
+    case XK_Print:
+      return KEYCODE_PRTSCRN;
+    case XK_Sys_Req:
+      return KEYCODE_SYSREQ;
+
+      /* Context-specific function keys */
+
+    case XK_F1:
+      return KEYCODE_F1;
+    case XK_F2:
+      return KEYCODE_F2;
+    case XK_F3:
+      return KEYCODE_F3;
+    case XK_F4:
+      return KEYCODE_F4;
+    case XK_F5:
+      return KEYCODE_F5;
+    case XK_F6:
+      return KEYCODE_F6;
+    case XK_F7:
+      return KEYCODE_F7;
+    case XK_F8:
+      return KEYCODE_F8;
+    case XK_F9:
+      return KEYCODE_F9;
+    case XK_F10:
+      return KEYCODE_F10;
+    case XK_F11:
+      return KEYCODE_F11;
+    case XK_F12:
+      return KEYCODE_F12;
+    case XK_F13:
+      return KEYCODE_F13;
+    case XK_F14:
+      return KEYCODE_F14;
+    case XK_F15:
+      return KEYCODE_F15;
+    case XK_F16:
+      return KEYCODE_F16;
+    case XK_F17:
+      return KEYCODE_F17;
+    case XK_F18:
+      return KEYCODE_F18;
+    case XK_F19:
+      return KEYCODE_F19;
+    case XK_F20:
+      return KEYCODE_F20;
+    case XK_F21:
+      return KEYCODE_F21;
+    case XK_F22:
+      return KEYCODE_F22;
+    case XK_F23:
+      return KEYCODE_F23;
+    case XK_F24:
+      return KEYCODE_F24;
+
+    default:
+      return code;
+    }
+}
 
 /****************************************************************************
  * Public Functions
@@ -98,6 +245,7 @@ int sim_kbd_initialize(void)
 
 void sim_kbdevent(uint32_t key, bool is_press)
 {
+  uint32_t trans_key;
   struct sim_dev_s *priv = (struct sim_dev_s *) &g_simkeyboard;
   uint32_t types[2] =
     {
@@ -109,9 +257,10 @@ void sim_kbdevent(uint32_t key, bool is_press)
       return;
     }
 
+  trans_key = translate_x11_key(key);
   iinfo("key=%04x\n", key);
 
   /* Report data changes */
 
-  keyboard_event(&priv->lower, key, types[is_press]);
+  keyboard_event(&priv->lower, trans_key, types[is_press]);
 }
