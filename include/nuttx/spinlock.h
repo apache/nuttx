@@ -126,14 +126,7 @@ pid_t spinlock_get_holder(FAR spinlock_debug_t *info);
  ****************************************************************************/
 
 #define spin_lock_init(l) \
-  do \
-    { \
-      if (sizeof(*(l)) > 0u) \
-        { \
-          memset((FAR void *)(l), 0, sizeof(*(l))); \
-        } \
-    } \
-  while (0)
+  do { memset((FAR void *)(l), 0, sizeof(*(l))); } while (0)
 
 /****************************************************************************
  * Name: rspin_lock_init
