@@ -696,7 +696,7 @@ config SIM_SPIDEV_NAME
 endif
 
 config SIM_GPIOCHIP
-	bool "Simulated gpiochip"
+	bool "Support to Control External GPIO devices"
 	default n
 	depends on IOEXPANDER
 	---help---
@@ -709,23 +709,43 @@ choice
 	default SIM_GPIOCHIP_LINUX
 
 config SIM_GPIOCHIP_LINUX
-	bool "Linux Gpiochip Character Dev"
+	bool "Linux GPIOCHIP Character Dev"
 	depends on HOST_LINUX
 	---help---
 		Attach a Linux Gpiochip via the character device
 		interface. To achieve a SPI port on Linux host, it is
 		recommended to use a USB<>GPIO device such as CH341A/B.
 
+config SIM_GPIOCHIP_FTDI
+	bool "FTDI I/O Expander (i.e. FT2232H) as GPIOCHIP"
+	---help---
+		It is possible to use a USB FTDI FTDI to support external
+		devices connected to the computer. These devices could be GPIO,
+		I2C or SPI and NuttX on SIM will see it as a real device.
+
 endchoice
 
 config SIM_GPIOCHIP_NAME
 	string "the name of host gpiochip dev to attach to simulator"
 	default "/dev/gpiochip0"
+	depends on SIM_GPIOCHIP_LINUX
 	---help---
-		This is the name of the gpiochip device on the host implementation to
-		attach to the simulator driver.
+		This is the name of the gpiochip device on the host
+		implementation to attach to the simulator driver.
 
-endif
+if SIM_GPIOCHIP_FTDI
+
+config SIM_FTDI_VID
+	hex "USB Vendor ID"
+	default 0x0403
+
+config SIM_FTDI_PID
+	hex "USB Product ID"
+	default 0x6010
+
+endif # SIM_FTDI
+
+endif # SIM_GPIOCHIP
 
 menu "Simulated UART"
 

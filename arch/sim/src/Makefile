@@ -262,9 +262,18 @@ ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += sim_linuxspi.c
 endif
 
+ifeq ($(CONFIG_SIM_GPIOCHIP),y)
+  CSRCS += sim_gpiochip.c
+
 ifeq ($(CONFIG_SIM_GPIOCHIP_LINUX),y)
   HOSTSRCS += sim_linux_gpiochip.c
-  CSRCS += sim_gpiochip.c
+endif
+
+ifeq ($(CONFIG_SIM_GPIOCHIP_FTDI),y)
+  HOSTSRCS += sim_ftdi_gpiochip.c
+  HOSTCFLAGS += $(shell pkg-config --cflags libftdi1)
+  STDLIBS += $(shell pkg-config --libs libftdi1)
+endif
 endif
 
 ifeq ($(CONFIG_SIM_USB_DEV),y)

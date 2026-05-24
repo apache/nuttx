@@ -418,7 +418,11 @@ static void sim_gpiochip_interrupt(wdparm_t arg)
  *
  ****************************************************************************/
 
-int sim_gpiochip_initialize(const char *path)
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+  int sim_gpiochip_initialize(uint8_t pins_dir)
+#else
+  int sim_gpiochip_initialize(const char *path)
+#endif
 {
   struct sim_gpiochip_dev_s *priv;
   int ret;
@@ -432,7 +436,11 @@ int sim_gpiochip_initialize(const char *path)
 
   priv->ops = &g_sim_gpiochip_ops;
 
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+  priv->dev = host_gpiochip_alloc(pins_dir);
+#else
   priv->dev = host_gpiochip_alloc(path);
+#endif
   if (priv->dev == NULL)
     {
       gpioerr("Failed to init gpiochip: %d", ret);

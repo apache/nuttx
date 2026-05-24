@@ -502,8 +502,13 @@ size_t sim_stack_check(void *alloc, size_t size);
 void sim_stack_color(void *stackbase, size_t nbytes);
 #endif
 
-#ifdef CONFIG_SIM_GPIOCHIP
+#ifdef CONFIG_SIM_GPIOCHIP_LINUX
 int sim_gpiochip_initialize(const char *filename);
+struct ioexpander_dev_s *sim_gpiochip_get_ioe(void);
+#endif
+
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+int sim_gpiochip_initialize(uint8_t pins_dir);
 struct ioexpander_dev_s *sim_gpiochip_get_ioe(void);
 #endif
 

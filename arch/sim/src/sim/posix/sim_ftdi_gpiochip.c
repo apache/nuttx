@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/posix/sim_linux_gpiochip.c
+ * arch/sim/src/sim/posix/sim_ftdi_gpiochip.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,6 +37,7 @@
 #include <linux/ioctl.h>
 #include <linux/types.h>
 #include <linux/gpio.h>
+#include <ftdi.h>
 
 #include "sim_gpiochip.h"
 #include "sim_internal.h"
@@ -45,10 +46,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define GPIOCHIP_NPINS            8
+
 #define gpioerr(fmt, ...) \
-        syslog(LOG_ERR, "sim_linux_gpiochip: " fmt "\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "sim_ftdi_gpio: " fmt "\n", ##__VA_ARGS__)
 #define gpioinfo(fmt, ...) \
-        syslog(LOG_ERR, "sim_linux_gpiochip: " fmt "\n", ##__VA_ARGS__)
+        syslog(LOG_ERR, "sim_ftdi_gpio: " fmt "\n", ##__VA_ARGS__)
 
 /****************************************************************************
  * Type Definitions
@@ -58,8 +61,9 @@
 
 struct host_gpiochip_dev
 {
-  int file;
-  int line_fd[CONFIG_IOEXPANDER_NPINS];
+  struct ftdi_context *ftdi;
+  uint8_t port_dir;
+  uint8_t port_value;
 };
 
 /****************************************************************************
@@ -82,10 +86,10 @@ struct host_gpiochip_dev
  * Name: host_gpiochip_direction
  *
  * Description:
- *   Provide gpiochip pin direction config.
+ *   Provide gpio pin direction config.
  *
  * Input Parameters:
- *   priv  - A pointer to instance of Linux gpiochip.
+ *   priv  - A pointer to instance of Linux ft2232h_gpio.
  *   pin   - The pin number.
  *   input - The direction of the pin.
  *
@@ -93,49 +97,31 @@ struct host_gpiochip_dev
  *   0 for success, other for fail.
  ****************************************************************************/
 
-int host_gpiochip_direction(struct host_gpiochip_dev *priv, uint8_t pin,
-                            bool input)
+int host_gpiochip_direction(struct host_gpiochip_dev *priv,
+                            uint8_t pin, bool input)
 {
-  struct gpio_v2_line_request req;
-  int nonblock = 1;
-  int ret;
+  struct ftdi_context *ftdi = priv->ftdi;
+  uint8_t dir = priv->port_dir;
 
-  memset(&req, 0, sizeof(req));
-  req.num_lines = 1;
-  req.offsets[0] = pin;
-
-  if (priv->line_fd[pin] > 0)
+  if (pin >= GPIOCHIP_NPINS)
     {
-      close(priv->line_fd[pin]);
-      priv->line_fd[pin] = -1;
+      gpioerr("ERROR: Invalid pin %d config\n", pin);
+      return -EINVAL;
     }
 
-  if (input)
+  /* FTDI uses 1 as output and 0 as input, so invert input first */
+
+  input = !input;
+  dir &= ~(input << pin);
+  dir |= (input << pin);
+
+  if (ftdi_set_bitmode(ftdi, dir, BITMODE_SYNCBB) < 0)
     {
-      req.config.flags = GPIO_V2_LINE_FLAG_INPUT;
-    }
-  else
-    {
-      req.config.flags = GPIO_V2_LINE_FLAG_OUTPUT;
+      gpioerr("Failed to change pin %d direction\n", pin);
+      return -EIO;
     }
 
-  snprintf(req.consumer, sizeof(req.consumer) - 1, "gpio%d", pin);
-  ret = host_uninterruptible(ioctl, priv->file, GPIO_V2_GET_LINE_IOCTL,
-                             &req);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: pin %d set direction failed\n", pin);
-      return -errno;
-    }
-
-  ret = host_uninterruptible(ioctl, req.fd, FIONBIO, &nonblock);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: Failed to set non-blocking: %s\n", strerror(errno));
-      return -errno;
-    }
-
-  priv->line_fd[pin] = req.fd;
+  priv->port_dir = dir;
 
   return 0;
 }
@@ -155,61 +141,6 @@ int host_gpiochip_direction(struct host_gpiochip_dev *priv, uint8_t pin,
 int host_gpiochip_irq_request(struct host_gpiochip_dev *priv, uint8_t pin,
                               uint16_t cfg)
 {
-  struct gpio_v2_line_request req;
-  int nonblock = 1;
-  int ret;
-
-  if (priv->line_fd[pin] > 0)
-    {
-      close(priv->line_fd[pin]);
-      priv->line_fd[pin] = -1;
-    }
-
-  memset(&req, 0, sizeof(req));
-  switch (cfg)
-    {
-      case GPIOCHIP_LINE_FLAG_FALLING:
-        req.config.flags = GPIO_V2_LINE_FLAG_EDGE_FALLING;
-        break;
-      case GPIOCHIP_LINE_FLAG_RISING:
-        req.config.flags = GPIO_V2_LINE_FLAG_EDGE_RISING;
-        break;
-      case GPIOCHIP_LINE_FLAG_BOTH:
-        req.config.flags = GPIO_V2_LINE_FLAG_EDGE_FALLING |
-                           GPIO_V2_LINE_FLAG_EDGE_RISING;
-        break;
-      default:
-        req.config.flags = 0;
-        break;
-    }
-
-  req.offsets[0] = pin;
-  req.num_lines = 1;
-  req.config.flags |= GPIO_V2_LINE_FLAG_INPUT;
-  if (req.config.flags != GPIO_V2_LINE_FLAG_INPUT)
-    {
-      snprintf(req.consumer, sizeof(req.consumer) - 1, "gpio-irq%d", pin);
-    }
-
-  /* Warn only pin 10 can register in ch341A */
-
-  ret = host_uninterruptible(ioctl, priv->file, GPIO_V2_GET_LINE_IOCTL,
-                             &req);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: ioctl failed: %s \n", strerror(errno));
-      return -errno;
-    }
-
-  ret = host_uninterruptible(ioctl, req.fd, FIONBIO, &nonblock);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: Failed to set non-blocking: %s\n", strerror(errno));
-      return -errno;
-    }
-
-  priv->line_fd[pin] = req.fd;
-
   return 0;
 }
 
@@ -217,10 +148,10 @@ int host_gpiochip_irq_request(struct host_gpiochip_dev *priv, uint8_t pin,
  * Name: host_gpiochip_writepin
  *
  * Description:
- *   Write gpiochip pin value.
+ *   Write ft2232h_gpio pin value.
  *
  * Input Parameters:
- *   priv  - A pointer to instance of Linux gpiochip.
+ *   priv  - A pointer to instance of Linux ft2232h_gpio.
  *   pin   - The pin number.
  *   value - The value write to the pin.
  *
@@ -228,29 +159,22 @@ int host_gpiochip_irq_request(struct host_gpiochip_dev *priv, uint8_t pin,
  *   0 for success, other for fail.
  ****************************************************************************/
 
-int host_gpiochip_writepin(struct host_gpiochip_dev *priv, uint8_t pin,
-                           bool value)
+int host_gpiochip_writepin(struct host_gpiochip_dev *priv,
+                           uint8_t pin, bool value)
 {
-  struct gpio_v2_line_values vals;
-  int ret;
+  struct ftdi_context *ftdi = priv->ftdi;
+  uint8_t pins = priv->port_value;
 
-  if (priv->line_fd[pin] <= 0)
+  if (pin >= GPIOCHIP_NPINS)
     {
       gpioerr("ERROR: Invalid pin %d config\n", pin);
       return -EINVAL;
     }
 
-  memset(&vals, 0, sizeof(vals));
-  vals.mask = 1;
-  vals.bits = !!value;
-
-  ret = host_uninterruptible(ioctl, priv->line_fd[pin],
-                             GPIO_V2_LINE_SET_VALUES_IOCTL, &vals);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: Failed to set pin %d value %d\n", pin, value);
-      return -errno;
-    }
+  pins &= ~(value << pin);
+  pins |= (value << pin);
+  ftdi_write_data(ftdi, &pins, 1);
+  priv->port_value = pins;
 
   return 0;
 }
@@ -259,10 +183,10 @@ int host_gpiochip_writepin(struct host_gpiochip_dev *priv, uint8_t pin,
  * Name: host_gpiochip_readpin
  *
  * Description:
- *   Read gpiochip pin value.
+ *   Read ft2232h_gpio pin value.
  *
  * Input Parameters:
- *   priv  - A pointer to instance of Linux gpiochip.
+ *   priv  - A pointer to instance of Linux ft2232h_gpio.
  *   pin   - The pin number.
  *   value - The value write to the pin.
  *
@@ -270,29 +194,22 @@ int host_gpiochip_writepin(struct host_gpiochip_dev *priv, uint8_t pin,
  *   0 for success, other for fail.
  ****************************************************************************/
 
-int host_gpiochip_readpin(struct host_gpiochip_dev *priv, uint8_t pin,
-                          bool *value)
+int host_gpiochip_readpin(struct host_gpiochip_dev *priv,
+                          uint8_t pin, bool *value)
 {
-  struct gpio_v2_line_values vals;
-  int ret;
+  struct ftdi_context *ftdi = priv->ftdi;
+  uint8_t pins;
 
-  if (priv->line_fd[pin] <= 0)
+  if (pin >= GPIOCHIP_NPINS)
     {
       gpioerr("ERROR: Invalid pin %d config\n", pin);
       return -EINVAL;
     }
 
-  memset(&vals, 0, sizeof(vals));
-  vals.mask = 1;
-  ret = host_uninterruptible(ioctl, priv->line_fd[pin],
-                             GPIO_V2_LINE_GET_VALUES_IOCTL, &vals);
-  if (ret < 0)
-    {
-      gpioerr("ERROR: Failed to get pin%d value, errno[%d]\n", pin, errno);
-      return -errno;
-    }
+  ftdi_read_pins(ftdi, &pins);
+  priv->port_value = pins;
 
-  *value = !!(vals.bits & 0x01);
+  *value = !!(pins & (1 << pin));
 
   return 0;
 }
@@ -314,17 +231,6 @@ int host_gpiochip_readpin(struct host_gpiochip_dev *priv, uint8_t pin,
 
 bool host_gpiochip_irq_active(struct host_gpiochip_dev *priv, uint8_t pin)
 {
-  if (priv->line_fd[pin] > 0)
-    {
-      struct gpio_v2_line_event ev;
-      int fd = priv->line_fd[pin];
-      memset(&ev, 0, sizeof(ev));
-      if (host_uninterruptible(read, fd, &ev, sizeof(ev)) == sizeof(ev))
-        {
-          return true;
-        }
-    }
-
   return false;
 }
 
@@ -332,11 +238,11 @@ bool host_gpiochip_irq_active(struct host_gpiochip_dev *priv, uint8_t pin)
  * Name: host_gpiochip_get_line
  *
  * Description:
- *   Get line info from gpiochip device
+ *   Get line info from ft2232h_gpio device
  *
  * Input Parameters:
- *   priv  - A pointer to instance of Linux gpiochip.
- *   pin   - gpio line of Linux gpiochip.
+ *   priv  - A pointer to instance of Linux ft2232h_gpio.
+ *   pin   - gpio line of Linux ft2232h_gpio.
  *   input - A pointer to direction of gpioline.
  *
  * Returned Value:
@@ -344,35 +250,20 @@ bool host_gpiochip_irq_active(struct host_gpiochip_dev *priv, uint8_t pin)
  *
  ****************************************************************************/
 
-int host_gpiochip_get_line(struct host_gpiochip_dev *priv, uint8_t pin,
-                           bool *input)
+int host_gpiochip_get_line(struct host_gpiochip_dev *priv,
+                           uint8_t pin, bool *input)
 {
-  struct gpio_v2_line_info info;
-  int ret;
+  uint8_t dir = priv->port_dir;
 
-  memset(&info, 0, sizeof(info));
-  info.offset = pin;
-  ret = host_uninterruptible(ioctl, priv->file, GPIO_V2_GET_LINEINFO_IOCTL,
-                             &info);
-  if (ret < 0)
+  if (pin >= GPIOCHIP_NPINS)
     {
-      gpioerr("Failed to get line info: %d", ret);
-      return -errno;
+      gpioerr("ERROR: Invalid pin %d config\n", pin);
+      return -EINVAL;
     }
 
-  if (info.flags & GPIO_V2_LINE_FLAG_USED)
-    {
-      return 1;
-    }
+  /* For FTDI Input is defined as 0, so we need to invert here */
 
-  if (info.flags & GPIO_V2_LINE_FLAG_OUTPUT)
-    {
-      *input = false;
-    }
-  else
-    {
-      *input = true;
-    }
+  *input = !(dir & (1 << pin));
 
   return 0;
 }
@@ -381,34 +272,69 @@ int host_gpiochip_get_line(struct host_gpiochip_dev *priv, uint8_t pin,
  * Name: host_gpiochip_alloc
  *
  * Description:
- *   Initialize one gpiochip device
+ *   Initialize one ft2232h_gpio device
  *
  * Input Parameters:
- *   filename - the name of gpiochip device in Linux, e.g. "/dev/gpiochipN".
+ *   None
  *
  * Returned Value:
- *   The pointer to the instance of Linux gpiochip device.
+ *   The pointer to the instance of Linux ft2232h_gpio device.
  *
  ****************************************************************************/
 
-struct host_gpiochip_dev *host_gpiochip_alloc(const char *filename)
+struct host_gpiochip_dev *host_gpiochip_alloc(uint8_t pins_dir)
 {
   struct host_gpiochip_dev *dev;
 
   dev = malloc(sizeof(struct host_gpiochip_dev));
   if (!dev)
     {
-      gpioerr("Failed to allocate memory for gpiochip device");
+      gpioerr("Failed to allocate memory for ft2232h_gpio device");
       return NULL;
     }
 
-  dev->file = host_uninterruptible(open, filename, O_RDWR | O_CLOEXEC);
-  if (dev->file < 0)
+  dev->ftdi = ftdi_new();
+  if (dev->ftdi == NULL)
     {
-      gpioerr("Failed to open %s: %d", filename, dev->file);
+      gpioerr("Failed to initialize the new FTDI device!\n");
       free(dev);
       return NULL;
     }
+
+  /* Interface A controls AD0-AD7 pins on SYNCBB mode */
+
+  ftdi_set_interface(dev->ftdi, INTERFACE_A);
+
+  /* Open the device */
+
+  if (ftdi_usb_open(dev->ftdi, CONFIG_SIM_FTDI_VID,
+                    CONFIG_SIM_FTDI_PID) < 0)
+    {
+      gpioerr("Failed to open the FTDI FT2232H device!\n");
+      ftdi_free(dev->ftdi);
+      free(dev);
+      return NULL;
+    }
+
+  /* Reset the Bitmode */
+
+  ftdi_set_bitmode(dev->ftdi, 0x00, BITMODE_RESET);
+
+  /* Configure SYNCBB mode with the pins direction */
+
+  if (ftdi_set_bitmode(dev->ftdi, pins_dir, BITMODE_SYNCBB) < 0)
+    {
+      gpioerr("Failed to enter SYNCBB mode\n");
+      ftdi_usb_close(dev->ftdi);
+      ftdi_free(dev->ftdi);
+      free(dev);
+      return NULL;
+    }
+
+  /* Save the current pins direction */
+
+  dev->port_dir   = pins_dir;
+  dev->port_value = 0x00;
 
   return dev;
 }
@@ -417,7 +343,7 @@ struct host_gpiochip_dev *host_gpiochip_alloc(const char *filename)
  * Name: host_gpiochip_free
  *
  * Description:
- *   Uninitialize an gpiochip device
+ *   Uninitialize an ft2232h_gpio device
  *
  * Returned Value:
  *   None.
@@ -426,6 +352,9 @@ struct host_gpiochip_dev *host_gpiochip_alloc(const char *filename)
 
 void host_gpiochip_free(struct host_gpiochip_dev *priv)
 {
-  host_uninterruptible(close, priv->file);
+  ftdi_set_bitmode(priv->ftdi, 0x00, BITMODE_RESET);
+  ftdi_usb_close(priv->ftdi);
+  ftdi_free(priv->ftdi);
   free(priv);
 }
+

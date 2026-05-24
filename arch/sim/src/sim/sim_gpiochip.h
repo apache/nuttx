@@ -44,17 +44,18 @@
  * Type Definitions
  ****************************************************************************/
 
-struct host_gpiochip_dev
-{
-  int file;
-  int line_fd[CONFIG_IOEXPANDER_NPINS];
-};
+/* Host GPIOCHIP Device declared for sim_gpiochip.c */
+
+struct host_gpiochip_dev;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-struct host_gpiochip_dev *host_gpiochip_alloc(const char *filename);
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+  struct host_gpiochip_dev *host_gpiochip_alloc(uint8_t pins_dir);
+#else
+  struct host_gpiochip_dev *host_gpiochip_alloc(const char *filename);
+#endif
 void host_gpiochip_free(struct host_gpiochip_dev *dev);
 int host_gpiochip_get_line(struct host_gpiochip_dev *priv, uint8_t pin,
                            bool *input);

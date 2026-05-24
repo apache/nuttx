@@ -270,9 +270,22 @@ if(CONFIG_SIM_SPI_LINUX)
   list(APPEND HOSTSRCS sim_linuxspi.c)
 endif()
 
-if(CONFIG_SIM_GPIOCHIP_LINUX)
+if(CONFIG_SIM_GPIOCHIP)
   list(APPEND SRCS sim_gpiochip.c)
-  list(APPEND HOSTSRCS sim_linux_gpiochip.c)
+
+  if(CONFIG_SIM_GPIOCHIP_LINUX)
+    list(APPEND HOSTSRCS sim_linux_gpiochip.c)
+  endif()
+
+  if(CONFIG_SIM_GPIOCHIP_FTDI)
+    list(APPEND HOSTSRCS sim_ftdi_gpiochip.c)
+
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBFTDI1 REQUIRED IMPORTED_TARGET libftdi1)
+
+    list(APPEND HOST_INCLUDE_DIRECTORIES ${LIBFTDI1_INCLUDE_DIRS})
+    list(APPEND HOST_LINK_LIBRARIES PkgConfig::LIBFTDI1)
+  endif()
 endif()
 
 if(CONFIG_SIM_USB_DEV)
