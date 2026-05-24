@@ -651,6 +651,27 @@ fb
 A simple configuration used for some basic (non-graphic) debug of the
 framebuffer character drivers using ``apps/examples/fb``.
 
+ft2232h_gpio
+------------
+
+This example requires you have a FT2232H I/O Expander board (i.e. CJMCU-2232HL)
+connected to your host computer (read the "Sim FTDI GPIO Driver" documentation)
+to read/write external GPIO pins.
+
+Usage example:
+
+.. code:: console
+
+   nsh> gpio -o 1 /dev/gpio20
+   Driver: /dev/gpio20
+     Input pin:     Value=1
+   nsh> gpio -o 1 /dev/gpio27
+   Driver: /dev/gpio27
+     Output pin:    Value=0
+     Writing:       Value=1
+     Verify:        Value=1
+   nsh>
+
 ipforward
 ---------
 

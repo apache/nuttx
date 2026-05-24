@@ -15,3 +15,4 @@ The following Simulator/Emulators are supported:
    network_linux
    network_vpnkit
    sim_gpiochip
+   sim_ft2232h_gpio
