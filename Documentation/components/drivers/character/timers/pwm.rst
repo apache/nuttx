@@ -66,42 +66,17 @@ set through ``pwm_info_s`` structure.
 .. c:struct:: pwm_info_s
 .. code-block:: c
 
-   struct pwm_info_s
-   {
+    struct pwm_info_s
+    {
       /* Frequency of the pulse train */
-      uint32_t           frequency;
-   #ifdef CONFIG_PWM_MULTICHAN
+      uint32_t frequency;
       /* Per-channel output state */
-      struct pwm_chan_s  channels[CONFIG_PWM_NCHANNELS];
-   #else
-      /* Duty of the pulse train, "1"-to-"0" duration.
-       * Maximum: 65535/65536 (0x0000ffff)
-       * Minimum:     1/65536 (0x00000001)
-       */
-      ub16_t             duty;
-   #ifdef CONFIG_PWM_DEADTIME
-      /* Dead time value for main output */
-      ub16_t             dead_time_a;
-      /* Dead time value for complementary output */
-      ub16_t             dead_time_b;
-   #endif
-   #ifdef CONFIG_PWM_PULSECOUNT
-      /* The number of pulse to generate.  0 means to
-       * generate an indefinite number of pulses
-       */
-      uint32_t           count;
-   #endif
-      /* Channel polarity */
-      uint8_t            cpol;
-      /* Disabled channel polarity */
-      uint8_t            dcpol;
-   #endif /* CONFIG_PWM_MULTICHAN */
+      struct pwm_chan_s channels[CONFIG_PWM_NCHANNELS];
       /* User provided argument to be used in the lower half */
-      FAR void           *arg;
-   };
+      FAR void *arg;
+    };
 
-Structure ``pwm_chan_s`` holds the representation of one PWM channel
-if multiple channels are used ( ``CONFIG_PWM_MULTICHAN`` is set).
+Structure ``pwm_chan_s`` holds the representation of one PWM channel.
 
 .. c:struct:: pwm_chan_s
 .. code-block:: c
@@ -129,8 +104,15 @@ if multiple channels are used ( ``CONFIG_PWM_MULTICHAN`` is set).
       uint8_t cpol;
       /* Disabled channel polarity */
       uint8_t dcpol;
-      /* Channel number */
+      /* Channel number. Valid channel numbers are starting from 1.
+       * 0  - channel is not used, skip it in initialization
+       * -1 - this and all following channels are not used, skip all
+       */
       int8_t channel;
+    #ifdef CONFIG_PWM_PULSECOUNT
+      /* The number of pulses to generate. 0 is an infinite number of pulses */
+      uint32_t count;
+    #endif
    };
 
 Apart from duty cycle and frequency, the ``ioctl`` command allows to
@@ -217,10 +199,9 @@ This section describes common PWM configuration in ``Kconfig``. The reader
 should refer to target documentation for target specific configuration.
 
 PWM is enabled by ``CONFIG_PWM`` configuration option. Option
-``CONFIG_PWM_MULTICHAN`` selects support for multiple channels for one PWM
-instance. If multiple channels are used, configuration option
 ``CONFIG_PWM_NCHANNELS`` defines the maximum number of channels per instance.
-Each timer/controller may support fewer output channels than this value.
+Each timer/controller may support fewer output channels than this value
+by setting the channel number of unused channels to zero.
 
 Generation of pin overwrite is enabled by ``CONFIG_PWM_OVERWRITE`` option.
 This supports generation of a pin overwrite with 0 or 1 without the need to
