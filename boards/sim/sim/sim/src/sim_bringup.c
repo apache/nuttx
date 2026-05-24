@@ -43,6 +43,7 @@
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
+#include <nuttx/ioexpander/gpio.h>
 #include <nuttx/sensors/fakesensor.h>
 #include <nuttx/sensors/mpu60x0.h>
 #include <nuttx/sensors/wtgahrs2.h>
@@ -72,6 +73,10 @@
 
 #ifdef CONFIG_TIMER_WDOG
 #include <nuttx/timers/timer_wdog.h>
+#endif
+
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+#include "sim_gpiochip.h"
 #endif
 
 #include "sim_internal.h"
@@ -121,6 +126,20 @@ int sim_bringup(void)
   struct spi_dev_s *spidev;
 #endif
   int ret = OK;
+
+#ifdef CONFIG_SIM_GPIOCHIP_FTDI
+  /* Initialize the FT2232H GPIO device
+   * pass a parameter defining which pins will be input (0) and
+   * which will be output (1).
+   * 0xf0 = AD0-AD3: Input; AD4-AD7: Output.
+   */
+
+  ret = sim_gpiochip_initialize(0xf0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize FT2232H: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_BINFS
   /* Mount the binfs file system */
