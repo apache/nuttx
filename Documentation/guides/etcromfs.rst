@@ -125,7 +125,7 @@ In order to modify the start-up behavior, there are three things to study:
         `http://romfs.sourceforge.net <http://romfs.sourceforge.net/>`__)
         or included within the NuttX buildroot toolchain. There is also a
         snapshot available in the NuttX tools repository
-        `here <https://bitbucket.org/nuttx/tools/src/master/genromfs-0.5.2.tar.gz>`__.
+        `here <https://github.com/patacongo/tools/blob/main/genromfs-0.5.2.tar.gz>`__.
 
      #. The ``xxd`` tool that is used to generate the C header files (xxd
         is a normal part of a complete Linux or Cygwin installation,

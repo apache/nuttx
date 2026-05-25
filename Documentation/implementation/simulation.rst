@@ -146,7 +146,7 @@ The simulation's serial console is provided by wrapping host *stdin* and *stdout
 Host File System Access
 -----------------------
 
-Host file system access is supported via the *nxfuse* user-space file system that you can find in the NuttX https://bitbucket.org/nuttx/tools/src/master/nxfuse/ repository.  Instructions for using the *nxfuse* file system can be found in a https://bitbucket.org/nuttx/tools/src/master/nxfuse/README.txt in that repository directory.
+Host file system access is supported via the *nxfuse* user-space file system that you can find in the NuttX https://github.com/patacongo/tools/tree/main/nxfuse repository.  Instructions for using the *nxfuse* file system can be found in a https://github.com/patacongo/tools/blob/main/nxfuse/README.txt in that repository directory.
 
 Networking
 ----------
@@ -194,7 +194,7 @@ And you can enable some additional debug output with:
 
     Remove:  # CONFIG_DEBUG_SCHED is not set
     Add:     CONFIG_DEBUG_SCHED=y
-    
+
     Remove:  # CONFIG_SCHED_INSTRUMENTATION is not set
     Add:     CONFIG_SCHED_INSTRUMENTATION=y
 

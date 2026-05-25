@@ -50,7 +50,7 @@ RUN mkdir -p /tools
 WORKDIR /tools
 
 RUN mkdir -p /tools/nuttx-tools
-RUN curl -s -L https://bitbucket.org/nuttx/tools/get/9ad3e1ee75c7.tar.gz \
+RUN curl -s -L https://github.com/patacongo/tools/archive/9ad3e1ee75c7d39bfee8019ce44f4fd035d89584.tar.gz \
   | tar -C nuttx-tools --strip-components=1 -xz
 
 RUN mkdir -p /tools/bloaty \
