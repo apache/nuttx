@@ -152,6 +152,21 @@ config I2C_DUMMY
 		dummy targets on this bus without adding hardcoded devices to the
 		common driver.
 
+config I2C_RPMSG
+	bool "RPMSG I2C controller"
+	default n
+	depends on RPMSG
+	---help---
+		Enable an I2C lower-half that forwards I2C transfers to a remote
+		NuttX instance over RPMSG.
+
+config I2C_RPMSG_SERVER
+	bool "RPMSG I2C server"
+	default n
+	depends on RPMSG
+	---help---
+		Export a local I2C lower-half to remote RPMSG I2C clients.
+
 config I2C_DRIVER
 	bool "I2C character driver"
 	default n
