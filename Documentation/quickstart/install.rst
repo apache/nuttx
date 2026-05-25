@@ -41,8 +41,8 @@ First, install the following set of system dependencies according to your Operat
       $ expat-devel gcc-c++ g++ picocom uboot-tools util-linux
 
   .. tab:: macOS
-  
-    Run the following command to install packages:  
+
+    Run the following command to install packages:
 
     .. code-block:: console
 
@@ -80,7 +80,7 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
 which is exposed via a series of interactive menu-based *frontends*, part of the
 ``kconfig-frontends`` package. Depending on your OS you may use a precompiled
 package or you will have to build it from source, which is available in the
-`NuttX tools repository <https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/>`_:
+`NuttX tools repository <https://github.com/patacongo/tools/tree/main/kconfig-frontends>`_:
 
 .. tabs::
 
@@ -90,7 +90,7 @@ package or you will have to build it from source, which is available in the
 
   .. code-tab:: console Ubuntu 18.04 LTS and earlier
 
-    $ git clone https://bitbucket.org/nuttx/tools.git
+    $ git clone https://github.com/patacongo/tools
     $ cd tools/kconfig-frontends
     $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
     $ make
@@ -98,7 +98,7 @@ package or you will have to build it from source, which is available in the
 
   .. code-tab:: console Fedora
 
-    $ git clone https://bitbucket.org/nuttx/tools.git
+    $ git clone https://github.com/patacongo/tools
     $ cd tools/kconfig-frontends
     $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
     $ aclocal
@@ -108,7 +108,7 @@ package or you will have to build it from source, which is available in the
 
   .. code-tab:: console macOS
 
-    $ git clone https://bitbucket.org/nuttx/tools.git
+    $ git clone https://github.com/patacongo/tools
     $ cd tools/kconfig-frontends
     $ patch < ../kconfig-macos.diff -p 1
     $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
@@ -158,13 +158,13 @@ ARM architecture:
     For 32 bit ARM targets, such as STM32:
 
     .. code-block:: console
-      
+
       $ brew install --cask gcc-arm-embedded
 
     For 64 bit ARM targets, such as Allwinner A64:
 
     .. code-block:: console
-      
+
       $ brew install --cask gcc-aarch64-embedded
 
   .. tab:: From arm.com
@@ -203,7 +203,7 @@ ARM architecture:
   architectures in the Apache NuttX CI helper
   `script <https://github.com/apache/nuttx/tree/master/tools/ci/cibuild.sh>`_
   and Docker `container <https://github.com/apache/nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
-  
+
 .. todo::
   Required toolchain should be part of each arch documentation (see `relevant issue <https://github.com/apache/nuttx/issues/2409>`_).
 
@@ -221,7 +221,7 @@ repositories (recommended). Otherwise you can choose to download any
 .. tabs::
 
   .. tab:: Clone git repositories
-  
+
     .. code-block:: console
 
        $ mkdir nuttxspace
@@ -235,21 +235,21 @@ repositories (recommended). Otherwise you can choose to download any
 
        $ mkdir nuttxspace
        $ cd nuttxspace
-       $ curl -L https://github.com/apache/nuttx/tarball/master -o nuttx.tar.gz 
+       $ curl -L https://github.com/apache/nuttx/tarball/master -o nuttx.tar.gz
        $ curl -L https://github.com/apache/nuttx-apps/tarball/master -o apps.tar.gz
        $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
        $ tar zxf apps.tar.gz --one-top-level=apps --strip-components 1
-       
+
     There are also ``.zip`` archives available (useful for Windows users): just replace ``tarball`` with
     ``zipball``.
 
   .. tab:: Download stable release
-  
+
     Go to `releases <https://nuttx.apache.org/download/>`_ and choose a version to download. The following
     example uses version 12.2.1:
 
     .. code-block:: console
-    
+
        $ mkdir nuttxspace
        $ cd nuttxspace
        $ curl -L https://www.apache.org/dyn/closer.lua/nuttx/12.2.1/apache-nuttx-12.2.1.tar.gz?action=download -o nuttx.tar.gz
