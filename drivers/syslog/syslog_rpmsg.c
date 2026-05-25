@@ -37,6 +37,7 @@
 #include <nuttx/arch.h>
 #endif
 
+#include <nuttx/init.h>
 #include <nuttx/irq.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 
@@ -148,7 +149,7 @@ static bool syslog_rpmsg_transfer(FAR struct syslog_rpmsg_s *priv, bool wait)
   uint32_t len_end;
   uint32_t len;
 
-  if (!is_rpmsg_ept_ready(&priv->ept))
+  if (g_nx_initstate >= OSINIT_RESET || !is_rpmsg_ept_ready(&priv->ept))
     {
       return false;
     }
