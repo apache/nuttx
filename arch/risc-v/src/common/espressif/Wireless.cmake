@@ -40,15 +40,86 @@ target_include_directories(
 
 nuttx_add_extra_library(
   ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/lib/${CHIP_SERIES}/libphy.a
-  ${ESP_HAL_3RDPARTY_REPO}/components/esp_coex/lib/${CHIP_SERIES}/libcoexist.a
-  ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libmesh.a)
+  ${ESP_HAL_3RDPARTY_REPO}/components/esp_coex/lib/${CHIP_SERIES}/libcoexist.a)
+
+if(NOT CONFIG_ARCH_CHIP_ESP32H2)
+  nuttx_add_extra_library(
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libmesh.a
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libespnow.a)
+endif()
+
+# ##############################################################################
+# ESP32-C6 / ESP32-H2 BLE host and controller sources
+# ##############################################################################
+
+if((CONFIG_ARCH_CHIP_ESP32C6 OR CONFIG_ARCH_CHIP_ESP32H2)
+   AND CONFIG_ESPRESSIF_BLE)
+  target_include_directories(
+    arch
+    PRIVATE
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/osi/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/port
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/host/nimble/nimble/porting/nimble/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/host/nimble/port/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/include/${CHIP_SERIES}/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/transport/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_common/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/include
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/${CHIP_SERIES}/include
+      ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/nimble/include)
+
+  set(ESP_BLE_HOST_SRCS
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/src/ecc.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/src/ecc_dh.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/src/ecc_platform_specific.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/port/esp_tinycrypt_port.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/src/sha256.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/common/tinycrypt/src/utils.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/mem/bt_osi_mem.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/mem/os_msys_init.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/transport/src/hci_transport.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/porting/transport/driver/vhci/hci_driver_standard.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/${CHIP_SERIES}/ble.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/${CHIP_SERIES}/bt.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_security/ecc_hal.c
+      ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/btbb_init.c
+      ${ESP_HAL_3RDPARTY_REPO}/nuttx/src/platform/nimble/src/npl_os.c)
+
+  target_sources(arch PRIVATE ${ESP_BLE_HOST_SRCS})
+
+  target_compile_definitions(arch PRIVATE ESP_PLATFORM=1)
+
+  if(CONFIG_ARCH_CHIP_ESP32H2)
+    target_sources(
+      arch
+      PRIVATE
+        ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/lib_printf.c
+        ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/phy_common.c
+        ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/src/phy_init_esp32hxx.c)
+  endif()
+endif()
+
+# ##############################################################################
+# BLE prebuilt libraries (Wireless.mk lines 30-32, 65-72; chip Make.defs)
+# ##############################################################################
 
 if(CONFIG_ESPRESSIF_BLE)
   nuttx_add_extra_library(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_phy/lib/${CHIP_SERIES}/libbtbb.a)
+
   if(CONFIG_ARCH_CHIP_ESP32C3)
     nuttx_add_extra_library(
-      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32c3_family/esp32c3/libbtdm_app.a
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32c3_family/${CHIP_SERIES}/libbtdm_app.a
+    )
+  elseif(CONFIG_ARCH_CHIP_ESP32C6)
+    nuttx_add_extra_library(
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32c6/esp32c6-bt-lib/esp32c6/libble_app.a
+    )
+  elseif(CONFIG_ARCH_CHIP_ESP32H2)
+    nuttx_add_extra_library(
+      ${ESP_HAL_3RDPARTY_REPO}/components/bt/controller/lib_esp32h2/esp32h2-bt-lib/libble_app.a
     )
   endif()
 endif()
@@ -57,8 +128,7 @@ if(CONFIG_ESPRESSIF_WIFI)
   nuttx_add_extra_library(
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libcore.a
     ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libnet80211.a
-    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libpp.a
-    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libespnow.a)
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libpp.a)
   if(CONFIG_WPA_WAPI_PSK)
     nuttx_add_extra_library(
       ${ESP_HAL_3RDPARTY_REPO}/components/esp_wifi/lib/${CHIP_SERIES}/libwapi.a)

@@ -157,7 +157,9 @@ if(CONFIG_ESPRESSIF_WIRELESS)
     list(APPEND SRCS esp_wifi_api.c)
     list(APPEND SRCS esp_wlan_netdev.c)
   endif()
-  list(APPEND SRCS esp_wifi_utils.c)
+  if(NOT CONFIG_ARCH_CHIP_ESP32H2)
+    list(APPEND SRCS esp_wifi_utils.c)
+  endif()
 endif()
 
 if(CONFIG_ESP_MCPWM)
@@ -221,7 +223,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      e8d8638febf5310bf5b8f9bd04cf7fab9e9a4cb0
+      0eb59f7e02a4735f2b9a78797e691b66740fcadb
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 
@@ -321,6 +323,8 @@ if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
       COMMAND
         git submodule --quiet update --init --depth=1 components/esp_phy/lib
         components/esp_wifi/lib components/bt/controller/lib_esp32c3_family
+        components/bt/controller/lib_esp32c6/esp32c6-bt-lib
+        components/bt/controller/lib_esp32h2/esp32h2-bt-lib
         components/esp_coex/lib
       WORKING_DIRECTORY ${ESP_HAL_3RDPARTY_REPO}
       RESULT_VARIABLE GIT_SUBMODULE_RESULT)

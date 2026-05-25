@@ -2062,7 +2062,7 @@ config ESPRESSIF_WIFI
 
 config ESPRESSIF_BLE
 	bool "BLE"
-	depends on ARCH_CHIP_ESP32C3
+	depends on !ARCH_CHIP_ESP32P4
 	default n
 	select ESPRESSIF_WIRELESS
 	---help---
