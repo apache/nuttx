@@ -217,15 +217,24 @@ static int sim_x11untraperrors(Display *display)
 
 static void sim_x11uninit(void)
 {
+  Display *display;
+
   if (g_display == NULL)
     {
       return;
     }
 
+  /* Publish shutdown before tearing down the X connection so the event
+   * polling path stops touching a stale Display pointer.
+   */
+
+  display = g_display;
+  g_display = NULL;
+
 #ifndef CONFIG_SIM_X11NOSHM
   if (g_shmcheckpoint > 4)
     {
-      XShmDetach(g_display, &g_xshminfo);
+      XShmDetach(display, &g_xshminfo);
     }
 
   if (g_shmcheckpoint > 3)
@@ -251,10 +260,10 @@ static void sim_x11uninit(void)
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_SIM_BUTTONS)
-  XUngrabButton(g_display, Button1, AnyModifier, g_window);
+  XUngrabButton(display, Button1, AnyModifier, g_window);
 #endif
 
-  XCloseDisplay(g_display);
+  XCloseDisplay(display);
 }
 
 /****************************************************************************
