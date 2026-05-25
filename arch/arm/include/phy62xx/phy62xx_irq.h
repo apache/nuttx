@@ -44,7 +44,7 @@
  * memory in the IRQ to handle mapping tables.
  *
  * Processor Exceptions (vectors 0-15).  These common definitions can be
- * found in nuttx/arch/arm/include/stm32f0l0g0/irq.h
+ * found in nuttx/arch/arm/include/phy62xx/irq.h
  */
 
 #define PHY62XX_IRQ_BB_IRQn       (PHY62XX_IRQ_EXTINT + 4)         /* 4: RCC and CRS */

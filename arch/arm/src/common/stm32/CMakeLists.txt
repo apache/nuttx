@@ -467,6 +467,12 @@ if(CONFIG_ARCH_CORTEXM0)
     list(APPEND SRCS stm32_aes_m0_v1.c)
   endif()
 
+  if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE
+     AND CONFIG_STM32_AES
+     AND CONFIG_STM32_HAVE_IP_AES_M0_V1)
+    list(APPEND SRCS stm32_crypto_m0_v1.c)
+  endif()
+
   if(CONFIG_STM32_RNG AND CONFIG_STM32_HAVE_IP_RNG_M0_V1)
     list(APPEND SRCS stm32_rng_m0_v1.c)
   endif()

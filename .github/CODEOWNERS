@@ -905,9 +905,7 @@ arch/arm/include/mps/irq.h anjiahao@xiaomi.com alin.jerpelea@sony.com
 arch/arm/include/mx8mp/chip.h philippe.leduc@wandercraft.eu alin.jerpelea@sony.com
 arch/arm/include/mx8mp/irq.h philippe.leduc@wandercraft.eu alin.jerpelea@sony.com
 arch/arm/include/mx8mp/mx8mp_irq.h philippe.leduc@wandercraft.eu devel@sumpfralle.de alin.jerpelea@sony.com
-
 arch/arm/include/nrf* raiden00@railab.me alin.jerpelea@sony.com
-
 arch/arm/include/nuc1xx/chip.h alin.jerpelea@sony.com loketep@yahoo.com xiaoxiang@xiaomi.com
 arch/arm/include/nuc1xx/irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/include/nuc1xx/nuc120_irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
@@ -974,17 +972,17 @@ arch/arm/include/stm32/stm32f37xxx_irq.h 59230071+hartmannathan@users.noreply.gi
 arch/arm/include/stm32/stm32f40xxx_irq.h gwenj@trabucayre.com paul-a.patience@polymtl.ca david_s5@usa.net alin.jerpelea@sony.com
 arch/arm/include/stm32/stm32g4xxxx_irq.h raiden00@railab.me alin.jerpelea@sony.com devel@sumpfralle.de gustavo.nihei@espressif.com
 arch/arm/include/stm32/stm32l15xxx_irq.h 59230071+hartmannathan@users.noreply.github.com david_s5@usa.net alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/include/stm32f0l0g0/chip.h raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com tbennett@2g-eng.com
-arch/arm/include/stm32f0l0g0/irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me gustavo.nihei@espressif.com
-arch/arm/include/stm32f0l0g0/stm32c0_irq.h raiden00@railab.me
-arch/arm/include/stm32f0l0g0/stm32f0_irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
-arch/arm/include/stm32f0l0g0/stm32g0_irq.h dpo@certi.org.br 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com kwilson@2g-eng.com
-arch/arm/include/stm32f0l0g0/stm32l0_irq.h alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
+arch/arm/include/stm32c0/chip.h raiden00@railab.me
+arch/arm/include/stm32c0/irq.h raiden00pl@gmail.com dpo@certi.org.br raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com
+arch/arm/include/stm32f0/chip.h raiden00@railab.me juha.niskanen@haltian.com dave@marples.net acassis@gmail.com
+arch/arm/include/stm32f0/irq.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com peter.barada@gmail.com
 arch/arm/include/stm32f7/chip.h david_s5@usa.net alin.jerpelea@sony.com bob.feretich@rafresearch.com dave@marples.net
 arch/arm/include/stm32f7/irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com bob.feretich@rafresearch.com david_s5@usa.net
 arch/arm/include/stm32f7/stm32f72xx73xx_irq.h bob.feretich@rafresearch.com alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com gustavo.nihei@espressif.com
 arch/arm/include/stm32f7/stm32f74xx75xx_irq.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com gustavo.nihei@espressif.com titus@elbe-informatik.de
 arch/arm/include/stm32f7/stm32f76xx77xx_irq.h 59230071+hartmannathan@users.noreply.github.com david_s5@usa.net alin.jerpelea@sony.com gustavo.nihei@espressif.com
+arch/arm/include/stm32g0/chip.h raiden00@railab.me
+arch/arm/include/stm32g0/irq.h raiden00pl@gmail.com dpo@certi.org.br raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com
 arch/arm/include/stm32h5/chip.h kwilson@2g-eng.com tbennett@2g-eng.com alin.jerpelea@sony.com
 arch/arm/include/stm32h5/irq.h kwilson@2g-eng.com alin.jerpelea@sony.com
 arch/arm/include/stm32h5/stm32h5xx_irq.h kwilson@2g-eng.com alin.jerpelea@sony.com
@@ -994,6 +992,8 @@ arch/arm/include/stm32h7/stm32h7x3xx_irq.h simon@leitwert.ch David.Sidrane@NscDg
 arch/arm/include/stm32h7/stm32h7x5xx_cpu2_irq.h raiden00@railab.me alin.jerpelea@sony.com
 arch/arm/include/stm32h7/stm32h7x5xx_irq.h raiden00@railab.me alin.jerpelea@sony.com
 arch/arm/include/stm32h7/stm32h7x7xx_irq.h 59230071+hartmannathan@users.noreply.github.com lwazeh@gmail.com alin.jerpelea@sony.com gustavo.nihei@espressif.com
+arch/arm/include/stm32l0/chip.h raiden00@railab.me
+arch/arm/include/stm32l0/irq.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com peter.barada@gmail.com 59230071+hartmannathan@users.noreply.github.com
 arch/arm/include/stm32l4/chip.h juha.niskanen@haltian.com sebastien@lorquet.fr dave@marples.net alin.jerpelea@sony.com
 arch/arm/include/stm32l4/irq.h sebastien@lorquet.fr 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com juha.niskanen@haltian.com
 arch/arm/include/stm32l4/stm32l4x3xx_irq.h juha.niskanen@haltian.com 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com daniel.carvalho@ufu.br
@@ -3431,7 +3431,6 @@ arch/arm/src/rp2040/rp2040_ws2812.h 58759586+curuvar@users.noreply.github.com xi
 arch/arm/src/rp2040/rp2040_ws2812.pio 58759586+curuvar@users.noreply.github.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com devel@sumpfralle.de
 arch/arm/src/rp2040/rp2040_xosc.c y.512.nakamura@gmail.com ian@iandouglasscott.com xiaoxiang@xiaomi.com yinshengkai@xiaomi.com
 arch/arm/src/rp2040/rp2040_xosc.h y.512.nakamura@gmail.com alin.jerpelea@sony.com
-
 arch/arm/src/rp23xx/* marco.casaroli@gmail.com alin.jerpelea@sony.com bijunda@dreame.tech
 arch/arm/src/rtl8720c/* jerry_tang@realsil.com.cn petro.karashchenko@gmail.com alin.jerpelea@sony.com
 arch/arm/src/s32k1xx/* jari.vanewijk@nxp.com peter.vanderperk@nxp.com David.Sidrane@NscDg.com alin.jerpelea@sony.com gustavo.nihei@espressif.com
@@ -3440,7 +3439,6 @@ arch/arm/src/sama5/* alin.jerpelea@sony.com adam@adamfeuer.com 56726697+TimJTi@u
 arch/arm/src/samd2l2/* alin.jerpelea@sony.com
 arch/arm/src/samd5e5/* alin.jerpelea@sony.com xiaoxiang@xiaomi.com leomar@falker.com.br
 arch/arm/src/samv7/* michallenc@seznam.cz petro.karashchenko@gmail.com pressste@fel.cvut.cz alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-
 arch/arm/src/stm32/Kconfig raiden00pl@gmail.com raiden00@railab.me danieloak@gmail.com
 arch/arm/src/stm32/chip.h raiden00pl@gmail.com alin.jerpelea@sony.com paul-a.patience@polymtl.ca
 arch/arm/src/stm32/hardware/stm32_adc.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
@@ -3746,142 +3744,38 @@ arch/arm/src/stm32/stm32l15xx_flash.c alin.jerpelea@sony.com abdelatif.guettouch
 arch/arm/src/stm32/stm32l15xxx_alarm.h juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
 arch/arm/src/stm32/stm32l15xxx_rcc.c 59230071+hartmannathan@users.noreply.github.com juha.niskanen@haltian.com alin.jerpelea@sony.com raiden00pl@gmail.com
 arch/arm/src/stm32/stm32l15xxx_rtcc.c juha.niskanen@haltian.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/Kconfig dpo@certi.org.br raiden00@railab.me kwilson@2g-eng.com tbennett@2g-eng.com
-arch/arm/src/stm32f0l0g0/chip.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_adc.h tbennett@2g-eng.com alin.jerpelea@sony.com raiden00@railab.me kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_aes.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_can.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_comp.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_crc.h alin.jerpelea@sony.com devel@sumpfralle.de
-arch/arm/src/stm32f0l0g0/hardware/stm32_crs.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com devel@sumpfralle.de
-arch/arm/src/stm32f0l0g0/hardware/stm32_dac.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_dbgmcu.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_dma_v1.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_dmamux.h 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_exti.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_fdcan.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_flash.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_gpio.h alin.jerpelea@sony.com raiden00@railab.me hartman.nathan@gmail.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_i2c.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_memorymap.h alin.jerpelea@sony.com acassis@gmail.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_pinmap.h alin.jerpelea@sony.com David.Sidrane@NscDg.com acassis@gmail.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_pwr.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_rcc.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_rng.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_rtcc.h alin.jerpelea@sony.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_spi.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_syscfg.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_tim.h dpo@certi.org.br alin.jerpelea@sony.com raiden00@railab.me gvr@certi.org.br
-arch/arm/src/stm32f0l0g0/hardware/stm32_uart.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_uart_v1.h alin.jerpelea@sony.com petro.karashchenko@gmail.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_uart_v2.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com petro.karashchenko@gmail.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_usbdev.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32_wdg.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32_wdt.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_dmamux.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_exti.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_flash.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_memorymap.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_pinmap.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_pwr.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32c0_rcc.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32f03x_memorymap.h acassis@gmail.com alin.jerpelea@sony.com raiden00@railab.me petro.karashchenko@gmail.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f03x_pinmap.h acassis@gmail.com David.Sidrane@NscDg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f03x_pinmap_legacy.h David.Sidrane@NscDg.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f05x_pinmap.h David.Sidrane@NscDg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f05x_pinmap_legacy.h David.Sidrane@NscDg.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f05xf07xf09x_memorymap.h alin.jerpelea@sony.com raiden00@railab.me petro.karashchenko@gmail.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f07x_pinmap.h David.Sidrane@NscDg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f07x_pinmap_legacy.h David.Sidrane@NscDg.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f09x_pinmap.h David.Sidrane@NscDg.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f09x_pinmap_legacy.h David.Sidrane@NscDg.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f0_exti.h alin.jerpelea@sony.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f0_flash.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f0_pwr.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32f0_rcc.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32f0_syscfg.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_dmamux.h kwilson@2g-eng.com raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_exti.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_flash.h tbennett@2g-eng.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_memorymap.h raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com petro.karashchenko@gmail.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_pinmap.h dpo@certi.org.br David.Sidrane@NscDg.com raiden00@railab.me gvr@certi.org.br
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_pinmap_legacy.h David.Sidrane@NscDg.com tbennett@2g-eng.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_pwr.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_rcc.h raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_syscfg.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_exti.h alin.jerpelea@sony.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_flash.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_memorymap.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_pinmap.h David.Sidrane@NscDg.com raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_pinmap_legacy.h David.Sidrane@NscDg.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_pwr.h alin.jerpelea@sony.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_rcc.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/hardware/stm32l0_syscfg.h raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_adc.c raiden00@railab.me xiaoxiang@xiaomi.com tbennett@2g-eng.com kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_adc.h raiden00@railab.me xiaoxiang@xiaomi.com kwilson@2g-eng.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_aes.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com wangbowen6@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_aes.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_crypto.c anjiahao@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_dma.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_dma.h 59230071+hartmannathan@users.noreply.github.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_dma_v1.c alin.jerpelea@sony.com anjiahao@xiaomi.com xiaoxiang@xiaomi.com abdelatif.guettouche@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_dma_v1mux.c raiden00@railab.me kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_exti.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_exti_gpio.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_fdcan.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_fdcan.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_fdcan_sock.c raiden00@railab.me carlossanchez@geotab.com
-arch/arm/src/stm32f0l0g0/stm32_flash.c tbennett@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_flash.h tbennett@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_gpio.c alin.jerpelea@sony.com hujun5@xiaomi.com xiaoxiang@xiaomi.com David.Sidrane@NscDg.com
-arch/arm/src/stm32f0l0g0/stm32_gpio.h alin.jerpelea@sony.com t-ando@advaly.co.jp 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_hsi48.c alin.jerpelea@sony.com kwilson@2g-eng.com devel@sumpfralle.de xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_hsi48.h alin.jerpelea@sony.com devel@sumpfralle.de
-arch/arm/src/stm32f0l0g0/stm32_i2c.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com yamamoto@midokura.com
-arch/arm/src/stm32f0l0g0/stm32_i2c.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com juha.niskanen@haltian.com
-arch/arm/src/stm32f0l0g0/stm32_idle.c alin.jerpelea@sony.com gustavo.nihei@espressif.com abdelatif.guettouche@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_irq.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com wangzhi16@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_iwdg.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_lowputc.c raiden00@railab.me alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_lowputc.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_lowputc_v1.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com hartman.nathan@gmail.com raiden00pl@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_lowputc_v2.c alin.jerpelea@sony.com raiden00pl@gmail.com xiaoxiang@xiaomi.com hartman.nathan@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_lse.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/stm32_lsi.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_pwm.c dpo@certi.org.br gvr@certi.org.br anthony@vergeaero.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
-arch/arm/src/stm32f0l0g0/stm32_pwm.h dpo@certi.org.br alin.jerpelea@sony.com gvr@certi.org.br anchao@xiaomi.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_pwr.c dpo@certi.org.br alin.jerpelea@sony.com huangqi3@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_pwr.h alin.jerpelea@sony.com dpo@certi.org.br
-arch/arm/src/stm32f0l0g0/stm32_rcc.c alin.jerpelea@sony.com raiden00@railab.me 85544393+oreh-a@users.noreply.github.com alexander.oryshchenko@ge.com
-arch/arm/src/stm32f0l0g0/stm32_rcc.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_rng.c alin.jerpelea@sony.com anjiahao@xiaomi.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_serial.c alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_serial.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_serial_v1.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com David.Sidrane@NscDg.com yangsong8@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_serial_v2.c alin.jerpelea@sony.com David.Sidrane@NscDg.com raiden00@railab.me xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_spi.c raiden00@railab.me petro.karashchenko@gmail.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_spi.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me petro.karashchenko@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_start.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me yinshengkai@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_start.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_tim.c dpo@certi.org.br xiaoxiang@xiaomi.com yamamoto@midokura.com anthony@vergeaero.com raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_tim.h dpo@certi.org.br xiaoxiang@xiaomi.com alin.jerpelea@sony.com danieloak@gmail.com
-arch/arm/src/stm32f0l0g0/stm32_tim_lowerhalf.c dpo@certi.org.br xiaoxiang@xiaomi.com yamamoto@midokura.com alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_timerisr.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_uart.h alin.jerpelea@sony.com
-arch/arm/src/stm32f0l0g0/stm32_uid.c kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_uid.h kwilson@2g-eng.com
-arch/arm/src/stm32f0l0g0/stm32_usbdev.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com wangzhi16@xiaomi.com gustavo.nihei@espressif.com
-arch/arm/src/stm32f0l0g0/stm32_usbdev.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32_wdg.h raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32_wwdg.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32c0_rcc.c raiden00@railab.me
-arch/arm/src/stm32f0l0g0/stm32f0_rcc.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com alexander.oryshchenko@ge.com
-arch/arm/src/stm32f0l0g0/stm32f0l0_pwr.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32g0_flash.c tbennett@2g-eng.com simbit18@gmail.com
-arch/arm/src/stm32f0l0g0/stm32g0_pwr.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32f0l0g0/stm32g0_rcc.c alin.jerpelea@sony.com dpo@certi.org.br raiden00@railab.me raiden00pl@gmail.com
-arch/arm/src/stm32f0l0g0/stm32l0_rcc.c raiden00@railab.me xiaoxiang@xiaomi.com alin.jerpelea@sony.com alexander.oryshchenko@ge.com
+arch/arm/src/stm32c0/Kconfig raiden00@railab.me
+arch/arm/src/stm32c0/chip.h alin.jerpelea@sony.com acassis@gmail.com raiden00@railab.me raiden00pl@gmail.com
+arch/arm/src/stm32c0/hardware/stm32_memorymap.h raiden00@railab.me
+arch/arm/src/stm32c0/hardware/stm32_pinmap.h raiden00@railab.me
+arch/arm/src/stm32c0/hardware/stm32c0_dmamux.h raiden00pl@gmail.com raiden00@railab.me pettitkd@gmail.com alin.jerpelea@sony.com acassis@gmail.com
+arch/arm/src/stm32c0/hardware/stm32c0_exti.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32c0/hardware/stm32c0_flash.h raiden00@railab.me raiden00pl@gmail.com alin.jerpelea@sony.com
+arch/arm/src/stm32c0/hardware/stm32c0_memorymap.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com petro.karashchenko@gmail.com t-ando@advaly.co.jp
+arch/arm/src/stm32c0/hardware/stm32c0_pinmap.h raiden00@railab.me
+arch/arm/src/stm32c0/hardware/stm32c0_pwr.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32c0/hardware/stm32c0_rcc.h raiden00@railab.me
+arch/arm/src/stm32c0/stm32.h alin.jerpelea@sony.com raiden00pl@gmail.com pettitkd@gmail.com raiden00@railab.me acassis@gmail.com
+arch/arm/src/stm32c0/stm32_rcc.c raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com 85544393+oreh-a@users.noreply.github.com alexander.oryshchenko@ge.com
+arch/arm/src/stm32c0/stm32c0_rcc.c raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com dpo@certi.org.br juha.niskanen@haltian.com
+arch/arm/src/stm32f0/Kconfig acassis@gmail.com raiden00@railab.me jussi.kivilinna@haltian.com raiden00pl@gmail.com david_s5@nscdg.com
+arch/arm/src/stm32f0/chip.h alin.jerpelea@sony.com acassis@gmail.com raiden00@railab.me raiden00pl@gmail.com
+arch/arm/src/stm32f0/hardware/stm32_memorymap.h raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32_pinmap.h raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f03x_memorymap.h alin.jerpelea@sony.com acassis@gmail.com raiden00pl@gmail.com raiden00@railab.me petro.karashchenko@gmail.com
+arch/arm/src/stm32f0/hardware/stm32f03x_pinmap.h acassis@gmail.com David.Sidrane@NscDg.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+arch/arm/src/stm32f0/hardware/stm32f05x_pinmap.h acassis@gmail.com David.Sidrane@NscDg.com alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f05xf07xf09x_memorymap.h alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me petro.karashchenko@gmail.com david_s5@nscdg.com
+arch/arm/src/stm32f0/hardware/stm32f07x_pinmap.h David.Sidrane@NscDg.com raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+arch/arm/src/stm32f0/hardware/stm32f09x_pinmap.h David.Sidrane@NscDg.com alin.jerpelea@sony.com raiden00pl@gmail.com juha.niskanen@haltian.com raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f0_exti.h alin.jerpelea@sony.com raiden00@railab.me raiden00pl@gmail.com david_s5@usa.net bob.feretich@rafresearch.com
+arch/arm/src/stm32f0/hardware/stm32f0_flash.h alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f0_pwr.h acassis@gmail.com alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f0_rcc.h acassis@gmail.com raiden00pl@gmail.com alin.jerpelea@sony.com mrechte2@yahoo.com raiden00@railab.me
+arch/arm/src/stm32f0/hardware/stm32f0_syscfg.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00pl@gmail.com raiden00@railab.me
+arch/arm/src/stm32f0/stm32.h alin.jerpelea@sony.com raiden00pl@gmail.com pettitkd@gmail.com raiden00@railab.me acassis@gmail.com
+arch/arm/src/stm32f0/stm32_rcc.c raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com 85544393+oreh-a@users.noreply.github.com alexander.oryshchenko@ge.com
+arch/arm/src/stm32f0/stm32f0_rcc.c raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com piyushpatle228@gmail.com
 arch/arm/src/stm32f7/Kconfig david_s5@nscdg.com raiden00@railab.me david_s5@usa.net titus@elbe-informatik.de
 arch/arm/src/stm32f7/chip.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com Lok Tep  1 file changed, 1 insertion(+)
 arch/arm/src/stm32f7/hardware/stm32_adc.h alin.jerpelea@sony.com
@@ -4046,6 +3940,21 @@ arch/arm/src/stm32f7/stm32_waste.h ville.juven@unikie.com 101105604+simbit18@use
 arch/arm/src/stm32f7/stm32f72xx73xx_rcc.c bob.feretich@rafresearch.com alin.jerpelea@sony.com b.brandt@messwerk-gmbh.de ramtin@lambdaconcept.com
 arch/arm/src/stm32f7/stm32f74xx75xx_rcc.c david_s5@nscdg.com jussi.kivilinna@haltian.com alin.jerpelea@sony.com b.brandt@messwerk-gmbh.de
 arch/arm/src/stm32f7/stm32f76xx77xx_rcc.c david_s5@usa.net david_s5@nscdg.com titus@elbe-informatik.de jussi.kivilinna@haltian.com alin.jerpelea@sony.com
+arch/arm/src/stm32g0/Kconfig raiden00@railab.me
+arch/arm/src/stm32g0/chip.h alin.jerpelea@sony.com acassis@gmail.com raiden00@railab.me raiden00pl@gmail.com
+arch/arm/src/stm32g0/hardware/stm32_memorymap.h raiden00@railab.me
+arch/arm/src/stm32g0/hardware/stm32_pinmap.h raiden00@railab.me
+arch/arm/src/stm32g0/hardware/stm32g0_dmamux.h kwilson@2g-eng.com raiden00pl@gmail.com raiden00@railab.me pettitkd@gmail.com alin.jerpelea@sony.com
+arch/arm/src/stm32g0/hardware/stm32g0_exti.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32g0/hardware/stm32g0_flash.h tbennett@2g-eng.com raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me
+arch/arm/src/stm32g0/hardware/stm32g0_memorymap.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com petro.karashchenko@gmail.com kwilson@2g-eng.com
+arch/arm/src/stm32g0/hardware/stm32g0_pinmap.h raiden00pl@gmail.com dpo@certi.org.br raiden00@railab.me David.Sidrane@NscDg.com gvr@certi.org.br
+arch/arm/src/stm32g0/hardware/stm32g0_pwr.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me
+arch/arm/src/stm32g0/hardware/stm32g0_rcc.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com kwilson@2g-eng.com tbennett@2g-eng.com
+arch/arm/src/stm32g0/hardware/stm32g0_syscfg.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32g0/stm32.h alin.jerpelea@sony.com raiden00pl@gmail.com pettitkd@gmail.com raiden00@railab.me acassis@gmail.com
+arch/arm/src/stm32g0/stm32_rcc.c raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com 85544393+oreh-a@users.noreply.github.com alexander.oryshchenko@ge.com
+arch/arm/src/stm32g0/stm32g0_rcc.c raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me dpo@certi.org.br juha.niskanen@haltian.com
 arch/arm/src/stm32h5/Kconfig kwilson@2g-eng.com tbennett@2g-eng.com 101105604+simbit18@users.noreply.github.com raiden00@railab.me jlange@2g-eng.com
 arch/arm/src/stm32h5/chip.h kwilson@2g-eng.com tbennett@2g-eng.com alin.jerpelea@sony.com
 arch/arm/src/stm32h5/hardware/stm32_adc.h tbennett@2g-eng.com 101105604+simbit18@users.noreply.github.com
@@ -4276,6 +4185,20 @@ arch/arm/src/stm32h7/stm32h743xx_flash.c javiercasas@geotab.com petro.karashchen
 arch/arm/src/stm32h7/stm32h7b3xx_flash.c javiercasas@geotab.com petro.karashchenko@gmail.com alin.jerpelea@sony.com lipengfei28@xiaomi.com
 arch/arm/src/stm32h7/stm32h7x3xx_rcc.c simon@leitwert.ch raiden00pl@gmail.com david.sidrane@nscdg.com raiden00@railab.me anthony@vergeaero.com
 arch/arm/src/stm32h7/stm32h7x7xx_rcc.c lwazeh@gmail.com anthony@vergeaero.com raiden00@railab.me alin.jerpelea@sony.com jfbblue0922@gmail.com
+arch/arm/src/stm32l0/Kconfig raiden00@railab.me
+arch/arm/src/stm32l0/chip.h alin.jerpelea@sony.com acassis@gmail.com raiden00@railab.me raiden00pl@gmail.com
+arch/arm/src/stm32l0/hardware/stm32_memorymap.h raiden00@railab.me
+arch/arm/src/stm32l0/hardware/stm32_pinmap.h raiden00@railab.me
+arch/arm/src/stm32l0/hardware/stm32l0_exti.h alin.jerpelea@sony.com raiden00pl@gmail.com raiden00@railab.me david_s5@usa.net bob.feretich@rafresearch.com
+arch/arm/src/stm32l0/hardware/stm32l0_flash.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me
+arch/arm/src/stm32l0/hardware/stm32l0_memorymap.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com juha.niskanen@haltian.com
+arch/arm/src/stm32l0/hardware/stm32l0_pinmap.h David.Sidrane@NscDg.com raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32l0/hardware/stm32l0_pwr.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me
+arch/arm/src/stm32l0/hardware/stm32l0_rcc.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com
+arch/arm/src/stm32l0/hardware/stm32l0_syscfg.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com acassis@gmail.com
+arch/arm/src/stm32l0/stm32.h alin.jerpelea@sony.com raiden00pl@gmail.com pettitkd@gmail.com raiden00@railab.me acassis@gmail.com
+arch/arm/src/stm32l0/stm32_rcc.c raiden00@railab.me alin.jerpelea@sony.com raiden00pl@gmail.com 85544393+oreh-a@users.noreply.github.com alexander.oryshchenko@ge.com
+arch/arm/src/stm32l0/stm32l0_rcc.c raiden00pl@gmail.com raiden00@railab.me juha.niskanen@haltian.com matteo.golin@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/Kconfig dev@ziggurat29.com danieloak@gmail.com juha.niskanen@haltian.com sebastien@lorquet.fr
 arch/arm/src/stm32l4/chip.h sebastien@lorquet.fr alin.jerpelea@sony.com juha.niskanen@haltian.com
 arch/arm/src/stm32l4/hardware/stm32l4_adc.h danieloak@gmail.com alin.jerpelea@sony.com anchao@xiaomi.com acassis@gmail.com
@@ -4698,12 +4621,10 @@ arch/arm/src/stm32wl5/stm32wl5_userspace.c michal.lyszczek@bofc.pl alin.jerpelea
 arch/arm/src/stm32wl5/stm32wl5_userspace.h michal.lyszczek@bofc.pl alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/stm32wl5_waste.c michal.lyszczek@bofc.pl alin.jerpelea@sony.com
 arch/arm/src/stm32wl5/stm32wl5_waste.h michal.lyszczek@bofc.pl alin.jerpelea@sony.com
-
 arch/arm/src/str71x/* alin.jerpelea@sony.com
 arch/arm/src/tiva/* alin.jerpelea@sony.com xiaoxiang@xiaomi.com hartman.nathan@gmail.com
 arch/arm/src/tlsr82/* wangbowen6@xiaomi.com devel@sumpfralle.de alin.jerpelea@sony.com
 arch/arm/src/tms570/* xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-
 arch/arm/src/xmc4/Kconfig 101105604+simbit18@users.noreply.github.com adrien.desproges@gmail.com nicolas.lemble@gmail.com acassis@gmail.com
 arch/arm/src/xmc4/chip.h alin.jerpelea@sony.com raiden00pl@gmail.com
 arch/arm/src/xmc4/hardware/xmc4_ccu4.h thomas.narayana-swamy@wandercraft.eu nicolas.lemble@gmail.com alin.jerpelea@sony.com adrien.desproges@gmail.com
@@ -10399,179 +10320,175 @@ boards/arm/stm32/viewtool-stm32f107/src/stm32_ssd1289.c alin.jerpelea@sony.com x
 boards/arm/stm32/viewtool-stm32f107/src/stm32_usbdev.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 boards/arm/stm32/viewtool-stm32f107/src/stm32_usbmsc.c alin.jerpelea@sony.com
 boards/arm/stm32/viewtool-stm32f107/src/viewtool_stm32f107.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com petro.karashchenko@gmail.com thomas.narayana-swamy@wandercraft.eu raiden00@railab.me
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/configs/adc/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/configs/nxlines_oled/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/include/board.h alin.jerpelea@sony.com raiden00@railab.me devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/scripts/ld.script alin.jerpelea@sony.com acassis@gmail.com cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/b-l072z-lrwan1.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_adc.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_lcd_ssd1306.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_spi.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/b-l072z-lrwan1/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/common/Kconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/common/Makefile raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/common/include/stm32_ssd1306.h raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/common/src/stm32_ssd1306.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-c071rb/Kconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/configs/jumbo/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/configs/nsh/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/include/board.h raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/scripts/flash.ld raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/nucleo-c071rb.h raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_adc.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_appinit.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_autoleds.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_boot.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_bringup.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_buttons.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c071rb/src/stm32_userleds.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/Kconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/configs/can/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/configs/cansock/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/configs/jumbo/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/configs/nsh/defconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/include/board.h raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/scripts/flash.ld raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/nucleo-c092rc.h raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_adc.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_appinit.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_autoleds.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_boot.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_bringup.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_buttons.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_can.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_cansock.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-c092rc/src/stm32_userleds.c raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-f072rb/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/nucleo-f072rb.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_autoleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com devel@sumpfralle.de
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f072rb/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/nucleo-f091rc.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_autoleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_spi.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-f091rc/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/Kconfig dpo@certi.org.br
-boards/arm/stm32f0l0g0/nucleo-g070rb/configs/nsh/defconfig dpo@certi.org.br gvr@certi.org.br xiaoxiang@xiaomi.com liguiding1@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/include/board.h dpo@certi.org.br alin.jerpelea@sony.com raiden00@railab.me gvr@certi.org.br anthony@vergeaero.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/scripts/ld.script dpo@certi.org.br alin.jerpelea@sony.com cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/nucleo-g070rb.h dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_appinit.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_autoleds.c dpo@certi.org.br alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_boot.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_bringup.c dpo@certi.org.br gvr@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_buttons.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_gpio.c dpo@certi.org.br xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_pwm.c dpo@certi.org.br alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_timer.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/include/board.h alin.jerpelea@sony.com raiden00@railab.me anthony@vergeaero.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/scripts/ld.script alin.jerpelea@sony.com dpo@certi.org.br acassis@gmail.com cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/nucleo-g071rb.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g071rb/src/stm32_buttons.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/Kconfig tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/configs/adc/defconfig tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/configs/adc_dma/defconfig kwilson@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/configs/nsh/defconfig tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/include/board.h tbennett@2g-eng.com kwilson@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/scripts/ld.script tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/nucleo-g0b1re.h tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_adc.c tbennett@2g-eng.com kwilson@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_appinit.c tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_autoleds.c tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_boot.c tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_bringup.c tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-g0b1re/src/stm32_buttons.c tbennett@2g-eng.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/include/board.h alin.jerpelea@sony.com raiden00@railab.me devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/scripts/ld.script alin.jerpelea@sony.com acassis@gmail.com cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/nucleo-l073rz.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_mfrc522.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_nrf24l01.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_spi.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/nucleo-l073rz/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_autoleds.c alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32f051-discovery.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/Kconfig alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_autoleds.c alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32f072-discovery/src/stm32f072-discovery.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/Kconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/stm32g071b-disco/configs/nsh/defconfig raiden00@railab.me xiaoxiang@xiaomi.com wangjianyu3@xiaomi.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/configs/oled/defconfig raiden00@railab.me xiaoxiang@xiaomi.com wangjianyu3@xiaomi.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/include/board.h raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/scripts/ld.script raiden00@railab.me cuiziwei@xiaomi.com alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_appinit.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_boot.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_bringup.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_djoystick.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_gpio.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_ina226.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_lcd_ssd1306.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_spi.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32_userleds.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32g071b-disco/src/stm32g071b-disco.h raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/Kconfig raiden00@railab.me
-boards/arm/stm32f0l0g0/stm32l0538-disco/configs/nsh/defconfig raiden00@railab.me xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/include/board.h raiden00@railab.me devel@sumpfralle.de alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/scripts/ld.script raiden00@railab.me cuiziwei@xiaomi.com alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32_appinit.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32_autoleds.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32_boot.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32_bringup.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32_buttons.c raiden00@railab.me alin.jerpelea@sony.com
-boards/arm/stm32f0l0g0/stm32l0538-disco/src/stm32l0538-disco.h raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/b-l072z-lrwan1/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32l0/b-l072z-lrwan1/configs/adc/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/configs/nxlines_oled/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/include/board.h alin.jerpelea@sony.com raiden00@railab.me devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32l0/b-l072z-lrwan1/scripts/ld.script alin.jerpelea@sony.com acassis@gmail.com cuiziwei@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/b-l072z-lrwan1.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_adc.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_lcd_ssd1306.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_spi.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/b-l072z-lrwan1/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32c0/nucleo-c071rb/Kconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/configs/jumbo/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/configs/nsh/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/include/board.h raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/scripts/flash.ld raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/nucleo-c071rb.h raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_adc.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_appinit.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_autoleds.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_boot.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_bringup.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_buttons.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c071rb/src/stm32_userleds.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/Kconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/configs/can/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/configs/cansock/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/configs/jumbo/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/configs/nsh/defconfig raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/include/board.h raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/scripts/flash.ld raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/nucleo-c092rc.h raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_adc.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_appinit.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_autoleds.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_boot.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_bringup.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_buttons.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_can.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_cansock.c raiden00@railab.me
+boards/arm/stm32c0/nucleo-c092rc/src/stm32_userleds.c raiden00@railab.me
+boards/arm/stm32f0/nucleo-f072rb/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32f0/nucleo-f072rb/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32f0/nucleo-f072rb/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32f0/nucleo-f072rb/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
+boards/arm/stm32f0/nucleo-f072rb/src/nucleo-f072rb.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_autoleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com devel@sumpfralle.de
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f072rb/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32f0/nucleo-f091rc/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32f0/nucleo-f091rc/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/nucleo-f091rc.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_autoleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_spi.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32f0/nucleo-f091rc/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g070rb/Kconfig dpo@certi.org.br
+boards/arm/stm32g0/nucleo-g070rb/configs/nsh/defconfig dpo@certi.org.br gvr@certi.org.br xiaoxiang@xiaomi.com liguiding1@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32g0/nucleo-g070rb/include/board.h dpo@certi.org.br alin.jerpelea@sony.com raiden00@railab.me gvr@certi.org.br anthony@vergeaero.com
+boards/arm/stm32g0/nucleo-g070rb/scripts/ld.script dpo@certi.org.br alin.jerpelea@sony.com cuiziwei@xiaomi.com
+boards/arm/stm32g0/nucleo-g070rb/src/nucleo-g070rb.h dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_appinit.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com 59230071+hartmannathan@users.noreply.github.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_autoleds.c dpo@certi.org.br alin.jerpelea@sony.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_boot.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_bringup.c dpo@certi.org.br gvr@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_buttons.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_gpio.c dpo@certi.org.br xiaoxiang@xiaomi.com alin.jerpelea@sony.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_pwm.c dpo@certi.org.br alin.jerpelea@sony.com
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_timer.c dpo@certi.org.br alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32g0/nucleo-g071rb/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32g0/nucleo-g071rb/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32g0/nucleo-g071rb/include/board.h alin.jerpelea@sony.com raiden00@railab.me anthony@vergeaero.com
+boards/arm/stm32g0/nucleo-g071rb/scripts/ld.script alin.jerpelea@sony.com dpo@certi.org.br acassis@gmail.com cuiziwei@xiaomi.com
+boards/arm/stm32g0/nucleo-g071rb/src/nucleo-g071rb.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g071rb/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32g0/nucleo-g071rb/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
+boards/arm/stm32g0/nucleo-g071rb/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g071rb/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g071rb/src/stm32_buttons.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32g0/nucleo-g0b1re/Kconfig tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/configs/adc/defconfig tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/configs/adc_dma/defconfig kwilson@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/configs/nsh/defconfig tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/include/board.h tbennett@2g-eng.com kwilson@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/scripts/ld.script tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/nucleo-g0b1re.h tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_adc.c tbennett@2g-eng.com kwilson@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_appinit.c tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_autoleds.c tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_boot.c tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_bringup.c tbennett@2g-eng.com
+boards/arm/stm32g0/nucleo-g0b1re/src/stm32_buttons.c tbennett@2g-eng.com
+boards/arm/stm32l0/nucleo-l073rz/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32l0/nucleo-l073rz/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/configs/sx127x/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/include/board.h alin.jerpelea@sony.com raiden00@railab.me devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32l0/nucleo-l073rz/scripts/ld.script alin.jerpelea@sony.com acassis@gmail.com cuiziwei@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/nucleo-l073rz.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_appinit.c alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_autoleds.c alin.jerpelea@sony.com raiden00@railab.me
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_boot.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_bringup.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_mfrc522.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_nrf24l01.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_spi.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32l0/nucleo-l073rz/src/stm32_sx127x.c alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32f0/stm32f051-discovery/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32f0/stm32f051-discovery/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_autoleds.c alin.jerpelea@sony.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f051-discovery/src/stm32f051-discovery.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f072-discovery/Kconfig alin.jerpelea@sony.com
+boards/arm/stm32f0/stm32f072-discovery/configs/nsh/defconfig alin.jerpelea@sony.com xiaoxiang@xiaomi.com liguiding1@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32f0/stm32f072-discovery/include/board.h alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com devel@sumpfralle.de anthony@vergeaero.com
+boards/arm/stm32f0/stm32f072-discovery/scripts/flash.ld alin.jerpelea@sony.com raiden00@railab.me cuiziwei@xiaomi.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_appinit.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com hartman.nathan@gmail.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_autoleds.c alin.jerpelea@sony.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_boot.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_bringup.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_buttons.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com gustavo.nihei@espressif.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32_userleds.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32f0/stm32f072-discovery/src/stm32f072-discovery.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com
+boards/arm/stm32g0/stm32g071b-disco/Kconfig raiden00@railab.me
+boards/arm/stm32g0/stm32g071b-disco/configs/nsh/defconfig raiden00@railab.me xiaoxiang@xiaomi.com wangjianyu3@xiaomi.com
+boards/arm/stm32g0/stm32g071b-disco/configs/oled/defconfig raiden00@railab.me xiaoxiang@xiaomi.com wangjianyu3@xiaomi.com
+boards/arm/stm32g0/stm32g071b-disco/include/board.h raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/scripts/ld.script raiden00@railab.me cuiziwei@xiaomi.com alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_appinit.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_boot.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_bringup.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_djoystick.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_gpio.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_ina226.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_lcd_ssd1306.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_spi.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32_userleds.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32g0/stm32g071b-disco/src/stm32g071b-disco.h raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/Kconfig raiden00@railab.me
+boards/arm/stm32l0/stm32l0538-disco/configs/nsh/defconfig raiden00@railab.me xiaoxiang@xiaomi.com dongjiuzhu1@xiaomi.com
+boards/arm/stm32l0/stm32l0538-disco/include/board.h raiden00@railab.me devel@sumpfralle.de alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/scripts/ld.script raiden00@railab.me cuiziwei@xiaomi.com alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32_appinit.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32_autoleds.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32_boot.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32_bringup.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32_buttons.c raiden00@railab.me alin.jerpelea@sony.com
+boards/arm/stm32l0/stm32l0538-disco/src/stm32l0538-disco.h raiden00@railab.me alin.jerpelea@sony.com
 boards/arm/stm32f7/common/Kconfig raiden00@railab.me acassis@gmail.com
 boards/arm/stm32f7/common/Makefile acassis@gmail.com alin.jerpelea@sony.com
 boards/arm/stm32f7/common/include/stm32_bh1750.h acassis@gmail.com alin.jerpelea@sony.com
