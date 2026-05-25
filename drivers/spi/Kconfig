@@ -264,6 +264,20 @@ config SPI_DUMMY
 		command-line validation. Board logic can register callback-backed
 		dummy devices on this bus without adding hardcoded devices to the
 		common driver.
+config SPI_RPMSG
+	bool "RPMSG SPI controller"
+	default n
+	depends on RPMSG && SPI_EXCHANGE
+	---help---
+		Enable an SPI lower-half that forwards SPI operations to a remote
+		NuttX instance over RPMSG.
+
+config SPI_RPMSG_SERVER
+	bool "RPMSG SPI server"
+	default n
+	depends on RPMSG && SPI_EXCHANGE
+	---help---
+		Export a local SPI lower-half to remote RPMSG SPI clients.
 
 config SPI_ICE40
 	bool "SPI iCE40 driver"
