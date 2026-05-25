@@ -255,6 +255,16 @@ config SPI_DRIVER
 		this driver is to support SPI testing.  It is not suitable for use
 		in any real driver application.
 
+config SPI_DUMMY
+	bool "Callback-backed dummy SPI bus"
+	default n
+	depends on SPI_EXCHANGE
+	---help---
+		Enable a dummy SPI lower-half intended for transport and
+		command-line validation. Board logic can register callback-backed
+		dummy devices on this bus without adding hardcoded devices to the
+		common driver.
+
 config SPI_ICE40
 	bool "SPI iCE40 driver"
 	default n

@@ -39,6 +39,10 @@ if(CONFIG_SPI)
     list(APPEND SRCS spi_slave_driver.c)
   endif()
 
+  if(CONFIG_SPI_DUMMY)
+    list(APPEND SRCS spi_dummy.c)
+  endif()
+
   # Include the selected SPI drivers
 
   if(CONFIG_SPI_BITBANG)
