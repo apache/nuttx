@@ -186,7 +186,9 @@
 #define RING_INIT(cap)                                   \
   {                                                      \
     .base.magic    = RING_MAGIC_READY,                   \
-    .base.capacity = cap,                                \
+    .base.capacity = (cap),                              \
+    .base.mask     = ((cap) & ((cap) - 1)) ? 0 :         \
+                     (cap) - 1,                          \
   }
 
 /* RING_DECLARE - declare a ring variable (uninitialized).
@@ -203,8 +205,7 @@
  */
 
 #define RING_DECLARE(name, type, cap)                    \
-  static_assert((cap) > 0 && ((cap) & ((cap) - 1)) == 0, \
-                "ring cap must be power-of-2");          \
+  static_assert((cap) > 0, "ring cap must be > 0");      \
   struct ring_##name##_s                                 \
   {                                                      \
     struct ring_s base;                                  \
@@ -290,6 +291,8 @@
           RING_FIELD(&ring->magic) = RING_MAGIC_INIT;    \
           UP_WMB();                                      \
           ring->capacity = (cap);                        \
+          ring->mask = ((cap) & ((cap) - 1)) ? 0 :       \
+                       (cap) - 1;                        \
           ring_reset(r);                                 \
           UP_WMB();                                      \
           RING_FIELD(&ring->magic) = RING_MAGIC_READY;   \
@@ -433,9 +436,10 @@ struct aligned_data(CACHELINE_SIZE) ring_s
   /* Read-only metadata - cache-line aligned */
 
   atomic_t     magic;             /* Warm-restart detection */
-  uint32_t     capacity;          /* Power-of-2, max 16777215 */
+  uint32_t     capacity;          /* Max 16777215 */
+  uint32_t     mask;              /* capacity-1 if power-of-2, else 0 */
   uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) -
-                    sizeof(uint32_t) - sizeof(size_t)];
+                    sizeof(uint32_t) * 2];
 
   /* Producer side - cache-line aligned */
 
@@ -467,6 +471,20 @@ struct ring_buf_s
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: ring_idx
+ *
+ * Description:
+ *   Convert a logical index to a physical buffer position. Uses
+ *   bitmask for power-of-2 capacity, modulo for arbitrary size.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
+{
+  return r->mask ? (idx & r->mask) : (idx % r->capacity);
+}
 
 /****************************************************************************
  * Name: ring_init_magic
@@ -513,6 +531,7 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
   while (!atomic_cmpxchg(&r->magic, &old_magic, RING_MAGIC_INIT));
 
   r->capacity = cap;
+  r->mask = (cap & (cap - 1)) ? 0 : cap - 1;
 
   if (old_magic == RING_MAGIC_READY)
     {
@@ -575,7 +594,7 @@ static inline_function FAR struct ring_s *ring_alloc(uint32_t cap,
 {
   FAR struct ring_s *r;
 
-  if (cap == 0 || (cap & (cap - 1)) != 0)
+  if (cap == 0)
     {
       return NULL;
     }
@@ -633,7 +652,7 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
 
   buf->idx = idx;
 
-  idx   = idx & (r->capacity - 1);
+  idx   = ring_idx(r, idx);
   first = r->capacity - idx;
 
   if (first >= count)
