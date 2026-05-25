@@ -258,6 +258,14 @@ int arm64_psci_init(const char *method);
 void __start(void);
 void arm64_secondary_start(void);
 
+/* Boot sequence functions called from arm64_head.S */
+
+void arm64_boot_el3_init(void);
+void arm64_boot_el3_get_next_el(uint64_t switch_addr);
+void arm64_boot_el2_init(void);
+void arm64_boot_el1_init(void);
+void arm64_boot_primary_c_routine(void);
+
 /* Signal handling **********************************************************/
 
 void arm64_sigdeliver(void);
@@ -378,7 +386,11 @@ void arm64_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #ifdef CONFIG_ARCH_HAVE_DEBUG
-void arm64_enable_dbgmonitor(void);
+int arm64_enable_dbgmonitor(void);
+#endif
+
+#ifdef CONFIG_SMP
+void arm64_timer_secondary_init(void);
 #endif
 
 /****************************************************************************

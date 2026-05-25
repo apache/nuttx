@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include "arm64_internal.h"
 #include "arm64_fatal.h"
 #include "arm64_hwdebug.h"
 

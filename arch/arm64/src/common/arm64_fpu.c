@@ -98,7 +98,7 @@ static int arm64_fpu_procfs_stat(const char *relpath, struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations arm64_fpu_procfs_operations =
+static const struct procfs_operations arm64_fpu_procfs_operations =
 {
   arm64_fpu_procfs_open,  /* open */
   arm64_fpu_procfs_close, /* close */
