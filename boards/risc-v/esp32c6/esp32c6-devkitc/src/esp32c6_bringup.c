@@ -147,6 +147,10 @@
 #  include "esp_board_mmcsd.h"
 #endif
 
+#ifdef CONFIG_ESPRESSIF_BLE
+#  include "esp_ble.h"
+#endif
+
 #ifdef CONFIG_ESPRESSIF_USE_LP_CORE
 #  include "espressif/esp_ulp.h"
 #  ifdef CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
@@ -302,6 +306,15 @@ int esp_bringup(void)
   if (ret < 0)
     {
       _err("Failed to initialize the RTC driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESPRESSIF_BLE
+  ret = esp_ble_initialize();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
+      return ret;
     }
 #endif
 

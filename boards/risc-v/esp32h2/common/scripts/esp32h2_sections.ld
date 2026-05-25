@@ -431,6 +431,17 @@ SECTIONS
     _text_start = ABSOLUTE(.);
 
     *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+
+#ifdef CONFIG_ESPRESSIF_BLE
+    /* BLE controller (libble_app.a) uses custom section names; collect them
+     * here so elf2image does not see one ESP segment per input section (max 16).
+     */
+    *(.high_perf_code_iram1)
+    *(.high_perf_code_iram1.*)
+    *(.adv_fast_execute_code_iram1)
+    *(.adv_fast_execute_code_iram1.*)
+#endif
+
     *(.irom0.text) /* catch stray ICACHE_RODATA_ATTR */
     *(.fini.literal)
     *(.fini)
