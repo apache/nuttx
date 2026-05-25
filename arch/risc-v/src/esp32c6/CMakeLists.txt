@@ -29,6 +29,11 @@ if(CONFIG_ESPRESSIF_WIFI)
   list(APPEND SRCS esp_coex_adapter.c esp_wifi_adapter.c)
 endif()
 
+if(CONFIG_ESPRESSIF_BLE)
+  list(APPEND SRCS esp_ble.c)
+  target_compile_definitions(arch PRIVATE ESP_PLATFORM)
+endif()
+
 target_compile_definitions(arch PRIVATE _RETARGETABLE_LOCKING)
 
 if(SRCS)

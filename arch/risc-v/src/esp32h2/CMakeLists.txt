@@ -25,6 +25,11 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../common/espressif espressif)
 
 set(SRCS esp_chip_rev.c)
 
+if(CONFIG_ESPRESSIF_BLE)
+  list(APPEND SRCS esp_ble.c)
+  target_compile_definitions(arch PRIVATE ESP_PLATFORM)
+endif()
+
 target_compile_definitions(arch PRIVATE _RETARGETABLE_LOCKING)
 
 if(SRCS)
