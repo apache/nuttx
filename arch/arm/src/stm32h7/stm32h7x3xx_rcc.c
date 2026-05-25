@@ -326,6 +326,12 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_RNGEN;
 #endif
 
+#ifdef CONFIG_STM32H7_CRYP
+  /* Cryptographic clock enable */
+
+  regval |= RCC_AHB2ENR_CRYPTEN;
+#endif
+
   putreg32(regval, STM32_RCC_AHB2ENR);   /* Enable peripherals */
 }
 

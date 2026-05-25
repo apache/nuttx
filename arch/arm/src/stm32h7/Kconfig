@@ -233,42 +233,47 @@ config ARCH_CHIP_STM32H750VB
 	select STM32H7_STM32H7X0XX
 	select STM32H7_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
-		LQFP100
+		with cryptographic accelerator, LQFP100
 
 config ARCH_CHIP_STM32H750ZB
 	bool "STM32H750ZB"
 	select STM32H7_STM32H7X0XX
 	select STM32H7_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
-		LQFP144
+		with cryptographic accelerator, LQFP144
 
 config ARCH_CHIP_STM32H750IB
 	bool "STM32H750IB"
 	select STM32H7_STM32H7X0XX
 	select STM32H7_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
-		LQFP176 or UFBGA176+25
+		with cryptographic accelerator, LQFP176 or UFBGA176+25
 
 config ARCH_CHIP_STM32H750XB
 	bool "STM32H750XB"
 	select STM32H7_STM32H7X0XX
 	select STM32H7_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
-		TFBGA240+25
+		with cryptographic accelerator, TFBGA240+25
 
 config ARCH_CHIP_STM32H753AI
 	bool "STM32H753AI"
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_A
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, UFBGA169
@@ -278,6 +283,7 @@ config ARCH_CHIP_STM32H753BI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_B
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP208
@@ -287,6 +293,7 @@ config ARCH_CHIP_STM32H753II
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
@@ -296,6 +303,7 @@ config ARCH_CHIP_STM32H753VI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_V
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP100/TFBGA100
@@ -305,6 +313,7 @@ config ARCH_CHIP_STM32H753XI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, TFBGA240
@@ -314,6 +323,7 @@ config ARCH_CHIP_STM32H753ZI
 	select STM32H7_STM32H7X3XX
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
@@ -324,6 +334,7 @@ config ARCH_CHIP_STM32H7B3LI
 	select STM32H7_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_L
 	select STM32H7_HAVE_SMPS
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1376 Kb SRAM,
 		with cryptographic accelerator, TFBGA225
@@ -335,6 +346,7 @@ config ARCH_CHIP_STM32H755II
 	select STM32H7_IO_CONFIG_I
 	select STM32H7_HAVE_FDCAN1
 	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
@@ -346,6 +358,7 @@ config ARCH_CHIP_STM32H755XI
 	select STM32H7_IO_CONFIG_X
 	select STM32H7_HAVE_FDCAN1
 	select STM32H7_HAVE_FDCAN2
+	select STM32H7_HAVE_CRYP
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, TFBGA240
@@ -759,6 +772,10 @@ config STM32H7_HAVE_RNG
 	bool
 	default n
 
+config STM32H7_HAVE_CRYP
+	bool
+	default n
+
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -864,6 +881,11 @@ config STM32H7_RNG
 config STM32H7_CRC
 	bool "CRC"
 	default n
+
+config STM32H7_CRYP
+	bool "CRYP"
+	default n
+	depends on STM32H7_HAVE_CRYP
 
 config STM32H7_BKPSRAM
 	bool "Enable BKP RAM Domain"
