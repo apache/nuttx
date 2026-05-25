@@ -55,7 +55,7 @@ int stm32_pwm_setup(void)
 
   if (!initialized)
     {
-#ifdef CONFIG_STM32F0L0G0_TIM1_PWM
+#ifdef CONFIG_STM32_TIM1_PWM
       pwm = stm32_pwminitialize(1);
       if (pwm == NULL)
         {
@@ -71,7 +71,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM2_PWM
+#ifdef CONFIG_STM32_TIM2_PWM
       pwm = stm32_pwminitialize(2);
       if (pwm == NULL)
         {
@@ -87,7 +87,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM3_PWM
+#ifdef CONFIG_STM32_TIM3_PWM
       pwm = stm32_pwminitialize(3);
       if (pwm == NULL)
         {
@@ -103,7 +103,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM14_PWM
+#ifdef CONFIG_STM32_TIM14_PWM
       pwm = stm32_pwminitialize(14);
       if (pwm == NULL)
         {
@@ -119,7 +119,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM15_PWM
+#ifdef CONFIG_STM32_TIM15_PWM
       pwm = stm32_pwminitialize(15);
       if (pwm == NULL)
         {
@@ -135,7 +135,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM16_PWM
+#ifdef CONFIG_STM32_TIM16_PWM
       pwm = stm32_pwminitialize(16);
       if (pwm == NULL)
         {
@@ -151,7 +151,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32F0L0G0_TIM17_PWM
+#ifdef CONFIG_STM32_TIM17_PWM
       pwm = stm32_pwminitialize(17);
       if (pwm == NULL)
         {

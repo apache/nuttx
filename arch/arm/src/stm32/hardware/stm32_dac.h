@@ -36,14 +36,14 @@
  *   2. STM32 DAC IPv2: G4
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_DAC_V1) && \
-    defined(CONFIG_STM32_HAVE_IP_DAC_V2)
+#if defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V1) && \
+    defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2)
 #  error Only one STM32 DAC IP version must be selected
 #endif
 
-#if defined(CONFIG_STM32_HAVE_IP_DAC_V1)
+#if defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V1)
 #  include "stm32_dac_v1.h"
-#elif defined(CONFIG_STM32_HAVE_IP_DAC_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2)
 #  if defined(CONFIG_STM32_STM32G4XXX)
 #    include "stm32gxxxxx_dac.h"   /* Special case for G4 */
 #  else
