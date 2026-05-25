@@ -1,0 +1,46 @@
+#
+# STM32 digital filter configuration options.
+#
+
+config STM32_ADC1_DFSDM_L4_CHIP
+	bool
+	default y if STM32_STM32L496XX || STM32_STM32L4XR
+	select STM32_ADC1_HAVE_OUTPUT_DFSDM
+
+config STM32_ADC1_DFSDM_L5_CHIP
+	bool
+	default y if STM32_STM32L596XX || STM32_STM32L5XR
+	select STM32_ADC1_HAVE_OUTPUT_DFSDM
+
+config STM32_ADC1_DFSDM_U5_CHIP
+	bool
+	default y if STM32_STM32U596XX || STM32_STM32U5XR
+	select STM32_ADC1_HAVE_OUTPUT_DFSDM
+
+config STM32_DFSDM1_FLT0
+	bool "DFSDM1 Filter 0"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DFSDM1
+	select STM32_DFSDM
+
+config STM32_DFSDM1_FLT1
+	bool "DFSDM1 Filter 1"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DFSDM1
+	select STM32_DFSDM
+
+config STM32_DFSDM1_FLT2
+	bool "DFSDM1 Filter 2"
+	depends on (ARCH_CHIP_STM32L4 && STM32_DFSDM1 && !STM32_STM32L4X3) || (ARCH_CHIP_STM32L5 && STM32_DFSDM1 && !STM32_STM32L5X3) || (ARCH_CHIP_STM32U5 && STM32_DFSDM1 && !STM32_STM32U5X3)
+	select STM32_DFSDM
+
+config STM32_DFSDM1_FLT3
+	bool "DFSDM1 Filter 3"
+	depends on (ARCH_CHIP_STM32L4 && STM32_DFSDM1 && !STM32_STM32L4X3) || (ARCH_CHIP_STM32L5 && STM32_DFSDM1 && !STM32_STM32L5X3) || (ARCH_CHIP_STM32U5 && STM32_DFSDM1 && !STM32_STM32U5X3)
+	select STM32_DFSDM
+
+config STM32_DFSDM1_DMA
+	bool "DFSDM1 DMA"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DFSDM1 && STM32_DFSDM
+	---help---
+		If DMA is selected, then the DFSDM may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.

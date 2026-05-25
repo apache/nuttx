@@ -42,9 +42,9 @@
  *   - 4-bit SMS in SMCR register
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_TIMERS_V2)
+#if defined(CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V2)
 #  define HAVE_IP_TIMERS_V2
-#elif defined(CONFIG_STM32_HAVE_IP_TIMERS_V1)
+#elif defined(CONFIG_STM32_HAVE_IP_TIMERS_M3M4_V1)
 #  define HAVE_IP_TIMERS_V1
 #else
 #  error

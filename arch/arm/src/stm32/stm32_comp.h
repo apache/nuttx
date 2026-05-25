@@ -33,9 +33,9 @@
 
 #include "hardware/stm32_comp.h"
 
-#if defined(CONFIG_STM32_HAVE_IP_COMP_V1)
+#if defined(CONFIG_STM32_HAVE_IP_COMP_M3M4_V1)
 #  include "stm32_comp_v1.h"
-#elif defined(CONFIG_STM32_HAVE_IP_COMP_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_COMP_M3M4_V2)
 #  include "stm32_comp_v2.h"
 #endif
 

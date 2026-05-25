@@ -1,0 +1,150 @@
+#
+# STM32 common SDIO options.
+#
+
+config STM32_SDMMC2_HAVE_DMAPRIO
+	bool
+	default y if ARCH_CHIP_STM32F7
+
+config STM32_SDIO_CARD
+	bool "SDIO Card support"
+	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	default n
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config STM32_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	default n
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+config STM32_SDIO_DMA
+	bool "Support DMA data transfers"
+	default STM32_DMA2
+	select SDIO_DMA
+	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_DMA2
+	---help---
+		Support DMA data transfers.  Requires STM32_SDIO and config STM32_DMA2.
+
+config STM32_SDIO_DMAPRIO
+	hex "SDIO DMA priority"
+	default 0x00001000 if STM32_STM32F10XX
+	default 0x00010000 if !STM32_STM32F10XX
+	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	---help---
+		Select SDIO DMA priority.
+
+		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
+		0x00002000 high, 0x00003000 very high.  Default: medium.
+
+		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+config STM32_SDIO_WIDTH_D1_ONLY
+	bool "Use D1 only"
+	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config STM32_SDMMC_IDMA
+	bool "Support IDMA data transfers"
+	depends on ARCH_CHIP_STM32H7 && STM32_SDMMC
+	default y
+	select SDIO_DMA
+	---help---
+		Support IDMA data transfers.
+
+if STM32_SDMMC
+
+config STM32_SDMMC_XFRDEBUG
+	bool "SDMMC transfer debug"
+	depends on DEBUG_FS_INFO
+	---help---
+		Enable special debug instrumentation analyze SDMMC data transfers.
+		This logic is as non-invasive as possible:  It samples SDMMC
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and CONFIG_DEBUG_INFO.
+
+config STM32_SDMMC_DMA
+	bool "Support DMA data transfers"
+	depends on (ARCH_CHIP_STM32F7 || STM32_COMMON_L4_L5_U5) && STM32_SDMMC && STM32_DMA
+	select SDIO_DMA
+	---help---
+		Support DMA data transfers.
+
+config STM32_SDMMC1_DMAPRIO
+	hex "SDMMC1 DMA priority"
+	depends on (ARCH_CHIP_STM32F7 || STM32_COMMON_L4_L5_U5) && STM32_SDMMC1
+	default 0x00010000 if ARCH_CHIP_STM32F7
+	default 0x00001000
+	---help---
+		Select SDMMC1 DMA priority.
+
+		Options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+config SDMMC1_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC1"
+	depends on STM32_SDMMC1
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC1_SDIO_MODE
+	bool "SDIO Card Support"
+	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC1
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC1_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC1
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+config SDMMC2_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC2"
+	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+config SDMMC2_SDIO_MODE
+	bool "SDIO Card Support"
+	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	---help---
+		Build in additional support needed only for SDIO cards (vs. SD
+		memory cards)
+
+config SDMMC2_SDIO_PULLUP
+	bool "Enable internal Pull-Ups"
+	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	---help---
+		If you are using an external SDCard module that does not have the
+		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
+		Module) then enable this option to activate the internal pull-up
+		resistors.
+
+config STM32_SDMMC2_DMAPRIO
+	hex "SDMMC2 DMA priority"
+	default 0x00010000
+	depends on STM32_SDMMC2 && STM32_SDMMC2_HAVE_DMAPRIO
+	---help---
+		Select SDMMC2 DMA priority.
+
+		Options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+endif # STM32_SDMMC

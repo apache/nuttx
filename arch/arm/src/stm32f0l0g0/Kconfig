@@ -1053,6 +1053,7 @@ config STM32_FLASH_OVERRIDE
 config STM32_STM32F0
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select STM32_HAVE_USART3
 	select STM32_HAVE_USART4
 	select STM32_HAVE_TIM1
@@ -1064,14 +1065,19 @@ config STM32_STM32F0
 	select STM32_HAVE_TIM15
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
-	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_IP_USART_V1
 	select STM32_HAVE_IP_EXTI_V1
 
 config STM32_STM32G0
 	bool
 	default n
-	select STM32_HAVE_ADC1_DMA
+	select STM32_HAVE_PWR
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_ADC1
+	select STM32_HAVE_USART_RXFIFO_THRESHOLD
+	select STM32_HAVE_IP_ADC_M0_V1
+	select STM32_HAVE_IP_TIMERS_M0_V1
+	select STM32_HAVE_IP_WDG_M0_V1
 	select STM32_HAVE_DMAMUX
 	select STM32_HAVE_IP_USART_V2
 	select STM32_HAVE_IP_EXTI_V2
@@ -1086,20 +1092,29 @@ config STM32_STM32G0
 config STM32_STM32L0
 	bool
 	default n
+	select STM32_HAVE_PWR
+	select STM32_HAVE_ADC1
+	select STM32_HAVE_IP_ADC_M0_V1
+	select STM32_HAVE_DMA1
 	select STM32_ENERGYLITE
 	select STM32_HAVE_LCD
 	select STM32_HAVE_VREFINT
-	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_IP_USART_V1
 	select STM32_HAVE_IP_EXTI_V1
 
 config STM32_STM32C0
 	bool
 	default n
+	select STM32_HAVE_PWR
+	select STM32_HAVE_USART_RXFIFO_THRESHOLD
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_IP_WDG_M0_V1
+	select STM32_HAVE_ADC1
+	select STM32_HAVE_IP_ADC_M0_V1
+	select STM32_HAVE_IP_TIMERS_M0_V1
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_DMAMUX
-	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_IP_USART_V2
 	select STM32_HAVE_IP_EXTI_V2
 	select STM32_HAVE_TIM1
@@ -1401,134 +1416,3 @@ config ARCH_CHIP_STM32C092XX
 	select STM32_HAVE_USART3
 	select STM32_HAVE_USART4
 	select STM32_HAVE_FDCAN1
-
-choice
-	prompt "SysTick clock source"
-	default STM32_SYSTICK_CORECLK
-
-config STM32_SYSTICK_CORECLK
-	bool "Cortex-M0 core clock"
-
-config STM32_SYSTICK_CORECLK_DIV16
-	bool "Cortex-M0 core clock divided by 16"
-
-endchoice # SysTick clock source
-
-menu "STM32 Peripheral Support"
-
-# These "hidden" settings determine whether a peripheral option is available
-# for the selected MCU
-
-config STM32_HAVE_VREFINT
-	bool
-	default n
-
-config STM32_HAVE_USART4
-	bool
-	default n
-
-config STM32_HAVE_USART5
-	bool
-	default n
-
-config STM32_HAVE_USART7
-	bool
-	default n
-
-config STM32_HAVE_USART8
-	bool
-	default n
-
-config STM32_HAVE_LPUART2
-	bool
-	default n
-
-config STM32_HAVE_ADC_OVERSAMPLE
-	bool
-	default STM32_STM32L0 || STM32_STM32G0 || STM32_STM32C0
-
-config STM32_HAVE_CEC
-	bool
-	default n
-
-config STM32_HAVE_SDIO
-	bool
-	default n
-
-config STM32_HAVE_I2S2
-	bool
-	default n
-
-config STM32_HAVE_UCPD1
-	bool
-	default n
-
-config STM32_HAVE_UCPD2
-	bool
-	default n
-
-# These are STM32 peripherals IP blocks
-
-config STM32_HAVE_IP_USART_V1
-	bool
-	default n
-
-config STM32_HAVE_IP_USART_V2
-	bool
-	default n
-
-config STM32_HAVE_IP_EXTI_V1
-	bool
-	default n
-
-config STM32_HAVE_IP_EXTI_V2
-	bool
-	default n
-
-# These are the peripheral selections proper
-
-config STM32_VREFINT
-	bool "Enable VREFINT"
-	default n
-	depends on STM32_HAVE_VREFINT
-
-config STM32_USART4
-	bool "USART4"
-	default n
-	depends on STM32_HAVE_USART4
-	select STM32_USART
-
-config STM32_USART5
-	bool "USART5"
-	default n
-	depends on STM32_HAVE_USART5
-	select STM32_USART
-
-config STM32_USART7
-	bool "USART7"
-	default n
-	depends on STM32_HAVE_USART7
-	select STM32_USART
-
-config STM32_USART8
-	bool "USART8"
-	default n
-	depends on STM32_HAVE_USART8
-	select STM32_USART
-
-endmenu # STM32 Peripheral Support
-
-menu "ADC Configuration"
-	depends on STM32_ADC
-
-config STM32_ADC1_CONTINUOUS
-	bool "Enable ADC1 Continuous Conversion Mode"
-	default n
-	depends on STM32_ADC1
-	---help---
-		If enabled, the ADC will operate in continuous conversion mode.
-		Otherwise, it will perform single conversions.
-		Note: Continuous and discontinuous mode cannot be defined at
-		      the same time
-
-endmenu # ADC Configuration

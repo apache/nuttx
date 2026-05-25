@@ -1,0 +1,88 @@
+#
+# STM32 common SAI options.
+#
+
+choice
+	prompt "Operation mode"
+	depends on STM32_SAI
+	default STM32_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	depends on STM32_SAI1_A && STM32_SAI1_B
+	default STM32_SAI1_BOTH_ASYNC
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	depends on STM32_SAI2_A && STM32_SAI2_B
+	default STM32_SAI2_BOTH_ASYNC
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
+
+config STM32_SAI1PLL
+	bool "SAI1PLL"
+	depends on STM32_COMMON_L4_L5_U5
+	---help---
+		The STM32L4 has a separate PLL for the SAI1 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32_SAI2PLL
+	bool "SAI2PLL"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_HAVE_SAI2
+	---help---
+		The STM32L4 has a separate PLL for the SAI2 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32_SAIPLL
+	bool "SAIPLL"
+	default n
+	depends on STM32_HAVE_SAIPLL
+	---help---
+		The STM32F446 has a separate PLL for the SAI block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.

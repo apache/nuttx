@@ -1,0 +1,249 @@
+#
+# STM32 USB configuration options.
+#
+
+menu "USB Full Speed Host Configuration"
+	depends on STM32_HAVE_USBDRD_HOST && STM32_USBFS_HOST
+
+config STM32_USBDRD_NCHANNELS
+	int "Number of host channels"
+	default 8
+	range 1 8
+	depends on STM32_HAVE_USBDRD_HOST && STM32_USBFS_HOST
+	---help---
+		Number of USB host channels to use.
+
+config STM32_USBDRD_DESCSIZE
+	int "Descriptor buffer size"
+	default 128
+	depends on STM32_HAVE_USBDRD_HOST && STM32_USBFS_HOST
+	---help---
+		Size of descriptor/request buffers.
+
+endmenu
+
+config STM32_OTG_SOFOUTPUT
+	bool "OTG SOF output"
+	depends on STM32_HAVE_OTG_H7
+	default n
+
+config STM32_OTG_USBREGEN
+	bool "Enable USB voltage regulator"
+	depends on STM32_HAVE_OTG_H7
+	default n
+
+config STM32_USBHOST_REGDEBUG
+	bool "Register-Level Debug"
+	depends on STM32_COMMON_LEGACY && STM32_USBHOST && STM32_USBHOST && DEBUG_USB_INFO || STM32_COMMON_F7_H7 && USBHOST
+	---help---
+		Enable very low-level register access debug.
+
+config STM32_USBHOST_PKTDUMP
+	bool "Packet Dump Debug"
+	depends on STM32_COMMON_LEGACY && STM32_USBHOST && STM32_USBHOST && DEBUG_USB_INFO || STM32_COMMON_F7_H7 && USBHOST
+	---help---
+		Dump all incoming and outgoing USB packets.
+
+config STM32_USBFS_REGDEBUG
+	bool "Register-Level Debug"
+	depends on (STM32_COMMON_LEGACY || ARCH_CHIP_STM32H5) && STM32_USBFS && STM32_USBFS && DEBUG_USB_INFO
+	---help---
+		Enable very low-level register access debug.
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	depends on (STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7) && STM32_OTGFS || ARCH_CHIP_STM32H7 && (STM32_OTGFS || STM32_OTGHS)
+	---help---
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+menu "STM32_OTG_HS Configuration"
+	depends on ARCH_CHIP_STM32F7 && STM32_OTGFSHS
+
+choice
+	prompt "ULPI Selection"
+	default STM32_NO_ULPI
+
+config STM32_NO_ULPI
+	bool "No External ULPI"
+	---help---
+		Select to enable the presence of an external ULPI PHY
+
+config STM32_EXTERNAL_ULPI
+	bool "External ULPI"
+	depends on STM32_HAVE_EXTERNAL_ULPI
+	---help---
+		Select to enable the presence of an external ULPI PHY
+
+config STM32_INTERNAL_ULPI
+	bool "Internal ULPI PHY"
+	depends on STM32_HAVE_INTERNAL_ULPI
+	---help---
+		Select to enable the internal ULPI for USB HS
+
+endchoice # "ULPI Selection"
+
+endmenu # STM32_OTG_HS Configuration
+
+menu "OTG_HS Configuration"
+	depends on ARCH_CHIP_STM32H7 && STM32_OTGHS
+
+config STM32_OTGHS_FS
+	bool "OTGHS in FS mode"
+	default n
+
+choice
+	prompt "ULPI Selection"
+	default STM32_OTGHS_NO_ULPI
+
+config STM32_OTGHS_NO_ULPI
+	bool "No External ULPI on board."
+	---help---
+		Select to indicate that there is no external ULPI PHY. This means
+		the OTG_HS peripheral must use the internal full-speed PHY and will
+		be limited to full-speed mode.
+
+config STM32_OTGHS_EXTERNAL_ULPI
+	bool "External ULPI"
+	---help---
+		Select to indicate the presence of an external ULPI PHY and use it.
+
+endchoice # "ULPI Selection"
+
+endmenu # OTG_HS Configuration
+
+menu "OTG Configuration"
+	depends on ARCH_CHIP_STM32H7 && (STM32_OTGFS || STM32_OTGHS)
+
+choice
+	prompt "STM32H7 OTGFS role"
+	depends on STM32_OTGFS
+	default STM32_OTGFS_USBDEV if USBDEV
+	default STM32_OTGFS_HOST if !USBDEV && USBHOST
+
+config STM32_OTGFS_USBDEV
+	bool "OTGFS as USBDEV"
+	depends on USBDEV
+
+config STM32_OTGFS_HOST
+	bool "OTGFS as HOST"
+	depends on USBHOST
+
+endchoice # "STM32H7 OTGFS role"
+
+choice
+	prompt "STM32H7 OTGHS role (only USBDEV supported for now)"
+	depends on STM32_OTGHS
+	default STM32_OTGHS_USBDEV if USBDEV
+
+config STM32_OTGHS_USBDEV
+	bool "OTGHS as USBDEV"
+	depends on USBDEV
+
+endchoice # "STM32H7 OTGHS role"
+
+endmenu # OTG Configuration
+
+menu "USB FS Host Configuration"
+	depends on STM32_COMMON_LEGACY && STM32_OTGFS && STM32_USBHOST
+
+config STM32_OTGFS_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config STM32_OTGFS_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config STM32_OTGFS_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config STM32_OTGFS_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config STM32_OTGFS_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+config STM32_OTGFS_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG FS USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
+endmenu # USB FS Host Configuration
+
+menu "USB HS Host Configuration"
+	depends on STM32_COMMON_LEGACY && STM32_OTGHS && STM32_USBHOST
+
+config STM32_OTGHS_RXFIFO_SIZE
+	int "Rx Packet Size"
+	default 128
+	---help---
+		Size of the RX FIFO in 32-bit words. Default 128 (512 bytes)
+
+config STM32_OTGHS_NPTXFIFO_SIZE
+	int "Non-periodic Tx FIFO Size"
+	default 96
+	---help---
+		Size of the non-periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config STM32_OTGHS_PTXFIFO_SIZE
+	int "Periodic Tx FIFO size"
+	default 128
+	---help---
+		Size of the periodic Tx FIFO in 32-bit words.  Default 96 (384 bytes)
+
+config STM32_OTGHS_DESCSIZE
+	int "Descriptor Size"
+	default 128
+	---help---
+		Maximum size to allocate for descriptor memory descriptor.  Default: 128
+
+config STM32_OTGHS_SOFINTR
+	bool "Enable SOF interrupts"
+	default n
+	---help---
+		Enable SOF interrupts.  Why would you ever want to do that?
+
+config STM32_OTGHS_VBUS_CONTROL
+	bool "Enable VBus Control"
+	default y
+	---help---
+		Enable VBus control.  Used when the board has VBus sensing and
+		a power switch for the OTG HS USB port.  Disable this config
+		if the board lacks this USB VBus control circuitry.
+
+endmenu # USB HS Host Configuration
+
+config STM32_USBDEV_REGDEBUG
+	bool "OTG USBDEV REGDEBUG"
+	depends on STM32_COMMON_F7_H7 && USBDEV
+
+comment "USB Device Configuration"
+
+config STM32_USB_ITRMP
+	bool "Re-map USB interrupt"
+	default STM32_CAN1
+	depends on STM32_USB && STM32_STM32F30XX
+	---help---
+		The legacy USB in the F1 series shared interrupt lines with USB
+		device and CAN1.  In the F3 series, a hardware options was added to
+		either retain the legacy F1 behavior or to map the USB interrupts to
+		their own dedicated vectors.  The option is available only for the
+		F3 family and selects the use of the dedicated USB interrupts.

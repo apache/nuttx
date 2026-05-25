@@ -32,9 +32,9 @@
  *   2. STM32 I2C IPv2 - F0, F3, F7, G0, G4, H7, L0 and L4
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_I2C_V1)
+#if defined(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1)
 #  include "stm32_i2c_v1.h"
-#elif defined(CONFIG_STM32_HAVE_IP_I2C_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2)
 #  include "stm32_i2c_v2.h"
 #else
 #  error STM32 I2C IP version not specified
