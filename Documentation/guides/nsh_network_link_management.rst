@@ -45,7 +45,7 @@ must be satisfied:
   are implemented for Atmel SAM4/4, SAMA5 families, and for the STMicro STM32.
   See ``nuttx/arch/arm/src/sam34/sam_emac.c``,
   ``nuttx/arch/arm/src/sam34/sam_emaca.c``, ``sam_emacb.c``, and ``sam_gmac.c``,
-  and ``nuttx/arch/arm/src/stm32/stm32_eth.c``.
+  and ``nuttx/arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``.
 - ``CONFIG_ARCH_PHY_INTERRUPT``  
   This is not a user-selectable option. Rather, it is set when selecting a board
   that supports PHY interrupts. In most architectures, the PHY interrupt is not

@@ -2918,7 +2918,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32/photon/src/stm32_wlan_firmware.c
+boards/arm/stm32f2/photon/src/stm32_wlan_firmware.c
 drivers/wireless/ieee80211/bcm43xxx/bcmf_ioctl.h
 ================================================
 
@@ -3249,8 +3249,8 @@ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 boards/arm/rp2040/common/src/rp2040_ina219.c
-boards/arm/stm32/common/src/stm32_ina219.c
-boards/arm/stm32/olimex-stm32-e407/src/stm32_dac.c
+boards/arm/common/stm32/src/stm32_ina219.c
+boards/arm/stm32f4/olimex-stm32-e407/src/stm32_dac.c
 ===============================================
   Copyright (C) 2018,2019 Erle Robotics (Juan Flores Muñoz).
   All rights reserved.
@@ -3282,9 +3282,9 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32/nucleo-f303re/src/stm32_uid.c
-boards/arm/stm32/omnibusf4/src/stm32_uid.c
-boards/arm/stm32/stm32f4discovery/src/stm32_uid.c
+boards/arm/stm32f3/nucleo-f303re/src/stm32_uid.c
+boards/arm/stm32f4/omnibusf4/src/stm32_uid.c
+boards/arm/stm32f4/stm32f4discovery/src/stm32_uid.c
 boards/arm/stm32h7/nucleo-h743zi/src/stm32_uid.c
 boards/arm/stm32h7/stm32h747i-disco/src/stm32_uid.c
 ===============================================
@@ -3317,8 +3317,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32/nucleo-f412zg/src/stm32_usb.c
-boards/arm/stm32/stm32f411e-disco/src/stm32_usb.c
+boards/arm/stm32f4/nucleo-f412zg/src/stm32_usb.c
+boards/arm/stm32f4/stm32f411e-disco/src/stm32_usb.c
 =================================================
   Copyright (C) 2017 Gregory Nutt. All rights reserved.
   Copyright (C) 2017 Brian Webb. All rights reserved.
@@ -3350,10 +3350,10 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32/omnibusf4/src/stm32_romfs.h
-boards/arm/stm32/omnibusf4/src/stm32_romfs_initialize.c
-boards/arm/stm32/stm32f4discovery/src/stm32_romfs.h
-boards/arm/stm32/stm32f4discovery/src/stm32_romfs_initialize.c
+boards/arm/stm32f4/omnibusf4/src/stm32_romfs.h
+boards/arm/stm32f4/omnibusf4/src/stm32_romfs_initialize.c
+boards/arm/stm32f4/stm32f4discovery/src/stm32_romfs.h
+boards/arm/stm32f4/stm32f4discovery/src/stm32_romfs_initialize.c
 boards/arm/stm32f7/common/include/stm32_romfs.h
 boards/arm/stm32f7/common/src/stm32_romfs_initialize.c
 =============================================================
@@ -3975,7 +3975,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/hardware/stm32f100_pinmap.h
+arch/arm/src/stm32f1/hardware/stm32f100_pinmap.h
 =================================================
 
   Copyright (C) 2009 Gregory Nutt. All rights reserved.
@@ -4009,7 +4009,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/hardware/stm32f37xxx_sdadc.h
+arch/arm/src/stm32f3/hardware/stm32f37xxx_sdadc.h
 ====================================================
 
   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
@@ -4042,7 +4042,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_i2c_alt.c
+arch/arm/src/common/stm32/stm32_i2c_m3m4_v1_alt.c
 ===================================
 
   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -4076,7 +4076,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_i2c_v2.c
+arch/arm/src/common/stm32/stm32_i2c_m3m4_v2.c
 ===========================================
 
   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -4110,8 +4110,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_sdadc.c
-arch/arm/src/stm32/stm32_sdadc.h
+arch/arm/src/common/stm32/stm32_sdadc_m3m4_v1.c
+arch/arm/src/common/stm32/stm32_sdadc.h
 ===================================
 
   Copyright (C) 2011, 2013, 2015-2017 Gregory Nutt. All rights reserved.
@@ -4144,7 +4144,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_tickless.c
+arch/arm/src/common/stm32/stm32_tickless_m3m4_v1.c
 ======================================
 
   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
@@ -4177,7 +4177,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_tim_lowerhalf.c
+arch/arm/src/common/stm32/stm32_tim_m3m4_v1v2v3_lowerhalf.c
 ===========================================
 
   Copyright (C) 2015 Wail Khemir. All rights reserved.
@@ -4210,8 +4210,8 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32/stm32_uid.c
-arch/arm/src/stm32/stm32_uid.h
+arch/arm/src/common/stm32/stm32_uid_m3m4_v1v2.c
+arch/arm/src/common/stm32/stm32_uid.h
 ===================================
 
   Copyright (C) 2015 Marawan Ragab. All rights reserved.

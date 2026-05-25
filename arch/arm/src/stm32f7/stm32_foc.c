@@ -78,7 +78,8 @@
  *
  * Currently, up to two FOC instances are supported.
  *
- * This implementation is based on arch/arm/src/stm32/stm32_foc.c
+ * This implementation is based on
+ * arch/arm/src/common/stm32/stm32_foc_m3m4_v1.c
  */
 
 /* Verify system configuration **********************************************/

@@ -47,7 +47,7 @@
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"
 
-/* Ported from arch/arm/src/stm32/stm32_fdcan.c */
+/* Ported from arch/arm/src/common/stm32/stm32_fdcan_m0_v1.c */
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -68,7 +68,7 @@ specified by several settings in the NuttX configuration file.
    sub-directories and are discussed in a paragraph
    `below <#boards-subdirectory-structure>`__.
 
-   The directory ``boards/arm/stm32/stm32f4disovery/``, as an
+   The directory ``boards/arm/stm32f4/stm32f4discovery/``, as an
    example, holds board-specific logic for the STM32F4 Discovery
    board and is selected via the
    ``CONFIG_ARCH_BOARD="stm32f4discovery"`` configuration setting.

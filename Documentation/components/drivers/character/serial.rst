@@ -39,7 +39,7 @@ Serial Device Drivers
    `character drivers <#chardrivers>`__ and are accessed as other
    character drivers.
 
--  **Examples**: ``arch/arm/src/stm32/stm32_serial.c``,
+-  **Examples**: ``arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c``,
    ``arch/arm/src/lpc214x/lpc214x_serial.c``,
    ``arch/z16/src/z16f/z16f_serial.c``, etc.
 

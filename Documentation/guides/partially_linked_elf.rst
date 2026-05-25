@@ -40,7 +40,7 @@ compatible with the example provided here:
 
    In this example, let's illustrate this using an STM32F4-Discovery
    configuration. We will assume that you have modified the
-   ``boards/arm/stm32/stm32fdiscovery/src/stm32_bringup.c`` file, adding the
+   ``boards/arm/stm32f4/stm32f4discovery/src/stm32_bringup.c`` file, adding the
    following:
 
    .. code-block:: c

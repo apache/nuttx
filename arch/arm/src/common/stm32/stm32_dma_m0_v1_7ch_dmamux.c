@@ -20,7 +20,7 @@
  *
  ****************************************************************************/
 
-/* Ported from arch/arm/src/stm32/stm32_dma_v1mux.c */
+/* Ported from arch/arm/src/common/stm32/stm32_dma_m0_v1_7ch_dmamux.c */
 
 /****************************************************************************
  * Included Files
