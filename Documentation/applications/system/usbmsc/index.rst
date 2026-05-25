@@ -13,7 +13,7 @@ This function will be called by the ``system/usbmsc`` indirectly via the ``board
 block device drivers. For examples of the implementation of
 ``board_usbmsc_initialize()`` see
 ``boards/arm/lpc214x/mcu123-lpc214x/src/up_usbmsc.c`` or
-``boards/arm/stm32/stm3210e-eval/src/usbmsc.c``.
+``boards/arm/stm32f1/stm3210e-eval/src/usbmsc.c``.
 
 Configuration options:
 

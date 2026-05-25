@@ -191,7 +191,7 @@ An Example
 There is a good example in the STM32 Ethernet driver. The STM32 F7 
 Ethernet driver (``arch/arm/src/stm32f7/stm32_ethernet.c``) derives 
 directly from the STM32 F4 Ethernet driver 
-(``arch/arm/src/stm32/stm32_eth.c``). These two Ethernet MAC peripherals 
+(``arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``). These two Ethernet MAC peripherals
 are nearly identical. Only changes that are a direct consequence of the 
 STM32 F7 D-Cache were required to make the driver work on the STM32 F7. 
 Those changes are summarized below.

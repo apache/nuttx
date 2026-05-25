@@ -52,7 +52,7 @@ Precautions
 1.If you need to implement the ofloader on a different board,
 you will need to read the `wiki <https://wiki.segger.com/SEGGER_Flash_Loader>`
 and refer to the implementation of "ofloader.ld" linker script located
-in the "boards/arm/stm32/stm32f429i-disco/scripts" directory.
+in the "boards/arm/stm32f4/stm32f429i-disco/scripts" directory.
 This linker script defines how the different sections of the NuttX image are placed in memory.
 You should configure the corresponding sections to be located in RAM,
 where the J-Link can write the image correctly.

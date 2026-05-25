@@ -228,13 +228,13 @@ OpenOCD
 =======
 
 I have also used OpenOCD with the M3 Wildfire.  In this case, I used
-the Olimex USB ARM OCD.  See the script in boards/arm/stm32/fire-stm32v2/tools/oocd.sh
+the Olimex USB ARM OCD.  See the script in boards/arm/stm32f1/fire-stm32v2/tools/oocd.sh
 for more information.  Using the script:
 
 - Start the OpenOCD GDB server::
 
     cd <nuttx-build-directory>
-    boards/arm/stm32/fire-stm32v2/tools/oocd.sh $PWD
+    boards/arm/stm32f1/fire-stm32v2/tools/oocd.sh $PWD
 
 - Load NuttX::
 

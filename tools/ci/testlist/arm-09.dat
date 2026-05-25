@@ -1,12 +1,18 @@
-/arm/stm32/nucleo-f33*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f3/nucleo-f33*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/nucleo-f4*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/nucleo-f4*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/nucleo-g*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32g0/nucleo-g*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32g4/nucleo-g*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32l0/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32l1/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32l4/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32l5/nucleo-l*,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f1/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f2/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f4/olimex-*,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
 # Boards build by CMake
 

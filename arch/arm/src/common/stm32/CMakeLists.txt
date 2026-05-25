@@ -227,9 +227,8 @@ if(CONFIG_STM32_COMMON_LEGACY)
     endif()
   endif()
 
-  if(CONFIG_STM32_ADC
-     AND (CONFIG_STM32_HAVE_IP_ADC_M3M4_V1
-          OR CONFIG_STM32_HAVE_IP_ADC_M3M4_V2))
+  if(CONFIG_STM32_ADC AND (CONFIG_STM32_HAVE_IP_ADC_M3M4_V1
+                           OR CONFIG_STM32_HAVE_IP_ADC_M3M4_V2))
     list(APPEND SRCS stm32_adc_m3m4_v1v2.c)
   endif()
 
@@ -237,9 +236,8 @@ if(CONFIG_STM32_COMMON_LEGACY)
     list(APPEND SRCS stm32_sdadc_m3m4_v1.c)
   endif()
 
-  if(CONFIG_STM32_DAC
-     AND (CONFIG_STM32_HAVE_IP_DAC_M3M4_V1
-          OR CONFIG_STM32_HAVE_IP_DAC_M3M4_V2))
+  if(CONFIG_STM32_DAC AND (CONFIG_STM32_HAVE_IP_DAC_M3M4_V1
+                           OR CONFIG_STM32_HAVE_IP_DAC_M3M4_V2))
     list(APPEND SRCS stm32_dac_m3m4_v1.c)
   endif()
 
@@ -358,12 +356,7 @@ if(CONFIG_STM32_COMMON_LEGACY)
 endif()
 
 if(CONFIG_ARCH_CORTEXM0)
-  list(
-    APPEND
-    SRCS
-    stm32_irq_m0_v1.c
-    stm32_start_m0_v1.c
-    stm32_lsi_m0_v1.c)
+  list(APPEND SRCS stm32_irq_m0_v1.c stm32_start_m0_v1.c stm32_lsi_m0_v1.c)
 
   if(CONFIG_STM32_HAVE_IP_GPIO_M0_V1)
     list(APPEND SRCS stm32_gpio_m0_v1.c)

@@ -35,7 +35,7 @@ to any supported architecture.
 
 Here is the map of initialization function calls::
 
-  __start()-arch/arm/src/stm32/stm32_start.c
+  __start()-arch/arm/src/common/stm32/stm32_start_m3m4_v1.c
       |
       +--*Set stack limit
       +--stm32_clockconfig()
@@ -45,7 +45,7 @@ Here is the map of initialization function calls::
       +--showprogress('A')
       +--
       +--
-      +--stm32_boardinitialize()-boards/arm/stm32/stm32f4discovery/src/stm32_boot.c
+      +--stm32_boardinitialize()-boards/arm/stm32f4/stm32f4discovery/src/stm32_boot.c
       |    |
       |    +--stm32_spidev_initialize()-stm32_spi.c:ONLY CHIP SELECTS
       |    +--stm32_usbinitialize()-
@@ -196,7 +196,7 @@ There are few important things to note about this file.
 ``.section .vectors, ax``. This pseudo operation will place all of the
 vectors into a special section call ``.vectors``.
 On of the STM32 F4 linker scripts is located at
-``nuttx/boards/arm/stm32/stm32f4discovery/scripts/ld.script``.
+``nuttx/boards/arm/stm32f4/stm32f4discovery/scripts/ld.script``.
 In that file, you can see that section ``.vectors`` is forced to lie
 at the very beginning of FLASH memory.
 The STM32 F4 can be configured to boot in different ways via strapping.
@@ -229,7 +229,7 @@ nuttx/arch/arm/src/stm32_start.c
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The reset vector ``__start`` lies in the file
-``nuttx/arch/arm/src/stm32/stm32_start.c`` and does the real,
+``nuttx/arch/arm/src/common/stm32/stm32_start_m3m4_v1.c`` and does the real,
 low-level architecture-specific initialization. This initialization includes:
 
 1. ``stm32_clockconfig()`` - Initialize the PLLs and peripheral clocking
@@ -262,7 +262,7 @@ low-level architecture-specific initialization. This initialization includes:
 7. ``stm32_boardinitialize()`` - Board-specific logic is initialized by
    calling this function. For the case of the STM32F4Discovery board,
    this logic can be found at
-   ``nuttx/boards/arm/stm32/stm32f4discovery/src/stm32_boot.c`` and does
+   ``nuttx/boards/arm/stm32f4/stm32f4discovery/src/stm32_boot.c`` and does
    the following operations:
 
    a. ``stm32_spidev_initialize()`` - Initialize SPI chip selects
@@ -351,19 +351,19 @@ file and in that case those operations are not performed:
       ``nx_start()``. However, if the board supports multiple, discontiguous
       memory regions, any addition memory regions can be added to the heap
       by this function. For the STM32 F4, ``up_addregion()`` is implemented
-      in ``nuttx/arch/arm/src/stm32/stm32_allocateheap.c``.
+      in ``nuttx/arch/arm/src/common/stm32/stm32_allocateheap_m3m4_v1.c``.
 
     * ``arm_pminitialize()`` - If ``CONFIG_PM`` is defined, the function must
       initialize the power management subsystem. This MCU-specific function
-      must be called very early in the intialization sequence before any other
+      must be called very early in the initialization sequence before any other
       device drivers are initialized (since they may attempt to register with
       the power management subsystem). There is no implementation
       of ``up_pminitialize()`` for any STM32 platform.
 
     * ``arm_dmainitialize()`` - Initialize the DMA subsystem.
       For the STM32 F4, this DMA initialization can be found in
-      ``nuttx/arch/arm/src/stm32/stm32_dma.c`` (which includes
-      ``nuttx/arch/arm/src/stm32f4xxx_dma.c``).
+      ``nuttx/arch/arm/src/common/stm32/stm32_dma_m3m4_v1_8ch.c`` (which includes
+      ``nuttx/arch/arm/src/common/stm32/stm32_dma_m3m4_v1_8ch.c``).
 
     * ``devnull_register()`` - Registers the standard ``/dev/null``.
 
@@ -381,11 +381,11 @@ file and in that case those operations are not performed:
       (found at ``nuttx/arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c`` STM32 F4).
 
     * ``arm_netinitialize()`` - Initialize the network. For the STM32 F4,
-      this function is in ``nuttx/arch/arm/src/stm32/stm32_eth.c``.
+      this function is in ``nuttx/arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``.
 
     * ``arm_usbinitialize()`` - Initialize USB (host or device).
       For the STM32 F4, this function is in
-      ``nuttx/arch/arm/src/stm32/stm32_otgfsdev.c``.
+      ``nuttx/arch/arm/src/common/stm32/stm32_otgfsdev_m3m4_v1.c``.
 
     * ``arm_l2ccinitialize()`` - Initialize the L2 cache if present
       and selected.
@@ -448,7 +448,7 @@ This function performed the following specific operations:
   for a variety of purposes like misc garbage clean-up.
 
 * ``nx_create_initthread()`` - Once the operating system has been initialized,
-  this funcions either directly calls ``nx_start_application()`` or creates
+  this functions either directly calls ``nx_start_application()`` or creates
   a thread for running it
 
 * ``nx_start_application()`` - If set in the NuttX configuration,
@@ -640,7 +640,7 @@ The resulting ROMFS file system can be found in
 
 * ``board_app_initialize()`` - For the STM32F4Discovery, this architecture
   specific initialization can be found at
-  ``boards/arm/stm32/stm32f4discovery/src/stm32_appinit.c``.
+  ``boards/arm/stm32f4/stm32f4discovery/src/stm32_appinit.c``.
   This it does things like:
 
   1. Initialize SPI devices.

@@ -1093,7 +1093,7 @@ int stm32_dma2dinitialize(void)
       stm32_dma2duninitialize();
 
       /* Enable dma2d is done in rcc_enableahb1, see
-       * arch/arm/src/stm32/stm32f40xxx_rcc.c
+       * arch/arm/src/stm32f4/stm32_rcc.c
        */
 
 #ifdef CONFIG_STM32_FB_CMAP

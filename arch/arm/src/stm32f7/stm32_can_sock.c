@@ -49,7 +49,7 @@
 #include "stm32_rcc.h"
 #include "stm32_can.h"
 
-/* Ported form arch/arm/src/stm32/stm32_can_sock.c */
+/* Ported form arch/arm/src/common/stm32/stm32_can_m3m4_v1_sock.c */
 
 /****************************************************************************
  * Pre-processor Definitions

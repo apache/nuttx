@@ -1317,8 +1317,16 @@ config ARCH_CHIP
 	default "samd5e5"	if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
-	default "stm32"		if ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L1
-	default "stm32f0l0g0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
+	default "stm32f1"	if ARCH_CHIP_STM32F1
+	default "stm32f2"	if ARCH_CHIP_STM32F2
+	default "stm32f3"	if ARCH_CHIP_STM32F3
+	default "stm32f4"	if ARCH_CHIP_STM32F4
+	default "stm32g4"	if ARCH_CHIP_STM32G4
+	default "stm32l1"	if ARCH_CHIP_STM32L1
+	default "stm32f0"	if ARCH_CHIP_STM32F0
+	default "stm32l0"	if ARCH_CHIP_STM32L0
+	default "stm32g0"	if ARCH_CHIP_STM32G0
+	default "stm32c0"	if ARCH_CHIP_STM32C0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
@@ -1819,11 +1827,35 @@ endif
 if ARCH_CHIP_SAMV7
 source "arch/arm/src/samv7/Kconfig"
 endif
-if ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L1
-source "arch/arm/src/stm32/Kconfig"
+if ARCH_CHIP_STM32F1
+source "arch/arm/src/stm32f1/Kconfig"
 endif
-if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
-source "arch/arm/src/stm32f0l0g0/Kconfig"
+if ARCH_CHIP_STM32F2
+source "arch/arm/src/stm32f2/Kconfig"
+endif
+if ARCH_CHIP_STM32F3
+source "arch/arm/src/stm32f3/Kconfig"
+endif
+if ARCH_CHIP_STM32F4
+source "arch/arm/src/stm32f4/Kconfig"
+endif
+if ARCH_CHIP_STM32G4
+source "arch/arm/src/stm32g4/Kconfig"
+endif
+if ARCH_CHIP_STM32L1
+source "arch/arm/src/stm32l1/Kconfig"
+endif
+if ARCH_CHIP_STM32F0
+source "arch/arm/src/stm32f0/Kconfig"
+endif
+if ARCH_CHIP_STM32L0
+source "arch/arm/src/stm32l0/Kconfig"
+endif
+if ARCH_CHIP_STM32G0
+source "arch/arm/src/stm32g0/Kconfig"
+endif
+if ARCH_CHIP_STM32C0
+source "arch/arm/src/stm32c0/Kconfig"
 endif
 if ARCH_CHIP_STM32F7
 source "arch/arm/src/stm32f7/Kconfig"

@@ -86,7 +86,7 @@ behave as follows at Nuttx start-up time:
 ``CONFIG_ETC_ROMFS=y`` in the NuttX configuration file. They might
 provide useful examples:
 
-  -  ``boards/arm/stm32/hymini-stm32v/nsh2``
+  -  ``boards/arm/stm32f1/hymini-stm32v/nsh2``
   -  ``boards/arm/dm320/ntosd-dm320/nsh``
   -  ``boards/sim/sim/sim/nsh``
   -  ``boards/sim/sim/sim/nsh2``

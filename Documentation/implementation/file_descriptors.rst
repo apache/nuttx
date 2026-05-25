@@ -135,7 +135,7 @@ Detached File Helpers
 Once the file structure has been detached from its file descriptor,
 you can no longer use the standard VFS functions ``read()``, ``write()``,
 ``ioctl()``, etc. Fortunately, there are a parallel set of interfaces
-that can be used with detached files. These are decribed in detail
+that can be used with detached files. These are described in detail
 in ``include/nuttx/fs/fs.h`` and only listed here below:
 
 .. code-block:: c
@@ -153,8 +153,8 @@ in ``include/nuttx/fs/fs.h`` and only listed here below:
     int file_vfcntl(FAR struct file *filep, int cmd, va_list ap);
 
 
-The SYLOG Device: A Case Study
-==============================
+The SYSLOG Device: A Case Study
+===============================
 
 This technique is used for the SYSLOG device. Originally, NuttX used
 file descriptor ``1`` for SYSLOG output by default. For most task groups,
@@ -179,7 +179,7 @@ Other Examples
 There are some other examples in analog joystick lower half drivers
 that use the ADC character driver to read joystick positions::
 
-  boards/arm/stm32/nucleo-f4x1re/src/stm32_ajoystick.c:
+  boards/arm/stm32f4/nucleo-f411re/src/stm32_ajoystick.c:
     ret = file_detach(fd, &g_adcfile);
 
   boards/arm/stm32l4/nucleo-l476rg/src/stm32_ajoystick.c:
