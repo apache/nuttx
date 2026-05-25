@@ -1234,8 +1234,54 @@ config STM32_FLASH_CONFIG_Z
 	bool
 
 config STM32_STM32L15XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_COMP
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_LCD
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_L1
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_HRTIM_M3M4_V1 if STM32_HAVE_HRTIM1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_L1 if !STM32_HAVE_RTC_COUNTER
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V1
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM5_32BITS
+	select STM32_HAVE_IP_USART_V2
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select ARCH_CORTEXM3
 	select STM32_ENERGYLITE
 	select STM32_HAVE_USBDEV
@@ -1252,28 +1298,71 @@ config STM32_STM32L15XX
 	select STM32_HAVE_ADC2
 	select STM32_HAVE_USART3
 	select STM32_HAVE_RTC_SUBSECONDS if !STM32_LOWDENSITY
-	select STM32_HAVE_IP_DBGMCU_V2
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V1
+	select STM32_HAVE_IP_ADC_M3M4_V1
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V1
+	select STM32_HAVE_IP_I2C_M3M4_V1
 
 config STM32_STM32F10XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2 if !STM32F1_VALUELINE || STM32F1_HIGHDENSITY
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG if STM32F1_CONNECTIVITYLINE
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_BKP
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH
+	select STM32_HAVE_ETHERNET if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F1F3
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RTC_COUNTER_M3M4_V1
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_SDIO_M3M4_V1 if !STM32F1_CONNECTIVITYLINE && !STM32F1_VALUELINE
+	select STM32_HAVE_IP_SPI_V1
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_IP_USART_V1
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select ARCH_CORTEXM3
 	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY || STM32_MEDIUMDENSITY
 	select STM32_HAVE_RTC_COUNTER
 	select STM32_HAVE_TIM2
 	select STM32_HAVE_TIM3
-	select STM32_HAVE_IP_DBGMCU_V1
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1_BASIC
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V1
+	select STM32_HAVE_IP_TIMERS_M3M4_V1
+	select STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V1
+	select STM32_HAVE_IP_I2C_M3M4_V1
 
 config STM32_CONNECTIVITYLINE
 	bool
@@ -1371,8 +1460,58 @@ config STM32_LOWDENSITY
 	select STM32_HAVE_CAN1 if !STM32_VALUELINE
 
 config STM32_STM32F20XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_DCMI
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_HASH
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V2_STREAM
+	select STM32_HAVE_ETHERNET if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F2F4
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_OTGHS_M3M4_V1
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RNG_M3M4_V1 if STM32_HAVE_RNG
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_V1
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_BKPSRAM
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V2
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_TIM5_32BITS
+	select STM32_HAVE_IP_USART_V2
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select ARCH_CORTEXM3
 	select STM32_HAVE_FLASH_ICACHE
 	select STM32_HAVE_FLASH_DCACHE
@@ -1408,12 +1547,12 @@ config STM32_STM32F20XX
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_IOCOMPENSATION
-	select STM32_HAVE_IP_DBGMCU_V2
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V1
+	select STM32_HAVE_IP_ADC_M3M4_V1
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V2
-	select STM32_HAVE_IP_I2C_V1
+	select STM32_HAVE_IP_I2C_M3M4_V1
 
 config STM32_STM32F205
 	bool
@@ -1426,11 +1565,54 @@ config STM32_STM32F207
 	select STM32_HAVE_ETHMAC
 
 config STM32_STM32F30XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F1F3
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_HRTIM_M3M4_V1 if STM32_HAVE_HRTIM1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_V1
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V3
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_IP_USART_V3
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
-	select STM32_HAVE_ADC1_DMA
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_TIM1
@@ -1441,18 +1623,17 @@ config STM32_STM32F30XX
 	select STM32_HAVE_TIM16
 	select STM32_HAVE_TIM17
 	select STM32_HAVE_TSC
-	select STM32_HAVE_IP_DBGMCU_V2
-	select STM32_HAVE_IP_TIMERS_V2
-	select STM32_HAVE_IP_ADC_V2
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V2
+	select STM32_HAVE_IP_ADC_M3M4_V2
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V2
+	select STM32_HAVE_IP_I2C_M3M4_V2
 
 config STM32_STM32F302
 	bool
 	default n
 	select STM32_HAVE_ADC2
-	select STM32_HAVE_ADC2_DMA
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
@@ -1463,17 +1644,60 @@ config STM32_STM32F303
 	bool
 	default n
 	select STM32_HAVE_ADC2
-	select STM32_HAVE_ADC2_DMA
 	select STM32_HAVE_CCM
 	select STM32_HAVE_TIM7
 
 config STM32_STM32F33XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_COMP
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART2
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F1F3
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_HRTIM_M3M4_V1 if STM32_HAVE_HRTIM1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_OPAMP_M3M4_V1 if STM32_HAVE_OPAMP1 || STM32_HAVE_OPAMP2 || STM32_HAVE_OPAMP3 || STM32_HAVE_OPAMP4 || STM32_HAVE_OPAMP5 || STM32_HAVE_OPAMP6
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_V1
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_PWR
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V3
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_IP_USART_V3
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_HRTIM1
-	select STM32_HAVE_HRTIM1_PLLCLK
 	select STM32_HAVE_COMP2
 	select STM32_HAVE_COMP4
 	select STM32_HAVE_COMP6
@@ -1488,23 +1712,65 @@ config STM32_STM32F33XX
 	select STM32_HAVE_TIM17
 	select STM32_HAVE_TSC
 	select STM32_HAVE_ADC2
-	select STM32_HAVE_ADC1_DMA
-	select STM32_HAVE_ADC2_DMA
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_DAC1
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_USART3
-	select STM32_HAVE_IP_DBGMCU_V2
-	select STM32_HAVE_IP_TIMERS_V2
-	select STM32_HAVE_IP_ADC_V2
-	select STM32_HAVE_IP_COMP_V1
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V2
+	select STM32_HAVE_IP_ADC_M3M4_V2
+	select STM32_HAVE_IP_COMP_M3M4_V1
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V2
+	select STM32_HAVE_IP_I2C_M3M4_V2
 
 config STM32_STM32F37XX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_TIM5_32BITS
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F1F3
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_HRTIM_M3M4_V1 if STM32_HAVE_HRTIM1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_V1
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_IP_SDADC_M3M4_V1
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V3
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_IP_USART_V3
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
+	select STM32_HAVE_PWR
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_USBDEV
@@ -1528,16 +1794,68 @@ config STM32_STM32F37XX
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_SPI3
 	select STM32_HAVE_USART3
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1_BASIC
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_TIMERS_M3M4_V1
+	select STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V2
+	select STM32_HAVE_IP_I2C_M3M4_V2
 
 config STM32_STM32F4XXX
+	select STM32_HAVE_OTGHS
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_DCMI
+	select STM32_HAVE_HASH
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V2_STREAM
+	select STM32_HAVE_ETHERNET if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_EXTI_V1
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_F2F4
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_OTGHS_M3M4_V1
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RNG_M3M4_V1 if STM32_HAVE_RNG
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_F4
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_BKPSRAM
+	select STM32_HAVE_IP_SDIO_M3M4_V1
+	select STM32_HAVE_IP_SPI_V2
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_TIM5_32BITS
+	select STM32_HAVE_IP_USART_V2
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_LTDC_M3M4_V1 if STM32_HAVE_LTDC
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
 	select ARCH_CORTEXM4
+	select STM32_HAVE_PWR
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_FLASH_ICACHE
 	select STM32_HAVE_FLASH_DCACHE
@@ -1545,12 +1863,12 @@ config STM32_STM32F4XXX
 	select STM32_HAVE_SPI2
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_IOCOMPENSATION
-	select STM32_HAVE_IP_DBGMCU_V2
-	select STM32_HAVE_IP_TIMERS_V1
-	select STM32_HAVE_IP_ADC_V1
-	select STM32_HAVE_IP_DAC_V1
+	select STM32_HAVE_IP_DBGMCU_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V1
+	select STM32_HAVE_IP_ADC_M3M4_V1
+	select STM32_HAVE_IP_DAC_M3M4_V1
 	select STM32_HAVE_IP_DMA_V2
-	select STM32_HAVE_IP_I2C_V1
+	select STM32_HAVE_IP_I2C_M3M4_V1
 
 config STM32_STM32F401xBC
 	bool
@@ -1760,6 +2078,8 @@ config STM32_STM32F427
 # This is really 429/439, but we treat the two the same.
 
 config STM32_STM32F429
+	select STM32_HAVE_DMA2D
+	select STM32_HAVE_IP_DMA2D_M3M4_V1
 	bool
 	default n
 	select STM32_HAVE_OVERDRIVE
@@ -1841,6 +2161,8 @@ config STM32_STM32F446
 # This is really 469/479, but we treat the two the same.
 
 config STM32_STM32F469
+	select STM32_HAVE_DMA2D
+	select STM32_HAVE_IP_DMA2D_M3M4_V1
 	bool
 	default n
 	select STM32_HAVE_OVERDRIVE
@@ -1884,18 +2206,68 @@ config STM32_STM32F469
 	select STM32_HAVE_I2C3
 
 config STM32_STM32G4XXX
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_COMP
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_IP_AES_M3M4_V1 if STM32_HAVE_AES
+	select STM32_HAVE_IP_BBSRAM_M3M4_V1
+	select STM32_HAVE_IP_BKP_M3M4_V1
+	select STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	select STM32_HAVE_IP_CCM_M3M4_V1 if STM32_HAVE_CCM
+	select STM32_HAVE_IP_CRYPTO_M3M4_V1
+	select STM32_FOC_HAVE_ADC_CHAN0_WORKAROUND
+	select STM32_HAVE_COMMON_FOC
+	select STM32_HAVE_IP_CORDIC_M3M4_V1 if STM32_HAVE_CORDIC
+	select STM32_HAVE_IP_DCMI_V1
+	select STM32_HAVE_IP_DFUMODE_M3M4_V1
+	select STM32_HAVE_IP_DMA_V1_8CH_DMAMUX
+	select STM32_HAVE_IP_EXTI_V2
+	select STM32_HAVE_IP_ETHMAC_M3M4_V1 if STM32_HAVE_ETHMAC
+	select STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_V1
+	select STM32_HAVE_IP_FLASH_M3M4_G4
+	select STM32_HAVE_IP_FMC_M3M4_V1 if STM32_HAVE_FMC
+	select STM32_HAVE_IP_FREERUN_M3M4_V1
+	select STM32_HAVE_IP_FSMC_M3M4_V1 if STM32_HAVE_FSMC
+	select STM32_HAVE_IP_GPIO_M3M4_V1
+	select STM32_HAVE_IP_HRTIM_M3M4_V1 if STM32_HAVE_HRTIM1
+	select STM32_HAVE_IP_I2S_M3M4_V1
+	select STM32_HAVE_IP_ONESHOT_M3M4_V1
+	select STM32_HAVE_IP_OPAMP_M3M4_V1 if STM32_HAVE_OPAMP1 || STM32_HAVE_OPAMP2 || STM32_HAVE_OPAMP3 || STM32_HAVE_OPAMP4 || STM32_HAVE_OPAMP5 || STM32_HAVE_OPAMP6
+	select STM32_HAVE_IP_PWR_M3M4_V1
+	select STM32_HAVE_IP_RNG_M3M4_V1 if STM32_HAVE_RNG
+	select STM32_HAVE_IP_RTC_M3M4_V1
+	select STM32_HAVE_IP_RTCC_M3M4_V1
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_PWR
+	select STM32_HAVE_IP_SPI_V3
+	select STM32_HAVE_IP_SYSCFG_M3M4_V1
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_TIM5_32BITS
+	select STM32_HAVE_IP_USART_V4
+	select STM32_HAVE_IP_USBDEV_M3M4_V1 if STM32_HAVE_USBDEV
+	select STM32_HAVE_IP_USBFS_M3M4_V1 if STM32_HAVE_USBFS
+	select STM32_HAVE_IP_OTGFS_M3M4_V1 if STM32_HAVE_OTGFS
+	select STM32_HAVE_IP_WDG_M3M4_V1
 	bool
 	default n
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_FPU
 	select STM32_HAVE_DMAMUX
-	select STM32_HAVE_IP_DBGMCU_V3
-	select STM32_HAVE_IP_ADC_V2
-	select STM32_HAVE_IP_COMP_V2
-	select STM32_HAVE_IP_DAC_V2
+	select STM32_HAVE_IP_DBGMCU_M3M4_V3
+	select STM32_HAVE_IP_ADC_M3M4_V2
+	select STM32_HAVE_IP_COMP_M3M4_V2
+	select STM32_HAVE_IP_DAC_M3M4_V2
 	select STM32_HAVE_IP_DMA_V1
-	select STM32_HAVE_IP_I2C_V2
-	select STM32_HAVE_IP_TIMERS_V3
+	select STM32_HAVE_IP_I2C_M3M4_V2
+	select STM32_HAVE_IP_TIMERS_M3M4_V3
 
 config STM32_STM32G4_CAT2
 	bool
@@ -2025,8 +2397,8 @@ config STM32_STM32G47XX
 	select STM32_HAVE_DAC2
 	select STM32_HAVE_DAC3
 	select STM32_HAVE_DAC4
-	select STM32_HAVE_DMA1_CHAN8
-	select STM32_HAVE_DMA2_CHAN678
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
 	select STM32_HAVE_FSMC
 	select STM32_HAVE_FMAC
 	select STM32_HAVE_FDCAN1
@@ -2100,269 +2472,27 @@ config STM32_STM32G474V
 	select STM32_HAVE_UART4
 	select STM32_HAVE_UART5
 
-menu "STM32 Peripheral Support"
+# --- restored family-specific symbols over-deleted by move-to-common (split recreates per-family) ---
+if ARCH_CHIP_STM32
 
-# These are the peripheral selections proper
-
-config STM32_ADC5
-	bool "ADC5"
-	default n
-	select STM32_ADC
-	depends on STM32_HAVE_ADC5
-	select STM32_HAVE_ADC5_DMA if STM32_DMA2
-	select STM32_HAVE_ADC5_DMA if STM32_DMAMUX
-
-config STM32_SDADC1
-	bool "SDADC1"
-	default n
-	select STM32_SDADC
-	depends on STM32_HAVE_SDADC1
-	select STM32_HAVE_SDADC1_DMA if STM32_DMA2
-
-config STM32_SDADC2
-	bool "SDADC2"
-	default n
-	select STM32_SDADC
-	depends on STM32_HAVE_SDADC2
-	select STM32_HAVE_SDADC2_DMA if STM32_DMA2
-
-config STM32_SDADC3
-	bool "SDADC3"
-	default n
-	select STM32_SDADC
-	depends on STM32_HAVE_SDADC3
-	select STM32_HAVE_SDADC3_DMA if STM32_DMA2
-
-config STM32_COMP3
-	bool "COMP3"
-	default n
-	select STM32_COMP
-	depends on STM32_HAVE_COMP3
-
-config STM32_COMP4
-	bool "COMP4"
-	default n
-	select STM32_COMP
-	depends on STM32_HAVE_COMP4
-
-config STM32_COMP5
-	bool "COMP5"
-	default n
-	select STM32_COMP
-	depends on STM32_HAVE_COMP5
-
-config STM32_COMP6
-	bool "COMP6"
-	default n
-	select STM32_COMP
-	depends on STM32_HAVE_COMP6
-
-config STM32_COMP7
-	bool "COMP7"
-	default n
-	select STM32_COMP
-	depends on STM32_HAVE_COMP7
-
-config STM32_CCMDATARAM
-	bool "CMD/DATA RAM"
-	default n
-	depends on STM32_STM32F4XXX
-
-if STM32_DAC1
-
-config STM32_DAC1CH1
-	bool "DAC1CH1"
-	default n
-
-config STM32_DAC1CH2
-	bool "DAC1CH2"
-	default n
-
-endif #STM32_DAC1
-
-if STM32_DAC2
-
-config STM32_DAC2CH1
-	bool "DAC2CH1"
-	default n
-
-endif #STM32_DAC2
-
-config STM32_DAC3
-	bool "DAC3"
-	default n
-	depends on STM32_HAVE_DAC3
-	select STM32_DAC
-
-if STM32_DAC3
-
-config STM32_DAC3CH1
-	bool "DAC3CH1 Internal"
-	default n
-
-config STM32_DAC3CH2
-	bool "DAC3CH2 Internal"
-	default n
-
-endif #STM32_DAC3
-
-config STM32_DAC4
-	bool "DAC4"
-	default n
-	depends on STM32_HAVE_DAC4
-	select STM32_DAC
-
-if STM32_DAC4
-
-config STM32_DAC4CH1
-	bool "DAC4CH1 Internal"
-	default n
-
-config STM32_DAC4CH2
-	bool "DAC4CH2 Internal"
-	default n
-
-endif #STM32_DAC4
-
-config STM32_HRTIM
+config STM32_VALUELINE
 	bool
 	default n
-
-config STM32_HRTIM1
-	bool "HRTIM1"
-	default n
-	depends on STM32_HAVE_HRTIM1
-	select STM32_HRTIM
-
-if STM32_HRTIM1
-
-config STM32_HRTIM_MASTER
-	bool "HRTIM MASTER"
-	default n
-	---help---
-		Enable HRTIM Master Timer
-
-config STM32_HRTIM_TIMA
-	bool "HRTIM TIMA"
-	default n
-	---help---
-		Enable HRTIM Timer A
-
-config STM32_HRTIM_TIMB
-	bool "HRTIM TIMB"
-	default n
-	---help---
-		Enable HRTIM Timer B
-
-config STM32_HRTIM_TIMC
-	bool "HRTIM TIMC"
-	default n
-	---help---
-		Enable HRTIM Timer C
-
-config STM32_HRTIM_TIMD
-	bool "HRTIM TIMD"
-	default n
-	---help---
-		Enable HRTIM Timer D
-
-config STM32_HRTIM_TIME
-	bool "HRTIM TIME"
-	default n
-	---help---
-		Enable HRTIM Timer E
-
-endif # STM32_HRTIM
-
-config STM32_I2C1_SLAVE
-	bool "I2C1 Slave"
-	default n
-	depends on !STM32_I2C1 && I2C_SLAVE
-	select STM32_I2C_SLAVE
-
-config STM32_I2C2_SLAVE
-	bool "I2C2 Slave"
-	default n
-	depends on STM32_HAVE_I2C2 && !STM32_I2C2 && I2C_SLAVE
-	select STM32_I2C_SLAVE
-
-config STM32_I2C3_SLAVE
-	bool "I2C3 Slave"
-	default n
-	depends on STM32_HAVE_I2C3 && !STM32_I2C3 && I2C_SLAVE
-	select STM32_I2C_SLAVE
-
-config STM32_OPAMP1
-	bool "OPAMP1"
-	default n
-	select STM32_OPAMP
-	depends on STM32_HAVE_OPAMP1
-
-config STM32_OPAMP2
-	bool "OPAMP2"
-	default n
-	select STM32_OPAMP
-	depends on STM32_HAVE_OPAMP2
-
-config STM32_OPAMP3
-	bool "OPAMP3"
-	default n
-	select STM32_OPAMP
-	depends on STM32_HAVE_OPAMP3
-
-config STM32_OPAMP4
-	bool "OPAMP4"
-	default n
-	select STM32_OPAMP
-	depends on STM32_HAVE_OPAMP4
-
-config STM32_UCPD
-	bool "UCPD (USB Type C Power Delivery)"
-	default n
-	depends on STM32_HAVE_UCPD
-	select USBDEV
-
-if STM32_LCD
-
-choice
-	prompt "Segment LCD Clock Source"
-	default LCD_LSECLOCK
-
-config LCD_LSICLOCK
-	bool "Internal Low Speed Clock"
-
-config LCD_LSECLOCK
-	bool "External Low Speed Clock"
-
-config LCD_HSECLOCK
-	bool "External High Speed Clock"
-
-endchoice
-endif # STM32_LCD
-
-endmenu
-
-config STM32_SDADC
-	bool
-	default n
-
-config STM32_I2C_SLAVE
-	bool
-	default n
-
-config STM32_CAP
-	bool
-	default n
-
-config STM32_NOEXT_VECTORS
-	bool "Disable the ARMv7-M EXT vectors"
-	default n
-	---help---
-		Sometimes you may not need any Vector support beyond SysTick
-		and wish to save memory. This applies only to ARMv7-M architectures.
-
-menu "Alternate Pin Mapping"
-	depends on STM32_STM32F10XX || STM32_CONNECTIVITYLINE
+	select STM32_HAVE_USART3
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_SPI2 if STM32_HIGHDENSITY
+	select STM32_HAVE_SPI3 if STM32_HIGHDENSITY
 
 choice
 	prompt "CAN1 Alternate Pin Mappings"
@@ -2542,1887 +2672,4 @@ config STM32_USART3_PARTIAL_REMAP
 
 endchoice
 
-endmenu
-
-config STM32_FLASH_ICACHE
-	bool "Enable FLASH Instruction Cache"
-	default y
-	depends on STM32_HAVE_FLASH_ICACHE
-	---help---
-		Enable the FLASH instruction cache.
-
-config STM32_FLASH_DCACHE
-	bool "Enable FLASH Data Cache"
-	default y
-	depends on STM32_HAVE_FLASH_DCACHE
-	---help---
-		Enable the FLASH data cache.
-
-config STM32_FORCEPOWER
-	bool "Force power"
-	default n
-	---help---
-		Timer and I2C devices may need to the following to force power to be applied
-		unconditionally at power up.  (Otherwise, the device is powered when it is
-		initialized).
-
-config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
-	bool "Custom clock configuration"
-	default n
-	---help---
-		Enables special, board-specific STM32 clock configuration.
-
-config STM32_SAIPLL
-	bool "SAIPLL"
-	default n
-	depends on STM32_HAVE_SAIPLL
-	---help---
-		The STM32F446 has a separate PLL for the SAI block.
-		Set this true and provide configuration parameters in
-		board.h to use this PLL.
-
-config STM32_I2SPLL
-	bool "I2SPLL"
-	default n
-	depends on STM32_HAVE_I2SPLL
-	---help---
-		The STM32F446 has a separate PLL for the I2S block.
-		Set this true and provide configuration parameters in
-		board.h to use this PLL.
-
-config STM32_CCMEXCLUDE
-	bool "Exclude CCM SRAM from the heap"
-	default ARCH_DMA || LIBC_ARCH_ELF
-	depends on STM32_HAVE_CCM
-	---help---
-		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
-		and (2) it appears to be impossible to execute ELF modules from CCM
-		RAM.
-
-config STM32_CCM_PROCFS
-	bool "CCM PROCFS support"
-	default n
-	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
-	---help---
-		Select to build in support for /proc/ccm.  Reading from /proc/ccm
-		will provide statistics about CCM memory use similar to what you
-		would get from mallinfo() for the user heap.
-
-menu "Timer Configuration"
-	depends on STM32_TIM
-
-if STM32_TIM9_CAP
-
-config STM32_TIM9_CLOCK
-	int "TIM9 work frequency for capture"
-	default 1000000
-	---help---
-		This clock frequency limiting the count rate at the expense of resolution.
-
-endif # STM32_TIM9_CAP
-
-if STM32_TIM10_CAP
-
-config STM32_TIM10_CLOCK
-	int "TIM10 work frequency for capture"
-	default 1000000
-	---help---
-		This clock frequency limiting the count rate at the expense of resolution.
-
-endif # STM32_TIM10_CAP
-
-if STM32_TIM11_CAP
-
-config STM32_TIM11_CLOCK
-	int "TIM11 work frequency for capture"
-	default 1000000
-	---help---
-		This clock frequency limiting the count rate at the expense of resolution.
-
-endif # STM32_TIM11_CAP
-
-endmenu # Timer Configuration
-
-menu "HRTIM Configuration"
-	depends on STM32_HRTIM
-
-config STM32_HRTIM_DISABLE_CHARDRV
-	bool "HRTIM Disable Character Driver"
-	default n
-	---help---
-		In most cases we do not need HRTIM Character Driver, so we can disable it
-		and save some memory.
-
-config STM32_HRTIM_NO_ENABLE_TIMERS
-	bool "Do not enable HRTIM timers at startup"
-	default n
-	---help---
-		Do not enable HRTIM timers at startup
-
-menuconfig STM32_HRTIM_ADC
-	bool "HRTIM ADC Triggering"
-	default n
-	---help---
-		Enable HRTIM ADC Triggering support.
-
-if STM32_HRTIM_ADC
-
-config STM32_HRTIM_ADC1_TRG1
-	bool "HRTIM ADC1 Trigger 1"
-	default n
-
-config STM32_HRTIM_ADC1_TRG2
-	bool "HRTIM ADC1 Trigger 2"
-	default n
-
-config STM32_HRTIM_ADC1_TRG3
-	bool "HRTIM ADC1 Trigger 3"
-	default n
-
-config STM32_HRTIM_ADC1_TRG4
-	bool "HRTIM ADC1 Trigger 4"
-	default n
-
-config STM32_HRTIM_ADC2_TRG1
-	bool "HRTIM ADC2 Trigger 1"
-	default n
-
-config STM32_HRTIM_ADC2_TRG2
-	bool "HRTIM ADC2 Trigger 2"
-	default n
-
-config STM32_HRTIM_ADC2_TRG3
-	bool "HRTIM ADC2 Trigger 3"
-	default n
-
-config STM32_HRTIM_ADC2_TRG4
-	bool "HRTIM ADC2 Trigger 4"
-	default n
-
-endif # STM32_HRTIM_ADC
-
-config STM32_HRTIM_DAC
-	bool "HRTIM DAC Triggering"
-	default n
-	---help---
-		Enable HRTIM DAC Triggering support.
-
-config STM32_HRTIM_PWM
-	bool "HRTIM PWM Outputs"
-	default n
-	---help---
-		Enable HRTIM PWM Outputs support.
-
-config STM32_HRTIM_CAP
-	bool "HRTIM Capture"
-	default n
-	---help---
-		Enable HRTIM Capture support.
-
-config STM32_HRTIM_INTERRUPTS
-	bool "HRTIM Interrupts"
-	default n
-	---help---
-		Enable HRTIM Interrupts support.
-
-config STM32_HRTIM_BURST
-	bool "HRTIM Burst Mode"
-	depends on STM32_HRTIM_PWM
-	default n
-	---help---
-		Enable HRTIM Burst Mode support for PWM outputs.
-
-config STM32_HRTIM_DEADTIME
-	bool "HRTIM Dead-time"
-	depends on STM32_HRTIM_PWM
-	default n
-	---help---
-		Enable HRTIM Deadtime support for PWM outputs.
-
-config STM32_HRTIM_PUSHPULL
-	bool "HRTIM Push-Pull Mode"
-	depends on STM32_HRTIM_PWM
-	default n
-	---help---
-		Enable HRTIM Push-Pull Mode support for PWM outputs.
-
-config STM32_HRTIM_CHOPPER
-	bool "HRTIM Chopper"
-	depends on STM32_HRTIM_PWM
-	default n
-	---help---
-		Enable HRTIM Chopper Mode for PWM outputs.
-
-config STM32_HRTIM_DMA
-	bool "HRTIM DMA"
-	default n
-
-config STM32_HRTIM_DMABURST
-	bool "HRTIM DMA Burst"
-	default n
-
-config STM32_HRTIM_AUTODELAY
-	bool "HRTIM Autodelay"
-	depends on STM32_HRTIM_PWM
-	default n
-
-menuconfig STM32_HRTIM_EVENTS
-	bool "HRTIM Events Configuration"
-	default n
-	---help---
-		Enable HRTIM Events support.
-
-if STM32_HRTIM_EVENTS
-
-config STM32_HRTIM_EEV1
-	bool "HRTIM EEV1"
-	default n
-
-config STM32_HRTIM_EEV2
-	bool "HRTIM EEV2"
-	default n
-
-config STM32_HRTIM_EEV3
-	bool "HRTIM EEV3"
-	default n
-
-config STM32_HRTIM_EEV4
-	bool "HRTIM EEV4"
-	default n
-
-config STM32_HRTIM_EEV5
-	bool "HRTIM EEV5"
-	default n
-
-config STM32_HRTIM_EEV6
-	bool "HRTIM EEV6"
-	default n
-
-config STM32_HRTIM_EEV7
-	bool "HRTIM EEV7"
-	default n
-
-config STM32_HRTIM_EEV8
-	bool "HRTIM EEV8"
-	default n
-
-config STM32_HRTIM_EEV9
-	bool "HRTIM EEV9"
-	default n
-
-config STM32_HRTIM_EEV10
-	bool "HRTIM EEV10"
-	default n
-
-endif # STM32_HRTIM_EVENTS
-
-menuconfig STM32_HRTIM_FAULTS
-	bool "HRTIM Faults Configuration"
-	default n
-	---help---
-		Enable HRTIM Faults support.
-
-if STM32_HRTIM_FAULTS
-
-config STM32_HRTIM_FAULT1
-	bool "HRTIM Fault 1"
-	default n
-
-config STM32_HRTIM_FAULT2
-	bool "HRTIM Fault 2"
-	default n
-
-config STM32_HRTIM_FAULT3
-	bool "HRTIM Fault 3"
-	default n
-
-config STM32_HRTIM_FAULT4
-	bool "HRTIM Fault 4"
-	default n
-
-endif # STM32_HRTIM_FAULTS
-
-config STM32_HRTIM_CLK_FROM_PLL
-	bool "HRTIM Clock from PLL"
-	default n
-	depends on STM32_HAVE_HRTIM1_PLLCLK
-	---help---
-		Set PLL as the clock source for HRTIM.
-		This configuration requires the following conditions:
-		  1) system clock is PLL,
-			2) SYSCLK and PCLK2 ratio must be 1 o 2.
-
-menu "HRTIM Master Configuration"
-	depends on STM32_HRTIM_MASTER
-
-config STM32_HRTIM_MASTER_DAC
-	bool "HRTIM Master DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_MASTER_DMA
-	bool "HRTIM MASTER DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_MASTER_IRQ
-	bool "HRTIM MASTER Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-endmenu # "HRTIM Master Configuration"
-
-menu "HRTIM Timer A Configuration"
-	depends on STM32_HRTIM_TIMA
-
-config STM32_HRTIM_TIMA_CAP
-	bool "HRTIM TIMA Capture"
-	default n
-	depends on STM32_HRTIM_CAPTURE
-
-config STM32_HRTIM_TIMA_DAC
-	bool "HRTIM TIMA DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_TIMA_DMA
-	bool "HRTIM TIMA DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_TIMA_IRQ
-	bool "HRTIM TIMA Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-config STM32_HRTIM_TIMA_PWM
-	bool "HRTIM TIMA PWM Outputs"
-	default n
-	depends on STM32_HRTIM_PWM
-
-config STM32_HRTIM_TIMA_PWM_CH1
-	bool "HRTIM TIMA PWM Output 1"
-	default n
-	depends on STM32_HRTIM_TIMA_PWM
-
-config STM32_HRTIM_TIMA_PWM_CH2
-	bool "HRTIM TIMA PWM Output 2"
-	default n
-	depends on STM32_HRTIM_TIMA_PWM
-
-config STM32_HRTIM_TIMA_BURST
-	bool "HRTIM TIMA Burst"
-	default n
-	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMA_PWM)
-
-config STM32_HRTIM_TIMA_BURST_CH1
-	bool "HRTIM TIMA Output 1 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMA_BURST && STM32_HRTIM_TIMA_PWM_CH1)
-
-config STM32_HRTIM_TIMA_BURST_CH2
-	bool "HRTIM TIMA Output 2 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMA_BURST && STM32_HRTIM_TIMA_PWM_CH2)
-
-config STM32_HRTIM_TIMA_CHOP
-	bool "HRTIM TIMA PWM Chopper"
-	default n
-	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMA_PWM)
-
-config STM32_HRTIM_TIMA_DT
-	bool "HRTIM TIMA PWM Dead-time"
-	default n
-	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMA_PWM)
-
-config STM32_HRTIM_TIMA_PSHPLL
-	bool "HRTIM TIMA PWM Push-pull mode"
-	default n
-	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMA_PWM)
-
-endmenu # "HRTIM Timer A Configuration"
-
-menu "HRTIM Timer B Configuration"
-	depends on STM32_HRTIM_TIMB
-
-config STM32_HRTIM_TIMB_CAP
-	bool "HRTIM TIMB Capture"
-	default n
-	depends on STM32_HRTIM_CAPTURE
-
-config STM32_HRTIM_TIMB_DAC
-	bool "HRTIM TIMB DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_TIMB_DMA
-	bool "HRTIM TIMB DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_TIMB_IRQ
-	bool "HRTIM TIMB Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-config STM32_HRTIM_TIMB_PWM
-	bool "HRTIM TIMB PWM Outputs"
-	default n
-	depends on STM32_HRTIM_PWM
-
-config STM32_HRTIM_TIMB_PWM_CH1
-	bool "HRTIM TIMB PWM Output 1"
-	default n
-	depends on STM32_HRTIM_TIMB_PWM
-
-config STM32_HRTIM_TIMB_PWM_CH2
-	bool "HRTIM TIMB PWM Output 2"
-	default n
-	depends on STM32_HRTIM_TIMB_PWM
-
-config STM32_HRTIM_TIMB_BURST
-	bool "HRTIM TIMB Burst"
-	default n
-	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMB_PWM)
-
-config STM32_HRTIM_TIMB_BURST_CH1
-	bool "HRTIM TIMB Output 1 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMB_BURST && STM32_HRTIM_TIMB_PWM_CH1)
-
-config STM32_HRTIM_TIMB_BURST_CH2
-	bool "HRTIM TIMB Output 2 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMB_BURST && STM32_HRTIM_TIMB_PWM_CH2)
-
-config STM32_HRTIM_TIMB_CHOP
-	bool "HRTIM TIMB PWM Chopper"
-	default n
-	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMB_PWM)
-
-config STM32_HRTIM_TIMB_DT
-	bool "HRTIM TIMB PWM Dead-time"
-	default n
-	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMB_PWM)
-
-config STM32_HRTIM_TIMB_PSHPLL
-	bool "HRTIM TIMB PWM Push-pull mode"
-	default n
-	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMB_PWM)
-
-endmenu # "HRTIM Timer B Configuration"
-
-menu "HRTIM Timer C Configuration"
-	depends on STM32_HRTIM_TIMC
-
-config STM32_HRTIM_TIMC_CAP
-	bool "HRTIM TIMC Capture"
-	default n
-	depends on STM32_HRTIM_CAPTURE
-
-config STM32_HRTIM_TIMC_DAC
-	bool "HRTIM TIMC DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_TIMC_DMA
-	bool "HRTIM TIMC DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_TIMC_IRQ
-	bool "HRTIM TIMC Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-config STM32_HRTIM_TIMC_PWM
-	bool "HRTIM TIMC PWM Outputs"
-	default n
-	depends on STM32_HRTIM_PWM
-
-config STM32_HRTIM_TIMC_PWM_CH1
-	bool "HRTIM TIMC PWM Output 1"
-	default n
-	depends on STM32_HRTIM_TIMC_PWM
-
-config STM32_HRTIM_TIMC_PWM_CH2
-	bool "HRTIM TIMC PWM Output 2"
-	default n
-	depends on STM32_HRTIM_TIMC_PWM
-
-config STM32_HRTIM_TIMC_BURST
-	bool "HRTIM TIMC Burst"
-	default n
-	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMC_PWM)
-
-config STM32_HRTIM_TIMC_BURST_CH1
-	bool "HRTIM TIMC Output 1 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMC_BURST && STM32_HRTIM_TIMC_PWM_CH1)
-
-config STM32_HRTIM_TIMC_BURST_CH2
-	bool "HRTIM TIMC Output 2 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMC_BURST && STM32_HRTIM_TIMC_PWM_CH2)
-
-config STM32_HRTIM_TIMC_CHOP
-	bool "HRTIM TIMC PWM Chopper"
-	default n
-	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMC_PWM)
-
-config STM32_HRTIM_TIMC_DT
-	bool "HRTIM TIMC PWM Dead-time"
-	default n
-	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMC_PWM)
-
-config STM32_HRTIM_TIMC_PSHPLL
-	bool "HRTIM TIMC PWM Push-pull mode"
-	default n
-	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMC_PWM)
-
-endmenu # "HRTIM Timer C Configuration"
-
-menu "HRTIM Timer D Configuration"
-	depends on STM32_HRTIM_TIMD
-
-config STM32_HRTIM_TIMD_CAP
-	bool "HRTIM TIMD Capture"
-	default n
-	depends on STM32_HRTIM_CAPTURE
-
-config STM32_HRTIM_TIMD_DAC
-	bool "HRTIM TIMD DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_TIMD_DMA
-	bool "HRTIM TIMD DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_TIMD_IRQ
-	bool "HRTIM TIMD Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-config STM32_HRTIM_TIMD_PWM
-	bool "HRTIM TIMD PWM Outputs"
-	default n
-	depends on STM32_HRTIM_PWM
-
-config STM32_HRTIM_TIMD_PWM_CH1
-	bool "HRTIM TIMD PWM Output 1"
-	default n
-	depends on STM32_HRTIM_TIMD_PWM
-
-config STM32_HRTIM_TIMD_PWM_CH2
-	bool "HRTIM TIMD PWM Output 2"
-	default n
-	depends on STM32_HRTIM_TIMD_PWM
-
-config STM32_HRTIM_TIMD_BURST
-	bool "HRTIM TIMD Burst"
-	default n
-	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIMD_PWM)
-
-config STM32_HRTIM_TIMD_BURST_CH1
-	bool "HRTIM TIMD Output 1 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMD_BURST && STM32_HRTIM_TIMD_PWM_CH1)
-
-config STM32_HRTIM_TIMD_BURST_CH2
-	bool "HRTIM TIMD Output 2 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIMD_BURST && STM32_HRTIM_TIMD_PWM_CH2)
-
-config STM32_HRTIM_TIMD_CHOP
-	bool "HRTIM TIMD PWM Chopper"
-	default n
-	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIMD_PWM)
-
-config STM32_HRTIM_TIMD_DT
-	bool "HRTIM TIMD PWM Dead-time"
-	default n
-	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIMD_PWM)
-
-config STM32_HRTIM_TIMD_PSHPLL
-	bool "HRTIM TIMD PWM Push-pull mode"
-	default n
-	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIMD_PWM)
-
-endmenu # "HRTIM Timer D Configuration"
-
-menu "HRTIM Timer E Configuration"
-	depends on STM32_HRTIM_TIME
-
-config STM32_HRTIM_TIME_CAP
-	bool "HRTIM TIME Capture"
-	default n
-	depends on STM32_HRTIM_CAPTURE
-
-config STM32_HRTIM_TIME_DAC
-	bool "HRTIM TIME DAC Triggering"
-	default n
-	depends on STM32_HRTIM_DAC
-
-config STM32_HRTIM_TIME_DMA
-	bool "HRTIM TIME DMA"
-	default n
-	depends on STM32_HRTIM_DMA
-
-config STM32_HRTIM_TIME_IRQ
-	bool "HRTIM TIME Interrupts"
-	default n
-	depends on STM32_HRTIM_INTERRUPTS
-
-config STM32_HRTIM_TIME_PWM
-	bool "HRTIM TIME PWM Outputs"
-	default n
-	depends on STM32_HRTIM_PWM
-
-config STM32_HRTIM_TIME_PWM_CH1
-	bool "HRTIM TIME PWM Output 1"
-	default n
-	depends on STM32_HRTIM_TIME_PWM
-
-config STM32_HRTIM_TIME_PWM_CH2
-	bool "HRTIM TIME PWM Output 2"
-	default n
-	depends on STM32_HRTIM_TIME_PWM
-
-config STM32_HRTIM_TIME_BURST
-	bool "HRTIM TIME Burst"
-	default n
-	depends on (STM32_HRTIM_BURST && STM32_HRTIM_TIME_PWM)
-
-config STM32_HRTIM_TIME_BURST_CH1
-	bool "HRTIM TIME Output 1 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIME_BURST && STM32_HRTIM_TIME_PWM_CH1)
-
-config STM32_HRTIM_TIME_BURST_CH2
-	bool "HRTIM TIME Output 2 Burst Mode"
-	default n
-	depends on (STM32_HRTIM_TIME_BURST && STM32_HRTIM_TIME_PWM_CH2)
-
-config STM32_HRTIM_TIME_CHOP
-	bool "HRTIM TIME PWM Chopper"
-	default n
-	depends on (STM32_HRTIM_CHOPPER && STM32_HRTIM_TIME_PWM)
-
-config STM32_HRTIM_TIME_DT
-	bool "HRTIM TIME PWM Dead-time"
-	default n
-	depends on (STM32_HRTIM_DEADTIME && STM32_HRTIM_TIME_PWM)
-
-config STM32_HRTIM_TIME_PSHPLL
-	bool "HRTIM TIME PWM Push-pull mode"
-	default n
-	depends on (STM32_HRTIM_PUSHPULL && STM32_HRTIM_TIME_PWM)
-
-endmenu # "HRTIM Timer E Configuration"
-
-endmenu # "HRTIM Configuration"
-
-menu "ADC Configuration"
-	depends on STM32_ADC
-
-config STM32_ADC4_RESOLUTION
-	int "ADC4 resolution"
-	depends on STM32_ADC4 && !STM32_HAVE_IP_ADC_V1_BASIC
-	default 0
-	range 0 3
-	---help---
-		ADC4 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
-
-config STM32_ADC5_RESOLUTION
-	int "ADC5 resolution"
-	depends on STM32_ADC5 && !STM32_HAVE_IP_ADC_V1_BASIC
-	default 0
-	range 0 3
-	---help---
-		ADC5 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
-
-config STM32_ADC4_DMA
-	bool "ADC4 DMA"
-	depends on STM32_ADC4 && STM32_HAVE_ADC4_DMA
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32_ADC4_DMA_CFG
-	int "ADC4 DMA configuration"
-	depends on STM32_ADC4_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
-	range 0 1
-	default 0
-	---help---
-		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
-
-config STM32_ADC4_DMA_BATCH
-	int "ADC4 DMA number of conversions"
-	depends on STM32_ADC4 && STM32_ADC4_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-config STM32_ADC4_ANIOC_TRIGGER
-	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
-	depends on STM32_ADC4
-	range 1 3
-	default 3
-	---help---
-		1 - ANIOC_TRIGGER only starts regular conversion
-		2 - ANIOC_TRIGGER only starts injected conversion
-		3 - ANIOC_TRIGGER starts both regular and injected conversions
-
-config STM32_ADC5_DMA
-	bool "ADC5 DMA"
-	depends on STM32_ADC5 && STM32_HAVE_ADC5_DMA
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32_ADC5_DMA_CFG
-	int "ADC5 DMA configuration"
-	depends on STM32_ADC5_DMA && !STM32_HAVE_IP_ADC_V1_BASIC
-	range 0 1
-	default 0
-	---help---
-		0 - ADC5 DMA in One Shot Mode, 1 - ADC5 DMA in Circular Mode
-
-config STM32_ADC5_DMA_BATCH
-	int "ADC5 DMA number of conversions"
-	depends on STM32_ADC5 && STM32_ADC5_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-config STM32_ADC4_INJECTED_CHAN
-	int "ADC4 injected channels"
-	depends on STM32_ADC4
-	range 0 4
-	default 0
-	---help---
-		Support for ADC4 injected channels.
-
-config STM32_ADC5_INJECTED_CHAN
-	int "ADC5 injected channels"
-	depends on STM32_ADC5
-	range 0 4
-	default 0
-	---help---
-		Support for ADC5 injected channels.
-
-config STM32_ADC4_EXTSEL
-	bool "ADC4 external trigger for regular group"
-	depends on STM32_ADC4 && !STM32_HAVE_ADC4_TIMER
-	default n
-	---help---
-		Enable EXTSEL for ADC4.
-
-config STM32_ADC5_EXTSEL
-	bool "ADC5 external trigger for regular group"
-	depends on STM32_ADC5 && !STM32_HAVE_ADC5_TIMER
-	default n
-	---help---
-		Enable EXTSEL for ADC5.
-
-config STM32_ADC4_JEXTSEL
-	bool "ADC4 external trigger for injected group"
-	depends on STM32_ADC4
-	default n
-	---help---
-		Enable JEXTSEL for ADC4.
-
-config STM32_ADC5_JEXTSEL
-	bool "ADC5 external trigger for injected group"
-	depends on STM32_ADC5
-	default n
-	---help---
-		Enable JEXTSEL for ADC5.
-
-endmenu
-
-menu "COMP Configuration"
-	depends on STM32_COMP && STM32_HAVE_IP_COMP_V2
-
-config STM32_COMP1_OUT
-	bool "COMP1 GPIO Output"
-	depends on STM32_COMP1
-	default n
-	---help---
-		Enables COMP1 output.
-
-config STM32_COMP1_INM
-	int "COMP1 inverting input assignment"
-	depends on STM32_COMP1
-	range 0 7
-	default 0
-	---help---
-		Selects COMP1 inverting input pin.
-
-config STM32_COMP1_INP
-	int "COMP1 non-inverting input assignment"
-	depends on STM32_COMP1
-	range 0 1
-	default 0
-	---help---
-		Selects COMP1 non-inverting input pin.
-
-config STM32_COMP1_POL
-	int "COMP1 polarity"
-	depends on STM32_COMP1
-	range 0 1
-	default 0
-	---help---
-		Selects COMP1 output polarity.
-
-config STM32_COMP1_HYST
-	int "COMP1 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP1
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP1.
-
-config STM32_COMP1_BLANKSEL
-	int "COMP1 blanking signal select"
-	depends on STM32_COMP1
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP1.
-
-config STM32_COMP1_LOCK
-	int "COMP1 COMP_CxCSR register lock"
-	depends on STM32_COMP1
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP2_OUT
-	bool "COMP2 GPIO Output"
-	depends on STM32_COMP2
-	default n
-	---help---
-		Enables COMP2 output.
-
-config STM32_COMP2_INM
-	int "COMP2 inverting input assignment"
-	depends on STM32_COMP2
-	range 0 7
-	default 0
-	---help---
-		Selects COMP2 inverting input pin.
-
-config STM32_COMP2_INP
-	int "COMP2 non-inverting input assignment"
-	depends on STM32_COMP2
-	range 0 1
-	default 0
-	---help---
-		Selects COMP2 non-inverting input pin.
-
-config STM32_COMP2_POL
-	int "COMP2 polarity"
-	depends on STM32_COMP2
-	range 0 1
-	default 0
-	---help---
-		Selects COMP2 output polarity.
-
-config STM32_COMP2_HYST
-	int "COMP2 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP2
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP2.
-
-config STM32_COMP2_BLANKSEL
-	int "COMP2 blanking signal select"
-	depends on STM32_COMP2
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP2.
-
-config STM32_COMP2_LOCK
-	int "COMP2 COMP_CxCSR register lock"
-	depends on STM32_COMP2
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP3_OUT
-	bool "COMP3 GPIO Output"
-	depends on STM32_COMP3
-	default n
-	---help---
-		Enables COMP3 output.
-
-config STM32_COMP3_INM
-	int "COMP3 inverting input assignment"
-	depends on STM32_COMP3
-	range 0 7
-	default 0
-	---help---
-		Selects COMP3 inverting input pin.
-
-config STM32_COMP3_INP
-	int "COMP3 non-inverting input assignment"
-	depends on STM32_COMP3
-	range 0 1
-	default 0
-	---help---
-		Selects COMP3 non-inverting input pin.
-
-config STM32_COMP3_POL
-	int "COMP3 polarity"
-	depends on STM32_COMP3
-	range 0 1
-	default 0
-	---help---
-		Selects COMP3 output polarity.
-
-config STM32_COMP3_HYST
-	int "COMP3 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP3
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP3.
-
-config STM32_COMP3_BLANKSEL
-	int "COMP3 blanking signal select"
-	depends on STM32_COMP3
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP3.
-
-config STM32_COMP3_LOCK
-	int "COMP3 COMP_CxCSR register lock"
-	depends on STM32_COMP3
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP4_OUT
-	bool "COMP4 GPIO Output"
-	depends on STM32_COMP4
-	default n
-	---help---
-		Enables COMP4 output.
-
-config STM32_COMP4_INM
-	int "COMP4 inverting input assignment"
-	depends on STM32_COMP4
-	range 0 7
-	default 0
-	---help---
-		Selects COMP4 inverting input pin.
-
-config STM32_COMP4_INP
-	int "COMP4 non-inverting input assignment"
-	depends on STM32_COMP4
-	range 0 1
-	default 0
-	---help---
-		Selects COMP4 non-inverting input pin.
-
-config STM32_COMP4_POL
-	int "COMP4 polarity"
-	depends on STM32_COMP4
-	range 0 1
-	default 0
-	---help---
-		Selects COMP4 output polarity.
-
-config STM32_COMP4_HYST
-	int "COMP4 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP4
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP4.
-
-config STM32_COMP4_BLANKSEL
-	int "COMP4 blanking signal select"
-	depends on STM32_COMP4
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP4.
-
-config STM32_COMP4_LOCK
-	int "COMP4 COMP_CxCSR register lock"
-	depends on STM32_COMP4
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP5_OUT
-	bool "COMP5 GPIO Output"
-	depends on STM32_COMP5
-	default n
-	---help---
-		Enables COMP5 output.
-
-config STM32_COMP5_INM
-	int "COMP5 inverting input assignment"
-	depends on STM32_COMP5
-	range 0 7
-	default 0
-	---help---
-		Selects COMP5 inverting input pin.
-
-config STM32_COMP5_INP
-	int "COMP5 non-inverting input assignment"
-	depends on STM32_COMP5
-	range 0 1
-	default 0
-	---help---
-		Selects COMP5 non-inverting input pin.
-
-config STM32_COMP5_POL
-	int "COMP5 polarity"
-	depends on STM32_COMP5
-	range 0 1
-	default 0
-	---help---
-		Selects COMP5 output polarity.
-
-config STM32_COMP5_HYST
-	int "COMP5 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP5
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP5.
-
-config STM32_COMP5_BLANKSEL
-	int "COMP5 blanking signal select"
-	depends on STM32_COMP5
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP5.
-
-config STM32_COMP5_LOCK
-	int "COMP5 COMP_CxCSR register lock"
-	depends on STM32_COMP5
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP6_OUT
-	bool "COMP6 GPIO Output"
-	depends on STM32_COMP6
-	default n
-	---help---
-		Enables COMP6 output.
-
-config STM32_COMP6_INM
-	int "COMP6 inverting input assignment"
-	depends on STM32_COMP6
-	range 0 7
-	default 0
-	---help---
-		Selects COMP6 inverting input pin.
-
-config STM32_COMP6_INP
-	int "COMP6 non-inverting input assignment"
-	depends on STM32_COMP6
-	range 0 1
-	default 0
-	---help---
-		Selects COMP6 non-inverting input pin.
-
-config STM32_COMP6_POL
-	int "COMP6 polarity"
-	depends on STM32_COMP6
-	range 0 1
-	default 0
-	---help---
-		Selects COMP6 output polarity.
-
-config STM32_COMP6_HYST
-	int "COMP6 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP6
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP6.
-
-config STM32_COMP6_BLANKSEL
-	int "COMP6 blanking signal select"
-	depends on STM32_COMP6
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP6.
-
-config STM32_COMP6_LOCK
-	int "COMP6 COMP_CxCSR register lock"
-	depends on STM32_COMP6
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-config STM32_COMP7_OUT
-	bool "COMP7 GPIO Output"
-	depends on STM32_COMP7
-	default n
-	---help---
-		Enables COMP7 output.
-
-config STM32_COMP7_INM
-	int "COMP7 inverting input assignment"
-	depends on STM32_COMP7
-	range 0 7
-	default 0
-	---help---
-		Selects COMP7 inverting input pin.
-
-config STM32_COMP7_INP
-	int "COMP7 non-inverting input assignment"
-	depends on STM32_COMP7
-	range 0 1
-	default 0
-	---help---
-		Selects COMP7 non-inverting input pin.
-
-config STM32_COMP7_POL
-	int "COMP7 polarity"
-	depends on STM32_COMP7
-	range 0 1
-	default 0
-	---help---
-		Selects COMP7 output polarity.
-
-config STM32_COMP7_HYST
-	int "COMP7 hysteresis"
-	depends on STM32_STM32G4XXX && STM32_COMP7
-	range 0 7
-	default 0
-	---help---
-		Selects the hysteresis of the COMP7.
-
-config STM32_COMP7_BLANKSEL
-	int "COMP7 blanking signal select"
-	depends on STM32_COMP7
-	range 0 7
-	default 0
-	---help---
-		Selects the blanking signal for comparator COMP7.
-
-config STM32_COMP7_LOCK
-	int "COMP7 COMP_CxCSR register lock"
-	depends on STM32_COMP7
-	range 0 1
-	default 0
-	---help---
-		Locks COMP_CxCSR register.
-		  0 - Unlock 1 - Lock
-
-endmenu
-
-menu "SDADC Configuration"
-	depends on STM32_SDADC
-
-config STM32_SDADC1_DMA
-	bool "SDADC1 DMA"
-	depends on STM32_SDADC1 && STM32_HAVE_SDADC1_DMA
-	default n
-	---help---
-		If DMA is selected, then the SDADC may be configured to support
-		DMA transfer, which is advisable if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32_SDADC2_DMA
-	bool "SDADC2 DMA"
-	depends on STM32_SDADC2 && STM32_HAVE_SDADC2_DMA
-	default n
-	---help---
-		If DMA is selected, then the SDADC may be configured to support
-		DMA transfer, which is advisable if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32_SDADC3_DMA
-	bool "SDADC3 DMA"
-	depends on STM32_SDADC3 && STM32_HAVE_SDADC3_DMA
-	default n
-	---help---
-		If DMA is selected, then the SDADC may be configured to support
-		DMA transfer, which is advisable if multiple channels are read
-		or if very high trigger frequencies are used.
-
-endmenu
-
-menu "DAC Configuration"
-	depends on STM32_DAC1 || STM32_DAC2 || STM32_DAC3 || STM32_DAC4
-
-config STM32_DAC1CH1_MODE
-	int "DAC1CH1 channel mode"
-	depends on STM32_DAC1CH1 && STM32_HAVE_IP_DAC_V2
-	default 0
-	range 0 7
-	---help---
-		– DAC channel in Normal mode
-			0: DAC channel is connected to external pin with Buffer enabled
-			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
-			2: DAC channel2 is connected to external pin with buffer disabled
-			3: DAC channel is connected to on chip peripherals with Buffer disabled
-		- DAC channel in Sample and hold mode
-			4: DAC channel is connected to external pin with Buffer enabled
-			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
-			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
-			7: DAC channel is connected to on chip peripherals with Buffer disabled
-
-config STM32_DAC1CH1_DMA
-	bool "DAC1CH1 DMA"
-	depends on STM32_DAC1CH1
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC1CH1_DMA
-
-config STM32_DAC1CH1_DMA_BUFFER_SIZE
-	int "DAC1CH1 DMA buffer size"
-	default 256
-
-config STM32_DAC1CH1_DMA_EXTERNAL
-	bool "DAC1CH1 DMA External Trigger"
-	default n
-
-if STM32_HRTIM_DAC
-
-config STM32_DAC1CH1_HRTIM_TRG1
-	bool "DAC1CH1 HRTIM Trigger 1"
-	default n
-
-config STM32_DAC1CH1_HRTIM_TRG2
-	bool "DAC1CH1 HRTIM Trigger 2"
-	default n
-
-endif # STM32_HRTIM_DAC
-
-config STM32_DAC1CH1_TIMER
-	int "DAC1CH1 timer"
-	depends on !STM32_DAC1CH1_DMA_EXTERNAL
-	range 2 8
-
-config STM32_DAC1CH1_TIMER_FREQUENCY
-	int "DAC1CH1 timer frequency"
-	depends on !STM32_DAC1CH1_DMA_EXTERNAL
-	default 0
-
 endif
-
-config STM32_DAC1CH2_MODE
-	int "DAC1CH2 channel mode"
-	depends on STM32_DAC1CH2 && STM32_HAVE_IP_DAC_V2
-	default 0
-	range 0 7
-	---help---
-		– DAC channel in Normal mode
-			0: DAC channel is connected to external pin with Buffer enabled
-			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
-			2: DAC channel2 is connected to external pin with buffer disabled
-			3: DAC channel is connected to on chip peripherals with Buffer disabled
-		- DAC channel in Sample and hold mode
-			4: DAC channel is connected to external pin with Buffer enabled
-			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
-			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
-			7: DAC channel is connected to on chip peripherals with Buffer disabled
-
-config STM32_DAC1CH2_DMA
-	bool "DAC1CH2 DMA"
-	depends on STM32_DAC1CH2
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC1CH2_DMA
-
-config STM32_DAC1CH2_DMA_BUFFER_SIZE
-	int "DAC1CH2 DMA buffer size"
-	default 256
-
-config STM32_DAC1CH2_DMA_EXTERNAL
-	bool "DAC1CH2 DMA External Trigger"
-	default n
-
-if STM32_HRTIM_DAC
-
-config STM32_DAC1CH2_HRTIM_TRG1
-	bool "DAC1CH2 HRTIM Trigger 1"
-	default n
-
-config STM32_DAC1CH2_HRTIM_TRG2
-	bool "DAC1CH2 HRTIM Trigger 2"
-	default n
-
-endif # STM32_HRTIM_DAC
-
-config STM32_DAC1CH2_TIMER
-	int "DAC1CH2 timer"
-	depends on !STM32_DAC1CH2_DMA_EXTERNAL
-	range 2 8
-
-config STM32_DAC1CH2_TIMER_FREQUENCY
-	int "DAC1CH2 timer frequency"
-	depends on !STM32_DAC1CH2_DMA_EXTERNAL
-	default 0
-
-endif
-
-config STM32_DAC2CH1_MODE
-	int "DAC2CH1 channel mode"
-	depends on STM32_DAC2CH1 && STM32_HAVE_IP_DAC_V2
-	default 0
-	range 0 7
-	---help---
-		– DAC channel in Normal mode
-			0: DAC channel is connected to external pin with Buffer enabled
-			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
-			2: DAC channel2 is connected to external pin with buffer disabled
-			3: DAC channel is connected to on chip peripherals with Buffer disabled
-		- DAC channel in Sample and hold mode
-			4: DAC channel is connected to external pin with Buffer enabled
-			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
-			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
-			7: DAC channel is connected to on chip peripherals with Buffer disabled
-
-config STM32_DAC2CH1_DMA
-	bool "DAC2CH1 DMA"
-	depends on STM32_DAC2CH1
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer.  The DMA transfer could be
-		supported by and EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC2CH1_DMA
-
-config STM32_DAC2CH1_DMA_BUFFER_SIZE
-	int "DAC2CH1 DMA buffer size"
-	default 256
-
-config STM32_DAC2CH1_DMA_EXTERNAL
-	bool "DAC2CH1 DMA External Trigger"
-	default n
-
-if STM32_HRTIM_DAC
-
-config STM32_DAC2CH1_HRTIM_TRG3
-	bool "DAC2CH1 HRTIM Trigger 3"
-	default n
-
-endif # STM32_HRTIM_DAC
-
-config STM32_DAC2CH1_TIMER
-	int "DAC2CH1 timer"
-	depends on !STM32_DAC2CH1_DMA_EXTERNAL
-	default 0
-	range 2 8
-
-config STM32_DAC2CH1_TIMER_FREQUENCY
-	int "DAC2CH1 timer frequency"
-	depends on !STM32_DAC2CH1_DMA_EXTERNAL
-	default 0
-
-endif
-
-config STM32_DAC3CH1_MODE
-	int "DAC3CH1 channel mode"
-	depends on STM32_DAC3CH1 && STM32_HAVE_IP_DAC_V2
-	default 0
-	range 0 7
-	---help---
-		– DAC channel in Normal mode
-			0: DAC channel is connected to external pin with Buffer enabled
-			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
-			2: DAC channel is connected to external pin with buffer disabled
-			3: DAC channel is connected to on chip peripherals with Buffer disabled
-		- DAC channel in Sample and hold mode
-			4: DAC channel is connected to external pin with Buffer enabled
-			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
-			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
-			7: DAC channel is connected to on chip peripherals with Buffer disabled
-
-config STM32_DAC3CH1_DMA
-	bool "DAC3CH1 DMA"
-	depends on STM32_DAC3CH1
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer. The DMA transfer could be
-		supported by an EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC3CH1_DMA
-
-config STM32_DAC3CH1_DMA_BUFFER_SIZE
-	int "DAC3CH1 DMA buffer size"
-	default 256
-
-config STM32_DAC3CH1_DMA_EXTERNAL
-	bool "DAC3CH1 DMA External Trigger"
-	default n
-
-if STM32_HRTIM_DAC
-
-config STM32_DAC3CH1_HRTIM_TRG3
-	bool "DAC3CH1 HRTIM Trigger 3"
-	default n
-
-endif # STM32_HRTIM_DAC
-
-config STM32_DAC3CH1_TIMER
-	int "DAC3CH1 timer"
-	depends on !STM32_DAC3CH1_DMA_EXTERNAL
-	default 0
-	range 2 8
-
-config STM32_DAC3CH1_TIMER_FREQUENCY
-	int "DAC3CH1 timer frequency"
-	depends on !STM32_DAC3CH1_DMA_EXTERNAL
-	default 0
-
-endif
-
-config STM32_DAC3CH2_MODE
-	int "DAC3CH2 channel mode"
-	depends on STM32_DAC3CH2 && STM32_HAVE_IP_DAC_V2
-	default 0
-	range 0 7
-	---help---
-		– DAC channel in Normal mode
-			0: DAC channel is connected to external pin with Buffer enabled
-			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
-			2: DAC channel2 is connected to external pin with buffer disabled
-			3: DAC channel is connected to on chip peripherals with Buffer disabled
-		- DAC channel in Sample and hold mode
-			4: DAC channel is connected to external pin with Buffer enabled
-			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
-			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
-			7: DAC channel is connected to on chip peripherals with Buffer disabled
-
-config STM32_DAC3CH2_DMA
-	bool "DAC3CH2 DMA"
-	depends on STM32_DAC3CH2
-	default n
-	---help---
-		If DMA is selected, then a timer and output frequency must also be
-		provided to support the DMA transfer. The DMA transfer could be
-		supported by an EXTI trigger, but this feature is not currently
-		supported by the driver.
-
-if STM32_DAC3CH2_DMA
-
-config STM32_DAC3CH2_DMA_BUFFER_SIZE
-	int "DAC3CH2 DMA buffer size"
-	default 256
-
-config STM32_DAC3CH2_DMA_EXTERNAL
-	bool "DAC3CH1 DMA External Trigger"
-	default n
-
-if STM32_HRTIM_DAC
-
-config STM32_DAC3CH2_HRTIM_TRG3
-	bool "DAC3CH2 HRTIM Trigger 3"
-	default n
-
-endif # STM32_HRTIM_DAC
-
-config STM32_DAC3CH2_TIMER
-	int "DAC3CH2 timer"
-	depends on !STM32_DAC3CH2_DMA_EXTERNAL
-	default 0
-	range 2 8
-
-config STM32_DAC3CH2_TIMER_FREQUENCY
-	int "DAC3CH2 timer frequency"
-	depends on !STM32_DAC3CH2_DMA_EXTERNAL
-	default 0
-
-endif
-
-endmenu
-
-config STM32_HCIUART_RXDMA
-	bool
-	default n
-
-menu "U[S]ART Configuration"
-	depends on STM32_USART
-
-comment "U[S]ART Device Configuration"
-
-if STM32_USART1_HCIUART
-
-config STM32_HCIUART1_RXBUFSIZE
-	int "HCI UART1 Rx buffer size"
-	default 80
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.  Ideally this should be at least
-		the size of the largest frame that can be received
-
-config STM32_HCIUART1_TXBUFSIZE
-	int "HCI UART1 Transmit buffer size"
-	default 80
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.  Ideally this should be at least
-		the size of the largest frame that can be sent
-
-config STM32_HCIUART1_BAUD
-	int "HCI UART1 initial BAUD rate"
-	default 115200
-	---help---
-		The configured initial BAUD of the HCIR USART used during bringup.
-		In most cases this initial rate can be increased by the upper half
-		HCI UART driver using vendor-specifi HCI UART commands.
-
-config STM32_HCIUART1_RXDMA
-	bool "HCI UART1 Rx DMA"
-	default n
-	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
-	select STM32_HCIUART_RXDMA
-	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
-
-endif # STM32_USART1_HCIUART
-
-if STM32_USART2_HCIUART
-
-config STM32_HCIUART2_RXBUFSIZE
-	int "HCI UART2 Rx buffer size"
-	default 80
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.  Ideally this should be at least
-		the size of the largest frame that can be received
-
-config STM32_HCIUART2_TXBUFSIZE
-	int "HCI UART2 Transmit buffer size"
-	default 80
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.  Ideally this should be at least
-		the size of the largest frame that can be sent
-
-config STM32_HCIUART2_BAUD
-	int "HCI UART2 initial BAUD rate"
-	default 115200
-	---help---
-		The configured initial BAUD of the HCIR USART used during bringup.
-		In most cases this initial rate can be increased by the upper half
-		HCI UART driver using vendor-specifi HCI UART commands.
-
-config STM32_HCIUART2_RXDMA
-	bool "HCI UART2 Rx DMA"
-	default n
-	depends on STM32_DMA1
-	select STM32_HCIUART_RXDMA
-	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
-
-endif # STM32_USART2_HCIUART
-
-if STM32_USART3_HCIUART
-
-config STM32_HCIUART3_RXBUFSIZE
-	int "HCI UART3 Rx buffer size"
-	default 80
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.  Ideally this should be at least
-		the size of the largest frame that can be received
-
-config STM32_HCIUART3_TXBUFSIZE
-	int "HCI UART3 Transmit buffer size"
-	default 80
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.  Ideally this should be at least
-		the size of the largest frame that can be sent
-
-config STM32_HCIUART3_BAUD
-	int "HCI UART3 initial BAUD rate"
-	default 115200
-	---help---
-		The configured initial BAUD of the HCIR USART used during bringup.
-		In most cases this initial rate can be increased by the upper half
-		HCI UART driver using vendor-specifi HCI UART commands.
-
-config STM32_HCIUART3_RXDMA
-	bool "HCI UART3 Rx DMA"
-	default n
-	depends on STM32_DMA1
-	select STM32_HCIUART_RXDMA
-	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
-
-endif # STM32_USART3_HCIUART
-
-if STM32_USART6_HCIUART
-
-config STM32_HCIUART6_RXBUFSIZE
-	int "HCI UART6 Rx buffer size"
-	default 80
-	---help---
-		Characters are buffered as they are received. This specifies
-		the size of the receive buffer.  Ideally this should be at least
-		the size of the largest frame that can be received
-
-config STM32_HCIUART6_TXBUFSIZE
-	int "HCI UART6 Transmit buffer size"
-	default 80
-	---help---
-		Characters are buffered before being sent.  This specifies
-		the size of the transmit buffer.  Ideally this should be at least
-		the size of the largest frame that can be sent
-
-config STM32_HCIUART6_BAUD
-	int "HCI UART6 initial BAUD rate"
-	default 115200
-	---help---
-		The configured initial BAUD of the HCIR USART used during bringup.
-		In most cases this initial rate can be increased by the upper half
-		HCI UART driver using vendor-specifi HCI UART commands.
-
-config STM32_HCIUART6_RXDMA
-	bool "HCI UART6 Rx DMA"
-	default n
-	depends on STM32_DMA1
-	select STM32_HCIUART_RXDMA
-	---help---
-		In high data rate usage, Rx DMA may eliminate Rx overrun errors
-
-endif # STM32_USART6_HCIUART
-
-if STM32_LPUART1_SERIALDRIVER
-
-config LPUART1_TXDMA
-	bool "LPUART1 Tx DMA"
-	default n
-	depends on STM32_DMA1
-	---help---
-		In high data rate usage, Tx DMA may reduce CPU load
-
-endif # STM32_LPUART1_SERIALDRIVER
-
-menu "HCI UART Driver Configuration"
-	depends on STM32_SERIALDRIVER
-
-config STM32_HCIUART_RXDMA_BUFSIZE
-	int "Rx DMA buffer size"
-	default 32
-	range 32 4096
-	depends on STM32_HCIUART_RXDMA
-	---help---
-		The DMA buffer size when using RX DMA to emulate a FIFO.
-
-		When streaming data, the generic serial layer will be called
-		every time the FIFO receives half or this number of bytes.
-
-		Value given here will be rounded up to next multiple of 4 bytes.
-
-config STM32_HCIUART_RXDMAPRIO
-	hex "HCI UART DMA priority"
-	default 0x00001000 if STM32_STM32F10XX
-	default 0x00010000 if !STM32_STM32F10XX
-	depends on STM32_HCIUART_RXDMA
-	---help---
-		Select HCI UART DMA priority.
-
-		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
-		0x00002000 high, 0x00003000 very high.  Default: medium.
-
-		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
-		0x00020000 high, 0x00030000 very high.  Default: medium.
-
-config STM32_HCIUART_SW_RXFLOW
-	bool "Use Software UART RTS flow control"
-	default n
-	---help---
-		Enable UART RTS flow control using Software.  Current STM32 have
-		broken HW based RTS behavior (they assert nRTS after every byte
-		received)  Enable this setting workaround this issue by using
-		software based management of RTS
-
-		If HCI UART DMA is enabled, this is probably the better selection
-		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
-		to short, bursty activity.  Software RTS management will probably
-		result in overall better throughput and should still avoid Rx data
-		overrun conditions.
-
-config STM32_HCIUART_UPPER_WATERMARK
-	int "RTS flow control upper watermark (%)"
-	default 75
-	range 2 100
-	depends on STM32_HCIUART_SW_RXFLOW
-	---help---
-		If software RTS flow control is enable, then RTS will be asserted
-		when this amount of Rx data has been buffered.  The amount is
-		expressed as a percentage of the Rx buffer size.
-
-config STM32_HCIUART_LOWER_WATERMARK
-	int "RTS flow control lower watermark (%)"
-	default 25
-	range 1 99
-	depends on STM32_HCIUART_SW_RXFLOW
-	---help---
-		If software RTS flow control is enable, then RTS will be de-asserted
-		when there is less than this amount ofdata in the Rx buffere.  The
-		amount is expressed as a percentage of the Rx buffer size.
-
-endmenu # HCI UART Driver Configuration
-
-endmenu # U[S]ART Configuration
-
-menu "I2S Configuration"
-	depends on STM32_I2S3
-
-config STM32_I2S_MCK
-	bool "I2S_MCK"
-	default n
-	---help---
-		TBD.
-
-comment "I2S3 Configuration"
-
-endmenu # I2S Configuration
-
-menu "I2C Configuration"
-	depends on STM32_I2C
-
-config STM32_I2C_ALT
-	bool "Alternate I2C implementation"
-	default STM32_PERFORMANCELINE
-	depends on !STM32_STM32F30XX
-	---help---
-		This selection enables an alternative I2C driver.  This alternate
-		driver implements some rather complex workarounds for errata against
-		the STM32 F103 "Performance Line".  This selection is an option
-		because: (1) It has not yet been fully verified and (2) It is not
-		certain that he scope of this workaround is needed only for the F103.
-
-config STM32_I2C_DUTY16_9
-	bool "Frequency with Tlow/Thigh = 16/9"
-	default n
-	depends on STM32_I2C
-
-config STM32_I2C_DMA
-	bool "I2C DMA Support"
-	default n
-	depends on STM32_I2C && STM32_STM32F4XXX && STM32_DMA1 && !I2C_POLLED
-	---help---
-		This option enables the DMA for I2C transfers.
-		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
-		I2C dma streams, else the default priority level is set to medium.
-
-endmenu
-
-menu "I2C Slave Configuration"
-	depends on STM32_I2C_SLAVE
-
-config STM32_I2C_SLAVE_DEFAULT_TX
-	hex "Default TX byte to be sent when the TX buffer is empty"
-	default 0xFF
-
-config STM32_I2C_SLAVE_USEWQ
-	bool "Use work queue to delegate the isr completion status"
-	default n
-	---help---
-		With the current upperhalf I2C slave driver implementation, the user
-		should delegate the callback completion status using a work queue.
-		However, work queues introduce a delay, so in certain scenarios
-		it is better to use a custom driver without using a work queue.
-
-config STM32_I2C_SLAVE_RETRANSFER
-	bool "The frame is retransferred when stop is issued beforehand"
-	default n
-	---help---
-		If stop is issued before the whole frame is transferred,
-		the tx pointer is reset to 0.
-
-endmenu
-
-comment "USB Device Configuration"
-
-config STM32_USB_ITRMP
-	bool "Re-map USB interrupt"
-	default STM32_CAN1
-	depends on STM32_USB && STM32_STM32F30XX
-	---help---
-		The legacy USB in the F1 series shared interrupt lines with USB
-		device and CAN1.  In the F3 series, a hardware options was added to
-		either retain the legacy F1 behavior or to map the USB interrupts to
-		their own dedicated vectors.  The option is available only for the
-		F3 family and selects the use of the dedicated USB interrupts.
-
-config STM32_QE
-	bool
-	default n
-
-if STM32_FOC
-
-config STM32_FOC_USE_ADC4
-	bool
-	default n
-	select STM32_ADC4
-	select STM32_ADC3_JEXTSEL
-
-config STM32_FOC_G4_ADCCHAN0_WORKAROUND
-	bool "FOC G4 ADC channel 0 unwanted conversion workaround"
-	default n
-	depends on STM32_STM32G4XXX
-	---help---
-		Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
-		conversion when a regular conversion is interrupted by an injected conversion.
-		This FOC implementation uses injected conversion to sample phase currents
-		and allows user to use regular conversion as an auxiliary analog conversion.
-		In this case, there is a certain probability that regular conversion will be
-		interrupted by an injected conversion that will lead to an incorrect reading
-		of phase currents.
-
-		This workaround inserts a dummy conversion at the beginning of the injected
-		sequence. For more details look at the chip errata documents.
-
-endif #STM32_FOC

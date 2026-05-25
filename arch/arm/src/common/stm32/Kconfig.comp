@@ -1,0 +1,387 @@
+#
+# STM32 analog comparator (COMP) configuration options.
+#
+
+# COMP supported only for M3M4 for now
+
+if STM32_HAVE_IP_COMP_M3M4_V2
+
+if STM32_COMP1
+
+config STM32_COMP1_OUT
+	bool "COMP1 GPIO Output"
+	default n
+	---help---
+		Enables COMP1 output.
+
+config STM32_COMP1_INM
+	int "COMP1 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP1 inverting input pin.
+
+config STM32_COMP1_INP
+	int "COMP1 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP1 non-inverting input pin.
+
+config STM32_COMP1_POL
+	int "COMP1 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP1 output polarity.
+
+config STM32_COMP1_HYST
+	int "COMP1 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP1.
+
+config STM32_COMP1_BLANKSEL
+	int "COMP1 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP1.
+
+config STM32_COMP1_LOCK
+	int "COMP1 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP1
+
+if STM32_COMP2
+
+config STM32_COMP2_OUT
+	bool "COMP2 GPIO Output"
+	default n
+	---help---
+		Enables COMP2 output.
+
+config STM32_COMP2_INM
+	int "COMP2 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP2 inverting input pin.
+
+config STM32_COMP2_INP
+	int "COMP2 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP2 non-inverting input pin.
+
+config STM32_COMP2_POL
+	int "COMP2 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP2 output polarity.
+
+config STM32_COMP2_HYST
+	int "COMP2 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP2.
+
+config STM32_COMP2_BLANKSEL
+	int "COMP2 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP2.
+
+config STM32_COMP2_LOCK
+	int "COMP2 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP2
+
+if STM32_COMP3
+
+config STM32_COMP3_OUT
+	bool "COMP3 GPIO Output"
+	default n
+	---help---
+		Enables COMP3 output.
+
+config STM32_COMP3_INM
+	int "COMP3 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP3 inverting input pin.
+
+config STM32_COMP3_INP
+	int "COMP3 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP3 non-inverting input pin.
+
+config STM32_COMP3_POL
+	int "COMP3 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP3 output polarity.
+
+config STM32_COMP3_HYST
+	int "COMP3 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP3.
+
+config STM32_COMP3_BLANKSEL
+	int "COMP3 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP3.
+
+config STM32_COMP3_LOCK
+	int "COMP3 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP3
+
+if STM32_COMP4
+
+config STM32_COMP4_OUT
+	bool "COMP4 GPIO Output"
+	default n
+	---help---
+		Enables COMP4 output.
+
+config STM32_COMP4_INM
+	int "COMP4 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP4 inverting input pin.
+
+config STM32_COMP4_INP
+	int "COMP4 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP4 non-inverting input pin.
+
+config STM32_COMP4_POL
+	int "COMP4 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP4 output polarity.
+
+config STM32_COMP4_HYST
+	int "COMP4 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP4.
+
+config STM32_COMP4_BLANKSEL
+	int "COMP4 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP4.
+
+config STM32_COMP4_LOCK
+	int "COMP4 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP4
+
+if STM32_COMP5
+
+config STM32_COMP5_OUT
+	bool "COMP5 GPIO Output"
+	default n
+	---help---
+		Enables COMP5 output.
+
+config STM32_COMP5_INM
+	int "COMP5 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP5 inverting input pin.
+
+config STM32_COMP5_INP
+	int "COMP5 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP5 non-inverting input pin.
+
+config STM32_COMP5_POL
+	int "COMP5 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP5 output polarity.
+
+config STM32_COMP5_HYST
+	int "COMP5 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP5.
+
+config STM32_COMP5_BLANKSEL
+	int "COMP5 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP5.
+
+config STM32_COMP5_LOCK
+	int "COMP5 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP5
+
+if STM32_COMP6
+
+config STM32_COMP6_OUT
+	bool "COMP6 GPIO Output"
+	default n
+	---help---
+		Enables COMP6 output.
+
+config STM32_COMP6_INM
+	int "COMP6 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP6 inverting input pin.
+
+config STM32_COMP6_INP
+	int "COMP6 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP6 non-inverting input pin.
+
+config STM32_COMP6_POL
+	int "COMP6 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP6 output polarity.
+
+config STM32_COMP6_HYST
+	int "COMP6 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP6.
+
+config STM32_COMP6_BLANKSEL
+	int "COMP6 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP6.
+
+config STM32_COMP6_LOCK
+	int "COMP6 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP6
+
+if STM32_COMP7
+
+config STM32_COMP7_OUT
+	bool "COMP7 GPIO Output"
+	default n
+	---help---
+		Enables COMP7 output.
+
+config STM32_COMP7_INM
+	int "COMP7 inverting input assignment"
+	range 0 7
+	default 0
+	---help---
+		Selects COMP7 inverting input pin.
+
+config STM32_COMP7_INP
+	int "COMP7 non-inverting input assignment"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP7 non-inverting input pin.
+
+config STM32_COMP7_POL
+	int "COMP7 polarity"
+	range 0 1
+	default 0
+	---help---
+		Selects COMP7 output polarity.
+
+config STM32_COMP7_HYST
+	int "COMP7 hysteresis"
+	depends on STM32_STM32G4XXX
+	range 0 7
+	default 0
+	---help---
+		Selects the hysteresis of the COMP7.
+
+config STM32_COMP7_BLANKSEL
+	int "COMP7 blanking signal select"
+	range 0 7
+	default 0
+	---help---
+		Selects the blanking signal for comparator COMP7.
+
+config STM32_COMP7_LOCK
+	int "COMP7 COMP_CxCSR register lock"
+	range 0 1
+	default 0
+	---help---
+		Locks COMP_CxCSR register.
+		  0 - Unlock 1 - Lock
+
+endif # STM32_COMP7
+
+endif # STM32_HAVE_IP_COMP_M3M4_V2

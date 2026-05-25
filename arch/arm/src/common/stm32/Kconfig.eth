@@ -1,0 +1,290 @@
+#
+# STM32 common ETH options.
+#
+
+config STM32_PHY_HAVE_POLLED
+	bool
+
+if STM32_ETHMAC
+
+config STM32_PHYADDR
+	int "PHY address"
+	default 1 if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
+	default 0
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config STM32_PHYINIT
+	bool "Board-specific PHY Initialization"
+	---help---
+		Some boards require specialized initialization of the PHY before it can be used.
+		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
+		STM32_PHYINIT is defined in the configuration then the board specific logic must
+		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
+		one time before it first uses the PHY.
+
+config STM32_MII
+	bool "Use MII interface"
+	---help---
+		Support Ethernet MII interface.
+
+config STM32_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+if !STM32_AUTONEG
+
+config STM32_ETHFD
+	bool "Full duplex"
+	---help---
+		If STM32_AUTONEG is not defined, then this may be defined to select full duplex
+		mode. Default: half-duplex
+
+config STM32_ETH100MBPS
+	bool "100 Mbps"
+	---help---
+		If STM32_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 10 Mbps
+
+endif # !STM32_AUTONEG
+
+if STM32_AUTONEG
+
+config STM32_PHYSR
+	int "PHY Status Register Address (decimal)"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  The PHY status register
+		address may diff from PHY to PHY.  This configuration sets the address of
+		the PHY status register.
+
+config STM32_PHYSR_ALTCONFIG
+	bool "PHY Status Alternate Bit Layout"
+	---help---
+		Different PHYs present speed and mode information in different ways.  Some
+		will present separate information for speed and mode (this is the default).
+		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
+		full/half duplex indication. This options selects an alternative representation
+		where speed and mode information are combined.  This might mean, for example,
+		separate bits for 10HD, 100HD, 10FD and 100FD.
+
+if !STM32_PHYSR_ALTCONFIG
+
+config STM32_PHYSR_SPEED
+	hex "PHY Speed Mask"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This provides bit mask
+		for isolating the 10 or 100MBps speed indication.
+
+config STM32_PHYSR_100MBPS
+	hex "PHY 100Mbps Speed Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This provides the value
+		of the speed bit(s) indicating 100MBps speed.
+
+config STM32_PHYSR_MODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This provide bit mask
+		for isolating the full or half duplex mode bits.
+
+config STM32_PHYSR_FULLDUPLEX
+	hex "PHY Full Duplex Mode Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This provides the
+		value of the mode bits indicating full duplex mode.
+
+endif # !STM32_PHYSR_ALTCONFIG
+
+if STM32_PHYSR_ALTCONFIG
+
+config STM32_PHYSR_ALTMODE
+	hex "PHY Mode Mask"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This provide bit mask
+		for isolating the speed and full/half duplex mode bits.
+
+config STM32_PHYSR_10HD
+	hex "10MBase-T Half Duplex Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, half duplex setting.
+
+config STM32_PHYSR_100HD
+	hex "100Base-T Half Duplex Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, half duplex setting.
+
+config STM32_PHYSR_10FD
+	hex "10Base-T Full Duplex Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 10Mbps, full duplex setting.
+
+config STM32_PHYSR_100FD
+	hex "100Base-T Full Duplex Value"
+	---help---
+		This must be provided if STM32_AUTONEG is defined.  This is the value
+		under the bit mask that represents the 100Mbps, full duplex setting.
+
+endif # STM32_PHYSR_ALTCONFIG
+
+endif # STM32_AUTONEG
+
+config STM32_ETH_PTP
+	bool "Precision Time Protocol (PTP)"
+	---help---
+		Enables Precision Time Protocol (PTP) hardware timer.
+
+config STM32_ETH_ENHANCEDDESC
+	bool "Enable enhanced RX/TX descriptors"
+	depends on STM32_COMMON_LEGACY
+	default n
+	---help---
+		Enables double-length DMA descriptors that have space for packet
+		timestamps and checksum offloading.
+
+config STM32_ETH_PTP_GPIO
+	bool "PTP pulse-per-second output signal"
+	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP
+	default n
+	---help---
+		Enables pulse-per-second output on GPIO pin.
+
+config STM32_ETH_PTP_RTC_HIRES
+	bool "Use PTP timer as system high-resolution RTC"
+	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP
+	default n
+	---help---
+		Uses the Ethernet peripheral PTP timer as the CONFIG_RTC_HIRES source.
+		This provides high resolution timestamps to clock_gettime().
+		Note that PTP timer is disabled when Ethernet interface is down or
+		being reset. During this time g_rtc_enabled is set to false and system
+		uses the lower resolution system tick counter.
+
+config STM32_ETH_TIMESTAMP_RX
+	bool "Hardware timestamping of received packets"
+	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
+	select ARCH_HAVE_NETDEV_TIMESTAMP
+	default n
+	---help---
+		Timestamp all received Ethernet packets.
+		Timestamp is available to application through SO_TIMESTAMP socket option.
+
+config STM32_RMII
+	bool
+	default !STM32_MII
+
+config STM32_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on CONFIG_DEBUG_FEATURES.
+
+endif # STM32_ETHMAC
+
+choice
+	prompt "MII clock configuration"
+	depends on STM32_MII
+	default STM32_MII_MCO if STM32_STM32F10XX
+	default STM32_MII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
+	default STM32_MII_EXTCLK
+
+config STM32_MII_MCO
+	bool "Use MC0 as MII clock"
+	depends on STM32_STM32F10XX
+	---help---
+		Use MCO to clock the MII interface.  Default:  Use MC0
+
+config STM32_MII_MCO1
+	bool "Use MC01 as MII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	---help---
+		Use MCO1 to clock the MII interface.  Default:  Use MC01
+
+config STM32_MII_MCO2
+	bool "Use MC02 as MII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	---help---
+		Use MCO2 to clock the MII interface.  Default:  Use MC01
+
+config STM32_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for MII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+choice
+	prompt "RMII clock configuration"
+	depends on STM32_RMII
+	default STM32_RMII_MCO if STM32_STM32F10XX
+	default STM32_RMII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
+	default STM32_RMII_EXTCLK
+
+config STM32_RMII_MCO
+	bool "Use MC0 as RMII clock"
+	depends on STM32_STM32F10XX
+	---help---
+		Use MCO to clock the RMII interface.  Default:  Use MC0
+
+config STM32_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	---help---
+		Use MCO1 to clock the RMII interface.  Default:  Use MC01
+
+config STM32_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	---help---
+		Use MCO2 to clock the RMII interface.  Default:  Use MC01
+
+config STM32_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for RMII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+config STM32_PHY_POLLING
+	bool "Support network monitoring by polling the PHY"
+	depends on (STM32_COMMON_F7_H7_H5) && STM32_ETHMAC && STM32_PHY_HAVE_POLLED
+	select ARCH_PHY_POLLED
+	---help---
+		Some boards may not have an interrupt connected to the PHY.
+		This option allows the network monitor to be used by polling the
+		the PHY for status.
+
+config STM32_ETH_HWCHECKSUM
+	bool "Enable ethernet hardware checksum"
+	depends on ARCH_CHIP_STM32H5 && STM32_ETHMAC
+	---help---
+		Enable the IPv4/IPv6 header and TCP/UDP/ICMP payload checksum offload
+		engine in the Ethernet MAC.
+		When enabled, hardware generates checksums for TX and checks RX frames.
+		Be sure to disable software checksums (NET_TCP_CHECKSUMS, NET_UDP_CHECKSUMS,
+		NET_ICMP_CHECKSUMS, NET_IPV4_CHECKSUMS, NET_IPV6_CHECKSUMS) to avoid
+		redundant verification in the network stack.
+
+config STM32_NO_PHY
+	bool "MAC has no PHY"
+	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+
+config STM32_ETH_NRXDESC
+	int "Number of RX descriptors"
+	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+	default 8
+	---help---
+		Number of RX DMA descriptors to use.
+
+config STM32_ETH_NTXDESC
+	int "Number of TX descriptors"
+	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+	default 4
+	---help---
+		Number of TX DMA descriptors to use.

@@ -1,0 +1,158 @@
+#
+# STM32 QSPI/OCTOSPI configuration options.
+#
+
+choice
+	prompt "DMA Channel"
+	default STM32_QSPI_DMA_CHAN_1_5
+	depends on ARCH_CHIP_STM32L4
+	---help---
+		You can choose between two DMA channels for use with QSPI:
+		either DMA1 channel 5, or DMA2 channel 7.
+		If you only see one choice here, it is probably because
+		you have not also enabled the associated DMA controller.
+
+config STM32_QSPI_DMA_CHAN_1_5
+	bool "DMA1 Channel 5"
+	depends on STM32_DMA1 && !STM32_DMAMUX
+	---help---
+		Use DMA1 channel 5 for QSPI.
+
+config STM32_QSPI_DMA_CHAN_2_7
+	bool "DMA2 Channel 7"
+	depends on STM32_DMA2 && !STM32_DMAMUX
+	---help---
+		Use DMA2 channel 7 for QSPI.
+
+endchoice
+
+choice
+	prompt "Transfer technique"
+	default STM32_QSPI_DMA
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32_QSPI_POLLING
+	bool "Polling"
+	---help---
+		Use conventional register I/O with status polling to transfer data.
+
+config STM32_QSPI_INTERRUPTS
+	bool "Interrupts"
+	---help---
+		User interrupt driven I/O transfers.
+
+config STM32_QSPI_DMA
+	bool "DMA"
+	depends on STM32_DMA
+	---help---
+		Use DMA to improve QSPI transfer performance.
+
+endchoice
+
+choice
+	prompt "Bank selection"
+	default STM32_QSPI_MODE_BANK1
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32_QSPI_MODE_BANK1
+	bool "Bank 1"
+
+config STM32_QSPI_MODE_BANK2
+	bool "Bank 2"
+
+config STM32_QSPI_MODE_DUAL
+	bool "Dual Bank"
+
+endchoice
+
+choice
+	prompt "DMA Priority"
+	depends on STM32_QSPI_DMA && STM32_DMA
+	default STM32_QSPI_DMAPRIORITY_MEDIUM
+	---help---
+		The DMA controller supports priority levels.  You are probably fine
+		with the default of 'medium' except for special cases.  In the event
+		of contention between to channels at the same priority, the lower
+		numbered channel has hardware priority over the higher numbered one.
+
+config STM32_QSPI_DMAPRIORITY_VERYHIGH
+	bool "Very High priority"
+	depends on STM32_DMA
+	---help---
+		'Highest' priority.
+
+config STM32_QSPI_DMAPRIORITY_HIGH
+	bool "High priority"
+	depends on STM32_DMA
+	---help---
+		'High' priority.
+
+config STM32_QSPI_DMAPRIORITY_MEDIUM
+	bool "Medium priority"
+	depends on STM32_DMA
+	---help---
+		'Medium' priority.
+
+config STM32_QSPI_DMAPRIORITY_LOW
+	bool "Low priority"
+	depends on STM32_DMA
+	---help---
+		'Low' priority.
+
+endchoice
+
+config STM32_QSPI_FLASH_SIZE
+	int "Size of attached serial flash, bytes"
+	default 16777216
+	range 1 2147483647 if ARCH_CHIP_STM32L4 && STM32_QSPI
+	range 1 2147483648 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32H5 && STM32_QSPI1
+	---help---
+		The STM32F7 QSPI peripheral requires the size of the Flash be specified
+
+config STM32_QSPI_FIFO_THESHOLD
+	int "Number of bytes before asserting FIFO threshold flag"
+	default 4
+	range 1 16 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
+	range 1 32 if ARCH_CHIP_STM32H5 && STM32_QSPI1
+	---help---
+		The STM32F7 QSPI peripheral requires that the FIFO threshold be specified
+		I would leave it at the default value of 4 unless you know what you are doing.
+
+config STM32_QSPI_CSHT
+	int "Number of cycles Chip Select must be inactive between transactions"
+	default 5 if ARCH_CHIP_STM32H5 && STM32_QSPI1
+	default 1
+	range 1 8 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
+	range 1 64 if ARCH_CHIP_STM32H5 && STM32_QSPI1
+	---help---
+		The STM32F7 QSPI peripheral requires that it be specified the minimum number
+		of AHB cycles that Chip Select be held inactive between transactions.
+
+config STM32_QSPI_DMATHRESHOLD
+	int "QSPI DMA threshold"
+	depends on STM32_QSPI_DMA
+	default 4
+	---help---
+		When QSPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  This value is the threshold below which transfers
+		will still be performed by conventional register status polling.
+
+config STM32_QSPI_DMADEBUG
+	bool "QSPI DMA transfer debug"
+	depends on STM32_QSPI_DMA && DEBUG_SPI && DEBUG_DMA
+	---help---
+		Enable special debug instrumentation to analyze QSPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32_QSPI_REGDEBUG
+	bool "QSPI Register level debug"
+	depends on DEBUG_SPI_INFO
+	---help---
+		Output detailed register-level QSPI device debug information.
+		Requires also CONFIG_DEBUG_SPI_INFO.

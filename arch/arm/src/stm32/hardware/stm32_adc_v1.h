@@ -54,7 +54,7 @@
  *   - ...
  */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1_BASIC)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1_BASIC)
 #  define HAVE_BASIC_ADC
 #else
 #  undef HAVE_BASIC_ADC

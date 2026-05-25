@@ -1,0 +1,1282 @@
+#
+# STM32 common peripheral selection options.
+#
+
+menu "STM32 Peripheral Support"
+
+config STM32_OPAMP
+	bool
+	depends on STM32_HAVE_IP_OPAMP_M3M4_V1
+	select STM32_SYSCFG
+
+config STM32_COMP
+	bool
+	depends on STM32_HAVE_COMP
+	select STM32_SYSCFG
+	select COMP if ARCH_CHIP_STM32L4 && STM32_HAVE_COMP
+
+config STM32_ADC
+	bool
+
+config STM32_SDADC
+	bool
+	default n
+
+config STM32_CAN
+	bool
+
+config STM32_FDCAN
+	bool
+	select NET_CAN_HAVE_ERRORS if ARCH_CHIP_STM32H7
+	select NET_CAN_HAVE_CANFD if ARCH_CHIP_STM32H7
+	select NET_CAN_EXTID if ARCH_CHIP_STM32H7
+	select NET_CAN_HAVE_TX_DEADLINE if ARCH_CHIP_STM32H7
+
+config STM32_DAC
+	bool
+
+config STM32_DMA
+	bool
+	select STM32_DMAMUX if ARCH_CHIP_STM32L4 && STM32_HAVE_DMAMUX
+	select STM32_DMAMUX if ARCH_CHIP_STM32WB
+
+config STM32_DMAMUX
+	bool
+
+config STM32_I2C
+	bool
+
+config STM32_SPI
+	bool
+
+config STM32_TIM
+	bool
+
+config STM32_LPTIM
+	bool
+
+config STM32_HRTIM
+	bool
+
+config STM32_USART
+	bool
+
+config STM32_SERIALDRIVER
+	bool
+
+config STM32_SAI
+	bool
+
+config STM32_I2S
+	bool
+	select STM32_SPI_DMA if STM32_COMMON_LEGACY
+	select STM32_SPI_DMA if ARCH_CHIP_STM32F7
+
+config STM32_SDMMC
+	bool
+
+config STM32_DFSDM
+	bool
+	default n
+
+config STM32_MBOX
+	bool
+	depends on STM32_HAVE_MBOX
+	default n
+	select STM32_IPCC
+
+# DMA peripherals
+
+config STM32_MDMA
+	bool "MDMA"
+	default n
+	depends on STM32_HAVE_MDMA && EXPERIMENTAL
+	select STM32_DMA
+	select ARCH_DMA
+
+config STM32_BDMA
+	bool "BDMA"
+	default n
+	depends on STM32_HAVE_BDMA && EXPERIMENTAL
+	select STM32_DMA
+	select ARCH_DMA
+
+config STM32_GPADMA1
+	depends on STM32_HAVE_GPADMA1
+	bool "GPADMA1"
+	default n
+
+config STM32_LPDMA1
+	depends on STM32_HAVE_LPDMA1
+	bool "LPDMA1"
+	default n
+
+config STM32_DMA1
+	bool "DMA1"
+	depends on STM32_HAVE_DMA1
+	select STM32_DMA
+	select ARCH_DMA
+	select STM32_DMAMUX1 if ARCH_CHIP_STM32L4 && STM32_HAVE_DMAMUX
+
+config STM32_DMA2
+	bool "DMA2"
+	depends on STM32_HAVE_DMA2
+	select STM32_DMA
+	select ARCH_DMA
+	select STM32_DMAMUX1 if ARCH_CHIP_STM32L4 && STM32_HAVE_DMAMUX
+
+config STM32_DMAMUX1
+	bool "DMAMUX1"
+	depends on STM32_HAVE_DMAMUX
+	select STM32_DMAMUX
+
+config STM32_DMA2D
+	bool "DMA2D"
+	depends on STM32_HAVE_DMA2D
+	select FB if STM32_COMMON_LEGACY && STM32_STM32F429 || ARCH_CHIP_STM32F7 && STM32_HAVE_DMA2D
+	select FB_OVERLAY if STM32_COMMON_LEGACY && STM32_STM32F429 || ARCH_CHIP_STM32F7 && STM32_HAVE_DMA2D
+	---help---
+		The STM32 DMA2D is an Chrom-Art Accelerator for image manipulation
+		available on the STM32F429 and STM32F439 devices.
+
+# CLOCK peripherals
+
+config STM32_CSI
+	bool "CSI Low-speed internal oscillator (4MHz)"
+	depends on STM32_HAVE_CSI
+	default n
+
+config STM32_HSI48
+	bool "HSI48 High-speed 48MHz internal oscillator"
+	depends on STM32_HAVE_HSI48
+	default n
+
+config STM32_CRS
+	bool "CRS (Clock Recovery System)"
+	depends on STM32_HAVE_CRS
+
+# POWER peripherals
+
+config STM32_VREF
+	depends on STM32_HAVE_VREF
+	bool "VREF"
+	default n
+
+config STM32_BKPSRAM
+	bool "Enable BKP RAM Domain"
+	depends on STM32_HAVE_BKPSRAM
+	select STM32_PWR if ARCH_CHIP_STM32H7
+
+config STM32_VREFINT
+	bool "Enable VREFINT"
+	depends on STM32_HAVE_VREFINT
+
+config STM32_PWR
+	bool "PWR"
+	depends on STM32_HAVE_PWR
+
+# MEMORY peripherals
+
+config STM32_RAMCFG
+	depends on STM32_HAVE_RAMCFG
+	bool "RAMCFG"
+	default n
+
+config STM32_SRAM1
+	depends on STM32_HAVE_SRAM1
+	bool "SRAM1"
+	default y
+
+config STM32_SRAM2
+	depends on STM32_HAVE_SRAM2
+	bool "SRAM2"
+	default n
+
+config STM32_SRAM3
+	bool "SRAM3"
+	default n
+	depends on STM32_HAVE_SRAM3 && (STM32_STM32U575XX || STM32_STM32U585XX || STM32_STM32U59XX || STM32_STM32U59AXX || \
+              STM32_STM32U5A5XX || STM32_STM32U5A9XX)
+
+config STM32_SRAM5
+	bool "SRAM5"
+	default n
+	depends on STM32_HAVE_SRAM5 && (STM32_STM32U575XX || STM32_STM32U585XX || STM32_STM32U59XX || STM32_STM32U59AXX || \
+              STM32_STM32U5A5XX || STM32_STM32U5A9XX)
+
+config STM32_BKP
+	bool "BKP"
+	depends on STM32_HAVE_BKP
+
+config STM32_FSMC
+	bool "FSMC"
+	depends on STM32_HAVE_FSMC
+
+config STM32_FMC
+	bool "FMC"
+	depends on STM32_HAVE_FMC
+	---help---
+		Enable Flexible Memory Controller.
+		To correctly configure FMC for your hardware, you will have to define
+		a number of macros in your board.h file. See stm32_fmc.c for directions.
+
+config STM32_BBSRAM
+	bool "BBSRAM File Support"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7) && STM32_BKPSRAM
+	select ARM_MPU if ARCH_CHIP_STM32H7 && STM32_BKPSRAM
+
+config STM32_CCMDATARAM
+	bool "CMD/DATA RAM"
+	default n
+	depends on STM32_STM32F4XXX
+
+# FLASH peripherals
+
+config STM32_FLASH
+	depends on STM32_HAVE_FLASH
+	bool "FLASH"
+	default n
+
+# GPIO peripherals
+
+config STM32_LPGPIO1
+	depends on STM32_HAVE_LPGPIO1
+	bool "LPGPIO1"
+	default n
+
+config STM32_SYSCFG
+	bool "SYSCFG"
+	depends on STM32_HAVE_SYSCFG
+	default y
+
+# SECURITY peripherals
+
+config STM32_FIREWALL
+	bool "FIREWALL"
+	default y
+	depends on STM32_HAVE_FIREWALL && STM32_SYSCFG
+
+config STM32_GTZC1
+	depends on STM32_HAVE_GTZC1
+	bool "GTZC1"
+	default n
+
+config STM32_GTZC2
+	depends on STM32_HAVE_GTZC2
+	bool "GTZC2"
+	default n
+
+config STM32_PKA
+	depends on STM32_HAVE_PKA
+	bool "PKA"
+	default n
+
+config STM32_SAES
+	depends on STM32_HAVE_SAES
+	bool "SAES"
+	default n
+
+config STM32_OTFDEC1
+	depends on STM32_HAVE_OTFDEC1
+	bool "OTFDEC1"
+	default n
+
+config STM32_OTFDEC2
+	depends on STM32_HAVE_OTFDEC2
+	bool "OTFDEC2"
+	default n
+
+config STM32_CRC
+	bool "CRC"
+	depends on STM32_HAVE_CRC
+
+config STM32_AES
+	bool "128-bit AES"
+	depends on STM32_HAVE_IP_AES_M0_V1 || STM32_HAVE_IP_AES_M3M4_V1
+	select CRYPTO_AES192_DISABLE if (STM32_COMMON_LEGACY && STM32_HAVE_AES) && CRYPTO_ALGTEST
+	select CRYPTO_AES256_DISABLE if (STM32_COMMON_LEGACY && STM32_HAVE_AES) && CRYPTO_ALGTEST
+	select CRYPTO_AES192_DISABLE if (STM32_COMMON_F0_L0_G0_C0 && STM32_HAVE_AES) && CRYPTO_ALGTEST
+	select CRYPTO_AES256_DISABLE if (STM32_COMMON_F0_L0_G0_C0 && STM32_HAVE_AES) && CRYPTO_ALGTEST
+
+config STM32_CRYP
+	bool "CRYP"
+	depends on STM32_HAVE_CRYP
+	depends on STM32_HAVE_IP_CRYPTO_M3M4_V1 || STM32_HAVE_IP_CRYPTO_H7
+
+config STM32_HASH
+	bool "HASH"
+	depends on STM32_HAVE_HASH
+	select ARCH_HAVE_HASH if ARCH_CHIP_STM32F7 && STM32_HAVE_HASH
+
+# BLE peripherals
+
+menuconfig STM32_BLE
+	bool "BLE"
+	depends on STM32_HAVE_BLE
+	default n
+	select STM32_MBOX
+	---help---
+		Enable BLE support.
+
+# CACHE peripherals
+
+config STM32_ICACHE
+	bool "ICACHE"
+	default n
+	depends on STM32_HAVE_ICACHE
+
+config STM32_DCACHE1
+	depends on STM32_HAVE_DCACHE1
+	bool "DCACHE1"
+	default n
+
+# RTC peripherals
+
+config STM32_RTCAPB
+	depends on STM32_HAVE_RTCAPB
+	bool "RTCAPB"
+	default n
+
+config STM32_RTC
+	bool "RTC"
+	depends on STM32_HAVE_RTC
+	select RTC if !ARCH_CHIP_STM32L5
+
+# RNG peripherals
+
+config STM32_RNG
+	bool "RNG"
+	depends on STM32_HAVE_RNG
+	select ARCH_HAVE_RNG if !ARCH_CHIP_STM32U5
+
+# WDG peripherals
+
+config STM32_IWDG
+	bool "IWDG"
+	depends on STM32_HAVE_IP_WDG_M0_V1 || STM32_HAVE_IP_WDG_M3M4_V1
+	select WATCHDOG
+
+config STM32_WWDG
+	bool "WWDG"
+	depends on STM32_HAVE_IP_WDG_M0_V1 || STM32_HAVE_IP_WDG_M3M4_V1
+	select WATCHDOG if !ARCH_CHIP_STM32U5
+
+# ADC peripherals
+
+config STM32_ADC1
+	bool "ADC1"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32U5
+	select STM32_ADC if !ARCH_CHIP_STM32U5
+	select STM32_ADC1_HAVE_DMA if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && ((STM32_STM32F10XX || STM32_STM32F37XX) && STM32_DMA1 || !STM32_STM32F10XX && STM32_DMA2 || STM32_DMAMUX)
+	select STM32_ADC1_HAVE_DMA if ARCH_CHIP_STM32F7
+	select STM32_ADC1_HAVE_DMA if STM32_HAVE_IP_ADC_M0_V1
+	select STM32_ADC1_HAVE_DMA if STM32_STM32F30XX || STM32_STM32F33XX
+
+config STM32_ADC2
+	bool "ADC2"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32L4) && STM32_HAVE_ADC2 || STM32_COMMON_F7_H7_H5
+	select STM32_ADC
+	select STM32_ADC2_HAVE_DMA if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_HAVE_ADC2 && (STM32_DMA2 || STM32_DMAMUX)
+	select STM32_ADC2_HAVE_DMA if ARCH_CHIP_STM32F7
+	select STM32_ADC2_HAVE_DMA if STM32_STM32F302 || STM32_STM32F303 || STM32_STM32F33XX
+
+config STM32_ADC3
+	bool "ADC3"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32L4) && STM32_HAVE_ADC3 || STM32_COMMON_F7_H7
+	select STM32_ADC
+	select STM32_ADC3_HAVE_DMA if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_HAVE_ADC3 && (STM32_DMA2 || STM32_DMAMUX)
+	select STM32_ADC3_HAVE_DMA if ARCH_CHIP_STM32F7
+
+config STM32_ADC4
+	bool "ADC4"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_HAVE_ADC4) || ARCH_CHIP_STM32U5
+	select STM32_ADC if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2)
+	select STM32_ADC4_HAVE_DMA if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_HAVE_ADC4 && (STM32_DMA2 || STM32_DMAMUX)
+
+config STM32_ADC5
+	bool "ADC5"
+	default n
+	select STM32_ADC
+	depends on STM32_HAVE_ADC5
+	select STM32_ADC5_HAVE_DMA if STM32_DMA2
+	select STM32_ADC5_HAVE_DMA if STM32_DMAMUX
+
+config STM32_SDADC1
+	bool "SDADC1"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC1
+	select STM32_SDADC1_HAVE_DMA if STM32_DMA2
+
+config STM32_SDADC2
+	bool "SDADC2"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC2
+	select STM32_SDADC2_HAVE_DMA if STM32_DMA2
+
+config STM32_SDADC3
+	bool "SDADC3"
+	default n
+	select STM32_SDADC
+	depends on STM32_HAVE_SDADC3
+	select STM32_SDADC3_HAVE_DMA if STM32_DMA2
+
+# DAC peripherals
+
+config STM32_DAC1
+	bool "DAC1"
+	depends on STM32_HAVE_DAC1
+	select STM32_DAC if !ARCH_CHIP_STM32U5
+
+config STM32_DAC2
+	bool "DAC2"
+	depends on STM32_HAVE_DAC2
+	select STM32_DAC
+
+config STM32_DAC1CH1
+	bool "DAC1CH1"
+	default n
+	depends on STM32_DAC1
+
+config STM32_DAC1CH2
+	bool "DAC1CH2"
+	default n
+	depends on STM32_DAC1
+
+config STM32_DAC2CH1
+	bool "DAC2CH1"
+	default n
+	depends on STM32_DAC2
+
+config STM32_DAC3
+	bool "DAC3"
+	default n
+	depends on STM32_HAVE_DAC3
+	select STM32_DAC
+
+config STM32_DAC3CH1
+	bool "DAC3CH1 Internal"
+	default n
+	depends on STM32_DAC3
+
+config STM32_DAC3CH2
+	bool "DAC3CH2 Internal"
+	default n
+	depends on STM32_DAC3
+
+config STM32_DAC4
+	bool "DAC4"
+	default n
+	depends on STM32_HAVE_DAC4
+	select STM32_DAC
+
+config STM32_DAC4CH1
+	bool "DAC4CH1 Internal"
+	default n
+	depends on STM32_DAC4
+
+config STM32_DAC4CH2
+	bool "DAC4CH2 Internal"
+	default n
+	depends on STM32_DAC4
+
+# DFSDM peripherals
+
+config STM32_MDF1
+	depends on STM32_HAVE_MDF1
+	bool "MDF1"
+	default n
+
+config STM32_ADF1
+	depends on STM32_HAVE_ADF1
+	bool "ADF1"
+	default n
+
+config STM32_DFSDM1
+	bool "DFSDM1"
+	depends on (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_HAVE_DFSDM1
+	select ARCH_HAVE_DFSDM1 if ARCH_CHIP_STM32F7 && STM32_HAVE_DFSDM1
+
+# CAN peripherals
+
+config STM32_CAN1
+	bool "CAN1"
+	depends on STM32_HAVE_CAN1
+	select STM32_CAN
+	select CAN
+
+config STM32_CAN2
+	bool "CAN2"
+	depends on STM32_HAVE_CAN2
+	select STM32_CAN
+	select CAN
+
+config STM32_CAN3
+	bool "CAN3"
+	depends on STM32_HAVE_CAN3
+	select STM32_CAN
+	select CAN
+
+config STM32_FDCAN1
+	bool "FDCAN1"
+	depends on STM32_HAVE_FDCAN1
+	select STM32_FDCAN if !ARCH_CHIP_STM32U5
+
+config STM32_FDCAN2
+	bool "FDCAN2"
+	depends on STM32_HAVE_FDCAN2
+	select STM32_FDCAN
+
+config STM32_FDCAN3
+	bool "FDCAN3"
+	depends on STM32_HAVE_FDCAN3
+	select STM32_FDCAN
+
+# I2C peripherals
+
+config STM32_I2C5
+	bool "I2C5"
+	depends on STM32_HAVE_I2C5 && (STM32_STM32U59XX || STM32_STM32U59AXX || STM32_STM32U5A5XX || STM32_STM32U5A9XX)
+	default n
+	select STM32_I2C
+
+config STM32_I2C6
+	bool "I2C6"
+	depends on STM32_HAVE_I2C6 && (STM32_STM32U59XX || STM32_STM32U59AXX || STM32_STM32U5A5XX || STM32_STM32U5A9XX)
+	default n
+	select STM32_I2C
+
+config STM32_I2C1
+	bool "I2C1"
+	depends on STM32_HAVE_I2C1
+	select STM32_I2C
+	select I2C if ARCH_CHIP_STM32WB
+
+config STM32_I2C2
+	bool "I2C2"
+	depends on STM32_HAVE_I2C2
+	select STM32_I2C
+
+config STM32_I2C3
+	bool "I2C3"
+	depends on STM32_HAVE_I2C3
+	select STM32_I2C
+	select I2C if ARCH_CHIP_STM32WB && STM32_HAVE_I2C3
+
+config STM32_I2C4
+	bool "I2C4"
+	depends on STM32_HAVE_I2C4
+	select STM32_I2C
+
+#
+#
+
+config STM32_I2C1_SLAVE
+	bool "I2C1 Slave"
+	default n
+	depends on !STM32_I2C1 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
+config STM32_I2C2_SLAVE
+	bool "I2C2 Slave"
+	default n
+	depends on STM32_HAVE_I2C2 && !STM32_I2C2 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
+config STM32_I2C3_SLAVE
+	bool "I2C3 Slave"
+	default n
+	depends on STM32_HAVE_I2C3 && !STM32_I2C3 && I2C_SLAVE
+	select STM32_I2C_SLAVE
+
+# SPI peripherals
+
+config STM32_SPI1
+	bool "SPI1"
+	depends on STM32_HAVE_SPI1
+	select SPI if !ARCH_CHIP_STM32WL5
+	select STM32_SPI
+
+config STM32_SPI2
+	bool "SPI2"
+	depends on STM32_HAVE_SPI2
+	select SPI
+	select STM32_SPI
+
+config STM32_SPI3
+	bool "SPI3"
+	depends on STM32_HAVE_SPI3
+	select SPI
+	select STM32_SPI
+
+config STM32_SPI4
+	bool "SPI4"
+	depends on STM32_HAVE_SPI4
+	select SPI
+	select STM32_SPI
+
+config STM32_SPI5
+	bool "SPI5"
+	depends on STM32_HAVE_SPI5
+	select SPI
+	select STM32_SPI
+
+config STM32_SPI6
+	bool "SPI6"
+	depends on STM32_HAVE_SPI6
+	select SPI
+	select STM32_SPI
+
+# SERIAL peripherals
+
+config STM32_UART9
+	bool "UART9"
+	default n
+	depends on STM32_HAVE_UART9
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_USART
+
+config STM32_UART12
+	bool "UART12"
+	default n
+	depends on STM32_HAVE_UART12
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_USART
+
+config STM32_USART10
+	bool "USART10"
+	default n
+	depends on STM32_HAVE_USART10
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_USART
+
+config STM32_USART11
+	bool "USART11"
+	default n
+	depends on STM32_HAVE_USART11
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_USART
+
+config STM32_SWPMI
+	bool "SWPMI"
+	depends on STM32_HAVE_SWPMI
+	default n
+
+config STM32_LPUART1
+	bool "LPUART1"
+	depends on STM32_HAVE_LPUART1
+	select LPUART1_SERIALDRIVER if ARCH_CHIP_STM32L4 && STM32_HAVE_LPUART1
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select ARCH_HAVE_LPUART1 if ARCH_CHIP_STM32L4 && STM32_HAVE_LPUART1 || ARCH_CHIP_STM32WB && STM32_HAVE_LPUART
+
+config STM32_USART4
+	bool "USART4"
+	depends on STM32_HAVE_USART4
+	select STM32_USART
+
+config STM32_USART5
+	bool "USART5"
+	depends on STM32_HAVE_USART5
+	select STM32_USART
+
+config STM32_USART7
+	bool "USART7"
+	depends on STM32_HAVE_USART7
+	select STM32_USART
+
+config STM32_USART8
+	bool "USART8"
+	depends on STM32_HAVE_USART8
+	select STM32_USART
+
+config STM32_USART1
+	bool "USART1"
+	depends on STM32_HAVE_USART1
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select USART1_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_USART2
+	bool "USART2"
+	depends on STM32_HAVE_USART2
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select USART2_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_USART3
+	bool "USART3"
+	depends on STM32_HAVE_USART3
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select USART3_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_UART4
+	bool "UART4"
+	depends on STM32_HAVE_UART4
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select UART4_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_UART5
+	bool "UART5"
+	depends on STM32_HAVE_UART5
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select UART5_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_USART6
+	bool "USART6"
+	depends on STM32_HAVE_USART6
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select USART6_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_UART7
+	bool "UART7"
+	depends on STM32_HAVE_UART7
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select UART7_SERIALDRIVER if STM32_COMMON_F7_H7
+
+config STM32_UART8
+	bool "UART8"
+	depends on STM32_HAVE_UART8
+	select STM32_USART
+	select ARCH_HAVE_SERIAL_TERMIOS if !STM32_HAVE_IP_USART
+	select UART8_SERIALDRIVER if STM32_COMMON_F7_H7
+
+# TIM peripherals
+
+config STM32_LPTIM1
+	bool "LPTIM1"
+	depends on STM32_HAVE_LPTIM1
+	select STM32_LPTIM if ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32WB
+
+config STM32_TIM1
+	bool "TIM1"
+	depends on STM32_HAVE_TIM1
+	select STM32_TIM
+
+config STM32_TIM2
+	bool "TIM2"
+	depends on STM32_HAVE_TIM2
+	select STM32_TIM
+
+config STM32_TIM3
+	bool "TIM3"
+	depends on STM32_HAVE_TIM3
+	select STM32_TIM
+
+config STM32_TIM4
+	bool "TIM4"
+	depends on STM32_HAVE_TIM4
+	select STM32_TIM
+
+config STM32_TIM5
+	bool "TIM5"
+	depends on STM32_HAVE_TIM5
+	select STM32_TIM
+
+config STM32_TIM6
+	bool "TIM6"
+	depends on STM32_HAVE_TIM6
+	select STM32_TIM
+
+config STM32_TIM7
+	bool "TIM7"
+	depends on STM32_HAVE_TIM7
+	select STM32_TIM
+
+config STM32_TIM8
+	bool "TIM8"
+	depends on STM32_HAVE_TIM8
+	select STM32_TIM
+
+config STM32_TIM9
+	bool "TIM9"
+	depends on STM32_HAVE_TIM9
+	select STM32_TIM
+
+config STM32_TIM10
+	bool "TIM10"
+	depends on STM32_HAVE_TIM10
+	select STM32_TIM
+
+config STM32_TIM11
+	bool "TIM11"
+	depends on STM32_HAVE_TIM11
+	select STM32_TIM
+
+config STM32_TIM12
+	bool "TIM12"
+	depends on STM32_HAVE_TIM12
+	select STM32_TIM
+
+config STM32_TIM13
+	bool "TIM13"
+	depends on STM32_HAVE_TIM13
+	select STM32_TIM
+
+config STM32_TIM14
+	bool "TIM14"
+	depends on STM32_HAVE_TIM14
+	select STM32_TIM
+
+config STM32_TIM15
+	bool "TIM15"
+	depends on STM32_HAVE_TIM15
+	select STM32_TIM
+
+config STM32_TIM16
+	bool "TIM16"
+	depends on STM32_HAVE_TIM16
+	select STM32_TIM
+
+config STM32_TIM17
+	bool "TIM17"
+	depends on STM32_HAVE_TIM17
+	select STM32_TIM
+
+config STM32_LPTIM2
+	bool "LPTIM2"
+	depends on ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32U5 || ARCH_CHIP_STM32WB || ARCH_CHIP_STM32L4 && STM32_HAVE_LPTIM2
+	select STM32_LPTIM if ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32WB
+
+config STM32_LPTIM3
+	bool "LPTIM3"
+	depends on STM32_HAVE_LPTIM3
+	select STM32_LPTIM if ARCH_CHIP_STM32H7
+
+config STM32_LPTIM4
+	bool "LPTIM4"
+	depends on STM32_HAVE_LPTIM4
+	select STM32_LPTIM if ARCH_CHIP_STM32H7
+
+config STM32_LPTIM5
+	bool "LPTIM5"
+	depends on ARCH_CHIP_STM32H7
+	select STM32_LPTIM
+
+config STM32_HRTIM1
+	bool "HRTIM1"
+	default n
+	depends on STM32_HAVE_HRTIM1
+	select STM32_HRTIM
+
+config STM32_HRTIM_MASTER
+	bool "HRTIM MASTER"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Master Timer
+
+config STM32_HRTIM_TIMA
+	bool "HRTIM TIMA"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Timer A
+
+config STM32_HRTIM_TIMB
+	bool "HRTIM TIMB"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Timer B
+
+config STM32_HRTIM_TIMC
+	bool "HRTIM TIMC"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Timer C
+
+config STM32_HRTIM_TIMD
+	bool "HRTIM TIMD"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Timer D
+
+config STM32_HRTIM_TIME
+	bool "HRTIM TIME"
+	default n
+	depends on STM32_HRTIM1
+	---help---
+		Enable HRTIM Timer E
+
+# USB peripherals
+
+choice STM32_USBFS_MODE
+	prompt "USB FS Mode"
+	depends on STM32_HAVE_USBFS_MODE && STM32_HAVE_USBFS
+	default STM32_USBFS_NONE
+	---help---
+	  Select the operating mode for the USB_DRD_FS peripheral.
+	  The hardware supports Device or Host, but not simultaneously.
+
+config STM32_USBFS_NONE
+	bool "Disabled"
+
+config STM32_USBFS_DEVICE
+	bool "USB Device"
+	select STM32_USBFS
+	select USBDEV
+
+config STM32_USBFS_HOST
+	bool "USB Host"
+	select USBHOST_HAVE_ASYNCH
+	select USBHOST
+	---help---
+	  Enable USB host mode for USB_DRD_FS peripheral.
+
+endchoice
+
+config STM32_OTGFS
+	bool "OTG FS"
+	depends on STM32_HAVE_OTGFS
+	select USBHOST_HAVE_ASYNCH if !ARCH_CHIP_STM32U5 && USBHOST
+
+config STM32_OTGHS
+	bool "OTG HS"
+	depends on STM32_HAVE_OTGHS && (!ARCH_CHIP_STM32H7 || EXPERIMENTAL)
+	select USBHOST_HAVE_ASYNCH if !ARCH_CHIP_STM32U5 && USBHOST
+
+config STM32_OTGFSHS
+	bool "OTG FS/HS"
+	depends on ARCH_CHIP_STM32F7
+	default n
+	select USBHOST_HAVE_ASYNCH if USBHOST
+
+config STM32_USB
+	bool "USB Device"
+	depends on STM32_HAVE_USBDEV
+	select USBDEV
+
+config STM32_USBFS
+	bool "USB Full Speed Device"
+	depends on STM32_HAVE_USBFS
+	select USBDEV
+	select USBDEV if STM32_COMMON_LEGACY || ARCH_CHIP_STM32L4
+
+config STM32_USBHOST
+	bool "Enable USB Host Support"
+	depends on STM32_COMMON_LEGACY && (STM32_OTGFS || STM32_OTGHS)
+	default n
+	select USBHOST
+
+config STM32_UCPD
+	bool "UCPD (USB Type C Power Delivery)"
+	default n
+	depends on STM32_HAVE_UCPD
+	select USBDEV
+
+config STM32_UCPD1
+	depends on STM32_HAVE_UCPD1
+	bool "UCPD1"
+	default n
+
+# CEC peripherals
+
+config STM32_CEC
+	bool "CEC"
+	depends on STM32_HAVE_CEC
+
+# SDIO peripherals
+
+config STM32_SDIO
+	bool "SDIO"
+	depends on (STM32_COMMON_LEGACY && !STM32F1_CONNECTIVITYLINE && !STM32F1_VALUELINE)
+	select ARCH_HAVE_SDIO
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
+	select ARCH_HAVE_SDIO_PREFLIGHT
+
+config STM32_SDMMC1
+	bool "SDMMC1"
+	depends on STM32_HAVE_SDMMC1
+	select STM32_SDMMC if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIO if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIO_PREFLIGHT if !ARCH_CHIP_STM32U5
+	select SDIO_BLOCKSETUP if STM32_COMMON_F7_H7
+	select SCHED_HPWORK if ARCH_CHIP_STM32L4
+	select STM32_SAI1PLL if ARCH_CHIP_STM32L4
+
+config STM32_SDMMC2
+	bool "SDMMC2"
+	depends on STM32_HAVE_SDMMC2
+	select STM32_SDMMC if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIO if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE if !ARCH_CHIP_STM32U5
+	select ARCH_HAVE_SDIO_PREFLIGHT if !ARCH_CHIP_STM32U5
+	select SDIO_BLOCKSETUP if !ARCH_CHIP_STM32U5
+
+# SAI peripherals
+
+config STM32_SPDIFRX
+	bool "SPDIFRX"
+	depends on ARCH_CHIP_STM32F7
+
+config STM32_I2S1
+	bool "I2S1"
+	depends on ARCH_CHIP_STM32F7 && !STM32_SPI1
+	select STM32_I2S
+
+config STM32_I2S2
+	bool "I2S2"
+	depends on ARCH_CHIP_STM32F7 && !STM32_SPI2
+	select STM32_I2S
+
+config STM32_I2S3
+	bool "I2S3"
+	depends on STM32_HAVE_I2S3
+	select I2S if STM32_COMMON_LEGACY
+	select STM32_I2S
+
+config STM32_SPI2S2
+	bool "SPI2S2"
+	depends on STM32_HAVE_SPI2S2
+	select STM32_SPI
+
+config STM32_SAI1
+	bool "SAI1"
+	depends on STM32_HAVE_SAI1
+
+config STM32_SAI1_A
+	bool "SAI1 Block A"
+	depends on (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_SAI1
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32_SAI
+
+config STM32_SAI1_B
+	bool "SAI1 Block B"
+	depends on (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_SAI1
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32_SAI
+
+config STM32_SAI2
+	bool "SAI2"
+	depends on STM32_HAVE_SAI2
+
+config STM32_SAI2_A
+	bool "SAI2 Block A"
+	depends on (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_SAI2
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32_SAI
+
+config STM32_SAI2_B
+	bool "SAI2 Block B"
+	depends on (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_SAI2
+	select AUDIO
+	select I2S
+	select SCHED_HPWORK
+	select STM32_SAI
+
+# QSPI peripherals
+
+config STM32_QSPI1
+	bool "QSPI1"
+	depends on STM32_HAVE_QSPI1
+	default n
+
+config STM32_OCTOSPIM
+	depends on STM32_HAVE_OCTOSPIM
+	bool "OCTOSPIM"
+	default n
+
+config STM32_OCTOSPI1
+	depends on STM32_HAVE_OCTOSPI1
+	bool "OCTOSPI1"
+	default n
+
+config STM32_OCTOSPI2
+	depends on STM32_HAVE_OCTOSPI2
+	bool "OCTOSPI2"
+	default n
+
+config STM32_QSPI
+	bool "QSPI (QUADSPI)"
+	depends on STM32_HAVE_QSPI || STM32_COMMON_F7_H7
+	---help---
+		The STM32L4 QSPI block is intended to support one serial NOR flash device
+
+# ETH peripherals
+
+config STM32_ETHMAC
+	bool "Ethernet MAC"
+	depends on STM32_HAVE_ETHERNET
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+	select STM32_PHY_HAVE_POLLED if !STM32_COMMON_LEGACY
+
+# CORDIC peripherals
+
+config STM32_CORDIC
+	bool "CORDIC Accelerator"
+	depends on STM32_HAVE_IP_CORDIC_M3M4_V1 && MATH_CORDIC_USE_Q31
+
+config STM32_FMAC
+	bool "FMAC (Filter Math Accelerator)"
+	depends on STM32_HAVE_FMAC
+
+# SENSOR peripherals
+
+config STM32_DTS
+	bool "DTS"
+	depends on STM32_HAVE_DTS
+	default n
+	---help---
+		Enable support for the on‑die digital temperature sensor (DTS)
+		built into STM32H5 devices.  When enabled, the driver will register
+		a `/dev/sensor_tempX` device using the common NuttX sensor framework.
+
+config STM32_DCMI_PSSI
+	depends on STM32_HAVE_DCMI_PSSI
+	bool "DCMI_PSSI"
+	default n
+
+config STM32_DCMI
+	bool "DCMI"
+	depends on STM32_HAVE_DCMI
+	---help---
+		The devices embed a camera interface that can connect with camera
+		modules and CMOS sensors through an 8-bit to 14-bit parallel interface,
+		to receive video data.
+
+config STM32_SYSCFG_IOCOMPENSATION
+	bool "SYSCFG I/O Compensation"
+	depends on STM32_HAVE_IOCOMPENSATION
+	select STM32_CSI if ARCH_CHIP_STM32H7
+	---help---
+		By default the I/O compensation cell is not used. However when the I/O
+		output buffer speed is configured in 50 MHz or 100 MHz mode, it is
+		recommended to use the compensation cell for slew rate control on I/O
+		tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
+
+		The I/O compensation cell can be used only when the supply voltage ranges
+		from 2.4 to 3.6 V.
+
+config STM32_JPEG
+	bool "JPEG"
+	depends on STM32_HAVE_JPEG
+	---help---
+		The JPEG codec provides a hardware compressor and decompressor of JPEG
+		images with full management of JPEG headers.
+
+config STM32_TSC
+	bool "TSC"
+	depends on STM32_HAVE_TSC
+
+config STM32_COMP1
+	bool "COMP1"
+	select STM32_COMP
+	depends on STM32_HAVE_COMP1
+
+config STM32_COMP2
+	bool "COMP2"
+	select STM32_COMP
+	depends on STM32_HAVE_COMP2
+
+config STM32_COMP3
+	bool "COMP3"
+	default n
+	select STM32_COMP
+	depends on STM32_HAVE_COMP3
+
+config STM32_COMP4
+	bool "COMP4"
+	default n
+	select STM32_COMP
+	depends on STM32_HAVE_COMP4
+
+config STM32_COMP5
+	bool "COMP5"
+	default n
+	select STM32_COMP
+	depends on STM32_HAVE_COMP5
+
+config STM32_COMP6
+	bool "COMP6"
+	default n
+	select STM32_COMP
+	depends on STM32_HAVE_COMP6
+
+config STM32_COMP7
+	bool "COMP7"
+	default n
+	select STM32_COMP
+	depends on STM32_HAVE_COMP7
+
+config STM32_OPAMP1
+	bool "OPAMP1"
+	default n
+	select STM32_OPAMP
+	depends on STM32_HAVE_OPAMP1
+
+config STM32_OPAMP2
+	bool "OPAMP2"
+	default n
+	select STM32_OPAMP
+	depends on STM32_HAVE_OPAMP2
+
+config STM32_OPAMP3
+	bool "OPAMP3"
+	default n
+	select STM32_OPAMP
+	depends on STM32_HAVE_OPAMP3
+
+config STM32_OPAMP4
+	bool "OPAMP4"
+	default n
+	select STM32_OPAMP
+	depends on STM32_HAVE_OPAMP4
+
+# IPCC peripherals
+
+config STM32_IPCC
+	bool "IPCC"
+	depends on STM32_HAVE_IPCC
+	select IPCC if ARCH_CHIP_STM32WL5
+	---help---
+		IPCC - Inter Processor Communication Controller. A very simple
+		character device stream driver to exchange data between
+		CM0 and CM4.
+
+config STM32_HSEM
+	bool "Hardware semaphore"
+	depends on STM32_HAVE_HSEM
+	default n
+
+# Display peripherals
+
+config STM32_LCD
+	bool "Segment LCD"
+	depends on STM32_HAVE_LCD
+	select USBDEV if STM32_COMMON_F0_L0_G0_C0 && STM32_HAVE_LCD
+
+config STM32_DSIHOST
+	bool "DSIHOST"
+	depends on STM32_HAVE_DSIHOST
+	---help---
+		The DSI Host is a dedicated peripheral for interfacing with MIPI DSI
+		compliant displays.
+
+config STM32_LTDC
+	bool "LTDC"
+	depends on STM32_HAVE_LTDC
+	select FB
+	---help---
+		The STM32 LTDC is an LCD-TFT Display Controller available on
+		the STM32F429 and STM32F439 devices.  It is a standard parallel
+		video interface (HSYNC, VSYNC, etc.) for controlling TFT
+		LCD displays.
+
+endmenu # STM32 Peripheral Support

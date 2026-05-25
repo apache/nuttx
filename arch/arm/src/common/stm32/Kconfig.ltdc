@@ -1,0 +1,233 @@
+#
+# STM32 common LTDC options.
+#
+
+choice
+	prompt "Layer 1 color format"
+	depends on STM32_LTDC
+	default STM32_LTDC_L1_RGB565
+
+config STM32_LTDC_L1_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_RGB565
+	bool "16 bpp RGB 565"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB4444
+	bool "16 bpp ARGB 4444"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB1555
+	bool "16 bpp ARGB 1555"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_RGB888
+	bool "24 bpp RGB 888"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB8888
+	bool "32 bpp ARGB 8888"
+	depends on !STM32_FB_CMAP
+
+endchoice # Layer 1 color format
+
+choice
+	prompt "Layer 2 (top layer) color format"
+	depends on STM32_LTDC && STM32_LTDC_L2
+	default STM32_LTDC_L2_RGB565
+
+config STM32_LTDC_L2_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	depends on STM32_LTDC_L1_L8
+
+config STM32_LTDC_L2_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on STM32_LTDC_L1_AL44
+
+config STM32_LTDC_L2_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on STM32_LTDC_L1_AL88
+
+config STM32_LTDC_L2_RGB565
+	bool "16 bpp RGB 565"
+	depends on STM32_LTDC_L1_RGB565
+
+config STM32_LTDC_L2_ARGB4444
+	bool "16 bpp ARGB 4444"
+	depends on STM32_LTDC_L1_ARGB4444
+
+config STM32_LTDC_L2_ARGB1555
+	bool "16 bpp ARGB 1555"
+	depends on STM32_LTDC_L1_ARGB1555
+
+config STM32_LTDC_L2_RGB888
+	bool "24 bpp RGB 888"
+	depends on STM32_LTDC_L1_RGB888
+
+config STM32_LTDC_L2_ARGB8888
+	bool "32 bpp ARGB 8888"
+	depends on STM32_LTDC_L1_ARGB8888
+
+endchoice # Layer 2 color format
+
+if STM32_LTDC
+
+config STM32_LTDC_BACKLIGHT
+	bool "Backlight support"
+	default y
+
+config STM32_LTDC_DEFBACKLIGHT
+	hex "Default backlight level"
+	default 0xf0
+
+config STM32_LTDC_BACKCOLOR
+	hex "Background color"
+	default 0x0
+	---help---
+		This is the background color that will be used as the LTDC
+		background layer color.  It is an RGB888 format value.
+
+config STM32_LTDC_DITHER
+	bool "Dither support"
+
+config STM32_LTDC_FB_DOUBLE_BUFFER
+	bool "Enable double buffering"
+	depends on ARCH_CHIP_STM32H7
+	default n
+	---help---
+		Enable double buffering to allow updates to the framebuffer while
+		the display is being refreshed.  This configuration requires two
+		framebuffers: one active and one inactive.  When the display
+		refreshes, the active and inactive framebuffers are swapped,
+		enabling smooth and flicker-free updates.
+
+if STM32_LTDC_DITHER
+
+config STM32_LTDC_DITHER_RED
+	int "Dither red width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither red width.
+
+config STM32_LTDC_DITHER_GREEN
+	int "Dither green width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither green width.
+
+config STM32_LTDC_DITHER_BLUE
+	int "Dither blue width"
+	range 0 7
+	default 2
+	---help---
+		This is the dither blue width.
+
+endif # STM32_LTDC_DITHER
+
+config STM32_LTDC_FB_BASE
+	hex "Framebuffer memory start address"
+	default 0
+	---help---
+		If you are using the LTDC, then you must provide the address
+		of the start of the framebuffer.  This address will typically
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
+
+config STM32_LTDC_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+	---help---
+		Must be the whole size of the active LTDC layer.
+
+config STM32_LTDC_L1_CHROMAKEYEN
+	bool "Enable chromakey support for layer 1"
+	default y
+
+config STM32_LTDC_L1_CHROMAKEY
+	hex "Layer L1 initial chroma key"
+	default 0x00000000
+
+config STM32_LTDC_L1_COLOR
+	hex "Layer L1 default color"
+	default 0x00000000
+
+config STM32_LTDC_L2
+	bool "Enable Layer 2 support"
+	default y
+
+if STM32_LTDC_L2
+
+config STM32_LTDC_L2_COLOR
+	hex "Layer L2 default color"
+	default 0x00000000
+
+config STM32_LTDC_L2_CHROMAKEYEN
+	bool "Enable chromakey support for layer 2"
+	default y
+
+config STM32_LTDC_L2_CHROMAKEY
+	hex "Layer L2 initial chroma key"
+	default 0x00000000
+
+endif # STM32_LTDC_L2
+
+config STM32_FB_CMAP
+	bool "Color map support"
+	default y
+	select FB_CMAP
+	---help---
+		Enabling color map support is necessary for LTDC L8 format.
+
+config STM32_FB_TRANSPARENCY
+	bool "Transparency color map support"
+	depends on STM32_FB_CMAP
+	default y
+	select FB_TRANSPARENCY
+	---help---
+		Enabling transparency color map support is necessary for LTDC L8 format.
+
+config STM32_LTDC_REGDEBUG
+	bool "LTDC Register level debug"
+	depends on (STM32_COMMON_LEGACY && DEBUG_INFO && DEBUG_LCD) || STM32_COMMON_F7_H7
+	---help---
+		Output detailed register-level LTDC device debug information.
+
+endif # STM32_LTDC
+
+config STM32_LTDC_USE_DSI
+	bool "Use DSI as display connection"
+	depends on STM32_COMMON_F7_H7 && STM32_LTDC && STM32_DSIHOST
+	---help---
+		Select this if your display is connected via DSI.
+		Deselect option if your display is connected via digital
+		RGB+HSYNC+VSYNC
+
+if STM32_LCD
+
+choice
+	prompt "Segment LCD Clock Source"
+	default LCD_LSECLOCK
+
+config LCD_LSICLOCK
+	bool "Internal Low Speed Clock"
+
+config LCD_LSECLOCK
+	bool "External Low Speed Clock"
+
+config LCD_HSECLOCK
+	bool "External High Speed Clock"
+
+endchoice
+
+endif # STM32_LCD

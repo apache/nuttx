@@ -57,7 +57,7 @@
  * TODO: definitions for basic STM32 ADC IPv2 (F0, L0)
  */
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V2_BASIC
+#ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V2_BASIC
 #  define HAVE_BASIC_ADC
 #  error TODO
 #else

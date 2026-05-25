@@ -1,0 +1,292 @@
+#
+# STM32 common HCI UART options.
+#
+
+config STM32_HCIUART
+	bool
+
+config STM32_HCIUART_RXDMA
+	bool
+
+if STM32_USART1_HCIUART
+
+config STM32_HCIUART1_RXBUFSIZE
+	int "HCI UART1 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART1_TXBUFSIZE
+	int "HCI UART1 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART1_BAUD
+	int "HCI UART1 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART1_RXDMA
+	bool "HCI UART1 Rx DMA"
+	default n
+	depends on (((STM32_STM32F10XX || STM32_STM32L15XX) && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART1_HCIUART
+
+if STM32_USART2_HCIUART
+
+config STM32_HCIUART2_RXBUFSIZE
+	int "HCI UART2 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART2_TXBUFSIZE
+	int "HCI UART2 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART2_BAUD
+	int "HCI UART2 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART2_RXDMA
+	bool "HCI UART2 Rx DMA"
+	default n
+	depends on STM32_DMA1
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART2_HCIUART
+
+if STM32_USART3_HCIUART
+
+config STM32_HCIUART3_RXBUFSIZE
+	int "HCI UART3 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART3_TXBUFSIZE
+	int "HCI UART3 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART3_BAUD
+	int "HCI UART3 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART3_RXDMA
+	bool "HCI UART3 Rx DMA"
+	default n
+	depends on STM32_DMA1
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART3_HCIUART
+
+if STM32_USART6_HCIUART
+
+config STM32_HCIUART6_RXBUFSIZE
+	int "HCI UART6 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART6_TXBUFSIZE
+	int "HCI UART6 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART6_BAUD
+	int "HCI UART6 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART6_RXDMA
+	bool "HCI UART6 Rx DMA"
+	default n
+	depends on STM32_DMA1
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_USART6_HCIUART
+
+if STM32_UART7_HCIUART
+
+config STM32_HCIUART7_RXBUFSIZE
+	int "HCI UART7 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART7_TXBUFSIZE
+	int "HCI UART7 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART7_BAUD
+	int "HCI UART7 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART7_RXDMA
+	bool "HCI UART7 Rx DMA"
+	default n
+	depends on STM32_DMA2
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART7_HCIUART
+
+if STM32_UART8_HCIUART
+
+config STM32_HCIUART8_RXBUFSIZE
+	int "HCI UART8 Rx buffer size"
+	default 80
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.  Ideally this should be at least
+		the size of the largest frame that can be received
+
+config STM32_HCIUART8_TXBUFSIZE
+	int "HCI UART8 Transmit buffer size"
+	default 80
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.  Ideally this should be at least
+		the size of the largest frame that can be sent
+
+config STM32_HCIUART8_BAUD
+	int "HCI UART8 initial BAUD rate"
+	default 115200
+	---help---
+		The configured initial BAUD of the HCIR USART used during bringup.
+		In most cases this initial rate can be increased by the upper half
+		HCI UART driver using vendor-specifi HCI UART commands.
+
+config STM32_HCIUART8_RXDMA
+	bool "HCI UART8 Rx DMA"
+	default n
+	depends on STM32_DMA2
+	select STM32_HCIUART_RXDMA
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # STM32_UART8_HCIUART
+
+menu "HCI UART Driver Configuration"
+	depends on STM32_SERIALDRIVER
+
+config STM32_HCIUART_RXDMA_BUFSIZE
+	int "Rx DMA buffer size"
+	default 32
+	range 32 4096
+	depends on STM32_HCIUART_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half or this number of bytes.
+
+		Value given here will be rounded up to next multiple of 4 bytes.
+
+config STM32_HCIUART_RXDMAPRIO
+	hex "HCI UART DMA priority"
+	default 0x00001000 if STM32_STM32F10XX
+	default 0x00010000 if !STM32_STM32F10XX
+	depends on STM32_HCIUART_RXDMA
+	---help---
+		Select HCI UART DMA priority.
+
+		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
+		0x00002000 high, 0x00003000 very high.  Default: medium.
+
+		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
+		0x00020000 high, 0x00030000 very high.  Default: medium.
+
+config STM32_HCIUART_SW_RXFLOW
+	bool "Use Software UART RTS flow control"
+	default n
+	---help---
+		Enable UART RTS flow control using Software.  Current STM32 have
+		broken HW based RTS behavior (they assert nRTS after every byte
+		received)  Enable this setting workaround this issue by using
+		software based management of RTS
+
+		If HCI UART DMA is enabled, this is probably the better selection
+		as well. In that case, the Rx DMA buffer will avoid Rx overrun due
+		to short, bursty activity.  Software RTS management will probably
+		result in overall better throughput and should still avoid Rx data
+		overrun conditions.
+
+config STM32_HCIUART_UPPER_WATERMARK
+	int "RTS flow control upper watermark (%)"
+	default 75
+	range 2 100
+	depends on STM32_HCIUART_SW_RXFLOW
+	---help---
+		If software RTS flow control is enable, then RTS will be asserted
+		when this amount of Rx data has been buffered.  The amount is
+		expressed as a percentage of the Rx buffer size.
+
+config STM32_HCIUART_LOWER_WATERMARK
+	int "RTS flow control lower watermark (%)"
+	default 25
+	range 1 99
+	depends on STM32_HCIUART_SW_RXFLOW
+	---help---
+		If software RTS flow control is enable, then RTS will be de-asserted
+		when there is less than this amount ofdata in the Rx buffere.  The
+		amount is expressed as a percentage of the Rx buffer size.
+
+endmenu # HCI UART Driver Configuration
