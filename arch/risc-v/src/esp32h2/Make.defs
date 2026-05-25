@@ -25,4 +25,9 @@ include common/espressif/Make.defs
 
 CHIP_CSRCS += esp_chip_rev.c
 
+ifeq ($(CONFIG_ESPRESSIF_BLE),y)
+CHIP_CSRCS += esp_ble.c
+EXTRA_LIBS += -lbtbb -lble_app
+endif
+
 CFLAGS += ${DEFINE_PREFIX}_RETARGETABLE_LOCKING
