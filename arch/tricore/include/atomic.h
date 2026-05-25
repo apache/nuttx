@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 #ifndef ARCH_ATOMIC_SPECIFIER
-#  define ARCH_ATOMIC_SPECIFIER static inline_function
+#  define ARCH_ATOMIC_SPECIFIER static always_inline_function
 #endif
 
 #define ARCH_ATOMIC_PRE_BARRIER(memorder)                                \
