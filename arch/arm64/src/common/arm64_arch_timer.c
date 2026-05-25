@@ -40,6 +40,7 @@
 #include "arm64_internal.h"
 #include "arm64_gic.h"
 #include "arm64_arch_timer.h"
+#include "arm64_smp.h"
 
 /****************************************************************************
  * Pre-processor Definitions

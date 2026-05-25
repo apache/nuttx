@@ -49,12 +49,16 @@
 #include "chip.h"
 
 /****************************************************************************
- * Public data
+ * Private Data
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
 static struct notifier_block g_fpu_panic_block;
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 INIT_STACK_ARRAY_DEFINE(g_cpu_idlestackalloc, CONFIG_NCPUS,
                         CONFIG_IDLETHREAD_STACKSIZE);
@@ -67,7 +71,7 @@ INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stack, CONFIG_NCPUS,
                         INTSTACK_SIZE);
 #endif
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -79,13 +83,17 @@ INIT_STACK_ARRAY_DEFINE(g_interrupt_fiq_stack, CONFIG_NCPUS,
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_FPU
-int arm64_panic_disable_fpu(struct notifier_block *block,
-                            unsigned long action, void *data)
+static int arm64_panic_disable_fpu(struct notifier_block *block,
+                                   unsigned long action, void *data)
 {
   arm64_fpu_disable();
   return 0;
 }
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_initialize
