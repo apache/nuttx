@@ -1,0 +1,463 @@
+/****************************************************************************
+ * boards/arm/stm32f1/shenzhou/include/board.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
+#include <nuttx/arch.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Clocking *****************************************************************/
+
+/* HSI - 8 MHz RC factory-trimmed
+ * LSI - 40 KHz RC (30-60KHz, uncalibrated)
+ * HSE - On-board crystal frequency is 25MHz
+ * LSE - 32.768 kHz
+ */
+
+#define STM32_BOARD_XTAL        25000000ul
+
+#define STM32_HSI_FREQUENCY     8000000ul
+#define STM32_LSI_FREQUENCY     40000
+#define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
+#define STM32_LSE_FREQUENCY     32768
+
+/* PLL output is 72MHz */
+
+#define STM32_PLL_PREDIV2       RCC_CFGR2_PREDIV2d5   /* 25MHz / 5 => 5MHz */
+#define STM32_PLL_PLL2MUL       RCC_CFGR2_PLL2MULx8   /* 5MHz * 8  => 40MHz */
+#define STM32_PLL_PREDIV1       RCC_CFGR2_PREDIV1d5   /* 40MHz / 5 => 8MHz */
+#define STM32_PLL_PLLMUL        RCC_CFGR_PLLMUL_CLKx9 /* 8MHz * 9  => 72Mhz */
+#define STM32_PLL_FREQUENCY     (72000000)
+
+/* SYCLLK and HCLK are the PLL frequency */
+
+#define STM32_SYSCLK_FREQUENCY  STM32_PLL_FREQUENCY
+#define STM32_HCLK_FREQUENCY    STM32_PLL_FREQUENCY
+
+/* APB2 clock (PCLK2) is HCLK (72MHz) */
+
+#define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK
+#define STM32_PCLK2_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_APB2_CLKIN        (STM32_PCLK2_FREQUENCY)   /* Timers 2-7, 12-14 */
+
+/* APB2 timers 1 and 8 will receive PCLK2. */
+
+#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
+
+/* APB1 clock (PCLK1) is HCLK/2 (36MHz) */
+
+#define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLKd2
+#define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY/2)
+
+/* APB1 timers 2-7 will be twice PCLK1 */
+
+#define STM32_APB1_TIM2_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM4_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM5_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN   (2*STM32_PCLK1_FREQUENCY)
+
+/* MCO output driven by PLL3.
+ * From above, we already have PLL3 input frequency as:
+ *
+ *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
+ */
+
+#if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
+#  define BOARD_CFGR_MCO_SOURCE  RCC_CFGR_PLL3CLK      /* Source: PLL3 */
+#  define STM32_PLL_PLL3MUL      RCC_CFGR2_PLL3MULx10  /* MCO 5MHz * 10 = 50MHz */
+#endif
+
+/* LED definitions **********************************************************/
+
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
+ * any way.  The following definitions are used to access individual LEDs.
+ */
+
+/* LED index values for use with board_userled() */
+
+#define BOARD_LED1          0
+#define BOARD_LED2          1
+#define BOARD_LED3          2
+#define BOARD_LED4          3
+#define BOARD_NLEDS         4
+
+/* LED bits for use with board_userled_all() */
+
+#define BOARD_LED1_BIT      (1 << BOARD_LED1)
+#define BOARD_LED2_BIT      (1 << BOARD_LED2)
+#define BOARD_LED3_BIT      (1 << BOARD_LED3)
+#define BOARD_LED4_BIT      (1 << BOARD_LED4)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on
+ * board the STM3240G-EVAL.
+ * The following definitions describe how NuttX controls the LEDs:
+ */
+
+#define LED_STARTED         0  /* LED1 */
+#define LED_HEAPALLOCATE    1  /* LED2 */
+#define LED_IRQSENABLED     2  /* LED1 + LED2 */
+#define LED_STACKCREATED    3  /* LED3 */
+#define LED_INIRQ           4  /* LED1 + LED3 */
+#define LED_SIGNAL          5  /* LED2 + LED3 */
+#define LED_ASSERTION       6  /* LED1 + LED2 + LED3 */
+#define LED_PANIC           7  /* N/C  + N/C  + N/C + LED4 */
+
+/* Button definitions *******************************************************/
+
+/* The STM3240G-EVAL supports three buttons: */
+
+#define BUTTON_KEY1         0  /* Name printed on board */
+#define BUTTON_KEY2         1
+#define BUTTON_KEY3         2
+#define BUTTON_KEY4         3
+#define NUM_BUTTONS         4
+
+#define BUTTON_USERKEY2     BUTTON_KEY1 /* Names in schematic */
+#define BUTTON_USERKEY      BUTTON_KEY2
+#define BUTTON_TAMPER       BUTTON_KEY3
+#define BUTTON_WAKEUP       BUTTON_KEY4
+
+#define BUTTON_KEY1_BIT     (1 << BUTTON_KEY1)
+#define BUTTON_KEY2_BIT     (1 << BUTTON_KEY2)
+#define BUTTON_KEY3_BIT     (1 << BUTTON_KEY3)
+#define BUTTON_KEY4_BIT     (1 << BUTTON_KEY4)
+
+#define BUTTON_USERKEY2_BIT BUTTON_KEY1_BIT
+#define BUTTON_USERKEY_BIT  BUTTON_KEY2_BIT
+#define BUTTON_TAMPER_BIT   BUTTON_KEY3_BIT
+#define BUTTON_WAKEUP_BIT   BUTTON_KEY4_BIT
+
+/* Relays */
+
+#define NUM_RELAYS          2
+
+/* Pin selections ***********************************************************/
+
+/* Ethernet
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 24 PA1  MII_RX_CLK     Ethernet PHY   NOTE:  Despite the MII labeling of
+ *         RMII_REF_CLK   Ethernet PHY   these signals, the DM916AEP is
+ * 25 PA2  MII_MDIO       Ethernet PHY   actually configured to work in RMII
+ * 48 PB11 MII_TX_EN      Ethernet PHY   mode.
+ * 51 PB12 MII_TXD0       Ethernet PHY
+ * 52 PB13 MII_TXD1       Ethernet PHY
+ * 16 PC1  MII_MDC        Ethernet PHY
+ * 34 PC5  MII_INT        Ethernet PHY
+ * 55 PD8  MII_RX_DV      Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
+ * 55 PD8  RMII_CRSDV     Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
+ * 56 PD9  MII_RXD0       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
+ * 57 PD10 MII_RXD1       Ethernet PHY.  Requires CONFIG_STM32_ETH_REMAP
+ *
+ * The board desdign can support a 50MHz external clock to drive the PHY
+ * (U9).  However, on my board, U9 is not present.
+ *
+ * 67 PA8  MCO            DM9161AEP
+ */
+
+#ifdef CONFIG_STM32_ETHMAC
+#  ifndef CONFIG_STM32_ETH_REMAP
+#    error "STM32 Ethernet requires CONFIG_STM32_ETH_REMAP"
+#  endif
+#  ifndef CONFIG_STM32_RMII
+#    error "STM32 Ethernet requires CONFIG_STM32_RMII"
+#  endif
+#  ifndef CONFIG_STM32_RMII_MCO
+#    error "STM32 Ethernet requires CONFIG_STM32_RMII_MCO"
+#  endif
+#endif
+
+/* USB
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 68 PA9  USB_VBUS       MINI-USB-AB. JP3
+ * 69 PA10 USB_ID         MINI-USB-AB. JP5
+ * 70 PA11 USB_DM         MINI-USB-AB
+ * 71 PA12 USB_DP         MINI-USB-AB
+ * 95 PB8  USB_PWR        Drives USB VBUS
+ */
+
+/* UARTS/USARTS
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 68 PA9  USART1_TX      MAX3232 to CN5.  Requires CONFIG_STM32_USART1_REMAP
+ * 69 PA10 USART1_RX      MAX3232 to CN5.  Requires CONFIG_STM32_USART1_REMAP
+ * 86 PD5  USART2_TX      MAX3232 to CN6.  Requires CONFIG_STM32_USART2_REMAP
+ * 87 PD6  USART2_RX      MAX3232 to CN6.  Requires CONFIG_STM32_USART2_REMAP
+ * 86 PD5  485_TX         Same as USART2_TX but goes to SP3485
+ * 87 PD6  485_RX         Save as USART2_RX but goes to SP3485 (see JP4)
+ */
+
+#if defined(CONFIG_STM32_USART1) && !defined(CONFIG_STM32_USART1_REMAP)
+#  error "CONFIG_STM32_USART1 requires CONFIG_STM32_USART1_REMAP"
+#endif
+
+#if defined(CONFIG_STM32_USART2) && !defined(CONFIG_STM32_USART2_REMAP)
+#  error "CONFIG_STM32_USART2 requires CONFIG_STM32_USART2_REMAP"
+#endif
+
+/* SPI
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 30 PA5  SPI1_SCK       To the SD card, SPI FLASH.
+ *                        Requires !CONFIG_STM32_SPI1_REMAP
+ * 31 PA6  SPI1_MISO      To the SD card, SPI FLASH.
+ *                        Requires !CONFIG_STM32_SPI1_REMAP
+ * 32 PA7  SPI1_MOSI      To the SD card, SPI FLASH.
+ *                        Requires !CONFIG_STM32_SPI1_REMAP
+ * 78 PC10 SPI3_SCK       To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
+ *                        Requires CONFIG_STM32_SPI3_REMAP.
+ * 79 PC11 SPI3_MISO      To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
+ *                        Requires CONFIG_STM32_SPI3_REMAP.
+ * 80 PC12 SPI3_MOSI      To TFT LCD (CN13),
+ *                        the NRF24L01 2.4G wireless module.
+ *                        Requires CONFIG_STM32_SPI3_REMAP.
+ */
+
+#if defined(CONFIG_STM32_SPI1) && defined(CONFIG_STM32_SPI1_REMAP)
+#  error "CONFIG_STM32_SPI1 must not have CONFIG_STM32_SPI1_REMAP"
+#endif
+
+#if defined(CONFIG_STM32_SPI3) && !defined(CONFIG_STM32_SPI3_REMAP)
+#  error "CONFIG_STM32_SPI3 requires CONFIG_STM32_SPI3_REMAP"
+#endif
+
+/* DAC
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 29 PA4  DAC_OUT1       To CON5(CN14)
+ * 30 PA5  DAC_OUT2       To CON5(CN14). JP10
+ */
+
+/* ADC
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 35 PB0  ADC_IN1        GPIO_ADC12_IN8. To CON5(CN14)
+ * 36 PB1  ADC_IN2        GPIO_ADC12_IN9. To CON5(CN14)
+ * 15 PC0  POTENTIO_METER GPIO_ADC12_IN10
+ */
+
+/* CAN
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 91 PB5  CAN2_RX        Requires CONFIG_STM32_CAN2_REMAP.
+ * 92 PB6  CAN2_TX        Requires CONFIG_STM32_CAN2_REMAP.  See also JP11
+ * 81 PD0  CAN1_RX        Requires CONFIG_STM32_CAN1_REMAP2.
+ * 82 PD1  CAN1_TX        Requires CONFIG_STM32_CAN1_REMAP2.
+ */
+
+#if defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN1_REMAP2)
+#  error "CONFIG_STM32_CAN1 requires CONFIG_STM32_CAN1_REMAP2"
+#endif
+
+#if defined(CONFIG_STM32_CAN2) && !defined(CONFIG_STM32_CAN2_REMAP)
+#  error "CONFIG_STM32_CAN2 requires CONFIG_STM32_CAN2_REMAP"
+#endif
+
+/* I2C
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 92 PB6  I2C1_SCL       Requires !CONFIG_STM32_I2C1_REMAP
+ * 93 PB7  I2C1_SDA
+ */
+
+#if defined(CONFIG_STM32_I2C1) && defined(CONFIG_STM32_I2C1_REMAP)
+#  error "CONFIG_STM32_I2C1 must not have CONFIG_STM32_I2C1_REMAP"
+#endif
+
+/* I2S
+ *
+ * -- ---- -------------- ---------------------------------------------------
+ * PN NAME SIGNAL         NOTES
+ * -- ---- -------------- ---------------------------------------------------
+ * 51 PB12 I2S_WS         GPIO_I2S2_WS. Audio DAC
+ * 52 PB13 I2S_CK         GPIO_I2S2_CK. Audio DAC
+ * 54 PB15 I2S_DIN        ??? Audio DAC data in.
+ * 63 PC6  I2S_MCK        GPIO_I2S2_MCK. Audio DAC. Active low: Pulled high
+ */
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name:  stm32_lcdclear
+ *
+ * Description:
+ *   This is a non-standard LCD interface just for the Shenzhou board.
+ *   Because of the various rotations, clearing the display in the normal way
+ *   by writing a sequences of runs that covers the entire display can be
+ *   very slow.  Here the display is cleared by simply setting all GRAM
+ *   memory to the specified color.
+ *
+ ****************************************************************************/
+
+void stm32_lcdclear(uint16_t color);
+
+/****************************************************************************
+ * Relay control functions
+ *
+ * Description:
+ *   Non-standard functions for relay control from the Shenzhou board.
+ *
+ *   NOTE:  These must match the prototypes in include/nuttx/arch.h
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_RELAYS
+void up_relaysinit(void);
+void relays_setstat(int relays, bool stat);
+bool relays_getstat(int relays);
+void relays_setstats(uint32_t relays_stat);
+uint32_t relays_getstats(void);
+void relays_onoff(int relays, uint32_t mdelay);
+void relays_onoffs(uint32_t relays_stat, uint32_t mdelay);
+void relays_resetmode(int relays);
+void relays_powermode(int relays);
+void relays_resetmodes(uint32_t relays_stat);
+void relays_powermodes(uint32_t relays_stat);
+#endif
+
+/****************************************************************************
+ * Chip ID functions
+ *
+ * Description:
+ *   Non-standard functions to obtain chip ID information.
+ *
+ ****************************************************************************/
+
+const char *stm32_getchipid(void);
+const char *stm32_getchipid_string(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+
+/* Alternate function pin selections (auto-aliased for new pinmap) */
+
+/* USART2 */
+
+#define GPIO_USART2_TX     GPIO_ADJUST_MODE(GPIO_USART2_TX_0, GPIO_MODE_50MHz)
+#define GPIO_USART2_RX     GPIO_USART2_RX_0
+#define GPIO_USART2_CTS    GPIO_USART2_CTS_0
+#define GPIO_USART2_RTS    GPIO_ADJUST_MODE(GPIO_USART2_RTS_0, GPIO_MODE_50MHz)
+#define GPIO_USART2_CK     GPIO_ADJUST_MODE(GPIO_USART2_CK_0, GPIO_MODE_50MHz)
+
+/* SPI1 */
+
+#define GPIO_SPI1_NSS      GPIO_ADJUST_MODE(GPIO_SPI1_NSS_0, GPIO_MODE_50MHz)
+#define GPIO_SPI1_SCK      GPIO_ADJUST_MODE(GPIO_SPI1_SCK_0, GPIO_MODE_50MHz)
+#define GPIO_SPI1_MISO     GPIO_ADJUST_MODE(GPIO_SPI1_MISO_0, GPIO_MODE_50MHz)
+#define GPIO_SPI1_MOSI     GPIO_ADJUST_MODE(GPIO_SPI1_MOSI_0, GPIO_MODE_50MHz)
+
+/* SPI3 */
+
+#define GPIO_SPI3_NSS      GPIO_ADJUST_MODE(GPIO_SPI3_NSS_0, GPIO_MODE_50MHz)
+#define GPIO_SPI3_SCK      GPIO_ADJUST_MODE(GPIO_SPI3_SCK_0, GPIO_MODE_50MHz)
+#define GPIO_SPI3_MISO     GPIO_ADJUST_MODE(GPIO_SPI3_MISO_0, GPIO_MODE_50MHz)
+#define GPIO_SPI3_MOSI     GPIO_ADJUST_MODE(GPIO_SPI3_MOSI_0, GPIO_MODE_50MHz)
+
+/* MCO */
+
+#define GPIO_MCO           GPIO_ADJUST_MODE(GPIO_MCO_0, GPIO_MODE_50MHz)
+
+/* Ethernet (MII/RMII) */
+
+#define GPIO_ETH_MDC          GPIO_ADJUST_MODE(GPIO_ETH_MDC_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MDIO         GPIO_ADJUST_MODE(GPIO_ETH_MDIO_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MII_COL      GPIO_ETH_MII_COL_0
+#define GPIO_ETH_MII_CRS      GPIO_ETH_MII_CRS_0
+#define GPIO_ETH_MII_RX_CLK   GPIO_ETH_MII_RX_CLK_0
+#define GPIO_ETH_MII_RXD0     GPIO_ETH_MII_RXD0_0
+#define GPIO_ETH_MII_RXD1     GPIO_ETH_MII_RXD1_0
+#define GPIO_ETH_MII_RXD2     GPIO_ETH_MII_RXD2_0
+#define GPIO_ETH_MII_RXD3     GPIO_ETH_MII_RXD3_0
+#define GPIO_ETH_MII_RX_DV    GPIO_ETH_MII_RX_DV_0
+#define GPIO_ETH_MII_RX_ER    GPIO_ETH_MII_RX_ER_0
+#define GPIO_ETH_MII_TX_CLK   GPIO_ETH_MII_TX_CLK_0
+#define GPIO_ETH_MII_TXD0     GPIO_ADJUST_MODE(GPIO_ETH_MII_TXD0_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MII_TXD1     GPIO_ADJUST_MODE(GPIO_ETH_MII_TXD1_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MII_TXD2     GPIO_ADJUST_MODE(GPIO_ETH_MII_TXD2_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MII_TXD3     GPIO_ADJUST_MODE(GPIO_ETH_MII_TXD3_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_MII_TX_EN    GPIO_ADJUST_MODE(GPIO_ETH_MII_TX_EN_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_RMII_CRS_DV  GPIO_ETH_RMII_CRS_DV_0
+#define GPIO_ETH_RMII_REF_CLK GPIO_ETH_RMII_REF_CLK_0
+#define GPIO_ETH_RMII_RXD0    GPIO_ETH_RMII_RXD0_0
+#define GPIO_ETH_RMII_RXD1    GPIO_ETH_RMII_RXD1_0
+#define GPIO_ETH_RMII_TXD0    GPIO_ADJUST_MODE(GPIO_ETH_RMII_TXD0_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_RMII_TXD1    GPIO_ADJUST_MODE(GPIO_ETH_RMII_TXD1_0, GPIO_MODE_50MHz)
+#define GPIO_ETH_RMII_TX_EN   GPIO_ADJUST_MODE(GPIO_ETH_RMII_TX_EN_0, GPIO_MODE_50MHz)
+
+#endif /* __BOARDS_ARM_STM32_SHENZHOU_INCLUDE_BOARD_H */
