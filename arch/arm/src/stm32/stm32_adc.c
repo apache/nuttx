@@ -308,7 +308,7 @@
 
 /* ADC resolution. Not supported for basic STM32 ADC IPv1 */
 
-#ifndef CONFIG_STM32_HAVE_IP_ADC_V1_BASIC
+#ifndef CONFIG_STM32_HAVE_IP_ADC_M3M4_V1_BASIC
 #  define HAVE_ADC_RESOLUTION
 #else
 #  undef HAVE_ADC_RESOLUTION
@@ -316,7 +316,7 @@
 
 /* ADC have common registers for all cores except basic ADC IPv1 (F1, F37x) */
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V1_BASIC
+#ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V1_BASIC
 #  undef HAVE_ADC_CMN_REGS
 #else
 #  define HAVE_ADC_CMN_REGS
@@ -333,7 +333,7 @@
 
 /* ADC DMA configuration bit support */
 
-#ifndef CONFIG_STM32_HAVE_IP_ADC_V1_BASIC
+#ifndef CONFIG_STM32_HAVE_IP_ADC_M3M4_V1_BASIC
 #  define ADC_HAVE_DMACFG 1
 #else
 #  undef ADC_HAVE_DMACFG
@@ -341,7 +341,7 @@
 
 /* ADC scan mode support - only for ADCv1 */
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V1
+#ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V1
 #  define ADC_HAVE_SCAN 1
 #  ifndef CONFIG_STM32_ADC1_SCAN
 #    define CONFIG_STM32_ADC1_SCAN 0

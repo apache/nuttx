@@ -1,0 +1,107 @@
+#
+# STM32 common SYSTEM options.
+#
+
+config STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	depends on STM32_COMMON_LEGACY || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+choice
+	prompt "JTAG Configuration"
+	default STM32_JTAG_DISABLE
+	---help---
+		JTAG Enable settings (by default JTAG-DP and SW-DP are disabled)
+
+config STM32_JTAG_DISABLE
+	bool "Disable all JTAG clocking"
+
+config STM32_JTAG_FULL_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP)"
+
+config STM32_JTAG_NOJNTRST_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP) but without JNTRST"
+
+config STM32_JTAG_SW_ENABLE
+	bool "Set JTAG-DP disabled and SW-DP enabled"
+
+endchoice
+
+config STM32_DFU
+	bool "DFU bootloader"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F0_L0_G0_C0) && !(STM32F1_VALUELINE || STM32F0_VALUELINE)
+	---help---
+		Configure and position code for use with the STMicro DFU bootloader.  Do
+		not select this option if you will load code using JTAG/SWM.
+
+config STM32_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	depends on SCHED_TICKLESS
+	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	default 2
+	range 1 14 if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
+	range 1 17 if STM32_COMMON_H7_H5 || ARCH_CHIP_STM32WB
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the timer needed by the OS.
+
+config STM32_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	depends on SCHED_TICKLESS
+	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	default 1
+	range 1 4
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+config STM32_NOEXT_VECTORS
+	bool "Disable the ARMv7-M EXT vectors"
+	default n
+	---help---
+		Sometimes you may not need any Vector support beyond SysTick
+		and wish to save memory. This applies only to ARMv7-M architectures.
+
+# Clock options
+
+choice
+	prompt "SysTick clock source"
+	depends on STM32_COMMON_F0_L0_G0_C0
+	default STM32_SYSTICK_CORECLK
+
+config STM32_SYSTICK_CORECLK
+	bool "Cortex-M0 core clock"
+
+config STM32_SYSTICK_CORECLK_DIV16
+	bool "Cortex-M0 core clock divided by 16"
+
+endchoice
+
+config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+# Power options
+
+config STM32_FORCEPOWER
+	bool "Force power"
+	default n
+	---help---
+		Timer and I2C devices may need to the following to force power to be applied
+		unconditionally at power up.  (Otherwise, the device is powered when it is
+		initialized).
+
+# Debug MCU options
+
+config STM32_DBGMCU_HAVE_TIM_FZ_IN_CR
+	bool
+
+config STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ
+	bool

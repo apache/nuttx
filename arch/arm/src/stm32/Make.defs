@@ -59,7 +59,7 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c stm32_mpuinit.c
 endif
 
-ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V1),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1),y)
 ifeq ($(CONFIG_STM32_I2C_ALT),y)
 CHIP_CSRCS += stm32_i2c_alt.c
 else ifeq ($(CONFIG_STM32_STM32F4XXX),y)
@@ -67,7 +67,7 @@ CHIP_CSRCS += stm32f40xxx_i2c.c
 else
 CHIP_CSRCS += stm32_i2c.c
 endif
-else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
+else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2),y)
 CHIP_CSRCS += stm32_i2c_v2.c
 ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
 CHIP_CSRCS += stm32_i2cslave_v2.c

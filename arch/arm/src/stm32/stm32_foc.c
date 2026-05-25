@@ -106,14 +106,14 @@
 
 /* This is not for ADC IPv2 basic */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V2) && defined(HAVE_BASIC_ADC)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2) && defined(HAVE_BASIC_ADC)
 #  error Not supported ADC IP core
 #endif
 
 /* Multi instances support tested only on IP_ADC_V1 */
 
 #if CONFIG_MOTOR_FOC_INST > 1
-#  if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
+#  if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2)
 #    error Not tested yet
 #  endif
 #endif
@@ -141,10 +141,10 @@
 
 /* Debug register for PWM timers */
 
-#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2) || \
-    defined(CONFIG_STM32_HAVE_IP_DBGMCU_V3)
+#if defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) || \
+    defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)
 #  define FOC_PWM_FZ_REG    (STM32_DBGMCU_APB2_FZ)
-#elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1)
 #  define FOC_PWM_FZ_REG    (STM32_DBGMCU_CR)
 #endif
 
@@ -154,10 +154,10 @@
 #  define FOC0_PWM           (1)
 #  define FOC0_PWM_NCHANNELS (PWM_TIM1_NCHANNELS)
 #  define FOC0_PWM_BASE      (STM32_TIM1_BASE)
-#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2) ||  \
-      defined(CONFIG_STM32_HAVE_IP_DBGMCU_V3)
+#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) ||  \
+      defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)
 #    define FOC0_PWM_FZ_BIT    (DBGMCU_APB2_TIM1STOP)
-#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1)
 #    define FOC0_PWM_FZ_BIT    (DBGMCU_CR_TIM1STOP)
 #  endif
 #  if CONFIG_STM32_TIM1_MODE != 2
@@ -171,10 +171,10 @@
 #  define FOC1_PWM           (8)
 #  define FOC1_PWM_NCHANNELS (PWM_TIM8_NCHANNELS)
 #  define FOC1_PWM_BASE      (STM32_TIM8_BASE)
-#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_V2) ||  \
-      defined(CONFIG_STM32_HAVE_IP_DBGMCU_V3)
+#  if defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) ||  \
+      defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)
 #    define FOC1_PWM_FZ_BIT    (DBGMCU_APB2_TIM8STOP)
-#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_V1)
+#  elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1)
 #    define FOC1_PWM_FZ_BIT    (DBGMCU_CR_TIM8STOP)
 #  endif
 #  if CONFIG_STM32_TIM8_MODE != 2
@@ -248,14 +248,14 @@
  *   TIMx CCR4 = (ARR - trigger_offset)
  */
 
-#  if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
+#  if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2)
 #    ifdef CONFIG_STM32_FOC_USE_TIM1
 #      define ADC_JEXTSEL_T1CC4 (ADC12_JSQR_JEXTSEL_T1CC4)
 #    endif
 #    ifdef CONFIG_STM32_FOC_USE_TIM8
 #      define ADC_JEXTSEL_T8CC4 (ADC12_JSQR_JEXTSEL_T8CC4)
 #    endif
-#  elif defined(CONFIG_STM32_HAVE_IP_ADC_V1)
+#  elif defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1)
 #    ifdef CONFIG_STM32_FOC_USE_TIM1
 #      define ADC_JEXTSEL_T1CC4  (ADC_CR2_JEXTSEL_T1CC4)
 #    endif
@@ -314,14 +314,14 @@
  *   TIMx TRGO = (ARR)
  */
 
-#  if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
+#  if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2)
 #    ifdef CONFIG_STM32_FOC_USE_TIM1
 #      define ADC_JEXTSEL_T1TRGO (ADC12_JSQR_JEXTSEL_T1TRGO)
 #    endif
 #    ifdef CONFIG_STM32_FOC_USE_TIM8
 #      define ADC_JEXTSEL_T8TRGO (ADC12_JSQR_JEXTSEL_T8TRGO)
 #    endif
-#  elif defined(CONFIG_STM32_HAVE_IP_ADC_V1)
+#  elif defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1)
 #    ifdef CONFIG_STM32_FOC_USE_TIM1
 #      define ADC_JEXTSEL_T1TRGO  (ADC_CR2_JEXTSEL_T1TRGO)
 #    endif
@@ -470,11 +470,11 @@
 
 /* Generalize ADC interrupt flags */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V2)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2)
 #  define FOC_ADC_ISR_FOC ADC_ISR_JEOS
 #  define FOC_ADC_IER_FOC ADC_IER_JEOS
 #  define FOC_ADC_ISR_OVR ADC_INT_OVR
-#elif defined(CONFIG_STM32_HAVE_IP_ADC_V1)
+#elif defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1)
 #  define FOC_ADC_ISR_FOC ADC_ISR_JEOC
 #  define FOC_ADC_IER_FOC ADC_IER_JEOC
 #  define FOC_ADC_ISR_OVR ADC_SR_OVR
@@ -515,7 +515,7 @@
 
 /* Common for ADCv1 */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && !defined(HAVE_BASIC_ADC)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1) && !defined(HAVE_BASIC_ADC)
 #  define FOC_ADC_HAVE_CMN (1)
 #  ifdef CONFIG_STM32_FOC_USE_ADC1
 #    define FOC_ADC1_CMN (&g_stm32_foc_adccmn123)
@@ -530,7 +530,7 @@
 
 /* Common for ADCv1 basic */
 
-#if defined(CONFIG_STM32_HAVE_IP_ADC_V1) && defined(HAVE_BASIC_ADC)
+#if defined(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1) && defined(HAVE_BASIC_ADC)
 #  undef FOC_ADC_HAVE_CMN
 #  ifdef CONFIG_STM32_FOC_USE_ADC1
 #    define FOC_ADC1_CMN (0)
@@ -545,7 +545,7 @@
 
 /* Common for ADCv2 */
 
-#ifdef CONFIG_STM32_HAVE_IP_ADC_V2
+#ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V2
 #  define FOC_ADC_HAVE_CMN (1)
 #  ifdef CONFIG_STM32_FOC_USE_ADC1
 #    define FOC_ADC1_CMN (&g_stm32_foc_adccmn12)
@@ -895,7 +895,7 @@ static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
  ****************************************************************************/
 
 #ifdef FOC_ADC_HAVE_CMN
-#  ifdef CONFIG_STM32_HAVE_IP_ADC_V1
+#  ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V1
 /* Common for ADC123 */
 
 static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
@@ -903,9 +903,9 @@ static struct stm32_foc_adccmn_s g_stm32_foc_adccmn123 =
   .cntr = 0,
   .lock = NXMUTEX_INITIALIZER,
 };
-#  endif /* CONFIG_STM32_HAVE_IP_ADC_V1 */
+#  endif /* CONFIG_STM32_HAVE_IP_ADC_M3M4_V1 */
 
-#  ifdef CONFIG_STM32_HAVE_IP_ADC_V2
+#  ifdef CONFIG_STM32_HAVE_IP_ADC_M3M4_V2
 #    if defined(CONFIG_STM32_HAVE_ADC1) || defined(CONFIG_STM32_HAVE_ADC2)
 /* Common for ADC12 */
 
@@ -924,7 +924,7 @@ static struct stm32_foc_adccmn_s g_stm32_foc_adccmn34 =
   .lock = NXMUTEX_INITIALIZER,
 };
 #    endif  /* CONFIG_STM32_HAVE_ADC3 || CONFIG_STM32_HAVE_ADC4 */
-#  endif    /* CONFIG_STM32_HAVE_IP_ADC_V2 */
+#  endif    /* CONFIG_STM32_HAVE_IP_ADC_M3M4_V2 */
 #endif  /* FOC_ADC_HAVE_CMN */
 
 /* STM32 specific FOC data */

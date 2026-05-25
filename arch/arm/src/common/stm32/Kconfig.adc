@@ -1,0 +1,964 @@
+#
+# STM32 ADC configuration options.
+#
+
+# TODO: The options below are a special case for the legacy family-local
+# stm32l4_adc.c driver (selected by STM32_HAVE_ADC_L4).  They must be migrated
+# to the common ADC interface used by stm32_adc_m3m4_v1v2.c (STM32_ADCx_EXTSEL /
+# STM32_ADCx_JEXTSEL / STM32_ADCx_INJECTED_CHAN) and removed from here.
+
+config STM32_ADC1_HAVE_TIMER_FREQ
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_TIM && STM32_ADC1_HAVE_TIMER
+	default y if (STM32_HAVE_IP_ADC_M0_V1 || STM32_COMMON_F7_H7 || STM32_COMMON_L4_H5_L5_U5) && STM32_ADC1_HAVE_TIMER
+
+config STM32_ADC1_HAVE_TIMTRIG
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_TIM && STM32_ADC1_HAVE_TIMER
+	default y if (STM32_HAVE_IP_ADC_M0_V1 || STM32_COMMON_F7_H7) && STM32_ADC1_HAVE_TIMER
+	default y if (ARCH_CHIP_STM32H5 || STM32_COMMON_L5_U5) && STM32_ADC1_HAVE_TIMER
+
+config STM32_ADC2_HAVE_TIMER_FREQ
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_TIM && STM32_ADC2_HAVE_TIMER
+	default y if (STM32_COMMON_F7_H7 || STM32_COMMON_L4_H5_L5_U5) && STM32_ADC2_HAVE_TIMER
+
+config STM32_ADC2_HAVE_TIMTRIG
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_TIM && STM32_ADC2_HAVE_TIMER
+	default y if (STM32_COMMON_F7_H7_H5) && STM32_ADC2_HAVE_TIMER
+	default y if STM32_COMMON_L5_U5 && STM32_ADC2_HAVE_TIMER
+
+config STM32_ADC3_HAVE_TIMTRIG
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_TIM && STM32_ADC3_HAVE_TIMER
+	default y if (STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4) && STM32_ADC3_HAVE_TIMER
+	default y if STM32_COMMON_L5_U5 && STM32_ADC3_HAVE_TIMER
+
+config STM32_ADC1_HAVE_DMA
+	bool
+
+config STM32_ADC2_HAVE_DMA
+	bool
+
+config STM32_ADC3_HAVE_DMA
+	bool
+
+config STM32_ADC4_HAVE_DMA
+	bool
+
+config STM32_ADC5_HAVE_DMA
+	bool
+
+config STM32_ADC4_HAVE_TIMER
+	bool
+
+config STM32_ADC5_HAVE_TIMER
+	bool
+
+config STM32_ADC1_HAVE_OUTPUT_DFSDM
+	bool
+
+config STM32_ADC2_HAVE_OUTPUT_DFSDM
+	bool
+
+config STM32_ADC3_HAVE_OUTPUT_DFSDM
+	bool
+
+config STM32_ADC1_HAVE_TIMER
+	bool
+
+config STM32_ADC2_HAVE_TIMER
+	bool
+
+config STM32_ADC3_HAVE_TIMER
+	bool
+
+menu "STM32L4 ADC Configuration"
+	depends on STM32_HAVE_ADC_L4 && STM32_ADC
+
+config STM32_ADC_SMPR
+	int "ADC sample time"
+	default 0
+	range 0 7
+	---help---
+		ADC sample time
+		  0 -   2.5 ADC clock cycles
+			1 -   6.5 ADC clock cycles
+			2 -  12.5 ADC clock cycles
+			3 -  24.5 ADC clock cycles
+			4 -  47.5 ADC clock cycles
+			5 -  92.5 ADC clock cycles
+			6 - 247.5 ADC clock cycles
+			7 - 640.5 ADC clock cycles
+
+config STM32_ADC1_INJ_CHAN
+	int "ADC1 configured injected channels"
+	depends on STM32_ADC1
+	range 0 4
+	default 0
+	---help---
+		Number of configured ADC1 injected channels.
+
+config STM32_ADC2_INJ_CHAN
+	int "ADC2 configured injected channels"
+	depends on STM32_ADC2
+	range 0 4
+	default 0
+	---help---
+		Number of configured ADC2 injected channels.
+
+config STM32_ADC3_INJ_CHAN
+	int "ADC3 configured injected channels"
+	depends on STM32_ADC3
+	range 0 4
+	default 0
+	---help---
+		Number of configured ADC3 injected channels.
+
+menu "STM32L4 ADCx triggering Configuration"
+
+config STM32_ADC1_EXTTRIG
+	int "ADC1 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC1
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC1_EXTTRIG > 0
+
+config STM32_ADC_L4_ADC1_EXTSEL
+	int "ADC1 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32_ADC1
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for more information.
+
+endif
+
+config STM32_ADC2_EXTTRIG
+	int "ADC2 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC2
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC2_EXTTRIG > 0
+
+config STM32_ADC_L4_ADC2_EXTSEL
+	int "ADC2 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32_ADC2
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for more information.
+
+endif
+
+config STM32_ADC3_EXTTRIG
+	int "ADC3 External trigger configuration for regular channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC3
+	---help---
+		Values 0: Hardware trigger detection disabled
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC3_EXTTRIG > 0
+
+config STM32_ADC_L4_ADC3_EXTSEL
+	int "ADC3 External trigger selection for regular group"
+	default 0
+	range 0 15
+	depends on STM32_ADC3
+	---help---
+		 Select the external event used to trigger the start of conversion of
+		 a regular group. See Reference Manual for more information.
+
+endif
+
+if STM32_ADC1_INJ_CHAN > 0
+
+config STM32_ADC1_JEXTTRIG
+	int "ADC1 External Trigger Enable and Polarity Selection for injected channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC1
+	---help---
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC1_JEXTTRIG > 0
+
+config STM32_ADC_L4_ADC1_JEXTSEL
+	int "ADC1 External Trigger Selection for injected group"
+	default 0
+	range 0 15
+	depends on STM32_ADC1
+	---help---
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
+
+endif
+
+if STM32_ADC2_INJ_CHAN > 0
+
+config STM32_ADC2_JEXTTRIG
+	int "ADC2 External Trigger Enable and Polarity Selection for injected channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC2
+	---help---
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC2_JEXTTRIG > 0
+
+config STM32_ADC_L4_ADC2_JEXTSEL
+	int "ADC2 External Trigger Selection for injected group"
+	default 0
+	range 0 5
+	depends on STM32_ADC2
+	---help---
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
+
+endif
+
+if STM32_ADC3_INJ_CHAN > 0
+
+config STM32_ADC3_JEXTTRIG
+	int "ADC3 External Trigger Enable and Polarity Selection for injected channels"
+	default 0
+	range 0 4
+	depends on STM32_ADC3
+	---help---
+		Values 0: Hardware and software trigger detection disabled, JQDIS=0
+		          (queue enabled)
+		       0: Hardware trigger detection disabled, JQDIS=1 (queue disabled)
+		       1: Hardware trigger detection on the rising edge
+		       2: Hardware trigger detection on the falling edge
+		       3: Hardware trigger detection on the rising and falling edges
+
+if STM32_ADC3_JEXTTRIG > 0
+
+config STM32_ADC_L4_ADC3_JEXTSEL
+	int "ADC3 External Trigger Selection for injected group"
+	default 0
+	range 0 5
+	depends on STM32_ADC3
+	---help---
+		Select the external event used to trigger the start of conversion of an
+		injected group
+
+endif
+
+endif
+
+endmenu #STM32L4 ADCx triggering Configuration
+
+endmenu
+
+menu "ADC Configuration"
+	depends on STM32_HAVE_ADC_H5 && STM32_ADC
+
+config STM32_ADC1_OVERSAMPLE
+	bool "Enable ADC1 hardware oversampling support"
+	depends on STM32_ADC1
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+		Only STM32G0 and STM32L0 series include this hardware block.
+
+if STM32_ADC1_OVERSAMPLE
+
+config STM32_ADC1_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, oversampling will only occur when a trigger event occurs.
+		If not set, oversampling occurs continuously (TOVS=0).
+
+config STM32_ADC1_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2×
+		1 -> 4×
+		2 -> 8×
+		...
+		7 -> 256×
+
+config STM32_ADC1_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		Max of 8-bits.
+
+endif # STM32_ADC1_OVERSAMPLE
+
+config STM32_ADC1_WDG1
+	bool "Enable STM32H5 ADC1 Watchdog 1"
+	depends on STM32_ADC1
+	default n
+	---help---
+		Enable STM32H5 ADC1 Watchdog 1.
+
+config STM32_ADC1_WDG1_FLT
+	int "Set ADC1 Watchdog 1 Filter"
+	depends on STM32_ADC1_WDG1
+	default 0
+	range 0 7
+	---help---
+		N+1 watchdog events generates an interrupt.
+		Default: 0.
+
+config STM32_ADC1_WDG1_LOWTHRESH
+	int "Set ADC1 Watchdog 1 Low Threshold"
+	depends on STM32_ADC1_WDG1
+	default 0
+	range 0 4095
+	---help---
+		Set the ADC1 Watchdog 1 low threshold value.
+		Default: 0.
+
+config STM32_ADC1_WDG1_HIGHTHRESH
+	int "Set ADC1 Watchdog 1 High Threshold"
+	depends on STM32_ADC1_WDG1
+	default 4095
+	range 0 4095
+	---help---
+		Set the ADC1 Watchdog 1 high threshold value.
+		Default: 4095.
+
+config STM32_ADC1_WDG1_SGL
+	bool "Enable STM32H5 ADC1 Watchdog 1 on a single channel"
+	depends on STM32_ADC1_WDG1
+	default n
+	---help---
+		This option determines if ADC1 Watchdog 1 is enabled on all
+		channels or just a single channel.
+
+config STM32_ADC1_WDG1_CHAN
+	int "STM32H5 ADC1 Watchdog 1 Channel Selection"
+	depends on STM32_ADC1_WDG1_SGL
+	default 0
+	range 0 19
+	---help---
+		Select the channel to enable for ADC1 Watchdog 1.
+
+config STM32_ADC2_OVERSAMPLE
+	bool "Enable ADC2 hardware oversampling support"
+	depends on STM32_ADC2
+	default n
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+		Only STM32G0 and STM32L0 series include this hardware block.
+
+if STM32_ADC2_OVERSAMPLE
+
+config STM32_ADC2_TROVS
+	bool "Enable triggered oversampling (CFGR2.TROVS)"
+	default n
+	---help---
+		If set, oversampling will only occur when a trigger event occurs.
+		If not set, oversampling occurs continuously (TOVS=0).
+
+config STM32_ADC2_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2×
+		1 -> 4×
+		2 -> 8×
+		...
+		7 -> 256×
+
+config STM32_ADC2_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		Max of 8-bits.
+
+endif # STM32_ADC2_OVERSAMPLE
+
+config STM32_ADC2_WDG1
+	bool "Enable STM32H5 ADC2 Watchdog 1"
+	depends on STM32_ADC2
+	default n
+	---help---
+		Enable STM32H5 ADC2 Watchdog 1.
+
+config STM32_ADC2_WDG1_FLT
+	int "Set ADC2 Watchdog 1 Filter"
+	depends on STM32_ADC2_WDG1
+	default 0
+	range 0 7
+	---help---
+		N+1 watchdog events generates an interrupt.
+		Default: 0.
+
+config STM32_ADC2_WDG1_LOWTHRESH
+	int "Set ADC2 Watchdog 1 Low Threshold"
+	depends on STM32_ADC2_WDG1
+	default 0
+	range 0 4095
+	---help---
+		Set the ADC2 Watchdog 1 low threshold value.
+		Default: 0.
+
+config STM32_ADC2_WDG1_HIGHTHRESH
+	int "Set ADC2 Watchdog 1 High Threshold"
+	depends on STM32_ADC2_WDG1
+	default 4095
+	range 0 4095
+	---help---
+		Set the ADC2 Watchdog 1 high threshold value.
+		Default: 4095.
+
+config STM32_ADC2_WDG1_SGL
+	bool "Enable STM32H5 ADC2 Watchdog 1 on a single channel"
+	depends on STM32_ADC2_WDG1
+	default n
+	---help---
+		This option determines if ADC2 Watchdog 1 is enabled on all
+		channels or just a single channel.
+
+config STM32_ADC2_WDG1_CHAN
+	int "STM32H5 ADC2 Watchdog 1 Channel Selection"
+	depends on STM32_ADC2_WDG1_SGL
+	default 0
+	range 0 19
+	---help---
+		Select the channel to enable for ADC2 Watchdog 1.
+
+endmenu # ADC Configuration
+
+config STM32_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	depends on STM32_ADC1_HAVE_TIMER_FREQ
+	default 100
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config STM32_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	depends on STM32_ADC1_HAVE_TIMTRIG
+	default 0
+	range 0 5 if STM32_HAVE_ADC_TIMTRIG_TRGO2
+	range 0 4 if STM32_HAVE_ADC_TIMTRIG_TRGO
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+
+config STM32_ADC2_SAMPLE_FREQUENCY
+	int "ADC2 Sampling Frequency"
+	depends on STM32_ADC2_HAVE_TIMER_FREQ
+	default 100
+	---help---
+		ADC2 sampling frequency.  Default:  100Hz
+
+config STM32_ADC2_TIMTRIG
+	int "ADC2 Timer Trigger"
+	depends on STM32_ADC2_HAVE_TIMTRIG
+	default 0
+	range 0 5 if STM32_HAVE_ADC_TIMTRIG_TRGO2
+	range 0 4 if STM32_HAVE_ADC_TIMTRIG_TRGO
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+
+config STM32_ADC3_SAMPLE_FREQUENCY
+	int "ADC3 Sampling Frequency"
+	depends on STM32_ADC3_HAVE_TIMTRIG
+	default 100
+	---help---
+		ADC3 sampling frequency.  Default:  100Hz
+
+config STM32_ADC3_TIMTRIG
+	int "ADC3 Timer Trigger"
+	depends on STM32_ADC3_HAVE_TIMTRIG && !ARCH_CHIP_STM32L4
+	default 0
+	range 0 5 if STM32_HAVE_ADC_TIMTRIG_TRGO2
+	range 0 4 if STM32_HAVE_ADC_TIMTRIG_TRGO
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO 5:TRGO2
+
+config STM32_ADC1_RESOLUTION
+	int "ADC1 resolution"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC1 && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5) && STM32_ADC && STM32_ADC1
+	default 0
+	range 0 3
+	---help---
+		ADC1 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC2_RESOLUTION
+	int "ADC2 resolution"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC2 && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5) && STM32_ADC && STM32_ADC2
+	default 0
+	range 0 3
+	---help---
+		ADC2 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC3_RESOLUTION
+	int "ADC3 resolution"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC3 && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_ADC && STM32_ADC3
+	default 0
+	range 0 3
+	---help---
+		ADC3 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC_MAX_SAMPLES
+	int "The maximum number of channels that can be sampled"
+	depends on STM32_ADC
+	default 1 if STM32_HAVE_IP_ADC_M0_V1 && !STM32_ADC1_DMA
+	default 16
+	---help---
+		The maximum number of samples which can be handled without
+		overrun depends on various factors. This is the user's
+		responsibility to correctly select this value.
+		Since the interface to update the sampling time is available
+		for all supported devices, the user can change the default
+		values in the board initialization logic and avoid ADC overrun.
+
+config STM32_ADC_NO_STARTUP_CONV
+	bool "Do not start conversion when opening ADC device"
+	depends on STM32_ADC
+	---help---
+		Do not start conversion when opening ADC device.
+
+config STM32_ADC_NOIRQ
+	bool "Do not use default ADC interrupts"
+	depends on STM32_ADC
+	---help---
+		Do not use default ADC interrupts handlers.
+
+config STM32_ADC_LL_OPS
+	bool "ADC low-level operations"
+	depends on STM32_ADC
+	---help---
+		Enable low-level ADC ops.
+
+config STM32_ADC_CHANGE_SAMPLETIME
+	bool "ADC sample time configuration"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7) && STM32_ADC_LL_OPS
+	---help---
+		Enable ADC sample time configuration (SMPRx registers).
+
+config STM32_ADC_OVERSAMPLE
+	bool "Enable ADC hardware oversampling support"
+	depends on STM32_ADC1 && STM32_HAVE_ADC_OVERSAMPLE
+	---help---
+		Enable the on-chip ADC oversampling/accumulation block (CFGR2.OVSE).
+		Only STM32G0 and STM32L0 series include this hardware block.
+
+if STM32_ADC_OVERSAMPLE
+
+config STM32_ADC_TOVS
+	bool "Enable triggered oversampling (CFGR2.TOVS)"
+	---help---
+		If set, oversampling will only occur when a trigger event occurs.
+		If not set, oversampling occurs continuously (TOVS=0).
+
+config STM32_ADC_OVSR
+	int "Oversampling ratio (CFGR2.OVSR)"
+	default 0
+	range 0 7
+	---help---
+		Sets the oversampling ratio as 2^(OVSR+1). For example:
+		0 -> 2x
+		1 -> 4x
+		2 -> 8x
+		...
+		7 -> 256x
+
+config STM32_ADC_OVSS
+	int "Oversampling right-shift bits (CFGR2.OVSS)"
+	default 0
+	range 0 8
+	---help---
+		Sets how many bits the accumulated result is right-shifted.
+		Max of 8-bits.
+
+endif # STM32_ADC_OVERSAMPLE
+
+config STM32_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC1 && STM32_ADC1_HAVE_DMA || ARCH_CHIP_STM32H7 && STM32_ADC && STM32_ADC1 && EXPERIMENTAL || STM32_COMMON_L4_L5_U5 && STM32_ADC && STM32_ADC1 || ARCH_CHIP_STM32H5 && STM32_ADC && STM32_ADC1 && STM32_DMA
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC1_SCAN
+	bool "ADC1 scan mode"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC1 && STM32_HAVE_IP_ADC_M3M4_V1) || (ARCH_CHIP_STM32F7 && STM32_ADC && STM32_ADC1)
+	default STM32_ADC1_DMA
+
+config STM32_ADC1_DMA_CFG
+	int "ADC1 DMA configuration"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1) && STM32_ADC && STM32_ADC1_DMA && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5) && STM32_ADC && STM32_ADC1_DMA
+	default 1 if ARCH_CHIP_STM32L4
+	default 0
+	range 0 1
+	---help---
+		0 - ADC1 DMA in One Shot Mode, 1 - ADC1 DMA in Circular Mode
+
+config STM32_ADC1_DMA_BATCH
+	int "ADC1 DMA number of conversions"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5) && STM32_ADC && STM32_ADC1 && STM32_ADC1_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32_ADC1_ANIOC_TRIGGER
+	int "ADC1 software trigger (ANIOC_TRIGGER) configuration"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC1)
+	default 3
+	range 1 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config STM32_ADC2_DMA
+	bool "ADC2 DMA"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC2 && STM32_ADC2_HAVE_DMA || ARCH_CHIP_STM32H7 && STM32_ADC && STM32_ADC2 && EXPERIMENTAL || STM32_COMMON_L4_L5_U5 && STM32_ADC && STM32_ADC2 || ARCH_CHIP_STM32H5 && STM32_ADC && STM32_ADC2 && STM32_DMA
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC2_SCAN
+	bool "ADC2 scan mode"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC2 && STM32_HAVE_IP_ADC_M3M4_V1) || (ARCH_CHIP_STM32F7 && STM32_ADC && STM32_ADC2)
+	default STM32_ADC2_DMA
+
+config STM32_ADC2_DMA_CFG
+	int "ADC2 DMA configuration"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC2_DMA && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_ADC && STM32_ADC2_DMA || ARCH_CHIP_STM32H5 && STM32_ADC && STM32_ADC2_DMA && STM32_DMA
+	default 1 if ARCH_CHIP_STM32L4
+	default 0
+	range 0 1
+	---help---
+		0 - ADC2 DMA in One Shot Mode, 1 - ADC2 DMA in Circular Mode
+
+config STM32_ADC2_DMA_BATCH
+	int "ADC2 DMA number of conversions"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5) && STM32_ADC && STM32_ADC2 && STM32_ADC2_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32_ADC2_ANIOC_TRIGGER
+	int "ADC2 software trigger (ANIOC_TRIGGER) configuration"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC2)
+	default 3
+	range 1 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config STM32_ADC3_DMA
+	bool "ADC3 DMA"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC3 && STM32_ADC3_HAVE_DMA || ARCH_CHIP_STM32H7 && STM32_ADC && STM32_ADC3 && EXPERIMENTAL || STM32_COMMON_L4_L5_U5 && STM32_ADC && STM32_ADC3
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC3_SCAN
+	bool "ADC3 scan mode"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC3 && STM32_HAVE_IP_ADC_M3M4_V1) || (ARCH_CHIP_STM32F7 && STM32_ADC && STM32_ADC3)
+	default STM32_ADC3_DMA
+
+config STM32_ADC3_DMA_CFG
+	int "ADC3 DMA configuration"
+	depends on (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) && STM32_ADC && STM32_ADC3_DMA && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC || (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32L4) && STM32_ADC && STM32_ADC3_DMA
+	default 1 if ARCH_CHIP_STM32L4
+	default 0
+	range 0 1
+	---help---
+		0 - ADC3 DMA in One Shot Mode, 1 - ADC3 DMA in Circular Mode
+
+config STM32_ADC3_DMA_BATCH
+	int "ADC3 DMA number of conversions"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4) && STM32_ADC && STM32_ADC3 && STM32_ADC3_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32_ADC3_ANIOC_TRIGGER
+	int "ADC3 software trigger (ANIOC_TRIGGER) configuration"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC3)
+	default 3
+	range 1 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config STM32_ADC1_INJECTED_CHAN
+	int "ADC1 injected channels"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC1)
+	default 0
+	range 0 4
+	---help---
+		Support for ADC1 injected channels.
+
+config STM32_ADC2_INJECTED_CHAN
+	int "ADC2 injected channels"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC2)
+	default 0
+	range 0 4
+	---help---
+		Support for ADC2 injected channels.
+
+config STM32_ADC3_INJECTED_CHAN
+	int "ADC3 injected channels"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC3)
+	default 0
+	range 0 4
+	---help---
+		Support for ADC3 injected channels.
+
+config STM32_ADC1_EXTSEL
+	bool "ADC1 external trigger for regular group"
+	depends on ((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC1 && !STM32_ADC1_HAVE_TIMER
+	---help---
+		Enable EXTSEL for ADC1.
+
+config STM32_ADC2_EXTSEL
+	bool "ADC2 external trigger for regular group"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC2) && !STM32_ADC2_HAVE_TIMER
+	---help---
+		Enable EXTSEL for ADC2.
+
+config STM32_ADC3_EXTSEL
+	bool "ADC3 external trigger for regular group"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC3) && !STM32_ADC3_HAVE_TIMER
+	---help---
+		Enable EXTSEL for ADC3.
+
+config STM32_ADC1_JEXTSEL
+	bool "ADC1 external trigger for injected group"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC1)
+	---help---
+		Enable JEXTSEL for ADC1.
+
+config STM32_ADC2_JEXTSEL
+	bool "ADC2 external trigger for injected group"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC2)
+	---help---
+		Enable JEXTSEL for ADC2.
+
+config STM32_ADC3_JEXTSEL
+	bool "ADC3 external trigger for injected group"
+	depends on (((STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7) && STM32_ADC && STM32_ADC3)
+	---help---
+		Enable JEXTSEL for ADC3.
+
+config STM32_DAC1_OUTPUT_ADC
+	bool "DAC1 output to ADC"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC && STM32_DAC1
+	---help---
+		Route DAC1 output to ADC input instead of external pin.
+
+config STM32_DAC2_OUTPUT_ADC
+	bool "DAC2 output to ADC"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC && STM32_DAC2
+	---help---
+		Route DAC2 output to ADC input instead of external pin.
+
+config STM32_ADC1_OUTPUT_DFSDM
+	bool "ADC1 output to DFSDM"
+	depends on STM32_ADC1_HAVE_OUTPUT_DFSDM && STM32_ADC1 && STM32_DFSDM1
+	---help---
+		Route ADC1 output directly to DFSDM parallel inputs.
+
+config STM32_ADC2_OUTPUT_DFSDM
+	bool "ADC2 output to DFSDM"
+	depends on STM32_ADC2_HAVE_OUTPUT_DFSDM && STM32_ADC2 && STM32_DFSDM1
+	---help---
+		Route ADC2 output directly to DFSDM parallel inputs.
+
+config STM32_ADC3_OUTPUT_DFSDM
+	bool "ADC3 output to DFSDM"
+	depends on STM32_ADC3_HAVE_OUTPUT_DFSDM && STM32_ADC3 && STM32_DFSDM1
+	---help---
+		Route ADC3 output directly to DFSDM parallel inputs.
+
+config STM32_ADC4_RESOLUTION
+	int "ADC4 resolution"
+	depends on STM32_ADC4 && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC4 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC5_RESOLUTION
+	int "ADC5 resolution"
+	depends on STM32_ADC5 && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	default 0
+	range 0 3
+	---help---
+		ADC5 resolution. 0 - 12 bit, 1 - 10 bit, 2 - 8 bit, 3 - 6 bit
+
+config STM32_ADC4_DMA
+	bool "ADC4 DMA"
+	depends on STM32_ADC4 && STM32_ADC4_HAVE_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC4_DMA_CFG
+	int "ADC4 DMA configuration"
+	depends on STM32_ADC4_DMA && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC4 DMA in One Shot Mode, 1 - ADC4 DMA in Circular Mode
+
+config STM32_ADC4_DMA_BATCH
+	int "ADC4 DMA number of conversions"
+	depends on STM32_ADC4 && STM32_ADC4_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32_ADC4_ANIOC_TRIGGER
+	int "ADC4 software trigger (ANIOC_TRIGGER) configuration"
+	depends on STM32_ADC4
+	range 1 3
+	default 3
+	---help---
+		1 - ANIOC_TRIGGER only starts regular conversion
+		2 - ANIOC_TRIGGER only starts injected conversion
+		3 - ANIOC_TRIGGER starts both regular and injected conversions
+
+config STM32_ADC5_DMA
+	bool "ADC5 DMA"
+	depends on STM32_ADC5 && STM32_ADC5_HAVE_DMA
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_ADC5_DMA_CFG
+	int "ADC5 DMA configuration"
+	depends on STM32_ADC5_DMA && !STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	range 0 1
+	default 0
+	---help---
+		0 - ADC5 DMA in One Shot Mode, 1 - ADC5 DMA in Circular Mode
+
+config STM32_ADC5_DMA_BATCH
+	int "ADC5 DMA number of conversions"
+	depends on STM32_ADC5 && STM32_ADC5_DMA
+	default 1
+	---help---
+		This option allows you to select the number of regular group conversions
+		that will trigger a DMA callback transerring data to the upper-half driver.
+		By default, this value is 1, which means that data is transferred after
+		each group conversion.
+
+config STM32_ADC4_INJECTED_CHAN
+	int "ADC4 injected channels"
+	depends on STM32_ADC4
+	range 0 4
+	default 0
+	---help---
+		Support for ADC4 injected channels.
+
+config STM32_ADC5_INJECTED_CHAN
+	int "ADC5 injected channels"
+	depends on STM32_ADC5
+	range 0 4
+	default 0
+	---help---
+		Support for ADC5 injected channels.
+
+config STM32_ADC4_EXTSEL
+	bool "ADC4 external trigger for regular group"
+	depends on STM32_ADC4 && !STM32_ADC4_HAVE_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC4.
+
+config STM32_ADC5_EXTSEL
+	bool "ADC5 external trigger for regular group"
+	depends on STM32_ADC5 && !STM32_ADC5_HAVE_TIMER
+	default n
+	---help---
+		Enable EXTSEL for ADC5.
+
+config STM32_ADC4_JEXTSEL
+	bool "ADC4 external trigger for injected group"
+	depends on STM32_ADC4
+	default n
+	---help---
+		Enable JEXTSEL for ADC4.
+
+config STM32_ADC5_JEXTSEL
+	bool "ADC5 external trigger for injected group"
+	depends on STM32_ADC5
+	default n
+	---help---
+		Enable JEXTSEL for ADC5.
+
+config STM32_ADC1_CONTINUOUS
+	bool "Enable ADC1 Continuous Conversion Mode"
+	default n
+	depends on STM32_ADC1 && STM32_HAVE_IP_ADC_M0_V1
+	---help---
+		If enabled, the ADC will operate in continuous conversion mode.
+		Otherwise, it will perform single conversions.
+		Note: Continuous and discontinuous mode cannot be defined at
+		      the same time

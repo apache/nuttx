@@ -1,0 +1,9 @@
+#
+# STM32 GPIO configuration options.
+#
+
+config STM32_GPIO_HAVE_PORTD
+	bool
+
+config STM32_GPIO_HAVE_PORTE
+	bool

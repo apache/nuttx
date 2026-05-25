@@ -39,13 +39,13 @@
 
 /* If more than one COMP IP ensure that only one is selected */
 
-#if defined(CONFIG_STM32_HAVE_IP_COMP_V1)
+#if defined(CONFIG_STM32_HAVE_IP_COMP_M3M4_V1)
 #  if defined(CONFIG_STM32_STM32F33XX)
 #    include "stm32f33xxx_comp.h"
 #  else
 #    error "Device not supported."
 #  endif
-#elif defined(CONFIG_STM32_HAVE_IP_COMP_V2)
+#elif defined(CONFIG_STM32_HAVE_IP_COMP_M3M4_V2)
 #  if defined(CONFIG_STM32_STM32G4XXX)
 #    include "stm32g4xxxx_comp.h"
 #  else
