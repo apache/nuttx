@@ -213,3 +213,15 @@ endif
 ifeq ($(CONFIG_STM32H7_WWDG),y)
 CHIP_CSRCS += stm32_wwdg.c
 endif
+
+#ifeq ($(CONFIG_STM32H7_HASH),y)
+#CHIP_CSRCS += stm32_hash.c
+#endif
+
+ifeq ($(CONFIG_STM32H7_CRYP),y)
+CHIP_CSRCS += stm32_aes.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+CHIP_CSRCS += stm32_crypto.c
+endif
