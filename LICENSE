@@ -3386,9 +3386,9 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_gpio.c
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_pwm.c
-boards/arm/stm32f0l0g0/nucleo-g070rb/src/stm32_timer.c
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_gpio.c
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_pwm.c
+boards/arm/stm32g0/nucleo-g070rb/src/stm32_timer.c
 =====================================================
   Copyright (C) 2019 Fundação CERTI. All rights reserved.
 
@@ -4243,7 +4243,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32f0l0g0/hardware/stm32g0_pinmap.h
+arch/arm/src/stm32g0/hardware/stm32g0_pinmap.h
 =====================================================
 
   Copyright (C) 2019 Gregory Nutt. All rights reserved.
@@ -4276,7 +4276,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32f0l0g0/stm32_i2c.c
+arch/arm/src/common/stm32/stm32_i2c_m0_v1.c
 ===========================================
 
   Copyright (C) 2011 Uros Platise. All rights reserved.
@@ -4309,7 +4309,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32f0l0g0/stm32_pwm.c
+arch/arm/src/common/stm32/stm32_pwm_m0_v1.c
 =======================================
 
   Copyright (C) 2019 Fundação CERTI. All rights reserved.
@@ -4341,9 +4341,9 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32f0l0g0/stm32_pwm.h
-arch/arm/src/stm32f0l0g0/stm32_tim.c
-arch/arm/src/stm32f0l0g0/stm32_tim.h
+arch/arm/src/common/stm32/stm32_pwm_m0_v1.h
+arch/arm/src/common/stm32/stm32_tim_m0_v1.c
+arch/arm/src/common/stm32/stm32_tim_m0_v1.h
 =======================================
 
   Copyright (C) 2019 Fundação CERTI. All rights reserved.
@@ -4375,7 +4375,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-arch/arm/src/stm32f0l0g0/stm32_tim_lowerhalf.c
+arch/arm/src/common/stm32/stm32_tim_m0_v1_lowerhalf.c
 =================================================
 
   Copyright (C) 2019 Fundação CERTI. All rights reserved.
