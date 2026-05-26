@@ -237,6 +237,33 @@ static int wdt_lh_start(struct watchdog_lowerhalf_s *lower)
 
       ESP32S3_WDT_UNLOCK(priv->wdt);
 
+      /* Re-apply the prescaler for MWDT in case the Timer Group
+       * registers were reset after initialization (e.g. by a
+       * constructor function that resets the peripheral).
+       */
+
+      if (priv->peripheral == TIMER)
+        {
+          ESP32S3_MWDT_PRE(priv->wdt, MWDT_CLK_PRESCALER_VALUE);
+        }
+
+      /* Re-apply the timeout value */
+
+      if (priv->timeout > 0)
+        {
+          if (priv->peripheral == TIMER)
+            {
+              ESP32S3_WDT_STO(priv->wdt, MWDT_TIMEOUT_MS(priv->timeout),
+                              ESP32S3_WDT_STAGE0);
+            }
+          else if (priv->peripheral == RTC)
+            {
+              uint16_t rtc_cycles = ESP32S3_RWDT_CLK(priv->wdt);
+              ESP32S3_WDT_STO(priv->wdt, priv->timeout * rtc_cycles,
+                              ESP32S3_WDT_STAGE0);
+            }
+        }
+
       /* No User Handler */
 
       if (priv->handler == NULL)
@@ -271,6 +298,8 @@ static int wdt_lh_start(struct watchdog_lowerhalf_s *lower)
           spin_unlock_irqrestore(&priv->lock, flags);
           ESP32S3_WDT_ENABLEINT(priv->wdt);
         }
+
+      ESP32S3_WDT_FEED(priv->wdt);
 
       flags = spin_lock_irqsave(&priv->lock);
       priv->lastreset = clock_systime_ticks();
