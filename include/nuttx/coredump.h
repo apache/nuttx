@@ -71,6 +71,16 @@ int coredump_add_memory_region(FAR const void *ptr, size_t size,
                                uint32_t flags);
 
 /****************************************************************************
+ * Name: coredump_remove_memory_region
+ *
+ * Description:
+ *   Remove a previously registered memory region from the coredump list.
+ *
+ ****************************************************************************/
+
+int coredump_remove_memory_region(FAR const void *ptr, size_t size);
+
+/****************************************************************************
  * Name: coredump
  *
  * Description:
