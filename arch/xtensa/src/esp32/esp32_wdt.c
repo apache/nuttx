@@ -554,6 +554,20 @@ static uint16_t esp32_rtc_clk(struct esp32_wdt_dev_s *dev)
 
   DEBUGASSERT(dev);
 
+  /* Ensure the XTAL frequency is known before calibration.
+   * rtc_clk_cal divides by xtal_freq internally and will crash
+   * with divide-by-zero if it hasn't been stored yet.
+   */
+
+  if (rtc_clk_xtal_freq_get() == 0)
+    {
+#ifdef CONFIG_ESP32_XTAL_26MHz
+      rtc_clk_xtal_freq_update(SOC_XTAL_FREQ_26M);
+#else
+      rtc_clk_xtal_freq_update(SOC_XTAL_FREQ_40M);
+#endif
+    }
+
   /* Check which clock is sourcing the slow_clk_rtc */
 
   slow_clk_rtc = rtc_clk_slow_src_get();
