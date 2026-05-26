@@ -44,7 +44,7 @@ no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t n)
 {
   FAR unsigned char *pout = (FAR unsigned char *)dest;
-  FAR unsigned char *pin  = (FAR unsigned char *)src;
+  FAR const unsigned char *pin  = (FAR const unsigned char *)src;
 
   while (n-- > 0)
     {

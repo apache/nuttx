@@ -40,7 +40,7 @@ no_builtin("memmove")
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {
   FAR char *tmp;
-  FAR char *s;
+  FAR const char *s;
 
   if (dest <= src)
     {
@@ -49,7 +49,7 @@ FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
   else
     {
       tmp = (FAR char *) dest + count;
-      s   = (FAR char *) src + count;
+      s   = (FAR const char *) src + count;
 
       while (count--)
         {
