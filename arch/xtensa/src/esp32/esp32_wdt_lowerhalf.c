@@ -484,6 +484,12 @@ static int esp32_wdt_settimeout(struct watchdog_lowerhalf_s *lower,
   else
     {
       rtc_cycles = ESP32_RWDT_CLK(priv->wdt);
+      if (rtc_cycles == 0)
+        {
+          wderr("ERROR: RTC clock calibration returned 0 cycles/ms\n");
+          return -EIO;
+        }
+
       rtc_ms_max = (uint32_t)(FULL_STAGE / rtc_cycles);
 
       /* Is this timeout a valid value for RTC WDT? */
