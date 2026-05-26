@@ -215,6 +215,10 @@ config ARCH_HAVE_TIMEKEEPING
 	bool
 	default n
 
+config ARCH_HAVE_CLOCKID_TRANSLATE
+	bool
+	default n
+
 config CLOCK_TIMEKEEPING
 	bool "Support timekeeping algorithms"
 	default n

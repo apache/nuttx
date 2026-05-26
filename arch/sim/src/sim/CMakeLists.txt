@@ -150,6 +150,10 @@ list(
   sim_hosttime.c
   sim_hostuart.c)
 
+if(CONFIG_ARCH_HAVE_CLOCKID_TRANSLATE)
+  list(APPEND SRCS posix/sim_clockid.c)
+endif()
+
 if(CONFIG_HOST_MACOS AND CONFIG_HAVE_CXXINITIALIZE)
   # Keep classic __mod_init_func format so post-link lief patching works
   target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)

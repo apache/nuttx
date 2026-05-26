@@ -219,6 +219,10 @@ int clock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 {
   int ret;
 
+#ifdef CONFIG_ARCH_HAVE_CLOCKID_TRANSLATE
+  clock_id = up_translate_clockid(clock_id);
+#endif
+
   ret = nxclock_gettime(clock_id, tp);
   if (ret < 0)
     {

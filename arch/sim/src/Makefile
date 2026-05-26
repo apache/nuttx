@@ -103,6 +103,9 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   VPATH += :sim/win
 else
   VPATH += :sim/posix
+ifeq ($(CONFIG_ARCH_HAVE_CLOCKID_TRANSLATE),y)
+  CSRCS += sim_clockid.c
+endif
 endif
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 

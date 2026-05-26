@@ -2000,6 +2000,19 @@ int up_timer_gettick(FAR clock_t *ticks);
 void up_timer_getmask(FAR clock_t *mask);
 
 /****************************************************************************
+ * Name: up_translate_clockid
+ *
+ * Description:
+ *   Translate architecture-specific clock IDs before the common clock layer
+ *   handles them.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_CLOCKID_TRANSLATE
+clockid_t up_translate_clockid(clockid_t clockid);
+#endif
+
+/****************************************************************************
  * Name: up_alarm_cancel
  *
  * Description:
