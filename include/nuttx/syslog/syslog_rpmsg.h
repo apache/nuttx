@@ -98,12 +98,21 @@ static inline_function void syslog_rpmsg_dump(FAR const void *buffer)
 {
   FAR const struct syslog_rpmsg_buffer_header_s *header =
     (FAR const struct syslog_rpmsg_buffer_header_s *)buffer;
-  uint32_t head = header->head;
-  uint32_t tail = header->tail;
-  uint32_t size = header->size;
+  uint32_t head;
+  uint32_t tail;
+  uint32_t size;
+
+  up_invalidate_dcache((uintptr_t)header,
+                       (uintptr_t)header + sizeof(*header));
+  head = header->head;
+  tail = header->tail;
+  size = header->size;
 
   _alert("Dump syslog rpmsg header:%p head:%" PRIu32 " tail:%" PRIu32
          " size:%" PRIu32 "\n", header, head, tail, size);
+
+  up_invalidate_dcache((uintptr_t)header->buffer,
+                       (uintptr_t)header->buffer + header->size);
 
   if (head > tail)
     {
