@@ -150,6 +150,13 @@ list(
   sim_hosttime.c
   sim_hostuart.c)
 
+if(CONFIG_HOST_MACOS)
+  # Provide a sim/macOS specific override of clock_gettime() that translates
+  # Darwin clock IDs to NuttX's CLOCK_MONOTONIC.  Keep all macOS specific logic
+  # in arch/sim/ instead of polluting sched/clock/clock_gettime.c.
+  list(APPEND SRCS macos/sim_clock_gettime.c)
+endif()
+
 if(CONFIG_HOST_MACOS AND CONFIG_HAVE_CXXINITIALIZE)
   # Keep classic __mod_init_func format so post-link lief patching works
   target_link_options(nuttx PRIVATE -Wl,-ld_classic,-no_fixup_chains)

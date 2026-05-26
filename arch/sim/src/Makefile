@@ -103,6 +103,10 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   VPATH += :sim/win
 else
   VPATH += :sim/posix
+ifeq ($(CONFIG_HOST_MACOS),y)
+  CSRCS += sim/macos/sim_clock_gettime.c
+  REQUIREDOBJS += sim/macos/sim_clock_gettime$(OBJEXT)
+endif
 endif
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 

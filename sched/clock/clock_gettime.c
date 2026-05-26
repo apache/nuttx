@@ -215,7 +215,7 @@ int nxclock_gettime(clockid_t clock_id, FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int clock_gettime(clockid_t clock_id, FAR struct timespec *tp)
+int weak_function clock_gettime(clockid_t clock_id, FAR struct timespec *tp)
 {
   int ret;
 
