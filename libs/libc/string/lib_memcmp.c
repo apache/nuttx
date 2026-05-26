@@ -39,8 +39,8 @@
 no_builtin("memcmp")
 int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
 {
-  FAR unsigned char *p1 = (FAR unsigned char *)s1;
-  FAR unsigned char *p2 = (FAR unsigned char *)s2;
+  FAR const unsigned char *p1 = (FAR const unsigned char *)s1;
+  FAR const unsigned char *p2 = (FAR const unsigned char *)s2;
 
   while (n-- > 0)
     {
