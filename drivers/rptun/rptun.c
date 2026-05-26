@@ -88,7 +88,7 @@ struct rptun_priv_s
   FAR struct rptun_dev_s      *dev;
   struct remoteproc           rproc;
   dq_entry_t                  entry;
-  bool                        rreset;
+  uint32_t                    lstatus;
   bool                        stop;
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   bool                        unlinked;
@@ -169,8 +169,8 @@ static void rptun_unmap_buf(FAR struct virtio_device *vdev,
                             FAR void *buf, size_t len,
                             enum virtio_dma_map dir, FAR void *mapped);
 
-static void rptun_set_status(FAR struct rptun_priv_s *priv,
-                             unsigned long reason);
+static void rptun_set_status_notify(FAR struct rptun_priv_s *priv,
+                                    unsigned long reason);
 
 #ifndef CONFIG_RPTUN_AUTO_RESET_DISABLE
 static int rptun_notifier(FAR struct notifier_block *block,
@@ -306,7 +306,7 @@ static int rptun_stop(FAR struct remoteproc *rproc)
 
       if (ret == -ENOTSUP)
         {
-          rptun_set_status(priv, RPTUN_STATUS_STOP);
+          rptun_set_status_notify(priv, RPTUN_STATUS_STOP);
           ret = OK;
         }
     }
@@ -916,8 +916,8 @@ rptun_get_peer_status(FAR struct rptun_priv_s *priv)
          status->slave : status->master;
 }
 
-static void rptun_set_status(FAR struct rptun_priv_s *priv,
-                             unsigned long reason)
+static inline_function void rptun_set_status(FAR struct rptun_priv_s *priv,
+                                             unsigned long reason)
 {
   FAR struct rptun_status_s *status;
 
@@ -938,7 +938,12 @@ static void rptun_set_status(FAR struct rptun_priv_s *priv,
     }
 
   RPTUN_FLUSH(status, sizeof(*status));
+}
 
+static void rptun_set_status_notify(FAR struct rptun_priv_s *priv,
+                                    unsigned long reason)
+{
+  rptun_set_status(priv, reason);
   rptun_notify(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
@@ -973,6 +978,8 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
     }
 
   status = rptun_get_peer_status(priv);
+  status = status & ~priv->lstatus;
+  priv->lstatus |= status;
 
   if (RPTUN_STATUS_CHECK(status, RPTUN_STATUS_PAUSE))
     {
@@ -1018,8 +1025,8 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
           work_queue(HPWORK, &priv->work, rptun_boardctl_work,
             (FAR void *)(uintptr_t)BOARDIOC_SOFTRESETCAUSE_POWEROFF, 0);
 #else
-          rptun_set_status(priv,
-                           (unsigned long)BOARDIOC_SOFTRESETCAUSE_POWEROFF);
+          rptun_set_status_notify(priv,
+            (unsigned long)BOARDIOC_SOFTRESETCAUSE_POWEROFF);
 #endif
         }
       else
@@ -1028,7 +1035,8 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
           work_queue(HPWORK, &priv->work, rptun_boardctl_work,
                      (FAR void *)(uintptr_t)RPTUN_REASON_GET(status), 0);
 #else
-          rptun_set_status(priv, (unsigned long)RPTUN_REASON_GET(status));
+          rptun_set_status_notify(priv,
+            (unsigned long)RPTUN_REASON_GET(status));
 #endif
         }
     }
@@ -1312,7 +1320,14 @@ static int rptun_dev_reset(FAR struct rptun_priv_s *priv, unsigned long val)
 
   if (ret == -ENOTSUP)
     {
-      rptun_set_status(priv, val);
+      if (RPTUN_STATUS_CHECK(priv->lstatus, val))
+        {
+          rptun_set_status(priv, val);
+          return OK;
+        }
+
+      RPTUN_STATUS_SET(priv->lstatus, val);
+      rptun_set_status_notify(priv, val);
 
       if (val == RPTUN_STATUS_PAUSE)
         {
