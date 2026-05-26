@@ -61,4 +61,5 @@ Guides
   optee.rst
   qemu_tips.rst
   lwl.rst
+  stm32_ports.rst
 
