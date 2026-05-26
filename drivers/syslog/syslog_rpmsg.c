@@ -274,7 +274,7 @@ static void syslog_rpmsg_addbuf(FAR struct syslog_rpmsg_s *priv,
   header->head = (header->head + len) % header->size;
   if (overwritten)
     {
-      header->tail = header->head;
+      header->tail = (header->head + 1) % header->size;
     }
 
   if (!priv->suspend && is_rpmsg_ept_ready(&priv->ept))
