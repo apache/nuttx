@@ -993,6 +993,13 @@ static void rptun_check_peer_status(FAR struct rptun_priv_s *priv)
           status = rptun_get_peer_status(priv);
           up_udelay(1000);
         }
+
+      if (!RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
+        {
+          _emerg("FATAL: Timeout waiting for remote core panic: %s\n",
+                 RPTUN_GET_CPUNAME(priv->dev));
+          return;
+        }
     }
 
   if (RPTUN_STATUS_CHECK(status, BOARDIOC_SOFTRESETCAUSE_PANIC))
