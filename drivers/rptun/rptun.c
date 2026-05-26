@@ -1767,6 +1767,14 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
   if (priv != NULL)
     {
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+      /* Secure and Non-secure worlds share the same CPU. If the
+       * secure side handles PAUSE, the CPU stalls in secure world
+       * blocking the non-secure side as well.
+       */
+
+      RPTUN_STATUS_SET(priv->lstatus, RPTUN_STATUS_PAUSE);
+#endif
       priv->dev = dev;
       priv->pid = -EINVAL;
       remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
