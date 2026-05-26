@@ -405,7 +405,9 @@ static uint32_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * the next transfer.
        */
 
+      conn_lock(&conn->sconn);
       sendto_writebuffer_release(conn, NULL);
+      conn_unlock(&conn->sconn);
       return flags;
     }
 
