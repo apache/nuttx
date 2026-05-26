@@ -316,6 +316,10 @@ static void delay_free(struct mm_heap_s *heap, void *mem, bool delay)
   else
     {
       node = (struct mm_allocnode_s *)((uintptr_t)mem - MM_ALLOCNODE_SIZE);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(mem, MM_FREE_MAGIC,
+             node->size - MM_ALLOCNODE_SIZE - node->padding);
+#endif
       update_stats(heap, mem, node->size, false);
       sched_note_heap(NOTE_HEAP_FREE, heap, mem, node->size, 0);
       host_free(node->allocmem);
@@ -329,6 +333,7 @@ static void *reallocate(void *oldmem, size_t alignment, size_t size)
   void *new_alloc_addr;
   struct mm_allocnode_s *old_node;
   size_t old_size;
+  size_t old_user_size;
   void *old_alloc_addr;
   void *mem = oldmem;
 
@@ -373,6 +378,10 @@ static void *reallocate(void *oldmem, size_t alignment, size_t size)
 
       mem = init_allocnode(g_mmheap, new_alloc_addr, aligned_size,
                            padding_size);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      memset(mem, MM_ALLOC_MAGIC,
+             aligned_size - MM_ALLOCNODE_SIZE - padding_size);
+#endif
       sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
       return mem;
     }
@@ -391,6 +400,8 @@ static void *reallocate(void *oldmem, size_t alignment, size_t size)
              ((uintptr_t)oldmem - MM_ALLOCNODE_SIZE);
   old_alloc_addr = old_node->allocmem;
   old_size = old_node->size;
+  old_user_size = old_size - MM_ALLOCNODE_SIZE - old_node->padding;
+  UNUSED(old_user_size);
 
   update_stats(g_mmheap, oldmem, old_size, false);
 
@@ -411,12 +422,28 @@ static void *reallocate(void *oldmem, size_t alignment, size_t size)
       old_node->padding = padding_size;
       MM_ADD_BACKTRACE(g_mmheap, old_node);
       update_stats(g_mmheap, oldmem, aligned_size, true);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+      if (aligned_size > old_size)
+        {
+          memset(oldmem + old_user_size, MM_ALLOC_MAGIC,
+                 aligned_size - old_size);
+        }
+#endif
+
       sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
       return oldmem;
     }
 
   sched_note_heap(NOTE_HEAP_FREE, g_mmheap, oldmem, old_size, 0);
   mem = init_allocnode(g_mmheap, new_alloc_addr, aligned_size, padding_size);
+#ifdef CONFIG_MM_FILL_ALLOCATIONS
+  if (aligned_size > old_size)
+    {
+      memset(mem + old_user_size, MM_ALLOC_MAGIC,
+             aligned_size - old_size);
+    }
+#endif
+
   sched_note_heap(NOTE_HEAP_ALLOC, g_mmheap, mem, aligned_size, 0);
   return mem;
 }
