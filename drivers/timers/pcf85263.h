@@ -458,6 +458,7 @@
 /* Stop */
 
 #define PCF85263_CTL_STOP_ENABLE           0x2e      /* Stop enable register */
+#define PCF85263_CTL_RESET_REGISTER        0x2f      /* Reset register */
 #  define PCF85263_CTL_STOP                (1 << 0)  /* Bit 0:  Stop bit */
 
 /* Reset */

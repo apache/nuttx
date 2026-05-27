@@ -179,6 +179,89 @@ static int rtc_bcd2bin(uint8_t value)
 }
 
 /****************************************************************************
+ * Name: pcf85263_write_reg
+ *
+ * Description:
+ *   Write one or more registers starting at regaddr.
+ *
+ * Input Parameters:
+ *   regaddr - The first register address to write.
+ *   buf     - Data to write.
+ *   len     - Number of bytes to write.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int pcf85263_write_reg(uint8_t regaddr, const uint8_t *buf,
+                              uint8_t len)
+{
+  struct i2c_msg_s msg;
+  uint8_t buffer[len + 1];
+  int ret;
+
+  buffer[0] = regaddr;
+  memcpy(&buffer[1], buf, len);
+
+  msg.frequency = CONFIG_PCF85263_I2C_FREQUENCY;
+  msg.addr      = PCF85263_I2C_ADDRESS;
+  msg.flags     = 0;
+  msg.buffer    = buffer;
+  msg.length    = len + 1;
+
+  ret = I2C_TRANSFER(g_pcf85263.i2c, &msg, 1);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pcf85263_read_reg
+ *
+ * Description:
+ *   Read one or more registers starting at regaddr.
+ *
+ * Input Parameters:
+ *   regaddr - The first register address to read.
+ *   buf     - Buffer to store the read data.
+ *   len     - Number of bytes to read.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int pcf85263_read_reg(uint8_t regaddr, uint8_t *buf, uint8_t len)
+{
+  struct i2c_msg_s msg[2];
+  int ret;
+
+  msg[0].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
+  msg[0].addr      = PCF85263_I2C_ADDRESS;
+  msg[0].flags     = 0;
+  msg[0].buffer    = &regaddr;
+  msg[0].length    = 1;
+
+  msg[1].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
+  msg[1].addr      = PCF85263_I2C_ADDRESS;
+  msg[1].flags     = I2C_M_READ;
+  msg[1].buffer    = buf;
+  msg[1].length    = len;
+
+  ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 2);
+  if (ret < 0)
+    {
+      rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -208,9 +291,19 @@ static int rtc_bcd2bin(uint8_t value)
 
 int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
 {
+  uint8_t val = 0x00;
+  int ret;
+
   /* Remember the i2c device and claim that the RTC is enabled */
 
   g_pcf85263.i2c = i2c;
+
+  ret = pcf85263_write_reg(PCF85263_CTL_STOP_ENABLE, &val, 1);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   g_rtc_enabled  = true;
   return OK;
 }
@@ -241,8 +334,6 @@ int pcf85263_rtc_initialize(FAR struct i2c_master_s *i2c)
 
 int up_rtc_getdatetime(FAR struct tm *tp)
 {
-  struct i2c_msg_s msg[4];
-  uint8_t secaddr;
   uint8_t buffer[7];
   uint8_t seconds;
   int ret;
@@ -267,51 +358,21 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       return -EAGAIN;
     }
 
-  /* Select to begin reading at the seconds register */
-
-  secaddr          = PCF85263_RTC_SECONDS;
-
-  msg[0].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[0].addr      = PCF85263_I2C_ADDRESS;
-  msg[0].flags     = 0;
-  msg[0].buffer    = &secaddr;
-  msg[0].length    = 1;
-
-  /* Set up to read 7 registers: secondss, minutes, hour, day-of-week, date,
-   * month, year
-   */
-
-  msg[1].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[1].addr      = PCF85263_I2C_ADDRESS;
-  msg[1].flags     = I2C_M_READ;
-  msg[1].buffer    = buffer;
-  msg[1].length    = 7;
-
-  /* Read the seconds register again */
-
-  msg[2].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[2].addr      = PCF85263_I2C_ADDRESS;
-  msg[2].flags     = 0;
-  msg[2].buffer    = &secaddr;
-  msg[2].length    = 1;
-
-  msg[3].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[3].addr      = PCF85263_I2C_ADDRESS;
-  msg[3].flags     = I2C_M_READ;
-  msg[3].buffer    = &seconds;
-  msg[3].length    = 1;
-
-  /* Perform the transfer.  The transfer may be performed repeatedly of the
-   * seconds values decreases, meaning that that was a rollover in the
-   * seconds.
+  /* Read 7 registers starting at seconds, then re-read seconds to detect
+   * a rollover during the burst read.
    */
 
   do
     {
-      ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 4);
+      ret = pcf85263_read_reg(PCF85263_RTC_SECONDS, buffer, 7);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          return ret;
+        }
+
+      ret = pcf85263_read_reg(PCF85263_RTC_SECONDS, &seconds, 1);
+      if (ret < 0)
+        {
           return ret;
         }
     }
@@ -371,11 +432,10 @@ int up_rtc_getdatetime(FAR struct tm *tp)
 
 int up_rtc_settime(FAR const struct timespec *tp)
 {
-  struct i2c_msg_s msg[3];
   struct tm newtm;
   time_t newtime;
-  uint8_t buffer[9];
-  uint8_t cmd;
+  uint8_t time_buf[8];
+  uint8_t val;
   uint8_t seconds;
   int ret;
 
@@ -406,69 +466,41 @@ int up_rtc_settime(FAR const struct timespec *tp)
       return -EINVAL;
     }
 
-  rtc_dumptime(&tm, "New time");
+  rtc_dumptime(&newtm, "New time");
 
-  /* Construct the message */
-
-  /* Write starting with the 100ths of seconds register */
-
-  buffer[0] = PCF85263_RTC_100TH_SECONDS;
+  /* Build the time register buffer starting at PCF85263_RTC_100TH_SECONDS */
 
   /* Clear the 100ths of seconds */
 
-  buffer[1] = 0;
+  time_buf[0] = 0;
 
   /* Save seconds (0-59) converted to BCD */
 
-  buffer[2] = rtc_bin2bcd(newtm.tm_sec);
+  time_buf[1] = rtc_bin2bcd(newtm.tm_sec);
 
   /* Save minutes (0-59) converted to BCD */
 
-  buffer[3] = rtc_bin2bcd(newtm.tm_min);
+  time_buf[2] = rtc_bin2bcd(newtm.tm_min);
 
   /* Save hour (0-23) with 24-hour time indication */
 
-  buffer[4] = rtc_bin2bcd(newtm.tm_hour);
+  time_buf[3] = rtc_bin2bcd(newtm.tm_hour);
 
   /* Save the day of the month (1-31) */
 
-  buffer[5] = rtc_bin2bcd(newtm.tm_mday);
+  time_buf[4] = rtc_bin2bcd(newtm.tm_mday);
 
   /* Save the day of the week (1-7) */
 
-  buffer[6] = rtc_bin2bcd(newtm.tm_wday);
+  time_buf[5] = rtc_bin2bcd(newtm.tm_wday);
 
   /* Save the month (1-12) */
 
-  buffer[7] = rtc_bin2bcd(newtm.tm_mon + 1);
+  time_buf[6] = rtc_bin2bcd(newtm.tm_mon + 1);
 
   /* Save the year.  Use years since 1968 (a leap year like 2000) */
 
-  buffer[8] = rtc_bin2bcd(newtm.tm_year - 68);
-
-  /* Setup the I2C message */
-
-  msg[0].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[0].addr      = PCF85263_I2C_ADDRESS;
-  msg[0].flags     = 0;
-  msg[0].buffer    = buffer;
-  msg[0].length    = 9;
-
-  /* Read back the seconds register */
-
-  cmd              = PCF85263_RTC_SECONDS;
-
-  msg[1].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[1].addr      = PCF85263_I2C_ADDRESS;
-  msg[1].flags     = 0;
-  msg[1].buffer    = &cmd;
-  msg[1].length    = 1;
-
-  msg[2].frequency = CONFIG_PCF85263_I2C_FREQUENCY;
-  msg[2].addr      = PCF85263_I2C_ADDRESS;
-  msg[2].flags     = I2C_M_READ;
-  msg[2].buffer    = &seconds;
-  msg[2].length    = 1;
+  time_buf[7] = rtc_bin2bcd(newtm.tm_year - 68);
 
   /* Perform the transfer.  This transfer will be repeated if the seconds
    * count rolls over to a smaller value while writing.
@@ -476,14 +508,50 @@ int up_rtc_settime(FAR const struct timespec *tp)
 
   do
     {
-      ret = I2C_TRANSFER(g_pcf85263.i2c, msg, 3);
+      /* Stop the RTC */
+
+      val = 0x01;
+      ret = pcf85263_write_reg(PCF85263_CTL_STOP_ENABLE, &val, 1);
       if (ret < 0)
         {
-          rtcerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Register reset */
+
+      val = 0xa4;
+      ret = pcf85263_write_reg(PCF85263_CTL_RESET_REGISTER, &val, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Write all time registers in a single burst */
+
+      ret = pcf85263_write_reg(PCF85263_RTC_100TH_SECONDS, time_buf, 8);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Read back seconds to detect a rollover */
+
+      ret = pcf85263_read_reg(PCF85263_RTC_SECONDS, &seconds, 1);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* Restart the RTC */
+
+      val = 0x00;
+      ret = pcf85263_write_reg(PCF85263_CTL_STOP_ENABLE, &val, 1);
+      if (ret < 0)
+        {
           return ret;
         }
     }
-  while ((buffer[2] & PCF85263_RTC_SECONDS_MASK) >
+  while ((time_buf[1] & PCF85263_RTC_SECONDS_MASK) >
          (seconds & PCF85263_RTC_SECONDS_MASK));
 
   return OK;
