@@ -344,7 +344,6 @@ FAR struct dac_dev_s *mcp48xx_initialize(FAR struct spi_dev_s *spi,
   if (priv == NULL)
     {
       aerr("ERROR: Failed to allocate mcp48xx_dev_s instance\n");
-      free(priv);
       return NULL;
     }
 
@@ -352,6 +351,7 @@ FAR struct dac_dev_s *mcp48xx_initialize(FAR struct spi_dev_s *spi,
   if (dacdev == NULL)
     {
       aerr("ERROR: Failed to allocate dac_dev_s instance\n");
+      kmm_free(priv);
       return NULL;
     }
 

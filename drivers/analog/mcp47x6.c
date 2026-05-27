@@ -438,7 +438,6 @@ FAR struct dac_dev_s *mcp47x6_initialize(FAR struct i2c_master_s *i2c,
   if (priv == NULL)
     {
       aerr("ERROR: Failed to allocate mcp47x6_dev_s instance\n");
-      free(priv);
       return NULL;
     }
 
@@ -446,6 +445,7 @@ FAR struct dac_dev_s *mcp47x6_initialize(FAR struct i2c_master_s *i2c,
   if (dacdev == NULL)
     {
       aerr("ERROR: Failed to allocate dac_dev_s instance\n");
+      kmm_free(priv);
       return NULL;
     }
 
