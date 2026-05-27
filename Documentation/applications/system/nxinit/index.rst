@@ -19,7 +19,8 @@ service/daemon management and many more.
 The ``init.rc`` consists of five categories of statements, all line-oriented with
 parameters separated by spaces. The content is processed by a preprocessor,
 following C language specifications for escape rules and comment formats.
-File path: /etc/init.d/init.rc.
+
+File path configured by ``CONFIG_SYSTEM_NXINIT_RC_FILE_PATH``.
 
 1. Actions and Commands
 -----------------------
