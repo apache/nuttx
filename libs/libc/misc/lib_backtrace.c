@@ -253,7 +253,7 @@ static int backtrace_expand(FAR struct backtrace_pool_s *bp)
  * Name: backtrace_exist
  ****************************************************************************/
 
-nosanitize_address
+nosanitize_address no_builtin("memcmp")
 static FAR struct backtrace_entry_s *
 backtrace_find(FAR struct backtrace_pool_s *bp, uint32_t slot,
                FAR const void *stack, int depth)
@@ -277,6 +277,12 @@ backtrace_find(FAR struct backtrace_pool_s *bp, uint32_t slot,
            * large partition) past the test framework's busy-loop threshold.
            * The stack array stores word-aligned function pointers, so word
            * comparison is semantically equivalent to memcmp().
+           *
+           * The no_builtin("memcmp") attribute is required because GCC's
+           * -ftree-loop-distribute-patterns optimization (enabled at -O2)
+           * recognizes this loop as a memcmp pattern and rewrites it back
+           * into a memcmp() call, defeating the nosanitize_address intent
+           * (the called memcmp is still KASAN-instrumented per byte read).
            */
 
           for (i = 0; i < depth; i++)
