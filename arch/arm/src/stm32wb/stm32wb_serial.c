@@ -1096,8 +1096,15 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
 
   /* Configure pins for USART use */
 
-  stm32wb_configgpio(priv->tx_gpio);
-  stm32wb_configgpio(priv->rx_gpio);
+  if (priv->tx_gpio != 0)
+    {
+      stm32wb_configgpio(priv->tx_gpio);
+    }
+
+  if (priv->rx_gpio != 0)
+    {
+      stm32wb_configgpio(priv->rx_gpio);
+    }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
@@ -1320,8 +1327,15 @@ static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
    * then this may need to be a configuration option.
    */
 
-  stm32wb_unconfiggpio(priv->tx_gpio);
-  stm32wb_unconfiggpio(priv->rx_gpio);
+  if (priv->tx_gpio != 0)
+    {
+      stm32wb_unconfiggpio(priv->tx_gpio);
+    }
+
+  if (priv->rx_gpio != 0)
+    {
+      stm32wb_unconfiggpio(priv->rx_gpio);
+    }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
@@ -1632,17 +1646,23 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
               (arg & SER_SINGLEWIRE_PULL_MASK) == SER_SINGLEWIRE_PULLDOWN ?
                                                   GPIO_PULLDOWN : GPIO_FLOAT;
 
-            stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
-                                                  GPIO_OPENDRAIN)) |
-                                                  gpio_val);
+            if (priv->tx_gpio != 0)
+              {
+                stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
+                                                      GPIO_OPENDRAIN)) |
+                                                      gpio_val);
+              }
 
             cr |= USART_CR3_HDSEL;
           }
         else
           {
-            stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
-                                                  GPIO_OPENDRAIN)) |
-                                                  GPIO_PUSHPULL);
+            if (priv->tx_gpio != 0)
+              {
+                stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
+                                                      GPIO_OPENDRAIN)) |
+                                                      GPIO_PUSHPULL);
+              }
 
             cr &= ~USART_CR3_HDSEL;
           }
@@ -1850,7 +1870,6 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags;
-        uint32_t tx_break;
 
         flags = enter_critical_section();
 
@@ -1862,9 +1881,12 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Configure TX as a GPIO output pin and Send a break signal */
 
-        tx_break = GPIO_OUTPUT |
-                   (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
-        stm32wb_configgpio(tx_break);
+        if (priv->tx_gpio != 0)
+          {
+            uint32_t tx_break = GPIO_OUTPUT |
+                    (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
+            stm32wb_configgpio(tx_break);
+          }
 
         leave_critical_section(flags);
       }
@@ -1878,7 +1900,10 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Configure TX back to U(S)ART */
 
-        stm32wb_configgpio(priv->tx_gpio);
+        if (priv->tx_gpio != 0)
+          {
+            stm32wb_configgpio(priv->tx_gpio);
+          }
 
         priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
 
