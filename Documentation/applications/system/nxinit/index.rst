@@ -1,5 +1,5 @@
 ======================
-``init`` Init
+``nxinit`` NXInit
 ======================
 
 Overview
@@ -11,12 +11,12 @@ suitable for all usage scenarios. For instance, the code size required by
 NSH and NSH_LIBRARY is relatively large, and NSH lacks management
 capabilities for daemons/services (such as restarting services).
 
-Therefore, we have newly implemented an Init component that is compatible
-with most of the syntax of Android Init. It is lightweight, supports
-command execution triggered by events, supports service/daemon management,
-and its configuration files support include/import functionalities.
+NXInit was created by Xiaomi to solve these issues. It is compatible with
+most of the syntax of Android Init.
+It is lightweight, supports command execution triggered by events, supports
+service/daemon management and many more.
 
-Init.rc consists of five categories of statements, all line-oriented with
+The ``init.rc`` consists of five categories of statements, all line-oriented with
 parameters separated by spaces. The content is processed by a preprocessor,
 following C language specifications for escape rules and comment formats.
 File path: /etc/init.d/init.rc.
@@ -53,23 +53,6 @@ File path: /etc/init.d/init.rc.
   for restarting exited services), and reboot_on_failure (critical services
   trigger device reboot on startup failure or abnormal exit).
 
-3. Imports
-----------
-Used to import other configuration files, supporting single files or all files
-in a directory (non-recursive).
-
-.. code-block::
-
-    import <path>
-
-In addition, since init.rc undergoes compiler preprocessing, we can also
-include other configuration files during the preprocessing stage using
-the #include directive.
-
-.. code-block::
-
-    #include "example.rc"
-
 Triggers
 ========
 
@@ -81,15 +64,16 @@ triggers (also known as property triggers, e.g., property:a=b). Actions can
 include multiple action triggers but only one event trigger. Triggers can be
 combined with && to represent "AND" conditions.
 
-Note: Currently, only event triggers are supported; action triggers will be
-uploaded as soon as possible.
+.. note:: Currently, only event triggers are supported.
+
+.. todo:: Implement action triggers.
 
 1. Event Trigger Execution Order
 --------------------------------
-1. boot: The first event after Init starts.
-2. init: After BOARDIOC_INIT completes.
+1. boot: The first event after NXInit starts.
+2. init: After boot event completation.
 3. netinit: Optional, after netinit_bringup() returns.
-4. finalinit: After BOARDIOC_FINALINIT completes.
+4. finalinit: After all previous events complete.
 
 2. Action Triggers Checking
 ---------------------------
@@ -100,11 +84,10 @@ uploaded as soon as possible.
 Commands
 ========
 The commands supported by an action fall into three types: the built-in
-commands of Init, the built-in commands of NSH (if NSH is enabled), and
+commands of NXInit, the built-in commands of NSH (if NSH is enabled), and
 Builtin Apps.
 
-The following is an explanation of some of Init's built-in commands
-(some are still under development).
+The following is an explanation of some of NXInit's built-in commands.
 
 - System Operations: mount/umount (mount/unmount file systems), setprop
   (set system properties), chmod/chown (modify file permissions/owner).
@@ -112,12 +95,11 @@ The following is an explanation of some of Init's built-in commands
   class_start/class_stop (batch start/stop service categories).
 - File Operations: mkdir (create directories with configurable permissions,
   owner, and encryption settings), copy/write (copy files/write file content).
-- Others: trigger (trigger events), wait (wait for file existence or timeout),
-  loglevel (set Init log level).
+- Others: trigger (trigger events).
 
 Examples
 ========
-This is an example of enabling the basic functions of the Init component,
+This is an example of enabling the basic functions of the NXInit component,
 with all log levels additionally enabled to facilitate debugging of the
 init.rc script.
 
@@ -153,5 +135,3 @@ init.rc:
         reboot_on_failure 0 /* Reboot device with reason 0 on startup failure or abnormal exit */
         oneshot             /* This service runs only once; releases resources after exit */
 
-    import /etc/init.d/test.rc /* Include test.rc at runtime */
-    #include "test.rc"         /* Include test.rc during preprocessing */
