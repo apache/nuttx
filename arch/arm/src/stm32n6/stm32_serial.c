@@ -730,8 +730,15 @@ static int stm32serial_setup(struct uart_dev_s *dev)
 
   /* Configure pins for USART use */
 
-  stm32_configgpio(priv->tx_gpio);
-  stm32_configgpio(priv->rx_gpio);
+  if (priv->tx_gpio != 0)
+    {
+      stm32_configgpio(priv->tx_gpio);
+    }
+
+  if (priv->rx_gpio != 0)
+    {
+      stm32_configgpio(priv->rx_gpio);
+    }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
@@ -858,12 +865,12 @@ static void stm32serial_shutdown(struct uart_dev_s *dev)
    * not, then this may need to be a configuration option.
    */
 
-  if (priv->unconfigure & USART_UNCONFIGURE_TX)
+  if ((priv->unconfigure & USART_UNCONFIGURE_TX) && (priv->tx_gpio != 0))
     {
       stm32_unconfiggpio(priv->tx_gpio);
     }
 
-  if (priv->unconfigure & USART_UNCONFIGURE_RX)
+  if ((priv->unconfigure & USART_UNCONFIGURE_RX) && (priv->rx_gpio != 0))
     {
       stm32_unconfiggpio(priv->rx_gpio);
     }
