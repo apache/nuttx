@@ -74,7 +74,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WL5_PWR) && defined(CONFIG_STM32WL5_RTC)
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_STM32_RTC)
 static inline void stm32_rcc_resetbkp(void)
 {
   bool init_stat;
@@ -139,7 +139,7 @@ static inline void stm32_rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -162,7 +162,7 @@ void stm32_clockconfig(void)
 
   rcc_resetbkp();
 #endif
-#if defined(CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
@@ -201,19 +201,19 @@ static void stm32_rcc_enableahb1(void)
 
   regval = getreg32(STM32_RCC_AHB1ENR);
 
-#ifdef CONFIG_STM32WL5_DMA1
+#ifdef CONFIG_STM32_DMA1
   /* DMA 1 clock enable */
 
   regval |= RCC_AHB1ENR_DMA1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_DMA2
+#ifdef CONFIG_STM32_DMA2
   /* DMA 2 clock enable */
 
   regval |= RCC_AHB1ENR_DMA2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_CRC
+#ifdef CONFIG_STM32_CRC
   /* CRC clock enable */
 
   regval |= RCC_AHB1ENR_CRCEN;
@@ -277,13 +277,13 @@ static inline void stm32_rcc_enableahb3(void)
 
   regval = getreg32(STM32_RCC_AHB3ENR);
 
-#ifdef CONFIG_STM32WL5_AES
+#ifdef CONFIG_STM32_AES
   /* Cryptographic modules clock enable */
 
   regval |= RCC_AHB2ENR_AESEN;
 #endif
 
-#ifdef CONFIG_STM32WL5_RNG
+#ifdef CONFIG_STM32_RNG
   /* Random number generator clock enable */
 
   regval |= RCC_AHB2ENR_RNGEN;
@@ -295,7 +295,7 @@ static inline void stm32_rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_FLASHEN;
 #endif
 
-#ifdef CONFIG_STM32WL5_IPCC
+#ifdef CONFIG_STM32_IPCC
   /* IPCC interface clock enable */
 
   regval |= RCC_AHB3ENR_IPCCEN;
@@ -322,49 +322,49 @@ static inline void stm32_rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1ENR1);
 
-#ifdef CONFIG_STM32WL5_TIM2
+#ifdef CONFIG_STM32_TIM2
   /* TIM2 clock enable */
 
   regval |= RCC_APB1ENR1_TIM2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2
+#ifdef CONFIG_STM32_SPI2
   /* SPI2 clock enable */
 
   regval |= RCC_APB1ENR1_SPI2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_USART2
+#ifdef CONFIG_STM32_USART2
   /* USART 2 clock enable */
 
   regval |= RCC_APB1ENR1_USART2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_I2C1
+#ifdef CONFIG_STM32_I2C1
   /* I2C1 clock enable */
 
   regval |= RCC_APB1ENR1_I2C1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_I2C2
+#ifdef CONFIG_STM32_I2C2
   /* I2C2 clock enable */
 
   regval |= RCC_APB1ENR1_I2C2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_I2C3
+#ifdef CONFIG_STM32_I2C3
   /* I2C3 clock enable */
 
   regval |= RCC_APB1ENR1_I2C3EN;
 #endif
 
-#if defined (CONFIG_STM32WL5_DAC1)
+#if defined (CONFIG_STM32_DAC1)
   /* DAC interface clock enable */
 
   regval |= RCC_APB1ENR1_DAC1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_LPTIM1
+#ifdef CONFIG_STM32_LPTIM1
   /* Low power timer 1 clock enable */
 
   regval |= RCC_APB1ENR1_LPTIM1EN;
@@ -376,19 +376,19 @@ static inline void stm32_rcc_enableapb1(void)
 
   regval = getreg32(STM32_RCC_APB1ENR2);
 
-#ifdef CONFIG_STM32WL5_LPUART1
+#ifdef CONFIG_STM32_LPUART1
   /* Low power uart clock enable */
 
   regval |= RCC_APB1ENR2_LPUART1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_LPTIM2
+#ifdef CONFIG_STM32_LPTIM2
   /* Low power timer 2 clock enable */
 
   regval |= RCC_APB1ENR2_LPTIM2EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_LPTIM3
+#ifdef CONFIG_STM32_LPTIM3
   /* Low power timer 3 clock enable */
 
   regval |= RCC_APB1ENR2_LPTIM3EN;
@@ -415,37 +415,37 @@ static inline void stm32_rcc_enableapb2(void)
 
   regval = getreg32(STM32_RCC_APB2ENR);
 
-#if defined(CONFIG_STM32WL5_ADC1)
+#if defined(CONFIG_STM32_ADC1)
   /* ADC clock enable */
 
   regval |= RCC_AHB2ENR_ADC1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_TIM1
+#ifdef CONFIG_STM32_TIM1
   /* TIM1 clock enable */
 
   regval |= RCC_APB2ENR_TIM1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
   /* SPI1 clock enable */
 
   regval |= RCC_APB2ENR_SPI1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_USART1
+#ifdef CONFIG_STM32_USART1
   /* USART1 clock enable */
 
   regval |= RCC_APB2ENR_USART1EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_TIM16
+#ifdef CONFIG_STM32_TIM16
   /* TIM16 clock enable */
 
   regval |= RCC_APB2ENR_TIM16EN;
 #endif
 
-#ifdef CONFIG_STM32WL5_TIM17
+#ifdef CONFIG_STM32_TIM17
   /* TIM16 clock enable */
 
   regval |= RCC_APB2ENR_TIM17EN;
@@ -474,17 +474,17 @@ static inline void stm32_rcc_enableccip(void)
   regval = getreg32(STM32_RCC_CCIPR);
 
 #if defined(STM32_I2C_USE_HSI16)
-#ifdef CONFIG_STM32WL5_I2C1
+#ifdef CONFIG_STM32_I2C1
   /* Select HSI16 as I2C1 clock source. */
 
   regval |= RCC_CCIPR_I2C1SEL_HSI;
 #endif
-#ifdef CONFIG_STM32WL5_I2C2
+#ifdef CONFIG_STM32_I2C2
   /* Select HSI16 as I2C2 clock source. */
 
   regval |= RCC_CCIPR_I2C2SEL_HSI;
 #endif
-#ifdef CONFIG_STM32WL5_I2C3
+#ifdef CONFIG_STM32_I2C3
   /* Select HSI16 as I2C3 clock source. */
 
   regval |= RCC_CCIPR_I2C3SEL_HSI;
@@ -500,13 +500,13 @@ static inline void stm32_rcc_enableccip(void)
   regval |= STM32_CLK48_SEL;
 #endif
 
-#if defined(CONFIG_STM32WL5_ADC1)
+#if defined(CONFIG_STM32_ADC1)
   /* Select SYSCLK as ADC clock source */
 
   regval |= RCC_CCIPR_ADCSEL_SYSCLK;
 #endif
 
-#ifdef CONFIG_STM32WL5_DFSDM1
+#ifdef CONFIG_STM32_DFSDM1
   /* Select SYSCLK as DFSDM clock source */
 
   /* RM0394 Rev 3, p. 525 is confused about DFSDM clock source.
@@ -523,7 +523,7 @@ static inline void stm32_rcc_enableccip(void)
   /* I2C4 alone has their clock selection in CCIPR2 register. */
 
 #if defined(STM32_I2C_USE_HSI16)
-#ifdef CONFIG_STM32WL5_I2C4
+#ifdef CONFIG_STM32_I2C4
   regval = getreg32(STM32_RCC_CCIPR2);
 
   /* Select HSI16 as I2C4 clock source. */
@@ -548,7 +548,7 @@ static inline void stm32_rcc_enableccip(void)
  *   stm32_clockconfig()
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -563,7 +563,7 @@ static inline void stm32_rcc_enableccip(void)
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
@@ -605,7 +605,7 @@ void stm32_rcc_enableperipherals(void)
  *   power clocking modes!
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_stdclockconfig(void)
 {
   uint32_t regval;
@@ -759,7 +759,7 @@ void stm32_stdclockconfig(void)
   regval |= STM32_RCC_CFGR_PPRE1;
   putreg32(regval, STM32_RCC_CFGR);
 
-#ifdef CONFIG_STM32WL5_RTC_HSECLOCK
+#ifdef CONFIG_STM32_RTC_HSECLOCK
   /* Set the RTC clock divisor */
 
   regval  = getreg32(STM32_RCC_CFGR);
@@ -849,7 +849,7 @@ void stm32_stdclockconfig(void)
     {
     }
 
-#if defined(CONFIG_STM32WL5_IWDG) || defined(CONFIG_STM32WL5_RTC_LSICLOCK)
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
   /* Low speed internal clock source LSI */
 
   stm32_rcc_enablelsi();

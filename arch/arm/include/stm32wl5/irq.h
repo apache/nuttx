@@ -69,7 +69,7 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1)
+#if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
 #  include <arch/stm32wl5/stm32wl5xxx_cpu1_irq.h>
 #else
 #  error "Unsupported STM32 L5 chip"

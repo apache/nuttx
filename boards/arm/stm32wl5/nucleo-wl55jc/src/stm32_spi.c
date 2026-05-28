@@ -40,7 +40,7 @@
 #include "stm32.h"
 #include "nucleo-wl55jc.h"
 
-#if defined(CONFIG_STM32WL5_SPI1) || defined(CONFIG_STM32WL5_SPI2S2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
 
 /****************************************************************************
  * Public Data
@@ -48,10 +48,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -70,7 +70,7 @@ struct spi_dev_s *g_spi2;
 
 void weak_function stm32_spidev_initialize(void)
 {
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
   /* Configure SPI-based devices */
 
   g_spi1 = stm32_spibus_initialize(1);
@@ -90,7 +90,7 @@ void weak_function stm32_spidev_initialize(void)
 
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
   /* Configure SPI-based devices */
 
   g_spi2 = stm32_spibus_initialize(2);
@@ -123,7 +123,7 @@ void weak_function stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
@@ -178,7 +178,7 @@ int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
 void stm32_spi2s2select(struct spi_dev_s *dev, uint32_t devid,
                       bool selected)
 {
@@ -198,4 +198,4 @@ int stm32_spi2s2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 
 #endif
 
-#endif /* CONFIG_STM32WL5_SPI1 || CONFIG_STM32WL5_SPI2S2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2S2 */
