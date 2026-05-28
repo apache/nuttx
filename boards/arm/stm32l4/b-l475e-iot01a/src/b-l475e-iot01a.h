@@ -46,7 +46,7 @@
 
 /* SPSGRF support depends on:
  *
- *   CONFIG_STM32L4_SPI3  - SPI3 support
+ *   CONFIG_STM32_SPI3  - SPI3 support
  *   CONFIG_WL_SPIRIT     - Spirit wireless library
  *   CONFIG_SPIRIT_NETDEV - Spirit network driver
  *   CONFIG_SCHED_HPWORK  - HP work queue support
@@ -57,7 +57,7 @@
  * And probably a few other things.
  */
 
-#if !defined(CONFIG_STM32L4_SPI3)
+#if !defined(CONFIG_STM32_SPI3)
 #  undef HAVE_SPSGRF
 #endif
 
@@ -73,7 +73,7 @@
 #  undef HAVE_SPSGRF
 #endif
 
-#if !defined(CONFIG_MTD_MX25RXX) || !defined(CONFIG_STM32L4_QSPI)
+#if !defined(CONFIG_MTD_MX25RXX) || !defined(CONFIG_STM32_QSPI)
 #  undef HAVE_MX25R6435F
 #endif
 
@@ -154,8 +154,8 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
-    defined(CONFIG_STM32L4_SPI3)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3)
 void weak_function stm32_spidev_initialize(void);
 #endif
 

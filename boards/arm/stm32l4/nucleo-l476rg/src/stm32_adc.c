@@ -38,7 +38,7 @@
 #include "stm32l4_adc.h"
 #include "nucleo-l476rg.h"
 
-#ifdef CONFIG_STM32L4_ADC1
+#ifdef CONFIG_STM32_ADC1
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -144,4 +144,4 @@ int stm32_adc_setup(void)
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_ADC1 */
+#endif /* CONFIG_STM32_ADC1 */

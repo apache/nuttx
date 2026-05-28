@@ -62,7 +62,7 @@
 #define STM32_SYSMEM_BASE    0x1fff0000     /* 0x1fff0000-0x1fff6fff: System memory */
 #define STM32_OTP_BASE       0x1fff7000     /* 0x1fff7000-0x1fff73ff: OTP memory */
                                             /* 0x1fff7400-0x1fff77ff: Reserved */
-#ifdef CONFIG_STM32L4_STM32L4XR
+#ifdef CONFIG_STM32_STM32L4XR
 #  define STM32_OPTION_BASE  0x1ff00000     /* 0x1ff00000-0x1ff0000f: Option bytes */
                                             /* 0x1ff00010-0x1ff00fff: Reserved */
 #  define STM32_OPTION2_BASE 0x1ff01000     /* 0x1ff01000-0x1ff0100f: Option bytes 2 */
@@ -134,7 +134,7 @@
 #define STM32_OPAMP_BASE      0x40007800
 #define STM32_DAC_BASE        0x40007400
 #define STM32_PWR_BASE        0x40007000
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define STM32_USB_SRAM_BASE 0x40006c00
 #  define STM32_USB_FS_BASE   0x40006800
 #else
@@ -176,7 +176,7 @@
 #define STM32_TIM8_BASE       0x40013400
 #define STM32_SPI1_BASE       0x40013000
 #define STM32_TIM1_BASE       0x40012c00
-#ifndef CONFIG_STM32L4_STM32L4XR
+#ifndef CONFIG_STM32_STM32L4XR
 #  define STM32_SDMMC1_BASE   0x40012800
 #endif
 #define STM32_FIREWALL_BASE   0x40011c00
@@ -199,7 +199,7 @@
 
 /* AHB2 Base Addresses ******************************************************/
 
-#ifdef CONFIG_STM32L4_STM32L4XR
+#ifdef CONFIG_STM32_STM32L4XR
 #  define STM32_SDMMC1_BASE   0x50062400
 #endif
 #define STM32_OCTOSPIIOM_BASE 0x50061c00

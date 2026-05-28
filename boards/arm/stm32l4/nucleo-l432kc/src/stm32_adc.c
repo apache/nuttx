@@ -38,7 +38,7 @@
 #include "stm32l4_adc.h"
 #include "nucleo-l432kc.h"
 
-#ifdef CONFIG_STM32L4_ADC1
+#ifdef CONFIG_STM32_ADC1
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,7 +46,7 @@
 
 /* The number of ADC channels in the conversion list */
 
-#ifdef CONFIG_STM32L4_ADC1_DMA
+#ifdef CONFIG_STM32_ADC1_DMA
 #  define ADC1_NCHANNELS 2
 #else
 #  define ADC1_NCHANNELS 1
@@ -58,7 +58,7 @@
 
 /* Identifying number of each ADC channel. */
 
-#ifdef CONFIG_STM32L4_ADC1_DMA
+#ifdef CONFIG_STM32_ADC1_DMA
 
 static const uint8_t  g_adc1_chanlist[ADC1_NCHANNELS] =
 {
@@ -87,7 +87,7 @@ static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS]  =
   GPIO_ADC1_IN11_0
 };
 
-#endif /* CONFIG_STM32L4_ADC1_DMA */
+#endif /* CONFIG_STM32_ADC1_DMA */
 
 /****************************************************************************
  * Private Functions
@@ -139,4 +139,4 @@ int stm32_adc_setup(void)
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_ADC1 */
+#endif /* CONFIG_STM32_ADC1 */

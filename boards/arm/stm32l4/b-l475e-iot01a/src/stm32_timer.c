@@ -56,7 +56,7 @@ int stm32_timer_driver_setup(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_STM32L4_TIM1
+#ifdef CONFIG_STM32_TIM1
   ret = stm32_timer_initialize("/dev/timer0", 1);
   if (ret < 0)
     {
@@ -65,7 +65,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2
+#ifdef CONFIG_STM32_TIM2
   ret = stm32_timer_initialize("/dev/timer1", 2);
   if (ret < 0)
     {
@@ -74,7 +74,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3
+#ifdef CONFIG_STM32_TIM3
   ret = stm32_timer_initialize("/dev/timer2", 3);
   if (ret < 0)
     {
@@ -83,7 +83,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4
+#ifdef CONFIG_STM32_TIM4
   ret = stm32_timer_initialize("/dev/timer3", 4);
   if (ret < 0)
     {
@@ -92,7 +92,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5
+#ifdef CONFIG_STM32_TIM5
   ret = stm32_timer_initialize("/dev/timer4", 5);
   if (ret < 0)
     {
@@ -101,7 +101,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM6
+#ifdef CONFIG_STM32_TIM6
   ret = stm32_timer_initialize("/dev/timer5", 6);
   if (ret < 0)
     {
@@ -110,7 +110,7 @@ int stm32_timer_driver_setup(void)
     }
 
 #endif
-#ifdef CONFIG_STM32L4_TIM7
+#ifdef CONFIG_STM32_TIM7
   ret = stm32_timer_initialize("/dev/timer6", 7);
   if (ret < 0)
     {
@@ -119,7 +119,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8
+#ifdef CONFIG_STM32_TIM8
   ret = stm32_timer_initialize("/dev/timer7", 8);
   if (ret < 0)
     {
@@ -128,7 +128,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM15
+#ifdef CONFIG_STM32_TIM15
   ret = stm32_timer_initialize("/dev/timer8", 15);
   if (ret < 0)
     {
@@ -137,7 +137,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM16
+#ifdef CONFIG_STM32_TIM16
   ret = stm32_timer_initialize("/dev/timer9", 16);
   if (ret < 0)
     {
@@ -146,7 +146,7 @@ int stm32_timer_driver_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM17
+#ifdef CONFIG_STM32_TIM17
   ret = stm32_timer_initialize("/dev/timer10", 17);
   if (ret < 0)
     {

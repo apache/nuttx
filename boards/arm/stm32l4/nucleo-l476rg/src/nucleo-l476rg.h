@@ -61,12 +61,12 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SPI)
 #  undef  HAVE_MMCSD_SPI
 #endif
 
-#if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_MMCSD_SDIO
 #endif
@@ -265,10 +265,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 #ifdef HAVE_MMCSD_SDIO

@@ -221,7 +221,7 @@ bool stm32_pwr_enableusv(bool set)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 bool stm32_pwr_enable_pvme2(bool set)
 {
   uint32_t regval;

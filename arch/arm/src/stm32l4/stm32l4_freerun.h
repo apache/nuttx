@@ -35,7 +35,7 @@
 
 #include "stm32l4_tim.h"
 
-#ifdef CONFIG_STM32L4_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Public Types
@@ -140,5 +140,5 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun);
 }
 #endif
 
-#endif /* CONFIG_STM32L4_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_FREERUN_H */

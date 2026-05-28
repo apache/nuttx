@@ -68,7 +68,7 @@ void stm32_board_initialize(void)
   stm32_spiinitialize();
 #endif
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   /* Initialize USB if the
    * 1) OTG FS controller is in the configuration and
    * 2) disabled, and

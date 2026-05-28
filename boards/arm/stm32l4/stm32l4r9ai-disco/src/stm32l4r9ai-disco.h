@@ -67,7 +67,7 @@
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
-#ifndef CONFIG_STM32L4_OTGFS
+#ifndef CONFIG_STM32_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #endif
@@ -188,10 +188,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 
@@ -252,7 +252,7 @@ int stm32_dac_setup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ADC) && defined(CONFIG_STM32L4_DFSDM)
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_DFSDM)
 int stm32_dfsdm_setup(void);
 #endif
 

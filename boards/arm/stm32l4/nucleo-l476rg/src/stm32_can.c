@@ -43,11 +43,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_STM32_CAN1)
 #  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
 #endif
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
 #  define CAN_PORT 1
 #endif
 
@@ -65,7 +65,7 @@
 
 int stm32_can_setup(void)
 {
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   struct can_dev_s *can;
   int ret;
 

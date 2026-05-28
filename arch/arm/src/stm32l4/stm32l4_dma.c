@@ -35,10 +35,10 @@
  * family.
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L4X5) || \
+    defined(CONFIG_STM32_STM32L4X6)
 #include "stm32l4x6xx_dma.c"
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 #include "stm32l4xrxx_dma.c"
 #else
 #  error "Unsupported STM32L4 chip"

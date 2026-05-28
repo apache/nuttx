@@ -344,10 +344,10 @@ int stm32_configgpio(uint32_t cfgset)
    * (RM0351 Rev 7, p521)
    */
 
-#if defined(CONFIG_STM32L4_STM32L471XX) || \
-    defined(CONFIG_STM32L4_STM32L475XX) || \
-    defined(CONFIG_STM32L4_STM32L476XX) || \
-    defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32_STM32L471XX) || \
+    defined(CONFIG_STM32_STM32L475XX) || \
+    defined(CONFIG_STM32_STM32L476XX) || \
+    defined(CONFIG_STM32_STM32L486XX)
 
   if (pinmode == GPIO_MODER_ANALOG)
     {

@@ -44,7 +44,7 @@
 #include "stm32.h"
 #include "stm32l4_can.h"
 
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,10 +62,10 @@
 
 /* Bit timing ***************************************************************/
 
-#define CAN_BIT_QUANTA (CONFIG_STM32L4_CAN_TSEG1 + CONFIG_STM32L4_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_STM32_CAN_TSEG1 + CONFIG_STM32_CAN_TSEG2 + 1)
 
 #ifndef CONFIG_DEBUG_CAN_INFO
-#  undef CONFIG_STM32L4_CAN_REGDEBUG
+#  undef CONFIG_STM32_CAN_REGDEBUG
 #endif
 
 /****************************************************************************
@@ -97,7 +97,7 @@ static void stm32l4can_putreg(struct stm32_can_s *priv, int offset,
                               uint32_t value);
 static void stm32l4can_putfreg(struct stm32_can_s *priv, int offset,
                                uint32_t value);
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_dumpctrlregs(struct stm32_can_s *priv,
                                     const char *msg);
 static void stm32l4can_dumpmbregs(struct stm32_can_s *priv,
@@ -175,7 +175,7 @@ static const struct can_ops_s g_canops =
   .co_txempty       = stm32l4can_txempty,
 };
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
 static struct stm32_can_s g_can1priv =
 {
   .port             = 1,
@@ -188,7 +188,7 @@ static struct stm32_can_s g_can1priv =
   .filter           = 0,
   .base             = STM32_CAN1_BASE,
   .fbase            = STM32_CAN1_BASE,
-  .baud             = CONFIG_STM32L4_CAN1_BAUD,
+  .baud             = CONFIG_STM32_CAN1_BAUD,
 };
 
 static struct can_dev_s g_can1dev =
@@ -217,7 +217,7 @@ static struct can_dev_s g_can1dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static uint32_t stm32l4can_vgetreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -313,7 +313,7 @@ static uint32_t stm32l4can_getfreg(struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
@@ -365,7 +365,7 @@ static void stm32l4can_putfreg(struct stm32_can_s *priv, int offset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_dumpctrlregs(struct stm32_can_s *priv,
                                     const char *msg)
 {
@@ -410,7 +410,7 @@ static void stm32l4can_dumpctrlregs(struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_dumpmbregs(struct stm32_can_s *priv,
                                   const char *msg)
 {
@@ -476,7 +476,7 @@ static void stm32l4can_dumpmbregs(struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_dumpfiltregs(struct stm32_can_s *priv,
                                     const char *msg)
 {
@@ -535,7 +535,7 @@ static void stm32l4can_reset(struct can_dev_s *dev)
 
   /* Get the bits in the AHB1RSTR1 register needed to reset this CAN device */
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
       regbit = RCC_APB1RSTR1_CAN1RST;
@@ -1729,15 +1729,15 @@ static int stm32l4can_bittiming(struct stm32_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32L4_CAN_TSEG1,
-   * ts2 is CONFIG_STM32L4_CAN_TSEG2 and we calculate brp to achieve
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32_CAN_TSEG1,
+   * ts2 is CONFIG_STM32_CAN_TSEG2 and we calculate brp to achieve
    * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
     {
-      ts1 = CONFIG_STM32L4_CAN_TSEG1;
-      ts2 = CONFIG_STM32L4_CAN_TSEG2;
+      ts1 = CONFIG_STM32_CAN_TSEG1;
+      ts2 = CONFIG_STM32_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
@@ -2148,7 +2148,7 @@ struct can_dev_s *stm32_caninitialize(int port)
    * by stm32_clockconfig() early in the reset sequence.
    */
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (port == 1)
     {
       /* Select the CAN1 device structure */
@@ -2172,4 +2172,4 @@ struct can_dev_s *stm32_caninitialize(int port)
   return dev;
 }
 
-#endif /* CONFIG_CAN && (CONFIG_STM32L4_CAN1 || CONFIG_STM32L4_CAN2) */
+#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */

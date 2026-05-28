@@ -144,7 +144,7 @@
  *
  * The clock input and M divider are identical to the main PLL.
  * However the multiplier and postscalers are independent.
- * The PLLSAI1 is configured only if CONFIG_STM32L4_SAI1PLL is defined
+ * The PLLSAI1 is configured only if CONFIG_STM32_SAI1PLL is defined
  *
  *   SAI1VCO input frequency        = PLL input clock frequency
  *   SAI1VCO output frequency       = SAI1VCO input frequency × PLLSAI1N,
@@ -170,7 +170,7 @@
  *
  * The clock input and M divider are identical to the main PLL.
  * However the multiplier and postscalers are independent.
- * The PLLSAI2 is configured only if CONFIG_STM32L4_SAI2PLL is defined
+ * The PLLSAI2 is configured only if CONFIG_STM32_SAI2PLL is defined
  *
  *   SAI2VCO input frequency        = PLL input clock frequency
  *   SAI2VCO output frequency       = SAI2VCO input frequency × PLLSAI2N,
@@ -262,7 +262,7 @@
 
 /* CLK48 will come from HSI48 */
 
-#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
@@ -360,7 +360,7 @@
 
 /* Enable CLK48; get it from PLLSAI1 */
 
-#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
@@ -443,7 +443,7 @@
 
 /* Enable CLK48; get it from HSI48 */
 
-#if defined(CONFIG_STM32L4_USBFS) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE

@@ -72,8 +72,8 @@ void stm32_board_initialize(void)
    * function stm32_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
-                                    defined(CONFIG_STM32L4_SPI3)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+                                    defined(CONFIG_STM32_SPI3)
   stm32_spiinitialize();
 #endif
 
@@ -82,7 +82,7 @@ void stm32_board_initialize(void)
    * brought into the build.
    */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32L4_USB)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   stm32_usbinitialize();
 #endif
 }

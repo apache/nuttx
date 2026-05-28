@@ -65,10 +65,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_I2C
-#  ifdef CONFIG_STM32L4_I2C1
+#  ifdef CONFIG_STM32_I2C1
 static struct i2c_master_s *g_i2c1;
 #  endif
-#  ifdef CONFIG_STM32L4_I2C3
+#  ifdef CONFIG_STM32_I2C3
 static struct i2c_master_s *g_i2c3;
 #  endif
 #endif
@@ -135,14 +135,14 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_I2C
   i2cinfo("Initializing I2C buses\n");
-#ifdef CONFIG_STM32L4_I2C1
+#ifdef CONFIG_STM32_I2C1
   g_i2c1 = stm32_i2cbus_initialize(1);
 #ifdef CONFIG_I2C_DRIVER
   i2c_register(g_i2c1, 1);
 #endif
 #endif
 
-#ifdef CONFIG_STM32L4_I2C3
+#ifdef CONFIG_STM32_I2C3
   g_i2c3 = stm32_i2cbus_initialize(3);
 #ifdef CONFIG_I2C_DRIVER
   i2c_register(g_i2c3, 3);
@@ -178,7 +178,7 @@ int stm32_bringup(void)
   ainfo("Initializing ADC\n");
 
   stm32_adc_setup();
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32_DFSDM
   /* Initialize DFSDM and register its filters as additional ADC devices. */
 
   ret = stm32_dfsdm_setup();

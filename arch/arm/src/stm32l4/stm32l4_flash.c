@@ -50,12 +50,12 @@
 #include "stm32l4_flash.h"
 #include "arm_internal.h"
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-      defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR))
+#if !(defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L4X5) || \
+      defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR))
 #  error "Unrecognized STM32 chip"
 #endif
 
-#if !defined(CONFIG_STM32L4_FLASH_OVERRIDE_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
 #  warning "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
@@ -153,9 +153,9 @@ static inline void flash_erase(size_t page)
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PNB_MASK,
               FLASH_CR_PNB(page & 0xff));
 
-#if defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6) || \
-    defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X5) || \
+    defined(CONFIG_STM32_STM32L4X6) || \
+    defined(CONFIG_STM32_STM32L4XR)
   if (page <= 0xff)
     {
       /* Select bank 1 */
@@ -180,7 +180,7 @@ static inline void flash_erase(size_t page)
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
 }
 
-#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
 static void data_cache_disable(void)
 {
   modifyreg32(STM32_FLASH_ACR, FLASH_ACR_DCEN, 0);
@@ -196,7 +196,7 @@ static void data_cache_enable(void)
 
   modifyreg32(STM32_FLASH_ACR, 0, FLASH_ACR_DCEN);
 }
-#endif /* defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
+#endif /* defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW) */
 
 /****************************************************************************
  * Public Functions
@@ -494,7 +494,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
       /* Write the page. Must be with double-words. */
 
-#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
       data_cache_disable();
 #endif
 
@@ -530,7 +530,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
       modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
       set_pg_bit = false;
 
-#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
       data_cache_enable();
 #endif
 
@@ -548,7 +548,7 @@ out:
   if (set_pg_bit)
     {
       modifyreg32(STM32_FLASH_CR, FLASH_CR_PG, 0);
-#if defined(CONFIG_STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
+#if defined(CONFIG_STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW)
       data_cache_enable();
 #endif
     }
