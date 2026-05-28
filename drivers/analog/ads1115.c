@@ -793,7 +793,7 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
   if (ret != OK)
     {
       aerr("Failed to initialize ADS1115\n");
-      free(priv);
+      kmm_free(priv);
       return NULL;
     }
 
@@ -801,6 +801,7 @@ FAR struct adc_dev_s *ads1115_initialize(FAR struct i2c_master_s *i2c,
   if (adcdev == NULL)
     {
       aerr("ERROR: Failed to allocate adc_dev_s instance\n");
+      kmm_free(priv);
       return NULL;
     }
 
