@@ -49,11 +49,11 @@
 #  undef HAVE_PWM
 #endif
 
-#ifndef CONFIG_STM32H5_TIM1
+#ifndef CONFIG_STM32_TIM1
 #  undef HAVE_PWM
 #endif
 
-#ifndef CONFIG_STM32H5_TIM1_PWM
+#ifndef CONFIG_STM32_TIM1_PWM
 #  undef HAVE_PWM
 #endif
 

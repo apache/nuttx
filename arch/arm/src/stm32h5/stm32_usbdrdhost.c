@@ -62,7 +62,7 @@
 #include "hardware/stm32h5xxx_pwr.h"
 #include "stm32_usbdrdhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32H5_USBFS_HOST)
+#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_USBFS_HOST)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,12 +70,12 @@
 
 /* Configuration */
 
-#ifndef CONFIG_STM32H5_USBDRD_NCHANNELS
-#  define CONFIG_STM32H5_USBDRD_NCHANNELS 8
+#ifndef CONFIG_STM32_USBDRD_NCHANNELS
+#  define CONFIG_STM32_USBDRD_NCHANNELS 8
 #endif
 
-#ifndef CONFIG_STM32H5_USBDRD_DESCSIZE
-#  define CONFIG_STM32H5_USBDRD_DESCSIZE 128
+#ifndef CONFIG_STM32_USBDRD_DESCSIZE
+#  define CONFIG_STM32_USBDRD_DESCSIZE 128
 #endif
 
 #ifndef CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT
@@ -84,7 +84,7 @@
 
 /* Hardware definitions */
 
-#define STM32_NHOST_CHANNELS    CONFIG_STM32H5_USBDRD_NCHANNELS
+#define STM32_NHOST_CHANNELS    CONFIG_STM32_USBDRD_NCHANNELS
 #define STM32_EP0_MAX_PACKET_SIZE 64
 #define STM32_RETRY_COUNT       3   /* Control transfer retries */
 
@@ -2176,14 +2176,14 @@ static int stm32_alloc(struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(drvr && buffer && maxlen);
 
-  alloc = kmm_malloc(CONFIG_STM32H5_USBDRD_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_STM32_USBDRD_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
     }
 
   *buffer = alloc;
-  *maxlen = CONFIG_STM32H5_USBDRD_DESCSIZE;
+  *maxlen = CONFIG_STM32_USBDRD_DESCSIZE;
   return OK;
 }
 
@@ -2890,4 +2890,4 @@ void stm32_usbdrdhost_vbusdrive(int port, bool enable)
   uinfo("VBUS drive port=%d enable=%d (default - no-op)\n", port, enable);
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_STM32H5_USBFS_HOST */
+#endif /* CONFIG_USBHOST && CONFIG_STM32_USBFS_HOST */

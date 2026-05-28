@@ -36,7 +36,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H5_USBFS_HOST) && !defined(CONFIG_STM32H5_USE_HSE)
+#if defined(CONFIG_STM32_USBFS_HOST) && !defined(CONFIG_STM32_USE_HSE)
     #error "This board config requires HSE to use the USB HOST."
     "HSI48 is not stable enough to use as a host."
     "To use HSE on the nucleo-H563ZI,"
@@ -65,7 +65,7 @@
 #define STM32_LSI_FREQUENCY         32000
 #define STM32_LSE_FREQUENCY         32768
 
-#ifdef CONFIG_STM32H5_USE_HSE
+#ifdef CONFIG_STM32_USE_HSE
 
 #define STM32_HSE_FREQUENCY     25000000ul
 #define STM32_BOARD_USEHSE
@@ -108,7 +108,7 @@
 #define STM32_VCO2_FRQ            ((STM32_HSE_FREQUENCY / 5) * 60)
 #define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
 
-#if defined(CONFIG_STM32H5_USBFS_HOST)
+#if defined(CONFIG_STM32_USBFS_HOST)
 /* PLL3 config: Generate 48 MHz for USB from 25 MHz HSE.
  * VCO input = 25 MHz / 5 = 5 MHz
  * VCO output = 5 MHz * 96 = 480 MHz
@@ -134,7 +134,7 @@
 /* Use PLL3Q (48 MHz) for USB - more stable than HSI48 */
 #define STM32_CLKUSB_SEL      RCC_CCIPR4_USBSEL_PLL3QCK
 
-#endif /* CONFIG_STM32H5_USBFS_HOST */
+#endif /* CONFIG_STM32_USBFS_HOST */
 
 #else
 
@@ -181,22 +181,22 @@
 #define STM32_VCO2_FRQ            ((STM32_HSI_FREQUENCY / 8) * 75)
 #define STM32_PLL2R_FREQUENCY     (STM32_VCO2_FRQ / 4)
 
-#endif /* CONFIG_STM32H5_USE_HSE*/
+#endif /* CONFIG_STM32_USE_HSE*/
 
 /* Enable CLK48; get it from HSI48 */
 
-#if defined(CONFIG_STM32H5_USBFS) || defined(CONFIG_STM32H5_RNG)
+#if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #endif
 
-#if defined(CONFIG_STM32H5_USBFS)
+#if defined(CONFIG_STM32_USBFS)
 #  define STM32_CLKUSB_SEL      RCC_CCIPR4_USBSEL_HSI48KERCK
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_USB
 #else
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
 #endif
 
-#if defined(CONFIG_STM32H5_RNG)
+#if defined(CONFIG_STM32_RNG)
 #  define STM32_CLKRNG_SEL      RCC_CCIPR5_RNGSEL_HSI48KERCK
 #endif
 
