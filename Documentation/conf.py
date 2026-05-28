@@ -87,6 +87,7 @@ exclude_patterns = [
     ".DS_Store",
     "legacy_README.md",
     "venv",
+    ".venv",
 ]
 
 # list of documentation versions to offer (besides latest). this will be
