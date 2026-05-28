@@ -747,7 +747,7 @@ static void gnss_push_event(FAR void *priv, FAR const void *data,
  *   count   - The array size of nbuffer.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

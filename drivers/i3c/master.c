@@ -2171,7 +2171,7 @@ void i3c_master_detach_i2c_dev(FAR struct i3c_master_controller *master,
  *     -ENOTSUP if set to true since secondary masters are not yet supported
  *
  * return:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

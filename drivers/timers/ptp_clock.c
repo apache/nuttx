@@ -412,7 +412,7 @@ int ptp_clockid_to_filep(clockid_t clock_id, FAR struct file **filep)
  *   devno   - The user specifies number of device. ex: /dev/ptpX.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

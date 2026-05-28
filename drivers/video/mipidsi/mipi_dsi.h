@@ -58,7 +58,7 @@ extern "C"
  *   host - An instance of the struct mipi_dsi_host
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/
@@ -78,7 +78,7 @@ int mipi_dsi_host_driver_register(FAR struct mipi_dsi_host *host);
  *   device - An instance of the struct mipi_dsi_device
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

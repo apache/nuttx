@@ -1376,7 +1376,7 @@ void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
  *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/
@@ -1422,7 +1422,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
  *   esize - The element size of intermediate circular buffer.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

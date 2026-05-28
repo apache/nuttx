@@ -181,7 +181,7 @@ static int ptp_clock_dummy_getres(FAR struct ptp_lowerhalf_s *lower,
  *   devno - The user specifies number of device. ex: /dev/ptpX.
  *
  * Returned Value:
- *   OK if the driver was successfully initialize; A negated errno value is
+ *   OK if the driver was successfully initialized; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

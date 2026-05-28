@@ -386,7 +386,7 @@ static int i2cdrvr_unlink(FAR struct inode *inode)
  *     where N is the minor number
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

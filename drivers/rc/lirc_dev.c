@@ -766,7 +766,7 @@ static ssize_t lirc_read(FAR struct file *filep, FAR char *buffer,
  *           devno already exists, -EEXIST will be returned.
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/

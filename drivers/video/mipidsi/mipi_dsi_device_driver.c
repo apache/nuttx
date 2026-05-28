@@ -196,7 +196,7 @@ static int dsi_dev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  *   device - An instance of the struct mipi_dsi_device
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/
