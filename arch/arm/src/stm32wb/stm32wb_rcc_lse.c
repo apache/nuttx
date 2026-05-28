@@ -35,16 +35,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY
-#  if CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-#  if CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
@@ -86,11 +86,11 @@ void stm32_rcc_enable_lse(void)
 
       regval |= RCC_BDCR_LSEON;
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
       /* Set start-up drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+      regval |= CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
 #endif
 
@@ -103,18 +103,18 @@ void stm32_rcc_enable_lse(void)
           stm32_waste();
         }
 
-#if defined(CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
-    CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY != \
-    CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#if defined(CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
+    CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY != \
+    CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 
-#  if CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
+#  if CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
 #    error "STM32WB only allows lowering LSE drive capability to zero"
 #  endif
 
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
+      regval |= CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
       putreg32(regval, STM32_RCC_BDCR);
 #endif

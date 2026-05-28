@@ -40,14 +40,14 @@
 #define STM32_NLPTIM              2   /* Two low-power timers, LPTIM1-2 */
 #define STM32_NGTIMNDMA           0   /* No general timers without DMA */
 
-#if defined(CONFIG_STM32WB_STM32WB30) || defined(CONFIG_STM32WB_STM32WB50) \
-    || defined(CONFIG_STM32WB_STM32WB35) || defined(CONFIG_STM32WB_STM32WB55)
+#if defined(CONFIG_STM32_STM32WB30) || defined(CONFIG_STM32_STM32WB50) \
+    || defined(CONFIG_STM32_STM32WB35) || defined(CONFIG_STM32_STM32WB55)
 #  define STM32_NGTIM16           2   /* 16-bit general timers TIM16-17 with DMA */
 #else
 #  define STM32_NGTIM16           0   /* No 16-bit general timers */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB35) || defined(CONFIG_STM32WB_STM32WB55)
+#if defined(CONFIG_STM32_STM32WB35) || defined(CONFIG_STM32_STM32WB55)
 #  define STM32_NDMA              2   /* DMA1-2 with 7 channels each */
 #  define STM32_NI2S              1   /* SAI1 (dual channel high quality audio) */
 #  define STM32_NI2C              2   /* I2C1, I2C3 */
@@ -67,8 +67,8 @@
 #  define STM32_NSPI              1   /* SPI1 */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB15) || defined(CONFIG_STM32WB_STM32WB35) \
-    || defined(CONFIG_STM32WB_STM32WB55)
+#if defined(CONFIG_STM32_STM32WB15) || defined(CONFIG_STM32_STM32WB35) \
+    || defined(CONFIG_STM32_STM32WB55)
 #  define STM32_NLPUART           1   /* LPUART1 */
 #else
 #  define STM32_NLPUART           0   /* No LPUART */
@@ -80,7 +80,7 @@
 #  define STM32_NCAPSENSE         0   /* No Capacitive sensing */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB55)
+#if defined(CONFIG_STM32_STM32WB55)
 #  define STM32_NLCD              1   /* One LCD controller with up to 8x40
                                          * terminals, depending on subfamily.
                                          * 55Cx: 4x13
@@ -138,20 +138,20 @@
  *   3) 32 KiB of SRAM2b beginning at address 0x2003:8000 - 0x2004:0000
  */
 
-#if defined(CONFIG_STM32WB_STM32WB10) || defined(CONFIG_STM32WB_STM32WB15)
+#if defined(CONFIG_STM32_STM32WB10) || defined(CONFIG_STM32_STM32WB15)
 #  define STM32_SRAM1_SIZE        (12*1024)
 #  define STM32_SRAM2A_SIZE       (32*1024)
 #  define STM32_SRAM2B_SIZE       (4*1024)
-#elif defined(CONFIG_STM32WB_STM32WB30) || defined(CONFIG_STM32WB_STM32WB35)
+#elif defined(CONFIG_STM32_STM32WB30) || defined(CONFIG_STM32_STM32WB35)
 #  define STM32_SRAM1_SIZE        (32*1024)
 #  define STM32_SRAM2A_SIZE       (32*1024)
 #  define STM32_SRAM2B_SIZE       (32*1024)
-#elif (defined(CONFIG_STM32WB_STM32WB50) || defined(CONFIG_STM32WB_STM32WB55)) \
+#elif (defined(CONFIG_STM32_STM32WB50) || defined(CONFIG_STM32_STM32WB55)) \
       && defined(CONFIG_STM32WB_IO_CONFIG_C)
 #  define STM32_SRAM1_SIZE        (64*1024)
 #  define STM32_SRAM2A_SIZE       (32*1024)
 #  define STM32_SRAM2B_SIZE       (32*1024)
-#elif defined(CONFIG_STM32WB_STM32WB55) && \
+#elif defined(CONFIG_STM32_STM32WB55) && \
       (defined(CONFIG_STM32WB_IO_CONFIG_R) || defined(CONFIG_STM32WB_IO_CONFIG_V))
 #  define STM32_SRAM1_SIZE        (192*1024)
 #  define STM32_SRAM2A_SIZE       (32*1024)

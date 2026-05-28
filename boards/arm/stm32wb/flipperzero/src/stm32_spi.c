@@ -85,7 +85,7 @@ void weak_function stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 #ifdef CONFIG_LCD_ST7565

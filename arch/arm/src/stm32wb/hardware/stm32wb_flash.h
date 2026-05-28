@@ -35,7 +35,7 @@
 
 /* Flash size is known from the chip selection:
  *
- *   When CONFIG_STM32WB_FLASH_OVERRIDE_DEFAULT is set the
+ *   When CONFIG_STM32_FLASH_OVERRIDE_DEFAULT is set the
  *   CONFIG_STM32WB_FLASH_CONFIG_x selects the default FLASH size based on
  *   the chip part number.  This value can be overridden with
  *   CONFIG_STM32WB_FLASH_OVERRIDE_x
@@ -50,38 +50,38 @@
  *   N.B. Only Single bank mode is supported
  */
 
-#if !defined(CONFIG_STM32WB_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32WB_FLASH_OVERRIDE_C_256) && \
-    !defined(CONFIG_STM32WB_FLASH_OVERRIDE_C_320) && \
-    !defined(CONFIG_STM32WB_FLASH_OVERRIDE_E_512) && \
-    !defined(CONFIG_STM32WB_FLASH_OVERRIDE_Y_640) && \
-    !defined(CONFIG_STM32WB_FLASH_OVERRIDE_G_1024) && \
-    !defined(CONFIG_STM32WB_FLASH_CONFIG_C_256) && \
-    !defined(CONFIG_STM32WB_FLASH_CONFIG_C_320) && \
-    !defined(CONFIG_STM32WB_FLASH_CONFIG_E_512) && \
-    !defined(CONFIG_STM32WB_FLASH_CONFIG_Y_640) && \
-    !defined(CONFIG_STM32WB_FLASH_CONFIG_G_1024)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_C) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_C_320) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_Y) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_C) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_C_320) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_Y) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_G)
 #  error "Flash size not defined"
 #endif
 
 /* Override of the Flash has been chosen */
 
-#if !defined(CONFIG_STM32WB_FLASH_OVERRIDE_DEFAULT)
-#  undef CONFIG_STM32WB_FLASH_CONFIG_C_256
-#  undef CONFIG_STM32WB_FLASH_CONFIG_C_320
-#  undef CONFIG_STM32WB_FLASH_CONFIG_E_512
-#  undef CONFIG_STM32WB_FLASH_CONFIG_Y_640
-#  undef CONFIG_STM32WB_FLASH_CONFIG_G_1024
-#  if defined(CONFIG_STM32WB_FLASH_OVERRIDE_C_256)
-#    define CONFIG_STM32WB_FLASH_CONFIG_C_256
-#  elif defined(CONFIG_STM32WB_FLASH_OVERRIDE_C_320)
-#    define CONFIG_STM32WB_FLASH_CONFIG_C_320
-#  elif defined(CONFIG_STM32WB_FLASH_OVERRIDE_E_512)
-#    define CONFIG_STM32WB_FLASH_CONFIG_E_512
-#  elif defined(CONFIG_STM32WB_FLASH_OVERRIDE_Y_640)
-#    define CONFIG_STM32WB_FLASH_CONFIG_Y_640
-#  elif defined(CONFIG_STM32WB_FLASH_OVERRIDE_G_1024)
-#    define CONFIG_STM32WB_FLASH_CONFIG_G_1024
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
+#  undef CONFIG_STM32_FLASH_CONFIG_C
+#  undef CONFIG_STM32_FLASH_CONFIG_C_320
+#  undef CONFIG_STM32_FLASH_CONFIG_E
+#  undef CONFIG_STM32_FLASH_CONFIG_Y
+#  undef CONFIG_STM32_FLASH_CONFIG_G
+#  if defined(CONFIG_STM32_FLASH_OVERRIDE_C)
+#    define CONFIG_STM32_FLASH_CONFIG_C
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_C_320)
+#    define CONFIG_STM32_FLASH_CONFIG_C_320
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_E)
+#    define CONFIG_STM32_FLASH_CONFIG_E
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_Y)
+#    define CONFIG_STM32_FLASH_CONFIG_Y
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_G)
+#    define CONFIG_STM32_FLASH_CONFIG_G
 #  endif
 #endif
 
@@ -89,15 +89,15 @@
 
 #define STM32_FLASH_PAGESIZE      4096
 
-#if defined(CONFIG_STM32WB_FLASH_CONFIG_C_256)   /* 256 kB */
+#if defined(CONFIG_STM32_FLASH_CONFIG_C)   /* 256 kB */
 #  define STM32_FLASH_NPAGES      64
-#elif defined(CONFIG_STM32WB_FLASH_CONFIG_C_320) /* 320 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_C_320) /* 320 kB */
 #  define STM32_FLASH_NPAGES      80
-#elif defined(CONFIG_STM32WB_FLASH_CONFIG_E_512) /* 512 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_E) /* 512 kB */
 #  define STM32_FLASH_NPAGES      128
-#elif defined(CONFIG_STM32WB_FLASH_CONFIG_Y_640) /* 640 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_Y) /* 640 kB */
 #  define STM32_FLASH_NPAGES      160
-#elif defined(CONFIG_STM32WB_FLASH_CONFIG_G_1024) /* 1 MB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_G) /* 1 MB */
 #  define STM32_FLASH_NPAGES      256
 #else
 #  error "Unknown flash configuration!"

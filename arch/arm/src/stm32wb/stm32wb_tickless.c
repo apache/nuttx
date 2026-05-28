@@ -84,8 +84,8 @@
 
 #undef HAVE_32BIT_TICKLESS
 
-#ifdef CONFIG_STM32WB_TICKLESS_TIMER
-#  if CONFIG_STM32WB_TICKLESS_TIMER == 2
+#ifdef CONFIG_STM32_TICKLESS_TIMER
+#  if CONFIG_STM32_TICKLESS_TIMER == 2
 #    define HAVE_32BIT_TICKLESS 1
 #  endif
 #else
@@ -360,27 +360,27 @@ static int stm32_tickless_handler(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  switch (CONFIG_STM32WB_TICKLESS_TIMER)
+  switch (CONFIG_STM32_TICKLESS_TIMER)
     {
-#ifdef CONFIG_STM32WB_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         g_tickless.base = STM32_TIM1_BASE;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         g_tickless.base = STM32_TIM16_BASE;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         g_tickless.base = STM32_TIM17_BASE;
         break;
@@ -393,8 +393,8 @@ void up_timer_initialize(void)
   /* Get the TC frequency that corresponds to the requested resolution */
 
   g_tickless.frequency = USEC_PER_SEC / (uint32_t)CONFIG_USEC_PER_TICK;
-  g_tickless.timer     = CONFIG_STM32WB_TICKLESS_TIMER;
-  g_tickless.channel   = CONFIG_STM32WB_TICKLESS_CHANNEL;
+  g_tickless.timer     = CONFIG_STM32_TICKLESS_TIMER;
+  g_tickless.channel   = CONFIG_STM32_TICKLESS_CHANNEL;
   g_tickless.pending   = false;
   g_tickless.period    = 0;
   g_tickless.overflow  = 0;

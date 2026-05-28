@@ -37,7 +37,7 @@
 
 #include "stm32wb_freerun.h"
 
-#ifdef CONFIG_STM32WB_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Private Functions
@@ -297,4 +297,4 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
   return OK;
 }
 
-#endif /* CONFIG_STM32WB_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */
