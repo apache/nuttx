@@ -20,5 +20,6 @@
 #
 # ##############################################################################
 
-add_subdirectory(src)
-target_include_directories(board PRIVATE include)
+if(CONFIG_ARCH_BOARD_COMMON)
+  add_subdirectory(${NUTTX_DIR}/boards/arm/common/stm32 stm32_common)
+endif()

@@ -5208,13 +5208,13 @@ if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
 endif
 if ARCH_CHIP_STM32
-source "boards/arm/stm32/common/Kconfig"
+source "boards/arm/common/stm32/Kconfig"
 endif
 if ARCH_CHIP_STM32F7
 source "boards/arm/stm32f7/common/Kconfig"
 endif
 if ARCH_CHIP_STM32F0L0G0
-source "boards/arm/stm32f0l0g0/common/Kconfig"
+source "boards/arm/common/stm32/Kconfig"
 endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"

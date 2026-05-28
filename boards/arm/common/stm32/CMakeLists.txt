@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32/common/CMakeLists.txt
+# boards/arm/common/stm32/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,6 +20,5 @@
 #
 # ##############################################################################
 
-if(CONFIG_ARCH_BOARD_COMMON)
-  add_subdirectory(${NUTTX_DIR}/boards/arm/common/stm32 stm32_common)
-endif()
+add_subdirectory(src)
+target_include_directories(board PRIVATE include)

@@ -62,7 +62,7 @@ kbd-codec layer.
      ``board_kmatrix_initialize("/dev/keypad0")``).
 
 **Reference Implementation (STM32F4Discovery)**. The current reference
-is in ``boards/arm/stm32/common/src/stm32_kmatrix_gpio.c``:
+is in ``boards/arm/common/stm32/src/stm32_kmatrix_gpio.c``:
 
 - Rows: ``BOARD_KMATRIX_ROW0..3`` (outputs)
 - Columns: ``BOARD_KMATRIX_COL0..2`` (inputs with pull-up)
