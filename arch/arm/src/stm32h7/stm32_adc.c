@@ -1947,6 +1947,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
     {
       case ANIOC_TRIGGER:
         {
+          priv->current = 0;
           adc_startconv(priv, true);
         }
         break;
