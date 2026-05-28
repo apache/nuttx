@@ -108,7 +108,7 @@ void board_late_initialize(void)
 {
   int ret;
 
-#if defined(CONFIG_STM32WL5_SPI1) || defined(CONFIG_STM32WL5_SPI2S2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
   stm32_spidev_initialize();
 #endif
 

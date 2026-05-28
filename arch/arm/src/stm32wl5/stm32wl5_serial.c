@@ -82,8 +82,8 @@
  */
 
 #  if defined(CONFIG_USART2_RXDMA)
-#    if !defined(CONFIG_STM32WL5_DMA1) && !defined(CONFIG_STM32WL5_DMAMUX)
-#      error STM32WL5 USART2/3 receive DMA requires CONFIG_STM32WL5_DMA1
+#    if !defined(CONFIG_STM32_DMA1) && !defined(CONFIG_STM32_DMAMUX)
+#      error STM32WL5 USART2/3 receive DMA requires CONFIG_STM32_DMA1
 #    endif
 #  endif
 
@@ -98,7 +98,7 @@
 
 /* UART2-5 have no alternate channels without DMAMUX */
 
-#  ifndef CONFIG_STM32WL5_HAVE_DMAMUX
+#  ifndef CONFIG_STM32_HAVE_DMAMUX
 #    define DMAMAP_USART2_RX  DMACHAN_USART2_RX
 #  endif
 
@@ -116,11 +116,11 @@
  * can be individually invalidated.
  */
 
-#  if !defined(CONFIG_STM32WL5_SERIAL_RXDMA_BUFFER_SIZE) || \
-      CONFIG_STM32WL5_SERIAL_RXDMA_BUFFER_SIZE == 0
+#  if !defined(CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE) || \
+      CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE == 0
 #    define RXDMA_BUFFER_SIZE 32
 #  else
-#    define RXDMA_BUFFER_SIZE ((CONFIG_STM32WL5_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
+#    define RXDMA_BUFFER_SIZE ((CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
 #  endif
 
 /* DMA priority */
@@ -152,8 +152,8 @@
 
 /* Power management definitions */
 
-#if defined(CONFIG_PM) && !defined(CONFIG_STM32WL5_PM_SERIAL_ACTIVITY)
-#  define CONFIG_STM32WL5_PM_SERIAL_ACTIVITY  10
+#if defined(CONFIG_PM) && !defined(CONFIG_STM32_PM_SERIAL_ACTIVITY)
+#  define CONFIG_STM32_PM_SERIAL_ACTIVITY  10
 #endif
 #if defined(CONFIG_PM)
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
@@ -170,7 +170,7 @@
  * See stm32wl5serial_restoreusartint where the masking is done.
  */
 
-#ifdef CONFIG_STM32WL5_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
 #  define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
 #  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
 #endif
@@ -366,7 +366,7 @@ static const struct uart_ops_s g_uart_dma_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
 #  ifdef CONFIG_LPUART1_RXDMA
@@ -374,7 +374,7 @@ static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WL5_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #  ifdef CONFIG_USART1_RXDMA
@@ -382,7 +382,7 @@ static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WL5_USART2_SERIALDRIVER
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #  ifdef CONFIG_USART2_RXDMA
@@ -392,7 +392,7 @@ static char g_usart2rxfifo[RXDMA_BUFFER_SIZE];
 
 /* This describes the state of the STM32 USART1 ports. */
 
-#ifdef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
 static struct stm32_serial_s g_lpuart1priv =
 {
   .dev =
@@ -452,7 +452,7 @@ static struct stm32_serial_s g_lpuart1priv =
 };
 #endif
 
-#ifdef CONFIG_STM32WL5_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static struct stm32_serial_s g_usart1priv =
 {
   .dev =
@@ -514,7 +514,7 @@ static struct stm32_serial_s g_usart1priv =
 
 /* This describes the state of the STM32 USART2 port. */
 
-#ifdef CONFIG_STM32WL5_USART2_SERIALDRIVER
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
 static struct stm32_serial_s g_usart2priv =
 {
   .dev =
@@ -579,13 +579,13 @@ static struct stm32_serial_s g_usart2priv =
 static struct stm32_serial_s * const
   g_uart_devs[STM32_NLPUART + STM32_NUSART] =
 {
-#ifdef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
   [0] = &g_lpuart1priv,
 #endif
-#ifdef CONFIG_STM32WL5_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
   [1] = &g_usart1priv,
 #endif
-#ifdef CONFIG_STM32WL5_USART2_SERIALDRIVER
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
   [2] = &g_usart2priv,
 #endif
 };
@@ -892,7 +892,7 @@ static void stm32wl5serial_setformat(struct uart_dev_s *dev)
   regval  = stm32wl5serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32WL5_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;
@@ -1096,19 +1096,19 @@ static void stm32wl5serial_setapbclock(struct uart_dev_s *dev, bool on)
     {
     default:
       return;
-#ifdef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
     case STM32_LPUART1_BASE:
       rcc_en = RCC_APB1ENR2_LPUART1EN;
       regaddr = STM32_RCC_APB1ENR2;
       break;
 #endif
-#ifdef CONFIG_STM32WL5_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
     case STM32_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
-#ifdef CONFIG_STM32WL5_USART2_SERIALDRIVER
+#ifdef CONFIG_STM32_USART2_SERIALDRIVER
     case STM32_USART2_BASE:
       rcc_en = RCC_APB1ENR1_USART2EN;
       regaddr = STM32_RCC_APB1ENR1;
@@ -1177,7 +1177,7 @@ static int stm32wl5serial_setup(struct uart_dev_s *dev)
     {
       uint32_t config = priv->rts_gpio;
 
-#ifdef CONFIG_STM32WL5_FLOWCONTROL_BROKEN
+#ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
       /* Instead of letting hw manage this pin, we will bitbang */
 
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
@@ -1529,8 +1529,8 @@ static int stm32wl5serial_interrupt(int irq, void *context,
 
   /* Report serial activity to the power management logic */
 
-#if defined(CONFIG_PM) && CONFIG_STM32WL5_PM_SERIAL_ACTIVITY > 0
-  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32WL5_PM_SERIAL_ACTIVITY);
+#if defined(CONFIG_PM) && CONFIG_STM32_PM_SERIAL_ACTIVITY > 0
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32_PM_SERIAL_ACTIVITY);
 #endif
 
   /* Loop until there are no characters to be transferred or,
@@ -1674,7 +1674,7 @@ static int stm32wl5serial_ioctl(struct file *filep, int cmd,
       break;
 #endif
 
-#ifdef CONFIG_STM32WL5_USART_SINGLEWIRE
+#ifdef CONFIG_STM32_USART_SINGLEWIRE
     case TIOCSSINGLEWIRE:
       {
         uint32_t cr1;
@@ -1752,7 +1752,7 @@ static int stm32wl5serial_ioctl(struct file *filep, int cmd,
      break;
 #endif
 
-#ifdef CONFIG_STM32WL5_USART_INVERT
+#ifdef CONFIG_STM32_USART_INVERT
     case TIOCSINVERT:
       {
         uint32_t cr1;
@@ -1803,7 +1803,7 @@ static int stm32wl5serial_ioctl(struct file *filep, int cmd,
      break;
 #endif
 
-#ifdef CONFIG_STM32WL5_USART_SWAP
+#ifdef CONFIG_STM32_USART_SWAP
     case TIOCSSWAP:
       {
         uint32_t cr1;
@@ -1940,8 +1940,8 @@ static int stm32wl5serial_ioctl(struct file *filep, int cmd,
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-#ifdef CONFIG_STM32WL5_USART_BREAKS
-#  ifdef CONFIG_STM32WL5_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_USART_BREAKS
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags;
@@ -2169,7 +2169,7 @@ static bool stm32wl5serial_rxflowcontrol(struct uart_dev_s *dev,
     (struct stm32_serial_s *)dev->priv;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
-    defined(CONFIG_STM32WL5_FLOWCONTROL_BROKEN)
+    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
@@ -2521,7 +2521,7 @@ static void stm32wl5serial_txint(struct uart_dev_s *dev, bool enable)
         }
 #  endif
 
-#  ifdef CONFIG_STM32WL5_SERIALBRK_BSDCOMPAT
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {
           leave_critical_section(flags);
@@ -2862,7 +2862,7 @@ void arm_serialinit(void)
 #if CONSOLE_UART > 0
   (void)uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
-#ifndef CONFIG_STM32WL5_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
@@ -2891,7 +2891,7 @@ void arm_serialinit(void)
           continue;
         }
 
-#ifndef CONFIG_STM32WL5_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
       if (g_uart_devs[i]->dev.isconsole)
