@@ -107,14 +107,14 @@ struct spi_dev_s *stm32_spibus_initialize(int bus);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
 uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid);
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
 void stm32_spi2s2select(struct spi_dev_s *dev, uint32_t devid,
                            bool selected);
 uint8_t stm32_spi2s2status(struct spi_dev_s *dev, uint32_t devid);
@@ -142,12 +142,12 @@ int stm32_spi2s2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CALLBACK
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
 int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
                           void *arg);
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
 int stm32_spi2s2register(struct spi_dev_s *dev,
                             spi_mediachange_t callback,
                             void *arg);
