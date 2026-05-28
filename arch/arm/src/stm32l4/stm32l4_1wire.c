@@ -172,7 +172,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
 
 /* 1-Wire device structures */
 
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire1_config =
 {
@@ -196,7 +196,7 @@ static struct stm32_1wire_priv_s stm32_1wire1_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire2_config =
 {
@@ -220,7 +220,7 @@ static struct stm32_1wire_priv_s stm32_1wire2_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire3_config =
 {
@@ -244,7 +244,7 @@ static struct stm32_1wire_priv_s stm32_1wire3_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire4_config =
 {
@@ -268,7 +268,7 @@ static struct stm32_1wire_priv_s stm32_1wire4_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire5_config =
 {
@@ -463,35 +463,35 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
     default:
       return;
 
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
     case STM32_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
       regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
     case STM32_USART2_BASE:
       rcc_en = RCC_APB1ENR1_USART2EN;
       regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
     case STM32_USART3_BASE:
       rcc_en = RCC_APB1ENR1_USART3EN;
       regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
     case STM32_UART4_BASE:
       rcc_en = RCC_APB1ENR1_UART4EN;
       regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
     case STM32_UART5_BASE:
       rcc_en = RCC_APB1ENR1_UART5EN;
       regaddr = STM32_RCC_APB1ENR1;
@@ -1150,31 +1150,31 @@ struct onewire_dev_s *stm32_1wireinitialize(int port)
 
   switch (port)
     {
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
     case 1:
       priv = &stm32_1wire1_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
     case 2:
       priv = &stm32_1wire2_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
     case 3:
       priv = &stm32_1wire3_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
     case 4:
       priv = &stm32_1wire4_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
     case 5:
       priv = &stm32_1wire5_priv;
       break;

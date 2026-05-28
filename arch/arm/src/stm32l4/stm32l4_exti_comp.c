@@ -70,8 +70,8 @@ static struct comp_callback_s g_comp_handlers[STM32_COMP_NUM];
 
 static const uint32_t g_comp_lines[STM32_COMP_NUM] =
 {
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L4X5) || \
+    defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
   EXTI1_COMP1,
   EXTI1_COMP2
 #else

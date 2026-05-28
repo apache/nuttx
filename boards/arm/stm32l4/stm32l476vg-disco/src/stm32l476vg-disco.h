@@ -74,7 +74,7 @@
 #  undef HAVE_N25QXXX_CHARDEV
 #endif
 
-#ifndef CONFIG_STM32L4_QSPI
+#ifndef CONFIG_STM32_QSPI
 #  undef HAVE_N25QXXX
 #  undef HAVE_N25QXXX_NXFFS
 #  undef HAVE_N25QXXX_SMARTFS
@@ -116,7 +116,7 @@
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
-#ifndef CONFIG_STM32L4_OTGFS
+#ifndef CONFIG_STM32_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #endif

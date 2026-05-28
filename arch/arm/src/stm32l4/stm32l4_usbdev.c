@@ -49,7 +49,7 @@
 #include "stm32l4_gpio.h"
 #include "stm32l4_usbdev.h"
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32L4_USBFS)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USBFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,7 +70,7 @@
  */
 
 #ifndef CONFIG_DEBUG_USB_INFO
-#  undef CONFIG_STM32L4_USBDEV_REGDEBUG
+#  undef CONFIG_STM32_USBDEV_REGDEBUG
 #endif
 
 /* Initial interrupt mask: Reset + Suspend + Correct Transfer */
@@ -351,7 +351,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_STM32L4_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint16_t val, uint32_t addr);
 static void stm32_checksetup(void);
@@ -618,7 +618,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
  * Name: stm32_getreg
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -677,7 +677,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  * Name: stm32_putreg
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -694,7 +694,7 @@ static void stm32_putreg(uint16_t val, uint32_t addr)
  * Name: stm32_dumpep
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_dumpep(int epno)
 {
   uint32_t addr;
@@ -737,7 +737,7 @@ static void stm32_dumpep(int epno)
  * Name: stm32_checksetup
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_USBDEV_REGDEBUG
+#ifdef CONFIG_STM32_USBDEV_REGDEBUG
 static void stm32_checksetup(void)
 {
   uint32_t cfgr     = getreg32(STM32_RCC_CFGR);
@@ -3939,4 +3939,4 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   return OK;
 }
 
-#endif /* CONFIG_USBDEV && CONFIG_STM32L4_USB */
+#endif /* CONFIG_USBDEV && CONFIG_STM32_USB */

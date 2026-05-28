@@ -34,13 +34,13 @@
 
 /* Include the correct DMA register definitions for this STM32 family */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  include "hardware/stm32l4x3xx_dma.h"
-#elif defined(CONFIG_STM32L4_STM32L4X5)
+#elif defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_dma.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32_STM32L4X6)
 #  include "hardware/stm32l4x6xx_dma.h"
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 #  include "hardware/stm32l4xrxx_dma.h"
 #  include "hardware/stm32l4xrxx_dmamux.h"
 #else
@@ -90,7 +90,7 @@ struct stm32_dmaregs_s
   uint32_t cndtr;     /* Channel Count Register; determines number of transfers */
   uint32_t cpar;      /* Channel Peripheral Address Register; determines start */
   uint32_t cmar;      /* Channel Memory Address Register; determines start */
-#ifndef CONFIG_STM32L4_HAVE_DMAMUX
+#ifndef CONFIG_STM32_HAVE_DMAMUX
   uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
 #else
   struct
@@ -126,8 +126,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-    defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L4X5) || \
+    defined(CONFIG_STM32_STM32L4X6)
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -168,7 +168,7 @@ extern "C"
 
 DMA_HANDLE stm32_dmachannel(unsigned int chan);
 
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 
 /****************************************************************************
  * Name: stm32_dmachannel
@@ -291,7 +291,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
 #  define stm32_dmacapable(maddr, count, ccr) (true)

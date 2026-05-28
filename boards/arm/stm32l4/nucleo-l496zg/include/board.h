@@ -119,7 +119,7 @@
 
 /* CLK48 will come from PLLSAI1 (implicitly Q) */
 
-#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
@@ -229,7 +229,7 @@
 
 /* CLK48 will come from PLLSAI1 (implicitly Q) */
 
-#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
@@ -340,7 +340,7 @@
 
 /* CLK48 will come from PLLSAI1 (implicitly Q) */
 
-#if defined(CONFIG_STM32L4_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_OTGFS) || defined(STM32_SDMMC) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_PLLSAI1
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE

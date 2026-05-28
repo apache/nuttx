@@ -36,13 +36,13 @@
  * family
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  include "hardware/stm32l4x3xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4X5)
+#elif defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32_STM32L4X6)
 #  include "hardware/stm32l4x6xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 #  include "hardware/stm32l4xrxx_firewall.h"
 #else
 #  error "Unsupported STM32L4 chip"

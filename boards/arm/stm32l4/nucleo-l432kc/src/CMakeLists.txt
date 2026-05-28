@@ -36,11 +36,11 @@ if(CONFIG_DEV_GPIO)
   list(APPEND SRCS stm32_gpio.c)
 endif()
 
-if(CONFIG_STM32L4_ADC)
+if(CONFIG_STM32_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32L4_DAC)
+if(CONFIG_STM32_DAC)
   list(APPEND SRCS stm32_dac.c)
 endif()
 

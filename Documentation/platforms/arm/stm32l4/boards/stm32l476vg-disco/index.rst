@@ -468,7 +468,7 @@ NOTES:
    not enabled in the default configuration but can be enabled with the
    following settings::
 
-         CONFIG_STM32L4_OTGFS=y
+         CONFIG_STM32_OTGFS=y
 
          CONFIG_USBDEV=y
          CONFIG_USBDEV_SELFPOWERED=y

@@ -46,7 +46,7 @@
  * intended for use with the pulsecount upper half driver.
  */
 
-#if defined(CONFIG_STM32L4_TIM1_PULSECOUNT) || defined(CONFIG_STM32L4_TIM8_PULSECOUNT)
+#if defined(CONFIG_STM32_TIM1_PULSECOUNT) || defined(CONFIG_STM32_TIM8_PULSECOUNT)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -159,10 +159,10 @@ static int pulsecount_configure(struct pulsecount_lowerhalf_s *dev);
 static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
                             const struct pulsecount_info_s *info);
 static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev);
-#  ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#  ifdef CONFIG_STM32_TIM1_PULSECOUNT
 static int pulsecount_tim1interrupt(int irq, void *context, void *arg);
 #  endif
-#  ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#  ifdef CONFIG_STM32_TIM8_PULSECOUNT
 static int pulsecount_tim8interrupt(int irq, void *context, void *arg);
 #  endif
 static uint8_t pulsecount_count(uint32_t count);
@@ -189,107 +189,107 @@ static int pulsecount_ioctl(struct pulsecount_lowerhalf_s *dev,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
 
 static struct stm32_tim_s g_pulsecount1dev =
 {
   .channel =
   {
-    .channel = CONFIG_STM32L4_TIM1_PULSECOUNT_CHANNEL,
-#if CONFIG_STM32L4_TIM1_PULSECOUNT_CHANNEL == 1
+    .channel = CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL,
+#if CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 1
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM1_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM1_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM1_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM1_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM1_CH1OUT,
     },
-#elif CONFIG_STM32L4_TIM1_PULSECOUNT_CHANNEL == 2
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 2
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM1_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM1_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM1_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM1_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM1_CH2OUT,
     },
-#elif CONFIG_STM32L4_TIM1_PULSECOUNT_CHANNEL == 3
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 3
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM1_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM1_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM1_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM1_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM1_CH3OUT,
     },
-#elif CONFIG_STM32L4_TIM1_PULSECOUNT_CHANNEL == 4
+#elif CONFIG_STM32_TIM1_PULSECOUNT_CHANNEL == 4
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM1_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM1_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM1_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM1_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM1_CH4OUT,
     },
 #endif
   },
   .timid       = 1,
   .timtype     = TIMTYPE_TIM1,
-  .t_dts       = CONFIG_STM32L4_TIM1_PULSECOUNT_TDTS,
+  .t_dts       = CONFIG_STM32_TIM1_PULSECOUNT_TDTS,
   .irq         = STM32_IRQ_TIM1UP,
   .base        = STM32_TIM1_BASE,
   .pclk        = STM32_APB2_TIM1_CLKIN,
 };
 
-#endif /* CONFIG_STM32L4_TIM1_PULSECOUNT */
+#endif /* CONFIG_STM32_TIM1_PULSECOUNT */
 
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
 
 static struct stm32_tim_s g_pulsecount8dev =
 {
   .channel =
   {
-    .channel = CONFIG_STM32L4_TIM8_PULSECOUNT_CHANNEL,
-#if CONFIG_STM32L4_TIM8_PULSECOUNT_CHANNEL == 1
+    .channel = CONFIG_STM32_TIM8_PULSECOUNT_CHANNEL,
+#if CONFIG_STM32_TIM8_PULSECOUNT_CHANNEL == 1
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM8_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM8_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM8_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM8_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM8_CH1OUT,
     },
-#elif CONFIG_STM32L4_TIM8_PULSECOUNT_CHANNEL == 2
+#elif CONFIG_STM32_TIM8_PULSECOUNT_CHANNEL == 2
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM8_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM8_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM8_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM8_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM8_CH2OUT,
     },
-#elif CONFIG_STM32L4_TIM8_PULSECOUNT_CHANNEL == 3
+#elif CONFIG_STM32_TIM8_PULSECOUNT_CHANNEL == 3
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM8_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM8_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM8_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM8_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM8_CH3OUT,
     },
-#elif CONFIG_STM32L4_TIM8_PULSECOUNT_CHANNEL == 4
+#elif CONFIG_STM32_TIM8_PULSECOUNT_CHANNEL == 4
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM8_PULSECOUNT_POL,
-      .idle    = CONFIG_STM32L4_TIM8_PULSECOUNT_IDLE,
+      .pol     = CONFIG_STM32_TIM8_PULSECOUNT_POL,
+      .idle    = CONFIG_STM32_TIM8_PULSECOUNT_IDLE,
       .pincfg  = GPIO_TIM8_CH4OUT,
     },
 #endif
   },
   .timid       = 8,
   .timtype     = TIMTYPE_TIM8,
-  .t_dts       = CONFIG_STM32L4_TIM8_PULSECOUNT_TDTS,
+  .t_dts       = CONFIG_STM32_TIM8_PULSECOUNT_TDTS,
   .irq         = STM32_IRQ_TIM8UP,
   .base        = STM32_TIM8_BASE,
   .pclk        = STM32_APB2_TIM8_CLKIN,
 };
 
-#endif /* CONFIG_STM32L4_TIM8_PULSECOUNT */
+#endif /* CONFIG_STM32_TIM8_PULSECOUNT */
 
 static const struct pulsecount_ops_s g_pulsecountops =
 {
@@ -300,7 +300,7 @@ static const struct pulsecount_ops_s g_pulsecountops =
   .ioctl       = pulsecount_ioctl,
 };
 
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
 static struct stm32_pulsecount_s g_pulsecount1lower =
 {
   .ops = &g_pulsecountops,
@@ -308,7 +308,7 @@ static struct stm32_pulsecount_s g_pulsecount1lower =
 };
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
 static struct stm32_pulsecount_s g_pulsecount8lower =
 {
   .ops = &g_pulsecountops,
@@ -1224,21 +1224,21 @@ static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
 static int pulsecount_tim1interrupt(int irq, void *context, void *arg)
 {
   return pulsecount_interrupt((struct pulsecount_lowerhalf_s *)
                               &g_pulsecount1dev);
 }
-#endif /* CONFIG_STM32L4_TIM1_PULSECOUNT */
+#endif /* CONFIG_STM32_TIM1_PULSECOUNT */
 
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
 static int pulsecount_tim8interrupt(int irq, void *context, void *arg)
 {
   return pulsecount_interrupt((struct pulsecount_lowerhalf_s *)
                               &g_pulsecount8dev);
 }
-#endif /* CONFIG_STM32L4_TIM8_PULSECOUNT */
+#endif /* CONFIG_STM32_TIM8_PULSECOUNT */
 
 /****************************************************************************
  * Name: pulsecount_count
@@ -1308,7 +1308,7 @@ static int pulsecount_setapbclock(struct stm32_tim_s *priv,
 
   switch (priv->timid)
     {
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
           case 1:
             {
               regaddr  = STM32_RCC_APB2ENR;
@@ -1317,7 +1317,7 @@ static int pulsecount_setapbclock(struct stm32_tim_s *priv,
             }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
           case 8:
             {
               regaddr  = STM32_RCC_APB2ENR;
@@ -1482,13 +1482,13 @@ static int pulsecount_ll_stop(struct pulsecount_lowerhalf_s *dev)
 
   switch (priv->timid)
     {
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
           case 1:
             regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM1RST;
             break;
 #endif
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
           case 8:
             regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM8RST;
@@ -1624,7 +1624,7 @@ struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
+#ifdef CONFIG_STM32_TIM1_PULSECOUNT
       case 1:
         {
           lower = &g_pulsecount1lower;
@@ -1634,7 +1634,7 @@ struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
+#ifdef CONFIG_STM32_TIM8_PULSECOUNT
       case 8:
         {
           lower = &g_pulsecount8lower;
@@ -1654,4 +1654,4 @@ struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
   return (struct pulsecount_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_STM32L4_TIM1_PULSECOUNT || CONFIG_STM32L4_TIM8_PULSECOUNT */
+#endif /* CONFIG_STM32_TIM1_PULSECOUNT || CONFIG_STM32_TIM8_PULSECOUNT */

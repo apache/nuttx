@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -791,5 +791,5 @@
 #  define RCC_CCIPR2_I2C4SEL_SYSCLK (1 << RCC_CCIPR2_I2C4SEL_SHIFT)
 #  define RCC_CCIPR2_I2C4SEL_HSI    (2 << RCC_CCIPR2_I2C4SEL_SHIFT)
 
-#endif /* CONFIG_STM32L4_STM32L4X3 */
+#endif /* CONFIG_STM32_STM32L4X3 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_RCC_H */

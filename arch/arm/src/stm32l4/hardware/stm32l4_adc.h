@@ -74,7 +74,7 @@
 
 #define STM32_ADC_CSR_OFFSET         0x0000  /* Common status register */
 #define STM32_ADC_CCR_OFFSET         0x0008  /* Common control register */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_ADC_CDR_OFFSET       0x000c  /* Common regular data register for dual mode */
 #endif
 
@@ -169,7 +169,7 @@
 
 #define STM32_ADC_CSR                (STM32_ADCCMN_BASE+STM32_ADC_CSR_OFFSET)
 #define STM32_ADC_CCR                (STM32_ADCCMN_BASE+STM32_ADC_CCR_OFFSET)
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_ADC_CDR              (STM32_ADCCMN_BASE+STM32_ADC_CDR_OFFSET)
 #endif
 
@@ -226,23 +226,23 @@
 #  define ADC_CFGR_EXTSEL_T1CC3      (0x02 << ADC_CFGR_EXTSEL_SHIFT)   /* 0010: Timer 1 CC3 event */
 #  define ADC_CFGR_EXTSEL_T2CC4      (0x03 << ADC_CFGR_EXTSEL_SHIFT)   /* 0011: Timer 2 CC4 event */
 #  define ADC_CFGR_EXTSEL_T3TRGO     (0x04 << ADC_CFGR_EXTSEL_SHIFT)   /* 0100: Timer 3 TRGO event */
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T4CC4    (0x05 << ADC_CFGR_EXTSEL_SHIFT)   /* 0101: Timer 4 CC4 event */
 #  endif
 #  define ADC_CFGR_EXTSEL_EXTI11     (0x06 << ADC_CFGR_EXTSEL_SHIFT)   /* 0110: EXTI line 11 */
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T8TRGO   (0x07 << ADC_CFGR_EXTSEL_SHIFT)   /* 0111: Timer 8 TRGO event */
 #    define ADC_CFGR_EXTSEL_T8TRGO2  (0x08 << ADC_CFGR_EXTSEL_SHIFT)   /* 1000: Timer 8 TRGO2 event */
 #  endif
 #  define ADC_CFGR_EXTSEL_T1TRGO     (0x09 << ADC_CFGR_EXTSEL_SHIFT)   /* 1001: Timer 1 TRGO event */
 #  define ADC_CFGR_EXTSEL_T1TRGO2    (0x0a << ADC_CFGR_EXTSEL_SHIFT)   /* 1010: Timer 1 TRGO2 event */
 #  define ADC_CFGR_EXTSEL_T2TRGO     (0x0b << ADC_CFGR_EXTSEL_SHIFT)   /* 1011: Timer 2 TRGO event */
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T4TRGO   (0x0c << ADC_CFGR_EXTSEL_SHIFT)   /* 1100: Timer 4 TRGO event */
 #  endif
 #  define ADC_CFGR_EXTSEL_T6TRGO     (0x0d << ADC_CFGR_EXTSEL_SHIFT)   /* 1101: Timer 6 TRGO event */
 #  define ADC_CFGR_EXTSEL_T15TRGO    (0x0e << ADC_CFGR_EXTSEL_SHIFT)   /* 1110: Timer 15 TRGO event */
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define ADC_CFGR_EXTSEL_T3CC4    (0x0f << ADC_CFGR_EXTSEL_SHIFT)   /* 1111: Timer 3 CC4 event */
 #  endif
 #define ADC_CFGR_EXTEN_SHIFT         (10)                              /* Bits 10-11: External trigger/polarity selection regular channels */
@@ -541,7 +541,7 @@
 #define ADC_CSR_AWD3_MST             (1 << 9)  /* Bit 9: Analog watchdog 3 flag (master ADC) */
 #define ADC_CSR_JQOVF_MST            (1 << 10) /* Bit 10: Injected Context Queue Overflow flag (master ADC) */
 
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define ADC_CSR_ADRDY_SLV          (1 << 16) /* Bit 16: Slave ADC ready */
 #  define ADC_CSR_EOSMP_SLV          (1 << 17) /* Bit 17: End of Sampling phase flag (slave ADC) */
 #  define ADC_CSR_EOC_SLV            (1 << 18) /* Bit 18: End of regular conversion (slave ADC) */
@@ -557,7 +557,7 @@
 
 /* Common control register */
 
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define ADC_CCR_DUAL_SHIFT         (0)                         /* Bits 0-4: Dual ADC mode selection */
 #  define ADC_CCR_DUAL_MASK          (31 << ADC_CCR_DUAL_SHIFT)
 #    define ADC_CCR_DUAL_IND         (0 << ADC_CCR_DUAL_SHIFT)   /* Independent mode */
@@ -605,7 +605,7 @@
 
 /* Common regular data register for dual mode */
 
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define ADC_CDR_RDATA_MST_SHIFT    (0)       /* Bits 0-15: Regular data of the master ADC */
 #  define ADC_CDR_RDATA_MST_MASK     (0xffff << ADC_CDR_RDATA_MST_SHIFT)
 #  define ADC_CDR_RDATA_SLV_SHIFT    (16)      /* Bits 16-31: Regular data of the slave ADC */

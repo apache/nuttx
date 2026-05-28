@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -169,5 +169,5 @@
 #define SYSCFG_SKR_SHIFT              0
 #define SYSCFG_SKR_MASK               (0xFF << SYSCFG_SKR_SHIFT)
 
-#endif /* CONFIG_STM32L4_STM32L4X3 */
+#endif /* CONFIG_STM32_STM32L4X3 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_SYSCFG_H */

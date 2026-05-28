@@ -58,7 +58,7 @@
 #  define COMP_CSR_INMSEL_DAC1     (4 << COMP_CSR_INMSEL_SHIFT) /* DAC Channel1 */
 #  define COMP_CSR_INMSEL_DAC2     (5 << COMP_CSR_INMSEL_SHIFT) /* DAC Channel2 */
 #  define COMP_CSR_INMSEL_PIN1     (6 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 1: COMP1=PB1; COMP2=PB3 */
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define COMP_CSR_INMSEL_INMESEL  (7 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 2: Selected by INMESEL */
 #else
 #  define COMP_CSR_INMSEL_PIN2     (7 << COMP_CSR_INMSEL_SHIFT) /* Input minus pin 2: COMP1=PC4; COMP2=PB7 */
@@ -68,7 +68,7 @@
 #define COMP_CSR_INPSEL_MASK       (3 << COMP_CSR_INPSEL_SHIFT)
 #  define COMP_CSR_INPSEL_PIN1     (0 << COMP_CSR_INPSEL_SHIFT) /* Input plus pin 1: COMP1=PC5; COMP2=PB4 */
 #  define COMP_CSR_INPSEL_PIN2     (1 << COMP_CSR_INPSEL_SHIFT) /* Input plus pin 2: COMP1=PB2; COMP2=PB6 */
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define COMP_CSR_INPSEL_PIN3     (2 << COMP_CSR_INPSEL_SHIFT) /* Input plus pin 3: COMP1=PA1; COMP2=PA3 */
 #endif
 
@@ -101,7 +101,7 @@
 #define COMP_CSR_BRGEN             (1 << 22) /* Bit 22: Scaler bridge enable */
 #define COMP_CSR_SCALEN            (1 << 23) /* Bit 23: Voltage scaler enable bit */
                                              /* Bit 24: Reserved */
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define COMP_CSR_INMESEL_SHIFT   (25)      /* Bits 25-26: Input minus extended selection bits */
 #  define COMP_CSR_INMESEL_MASK    (3 << COMP_CSR_INMESEL_SHIFT)
 #    define COMP_CSR_INMESEL_PIN2  (0 << COMP_CSR_INMESEL_SHIFT) /* Input minus pin 2: COMP1=PC4; COMP2=PB7 */

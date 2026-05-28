@@ -88,7 +88,7 @@ int stm32_pwm_setup(void)
        * (see board.h). Let's figure out which the user has configured.
        */
 
-#if defined(CONFIG_STM32L4_TIM1_PWM)
+#if defined(CONFIG_STM32_TIM1_PWM)
       pwm = stm32_pwminitialize(1);
       if (!pwm)
         {
@@ -106,7 +106,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM2_PWM)
+#if defined(CONFIG_STM32_TIM2_PWM)
       pwm = stm32_pwminitialize(2);
       if (!pwm)
         {
@@ -124,7 +124,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM3_PWM)
+#if defined(CONFIG_STM32_TIM3_PWM)
       pwm = stm32_pwminitialize(3);
       if (!pwm)
         {
@@ -142,7 +142,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM4_PWM)
+#if defined(CONFIG_STM32_TIM4_PWM)
       pwm = stm32_pwminitialize(4);
       if (!pwm)
         {
@@ -160,7 +160,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM5_PWM)
+#if defined(CONFIG_STM32_TIM5_PWM)
       pwm = stm32_pwminitialize(5);
       if (!pwm)
         {
@@ -178,7 +178,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM8_PWM)
+#if defined(CONFIG_STM32_TIM8_PWM)
       pwm = stm32_pwminitialize(8);
       if (!pwm)
         {
@@ -196,7 +196,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM15_PWM)
+#if defined(CONFIG_STM32_TIM15_PWM)
       pwm = stm32_pwminitialize(15);
       if (!pwm)
         {
@@ -214,7 +214,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM16_PWM)
+#if defined(CONFIG_STM32_TIM16_PWM)
       pwm = stm32_pwminitialize(16);
       if (!pwm)
         {
@@ -232,7 +232,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_TIM17_PWM)
+#if defined(CONFIG_STM32_TIM17_PWM)
       pwm = stm32_pwminitialize(17);
       if (!pwm)
         {
@@ -250,7 +250,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_LPTIM1_PWM)
+#if defined(CONFIG_STM32_LPTIM1_PWM)
       pwm = stm32_lp_pwminitialize(1);
       if (!pwm)
         {
@@ -268,7 +268,7 @@ int stm32_pwm_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32L4_LPTIM2_PWM)
+#if defined(CONFIG_STM32_LPTIM2_PWM)
       pwm = stm32_lp_pwminitialize(2);
       if (!pwm)
         {

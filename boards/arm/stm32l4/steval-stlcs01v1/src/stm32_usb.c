@@ -39,7 +39,7 @@
 #include "stm32l4_otgfs.h"
 #include "steval-stlcs01v1.h"
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,7 +48,7 @@
 #if defined(CONFIG_USBDEV)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32L4_OTGFS is enabled but not CONFIG_USBDEV"
+#  warning "CONFIG_STM32_OTGFS is enabled but not CONFIG_USBDEV"
 #  undef HAVE_USB
 #endif
 
@@ -99,4 +99,4 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 }
 #endif
 
-#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */

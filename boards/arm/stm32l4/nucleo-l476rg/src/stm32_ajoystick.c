@@ -51,8 +51,8 @@
 #  if !defined(CONFIG_ADC)
 #    error CONFIG_ADC is required for the Itead joystick
 #    undef CONFIG_INPUT_AJOYSTICK
-#  elif !defined(CONFIG_STM32L4_ADC1)
-#    error CONFIG_STM32L4_ADC1 is required for Itead joystick
+#  elif !defined(CONFIG_STM32_ADC1)
+#    error CONFIG_STM32_ADC1 is required for Itead joystick
 #    undef CONFIG_INPUT_AJOYSTICK
 #  endif
 #endif /* CONFIG_INPUT_AJOYSTICK */

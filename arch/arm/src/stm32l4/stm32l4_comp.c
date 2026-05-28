@@ -53,12 +53,12 @@
 
 #include <errno.h>
 
-#if !(defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
-      defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR))
+#if !(defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L4X5) || \
+      defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR))
 #  error "Unrecognized STM32 chip"
 #endif
 
-#ifdef CONFIG_STM32L4_COMP
+#ifdef CONFIG_STM32_COMP
 
 /****************************************************************************
  * Private Function Prototypes
@@ -373,7 +373,7 @@ static int stm32_compconfig(const struct comp_dev_s *dev)
       regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
     case STM32_COMP_INP_PIN_3:
       stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_3 :
                                                 GPIO_COMP2_INP_3);
@@ -431,8 +431,8 @@ static int stm32_compconfig(const struct comp_dev_s *dev)
   case STM32_COMP_INM_PIN_2:
       stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_2 :
                                                 GPIO_COMP2_INM_2);
-#if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
-    defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X5) || defined(CONFIG_STM32_STM32L4X6) || \
+    defined(CONFIG_STM32_STM32L4XR)
       regval |= COMP_CSR_INMSEL_PIN2;
 #else
       regval |= COMP_CSR_INMSEL_INMESEL;
@@ -441,7 +441,7 @@ static int stm32_compconfig(const struct comp_dev_s *dev)
 #endif
       break;
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
     case STM32_COMP_INM_PIN_3:
       stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_3 :
                                                 GPIO_COMP2_INM_3);
@@ -606,4 +606,4 @@ stm32_compinitialize(int intf, const struct stm32_comp_config_s *cfg)
   return dev;
 }
 
-#endif /* CONFIG_STM32L4_COMP */
+#endif /* CONFIG_STM32_COMP */

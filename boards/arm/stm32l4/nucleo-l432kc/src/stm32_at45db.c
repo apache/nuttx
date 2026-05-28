@@ -42,7 +42,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_SPI1
+#ifndef CONFIG_STM32_SPI1
 #  error "AT45DB driver requires CONFIG_STM32_SPI1 to be enabled"
 #endif
 

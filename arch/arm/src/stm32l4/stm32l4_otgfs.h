@@ -33,11 +33,11 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_STM32L4_OTGFS)
+#if defined(CONFIG_STM32_OTGFS)
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_otgfs.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
 #  include "hardware/stm32l4x6xx_otgfs.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -116,5 +116,5 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H */

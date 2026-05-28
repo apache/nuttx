@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 void stm32_board_clockconfig(void)
 {
   uint32_t regval;
@@ -175,7 +175,7 @@ void stm32_board_clockconfig(void)
    * data cache, and 5 wait states
    */
 
-#ifdef CONFIG_STM32L4_FLASH_PREFETCH
+#ifdef CONFIG_STM32_FLASH_PREFETCH
   regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
             FLASH_ACR_PRFTEN);
 #else
@@ -197,7 +197,7 @@ void stm32_board_clockconfig(void)
     {
     }
 
-#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
 
   /* Low speed internal clock source LSI */
 

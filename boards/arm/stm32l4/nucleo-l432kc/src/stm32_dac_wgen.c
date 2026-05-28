@@ -66,19 +66,19 @@
 #  error "CONFIG_DAC is required"
 #endif
 
-#ifndef CONFIG_STM32L4_DAC1
-#  error "CONFIG_STM32L4_DAC1 is required"
+#ifndef CONFIG_STM32_DAC1
+#  error "CONFIG_STM32_DAC1 is required"
 #endif
 
-#ifndef CONFIG_STM32L4_DAC_LL_OPS
-#  error "CONFIG_STM32L4_DAC_LL_OPS is required"
+#ifndef CONFIG_STM32_DAC_LL_OPS
+#  error "CONFIG_STM32_DAC_LL_OPS is required"
 #endif
 
-#ifndef CONFIG_STM32L4_DAC1_DMA
-#  error "CONFIG_STM32L4_DAC1_DMA is required"
+#ifndef CONFIG_STM32_DAC1_DMA
+#  error "CONFIG_STM32_DAC1_DMA is required"
 #endif
 
-#if (CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE < CONFIG_NUCLEOL432KC_DAC_WGEN_SAMPLES)
+#if (CONFIG_STM32_DAC1_DMA_BUFFER_SIZE < CONFIG_NUCLEOL432KC_DAC_WGEN_SAMPLES)
 #  error "DMA buffer size should be equal or greater than the number of samples."
 #endif
 

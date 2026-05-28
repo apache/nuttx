@@ -38,7 +38,7 @@
 #include "chip.h"
 #include <stm32.h>
 
-#if defined(CONFIG_I2C) && defined(CONFIG_STM32L4_I2C1) && \
+#if defined(CONFIG_I2C) && defined(CONFIG_STM32_I2C1) && \
     defined(CONFIG_SENSORS_INA226)
 
 /****************************************************************************

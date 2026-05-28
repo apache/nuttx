@@ -58,7 +58,7 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-#if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_MMCSD
 #endif
@@ -66,14 +66,14 @@
 /* How many SPI modules does this chip support? */
 
 #if STM32_NSPI < 1
-#  undef CONFIG_STM32L4_SPI1
-#  undef CONFIG_STM32L4_SPI2
-#  undef CONFIG_STM32L4_SPI3
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
 #elif STM32_NSPI < 2
-#  undef CONFIG_STM32L4_SPI2
-#  undef CONFIG_STM32L4_SPI3
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
 #elif STM32_NSPI < 3
-#  undef CONFIG_STM32L4_SPI3
+#  undef CONFIG_STM32_SPI3
 #endif
 
 /* Nucleo-L452RE GPIOs ******************************************************/
