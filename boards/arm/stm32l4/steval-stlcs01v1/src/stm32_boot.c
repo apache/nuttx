@@ -60,7 +60,7 @@ void stm32_board_initialize(void)
    * selected.
    */
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   /* Enable Vddusb - mandatory to use the USB OTG FS peripheral */
 
   stm32_pwr_enableusv(true);

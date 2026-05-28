@@ -24,7 +24,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c
 
-ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
+ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
 endif
 
@@ -39,10 +39,10 @@ CSRCS += stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_ADC),y)
-ifeq ($(CONFIG_STM32L4_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CSRCS += stm32_adc.c
 endif
-ifeq ($(CONFIG_STM32L4_DFSDM),y)
+ifeq ($(CONFIG_STM32_DFSDM),y)
 CSRCS += stm32_dfsdm.c
 endif
 endif
@@ -51,11 +51,11 @@ ifeq ($(CONFIG_DAC),y)
 CSRCS += stm32_dac.c
 endif
 
-ifeq ($(CONFIG_STM32L4_SPI),y)
+ifeq ($(CONFIG_STM32_SPI),y)
 CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_STM32L4_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 

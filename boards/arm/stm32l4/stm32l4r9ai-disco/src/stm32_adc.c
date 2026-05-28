@@ -111,7 +111,7 @@
 
 #define ADC1_NCHANNELS 4
 
-#if ADC1_NCHANNELS > 1 && !defined(CONFIG_STM32L4_ADC1_DMA)
+#if ADC1_NCHANNELS > 1 && !defined(CONFIG_STM32_ADC1_DMA)
 #  warning "Reading multiple channels without DMA might cause overruns!"
 #endif
 
@@ -274,7 +274,7 @@ int stm32_adc_setup(void)
 
   if (!initialized)
     {
-#ifdef CONFIG_STM32L4_ADC1
+#ifdef CONFIG_STM32_ADC1
       int ret;
       int i;
 

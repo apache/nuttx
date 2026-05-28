@@ -150,7 +150,7 @@ int stm32_pmstop2(void)
   uint32_t regval;
 
   regval  = getreg32(STM32_PWR_CR1);
-#ifdef CONFIG_STM32L4_SRAM3_HEAP
+#ifdef CONFIG_STM32_SRAM3_HEAP
   /* SRAM3 is used as heap, so it must not be powered off in Stop 2 mode. */
 
   regval |= PWR_CR1_RRSTP;

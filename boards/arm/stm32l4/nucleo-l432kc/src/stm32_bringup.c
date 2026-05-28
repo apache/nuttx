@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if (defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C3)) && defined(CONFIG_I2C_DRIVER)
+#if (defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C3)) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
@@ -82,10 +82,10 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *rtclower;
 #endif
-#ifdef CONFIG_STM32L4_I2C1
+#ifdef CONFIG_STM32_I2C1
   struct i2c_master_s *i2c1;
 #endif
-#ifdef CONFIG_STM32L4_I2C3
+#ifdef CONFIG_STM32_I2C3
   struct i2c_master_s *i2c3;
 #endif
 #ifdef CONFIG_SENSORS_QENCODER
@@ -151,7 +151,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_I2C1
+#ifdef CONFIG_STM32_I2C1
   /* Get the I2C lower half instance */
 
   i2c1 = stm32_i2cbus_initialize(1);
@@ -171,7 +171,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_I2C3
+#ifdef CONFIG_STM32_I2C3
   /* Get the I2C lower half instance */
 
   i2c3 = stm32_i2cbus_initialize(3);
@@ -220,7 +220,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_ADC
+#ifdef CONFIG_STM32_ADC
   /* Initialize ADC and register the ADC driver. */
 
   ret = stm32_adc_setup();
@@ -230,7 +230,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_DAC
+#ifdef CONFIG_STM32_DAC
   /* Initialize DAC and register the DAC driver. */
 
   ret = stm32_dac_setup();
@@ -298,7 +298,7 @@ int stm32_bringup(void)
 
   index = 0;
 
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 1);
   if (ret != OK)
@@ -309,7 +309,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 2);
   if (ret != OK)
@@ -320,7 +320,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 3);
   if (ret != OK)
@@ -331,7 +331,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 4);
   if (ret != OK)
@@ -342,7 +342,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 5);
   if (ret != OK)
@@ -353,7 +353,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 8);
   if (ret != OK)

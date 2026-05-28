@@ -38,11 +38,11 @@ ifeq ($(CONFIG_DEV_GPIO),y)
   CSRCS += stm32_gpio.c
 endif
 
-ifeq ($(CONFIG_STM32L4_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_STM32L4_DAC),y)
+ifeq ($(CONFIG_STM32_DAC),y)
 CSRCS += stm32_dac.c
 endif
 

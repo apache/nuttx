@@ -45,43 +45,43 @@
  * on STM32L4X3, while STM32L4X6 adds support for timers 4,7 and 8 as well.
  */
 
-#ifndef CONFIG_STM32L4_TIM1
+#ifndef CONFIG_STM32_TIM1
 #  undef CONFIG_STM32L4_TIM1_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM3
+#ifndef CONFIG_STM32_TIM3
 #  undef CONFIG_STM32L4_TIM3_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM4
+#ifndef CONFIG_STM32_TIM4
 #  undef CONFIG_STM32L4_TIM4_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM6
+#ifndef CONFIG_STM32_TIM6
 #  undef CONFIG_STM32L4_TIM6_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM7
+#ifndef CONFIG_STM32_TIM7
 #  undef CONFIG_STM32L4_TIM7_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM8
+#ifndef CONFIG_STM32_TIM8
 #  undef CONFIG_STM32L4_TIM8_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM16
+#ifndef CONFIG_STM32_TIM16
 #  undef CONFIG_STM32L4_TIM16_DFSDM
 #endif
 
-#if defined(CONFIG_STM32L4_DFSDM)
+#if defined(CONFIG_STM32_DFSDM)
 
 /* DMA support */
 
 #undef DFSDM_HAVE_DMA
-#if defined(CONFIG_STM32L4_DFSDM1_DMA)
+#if defined(CONFIG_STM32_DFSDM1_DMA)
 #  define DFSDM_HAVE_DMA  1
 #endif
 
 /* ADC output to DFSDM support */
 
 #undef ADC_HAVE_DFSDM
-#if defined(CONFIG_STM32L4_ADC1_OUTPUT_DFSDM) || \
-    defined(CONFIG_STM32L4_ADC2_OUTPUT_DFSDM) || \
-    defined(CONFIG_STM32L4_ADC3_OUTPUT_DFSDM)
+#if defined(CONFIG_STM32_ADC1_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32_ADC2_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32_ADC3_OUTPUT_DFSDM)
 #  define ADC_HAVE_DFSDM
 #endif
 
@@ -330,5 +330,5 @@ struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_STM32L4_DFSDM */
+#endif /* CONFIG_STM32_DFSDM */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_DFSDM_H */

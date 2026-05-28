@@ -53,7 +53,7 @@
 
 /* The peripheral must be enabled */
 
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32_DFSDM
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,14 +61,14 @@
 
 /* Sanity checking **********************************************************/
 
-#if !defined(CONFIG_STM32L4_DFSDM1_FLT0) && \
-    !defined(CONFIG_STM32L4_DFSDM1_FLT1) && \
-    !defined(CONFIG_STM32L4_DFSDM1_FLT2) && !defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if !defined(CONFIG_STM32_DFSDM1_FLT0) && \
+    !defined(CONFIG_STM32_DFSDM1_FLT1) && \
+    !defined(CONFIG_STM32_DFSDM1_FLT2) && !defined(CONFIG_STM32_DFSDM1_FLT3)
 #  error "At least one DFSDM filter must be defined"
 #endif
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
-#  if defined(CONFIG_STM32L4_DFSDM1_FLT2) || defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_STM32L4X3)
+#  if defined(CONFIG_STM32_DFSDM1_FLT2) || defined(CONFIG_STM32_DFSDM1_FLT3)
 #    error "Non-existent DFSDM filter defined"
 #  endif
 #endif
@@ -122,7 +122,7 @@
  * without, although there is a risk of overrun.
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define DFSDM_MAX_CHANNELS 4
 #  define DFSDM_MAX_FILTERS  2
 #else
@@ -131,8 +131,8 @@
 #endif
 
 #ifdef DFSDM_HAVE_DMA
-#  if !defined(CONFIG_STM32L4_DMA1) && !defined(CONFIG_STM32L4_DMAMUX)
-#    error "STM32L4 DFSDM DMA support requires CONFIG_STM32L4_DMA1"
+#  if !defined(CONFIG_STM32_DMA1) && !defined(CONFIG_STM32_DMAMUX)
+#    error "STM32L4 DFSDM DMA support requires CONFIG_STM32_DMA1"
 #  endif
 #endif
 
@@ -232,16 +232,16 @@ static void dfsdm_startconv(struct stm32_dev_s *priv, bool enable);
 /* Interrupt Handler */
 
 static int dfsdm_interrupt(struct adc_dev_s *dev, uint32_t regval);
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static int dfsdm_flt0_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static int dfsdm_flt1_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static int dfsdm_flt2_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static int dfsdm_flt3_interrupt(int irq, void *context, void *arg);
 #endif
 
@@ -274,7 +274,7 @@ static const struct adc_ops_s g_adcops =
 
 /* DFSDM FLT0 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static struct stm32_dev_s g_dfsdmpriv0 =
 {
   .irq         = STM32_IRQ_DFSDM0,
@@ -303,7 +303,7 @@ static struct adc_dev_s g_dfsdmdev0 =
 
 /* DFSDM FLT1 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static struct stm32_dev_s g_dfsdmpriv1 =
 {
   .irq         = STM32_IRQ_DFSDM1,
@@ -332,7 +332,7 @@ static struct adc_dev_s g_dfsdmdev1 =
 
 /* DFSDM FLT2 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static struct stm32_dev_s g_dfsdmpriv2 =
 {
   .irq         = STM32_IRQ_DFSDM2,
@@ -361,7 +361,7 @@ static struct adc_dev_s g_dfsdmdev2 =
 
 /* DFSDM FLT3 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static struct stm32_dev_s g_dfsdmpriv3 =
 {
   .irq         = STM32_IRQ_DFSDM3,
@@ -1582,7 +1582,7 @@ static int dfsdm_interrupt(struct adc_dev_s *dev, uint32_t isr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static int dfsdm_flt0_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
@@ -1607,7 +1607,7 @@ static int dfsdm_flt0_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static int dfsdm_flt1_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
@@ -1632,7 +1632,7 @@ static int dfsdm_flt1_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static int dfsdm_flt2_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
@@ -1657,7 +1657,7 @@ static int dfsdm_flt2_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static int dfsdm_flt3_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
@@ -1760,25 +1760,25 @@ struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
 
   switch (intf)
     {
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
       case 0:
         ainfo("DFSDM FLT0 selected\n");
         dev = &g_dfsdmdev0;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
       case 1:
         ainfo("DFSDM FLT1 selected\n");
         dev = &g_dfsdmdev1;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
       case 2:
         ainfo("DFSDM FLT2 selected\n");
         dev = &g_dfsdmdev2;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
       case 3:
         ainfo("DFSDM FLT3 selected\n");
         dev = &g_dfsdmdev3;
@@ -1817,5 +1817,5 @@ struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
   return dev;
 }
 
-#endif /* CONFIG_STM32L4_DFSDM */
+#endif /* CONFIG_STM32_DFSDM */
 #endif /* CONFIG_ADC */

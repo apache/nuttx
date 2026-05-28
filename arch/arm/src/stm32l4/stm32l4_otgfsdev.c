@@ -50,7 +50,7 @@
 #include "stm32l4_otgfs.h"
 #include "stm32l4_pwr.h"
 
-#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32L4_OTGFS))
+#if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGFS))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,8 +58,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32L4_SYSCFG
-#  error "CONFIG_STM32L4_SYSCFG is required"
+#ifndef CONFIG_STM32_SYSCFG
+#  error "CONFIG_STM32_SYSCFG is required"
 #endif
 
 #ifndef CONFIG_USBDEV_EP0_MAXSIZE
@@ -548,7 +548,7 @@ struct stm32_usbdev_s
 
 /* Register operations ******************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t    stm32_getreg(uint32_t addr);
 static void        stm32_putreg(uint32_t val, uint32_t addr);
 #else
@@ -893,7 +893,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static uint32_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -956,7 +956,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
+#if defined(CONFIG_STM32_USBDEV_REGDEBUG) && defined(CONFIG_DEBUG_FEATURES)
 static void stm32_putreg(uint32_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -5687,7 +5687,7 @@ void arm_usbinitialize(void)
 
   /* SOF output pin configuration is configurable. */
 
-#ifdef CONFIG_STM32L4_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTGFS_SOFOUTPUT
   stm32_configgpio(GPIO_OTGFS_SOF);
 #endif
 

@@ -61,7 +61,7 @@
 #define STM32_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
 #define STM32_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
 #define STM32_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define STM32_PWR_CR5_OFFSET 0x0080  /* Power control register 5 */
 #endif
 
@@ -92,7 +92,7 @@
 #define STM32_PWR_PDCRH        (STM32_PWR_BASE+STM32_PWR_PDCRH_OFFSET)
 #define STM32_PWR_PUCRI        (STM32_PWR_BASE+STM32_PWR_PUCRI_OFFSET)
 #define STM32_PWR_PDCRI        (STM32_PWR_BASE+STM32_PWR_PDCRI_OFFSET)
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define STM32_PWR_CR5        (STM32_PWR_BASE+STM32_PWR_CR5_OFFSET)
 #endif
 
@@ -107,7 +107,7 @@
 #  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode */
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR1_RRSTP          (1 <<  4) /* Bit  4: SRAM3 retention in Stop 2 mode */
 #endif
 #define PWR_CR1_DBP              (1 <<  8) /* Bit  8: Disable Backup domain write protection */
@@ -133,12 +133,12 @@
 #  define PWR_CR2_PLS_EXT        (7 << PWR_CR2_PLS_SHIFT) /* 111: External input analog voltage PVD_IN */
 
 #define PWR_CR2_PVME1            (1 <<  4) /* Bit  4: Peripheral voltage monitoring 1 enable (VDDUSB vs 1.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_CR2_PVME2          (1 <<  5) /* Bit  5: Peripheral voltage monitoring 2 enable (VDDIO2 vs 0.9V) */
 #endif
 #define PWR_CR2_PVME3            (1 <<  6) /* Bit  6: Peripheral voltage monitoring 3 enable (VDDA vs 1.62V) */
 #define PWR_CR2_PVME4            (1 <<  7) /* Bit  7: Peripheral voltage monitoring 4 enable (VDDA vs 2.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_CR2_IOSV           (1 <<  9) /* Bit  9: VDDIO2 Independent I/Os supply valid */
 #endif
 #define PWR_CR2_USV              (1 << 10) /* Bit 10: VDDUSB USB supply valid */
@@ -152,7 +152,7 @@
 #define PWR_CR3_EWUP5            (1 <<  4) /* Bit  4: Enable Wakeup pin WKUP5 */
 #define PWR_CR3_RRS              (1 <<  8) /* Bit  8: SRAM2 retention in Standby mode */
 #define PWR_CR3_APC              (1 << 10) /* Bit 10: Apply pull-up and pull-down configuration */
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR3_DSIPDEN        (1 << 12) /* Bit 12: Enable Pull-down activation on DSI pins */
 #endif
 #define PWR_CR3_EIWUL            (1 << 15) /* Bit 15: Enable internal wakeup line */
@@ -187,7 +187,7 @@
 #define PWR_SR2_VOSF             (1 << 10) /* Bit 10: Voltage scaling flag */
 #define PWR_SR2_PVDO             (1 << 11) /* Bit 11: Power voltage detector output */
 #define PWR_SR2_PVMO1            (1 << 12) /* Bit 12: Peripheral voltage monitoring output 1 (VDDUSB vs 1.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_SR2_PVMO2          (1 << 13) /* Bit 13: Peripheral voltage monitoring output 2 (VDDIO2 vs 0.9V) */
 #endif
 #define PWR_SR2_PVMO3            (1 << 14) /* Bit 14: Peripheral voltage monitoring output 3 (VDDA vs 1.62V) */
@@ -208,7 +208,7 @@
 
 /* Power control register 5 */
 
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR5_R1MODE         (1 <<  8) /* Bit  8: Main regulator in Range 1 normal mode. */
 #endif
 

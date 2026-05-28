@@ -37,7 +37,7 @@
 
 #include "stm32l4_freerun.h"
 
-#ifdef CONFIG_STM32L4_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Private Functions
@@ -272,4 +272,4 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */

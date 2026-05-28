@@ -87,20 +87,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_ONESHOT
-#  error CONFIG_STM32L4_ONESHOT must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_ONESHOT
+#  error CONFIG_STM32_ONESHOT must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_FREERUN
-#  error CONFIG_STM32L4_FREERUN must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_FREERUN
+#  error CONFIG_STM32_FREERUN must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_TICKLESS_FREERUN
-#  error CONFIG_STM32L4_TICKLESS_FREERUN must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_TICKLESS_FREERUN
+#  error CONFIG_STM32_TICKLESS_FREERUN must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_TICKLESS_ONESHOT
-#  error CONFIG_STM32L4_TICKLESS_ONESHOT must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_TICKLESS_ONESHOT
+#  error CONFIG_STM32_TICKLESS_ONESHOT must be selected for the Tickless OS option
 #endif
 
 /****************************************************************************
@@ -186,7 +186,7 @@ void up_timer_initialize(void)
   /* Initialize the one-shot timer */
 
   ret = stm32_oneshot_initialize(&g_tickless.oneshot,
-                                 CONFIG_STM32L4_TICKLESS_ONESHOT,
+                                 CONFIG_STM32_TICKLESS_ONESHOT,
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
@@ -220,7 +220,7 @@ void up_timer_initialize(void)
   /* Initialize the free-running timer */
 
   ret = stm32_freerun_initialize(&g_tickless.freerun,
-                                 CONFIG_STM32L4_TICKLESS_FREERUN,
+                                 CONFIG_STM32_TICKLESS_FREERUN,
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {

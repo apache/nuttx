@@ -81,7 +81,7 @@
 /* Volatile Data Segment Start Address */
 
 #define FIREWALL_VDSADD_SHIFT           6
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define FIREWALL_VDSADD_MASK          (0x0fff << FIREWALL_VDSADD_SHIFT)
 #else
 #  define FIREWALL_VDSADD_MASK          (0x07ff << FIREWALL_VDSADD_SHIFT)
@@ -90,7 +90,7 @@
 /* Volatile Data Segment Length */
 
 #define FIREWALL_VDSLENG_SHIFT          6
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define FIREWALL_VDSLENG_MASK         (0x0fff << FIREWALL_VDSLENG_SHIFT)
 #else
 #  define FIREWALL_VDSLENG_MASK         (0x07ff << FIREWALL_VDSLENG_SHIFT)

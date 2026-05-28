@@ -81,10 +81,10 @@
 /* Phase 1 is TIM1 CH1 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 0
-#    ifndef CONFIG_STM32L4_TIM1_CH1OUT
+#    ifndef CONFIG_STM32_TIM1_CH1OUT
 #      error
 #    endif
-#    ifndef CONFIG_STM32L4_TIM6
+#    ifndef CONFIG_STM32_TIM6
 #      error
 #    endif
 #  endif
@@ -92,7 +92,7 @@
 /* Phase 2 is TIM1 CH2 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 1
-#    ifndef CONFIG_STM32L4_TIM1_CH2OUT
+#    ifndef CONFIG_STM32_TIM1_CH2OUT
 #      error
 #    endif
 #  endif
@@ -100,7 +100,7 @@
 /* Phase 3 is TIM1 CH3 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 2
-#    ifndef CONFIG_STM32L4_TIM1_CH3OUT
+#    ifndef CONFIG_STM32_TIM1_CH3OUT
 #      error
 #    endif
 #  endif
@@ -108,7 +108,7 @@
 /* Phase 4 is TIM1 CH4 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 3
-#    ifndef CONFIG_STM32L4_TIM1_CH4OUT
+#    ifndef CONFIG_STM32_TIM1_CH4OUT
 #      error
 #    endif
 #  endif

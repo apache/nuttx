@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X2)
+#if defined(CONFIG_STM32_STM32L4X2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -251,5 +251,5 @@
 #define USB_BCDR_PS2DET              (1 << 7)  /* Bit 7: DM pull-up detection status */
 #define USB_BCDR_DPPU                (1 << 15) /* Bit 15: DP pull-up control */
 
-#endif /* CONFIG_STM32L4_STM32L4X2 */
+#endif /* CONFIG_STM32_STM32L4X2 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_USBDEV_H */

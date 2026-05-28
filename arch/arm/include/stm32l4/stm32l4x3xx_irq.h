@@ -136,7 +136,7 @@
 #define STM32_IRQ_I2C4EV      (STM32_IRQ_FIRST + 83) /* 83: I2C4 event interrupt */
 #define STM32_IRQ_I2C4ER      (STM32_IRQ_FIRST + 84) /* 84: I2C4 error interrupt */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define STM32_IRQ_NEXTINTS  85
 #else
 #  error "Unsupported STM32L4 chip"

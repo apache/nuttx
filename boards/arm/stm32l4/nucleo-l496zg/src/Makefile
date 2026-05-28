@@ -44,7 +44,7 @@ endif
 
 ifeq ($(CONFIG_ADC),y)
 CSRCS += stm32_adc.c
-  ifeq ($(CONFIG_STM32L4_DFSDM),y)
+  ifeq ($(CONFIG_STM32_DFSDM),y)
   CSRCS += stm32_dfsdm.c
   endif
 endif
@@ -57,7 +57,7 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_sdio.c
 endif
 
-ifeq ($(CONFIG_STM32L4_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 

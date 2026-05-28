@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_SPI1
+#ifndef CONFIG_STM32_SPI1
 #  error "SD driver requires CONFIG_STM32_SPI1 to be enabled"
 #endif
 
