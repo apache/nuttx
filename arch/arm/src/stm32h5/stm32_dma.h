@@ -39,9 +39,9 @@
 #  undef CONFIG_DEBUG_DMA_INFO
 #endif
 
-#ifdef CONFIG_STM32H5_DMACAPABLE
-#  error "CONFIG_STM32H5_DMACAPABLE not yet implemented."
-#  undef CONFIG_STM32H5_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
+#  error "CONFIG_STM32_DMACAPABLE not yet implemented."
+#  undef CONFIG_STM32_DMACAPABLE
 #endif
 
 /****************************************************************************
@@ -319,7 +319,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(DMA_HANDLE handle, struct stm32_gpdma_cfg_s *cfg);
 #else
 #  define stm32_dmacapable(handle, cfg) (true)

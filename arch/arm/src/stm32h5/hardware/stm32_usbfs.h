@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#ifdef CONFIG_STM32H5_HAVE_USBFS
+#ifdef CONFIG_STM32_HAVE_USBFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -331,5 +331,5 @@
 #define USB_COUNT_RX_SHIFT             (16)      /* Bits 25-16: Reception Byte Count */
 #define USB_COUNT_RX_MASK              (0x3ff << USB_COUNT_RX_SHIFT)
 
-#endif /* CONFIG_STM32H5_HAVE_USBFS */
+#endif /* CONFIG_STM32_HAVE_USBFS */
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_USBFS_H */

@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32H5_HAVE_HSI48
+#ifdef CONFIG_STM32_HAVE_HSI48
 
 /****************************************************************************
  * Public Types
@@ -92,5 +92,5 @@ void stm32_enable_hsi48(enum syncsrc_e syncsrc);
 
 void stm32_disable_hsi48(void);
 
-#endif /* CONFIG_STM32H5_HAVE_HSI48 */
+#endif /* CONFIG_STM32_HAVE_HSI48 */
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_HSI48_H */

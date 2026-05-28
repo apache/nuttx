@@ -32,7 +32,7 @@
 
 #if !defined(CONFIG_STM32H5_STM32H52XXX) && \
     !defined(CONFIG_STM32H5_STM32H53XXX) && \
-    !defined(CONFIG_STM32H5_STM32H56XXX) && \
+    !defined(CONFIG_STM32_STM32H56XXX) && \
     !defined(CONFIG_STM32H5_STM32H57XXX)
 #  warning "SBS not verified on STM32H50x variants."
 #endif

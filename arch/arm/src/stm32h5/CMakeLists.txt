@@ -24,7 +24,7 @@ set(SRCS)
 
 # Common ARM and Cortex-M33 files
 
-if(CONFIG_STM32H5_PROGMEM)
+if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
 endif()
 
@@ -44,7 +44,7 @@ list(
   stm32_lsi.c
   stm32_uid.c)
 
-if(CONFIG_STM32H5_USART)
+if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
 endif()
 
@@ -56,7 +56,7 @@ if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
 endif()
 
-if(CONFIG_STM32H5_I2C)
+if(CONFIG_STM32_I2C)
   list(APPEND SRCS stm32_i2c.c)
 endif()
 
@@ -64,55 +64,55 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32H5_FDCAN_CHARDRIVER)
+if(CONFIG_STM32_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
 endif()
 
-if(CONFIG_STM32H5_RNG)
+if(CONFIG_STM32_RNG)
   list(APPEND SRCS stm32_rng.c)
 endif()
 
-if(CONFIG_STM32H5_ICACHE)
+if(CONFIG_STM32_ICACHE)
   list(APPEND SRCS stm32_icache.c)
 endif()
 
-if(CONFIG_STM32H5_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_STM32H5_QSPI1)
+if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32H5_TIM)
+if(CONFIG_STM32_TIM)
   list(APPEND SRCS stm32_tim.c)
 endif()
 
-if(CONFIG_STM32H5_HAVE_HSI48)
+if(CONFIG_STM32_HAVE_HSI48)
   list(APPEND SRCS stm32_hsi48.c)
 endif()
 
-if(CONFIG_STM32H5_USBFS)
+if(CONFIG_STM32_USBFS)
   list(APPEND SRCS stm32_usbfs.c)
 endif()
 
-if(CONFIG_STM32H5_USBFS_HOST)
+if(CONFIG_STM32_USBFS_HOST)
   list(APPEND SRCS stm32_usbdrdhost.c)
 endif()
 
-if(CONFIG_STM32H5_ETHMAC)
+if(CONFIG_STM32_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
 
-if(CONFIG_STM32H5_DMA)
+if(CONFIG_STM32_DMA)
   list(APPEND SRCS stm32_dma.c)
 endif()
 
-if(CONFIG_STM32H5_DTS)
+if(CONFIG_STM32_DTS)
   list(APPEND SRCS stm32_dts.c)
 endif()
 
-if(CONFIG_STM32H5_PWM)
+if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
@@ -122,7 +122,7 @@ endif()
 
 # Required chip type specific files
 
-if(CONFIG_STM32H5_STM32H5XXXX)
+if(CONFIG_STM32_STM32H5XXXX)
   list(APPEND SRCS stm32h5xx_rcc.c)
 endif()
 

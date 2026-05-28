@@ -39,20 +39,20 @@
 
 /* Pre-requisites */
 
-#if !defined(CONFIG_STM32H5_USBFS_HOST)
-#  error "CONFIG_STM32H5_USBFS_HOST is required"
+#if !defined(CONFIG_STM32_USBFS_HOST)
+#  error "CONFIG_STM32_USBFS_HOST is required"
 #endif
 
 /* USB DRD Host Driver Configuration */
 
-#ifndef CONFIG_STM32H5_USBDRD_NCHANNELS
-#  define CONFIG_STM32H5_USBDRD_NCHANNELS 8
+#ifndef CONFIG_STM32_USBDRD_NCHANNELS
+#  define CONFIG_STM32_USBDRD_NCHANNELS 8
 #endif
 
 /* Default descriptor buffer size */
 
-#ifndef CONFIG_STM32H5_USBDRD_DESCSIZE
-#  define CONFIG_STM32H5_USBDRD_DESCSIZE 128
+#ifndef CONFIG_STM32_USBDRD_DESCSIZE
+#  define CONFIG_STM32_USBDRD_DESCSIZE 128
 #endif
 
 /****************************************************************************
