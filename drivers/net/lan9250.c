@@ -280,8 +280,8 @@ static inline void lan9250_send_buffer(FAR struct lan9250_driver_s *priv,
 static void lan9250_enable_sqi(FAR struct lan9250_driver_s *priv);
 #endif
 static inline void lan9250_sw_reset(FAR struct lan9250_driver_s *priv);
-static void lan9250_set_txavailabe(FAR struct lan9250_driver_s *priv,
-                                   bool enable);
+static void lan9250_set_txavailable(FAR struct lan9250_driver_s *priv,
+                                    bool enable);
 static int lan9250_reset(FAR struct lan9250_driver_s *priv);
 static void lan9250_set_macaddr(FAR struct lan9250_driver_s *priv);
 
@@ -1088,7 +1088,7 @@ static inline void lan9250_sw_reset(FAR struct lan9250_driver_s *priv)
 }
 
 /****************************************************************************
- * Name: lan9250_set_txavailabe
+ * Name: lan9250_set_txavailable
  *
  * Description:
  *   Enable or disable TX data FIFO available interrupt.
@@ -1102,8 +1102,8 @@ static inline void lan9250_sw_reset(FAR struct lan9250_driver_s *priv)
  *
  ****************************************************************************/
 
-static void lan9250_set_txavailabe(FAR struct lan9250_driver_s *priv,
-                                   bool enable)
+static void lan9250_set_txavailable(FAR struct lan9250_driver_s *priv,
+                                    bool enable)
 {
   uint32_t regval;
 
@@ -1241,7 +1241,7 @@ static int lan9250_reset(FAR struct lan9250_driver_s *priv)
 
   /* Disable TX data FIFO available interrupt */
 
-  lan9250_set_txavailabe(priv, false);
+  lan9250_set_txavailable(priv, false);
 
   /* Configure RX:
    *
@@ -1445,7 +1445,7 @@ static int lan9250_transmit(FAR struct lan9250_driver_s *priv)
         {
           /* Enable TX data FIFO available interrupt */
 
-          lan9250_set_txavailabe(priv, true);
+          lan9250_set_txavailable(priv, true);
 
           /* Enable the TX timeout watchdog (perhaps restarting the timer)
            * when free data space is not enough.
@@ -1602,7 +1602,7 @@ static void lan9250_txavailable_isr(FAR struct lan9250_driver_s *priv)
 
   /* Disable TX data FIFO available interrupt */
 
-  lan9250_set_txavailabe(priv, false);
+  lan9250_set_txavailable(priv, false);
 
   /* If no further xmits are pending, then cancel the TX timeout */
 
