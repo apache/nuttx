@@ -41,10 +41,14 @@ ifeq ($(CONFIG_ARCH_SIM),y)
       RUSTFLAGS += --target i686-unknown-linux-gnu
     else
       # For other archs, such as aarch64, arm etc
-        RUSTFLAGS += --target $(LLVM_ARCHTYPE)-unknown-linux-gnu
+      RUSTFLAGS += --target $(LLVM_ARCHTYPE)-unknown-linux-gnu
     endif
   else ifeq ($(CONFIG_HOST_MACOS),y)
-    RUSTFLAGS += --target $(LLVM_ARCHTYPE)-apple-darwin
+    ifeq ($(LLVM_ARCHTYPE),aarch64)
+      RUSTFLAGS += --target $(TOPDIR)/tools/aarch64-unknown-nuttx-macho.json
+    else
+      $(error Unsupported Rust SIM target on macOS: LLVM_ARCHTYPE=$(LLVM_ARCHTYPE))
+    endif
   endif
 else ifeq ($(CONFIG_ARCH_RISCV),y)
   # Target triple is riscv[32|64][isa]-unknown-none-elf

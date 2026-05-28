@@ -151,7 +151,7 @@ ifeq ($(CONFIG_SIM_M32),y)
 else
   ARCHCFLAGS += -fno-pic
   ARCHCXXFLAGS += -fno-pic
-  ifneq ($(CONFIG_HOST_MACOS),y)
+  ifeq ($(CONFIG_HOST_X86_64),y)
     ARCHCFLAGS += -mcmodel=medium
     ARCHCXXFLAGS += -mcmodel=medium
   endif
@@ -167,7 +167,7 @@ ifeq ($(CONFIG_HOST_X86_64),y)
     LLVM_ARCHTYPE := x86_64
     LLVM_CPUTYPE := skylake
   endif
-else ifeq ($(CONFIG_HOST_X86_32),y)
+else ifeq ($(CONFIG_HOST_X86),y)
   LLVM_ARCHTYPE := x86
   LLVM_CPUTYPE := i686
 else ifeq ($(CONFIG_HOST_ARM64),y)
