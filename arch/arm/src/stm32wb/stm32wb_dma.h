@@ -78,7 +78,7 @@ struct stm32_dmaregs_s
   uint32_t cndtr;     /* Channel Count Register; determines number of transfers */
   uint32_t cpar;      /* Channel Peripheral Address Register; determines start */
   uint32_t cmar;      /* Channel Memory Address Register; determines start */
-#ifndef CONFIG_STM32WB_HAVE_DMAMUX
+#ifndef CONFIG_STM32_HAVE_DMAMUX
   uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
 #else
   struct
@@ -233,7 +233,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
 #  define stm32_dmacapable(maddr, count, ccr) (true)

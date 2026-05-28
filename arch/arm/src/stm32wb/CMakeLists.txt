@@ -55,11 +55,11 @@ else()
   list(APPEND SRCS stm32wb_tickless.c)
 endif()
 
-if(CONFIG_STM32WB_ONESHOT)
+if(CONFIG_STM32_ONESHOT)
   list(APPEND SRCS stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c)
 endif()
 
-if(CONFIG_STM32WB_FREERUN)
+if(CONFIG_STM32_FREERUN)
   list(APPEND SRCS stm32wb_freerun.c)
 endif()
 
@@ -67,11 +67,11 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32wb_userspace.c stm32wb_mpuinit.c)
 endif()
 
-if(CONFIG_STM32WB_HAVE_HSI48)
+if(CONFIG_STM32_HAVE_HSI48)
   list(APPEND SRCS stm32wb_rcc_hsi48.c)
 endif()
 
-if(CONFIG_STM32WB_DMA)
+if(CONFIG_STM32_DMA)
   list(APPEND SRCS stm32wb_dma.c)
 endif()
 
@@ -84,11 +84,11 @@ if(CONFIG_PM)
   endif()
 endif()
 
-if(CONFIG_STM32WB_PWR)
+if(CONFIG_STM32_PWR)
   list(APPEND SRCS stm32wb_exti_pwr.c)
 endif()
 
-if(CONFIG_STM32WB_RTC)
+if(CONFIG_STM32_RTC)
   if(CONFIG_RTC_ALARM)
     list(APPEND SRCS stm32wb_exti_alarm.c)
   endif()
@@ -100,15 +100,15 @@ if(CONFIG_STM32WB_RTC)
   endif()
 endif()
 
-if(CONFIG_STM32WB_IPCC)
+if(CONFIG_STM32_IPCC)
   list(APPEND SRCS stm32wb_ipcc.c)
 endif()
 
-if(CONFIG_STM32WB_MBOX)
+if(CONFIG_STM32_MBOX)
   list(APPEND SRCS stm32wb_mbox.c)
 endif()
 
-if(CONFIG_STM32WB_BLE)
+if(CONFIG_STM32_BLE)
   list(APPEND SRCS stm32wb_blehci.c)
 endif()
 

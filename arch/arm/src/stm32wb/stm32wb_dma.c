@@ -42,19 +42,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32WB_DMAMUX
-#  error "Configuration error, CONFIG_STM32WB_DMAMUX not defined!"
+#ifndef CONFIG_STM32_DMAMUX
+#  error "Configuration error, CONFIG_STM32_DMAMUX not defined!"
 #endif
 
 #define DMAMUX_NUM      1
 #define DMA_CONTROLLERS 2
 
-#ifdef CONFIG_STM32WB_DMA1
+#ifdef CONFIG_STM32_DMA1
 #  define DMA1_NCHAN    7
 #else
 #  define DMA1_NCHAN    0
 #endif
-#ifdef CONFIG_STM32WB_DMA2
+#ifdef CONFIG_STM32_DMA2
 #  define DMA2_NCHAN    7
 #else
 #  define DMA2_NCHAN    0
@@ -159,7 +159,7 @@ struct stm32_dma_ops_s
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WB_DMA1) || defined(CONFIG_STM32WB_DMA2)
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
 static void stm32_dma12_disable(DMA_CHANNEL dmachan);
 static int stm32_dma12_interrupt(int irq, void *context, void *arg);
 static void stm32_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
@@ -205,7 +205,7 @@ static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
 
 static const struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 {
-#ifdef CONFIG_STM32WB_DMA1
+#ifdef CONFIG_STM32_DMA1
   /* 0 - DMA1 */
 
     {
@@ -225,7 +225,7 @@ static const struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
     },
 #endif
 
-#ifdef CONFIG_STM32WB_DMA2
+#ifdef CONFIG_STM32_DMA2
   /* 1 - DMA2 */
 
     {
@@ -286,7 +286,7 @@ static const struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 
 static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
 {
-#ifdef CONFIG_STM32WB_DMA1
+#ifdef CONFIG_STM32_DMA1
   /* DMA1 */
 
     {
@@ -346,7 +346,7 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
     },
 #endif
 
-#ifdef CONFIG_STM32WB_DMA2
+#ifdef CONFIG_STM32_DMA2
   /* DMA2 */
 
     {
@@ -564,7 +564,7 @@ static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
  * DMA controller functions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WB_DMA1) || defined(CONFIG_STM32WB_DMA2)
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
 
 /****************************************************************************
  * Name: stm32_dma12_disable
@@ -616,14 +616,14 @@ static int stm32_dma12_interrupt(int irq, void *context, void *arg)
   if (0)
     {
     }
-#ifdef CONFIG_STM32WB_DMA1
+#ifdef CONFIG_STM32_DMA1
   else if (irq >= STM32_IRQ_DMA1CH1 && irq <= STM32_IRQ_DMA1CH7)
     {
       channel = irq - STM32_IRQ_DMA1CH1;
       controller = DMA1;
     }
 #endif
-#ifdef CONFIG_STM32WB_DMA2
+#ifdef CONFIG_STM32_DMA2
   else if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
     {
       channel = irq - STM32_IRQ_DMA2CH1;
@@ -689,7 +689,7 @@ static void stm32_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
           " ntransfers: %zd ccr: %08" PRIx32 "\n",
           paddr, maddr, ntransfers, ccr);
 
-#ifdef CONFIG_STM32WB_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(g_dma_ops[dmachan->ctrl].dma_capable(maddr, ntransfers, ccr));
 #endif
 
@@ -878,7 +878,7 @@ static void stm32_dma12_dump(DMA_HANDLE handle,
 }
 #endif
 
-#endif /* CONFIG_STM32WB_DMA1 || CONFIG_STM32WB_DMA2 */
+#endif /* CONFIG_STM32_DMA1 || CONFIG_STM32_DMA2 */
 
 /****************************************************************************
  * Name: stm32_dmamux_sample
@@ -1270,7 +1270,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 {
   unsigned int msize_shift;
