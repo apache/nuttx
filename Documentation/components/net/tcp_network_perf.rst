@@ -191,3 +191,25 @@ system, that remote peer can easily overrun the
 embedded system due to the embedded system's limited
 buffering space, its much lower processing capability,
 and its slower storage peripherals.
+
+Performance tips
+-------------------------------
+
+If you are chasing throughput on ARM boards (for example STM32H5),
+double-check which libc string implementation is active. In some
+configurations, ``memcpy()``/``memset()`` may fall back to the generic
+implementation, while the architecture-optimized implementation is gated by
+``CONFIG_ARMV8M_STRING_FUNCTION`` or similar.
+
+Practical tuning checklist:
+
+- Enable ``CONFIG_ARMV8M_STRING_FUNCTION`` or similar when using an ARM target
+  and GNU toolchain.
+- Rebuild and re-run throughput tests (for example with ``iperf``) for both
+  TCP and UDP after changing this option.
+- Validate CPU headroom during the test (for example with ``top`` or idle
+  metrics), not only link throughput.
+
+In one STM32H5 test setup, enabling ``CONFIG_ARMV8M_STRING_FUNCTION`` improved
+performance from roughly ~50 Mbit/s to about 95 Mbit/s (UDP) and 84 Mbit/s
+(TCP), with significant idle time still available during ``iperf``.
