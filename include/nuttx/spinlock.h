@@ -550,7 +550,7 @@ void rspin_lock(FAR rspinlock_t *lock)
 
   if (RSPINLOCK_OWNER(old_val) == owner)
     {
-      DEBUGASSERT(RSPINLOCK_COUNT(old_val + 1u) <= UINT16_MAX);
+      DEBUGASSERT(RSPINLOCK_COUNT(old_val) + 1u <= UINT16_MAX);
 
       lock->local_val = old_val + 1u;
     }
@@ -633,7 +633,7 @@ static inline_function bool rspin_trylock(FAR rspinlock_t *lock)
 
   if (RSPINLOCK_OWNER(old_val) == owner)
     {
-      DEBUGASSERT(RSPINLOCK_COUNT(old_val + 1u) <= UINT16_MAX);
+      DEBUGASSERT(RSPINLOCK_COUNT(old_val) + 1u <= UINT16_MAX);
 
       lock->local_val = old_val + 1u;
       ret = true;
