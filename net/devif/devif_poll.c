@@ -336,6 +336,22 @@ devif_poll_bluetooth_connections(FAR struct net_driver_s *dev,
   FAR struct bluetooth_conn_s *bluetooth_conn = NULL;
   int bstop = 0;
 
+  DEBUGASSERT(dev != NULL);
+
+  /* Bluetooth sockets must only be polled on Bluetooth radio devices.
+   * bluetooth_poll() treats the generic net_driver_s as a radio_driver_s,
+   * which is only valid for NET_LL_BLUETOOTH devices.  Without this guard,
+   * any active PF_BLUETOOTH socket causes every netdev poll, including PPP
+   * or TUN devices, to enter the Bluetooth poll path and corrupt that
+   * device's poll state.
+   */
+
+  if (dev->d_lltype != NET_LL_BLUETOOTH)
+    {
+      nwarn("WARNING: Bluetooth poll skipped for non-BT device\n");
+      return 0;
+    }
+
   /* Traverse all of the allocated packet connections and perform the poll
    * action.
    */

@@ -70,6 +70,18 @@ void bluetooth_poll(FAR struct net_driver_s *dev,
   FAR struct radio_driver_s *radio;
 
   DEBUGASSERT(dev != NULL && conn != NULL);
+
+  /* This function operates on Bluetooth radio devices only.  It casts the
+   * generic net_driver_s to radio_driver_s below, so do not allow generic
+   * IP, PPP, TUN, loopback, CAN, or other non-Bluetooth devices through.
+   */
+
+  if (dev->d_lltype != NET_LL_BLUETOOTH)
+    {
+      nwarn("WARNING: Bluetooth poll skipped for non-BT device\n");
+      return;
+    }
+
   radio = (FAR struct radio_driver_s *)dev;
 
   /* Verify that the packet connection is valid */
