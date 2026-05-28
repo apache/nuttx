@@ -12,7 +12,9 @@ NSH and NSH_LIBRARY is relatively large, and NSH lacks management
 capabilities for daemons/services (such as restarting services).
 
 NXInit was created by Xiaomi to solve these issues. It is compatible with
-most of the syntax of Android Init.
+most of the syntax of Android Init, which you can read about here:
+https://android.googlesource.com/platform/system/core/+/master/init/README.md
+
 It is lightweight, supports command execution triggered by events, supports
 service/daemon management and many more.
 
