@@ -378,7 +378,7 @@ file and in that case those operations are not performed:
     * ``note_register()`` - Registers the standard ``/dev/note``.
 
     * ``arm_serialinit()`` - Initialize the **standard** serial driver
-      (found at ``nuttx/arch/arm/src/stm32/stm32_serial.c`` STM32 F4).
+      (found at ``nuttx/arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c`` STM32 F4).
 
     * ``arm_netinitialize()`` - Initialize the network. For the STM32 F4,
       this function is in ``nuttx/arch/arm/src/stm32/stm32_eth.c``.

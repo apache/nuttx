@@ -26,21 +26,13 @@ list(
   APPEND
   SRCS
   stm32_start.c
-  stm32_gpio.c
-  stm32_exti_gpio.c
   stm32_irq.c
   stm32_lowputc.c
-  stm32_serial.c
   stm32_lsi.c
-  stm32_rcc.c
-  stm32_uid.c)
+  stm32_rcc.c)
 
 if(CONFIG_STM32_RTC_LSECLOCK OR CONFIG_LCD_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
-endif()
-
-if(CONFIG_STM32_DMA)
-  list(APPEND SRCS stm32_dma.c)
 endif()
 
 if(CONFIG_STM32_PWR)
@@ -59,77 +51,5 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32_userspace.c)
 endif()
 
-if(CONFIG_STM32_PROGMEM)
-  list(APPEND SRCS stm32_flash.c)
-endif()
-
-if(CONFIG_STM32_GPIOIRQ)
-  list(APPEND SRCS stm32_gpioint.c)
-endif()
-
-if(CONFIG_ARCH_IRQPRIO)
-  list(APPEND SRCS stm32_irqprio.c)
-endif()
-
-if(CONFIG_STM32_HAVE_HSI48)
-  list(APPEND SRCS stm32_hsi48.c)
-endif()
-
-if(CONFIG_STM32_USB)
-  list(APPEND SRCS stm32_usbdev.c)
-endif()
-
-if(CONFIG_STM32_I2C)
-  list(APPEND SRCS stm32_i2c.c)
-endif()
-
-if(CONFIG_STM32_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
-if(CONFIG_STM32_PWM)
-  list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_PULSECOUNT AND CONFIG_STM32_TIM1_PULSECOUNT)
-  list(APPEND SRCS stm32_pulsecount.c)
-endif()
-
-if(CONFIG_STM32_ADC)
-  list(APPEND SRCS stm32_adc.c)
-endif()
-
-if(CONFIG_STM32_AES)
-  list(APPEND SRCS stm32_aes.c)
-endif()
-
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32_rng.c)
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c stm32_tim_lowerhalf.c)
-endif()
-
-if(CONFIG_STM32_IWDG)
-  list(APPEND SRCS stm32_iwdg.c)
-endif()
-
-if(CONFIG_STM32_WWDG)
-  list(APPEND SRCS stm32_wwdg.c)
-endif()
-
-if(CONFIG_STM32_FDCAN)
-  if(CONFIG_STM32_FDCAN_CHARDRIVER)
-    list(APPEND SRCS stm32_fdcan.c)
-  endif()
-  if(CONFIG_STM32_FDCAN_SOCKET)
-    list(APPEND SRCS stm32_fdcan_sock.c)
-  endif()
-endif()
-
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../common/stm32 stm32_common)

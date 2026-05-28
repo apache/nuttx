@@ -22,15 +22,11 @@
 
 include armv6-m/Make.defs
 
-CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c
-CHIP_CSRCS += stm32_lowputc.c stm32_serial.c stm32_rcc.c stm32_lsi.c stm32_uid.c
+CHIP_CSRCS  = stm32_start.c stm32_irq.c stm32_lowputc.c
+CHIP_CSRCS += stm32_rcc.c stm32_lsi.c
 
 ifneq ($(CONFIG_STM32_RTC_LSECLOCK)$(CONFIG_STM32_LCD_LSECLOCK),)
 CHIP_CSRCS += stm32_lse.c
-endif
-
-ifeq ($(CONFIG_STM32_DMA),y)
-CHIP_CSRCS += stm32_dma.c
 endif
 
 ifeq ($(CONFIG_STM32_PWR),y)
@@ -49,73 +45,4 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32_userspace.c
 endif
 
-ifeq ($(CONFIG_STM32_PROGMEM),y)
-CHIP_CSRCS += stm32_flash.c
-endif
-
-ifeq ($(CONFIG_STM32_GPIOIRQ),y)
-CHIP_CSRCS += stm32_gpioint.c
-endif
-
-ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
-CHIP_CSRCS += stm32_hsi48.c
-endif
-
-ifeq ($(CONFIG_STM32_USB),y)
-CHIP_CSRCS += stm32_usbdev.c
-endif
-
-ifeq ($(CONFIG_STM32_I2C),y)
-CHIP_CSRCS += stm32_i2c.c
-endif
-
-ifeq ($(CONFIG_STM32_SPI),y)
-CHIP_CSRCS += stm32_spi.c
-endif
-
-ifeq ($(CONFIG_STM32_PWM),y)
-CHIP_CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_PULSECOUNT),y)
-ifeq ($(CONFIG_STM32_TIM1_PULSECOUNT),y)
-CHIP_CSRCS += stm32_pulsecount.c
-endif
-endif
-
-ifeq ($(CONFIG_STM32_ADC),y)
-CHIP_CSRCS += stm32_adc.c
-endif
-
-ifeq ($(CONFIG_STM32_AES),y)
-CHIP_CSRCS += stm32_aes.c
-endif
-
-ifeq ($(CONFIG_STM32_RNG),y)
-CHIP_CSRCS += stm32_rng.c
-endif
-
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
-endif
-
-ifeq ($(CONFIG_STM32_IWDG),y)
-CHIP_CSRCS += stm32_iwdg.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG),y)
-CHIP_CSRCS += stm32_wwdg.c
-endif
-
-ifeq ($(CONFIG_STM32_FDCAN),y)
-ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
-CHIP_CSRCS += stm32_fdcan.c
-endif
-ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
-CHIP_CSRCS += stm32_fdcan_sock.c
-endif
-endif
-
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CHIP_CSRCS += stm32_qencoder.c
-endif
+include common/stm32/Make.defs
