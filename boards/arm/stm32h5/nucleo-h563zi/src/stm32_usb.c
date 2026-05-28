@@ -42,7 +42,7 @@
 #include "stm32.h"
 #include "stm32_usbdrdhost.h"
 
-#ifdef CONFIG_STM32H5_USBFS_HOST
+#ifdef CONFIG_STM32_USBFS_HOST
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -265,4 +265,4 @@ int board_usbhost_select_configuration(FAR struct usbhost_hubport_s *hport,
 }
 #endif
 
-#endif /* CONFIG_STM32H5_USBFS_HOST */
+#endif /* CONFIG_STM32_USBFS_HOST */

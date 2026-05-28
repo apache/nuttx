@@ -33,7 +33,7 @@
 
 /* Ethernet support only on STM32H563/573 chips. */
 
-#if defined(CONFIG_STM32H5_STM32H56XXX)
+#if defined(CONFIG_STM32_STM32H56XXX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -681,5 +681,5 @@ struct eth_desc_s
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32H5_STM32H56XXX */
+#endif /* CONFIG_STM32_STM32H56XXX */
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32_ETHERNET_H */

@@ -55,9 +55,9 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 #define LSERDY_TIMEOUT (500 * CONFIG_BOARD_LOOPSPERMSEC)
 
-#ifdef CONFIG_STM32H5_RTC_LSECLOCK_START_DRV_CAPABILITY
-#  if CONFIG_STM32H5_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32H5_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
@@ -66,7 +66,7 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 static const uint32_t drives[4] =
 {
     RCC_BDCR_LSEDRV_LOW,
@@ -101,7 +101,7 @@ static const uint32_t drives[4] =
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H5_PWR) && defined(CONFIG_STM32H5_RTC)
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_STM32_RTC)
 static inline void rcc_resetbkp(void)
 {
   bool init_stat;
@@ -166,7 +166,7 @@ static inline void rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -189,7 +189,7 @@ void stm32_clockconfig(void)
 
   rcc_resetbkp();
 #endif
-#if defined(CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
@@ -223,7 +223,7 @@ void stm32_clockconfig(void)
  *   stm32_clockconfig()
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -238,7 +238,7 @@ void stm32_clockconfig(void)
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
