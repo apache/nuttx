@@ -64,7 +64,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
 
 /****************************************************************************
  * Name: stm32_fdcaninitialize
@@ -83,7 +83,7 @@ extern "C"
 struct can_dev_s *stm32_fdcaninitialize(int port);
 #endif
 
-#ifdef CONFIG_STM32H5_FDCAN_SOCKET
+#ifdef CONFIG_STM32_FDCAN_SOCKET
 
 /****************************************************************************
  * Name: stm32_fdcansockinitialize

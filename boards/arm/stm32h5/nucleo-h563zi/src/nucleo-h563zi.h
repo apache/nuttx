@@ -126,7 +126,7 @@ int stm32_bringup(void);
 int stm32_adc_setup(void);
 #endif
 
-#ifdef CONFIG_STM32H5_DTS
+#ifdef CONFIG_STM32_DTS
 int stm32_dts_setup(int devno);
 #endif
 
@@ -138,7 +138,7 @@ int stm32_dts_setup(int devno);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
 int stm32_can_setup(uint8_t port);
 #endif
 

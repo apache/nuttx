@@ -36,15 +36,15 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32H5_DTS)
+if(CONFIG_STM32_DTS)
   list(APPEND SRCS stm32_dts.c)
 endif()
 
-if(CONFIG_STM32H5_FDCAN)
+if(CONFIG_STM32_FDCAN)
   list(APPEND SRCS stm32_can.c)
 endif()
 
-if(CONFIG_STM32H5_USBFS_HOST)
+if(CONFIG_STM32_USBFS_HOST)
   list(APPEND SRCS stm32_usb.c)
 endif()
 

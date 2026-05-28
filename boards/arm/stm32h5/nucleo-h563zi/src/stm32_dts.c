@@ -34,7 +34,7 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_STM32H5_DTS)
+#if defined(CONFIG_STM32_DTS)
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -37,7 +37,7 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_HAVE_HSI48
+#ifdef CONFIG_STM32_HAVE_HSI48
 /****************************************************************************
  * Name: stm32_enable_hsi48
  *
@@ -168,4 +168,4 @@ void stm32_disable_hsi48(void)
   putreg32(regval, STM32_CRS_CR);
 }
 
-#endif /* CONFIG_STM32H5_HAVE_HSI48 */
+#endif /* CONFIG_STM32_HAVE_HSI48 */
