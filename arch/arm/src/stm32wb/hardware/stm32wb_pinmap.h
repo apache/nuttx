@@ -30,9 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32WB_STM32WB10) || defined(CONFIG_STM32WB_STM32WB15) || \
-    defined(CONFIG_STM32WB_STM32WB30) || defined(CONFIG_STM32WB_STM32WB35) || \
-    defined(CONFIG_STM32WB_STM32WB50) || defined(CONFIG_STM32WB_STM32WB55)
+#if defined(CONFIG_STM32_STM32WB10) || defined(CONFIG_STM32_STM32WB15) || \
+    defined(CONFIG_STM32_STM32WB30) || defined(CONFIG_STM32_STM32WB35) || \
+    defined(CONFIG_STM32_STM32WB50) || defined(CONFIG_STM32_STM32WB55)
 #  include "hardware/stm32wbxx_pinmap.h"
 #else
 #  error "Unsupported STM32WB Pin map"

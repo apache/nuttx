@@ -37,8 +37,8 @@
 #include "stm32wb_tim.h"
 
 #if defined(CONFIG_TIMER) && \
-    (defined(CONFIG_STM32WB_TIM1) || defined(CONFIG_STM32WB_TIM2) || \
-     defined(CONFIG_STM32WB_TIM16) || defined(CONFIG_STM32WB_TIM17))
+    (defined(CONFIG_STM32_TIM1) || defined(CONFIG_STM32_TIM2) || \
+     defined(CONFIG_STM32_TIM16) || defined(CONFIG_STM32_TIM17))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -103,7 +103,7 @@ static const struct timer_ops_s g_timer_ops =
   .ioctl       = NULL,
 };
 
-#ifdef CONFIG_STM32WB_TIM1
+#ifdef CONFIG_STM32_TIM1
 static struct stm32_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops         = &g_timer_ops,
@@ -111,7 +111,7 @@ static struct stm32_lowerhalf_s g_tim1_lowerhalf =
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM2
+#ifdef CONFIG_STM32_TIM2
 static struct stm32_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops         = &g_timer_ops,
@@ -119,7 +119,7 @@ static struct stm32_lowerhalf_s g_tim2_lowerhalf =
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM16
+#ifdef CONFIG_STM32_TIM16
 static struct stm32_lowerhalf_s g_tim16_lowerhalf =
 {
   .ops         = &g_timer_ops,
@@ -127,7 +127,7 @@ static struct stm32_lowerhalf_s g_tim16_lowerhalf =
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM17
+#ifdef CONFIG_STM32_TIM17
 static struct stm32_lowerhalf_s g_tim17_lowerhalf =
 {
   .ops         = &g_timer_ops,
@@ -426,25 +426,25 @@ int stm32_timer_initialize(const char *devpath, int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32WB_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         lower = &g_tim1_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         lower = &g_tim2_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         lower = &g_tim16_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         lower = &g_tim17_lowerhalf;
         break;

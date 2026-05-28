@@ -43,7 +43,7 @@
 #include "stm32wb_rtc.h"
 #include "stm32wb_exti.h"
 
-#ifdef CONFIG_STM32WB_RTC
+#ifdef CONFIG_STM32_RTC
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,8 +64,8 @@
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
 #endif
 
-#ifndef CONFIG_STM32WB_PWR
-#  error "CONFIG_STM32WB_PWR must selected to use this driver"
+#ifndef CONFIG_STM32_PWR
+#  error "CONFIG_STM32_PWR must selected to use this driver"
 #endif
 
 /* Constants ****************************************************************/
@@ -860,13 +860,13 @@ int up_rtc_initialize(void)
 
       stm32_pwr_enablebkp(true);
 
-#if defined(CONFIG_STM32WB_RTC_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK)
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK,
                   RCC_BDCR_RTCSEL_HSE);
-#elif defined(CONFIG_STM32WB_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK,
                   RCC_BDCR_RTCSEL_LSI);
-#elif defined(CONFIG_STM32WB_RTC_LSECLOCK)
+#elif defined(CONFIG_STM32_RTC_LSECLOCK)
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK,
                   RCC_BDCR_RTCSEL_LSE);
 #else
@@ -909,7 +909,7 @@ int up_rtc_initialize(void)
 
           /* Configure RTC pre-scaler with the required values */
 
-#ifdef CONFIG_STM32WB_RTC_HSECLOCK
+#ifdef CONFIG_STM32_RTC_HSECLOCK
           /* The HSE is divided by 32 prior to the prescaler we set here.
            * 1953
            * NOTE: max HSE/32 is 4 MHz if it is to be used with RTC
@@ -922,7 +922,7 @@ int up_rtc_initialize(void)
           putreg32(((uint32_t)7812 << RTC_PRER_PREDIV_S_SHIFT) |
                    ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
                    STM32_RTC_PRER);
-#elif defined(CONFIG_STM32WB_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
           /* Suitable values for 32.000 KHz LSI clock (29.5 - 34 KHz,
            * though)
            */
@@ -930,7 +930,7 @@ int up_rtc_initialize(void)
           putreg32(((uint32_t)0xf9 << RTC_PRER_PREDIV_S_SHIFT) |
                    ((uint32_t)0x7f << RTC_PRER_PREDIV_A_SHIFT),
                    STM32_RTC_PRER);
-#else /* defined(CONFIG_STM32WB_RTC_LSECLOCK) */
+#else /* defined(CONFIG_STM32_RTC_LSECLOCK) */
           /* Correct values for 32.768 KHz LSE clock */
 
           putreg32(((uint32_t)0xff << RTC_PRER_PREDIV_S_SHIFT) |
@@ -1012,7 +1012,7 @@ int up_rtc_initialize(void)
 int stm32_rtc_getdatetime_with_subseconds(struct tm *tp,
                                             long *nsec)
 {
-#ifdef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
   uint32_t ssr;
 #endif
   uint32_t dr;
@@ -1031,7 +1031,7 @@ int stm32_rtc_getdatetime_with_subseconds(struct tm *tp,
     {
       dr  = getreg32(STM32_RTC_DR);
       tr  = getreg32(STM32_RTC_TR);
-#ifdef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
       ssr = getreg32(STM32_RTC_SSR);
       tmp = getreg32(STM32_RTC_TR);
       if (tmp != tr)
@@ -1089,7 +1089,7 @@ int stm32_rtc_getdatetime_with_subseconds(struct tm *tp,
    * of nsec has been provided to receive the sub-second value.
    */
 
-#ifdef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
   if (nsec)
     {
       uint32_t prediv_s;
@@ -1169,8 +1169,8 @@ int up_rtc_getdatetime(struct tm *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_HAVE_RTC_SUBSECONDS
-#  ifndef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
-#    error "Invalid config, enable CONFIG_STM32WB_HAVE_RTC_SUBSECONDS."
+#  ifndef CONFIG_STM32_HAVE_RTC_SUBSECONDS
+#    error "Invalid config, enable CONFIG_STM32_HAVE_RTC_SUBSECONDS."
 #  endif
 int up_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec)
 {
@@ -1655,11 +1655,11 @@ int stm32_rtc_setperiodic(const struct timespec *period,
   uint32_t secs;
   uint32_t millisecs;
 
-#if defined(CONFIG_STM32WB_RTC_HSECLOCK)
+#if defined(CONFIG_STM32_RTC_HSECLOCK)
 #  error "Periodic wakeup not available for HSE"
-#elif defined(CONFIG_STM32WB_RTC_LSICLOCK)
+#elif defined(CONFIG_STM32_RTC_LSICLOCK)
 #  error "Periodic wakeup not available for LSI (and it is too inaccurate!)"
-#elif defined(CONFIG_STM32WB_RTC_LSECLOCK)
+#elif defined(CONFIG_STM32_RTC_LSECLOCK)
   const uint32_t rtc_div16_max_msecs = 16 * 1000 * 0xffffu /
                                        STM32_LSE_FREQUENCY;
 #else
@@ -1830,4 +1830,4 @@ int stm32_rtc_cancelperiodic(void)
 }
 #endif
 
-#endif /* CONFIG_STM32WB_RTC */
+#endif /* CONFIG_STM32_RTC */

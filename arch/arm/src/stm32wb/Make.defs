@@ -50,11 +50,11 @@ else
 CHIP_CSRCS += stm32wb_tickless.c
 endif
 
-ifeq ($(CONFIG_STM32WB_ONESHOT),y)
+ifeq ($(CONFIG_STM32_ONESHOT),y)
 CHIP_CSRCS += stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32WB_FREERUN),y)
+ifeq ($(CONFIG_STM32_FREERUN),y)
 CHIP_CSRCS += stm32wb_freerun.c
 endif
 
@@ -62,11 +62,11 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32wb_userspace.c stm32wb_mpuinit.c
 endif
 
-ifeq ($(CONFIG_STM32WB_HAVE_HSI48),y)
+ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
 CHIP_CSRCS += stm32wb_rcc_hsi48.c
 endif
 
-ifeq ($(CONFIG_STM32WB_DMA),y)
+ifeq ($(CONFIG_STM32_DMA),y)
 CHIP_CSRCS += stm32wb_dma.c
 endif
 
@@ -79,11 +79,11 @@ CHIP_CSRCS += stm32wb_pminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32WB_PWR),y)
+ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32wb_exti_pwr.c
 endif
 
-ifeq ($(CONFIG_STM32WB_RTC),y)
+ifeq ($(CONFIG_STM32_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32wb_exti_alarm.c
 endif
@@ -95,15 +95,15 @@ CHIP_CSRCS += stm32wb_rtc.c stm32wb_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32WB_IPCC),y)
+ifeq ($(CONFIG_STM32_IPCC),y)
 CHIP_CSRCS += stm32wb_ipcc.c
 endif
 
-ifeq ($(CONFIG_STM32WB_MBOX),y)
+ifeq ($(CONFIG_STM32_MBOX),y)
 CHIP_CSRCS += stm32wb_mbox.c
 endif
 
-ifeq ($(CONFIG_STM32WB_BLE),y)
+ifeq ($(CONFIG_STM32_BLE),y)
 CHIP_CSRCS += stm32wb_blehci.c
 endif
 

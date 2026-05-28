@@ -44,9 +44,9 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WB_GPIO_HAVE_PORTD) && defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
+#if defined(CONFIG_STM32_GPIO_HAVE_PORTD) && defined(CONFIG_STM32_GPIO_HAVE_PORTE)
 #  define STM32_NPORTS              6
-#elif defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
+#elif defined(CONFIG_STM32_GPIO_HAVE_PORTE)
 #  define STM32_NPORTS              5
 #else
 #  define STM32_NPORTS              4
@@ -195,11 +195,11 @@
 #  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
-#if defined(CONFIG_STM32WB_GPIO_HAVE_PORTD) && defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
+#if defined(CONFIG_STM32_GPIO_HAVE_PORTD) && defined(CONFIG_STM32_GPIO_HAVE_PORTE)
 #  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
 #  define GPIO_PORTH                  (5 << GPIO_PORT_SHIFT)     /*   GPIOH */
-#elif defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
+#elif defined(CONFIG_STM32_GPIO_HAVE_PORTE)
 #  define GPIO_PORTE                  (3 << GPIO_PORT_SHIFT)     /*   GPIOE */
 #  define GPIO_PORTH                  (4 << GPIO_PORT_SHIFT)     /*   GPIOH */
 #else

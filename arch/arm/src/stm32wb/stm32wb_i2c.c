@@ -111,26 +111,26 @@
  *
  *  To use this driver, enable the following configuration variable:
  *
- *    CONFIG_STM32WB_I2C
+ *    CONFIG_STM32_I2C
  *
  *  and one or more interfaces:
  *
- *    CONFIG_STM32WB_I2C1
- *    CONFIG_STM32WB_I2C3
+ *    CONFIG_STM32_I2C1
+ *    CONFIG_STM32_I2C3
  *
  *  To configure the ISR timeout using fixed values
- *  (CONFIG_STM32WB_I2C_DYNTIMEO=n):
+ *  (CONFIG_STM32_I2C_DYNTIMEO=n):
  *
- *    CONFIG_STM32WB_I2CTIMEOSEC   (Timeout in seconds)
- *    CONFIG_STM32WB_I2CTIMEOMS    (Timeout in milliseconds)
- *    CONFIG_STM32WB_I2CTIMEOTICKS (Timeout in ticks)
+ *    CONFIG_STM32_I2CTIMEOSEC   (Timeout in seconds)
+ *    CONFIG_STM32_I2CTIMEOMS    (Timeout in milliseconds)
+ *    CONFIG_STM32_I2CTIMEOTICKS (Timeout in ticks)
  *
  *  To configure the ISR timeout using dynamic values
- *  (CONFIG_STM32WB_I2C_DYNTIMEO=y):
+ *  (CONFIG_STM32_I2C_DYNTIMEO=y):
  *
- *    CONFIG_STM32WB_I2C_DYNTIMEO_USECPERBYTE
+ *    CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE
  *                    (Timeout in microseconds per byte)
- *    CONFIG_STM32WB_I2C_DYNTIMEO_STARTSTOP
+ *    CONFIG_STM32_I2C_DYNTIMEO_STARTSTOP
  *                    (Timeout for start/stop in milliseconds)
  *
  *  Debugging output enabled with:
@@ -190,7 +190,7 @@
 
 /* At least one I2C peripheral must be enabled */
 
-#if defined(CONFIG_STM32WB_I2C1) || defined(CONFIG_STM32WB_I2C3)
+#if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -202,25 +202,25 @@
 
 /* Interrupt wait timeout in seconds and milliseconds */
 
-#if !defined(CONFIG_STM32WB_I2CTIMEOSEC) && !defined(CONFIG_STM32WB_I2CTIMEOMS)
-#  define CONFIG_STM32WB_I2CTIMEOSEC 0
-#  define CONFIG_STM32WB_I2CTIMEOMS  500   /* Default is 500 milliseconds */
+#if !defined(CONFIG_STM32_I2CTIMEOSEC) && !defined(CONFIG_STM32_I2CTIMEOMS)
+#  define CONFIG_STM32_I2CTIMEOSEC 0
+#  define CONFIG_STM32_I2CTIMEOMS  500   /* Default is 500 milliseconds */
 #  warning "Using Default 500 Ms Timeout"
-#elif !defined(CONFIG_STM32WB_I2CTIMEOSEC)
-#  define CONFIG_STM32WB_I2CTIMEOSEC 0     /* User provided milliseconds */
-#elif !defined(CONFIG_STM32WB_I2CTIMEOMS)
-#  define CONFIG_STM32WB_I2CTIMEOMS  0     /* User provided seconds */
+#elif !defined(CONFIG_STM32_I2CTIMEOSEC)
+#  define CONFIG_STM32_I2CTIMEOSEC 0     /* User provided milliseconds */
+#elif !defined(CONFIG_STM32_I2CTIMEOMS)
+#  define CONFIG_STM32_I2CTIMEOMS  0     /* User provided seconds */
 #endif
 
 /* Interrupt wait time timeout in system timer ticks */
 
-#ifndef CONFIG_STM32WB_I2CTIMEOTICKS
-#  define CONFIG_STM32WB_I2CTIMEOTICKS \
-    (SEC2TICK(CONFIG_STM32WB_I2CTIMEOSEC) + MSEC2TICK(CONFIG_STM32WB_I2CTIMEOMS))
+#ifndef CONFIG_STM32_I2CTIMEOTICKS
+#  define CONFIG_STM32_I2CTIMEOTICKS \
+    (SEC2TICK(CONFIG_STM32_I2CTIMEOSEC) + MSEC2TICK(CONFIG_STM32_I2CTIMEOMS))
 #endif
 
-#ifndef CONFIG_STM32WB_I2C_DYNTIMEO_STARTSTOP
-#  define CONFIG_STM32WB_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_STM32WB_I2CTIMEOTICKS)
+#ifndef CONFIG_STM32_I2C_DYNTIMEO_STARTSTOP
+#  define CONFIG_STM32_I2C_DYNTIMEO_STARTSTOP TICK2USEC(CONFIG_STM32_I2CTIMEOTICKS)
 #endif
 
 /* Macros to convert an I2C pin to a GPIO output */
@@ -383,9 +383,9 @@ static inline
 void stm32_i2c_modifyreg32(struct stm32_i2c_priv_s *priv,
                              uint8_t offset, uint32_t clearbits,
                              uint32_t setbits);
-#ifdef CONFIG_STM32WB_I2C_DYNTIMEO
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
 static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs);
-#endif /* CONFIG_STM32WB_I2C_DYNTIMEO */
+#endif /* CONFIG_STM32_I2C_DYNTIMEO */
 static inline
 int  stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv);
 static inline
@@ -429,7 +429,7 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_I2C1
+#ifdef CONFIG_STM32_I2C1
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
   .base       = STM32_I2C1_BASE,
@@ -465,7 +465,7 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32WB_I2C3
+#ifdef CONFIG_STM32_I2C3
 static const struct stm32_i2c_config_s stm32_i2c3_config =
 {
   .base       = STM32_I2C3_BASE,
@@ -598,7 +598,7 @@ void stm32_i2c_modifyreg32(struct stm32_i2c_priv_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_I2C_DYNTIMEO
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
 static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 {
   size_t bytecount = 0;
@@ -615,7 +615,7 @@ static uint32_t stm32_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
    * factor.
    */
 
-  return USEC2TICK(CONFIG_STM32WB_I2C_DYNTIMEO_USECPERBYTE * bytecount);
+  return USEC2TICK(CONFIG_STM32_I2C_DYNTIMEO_USECPERBYTE * bytecount);
 }
 #endif
 
@@ -673,12 +673,12 @@ int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
     {
       /* Wait until either the transfer is complete or the timeout expires */
 
-#ifdef CONFIG_STM32WB_I2C_DYNTIMEO
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
                        stm32_i2c_toticks(priv->msgc, priv->msgv));
 #else
       ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                                           CONFIG_STM32WB_I2CTIMEOTICKS);
+                                           CONFIG_STM32_I2CTIMEOTICKS);
 #endif
       if (ret < 0)
         {
@@ -717,10 +717,10 @@ int stm32_i2c_sem_waitdone(struct stm32_i2c_priv_s *priv)
 
   /* Get the timeout value */
 
-#ifdef CONFIG_STM32WB_I2C_DYNTIMEO
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
   timeout = stm32_i2c_toticks(priv->msgc, priv->msgv);
 #else
-  timeout = CONFIG_STM32WB_I2CTIMEOTICKS;
+  timeout = CONFIG_STM32_I2CTIMEOTICKS;
 #endif
 
   /* Signal the interrupt handler that we are waiting.  NOTE:  Interrupts
@@ -863,10 +863,10 @@ void stm32_i2c_sem_waitstop(struct stm32_i2c_priv_s *priv)
 
   /* Select a timeout */
 
-#ifdef CONFIG_STM32WB_I2C_DYNTIMEO
-  timeout = USEC2TICK(CONFIG_STM32WB_I2C_DYNTIMEO_STARTSTOP);
+#ifdef CONFIG_STM32_I2C_DYNTIMEO
+  timeout = USEC2TICK(CONFIG_STM32_I2C_DYNTIMEO_STARTSTOP);
 #else
-  timeout = CONFIG_STM32WB_I2CTIMEOTICKS;
+  timeout = CONFIG_STM32_I2CTIMEOTICKS;
 #endif
 
   /* Wait as stop might still be in progress */
@@ -2561,12 +2561,12 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port)
 
   switch (port)
     {
-#ifdef CONFIG_STM32WB_I2C1
+#ifdef CONFIG_STM32_I2C1
       case 1:
         priv = (struct stm32_i2c_priv_s *)&stm32_i2c1_priv;
         break;
 #endif
-#ifdef CONFIG_STM32WB_I2C3
+#ifdef CONFIG_STM32_I2C3
       case 3:
         priv = (struct stm32_i2c_priv_s *)&stm32_i2c3_priv;
         break;
@@ -2651,4 +2651,4 @@ int stm32_i2cbus_uninitialize(struct i2c_master_s *dev)
   kmm_free(dev);
   return OK;
 }
-#endif /* CONFIG_STM32WB_I2C1 || CONFIG_STM32WB_I2C3 */
+#endif /* CONFIG_STM32_I2C1 || CONFIG_STM32_I2C3 */
