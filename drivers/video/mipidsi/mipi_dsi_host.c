@@ -94,7 +94,7 @@ static bool mipi_dsi_host_exist(int bus)
  *   host - An instance of the dsi host
  *
  * Returned Value:
- *   OK if the driver was successfully register; A negated errno value is
+ *   OK if the driver was successfully registered; A negated errno value is
  *   returned on any failure.
  *
  ****************************************************************************/
