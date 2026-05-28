@@ -83,11 +83,11 @@
  * that we have been asked to add to the heap.
  */
 
-#if CONFIG_MM_REGIONS < defined(CONFIG_STM32WL5_SRAM2_HEAP) + 1
+#if CONFIG_MM_REGIONS < defined(CONFIG_STM32_SRAM2_HEAP) + 1
 #  error "You need more memory manager regions to support selected heap components"
 #endif
 
-#if CONFIG_MM_REGIONS > defined(CONFIG_STM32WL5_SRAM2_HEAP) + 1
+#if CONFIG_MM_REGIONS > defined(CONFIG_STM32_SRAM2_HEAP) + 1
 #  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
@@ -264,7 +264,7 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-#ifdef CONFIG_STM32WL5_SRAM2_HEAP
+#ifdef CONFIG_STM32_SRAM2_HEAP
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 

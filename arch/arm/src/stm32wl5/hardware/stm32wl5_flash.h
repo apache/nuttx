@@ -35,7 +35,7 @@
 
 /* Flash size is known from the chip selection:
  *
- *  When CONFIG_STM32WL5_FLASH_OVERRIDE_DEFAULT is set the
+ *  When CONFIG_STM32_FLASH_OVERRIDE_DEFAULT is set the
  *  CONFIG_STM32WL5_FLASH_CONFIG_x selects the default FLASH size based
  *  on the chip part number. This value can be overridden with
  *  CONFIG_STM32WL5_FLASH_OVERRIDE_x. For example:
@@ -47,57 +47,57 @@
  * STM32WL5xxx has only single bank flash and page size 2KiB
  */
 
-#if !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_8) && \
-    !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_B) && \
-    !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_C) && \
-    !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_E) && \
-    !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_G) && \
-    !defined(CONFIG_STM32WL5_FLASH_CONFIG_8) && \
-    !defined(CONFIG_STM32WL5_FLASH_CONFIG_B) && \
-    !defined(CONFIG_STM32WL5_FLASH_CONFIG_C) && \
-    !defined(CONFIG_STM32WL5_FLASH_CONFIG_E) && \
-    !defined(CONFIG_STM32WL5_FLASH_CONFIG_G)
-#  define CONFIG_STM32WL5_FLASH_OVERRIDE_E
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_8) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_B) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_C) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_8) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_B) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_C) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_G)
+#  define CONFIG_STM32_FLASH_OVERRIDE_E
 #  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
 /* Override of the Flash has been chosen */
 
-#if !defined(CONFIG_STM32WL5_FLASH_OVERRIDE_DEFAULT)
-#  undef CONFIG_STM32WL5_FLASH_CONFIG_8
-#  undef CONFIG_STM32WL5_FLASH_CONFIG_B
-#  undef CONFIG_STM32WL5_FLASH_CONFIG_C
-#  undef CONFIG_STM32WL5_FLASH_CONFIG_E
-#  undef CONFIG_STM32WL5_FLASH_CONFIG_G
-#  if defined(CONFIG_STM32WL5_FLASH_OVERRIDE_8)
-#    define CONFIG_STM32WL5_FLASH_CONFIG_8
-#  elif defined(CONFIG_STM32WL5_FLASH_OVERRIDE_B)
-#    define CONFIG_STM32WL5_FLASH_CONFIG_B
-#  elif defined(CONFIG_STM32WL5_FLASH_OVERRIDE_C)
-#    define CONFIG_STM32WL5_FLASH_CONFIG_C
-#  elif defined(CONFIG_STM32WL5_FLASH_OVERRIDE_E)
-#    define CONFIG_STM32WL5_FLASH_CONFIG_E
-#  elif defined(CONFIG_STM32WL5_FLASH_OVERRIDE_G)
-#    define CONFIG_STM32WL5_FLASH_CONFIG_G
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
+#  undef CONFIG_STM32_FLASH_CONFIG_8
+#  undef CONFIG_STM32_FLASH_CONFIG_B
+#  undef CONFIG_STM32_FLASH_CONFIG_C
+#  undef CONFIG_STM32_FLASH_CONFIG_E
+#  undef CONFIG_STM32_FLASH_CONFIG_G
+#  if defined(CONFIG_STM32_FLASH_OVERRIDE_8)
+#    define CONFIG_STM32_FLASH_CONFIG_8
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_B)
+#    define CONFIG_STM32_FLASH_CONFIG_B
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_C)
+#    define CONFIG_STM32_FLASH_CONFIG_C
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_E)
+#    define CONFIG_STM32_FLASH_CONFIG_E
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_G)
+#    define CONFIG_STM32_FLASH_CONFIG_G
 #  endif
 #endif
 
 /* Define the valid configuration  */
 
-#if defined(CONFIG_STM32WL5_FLASH_CONFIG_8) /* 64 kB */
+#if defined(CONFIG_STM32_FLASH_CONFIG_8) /* 64 kB */
 #  define STM32_FLASH_NPAGES      32
 #  define STM32_FLASH_PAGESIZE    2048
-#elif defined(CONFIG_STM32WL5_FLASH_CONFIG_B) /* 128 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_B) /* 128 kB */
 #  define STM32_FLASH_NPAGES      64
 #  define STM32_FLASH_PAGESIZE    2048
-#elif defined(CONFIG_STM32WL5_FLASH_CONFIG_C) /* 256 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_C) /* 256 kB */
 #  define STM32_FLASH_NPAGES      128
 #  define STM32_FLASH_PAGESIZE    2048
-#elif defined(CONFIG_STM32WL5_FLASH_CONFIG_E) /* 512 kB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_E) /* 512 kB */
 #  define STM32_FLASH_NPAGES      256
 #  define STM32_FLASH_PAGESIZE    2048
-#elif defined(CONFIG_STM32WL5_FLASH_CONFIG_G) /* 1 MB */
+#elif defined(CONFIG_STM32_FLASH_CONFIG_G) /* 1 MB */
 #  define STM32_FLASH_NPAGES      512
 #  define STM32_FLASH_PAGESIZE    2048
 #else

@@ -39,7 +39,7 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX)
+#if defined(CONFIG_STM32_STM32WL5XXX)
 #  include "hardware/stm32wl5_gpio.h"
 #else
 #  error "Unsupported STM32WL5 chip"

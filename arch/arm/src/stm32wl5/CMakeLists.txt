@@ -42,7 +42,7 @@ set(SRCS
     stm32wl5_timerisr.c
     stm32wl5_spi.c)
 
-if(CONFIG_STM32WL5_IPCC)
+if(CONFIG_STM32_IPCC)
   list(APPEND SRCS stm32wl5_ipcc.c)
 endif()
 

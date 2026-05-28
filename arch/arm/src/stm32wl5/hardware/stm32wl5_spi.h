@@ -74,7 +74,7 @@
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
-#if defined(CONFIG_STM32WL5_STM32F4XXX)
+#if defined(CONFIG_STM32_STM32F4XXX)
 #  define STM32_SPI_CLK_MAX     37500000UL
 #else
 #  define STM32_SPI_CLK_MAX     18000000UL
