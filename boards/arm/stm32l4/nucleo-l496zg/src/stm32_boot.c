@@ -64,7 +64,7 @@ void stm32_board_initialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG_STM32L4_OTGFS) || defined(CONFIG_STM32L4_HOST)
+#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32L4_HOST)
   stm32_usbinitialize();
 #endif
 

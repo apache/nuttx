@@ -327,7 +327,7 @@ int stm32_bringup(void)
 
   index = 0;
 
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 1);
   if (ret < 0)
@@ -338,7 +338,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 2);
   if (ret < 0)
@@ -349,7 +349,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 3);
   if (ret < 0)
@@ -360,7 +360,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 4);
   if (ret < 0)
@@ -371,7 +371,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 5);
   if (ret < 0)
@@ -382,7 +382,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
   ret = stm32_qencoder_initialize(buf, 8);
   if (ret < 0)

@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -163,5 +163,5 @@
 #define SYSCFG_CFGR2_ECCL             (1 <<  3) /* Bit  3: ECC lock enable (same) */
 #define SYSCFG_CFGR2_SPF              (1 <<  8) /* Bit  8: SRAM2 parity error flag */
 
-#endif /* CONFIG_STM32L4_STM32L4X5 */
+#endif /* CONFIG_STM32_STM32L4X5 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_SYSCFG_H */

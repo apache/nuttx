@@ -42,7 +42,7 @@
 #include "stm32l4_dbgmcu.h"
 #include "stm32l4_wdg.h"
 
-#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32L4_IWDG)
+#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -104,7 +104,7 @@ struct stm32_lowerhalf_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_STM32L4_IWDG_REGDEBUG
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr);
 static void     stm32_putreg(uint16_t val, uint32_t addr);
 #else
@@ -158,7 +158,7 @@ static struct stm32_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_IWDG_REGDEBUG
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static uint16_t stm32_getreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -221,7 +221,7 @@ static uint16_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_IWDG_REGDEBUG
+#ifdef CONFIG_STM32_IWDG_REGDEBUG
 static void stm32_putreg(uint16_t val, uint32_t addr)
 {
   /* Show the register value being written */
@@ -637,7 +637,7 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
    */
 
   stm32_settimeout((struct watchdog_lowerhalf_s *)priv,
-                     CONFIG_STM32L4_IWDG_DEFTIMOUT);
+                     CONFIG_STM32_IWDG_DEFTIMOUT);
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
@@ -648,9 +648,9 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
    * on DBG_IWDG_STOP configuration bit in DBG module.
    */
 
-#if defined(CONFIG_STM32L4_JTAG_FULL_ENABLE) || \
-    defined(CONFIG_STM32L4_JTAG_NOJNTRST_ENABLE) || \
-    defined(CONFIG_STM32L4_JTAG_SW_ENABLE)
+#if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
       uint32_t cr;
 
@@ -661,4 +661,4 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
 #endif
 }
 
-#endif /* CONFIG_WATCHDOG && CONFIG_STM32L4_IWDG */
+#endif /* CONFIG_WATCHDOG && CONFIG_STM32_IWDG */

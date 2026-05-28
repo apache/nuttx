@@ -121,7 +121,7 @@ bool stm32_pwr_enableusv(bool set);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 bool stm32_pwr_enable_pvme2(bool set);
 #endif
 
@@ -137,7 +137,7 @@ bool stm32_pwr_enable_pvme2(bool set);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 bool stm32_pwr_get_pvmo2(void);
 #endif
 
@@ -156,7 +156,7 @@ bool stm32_pwr_get_pvmo2(void);
  *   True: The bit was previously set.
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 bool stm32_pwr_vddio2_valid(bool set);
 #endif
 

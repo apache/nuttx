@@ -41,7 +41,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
 void stm32_dfumode(void) noreturn_function;
 #endif
 

@@ -103,7 +103,7 @@
 #define GPIO_SPI3_CS2  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
 #define GPIO_SPI3_CS3  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
 
-#if defined(CONFIG_STM32L4_SDMMC1) || defined(CONFIG_STM32L4_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 #  define HAVE_SDIO
 #endif
 
@@ -114,7 +114,7 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-#  if defined(CONFIG_STM32L4_SDMMC1)
+#  if defined(CONFIG_STM32_SDMMC1)
 #    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
 #  endif
 
@@ -240,7 +240,7 @@ int stm32_sdio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 void stm32_usbinitialize(void);
 #endif
 
@@ -276,7 +276,7 @@ int stm32_dac_setup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ADC) && defined(CONFIG_STM32L4_DFSDM)
+#if defined(CONFIG_ADC) && defined(CONFIG_STM32_DFSDM)
 int stm32_dfsdm_setup(void);
 #endif
 

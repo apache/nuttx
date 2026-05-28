@@ -40,7 +40,7 @@
 
 #include "nucleo-l432kc.h"
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 
 /****************************************************************************
  * Public Data
@@ -48,10 +48,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -70,7 +70,7 @@ struct spi_dev_s *g_spi2;
 
 void stm32_spiregister(void)
 {
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
       int ret = spi_register(g_spi1, 1);
       if (ret < 0)
         {
@@ -78,7 +78,7 @@ void stm32_spiregister(void)
         }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
       int ret = spi_register(g_spi2, 2);
       if (ret < 0)
         {
@@ -98,7 +98,7 @@ void stm32_spiregister(void)
 
 void stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
   /* Configure SPI1-based devices */
 
   g_spi1 = stm32_spibus_initialize(1);
@@ -118,7 +118,7 @@ void stm32_spiinitialize(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
   /* Configure SPI2-based devices */
 
   g_spi2 = stm32_spibus_initialize(2);
@@ -161,7 +161,7 @@ void stm32_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
@@ -182,7 +182,7 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
@@ -220,14 +220,14 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
@@ -235,4 +235,4 @@ int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 
-#endif /* CONFIG_STM32L4_SPI1 || CONFIG_STM32L4_SPI2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_DAC1
+#ifdef CONFIG_STM32_DAC1
 static struct dac_dev_s *g_dac;
 #endif
 
@@ -59,7 +59,7 @@ int stm32_dac_setup(void)
 
   if (!initialized)
     {
-#ifdef CONFIG_STM32L4_DAC1
+#ifdef CONFIG_STM32_DAC1
       int ret;
 
       g_dac = stm32_dacinitialize(0);

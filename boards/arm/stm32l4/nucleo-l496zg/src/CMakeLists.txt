@@ -42,7 +42,7 @@ endif()
 
 if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
-  if(CONFIG_STM32L4_DFSDM)
+  if(CONFIG_STM32_DFSDM)
     list(APPEND SRCS stm32_dfsdm.c)
   endif()
 endif()
@@ -55,7 +55,7 @@ if(CONFIG_MMCSD)
   list(APPEND SRCS stm32_sdio.c)
 endif()
 
-if(CONFIG_STM32L4_OTGFS)
+if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 

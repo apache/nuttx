@@ -148,9 +148,9 @@
 #define STM32_IRQ_CAN2SCE     (STM32_IRQ_FIRST + 89) /* 89: CAN2 SCE interrupt */
 #define STM32_IRQ_DMA2D       (STM32_IRQ_FIRST + 90) /* 90: DMA2D global interrupt */
 
-#if defined(CONFIG_STM32L4_STM32L476XX) || defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32_STM32L476XX) || defined(CONFIG_STM32_STM32L486XX)
 #  define STM32_IRQ_NEXTINTS  82
-#elif defined(CONFIG_STM32L4_STM32L496XX)
+#elif defined(CONFIG_STM32_STM32L496XX)
 #  define STM32_IRQ_NEXTINTS  91
 #else
 #  error "Unsupported STM32L4 chip"

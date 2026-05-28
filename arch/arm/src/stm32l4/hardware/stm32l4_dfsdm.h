@@ -47,7 +47,7 @@
 #define STM32_DFSDM_CH1CFGR1_OFFSET      0x0020  /* DFSDM channel configuration 1 register */
 #define STM32_DFSDM_CH2CFGR1_OFFSET      0x0040  /* DFSDM channel configuration 2 register */
 #define STM32_DFSDM_CH3CFGR1_OFFSET      0x0060  /* DFSDM channel configuration 3 register */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_DFSDM_CH4CFGR1_OFFSET    0x0080  /* DFSDM channel configuration 4 register */
 #  define STM32_DFSDM_CH5CFGR1_OFFSET    0x00a0  /* DFSDM channel configuration 5 register */
 #  define STM32_DFSDM_CH6CFGR1_OFFSET    0x00c0  /* DFSDM channel configuration 6 register */
@@ -60,7 +60,7 @@
 #define STM32_DFSDM_CH1CFGR2_OFFSET      0x0024  /* DFSDM channel configuration 1 register 2 */
 #define STM32_DFSDM_CH2CFGR2_OFFSET      0x0044  /* DFSDM channel configuration 2 register 2 */
 #define STM32_DFSDM_CH3CFGR2_OFFSET      0x0064  /* DFSDM channel configuration 3 register 2 */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_DFSDM_CH4CFGR2_OFFSET    0x0084  /* DFSDM channel configuration 4 register 2 */
 #  define STM32_DFSDM_CH5CFGR2_OFFSET    0x00a4  /* DFSDM channel configuration 5 register 2 */
 #  define STM32_DFSDM_CH6CFGR2_OFFSET    0x00c4  /* DFSDM channel configuration 6 register 2 */
@@ -73,7 +73,7 @@
 #define STM32_DFSDM_CH1AWSCDR_OFFSET     0x0028 /* DFSDM channel 1 analog watchdog and short-circuit detector register */
 #define STM32_DFSDM_CH2AWSCDR_OFFSET     0x0048 /* DFSDM channel 2 analog watchdog and short-circuit detector register */
 #define STM32_DFSDM_CH3AWSCDR_OFFSET     0x0068 /* DFSDM channel 3 analog watchdog and short-circuit detector register */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_DFSDM_CH4AWSCDR_OFFSET   0x0088 /* DFSDM channel 4 analog watchdog and short-circuit detector register */
 #  define STM32_DFSDM_CH5AWSCDR_OFFSET   0x00a8 /* DFSDM channel 5 analog watchdog and short-circuit detector register */
 #  define STM32_DFSDM_CH6AWSCDR_OFFSET   0x00c8 /* DFSDM channel 6 analog watchdog and short-circuit detector register */
@@ -86,7 +86,7 @@
 #define STM32_DFSDM_CH1WDATR_OFFSET      0x002c  /* DFSDM channel 1 watchdog filter data register */
 #define STM32_DFSDM_CH2WDATR_OFFSET      0x004c  /* DFSDM channel 2 watchdog filter data register */
 #define STM32_DFSDM_CH3WDATR_OFFSET      0x006c  /* DFSDM channel 3 watchdog filter data register */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_DFSDM_CH4WDATR_OFFSET    0x008c  /* DFSDM channel 4 watchdog filter data register */
 #  define STM32_DFSDM_CH5WDATR_OFFSET    0x00ac  /* DFSDM channel 5 watchdog filter data register */
 #  define STM32_DFSDM_CH6WDATR_OFFSET    0x00cc  /* DFSDM channel 6 watchdog filter data register */
@@ -99,14 +99,14 @@
 #define STM32_DFSDM_CH1DATINR_OFFSET     0x0030  /* DFSDM channel 1 data input register  */
 #define STM32_DFSDM_CH2DATINR_OFFSET     0x0050  /* DFSDM channel 2 data input register  */
 #define STM32_DFSDM_CH3DATINR_OFFSET     0x0070  /* DFSDM channel 3 data input register  */
-#ifndef CONFIG_STM32L4_STM32L4X3
+#ifndef CONFIG_STM32_STM32L4X3
 #  define STM32_DFSDM_CH4DATINR_OFFSET   0x0090  /* DFSDM channel 4 data input register  */
 #  define STM32_DFSDM_CH5DATINR_OFFSET   0x00b0  /* DFSDM channel 5 data input register  */
 #  define STM32_DFSDM_CH6DATINR_OFFSET   0x00d0  /* DFSDM channel 6 data input register  */
 #  define STM32_DFSDM_CH7DATINR_OFFSET   0x00f0  /* DFSDM channel 7 data input register  */
 #endif
 
-#ifdef CONFIG_STM32L4_STM32L4XR
+#ifdef CONFIG_STM32_STM32L4XR
 #  define STM32_DFSDM_CHDLYR_OFFSET(ch)  (0x14 + 0x20 * (ch)) /* DFSDM channel delay register */
 
 #  define STM32_DFSDM_CH0DLYR_OFFSET     0x0014  /* DFSDM channel 0 delay register  */
@@ -148,7 +148,7 @@
 #define STM32_DFSDM_CHAWSCDR(y)        (STM32_DFSDM_BASE + STM32_DFSDM_CHAWSCDR_OFFSET(y))
 #define STM32_DFSDM_CHWDATR(y)         (STM32_DFSDM_BASE + STM32_DFSDM_CHWDATR_OFFSET(y)
 #define STM32_DFSDM_CHDATINR(y)        (STM32_DFSDM_BASE + STM32_DFSDM_CHDATINR_OFFSET(y))
-#ifdef CONFIG_STM32L4_STM32L4XR
+#ifdef CONFIG_STM32_STM32L4XR
 #  define STM32_DFSDM_CHDLYR(y)        (STM32_DFSDM_BASE + STM32_DFSDM_CHDLYR_OFFSET(y))
 #endif
 
@@ -289,17 +289,17 @@
 
 #  define DFSDM_FLTCR1_JEXTSEL_T1TRGO    (0x00 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0000: Timer 1 TRGO event */
 #  define DFSDM_FLTCR1_JEXTSEL_T1TRGO2   (0x01 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0001: Timer 1 TRGO2 event */
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define DFSDM_FLTCR1_JEXTSEL_T8TRGO  (0x02 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0010: Timer 8 TRGO event */
 #  else
 #    define DFSDM_FLTCR1_JEXTSEL_T3TRGO  (0x02 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0010: Timer 3 TRGO event */
 #  endif
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define DFSDM_FLTCR1_JEXTSEL_T8TRGO2 (0x03 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0011: Timer 8 TRGO2 event */
 #  else
 #    define DFSDM_FLTCR1_JEXTSEL_T16CC1  (0x03 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0011: Timer 16 CC1 (or OC1) event */
 #  endif
-#  if !defined(CONFIG_STM32L4_STM32L4X3)
+#  if !defined(CONFIG_STM32_STM32L4X3)
 #    define DFSDM_FLTCR1_JEXTSEL_T4TRGO  (0x04 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0100: Timer 4 TRGO event */
 #  endif
 #  define DFSDM_FLTCR1_JEXTSEL_T6TRGO    (0x05 << DFSDM_FLTCR1_JEXTSEL_SHIFT) /* 0101: Timer 6 TRGO event */
@@ -413,8 +413,8 @@
 
 /* DFSDM data register for the regular channel (DFSDM_FLTxRDATAR) */
 
-#if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L496XX) || \
-    defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X3) || defined(CONFIG_STM32_STM32L496XX) || \
+    defined(CONFIG_STM32_STM32L4XR)
 #  define DFSDM_FLTRDATAR_RDATACH_SHIFT  (0)     /* Bits  0-3: channel most recently converted */
 #  define DFSDM_FLTRDATAR_RDATACH_MASK   (7 << DFSDM_FLTRDATAR_RDATACH_SHIFT)
 #endif

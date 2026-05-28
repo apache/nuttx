@@ -40,7 +40,7 @@
 
 #include "stm32l4r9ai-disco.h"
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || defined(CONFIG_STM32L4_SPI3)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 
 /****************************************************************************
  * Public Data
@@ -48,13 +48,13 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
-#ifdef CONFIG_STM32L4_SPI3
+#ifdef CONFIG_STM32_SPI3
 struct spi_dev_s *g_spi3;
 #endif
 
@@ -72,7 +72,7 @@ struct spi_dev_s *g_spi3;
 
 void weak_function stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
   /* Configure SPI-based devices on SPI1 */
 
   g_spi1 = stm32_spibus_initialize(1);
@@ -90,7 +90,7 @@ void weak_function stm32_spiinitialize(void)
 #endif
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
   /* Configure SPI-based devices on SPI2 */
 
   g_spi2 = stm32_spibus_initialize(2);
@@ -106,7 +106,7 @@ void weak_function stm32_spiinitialize(void)
 #warning No devices specified on SPI2
 #endif
 
-#ifdef CONFIG_STM32L4_SPI3
+#ifdef CONFIG_STM32_SPI3
   /* Configure SPI-based devices on SPI3 */
 
   g_spi3 = stm32_spibus_initialize(3);
@@ -149,7 +149,7 @@ void weak_function stm32_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 void stm32_spi1select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected)
 {
@@ -170,7 +170,7 @@ uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 void stm32_spi2select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected)
 {
@@ -184,7 +184,7 @@ uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI3
+#ifdef CONFIG_STM32_SPI3
 void stm32_spi3select(struct spi_dev_s *dev,
                         uint32_t devid, bool selected)
 {
@@ -222,21 +222,21 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI3
+#ifdef CONFIG_STM32_SPI3
 int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
@@ -244,4 +244,4 @@ int stm32_spi3cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 
-#endif /* CONFIG_STM32L4_SPI1 || CONFIG_STM32L4_SPI2 || CONFIG_STM32L4_SPI3 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 || CONFIG_STM32_SPI3 */

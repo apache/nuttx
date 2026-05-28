@@ -24,7 +24,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_spi.c stm32_userleds.c
 
-ifeq ($(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG),y)
+ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
 CSRCS += stm32_clockconfig.c
 endif
 

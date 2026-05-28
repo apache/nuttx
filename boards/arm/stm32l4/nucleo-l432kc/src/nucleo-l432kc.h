@@ -61,7 +61,7 @@
 
 /* Check if we can support AT45DB FLASH file system */
 
-#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MTD_AT45DB)
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_AT45DB)
 #  undef HAVE_AT45DB
 #endif
 
@@ -108,10 +108,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 

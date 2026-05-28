@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32_STM32L4X6)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -179,5 +179,5 @@
 
 /* There is one bit per SRAM2 page (32 to 63) */
 
-#endif /* CONFIG_STM32L4_STM32L4X6 */
+#endif /* CONFIG_STM32_STM32L4X6 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_SYSCFG_H */

@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -721,5 +721,5 @@
 #define RCC_CSR_WWDGRSTF            (1 << 30) /* Bit 30: Window watchdog reset flag */
 #define RCC_CSR_LPWRRSTF            (1 << 31) /* Bit 31: Low-Power reset flag */
 
-#endif /* CONFIG_STM32L4_STM32L4X5 */
+#endif /* CONFIG_STM32_STM32L4X5 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X5XX_RCC_H */

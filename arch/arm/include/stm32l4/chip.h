@@ -61,36 +61,36 @@
  * Parts STM32L4x6xE have 512Kb of FLASH
  * Parts STM32L4x6xG have 1024Kb of FLASH
  *
- * The correct FLASH size must be set with a CONFIG_STM32L4_FLASH_CONFIG_*
+ * The correct FLASH size must be set with a CONFIG_STM32_FLASH_CONFIG_*
  * selection.
  */
 
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define STM32_SRAM1_SIZE       (192*1024)  /* 192Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
 #  define STM32_SRAM3_SIZE       (384*1024)  /* 384Kb SRAM3 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L496XX)
+#elif defined(CONFIG_STM32_STM32L496XX)
 #  define STM32_SRAM1_SIZE       (256*1024)  /* 256Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L475XX) || defined(CONFIG_STM32L4_STM32L476XX) || \
-      defined(CONFIG_STM32L4_STM32L486XX)
+#elif defined(CONFIG_STM32_STM32L475XX) || defined(CONFIG_STM32_STM32L476XX) || \
+      defined(CONFIG_STM32_STM32L486XX)
 #  define STM32_SRAM1_SIZE       (96*1024)   /* 96Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L451XX) || defined(CONFIG_STM32L4_STM32L452XX) || \
-      defined(CONFIG_STM32L4_STM32L462XX)
+#elif defined(CONFIG_STM32_STM32L451XX) || defined(CONFIG_STM32_STM32L452XX) || \
+      defined(CONFIG_STM32_STM32L462XX)
 #  define STM32_SRAM1_SIZE       (128*1024)  /* 128Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (32*1024)   /* 32Kb SRAM2 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L432XX) || defined(CONFIG_STM32L4_STM32L433XX)
+#elif defined(CONFIG_STM32_STM32L432XX) || defined(CONFIG_STM32_STM32L433XX)
 #  define STM32_SRAM1_SIZE       (48*1024)   /* 48Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (16*1024)   /* 16Kb SRAM2 on AHB bus Matrix */
-#elif defined(CONFIG_STM32L4_STM32L412XX) || defined(CONFIG_STM32L4_STM32L422XX)
+#elif defined(CONFIG_STM32_STM32L412XX) || defined(CONFIG_STM32_STM32L422XX)
 #  define STM32_SRAM1_SIZE       (32*1024)   /* 32Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (8*1024)    /* 8Kb SRAM2 on AHB bus Matrix */
 #else
 #  error "Unsupported STM32L4 chip"
 #endif
 
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -119,9 +119,9 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L4XR */
+#endif /* CONFIG_STM32_STM32L4XR */
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -149,9 +149,9 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L4X5 */
+#endif /* CONFIG_STM32_STM32L4X5 */
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32_STM32L4X6)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -165,7 +165,7 @@
 #  define STM32_NLPUART                  1   /* LPUART 1 */
 #  define STM32_QSPI                     1   /* QuadSPI1 */
 #  define STM32_NSPI                     3   /* SPI1-3 */
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define STM32_NI2C                     4   /* I2C1-4 */
 #else
 #  define STM32_NI2C                     3   /* I2C1-3 */
@@ -173,7 +173,7 @@
 #  define STM32_NSWPMI                   1   /* SWPMI1 */
 #  define STM32_NUSBOTGFS                1   /* USB OTG FS */
 #  define STM32_NUSBFS                   0   /* No USB FS */
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define STM32_NCAN                     2   /* CAN1-2 */
 #else
 #  define STM32_NCAN                     1   /* CAN1 */
@@ -181,7 +181,7 @@
 #  define STM32_NSAI                     2   /* SAI1-2 */
 #  define STM32_NSDMMC                   1   /* SDMMC interface */
 #  define STM32_NDMA                     2   /* DMA1-2 */
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define STM32_NPORTS                   9   /* 9 GPIO ports, GPIOA-I */
 #else
 #  define STM32_NPORTS                   8   /* 8 GPIO ports, GPIOA-H */
@@ -191,10 +191,10 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L4X6 */
+#endif /* CONFIG_STM32_STM32L4X6 */
 
-#if defined(CONFIG_STM32L4_STM32L451XX) || defined(CONFIG_STM32L4_STM32L452XX) || \
-    defined(CONFIG_STM32L4_STM32L462XX)
+#if defined(CONFIG_STM32_STM32L451XX) || defined(CONFIG_STM32_STM32L452XX) || \
+    defined(CONFIG_STM32_STM32L462XX)
 #  define STM32_NFSMC                    0   /* No FSMC memory controller */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
@@ -211,14 +211,14 @@
 #  define STM32_NI2C                     4   /* I2C1-4 */
 #  define STM32_NSWPMI                   1   /* SWPMI1 */
 #  define STM32_NUSBOTGFS                0   /* No USB OTG FS */
-#if defined(CONFIG_STM32L4_STM32L451XX)
+#if defined(CONFIG_STM32_STM32L451XX)
 #  define STM32_NUSBFS                   0   /* No USB FS */
 #else
 #  define STM32_NUSBFS                   1   /* USB FS */
 #endif
 #  define STM32_NCAN                     1   /* CAN1 */
 #  define STM32_NSAI                     1   /* SAI1 */
-#if defined(CONFIG_STM32L4_HAVE_SDMMC1)
+#if defined(CONFIG_STM32_HAVE_SDMMC1)
 #  define STM32_NSDMMC                   1   /* SDMMC interface */
 #else
 #  define STM32_NSDMMC                   0   /* No SDMMC interface */
@@ -230,9 +230,9 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   1   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L451XX */
+#endif /* CONFIG_STM32_STM32L451XX */
 
-#if defined(CONFIG_STM32L4_STM32L432XX)
+#if defined(CONFIG_STM32_STM32L432XX)
 #  define STM32_NFSMC                    0   /* No FSMC memory controller */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
@@ -260,9 +260,9 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   1   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L432XX */
+#endif /* CONFIG_STM32_STM32L432XX */
 
-#if defined(CONFIG_STM32L4_STM32L433XX)
+#if defined(CONFIG_STM32_STM32L433XX)
 #  define STM32_NFSMC                    0   /* No FSMC memory controller */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
@@ -290,9 +290,9 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   1   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L433XX */
+#endif /* CONFIG_STM32_STM32L433XX */
 
-#if defined(CONFIG_STM32L4_STM32L412XX) || defined(CONFIG_STM32L4_STM32L422XX)
+#if defined(CONFIG_STM32_STM32L412XX) || defined(CONFIG_STM32_STM32L422XX)
 #  define STM32_NFSMC                    0   /* No FSMC memory controller */
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
@@ -320,7 +320,7 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   1   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L4_STM32L412XX || CONFIG_STM32L4_STM32L422XX */
+#endif /* CONFIG_STM32_STM32L412XX || CONFIG_STM32_STM32L422XX */
 
 /* NVIC priority levels *****************************************************/
 

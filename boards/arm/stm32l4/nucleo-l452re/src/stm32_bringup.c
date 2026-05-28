@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if defined(CONFIG_STM32L4_I2C1) && defined(CONFIG_I2C_DRIVER)
+#if defined(CONFIG_STM32_I2C1) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
