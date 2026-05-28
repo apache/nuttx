@@ -379,7 +379,6 @@ FAR struct adc_dev_s *mcp3008_initialize(FAR struct spi_dev_s *spi)
   if (priv == NULL)
     {
       aerr("ERROR: Failed to allocate mcp3008_dev_s instance\n");
-      free(priv);
       return NULL;
     }
 
@@ -393,6 +392,7 @@ FAR struct adc_dev_s *mcp3008_initialize(FAR struct spi_dev_s *spi)
   if (adcdev == NULL)
     {
       aerr("ERROR: Failed to allocate adc_dev_s instance\n");
+      kmm_free(priv);
       return NULL;
     }
 
