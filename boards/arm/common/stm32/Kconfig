@@ -1,0 +1,71 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if STM32_FOC
+
+menuconfig BOARD_STM32_IHM07M1
+	bool "X-NUCLEO-IHM07M1 board support"
+	default n
+	---help---
+		Board based on the L6230 DMOS driver.
+
+if BOARD_STM32_IHM07M1
+
+config BOARD_STM32_IHM07M1_VBUS
+	bool "X-NUCLEO-IHM07M1 board VBUS sense"
+	default n
+
+config BOARD_STM32_IHM07M1_POT
+	bool "X-NUCLEO-IHM07M1 board POT support"
+	default n
+
+endif # BOARD_STM32_IHM07M1
+
+menuconfig BOARD_STM32_IHM08M1
+	bool "X-NUCLEO-IHM08M1 board support"
+	default n
+	select STM32_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		Board based on the discrete L6398 gate drivers and STL220N6F7 POWER MOSFETs.
+
+if BOARD_STM32_IHM08M1
+
+config BOARD_STM32_IHM08M1_VBUS
+	bool "X-NUCLEO-IHM08M1 board VBUS sense"
+	default n
+
+config BOARD_STM32_IHM08M1_POT
+	bool "X-NUCLEO-IHM08M1 board POT support"
+	default n
+
+endif # BOARD_STM32_IHM08M1
+
+menuconfig BOARD_STM32_IHM16M1
+	bool "X-NUCLEO-IHM16M1 board support"
+	default n
+	---help---
+		Board based on the STSPIN830 three-phase brushless motor driver.
+
+if BOARD_STM32_IHM16M1
+
+config BOARD_STM32_IHM16M1_VBUS
+	bool "X-NUCLEO-IHM16M1 board VBUS sense"
+	default n
+
+config BOARD_STM32_IHM16M1_POT
+	bool "X-NUCLEO-IHM16M1 board POT support"
+	default n
+
+endif # BOARD_STM32_IHM16M1
+
+endif # STM32_FOC
+
+if SENSORS_HALL3PHASE
+
+config BOARD_STM32_HALL3PHASE_SAMPLES
+	int "3-phase Hall effect sensor number of samples"
+	default 10
+
+endif # SENSORS_HALL3PHASE
