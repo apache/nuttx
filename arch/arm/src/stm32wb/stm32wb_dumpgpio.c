@@ -52,10 +52,10 @@
 static const char g_portchar[STM32_NPORTS] =
 {
   'A', 'B', 'C',
-#if defined(CONFIG_STM32WB_GPIO_HAVE_PORTD)
+#if defined(CONFIG_STM32_GPIO_HAVE_PORTD)
   'D',
 #endif
-#if defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
+#if defined(CONFIG_STM32_GPIO_HAVE_PORTE)
   'E',
 #endif
   'H'

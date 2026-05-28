@@ -43,21 +43,21 @@
 #define STM32_RTC_PRESCALER_MIN           1      /* Maximum speed
                                                     * of 16384 Hz */
 
-#if !defined(CONFIG_STM32WB_RTC_MAGIC)
-#  define CONFIG_STM32WB_RTC_MAGIC          (0xfacefeee)
+#if !defined(CONFIG_STM32_RTC_MAGIC)
+#  define CONFIG_STM32_RTC_MAGIC          (0xfacefeee)
 #endif
 
-#if !defined(CONFIG_STM32WB_RTC_MAGIC_TIME_SET)
-#  define CONFIG_STM32WB_RTC_MAGIC_TIME_SET (0xf00dface)
+#if !defined(CONFIG_STM32_RTC_MAGIC_TIME_SET)
+#  define CONFIG_STM32_RTC_MAGIC_TIME_SET (0xf00dface)
 #endif
 
-#if !defined(CONFIG_STM32WB_RTC_MAGIC_REG)
-#  define CONFIG_STM32WB_RTC_MAGIC_REG      (0)
+#if !defined(CONFIG_STM32_RTC_MAGIC_REG)
+#  define CONFIG_STM32_RTC_MAGIC_REG      (0)
 #endif
 
-#define RTC_MAGIC             CONFIG_STM32WB_RTC_MAGIC
-#define RTC_MAGIC_TIME_SET    CONFIG_STM32WB_RTC_MAGIC_TIME_SET
-#define RTC_MAGIC_REG         STM32_RTC_BKPR(CONFIG_STM32WB_RTC_MAGIC_REG)
+#define RTC_MAGIC             CONFIG_STM32_RTC_MAGIC
+#define RTC_MAGIC_TIME_SET    CONFIG_STM32_RTC_MAGIC_TIME_SET
+#define RTC_MAGIC_REG         STM32_RTC_BKPR(CONFIG_STM32_RTC_MAGIC_REG)
 
 /****************************************************************************
  * Public Types
@@ -158,7 +158,7 @@ bool stm32_rtc_is_initialized(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
+#ifdef CONFIG_STM32_HAVE_RTC_SUBSECONDS
 int stm32_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec);
 #endif
 

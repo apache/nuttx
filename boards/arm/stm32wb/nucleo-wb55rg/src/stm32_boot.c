@@ -47,7 +47,7 @@
 #  include "stm32wb_rtc.h"
 #endif
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
 #  include "stm32wb_blehci.h"
 #endif
 
@@ -164,7 +164,7 @@ void board_late_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   /* Initialize and register BLE HCI driver */
 
   stm32_blehci_initialize();

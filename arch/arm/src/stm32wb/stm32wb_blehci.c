@@ -54,38 +54,38 @@
 /* BLE init configuration params */
 
 #define STM32_BLE_PREP_WRITE_NUM \
-  STM32_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU)
+  STM32_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(CONFIG_STM32_BLE_MAX_ATT_MTU)
 
 #define STM32_C2_MEM_BLOCK_NUM \
-  STM32_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU, \
-                                        CONFIG_STM32WB_BLE_MAX_CONN, \
+  STM32_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(CONFIG_STM32_BLE_MAX_ATT_MTU, \
+                                        CONFIG_STM32_BLE_MAX_CONN, \
                                         STM32_BLE_PREP_WRITE_NUM)
 
-#ifdef CONFIG_STM32WB_BLE_C2HOST
+#ifdef CONFIG_STM32_BLE_C2HOST
 #  define STM32_BLE_C2HOST              STM32_SHCI_BLE_INIT_OPT_STACK_LL_HOST
 #else
 #  define STM32_BLE_C2HOST              STM32_SHCI_BLE_INIT_OPT_STACK_LL
 #endif
 
-#ifdef CONFIG_STM32WB_BLE_SVC_CHANGED_CHAR
+#ifdef CONFIG_STM32_BLE_SVC_CHANGED_CHAR
 #  define STM32_BLE_SVC_CHANGED_CHAR    STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_ENABLED
 #else
 #  define STM32_BLE_SVC_CHANGED_CHAR    STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_DISABLED
 #endif
 
-#ifdef CONFIG_STM32WB_BLE_WRITABLE_DEVICE_NAME
+#ifdef CONFIG_STM32_BLE_WRITABLE_DEVICE_NAME
 #  define STM32_BLE_DEVICE_NAME_MODE    STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RW
 #else
 #  define STM32_BLE_DEVICE_NAME_MODE    STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RO
 #endif
 
-#ifdef CONFIG_STM32WB_BLE_CHAN_SEL_ALG2
+#ifdef CONFIG_STM32_BLE_CHAN_SEL_ALG2
 #  define STM32_BLE_CS_ALG2             STM32_SHCI_BLE_INIT_OPT_CS_ALG2_ENABLED
 #else
 #  define STM32_BLE_CS_ALG2             STM32_SHCI_BLE_INIT_OPT_CS_ALG2_DISABLED
 #endif
 
-#ifdef CONFIG_STM32WB_BLE_POWER_CLASS_1
+#ifdef CONFIG_STM32_BLE_POWER_CLASS_1
 #  define STM32_BLE_POWER_CLASS         STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_1
 #else
 #  define STM32_BLE_POWER_CLASS         STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_2_3
@@ -96,7 +96,7 @@
    STM32_BLE_DEVICE_NAME_MODE | STM32_BLE_CS_ALG2 | \
    STM32_BLE_POWER_CLASS)
 
-#ifdef CONFIG_STM32WB_BLE_AGC_RSSI_IMPROVED
+#ifdef CONFIG_STM32_BLE_AGC_RSSI_IMPROVED
 #  define STM32_BLE_RXMOD_AGC_RSSI      STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_IMPROVED
 #else
 #  define STM32_BLE_RXMOD_AGC_RSSI      STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_LEGACY
@@ -299,25 +299,25 @@ static void stm32_blehci_bleinit(void)
   {
     .ble_buf =              NULL,
     .ble_buf_size =         0,
-    .gatt_attr_num =        CONFIG_STM32WB_BLE_GATT_MAX_ATTR_NUM,
-    .gatt_srv_num =         CONFIG_STM32WB_BLE_GATT_MAX_SVC_NUM,
-    .gatt_attr_buf_size =   CONFIG_STM32WB_BLE_GATT_ATTR_BUF_SIZE,
-    .max_conn =             CONFIG_STM32WB_BLE_MAX_CONN,
-    .dle_enable =           CONFIG_STM32WB_BLE_DLE,
+    .gatt_attr_num =        CONFIG_STM32_BLE_GATT_MAX_ATTR_NUM,
+    .gatt_srv_num =         CONFIG_STM32_BLE_GATT_MAX_SVC_NUM,
+    .gatt_attr_buf_size =   CONFIG_STM32_BLE_GATT_ATTR_BUF_SIZE,
+    .max_conn =             CONFIG_STM32_BLE_MAX_CONN,
+    .dle_enable =           CONFIG_STM32_BLE_DLE,
     .prep_write_op_num =    STM32_BLE_PREP_WRITE_NUM,
     .mem_block_num =        STM32_C2_MEM_BLOCK_NUM,
-    .att_max_mtu_size =     CONFIG_STM32WB_BLE_MAX_ATT_MTU,
-    .slave_sca =            CONFIG_STM32WB_BLE_SLAVE_SCA,
-    .master_sca_range =     CONFIG_STM32WB_BLE_MASTER_SCA,
-    .ls_clock_source =      CONFIG_STM32WB_BLE_LS_CLK_SRC,
-    .conn_event_length =    CONFIG_STM32WB_BLE_MAX_CONN_EVT_LENGTH,
-    .hse_startup =          CONFIG_STM32WB_BLE_HSE_STARTUP,
-    .viterbi_enable =       CONFIG_STM32WB_BLE_VITERBI,
+    .att_max_mtu_size =     CONFIG_STM32_BLE_MAX_ATT_MTU,
+    .slave_sca =            CONFIG_STM32_BLE_SLAVE_SCA,
+    .master_sca_range =     CONFIG_STM32_BLE_MASTER_SCA,
+    .ls_clock_source =      CONFIG_STM32_BLE_LS_CLK_SRC,
+    .conn_event_length =    CONFIG_STM32_BLE_MAX_CONN_EVT_LENGTH,
+    .hse_startup =          CONFIG_STM32_BLE_HSE_STARTUP,
+    .viterbi_enable =       CONFIG_STM32_BLE_VITERBI,
     .options =              STM32_BLE_INIT_OPTIONS,
     .hw_version =           0,
-    .max_initor_coc_num =   CONFIG_STM32WB_BLE_MAX_INITOR_COC_NUM,
-    .tx_power_min =         CONFIG_STM32WB_BLE_MIN_TX_POWER,
-    .tx_power_max =         CONFIG_STM32WB_BLE_MAX_TX_POWER,
+    .max_initor_coc_num =   CONFIG_STM32_BLE_MAX_INITOR_COC_NUM,
+    .tx_power_min =         CONFIG_STM32_BLE_MIN_TX_POWER,
+    .tx_power_max =         CONFIG_STM32_BLE_MAX_TX_POWER,
     .rx_model_config =      STM32_BLE_RXMOD_AGC_RSSI
   };
 

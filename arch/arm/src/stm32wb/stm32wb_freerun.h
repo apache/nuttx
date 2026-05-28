@@ -35,7 +35,7 @@
 
 #include "stm32wb_tim.h"
 
-#ifdef CONFIG_STM32WB_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Public Types
@@ -158,5 +158,5 @@ int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun);
 }
 #endif
 
-#endif /* CONFIG_STM32WB_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_FREERUN_H */

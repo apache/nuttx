@@ -64,7 +64,7 @@
 #define STM32_MBOX_ACLPKT_BUF_SIZE  264
 
 #define STM32_MBOX_RX_BUF_SIZE \
-  (CONFIG_STM32WB_MBOX_RX_EVT_QUEUE_LEN * STM32_MBOX_CMDPKT_BUF_SIZE)
+  (CONFIG_STM32_MBOX_RX_EVT_QUEUE_LEN * STM32_MBOX_CMDPKT_BUF_SIZE)
 
 /****************************************************************************
  * Private Types
@@ -150,18 +150,18 @@ struct stm32_mbox_shared_buffer_s
   aligned_data(4) struct stm32_mbox_mem_manager_table_s mm_table;
 
   aligned_data(4) stm32_mbox_list_t  evtfree_buffer;
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   aligned_data(4) stm32_mbox_list_t  ble_evt_queue;
 #endif
   aligned_data(4) stm32_mbox_list_t  sys_evt_queue;
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   aligned_data(4) uint8_t ble_cs_buffer[STM32_MBOX_CS_BUF_SIZE];
 #endif
   aligned_data(4) uint8_t evtpool_buffer[STM32_MBOX_RX_BUF_SIZE];
   aligned_data(4) uint8_t sys_cmd_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
   aligned_data(4) uint8_t sys_spare_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   aligned_data(4) uint8_t ble_spare_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
   aligned_data(4) uint8_t ble_cmd_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
   aligned_data(4) uint8_t ble_acl_buffer[STM32_MBOX_ACLPKT_BUF_SIZE];
@@ -204,12 +204,12 @@ static struct work_s g_tx_cmd_work;
 
 static stm32_mbox_list_t g_rx_evt_queue;
 static stm32_mbox_list_t g_tx_evtfree_queue;
-static uint8_t g_free_buffers[CONFIG_STM32WB_MBOX_TX_CMD_QUEUE_LEN]
+static uint8_t g_free_buffers[CONFIG_STM32_MBOX_TX_CMD_QUEUE_LEN]
                              [STM32_MBOX_CMDPKT_BUF_SIZE];
 static stm32_mbox_list_t g_free_buffers_pool;
 
 static struct stm32_mbox_channel_s g_syscmd_channel;
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
 static struct stm32_mbox_channel_s g_blecmd_channel;
 static struct stm32_mbox_channel_s g_bleacl_channel;
 #endif
@@ -243,7 +243,7 @@ static void stm32_ipcc_rxoisr(int irq, uint32_t *regs, void *arg)
       clrmask |= IPCC_C1SCR_CLR_BIT(STM32_MBOX_SYSEVT_CHANNEL);
     }
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
 
   /* Pull events from BLE channel into processing queue */
 
@@ -363,7 +363,7 @@ static void stm32_mbox_txworker(void *arg)
           handled = stm32_mbox_txnext(&g_syscmd_channel);
         }
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
       if (!stm32_ipcc_txactive(STM32_MBOX_BLECMD_CHANNEL))
         {
           handled |= stm32_mbox_txnext(&g_blecmd_channel);
@@ -628,7 +628,7 @@ void stm32_mboxinitialize(stm32_mbox_evt_handler_t evt_handler)
 
   stm32_mbox_list_initialize(&stm32_mbox_shared.sys_evt_queue);
   stm32_mbox_list_initialize(&stm32_mbox_shared.evtfree_buffer);
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   stm32_mbox_list_initialize(&stm32_mbox_shared.ble_evt_queue);
 #endif
 
@@ -648,12 +648,12 @@ void stm32_mboxinitialize(stm32_mbox_evt_handler_t evt_handler)
                                             .evtfree_buffer;
   stm32_mbox_mm_table.sys_spare_buffer = &stm32_mbox_shared
                                             .sys_spare_buffer;
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   stm32_mbox_mm_table.ble_spare_buffer = &stm32_mbox_shared
                                             .ble_spare_buffer;
 #endif
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   stm32_mbox_ble_table.cmd_buffer = &stm32_mbox_shared.ble_cmd_buffer;
   stm32_mbox_ble_table.acl_buffer = &stm32_mbox_shared.ble_acl_buffer;
   stm32_mbox_ble_table.cs_buffer  = &stm32_mbox_shared.ble_cs_buffer;
@@ -667,7 +667,7 @@ void stm32_mboxinitialize(stm32_mbox_evt_handler_t evt_handler)
                               stm32_mbox_shared.sys_cmd_buffer;
   stm32_mbox_list_initialize(&g_syscmd_channel.cmd_buf_queue);
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   /* Init BLE command channel data */
 
   g_blecmd_channel.ch_num =  STM32_MBOX_BLECMD_CHANNEL;
@@ -689,7 +689,7 @@ void stm32_mboxinitialize(stm32_mbox_evt_handler_t evt_handler)
   stm32_mbox_list_initialize(&g_tx_evtfree_queue);
 
   stm32_mbox_list_initialize(&g_free_buffers_pool);
-  for (i = 0; i < CONFIG_STM32WB_MBOX_TX_CMD_QUEUE_LEN; i++)
+  for (i = 0; i < CONFIG_STM32_MBOX_TX_CMD_QUEUE_LEN; i++)
     {
       stm32_mbox_list_add_tail(&g_free_buffers_pool,
                                  (stm32_mbox_list_t *)g_free_buffers[i]);
@@ -751,7 +751,7 @@ int stm32_mbox_syscmd(void *data, size_t len)
                              data, len);
 }
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
 /****************************************************************************
  * Name: stm32_mbox_blecmd
  *
@@ -812,4 +812,4 @@ void stm32_mbox_bleinit(struct stm32_shci_ble_init_cfg_s *params)
 
   stm32_ipcc_unmaskrxo(STM32_MBOX_BLEEVT_CHANNEL);
 }
-#endif /* CONFIG_STM32WB_BLE */
+#endif /* CONFIG_STM32_BLE */
