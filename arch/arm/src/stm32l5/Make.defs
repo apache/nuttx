@@ -56,6 +56,6 @@ endif
 
 # Required chip type specific files
 
-ifeq ($(CONFIG_STM32L5_STM32L562XX),y)
+ifeq ($(CONFIG_STM32_STM32L562XX),y)
 CHIP_CSRCS += stm32l562xx_rcc.c
 endif

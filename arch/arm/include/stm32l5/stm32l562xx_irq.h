@@ -160,7 +160,7 @@
 #define STM32_IRQ_ICACHE        (STM32_IRQ_FIRST + 107) /* 107: Instruction cache global interrupt */
 #define STM32_IRQ_OTFDEC1       (STM32_IRQ_FIRST + 108) /* 108: OTFDEC1 global interrupt */
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 #  define STM32_IRQ_NEXTINTS  109
 #else
 #  error "Unsupported STM32L5 chip"
