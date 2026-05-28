@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -133,5 +133,5 @@
 #define SYSCFG_RSSCMDR_SHIFT              0
 #define SYSCFG_RSSCMDR_MASK               (0xFFFF << SYSCFG_RSSCMDR_SHIFT)
 
-#endif /* CONFIG_STM32L5_STM32L562XX */
+#endif /* CONFIG_STM32_STM32L562XX */
 #endif /* __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_SYSCFG_H */

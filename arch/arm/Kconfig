@@ -614,6 +614,7 @@ config ARCH_CHIP_STM32N6
 
 config ARCH_CHIP_STM32L5
 	bool "STMicro STM32 L5"
+	select ARCH_CHIP_STM32
 	select ARCH_CORTEXM33
 	select ARCH_HAVE_MPU
 	select ARM_HAVE_DSP

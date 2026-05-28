@@ -50,11 +50,11 @@
 #include "stm32l5_flash.h"
 #include "arm_internal.h"
 
-#if !defined(CONFIG_STM32L5_STM32L562XX)
+#if !defined(CONFIG_STM32_STM32L562XX)
 #  error "Unrecognized STM32 chip"
 #endif
 
-#if !defined(CONFIG_STM32L5_FLASH_OVERRIDE_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
 #  warning "Flash Configuration has been overridden - make sure it is correct"
 #endif
 

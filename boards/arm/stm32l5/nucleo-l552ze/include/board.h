@@ -108,7 +108,7 @@
 
 /* Enable CLK48; get it from HSI48 */
 
-#if defined(CONFIG_STM32L5_USBFS) || defined(CONFIG_STM32L5_RNG)
+#if defined(CONFIG_STM32_USBFS) || defined(CONFIG_STM32_RNG)
 #  define STM32_USE_CLK48       1
 #  define STM32_CLK48_SEL       RCC_CCIPR_CLK48SEL_HSI48
 #  define STM32_HSI48_SYNCSRC   SYNCSRC_NONE
