@@ -61,7 +61,7 @@ endif()
 
 # Required chip type specific files
 
-if(CONFIG_STM32L5_STM32L562XX)
+if(CONFIG_STM32_STM32L562XX)
   list(APPEND SRCS stm32l562xx_rcc.c)
 endif()
 

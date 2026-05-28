@@ -33,14 +33,14 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 #  define STM32_SRAM1_SIZE       (192*1024)  /* 192Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
 #else
 #  error "Unsupported STM32L5 chip"
 #endif
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 #  define STM32_NFSMC                    1   /* Have FSMC memory controller */
 #  define STM32_NATIM                    2   /* Two advanced timers TIM1 and 8 */
 #  define STM32_NGTIM32                  2   /* 32-bit general timers TIM2 and 5 with DMA */
@@ -69,7 +69,7 @@
 #  define STM32_NCRC                     1   /* CRC */
 #  define STM32_NCOMP                    2   /* Comparators */
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
-#endif /* CONFIG_STM32L5_STM32L562XX */
+#endif /* CONFIG_STM32_STM32L562XX */
 
 /* NVIC priority levels *****************************************************/
 

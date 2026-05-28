@@ -84,7 +84,7 @@ the STLINK Virtual COM Port.
 
 Use make menuconfig to configure USART1 as the console::
 
-    CONFIG_STM32L5_USART1=y
+    CONFIG_STM32_USART1=y
     CONFIG_USART1_SERIALDRIVER=y
     CONFIG_USART1_SERIAL_CONSOLE=y
     CONFIG_USART1_RXBUFSIZE=256
@@ -220,9 +220,9 @@ NOTES:
    output on USART1, as described above under "Serial Console".  The
    elevant configuration settings are listed below::
 
-         CONFIG_STM32L5_USART1=y
-         CONFIG_STM32L5_USART1_SERIALDRIVER=y
-         CONFIG_STM32L5_USART=y
+         CONFIG_STM32_USART1=y
+         CONFIG_STM32_USART1_SERIALDRIVER=y
+         CONFIG_STM32_USART=y
 
          CONFIG_USART1_SERIALDRIVER=y
          CONFIG_USART1_SERIAL_CONSOLE=y
