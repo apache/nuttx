@@ -416,7 +416,7 @@ Peripheral      Support NOTES
 ==============  ======= ====================
 ADC              Yes     Oneshot and internal temperature sensor
 AES              Yes
-Bluetooth        No
+Bluetooth        Yes
 CAN/TWAI         Yes
 DMA              Yes
 DS               No
