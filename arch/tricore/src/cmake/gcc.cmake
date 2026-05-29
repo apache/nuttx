@@ -147,6 +147,24 @@ endif()
 
 add_link_options(-Wl,--no-warn-rwx-segments)
 
+if(CONFIG_MM_KASAN_INSTRUMENT_ALL)
+  add_compile_options(-fsanitize=kernel-address)
+  add_compile_options(--param=asan-stack=0)
+  add_compile_options(--param=asan-instrumentation-with-call-threshold=0)
+endif()
+
+if(CONFIG_MM_KASAN_GLOBAL)
+  add_compile_options(--param=asan-globals=1)
+endif()
+
+if(CONFIG_MM_KASAN_DISABLE_READS_CHECK)
+  add_compile_options(--param=asan-instrument-reads=0)
+endif()
+
+if(CONFIG_MM_KASAN_DISABLE_WRITES_CHECK)
+  add_compile_options(--param=asan-instrument-writes=0)
+endif()
+
 add_compile_options(-Wno-attributes -Wno-unknown-pragmas
                     $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
 
