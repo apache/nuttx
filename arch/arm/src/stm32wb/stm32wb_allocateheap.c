@@ -201,7 +201,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-  stm32wb_mpu_uheap((uintptr_t)ubase, usize);
+  stm32_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -289,7 +289,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM2a heap */
 
-  stm32wb_mpu_uheap((uintptr_t)SRAM2A_START, SRAM2A_END - SRAM2A_START);
+  stm32_mpu_uheap((uintptr_t)SRAM2A_START, SRAM2A_END - SRAM2A_START);
 
 #endif
 
@@ -309,7 +309,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM2b heap */
 
-  stm32wb_mpu_uheap((uintptr_t)SRAM2B_START, SRAM2B_END - SRAM2B_START);
+  stm32_mpu_uheap((uintptr_t)SRAM2B_START, SRAM2B_END - SRAM2B_START);
 
 #endif
 

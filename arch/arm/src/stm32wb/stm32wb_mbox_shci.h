@@ -119,7 +119,7 @@
 
 /* STM32_SHCI_BLE_INIT command params */
 
-begin_packed_struct struct stm32wb_shci_ble_init_cfg_s
+begin_packed_struct struct stm32_shci_ble_init_cfg_s
 {
   void     *ble_buf;              /* Not used, must be NULL. */
   uint32_t ble_buf_size;          /* Not used, must be 0. */

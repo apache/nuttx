@@ -164,15 +164,15 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32wb_clockconfig();
+  stm32_clockconfig();
 #ifdef CONFIG_STM32WB_IPCC
-  stm32wb_ipccreset();
+  stm32_ipccreset();
 #endif
   arm_fpuconfig();
 
-  /* Todo: stm32wb_lowsetup(); */
+  /* Todo: stm32_lowsetup(); */
 
-  stm32wb_gpioinit();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -223,13 +223,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  stm32wb_userspace();
+  stm32_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  stm32wb_board_initialize();
+  stm32_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */
