@@ -69,14 +69,14 @@ static const uint32_t drives[4] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_rcc_enablelse
+ * Name: stm32_rcc_enablelse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) oscillator and the LSE system clock.
  *
  ****************************************************************************/
 
-void stm32wl5_rcc_enablelse(void)
+void stm32_rcc_enablelse(void)
 {
   int writable;
   uint32_t regval;
@@ -101,7 +101,7 @@ void stm32wl5_rcc_enablelse(void)
        * the PWR CR register before to configuring the LSE.
        */
 
-      writable = stm32wl5_pwr_enablebkp(true);
+      writable = stm32_pwr_enablebkp(true);
 
       /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON
        * bit the RCC BDCR register.
@@ -174,7 +174,7 @@ void stm32wl5_rcc_enablelse(void)
           while (!((regval = getreg32(STM32_RCC_BDCR)) &
                    RCC_BDCR_LSESYSRDY))
             {
-              stm32wl5_waste();
+              stm32_waste();
             }
         }
 
@@ -189,6 +189,6 @@ void stm32wl5_rcc_enablelse(void)
 
       /* Disable backup domain access if it was disabled on entry */
 
-      (void)stm32wl5_pwr_enablebkp(writable);
+      (void)stm32_pwr_enablebkp(writable);
     }
 }
