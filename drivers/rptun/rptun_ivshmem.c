@@ -35,6 +35,7 @@
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
+#include <nuttx/virtio/virtio-config.h>
 #include <nuttx/virtio/virtio-vsock.h>
 #include <nuttx/wdog.h>
 
@@ -67,9 +68,16 @@
 #  define RPTUN_IVSHMEM_VSOCK     0
 #endif
 
+#ifdef CONFIG_DRIVERS_VHOST_NET
+#  define RPTUN_IVSHMEM_NET       1
+#else
+#  define RPTUN_IVSHMEM_NET       0
+#endif
+
 #define RPTUN_IVSHMEM_VIRTIO_NUM  (RPTUN_IVSHMEM_RNG + \
                                    RPTUN_IVSHMEM_RPMSG + \
-                                   RPTUN_IVSHMEM_VSOCK)
+                                   RPTUN_IVSHMEM_VSOCK + \
+                                   RPTUN_IVSHMEM_NET)
 #define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
@@ -102,6 +110,13 @@ struct aligned_data(8) rptun_ivshmem_rsc_s
   struct virtio_vsock_config_s vsock_config;
   struct fw_rsc_carveout       vsock_carveout;
   char                         vsock_shm[8 * RPTUN_IVSHMEM_SHMEM_SIZE];
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_NET
+  struct fw_rsc_vdev           net;
+  struct fw_rsc_vdev_vring     net_vring0;
+  struct fw_rsc_vdev_vring     net_vring1;
+  struct fw_rsc_carveout       net_carveout;
+  char                         net_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
 #endif
 };
 
@@ -196,6 +211,10 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
 #ifdef CONFIG_NET_VSOCK_VHOST
       offsetof(struct rptun_ivshmem_rsc_s, vsock),
       offsetof(struct rptun_ivshmem_rsc_s, vsock_carveout),
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_NET
+      offsetof(struct rptun_ivshmem_rsc_s, net),
+      offsetof(struct rptun_ivshmem_rsc_s, net_carveout),
 #endif
     },
 
@@ -319,6 +338,43 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
       .len  = sizeof(g_rsc_table.vsock_shm),
     },
 #endif
+#ifdef CONFIG_DRIVERS_VHOST_NET
+  .net =
+    {
+      .type       = RSC_VDEV,
+      .id         = VIRTIO_ID_NETWORK,
+      .notifyid   = RSC_NOTIFY_ID_ANY,
+      .dfeatures  = (1 << VIRTIO_F_ANY_LAYOUT),
+      .config_len = sizeof(struct fw_rsc_config),
+      .num_of_vrings = 2,
+      .reserved   =
+        {
+          VIRTIO_DEV_DRIVER, 0
+        },
+    },
+  .net_vring0 =
+    {
+      .align     = 8,
+      .num       = 32,
+      .notifyid  = RSC_NOTIFY_ID_ANY,
+      .da        = FW_RSC_U32_ADDR_ANY,
+    },
+  .net_vring1 =
+    {
+      .align     = 8,
+      .num       = 32,
+      .notifyid  = RSC_NOTIFY_ID_ANY,
+      .da        = FW_RSC_U32_ADDR_ANY,
+    },
+  .net_carveout =
+    {
+      .type = RSC_CARVEOUT,
+      .da   = offsetof(struct rptun_ivshmem_rsc_s, net_shm) +
+              offsetof(struct rptun_ivshmem_mem_s, rsc_table),
+      .pa   = (uint32_t)METAL_BAD_PHYS,
+      .len  = sizeof(g_rsc_table.net_shm),
+    },
+#endif
 };
 
 /****************************************************************************
@@ -385,6 +441,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
                   priv->cpuname, 5);
           strlcpy((FAR char *)&rsc->vsock_config.host_cid,
                   CONFIG_RPMSG_LOCAL_CPUNAME, 5);
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_NET
+          snprintf((FAR char *)rsc->net_carveout.name, RPROC_MAX_NAME_LEN,
+                   "vdev%dbuffer", i++);
 #endif
           UNUSED(rsc);
           UNUSED(i);
