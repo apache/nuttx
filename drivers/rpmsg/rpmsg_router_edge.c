@@ -525,7 +525,7 @@ static void rpmsg_router_edge_destroy(FAR struct rpmsg_router_edge_s *edge)
                             rpmsg_router_edge_match,
                             rpmsg_router_edge_bind);
   rpmsg_unregister(edge->name, &edge->rpmsg);
-  rpmsg_device_destory(&edge->rpmsg);
+  rpmsg_device_destroy(&edge->rpmsg);
   kmm_free(edge);
 }
 

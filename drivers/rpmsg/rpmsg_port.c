@@ -824,7 +824,7 @@ void rpmsg_port_unregister(FAR struct rpmsg_port_s *port)
 
   snprintf(name, sizeof(name), "/dev/rpmsg/%s", port->rpmsg.cpuname);
 
-  rpmsg_device_destory(&port->rpmsg);
+  rpmsg_device_destroy(&port->rpmsg);
   rpmsg_unregister(name, &port->rpmsg);
 }
 

@@ -445,7 +445,7 @@ void rpmsg_device_created(FAR struct rpmsg_s *rpmsg)
 #endif
 }
 
-void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg)
+void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
 {
   FAR struct rpmsg_device *rdev = rpmsg_get_rdev_by_rpmsg(rpmsg);
   FAR struct metal_list *node;
