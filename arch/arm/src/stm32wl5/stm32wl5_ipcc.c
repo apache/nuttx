@@ -35,7 +35,7 @@
 
 #include <arch/stm32wl5/stm32wl5xxx_cpu1_irq.h>
 #include "hardware/stm32wl5_ipcc.h"
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_ipcc.h"
 
 /****************************************************************************
@@ -44,7 +44,7 @@
 
 /* This structure describes tx or rx of single channel in memory */
 
-struct stm32wl5_ipcc_chan_mem_s
+struct stm32_ipcc_chan_mem_s
 {
   unsigned len; /* Number of valid bytes in data[] */
   char data[];  /* Data in IPCC memory */
@@ -52,7 +52,7 @@ struct stm32wl5_ipcc_chan_mem_s
 
 /* Internal stm32wl5 ipcc structure describing channel state. */
 
-struct stm32wl5_ipcc_s
+struct stm32_ipcc_s
 {
   /* Pointer to API connecting upper and lower half of the driver */
 
@@ -65,14 +65,14 @@ struct stm32wl5_ipcc_s
   char *rxmem;
 
   /* Maximum length of data that rxmem can hold. It is size of the
-   * reserved space for rxmem minus sizeof(stm32wl5_ipcc_chan_mem_s.len)
+   * reserved space for rxmem minus sizeof(stm32_ipcc_chan_mem_s.len)
    */
 
   unsigned rxlen;
 
   /* Number of bytes copied from IPCC memory to buffer. Can be less than
-   * stm32wl5_ipcc_chan_mem_s.len after copy operation when buffer is full.
-   * Value can persist between multiple ISR and stm32wl5_ipcc_buffer_data()
+   * stm32_ipcc_chan_mem_s.len after copy operation when buffer is full.
+   * Value can persist between multiple ISR and stm32_ipcc_buffer_data()
    * calls, until all data from IPCC memory is successfully buffered.
    *
    * When unbuffered version is used, this holds number of bytes already
@@ -89,7 +89,7 @@ struct stm32wl5_ipcc_s
   char *txmem;
 
   /* Maximum length of data that txmem can hold. It is size of the
-   * reserved space for txmem minus sizeof(stm32wl5_ipcc_chan_mem_s.len)
+   * reserved space for txmem minus sizeof(stm32_ipcc_chan_mem_s.len)
    */
 
   unsigned txlen;
@@ -99,24 +99,24 @@ struct stm32wl5_ipcc_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_read(struct ipcc_lower_s *ipcc,
                                   char *buffer, size_t buflen);
-static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_write(struct ipcc_lower_s *ipcc,
                                    const char *buffer, size_t buflen);
 #ifdef CONFIG_IPCC_BUFFERED
-static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
                                          struct circbuf_s *rxbuf);
-static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
+static ssize_t stm32_ipcc_copy_to_buffer(int chan,
                                             struct circbuf_s *rxbuf);
 #endif
-static int     stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg);
-static int     stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg);
+static int     stm32_ipcc_rx_isr(int irq, void *context, void *arg);
+static int     stm32_ipcc_tx_isr(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct stm32wl5_ipcc_s g_ipccpriv[IPCC_NCHAN] =
+struct stm32_ipcc_s g_ipccpriv[IPCC_NCHAN] =
 {
   /* Channel 1 is always enabled when IPCC is enabled */
 
@@ -183,7 +183,7 @@ struct stm32wl5_ipcc_s g_ipccpriv[IPCC_NCHAN] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_tx_isr
+ * Name: stm32_ipcc_tx_isr
  *
  * Description:
  *   IPCC TX interrupt service routine. This interrupt is called when
@@ -209,16 +209,16 @@ struct stm32wl5_ipcc_s g_ipccpriv[IPCC_NCHAN] =
  *
  ****************************************************************************/
 
-static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
+static int stm32_ipcc_tx_isr(int irq, void *context, void *arg)
 {
   int chan;
   uint32_t mr;
   uint32_t sr;
   uint32_t status;
-  struct stm32wl5_ipcc_s *priv;
+  struct stm32_ipcc_s *priv;
 #ifdef CONFIG_IPCC_BUFFERED
   size_t nwritten;
-  struct stm32wl5_ipcc_chan_mem_s *txmem;
+  struct stm32_ipcc_chan_mem_s *txmem;
 #endif
 
   UNUSED(context);
@@ -251,7 +251,7 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
       priv = &g_ipccpriv[chan];
 
 #ifdef CONFIG_IPCC_BUFFERED
-      txmem = (struct stm32wl5_ipcc_chan_mem_s *)priv->txmem;
+      txmem = (struct stm32_ipcc_chan_mem_s *)priv->txmem;
 
       /* Copy as much as we can into IPCC memory, circbuf won't copy
        * more than there is in the buffer.
@@ -297,7 +297,7 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_write
+ * Name: stm32_ipcc_write
  *
  * Description:
  *   Function writes buffer to IPCC memory that will be later read by
@@ -316,12 +316,12 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_write(struct ipcc_lower_s *ipcc,
                                    const char *buffer, size_t buflen)
 {
   size_t to_copy;
-  struct stm32wl5_ipcc_s *priv;
-  struct stm32wl5_ipcc_chan_mem_s *txmem;
+  struct stm32_ipcc_s *priv;
+  struct stm32_ipcc_chan_mem_s *txmem;
   uint32_t sr;
 
   sr = getreg32(STM32_IPCC_C1TOC2SR);
@@ -339,7 +339,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
     }
 
   priv = &g_ipccpriv[ipcc->chan];
-  txmem = (struct stm32wl5_ipcc_chan_mem_s *)priv->txmem;
+  txmem = (struct stm32_ipcc_chan_mem_s *)priv->txmem;
 
   /* Disable TX interrupt since we will modify shared data */
 
@@ -366,7 +366,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
 }
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_rx_isr
+ * Name: stm32_ipcc_rx_isr
  *
  * Description:
  *   Interrupt service routine - this function is called when another CPU
@@ -389,13 +389,13 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
  *
  ****************************************************************************/
 
-static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
+static int stm32_ipcc_rx_isr(int irq, void *context, void *arg)
 {
   int chan;
   uint32_t mr;
   uint32_t sr;
   uint32_t status;
-  struct stm32wl5_ipcc_s *priv;
+  struct stm32_ipcc_s *priv;
 #ifdef CONFIG_IPCC_BUFFERED
   ssize_t nread;
 #endif
@@ -429,7 +429,7 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
       priv = &g_ipccpriv[chan];
 
 #ifdef CONFIG_IPCC_BUFFERED
-      nread = stm32wl5_ipcc_copy_to_buffer(chan, &priv->ipcc->rxbuf);
+      nread = stm32_ipcc_copy_to_buffer(chan, &priv->ipcc->rxbuf);
 
       if (nread)
 #endif /* CONFIG_IPCC_BUFFERED */
@@ -454,7 +454,7 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_read
+ * Name: stm32_ipcc_read
  *
  * Description:
  *   Function will copy requests number of bytes to buffer. If there is not
@@ -477,13 +477,13 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_read(struct ipcc_lower_s *ipcc,
                                   char *buffer, size_t buflen)
 {
   size_t to_copy;
   uint32_t sr;
-  struct stm32wl5_ipcc_s *priv;
-  struct stm32wl5_ipcc_chan_mem_s *rxmem;
+  struct stm32_ipcc_s *priv;
+  struct stm32_ipcc_chan_mem_s *rxmem;
 
   sr = getreg32(STM32_IPCC_C2TOC1SR);
 
@@ -498,7 +498,7 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
     }
 
   priv = &g_ipccpriv[ipcc->chan];
-  rxmem = (struct stm32wl5_ipcc_chan_mem_s *)priv->rxmem;
+  rxmem = (struct stm32_ipcc_chan_mem_s *)priv->rxmem;
 
   /* Disable RX interrupt since we will modify shared data */
 
@@ -541,7 +541,7 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
 }
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_copy_to_buffer
+ * Name: stm32_ipcc_copy_to_buffer
  *
  * Description:
  *   Copies as much bytes from channel as possible to rxbuf circ buffer.
@@ -560,13 +560,13 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
  ****************************************************************************/
 
 #ifdef CONFIG_IPCC_BUFFERED
-static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
+static ssize_t stm32_ipcc_copy_to_buffer(int chan,
                                             struct circbuf_s *rxbuf)
 {
   size_t to_copy;
   size_t rxbuf_space;
-  struct stm32wl5_ipcc_s *priv;
-  struct stm32wl5_ipcc_chan_mem_s *rxmem;
+  struct stm32_ipcc_s *priv;
+  struct stm32_ipcc_chan_mem_s *rxmem;
   uint32_t sr;
 
   sr = getreg32(STM32_IPCC_C2TOC1SR);
@@ -582,7 +582,7 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
     }
 
   priv = &g_ipccpriv[chan];
-  rxmem = (struct stm32wl5_ipcc_chan_mem_s *)priv->rxmem;
+  rxmem = (struct stm32_ipcc_chan_mem_s *)priv->rxmem;
 
   /* If buffer is full, it's possible we did not copy everything from
    * IPCC memory to buffer in previous interrupt. Then when another
@@ -641,7 +641,7 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_buffer_data
+ * Name: stm32_ipcc_buffer_data
  *
  * Description:
  *   Copies as many bytes as possible from ipcc channel to rxbuf.
@@ -658,7 +658,7 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
  ****************************************************************************/
 
 #ifdef CONFIG_IPCC_BUFFERED
-static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
+static ssize_t stm32_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
                                          struct circbuf_s *rxbuf)
 {
   int ret;
@@ -669,7 +669,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 
   /* Copy data to buffer */
 
-  ret = stm32wl5_ipcc_copy_to_buffer(ipcc->chan, rxbuf);
+  ret = stm32_ipcc_copy_to_buffer(ipcc->chan, rxbuf);
 
   /* Re-enable interrupt */
 
@@ -682,7 +682,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_write_notify
+ * Name: stm32_ipcc_write_notify
  *
  * Description:
  *   This function is called when there is new data on circ buffer.
@@ -699,7 +699,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
  ****************************************************************************/
 
 #ifdef CONFIG_IPCC_BUFFERED
-static ssize_t stm32wl5_ipcc_write_notify(struct ipcc_lower_s *ipcc)
+static ssize_t stm32_ipcc_write_notify(struct ipcc_lower_s *ipcc)
 {
   modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNFM(ipcc->chan), 0);
   return 0;
@@ -707,10 +707,10 @@ static ssize_t stm32wl5_ipcc_write_notify(struct ipcc_lower_s *ipcc)
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_cleanup
+ * Name: stm32_ipcc_cleanup
  *
  * Description:
- *   Cleans up resources initialized by stm32wl5_ipcc_init(). This will
+ *   Cleans up resources initialized by stm32_ipcc_init(). This will
  *   free() ipcc pointer!
  *
  * Input Parameters:
@@ -721,7 +721,7 @@ static ssize_t stm32wl5_ipcc_write_notify(struct ipcc_lower_s *ipcc)
  *
  ****************************************************************************/
 
-static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
+static int stm32_ipcc_cleanup(struct ipcc_lower_s *ipcc)
 {
   DEBUGASSERT(ipcc);
   DEBUGASSERT(ipcc->chan <= IPCC_NCHAN);
@@ -743,7 +743,7 @@ static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_ipcc_init
+ * Name: stm32_ipcc_init
  *
  * Description:
  *   Function initializes runtime options for IPCC. This function is called
@@ -762,7 +762,7 @@ static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
  *
  ****************************************************************************/
 
-struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
+struct ipcc_lower_s *stm32_ipcc_init(int chan)
 {
   int ret;
   static int ipcc_fti;
@@ -786,12 +786,12 @@ struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
    * upper half needs to call to work properly.
    */
 
-  ipcc->ops.read = stm32wl5_ipcc_read;
-  ipcc->ops.write = stm32wl5_ipcc_write;
-  ipcc->ops.cleanup = stm32wl5_ipcc_cleanup;
+  ipcc->ops.read = stm32_ipcc_read;
+  ipcc->ops.write = stm32_ipcc_write;
+  ipcc->ops.cleanup = stm32_ipcc_cleanup;
 #ifdef CONFIG_IPCC_BUFFERED
-  ipcc->ops.buffer_data = stm32wl5_ipcc_buffer_data;
-  ipcc->ops.write_notify = stm32wl5_ipcc_write_notify;
+  ipcc->ops.buffer_data = stm32_ipcc_buffer_data;
+  ipcc->ops.write_notify = stm32_ipcc_write_notify;
 #endif
 
   ipcc->chan = chan;
@@ -810,14 +810,14 @@ struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
    * interrupt functions
    */
 
-  ret = irq_attach(STM32_IRQ_IPCC_C1_RX_IT, stm32wl5_ipcc_rx_isr, NULL);
+  ret = irq_attach(STM32_IRQ_IPCC_C1_RX_IT, stm32_ipcc_rx_isr, NULL);
   if (ret)
     {
       kmm_free(ipcc);
       return NULL;
     }
 
-  ret = irq_attach(STM32_IRQ_IPCC_C1_TX_IT, stm32wl5_ipcc_tx_isr, NULL);
+  ret = irq_attach(STM32_IRQ_IPCC_C1_TX_IT, stm32_ipcc_tx_isr, NULL);
   if (ret)
     {
       kmm_free(ipcc);

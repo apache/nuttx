@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "nvic.h"
 
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_gpio.h"
 #include "stm32wl5_userspace.h"
 #include "stm32wl5_start.h"
@@ -153,9 +153,9 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32wl5_clockconfig();
-  stm32wl5_lowsetup();
-  stm32wl5_gpioinit();
+  stm32_clockconfig();
+  stm32_lowsetup();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -202,13 +202,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  stm32wl5_userspace();
+  stm32_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  stm32wl5_board_initialize();
+  stm32_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */

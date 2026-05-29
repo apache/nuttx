@@ -142,6 +142,6 @@
                         IPCC_CHAN3_SIZE + IPCC_CHAN4_SIZE + \
                         IPCC_CHAN5_SIZE + IPCC_CHAN6_SIZE)
 
-struct ipcc_lower_s *stm32wl5_ipcc_init(int chan);
+struct ipcc_lower_s *stm32_ipcc_init(int chan);
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_IPCC_H */

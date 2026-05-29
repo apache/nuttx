@@ -173,7 +173,7 @@ static const struct part_table part_table[] =
  * Public Functions
  ****************************************************************************/
 
-int stm32wl5_flash_init(void)
+int stm32_flash_init(void)
 {
   struct mtd_dev_s *mtd;
   struct mtd_dev_s *mtd_part;
