@@ -37,6 +37,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   gawk \
   git \
   gperf \
+  libftdi1-dev \
   libncurses5-dev \
   make \
   ninja-build \
