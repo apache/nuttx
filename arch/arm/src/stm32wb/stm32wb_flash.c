@@ -93,7 +93,7 @@ static void flash_unlock(void)
 {
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      stm32wb_waste();
+      stm32_waste();
     }
 
   if (getreg32(STM32_FLASH_CR) & FLASH_CR_LOCK)
@@ -143,7 +143,7 @@ static inline void flash_erase(size_t page)
 
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      stm32wb_waste();
+      stm32_waste();
     }
 
   modifyreg32(STM32_FLASH_CR, FLASH_CR_PAGE_ERASE, 0);
@@ -153,7 +153,7 @@ static inline void flash_erase(size_t page)
  * Public Functions
  ****************************************************************************/
 
-int stm32wb_flash_unlock(void)
+int stm32_flash_unlock(void)
 {
   int ret;
 
@@ -169,7 +169,7 @@ int stm32wb_flash_unlock(void)
   return ret;
 }
 
-int stm32wb_flash_lock(void)
+int stm32_flash_lock(void)
 {
   int ret;
 
@@ -186,7 +186,7 @@ int stm32wb_flash_lock(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_flash_user_optbytes
+ * Name: stm32_flash_user_optbytes
  *
  * Description:
  *   Modify the contents of the user option bytes (USR OPT) on the flash.
@@ -202,7 +202,7 @@ int stm32wb_flash_lock(void)
  *
  ****************************************************************************/
 
-uint32_t stm32wb_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
+uint32_t stm32_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 {
   uint32_t regval;
   int ret;
@@ -240,7 +240,7 @@ uint32_t stm32wb_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
   while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
     {
-      stm32wb_waste();
+      stm32_waste();
     }
 
   flash_optbytes_lock();
@@ -453,7 +453,7 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
           while (getreg32(STM32_FLASH_SR) & FLASH_SR_BSY)
             {
-              stm32wb_waste();
+              stm32_waste();
             }
 
           /* Verify */

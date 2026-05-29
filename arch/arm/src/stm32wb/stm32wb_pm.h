@@ -48,7 +48,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32wb_pmstop
+ * Name: stm32_pmstop
  *
  * Description:
  *   Enter STOP mode.
@@ -66,10 +66,10 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32wb_pmstop(bool lpds);
+int stm32_pmstop(bool lpds);
 
 /****************************************************************************
- * Name: stm32wb_pmstop2
+ * Name: stm32_pmstop2
  *
  * Description:
  *   Enter STOP2 mode.
@@ -84,10 +84,10 @@ int stm32wb_pmstop(bool lpds);
  *
  ****************************************************************************/
 
-int stm32wb_pmstop2(void);
+int stm32_pmstop2(void);
 
 /****************************************************************************
- * Name: stm32wb_pmstandby
+ * Name: stm32_pmstandby
  *
  * Description:
  *   Enter STANDBY mode.
@@ -103,10 +103,10 @@ int stm32wb_pmstop2(void);
  *
  ****************************************************************************/
 
-int stm32wb_pmstandby(void);
+int stm32_pmstandby(void);
 
 /****************************************************************************
- * Name: stm32wb_pmsleep
+ * Name: stm32_pmsleep
  *
  * Description:
  *   Enter SLEEP mode.
@@ -122,10 +122,10 @@ int stm32wb_pmstandby(void);
  *
  ****************************************************************************/
 
-void stm32wb_pmsleep(bool sleeponexit);
+void stm32_pmsleep(bool sleeponexit);
 
 /****************************************************************************
- * Name: stm32wb_pmlpr
+ * Name: stm32_pmlpr
  *
  * Description:
  *   Enter Low-Power Run (LPR) mode.
@@ -140,7 +140,7 @@ void stm32wb_pmsleep(bool sleeponexit);
  *
  ****************************************************************************/
 
-int stm32wb_pmlpr(void);
+int stm32_pmlpr(void);
 
 #undef EXTERN
 #ifdef __cplusplus

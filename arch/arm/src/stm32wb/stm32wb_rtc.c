@@ -199,7 +199,7 @@ static void rtc_wprunlock(void)
 {
   /* Enable write access to the backup domain. */
 
-  stm32wb_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* The following steps are required to unlock the write protection on
    * all the RTC registers (except for RTC_ISR[13:8], RTC_TAFCR, and
@@ -237,7 +237,7 @@ static inline void rtc_wprlock(void)
 
   /* Disable write access to the backup domain. */
 
-  stm32wb_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 }
 
 /****************************************************************************
@@ -436,7 +436,7 @@ static void rtc_resume(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_rtc_alarm_handler
+ * Name: stm32_rtc_alarm_handler
  *
  * Description:
  *   RTC ALARM interrupt service routine through the EXTI line
@@ -451,7 +451,7 @@ static void rtc_resume(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32wb_rtc_alarm_handler(int irq, void *context,
+static int stm32_rtc_alarm_handler(int irq, void *context,
                                      void *rtc_handler_arg)
 {
   struct alm_cbinfo_s *cbinfo;
@@ -465,7 +465,7 @@ static int stm32wb_rtc_alarm_handler(int irq, void *context,
    * backup data registers and backup SRAM).
    */
 
-  stm32wb_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   /* Check for EXTI from Alarm A or B and handle according */
 
@@ -531,7 +531,7 @@ static int stm32wb_rtc_alarm_handler(int irq, void *context,
    * data registers and backup SRAM).
    */
 
-  stm32wb_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   return ret;
 }
@@ -737,14 +737,14 @@ static inline void rtc_enable_alarm(void)
        * 3. Configure the RTC to generate RTC alarms (Alarm A or Alarm B).
        */
 
-      stm32wb_exti_alarm(true, false, true, stm32wb_rtc_alarm_handler, NULL);
+      stm32_exti_alarm(true, false, true, stm32_rtc_alarm_handler, NULL);
       g_alarm_enabled = true;
     }
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_getalarmdatetime
+ * Name: stm32_rtc_getalarmdatetime
  *
  * Description:
  *   Get the current date and time for a RTC alarm.
@@ -759,7 +759,7 @@ static inline void rtc_enable_alarm(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int stm32wb_rtc_getalarmdatetime(rtc_alarmreg_t reg,
+static int stm32_rtc_getalarmdatetime(rtc_alarmreg_t reg,
                                         struct tm *tp)
 {
   uint32_t data;
@@ -800,7 +800,7 @@ static int stm32wb_rtc_getalarmdatetime(rtc_alarmreg_t reg,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rtc_is_initialized
+ * Name: stm32_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized
@@ -816,7 +816,7 @@ static int stm32wb_rtc_getalarmdatetime(rtc_alarmreg_t reg,
  *
  ****************************************************************************/
 
-bool stm32wb_rtc_is_initialized(void)
+bool stm32_rtc_is_initialized(void)
 {
   uint32_t regval;
 
@@ -851,14 +851,14 @@ int up_rtc_initialize(void)
    * backed, we don't need or want to re-initialize on each reset.
    */
 
-  init_stat = stm32wb_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
       /* Enable write access to the backup domain (RTC registers, RTC
        * backup data registers and backup SRAM).
        */
 
-      stm32wb_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
 #if defined(CONFIG_STM32WB_RTC_HSECLOCK)
       modifyreg32(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK,
@@ -893,7 +893,7 @@ int up_rtc_initialize(void)
            * RTC backup data registers and backup SRAM).
            */
 
-          stm32wb_pwr_enablebkp(false);
+          stm32_pwr_enablebkp(false);
 
           rtc_dumpregs("After Failed Initialization");
 
@@ -960,7 +960,7 @@ int up_rtc_initialize(void)
            * RTC backup data registers and backup SRAM).
            */
 
-          stm32wb_pwr_enablebkp(false);
+          stm32_pwr_enablebkp(false);
         }
     }
   else
@@ -969,7 +969,7 @@ int up_rtc_initialize(void)
        * backup data registers and backup SRAM).
        */
 
-      stm32wb_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* Write protection for RTC registers does not need to be disabled. */
 
@@ -979,7 +979,7 @@ int up_rtc_initialize(void)
        * data registers and backup SRAM).
        */
 
-      stm32wb_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 
   g_rtc_enabled = true;
@@ -989,7 +989,7 @@ int up_rtc_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_rtc_getdatetime_with_subseconds
+ * Name: stm32_rtc_getdatetime_with_subseconds
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
@@ -1009,7 +1009,7 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-int stm32wb_rtc_getdatetime_with_subseconds(struct tm *tp,
+int stm32_rtc_getdatetime_with_subseconds(struct tm *tp,
                                             long *nsec)
 {
 #ifdef CONFIG_STM32WB_HAVE_RTC_SUBSECONDS
@@ -1140,7 +1140,7 @@ int stm32wb_rtc_getdatetime_with_subseconds(struct tm *tp,
 
 int up_rtc_getdatetime(struct tm *tp)
 {
-  return stm32wb_rtc_getdatetime_with_subseconds(tp, NULL);
+  return stm32_rtc_getdatetime_with_subseconds(tp, NULL);
 }
 
 /****************************************************************************
@@ -1174,12 +1174,12 @@ int up_rtc_getdatetime(struct tm *tp)
 #  endif
 int up_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec)
 {
-  return stm32wb_rtc_getdatetime_with_subseconds(tp, nsec);
+  return stm32_rtc_getdatetime_with_subseconds(tp, nsec);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_setdatetime
+ * Name: stm32_rtc_setdatetime
  *
  * Description:
  *   Set the RTC to the provided time. RTC implementations which provide
@@ -1194,7 +1194,7 @@ int up_rtc_getdatetime_with_subseconds(struct tm *tp, long *nsec)
  *
  ****************************************************************************/
 
-int stm32wb_rtc_setdatetime(const struct tm *tp)
+int stm32_rtc_setdatetime(const struct tm *tp)
 {
   uint32_t tr;
   uint32_t dr;
@@ -1257,9 +1257,9 @@ int stm32wb_rtc_setdatetime(const struct tm *tp)
 
   if (getreg32(RTC_MAGIC_REG) != RTC_MAGIC_TIME_SET)
     {
-      stm32wb_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
       putreg32(RTC_MAGIC_TIME_SET, RTC_MAGIC_REG);
-      stm32wb_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 
   /* Re-enable the write protection for RTC registers */
@@ -1270,7 +1270,7 @@ int stm32wb_rtc_setdatetime(const struct tm *tp)
 }
 
 /****************************************************************************
- * Name: stm32wb_rtc_havesettime
+ * Name: stm32_rtc_havesettime
  *
  * Description:
  *   Check if RTC time has been set.
@@ -1280,7 +1280,7 @@ int stm32wb_rtc_setdatetime(const struct tm *tp)
  *
  ****************************************************************************/
 
-bool stm32wb_rtc_havesettime(void)
+bool stm32_rtc_havesettime(void)
 {
   return getreg32(RTC_MAGIC_REG) == RTC_MAGIC_TIME_SET;
 }
@@ -1309,11 +1309,11 @@ int up_rtc_settime(const struct timespec *tp)
    */
 
   gmtime_r(&tp->tv_sec, &newtime);
-  return stm32wb_rtc_setdatetime(&newtime);
+  return stm32_rtc_setdatetime(&newtime);
 }
 
 /****************************************************************************
- * Name: stm32wb_rtc_setalarm
+ * Name: stm32_rtc_setalarm
  *
  * Description:
  *   Set an alarm to an absolute time using associated hardware.
@@ -1327,7 +1327,7 @@ int up_rtc_settime(const struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32wb_rtc_setalarm(struct alm_setalarm_s *alminfo)
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo)
 {
   struct alm_cbinfo_s *cbinfo;
   rtc_alarmreg_t alarmreg;
@@ -1402,7 +1402,7 @@ int stm32wb_rtc_setalarm(struct alm_setalarm_s *alminfo)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_cancelalarm
+ * Name: stm32_rtc_cancelalarm
  *
  * Description:
  *   Cancel an alarm.
@@ -1416,7 +1416,7 @@ int stm32wb_rtc_setalarm(struct alm_setalarm_s *alminfo)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32wb_rtc_cancelalarm(enum alm_id_e alarmid)
+int stm32_rtc_cancelalarm(enum alm_id_e alarmid)
 {
   int ret = -EINVAL;
 
@@ -1502,7 +1502,7 @@ errout_with_wprunlock:
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_rdalarm
+ * Name: stm32_rtc_rdalarm
  *
  * Description:
  *   Query an alarm configured in hardware.
@@ -1516,7 +1516,7 @@ errout_with_wprunlock:
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32wb_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
+int stm32_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
 {
   rtc_alarmreg_t alarmreg;
   int ret = -EINVAL;
@@ -1529,7 +1529,7 @@ int stm32wb_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
       case RTC_ALARMA:
         {
           alarmreg = STM32_RTC_ALRMAR;
-          ret = stm32wb_rtc_getalarmdatetime(alarmreg,
+          ret = stm32_rtc_getalarmdatetime(alarmreg,
                                              (struct tm *)alminfo->ar_time);
         }
         break;
@@ -1538,7 +1538,7 @@ int stm32wb_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
       case RTC_ALARMB:
         {
           alarmreg = STM32_RTC_ALRMBR;
-          ret = stm32wb_rtc_getalarmdatetime(alarmreg,
+          ret = stm32_rtc_getalarmdatetime(alarmreg,
                                              (struct tm *)alminfo->ar_time);
         }
         break;
@@ -1554,7 +1554,7 @@ int stm32wb_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_wakeup_handler
+ * Name: stm32_rtc_wakeup_handler
  *
  * Description:
  *   RTC WAKEUP interrupt service routine through the EXTI line
@@ -1568,17 +1568,17 @@ int stm32wb_rtc_rdalarm(struct alm_rdalarm_s *alminfo)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-static int stm32wb_rtc_wakeup_handler(int irq, void *context, void *arg)
+static int stm32_rtc_wakeup_handler(int irq, void *context, void *arg)
 {
   uint32_t regval = 0;
 
-  stm32wb_pwr_enablebkp(true);
+  stm32_pwr_enablebkp(true);
 
   regval = getreg32(STM32_RTC_ISR);
   regval &= ~RTC_ISR_WUTF;
   putreg32(regval, STM32_RTC_ISR);
 
-  stm32wb_pwr_enablebkp(false);
+  stm32_pwr_enablebkp(false);
 
   if (g_wakeupcb != NULL)
     {
@@ -1602,7 +1602,7 @@ static inline void rtc_enable_wakeup(void)
 {
   if (!g_wakeup_enabled)
     {
-      stm32wb_exti_wakeup(true, false, true, stm32wb_rtc_wakeup_handler,
+      stm32_exti_wakeup(true, false, true, stm32_rtc_wakeup_handler,
                           NULL);
       g_wakeup_enabled = true;
     }
@@ -1630,7 +1630,7 @@ static inline void rtc_set_wcksel(unsigned int wucksel)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_setperiodic
+ * Name: stm32_rtc_setperiodic
  *
  * Description:
  *   Set a periodic RTC wakeup
@@ -1645,7 +1645,7 @@ static inline void rtc_set_wcksel(unsigned int wucksel)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-int stm32wb_rtc_setperiodic(const struct timespec *period,
+int stm32_rtc_setperiodic(const struct timespec *period,
                             wakeupcb_t callback)
 {
   unsigned int wutr_val;
@@ -1774,7 +1774,7 @@ int stm32wb_rtc_setperiodic(const struct timespec *period,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rtc_cancelperiodic
+ * Name: stm32_rtc_cancelperiodic
  *
  * Description:
  *   Cancel a periodic wakeup
@@ -1787,7 +1787,7 @@ int stm32wb_rtc_setperiodic(const struct timespec *period,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-int stm32wb_rtc_cancelperiodic(void)
+int stm32_rtc_cancelperiodic(void)
 {
   int ret = OK;
   int timeout = 0;

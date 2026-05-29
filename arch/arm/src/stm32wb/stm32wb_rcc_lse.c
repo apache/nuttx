@@ -54,14 +54,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lse
+ * Name: stm32_rcc_enable_lse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lse(void)
+void stm32_rcc_enable_lse(void)
 {
   bool writable;
   uint32_t regval;
@@ -78,7 +78,7 @@ void stm32wb_rcc_enable_lse(void)
        * in the PWR CR register before to configuring the LSE.
        */
 
-      writable = stm32wb_pwr_enablebkp(true);
+      writable = stm32_pwr_enablebkp(true);
 
       /* Enable the External Low-Speed (LSE) oscillator by setting the
        * LSEON bit the RCC BDCR register.
@@ -100,7 +100,7 @@ void stm32wb_rcc_enable_lse(void)
 
       while (((regval = getreg32(STM32_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
         {
-          stm32wb_waste();
+          stm32_waste();
         }
 
 #if defined(CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
@@ -121,6 +121,6 @@ void stm32wb_rcc_enable_lse(void)
 
       /* Disable backup domain access if it was disabled on entry */
 
-      stm32wb_pwr_enablebkp(writable);
+      stm32_pwr_enablebkp(writable);
     }
 }

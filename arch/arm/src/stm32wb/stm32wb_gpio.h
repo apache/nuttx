@@ -52,7 +52,7 @@
 #  define STM32_NPORTS              4
 #endif
 
-/* Bit-encoded input to stm32wb_configgpio() */
+/* Bit-encoded input to stm32_configgpio() */
 
 /* Each port bit of the general-purpose I/O (GPIO) ports can be individually
  * configured by software in several modes:
@@ -257,12 +257,12 @@ EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_configgpio
+ * Name: stm32_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32wb_unconfiggpio() with
+ *   function, it must be unconfigured with stm32_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returned Value:
@@ -271,10 +271,10 @@ EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
  *
  ****************************************************************************/
 
-int stm32wb_configgpio(uint32_t cfgset);
+int stm32_configgpio(uint32_t cfgset);
 
 /****************************************************************************
- * Name: stm32wb_unconfiggpio
+ * Name: stm32_unconfiggpio
  *
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
@@ -293,30 +293,30 @@ int stm32wb_configgpio(uint32_t cfgset);
  *
  ****************************************************************************/
 
-int stm32wb_unconfiggpio(uint32_t cfgset);
+int stm32_unconfiggpio(uint32_t cfgset);
 
 /****************************************************************************
- * Name: stm32wb_gpiowrite
+ * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void stm32wb_gpiowrite(uint32_t pinset, bool value);
+void stm32_gpiowrite(uint32_t pinset, bool value);
 
 /****************************************************************************
- * Name: stm32wb_gpioread
+ * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ****************************************************************************/
 
-bool stm32wb_gpioread(uint32_t pinset);
+bool stm32_gpioread(uint32_t pinset);
 
 /****************************************************************************
- * Name: stm32wb_gpiosetevent
+ * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
@@ -335,11 +335,11 @@ bool stm32wb_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
-int stm32wb_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                          bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
- * Function:  stm32wb_dumpgpio
+ * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
@@ -347,23 +347,23 @@ int stm32wb_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-int stm32wb_dumpgpio(uint32_t pinset, const char *msg);
+int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
-#  define stm32wb_dumpgpio(p,m)
+#  define stm32_dumpgpio(p,m)
 #endif
 
 /****************************************************************************
- * Function:  stm32wb_gpioinit
+ * Function:  stm32_gpioinit
  *
  * Description:
  *   Based on configuration within the .config file, it does:
  *    - Remaps positions of alternative functions.
  *
- *   Typically called from stm32wb_start().
+ *   Typically called from stm32_start().
  *
  ****************************************************************************/
 
-void stm32wb_gpioinit(void);
+void stm32_gpioinit(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

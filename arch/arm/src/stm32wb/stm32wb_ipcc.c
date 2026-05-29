@@ -40,14 +40,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_ipccreset
+ * Name: stm32_ipccreset
  *
  * Description:
  *   Reset the IPCC registers to default state
  *
  ****************************************************************************/
 
-void stm32wb_ipccreset(void)
+void stm32_ipccreset(void)
 {
   uint32_t regval;
 
@@ -77,14 +77,14 @@ void stm32wb_ipccreset(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_ipccenable
+ * Name: stm32_ipccenable
  *
  * Description:
  *   Enable the IPCC and start CPU2
  *
  ****************************************************************************/
 
-void stm32wb_ipccenable(void)
+void stm32_ipccenable(void)
 {
   uint32_t regval;
 
