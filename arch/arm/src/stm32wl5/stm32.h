@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wl5/stm32wl5.h
+ * arch/arm/src/stm32wl5/stm32.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -55,13 +55,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_spidev_initialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ****************************************************************************/
 
-void stm32wl5_spidev_initialize(void);
+void stm32_spidev_initialize(void);
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_STM32WL5_H */

@@ -38,7 +38,7 @@
 #include "chip.h"
 #include "stm32wl5_rcc.h"
 #include "stm32wl5_flash.h"
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_waste.h"
 
 /****************************************************************************
@@ -75,13 +75,13 @@
  ****************************************************************************/
 
 #if defined(CONFIG_STM32WL5_PWR) && defined(CONFIG_STM32WL5_RTC)
-static inline void stm32wl5_rcc_resetbkp(void)
+static inline void stm32_rcc_resetbkp(void)
 {
   bool init_stat;
 
   /* Check if the RTC is already configured */
 
-  init_stat = stm32wl5_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
       uint32_t bkregs[STM32_RTC_BKCOUNT];
@@ -98,7 +98,7 @@ static inline void stm32wl5_rcc_resetbkp(void)
        * backup data registers and backup SRAM).
        */
 
-      (void)stm32wl5_pwr_enablebkp(true);
+      (void)stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
@@ -119,7 +119,7 @@ static inline void stm32wl5_rcc_resetbkp(void)
           putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
-      (void)stm32wl5_pwr_enablebkp(false);
+      (void)stm32_pwr_enablebkp(false);
     }
 }
 #else
@@ -141,7 +141,7 @@ static inline void stm32wl5_rcc_resetbkp(void)
  *
  *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wl5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters
  *   None
@@ -151,7 +151,7 @@ static inline void stm32wl5_rcc_resetbkp(void)
  *
  ****************************************************************************/
 
-void stm32wl5_clockconfig(void)
+void stm32_clockconfig(void)
 {
 #if 0
   /* Make sure that we are starting in the reset state */
@@ -166,7 +166,7 @@ void stm32wl5_clockconfig(void)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32wl5_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -174,13 +174,13 @@ void stm32wl5_clockconfig(void)
    * board.h
    */
 
-  stm32wl5_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 
   /* Enable peripheral clocking */
 
-  stm32wl5_rcc_enableperipherals();
+  stm32_rcc_enableperipherals();
 }
 
 /****************************************************************************
@@ -191,7 +191,7 @@ void stm32wl5_clockconfig(void)
  *
  ****************************************************************************/
 
-static void stm32wl5_rcc_enableahb1(void)
+static void stm32_rcc_enableahb1(void)
 {
   uint32_t regval;
 
@@ -230,7 +230,7 @@ static void stm32wl5_rcc_enableahb1(void)
  *
  ****************************************************************************/
 
-static inline void stm32wl5_rcc_enableahb2(void)
+static inline void stm32_rcc_enableahb2(void)
 {
   uint32_t regval;
 
@@ -267,7 +267,7 @@ static inline void stm32wl5_rcc_enableahb2(void)
  *
  ****************************************************************************/
 
-static inline void stm32wl5_rcc_enableahb3(void)
+static inline void stm32_rcc_enableahb3(void)
 {
   uint32_t regval;
 
@@ -312,7 +312,7 @@ static inline void stm32wl5_rcc_enableahb3(void)
  *
  ****************************************************************************/
 
-static inline void stm32wl5_rcc_enableapb1(void)
+static inline void stm32_rcc_enableapb1(void)
 {
   uint32_t regval;
 
@@ -405,7 +405,7 @@ static inline void stm32wl5_rcc_enableapb1(void)
  *
  ****************************************************************************/
 
-static inline void stm32wl5_rcc_enableapb2(void)
+static inline void stm32_rcc_enableapb2(void)
 {
   uint32_t regval;
 
@@ -462,7 +462,7 @@ static inline void stm32wl5_rcc_enableapb2(void)
  *
  ****************************************************************************/
 
-static inline void stm32wl5_rcc_enableccip(void)
+static inline void stm32_rcc_enableccip(void)
 {
   uint32_t regval;
 
@@ -545,12 +545,12 @@ static inline void stm32wl5_rcc_enableccip(void)
  *   re-enable/re-start the PLL
  *
  *   This function performs a subset of the operations performed by
- *   stm32wl5_clockconfig()
+ *   stm32_clockconfig()
  *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wl5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters
  *   None
@@ -561,13 +561,13 @@ static inline void stm32wl5_rcc_enableccip(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32wl5_clockenable(void)
+void stm32_clockenable(void)
 {
 #if defined(CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32wl5_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -575,28 +575,28 @@ void stm32wl5_clockenable(void)
    * board.h
    */
 
-  stm32wl5_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_rcc_enableperipherals
+ * Name: stm32_rcc_enableperipherals
  ****************************************************************************/
 
-void stm32wl5_rcc_enableperipherals(void)
+void stm32_rcc_enableperipherals(void)
 {
-    stm32wl5_rcc_enableccip();
-    stm32wl5_rcc_enableahb1();
-    stm32wl5_rcc_enableahb2();
-    stm32wl5_rcc_enableahb3();
-    stm32wl5_rcc_enableapb1();
-    stm32wl5_rcc_enableapb2();
+    stm32_rcc_enableccip();
+    stm32_rcc_enableahb1();
+    stm32_rcc_enableahb2();
+    stm32_rcc_enableahb3();
+    stm32_rcc_enableapb1();
+    stm32_rcc_enableapb2();
 }
 
 /****************************************************************************
- * Name: stm32wl5_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
@@ -606,7 +606,7 @@ void stm32wl5_rcc_enableperipherals(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG
-void stm32wl5_stdclockconfig(void)
+void stm32_stdclockconfig(void)
 {
   uint32_t regval;
 
@@ -704,7 +704,7 @@ void stm32wl5_stdclockconfig(void)
     }
 #else
 
-#  error stm32wl5_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
 
 #endif
 
@@ -852,7 +852,7 @@ void stm32wl5_stdclockconfig(void)
 #if defined(CONFIG_STM32WL5_IWDG) || defined(CONFIG_STM32WL5_RTC_LSICLOCK)
   /* Low speed internal clock source LSI */
 
-  stm32wl5_rcc_enablelsi();
+  stm32_rcc_enablelsi();
 #endif
 }
 #endif

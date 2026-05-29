@@ -33,7 +33,7 @@
 #include <nuttx/lcd/ssd1680.h>
 #include <nuttx/spi/spi.h>
 
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "nucleo-wl55jc.h"
 #include "stm32wl5_gpio.h"
 #include "stm32wl5_ssd1680.h"
@@ -59,7 +59,7 @@ static bool ssd1680_set_vcc(bool state)
 #if defined(CONFIG_SSD1680_GPIO_PIN_RST)
 static bool ssd1680_set_rst(bool state)
 {
-  stm32wl5_gpiowrite(GPIO_SSD1680_RST, state);
+  stm32_gpiowrite(GPIO_SSD1680_RST, state);
   return true;
 }
 #endif
@@ -67,7 +67,7 @@ static bool ssd1680_set_rst(bool state)
 #if defined(CONFIG_SSD1680_GPIO_PIN_BUSY)
 static bool ssd1680_check_busy(void)
 {
-  return stm32wl5_gpioread(GPIO_SSD1680_BUSY);
+  return stm32_gpioread(GPIO_SSD1680_BUSY);
 }
 #endif
 
@@ -106,20 +106,20 @@ int board_lcd_initialize(void)
   /* Initialize additional I/O for e-ink display */
 
 #if defined(GPIO_SSD1680_PWR)
-  stm32wl5_configgpio(GPIO_SSD1680_PWR);   /* SSD1680 pwr */
+  stm32_configgpio(GPIO_SSD1680_PWR);   /* SSD1680 pwr */
   lcdinfo("SSD1680 power line is available (0x%08x)\n", GPIO_SSD1680_PWR);
 #else
   lcdinfo("PWR control line is disabled\n");
 #endif
 #if defined(GPIO_SSD1680_RST)
-  stm32wl5_configgpio(GPIO_SSD1680_RST);   /* SSD1680 reset */
+  stm32_configgpio(GPIO_SSD1680_RST);   /* SSD1680 reset */
   lcdinfo("SSD1680 reset line is available (0x%08x)\n", GPIO_SSD1680_RST);
 #elif
   lcdinfo("SSD1680 RESET line is disabled\n");
 #endif
 
 #if defined(GPIO_SSD1680_BUSY)
-  stm32wl5_configgpio(GPIO_SSD1680_BUSY);  /* SSD1680 busy */
+  stm32_configgpio(GPIO_SSD1680_BUSY);  /* SSD1680 busy */
   lcdinfo("SSD1680 Line for reading busy state is available (0x%08x)\n",
           GPIO_SSD1680_BUSY);
 #elif
@@ -128,7 +128,7 @@ int board_lcd_initialize(void)
 
   /* Initialize SPI */
 
-  spi = stm32wl5_spibus_initialize(CONFIG_SSD1680_SPI_BUS);
+  spi = stm32_spibus_initialize(CONFIG_SSD1680_SPI_BUS);
   if (!spi)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n",
