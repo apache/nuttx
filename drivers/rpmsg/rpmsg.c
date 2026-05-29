@@ -1061,7 +1061,7 @@ int rpmsg_queue_work(FAR struct rpmsg_s *rpmsg, int priority,
       if (wqueues[i].priority == 0)
         {
           DEBUGVERIFY(work_queue_setpriority_wq(wqueues[i].kwqueue,
-                                                priority) == 0);
+                                                priority));
           wqueues[i].priority = priority;
           idx = i;
           break;
