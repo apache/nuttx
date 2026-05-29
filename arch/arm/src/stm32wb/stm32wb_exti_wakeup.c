@@ -51,14 +51,14 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_exti_wakeup_isr
+ * Name: stm32_exti_wakeup_isr
  *
  * Description:
  *   EXTI periodic WAKEUP interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32wb_exti_wakeup_isr(int irq, void *context, void *arg)
+static int stm32_exti_wakeup_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -81,7 +81,7 @@ static int stm32wb_exti_wakeup_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_exti_wakeup
+ * Name: stm32_exti_wakeup
  *
  * Description:
  *   Sets/clears EXTI wakeup interrupt.
@@ -97,7 +97,7 @@ static int stm32wb_exti_wakeup_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32wb_exti_wakeup(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
                         xcpt_t func, void *arg)
 {
   g_wakeup_callback = func;
@@ -107,7 +107,7 @@ int stm32wb_exti_wakeup(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32_IRQ_RTC_WKUP, stm32wb_exti_wakeup_isr, NULL);
+      irq_attach(STM32_IRQ_RTC_WKUP, stm32_exti_wakeup_isr, NULL);
       up_enable_irq(STM32_IRQ_RTC_WKUP);
     }
   else

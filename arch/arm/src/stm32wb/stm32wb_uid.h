@@ -33,6 +33,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-void stm32wb_get_uniqueid(uint8_t uniqueid[12]);
+void stm32_get_uniqueid(uint8_t uniqueid[12]);
 
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_UID_H */

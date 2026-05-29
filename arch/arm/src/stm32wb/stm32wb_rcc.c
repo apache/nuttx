@@ -504,7 +504,7 @@ static inline void rcc_enableccip(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
@@ -514,7 +514,7 @@ static inline void rcc_enableccip(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG
-static void stm32wb_stdclockconfig(void)
+static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
@@ -604,7 +604,7 @@ static void stm32wb_stdclockconfig(void)
     }
 #else
 
-#  error stm32wb_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
 
 #endif
 
@@ -789,7 +789,7 @@ static void stm32wb_stdclockconfig(void)
 #if defined(CONFIG_STM32WB_IWDG) || defined(CONFIG_STM32WB_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32wb_rcc_enable_lsi();
+      stm32_rcc_enable_lsi();
 #endif
 
 #if defined(STM32_USE_LSE)
@@ -805,7 +805,7 @@ static void stm32wb_stdclockconfig(void)
        * this for automatically trimming MSI, etc.
        */
 
-      stm32wb_rcc_enable_lse();
+      stm32_rcc_enable_lse();
 
 #  if defined(STM32_BOARD_USEMSI)
       /* Now that LSE is up, auto trim the MSI */
@@ -846,7 +846,7 @@ static inline void rcc_enableperipherals(void)
 #ifdef STM32_USE_HSI48
   /* Enable HSI48 clocking to support USB transfers or RNG */
 
-  stm32wb_enable_hsi48(STM32_HSI48_SYNCSRC);
+  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
 #endif
 }
 
@@ -878,7 +878,7 @@ static inline void rcc_resetbkp(void)
 
   /* Check if the RTC is already configured */
 
-  init_stat = stm32wb_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
       uint32_t bkregs[STM32_RTC_BKCOUNT];
@@ -895,7 +895,7 @@ static inline void rcc_resetbkp(void)
        * backup data registers and backup SRAM).
        */
 
-      stm32wb_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
@@ -914,7 +914,7 @@ static inline void rcc_resetbkp(void)
             }
         }
 
-      stm32wb_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 }
 #else
@@ -922,7 +922,7 @@ static inline void rcc_resetbkp(void)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -932,7 +932,7 @@ static inline void rcc_resetbkp(void)
  *
  *   If CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wb_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -942,7 +942,7 @@ static inline void rcc_resetbkp(void)
  *
  ****************************************************************************/
 
-void stm32wb_clockconfig(void)
+void stm32_clockconfig(void)
 {
   /* Make sure that we are starting in the reset state */
 
@@ -956,7 +956,7 @@ void stm32wb_clockconfig(void)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32wb_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -964,7 +964,7 @@ void stm32wb_clockconfig(void)
    * board.h
    */
 
-  stm32wb_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 
@@ -974,7 +974,7 @@ void stm32wb_clockconfig(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -984,12 +984,12 @@ void stm32wb_clockconfig(void)
  *   re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32wb_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wb_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -1000,13 +1000,13 @@ void stm32wb_clockconfig(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32wb_clockenable(void)
+void stm32_clockenable(void)
 {
 #if defined(CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32wb_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -1014,7 +1014,7 @@ void stm32wb_clockenable(void)
    * board.h
    */
 
-  stm32wb_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 }

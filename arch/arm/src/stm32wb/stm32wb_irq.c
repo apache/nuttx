@@ -65,7 +65,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_dumpnvic
+ * Name: stm32_dumpnvic
  *
  * Description:
  *   Dump some interesting NVIC registers
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_IRQ_INFO)
-static void stm32wb_dumpnvic(const char *msg, int irq)
+static void stm32_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
@@ -129,11 +129,11 @@ static void stm32wb_dumpnvic(const char *msg, int irq)
   leave_critical_section(flags);
 }
 #else
-#  define stm32wb_dumpnvic(msg, irq)
+#  define stm32_dumpnvic(msg, irq)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_nmi, stm32wb_pendsv,stm32wb_pendsv, stm32wb_reserved
+ * Name: stm32_nmi, stm32_pendsv,stm32_pendsv, stm32_reserved
  *
  * Description:
  *   Handlers for various exceptions.  None are handled and all are fatal
@@ -143,7 +143,7 @@ static void stm32wb_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-static int stm32wb_nmi(int irq, void *context, void *arg)
+static int stm32_nmi(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! NMI received\n");
@@ -151,7 +151,7 @@ static int stm32wb_nmi(int irq, void *context, void *arg)
   return 0;
 }
 
-static int stm32wb_pendsv(int irq, void *context, void *arg)
+static int stm32_pendsv(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! PendSV received\n");
@@ -159,7 +159,7 @@ static int stm32wb_pendsv(int irq, void *context, void *arg)
   return 0;
 }
 
-static int stm32wb_reserved(int irq, void *context, void *arg)
+static int stm32_reserved(int irq, void *context, void *arg)
 {
   up_irq_save();
   _err("PANIC!!! Reserved interrupt\n");
@@ -169,7 +169,7 @@ static int stm32wb_reserved(int irq, void *context, void *arg)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_prioritize_syscall
+ * Name: stm32_prioritize_syscall
  *
  * Description:
  *   Set the priority of an exception.  This function may be needed
@@ -177,7 +177,7 @@ static int stm32wb_reserved(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static inline void stm32wb_prioritize_syscall(int priority)
+static inline void stm32_prioritize_syscall(int priority)
 {
   uint32_t regval;
 
@@ -190,7 +190,7 @@ static inline void stm32wb_prioritize_syscall(int priority)
 }
 
 /****************************************************************************
- * Name: stm32wb_irqinfo
+ * Name: stm32_irqinfo
  *
  * Description:
  *   Given an IRQ number, provide the register and bit setting to enable or
@@ -198,7 +198,7 @@ static inline void stm32wb_prioritize_syscall(int priority)
  *
  ****************************************************************************/
 
-static int stm32wb_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
+static int stm32_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
                          uintptr_t offset)
 {
   int n;
@@ -328,7 +328,7 @@ void up_irqinitialize(void)
   /* up_prioritize_irq(STM32_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 
-  stm32wb_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+  stm32_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 
   /* If the MPU is enabled, then attach and enable the Memory Management
    * Fault handler.
@@ -342,19 +342,19 @@ void up_irqinitialize(void)
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG_FEATURES
-  irq_attach(STM32_IRQ_NMI, stm32wb_nmi, NULL);
+  irq_attach(STM32_IRQ_NMI, stm32_nmi, NULL);
 #ifndef CONFIG_ARM_MPU
   irq_attach(STM32_IRQ_MEMFAULT, arm_memfault, NULL);
 #endif
   irq_attach(STM32_IRQ_BUSFAULT, arm_busfault, NULL);
   irq_attach(STM32_IRQ_USAGEFAULT, arm_usagefault, NULL);
-  irq_attach(STM32_IRQ_PENDSV, stm32wb_pendsv, NULL);
+  irq_attach(STM32_IRQ_PENDSV, stm32_pendsv, NULL);
   arm_enable_dbgmonitor();
   irq_attach(STM32_IRQ_DBGMONITOR, arm_dbgmonitor, NULL);
-  irq_attach(STM32_IRQ_RESERVED, stm32wb_reserved, NULL);
+  irq_attach(STM32_IRQ_RESERVED, stm32_reserved, NULL);
 #endif
 
-  stm32wb_dumpnvic("initial", NR_IRQS);
+  stm32_dumpnvic("initial", NR_IRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -379,7 +379,7 @@ void up_disable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (stm32wb_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
+  if (stm32_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to disable the interrupt.
        * For normal interrupts, we need to set the bit in the associated
@@ -414,7 +414,7 @@ void up_enable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (stm32wb_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
+  if (stm32_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
       /* Modify the appropriate bit in the register to enable the interrupt.
        * For normal interrupts, we need to set the bit in the associated
@@ -491,7 +491,7 @@ int up_prioritize_irq(int irq, int priority)
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
 
-  stm32wb_dumpnvic("prioritize", irq);
+  stm32_dumpnvic("prioritize", irq);
   return OK;
 }
 #endif
