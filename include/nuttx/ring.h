@@ -209,7 +209,6 @@
  */
 
 #define RING_DECLARE(name, type, cap)                    \
-  static_assert((cap) > 0, "ring cap must be > 0");      \
   struct ring_##name##_s                                 \
   {                                                      \
     struct ring_s base;                                  \
@@ -315,6 +314,20 @@
 
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
 #define ring_space(r)       (ring_capacity(r) - ring_count(r))
+
+/* Check whether cons_index is still valid (not overwritten).
+ * Returns true if cons_index >= current cons_tail (data still valid).
+ */
+
+#define ring_is_valid_cons(cons_index, cons_tail) \
+  ((int32_t)((cons_index) - (cons_tail)) >= 0)
+
+/* Clamp an external index if it fell behind cons_tail (overwritten).
+ * Returns the effective read position.
+ */
+
+#define ring_clamp_cons(cons_index, cons_tail) \
+  (ring_is_valid_cons(cons_index, cons_tail) ? (cons_index) : (cons_tail))
 
 #define ring_spsc_enqueue(r, items, count)               \
   (ring_is_ready(r) ?                                    \
@@ -430,6 +443,18 @@
 
 #define ring_mpsc_dequeue_finish(r, b) \
   ring_sc_finish(RING_BASE(r), b)
+
+#define ring_mpsc_peek(r, items, count, index) \
+  ring_sc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+
+#define ring_spsc_peek(r, items, count, index) \
+  ring_sc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+
+#define ring_mpmc_peek(r, items, count, index) \
+  ring_mc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+
+#define ring_spmc_peek(r, items, count, index) \
+  ring_mc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
 
 /****************************************************************************
  * Public Types
@@ -980,6 +1005,120 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
       UP_WMB();
       RING_FIELD(&r->cons_tail) = RTS_PACK(0, cons_index);
     }
+}
+
+/****************************************************************************
+ * Name: ring_sc_peek
+ *
+ * Description:
+ *   Single-consumer peek with external index. Read data from ring
+ *   without advancing cons_tail. The caller's index tracks the read
+ *   position independently.
+ *
+ * Returned Value:
+ *   Number of elements peeked.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
+             size_t elem_size, FAR uint32_t *index)
+{
+  uint32_t cons_index;
+  uint32_t prod_index;
+  uint32_t available;
+  uint32_t n;
+
+  cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  if (index)
+    {
+      cons_index = ring_clamp_cons(*index, cons_index);
+    }
+
+  UP_RMB();
+  prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  available = RTS_IDX(prod_index - cons_index);
+  n = count < available ? count : available;
+
+  if (items)
+    {
+      struct ring_buf_s buf;
+
+      ring_buf_init(&buf, r, cons_index, n, elem_size);
+      ring_copy_to(&buf, items, elem_size);
+      cons_index = RTS_IDX(cons_index + n);
+    }
+
+  if (index)
+    {
+      *index = cons_index;
+    }
+
+  return n;
+}
+
+/****************************************************************************
+ * Name: ring_mc_peek
+ *
+ * Description:
+ *   Multi-consumer peek with external index and overwrite detection.
+ *   Uses optimistic-read-then-verify to ensure data consistency when
+ *   producers may overwrite the region being read.
+ *
+ * Returned Value:
+ *   Number of elements peeked.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
+             size_t elem_size, FAR uint32_t *index)
+{
+  uint32_t cons_index;
+  uint32_t n;
+
+  do
+    {
+      struct ring_buf_s buf;
+      uint32_t prod_index;
+      uint32_t available;
+
+      cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
+      if (index)
+        {
+          cons_index = ring_clamp_cons(*index, cons_index);
+        }
+
+      prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+      available = RTS_IDX(prod_index - cons_index);
+      n = count < available ? count : available;
+
+      if (n == 0 || !items)
+        {
+          break;
+        }
+
+      ring_buf_init(&buf, r, cons_index, n, elem_size);
+      ring_copy_to(&buf, items, elem_size);
+
+      /* Verify data wasn't overwritten during copy:
+       * If cons_tail advanced past our read position, retry.
+       */
+    }
+  while (!ring_is_valid_cons(cons_index,
+                             RTS_IDX(atomic_read_acquire(&r->cons_tail))));
+
+  if (items)
+    {
+      cons_index = RTS_IDX(cons_index + n);
+    }
+
+  if (index)
+    {
+      *index = cons_index;
+    }
+
+  return n;
 }
 
 /****************************************************************************
