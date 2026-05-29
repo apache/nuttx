@@ -218,24 +218,24 @@ void stm32_rcc_disablelsi(void);
 
 #if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
 /****************************************************************************
- * Name: stm32f7x9_rcc_dsisrcphy
+ * Name: stm32_rcc_dsisrcphy
  *
  * Description:
  *   Set DSI clock source to DSI PHY
  *
  ****************************************************************************/
 
-void stm32f7x9_rcc_dsisrcphy(void);
+void stm32_rcc_dsisrcphy(void);
 
 /****************************************************************************
- * Name: stm32f7x9_rcc_dsisrcpllr
+ * Name: stm32_rcc_dsisrcpllr
  *
  * Description:
  *   Set DSI clock source to PLLR
  *
  ****************************************************************************/
 
-void stm32f7x9_rcc_dsisrcpllr(void);
+void stm32_rcc_dsisrcpllr(void);
 #endif
 
 #undef EXTERN

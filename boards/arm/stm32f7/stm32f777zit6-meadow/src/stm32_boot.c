@@ -46,7 +46,7 @@
 
 /* MEADOW FIXME: header clash? */
 
-extern struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
+extern struct qspi_dev_s *stm32_qspi_initialize(int intf);
 #endif
 
 /****************************************************************************
@@ -132,7 +132,7 @@ void board_late_initialize(void)
 
   int ret;
 
-  qspi = stm32f7_qspi_initialize(0);
+  qspi = stm32_qspi_initialize(0);
   if (!qspi)
     {
       syslog(LOG_ERR, "ERROR: sam_qspi_initialize failed\n");
@@ -159,7 +159,7 @@ void board_late_initialize(void)
   meminfo.buflen = 0;
   meminfo.buffer = NULL;
 
-  stm32f7_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
+  stm32_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
 
   /* FIXME: stm32_mpu_uheap depends on PROTECTED && MPU
    *
