@@ -1228,6 +1228,45 @@ found:
                     tcp_getsequence(conn->sndseq), ackseq, unackseq,
                     (uint32_t)conn->tx_unacked);
               tcp_setsequence(conn->sndseq, ackseq);
+
+              /* Fix for issue #13161: When we receive an ACK that
+               * acknowledges new data after retransmissions, we must
+               * reset the RTO to prevent it from staying at the
+               * exponentially backed-off value.
+               *
+               * According to Karn's algorithm (RFC 6298), we cannot
+               * use retransmitted segments for RTT estimation. However,
+               * we should reset the RTO to a reasonable value based on
+               * the current RTT estimate (sa/sv) rather than keeping
+               * the inflated RTO from exponential backoff.
+               */
+
+              if (conn->nrtx > 0)
+                {
+                  /* Retransmissions occurred. Reset RTO to current
+                   * RTT estimate, clamped to [TCP_RTO_MIN, TCP_RTO_MAX].
+                   */
+
+#ifndef CONFIG_NET_TCP_FIXED_RTO
+                  uint8_t new_rto = (conn->sa >> 3) + conn->sv;
+                  if (new_rto < TCP_RTO_MIN)
+                    {
+                      new_rto = TCP_RTO_MIN;
+                    }
+                  else if (new_rto > TCP_RTO_MAX)
+                    {
+                      new_rto = TCP_RTO_MAX;
+                    }
+
+                  ninfo("TCP RTO fix: retransmissions=%d, old_rto=%d, "
+                        "new_rto=%d (sa=%d, sv=%d)\n",
+                        conn->nrtx, conn->rto, new_rto,
+                        conn->sa, conn->sv);
+
+                  conn->rto = new_rto;
+#endif
+                }
+
               conn->nrtx = 0;
             }
         }
@@ -1253,6 +1292,17 @@ found:
           m = m - (conn->sv >> 2);
           conn->sv += m;
           conn->rto = (conn->sa >> 3) + conn->sv;
+
+          /* Clamp RTO to valid range */
+
+          if (conn->rto < TCP_RTO_MIN)
+            {
+              conn->rto = TCP_RTO_MIN;
+            }
+          else if (conn->rto > TCP_RTO_MAX)
+            {
+              conn->rto = TCP_RTO_MAX;
+            }
         }
 #endif
 
