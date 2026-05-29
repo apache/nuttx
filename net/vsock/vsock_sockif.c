@@ -2175,8 +2175,8 @@ static int vsock_close(FAR struct socket *psock)
       if (ret < 0)
         {
           vsockdbg("send shutdown failed conn=%p\n", conn);
-          vsock_sub_ref(conn);
           vsock_unlock(conn);
+          vsock_sub_ref(conn);
           return ret;
         }
 
