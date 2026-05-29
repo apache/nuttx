@@ -45,16 +45,16 @@ extern "C"
 #define EXTERN extern
 #endif
 
-void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2);
+void stm32_flash_getopt(uint32_t *opt1, uint32_t *opt2);
 
-int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
-                            uint32_t clear2, uint32_t set2);
+int stm32_flash_optmodify(uint32_t clear1, uint32_t set1,
+                          uint32_t clear2, uint32_t set2);
 
-int stm32h5_flash_swapbanks(void);
+int stm32_flash_swapbanks(void);
 
-void stm32h5_flash_lock(void);
+void stm32_flash_lock(void);
 
-void stm32h5_flash_unlock(void);
+void stm32_flash_unlock(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

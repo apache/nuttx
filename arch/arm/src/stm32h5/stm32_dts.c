@@ -538,7 +538,7 @@ static int stm32_dts_isr(int irq, void *context, void *arg)
  * Name: stm32_dts_register
  ****************************************************************************/
 
-int stm32h5_dts_register(int devno)
+int stm32_dts_register(int devno)
 {
   int ret;
 

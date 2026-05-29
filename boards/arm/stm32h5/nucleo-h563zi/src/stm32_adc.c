@@ -122,7 +122,7 @@ int stm32_adc_setup(void)
           stm32_configgpio(g_pinlist1[i]);
         }
 
-      adc1 = stm32h5_adc_initialize(1, g_chanlist1, ADC1_NCHANNELS);
+      adc1 = stm32_adc_initialize(1, g_chanlist1, ADC1_NCHANNELS);
       if (adc1 == NULL)
         {
           aerr("ERROR: Failed to get ADC interface 1\n");
@@ -145,7 +145,7 @@ int stm32_adc_setup(void)
           stm32_configgpio(g_pinlist2[i]);
         }
 
-      adc2 = stm32h5_adc_initialize(2, g_chanlist2, ADC2_NCHANNELS);
+      adc2 = stm32_adc_initialize(2, g_chanlist2, ADC2_NCHANNELS);
       if (adc2 == NULL)
         {
           aerr("ERROR: Failed to get ADC interface 1\n");
