@@ -92,10 +92,10 @@
  * timer_lowerhalf_s structure.
  */
 
-struct stm32l4_lowerhalf_s
+struct stm32_lowerhalf_s
 {
   const struct timer_ops_s *ops;        /* Lower half operations */
-  struct stm32l4_tim_dev_s *tim;        /* stm32 timer driver */
+  struct stm32_tim_dev_s   *tim;        /* stm32 timer driver */
   tccb_t                    callback;   /* Current upper half interrupt callback */
   void                     *arg;        /* Argument passed to upper half callback */
   bool                      started;    /* True: Timer has been started */
@@ -108,17 +108,17 @@ struct stm32l4_lowerhalf_s
 
 /* Interrupt handling *******************************************************/
 
-static int stm32l4_timer_handler(int irq, void *context, void *arg);
+static int stm32_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int stm32l4_start(struct timer_lowerhalf_s *lower);
-static int stm32l4_stop(struct timer_lowerhalf_s *lower);
-static int stm32l4_getstatus(struct timer_lowerhalf_s *lower,
+static int stm32_start(struct timer_lowerhalf_s *lower);
+static int stm32_stop(struct timer_lowerhalf_s *lower);
+static int stm32_getstatus(struct timer_lowerhalf_s *lower,
                              struct timer_status_s *status);
-static int stm32l4_settimeout(struct timer_lowerhalf_s *lower,
+static int stm32_settimeout(struct timer_lowerhalf_s *lower,
                               uint32_t timeout);
-static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
+static void stm32_setcallback(struct timer_lowerhalf_s *lower,
                                 tccb_t callback, void *arg);
 
 /****************************************************************************
@@ -129,16 +129,16 @@ static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
 
 static const struct timer_ops_s g_timer_ops =
 {
-  .start       = stm32l4_start,
-  .stop        = stm32l4_stop,
-  .getstatus   = stm32l4_getstatus,
-  .settimeout  = stm32l4_settimeout,
-  .setcallback = stm32l4_setcallback,
+  .start       = stm32_start,
+  .stop        = stm32_stop,
+  .getstatus   = stm32_getstatus,
+  .settimeout  = stm32_settimeout,
+  .setcallback = stm32_setcallback,
   .ioctl       = NULL,
 };
 
 #ifdef CONFIG_STM32L4_TIM1
-static struct stm32l4_lowerhalf_s g_tim1_lowerhalf =
+static struct stm32_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM1_RES,
@@ -146,7 +146,7 @@ static struct stm32l4_lowerhalf_s g_tim1_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM2
-static struct stm32l4_lowerhalf_s g_tim2_lowerhalf =
+static struct stm32_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM2_RES,
@@ -154,7 +154,7 @@ static struct stm32l4_lowerhalf_s g_tim2_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM3
-static struct stm32l4_lowerhalf_s g_tim3_lowerhalf =
+static struct stm32_lowerhalf_s g_tim3_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM3_RES,
@@ -162,7 +162,7 @@ static struct stm32l4_lowerhalf_s g_tim3_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM4
-static struct stm32l4_lowerhalf_s g_tim4_lowerhalf =
+static struct stm32_lowerhalf_s g_tim4_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM4_RES,
@@ -170,7 +170,7 @@ static struct stm32l4_lowerhalf_s g_tim4_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM5
-static struct stm32l4_lowerhalf_s g_tim5_lowerhalf =
+static struct stm32_lowerhalf_s g_tim5_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM5_RES,
@@ -178,7 +178,7 @@ static struct stm32l4_lowerhalf_s g_tim5_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM6
-static struct stm32l4_lowerhalf_s g_tim6_lowerhalf =
+static struct stm32_lowerhalf_s g_tim6_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM6_RES,
@@ -186,7 +186,7 @@ static struct stm32l4_lowerhalf_s g_tim6_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM7
-static struct stm32l4_lowerhalf_s g_tim7_lowerhalf =
+static struct stm32_lowerhalf_s g_tim7_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM7_RES,
@@ -194,7 +194,7 @@ static struct stm32l4_lowerhalf_s g_tim7_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM8
-static struct stm32l4_lowerhalf_s g_tim8_lowerhalf =
+static struct stm32_lowerhalf_s g_tim8_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM8_RES,
@@ -202,7 +202,7 @@ static struct stm32l4_lowerhalf_s g_tim8_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM15
-static struct stm32l4_lowerhalf_s g_tim15_lowerhalf =
+static struct stm32_lowerhalf_s g_tim15_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM15_RES,
@@ -210,7 +210,7 @@ static struct stm32l4_lowerhalf_s g_tim15_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM16
-static struct stm32l4_lowerhalf_s g_tim16_lowerhalf =
+static struct stm32_lowerhalf_s g_tim16_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM16_RES,
@@ -218,7 +218,7 @@ static struct stm32l4_lowerhalf_s g_tim16_lowerhalf =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM17
-static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
+static struct stm32_lowerhalf_s g_tim17_lowerhalf =
 {
   .ops         = &g_timer_ops,
   .resolution  = STM32_TIM17_RES,
@@ -230,7 +230,7 @@ static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_timer_handler
+ * Name: stm32_timer_handler
  *
  * Description:
  *   timer interrupt handler
@@ -241,10 +241,10 @@ static struct stm32l4_lowerhalf_s g_tim17_lowerhalf =
  *
  ****************************************************************************/
 
-static int stm32l4_timer_handler(int irq, void *context, void *arg)
+static int stm32_timer_handler(int irq, void *context, void *arg)
 {
-  struct stm32l4_lowerhalf_s *lower =
-                              (struct stm32l4_lowerhalf_s *) arg;
+  struct stm32_lowerhalf_s *lower =
+                              (struct stm32_lowerhalf_s *) arg;
   uint32_t next_interval_us = 0;
 
   STM32_TIM_ACKINT(lower->tim, 0);
@@ -258,14 +258,14 @@ static int stm32l4_timer_handler(int irq, void *context, void *arg)
     }
   else
     {
-      stm32l4_stop((struct timer_lowerhalf_s *)lower);
+      stm32_stop((struct timer_lowerhalf_s *)lower);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32l4_start
+ * Name: stm32_start
  *
  * Description:
  *   Start the timer, resetting the time to the current timeout,
@@ -279,10 +279,10 @@ static int stm32l4_timer_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32l4_start(struct timer_lowerhalf_s *lower)
+static int stm32_start(struct timer_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                              (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                              (struct stm32_lowerhalf_s *)lower;
 
   if (!priv->started)
     {
@@ -290,7 +290,7 @@ static int stm32l4_start(struct timer_lowerhalf_s *lower)
 
       if (priv->callback != NULL)
         {
-          STM32_TIM_SETISR(priv->tim, stm32l4_timer_handler, priv, 0);
+          STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
           STM32_TIM_ENABLEINT(priv->tim, 0);
         }
 
@@ -304,7 +304,7 @@ static int stm32l4_start(struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: stm32l4_stop
+ * Name: stm32_stop
  *
  * Description:
  *   Stop the timer
@@ -318,10 +318,10 @@ static int stm32l4_start(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32l4_stop(struct timer_lowerhalf_s *lower)
+static int stm32_stop(struct timer_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                                (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                                (struct stm32_lowerhalf_s *)lower;
 
   if (priv->started)
     {
@@ -338,7 +338,7 @@ static int stm32l4_stop(struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: stm32l4_getstatus
+ * Name: stm32_getstatus
  *
  * Description:
  *   get timer status
@@ -353,11 +353,11 @@ static int stm32l4_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32l4_getstatus(struct timer_lowerhalf_s *lower,
+static int stm32_getstatus(struct timer_lowerhalf_s *lower,
                              struct timer_status_s *status)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                             (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                             (struct stm32_lowerhalf_s *)lower;
   uint64_t maxtimeout;
   uint32_t timeout;
   uint32_t clock;
@@ -405,7 +405,7 @@ static int stm32l4_getstatus(struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: stm32l4_settimeout
+ * Name: stm32_settimeout
  *
  * Description:
  *   Set a new timeout value (and reset the timer)
@@ -420,11 +420,11 @@ static int stm32l4_getstatus(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stm32l4_settimeout(struct timer_lowerhalf_s *lower,
+static int stm32_settimeout(struct timer_lowerhalf_s *lower,
                               uint32_t timeout)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                             (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                             (struct stm32_lowerhalf_s *)lower;
   uint64_t maxtimeout;
 
   if (priv->started)
@@ -449,7 +449,7 @@ static int stm32l4_settimeout(struct timer_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: stm32l4_sethandler
+ * Name: stm32_sethandler
  *
  * Description:
  *   Call this user provided timeout handler.
@@ -468,11 +468,11 @@ static int stm32l4_settimeout(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
+static void stm32_setcallback(struct timer_lowerhalf_s *lower,
                                 tccb_t callback, void *arg)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                            (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                            (struct stm32_lowerhalf_s *)lower;
   irqstate_t flags = enter_critical_section();
 
   /* Save the new callback */
@@ -482,7 +482,7 @@ static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
 
   if (callback != NULL && priv->started)
     {
-      STM32_TIM_SETISR(priv->tim, stm32l4_timer_handler, priv, 0);
+      STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
       STM32_TIM_ENABLEINT(priv->tim, 0);
     }
   else
@@ -499,7 +499,7 @@ static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_timer_initialize
+ * Name: stm32_timer_initialize
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and
@@ -516,9 +516,9 @@ static void stm32l4_setcallback(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int stm32l4_timer_initialize(const char *devpath, int timer)
+int stm32_timer_initialize(const char *devpath, int timer)
 {
-  struct stm32l4_lowerhalf_s *lower;
+  struct stm32_lowerhalf_s *lower;
 
   switch (timer)
     {
@@ -595,7 +595,7 @@ int stm32l4_timer_initialize(const char *devpath, int timer)
 
   lower->started  = false;
   lower->callback = NULL;
-  lower->tim      = stm32l4_tim_init(timer);
+  lower->tim      = stm32_tim_init(timer);
 
   if (lower->tim == NULL)
     {

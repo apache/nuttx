@@ -53,14 +53,14 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_alarm_isr
+ * Name: stm32_exti_alarm_isr
  *
  * Description:
  *   EXTI ALARM interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
+static int stm32_exti_alarm_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -83,7 +83,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_alarm
+ * Name: stm32_exti_alarm
  *
  * Description:
  *   Sets/clears EXTI alarm interrupt.
@@ -99,7 +99,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
                        xcpt_t func, void *arg)
 {
   g_alarm_callback = func;
@@ -109,7 +109,7 @@ int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32_IRQ_RTCALRM, stm32l4_exti_alarm_isr, NULL);
+      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr, NULL);
       up_enable_irq(STM32_IRQ_RTCALRM);
     }
   else

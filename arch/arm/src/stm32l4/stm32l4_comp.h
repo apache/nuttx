@@ -54,7 +54,7 @@
 
 /* Comparators */
 
-enum stm32l4_comp_e
+enum stm32_comp_e
 {
   STM32_COMP1,
   STM32_COMP2,
@@ -63,7 +63,7 @@ enum stm32l4_comp_e
 
 /* Plus input */
 
-enum stm32l4_comp_inp_e
+enum stm32_comp_inp_e
 {
   STM32_COMP_INP_PIN_1,   /* COMP1: PC5, COMP2: PB4 */
   STM32_COMP_INP_PIN_2,   /* COMP1: PB2, COMP2: PB6 */
@@ -72,7 +72,7 @@ enum stm32l4_comp_inp_e
 
 /* Minus input */
 
-enum stm32l4_comp_inm_e
+enum stm32_comp_inm_e
 {
   STM32_COMP_INM_1_4_VREF,
   STM32_COMP_INM_1_2_VREF,
@@ -91,7 +91,7 @@ enum stm32l4_comp_inm_e
 
 /* Comparators */
 
-enum stm32l4_comp_e
+enum stm32_comp_e
 {
   STM32_COMP1,
   STM32_COMP2,
@@ -100,7 +100,7 @@ enum stm32l4_comp_e
 
 /* Plus input */
 
-enum stm32l4_comp_inp_e
+enum stm32_comp_inp_e
 {
   STM32_COMP_INP_PIN_1,   /* COMP1: PC5, COMP2: PB4 */
   STM32_COMP_INP_PIN_2    /* COMP1: PB2, COMP2: PB6 */
@@ -108,7 +108,7 @@ enum stm32l4_comp_inp_e
 
 /* Minus input */
 
-enum stm32l4_comp_inm_e
+enum stm32_comp_inm_e
 {
   STM32_COMP_INM_1_4_VREF,
   STM32_COMP_INM_1_2_VREF,
@@ -123,7 +123,7 @@ enum stm32l4_comp_inm_e
 
 /* Hysteresis */
 
-enum stm32l4_comp_hyst_e
+enum stm32_comp_hyst_e
 {
   STM32_COMP_HYST_NONE,
   STM32_COMP_HYST_LOW,
@@ -133,7 +133,7 @@ enum stm32l4_comp_hyst_e
 
 /* Power/Speed Modes */
 
-enum stm32l4_comp_speed_e
+enum stm32_comp_speed_e
 {
   STM32_COMP_SPEED_HIGH,
   STM32_COMP_SPEED_MEDIUM,
@@ -142,7 +142,7 @@ enum stm32l4_comp_speed_e
 
 /* Comparator configuration *************************************************/
 
-struct stm32l4_comp_config_s
+struct stm32_comp_config_s
 {
   struct
   {
@@ -151,10 +151,10 @@ struct stm32l4_comp_config_s
     bool                          falling;
   } interrupt;
 
-  uint8_t  inp;                 /* Plus input pin (see enum stm32l4_comp_inp_e) */
-  uint8_t  inm;                 /* Minus input pin (see enum stm32l4_comp_inm_e) */
-  uint8_t  hyst;                /* Hysteresis (see enum stm32l4_comp_hyst_e) */
-  uint8_t  speed;               /* Speed (see stm32l4_comp_speed_e) */
+  uint8_t  inp;                 /* Plus input pin (see enum stm32_comp_inp_e) */
+  uint8_t  inm;                 /* Minus input pin (see enum stm32_comp_inm_e) */
+  uint8_t  hyst;                /* Hysteresis (see enum stm32_comp_hyst_e) */
+  uint8_t  speed;               /* Speed (see stm32_comp_speed_e) */
   bool     inverted;            /* Invert output? */
   uint32_t csr;                 /* Control and status register */
 };
@@ -173,7 +173,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_compinitialize
+ * Name: stm32_compinitialize
  *
  * Description:
  *   Initialize the COMP.
@@ -191,9 +191,8 @@ extern "C"
  *
  ****************************************************************************/
 
-struct
-comp_dev_s *stm32l4_compinitialize(int intf,
-                                   const struct stm32l4_comp_config_s *cfg);
+struct comp_dev_s *
+stm32_compinitialize(int intf, const struct stm32_comp_config_s *cfg);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -58,14 +58,14 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_pvd_isr
+ * Name: stm32_exti_pvd_isr
  *
  * Description:
  *   EXTI PVD interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
+static int stm32_exti_pvd_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -88,7 +88,7 @@ static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_pvd
+ * Name: stm32_exti_pvd
  *
  * Description:
  *   Sets/clears EXTI PVD interrupt.
@@ -104,7 +104,7 @@ static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
                         xcpt_t func, void *arg)
 {
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
@@ -116,7 +116,7 @@ int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32_IRQ_PVD, stm32l4_exti_pvd_isr, NULL);
+      irq_attach(STM32_IRQ_PVD, stm32_exti_pvd_isr, NULL);
       up_enable_irq(STM32_IRQ_PVD);
     }
   else

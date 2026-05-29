@@ -37,7 +37,7 @@
 #include "chip.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_flash.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_waste.h"
 #include "stm32l4_rtc.h"
 
@@ -105,7 +105,7 @@ static inline void rcc_resetbkp(void)
 
   /* Check if the RTC is already configured */
 
-  init_stat = stm32l4_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
       uint32_t bkregs[STM32_RTC_BKCOUNT];
@@ -122,7 +122,7 @@ static inline void rcc_resetbkp(void)
        * backup data registers and backup SRAM).
        */
 
-      stm32l4_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
@@ -143,7 +143,7 @@ static inline void rcc_resetbkp(void)
            putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
-      stm32l4_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 }
 #else
@@ -155,7 +155,7 @@ static inline void rcc_resetbkp(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -165,7 +165,7 @@ static inline void rcc_resetbkp(void)
  *
  *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -175,7 +175,7 @@ static inline void rcc_resetbkp(void)
  *
  ****************************************************************************/
 
-void stm32l4_clockconfig(void)
+void stm32_clockconfig(void)
 {
   /* Make sure that we are starting in the reset state */
 
@@ -189,7 +189,7 @@ void stm32l4_clockconfig(void)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l4_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -197,7 +197,7 @@ void stm32l4_clockconfig(void)
    * board.h
    */
 
-  stm32l4_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 
@@ -207,7 +207,7 @@ void stm32l4_clockconfig(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -217,12 +217,12 @@ void stm32l4_clockconfig(void)
  *   re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32l4_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -233,13 +233,13 @@ void stm32l4_clockconfig(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32l4_clockenable(void)
+void stm32_clockenable(void)
 {
 #if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l4_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -247,7 +247,7 @@ void stm32l4_clockenable(void)
    * board.h
    */
 
-  stm32l4_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 }

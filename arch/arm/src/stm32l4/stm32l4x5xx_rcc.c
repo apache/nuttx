@@ -581,7 +581,7 @@ static inline void rcc_enableccip(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
@@ -591,7 +591,7 @@ static inline void rcc_enableccip(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
-static void stm32l4_stdclockconfig(void)
+static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
@@ -680,7 +680,7 @@ static void stm32l4_stdclockconfig(void)
     }
 #else
 
-#  error stm32l4_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
 
 #endif
 
@@ -876,7 +876,7 @@ static void stm32l4_stdclockconfig(void)
 #if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32l4_rcc_enablelsi();
+      stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_USE_LSE)
@@ -891,7 +891,7 @@ static void stm32l4_stdclockconfig(void)
        * to alter the LSE parameters.
        */
 
-      stm32l4_pwr_enableclk(true);
+      stm32_pwr_enableclk(true);
 
       /* XXX other LSE settings must be made before turning on the oscillator
        * and we need to ensure it is first off before doing so.
@@ -902,7 +902,7 @@ static void stm32l4_stdclockconfig(void)
        * this for automatically trimming MSI, etc.
        */
 
-      stm32l4_rcc_enablelse();
+      stm32_rcc_enablelse();
 
 #  if defined(STM32_BOARD_USEMSI)
       /* Now that LSE is up, auto trim the MSI */

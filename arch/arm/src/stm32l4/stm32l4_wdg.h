@@ -54,7 +54,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_iwdginitialize
+ * Name: stm32_iwdginitialize
  *
  * Description:
  *   Initialize the IWDG watchdog time.  The watchdog timer is initialized
@@ -72,11 +72,11 @@ extern "C"
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_IWDG
-void stm32l4_iwdginitialize(const char *devpath, uint32_t lsifreq);
+void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_wwdginitialize
+ * Name: stm32_wwdginitialize
  *
  * Description:
  *   Initialize the WWDG watchdog time.  The watchdog timer is initialized
@@ -93,7 +93,7 @@ void stm32l4_iwdginitialize(const char *devpath, uint32_t lsifreq);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_WWDG
-void stm32l4_wwdginitialize(const char *devpath);
+void stm32_wwdginitialize(const char *devpath);
 #endif
 
 #undef EXTERN

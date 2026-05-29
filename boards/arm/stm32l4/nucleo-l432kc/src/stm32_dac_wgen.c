@@ -104,7 +104,7 @@ struct dac_wgen_s
 static struct dac_wgen_s g_dac_wgen =
 {
   .dac           = NULL,
-  .dac_dmabuffer = stm32l4_dac1_dmabuffer,
+  .dac_dmabuffer = stm32_dac1_dmabuffer,
   .samples       = CONFIG_NUCLEOL432KC_DAC_WGEN_SAMPLES,
   .waveform_freq = ((float)CONFIG_NUCLEOL432KC_DAC_WGEN_FREQ)
 };
@@ -199,7 +199,7 @@ int dac_wgen_setup(struct dac_wgen_s *dac_wgen)
 
   int ret = OK;
 
-  dac = stm32l4_dacinitialize(0);
+  dac = stm32_dacinitialize(0);
   if (dac == NULL)
     {
       syslog(LOG_ERR, "Failed to get DAC interface\n");

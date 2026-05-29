@@ -213,36 +213,36 @@ extern struct spi_dev_s *g_spi2;
 int stm32_bringup(void);
 
 /****************************************************************************
- * Name: stm32l4_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
  ****************************************************************************/
 
-int stm32l4_adc_setup(void);
+int stm32_adc_setup(void);
 
 /****************************************************************************
- * Name: stm32l4_adc_measure_voltages
+ * Name: stm32_adc_measure_voltages
  *
  * Description:
  *   Read internal reference voltage, internal VBAT and one external voltage.
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint,
+int stm32_adc_measure_voltages(uint32_t *vrefint,
                                  uint32_t *vbat,
                                  uint32_t *vext);
 
 /****************************************************************************
- * Name: stm32l4_dac_setup
+ * Name: stm32_dac_setup
  *
  * Description:
  *   Initialize DAC and register the DAC driver.
  *
  ****************************************************************************/
 
-int stm32l4_dac_setup(void);
+int stm32_dac_setup(void);
 
 /****************************************************************************
  * Name: stm32_dfsdm_setup
@@ -267,13 +267,13 @@ int stm32_dfsdm_setup(void);
 void stm32_spiinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void);
+void stm32_usbinitialize(void);
 
 #endif /* __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_SRC_STM32L4R9AI_DISCO_H */

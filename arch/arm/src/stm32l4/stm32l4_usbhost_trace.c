@@ -47,7 +47,7 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32l4_usbhost_trace_s
+struct stm32_usbhost_trace_s
 {
 #if 0
   uint16_t id;
@@ -60,7 +60,7 @@ struct stm32l4_usbhost_trace_s
  * Private Data
  ****************************************************************************/
 
-static const struct stm32l4_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
+static const struct stm32_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 {
   TRENTRY(OTGFS_TRACE1_DEVDISCONN,         TR_FMT1,
           "OTGFS ERROR: Host Port %d. Device disconnected\n"),
@@ -117,7 +117,7 @@ static const struct stm32l4_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 #endif
 };
 
-static const struct stm32l4_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
+static const struct stm32_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
   TRENTRY(OTGFS_TRACE2_CLIP,                TR_FMT2,
           "OTGFS CLIP: chidx: %d buflen: %d\n"),

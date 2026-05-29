@@ -35,7 +35,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4r9ai-disco.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -52,8 +52,8 @@ void board_autoled_initialize(void)
 {
   /* Configure LD4,5 GPIO for output */
 
-  stm32l4_configgpio(GPIO_LED_RED);
-  stm32l4_configgpio(GPIO_LED_GRN);
+  stm32_configgpio(GPIO_LED_RED);
+  stm32_configgpio(GPIO_LED_GRN);
 }
 
 /****************************************************************************
@@ -92,7 +92,7 @@ void board_autoled_on(int led)
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
-        stm32l4_gpiowrite(GPIO_LED_RED, true);
+        stm32_gpiowrite(GPIO_LED_RED, true);
         break;
 
       /* 3: LED_PANIC: GPIO_LED_GRN=OFF RX=ON
@@ -101,13 +101,13 @@ void board_autoled_on(int led)
        */
 
       case LED_PANIC:
-        stm32l4_gpiowrite(GPIO_LED_GRN, false);
-        stm32l4_gpiowrite(GPIO_LED_RED, true);
+        stm32_gpiowrite(GPIO_LED_GRN, false);
+        stm32_gpiowrite(GPIO_LED_RED, true);
         break;
 
       case LED_IDLE:
-        stm32l4_gpiowrite(GPIO_LED_GRN, true);
-        stm32l4_gpiowrite(GPIO_LED_RED, false);
+        stm32_gpiowrite(GPIO_LED_GRN, true);
+        stm32_gpiowrite(GPIO_LED_RED, false);
         break;
     }
 }
@@ -141,7 +141,7 @@ void board_autoled_off(int led)
       case LED_INIRQ:
       case LED_SIGNAL:
       case LED_ASSERTION:
-        stm32l4_gpiowrite(GPIO_LED_RED, false);
+        stm32_gpiowrite(GPIO_LED_RED, false);
         break;
 
       /* 3: LED_PANIC: GPIO_LED_GRN=OFF RX=OFF
@@ -150,13 +150,13 @@ void board_autoled_off(int led)
        */
 
       case LED_PANIC:
-        stm32l4_gpiowrite(GPIO_LED_GRN, false);
-        stm32l4_gpiowrite(GPIO_LED_RED, false);
+        stm32_gpiowrite(GPIO_LED_GRN, false);
+        stm32_gpiowrite(GPIO_LED_RED, false);
         break;
 
       case LED_IDLE:
-        stm32l4_gpiowrite(GPIO_LED_GRN, false);
-        stm32l4_gpiowrite(GPIO_LED_RED, false);
+        stm32_gpiowrite(GPIO_LED_GRN, false);
+        stm32_gpiowrite(GPIO_LED_RED, false);
         break;
     }
 }

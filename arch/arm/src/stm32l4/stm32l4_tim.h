@@ -74,14 +74,14 @@ extern "C"
 
 /* TIM Device Structure */
 
-struct stm32l4_tim_dev_s
+struct stm32_tim_dev_s
 {
-  struct stm32l4_tim_ops_s *ops;
+  struct stm32_tim_ops_s *ops;
 };
 
 /* TIM Modes of Operation */
 
-enum stm32l4_tim_mode_e
+enum stm32_tim_mode_e
 {
   STM32_TIM_MODE_UNUSED       = -1,
 
@@ -118,7 +118,7 @@ enum stm32l4_tim_mode_e
 
 /* TIM Channel Modes */
 
-enum stm32l4_tim_channel_e
+enum stm32_tim_channel_e
 {
   STM32_TIM_CH_DISABLED       = 0x00,
 
@@ -151,41 +151,41 @@ enum stm32l4_tim_channel_e
 
 /* TIM Operations */
 
-struct stm32l4_tim_ops_s
+struct stm32_tim_ops_s
 {
   /* Basic Timers */
 
-  void (*enable)(struct stm32l4_tim_dev_s *dev);
-  void (*disable)(struct stm32l4_tim_dev_s *dev);
-  int  (*setmode)(struct stm32l4_tim_dev_s *dev,
-                  enum stm32l4_tim_mode_e mode);
-  int  (*setfreq)(struct stm32l4_tim_dev_s *dev, uint32_t freq);
-  int  (*setclock)(struct stm32l4_tim_dev_s *dev, uint32_t freq);
-  uint32_t (*getclock)(struct stm32l4_tim_dev_s *dev);
-  void (*setperiod)(struct stm32l4_tim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(struct stm32l4_tim_dev_s *dev);
-  uint32_t (*getcounter)(struct stm32l4_tim_dev_s *dev);
+  void (*enable)(struct stm32_tim_dev_s *dev);
+  void (*disable)(struct stm32_tim_dev_s *dev);
+  int  (*setmode)(struct stm32_tim_dev_s *dev,
+                  enum stm32_tim_mode_e mode);
+  int  (*setfreq)(struct stm32_tim_dev_s *dev, uint32_t freq);
+  int  (*setclock)(struct stm32_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getclock)(struct stm32_tim_dev_s *dev);
+  void (*setperiod)(struct stm32_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct stm32_tim_dev_s *dev);
+  uint32_t (*getcounter)(struct stm32_tim_dev_s *dev);
 
   /* General and Advanced Timers Adds */
 
-  int  (*setchannel)(struct stm32l4_tim_dev_s *dev, uint8_t channel,
-                     enum stm32l4_tim_channel_e mode);
-  int  (*setcompare)(struct stm32l4_tim_dev_s *dev, uint8_t channel,
+  int  (*setchannel)(struct stm32_tim_dev_s *dev, uint8_t channel,
+                     enum stm32_tim_channel_e mode);
+  int  (*setcompare)(struct stm32_tim_dev_s *dev, uint8_t channel,
                      uint32_t compare);
-  int  (*getcapture)(struct stm32l4_tim_dev_s *dev, uint8_t channel);
+  int  (*getcapture)(struct stm32_tim_dev_s *dev, uint8_t channel);
 
   /* Timer interrupts */
 
-  int  (*setisr)(struct stm32l4_tim_dev_s *dev,
+  int  (*setisr)(struct stm32_tim_dev_s *dev,
                  xcpt_t handler, void *arg, int source);
-  void (*enableint)(struct stm32l4_tim_dev_s *dev, int source);
-  void (*disableint)(struct stm32l4_tim_dev_s *dev, int source);
-  void (*ackint)(struct stm32l4_tim_dev_s *dev, int source);
-  int  (*checkint)(struct stm32l4_tim_dev_s *dev, int source);
+  void (*enableint)(struct stm32_tim_dev_s *dev, int source);
+  void (*disableint)(struct stm32_tim_dev_s *dev, int source);
+  void (*ackint)(struct stm32_tim_dev_s *dev, int source);
+  int  (*checkint)(struct stm32_tim_dev_s *dev, int source);
 
   /* Debug */
 
-  void (*dump_regs)(struct stm32l4_tim_dev_s *dev);
+  void (*dump_regs)(struct stm32_tim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -194,14 +194,14 @@ struct stm32l4_tim_ops_s
 
 /* Power-up timer and get its structure */
 
-struct stm32l4_tim_dev_s *stm32l4_tim_init(int timer);
+struct stm32_tim_dev_s *stm32_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32l4_tim_deinit(struct stm32l4_tim_dev_s *dev);
+int stm32_tim_deinit(struct stm32_tim_dev_s *dev);
 
 /****************************************************************************
- * Name: stm32l4_timer_initialize
+ * Name: stm32_timer_initialize
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and
@@ -219,7 +219,7 @@ int stm32l4_tim_deinit(struct stm32l4_tim_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32l4_timer_initialize(const char *devpath, int timer);
+int stm32_timer_initialize(const char *devpath, int timer);
 #endif
 
 #undef EXTERN

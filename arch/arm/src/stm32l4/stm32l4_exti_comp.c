@@ -83,7 +83,7 @@ static const uint32_t g_comp_lines[STM32_COMP_NUM] =
  * Private Functions
  ****************************************************************************/
 
-static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
+static int stm32_exti_comp_isr(int irq, void *context, void *arg)
 {
   uint32_t pr;
   uint32_t ln;
@@ -118,7 +118,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_comp
+ * Name: stm32_exti_comp
  *
  * Description:
  *   Sets/clears comparator based events and interrupt triggers.
@@ -136,7 +136,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
+int stm32_exti_comp(int cmp, bool risingedge, bool fallingedge,
                       bool event, xcpt_t func, void *arg)
 {
   irqstate_t flags;
@@ -152,7 +152,7 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
   if (func != NULL)
     {
-      irq_attach(STM32_IRQ_COMP, stm32l4_exti_comp_isr, NULL);
+      irq_attach(STM32_IRQ_COMP, stm32_exti_comp_isr, NULL);
       up_enable_irq(STM32_IRQ_COMP);
     }
   else

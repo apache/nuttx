@@ -66,7 +66,7 @@ static struct gpio_callback_s g_gpio_handlers[16];
  * Interrupt Service Routines - Dispatchers
  ****************************************************************************/
 
-static int stm32l4_exti0_isr(int irq, void *context, void *arg)
+static int stm32_exti0_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -87,7 +87,7 @@ static int stm32l4_exti0_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32l4_exti1_isr(int irq, void *context, void *arg)
+static int stm32_exti1_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -108,7 +108,7 @@ static int stm32l4_exti1_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32l4_exti2_isr(int irq, void *context, void *arg)
+static int stm32_exti2_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -129,7 +129,7 @@ static int stm32l4_exti2_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32l4_exti3_isr(int irq, void *context, void *arg)
+static int stm32_exti3_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -150,7 +150,7 @@ static int stm32l4_exti3_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32l4_exti4_isr(int irq, void *context, void *arg)
+static int stm32_exti4_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -171,7 +171,7 @@ static int stm32l4_exti4_isr(int irq, void *context, void *arg)
   return ret;
 }
 
-static int stm32l4_exti_multiisr(int irq, void *context, void *arg,
+static int stm32_exti_multiisr(int irq, void *context, void *arg,
                                  int first, int last)
 {
   uint32_t pr;
@@ -215,14 +215,14 @@ static int stm32l4_exti_multiisr(int irq, void *context, void *arg,
   return ret;
 }
 
-static int stm32l4_exti95_isr(int irq, void *context, void *arg)
+static int stm32_exti95_isr(int irq, void *context, void *arg)
 {
-  return stm32l4_exti_multiisr(irq, context, arg, 5, 9);
+  return stm32_exti_multiisr(irq, context, arg, 5, 9);
 }
 
-static int stm32l4_exti1510_isr(int irq, void *context, void *arg)
+static int stm32_exti1510_isr(int irq, void *context, void *arg)
 {
-  return stm32l4_exti_multiisr(irq, context, arg, 10, 15);
+  return stm32_exti_multiisr(irq, context, arg, 10, 15);
 }
 
 /****************************************************************************
@@ -230,7 +230,7 @@ static int stm32l4_exti1510_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_gpiosetevent
+ * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
@@ -252,7 +252,7 @@ static int stm32l4_exti1510_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                          bool event, xcpt_t func, void *arg)
 {
   struct gpio_callback_s *shared_cbs;
@@ -273,37 +273,37 @@ int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
       switch (pin)
         {
           case 0:
-            handler = stm32l4_exti0_isr;
+            handler = stm32_exti0_isr;
             break;
 
           case 1:
-            handler = stm32l4_exti1_isr;
+            handler = stm32_exti1_isr;
             break;
 
           case 2:
-            handler = stm32l4_exti2_isr;
+            handler = stm32_exti2_isr;
             break;
 
           case 3:
-            handler = stm32l4_exti3_isr;
+            handler = stm32_exti3_isr;
             break;
 
           default:
-            handler = stm32l4_exti4_isr;
+            handler = stm32_exti4_isr;
             break;
         }
     }
   else if (pin < 10)
     {
       irq        = STM32_IRQ_EXTI95;
-      handler    = stm32l4_exti95_isr;
+      handler    = stm32_exti95_isr;
       shared_cbs = &g_gpio_handlers[5];
       nshared    = 5;
     }
   else
     {
       irq        = STM32_IRQ_EXTI1510;
-      handler    = stm32l4_exti1510_isr;
+      handler    = stm32_exti1510_isr;
       shared_cbs = &g_gpio_handlers[10];
       nshared    = 6;
     }
@@ -349,7 +349,7 @@ int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
       pinset |= GPIO_EXTI;
     }
 
-  stm32l4_configgpio(pinset);
+  stm32_configgpio(pinset);
 
   /* Configure rising/falling edges */
 

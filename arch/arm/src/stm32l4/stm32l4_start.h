@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.  This
@@ -42,6 +42,6 @@
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void);
+void stm32_board_initialize(void);
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_START_H */

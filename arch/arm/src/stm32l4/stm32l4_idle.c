@@ -119,12 +119,12 @@ static void up_idlepm(void)
           /* Enter STOP mode */
 
           BEGIN_IDLE();
-          stm32l4_pmstop(true);
+          stm32_pmstop(true);
           END_IDLE();
 
           /* Set correct clock again after returning from STOP */
 
-          stm32l4_clockenable();
+          stm32_clockenable();
 
           /* Inform of all drivers of the new state */
 
@@ -137,7 +137,7 @@ static void up_idlepm(void)
           break;
 
         case PM_SLEEP:
-          stm32l4_pmstandby();
+          stm32_pmstandby();
           break;
 
         default:

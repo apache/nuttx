@@ -147,14 +147,14 @@ static const uint32_t g_pinlist[ADC1_NCHANNELS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_adc_measure_voltages
+ * Name: stm32_adc_measure_voltages
  *
  * Description:
  *   Read internal reference voltage, internal VBAT and one external voltage.
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
+int stm32_adc_measure_voltages(uint32_t *vrefint, uint32_t *vbat,
                                  uint32_t *vext)
 {
   struct file filestruct;
@@ -277,10 +277,10 @@ out:
 }
 
 /****************************************************************************
- * Name: stm32l4_adc_setup
+ * Name: stm32_adc_setup
  ****************************************************************************/
 
-int stm32l4_adc_setup(void)
+int stm32_adc_setup(void)
 {
   static bool initialized = false;
 
@@ -296,15 +296,15 @@ int stm32l4_adc_setup(void)
         {
           if (g_pinlist[i] != 0xffffffffu)
             {
-              stm32l4_configgpio(g_pinlist[i]);
+              stm32_configgpio(g_pinlist[i]);
             }
         }
 
-      /* Call stm32l4_adc_initialize() to get an instance of the ADC
+      /* Call stm32_adc_initialize() to get an instance of the ADC
        * interface
        */
 
-      g_adc = stm32l4_adc_initialize(1, g_chanlist, ADC1_NCHANNELS);
+      g_adc = stm32_adc_initialize(1, g_chanlist, ADC1_NCHANNELS);
       if (g_adc == NULL)
         {
           aerr("ERROR: Failed to get ADC interface\n");

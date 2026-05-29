@@ -158,7 +158,7 @@ int stm32_adc_setup(void)
         {
           if (g_pinlist_adc1[i] != 0)
             {
-              stm32l4_configgpio(g_pinlist_adc1[i]);
+              stm32_configgpio(g_pinlist_adc1[i]);
             }
         }
 #endif
@@ -168,7 +168,7 @@ int stm32_adc_setup(void)
         {
           if (g_pinlist_adc2[i] != 0)
             {
-              stm32l4_configgpio(g_pinlist_adc2[i]);
+              stm32_configgpio(g_pinlist_adc2[i]);
             }
         }
 #endif
@@ -178,17 +178,17 @@ int stm32_adc_setup(void)
         {
           if (g_pinlist_adc3[i] != 0)
             {
-              stm32l4_configgpio(g_pinlist_adc3[i]);
+              stm32_configgpio(g_pinlist_adc3[i]);
             }
         }
 #endif
 
-      /* Call stm32l4_adc_initialize() to get an instance of the ADC
+      /* Call stm32_adc_initialize() to get an instance of the ADC
        * interface
        */
 
 #ifdef CONFIG_STM32L4_ADC1
-      adc = stm32l4_adc_initialize(1, g_chanlist_adc1, ADC1_NCHANNELS);
+      adc = stm32_adc_initialize(1, g_chanlist_adc1, ADC1_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC1 interface\n");
@@ -206,7 +206,7 @@ int stm32_adc_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_ADC2
-      adc = stm32l4_adc_initialize(2, g_chanlist_adc2, ADC2_NCHANNELS);
+      adc = stm32_adc_initialize(2, g_chanlist_adc2, ADC2_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC2 interface\n");
@@ -224,7 +224,7 @@ int stm32_adc_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_ADC3
-      adc = stm32l4_adc_initialize(3, g_chanlist_adc3, ADC3_NCHANNELS);
+      adc = stm32_adc_initialize(3, g_chanlist_adc3, ADC3_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC3 interface\n");

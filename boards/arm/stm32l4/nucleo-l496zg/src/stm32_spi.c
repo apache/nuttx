@@ -206,7 +206,7 @@ void weak_function stm32_spidev_initialize(void)
     {
       if (g_spi1gpio[i] != 0)
         {
-          stm32l4_configgpio(g_spi1gpio[i]);
+          stm32_configgpio(g_spi1gpio[i]);
         }
     }
 #endif
@@ -216,7 +216,7 @@ void weak_function stm32_spidev_initialize(void)
     {
       if (g_spi2gpio[i] != 0)
         {
-          stm32l4_configgpio(g_spi2gpio[i]);
+          stm32_configgpio(g_spi2gpio[i]);
         }
     }
 #endif
@@ -226,7 +226,7 @@ void weak_function stm32_spidev_initialize(void)
     {
       if (g_spi3gpio[i] != 0)
         {
-          stm32l4_configgpio(g_spi3gpio[i]);
+          stm32_configgpio(g_spi3gpio[i]);
         }
     }
 #endif
@@ -269,7 +269,7 @@ void stm32_spi1select(struct spi_dev_s *dev,
 
   if (g_spi1gpio[index] != 0)
     {
-      stm32l4_gpiowrite(g_spi1gpio[index], !selected);
+      stm32_gpiowrite(g_spi1gpio[index], !selected);
     }
 }
 
@@ -290,7 +290,7 @@ void stm32_spi2select(struct spi_dev_s *dev,
 
   if (g_spi2gpio[index] != 0)
     {
-      stm32l4_gpiowrite(g_spi2gpio[index], !selected);
+      stm32_gpiowrite(g_spi2gpio[index], !selected);
     }
 }
 
@@ -311,7 +311,7 @@ void stm32_spi3select(struct spi_dev_s *dev,
 
   if (g_spi3gpio[index] != 0)
     {
-      stm32l4_gpiowrite(g_spi3gpio[index], !selected);
+      stm32_gpiowrite(g_spi3gpio[index], !selected);
     }
 }
 
@@ -393,7 +393,7 @@ int stm32_spidev_bus_test(void)
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI2_TEST)
-  spi2 = stm32l4_spibus_initialize(2);
+  spi2 = stm32_spibus_initialize(2);
 
   if (!spi2)
     {
@@ -410,7 +410,7 @@ int stm32_spidev_bus_test(void)
 #endif
 
 #if defined(CONFIG_NUCLEO_SPI3_TEST)
-  spi3 = stm32l4_spibus_initialize(3);
+  spi3 = stm32_spibus_initialize(3);
 
   if (!spi3)
     {

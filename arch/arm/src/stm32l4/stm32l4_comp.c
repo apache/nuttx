@@ -66,12 +66,11 @@
 
 /* COMP Register access */
 
-static inline void modify_csr(const struct stm32l4_comp_config_s *cfg,
+static inline void modify_csr(const struct stm32_comp_config_s *cfg,
                               uint32_t clearbits, uint32_t setbits);
-static inline uint32_t get_csr(const struct stm32l4_comp_config_s *cfg);
-static void stm32l4_compenable(struct stm32l4_comp_config_s *cfg,
-                               bool en);
-static int stm32l4_compconfig(const struct comp_dev_s *dev);
+static inline uint32_t get_csr(const struct stm32_comp_config_s *cfg);
+static void stm32_compenable(struct stm32_comp_config_s *cfg, bool en);
+static int stm32_compconfig(const struct comp_dev_s *dev);
 
 /* COMP Driver Methods */
 
@@ -96,7 +95,7 @@ static const struct comp_ops_s g_compops =
   .ao_bind      = comp_bind,
 };
 
-static struct stm32l4_comp_config_s g_comp1priv =
+static struct stm32_comp_config_s g_comp1priv =
 {
   .interrupt    =
   {
@@ -118,7 +117,7 @@ static struct comp_dev_s g_comp1dev =
   .ad_priv      = &g_comp1priv,
 };
 
-static struct stm32l4_comp_config_s g_comp2priv =
+static struct stm32_comp_config_s g_comp2priv =
 {
   .interrupt    =
   {
@@ -148,7 +147,7 @@ static struct comp_dev_s g_comp2dev =
  * Name: modify_csr
  ****************************************************************************/
 
-static inline void modify_csr(const struct stm32l4_comp_config_s *cfg,
+static inline void modify_csr(const struct stm32_comp_config_s *cfg,
                               uint32_t clearbits, uint32_t setbits)
 {
   modifyreg32(cfg->csr, clearbits, setbits);
@@ -158,7 +157,7 @@ static inline void modify_csr(const struct stm32l4_comp_config_s *cfg,
  * Name: get_csr
  ****************************************************************************/
 
-static inline uint32_t get_csr(const struct stm32l4_comp_config_s *cfg)
+static inline uint32_t get_csr(const struct stm32_comp_config_s *cfg)
 {
   return getreg32(cfg->csr);
 }
@@ -184,7 +183,7 @@ static int comp_setup(struct comp_dev_s *dev)
 
   /* Configure selected comparator */
 
-  ret = stm32l4_compconfig(dev);
+  ret = stm32_compconfig(dev);
   if (ret < 0)
     {
       aerr("ERROR: Failed to initialize COMP: %d\n", ret);
@@ -212,10 +211,10 @@ static int comp_setup(struct comp_dev_s *dev)
 
 static void comp_shutdown(struct comp_dev_s *dev)
 {
-  struct stm32l4_comp_config_s *cfg;
+  struct stm32_comp_config_s *cfg;
 
   cfg = dev->ad_priv;
-  stm32l4_compenable(cfg, false);
+  stm32_compenable(cfg, false);
 }
 
 /****************************************************************************
@@ -235,7 +234,7 @@ static void comp_shutdown(struct comp_dev_s *dev)
 
 static int comp_read(struct comp_dev_s *dev)
 {
-  struct stm32l4_comp_config_s *cfg;
+  struct stm32_comp_config_s *cfg;
   uint32_t regval;
 
   cfg = dev->ad_priv;
@@ -283,8 +282,8 @@ static int comp_ioctl(struct comp_dev_s *dev, int cmd, unsigned long arg)
 static int comp_bind(struct comp_dev_s *dev,
                      const struct comp_callback_s *callback)
 {
-  struct stm32l4_comp_config_s *priv =
-    (struct stm32l4_comp_config_s *)dev->ad_priv;
+  struct stm32_comp_config_s *priv =
+    (struct stm32_comp_config_s *)dev->ad_priv;
 
   DEBUGASSERT(priv != NULL);
   priv->interrupt.cb = callback;
@@ -296,7 +295,7 @@ static int comp_bind(struct comp_dev_s *dev,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_compenable
+ * Name: stm32_compenable
  *
  * Description:
  *   Enable/disable comparator
@@ -307,8 +306,7 @@ static int comp_bind(struct comp_dev_s *dev,
  *
  ****************************************************************************/
 
-static void stm32l4_compenable(struct stm32l4_comp_config_s *cfg,
-                               bool en)
+static void stm32_compenable(struct stm32_comp_config_s *cfg, bool en)
 {
   uint32_t clearbits = en ? 0 : COMP_CSR_EN;
   uint32_t setbits = en ? COMP_CSR_EN : 0;
@@ -316,10 +314,10 @@ static void stm32l4_compenable(struct stm32l4_comp_config_s *cfg,
   modify_csr(cfg, clearbits, setbits);
 }
 
-static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
+static int stm32_exti_comp_isr(int irq, void *context, void *arg)
 {
   struct comp_dev_s *dev = (struct comp_dev_s *)arg;
-  struct stm32l4_comp_config_s *cfg = dev->ad_priv;
+  struct stm32_comp_config_s *cfg = dev->ad_priv;
 
   DEBUGASSERT(cfg->interrupt.cb &&
               (cfg->interrupt.rising || cfg->interrupt.falling));
@@ -332,7 +330,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32l4_compconfig
+ * Name: stm32_compconfig
  *
  * Description:
  *   Configure comparator and I/Os used as comparators inputs
@@ -345,9 +343,9 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32l4_compconfig(const struct comp_dev_s *dev)
+static int stm32_compconfig(const struct comp_dev_s *dev)
 {
-  struct stm32l4_comp_config_s *cfg;
+  struct stm32_comp_config_s *cfg;
   uint32_t regval = 0;
   uint32_t mask = 0;
   uint32_t clearbits;
@@ -364,20 +362,20 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
   switch (cfg->inp)
     {
     case STM32_COMP_INP_PIN_1:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_1 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_1 :
                                                 GPIO_COMP2_INP_1);
       regval |= COMP_CSR_INPSEL_PIN1;
       break;
 
     case STM32_COMP_INP_PIN_2:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_2 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_2 :
                                                 GPIO_COMP2_INP_2);
       regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
     case STM32_COMP_INP_PIN_3:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_3 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_3 :
                                                 GPIO_COMP2_INP_3);
       regval |= COMP_CSR_INPSEL_PIN3;
       break;
@@ -425,13 +423,13 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
       break;
 
   case STM32_COMP_INM_PIN_1:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_1 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_1 :
                                                 GPIO_COMP2_INM_1);
       regval |= COMP_CSR_INMSEL_PIN1;
       break;
 
   case STM32_COMP_INM_PIN_2:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_2 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_2 :
                                                 GPIO_COMP2_INM_2);
 #if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
     defined(CONFIG_STM32L4_STM32L4XR)
@@ -445,7 +443,7 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
     case STM32_COMP_INM_PIN_3:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_3 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_3 :
                                                 GPIO_COMP2_INM_3);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
@@ -453,7 +451,7 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
       break;
 
     case STM32_COMP_INM_PIN_4:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_4 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_4 :
                                                 GPIO_COMP2_INM_4);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
@@ -461,7 +459,7 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
       break;
 
     case STM32_COMP_INM_PIN_5:
-      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_5 :
+      stm32_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_5 :
                                                 GPIO_COMP2_INM_5);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
@@ -539,18 +537,18 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
 
   /* Enable */
 
-  stm32l4_compenable(cfg, true);
+  stm32_compenable(cfg, true);
 
   /* Enable interrupt */
 
   if (cfg->interrupt.cb && (cfg->interrupt.rising || cfg->interrupt.falling))
     {
-      ret = stm32l4_exti_comp(cmp, cfg->interrupt.rising,
+      ret = stm32_exti_comp(cmp, cfg->interrupt.rising,
                               cfg->interrupt.falling, 0,
-                              stm32l4_exti_comp_isr, (void *)dev);
+                              stm32_exti_comp_isr, (void *)dev);
       if (ret < 0)
         {
-          aerr("stm32l4_exti_comp failed ret = %d\n", ret);
+          aerr("stm32_exti_comp failed ret = %d\n", ret);
           return ERROR;
         }
     }
@@ -561,7 +559,7 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: stm32l4_compinitialize
+ * Name: stm32_compinitialize
  *
  * Description:
  *   Initialize the COMP.
@@ -579,8 +577,7 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
  ****************************************************************************/
 
 struct comp_dev_s *
-  stm32l4_compinitialize(int intf,
-                         const struct stm32l4_comp_config_s *cfg)
+stm32_compinitialize(int intf, const struct stm32_comp_config_s *cfg)
 {
   struct comp_dev_s *dev;
 
