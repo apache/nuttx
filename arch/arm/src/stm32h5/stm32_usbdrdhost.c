@@ -2829,7 +2829,7 @@ static int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   /* Enable VBUS drive */
 
-  stm32h5_usbhost_vbusdrive(0, true);
+  stm32_usbdrdhost_vbusdrive(0, true);
 
   uinfo("USB Host initialized\n");
 
@@ -2841,14 +2841,14 @@ static int stm32_hw_initialize(struct stm32_usbhost_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_usbhost_initialize
+ * Name: stm32_usbdrdhost_initialize
  *
  * Description:
  *   Initialize USB host controller
  *
  ****************************************************************************/
 
-struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
+struct usbhost_connection_s *stm32_usbdrdhost_initialize(void)
 {
   struct stm32_usbhost_s *priv = &g_usbhost;
   int ret;
@@ -2872,7 +2872,7 @@ struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32_usbhost_vbusdrive
+ * Name: stm32_usbdrdhost_vbusdrive
  *
  * Description:
  *   Control VBUS power
@@ -2881,7 +2881,7 @@ struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
  ****************************************************************************/
 
 __attribute__((weak))
-void stm32_usbhost_vbusdrive(int port, bool enable)
+void stm32_usbdrdhost_vbusdrive(int port, bool enable)
 {
   /* Default implementation - do nothing.
    * Board-specific code should override this to control VBUS power.

@@ -500,7 +500,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32h5_adc_initialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *    Initialize the ADC.
@@ -516,9 +516,8 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32h5_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int nchannels);
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }
