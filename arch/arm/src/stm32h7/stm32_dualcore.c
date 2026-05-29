@@ -137,14 +137,14 @@ static void stm32_cpu2sem_take(void)
     defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
 
 /****************************************************************************
- * Name: stm32h7_start_cm4
+ * Name: stm32_start_cm4
  *
  * Description:
  *   Start CM4 core
  *
  ****************************************************************************/
 
-void stm32h7_start_cm4(void)
+void stm32_start_cm4(void)
 {
   uint32_t regval = 0;
 
@@ -177,14 +177,14 @@ void stm32h7_start_cm4(void)
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
 /****************************************************************************
- * Name: stm32h7_waitfor_cm7
+ * Name: stm32_waitfor_cm7
  *
  * Description:
  *   Wait for CM7 core initialization
  *
  ****************************************************************************/
 
-void stm32h7_waitfor_cm7(void)
+void stm32_waitfor_cm7(void)
 {
   if (stm32_cm4_boot() == true)
     {

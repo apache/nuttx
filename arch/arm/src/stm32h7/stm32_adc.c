@@ -2277,7 +2277,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h7_adc_initialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *   Initialize the ADC.
@@ -2302,9 +2302,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32h7_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int cchannels)
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int cchannels)
 {
   struct adc_dev_s   *dev;
   struct stm32_dev_s *priv;
