@@ -46,7 +46,7 @@ extern "C"
 
 /* Waste CPU Time
  *
- * stm32wl5_waste() is the logic that will be executed when portions of
+ * stm32_waste() is the logic that will be executed when portions of
  * kernel or user-app is polling some register or similar, waiting for
  * desired status. This time is wasted away. This function offers a measure
  * of badly written piece of software or some undesired behavior. At
@@ -54,7 +54,7 @@ extern "C"
  * be used for other purposes (yet).
  */
 
-void stm32wl5_waste(void);
+void stm32_waste(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

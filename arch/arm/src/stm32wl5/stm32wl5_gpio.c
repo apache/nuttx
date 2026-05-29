@@ -80,13 +80,13 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32wl5_gpioinit
+ * Function:  stm32_gpioinit
  *
  * Description:
  *   Based on configuration within the .config file, it does:
  *    - Remaps positions of alternative functions.
  *
- *   Typically called from stm32wl5_start().
+ *   Typically called from stm32_start().
  *
  * Assumptions:
  *   This function is called early in the initialization sequence so that
@@ -94,17 +94,17 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
  *
  ****************************************************************************/
 
-void stm32wl5_gpioinit(void)
+void stm32_gpioinit(void)
 {
 }
 
 /****************************************************************************
- * Name: stm32wl5_configgpio
+ * Name: stm32_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32wl5_unconfiggpio() with
+ *   function, it must be unconfigured with stm32_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returned Value:
@@ -115,7 +115,7 @@ void stm32wl5_gpioinit(void)
  * To-Do: Auto Power Enable
  ****************************************************************************/
 
-int stm32wl5_configgpio(uint32_t cfgset)
+int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
   uint32_t regval;
@@ -158,7 +158,7 @@ int stm32wl5_configgpio(uint32_t cfgset)
 
         /* Set the initial output value */
 
-        stm32wl5_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -317,7 +317,7 @@ int stm32wl5_configgpio(uint32_t cfgset)
 }
 
 /****************************************************************************
- * Name: stm32wl5_unconfiggpio
+ * Name: stm32_unconfiggpio
  *
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
@@ -337,7 +337,7 @@ int stm32wl5_configgpio(uint32_t cfgset)
  * To-Do: Auto Power Disable
  ****************************************************************************/
 
-int stm32wl5_unconfiggpio(uint32_t cfgset)
+int stm32_unconfiggpio(uint32_t cfgset)
 {
   /* Reuse port and pin number and set it to default HiZ INPUT */
 
@@ -346,18 +346,18 @@ int stm32wl5_unconfiggpio(uint32_t cfgset)
 
   /* To-Do: Mark its unuse for automatic power saving options */
 
-  return stm32wl5_configgpio(cfgset);
+  return stm32_configgpio(cfgset);
 }
 
 /****************************************************************************
- * Name: stm32wl5_gpiowrite
+ * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void stm32wl5_gpiowrite(uint32_t pinset, bool value)
+void stm32_gpiowrite(uint32_t pinset, bool value)
 {
   uint32_t base;
   uint32_t bit;
@@ -391,14 +391,14 @@ void stm32wl5_gpiowrite(uint32_t pinset, bool value)
 }
 
 /****************************************************************************
- * Name: stm32wl5_gpioread
+ * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ****************************************************************************/
 
-bool stm32wl5_gpioread(uint32_t pinset)
+bool stm32_gpioread(uint32_t pinset)
 {
   uint32_t base;
   unsigned int port;

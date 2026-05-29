@@ -34,7 +34,7 @@
 
 #include "chip.h"
 
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_rcc.h"
 #include "stm32wl5_gpio.h"
 #include "stm32wl5_uart.h"
@@ -241,7 +241,7 @@ void arm_lowputc(char ch)
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
          USART_ISR_TXE) == 0);
 #ifdef STM32_CONSOLE_RS485_DIR
-  stm32wl5_gpiowrite(STM32_CONSOLE_RS485_DIR,
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
                     STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
@@ -252,7 +252,7 @@ void arm_lowputc(char ch)
 #ifdef STM32_CONSOLE_RS485_DIR
   while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
          USART_ISR_TC) == 0);
-  stm32wl5_gpiowrite(STM32_CONSOLE_RS485_DIR,
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
                     !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
@@ -260,7 +260,7 @@ void arm_lowputc(char ch)
 }
 
 /****************************************************************************
- * Name: stm32wl5_lowsetup
+ * Name: stm32_lowsetup
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -269,7 +269,7 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-void stm32wl5_lowsetup(void)
+void stm32_lowsetup(void)
 {
 #if defined(HAVE_UART)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
@@ -285,19 +285,19 @@ void stm32wl5_lowsetup(void)
   /* Enable the console USART and configure GPIO pins needed for rx/tx.
    *
    * NOTE: Clocking for selected U[S]ARTs was already provided in
-   * stm32wl5_rcc.c
+   * stm32_rcc.c
    */
 
 #ifdef STM32_CONSOLE_TX
-  stm32wl5_configgpio(STM32_CONSOLE_TX);
+  stm32_configgpio(STM32_CONSOLE_TX);
 #endif
 #ifdef STM32_CONSOLE_RX
-  stm32wl5_configgpio(STM32_CONSOLE_RX);
+  stm32_configgpio(STM32_CONSOLE_RX);
 #endif
 
 #ifdef STM32_CONSOLE_RS485_DIR
-  stm32wl5_configgpio(STM32_CONSOLE_RS485_DIR);
-  stm32wl5_gpiowrite(STM32_CONSOLE_RS485_DIR,
+  stm32_configgpio(STM32_CONSOLE_RS485_DIR);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
                     !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
