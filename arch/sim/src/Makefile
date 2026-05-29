@@ -362,6 +362,7 @@ $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), 
 
 EXTRA_LIBS := $(filter-out $(NAMEFULL_LIBS) $(NAMESPEC_LIBS),$(EXTRA_LIBS))
 EXTRA_LIBS += $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))
+EXTRA_LIB_DEPS := $(wildcard $(filter-out -%,$(EXTRA_LIBS)))
 
 # Override in Make.defs if linker is not 'ld'
 
@@ -480,7 +481,7 @@ endef
 # stuff doesn't work there as we expect.
 # Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
 # necessary for macOS.
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat $(EXTRA_LIB_DEPS)
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) $(EXTRALINKCMDS) \
 	     -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
