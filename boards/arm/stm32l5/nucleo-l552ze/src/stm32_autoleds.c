@@ -64,7 +64,7 @@ static void phy_set_led(int led, bool state)
 {
   /* Active High */
 
-  stm32l5_gpiowrite(g_ledmap[led], state);
+  stm32_gpiowrite(g_ledmap[led], state);
 }
 
 /****************************************************************************
@@ -83,7 +83,7 @@ void board_autoled_initialize(void)
 
   for (i = 0; i < nitems(g_ledmap); i++)
     {
-      stm32l5_configgpio(g_ledmap[i]);
+      stm32_configgpio(g_ledmap[i]);
     }
 }
 

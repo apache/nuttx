@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG)
-void stm32l5_board_clockconfig(void)
+void stm32_board_clockconfig(void)
 {
 }
 #endif

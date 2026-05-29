@@ -240,7 +240,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-  stm32l5_mpu_uheap((uintptr_t)ubase, usize);
+  stm32_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -318,7 +318,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM2 heap */
 
-  stm32l5_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END - SRAM2_START);
+  stm32_mpu_uheap((uintptr_t)SRAM2_START, SRAM2_END - SRAM2_START);
 
 #endif
 
@@ -338,7 +338,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the SRAM3 heap */
 
-  stm32l5_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END - SRAM3_START);
+  stm32_mpu_uheap((uintptr_t)SRAM3_START, SRAM3_END - SRAM3_START);
 
 #endif
 
@@ -357,7 +357,7 @@ void arm_addregion(void)
 
   /* Allow user-mode access to the FSMC SRAM user heap memory */
 
-  stm32l5_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  stm32_mpu_uheap((uintptr_t)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 
 #endif
 

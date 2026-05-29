@@ -37,7 +37,7 @@
 #include "clock/clock.h"
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l5.h"
+#include "stm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32l5_timerisr
+ * Function:  stm32_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -87,7 +87,7 @@
  *
  ****************************************************************************/
 
-static int stm32l5_timerisr(int irq, uint32_t *regs, void *arg)
+static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -137,7 +137,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32l5_timerisr, NULL);
+  irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 

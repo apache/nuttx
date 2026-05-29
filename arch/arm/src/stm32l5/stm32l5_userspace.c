@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_userspace
+ * Name: stm32_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-void stm32l5_userspace(void)
+void stm32_userspace(void)
 {
   uint8_t *src;
   uint8_t *dest;
@@ -87,7 +87,7 @@ void stm32l5_userspace(void)
 
   /* Configure the MPU to permit user-space access to its FLASH and RAM */
 
-  stm32l5_mpuinitialize();
+  stm32_mpuinitialize();
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
