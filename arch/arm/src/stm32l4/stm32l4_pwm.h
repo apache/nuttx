@@ -797,7 +797,7 @@
 #ifdef CONFIG_STM32L4_PWM_LL_OPS
 
 /* NOTE: low-level ops accept pwm_lowerhalf_s as first argument, but llops
- *       access can be found in stm32l4_pwm_dev_s
+ *       access can be found in stm32_pwm_dev_s
  */
 
 #define PWM_SETUP(dev)                                                             \
@@ -842,7 +842,7 @@
 
 /* Timer mode */
 
-enum stm32l4_timmode_e
+enum stm32_timmode_e
 {
   STM32_TIMMODE_COUNTUP   = 0,
   STM32_TIMMODE_COUNTDOWN = 1,
@@ -853,7 +853,7 @@ enum stm32l4_timmode_e
 
 /* Timer output polarity */
 
-enum stm32l4_pwm_pol_e
+enum stm32_pwm_pol_e
 {
   STM32_POL_POS  = 0,
   STM32_POL_NEG  = 1,
@@ -861,7 +861,7 @@ enum stm32l4_pwm_pol_e
 
 /* Timer output IDLE state */
 
-enum stm32l4_pwm_idle_e
+enum stm32_pwm_idle_e
 {
   STM32_IDLE_INACTIVE = 0,
   STM32_IDLE_ACTIVE   = 1
@@ -869,7 +869,7 @@ enum stm32l4_pwm_idle_e
 
 /* PWM channel mode */
 
-enum stm32l4_chanmode_e
+enum stm32_chanmode_e
 {
   STM32_CHANMODE_FRZN        = 0,  /* CCRx matches has no effects on outputs */
   STM32_CHANMODE_CHACT       = 1,  /* OCxREF active on match */
@@ -887,7 +887,7 @@ enum stm32l4_chanmode_e
 
 /* PWM timer channel */
 
-enum stm32l4_pwm_chan_e
+enum stm32_pwm_chan_e
 {
   STM32_PWM_CHAN1  = 1,
   STM32_PWM_CHAN2  = 2,
@@ -899,7 +899,7 @@ enum stm32l4_pwm_chan_e
 
 /* PWM timer channel output */
 
-enum stm32l4_pwm_output_e
+enum stm32_pwm_output_e
 {
   STM32_PWM_OUT1  = (1 << 0),
   STM32_PWM_OUT1N = (1 << 1),
@@ -928,7 +928,7 @@ enum stm32l4_pwm_output_e
  * "lower-half" PWM driver structure.
  */
 
-struct stm32l4_pwm_dev_s
+struct stm32_pwm_dev_s
 {
   /* The first field of this state structure must be a pointer to the PWM
    * callback structure to be consistent with upper-half PWM driver.
@@ -938,7 +938,7 @@ struct stm32l4_pwm_dev_s
 
   /* Publicly visible portion of the "lower-half" PWM driver structure */
 
-  const struct stm32l4_pwm_ops_s *llops;
+  const struct stm32_pwm_ops_s *llops;
 
   /* Require cast-compatibility with private "lower-half" PWM structure */
 };
@@ -946,7 +946,7 @@ struct stm32l4_pwm_dev_s
 /* Low-level operations for PWM */
 
 struct pwm_lowerhalf_s;
-struct stm32l4_pwm_ops_s
+struct stm32_pwm_ops_s
 {
   /* Update CCR register */
 
@@ -1030,7 +1030,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_pwminitialize
+ * Name: stm32_pwminitialize
  *
  * Description:
  *   Initialize one timer for use with the upper_level PWM driver.
@@ -1046,10 +1046,10 @@ extern "C"
  *
  ****************************************************************************/
 
-struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
+struct pwm_lowerhalf_s *stm32_pwminitialize(int timer);
 
 /****************************************************************************
- * Name: stm32l4_lp_pwminitialize
+ * Name: stm32_lp_pwminitialize
  *
  * Description:
  *   Initialize one low-power timer for use with the upper_level PWM driver.
@@ -1065,7 +1065,7 @@ struct pwm_lowerhalf_s *stm32l4_pwminitialize(int timer);
  *
  ****************************************************************************/
 
-struct pwm_lowerhalf_s *stm32l4_lp_pwminitialize(int timer);
+struct pwm_lowerhalf_s *stm32_lp_pwminitialize(int timer);
 
 #undef EXTERN
 #if defined(__cplusplus)

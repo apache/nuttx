@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_qeinitialize
+ * Name: stm32_qeinitialize
  *
  * Description:
  *   Initialize a quadrature encoder interface.
@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-int stm32l4_qeinitialize(const char *devpath, int tim);
+int stm32_qeinitialize(const char *devpath, int tim);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_QENCODER_H */

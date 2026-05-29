@@ -149,7 +149,7 @@
  * designed to support multiple QSPI peripherals.
  */
 
-struct stm32l4_qspidev_s
+struct stm32_qspidev_s
 {
   struct qspi_dev_s qspi;       /* Externally visible part of the QSPI interface */
   uint32_t base;                /* QSPI controller register base address */
@@ -180,7 +180,7 @@ struct stm32l4_qspidev_s
   /* Debug stuff */
 
 #ifdef CONFIG_STM32L4_QSPI_DMADEBUG
-  struct stm32l4_dmaregs_s dmaregs[DMA_NSAMPLES];
+  struct stm32_dmaregs_s dmaregs[DMA_NSAMPLES];
 #endif
 
 #ifdef CONFIG_STM32L4_QSPI_REGDEBUG
@@ -234,19 +234,19 @@ struct qspi_xctnspec_s
 /* Helpers */
 
 #ifdef CONFIG_STM32L4_QSPI_REGDEBUG
-static bool     qspi_checkreg(struct stm32l4_qspidev_s *priv, bool wr,
+static bool     qspi_checkreg(struct stm32_qspidev_s *priv, bool wr,
                   uint32_t value, uint32_t address);
 #else
 #  define       qspi_checkreg(priv,wr,value,address) (false)
 #endif
 
-static inline uint32_t qspi_getreg(struct stm32l4_qspidev_s *priv,
+static inline uint32_t qspi_getreg(struct stm32_qspidev_s *priv,
                   unsigned int offset);
-static inline void qspi_putreg(struct stm32l4_qspidev_s *priv,
+static inline void qspi_putreg(struct stm32_qspidev_s *priv,
                   uint32_t value, unsigned int offset);
 
 #ifdef CONFIG_DEBUG_SPI_INFO
-static void     qspi_dumpregs(struct stm32l4_qspidev_s *priv,
+static void     qspi_dumpregs(struct stm32_qspidev_s *priv,
                   const char *msg);
 #else
 #  define       qspi_dumpregs(priv,msg)
@@ -270,9 +270,9 @@ static int     qspi0_interrupt(int irq, void *context, void *arg);
 #ifdef CONFIG_STM32L4_QSPI_DMA
 
 #  ifdef CONFIG_STM32L4_QSPI_DMADEBUG
-#    define qspi_dma_sample(s,i) stm32l4_dmasample((s)->dmach, &(s)->dmaregs[i])
-static void     qspi_dma_sampleinit(struct stm32l4_qspidev_s *priv);
-static void     qspi_dma_sampledone(struct stm32l4_qspidev_s *priv);
+#    define qspi_dma_sample(s,i) stm32_dmasample((s)->dmach, &(s)->dmaregs[i])
+static void     qspi_dma_sampleinit(struct stm32_qspidev_s *priv);
+static void     qspi_dma_sampledone(struct stm32_qspidev_s *priv);
 #  else
 #    define qspi_dma_sample(s,i)
 #    define qspi_dma_sampleinit(s)
@@ -301,7 +301,7 @@ static void     qspi_free(struct qspi_dev_s *dev, void *buffer);
 
 /* Initialization */
 
-static int      qspi_hw_initialize(struct stm32l4_qspidev_s *priv);
+static int      qspi_hw_initialize(struct stm32_qspidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -326,7 +326,7 @@ static const struct qspi_ops_s g_qspi0ops =
 
 /* This is the overall state of the QSPI0 controller */
 
-static struct stm32l4_qspidev_s g_qspi0dev =
+static struct stm32_qspidev_s g_qspi0dev =
 {
   .qspi              =
   {
@@ -367,7 +367,7 @@ static struct stm32l4_qspidev_s g_qspi0dev =
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_QSPI_REGDEBUG
-static bool qspi_checkreg(struct stm32l4_qspidev_s *priv, bool wr,
+static bool qspi_checkreg(struct stm32_qspidev_s *priv, bool wr,
                           uint32_t value, uint32_t address)
 {
   if (wr      == priv->wrlast &&     /* Same kind of access? */
@@ -412,7 +412,7 @@ static bool qspi_checkreg(struct stm32l4_qspidev_s *priv, bool wr,
  *
  ****************************************************************************/
 
-static inline uint32_t qspi_getreg(struct stm32l4_qspidev_s *priv,
+static inline uint32_t qspi_getreg(struct stm32_qspidev_s *priv,
                                   unsigned int offset)
 {
   uint32_t address = priv->base + offset;
@@ -436,7 +436,7 @@ static inline uint32_t qspi_getreg(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void qspi_putreg(struct stm32l4_qspidev_s *priv,
+static inline void qspi_putreg(struct stm32_qspidev_s *priv,
                                uint32_t value, unsigned int offset)
 {
   uint32_t address = priv->base + offset;
@@ -467,7 +467,7 @@ static inline void qspi_putreg(struct stm32l4_qspidev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_SPI_INFO
-static void qspi_dumpregs(struct stm32l4_qspidev_s *priv, const char *msg)
+static void qspi_dumpregs(struct stm32_qspidev_s *priv, const char *msg)
 {
   uint32_t regval;
   spiinfo("%s:\n", msg);
@@ -596,16 +596,16 @@ static void qspi_dumpgpioconfig(const char *msg)
  *
  ****************************************************************************/
 
-static void qspi_dma_sampleinit(struct stm32l4_qspidev_s *priv)
+static void qspi_dma_sampleinit(struct stm32_qspidev_s *priv)
 {
   /* Put contents of register samples into a known state */
 
   memset(priv->dmaregs, 0xff,
-         DMA_NSAMPLES * sizeof(struct stm32l4_dmaregs_s));
+         DMA_NSAMPLES * sizeof(struct stm32_dmaregs_s));
 
   /* Then get the initial samples */
 
-  stm32l4_dmasample(priv->dmach, &priv->dmaregs[DMA_INITIAL]);
+  stm32_dmasample(priv->dmach, &priv->dmaregs[DMA_INITIAL]);
 }
 
 /****************************************************************************
@@ -622,27 +622,27 @@ static void qspi_dma_sampleinit(struct stm32l4_qspidev_s *priv)
  *
  ****************************************************************************/
 
-static void qspi_dma_sampledone(struct stm32l4_qspidev_s *priv)
+static void qspi_dma_sampledone(struct stm32_qspidev_s *priv)
 {
   /* Sample the final registers */
 
-  stm32l4_dmasample(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER]);
+  stm32_dmasample(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
 
   /* Initial register values */
 
-  stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_INITIAL],
+  stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_INITIAL],
               "Initial Registers");
 
   /* Register values after DMA setup */
 
-  stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_SETUP],
+  stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_SETUP],
               "After DMA Setup");
 
   /* Register values after DMA start */
 
-  stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_START],
+  stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_AFTER_START],
               "After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
@@ -655,16 +655,16 @@ static void qspi_dma_sampledone(struct stm32l4_qspidev_s *priv)
 
   if (priv->result == -ETIMEDOUT)
     {
-      stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_TIMEOUT],
+      stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_TIMEOUT],
                   "At DMA timeout");
     }
   else
     {
-      stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_CALLBACK],
+      stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_CALLBACK],
                   "At DMA callback");
     }
 
-  stm32l4_dmadump(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER],
+  stm32_dmadump(priv->dmach, &priv->dmaregs[DMA_END_TRANSFER],
               "At End-of-Transfer");
 }
 #endif
@@ -944,7 +944,7 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
  *
  ****************************************************************************/
 
-static void qspi_waitstatusflags(struct stm32l4_qspidev_s *priv,
+static void qspi_waitstatusflags(struct stm32_qspidev_s *priv,
                                  uint32_t mask, int polarity)
 {
   uint32_t regval;
@@ -975,7 +975,7 @@ static void qspi_waitstatusflags(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static void qspi_abort(struct stm32l4_qspidev_s *priv)
+static void qspi_abort(struct stm32_qspidev_s *priv)
 {
   uint32_t regval;
 
@@ -1000,7 +1000,7 @@ static void qspi_abort(struct stm32l4_qspidev_s *priv)
  *
  ****************************************************************************/
 
-static void qspi_ccrconfig(struct stm32l4_qspidev_s *priv,
+static void qspi_ccrconfig(struct stm32_qspidev_s *priv,
                            struct qspi_xctnspec_s *xctn,
                            uint8_t fctn)
 {
@@ -1290,7 +1290,7 @@ static int qspi0_interrupt(int irq, void *context, void *arg)
 
 static void qspi_dma_timeout(wdparm_t arg)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)arg;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
@@ -1326,7 +1326,7 @@ static void qspi_dma_timeout(wdparm_t arg)
 
 static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)arg;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
@@ -1374,7 +1374,7 @@ static void qspi_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-static inline uintptr_t qspi_regaddr(struct stm32l4_qspidev_s *priv,
+static inline uintptr_t qspi_regaddr(struct stm32_qspidev_s *priv,
                                     unsigned int offset)
 {
   return priv->base + offset;
@@ -1396,7 +1396,7 @@ static inline uintptr_t qspi_regaddr(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
+static int qspi_memory_dma(struct stm32_qspidev_s *priv,
                            struct qspi_meminfo_s *meminfo,
                            struct qspi_xctnspec_s *xctn)
 {
@@ -1425,7 +1425,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
                   DMA_CCR_MINC);
     }
 
-  stm32l4_dmasetup(priv->dmach, qspi_regaddr(priv,
+  stm32_dmasetup(priv->dmach, qspi_regaddr(priv,
                                              STM32_QUADSPI_DR_OFFSET),
                  (uint32_t)meminfo->buffer, meminfo->buflen, dmaflags);
 
@@ -1446,7 +1446,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
   /* Start the DMA */
 
   priv->result = -EBUSY;
-  stm32l4_dmastart(priv->dmach, qspi_dma_callback, priv, false);
+  stm32_dmastart(priv->dmach, qspi_dma_callback, priv, false);
 
   qspi_dma_sample(priv, DMA_AFTER_START);
 
@@ -1510,7 +1510,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
    * on an error condition).
    */
 
-  stm32l4_dmastop(priv->dmach);
+  stm32_dmastop(priv->dmach);
 
   regval = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
   regval &= ~QSPI_CR_DMAEN;
@@ -1543,7 +1543,7 @@ static int qspi_memory_dma(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static int qspi_receive_blocking(struct stm32l4_qspidev_s *priv,
+static int qspi_receive_blocking(struct stm32_qspidev_s *priv,
                                  struct qspi_xctnspec_s *xctn)
 {
   int ret = OK;
@@ -1621,7 +1621,7 @@ static int qspi_receive_blocking(struct stm32l4_qspidev_s *priv,
  *
  ****************************************************************************/
 
-static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
+static int qspi_transmit_blocking(struct stm32_qspidev_s *priv,
                                  struct qspi_xctnspec_s *xctn)
 {
   int ret = OK;
@@ -1692,7 +1692,7 @@ static int qspi_transmit_blocking(struct stm32l4_qspidev_s *priv,
 
 static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   int ret;
 
   spiinfo("lock=%d\n", lock);
@@ -1725,7 +1725,7 @@ static int qspi_lock(struct qspi_dev_s *dev, bool lock)
 
 static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   uint32_t actual;
   uint32_t prescaler;
   uint32_t regval;
@@ -1822,7 +1822,7 @@ static uint32_t qspi_setfrequency(struct qspi_dev_s *dev, uint32_t frequency)
 
 static void qspi_setmode(struct qspi_dev_s *dev, enum qspi_mode_e mode)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   uint32_t regval;
 
   if (priv->memmap)
@@ -1924,7 +1924,7 @@ static void qspi_setbits(struct qspi_dev_s *dev, int nbits)
 static int qspi_command(struct qspi_dev_s *dev,
                         struct qspi_cmdinfo_s *cmdinfo)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   struct qspi_xctnspec_s xctn;
   int ret;
 
@@ -2106,7 +2106,7 @@ static int qspi_command(struct qspi_dev_s *dev,
 static int qspi_memory(struct qspi_dev_s *dev,
                        struct qspi_meminfo_s *meminfo)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   struct qspi_xctnspec_s xctn;
   int ret;
 
@@ -2346,7 +2346,7 @@ static void qspi_free(struct qspi_dev_s *dev, void *buffer)
  *
  ****************************************************************************/
 
-static int qspi_hw_initialize(struct stm32l4_qspidev_s *priv)
+static int qspi_hw_initialize(struct stm32_qspidev_s *priv)
 {
   uint32_t regval;
 
@@ -2429,7 +2429,7 @@ static int qspi_hw_initialize(struct stm32l4_qspidev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_qspi_initialize
+ * Name: stm32_qspi_initialize
  *
  * Description:
  *   Initialize the selected QSPI port in master mode
@@ -2442,9 +2442,9 @@ static int qspi_hw_initialize(struct stm32l4_qspidev_s *priv)
  *
  ****************************************************************************/
 
-struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
+struct qspi_dev_s *stm32_qspi_initialize(int intf)
 {
-  struct stm32l4_qspidev_s *priv;
+  struct stm32_qspidev_s *priv;
   uint32_t regval;
   int ret;
 
@@ -2482,12 +2482,12 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
 
       /* Configure multiplexed pins as connected on the board. */
 
-      stm32l4_configgpio(GPIO_QSPI_CS);
-      stm32l4_configgpio(GPIO_QSPI_IO0);
-      stm32l4_configgpio(GPIO_QSPI_IO1);
-      stm32l4_configgpio(GPIO_QSPI_IO2);
-      stm32l4_configgpio(GPIO_QSPI_IO3);
-      stm32l4_configgpio(GPIO_QSPI_SCK);
+      stm32_configgpio(GPIO_QSPI_CS);
+      stm32_configgpio(GPIO_QSPI_IO0);
+      stm32_configgpio(GPIO_QSPI_IO1);
+      stm32_configgpio(GPIO_QSPI_IO2);
+      stm32_configgpio(GPIO_QSPI_IO3);
+      stm32_configgpio(GPIO_QSPI_SCK);
     }
   else
     {
@@ -2506,7 +2506,7 @@ struct qspi_dev_s *stm32l4_qspi_initialize(int intf)
 
       if (priv->candma)
         {
-          priv->dmach = stm32l4_dmachannel(DMACHAN_QUADSPI);
+          priv->dmach = stm32_dmachannel(DMACHAN_QUADSPI);
           if (!priv->dmach)
             {
               spierr("ERROR: Failed to allocate the DMA channel\n");
@@ -2557,7 +2557,7 @@ errout_with_dmach:
 #ifdef CONFIG_STM32L4_QSPI_DMA
   if (priv->dmach)
     {
-      stm32l4_dmafree(priv->dmach);
+      stm32_dmafree(priv->dmach);
       priv->dmach = NULL;
     }
 #endif
@@ -2566,7 +2566,7 @@ errout_with_dmach:
 }
 
 /****************************************************************************
- * Name: stm32l4_qspi_enter_memorymapped
+ * Name: stm32_qspi_enter_memorymapped
  *
  * Description:
  *   Put the QSPI device into memory mapped mode
@@ -2580,11 +2580,11 @@ errout_with_dmach:
  *
  ****************************************************************************/
 
-void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s *dev,
+void stm32_qspi_enter_memorymapped(struct qspi_dev_s *dev,
                                      const struct qspi_meminfo_s *meminfo,
                                      uint32_t lpto)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
   uint32_t regval;
   struct qspi_xctnspec_s xctn;
 
@@ -2658,7 +2658,7 @@ void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: stm32l4_qspi_exit_memorymapped
+ * Name: stm32_qspi_exit_memorymapped
  *
  * Description:
  *   Take the QSPI device out of memory mapped mode
@@ -2671,9 +2671,9 @@ void stm32l4_qspi_enter_memorymapped(struct qspi_dev_s *dev,
  *
  ****************************************************************************/
 
-void stm32l4_qspi_exit_memorymapped(struct qspi_dev_s *dev)
+void stm32_qspi_exit_memorymapped(struct qspi_dev_s *dev)
 {
-  struct stm32l4_qspidev_s *priv = (struct stm32l4_qspidev_s *)dev;
+  struct stm32_qspidev_s *priv = (struct stm32_qspidev_s *)dev;
 
   qspi_lock(dev, true);
 

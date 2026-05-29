@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_mpuinitialize
+ * Name: stm32_mpuinitialize
  *
  * Description:
  *   Configure the MPU to permit user-space access to only unrestricted MCU
@@ -43,13 +43,13 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void stm32l4_mpuinitialize(void);
+void stm32_mpuinitialize(void);
 #else
-#  define stm32l4_mpuinitialize()
+#  define stm32_mpuinitialize()
 #endif
 
 /****************************************************************************
- * Name: stm32l4_mpu_uheap
+ * Name: stm32_mpu_uheap
  *
  * Description:
  *  Map the user heap region.
@@ -57,9 +57,9 @@ void stm32l4_mpuinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void stm32l4_mpu_uheap(uintptr_t start, size_t size);
+void stm32_mpu_uheap(uintptr_t start, size_t size);
 #else
-#  define stm32l4_mpu_uheap(start,size)
+#  define stm32_mpu_uheap(start,size)
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_MPUINIT_H */

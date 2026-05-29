@@ -92,7 +92,7 @@ int stm32_dfsdm_setup(void)
        */
 
 #ifdef CONFIG_STM32L4_DFSDM1_FLT0
-      adc = stm32l4_dfsdm_initialize(0, chanlist0, 1);
+      adc = stm32_dfsdm_initialize(0, chanlist0, 1);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT0 interface\n");
@@ -108,7 +108,7 @@ int stm32_dfsdm_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_DFSDM1_FLT1
-      adc = stm32l4_dfsdm_initialize(1, chanlist1, 2);
+      adc = stm32_dfsdm_initialize(1, chanlist1, 2);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT1 interface\n");
@@ -124,7 +124,7 @@ int stm32_dfsdm_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_DFSDM1_FLT2
-      adc = stm32l4_dfsdm_initialize(2, chanlist2, 8);
+      adc = stm32_dfsdm_initialize(2, chanlist2, 8);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT2 interface\n");
@@ -140,7 +140,7 @@ int stm32_dfsdm_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_DFSDM1_FLT3
-      adc = stm32l4_dfsdm_initialize(3, chanlist3, 4);
+      adc = stm32_dfsdm_initialize(3, chanlist3, 4);
       if (adc == NULL)
         {
           aerr("Failed to get DFSDM FLT3 interface\n");

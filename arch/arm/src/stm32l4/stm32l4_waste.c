@@ -38,7 +38,7 @@ uint32_t g_waste_counter = 0;
  * Public Functions
  ****************************************************************************/
 
-void stm32l4_waste(void)
+void stm32_waste(void)
 {
   g_waste_counter++;
 }

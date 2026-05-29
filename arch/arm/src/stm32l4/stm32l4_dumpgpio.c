@@ -86,14 +86,14 @@ static const char g_portchar[STM32_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32l4_dumpgpio
+ * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
  ****************************************************************************/
 
-int stm32l4_dumpgpio(uint32_t pinset, const char *msg)
+int stm32_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t   flags;
   uint32_t     base;

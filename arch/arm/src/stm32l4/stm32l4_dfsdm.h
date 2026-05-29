@@ -306,7 +306,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dfsdm_initialize
+ * Name: stm32_dfsdm_initialize
  *
  * Description:
  *   Initialize the DFSDM.
@@ -322,9 +322,8 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
-                                           const uint8_t *chanlist,
-                                           int nchannels);
+struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
+                                         int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }

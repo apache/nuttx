@@ -112,9 +112,9 @@ extern "C"
 
 /* LPTIM Device Structure */
 
-struct stm32l4_lptim_dev_s
+struct stm32_lptim_dev_s
 {
-  struct stm32l4_lptim_ops_s *ops;
+  struct stm32_lptim_ops_s *ops;
 };
 
 /* LPTIM Modes of Operation */
@@ -129,7 +129,7 @@ typedef enum
   STM32_LPTIM_MODE_SINGLE       = 0x0001,
   STM32_LPTIM_MODE_CONTINUOUS   = 0x0002,
   STM32_LPTIM_MODE_MASK         = 0x000f,
-} stm32l4_lptim_mode_t;
+} stm32_lptim_mode_t;
 
 /* LPTIM Clock Source */
 
@@ -142,7 +142,7 @@ typedef enum
   STM32_LPTIM_CLK_HSI           = 0x0002,
   STM32_LPTIM_CLK_LSE           = 0x0003,
   STM32_LPTIM_CLK_EXT           = 0x0004,
-} stm32l4_lptim_clksrc_t;
+} stm32_lptim_clksrc_t;
 
 /* LPTIM Counter Modes */
 
@@ -152,7 +152,7 @@ typedef enum
 
   STM32_LPTIM_COUNT_CLOCK       = 0x0000,
   STM32_LPTIM_COUNT_EXTTRIG     = 0x0001,
-} stm32l4_lptim_cntmode_t;
+} stm32_lptim_cntmode_t;
 
 /* LPTIM Clock Polarity */
 
@@ -163,7 +163,7 @@ typedef enum
   STM32_LPTIM_CLKPOL_RISING     = 0x0000,
   STM32_LPTIM_CLKPOL_FALLING    = 0x0001,
   STM32_LPTIM_CLKPOL_BOTH       = 0x0002,
-} stm32l4_lptim_clkpol_t;
+} stm32_lptim_clkpol_t;
 
 /* LPTIM Channel Modes */
 
@@ -178,26 +178,26 @@ typedef enum
   STM32_LPTIM_CH_CH2            = 0x0002,
   STM32_LPTIM_CH_CH3            = 0x0003,
   STM32_LPTIM_CH_MASK           = 0x000f,
-} stm32l4_lptim_channel_t;
+} stm32_lptim_channel_t;
 
 /* LPTIM Operations */
 
-struct stm32l4_lptim_ops_s
+struct stm32_lptim_ops_s
 {
-  int  (*setmode)(struct stm32l4_lptim_dev_s *dev,
-                  stm32l4_lptim_mode_t mode);
-  int  (*setclock)(struct stm32l4_lptim_dev_s *dev, uint32_t freq);
-  int  (*setchannel)(struct stm32l4_lptim_dev_s *dev,
-                     stm32l4_lptim_channel_t channel, int enable);
-  int  (*setclocksource)(struct stm32l4_lptim_dev_s *dev,
-                         stm32l4_lptim_clksrc_t clksrc);
-  int  (*setpolarity)(struct stm32l4_lptim_dev_s *dev,
-                      stm32l4_lptim_clkpol_t polarity);
-  uint32_t (*getcounter)(struct stm32l4_lptim_dev_s *dev);
-  int  (*setcountmode)(struct stm32l4_lptim_dev_s *dev,
-                       stm32l4_lptim_cntmode_t cntmode);
-  void (*setperiod)(struct stm32l4_lptim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(struct stm32l4_lptim_dev_s *dev);
+  int  (*setmode)(struct stm32_lptim_dev_s *dev,
+                  stm32_lptim_mode_t mode);
+  int  (*setclock)(struct stm32_lptim_dev_s *dev, uint32_t freq);
+  int  (*setchannel)(struct stm32_lptim_dev_s *dev,
+                     stm32_lptim_channel_t channel, int enable);
+  int  (*setclocksource)(struct stm32_lptim_dev_s *dev,
+                         stm32_lptim_clksrc_t clksrc);
+  int  (*setpolarity)(struct stm32_lptim_dev_s *dev,
+                      stm32_lptim_clkpol_t polarity);
+  uint32_t (*getcounter)(struct stm32_lptim_dev_s *dev);
+  int  (*setcountmode)(struct stm32_lptim_dev_s *dev,
+                       stm32_lptim_cntmode_t cntmode);
+  void (*setperiod)(struct stm32_lptim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct stm32_lptim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -206,11 +206,11 @@ struct stm32l4_lptim_ops_s
 
 /* Get timer structure, power-up, reset, and mark it as used */
 
-struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer);
+struct stm32_lptim_dev_s *stm32_lptim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32l4_lptim_deinit(struct stm32l4_lptim_dev_s *dev);
+int stm32_lptim_deinit(struct stm32_lptim_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

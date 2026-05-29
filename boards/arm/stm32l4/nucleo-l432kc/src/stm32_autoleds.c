@@ -35,7 +35,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "nucleo-l432kc.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -52,7 +52,7 @@ void board_autoled_initialize(void)
 {
   /* Configure LD3 GPIO for output */
 
-  stm32l4_configgpio(GPIO_LD3);
+  stm32_configgpio(GPIO_LD3);
 }
 
 /****************************************************************************
@@ -63,7 +63,7 @@ void board_autoled_on(int led)
 {
   if (led == 1)
     {
-      stm32l4_gpiowrite(GPIO_LD3, true);
+      stm32_gpiowrite(GPIO_LD3, true);
     }
 }
 
@@ -75,7 +75,7 @@ void board_autoled_off(int led)
 {
   if (led == 1)
     {
-      stm32l4_gpiowrite(GPIO_LD3, false);
+      stm32_gpiowrite(GPIO_LD3, false);
     }
 }
 

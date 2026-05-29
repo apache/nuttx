@@ -33,7 +33,7 @@
 #include <nuttx/sensors/mpu9250.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_i2c.h"
 #include "stm32_mpu9250.h"
 
@@ -94,7 +94,7 @@ int board_mpu9250_initialize(int devno, int busno)
 
   /* Initialize MPU9250 */
 
-  i2c = stm32l4_i2cbus_initialize(busno);
+  i2c = stm32_i2cbus_initialize(busno);
   if (i2c)
     {
       /* Then try to register the IMU sensor in I2Cx */

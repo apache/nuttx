@@ -575,7 +575,7 @@ static int stm32_1wire_init(struct stm32_1wire_priv_s *priv)
 
   /* Configure pins for USART use */
 
-  stm32l4_configgpio(config->data_pin);
+  stm32_configgpio(config->data_pin);
 
   ret = irq_attach(config->irq, stm32_1wire_isr, priv);
   if (ret == OK)
@@ -604,7 +604,7 @@ static int stm32_1wire_deinit(struct stm32_1wire_priv_s *priv)
 
   /* Unconfigure GPIO pins */
 
-  stm32l4_unconfiggpio(config->data_pin);
+  stm32_unconfiggpio(config->data_pin);
 
   /* Disable RXNEIE, Rx, Tx, and the USART */
 
@@ -1125,7 +1125,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_1wireinitialize
+ * Name: stm32_1wireinitialize
  *
  * Description:
  *   Initialize the selected 1-Wire port. And return a unique instance of
@@ -1141,7 +1141,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-struct onewire_dev_s *stm32l4_1wireinitialize(int port)
+struct onewire_dev_s *stm32_1wireinitialize(int port)
 {
   struct stm32_1wire_priv_s *priv = NULL;  /* Private data of device with multiple instances */
   struct stm32_1wire_inst_s *inst = NULL;  /* Device, single instance */
@@ -1218,13 +1218,13 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 }
 
 /****************************************************************************
- * Name: stm32l4_1wireuninitialize
+ * Name: stm32_1wireuninitialize
  *
  * Description:
  *   De-initialize the selected 1-Wire port, and power down the device.
  *
  * Input Parameters:
- *   Device structure as returned by the stm32l4_1wireinitialize()
+ *   Device structure as returned by the stm32_1wireinitialize()
  *
  * Returned Value:
  *   OK on success, ERROR when internal reference count mismatch or dev
@@ -1232,7 +1232,7 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
  *
  ****************************************************************************/
 
-int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
+int stm32_1wireuninitialize(struct onewire_dev_s *dev)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
 

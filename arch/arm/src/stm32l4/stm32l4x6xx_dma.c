@@ -41,7 +41,7 @@
 #include "sched/sched.h"
 #include "chip.h"
 #include "stm32l4_dma.h"
-#include "stm32l4.h"
+#include "stm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,7 +65,7 @@
 
 /* This structure describes one DMA channel */
 
-struct stm32l4_dma_s
+struct stm32_dma_s
 {
   uint8_t        chan;     /* DMA channel number (0-6) */
   uint8_t        function; /* DMA peripheral connected to this channel (0-7) */
@@ -82,7 +82,7 @@ struct stm32l4_dma_s
 
 /* This array describes the state of each DMA */
 
-static struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
+static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   {
     .chan     = 0,
@@ -182,7 +182,7 @@ static struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
 
 /* Get non-channel register from DMA1 or DMA2 */
 
-static inline uint32_t dmabase_getreg(struct stm32l4_dma_s *dmach,
+static inline uint32_t dmabase_getreg(struct stm32_dma_s *dmach,
                                       uint32_t offset)
 {
   return getreg32(DMA_BASE(dmach->base) + offset);
@@ -190,7 +190,7 @@ static inline uint32_t dmabase_getreg(struct stm32l4_dma_s *dmach,
 
 /* Write to non-channel register in DMA1 or DMA2 */
 
-static inline void dmabase_putreg(struct stm32l4_dma_s *dmach,
+static inline void dmabase_putreg(struct stm32_dma_s *dmach,
                                   uint32_t offset, uint32_t value)
 {
   putreg32(value, DMA_BASE(dmach->base) + offset);
@@ -198,7 +198,7 @@ static inline void dmabase_putreg(struct stm32l4_dma_s *dmach,
 
 /* Get channel register from DMA1 or DMA2 */
 
-static inline uint32_t dmachan_getreg(struct stm32l4_dma_s *dmach,
+static inline uint32_t dmachan_getreg(struct stm32_dma_s *dmach,
                                       uint32_t offset)
 {
   return getreg32(dmach->base + offset);
@@ -206,21 +206,21 @@ static inline uint32_t dmachan_getreg(struct stm32l4_dma_s *dmach,
 
 /* Write to channel register in DMA1 or DMA2 */
 
-static inline void dmachan_putreg(struct stm32l4_dma_s *dmach,
+static inline void dmachan_putreg(struct stm32_dma_s *dmach,
                                   uint32_t offset, uint32_t value)
 {
   putreg32(value, dmach->base + offset);
 }
 
 /****************************************************************************
- * Name: stm32l4_dmachandisable
+ * Name: stm32_dmachandisable
  *
  * Description:
  *  Disable the DMA channel
  *
  ****************************************************************************/
 
-static void stm32l4_dmachandisable(struct stm32l4_dma_s *dmach)
+static void stm32_dmachandisable(struct stm32_dma_s *dmach)
 {
   uint32_t regval;
 
@@ -241,16 +241,16 @@ static void stm32l4_dmachandisable(struct stm32l4_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmainterrupt
+ * Name: stm32_dmainterrupt
  *
  * Description:
  *  DMA interrupt handler
  *
  ****************************************************************************/
 
-static int stm32l4_dmainterrupt(int irq, void *context, void *arg)
+static int stm32_dmainterrupt(int irq, void *context, void *arg)
 {
-  struct stm32l4_dma_s *dmach;
+  struct stm32_dma_s *dmach;
   uint32_t isr;
   int chndx = 0;
 
@@ -303,7 +303,7 @@ static int stm32l4_dmainterrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_dmainitialize
+ * Name: stm32_dmainitialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -315,7 +315,7 @@ static int stm32l4_dmainterrupt(int irq, void *context, void *arg)
 
 void weak_function arm_dma_initialize(void)
 {
-  struct stm32l4_dma_s *dmach;
+  struct stm32_dma_s *dmach;
   int chndx;
 
   /* Initialize each DMA channel */
@@ -326,11 +326,11 @@ void weak_function arm_dma_initialize(void)
 
       /* Attach DMA interrupt vectors */
 
-      irq_attach(dmach->irq, stm32l4_dmainterrupt, NULL);
+      irq_attach(dmach->irq, stm32_dmainterrupt, NULL);
 
       /* Disable the DMA channel */
 
-      stm32l4_dmachandisable(dmach);
+      stm32_dmachandisable(dmach);
 
       /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
@@ -339,7 +339,7 @@ void weak_function arm_dma_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmachannel
+ * Name: stm32_dmachannel
  *
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
@@ -348,10 +348,10 @@ void weak_function arm_dma_initialize(void)
  *   channel cannot do DMA concurrently!  See the DMACHAN_* definitions in
  *   stm32l4_dma.h.
  *
- *   If the DMA channel is not available, then stm32l4_dmachannel() will wait
+ *   If the DMA channel is not available, then stm32_dmachannel() will wait
  *   until the holder of the channel relinquishes the channel by calling
- *   stm32l4_dmafree().  WARNING: If you have two devices sharing a DMA
- *   channel and the code never releases the channel, the stm32l4_dmachannel
+ *   stm32_dmafree().  WARNING: If you have two devices sharing a DMA
+ *   channel and the code never releases the channel, the stm32_dmachannel
  *   call for the other will hang forever in this function!  Don't let your
  *   design do that!
  *
@@ -375,12 +375,12 @@ void weak_function arm_dma_initialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32l4_dmachannel(unsigned int chndef)
+DMA_HANDLE stm32_dmachannel(unsigned int chndef)
 {
   int ret;
   int chndx = (chndef & DMACHAN_SETTING_CHANNEL_MASK) >>
                DMACHAN_SETTING_CHANNEL_SHIFT;
-  struct stm32l4_dma_s *dmach = &g_dma[chndx];
+  struct stm32_dma_s *dmach = &g_dma[chndx];
 
   DEBUGASSERT(chndx < DMA_NCHANNELS);
 
@@ -407,13 +407,13 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int chndef)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmafree
+ * Name: stm32_dmafree
  *
  * Description:
  *   Release a DMA channel. If another thread is waiting for this DMA channel
- *   in a call to stm32l4_dmachannel, then this function will re-assign the
+ *   in a call to stm32_dmachannel, then this function will re-assign the
  *   DMA channel to that thread and wake it up.  NOTE:  The 'handle' used
- *   in this argument must NEVER be used again until stm32l4_dmachannel() is
+ *   in this argument must NEVER be used again until stm32_dmachannel() is
  *   called again to re-gain access to the channel.
  *
  * Returned Value:
@@ -425,9 +425,9 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int chndef)
  *
  ****************************************************************************/
 
-void stm32l4_dmafree(DMA_HANDLE handle)
+void stm32_dmafree(DMA_HANDLE handle)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
 
   DEBUGASSERT(handle != NULL);
 
@@ -437,17 +437,17 @@ void stm32l4_dmafree(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmasetup
+ * Name: stm32_dmasetup
  *
  * Description:
  *   Configure DMA before using
  *
  ****************************************************************************/
 
-void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                     size_t ntransfers, uint32_t ccr)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t regval;
 
   DEBUGASSERT(handle != NULL);
@@ -505,21 +505,21 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 }
 
 /****************************************************************************
- * Name: stm32l4_dmastart
+ * Name: stm32_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *   - No DMA in progress
  *
  ****************************************************************************/
 
-void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
                     void *arg, bool half)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t ccr;
 
   DEBUGASSERT(handle != NULL);
@@ -571,44 +571,44 @@ void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback,
 }
 
 /****************************************************************************
- * Name: stm32l4_dmastop
+ * Name: stm32_dmastop
  *
  * Description:
- *   Cancel the DMA.  After stm32l4_dmastop() is called, the DMA channel is
- *   reset and stm32l4_dmasetup() must be called before stm32l4_dmastart()
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart()
  *   can be called again
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-void stm32l4_dmastop(DMA_HANDLE handle)
+void stm32_dmastop(DMA_HANDLE handle)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
-  stm32l4_dmachandisable(dmach);
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
+  stm32_dmachandisable(dmach);
 }
 
 /****************************************************************************
- * Name: stm32l4_dmaresidual
+ * Name: stm32_dmaresidual
  *
  * Description:
  *   Returns the number of bytes remaining to be transferred
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-size_t stm32l4_dmaresidual(DMA_HANDLE handle)
+size_t stm32_dmaresidual(DMA_HANDLE handle)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
 
   return dmachan_getreg(dmach, STM32_DMACHAN_CNDTR_OFFSET);
 }
 
 /****************************************************************************
- * Name: stm32l4_dmacapable
+ * Name: stm32_dmacapable
  *
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
@@ -622,7 +622,7 @@ size_t stm32l4_dmaresidual(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_DMACAPABLE
-bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
+bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size;
   uint32_t mend;
@@ -698,20 +698,20 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dmasample
+ * Name: stm32_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
+void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   irqstate_t flags;
 
   flags       = enter_critical_section();
@@ -726,21 +726,21 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dmadump
+ * Name: stm32_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
+void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
                    const char *msg)
 {
-  struct stm32l4_dma_s *dmach = (struct stm32l4_dma_s *)handle;
+  struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t dmabase = DMA_BASE(dmach->base);
 
   dmainfo("DMA Registers: %s\n", msg);

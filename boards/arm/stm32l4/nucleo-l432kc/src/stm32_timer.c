@@ -61,7 +61,7 @@
 
 int board_timer_driver_initialize(const char *devpath, int timer)
 {
-  return stm32l4_timer_initialize(devpath, timer);
+  return stm32_timer_initialize(devpath, timer);
 }
 
 #endif

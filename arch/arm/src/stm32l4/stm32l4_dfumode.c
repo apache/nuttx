@@ -120,7 +120,7 @@ static inline void apb_reset(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  stm32l4_dfumode
+ * Name:  stm32_dfumode
  *
  * Description:
  *   Reboot the part in DFU mode (GCC only).
@@ -128,7 +128,7 @@ static inline void apb_reset(void)
  ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
-void stm32l4_dfumode(void)
+void stm32_dfumode(void)
 {
   uint32_t regval;
   boot_call_t boot;
