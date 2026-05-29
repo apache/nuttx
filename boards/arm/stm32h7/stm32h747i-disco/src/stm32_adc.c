@@ -149,7 +149,7 @@ int stm32_adc_setup(void)
 
       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      adc = stm32h7_adc_initialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
+      adc = stm32_adc_initialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC1 interface\n");
@@ -180,7 +180,7 @@ int stm32_adc_setup(void)
 
       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      adc = stm32h7_adc_initialize(3, g_adc3_chanlist, ADC3_NCHANNELS);
+      adc = stm32_adc_initialize(3, g_adc3_chanlist, ADC3_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC3 interface\n");
