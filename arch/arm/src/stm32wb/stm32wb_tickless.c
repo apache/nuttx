@@ -52,7 +52,7 @@
  * There are two interrupts generated from our timer, the overflow interrupt
  * which drives the timing handler and the capture/compare interrupt which
  * drives the interval handler.  There are some low level timer control
- * functions implemented here because the API of stm32wb_tim.c does not
+ * functions implemented here because the API of stm32_tim.c does not
  * provide adequate control over capture/compare interrupts.
  *
  ****************************************************************************/
@@ -96,13 +96,13 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32wb_tickless_s
+struct stm32_tickless_s
 {
   uint8_t timer;                     /* The timer/counter in use */
   uint8_t channel;                   /* The timer channel to use
                                       * for intervals */
-  struct stm32wb_tim_dev_s *tch;     /* Pointer returned by
-                                      * stm32wb_tim_init() */
+  struct stm32_tim_dev_s *tch;       /* Pointer returned by
+                                      * stm32_tim_init() */
   uint32_t frequency;
   uint32_t overflow;                 /* Timer counter overflow */
   volatile bool pending;             /* True: pending task */
@@ -114,93 +114,93 @@ struct stm32wb_tickless_s
  * Private Data
  ****************************************************************************/
 
-static struct stm32wb_tickless_s g_tickless;
+static struct stm32_tickless_s g_tickless;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_getreg16
+ * Name: stm32_getreg16
  *
  * Description:
  *   Get a 16-bit register value by offset
  *
  ****************************************************************************/
 
-static inline uint16_t stm32wb_getreg16(uint8_t offset)
+static inline uint16_t stm32_getreg16(uint8_t offset)
 {
   return getreg16(g_tickless.base + offset);
 }
 
 /****************************************************************************
- * Name: stm32wb_putreg16
+ * Name: stm32_putreg16
  *
  * Description:
  *   Put a 16-bit register value by offset
  *
  ****************************************************************************/
 
-static inline void stm32wb_putreg16(uint8_t offset, uint16_t value)
+static inline void stm32_putreg16(uint8_t offset, uint16_t value)
 {
   putreg16(value, g_tickless.base + offset);
 }
 
 /****************************************************************************
- * Name: stm32wb_modifyreg16
+ * Name: stm32_modifyreg16
  *
  * Description:
  *   Modify a 16-bit register value by offset
  *
  ****************************************************************************/
 
-static inline void stm32wb_modifyreg16(uint8_t offset, uint16_t clearbits,
+static inline void stm32_modifyreg16(uint8_t offset, uint16_t clearbits,
                                        uint16_t setbits)
 {
   modifyreg16(g_tickless.base + offset, clearbits, setbits);
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_enableint
+ * Name: stm32_tickless_enableint
  ****************************************************************************/
 
-static inline void stm32wb_tickless_enableint(int channel)
+static inline void stm32_tickless_enableint(int channel)
 {
-  stm32wb_modifyreg16(STM32_TIM_DIER_OFFSET, 0, 1 << channel);
+  stm32_modifyreg16(STM32_TIM_DIER_OFFSET, 0, 1 << channel);
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_disableint
+ * Name: stm32_tickless_disableint
  ****************************************************************************/
 
-static inline void stm32wb_tickless_disableint(int channel)
+static inline void stm32_tickless_disableint(int channel)
 {
-  stm32wb_modifyreg16(STM32_TIM_DIER_OFFSET, 1 << channel, 0);
+  stm32_modifyreg16(STM32_TIM_DIER_OFFSET, 1 << channel, 0);
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_ackint
+ * Name: stm32_tickless_ackint
  ****************************************************************************/
 
-static inline void stm32wb_tickless_ackint(int channel)
+static inline void stm32_tickless_ackint(int channel)
 {
-  stm32wb_putreg16(STM32_TIM_SR_OFFSET, ~(1 << channel));
+  stm32_putreg16(STM32_TIM_SR_OFFSET, ~(1 << channel));
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_getint
+ * Name: stm32_tickless_getint
  ****************************************************************************/
 
-static inline uint16_t stm32wb_tickless_getint(void)
+static inline uint16_t stm32_tickless_getint(void)
 {
-  return stm32wb_getreg16(STM32_TIM_SR_OFFSET);
+  return stm32_getreg16(STM32_TIM_SR_OFFSET);
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_setchannel
+ * Name: stm32_tickless_setchannel
  ****************************************************************************/
 
-static int stm32wb_tickless_setchannel(uint8_t channel)
+static int stm32_tickless_setchannel(uint8_t channel)
 {
   uint16_t ccmr_orig = 0;
   uint16_t ccmr_val = 0;
@@ -216,7 +216,7 @@ static int stm32wb_tickless_setchannel(uint8_t channel)
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val = stm32wb_getreg16(STM32_TIM_CCER_OFFSET);
+  ccer_val = stm32_getreg16(STM32_TIM_CCER_OFFSET);
   ccer_val &= ~(GTIM_CCER_CCXE(channel) | GTIM_CCER_CCXP(channel));
 
   /* Frozen mode because we don't want to change the GPIO, preload register
@@ -234,17 +234,17 @@ static int stm32wb_tickless_setchannel(uint8_t channel)
       ccmr_offset = STM32_TIM_CCMR2_OFFSET;
     }
 
-  ccmr_orig  = stm32wb_getreg16(ccmr_offset);
+  ccmr_orig  = stm32_getreg16(ccmr_offset);
   ccmr_orig &= ~(GTIM_CCMR_OCXM_MASK(channel) | GTIM_CCMR_OCXPE(channel));
   ccmr_orig |= ccmr_val;
-  stm32wb_putreg16(ccmr_offset, ccmr_orig);
-  stm32wb_putreg16(STM32_TIM_CCER_OFFSET, ccer_val);
+  stm32_putreg16(ccmr_offset, ccmr_orig);
+  stm32_putreg16(STM32_TIM_CCER_OFFSET, ccer_val);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32wb_interval_handler
+ * Name: stm32_interval_handler
  *
  * Description:
  *   Called when the timer counter matches the compare register
@@ -261,14 +261,14 @@ static int stm32wb_tickless_setchannel(uint8_t channel)
  *
  ****************************************************************************/
 
-static void stm32wb_interval_handler(void)
+static void stm32_interval_handler(void)
 {
   tmrinfo("Expired...\n");
 
   /* Disable the compare interrupt now. */
 
-  stm32wb_tickless_disableint(g_tickless.channel);
-  stm32wb_tickless_ackint(g_tickless.channel);
+  stm32_tickless_disableint(g_tickless.channel);
+  stm32_tickless_ackint(g_tickless.channel);
 
   g_tickless.pending = false;
 
@@ -276,7 +276,7 @@ static void stm32wb_interval_handler(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_timing_handler
+ * Name: stm32_timing_handler
  *
  * Description:
  *   Timer interrupt callback.  When the freerun timer counter overflows,
@@ -290,7 +290,7 @@ static void stm32wb_interval_handler(void)
  *
  ****************************************************************************/
 
-static void stm32wb_timing_handler(void)
+static void stm32_timing_handler(void)
 {
   g_tickless.overflow++;
 
@@ -298,7 +298,7 @@ static void stm32wb_timing_handler(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_tickless_handler
+ * Name: stm32_tickless_handler
  *
  * Description:
  *   Generic interrupt handler for this timer.  It checks the source of the
@@ -312,18 +312,18 @@ static void stm32wb_timing_handler(void)
  *
  ****************************************************************************/
 
-static int stm32wb_tickless_handler(int irq, void *context, void *arg)
+static int stm32_tickless_handler(int irq, void *context, void *arg)
 {
-  int interrupt_flags = stm32wb_tickless_getint();
+  int interrupt_flags = stm32_tickless_getint();
 
   if (interrupt_flags & GTIM_SR_UIF)
     {
-      stm32wb_timing_handler();
+      stm32_timing_handler();
     }
 
   if (interrupt_flags & (1 << g_tickless.channel))
     {
-      stm32wb_interval_handler();
+      stm32_interval_handler();
     }
 
   return OK;
@@ -402,7 +402,7 @@ void up_timer_initialize(void)
   tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
            g_tickless.timer, g_tickless.channel, g_tickless.frequency);
 
-  g_tickless.tch = stm32wb_tim_init(g_tickless.timer);
+  g_tickless.tch = stm32_tim_init(g_tickless.timer);
   if (!g_tickless.tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
@@ -413,7 +413,7 @@ void up_timer_initialize(void)
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32_TIM_SETISR(g_tickless.tch, stm32wb_tickless_handler, NULL, 0);
+  STM32_TIM_SETISR(g_tickless.tch, stm32_tickless_handler, NULL, 0);
 
   /* Initialize interval to zero */
 
@@ -421,7 +421,7 @@ void up_timer_initialize(void)
 
   /* Setup compare channel for the interval timing */
 
-  stm32wb_tickless_setchannel(g_tickless.channel);
+  stm32_tickless_setchannel(g_tickless.channel);
 
   /* Set timer period */
 
@@ -493,7 +493,7 @@ int up_timer_gettime(struct timespec *ts)
   DEBUGASSERT(g_tickless.tch && ts);
 
   /* Temporarily disable the overflow counter.  NOTE that we have to be
-   * careful here because  stm32wb_tc_getpending() will reset the pending
+   * careful here because  stm32_tc_getpending() will reset the pending
    * interrupt status.  If we do not handle the overflow here then, it will
    * be lost.
    */
@@ -679,7 +679,7 @@ int up_timer_cancel(struct timespec *ts)
 
   /* Disable the interrupt. */
 
-  stm32wb_tickless_disableint(g_tickless.channel);
+  stm32_tickless_disableint(g_tickless.channel);
 
   count  = STM32_TIM_GETCOUNTER(g_tickless.tch);
   period = g_tickless.period;
@@ -829,8 +829,8 @@ int up_timer_start(const struct timespec *ts)
    * occurs.
    */
 
-  stm32wb_tickless_ackint(g_tickless.channel);
-  stm32wb_tickless_enableint(g_tickless.channel);
+  stm32_tickless_ackint(g_tickless.channel);
+  stm32_tickless_enableint(g_tickless.channel);
 
   g_tickless.pending = true;
   leave_critical_section(flags);

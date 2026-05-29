@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_i2cbus_initialize
+ * Name: stm32_i2cbus_initialize
  *
  * Description:
  *   Initialize the selected I2C port. And return a unique instance of struct
@@ -69,16 +69,16 @@
  *
  ****************************************************************************/
 
-struct i2c_master_s *stm32wb_i2cbus_initialize(int port);
+struct i2c_master_s *stm32_i2cbus_initialize(int port);
 
 /****************************************************************************
- * Name: stm32wb_i2cbus_uninitialize
+ * Name: stm32_i2cbus_uninitialize
  *
  * Description:
  *   De-initialize the selected I2C port, and power down the device.
  *
  * Input Parameters:
- *   Device structure as returned by the stm32wb_i2cbus_initialize()
+ *   Device structure as returned by the stm32_i2cbus_initialize()
  *
  * Returned Value:
  *   OK on success, ERROR when internal reference count mismatch or dev
@@ -86,6 +86,6 @@ struct i2c_master_s *stm32wb_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int stm32wb_i2cbus_uninitialize(struct i2c_master_s *dev);
+int stm32_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_I2C_H */

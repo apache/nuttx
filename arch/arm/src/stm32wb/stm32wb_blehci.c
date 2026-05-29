@@ -106,14 +106,14 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32wb_blehci_driveropen(struct bt_driver_s *btdev);
-static int stm32wb_blehci_driversend(struct bt_driver_s *btdev,
+static int stm32_blehci_driveropen(struct bt_driver_s *btdev);
+static int stm32_blehci_driversend(struct bt_driver_s *btdev,
                                      enum bt_buf_type_e type,
                                      void *data, size_t len);
-static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt);
-static void stm32wb_blehci_bleinit(void);
-static int stm32wb_blehci_driverinitialize(void);
-static void stm32wb_blehci_drvinitworker(void *arg);
+static int stm32_blehci_rxevt(struct stm32_mbox_evt_s *evt);
+static void stm32_blehci_bleinit(void);
+static int stm32_blehci_driverinitialize(void);
+static void stm32_blehci_drvinitworker(void *arg);
 
 /****************************************************************************
  * Private Data
@@ -122,8 +122,8 @@ static void stm32wb_blehci_drvinitworker(void *arg);
 static struct bt_driver_s g_blehci_driver =
 {
   .head_reserve = 0,
-  .open         = stm32wb_blehci_driveropen,
-  .send         = stm32wb_blehci_driversend
+  .open         = stm32_blehci_driveropen,
+  .send         = stm32_blehci_driversend
 };
 
 static mutex_t g_lock = NXMUTEX_INITIALIZER;
@@ -134,19 +134,19 @@ struct work_s g_drv_init_work;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_blehci_driveropen
+ * Name: stm32_blehci_driveropen
  ****************************************************************************/
 
-static int stm32wb_blehci_driveropen(struct bt_driver_s *btdev)
+static int stm32_blehci_driveropen(struct bt_driver_s *btdev)
 {
   return 0;
 }
 
 /****************************************************************************
- * Name: stm32wb_blehci_driversend
+ * Name: stm32_blehci_driversend
  ****************************************************************************/
 
-static int stm32wb_blehci_driversend(struct bt_driver_s *btdev,
+static int stm32_blehci_driversend(struct bt_driver_s *btdev,
                                      enum bt_buf_type_e type,
                                      void *data, size_t len)
 {
@@ -177,11 +177,11 @@ static int stm32wb_blehci_driversend(struct bt_driver_s *btdev,
 
       if (type == BT_CMD)
         {
-          ret = stm32wb_mbox_blecmd(data, len);
+          ret = stm32_mbox_blecmd(data, len);
         }
       else
         {
-          ret = stm32wb_mbox_bleacl(data, len);
+          ret = stm32_mbox_bleacl(data, len);
         }
 
       nxmutex_unlock(&g_lock);
@@ -191,10 +191,10 @@ static int stm32wb_blehci_driversend(struct bt_driver_s *btdev,
 }
 
 /****************************************************************************
- * Name: stm32wb_blehci_rxevt
+ * Name: stm32_blehci_rxevt
  ****************************************************************************/
 
-static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
+static int stm32_blehci_rxevt(struct stm32_mbox_evt_s *evt)
 {
   size_t len;
 
@@ -259,7 +259,7 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
         if (evt->evt_hdr.evt == STM32_SHCI_ASYNC_EVT &&
             *(uint16_t *)(&evt->evt_hdr + 1) == STM32_SHCI_ASYNC_EVT_C2RDY)
           {
-            stm32wb_blehci_bleinit();
+            stm32_blehci_bleinit();
           }
         break;
 
@@ -276,7 +276,7 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
             /* Make driver initialisation in low priority work queue */
 
             work_queue(LPWORK, &g_drv_init_work,
-                       stm32wb_blehci_drvinitworker, NULL, 0);
+                       stm32_blehci_drvinitworker, NULL, 0);
           }
         break;
 
@@ -288,14 +288,14 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
 }
 
 /****************************************************************************
- * Name: stm32wb_blehci_bleinit
+ * Name: stm32_blehci_bleinit
  ****************************************************************************/
 
-static void stm32wb_blehci_bleinit(void)
+static void stm32_blehci_bleinit(void)
 {
   /* Prepare BLE configuration */
 
-  struct stm32wb_shci_ble_init_cfg_s params =
+  struct stm32_shci_ble_init_cfg_s params =
   {
     .ble_buf =              NULL,
     .ble_buf_size =         0,
@@ -323,14 +323,14 @@ static void stm32wb_blehci_bleinit(void)
 
   /* Initialise BLE */
 
-  stm32wb_mbox_bleinit(&params);
+  stm32_mbox_bleinit(&params);
 }
 
 /****************************************************************************
- * Name: stm32wb_blehci_driverinitialize
+ * Name: stm32_blehci_driverinitialize
  ****************************************************************************/
 
-static int stm32wb_blehci_driverinitialize(void)
+static int stm32_blehci_driverinitialize(void)
 {
   int ret = 0;
 
@@ -345,12 +345,12 @@ static int stm32wb_blehci_driverinitialize(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_blehci_drvinitworker
+ * Name: stm32_blehci_drvinitworker
  ****************************************************************************/
 
-static void stm32wb_blehci_drvinitworker(void *arg)
+static void stm32_blehci_drvinitworker(void *arg)
 {
-  stm32wb_blehci_driverinitialize();
+  stm32_blehci_driverinitialize();
 }
 
 /****************************************************************************
@@ -358,7 +358,7 @@ static void stm32wb_blehci_drvinitworker(void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_blehci_initialize
+ * Name: stm32_blehci_initialize
  *
  * Description:
  *   Initialize and register BLE HCI driver which interfaces a BLE host
@@ -367,15 +367,15 @@ static void stm32wb_blehci_drvinitworker(void *arg)
  *
  ****************************************************************************/
 
-void stm32wb_blehci_initialize(void)
+void stm32_blehci_initialize(void)
 {
   /* Initialize mbox internal data structures and set
    * event receive handler.
    */
 
-  stm32wb_mboxinitialize(stm32wb_blehci_rxevt);
+  stm32_mboxinitialize(stm32_blehci_rxevt);
 
   /* Enable communication hardware and boot up CPU2 */
 
-  stm32wb_mboxenable();
+  stm32_mboxenable();
 }

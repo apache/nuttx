@@ -35,7 +35,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_hsi48
+ * Name: stm32_rcc_enable_hsi48
  *
  * Description:
  *   HSI48 clock signal is generated from an internal 48 MHz RC oscillator
@@ -61,7 +61,7 @@
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
+void stm32_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
 {
   uint32_t regval;
 
@@ -130,7 +130,7 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
 }
 
 /****************************************************************************
- * Name: stm32wb_rcc_disable_hsi48
+ * Name: stm32_rcc_disable_hsi48
  *
  * Description:
  *   Disable the HSI48 clock.
@@ -143,7 +143,7 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
  *
  ****************************************************************************/
 
-void stm32wb_rcc_disable_hsi48(void)
+void stm32_rcc_disable_hsi48(void)
 {
   uint32_t regval;
 

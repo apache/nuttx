@@ -34,14 +34,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lsi
+ * Name: stm32_rcc_enable_lsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lsi(void)
+void stm32_rcc_enable_lsi(void)
 {
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
    * bit the RCC CSR register.
@@ -55,14 +55,14 @@ void stm32wb_rcc_enable_lsi(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_rcc_disable_lsi
+ * Name: stm32_rcc_disable_lsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_disable_lsi(void)
+void stm32_rcc_disable_lsi(void)
 {
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
    * bit the RCC CSR register.

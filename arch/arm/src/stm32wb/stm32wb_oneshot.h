@@ -67,20 +67,20 @@
 typedef void (*oneshot_handler_t)(void *arg);
 
 /* The oneshot client must allocate an instance of this structure and called
- * stm32wb_oneshot_initialize() before using the oneshot facilities.  The
+ * stm32_oneshot_initialize() before using the oneshot facilities.  The
  * client should not access the contents of this structure directly since
  * the contents are subject to change.
  */
 
-struct stm32wb_oneshot_s
+struct stm32_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
 #if CONFIG_STM32WB_ONESHOT_MAXTIMERS > 1
   uint8_t cbndx;                      /* Timer callback handler index */
 #endif
   volatile bool running;              /* True: the timer is running */
-  struct stm32wb_tim_dev_s *tch;      /* Pointer returned by
-                                       * stm32wb_tim_init() */
+  struct stm32_tim_dev_s *tch;        /* Pointer returned by
+                                       * stm32_tim_init() */
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void *arg;                 /* The argument that will accompany
                                        * the callback */
@@ -106,7 +106,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_oneshot_initialize
+ * Name: stm32_oneshot_initialize
  *
  * Description:
  *   Initialize the oneshot timer wrapper
@@ -124,22 +124,22 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32wb_oneshot_initialize(struct stm32wb_oneshot_s *oneshot, int chan,
+int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot, int chan,
                                uint16_t resolution);
 
 /****************************************************************************
- * Name: stm32wb_oneshot_max_delay
+ * Name: stm32_oneshot_max_delay
  *
  * Description:
  *   Determine the maximum delay of the one-shot timer (in microseconds)
  *
  ****************************************************************************/
 
-int stm32wb_oneshot_max_delay(struct stm32wb_oneshot_s *oneshot,
+int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot,
                               uint64_t *usec);
 
 /****************************************************************************
- * Name: stm32wb_oneshot_start
+ * Name: stm32_oneshot_start
  *
  * Description:
  *   Start the oneshot timer
@@ -147,7 +147,7 @@ int stm32wb_oneshot_max_delay(struct stm32wb_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_oneshot_initialize();
+ *           stm32_oneshot_initialize();
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -158,12 +158,12 @@ int stm32wb_oneshot_max_delay(struct stm32wb_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32wb_oneshot_start(struct stm32wb_oneshot_s *oneshot,
+int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
                           oneshot_handler_t handler, void *arg,
                           const struct timespec *ts);
 
 /****************************************************************************
- * Name: stm32wb_oneshot_cancel
+ * Name: stm32_oneshot_cancel
  *
  * Description:
  *   Cancel the oneshot timer and return the time remaining on the timer.
@@ -174,7 +174,7 @@ int stm32wb_oneshot_start(struct stm32wb_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_oneshot_initialize();
+ *           stm32_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.
@@ -186,7 +186,7 @@ int stm32wb_oneshot_start(struct stm32wb_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32wb_oneshot_cancel(struct stm32wb_oneshot_s *oneshot,
+int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
                            struct timespec *ts);
 
 #undef EXTERN

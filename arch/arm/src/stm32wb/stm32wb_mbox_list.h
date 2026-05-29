@@ -38,42 +38,42 @@
  * a new list_moveall function.
  */
 
-begin_packed_struct struct stm32wb_mbox_list_s
+begin_packed_struct struct stm32_mbox_list_s
 {
-  struct stm32wb_mbox_list_s *next;
-  struct stm32wb_mbox_list_s *prev;
+  struct stm32_mbox_list_s *next;
+  struct stm32_mbox_list_s *prev;
 } end_packed_struct;
 
-typedef struct stm32wb_mbox_list_s stm32wb_mbox_list_t;
+typedef struct stm32_mbox_list_s stm32_mbox_list_t;
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_mbox_list_initialize
+ * Name: stm32_mbox_list_initialize
  *
  * Description:
  *   Initialize internal fields.
  *
  ****************************************************************************/
 
-static inline void stm32wb_mbox_list_initialize(stm32wb_mbox_list_t *list)
+static inline void stm32_mbox_list_initialize(stm32_mbox_list_t *list)
 {
   list->prev = list;
   list->next = list;
 }
 
 /****************************************************************************
- * Name: stm32wb_mbox_list_add_tail
+ * Name: stm32_mbox_list_add_tail
  *
  * Description:
  *   Add new node at the end of the list.
  *
  ****************************************************************************/
 
-static inline void stm32wb_mbox_list_add_tail(stm32wb_mbox_list_t *list,
-                                              stm32wb_mbox_list_t *item)
+static inline void stm32_mbox_list_add_tail(stm32_mbox_list_t *list,
+                                              stm32_mbox_list_t *item)
 {
   item->prev       = list->prev;
   item->next       = list;
@@ -82,19 +82,19 @@ static inline void stm32wb_mbox_list_add_tail(stm32wb_mbox_list_t *list,
 }
 
 /****************************************************************************
- * Name: stm32wb_mbox_list_remove_head
+ * Name: stm32_mbox_list_remove_head
  *
  * Description:
  *   Remove and return first node from the list head (if any).
  *
  ****************************************************************************/
 
-static inline stm32wb_mbox_list_t *
-stm32wb_mbox_list_remove_head(stm32wb_mbox_list_t *list)
+static inline stm32_mbox_list_t *
+stm32_mbox_list_remove_head(stm32_mbox_list_t *list)
 {
   if (list->next != list)
   {
-    stm32wb_mbox_list_t *item = list->next;
+    stm32_mbox_list_t *item = list->next;
     item->next->prev = item->prev;
     item->prev->next = item->next;
     item->prev       = NULL;
@@ -108,20 +108,20 @@ stm32wb_mbox_list_remove_head(stm32wb_mbox_list_t *list)
 }
 
 /****************************************************************************
- * Name: stm32wb_mbox_list_is_empty
+ * Name: stm32_mbox_list_is_empty
  *
  * Description:
  *   Check if the list is empty.
  *
  ****************************************************************************/
 
-static inline bool stm32wb_mbox_list_is_empty(stm32wb_mbox_list_t *list)
+static inline bool stm32_mbox_list_is_empty(stm32_mbox_list_t *list)
 {
   return (list->next == list);
 }
 
 /****************************************************************************
- * Name: stm32wb_mbox_list_moveall
+ * Name: stm32_mbox_list_moveall
  *
  * Description:
  *   Remove all nodes from source list and add them to the end of the
@@ -129,8 +129,8 @@ static inline bool stm32wb_mbox_list_is_empty(stm32wb_mbox_list_t *list)
  *
  ****************************************************************************/
 
-static inline void stm32wb_mbox_list_moveall(stm32wb_mbox_list_t *src,
-                                             stm32wb_mbox_list_t *dst)
+static inline void stm32_mbox_list_moveall(stm32_mbox_list_t *src,
+                                             stm32_mbox_list_t *dst)
 {
   if (src->next != src)
     {
