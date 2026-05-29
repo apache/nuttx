@@ -144,10 +144,10 @@ struct stm32_dac_ops_s
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
-extern uint16_t stm32l4_dac1_dmabuffer[];
+extern uint16_t stm32_dac1_dmabuffer[];
 #endif
 #ifdef CONFIG_STM32L4_DAC2_DMA
-extern uint16_t stm32l4_dac2_dmabuffer[];
+extern uint16_t stm32_dac2_dmabuffer[];
 #endif
 
 /****************************************************************************
@@ -164,7 +164,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dacinitialize
+ * Name: stm32_dacinitialize
  *
  * Description:
  *   Initialize the DAC
@@ -178,7 +178,7 @@ extern "C"
  ****************************************************************************/
 
 struct dac_dev_s;
-struct dac_dev_s *stm32l4_dacinitialize(int intf);
+struct dac_dev_s *stm32_dacinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

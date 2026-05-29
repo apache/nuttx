@@ -56,6 +56,6 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
-  stm32l4_get_uniqueid(uniqueid);
+  stm32_get_uniqueid(uniqueid);
   return OK;
 }

@@ -44,7 +44,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_freerun_handler
+ * Name: stm32_freerun_handler
  *
  * Description:
  *   Timer interrupt callback.  When the freerun timer counter overflows,
@@ -61,10 +61,10 @@
  *
  ****************************************************************************/
 
-static int stm32l4_freerun_handler(int irq, void *context, void *arg)
+static int stm32_freerun_handler(int irq, void *context, void *arg)
 {
-  struct stm32l4_freerun_s *freerun =
-                             (struct stm32l4_freerun_s *)arg;
+  struct stm32_freerun_s *freerun =
+                             (struct stm32_freerun_s *)arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
@@ -78,7 +78,7 @@ static int stm32l4_freerun_handler(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_freerun_initialize
+ * Name: stm32_freerun_initialize
  *
  * Description:
  *   Initialize the freerun timer wrapper
@@ -96,7 +96,7 @@ static int stm32l4_freerun_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
+int stm32_freerun_initialize(struct stm32_freerun_s *freerun,
                                int chan,
                                uint16_t resolution)
 {
@@ -110,7 +110,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
   frequency = USEC_PER_SEC / (uint32_t)resolution;
   freerun->frequency = frequency;
 
-  freerun->tch = stm32l4_tim_init(chan);
+  freerun->tch = stm32_tim_init(chan);
   if (!freerun->tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", chan);
@@ -128,7 +128,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32_TIM_SETISR(freerun->tch, stm32l4_freerun_handler, freerun, 0);
+  STM32_TIM_SETISR(freerun->tch, stm32_freerun_handler, freerun, 0);
 
   /* Set timer period */
 
@@ -144,7 +144,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
 }
 
 /****************************************************************************
- * Name: stm32l4_freerun_counter
+ * Name: stm32_freerun_counter
  *
  * Description:
  *   Read the counter register of the free-running timer.
@@ -152,7 +152,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32l4_freerun_initialize();
+ *           stm32_freerun_initialize();
  *   ts      The location in which to return the time from the free-running
  *           timer.
  *
@@ -162,7 +162,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                             struct timespec *ts)
 {
   uint64_t usec;
@@ -176,7 +176,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
   DEBUGASSERT(freerun && freerun->tch && ts);
 
   /* Temporarily disable the overflow counter.  NOTE that we have to be
-   * careful here because  stm32l4_tc_getpending() will reset the pending
+   * careful here because  stm32_tc_getpending() will reset the pending
    * interrupt status.  If we do not handle the overflow here then, it will
    * be lost.
    */
@@ -238,7 +238,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
 }
 
 /****************************************************************************
- * Name: stm32l4_freerun_uninitialize
+ * Name: stm32_freerun_uninitialize
  *
  * Description:
  *   Stop the free-running timer and release all resources that it uses.
@@ -246,7 +246,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32l4_freerun_initialize();
+ *           stm32_freerun_initialize();
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -254,7 +254,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun)
+int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
 {
   DEBUGASSERT(freerun && freerun->tch);
 
@@ -266,7 +266,7 @@ int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun)
 
   /* Free the timer */
 
-  stm32l4_tim_deinit(freerun->tch);
+  stm32_tim_deinit(freerun->tch);
   freerun->tch = NULL;
 
   return OK;

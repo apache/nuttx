@@ -483,13 +483,13 @@
 
 /* IOCTL Commands ***********************************************************
  *
- * Cmd: ANIOC_STM32L4_TRIGGER_REG           Arg:
- * Cmd: ANIOC_STM32L4_TRIGGER_INJ           Arg:
+ * Cmd: ANIOC_STM32_TRIGGER_REG           Arg:
+ * Cmd: ANIOC_STM32_TRIGGER_INJ           Arg:
  *
  */
 
-#define ANIOC_STM32L4_TRIGGER_REG           _ANIOC(AN_STM32L4_FIRST + 0)
-#define ANIOC_STM32L4_TRIGGER_INJ           _ANIOC(AN_STM32L4_FIRST + 1)
+#define ANIOC_STM32_TRIGGER_REG           _ANIOC(AN_STM32_FIRST + 0)
+#define ANIOC_STM32_TRIGGER_INJ           _ANIOC(AN_STM32_FIRST + 1)
 
 /****************************************************************************
  * Public Types
@@ -600,7 +600,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_adc_initialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *   Initialize the ADC.
@@ -616,9 +616,8 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32l4_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int nchannels);
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }

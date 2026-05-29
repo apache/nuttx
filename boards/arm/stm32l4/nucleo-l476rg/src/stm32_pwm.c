@@ -60,14 +60,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
  *
  ****************************************************************************/
 
-int stm32l4_pwm_setup(void)
+int stm32_pwm_setup(void)
 {
   static bool initialized = false;
   struct pwm_lowerhalf_s *pwm;
@@ -77,7 +77,7 @@ int stm32l4_pwm_setup(void)
 
   if (!initialized)
     {
-      /* Call stm32l4_pwminitialize() to get an instance of the PWM
+      /* Call stm32_pwminitialize() to get an instance of the PWM
        * interface
        */
 
@@ -89,7 +89,7 @@ int stm32l4_pwm_setup(void)
        */
 
 #if defined(CONFIG_STM32L4_TIM1_PWM)
-      pwm = stm32l4_pwminitialize(1);
+      pwm = stm32_pwminitialize(1);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -107,7 +107,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM2_PWM)
-      pwm = stm32l4_pwminitialize(2);
+      pwm = stm32_pwminitialize(2);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -125,7 +125,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM3_PWM)
-      pwm = stm32l4_pwminitialize(3);
+      pwm = stm32_pwminitialize(3);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -143,7 +143,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM4_PWM)
-      pwm = stm32l4_pwminitialize(4);
+      pwm = stm32_pwminitialize(4);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -161,7 +161,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM5_PWM)
-      pwm = stm32l4_pwminitialize(5);
+      pwm = stm32_pwminitialize(5);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -179,7 +179,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM8_PWM)
-      pwm = stm32l4_pwminitialize(8);
+      pwm = stm32_pwminitialize(8);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -197,7 +197,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM15_PWM)
-      pwm = stm32l4_pwminitialize(15);
+      pwm = stm32_pwminitialize(15);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -215,7 +215,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM16_PWM)
-      pwm = stm32l4_pwminitialize(16);
+      pwm = stm32_pwminitialize(16);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -233,7 +233,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_TIM17_PWM)
-      pwm = stm32l4_pwminitialize(17);
+      pwm = stm32_pwminitialize(17);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -251,7 +251,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_LPTIM1_PWM)
-      pwm = stm32l4_lp_pwminitialize(1);
+      pwm = stm32_lp_pwminitialize(1);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");
@@ -269,7 +269,7 @@ int stm32l4_pwm_setup(void)
 #endif
 
 #if defined(CONFIG_STM32L4_LPTIM2_PWM)
-      pwm = stm32l4_lp_pwminitialize(2);
+      pwm = stm32_lp_pwminitialize(2);
       if (!pwm)
         {
           aerr("ERROR: Failed to get the STM32L4 PWM lower half\n");

@@ -64,7 +64,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_mcoconfig
+ * Name: stm32_mcoconfig
  *
  * Description:
  *   Selects the clock source to output on MC pin (PA8) for stm32f10xxx.
@@ -82,7 +82,7 @@ extern "C"
  *
  ****************************************************************************/
 
-static inline void stm32l4_mcoconfig(uint32_t source)
+static inline void stm32_mcoconfig(uint32_t source)
 {
   uint32_t regval;
 
@@ -99,7 +99,7 @@ static inline void stm32l4_mcoconfig(uint32_t source)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -109,7 +109,7 @@ static inline void stm32l4_mcoconfig(uint32_t source)
  *
  *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -119,10 +119,10 @@ static inline void stm32l4_mcoconfig(uint32_t source)
  *
  ****************************************************************************/
 
-void stm32l4_clockconfig(void);
+void stm32_clockconfig(void);
 
 /****************************************************************************
- * Name: stm32l4_board_clockconfig
+ * Name: stm32_board_clockconfig
  *
  * Description:
  *   Any STM32L4 board may replace the "standard" board clock configuration
@@ -131,11 +131,11 @@ void stm32l4_clockconfig(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
-void stm32l4_board_clockconfig(void);
+void stm32_board_clockconfig(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -144,12 +144,12 @@ void stm32l4_board_clockconfig(void);
  *   re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32l4_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -160,11 +160,11 @@ void stm32l4_board_clockconfig(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32l4_clockenable(void);
+void stm32_clockenable(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_rcc_enablelse
+ * Name: stm32_rcc_enablelse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) Oscillator.
@@ -177,27 +177,27 @@ void stm32l4_clockenable(void);
  *
  ****************************************************************************/
 
-void stm32l4_rcc_enablelse(void);
+void stm32_rcc_enablelse(void);
 
 /****************************************************************************
- * Name: stm32l4_rcc_enablelsi
+ * Name: stm32_rcc_enablelsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32l4_rcc_enablelsi(void);
+void stm32_rcc_enablelsi(void);
 
 /****************************************************************************
- * Name: stm32l4_rcc_disablelsi
+ * Name: stm32_rcc_disablelsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32l4_rcc_disablelsi(void);
+void stm32_rcc_disablelsi(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

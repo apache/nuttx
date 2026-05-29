@@ -53,7 +53,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
-void stm32l4_board_clockconfig(void)
+void stm32_board_clockconfig(void)
 {
   uint32_t regval;
 
@@ -201,7 +201,7 @@ void stm32l4_board_clockconfig(void)
 
   /* Low speed internal clock source LSI */
 
-  stm32l4_rcc_enablelsi();
+  stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_USE_LSE)
@@ -212,8 +212,8 @@ void stm32l4_board_clockconfig(void)
    * be enabled: if the MCO1 pin selects LSE as source.
    */
 
-  stm32l4_pwr_enableclk(true);
-  stm32l4_rcc_enablelse();
+  stm32_pwr_enableclk(true);
+  stm32_rcc_enablelse();
 #endif
 }
 #endif

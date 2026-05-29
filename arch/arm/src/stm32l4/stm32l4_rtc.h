@@ -118,7 +118,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_rtc_is_initialized
+ * Name: stm32_rtc_is_initialized
  *
  * Description:
  *    Returns 'true' if the RTC has been initialized
@@ -133,10 +133,10 @@ extern "C"
  *
  ****************************************************************************/
 
-bool stm32l4_rtc_is_initialized(void);
+bool stm32_rtc_is_initialized(void);
 
 /****************************************************************************
- * Name: stm32l4_rtc_getdatetime_with_subseconds
+ * Name: stm32_rtc_getdatetime_with_subseconds
  *
  * Description:
  *   Get the current date and time from the date/time RTC.  This interface
@@ -157,12 +157,12 @@ bool stm32l4_rtc_is_initialized(void);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_HAVE_RTC_SUBSECONDS
-int stm32l4_rtc_getdatetime_with_subseconds(struct tm *tp,
+int stm32_rtc_getdatetime_with_subseconds(struct tm *tp,
                                             long *nsec);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_rtc_setdatetime
+ * Name: stm32_rtc_setdatetime
  *
  * Description:
  *   Set the RTC to the provided time. RTC implementations which provide
@@ -179,11 +179,11 @@ int stm32l4_rtc_getdatetime_with_subseconds(struct tm *tp,
 
 #ifdef CONFIG_RTC_DATETIME
 struct tm;
-int stm32l4_rtc_setdatetime(const struct tm *tp);
+int stm32_rtc_setdatetime(const struct tm *tp);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_rtc_havesettime
+ * Name: stm32_rtc_havesettime
  *
  * Description:
  *   Check if RTC time has been set.
@@ -193,11 +193,11 @@ int stm32l4_rtc_setdatetime(const struct tm *tp);
  *
  ****************************************************************************/
 
-bool stm32l4_rtc_havesettime(void);
+bool stm32_rtc_havesettime(void);
 
 #ifdef CONFIG_RTC_ALARM
 /****************************************************************************
- * Name: stm32l4_rtc_setalarm
+ * Name: stm32_rtc_setalarm
  *
  * Description:
  *   Set an alarm to an absolute time using associated hardware.
@@ -210,10 +210,10 @@ bool stm32l4_rtc_havesettime(void);
  *
  ****************************************************************************/
 
-int stm32l4_rtc_setalarm(struct alm_setalarm_s *alminfo);
+int stm32_rtc_setalarm(struct alm_setalarm_s *alminfo);
 
 /****************************************************************************
- * Name: stm32l4_rtc_rdalarm
+ * Name: stm32_rtc_rdalarm
  *
  * Description:
  *   Query an alarm configured in hardware.
@@ -226,10 +226,10 @@ int stm32l4_rtc_setalarm(struct alm_setalarm_s *alminfo);
  *
  ****************************************************************************/
 
-int stm32l4_rtc_rdalarm(struct alm_rdalarm_s *alminfo);
+int stm32_rtc_rdalarm(struct alm_rdalarm_s *alminfo);
 
 /****************************************************************************
- * Name: stm32l4_rtc_cancelalarm
+ * Name: stm32_rtc_cancelalarm
  *
  * Description:
  *   Cancel an alarm.
@@ -242,13 +242,13 @@ int stm32l4_rtc_rdalarm(struct alm_rdalarm_s *alminfo);
  *
  ****************************************************************************/
 
-int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid);
+int stm32_rtc_cancelalarm(enum alm_id_e alarmid);
 #endif /* CONFIG_RTC_ALARM */
 
 #ifdef CONFIG_RTC_PERIODIC
 
 /****************************************************************************
- * Name: stm32l4_rtc_setperiodic
+ * Name: stm32_rtc_setperiodic
  *
  * Description:
  *   Set a periodic RTC wakeup
@@ -262,11 +262,11 @@ int stm32l4_rtc_cancelalarm(enum alm_id_e alarmid);
  *
  ****************************************************************************/
 
-int stm32l4_rtc_setperiodic(const struct timespec *period,
+int stm32_rtc_setperiodic(const struct timespec *period,
                             wakeupcb_t callback);
 
 /****************************************************************************
- * Name: stm32l4_rtc_cancelperiodic
+ * Name: stm32_rtc_cancelperiodic
  *
  * Description:
  *   Cancel a periodic wakeup
@@ -278,11 +278,11 @@ int stm32l4_rtc_setperiodic(const struct timespec *period,
  *
  ****************************************************************************/
 
-int stm32l4_rtc_cancelperiodic(void);
+int stm32_rtc_cancelperiodic(void);
 #endif /* CONFIG_RTC_PERIODIC */
 
 /****************************************************************************
- * Name: stm32l4_rtc_lowerhalf
+ * Name: stm32_rtc_lowerhalf
  *
  * Description:
  *   Instantiate the RTC lower half driver for the STM32L4.  General usage:
@@ -291,7 +291,7 @@ int stm32l4_rtc_cancelperiodic(void);
  *     #include "stm32l4_rtc.h>
  *
  *     struct rtc_lowerhalf_s *lower;
- *     lower = stm32l4_rtc_lowerhalf();
+ *     lower = stm32_rtc_lowerhalf();
  *     rtc_initialize(0, lower);
  *
  * Input Parameters:
@@ -305,7 +305,7 @@ int stm32l4_rtc_cancelperiodic(void);
 
 #ifdef CONFIG_RTC_DRIVER
 struct rtc_lowerhalf_s;
-struct rtc_lowerhalf_s *stm32l4_rtc_lowerhalf(void);
+struct rtc_lowerhalf_s *stm32_rtc_lowerhalf(void);
 #endif
 
 #undef EXTERN

@@ -1204,19 +1204,19 @@ static int dfsdm_setup(struct adc_dev_s *dev)
 
       if (priv->dma != NULL)
         {
-          stm32l4_dmastop(priv->dma);
-          stm32l4_dmafree(priv->dma);
+          stm32_dmastop(priv->dma);
+          stm32_dmafree(priv->dma);
         }
 
-      priv->dma = stm32l4_dmachannel(priv->dmachan);
+      priv->dma = stm32_dmachannel(priv->dmachan);
 
-      stm32l4_dmasetup(priv->dma,
+      stm32_dmasetup(priv->dma,
                        priv->base + FLTRDATAR_OFFSET(priv),
                        (uint32_t)priv->dmabuffer,
                        priv->nchannels,
                        DFSDM_DMA_CONTROL_WORD);
 
-      stm32l4_dmastart(priv->dma, dfsdm_dmaconvcallback, dev, false);
+      stm32_dmastart(priv->dma, dfsdm_dmaconvcallback, dev, false);
     }
 #endif
 
@@ -1735,7 +1735,7 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_dfsdm_initialize
+ * Name: stm32_dfsdm_initialize
  *
  * Description:
  *   Initialize the DFSDM.
@@ -1750,9 +1750,8 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle,
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
-                                           const uint8_t *chanlist,
-                                           int cchannels)
+struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
+                                         int cchannels)
 {
   struct adc_dev_s   *dev;
   struct stm32_dev_s *priv;

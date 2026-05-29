@@ -39,7 +39,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32l4_pulsecount.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_tim.h"
 
 /* This module then only compiles if there is at least one enabled timer
@@ -66,7 +66,7 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
-#  define pulsecount_dumpgpio(p,m) stm32l4_dumpgpio(p,m)
+#  define pulsecount_dumpgpio(p,m) stm32_dumpgpio(p,m)
 #else
 #  define pulsecount_dumpgpio(p,m)
 #endif
@@ -77,7 +77,7 @@
 
 /* Pulsecount output configuration */
 
-struct stm32l4_out_s
+struct stm32_out_s
 {
   uint8_t  in_use:1;
   uint8_t  pol:1;
@@ -88,17 +88,17 @@ struct stm32l4_out_s
 
 /* Pulsecount channel configuration */
 
-struct stm32l4_chan_s
+struct stm32_chan_s
 {
   uint8_t              channel;
-  struct stm32l4_out_s out1;
+  struct stm32_out_s out1;
 };
 
 /* This structure represents the state of one pulsecount timer */
 
-struct stm32l4_tim_s
+struct stm32_tim_s
 {
-  struct stm32l4_chan_s  channel;
+  struct stm32_chan_s  channel;
   uint8_t                timid:5;
   uint8_t                timtype:3;
   uint8_t                t_dts:3;
@@ -113,10 +113,10 @@ struct stm32l4_tim_s
   void                  *handle;
 };
 
-struct stm32l4_pulsecount_s
+struct stm32_pulsecount_s
 {
   const struct pulsecount_ops_s *ops;
-  struct stm32l4_tim_s *timer;
+  struct stm32_tim_s *timer;
 };
 
 /****************************************************************************
@@ -125,10 +125,10 @@ struct stm32l4_pulsecount_s
 
 /* Register access */
 
-static uint16_t pulsecount_getreg(struct stm32l4_tim_s *priv, int offset);
-static void pulsecount_putreg(struct stm32l4_tim_s *priv, int offset,
+static uint16_t pulsecount_getreg(struct stm32_tim_s *priv, int offset);
+static void pulsecount_putreg(struct stm32_tim_s *priv, int offset,
                               uint16_t value);
-static void pulsecount_modifyreg(struct stm32l4_tim_s *priv, uint32_t offset,
+static void pulsecount_modifyreg(struct stm32_tim_s *priv, uint32_t offset,
                                  uint32_t clearbits, uint32_t setbits);
 
 #ifdef CONFIG_DEBUG_TIMER_INFO
@@ -146,11 +146,11 @@ static int pulsecount_duty_update(struct pulsecount_lowerhalf_s *dev,
                                   uint8_t channel, ub16_t duty);
 static int pulsecount_frequency_update(struct pulsecount_lowerhalf_s *dev,
                                        uint32_t frequency);
-static int pulsecount_timer_configure(struct stm32l4_tim_s *priv);
+static int pulsecount_timer_configure(struct stm32_tim_s *priv);
 static int pulsecount_channel_configure(struct pulsecount_lowerhalf_s *dev,
                                         uint8_t channel);
-static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
-                                       struct stm32l4_chan_s *chan);
+static int pulsecount_output_configure(struct stm32_tim_s *priv,
+                                       struct stm32_chan_s *chan);
 static int pulsecount_outputs_enable(struct pulsecount_lowerhalf_s *dev,
                                      uint16_t outputs, bool state);
 static void pulsecount_moe_enable(struct pulsecount_lowerhalf_s *dev,
@@ -191,7 +191,7 @@ static int pulsecount_ioctl(struct pulsecount_lowerhalf_s *dev,
 
 #ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
 
-static struct stm32l4_tim_s g_pulsecount1dev =
+static struct stm32_tim_s g_pulsecount1dev =
 {
   .channel =
   {
@@ -242,7 +242,7 @@ static struct stm32l4_tim_s g_pulsecount1dev =
 
 #ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
 
-static struct stm32l4_tim_s g_pulsecount8dev =
+static struct stm32_tim_s g_pulsecount8dev =
 {
   .channel =
   {
@@ -301,7 +301,7 @@ static const struct pulsecount_ops_s g_pulsecountops =
 };
 
 #ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
-static struct stm32l4_pulsecount_s g_pulsecount1lower =
+static struct stm32_pulsecount_s g_pulsecount1lower =
 {
   .ops = &g_pulsecountops,
   .timer = &g_pulsecount1dev,
@@ -309,7 +309,7 @@ static struct stm32l4_pulsecount_s g_pulsecount1lower =
 #endif
 
 #ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
-static struct stm32l4_pulsecount_s g_pulsecount8lower =
+static struct stm32_pulsecount_s g_pulsecount8lower =
 {
   .ops = &g_pulsecountops,
   .timer = &g_pulsecount8dev,
@@ -335,7 +335,7 @@ static struct stm32l4_pulsecount_s g_pulsecount8lower =
  *
  ****************************************************************************/
 
-static uint16_t pulsecount_getreg(struct stm32l4_tim_s *priv, int offset)
+static uint16_t pulsecount_getreg(struct stm32_tim_s *priv, int offset)
 {
   return getreg16(priv->base + offset);
 }
@@ -355,7 +355,7 @@ static uint16_t pulsecount_getreg(struct stm32l4_tim_s *priv, int offset)
  *
  ****************************************************************************/
 
-static void pulsecount_putreg(struct stm32l4_tim_s *priv, int offset,
+static void pulsecount_putreg(struct stm32_tim_s *priv, int offset,
                               uint16_t value)
 {
   putreg16(value, priv->base + offset);
@@ -378,7 +378,7 @@ static void pulsecount_putreg(struct stm32l4_tim_s *priv, int offset,
  *
  ****************************************************************************/
 
-static void pulsecount_modifyreg(struct stm32l4_tim_s *priv, uint32_t offset,
+static void pulsecount_modifyreg(struct stm32_tim_s *priv, uint32_t offset,
                                  uint32_t clearbits, uint32_t setbits)
 {
   modifyreg16(priv->base + offset, (uint16_t)clearbits,
@@ -403,7 +403,7 @@ static void pulsecount_modifyreg(struct stm32l4_tim_s *priv, uint32_t offset,
 static void pulsecount_dumpregs(struct pulsecount_lowerhalf_s *dev,
                                 const char *msg)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
 
   _info("%s:\n", msg);
   _info("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
@@ -441,7 +441,7 @@ static void pulsecount_dumpregs(struct pulsecount_lowerhalf_s *dev,
 static int pulsecount_ccr_update(struct pulsecount_lowerhalf_s *dev,
                                  uint8_t index, uint32_t ccr)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t offset = 0;
 
   /* CCR channel indices are one-based to match timer channel numbers. */
@@ -505,7 +505,7 @@ static int pulsecount_ccr_update(struct pulsecount_lowerhalf_s *dev,
 static int pulsecount_duty_update(struct pulsecount_lowerhalf_s *dev,
                                   uint8_t channel, ub16_t duty)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t reload = 0;
   uint32_t ccr    = 0;
 
@@ -547,7 +547,7 @@ static int pulsecount_duty_update(struct pulsecount_lowerhalf_s *dev,
 static int pulsecount_frequency_update(struct pulsecount_lowerhalf_s *dev,
                                        uint32_t frequency)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t reload    = 0;
   uint32_t timclk    = 0;
   uint32_t prescaler = 0;
@@ -632,7 +632,7 @@ static int pulsecount_frequency_update(struct pulsecount_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pulsecount_timer_configure(struct stm32l4_tim_s *priv)
+static int pulsecount_timer_configure(struct stm32_tim_s *priv)
 {
   uint16_t cr1 = 0;
 
@@ -669,7 +669,7 @@ static int pulsecount_timer_configure(struct stm32l4_tim_s *priv)
 static int pulsecount_channel_configure(struct pulsecount_lowerhalf_s *dev,
                                         uint8_t channel)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t chanmode = 0;
   uint32_t ocmode   = 0;
   uint32_t ccmr     = 0;
@@ -765,7 +765,7 @@ errout:
  *
  ****************************************************************************/
 
-static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
+static int pulsecount_output_configure(struct stm32_tim_s *priv,
                                        uint8_t channel)
 {
   uint32_t cr2  = 0;
@@ -824,7 +824,7 @@ static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
  *
  * Input Parameters:
  *   dev     - A reference to the lower half driver state structure
- *   outputs - outputs to set (look at enum stm32l4_pulsecount_chan_e)
+ *   outputs - outputs to set (look at enum stm32_pulsecount_chan_e)
  *   state   - Enable/disable operation
  *
  ****************************************************************************/
@@ -832,7 +832,7 @@ static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
 static int pulsecount_outputs_enable(struct pulsecount_lowerhalf_s *dev,
                                      uint16_t outputs, bool state)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t ccer   = 0;
   uint32_t regval = 0;
 
@@ -877,7 +877,7 @@ static int pulsecount_outputs_enable(struct pulsecount_lowerhalf_s *dev,
 static void pulsecount_moe_enable(struct pulsecount_lowerhalf_s *dev,
                                   bool enable)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
 
   if (enable)
     {
@@ -898,7 +898,7 @@ static void pulsecount_moe_enable(struct pulsecount_lowerhalf_s *dev,
  ****************************************************************************/
 
 static uint16_t
-pulsecount_outputs_from_channels(struct stm32l4_tim_s *priv,
+pulsecount_outputs_from_channels(struct stm32_tim_s *priv,
                                  uint8_t selected)
 {
   uint16_t outputs = 0;
@@ -925,7 +925,7 @@ pulsecount_outputs_from_channels(struct stm32l4_tim_s *priv,
 
 static int pulsecount_configure(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint16_t outputs = 0;
   int      ret     = OK;
 
@@ -991,7 +991,7 @@ errout:
 static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
                             const struct pulsecount_info_s *info)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   ub16_t    duty    = 0;
   uint8_t   channel = 0;
   uint16_t  outputs = 0;
@@ -1139,7 +1139,7 @@ errout:
 
 static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint16_t regval;
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
@@ -1297,7 +1297,7 @@ static uint8_t pulsecount_count(uint32_t count)
  *
  ****************************************************************************/
 
-static int pulsecount_setapbclock(struct stm32l4_tim_s *priv,
+static int pulsecount_setapbclock(struct stm32_tim_s *priv,
                                   bool on)
 {
   uint32_t en_bit;
@@ -1371,7 +1371,7 @@ errout:
 
 static int pulsecount_ll_setup(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t pincfg;
 
   _info("TIM%u\n", priv->timid);
@@ -1389,7 +1389,7 @@ static int pulsecount_ll_setup(struct pulsecount_lowerhalf_s *dev)
       pincfg = priv->channel.out1.pincfg;
       _info("pincfg: %08" PRIx32 "\n", pincfg);
 
-      stm32l4_configgpio(pincfg);
+      stm32_configgpio(pincfg);
       pulsecount_dumpgpio(pincfg, "pulsecount setup");
     }
 
@@ -1414,7 +1414,7 @@ static int pulsecount_ll_setup(struct pulsecount_lowerhalf_s *dev)
 
 static int pulsecount_ll_shutdown(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t pincfg = 0;
   int      ret    = OK;
 
@@ -1442,7 +1442,7 @@ static int pulsecount_ll_shutdown(struct pulsecount_lowerhalf_s *dev)
       pincfg &= (GPIO_PORT_MASK | GPIO_PIN_MASK);
       pincfg |= GPIO_INPUT | GPIO_FLOAT;
 
-      stm32l4_configgpio(pincfg);
+      stm32_configgpio(pincfg);
     }
 
 errout:
@@ -1470,7 +1470,7 @@ errout:
 
 static int pulsecount_ll_stop(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
   uint32_t resetbit = 0;
   uint32_t regaddr;
   uint32_t regval;
@@ -1547,7 +1547,7 @@ static int pulsecount_ll_ioctl(struct pulsecount_lowerhalf_s *dev, int cmd,
                                unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_TIMER_INFO
-  struct stm32l4_tim_s *priv = (struct stm32l4_tim_s *)dev;
+  struct stm32_tim_s *priv = (struct stm32_tim_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
@@ -1558,7 +1558,7 @@ static int pulsecount_ll_ioctl(struct pulsecount_lowerhalf_s *dev, int cmd,
 
 static int pulsecount_setup(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_pulsecount_s *pulse = (struct stm32l4_pulsecount_s *)dev;
+  struct stm32_pulsecount_s *pulse = (struct stm32_pulsecount_s *)dev;
   int ret;
 
   ret = pulsecount_ll_setup((struct pulsecount_lowerhalf_s *)pulse->timer);
@@ -1572,7 +1572,7 @@ static int pulsecount_setup(struct pulsecount_lowerhalf_s *dev)
 
 static int pulsecount_shutdown(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_pulsecount_s *pulse = (struct stm32l4_pulsecount_s *)dev;
+  struct stm32_pulsecount_s *pulse = (struct stm32_pulsecount_s *)dev;
   return pulsecount_ll_shutdown((struct pulsecount_lowerhalf_s *)
                                 pulse->timer);
 }
@@ -1581,8 +1581,8 @@ static int pulsecount_start(struct pulsecount_lowerhalf_s *dev,
                             const struct pulsecount_info_s *info,
                             void *handle)
 {
-  struct stm32l4_pulsecount_s *pulse = (struct stm32l4_pulsecount_s *)dev;
-  struct stm32l4_tim_s *priv = pulse->timer;
+  struct stm32_pulsecount_s *pulse = (struct stm32_pulsecount_s *)dev;
+  struct stm32_tim_s *priv = pulse->timer;
 
   if (info->count > 0)
     {
@@ -1600,14 +1600,14 @@ static int pulsecount_start(struct pulsecount_lowerhalf_s *dev,
 
 static int pulsecount_stop(struct pulsecount_lowerhalf_s *dev)
 {
-  struct stm32l4_pulsecount_s *pulse = (struct stm32l4_pulsecount_s *)dev;
+  struct stm32_pulsecount_s *pulse = (struct stm32_pulsecount_s *)dev;
   return pulsecount_ll_stop((struct pulsecount_lowerhalf_s *)pulse->timer);
 }
 
 static int pulsecount_ioctl(struct pulsecount_lowerhalf_s *dev,
                             int cmd, unsigned long arg)
 {
-  struct stm32l4_pulsecount_s *pulse = (struct stm32l4_pulsecount_s *)dev;
+  struct stm32_pulsecount_s *pulse = (struct stm32_pulsecount_s *)dev;
   return pulsecount_ll_ioctl((struct pulsecount_lowerhalf_s *)pulse->timer,
                              cmd, arg);
 }
@@ -1616,9 +1616,9 @@ static int pulsecount_ioctl(struct pulsecount_lowerhalf_s *dev,
  * Public Functions
  ****************************************************************************/
 
-struct pulsecount_lowerhalf_s *stm32l4_pulsecountinitialize(int timer)
+struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer)
 {
-  struct stm32l4_pulsecount_s *lower = NULL;
+  struct stm32_pulsecount_s *lower = NULL;
 
   _info("TIM%u\n", timer);
 

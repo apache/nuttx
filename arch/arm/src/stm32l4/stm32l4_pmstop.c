@@ -88,7 +88,7 @@ static int do_stop(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_pmstop
+ * Name: stm32_pmstop
  *
  * Description:
  *   Enter STOP mode.
@@ -106,7 +106,7 @@ static int do_stop(void)
  *
  ****************************************************************************/
 
-int stm32l4_pmstop(bool lpds)
+int stm32_pmstop(bool lpds)
 {
   uint32_t regval;
 
@@ -130,7 +130,7 @@ int stm32l4_pmstop(bool lpds)
 }
 
 /****************************************************************************
- * Name: stm32l4_pmstop2
+ * Name: stm32_pmstop2
  *
  * Description:
  *   Enter STOP2 mode.
@@ -145,7 +145,7 @@ int stm32l4_pmstop(bool lpds)
  *
  ****************************************************************************/
 
-int stm32l4_pmstop2(void)
+int stm32_pmstop2(void)
 {
   uint32_t regval;
 

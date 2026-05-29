@@ -659,7 +659,7 @@ static inline void rcc_enableccip(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
@@ -669,7 +669,7 @@ static inline void rcc_enableccip(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG
-static void stm32l4_stdclockconfig(void)
+static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
@@ -793,7 +793,7 @@ static void stm32l4_stdclockconfig(void)
     }
 #else
 
-#  error stm32l4_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
 
 #endif
 
@@ -812,7 +812,7 @@ static void stm32l4_stdclockconfig(void)
 
           /* TODO: this seems to hang on STM32L476, at least for MSI@48MHz */
 #if 0
-          stm32l4_pwr_enableclk(true);
+          stm32_pwr_enableclk(true);
           stm32_pwr_setvos(1);
 #endif
         }
@@ -822,7 +822,7 @@ static void stm32l4_stdclockconfig(void)
            * frequencies below 24 MHz
            */
 
-          stm32l4_pwr_enableclk(true);
+          stm32_pwr_enableclk(true);
           stm32_pwr_setvos(2);
         }
 
@@ -1002,7 +1002,7 @@ static void stm32l4_stdclockconfig(void)
 #if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32l4_rcc_enablelsi();
+      stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_BOARD_USEHSI)
@@ -1025,7 +1025,7 @@ static void stm32l4_stdclockconfig(void)
        * to alter the LSE parameters.
        */
 
-      stm32l4_pwr_enableclk(true);
+      stm32_pwr_enableclk(true);
 
       /* XXX other LSE settings must be made before turning on the oscillator
        * and we need to ensure it is first off before doing so.
@@ -1036,7 +1036,7 @@ static void stm32l4_stdclockconfig(void)
        * this for automatically trimming MSI, etc.
        */
 
-      stm32l4_rcc_enablelse();
+      stm32_rcc_enablelse();
 
 #  if defined(STM32_BOARD_USEMSI)
       /* Now that LSE is up, auto trim the MSI */
@@ -1066,7 +1066,7 @@ static inline void rcc_enableperipherals(void)
 #ifdef STM32_USE_HSI48
   /* Enable HSI48 clocking to support USB transfers or RNG */
 
-  stm32l4_enable_hsi48(STM32_HSI48_SYNCSRC);
+  stm32_enable_hsi48(STM32_HSI48_SYNCSRC);
 #endif
 }
 

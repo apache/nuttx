@@ -48,6 +48,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-void stm32l4_get_uniqueid(uint8_t uniqueid[12]);
+void stm32_get_uniqueid(uint8_t uniqueid[12]);
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_UID_H */

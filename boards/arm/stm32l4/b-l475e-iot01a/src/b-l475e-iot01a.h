@@ -133,7 +133,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_bringup
+ * Name: stm32_bringup
  *
  * Description:
  *   This function initializes and configures all on-board features
@@ -142,11 +142,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int stm32l4_bringup(void);
+int stm32_bringup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spidev_initialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE and
@@ -156,7 +156,7 @@ int stm32l4_bringup(void);
 
 #if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
     defined(CONFIG_STM32L4_SPI3)
-void weak_function stm32l4_spidev_initialize(void);
+void weak_function stm32_spidev_initialize(void);
 #endif
 
 /****************************************************************************
@@ -175,11 +175,11 @@ void weak_function stm32l4_spidev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32l4_timer_driver_setup(void);
+int stm32_timer_driver_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spirit_initialize
+ * Name: stm32_spirit_initialize
  *
  * Description:
  *   Initialize the Spirit device.
@@ -191,7 +191,7 @@ int stm32l4_timer_driver_setup(void);
  ****************************************************************************/
 
 #ifdef HAVE_SPSGRF
-int stm32l4_spirit_initialize(void);
+int stm32_spirit_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

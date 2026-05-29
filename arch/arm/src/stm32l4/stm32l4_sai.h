@@ -71,7 +71,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_sai_initialize
+ * Name: stm32_sai_initialize
  *
  * Description:
  *   Initialize the selected SAI block
@@ -84,7 +84,7 @@ extern "C"
  *
  ****************************************************************************/
 
-struct i2s_dev_s *stm32l4_sai_initialize(int intf);
+struct i2s_dev_s *stm32_sai_initialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

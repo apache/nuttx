@@ -2074,7 +2074,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case ANIOC_STM32L4_TRIGGER_REG:
+      case ANIOC_STM32_TRIGGER_REG:
 
         /* Start regular conversion if regular channels configured */
 
@@ -2086,7 +2086,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
         break;
 
 #ifdef ADC_HAVE_INJECTED
-      case ANIOC_STM32L4_TRIGGER_INJ:
+      case ANIOC_STM32_TRIGGER_INJ:
 
         /* Start injected conversion if injected channels configured */
 
@@ -2354,20 +2354,20 @@ static void adc_dma_start(struct adc_dev_s *dev)
 
   if (priv->dma != NULL)
     {
-      stm32l4_dmastop(priv->dma);
-      stm32l4_dmafree(priv->dma);
+      stm32_dmastop(priv->dma);
+      stm32_dmafree(priv->dma);
     }
 
-  priv->dma = stm32l4_dmachannel(priv->dmachan);
+  priv->dma = stm32_dmachannel(priv->dmachan);
 
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
-  stm32l4_dmasetup(priv->dma,
+  stm32_dmasetup(priv->dma,
                    priv->base + STM32_ADC_DR_OFFSET,
                    (uint32_t)priv->r_dmabuffer,
                    priv->rnchannels * priv->dmabatch,
                    ADC_DMA_CONTROL_WORD);
 
-  stm32l4_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
+  stm32_dmastart(priv->dma, adc_dmaconvcallback, dev, false);
 #endif
 }
 
@@ -2544,7 +2544,7 @@ static int adc_regbufregister(struct stm32_adc_dev_s *dev,
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
-  stm32l4_dmasetup(priv->dma,
+  stm32_dmasetup(priv->dma,
                  priv->base + STM32_ADC_DR_OFFSET,
                  (uint32_t)buffer,
                  len,
@@ -2552,7 +2552,7 @@ static int adc_regbufregister(struct stm32_adc_dev_s *dev,
 
   /* No DMA callback */
 
-  stm32l4_dmastart(priv->dma, NULL, dev, false);
+  stm32_dmastart(priv->dma, NULL, dev, false);
 
   return OK;
 }
@@ -2571,19 +2571,19 @@ static void adc_llops_dma_start(struct stm32_adc_dev_s *adc,
 
   if (dev->dma != NULL)
     {
-      stm32l4_dmastop(dev->dma);
-      stm32l4_dmafree(dev->dma);
+      stm32_dmastop(dev->dma);
+      stm32_dmafree(dev->dma);
     }
 
-  dev->dma = stm32l4_dmachannel(dev->dmachan);
+  dev->dma = stm32_dmachannel(dev->dmachan);
 
-  stm32l4_dmasetup(dev->dma,
+  stm32_dmasetup(dev->dma,
                    dev->base + STM32_ADC_DR_OFFSET,
                    (uint32_t)buffer,
                    len,
                    ADC_DMA_CONTROL_WORD);
 
-  stm32l4_dmastart(dev->dma, callback, dev, false);
+  stm32_dmastart(dev->dma, callback, dev, false);
 }
 
 /****************************************************************************
@@ -2598,8 +2598,8 @@ static void adc_llops_dma_stop(struct stm32_adc_dev_s *adc)
 
   if (dev->dma != NULL)
     {
-      stm32l4_dmastop(dev->dma);
-      stm32l4_dmafree(dev->dma);
+      stm32_dmastop(dev->dma);
+      stm32_dmafree(dev->dma);
     }
 }
 
@@ -2678,7 +2678,7 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_adc_initialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *   Initialize the ADC.
@@ -2725,9 +2725,8 @@ static void adc_llops_dumpregs(struct stm32_adc_dev_s *dev)
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32l4_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int cchannels)
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int cchannels)
 {
   struct adc_dev_s   *dev;
   struct stm32_dev_s *priv;

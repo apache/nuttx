@@ -50,7 +50,7 @@
  * Public Functions
  ****************************************************************************/
 
-void stm32l4_get_uniqueid(uint8_t uniqueid[12])
+void stm32_get_uniqueid(uint8_t uniqueid[12])
 {
   int i;
 

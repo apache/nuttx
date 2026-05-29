@@ -138,9 +138,9 @@
 
 struct spwm_s
 {
-  struct stm32l4_pwm_dev_s *pwm;
+  struct stm32_pwm_dev_s *pwm;
 #ifdef CONFIG_NUCLEOL432KC_SPWM_USE_TIM1
-  struct stm32l4_tim_dev_s *tim;
+  struct stm32_tim_dev_s *tim;
 #endif
   float waveform[SAMPLES_NUM];               /* Waveform samples */
   float phase_step;                          /* Waveform phase step */
@@ -314,8 +314,8 @@ static int spwm_stop(struct spwm_s *spwm)
 static void tim6_handler(void)
 {
   struct spwm_s *spwm = &g_spwm;
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_tim_dev_s *tim = spwm->tim;
   uint8_t i = 0;
 
   for (i = 0; i < spwm->phases; i += 1)
@@ -345,13 +345,13 @@ static void tim6_handler(void)
 
 static int spwm_tim6_setup(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = NULL;
+  struct stm32_tim_dev_s *tim = NULL;
   uint64_t freq = 0;
   int ret = OK;
 
   /* Get TIM6 interface */
 
-  tim = stm32l4_tim_init(6);
+  tim = stm32_tim_init(6);
   if (tim == NULL)
     {
       printf("ERROR: Failed to get TIM6 interface\n");
@@ -403,7 +403,7 @@ errout:
 
 static int spwm_tim6_start(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
@@ -419,7 +419,7 @@ static int spwm_tim6_start(struct spwm_s *spwm)
 
 static int spwm_tim6_stop(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Disable the timer interrupt at the NVIC and at TIM6 */
 
@@ -435,12 +435,12 @@ static int spwm_tim6_stop(struct spwm_s *spwm)
 
 static int spwm_tim1_setup(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = NULL;
+  struct stm32_pwm_dev_s *pwm = NULL;
   int ret = OK;
 
   /* Get TIM1 PWM interface */
 
-  pwm = (struct stm32l4_pwm_dev_s *)stm32l4_pwminitialize(1);
+  pwm = (struct stm32_pwm_dev_s *)stm32_pwminitialize(1);
   if (pwm == NULL)
     {
       printf("ERROR: Failed to get TIM1 PWM interface\n");
@@ -486,7 +486,7 @@ errout:
 
 static int spwm_tim1_start(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
   int i = 0;
 
@@ -514,7 +514,7 @@ static int spwm_tim1_start(struct spwm_s *spwm)
 
 static int spwm_tim1_stop(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
   int i = 0;
 

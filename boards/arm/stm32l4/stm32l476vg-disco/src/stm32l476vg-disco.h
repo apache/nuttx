@@ -274,13 +274,13 @@ int stm32_bringup(void);
 void stm32_spiinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void);
+void stm32_usbinitialize(void);
 
 #endif /* __BOARDS_ARM_STM32L4_STM32L476VG_DISCO_SRC_STM32L476VG_DISCO_H */

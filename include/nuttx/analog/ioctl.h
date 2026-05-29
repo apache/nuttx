@@ -93,12 +93,12 @@
 
 /* See arch/arm/src/stm32l4/stm32l4_adc.h */
 
-#define AN_STM32L4_FIRST (AN_ADS7828_FIRST + AN_ADS7828_NCMDS)
-#define AN_STM32L4_NCMDS 2
+#define AN_STM32_FIRST (AN_ADS7828_FIRST + AN_ADS7828_NCMDS)
+#define AN_STM32_NCMDS 2
 
 /* See include/nuttx/analog/max1161x.h */
 
-#define AN_MAX1161X_FIRST (AN_STM32L4_FIRST + AN_STM32L4_NCMDS)
+#define AN_MAX1161X_FIRST (AN_STM32_FIRST + AN_STM32_NCMDS)
 #define AN_MAX1161X_NCMDS 8
 
 /* See include/nuttx/analog/mcp48xx.h */
