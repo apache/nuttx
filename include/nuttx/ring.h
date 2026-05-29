@@ -214,7 +214,7 @@
   {                                                      \
     struct ring_s base;                                  \
     type          buf[cap];                              \
-  } name
+  } name aligned_data(CACHELINE_SIZE)
 
 /* RING_DEFINE - define and initialise a ring (no init call needed).
  *
@@ -435,7 +435,18 @@
  * Public Types
  ****************************************************************************/
 
-struct aligned_data(CACHELINE_SIZE) ring_s
+/* NOTE: The cache-line isolation between the metadata / producer /
+ * consumer regions is provided by the explicit pad0/pad1/pad2 arrays,
+ * not by a type-level aligned attribute.  The aligned_data(CACHELINE_SIZE)
+ * attribute is applied at each declaration/definition site instead (see
+ * RING_DECLARE and ring_alloc), so that it binds to the
+ * variable rather than the type.  Binding it to the type makes some
+ * compilers (e.g. TASKING) propagate the alignment to every member,
+ * inflating sizeof(struct ring_s) and breaking the cross-core shared
+ * memory layout.
+ */
+
+struct ring_s
 {
   /* Read-only metadata - cache-line aligned */
 
@@ -603,7 +614,7 @@ static inline_function FAR struct ring_s *ring_alloc(uint32_t cap,
       return NULL;
     }
 
-  r = lib_malloc(sizeof(*r) + cap * elem_size);
+  r = lib_memalign(CACHELINE_SIZE, sizeof(*r) + cap * elem_size);
   if (r == NULL)
     {
       return NULL;
