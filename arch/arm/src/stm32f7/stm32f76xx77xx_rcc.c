@@ -1040,14 +1040,14 @@ static inline void rcc_enableperipherals(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32f7x9_rcc_dsisrcphy
+ * Name: stm32_rcc_dsisrcphy
  *
  * Description:
  *   Set DSI clock source to DSI PHY
  *
  ****************************************************************************/
 
-void stm32f7x9_rcc_dsisrcphy(void)
+void stm32_rcc_dsisrcphy(void)
 {
   uint32_t regval;
   regval  = getreg32(STM32_RCC_DCKCFGR2);
@@ -1058,14 +1058,14 @@ void stm32f7x9_rcc_dsisrcphy(void)
 }
 
 /****************************************************************************
- * Name: stm32f7x9_rcc_dsisrcpllr
+ * Name: stm32_rcc_dsisrcpllr
  *
  * Description:
  *   Set DSI clock source to PLLR
  *
  ****************************************************************************/
 
-void stm32f7x9_rcc_dsisrcpllr(void)
+void stm32_rcc_dsisrcpllr(void)
 {
   uint32_t regval;
   regval  = getreg32(STM32_RCC_DCKCFGR2);

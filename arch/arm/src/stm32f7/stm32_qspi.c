@@ -2489,7 +2489,7 @@ static int qspi_hw_initialize(struct stm32f7_qspidev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32f7_qspi_initialize
+ * Name: stm32_qspi_initialize
  *
  * Description:
  *   Initialize the selected QSPI port in master mode
@@ -2502,7 +2502,7 @@ static int qspi_hw_initialize(struct stm32f7_qspidev_s *priv)
  *
  ****************************************************************************/
 
-struct qspi_dev_s *stm32f7_qspi_initialize(int intf)
+struct qspi_dev_s *stm32_qspi_initialize(int intf)
 {
   struct stm32f7_qspidev_s *priv;
   uint32_t regval;
@@ -2625,7 +2625,7 @@ errout_with_dmach:
 }
 
 /****************************************************************************
- * Name: stm32f7_qspi_enter_memorymapped
+ * Name: stm32_qspi_enter_memorymapped
  *
  * Description:
  *   Put the QSPI device into memory mapped mode
@@ -2639,9 +2639,9 @@ errout_with_dmach:
  *
  ****************************************************************************/
 
-void stm32f7_qspi_enter_memorymapped(struct qspi_dev_s *dev,
-                                     const struct qspi_meminfo_s *meminfo,
-                                     uint32_t lpto)
+void stm32_qspi_enter_memorymapped(struct qspi_dev_s *dev,
+                                   const struct qspi_meminfo_s *meminfo,
+                                   uint32_t lpto)
 {
   struct stm32f7_qspidev_s *priv = (struct stm32f7_qspidev_s *)dev;
   uint32_t regval;
@@ -2717,7 +2717,7 @@ void stm32f7_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: stm32f7_qspi_exit_memorymapped
+ * Name: stm32_qspi_exit_memorymapped
  *
  * Description:
  *   Take the QSPI device out of memory mapped mode
@@ -2730,7 +2730,7 @@ void stm32f7_qspi_enter_memorymapped(struct qspi_dev_s *dev,
  *
  ****************************************************************************/
 
-void stm32f7_qspi_exit_memorymapped(struct qspi_dev_s *dev)
+void stm32_qspi_exit_memorymapped(struct qspi_dev_s *dev)
 {
   struct stm32f7_qspidev_s *priv = (struct stm32f7_qspidev_s *)dev;
 
