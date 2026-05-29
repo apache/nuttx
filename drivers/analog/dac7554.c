@@ -248,10 +248,23 @@ FAR struct dac_dev_s *dac7554_initialize(FAR struct spi_dev_s *spi,
   /* Initialize the DAC7554 device structure */
 
   priv = kmm_malloc(sizeof(struct dac7554_dev_s));
+  if (priv == NULL)
+    {
+      aerr("ERROR: Failed to allocate dac7554_dev_s instance\n");
+      return NULL;
+    }
+
   priv->spi = spi;
   priv->spidev = spidev;
 
   g_dacdev = kmm_malloc(sizeof(struct dac_dev_s));
+  if (g_dacdev == NULL)
+    {
+      aerr("ERROR: Failed to allocate dac_dev_s instance\n");
+      kmm_free(priv);
+      return NULL;
+    }
+
   g_dacdev->ad_ops = &g_dacops;
   g_dacdev->ad_priv = priv;
 
