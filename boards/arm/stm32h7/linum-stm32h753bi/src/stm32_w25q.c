@@ -79,7 +79,7 @@ int stm32_w25qxxx_setup(void)
   struct mtd_dev_s *mtd_dev;
   int ret = -1;
 
-  qspi_dev = stm32h7_qspi_initialize(0);
+  qspi_dev = stm32_qspi_initialize(0);
   if (!qspi_dev)
     {
       _err("ERROR: Failed to initialize W25 minor %d: %d\n",

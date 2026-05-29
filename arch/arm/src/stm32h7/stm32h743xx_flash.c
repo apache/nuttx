@@ -508,14 +508,14 @@ static void stm32h7_save_flashopt(struct stm32h7_flash_priv_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h7_flash_unlock
+ * Name: stm32_flash_unlock
  *
  * Description:
  *   Unlocks a bank
  *
  ****************************************************************************/
 
-int stm32h7_flash_unlock(size_t addr)
+int stm32_flash_unlock(size_t addr)
 {
   int ret = -ENODEV;
   struct stm32h7_flash_priv_s *priv = stm32h7_flash_bank(addr);
@@ -536,14 +536,14 @@ int stm32h7_flash_unlock(size_t addr)
 }
 
 /****************************************************************************
- * Name: stm32h7_flash_lock
+ * Name: stm32_flash_lock
  *
  * Description:
  *   Locks a bank
  *
  ****************************************************************************/
 
-int stm32h7_flash_lock(size_t addr)
+int stm32_flash_lock(size_t addr)
 {
   int ret = -ENODEV;
   struct stm32h7_flash_priv_s *priv = stm32h7_flash_bank(addr);
@@ -564,14 +564,14 @@ int stm32h7_flash_lock(size_t addr)
 }
 
 /****************************************************************************
- * Name: stm32h7_flash_writeprotect
+ * Name: stm32_flash_writeprotect
  *
  * Description:
  *   Enable or disable the write protection of a flash sector.
  *
  ****************************************************************************/
 
-int stm32h7_flash_writeprotect(size_t block, bool enabled)
+int stm32_flash_writeprotect(size_t block, bool enabled)
 {
   struct stm32h7_flash_priv_s *priv;
   uint32_t setbits   = 0;
@@ -605,14 +605,14 @@ int stm32h7_flash_writeprotect(size_t block, bool enabled)
 }
 
 /****************************************************************************
- * Name: stm32h7_flash_getopt
+ * Name: stm32_flash_getopt
  *
  * Description:
  *   Returns the current flash option bytes from the FLASH_OPTSR_CR register.
  *
  ****************************************************************************/
 
-uint32_t stm32h7_flash_getopt(void)
+uint32_t stm32_flash_getopt(void)
 {
   struct stm32h7_flash_priv_s *priv;
   priv = stm32h7_flash_bank(STM32_FLASH_BANK1);
@@ -625,14 +625,14 @@ uint32_t stm32h7_flash_getopt(void)
 }
 
 /****************************************************************************
- * Name: stm32h7_flash_optmodify
+ * Name: stm32_flash_optmodify
  *
  * Description:
  *   Modifies the current flash option bytes, given bits to set and clear.
  *
  ****************************************************************************/
 
-void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
+void stm32_flash_optmodify(uint32_t clear, uint32_t set)
 {
   struct stm32h7_flash_priv_s *priv;
   bool was_locked;
@@ -652,7 +652,7 @@ void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
 }
 
 /****************************************************************************
- * Name: stm32h7_flash_swapbanks
+ * Name: stm32_flash_swapbanks
  *
  * Description:
  *   Swaps banks 1 and 2 in the processor's memory map.  Takes effect
@@ -660,16 +660,16 @@ void stm32h7_flash_optmodify(uint32_t clear, uint32_t set)
  *
  ****************************************************************************/
 
-void stm32h7_flash_swapbanks(void)
+void stm32_flash_swapbanks(void)
 {
-  uint32_t opts = stm32h7_flash_getopt();
+  uint32_t opts = stm32_flash_getopt();
   if (opts & FLASH_OPTCR_SWAPBANK)
     {
-      stm32h7_flash_optmodify(FLASH_OPTCR_SWAPBANK, 0);
+      stm32_flash_optmodify(FLASH_OPTCR_SWAPBANK, 0);
     }
   else
     {
-      stm32h7_flash_optmodify(0, FLASH_OPTCR_SWAPBANK);
+      stm32_flash_optmodify(0, FLASH_OPTCR_SWAPBANK);
     }
 }
 

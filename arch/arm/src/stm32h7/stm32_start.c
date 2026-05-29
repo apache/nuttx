@@ -195,7 +195,7 @@ void __start(void)
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
   /* Wait for CM7 initialization done */
 
-  stm32h7_waitfor_cm7();
+  stm32_waitfor_cm7();
 #endif
 
   /* If enabled reset the MPU */
@@ -309,7 +309,7 @@ void __start(void)
 
   /* Start CM4 core after clock configuration is done */
 
-  stm32h7_start_cm4();
+  stm32_start_cm4();
 #endif
 
   nx_start();
