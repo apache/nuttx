@@ -60,3 +60,22 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
   return 0;
 }
 #endif
+
+#if CONFIG_FORTIFY_SOURCE
+#undef bcmp
+int bcmp(FAR const void *s1, FAR const void *s2, size_t n)
+{
+  FAR const unsigned char *p1 = s1;
+  FAR const unsigned char *p2 = s2;
+
+  while (n--)
+    {
+      if (*p1++ != *p2++)
+        {
+          return 1;
+        }
+    }
+
+  return 0;
+}
+#endif
