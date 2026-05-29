@@ -2585,12 +2585,11 @@ static int adc_timinit(struct stm32_dev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_adc_initialize
+ * Name: stm32_adc_initialize
  ****************************************************************************/
 
-struct adc_dev_s *stm32h5_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int cchannels)
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int cchannels)
 {
   struct adc_dev_s *dev;
   struct stm32_dev_s *priv;

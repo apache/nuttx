@@ -63,7 +63,7 @@
  * to the board-level USB host logic.
  */
 
-struct stm32h5_usbhost_connection_s
+struct stm32_usbhost_connection_s
 {
   /* Wait for device connection/disconnection */
 
@@ -90,7 +90,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_usbhost_initialize
+ * Name: stm32_usbdrdhost_initialize
  *
  * Description:
  *   Initialize USB host controller hardware.
@@ -108,10 +108,10 @@ extern "C"
  *
  ****************************************************************************/
 
-struct usbhost_connection_s *stm32h5_usbhost_initialize(void);
+struct usbhost_connection_s *stm32_usbdrdhost_initialize(void);
 
 /****************************************************************************
- * Name: stm32h5_usbhost_vbusdrive
+ * Name: stm32_usbdrdhost_vbusdrive
  *
  * Description:
  *   Enable/disable VBUS power to the connected USB device.
@@ -133,7 +133,7 @@ struct usbhost_connection_s *stm32h5_usbhost_initialize(void);
  *
  ****************************************************************************/
 
-void stm32h5_usbhost_vbusdrive(int port, bool enable);
+void stm32_usbdrdhost_vbusdrive(int port, bool enable);
 
 #undef EXTERN
 #if defined(__cplusplus)

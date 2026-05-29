@@ -344,14 +344,14 @@ static void flash_lock_opt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_flash_unlock
+ * Name: stm32_flash_unlock
  *
  * Description:
  *   Unlock non-secure flash control
  *
  ****************************************************************************/
 
-void stm32h5_flash_unlock(void)
+void stm32_flash_unlock(void)
 {
   nxmutex_lock(&g_lock);
   flash_unlock_nscr();
@@ -359,14 +359,14 @@ void stm32h5_flash_unlock(void)
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_lock
+ * Name: stm32_flash_lock
  *
  * Description:
  *   Lock non-secure flash control
  *
  ****************************************************************************/
 
-void stm32h5_flash_lock(void)
+void stm32_flash_lock(void)
 {
   nxmutex_lock(&g_lock);
   flash_lock_nscr();
@@ -374,7 +374,7 @@ void stm32h5_flash_lock(void)
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_getopt
+ * Name: stm32_flash_getopt
  *
  * Description:
  *   Read the current flash option bytes from FLASH_OPTSR_CUR and
@@ -386,14 +386,14 @@ void stm32h5_flash_lock(void)
  *
  ****************************************************************************/
 
-void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2)
+void stm32_flash_getopt(uint32_t *opt1, uint32_t *opt2)
 {
   *opt1 = getreg32(STM32_FLASH_OPTSR_CUR);
   *opt2 = getreg32(STM32_FLASH_OPTSR2_CUR);
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_optmodify
+ * Name: stm32_flash_optmodify
  *
  * Description:
  *   Modifies the current flash option bytes, given bits to set and clear.
@@ -412,8 +412,8 @@ void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2)
  *
  ****************************************************************************/
 
-int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
-                             uint32_t clear2, uint32_t set2)
+int stm32_flash_optmodify(uint32_t clear1, uint32_t set1,
+                          uint32_t clear2, uint32_t set2)
 {
   int ret;
   uint32_t reg;
@@ -451,7 +451,7 @@ int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_swapbanks
+ * Name: stm32_flash_swapbanks
  *
  * Description:
  *   Swaps banks 1 and 2 in the processor's memory map.  Takes effect
@@ -464,7 +464,7 @@ int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
  *
  ****************************************************************************/
 
-int stm32h5_flash_swapbanks(void)
+int stm32_flash_swapbanks(void)
 {
   uint32_t reg;
   bool was_locked;
