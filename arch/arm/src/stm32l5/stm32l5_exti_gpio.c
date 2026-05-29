@@ -67,7 +67,7 @@ static struct gpio_callback_s g_gpio_handlers[16];
  * Interrupt Service Routine - Dispatcher
  ****************************************************************************/
 
-static int stm32l5_exti0_15_isr(int irq, void *context, void *arg)
+static int stm32_exti0_15_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
   int exti;
@@ -98,7 +98,7 @@ static int stm32l5_exti0_15_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_gpiosetevent
+ * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
@@ -120,7 +120,7 @@ static int stm32l5_exti0_15_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                          bool event, xcpt_t func, void *arg)
 {
   uint32_t pin = pinset & GPIO_PIN_MASK;
@@ -134,7 +134,7 @@ int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   if (func)
     {
-      irq_attach(irq, stm32l5_exti0_15_isr, NULL);
+      irq_attach(irq, stm32_exti0_15_isr, NULL);
       up_enable_irq(irq);
     }
   else
@@ -151,7 +151,7 @@ int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
       pinset |= GPIO_EXTI;
     }
 
-  stm32l5_configgpio(pinset);
+  stm32_configgpio(pinset);
 
   /* Configure rising/falling edges */
 

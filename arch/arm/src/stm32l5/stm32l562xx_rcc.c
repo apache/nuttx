@@ -575,10 +575,10 @@ static inline void rcc_enableccip(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_rcc_enableperipherals
+ * Name: stm32_rcc_enableperipherals
  ****************************************************************************/
 
-void stm32l5_rcc_enableperipherals(void)
+void stm32_rcc_enableperipherals(void)
 {
   rcc_enableccip();
   rcc_enableahb1();
@@ -589,7 +589,7 @@ void stm32l5_rcc_enableperipherals(void)
 }
 
 /****************************************************************************
- * Name: stm32l5_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   Called to change to new clock based on settings in board.h
@@ -599,7 +599,7 @@ void stm32l5_rcc_enableperipherals(void)
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG
-void stm32l5_stdclockconfig(void)
+void stm32_stdclockconfig(void)
 {
   uint32_t regval;
   volatile int32_t timeout;
@@ -687,7 +687,7 @@ void stm32l5_stdclockconfig(void)
     }
 #else
 
-#  error stm32l5_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
 
 #endif
 
@@ -704,7 +704,7 @@ void stm32l5_stdclockconfig(void)
 
       /* Ensure Power control is enabled before modifying it. */
 
-      stm32l5_pwr_enableclk(true);
+      stm32_pwr_enableclk(true);
 
       /* Select correct main regulator range */
 
@@ -901,7 +901,7 @@ void stm32l5_stdclockconfig(void)
 #if defined(CONFIG_STM32L5_IWDG) || defined(CONFIG_STM32L5_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32l5_rcc_enablelsi();
+      stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_USE_LSE)
@@ -916,7 +916,7 @@ void stm32l5_stdclockconfig(void)
        * to alter the LSE parameters.
        */
 
-      stm32l5_pwr_enableclk(true);
+      stm32_pwr_enableclk(true);
 
       /* XXX other LSE settings must be made before turning on the oscillator
        * and we need to ensure it is first off before doing so.
@@ -927,7 +927,7 @@ void stm32l5_stdclockconfig(void)
        * this for automatically trimming MSI, etc.
        */
 
-      stm32l5_rcc_enablelse();
+      stm32_rcc_enablelse();
 
 #  if defined(STM32_BOARD_USEMSI)
       /* Now that LSE is up, auto trim the MSI */
