@@ -142,7 +142,7 @@ struct sai_buffer_s
 
 /* The state of the one SAI peripheral */
 
-struct stm32l4_sai_s
+struct stm32_sai_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SAI block register base address */
@@ -176,7 +176,7 @@ struct stm32l4_sai_s
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_I2S_INFO
-static void     sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg);
+static void     sai_dump_regs(struct stm32_sai_s *priv, const char *msg);
 #else
 #  define       sai_dump_regs(s,m)
 #endif
@@ -184,15 +184,15 @@ static void     sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg);
 /* Buffer container helpers */
 
 static struct sai_buffer_s *
-                sai_buf_allocate(struct stm32l4_sai_s *priv);
-static void     sai_buf_free(struct stm32l4_sai_s *priv,
+                sai_buf_allocate(struct stm32_sai_s *priv);
+static void     sai_buf_free(struct stm32_sai_s *priv,
                   struct sai_buffer_s *bfcontainer);
-static void     sai_buf_initialize(struct stm32l4_sai_s *priv);
+static void     sai_buf_initialize(struct stm32_sai_s *priv);
 
 /* DMA support */
 
 #ifdef CONFIG_STM32L4_SAI_DMA
-static void     sai_schedule(struct stm32l4_sai_s *priv, int result);
+static void     sai_schedule(struct stm32_sai_s *priv, int result);
 static void     sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
 
@@ -230,7 +230,7 @@ static const struct i2s_ops_s g_i2sops =
 /* SAI1 state */
 
 #ifdef CONFIG_STM32L4_SAI1_A
-static struct stm32l4_sai_s g_sai1a_priv =
+static struct stm32_sai_s g_sai1a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI1_A_BASE,
@@ -251,7 +251,7 @@ static struct stm32l4_sai_s g_sai1a_priv =
 #endif
 
 #ifdef CONFIG_STM32L4_SAI1_B
-static struct stm32l4_sai_s g_sai1b_priv =
+static struct stm32_sai_s g_sai1b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI1_B_BASE,
@@ -274,7 +274,7 @@ static struct stm32l4_sai_s g_sai1b_priv =
 /* SAI2 state */
 
 #ifdef CONFIG_STM32L4_SAI2_A
-static struct stm32l4_sai_s g_sai2a_priv =
+static struct stm32_sai_s g_sai2a_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI2_A_BASE,
@@ -295,7 +295,7 @@ static struct stm32l4_sai_s g_sai2a_priv =
 #endif
 
 #ifdef CONFIG_STM32L4_SAI2_B
-static struct stm32l4_sai_s g_sai2b_priv =
+static struct stm32_sai_s g_sai2b_priv =
 {
   .dev.ops     = &g_i2sops,
   .base        = STM32_SAI2_B_BASE,
@@ -333,7 +333,7 @@ static struct stm32l4_sai_s g_sai2b_priv =
  *
  ****************************************************************************/
 
-static inline uint32_t sai_getbitrate(struct stm32l4_sai_s *priv)
+static inline uint32_t sai_getbitrate(struct stm32_sai_s *priv)
 {
   /* Calculate the bitrate in Hz */
 
@@ -355,7 +355,7 @@ static inline uint32_t sai_getbitrate(struct stm32l4_sai_s *priv)
  *
  ****************************************************************************/
 
-static inline uint32_t sai_getreg(struct stm32l4_sai_s *priv, uint8_t offset)
+static inline uint32_t sai_getreg(struct stm32_sai_s *priv, uint8_t offset)
 {
   return getreg32(priv->base + offset);
 }
@@ -376,7 +376,7 @@ static inline uint32_t sai_getreg(struct stm32l4_sai_s *priv, uint8_t offset)
  *
  ****************************************************************************/
 
-static inline void sai_putreg(struct stm32l4_sai_s *priv, uint8_t offset,
+static inline void sai_putreg(struct stm32_sai_s *priv, uint8_t offset,
                               uint32_t value)
 {
   putreg32(value, priv->base + offset);
@@ -399,7 +399,7 @@ static inline void sai_putreg(struct stm32l4_sai_s *priv, uint8_t offset,
  *
  ****************************************************************************/
 
-static void sai_modifyreg(struct stm32l4_sai_s *priv, uint8_t offset,
+static void sai_modifyreg(struct stm32_sai_s *priv, uint8_t offset,
                           uint32_t clrbits, uint32_t setbits)
 {
   uint32_t regval;
@@ -426,7 +426,7 @@ static void sai_modifyreg(struct stm32l4_sai_s *priv, uint8_t offset,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_I2S_INFO
-static void sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg)
+static void sai_dump_regs(struct stm32_sai_s *priv, const char *msg)
 {
   if (msg)
       i2sinfo("%s\n", msg);
@@ -460,7 +460,7 @@ static void sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg)
  *
  ****************************************************************************/
 
-static void sai_mckdivider(struct stm32l4_sai_s *priv)
+static void sai_mckdivider(struct stm32_sai_s *priv)
 {
   uint32_t mckdiv;
 
@@ -497,13 +497,13 @@ static void sai_mckdivider(struct stm32l4_sai_s *priv)
 
 static void sai_timeout(wdparm_t arg)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)arg;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
 
 #ifdef CONFIG_STM32L4_SAI_DMA
   /* Cancel the DMA */
 
-  stm32l4_dmastop(priv->dma);
+  stm32_dmastop(priv->dma);
 #endif
 
   /* Then schedule completion of the transfer to occur on the worker
@@ -531,7 +531,7 @@ static void sai_timeout(wdparm_t arg)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_SAI_DMA
-static int sai_dma_setup(struct stm32l4_sai_s *priv)
+static int sai_dma_setup(struct stm32_sai_s *priv)
 {
   struct sai_buffer_s *bfcontainer;
   struct ap_buffer_s *apb;
@@ -621,7 +621,7 @@ static int sai_dma_setup(struct stm32l4_sai_s *priv)
 
   DEBUGASSERT(ntransfers > 0);
 
-  stm32l4_dmasetup(priv->dma, priv->base + STM32_SAI_DR_OFFSET,
+  stm32_dmasetup(priv->dma, priv->base + STM32_SAI_DR_OFFSET,
                  samp, ntransfers, priv->dma_ccr);
 
   /* Add the container to the list of active DMAs */
@@ -630,7 +630,7 @@ static int sai_dma_setup(struct stm32l4_sai_s *priv)
 
   /* Start the DMA, saving the container as the current active transfer */
 
-  stm32l4_dmastart(priv->dma, sai_dma_callback, priv, false);
+  stm32_dmastart(priv->dma, sai_dma_callback, priv, false);
 
   /* Enable the transmitter */
 
@@ -675,7 +675,7 @@ static int sai_dma_setup(struct stm32l4_sai_s *priv)
 
 static void sai_worker(void *arg)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)arg;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)arg;
   struct sai_buffer_s *bfcontainer;
   irqstate_t flags;
 
@@ -759,7 +759,7 @@ static void sai_worker(void *arg)
  *
  ****************************************************************************/
 
-static void sai_schedule(struct stm32l4_sai_s *priv, int result)
+static void sai_schedule(struct stm32_sai_s *priv, int result)
 {
   struct sai_buffer_s *bfcontainer;
   int ret;
@@ -817,7 +817,7 @@ static void sai_schedule(struct stm32l4_sai_s *priv, int result)
 #ifdef CONFIG_STM32L4_SAI_DMA
 static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)arg;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)arg;
   DEBUGASSERT(priv);
 
   /* Cancel the watchdog timeout */
@@ -847,7 +847,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 
 static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)dev;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)dev;
 
   DEBUGASSERT(priv && rate > 0);
 
@@ -877,7 +877,7 @@ static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
 
 static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)dev;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)dev;
   uint32_t setbits;
 
   DEBUGASSERT(priv && bits >= 8);
@@ -947,7 +947,7 @@ static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
 static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                        i2s_callback_t callback, void *arg, uint32_t timeout)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)dev;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)dev;
   struct sai_buffer_s *bfcontainer;
   uint32_t mode;
   irqstate_t flags;
@@ -1052,7 +1052,7 @@ errout_with_lock:
 static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                     i2s_callback_t callback, void *arg, uint32_t timeout)
 {
-  struct stm32l4_sai_s *priv = (struct stm32l4_sai_s *)dev;
+  struct stm32_sai_s *priv = (struct stm32_sai_s *)dev;
   struct sai_buffer_s *bfcontainer;
   uint32_t mode;
   irqstate_t flags;
@@ -1144,7 +1144,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-static struct sai_buffer_s *sai_buf_allocate(struct stm32l4_sai_s *priv)
+static struct sai_buffer_s *sai_buf_allocate(struct stm32_sai_s *priv)
 {
   struct sai_buffer_s *bfcontainer;
   irqstate_t flags;
@@ -1191,7 +1191,7 @@ static struct sai_buffer_s *sai_buf_allocate(struct stm32l4_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_buf_free(struct stm32l4_sai_s *priv,
+static void sai_buf_free(struct stm32_sai_s *priv,
                          struct sai_buffer_s *bfcontainer)
 {
   irqstate_t flags;
@@ -1227,7 +1227,7 @@ static void sai_buf_free(struct stm32l4_sai_s *priv,
  *
  ****************************************************************************/
 
-static void sai_buf_initialize(struct stm32l4_sai_s *priv)
+static void sai_buf_initialize(struct stm32_sai_s *priv)
 {
   int i;
 
@@ -1252,7 +1252,7 @@ static void sai_buf_initialize(struct stm32l4_sai_s *priv)
  *
  ****************************************************************************/
 
-static void sai_portinitialize(struct stm32l4_sai_s *priv)
+static void sai_portinitialize(struct stm32_sai_s *priv)
 {
   sai_dump_regs(priv, "Before initialization");
 
@@ -1272,7 +1272,7 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
 #ifdef CONFIG_STM32L4_SAI_DMA
   /* Get DMA channel */
 
-  priv->dma = stm32l4_dmachannel(priv->dma_ch);
+  priv->dma = stm32_dmachannel(priv->dma_ch);
   DEBUGASSERT(priv->dma);
 
   sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_DMAEN);
@@ -1302,7 +1302,7 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_sai_initialize
+ * Name: stm32_sai_initialize
  *
  * Description:
  *   Initialize the selected SAI block
@@ -1315,9 +1315,9 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
  *
  ****************************************************************************/
 
-struct i2s_dev_s *stm32l4_sai_initialize(int intf)
+struct i2s_dev_s *stm32_sai_initialize(int intf)
 {
-  struct stm32l4_sai_s *priv;
+  struct stm32_sai_s *priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -1330,11 +1330,11 @@ struct i2s_dev_s *stm32l4_sai_initialize(int intf)
           i2sinfo("SAI1 Block A Selected\n");
           priv = &g_sai1a_priv;
 
-          stm32l4_configgpio(GPIO_SAI1_SD_A);
+          stm32_configgpio(GPIO_SAI1_SD_A);
 #  ifndef CONFIG_STM32L4_SAI1_A_SYNC_WITH_B
-          stm32l4_configgpio(GPIO_SAI1_FS_A);
-          stm32l4_configgpio(GPIO_SAI1_SCK_A);
-          stm32l4_configgpio(GPIO_SAI1_MCLK_A);
+          stm32_configgpio(GPIO_SAI1_FS_A);
+          stm32_configgpio(GPIO_SAI1_SCK_A);
+          stm32_configgpio(GPIO_SAI1_MCLK_A);
 #  endif
           break;
         }
@@ -1346,11 +1346,11 @@ struct i2s_dev_s *stm32l4_sai_initialize(int intf)
           i2sinfo("SAI1 Block B Selected\n");
           priv = &g_sai1b_priv;
 
-          stm32l4_configgpio(GPIO_SAI1_SD_B);
+          stm32_configgpio(GPIO_SAI1_SD_B);
 #  ifndef CONFIG_STM32L4_SAI1_B_SYNC_WITH_A
-          stm32l4_configgpio(GPIO_SAI1_FS_B);
-          stm32l4_configgpio(GPIO_SAI1_SCK_B);
-          stm32l4_configgpio(GPIO_SAI1_MCLK_B);
+          stm32_configgpio(GPIO_SAI1_FS_B);
+          stm32_configgpio(GPIO_SAI1_SCK_B);
+          stm32_configgpio(GPIO_SAI1_MCLK_B);
 #  endif
           break;
         }
@@ -1362,11 +1362,11 @@ struct i2s_dev_s *stm32l4_sai_initialize(int intf)
           i2sinfo("SAI2 Block A Selected\n");
           priv = &g_sai2a_priv;
 
-          stm32l4_configgpio(GPIO_SAI2_SD_A);
+          stm32_configgpio(GPIO_SAI2_SD_A);
 #  ifndef CONFIG_STM32L4_SAI2_A_SYNC_WITH_B
-          stm32l4_configgpio(GPIO_SAI2_FS_A);
-          stm32l4_configgpio(GPIO_SAI2_SCK_A);
-          stm32l4_configgpio(GPIO_SAI2_MCLK_A);
+          stm32_configgpio(GPIO_SAI2_FS_A);
+          stm32_configgpio(GPIO_SAI2_SCK_A);
+          stm32_configgpio(GPIO_SAI2_MCLK_A);
 #  endif
           break;
         }
@@ -1378,11 +1378,11 @@ struct i2s_dev_s *stm32l4_sai_initialize(int intf)
           i2sinfo("SAI2 Block B Selected\n");
           priv = &g_sai2b_priv;
 
-          stm32l4_configgpio(GPIO_SAI2_SD_B);
+          stm32_configgpio(GPIO_SAI2_SD_B);
 #  ifndef CONFIG_STM32L4_SAI2_B_SYNC_WITH_A
-          stm32l4_configgpio(GPIO_SAI2_FS_B);
-          stm32l4_configgpio(GPIO_SAI2_SCK_B);
-          stm32l4_configgpio(GPIO_SAI2_MCLK_B);
+          stm32_configgpio(GPIO_SAI2_FS_B);
+          stm32_configgpio(GPIO_SAI2_SCK_B);
+          stm32_configgpio(GPIO_SAI2_MCLK_B);
 #  endif
           break;
         }

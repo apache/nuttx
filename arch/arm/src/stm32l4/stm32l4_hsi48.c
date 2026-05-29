@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_enable_hsi48
+ * Name: stm32_enable_hsi48
  *
  * Description:
  *   On STM32L4X3, STM32L496xx/4A6xx and STM32L4XR devices only, the HSI48
@@ -64,7 +64,7 @@
  *
  ****************************************************************************/
 
-void stm32l4_enable_hsi48(enum syncsrc_e syncsrc)
+void stm32_enable_hsi48(enum syncsrc_e syncsrc)
 {
   uint32_t regval;
 
@@ -133,7 +133,7 @@ void stm32l4_enable_hsi48(enum syncsrc_e syncsrc)
 }
 
 /****************************************************************************
- * Name: stm32l4_disable_hsi48
+ * Name: stm32_disable_hsi48
  *
  * Description:
  *   Disable the HSI48 clock.
@@ -146,7 +146,7 @@ void stm32l4_enable_hsi48(enum syncsrc_e syncsrc)
  *
  ****************************************************************************/
 
-void stm32l4_disable_hsi48(void)
+void stm32_disable_hsi48(void)
 {
   uint32_t regval;
 

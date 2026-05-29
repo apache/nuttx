@@ -82,20 +82,20 @@
 
 /* This structure described one DMAMUX device */
 
-struct stm32l4_dmamux_s
+struct stm32_dmamux_s
 {
   uint8_t  id;                  /* DMAMUX id */
   uint8_t  nchan;               /* DMAMUX channels */
   uint32_t base;                /* DMAMUX base address */
 };
 
-typedef const struct stm32l4_dmamux_s *DMA_MUX;
+typedef const struct stm32_dmamux_s *DMA_MUX;
 
 /* This structure describes one DMA controller */
 
-struct stm32l4_dma_s
+struct stm32_dma_s
 {
-  uint8_t       first;           /* Offset in stm32l4_dmach_s array */
+  uint8_t       first;           /* Offset in stm32_dmach_s array */
   uint8_t       nchan;           /* Number of channels */
   uint8_t       dmamux_offset;   /* DMAMUX channel offset */
   uint32_t      base;            /* Base address */
@@ -104,7 +104,7 @@ struct stm32l4_dma_s
 
 /* This structure describes one DMA channel (DMA1, DMA2) */
 
-struct stm32l4_dmach_s
+struct stm32_dmach_s
 {
   bool             used;         /* Channel in use */
   uint8_t          dmamux_req;   /* Configured DMAMUX input request */
@@ -117,11 +117,11 @@ struct stm32l4_dmach_s
   void             *arg;         /* Argument passed to callback function */
 };
 
-typedef struct stm32l4_dmach_s *DMA_CHANNEL;
+typedef struct stm32_dmach_s *DMA_CHANNEL;
 
 /* DMA operations */
 
-struct stm32l4_dma_ops_s
+struct stm32_dma_ops_s
 {
   /* Disable the DMA transfer */
 
@@ -152,12 +152,12 @@ struct stm32l4_dma_ops_s
 #ifdef CONFIG_DEBUG_DMA_INFO
   /* Sample the DMA registers */
 
-  void (*dma_sample)(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs);
+  void (*dma_sample)(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 
   /* Dump the DMA registers */
 
   void (*dma_dump)(DMA_HANDLE handle,
-                   const struct stm32l4_dmaregs_s *regs,
+                   const struct stm32_dmaregs_s *regs,
                    const char *msg);
 #endif
 };
@@ -167,19 +167,19 @@ struct stm32l4_dma_ops_s
  ****************************************************************************/
 
 #if defined(CONFIG_STM32L4_DMA1) || defined(CONFIG_STM32L4_DMA2)
-static void stm32l4_dma12_disable(DMA_CHANNEL dmachan);
-static int stm32l4_dma12_interrupt(int irq, void *context, void *arg);
-static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
+static void stm32_dma12_disable(DMA_CHANNEL dmachan);
+static int stm32_dma12_interrupt(int irq, void *context, void *arg);
+static void stm32_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
                                 uint32_t maddr, size_t ntransfers,
                                 uint32_t ccr);
-static void stm32l4_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
+static void stm32_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
                                 void *arg, bool half);
-static size_t stm32l4_dma12_residual(DMA_HANDLE handle);
+static size_t stm32_dma12_residual(DMA_HANDLE handle);
 #ifdef CONFIG_DEBUG_DMA_INFO
-static void stm32l4_dma12_sample(DMA_HANDLE handle,
-                                 struct stm32l4_dmaregs_s *regs);
-static void stm32l4_dma12_dump(DMA_HANDLE handle,
-                               const struct stm32l4_dmaregs_s *regs,
+static void stm32_dma12_sample(DMA_HANDLE handle,
+                                 struct stm32_dmaregs_s *regs);
+static void stm32_dma12_dump(DMA_HANDLE handle,
+                               const struct stm32_dmaregs_s *regs,
                                const char *msg);
 #endif
 #endif
@@ -194,14 +194,14 @@ static void dmachan_putreg(DMA_CHANNEL dmachan, uint32_t offset,
 static void dmamux_putreg(DMA_MUX dmamux, uint32_t offset, uint32_t value);
 #ifdef CONFIG_DEBUG_DMA_INFO
 static uint32_t dmamux_getreg(DMA_MUX dmamux, uint32_t offset);
-static void stm32l4_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
-                                  struct stm32l4_dmaregs_s *regs);
-static void stm32l4_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
-                                const struct stm32l4_dmaregs_s *regs);
+static void stm32_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
+                                  struct stm32_dmaregs_s *regs);
+static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
+                                const struct stm32_dmaregs_s *regs);
 #endif
-static DMA_CHANNEL stm32l4_dma_channel_get(uint8_t channel,
+static DMA_CHANNEL stm32_dma_channel_get(uint8_t channel,
                                            uint8_t controller);
-static void stm32l4_gdma_limits_get(uint8_t controller, uint8_t *first,
+static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
                                     uint8_t *last);
 
 /****************************************************************************
@@ -210,20 +210,20 @@ static void stm32l4_gdma_limits_get(uint8_t controller, uint8_t *first,
 
 /* Operations specific to DMA controller */
 
-static const struct stm32l4_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
+static const struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 {
 #ifdef CONFIG_STM32L4_DMA1
   /* 0 - DMA1 */
 
     {
-      .dma_disable   = stm32l4_dma12_disable,
-      .dma_interrupt = stm32l4_dma12_interrupt,
-      .dma_setup     = stm32l4_dma12_setup,
-      .dma_start     = stm32l4_dma12_start,
-      .dma_residual  = stm32l4_dma12_residual,
+      .dma_disable   = stm32_dma12_disable,
+      .dma_interrupt = stm32_dma12_interrupt,
+      .dma_setup     = stm32_dma12_setup,
+      .dma_start     = stm32_dma12_start,
+      .dma_residual  = stm32_dma12_residual,
 #ifdef CONFIG_DEBUG_DMA_INFO
-      .dma_sample    = stm32l4_dma12_sample,
-      .dma_dump      = stm32l4_dma12_dump,
+      .dma_sample    = stm32_dma12_sample,
+      .dma_dump      = stm32_dma12_dump,
 #endif
     },
 #else
@@ -236,14 +236,14 @@ static const struct stm32l4_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
   /* 1 - DMA2 */
 
     {
-      .dma_disable   = stm32l4_dma12_disable,
-      .dma_interrupt = stm32l4_dma12_interrupt,
-      .dma_setup     = stm32l4_dma12_setup,
-      .dma_start     = stm32l4_dma12_start,
-      .dma_residual  = stm32l4_dma12_residual,
+      .dma_disable   = stm32_dma12_disable,
+      .dma_interrupt = stm32_dma12_interrupt,
+      .dma_setup     = stm32_dma12_setup,
+      .dma_start     = stm32_dma12_start,
+      .dma_residual  = stm32_dma12_residual,
 #ifdef CONFIG_DEBUG_DMA_INFO
-      .dma_sample    = stm32l4_dma12_sample,
-      .dma_dump      = stm32l4_dma12_dump,
+      .dma_sample    = stm32_dma12_sample,
+      .dma_dump      = stm32_dma12_dump,
 #endif
     }
 #else
@@ -255,7 +255,7 @@ static const struct stm32l4_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 
 /* This array describes the state of DMAMUX controller */
 
-static const struct stm32l4_dmamux_s g_dmamux[DMAMUX_NUM] =
+static const struct stm32_dmamux_s g_dmamux[DMAMUX_NUM] =
 {
     {
       .id      = 1,
@@ -266,7 +266,7 @@ static const struct stm32l4_dmamux_s g_dmamux[DMAMUX_NUM] =
 
 /* This array describes the state of each controller */
 
-static const struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
+static const struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 {
   /* 0 - DMA1 */
 
@@ -291,7 +291,7 @@ static const struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
 
 /* This array describes the state of each DMA channel. */
 
-static struct stm32l4_dmach_s g_dmach[DMA_NCHANNELS] =
+static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
 {
 #ifdef CONFIG_STM32L4_DMA1
   /* DMA1 */
@@ -524,7 +524,7 @@ static uint32_t dmamux_getreg(DMA_MUX dmamux, uint32_t offset)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dma_channel_get
+ * Name: stm32_dma_channel_get
  *
  * Description:
  *  Get the g_dmach table entry associated with a given DMA controller
@@ -532,7 +532,7 @@ static uint32_t dmamux_getreg(DMA_MUX dmamux, uint32_t offset)
  *
  ****************************************************************************/
 
-static DMA_CHANNEL stm32l4_dma_channel_get(uint8_t channel,
+static DMA_CHANNEL stm32_dma_channel_get(uint8_t channel,
                                            uint8_t controller)
 {
   uint8_t first = 0;
@@ -540,7 +540,7 @@ static DMA_CHANNEL stm32l4_dma_channel_get(uint8_t channel,
 
   /* Get limits for g_dma array */
 
-  stm32l4_gdma_limits_get(controller, &first, &nchan);
+  stm32_gdma_limits_get(controller, &first, &nchan);
 
   DEBUGASSERT(channel <= nchan);
 
@@ -548,14 +548,14 @@ static DMA_CHANNEL stm32l4_dma_channel_get(uint8_t channel,
 }
 
 /****************************************************************************
- * Name: stm32l4_gdma_limits_get
+ * Name: stm32_gdma_limits_get
  *
  * Description:
  *  Get g_dma array limits for a given DMA controller.
  *
  ****************************************************************************/
 
-static void stm32l4_gdma_limits_get(uint8_t controller, uint8_t *first,
+static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
                                     uint8_t *nchan)
 {
   DEBUGASSERT(first != NULL);
@@ -574,14 +574,14 @@ static void stm32l4_gdma_limits_get(uint8_t controller, uint8_t *first,
 #if defined(CONFIG_STM32L4_DMA1) || defined(CONFIG_STM32L4_DMA2)
 
 /****************************************************************************
- * Name: stm32l4_dma12_disable
+ * Name: stm32_dma12_disable
  *
  * Description:
  *  Disable DMA channel (DMA1/DMA2)
  *
  ****************************************************************************/
 
-static void stm32l4_dma12_disable(DMA_CHANNEL dmachan)
+static void stm32_dma12_disable(DMA_CHANNEL dmachan)
 {
   uint32_t regval;
 
@@ -604,14 +604,14 @@ static void stm32l4_dma12_disable(DMA_CHANNEL dmachan)
 }
 
 /****************************************************************************
- * Name: stm32l4_dma12_interrupt
+ * Name: stm32_dma12_interrupt
  *
  * Description:
  *  DMA channel interrupt handler
  *
  ****************************************************************************/
 
-static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
+static int stm32_dma12_interrupt(int irq, void *context, void *arg)
 {
   DMA_CHANNEL dmachan;
   uint32_t isr;
@@ -650,7 +650,7 @@ static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
 
   /* Get the channel structure from the stream and controller numbers */
 
-  dmachan = stm32l4_dma_channel_get(channel, controller);
+  dmachan = stm32_dma_channel_get(channel, controller);
 
   /* Get the interrupt status (for this channel only) */
 
@@ -673,14 +673,14 @@ static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32l4_dma12_setup
+ * Name: stm32_dma12_setup
  *
  * Description:
  *   Configure DMA before using
  *
  ****************************************************************************/
 
-static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
+static void stm32_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
                                 uint32_t maddr, size_t ntransfers,
                                 uint32_t ccr)
 {
@@ -745,13 +745,13 @@ static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
 }
 
 /****************************************************************************
- * Name: stm32l4_dma12_start
+ * Name: stm32_dma12_start
  *
  * Description:
  *   Start the standard DMA transfer
  ****************************************************************************/
 
-static void stm32l4_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
+static void stm32_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
                                 void *arg, bool half)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
@@ -807,10 +807,10 @@ static void stm32l4_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
 }
 
 /****************************************************************************
- * Name: stm32l4_dma12_residual
+ * Name: stm32_dma12_residual
  ****************************************************************************/
 
-static size_t stm32l4_dma12_residual(DMA_HANDLE handle)
+static size_t stm32_dma12_residual(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
 
@@ -820,11 +820,11 @@ static size_t stm32l4_dma12_residual(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: stm32l4_dma12_sample
+ * Name: stm32_dma12_sample
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32l4_dma12_sample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
+void stm32_dma12_sample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   irqstate_t flags;
@@ -837,7 +837,7 @@ void stm32l4_dma12_sample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
   regs->cpar = dmachan_getreg(dmachan, STM32_DMACHAN_CPAR_OFFSET);
   regs->cmar = dmachan_getreg(dmachan, STM32_DMACHAN_CMAR_OFFSET);
 
-  stm32l4_dmamux_sample(g_dma[dmachan->ctrl].dmamux,
+  stm32_dmamux_sample(g_dma[dmachan->ctrl].dmamux,
                         dmachan->chan + g_dma[dmachan->ctrl].dmamux_offset,
                         regs);
 
@@ -846,12 +846,12 @@ void stm32l4_dma12_sample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dma12_dump
+ * Name: stm32_dma12_dump
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-static void stm32l4_dma12_dump(DMA_HANDLE handle,
-                               const struct stm32l4_dmaregs_s *regs,
+static void stm32_dma12_dump(DMA_HANDLE handle,
+                               const struct stm32_dmaregs_s *regs,
                                const char *msg)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
@@ -879,7 +879,7 @@ static void stm32l4_dma12_dump(DMA_HANDLE handle,
           dmachan->base + STM32_DMACHAN_CMAR_OFFSET,
           regs->cmar);
 
-  stm32l4_dmamux_dump(g_dma[dmachan->ctrl].dmamux,
+  stm32_dmamux_dump(g_dma[dmachan->ctrl].dmamux,
                       dmachan->chan + g_dma[dmachan->ctrl].dmamux_offset,
                       regs);
 }
@@ -888,12 +888,12 @@ static void stm32l4_dma12_dump(DMA_HANDLE handle,
 #endif /* CONFIG_STM32L4_DMA1 || CONFIG_STM32L4_DMA2 */
 
 /****************************************************************************
- * Name: stm32l4_dmamux_sample
+ * Name: stm32_dmamux_sample
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-static void stm32l4_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
-                                  struct stm32l4_dmaregs_s *regs)
+static void stm32_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
+                                  struct stm32_dmaregs_s *regs)
 {
   regs->dmamux.ccr = dmamux_getreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(chan));
   regs->dmamux.csr = dmamux_getreg(dmamux, STM32_DMAMUX_CSR_OFFSET);
@@ -906,12 +906,12 @@ static void stm32l4_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dmamux_dump
+ * Name: stm32_dmamux_dump
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-static void stm32l4_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
-                                const struct stm32l4_dmaregs_s *regs)
+static void stm32_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
+                                const struct stm32_dmaregs_s *regs)
 {
   dmainfo("DMAMUX%d CH=%d\n", dmamux->id, channel);
   dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
@@ -987,7 +987,7 @@ void weak_function arm_dma_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmachannel
+ * Name: stm32_dmachannel
  *
  * Description:
  *   Allocate a DMA channel.  This function gives the caller mutually
@@ -1011,7 +1011,7 @@ void weak_function arm_dma_initialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap)
+DMA_HANDLE stm32_dmachannel(unsigned int dmamap)
 {
   DMA_CHANNEL dmachan;
   uint8_t dmamux_req;
@@ -1033,7 +1033,7 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap)
 
   /* Get g_dma array limits for given controller */
 
-  stm32l4_gdma_limits_get(controller, &first, &nchan);
+  stm32_gdma_limits_get(controller, &first, &nchan);
 
   /* Find available channel for given controller */
 
@@ -1077,13 +1077,13 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmafree
+ * Name: stm32_dmafree
  *
  * Description:
  *   Release a DMA channel and unmap DMAMUX if required.
  *
  *   NOTE:  The 'handle' used in this argument must NEVER be used again
- *   until stm32l4_dmachannel() is called again to re-gain access to the
+ *   until stm32_dmachannel() is called again to re-gain access to the
  *   channel.
  *
  * Returned Value:
@@ -1095,7 +1095,7 @@ DMA_HANDLE stm32l4_dmachannel(unsigned int dmamap)
  *
  ****************************************************************************/
 
-void stm32l4_dmafree(DMA_HANDLE handle)
+void stm32_dmafree(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   uint8_t controller;
@@ -1121,14 +1121,14 @@ void stm32l4_dmafree(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmasetup
+ * Name: stm32_dmasetup
  *
  * Description:
  *   Configure DMA before using
  *
  ****************************************************************************/
 
-void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                       size_t ntransfers, uint32_t ccr)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
@@ -1145,18 +1145,18 @@ void stm32l4_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 }
 
 /****************************************************************************
- * Name: stm32l4_dmastart
+ * Name: stm32_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *   - No DMA in progress
  *
  ****************************************************************************/
 
-void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
                       bool half)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
@@ -1194,19 +1194,19 @@ void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
 }
 
 /****************************************************************************
- * Name: stm32l4_dmastop
+ * Name: stm32_dmastop
  *
  * Description:
- *   Cancel the DMA.  After stm32l4_dmastop() is called, the DMA channel is
- *   reset and stm32l4_dmasetup() must be called before stm32l4_dmastart()
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart()
  *   can be called again
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-void stm32l4_dmastop(DMA_HANDLE handle)
+void stm32_dmastop(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   DMA_MUX dmamux;
@@ -1235,17 +1235,17 @@ void stm32l4_dmastop(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmaresidual
+ * Name: stm32_dmaresidual
  *
  * Description:
  *   Read the DMA bytes-remaining register.
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-size_t stm32l4_dmaresidual(DMA_HANDLE handle)
+size_t stm32_dmaresidual(DMA_HANDLE handle)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   uint8_t controller;
@@ -1261,7 +1261,7 @@ size_t stm32l4_dmaresidual(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: stm32l4_dmacapable
+ * Name: stm32_dmacapable
  *
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
@@ -1278,7 +1278,7 @@ size_t stm32l4_dmaresidual(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32L4_DMACAPABLE
-bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
+bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 {
   unsigned int msize_shift;
   uint32_t transfer_size;
@@ -1354,18 +1354,18 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dmasample
+ * Name: stm32_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
+void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;
   uint8_t controller;
@@ -1382,18 +1382,18 @@ void stm32l4_dmasample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dmadump
+ * Name: stm32_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32l4_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32l4_dmadump(DMA_HANDLE handle, const struct stm32l4_dmaregs_s *regs,
+void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
                      const char *msg)
 {
   DMA_CHANNEL dmachan = (DMA_CHANNEL)handle;

@@ -101,7 +101,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4can_initialize
+ * Name: stm32_caninitialize
  *
  * Description:
  *   Initialize the selected CAN port
@@ -115,7 +115,7 @@ extern "C"
  ****************************************************************************/
 
 struct can_dev_s;
-struct can_dev_s *stm32l4can_initialize(int port);
+struct can_dev_s *stm32_caninitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

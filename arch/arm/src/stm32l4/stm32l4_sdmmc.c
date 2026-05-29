@@ -1373,7 +1373,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
        * terminates on an error condition).
        */
 
-      stm32l4_dmastop(priv->dma);
+      stm32_dmastop(priv->dma);
     }
 #endif
 
@@ -2127,7 +2127,7 @@ static int stm32_cancel(struct sdio_dev_s *dev)
        * terminates on an error condition.
        */
 
-      stm32l4_dmastop(priv->dma);
+      stm32_dmastop(priv->dma);
     }
 #endif
 
@@ -2751,7 +2751,7 @@ static int stm32_dmapreflight(struct sdio_dev_s *dev,
 
   /* DMA must be possible to the buffer */
 
-  if (!stm32l4_dmacapable((uintptr_t)buffer, (buflen + 3) >> 2,
+  if (!stm32_dmacapable((uintptr_t)buffer, (buflen + 3) >> 2,
                         SDMMC_RXDMA32_CONFIG | priv->dmapri))
     {
       return -EFAULT;
@@ -2818,14 +2818,14 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
 
   sdmmc_modifyreg32(priv, STM32_SDMMC_DCTRL_OFFSET, 0,
                     STM32_SDMMC_DCTRL_DMAEN);
-  stm32l4_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
+  stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
                    (uint32_t)buffer, (buflen + 3) >> 2,
                    SDMMC_RXDMA32_CONFIG | priv->dmapri);
 
   /* Start the DMA */
 
   stm32_sample(priv, SAMPLENDX_BEFORE_ENABLE);
-  stm32l4_dmastart(priv->dma, stm32_dmacallback, priv, false);
+  stm32_dmastart(priv->dma, stm32_dmacallback, priv, false);
   stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
 
   return OK;
@@ -2883,7 +2883,7 @@ static int stm32_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  stm32l4_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
+  stm32_dmasetup(priv->dma, priv->base + STM32_SDMMC_FIFO_OFFSET,
                    (uint32_t)buffer, (buflen + 3) >> 2,
                    SDMMC_TXDMA32_CONFIG | priv->dmapri);
 
@@ -2893,7 +2893,7 @@ static int stm32_dmasendsetup(struct sdio_dev_s *dev,
 
   /* Start the DMA */
 
-  stm32l4_dmastart(priv->dma, stm32_dmacallback, priv, false);
+  stm32_dmastart(priv->dma, stm32_dmacallback, priv, false);
   stm32_sample(priv, SAMPLENDX_AFTER_SETUP);
 
   /* Enable TX interrupts */
@@ -3056,14 +3056,14 @@ struct sdio_dev_s *sdio_initialize(int slotno)
        * utility in the scope of the board support package.
        */
 #ifndef CONFIG_SDIO_MUXBUS
-      stm32l4_configgpio(GPIO_SDMMC1_D0);
+      stm32_configgpio(GPIO_SDMMC1_D0);
 #ifndef CONFIG_SDMMC1_WIDTH_D1_ONLY
-      stm32l4_configgpio(GPIO_SDMMC1_D1);
-      stm32l4_configgpio(GPIO_SDMMC1_D2);
-      stm32l4_configgpio(GPIO_SDMMC1_D3);
+      stm32_configgpio(GPIO_SDMMC1_D1);
+      stm32_configgpio(GPIO_SDMMC1_D2);
+      stm32_configgpio(GPIO_SDMMC1_D3);
 #endif
-      stm32l4_configgpio(GPIO_SDMMC1_CK);
-      stm32l4_configgpio(GPIO_SDMMC1_CMD);
+      stm32_configgpio(GPIO_SDMMC1_CK);
+      stm32_configgpio(GPIO_SDMMC1_CMD);
 #endif
     }
   else
@@ -3113,7 +3113,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 #ifdef CONFIG_STM32L4_SDMMC_DMA
   /* Allocate a DMA channel */
 
-  priv->dma = stm32l4_dmachannel(dmachan);
+  priv->dma = stm32_dmachannel(dmachan);
   DEBUGASSERT(priv->dma);
 #endif
 

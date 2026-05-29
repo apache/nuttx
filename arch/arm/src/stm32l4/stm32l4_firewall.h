@@ -52,7 +52,7 @@
  * Public Types
  ****************************************************************************/
 
-struct stm32l4_firewall_t
+struct stm32_firewall_t
 {
   uintptr_t  codestart;
   size_t     codelen;
@@ -84,7 +84,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_firewallsetup
+ * Name: stm32_firewallsetup
  *
  * Description:
  *   Configure the STM32L4 firewall. After this, protected code will only
@@ -95,7 +95,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup);
+int stm32_firewallsetup(struct stm32_firewall_t *setup);
 
 #undef EXTERN
 #if defined(__cplusplus)

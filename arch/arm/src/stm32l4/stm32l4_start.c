@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "nvic.h"
 
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_userspace.h"
 #include "stm32l4_start.h"
@@ -149,10 +149,10 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32l4_clockconfig();
+  stm32_clockconfig();
   arm_fpuconfig();
-  stm32l4_lowsetup();
-  stm32l4_gpioinit();
+  stm32_lowsetup();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -203,13 +203,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  stm32l4_userspace();
+  stm32_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  stm32l4_board_initialize();
+  stm32_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */

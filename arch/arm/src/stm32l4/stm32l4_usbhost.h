@@ -168,7 +168,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_usbhost_vbusdrive
+ * Name: stm32_usbhost_vbusdrive
  *
  * Description:
  *   Enable/disable driving of VBUS 5V output.  This function must be
@@ -196,7 +196,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l4_usbhost_vbusdrive(int iface, bool enable);
+void stm32_usbhost_vbusdrive(int iface, bool enable);
 
 #undef EXTERN
 #if defined(__cplusplus)

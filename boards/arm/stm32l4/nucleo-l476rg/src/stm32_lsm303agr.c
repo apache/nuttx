@@ -31,7 +31,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/board.h>
-#include "stm32l4.h"
+#include "stm32.h"
 #include <nucleo-l476rg.h>
 #include <nuttx/sensors/lsm303agr.h>
 
@@ -48,13 +48,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_lsm303agr_initialize
+ * Name: stm32_lsm303agr_initialize
  *
  * Description:
  *   Initialize I2C-based LSM303AGR.
  ****************************************************************************/
 
-int stm32l4_lsm303agr_initialize(char *devpath)
+int stm32_lsm303agr_initialize(char *devpath)
 {
   struct i2c_master_s *i2c;
   int ret = OK;
@@ -62,7 +62,7 @@ int stm32l4_lsm303agr_initialize(char *devpath)
   sninfo("INFO: Initializing LMS303AGR sensor over I2C\n");
 
 #if defined(CONFIG_STM32L4_I2C1)
-  i2c = stm32l4_i2cbus_initialize(1);
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
       return -ENODEV;

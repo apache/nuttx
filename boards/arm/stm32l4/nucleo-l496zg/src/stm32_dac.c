@@ -66,7 +66,7 @@ int stm32_dac_setup(void)
       int ret;
 
 #ifdef CONFIG_STM32L4_DAC1
-      g_dac1 = stm32l4_dacinitialize(0);
+      g_dac1 = stm32_dacinitialize(0);
       if (g_dac1 == NULL)
         {
           aerr("ERROR: Failed to get DAC1 interface\n");
@@ -82,7 +82,7 @@ int stm32_dac_setup(void)
 #endif
 
 #ifdef CONFIG_STM32L4_DAC2
-      g_dac2 = stm32l4_dacinitialize(1);
+      g_dac2 = stm32_dacinitialize(1);
       if (g_dac2 == NULL)
         {
           aerr("ERROR: Failed to get DAC2 interface\n");

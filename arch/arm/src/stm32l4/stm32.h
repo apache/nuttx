@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4.h
+ * arch/arm/src/stm32l4/stm32.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *

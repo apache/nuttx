@@ -151,7 +151,7 @@ static int gpin_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOIN);
   gpioinfo("Reading...\n");
 
-  *value = stm32l4_gpioread(g_gpioinputs[stm32gpio->id]);
+  *value = stm32_gpioread(g_gpioinputs[stm32gpio->id]);
   return OK;
 }
 #endif
@@ -165,7 +165,7 @@ static int gpout_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Reading...\n");
 
-  *value = stm32l4_gpioread(g_gpiooutputs[stm32gpio->id]);
+  *value = stm32_gpioread(g_gpiooutputs[stm32gpio->id]);
   return OK;
 }
 
@@ -177,7 +177,7 @@ static int gpout_write(struct gpio_dev_s *dev, bool value)
   DEBUGASSERT(stm32gpio->id < BOARD_NGPIOOUT);
   gpioinfo("Writing %d\n", (int)value);
 
-  stm32l4_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
+  stm32_gpiowrite(g_gpiooutputs[stm32gpio->id], value);
   return OK;
 }
 #endif
@@ -205,7 +205,7 @@ static int gpint_read(struct gpio_dev_s *dev, bool *value)
   DEBUGASSERT(stm32gpint->stm32gpio.id < BOARD_NGPIOINT);
   gpioinfo("Reading int pin...\n");
 
-  *value = stm32l4_gpioread(g_gpiointinputs[stm32gpint->stm32gpio.id]);
+  *value = stm32_gpioread(g_gpiointinputs[stm32gpint->stm32gpio.id]);
   return OK;
 }
 
@@ -219,7 +219,7 @@ static int gpint_attach(struct gpio_dev_s *dev,
 
   /* Make sure the interrupt is disabled */
 
-  stm32l4_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id], false,
+  stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id], false,
                        false, false, NULL, NULL);
 
   gpioinfo("Attach %p\n", callback);
@@ -240,7 +240,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
 
           /* Configure the interrupt for rising edge */
 
-          stm32l4_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
+          stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
                                true, false, false, stm32gpio_interrupt,
                                &g_gpint[stm32gpint->stm32gpio.id]);
         }
@@ -248,7 +248,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
   else
     {
       gpioinfo("Disable the interrupt\n");
-      stm32l4_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
+      stm32_gpiosetevent(g_gpiointinputs[stm32gpint->stm32gpio.id],
                            false, false, false, NULL, NULL);
     }
 
@@ -268,7 +268,7 @@ static int gpint_enable(struct gpio_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
-int stm32l4_gpio_initialize(void)
+int stm32_gpio_initialize(void)
 {
   int i;
   int pincount = 0;
@@ -285,7 +285,7 @@ int stm32l4_gpio_initialize(void)
 
       /* Configure the pin that will be used as input */
 
-      stm32l4_configgpio(g_gpioinputs[i]);
+      stm32_configgpio(g_gpioinputs[i]);
 
       pincount++;
     }
@@ -303,8 +303,8 @@ int stm32l4_gpio_initialize(void)
 
       /* Configure the pin that will be used as output */
 
-      stm32l4_gpiowrite(g_gpiooutputs[i], 0);
-      stm32l4_configgpio(g_gpiooutputs[i]);
+      stm32_gpiowrite(g_gpiooutputs[i], 0);
+      stm32_configgpio(g_gpiooutputs[i]);
 
       pincount++;
     }
@@ -322,7 +322,7 @@ int stm32l4_gpio_initialize(void)
 
       /* Configure the pin that will be used as interrupt input */
 
-      stm32l4_configgpio(g_gpiointinputs[i]);
+      stm32_configgpio(g_gpiointinputs[i]);
 
       pincount++;
     }

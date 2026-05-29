@@ -40,7 +40,7 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_dac.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_dma.h"
@@ -408,7 +408,7 @@ static const struct stm32_dac_ops_s g_dac_llops =
 /* Channel 1 */
 
 #ifdef CONFIG_STM32L4_DAC1_DMA
-uint16_t stm32l4_dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
+uint16_t stm32_dac1_dmabuffer[CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE];
 #endif
 
 static struct stm32_chan_s g_dac1priv =
@@ -428,7 +428,7 @@ static struct stm32_chan_s g_dac1priv =
   .hasdma     = 1,
   .dmachan    = DAC1_DMA_CHAN,
   .buffer_len = CONFIG_STM32L4_DAC1_DMA_BUFFER_SIZE,
-  .dmabuffer  = stm32l4_dac1_dmabuffer,
+  .dmabuffer  = stm32_dac1_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC1_TIMER,
   .tsel       = DAC1_TSEL_VALUE,
   .tbase      = DAC1_TIMER_BASE,
@@ -448,7 +448,7 @@ static struct dac_dev_s g_dac1dev =
 /* Channel 2 */
 
 #ifdef CONFIG_STM32L4_DAC2_DMA
-uint16_t stm32l4_dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
+uint16_t stm32_dac2_dmabuffer[CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE];
 #endif
 
 static struct stm32_chan_s g_dac2priv =
@@ -468,7 +468,7 @@ static struct stm32_chan_s g_dac2priv =
   .hasdma     = 1,
   .dmachan    = DAC2_DMA_CHAN,
   .buffer_len = CONFIG_STM32L4_DAC2_DMA_BUFFER_SIZE,
-  .dmabuffer  = stm32l4_dac2_dmabuffer,
+  .dmabuffer  = stm32_dac2_dmabuffer,
   .timer      = CONFIG_STM32L4_DAC2_TIMER,
   .tsel       = DAC2_TSEL_VALUE,
   .tbase      = DAC2_TIMER_BASE,
@@ -511,7 +511,7 @@ static uint32_t dac_getreg(struct stm32_chan_s *priv, int offset)
 }
 
 /****************************************************************************
- * Name: stm32l4_dac_modify_cr
+ * Name: stm32_dac_modify_cr
  *
  * Description:
  *   Modify the contents of the DAC control register.
@@ -526,7 +526,7 @@ static uint32_t dac_getreg(struct stm32_chan_s *priv, int offset)
  *
  ****************************************************************************/
 
-static inline void stm32l4_dac_modify_cr(struct stm32_chan_s *chan,
+static inline void stm32_dac_modify_cr(struct stm32_chan_s *chan,
                                          uint32_t clearbits,
                                          uint32_t setbits)
 {
@@ -546,7 +546,7 @@ static inline void stm32l4_dac_modify_cr(struct stm32_chan_s *chan,
 }
 
 /****************************************************************************
- * Name: stm32l4_dac_modify_mcr
+ * Name: stm32_dac_modify_mcr
  *
  * Description:
  *   Modify the contents of the DAC mode register.
@@ -561,9 +561,9 @@ static inline void stm32l4_dac_modify_cr(struct stm32_chan_s *chan,
  *
  ****************************************************************************/
 
-static inline void stm32l4_dac_modify_mcr(struct stm32_chan_s *chan,
-                                          uint32_t clearbits,
-                                          uint32_t setbits)
+static inline void stm32_dac_modify_mcr(struct stm32_chan_s *chan,
+                                        uint32_t clearbits,
+                                        uint32_t setbits)
 {
   unsigned int shift;
 
@@ -807,7 +807,7 @@ static int dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 
   /* Enable DAC Channel */
 
-  stm32l4_dac_modify_cr(chan, 0, DAC_CR_EN);
+  stm32_dac_modify_cr(chan, 0, DAC_CR_EN);
 
 #ifdef HAVE_DMA
   if (chan->hasdma)
@@ -843,17 +843,17 @@ static int dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
        * - Peripheral Burst: single
        */
 
-      stm32l4_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
+      stm32_dmasetup(chan->dma, chan->dro, (uint32_t)chan->dmabuffer,
                        chan->buffer_len, DAC_DMA_CONTROL_WORD);
 
       /* Start the DMA */
 
       chan->result = -EBUSY;
-      stm32l4_dmastart(chan->dma, dac_dmatxcallback, chan, false);
+      stm32_dmastart(chan->dma, dac_dmatxcallback, chan, false);
 
       /* Enable DMA for DAC Channel */
 
-      stm32l4_dac_modify_cr(chan, 0, DAC_CR_DMAEN);
+      stm32_dac_modify_cr(chan, 0, DAC_CR_DMAEN);
     }
   else
 #endif
@@ -1098,7 +1098,7 @@ static int dac_chaninit(struct stm32_chan_s *chan)
 
   if (chan->pin != 0xffffffffu)
     {
-      stm32l4_configgpio(chan->pin);
+      stm32_configgpio(chan->pin);
     }
 
   /* DAC channel configuration:
@@ -1110,7 +1110,7 @@ static int dac_chaninit(struct stm32_chan_s *chan)
 
   /* Disable before change */
 
-  stm32l4_dac_modify_cr(chan, DAC_CR_EN, 0);
+  stm32_dac_modify_cr(chan, DAC_CR_EN, 0);
 
   clearbits = DAC_CR_TSEL_MASK |
               DAC_CR_MAMP_MASK |
@@ -1119,7 +1119,7 @@ static int dac_chaninit(struct stm32_chan_s *chan)
       chan->tsel |           /* Set trigger source (SW or timer TRGO event) */
       DAC_CR_MAMP_AMP1 |     /* Set waveform characteristics */
       DAC_CR_WAVE_DISABLED;  /* Set no noise */
-  stm32l4_dac_modify_cr(chan, clearbits, setbits);
+  stm32_dac_modify_cr(chan, clearbits, setbits);
 
   /* Enable output buffer or route DAC output to on-chip peripherals (ADC) */
 
@@ -1133,7 +1133,7 @@ static int dac_chaninit(struct stm32_chan_s *chan)
       setbits = DAC_MCR_MODE_IN;
     }
 
-  stm32l4_dac_modify_mcr(chan, clearbits, setbits);
+  stm32_dac_modify_mcr(chan, clearbits, setbits);
 
 #ifdef HAVE_DMA
   /* Determine if DMA is supported by this channel */
@@ -1144,11 +1144,11 @@ static int dac_chaninit(struct stm32_chan_s *chan)
 
       /* Yes.. DAC trigger enable */
 
-      stm32l4_dac_modify_cr(chan, 0, DAC_CR_TEN);
+      stm32_dac_modify_cr(chan, 0, DAC_CR_TEN);
 
       /* Allocate a DMA channel */
 
-      chan->dma = stm32l4_dmachannel(chan->dmachan);
+      chan->dma = stm32_dmachannel(chan->dmachan);
       if (!chan->dma)
         {
           aerr("ERROR: Failed to allocate a DMA channel\n");
@@ -1161,7 +1161,7 @@ static int dac_chaninit(struct stm32_chan_s *chan)
       if (ret < 0)
         {
           aerr("ERROR: Failed to initialize the DMA timer: %d\n", ret);
-          stm32l4_dmafree(chan->dma);
+          stm32_dmafree(chan->dma);
           return ret;
         }
     }
@@ -1229,11 +1229,11 @@ static void dac_llops_enable(struct stm32_dac_dev_s *dev, bool enabled)
 
   if (enabled)
     {
-      stm32l4_dac_modify_cr(priv, 0, DAC_CR_EN);
+      stm32_dac_modify_cr(priv, 0, DAC_CR_EN);
     }
   else
     {
-      stm32l4_dac_modify_cr(priv, DAC_CR_EN, 0);
+      stm32_dac_modify_cr(priv, DAC_CR_EN, 0);
     }
 }
 
@@ -1272,17 +1272,17 @@ static void dac_llops_startdma(struct stm32_dac_dev_s *dev)
    * - Peripheral Burst: single
    */
 
-  stm32l4_dmasetup(priv->dma, priv->dro, (uint32_t)priv->dmabuffer,
+  stm32_dmasetup(priv->dma, priv->dro, (uint32_t)priv->dmabuffer,
                     priv->buffer_len, DAC_DMA_CONTROL_WORD);
 
   /* Start the DMA */
 
   priv->result = -EBUSY;
-  stm32l4_dmastart(priv->dma, dac_dmatxcallback, priv, false);
+  stm32_dmastart(priv->dma, dac_dmatxcallback, priv, false);
 
   /* Enable DMA for DAC Channel */
 
-  stm32l4_dac_modify_cr(priv, 0, DAC_CR_DMAEN);
+  stm32_dac_modify_cr(priv, 0, DAC_CR_DMAEN);
 
   /* Reset counters (generate an update) */
 
@@ -1300,11 +1300,11 @@ static void dac_llops_stopdma(struct stm32_dac_dev_s *dev)
   /* Stop the DMA */
 
   priv->result = -EBUSY;
-  stm32l4_dmastop(priv->dma);
+  stm32_dmastop(priv->dma);
 
   /* Enable DMA for DAC Channel */
 
-  stm32l4_dac_modify_cr(priv, 0, DAC_CR_DMAEN);
+  stm32_dac_modify_cr(priv, 0, DAC_CR_DMAEN);
 }
 #endif
 
@@ -1326,7 +1326,7 @@ static void dac_llops_dumpregs(struct stm32_dac_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_dacinitialize
+ * Name: stm32_dacinitialize
  *
  * Description:
  *   Initialize the DAC.
@@ -1343,7 +1343,7 @@ static void dac_llops_dumpregs(struct stm32_dac_dev_s *dev)
  *
  ****************************************************************************/
 
-struct dac_dev_s *stm32l4_dacinitialize(int intf)
+struct dac_dev_s *stm32_dacinitialize(int intf)
 {
   struct dac_dev_s    *dev;
   struct stm32_chan_s *chan;

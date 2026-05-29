@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 
-#include "stm32l4.h"
+#include "stm32.h"
 
 #if defined(CONFIG_STM32L4_OTGFS)
 
@@ -67,7 +67,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_otgfshost_initialize
+ * Name: stm32_otgfshost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -94,21 +94,21 @@ extern "C"
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
 struct
-usbhost_connection_s *stm32l4_otgfshost_initialize(int controller);
+usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 #endif
 
 /****************************************************************************
- * Name:  stm32l4_usbsuspend
+ * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the OTG FS
+ *   Board logic must provide the stm32_usbsuspend logic if the OTG FS
  *   device driver is used.  This function is called whenever the USB enters
  *   or leaves suspend mode. This is an opportunity for the board logic to
  *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 
-void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume);
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
