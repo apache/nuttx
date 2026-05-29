@@ -212,7 +212,7 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32l5_serial_s
+struct stm32_serial_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
@@ -327,9 +327,9 @@ static int  stm32l5serial_dmasetup(struct uart_dev_s *dev);
 static void stm32l5serial_dmashutdown(struct uart_dev_s *dev);
 static int  stm32l5serial_dmareceive(struct uart_dev_s *dev,
                                      unsigned int *status);
-static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv);
+static void stm32l5serial_dmareenable(struct stm32_serial_s *priv);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool stm32l5serial_dmaiflowrestart(struct stm32l5_serial_s *priv);
+static bool stm32l5serial_dmaiflowrestart(struct stm32_serial_s *priv);
 #endif
 static void stm32l5serial_dmarxint(struct uart_dev_s *dev, bool enable);
 static bool stm32l5serial_dmarxavailable(struct uart_dev_s *dev);
@@ -446,7 +446,7 @@ static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
 /* This describes the state of the STM32 USART1 ports. */
 
 #ifdef CONFIG_STM32L5_LPUART1_SERIALDRIVER
-static struct stm32l5_serial_s g_lpuart1priv =
+static struct stm32_serial_s g_lpuart1priv =
 {
   .dev =
     {
@@ -506,7 +506,7 @@ static struct stm32l5_serial_s g_lpuart1priv =
 #endif
 
 #ifdef CONFIG_STM32L5_USART1_SERIALDRIVER
-static struct stm32l5_serial_s g_usart1priv =
+static struct stm32_serial_s g_usart1priv =
 {
   .dev =
     {
@@ -568,7 +568,7 @@ static struct stm32l5_serial_s g_usart1priv =
 /* This describes the state of the STM32 USART2 port. */
 
 #ifdef CONFIG_STM32L5_USART2_SERIALDRIVER
-static struct stm32l5_serial_s g_usart2priv =
+static struct stm32_serial_s g_usart2priv =
 {
   .dev =
     {
@@ -630,7 +630,7 @@ static struct stm32l5_serial_s g_usart2priv =
 /* This describes the state of the STM32 USART3 port. */
 
 #ifdef CONFIG_STM32L5_USART3_SERIALDRIVER
-static struct stm32l5_serial_s g_usart3priv =
+static struct stm32_serial_s g_usart3priv =
 {
   .dev =
     {
@@ -692,7 +692,7 @@ static struct stm32l5_serial_s g_usart3priv =
 /* This describes the state of the STM32 UART4 port. */
 
 #ifdef CONFIG_STM32L5_UART4_SERIALDRIVER
-static struct stm32l5_serial_s g_uart4priv =
+static struct stm32_serial_s g_uart4priv =
 {
   .dev =
     {
@@ -754,7 +754,7 @@ static struct stm32l5_serial_s g_uart4priv =
 /* This describes the state of the STM32 UART5 port. */
 
 #ifdef CONFIG_STM32L5_UART5_SERIALDRIVER
-static struct stm32l5_serial_s g_uart5priv =
+static struct stm32_serial_s g_uart5priv =
 {
   .dev =
     {
@@ -815,7 +815,7 @@ static struct stm32l5_serial_s g_uart5priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-static struct stm32l5_serial_s * const
+static struct stm32_serial_s * const
   g_uart_devs[STM32_NLPUART + STM32_NUSART + STM32_NUART] =
 {
 #ifdef CONFIG_STM32L5_LPUART1_SERIALDRIVER
@@ -862,7 +862,7 @@ static struct serialpm_s g_serialpm =
  ****************************************************************************/
 
 static inline
-uint32_t stm32l5serial_getreg(struct stm32l5_serial_s *priv, int offset)
+uint32_t stm32l5serial_getreg(struct stm32_serial_s *priv, int offset)
 {
   return getreg32(priv->usartbase + offset);
 }
@@ -872,7 +872,7 @@ uint32_t stm32l5serial_getreg(struct stm32l5_serial_s *priv, int offset)
  ****************************************************************************/
 
 static inline
-void stm32l5serial_putreg(struct stm32l5_serial_s *priv,
+void stm32l5serial_putreg(struct stm32_serial_s *priv,
                           int offset, uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
@@ -883,7 +883,7 @@ void stm32l5serial_putreg(struct stm32l5_serial_s *priv,
  ****************************************************************************/
 
 static inline
-void stm32l5serial_setusartint(struct stm32l5_serial_s *priv,
+void stm32l5serial_setusartint(struct stm32_serial_s *priv,
                                uint16_t ie)
 {
   uint32_t cr;
@@ -911,7 +911,7 @@ void stm32l5serial_setusartint(struct stm32l5_serial_s *priv,
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void stm32l5serial_restoreusartint(struct stm32l5_serial_s *priv,
+static void stm32l5serial_restoreusartint(struct stm32_serial_s *priv,
                                           uint16_t ie)
 {
   irqstate_t flags;
@@ -927,7 +927,7 @@ static void stm32l5serial_restoreusartint(struct stm32l5_serial_s *priv,
  * Name: stm32l5serial_disableusartint
  ****************************************************************************/
 
-static void stm32l5serial_disableusartint(struct stm32l5_serial_s *priv,
+static void stm32l5serial_disableusartint(struct stm32_serial_s *priv,
                                           uint16_t *ie)
 {
   irqstate_t flags;
@@ -988,11 +988,11 @@ static void stm32l5serial_disableusartint(struct stm32l5_serial_s *priv,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-static int stm32l5serial_dmanextrx(struct stm32l5_serial_s *priv)
+static int stm32l5serial_dmanextrx(struct stm32_serial_s *priv)
 {
   size_t dmaresidual;
 
-  dmaresidual = stm32l5_dmaresidual(priv->rxdma);
+  dmaresidual = stm32_dmaresidual(priv->rxdma);
 
   return (RXDMA_BUFFER_SIZE - (int)dmaresidual);
 }
@@ -1009,8 +1009,8 @@ static int stm32l5serial_dmanextrx(struct stm32l5_serial_s *priv)
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
 static void stm32l5serial_setformat(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
 
   /* This first implementation is for U[S]ARTs that support oversampling
@@ -1140,7 +1140,7 @@ static void stm32l5serial_setformat(struct uart_dev_s *dev)
 #ifdef CONFIG_PM
 static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 {
-  struct stm32l5_serial_s *priv = (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 #ifdef SERIAL_HAVE_DMA
   bool dmarestored = false;
 #endif
@@ -1159,7 +1159,7 @@ static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
         {
           /* Force RTS high to prevent further Rx. */
 
-          stm32l5_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
+          stm32_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
                              | (GPIO_OUTPUT | GPIO_OUTPUT_SET));
         }
 #endif
@@ -1188,7 +1188,7 @@ static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
             {
               /* Suspend Rx DMA. */
 
-              stm32l5_dmastop(priv->rxdma);
+              stm32_dmastop(priv->rxdma);
               priv->rxdmasusp = true;
             }
         }
@@ -1229,7 +1229,7 @@ static void stm32l5serial_setsuspend(struct uart_dev_s *dev, bool suspend)
         {
           /* Restore peripheral RTS control. */
 
-          stm32l5_configgpio(priv->rts_gpio);
+          stm32_configgpio(priv->rts_gpio);
         }
 #endif
     }
@@ -1278,7 +1278,7 @@ static void stm32l5serial_pm_setsuspend(bool suspend)
 
   for (n = 0; n < STM32_NLPUART + STM32_NUSART + STM32_NUART; n++)
     {
-      struct stm32l5_serial_s *priv = g_uart_devs[n];
+      struct stm32_serial_s *priv = g_uart_devs[n];
 
       if (!priv || !priv->initialized)
         {
@@ -1304,8 +1304,8 @@ static void stm32l5serial_pm_setsuspend(bool suspend)
 
 static void stm32l5serial_setapbclock(struct uart_dev_s *dev, bool on)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   uint32_t rcc_en;
   uint32_t regaddr;
 
@@ -1376,14 +1376,14 @@ static void stm32l5serial_setapbclock(struct uart_dev_s *dev, bool on)
 
 static int stm32l5serial_setup(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
 
   /* Note: The logic here depends on the fact that that the USART module
-   * was enabled in stm32l5_lowsetup().
+   * was enabled in stm32_lowsetup().
    */
 
   /* Enable USART APB1/2 clock */
@@ -1394,18 +1394,18 @@ static int stm32l5serial_setup(struct uart_dev_s *dev)
 
   if (priv->tx_gpio != 0)
     {
-      stm32l5_configgpio(priv->tx_gpio);
+      stm32_configgpio(priv->tx_gpio);
     }
 
   if (priv->rx_gpio != 0)
     {
-      stm32l5_configgpio(priv->rx_gpio);
+      stm32_configgpio(priv->rx_gpio);
     }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
-      stm32l5_configgpio(priv->cts_gpio);
+      stm32_configgpio(priv->cts_gpio);
     }
 #endif
 
@@ -1419,15 +1419,15 @@ static int stm32l5serial_setup(struct uart_dev_s *dev)
 
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
 #endif
-      stm32l5_configgpio(config);
+      stm32_configgpio(config);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32l5_configgpio(priv->rs485_dir_gpio);
-      stm32l5_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      stm32_configgpio(priv->rs485_dir_gpio);
+      stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 
@@ -1502,8 +1502,8 @@ static int stm32l5serial_setup(struct uart_dev_s *dev)
 #ifdef SERIAL_HAVE_DMA
 static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   int result;
   uint32_t regval;
 
@@ -1520,14 +1520,14 @@ static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
 
   /* Acquire the DMA channel.  This should always succeed. */
 
-  priv->rxdma = stm32l5_dmachannel(priv->rxdma_channel);
+  priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
       /* Configure for non-circular DMA reception into the RX FIFO */
 
-      stm32l5_dmasetup(priv->rxdma,
+      stm32_dmasetup(priv->rxdma,
                      priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
@@ -1538,7 +1538,7 @@ static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
     {
       /* Configure for circular DMA reception into the RX FIFO */
 
-      stm32l5_dmasetup(priv->rxdma,
+      stm32_dmasetup(priv->rxdma,
                      priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
@@ -1565,7 +1565,7 @@ static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
        * in and DMA transfer is stopped.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
                        (void *)priv, false);
     }
   else
@@ -1576,7 +1576,7 @@ static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
                        (void *)priv, true);
     }
 
@@ -1595,8 +1595,8 @@ static int stm32l5serial_dmasetup(struct uart_dev_s *dev)
 
 static void stm32l5serial_shutdown(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
 
   /* Mark device as uninitialized. */
@@ -1627,32 +1627,32 @@ static void stm32l5serial_shutdown(struct uart_dev_s *dev)
 
   if (priv->tx_gpio != 0)
     {
-      stm32l5_unconfiggpio(priv->tx_gpio);
+      stm32_unconfiggpio(priv->tx_gpio);
     }
 
   if (priv->rx_gpio != 0)
     {
-      stm32l5_unconfiggpio(priv->rx_gpio);
+      stm32_unconfiggpio(priv->rx_gpio);
     }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
-      stm32l5_unconfiggpio(priv->cts_gpio);
+      stm32_unconfiggpio(priv->cts_gpio);
     }
 #endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rts_gpio != 0)
     {
-      stm32l5_unconfiggpio(priv->rts_gpio);
+      stm32_unconfiggpio(priv->rts_gpio);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32l5_unconfiggpio(priv->rs485_dir_gpio);
+      stm32_unconfiggpio(priv->rs485_dir_gpio);
     }
 #endif
 }
@@ -1669,8 +1669,8 @@ static void stm32l5serial_shutdown(struct uart_dev_s *dev)
 #ifdef SERIAL_HAVE_DMA
 static void stm32l5serial_dmashutdown(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
   /* Perform the normal UART shutdown */
 
@@ -1678,11 +1678,11 @@ static void stm32l5serial_dmashutdown(struct uart_dev_s *dev)
 
   /* Stop the DMA channel */
 
-  stm32l5_dmastop(priv->rxdma);
+  stm32_dmastop(priv->rxdma);
 
   /* Release the DMA channel */
 
-  stm32l5_dmafree(priv->rxdma);
+  stm32_dmafree(priv->rxdma);
   priv->rxdma = NULL;
 }
 #endif
@@ -1705,8 +1705,8 @@ static void stm32l5serial_dmashutdown(struct uart_dev_s *dev)
 
 static int stm32l5serial_attach(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -1737,8 +1737,8 @@ static int stm32l5serial_attach(struct uart_dev_s *dev)
 
 static void stm32l5serial_detach(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -1757,7 +1757,7 @@ static void stm32l5serial_detach(struct uart_dev_s *dev)
 
 static int stm32l5serial_interrupt(int irq, void *context, void *arg)
 {
-  struct stm32l5_serial_s *priv = (struct stm32l5_serial_s *)arg;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
   int  passes;
   bool handled;
 
@@ -1817,7 +1817,7 @@ static int stm32l5serial_interrupt(int irq, void *context, void *arg)
           (priv->ie & USART_CR1_TCIE) != 0 &&
           (priv->ie & USART_CR1_TXEIE) == 0)
         {
-          stm32l5_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+          stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
           stm32l5serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
         }
 #endif
@@ -1883,8 +1883,8 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
   struct uart_dev_s *dev   = inode->i_private;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS)
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 #endif
   int                ret    = OK;
 
@@ -1893,9 +1893,9 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-        struct stm32l5_serial_s *user;
+        struct stm32_serial_s *user;
 
-        user = (struct stm32l5_serial_s *)arg;
+        user = (struct stm32_serial_s *)arg;
 
         if (!user)
           {
@@ -1903,7 +1903,7 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
           }
         else
           {
-            memcpy(user, dev, sizeof(struct stm32l5_serial_s));
+            memcpy(user, dev, sizeof(struct stm32_serial_s));
           }
       }
       break;
@@ -1958,7 +1958,7 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
 
             if (priv->tx_gpio != 0)
               {
-                stm32l5_configgpio((priv->tx_gpio &
+                stm32_configgpio((priv->tx_gpio &
                                     ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
                                     gpio_val);
               }
@@ -1969,7 +1969,7 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
           {
             if (priv->tx_gpio != 0)
               {
-                stm32l5_configgpio((priv->tx_gpio &
+                stm32_configgpio((priv->tx_gpio &
                                     ~(GPIO_PUPD_MASK | GPIO_OPENDRAIN)) |
                                     GPIO_PUSHPULL);
               }
@@ -2195,7 +2195,7 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
           {
             uint32_t tx_break = GPIO_OUTPUT |
                     (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
-            stm32l5_configgpio(tx_break);
+            stm32_configgpio(tx_break);
           }
 
         leave_critical_section(flags);
@@ -2212,7 +2212,7 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
 
         if (priv->tx_gpio != 0)
           {
-            stm32l5_configgpio(priv->tx_gpio);
+            stm32_configgpio(priv->tx_gpio);
           }
 
         priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
@@ -2275,8 +2275,8 @@ static int stm32l5serial_ioctl(struct file *filep, int cmd,
 static int stm32l5serial_receive(struct uart_dev_s *dev,
                                  unsigned int *status)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   uint32_t rdr;
 
   /* Get the Rx byte */
@@ -2305,8 +2305,8 @@ static int stm32l5serial_receive(struct uart_dev_s *dev,
 #ifndef SERIAL_HAVE_ONLY_DMA
 static void stm32l5serial_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   irqstate_t flags;
   uint16_t ie;
 
@@ -2365,8 +2365,8 @@ static void stm32l5serial_rxint(struct uart_dev_s *dev, bool enable)
 #ifndef SERIAL_HAVE_ONLY_DMA
 static bool stm32l5serial_rxavailable(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
   return ((stm32l5serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_RXNE) != 0);
@@ -2400,8 +2400,8 @@ static bool stm32l5serial_rxavailable(struct uart_dev_s *dev)
 static bool stm32l5serial_rxflowcontrol(struct uart_dev_s *dev,
                                         unsigned int nbuffered, bool upper)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
     defined(CONFIG_STM32L5_FLOWCONTROL_BROKEN)
@@ -2409,7 +2409,7 @@ static bool stm32l5serial_rxflowcontrol(struct uart_dev_s *dev,
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
 
-      stm32l5_gpiowrite(priv->rts_gpio, upper);
+      stm32_gpiowrite(priv->rts_gpio, upper);
 
       if (upper)
         {
@@ -2484,8 +2484,8 @@ static bool stm32l5serial_rxflowcontrol(struct uart_dev_s *dev,
 static int stm32l5serial_dmareceive(struct uart_dev_s *dev,
                                     unsigned int *status)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   int c = 0;
 
   if (stm32l5serial_dmanextrx(priv) != priv->rxdmanext)
@@ -2523,14 +2523,14 @@ static int stm32l5serial_dmareceive(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #if defined(SERIAL_HAVE_DMA)
-static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv)
+static void stm32l5serial_dmareenable(struct stm32_serial_s *priv)
 {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
       /* Configure for non-circular DMA reception into the RX FIFO */
 
-      stm32l5_dmasetup(priv->rxdma,
+      stm32_dmasetup(priv->rxdma,
                        priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
@@ -2541,7 +2541,7 @@ static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv)
     {
       /* Configure for circular DMA reception into the RX FIFO */
 
-      stm32l5_dmasetup(priv->rxdma,
+      stm32_dmasetup(priv->rxdma,
                        priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
@@ -2562,7 +2562,7 @@ static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv)
        * in and DMA transfer is stopped.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
                       (void *)priv, false);
     }
   else
@@ -2573,7 +2573,7 @@ static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32l5_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
+      stm32_dmastart(priv->rxdma, stm32l5serial_dmarxcallback,
                       (void *)priv, true);
     }
 
@@ -2594,7 +2594,7 @@ static void stm32l5serial_dmareenable(struct stm32l5_serial_s *priv)
  ****************************************************************************/
 
 #if defined(SERIAL_HAVE_DMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
-static bool stm32l5serial_dmaiflowrestart(struct stm32l5_serial_s *priv)
+static bool stm32l5serial_dmaiflowrestart(struct stm32_serial_s *priv)
 {
   if (!priv->rxenable)
     {
@@ -2645,8 +2645,8 @@ static bool stm32l5serial_dmaiflowrestart(struct stm32l5_serial_s *priv)
 #ifdef SERIAL_HAVE_DMA
 static void stm32l5serial_dmarxint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
   /* En/disable DMA reception.
    *
@@ -2680,8 +2680,8 @@ static void stm32l5serial_dmarxint(struct uart_dev_s *dev, bool enable)
 #ifdef SERIAL_HAVE_DMA
 static bool stm32l5serial_dmarxavailable(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
   /* Compare our receive pointer to the current DMA pointer, if they
    * do not match, then there are bytes to be received.
@@ -2701,13 +2701,13 @@ static bool stm32l5serial_dmarxavailable(struct uart_dev_s *dev)
 
 static void stm32l5serial_send(struct uart_dev_s *dev, int ch)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32l5_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+      stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
     }
 #endif
 
@@ -2724,8 +2724,8 @@ static void stm32l5serial_send(struct uart_dev_s *dev, int ch)
 
 static void stm32l5serial_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
   irqstate_t flags;
 
   /* USART transmit interrupts:
@@ -2793,8 +2793,8 @@ static void stm32l5serial_txint(struct uart_dev_s *dev, bool enable)
 
 static bool stm32l5serial_txready(struct uart_dev_s *dev)
 {
-  struct stm32l5_serial_s *priv =
-    (struct stm32l5_serial_s *)dev->priv;
+  struct stm32_serial_s *priv =
+    (struct stm32_serial_s *)dev->priv;
 
   return ((stm32l5serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_TXE) != 0);
@@ -2813,7 +2813,7 @@ static bool stm32l5serial_txready(struct uart_dev_s *dev)
 static void stm32l5serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
                                         void *arg)
 {
-  struct stm32l5_serial_s *priv = (struct stm32l5_serial_s *)arg;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
 
   if (priv->rxenable && stm32l5serial_dmarxavailable(&priv->dev))
     {
@@ -2971,7 +2971,7 @@ static int stm32l5serial_pmprepare(struct pm_callback_s *cb, int domain,
        * buffers.
        */
 
-      stm32l5_serial_dma_poll();
+      stm32_serial_dma_poll();
 #endif
 
       /* Check if any of the active ports have data pending on Tx/Rx
@@ -2980,7 +2980,7 @@ static int stm32l5serial_pmprepare(struct pm_callback_s *cb, int domain,
 
       for (n = 0; n < STM32_NLPUART + STM32_NUSART + STM32_NUART; n++)
         {
-          struct stm32l5_serial_s *priv = g_uart_devs[n];
+          struct stm32_serial_s *priv = g_uart_devs[n];
 
           if (!priv || !priv->initialized)
             {
@@ -3144,7 +3144,7 @@ void arm_serialinit(void)
 }
 
 /****************************************************************************
- * Name: stm32l5_serial_dma_poll
+ * Name: stm32_serial_dma_poll
  *
  * Description:
  *   Checks receive DMA buffers for received bytes that have not accumulated
@@ -3155,7 +3155,7 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-void stm32l5_serial_dma_poll(void)
+void stm32_serial_dma_poll(void)
 {
     irqstate_t flags;
 
@@ -3218,7 +3218,7 @@ void stm32l5_serial_dma_poll(void)
 void up_putc(int ch)
 {
 #if CONSOLE_UART > 0
-  struct stm32l5_serial_s *priv = g_uart_devs[CONSOLE_UART - 1];
+  struct stm32_serial_s *priv = g_uart_devs[CONSOLE_UART - 1];
   uint16_t ie;
 
   stm32l5serial_disableusartint(priv, &ie);

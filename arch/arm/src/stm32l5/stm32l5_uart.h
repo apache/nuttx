@@ -275,7 +275,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_serial_dma_poll
+ * Name: stm32_serial_dma_poll
  *
  * Description:
  *   Must be called periodically if any STM32 UART is configured for DMA.
@@ -288,7 +288,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-void stm32l5_serial_dma_poll(void);
+void stm32_serial_dma_poll(void);
 #endif
 
 #undef EXTERN
