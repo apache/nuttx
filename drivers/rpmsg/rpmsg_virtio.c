@@ -791,7 +791,7 @@ void rpmsg_virtio_remove(FAR struct virtio_device *vdev)
 
   /* Destroy all the rpmsg services */
 
-  rpmsg_device_destory(&priv->rpmsg);
+  rpmsg_device_destroy(&priv->rpmsg);
 
   /* Reset the rpmsg virtio device for driver */
 

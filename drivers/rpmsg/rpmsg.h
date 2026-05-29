@@ -53,7 +53,7 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
                      FAR const char *name, uint32_t dest);
 
 void rpmsg_device_created(FAR struct rpmsg_s *rpmsg);
-void rpmsg_device_destory(FAR struct rpmsg_s *rpmsg);
+void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg);
 
 int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
                    FAR const struct rpmsg_ops_s *ops);
