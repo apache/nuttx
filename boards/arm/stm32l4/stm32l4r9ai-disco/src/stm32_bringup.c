@@ -39,7 +39,7 @@
 
 #include <stm32.h>
 #include <stm32l4_uart.h>
-#include <stm32l4_uid.h>
+#include <stm32_uid.h>
 
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>

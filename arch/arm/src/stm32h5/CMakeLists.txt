@@ -41,8 +41,7 @@ list(
   stm32_pwr.c
   stm32_timerisr.c
   stm32_lse.c
-  stm32_lsi.c
-  stm32_uid.c)
+  stm32_lsi.c)
 
 if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
@@ -127,3 +126,5 @@ if(CONFIG_STM32_STM32H5XXXX)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

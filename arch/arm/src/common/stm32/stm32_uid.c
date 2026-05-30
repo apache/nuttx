@@ -1,10 +1,9 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_uid.h
+ * arch/arm/src/common/stm32/stm32_uid.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2015 Marawan Ragab. All rights reserved.
  * SPDX-FileContributor: Marawan Ragab <marawan31@gmail.com>
- * SPDX-FileContributor: dev@ziggurat9.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,19 +34,29 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_UID_H
-#define __ARCH_ARM_SRC_STM32L4_STM32L4_UID_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
+#include <nuttx/config.h>
+
+#include "chip.h"
+#include "stm32_uid.h"
+
+#ifdef STM32_SYSMEM_UID /* Not defined for some STM32 parts */
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-void stm32_get_uniqueid(uint8_t uniqueid[12]);
+void stm32_get_uniqueid(uint8_t uniqueid[12])
+{
+  int i;
 
-#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_UID_H */
+  for (i = 0; i < 12; i++)
+    {
+      uniqueid[i] = *((uint8_t *)(STM32_SYSMEM_UID) + i);
+    }
+}
+
+#endif /* STM32_SYSMEM_UID */

@@ -26,6 +26,7 @@
 # Common ARM and Cortex-M7 files
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 ifeq ($(CONFIG_STM32_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
@@ -47,7 +48,6 @@ endif
 
 CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
-CHIP_CSRCS += stm32_uid.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_tickless.c

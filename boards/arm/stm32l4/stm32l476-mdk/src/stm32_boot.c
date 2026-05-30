@@ -44,7 +44,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
-#include "stm32l4_uid.h"
+#include "stm32_uid.h"
 #include "stm32l476-mdk.h"
 
 /* Conditional logic in stm32l476-mdk.h will determine if certain features

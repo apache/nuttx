@@ -33,7 +33,6 @@ list(
   stm32l5_rcc.c
   stm32l5_serial.c
   stm32l5_start.c
-  stm32l5_uid.c
   stm32l5_spi.c
   stm32l5_lse.c
   stm32l5_lsi.c

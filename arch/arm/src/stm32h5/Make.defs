@@ -28,6 +28,7 @@ HEAD_ASRC =
 # Common ARM and Cortex-M33 files
 
 include armv8-m/Make.defs
+include common/stm32/Make.defs
 
 ifeq ($(CONFIG_STM32_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
@@ -38,7 +39,6 @@ endif
 CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
 CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
 CHIP_CSRCS += stm32_lse.c stm32_lsi.c
-CHIP_CSRCS += stm32_uid.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
