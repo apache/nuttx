@@ -198,6 +198,22 @@ nsh
 A simple configuration with NSH on the Mini-UART console, accessible using a TTL
 cable connected to GPIO 14 & 15.
 
+nxinit
+------
+
+This configuration has the same features as the ``sd`` configuration, but uses
+the :doc:`NXInit </applications/system/nxinit/index>` init system instead of NSH
+directly. The ``init.rc`` init script is pulled from the SD card. It is
+recommended to use the following script:
+
+.. code:: text
+
+   on boot
+       start console
+   service console nsh
+       class core
+       restart_period 1000
+
 coremark
 --------
 
