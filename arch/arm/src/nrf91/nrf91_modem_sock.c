@@ -1111,16 +1111,29 @@ static int nrf91_usrsock_ioctl_handler(struct nrf91_usrsock_s *usrsock,
 {
   const struct usrsock_request_ioctl_s *req = data;
   struct usrsock_message_datareq_ack_s *ack = NULL;
+  size_t                                copylen;
   int                                   ret = 0;
 
+  if (len < sizeof(*req))
+    {
+      return -EINVAL;
+    }
+
   ack = (struct usrsock_message_datareq_ack_s *)usrsock->out;
-  memcpy(ack + 1, req + 1, req->arglen);
+  copylen = req->arglen;
+  if (copylen > len - sizeof(*req) ||
+      copylen > sizeof(usrsock->out) - sizeof(*ack))
+    {
+      return -EINVAL;
+    }
+
+  memcpy(ack + 1, req + 1, copylen);
   ret = nrf91_usrsock_ioctl(req->usockid,
                             req->cmd,
                             (unsigned long)(ack + 1));
 
   return nrf91_usrsock_send_dack(usrsock, ack, req->head.xid, ret,
-                           req->arglen, req->arglen);
+                           copylen, copylen);
 }
 
 /****************************************************************************
