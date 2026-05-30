@@ -340,6 +340,26 @@ config BCM2711_FRAMEBUFFER
 	---help---
 		Support for the VideoCore frame buffer interface.
 
+config BCM2711_FB_WIDTH
+	int "Default x resolution (width)"
+	default 1920
+	---help---
+		The x resolution (width) of the frame buffer.
+
+config BCM2711_FB_HEIGHT
+	int "Default y resolution (height)"
+	default 1080
+	---help---
+		The y resolution (height) of the frame buffer.
+
+config BCM2711_FB_FORCE_RESOLUTION
+	bool "Force resolution"
+	depends on VIDEO_FB
+	default n
+	---help---
+		Force the frame buffer allocation to use the default resolution instead
+		of querying the physical display and using that.
+
 endmenu # Broadcom BCM2711 Peripheral Selection
 
 endif # ARCH_CHIP_BCM2711

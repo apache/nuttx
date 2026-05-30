@@ -46,11 +46,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Screen resolution */
-
-#define FB_WIDTH (1920)
-#define FB_HEIGHT (1080)
-
 /* Bits per pixel (32 for RGB) */
 
 #define FB_BPP (32)
@@ -344,8 +339,8 @@ int up_fbinitialize(int display)
 {
   int err;
   uint8_t tries = 0;
-  uint32_t xres = FB_WIDTH;
-  uint32_t yres = FB_HEIGHT;
+  uint32_t xres = CONFIG_BCM2711_FB_WIDTH;
+  uint32_t yres = CONFIG_BCM2711_FB_HEIGHT;
   uint32_t bpp = FB_BPP;
   struct bcm2711_fb_s *priv;
 
@@ -371,6 +366,24 @@ int up_fbinitialize(int display)
   priv->fb = NULL;
   priv->fbsize = 0;
 
+#ifndef CONFIG_BCM2711_FB_FORCE_RESOLUTION
+  /* Ask for physical resolution to choose the frame buffer resolution */
+
+  err = bcm2711_mbox_getdisp(&xres, &yres);
+  if (err < 0)
+    {
+      gerr("Couldn't get display dimensions: %d", err);
+      return err;
+    }
+
+  err = bcm2711_mbox_getdepth(&bpp);
+  if (err < 0)
+    {
+      gerr("Couldn't get display depth: %d", err);
+      return err;
+    }
+#endif
+
   /* Initialize the frame-buffer in a bulk request. Doing this piece-wise
    * never seems to work, always resulting a virtual resolution of 2x2 px.
    * This attempts the initialization three times since the operation always
@@ -391,12 +404,14 @@ int up_fbinitialize(int display)
       return err;
     }
 
-  if (xres != FB_WIDTH || yres != FB_HEIGHT)
+#ifdef CONFIG_BCM2711_FB_FORCE_RESOLUTION
+  if (xres != CONFIG_BCM2711_FB_WIDTH || yres != CONFIG_BCM2711_FB_HEIGHT)
     {
       gerr("Display mismatch: wanted %u x %u px, but got %u x %u px",
-           FB_WIDTH, FB_HEIGHT, xres, yres);
+           CONFIG_BCM2711_FB_WIDTH, CONFIG_BCM2711_FB_HEIGHT, xres, yres);
       return -EIO;
     }
+#endif
 
   if (bpp != FB_BPP)
     {
