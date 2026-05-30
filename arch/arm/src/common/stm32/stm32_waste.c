@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_waste.c
+ * arch/arm/src/common/stm32/stm32_waste.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 #include <stdint.h>
-#include "stm32l4_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Public Data

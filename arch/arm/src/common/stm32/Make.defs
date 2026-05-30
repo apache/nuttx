@@ -37,6 +37,10 @@ ARCHXXINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
 #    the M3/M4 block because the other Cortex-M4 families (L4/WB/WL5) include
 #    this file too but provide their own implementation.
 
+# Architecture-neutral sources used by every STM32 family
+
+CHIP_CSRCS += stm32_waste.c
+
 ifeq ($(CONFIG_STM32_COMMON_LEGACY),y)
 
 CHIP_CSRCS += stm32_allocateheap_m3m4_v1.c
@@ -81,7 +85,6 @@ endif
 ifeq ($(CONFIG_STM32_HAVE_IP_TIMERS),y)
 CHIP_CSRCS += stm32_tim_m3m4_v1v2v3.c
 endif
-CHIP_CSRCS += stm32_waste_m3m4_v1.c
 ifeq ($(CONFIG_STM32_HAVE_IP_CCM_M3M4_V1),y)
 CHIP_CSRCS += stm32_ccm_m3m4_v1.c
 endif

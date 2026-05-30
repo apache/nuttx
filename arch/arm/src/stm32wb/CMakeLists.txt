@@ -33,7 +33,6 @@ set(SRCS
     stm32wb_serial.c
     stm32wb_i2c.c
     stm32wb_start.c
-    stm32wb_waste.c
     stm32wb_rcc_lse.c
     stm32wb_rcc_lsi.c
     stm32wb_pwr.c
@@ -117,3 +116,5 @@ if(CONFIG_DEBUG_FEATURES)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

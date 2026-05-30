@@ -33,7 +33,6 @@ list(
   stm32l4_rcc.c
   stm32l4_serial.c
   stm32l4_start.c
-  stm32l4_waste.c
   stm32l4_uid.c
   stm32l4_spi.c
   stm32l4_i2c.c
@@ -197,3 +196,5 @@ if(CONFIG_STM32_1WIREDRIVER)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

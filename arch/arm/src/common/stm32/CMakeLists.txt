@@ -29,6 +29,10 @@ endif()
 
 set(SRCS)
 
+# Architecture-neutral sources used by every STM32 family
+
+list(APPEND SRCS stm32_waste.c)
+
 if(CONFIG_STM32_COMMON_LEGACY)
   list(
     APPEND
@@ -38,7 +42,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     stm32_lse_m3m4_v1.c
     stm32_lsi_m3m4_v1.c
     stm32_irq_m3m4_v1.c
-    stm32_waste_m3m4_v1.c
     stm32_capture_m3m4_v1.c)
 
   if(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1)

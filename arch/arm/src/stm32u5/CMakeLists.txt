@@ -30,7 +30,6 @@ set(SRCS
     stm32_i2c.c
     stm32_serial.c
     stm32_start.c
-    stm32_waste.c
     stm32_uid.c
     stm32_spi.c
     stm32_lse.c
@@ -62,3 +61,5 @@ if(CONFIG_USBDEV)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)
