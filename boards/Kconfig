@@ -2461,6 +2461,13 @@ config ARCH_BOARD_A2G_TC375_LITE
 		Infineon AURIX Lite Kit evaluation board (KIT_A2G_TC375_LITE)
 		with the TC375 SoC.
 
+config ARCH_BOARD_A3G_TC4D7_LITE
+	bool "Infineon AURIX Lite Kit (TC4D7)"
+	depends on TC4X_CHIP_TC4D7
+	---help---
+		Infineon AURIX Lite Kit evaluation board (KIT_A3G_TC4D7_LITE)
+		with the TC4D7 SoC.
+
 config ARCH_BOARD_QEMU_ARMV7A
 	bool "Qemu ARMv7a CPUs board"
 	depends on ARCH_CHIP_QEMU_ARM
@@ -3892,6 +3899,7 @@ config ARCH_BOARD
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
 	default "a2g-tc375-lite"               if ARCH_BOARD_A2G_TC375_LITE
+	default "a3g-tc4d7-lite"               if ARCH_BOARD_A3G_TC4D7_LITE
 	default "qemu-armv7a"                  if ARCH_BOARD_QEMU_ARMV7A
 	default "qemu-armv7r"                  if ARCH_BOARD_QEMU_ARMV7R
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
@@ -4116,6 +4124,9 @@ source "boards/arm/imx6/sabre-6quad/Kconfig"
 endif
 if ARCH_BOARD_A2G_TC375_LITE
 source "boards/tricore/tc3x/a2g-tc375-lite/Kconfig"
+endif
+if ARCH_BOARD_A3G_TC4D7_LITE
+source "boards/tricore/tc4x/a3g-tc4d7-lite/Kconfig"
 endif
 if ARCH_BOARD_MPS2_AN500
 source "boards/arm/mps/mps2-an500/Kconfig"
