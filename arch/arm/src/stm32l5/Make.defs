@@ -28,13 +28,14 @@ HEAD_ASRC =
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
 include armv8-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32L5 files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = stm32l5_allocateheap.c stm32l5_exti_gpio.c stm32l5_gpio.c
+CHIP_CSRCS += stm32l5_allocateheap.c stm32l5_exti_gpio.c stm32l5_gpio.c
 CHIP_CSRCS += stm32l5_irq.c stm32l5_lowputc.c stm32l5_rcc.c
-CHIP_CSRCS += stm32l5_serial.c stm32l5_start.c stm32l5_waste.c stm32l5_uid.c
+CHIP_CSRCS += stm32l5_serial.c stm32l5_start.c stm32l5_uid.c
 CHIP_CSRCS += stm32l5_spi.c stm32l5_lse.c stm32l5_lsi.c
 CHIP_CSRCS += stm32l5_pwr.c stm32l5_tim.c stm32l5_flash.c stm32l5_timerisr.c
 

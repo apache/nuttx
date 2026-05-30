@@ -34,8 +34,7 @@ list(
   stm32_serial.c
   stm32_start.c
   stm32_capture.c
-  stm32_uid.c
-  stm32_waste.c)
+  stm32_uid.c)
 
 if(CONFIG_STM32_TICKLESS_TIMER)
   list(APPEND SRCS stm32_tickless.c)
@@ -189,3 +188,5 @@ if(CONFIG_STM32_FOC)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

@@ -29,6 +29,10 @@ endif()
 
 set(SRCS)
 
+# Architecture-neutral sources used by every STM32 family
+
+list(APPEND SRCS stm32_waste.c)
+
 if(CONFIG_STM32_COMMON_LEGACY)
   list(
     APPEND
@@ -38,7 +42,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     stm32_lse_m3m4_v1.c
     stm32_lsi_m3m4_v1.c
     stm32_irq_m3m4_v1.c
-    stm32_waste_m3m4_v1.c
     stm32_capture_m3m4_v1.c)
 
   if(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1)
@@ -366,14 +369,15 @@ if(CONFIG_ARCH_CORTEXM0)
     list(APPEND SRCS stm32_exti_gpio_m0_v1.c)
   endif()
 
-  if(CONFIG_STM32_HAVE_IP_UID_M0_V1)
-    list(APPEND SRCS stm32_uid_m0_v1.c)
-  endif()
 
   if(CONFIG_STM32_HAVE_IP_USART_V3)
     list(APPEND SRCS stm32_lowputc_usart_m0_v3.c stm32_serial_m0_v3.c)
   elseif(CONFIG_STM32_HAVE_IP_USART_V4)
     list(APPEND SRCS stm32_lowputc_usart_m0_v4.c stm32_serial_m0_v4.c)
+  endif()
+
+  if(CONFIG_STM32_HAVE_IP_UID_M0_V1)
+    list(APPEND SRCS stm32_uid_m0_v1.c)
   endif()
 
   if(CONFIG_STM32_RTC_LSECLOCK OR CONFIG_LCD_LSECLOCK)

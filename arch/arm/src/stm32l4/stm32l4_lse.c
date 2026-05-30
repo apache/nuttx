@@ -29,7 +29,7 @@
 #include "arm_internal.h"
 #include "stm32l4_pwr.h"
 #include "stm32l4_rcc.h"
-#include "stm32l4_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions

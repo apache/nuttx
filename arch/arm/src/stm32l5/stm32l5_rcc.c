@@ -38,7 +38,7 @@
 #include "stm32l5_rcc.h"
 #include "stm32l5_flash.h"
 #include "stm32.h"
-#include "stm32l5_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -46,7 +46,7 @@
 #include <sys/param.h>
 
 #include "stm32l4_rcc.h"
-#include "stm32l4_waste.h"
+#include "stm32_waste.h"
 #include "stm32l4_flash.h"
 #include "arm_internal.h"
 
