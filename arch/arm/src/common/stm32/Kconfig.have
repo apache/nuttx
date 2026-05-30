@@ -1114,14 +1114,6 @@ config STM32_HAVE_UART12
 config STM32_HAVE_USART1
 	bool
 
-# UID capabilities
-
-config STM32_HAVE_IP_UID_M0_V1
-	bool
-
-config STM32_HAVE_IP_UID_M3M4_V1
-	bool
-
 # USB capabilities
 
 config STM32_HAVE_USBFS_MODE

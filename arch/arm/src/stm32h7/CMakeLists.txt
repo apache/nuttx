@@ -32,8 +32,7 @@ list(
   stm32_start.c
   stm32_rcc.c
   stm32_lowputc.c
-  stm32_serial.c
-  stm32_uid.c)
+  stm32_serial.c)
 
 if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
@@ -225,3 +224,5 @@ if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE AND CONFIG_STM32_HAVE_IP_CRYPTO_H7)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

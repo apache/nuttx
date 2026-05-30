@@ -38,7 +38,7 @@
 
 #include <arch/board/board.h>
 
-#include "stm32l4_uid.h"
+#include "stm32_uid.h"
 #include "nucleo-144.h"
 
 /****************************************************************************

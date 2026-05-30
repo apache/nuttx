@@ -33,8 +33,7 @@ list(
   stm32_rcc.c
   stm32_serial.c
   stm32_start.c
-  stm32_capture.c
-  stm32_uid.c)
+  stm32_capture.c)
 
 if(CONFIG_STM32_TICKLESS_TIMER)
   list(APPEND SRCS stm32_tickless.c)

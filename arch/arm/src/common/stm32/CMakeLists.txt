@@ -32,6 +32,7 @@ set(SRCS)
 # Architecture-neutral sources used by every STM32 family
 
 list(APPEND SRCS stm32_waste.c)
+list(APPEND SRCS stm32_uid.c)
 
 if(CONFIG_STM32_COMMON_LEGACY)
   list(
@@ -73,10 +74,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
 
   if(CONFIG_STM32_HAVE_IP_CCM_M3M4_V1)
     list(APPEND SRCS stm32_ccm_m3m4_v1.c)
-  endif()
-
-  if(CONFIG_STM32_HAVE_IP_UID_M3M4_V1)
-    list(APPEND SRCS stm32_uid_m3m4_v1v2.c)
   endif()
 
   if(CONFIG_STM32_HAVE_IP_DFUMODE_M3M4_V1)
@@ -367,10 +364,6 @@ if(CONFIG_ARCH_CORTEXM0)
 
   if(CONFIG_STM32_HAVE_IP_EXTI_V1 OR CONFIG_STM32_HAVE_IP_EXTI_V2)
     list(APPEND SRCS stm32_exti_gpio_m0_v1.c)
-  endif()
-
-  if(CONFIG_STM32_HAVE_IP_UID_M0_V1)
-    list(APPEND SRCS stm32_uid_m0_v1.c)
   endif()
 
   if(CONFIG_STM32_HAVE_IP_USART_V3)

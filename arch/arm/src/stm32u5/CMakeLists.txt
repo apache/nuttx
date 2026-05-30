@@ -30,7 +30,6 @@ set(SRCS
     stm32_i2c.c
     stm32_serial.c
     stm32_start.c
-    stm32_uid.c
     stm32_spi.c
     stm32_lse.c
     stm32_lsi.c

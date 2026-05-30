@@ -33,7 +33,6 @@ list(
   stm32l4_rcc.c
   stm32l4_serial.c
   stm32l4_start.c
-  stm32l4_uid.c
   stm32l4_spi.c
   stm32l4_i2c.c
   stm32l4_lse.c

@@ -37,8 +37,7 @@ set(SRCS
     stm32wb_rcc_lsi.c
     stm32wb_pwr.c
     stm32wb_tim.c
-    stm32wb_flash.c
-    stm32wb_uid.c)
+    stm32wb_flash.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32wb_idle.c)
