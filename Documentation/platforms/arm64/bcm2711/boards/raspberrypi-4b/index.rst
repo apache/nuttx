@@ -269,12 +269,12 @@ colourful rectangles on the screen.
    ``memcpy``'d to the frame buffer, the image will be clear. I have not
    modified the frame buffer example though since this is its own limitation.
 
-.. todo::
+.. note::
 
-   The frame-buffer driver always sets the physical and virtual display
-   resolution to 1080 x 1920 pixels with a depth of 32 bits per pixel. Other
-   options cannot yet be configured via Kconfig, nor is there any kind of
-   negotiation with the display to agree on some maximum quality options.
+   The frame buffer driver currently uses the resolution obtained by querying
+   the physical display. It is also possible to use
+   ``CONFIG_BCM2711_FB_FORCE_RESOLUTION=y`` to force the request of your
+   configured default resolution instead.
 
 lvgl
 ----
