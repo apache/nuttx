@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/stm32l476vg-disco/src/Makefile
+# boards/arm/stm32l4/steval-stlcs01v1/src/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,46 +22,16 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
-ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
-CSRCS += stm32_clockconfig.c
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_ADC),y)
-#CSRCS += stm32_adc.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
-CSRCS += stm32_ioctl.c
-endif
-
-ifeq ($(CONFIG_ETC_ROMFS),y)
-CSRCS += etc_romfs.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
-CSRCS += stm32_uid.c
-endif
-
-ifneq ($(CONFIG_STM32_ETHMAC),y)
-ifeq ($(CONFIG_NETDEVICES),y)
-CSRCS += stm32_netinit.c
-endif
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

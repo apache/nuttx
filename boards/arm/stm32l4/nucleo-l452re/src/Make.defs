@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/b-l475e-iot01a/src/Makefile
+# boards/arm/stm32l4/nucleo-l452re/src/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c stm32_timer.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -30,8 +30,18 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_SPIRIT_NETDEV),y)
-CSRCS += stm32_spirit.c
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+ifeq ($(CONFIG_ADC),y)
+CSRCS += stm32_adc.c
+endif
+
+ifeq ($(CONFIG_DAC),y)
+CSRCS += stm32_dac.c
+endif
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
