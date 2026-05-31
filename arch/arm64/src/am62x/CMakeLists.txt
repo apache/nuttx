@@ -24,6 +24,21 @@
 
 list(APPEND SRCS am62x_boot.c am62x_16550serial.c)
 
+if(CONFIG_AM62X_GPIO)
+  list(APPEND SRCS am62x_gpio.c)
+endif()
+
+if(CONFIG_AM62X_I2C0
+   OR CONFIG_AM62X_I2C1
+   OR CONFIG_AM62X_I2C2
+   OR CONFIG_AM62X_I2C3)
+  list(APPEND SRCS am62x_i2c.c)
+endif()
+
+if(CONFIG_AM62X_TISCI)
+  list(APPEND SRCS am62x_tisci.c)
+endif()
+
 # Early UART assembly (needed for CONFIG_ARCH_EARLY_PRINT / semihosting console
 # before the full serial driver is up)
 

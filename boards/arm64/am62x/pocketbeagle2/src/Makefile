@@ -32,4 +32,8 @@ ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += pocketbeagle2_autoleds.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += pocketbeagle2_gpio.c
+endif
+
 include $(TOPDIR)/boards/Board.mk

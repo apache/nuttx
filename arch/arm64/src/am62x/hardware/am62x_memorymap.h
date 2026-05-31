@@ -83,6 +83,21 @@
 #define AM62X_SPI1_BASE         0x20110000ul
 #define AM62X_SPI2_BASE         0x20120000ul
 
+/* Secure Proxy (TISCI transport to the DM/TIFS system firmware).
+ * Three 512 KB regions of per-thread 0x1000-stride windows.
+ * Source: Linux k3-am62-main.dtsi (secure_proxy_main).
+ */
+
+#define AM62X_SEC_PROXY_DATA_BASE  0x4d000000ul  /* "target_data" region    */
+#define AM62X_SEC_PROXY_RT_BASE    0x4a600000ul  /* "rt" (status) region    */
+#define AM62X_SEC_PROXY_SCFG_BASE  0x4a400000ul  /* "scfg" (config) region  */
+
+/* DMSC / TIFS system controller (TISCI message target).
+ * Source: Linux k3-am62-main.dtsi (dmsc: system-controller@44043000).
+ */
+
+#define AM62X_DMSC_BASE            0x44043000ul
+
 /* USB */
 
 #define AM62X_USB0_BASE         0x31100000ul
@@ -99,10 +114,10 @@
 #define AM62X_WDT0_BASE         0x23100000ul
 #define AM62X_WDT1_BASE         0x23110000ul
 
-/* CTRL_MMR (Pad config / system control) */
+/* CTRL_MMR (system control) and main-domain pad config */
 
 #define AM62X_CTRLMMR_BASE      0x000f0000ul
-#define AM62X_PADCFG_BASE       0x000f0000ul
+#define AM62X_PADCFG_BASE       0x000f4000ul
 
 /* DDR Base (512 MB on PocketBeagle 2 / BeaglePlay) */
 

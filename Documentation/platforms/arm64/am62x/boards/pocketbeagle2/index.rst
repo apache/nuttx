@@ -17,10 +17,11 @@ Features
 * Expansion headers for GPIO, I2C, SPI, UART, PWM, and ADC
 * User LEDs exposed by the board port
 
-Current NuttX support is limited to early boot, the 16550 serial console,
-interactive NSH, and ``procfs`` mount during board bring-up. GPIO, functional
-LED control, I2C, SPI, MMC/SD runtime support, Ethernet, and USB runtime
-support are not implemented yet.
+Current NuttX support includes early boot, the 16550 serial console,
+interactive NSH, ``procfs`` mount during board bring-up, AM62x TISCI
+initialization, main-domain GPIO, and I2C0/I2C2 controller support in the
+``pocketbeagle2:i2c`` configuration. SPI, MMC/SD runtime support, Ethernet,
+and USB runtime support are not implemented yet.
 
 Buttons and LEDs
 ================
@@ -35,7 +36,8 @@ USR1    Amber     ``CONFIG_ARCH_LEDS`` placeholder
 USR2    Red       ``CONFIG_ARCH_LEDS`` placeholder
 ======  ========  =====================
 
-These LEDs are not driven yet because AM62x GPIO support has not been added.
+The AM62x GPIO controller is initialized by the board port. Automatic
+``CONFIG_ARCH_LEDS`` LED hooks remain placeholders only.
 
 Serial Console
 ==============
@@ -54,7 +56,9 @@ Interface    SoC signal              Notes
 ===========  ======================  =======================================
 USB-C debug  UART6                   Default NuttX serial console
 microSD      MMC1                    Validated boot media for ``nuttx.bin``
-USR0-2       Board user LEDs         Not yet driven by NuttX GPIO support
+USR0-2       Board user LEDs         Available through the main GPIO block
+I2C0         I2C0                    Available in ``pocketbeagle2:i2c``
+I2C2         Header I2C2             Available in ``pocketbeagle2:i2c``
 ===========  ======================  =======================================
 
 Power Supply
@@ -103,8 +107,23 @@ present in on-board flash.
 Configurations
 ==============
 
-``pocketbeagle2:nsh``
-  Interactive NSH configuration for serial bring-up and shell access.
+Configure NuttX with ``pocketbeagle2:<config-name>``.
 
-``pocketbeagle2:ostest``
-  Hardware validation configuration that boots directly into ``ostest_main``.
+.. code:: console
+
+   $ ./tools/configure.sh pocketbeagle2:nsh
+
+nsh
+---
+
+Interactive NSH configuration for serial bring-up and shell access.
+
+i2c
+---
+
+NSH configuration with AM62x I2C0/I2C2 and the ``i2c`` tool enabled.
+
+ostest
+------
+
+Hardware validation configuration that boots directly into ``ostest_main``.

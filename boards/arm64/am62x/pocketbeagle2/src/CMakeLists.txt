@@ -26,4 +26,8 @@ if(CONFIG_ARCH_LEDS)
   list(APPEND SRCS pocketbeagle2_autoleds.c)
 endif()
 
+if(CONFIG_DEV_GPIO)
+  list(APPEND SRCS pocketbeagle2_gpio.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
