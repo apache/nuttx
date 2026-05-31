@@ -1,0 +1,42 @@
+{
+  "arch": "aarch64",
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32",
+  "default-uwtable": true,
+  "disable-redzone": true,
+  "features": "+v8a,+strict-align,+neon",
+  "linker": "rust-lld",
+  "linker-flavor": "gnu-lld",
+  "llvm-target": "aarch64-unknown-nuttx",
+  "max-atomic-width": 128,
+  "metadata": {
+    "description": "aarch64 target for NuttX RTOS",
+    "host_tools": false,
+    "std": true,
+    "tier": 3
+  },
+  "os": "nuttx",
+  "panic-strategy": "abort",
+  "pre-link-args": {
+    "gnu": [
+      "--fix-cortex-a53-843419"
+    ],
+    "gnu-lld": [
+      "--fix-cortex-a53-843419"
+    ]
+  },
+  "relocation-model": "static",
+  "stack-probes": {
+    "kind": "inline"
+  },
+  "supported-sanitizers": [
+    "kcfi",
+    "kernel-address",
+    "kernel-hwaddress"
+  ],
+  "supports-xray": true,
+  "target-family": [
+    "unix"
+  ],
+  "target-pointer-width": 64
+}
