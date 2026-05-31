@@ -250,6 +250,13 @@ static const char *g_white_prefix[] =
   "UInt64",
   "Float32",
   "Float64",
+
+  /* Ref:  apps/system/microros/transport
+   * Micro XRCE-DDS Client custom transport struct exposed in the
+   * callback prototypes registered via rmw_uros_set_custom_transport().
+   */
+
+  "uxrCustom",           /* uxrCustomTransport */
   NULL
 };
 
