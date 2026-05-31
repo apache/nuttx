@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/src/stm32_reset.c
+ * boards/arm/common/stm32/src/stm32_can_setup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,35 +26,78 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/board.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <nuttx/debug.h>
+
+#include <nuttx/can/can.h>
+
+#include "stm32_can.h"
+
+#ifdef CONFIG_CAN
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_CAN1
+#  define CAN_PORT 1
+#else
+#  define CAN_PORT 2
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_reset
+ * Name: stm32_can_setup
  *
  * Description:
- *   Reset board.  Support for this function is required by board-level
- *   logic if CONFIG_BOARDCTL_RESET is selected.
- *
- * Input Parameters:
- *   status - Status information provided with the reset event.  This
- *            meaning of this status information is board-specific.  If not
- *            used by a board, the value zero may be provided in calls to
- *            board_reset().
- *
- * Returned Value:
- *   If this function returns, then it was not possible to power-off the
- *   board due to some constraints.  The return value int this case is a
- *   board-specific reason for the failure to shutdown.
+ *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int board_reset(int status)
+int stm32_can_setup(void)
 {
-  up_systemreset();
-  return 0;
+  struct can_dev_s *can;
+  int ret;
+
+  /* Register the first enabled CAN interface at "/dev/can0" */
+
+  can = stm32_caninitialize(CAN_PORT);
+  if (can == NULL)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+
+  ret = can_register("/dev/can0", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
+    }
+
+#if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_CAN2)
+  /* Both CAN1 and CAN2 are enabled: register CAN2 at "/dev/can1" */
+
+  can = stm32_caninitialize(2);
+  if (can == NULL)
+    {
+      canerr("ERROR: Failed to get CAN interface\n");
+      return -ENODEV;
+    }
+
+  ret = can_register("/dev/can1", can);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register failed: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  return OK;
 }
+
+#endif /* CONFIG_CAN */

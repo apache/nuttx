@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_bmi270.h
+ * boards/arm/common/stm32/src/stm32_bmi270.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,41 +20,30 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BMI270_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BMI270_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+#include <nuttx/debug.h>
+#include <stdio.h>
+
+#include <nuttx/spi/spi.h>
+#include <arch/board/board.h>
+#include <nuttx/sensors/bmi270.h>
+
+#include "stm32_i2c.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#define BMI270_I2C_ADDR    0x68
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -72,11 +61,31 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_bmi270_initialize(int devno, int busno);
+int board_bmi270_initialize(int devno, int busno)
+{
+  struct i2c_master_s *i2c;
+  char devpath[16];
+  int ret;
 
-#undef EXTERN
-#ifdef __cplusplus
+  sninfo("Initializing BMI270!\n");
+
+  /* Initialize I2C */
+
+  i2c = stm32_i2cbus_initialize(busno);
+  if (!i2c)
+    {
+      return -ENODEV;
+    }
+
+  /* Then register the ambient light sensor */
+
+  snprintf(devpath, sizeof(devpath), "/dev/imu%d", devno);
+  ret = bmi270_register(devpath, i2c, BMI270_I2C_ADDR);
+  if (ret < 0)
+    {
+      snerr("ERROR: Error registering BMI270\n");
+    }
+
+  return ret;
 }
-#endif
 
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BMI270_H */
