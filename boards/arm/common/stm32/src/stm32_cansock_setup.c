@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_cansock_setup.h
+ * boards/arm/common/stm32/src/stm32_cansock_setup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,54 +20,66 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CANSOCK_SETUP_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CANSOCK_SETUP_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <nuttx/debug.h>
+
+#include "stm32_can.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+/* Configuration ************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
+#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
+#  error "No CAN is enable. Please enable at least one CAN device"
 #endif
 
 /****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
  * Name: stm32_cansock_setup
+ *
+ * Description:
+ *  Initialize CAN socket interface
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_CAN_SOCKET
-int stm32_cansock_setup(void);
+int stm32_cansock_setup(void)
+{
+  int ret = OK;
+
+  UNUSED(ret);
+
+#ifdef CONFIG_STM32_CAN1
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+
+  ret = stm32_cansockinitialize(1);
+  if (ret < 0)
+    {
+      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
+      goto errout;
+    }
 #endif
 
-#undef EXTERN
-#ifdef __cplusplus
+#ifdef CONFIG_STM32_CAN2
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
+
+  ret = stm32_cansockinitialize(2);
+  if (ret < 0)
+    {
+      canerr("ERROR:  Failed to get CAN interface %d\n", ret);
+      goto errout;
+    }
+#endif
+
+errout:
+  return ret;
 }
-#endif
-
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CANSOCK_SETUP_H */

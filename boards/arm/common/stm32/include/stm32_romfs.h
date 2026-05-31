@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_romfs.h
+ * boards/arm/common/stm32/include/stm32_romfs.h
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2017 Tomasz Wozniak. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_ROMFS_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_ROMFS_H
+#ifndef __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_ROMFS_H
+#define __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_ROMFS_H
 
 /****************************************************************************
  * Included Files
@@ -74,4 +74,4 @@ int stm32_romfs_initialize(void);
 
 #endif /* CONFIG_STM32_ROMFS */
 
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_ROMFS_H */
+#endif /* __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_ROMFS_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/src/stm32_bh1750.c
+ * boards/arm/common/stm32/src/stm32_reset.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,64 +26,35 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <nuttx/debug.h>
-#include <stdio.h>
-
-#include <nuttx/spi/spi.h>
-#include <arch/board/board.h>
-#include <nuttx/sensors/bh1750fvi.h>
-
-#include "stm32_i2c.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_bh1750initialize
+ * Name: board_reset
  *
  * Description:
- *   Initialize and register the BH1750FVI Ambient Light driver.
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/lightN
- *   busno - The I2C bus number
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value int this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-int board_bh1750_initialize(int devno, int busno)
+int board_reset(int status)
 {
-  struct i2c_master_s *i2c;
-  char devpath[16];
-  int ret;
-
-  sninfo("Initializing BH1750FVI!\n");
-
-  /* Initialize I2C */
-
-  i2c = stm32_i2cbus_initialize(busno);
-  if (!i2c)
-    {
-      return -ENODEV;
-    }
-
-  /* Then register the ambient light sensor */
-
-  snprintf(devpath, sizeof(devpath), "/dev/light%d", devno);
-  ret = bh1750fvi_register(devpath, i2c, BH1750FVI_I2C_ADDR);
-  if (ret < 0)
-    {
-      snerr("ERROR: Error registering BH1750FVI\n");
-    }
-
-  return ret;
+  up_systemreset();
+  return 0;
 }
-

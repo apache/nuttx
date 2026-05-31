@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_spitest.h
+ * boards/arm/common/stm32/include/stm32_cs4344.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_SPITEST_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_SPITEST_H
+#ifndef __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_CS4344_H
+#define __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_CS4344_H
 
 /****************************************************************************
  * Included Files
@@ -58,19 +58,27 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_spidev_bus_test
+ * Name: stm32_cs4344_initialize
  *
  * Description:
- *   Called to create the defined SPI buses and test them by initializing
- *   them and sending the CONFIG_STM32_SPI_TEST_MESSAGE (no chip select).
+ *   This function is called by platform-specific, setup logic to configure
+ *   and register the CS4344 device.  This function will register the driver
+ *   as /dev/audio/pcm[x] where x is determined by the minor device number.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int stm32_spidev_bus_test(void);
+int board_cs4344_initialize(int devno, int port);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_SPITEST_H */
+#endif /* __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_CS4344_H */
