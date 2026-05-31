@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_cs4344.h
+ * boards/arm/common/stm32/include/stm32_bmi270.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CS4344_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CS4344_H
+#ifndef __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_BMI270_H
+#define __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_BMI270_H
 
 /****************************************************************************
  * Included Files
@@ -58,27 +58,25 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_cs4344_initialize
+ * Name: board_bmi270_initialize
  *
  * Description:
- *   This function is called by platform-specific, setup logic to configure
- *   and register the CS4344 device.  This function will register the driver
- *   as /dev/audio/pcm[x] where x is determined by the minor device number.
+ *   Initialize and register the BMI270 IMU device.
  *
  * Input Parameters:
- *   minor - The input device minor number
+ *   devno - The device number, used to build the device path as /dev/imuN
+ *   busno - The I2C bus number
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
+ *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int board_cs4344_initialize(int devno, int port);
+int board_bmi270_initialize(int devno, int busno);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_CS4344_H */
+#endif /* __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_BMI270_H */

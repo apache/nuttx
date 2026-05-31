@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/include/stm32_bh1750.h
+ * boards/arm/common/stm32/include/stm32_spitest.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BH1750_H
-#define __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BH1750_H
+#ifndef __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_SPITEST_H
+#define __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_SPITEST_H
 
 /****************************************************************************
  * Included Files
@@ -58,25 +58,19 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_bh1750_initialize
+ * Name: stm32_spidev_bus_test
  *
  * Description:
- *   Initialize and register the BH1750FVI Ambient Light driver.
- *
- * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/lightN
- *   busno - The I2C bus number
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
+ *   Called to create the defined SPI buses and test them by initializing
+ *   them and sending the CONFIG_STM32_SPI_TEST_MESSAGE (no chip select).
  *
  ****************************************************************************/
 
-int board_bh1750_initialize(int devno, int busno);
+int stm32_spidev_bus_test(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_BH1750_H */
+#endif /* __BOARDS_ARM_COMMON_STM32_INCLUDE_STM32_SPITEST_H */

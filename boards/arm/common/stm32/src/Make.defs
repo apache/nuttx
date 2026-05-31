@@ -192,6 +192,35 @@ ifeq ($(CONFIG_INPUT_KMATRIX_I2C),y)
   CSRCS += stm32_kmatrix_i2c.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMI270_I2C),y)
+  CSRCS += stm32_bmi270.c
+endif
+
+ifeq ($(CONFIG_AUDIO_CS4344),y)
+  CSRCS += stm32_cs4344.c
+endif
+
+ifeq ($(CONFIG_STM32_CAN),y)
+  ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
+    CSRCS += stm32_can_setup.c
+  endif
+  ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+    CSRCS += stm32_cansock_setup.c
+  endif
+endif
+
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+  CSRCS += stm32_reset.c
+endif
+
+ifeq ($(CONFIG_STM32_ROMFS),y)
+  CSRCS += stm32_romfs_initialize.c
+endif
+
+ifeq ($(CONFIG_STM32_SPI_TEST),y)
+  CSRCS += stm32_spitest.c
+endif
+
 DEPPATH += --dep-path $(STM32_BOARD_COMMON_DIR)$(DELIM)src
 VPATH += :$(STM32_BOARD_COMMON_DIR)$(DELIM)src
 CFLAGS += ${INCDIR_PREFIX}$(STM32_BOARD_COMMON_DIR)$(DELIM)include

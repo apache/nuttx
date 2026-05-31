@@ -180,4 +180,33 @@ if(CONFIG_INPUT_MPR121_KEYPAD)
   list(APPEND SRCS stm32_mpr121.c)
 endif()
 
+if(CONFIG_SENSORS_BMI270_I2C)
+  list(APPEND SRCS stm32_bmi270.c)
+endif()
+
+if(CONFIG_AUDIO_CS4344)
+  list(APPEND SRCS stm32_cs4344.c)
+endif()
+
+if(CONFIG_STM32_CAN)
+  if(CONFIG_STM32_CAN_CHARDRIVER)
+    list(APPEND SRCS stm32_can_setup.c)
+  endif()
+  if(CONFIG_STM32_CAN_SOCKET)
+    list(APPEND SRCS stm32_cansock_setup.c)
+  endif()
+endif()
+
+if(CONFIG_BOARDCTL_RESET)
+  list(APPEND SRCS stm32_reset.c)
+endif()
+
+if(CONFIG_STM32_ROMFS)
+  list(APPEND SRCS stm32_romfs_initialize.c)
+endif()
+
+if(CONFIG_STM32_SPI_TEST)
+  list(APPEND SRCS stm32_spitest.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
