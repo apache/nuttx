@@ -64,7 +64,9 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#include "stm32_romfs.h"
+#ifdef CONFIG_STM32_ROMFS
+#  include "stm32_romfs.h"
+#endif
 #include "nucleo-f446re.h"
 
 /****************************************************************************

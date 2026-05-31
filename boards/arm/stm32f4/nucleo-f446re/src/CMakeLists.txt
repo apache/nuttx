@@ -70,10 +70,6 @@ if(CONFIG_BOARD_STM32_IHM08M1)
   list(APPEND SRCS stm32_foc_ihm08m1.c)
 endif()
 
-if(CONFIG_STM32_ROMFS)
-  list(APPEND SRCS stm32_romfs_initialize.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/f446re.ld")
