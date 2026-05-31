@@ -102,4 +102,16 @@
 #define AM62X_IRQ_UART5           215   /* GIC_SPI 183                    */
 #define AM62X_IRQ_UART6           216   /* GIC_SPI 184                    */
 
+/* GPIO */
+
+#define AM62X_IRQ_GPIO0            57
+#define AM62X_IRQ_GPIO1            58
+
+/* I2C */
+
+#define AM62X_IRQ_I2C0            193   /* GIC_SPI 161 */
+#define AM62X_IRQ_I2C1            194   /* GIC_SPI 162 */
+#define AM62X_IRQ_I2C2            195   /* GIC_SPI 163 */
+#define AM62X_IRQ_I2C3            196   /* GIC_SPI 164 */
+
 #endif /* __ARCH_ARM64_INCLUDE_AM62X_IRQ_H */

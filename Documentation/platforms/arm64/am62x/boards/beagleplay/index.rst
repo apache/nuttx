@@ -18,10 +18,11 @@ Features
 * Four user LEDs
 * Gigabit Ethernet, USB, Wi-Fi, and Bluetooth hardware on the board
 
-Current NuttX support is limited to early boot, the 16550 serial console,
-interactive NSH, and ``procfs`` mount during board bring-up. GPIO, LEDs,
-I2C, SPI, MMC/SD, Ethernet, Wi-Fi, Bluetooth, and USB runtime support are
-not implemented yet.
+Current NuttX support includes early boot, the 16550 serial console,
+interactive NSH, ``procfs`` mount during board bring-up, AM62x TISCI
+initialization, main-domain GPIO, and I2C0/I2C1 controller support in the
+``beagleplay:i2c`` configuration. SPI, MMC/SD, Ethernet, Wi-Fi, Bluetooth,
+and USB runtime support are not implemented yet.
 
 Buttons and LEDs
 ================
@@ -37,8 +38,8 @@ USR2    GPIO1_24  Red user LED
 USR3    GPIO1_25  Blue user LED
 ======  ========  ==================
 
-The current NuttX port does not yet provide functional GPIO-backed LED
-control. The ``CONFIG_ARCH_LEDS`` hooks are present as placeholders only.
+The current NuttX port initializes the AM62x GPIO controller. Automatic
+``CONFIG_ARCH_LEDS`` LED hooks remain placeholders only.
 
 Serial Console
 ==============
@@ -57,7 +58,9 @@ Interface    SoC signal              Notes
 ===========  ======================  =======================================
 DEBUG USB-C  UART0                   Default NuttX serial console
 microSD      MMC1                    Validated boot media for ``nuttx.bin``
-USR0-3       GPIO1_22 through 1_25   User LEDs, not yet driven by NuttX
+USR0-3       GPIO1_22 through 1_25   User LEDs on the main GPIO block
+I2C0         I2C0                    Available in ``beagleplay:i2c``
+I2C1         I2C1                    Available in ``beagleplay:i2c``
 ===========  ======================  =======================================
 
 Power Supply
@@ -113,8 +116,23 @@ microSD using the BeaglePlay U-Boot prompt.
 Configurations
 ==============
 
-``beagleplay:nsh``
-  Interactive NSH configuration for serial bring-up and shell access.
+Configure NuttX with ``beagleplay:<config-name>``.
 
-``beagleplay:ostest``
-  Hardware validation configuration that boots directly into ``ostest_main``.
+.. code:: console
+
+   $ ./tools/configure.sh beagleplay:nsh
+
+nsh
+---
+
+Interactive NSH configuration for serial bring-up and shell access.
+
+i2c
+---
+
+NSH configuration with AM62x I2C0/I2C1 and the ``i2c`` tool enabled.
+
+ostest
+------
+
+Hardware validation configuration that boots directly into ``ostest_main``.

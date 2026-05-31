@@ -238,3 +238,4 @@ void arm64_boot_primary_c_routine(void)
   arm64_chip_boot();
   nx_start();
 }
+

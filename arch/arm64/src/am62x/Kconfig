@@ -7,6 +7,89 @@
 
 if ARCH_CHIP_AM62X
 
-comment "AM62x peripheral selection is provided by board defconfig for now."
+menu "AM62x peripheral support"
+
+config AM62X_TISCI
+	bool "TISCI system controller (DM/TIFS) client"
+	default n
+	---help---
+		Enable the AM62x TISCI client.  On K3 SoCs the A53 does not own
+		device power, clocks, resets, or interrupt routing; those are
+		requested from the DM/TIFS firmware over the TISCI protocol via the
+		secure-proxy mailbox.  This driver provides the request helpers used
+		by peripheral drivers to power on a block, enable its functional
+		clock, release resets, and route its interrupt to the GIC.
+
+if AM62X_TISCI
+
+config AM62X_TISCI_HOST_ID
+	int "TISCI host ID"
+	default 12
+	---help---
+		Host ID this core presents to the DM/TIFS firmware.  Must match the
+		host allocation in the firmware boardcfg.  12 is the standard A53
+		HLOS host on AM62x.
+
+config AM62X_TISCI_RX_THREAD
+	int "Secure proxy RX (response) thread"
+	default 12
+	---help---
+		Secure-proxy thread the firmware uses to send responses back to this
+		host.
+
+config AM62X_TISCI_TX_THREAD
+	int "Secure proxy TX (request) thread"
+	default 13
+	---help---
+		Secure-proxy thread this host uses to send requests to the firmware.
+
+endif # AM62X_TISCI
+
+config AM62X_GPIO
+	bool "GPIO support"
+	default n
+	---help---
+		Enable the AM62x main-domain GPIO controller driver, including
+		basic GPIO input/output operations, pad-mux helper support, and
+		per-pin interrupt callback dispatch for GPIO0/GPIO1.
+
+config AM62X_GPIO_IRQ
+	bool "GPIO interrupt (GIC) delivery"
+	depends on AM62X_GPIO
+	default n
+	---help---
+		Enable per-bank GPIO interrupt delivery through the GIC.  On AM62x
+		the GPIO bank interrupts are routed through the main GPIO interrupt
+		router, which must be programmed over TISCI (RM_IRQ_SET) before the
+		GIC input line is valid.  Until that routing is implemented, leave
+		this disabled: enabling an unrouted GIC line faults at boot.  GPIO
+		input/output and the callback API still work without it.
+
+config AM62X_I2C0
+	bool "I2C0 support"
+	depends on I2C
+	default n
+
+config AM62X_I2C1
+	bool "I2C1 support"
+	depends on I2C
+	default n
+
+config AM62X_I2C2
+	bool "I2C2 support"
+	depends on I2C
+	default n
+
+config AM62X_I2C3
+	bool "I2C3 support"
+	depends on I2C
+	default n
+
+config AM62X_I2CTIMEOMS
+	int "I2C transfer timeout milliseconds"
+	default 500
+	depends on AM62X_I2C0 || AM62X_I2C1 || AM62X_I2C2 || AM62X_I2C3
+
+endmenu
 
 endif # ARCH_CHIP_AM62X
