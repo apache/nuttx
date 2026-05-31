@@ -52,24 +52,25 @@
 
 /* LED definitions *********************************************************
  *
- * PocketBeagle 2 user LEDs are connected to GPIO pins on the AM6254.
- * The exact GPIO numbers will be finalised when the GPIO driver is added;
- * these defines are placeholders so board code can compile now.
- *
- * LED index   Colour   Net name
- *   0          USR0     Green
- *   1          USR1     Yellow/Amber
- *   2          USR2     Red
+ * The PocketBeagle 2 user LEDs are on main GPIO0 lines 3-6.
  */
 
 #define BOARD_LED_USR0      0
 #define BOARD_LED_USR1      1
 #define BOARD_LED_USR2      2
-#define BOARD_NLEDS         3
+#define BOARD_LED_USR3      3
+#define BOARD_NLEDS         4
 
 #define BOARD_LED_USR0_BIT  (1 << BOARD_LED_USR0)
 #define BOARD_LED_USR1_BIT  (1 << BOARD_LED_USR1)
 #define BOARD_LED_USR2_BIT  (1 << BOARD_LED_USR2)
+#define BOARD_LED_USR3_BIT  (1 << BOARD_LED_USR3)
+
+/* GPIO test devices ********************************************************/
+
+#define BOARD_NGPIOOUT      4
+#define BOARD_NGPIOIN       0
+#define BOARD_NGPIOINT      0
 
 /* LED encoded OS states (used when CONFIG_ARCH_LEDS is set) ***************
  *

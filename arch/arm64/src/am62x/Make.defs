@@ -30,6 +30,24 @@ include common/Make.defs
 CHIP_CSRCS  = am62x_boot.c
 CHIP_CSRCS += am62x_16550serial.c
 
+ifeq ($(CONFIG_AM62X_GPIO),y)
+CHIP_CSRCS += am62x_gpio.c
+endif
+
+AM62X_I2C_CONFIGS := $(CONFIG_AM62X_I2C0)
+AM62X_I2C_CONFIGS += $(CONFIG_AM62X_I2C1)
+AM62X_I2C_CONFIGS += $(CONFIG_AM62X_I2C2)
+AM62X_I2C_CONFIGS += $(CONFIG_AM62X_I2C3)
+
+ifneq ($(AM62X_I2C_CONFIGS),)
+CHIP_CSRCS += am62x_i2c.c
+endif
+
+ifeq ($(CONFIG_AM62X_TISCI),y)
+CHIP_CSRCS += am62x_tisci.c
+endif
+
+
 # Early UART assembly (only when CONFIG_ARCH_EARLY_PRINT is set, which
 # is selected automatically when CONFIG_ARCH_HAVE_LOWPUTC is enabled
 # and the common arch layer needs early console output).

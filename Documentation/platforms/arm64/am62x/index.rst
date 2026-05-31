@@ -10,6 +10,8 @@ Texas Instruments featuring:
 - **Boot:** ROM → R5 SYSFW (TIFS) → U-Boot SPL → U-Boot → NuttX
 - **Memory:** External DDR4/LPDDR4 (512 MB – 2 GB depending on board)
 - **UART:** Seven 16550-compatible UARTs (48 MHz clock)
+- **GPIO:** Main-domain GPIO controller support
+- **I2C:** Main-domain I2C controller support
 
 Supported Boards
 ================
