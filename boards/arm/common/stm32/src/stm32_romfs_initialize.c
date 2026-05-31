@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/src/stm32_romfs_initialize.c
+ * boards/arm/common/stm32/src/stm32_romfs_initialize.c
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: Tomasz Wozniak. All rights reserved.

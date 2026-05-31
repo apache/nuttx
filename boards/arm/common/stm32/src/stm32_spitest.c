@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f7/common/src/stm32_spitest.c
+ * boards/arm/common/stm32/src/stm32_spitest.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
