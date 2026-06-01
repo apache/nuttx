@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/nucleo-h723zg/src/Makefile
+# boards/arm/stm32h7/stm32h745i-disco/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,46 +24,28 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c
 
-ifeq ($(CONFIG_ADC),y)
-CSRCS += stm32_adc.c
-endif
-
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
 else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_STM32_SPI),y)
-CSRCS += stm32_spi.c
-endif
-
-ifeq ($(CONFIG_STM32_OTGHS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
-CSRCS += stm32_uid.c
+ifeq ($(CONFIG_TESTING_OSTEST),y)
+CSRCS += stm32_ostest.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += stm32_gpio.c
+ifeq ($(CONFIG_INPUT_FT5X06),y)
+CSRCS += stm32_ft5x06.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
+ifeq ($(CONFIG_STM32_LTDC),y)
+CSRCS += stm32_lcd.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
-ifeq ($(CONFIG_NET_OA_TC6),y)
-CSRCS += stm32_oa_tc6.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

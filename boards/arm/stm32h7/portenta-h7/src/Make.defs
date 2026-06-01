@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/linum-stm32h753bi/src/Makefile
+# boards/arm/stm32h7/portenta-h7/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,62 +22,12 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
-else
-  ifeq ($(CONFIG_USERLED),y)
-  CSRCS += stm32_userleds.c
-  endif
 endif
 
-ifeq ($(CONFIG_STM32_OTGFS),y)
-CSRCS += stm32_usb.c
-endif
-
-ifeq ($(CONFIG_STM32_SDMMC),y)
-CSRCS += stm32_sdmmc.c
-endif
-
-ifeq ($(CONFIG_FAT_DMAMEMORY),y)
-CSRCS += stm32_dma_alloc.c
-endif
-
-ifeq ($(CONFIG_I2C_EE_24XX),y)
-CSRCS += stm32_at24.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_MTD_W25QXXXJV),y)
-CSRCS += stm32_w25q.c
-endif
-
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += stm32_usbmsc.c
-endif
-
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CSRCS += stm32_qencoder.c
-endif
-
-ifeq ($(CONFIG_CL_MFRC522),y)
-  CSRCS += stm32_mfrc522.c
-endif
-
-ifeq ($(CONFIG_STM32_LTDC),y)
-CSRCS += stm32_lcd.c
-endif
-
-ifeq ($(CONFIG_AUDIO_TONE),y)
-  CSRCS += stm32_tone.c
-endif
-
-ifeq ($(CONFIG_INPUT_FT5X06),y)
-CSRCS += stm32_touchscreen.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

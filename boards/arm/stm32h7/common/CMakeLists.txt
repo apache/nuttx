@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32h7/nucleo-h743zi2/src/CMakeLists.txt
+# boards/arm/stm32h7/common/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -20,45 +20,6 @@
 #
 # ##############################################################################
 
-set(SRCS stm32_boot.c stm32_bringup.c)
-
-if(CONFIG_ADC)
-  list(APPEND SRCS stm32_adc.c)
-endif()
-
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
-endif()
-
-if(CONFIG_STM32_OTGFS)
-  list(APPEND SRCS stm32_usb.c)
-endif()
-
-if(CONFIG_DEV_GPIO)
-  list(APPEND SRCS stm32_gpio.c)
-endif()
-
-if(CONFIG_PWM)
-  list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
-endif()
-
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS stm32_buttons.c)
-endif()
-
-target_sources(board PRIVATE ${SRCS})
-
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
-
-if(NOT CONFIG_BUILD_FLAT)
-  add_subdirectory(${NUTTX_BOARD_DIR}/kernel)
-  set_property(
-    GLOBAL PROPERTY LD_SCRIPT_USER ${NUTTX_BOARD_DIR}/scripts/memory.ld
-                    ${NUTTX_BOARD_DIR}/scripts/user-space.ld)
+if(CONFIG_ARCH_BOARD_COMMON)
+  add_subdirectory(${NUTTX_DIR}/boards/arm/common/stm32 stm32_common)
 endif()

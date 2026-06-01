@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/nucleo-h743zi2/src/Makefile
+# boards/arm/stm32h7/stm32h747i-disco/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -38,24 +38,26 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
+ifeq ($(CONFIG_STM32_OTGHS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += stm32_gpio.c
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += stm32_uid.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
+ifeq ($(CONFIG_STM32_SDMMC),y)
+CSRCS += stm32_sdmmc.c
 endif
 
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CSRCS += stm32_qencoder.c
+ifeq ($(CONFIG_FAT_DMAMEMORY),y)
+CSRCS += stm32_dma_alloc.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

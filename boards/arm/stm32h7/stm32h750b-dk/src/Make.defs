@@ -1,7 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/stm32h745i-disco/src/Makefile
-#
-# SPDX-License-Identifier: Apache-2.0
+# boards/arm/stm32h7/stm32h750b-dk/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -38,10 +36,6 @@ ifeq ($(CONFIG_TESTING_OSTEST),y)
 CSRCS += stm32_ostest.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
 ifeq ($(CONFIG_INPUT_FT5X06),y)
 CSRCS += stm32_ft5x06.c
 endif
@@ -50,4 +44,6 @@ ifeq ($(CONFIG_STM32_LTDC),y)
 CSRCS += stm32_lcd.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

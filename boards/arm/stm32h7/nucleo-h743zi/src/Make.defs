@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/nucleo-h743zi/src/Makefile
+# boards/arm/stm32h7/nucleo-h743zi/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -36,10 +36,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_STM32_ROMFS),y)
-CSRCS += stm32_romfs_initialize.c
 endif
 
 ifeq ($(CONFIG_STM32_SPI),y)
@@ -90,10 +86,6 @@ ifeq ($(CONFIG_PWM),y)
 CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
 ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
 CSRCS += stm32_boot_image.c
 endif
@@ -110,4 +102,6 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_mmcsd.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

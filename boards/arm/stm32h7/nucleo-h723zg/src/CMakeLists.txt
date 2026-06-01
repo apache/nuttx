@@ -56,10 +56,6 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
 if(CONFIG_NET_OA_TC6)
   list(APPEND SRCS stm32_oa_tc6.c)
 endif()
