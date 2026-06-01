@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/weact-stm32h743/src/Makefile
+# boards/arm/stm32h7/weact-stm32h743/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -44,4 +44,6 @@ ifeq ($(CONFIG_FAT_DMAMEMORY),y)
 CSRCS += stm32_dma_alloc.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

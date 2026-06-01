@@ -36,10 +36,6 @@ if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
 
-if(CONFIG_STM32_ROMFS)
-  list(APPEND SRCS stm32_romfs_initialize.c)
-endif()
-
 if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
@@ -86,10 +82,6 @@ endif()
 
 if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
 endif()
 
 if(CONFIG_BOARDCTL_BOOT_IMAGE)

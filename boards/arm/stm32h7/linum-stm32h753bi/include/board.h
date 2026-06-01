@@ -595,6 +595,13 @@
 #define GPIO_TIM5_CH1IN  GPIO_TIM5_CH1IN_1 /* PA0 */
 #define GPIO_TIM5_CH2IN  GPIO_TIM5_CH2IN_2 /* PH11 */
 
+/* Tone generator */
+
+#define BOARD_TONE_PWM_TIM         4   /* Timer 4 - PWM timer for tone generation  */
+#define BOARD_TONE_PWM_CHANNEL     2   /* Timer 4 - PWM channel for tone generation */
+#define BOARD_TONE_ONESHOT_TIM     17  /* Timer 17 - Oneshot timer for note timings */
+#define BOARD_TONE_ONESHOT_TIM_RES 10  /* Timer 17 - Oneshot timer resolution (us)  */
+
 /* LTDC */
 
 #define GPIO_LTDC_R0     (GPIO_LTDC_R0_3|GPIO_SPEED_100MHz) /* PI15 */

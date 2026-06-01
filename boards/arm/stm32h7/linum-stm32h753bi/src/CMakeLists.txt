@@ -50,20 +50,12 @@ if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_AUDIO_TONE)
-  list(APPEND SRCS stm32_tone.c)
-endif()
-
 if(CONFIG_MTD_W25QXXXJV)
   list(APPEND SRCS stm32_w25q.c)
 endif()
 
 if(CONFIG_USBMSC)
   list(APPEND SRCS stm32_usbmsc.c)
-endif()
-
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
 endif()
 
 if(CONFIG_CL_MFRC522)

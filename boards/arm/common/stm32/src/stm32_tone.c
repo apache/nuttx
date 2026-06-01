@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #include <nuttx/timers/pwm.h>
 #include <nuttx/timers/oneshot.h>
@@ -67,6 +68,44 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tone_example
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/toneN
+ *
+ * Description:
+ *   Configure and test the tone generator.
+ *
+ ****************************************************************************/
+
+static int tone_example(int devno)
+{
+  int ret;
+  int fd;
+  char devpath[12];
+  const char msg[] = "t120o1l16b9n0baan0bn0bn0baaan0b9n0baan0b";
+
+  snprintf(devpath, 12, "/dev/tone%d", devno);
+  fd = open(devpath, O_RDWR);
+  if (fd < 0)
+    {
+      printf("Failed to open device driver at: %s\n", devpath);
+      return -errno;
+    }
+
+  ret = write(fd, msg, sizeof(msg));
+  if (ret < 0)
+    {
+      printf("Failed to write to device driver at: %s\n", devpath);
+      return ret;
+    }
+
+  close(fd);
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -131,6 +170,10 @@ int board_tone_initialize(int devno)
       /* Now we are initialized */
 
       initialized = true;
+
+      /* Play tone example */
+
+      tone_example(devno);
     }
 
   return OK;
