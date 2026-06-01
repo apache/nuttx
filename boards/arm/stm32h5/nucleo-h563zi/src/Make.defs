@@ -1,5 +1,5 @@
-##############################################################################
-# boards/arm/stm32h5/nucleo-h563zi/src/Makefile
+############################################################################
+# boards/arm/stm32h5/nucleo-h563zi/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,11 +18,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-##############################################################################
+############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
-ASRCS =
 CSRCS = stm32_boot.c stm32_bringup.c stm32_clockconfig.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -55,4 +54,6 @@ ifeq ($(CONFIG_STM32_USBFS_HOST),y)
 CSRCS += stm32_usb.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
