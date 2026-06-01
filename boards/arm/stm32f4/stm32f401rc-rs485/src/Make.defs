@@ -41,10 +41,6 @@ ifeq ($(CONFIG_USERLED),y)
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS +=  stm32_buttons.c
 endif
