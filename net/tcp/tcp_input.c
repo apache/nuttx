@@ -1128,7 +1128,6 @@ found:
       uint32_t unackseq;
       uint32_t ackseq;
       int timeout;
-
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
        * data (tx_unacked).
@@ -1228,13 +1227,46 @@ found:
                     tcp_getsequence(conn->sndseq), ackseq, unackseq,
                     (uint32_t)conn->tx_unacked);
               tcp_setsequence(conn->sndseq, ackseq);
+
+              /* Save nrtx before reset so we can use it for Karn's
+               * Algorithm check below. After retransmissions, the RTT
+               * sample from the retransmitted segment is unreliable,
+               * so we must skip Jacobson RTT estimation and instead
+               * reset RTO to the current RTT estimate (sa/sv).
+               */
+
+              if (conn->nrtx > 0)
+                {
+                  uint8_t new_rto = (conn->sa >> 3) + conn->sv;
+                  if (new_rto < TCP_RTO_MIN)
+                    {
+                      new_rto = TCP_RTO_MIN;
+                    }
+                  else if (new_rto > TCP_RTO_MAX)
+                    {
+                      new_rto = TCP_RTO_MAX;
+                    }
+
+                  ninfo("TCP RTO reset: retransmissions=%d, "
+                        "old_rto=%d, new_rto=%d (sa=%d, sv=%d)\n",
+                        conn->nrtx, conn->rto, new_rto,
+                        conn->sa, conn->sv);
+                  conn->rto = new_rto;
+                }
+
               conn->nrtx = 0;
             }
         }
 #endif
 
 #ifndef CONFIG_NET_TCP_FIXED_RTO
-      /* Do RTT estimation, unless we have done retransmissions. */
+      /* Do RTT estimation, unless we have done retransmissions.
+       * Karn's Algorithm: do not use retransmitted segments for
+       * RTT estimation. The nrtx check above already handles the
+       * retransmission case by resetting RTO to the current RTT
+       * estimate, so here we only run Jacobson for non-retransmit
+       * ACKs.
+       */
 
       if (conn->nrtx == 0)
         {
@@ -1253,6 +1285,17 @@ found:
           m = m - (conn->sv >> 2);
           conn->sv += m;
           conn->rto = (conn->sa >> 3) + conn->sv;
+
+          /* Clamp RTO to valid range */
+
+          if (conn->rto < TCP_RTO_MIN)
+            {
+              conn->rto = TCP_RTO_MIN;
+            }
+          else if (conn->rto > TCP_RTO_MAX)
+            {
+              conn->rto = TCP_RTO_MAX;
+            }
         }
 #endif
 
