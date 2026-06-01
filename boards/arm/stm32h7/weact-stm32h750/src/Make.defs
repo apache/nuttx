@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/openh743i/src/Makefile
+# boards/arm/stm32h7/weact-stm32h750/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,24 +22,28 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_bringup.c
+CSRCS = stm32_boot.c stm32_bringup.c stm32_usb.c stm32_ioctl.c stm32_spi.c
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += stm32_autoleds.c
+else
+CSRCS += stm32_userleds.c
+endif
+
+ifeq ($(CONFIG_VIDEO_FB),y)
+  ifeq ($(CONFIG_LCD_ST7735),y)
+    CSRCS += stm32_lcd_st7735.c
+  endif
+endif
 
 ifeq ($(CONFIG_STM32_SDMMC),y)
 CSRCS += stm32_sdmmc.c
 endif
 
-ifeq ($(CONFIG_USBDEV),y)
-CSRCS += stm32_usb.c
-else ifeq ($(CONFIG_USBHOST),y)
-CSRCS += stm32_usb.c
+ifeq ($(CONFIG_FAT_DMAMEMORY),y)
+CSRCS += stm32_dma_alloc.c
 endif
 
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += stm32_usbmsc.c
-endif
-
-ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-CSRCS += stm32_composite.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

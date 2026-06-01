@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32h7/nucleo-h753zi/src/Makefile
+# boards/arm/stm32h7/openh743i/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -24,38 +24,24 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = stm32_boot.c stm32_bringup.c
 
-ifeq ($(CONFIG_ADC),y)
-CSRCS += stm32_adc.c
+ifeq ($(CONFIG_STM32_SDMMC),y)
+CSRCS += stm32_sdmmc.c
 endif
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += stm32_usb.c
+else ifeq ($(CONFIG_USBHOST),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_DEV_GPIO),y)
-CSRCS += stm32_gpio.c
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += stm32_usbmsc.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += stm32_composite.c
 endif
 
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CSRCS += stm32_qencoder.c
-endif
-
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
