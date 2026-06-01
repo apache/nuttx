@@ -123,7 +123,7 @@ bool bcmf_board_etheraddr(struct ether_addr *ethaddr)
  * Name: photon_wlan_initialize
  ****************************************************************************/
 
-int photon_wlan_initialize()
+int photon_wlan_initialize(void)
 {
   int ret;
 
