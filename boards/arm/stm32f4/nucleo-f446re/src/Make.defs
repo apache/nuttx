@@ -72,10 +72,6 @@ ifeq ($(CONFIG_BOARD_STM32_IHM08M1),y)
 CSRCS += stm32_foc_ihm08m1.c
 endif
 
-ifeq ($(CONFIG_STM32_ROMFS),y)
-CSRCS += stm32_romfs_initialize.c
-endif
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

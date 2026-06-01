@@ -39,7 +39,9 @@
 #endif
 
 #include "stm32.h"
-#include "stm32_romfs.h"
+#ifdef CONFIG_STM32_ROMFS
+#  include "stm32_romfs.h"
+#endif
 
 #ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"

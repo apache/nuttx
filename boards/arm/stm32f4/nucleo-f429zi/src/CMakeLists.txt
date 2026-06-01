@@ -60,14 +60,6 @@ if(CONFIG_STM32_BBSRAM)
   list(APPEND SRCS stm32_bbsram.c)
 endif()
 
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
-if(CONFIG_STM32_ROMFS)
-  list(APPEND SRCS stm32_romfs_initialize.c)
-endif()
-
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
