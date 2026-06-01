@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/stm32wb/flipperzero/src/Makefile
+##############################################################################
+# boards/arm/stm32u5/nucleo-u5a5zj-q/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,18 +18,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+##############################################################################
 
-include $(TOPDIR)/Make.defs
+-include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c
+ASRCS =
+CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
 
-ifeq ($(CONFIG_SPI),y)
-CSRCS += stm32_spi.c
+ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
+CSRCS += stm32_clockconfig.c
 endif
 
-ifeq ($(CONFIG_LCD_ST7565),y)
-CSRCS += stm32_lcd_st7565.c
+ifeq ($(CONFIG_USBDEV),y)
+CSRCS += stm32_usb.c
 endif
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

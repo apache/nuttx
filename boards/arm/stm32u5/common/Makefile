@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/stm32wl5/nucleo-wl55jc/src/Makefile
+#############################################################################
+# boards/arm/stm32u5/common/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,23 +18,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = stm32_boot.c stm32_leds.c
+STM32_BOARD_COMMON_DIR := $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)common$(DELIM)stm32
+STM32_COMMON_SRCDIR := $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)stm32
 
-CSRCS-$(CONFIG_ARCH_BUTTONS) += stm32_buttons.c
-CSRCS-$(CONFIG_ARCH_BOARD_FLASH_MOUNT) += stm32_flash.c
-CSRCS-$(CONFIG_SPI_DRIVER) += stm32_spi.c
-CSRCS-$(CONFIG_ARCH_BOARD_IPCC) += stm32_ipcc.c
+include board/Make.defs
+include $(STM32_BOARD_COMMON_DIR)$(DELIM)src$(DELIM)Make.defs
 
-ifeq ($(CONFIG_VIDEO_FB),y)
-ifeq ($(CONFIG_LCD_SSD1680),y)
-  CSRCS += stm32_ssd1680.c
-endif
-endif
-
-CSRCS += $(CSRCS-y)
+DEPPATH += --dep-path board
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += ${INCDIR_PREFIX}$(BOARDDIR)$(DELIM)include
+
+CFLAGS += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)

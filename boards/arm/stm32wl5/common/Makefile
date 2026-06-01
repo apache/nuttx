@@ -1,5 +1,5 @@
-##############################################################################
-# boards/arm/stm32u5/nucleo-u5a5zj-q/src/Makefile
+#############################################################################
+# boards/arm/stm32wl5/common/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,19 +18,22 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-##############################################################################
+#############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+STM32_BOARD_COMMON_DIR := $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)common$(DELIM)stm32
+STM32_COMMON_SRCDIR := $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)stm32
 
-ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
-CSRCS += stm32_clockconfig.c
-endif
+include board/Make.defs
+include $(STM32_BOARD_COMMON_DIR)$(DELIM)src$(DELIM)Make.defs
 
-ifeq ($(CONFIG_USBDEV),y)
-CSRCS += stm32_usb.c
-endif
+DEPPATH += --dep-path board
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += ${INCDIR_PREFIX}$(BOARDDIR)$(DELIM)include
+
+CFLAGS += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)

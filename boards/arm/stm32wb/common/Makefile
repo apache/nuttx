@@ -1,5 +1,5 @@
-##############################################################################
-# boards/arm/stm32l5/nucleo-l552ze/src/Makefile
+#############################################################################
+# boards/arm/stm32wb/common/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,21 +18,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-##############################################################################
+#############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c
+STM32_BOARD_COMMON_DIR := $(TOPDIR)$(DELIM)boards$(DELIM)arm$(DELIM)common$(DELIM)stm32
 
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += stm32_autoleds.c
-else
-CSRCS += stm32_userleds.c
-endif
+include board/Make.defs
+include $(STM32_BOARD_COMMON_DIR)$(DELIM)src$(DELIM)Make.defs
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
+DEPPATH += --dep-path board
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += ${INCDIR_PREFIX}$(BOARDDIR)$(DELIM)include

@@ -1,5 +1,5 @@
-##############################################################################
-# boards/arm/stm32u5/b-u585i-iot02a/src/Makefile
+############################################################################
+# boards/arm/stm32wl5/nucleo-wl55jc/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -18,15 +18,25 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-##############################################################################
+############################################################################
 
--include $(TOPDIR)/Make.defs
+include $(TOPDIR)/Make.defs
 
-ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_leds.c
 
-ifeq ($(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG),y)
-CSRCS += stm32_clockconfig.c
+CSRCS-$(CONFIG_ARCH_BUTTONS) += stm32_buttons.c
+CSRCS-$(CONFIG_ARCH_BOARD_FLASH_MOUNT) += stm32_flash.c
+CSRCS-$(CONFIG_SPI_DRIVER) += stm32_spi.c
+CSRCS-$(CONFIG_ARCH_BOARD_IPCC) += stm32_ipcc.c
+
+ifeq ($(CONFIG_VIDEO_FB),y)
+ifeq ($(CONFIG_LCD_SSD1680),y)
+  CSRCS += stm32_ssd1680.c
+endif
 endif
 
-include $(TOPDIR)/boards/Board.mk
+CSRCS += $(CSRCS-y)
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

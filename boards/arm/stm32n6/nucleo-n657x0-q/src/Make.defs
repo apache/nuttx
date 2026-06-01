@@ -1,5 +1,5 @@
 ##############################################################################
-# boards/arm/stm32l5/stm32l562e-dk/src/Makefile
+# boards/arm/stm32n6/nucleo-n657x0-q/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -23,7 +23,7 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = stm32_boot.c stm32_bringup.c stm32_clockconfig.c
+CSRCS = stm32_boot.c stm32_bringup.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += stm32_autoleds.c
@@ -31,8 +31,6 @@ else
 CSRCS += stm32_userleds.c
 endif
 
-ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += stm32_buttons.c
-endif
-
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
