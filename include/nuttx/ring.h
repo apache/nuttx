@@ -239,15 +239,18 @@
 
 /* Public API macros - accept RING_DECLARE/RING_DEFINE structs */
 
-#define ring_reset(r)                                    \
-  do                                                     \
-    {                                                    \
-      RING_FIELD(&RING_BASE(r)->prod_head) = 0;          \
-      RING_FIELD(&RING_BASE(r)->prod_tail) = 0;          \
-      RING_FIELD(&RING_BASE(r)->cons_head) = 0;          \
-      RING_FIELD(&RING_BASE(r)->cons_tail) = 0;          \
-    }                                                    \
-  while (0)
+/* ring_reset - clear all indices and return the count of elements that
+ * were present before the reset (i.e. the number of elements discarded
+ * by the reset operation).
+ *
+ * Callers may either use the return value (e.g. to bump a "dropped"
+ * counter) or discard it.  Safe to call on a freshly-zeroed ring whose
+ * indices have not been written yet: reading the volatile fields yields
+ * whatever happens to be in memory and the caller is expected to discard
+ * the value in that case.
+ */
+
+#define ring_reset(r)       ring_reset_indices(RING_BASE(r))
 
 /* ring_init - runtime initialization with warm-restart recovery.
  *
@@ -524,6 +527,42 @@ struct ring_buf_s
 static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
 {
   return r->mask ? (idx & r->mask) : (idx % r->capacity);
+}
+
+/****************************************************************************
+ * Name: ring_reset_indices
+ *
+ * Description:
+ *   Clear all indices and return the count of elements that were present
+ *   before the reset (i.e. the number of elements discarded by the reset
+ *   operation).  Called by the ring_reset() macro after RING_BASE()
+ *   conversion, and may also be invoked directly when the caller already
+ *   holds a FAR struct ring_s * (e.g. from inside other inline helpers
+ *   such as ring_init_magic).
+ *
+ *   Callers may either use the return value (e.g. to bump a "dropped"
+ *   counter) or discard it.  Safe to call on a freshly-zeroed ring whose
+ *   indices have not been written yet: reading the volatile fields yields
+ *   whatever happens to be in memory and the caller is expected to discard
+ *   the value in that case.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
+{
+  uint32_t dropped = ring_count(r);
+
+  if (dropped > r->capacity)
+    {
+      dropped = r->capacity;
+    }
+
+  RING_FIELD(&r->prod_head) = 0;
+  RING_FIELD(&r->prod_tail) = 0;
+  RING_FIELD(&r->cons_head) = 0;
+  RING_FIELD(&r->cons_tail) = 0;
+
+  return dropped;
 }
 
 /****************************************************************************
