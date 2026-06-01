@@ -142,7 +142,7 @@ bool bcmf_board_etheraddr(struct ether_addr *ethaddr)
  * Name: emw3162_wlan_initialize
  ****************************************************************************/
 
-int emw3162_wlan_initialize()
+int emw3162_wlan_initialize(void)
 {
   int ret;
 

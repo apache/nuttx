@@ -106,6 +106,8 @@ void board_late_initialize(void)
 {
   int ret = OK;
 
+  UNUSED(ret);
+
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
