@@ -5,6 +5,41 @@
 
 menu "Time/Time Zone Support"
 
+config LIBC_STRFTIME_C_STANDARD_FORMATS
+	bool "strftime ISO C conversion specifiers"
+	default !DEFAULT_SMALL
+	---help---
+		Enable ISO C strftime conversion specifiers that are not part of
+		the small always-enabled subset.  Disabling this option
+		removes support for %A, %B, %I, %j, %p, %U, %w, %W, %x, %X, and
+		%y.  The always-enabled subset is %a, %b/%h, %d, %H, %m, %M,
+		%S, %Y, and %%.
+
+		Disabling this option makes strftime smaller, but the implementation
+		no longer supports all conversion specifiers required by ISO C.
+
+config LIBC_STRFTIME_POSIX_FORMATS
+	bool "strftime POSIX conversion specifiers"
+	default !DEFAULT_SMALL
+	depends on LIBC_STRFTIME_C_STANDARD_FORMATS
+	---help---
+		Enable POSIX strftime conversion specifiers beyond ISO C that are
+		implemented by NuttX.  Disabling this option removes support for
+		%C, %e, %F, %g, %G, %n, %r, %R, %t, %T, %u, %V, and %z.
+		Enabling this option also enables the ISO C conversion specifiers.
+
+		Note that %h is kept in the always-enabled subset as an alias for
+		%b because it shares the same implementation.  Some POSIX
+		specifiers may be controlled by other options.
+
+config LIBC_STRFTIME_NONSTANDARD_FORMATS
+	bool "strftime non-standard conversion specifiers"
+	default !DEFAULT_SMALL
+	---help---
+		Enable NuttX/GNU-style strftime conversion specifiers that are not
+		required by ISO C or POSIX.  Disabling this option removes support
+		for %k, %l, %P, and %s.
+
 config LIBC_LOCALTIME
 	bool "localtime API call support"
 	default "n"
