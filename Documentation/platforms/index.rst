@@ -12,4 +12,5 @@ series and boards supported in NuttX:
    :maxdepth: 3
    :titlesonly:
    
-   */*
+   */index
+
