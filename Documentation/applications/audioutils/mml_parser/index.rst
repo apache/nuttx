@@ -146,7 +146,6 @@ On success, following values can be returned. And those values are defined in ``
 ===================== ===========================================
 Return values          Description
 ===================== ===========================================
-
 MML_TYPE_EOF          This means that it have reached the end of the string. The content of the ``result`` has no meaning.
 MML_TYPE_NOTE         This indicates that some note has been parsed. The scale of the note is stored in ``note_idx[0]``. The length of the note is given by the ``length`` member as the number of samples. In the case of tuplet, this return value is returned at the time each note is parsed. In other words, a tuplet is parsed as a single note.
 MML_TYPE_REST         This indicates the ``rest`` has been parsed. The length of it is given by the ``length`` member as the number of samples.
@@ -218,4 +217,4 @@ Please write unit tests for any new functions you add - it's fun!
 Author
 ------
 
-mml_parser was written by Takayoshi Koizumi &lt;takayoshi.koizumi@gmail.com&gt;
+mml_parser was written by Takayoshi Koizumi <takayoshi.koizumi@gmail.com>
