@@ -1127,7 +1127,7 @@ static int usrsock_rpmsg_ept_do_cb(FAR struct usrsock_rpmsg_ept_s *uept,
     {
       return usrsock_rpmsg_sendto_handler(&uept->ept, data, len, src, priv);
     }
-  else if (common->reqid >= 0 && common->reqid <= USRSOCK_REQUEST__MAX)
+  else if (common->reqid <= USRSOCK_REQUEST__MAX)
     {
       return g_usrsock_rpmsg_handler[common->reqid](&uept->ept, data, len,
                                                     src, priv);
