@@ -166,7 +166,4 @@ recalculate their frequency related settings.
 
 Here is some Power Management documentation:
 
-.. toctree::
-  :maxdepth: 1
-
-  /components/drivers/special/power/pm/index.rst
+- :doc:`/components/drivers/special/power/pm/index`

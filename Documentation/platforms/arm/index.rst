@@ -8,4 +8,5 @@ The following ARM SoC are supported:
    :maxdepth: 1
    :glob:
 
-   */*
+   */index
+
