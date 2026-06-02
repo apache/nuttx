@@ -70,6 +70,13 @@
  *     ring_spmc_dequeue_skip(&g_ring, n);
  *     ring_mpmc_dequeue_skip(&g_ring, n);
  *
+ *    Skip-to (advance cons_tail to a specific target index):
+ *
+ *     ring_spsc_skipto(&g_ring, target_index);
+ *     ring_mpsc_skipto(&g_ring, target_index);
+ *     ring_spmc_skipto(&g_ring, target_index);
+ *     ring_mpmc_skipto(&g_ring, target_index);
+ *
  * 4. Overwrite Mode (SPMC/MPMC only, discards oldest on full):
  *
  *     ring_spmc_enqueue_overwrite(&g_ring, &val, 1);
@@ -370,6 +377,18 @@
 
 #define ring_mpsc_dequeue_skip(r, count) \
   ring_sc_dequeue_skip(RING_BASE(r), count)
+
+#define ring_mpsc_skipto(r, target) \
+  ring_sc_skipto(RING_BASE(r), target)
+
+#define ring_spsc_skipto(r, target) \
+   ring_sc_skipto(RING_BASE(r), target)
+
+#define ring_spmc_skipto(r, target) \
+  ring_mc_skipto(RING_BASE(r), target)
+
+#define ring_mpmc_skipto(r, target) \
+  ring_mc_skipto(RING_BASE(r), target)
 
 /* Overwrite enqueue: when the ring is full, discard oldest data to
  * make room.  The discard path acts as a virtual multi-consumer,
@@ -1313,6 +1332,30 @@ ring_sc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
 }
 
 /****************************************************************************
+ * Name: ring_sc_skipto
+ *
+ * Description:
+ *   Single-consumer skip-to. Advance cons_tail to the specified target
+ *   index. Computes the skip count from current cons_tail internally.
+ *   If target is behind cons_tail (already consumed), does nothing.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
+{
+  uint32_t cons_index = RING_FIELD(&r->cons_tail);
+  uint32_t count = RTS_IDX(target - cons_index);
+
+  if (count != 0)
+    {
+      return ring_sc_dequeue_skip(r, count);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: ring_mc_dequeue_skip
  *
  * Description:
@@ -1330,6 +1373,31 @@ ring_mc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
   ring_mc_finish(r, &buf);
 
   return buf.cnt;
+}
+
+/****************************************************************************
+ * Name: ring_mc_skipto
+ *
+ * Description:
+ *   Multi-consumer skip-to. Advance cons_tail to the specified target
+ *   index. This is a convenience wrapper that computes the skip count
+ *   from the current cons_tail and then calls ring_mc_dequeue_skip.
+ *   If target is behind cons_tail (already consumed), does nothing.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
+{
+  uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
+  uint32_t count = RTS_IDX(target - cons_index);
+
+  if (count != 0)
+    {
+      return ring_mc_dequeue_skip(r, count);
+    }
+
+  return 0;
 }
 
 /****************************************************************************
