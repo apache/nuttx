@@ -70,7 +70,7 @@ Summary of Files
 
 * ``include/`` -- This directory contains board specific header files.  This
   directory will be linked as include/arch/board at configuration time and
-  can be included via #include <arch/board/header.h>``.  These header file
+  can be included via ``#include <arch/board/header.h>``.  These header file
   can only be included by files in ``arch/<arch>include/`` and
   ``arch/<arch>/src``
 
