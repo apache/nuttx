@@ -604,6 +604,11 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
               if (elapsed >= timeout)
                 {
                   nxmutex_unlock(&dev->xmit.lock);
+                  if (cancelable)
+                    {
+                      leave_cancellation_point();
+                    }
+
                   return -ETIMEDOUT;
                 }
             }
