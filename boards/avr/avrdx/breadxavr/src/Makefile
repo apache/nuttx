@@ -22,14 +22,10 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = avrdx_boot.c
+CSRCS = avrdx_boot.c avrdx_init.c
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += avr_leds.c
-endif
-
-ifeq ($(CONFIG_BOARD_EARLY_INITIALIZE),y)
-CSRCS += avrdx_init.c
 endif
 
 ifeq ($(CONFIG_BREADXAVR_BUTTONS_DRIVER),y)
