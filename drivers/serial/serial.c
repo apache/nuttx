@@ -525,6 +525,14 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
     {
       irqstate_t flags;
       clock_t start;
+      clock_t elapsed;
+
+      /* Take a single timestamp.  The caller-supplied timeout bounds the
+       * total time spent in this function, covering both the xmit-buffer
+       * drain wait below and the FIFO-empty polling loop further down.
+       */
+
+      start = clock_systime_ticks();
 
       /* Trigger emission to flush the contents of the tx buffer */
 
@@ -544,12 +552,11 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
       else
 #endif
         {
-          /* Continue waiting while the TX buffer is not empty.
-           *
-           * NOTE: There is no timeout on the following loop.  In
-           * situations were this loop could hang (with hardware flow
-           * control, as an example),  the caller should call
-           * tcflush() first to discard this buffered Tx data.
+          /* Continue waiting while the TX buffer is not empty.  The wait is
+           * bounded by the caller-supplied timeout so this loop cannot hang
+           * indefinitely (e.g. on hardware-flow-control stalls).  The caller
+           * may still call tcflush() to discard the buffered Tx data on
+           * timeout.
            */
 
           ret = OK;
@@ -569,7 +576,17 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
               uart_dmatxavail(dev);
 #endif
               uart_enabletxint(dev);
-              ret = nxsem_wait(&dev->xmitsem);
+
+              elapsed = clock_systime_ticks() - start;
+              if (elapsed >= timeout)
+                {
+                  ret = -ETIMEDOUT;
+                }
+              else
+                {
+                  ret = nxsem_tickwait(&dev->xmitsem, timeout - elapsed);
+                }
+
               uart_disabletxint(dev);
             }
         }
@@ -581,21 +598,15 @@ static int uart_tcdrain(FAR uart_dev_t *dev,
        * this event, so we have to do a busy wait poll.
        */
 
-      /* Set up for the timeout
-       *
-       * REVISIT:  This is a kludge.  The correct fix would be add an
+      /* REVISIT: This is a kludge.  The correct fix would be add an
        * interface to the lower half driver so that the tcflush() operation
        * all also cause the lower half driver to clear and reset the Tx FIFO.
        */
-
-      start = clock_systime_ticks();
 
       if (ret >= 0)
         {
           while (!uart_txempty(dev))
             {
-              clock_t elapsed;
-
               nxsched_usleep(POLL_DELAY_USEC);
 
               /* Check for a timeout */
