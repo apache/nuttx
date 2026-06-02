@@ -94,12 +94,39 @@ int setjmp(jmp_buf env)
   return 0;
 }
 
+/* The CSA unwind loop below uses `ret` in .Lupper to release one Upper
+ * Context per iteration.  The hardware side-effect of `ret` is that the
+ * popped UC's PSW becomes the active PSW, which may put the CPU into
+ * user mode / wrong PRS even though longjmp itself runs in supervisor
+ * mode.  The next access to env (a4) would then fault on the MPU, since
+ * jmp_buf may live in kernel-protected memory.
+ *
+ * To keep the unwind loop running in a known-safe context, the head of
+ * .Lloop forces PSW.IO=Supervisor and PSW.PRS=0 on every iteration.
+ * Once the loop terminates, the original PSW saved at setjmp time
+ * (env->psw) is restored before the indirect jump back to the setjmp
+ * call site.
+ *
+ * PSW layout on TC1.6.2 / TC1.8:
+ *   bit 15    = PRS[2]
+ *   bit 14    = S    (alternate master tag selector, must preserve)
+ *   bit 13:12 = PRS[1:0]
+ *   bit 11:10 = IO   (0b10 = Supervisor)
+ */
+
 void longjmp(jmp_buf env, int val)
 {
   __asm__ __volatile__ (
 #ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
     "ld.w   d5, [a4]0\n\t"
     ".Lloop:\n\t"
+    "mfcr   d3, #0xfe04\n\t"
+    "mov    d2, #2\n\t"
+    "insert d3, d3, d2, #10, #4\n\t"
+    "mov    d2, #0\n\t"
+    "insert d3, d3, d2, #15, #1\n\t"
+    "mtcr   #0xfe04, d3\n\t"
+    "isync\n\t"
     "mfcr   d2, #0xfe00\n\t"
     "jne    d2, d5, .Lrelease\n\t"
     "max.u  d2, d4, #1\n\t"
@@ -117,6 +144,9 @@ void longjmp(jmp_buf env, int val)
     "ld.w   d13, [a4]52\n\t"
     "ld.w   d14, [a4]56\n\t"
     "ld.w   d15, [a4]60\n\t"
+    "ld.w   d3, [a4]4\n\t"
+    "mtcr   #0xfe04, d3\n\t"
+    "isync\n\t"
     "ji     a2\n\t"
     ".Lrelease:\n\t"
     "jnz.t  d2, #20, .Lupper\n\t"
@@ -135,6 +165,13 @@ void longjmp(jmp_buf env, int val)
 #else
     "ld.w   %%d5, [%%a4]0\n\t"
     ".Lloop:\n\t"
+    "mfcr   %%d3, 0xfe04\n\t"
+    "mov    %%d2, 2\n\t"
+    "insert %%d3, %%d3, %%d2, 10, 4\n\t"
+    "mov    %%d2, 0\n\t"
+    "insert %%d3, %%d3, %%d2, 15, 1\n\t"
+    "mtcr   0xfe04, %%d3\n\t"
+    "isync\n\t"
     "mfcr   %%d2, 0xfe00\n\t"
     "jne    %%d2, %%d5, .Lrelease\n\t"
     "max.u  %%d2, %%d4, 1\n\t"
@@ -152,6 +189,9 @@ void longjmp(jmp_buf env, int val)
     "ld.w   %%d13, [%%a4]52\n\t"
     "ld.w %%d14, [%%a4]56\n\t"
     "ld.w   %%d15, [%%a4]60\n\t"
+    "ld.w   %%d3, [%%a4]4\n\t"
+    "mtcr   0xfe04, %%d3\n\t"
+    "isync\n\t"
     "ji     %%a2\n\t"
     ".Lrelease:\n\t"
     "jnz.t  %%d2, 20, .Lupper\n\t"
