@@ -66,10 +66,10 @@ def try_extract(filepath) -> io.BytesIO:
                 if coredump:
                     print("Warning: multiple core dump found.")
                     break
-            elif "Finish coredump" in line:
+            elif "Coredump finish" in line:
                 bas64 = "base64 formatted" in line
                 line = line.strip("\n\r")
-                print(f"Found finish coredump marker at '{line}'")
+                print(f"Found Coredump finish marker at '{line}'")
                 in_coredump = False
             elif in_coredump:
                 index = line.rfind(" ")
