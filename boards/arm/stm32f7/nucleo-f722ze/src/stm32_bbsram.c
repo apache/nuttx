@@ -239,7 +239,7 @@ typedef struct
   int           lineno;                           /* __LINE__ to up_assert */
   int           pid;                              /* Process ID */
   uint32_t      regs[XCPTCONTEXT_REGS];           /* Interrupt register save area */
-  stack_t       stacks;                           /* Stack info */
+  stacks_t      stacks;                           /* Stack info */
   char          name[CONFIG_TASK_NAME_SIZE + 1];  /* Task name (with NULL
                                                    * terminator) */
   char          filename[MAX_FILE_PATH_LENGTH];   /* the Last of chars in
@@ -426,9 +426,13 @@ void board_crashdump(uintptr_t sp, struct tcb_s *tcb,
 
   if (up_interrupt_context())
     {
+#if CONFIG_ARCH_INTERRUPTSTACK > 3
       pdump->info.stacks.interrupt.sp = sp;
       pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT |
                             INTSTACK_PRESENT);
+#else
+      pdump->info.flags |= (REGS_PRESENT | USERSTACK_PRESENT);
+#endif
       memcpy(pdump->info.regs, running_regs(),
              sizeof(pdump->info.regs));
       pdump->info.stacks.user.sp = pdump->info.regs[REG_R13];
