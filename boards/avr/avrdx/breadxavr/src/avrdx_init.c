@@ -89,3 +89,32 @@ void board_early_initialize(void)
 }
 
 #endif /* CONFIG_BOARD_EARLY_INITIALIZE */
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *   Excerpt from Kconfig:
+ *
+ *   If CONFIG_BOARD_LATE_INITIALIZE is set, board_late_initialize() is
+ *   called after up_initialize() just before the main application is
+ *   started. It can be used to initialize more complex, board-specific
+ *   device drivers.
+ *
+ *   Function runs on a temporary, internal kernel thread and can therefore
+ *   wait for events.
+ *
+ *   Currently, the board has no need for this function but the Kconfig
+ *   option is enabled by default so the function either needs to be defined,
+ *   or default configuration needs to be changed. This is why this function
+ *   exists but is empty.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+
+void board_late_initialize(void)
+{
+}
+
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
