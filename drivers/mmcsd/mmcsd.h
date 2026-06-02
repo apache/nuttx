@@ -44,7 +44,11 @@
 #  undef CONFIG_MMCSD_DUMPALL
 #endif
 
-#define MMCSD_PART_COUNT             8
+#ifdef CONFIG_MMCSD_MMCSUPPORT
+#  define MMCSD_PART_COUNT           8
+#else
+#  define MMCSD_PART_COUNT           1
+#endif
 
 /* Card type */
 
