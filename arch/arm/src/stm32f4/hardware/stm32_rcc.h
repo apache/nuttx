@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f4/hardware/stm32f40xxx_rcc.h
+ * arch/arm/src/stm32f4/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_RCC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32F4_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32F4_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -937,4 +937,4 @@
 #    define RCC_DCKCFGR2_SPDIFRXSEL_PLLI2S (1 << RCC_DCKCFGR2_SPDIFRXSEL_SHIFT) /* PLLI2S clock is selected as SPDIF-Rx clock */
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F40XXX_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32F4_HARDWARE_STM32_RCC_H */

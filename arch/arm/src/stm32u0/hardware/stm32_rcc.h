@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u0/hardware/stm32u0_rcc.h
+ * arch/arm/src/stm32u0/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32U0_RCC_H
-#define __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32U0_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -608,4 +608,4 @@
 #define RCC_CRRCR_HSI48CAL_SHIFT      (7)      /* Bits 7-15: HSI48 clock calibration */
 #define RCC_CRRCR_HSI48CAL_MASK       (0x1ff << RCC_CRRCR_HSI48CAL_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32U0_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32U0_HARDWARE_STM32_RCC_H */
