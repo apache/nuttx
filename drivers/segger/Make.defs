@@ -80,7 +80,7 @@ ifeq ($(wildcard $(SGDIR)/SystemView/.git),)
 TARGET_ZIP = $(SGDIR)/$(SYSVIEW_ZIP)
 
 $(SGDIR)/$(SYSVIEW_ZIP):
-	$(call DOWNLOAD,https://www.segger.com/downloads/systemview,$(SYSVIEW_ZIP),$(TARGET_ZIP))
+	$(call DOWNLOAD,https://github.com/NuttX/nuttx/releases/download/systemview,$(SYSVIEW_ZIP),$(TARGET_ZIP))
 	$(Q) unzip -o $(TARGET_ZIP) -d $(SGDIR)/SystemView
 endif
 
