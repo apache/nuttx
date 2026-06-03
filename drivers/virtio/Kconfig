@@ -162,3 +162,16 @@ config DRIVERS_VIRTIO_SND_BUFFER_COUNT
 	int "Virtio snd driver buffer count"
 	default 6
 endif
+
+config DRIVERS_VIRTIO_SPI
+	bool "Virtio SPI support"
+	depends on SPI && SPI_EXCHANGE
+	default n
+	select DRIVERS_VIRTIO
+	---help---
+		Enable the native VirtIO SPI frontend driver.  It probes a VirtIO
+		SPI device (device ID 45), reads the SPI configuration space,
+		exposes a NuttX SPI lower-half instance through
+		virtio_spi_get_master(), and submits transfers through the request
+		virtqueue using the Linux-compatible VirtIO SPI wire format.
+

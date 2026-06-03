@@ -23,3 +23,19 @@ SPI Device Drivers
 
 -  **Examples**: ``drivers/loop.c``,
    ``drivers/mmcsd/mmcsd_spi.c``, ``drivers/ramdisk.c``, etc.
+
+=================
+Native VirtIO SPI
+=================
+
+An SPI controller can be exposed over a VirtIO transport.
+``CONFIG_DRIVERS_VIRTIO_SPI`` enables the frontend (client), which probes a
+VirtIO SPI device (device id 45), reads its configuration space and exposes a
+``struct spi_dev_s`` retrievable with ``virtio_spi_get_master(index)``.
+Board code may then pass it to device drivers or register it with
+``spi_register()`` as ``/dev/spiN``. ``CONFIG_SPI_EXCHANGE`` is required.
+
+The wire format in ``include/nuttx/virtio/virtio-spi.h`` follows the
+Linux VirtIO SPI definitions. An ``spi_transfer()`` sequence executes as one
+bus-locked run of requests, with CS held between transfers that do not
+de-select. The frontend can be validated against a host vhost-user backend.
