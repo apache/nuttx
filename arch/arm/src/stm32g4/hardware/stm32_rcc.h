@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32g4/hardware/stm32g4xxxx_rcc.h
+ * arch/arm/src/stm32g4/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -693,4 +693,4 @@
 #define RCC_APB1ENR_TIM4EN             RCC_APB1ENR1_TIM4EN
 #define RCC_APB1ENR_TIM5EN             RCC_APB1ENR1_TIM5EN
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H */

@@ -34,14 +34,7 @@ endif()
 
 # Required STM32H5 files
 
-list(
-  APPEND
-  SRCS
-  stm32_rcc.c
-  stm32_pwr.c
-  stm32_lse.c
-  stm32_lsi.c
-  stm32_sdmmc.c)
+list(APPEND SRCS stm32_rcc.c stm32_pwr.c stm32_lse.c stm32_sdmmc.c)
 
 if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)

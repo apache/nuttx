@@ -36,7 +36,6 @@ list(
   stm32l4_spi.c
   stm32l4_i2c.c
   stm32l4_lse.c
-  stm32l4_lsi.c
   stm32l4_pwr.c
   stm32l4_tim.c
   stm32l4_flash.c
