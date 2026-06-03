@@ -27,7 +27,7 @@ if(CONFIG_SEGGER_RTT OR CONFIG_SEGGER_SYSVIEW)
       systemview
       DOWNLOAD_NAME "SystemView.zip"
       DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR}
-      URL "https://www.segger.com/downloads/systemview/SystemView_Src_V${CONFIG_SEGGER_SYSVIEW_TARGET_SOURCE}.zip"
+      URL "https://github.com/NuttX/nuttx/releases/download/systemview/SystemView_Src_V${CONFIG_SEGGER_SYSVIEW_TARGET_SOURCE}.zip"
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/SystemView
           BINARY_DIR
