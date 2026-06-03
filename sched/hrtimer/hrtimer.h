@@ -34,6 +34,8 @@
 #include <nuttx/list.h>
 #include <nuttx/seqlock.h>
 
+#include <sys/tree.h>
+
 #include "sched/sched.h"
 
 #ifdef CONFIG_HRTIMER
