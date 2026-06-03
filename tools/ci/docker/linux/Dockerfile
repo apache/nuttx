@@ -251,7 +251,7 @@ RUN cd /tools/renesas-tools/build/gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-riscv
 # Download the latest RISCV GCC toolchain prebuilt by xPack
 RUN mkdir -p riscv-none-elf-gcc && \
-  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/xpack-riscv-none-elf-gcc-14.2.0-3-linux-x64.tar.gz" \
+  curl -s -L "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v15.2.0-1/xpack-riscv-none-elf-gcc-15.2.0-1-linux-x64.tar.gz" \
   | tar -C riscv-none-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
