@@ -32,7 +32,6 @@ set(SRCS
     stm32wl5_serial.c
     stm32wl5_start.c
     stm32wl5_lse.c
-    stm32wl5_lsi.c
     stm32wl5_idle.c
     stm32wl5_pwr.c
     stm32wl5_tim.c

@@ -41,6 +41,7 @@ ARCHXXINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
 
 CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
+CHIP_CSRCS += stm32_lsi.c
 
 ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
@@ -55,7 +56,6 @@ ifeq ($(CONFIG_STM32_COMMON_LEGACY),y)
 CHIP_CSRCS += stm32_allocateheap_m3m4_v1.c
 CHIP_CSRCS += stm32_start_m3m4_v1.c
 CHIP_CSRCS += stm32_lse_m3m4_v1.c
-CHIP_CSRCS += stm32_lsi_m3m4_v1.c
 CHIP_CSRCS += stm32_irq_m3m4_v1.c
 ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_USART_V1) \
             $(CONFIG_STM32_HAVE_IP_USART_V2) \
@@ -407,7 +407,6 @@ else ifeq ($(CONFIG_STM32_HAVE_IP_USART_V4),y)
 CHIP_CSRCS += stm32_lowputc_usart_m0_v4.c
 endif
 CHIP_CSRCS += stm32_start_m0_v1.c
-CHIP_CSRCS += stm32_lsi_m0_v1.c
 ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M0_V1),y)
 CHIP_CSRCS += stm32_gpio_m0_v1.c
 endif

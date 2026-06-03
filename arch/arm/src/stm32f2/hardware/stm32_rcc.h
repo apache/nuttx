@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f2/hardware/stm32f20xxx_rcc.h
+ * arch/arm/src/stm32f2/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_RCC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32F2_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32F2_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -503,4 +503,4 @@
 #define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
 #define RCC_PLLI2SCFGR_PLLI2SR_MASK  (7 << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F20XXX_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32F2_HARDWARE_STM32_RCC_H */
