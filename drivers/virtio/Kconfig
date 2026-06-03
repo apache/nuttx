@@ -62,6 +62,17 @@ config DRIVERS_VIRTIO_GPU_RGB565
 
 endchoice
 
+config DRIVERS_VIRTIO_I2C
+	bool "Virtio I2C support"
+	default n
+	select I2C
+	select DRIVERS_VIRTIO
+	---help---
+		Enable the native VirtIO I2C frontend driver.  It probes a VirtIO
+		I2C adapter device (device ID 34), exposes a NuttX I2C lower-half
+		instance through virtio_i2c_get_master(), and submits transfers
+		through the request virtqueue using the OASIS VirtIO I2C wire format.
+
 config DRIVERS_VIRTIO_INPUT
 	bool "Virtio input support"
 	depends on INPUT

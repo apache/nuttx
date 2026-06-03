@@ -41,6 +41,10 @@ if(CONFIG_DRIVERS_VIRTIO_GPU)
   list(APPEND SRCS virtio-gpu.c)
 endif()
 
+if(CONFIG_DRIVERS_VIRTIO_I2C)
+  list(APPEND SRCS virtio-i2c.c)
+endif()
+
 if(CONFIG_DRIVERS_VIRTIO_INPUT)
   list(APPEND SRCS virtio-input.c)
 endif()

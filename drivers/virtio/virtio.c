@@ -39,6 +39,7 @@
 
 #include "virtio-blk.h"
 #include "virtio-gpu.h"
+#include "virtio-i2c.h"
 #include "virtio-input.h"
 #include "virtio-net.h"
 #include "virtio-rng.h"
@@ -296,6 +297,14 @@ void virtio_register_drivers(void)
   if (ret < 0)
     {
       vrterr("virtio_register_gpu_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VIRTIO_I2C
+  ret = virtio_register_i2c_driver();
+  if (ret < 0)
+    {
+      vrterr("virtio_register_i2c_driver failed, ret=%d\n", ret);
     }
 #endif
 

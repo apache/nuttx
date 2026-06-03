@@ -42,6 +42,10 @@ ifeq ($(CONFIG_DRIVERS_VIRTIO_GPU),y)
   CSRCS += virtio-gpu.c
 endif
 
+ifeq ($(CONFIG_DRIVERS_VIRTIO_I2C),y)
+  CSRCS += virtio-i2c.c
+endif
+
 ifeq ($(CONFIG_DRIVERS_VIRTIO_INPUT),y)
   CSRCS += virtio-input.c
 endif

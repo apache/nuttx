@@ -210,3 +210,21 @@ I2C Slave Driver API
      I2C packet.
    - ``setup``: initializes the peripheral,
    - ``shutdown``: shutdowns the peripheral.
+
+=================
+Native VirtIO I2C
+=================
+
+An I2C controller can be exposed over a VirtIO transport.
+``CONFIG_DRIVERS_VIRTIO_I2C`` enables the frontend (client), which probes a
+VirtIO I2C adapter device (device id 34) and exposes a
+``struct i2c_master_s`` retrievable with ``virtio_i2c_get_master(index)``.
+Board code may then pass it to device drivers or register it with
+``i2c_register()`` as ``/dev/i2cN``. ``CONFIG_DRIVERS_VHOST_I2C`` enables
+the device-side backend (server), which serves the request virtqueue and
+forwards transfers to the local I2C device node named in its config space.
+
+The frontend and backend share the OASIS VirtIO I2C wire-format definitions in
+``include/nuttx/virtio/virtio-i2c.h``. The frontend can be validated against a
+host vhost-user backend, or against a second NuttX instance running the vhost
+backend over rptun/IVSHMEM.
