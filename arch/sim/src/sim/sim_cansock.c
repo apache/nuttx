@@ -198,6 +198,11 @@ static void sim_can_work(void *arg)
       NETDEV_RXPACKETS(&priv->dev);
 
       can_input(&priv->dev);
+
+      /* d_buf pointed at the stack local 'hframe', clear it before return */
+
+      priv->dev.d_buf = NULL;
+      priv->dev.d_len = 0;
       netdev_unlock(&priv->dev);
     }
 
