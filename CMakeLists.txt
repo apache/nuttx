@@ -42,6 +42,11 @@ if(POLICY CMP0115)
   cmake_policy(SET CMP0115 NEW)
 endif()
 
+if(POLICY CMP0116)
+  # transform DEPFILE paths correctly for Ninja custom commands
+  cmake_policy(SET CMP0116 NEW)
+endif()
+
 # Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
