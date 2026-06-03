@@ -46,6 +46,10 @@ ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
 endif
 
+ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
+CHIP_CSRCS += stm32_1wire_m3m4_v1.c
+endif
+
 ifeq ($(CONFIG_STM32_COMMON_LEGACY),y)
 
 CHIP_CSRCS += stm32_allocateheap_m3m4_v1.c
@@ -288,10 +292,6 @@ ifeq ($(CONFIG_STM32_HRTIM),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_HRTIM_M3M4_V1),y)
 CHIP_CSRCS += stm32_hrtim_m3m4_v1.c
 endif
-endif
-
-ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
-CHIP_CSRCS += stm32_1wire_m3m4_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_HCIUART),y)

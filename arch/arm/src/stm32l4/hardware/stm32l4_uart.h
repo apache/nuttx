@@ -296,6 +296,26 @@
 #define USART_TDR_SHIFT           (0)       /* Bits 8:0: Data value */
 #define USART_TDR_MASK            (0xff << USART_TDR_SHIFT)
 
+/* Compatibility with F1/F2/F4 Status Register names.  This USART IP replaces
+ * the SR register with separate ISR/ICR registers; alias the legacy SR names
+ * so the shared M3/M4 drivers keep working on these parts.
+ */
+
+#define STM32_USART_SR_OFFSET     STM32_USART_ISR_OFFSET
+
+#define USART_SR_PE               USART_ISR_PE   /* Parity Error */
+#define USART_SR_FE               USART_ISR_FE   /* Framing error */
+#define USART_SR_NE               USART_ISR_NF   /* Noise detected flag */
+#define USART_SR_ORE              USART_ISR_ORE  /* Overrun error */
+#define USART_SR_IDLE             USART_ISR_IDLE /* IDLE line detected */
+#define USART_SR_RXNE             USART_ISR_RXNE /* Read Data Register Not Empty */
+#define USART_SR_TC               USART_ISR_TC   /* Transmission Complete */
+#define USART_SR_TXE              USART_ISR_TXE  /* Transmit Data Register Empty */
+#define USART_SR_LBD              USART_ISR_LBDF /* LIN Break Detection Flag */
+#define USART_SR_CTS              USART_ISR_CTS  /* CTS Flag */
+
+#define USART_CR1_M               USART_CR1_M0
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

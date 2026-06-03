@@ -4405,8 +4405,6 @@ arch/arm/src/stm32l4/hardware/stm32l4xrxx_pinmap_legacy.h David.Sidrane@NscDg.co
 arch/arm/src/stm32l4/hardware/stm32l4xrxx_rcc.h alin.jerpelea@sony.com s.nikitenko@me.com juha.niskanen@haltian.com shen497@purdue.edu
 arch/arm/src/stm32l4/hardware/stm32l4xrxx_syscfg.h alin.jerpelea@sony.com
 arch/arm/src/stm32l4/stm32l4.h sebastien@lorquet.fr alin.jerpelea@sony.com miha.vrhovnik@gmail.com pekka.ervasti@haltian.com
-arch/arm/src/stm32l4/stm32l4_1wire.c juha.niskanen@haltian.com anjiahao@xiaomi.com abdelatif.guettouche@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com
-arch/arm/src/stm32l4/stm32l4_1wire.h juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_adc.c juha.niskanen@haltian.com danieloak@gmail.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me
 arch/arm/src/stm32l4/stm32l4_adc.h danieloak@gmail.com juha.niskanen@haltian.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com
 arch/arm/src/stm32l4/stm32l4_allocateheap.c sebastien@lorquet.fr juha.niskanen@haltian.com alin.jerpelea@sony.com dev@ziggurat29.com xiaoxiang@xiaomi.com
