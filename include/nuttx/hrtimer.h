@@ -33,7 +33,7 @@
 #include <nuttx/list_type.h>
 
 #include <stdint.h>
-#include <sys/tree.h>
+#include <sys/tree_type.h>
 
 /****************************************************************************
  * Pre-processor Definitions

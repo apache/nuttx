@@ -61,15 +61,13 @@
 #ifndef __INCLUDE_SYS_TREE_H
 #define __INCLUDE_SYS_TREE_H
 
+/* Include type definitions for backward compatibility */
+
+#include <sys/tree_type.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define SPLAY_HEAD(name, type) \
-  struct name \
-  { \
-    struct type *sph_root; /* root of the tree */ \
-  }
 
 #define SPLAY_INITIALIZER(root) \
   { NULL }
@@ -79,13 +77,6 @@
     { \
       (root)->sph_root = NULL; \
     } while (0)
-
-#define SPLAY_ENTRY(type) \
-  struct \
-  { \
-    struct type *spe_left;  /* left element */ \
-    struct type *spe_right; /* right element */ \
-  }
 
 #define SPLAY_LEFT(elm, field)         (elm)->field.spe_left
 #define SPLAY_RIGHT(elm, field)        (elm)->field.spe_right
@@ -385,12 +376,6 @@ while (0)
 
 /* Macros that define a red-black tree */
 
-#define RB_HEAD(name, type) \
-  struct name \
-  { \
-    struct type *rbh_root; /* root of the tree */ \
-  }
-
 #define RB_INITIALIZER(root) \
     { NULL }
 
@@ -400,17 +385,6 @@ while (0)
       (root)->rbh_root = NULL; \
     } \
   while (0)
-
-#define RB_BLACK                       0
-#define RB_RED                         1
-#define RB_ENTRY(type) \
-  struct \
-  { \
-    struct type *rbe_left;    /* left element */ \
-    struct type *rbe_right;   /* right element */ \
-    struct type *rbe_parent;  /* parent element */ \
-    int rbe_color;            /* node color */ \
-  }
 
 #define RB_LEFT(elm, field)            (elm)->field.rbe_left
 #define RB_RIGHT(elm, field)           (elm)->field.rbe_right
