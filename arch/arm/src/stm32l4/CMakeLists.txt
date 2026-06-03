@@ -186,10 +186,6 @@ if(CONFIG_STM32_SDMMC1)
   list(APPEND SRCS stm32l4_sdmmc.c)
 endif()
 
-if(CONFIG_STM32_1WIREDRIVER)
-  list(APPEND SRCS stm32l4_1wire.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})
 
 add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)
