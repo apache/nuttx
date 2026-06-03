@@ -34,6 +34,10 @@ set(SRCS)
 list(APPEND SRCS stm32_waste.c)
 list(APPEND SRCS stm32_uid.c)
 
+if(CONFIG_STM32_PULSECOUNT)
+  list(APPEND SRCS stm32_pulsecount.c)
+endif()
+
 if(CONFIG_STM32_COMMON_LEGACY)
   list(
     APPEND
@@ -281,10 +285,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     list(APPEND SRCS stm32_pwm_m3m4_v1v2v3.c)
   endif()
 
-  if(CONFIG_STM32_PULSECOUNT)
-    list(APPEND SRCS stm32_pulsecount_m3m4_v1v2v3.c)
-  endif()
-
   if(CONFIG_STM32_CAP)
     list(APPEND SRCS stm32_capture_m3m4_v1_lowerhalf.c)
   endif()
@@ -442,10 +442,6 @@ if(CONFIG_ARCH_CORTEXM0)
 
   if(CONFIG_STM32_PWM)
     list(APPEND SRCS stm32_pwm_m0_v1.c)
-  endif()
-
-  if(CONFIG_PULSECOUNT AND CONFIG_STM32_TIM1_PULSECOUNT)
-    list(APPEND SRCS stm32_pulsecount_m0_v1.c)
   endif()
 
   if(CONFIG_STM32_ADC AND CONFIG_STM32_HAVE_IP_ADC_M0_V1)

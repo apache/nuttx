@@ -43,6 +43,7 @@
 #include "stm32_i2c.h"
 #include "stm32_spi.h"
 #include "stm32_rcc.h"
+#include "stm32_tim.h"
 #include "stm32_lowputc.h"
 
 #endif /* __ARCH_ARM_SRC_STM32H7_STM32_H */

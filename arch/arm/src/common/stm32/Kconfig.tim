@@ -2762,7 +2762,6 @@ config STM32_TIM1_PULSECOUNT_TDTS
 	int "TIM1 pulse count clock division"
 	default 0
 	range 0 2
-	depends on !STM32_HAVE_IP_TIMERS
 
 config STM32_TIM1_PULSECOUNT_CHANNEL
 	int "TIM1 pulse count channel"
@@ -2775,13 +2774,11 @@ config STM32_TIM1_PULSECOUNT_POL
 	int "TIM1 pulse count output polarity"
 	default 0
 	range 0 1
-	depends on !STM32_HAVE_IP_TIMERS
 
 config STM32_TIM1_PULSECOUNT_IDLE
 	int "TIM1 pulse count idle state"
 	default 0
 	range 0 1
-	depends on !STM32_HAVE_IP_TIMERS
 
 endif # STM32_TIM1_PULSECOUNT
 

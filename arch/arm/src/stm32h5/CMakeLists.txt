@@ -115,10 +115,6 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_PULSECOUNT)
-  list(APPEND SRCS stm32_pulsecount.c)
-endif()
-
 # Required chip type specific files
 
 if(CONFIG_STM32_STM32H5XXXX)

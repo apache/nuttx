@@ -47,6 +47,7 @@
 #include "stm32_lowputc.h"
 #include "stm32_pwr.h"
 #include "stm32_rcc.h"
+#include "stm32_tim.h"
 #include "stm32_uart.h"
 #include "stm32_usbfs.h"
 

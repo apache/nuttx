@@ -1820,9 +1820,8 @@ arch/arm/src/common/stm32/stm32_pminitialize_m3m4_v1.c alin.jerpelea@sony.com ju
 arch/arm/src/common/stm32/stm32_pmsleep_m3m4_v1.c alin.jerpelea@sony.com juha.niskanen@haltian.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_pmstandby_m3m4_v1.c alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_pmstop_m3m4_v1.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me
+arch/arm/src/common/stm32/stm32_pulsecount.c raiden00@railab.me
 arch/arm/src/common/stm32/stm32_pulsecount.h alin.jerpelea@sony.com raiden00@railab.me moura.fmo@gmail.com xiaoxiang@xiaomi.com
-arch/arm/src/common/stm32/stm32_pulsecount_m0_v1.c raiden00@railab.me
-arch/arm/src/common/stm32/stm32_pulsecount_m3m4_v1v2v3.c raiden00@railab.me
 arch/arm/src/common/stm32/stm32_pwm.h alin.jerpelea@sony.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_pwm_m0_v1.c paul-a.patience@polymtl.ca dev@ziggurat29.com dpo@certi.org.br raiden00@railab.me gvr@certi.org.br
 arch/arm/src/common/stm32/stm32_pwm_m0_v1.h raiden00@railab.me dpo@certi.org.br alin.jerpelea@sony.com gvr@certi.org.br anchao@xiaomi.com
