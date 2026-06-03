@@ -96,10 +96,6 @@ if(CONFIG_STM32_RNG)
   list(APPEND SRCS stm32_rng.c)
 endif()
 
-if(CONFIG_STM32_IWDG OR CONFIG_STM32_RTC_LSICLOCK)
-  list(APPEND SRCS stm32_lsi.c)
-endif()
-
 if(CONFIG_STM32_RTC_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
 endif()

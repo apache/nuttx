@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l5/hardware/stm32l562xx_rcc.h
+ * arch/arm/src/stm32l5/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_RCC_H
-#define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Included Files
@@ -866,4 +866,4 @@
 #  define RCC_CCIPR2_OSPISEL_PLL48M1CLK  (2 << RCC_CCIPR2_OSPISEL_SHIFT)
 
 #endif /* CONFIG_STM32_STM32L562XX */
-#endif /* __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32_RCC_H */

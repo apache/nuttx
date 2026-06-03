@@ -31,7 +31,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 #include "stm32wb_ipcc.h"
-#include "hardware/stm32wb_rcc.h"
+#include "hardware/stm32_rcc.h"
 #include "hardware/stm32wb_exti.h"
 #include "hardware/stm32wb_pwr.h"
 

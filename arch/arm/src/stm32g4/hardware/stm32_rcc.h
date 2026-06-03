@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32g4/hardware/stm32g4xxxx_rcc.h
+ * arch/arm/src/stm32g4/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -688,5 +688,14 @@
 #define RCC_APB1ENR_TIM3EN             RCC_APB1ENR1_TIM3EN
 #define RCC_APB1ENR_TIM4EN             RCC_APB1ENR1_TIM4EN
 #define RCC_APB1ENR_TIM5EN             RCC_APB1ENR1_TIM5EN
+#define RCC_APB1ENR_TIM6EN             RCC_APB1ENR1_TIM6EN
+#define RCC_APB1ENR_TIM7EN             RCC_APB1ENR1_TIM7EN
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32G4XXXX_RCC_H */
+#define RCC_APB1RSTR_TIM2RST           RCC_APB1RSTR1_TIM2RST
+#define RCC_APB1RSTR_TIM3RST           RCC_APB1RSTR1_TIM3RST
+#define RCC_APB1RSTR_TIM4RST           RCC_APB1RSTR1_TIM4RST
+#define RCC_APB1RSTR_TIM5RST           RCC_APB1RSTR1_TIM5RST
+#define RCC_APB1RSTR_TIM6RST           RCC_APB1RSTR1_TIM6RST
+#define RCC_APB1RSTR_TIM7RST           RCC_APB1RSTR1_TIM7RST
+
+#endif /* __ARCH_ARM_SRC_STM32G4_HARDWARE_STM32_RCC_H */

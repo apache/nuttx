@@ -95,10 +95,6 @@ ifeq ($(CONFIG_STM32_FMC),y)
 CHIP_CSRCS += stm32_fmc.c
 endif
 
-ifeq ($(filter y,$(CONFIG_STM32_IWDG) $(CONFIG_STM32_RTC_LSICLOCK)),y)
-CHIP_CSRCS += stm32_lsi.c
-endif
-
 ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
 endif

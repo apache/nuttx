@@ -32,7 +32,6 @@ set(SRCS
     stm32_start.c
     stm32_spi.c
     stm32_lse.c
-    stm32_lsi.c
     stm32u5xx_rcc.c
     stm32_pwr.c
     stm32_tim.c

@@ -38,7 +38,7 @@ endif
 
 CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
 CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
-CHIP_CSRCS += stm32_lse.c stm32_lsi.c
+CHIP_CSRCS += stm32_lse.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c

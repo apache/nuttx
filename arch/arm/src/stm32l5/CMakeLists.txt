@@ -35,7 +35,6 @@ list(
   stm32l5_start.c
   stm32l5_spi.c
   stm32l5_lse.c
-  stm32l5_lsi.c
   stm32l5_pwr.c
   stm32l5_tim.c
   stm32l5_flash.c

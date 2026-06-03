@@ -58,7 +58,7 @@
 #include "stm32_rcc.h"
 #include "hardware/stm32_pinmap.h"
 #include "hardware/stm32_usbfs.h"
-#include "hardware/stm32h5xxx_rcc.h"
+#include "hardware/stm32_rcc.h"
 #include "hardware/stm32h5xxx_pwr.h"
 #include "stm32_usbdrdhost.h"
 
