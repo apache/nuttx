@@ -32,6 +32,7 @@
 
 #include <nuttx/nuttx.h>
 #include <nuttx/drivers/addrenv.h>
+#include <nuttx/virtio/virtio-i2c.h>
 #include <nuttx/pci/pci_ivshmem.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
@@ -74,10 +75,17 @@
 #  define RPTUN_IVSHMEM_NET       0
 #endif
 
+#ifdef CONFIG_DRIVERS_VHOST_I2C
+#  define RPTUN_IVSHMEM_I2C       1
+#else
+#  define RPTUN_IVSHMEM_I2C       0
+#endif
+
 #define RPTUN_IVSHMEM_VIRTIO_NUM  (RPTUN_IVSHMEM_RNG + \
                                    RPTUN_IVSHMEM_RPMSG + \
                                    RPTUN_IVSHMEM_VSOCK + \
-                                   RPTUN_IVSHMEM_NET)
+                                   RPTUN_IVSHMEM_NET + \
+                                   RPTUN_IVSHMEM_I2C)
 #define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
@@ -117,6 +125,13 @@ struct aligned_data(8) rptun_ivshmem_rsc_s
   struct fw_rsc_vdev_vring     net_vring1;
   struct fw_rsc_carveout       net_carveout;
   char                         net_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+#endif
+#if RPTUN_IVSHMEM_I2C
+  struct fw_rsc_vdev           i2c;
+  struct fw_rsc_vdev_vring     i2c_vring;
+  struct vhost_i2c_config_s    i2c_config;
+  struct fw_rsc_carveout       i2c_carveout;
+  char                         i2c_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
 #endif
 };
 
@@ -215,6 +230,10 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
 #ifdef CONFIG_DRIVERS_VHOST_NET
       offsetof(struct rptun_ivshmem_rsc_s, net),
       offsetof(struct rptun_ivshmem_rsc_s, net_carveout),
+#endif
+#if RPTUN_IVSHMEM_I2C
+      offsetof(struct rptun_ivshmem_rsc_s, i2c),
+      offsetof(struct rptun_ivshmem_rsc_s, i2c_carveout),
 #endif
     },
 
@@ -375,6 +394,40 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
       .len  = sizeof(g_rsc_table.net_shm),
     },
 #endif
+#if RPTUN_IVSHMEM_I2C
+  .i2c =
+    {
+      .type          = RSC_VDEV,
+      .id            = VIRTIO_ID_I2C_ADAPTER,
+      .notifyid      = RSC_NOTIFY_ID_ANY,
+      .dfeatures     = 1 << VIRTIO_I2C_F_ZERO_LENGTH_REQUEST,
+      .config_len    = sizeof(struct vhost_i2c_config_s),
+      .num_of_vrings = 1,
+      .reserved      =
+        {
+          VIRTIO_DEV_DRIVER, 0
+        },
+    },
+  .i2c_vring =
+    {
+      .align     = 8,
+      .num       = 8,
+      .notifyid  = RSC_NOTIFY_ID_ANY,
+      .da        = FW_RSC_U32_ADDR_ANY,
+    },
+  .i2c_config =
+    {
+      .path = "/dev/i2c0",    /* Local I2C device node on the device side */
+    },
+  .i2c_carveout =
+    {
+      .type = RSC_CARVEOUT,
+      .da   = offsetof(struct rptun_ivshmem_rsc_s, i2c_shm) +
+              offsetof(struct rptun_ivshmem_mem_s, rsc_table),
+      .pa   = (uint32_t)METAL_BAD_PHYS,
+      .len  = sizeof(g_rsc_table.i2c_shm),
+    },
+#endif
 };
 
 /****************************************************************************
@@ -444,6 +497,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 #endif
 #ifdef CONFIG_DRIVERS_VHOST_NET
           snprintf((FAR char *)rsc->net_carveout.name, RPROC_MAX_NAME_LEN,
+                   "vdev%dbuffer", i++);
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_I2C
+          snprintf((FAR char *)rsc->i2c_carveout.name, RPROC_MAX_NAME_LEN,
                    "vdev%dbuffer", i++);
 #endif
           UNUSED(rsc);
