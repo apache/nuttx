@@ -37,6 +37,7 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
 #include <nuttx/virtio/virtio-config.h>
+#include <nuttx/virtio/virtio-spi.h>
 #include <nuttx/virtio/virtio-vsock.h>
 #include <nuttx/wdog.h>
 
@@ -81,11 +82,18 @@
 #  define RPTUN_IVSHMEM_I2C       0
 #endif
 
+#ifdef CONFIG_DRIVERS_VHOST_SPI
+#  define RPTUN_IVSHMEM_SPI       1
+#else
+#  define RPTUN_IVSHMEM_SPI       0
+#endif
+
 #define RPTUN_IVSHMEM_VIRTIO_NUM  (RPTUN_IVSHMEM_RNG + \
                                    RPTUN_IVSHMEM_RPMSG + \
                                    RPTUN_IVSHMEM_VSOCK + \
                                    RPTUN_IVSHMEM_NET + \
-                                   RPTUN_IVSHMEM_I2C)
+                                   RPTUN_IVSHMEM_I2C + \
+                                   RPTUN_IVSHMEM_SPI)
 #define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
@@ -132,6 +140,13 @@ struct aligned_data(8) rptun_ivshmem_rsc_s
   struct vhost_i2c_config_s    i2c_config;
   struct fw_rsc_carveout       i2c_carveout;
   char                         i2c_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+#endif
+#if RPTUN_IVSHMEM_SPI
+  struct fw_rsc_vdev           spi;
+  struct fw_rsc_vdev_vring     spi_vring;
+  struct vhost_spi_config_s    spi_config;
+  struct fw_rsc_carveout       spi_carveout;
+  char                         spi_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
 #endif
 };
 
@@ -234,6 +249,10 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
 #if RPTUN_IVSHMEM_I2C
       offsetof(struct rptun_ivshmem_rsc_s, i2c),
       offsetof(struct rptun_ivshmem_rsc_s, i2c_carveout),
+#endif
+#if RPTUN_IVSHMEM_SPI
+      offsetof(struct rptun_ivshmem_rsc_s, spi),
+      offsetof(struct rptun_ivshmem_rsc_s, spi_carveout),
 #endif
     },
 
@@ -428,6 +447,39 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
       .len  = sizeof(g_rsc_table.i2c_shm),
     },
 #endif
+#if RPTUN_IVSHMEM_SPI
+  .spi =
+    {
+      .type          = RSC_VDEV,
+      .id            = VIRTIO_ID_SPI,
+      .notifyid      = RSC_NOTIFY_ID_ANY,
+      .config_len    = sizeof(struct vhost_spi_config_s),
+      .num_of_vrings = 1,
+      .reserved      =
+        {
+          VIRTIO_DEV_DRIVER, 0
+        },
+    },
+  .spi_vring =
+    {
+      .align     = 8,
+      .num       = 8,
+      .notifyid  = RSC_NOTIFY_ID_ANY,
+      .da        = FW_RSC_U32_ADDR_ANY,
+    },
+  .spi_config =
+    {
+      .path = "/dev/spi0",    /* Local SPI device node on the device side */
+    },
+  .spi_carveout =
+    {
+      .type = RSC_CARVEOUT,
+      .da   = offsetof(struct rptun_ivshmem_rsc_s, spi_shm) +
+              offsetof(struct rptun_ivshmem_mem_s, rsc_table),
+      .pa   = (uint32_t)METAL_BAD_PHYS,
+      .len  = sizeof(g_rsc_table.spi_shm),
+    },
+#endif
 };
 
 /****************************************************************************
@@ -501,6 +553,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 #endif
 #ifdef CONFIG_DRIVERS_VHOST_I2C
           snprintf((FAR char *)rsc->i2c_carveout.name, RPROC_MAX_NAME_LEN,
+                   "vdev%dbuffer", i++);
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_SPI
+          snprintf((FAR char *)rsc->spi_carveout.name, RPROC_MAX_NAME_LEN,
                    "vdev%dbuffer", i++);
 #endif
           UNUSED(rsc);
