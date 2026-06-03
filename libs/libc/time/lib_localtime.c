@@ -301,6 +301,8 @@ static FAR const char *g_utc = g_etc_utc + sizeof("Etc/") - 1;
 static char g_lcl_tzname[MY_TZNAME_MAX + 1];
 static int g_lcl_isset;
 static int g_gmt_isset;
+static volatile bool g_lcl_loading;
+static volatile bool g_gmt_loading;
 static FAR struct state_s *g_lcl_ptr;
 static FAR struct state_s *g_gmt_ptr;
 static rmutex_t g_lcl_lock = NXRMUTEX_INITIALIZER;
@@ -2123,24 +2125,34 @@ static FAR struct tm *gmtsub(FAR const time_t *timep,
 
   /* gmtload() may log through syslog, which formats its timestamp with
    * gmtime_r() and comes back here on the same thread.  Do not load again
-   * in that case, convert as plain UTC instead.
+   * in that case, convert as plain UTC instead.  The zone is loaded
+   * without holding g_gmt_lock for the same reason as in tzset().
    */
 
-  if (!g_gmt_isset && !nxrmutex_is_hold(&g_gmt_lock))
+  if (!g_gmt_isset && !g_gmt_loading)
     {
+      FAR struct state_s *gsp;
+
+      g_gmt_loading = true;
+      gsp = lib_malloc(sizeof(*gsp));
+      if (gsp != NULL)
+        {
+          gmtload(gsp);
+        }
+
+      g_gmt_loading = false;
+
       tz_lock(&g_gmt_lock);
 
-      if (!g_gmt_isset)
+      if (!g_gmt_isset && gsp != NULL)
         {
-          g_gmt_ptr = lib_malloc(sizeof(*g_gmt_ptr));
-          if (g_gmt_ptr != NULL)
-            {
-              gmtload(g_gmt_ptr);
-              g_gmt_isset = 1;
-            }
+          g_gmt_ptr = gsp;
+          gsp = NULL;
+          g_gmt_isset = 1;
         }
 
       tz_unlock(&g_gmt_lock);
+      lib_free(gsp);
     }
 
   if (g_gmt_isset)
@@ -2828,38 +2840,38 @@ static time_t time1(FAR struct tm *tmp,
  * Return 0 on success, an errno value on failure.
  */
 
-static int zoneinit(FAR const char *name)
+static int zoneinit(FAR struct state_s *sp, FAR const char *name)
 {
   if (name != NULL && name[0] == '\0')
     {
       /* User wants it fast rather than right */
 
-      g_lcl_ptr->leapcnt = 0; /* so, we're off a little */
-      g_lcl_ptr->timecnt = 0;
-      g_lcl_ptr->typecnt = 0;
-      g_lcl_ptr->charcnt = 0;
-      g_lcl_ptr->goback  = 0;
-      g_lcl_ptr->goahead = 0;
-      init_ttinfo(&g_lcl_ptr->ttis[0], 0, FALSE, 0);
-      strlcpy(g_lcl_ptr->chars, g_utc, sizeof(g_lcl_ptr->chars));
-      g_lcl_ptr->defaulttype = 0;
+      sp->leapcnt = 0; /* so, we're off a little */
+      sp->timecnt = 0;
+      sp->typecnt = 0;
+      sp->charcnt = 0;
+      sp->goback  = 0;
+      sp->goahead = 0;
+      init_ttinfo(&sp->ttis[0], 0, FALSE, 0);
+      strlcpy(sp->chars, g_utc, sizeof(sp->chars));
+      sp->defaulttype = 0;
       return 0;
     }
   else
     {
       int err;
 
-      err = tzload(name, g_lcl_ptr, TRUE);
+      err = tzload(name, sp, TRUE);
       if (err == 0)
         {
           /* Data came from a zoneinfo binary file: scrub bogus abbreviation
            * characters that could originate from an untrusted file.
            */
 
-          scrub_abbrs(g_lcl_ptr);
+          scrub_abbrs(sp);
         }
       else if (name != NULL && name[0] != ':' &&
-               tzparse(name, g_lcl_ptr, NULL) == 0)
+               tzparse(name, sp, NULL) == 0)
         {
           /* Data came from the TZ environment string.  POSIX allows a wider
            * character set (e.g. ! # $ % / ; = >) in unquoted zone names
@@ -2882,6 +2894,7 @@ static int zoneinit(FAR const char *name)
 void tzset(void)
 {
   char buf[MY_TZNAME_MAX + 1];
+  FAR struct state_s *sp;
   FAR const char *name;
   int lcl;
 
@@ -2916,36 +2929,54 @@ void tzset(void)
       lcl = 1;
     }
 
-  if (nxrmutex_is_hold(&g_lcl_lock))
+  /* A message logged while the zone is loaded comes back here through
+   * the syslog timestamp.  Keep the current state in that case.
+   */
+
+  if (g_lcl_loading || nxrmutex_is_hold(&g_lcl_lock))
     {
       return;
     }
 
+  /* Load the zone into a scratch state without holding g_lcl_lock.  The
+   * load opens and reads files, and a task that logs while it holds a
+   * file system lock takes the two locks in the opposite order.
+   */
+
+  g_lcl_loading = true;
+  sp = lib_malloc(sizeof(*sp));
+  if (sp != NULL && zoneinit(sp, name) != 0)
+    {
+      zoneinit(sp, "");
+    }
+
+  g_lcl_loading = false;
+
   tz_lock(&g_lcl_lock);
 
-  if (g_lcl_ptr == NULL)
+  if (sp != NULL)
     {
-      g_lcl_ptr = lib_malloc(sizeof(*g_lcl_ptr));
       if (g_lcl_ptr == NULL)
         {
-          goto tzname;
+          g_lcl_ptr = sp;
+          sp = NULL;
+        }
+      else
+        {
+          memcpy(g_lcl_ptr, sp, sizeof(*sp));
+        }
+
+      if (lcl > 0)
+        {
+          strlcpy(g_lcl_tzname, name, sizeof(g_lcl_tzname));
         }
     }
 
-  if (zoneinit(name) != 0)
-    {
-      zoneinit("");
-    }
-
-  if (lcl > 0)
-    {
-      strlcpy(g_lcl_tzname, name, sizeof(g_lcl_tzname));
-    }
-
-tzname:
   settzname();
   g_lcl_isset = lcl;
   tz_unlock(&g_lcl_lock);
+
+  lib_free(sp);
 }
 
 FAR struct tm *localtime(FAR const time_t *timep)
