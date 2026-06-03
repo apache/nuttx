@@ -2203,6 +2203,14 @@ config SCHED_BACKTRACE
 		compiler or architecture specific approach when ARCH_HAVE_BACKTRACE
 		is selected
 
+config SCHED_DUMP_BACKTRACE
+	bool "Dump backtrace of all threads on assert"
+	depends on SCHED_BACKTRACE
+	default y
+	---help---
+		Dump the stack backtrace of every thread when an assertion fails.
+		If not selected, only the backtrace of the crashing thread is dumped.
+
 config GROUP_KILL_CHILDREN_TIMEOUT_MS
 	int "Group kill children timeout"
 	default 0

@@ -499,7 +499,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
  * Name: dump_backtrace
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_BACKTRACE
+#ifdef CONFIG_SCHED_DUMP_BACKTRACE
 static void dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 {
   sched_dumpstack(tcb->pid);
@@ -599,7 +599,7 @@ static void dump_tasks(void)
   nxsched_foreach(dump_task, NULL);
 #endif /* CONFIG_SCHED_DUMP_TASKS */
 
-#ifdef CONFIG_SCHED_BACKTRACE
+#ifdef CONFIG_SCHED_DUMP_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
 #endif
 
