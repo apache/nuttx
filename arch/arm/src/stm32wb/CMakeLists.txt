@@ -34,7 +34,6 @@ set(SRCS
     stm32wb_i2c.c
     stm32wb_start.c
     stm32wb_rcc_lse.c
-    stm32wb_rcc_lsi.c
     stm32wb_pwr.c
     stm32wb_tim.c
     stm32wb_flash.c)
