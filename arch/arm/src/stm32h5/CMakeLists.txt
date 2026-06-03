@@ -40,8 +40,7 @@ list(
   stm32_start.c
   stm32_pwr.c
   stm32_timerisr.c
-  stm32_lse.c
-  stm32_lsi.c)
+  stm32_lse.c)
 
 if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)

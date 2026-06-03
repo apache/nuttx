@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l0/hardware/stm32l0_rcc.h
+ * arch/arm/src/stm32l0/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32L0_RCC_H
-#define __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32L0_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32_RCC_H
+#define __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32_RCC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -538,4 +538,4 @@
 #define RCC_CSR_WWDGRSTF                (1 << 30) /* Bit 30: WWDG reset flag */
 #define RCC_CSR_LPWRRSTF                (1 << 31) /* Bit 31: Low-power reset flag */
 
-#endif /* __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32L0_RCC_H */
+#endif /* __ARCH_ARM_SRC_STM32L0_HARDWARE_STM32_RCC_H */

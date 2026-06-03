@@ -35,7 +35,7 @@
 #include <nuttx/crypto/crypto.h>
 
 #include "arm_internal.h"
-#include "hardware/stm32h7x3xx_rcc.h"
+#include "hardware/stm32_rcc.h"
 #include "hardware/stm32h7xxxx_crc.h"
 #include "hardware/stm32h7xxxx_hash.h"
 

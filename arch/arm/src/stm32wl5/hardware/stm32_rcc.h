@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wl5/hardware/stm32wl5_rcc.h
+ * arch/arm/src/stm32wl5/hardware/stm32_rcc.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *

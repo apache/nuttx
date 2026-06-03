@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wl5/stm32wl5_lsi.c
+ * arch/arm/src/common/stm32/stm32_lsi.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,8 +25,43 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include "arm_internal.h"
-#include "stm32wl5_rcc.h"
+#include "stm32_rcc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The LSI enable/disable sequence is identical on every STM32, regardless of
+ * the CPU core.  Only the register/bits that carry LSION/LSIRDY differ:
+ *
+ *   - most families : RCC_CSR  (LSION/LSIRDY)
+ *   - STM32C0        : RCC_CSR2 (LSION/LSIRDY)
+ *   - STM32WB        : RCC_CSR  (LSI1ON/LSI1RDY)
+ *   - STM32H5/U5     : RCC_BDCR (LSION/LSIRDY)
+ *
+ * A single driver therefore serves all of them, selecting the register with
+ * the preprocessor below.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_STM32H5) || defined(CONFIG_ARCH_CHIP_STM32U5)
+#  define STM32_RCC_LSI_REG STM32_RCC_BDCR
+#  define RCC_LSI_LSION      RCC_BDCR_LSION
+#  define RCC_LSI_LSIRDY     RCC_BDCR_LSIRDY
+#elif defined(CONFIG_ARCH_CHIP_STM32C0)
+#  define STM32_RCC_LSI_REG STM32_RCC_CSR2
+#  define RCC_LSI_LSION      RCC_CSR2_LSION
+#  define RCC_LSI_LSIRDY     RCC_CSR2_LSIRDY
+#elif defined(CONFIG_ARCH_CHIP_STM32WB)
+#  define STM32_RCC_LSI_REG STM32_RCC_CSR
+#  define RCC_LSI_LSION      RCC_CSR_LSI1ON
+#  define RCC_LSI_LSIRDY     RCC_CSR_LSI1RDY
+#else
+#  define STM32_RCC_LSI_REG STM32_RCC_CSR
+#  define RCC_LSI_LSION      RCC_CSR_LSION
+#  define RCC_LSI_LSIRDY     RCC_CSR_LSIRDY
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -43,14 +78,14 @@
 void stm32_rcc_enablelsi(void)
 {
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
-   * bit the RCC CSR register.
+   * bit in the controlling RCC register.
    */
 
-  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
+  modifyreg32(STM32_RCC_LSI_REG, 0, RCC_LSI_LSION);
 
   /* Wait for the internal LSI oscillator to be stable. */
 
-  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
+  while ((getreg32(STM32_RCC_LSI_REG) & RCC_LSI_LSIRDY) == 0);
 }
 
 /****************************************************************************
@@ -63,11 +98,11 @@ void stm32_rcc_enablelsi(void)
 
 void stm32_rcc_disablelsi(void)
 {
-  /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
-   * bit the RCC CSR register.
+  /* Disable the Internal Low-Speed (LSI) RC Oscillator by resetting the
+   * LSION bit in the controlling RCC register.
    */
 
-  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
+  modifyreg32(STM32_RCC_LSI_REG, RCC_LSI_LSION, 0);
 
   /* LSIRDY should go low after 3 LSI clock cycles */
 }

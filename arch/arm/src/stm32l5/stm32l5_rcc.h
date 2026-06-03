@@ -33,7 +33,7 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32L562XX)
-#  include "hardware/stm32l562xx_rcc.h"
+#  include "hardware/stm32_rcc.h"
 #else
 #  error "Unsupported STM32L5 chip"
 #endif
