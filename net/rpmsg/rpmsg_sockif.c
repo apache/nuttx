@@ -764,7 +764,7 @@ static void rpmsg_socket_ns_destroy(FAR struct rpmsg_device *rdev,
   struct rpmsg_ns_msg ns_msg;
 
   strlcpy(ns_msg.name, name, RPMSG_NAME_SIZE);
-  ns_msg.addr  = dest;
+  ns_msg.addr  = RPMSG_ADDR_ANY;
   ns_msg.flags = RPMSG_NS_DESTROY;
 
   rpmsg_send_offchannel_raw(&rdev->ns_ept, rdev->ns_ept.addr,
