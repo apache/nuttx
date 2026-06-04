@@ -186,9 +186,9 @@ int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
       _alert("\tCoprocessor Trap Synchronous Error\n");
 #  ifdef CONFIG_ARCH_HAVE_FPU
       _alert("\tFPU_SYNC_TRAP:%" PRIX32 "\n\n",
-             (uint32_t)__mfcr(FPU_SYNC_TRAP_REG));
-      __mtcr(FPU_SYNC_TRAP_REG,
-             __mfcr(FPU_SYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
+             tricore_mfcr(FPU_SYNC_TRAP_REG));
+      tricore_mtcr(FPU_SYNC_TRAP_REG, tricore_mfcr(FPU_SYNC_TRAP_REG) |
+                                      (1U << FPU_TRAP_TCL_SHIFT));
 #  endif
     }
 #endif
@@ -272,9 +272,10 @@ int tricore_bustrap(uint32_t tid, void *context, void *arg)
       _alert("\tCoprocessor Trap Asynchronous Error\n");
 #ifdef CONFIG_ARCH_HAVE_FPU
       _alert("\tFPU_ASYNC_TRAP:%" PRIX32 "\n\n",
-             (uint32_t)__mfcr(FPU_ASYNC_TRAP_REG));
-      __mtcr(FPU_ASYNC_TRAP_REG,
-             __mfcr(FPU_ASYNC_TRAP_REG) | (1U << FPU_TRAP_TCL_SHIFT));
+             tricore_mfcr(FPU_ASYNC_TRAP_REG));
+      tricore_mtcr(FPU_ASYNC_TRAP_REG, tricore_mfcr(FPU_ASYNC_TRAP_REG) |
+                                       (1U << FPU_TRAP_TCL_SHIFT));
+      UP_ISB();
 #endif
     }
 
@@ -340,7 +341,7 @@ void tricore_trapcall(volatile void *trap)
 
   tricore_trapinfo(trap);
 
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
   pcxi = regs[REG_UPCXI];
   regs = tricore_csa2addr(pcxi);
 
