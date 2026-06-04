@@ -38,6 +38,32 @@ config FB_OVERLAY_BLIT
 	depends on FB_OVERLAY
 	default n
 
+config FB_HWCURSOR
+	bool "Hardware cursor support"
+	default n
+	---help---
+		Enable hardware cursor support for framebuffer devices.
+		Set this if the video controller hardware supports a
+		hardware cursor.
+
+config FB_HWCURSORIMAGE
+	bool "Hardware cursor image support"
+	default n
+	depends on FB_HWCURSOR
+	---help---
+		Enable support for user-provided hardware cursor images.
+		If set, the cursor image can be set via FBIOPUT_CURSOR
+		ioctl command.
+
+config FB_HWCURSORSIZE
+	bool "Hardware cursor size support"
+	default n
+	depends on FB_HWCURSOR
+	---help---
+		Enable support for changing hardware cursor size.
+		If set, the cursor size can be changed via FBIOPUT_CURSOR
+		ioctl command.
+
 menuconfig DRIVERS_VIDEO
 	bool "Video Device Support"
 	default n
