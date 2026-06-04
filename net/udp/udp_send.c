@@ -153,6 +153,7 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
   FAR const uint16_t *laddr;
 #endif
 #ifdef CONFIG_NET_IPv4
+  FAR const in_addr_t *src;
   in_addr_t raddr;
 #endif
 
@@ -188,8 +189,11 @@ void udp_send(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 
           dev->d_len        = dev->d_sndlen + IPv4UDP_HDRLEN;
 
+          src = net_ipv4addr_cmp(conn->u.ipv4.laddr, INADDR_ANY) ?
+                &dev->d_ipaddr : &conn->u.ipv4.laddr;
+
           ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_UDP,
-                            &dev->d_ipaddr, &raddr, conn->sconn.s_ttl,
+                            src, &raddr, conn->sconn.s_ttl,
                             conn->sconn.s_tos, NULL);
 
 #ifdef CONFIG_NET_STATISTICS

@@ -261,9 +261,17 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   else
 #endif
     {
+      /* Copy out of the address union: taking the address of the IPv4
+       * member makes GCC 11/12 narrow the whole union to 4 bytes and
+       * warn about the 16-byte IPv6 read in the branch above.
+       */
+
+      in_addr_t laddr = conn->u.ipv4.laddr;
+      in_addr_t raddr = conn->u.ipv4.raddr;
+
       ninfo("do IPv4 IP header build!\n");
       ipv4_build_header(IPv4BUF, dev->d_len, IP_PROTO_TCP,
-                        &dev->d_ipaddr, &conn->u.ipv4.raddr,
+                        &laddr, &raddr,
                         conn->sconn.s_ttl, conn->sconn.s_tos, NULL);
 
       /* Calculate TCP checksum. */
