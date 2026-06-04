@@ -34,7 +34,6 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
-#include "riscv_internal.h"
 #include "rp23xx_config.h"
 #include "rp23xx_clock.h"
 #include "rp23xx_uart.h"
