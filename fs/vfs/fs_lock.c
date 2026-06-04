@@ -260,18 +260,20 @@ static void file_lock_delete_bucket(FAR struct file_lock_bucket_s *bucket,
  ****************************************************************************/
 
 static bool file_lock_is_conflict(FAR struct flock *request,
-                                  FAR struct flock *internal)
+                                  FAR struct file *request_filep,
+                                  FAR struct file_lock_s *internal)
 {
   /* If the request is not exactly to the left or right of the internal,
    * then there is an overlap.
    */
 
-  if (request->l_start <= internal->l_end && request->l_end >=
-      internal->l_start)
+  if (request->l_start <= internal->fl_lock.l_end && request->l_end >=
+      internal->fl_lock.l_start)
     {
-      if (request->l_type == F_WRLCK || internal->l_type == F_WRLCK)
+      if (request->l_type == F_WRLCK || internal->fl_lock.l_type == F_WRLCK)
         {
-          return request->l_pid != internal->l_pid;
+          return request->l_pid != internal->fl_lock.l_pid ||
+                 request_filep != internal->fl_file;
         }
     }
 
@@ -371,8 +373,8 @@ static int file_lock_modify(FAR struct file *filep,
     {
       if (request->l_pid != file_lock->fl_lock.l_pid)
         {
-          /* Only file locks with the same pid need to be processed, so the
-           * lookup is skipped.
+          /* Only file locks with the same thread id need to be
+           * processed, so the lookup is skipped.
            */
 
           if (find)
@@ -598,7 +600,7 @@ int file_getlk(FAR struct file *filep, FAR struct flock *flock)
       list_for_every_entry(&bucket->list, file_lock, struct file_lock_s,
                            fl_node)
         {
-          if (file_lock_is_conflict(flock, &file_lock->fl_lock))
+          if (file_lock_is_conflict(flock, filep, file_lock))
             {
               memcpy(flock, &file_lock->fl_lock, sizeof(*flock));
               goto out;
@@ -677,7 +679,7 @@ int file_setlk(FAR struct file *filep, FAR struct flock *flock,
       goto out_free;
     }
 
-  request.l_pid = getpid();
+  request.l_pid = gettid();
 
   nxmutex_lock(&g_protect_lock);
 
@@ -709,7 +711,7 @@ retry:
       list_for_every_entry(&bucket->list, file_lock, struct file_lock_s,
                            fl_node)
         {
-          if (file_lock_is_conflict(&request, &file_lock->fl_lock))
+          if (file_lock_is_conflict(&request, filep, file_lock))
             {
               if (nonblock)
                 {
