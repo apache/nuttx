@@ -1222,10 +1222,10 @@ static int rpmsg_socket_poll(FAR struct socket *psock,
         }
       else /* !_SS_ISCONNECTED(conn->sconn.s_flags) */
         {
-          if ((!conn->ept.rdev || conn->unbind) &&
-              !_SS_INITD(conn->sconn.s_flags))
+          if (conn->unbind ||
+              (!conn->ept.rdev && !_SS_INITD(conn->sconn.s_flags)))
             {
-              eventset |= POLLHUP;
+              eventset |= POLLHUP | POLLERR;
             }
         }
 
