@@ -118,7 +118,7 @@ static spinlock_t g_assert_lock = SP_UNLOCKED;
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
-#ifdef CONFIG_DEBUG_ALERT
+#ifdef CONFIG_SCHED_DUMP_TASKS
 static FAR const char * const g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -173,6 +173,7 @@ static void sp_out_of_range(uintptr_t sp)
   _alert("ERROR: Stack pointer %" PRIxPTR " is not within the stack\n", sp);
 }
 
+#ifdef CONFIG_SCHED_DUMP_STACK
 /****************************************************************************
  * Name: stack_dump
  ****************************************************************************/
@@ -192,6 +193,7 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
              DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
     }
 }
+#endif
 
 /****************************************************************************
  * Name: dump_stackinfo
@@ -200,14 +202,14 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
                            uintptr_t base, size_t size, size_t used)
 {
-  uintptr_t top = base + size;
-
   _alert("%s Stack:\n", tag);
   _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
+#ifdef CONFIG_SCHED_DUMP_STACK
   if (sp != 0)
     {
+      uintptr_t top = base + size;
       _alert("    sp: %p\n", (FAR void *)sp);
 
       /* Get more information */
@@ -237,6 +239,7 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
 
       stack_dump(base, base + size);
     }
+#endif
 }
 
 /****************************************************************************
@@ -346,10 +349,9 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                      );
     }
 }
-
 #endif
 
-#ifdef CONFIG_DEBUG_ALERT
+#ifdef CONFIG_SCHED_DUMP_TASKS
 /****************************************************************************
  * Name: dump_task
  ****************************************************************************/
@@ -481,6 +483,7 @@ static void dump_fdlist(FAR struct tcb_s *tcb, FAR void *arg)
 
 static void dump_tasks(void)
 {
+#ifdef CONFIG_SCHED_DUMP_TASKS
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   int cpu;
 #endif
@@ -551,9 +554,8 @@ static void dump_tasks(void)
     }
 #endif
 
-#ifdef CONFIG_DEBUG_ALERT
   nxsched_foreach(dump_task, NULL);
-#endif
+#endif /* CONFIG_SCHED_DUMP_TASKS */
 
 #ifdef CONFIG_SCHED_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);
