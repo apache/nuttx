@@ -4509,7 +4509,9 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
    * removed from the slot (Initially all callbacks are disabled).
    */
 
+#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_SCHED_HPWORK)
   SDIO_REGISTERCALLBACK(priv->dev, mmcsd_mediachange, (FAR void *)priv);
+#endif
 
   /* Is there a card in the slot now? For an MMC/SD card, there are three
    * possible card detect mechanisms:
