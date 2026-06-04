@@ -127,7 +127,7 @@ int up_backtrace(struct tcb_s *tcb,
 
   if (tcb == NULL || tcb == rtcb)
     {
-      ret = backtrace(__mfcr(CPU_PCXI), buffer, size, &skip);
+      ret = backtrace(tricore_mfcr(CPU_PCXI), buffer, size, &skip);
     }
   else
     {

@@ -56,8 +56,8 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
   Ifx_CPU_ICR icr;
   uintptr_t *regs;
 
-  icr.U = __mfcr(CPU_ICR);
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  icr.U = tricore_mfcr(CPU_ICR);
+  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
   if (*running_task != NULL)
     {
@@ -106,7 +106,7 @@ IFX_INTERRUPT_INTERNAL(tricore_doirq, 0, 255)
 
       *running_task = tcb;
 
-      __mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
+      tricore_mtcr(CPU_PCXI, tricore_addr2csa(tcb->xcp.regs));
       UP_ISB();
     }
 

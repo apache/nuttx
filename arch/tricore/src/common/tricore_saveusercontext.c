@@ -54,7 +54,7 @@ int up_saveusercontext(void *saveregs)
   uintptr_t pcxi;
   int csa_size = TC_CONTEXT_REGS * sizeof(uintptr_t);
 
-  pcxi = __mfcr(CPU_PCXI);
+  pcxi = tricore_mfcr(CPU_PCXI);
   regs = tricore_csa2addr(pcxi);
   memcpy((char *)saveregs + csa_size, regs, csa_size);
 
@@ -62,7 +62,7 @@ int up_saveusercontext(void *saveregs)
 
   __asm("svlcx");
 
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
+  regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
   memcpy(saveregs, regs, csa_size);
 
   /* lowcsa[REG_LPCXI] saves the upcsa's pcxi, but if lowcsa and upcsa is
