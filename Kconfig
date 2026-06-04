@@ -733,6 +733,28 @@ config DEBUG_ALERT
 	bool
 	default n
 
+config SCHED_DUMP_TASKS
+	bool "Include dumping the task info table in assert/crash output"
+	default !DEFAULT_SMALL
+	depends on DEBUG_ALERT
+	---help---
+		Selects whether the per-task table is printed as part of the
+		crash dump.
+
+		Defaults to y unless DEFAULT_SMALL is selected.
+
+config SCHED_DUMP_STACK
+	bool "Include stack content in assert/crash output"
+	default !DEFAULT_SMALL
+	depends on DEBUG_ALERT && ARCH_STACKDUMP
+	---help---
+		When enabled, the crash dump prints the contents of each stack
+		(IRQ / kernel / user) as hex words.
+
+		When disabled, only base and size are printed out for each stack.
+
+		Defaults to y unless DEFAULT_SMALL is selected.
+
 config DEBUG_FEATURES
 	bool "Enable Debug Features"
 	default n
