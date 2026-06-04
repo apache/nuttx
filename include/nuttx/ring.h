@@ -63,12 +63,12 @@
  *     ring_mpmc_enqueue(&g_ring, &val, 1);
  *     ring_mpmc_dequeue(&g_ring, &out, 1);
  *
- * 3. Dequeue Skip (advance index without reading data):
+ * 3. Skip (advance consumer index without reading data):
  *
- *     ring_spsc_dequeue_skip(&g_ring, n);
- *     ring_mpsc_dequeue_skip(&g_ring, n);
- *     ring_spmc_dequeue_skip(&g_ring, n);
- *     ring_mpmc_dequeue_skip(&g_ring, n);
+ *     ring_spsc_skip(&g_ring, n);
+ *     ring_mpsc_skip(&g_ring, n);
+ *     ring_spmc_skip(&g_ring, n);
+ *     ring_mpmc_skip(&g_ring, n);
  *
  *    Skip-to (advance cons_tail to a specific target index):
  *
@@ -79,8 +79,8 @@
  *
  * 4. Overwrite Mode (SPMC/MPMC only, discards oldest on full):
  *
- *     ring_spmc_enqueue_overwrite(&g_ring, &val, 1);
- *     ring_mpmc_enqueue_overwrite(&g_ring, &val, 1);
+ *     ring_spmc_overwrite(&g_ring, &val, 1);
+ *     ring_mpmc_overwrite(&g_ring, &val, 1);
  *     // Consumer MUST use MC dequeue (ring_spmc/mpmc_dequeue)
  *
  * 5. Zero-copy enqueue/dequeue (start/finish pattern):
@@ -100,16 +100,16 @@
  *     // Read from buf.ptr1 (len1) and buf.ptr2 (len2)
  *     ring_spsc_dequeue_finish(&g_ring, &buf);
  *
- * 6. Zero-copy overwrite enqueue (start/finish pattern):
+ * 6. Zero-copy overwrite (start/finish pattern):
  *
  *     struct ring_buf_s buf;
- *     ring_spmc_enqueue_overwrite_start(&g_ring, count,
- *                                       elem_size, &buf);
+ *     ring_spmc_overwrite_start(&g_ring, count,
+ *                               elem_size, &buf);
  *     memcpy(buf.ptr1, src, buf.len1 * elem_size);
  *     if (buf.ptr2)
  *       memcpy(buf.ptr2, src + buf.len1 * elem_size,
  *              buf.len2 * elem_size);
- *     ring_spmc_enqueue_overwrite_finish(&g_ring, &buf);
+ *     ring_spmc_overwrite_finish(&g_ring, &buf);
  *
  * 7. Query:
  *
@@ -347,9 +347,9 @@
   (ring_is_ready(r) ?                                    \
    ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items))) : 0)
 
-#define ring_spsc_dequeue_skip(r, count)                 \
+#define ring_spsc_skip(r, count)                         \
   (ring_is_ready(r) ?                                    \
-   ring_sc_dequeue_skip(RING_BASE(r), count) : 0)
+   ring_sc_skip(RING_BASE(r), count) : 0)
 
 #define ring_mpmc_enqueue(r, items, count) \
   ring_mp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
@@ -369,20 +369,20 @@
 #define ring_mpsc_dequeue(r, items, count) \
   ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
 
-#define ring_mpmc_dequeue_skip(r, count) \
-  ring_mc_dequeue_skip(RING_BASE(r), count)
+#define ring_mpmc_skip(r, count) \
+  ring_mc_skip(RING_BASE(r), count)
 
-#define ring_spmc_dequeue_skip(r, count) \
-  ring_mc_dequeue_skip(RING_BASE(r), count)
+#define ring_spmc_skip(r, count) \
+  ring_mc_skip(RING_BASE(r), count)
 
-#define ring_mpsc_dequeue_skip(r, count) \
-  ring_sc_dequeue_skip(RING_BASE(r), count)
+#define ring_mpsc_skip(r, count) \
+  ring_sc_skip(RING_BASE(r), count)
 
 #define ring_mpsc_skipto(r, target) \
   ring_sc_skipto(RING_BASE(r), target)
 
 #define ring_spsc_skipto(r, target) \
-   ring_sc_skipto(RING_BASE(r), target)
+  ring_sc_skipto(RING_BASE(r), target)
 
 #define ring_spmc_skipto(r, target) \
   ring_mc_skipto(RING_BASE(r), target)
@@ -390,7 +390,7 @@
 #define ring_mpmc_skipto(r, target) \
   ring_mc_skipto(RING_BASE(r), target)
 
-/* Overwrite enqueue: when the ring is full, discard oldest data to
+/* Overwrite: when the ring is full, discard oldest data to
  * make room.  The discard path acts as a virtual multi-consumer,
  * so the dequeue side MUST use MC protocol (ring_spmc_dequeue or
  * ring_mpmc_dequeue) regardless of the number of real consumers.
@@ -400,22 +400,22 @@
  * discard, which conflicts with SC's plain-store protocol.
  */
 
-#define ring_spmc_enqueue_overwrite(r, items, count) \
-  ring_sp_enqueue_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+#define ring_spmc_overwrite(r, items, count) \
+  ring_sp_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
 
-#define ring_mpmc_enqueue_overwrite(r, items, count) \
-  ring_mp_enqueue_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+#define ring_mpmc_overwrite(r, items, count) \
+  ring_mp_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
 
-#define ring_spmc_enqueue_overwrite_start(r, count, elem_size, b) \
-  ring_sp_enqueue_overwrite_start(RING_BASE(r), count, elem_size, b)
+#define ring_spmc_overwrite_start(r, count, elem_size, b) \
+  ring_sp_overwrite_start(RING_BASE(r), count, elem_size, b)
 
-#define ring_spmc_enqueue_overwrite_finish(r, b) \
+#define ring_spmc_overwrite_finish(r, b) \
   ring_sp_finish(RING_BASE(r), b)
 
-#define ring_mpmc_enqueue_overwrite_start(r, count, elem_size, b) \
-  ring_mp_enqueue_overwrite_start(RING_BASE(r), count, elem_size, b)
+#define ring_mpmc_overwrite_start(r, count, elem_size, b) \
+  ring_mp_overwrite_start(RING_BASE(r), count, elem_size, b)
 
-#define ring_mpmc_enqueue_overwrite_finish(r, b) \
+#define ring_mpmc_overwrite_finish(r, b) \
   ring_mp_finish(RING_BASE(r), b)
 
 #define ring_spsc_enqueue_start(r, count, elem_size, b) \
@@ -1312,16 +1312,16 @@ ring_mc_dequeue(FAR struct ring_s *r, FAR void *items,
 }
 
 /****************************************************************************
- * Name: ring_sc_dequeue_skip
+ * Name: ring_sc_skip
  *
  * Description:
- *   Single-consumer dequeue skip. Advance cons_tail by count without
+ *   Single-consumer skip. Advance cons_tail by count without
  *   reading data. Returns actual count skipped.
  *
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_sc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
+ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
@@ -1349,23 +1349,23 @@ ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
 
   if (count != 0)
     {
-      return ring_sc_dequeue_skip(r, count);
+      return ring_sc_skip(r, count);
     }
 
   return 0;
 }
 
 /****************************************************************************
- * Name: ring_mc_dequeue_skip
+ * Name: ring_mc_skip
  *
  * Description:
- *   Multi-consumer dequeue skip. Reserve and finish slots on
+ *   Multi-consumer skip. Reserve and finish slots on
  *   cons_head and cons_tail without reading data.
  *
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_mc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
+ring_mc_skip(FAR struct ring_s *r, uint32_t count)
 {
   struct ring_buf_s buf;
 
@@ -1381,7 +1381,7 @@ ring_mc_dequeue_skip(FAR struct ring_s *r, uint32_t count)
  * Description:
  *   Multi-consumer skip-to. Advance cons_tail to the specified target
  *   index. This is a convenience wrapper that computes the skip count
- *   from the current cons_tail and then calls ring_mc_dequeue_skip.
+ *   from the current cons_tail and then calls ring_mc_skip.
  *   If target is behind cons_tail (already consumed), does nothing.
  *
  ****************************************************************************/
@@ -1394,14 +1394,14 @@ ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
 
   if (count != 0)
     {
-      return ring_mc_dequeue_skip(r, count);
+      return ring_mc_skip(r, count);
     }
 
   return 0;
 }
 
 /****************************************************************************
- * Name: ring_sp_enqueue_overwrite_start
+ * Name: ring_sp_overwrite_start
  *
  * Description:
  *   Single-producer overwrite start. Discard oldest committed data
@@ -1414,8 +1414,8 @@ ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_sp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
-                                size_t elem_size, FAR struct ring_buf_s *buf)
+ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
+                        size_t elem_size, FAR struct ring_buf_s *buf)
 {
   uint32_t prod_idx;
   uint32_t cons_idx;
@@ -1458,10 +1458,10 @@ ring_sp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
 }
 
 /****************************************************************************
- * Name: ring_sp_enqueue_overwrite
+ * Name: ring_sp_overwrite
  *
  * Description:
- *   Single-producer overwrite enqueue (copy variant).  Returns the net
+ *   Single-producer overwrite (copy variant).  Returns the net
  *   number of elements added to the ring (count - discarded);
  *   when the ring was full, the count of evicted elements is subtracted
  *   from the inserted count so the caller sees the true delta in
@@ -1470,13 +1470,13 @@ ring_sp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_sp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
-                          uint32_t count, size_t elem_size)
+ring_sp_overwrite(FAR struct ring_s *r, FAR const void *items,
+                  uint32_t count, size_t elem_size)
 {
   struct ring_buf_s buf;
   uint32_t discard;
 
-  discard = ring_sp_enqueue_overwrite_start(r, count, elem_size, &buf);
+  discard = ring_sp_overwrite_start(r, count, elem_size, &buf);
   ring_copy_from(&buf,
                  (FAR const char *)items + (count - buf.cnt) * elem_size,
                  elem_size);
@@ -1486,7 +1486,7 @@ ring_sp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
 }
 
 /****************************************************************************
- * Name: ring_mp_enqueue_overwrite_start
+ * Name: ring_mp_overwrite_start
  *
  * Description:
  *   Multi-producer overwrite start. Discard oldest committed data
@@ -1500,8 +1500,8 @@ ring_sp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_mp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
-                                size_t elem_size, FAR struct ring_buf_s *buf)
+ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
+                        size_t elem_size, FAR struct ring_buf_s *buf)
 {
   uint32_t old_prod;
   uint32_t new_prod;
@@ -1570,10 +1570,10 @@ ring_mp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
 }
 
 /****************************************************************************
- * Name: ring_mp_enqueue_overwrite
+ * Name: ring_mp_overwrite
  *
  * Description:
- *   Multi-producer overwrite enqueue (copy variant).  Returns the net
+ *   Multi-producer overwrite (copy variant).  Returns the net
  *   number of elements added to the ring (count - discarded);
  *   when the ring was full, the count of evicted elements is subtracted
  *   from the inserted count so the caller sees the true delta in
@@ -1582,13 +1582,13 @@ ring_mp_enqueue_overwrite_start(FAR struct ring_s *r, uint32_t count,
  ****************************************************************************/
 
 static inline_function uint32_t
-ring_mp_enqueue_overwrite(FAR struct ring_s *r, FAR const void *items,
-                          uint32_t count, size_t elem_size)
+ring_mp_overwrite(FAR struct ring_s *r, FAR const void *items,
+                  uint32_t count, size_t elem_size)
 {
   struct ring_buf_s buf;
   uint32_t discard;
 
-  discard = ring_mp_enqueue_overwrite_start(r, count, elem_size, &buf);
+  discard = ring_mp_overwrite_start(r, count, elem_size, &buf);
   ring_copy_from(&buf,
                  (FAR const char *)items + (count - buf.cnt) * elem_size,
                  elem_size);
