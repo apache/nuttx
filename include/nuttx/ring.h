@@ -128,6 +128,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
+#include <nuttx/arch.h>
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/lib/lib.h>
@@ -621,7 +622,10 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
 
           /* Another core is initializing - spin until READY */
 
-          while (atomic_read_acquire(&r->magic) != RING_MAGIC_READY);
+          while (atomic_read_acquire(&r->magic) != RING_MAGIC_READY)
+            {
+              UP_WFE();
+            }
 
           return;
         }
@@ -676,6 +680,7 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
   /* Publish: all stores above are visible before magic becomes READY */
 
   atomic_set_release(&r->magic, RING_MAGIC_READY);
+  UP_SEV();
   irq_restore(flags);
 }
 
