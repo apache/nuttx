@@ -2763,7 +2763,7 @@ void arm_earlyserialinit(void)
 
   for (i = 0; i < GD32_NUSART; i++)
     {
-      if (g_uart_devs[i]->priv)
+      if (g_uart_devs[i] && g_uart_devs[i]->priv)
         {
           up_disableusartint(g_uart_devs[i]->priv, 0);
         }
