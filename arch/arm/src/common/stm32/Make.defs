@@ -49,6 +49,9 @@ endif
 ifeq ($(CONFIG_STM32_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
+ifeq ($(CONFIG_STM32_FREERUN),y)
+CHIP_CSRCS += stm32_freerun.c
+endif
 
 ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
@@ -161,9 +164,6 @@ CHIP_CSRCS += stm32_oneshot_m3m4_v1.c
 CHIP_CSRCS += stm32_oneshot_m3m4_v1_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32_FREERUN),y)
-CHIP_CSRCS += stm32_freerun_m3m4_v1.c
-endif
 
 ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1),y)
 ifeq ($(CONFIG_STM32_I2C_ALT),y)
