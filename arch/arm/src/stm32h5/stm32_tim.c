@@ -742,7 +742,7 @@ static int stm32_tim_setisr(struct stm32_tim_dev_s *dev,
     {
 #ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
-        vectorno = STM32_IRQ_TIM1_UP;
+        vectorno = STM32_IRQ_TIM1UP;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM2
@@ -777,7 +777,7 @@ static int stm32_tim_setisr(struct stm32_tim_dev_s *dev,
 #endif
 #ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
-        vectorno = STM32_IRQ_TIM8_UP;
+        vectorno = STM32_IRQ_TIM8UP;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM12
