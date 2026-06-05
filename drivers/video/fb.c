@@ -1934,6 +1934,9 @@ int fb_register_device(int display, int plane,
   struct fb_panelinfo_s    panelinfo;
 #ifdef CONFIG_VIDEO_FB_SPLASHSCREEN
   struct fb_planeinfo_s    pinfo;
+#  ifdef CONFIG_FB_UPDATE
+  struct fb_area_s area;
+#  endif
 #endif
   struct fb_videoinfo_s    vinfo;
   char                     devname[16];
@@ -2041,6 +2044,24 @@ int fb_register_device(int display, int plane,
       goto errout_with_paninfo;
     }
 
+#  ifdef CONFIG_FB_UPDATE
+  if (fb->vtable->updatearea == NULL)
+    {
+      goto errout_with_paninfo;
+    }
+
+  area.x = 0;
+  area.y = 0;
+  area.w = vinfo.xres;
+  area.h = vinfo.yres;
+
+  ret = fb->vtable->updatearea(fb->vtable, &area);
+  if (ret < 0)
+    {
+      goto errout_with_paninfo;
+    }
+#  endif
+
   if (SPLASH_SLEEP != 0)
     {
       nxsched_sleep(SPLASH_SLEEP);
@@ -2052,6 +2073,14 @@ int fb_register_device(int display, int plane,
     {
       goto errout_with_paninfo;
     }
+
+#    ifdef CONFIG_FB_UPDATE
+  ret = fb->vtable->updatearea(fb->vtable, &area);
+  if (ret < 0)
+    {
+      goto errout_with_paninfo;
+    }
+#    endif
 #  endif
 #endif
 
