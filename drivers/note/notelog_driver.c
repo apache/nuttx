@@ -69,10 +69,10 @@ static void notelog_csection(FAR struct note_driver_s *drv,
                              FAR struct tcb_s *tcb, bool enter);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-static void note_spinlock(FAR struct note_driver_s *drv,
-                          FAR struct tcb_s *tcb,
-                          FAR volatile void *spinlock,
-                          int type);
+static void notelog_spinlock(FAR struct note_driver_s *drv,
+                             FAR struct tcb_s *tcb,
+                             FAR volatile void *spinlock,
+                             int type);
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 static void notelog_irqhandler(FAR struct note_driver_s *drv, int irq,
@@ -109,7 +109,7 @@ static const struct note_driver_ops_s g_notelog_ops =
   notelog_csection,      /* csection */
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-  note_spinlock,         /* spinlock */
+  notelog_spinlock,      /* spinlock */
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
   NULL,                  /* syscall_enter */
@@ -283,10 +283,10 @@ static void notelog_csection(FAR struct note_driver_s *drv,
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-static void note_spinlock(FAR struct note_driver_s *drv,
-                          FAR struct tcb_s *tcb,
-                          FAR volatile void *spinlock,
-                          int type)
+static void notelog_spinlock(FAR struct note_driver_s *drv,
+                             FAR struct tcb_s *tcb,
+                             FAR volatile void *spinlock,
+                             int type)
 {
   FAR static const char * const tmp[] =
     {
