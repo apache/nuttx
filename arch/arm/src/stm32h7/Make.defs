@@ -55,10 +55,6 @@ else
 CHIP_CSRCS += stm32_timerisr.c
 endif
 
-ifeq ($(CONFIG_STM32_ONESHOT),y)
-CHIP_CSRCS += stm32_oneshot.c stm32_oneshot_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_ARM_MPU),y)
 CHIP_CSRCS += stm32_mpuinit.c
 endif
