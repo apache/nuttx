@@ -47,6 +47,10 @@ if(CONFIG_STM32_FREERUN)
   list(APPEND SRCS stm32_freerun.c)
 endif()
 
+if(CONFIG_STM32_ONESHOT)
+  list(APPEND SRCS stm32_oneshot.c stm32_oneshot_lowerhalf.c)
+endif()
+
 if(CONFIG_STM32_PULSECOUNT)
   list(APPEND SRCS stm32_pulsecount.c)
 endif()
@@ -158,10 +162,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     elseif(CONFIG_STM32_HAVE_IP_DMA_V2_STREAM)
       list(APPEND SRCS stm32_dma_m3m4_v2_stream.c)
     endif()
-  endif()
-
-  if(CONFIG_STM32_ONESHOT)
-    list(APPEND SRCS stm32_oneshot_m3m4_v1.c stm32_oneshot_m3m4_v1_lowerhalf.c)
   endif()
 
 

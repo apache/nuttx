@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c
+ * arch/arm/src/common/stm32/stm32_oneshot_lowerhalf.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -35,14 +35,13 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
-#include "stm32l4_oneshot.h"
+#include "stm32_oneshot.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-/* This structure describes the state of the oneshot timer lower-half
- * driver
+/* This structure describes the state of the oneshot timer lower-half driver
  */
 
 struct stm32_oneshot_lowerhalf_s
@@ -53,7 +52,7 @@ struct stm32_oneshot_lowerhalf_s
    * compatible to struct stm32_oneshot_lowerhalf_s and vice versa.
    */
 
-  struct oneshot_lowerhalf_s lh;    /* Common lower-half driver fields */
+  struct oneshot_lowerhalf_s lh;  /* Common lower-half driver fields */
 
   /* Private lower half data follows */
 
@@ -67,11 +66,11 @@ struct stm32_oneshot_lowerhalf_s
 static void stm32_oneshot_handler(void *arg);
 
 static int stm32_max_delay(struct oneshot_lowerhalf_s *lower,
-                             struct timespec *ts);
+                           struct timespec *ts);
 static int stm32_start(struct oneshot_lowerhalf_s *lower,
-                         const struct timespec *ts);
+                       const struct timespec *ts);
 static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
-                          struct timespec *ts);
+                        struct timespec *ts);
 
 /****************************************************************************
  * Private Data
@@ -138,7 +137,7 @@ static void stm32_oneshot_handler(void *arg)
  ****************************************************************************/
 
 static int stm32_max_delay(struct oneshot_lowerhalf_s *lower,
-                             struct timespec *ts)
+                           struct timespec *ts)
 {
   struct stm32_oneshot_lowerhalf_s *priv =
     (struct stm32_oneshot_lowerhalf_s *)lower;
@@ -180,7 +179,7 @@ static int stm32_max_delay(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int stm32_start(struct oneshot_lowerhalf_s *lower,
-                         const struct timespec *ts)
+                       const struct timespec *ts)
 {
   struct stm32_oneshot_lowerhalf_s *priv =
     (struct stm32_oneshot_lowerhalf_s *)lower;
@@ -193,7 +192,7 @@ static int stm32_start(struct oneshot_lowerhalf_s *lower,
 
   flags = enter_critical_section();
   ret   = stm32_oneshot_start(&priv->oneshot,
-                                stm32_oneshot_handler, priv, ts);
+                              stm32_oneshot_handler, priv, ts);
   leave_critical_section(flags);
 
   if (ret < 0)
@@ -229,7 +228,7 @@ static int stm32_start(struct oneshot_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int stm32_cancel(struct oneshot_lowerhalf_s *lower,
-                          struct timespec *ts)
+                        struct timespec *ts)
 {
   struct stm32_oneshot_lowerhalf_s *priv =
     (struct stm32_oneshot_lowerhalf_s *)lower;

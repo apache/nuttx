@@ -50,10 +50,6 @@ else
 CHIP_CSRCS += stm32wb_tickless.c
 endif
 
-ifeq ($(CONFIG_STM32_ONESHOT),y)
-CHIP_CSRCS += stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32wb_userspace.c stm32wb_mpuinit.c
 endif
