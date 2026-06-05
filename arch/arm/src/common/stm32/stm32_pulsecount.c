@@ -270,7 +270,7 @@ static struct stm32_tim_s g_pulsecount1dev =
   .timid       = 1,
   .timtype     = TIMTYPE_TIM1,
   .t_dts       = CONFIG_STM32_TIM1_PULSECOUNT_TDTS,
-  .irq         = PULSECOUNT_TIM1_IRQ,
+  .irq         = STM32_IRQ_TIM1UP,
   .base        = STM32_TIM1_BASE,
   .pclk        = TIMCLK_TIM1,
 };
@@ -321,7 +321,7 @@ static struct stm32_tim_s g_pulsecount8dev =
   .timid       = 8,
   .timtype     = TIMTYPE_TIM8,
   .t_dts       = CONFIG_STM32_TIM8_PULSECOUNT_TDTS,
-  .irq         = PULSECOUNT_TIM8_IRQ,
+  .irq         = STM32_IRQ_TIM8UP,
   .base        = STM32_TIM8_BASE,
   .pclk        = TIMCLK_TIM8,
 };
