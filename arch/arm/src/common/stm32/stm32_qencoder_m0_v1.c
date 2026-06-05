@@ -285,7 +285,7 @@ static const struct qe_ops_s g_qecallbacks =
 static const struct stm32_qeconfig_s g_tim1config =
 {
   .timid    = 1,
-  .irq      = STM32_IRQ_TIM1_BRK,
+  .irq      = STM32_IRQ_TIM1UP,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM1_BITWIDTH,
 #endif
