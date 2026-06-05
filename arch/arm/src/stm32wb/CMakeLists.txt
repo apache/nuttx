@@ -42,16 +42,13 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
 endif()
 
 if(CONFIG_TIMER)
+
 endif()
 
 if(NOT CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS stm32wb_timerisr.c)
 else()
   list(APPEND SRCS stm32wb_tickless.c)
-endif()
-
-if(CONFIG_STM32_ONESHOT)
-  list(APPEND SRCS stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c)
 endif()
 
 if(CONFIG_BUILD_PROTECTED)

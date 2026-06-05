@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wb/stm32wb_oneshot.c
+ * arch/arm/src/common/stm32/stm32_oneshot.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -37,7 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
-#include "stm32wb_oneshot.h"
+#include "stm32_oneshot.h"
 
 #ifdef CONFIG_STM32_ONESHOT
 
@@ -45,7 +45,7 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32_oneshot_handler(int irq, void *context, void *arg);
+static int stm32_oneshot_handler(int irg_num, void * context, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -73,9 +73,9 @@ static struct stm32_oneshot_s *g_oneshot[CONFIG_STM32_ONESHOT_MAXTIMERS];
  *
  ****************************************************************************/
 
-static int stm32_oneshot_handler(int irq, void *context, void *arg)
+static int stm32_oneshot_handler(int irg_num, void * context, void *arg)
 {
-  struct stm32_oneshot_s *oneshot = (struct stm32_oneshot_s *)arg;
+  struct stm32_oneshot_s * oneshot = (struct stm32_oneshot_s *) arg;
   oneshot_handler_t oneshot_handler;
   void *oneshot_arg;
 
@@ -180,8 +180,8 @@ static inline int stm32_allocate_handler(struct stm32_oneshot_s *oneshot)
  *
  ****************************************************************************/
 
-int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot,
-                               int chan, uint16_t resolution)
+int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot, int chan,
+                             uint16_t resolution)
 {
   uint32_t frequency;
 
@@ -222,8 +222,7 @@ int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot,
-                              uint64_t *usec)
+int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot, uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
 
@@ -253,15 +252,15 @@ int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot,
  ****************************************************************************/
 
 int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
-                          oneshot_handler_t handler, void *arg,
-                          const struct timespec *ts)
+                        oneshot_handler_t handler, void *arg,
+                        const struct timespec *ts)
 {
   uint64_t usec;
   uint64_t period;
   irqstate_t flags;
 
   tmrinfo("handler=%p arg=%p, ts=(%jd, %ld)\n",
-          handler, arg, (intmax_t)ts->tv_sec, ts->tv_nsec);
+         handler, arg, (intmax_t)ts->tv_sec, ts->tv_nsec);
   DEBUGASSERT(oneshot && handler && ts);
   DEBUGASSERT(oneshot->tch);
 
@@ -297,7 +296,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
   period = (usec * (uint64_t)oneshot->frequency) / USEC_PER_SEC;
 
   tmrinfo("usec=%llu period=%08llx\n", usec, period);
-  DEBUGASSERT(period > 0 && period <= UINT32_MAX);
+  DEBUGASSERT(period <= UINT32_MAX);
 
   /* Set up to receive the callback when the interrupt occurs */
 
@@ -350,7 +349,7 @@ int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
  ****************************************************************************/
 
 int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
-                           struct timespec *ts)
+                         struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t usec;
@@ -413,7 +412,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
        */
 
       tmrinfo("period=%lu count=%lu\n",
-              (unsigned long)period, (unsigned long)count);
+             (unsigned long)period, (unsigned long)count);
 
       /* REVISIT: I am not certain why the timer counter value sometimes
        * exceeds RC.  Might be a bug, or perhaps the counter does not stop
@@ -443,7 +442,7 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
           /* Return the time remaining in the correct form */
 
           sec         = usec / USEC_PER_SEC;
-          nsec        = (usec - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+          nsec        = ((usec) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
           ts->tv_sec  = sec;
           ts->tv_nsec = nsec;
