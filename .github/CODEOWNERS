@@ -1800,9 +1800,9 @@ arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.c ocram.lhark@gmail.com xiaoxiang@x
 arch/arm/src/common/stm32/stm32_ltdc_m3m4_v1.h ocram.lhark@gmail.com alin.jerpelea@sony.com raiden00@railab.me 59230071+hartmannathan@users.noreply.github.com xiaoxiang@xiaomi.com
 arch/arm/src/common/stm32/stm32_mpuinit.h alin.jerpelea@sony.com 59230071+hartmannathan@users.noreply.github.com raiden00@railab.me
 arch/arm/src/common/stm32/stm32_mpuinit_m3m4_v1.c alin.jerpelea@sony.com gustavo.nihei@espressif.com petro.karashchenko@gmail.com David.Sidrane@NscDg.com raiden00@railab.me
+arch/arm/src/common/stm32/stm32_oneshot.c macscomp@gmail.com mark@mjs.pw alin.jerpelea@sony.com xiaoxiang@xiaomi.com max.kriegleder@gmail.com
 arch/arm/src/common/stm32/stm32_oneshot.h raiden00@railab.me
-arch/arm/src/common/stm32/stm32_oneshot_m3m4_v1.c macscomp@gmail.com mark@mjs.pw alin.jerpelea@sony.com xiaoxiang@xiaomi.com max.kriegleder@gmail.com
-arch/arm/src/common/stm32/stm32_oneshot_m3m4_v1_lowerhalf.c macscomp@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com ouyangxiangzhen@xiaomi.com dev@ziggurat29.com
+arch/arm/src/common/stm32/stm32_oneshot_lowerhalf.c macscomp@gmail.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com ouyangxiangzhen@xiaomi.com dev@ziggurat29.com
 arch/arm/src/common/stm32/stm32_opamp.h yamamoto@midokura.com masayuki.ishikawa@gmail.com anchao@xiaomi.com 53337780+aenrbes@users.noreply.github.com mijung@gmx.net
 arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.c raiden00pl@gmail.com xiaoxiang@xiaomi.com raiden00@railab.me piyushpatle228@gmail.com alin.jerpelea@sony.com
 arch/arm/src/common/stm32/stm32_opamp_m3m4_v1.h raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com juha.niskanen@haltian.com
@@ -4250,9 +4250,6 @@ arch/arm/src/stm32h7/stm32_ltdc.c raiden00@railab.me xiaoxiang@xiaomi.com liujp@
 arch/arm/src/stm32h7/stm32_ltdc.h raiden00@railab.me alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32h7/stm32_mpuinit.c raiden00pl@gmail.com raiden00@railab.me alin.jerpelea@sony.com gustavo.nihei@espressif.com petro.karashchenko@gmail.com
 arch/arm/src/stm32h7/stm32_mpuinit.h raiden00pl@gmail.com alin.jerpelea@sony.com raiden00@railab.me gustavo.nihei@espressif.com
-arch/arm/src/stm32h7/stm32_oneshot.c po@lambdaconcept.com carlossanchez@geotab.com alin.jerpelea@sony.com hujun5@xiaomi.com
-arch/arm/src/stm32h7/stm32_oneshot.h po@lambdaconcept.com petro.karashchenko@gmail.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
-arch/arm/src/stm32h7/stm32_oneshot_lowerhalf.c po@lambdaconcept.com xiaoxiang@xiaomi.com alin.jerpelea@sony.com gustavo.nihei@espressif.com
 arch/arm/src/stm32h7/stm32_otg.h raiden00pl@gmail.com raiden00@railab.me bashton@brennanashton.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32h7/stm32_otgdev.c raiden00pl@gmail.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com raiden00@railab.me David.Sidrane@NscDg.com
 arch/arm/src/stm32h7/stm32_otghost.c raiden00pl@gmail.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com porter.adam@gmail.com
@@ -4433,9 +4430,6 @@ arch/arm/src/stm32l4/stm32l4_lptim.h alin.jerpelea@sony.com mnitsche@dc.uba.ar x
 arch/arm/src/stm32l4/stm32l4_lse.c dev@ziggurat29.com juha.niskanen@haltian.com alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_mpuinit.c alin.jerpelea@sony.com gustavo.nihei@espressif.com petro.karashchenko@gmail.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_mpuinit.h alin.jerpelea@sony.com sebastien@lorquet.fr
-arch/arm/src/stm32l4/stm32l4_oneshot.c dev@ziggurat29.com mark@mjs.pw alin.jerpelea@sony.com sebastien@lorquet.fr
-arch/arm/src/stm32l4/stm32l4_oneshot.h dev@ziggurat29.com alin.jerpelea@sony.com petro.karashchenko@gmail.com sebastien@lorquet.fr
-arch/arm/src/stm32l4/stm32l4_oneshot_lowerhalf.c xiaoxiang@xiaomi.com alin.jerpelea@sony.com gustavo.nihei@espressif.com
 arch/arm/src/stm32l4/stm32l4_otgfs.h dev@ziggurat29.com alin.jerpelea@sony.com raiden00@railab.me xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_otgfsdev.c dev@ziggurat29.com sebastien@lorquet.fr alin.jerpelea@sony.com xiaoxiang@xiaomi.com
 arch/arm/src/stm32l4/stm32l4_otgfshost.c dev@ziggurat29.com sebastien@lorquet.fr xiaoxiang@xiaomi.com anjiahao@xiaomi.com
@@ -4645,9 +4639,6 @@ arch/arm/src/stm32wb/stm32wb_mbox_list.h s.nikitenko@me.com alin.jerpelea@sony.c
 arch/arm/src/stm32wb/stm32wb_mbox_shci.h s.nikitenko@me.com alin.jerpelea@sony.com
 arch/arm/src/stm32wb/stm32wb_mpuinit.c s.nikitenko@me.com gustavo.nihei@espressif.com alin.jerpelea@sony.com
 arch/arm/src/stm32wb/stm32wb_mpuinit.h s.nikitenko@me.com alin.jerpelea@sony.com
-arch/arm/src/stm32wb/stm32wb_oneshot.c s.nikitenko@me.com alin.jerpelea@sony.com hujun5@xiaomi.com
-arch/arm/src/stm32wb/stm32wb_oneshot.h s.nikitenko@me.com alin.jerpelea@sony.com
-arch/arm/src/stm32wb/stm32wb_oneshot_lowerhalf.c s.nikitenko@me.com alin.jerpelea@sony.com
 arch/arm/src/stm32wb/stm32wb_pm.h s.nikitenko@me.com alin.jerpelea@sony.com
 arch/arm/src/stm32wb/stm32wb_pminitialize.c s.nikitenko@me.com alin.jerpelea@sony.com
 arch/arm/src/stm32wb/stm32wb_pmlpr.c s.nikitenko@me.com alin.jerpelea@sony.com

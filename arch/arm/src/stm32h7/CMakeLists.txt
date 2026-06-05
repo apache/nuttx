@@ -56,10 +56,6 @@ else()
   list(APPEND SRCS stm32_timerisr.c)
 endif()
 
-if(CONFIG_STM32_ONESHOT)
-  list(APPEND SRCS stm32_oneshot.c stm32_oneshot_lowerhalf.c)
-endif()
-
 if(CONFIG_ARM_MPU)
   list(APPEND SRCS stm32_mpuinit.c)
 endif()
