@@ -176,10 +176,6 @@ if(CONFIG_MDIO_BUS)
   list(APPEND SRCS stm32_mdio.c)
 endif()
 
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
-endif()
-
 if(CONFIG_PM)
   list(APPEND SRCS stm32_pmsleep.c stm32_pmstandby.c stm32_pmstop.c)
   if(NOT CONFIG_ARCH_CUSTOM_PMINIT)

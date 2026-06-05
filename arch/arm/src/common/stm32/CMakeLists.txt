@@ -50,6 +50,9 @@ endif()
 if(CONFIG_STM32_ONESHOT)
   list(APPEND SRCS stm32_oneshot.c stm32_oneshot_lowerhalf.c)
 endif()
+if(CONFIG_SENSORS_QENCODER AND CONFIG_STM32_QE)
+  list(APPEND SRCS stm32_qencoder.c)
+endif()
 
 if(CONFIG_STM32_PULSECOUNT)
   list(APPEND SRCS stm32_pulsecount.c)
@@ -91,7 +94,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
   if(CONFIG_STM32_HAVE_IP_SDIO_M3M4_V1)
     list(APPEND SRCS stm32_sdio_m3m4_v1.c)
   endif()
-
 
   if(CONFIG_STM32_HAVE_IP_CCM_M3M4_V1)
     list(APPEND SRCS stm32_ccm_m3m4_v1.c)
@@ -163,7 +165,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
       list(APPEND SRCS stm32_dma_m3m4_v2_stream.c)
     endif()
   endif()
-
 
   if(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1)
     if(CONFIG_STM32_I2C_ALT)
@@ -289,10 +290,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
 
   if(CONFIG_STM32_CAP)
     list(APPEND SRCS stm32_capture_m3m4_v1_lowerhalf.c)
-  endif()
-
-  if(CONFIG_SENSORS_QENCODER AND CONFIG_STM32_QE)
-    list(APPEND SRCS stm32_qencoder_m3m4_v1v2v3.c)
   endif()
 
   if(CONFIG_STM32_CAN AND CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1)
@@ -464,7 +461,6 @@ if(CONFIG_ARCH_CORTEXM0)
     list(APPEND SRCS stm32_rng_m0_v1.c)
   endif()
 
-
   if(CONFIG_STM32_IWDG AND CONFIG_STM32_HAVE_IP_WDG_M0_V1)
     list(APPEND SRCS stm32_iwdg_m0_v1.c)
   endif()
@@ -482,9 +478,6 @@ if(CONFIG_ARCH_CORTEXM0)
     endif()
   endif()
 
-  if(CONFIG_SENSORS_QENCODER)
-    list(APPEND SRCS stm32_qencoder_m0_v1.c)
-  endif()
 endif()
 
 if(CONFIG_SENSORS_HALL3PHASE)
