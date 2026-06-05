@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32wb/stm32wb_freerun.c
+ * arch/arm/src/common/stm32/stm32_freerun.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
@@ -35,7 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 
-#include "stm32wb_freerun.h"
+#include "stm32_freerun.h"
 
 #ifdef CONFIG_STM32_FREERUN
 
@@ -64,7 +65,7 @@
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 static int stm32_freerun_handler(int irq, void *context, void *arg)
 {
-  struct stm32_freerun_s *freerun = (struct stm32_freerun_s *)arg;
+  struct stm32_freerun_s *freerun = (struct stm32_freerun_s *) arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
@@ -98,7 +99,7 @@ static int stm32_freerun_handler(int irq, void *context, void *arg)
  ****************************************************************************/
 
 int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
-                               uint16_t resolution)
+                             uint16_t resolution)
 {
   uint32_t frequency;
 
@@ -127,7 +128,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
   freerun->width        = STM32_TIM_GETWIDTH(freerun->tch);
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
-  freerun->counter_mask = 0xffffffff;
+  freerun->counter_mask = 0xffffffffull;
 #endif
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
@@ -141,7 +142,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
   /* Set timer period */
 
   STM32_TIM_SETPERIOD(freerun->tch,
-                        (uint32_t)((1ull << freerun->width) - 1));
+                      (uint32_t)((1ull << freerun->width) - 1));
 
   /* Start the counter */
 
@@ -177,7 +178,7 @@ int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 
 int stm32_freerun_counter(struct stm32_freerun_s *freerun,
-                            struct timespec *ts)
+                          struct timespec *ts)
 {
   uint64_t usec;
   uint32_t counter;
@@ -237,7 +238,8 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
    */
 
   usec = ((((uint64_t)overflow << freerun->width) +
-           (uint64_t)counter) * USEC_PER_SEC) / freerun->frequency;
+            (uint64_t)counter) * USEC_PER_SEC) /
+         freerun->frequency;
 
   /* And return the value of the timer */
 
@@ -253,8 +255,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 
 #else /* CONFIG_CLOCK_TIMEKEEPING */
 
-int stm32_freerun_counter(struct stm32_freerun_s *freerun,
-                            uint64_t *counter)
+int stm32_freerun_counter(struct stm32_freerun_s *freerun, uint64_t *counter)
 {
   *counter = STM32_TIM_GETCOUNTER(freerun->tch);
   return OK;
