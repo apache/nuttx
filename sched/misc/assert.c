@@ -168,6 +168,11 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
+static void sp_out_of_range(uintptr_t sp)
+{
+  _alert("ERROR: Stack pointer %" PRIxPTR " is not within the stack\n", sp);
+}
+
 /****************************************************************************
  * Name: stack_dump
  ****************************************************************************/
@@ -285,8 +290,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   else
     {
       force = true;
-      _alert("ERROR: Stack pointer %" PRIxPTR "is not within the stack\n",
-             sp);
+      sp_out_of_range(sp);
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
@@ -309,8 +313,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                     up_getusrsp((FAR void *)running_regs()) : 0;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
-          _alert("ERROR: Stack pointer %" PRIxPTR " is not within the"
-                 " stack\n", tcbstack_sp);
+          sp_out_of_range(tcbstack_sp);
 
           tcbstack_sp = 0;
           force = true;
@@ -436,7 +439,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
-         , up_check_tcbstack(tcb, tcb->adj_stack_size)
+         , stack_used
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
