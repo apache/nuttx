@@ -175,9 +175,6 @@ ifeq ($(CONFIG_MDIO_BUS),y)
 CHIP_CSRCS += stm32_mdio.c
 endif 
 
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CHIP_CSRCS += stm32_qencoder.c
-endif
 
 ifeq ($(CONFIG_PM),y)
 CHIP_CSRCS += stm32_pmsleep.c stm32_pmstandby.c stm32_pmstop.c

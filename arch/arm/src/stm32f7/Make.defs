@@ -151,9 +151,6 @@ ifeq ($(CONFIG_STM32_DMA2D),y)
 CHIP_CSRCS += stm32_dma2d.c
 endif
 
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CHIP_CSRCS += stm32_qencoder.c
-endif
 
 ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c

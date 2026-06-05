@@ -468,7 +468,6 @@ TIM           to be done    arch/arm/src/common/stm32/stm32_tim.c
 USART/LPUART  v3            arch/arm/src/stm32l4/stm32l4_serial.c   
 USB           OTG FS        arch/arm/src/stm32l4/stm32l4_otgfsdev.c 
 PWM           n/a           arch/arm/src/stm32l4/stm32l4_pwm.c      
-QENCODER      n/a           arch/arm/src/stm32l4/stm32l4_qencoder.c 
 USB host      n/a           arch/arm/src/stm32l4/stm32l4_otgfshost.c
 ============  ============  ========================================
 
@@ -506,7 +505,6 @@ BBSRAM        n/a           arch/arm/src/stm32f7/stm32_bbsram.c
 CAPTURE       n/a           arch/arm/src/stm32f7/stm32_capture.c  
 FOC           n/a           arch/arm/src/stm32f7/stm32_foc.c      
 PWM           n/a           arch/arm/src/stm32f7/stm32_pwm.c      
-QENCODER      n/a           arch/arm/src/stm32f7/stm32_qencoder.c 
 SAI           n/a           arch/arm/src/stm32f7/stm32_sai.c      
 USB host      n/a           arch/arm/src/stm32f7/stm32_otghost.c  
 ============  ============  ======================================
@@ -608,7 +606,6 @@ BBSRAM        n/a           arch/arm/src/stm32h7/stm32_bbsram.c
 CAPTURE       n/a           arch/arm/src/stm32h7/stm32_capture.c   
 LPTIM         n/a           arch/arm/src/stm32h7/stm32_lptim.c     
 PWM           n/a           arch/arm/src/stm32h7/stm32_pwm.c       
-QENCODER      n/a           arch/arm/src/stm32h7/stm32_qencoder.c  
 USB host      n/a           arch/arm/src/stm32h7/stm32_otghost.c   
 ============  ============  =======================================
 
