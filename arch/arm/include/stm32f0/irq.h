@@ -91,8 +91,8 @@
 #define STM32_IRQ_DMA2CH5       (STM32_IRQ_EXTINT + 11) /* 11: DMA2_CH5 */
 #define STM32_IRQ_ADC           (STM32_IRQ_EXTINT + 12) /* 12: ADC */
 #define STM32_IRQ_COMP          (STM32_IRQ_EXTINT + 12) /* 12: COMP */
-#define STM32_IRQ_TIM1_BRK      (STM32_IRQ_EXTINT + 13) /* 13: TIM1_BRK_UP_TRG_COM */
-#define STM32_IRQ_TIM1_CC       (STM32_IRQ_EXTINT + 14) /* 14: TIM1_CC */
+#define STM32_IRQ_TIM1UP        (STM32_IRQ_EXTINT + 13) /* 13: TIM1_BRK_UP_TRG_COM */
+#define STM32_IRQ_TIM1CC        (STM32_IRQ_EXTINT + 14) /* 14: TIM1_CC */
 #define STM32_IRQ_TIM2          (STM32_IRQ_EXTINT + 15) /* 15: TIM2 */
 #define STM32_IRQ_TIM3          (STM32_IRQ_EXTINT + 16) /* 16: TIM3 */
 #define STM32_IRQ_TIM6          (STM32_IRQ_EXTINT + 17) /* 17: TIM6 */
