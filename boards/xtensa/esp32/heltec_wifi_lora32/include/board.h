@@ -48,6 +48,7 @@
 /* Define how many LEDs this board has (needed by userleds) */
 
 #define BOARD_NLEDS       1
+#define GPIO_LED1         25  /* White LED on Heltec WiFi LoRa 32 */
 
 /* GPIO pins used by the GPIO Subsystem */
 
