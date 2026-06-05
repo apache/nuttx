@@ -43,6 +43,10 @@ if(CONFIG_STM32_TIM)
   list(APPEND SRCS stm32_tim.c)
 endif()
 
+if(CONFIG_STM32_FREERUN)
+  list(APPEND SRCS stm32_freerun.c)
+endif()
+
 if(CONFIG_STM32_PULSECOUNT)
   list(APPEND SRCS stm32_pulsecount.c)
 endif()
@@ -160,9 +164,6 @@ if(CONFIG_STM32_COMMON_LEGACY)
     list(APPEND SRCS stm32_oneshot_m3m4_v1.c stm32_oneshot_m3m4_v1_lowerhalf.c)
   endif()
 
-  if(CONFIG_STM32_FREERUN)
-    list(APPEND SRCS stm32_freerun_m3m4_v1.c)
-  endif()
 
   if(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1)
     if(CONFIG_STM32_I2C_ALT)

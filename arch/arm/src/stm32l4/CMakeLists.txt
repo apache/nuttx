@@ -54,10 +54,6 @@ if(CONFIG_STM32_ONESHOT)
   list(APPEND SRCS stm32l4_oneshot.c stm32l4_oneshot_lowerhalf.c)
 endif()
 
-if(CONFIG_STM32_FREERUN)
-  list(APPEND SRCS stm32l4_freerun.c)
-endif()
-
 if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32l4_userspace.c stm32l4_mpuinit.c)
 endif()
