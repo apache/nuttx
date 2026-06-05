@@ -34,4 +34,9 @@ if(CONFIG_MM_KASAN)
 endif()
 
 target_sources(mm PRIVATE ${SRCS})
-target_compile_options(mm PRIVATE ${FLAGS})
+
+if(CONFIG_BUILD_FLAT)
+  target_compile_options(mm PRIVATE ${FLAGS})
+else()
+  target_compile_options(kmm PRIVATE ${FLAGS})
+endif()
