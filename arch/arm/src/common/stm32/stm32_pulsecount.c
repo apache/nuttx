@@ -71,24 +71,6 @@
 #define TIMRCCRST_TIM8   STM32_RCC_APB2RSTR
 #define TIMRST_TIM8      RCC_APB2RSTR_TIM8RST
 
-/* The TIM1/TIM8 update-event interrupt vector is named differently across
- * families
- */
-
-#if defined(STM32_IRQ_TIM1UP)
-#  define PULSECOUNT_TIM1_IRQ  STM32_IRQ_TIM1UP
-#elif defined(STM32_IRQ_TIM1_UP)
-#  define PULSECOUNT_TIM1_IRQ  STM32_IRQ_TIM1_UP
-#elif defined(STM32_IRQ_TIM1_BRK)
-#  define PULSECOUNT_TIM1_IRQ  STM32_IRQ_TIM1_BRK
-#endif
-
-#if defined(STM32_IRQ_TIM8UP)
-#  define PULSECOUNT_TIM8_IRQ  STM32_IRQ_TIM8UP
-#elif defined(STM32_IRQ_TIM8_UP)
-#  define PULSECOUNT_TIM8_IRQ  STM32_IRQ_TIM8_UP
-#endif
-
 /* Default GPIO pins state */
 
 #if defined(CONFIG_STM32_STM32F10XX)
@@ -270,7 +252,7 @@ static struct stm32_tim_s g_pulsecount1dev =
   .timid       = 1,
   .timtype     = TIMTYPE_TIM1,
   .t_dts       = CONFIG_STM32_TIM1_PULSECOUNT_TDTS,
-  .irq         = PULSECOUNT_TIM1_IRQ,
+  .irq         = STM32_IRQ_TIM1UP,
   .base        = STM32_TIM1_BASE,
   .pclk        = TIMCLK_TIM1,
 };
@@ -321,7 +303,7 @@ static struct stm32_tim_s g_pulsecount8dev =
   .timid       = 8,
   .timtype     = TIMTYPE_TIM8,
   .t_dts       = CONFIG_STM32_TIM8_PULSECOUNT_TDTS,
-  .irq         = PULSECOUNT_TIM8_IRQ,
+  .irq         = STM32_IRQ_TIM8UP,
   .base        = STM32_TIM8_BASE,
   .pclk        = TIMCLK_TIM8,
 };
