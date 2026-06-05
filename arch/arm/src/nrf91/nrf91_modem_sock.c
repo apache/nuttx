@@ -475,6 +475,138 @@ static int nrf91_modem_getver(lte_version_t *version)
 }
 
 /****************************************************************************
+ * Name: nrf91_modem_actpdn
+ *
+ * Description:
+ *   Activate the default packet data network: optionally (re)configure the
+ *   APN, attach to the network (AT+CFUN=1), wait for registration and read
+ *   the assigned IP address.
+ *
+ ****************************************************************************/
+
+static int nrf91_modem_actpdn(FAR lte_apn_setting_t *apn,
+                              FAR lte_pdn_t *pdn)
+{
+  FAR const char *pdptype = "IP";
+  char resp[64];
+  FAR char *p;
+  FAR char *q;
+  size_t n;
+  int stat = 0;
+  int tmp = 0;
+  int elapsed = 0;
+  int ret;
+
+  switch (apn->ip_type)
+    {
+      case LTE_IPTYPE_V6:
+        pdptype = "IPV6";
+        break;
+      case LTE_IPTYPE_V4V6:
+        pdptype = "IPV4V6";
+        break;
+      default:
+        pdptype = "IP";
+        break;
+    }
+
+  /* (Re)configure the default PDN context when an APN is provided.  Toggle
+   * the radio off first so the new context is used on (re)attach.
+   */
+
+  if (apn->apn != NULL && apn->apn[0] != '\0')
+    {
+      nrf_modem_at_printf("AT+CFUN=4");
+
+      ret = nrf_modem_at_printf("AT+CGDCONT=0,\"%s\",\"%s\"",
+                                pdptype, apn->apn);
+      if (ret < 0)
+        {
+          nerr("AT+CGDCONT failed %d\n", ret);
+          return ret;
+        }
+
+      if (apn->auth_type != LTE_APN_AUTHTYPE_NONE &&
+          apn->user_name != NULL && apn->password != NULL)
+        {
+          ret = nrf_modem_at_printf("AT+CGAUTH=0,%u,\"%s\",\"%s\"",
+                                    (unsigned)apn->auth_type,
+                                    apn->user_name, apn->password);
+          if (ret < 0)
+            {
+              nerr("AT+CGAUTH failed %d\n", ret);
+              return ret;
+            }
+        }
+    }
+
+  /* Attach to the network */
+
+  ret = nrf_modem_at_printf("AT+CFUN=1");
+  if (ret < 0)
+    {
+      nerr("AT+CFUN=1 failed %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for network registration (1 = home, 5 = roaming) */
+
+  while (elapsed < 120)
+    {
+      ret = nrf_modem_at_scanf("AT+CEREG?", "+CEREG: %d,%d", &tmp, &stat);
+      if (ret >= 2 && (stat == 1 || stat == 5))
+        {
+          break;
+        }
+
+      nxsig_usleep(1000 * 1000);
+      elapsed++;
+    }
+
+  if (stat != 1 && stat != 5)
+    {
+      nerr("LTE registration timed out, CEREG stat=%d\n", stat);
+      return -ETIMEDOUT;
+    }
+
+  /* Fill the PDN info and read the assigned IP address from
+   * "+CGPADDR: 0,\"a.b.c.d\"".
+   */
+
+  memset(pdn, 0, sizeof(*pdn));
+  pdn->session_id = 0;
+  pdn->active     = LTE_PDN_ACTIVE;
+  pdn->apn_type   = apn->apn_type;
+  pdn->ipaddr_num = 0;
+
+  ret = nrf_modem_at_cmd(resp, sizeof(resp), "AT+CGPADDR=0");
+  if (ret == 0)
+    {
+      p = strchr(resp, '"');
+      if (p != NULL)
+        {
+          p++;
+          q = strchr(p, '"');
+          if (q != NULL)
+            {
+              n = (size_t)(q - p);
+              if (n >= LTE_IPADDR_MAX_LEN)
+                {
+                  n = LTE_IPADDR_MAX_LEN - 1;
+                }
+
+              pdn->address[0].ip_type = apn->ip_type;
+              memcpy(pdn->address[0].address, p, n);
+              pdn->address[0].address[n] = '\0';
+              pdn->ipaddr_num = 1;
+            }
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: nrf91_ioctl_ltecmd
  ****************************************************************************/
 
@@ -497,6 +629,32 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
       case LTE_CMDID_POWEROFF:
         {
           ret = nrf_modem_at_printf("AT+CFUN=0");
+          break;
+        }
+
+      case LTE_CMDID_RADIOON:
+        {
+          /* The radio is enabled by AT+CFUN=1 at power-on / PDN
+           * activation, so there is nothing extra to do here.
+           */
+
+          ret = OK;
+          break;
+        }
+
+      case LTE_CMDID_RADIOOFF:
+        {
+          ret = nrf_modem_at_printf("AT+CFUN=4");
+          break;
+        }
+
+      case LTE_CMDID_ACTPDN:
+        {
+          lte_apn_setting_t **apn =
+            (lte_apn_setting_t **)(ltecmd->inparam);
+          lte_pdn_t **pdn =
+            (lte_pdn_t **)(ltecmd->outparam + 1);
+          ret = nrf91_modem_actpdn(*apn, *pdn);
           break;
         }
 
@@ -558,6 +716,7 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
           }
 
         (*quality)->valid = true;
+        break;
       }
 
       /* TODO: commands from include/nuttx/wireless/lte/lte.h */
