@@ -43,6 +43,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 #include "viewtool_stm32f107.h"
 
 #ifdef CONFIG_LCD_SSD1289

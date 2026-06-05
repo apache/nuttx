@@ -119,10 +119,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif

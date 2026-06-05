@@ -1007,6 +1007,19 @@ config STM32_HAVE_TIM19
 config STM32_HAVE_TIM20
 	bool
 
+# Timer counter width.  TIM2 and TIM5 are 32-bit on most families; these
+# capability flags carry that per-family knowledge so the common timer
+# lower-half driver does not need chip-line #ifdefs.  A family whose TIM2 or
+# TIM5 is 32-bit selects the matching flag from its chip Kconfig; every other
+# timer (and the 16-bit STM32F10xx/STM32L15xx/STM32F30xx/Cortex-M0 lines) is
+# left at the default 16-bit width.
+
+config STM32_HAVE_TIM2_32BITS
+	bool
+
+config STM32_HAVE_TIM5_32BITS
+	bool
+
 config STM32_HAVE_LPTIM1
 	bool
 

@@ -43,7 +43,6 @@
 #include "stm32wl5_pwr.h"
 #include "stm32wl5_rcc.h"
 #include "stm32wl5_spi.h"
-#include "stm32wl5_tim.h"
 #include "stm32wl5_uart.h"
 
 /****************************************************************************

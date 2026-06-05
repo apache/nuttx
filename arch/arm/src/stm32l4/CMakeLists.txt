@@ -37,16 +37,11 @@ list(
   stm32l4_i2c.c
   stm32l4_lse.c
   stm32l4_pwr.c
-  stm32l4_tim.c
   stm32l4_flash.c
   stm32l4_dfumode.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l4_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32l4_tim_lowerhalf.c)
 endif()
 
 if(NOT CONFIG_SCHED_TICKLESS)

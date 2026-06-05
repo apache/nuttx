@@ -64,6 +64,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 #include "stm3210e-eval.h"
 
 /****************************************************************************

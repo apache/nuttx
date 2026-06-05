@@ -136,10 +136,6 @@ ifeq ($(CONFIG_STM32_SDMMC),y)
 CHIP_CSRCS += stm32_sdmmc.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_STM32_TIMX_CAP),y)
 CHIP_CSRCS += stm32_capture.c
 endif
@@ -165,10 +161,6 @@ ifeq ($(CONFIG_DEBUG_USB),y)
 CHIP_CSRCS += stm32_usbhost.c
 endif
 endif
-endif
-
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c
 endif
 
 ifeq ($(CONFIG_STM32_LPTIM),y)

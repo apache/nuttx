@@ -247,6 +247,9 @@
 #  error STM32 H7 chip Family not identified
 #endif
 
+#define STM32_NATIM                      2   /* Advanced timers TIM1 and TIM8 */
+#define STM32_NBTIM                      2   /* Basic timers TIM6 and TIM7 */
+
 /* TBD FPU Configuration */
 
 #if defined(CONFIG_ARCH_HAVE_FPU)
