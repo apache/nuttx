@@ -46,4 +46,4 @@ if(CONFIG_DEBUG_OPT_UNUSED_SECTIONS)
   endif()
 endif()
 
-nuttx_elf_link_options(-e __start)
+nuttx_elf_link_options(-e _start)
