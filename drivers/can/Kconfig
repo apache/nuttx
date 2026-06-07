@@ -341,11 +341,11 @@ endchoice # "Kvaser PCI CAN device type"
 endif # CAN_KVASER
 
 config CAN_CTUCANFD
-	bool "CTUCANFD PCI CAN card"
+	bool "CTUCANFD CAN FD controller"
 	default n
-	depends on PCI
 	---help---
-		Enable driver support for CTU CAN FD PCI card.
+		Enable driver support for CTU CAN FD controller.
+		Supports both PCI (requires CONFIG_PCI) and SysBus MMIO modes.
 		NOTE: for now works only with QEMU
 
 if CAN_CTUCANFD
