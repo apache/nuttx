@@ -610,4 +610,46 @@ int fdt_qemu_fwcfg_register(FAR const void *fdt);
 #ifdef CONFIG_PWM_SIFIVE
 int fdt_sifive_pwm_devices_register(FAR const void *fdt);
 #endif
+
+/****************************************************************************
+ * Name: fdt_pl061_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "arm,pl061" and registers each as an ioexpander via
+ *   pl061_ioe_initialize().
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOEXPANDER_PL061
+int fdt_pl061_devices_register(FAR const void *fdt, int irqbase);
+#endif
+
+/****************************************************************************
+ * Name: fdt_ctucanfd_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "ctu,ctucanfd" and registers each via ctucanfd_register()
+ *   (SysBus/MMIO path, no PCI).
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_CAN_CTUCANFD
+int fdt_ctucanfd_devices_register(FAR const void *fdt, int irqbase);
+#endif
 #endif /* __INCLUDE_NUTTX_FDT_H */
