@@ -35,7 +35,10 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/pci/pci.h>
+
+#ifdef CONFIG_PCI
+#  include <nuttx/pci/pci.h>
+#endif
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
 #  include <nuttx/can.h>
@@ -109,7 +112,9 @@ struct ctucanfd_can_s
   struct netdev_lowerhalf_s dev;
 #endif
 
+#ifdef CONFIG_PCI
   FAR struct pci_device_s *pcidev;
+#endif
   uint64_t                 base;
   uint8_t                  txbufcnt;
 };
@@ -125,7 +130,9 @@ struct ctucanfd_driver_s
 
   /* PCI data */
 
+#ifdef CONFIG_PCI
   FAR struct pci_device_s   *pcidev;
+#endif
   int                        irq;
   uintptr_t                  base;
 };
@@ -198,9 +205,11 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg);
 
 /* PCI */
 
+#ifdef CONFIG_PCI
 static void ctucanfd_init(FAR struct ctucanfd_driver_s *priv);
 static uint8_t ctucanfd_ctucanfd_probe(FAR struct ctucanfd_driver_s *priv);
 static int ctucanfd_probe(FAR struct pci_device_s *dev);
+#endif
 
 /*****************************************************************************
  * Private Data
@@ -235,6 +244,7 @@ static const struct netdev_ops_s g_ctucanfd_net_ops =
 };
 #endif
 
+#ifdef CONFIG_PCI
 static const struct pci_device_id_s g_ctucanfd_id_table[] =
 {
   {
@@ -249,6 +259,7 @@ static struct pci_driver_s g_ctucanfd_drv =
   .id_table = g_ctucanfd_id_table,
   .probe    = ctucanfd_probe,
 };
+#endif
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
 static uint8_t g_ctucanfd_count = 0;
@@ -1664,6 +1675,7 @@ static int ctucanfd_interrupt(int irq, FAR void *context, FAR void *arg)
   return OK;
 }
 
+#ifdef CONFIG_PCI
 /*****************************************************************************
  * Name: ctucanfd_init
  *
@@ -1880,6 +1892,7 @@ errout:
 
   return ret;
 }
+#endif /* CONFIG_PCI */
 
 /*****************************************************************************
  * Public Functions
@@ -1893,7 +1906,112 @@ errout:
  *
  *****************************************************************************/
 
+#ifdef CONFIG_PCI
 int pci_ctucanfd_init(void)
 {
   return pci_register_driver(&g_ctucanfd_drv);
+}
+#endif
+
+/*****************************************************************************
+ * Name: ctucanfd_register
+ *
+ * Description:
+ *   Register a CTU CAN FD device via SysBus MMIO (without PCI).
+ *   Used on platforms where the CAN controller is memory-mapped directly,
+ *   such as the QEMU ARM virt platform with ctucan-sysbus.
+ *
+ * Input Parameters:
+ *   base - MMIO base address of the CTU CAN FD controller
+ *   irq  - IRQ number
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno on failure
+ *
+ *****************************************************************************/
+
+int ctucanfd_register(uintptr_t base, int irq)
+{
+  FAR struct ctucanfd_driver_s *priv;
+  FAR struct ctucanfd_can_s    *dev;
+#ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+  char                          devpath[16];
+  uint8_t                       canid = g_ctucanfd_count++;
+#endif
+  int                           ret;
+
+  priv = kmm_zalloc(sizeof(struct ctucanfd_driver_s));
+  if (!priv)
+    {
+      return -ENOMEM;
+    }
+
+  dev = kmm_zalloc(sizeof(struct ctucanfd_can_s));
+  if (!dev)
+    {
+      ret = -ENOMEM;
+      goto err_free_priv;
+    }
+
+  /* Set up single channel */
+
+  priv->devs       = dev;
+  priv->count      = 1;
+  priv->canfd_base = base;
+  priv->irq        = irq;
+
+  dev->base        = base;
+  dev->txbufcnt    = CTUCANFD_TXBUF_CNT;
+
+  /* Attach interrupt handler.  The GIC line is left masked here; we only
+   * call up_enable_irq() after every registration step succeeds.  This
+   * keeps the error path race-free: a stray pending IRQ (warm reset, etc.)
+   * cannot dispatch into ctucanfd_interrupt() while we are tearing down
+   * priv/dev on failure, and on SMP no in-flight handler can run on a
+   * peer core against memory we are about to free.
+   */
+
+  irq_attach(irq, ctucanfd_interrupt, priv);
+
+  /* Register the CAN interface */
+
+#ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+  snprintf(devpath, sizeof(devpath), "/dev/can%d", canid);
+
+  dev->dev.cd_ops  = &g_ctucanfd_can_ops;
+  dev->dev.cd_priv = dev;
+
+  ret = can_register(devpath, &dev->dev);
+  if (ret < 0)
+    {
+      canerr("ERROR: can_register(%s) failed: %d\n", devpath, ret);
+      goto err_detach_irq;
+    }
+#endif
+
+#ifdef CONFIG_CAN_CTUCANFD_SOCKET
+  dev->dev.quota[NETPKT_TX] = CTUCANFD_TX_QUOTA;
+  dev->dev.quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
+  dev->dev.ops              = &g_ctucanfd_net_ops;
+
+  ret = netdev_lower_register(&dev->dev, NET_LL_CAN);
+  if (ret < 0)
+    {
+      canerr("ERROR: netdev_lower_register failed: %d\n", ret);
+      goto err_detach_irq;
+    }
+#endif
+
+  /* All registrations succeeded; enable the GIC line. */
+
+  up_enable_irq(irq);
+
+  return OK;
+
+err_detach_irq:
+  irq_detach(irq);
+  kmm_free(dev);
+err_free_priv:
+  kmm_free(priv);
+  return ret;
 }
