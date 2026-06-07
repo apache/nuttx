@@ -57,6 +57,14 @@ ifeq ($(CONFIG_PWM_SIFIVE),y)
   CSRCS += fdt_sifive_pwm.c
 endif
 
+ifeq ($(CONFIG_IOEXPANDER_PL061),y)
+  CSRCS += fdt_pl061.c
+endif
+
+ifeq ($(CONFIG_CAN_CTUCANFD),y)
+  CSRCS += fdt_ctucanfd.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree
