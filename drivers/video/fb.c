@@ -2047,18 +2047,20 @@ int fb_register_device(int display, int plane,
 #  ifdef CONFIG_FB_UPDATE
   if (fb->vtable->updatearea == NULL)
     {
-      goto errout_with_paninfo;
+      gerr("ERROR: updatearea() == NULL\n");
     }
-
-  area.x = 0;
-  area.y = 0;
-  area.w = vinfo.xres;
-  area.h = vinfo.yres;
-
-  ret = fb->vtable->updatearea(fb->vtable, &area);
-  if (ret < 0)
+  else
     {
-      goto errout_with_paninfo;
+      area.x = 0;
+      area.y = 0;
+      area.w = vinfo.xres;
+      area.h = vinfo.yres;
+
+      ret = fb->vtable->updatearea(fb->vtable, &area);
+      if (ret < 0)
+        {
+          goto errout_with_paninfo;
+        }
     }
 #  endif
 
@@ -2075,10 +2077,13 @@ int fb_register_device(int display, int plane,
     }
 
 #    ifdef CONFIG_FB_UPDATE
-  ret = fb->vtable->updatearea(fb->vtable, &area);
-  if (ret < 0)
+  if (fb->vtable->updatearea != NULL)
     {
-      goto errout_with_paninfo;
+      ret = fb->vtable->updatearea(fb->vtable, &area);
+      if (ret < 0)
+        {
+          goto errout_with_paninfo;
+        }
     }
 #    endif
 #  endif
