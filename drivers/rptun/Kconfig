@@ -151,4 +151,12 @@ config RPTUN_LOADER
 	bool "rptun loader support"
 	default n
 
+config RPTUN_TRACE_DUMP
+	bool "rptun dump remote core's syslog"
+	default y
+	depends on SYSLOG_RPMSG_SERVER
+	---help---
+		Print the remote core's syslog buffer (its RSC_TRACE entry) on
+		halt and on RPTUNIOC_DUMP.
+
 endif # RPTUN
