@@ -137,7 +137,11 @@ static int sim_can_txavail(struct net_driver_s *dev)
   netdev_lock(dev);
   if (IFF_IS_UP(priv->dev.d_flags))
     {
-      devif_poll(&priv->dev, sim_can_txpoll);
+      /* Drain all pending TX frames */
+
+      while (devif_poll(&priv->dev, sim_can_txpoll) > 0)
+        {
+        }
     }
 
   netdev_unlock(dev);
