@@ -145,9 +145,9 @@
 
 #define RING_IDX_MASK    0xffffff
 
-/* Maximum ring capacity: must be power-of-2 and fit in 24-bit index space */
+/* Maximum ring capacity (fits in 24-bit index space) */
 
-#define RING_SIZE_MAX    (1u << 23)
+#define RING_SIZE_MAX    RING_IDX_MASK
 
 /* 32-bit RTS packed type: {cnt:8, idx:24} in a single atomic_t.
  *
@@ -609,6 +609,8 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
 {
   irqstate_t flags;
   int32_t old_magic;
+
+  DEBUGASSERT(r != NULL && cap > 0 && cap <= RING_SIZE_MAX);
 
   flags = irq_save();
 
