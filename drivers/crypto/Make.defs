@@ -31,6 +31,10 @@ ifeq ($(CONFIG_DEV_SE05X),y)
   include crypto/pnt/Make.defs
 endif
 
+ifeq ($(CONFIG_DEV_RNG90),y)
+  CSRCS += rng90.c
+endif
+
 # Include crypto device driver build support
 
 DEPPATH += --dep-path crypto

@@ -137,3 +137,13 @@ config SE05X_LOG_DEBUG
 endchoice # SE05x debug log level
 
 endif #DEV_SE05X
+
+config DEV_RNG90
+	bool "Enable Microchip RNG90 TRNG"
+	depends on I2C
+	depends on CRYPTO
+	default n
+	---help---
+		Enable support for /dev/rng90 random number generator provided by
+		Microchip RNG90 TRNG.
+

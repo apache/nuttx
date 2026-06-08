@@ -74,6 +74,10 @@ ifeq ($(CONFIG_SENSORS_BMP280),y)
   CSRCS += esp_board_bmp280.c
 endif
 
+ifeq ($(CONFIG_DEV_RNG90),y)
+  CSRCS += esp_board_rng90.c
+endif
+
 ifeq ($(CONFIG_MMCSD_SPI),y)
   CSRCS += esp_board_mmcsd.c
 endif

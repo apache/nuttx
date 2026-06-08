@@ -41,6 +41,10 @@
 #include "esp_board_i2c.h"
 #include "esp_board_bmp180.h"
 
+#ifdef CONFIG_DEV_RNG90
+#  include "esp_board_rng90.h"
+#endif
+
 #include "espressif/esp_start.h"
 
 #ifdef CONFIG_ESPRESSIF_ADC
@@ -401,6 +405,15 @@ int esp_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 "
              "Driver for I2C0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DEV_RNG90
+  ret = board_rng90_initialize(0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RNG90 driver: %d\n", ret);
     }
 #endif
 
