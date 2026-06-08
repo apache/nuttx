@@ -41,6 +41,10 @@
 
 #  include <math.h>
 
+#  if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_METHOD__)
+#    define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
+#  endif
+
 #undef signbit
 #undef fpclassify
 #undef isfinite
