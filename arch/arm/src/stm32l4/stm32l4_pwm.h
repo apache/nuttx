@@ -844,80 +844,80 @@
 
 enum stm32l4_timmode_e
 {
-  STM32L4_TIMMODE_COUNTUP   = 0,
-  STM32L4_TIMMODE_COUNTDOWN = 1,
-  STM32L4_TIMMODE_CENTER1   = 2,
-  STM32L4_TIMMODE_CENTER2   = 3,
-  STM32L4_TIMMODE_CENTER3   = 4,
+  STM32_TIMMODE_COUNTUP   = 0,
+  STM32_TIMMODE_COUNTDOWN = 1,
+  STM32_TIMMODE_CENTER1   = 2,
+  STM32_TIMMODE_CENTER2   = 3,
+  STM32_TIMMODE_CENTER3   = 4,
 };
 
 /* Timer output polarity */
 
 enum stm32l4_pwm_pol_e
 {
-  STM32L4_POL_POS  = 0,
-  STM32L4_POL_NEG  = 1,
+  STM32_POL_POS  = 0,
+  STM32_POL_NEG  = 1,
 };
 
 /* Timer output IDLE state */
 
 enum stm32l4_pwm_idle_e
 {
-  STM32L4_IDLE_INACTIVE = 0,
-  STM32L4_IDLE_ACTIVE   = 1
+  STM32_IDLE_INACTIVE = 0,
+  STM32_IDLE_ACTIVE   = 1
 };
 
 /* PWM channel mode */
 
 enum stm32l4_chanmode_e
 {
-  STM32L4_CHANMODE_FRZN        = 0,  /* CCRx matches has no effects on outputs */
-  STM32L4_CHANMODE_CHACT       = 1,  /* OCxREF active on match */
-  STM32L4_CHANMODE_CHINACT     = 2,  /* OCxREF inactive on match */
-  STM32L4_CHANMODE_OCREFTOG    = 3,  /* OCxREF toggles when TIMy_CNT=TIMyCCRx */
-  STM32L4_CHANMODE_OCREFLO     = 4,  /* OCxREF is forced low */
-  STM32L4_CHANMODE_OCREFHI     = 5,  /* OCxREF is forced high */
-  STM32L4_CHANMODE_PWM1        = 6,  /* PWM mode 1 */
-  STM32L4_CHANMODE_PWM2        = 7,  /* PWM mode 2 */
-  STM32L4_CHANMODE_COMBINED1   = 8,  /* Combined PWM mode 1 */
-  STM32L4_CHANMODE_COMBINED2   = 9,  /* Combined PWM mode 2 */
-  STM32L4_CHANMODE_ASYMMETRIC1 = 10, /* Asymmetric PWM mode 1 */
-  STM32L4_CHANMODE_ASYMMETRIC2 = 11, /* Asymmetric PWM mode 2 */
+  STM32_CHANMODE_FRZN        = 0,  /* CCRx matches has no effects on outputs */
+  STM32_CHANMODE_CHACT       = 1,  /* OCxREF active on match */
+  STM32_CHANMODE_CHINACT     = 2,  /* OCxREF inactive on match */
+  STM32_CHANMODE_OCREFTOG    = 3,  /* OCxREF toggles when TIMy_CNT=TIMyCCRx */
+  STM32_CHANMODE_OCREFLO     = 4,  /* OCxREF is forced low */
+  STM32_CHANMODE_OCREFHI     = 5,  /* OCxREF is forced high */
+  STM32_CHANMODE_PWM1        = 6,  /* PWM mode 1 */
+  STM32_CHANMODE_PWM2        = 7,  /* PWM mode 2 */
+  STM32_CHANMODE_COMBINED1   = 8,  /* Combined PWM mode 1 */
+  STM32_CHANMODE_COMBINED2   = 9,  /* Combined PWM mode 2 */
+  STM32_CHANMODE_ASYMMETRIC1 = 10, /* Asymmetric PWM mode 1 */
+  STM32_CHANMODE_ASYMMETRIC2 = 11, /* Asymmetric PWM mode 2 */
 };
 
 /* PWM timer channel */
 
 enum stm32l4_pwm_chan_e
 {
-  STM32L4_PWM_CHAN1  = 1,
-  STM32L4_PWM_CHAN2  = 2,
-  STM32L4_PWM_CHAN3  = 3,
-  STM32L4_PWM_CHAN4  = 4,
-  STM32L4_PWM_CHAN5  = 5,
-  STM32L4_PWM_CHAN6  = 6,
+  STM32_PWM_CHAN1  = 1,
+  STM32_PWM_CHAN2  = 2,
+  STM32_PWM_CHAN3  = 3,
+  STM32_PWM_CHAN4  = 4,
+  STM32_PWM_CHAN5  = 5,
+  STM32_PWM_CHAN6  = 6,
 };
 
 /* PWM timer channel output */
 
 enum stm32l4_pwm_output_e
 {
-  STM32L4_PWM_OUT1  = (1 << 0),
-  STM32L4_PWM_OUT1N = (1 << 1),
-  STM32L4_PWM_OUT2  = (1 << 2),
-  STM32L4_PWM_OUT2N = (1 << 3),
-  STM32L4_PWM_OUT3  = (1 << 4),
-  STM32L4_PWM_OUT3N = (1 << 5),
-  STM32L4_PWM_OUT4  = (1 << 6),
+  STM32_PWM_OUT1  = (1 << 0),
+  STM32_PWM_OUT1N = (1 << 1),
+  STM32_PWM_OUT2  = (1 << 2),
+  STM32_PWM_OUT2N = (1 << 3),
+  STM32_PWM_OUT3  = (1 << 4),
+  STM32_PWM_OUT3N = (1 << 5),
+  STM32_PWM_OUT4  = (1 << 6),
 
   /* 1 << 7 reserved - no complementary output for CH4 */
 
   /* Only available inside micro */
 
-  STM32L4_PWM_OUT5  = (1 << 8),
+  STM32_PWM_OUT5  = (1 << 8),
 
   /* 1 << 9 reserved - no complementary output for CH5 */
 
-  STM32L4_PWM_OUT6  = (1 << 10),
+  STM32_PWM_OUT6  = (1 << 10),
 
   /* 1 << 11 reserved - no complementary output for CH6 */
 };

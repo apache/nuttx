@@ -154,9 +154,9 @@ static const struct stm32l4_lptim_ops_s stm32l4_lptim_ops =
 static struct stm32l4_lptim_priv_s stm32l4_lptim1_priv =
 {
   .ops        = &stm32l4_lptim_ops,
-  .mode       = STM32L4_LPTIM_MODE_UNUSED,
-  .base       = STM32L4_LPTIM1_BASE,
-  .freq       = STM32L4_LPTIM1_FREQUENCY,  /* Must be defined in board.h */
+  .mode       = STM32_LPTIM_MODE_UNUSED,
+  .base       = STM32_LPTIM1_BASE,
+  .freq       = STM32_LPTIM1_FREQUENCY,  /* Must be defined in board.h */
 };
 #endif
 
@@ -164,9 +164,9 @@ static struct stm32l4_lptim_priv_s stm32l4_lptim1_priv =
 static struct stm32l4_lptim_priv_s stm32l4_lptim2_priv =
 {
   .ops        = &stm32l4_lptim_ops,
-  .mode       = STM32L4_LPTIM_MODE_UNUSED,
-  .base       = STM32L4_LPTIM2_BASE,
-  .freq       = STM32L4_LPTIM2_FREQUENCY,  /* Must be defined in board.h */
+  .mode       = STM32_LPTIM_MODE_UNUSED,
+  .base       = STM32_LPTIM2_BASE,
+  .freq       = STM32_LPTIM2_FREQUENCY,  /* Must be defined in board.h */
 };
 #endif
 
@@ -218,13 +218,13 @@ static int stm32l4_lptim_enable(struct stm32l4_lptim_dev_s *dev)
   switch (((struct stm32l4_lptim_priv_s *)dev)->base)
     {
 #if defined(CONFIG_STM32L4_LPTIM1)
-      case STM32L4_LPTIM1_BASE:
-        modifyreg32(STM32L4_RCC_APB1ENR1, 0, RCC_APB1ENR1_LPTIM1EN);
+      case STM32_LPTIM1_BASE:
+        modifyreg32(STM32_RCC_APB1ENR1, 0, RCC_APB1ENR1_LPTIM1EN);
         break;
 #endif
 #if defined(CONFIG_STM32L4_LPTIM2)
-      case STM32L4_LPTIM2_BASE:
-        modifyreg32(STM32L4_RCC_APB1ENR2, 0, RCC_APB1ENR2_LPTIM2EN);
+      case STM32_LPTIM2_BASE:
+        modifyreg32(STM32_RCC_APB1ENR2, 0, RCC_APB1ENR2_LPTIM2EN);
         break;
 #endif
 
@@ -246,13 +246,13 @@ static int stm32l4_lptim_disable(struct stm32l4_lptim_dev_s *dev)
   switch (((struct stm32l4_lptim_priv_s *)dev)->base)
     {
 #if defined(CONFIG_STM32L4_LPTIM1)
-      case STM32L4_LPTIM1_BASE:
-        modifyreg32(STM32L4_RCC_APB1ENR1, RCC_APB1ENR1_LPTIM1EN, 0);
+      case STM32_LPTIM1_BASE:
+        modifyreg32(STM32_RCC_APB1ENR1, RCC_APB1ENR1_LPTIM1EN, 0);
         break;
 #endif
 #if defined(CONFIG_STM32L4_LPTIM2)
-      case STM32L4_LPTIM2_BASE:
-        modifyreg32(STM32L4_RCC_APB1ENR2, RCC_APB1ENR2_LPTIM2EN, 0);
+      case STM32_LPTIM2_BASE:
+        modifyreg32(STM32_RCC_APB1ENR2, RCC_APB1ENR2_LPTIM2EN, 0);
         break;
 #endif
 
@@ -274,15 +274,15 @@ static int stm32l4_lptim_reset(struct stm32l4_lptim_dev_s *dev)
   switch (((struct stm32l4_lptim_priv_s *)dev)->base)
     {
 #if defined(CONFIG_STM32L4_LPTIM1)
-      case STM32L4_LPTIM1_BASE:
-        modifyreg32(STM32L4_RCC_APB1RSTR1, 0, RCC_APB1RSTR1_LPTIM1RST);
-        modifyreg32(STM32L4_RCC_APB1RSTR1, RCC_APB1RSTR1_LPTIM1RST, 0);
+      case STM32_LPTIM1_BASE:
+        modifyreg32(STM32_RCC_APB1RSTR1, 0, RCC_APB1RSTR1_LPTIM1RST);
+        modifyreg32(STM32_RCC_APB1RSTR1, RCC_APB1RSTR1_LPTIM1RST, 0);
         break;
 #endif
 #if defined(CONFIG_STM32L4_LPTIM2)
-      case STM32L4_LPTIM2_BASE:
-        modifyreg32(STM32L4_RCC_APB1RSTR2, 0, RCC_APB1RSTR2_LPTIM2RST);
-        modifyreg32(STM32L4_RCC_APB1RSTR2, RCC_APB1RSTR2_LPTIM2RST, 0);
+      case STM32_LPTIM2_BASE:
+        modifyreg32(STM32_RCC_APB1RSTR2, 0, RCC_APB1RSTR2_LPTIM2RST);
+        modifyreg32(STM32_RCC_APB1RSTR2, RCC_APB1RSTR2_LPTIM2RST, 0);
         break;
 #endif
     }
@@ -300,12 +300,12 @@ static int stm32l4_lptim_get_gpioconfig(struct stm32l4_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL && cfg != NULL);
 
-  channel &= STM32L4_LPTIM_CH_MASK;
+  channel &= STM32_LPTIM_CH_MASK;
 
   switch (((struct stm32l4_lptim_priv_s *)dev)->base)
     {
 #if defined(CONFIG_STM32L4_LPTIM1)
-      case STM32L4_LPTIM1_BASE:
+      case STM32_LPTIM1_BASE:
         switch (channel)
           {
 #  if defined(GPIO_LPTIM1_OUT_1)
@@ -330,7 +330,7 @@ static int stm32l4_lptim_get_gpioconfig(struct stm32l4_lptim_dev_s *dev,
 #endif /* CONFIG_STM32L4_LPTIM1 */
 
 #if defined(CONFIG_STM32L4_LPTIM2)
-      case STM32L4_LPTIM2_BASE:
+      case STM32_LPTIM2_BASE:
         switch (channel)
           {
 #  if defined(GPIO_LPTIM2_OUT_1)
@@ -369,24 +369,24 @@ static int stm32l4_lptim_setmode(struct stm32l4_lptim_dev_s *dev,
                                  stm32l4_lptim_mode_t mode)
 {
   const uint32_t addr = ((struct stm32l4_lptim_priv_s *)dev)->base +
-                        STM32L4_LPTIM_CR_OFFSET;
+                        STM32_LPTIM_CR_OFFSET;
 
   DEBUGASSERT(dev != NULL);
 
   /* Mode */
 
-  switch (mode & STM32L4_LPTIM_MODE_MASK)
+  switch (mode & STM32_LPTIM_MODE_MASK)
     {
-      case STM32L4_LPTIM_MODE_DISABLED:
+      case STM32_LPTIM_MODE_DISABLED:
           modifyreg32(addr, LPTIM_CR_ENABLE, 0);
           break;
 
-      case STM32L4_LPTIM_MODE_SINGLE:
+      case STM32_LPTIM_MODE_SINGLE:
           modifyreg32(addr, 0, LPTIM_CR_ENABLE);
           modifyreg32(addr, 0, LPTIM_CR_SNGSTRT);
           break;
 
-      case STM32L4_LPTIM_MODE_CONTINUOUS:
+      case STM32_LPTIM_MODE_CONTINUOUS:
           modifyreg32(addr, 0, LPTIM_CR_ENABLE);
           modifyreg32(addr, 0, LPTIM_CR_CNTSTRT);
           break;
@@ -469,7 +469,7 @@ static int stm32l4_lptim_setclock(struct stm32l4_lptim_dev_s *dev,
       actual = priv->freq >> 7;
     }
 
-  stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET, LPTIM_CFGR_PRESC_MASK,
+  stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET, LPTIM_CFGR_PRESC_MASK,
                     setbits);
   stm32l4_lptim_enable(dev);
 
@@ -519,9 +519,9 @@ static int stm32l4_lptim_setclocksource(struct stm32l4_lptim_dev_s *dev,
 
   DEBUGASSERT(dev != NULL);
 
-  if (clksrc == STM32L4_LPTIM_CLK_EXT)
+  if (clksrc == STM32_LPTIM_CLK_EXT)
     {
-      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                           LPTIM_CFGR_CKSEL_MASK,
                           LPTIM_CFGR_CKSEL_EXTCLK);
     }
@@ -532,12 +532,12 @@ static int stm32l4_lptim_setclocksource(struct stm32l4_lptim_dev_s *dev,
       switch (priv->base)
         {
 #ifdef CONFIG_STM32L4_LPTIM1
-          case STM32L4_LPTIM1_BASE:
+          case STM32_LPTIM1_BASE:
             ccr_mask = RCC_CCIPR_LPTIM1SEL_MASK;
           break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2
-          case STM32L4_LPTIM2_BASE:
+          case STM32_LPTIM2_BASE:
             ccr_mask = RCC_CCIPR_LPTIM2SEL_MASK;
           break;
 #endif
@@ -547,61 +547,61 @@ static int stm32l4_lptim_setclocksource(struct stm32l4_lptim_dev_s *dev,
 
       switch (clksrc)
         {
-          case STM32L4_LPTIM_CLK_PCLK:
+          case STM32_LPTIM_CLK_PCLK:
             switch (priv->base)
               {
 #ifdef CONFIG_STM32L4_LPTIM1
-                case STM32L4_LPTIM1_BASE:
+                case STM32_LPTIM1_BASE:
                   ccr_bits = RCC_CCIPR_LPTIM1SEL_PCLK;
                 break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2
-              case STM32L4_LPTIM2_BASE:
+              case STM32_LPTIM2_BASE:
                   ccr_bits = RCC_CCIPR_LPTIM2SEL_PCLK;
                 break;
 #endif
               }
           break;
-          case STM32L4_LPTIM_CLK_HSI:
+          case STM32_LPTIM_CLK_HSI:
           switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
-              case STM32L4_LPTIM1_BASE:
+              case STM32_LPTIM1_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM1SEL_HSI;
               break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2
-            case STM32L4_LPTIM2_BASE:
+            case STM32_LPTIM2_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM2SEL_HSI;
               break;
 #endif
             }
           break;
-          case STM32L4_LPTIM_CLK_LSI:
+          case STM32_LPTIM_CLK_LSI:
           switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
-              case STM32L4_LPTIM1_BASE:
+              case STM32_LPTIM1_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM1SEL_LSI;
               break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2
-            case STM32L4_LPTIM2_BASE:
+            case STM32_LPTIM2_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM2SEL_LSI;
               break;
 #endif
             }
           break;
-          case STM32L4_LPTIM_CLK_LSE:
+          case STM32_LPTIM_CLK_LSE:
           switch (priv->base)
             {
 #ifdef CONFIG_STM32L4_LPTIM1
-              case STM32L4_LPTIM1_BASE:
+              case STM32_LPTIM1_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM1SEL_LSE;
               break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2
-            case STM32L4_LPTIM2_BASE:
+            case STM32_LPTIM2_BASE:
                 ccr_bits = RCC_CCIPR_LPTIM2SEL_LSE;
               break;
 #endif
@@ -611,9 +611,9 @@ static int stm32l4_lptim_setclocksource(struct stm32l4_lptim_dev_s *dev,
           break;
         }
 
-      modifyreg32(STM32L4_RCC_CCIPR, ccr_mask, ccr_bits);
+      modifyreg32(STM32_RCC_CCIPR, ccr_mask, ccr_bits);
 
-      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                           LPTIM_CFGR_CKSEL_MASK,
                           LPTIM_CFGR_CKSEL_INTCLK);
     }
@@ -632,7 +632,7 @@ static void stm32l4_lptim_setperiod(struct stm32l4_lptim_dev_s *dev,
                                 (struct stm32l4_lptim_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
-  putreg32(period, (uintptr_t)(priv->base + STM32L4_LPTIM_ARR_OFFSET));
+  putreg32(period, (uintptr_t)(priv->base + STM32_LPTIM_ARR_OFFSET));
 }
 
 /****************************************************************************
@@ -645,7 +645,7 @@ static uint32_t stm32l4_lptim_getperiod(struct stm32l4_lptim_dev_s *dev)
                                   (struct stm32l4_lptim_priv_s *)dev;
 
   DEBUGASSERT(dev != NULL);
-  return getreg32((uintptr_t)(priv->base + STM32L4_LPTIM_ARR_OFFSET));
+  return getreg32((uintptr_t)(priv->base + STM32_LPTIM_ARR_OFFSET));
 }
 
 /****************************************************************************
@@ -657,14 +657,14 @@ static int stm32l4_lptim_setcountmode(struct stm32l4_lptim_dev_s *dev,
 {
   DEBUGASSERT(dev != NULL);
 
-  if (cntmode == STM32L4_LPTIM_COUNT_CLOCK)
+  if (cntmode == STM32_LPTIM_COUNT_CLOCK)
     {
-      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                           LPTIM_CFGR_COUNTMODE, 0);
     }
-  else if (cntmode == STM32L4_LPTIM_COUNT_EXTTRIG)
+  else if (cntmode == STM32_LPTIM_COUNT_EXTTRIG)
     {
-      stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                           0, LPTIM_CFGR_COUNTMODE);
     }
   else
@@ -686,20 +686,20 @@ static int stm32l4_lptim_setpolarity(struct stm32l4_lptim_dev_s *dev,
 
   switch (polarity)
     {
-      case STM32L4_LPTIM_CLKPOL_RISING:
-          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      case STM32_LPTIM_CLKPOL_RISING:
+          stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                               LPTIM_CFGR_CKPOL_MASK,
                               LPTIM_CFGR_CKPOL_RISING);
           break;
 
-      case STM32L4_LPTIM_CLKPOL_FALLING:
-          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      case STM32_LPTIM_CLKPOL_FALLING:
+          stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                               LPTIM_CFGR_CKPOL_MASK,
                               LPTIM_CFGR_CKPOL_FALLING);
           break;
 
-      case STM32L4_LPTIM_CLKPOL_BOTH:
-          stm32l4_modifyreg32(dev, STM32L4_LPTIM_CFGR_OFFSET,
+      case STM32_LPTIM_CLKPOL_BOTH:
+          stm32l4_modifyreg32(dev, STM32_LPTIM_CFGR_OFFSET,
                               LPTIM_CFGR_CKPOL_MASK,
                               LPTIM_CFGR_CKPOL_BOTH);
           break;
@@ -725,9 +725,9 @@ static uint32_t stm32l4_lptim_getcounter(struct stm32l4_lptim_dev_s *dev)
   do
     {
       counter1 = getreg32((uintptr_t)(priv->base +
-                                      STM32L4_LPTIM_CNT_OFFSET));
+                                      STM32_LPTIM_CNT_OFFSET));
       counter2 = getreg32((uintptr_t)(priv->base +
-                                      STM32L4_LPTIM_CNT_OFFSET));
+                                      STM32_LPTIM_CNT_OFFSET));
     }
   while (counter1 != counter2);
 
@@ -757,7 +757,7 @@ struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer)
   /* Is device already allocated */
 
   if (((struct stm32l4_lptim_priv_s *)dev)->mode !=
-        STM32L4_LPTIM_MODE_UNUSED)
+        STM32_LPTIM_MODE_UNUSED)
     {
       return NULL;
     }
@@ -772,7 +772,7 @@ struct stm32l4_lptim_dev_s *stm32l4_lptim_init(int timer)
 
   /* Mark it as used */
 
-  ((struct stm32l4_lptim_priv_s *)dev)->mode = STM32L4_LPTIM_MODE_DISABLED;
+  ((struct stm32l4_lptim_priv_s *)dev)->mode = STM32_LPTIM_MODE_DISABLED;
 
   return dev;
 }
@@ -791,7 +791,7 @@ int stm32l4_lptim_deinit(struct stm32l4_lptim_dev_s * dev)
 
   /* Mark it as free */
 
-  ((struct stm32l4_lptim_priv_s *)dev)->mode = STM32L4_LPTIM_MODE_UNUSED;
+  ((struct stm32l4_lptim_priv_s *)dev)->mode = STM32_LPTIM_MODE_UNUSED;
 
   return OK;
 }

@@ -86,10 +86,10 @@ static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
    * Disable the TC now and disable any further interrupts.
    */
 
-  STM32L4_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32L4_TIM_DISABLEINT(oneshot->tch, 0);
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_DISABLED);
-  STM32L4_TIM_ACKINT(oneshot->tch, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
+  STM32_TIM_ACKINT(oneshot->tch, 0);
 
   /* The timer is no longer running */
 
@@ -200,7 +200,7 @@ int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot,
       return -EBUSY;
     }
 
-  STM32L4_TIM_SETCLOCK(oneshot->tch, frequency);
+  STM32_TIM_SETCLOCK(oneshot->tch, frequency);
 
   /* Initialize the remaining fields in the state structure. */
 
@@ -302,19 +302,19 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  STM32L4_TIM_SETISR(oneshot->tch, stm32l4_oneshot_handler, oneshot, 0);
+  STM32_TIM_SETISR(oneshot->tch, stm32l4_oneshot_handler, oneshot, 0);
 
   /* Set timer period */
 
   oneshot->period = (uint32_t)period;
-  STM32L4_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
+  STM32_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
 
   /* Start the counter */
 
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_PULSE);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_PULSE);
 
-  STM32L4_TIM_ACKINT(oneshot->tch, 0);
-  STM32L4_TIM_ENABLEINT(oneshot->tch, 0);
+  STM32_TIM_ACKINT(oneshot->tch, 0);
+  STM32_TIM_ENABLEINT(oneshot->tch, 0);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -389,14 +389,14 @@ int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
 
   tmrinfo("Cancelling...\n");
 
-  count  = STM32L4_TIM_GETCOUNTER(oneshot->tch);
+  count  = STM32_TIM_GETCOUNTER(oneshot->tch);
   period = oneshot->period;
 
   /* Now we can disable the interrupt and stop the timer. */
 
-  STM32L4_TIM_DISABLEINT(oneshot->tch, 0);
-  STM32L4_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_DISABLED);
+  STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 
   oneshot->running = false;
   oneshot->handler = NULL;

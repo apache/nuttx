@@ -36,15 +36,15 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_RNG_CR_OFFSET     0x0000  /* RNG Control Register */
-#define STM32L4_RNG_SR_OFFSET     0x0004  /* RNG Status Register */
-#define STM32L4_RNG_DR_OFFSET     0x0008  /* RNG Data Register */
+#define STM32_RNG_CR_OFFSET     0x0000  /* RNG Control Register */
+#define STM32_RNG_SR_OFFSET     0x0004  /* RNG Status Register */
+#define STM32_RNG_DR_OFFSET     0x0008  /* RNG Data Register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_RNG_CR            (STM32L4_RNG_BASE+STM32L4_RNG_CR_OFFSET)
-#define STM32L4_RNG_SR            (STM32L4_RNG_BASE+STM32L4_RNG_SR_OFFSET)
-#define STM32L4_RNG_DR            (STM32L4_RNG_BASE+STM32L4_RNG_DR_OFFSET)
+#define STM32_RNG_CR            (STM32_RNG_BASE+STM32_RNG_CR_OFFSET)
+#define STM32_RNG_SR            (STM32_RNG_BASE+STM32_RNG_SR_OFFSET)
+#define STM32_RNG_DR            (STM32_RNG_BASE+STM32_RNG_DR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

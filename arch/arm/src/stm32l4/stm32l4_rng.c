@@ -93,7 +93,7 @@ static int stm32l4_rng_initialize(void)
 {
   _info("Initializing RNG\n");
 
-  if (irq_attach(STM32L4_IRQ_RNG, stm32l4_rnginterrupt, NULL))
+  if (irq_attach(STM32_IRQ_RNG, stm32l4_rnginterrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -113,24 +113,24 @@ static void stm32l4_rngenable(void)
 
   /* Enable generation and interrupts */
 
-  regval  = getreg32(STM32L4_RNG_CR);
+  regval  = getreg32(STM32_RNG_CR);
   regval |= RNG_CR_RNGEN;
   regval |= RNG_CR_IE;
-  putreg32(regval, STM32L4_RNG_CR);
+  putreg32(regval, STM32_RNG_CR);
 
-  up_enable_irq(STM32L4_IRQ_RNG);
+  up_enable_irq(STM32_IRQ_RNG);
 }
 
 static void stm32l4_rngdisable(void)
 {
   uint32_t regval;
 
-  up_disable_irq(STM32L4_IRQ_RNG);
+  up_disable_irq(STM32_IRQ_RNG);
 
-  regval  =  getreg32(STM32L4_RNG_CR);
+  regval  =  getreg32(STM32_RNG_CR);
   regval &= ~RNG_CR_IE;
   regval &= ~RNG_CR_RNGEN;
-  putreg32(regval, STM32L4_RNG_CR);
+  putreg32(regval, STM32_RNG_CR);
 }
 
 static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
@@ -138,12 +138,12 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
   uint32_t rngsr;
   uint32_t data;
 
-  rngsr = getreg32(STM32L4_RNG_SR);
+  rngsr = getreg32(STM32_RNG_SR);
   if (rngsr & RNG_SR_CEIS) /* Check for clock error int stat */
     {
       /* Clear it, we will try again. */
 
-      putreg32(rngsr & ~RNG_SR_CEIS, STM32L4_RNG_SR);
+      putreg32(rngsr & ~RNG_SR_CEIS, STM32_RNG_SR);
       return OK;
     }
 
@@ -153,12 +153,12 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
 
       /* Clear seed error, then disable/enable the rng and try again. */
 
-      putreg32(rngsr & ~RNG_SR_SEIS, STM32L4_RNG_SR);
-      crval = getreg32(STM32L4_RNG_CR);
+      putreg32(rngsr & ~RNG_SR_SEIS, STM32_RNG_SR);
+      crval = getreg32(STM32_RNG_CR);
       crval &= ~RNG_CR_RNGEN;
-      putreg32(crval, STM32L4_RNG_CR);
+      putreg32(crval, STM32_RNG_CR);
       crval |= RNG_CR_RNGEN;
-      putreg32(crval, STM32L4_RNG_CR);
+      putreg32(crval, STM32_RNG_CR);
       return OK;
     }
 
@@ -169,7 +169,7 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
       return OK;
     }
 
-  data = getreg32(STM32L4_RNG_DR);
+  data = getreg32(STM32_RNG_DR);
 
   /* As required by the FIPS PUB (Federal Information Processing Standard
    * Publication) 140-2, the first random number generated after setting the

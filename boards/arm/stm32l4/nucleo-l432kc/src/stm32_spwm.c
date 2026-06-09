@@ -336,7 +336,7 @@ static void tim6_handler(void)
 
   /* TODO: Software update */
 
-  STM32L4_TIM_ACKINT(tim, ATIM_SR_UIF);
+  STM32_TIM_ACKINT(tim, ATIM_SR_UIF);
 }
 
 /****************************************************************************
@@ -368,12 +368,12 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
 
   freq = spwm->samples * spwm->waveform_freq;
 
-  STM32L4_TIM_SETFREQ(tim, freq);
-  STM32L4_TIM_ENABLE(tim);
+  STM32_TIM_SETFREQ(tim, freq);
+  STM32_TIM_ENABLE(tim);
 
   /* Attach TIM6 ram vector */
 
-  ret = arm_ramvec_attach(STM32L4_IRQ_TIM6, tim6_handler);
+  ret = arm_ramvec_attach(STM32_IRQ_TIM6, tim6_handler);
   if (ret < 0)
     {
       printf("ERROR: arm_ramvec_attach failed: %d\n", ret);
@@ -383,7 +383,7 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
 
   /* Set the priority of the TIM6 interrupt vector */
 
-  ret = up_prioritize_irq(STM32L4_IRQ_TIM6, NVIC_SYSH_HIGH_PRIORITY);
+  ret = up_prioritize_irq(STM32_IRQ_TIM6, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
       printf("ERROR: up_prioritize_irq failed: %d\n", ret);
@@ -407,8 +407,8 @@ static int spwm_tim6_start(struct spwm_s *spwm)
 
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
-  up_enable_irq(STM32L4_IRQ_TIM6);
-  STM32L4_TIM_ENABLEINT(tim, BTIM_DIER_UIE);
+  up_enable_irq(STM32_IRQ_TIM6);
+  STM32_TIM_ENABLEINT(tim, BTIM_DIER_UIE);
 
   return OK;
 }
@@ -423,8 +423,8 @@ static int spwm_tim6_stop(struct spwm_s *spwm)
 
   /* Disable the timer interrupt at the NVIC and at TIM6 */
 
-  up_disable_irq(STM32L4_IRQ_TIM6);
-  STM32L4_TIM_DISABLEINT(tim, BTIM_DIER_UIE);
+  up_disable_irq(STM32_IRQ_TIM6);
+  STM32_TIM_DISABLEINT(tim, BTIM_DIER_UIE);
 
   return OK;
 }

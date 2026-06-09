@@ -69,7 +69,7 @@ static int stm32l4_freerun_handler(int irq, void *context, void *arg)
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
 
-  STM32L4_TIM_ACKINT(freerun->tch, 0);
+  STM32_TIM_ACKINT(freerun->tch, 0);
   return OK;
 }
 
@@ -117,7 +117,7 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
       return -EBUSY;
     }
 
-  STM32L4_TIM_SETCLOCK(freerun->tch, frequency);
+  STM32_TIM_SETCLOCK(freerun->tch, frequency);
 
   /* Initialize the remaining fields in the state structure and return
    * success.
@@ -128,17 +128,17 @@ int stm32l4_freerun_initialize(struct stm32l4_freerun_s *freerun,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32L4_TIM_SETISR(freerun->tch, stm32l4_freerun_handler, freerun, 0);
+  STM32_TIM_SETISR(freerun->tch, stm32l4_freerun_handler, freerun, 0);
 
   /* Set timer period */
 
-  STM32L4_TIM_SETPERIOD(freerun->tch, UINT32_MAX);
+  STM32_TIM_SETPERIOD(freerun->tch, UINT32_MAX);
 
   /* Start the counter */
 
-  STM32L4_TIM_SETMODE(freerun->tch, STM32L4_TIM_MODE_UP);
-  STM32L4_TIM_ACKINT(freerun->tch, 0);
-  STM32L4_TIM_ENABLEINT(freerun->tch, 0);
+  STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_UP);
+  STM32_TIM_ACKINT(freerun->tch, 0);
+  STM32_TIM_ENABLEINT(freerun->tch, 0);
 
   return OK;
 }
@@ -184,9 +184,9 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
   flags    = enter_critical_section();
 
   overflow = freerun->overflow;
-  counter  = STM32L4_TIM_GETCOUNTER(freerun->tch);
-  pending  = STM32L4_TIM_CHECKINT(freerun->tch, 0);
-  verify   = STM32L4_TIM_GETCOUNTER(freerun->tch);
+  counter  = STM32_TIM_GETCOUNTER(freerun->tch);
+  pending  = STM32_TIM_CHECKINT(freerun->tch, 0);
+  verify   = STM32_TIM_GETCOUNTER(freerun->tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,
    * then the overflow needs to be incremented.
@@ -194,7 +194,7 @@ int stm32l4_freerun_counter(struct stm32l4_freerun_s *freerun,
 
   if (pending)
     {
-      STM32L4_TIM_ACKINT(freerun->tch, 0);
+      STM32_TIM_ACKINT(freerun->tch, 0);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.
@@ -260,9 +260,9 @@ int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun)
 
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  STM32L4_TIM_DISABLEINT(freerun->tch, 0);
-  STM32L4_TIM_SETMODE(freerun->tch, STM32L4_TIM_MODE_DISABLED);
-  STM32L4_TIM_SETISR(freerun->tch, NULL, NULL, 0);
+  STM32_TIM_DISABLEINT(freerun->tch, 0);
+  STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_DISABLED);
+  STM32_TIM_SETISR(freerun->tch, NULL, NULL, 0);
 
   /* Free the timer */
 

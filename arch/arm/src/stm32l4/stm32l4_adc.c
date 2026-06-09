@@ -81,7 +81,7 @@
 
 /* RCC reset ****************************************************************/
 
-#define STM32L4_RCC_RSTR STM32L4_RCC_AHB2RSTR
+#define STM32_RCC_RSTR STM32_RCC_AHB2RSTR
 #define RCC_RSTR_ADC1RST RCC_AHB2RSTR_ADCRST
 #define RCC_RSTR_ADC2RST RCC_AHB2RSTR_ADCRST
 #define RCC_RSTR_ADC3RST RCC_AHB2RSTR_ADCRST
@@ -89,7 +89,7 @@
 /* ADC interrupts ***********************************************************/
 
 #if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4XR)
-#  define STM32L4_IRQ_ADC12 STM32L4_IRQ_ADC1
+#  define STM32_IRQ_ADC12 STM32_IRQ_ADC1
 #endif
 
 /* ADC Channels/DMA *********************************************************/
@@ -425,14 +425,14 @@ static struct stm32_dev_s g_adcpriv1 =
   .llops       = &g_adc_llops,
 #endif
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
-  .irq         = STM32L4_IRQ_ADC12,
+  .irq         = STM32_IRQ_ADC12,
   .isr         = adc12_interrupt,
 #endif /* CONFIG_STM32L4_ADC_NOIRQ */
   .intf        = 1,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32L4_ADC1_RESOLUTION,
 #endif
-  .base        = STM32L4_ADC1_BASE,
+  .base        = STM32_ADC1_BASE,
 #if defined(ADC1_HAVE_TIMER) || defined(ADC1_HAVE_EXTCFG)
   .extcfg      = ADC1_EXTCFG_VALUE,
 #endif
@@ -485,14 +485,14 @@ static struct stm32_dev_s g_adcpriv2 =
   .llops       = &g_adc_llops,
 #endif
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
-  .irq         = STM32L4_IRQ_ADC12,
+  .irq         = STM32_IRQ_ADC12,
   .isr         = adc12_interrupt,
 #endif /* CONFIG_STM32L4_ADC_NOIRQ */
   .intf        = 2,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32L4_ADC2_RESOLUTION,
 #endif
-  .base        = STM32L4_ADC2_BASE,
+  .base        = STM32_ADC2_BASE,
 #if defined(ADC2_HAVE_TIMER) || defined(ADC2_HAVE_EXTCFG)
   .extcfg      = ADC2_EXTCFG_VALUE,
 #endif
@@ -545,14 +545,14 @@ static struct stm32_dev_s g_adcpriv3 =
   .llops       = &g_adc_llops,
 #endif
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
-  .irq         = STM32L4_IRQ_ADC3,
+  .irq         = STM32_IRQ_ADC3,
   .isr         = adc3_interrupt,
 #endif /* CONFIG_STM32L4_ADC_NOIRQ */
   .intf        = 3,
 #ifdef HAVE_ADC_RESOLUTION
   .resolution  = CONFIG_STM32L4_ADC3_RESOLUTION,
 #endif
-  .base        = STM32L4_ADC3_BASE,
+  .base        = STM32_ADC3_BASE,
 #if defined(ADC3_HAVE_TIMER) || defined(ADC3_HAVE_EXTCFG)
   .extcfg      = ADC3_EXTCFG_VALUE,
 #endif
@@ -771,38 +771,38 @@ static void tim_dumpregs(struct stm32_dev_s *priv, const char *msg)
 {
   ainfo("%s:\n", msg);
   ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CR2_OFFSET),
+        tim_getreg(priv, STM32_GTIM_SMCR_OFFSET),
+        tim_getreg(priv, STM32_GTIM_DIER_OFFSET));
   ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_SR_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
+        tim_getreg(priv, STM32_GTIM_SR_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
   ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CCER_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CNT_OFFSET),
+        tim_getreg(priv, STM32_GTIM_PSC_OFFSET),
+        tim_getreg(priv, STM32_GTIM_ARR_OFFSET));
   ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CCR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR2_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR4_OFFSET));
 
-  if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
       ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-            tim_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
+            tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DMAR_OFFSET));
     }
   else
     {
       ainfo("  DCR: %04x DMAR: %04x\n",
-            tim_getreg(priv, STM32L4_GTIM_DCR_OFFSET),
-            tim_getreg(priv, STM32L4_GTIM_DMAR_OFFSET));
+            tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
     }
 }
 #endif
@@ -830,14 +830,14 @@ static void adc_timstart(struct stm32_dev_s *priv, bool enable)
     {
       /* Start the counter */
 
-      tim_modifyreg(priv, STM32L4_GTIM_EGR_OFFSET, 0, GTIM_EGR_UG);
-      tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+      tim_modifyreg(priv, STM32_GTIM_EGR_OFFSET, 0, GTIM_EGR_UG);
+      tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
     }
   else
     {
       /* Disable the counter */
 
-      tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+      tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
     }
 }
 #endif
@@ -870,7 +870,7 @@ static int adc_timinit(struct stm32_dev_s *priv)
   uint16_t ccmr_val    = 0;
   uint16_t ccmr_mask   = 0xff;
   uint16_t ccer_val;
-  uint8_t  ccmr_offset = STM32L4_GTIM_CCMR1_OFFSET;
+  uint8_t  ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
   uint32_t channel = priv->channel - 1;
 
   /* If the timer base address is zero, then this ADC was not configured to
@@ -955,30 +955,30 @@ static int adc_timinit(struct stm32_dev_s *priv)
 
   clrbits = GTIM_CR1_DIR | GTIM_CR1_CMS_MASK | GTIM_CR1_CKD_MASK;
   setbits = GTIM_CR1_EDGE;
-  tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, clrbits, setbits);
+  tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, clrbits, setbits);
 
   /* Set the ARR Preload Bit */
 
-  tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_ARPE);
+  tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_ARPE);
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32L4_GTIM_PSC_OFFSET, prescaler - 1);
-  tim_putreg(priv, STM32L4_GTIM_ARR_OFFSET, reload);
+  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler - 1);
+  tim_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
 
-  if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
-      tim_putreg(priv, STM32L4_ATIM_RCR_OFFSET, 0);
-      tim_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE); /* Check me */
+      tim_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
+      tim_putreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE); /* Check me */
     }
 
   /* Handle channel specific setup */
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val = tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer_val = tim_getreg(priv, STM32_GTIM_CCER_OFFSET);
   ccer_val &= ~((GTIM_CCER_CC1P | GTIM_CCER_CC1E) <<
                 GTIM_CCER_CCXBASE(channel));
 
@@ -995,41 +995,41 @@ static int adc_timinit(struct stm32_dev_s *priv)
 
   if (channel > 1)
     {
-      ccmr_offset = STM32L4_GTIM_CCMR2_OFFSET;
+      ccmr_offset = STM32_GTIM_CCMR2_OFFSET;
     }
 
   ccmr_orig  = tim_getreg(priv, ccmr_offset);
   ccmr_orig &= ~ccmr_mask;
   ccmr_orig |= ccmr_val;
   tim_putreg(priv, ccmr_offset, ccmr_orig);
-  tim_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer_val);
+  tim_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer_val);
 
   switch (channel)
     {
       case 0: /* TIMx CC1 */
         {
-          tim_putreg(priv, STM32L4_GTIM_CCR1_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR1_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
 
       case 1: /* TIMx CC2 */
         {
-          tim_putreg(priv, STM32L4_GTIM_CCR2_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR2_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
 
       case 2: /* TIMx CC3 */
         {
-          tim_putreg(priv, STM32L4_GTIM_CCR3_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR3_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
 
       case 3: /* TIMx CC4 */
         {
-          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR4_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -1063,7 +1063,7 @@ static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
       container_of(cb, struct stm32_dev_s, pm_callback);
   uint32_t regval;
 
-  regval = adc_getreg(priv, STM32L4_ADC_CR_OFFSET);
+  regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
   if ((state >= PM_IDLE) && (regval & ADC_CR_ADSTART))
     {
       return -EBUSY;
@@ -1087,16 +1087,16 @@ static void adc_wdog_enable(struct stm32_dev_s *priv)
 
   /* Initialize the Analog watchdog enable */
 
-  regval  = adc_getreg(priv, STM32L4_ADC_CFGR_OFFSET);
+  regval  = adc_getreg(priv, STM32_ADC_CFGR_OFFSET);
   regval |= ADC_CFGR_AWD1EN | ADC_CFGR_CONT | ADC_CFGR_OVRMOD;
-  adc_putreg(priv, STM32L4_ADC_CFGR_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_CFGR_OFFSET, regval);
 
   /* Switch to analog watchdog interrupt */
 
-  regval = adc_getreg(priv, STM32L4_ADC_IER_OFFSET);
+  regval = adc_getreg(priv, STM32_ADC_IER_OFFSET);
   regval |= ADC_INT_AWD1;
   regval &= ~ADC_INT_EOC;
-  adc_putreg(priv, STM32L4_ADC_IER_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_IER_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1119,7 +1119,7 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
 
   ainfo("enable: %d\n", enable ? 1 : 0);
 
-  regval = adc_getreg(priv, STM32L4_ADC_CR_OFFSET);
+  regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
   if (enable)
     {
       /* Start conversion of regular channels */
@@ -1133,7 +1133,7 @@ static void adc_startconv(struct stm32_dev_s *priv, bool enable)
       regval |= ADC_CR_ADSTP;
     }
 
-  adc_putreg(priv, STM32L4_ADC_CR_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_CR_OFFSET, regval);
 }
 
 #ifdef ADC_HAVE_INJECTED
@@ -1162,11 +1162,11 @@ static void adc_inj_startconv(struct stm32_dev_s *priv, bool enable)
     {
       /* Start the conversion of regular channels */
 
-      adc_modifyreg(priv, STM32L4_ADC_CR_OFFSET, 0, ADC_CR_JADSTART);
+      adc_modifyreg(priv, STM32_ADC_CR_OFFSET, 0, ADC_CR_JADSTART);
     }
   else
     {
-      regval = adc_getreg(priv, STM32L4_ADC_CR_OFFSET);
+      regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
 
       /* Is a conversion ongoing? */
 
@@ -1174,11 +1174,11 @@ static void adc_inj_startconv(struct stm32_dev_s *priv, bool enable)
         {
           /* Stop the conversion */
 
-          adc_putreg(priv, STM32L4_ADC_CR_OFFSET, regval | ADC_CR_JADSTP);
+          adc_putreg(priv, STM32_ADC_CR_OFFSET, regval | ADC_CR_JADSTP);
 
           /* Wait for the conversion to stop */
 
-          while ((adc_getreg(priv, STM32L4_ADC_CR_OFFSET) &
+          while ((adc_getreg(priv, STM32_ADC_CR_OFFSET) &
                              ADC_CR_JADSTP) != 0);
         }
     }
@@ -1216,7 +1216,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
 
   /* Set or clear the selected bit in the AHB2 reset register */
 
-  regval = getreg32(STM32L4_RCC_AHB2RSTR);
+  regval = getreg32(STM32_RCC_AHB2RSTR);
   if (reset)
     {
       regval |= RCC_AHB2RSTR_ADCRST;
@@ -1226,7 +1226,7 @@ static void adc_rccreset(struct stm32_dev_s *priv, bool reset)
       regval &= ~RCC_AHB2RSTR_ADCRST;
     }
 
-  putreg32(regval, STM32L4_RCC_AHB2RSTR);
+  putreg32(regval, STM32_RCC_AHB2RSTR);
   leave_critical_section(flags);
 }
 
@@ -1247,13 +1247,13 @@ static void adc_enable(struct stm32_dev_s *priv)
 {
   uint32_t regval;
 
-  regval = adc_getreg(priv, STM32L4_ADC_CR_OFFSET);
+  regval = adc_getreg(priv, STM32_ADC_CR_OFFSET);
 
   /* Exit deep power down mode and enable voltage regulator */
 
   regval &= ~ADC_CR_DEEPPWD;
   regval |= ADC_CR_ADVREGEN;
-  adc_putreg(priv, STM32L4_ADC_CR_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_CR_OFFSET, regval);
 
   /* Wait for voltage regulator to power up */
 
@@ -1264,11 +1264,11 @@ static void adc_enable(struct stm32_dev_s *priv)
    */
 
   regval |= ADC_CR_ADCAL;
-  adc_putreg(priv, STM32L4_ADC_CR_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_CR_OFFSET, regval);
 
   /* Wait for calibration to complete */
 
-  while (adc_getreg(priv, STM32L4_ADC_CR_OFFSET) & ADC_CR_ADCAL);
+  while (adc_getreg(priv, STM32_ADC_CR_OFFSET) & ADC_CR_ADCAL);
 
   /* Enable ADC
    * Note: ADEN bit cannot be set during ADCAL=1 and 4 ADC clock cycle
@@ -1277,13 +1277,13 @@ static void adc_enable(struct stm32_dev_s *priv)
    * ARM instructions.
    */
 
-  regval  = adc_getreg(priv, STM32L4_ADC_CR_OFFSET);
+  regval  = adc_getreg(priv, STM32_ADC_CR_OFFSET);
   regval |= ADC_CR_ADEN;
-  adc_putreg(priv, STM32L4_ADC_CR_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_CR_OFFSET, regval);
 
   /* Wait for hardware to be ready for conversions */
 
-  while (!(adc_getreg(priv, STM32L4_ADC_ISR_OFFSET) & ADC_INT_ADRDY));
+  while (!(adc_getreg(priv, STM32_ADC_ISR_OFFSET) & ADC_INT_ADRDY));
 }
 
 /****************************************************************************
@@ -1400,7 +1400,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   /* Set CFGR configuration */
 
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, clrbits, setbits);
+  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, clrbits, setbits);
 
   /* Configuration of the channel conversions */
 
@@ -1432,7 +1432,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   adc_internal(priv, &setbits);
 
-  stm32_modifyreg32(STM32L4_ADC_CCR, clrbits, setbits);
+  stm32_modifyreg32(STM32_ADC_CCR, clrbits, setbits);
 
 #ifdef ADC_HAVE_DMA
   if (priv->hasdma)
@@ -1569,7 +1569,7 @@ static void adc_rxint(struct adc_dev_s *dev, bool enable)
 
   ainfo("intf: %d enable: %d\n", priv->intf, enable ? 1 : 0);
 
-  regval = adc_getreg(priv, STM32L4_ADC_IER_OFFSET);
+  regval = adc_getreg(priv, STM32_ADC_IER_OFFSET);
   if (enable)
     {
       /* Enable end of conversion interrupt */
@@ -1592,7 +1592,7 @@ static void adc_rxint(struct adc_dev_s *dev, bool enable)
       regval &= ~ADC_INT_MASK;
     }
 
-  adc_putreg(priv, STM32L4_ADC_IER_OFFSET, regval);
+  adc_putreg(priv, STM32_ADC_IER_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1615,7 +1615,7 @@ static int adc_resolution_set(struct adc_dev_s *dev, uint8_t res)
 
   /* Modify appropriate register */
 
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, ADC_CFGR_RES_MASK,
+  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, ADC_CFGR_RES_MASK,
                 res << ADC_CFGR_RES_SHIFT);
 
 errout:
@@ -1635,8 +1635,8 @@ static void adc_sample_time_set(struct adc_dev_s *dev)
 
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev->ad_priv;
 
-  adc_putreg(priv, STM32L4_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
-  adc_putreg(priv, STM32L4_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
+  adc_putreg(priv, STM32_ADC_SMPR1_OFFSET, ADC_SMPR1_DEFAULT);
+  adc_putreg(priv, STM32_ADC_SMPR2_OFFSET, ADC_SMPR2_DEFAULT);
 }
 
 /****************************************************************************
@@ -1673,7 +1673,7 @@ static int adc_extsel_set(struct stm32_dev_s *priv, uint32_t extcfg)
 
       /* Write register */
 
-      adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, clrbits, setbits);
+      adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, clrbits, setbits);
     }
 
   return OK;
@@ -1714,7 +1714,7 @@ static int adc_jextsel_set(struct stm32_dev_s *priv, uint32_t jextcfg)
 
       /* Write register */
 
-      adc_modifyreg(priv, STM32L4_ADC_JSQR_OFFSET, clrbits, setbits);
+      adc_modifyreg(priv, STM32_ADC_JSQR_OFFSET, clrbits, setbits);
     }
 
   return OK;
@@ -1731,25 +1731,25 @@ static void adc_dumpregs(struct stm32_dev_s *priv)
 
   ainfo("ISR:  0x%08" PRIx32 " IER:  0x%08" PRIx32
         " CR:   0x%08" PRIx32 " CFGR1: 0x%08" PRIx32 "\n",
-        adc_getreg(priv, STM32L4_ADC_ISR_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_IER_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_CR_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_CFGR_OFFSET));
+        adc_getreg(priv, STM32_ADC_ISR_OFFSET),
+        adc_getreg(priv, STM32_ADC_IER_OFFSET),
+        adc_getreg(priv, STM32_ADC_CR_OFFSET),
+        adc_getreg(priv, STM32_ADC_CFGR_OFFSET));
 
   ainfo("SQR1: 0x%08" PRIx32 " SQR2: 0x%08" PRIx32
         " SQR3: 0x%08" PRIx32 " SQR4: 0x%08" PRIx32 "\n",
-        adc_getreg(priv, STM32L4_ADC_SQR1_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR2_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR3_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SQR4_OFFSET));
+        adc_getreg(priv, STM32_ADC_SQR1_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR2_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR3_OFFSET),
+        adc_getreg(priv, STM32_ADC_SQR4_OFFSET));
 
   ainfo("SMPR1: 0x%08" PRIx32 " SMPR2: 0x%08" PRIx32 "\n",
-        adc_getreg(priv, STM32L4_ADC_SMPR1_OFFSET),
-        adc_getreg(priv, STM32L4_ADC_SMPR2_OFFSET));
+        adc_getreg(priv, STM32_ADC_SMPR1_OFFSET),
+        adc_getreg(priv, STM32_ADC_SMPR2_OFFSET));
 
 #ifdef ADC_HAVE_INJECTED
   ainfo("JSQR: 0x%08" PRIx32 "\n",
-        adc_getreg(priv, STM32L4_ADC_JSQR_OFFSET));
+        adc_getreg(priv, STM32_ADC_JSQR_OFFSET));
 #endif
 }
 
@@ -1841,7 +1841,7 @@ static int adc_offset_set(struct stm32_dev_s *priv,
       goto errout;
     }
 
-  reg = STM32L4_ADC_OFR1_OFFSET + i * 4;
+  reg = STM32_ADC_OFR1_OFFSET + i * 4;
 
   regval = ADC_OFR_OFFSETY_EN;
   adc_putreg(priv, reg, regval);
@@ -1898,23 +1898,23 @@ static int adc_set_ch(struct adc_dev_s *dev, uint8_t ch)
   bits = adc_sqrbits(priv,
                      ADC_SQR4_FIRST, ADC_SQR4_LAST, ADC_SQR4_SQ_OFFSET);
   adc_modifyreg(priv,
-                STM32L4_ADC_SQR4_OFFSET, ~ADC_SQR4_RESERVED, bits);
+                STM32_ADC_SQR4_OFFSET, ~ADC_SQR4_RESERVED, bits);
 
   bits = adc_sqrbits(priv,
                      ADC_SQR3_FIRST, ADC_SQR3_LAST, ADC_SQR3_SQ_OFFSET);
   adc_modifyreg(priv,
-                STM32L4_ADC_SQR3_OFFSET, ~ADC_SQR3_RESERVED, bits);
+                STM32_ADC_SQR3_OFFSET, ~ADC_SQR3_RESERVED, bits);
 
   bits = adc_sqrbits(priv,
                      ADC_SQR2_FIRST, ADC_SQR2_LAST, ADC_SQR2_SQ_OFFSET);
   adc_modifyreg(priv,
-                STM32L4_ADC_SQR2_OFFSET, ~ADC_SQR2_RESERVED, bits);
+                STM32_ADC_SQR2_OFFSET, ~ADC_SQR2_RESERVED, bits);
 
   bits = ((uint32_t)priv->rnchannels - 1) << ADC_SQR1_L_SHIFT |
          adc_sqrbits(priv,
                      ADC_SQR1_FIRST, ADC_SQR1_LAST, ADC_SQR1_SQ_OFFSET);
   adc_modifyreg(priv,
-                STM32L4_ADC_SQR1_OFFSET, ~ADC_SQR1_RESERVED, bits);
+                STM32_ADC_SQR1_OFFSET, ~ADC_SQR1_RESERVED, bits);
 
 #ifdef ADC_HAVE_DFSDM
   if (priv->hasdfsdm)
@@ -1966,7 +1966,7 @@ static int adc_inj_set_ch(struct adc_dev_s *dev, uint8_t ch)
 
   /* Write register */
 
-  adc_modifyreg(priv, STM32L4_ADC_JSQR_OFFSET, clrbits, setbits);
+  adc_modifyreg(priv, STM32_ADC_JSQR_OFFSET, clrbits, setbits);
 
   return OK;
 }
@@ -2026,7 +2026,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
       case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */
         {
-          regval = adc_getreg(priv, STM32L4_ADC_TR1_OFFSET);
+          regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
 
           /* Verify new upper threshold greater than lower threshold */
 
@@ -2041,7 +2041,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           regval &= ~ADC_TR1_HT_MASK;
           regval |= ((arg << ADC_TR1_HT_SHIFT) & ADC_TR1_HT_MASK);
-          adc_putreg(priv, STM32L4_ADC_TR1_OFFSET, regval);
+          adc_putreg(priv, STM32_ADC_TR1_OFFSET, regval);
 
           /* Ensure analog watchdog is enabled */
 
@@ -2051,7 +2051,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
       case ANIOC_WDOG_LOWER: /* Set watchdog lower threshold */
         {
-          regval = adc_getreg(priv, STM32L4_ADC_TR1_OFFSET);
+          regval = adc_getreg(priv, STM32_ADC_TR1_OFFSET);
 
           /* Verify new lower threshold less than upper threshold */
 
@@ -2066,7 +2066,7 @@ static int adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
           regval &= ~ADC_TR1_LT_MASK;
           regval |= ((arg << ADC_TR1_LT_SHIFT) & ADC_TR1_LT_MASK);
-          adc_putreg(priv, STM32L4_ADC_TR1_OFFSET, regval);
+          adc_putreg(priv, STM32_ADC_TR1_OFFSET, regval);
 
           /* Ensure analog watchdog is enabled */
 
@@ -2133,7 +2133,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
 
   if ((adcisr & ADC_INT_AWD1) != 0)
     {
-      value  = adc_getreg(priv, STM32L4_ADC_DR_OFFSET);
+      value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
       awarn("WARNING: Analog Watchdog, "
@@ -2158,7 +2158,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
        * (It is cleared by reading the ADC_DR)
        */
 
-      value  = adc_getreg(priv, STM32L4_ADC_DR_OFFSET);
+      value  = adc_getreg(priv, STM32_ADC_DR_OFFSET);
       value &= ADC_DR_MASK;
 
       /* Verify that the upper-half driver has bound its callback functions */
@@ -2198,7 +2198,7 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
     {
       for (i = 0; i < priv->cjchannels; i++)
         {
-          value = adc_getreg(priv, STM32L4_ADC_JDR1_OFFSET + (4 * i)) &
+          value = adc_getreg(priv, STM32_ADC_JDR1_OFFSET + (4 * i)) &
                     ADC_JDR_MASK;
 
           if (priv->cb != NULL)
@@ -2232,7 +2232,7 @@ static int adc12_interrupt(int irq, void *context, void *arg)
   uint32_t pending;
 
 #ifdef CONFIG_STM32L4_ADC1
-  regval  = getreg32(STM32L4_ADC1_ISR);
+  regval  = getreg32(STM32_ADC1_ISR);
   pending = regval & ADC_INT_MASK;
   if (pending != 0)
     {
@@ -2240,12 +2240,12 @@ static int adc12_interrupt(int irq, void *context, void *arg)
 
       /* Clear interrupts */
 
-      putreg32(regval, STM32L4_ADC1_ISR);
+      putreg32(regval, STM32_ADC1_ISR);
     }
 #endif
 
 #ifdef CONFIG_STM32L4_ADC2
-  regval  = getreg32(STM32L4_ADC2_ISR);
+  regval  = getreg32(STM32_ADC2_ISR);
   pending = regval & ADC_INT_MASK;
   if (pending != 0)
     {
@@ -2253,7 +2253,7 @@ static int adc12_interrupt(int irq, void *context, void *arg)
 
       /* Clear interrupts */
 
-      putreg32(regval, STM32L4_ADC2_ISR);
+      putreg32(regval, STM32_ADC2_ISR);
     }
 #endif
 
@@ -2279,7 +2279,7 @@ static int adc3_interrupt(int irq, void *context, void *arg)
   uint32_t regval;
   uint32_t pending;
 
-  regval  = getreg32(STM32L4_ADC3_ISR);
+  regval  = getreg32(STM32_ADC3_ISR);
   pending = regval & ADC_INT_MASK;
   if (pending != 0)
     {
@@ -2287,7 +2287,7 @@ static int adc3_interrupt(int irq, void *context, void *arg)
 
       /* Clear interrupts */
 
-      putreg32(regval, STM32L4_ADC3_ISR);
+      putreg32(regval, STM32_ADC3_ISR);
     }
 
   return OK;
@@ -2339,7 +2339,7 @@ static void adc_dma_cfg(struct stm32_dev_s *priv)
 
   /* Modify CFGR configuration */
 
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, clrbits, setbits);
+  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, clrbits, setbits);
 }
 
 /****************************************************************************
@@ -2362,7 +2362,7 @@ static void adc_dma_start(struct adc_dev_s *dev)
 
 #ifndef CONFIG_STM32L4_ADC_NOIRQ
   stm32l4_dmasetup(priv->dma,
-                   priv->base + STM32L4_ADC_DR_OFFSET,
+                   priv->base + STM32_ADC_DR_OFFSET,
                    (uint32_t)priv->r_dmabuffer,
                    priv->rnchannels * priv->dmabatch,
                    ADC_DMA_CONTROL_WORD);
@@ -2418,8 +2418,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle,
 
   /* Restart DMA for the next conversion series */
 
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, ADC_CFGR_DMAEN, 0);
-  adc_modifyreg(priv, STM32L4_ADC_CFGR_OFFSET, 0, ADC_CFGR_DMAEN);
+  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, ADC_CFGR_DMAEN, 0);
+  adc_modifyreg(priv, STM32_ADC_CFGR_OFFSET, 0, ADC_CFGR_DMAEN);
 }
 #endif
 #endif /* ADC_HAVE_DMA */
@@ -2437,7 +2437,7 @@ static void adc_llops_intack(struct stm32_adc_dev_s *dev,
 
   /* Clear pending interrupts */
 
-  adc_putreg(priv, STM32L4_ADC_ISR_OFFSET, (source & ADC_ISR_ALLINTS));
+  adc_putreg(priv, STM32_ADC_ISR_OFFSET, (source & ADC_ISR_ALLINTS));
 }
 
 /****************************************************************************
@@ -2451,7 +2451,7 @@ static void adc_llops_inten(struct stm32_adc_dev_s *dev,
 
   /* Enable interrupts */
 
-  adc_modifyreg(priv, STM32L4_ADC_IER_OFFSET, 0, (source & ADC_IER_ALLINTS));
+  adc_modifyreg(priv, STM32_ADC_IER_OFFSET, 0, (source & ADC_IER_ALLINTS));
 }
 
 /****************************************************************************
@@ -2465,7 +2465,7 @@ static void adc_llops_intdis(struct stm32_adc_dev_s *dev,
 
   /* Disable interrupts */
 
-  adc_modifyreg(priv, STM32L4_ADC_IER_OFFSET, (source & ADC_IER_ALLINTS), 0);
+  adc_modifyreg(priv, STM32_ADC_IER_OFFSET, (source & ADC_IER_ALLINTS), 0);
 }
 
 /****************************************************************************
@@ -2478,7 +2478,7 @@ static uint32_t adc_llops_intget(struct stm32_adc_dev_s *dev)
   uint32_t regval;
   uint32_t pending;
 
-  regval  = adc_getreg(priv, STM32L4_ADC_ISR_OFFSET);
+  regval  = adc_getreg(priv, STM32_ADC_ISR_OFFSET);
   pending = regval & ADC_ISR_ALLINTS;
 
   return pending;
@@ -2492,7 +2492,7 @@ static uint32_t adc_llops_regget(struct stm32_adc_dev_s *dev)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
-  return adc_getreg(priv, STM32L4_ADC_DR_OFFSET) & ADC_DR_MASK;
+  return adc_getreg(priv, STM32_ADC_DR_OFFSET) & ADC_DR_MASK;
 }
 
 /****************************************************************************
@@ -2545,7 +2545,7 @@ static int adc_regbufregister(struct stm32_adc_dev_s *dev,
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
 
   stm32l4_dmasetup(priv->dma,
-                 priv->base + STM32L4_ADC_DR_OFFSET,
+                 priv->base + STM32_ADC_DR_OFFSET,
                  (uint32_t)buffer,
                  len,
                  ADC_DMA_CONTROL_WORD);
@@ -2578,7 +2578,7 @@ static void adc_llops_dma_start(struct stm32_adc_dev_s *adc,
   dev->dma = stm32l4_dmachannel(dev->dmachan);
 
   stm32l4_dmasetup(dev->dma,
-                   dev->base + STM32L4_ADC_DR_OFFSET,
+                   dev->base + STM32_ADC_DR_OFFSET,
                    (uint32_t)buffer,
                    len,
                    ADC_DMA_CONTROL_WORD);
@@ -2639,7 +2639,7 @@ static uint32_t adc_llops_injget(struct stm32_adc_dev_s *dev,
       goto errout;
     }
 
-  regval = adc_getreg(priv, STM32L4_ADC_JDR1_OFFSET + (4 * chan)) &
+  regval = adc_getreg(priv, STM32_ADC_JDR1_OFFSET + (4 * chan)) &
                       ADC_JDR_MASK;
 
 errout:
