@@ -96,19 +96,19 @@
 
 /* Set the range of system SRAM */
 
-#define SRAM1_START  STM32L5_SRAM_BASE
-#define SRAM1_END    (SRAM1_START + STM32L5_SRAM1_SIZE)
+#define SRAM1_START  STM32_SRAM_BASE
+#define SRAM1_END    (SRAM1_START + STM32_SRAM1_SIZE)
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
-#define SRAM2_START  STM32L5_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32L5_SRAM2_SIZE)
+#define SRAM2_START  STM32_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 /* Set the range of SRAM3, requiring a third memory region */
 
-#ifdef STM32L5_SRAM3_SIZE
-#  define SRAM3_START  STM32L5_SRAM3_BASE
-#  define SRAM3_END    (SRAM3_START + STM32L5_SRAM3_SIZE)
+#ifdef STM32_SRAM3_SIZE
+#  define SRAM3_START  STM32_SRAM3_BASE
+#  define SRAM3_END    (SRAM3_START + STM32_SRAM3_SIZE)
 #endif
 
 /* Some sanity checking.  If multiple memory regions are defined, verify
