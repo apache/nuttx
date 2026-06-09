@@ -149,6 +149,10 @@
 
 #define RING_SIZE_MAX    RING_IDX_MASK
 
+/* Extract data capacity from total buffer size (total - header) */
+
+#define RING_CAPACITY(l) ((l) - sizeof(struct ring_s))
+
 /* 32-bit RTS packed type: {cnt:8, idx:24} in a single atomic_t.
  *
  * Layout (little-endian and big-endian safe via shift/mask):
@@ -189,18 +193,19 @@
 
 /* RING_INIT - static initialize a ring
  *
- * cap   - capacity (must be power-of-2)
+ * buflen - total buffer size in bytes (header + data)
  *
  * Usage:
  *   RING_DECLARE(g_my_ring, uint32_t, 64) = RING_INIT(64);
  */
 
-#define RING_INIT(cap)                                   \
+#define RING_INIT(buflen)                                \
   {                                                      \
     .base.magic    = RING_MAGIC_READY,                   \
-    .base.capacity = (cap),                              \
-    .base.mask     = ((cap) & ((cap) - 1)) ? 0 :         \
-                     (cap) - 1,                          \
+    .base.capacity = RING_CAPACITY(buflen),              \
+    .base.mask     = (RING_CAPACITY(buflen) &            \
+                     (RING_CAPACITY(buflen) - 1))        \
+                     ? 0 : RING_CAPACITY(buflen) - 1,    \
   }
 
 /* RING_DECLARE - declare a ring variable (uninitialized).
@@ -216,26 +221,26 @@
  *   ring_spsc_enqueue(&g_my_ring, &val, 1);
  */
 
-#define RING_DECLARE(name, type, cap)                    \
+#define RING_DECLARE(name, type, buflen)                 \
   struct ring_##name##_s                                 \
   {                                                      \
     struct ring_s base;                                  \
-    type          buf[cap];                              \
+    type          buf[RING_CAPACITY(buflen)];            \
   } name aligned_data(CACHELINE_SIZE)
 
 /* RING_DEFINE - define and initialise a ring (no init call needed).
  *
- * name  - variable name
- * type  - element type
- * cap   - capacity (must be power-of-2)
+ * name   - variable name
+ * type   - element type
+ * buflen - total buffer size in bytes (header + data)
  *
  * Usage:
  *   RING_DEFINE(g_my_ring, uint32_t, 64);
  *   ring_spsc_enqueue(&my_ring, &val, 1);
  */
 
-#define RING_DEFINE(name, type, cap)                     \
-  RING_DECLARE(name, type, cap) = RING_INIT(cap)
+#define RING_DEFINE(name, type, buflen)                  \
+  RING_DECLARE(name, type, buflen) = RING_INIT(buflen)
 
 /* RING_BASE - convert a RING_DECLARE/RING_DEFINE variable to
  * struct ring_s pointer for use with internal APIs.
@@ -278,7 +283,7 @@
  *   magic == RING_MAGIC_READY -> warm restart; validate & recover
  */
 
-#define ring_init(r, cap)   ring_init_magic(RING_BASE(r), cap)
+#define ring_init(buf, buflen)   ring_init_magic(buf, buflen)
 
 /* ring_spsc_init - lightweight initialization for SPSC mode.
  *
@@ -500,7 +505,7 @@ struct ring_s
 
   atomic_t     magic;             /* Warm-restart detection */
   uint32_t     capacity;          /* Max 16777215 */
-  uint32_t     mask;              /* capacity-1 if power-of-2, else 0 */
+  uint32_t     mask;              /* capacity-1 if power-of-2, else 0 (use modulo) */
   uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) -
                     sizeof(uint32_t) * 2];
 
@@ -540,7 +545,7 @@ struct ring_buf_s
  *
  * Description:
  *   Convert a logical index to a physical buffer position. Uses
- *   bitmask for power-of-2 capacity, modulo for arbitrary size.
+ *   bitmask when capacity is power-of-2, modulo otherwise.
  *
  ****************************************************************************/
 
@@ -604,13 +609,17 @@ static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
  *
  ****************************************************************************/
 
-static inline_function void ring_init_magic(FAR struct ring_s *r,
-                                            uint32_t cap)
+static inline_function FAR struct ring_s *
+ring_init_magic(FAR void *buf, uint32_t buflen)
 {
+  FAR struct ring_s *r = (FAR struct ring_s *)buf;
   irqstate_t flags;
   int32_t old_magic;
 
-  DEBUGASSERT(r != NULL && cap > 0 && cap <= RING_SIZE_MAX);
+  DEBUGASSERT(buf != NULL && buflen > sizeof(struct ring_s) &&
+              RING_CAPACITY(buflen) <= RING_SIZE_MAX);
+
+  buflen = RING_CAPACITY(buflen);
 
   flags = irq_save();
 
@@ -629,13 +638,13 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
               UP_WFE();
             }
 
-          return;
+          return r;
         }
     }
   while (!atomic_cmpxchg(&r->magic, &old_magic, RING_MAGIC_INIT));
 
-  r->capacity = cap;
-  r->mask = (cap & (cap - 1)) ? 0 : cap - 1;
+  r->capacity = buflen;
+  r->mask = (buflen & (buflen - 1)) ? 0 : buflen - 1;
 
   if (old_magic == RING_MAGIC_READY)
     {
@@ -684,6 +693,7 @@ static inline_function void ring_init_magic(FAR struct ring_s *r,
   atomic_set_release(&r->magic, RING_MAGIC_READY);
   UP_SEV();
   irq_restore(flags);
+  return r;
 }
 
 /****************************************************************************
