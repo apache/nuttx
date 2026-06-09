@@ -96,7 +96,7 @@
 #elif defined(CONFIG_STM32H5_FLASH_CONFIG_B)
 #  define H5_FLASH_BANK_NBLOCKS    8
 #else
-#  warning "No valid STM32H5_FLASH_CONFIG_x defined."
+#  warning "No valid STM32_FLASH_CONFIG_x defined."
 #endif
 
 #define H5_FLASH_BANKSIZE   (FLASH_BLOCK_SIZE * H5_FLASH_BANK_NBLOCKS)

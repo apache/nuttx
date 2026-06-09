@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32H5_ICACHE_INTERRUPT  (defined(CONFIG_STM32H5_ICACHE_INV_INT) ||\
+#define STM32_ICACHE_INTERRUPT  (defined(CONFIG_STM32H5_ICACHE_INV_INT) ||\
                                    defined(CONFIG_STM32H5_ICACHE_ERR_INT))
 
 /****************************************************************************
@@ -266,7 +266,7 @@ void stm32_icache_initialize(void)
   stm32_icache_setup_region(region3);
 #endif
 
-#if STM32H5_ICACHE_INTERRUPT 
+#if STM32_ICACHE_INTERRUPT
   /* Attach ISR */
 
   int ret;
