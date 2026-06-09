@@ -29,7 +29,7 @@
 
 #include "hardware/stm32_ethernet.h"
 
-#if STM32H5_NETHERNET > 0
+#if STM32_NETHERNET > 0
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -65,7 +65,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if STM32H5_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
+#if STM32_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf);
 #endif
 
@@ -100,5 +100,5 @@ int stm32_phy_boardinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* STM32H5_NETHERNET > 0 */
+#endif /* STM32_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_ETHERNET_H */
