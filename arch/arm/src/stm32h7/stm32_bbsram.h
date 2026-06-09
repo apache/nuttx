@@ -46,17 +46,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32H7_BBSRAM_SIZE 4096
+#define STM32_BBSRAM_SIZE 4096
 
 #if !defined(CONFIG_STM32H7_BBSRAM_FILES)
 #  define CONFIG_STM32H7_BBSRAM_FILES 4
 #endif
 
-/* REVISIT: What guarantees that STM32H7_BBSRAM_GETDESC_IOCTL has a unique
+/* REVISIT: What guarantees that STM32_BBSRAM_GETDESC_IOCTL has a unique
  * value among all over _DIOC() values?
  */
 
-#define STM32H7_BBSRAM_GETDESC_IOCTL _DIOC(0x0010) /* Returns a bbsramd_s */
+#define STM32_BBSRAM_GETDESC_IOCTL _DIOC(0x0010) /* Returns a bbsramd_s */
 
 /****************************************************************************
  * Public Types
@@ -126,7 +126,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes);
 *   Saves the panic context in a previously allocated BBSRAM file
 *
 * Parameters:
-*   fileno  - the value returned by the ioctl STM32H7_BBSRAM_GETDESC_IOCTL
+*   fileno  - the value returned by the ioctl STM32_BBSRAM_GETDESC_IOCTL
 *   context - Pointer to a any array of bytes to save
 *   length  - The length of the data pointed to byt context
 *

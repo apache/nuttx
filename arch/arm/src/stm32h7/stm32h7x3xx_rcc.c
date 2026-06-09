@@ -408,36 +408,36 @@ static inline void rcc_enableahb4(void)
 
   /* Enable GPIO, GPIOB, ... GPIOK */
 
-#if STM32H7_NGPIO > 0
+#if STM32_NGPIO > 0
   regval |= (RCC_AHB4ENR_GPIOAEN
-#if STM32H7_NGPIO > 1
+#if STM32_NGPIO > 1
              | RCC_AHB4ENR_GPIOBEN
 #endif
-#if STM32H7_NGPIO > 2
+#if STM32_NGPIO > 2
              | RCC_AHB4ENR_GPIOCEN
 #endif
-#if STM32H7_NGPIO > 3
+#if STM32_NGPIO > 3
              | RCC_AHB4ENR_GPIODEN
 #endif
-#if STM32H7_NGPIO > 4
+#if STM32_NGPIO > 4
              | RCC_AHB4ENR_GPIOEEN
 #endif
-#if (STM32H7_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
+#if (STM32_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
              | RCC_AHB4ENR_GPIOFEN
 #endif
-#if (STM32H7_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
+#if (STM32_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
              | RCC_AHB4ENR_GPIOGEN
 #endif
-#if STM32H7_NGPIO > 7
+#if STM32_NGPIO > 7
              | RCC_AHB4ENR_GPIOHEN
 #endif
-#if STM32H7_NGPIO > 8
+#if STM32_NGPIO > 8
              | RCC_AHB4ENR_GPIOIEN
 #endif
-#if STM32H7_NGPIO > 9
+#if STM32_NGPIO > 9
              | RCC_AHB4ENR_GPIOJEN
 #endif
-#if STM32H7_NGPIO > 10
+#if STM32_NGPIO > 10
              | RCC_AHB4ENR_GPIOKEN
 #endif
     );

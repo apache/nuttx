@@ -46,7 +46,7 @@
 #ifdef CONFIG_RPTUN
 #  ifdef CONFIG_STM32H7_SHMEM_SRAM3
 #    define STM32_SHMEM_BASE STM32_SRAM3_BASE
-#    define STM32_SHMEM_SIZE STM32H7_SRAM3_SIZE
+#    define STM32_SHMEM_SIZE STM32_SRAM3_SIZE
 #  else
 #    error missing shmem MPU configuration
 #  endif

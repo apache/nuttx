@@ -111,10 +111,10 @@
 /* Set the start and end of the SRAMs */
 
 #  define SRAM_START STM32_AXISRAM_BASE
-#  define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)
+#  define SRAM_END   (SRAM_START + STM32_SRAM_SIZE)
 
 #  define SRAM123_START STM32_SRAM123_BASE
-#  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+#  define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
 
 #elif defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
       defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
@@ -122,7 +122,7 @@
 /* Configuration for M7 core when M4 core support enabled */
 
 #  define SRAM_START STM32_AXISRAM_BASE
-#  define SRAM_END   (SRAM_START + STM32H7_SRAM_SIZE)
+#  define SRAM_END   (SRAM_START + STM32_SRAM_SIZE)
 
 /* Exclude SRAM123 */
 
@@ -134,8 +134,8 @@
 /* Configuration for M4 core support enabled */
 
 #  define SRAM_START STM32_SRAM123_BASE
-#  define SRAM_END   (SRAM_START + STM32H7_SRAM123_SIZE - \
-                      STM32H7_SRAM3_SIZE)
+#  define SRAM_END   (SRAM_START + STM32_SRAM123_SIZE - \
+                      STM32_SRAM3_SIZE)
 #endif
 
 #undef HAVE_SRAM4
@@ -143,7 +143,7 @@
 #  define HAVE_SRAM4 1
 
 #  define SRAM4_START ((uint32_t)(STM32_SRAM4_BASE))
-#  define SRAM4_END   ((uint32_t)(SRAM4_START + STM32H7_SRAM4_SIZE))
+#  define SRAM4_END   ((uint32_t)(SRAM4_START + STM32_SRAM4_SIZE))
 
 #  define SRAM4_HEAP_START ((uint32_t)_sram4_heap_start)
 #endif

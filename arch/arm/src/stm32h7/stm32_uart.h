@@ -40,29 +40,29 @@
  * device.
  */
 
-#if STM32H7_NUART < 4
+#if STM32_NUART < 4
 #  undef CONFIG_STM32H7_UART8
 #endif
-#if STM32H7_NUART < 3
+#if STM32_NUART < 3
 #  undef CONFIG_STM32H7_UART7
 #endif
-#if STM32H7_NUART < 2
+#if STM32_NUART < 2
 #  undef CONFIG_STM32H7_UART5
 #endif
-#if STM32H7_NUART < 1
+#if STM32_NUART < 1
 #  undef CONFIG_STM32H7_UART4
 #endif
 
-#if STM32H7_NUSART < 4
+#if STM32_NUSART < 4
 #  undef CONFIG_STM32H7_USART6
 #endif
-#if STM32H7_NUSART < 3
+#if STM32_NUSART < 3
 #  undef CONFIG_STM32H7_USART3
 #endif
-#if STM32H7_NUSART < 2
+#if STM32_NUSART < 2
 #  undef CONFIG_STM32H7_USART2
 #endif
-#if STM32H7_NUSART < 1
+#if STM32_NUSART < 1
 #  undef CONFIG_STM32H7_USART1
 #endif
 

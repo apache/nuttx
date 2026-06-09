@@ -151,7 +151,7 @@ static int     stm32_bbsram_unlink(struct inode *inode);
  ****************************************************************************/
 
 #if defined(CONFIG_BBSRAM_DEBUG)
-static uint8_t debug[STM32H7_BBSRAM_SIZE];
+static uint8_t debug[STM32_BBSRAM_SIZE];
 #endif
 
 static const struct file_operations g_stm32_bbsram_fops =
@@ -591,7 +591,7 @@ static int stm32_bbsram_ioctl(struct file *filep, int cmd,
   DEBUGASSERT(inode->i_private);
   bbr = inode->i_private;
 
-  if (cmd == STM32H7_BBSRAM_GETDESC_IOCTL)
+  if (cmd == STM32_BBSRAM_GETDESC_IOCTL)
     {
       struct bbsramd_s *bbrr = (struct bbsramd_s *)((uintptr_t)arg);
 
@@ -688,7 +688,7 @@ static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
    * after reset due to the ECC behavior.
    */
 
-  avail = STM32H7_BBSRAM_SIZE;
+  avail = STM32_BBSRAM_SIZE;
 
   for (i = 0; (i < CONFIG_STM32H7_BBSRAM_FILES) && ent[i] && (avail > 0);
        i++)
@@ -793,9 +793,9 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
    */
 
 #  if defined(CONFIG_BUILD_PROTECTED)
-  mpu_peripheral(STM32_BBSRAM_BASE, STM32H7_BBSRAM_SIZE);
+  mpu_peripheral(STM32_BBSRAM_BASE, STM32_BBSRAM_SIZE);
 #  else
-  mpu_user_peripheral(STM32_BBSRAM_BASE, STM32H7_BBSRAM_SIZE);
+  mpu_user_peripheral(STM32_BBSRAM_BASE, STM32_BBSRAM_SIZE);
   mpu_control(true, true, true);
 #  endif
 #endif
