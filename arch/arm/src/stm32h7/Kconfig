@@ -954,7 +954,7 @@ config STM32H7_OTG_USBREGEN
 	bool "Enable USB voltage regulator"
 	default n
 
-config STM32H7_QUADSPI
+config STM32H7_QSPI
 	bool "QuadSPI"
 	default n
 
@@ -2221,7 +2221,7 @@ endif # STM32H7_RTC_LSECLOCK
 endmenu # RTC Configuration
 
 menu "QuadSPI Configuration"
-	depends on STM32H7_QUADSPI
+	depends on STM32H7_QSPI
 
 config STM32H7_QSPI_FLASH_SIZE
 	int "Size of attached serial flash, bytes"

@@ -109,7 +109,7 @@ if(CONFIG_STM32H7_PWR)
   list(APPEND SRCS stm32_pwr.c)
 endif()
 
-if(CONFIG_STM32H7_QUADSPI)
+if(CONFIG_STM32H7_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
