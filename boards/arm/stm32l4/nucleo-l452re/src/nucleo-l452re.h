@@ -65,14 +65,14 @@
 
 /* How many SPI modules does this chip support? */
 
-#if STM32L4_NSPI < 1
+#if STM32_NSPI < 1
 #  undef CONFIG_STM32L4_SPI1
 #  undef CONFIG_STM32L4_SPI2
 #  undef CONFIG_STM32L4_SPI3
-#elif STM32L4_NSPI < 2
+#elif STM32_NSPI < 2
 #  undef CONFIG_STM32L4_SPI2
 #  undef CONFIG_STM32L4_SPI3
-#elif STM32L4_NSPI < 3
+#elif STM32_NSPI < 3
 #  undef CONFIG_STM32L4_SPI3
 #endif
 

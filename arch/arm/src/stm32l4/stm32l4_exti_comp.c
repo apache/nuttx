@@ -64,11 +64,11 @@ struct comp_callback_s
 
 /* Interrupt handlers attached to the COMP EXTI lines */
 
-static struct comp_callback_s g_comp_handlers[STM32L4_COMP_NUM];
+static struct comp_callback_s g_comp_handlers[STM32_COMP_NUM];
 
 /* Comparator EXTI lines */
 
-static const uint32_t g_comp_lines[STM32L4_COMP_NUM] =
+static const uint32_t g_comp_lines[STM32_COMP_NUM] =
 {
 #if defined(CONFIG_STM32L4_STM32L4X3) || defined(CONFIG_STM32L4_STM32L4X5) || \
     defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
@@ -92,15 +92,15 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
 
   /* Examine the state of each comparator line and dispatch interrupts */
 
-  pr = getreg32(STM32L4_EXTI1_PR);
-  for (i = 0; i < STM32L4_COMP_NUM; i++)
+  pr = getreg32(STM32_EXTI1_PR);
+  for (i = 0; i < STM32_COMP_NUM; i++)
     {
       ln = g_comp_lines[i];
       if ((pr & ln) != 0)
         {
           /* Clear the pending interrupt */
 
-          putreg32(ln, STM32L4_EXTI1_PR);
+          putreg32(ln, STM32_EXTI1_PR);
           if (g_comp_handlers[i].callback != NULL)
             {
               xcpt_t callback = g_comp_handlers[i].callback;
@@ -152,25 +152,25 @@ int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
 
   if (func != NULL)
     {
-      irq_attach(STM32L4_IRQ_COMP, stm32l4_exti_comp_isr, NULL);
-      up_enable_irq(STM32L4_IRQ_COMP);
+      irq_attach(STM32_IRQ_COMP, stm32l4_exti_comp_isr, NULL);
+      up_enable_irq(STM32_IRQ_COMP);
     }
   else
     {
-      up_disable_irq(STM32L4_IRQ_COMP);
+      up_disable_irq(STM32_IRQ_COMP);
     }
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L4_EXTI1_RTSR, risingedge  ?
+  modifyreg32(STM32_EXTI1_RTSR, risingedge  ?
               0 : ln, risingedge  ? ln : 0);
-  modifyreg32(STM32L4_EXTI1_FTSR, fallingedge ?
+  modifyreg32(STM32_EXTI1_FTSR, fallingedge ?
               0 : ln, fallingedge ? ln : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32L4_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
-  modifyreg32(STM32L4_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
+  modifyreg32(STM32_EXTI1_EMR, event ? 0 : ln, event ? ln : 0);
+  modifyreg32(STM32_EXTI1_IMR, func  ? 0 : ln, func  ? ln : 0);
 
   /* Get the previous IRQ handler and save the new IRQ handler. */
 

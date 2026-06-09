@@ -104,12 +104,12 @@ static struct stm32l4_comp_config_s g_comp1priv =
     .rising     = true,
     .falling    = false
   },
-  .inp          = STM32L4_COMP_INP_PIN_2,
-  .inm          = STM32L4_COMP_INM_VREF,
-  .hyst         = STM32L4_COMP_HYST_LOW,
-  .speed        = STM32L4_COMP_SPEED_MEDIUM,
+  .inp          = STM32_COMP_INP_PIN_2,
+  .inm          = STM32_COMP_INM_VREF,
+  .hyst         = STM32_COMP_HYST_LOW,
+  .speed        = STM32_COMP_SPEED_MEDIUM,
   .inverted     = false,
-  .csr          = STM32L4_COMP1_CSR,
+  .csr          = STM32_COMP1_CSR,
 };
 
 static struct comp_dev_s g_comp1dev =
@@ -126,12 +126,12 @@ static struct stm32l4_comp_config_s g_comp2priv =
     .rising     = true,
     .falling    = false
   },
-  .inp          = STM32L4_COMP_INP_PIN_1,
-  .inm          = STM32L4_COMP_INM_DAC_1,
-  .hyst         = STM32L4_COMP_HYST_LOW,
-  .speed        = STM32L4_COMP_SPEED_MEDIUM,
+  .inp          = STM32_COMP_INP_PIN_1,
+  .inm          = STM32_COMP_INM_DAC_1,
+  .hyst         = STM32_COMP_HYST_LOW,
+  .speed        = STM32_COMP_SPEED_MEDIUM,
   .inverted     = false,
-  .csr          = STM32L4_COMP2_CSR,
+  .csr          = STM32_COMP2_CSR,
 };
 
 static struct comp_dev_s g_comp2dev =
@@ -324,7 +324,7 @@ static int stm32l4_exti_comp_isr(int irq, void *context, void *arg)
   DEBUGASSERT(cfg->interrupt.cb &&
               (cfg->interrupt.rising || cfg->interrupt.falling));
 
-  ainfo("isr: %d\n", (cfg->csr == STM32L4_COMP1_CSR ? 0 : 1));
+  ainfo("isr: %d\n", (cfg->csr == STM32_COMP1_CSR ? 0 : 1));
 
   cfg->interrupt.cb->au_notify(dev, comp_read(dev));
 
@@ -356,28 +356,28 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
   int cmp;
 
   cfg = dev->ad_priv;
-  cmp = cfg->csr == STM32L4_COMP1_CSR ? STM32L4_COMP1 : STM32L4_COMP2;
+  cmp = cfg->csr == STM32_COMP1_CSR ? STM32_COMP1 : STM32_COMP2;
 
   /* Input plus */
 
   mask |= COMP_CSR_INPSEL_MASK;
   switch (cfg->inp)
     {
-    case STM32L4_COMP_INP_PIN_1:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_1 :
+    case STM32_COMP_INP_PIN_1:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_1 :
                                                 GPIO_COMP2_INP_1);
       regval |= COMP_CSR_INPSEL_PIN1;
       break;
 
-    case STM32L4_COMP_INP_PIN_2:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_2 :
+    case STM32_COMP_INP_PIN_2:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_2 :
                                                 GPIO_COMP2_INP_2);
       regval |= COMP_CSR_INPSEL_PIN2;
       break;
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
-    case STM32L4_COMP_INP_PIN_3:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INP_3 :
+    case STM32_COMP_INP_PIN_3:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INP_3 :
                                                 GPIO_COMP2_INP_3);
       regval |= COMP_CSR_INPSEL_PIN3;
       break;
@@ -392,46 +392,46 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
   mask |= COMP_CSR_INMSEL_MASK;
   switch (cfg->inm)
     {
-    case STM32L4_COMP_INM_1_4_VREF:
+    case STM32_COMP_INM_1_4_VREF:
       regval |= COMP_CSR_INMSEL_25PCT;
       mask   |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       regval |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       break;
 
-    case STM32L4_COMP_INM_1_2_VREF:
+    case STM32_COMP_INM_1_2_VREF:
       regval |= COMP_CSR_INMSEL_50PCT;
       mask   |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       regval |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       break;
 
-    case STM32L4_COMP_INM_3_4_VREF:
+    case STM32_COMP_INM_3_4_VREF:
       regval |= COMP_CSR_INMSEL_75PCT;
       mask   |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       regval |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       break;
 
-    case STM32L4_COMP_INM_VREF:
+    case STM32_COMP_INM_VREF:
       regval |= COMP_CSR_INMSEL_VREF;
       mask   |= (COMP_CSR_SCALEN | COMP_CSR_BRGEN);
       regval |= COMP_CSR_SCALEN;
       break;
 
-    case STM32L4_COMP_INM_DAC_1:
+    case STM32_COMP_INM_DAC_1:
       regval |= COMP_CSR_INMSEL_DAC1;
       break;
 
-    case STM32L4_COMP_INM_DAC_2:
+    case STM32_COMP_INM_DAC_2:
       regval |= COMP_CSR_INMSEL_DAC2;
       break;
 
-  case STM32L4_COMP_INM_PIN_1:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_1 :
+  case STM32_COMP_INM_PIN_1:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_1 :
                                                 GPIO_COMP2_INM_1);
       regval |= COMP_CSR_INMSEL_PIN1;
       break;
 
-  case STM32L4_COMP_INM_PIN_2:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_2 :
+  case STM32_COMP_INM_PIN_2:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_2 :
                                                 GPIO_COMP2_INM_2);
 #if defined(CONFIG_STM32L4_STM32L4X5) || defined(CONFIG_STM32L4_STM32L4X6) || \
     defined(CONFIG_STM32L4_STM32L4XR)
@@ -444,24 +444,24 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
       break;
 
 #if defined(CONFIG_STM32L4_STM32L4X3)
-    case STM32L4_COMP_INM_PIN_3:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_3 :
+    case STM32_COMP_INM_PIN_3:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_3 :
                                                 GPIO_COMP2_INM_3);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
       regval |= COMP_CSR_INMESEL_PIN3;
       break;
 
-    case STM32L4_COMP_INM_PIN_4:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_4 :
+    case STM32_COMP_INM_PIN_4:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_4 :
                                                 GPIO_COMP2_INM_4);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
       regval |= COMP_CSR_INMESEL_PIN4;
       break;
 
-    case STM32L4_COMP_INM_PIN_5:
-      stm32l4_configgpio(cmp == STM32L4_COMP1 ? GPIO_COMP1_INM_5 :
+    case STM32_COMP_INM_PIN_5:
+      stm32l4_configgpio(cmp == STM32_COMP1 ? GPIO_COMP1_INM_5 :
                                                 GPIO_COMP2_INM_5);
       regval |= COMP_CSR_INMSEL_INMESEL;
       mask   |= COMP_CSR_INMESEL_MASK;
@@ -478,19 +478,19 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
   mask |= COMP_CSR_HYST_MASK;
   switch (cfg->hyst)
     {
-    case STM32L4_COMP_HYST_NONE:
+    case STM32_COMP_HYST_NONE:
       regval |= COMP_CSR_HYST_NONE;
       break;
 
-    case STM32L4_COMP_HYST_LOW:
+    case STM32_COMP_HYST_LOW:
       regval |= COMP_CSR_HYST_LOW;
       break;
 
-    case STM32L4_COMP_HYST_MEDIUM:
+    case STM32_COMP_HYST_MEDIUM:
       regval |= COMP_CSR_HYST_MEDIUM;
       break;
 
-    case STM32L4_COMP_HYST_HIGH:
+    case STM32_COMP_HYST_HIGH:
       regval |= COMP_CSR_HYST_HIGH;
       break;
 
@@ -503,15 +503,15 @@ static int stm32l4_compconfig(const struct comp_dev_s *dev)
   mask |= COMP_CSR_PWRMODE_MASK;
   switch (cfg->speed)
     {
-    case STM32L4_COMP_SPEED_HIGH:
+    case STM32_COMP_SPEED_HIGH:
       regval |= COMP_CSR_PWRMODE_HIGH;
       break;
 
-    case STM32L4_COMP_SPEED_MEDIUM:
+    case STM32_COMP_SPEED_MEDIUM:
       regval |= COMP_CSR_PWRMODE_MEDIUM;
       break;
 
-    case STM32L4_COMP_SPEED_LOW:
+    case STM32_COMP_SPEED_LOW:
       regval |= COMP_CSR_PWRMODE_LOW;
       break;
 

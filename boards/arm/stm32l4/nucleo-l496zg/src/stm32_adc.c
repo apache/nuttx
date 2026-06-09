@@ -48,15 +48,15 @@
 
 /* Up to 3 ADC interfaces are supported */
 
-#if STM32L4_NADC < 3
+#if STM32_NADC < 3
 #  undef CONFIG_STM32L4_ADC3
 #endif
 
-#if STM32L4_NADC < 2
+#if STM32_NADC < 2
 #  undef CONFIG_STM32L4_ADC2
 #endif
 
-#if STM32L4_NADC < 1
+#if STM32_NADC < 1
 #  undef CONFIG_STM32L4_ADC1
 #endif
 

@@ -233,9 +233,9 @@ static const struct i2s_ops_s g_i2sops =
 static struct stm32l4_sai_s g_sai1a_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32L4_SAI1_A_BASE,
+  .base        = STM32_SAI1_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32L4_SAI1_FREQUENCY,
+  .frequency   = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI1_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
 #else
@@ -254,9 +254,9 @@ static struct stm32l4_sai_s g_sai1a_priv =
 static struct stm32l4_sai_s g_sai1b_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32L4_SAI1_B_BASE,
+  .base        = STM32_SAI1_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32L4_SAI1_FREQUENCY,
+  .frequency   = STM32_SAI1_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI1_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
 #else
@@ -277,9 +277,9 @@ static struct stm32l4_sai_s g_sai1b_priv =
 static struct stm32l4_sai_s g_sai2a_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32L4_SAI2_A_BASE,
+  .base        = STM32_SAI2_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32L4_SAI2_FREQUENCY,
+  .frequency   = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI2_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
 #else
@@ -298,9 +298,9 @@ static struct stm32l4_sai_s g_sai2a_priv =
 static struct stm32l4_sai_s g_sai2b_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32L4_SAI2_B_BASE,
+  .base        = STM32_SAI2_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32L4_SAI2_FREQUENCY,
+  .frequency   = STM32_SAI2_FREQUENCY,
 #ifdef CONFIG_STM32L4_SAI2_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_SYNC_INT,
 #else
@@ -433,14 +433,14 @@ static void sai_dump_regs(struct stm32l4_sai_s *priv, const char *msg)
 
   i2sinfo("CR1:%08" PRIx32 " CR2:%08" PRIx32
           "  FRCR:%08" PRIx32 " SLOTR:%08" PRIx32 "\n",
-          sai_getreg(priv, STM32L4_SAI_CR1_OFFSET),
-          sai_getreg(priv, STM32L4_SAI_CR2_OFFSET),
-          sai_getreg(priv, STM32L4_SAI_FRCR_OFFSET),
-          sai_getreg(priv, STM32L4_SAI_SLOTR_OFFSET));
+          sai_getreg(priv, STM32_SAI_CR1_OFFSET),
+          sai_getreg(priv, STM32_SAI_CR2_OFFSET),
+          sai_getreg(priv, STM32_SAI_FRCR_OFFSET),
+          sai_getreg(priv, STM32_SAI_SLOTR_OFFSET));
   i2sinfo(" IM:%08" PRIx32 "  SR:%08" PRIx32 " CLRFR:%08" PRIx32 "\n",
-          sai_getreg(priv, STM32L4_SAI_IM_OFFSET),
-          sai_getreg(priv, STM32L4_SAI_SR_OFFSET),
-          sai_getreg(priv, STM32L4_SAI_CLRFR_OFFSET));
+          sai_getreg(priv, STM32_SAI_IM_OFFSET),
+          sai_getreg(priv, STM32_SAI_SR_OFFSET),
+          sai_getreg(priv, STM32_SAI_CLRFR_OFFSET));
 }
 #endif
 
@@ -474,7 +474,7 @@ static void sai_mckdivider(struct stm32l4_sai_s *priv)
 
   mckdiv = priv->frequency / (priv->samplerate * 2 * 256);
 
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, SAI_CR1_MCKDIV_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MCKDIV_MASK,
                 mckdiv << SAI_CR1_MCKDIV_SHIFT);
 }
 
@@ -621,7 +621,7 @@ static int sai_dma_setup(struct stm32l4_sai_s *priv)
 
   DEBUGASSERT(ntransfers > 0);
 
-  stm32l4_dmasetup(priv->dma, priv->base + STM32L4_SAI_DR_OFFSET,
+  stm32l4_dmasetup(priv->dma, priv->base + STM32_SAI_DR_OFFSET,
                  samp, ntransfers, priv->dma_ccr);
 
   /* Add the container to the list of active DMAs */
@@ -634,7 +634,7 @@ static int sai_dma_setup(struct stm32l4_sai_s *priv)
 
   /* Enable the transmitter */
 
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
 
   /* Start a watchdog to catch DMA timeouts */
 
@@ -901,9 +901,9 @@ static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
         return 0;
     }
 
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, SAI_CR1_DS_MASK, setbits);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_DS_MASK, setbits);
 
-  sai_modifyreg(priv, STM32L4_SAI_FRCR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_FRCR_OFFSET,
                 SAI_FRCR_FSALL_MASK | SAI_FRCR_FRL_MASK,
                 SAI_FRCR_FSALL(bits) | SAI_FRCR_FRL(bits * 2));
 
@@ -981,7 +981,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_RX : SAI_CR1_MODE_MASTER_RX;
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
   priv->rxenab = true;
 
   /* Add a reference to the audio buffer */
@@ -1086,7 +1086,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_TX : SAI_CR1_MODE_MASTER_TX;
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
   priv->txenab = true;
 
   /* Add a reference to the audio buffer */
@@ -1275,21 +1275,21 @@ static void sai_portinitialize(struct stm32l4_sai_s *priv)
   priv->dma = stm32l4_dmachannel(priv->dma_ch);
   DEBUGASSERT(priv->dma);
 
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, 0, SAI_CR1_DMAEN);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_DMAEN);
 #endif
 
-  sai_modifyreg(priv, STM32L4_SAI_CR1_OFFSET, SAI_CR1_SYNCEN_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_SYNCEN_MASK,
                 priv->syncen);
 
-  sai_modifyreg(priv, STM32L4_SAI_CR2_OFFSET, SAI_CR2_FTH_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR2_OFFSET, SAI_CR2_FTH_MASK,
                 SAI_CR2_FTH_1QF);
 
-  sai_modifyreg(priv, STM32L4_SAI_FRCR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_FRCR_OFFSET,
                 SAI_FRCR_FSDEF | SAI_FRCR_FSPOL | SAI_FRCR_FSOFF,
                 SAI_FRCR_FSDEF_CHID | SAI_FRCR_FSPOL_LOW |
                 SAI_FRCR_FSOFF_BFB);
 
-  sai_modifyreg(priv, STM32L4_SAI_SLOTR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_SLOTR_OFFSET,
                 SAI_SLOTR_NBSLOT_MASK | SAI_SLOTR_SLOTEN_MASK,
                 SAI_SLOTR_NBSLOT(2) | SAI_SLOTR_SLOTEN_0 |
                 SAI_SLOTR_SLOTEN_1);

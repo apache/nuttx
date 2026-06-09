@@ -561,8 +561,8 @@ struct stm32_dev_s g_sdmmcdev1 =
 #endif
 #endif
   },
-  .base              = STM32L4_SDMMC1_BASE,
-  .nirq              = STM32L4_IRQ_SDMMC1,
+  .base              = STM32_SDMMC1_BASE,
+  .nirq              = STM32_IRQ_SDMMC1,
 #ifdef CONFIG_MMCSD_SDIOWAIT_WRCOMPLETE
   .d0_gpio           = GPIO_SDMMC1_D0,
 #endif

@@ -233,9 +233,9 @@ static struct stm32l4_tim_s g_pulsecount1dev =
   .timid       = 1,
   .timtype     = TIMTYPE_TIM1,
   .t_dts       = CONFIG_STM32L4_TIM1_PULSECOUNT_TDTS,
-  .irq         = STM32L4_IRQ_TIM1UP,
-  .base        = STM32L4_TIM1_BASE,
-  .pclk        = STM32L4_APB2_TIM1_CLKIN,
+  .irq         = STM32_IRQ_TIM1UP,
+  .base        = STM32_TIM1_BASE,
+  .pclk        = STM32_APB2_TIM1_CLKIN,
 };
 
 #endif /* CONFIG_STM32L4_TIM1_PULSECOUNT */
@@ -284,9 +284,9 @@ static struct stm32l4_tim_s g_pulsecount8dev =
   .timid       = 8,
   .timtype     = TIMTYPE_TIM8,
   .t_dts       = CONFIG_STM32L4_TIM8_PULSECOUNT_TDTS,
-  .irq         = STM32L4_IRQ_TIM8UP,
-  .base        = STM32L4_TIM8_BASE,
-  .pclk        = STM32L4_APB2_TIM8_CLKIN,
+  .irq         = STM32_IRQ_TIM8UP,
+  .base        = STM32_TIM8_BASE,
+  .pclk        = STM32_APB2_TIM8_CLKIN,
 };
 
 #endif /* CONFIG_STM32L4_TIM8_PULSECOUNT */
@@ -407,30 +407,30 @@ static void pulsecount_dumpregs(struct pulsecount_lowerhalf_s *dev,
 
   _info("%s:\n", msg);
   _info("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-          pulsecount_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
+          pulsecount_getreg(priv, STM32_GTIM_CR1_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CR2_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_SMCR_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_DIER_OFFSET));
   _info("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
-          pulsecount_getreg(priv, STM32L4_GTIM_SR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_EGR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
+          pulsecount_getreg(priv, STM32_GTIM_SR_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_EGR_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
   _info(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-          pulsecount_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
+          pulsecount_getreg(priv, STM32_GTIM_CCER_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CNT_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_PSC_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_ARR_OFFSET));
   _info(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-          pulsecount_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
-          pulsecount_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+          pulsecount_getreg(priv, STM32_GTIM_CCR1_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CCR2_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CCR3_OFFSET),
+          pulsecount_getreg(priv, STM32_GTIM_CCR4_OFFSET));
   _info("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-          pulsecount_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
-          pulsecount_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
+          pulsecount_getreg(priv, STM32_ATIM_RCR_OFFSET),
+          pulsecount_getreg(priv, STM32_ATIM_BDTR_OFFSET),
+          pulsecount_getreg(priv, STM32_ATIM_DCR_OFFSET),
+          pulsecount_getreg(priv, STM32_ATIM_DMAR_OFFSET));
 }
 #endif
 
@@ -450,25 +450,25 @@ static int pulsecount_ccr_update(struct pulsecount_lowerhalf_s *dev,
     {
       case 1:
         {
-          offset = STM32L4_GTIM_CCR1_OFFSET;
+          offset = STM32_GTIM_CCR1_OFFSET;
           break;
         }
 
       case 2:
         {
-          offset = STM32L4_GTIM_CCR2_OFFSET;
+          offset = STM32_GTIM_CCR2_OFFSET;
           break;
         }
 
       case 3:
         {
-          offset = STM32L4_GTIM_CCR3_OFFSET;
+          offset = STM32_GTIM_CCR3_OFFSET;
           break;
         }
 
       case 4:
         {
-          offset = STM32L4_GTIM_CCR4_OFFSET;
+          offset = STM32_GTIM_CCR4_OFFSET;
           break;
         }
 
@@ -520,7 +520,7 @@ static int pulsecount_duty_update(struct pulsecount_lowerhalf_s *dev,
 
   /* Get the reload values */
 
-  reload = pulsecount_getreg(priv, STM32L4_GTIM_ARR_OFFSET);
+  reload = pulsecount_getreg(priv, STM32_GTIM_ARR_OFFSET);
 
   /* Duty cycle:
    *
@@ -617,8 +617,8 @@ static int pulsecount_frequency_update(struct pulsecount_lowerhalf_s *dev,
 
   /* Set the reload and prescaler values */
 
-  pulsecount_putreg(priv, STM32L4_GTIM_ARR_OFFSET, reload);
-  pulsecount_putreg(priv, STM32L4_GTIM_PSC_OFFSET,
+  pulsecount_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
+  pulsecount_putreg(priv, STM32_GTIM_PSC_OFFSET,
                      (uint16_t)(prescaler - 1));
 
   return OK;
@@ -638,7 +638,7 @@ static int pulsecount_timer_configure(struct stm32l4_tim_s *priv)
 
   /* Set up the advanced timer CR1 register. */
 
-  cr1 = pulsecount_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = pulsecount_getreg(priv, STM32_GTIM_CR1_OFFSET);
 
   /* Pulsecount always uses edge-aligned up-counting mode. */
 
@@ -653,7 +653,7 @@ static int pulsecount_timer_configure(struct stm32l4_tim_s *priv)
 
   /* Write CR1 */
 
-  pulsecount_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  pulsecount_putreg(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
   return OK;
 }
@@ -689,14 +689,14 @@ static int pulsecount_channel_configure(struct pulsecount_lowerhalf_s *dev,
       case 1:
       case 2:
         {
-          offset = STM32L4_GTIM_CCMR1_OFFSET;
+          offset = STM32_GTIM_CCMR1_OFFSET;
           break;
         }
 
       case 3:
       case 4:
         {
-          offset = STM32L4_GTIM_CCMR2_OFFSET;
+          offset = STM32_GTIM_CCMR2_OFFSET;
           break;
         }
 
@@ -773,8 +773,8 @@ static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
 
   /* Get current registers state */
 
-  cr2  = pulsecount_getreg(priv, STM32L4_GTIM_CR2_OFFSET);
-  ccer = pulsecount_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  cr2  = pulsecount_getreg(priv, STM32_GTIM_CR2_OFFSET);
+  ccer = pulsecount_getreg(priv, STM32_GTIM_CCER_OFFSET);
 
   /* | OISx | IDLE | advanced timers | CR2 register
    * | CCxP | POL  | all pulsecount timers | CCER register
@@ -807,8 +807,8 @@ static int pulsecount_output_configure(struct stm32l4_tim_s *priv,
 
   /* Write registers */
 
-  pulsecount_modifyreg(priv, STM32L4_GTIM_CR2_OFFSET, 0, cr2);
-  pulsecount_modifyreg(priv, STM32L4_GTIM_CCER_OFFSET, 0, ccer);
+  pulsecount_modifyreg(priv, STM32_GTIM_CR2_OFFSET, 0, cr2);
+  pulsecount_modifyreg(priv, STM32_GTIM_CCER_OFFSET, 0, ccer);
 
   return OK;
 }
@@ -838,7 +838,7 @@ static int pulsecount_outputs_enable(struct pulsecount_lowerhalf_s *dev,
 
   /* Get current register state */
 
-  ccer = pulsecount_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer = pulsecount_getreg(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Get outputs configuration */
 
@@ -865,7 +865,7 @@ static int pulsecount_outputs_enable(struct pulsecount_lowerhalf_s *dev,
 
   /* Write register */
 
-  pulsecount_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  pulsecount_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   return OK;
 }
@@ -881,11 +881,11 @@ static void pulsecount_moe_enable(struct pulsecount_lowerhalf_s *dev,
 
   if (enable)
     {
-      pulsecount_modifyreg(priv, STM32L4_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
+      pulsecount_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
     }
   else
     {
-      pulsecount_modifyreg(priv, STM32L4_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
+      pulsecount_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
     }
 }
 
@@ -933,7 +933,7 @@ static int pulsecount_configure(struct pulsecount_lowerhalf_s *dev)
 
   /* Disable the timer until we get it configured */
 
-  pulsecount_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+  pulsecount_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
 
   /* Get configured outputs */
 
@@ -1015,8 +1015,8 @@ static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
 
   /* Disable all interrupts and DMA requests, clear all pending status */
 
-  pulsecount_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  pulsecount_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  pulsecount_putreg(priv, STM32_GTIM_DIER_OFFSET, 0);
+  pulsecount_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
 
   /* Set timer frequency */
 
@@ -1051,14 +1051,14 @@ static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
        */
 
       priv->prev  = pulsecount_count(info->count);
-      pulsecount_putreg(priv, STM32L4_GTIM_RCR_OFFSET,
+      pulsecount_putreg(priv, STM32_GTIM_RCR_OFFSET,
                          (uint16_t)priv->prev - 1);
 
       /* Generate an update event to reload the prescaler.  This should
        * preload the RCR into active repetition counter.
        */
 
-      pulsecount_putreg(priv, STM32L4_GTIM_EGR_OFFSET, GTIM_EGR_UG);
+      pulsecount_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
 
       /* Now set the value of the RCR that will be loaded on the next
        * update event.
@@ -1066,7 +1066,7 @@ static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
 
       priv->count = info->count;
       priv->curr  = pulsecount_count(info->count - priv->prev);
-      pulsecount_putreg(priv, STM32L4_GTIM_RCR_OFFSET,
+      pulsecount_putreg(priv, STM32_GTIM_RCR_OFFSET,
                          (uint16_t)priv->curr - 1);
     }
 
@@ -1076,11 +1076,11 @@ static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
     {
       /* Set the repetition counter to zero */
 
-      pulsecount_putreg(priv, STM32L4_GTIM_RCR_OFFSET, 0);
+      pulsecount_putreg(priv, STM32_GTIM_RCR_OFFSET, 0);
 
       /* Generate an update event to reload the prescaler */
 
-      pulsecount_putreg(priv, STM32L4_GTIM_EGR_OFFSET, GTIM_EGR_UG);
+      pulsecount_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
     }
 
   /* Get configured outputs */
@@ -1105,12 +1105,12 @@ static int pulsecount_timer(struct pulsecount_lowerhalf_s *dev,
     {
       /* Clear all pending interrupts and enable the update interrupt. */
 
-      pulsecount_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
-      pulsecount_putreg(priv, STM32L4_GTIM_DIER_OFFSET, GTIM_DIER_UIE);
+      pulsecount_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
+      pulsecount_putreg(priv, STM32_GTIM_DIER_OFFSET, GTIM_DIER_UIE);
 
       /* Enable the timer */
 
-      pulsecount_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+      pulsecount_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
 
       /* And enable timer interrupts at the NVIC */
 
@@ -1144,12 +1144,12 @@ static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev)
 
   /* Verify that this is an update interrupt.  Nothing else is expected. */
 
-  regval = pulsecount_getreg(priv, STM32L4_ATIM_SR_OFFSET);
+  regval = pulsecount_getreg(priv, STM32_ATIM_SR_OFFSET);
   DEBUGASSERT((regval & ATIM_SR_UIF) != 0);
 
   /* Clear the UIF interrupt bit */
 
-  pulsecount_putreg(priv, STM32L4_ATIM_SR_OFFSET, regval & ~ATIM_SR_UIF);
+  pulsecount_putreg(priv, STM32_ATIM_SR_OFFSET, regval & ~ATIM_SR_UIF);
 
   /* Calculate the new count by subtracting the number of pulses
    * since the last interrupt.
@@ -1161,9 +1161,9 @@ static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev)
        * quickly as possible.
        */
 
-      regval  = pulsecount_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
+      regval  = pulsecount_getreg(priv, STM32_ATIM_BDTR_OFFSET);
       regval &= ~ATIM_BDTR_MOE;
-      pulsecount_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, regval);
+      pulsecount_putreg(priv, STM32_ATIM_BDTR_OFFSET, regval);
 
       /* Disable first interrupts, stop and reset the timer */
 
@@ -1194,7 +1194,7 @@ static int pulsecount_interrupt(struct pulsecount_lowerhalf_s *dev)
 
       priv->prev = priv->curr;
       priv->curr = pulsecount_count(priv->count - priv->prev);
-      pulsecount_putreg(priv, STM32L4_ATIM_RCR_OFFSET,
+      pulsecount_putreg(priv, STM32_ATIM_RCR_OFFSET,
                          (uint16_t)priv->curr - 1);
     }
 
@@ -1311,7 +1311,7 @@ static int pulsecount_setapbclock(struct stm32l4_tim_s *priv,
 #ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
           case 1:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM1EN;
               break;
             }
@@ -1320,7 +1320,7 @@ static int pulsecount_setapbclock(struct stm32l4_tim_s *priv,
 #ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
           case 8:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM8EN;
               break;
             }
@@ -1484,13 +1484,13 @@ static int pulsecount_ll_stop(struct pulsecount_lowerhalf_s *dev)
     {
 #ifdef CONFIG_STM32L4_TIM1_PULSECOUNT
           case 1:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM1RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM8_PULSECOUNT
           case 8:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM8RST;
             break;
 #endif
@@ -1506,8 +1506,8 @@ static int pulsecount_ll_stop(struct pulsecount_lowerhalf_s *dev)
 
   /* Disable further interrupts and stop the timer */
 
-  pulsecount_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  pulsecount_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  pulsecount_putreg(priv, STM32_GTIM_DIER_OFFSET, 0);
+  pulsecount_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
 
   /* Reset the timer - stopping the output and putting the timer back
    * into a state where pulsecount_start() can be called.

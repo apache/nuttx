@@ -65,7 +65,7 @@
  *   1000 * 4095 / Fmin = 34,944 MSec
  */
 
-#define IWDG_FMIN       (STM32L4_LSI_FREQUENCY / 256)
+#define IWDG_FMIN       (STM32_LSI_FREQUENCY / 256)
 #define IWDG_MAXTIMEOUT (1000 * IWDG_RLR_MAX / IWDG_FMIN)
 
 /* Configuration ************************************************************/
@@ -254,26 +254,26 @@ static inline void stm32l4_setprescaler(struct stm32l4_lowerhalf_s *priv)
 
   /* Enable write access to IWDG_PR and IWDG_RLR registers */
 
-  stm32l4_putreg(IWDG_KR_KEY_ENABLE, STM32L4_IWDG_KR);
+  stm32l4_putreg(IWDG_KR_KEY_ENABLE, STM32_IWDG_KR);
 
   /* Wait for the PVU and RVU bits to be reset by hardware.  These bits
    * were set the last time that the PR register was written and may not
    * yet be cleared.
    */
 
-  while (stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
+  while (stm32l4_getreg(STM32_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
 
   /* Set the prescaler */
 
-  stm32l4_putreg(priv->prescaler << IWDG_PR_SHIFT, STM32L4_IWDG_PR);
+  stm32l4_putreg(priv->prescaler << IWDG_PR_SHIFT, STM32_IWDG_PR);
 
   /* Set the reload value */
 
-  stm32l4_putreg((uint16_t)priv->reload, STM32L4_IWDG_RLR);
+  stm32l4_putreg((uint16_t)priv->reload, STM32_IWDG_RLR);
 
   /* Reload the counter (and disable write access) */
 
-  stm32l4_putreg(IWDG_KR_KEY_RELOAD, STM32L4_IWDG_KR);
+  stm32l4_putreg(IWDG_KR_KEY_RELOAD, STM32_IWDG_KR);
 
   /* Wait for the PVU and RVU bits to be reset by hardware.  This is
    * to wait for the change to take effect before exiting critical section,
@@ -289,7 +289,7 @@ static inline void stm32l4_setprescaler(struct stm32l4_lowerhalf_s *priv)
 
   if (priv->started)
     {
-      while (stm32l4_getreg(STM32L4_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
+      while (stm32l4_getreg(STM32_IWDG_SR) & (IWDG_SR_PVU | IWDG_SR_RVU));
     }
 
   leave_critical_section(flags);
@@ -335,7 +335,7 @@ static int stm32l4_start(struct watchdog_lowerhalf_s *lower)
        */
 
       flags           = enter_critical_section();
-      stm32l4_putreg(IWDG_KR_KEY_START, STM32L4_IWDG_KR);
+      stm32l4_putreg(IWDG_KR_KEY_START, STM32_IWDG_KR);
       priv->lastreset = clock_systime_ticks();
       priv->started   = true;
       leave_critical_section(flags);
@@ -395,7 +395,7 @@ static int stm32l4_keepalive(struct watchdog_lowerhalf_s *lower)
   /* Reload the IWDG timer */
 
   flags = enter_critical_section();
-  stm32l4_putreg(IWDG_KR_KEY_RELOAD, STM32L4_IWDG_KR);
+  stm32l4_putreg(IWDG_KR_KEY_RELOAD, STM32_IWDG_KR);
   priv->lastreset = clock_systime_ticks();
   leave_critical_section(flags);
 
@@ -629,7 +629,7 @@ void stm32l4_iwdginitialize(const char *devpath, uint32_t lsifreq)
    */
 
   stm32l4_rcc_enablelsi();
-  wdinfo("RCC CSR: %08" PRIx32 "\n", getreg32(STM32L4_RCC_CSR));
+  wdinfo("RCC CSR: %08" PRIx32 "\n", getreg32(STM32_RCC_CSR));
 
   /* Select an arbitrary initial timeout value.  But don't start the watchdog
    * yet. NOTE: If the "Hardware watchdog" feature is enabled through the

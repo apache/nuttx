@@ -260,7 +260,7 @@ static const struct stm32l4_dmamux_s g_dmamux[DMAMUX_NUM] =
     {
       .id      = 1,
       .nchan   = 14,              /* 0-6 - DMA1, 7-13 - DMA2 */
-      .base    = STM32L4_DMAMUX1_BASE
+      .base    = STM32_DMAMUX1_BASE
     }
 };
 
@@ -271,7 +271,7 @@ static const struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
   /* 0 - DMA1 */
 
     {
-      .base   = STM32L4_DMA1_BASE,
+      .base   = STM32_DMA1_BASE,
       .first  = DMA1_FIRST,
       .nchan  = DMA1_NCHAN,
       .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 0-6 */
@@ -281,7 +281,7 @@ static const struct stm32l4_dma_s g_dma[DMA_NCHANNELS] =
   /* 1 - DMA2 */
 
     {
-      .base   = STM32L4_DMA2_BASE,
+      .base   = STM32_DMA2_BASE,
       .first  = DMA2_FIRST,
       .nchan  = DMA2_NCHAN,
       .dmamux = &g_dmamux[DMAMUX1], /* DMAMUX1 channels 7-13 */
@@ -299,57 +299,57 @@ static struct stm32l4_dmach_s g_dmach[DMA_NCHANNELS] =
     {
       .ctrl     = DMA1,
       .chan     = 0,
-      .irq      = STM32L4_IRQ_DMA1CH1,
+      .irq      = STM32_IRQ_DMA1CH1,
       .shift    = DMA_CHAN_SHIFT(0),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(0),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(0),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 1,
-      .irq      = STM32L4_IRQ_DMA1CH2,
+      .irq      = STM32_IRQ_DMA1CH2,
       .shift    = DMA_CHAN_SHIFT(1),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(1),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(1),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 2,
-      .irq      = STM32L4_IRQ_DMA1CH3,
+      .irq      = STM32_IRQ_DMA1CH3,
       .shift    = DMA_CHAN_SHIFT(2),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(2),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(2),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 3,
-      .irq      = STM32L4_IRQ_DMA1CH4,
+      .irq      = STM32_IRQ_DMA1CH4,
       .shift    = DMA_CHAN_SHIFT(3),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(3),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(3),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 4,
-      .irq      = STM32L4_IRQ_DMA1CH5,
+      .irq      = STM32_IRQ_DMA1CH5,
       .shift    = DMA_CHAN_SHIFT(4),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(4),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(4),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 5,
-      .irq      = STM32L4_IRQ_DMA1CH6,
+      .irq      = STM32_IRQ_DMA1CH6,
       .shift    = DMA_CHAN_SHIFT(5),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(5),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(5),
     },
 
     {
       .ctrl     = DMA1,
       .chan     = 6,
-      .irq      = STM32L4_IRQ_DMA1CH7,
+      .irq      = STM32_IRQ_DMA1CH7,
       .shift    = DMA_CHAN_SHIFT(6),
-      .base     = STM32L4_DMA1_BASE + STM32L4_DMACHAN_OFFSET(6),
+      .base     = STM32_DMA1_BASE + STM32_DMACHAN_OFFSET(6),
     },
 #endif
 
@@ -359,57 +359,57 @@ static struct stm32l4_dmach_s g_dmach[DMA_NCHANNELS] =
     {
       .ctrl     = DMA2,
       .chan     = 0,
-      .irq      = STM32L4_IRQ_DMA2CH1,
+      .irq      = STM32_IRQ_DMA2CH1,
       .shift    = DMA_CHAN_SHIFT(0),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(0),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(0),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 1,
-      .irq      = STM32L4_IRQ_DMA2CH2,
+      .irq      = STM32_IRQ_DMA2CH2,
       .shift    = DMA_CHAN_SHIFT(1),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(1),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(1),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 2,
-      .irq      = STM32L4_IRQ_DMA2CH3,
+      .irq      = STM32_IRQ_DMA2CH3,
       .shift    = DMA_CHAN_SHIFT(2),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(2),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(2),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 3,
-      .irq      = STM32L4_IRQ_DMA2CH4,
+      .irq      = STM32_IRQ_DMA2CH4,
       .shift    = DMA_CHAN_SHIFT(3),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(3),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(3),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 4,
-      .irq      = STM32L4_IRQ_DMA2CH5,
+      .irq      = STM32_IRQ_DMA2CH5,
       .shift    = DMA_CHAN_SHIFT(4),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(4),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(4),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 5,
-      .irq      = STM32L4_IRQ_DMA2CH6,
+      .irq      = STM32_IRQ_DMA2CH6,
       .shift    = DMA_CHAN_SHIFT(5),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(5),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(5),
     },
 
     {
       .ctrl     = DMA2,
       .chan     = 6,
-      .irq      = STM32L4_IRQ_DMA2CH7,
+      .irq      = STM32_IRQ_DMA2CH7,
       .shift    = DMA_CHAN_SHIFT(6),
-      .base     = STM32L4_DMA2_BASE + STM32L4_DMACHAN_OFFSET(6),
+      .base     = STM32_DMA2_BASE + STM32_DMACHAN_OFFSET(6),
     },
 #endif
 };
@@ -589,17 +589,17 @@ static void stm32l4_dma12_disable(DMA_CHANNEL dmachan)
 
   /* Disable all interrupts at the DMA controller */
 
-  regval = dmachan_getreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET);
+  regval = dmachan_getreg(dmachan, STM32_DMACHAN_CCR_OFFSET);
   regval &= ~DMA_CCR_ALLINTS;
 
   /* Disable the DMA channel */
 
   regval &= ~DMA_CCR_EN;
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET, regval);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CCR_OFFSET, regval);
 
   /* Clear pending channel interrupts */
 
-  dmabase_putreg(dmachan, STM32L4_DMA_IFCR_OFFSET,
+  dmabase_putreg(dmachan, STM32_DMA_IFCR_OFFSET,
                  DMA_ISR_CHAN_MASK(dmachan->chan));
 }
 
@@ -624,21 +624,21 @@ static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
     {
     }
 #ifdef CONFIG_STM32L4_DMA1
-  else if (irq >= STM32L4_IRQ_DMA1CH1 && irq <= STM32L4_IRQ_DMA1CH7)
+  else if (irq >= STM32_IRQ_DMA1CH1 && irq <= STM32_IRQ_DMA1CH7)
     {
-      channel = irq - STM32L4_IRQ_DMA1CH1;
+      channel = irq - STM32_IRQ_DMA1CH1;
       controller = DMA1;
     }
 #endif
 #ifdef CONFIG_STM32L4_DMA2
-  else if (irq >= STM32L4_IRQ_DMA2CH1 && irq <= STM32L4_IRQ_DMA2CH5)
+  else if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
     {
-      channel = irq - STM32L4_IRQ_DMA2CH1;
+      channel = irq - STM32_IRQ_DMA2CH1;
       controller = DMA2;
     }
-  else if (irq >= STM32L4_IRQ_DMA2CH6 && irq <= STM32L4_IRQ_DMA2CH7)
+  else if (irq >= STM32_IRQ_DMA2CH6 && irq <= STM32_IRQ_DMA2CH7)
     {
-      channel = irq - STM32L4_IRQ_DMA2CH6 + (6 - 1);
+      channel = irq - STM32_IRQ_DMA2CH6 + (6 - 1);
       controller = DMA2;
     }
 #endif
@@ -654,7 +654,7 @@ static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
 
   /* Get the interrupt status (for this channel only) */
 
-  isr = dmabase_getreg(dmachan, STM32L4_DMA_ISR_OFFSET) &
+  isr = dmabase_getreg(dmachan, STM32_DMA_ISR_OFFSET) &
         DMA_ISR_CHAN_MASK(dmachan->chan);
 
   /* Invoke the callback */
@@ -667,7 +667,7 @@ static int stm32l4_dma12_interrupt(int irq, void *context, void *arg)
 
   /* Clear the interrupts we are handling */
 
-  dmabase_putreg(dmachan, STM32L4_DMA_IFCR_OFFSET, isr);
+  dmabase_putreg(dmachan, STM32_DMA_IFCR_OFFSET, isr);
 
   return OK;
 }
@@ -704,28 +704,28 @@ static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
    * disabled.
    */
 
-  regval  = dmachan_getreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET);
+  regval  = dmachan_getreg(dmachan, STM32_DMACHAN_CCR_OFFSET);
   regval &= ~(DMA_CCR_EN);
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET, regval);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CCR_OFFSET, regval);
 
   /* Set the peripheral register address in the DMA_CPARx register. The data
    * will be moved from/to this address to/from the memory after the
    * peripheral event.
    */
 
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CPAR_OFFSET, paddr);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CPAR_OFFSET, paddr);
 
   /* Set the memory address in the DMA_CMARx register. The data will be
    * written to or read from this memory after the peripheral event.
    */
 
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CMAR_OFFSET, maddr);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CMAR_OFFSET, maddr);
 
   /* Configure the total number of data to be transferred in the DMA_CNDTRx
    * register.  After each peripheral event, this value will be decremented.
    */
 
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CNDTR_OFFSET, ntransfers);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CNDTR_OFFSET, ntransfers);
 
   /* Configure the channel priority using the PL[1:0] bits in the DMA_CCRx
    * register.  Configure data transfer direction, circular mode, peripheral
@@ -733,7 +733,7 @@ static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
    * after half and/or full transfer in the DMA_CCRx register.
    */
 
-  regval  = dmachan_getreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET);
+  regval  = dmachan_getreg(dmachan, STM32_DMACHAN_CCR_OFFSET);
   regval &= ~(DMA_CCR_MEM2MEM | DMA_CCR_PL_MASK | DMA_CCR_MSIZE_MASK |
               DMA_CCR_PSIZE_MASK | DMA_CCR_MINC | DMA_CCR_PINC |
               DMA_CCR_CIRC | DMA_CCR_DIR);
@@ -741,7 +741,7 @@ static void stm32l4_dma12_setup(DMA_HANDLE handle, uint32_t paddr,
               DMA_CCR_PSIZE_MASK | DMA_CCR_MINC | DMA_CCR_PINC |
               DMA_CCR_CIRC | DMA_CCR_DIR);
   regval |= ccr;
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET, regval);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CCR_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -769,7 +769,7 @@ static void stm32l4_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
    * peripheral connected on the channel.
    */
 
-  ccr  = dmachan_getreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET);
+  ccr  = dmachan_getreg(dmachan, STM32_DMACHAN_CCR_OFFSET);
   ccr |= DMA_CCR_EN;
 
   /* In normal mode, interrupt at either half or full completion. In circular
@@ -803,7 +803,7 @@ static void stm32l4_dma12_start(DMA_HANDLE handle, dma_callback_t callback,
       ccr |= (half ? DMA_CCR_HTIE : 0) | DMA_CCR_TCIE | DMA_CCR_TEIE;
     }
 
-  dmachan_putreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET, ccr);
+  dmachan_putreg(dmachan, STM32_DMACHAN_CCR_OFFSET, ccr);
 }
 
 /****************************************************************************
@@ -816,7 +816,7 @@ static size_t stm32l4_dma12_residual(DMA_HANDLE handle)
 
   DEBUGASSERT(dmachan->ctrl == DMA1 || dmachan->ctrl == DMA2);
 
-  return dmachan_getreg(dmachan, STM32L4_DMACHAN_CNDTR_OFFSET);
+  return dmachan_getreg(dmachan, STM32_DMACHAN_CNDTR_OFFSET);
 }
 
 /****************************************************************************
@@ -831,11 +831,11 @@ void stm32l4_dma12_sample(DMA_HANDLE handle, struct stm32l4_dmaregs_s *regs)
 
   flags = enter_critical_section();
 
-  regs->isr = dmabase_getreg(dmachan, STM32L4_DMA_ISR_OFFSET);
-  regs->ccr = dmachan_getreg(dmachan, STM32L4_DMACHAN_CCR_OFFSET);
-  regs->cndtr = dmachan_getreg(dmachan, STM32L4_DMACHAN_CNDTR_OFFSET);
-  regs->cpar = dmachan_getreg(dmachan, STM32L4_DMACHAN_CPAR_OFFSET);
-  regs->cmar = dmachan_getreg(dmachan, STM32L4_DMACHAN_CMAR_OFFSET);
+  regs->isr = dmabase_getreg(dmachan, STM32_DMA_ISR_OFFSET);
+  regs->ccr = dmachan_getreg(dmachan, STM32_DMACHAN_CCR_OFFSET);
+  regs->cndtr = dmachan_getreg(dmachan, STM32_DMACHAN_CNDTR_OFFSET);
+  regs->cpar = dmachan_getreg(dmachan, STM32_DMACHAN_CPAR_OFFSET);
+  regs->cmar = dmachan_getreg(dmachan, STM32_DMACHAN_CMAR_OFFSET);
 
   stm32l4_dmamux_sample(g_dma[dmachan->ctrl].dmamux,
                         dmachan->chan + g_dma[dmachan->ctrl].dmamux_offset,
@@ -864,19 +864,19 @@ static void stm32l4_dma12_dump(DMA_HANDLE handle,
           dmachan->ctrl + 1,
           msg);
   dmainfo("    ISR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmabase + STM32L4_DMA_ISR_OFFSET,
+          dmabase + STM32_DMA_ISR_OFFSET,
           regs->isr);
   dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmachan->base + STM32L4_DMACHAN_CCR_OFFSET,
+          dmachan->base + STM32_DMACHAN_CCR_OFFSET,
           regs->ccr);
   dmainfo("  CNDTR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmachan->base + STM32L4_DMACHAN_CNDTR_OFFSET,
+          dmachan->base + STM32_DMACHAN_CNDTR_OFFSET,
           regs->cndtr);
   dmainfo("   CPAR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmachan->base + STM32L4_DMACHAN_CPAR_OFFSET,
+          dmachan->base + STM32_DMACHAN_CPAR_OFFSET,
           regs->cpar);
   dmainfo("   CMAR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmachan->base + STM32L4_DMACHAN_CMAR_OFFSET,
+          dmachan->base + STM32_DMACHAN_CMAR_OFFSET,
           regs->cmar);
 
   stm32l4_dmamux_dump(g_dma[dmachan->ctrl].dmamux,
@@ -895,13 +895,13 @@ static void stm32l4_dma12_dump(DMA_HANDLE handle,
 static void stm32l4_dmamux_sample(DMA_MUX dmamux, uint8_t chan,
                                   struct stm32l4_dmaregs_s *regs)
 {
-  regs->dmamux.ccr = dmamux_getreg(dmamux, STM32L4_DMAMUX_CXCR_OFFSET(chan));
-  regs->dmamux.csr = dmamux_getreg(dmamux, STM32L4_DMAMUX_CSR_OFFSET);
-  regs->dmamux.rg0cr = dmamux_getreg(dmamux, STM32L4_DMAMUX_RG0CR_OFFSET);
-  regs->dmamux.rg1cr = dmamux_getreg(dmamux, STM32L4_DMAMUX_RG1CR_OFFSET);
-  regs->dmamux.rg2cr = dmamux_getreg(dmamux, STM32L4_DMAMUX_RG2CR_OFFSET);
-  regs->dmamux.rg3cr = dmamux_getreg(dmamux, STM32L4_DMAMUX_RG3CR_OFFSET);
-  regs->dmamux.rgsr = dmamux_getreg(dmamux, STM32L4_DMAMUX_RGSR_OFFSET);
+  regs->dmamux.ccr = dmamux_getreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(chan));
+  regs->dmamux.csr = dmamux_getreg(dmamux, STM32_DMAMUX_CSR_OFFSET);
+  regs->dmamux.rg0cr = dmamux_getreg(dmamux, STM32_DMAMUX_RG0CR_OFFSET);
+  regs->dmamux.rg1cr = dmamux_getreg(dmamux, STM32_DMAMUX_RG1CR_OFFSET);
+  regs->dmamux.rg2cr = dmamux_getreg(dmamux, STM32_DMAMUX_RG2CR_OFFSET);
+  regs->dmamux.rg3cr = dmamux_getreg(dmamux, STM32_DMAMUX_RG3CR_OFFSET);
+  regs->dmamux.rgsr = dmamux_getreg(dmamux, STM32_DMAMUX_RGSR_OFFSET);
 }
 #endif
 
@@ -915,20 +915,20 @@ static void stm32l4_dmamux_dump(DMA_MUX dmamux, uint8_t channel,
 {
   dmainfo("DMAMUX%d CH=%d\n", dmamux->id, channel);
   dmainfo("    CCR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_CXCR_OFFSET(channel),
+          dmamux->base + STM32_DMAMUX_CXCR_OFFSET(channel),
           regs->dmamux.ccr);
   dmainfo("    CSR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_CSR_OFFSET, regs->dmamux.csr);
+          dmamux->base + STM32_DMAMUX_CSR_OFFSET, regs->dmamux.csr);
   dmainfo("  RG0CR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_RG0CR_OFFSET, regs->dmamux.rg0cr);
+          dmamux->base + STM32_DMAMUX_RG0CR_OFFSET, regs->dmamux.rg0cr);
   dmainfo("  RG1CR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_RG1CR_OFFSET, regs->dmamux.rg1cr);
+          dmamux->base + STM32_DMAMUX_RG1CR_OFFSET, regs->dmamux.rg1cr);
   dmainfo("  RG2CR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_RG2CR_OFFSET, regs->dmamux.rg2cr);
+          dmamux->base + STM32_DMAMUX_RG2CR_OFFSET, regs->dmamux.rg2cr);
   dmainfo("  RG3CR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_RG3CR_OFFSET, regs->dmamux.rg3cr);
+          dmamux->base + STM32_DMAMUX_RG3CR_OFFSET, regs->dmamux.rg3cr);
   dmainfo("   RGSR[%08" PRIx32 "]: %08" PRIx32 "\n",
-          dmamux->base + STM32L4_DMAMUX_RGSR_OFFSET, regs->dmamux.rgsr);
+          dmamux->base + STM32_DMAMUX_RGSR_OFFSET, regs->dmamux.rgsr);
 };
 #endif
 
@@ -1186,7 +1186,7 @@ void stm32l4_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
   /* DMAMUX Set DMA channel source */
 
   regval = dmachan->dmamux_req << DMAMUX_CCR_DMAREQID_SHIFT;
-  dmamux_putreg(dmamux, STM32L4_DMAMUX_CXCR_OFFSET(dmamux_chan), regval);
+  dmamux_putreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(dmamux_chan), regval);
 
   /* Enable DMA channel */
 
@@ -1231,7 +1231,7 @@ void stm32l4_dmastop(DMA_HANDLE handle)
 
   /* DMAMUX Clear DMA channel source */
 
-  dmamux_putreg(dmamux, STM32L4_DMAMUX_CXCR_OFFSET(dmamux_chan), 0);
+  dmamux_putreg(dmamux, STM32_DMAMUX_CXCR_OFFSET(dmamux_chan), 0);
 }
 
 /****************************************************************************
@@ -1322,23 +1322,23 @@ bool stm32l4_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 
   mend = maddr + (count << msize_shift) - 1;
 
-  if ((maddr & STM32L4_REGION_MASK) != (mend & STM32L4_REGION_MASK))
+  if ((maddr & STM32_REGION_MASK) != (mend & STM32_REGION_MASK))
     {
       return false;
     }
 
-  switch (maddr & STM32L4_REGION_MASK)
+  switch (maddr & STM32_REGION_MASK)
     {
-      case STM32L4_PERIPH_BASE:
-      case STM32L4_FSMC_BASE:
-      case STM32L4_FSMC_BANK1:
-      case STM32L4_FSMC_BANK2:
-      case STM32L4_FSMC_BANK3:
-      case STM32L4_QSPI_BANK:
-      case STM32L4_SRAM_BASE:
-      case STM32L4_SRAM2_BASE:
-      case STM32L4_SRAM3_BASE:
-      case STM32L4_CODE_BASE:
+      case STM32_PERIPH_BASE:
+      case STM32_FSMC_BASE:
+      case STM32_FSMC_BANK1:
+      case STM32_FSMC_BANK2:
+      case STM32_FSMC_BANK3:
+      case STM32_QSPI_BANK:
+      case STM32_SRAM_BASE:
+      case STM32_SRAM2_BASE:
+      case STM32_SRAM3_BASE:
+      case STM32_CODE_BASE:
 
         /* All RAM and flash is supported */
 
