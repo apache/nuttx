@@ -55,7 +55,7 @@ endchoice # ARM Toolchain Selection
 
 choice
 	prompt "ARM MCU selection"
-	default ARCH_CHIP_STM32
+	default ARCH_CHIP_STM32F1
 
 config ARCH_CHIP_A1X
 	bool "Allwinner A1X"
@@ -489,8 +489,9 @@ config ARCH_CHIP_SIMPLELINK
 	---help---
 		TI SimpleLink CCxxx architectures (ARM Cortex-M3 or M4)
 
-config ARCH_CHIP_STM32
-	bool "STMicro STM32 F1/F2/F3/F4/G4/L1"
+config ARCH_CHIP_STM32F1
+	bool "STMicro STM32 F1"
+	select ARCH_CHIP_STM32
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
 	select ARCH_HAVE_I2CRESET
@@ -503,7 +504,92 @@ config ARCH_CHIP_STM32
 	select ARMV7M_HAVE_STACKCHECK
 	select ARCH_HAVE_ADJTIME
 	---help---
-		STMicro STM32 architectures (ARM Cortex-M3/4).
+		STMicro STM32F1 architectures (ARM Cortex-M3).
+
+config ARCH_CHIP_STM32F2
+	bool "STMicro STM32 F2"
+	select ARCH_CHIP_STM32
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	---help---
+		STMicro STM32F2 architectures (ARM Cortex-M3).
+
+config ARCH_CHIP_STM32F3
+	bool "STMicro STM32 F3"
+	select ARCH_CHIP_STM32
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	---help---
+		STMicro STM32F3 architectures (ARM Cortex-M4).
+
+config ARCH_CHIP_STM32F4
+	bool "STMicro STM32 F4"
+	select ARCH_CHIP_STM32
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	---help---
+		STMicro STM32F4 architectures (ARM Cortex-M4).
+
+config ARCH_CHIP_STM32G4
+	bool "STMicro STM32 G4"
+	select ARCH_CHIP_STM32
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	---help---
+		STMicro STM32G4 architectures (ARM Cortex-M4).
+
+config ARCH_CHIP_STM32L1
+	bool "STMicro STM32 L1"
+	select ARCH_CHIP_STM32
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_I2CRESET
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_ADJTIME
+	---help---
+		STMicro STM32L1 architectures (ARM Cortex-M3).
 
 config ARCH_CHIP_STM32F0
 	bool "STMicro STM32 F0"
@@ -824,6 +910,13 @@ config ARCH_CHIP_ARM_CUSTOM
 		Select this option if there is no directory for the chip under arch/arm/src/.
 
 endchoice # ARM MCU selection
+
+config ARCH_CHIP_STM32
+	bool
+	default n
+	---help---
+		Common STM32 architecture selector.  This is selected by the concrete
+		STM32 family options and gates shared STM32 Kconfig options.
 
 config ARCH_ARM7TDMI
 	bool
@@ -1224,7 +1317,7 @@ config ARCH_CHIP
 	default "samd5e5"	if ARCH_CHIP_SAMD5X || ARCH_CHIP_SAME5X
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "samv7"		if ARCH_CHIP_SAMV7
-	default "stm32"		if ARCH_CHIP_STM32
+	default "stm32"		if ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L1
 	default "stm32f0l0g0"	if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
 	default "stm32f7"	if ARCH_CHIP_STM32F7
 	default "stm32h7"	if ARCH_CHIP_STM32H7
@@ -1726,7 +1819,7 @@ endif
 if ARCH_CHIP_SAMV7
 source "arch/arm/src/samv7/Kconfig"
 endif
-if ARCH_CHIP_STM32
+if ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L1
 source "arch/arm/src/stm32/Kconfig"
 endif
 if ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
