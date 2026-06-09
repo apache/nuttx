@@ -36,7 +36,7 @@
 
 #include "stm32f777zit6-meadow.h"
 
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32F7_QSPI
 #  include "stm32_qspi.h"
 
 #  ifdef CONFIG_FS_FAT
@@ -124,7 +124,7 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32F7_QSPI
   struct qspi_dev_s *qspi;
   struct mtd_dev_s *mtd;
 

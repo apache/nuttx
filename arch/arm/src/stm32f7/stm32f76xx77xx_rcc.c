@@ -319,7 +319,7 @@ static inline void rcc_enableahb3(void)
   regval |= RCC_AHB3ENR_FMCEN;
 #endif
 
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32F7_QSPI
   /* FQuad SPI memory controller clock enable */
 
   regval |= RCC_AHB3ENR_QSPIEN;

@@ -35,7 +35,7 @@
 
 #include "chip.h"
 
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32F7_QSPI
 
 /****************************************************************************
  * Pre-processor Definitions

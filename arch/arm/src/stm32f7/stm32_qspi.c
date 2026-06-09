@@ -56,7 +56,7 @@
 #include "stm32_rcc.h"
 #include "hardware/stm32_qspi.h"
 
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32F7_QSPI
 
 /****************************************************************************
  * Pre-processor Definitions
