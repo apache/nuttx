@@ -158,8 +158,8 @@
  *   25000000 / 25 * 384 / 2 / 8
  */
 
-#define STM32F7_SAI1_FREQUENCY           (49142857)
-#define STM32F7_SAI2_FREQUENCY           (49142857)
+#define STM32_SAI1_FREQUENCY           (49142857)
+#define STM32_SAI2_FREQUENCY           (49142857)
 
 /* Configure Dedicated Clock Configuration Register */
 

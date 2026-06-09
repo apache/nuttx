@@ -65,12 +65,12 @@
 
 #include <arch/board/board.h>
 
-/* STM32F7_NETHERNET determines the number of physical interfaces that can
+/* STM32_NETHERNET determines the number of physical interfaces that can
  * be supported by the hardware.  CONFIG_STM32F7_ETHMAC will defined if
  * any STM32F7 Ethernet support is enabled in the configuration.
  */
 
-#if STM32F7_NETHERNET > 0 && defined(CONFIG_STM32F7_ETHMAC)
+#if STM32_NETHERNET > 0 && defined(CONFIG_STM32F7_ETHMAC)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -78,7 +78,7 @@
 
 /* Configuration ************************************************************/
 
-#if STM32F7_NETHERNET > 1
+#if STM32_NETHERNET > 1
 #  error "Logic to support multiple Ethernet interfaces is incomplete"
 #endif
 
@@ -243,14 +243,14 @@
 #define TXDESC_PADSIZE      DMA_ALIGN_UP(TXDESC_SIZE)
 #define ALIGNED_BUFSIZE     DMA_ALIGN_UP(ETH_BUFSIZE)
 
-#define RXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NRXDESC)
-#define TXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NTXDESC)
+#define RXTABLE_SIZE        (STM32_NETHERNET * CONFIG_STM32F7_ETH_NRXDESC)
+#define TXTABLE_SIZE        (STM32_NETHERNET * CONFIG_STM32F7_ETH_NTXDESC)
 
 #define RXBUFFER_SIZE       (CONFIG_STM32F7_ETH_NRXDESC * ALIGNED_BUFSIZE)
-#define RXBUFFER_ALLOC      (STM32F7_NETHERNET * RXBUFFER_SIZE)
+#define RXBUFFER_ALLOC      (STM32_NETHERNET * RXBUFFER_SIZE)
 
 #define TXBUFFER_SIZE       (STM32_ETH_NFREEBUFFERS * ALIGNED_BUFSIZE)
-#define TXBUFFER_ALLOC      (STM32F7_NETHERNET * TXBUFFER_SIZE)
+#define TXBUFFER_ALLOC      (STM32_NETHERNET * TXBUFFER_SIZE)
 
 /* Extremely detailed register debug that you would normally never want
  * enabled.
@@ -659,7 +659,7 @@ static uint8_t g_txbuffer[TXBUFFER_ALLOC]
 
 /* These are the pre-allocated Ethernet device structures */
 
-static struct stm32_ethmac_s g_stm32ethmac[STM32F7_NETHERNET];
+static struct stm32_ethmac_s g_stm32ethmac[STM32_NETHERNET];
 
 /****************************************************************************
  * Private Function Prototypes
@@ -3899,7 +3899,7 @@ static int stm32_ethconfig(struct stm32_ethmac_s *priv)
  *
  ****************************************************************************/
 
-#if STM32F7_NETHERNET == 1 || defined(CONFIG_NETDEV_LATEINIT)
+#if STM32_NETHERNET == 1 || defined(CONFIG_NETDEV_LATEINIT)
 static inline
 #endif
 int stm32_ethinitialize(int intf)
@@ -3912,7 +3912,7 @@ int stm32_ethinitialize(int intf)
 
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf < STM32F7_NETHERNET);
+  DEBUGASSERT(intf < STM32_NETHERNET);
   priv = &g_stm32ethmac[intf];
 
   /* Initialize the driver structure */
@@ -3973,7 +3973,7 @@ int stm32_ethinitialize(int intf)
  *
  * Description:
  *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in arm_initialize.c. If STM32F7_NETHERNET
+ *   low-level initialization logic in arm_initialize.c. If STM32_NETHERNET
  *   greater than one, then board specific logic will have to supply a
  *   version of arm_netinitialize() that calls stm32_ethinitialize() with
  *   the appropriate interface number.
@@ -3988,11 +3988,11 @@ int stm32_ethinitialize(int intf)
  *
  ****************************************************************************/
 
-#if STM32F7_NETHERNET == 1 && !defined(CONFIG_NETDEV_LATEINIT)
+#if STM32_NETHERNET == 1 && !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void)
 {
   stm32_ethinitialize(0);
 }
 #endif
 
-#endif /* STM32F7_NETHERNET > 0 && CONFIG_STM32F7_ETHMAC */
+#endif /* STM32_NETHERNET > 0 && CONFIG_STM32F7_ETHMAC */
