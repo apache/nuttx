@@ -66,17 +66,17 @@
 
 /* Set the range of system SRAM */
 
-#define SRAM1_START  STM32WL5_SRAM_BASE
-#define SRAM1_END    (SRAM1_START + STM32WL5_SRAM1_SIZE)
+#define SRAM1_START  STM32_SRAM_BASE
+#define SRAM1_END    (SRAM1_START + STM32_SRAM1_SIZE)
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
 #ifdef CONFIG_IPCC
 #  define SRAM2_START  IPCC_END
 #else
-#  define SRAM2_START  STM32WL5_SRAM2_BASE
+#  define SRAM2_START  STM32_SRAM2_BASE
 #endif
-#define SRAM2_END    (SRAM2_START + STM32WL5_SRAM2_SIZE)
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 /* Some sanity checking.  If multiple memory regions are defined, verify
  * that CONFIG_MM_REGIONS is set to match the number of memory regions

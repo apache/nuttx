@@ -91,7 +91,7 @@
 #   warning "There is unused space on flash"
 #endif
 
-#define FLASH_PAGE_SIZE    STM32WL5_FLASH_PAGESIZE
+#define FLASH_PAGE_SIZE    STM32_FLASH_PAGESIZE
 
 /****************************************************************************
  * Private Definitions

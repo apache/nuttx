@@ -135,7 +135,7 @@
  * of SRAM2. SRAM2 region will be right after IPCC reserved memory
  */
 
-#define IPCC_START      STM32WL5_SRAM2_BASE
+#define IPCC_START      STM32_SRAM2_BASE
 #define IPCC_NCHAN     (IPCC_CHAN1 + IPCC_CHAN2 + IPCC_CHAN3 + \
                         IPCC_CHAN4 + IPCC_CHAN5 + IPCC_CHAN6)
 #define IPCC_END       (IPCC_START + IPCC_CHAN1_SIZE + IPCC_CHAN2_SIZE + \
