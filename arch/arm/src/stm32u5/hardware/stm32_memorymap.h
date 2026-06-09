@@ -40,8 +40,8 @@
 #define STM32_CORTEX_BASE       0xE0000000  /* 0xe0000000-0xffffffff: 512Mb Cortex-M4 block */
 
 #define STM32_REGION_MASK       0xF0000000
-#define STM32_IS_SRAM(a)        ((((uint32_t)(a)) & STM32U5_REGION_MASK) == STM32U5_SRAM_BASE)
-#define STM32_IS_EXTSRAM(a)     ((((uint32_t)(a)) & STM32U5_REGION_MASK) == STM32U5_FMC_BANK1)
+#define STM32_IS_SRAM(a)        ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
+#define STM32_IS_EXTSRAM(a)     ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_FMC_BANK1)
 
 /* Code Base Addresses ******************************************************/
 
