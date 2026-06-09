@@ -52,10 +52,10 @@
  * Each bank requires its RCC MEMENR clock enable bit to be set.
  */
 
-#define STM32N6_SRAM_SIZE         (4 * 1024 * 1024)  /* 4194304 bytes (4 MiB) */
+#define STM32_SRAM_SIZE         (4 * 1024 * 1024)  /* 4194304 bytes (4 MiB) */
 
-#define STM32N6_NPORTS                  (12)   /* GPIO ports A-H (8) + N, O, P, Q (4) */
-#define STM32N6_NUSART                   (1)   /* USART1 */
+#define STM32_NPORTS                  (12)   /* GPIO ports A-H (8) + N, O, P, Q (4) */
+#define STM32_NUSART                   (1)   /* USART1 */
 
 /* NVIC priority levels *****************************************************/
 
