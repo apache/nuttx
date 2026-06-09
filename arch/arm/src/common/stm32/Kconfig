@@ -1,0 +1,1307 @@
+#
+# Common STM32 Kconfig options shared by STM32 families.
+#
+
+menu "Common STM32 Configuration Options"
+	depends on ARCH_CHIP_STM32
+
+config STM32_SERIALDRIVER
+	bool
+
+config STM32_1WIREDRIVER
+	bool
+
+config STM32_HCIUART
+	bool
+
+choice
+	prompt "JTAG Configuration"
+	default STM32_JTAG_DISABLE
+	---help---
+		JTAG Enable settings (by default JTAG-DP and SW-DP are disabled)
+
+config STM32_JTAG_DISABLE
+	bool "Disable all JTAG clocking"
+
+config STM32_JTAG_FULL_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP)"
+
+config STM32_JTAG_NOJNTRST_ENABLE
+	bool "Enable full SWJ (JTAG-DP + SW-DP) but without JNTRST"
+
+config STM32_JTAG_SW_ENABLE
+	bool "Set JTAG-DP disabled and SW-DP enabled"
+
+endchoice
+
+choice
+	prompt "Select TIM1 ADC channel"
+	depends on STM32_TIM1_ADC
+	default STM32_TIM1_ADC1
+
+config STM32_TIM1_ADC1
+	bool "TIM1 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+config STM32_TIM1_ADC2
+	bool "TIM1 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC2
+
+config STM32_TIM1_ADC3
+	bool "TIM1 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM2 ADC channel"
+	depends on STM32_TIM2_ADC
+	default STM32_TIM2_ADC1
+
+config STM32_TIM2_ADC1
+	bool "TIM2 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+config STM32_TIM2_ADC2
+	bool "TIM2 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC2
+
+config STM32_TIM2_ADC3
+	bool "TIM2 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM3 ADC channel"
+	depends on STM32_TIM3_ADC
+	default STM32_TIM3_ADC1
+
+config STM32_TIM3_ADC1
+	bool "TIM3 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+config STM32_TIM3_ADC2
+	bool "TIM3 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC2
+
+config STM32_TIM3_ADC3
+	bool "TIM3 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM4 ADC channel"
+	depends on STM32_TIM4_ADC
+	default STM32_TIM4_ADC1
+
+config STM32_TIM4_ADC1
+	bool "TIM4 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC1
+
+config STM32_TIM4_ADC2
+	bool "TIM4 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC2
+
+config STM32_TIM4_ADC3
+	bool "TIM4 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM5 ADC channel"
+	depends on STM32_TIM5_ADC
+	default STM32_TIM5_ADC1
+
+config STM32_TIM5_ADC1
+	bool "TIM5 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC1
+
+config STM32_TIM5_ADC2
+	bool "TIM5 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC2
+
+config STM32_TIM5_ADC3
+	bool "TIM5 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM5 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM8 ADC channel"
+	depends on STM32_TIM8_ADC
+	default STM32_TIM8_ADC1
+
+config STM32_TIM8_ADC1
+	bool "TIM8 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC1
+
+config STM32_TIM8_ADC2
+	bool "TIM8 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC2
+
+config STM32_TIM8_ADC3
+	bool "TIM8 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Select TIM1 DAC channel"
+	depends on STM32_TIM1_DAC
+	default STM32_TIM1_DAC1
+
+config STM32_TIM1_DAC1
+	bool "TIM1 DAC channel 1"
+	---help---
+		Reserve TIM1 to trigger DAC1
+
+config STM32_TIM1_DAC2
+	bool "TIM1 DAC channel 2"
+	---help---
+		Reserve TIM1 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM2 DAC channel"
+	depends on STM32_TIM2_DAC
+	default STM32_TIM2_DAC1
+
+config STM32_TIM2_DAC1
+	bool "TIM2 DAC channel 1"
+	---help---
+		Reserve TIM2 to trigger DAC1
+
+config STM32_TIM2_DAC2
+	bool "TIM2 DAC channel 2"
+	---help---
+		Reserve TIM2 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM3 DAC channel"
+	depends on STM32_TIM3_DAC
+	default STM32_TIM3_DAC1
+
+config STM32_TIM3_DAC1
+	bool "TIM3 DAC channel 1"
+	---help---
+		Reserve TIM3 to trigger DAC1
+
+config STM32_TIM3_DAC2
+	bool "TIM3 DAC channel 2"
+	---help---
+		Reserve TIM3 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM4 DAC channel"
+	depends on STM32_TIM4_DAC
+	default STM32_TIM4_DAC1
+
+config STM32_TIM4_DAC1
+	bool "TIM4 DAC channel 1"
+	---help---
+		Reserve TIM4 to trigger DAC1
+
+config STM32_TIM4_DAC2
+	bool "TIM4 DAC channel 2"
+	---help---
+		Reserve TIM4 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM5 DAC channel"
+	depends on STM32_TIM5_DAC
+	default STM32_TIM5_DAC1
+
+config STM32_TIM5_DAC1
+	bool "TIM5 DAC channel 1"
+	---help---
+		Reserve TIM5 to trigger DAC1
+
+config STM32_TIM5_DAC2
+	bool "TIM5 DAC channel 2"
+	---help---
+		Reserve TIM5 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM6 DAC channel"
+	depends on STM32_TIM6_DAC
+	default STM32_TIM6_DAC1
+
+config STM32_TIM6_DAC1
+	bool "TIM6 DAC channel 1"
+	---help---
+		Reserve TIM6 to trigger DAC1
+
+config STM32_TIM6_DAC2
+	bool "TIM6 DAC channel 2"
+	---help---
+		Reserve TIM6 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM7 DAC channel"
+	depends on STM32_TIM7_DAC
+	default STM32_TIM7_DAC1
+
+config STM32_TIM7_DAC1
+	bool "TIM7 DAC channel 1"
+	---help---
+		Reserve TIM7 to trigger DAC1
+
+config STM32_TIM7_DAC2
+	bool "TIM7 DAC channel 2"
+	---help---
+		Reserve TIM7 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM8 DAC channel"
+	depends on STM32_TIM8_DAC
+	default STM32_TIM8_DAC1
+
+config STM32_TIM8_DAC1
+	bool "TIM8 DAC channel 1"
+	---help---
+		Reserve TIM8 to trigger DAC1
+
+config STM32_TIM8_DAC2
+	bool "TIM8 DAC channel 2"
+	---help---
+		Reserve TIM8 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM9 DAC channel"
+	depends on STM32_TIM9_DAC
+	default STM32_TIM9_DAC1
+
+config STM32_TIM9_DAC1
+	bool "TIM9 DAC channel 1"
+	---help---
+		Reserve TIM9 to trigger DAC1
+
+config STM32_TIM9_DAC2
+	bool "TIM9 DAC channel 2"
+	---help---
+		Reserve TIM9 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM10 DAC channel"
+	depends on STM32_TIM10_DAC
+	default STM32_TIM10_DAC1
+
+config STM32_TIM10_DAC1
+	bool "TIM10 DAC channel 1"
+	---help---
+		Reserve TIM10 to trigger DAC1
+
+config STM32_TIM10_DAC2
+	bool "TIM10 DAC channel 2"
+	---help---
+		Reserve TIM10 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM11 DAC channel"
+	depends on STM32_TIM11_DAC
+	default STM32_TIM11_DAC1
+
+config STM32_TIM11_DAC1
+	bool "TIM11 DAC channel 1"
+	---help---
+		Reserve TIM11 to trigger DAC1
+
+config STM32_TIM11_DAC2
+	bool "TIM11 DAC channel 2"
+	---help---
+		Reserve TIM11 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM12 DAC channel"
+	depends on STM32_TIM12_DAC
+	default STM32_TIM12_DAC1
+
+config STM32_TIM12_DAC1
+	bool "TIM12 DAC channel 1"
+	---help---
+		Reserve TIM12 to trigger DAC1
+
+config STM32_TIM12_DAC2
+	bool "TIM12 DAC channel 2"
+	---help---
+		Reserve TIM12 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM13 DAC channel"
+	depends on STM32_TIM13_DAC
+	default STM32_TIM13_DAC1
+
+config STM32_TIM13_DAC1
+	bool "TIM13 DAC channel 1"
+	---help---
+		Reserve TIM13 to trigger DAC1
+
+config STM32_TIM13_DAC2
+	bool "TIM13 DAC channel 2"
+	---help---
+		Reserve TIM13 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "Select TIM14 DAC channel"
+	depends on STM32_TIM14_DAC
+	default STM32_TIM14_DAC1
+
+config STM32_TIM14_DAC1
+	bool "TIM14 DAC channel 1"
+	---help---
+		Reserve TIM14 to trigger DAC1
+
+config STM32_TIM14_DAC2
+	bool "TIM14 DAC channel 2"
+	---help---
+		Reserve TIM14 to trigger DAC2
+
+endchoice
+
+choice
+	prompt "USART1 Driver Configuration"
+	depends on STM32_USART1
+	default STM32_USART1_SERIALDRIVER
+
+config STM32_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART1_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART1 Driver Configuration
+
+choice
+	prompt "USART2 Driver Configuration"
+	depends on STM32_USART2
+	default STM32_USART2_SERIALDRIVER
+
+config STM32_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART2_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART2 Driver Configuration
+
+choice
+	prompt "USART3 Driver Configuration"
+	depends on STM32_USART3
+	default STM32_USART3_SERIALDRIVER
+
+config STM32_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART3_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART3 Driver Configuration
+
+choice
+	prompt "UART4 Driver Configuration"
+	depends on STM32_UART4
+	default STM32_UART4_SERIALDRIVER
+
+config STM32_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART1 Driver Configuration
+
+choice
+	prompt "UART5 Driver Configuration"
+	depends on STM32_UART5
+	default STM32_UART5_SERIALDRIVER
+
+config STM32_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+choice
+	prompt "USART6 Driver Configuration"
+	depends on STM32_USART6
+	default STM32_USART6_SERIALDRIVER
+
+config STM32_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART6_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART6 Driver Configuration
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	depends on STM32_LPUART1
+	default STM32_LPUART1_SERIALDRIVER
+
+config STM32_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_LPUART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+choice
+	prompt "RTC clock source"
+	depends on STM32_RTC
+	default STM32_RTC_LSECLOCK
+
+config STM32_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config STM32_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice # RTC clock source
+
+choice
+	prompt "MII clock configuration"
+	depends on STM32_MII
+	default STM32_MII_MCO if STM32_STM32F10XX
+	default STM32_MII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
+	default STM32_MII_EXTCLK
+
+config STM32_MII_MCO
+	bool "Use MC0 as MII clock"
+	depends on STM32_STM32F10XX
+	---help---
+		Use MCO to clock the MII interface.  Default:  Use MC0
+
+config STM32_MII_MCO1
+	bool "Use MC01 as MII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
+	---help---
+		Use MCO1 to clock the MII interface.  Default:  Use MC01
+
+config STM32_MII_MCO2
+	bool "Use MC02 as MII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
+	---help---
+		Use MCO2 to clock the MII interface.  Default:  Use MC01
+
+config STM32_MII_EXTCLK
+	bool "External MII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for MII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+choice
+	prompt "RMII clock configuration"
+	depends on STM32_RMII
+	default STM32_RMII_MCO if STM32_STM32F10XX
+	default STM32_RMII_MCO1 if STM32_STM32F20XX || STM32_STM32F4XXX
+	default STM32_RMII_EXTCLK
+
+config STM32_RMII_MCO
+	bool "Use MC0 as RMII clock"
+	depends on STM32_STM32F10XX
+	---help---
+		Use MCO to clock the RMII interface.  Default:  Use MC0
+
+config STM32_RMII_MCO1
+	bool "Use MC01 as RMII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
+	---help---
+		Use MCO1 to clock the RMII interface.  Default:  Use MC01
+
+config STM32_RMII_MCO2
+	bool "Use MC02 as RMII clock"
+	depends on (STM32_STM32F20XX || STM32_STM32F4XXX)
+	---help---
+		Use MCO2 to clock the RMII interface.  Default:  Use MC01
+
+config STM32_RMII_EXTCLK
+	bool "External RMII clock"
+	---help---
+		Clocking is provided by external logic.  Don't use MCO for RMII
+		clock.  Default:  Use MC0[1]
+
+endchoice
+
+choice
+	prompt "CAN character driver or SocketCAN support"
+	depends on STM32_CAN
+	default STM32_CAN_CHARDRIVER
+
+config STM32_CAN_CHARDRIVER
+	bool "STM32F7 CAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32_CAN_SOCKET
+	bool "STM32F7 CAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # CAN character driver or SocketCAN support
+
+choice
+	prompt "FDCAN character driver or SocketCAN support"
+	depends on STM32_FDCAN
+	default STM32_FDCAN_CHARDRIVER
+
+config STM32_FDCAN_CHARDRIVER
+	bool "STM32 FDCAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32_FDCAN_SOCKET
+	bool "STM32 FDCAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # FDCAN character driver or SocketCAN support
+
+choice
+	prompt "FDCAN1 frame format"
+	depends on STM32_FDCAN1
+	default STM32_FDCAN1_ISO11898_1
+
+config STM32_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	depends on STM32_FDCAN1
+	default STM32_FDCAN1_CLASSIC
+
+config STM32_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Classic CAN mode
+
+config STM32_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+choice
+	prompt "FDCAN2 frame format"
+	depends on STM32_FDCAN2
+	default STM32_FDCAN2_ISO11898_1
+
+config STM32_FDCAN2_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN2_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN2 frame format
+
+choice
+	prompt "FDCAN2 mode"
+	depends on STM32_FDCAN2
+	default STM32_FDCAN2_CLASSIC
+
+config STM32_FDCAN2_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Classic CAN mode
+
+config STM32_FDCAN2_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN2_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN2 mode
+
+choice
+	prompt "Layer 1 color format"
+	depends on STM32_LTDC
+	default STM32_LTDC_L1_RGB565
+
+config STM32_LTDC_L1_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on STM32_FB_CMAP
+
+config STM32_LTDC_L1_RGB565
+	bool "16 bpp RGB 565"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB4444
+	bool "16 bpp ARGB 4444"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB1555
+	bool "16 bpp ARGB 1555"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_RGB888
+	bool "24 bpp RGB 888"
+	depends on !STM32_FB_CMAP
+
+config STM32_LTDC_L1_ARGB8888
+	bool "32 bpp ARGB 8888"
+	depends on !STM32_FB_CMAP
+
+endchoice # Layer 1 color format
+
+choice
+	prompt "Layer 2 (top layer) color format"
+	depends on STM32_LTDC && STM32_LTDC_L2
+	default STM32_LTDC_L2_RGB565
+
+config STM32_LTDC_L2_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	depends on STM32_LTDC_L1_L8
+
+config STM32_LTDC_L2_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on STM32_LTDC_L1_AL44
+
+config STM32_LTDC_L2_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on STM32_LTDC_L1_AL88
+
+config STM32_LTDC_L2_RGB565
+	bool "16 bpp RGB 565"
+	depends on STM32_LTDC_L1_RGB565
+
+config STM32_LTDC_L2_ARGB4444
+	bool "16 bpp ARGB 4444"
+	depends on STM32_LTDC_L1_ARGB4444
+
+config STM32_LTDC_L2_ARGB1555
+	bool "16 bpp ARGB 1555"
+	depends on STM32_LTDC_L1_ARGB1555
+
+config STM32_LTDC_L2_RGB888
+	bool "24 bpp RGB 888"
+	depends on STM32_LTDC_L1_RGB888
+
+config STM32_LTDC_L2_ARGB8888
+	bool "32 bpp ARGB 8888"
+	depends on STM32_LTDC_L1_ARGB8888
+
+endchoice # Layer 2 color format
+
+choice
+	prompt "Input channel sampling frequency"
+	depends on STM32_QENCODER_FILTER
+	default STM32_QENCODER_SAMPLE_FDTS_4
+
+config STM32_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	prompt "Input channel event count"
+	depends on STM32_QENCODER_FILTER
+	default STM32_QENCODER_SAMPLE_EVENT_6
+
+config STM32_QENCODER_SAMPLE_EVENT_1
+	bool "1"
+	depends on STM32_QENCODER_SAMPLE_FDTS
+
+config STM32_QENCODER_SAMPLE_EVENT_2
+	bool "2"
+	depends on STM32_QENCODER_SAMPLE_CKINT
+
+config STM32_QENCODER_SAMPLE_EVENT_4
+	bool "4"
+	depends on STM32_QENCODER_SAMPLE_CKINT
+
+config STM32_QENCODER_SAMPLE_EVENT_5
+	bool "5"
+	depends on STM32_QENCODER_SAMPLE_FDTS_16 || STM32_QENCODER_SAMPLE_FDTS_32
+
+config STM32_QENCODER_SAMPLE_EVENT_6
+	bool "6"
+	depends on !STM32_QENCODER_SAMPLE_FDTS && !STM32_QENCODER_SAMPLE_CKINT
+
+config STM32_QENCODER_SAMPLE_EVENT_8
+	bool "8"
+	depends on !STM32_QENCODER_SAMPLE_FDTS
+
+endchoice
+
+choice
+	prompt "FOC ADC trigger selection"
+	depends on STM32_FOC
+	default STM32_FOC_ADC_TRGO
+
+config STM32_FOC_ADC_CCR4
+	bool "FOC uses CCR4 as ADC trigger"
+	---help---
+		This option uses the software frequency prescaler and is
+		not possible for 4-phase output.
+
+config STM32_FOC_ADC_TRGO
+	bool "FOC uses TRGO as ADC trigger"
+	depends on STM32_HAVE_IP_ADC_V2 || (STM32_HAVE_IP_ADC_V1 && !STM32_FOC_FOC1)
+	select STM32_PWM_TRGO
+	---help---
+		This option allows you to use higher PWM frequency and works for 4-phase output.
+		It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
+
+endchoice # "FOC ADC trigger selection"
+
+choice
+	prompt "FOC0 device ADC selection"
+	depends on STM32_FOC_FOC0
+	default STM32_FOC_FOC0_ADC1
+
+config STM32_FOC_FOC0_ADC1
+	bool "FOC0 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
+
+config STM32_FOC_FOC0_ADC2
+	bool "FOC0 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
+
+config STM32_FOC_FOC0_ADC3
+	bool "FOC0 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
+
+config STM32_FOC_FOC0_ADC4
+	bool "FOC0 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
+
+endchoice # "FOC0 device ADC selection"
+
+choice
+	prompt "FOC1 device ADC selection"
+	depends on STM32_FOC_FOC1
+	default STM32_FOC_FOC1_ADC2
+
+config STM32_FOC_FOC1_ADC1
+	bool "FOC1 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
+
+config STM32_FOC_FOC1_ADC2
+	bool "FOC1 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
+
+config STM32_FOC_FOC1_ADC3
+	bool "FOC1 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
+
+config STM32_FOC_FOC1_ADC4
+	bool "FOC1 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
+
+endchoice # "FOC0 device ADC selection"
+
+choice
+	prompt "Override Flash Size Designator"
+	default STM32_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32F series parts numbering (sans the package type) ends with a number or letter
+		that designates the FLASH size.
+
+			Designator  Size in KiB
+				4    16
+				6    32
+				8    64
+				B    128
+				C    256
+				D    384
+				E    512
+				F    768
+				G    1024
+				I    2048
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+			If the STM32G071RB is chosen, the Flash configuration would be 'B', if a variant of
+			the part with a  2048 KiB Flash is released in the future one could simply select
+			the 'I' designator here.
+
+config STM32_FLASH_OVERRIDE_4
+	bool "4 16KiB"
+
+config STM32_FLASH_OVERRIDE_6
+	bool "6 32KiB"
+
+config STM32_FLASH_OVERRIDE_8
+	bool "8 64KiB"
+
+config STM32_FLASH_OVERRIDE_B
+	bool "B 128KiB"
+
+config STM32_FLASH_OVERRIDE_C
+	bool "C 256KiB"
+
+config STM32_FLASH_OVERRIDE_D
+	bool "D 384KiB"
+
+config STM32_FLASH_OVERRIDE_E
+	bool "E 512KiB"
+
+config STM32_FLASH_OVERRIDE_F
+	bool "F 768KiB"
+
+config STM32_FLASH_OVERRIDE_G
+	bool "G 1024KiB"
+
+config STM32_FLASH_OVERRIDE_I
+	bool "I 2048KiB"
+
+config STM32_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32_FLASH_OVERRIDE_C_256
+	bool "C 256 KB"
+
+config STM32_FLASH_OVERRIDE_C_320
+	bool "C 320 KB"
+
+config STM32_FLASH_OVERRIDE_E_512
+	bool "E 512 KB"
+
+config STM32_FLASH_OVERRIDE_Y_640
+	bool "Y 640 KB"
+
+config STM32_FLASH_OVERRIDE_G_1024
+	bool "G 1024 KB"
+
+endchoice # Override Flash Size Designator
+
+choice
+	prompt "Select TIM15 ADC channel"
+	depends on STM32_TIM15_ADC
+	default STM32_TIM15_ADC1
+
+config STM32_TIM15_ADC1
+	bool "TIM15 ADC channel 1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+config STM32_TIM15_ADC2
+	bool "TIM15 ADC channel 2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC2
+
+config STM32_TIM15_ADC3
+	bool "TIM15 ADC channel 3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "Transfer technique"
+	depends on STM32_QSPI
+	default STM32_QSPI_DMA
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32_QSPI_POLLING
+	bool "Polling"
+	---help---
+		Use conventional register I/O with status polling to transfer data.
+
+config STM32_QSPI_INTERRUPTS
+	bool "Interrupts"
+	---help---
+		User interrupt driven I/O transfers.
+
+config STM32_QSPI_DMA
+	bool "DMA"
+	depends on STM32_DMA
+	---help---
+		Use DMA to improve QSPI transfer performance.
+
+endchoice
+
+choice
+	prompt "Bank selection"
+	depends on STM32_QSPI
+	default STM32_QSPI_MODE_BANK1
+	---help---
+		You can choose between using polling, interrupts, or DMA to transfer data
+		over the QSPI interface.
+
+config STM32_QSPI_MODE_BANK1
+	bool "Bank 1"
+
+config STM32_QSPI_MODE_BANK2
+	bool "Bank 2"
+
+config STM32_QSPI_MODE_DUAL
+	bool "Dual Bank"
+
+endchoice
+
+choice
+	prompt "DMA Priority"
+	depends on STM32_QSPI && STM32_QSPI_DMA && STM32_DMA
+	default STM32_QSPI_DMAPRIORITY_MEDIUM
+	---help---
+		The DMA controller supports priority levels.  You are probably fine
+		with the default of 'medium' except for special cases.  In the event
+		of contention between to channels at the same priority, the lower
+		numbered channel has hardware priority over the higher numbered one.
+
+config STM32_QSPI_DMAPRIORITY_VERYHIGH
+	bool "Very High priority"
+	depends on STM32_DMA
+	---help---
+		'Highest' priority.
+
+config STM32_QSPI_DMAPRIORITY_HIGH
+	bool "High priority"
+	depends on STM32_DMA
+	---help---
+		'High' priority.
+
+config STM32_QSPI_DMAPRIORITY_MEDIUM
+	bool "Medium priority"
+	depends on STM32_DMA
+	---help---
+		'Medium' priority.
+
+config STM32_QSPI_DMAPRIORITY_LOW
+	bool "Low priority"
+	depends on STM32_DMA
+	---help---
+		'Low' priority.
+
+endchoice
+
+choice
+	prompt "Operation mode"
+	depends on STM32_SAI
+	default STM32_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	depends on STM32_SAI1_A && STM32_SAI1_B
+	default STM32_SAI1_BOTH_ASYNC
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	depends on STM32_SAI2_A && STM32_SAI2_B
+	default STM32_SAI2_BOTH_ASYNC
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
+
+choice
+	prompt "Select ADC for use with TIM6"
+	depends on STM32_TIM6_ADC
+	default STM32_TIM6_ADC1
+
+config STM32_TIM6_ADC1
+	bool "Use TIM6 for ADC1"
+	depends on STM32_ADC1
+	select STM32_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC1
+
+config STM32_TIM6_ADC2
+	bool "Use TIM6 for ADC2"
+	depends on STM32_ADC2
+	select STM32_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC2
+
+config STM32_TIM6_ADC3
+	bool "Use TIM6 for ADC3"
+	depends on STM32_ADC3
+	select STM32_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC3
+
+endchoice
+
+choice
+	prompt "LPTIM1 clock source"
+	default STM32_LPTIM1_CLK_APB1
+
+config STM32_LPTIM1_CLK_APB1
+	bool "Clock LPTIM1 from APB1"
+
+config STM32_LPTIM1_CLK_LSE
+	bool "Clock LPTIM1 from LSE"
+
+config STM32_LPTIM1_CLK_LSI
+	bool "Clock LPTIM1 from LSI"
+
+config STM32_LPTIM1_CLK_HSI
+	bool "Clock LPTIM1 from HSI"
+
+endchoice
+
+choice
+	prompt "LPTIM2 clock source"
+	default STM32_LPTIM2_CLK_APB1
+
+config STM32_LPTIM2_CLK_APB1
+	bool "Clock LPTIM2 from APB1"
+
+config STM32_LPTIM2_CLK_LSE
+	bool "Clock LPTIM2 from LSE"
+
+config STM32_LPTIM2_CLK_LSI
+	bool "Clock LPTIM2 from LSI"
+
+config STM32_LPTIM2_CLK_HSI
+	bool "Clock LPTIM2 from HSI"
+
+endchoice
+endmenu # Common STM32 Configuration Options
