@@ -1839,6 +1839,9 @@ endif
 if ARCH_CHIP_STM32WL5
 source "arch/arm/src/stm32wl5/Kconfig"
 endif
+if ARCH_CHIP_STM32
+source "arch/arm/src/common/stm32/Kconfig"
+endif
 if ARCH_CHIP_STR71X
 source "arch/arm/src/str71x/Kconfig"
 endif
