@@ -729,7 +729,7 @@ static void stm32can_errint(struct stm32_can_s *priv, bool enable)
     }
   else
     {
-      regval &= ~STM32F7_CAN_ERRINT;
+      regval &= ~STM32_CAN_ERRINT;
     }
 
   stm32can_putreg(priv, STM32_CAN_IER_OFFSET, regval);

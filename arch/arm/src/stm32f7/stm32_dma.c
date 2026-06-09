@@ -55,7 +55,7 @@
  ****************************************************************************/
 
 #define DMA1_NSTREAMS    8
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
 #  define DMA2_NSTREAMS  8
 #  define DMA_NSTREAMS   (DMA1_NSTREAMS+DMA2_NSTREAMS)
 #else
@@ -148,7 +148,7 @@ static struct stm32_dma_s g_dma[DMA_NSTREAMS] =
     .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
   },
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   {
     .stream   = 0,
     .irq      = STM32_IRQ_DMA2S0,
@@ -268,13 +268,13 @@ static inline struct stm32_dma_s *stm32_dmastream(unsigned int stream,
 {
   int index;
 
-  DEBUGASSERT(stream < DMA_NSTREAMS && controller < STM32F7_NDMA);
+  DEBUGASSERT(stream < DMA_NSTREAMS && controller < STM32_NDMA);
 
   /* Convert the controller + stream based on the fact that there are
    * 8 streams per controller.
    */
 
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   index = controller << 3 | stream;
 #else
   index = stream;
@@ -376,7 +376,7 @@ static int stm32_dmainterrupt(int irq, void *context, void *arg)
       controller = DMA1;
     }
   else
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   if (irq >= STM32_IRQ_DMA2S0 && irq <= STM32_IRQ_DMA2S4)
     {
       stream     = irq - STM32_IRQ_DMA2S0;
