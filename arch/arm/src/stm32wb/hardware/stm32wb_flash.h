@@ -87,67 +87,67 @@
 
 /* Define the valid configuration  */
 
-#define STM32WB_FLASH_PAGESIZE      4096
+#define STM32_FLASH_PAGESIZE      4096
 
 #if defined(CONFIG_STM32WB_FLASH_CONFIG_C_256)   /* 256 kB */
-#  define STM32WB_FLASH_NPAGES      64
+#  define STM32_FLASH_NPAGES      64
 #elif defined(CONFIG_STM32WB_FLASH_CONFIG_C_320) /* 320 kB */
-#  define STM32WB_FLASH_NPAGES      80
+#  define STM32_FLASH_NPAGES      80
 #elif defined(CONFIG_STM32WB_FLASH_CONFIG_E_512) /* 512 kB */
-#  define STM32WB_FLASH_NPAGES      128
+#  define STM32_FLASH_NPAGES      128
 #elif defined(CONFIG_STM32WB_FLASH_CONFIG_Y_640) /* 640 kB */
-#  define STM32WB_FLASH_NPAGES      160
+#  define STM32_FLASH_NPAGES      160
 #elif defined(CONFIG_STM32WB_FLASH_CONFIG_G_1024) /* 1 MB */
-#  define STM32WB_FLASH_NPAGES      256
+#  define STM32_FLASH_NPAGES      256
 #else
 #  error "Unknown flash configuration!"
 #endif
 
-#define STM32WB_FLASH_SIZE        (STM32WB_FLASH_NPAGES * STM32WB_FLASH_PAGESIZE)
+#define STM32_FLASH_SIZE        (STM32_FLASH_NPAGES * STM32_FLASH_PAGESIZE)
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_FLASH_ACR_OFFSET        0x0000  /* Flash Access Control Register */
-#define STM32WB_FLASH_KEYR_OFFSET       0x0008  /* Flash Key Register */
-#define STM32WB_FLASH_OPTKEYR_OFFSET    0x000c  /* Flash Option Key Register */
-#define STM32WB_FLASH_SR_OFFSET         0x0010  /* Flash Status Register */
-#define STM32WB_FLASH_CR_OFFSET         0x0014  /* Flash Control Register */
-#define STM32WB_FLASH_ECCR_OFFSET       0x0018  /* Flash ECC Register */
-#define STM32WB_FLASH_OPTR_OFFSET       0x0020  /* Flash Option Register */
-#define STM32WB_FLASH_PCROP1ASR_OFFSET  0x0024  /* Flash PCROP zone A Start address Register */
-#define STM32WB_FLASH_PCROP1AER_OFFSET  0x0028  /* Flash PCROP zone A End address Register */
-#define STM32WB_FLASH_WRP1AR_OFFSET     0x002c  /* Flash WRP area A Address Register */
-#define STM32WB_FLASH_WRP1BR_OFFSET     0x0030  /* Flash WRP area B Address Register */
-#define STM32WB_FLASH_PCROP1BSR_OFFSET  0x0034  /* Flash PCROP zone B Start address Register */
-#define STM32WB_FLASH_PCROP1BER_OFFSET  0x0038  /* Flash PCROP zone B End address Register */
-#define STM32WB_FLASH_IPCCBR_OFFSET     0x003C  /* Flash IPCC mailbox data buffer address Register */
-#define STM32WB_FLASH_C2ACR_OFFSET      0x005C  /* CPU2 flash Access Control Register */
-#define STM32WB_FLASH_C2SR_OFFSET       0x0060  /* CPU2 flash Status Register */
-#define STM32WB_FLASH_C2CR_OFFSET       0x0064  /* CPU2 flash Control Register */
-#define STM32WB_FLASH_SFR_OFFSET        0x0080  /* Secure Flash start address Register */
-#define STM32WB_FLASH_SRRVR_OFFSET      0x0084  /* SRAM2 start address and CPU2 Reset Vector Register */
+#define STM32_FLASH_ACR_OFFSET        0x0000  /* Flash Access Control Register */
+#define STM32_FLASH_KEYR_OFFSET       0x0008  /* Flash Key Register */
+#define STM32_FLASH_OPTKEYR_OFFSET    0x000c  /* Flash Option Key Register */
+#define STM32_FLASH_SR_OFFSET         0x0010  /* Flash Status Register */
+#define STM32_FLASH_CR_OFFSET         0x0014  /* Flash Control Register */
+#define STM32_FLASH_ECCR_OFFSET       0x0018  /* Flash ECC Register */
+#define STM32_FLASH_OPTR_OFFSET       0x0020  /* Flash Option Register */
+#define STM32_FLASH_PCROP1ASR_OFFSET  0x0024  /* Flash PCROP zone A Start address Register */
+#define STM32_FLASH_PCROP1AER_OFFSET  0x0028  /* Flash PCROP zone A End address Register */
+#define STM32_FLASH_WRP1AR_OFFSET     0x002c  /* Flash WRP area A Address Register */
+#define STM32_FLASH_WRP1BR_OFFSET     0x0030  /* Flash WRP area B Address Register */
+#define STM32_FLASH_PCROP1BSR_OFFSET  0x0034  /* Flash PCROP zone B Start address Register */
+#define STM32_FLASH_PCROP1BER_OFFSET  0x0038  /* Flash PCROP zone B End address Register */
+#define STM32_FLASH_IPCCBR_OFFSET     0x003C  /* Flash IPCC mailbox data buffer address Register */
+#define STM32_FLASH_C2ACR_OFFSET      0x005C  /* CPU2 flash Access Control Register */
+#define STM32_FLASH_C2SR_OFFSET       0x0060  /* CPU2 flash Status Register */
+#define STM32_FLASH_C2CR_OFFSET       0x0064  /* CPU2 flash Control Register */
+#define STM32_FLASH_SFR_OFFSET        0x0080  /* Secure Flash start address Register */
+#define STM32_FLASH_SRRVR_OFFSET      0x0084  /* SRAM2 start address and CPU2 Reset Vector Register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_FLASH_ACR               (STM32WB_FLASHREG_BASE + STM32WB_FLASH_ACR_OFFSET)
-#define STM32WB_FLASH_KEYR              (STM32WB_FLASHREG_BASE + STM32WB_FLASH_KEYR_OFFSET)
-#define STM32WB_FLASH_OPTKEYR           (STM32WB_FLASHREG_BASE + STM32WB_FLASH_OPTKEYR_OFFSET)
-#define STM32WB_FLASH_SR                (STM32WB_FLASHREG_BASE + STM32WB_FLASH_SR_OFFSET)
-#define STM32WB_FLASH_CR                (STM32WB_FLASHREG_BASE + STM32WB_FLASH_CR_OFFSET)
-#define STM32WB_FLASH_ECCR              (STM32WB_FLASHREG_BASE + STM32WB_FLASH_ECCR_OFFSET)
-#define STM32WB_FLASH_OPTR              (STM32WB_FLASHREG_BASE + STM32WB_FLASH_OPTR_OFFSET)
-#define STM32WB_FLASH_PCROP1ASR         (STM32WB_FLASHREG_BASE + STM32WB_FLASH_PCROP1ASR_OFFSET)
-#define STM32WB_FLASH_PCROP1AER         (STM32WB_FLASHREG_BASE + STM32WB_FLASH_PCROP1AER_OFFSET)
-#define STM32WB_FLASH_WRP1AR            (STM32WB_FLASHREG_BASE + STM32WB_FLASH_WRP1AR_OFFSET)
-#define STM32WB_FLASH_WRP1BR            (STM32WB_FLASHREG_BASE + STM32WB_FLASH_WRP1BR_OFFSET)
-#define STM32WB_FLASH_PCROP1BSR         (STM32WB_FLASHREG_BASE + STM32WB_FLASH_PCROP1BSR_OFFSET)
-#define STM32WB_FLASH_PCROP1BER         (STM32WB_FLASHREG_BASE + STM32WB_FLASH_PCROP1BER_OFFSET)
-#define STM32WB_FLASH_IPCCBR            (STM32WB_FLASHREG_BASE + STM32WB_FLASH_IPCCBR_OFFSET)
-#define STM32WB_FLASH_C2ACR             (STM32WB_FLASHREG_BASE + STM32WB_FLASH_C2ACR_OFFSET)
-#define STM32WB_FLASH_C2SR              (STM32WB_FLASHREG_BASE + STM32WB_FLASH_C2SR_OFFSET)
-#define STM32WB_FLASH_C2CR              (STM32WB_FLASHREG_BASE + STM32WB_FLASH_C2CR_OFFSET)
-#define STM32WB_FLASH_SFR               (STM32WB_FLASHREG_BASE + STM32WB_FLASH_SFR_OFFSET)
-#define STM32WB_FLASH_SRRVR             (STM32WB_FLASHREG_BASE + STM32WB_FLASH_SRRVR_OFFSET)
+#define STM32_FLASH_ACR               (STM32_FLASHREG_BASE + STM32_FLASH_ACR_OFFSET)
+#define STM32_FLASH_KEYR              (STM32_FLASHREG_BASE + STM32_FLASH_KEYR_OFFSET)
+#define STM32_FLASH_OPTKEYR           (STM32_FLASHREG_BASE + STM32_FLASH_OPTKEYR_OFFSET)
+#define STM32_FLASH_SR                (STM32_FLASHREG_BASE + STM32_FLASH_SR_OFFSET)
+#define STM32_FLASH_CR                (STM32_FLASHREG_BASE + STM32_FLASH_CR_OFFSET)
+#define STM32_FLASH_ECCR              (STM32_FLASHREG_BASE + STM32_FLASH_ECCR_OFFSET)
+#define STM32_FLASH_OPTR              (STM32_FLASHREG_BASE + STM32_FLASH_OPTR_OFFSET)
+#define STM32_FLASH_PCROP1ASR         (STM32_FLASHREG_BASE + STM32_FLASH_PCROP1ASR_OFFSET)
+#define STM32_FLASH_PCROP1AER         (STM32_FLASHREG_BASE + STM32_FLASH_PCROP1AER_OFFSET)
+#define STM32_FLASH_WRP1AR            (STM32_FLASHREG_BASE + STM32_FLASH_WRP1AR_OFFSET)
+#define STM32_FLASH_WRP1BR            (STM32_FLASHREG_BASE + STM32_FLASH_WRP1BR_OFFSET)
+#define STM32_FLASH_PCROP1BSR         (STM32_FLASHREG_BASE + STM32_FLASH_PCROP1BSR_OFFSET)
+#define STM32_FLASH_PCROP1BER         (STM32_FLASHREG_BASE + STM32_FLASH_PCROP1BER_OFFSET)
+#define STM32_FLASH_IPCCBR            (STM32_FLASHREG_BASE + STM32_FLASH_IPCCBR_OFFSET)
+#define STM32_FLASH_C2ACR             (STM32_FLASHREG_BASE + STM32_FLASH_C2ACR_OFFSET)
+#define STM32_FLASH_C2SR              (STM32_FLASHREG_BASE + STM32_FLASH_C2SR_OFFSET)
+#define STM32_FLASH_C2CR              (STM32_FLASHREG_BASE + STM32_FLASH_C2CR_OFFSET)
+#define STM32_FLASH_SFR               (STM32_FLASHREG_BASE + STM32_FLASH_SFR_OFFSET)
+#define STM32_FLASH_SRRVR             (STM32_FLASHREG_BASE + STM32_FLASH_SRRVR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

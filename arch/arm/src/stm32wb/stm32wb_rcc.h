@@ -88,7 +88,7 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
 {
   uint32_t regval;
 
-  regval = getreg32(STM32WB_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
 
     /* Set MCO source */
 
@@ -99,7 +99,7 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
 
   regval &= ~(RCC_CFGR_MCOPRE_MASK);
   regval |= (divider & RCC_CFGR_MCOPRE_MASK);
-  putreg32(regval, STM32WB_RCC_CFGR);
+  putreg32(regval, STM32_RCC_CFGR);
 }
 
 /****************************************************************************

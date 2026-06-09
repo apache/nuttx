@@ -45,11 +45,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_STM32WB_GPIO_HAVE_PORTD) && defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
-#  define STM32WB_NPORTS              6
+#  define STM32_NPORTS              6
 #elif defined(CONFIG_STM32WB_GPIO_HAVE_PORTE)
-#  define STM32WB_NPORTS              5
+#  define STM32_NPORTS              5
 #else
-#  define STM32WB_NPORTS              4
+#  define STM32_NPORTS              4
 #endif
 
 /* Bit-encoded input to stm32wb_configgpio() */
@@ -250,7 +250,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32WB_NPORTS];
+EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes
