@@ -12,7 +12,7 @@ config STM32F746GDISCO_FLASH
 	select MTD_N25QXXX
 	select MTD_SMART
 	select FS_SMARTFS
-	select STM32F7_QUADSPI
+	select STM32F7_QSPI
 	select MTD_BYTE_WRITE
 	---help---
 		Configures an MTD device for use with the onboard flash

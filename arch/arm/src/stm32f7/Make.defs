@@ -130,7 +130,7 @@ ifeq ($(CONFIG_STM32F7_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_STM32F7_QUADSPI),y)
+ifeq ($(CONFIG_STM32F7_QSPI),y)
 CHIP_CSRCS += stm32_qspi.c
 endif
 

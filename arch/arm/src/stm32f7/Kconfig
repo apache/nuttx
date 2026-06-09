@@ -1469,7 +1469,7 @@ config STM32F7_OTGFSHS
 	default n
 	select USBHOST_HAVE_ASYNCH if USBHOST
 
-config STM32F7_QUADSPI
+config STM32F7_QSPI
 	bool "QuadSPI"
 	default n
 
@@ -2185,7 +2185,7 @@ config STM32F7_EXTERNAL_RAM
 		In addition to internal SDRAM, external RAM may be available through the FMC.
 
 menu "QuadSPI Configuration"
-	depends on STM32F7_QUADSPI
+	depends on STM32F7_QSPI
 
 config STM32F7_QSPI_FLASH_SIZE
 	int "Size of attached serial flash, bytes"
