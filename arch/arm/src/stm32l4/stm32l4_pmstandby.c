@@ -79,15 +79,15 @@ int stm32l4_pmstandby(void)
 
   regval = PWR_SCR_CWUF1 | PWR_SCR_CWUF2 | PWR_SCR_CWUF3 |
            PWR_SCR_CWUF4 | PWR_SCR_CWUF5;
-  putreg32(regval, STM32L4_PWR_SCR);
+  putreg32(regval, STM32_PWR_SCR);
 
   /* Select Standby mode */
 
-  regval  = getreg32(STM32L4_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
   regval |= PWR_CR1_LPMS_STANDBY;
 
-  putreg32(regval, STM32L4_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */
 

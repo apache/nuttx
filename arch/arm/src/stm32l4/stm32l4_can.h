@@ -42,7 +42,7 @@
 
 /* Up to 1 CAN interfaces are supported */
 
-#if STM32L4_NCAN < 1
+#if STM32_NCAN < 1
 #  undef CONFIG_STM32L4_CAN1
 #endif
 

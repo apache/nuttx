@@ -75,7 +75,7 @@ int stm32l4_pmlpr(void)
 
   /* Enable MSI clock */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_MSION;
 
   /* Set MSI clock to 2 MHz */
@@ -83,27 +83,27 @@ int stm32l4_pmlpr(void)
   regval &= ~RCC_CR_MSIRANGE_MASK;
   regval |= RCC_CR_MSIRANGE_2M; /* 2 MHz */
   regval |= RCC_CR_MSIRGSEL;    /* Select new MSIRANGE */
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Select MSI clock as system clock source */
 
-  regval  = getreg32(STM32L4_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_SW_MASK;
   regval |= RCC_CFGR_SW_MSI;
-  putreg32(regval, STM32L4_RCC_CFGR);
+  putreg32(regval, STM32_RCC_CFGR);
 
   /* Wait until the MSI source is used as the system clock source */
 
-  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
           RCC_CFGR_SWS_MSI)
     {
     }
 
   /* Enable Low-Power Run */
 
-  regval  = getreg32(STM32L4_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval |= PWR_CR1_LPR;
-  putreg32(regval, STM32L4_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 
   return OK;
 }

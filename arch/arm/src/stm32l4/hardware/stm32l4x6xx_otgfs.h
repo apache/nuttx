@@ -48,182 +48,182 @@
 
 /* Core global control and status registers */
 
-#define STM32L4_OTGFS_GOTGCTL_OFFSET      0x0000 /* Control and status register */
-#define STM32L4_OTGFS_GOTGINT_OFFSET      0x0004 /* Interrupt register */
-#define STM32L4_OTGFS_GAHBCFG_OFFSET      0x0008 /* AHB configuration register */
-#define STM32L4_OTGFS_GUSBCFG_OFFSET      0x000c /* USB configuration register */
-#define STM32L4_OTGFS_GRSTCTL_OFFSET      0x0010 /* Reset register */
-#define STM32L4_OTGFS_GINTSTS_OFFSET      0x0014 /* Core interrupt register */
-#define STM32L4_OTGFS_GINTMSK_OFFSET      0x0018 /* Interrupt mask register */
-#define STM32L4_OTGFS_GRXSTSR_OFFSET      0x001c /* Receive status debug read/OTG status read register */
-#define STM32L4_OTGFS_GRXSTSP_OFFSET      0x0020 /* Receive status debug read/OTG status pop register */
-#define STM32L4_OTGFS_GRXFSIZ_OFFSET      0x0024 /* Receive FIFO size register */
-#define STM32L4_OTGFS_HNPTXFSIZ_OFFSET    0x0028 /* Host non-periodic transmit FIFO size register */
-#define STM32L4_OTGFS_DIEPTXF0_OFFSET     0x0028 /* Endpoint 0 Transmit FIFO size */
-#define STM32L4_OTGFS_HNPTXSTS_OFFSET     0x002c /* Non-periodic transmit FIFO/queue status register */
-#define STM32L4_OTGFS_GCCFG_OFFSET        0x0038 /* General core configuration register */
-#define STM32L4_OTGFS_CID_OFFSET          0x003c /* Core ID register  */
-#define STM32L4_OTGFS_GLPMCFG_OFFSET      0x0054 /* LPM configuration register */
-#define STM32L4_OTGFS_GPWRDN_OFFSET       0x0058 /* Power down register */
-#define STM32L4_OTGFS_GADPCTL_OFSSET      0x0060 /* ADP timer, control and status register */
-#define STM32L4_OTGFS_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
+#define STM32_OTGFS_GOTGCTL_OFFSET      0x0000 /* Control and status register */
+#define STM32_OTGFS_GOTGINT_OFFSET      0x0004 /* Interrupt register */
+#define STM32_OTGFS_GAHBCFG_OFFSET      0x0008 /* AHB configuration register */
+#define STM32_OTGFS_GUSBCFG_OFFSET      0x000c /* USB configuration register */
+#define STM32_OTGFS_GRSTCTL_OFFSET      0x0010 /* Reset register */
+#define STM32_OTGFS_GINTSTS_OFFSET      0x0014 /* Core interrupt register */
+#define STM32_OTGFS_GINTMSK_OFFSET      0x0018 /* Interrupt mask register */
+#define STM32_OTGFS_GRXSTSR_OFFSET      0x001c /* Receive status debug read/OTG status read register */
+#define STM32_OTGFS_GRXSTSP_OFFSET      0x0020 /* Receive status debug read/OTG status pop register */
+#define STM32_OTGFS_GRXFSIZ_OFFSET      0x0024 /* Receive FIFO size register */
+#define STM32_OTGFS_HNPTXFSIZ_OFFSET    0x0028 /* Host non-periodic transmit FIFO size register */
+#define STM32_OTGFS_DIEPTXF0_OFFSET     0x0028 /* Endpoint 0 Transmit FIFO size */
+#define STM32_OTGFS_HNPTXSTS_OFFSET     0x002c /* Non-periodic transmit FIFO/queue status register */
+#define STM32_OTGFS_GCCFG_OFFSET        0x0038 /* General core configuration register */
+#define STM32_OTGFS_CID_OFFSET          0x003c /* Core ID register  */
+#define STM32_OTGFS_GLPMCFG_OFFSET      0x0054 /* LPM configuration register */
+#define STM32_OTGFS_GPWRDN_OFFSET       0x0058 /* Power down register */
+#define STM32_OTGFS_GADPCTL_OFSSET      0x0060 /* ADP timer, control and status register */
+#define STM32_OTGFS_HPTXFSIZ_OFFSET     0x0100 /* Host periodic transmit FIFO size register */
 
-#define STM32L4_OTGFS_DIEPTXF_OFFSET(n)   (0x0104+(((n)-1) << 2))
+#define STM32_OTGFS_DIEPTXF_OFFSET(n)   (0x0104+(((n)-1) << 2))
 
 /* Host-mode control and status registers */
 
-#define STM32L4_OTGFS_HCFG_OFFSET         0x0400 /* Host configuration register */
-#define STM32L4_OTGFS_HFIR_OFFSET         0x0404 /* Host frame interval register */
-#define STM32L4_OTGFS_HFNUM_OFFSET        0x0408 /* Host frame number/frame time remaining register */
-#define STM32L4_OTGFS_HPTXSTS_OFFSET      0x0410 /* Host periodic transmit FIFO/queue status register */
-#define STM32L4_OTGFS_HAINT_OFFSET        0x0414 /* Host all channels interrupt register */
-#define STM32L4_OTGFS_HAINTMSK_OFFSET     0x0418 /* Host all channels interrupt mask register */
-#define STM32L4_OTGFS_HPRT_OFFSET         0x0440 /* Host port control and status register */
+#define STM32_OTGFS_HCFG_OFFSET         0x0400 /* Host configuration register */
+#define STM32_OTGFS_HFIR_OFFSET         0x0404 /* Host frame interval register */
+#define STM32_OTGFS_HFNUM_OFFSET        0x0408 /* Host frame number/frame time remaining register */
+#define STM32_OTGFS_HPTXSTS_OFFSET      0x0410 /* Host periodic transmit FIFO/queue status register */
+#define STM32_OTGFS_HAINT_OFFSET        0x0414 /* Host all channels interrupt register */
+#define STM32_OTGFS_HAINTMSK_OFFSET     0x0418 /* Host all channels interrupt mask register */
+#define STM32_OTGFS_HPRT_OFFSET         0x0440 /* Host port control and status register */
 
-#define STM32L4_OTGFS_CHAN_OFFSET(n)      (0x500 + ((n) << 5)
-#define STM32L4_OTGFS_HCCHAR_CHOFFSET     0x0000 /* Host channel characteristics register */
-#define STM32L4_OTGFS_HCINT_CHOFFSET      0x0008 /* Host channel interrupt register */
-#define STM32L4_OTGFS_HCINTMSK_CHOFFSET   0x000c /* Host channel interrupt mask register */
-#define STM32L4_OTGFS_HCTSIZ_CHOFFSET     0x0010 /* Host channel interrupt register */
+#define STM32_OTGFS_CHAN_OFFSET(n)      (0x500 + ((n) << 5)
+#define STM32_OTGFS_HCCHAR_CHOFFSET     0x0000 /* Host channel characteristics register */
+#define STM32_OTGFS_HCINT_CHOFFSET      0x0008 /* Host channel interrupt register */
+#define STM32_OTGFS_HCINTMSK_CHOFFSET   0x000c /* Host channel interrupt mask register */
+#define STM32_OTGFS_HCTSIZ_CHOFFSET     0x0010 /* Host channel interrupt register */
 
-#define STM32L4_OTGFS_HCCHAR_OFFSET(n)    (0x500 + ((n) << 5))
+#define STM32_OTGFS_HCCHAR_OFFSET(n)    (0x500 + ((n) << 5))
 
-#define STM32L4_OTGFS_HCINT_OFFSET(n)     (0x508 + ((n) << 5))
+#define STM32_OTGFS_HCINT_OFFSET(n)     (0x508 + ((n) << 5))
 
-#define STM32L4_OTGFS_HCINTMSK_OFFSET(n)  (0x50c + ((n) << 5))
+#define STM32_OTGFS_HCINTMSK_OFFSET(n)  (0x50c + ((n) << 5))
 
-#define STM32L4_OTGFS_HCTSIZ_OFFSET(n)    (0x510 + ((n) << 5))
+#define STM32_OTGFS_HCTSIZ_OFFSET(n)    (0x510 + ((n) << 5))
 
 /* Device-mode control and status registers */
 
-#define STM32L4_OTGFS_DCFG_OFFSET         0x0800 /* Device configuration register */
-#define STM32L4_OTGFS_DCTL_OFFSET         0x0804 /* Device control register */
-#define STM32L4_OTGFS_DSTS_OFFSET         0x0808 /* Device status register */
-#define STM32L4_OTGFS_DIEPMSK_OFFSET      0x0810 /* Device IN endpoint common interrupt mask register */
-#define STM32L4_OTGFS_DOEPMSK_OFFSET      0x0814 /* Device OUT endpoint common interrupt mask register */
-#define STM32L4_OTGFS_DAINT_OFFSET        0x0818 /* Device all endpoints interrupt register */
-#define STM32L4_OTGFS_DAINTMSK_OFFSET     0x081c /* All endpoints interrupt mask register */
-#define STM32L4_OTGFS_DVBUSDIS_OFFSET     0x0828 /* Device VBUS discharge time register */
-#define STM32L4_OTGFS_DVBUSPULSE_OFFSET   0x082c /* Device VBUS pulsing time register */
-#define STM32L4_OTGFS_DIEPEMPMSK_OFFSET   0x0834 /* Device IN endpoint FIFO empty interrupt mask register */
+#define STM32_OTGFS_DCFG_OFFSET         0x0800 /* Device configuration register */
+#define STM32_OTGFS_DCTL_OFFSET         0x0804 /* Device control register */
+#define STM32_OTGFS_DSTS_OFFSET         0x0808 /* Device status register */
+#define STM32_OTGFS_DIEPMSK_OFFSET      0x0810 /* Device IN endpoint common interrupt mask register */
+#define STM32_OTGFS_DOEPMSK_OFFSET      0x0814 /* Device OUT endpoint common interrupt mask register */
+#define STM32_OTGFS_DAINT_OFFSET        0x0818 /* Device all endpoints interrupt register */
+#define STM32_OTGFS_DAINTMSK_OFFSET     0x081c /* All endpoints interrupt mask register */
+#define STM32_OTGFS_DVBUSDIS_OFFSET     0x0828 /* Device VBUS discharge time register */
+#define STM32_OTGFS_DVBUSPULSE_OFFSET   0x082c /* Device VBUS pulsing time register */
+#define STM32_OTGFS_DIEPEMPMSK_OFFSET   0x0834 /* Device IN endpoint FIFO empty interrupt mask register */
 
-#define STM32L4_OTGFS_DIEP_OFFSET(n)      (0x0900 + ((n) << 5))
-#define STM32L4_OTGFS_DIEPCTL_EPOFFSET    0x0000 /* Device endpoint control register */
-#define STM32L4_OTGFS_DIEPINT_EPOFFSET    0x0008 /* Device endpoint interrupt register */
-#define STM32L4_OTGFS_DIEPTSIZ_EPOFFSET   0x0010 /* Device IN endpoint transfer size register */
-#define STM32L4_OTGFS_DTXFSTS_EPOFFSET    0x0018 /* Device IN endpoint transmit FIFO status register */
+#define STM32_OTGFS_DIEP_OFFSET(n)      (0x0900 + ((n) << 5))
+#define STM32_OTGFS_DIEPCTL_EPOFFSET    0x0000 /* Device endpoint control register */
+#define STM32_OTGFS_DIEPINT_EPOFFSET    0x0008 /* Device endpoint interrupt register */
+#define STM32_OTGFS_DIEPTSIZ_EPOFFSET   0x0010 /* Device IN endpoint transfer size register */
+#define STM32_OTGFS_DTXFSTS_EPOFFSET    0x0018 /* Device IN endpoint transmit FIFO status register */
 
-#define STM32L4_OTGFS_DIEPCTL_OFFSET(n)   (0x0900 + ((n) << 5))
+#define STM32_OTGFS_DIEPCTL_OFFSET(n)   (0x0900 + ((n) << 5))
 
-#define STM32L4_OTGFS_DIEPINT_OFFSET(n)   (0x0908 + ((n) << 5))
+#define STM32_OTGFS_DIEPINT_OFFSET(n)   (0x0908 + ((n) << 5))
 
-#define STM32L4_OTGFS_DIEPTSIZ_OFFSET(n)  (0x910 + ((n) << 5))
+#define STM32_OTGFS_DIEPTSIZ_OFFSET(n)  (0x910 + ((n) << 5))
 
-#define STM32L4_OTGFS_DTXFSTS_OFFSET(n)   (0x0918 + ((n) << 5))
+#define STM32_OTGFS_DTXFSTS_OFFSET(n)   (0x0918 + ((n) << 5))
 
-#define STM32L4_OTGFS_DOEP_OFFSET(n)      (0x0b00 + ((n) << 5))
-#define STM32L4_OTGFS_DOEPCTL_EPOFFSET    0x0000 /* Device control OUT endpoint 0 control register */
-#define STM32L4_OTGFS_DOEPINT_EPOFFSET    0x0008 /* Device endpoint-x interrupt register */
-#define STM32L4_OTGFS_DOEPTSIZ_EPOFFSET   0x0010 /* Device endpoint OUT transfer size register */
+#define STM32_OTGFS_DOEP_OFFSET(n)      (0x0b00 + ((n) << 5))
+#define STM32_OTGFS_DOEPCTL_EPOFFSET    0x0000 /* Device control OUT endpoint 0 control register */
+#define STM32_OTGFS_DOEPINT_EPOFFSET    0x0008 /* Device endpoint-x interrupt register */
+#define STM32_OTGFS_DOEPTSIZ_EPOFFSET   0x0010 /* Device endpoint OUT transfer size register */
 
-#define STM32L4_OTGFS_DOEPCTL_OFFSET(n)   (0x0b00 + ((n) << 5))
+#define STM32_OTGFS_DOEPCTL_OFFSET(n)   (0x0b00 + ((n) << 5))
 
-#define STM32L4_OTGFS_DOEPINT_OFFSET(n)   (0x0b08 + ((n) << 5))
+#define STM32_OTGFS_DOEPINT_OFFSET(n)   (0x0b08 + ((n) << 5))
 
-#define STM32L4_OTGFS_DOEPTSIZ_OFFSET(n)  (0x0b10 + ((n) << 5))
+#define STM32_OTGFS_DOEPTSIZ_OFFSET(n)  (0x0b10 + ((n) << 5))
 
 /* Power and clock gating registers */
 
-#define STM32L4_OTGFS_PCGCCTL_OFFSET      0x0e00 /* Power and clock gating control register */
+#define STM32_OTGFS_PCGCCTL_OFFSET      0x0e00 /* Power and clock gating control register */
 
 /* Data FIFO (DFIFO) access registers */
 
-#define STM32L4_OTGFS_DFIFO_DEP_OFFSET(n) (0x1000 + ((n) << 12))
-#define STM32L4_OTGFS_DFIFO_HCH_OFFSET(n) (0x1000 + ((n) << 12))
+#define STM32_OTGFS_DFIFO_DEP_OFFSET(n) (0x1000 + ((n) << 12))
+#define STM32_OTGFS_DFIFO_HCH_OFFSET(n) (0x1000 + ((n) << 12))
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_OTGFS_GOTGCTL             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GOTGCTL_OFFSET)
-#define STM32L4_OTGFS_GOTGINT             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GOTGINT_OFFSET)
-#define STM32L4_OTGFS_GAHBCFG             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GAHBCFG_OFFSET)
-#define STM32L4_OTGFS_GUSBCFG             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GUSBCFG_OFFSET)
-#define STM32L4_OTGFS_GRSTCTL             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GRSTCTL_OFFSET)
-#define STM32L4_OTGFS_GINTSTS             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GINTSTS_OFFSET)
-#define STM32L4_OTGFS_GINTMSK             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GINTMSK_OFFSET)
-#define STM32L4_OTGFS_GRXSTSR             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GRXSTSR_OFFSET)
-#define STM32L4_OTGFS_GRXSTSP             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GRXSTSP_OFFSET)
-#define STM32L4_OTGFS_GRXFSIZ             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GRXFSIZ_OFFSET)
-#define STM32L4_OTGFS_HNPTXFSIZ           (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HNPTXFSIZ_OFFSET)
-#define STM32L4_OTGFS_DIEPTXF0            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPTXF0_OFFSET)
-#define STM32L4_OTGFS_HNPTXSTS            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HNPTXSTS_OFFSET)
-#define STM32L4_OTGFS_GCCFG               (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GCCFG_OFFSET)
-#define STM32L4_OTGFS_CID                 (STM32L4_OTGFS_BASE+STM32L4_OTGFS_CID_OFFSET)
-#define STM32L4_OTGFS_GLPMCFG             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GLPMCFG_OFFSET)
-#define STM32L4_OTGFS_GPWRDN              (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GPWRDN_OFFSET)
-#define STM32L4_OTGFS_GADPCTL             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_GADPCTL_OFSSET)
-#define STM32L4_OTGFS_HPTXFSIZ            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HPTXFSIZ_OFFSET)
+#define STM32_OTGFS_GOTGCTL             (STM32_OTGFS_BASE+STM32_OTGFS_GOTGCTL_OFFSET)
+#define STM32_OTGFS_GOTGINT             (STM32_OTGFS_BASE+STM32_OTGFS_GOTGINT_OFFSET)
+#define STM32_OTGFS_GAHBCFG             (STM32_OTGFS_BASE+STM32_OTGFS_GAHBCFG_OFFSET)
+#define STM32_OTGFS_GUSBCFG             (STM32_OTGFS_BASE+STM32_OTGFS_GUSBCFG_OFFSET)
+#define STM32_OTGFS_GRSTCTL             (STM32_OTGFS_BASE+STM32_OTGFS_GRSTCTL_OFFSET)
+#define STM32_OTGFS_GINTSTS             (STM32_OTGFS_BASE+STM32_OTGFS_GINTSTS_OFFSET)
+#define STM32_OTGFS_GINTMSK             (STM32_OTGFS_BASE+STM32_OTGFS_GINTMSK_OFFSET)
+#define STM32_OTGFS_GRXSTSR             (STM32_OTGFS_BASE+STM32_OTGFS_GRXSTSR_OFFSET)
+#define STM32_OTGFS_GRXSTSP             (STM32_OTGFS_BASE+STM32_OTGFS_GRXSTSP_OFFSET)
+#define STM32_OTGFS_GRXFSIZ             (STM32_OTGFS_BASE+STM32_OTGFS_GRXFSIZ_OFFSET)
+#define STM32_OTGFS_HNPTXFSIZ           (STM32_OTGFS_BASE+STM32_OTGFS_HNPTXFSIZ_OFFSET)
+#define STM32_OTGFS_DIEPTXF0            (STM32_OTGFS_BASE+STM32_OTGFS_DIEPTXF0_OFFSET)
+#define STM32_OTGFS_HNPTXSTS            (STM32_OTGFS_BASE+STM32_OTGFS_HNPTXSTS_OFFSET)
+#define STM32_OTGFS_GCCFG               (STM32_OTGFS_BASE+STM32_OTGFS_GCCFG_OFFSET)
+#define STM32_OTGFS_CID                 (STM32_OTGFS_BASE+STM32_OTGFS_CID_OFFSET)
+#define STM32_OTGFS_GLPMCFG             (STM32_OTGFS_BASE+STM32_OTGFS_GLPMCFG_OFFSET)
+#define STM32_OTGFS_GPWRDN              (STM32_OTGFS_BASE+STM32_OTGFS_GPWRDN_OFFSET)
+#define STM32_OTGFS_GADPCTL             (STM32_OTGFS_BASE+STM32_OTGFS_GADPCTL_OFSSET)
+#define STM32_OTGFS_HPTXFSIZ            (STM32_OTGFS_BASE+STM32_OTGFS_HPTXFSIZ_OFFSET)
 
-#define STM32L4_OTGFS_DIEPTXF(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPTXF_OFFSET(n))
+#define STM32_OTGFS_DIEPTXF(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DIEPTXF_OFFSET(n))
 
 /* Host-mode control and status registers */
 
-#define STM32L4_OTGFS_HCFG                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HCFG_OFFSET)
-#define STM32L4_OTGFS_HFIR                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HFIR_OFFSET)
-#define STM32L4_OTGFS_HFNUM               (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HFNUM_OFFSET)
-#define STM32L4_OTGFS_HPTXSTS             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HPTXSTS_OFFSET)
-#define STM32L4_OTGFS_HAINT               (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HAINT_OFFSET)
-#define STM32L4_OTGFS_HAINTMSK            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HAINTMSK_OFFSET)
-#define STM32L4_OTGFS_HPRT                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HPRT_OFFSET)
+#define STM32_OTGFS_HCFG                (STM32_OTGFS_BASE+STM32_OTGFS_HCFG_OFFSET)
+#define STM32_OTGFS_HFIR                (STM32_OTGFS_BASE+STM32_OTGFS_HFIR_OFFSET)
+#define STM32_OTGFS_HFNUM               (STM32_OTGFS_BASE+STM32_OTGFS_HFNUM_OFFSET)
+#define STM32_OTGFS_HPTXSTS             (STM32_OTGFS_BASE+STM32_OTGFS_HPTXSTS_OFFSET)
+#define STM32_OTGFS_HAINT               (STM32_OTGFS_BASE+STM32_OTGFS_HAINT_OFFSET)
+#define STM32_OTGFS_HAINTMSK            (STM32_OTGFS_BASE+STM32_OTGFS_HAINTMSK_OFFSET)
+#define STM32_OTGFS_HPRT                (STM32_OTGFS_BASE+STM32_OTGFS_HPRT_OFFSET)
 
-#define STM32L4_OTGFS_CHAN(n)             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_CHAN_OFFSET(n))
+#define STM32_OTGFS_CHAN(n)             (STM32_OTGFS_BASE+STM32_OTGFS_CHAN_OFFSET(n))
 
-#define STM32L4_OTGFS_HCCHAR(n)           (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HCCHAR_OFFSET(n))
+#define STM32_OTGFS_HCCHAR(n)           (STM32_OTGFS_BASE+STM32_OTGFS_HCCHAR_OFFSET(n))
 
-#define STM32L4_OTGFS_HCINT(n)            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HCINT_OFFSET(n))
+#define STM32_OTGFS_HCINT(n)            (STM32_OTGFS_BASE+STM32_OTGFS_HCINT_OFFSET(n))
 
-#define STM32L4_OTGFS_HCINTMSK(n)         (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HCINTMSK_OFFSET(n))
+#define STM32_OTGFS_HCINTMSK(n)         (STM32_OTGFS_BASE+STM32_OTGFS_HCINTMSK_OFFSET(n))
 
-#define STM32L4_OTGFS_HCTSIZ(n)           (STM32L4_OTGFS_BASE+STM32L4_OTGFS_HCTSIZ_OFFSET(n))
+#define STM32_OTGFS_HCTSIZ(n)           (STM32_OTGFS_BASE+STM32_OTGFS_HCTSIZ_OFFSET(n))
 
 /* Device-mode control and status registers */
 
-#define STM32L4_OTGFS_DCFG                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DCFG_OFFSET)
-#define STM32L4_OTGFS_DCTL                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DCTL_OFFSET)
-#define STM32L4_OTGFS_DSTS                (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DSTS_OFFSET)
-#define STM32L4_OTGFS_DIEPMSK             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPMSK_OFFSET)
-#define STM32L4_OTGFS_DOEPMSK             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DOEPMSK_OFFSET)
-#define STM32L4_OTGFS_DAINT               (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DAINT_OFFSET)
-#define STM32L4_OTGFS_DAINTMSK            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DAINTMSK_OFFSET)
-#define STM32L4_OTGFS_DVBUSDIS            (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DVBUSDIS_OFFSET)
-#define STM32L4_OTGFS_DVBUSPULSE          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DVBUSPULSE_OFFSET)
-#define STM32L4_OTGFS_DIEPEMPMSK          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPEMPMSK_OFFSET)
+#define STM32_OTGFS_DCFG                (STM32_OTGFS_BASE+STM32_OTGFS_DCFG_OFFSET)
+#define STM32_OTGFS_DCTL                (STM32_OTGFS_BASE+STM32_OTGFS_DCTL_OFFSET)
+#define STM32_OTGFS_DSTS                (STM32_OTGFS_BASE+STM32_OTGFS_DSTS_OFFSET)
+#define STM32_OTGFS_DIEPMSK             (STM32_OTGFS_BASE+STM32_OTGFS_DIEPMSK_OFFSET)
+#define STM32_OTGFS_DOEPMSK             (STM32_OTGFS_BASE+STM32_OTGFS_DOEPMSK_OFFSET)
+#define STM32_OTGFS_DAINT               (STM32_OTGFS_BASE+STM32_OTGFS_DAINT_OFFSET)
+#define STM32_OTGFS_DAINTMSK            (STM32_OTGFS_BASE+STM32_OTGFS_DAINTMSK_OFFSET)
+#define STM32_OTGFS_DVBUSDIS            (STM32_OTGFS_BASE+STM32_OTGFS_DVBUSDIS_OFFSET)
+#define STM32_OTGFS_DVBUSPULSE          (STM32_OTGFS_BASE+STM32_OTGFS_DVBUSPULSE_OFFSET)
+#define STM32_OTGFS_DIEPEMPMSK          (STM32_OTGFS_BASE+STM32_OTGFS_DIEPEMPMSK_OFFSET)
 
-#define STM32L4_OTGFS_DIEP(n)             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEP_OFFSET(n))
+#define STM32_OTGFS_DIEP(n)             (STM32_OTGFS_BASE+STM32_OTGFS_DIEP_OFFSET(n))
 
-#define STM32L4_OTGFS_DIEPCTL(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPCTL_OFFSET(n))
+#define STM32_OTGFS_DIEPCTL(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DIEPCTL_OFFSET(n))
 
-#define STM32L4_OTGFS_DIEPINT(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPINT_OFFSET(n))
+#define STM32_OTGFS_DIEPINT(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DIEPINT_OFFSET(n))
 
-#define STM32L4_OTGFS_DIEPTSIZ(n)         (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DIEPTSIZ_OFFSET(n))
+#define STM32_OTGFS_DIEPTSIZ(n)         (STM32_OTGFS_BASE+STM32_OTGFS_DIEPTSIZ_OFFSET(n))
 
-#define STM32L4_OTGFS_DTXFSTS(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DTXFSTS_OFFSET(n))
+#define STM32_OTGFS_DTXFSTS(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DTXFSTS_OFFSET(n))
 
-#define STM32L4_OTGFS_DOEP(n)             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DOEP_OFFSET(n))
+#define STM32_OTGFS_DOEP(n)             (STM32_OTGFS_BASE+STM32_OTGFS_DOEP_OFFSET(n))
 
-#define STM32L4_OTGFS_DOEPCTL(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DOEPCTL_OFFSET(n))
+#define STM32_OTGFS_DOEPCTL(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DOEPCTL_OFFSET(n))
 
-#define STM32L4_OTGFS_DOEPINT(n)          (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DOEPINT_OFFSET(n))
+#define STM32_OTGFS_DOEPINT(n)          (STM32_OTGFS_BASE+STM32_OTGFS_DOEPINT_OFFSET(n))
 
-#define STM32L4_OTGFS_DOEPTSIZ(n)         (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DOEPTSIZ_OFFSET(n))
+#define STM32_OTGFS_DOEPTSIZ(n)         (STM32_OTGFS_BASE+STM32_OTGFS_DOEPTSIZ_OFFSET(n))
 
 /* Power and clock gating registers */
 
-#define STM32L4_OTGFS_PCGCCTL             (STM32L4_OTGFS_BASE+STM32L4_OTGFS_PCGCCTL_OFFSET)
+#define STM32_OTGFS_PCGCCTL             (STM32_OTGFS_BASE+STM32_OTGFS_PCGCCTL_OFFSET)
 
 /* Data FIFO (DFIFO) access registers */
 
-#define STM32L4_OTGFS_DFIFO_DEP(n)        (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DFIFO_DEP_OFFSET(n))
-#define STM32L4_OTGFS_DFIFO_HCH(n)        (STM32L4_OTGFS_BASE+STM32L4_OTGFS_DFIFO_HCH_OFFSET(n))
+#define STM32_OTGFS_DFIFO_DEP(n)        (STM32_OTGFS_BASE+STM32_OTGFS_DFIFO_DEP_OFFSET(n))
+#define STM32_OTGFS_DFIFO_HCH(n)        (STM32_OTGFS_BASE+STM32_OTGFS_DFIFO_HCH_OFFSET(n))
 
 /* Register Bitfield Definitions ********************************************/
 

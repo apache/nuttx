@@ -131,20 +131,20 @@
 
 /* Hardware capabilities */
 
-#define STM32L4_NHOST_CHANNELS      8   /* Number of host channels */
-#define STM32L4_MAX_PACKET_SIZE     64  /* Full speed max packet size */
-#define STM32L4_EP0_DEF_PACKET_SIZE 8   /* EP0 default packet size */
-#define STM32L4_EP0_MAX_PACKET_SIZE 64  /* EP0 FS max packet size */
-#define STM32L4_MAX_TX_FIFOS        15  /* Max number of TX FIFOs */
-#define STM32L4_MAX_PKTCOUNT        256 /* Max packet count */
-#define STM32L4_RETRY_COUNT         3   /* Number of ctrl transfer retries */
+#define STM32_NHOST_CHANNELS      8   /* Number of host channels */
+#define STM32_MAX_PACKET_SIZE     64  /* Full speed max packet size */
+#define STM32_EP0_DEF_PACKET_SIZE 8   /* EP0 default packet size */
+#define STM32_EP0_MAX_PACKET_SIZE 64  /* EP0 FS max packet size */
+#define STM32_MAX_TX_FIFOS        15  /* Max number of TX FIFOs */
+#define STM32_MAX_PKTCOUNT        256 /* Max packet count */
+#define STM32_RETRY_COUNT         3   /* Number of ctrl transfer retries */
 
 /* Delays *******************************************************************/
 
-#define STM32L4_READY_DELAY         200000      /* In loop counts */
-#define STM32L4_FLUSH_DELAY         200000      /* In loop counts */
-#define STM32L4_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
-#define STM32L4_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
+#define STM32_READY_DELAY         200000      /* In loop counts */
+#define STM32_FLUSH_DELAY         200000      /* In loop counts */
+#define STM32_SETUP_DELAY         SEC2TICK(5) /* 5 seconds in system ticks */
+#define STM32_DATANAK_DELAY       SEC2TICK(5) /* 5 seconds in system ticks */
 
 /****************************************************************************
  * Private Types
@@ -260,7 +260,7 @@ struct stm32l4_usbhost_s
 
   /* The state of each host channel */
 
-  struct stm32l4_chan_s chan[STM32L4_MAX_TX_FIFOS];
+  struct stm32l4_chan_s chan[STM32_MAX_TX_FIFOS];
 };
 
 /****************************************************************************
@@ -659,7 +659,7 @@ static int stm32l4_chan_alloc(struct stm32l4_usbhost_s *priv)
 
   /* Search the table of channels */
 
-  for (chidx = 0; chidx < STM32L4_NHOST_CHANNELS; chidx++)
+  for (chidx = 0; chidx < STM32_NHOST_CHANNELS; chidx++)
     {
       /* Is this channel available? */
 
@@ -687,7 +687,7 @@ static int stm32l4_chan_alloc(struct stm32l4_usbhost_s *priv)
 
 static void stm32l4_chan_free(struct stm32l4_usbhost_s *priv, int chidx)
 {
-  DEBUGASSERT((unsigned)chidx < STM32L4_NHOST_CHANNELS);
+  DEBUGASSERT((unsigned)chidx < STM32_NHOST_CHANNELS);
 
   /* Halt the channel */
 
@@ -712,7 +712,7 @@ static inline void stm32l4_chan_freeall(struct stm32l4_usbhost_s *priv)
 
   /* Free all host channels */
 
-  for (chidx = 2; chidx < STM32L4_NHOST_CHANNELS; chidx++)
+  for (chidx = 2; chidx < STM32_NHOST_CHANNELS; chidx++)
     {
       stm32l4_chan_free(priv, chidx);
     }
@@ -736,7 +736,7 @@ static void stm32l4_chan_configure(struct stm32l4_usbhost_s *priv,
 
   /* Clear any old pending interrupts for this host channel. */
 
-  stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), 0xffffffff);
+  stm32l4_putreg(STM32_OTGFS_HCINT(chidx), 0xffffffff);
 
   /* Enable channel interrupts required for transfers on this channel. */
 
@@ -836,15 +836,15 @@ static void stm32l4_chan_configure(struct stm32l4_usbhost_s *priv,
       break;
     }
 
-  stm32l4_putreg(STM32L4_OTGFS_HCINTMSK(chidx), regval);
+  stm32l4_putreg(STM32_OTGFS_HCINTMSK(chidx), regval);
 
   /* Enable the top level host channel interrupt. */
 
-  stm32l4_modifyreg(STM32L4_OTGFS_HAINTMSK, 0, OTGFS_HAINT(chidx));
+  stm32l4_modifyreg(STM32_OTGFS_HAINTMSK, 0, OTGFS_HAINT(chidx));
 
   /* Make sure host channel interrupts are enabled. */
 
-  stm32l4_modifyreg(STM32L4_OTGFS_GINTMSK, 0, OTGFS_GINT_HC);
+  stm32l4_modifyreg(STM32_OTGFS_GINTMSK, 0, OTGFS_GINT_HC);
 
   /* Program the HCCHAR register */
 
@@ -876,7 +876,7 @@ static void stm32l4_chan_configure(struct stm32l4_usbhost_s *priv,
 
   /* Write the channel configuration */
 
-  stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
+  stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), regval);
 }
 
 /****************************************************************************
@@ -913,7 +913,7 @@ static void stm32l4_chan_halt(struct stm32l4_usbhost_s *priv, int chidx,
    *  transaction that has already been started on the USB."
    */
 
-  hcchar  = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+  hcchar  = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
   hcchar |= (OTGFS_HCCHAR_CHDIS | OTGFS_HCCHAR_CHENA);
 
   /* Get the endpoint type from the HCCHAR register */
@@ -935,14 +935,14 @@ static void stm32l4_chan_halt(struct stm32l4_usbhost_s *priv, int chidx,
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
-      avail = stm32l4_getreg(STM32L4_OTGFS_HNPTXSTS) &
+      avail = stm32l4_getreg(STM32_OTGFS_HNPTXSTS) &
               OTGFS_HNPTXSTS_NPTXFSAV_MASK;
     }
   else
     {
       /* Get the number of words available in the non-periodic Tx FIFO. */
 
-      avail = stm32l4_getreg(STM32L4_OTGFS_HPTXSTS) &
+      avail = stm32l4_getreg(STM32_OTGFS_HPTXSTS) &
               OTGFS_HPTXSTS_PTXFSAVL_MASK;
     }
 
@@ -957,13 +957,13 @@ static void stm32l4_chan_halt(struct stm32l4_usbhost_s *priv, int chidx,
 
   /* Unmask the CHannel Halted (CHH) interrupt */
 
-  intmsk  = stm32l4_getreg(STM32L4_OTGFS_HCINTMSK(chidx));
+  intmsk  = stm32l4_getreg(STM32_OTGFS_HCINTMSK(chidx));
   intmsk |= OTGFS_HCINT_CHH;
-  stm32l4_putreg(STM32L4_OTGFS_HCINTMSK(chidx), intmsk);
+  stm32l4_putreg(STM32_OTGFS_HCINTMSK(chidx), intmsk);
 
   /* Halt the channel by setting CHDIS (and maybe CHENA) in the HCCHAR */
 
-  stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), hcchar);
+  stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), hcchar);
 }
 
 /****************************************************************************
@@ -1193,7 +1193,7 @@ static int stm32l4_ctrlchan_alloc(struct stm32l4_usbhost_s *priv,
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->interval  = 0;
-  chan->maxpacket = STM32L4_EP0_DEF_PACKET_SIZE;
+  chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
 
@@ -1218,7 +1218,7 @@ static int stm32l4_ctrlchan_alloc(struct stm32l4_usbhost_s *priv,
   chan->funcaddr  = funcaddr;
   chan->speed     = speed;
   chan->interval  = 0;
-  chan->maxpacket = STM32L4_EP0_DEF_PACKET_SIZE;
+  chan->maxpacket = STM32_EP0_DEF_PACKET_SIZE;
   chan->indata1   = false;
   chan->outdata1  = false;
 
@@ -1413,10 +1413,10 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
        * packets that can be transferred (this should not happen).
        */
 
-      if (npackets > STM32L4_MAX_PKTCOUNT)
+      if (npackets > STM32_MAX_PKTCOUNT)
         {
-          npackets = STM32L4_MAX_PKTCOUNT;
-          chan->buflen = STM32L4_MAX_PKTCOUNT * maxpacket;
+          npackets = STM32_MAX_PKTCOUNT;
+          chan->buflen = STM32_MAX_PKTCOUNT * maxpacket;
           usbhost_trace2(OTGFS_TRACE2_CLIP, chidx, chan->buflen);
         }
     }
@@ -1453,18 +1453,18 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
   regval = ((uint32_t)chan->buflen << OTGFS_HCTSIZ_XFRSIZ_SHIFT) |
            ((uint32_t)npackets << OTGFS_HCTSIZ_PKTCNT_SHIFT) |
            ((uint32_t)chan->pid << OTGFS_HCTSIZ_DPID_SHIFT);
-  stm32l4_putreg(STM32L4_OTGFS_HCTSIZ(chidx), regval);
+  stm32l4_putreg(STM32_OTGFS_HCTSIZ(chidx), regval);
 
   /* Setup the HCCHAR register: Frame oddness and host channel enable */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+  regval = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
 
   /* Set/clear the Odd Frame bit.  Check for an even frame; if so set Odd
    * Frame. This field is applicable for only periodic (isochronous and
    * interrupt) channels.
    */
 
-  if ((stm32l4_getreg(STM32L4_OTGFS_HFNUM) & 1) == 0)
+  if ((stm32l4_getreg(STM32_OTGFS_HFNUM) & 1) == 0)
     {
       regval |= OTGFS_HCCHAR_ODDFRM;
     }
@@ -1475,7 +1475,7 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
 
   regval &= ~OTGFS_HCCHAR_CHDIS;
   regval |= OTGFS_HCCHAR_CHENA;
-  stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
+  stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), regval);
 
   /* If this is an out transfer, then we need to do more.. we need to copy
    * the outgoing data into the correct TxFIFO.
@@ -1496,7 +1496,7 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
           {
             /* Read the Non-periodic Tx FIFO status register */
 
-            regval = stm32l4_getreg(STM32L4_OTGFS_HNPTXSTS);
+            regval = stm32l4_getreg(STM32_OTGFS_HNPTXSTS);
             avail  = ((regval & OTGFS_HNPTXSTS_NPTXFSAV_MASK) >>
                        OTGFS_HNPTXSTS_NPTXFSAV_SHIFT) << 2;
           }
@@ -1509,7 +1509,7 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
           {
             /* Read the Non-periodic Tx FIFO status register */
 
-            regval = stm32l4_getreg(STM32L4_OTGFS_HPTXSTS);
+            regval = stm32l4_getreg(STM32_OTGFS_HPTXSTS);
             avail  = ((regval & OTGFS_HPTXSTS_PTXFSAVL_MASK) >>
                        OTGFS_HPTXSTS_PTXFSAVL_SHIFT) << 2;
           }
@@ -1572,7 +1572,7 @@ static void stm32l4_transfer_start(struct stm32l4_usbhost_s *priv,
 static inline uint16_t stm32l4_getframe(void)
 {
   return (uint16_t)
-    (stm32l4_getreg(STM32L4_OTGFS_HFNUM) & OTGFS_HFNUM_FRNUM_MASK);
+    (stm32l4_getreg(STM32_OTGFS_HFNUM) & OTGFS_HFNUM_FRNUM_MASK);
 }
 #endif
 
@@ -1647,7 +1647,7 @@ static int stm32l4_ctrl_sendsetup(struct stm32l4_usbhost_s *priv,
 
       elapsed = clock_systime_ticks() - start;
     }
-  while (elapsed < STM32L4_SETUP_DELAY);
+  while (elapsed < STM32_SETUP_DELAY);
 
   return -ETIMEDOUT;
 }
@@ -1893,7 +1893,7 @@ static ssize_t stm32l4_in_transfer(struct stm32l4_usbhost_s *priv,
                    */
 
                   clock_t elapsed = clock_systime_ticks() - start;
-                  if (elapsed >= STM32L4_DATANAK_DELAY)
+                  if (elapsed >= STM32_DATANAK_DELAY)
                     {
                       /* Timeout out... break out returning the NAK as
                        * as a failure.
@@ -2247,7 +2247,7 @@ static ssize_t stm32l4_out_transfer(struct stm32l4_usbhost_s *priv,
 
           elapsed = clock_systime_ticks() - start;
           if (ret != -EAGAIN ||                    /* Not a NAK condition OR */
-              elapsed >= STM32L4_DATANAK_DELAY ||  /* Timeout has elapsed OR */
+              elapsed >= STM32_DATANAK_DELAY ||    /* Timeout has elapsed OR */
               chan->xfrd > 0)                      /* Data has been partially
                                                     * transferred */
             {
@@ -2419,7 +2419,7 @@ static void stm32l4_gint_wrpacket(struct stm32l4_usbhost_s *priv,
 
   /* Get the address of the Tx FIFO associated with this channel */
 
-  fifo = STM32L4_OTGFS_DFIFO_HCH(chidx);
+  fifo = STM32_OTGFS_DFIFO_HCH(chidx);
 
   /* Transfer all of the data into the Tx FIFO */
 
@@ -2465,8 +2465,8 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
    * HCINTMSK register to get the set of enabled HC interrupts.
    */
 
-  pending = stm32l4_getreg(STM32L4_OTGFS_HCINT(chidx));
-  regval  = stm32l4_getreg(STM32L4_OTGFS_HCINTMSK(chidx));
+  pending = stm32l4_getreg(STM32_OTGFS_HCINT(chidx));
+  regval  = stm32l4_getreg(STM32_OTGFS_HCINTMSK(chidx));
 
   /* AND the two to get the set of enabled, pending HC interrupts */
 
@@ -2480,7 +2480,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
     {
       /* Clear the pending the ACK response received/transmitted interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_ACK);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_ACK);
     }
 
   /* Check for a pending STALL response receive (STALL) interrupt */
@@ -2489,7 +2489,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
     {
       /* Clear the NAK and STALL Conditions. */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx),
                      (OTGFS_HCINT_NAK | OTGFS_HCINT_STALL));
 
       /* Halt the channel when a STALL, TXERR, BBERR or DTERR interrupt is
@@ -2517,7 +2517,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the NAK and data toggle error conditions */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx),
                      (OTGFS_HCINT_NAK | OTGFS_HCINT_DTERR));
     }
 
@@ -2531,7 +2531,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the FRaMe OverRun (FRMOR) condition */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_FRMOR);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_FRMOR);
     }
 
   /* Check for a pending TransFeR Completed (XFRC) interrupt */
@@ -2540,7 +2540,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
     {
       /* Clear the TransFeR Completed (XFRC) condition */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_XFRC);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_XFRC);
 
       /* Then handle the transfer completion event based on the endpoint */
 
@@ -2556,15 +2556,15 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
            * logic as each packet was received.
            */
 
-          stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
+          stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
         }
       else if (chan->eptype == OTGFS_EPTYPE_INTR)
         {
           /* Force the next transfer on an ODD frame */
 
-          regval = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+          regval = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
           regval |= OTGFS_HCCHAR_ODDFRM;
-          stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
+          stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), regval);
 
           /* Set the request done state */
 
@@ -2578,9 +2578,9 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
     {
       /* Mask the CHannel Halted (CHH) interrupt */
 
-      regval  = stm32l4_getreg(STM32L4_OTGFS_HCINTMSK(chidx));
+      regval  = stm32l4_getreg(STM32_OTGFS_HCINTMSK(chidx));
       regval &= ~OTGFS_HCINT_CHH;
-      stm32l4_putreg(STM32L4_OTGFS_HCINTMSK(chidx), regval);
+      stm32l4_putreg(STM32_OTGFS_HCINTMSK(chidx), regval);
 
       /* Update the request state based on the host state machine state */
 
@@ -2618,7 +2618,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the CHannel Halted (CHH) condition */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_CHH);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_CHH);
     }
 
   /* Check for a pending Transaction ERror (TXERR) interrupt */
@@ -2633,7 +2633,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the Transaction ERror (TXERR) condition */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_TXERR);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_TXERR);
     }
 
   /* Check for a pending NAK response received (NAK) interrupt */
@@ -2671,10 +2671,10 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
            * TODO: set channel reason to NACK?
            */
 
-          regval  = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+          regval  = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
           regval |= OTGFS_HCCHAR_CHENA;
           regval &= ~OTGFS_HCCHAR_CHDIS;
-          stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), regval);
+          stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), regval);
         }
 
 #else
@@ -2685,7 +2685,7 @@ static inline void stm32l4_gint_hcinisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the NAK condition */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
     }
 
   /* Check for a transfer complete event */
@@ -2723,8 +2723,8 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
    * HCINTMSK register to get the set of enabled HC interrupts.
    */
 
-  pending = stm32l4_getreg(STM32L4_OTGFS_HCINT(chidx));
-  regval  = stm32l4_getreg(STM32L4_OTGFS_HCINTMSK(chidx));
+  pending = stm32l4_getreg(STM32_OTGFS_HCINT(chidx));
+  regval  = stm32l4_getreg(STM32_OTGFS_HCINTMSK(chidx));
 
   /* AND the two to get the set of enabled, pending HC interrupts */
 
@@ -2738,7 +2738,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
     {
       /* Clear the pending the ACK response received/transmitted interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_ACK);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_ACK);
     }
 
   /* Check for a pending FRaMe OverRun (FRMOR) interrupt */
@@ -2751,7 +2751,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the FRaMe OverRun (FRMOR) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_FRMOR);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_FRMOR);
     }
 
   /* Check for a pending TransFeR Completed (XFRC) interrupt */
@@ -2772,7 +2772,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the TransFeR Completed (XFRC) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_XFRC);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_XFRC);
     }
 
   /* Check for a pending STALL response receive (STALL) interrupt */
@@ -2781,7 +2781,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
     {
       /* Clear the pending STALL response receive (STALL) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_STALL);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_STALL);
 
       /* Halt the channel when a STALL, TXERR, BBERR or DTERR interrupt is
        * received on the channel.
@@ -2800,7 +2800,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the NAK response received (NAK) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_NAK);
     }
 
   /* Check for a pending Transaction ERror (TXERR) interrupt */
@@ -2815,7 +2815,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the Transaction ERror (TXERR) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_TXERR);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_TXERR);
     }
 
   /* Check for a NYET interrupt */
@@ -2829,7 +2829,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the NYET interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_NYET);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_NYET);
     }
 #endif
 
@@ -2845,7 +2845,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the Data Toggle ERRor (DTERR) and NAK interrupts */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx),
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx),
                      (OTGFS_HCINT_DTERR | OTGFS_HCINT_NAK));
     }
 
@@ -2855,9 +2855,9 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
     {
       /* Mask the CHannel Halted (CHH) interrupt */
 
-      regval  = stm32l4_getreg(STM32L4_OTGFS_HCINTMSK(chidx));
+      regval  = stm32l4_getreg(STM32_OTGFS_HCINTMSK(chidx));
       regval &= ~OTGFS_HCINT_CHH;
-      stm32l4_putreg(STM32L4_OTGFS_HCINTMSK(chidx), regval);
+      stm32l4_putreg(STM32_OTGFS_HCINTMSK(chidx), regval);
 
       if (chan->chreason == CHREASON_XFRC)
         {
@@ -2869,7 +2869,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
            * the endpoint type.
            */
 
-          regval = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+          regval = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
 
           /* Is it a bulk endpoint?  Were an odd number of packets
            * transferred?
@@ -2913,7 +2913,7 @@ static inline void stm32l4_gint_hcoutisr(struct stm32l4_usbhost_s *priv,
 
       /* Clear the pending the CHannel Halted (CHH) interrupt */
 
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(chidx), OTGFS_HCINT_CHH);
+      stm32l4_putreg(STM32_OTGFS_HCINT(chidx), OTGFS_HCINT_CHH);
     }
 
   /* Check for a transfer complete event */
@@ -3018,7 +3018,7 @@ static inline void stm32l4_gint_sofisr(struct stm32l4_usbhost_s *priv)
 
   /* Clear pending SOF interrupt */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTSTS, OTGFS_GINT_SOF);
+  stm32l4_putreg(STM32_OTGFS_GINTSTS, OTGFS_GINT_SOF);
 }
 #endif
 
@@ -3045,13 +3045,13 @@ static inline void stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv)
 
   /* Disable the RxFIFO non-empty interrupt */
 
-  intmsk  = stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
+  intmsk  = stm32l4_getreg(STM32_OTGFS_GINTMSK);
   intmsk &= ~OTGFS_GINT_RXFLVL;
-  stm32l4_putreg(STM32L4_OTGFS_GINTMSK, intmsk);
+  stm32l4_putreg(STM32_OTGFS_GINTMSK, intmsk);
 
   /* Read and pop the next status from the Rx FIFO */
 
-  grxsts = stm32l4_getreg(STM32L4_OTGFS_GRXSTSP);
+  grxsts = stm32l4_getreg(STM32_OTGFS_GRXSTSP);
   uinfo("GRXSTS: %08" PRIx32 "\n", grxsts);
 
   /* Isolate the channel number/index in the status word */
@@ -3060,7 +3060,7 @@ static inline void stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv)
 
   /* Get the host channel characteristics register (HCCHAR) */
 
-  hcchar = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(chidx));
+  hcchar = stm32l4_getreg(STM32_OTGFS_HCCHAR(chidx));
 
   /* Then process the interrupt according to the packet status */
 
@@ -3077,7 +3077,7 @@ static inline void stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv)
             /* Transfer the packet from the Rx FIFO into the user buffer */
 
             dest   = (uint32_t *)priv->chan[chidx].buffer;
-            fifo   = STM32L4_OTGFS_DFIFO_HCH(0);
+            fifo   = STM32_OTGFS_DFIFO_HCH(0);
             bcnt32 = (bcnt + 3) >> 2;
 
             for (i = 0; i < bcnt32; i++)
@@ -3098,14 +3098,14 @@ static inline void stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv)
 
             /* Check if more packets are expected */
 
-            hctsiz = stm32l4_getreg(STM32L4_OTGFS_HCTSIZ(chidx));
+            hctsiz = stm32l4_getreg(STM32_OTGFS_HCTSIZ(chidx));
             if ((hctsiz & OTGFS_HCTSIZ_PKTCNT_MASK) != 0)
               {
                 /* Re-activate the channel when more packets are expected */
 
                 hcchar |= OTGFS_HCCHAR_CHENA;
                 hcchar &= ~OTGFS_HCCHAR_CHDIS;
-                stm32l4_putreg(STM32L4_OTGFS_HCCHAR(chidx), hcchar);
+                stm32l4_putreg(STM32_OTGFS_HCCHAR(chidx), hcchar);
               }
           }
       }
@@ -3121,7 +3121,7 @@ static inline void stm32l4_gint_rxflvlisr(struct stm32l4_usbhost_s *priv)
   /* Re-enable the RxFIFO non-empty interrupt */
 
   intmsk |= OTGFS_GINT_RXFLVL;
-  stm32l4_putreg(STM32L4_OTGFS_GINTMSK, intmsk);
+  stm32l4_putreg(STM32_OTGFS_GINTMSK, intmsk);
 }
 
 /****************************************************************************
@@ -3164,13 +3164,13 @@ static inline void stm32l4_gint_nptxfeisr(struct stm32l4_usbhost_s *priv)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
-      stm32l4_modifyreg(STM32L4_OTGFS_GINTMSK, OTGFS_GINT_NPTXFE, 0);
+      stm32l4_modifyreg(STM32_OTGFS_GINTMSK, OTGFS_GINT_NPTXFE, 0);
       return;
     }
 
   /* Read the status from the top of the non-periodic TxFIFO */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HNPTXSTS);
+  regval = stm32l4_getreg(STM32_OTGFS_HNPTXSTS);
 
   /* Extract the number of bytes available in the non-periodic Tx FIFO. */
 
@@ -3202,7 +3202,7 @@ static inline void stm32l4_gint_nptxfeisr(struct stm32l4_usbhost_s *priv)
 
   else
     {
-      stm32l4_modifyreg(STM32L4_OTGFS_GINTMSK, OTGFS_GINT_NPTXFE, 0);
+      stm32l4_modifyreg(STM32_OTGFS_GINTMSK, OTGFS_GINT_NPTXFE, 0);
     }
 
   /* Write the next group of packets into the Tx FIFO */
@@ -3254,13 +3254,13 @@ static inline void stm32l4_gint_ptxfeisr(struct stm32l4_usbhost_s *priv)
     {
       /* Disable further Tx FIFO empty interrupts and bail. */
 
-      stm32l4_modifyreg(STM32L4_OTGFS_GINTMSK, OTGFS_GINT_PTXFE, 0);
+      stm32l4_modifyreg(STM32_OTGFS_GINTMSK, OTGFS_GINT_PTXFE, 0);
       return;
     }
 
   /* Read the status from the top of the periodic TxFIFO */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HPTXSTS);
+  regval = stm32l4_getreg(STM32_OTGFS_HPTXSTS);
 
   /* Extract the number of bytes available in the periodic Tx FIFO. */
 
@@ -3292,7 +3292,7 @@ static inline void stm32l4_gint_ptxfeisr(struct stm32l4_usbhost_s *priv)
 
   else
     {
-      stm32l4_modifyreg(STM32L4_OTGFS_GINTMSK, OTGFS_GINT_PTXFE, 0);
+      stm32l4_modifyreg(STM32_OTGFS_GINTMSK, OTGFS_GINT_PTXFE, 0);
     }
 
   /* Write the next group of packets into the Tx FIFO */
@@ -3319,12 +3319,12 @@ static inline void stm32l4_gint_hcisr(struct stm32l4_usbhost_s *priv)
   int i = 0;
 
   /* Read the Host all channels interrupt register and test each bit in the
-   * register. Each bit i, i=0...(STM32L4_NHOST_CHANNELS-1), corresponds to
+   * register. Each bit i, i=0...(STM32_NHOST_CHANNELS-1), corresponds to
    * a pending interrupt on channel i.
    */
 
-  haint = stm32l4_getreg(STM32L4_OTGFS_HAINT);
-  for (i = 0; i < STM32L4_NHOST_CHANNELS; i++)
+  haint = stm32l4_getreg(STM32_OTGFS_HAINT);
+  for (i = 0; i < STM32_NHOST_CHANNELS; i++)
     {
       /* Is an interrupt pending on this channel? */
 
@@ -3332,7 +3332,7 @@ static inline void stm32l4_gint_hcisr(struct stm32l4_usbhost_s *priv)
         {
           /* Yes... read the HCCHAR register to get the direction bit */
 
-          hcchar = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(i));
+          hcchar = stm32l4_getreg(STM32_OTGFS_HCCHAR(i));
 
           /* Was this an interrupt on an IN or an OUT channel? */
 
@@ -3370,7 +3370,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
 
   /* Read the port status and control register (HPRT) */
 
-  hprt = stm32l4_getreg(STM32L4_OTGFS_HPRT);
+  hprt = stm32l4_getreg(STM32_OTGFS_HPRT);
 
   /* Setup to clear the interrupt bits in GINTSTS by setting the
    * corresponding bits in the HPRT.  The HCINT interrupt bit is cleared
@@ -3425,7 +3425,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
 
           /* Check the Host ConFiGuration register (HCFG) */
 
-          hcfg = stm32l4_getreg(STM32L4_OTGFS_HCFG);
+          hcfg = stm32l4_getreg(STM32_OTGFS_HCFG);
 
           /* Is this a low speed or full speed connection (OTG FS does not
            * support high speed)
@@ -3436,7 +3436,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
               /* Set the Host Frame Interval Register for the 6KHz speed */
 
               usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_LSDEV, 0);
-              stm32l4_putreg(STM32L4_OTGFS_HFIR, 6000);
+              stm32l4_putreg(STM32_OTGFS_HFIR, 6000);
 
               /* Are we switching from FS to LS? */
 
@@ -3449,7 +3449,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
 
                   hcfg &= ~OTGFS_HCFG_FSLSPCS_MASK;
                   hcfg |= OTGFS_HCFG_FSLSPCS_LS6MHz;
-                  stm32l4_putreg(STM32L4_OTGFS_HCFG, hcfg);
+                  stm32l4_putreg(STM32_OTGFS_HCFG, hcfg);
 
                   /* And reset the port */
 
@@ -3459,7 +3459,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
           else /* if ((hprt & OTGFS_HPRT_PSPD_MASK) == OTGFS_HPRT_PSPD_FS) */
             {
               usbhost_vtrace1(OTGFS_VTRACE1_GINT_HPRT_FSDEV, 0);
-              stm32l4_putreg(STM32L4_OTGFS_HFIR, 48000);
+              stm32l4_putreg(STM32_OTGFS_HFIR, 48000);
 
               /* Are we switching from LS to FS? */
 
@@ -3472,7 +3472,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
 
                   hcfg &= ~OTGFS_HCFG_FSLSPCS_MASK;
                   hcfg |= OTGFS_HCFG_FSLSPCS_FS48MHz;
-                  stm32l4_putreg(STM32L4_OTGFS_HCFG, hcfg);
+                  stm32l4_putreg(STM32_OTGFS_HCFG, hcfg);
 
                   /* And reset the port */
 
@@ -3484,7 +3484,7 @@ static inline void stm32l4_gint_hprtisr(struct stm32l4_usbhost_s *priv)
 
   /* Clear port interrupts by setting bits in the HPRT */
 
-  stm32l4_putreg(STM32L4_OTGFS_HPRT, newhprt);
+  stm32l4_putreg(STM32_OTGFS_HPRT, newhprt);
 }
 
 /****************************************************************************
@@ -3503,7 +3503,7 @@ static inline void stm32l4_gint_discisr(struct stm32l4_usbhost_s *priv)
 
   /* Clear the dicsonnect interrupt */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTSTS, OTGFS_GINT_DISC);
+  stm32l4_putreg(STM32_OTGFS_GINTSTS, OTGFS_GINT_DISC);
 }
 
 /****************************************************************************
@@ -3522,13 +3522,13 @@ static inline void stm32l4_gint_ipxfrisr(struct stm32l4_usbhost_s *priv)
    * CHDIS : Set to stop transmitting/receiving data on a channel
    */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HCCHAR(0));
+  regval = stm32l4_getreg(STM32_OTGFS_HCCHAR(0));
   regval |= (OTGFS_HCCHAR_CHDIS | OTGFS_HCCHAR_CHENA);
-  stm32l4_putreg(STM32L4_OTGFS_HCCHAR(0), regval);
+  stm32l4_putreg(STM32_OTGFS_HCCHAR(0), regval);
 
   /* Clear the incomplete isochronous OUT interrupt */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTSTS, OTGFS_GINT_IPXFR);
+  stm32l4_putreg(STM32_OTGFS_GINTSTS, OTGFS_GINT_IPXFR);
 }
 
 /****************************************************************************
@@ -3564,8 +3564,8 @@ static int stm32l4_gint_isr(int irq, void *context, void *arg)
     {
       /* Get the unmasked bits in the GINT status */
 
-      pending  = stm32l4_getreg(STM32L4_OTGFS_GINTSTS);
-      pending &= stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
+      pending  = stm32l4_getreg(STM32_OTGFS_GINTSTS);
+      pending &= stm32l4_getreg(STM32_OTGFS_GINTMSK);
 
       /* Return from the interrupt when there are no further pending
        * interrupts.
@@ -3669,9 +3669,9 @@ static void stm32l4_gint_enable(void)
 
   /* Set the GINTMSK bit to unmask the interrupt */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_GAHBCFG);
+  regval  = stm32l4_getreg(STM32_OTGFS_GAHBCFG);
   regval |= OTGFS_GAHBCFG_GINTMSK;
-  stm32l4_putreg(STM32L4_OTGFS_GAHBCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_GAHBCFG, regval);
 }
 
 static void stm32l4_gint_disable(void)
@@ -3680,9 +3680,9 @@ static void stm32l4_gint_disable(void)
 
   /* Clear the GINTMSK bit to mask the interrupt */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_GAHBCFG);
+  regval  = stm32l4_getreg(STM32_OTGFS_GAHBCFG);
   regval &= ~OTGFS_GAHBCFG_GINTMSK;
-  stm32l4_putreg(STM32L4_OTGFS_GAHBCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_GAHBCFG, regval);
 }
 
 /****************************************************************************
@@ -3705,19 +3705,19 @@ static inline void stm32l4_hostinit_enable(void)
 
   /* Disable all interrupts. */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTMSK, 0);
+  stm32l4_putreg(STM32_OTGFS_GINTMSK, 0);
 
   /* Clear any pending interrupts. */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTSTS, 0xffffffff);
+  stm32l4_putreg(STM32_OTGFS_GINTSTS, 0xffffffff);
 
   /* Clear any pending USB OTG Interrupts */
 
-  stm32l4_putreg(STM32L4_OTGFS_GOTGINT, 0xffffffff);
+  stm32l4_putreg(STM32_OTGFS_GOTGINT, 0xffffffff);
 
   /* Clear any pending USB OTG interrupts */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTSTS, 0xbfffffff);
+  stm32l4_putreg(STM32_OTGFS_GINTSTS, 0xbfffffff);
 
   /* Enable the host interrupts */
 
@@ -3753,7 +3753,7 @@ static inline void stm32l4_hostinit_enable(void)
   regval |= (OTGFS_GINT_RXFLVL | OTGFS_GINT_IPXFR    | OTGFS_GINT_HPRT     |
              OTGFS_GINT_HC     | OTGFS_GINT_DISC);
 #endif
-  stm32l4_putreg(STM32L4_OTGFS_GINTMSK, regval);
+  stm32l4_putreg(STM32_OTGFS_GINTMSK, regval);
 }
 
 /****************************************************************************
@@ -3793,7 +3793,7 @@ static void stm32l4_txfe_enable(struct stm32l4_usbhost_s *priv,
 
   /* Should we enable the periodic or non-peridic Tx FIFO empty interrupts */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_GINTMSK);
+  regval = stm32l4_getreg(STM32_OTGFS_GINTMSK);
   switch (chan->eptype)
     {
     default:
@@ -3810,7 +3810,7 @@ static void stm32l4_txfe_enable(struct stm32l4_usbhost_s *priv,
 
   /* Enable interrupts */
 
-  stm32l4_putreg(STM32L4_OTGFS_GINTMSK, regval);
+  stm32l4_putreg(STM32_OTGFS_GINTMSK, regval);
   leave_critical_section(flags);
 }
 
@@ -3972,7 +3972,7 @@ static int stm32l4_rh_enumerate(struct stm32l4_usbhost_s *priv,
 
   /* Get the current device speed */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HPRT);
+  regval = stm32l4_getreg(STM32_OTGFS_HPRT);
   if ((regval & OTGFS_HPRT_PSPD_MASK) == OTGFS_HPRT_PSPD_LS)
     {
       priv->rhport.hport.speed = USB_SPEED_LOW;
@@ -4205,11 +4205,11 @@ static int stm32l4_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   ret = nxmutex_lock(&priv->lock);
 
   /* A single channel is represent by an index in the range of 0 to
-   * STM32L4_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an
+   * STM32_MAX_TX_FIFOS.  Otherwise, the ep must be a pointer to an
    * allocated control endpoint structure.
    */
 
-  if ((uintptr_t)ep < STM32L4_MAX_TX_FIFOS)
+  if ((uintptr_t)ep < STM32_MAX_TX_FIFOS)
     {
       /* Halt the channel and mark the channel available */
 
@@ -4480,7 +4480,7 @@ static int stm32l4_ctrlin(struct usbhost_driver_s *drvr,
 
   /* Loop, retrying until the retry time expires */
 
-  for (retries = 0; retries < STM32L4_RETRY_COUNT; retries++)
+  for (retries = 0; retries < STM32_RETRY_COUNT; retries++)
     {
       /* Send the SETUP request */
 
@@ -4526,7 +4526,7 @@ static int stm32l4_ctrlin(struct usbhost_driver_s *drvr,
 
           elapsed = clock_systime_ticks() - start;
         }
-      while (elapsed < STM32L4_DATANAK_DELAY);
+      while (elapsed < STM32_DATANAK_DELAY);
     }
 
   /* All failures exit here after all retries and timeouts are exhausted */
@@ -4569,7 +4569,7 @@ static int stm32l4_ctrlout(struct usbhost_driver_s *drvr,
 
   /* Loop, retrying until the retry time expires */
 
-  for (retries = 0; retries < STM32L4_RETRY_COUNT; retries++)
+  for (retries = 0; retries < STM32_RETRY_COUNT; retries++)
     {
       /* Send the SETUP request */
 
@@ -4619,7 +4619,7 @@ static int stm32l4_ctrlout(struct usbhost_driver_s *drvr,
 
           elapsed = clock_systime_ticks() - start;
         }
-      while (elapsed < STM32L4_DATANAK_DELAY);
+      while (elapsed < STM32_DATANAK_DELAY);
     }
 
   /* All failures exit here after all retries and timeouts are exhausted */
@@ -4678,7 +4678,7 @@ static ssize_t stm32l4_transfer(struct usbhost_driver_s *drvr,
 
   uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
-  DEBUGASSERT(priv && buffer && chidx < STM32L4_MAX_TX_FIFOS && buflen > 0);
+  DEBUGASSERT(priv && buffer && chidx < STM32_MAX_TX_FIFOS && buflen > 0);
 
   /* We must have exclusive access to the USB host hardware and structures */
 
@@ -4750,7 +4750,7 @@ static int stm32l4_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   uvdbg("chidx: %d buflen: %d\n",  (unsigned int)ep, buflen);
 
-  DEBUGASSERT(priv && buffer && chidx < STM32L4_MAX_TX_FIFOS && buflen > 0);
+  DEBUGASSERT(priv && buffer && chidx < STM32_MAX_TX_FIFOS && buflen > 0);
 
   /* We must have exclusive access to the USB host hardware and structures */
 
@@ -4804,7 +4804,7 @@ static int stm32l4_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   uvdbg("chidx: %u: %d\n",  chidx);
 
-  DEBUGASSERT(priv && chidx < STM32L4_MAX_TX_FIFOS);
+  DEBUGASSERT(priv && chidx < STM32_MAX_TX_FIFOS);
   chan = &priv->chan[chidx];
 
   /* We need to disable interrupts to avoid race conditions with the
@@ -4976,16 +4976,16 @@ static void stm32l4_portreset(struct stm32l4_usbhost_s *priv)
 {
   uint32_t regval;
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_HPRT);
+  regval  = stm32l4_getreg(STM32_OTGFS_HPRT);
   regval &= ~(OTGFS_HPRT_PENA | OTGFS_HPRT_PCDET | OTGFS_HPRT_PENCHNG |
               OTGFS_HPRT_POCCHNG);
   regval |= OTGFS_HPRT_PRST;
-  stm32l4_putreg(STM32L4_OTGFS_HPRT, regval);
+  stm32l4_putreg(STM32_OTGFS_HPRT, regval);
 
   up_mdelay(20);
 
   regval &= ~OTGFS_HPRT_PRST;
-  stm32l4_putreg(STM32L4_OTGFS_HPRT, regval);
+  stm32l4_putreg(STM32_OTGFS_HPRT, regval);
 
   up_mdelay(20);
 }
@@ -5012,13 +5012,13 @@ static void stm32l4_flush_txfifos(uint32_t txfnum)
   /* Initiate the TX FIFO flush operation */
 
   regval = OTGFS_GRSTCTL_TXFFLSH | txfnum;
-  stm32l4_putreg(STM32L4_OTGFS_GRSTCTL, regval);
+  stm32l4_putreg(STM32_OTGFS_GRSTCTL, regval);
 
   /* Wait for the FLUSH to complete */
 
-  for (timeout = 0; timeout < STM32L4_FLUSH_DELAY; timeout++)
+  for (timeout = 0; timeout < STM32_FLUSH_DELAY; timeout++)
     {
-      regval = stm32l4_getreg(STM32L4_OTGFS_GRSTCTL);
+      regval = stm32l4_getreg(STM32_OTGFS_GRSTCTL);
       if ((regval & OTGFS_GRSTCTL_TXFFLSH) == 0)
         {
           break;
@@ -5051,13 +5051,13 @@ static void stm32l4_flush_rxfifo(void)
 
   /* Initiate the RX FIFO flush operation */
 
-  stm32l4_putreg(STM32L4_OTGFS_GRSTCTL, OTGFS_GRSTCTL_RXFFLSH);
+  stm32l4_putreg(STM32_OTGFS_GRSTCTL, OTGFS_GRSTCTL_RXFFLSH);
 
   /* Wait for the FLUSH to complete */
 
-  for (timeout = 0; timeout < STM32L4_FLUSH_DELAY; timeout++)
+  for (timeout = 0; timeout < STM32_FLUSH_DELAY; timeout++)
     {
-      regval = stm32l4_getreg(STM32L4_OTGFS_GRSTCTL);
+      regval = stm32l4_getreg(STM32_OTGFS_GRSTCTL);
       if ((regval & OTGFS_GRSTCTL_RXFFLSH) == 0)
         {
           break;
@@ -5094,20 +5094,20 @@ static void stm32l4_vbusdrive(struct stm32l4_usbhost_s *priv, bool state)
 
   /* Turn on the Host port power. */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_HPRT);
+  regval = stm32l4_getreg(STM32_OTGFS_HPRT);
   regval &= ~(OTGFS_HPRT_PENA | OTGFS_HPRT_PCDET | OTGFS_HPRT_PENCHNG |
               OTGFS_HPRT_POCCHNG);
 
   if (((regval & OTGFS_HPRT_PPWR) == 0) && state)
     {
       regval |= OTGFS_HPRT_PPWR;
-      stm32l4_putreg(STM32L4_OTGFS_HPRT, regval);
+      stm32l4_putreg(STM32_OTGFS_HPRT, regval);
     }
 
   if (((regval & OTGFS_HPRT_PPWR) != 0) && !state)
     {
       regval &= ~OTGFS_HPRT_PPWR;
-      stm32l4_putreg(STM32L4_OTGFS_HPRT, regval);
+      stm32l4_putreg(STM32_OTGFS_HPRT, regval);
     }
 
   up_mdelay(200);
@@ -5138,14 +5138,14 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Restart the PHY Clock */
 
-  stm32l4_putreg(STM32L4_OTGFS_PCGCCTL, 0);
+  stm32l4_putreg(STM32_OTGFS_PCGCCTL, 0);
 
   /* Initialize Host Configuration (HCFG) register */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_HCFG);
+  regval  = stm32l4_getreg(STM32_OTGFS_HCFG);
   regval &= ~OTGFS_HCFG_FSLSPCS_MASK;
   regval |= OTGFS_HCFG_FSLSPCS_FS48MHz;
-  stm32l4_putreg(STM32L4_OTGFS_HCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_HCFG, regval);
 
   /* Reset the host port */
 
@@ -5153,9 +5153,9 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Clear the FS-/LS-only support bit in the HCFG register */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_HCFG);
+  regval  = stm32l4_getreg(STM32_OTGFS_HCFG);
   regval &= ~OTGFS_HCFG_FSLSS;
-  stm32l4_putreg(STM32L4_OTGFS_HCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_HCFG, regval);
 
   /* Carve up FIFO memory for the Rx FIFO and the periodic and non-periodic
    * Tx FIFOs
@@ -5163,7 +5163,7 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Configure Rx FIFO size (GRXFSIZ) */
 
-  stm32l4_putreg(STM32L4_OTGFS_GRXFSIZ, CONFIG_STM32L4_OTGFS_RXFIFO_SIZE);
+  stm32l4_putreg(STM32_OTGFS_GRXFSIZ, CONFIG_STM32L4_OTGFS_RXFIFO_SIZE);
   offset = CONFIG_STM32L4_OTGFS_RXFIFO_SIZE;
 
   /* Setup the host non-periodic Tx FIFO size (HNPTXFSIZ) */
@@ -5171,7 +5171,7 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
   regval = (offset |
             (CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE <<
             OTGFS_HNPTXFSIZ_NPTXFD_SHIFT));
-  stm32l4_putreg(STM32L4_OTGFS_HNPTXFSIZ, regval);
+  stm32l4_putreg(STM32_OTGFS_HNPTXFSIZ, regval);
   offset += CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE;
 
   /* Set up the host periodic Tx fifo size register (HPTXFSIZ) */
@@ -5179,7 +5179,7 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
   regval = (offset |
             (CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE <<
             OTGFS_HPTXFSIZ_PTXFD_SHIFT));
-  stm32l4_putreg(STM32L4_OTGFS_HPTXFSIZ, regval);
+  stm32l4_putreg(STM32_OTGFS_HPTXFSIZ, regval);
 
   /* If OTG were supported, we should need to clear HNP enable bit in the
    * USB_OTG control register about here.
@@ -5192,10 +5192,10 @@ static void stm32l4_host_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Clear all pending HC Interrupts */
 
-  for (i = 0; i < STM32L4_NHOST_CHANNELS; i++)
+  for (i = 0; i < STM32_NHOST_CHANNELS; i++)
     {
-      stm32l4_putreg(STM32L4_OTGFS_HCINT(i), 0xffffffff);
-      stm32l4_putreg(STM32L4_OTGFS_HCINTMSK(i), 0);
+      stm32l4_putreg(STM32_OTGFS_HCINT(i), 0xffffffff);
+      stm32l4_putreg(STM32_OTGFS_HCINTMSK(i), 0);
     }
 
   /* Driver Vbus +5V (the smoke test).  Should be done elsewhere in OTG
@@ -5275,11 +5275,11 @@ static inline void stm32l4_sw_initialize(struct stm32l4_usbhost_s *priv)
   /* Put all of the channels back in their initial, allocated state */
 
   memset(priv->chan, 0,
-         STM32L4_MAX_TX_FIFOS * sizeof(struct stm32l4_chan_s));
+         STM32_MAX_TX_FIFOS * sizeof(struct stm32l4_chan_s));
 
   /* Initialize each channel */
 
-  for (i = 0; i < STM32L4_MAX_TX_FIFOS; i++)
+  for (i = 0; i < STM32_MAX_TX_FIFOS; i++)
     {
       struct stm32l4_chan_s *chan = &priv->chan[i];
 
@@ -5311,18 +5311,18 @@ static inline int stm32l4_hw_initialize(struct stm32l4_usbhost_s *priv)
    * transceiver: "This bit is always 1 with write-only access"
    */
 
-  regval = stm32l4_getreg(STM32L4_OTGFS_GUSBCFG);
+  regval = stm32l4_getreg(STM32_OTGFS_GUSBCFG);
   regval |= OTGFS_GUSBCFG_PHYSEL;
-  stm32l4_putreg(STM32L4_OTGFS_GUSBCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_GUSBCFG, regval);
 
   /* Reset after a PHY select and set Host mode.  First, wait for AHB master
    * IDLE state.
    */
 
-  for (timeout = 0; timeout < STM32L4_READY_DELAY; timeout++)
+  for (timeout = 0; timeout < STM32_READY_DELAY; timeout++)
     {
       up_udelay(3);
-      regval = stm32l4_getreg(STM32L4_OTGFS_GRSTCTL);
+      regval = stm32l4_getreg(STM32_OTGFS_GRSTCTL);
       if ((regval & OTGFS_GRSTCTL_AHBIDL) != 0)
         {
           break;
@@ -5331,10 +5331,10 @@ static inline int stm32l4_hw_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Then perform the core soft reset. */
 
-  stm32l4_putreg(STM32L4_OTGFS_GRSTCTL, OTGFS_GRSTCTL_CSRST);
-  for (timeout = 0; timeout < STM32L4_READY_DELAY; timeout++)
+  stm32l4_putreg(STM32_OTGFS_GRSTCTL, OTGFS_GRSTCTL_CSRST);
+  for (timeout = 0; timeout < STM32_READY_DELAY; timeout++)
     {
-      regval = stm32l4_getreg(STM32L4_OTGFS_GRSTCTL);
+      regval = stm32l4_getreg(STM32_OTGFS_GRSTCTL);
       if ((regval & OTGFS_GRSTCTL_CSRST) == 0)
         {
           break;
@@ -5355,7 +5355,7 @@ static inline int stm32l4_hw_initialize(struct stm32l4_usbhost_s *priv)
 #ifdef CONFIG_STM32L4_OTGFS_SOFOUTPUT
   regval |= OTGFS_GCCFG_SOFOUTEN;
 #endif
-  stm32l4_putreg(STM32L4_OTGFS_GCCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_GCCFG, regval);
   up_mdelay(20);
 
   /* Initialize OTG features:  In order to support OTP, the HNPCAP and SRPCAP
@@ -5364,10 +5364,10 @@ static inline int stm32l4_hw_initialize(struct stm32l4_usbhost_s *priv)
 
   /* Force Host Mode */
 
-  regval  = stm32l4_getreg(STM32L4_OTGFS_GUSBCFG);
+  regval  = stm32l4_getreg(STM32_OTGFS_GUSBCFG);
   regval &= ~OTGFS_GUSBCFG_FDMOD;
   regval |= OTGFS_GUSBCFG_FHMOD;
-  stm32l4_putreg(STM32L4_OTGFS_GUSBCFG, regval);
+  stm32l4_putreg(STM32_OTGFS_GUSBCFG, regval);
   up_mdelay(50);
 
   /* Initialize host mode and return success */
@@ -5467,7 +5467,7 @@ struct usbhost_connection_s *stm32l4_otgfshost_initialize(int controller)
 
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(STM32L4_IRQ_OTGFS, stm32l4_gint_isr, NULL) != 0)
+  if (irq_attach(STM32_IRQ_OTGFS, stm32l4_gint_isr, NULL) != 0)
     {
       usbhost_trace1(OTGFS_TRACE1_IRQATTACH, 0);
       return NULL;
@@ -5479,7 +5479,7 @@ struct usbhost_connection_s *stm32l4_otgfshost_initialize(int controller)
 
   /* Enable interrupts at the interrupt controller */
 
-  up_enable_irq(STM32L4_IRQ_OTGFS);
+  up_enable_irq(STM32_IRQ_OTGFS);
   return &g_usbconn;
 }
 
