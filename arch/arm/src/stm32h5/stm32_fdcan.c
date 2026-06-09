@@ -328,10 +328,10 @@
 #  undef CONFIG_STM32H5_FDCAN_REGDEBUG
 #endif
 
-#undef STM32H5_FDCAN_LOOPBACK
+#undef STM32_FDCAN_LOOPBACK
 #if defined(CONFIG_STM32H5_FDCAN1_LOOPBACK) ||   \
     defined(CONFIG_STM32H5_FDCAN2_LOOPBACK)
-#  define STM32H5_FDCAN_LOOPBACK 1
+#  define STM32_FDCAN_LOOPBACK 1
 #endif
 
 /****************************************************************************
@@ -403,7 +403,7 @@ struct stm32_config_s
   uint8_t rxfifo1esize;     /* RX FIFO1 element size (words) */
   uint8_t txeventesize;     /* TXevent element size (words) */
   uint8_t txbufferesize;    /* TX buffer element size (words) */
-#ifdef STM32H5_FDCAN_LOOPBACK
+#ifdef STM32_FDCAN_LOOPBACK
   bool loopback;            /* True: Loopback mode */
 #endif
 
@@ -3282,7 +3282,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 #endif
   fdcan_putreg(priv, STM32_FDCAN_TXBC_OFFSET, regval);
 
-#ifdef STM32H5_FDCAN_LOOPBACK
+#ifdef STM32_FDCAN_LOOPBACK
   /* Is loopback mode selected for this peripheral? */
 
   if (config->loopback)

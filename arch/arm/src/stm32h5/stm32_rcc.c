@@ -111,14 +111,14 @@ static inline void rcc_resetbkp(void)
   init_stat = stm32h5_rtc_is_initialized();
   if (!init_stat)
     {
-      uint32_t bkregs[STM32H5_RTC_BKCOUNT];
+      uint32_t bkregs[STM32_RTC_BKCOUNT];
       int i;
 
       /* Backup backup-registers before RTC reset. */
 
-      for (i = 0; i < STM32H5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          bkregs[i] = getreg32(STM32H5_RTC_BKR(i));
+          bkregs[i] = getreg32(STM32_RTC_BKR(i));
         }
 
       /* Enable write access to the backup domain (RTC registers, RTC
@@ -136,14 +136,14 @@ static inline void rcc_resetbkp(void)
 
       /* Restore backup-registers, except RTC related. */
 
-      for (i = 0; i < STM32H5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          if (RTC_MAGIC_REG == STM32H5_RTC_BKR(i))
+          if (RTC_MAGIC_REG == STM32_RTC_BKR(i))
             {
               continue;
             }
 
-          putreg32(bkregs[i], STM32H5_RTC_BKR(i));
+          putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
       stm32_pwr_enablebkp(false);

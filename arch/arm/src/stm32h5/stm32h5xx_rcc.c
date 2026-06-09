@@ -58,19 +58,19 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 /* HSE divisor to yield ~1MHz RTC clock */
 
-#define HSE_DIVISOR (STM32H5_HSE_FREQUENCY + 500000) / 1000000
+#define HSE_DIVISOR (STM32_HSE_FREQUENCY + 500000) / 1000000
 
 /* Determine if board wants to use HSI48 as 48 MHz oscillator. */
 
-#if defined(CONFIG_STM32H5_HAVE_HSI48) && defined(STM32H5_USE_CLK48)
-#  if defined(STM32H5_CLKUSB_SEL)
-#    if (STM32H5_CLKUSB_SEL == RCC_CCIPR4_USBSEL_HSI48KERCK)
-#      define STM32H5_USE_HSI48 1
+#if defined(CONFIG_STM32H5_HAVE_HSI48) && defined(STM32_USE_CLK48)
+#  if defined(STM32_CLKUSB_SEL)
+#    if (STM32_CLKUSB_SEL == RCC_CCIPR4_USBSEL_HSI48KERCK)
+#      define STM32_USE_HSI48 1
 #    endif
 #  endif
-#  if defined(STM32H5_CLKRNG_SEL)
-#    if (STM32H5_CLKRNG_SEL == RCC_CCIPR5_RNGSEL_HSI48KERCK)
-#      define STM32H5_USE_HSI48 1
+#  if defined(STM32_CLKRNG_SEL)
+#    if (STM32_CLKRNG_SEL == RCC_CCIPR5_RNGSEL_HSI48KERCK)
+#      define STM32_USE_HSI48 1
 #    endif
 #  endif
 #endif
@@ -203,30 +203,30 @@ static inline void rcc_enableahb2(void)
 
   /* Enable GPIOA, GPIOB, .... GPIOH */
 
-#if STM32H5_NPORTS > 0
+#if STM32_NPORTS > 0
   regval |= (RCC_AHB2ENR_GPIOAEN
-#if STM32H5_NPORTS > 1
+#if STM32_NPORTS > 1
              | RCC_AHB2ENR_GPIOBEN
 #endif
-#if STM32H5_NPORTS > 2
+#if STM32_NPORTS > 2
              | RCC_AHB2ENR_GPIOCEN
 #endif
-#if STM32H5_NPORTS > 3
+#if STM32_NPORTS > 3
              | RCC_AHB2ENR_GPIODEN
 #endif
-#if STM32H5_NPORTS > 4
+#if STM32_NPORTS > 4
              | RCC_AHB2ENR_GPIOEEN
 #endif
-#if STM32H5_NPORTS > 5
+#if STM32_NPORTS > 5
              | RCC_AHB2ENR_GPIOFEN
 #endif
-#if STM32H5_NPORTS > 6
+#if STM32_NPORTS > 6
              | RCC_AHB2ENR_GPIOGEN
 #endif
-#if STM32H5_NPORTS > 7
+#if STM32_NPORTS > 7
              | RCC_AHB2ENR_GPIOHEN
 #endif
-#if STM32H5_NPORTS > 7
+#if STM32_NPORTS > 7
              | RCC_AHB2ENR_GPIOIEN
 #endif
 
@@ -419,8 +419,8 @@ static inline void rcc_enableapb1l(void)
   regval |= RCC_APB1LENR_I3C1EN;
 #endif
 
-#ifdef STM32H5_USE_HSI48
-  if (STM32H5_HSI48_SYNCSRC != SYNCSRC_NONE)
+#ifdef STM32_USE_HSI48
+  if (STM32_HSI48_SYNCSRC != SYNCSRC_NONE)
     {
       /* Bit 24: CRS clock enable */
 
@@ -842,10 +842,10 @@ void stm32_rcc_enableperipherals(void)
   rcc_enableapb2();
   rcc_enableapb3();
 
-#ifdef STM32H5_USE_HSI48
+#ifdef STM32_USE_HSI48
   /* Enable HSI48 clocking to support USB transfers or RNG */
 
-  stm32h5_enable_hsi48(STM32H5_HSI48_SYNCSRC);
+  stm32h5_enable_hsi48(STM32_HSI48_SYNCSRC);
 #endif
 }
 
@@ -1097,14 +1097,14 @@ void stm32_stdclockconfig(void)
         }
 
 #if defined(CONFIG_STM32H5_IWDG) || defined(CONFIG_STM32H5_RTC_LSICLOCK) || \
-    defined(STM32H5_USE_LSCO_LSI)
+    defined(STM32_USE_LSCO_LSI)
 
       /* Low speed internal clock source LSI */
 
       stm32_rcc_enablelsi();
 #endif
 
-#if defined(STM32_USE_LSE) || defined(STM32H5_USE_LSCO_LSE)
+#if defined(STM32_USE_LSE) || defined(STM32_USE_LSCO_LSE)
       /* Low speed external clock source LSE */
 
       stm32_rcc_enablelse();
@@ -1203,19 +1203,19 @@ void stm32_stdclockconfig(void)
 
       /* Configure USB source clock */
 
-#if defined(STM32H5_CLKUSB_SEL)
+#if defined(STM32_CLKUSB_SEL)
       regval = getreg32(STM32_RCC_CCIPR4);
       regval &= ~RCC_CCIPR4_USBSEL_MASK;
-      regval |= STM32H5_CLKUSB_SEL;
+      regval |= STM32_CLKUSB_SEL;
       putreg32(regval, STM32_RCC_CCIPR4);
 #endif
 
       /* Configure RNG source clock */
 
-#if defined(STM32H5_CLKRNG_SEL)
+#if defined(STM32_CLKRNG_SEL)
       regval = getreg32(STM32_RCC_CCIPR5);
       regval &= ~RCC_CCIPR5_RNGSEL_MASK;
-      regval |= STM32H5_CLKRNG_SEL;
+      regval |= STM32_CLKRNG_SEL;
       putreg32(regval, STM32_RCC_CCIPR5);
 #endif
     }
