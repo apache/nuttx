@@ -89,7 +89,7 @@ void stm32wl5_rcc_enablelse(void)
    * clock are already running.
    */
 
-  regval = getreg32(STM32WL5_RCC_BDCR);
+  regval = getreg32(STM32_RCC_BDCR);
 
   if ((regval & (RCC_BDCR_LSEON | RCC_BDCR_LSERDY |
                  RCC_BDCR_LSESYSEN | RCC_BDCR_LSESYSEN)) !=
@@ -117,7 +117,7 @@ void stm32wl5_rcc_enablelse(void)
       regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
       regval |= CONFIG_STM32WL5_RTC_LSECLOCK_START_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
-      putreg32(regval, STM32WL5_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
       regval |= RCC_BDCR_LSEON;
 #endif
 
@@ -126,11 +126,11 @@ void stm32wl5_rcc_enablelse(void)
         {
           regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
           regval |= drives[drive++];
-          putreg32(regval, STM32WL5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
           regval |= RCC_BDCR_LSEON;
 #endif
 
-          putreg32(regval, STM32WL5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
 
           /* Wait for the LSE clock to be ready (or until a timeout elapsed)
            */
@@ -139,7 +139,7 @@ void stm32wl5_rcc_enablelse(void)
             {
               /* Check if the LSERDY flag is the set in the BDCR */
 
-              regval = getreg32(STM32WL5_RCC_BDCR);
+              regval = getreg32(STM32_RCC_BDCR);
 
               if (regval & RCC_BDCR_LSERDY)
                 {
@@ -167,11 +167,11 @@ void stm32wl5_rcc_enablelse(void)
 
           regval |= RCC_BDCR_LSESYSEN;
 
-          putreg32(regval, STM32WL5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
 
           /* Wait for the LSE system clock to be ready */
 
-          while (!((regval = getreg32(STM32WL5_RCC_BDCR)) &
+          while (!((regval = getreg32(STM32_RCC_BDCR)) &
                    RCC_BDCR_LSESYSRDY))
             {
               stm32wl5_waste();
@@ -184,7 +184,7 @@ void stm32wl5_rcc_enablelse(void)
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
       regval |= RCC_BDCR_LSEDRV_LOW << RCC_BDCR_LSEDRV_SHIFT;
-      putreg32(regval, STM32WL5_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
 #endif
 
       /* Disable backup domain access if it was disabled on entry */

@@ -44,7 +44,7 @@
 #include "hardware/stm32wl5_memorymap.h"
 #include "stm32wl5_uid.h"
 
-#ifdef STM32WL5_SYSMEM_UID
+#ifdef STM32_SYSMEM_UID
 
 /****************************************************************************
  * Public Functions
@@ -56,8 +56,8 @@ void stm32wl5_get_uniqueid(uint8_t uniqueid[12])
 
   for (i = 0; i < 12; i++)
     {
-      uniqueid[i] = *((uint8_t *)(STM32WL5_SYSMEM_UID)+i);
+      uniqueid[i] = *((uint8_t *)(STM32_SYSMEM_UID)+i);
     }
 }
 
-#endif /* STM32WL5_SYSMEM_UID */
+#endif /* STM32_SYSMEM_UID */
