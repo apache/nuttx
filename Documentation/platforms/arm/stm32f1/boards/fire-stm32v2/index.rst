@@ -324,7 +324,7 @@ M3 Wildfire-specific Configuration Options
 
    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact chip:
 
-   CONFIG_ARCH_CHIP_STM32
+   CONFIG_ARCH_CHIP_STM32F1
    CONFIG_ARCH_CHIP_STM32F103VE
 
    CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock
