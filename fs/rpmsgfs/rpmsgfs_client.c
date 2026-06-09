@@ -209,6 +209,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
     {
       strlcpy(entry->d_name, rsp->name, sizeof(entry->d_name));
       entry->d_type = rsp->type;
+      entry->d_ino = rsp->ino;
     }
 
   rpmsg_post(ept, &cookie->sem);
