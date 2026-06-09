@@ -71,7 +71,7 @@ static int stm32wb_exti0_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  putreg32(EXTI_PR1_PIF(0), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(0), STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -92,7 +92,7 @@ static int stm32wb_exti1_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  putreg32(EXTI_PR1_PIF(1), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(1), STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -113,7 +113,7 @@ static int stm32wb_exti2_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  putreg32(EXTI_PR1_PIF(2), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(2), STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -134,7 +134,7 @@ static int stm32wb_exti3_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  putreg32(EXTI_PR1_PIF(3), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(3), STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -155,7 +155,7 @@ static int stm32wb_exti4_isr(int irq, void *context, void *arg)
 
   /* Clear the pending interrupt */
 
-  putreg32(EXTI_PR1_PIF(4), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(4), STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -179,7 +179,7 @@ static int stm32wb_exti_multiisr(int irq, void *context, void *arg,
 
   /* Examine the state of each pin in the group */
 
-  pr = getreg32(STM32WB_EXTI_PR1);
+  pr = getreg32(STM32_EXTI_PR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -192,7 +192,7 @@ static int stm32wb_exti_multiisr(int irq, void *context, void *arg,
         {
           /* Clear the pending interrupt */
 
-          putreg32(mask, STM32WB_EXTI_PR1);
+          putreg32(mask, STM32_EXTI_PR1);
 
           /* And dispatch the interrupt to the handler */
 
@@ -265,7 +265,7 @@ int stm32wb_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   if (pin < 5)
     {
-      irq        = pin + STM32WB_IRQ_EXTI0;
+      irq        = pin + STM32_IRQ_EXTI0;
       nshared    = 1;
       shared_cbs = &g_gpio_handlers[pin];
       switch (pin)
@@ -293,14 +293,14 @@ int stm32wb_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
   else if (pin < 10)
     {
-      irq        = STM32WB_IRQ_EXTI95;
+      irq        = STM32_IRQ_EXTI95;
       handler    = stm32wb_exti95_isr;
       shared_cbs = &g_gpio_handlers[5];
       nshared    = 5;
     }
   else
     {
-      irq        = STM32WB_IRQ_EXTI1510;
+      irq        = STM32_IRQ_EXTI1510;
       handler    = stm32wb_exti1510_isr;
       shared_cbs = &g_gpio_handlers[10];
       nshared    = 6;
@@ -351,19 +351,19 @@ int stm32wb_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32WB_EXTI_RTSR1,
+  modifyreg32(STM32_EXTI_RTSR1,
               risingedge ? 0 : EXTI_RTSR1_RT(pin),
               risingedge ? EXTI_RTSR1_RT(pin) : 0);
-  modifyreg32(STM32WB_EXTI_FTSR1,
+  modifyreg32(STM32_EXTI_FTSR1,
               fallingedge ? 0 : EXTI_FTSR1_FT(pin),
               fallingedge ? EXTI_FTSR1_FT(pin) : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32WB_EXTI_C1EMR1,
+  modifyreg32(STM32_EXTI_C1EMR1,
               event ? 0 : EXTI_C1EMR1_EM(pin),
               event ? EXTI_C1EMR1_EM(pin) : 0);
-  modifyreg32(STM32WB_EXTI_C1IMR1,
+  modifyreg32(STM32_EXTI_C1IMR1,
               func ? 0 : EXTI_C1IMR1_IM(pin),
               func ? EXTI_C1IMR1_IM(pin) : 0);
 

@@ -86,10 +86,10 @@ static int stm32wb_oneshot_handler(int irq, void *context, void *arg)
    * Disable the TC now and disable any further interrupts.
    */
 
-  STM32WB_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32WB_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
-  STM32WB_TIM_SETMODE(oneshot->tch, STM32WB_TIM_MODE_DISABLED);
-  STM32WB_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
+  STM32_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
 
   /* The timer is no longer running */
 
@@ -200,7 +200,7 @@ int stm32wb_oneshot_initialize(struct stm32wb_oneshot_s *oneshot,
       return -EBUSY;
     }
 
-  STM32WB_TIM_SETCLOCK(oneshot->tch, frequency);
+  STM32_TIM_SETCLOCK(oneshot->tch, frequency);
 
   /* Initialize the remaining fields in the state structure. */
 
@@ -301,19 +301,19 @@ int stm32wb_oneshot_start(struct stm32wb_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  STM32WB_TIM_SETISR(oneshot->tch, stm32wb_oneshot_handler, oneshot, 0);
+  STM32_TIM_SETISR(oneshot->tch, stm32wb_oneshot_handler, oneshot, 0);
 
   /* Set timer period */
 
   oneshot->period = (uint32_t)period;
-  STM32WB_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
+  STM32_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
 
   /* Start the counter */
 
-  STM32WB_TIM_SETMODE(oneshot->tch, STM32WB_TIM_MODE_PULSE);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_PULSE);
 
-  STM32WB_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
-  STM32WB_TIM_ENABLEINT(oneshot->tch, GTIM_DIER_UIE);
+  STM32_TIM_ACKINT(oneshot->tch, GTIM_SR_UIF);
+  STM32_TIM_ENABLEINT(oneshot->tch, GTIM_DIER_UIE);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -388,14 +388,14 @@ int stm32wb_oneshot_cancel(struct stm32wb_oneshot_s *oneshot,
 
   tmrinfo("Cancelling...\n");
 
-  count  = STM32WB_TIM_GETCOUNTER(oneshot->tch);
+  count  = STM32_TIM_GETCOUNTER(oneshot->tch);
   period = oneshot->period;
 
   /* Now we can disable the interrupt and stop the timer. */
 
-  STM32WB_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
-  STM32WB_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32WB_TIM_SETMODE(oneshot->tch, STM32WB_TIM_MODE_DISABLED);
+  STM32_TIM_DISABLEINT(oneshot->tch, GTIM_DIER_UIE);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 
   oneshot->running = false;
   oneshot->handler = NULL;

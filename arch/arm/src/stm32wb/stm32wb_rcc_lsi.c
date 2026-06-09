@@ -47,11 +47,11 @@ void stm32wb_rcc_enable_lsi(void)
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32WB_RCC_CSR, 0, RCC_CSR_LSI1ON);
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSI1ON);
 
   /* Wait for the internal LSI oscillator to be stable. */
 
-  while ((getreg32(STM32WB_RCC_CSR) & RCC_CSR_LSI1RDY) == 0);
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSI1RDY) == 0);
 }
 
 /****************************************************************************
@@ -68,7 +68,7 @@ void stm32wb_rcc_disable_lsi(void)
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32WB_RCC_CSR, RCC_CSR_LSI1ON, 0);
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSI1ON, 0);
 
   /* LSIRDY should go low after 3 LSI clock cycles */
 }

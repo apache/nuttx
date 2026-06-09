@@ -55,7 +55,7 @@ void weak_function stm32wb_spidev_initialize(void)
    */
 
 #ifdef CONFIG_LCD_ST7565
-  stm32wb_configgpio(STM32WB_LCD_CS);       /* ST7565 chip select */
+  stm32wb_configgpio(STM32_LCD_CS);       /* ST7565 chip select */
 #endif
 }
 
@@ -91,7 +91,7 @@ void stm32wb_spi2select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 #ifdef CONFIG_LCD_ST7565
   if (devid == SPIDEV_DISPLAY(0))
     {
-      stm32wb_gpiowrite(STM32WB_LCD_CS, !selected);
+      stm32wb_gpiowrite(STM32_LCD_CS, !selected);
     }
 #endif
 }

@@ -32,7 +32,7 @@
  *      Standard-mode (up to 100 kHz)
  *      Fast-mode (up to 400 kHz)
  *      Fast-mode+ (up to 1 MHz)
- *      Clock source selection is based on STM32WB_RCC_CCIPR register
+ *      Clock source selection is based on STM32_RCC_CCIPR register
  *
  *  - Multiple instances (shared bus)
  *  - Interrupt based operation
@@ -432,14 +432,14 @@ static int stm32wb_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 #ifdef CONFIG_STM32WB_I2C1
 static const struct stm32wb_i2c_config_s stm32wb_i2c1_config =
 {
-  .base       = STM32WB_I2C1_BASE,
+  .base       = STM32_I2C1_BASE,
   .clk_bit    = RCC_APB1ENR1_I2C1EN,
   .reset_bit  = RCC_APB1RSTR1_I2C1RST,
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .ev_irq     = STM32WB_IRQ_I2C1EV,
-  .er_irq     = STM32WB_IRQ_I2C1ER
+  .ev_irq     = STM32_IRQ_I2C1EV,
+  .er_irq     = STM32_IRQ_I2C1ER
 #endif
 };
 
@@ -468,14 +468,14 @@ static struct stm32wb_i2c_priv_s stm32wb_i2c1_priv =
 #ifdef CONFIG_STM32WB_I2C3
 static const struct stm32wb_i2c_config_s stm32wb_i2c3_config =
 {
-  .base       = STM32WB_I2C3_BASE,
+  .base       = STM32_I2C3_BASE,
   .clk_bit    = RCC_APB1ENR1_I2C3EN,
   .reset_bit  = RCC_APB1RSTR1_I2C3RST,
   .scl_pin    = GPIO_I2C3_SCL,
   .sda_pin    = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
-  .ev_irq     = STM32WB_IRQ_I2C3EV,
-  .er_irq     = STM32WB_IRQ_I2C3ER
+  .ev_irq     = STM32_IRQ_I2C3EV,
+  .er_irq     = STM32_IRQ_I2C3ER
 #endif
 };
 
@@ -631,7 +631,7 @@ static uint32_t stm32wb_i2c_toticks(int msgc, struct i2c_msg_s *msgs)
 static inline
 void stm32wb_i2c_enableinterrupts(struct stm32wb_i2c_priv_s *priv)
 {
-    stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET, 0,
+    stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
                             (I2C_CR1_TXRX | I2C_CR1_NACKIE));
 }
 #endif
@@ -663,7 +663,7 @@ int stm32wb_i2c_sem_waitdone(struct stm32wb_i2c_priv_s *priv)
    * error-related, are enabled here.
    */
 
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET, 0,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0,
                           (I2C_CR1_ALLINTS & ~I2C_CR1_TXRX));
 
   /* Signal the interrupt handler that we are waiting */
@@ -701,7 +701,7 @@ int stm32wb_i2c_sem_waitdone(struct stm32wb_i2c_priv_s *priv)
 
   /* Disable I2C interrupts */
 
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET, I2C_CR1_ALLINTS, 0);
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, I2C_CR1_ALLINTS, 0);
 
   leave_critical_section(flags);
   return ret;
@@ -769,7 +769,7 @@ int stm32wb_i2c_sem_waitdone(struct stm32wb_i2c_priv_s *priv)
 static inline void
 stm32wb_i2c_set_7bit_address(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_SADD7_MASK,
                           (priv->msgv->addr << I2C_CR2_SADD7_SHIFT) &
                           I2C_CR2_SADD7_MASK);
 }
@@ -785,7 +785,7 @@ static inline void
 stm32wb_i2c_set_bytes_to_transfer(struct stm32wb_i2c_priv_s *priv,
                                   uint8_t n_bytes)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_NBYTES_MASK,
                           (n_bytes << I2C_CR2_NBYTES_SHIFT));
 }
 
@@ -799,7 +799,7 @@ stm32wb_i2c_set_bytes_to_transfer(struct stm32wb_i2c_priv_s *priv,
 static inline void
 stm32wb_i2c_set_write_transfer_dir(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET, I2C_CR2_RD_WRN, 0);
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, I2C_CR2_RD_WRN, 0);
 }
 
 /****************************************************************************
@@ -812,7 +812,7 @@ stm32wb_i2c_set_write_transfer_dir(struct stm32wb_i2c_priv_s *priv)
 static inline void
 stm32wb_i2c_set_read_transfer_dir(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET,
                           0, I2C_CR2_RD_WRN);
 }
 
@@ -826,7 +826,7 @@ stm32wb_i2c_set_read_transfer_dir(struct stm32wb_i2c_priv_s *priv)
 static inline void
 stm32wb_i2c_enable_reload(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET,
                           0, I2C_CR2_RELOAD);
 }
 
@@ -840,7 +840,7 @@ stm32wb_i2c_enable_reload(struct stm32wb_i2c_priv_s *priv)
 static inline void
 stm32wb_i2c_disable_reload(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET,
                           I2C_CR2_RELOAD, 0);
 }
 
@@ -880,7 +880,7 @@ void stm32wb_i2c_sem_waitstop(struct stm32wb_i2c_priv_s *priv)
 
       /* Check for STOP condition */
 
-      cr = stm32wb_i2c_getreg32(priv, STM32WB_I2C_CR2_OFFSET);
+      cr = stm32wb_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
       if ((cr & I2C_CR2_STOP) == 0)
         {
           return;
@@ -888,7 +888,7 @@ void stm32wb_i2c_sem_waitstop(struct stm32wb_i2c_priv_s *priv)
 
       /* Check for timeout error */
 
-      sr = stm32wb_i2c_getreg(priv, STM32WB_I2C_ISR_OFFSET);
+      sr = stm32wb_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
       if ((sr & I2C_INT_TIMEOUT) != 0)
         {
           i2cerr("ERROR: waiting for a STOP isr timeout, elapsed: %lu\n",
@@ -1076,14 +1076,14 @@ static void stm32wb_i2c_setclock(struct stm32wb_i2c_priv_s *priv,
     {
       /* I2C peripheral must be disabled to update clocking configuration */
 
-      pe = stm32wb_i2c_getreg32(priv, STM32WB_I2C_CR1_OFFSET) & I2C_CR1_PE;
+      pe = stm32wb_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET) & I2C_CR1_PE;
       if (pe)
         {
-          stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET,
+          stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET,
                                   I2C_CR1_PE, 0);
         }
 
-#if defined(STM32WB_I2C_USE_HSI16)
+#if defined(STM32_I2C_USE_HSI16)
       switch (frequency)
         {
           case 100000ul:
@@ -1104,7 +1104,7 @@ static void stm32wb_i2c_setclock(struct stm32wb_i2c_priv_s *priv,
         }
 #else
 
-#if STM32WB_PCLK1_FREQUENCY != 64000000ul
+#if STM32_PCLK1_FREQUENCY != 64000000ul
 #  error Unsupported I2C configuration.
 #endif
 
@@ -1128,11 +1128,11 @@ static void stm32wb_i2c_setclock(struct stm32wb_i2c_priv_s *priv,
         }
 #endif
 
-      stm32wb_i2c_putreg32(priv, STM32WB_I2C_TIMINGR_OFFSET, timingr);
+      stm32wb_i2c_putreg32(priv, STM32_I2C_TIMINGR_OFFSET, timingr);
 
       if (pe)
         {
-          stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET,
+          stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET,
                                   0, I2C_CR1_PE);
         }
 
@@ -1279,7 +1279,7 @@ void stm32wb_i2c_sendstart(struct stm32wb_i2c_priv_s *priv)
   i2cinfo("Sending START: dcnt=%i msgc=%i flags=0x%04x\n",
           priv->dcnt, priv->msgc, priv->flags);
 
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET, 0, I2C_CR2_START);
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET, 0, I2C_CR2_START);
 }
 
 /****************************************************************************
@@ -1300,7 +1300,7 @@ void stm32wb_i2c_sendstop(struct stm32wb_i2c_priv_s *priv)
   i2cinfo("Sending STOP\n");
   stm32wb_i2c_traceevent(priv, I2CEVENT_WRITE_STOP, 0);
 
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR2_OFFSET,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR2_OFFSET,
                           0, I2C_CR2_STOP);
 }
 
@@ -1315,7 +1315,7 @@ void stm32wb_i2c_sendstop(struct stm32wb_i2c_priv_s *priv)
 static inline
 uint32_t stm32wb_i2c_getstatus(struct stm32wb_i2c_priv_s *priv)
 {
-  return getreg32(priv->config->base + STM32WB_I2C_ISR_OFFSET);
+  return getreg32(priv->config->base + STM32_I2C_ISR_OFFSET);
 }
 
 /****************************************************************************
@@ -1329,7 +1329,7 @@ uint32_t stm32wb_i2c_getstatus(struct stm32wb_i2c_priv_s *priv)
 static inline
 void stm32wb_i2c_clearinterrupts(struct stm32wb_i2c_priv_s *priv)
 {
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_ICR_OFFSET,
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET,
                           0, I2C_ICR_CLEARMASK);
 }
 
@@ -1357,7 +1357,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 
   /* Get state of the I2C controller */
 
-  status = stm32wb_i2c_getreg32(priv, STM32WB_I2C_ISR_OFFSET);
+  status = stm32wb_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
   i2cinfo("ENTER: status = 0x%08" PRIx32 "\n", status);
 
@@ -1526,7 +1526,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 
           /* Transmit current byte */
 
-          stm32wb_i2c_putreg(priv, STM32WB_I2C_TXDR_OFFSET, *priv->ptr);
+          stm32wb_i2c_putreg(priv, STM32_I2C_TXDR_OFFSET, *priv->ptr);
 
           /* Advance to next byte */
 
@@ -1601,7 +1601,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 #endif
           /* Receive a byte */
 
-          *priv->ptr = stm32wb_i2c_getreg(priv, STM32WB_I2C_RXDR_OFFSET);
+          *priv->ptr = stm32wb_i2c_getreg(priv, STM32_I2C_RXDR_OFFSET);
 
           i2cinfo("RXNE: Read Data 0x%02x\n", *priv->ptr);
 
@@ -1622,7 +1622,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
           /* Unsupported state */
 
           stm32wb_i2c_traceevent(priv, I2CEVENT_READ_ERROR, 0);
-          status = stm32wb_i2c_getreg(priv, STM32WB_I2C_ISR_OFFSET);
+          status = stm32wb_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
           i2cerr("ERROR: RXNE Unsupported state detected, dcnt=%i, "
                  "status 0x%08" PRIx32 "\n",
                  priv->dcnt, status);
@@ -1866,7 +1866,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 
   else if (priv->dcnt == -1 && priv->msgc == 0)
     {
-      status = stm32wb_i2c_getreg(priv, STM32WB_I2C_ISR_OFFSET);
+      status = stm32wb_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
       i2cwarn("WARNING: EMPTY CALL: Stopping ISR: status 0x%08" PRIx32 "\n",
               status);
       stm32wb_i2c_traceevent(priv, I2CEVENT_ISR_EMPTY_CALL, 0);
@@ -1889,7 +1889,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 #else
       /* Read rest of the state */
 
-      status = stm32wb_i2c_getreg(priv, STM32WB_I2C_ISR_OFFSET);
+      status = stm32wb_i2c_getreg(priv, STM32_I2C_ISR_OFFSET);
 
       i2cerr("ERROR: Invalid state detected, status 0x%08" PRIx32 "\n",
              status);
@@ -1927,7 +1927,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
       priv->intstate = INTSTATE_DONE;
 #else
 
-      status = stm32wb_i2c_getreg32(priv, STM32WB_I2C_ISR_OFFSET);
+      status = stm32wb_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
 
       /* Update private state to capture NACK which is used in combination
        * with the astart flag to report the type of NACK received (address
@@ -1941,7 +1941,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 
       /* Clear all interrupts */
 
-      stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_ICR_OFFSET,
+      stm32wb_i2c_modifyreg32(priv, STM32_I2C_ICR_OFFSET,
                               0, I2C_ICR_CLEARMASK);
 
       /* If a thread is waiting then inform it transfer is complete */
@@ -1954,7 +1954,7 @@ static int stm32wb_i2c_isr_process(struct stm32wb_i2c_priv_s *priv)
 #endif
     }
 
-  status = stm32wb_i2c_getreg32(priv, STM32WB_I2C_ISR_OFFSET);
+  status = stm32wb_i2c_getreg32(priv, STM32_I2C_ISR_OFFSET);
   i2cinfo("EXIT: status = 0x%08" PRIx32 "\n", status);
 
   return OK;
@@ -1992,9 +1992,9 @@ static int stm32wb_i2c_init(struct stm32wb_i2c_priv_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  modifyreg32(STM32WB_RCC_APB1ENR1, 0, priv->config->clk_bit);
-  modifyreg32(STM32WB_RCC_APB1RSTR1, 0, priv->config->reset_bit);
-  modifyreg32(STM32WB_RCC_APB1RSTR1, priv->config->reset_bit, 0);
+  modifyreg32(STM32_RCC_APB1ENR1, 0, priv->config->clk_bit);
+  modifyreg32(STM32_RCC_APB1RSTR1, 0, priv->config->reset_bit);
+  modifyreg32(STM32_RCC_APB1RSTR1, priv->config->reset_bit, 0);
 
   /* Configure pins */
 
@@ -2030,7 +2030,7 @@ static int stm32wb_i2c_init(struct stm32wb_i2c_priv_s *priv)
 
   /* Enable I2C peripheral */
 
-  stm32wb_i2c_modifyreg32(priv, STM32WB_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
+  stm32wb_i2c_modifyreg32(priv, STM32_I2C_CR1_OFFSET, 0, I2C_CR1_PE);
 
   return OK;
 }
@@ -2047,7 +2047,7 @@ static int stm32wb_i2c_deinit(struct stm32wb_i2c_priv_s *priv)
 {
   /* Disable I2C */
 
-  stm32wb_i2c_putreg32(priv, STM32WB_I2C_CR1_OFFSET, 0);
+  stm32wb_i2c_putreg32(priv, STM32_I2C_CR1_OFFSET, 0);
 
   /* Unconfigure GPIO pins */
 
@@ -2066,7 +2066,7 @@ static int stm32wb_i2c_deinit(struct stm32wb_i2c_priv_s *priv)
 
   /* Disable clocking */
 
-  modifyreg32(STM32WB_RCC_APB1ENR1, priv->config->clk_bit, 0);
+  modifyreg32(STM32_RCC_APB1ENR1, priv->config->clk_bit, 0);
 
   return OK;
 }
@@ -2146,8 +2146,8 @@ static int stm32wb_i2c_process(struct i2c_master_s *dev,
 
   waitrc = stm32wb_i2c_sem_waitdone(priv);
 
-  cr1 = stm32wb_i2c_getreg32(priv, STM32WB_I2C_CR1_OFFSET);
-  cr2 = stm32wb_i2c_getreg32(priv, STM32WB_I2C_CR2_OFFSET);
+  cr1 = stm32wb_i2c_getreg32(priv, STM32_I2C_CR1_OFFSET);
+  cr2 = stm32wb_i2c_getreg32(priv, STM32_I2C_CR2_OFFSET);
 #if !defined(CONFIG_DEBUG_I2C)
   UNUSED(cr1);
   UNUSED(cr2);

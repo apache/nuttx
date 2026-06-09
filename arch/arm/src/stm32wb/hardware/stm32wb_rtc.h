@@ -29,93 +29,93 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_RTC_TR_OFFSET       0x0000 /* RTC time register */
-#define STM32WB_RTC_DR_OFFSET       0x0004 /* RTC date register */
-#define STM32WB_RTC_CR_OFFSET       0x0008 /* RTC control register */
-#define STM32WB_RTC_ISR_OFFSET      0x000c /* RTC initialization and status register */
-#define STM32WB_RTC_PRER_OFFSET     0x0010 /* RTC prescaler register */
-#define STM32WB_RTC_WUTR_OFFSET     0x0014 /* RTC wakeup timer register */
-#define STM32WB_RTC_ALRMAR_OFFSET   0x001c /* RTC alarm A register */
-#define STM32WB_RTC_ALRMBR_OFFSET   0x0020 /* RTC alarm B register */
-#define STM32WB_RTC_WPR_OFFSET      0x0024 /* RTC write protection register */
-#define STM32WB_RTC_SSR_OFFSET      0x0028 /* RTC sub second register */
-#define STM32WB_RTC_SHIFTR_OFFSET   0x002c /* RTC shift control register */
-#define STM32WB_RTC_TSTR_OFFSET     0x0030 /* RTC time stamp time register */
-#define STM32WB_RTC_TSDR_OFFSET     0x0034 /* RTC time stamp date register */
-#define STM32WB_RTC_TSSSR_OFFSET    0x0038 /* RTC timestamp sub second register */
-#define STM32WB_RTC_CALR_OFFSET     0x003c /* RTC calibration register */
-#define STM32WB_RTC_TAMPCR_OFFSET   0x0040 /* RTC tamper configuration register */
-#define STM32WB_RTC_ALRMASSR_OFFSET 0x0044 /* RTC alarm A sub second register */
-#define STM32WB_RTC_ALRMBSSR_OFFSET 0x0048 /* RTC alarm B sub second register */
-#define STM32WB_RTC_OR_OFFSET       0x004c /* RTC option register */
+#define STM32_RTC_TR_OFFSET       0x0000 /* RTC time register */
+#define STM32_RTC_DR_OFFSET       0x0004 /* RTC date register */
+#define STM32_RTC_CR_OFFSET       0x0008 /* RTC control register */
+#define STM32_RTC_ISR_OFFSET      0x000c /* RTC initialization and status register */
+#define STM32_RTC_PRER_OFFSET     0x0010 /* RTC prescaler register */
+#define STM32_RTC_WUTR_OFFSET     0x0014 /* RTC wakeup timer register */
+#define STM32_RTC_ALRMAR_OFFSET   0x001c /* RTC alarm A register */
+#define STM32_RTC_ALRMBR_OFFSET   0x0020 /* RTC alarm B register */
+#define STM32_RTC_WPR_OFFSET      0x0024 /* RTC write protection register */
+#define STM32_RTC_SSR_OFFSET      0x0028 /* RTC sub second register */
+#define STM32_RTC_SHIFTR_OFFSET   0x002c /* RTC shift control register */
+#define STM32_RTC_TSTR_OFFSET     0x0030 /* RTC time stamp time register */
+#define STM32_RTC_TSDR_OFFSET     0x0034 /* RTC time stamp date register */
+#define STM32_RTC_TSSSR_OFFSET    0x0038 /* RTC timestamp sub second register */
+#define STM32_RTC_CALR_OFFSET     0x003c /* RTC calibration register */
+#define STM32_RTC_TAMPCR_OFFSET   0x0040 /* RTC tamper configuration register */
+#define STM32_RTC_ALRMASSR_OFFSET 0x0044 /* RTC alarm A sub second register */
+#define STM32_RTC_ALRMBSSR_OFFSET 0x0048 /* RTC alarm B sub second register */
+#define STM32_RTC_OR_OFFSET       0x004c /* RTC option register */
 
-#define STM32WB_RTC_BKPR_OFFSET(n)  (0x0050 + ((n) << 2))
-#define STM32WB_RTC_BKP0R_OFFSET    0x0050 /* RTC backup register 0 */
-#define STM32WB_RTC_BKP1R_OFFSET    0x0054 /* RTC backup register 1 */
-#define STM32WB_RTC_BKP2R_OFFSET    0x0058 /* RTC backup register 2 */
-#define STM32WB_RTC_BKP3R_OFFSET    0x005c /* RTC backup register 3 */
-#define STM32WB_RTC_BKP4R_OFFSET    0x0060 /* RTC backup register 4 */
-#define STM32WB_RTC_BKP5R_OFFSET    0x0064 /* RTC backup register 5 */
-#define STM32WB_RTC_BKP6R_OFFSET    0x0068 /* RTC backup register 6 */
-#define STM32WB_RTC_BKP7R_OFFSET    0x006c /* RTC backup register 7 */
-#define STM32WB_RTC_BKP8R_OFFSET    0x0070 /* RTC backup register 8 */
-#define STM32WB_RTC_BKP9R_OFFSET    0x0074 /* RTC backup register 9 */
-#define STM32WB_RTC_BKP10R_OFFSET   0x0078 /* RTC backup register 10 */
-#define STM32WB_RTC_BKP11R_OFFSET   0x007c /* RTC backup register 11 */
-#define STM32WB_RTC_BKP12R_OFFSET   0x0080 /* RTC backup register 12 */
-#define STM32WB_RTC_BKP13R_OFFSET   0x0084 /* RTC backup register 13 */
-#define STM32WB_RTC_BKP14R_OFFSET   0x0088 /* RTC backup register 14 */
-#define STM32WB_RTC_BKP15R_OFFSET   0x008c /* RTC backup register 15 */
-#define STM32WB_RTC_BKP16R_OFFSET   0x0090 /* RTC backup register 16 */
-#define STM32WB_RTC_BKP17R_OFFSET   0x0094 /* RTC backup register 17 */
-#define STM32WB_RTC_BKP18R_OFFSET   0x0098 /* RTC backup register 18 */
-#define STM32WB_RTC_BKP19R_OFFSET   0x009c /* RTC backup register 19 */
+#define STM32_RTC_BKPR_OFFSET(n)  (0x0050 + ((n) << 2))
+#define STM32_RTC_BKP0R_OFFSET    0x0050 /* RTC backup register 0 */
+#define STM32_RTC_BKP1R_OFFSET    0x0054 /* RTC backup register 1 */
+#define STM32_RTC_BKP2R_OFFSET    0x0058 /* RTC backup register 2 */
+#define STM32_RTC_BKP3R_OFFSET    0x005c /* RTC backup register 3 */
+#define STM32_RTC_BKP4R_OFFSET    0x0060 /* RTC backup register 4 */
+#define STM32_RTC_BKP5R_OFFSET    0x0064 /* RTC backup register 5 */
+#define STM32_RTC_BKP6R_OFFSET    0x0068 /* RTC backup register 6 */
+#define STM32_RTC_BKP7R_OFFSET    0x006c /* RTC backup register 7 */
+#define STM32_RTC_BKP8R_OFFSET    0x0070 /* RTC backup register 8 */
+#define STM32_RTC_BKP9R_OFFSET    0x0074 /* RTC backup register 9 */
+#define STM32_RTC_BKP10R_OFFSET   0x0078 /* RTC backup register 10 */
+#define STM32_RTC_BKP11R_OFFSET   0x007c /* RTC backup register 11 */
+#define STM32_RTC_BKP12R_OFFSET   0x0080 /* RTC backup register 12 */
+#define STM32_RTC_BKP13R_OFFSET   0x0084 /* RTC backup register 13 */
+#define STM32_RTC_BKP14R_OFFSET   0x0088 /* RTC backup register 14 */
+#define STM32_RTC_BKP15R_OFFSET   0x008c /* RTC backup register 15 */
+#define STM32_RTC_BKP16R_OFFSET   0x0090 /* RTC backup register 16 */
+#define STM32_RTC_BKP17R_OFFSET   0x0094 /* RTC backup register 17 */
+#define STM32_RTC_BKP18R_OFFSET   0x0098 /* RTC backup register 18 */
+#define STM32_RTC_BKP19R_OFFSET   0x009c /* RTC backup register 19 */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_RTC_TR              (STM32WB_RTC_BASE + STM32WB_RTC_TR_OFFSET)
-#define STM32WB_RTC_DR              (STM32WB_RTC_BASE + STM32WB_RTC_DR_OFFSET)
-#define STM32WB_RTC_CR              (STM32WB_RTC_BASE + STM32WB_RTC_CR_OFFSET)
-#define STM32WB_RTC_ISR             (STM32WB_RTC_BASE + STM32WB_RTC_ISR_OFFSET)
-#define STM32WB_RTC_PRER            (STM32WB_RTC_BASE + STM32WB_RTC_PRER_OFFSET)
-#define STM32WB_RTC_WUTR            (STM32WB_RTC_BASE + STM32WB_RTC_WUTR_OFFSET)
-#define STM32WB_RTC_ALRMAR          (STM32WB_RTC_BASE + STM32WB_RTC_ALRMAR_OFFSET)
-#define STM32WB_RTC_ALRMBR          (STM32WB_RTC_BASE + STM32WB_RTC_ALRMBR_OFFSET)
-#define STM32WB_RTC_WPR             (STM32WB_RTC_BASE + STM32WB_RTC_WPR_OFFSET)
-#define STM32WB_RTC_SSR             (STM32WB_RTC_BASE + STM32WB_RTC_SSR_OFFSET)
-#define STM32WB_RTC_SHIFTR          (STM32WB_RTC_BASE + STM32WB_RTC_SHIFTR_OFFSET)
-#define STM32WB_RTC_TSTR            (STM32WB_RTC_BASE + STM32WB_RTC_TSTR_OFFSET)
-#define STM32WB_RTC_TSDR            (STM32WB_RTC_BASE + STM32WB_RTC_TSDR_OFFSET)
-#define STM32WB_RTC_TSSSR           (STM32WB_RTC_BASE + STM32WB_RTC_TSSSR_OFFSET)
-#define STM32WB_RTC_CALR            (STM32WB_RTC_BASE + STM32WB_RTC_CALR_OFFSET)
-#define STM32WB_RTC_TAMPCR          (STM32WB_RTC_BASE + STM32WB_RTC_TAMPCR_OFFSET)
-#define STM32WB_RTC_ALRMASSR        (STM32WB_RTC_BASE + STM32WB_RTC_ALRMASSR_OFFSET)
-#define STM32WB_RTC_ALRMBSSR        (STM32WB_RTC_BASE + STM32WB_RTC_ALRMBSSR_OFFSET)
-#define STM32WB_RTC_OR              (STM32WB_RTC_BASE + STM32WB_RTC_OR_OFFSET)
+#define STM32_RTC_TR              (STM32_RTC_BASE + STM32_RTC_TR_OFFSET)
+#define STM32_RTC_DR              (STM32_RTC_BASE + STM32_RTC_DR_OFFSET)
+#define STM32_RTC_CR              (STM32_RTC_BASE + STM32_RTC_CR_OFFSET)
+#define STM32_RTC_ISR             (STM32_RTC_BASE + STM32_RTC_ISR_OFFSET)
+#define STM32_RTC_PRER            (STM32_RTC_BASE + STM32_RTC_PRER_OFFSET)
+#define STM32_RTC_WUTR            (STM32_RTC_BASE + STM32_RTC_WUTR_OFFSET)
+#define STM32_RTC_ALRMAR          (STM32_RTC_BASE + STM32_RTC_ALRMAR_OFFSET)
+#define STM32_RTC_ALRMBR          (STM32_RTC_BASE + STM32_RTC_ALRMBR_OFFSET)
+#define STM32_RTC_WPR             (STM32_RTC_BASE + STM32_RTC_WPR_OFFSET)
+#define STM32_RTC_SSR             (STM32_RTC_BASE + STM32_RTC_SSR_OFFSET)
+#define STM32_RTC_SHIFTR          (STM32_RTC_BASE + STM32_RTC_SHIFTR_OFFSET)
+#define STM32_RTC_TSTR            (STM32_RTC_BASE + STM32_RTC_TSTR_OFFSET)
+#define STM32_RTC_TSDR            (STM32_RTC_BASE + STM32_RTC_TSDR_OFFSET)
+#define STM32_RTC_TSSSR           (STM32_RTC_BASE + STM32_RTC_TSSSR_OFFSET)
+#define STM32_RTC_CALR            (STM32_RTC_BASE + STM32_RTC_CALR_OFFSET)
+#define STM32_RTC_TAMPCR          (STM32_RTC_BASE + STM32_RTC_TAMPCR_OFFSET)
+#define STM32_RTC_ALRMASSR        (STM32_RTC_BASE + STM32_RTC_ALRMASSR_OFFSET)
+#define STM32_RTC_ALRMBSSR        (STM32_RTC_BASE + STM32_RTC_ALRMBSSR_OFFSET)
+#define STM32_RTC_OR              (STM32_RTC_BASE + STM32_RTC_OR_OFFSET)
 
-#define STM32WB_RTC_BKPR(n)         (STM32WB_RTC_BASE + STM32WB_RTC_BKPR_OFFSET(n))
-#define STM32WB_RTC_BKP0R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP0R_OFFSET)
-#define STM32WB_RTC_BKP1R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP1R_OFFSET)
-#define STM32WB_RTC_BKP2R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP2R_OFFSET)
-#define STM32WB_RTC_BKP3R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP3R_OFFSET)
-#define STM32WB_RTC_BKP4R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP4R_OFFSET)
-#define STM32WB_RTC_BKP5R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP5R_OFFSET)
-#define STM32WB_RTC_BKP6R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP6R_OFFSET)
-#define STM32WB_RTC_BKP7R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP7R_OFFSET)
-#define STM32WB_RTC_BKP8R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP8R_OFFSET)
-#define STM32WB_RTC_BKP9R           (STM32WB_RTC_BASE + STM32WB_RTC_BKP9R_OFFSET)
-#define STM32WB_RTC_BKP10R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP10R_OFFSET)
-#define STM32WB_RTC_BKP11R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP11R_OFFSET)
-#define STM32WB_RTC_BKP12R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP12R_OFFSET)
-#define STM32WB_RTC_BKP13R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP13R_OFFSET)
-#define STM32WB_RTC_BKP14R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP14R_OFFSET)
-#define STM32WB_RTC_BKP15R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP15R_OFFSET)
-#define STM32WB_RTC_BKP16R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP16R_OFFSET)
-#define STM32WB_RTC_BKP17R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP17R_OFFSET)
-#define STM32WB_RTC_BKP18R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP18R_OFFSET)
-#define STM32WB_RTC_BKP19R          (STM32WB_RTC_BASE + STM32WB_RTC_BKP19R_OFFSET)
+#define STM32_RTC_BKPR(n)         (STM32_RTC_BASE + STM32_RTC_BKPR_OFFSET(n))
+#define STM32_RTC_BKP0R           (STM32_RTC_BASE + STM32_RTC_BKP0R_OFFSET)
+#define STM32_RTC_BKP1R           (STM32_RTC_BASE + STM32_RTC_BKP1R_OFFSET)
+#define STM32_RTC_BKP2R           (STM32_RTC_BASE + STM32_RTC_BKP2R_OFFSET)
+#define STM32_RTC_BKP3R           (STM32_RTC_BASE + STM32_RTC_BKP3R_OFFSET)
+#define STM32_RTC_BKP4R           (STM32_RTC_BASE + STM32_RTC_BKP4R_OFFSET)
+#define STM32_RTC_BKP5R           (STM32_RTC_BASE + STM32_RTC_BKP5R_OFFSET)
+#define STM32_RTC_BKP6R           (STM32_RTC_BASE + STM32_RTC_BKP6R_OFFSET)
+#define STM32_RTC_BKP7R           (STM32_RTC_BASE + STM32_RTC_BKP7R_OFFSET)
+#define STM32_RTC_BKP8R           (STM32_RTC_BASE + STM32_RTC_BKP8R_OFFSET)
+#define STM32_RTC_BKP9R           (STM32_RTC_BASE + STM32_RTC_BKP9R_OFFSET)
+#define STM32_RTC_BKP10R          (STM32_RTC_BASE + STM32_RTC_BKP10R_OFFSET)
+#define STM32_RTC_BKP11R          (STM32_RTC_BASE + STM32_RTC_BKP11R_OFFSET)
+#define STM32_RTC_BKP12R          (STM32_RTC_BASE + STM32_RTC_BKP12R_OFFSET)
+#define STM32_RTC_BKP13R          (STM32_RTC_BASE + STM32_RTC_BKP13R_OFFSET)
+#define STM32_RTC_BKP14R          (STM32_RTC_BASE + STM32_RTC_BKP14R_OFFSET)
+#define STM32_RTC_BKP15R          (STM32_RTC_BASE + STM32_RTC_BKP15R_OFFSET)
+#define STM32_RTC_BKP16R          (STM32_RTC_BASE + STM32_RTC_BKP16R_OFFSET)
+#define STM32_RTC_BKP17R          (STM32_RTC_BASE + STM32_RTC_BKP17R_OFFSET)
+#define STM32_RTC_BKP18R          (STM32_RTC_BASE + STM32_RTC_BKP18R_OFFSET)
+#define STM32_RTC_BKP19R          (STM32_RTC_BASE + STM32_RTC_BKP19R_OFFSET)
 
-#  define STM32WB_RTC_BKCOUNT       20
+#  define STM32_RTC_BKCOUNT       20
 
 /* Register Bitfield Definitions ********************************************/
 

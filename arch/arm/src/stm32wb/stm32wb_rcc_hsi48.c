@@ -77,13 +77,13 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
    * enabled.
    */
 
-  regval  = getreg32(STM32WB_RCC_CRRCR);
+  regval  = getreg32(STM32_RCC_CRRCR);
   regval |= RCC_CRRCR_HSI48ON;
-  putreg32(regval, STM32WB_RCC_CRRCR);
+  putreg32(regval, STM32_RCC_CRRCR);
 
   /* Wait for the HSI48 clock to stabilize */
 
-  while ((getreg32(STM32WB_RCC_CRRCR) & RCC_CRRCR_HSI48RDY) == 0);
+  while ((getreg32(STM32_RCC_CRRCR) & RCC_CRRCR_HSI48RDY) == 0);
 
   /* Return if no synchronization */
 
@@ -97,7 +97,7 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
    * clock or the USB SOF signal.
    */
 
-  regval = getreg32(STM32WB_CRS_CFGR);
+  regval = getreg32(STM32_CRS_CFGR);
   regval &= ~CRS_CFGR_SYNCSRC_MASK;
 
   switch (syncsrc)
@@ -116,7 +116,7 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
         break;
     }
 
-  putreg32(regval, STM32WB_CRS_CFGR);
+  putreg32(regval, STM32_CRS_CFGR);
 
   /* Set the AUTOTRIMEN bit the CRS_CR register to enables the automatic
    * hardware adjustment of TRIM bits according to the measured frequency
@@ -124,9 +124,9 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc)
    * frequency error counter and SYNC events.
    */
 
-  regval  = getreg32(STM32WB_CRS_CR);
+  regval  = getreg32(STM32_CRS_CR);
   regval |= CRS_CR_AUTOTRIMEN | CRS_CR_CEN;
-  putreg32(regval, STM32WB_CRS_CR);
+  putreg32(regval, STM32_CRS_CR);
 }
 
 /****************************************************************************
@@ -149,18 +149,18 @@ void stm32wb_rcc_disable_hsi48(void)
 
   /* Disable the HSI48 clock */
 
-  regval  = getreg32(STM32WB_RCC_CRRCR);
+  regval  = getreg32(STM32_RCC_CRRCR);
   regval &= ~RCC_CRRCR_HSI48ON;
-  putreg32(regval, STM32WB_RCC_CRRCR);
+  putreg32(regval, STM32_RCC_CRRCR);
 
   /* Set other registers to the default settings. */
 
-  regval  = getreg32(STM32WB_CRS_CFGR);
+  regval  = getreg32(STM32_CRS_CFGR);
   regval &= ~CRS_CFGR_SYNCSRC_MASK;
   regval |= CRS_CFGR_SYNCSRC_USBSOF;
-  putreg32(regval, STM32WB_CRS_CFGR);
+  putreg32(regval, STM32_CRS_CFGR);
 
-  regval  = getreg32(STM32WB_CRS_CR);
+  regval  = getreg32(STM32_CRS_CR);
   regval &= ~CRS_CR_AUTOTRIMEN;
-  putreg32(regval, STM32WB_CRS_CR);
+  putreg32(regval, STM32_CRS_CR);
 }
