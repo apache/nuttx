@@ -166,6 +166,7 @@ begin_packed_struct struct rpmsgfs_readdir_s
 {
   struct rpmsgfs_header_s header;
   int32_t                 fd;
+  uint32_t                ino;
   uint32_t                type;
   char                    name[0];
 } end_packed_struct;
