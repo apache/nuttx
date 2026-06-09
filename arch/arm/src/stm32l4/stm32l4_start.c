@@ -60,8 +60,8 @@
  *               the stack + 4;
  */
 
-#define SRAM2_START  STM32L4_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32L4_SRAM2_SIZE)
+#define SRAM2_START  STM32_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 

@@ -49,7 +49,7 @@
 
 /* Number of endpoints */
 
-#define STM32L4_NENDPOINTS  (6)          /* ep0-5 x 2 for IN and OUT */
+#define STM32_NENDPOINTS  (6)          /* ep0-5 x 2 for IN and OUT */
 
 /****************************************************************************
  * Public Functions Prototypes

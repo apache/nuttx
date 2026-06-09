@@ -86,14 +86,14 @@
 
 /* Helpers ******************************************************************/
 
-#define STM32L4_LPTIM_SETMODE(d,mode)     ((d)->ops->setmode(d,mode))
-#define STM32L4_LPTIM_SETCLOCK(d,freq)    ((d)->ops->setclock(d,freq))
-#define STM32L4_LPTIM_SETCHANNEL(d,ch,en) ((d)->ops->setchannel(d,ch,en))
-#define STM32L4_LPTIM_SETCLOCKSOURCE(d,s) ((d)->ops->setclocksource(d,s))
-#define STM32L4_LPTIM_GETCOUNTER(d)       ((d)->ops->getcounter(d))
-#define STM32L4_LPTIM_SETCOUNTMODE(d,m)   ((d)->ops->setcountmode(d,m))
-#define STM32L4_LPTIM_SETPERIOD(d,period) ((d)->ops->setperiod(d,period))
-#define STM32L4_LPTIM_GETPERIOD(d)        ((d)->ops->getperiod(d))
+#define STM32_LPTIM_SETMODE(d,mode)     ((d)->ops->setmode(d,mode))
+#define STM32_LPTIM_SETCLOCK(d,freq)    ((d)->ops->setclock(d,freq))
+#define STM32_LPTIM_SETCHANNEL(d,ch,en) ((d)->ops->setchannel(d,ch,en))
+#define STM32_LPTIM_SETCLOCKSOURCE(d,s) ((d)->ops->setclocksource(d,s))
+#define STM32_LPTIM_GETCOUNTER(d)       ((d)->ops->getcounter(d))
+#define STM32_LPTIM_SETCOUNTMODE(d,m)   ((d)->ops->setcountmode(d,m))
+#define STM32_LPTIM_SETPERIOD(d,period) ((d)->ops->setperiod(d,period))
+#define STM32_LPTIM_GETPERIOD(d)        ((d)->ops->getperiod(d))
 
 /****************************************************************************
  * Public Types
@@ -121,14 +121,14 @@ struct stm32l4_lptim_dev_s
 
 typedef enum
 {
-  STM32L4_LPTIM_MODE_UNUSED       = -1,
+  STM32_LPTIM_MODE_UNUSED       = -1,
 
   /* MODES */
 
-  STM32L4_LPTIM_MODE_DISABLED     = 0x0000,
-  STM32L4_LPTIM_MODE_SINGLE       = 0x0001,
-  STM32L4_LPTIM_MODE_CONTINUOUS   = 0x0002,
-  STM32L4_LPTIM_MODE_MASK         = 0x000f,
+  STM32_LPTIM_MODE_DISABLED     = 0x0000,
+  STM32_LPTIM_MODE_SINGLE       = 0x0001,
+  STM32_LPTIM_MODE_CONTINUOUS   = 0x0002,
+  STM32_LPTIM_MODE_MASK         = 0x000f,
 } stm32l4_lptim_mode_t;
 
 /* LPTIM Clock Source */
@@ -137,11 +137,11 @@ typedef enum
 {
   /* Clock Sources */
 
-  STM32L4_LPTIM_CLK_PCLK          = 0x0000,
-  STM32L4_LPTIM_CLK_LSI           = 0x0001,
-  STM32L4_LPTIM_CLK_HSI           = 0x0002,
-  STM32L4_LPTIM_CLK_LSE           = 0x0003,
-  STM32L4_LPTIM_CLK_EXT           = 0x0004,
+  STM32_LPTIM_CLK_PCLK          = 0x0000,
+  STM32_LPTIM_CLK_LSI           = 0x0001,
+  STM32_LPTIM_CLK_HSI           = 0x0002,
+  STM32_LPTIM_CLK_LSE           = 0x0003,
+  STM32_LPTIM_CLK_EXT           = 0x0004,
 } stm32l4_lptim_clksrc_t;
 
 /* LPTIM Counter Modes */
@@ -150,8 +150,8 @@ typedef enum
 {
   /* Modes */
 
-  STM32L4_LPTIM_COUNT_CLOCK       = 0x0000,
-  STM32L4_LPTIM_COUNT_EXTTRIG     = 0x0001,
+  STM32_LPTIM_COUNT_CLOCK       = 0x0000,
+  STM32_LPTIM_COUNT_EXTTRIG     = 0x0001,
 } stm32l4_lptim_cntmode_t;
 
 /* LPTIM Clock Polarity */
@@ -160,24 +160,24 @@ typedef enum
 {
   /* MODES */
 
-  STM32L4_LPTIM_CLKPOL_RISING     = 0x0000,
-  STM32L4_LPTIM_CLKPOL_FALLING    = 0x0001,
-  STM32L4_LPTIM_CLKPOL_BOTH       = 0x0002,
+  STM32_LPTIM_CLKPOL_RISING     = 0x0000,
+  STM32_LPTIM_CLKPOL_FALLING    = 0x0001,
+  STM32_LPTIM_CLKPOL_BOTH       = 0x0002,
 } stm32l4_lptim_clkpol_t;
 
 /* LPTIM Channel Modes */
 
 typedef enum
 {
-  STM32L4_LPTIM_CH_DISABLED       = 0x0000,
+  STM32_LPTIM_CH_DISABLED       = 0x0000,
 
   /* CHANNELS */
 
-  STM32L4_LPTIM_CH_CHINVALID      = 0x0000,
-  STM32L4_LPTIM_CH_CH1            = 0x0001,
-  STM32L4_LPTIM_CH_CH2            = 0x0002,
-  STM32L4_LPTIM_CH_CH3            = 0x0003,
-  STM32L4_LPTIM_CH_MASK           = 0x000f,
+  STM32_LPTIM_CH_CHINVALID      = 0x0000,
+  STM32_LPTIM_CH_CH1            = 0x0001,
+  STM32_LPTIM_CH_CH2            = 0x0002,
+  STM32_LPTIM_CH_CH3            = 0x0003,
+  STM32_LPTIM_CH_MASK           = 0x000f,
 } stm32l4_lptim_channel_t;
 
 /* LPTIM Operations */

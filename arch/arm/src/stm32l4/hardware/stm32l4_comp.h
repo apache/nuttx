@@ -29,15 +29,15 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_COMP_CSR_OFFSET(n) (((n)-1) << 2)
-#define STM32L4_COMP1_CSR_OFFSET   0x0000  /* Comparator 1 control and status register */
-#define STM32L4_COMP2_CSR_OFFSET   0x0004  /* Comparator 2 control and status register */
+#define STM32_COMP_CSR_OFFSET(n) (((n)-1) << 2)
+#define STM32_COMP1_CSR_OFFSET   0x0000  /* Comparator 1 control and status register */
+#define STM32_COMP2_CSR_OFFSET   0x0004  /* Comparator 2 control and status register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_COMP_CSR(n)        (STM32L4_COMP_BASE+STM32L4_COMP_CSR_OFFSET(n))
-#define STM32L4_COMP1_CSR          (STM32L4_COMP_BASE+STM32L4_COMP1_CSR_OFFSET)
-#define STM32L4_COMP2_CSR          (STM32L4_COMP_BASE+STM32L4_COMP2_CSR_OFFSET)
+#define STM32_COMP_CSR(n)        (STM32_COMP_BASE+STM32_COMP_CSR_OFFSET(n))
+#define STM32_COMP1_CSR          (STM32_COMP_BASE+STM32_COMP1_CSR_OFFSET)
+#define STM32_COMP2_CSR          (STM32_COMP_BASE+STM32_COMP2_CSR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -109,7 +109,9 @@
 #    define COMP_CSR_INMESEL_PIN4  (2 << COMP_CSR_INMESEL_SHIFT) /* Input minus pin 4: COMP1=PA4; COMP2=PA4 */
 #    define COMP_CSR_INMESEL_PIN5  (3 << COMP_CSR_INMESEL_SHIFT) /* Input minus pin 5: COMP1=PA5; COMP2=PA5 */
 #endif
-                                             /* Bits 27-29: Reserved */
+
+/* Bits 27-29: Reserved */
+
 #define COMP_CSR_VALUE             (1 << 30) /* Bit 30: Comparator output status bit */
 #define COMP_CSR_LOCK_MASK         (1 << 31) /* Bit 31: CSR register lock bit */
 #  define COMP_CSR_LOCK_RW         (0)

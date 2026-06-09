@@ -108,14 +108,14 @@ static inline void rcc_resetbkp(void)
   init_stat = stm32l4_rtc_is_initialized();
   if (!init_stat)
     {
-      uint32_t bkregs[STM32L4_RTC_BKCOUNT];
+      uint32_t bkregs[STM32_RTC_BKCOUNT];
       int i;
 
       /* Backup backup-registers before RTC reset. */
 
-      for (i = 0; i < STM32L4_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          bkregs[i] = getreg32(STM32L4_RTC_BKR(i));
+          bkregs[i] = getreg32(STM32_RTC_BKR(i));
         }
 
       /* Enable write access to the backup domain (RTC registers, RTC
@@ -128,19 +128,19 @@ static inline void rcc_resetbkp(void)
        * reset the backup domain (having backed up the RTC_MAGIC token)
        */
 
-      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
       /* Restore backup-registers, except RTC related. */
 
-      for (i = 0; i < STM32L4_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          if (RTC_MAGIC_REG == STM32L4_RTC_BKR(i))
+          if (RTC_MAGIC_REG == STM32_RTC_BKR(i))
             {
               continue;
             }
 
-           putreg32(bkregs[i], STM32L4_RTC_BKR(i));
+           putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
       stm32l4_pwr_enablebkp(false);

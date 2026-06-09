@@ -451,11 +451,11 @@ static struct stm32l4_pwmtimer_s g_pwm1dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32L4_TIM1_DEADTIME,
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM1_TRGO)
-  .trgo        = STM32L4_TIM1_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM1_TRGO)
+  .trgo        = STM32_TIM1_TRGO,
 #endif
-  .base        = STM32L4_TIM1_BASE,
-  .pclk        = STM32L4_APB2_TIM1_CLKIN,
+  .base        = STM32_TIM1_BASE,
+  .pclk        = STM32_APB2_TIM1_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM1_PWM */
 
@@ -547,11 +547,11 @@ static struct stm32l4_pwmtimer_s g_pwm2dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM2_TRGO)
-  .trgo        = STM32L4_TIM2_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM2_TRGO)
+  .trgo        = STM32_TIM2_TRGO,
 #endif
-  .base        = STM32L4_TIM2_BASE,
-  .pclk        = STM32L4_APB1_TIM2_CLKIN,
+  .base        = STM32_TIM2_BASE,
+  .pclk        = STM32_APB1_TIM2_CLKIN,
 };
 
 #endif /* CONFIG_STM32L4_TIM2_PWM */
@@ -644,11 +644,11 @@ static struct stm32l4_pwmtimer_s g_pwm3dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM3_TRGO)
-  .trgo        = STM32L4_TIM3_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM3_TRGO)
+  .trgo        = STM32_TIM3_TRGO,
 #endif
-  .base        = STM32L4_TIM3_BASE,
-  .pclk        = STM32L4_APB1_TIM3_CLKIN,
+  .base        = STM32_TIM3_BASE,
+  .pclk        = STM32_APB1_TIM3_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM3_PWM */
 
@@ -740,11 +740,11 @@ static struct stm32l4_pwmtimer_s g_pwm4dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM4_TRGO)
-  .trgo        = STM32L4_TIM4_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM4_TRGO)
+  .trgo        = STM32_TIM4_TRGO,
 #endif
-  .base        = STM32L4_TIM4_BASE,
-  .pclk        = STM32L4_APB1_TIM4_CLKIN,
+  .base        = STM32_TIM4_BASE,
+  .pclk        = STM32_APB1_TIM4_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM4_PWM */
 
@@ -834,11 +834,11 @@ static struct stm32l4_pwmtimer_s g_pwm5dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = 0,             /* No deadtime */
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM5_TRGO)
-  .trgo        = STM32L4_TIM5_TRGO
+#if defined(HAVE_TRGO) && defined(STM32_TIM5_TRGO)
+  .trgo        = STM32_TIM5_TRGO
 #endif
-  .base        = STM32L4_TIM5_BASE,
-  .pclk        = STM32L4_APB1_TIM5_CLKIN,
+  .base        = STM32_TIM5_BASE,
+  .pclk        = STM32_APB1_TIM5_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM5_PWM */
 
@@ -997,11 +997,11 @@ static struct stm32l4_pwmtimer_s g_pwm8dev =
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32L4_TIM8_DEADTIME,
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM8_TRGO)
-  .trgo        = STM32L4_TIM8_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM8_TRGO)
+  .trgo        = STM32_TIM8_TRGO,
 #endif
-  .base        = STM32L4_TIM8_BASE,
-  .pclk        = STM32L4_APB2_TIM8_CLKIN,
+  .base        = STM32_TIM8_BASE,
+  .pclk        = STM32_APB2_TIM8_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM8_PWM */
 
@@ -1073,17 +1073,17 @@ static struct stm32l4_pwmtimer_s g_pwm15dev =
   .chan_num    = PWM_TIM15_NCHANNELS,
   .channels    = g_pwm15channels,
   .timtype     = TIMTYPE_TIM15,
-  .mode        = STM32L4_TIMMODE_COUNTUP,
+  .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32L4_TIM15_LOCK,
   .t_dts       = CONFIG_STM32L4_TIM15_TDTS,
 #ifdef HAVE_PWM_COMPLEMENTARY
   .deadtime    = CONFIG_STM32L4_TIM15_DEADTIME,
 #endif
-#if defined(HAVE_TRGO) && defined(STM32L4_TIM15_TRGO)
-  .trgo        = STM32L4_TIM15_TRGO,
+#if defined(HAVE_TRGO) && defined(STM32_TIM15_TRGO)
+  .trgo        = STM32_TIM15_TRGO,
 #endif
-  .base        = STM32L4_TIM15_BASE,
-  .pclk        = STM32L4_APB2_TIM15_CLKIN,
+  .base        = STM32_TIM15_BASE,
+  .pclk        = STM32_APB2_TIM15_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM15_PWM */
 
@@ -1139,7 +1139,7 @@ static struct stm32l4_pwmtimer_s g_pwm16dev =
   .chan_num    = PWM_TIM16_NCHANNELS,
   .channels    = g_pwm16channels,
   .timtype     = TIMTYPE_TIM16,
-  .mode        = STM32L4_TIMMODE_COUNTUP,
+  .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32L4_TIM16_LOCK,
   .t_dts       = CONFIG_STM32L4_TIM16_TDTS,
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -1148,8 +1148,8 @@ static struct stm32l4_pwmtimer_s g_pwm16dev =
 #if defined(HAVE_TRGO)
   .trgo        = 0,             /* TRGO not supported for TIM16 */
 #endif
-  .base        = STM32L4_TIM16_BASE,
-  .pclk        = STM32L4_APB2_TIM16_CLKIN,
+  .base        = STM32_TIM16_BASE,
+  .pclk        = STM32_APB2_TIM16_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM16_PWM */
 
@@ -1205,7 +1205,7 @@ static struct stm32l4_pwmtimer_s g_pwm17dev =
   .chan_num    = PWM_TIM17_NCHANNELS,
   .channels    = g_pwm17channels,
   .timtype     = TIMTYPE_TIM17,
-  .mode        = STM32L4_TIMMODE_COUNTUP,
+  .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = CONFIG_STM32L4_TIM17_LOCK,
   .t_dts       = CONFIG_STM32L4_TIM17_TDTS,
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -1214,8 +1214,8 @@ static struct stm32l4_pwmtimer_s g_pwm17dev =
 #if defined(HAVE_TRGO)
   .trgo        = 0,             /* TRGO not supported for TIM17 */
 #endif
-  .base        = STM32L4_TIM17_BASE,
-  .pclk        = STM32L4_APB2_TIM17_CLKIN,
+  .base        = STM32_TIM17_BASE,
+  .pclk        = STM32_APB2_TIM17_CLKIN,
 };
 #endif /* CONFIG_STM32L4_TIM17_PWM */
 
@@ -1253,7 +1253,7 @@ static struct stm32l4_pwmtimer_s g_pwmlp1dev =
   .chan_num    = PWM_LPTIM1_NCHANNELS,
   .channels    = g_pwmlp1channels,
   .timtype     = TIMTYPE_LPTIM1,
-  .mode        = STM32L4_TIMMODE_COUNTUP,
+  .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -1262,15 +1262,15 @@ static struct stm32l4_pwmtimer_s g_pwmlp1dev =
 #if defined(HAVE_TRGO)
   .trgo        = 0,             /* TRGO not supported for LPTIM1 */
 #endif
-  .base        = STM32L4_LPTIM1_BASE,
+  .base        = STM32_LPTIM1_BASE,
 #if defined(CONFIG_STM32L4_LPTIM1_CLK_APB1)
-  .pclk        = STM32L4_PCLK1_FREQUENCY,
+  .pclk        = STM32_PCLK1_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM1_CLK_LSE)
-  .pclk        = STM32L4_LSE_FREQUENCY,
+  .pclk        = STM32_LSE_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM1_CLK_LSI)
-  .pclk        = STM32L4_LSI_FREQUENCY,
+  .pclk        = STM32_LSI_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM1_CLK_HSI)
-  .pclk        = STM32L4_HSI_FREQUENCY,
+  .pclk        = STM32_HSI_FREQUENCY,
 #endif
 };
 #endif /* CONFIG_STM32L4_LPTIM1_PWM */
@@ -1309,7 +1309,7 @@ static struct stm32l4_pwmtimer_s g_pwmlp2dev =
   .chan_num    = PWM_LPTIM2_NCHANNELS,
   .channels    = g_pwmlp2channels,
   .timtype     = TIMTYPE_LPTIM2,
-  .mode        = STM32L4_TIMMODE_COUNTUP,
+  .mode        = STM32_TIMMODE_COUNTUP,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -1318,15 +1318,15 @@ static struct stm32l4_pwmtimer_s g_pwmlp2dev =
 #if defined(HAVE_TRGO)
   .trgo        = 0,             /* TRGO not supported for LPTIM2 */
 #endif
-  .base        = STM32L4_LPTIM2_BASE,
+  .base        = STM32_LPTIM2_BASE,
 #if defined(CONFIG_STM32L4_LPTIM2_CLK_APB1)
-  .pclk        = STM32L4_PCLK1_FREQUENCY,
+  .pclk        = STM32_PCLK1_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM2_CLK_LSE)
-  .pclk        = STM32L4_LSE_FREQUENCY,
+  .pclk        = STM32_LSE_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM2_CLK_LSI)
-  .pclk        = STM32L4_LSI_FREQUENCY,
+  .pclk        = STM32_LSI_FREQUENCY,
 #elif defined(CONFIG_STM32L4_LPTIM2_CLK_HSI)
-  .pclk        = STM32L4_HSI_FREQUENCY,
+  .pclk        = STM32_HSI_FREQUENCY,
 #endif
 };
 #endif /* CONFIG_STM32L4_LPTIM2_PWM */
@@ -1374,12 +1374,12 @@ static void pwm_putreg(struct stm32l4_pwmtimer_s *priv, int offset,
                               uint16_t value)
 {
   if (priv->timtype == TIMTYPE_GENERAL32 &&
-      (offset == STM32L4_GTIM_CNT_OFFSET ||
-       offset == STM32L4_GTIM_ARR_OFFSET ||
-       offset == STM32L4_GTIM_CCR1_OFFSET ||
-       offset == STM32L4_GTIM_CCR2_OFFSET ||
-       offset == STM32L4_GTIM_CCR3_OFFSET ||
-       offset == STM32L4_GTIM_CCR4_OFFSET))
+      (offset == STM32_GTIM_CNT_OFFSET ||
+       offset == STM32_GTIM_ARR_OFFSET ||
+       offset == STM32_GTIM_CCR1_OFFSET ||
+       offset == STM32_GTIM_CCR2_OFFSET ||
+       offset == STM32_GTIM_CCR3_OFFSET ||
+       offset == STM32_GTIM_CCR4_OFFSET))
     {
       /* a 32 bit access is required for a 32 bit register:
        * if only a 16 bit write would be performed, then the
@@ -1416,12 +1416,12 @@ static void pwm_modifyreg(struct stm32l4_pwmtimer_s *priv, uint32_t offset,
                           uint32_t clearbits, uint32_t setbits)
 {
   if (priv->timtype == TIMTYPE_GENERAL32 &&
-      (offset == STM32L4_GTIM_CNT_OFFSET ||
-       offset == STM32L4_GTIM_ARR_OFFSET ||
-       offset == STM32L4_GTIM_CCR1_OFFSET ||
-       offset == STM32L4_GTIM_CCR2_OFFSET ||
-       offset == STM32L4_GTIM_CCR3_OFFSET ||
-       offset == STM32L4_GTIM_CCR4_OFFSET))
+      (offset == STM32_GTIM_CNT_OFFSET ||
+       offset == STM32_GTIM_ARR_OFFSET ||
+       offset == STM32_GTIM_CCR1_OFFSET ||
+       offset == STM32_GTIM_CCR2_OFFSET ||
+       offset == STM32_GTIM_CCR3_OFFSET ||
+       offset == STM32_GTIM_CCR4_OFFSET))
     {
       /* a 32 bit access is required for a 32 bit register:
        * if only a 16 bit write would be performed, then the
@@ -1462,52 +1462,52 @@ static void pwm_dumpregs(struct pwm_lowerhalf_s *dev,
     {
       pwminfo("%s:\n", msg);
       pwminfo("  CFGR: %04x CR:  %04x CMP:  %04x ARR:  %04x\n",
-              pwm_getreg(priv, STM32L4_LPTIM_CFGR_OFFSET),
-              pwm_getreg(priv, STM32L4_LPTIM_CR_OFFSET),
-              pwm_getreg(priv, STM32L4_LPTIM_CMP_OFFSET),
-              pwm_getreg(priv, STM32L4_LPTIM_ARR_OFFSET));
+              pwm_getreg(priv, STM32_LPTIM_CFGR_OFFSET),
+              pwm_getreg(priv, STM32_LPTIM_CR_OFFSET),
+              pwm_getreg(priv, STM32_LPTIM_CMP_OFFSET),
+              pwm_getreg(priv, STM32_LPTIM_ARR_OFFSET));
       pwminfo("  ISR:  %04x CNT: %04x\n",
-              pwm_getreg(priv, STM32L4_LPTIM_ISR_OFFSET),
-              pwm_getreg(priv, STM32L4_LPTIM_CNT_OFFSET));
+              pwm_getreg(priv, STM32_LPTIM_ISR_OFFSET),
+              pwm_getreg(priv, STM32_LPTIM_CNT_OFFSET));
     }
   else
     {
       pwminfo("%s:\n", msg);
       pwminfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-              pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
+              pwm_getreg(priv, STM32_GTIM_CR1_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CR2_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_SMCR_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_DIER_OFFSET));
       pwminfo("   SR: %04x EGR:  %04x CCMR1: %04x CCMR2: %04x\n",
-              pwm_getreg(priv, STM32L4_GTIM_SR_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_EGR_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
+              pwm_getreg(priv, STM32_GTIM_SR_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_EGR_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
       pwminfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-              pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
+              pwm_getreg(priv, STM32_GTIM_CCER_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CNT_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_PSC_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_ARR_OFFSET));
       pwminfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-              pwm_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+              pwm_getreg(priv, STM32_GTIM_CCR1_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CCR2_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CCR3_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_CCR4_OFFSET));
 #if defined(CONFIG_STM32L4_TIM1_PWM) || defined(CONFIG_STM32L4_TIM8_PWM)
       if (priv->timtype == TIMTYPE_ADVANCED)
         {
           pwminfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-              pwm_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
-              pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
-              pwm_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
-              pwm_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
+              pwm_getreg(priv, STM32_ATIM_RCR_OFFSET),
+              pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET),
+              pwm_getreg(priv, STM32_ATIM_DCR_OFFSET),
+              pwm_getreg(priv, STM32_ATIM_DMAR_OFFSET));
         }
       else
 #endif
         {
           pwminfo("  DCR: %04x DMAR: %04x\n",
-              pwm_getreg(priv, STM32L4_GTIM_DCR_OFFSET),
-              pwm_getreg(priv, STM32L4_GTIM_DMAR_OFFSET));
+              pwm_getreg(priv, STM32_GTIM_DCR_OFFSET),
+              pwm_getreg(priv, STM32_GTIM_DMAR_OFFSET));
         }
     }
 }
@@ -1528,7 +1528,7 @@ static int pwm_ccr_update(struct pwm_lowerhalf_s *dev, uint8_t index,
     {
       /* REVISIT: What about index? Is it necessary for LPTIM? */
 
-      offset = STM32L4_LPTIM_CMP_OFFSET;
+      offset = STM32_LPTIM_CMP_OFFSET;
       pwm_putreg(priv, offset, ccr);
 
       return OK;
@@ -1547,39 +1547,39 @@ static int pwm_ccr_update(struct pwm_lowerhalf_s *dev, uint8_t index,
 
   switch (index)
     {
-      case STM32L4_PWM_CHAN1:
+      case STM32_PWM_CHAN1:
         {
-          offset = STM32L4_GTIM_CCR1_OFFSET;
+          offset = STM32_GTIM_CCR1_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN2:
+      case STM32_PWM_CHAN2:
         {
-          offset = STM32L4_GTIM_CCR2_OFFSET;
+          offset = STM32_GTIM_CCR2_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN3:
+      case STM32_PWM_CHAN3:
         {
-          offset = STM32L4_GTIM_CCR3_OFFSET;
+          offset = STM32_GTIM_CCR3_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN4:
+      case STM32_PWM_CHAN4:
         {
-          offset = STM32L4_GTIM_CCR4_OFFSET;
+          offset = STM32_GTIM_CCR4_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN5:
+      case STM32_PWM_CHAN5:
         {
-          offset = STM32L4_ATIM_CCR5_OFFSET;
+          offset = STM32_ATIM_CCR5_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN6:
+      case STM32_PWM_CHAN6:
         {
-          offset = STM32L4_ATIM_CCR6_OFFSET;
+          offset = STM32_ATIM_CCR6_OFFSET;
           break;
         }
 
@@ -1609,39 +1609,39 @@ static uint32_t pwm_ccr_get(struct pwm_lowerhalf_s *dev, uint8_t index)
 
   switch (index)
     {
-      case STM32L4_PWM_CHAN1:
+      case STM32_PWM_CHAN1:
         {
-          offset = STM32L4_GTIM_CCR1_OFFSET;
+          offset = STM32_GTIM_CCR1_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN2:
+      case STM32_PWM_CHAN2:
         {
-          offset = STM32L4_GTIM_CCR2_OFFSET;
+          offset = STM32_GTIM_CCR2_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN3:
+      case STM32_PWM_CHAN3:
         {
-          offset = STM32L4_GTIM_CCR3_OFFSET;
+          offset = STM32_GTIM_CCR3_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN4:
+      case STM32_PWM_CHAN4:
         {
-          offset = STM32L4_GTIM_CCR4_OFFSET;
+          offset = STM32_GTIM_CCR4_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN5:
+      case STM32_PWM_CHAN5:
         {
-          offset = STM32L4_ATIM_CCR5_OFFSET;
+          offset = STM32_ATIM_CCR5_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN6:
+      case STM32_PWM_CHAN6:
         {
-          offset = STM32L4_ATIM_CCR6_OFFSET;
+          offset = STM32_ATIM_CCR6_OFFSET;
           break;
         }
 
@@ -1670,11 +1670,11 @@ static int pwm_arr_update(struct pwm_lowerhalf_s *dev, uint32_t arr)
 
   if (priv->timtype == TIMTYPE_LOWPOWER)
     {
-      pwm_putreg(priv, STM32L4_LPTIM_ARR_OFFSET, arr);
+      pwm_putreg(priv, STM32_LPTIM_ARR_OFFSET, arr);
     }
   else
     {
-      pwm_putreg(priv, STM32L4_GTIM_ARR_OFFSET, arr);
+      pwm_putreg(priv, STM32_GTIM_ARR_OFFSET, arr);
     }
 
   return OK;
@@ -1690,11 +1690,11 @@ static uint32_t pwm_arr_get(struct pwm_lowerhalf_s *dev)
 
   if (priv->timtype == TIMTYPE_LOWPOWER)
     {
-      return pwm_getreg(priv, STM32L4_LPTIM_ARR_OFFSET);
+      return pwm_getreg(priv, STM32_LPTIM_ARR_OFFSET);
     }
   else
     {
-      return pwm_getreg(priv, STM32L4_GTIM_ARR_OFFSET);
+      return pwm_getreg(priv, STM32_GTIM_ARR_OFFSET);
     }
 }
 
@@ -1766,13 +1766,13 @@ static int pwm_timer_enable(struct pwm_lowerhalf_s *dev, bool state)
         {
           /* Enable timer counter */
 
-          pwm_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+          pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
         }
       else
         {
           /* Disable timer counter */
 
-          pwm_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+          pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
         }
 #ifdef HAVE_LPTIM
     }
@@ -1782,13 +1782,13 @@ static int pwm_timer_enable(struct pwm_lowerhalf_s *dev, bool state)
         {
           /* Enable timer counter */
 
-          pwm_modifyreg(priv, STM32L4_LPTIM_CR_OFFSET, 0, LPTIM_CR_ENABLE);
+          pwm_modifyreg(priv, STM32_LPTIM_CR_OFFSET, 0, LPTIM_CR_ENABLE);
         }
       else
         {
           /* Disable timer counter */
 
-          pwm_modifyreg(priv, STM32L4_LPTIM_CR_OFFSET, LPTIM_CR_ENABLE, 0);
+          pwm_modifyreg(priv, STM32_LPTIM_CR_OFFSET, LPTIM_CR_ENABLE, 0);
         }
     }
 #endif
@@ -1849,9 +1849,9 @@ static int pwm_frequency_update(struct pwm_lowerhalf_s *dev,
    * intended so multiply by x2
    */
 
-  if ((priv->mode == STM32L4_TIMMODE_CENTER1) ||
-      (priv->mode == STM32L4_TIMMODE_CENTER2) ||
-      (priv->mode == STM32L4_TIMMODE_CENTER3))
+  if ((priv->mode == STM32_TIMMODE_CENTER1) ||
+      (priv->mode == STM32_TIMMODE_CENTER2) ||
+      (priv->mode == STM32_TIMMODE_CENTER3))
     {
       frequency = frequency * 2;
     }
@@ -1889,7 +1889,7 @@ static int pwm_frequency_update(struct pwm_lowerhalf_s *dev,
   /* Set the reload and prescaler values */
 
   pwm_arr_update(dev, reload);
-  pwm_putreg(priv, STM32L4_GTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
+  pwm_putreg(priv, STM32_GTIM_PSC_OFFSET, (uint16_t)(prescaler - 1));
 
   return OK;
 }
@@ -1961,12 +1961,12 @@ static int pwm_lp_frequency_update(struct pwm_lowerhalf_s *dev,
 
   /* Set the prescaler value */
 
-  cfgr = pwm_getreg(priv, STM32L4_LPTIM_CFGR_OFFSET);
+  cfgr = pwm_getreg(priv, STM32_LPTIM_CFGR_OFFSET);
 
   cfgr &= ~LPTIM_CFGR_PRESC_MASK;
   cfgr |= (prescaler << LPTIM_CFGR_PRESC_SHIFT);
 
-  pwm_putreg(priv, STM32L4_LPTIM_CFGR_OFFSET, cfgr);
+  pwm_putreg(priv, STM32_LPTIM_CFGR_OFFSET, cfgr);
 
   return OK;
 }
@@ -1994,7 +1994,7 @@ static int pwm_timer_configure(struct stm32l4_pwmtimer_s *priv)
    * 15-17 CKD[1:0] ARPE              OPM URS UDIS CEN
    */
 
-  cr1 = pwm_getreg(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = pwm_getreg(priv, STM32_GTIM_CR1_OFFSET);
 
   /* Set the counter mode for the advanced timers (1,8) and most general
    * purpose timers (all 2-5, but not 9-17), i.e., all but TIMTYPE_COUNTUP16
@@ -2016,31 +2016,31 @@ static int pwm_timer_configure(struct stm32l4_pwmtimer_s *priv)
 
       switch (priv->mode)
         {
-          case STM32L4_TIMMODE_COUNTUP:
+          case STM32_TIMMODE_COUNTUP:
             {
               cr1 |= GTIM_CR1_EDGE;
               break;
             }
 
-          case STM32L4_TIMMODE_COUNTDOWN:
+          case STM32_TIMMODE_COUNTDOWN:
             {
               cr1 |= GTIM_CR1_EDGE | GTIM_CR1_DIR;
               break;
             }
 
-          case STM32L4_TIMMODE_CENTER1:
+          case STM32_TIMMODE_CENTER1:
             {
               cr1 |= GTIM_CR1_CENTER1;
               break;
             }
 
-          case STM32L4_TIMMODE_CENTER2:
+          case STM32_TIMMODE_CENTER2:
             {
               cr1 |= GTIM_CR1_CENTER2;
               break;
             }
 
-          case STM32L4_TIMMODE_CENTER3:
+          case STM32_TIMMODE_CENTER3:
             {
               cr1 |= GTIM_CR1_CENTER3;
               break;
@@ -2064,7 +2064,7 @@ static int pwm_timer_configure(struct stm32l4_pwmtimer_s *priv)
 
   /* Write CR1 */
 
-  pwm_putreg(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  pwm_putreg(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
 errout:
   return ret;
@@ -2104,76 +2104,76 @@ static int pwm_mode_configure(struct pwm_lowerhalf_s *dev,
 
   switch (mode)
     {
-      case STM32L4_CHANMODE_FRZN:
+      case STM32_CHANMODE_FRZN:
         {
           chanmode = GTIM_CCMR_MODE_FRZN;
           break;
         }
 
-      case STM32L4_CHANMODE_CHACT:
+      case STM32_CHANMODE_CHACT:
         {
           chanmode = GTIM_CCMR_MODE_CHACT;
           break;
         }
 
-      case STM32L4_CHANMODE_CHINACT:
+      case STM32_CHANMODE_CHINACT:
         {
           chanmode = GTIM_CCMR_MODE_CHINACT;
           break;
         }
 
-      case STM32L4_CHANMODE_OCREFTOG:
+      case STM32_CHANMODE_OCREFTOG:
         {
           chanmode = GTIM_CCMR_MODE_OCREFTOG;
           break;
         }
 
-      case STM32L4_CHANMODE_OCREFLO:
+      case STM32_CHANMODE_OCREFLO:
         {
           chanmode = GTIM_CCMR_MODE_OCREFLO;
           break;
         }
 
-      case STM32L4_CHANMODE_OCREFHI:
+      case STM32_CHANMODE_OCREFHI:
         {
           chanmode = GTIM_CCMR_MODE_OCREFHI;
           break;
         }
 
-      case STM32L4_CHANMODE_PWM1:
+      case STM32_CHANMODE_PWM1:
         {
           chanmode = GTIM_CCMR_MODE_PWM1;
           break;
         }
 
-      case STM32L4_CHANMODE_PWM2:
+      case STM32_CHANMODE_PWM2:
         {
           chanmode = GTIM_CCMR_MODE_PWM2;
           break;
         }
 
-      case STM32L4_CHANMODE_COMBINED1:
+      case STM32_CHANMODE_COMBINED1:
         {
           chanmode = ATIM_CCMR_MODE_COMBINED1;
           ocmbit   = true;
           break;
         }
 
-      case STM32L4_CHANMODE_COMBINED2:
+      case STM32_CHANMODE_COMBINED2:
         {
           chanmode = ATIM_CCMR_MODE_COMBINED2;
           ocmbit   = true;
           break;
         }
 
-      case STM32L4_CHANMODE_ASYMMETRIC1:
+      case STM32_CHANMODE_ASYMMETRIC1:
         {
           chanmode = ATIM_CCMR_MODE_ASYMMETRIC1;
           ocmbit   = true;
           break;
         }
 
-      case STM32L4_CHANMODE_ASYMMETRIC2:
+      case STM32_CHANMODE_ASYMMETRIC2:
         {
           chanmode = ATIM_CCMR_MODE_ASYMMETRIC2;
           ocmbit   = true;
@@ -2194,24 +2194,24 @@ static int pwm_mode_configure(struct pwm_lowerhalf_s *dev,
     {
       /* Get CCMR offset */
 
-      case STM32L4_PWM_CHAN1:
-      case STM32L4_PWM_CHAN2:
+      case STM32_PWM_CHAN1:
+      case STM32_PWM_CHAN2:
         {
-          offset = STM32L4_GTIM_CCMR1_OFFSET;
+          offset = STM32_GTIM_CCMR1_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN3:
-      case STM32L4_PWM_CHAN4:
+      case STM32_PWM_CHAN3:
+      case STM32_PWM_CHAN4:
         {
-          offset = STM32L4_GTIM_CCMR2_OFFSET;
+          offset = STM32_GTIM_CCMR2_OFFSET;
           break;
         }
 
-      case STM32L4_PWM_CHAN5:
-      case STM32L4_PWM_CHAN6:
+      case STM32_PWM_CHAN5:
+      case STM32_PWM_CHAN6:
         {
-          offset = STM32L4_ATIM_CCMR3_OFFSET;
+          offset = STM32_ATIM_CCMR3_OFFSET;
           break;
         }
 
@@ -2235,9 +2235,9 @@ static int pwm_mode_configure(struct pwm_lowerhalf_s *dev,
     {
       /* Configure channel 1/3/5 */
 
-      case STM32L4_PWM_CHAN1:
-      case STM32L4_PWM_CHAN3:
-      case STM32L4_PWM_CHAN5:
+      case STM32_PWM_CHAN1:
+      case STM32_PWM_CHAN3:
+      case STM32_PWM_CHAN5:
         {
           /* Reset current channel 1/3/5 mode configuration */
 
@@ -2271,9 +2271,9 @@ static int pwm_mode_configure(struct pwm_lowerhalf_s *dev,
 
       /* Configure channel 2/4/6 */
 
-      case STM32L4_PWM_CHAN2:
-      case STM32L4_PWM_CHAN4:
-      case STM32L4_PWM_CHAN6:
+      case STM32_PWM_CHAN2:
+      case STM32_PWM_CHAN4:
+      case STM32_PWM_CHAN6:
         {
           /* Reset current channel 2/4/6 mode configuration */
 
@@ -2334,8 +2334,8 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
 
   /* Get current registers state */
 
-  cr2  = pwm_getreg(priv, STM32L4_GTIM_CR2_OFFSET);
-  ccer = pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  cr2  = pwm_getreg(priv, STM32_GTIM_CR2_OFFSET);
+  ccer = pwm_getreg(priv, STM32_GTIM_CCER_OFFSET);
 
   /* | OISx/OISxN  | IDLE | for ADVANCED and COUNTUP16 | CR2 register
    * | CCxP/CCxNP  | POL  | all PWM timers             | CCER register
@@ -2343,7 +2343,7 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
 
   /* Configure output polarity (all PWM timers) */
 
-  if (priv->channels[channel - 1].out1.pol == STM32L4_POL_NEG)
+  if (priv->channels[channel - 1].out1.pol == STM32_POL_NEG)
     {
       ccer |= (GTIM_CCER_CC1P << ((channel - 1) * 4));
     }
@@ -2358,7 +2358,7 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
     {
       /* Configure output IDLE State */
 
-      if (priv->channels[channel - 1].out1.idle == STM32L4_IDLE_ACTIVE)
+      if (priv->channels[channel - 1].out1.idle == STM32_IDLE_ACTIVE)
         {
           cr2 |= (ATIM_CR2_OIS1 << ((channel - 1) * 2));
         }
@@ -2370,7 +2370,7 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
 #ifdef HAVE_PWM_COMPLEMENTARY
       /* Configure complementary output IDLE state */
 
-      if (priv->channels[channel - 1].out2.idle == STM32L4_IDLE_ACTIVE)
+      if (priv->channels[channel - 1].out2.idle == STM32_IDLE_ACTIVE)
         {
           cr2 |= (ATIM_CR2_OIS1N << ((channel - 1) * 2));
         }
@@ -2381,7 +2381,7 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
 
       /* Configure complementary output polarity */
 
-      if (priv->channels[channel - 1].out2.pol == STM32L4_POL_NEG)
+      if (priv->channels[channel - 1].out2.pol == STM32_POL_NEG)
         {
           ccer |= (ATIM_CCER_CC1NP << ((channel - 1) * 4));
         }
@@ -2417,8 +2417,8 @@ static int pwm_output_configure(struct stm32l4_pwmtimer_s *priv,
 
   /* Write registers */
 
-  pwm_modifyreg(priv, STM32L4_GTIM_CR2_OFFSET, 0, cr2);
-  pwm_modifyreg(priv, STM32L4_GTIM_CCER_OFFSET, 0, ccer);
+  pwm_modifyreg(priv, STM32_GTIM_CR2_OFFSET, 0, cr2);
+  pwm_modifyreg(priv, STM32_GTIM_CCER_OFFSET, 0, ccer);
 
   return OK;
 }
@@ -2448,23 +2448,23 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
 
   /* Get current register state */
 
-  ccer = pwm_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer = pwm_getreg(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Get outputs configuration */
 
-  regval |= ((outputs & STM32L4_PWM_OUT1)  ? GTIM_CCER_CC1E  : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT1N) ? ATIM_CCER_CC1NE : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT2)  ? GTIM_CCER_CC2E  : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT2N) ? ATIM_CCER_CC2NE : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT3)  ? GTIM_CCER_CC3E  : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT4)  ? GTIM_CCER_CC4E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT1)  ? GTIM_CCER_CC1E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT1N) ? ATIM_CCER_CC1NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT2)  ? GTIM_CCER_CC2E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT2N) ? ATIM_CCER_CC2NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT3)  ? GTIM_CCER_CC3E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT3N) ? ATIM_CCER_CC3NE : 0);
+  regval |= ((outputs & STM32_PWM_OUT4)  ? GTIM_CCER_CC4E  : 0);
 
   /* NOTE: CC4N does not exist, but some docs show configuration bits for it
    */
 
-  regval |= ((outputs & STM32L4_PWM_OUT5)  ? ATIM_CCER_CC5E  : 0);
-  regval |= ((outputs & STM32L4_PWM_OUT6)  ? ATIM_CCER_CC6E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT5)  ? ATIM_CCER_CC5E  : 0);
+  regval |= ((outputs & STM32_PWM_OUT6)  ? ATIM_CCER_CC6E  : 0);
 
   if (state == true)
     {
@@ -2481,7 +2481,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
 
   /* Write register */
 
-  pwm_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  pwm_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   return OK;
 }
@@ -2508,7 +2508,7 @@ static int pwm_deadtime_update(struct pwm_lowerhalf_s *dev, uint8_t dt)
 
   /* Get current register state */
 
-  bdtr = pwm_getreg(priv, STM32L4_ATIM_BDTR_OFFSET);
+  bdtr = pwm_getreg(priv, STM32_ATIM_BDTR_OFFSET);
 
   /* TODO: check if BDTR not locked */
 
@@ -2519,7 +2519,7 @@ static int pwm_deadtime_update(struct pwm_lowerhalf_s *dev, uint8_t dt)
 
   /* Write BDTR register */
 
-  pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
+  pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
 
 errout:
   return ret;
@@ -2538,7 +2538,7 @@ static int pwm_soft_update(struct pwm_lowerhalf_s *dev)
 {
   struct stm32l4_pwmtimer_s *priv = (struct stm32l4_pwmtimer_s *)dev;
 
-  pwm_putreg(priv, STM32L4_GTIM_EGR_OFFSET, GTIM_EGR_UG);
+  pwm_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
 
   return OK;
 }
@@ -2565,13 +2565,13 @@ static int pwm_soft_break(struct pwm_lowerhalf_s *dev, bool state)
     {
       /* Reset MOE bit */
 
-      pwm_modifyreg(priv, STM32L4_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
+      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE, 0);
     }
   else
     {
       /* Set MOE bit */
 
-      pwm_modifyreg(priv, STM32L4_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
+      pwm_modifyreg(priv, STM32_ATIM_BDTR_OFFSET, 0, ATIM_BDTR_MOE);
     }
 
   return OK;
@@ -2606,7 +2606,7 @@ pwm_outputs_from_channels(struct stm32l4_pwmtimer_s *priv)
 
           if (priv->channels[i].out1.in_use == 1)
             {
-              outputs |= (STM32L4_PWM_OUT1 << ((channel - 1) * 2));
+              outputs |= (STM32_PWM_OUT1 << ((channel - 1) * 2));
             }
 
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -2614,7 +2614,7 @@ pwm_outputs_from_channels(struct stm32l4_pwmtimer_s *priv)
 
           if (priv->channels[i].out2.in_use == 1)
             {
-              outputs |= (STM32L4_PWM_OUT1N << ((channel - 1) * 2));
+              outputs |= (STM32_PWM_OUT1N << ((channel - 1) * 2));
             }
 #endif
         }
@@ -2644,7 +2644,7 @@ static int pwm_break_dt_configure(struct stm32l4_pwmtimer_s *priv)
    * should be no basic timers in this context
    */
 
-  pwm_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, GTIM_CR1_CKD_MASK,
+  pwm_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CKD_MASK,
                 priv->t_dts << GTIM_CR1_CKD_SHIFT);
 
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -2664,7 +2664,7 @@ static int pwm_break_dt_configure(struct stm32l4_pwmtimer_s *priv)
 
       /* Set Break 1 polarity */
 
-      bdtr |= (priv->brk.pol1 == STM32L4_POL_NEG ? ATIM_BDTR_BKP : 0);
+      bdtr |= (priv->brk.pol1 == STM32_POL_NEG ? ATIM_BDTR_BKP : 0);
     }
 
   /* Configure Break 1 */
@@ -2677,7 +2677,7 @@ static int pwm_break_dt_configure(struct stm32l4_pwmtimer_s *priv)
 
       /* Set Break 2 polarity */
 
-      bdtr |= (priv->brk.pol2 == STM32L4_POL_NEG ? ATIM_BDTR_BK2P : 0);
+      bdtr |= (priv->brk.pol2 == STM32_POL_NEG ? ATIM_BDTR_BK2P : 0);
 
       /* Configure BRK2 filter */
 
@@ -2699,7 +2699,7 @@ static int pwm_break_dt_configure(struct stm32l4_pwmtimer_s *priv)
 
   /* Write BDTR register at once */
 
-  pwm_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, bdtr);
+  pwm_putreg(priv, STM32_ATIM_BDTR_OFFSET, bdtr);
 
   return OK;
 }
@@ -2956,7 +2956,7 @@ static int pwm_timer(struct pwm_lowerhalf_s *dev,
 
       /* Set the repetition counter to zero */
 
-      pwm_putreg(priv, STM32L4_ATIM_RCR_OFFSET, 0);
+      pwm_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
 
       /* Generate an update event to reload the prescaler */
 
@@ -3047,9 +3047,9 @@ static int pwm_lptimer(struct pwm_lowerhalf_s *dev,
 
   /* Start counter */
 
-  cr = pwm_getreg(priv, STM32L4_LPTIM_CR_OFFSET);
+  cr = pwm_getreg(priv, STM32_LPTIM_CR_OFFSET);
   cr |= LPTIM_CR_CNTSTRT;
-  pwm_putreg(priv, STM32L4_LPTIM_CR_OFFSET, cr);
+  pwm_putreg(priv, STM32_LPTIM_CR_OFFSET, cr);
 
   pwm_dumpregs(dev, "After starting");
 
@@ -3086,7 +3086,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM1_PWM
           case 1:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM1EN;
               break;
             }
@@ -3095,7 +3095,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM2_PWM
           case 2:
             {
-              regaddr  = STM32L4_RCC_APB1ENR1;
+              regaddr  = STM32_RCC_APB1ENR1;
               en_bit   = RCC_APB1ENR1_TIM2EN;
               break;
             }
@@ -3104,7 +3104,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM3_PWM
           case 3:
             {
-              regaddr  = STM32L4_RCC_APB1ENR1;
+              regaddr  = STM32_RCC_APB1ENR1;
               en_bit   = RCC_APB1ENR1_TIM3EN;
               break;
             }
@@ -3113,7 +3113,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM4_PWM
           case 4:
             {
-              regaddr  = STM32L4_RCC_APB1ENR1;
+              regaddr  = STM32_RCC_APB1ENR1;
               en_bit   = RCC_APB1ENR1_TIM4EN;
               break;
             }
@@ -3122,7 +3122,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM5_PWM
           case 5:
             {
-              regaddr  = STM32L4_RCC_APB1ENR1;
+              regaddr  = STM32_RCC_APB1ENR1;
               en_bit   = RCC_APB1ENR1_TIM5EN;
               break;
             }
@@ -3131,7 +3131,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM8_PWM
           case 8:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM8EN;
               break;
             }
@@ -3140,7 +3140,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM15_PWM
           case 15:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM15EN;
               break;
             }
@@ -3149,7 +3149,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM16_PWM
           case 16:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM16EN;
               break;
             }
@@ -3158,7 +3158,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #ifdef CONFIG_STM32L4_TIM17_PWM
           case 17:
             {
-              regaddr  = STM32L4_RCC_APB2ENR;
+              regaddr  = STM32_RCC_APB2ENR;
               en_bit   = RCC_APB2ENR_TIM17EN;
               break;
           }
@@ -3198,12 +3198,12 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 
               if (on)
                 {
-                  modifyreg32(STM32L4_RCC_APB1ENR1,
+                  modifyreg32(STM32_RCC_APB1ENR1,
                               0, RCC_APB1ENR1_LPTIM1EN);
                 }
               else
                 {
-                  modifyreg32(STM32L4_RCC_APB1ENR1,
+                  modifyreg32(STM32_RCC_APB1ENR1,
                               RCC_APB1ENR1_LPTIM1EN, 0);
                 }
 
@@ -3217,7 +3217,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #endif
               /* Choose which clock will be used for LPTIM1 */
 
-              modifyreg32(STM32L4_RCC_CCIPR, RCC_CCIPR_LPTIM1SEL_MASK,
+              modifyreg32(STM32_RCC_CCIPR, RCC_CCIPR_LPTIM1SEL_MASK,
                           clock_bits);
               break;
             }
@@ -3231,12 +3231,12 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 
               if (on)
                 {
-                  modifyreg32(STM32L4_RCC_APB1ENR2,
+                  modifyreg32(STM32_RCC_APB1ENR2,
                               0, RCC_APB1ENR2_LPTIM2EN);
                 }
               else
                 {
-                  modifyreg32(STM32L4_RCC_APB1ENR2,
+                  modifyreg32(STM32_RCC_APB1ENR2,
                               RCC_APB1ENR2_LPTIM2EN, 0);
                 }
 
@@ -3250,7 +3250,7 @@ static int pwm_setapbclock(struct stm32l4_pwmtimer_s *priv,
 #endif
               /* Choose which clock will be used for LPTIM2 */
 
-              modifyreg32(STM32L4_RCC_CCIPR, RCC_CCIPR_LPTIM2SEL_MASK,
+              modifyreg32(STM32_RCC_CCIPR, RCC_CCIPR_LPTIM2SEL_MASK,
                           clock_bits);
               break;
             }
@@ -3543,49 +3543,49 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
         {
 #ifdef CONFIG_STM32L4_TIM1_PWM
           case 1:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM1RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM2_PWM
           case 2:
-            regaddr  = STM32L4_RCC_APB1RSTR1;
+            regaddr  = STM32_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_TIM2RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM3_PWM
           case 3:
-            regaddr  = STM32L4_RCC_APB1RSTR1;
+            regaddr  = STM32_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_TIM3RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM4_PWM
           case 4:
-            regaddr  = STM32L4_RCC_APB1RSTR1;
+            regaddr  = STM32_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_TIM4RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM5_PWM
           case 5:
-            regaddr  = STM32L4_RCC_APB1RSTR1;
+            regaddr  = STM32_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_TIM5RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM8_PWM
           case 8:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM8RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM16_PWM
           case 16:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM16RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_TIM17_PWM
           case 17:
-            regaddr  = STM32L4_RCC_APB2RSTR;
+            regaddr  = STM32_RCC_APB2RSTR;
             resetbit = RCC_APB2RSTR_TIM17RST;
             break;
 #endif
@@ -3599,13 +3599,13 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
         {
 #ifdef CONFIG_STM32L4_LPTIM1_PWM
           case 1:
-            regaddr  = STM32L4_RCC_APB1RSTR1;
+            regaddr  = STM32_RCC_APB1RSTR1;
             resetbit = RCC_APB1RSTR1_LPTIM1RST;
             break;
 #endif
 #ifdef CONFIG_STM32L4_LPTIM2_PWM
           case 2:
-            regaddr  = STM32L4_RCC_APB1RSTR2;
+            regaddr  = STM32_RCC_APB1RSTR2;
             resetbit = RCC_APB1RSTR2_LPTIM2RST;
             break;
 #endif
@@ -3626,8 +3626,8 @@ static int pwm_stop(struct pwm_lowerhalf_s *dev)
 
   /* Disable further interrupts and stop the timer */
 
-  pwm_putreg(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  pwm_putreg(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_DIER_OFFSET, 0);
+  pwm_putreg(priv, STM32_GTIM_SR_OFFSET, 0);
 
   /* Reset the timer - stopping the output and putting the timer back
    * into a state where pwm_start() can be called.
