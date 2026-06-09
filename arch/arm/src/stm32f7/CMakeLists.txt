@@ -128,7 +128,7 @@ if(CONFIG_STM32F7_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32F7_QUADSPI)
+if(CONFIG_STM32F7_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
