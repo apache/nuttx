@@ -41,12 +41,12 @@
 
 static inline uint16_t stm32l5_pwr_getreg(uint8_t offset)
 {
-  return (uint16_t)getreg32(STM32L5_PWR_BASE + (uint32_t)offset);
+  return (uint16_t)getreg32(STM32_PWR_BASE + (uint32_t)offset);
 }
 
 static inline void stm32l5_pwr_putreg(uint8_t offset, uint16_t value)
 {
-  putreg32((uint32_t)value, STM32L5_PWR_BASE + (uint32_t)offset);
+  putreg32((uint32_t)value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
 /****************************************************************************
@@ -75,7 +75,7 @@ bool stm32l5_pwr_enableclk(bool enable)
   uint32_t regval;
   bool wasenabled;
 
-  regval = getreg32(STM32L5_RCC_APB1ENR1);
+  regval = getreg32(STM32_RCC_APB1ENR1);
   wasenabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
   /* Power interface clock enable. */
@@ -85,14 +85,14 @@ bool stm32l5_pwr_enableclk(bool enable)
       /* Disable power interface clock */
 
       regval &= ~RCC_APB1ENR1_PWREN;
-      putreg32(regval, STM32L5_RCC_APB1ENR1);
+      putreg32(regval, STM32_RCC_APB1ENR1);
     }
   else if (!wasenabled && enable)
     {
       /* Enable power interface clock */
 
       regval |= RCC_APB1ENR1_PWREN;
-      putreg32(regval, STM32L5_RCC_APB1ENR1);
+      putreg32(regval, STM32_RCC_APB1ENR1);
     }
 
   return wasenabled;
@@ -120,7 +120,7 @@ bool stm32l5_pwr_enablebkp(bool writable)
 
   /* Get the current state of the STM32L5 PWR control register 1 */
 
-  regval      = stm32l5_pwr_getreg(STM32L5_PWR_CR1_OFFSET);
+  regval      = stm32l5_pwr_getreg(STM32_PWR_CR1_OFFSET);
   waswritable = ((regval & PWR_CR1_DBP) != 0);
 
   /* Enable or disable the ability to write */
@@ -130,14 +130,14 @@ bool stm32l5_pwr_enablebkp(bool writable)
       /* Disable backup domain access */
 
       regval &= ~PWR_CR1_DBP;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR1_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
     }
   else if (!waswritable && writable)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR1_DBP;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR1_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
       /* Enable does not happen right away */
 
@@ -169,7 +169,7 @@ bool stm32l5_pwr_enableusv(bool set)
   bool was_set;
   bool was_clk_enabled;
 
-  regval = getreg32(STM32L5_RCC_APB1ENR1);
+  regval = getreg32(STM32_RCC_APB1ENR1);
   was_clk_enabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
   if (!was_clk_enabled)
@@ -179,7 +179,7 @@ bool stm32l5_pwr_enableusv(bool set)
 
   /* Get the current state of the STM32L5 PWR control register 2 */
 
-  regval  = stm32l5_pwr_getreg(STM32L5_PWR_CR2_OFFSET);
+  regval  = stm32l5_pwr_getreg(STM32_PWR_CR2_OFFSET);
   was_set = ((regval & PWR_CR2_USV) != 0);
 
   /* Enable or disable the ability to write */
@@ -189,14 +189,14 @@ bool stm32l5_pwr_enableusv(bool set)
       /* Disable the Vddusb monitoring */
 
       regval &= ~PWR_CR2_USV;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
   else if (!was_set && set)
     {
       /* Enable the Vddusb monitoring */
 
       regval |= PWR_CR2_USV;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
 
   if (!was_clk_enabled)
@@ -229,7 +229,7 @@ bool stm32l5_pwr_vddio2_valid(bool set)
   bool was_set;
   bool was_clk_enabled;
 
-  regval = getreg32(STM32L5_RCC_APB1ENR1);
+  regval = getreg32(STM32_RCC_APB1ENR1);
   was_clk_enabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
 
   if (!was_clk_enabled)
@@ -239,7 +239,7 @@ bool stm32l5_pwr_vddio2_valid(bool set)
 
   /* Get the current state of the STM32L5 PWR control register 2 */
 
-  regval  = stm32l5_pwr_getreg(STM32L5_PWR_CR2_OFFSET);
+  regval  = stm32l5_pwr_getreg(STM32_PWR_CR2_OFFSET);
   was_set = ((regval & PWR_CR2_IOSV) != 0);
 
   /* Enable or disable the ability to write */
@@ -249,14 +249,14 @@ bool stm32l5_pwr_vddio2_valid(bool set)
       /* Reset the Vddio2 independent I/O supply valid bit. */
 
       regval &= ~PWR_CR2_IOSV;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
   else if (!was_set && set)
     {
       /* Set the Vddio2 independent I/O supply valid bit. */
 
       regval |= PWR_CR2_IOSV;
-      stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);
+      stm32l5_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
 
   if (!was_clk_enabled)

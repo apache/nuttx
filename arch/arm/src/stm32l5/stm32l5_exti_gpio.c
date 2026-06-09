@@ -72,13 +72,13 @@ static int stm32l5_exti0_15_isr(int irq, void *context, void *arg)
   int ret = OK;
   int exti;
 
-  exti = irq - STM32L5_IRQ_EXTI0;
+  exti = irq - STM32_IRQ_EXTI0;
   DEBUGASSERT((exti >= 0) && (exti <= 15));
 
   /* Clear the pending interrupt for both rising and falling edges. */
 
-  putreg32(0x0001 << exti, STM32L5_EXTI_RPR1);
-  putreg32(0x0001 << exti, STM32L5_EXTI_FPR1);
+  putreg32(0x0001 << exti, STM32_EXTI_RPR1);
+  putreg32(0x0001 << exti, STM32_EXTI_FPR1);
 
   /* And dispatch the interrupt to the handler */
 
@@ -125,7 +125,7 @@ int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 {
   uint32_t pin = pinset & GPIO_PIN_MASK;
   uint32_t exti = 1 << pin;
-  int      irq = STM32L5_IRQ_EXTI0 + pin;
+  int      irq = STM32_IRQ_EXTI0 + pin;
 
   g_gpio_handlers[pin].callback = func;
   g_gpio_handlers[pin].arg      = arg;
@@ -155,19 +155,19 @@ int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L5_EXTI_RTSR1,
+  modifyreg32(STM32_EXTI_RTSR1,
               risingedge ? 0 : exti,
               risingedge ? exti : 0);
-  modifyreg32(STM32L5_EXTI_FTSR1,
+  modifyreg32(STM32_EXTI_FTSR1,
               fallingedge ? 0 : exti,
               fallingedge ? exti : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32L5_EXTI_EMR1,
+  modifyreg32(STM32_EXTI_EMR1,
               event ? 0 : exti,
               event ? exti : 0);
-  modifyreg32(STM32L5_EXTI_IMR1,
+  modifyreg32(STM32_EXTI_IMR1,
               func ? 0 : exti,
               func ? exti : 0);
 

@@ -285,10 +285,10 @@ static struct stm32l5_spidev_s g_spi1dev =
   {
     .ops    = &g_spi1ops,
   },
-  .spibase  = STM32L5_SPI1_BASE,
-  .spiclock = STM32L5_PCLK2_FREQUENCY,
+  .spibase  = STM32_SPI1_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32L5_SPI_INTERRUPTS
-  .spiirq   = STM32L5_IRQ_SPI1,
+  .spiirq   = STM32_IRQ_SPI1,
 #endif
 #ifdef CONFIG_STM32L5_SPI_DMA
   /* lines must be configured in board.h */
@@ -343,10 +343,10 @@ static struct stm32l5_spidev_s g_spi2dev =
   {
     .ops    = &g_spi2ops,
   },
-  .spibase  = STM32L5_SPI2_BASE,
-  .spiclock = STM32L5_PCLK1_FREQUENCY,
+  .spibase  = STM32_SPI2_BASE,
+  .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L5_SPI_INTERRUPTS
-  .spiirq   = STM32L5_IRQ_SPI2,
+  .spiirq   = STM32_IRQ_SPI2,
 #endif
 #ifdef CONFIG_STM32L5_SPI_DMA
   .rxch     = DMACHAN_SPI2_RX,
@@ -399,10 +399,10 @@ static struct stm32l5_spidev_s g_spi3dev =
   {
     .ops    = &g_spi3ops,
   },
-  .spibase  = STM32L5_SPI3_BASE,
-  .spiclock = STM32L5_PCLK1_FREQUENCY,
+  .spibase  = STM32_SPI3_BASE,
+  .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32L5_SPI_INTERRUPTS
-  .spiirq   = STM32L5_IRQ_SPI3,
+  .spiirq   = STM32_IRQ_SPI3,
 #endif
 #ifdef CONFIG_STM32L5_SPI_DMA
   .rxch     = DMACHAN_SPI3_RX,
@@ -522,11 +522,11 @@ static inline uint16_t spi_readword(struct stm32l5_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32L5_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
 
   /* Then return the received byte */
 
-  return spi_getreg(priv, STM32L5_SPI_DR_OFFSET);
+  return spi_getreg(priv, STM32_SPI_DR_OFFSET);
 }
 
 /****************************************************************************
@@ -547,11 +547,11 @@ static inline uint8_t spi_readbyte(struct stm32l5_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32L5_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0);
 
   /* Then return the received byte */
 
-  return spi_getreg8(priv, STM32L5_SPI_DR_OFFSET);
+  return spi_getreg8(priv, STM32_SPI_DR_OFFSET);
 }
 
 /****************************************************************************
@@ -574,11 +574,11 @@ static inline void spi_writeword(struct stm32l5_spidev_s *priv,
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32L5_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
 
   /* Then send the byte */
 
-  spi_putreg(priv, STM32L5_SPI_DR_OFFSET, word);
+  spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
 }
 
 /****************************************************************************
@@ -601,11 +601,11 @@ static inline void spi_writebyte(struct stm32l5_spidev_s *priv,
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32L5_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0);
 
   /* Then send the byte */
 
-  spi_putreg8(priv, STM32L5_SPI_DR_OFFSET, byte);
+  spi_putreg8(priv, STM32_SPI_DR_OFFSET, byte);
 }
 
 /****************************************************************************
@@ -805,7 +805,7 @@ static void spi_dmarxsetup(struct stm32l5_spidev_s *priv,
 
   /* Configure the RX DMA */
 
-  stm32l5_dmasetup(priv->rxdma, priv->spibase + STM32L5_SPI_DR_OFFSET,
+  stm32l5_dmasetup(priv->rxdma, priv->spibase + STM32_SPI_DR_OFFSET,
                  (uint32_t)rxbuffer, nwords, priv->rxccr);
 }
 #endif
@@ -856,7 +856,7 @@ static void spi_dmatxsetup(struct stm32l5_spidev_s *priv,
 
   /* Setup the TX DMA */
 
-  stm32l5_dmasetup(priv->txdma, priv->spibase + STM32L5_SPI_DR_OFFSET,
+  stm32l5_dmasetup(priv->txdma, priv->spibase + STM32_SPI_DR_OFFSET,
                  (uint32_t)txbuffer, nwords, priv->txccr);
 }
 #endif
@@ -983,11 +983,11 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
   uint16_t setbits;
   uint32_t actual;
 
-  /* Limit to max possible (if STM32L5_SPI_CLK_MAX is defined in board.h) */
+  /* Limit to max possible (if STM32_SPI_CLK_MAX is defined in board.h) */
 
-  if (frequency > STM32L5_SPI_CLK_MAX)
+  if (frequency > STM32_SPI_CLK_MAX)
     {
-      frequency = STM32L5_SPI_CLK_MAX;
+      frequency = STM32_SPI_CLK_MAX;
     }
 
   /* Has the frequency changed? */
@@ -1053,9 +1053,9 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
           actual = priv->spiclock >> 8;
         }
 
-      spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, setbits, SPI_CR1_BR_MASK);
-      spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, SPI_CR1_BR_MASK);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
       /* Save the frequency selection so that subsequent reconfigurations
        * will be faster.
@@ -1125,9 +1125,9 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-        spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-        spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, setbits, clrbits);
-        spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+        spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
         /* Save the mode so that subsequent re-configurations will be
          * faster
@@ -1192,9 +1192,9 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
           clrbits |= SPI_CR2_FRXTH; /* RX FIFO Threshold = 2 bytes */
         }
 
-      spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-      spi_modifycr(STM32L5_SPI_CR2_OFFSET, priv, setbits, clrbits);
-      spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+      spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
+      spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
       /* Save the selection so the subsequence re-configurations will be
        * faster
@@ -1247,9 +1247,9 @@ static int spi_hwfeatures(struct spi_dev_s *dev,
       clrbits = SPI_CR1_LSBFIRST;
     }
 
-  spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
-  spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, setbits, clrbits);
-  spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, 0, SPI_CR1_SPE);
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
   features &= ~HWFEAT_LSBFIRST;
 #endif
@@ -1315,7 +1315,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
    * flags).
    */
 
-  regval = spi_getreg(priv, STM32L5_SPI_SR_OFFSET);
+  regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
   if (spi_16bitmode(priv))
     {
@@ -1730,11 +1730,11 @@ static void spi_bus_initialize(struct stm32l5_spidev_s *priv)
             SPI_CR1_BR_MASK | SPI_CR1_LSBFIRST |
             SPI_CR1_RXONLY | SPI_CR1_BIDIOE | SPI_CR1_BIDIMODE;
   setbits = SPI_CR1_MSTR | SPI_CR1_SSI | SPI_CR1_SSM;
-  spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, setbits, clrbits);
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, setbits, clrbits);
 
   clrbits = SPI_CR2_DS_MASK;
   setbits = SPI_CR2_DS_8BIT | SPI_CR2_FRXTH; /* FRXTH must be high in 8-bit mode */
-  spi_modifycr(STM32L5_SPI_CR2_OFFSET, priv, setbits, clrbits);
+  spi_modifycr(STM32_SPI_CR2_OFFSET, priv, setbits, clrbits);
 
   priv->frequency = 0;
   priv->nbits     = 8;
@@ -1746,7 +1746,7 @@ static void spi_bus_initialize(struct stm32l5_spidev_s *priv)
 
   /* CRCPOLY configuration */
 
-  spi_putreg(priv, STM32L5_SPI_CRCPR_OFFSET, 7);
+  spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
 #ifdef CONFIG_STM32L5_SPI_DMA
   /* Get DMA channels.
@@ -1763,13 +1763,13 @@ static void spi_bus_initialize(struct stm32l5_spidev_s *priv)
   priv->txdma = stm32l5_dmachannel(priv->txch);
   DEBUGASSERT(priv->rxdma && priv->txdma);
 
-  spi_modifycr(STM32L5_SPI_CR2_OFFSET, priv,
+  spi_modifycr(STM32_SPI_CR2_OFFSET, priv,
                SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
 #endif
 
   /* Enable spi */
 
-  spi_modifycr(STM32L5_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
+  spi_modifycr(STM32_SPI_CR1_OFFSET, priv, SPI_CR1_SPE, 0);
 
 #ifdef CONFIG_PM
   /* Register to receive power management callbacks */
