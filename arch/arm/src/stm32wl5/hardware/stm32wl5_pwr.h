@@ -36,53 +36,53 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WL5_PWR_CR1_OFFSET         0x0000  /* Power control register 1 */
-#define STM32WL5_PWR_CR2_OFFSET         0x0004  /* Power control register 2 */
-#define STM32WL5_PWR_CR3_OFFSET         0x0008  /* Power control register 3 */
-#define STM32WL5_PWR_CR4_OFFSET         0x000C  /* Power control register 4 */
-#define STM32WL5_PWR_SR1_OFFSET         0x0010  /* Power status register 1 */
-#define STM32WL5_PWR_SR2_OFFSET         0x0014  /* Power status register 2 */
-#define STM32WL5_PWR_SCR_OFFSET         0x0018  /* Power status clear register */
-#define STM32WL5_PWR_CR5_OFFSET         0x001C  /* Power control register 5 */
-#define STM32WL5_PWR_PUCRA_OFFSET       0x0020  /* Power Port A pull-up control register */
-#define STM32WL5_PWR_PDCRA_OFFSET       0x0024  /* Power Port A pull-down control register */
-#define STM32WL5_PWR_PUCRB_OFFSET       0x0028  /* Power Port B pull-up control register */
-#define STM32WL5_PWR_PDCRB_OFFSET       0x002C  /* Power Port B pull-down control register */
-#define STM32WL5_PWR_PUCRC_OFFSET       0x0030  /* Power Port C pull-up control register */
-#define STM32WL5_PWR_PDCRC_OFFSET       0x0034  /* Power Port C pull-down control register */
-#define STM32WL5_PWR_PUCRH_OFFSET       0x0058  /* Power Port H pull-up control register */
-#define STM32WL5_PWR_PDCRH_OFFSET       0x005C  /* Power Port H pull-down control register */
-#define STM32WL5_PWR_C2CR1_OFFSET       0x0080  /* Power control register 1 for cpu2 */
-#define STM32WL5_PWR_C2CR3_OFFSET       0x0084  /* Power control register 3 for cpu2 */
-#define STM32WL5_PWR_EXTSCR_OFFSET      0x0088  /* Power extended status */
-#define STM32WL5_PWR_SECCFGR_OFFSET     0x0088  /* Power security configuration */
-#define STM32WL5_PWR_SUBGHZSPICR_OFFSET 0x0088  /* Power sub-ghz spi radio control */
-#define STM32WL5_PWR_RSSCMDR_OFFSET     0x0088  /* Power RSS command */
+#define STM32_PWR_CR1_OFFSET         0x0000  /* Power control register 1 */
+#define STM32_PWR_CR2_OFFSET         0x0004  /* Power control register 2 */
+#define STM32_PWR_CR3_OFFSET         0x0008  /* Power control register 3 */
+#define STM32_PWR_CR4_OFFSET         0x000C  /* Power control register 4 */
+#define STM32_PWR_SR1_OFFSET         0x0010  /* Power status register 1 */
+#define STM32_PWR_SR2_OFFSET         0x0014  /* Power status register 2 */
+#define STM32_PWR_SCR_OFFSET         0x0018  /* Power status clear register */
+#define STM32_PWR_CR5_OFFSET         0x001C  /* Power control register 5 */
+#define STM32_PWR_PUCRA_OFFSET       0x0020  /* Power Port A pull-up control register */
+#define STM32_PWR_PDCRA_OFFSET       0x0024  /* Power Port A pull-down control register */
+#define STM32_PWR_PUCRB_OFFSET       0x0028  /* Power Port B pull-up control register */
+#define STM32_PWR_PDCRB_OFFSET       0x002C  /* Power Port B pull-down control register */
+#define STM32_PWR_PUCRC_OFFSET       0x0030  /* Power Port C pull-up control register */
+#define STM32_PWR_PDCRC_OFFSET       0x0034  /* Power Port C pull-down control register */
+#define STM32_PWR_PUCRH_OFFSET       0x0058  /* Power Port H pull-up control register */
+#define STM32_PWR_PDCRH_OFFSET       0x005C  /* Power Port H pull-down control register */
+#define STM32_PWR_C2CR1_OFFSET       0x0080  /* Power control register 1 for cpu2 */
+#define STM32_PWR_C2CR3_OFFSET       0x0084  /* Power control register 3 for cpu2 */
+#define STM32_PWR_EXTSCR_OFFSET      0x0088  /* Power extended status */
+#define STM32_PWR_SECCFGR_OFFSET     0x0088  /* Power security configuration */
+#define STM32_PWR_SUBGHZSPICR_OFFSET 0x0088  /* Power sub-ghz spi radio control */
+#define STM32_PWR_RSSCMDR_OFFSET     0x0088  /* Power RSS command */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WL5_PWR_CR1         (STM32WL5_PWR_BASE+STM32WL5_PWR_CR1_OFFSET)
-#define STM32WL5_PWR_CR2         (STM32WL5_PWR_BASE+STM32WL5_PWR_CR2_OFFSET)
-#define STM32WL5_PWR_CR3         (STM32WL5_PWR_BASE+STM32WL5_PWR_CR3_OFFSET)
-#define STM32WL5_PWR_CR4         (STM32WL5_PWR_BASE+STM32WL5_PWR_CR4_OFFSET)
-#define STM32WL5_PWR_SR1         (STM32WL5_PWR_BASE+STM32WL5_PWR_SR1_OFFSET)
-#define STM32WL5_PWR_SR2         (STM32WL5_PWR_BASE+STM32WL5_PWR_SR2_OFFSET)
-#define STM32WL5_PWR_SCR         (STM32WL5_PWR_BASE+STM32WL5_PWR_SCR_OFFSET)
-#define STM32WL5_PWR_CR5         (STM32WL5_PWR_BASE+STM32WL5_PWR_CR5_OFFSET)
-#define STM32WL5_PWR_PUCRA       (STM32WL5_PWR_BASE+STM32WL5_PWR_PUCRA_OFFSET)
-#define STM32WL5_PWR_PDCRA       (STM32WL5_PWR_BASE+STM32WL5_PWR_PDCRA_OFFSET)
-#define STM32WL5_PWR_PUCRB       (STM32WL5_PWR_BASE+STM32WL5_PWR_PUCRB_OFFSET)
-#define STM32WL5_PWR_PDCRB       (STM32WL5_PWR_BASE+STM32WL5_PWR_PDCRB_OFFSET)
-#define STM32WL5_PWR_PUCRC       (STM32WL5_PWR_BASE+STM32WL5_PWR_PUCRC_OFFSET)
-#define STM32WL5_PWR_PDCRC       (STM32WL5_PWR_BASE+STM32WL5_PWR_PDCRC_OFFSET)
-#define STM32WL5_PWR_PUCRH       (STM32WL5_PWR_BASE+STM32WL5_PWR_PUCRH_OFFSET)
-#define STM32WL5_PWR_PDCRH       (STM32WL5_PWR_BASE+STM32WL5_PWR_PDCRH_OFFSET)
-#define STM32WL5_PWR_C2CR1       (STM32WL5_PWR_BASE+STM32WL5_PWR_C2CR1_OFFSET)
-#define STM32WL5_PWR_C2CR3       (STM32WL5_PWR_BASE+STM32WL5_PWR_C2CR3_OFFSET)
-#define STM32WL5_PWR_EXTSCR      (STM32WL5_PWR_BASE+STM32WL5_PWR_EXTSCR_OFFSET)
-#define STM32WL5_PWR_SECCFGR     (STM32WL5_PWR_BASE+STM32WL5_PWR_SECCFGR_OFFSET)
-#define STM32WL5_PWR_SUBGHZSPICR (STM32WL5_PWR_BASE+STM32WL5_PWR_SUBGHZSPICR_OFFSET)
-#define STM32WL5_PWR_RSSCMDR     (STM32WL5_PWR_BASE+STM32WL5_PWR_RSSCMDR_OFFSET)
+#define STM32_PWR_CR1         (STM32_PWR_BASE+STM32_PWR_CR1_OFFSET)
+#define STM32_PWR_CR2         (STM32_PWR_BASE+STM32_PWR_CR2_OFFSET)
+#define STM32_PWR_CR3         (STM32_PWR_BASE+STM32_PWR_CR3_OFFSET)
+#define STM32_PWR_CR4         (STM32_PWR_BASE+STM32_PWR_CR4_OFFSET)
+#define STM32_PWR_SR1         (STM32_PWR_BASE+STM32_PWR_SR1_OFFSET)
+#define STM32_PWR_SR2         (STM32_PWR_BASE+STM32_PWR_SR2_OFFSET)
+#define STM32_PWR_SCR         (STM32_PWR_BASE+STM32_PWR_SCR_OFFSET)
+#define STM32_PWR_CR5         (STM32_PWR_BASE+STM32_PWR_CR5_OFFSET)
+#define STM32_PWR_PUCRA       (STM32_PWR_BASE+STM32_PWR_PUCRA_OFFSET)
+#define STM32_PWR_PDCRA       (STM32_PWR_BASE+STM32_PWR_PDCRA_OFFSET)
+#define STM32_PWR_PUCRB       (STM32_PWR_BASE+STM32_PWR_PUCRB_OFFSET)
+#define STM32_PWR_PDCRB       (STM32_PWR_BASE+STM32_PWR_PDCRB_OFFSET)
+#define STM32_PWR_PUCRC       (STM32_PWR_BASE+STM32_PWR_PUCRC_OFFSET)
+#define STM32_PWR_PDCRC       (STM32_PWR_BASE+STM32_PWR_PDCRC_OFFSET)
+#define STM32_PWR_PUCRH       (STM32_PWR_BASE+STM32_PWR_PUCRH_OFFSET)
+#define STM32_PWR_PDCRH       (STM32_PWR_BASE+STM32_PWR_PDCRH_OFFSET)
+#define STM32_PWR_C2CR1       (STM32_PWR_BASE+STM32_PWR_C2CR1_OFFSET)
+#define STM32_PWR_C2CR3       (STM32_PWR_BASE+STM32_PWR_C2CR3_OFFSET)
+#define STM32_PWR_EXTSCR      (STM32_PWR_BASE+STM32_PWR_EXTSCR_OFFSET)
+#define STM32_PWR_SECCFGR     (STM32_PWR_BASE+STM32_PWR_SECCFGR_OFFSET)
+#define STM32_PWR_SUBGHZSPICR (STM32_PWR_BASE+STM32_PWR_SUBGHZSPICR_OFFSET)
+#define STM32_PWR_RSSCMDR     (STM32_PWR_BASE+STM32_PWR_RSSCMDR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

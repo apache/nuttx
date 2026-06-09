@@ -225,8 +225,8 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
   UNUSED(arg);
   UNUSED(irq);
 
-  mr = getreg32(STM32WL5_IPCC_C1MR) >> STM32WL5_IPCC_TX_SHIFT;
-  sr = getreg32(STM32WL5_IPCC_C1TOC2SR);
+  mr = getreg32(STM32_IPCC_C1MR) >> STM32_IPCC_TX_SHIFT;
+  sr = getreg32(STM32_IPCC_C1TOC2SR);
 
   /* Consider only channels that have tx memory free and are unmasked */
 
@@ -266,7 +266,7 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
           /* Yes, tell another CPU that data is available to read */
 
           txmem->len = nwritten;
-          modifyreg32(STM32WL5_IPCC_C1SCR, 0, STM32WL5_IPCC_SCR_CHNS(chan));
+          modifyreg32(STM32_IPCC_C1SCR, 0, STM32_IPCC_SCR_CHNS(chan));
         }
 
       if (circbuf_used(&priv->ipcc->txbuf) == 0)
@@ -276,7 +276,7 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
            * will be constantly interrupted by tx free irq.
            */
 
-          modifyreg32(STM32WL5_IPCC_C1MR, 0, STM32WL5_IPCC_MR_CHNFM(chan));
+          modifyreg32(STM32_IPCC_C1MR, 0, STM32_IPCC_MR_CHNFM(chan));
         }
 #else /* CONFIG_IPCC_BUFFERED */
       /* In unbuffered operations we never write anything to IPCC
@@ -284,7 +284,7 @@ static int stm32wl5_ipcc_tx_isr(int irq, void *context, void *arg)
        * or else we will constantly get TX interrupts
        */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, 0, STM32WL5_IPCC_MR_CHNFM(chan));
+      modifyreg32(STM32_IPCC_C1MR, 0, STM32_IPCC_MR_CHNFM(chan));
 #endif /* CONFIG_IPCC_BUFFERED */
       /* Wake up all blocked writers that there is free space available
        * in IPCC memory (or txbuffer) to write.
@@ -324,7 +324,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
   struct stm32wl5_ipcc_chan_mem_s *txmem;
   uint32_t sr;
 
-  sr = getreg32(STM32WL5_IPCC_C1TOC2SR);
+  sr = getreg32(STM32_IPCC_C1TOC2SR);
 
   if ((sr & (1 << ipcc->chan)))
     {
@@ -334,7 +334,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
        * so we are notified when we can write to memory.
        */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNFM(ipcc->chan), 0);
+      modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNFM(ipcc->chan), 0);
       return 0;
     }
 
@@ -343,7 +343,7 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
 
   /* Disable TX interrupt since we will modify shared data */
 
-  up_disable_irq(STM32WL5_IRQ_IPCC_C1_TX_IT);
+  up_disable_irq(STM32_IRQ_IPCC_C1_TX_IT);
 
   /* Copy as much as we can into IPCC memory */
 
@@ -353,12 +353,12 @@ static ssize_t stm32wl5_ipcc_write(struct ipcc_lower_s *ipcc,
 
   /* Tell another CPU that data is available to read */
 
-  modifyreg32(STM32WL5_IPCC_C1SCR, 0, STM32WL5_IPCC_SCR_CHNS(ipcc->chan));
+  modifyreg32(STM32_IPCC_C1SCR, 0, STM32_IPCC_SCR_CHNS(ipcc->chan));
 
   /* Re-enable interrupts */
 
-  modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNFM(ipcc->chan), 0);
-  up_enable_irq(STM32WL5_IRQ_IPCC_C1_TX_IT);
+  modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNFM(ipcc->chan), 0);
+  up_enable_irq(STM32_IRQ_IPCC_C1_TX_IT);
 
   /* Return number of successfully copied bytes to IPCC memory */
 
@@ -404,8 +404,8 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
   UNUSED(arg);
   UNUSED(irq);
 
-  mr = getreg32(STM32WL5_IPCC_C1MR);
-  sr = getreg32(STM32WL5_IPCC_C2TOC1SR);
+  mr = getreg32(STM32_IPCC_C1MR);
+  sr = getreg32(STM32_IPCC_C2TOC1SR);
 
   /* Consider only channels that have data in rx memory and are unmasked */
 
@@ -446,7 +446,7 @@ static int stm32wl5_ipcc_rx_isr(int irq, void *context, void *arg)
        * we have to mask rxirq so we don't get that irq again.
        */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, 0, STM32WL5_IPCC_MR_CHNOM(chan));
+      modifyreg32(STM32_IPCC_C1MR, 0, STM32_IPCC_MR_CHNOM(chan));
 #endif
     }
 
@@ -485,7 +485,7 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
   struct stm32wl5_ipcc_s *priv;
   struct stm32wl5_ipcc_chan_mem_s *rxmem;
 
-  sr = getreg32(STM32WL5_IPCC_C2TOC1SR);
+  sr = getreg32(STM32_IPCC_C2TOC1SR);
 
   if (!(sr & (1 << ipcc->chan)))
     {
@@ -502,7 +502,7 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
 
   /* Disable RX interrupt since we will modify shared data */
 
-  up_disable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
+  up_disable_irq(STM32_IRQ_IPCC_C1_RX_IT);
 
   /* This function may be called multiple times to get only part
    * of data from IPCC memory, ie. There are 8 bytes of data in
@@ -525,17 +525,17 @@ static ssize_t stm32wl5_ipcc_read(struct ipcc_lower_s *ipcc,
 
       /* Tell another CPU that IPCC rx buffer is free to be populated */
 
-      modifyreg32(STM32WL5_IPCC_C1SCR, 0,
-                  STM32WL5_IPCC_SCR_CHNC(ipcc->chan));
+      modifyreg32(STM32_IPCC_C1SCR, 0,
+                  STM32_IPCC_SCR_CHNC(ipcc->chan));
 
       /* Unmask RX interrupt to know when second CPU sends us a message */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNOM(ipcc->chan), 0);
+      modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNOM(ipcc->chan), 0);
     }
 
   /* Re-enable interrupt */
 
-  up_enable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
+  up_enable_irq(STM32_IRQ_IPCC_C1_RX_IT);
 
   return to_copy;
 }
@@ -569,7 +569,7 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
   struct stm32wl5_ipcc_chan_mem_s *rxmem;
   uint32_t sr;
 
-  sr = getreg32(STM32WL5_IPCC_C2TOC1SR);
+  sr = getreg32(STM32_IPCC_C2TOC1SR);
 
   if (!(sr & (1 << chan)))
     {
@@ -609,7 +609,7 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
        * this one.
        */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, 0, STM32WL5_IPCC_MR_CHNOM(chan));
+      modifyreg32(STM32_IPCC_C1MR, 0, STM32_IPCC_MR_CHNOM(chan));
     }
 
   /* Buffer data. This function cannot really fail us if we
@@ -629,11 +629,11 @@ static ssize_t stm32wl5_ipcc_copy_to_buffer(int chan,
 
       /* Tell another CPU that IPCC rx buffer is free to be populated */
 
-      modifyreg32(STM32WL5_IPCC_C1SCR, 0, STM32WL5_IPCC_SCR_CHNC(chan));
+      modifyreg32(STM32_IPCC_C1SCR, 0, STM32_IPCC_SCR_CHNC(chan));
 
       /* Unmask RX interrupt to know when second CPU sends us a message */
 
-      modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNOM(chan), 0);
+      modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNOM(chan), 0);
     }
 
   return to_copy;
@@ -665,7 +665,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 
   /* Disable RX interrupt since we will modify shared data */
 
-  up_disable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
+  up_disable_irq(STM32_IRQ_IPCC_C1_RX_IT);
 
   /* Copy data to buffer */
 
@@ -673,7 +673,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 
   /* Re-enable interrupt */
 
-  up_enable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
+  up_enable_irq(STM32_IRQ_IPCC_C1_RX_IT);
 
   /* Return number of bytes that were successfully buffered */
 
@@ -701,7 +701,7 @@ static ssize_t stm32wl5_ipcc_buffer_data(struct ipcc_lower_s *ipcc,
 #ifdef CONFIG_IPCC_BUFFERED
 static ssize_t stm32wl5_ipcc_write_notify(struct ipcc_lower_s *ipcc)
 {
-  modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNFM(ipcc->chan), 0);
+  modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNFM(ipcc->chan), 0);
   return 0;
 }
 #endif
@@ -728,8 +728,8 @@ static int stm32wl5_ipcc_cleanup(struct ipcc_lower_s *ipcc)
 
   /* Mask interrupts for given channel */
 
-  modifyreg32(STM32WL5_IPCC_C1MR, 1, STM32WL5_IPCC_MR_CHNFM(ipcc->chan));
-  modifyreg32(STM32WL5_IPCC_C1MR, 1, STM32WL5_IPCC_MR_CHNOM(ipcc->chan));
+  modifyreg32(STM32_IPCC_C1MR, 1, STM32_IPCC_MR_CHNFM(ipcc->chan));
+  modifyreg32(STM32_IPCC_C1MR, 1, STM32_IPCC_MR_CHNOM(ipcc->chan));
 
   /* Free allocated ipcc memory */
 
@@ -798,8 +798,8 @@ struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
 
   /* Unmask channel interrupt */
 
-  modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNFM(chan), 0);
-  modifyreg32(STM32WL5_IPCC_C1MR, STM32WL5_IPCC_MR_CHNOM(chan), 0);
+  modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNFM(chan), 0);
+  modifyreg32(STM32_IPCC_C1MR, STM32_IPCC_MR_CHNOM(chan), 0);
 
   if (ipcc_fti)
     {
@@ -810,14 +810,14 @@ struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
    * interrupt functions
    */
 
-  ret = irq_attach(STM32WL5_IRQ_IPCC_C1_RX_IT, stm32wl5_ipcc_rx_isr, NULL);
+  ret = irq_attach(STM32_IRQ_IPCC_C1_RX_IT, stm32wl5_ipcc_rx_isr, NULL);
   if (ret)
     {
       kmm_free(ipcc);
       return NULL;
     }
 
-  ret = irq_attach(STM32WL5_IRQ_IPCC_C1_TX_IT, stm32wl5_ipcc_tx_isr, NULL);
+  ret = irq_attach(STM32_IRQ_IPCC_C1_TX_IT, stm32wl5_ipcc_tx_isr, NULL);
   if (ret)
     {
       kmm_free(ipcc);
@@ -829,11 +829,11 @@ struct ipcc_lower_s *stm32wl5_ipcc_init(int chan)
    * - CPU2 has read message from us and TX memory is free to be used again
    */
 
-  putreg32(STM32WL5_IPCC_CR_RXOIE | STM32WL5_IPCC_CR_TXFIE,
-           STM32WL5_IPCC_C1CR);
+  putreg32(STM32_IPCC_CR_RXOIE | STM32_IPCC_CR_TXFIE,
+           STM32_IPCC_C1CR);
 
-  up_enable_irq(STM32WL5_IRQ_IPCC_C1_RX_IT);
-  up_enable_irq(STM32WL5_IRQ_IPCC_C1_TX_IT);
+  up_enable_irq(STM32_IRQ_IPCC_C1_RX_IT);
+  up_enable_irq(STM32_IRQ_IPCC_C1_TX_IT);
 
   ipcc_fti = 1;
 

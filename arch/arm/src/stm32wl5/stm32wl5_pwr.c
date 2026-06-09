@@ -42,18 +42,18 @@
 
 static inline uint16_t stm32wl5_pwr_getreg(uint8_t offset)
 {
-  return (uint16_t)getreg32(STM32WL5_PWR_BASE + (uint32_t)offset);
+  return (uint16_t)getreg32(STM32_PWR_BASE + (uint32_t)offset);
 }
 
 static inline void stm32wl5_pwr_putreg(uint8_t offset, uint16_t value)
 {
-  putreg32((uint32_t)value, STM32WL5_PWR_BASE + (uint32_t)offset);
+  putreg32((uint32_t)value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
 static inline void stm32wl5_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
                                          uint16_t setbits)
 {
-  modifyreg32(STM32WL5_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits,
+  modifyreg32(STM32_PWR_BASE + (uint32_t)offset, (uint32_t)clearbits,
               (uint32_t)setbits);
 }
 
@@ -83,7 +83,7 @@ bool stm32wl5_pwr_enablebkp(bool writable)
 
   /* Get the current state of the STM32WL5 PWR control register 1 */
 
-  regval      = stm32wl5_pwr_getreg(STM32WL5_PWR_CR1_OFFSET);
+  regval      = stm32wl5_pwr_getreg(STM32_PWR_CR1_OFFSET);
   waswritable = ((regval & PWR_CR1_DBP) != 0);
 
   /* Enable or disable the ability to write */
@@ -93,14 +93,14 @@ bool stm32wl5_pwr_enablebkp(bool writable)
       /* Disable backup domain access */
 
       regval &= ~PWR_CR1_DBP;
-      stm32wl5_pwr_putreg(STM32WL5_PWR_CR1_OFFSET, regval);
+      stm32wl5_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
     }
   else if (!waswritable && writable)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR1_DBP;
-      stm32wl5_pwr_putreg(STM32WL5_PWR_CR1_OFFSET, regval);
+      stm32wl5_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
       /* Enable does not happen right away */
 
@@ -121,5 +121,5 @@ bool stm32wl5_pwr_enablebkp(bool writable)
 
 void stm32wl5_pwr_boot_c2(void)
 {
-  modifyreg32(STM32WL5_PWR_CR4, 0, PWR_CR4_C2BOOT);
+  modifyreg32(STM32_PWR_CR4, 0, PWR_CR4_C2BOOT);
 }
