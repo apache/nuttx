@@ -55,7 +55,7 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
  * 8-11).  Note that there is no GPIOI-M on this chip.
  */
 
-const uint32_t g_gpiobase[STM32N6_NPORTS] =
+const uint32_t g_gpiobase[STM32_NPORTS] =
 {
   STM32_GPIOA_BASE,     /* Port A - index 0 */
   STM32_GPIOB_BASE,     /* Port B - index 1 */
@@ -110,7 +110,7 @@ int stm32_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32N6_NPORTS)
+  if (port >= STM32_NPORTS)
     {
       return -EINVAL;
     }
@@ -318,7 +318,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32N6_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
@@ -358,7 +358,7 @@ bool stm32_gpioread(uint32_t pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32N6_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
