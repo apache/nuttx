@@ -1215,6 +1215,14 @@ static FAR netpkt_t *kvaser_sock_recv(FAR struct netdev_lowerhalf_s *dev)
   st = kvaser_getreg_sja(priv, SJA1000_STATUS_REG);
   if ((st & SJA1000_RX_BUF_ST) == 0)
     {
+      /* RX FIFO drained. Clear any data overrun, otherwise the SJA1000
+       * drops every further received frame until it is cleared. Also
+       * re-enable the RX interrupt that the ISR masked.
+       */
+
+      kvaser_putreg_sja(priv, SJA1000_CMD_REG, SJA1000_CLR_OVERRUN);
+      kvaser_rxint(priv, true);
+
 #ifdef CONFIG_NET_CAN_ERRORS
       /* Check for errors */
 
@@ -1426,10 +1434,16 @@ static void kvaser_sock_interrupt(FAR struct kvaser_driver_s *priv)
               continue;
             }
 
-          /* RX ready */
+          /* RX ready. The SJA1000 RX interrupt is level triggered (it stays
+           * asserted while the RX FIFO is non-empty), and we process RX in a
+           * deferred poll, so leaving it enabled here makes the ISR re-fire
+           * continuously and starve the poll thread until the FIFO overruns.
+           * Mask it; kvaser_sock_recv() re-enables it once the FIFO drains.
+           */
 
           if (st & KVASER_SOCK_RXINT)
             {
+              kvaser_rxint(&priv->sja[i], false);
               netdev_lower_rxready(&priv->sja[i].dev);
             }
 
