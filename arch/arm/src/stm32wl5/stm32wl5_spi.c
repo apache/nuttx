@@ -316,10 +316,10 @@ static struct stm32wl5_spidev_s g_spi1dev =
   {
     .ops    = &g_sp1iops,
   },
-  .spibase  = STM32WL5_SPI1_BASE,
-  .spiclock = STM32WL5_PCLK2_FREQUENCY,
+  .spibase  = STM32_SPI1_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
 #ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
-  .spiirq   = STM32WL5_IRQ_SPI1,
+  .spiirq   = STM32_IRQ_SPI1,
 #endif
 #ifdef CONFIG_STM32WL5_SPI_DMA
 #  ifdef CONFIG_STM32WL5_SPI1_DMA
@@ -386,10 +386,10 @@ static struct stm32wl5_spidev_s g_spi2s2dev =
     {
       &g_sp2iops
     },
-  .spibase  = STM32WL5_SPI2S2_BASE,
-  .spiclock = STM32WL5_PCLK1_FREQUENCY,
+  .spibase  = STM32_SPI2S2_BASE,
+  .spiclock = STM32_PCLK1_FREQUENCY,
 #ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
-  .spiirq   = STM32WL5_IRQ_SPI2S2,
+  .spiirq   = STM32_IRQ_SPI2S2,
 #endif
 #ifdef CONFIG_STM32WL5_SPI_DMA
 #  ifdef CONFIG_STM32WL5_SPI2S2_DMA
@@ -518,7 +518,7 @@ static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32WL5_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
     {
     }
 
@@ -539,11 +539,11 @@ static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv)
 
   if (priv->nbits < 9)
     {
-      return (uint16_t)spi_getreg8(priv, STM32WL5_SPI_DR_OFFSET);
+      return (uint16_t)spi_getreg8(priv, STM32_SPI_DR_OFFSET);
     }
   else
     {
-      return spi_getreg(priv, STM32WL5_SPI_DR_OFFSET);
+      return spi_getreg(priv, STM32_SPI_DR_OFFSET);
     }
 }
 
@@ -568,7 +568,7 @@ static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32WL5_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
     {
     }
 
@@ -576,11 +576,11 @@ static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
 
   if (priv->nbits < 9)
     {
-      spi_putreg8(priv, STM32WL5_SPI_DR_OFFSET, (uint8_t)word);
+      spi_putreg8(priv, STM32_SPI_DR_OFFSET, (uint8_t)word);
     }
   else
     {
-      spi_putreg(priv, STM32WL5_SPI_DR_OFFSET, word);
+      spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
     }
 }
 
@@ -766,7 +766,7 @@ static void spi_dmarxsetup(struct stm32wl5_spidev_s *priv,
 
   /* Configure the RX DMA */
 
-  stm32wl5_dmasetup(priv->rxdma, priv->spibase + STM32WL5_SPI_DR_OFFSET,
+  stm32wl5_dmasetup(priv->rxdma, priv->spibase + STM32_SPI_DR_OFFSET,
                     (uint32_t)rxbuffer, nwords, priv->rxccr);
 }
 #endif
@@ -817,7 +817,7 @@ static void spi_dmatxsetup(struct stm32wl5_spidev_s *priv,
 
   /* Setup the TX DMA */
 
-  stm32wl5_dmasetup(priv->txdma, priv->spibase + STM32WL5_SPI_DR_OFFSET,
+  stm32wl5_dmasetup(priv->txdma, priv->spibase + STM32_SPI_DR_OFFSET,
                     (uint32_t)txbuffer, nwords, priv->txccr);
 }
 #endif
@@ -875,12 +875,12 @@ static void spi_modifycr1(struct stm32wl5_spidev_s *priv,
                           uint16_t clrbits)
 {
   uint16_t cr1;
-  cr1 = spi_getreg(priv, STM32WL5_SPI_CR1_OFFSET);
+  cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
-  spi_putreg(priv, STM32WL5_SPI_CR1_OFFSET, cr1);
+  spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
 
-  spiinfo("CR1 (0x%lx) = 0x%04x\n", priv->spibase + STM32WL5_SPI_CR1_OFFSET,
+  spiinfo("CR1 (0x%lx) = 0x%04x\n", priv->spibase + STM32_SPI_CR1_OFFSET,
           cr1);
 }
 
@@ -904,11 +904,11 @@ static void spi_modifycr2(struct stm32wl5_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
-  cr2  = spi_getreg(priv, STM32WL5_SPI_CR2_OFFSET);
+  cr2  = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
-  spi_putreg(priv, STM32WL5_SPI_CR2_OFFSET, cr2);
-  spiinfo("CR2 (0x%lx) = 0x%04x\n", priv->spibase + STM32WL5_SPI_CR2_OFFSET,
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
+  spiinfo("CR2 (0x%lx) = 0x%04x\n", priv->spibase + STM32_SPI_CR2_OFFSET,
           cr2);
 }
 
@@ -1314,7 +1314,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
    * (Reading from the SR clears the error flags)
    */
 
-  regval = spi_getreg(priv, STM32WL5_SPI_SR_OFFSET);
+  regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
   spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
           " Status: %02" PRIx32 "\n", wd, ret, regval);
@@ -1731,7 +1731,7 @@ static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
 
   /* CRCPOLY configuration */
 
-  spi_putreg(priv, STM32WL5_SPI_CRCPR_OFFSET, 7);
+  spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
 #ifdef CONFIG_STM32WL5_SPI_DMA
   if (priv->rxch && priv->txch)
