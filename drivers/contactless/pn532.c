@@ -789,7 +789,7 @@ bool pn532_set_rf_config(struct pn532_dev_s * dev,
                          struct pn_rf_config_s * conf)
 {
   /* cmd_buffer is sizeof(pn532_frame) + up to 16 bytes data */
-  
+
   bool res = false;
   uint8_t cmd_buffer[6 + 16];
   FAR struct pn532_frame *f = (FAR struct pn532_frame *) cmd_buffer;
@@ -798,7 +798,7 @@ bool pn532_set_rf_config(struct pn532_dev_s * dev,
   f->data[1] = conf->cfg_item;
 
   /* only copy 16 bytes minus 1 byte for each: cmd and cfg_item */
-  
+
   DEBUGASSERT(conf->data_size <= 16 - 2);
   memcpy(&f->data[2], conf->config, conf->data_size);
   f->len += conf->data_size + 1;
