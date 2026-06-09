@@ -31,7 +31,6 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/sched.h>
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
@@ -81,11 +80,13 @@ static int exec_internal(FAR const char *filename,
                          FAR const posix_spawnattr_t *attr, bool spawn)
 {
   FAR struct binary_s *bin;
-  int pid;
-  int ret;
 #ifndef CONFIG_BINFMT_LOADABLE
   struct binary_s sbin;
+#endif
+  int pid;
+  int ret;
 
+#ifndef CONFIG_BINFMT_LOADABLE
   bin = &sbin;
   memset(bin, 0, sizeof(*bin));
 #else
