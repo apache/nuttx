@@ -622,6 +622,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
           size = MIN(size - len, strlen(entry->d_name) + 1);
           msg->type = entry->d_type;
           strlcpy(msg->name, entry->d_name, size);
+          msg->ino = entry->d_ino;
           len += size;
           ret = 0;
         }

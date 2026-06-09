@@ -376,6 +376,8 @@ static int read_pseudodir(FAR struct fs_dirent_s *dir,
       entry->d_type = DTYPE_DIRECTORY;
     }
 
+  entry->d_ino = pdir->next->i_ino;
+
   /* Now get the inode to visit next time that readdir() is called */
 
   inode_lock();
