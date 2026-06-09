@@ -37,34 +37,34 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_USART_CR1_OFFSET       0x0000 /* Control Register 1 */
-#define STM32WB_USART_CR2_OFFSET       0x0004 /* Control Register 2 */
-#define STM32WB_USART_CR3_OFFSET       0x0008 /* Control Register 3 */
-#define STM32WB_USART_BRR_OFFSET       0x000c /* Baud Rate Register */
-#define STM32WB_USART_GTPR_OFFSET      0x0010 /* Guard Time and Prescaler Register */
-#define STM32WB_USART_RTOR_OFFSET      0x0014 /* Receiver Timeout Register */
-#define STM32WB_USART_RQR_OFFSET       0x0018 /* Request Register */
-#define STM32WB_USART_ISR_OFFSET       0x001c /* Interrupt and Status Register */
-#define STM32WB_USART_ICR_OFFSET       0x0020 /* Interrupt flag Clear Register */
-#define STM32WB_USART_RDR_OFFSET       0x0024 /* Receive Data Register */
-#define STM32WB_USART_TDR_OFFSET       0x0028 /* Transmit Data Register */
-#define STM32WB_USART_PRESC_OFFSET     0x002c /* Prescaler Register */
+#define STM32_USART_CR1_OFFSET       0x0000 /* Control Register 1 */
+#define STM32_USART_CR2_OFFSET       0x0004 /* Control Register 2 */
+#define STM32_USART_CR3_OFFSET       0x0008 /* Control Register 3 */
+#define STM32_USART_BRR_OFFSET       0x000c /* Baud Rate Register */
+#define STM32_USART_GTPR_OFFSET      0x0010 /* Guard Time and Prescaler Register */
+#define STM32_USART_RTOR_OFFSET      0x0014 /* Receiver Timeout Register */
+#define STM32_USART_RQR_OFFSET       0x0018 /* Request Register */
+#define STM32_USART_ISR_OFFSET       0x001c /* Interrupt and Status Register */
+#define STM32_USART_ICR_OFFSET       0x0020 /* Interrupt flag Clear Register */
+#define STM32_USART_RDR_OFFSET       0x0024 /* Receive Data Register */
+#define STM32_USART_TDR_OFFSET       0x0028 /* Transmit Data Register */
+#define STM32_USART_PRESC_OFFSET     0x002c /* Prescaler Register */
 
 /* Register Addresses *******************************************************/
 
-#if STM32WB_NUSART > 0
-#  define STM32WB_USART1_CR1           (STM32WB_USART1_BASE + STM32WB_USART_CR1_OFFSET)
-#  define STM32WB_USART1_CR2           (STM32WB_USART1_BASE + STM32WB_USART_CR2_OFFSET)
-#  define STM32WB_USART1_CR3           (STM32WB_USART1_BASE + STM32WB_USART_CR3_OFFSET)
-#  define STM32WB_USART1_BRR           (STM32WB_USART1_BASE + STM32WB_USART_BRR_OFFSET)
-#  define STM32WB_USART1_GTPR          (STM32WB_USART1_BASE + STM32WB_USART_GTPR_OFFSET)
-#  define STM32WB_USART1_RTOR          (STM32WB_USART1_BASE + STM32WB_USART_RTOR_OFFSET)
-#  define STM32WB_USART1_RQR           (STM32WB_USART1_BASE + STM32WB_USART_RQR_OFFSET)
-#  define STM32WB_USART1_ISR           (STM32WB_USART1_BASE + STM32WB_USART_ISR_OFFSET)
-#  define STM32WB_USART1_ICR           (STM32WB_USART1_BASE + STM32WB_USART_ICR_OFFSET)
-#  define STM32WB_USART1_RDR           (STM32WB_USART1_BASE + STM32WB_USART_RDR_OFFSET)
-#  define STM32WB_USART1_TDR           (STM32WB_USART1_BASE + STM32WB_USART_TDR_OFFSET)
-#  define STM32WB_USART1_PRESC         (STM32WB_USART1_BASE + STM32WB_USART_PRESC_OFFSET)
+#if STM32_NUSART > 0
+#  define STM32_USART1_CR1           (STM32_USART1_BASE + STM32_USART_CR1_OFFSET)
+#  define STM32_USART1_CR2           (STM32_USART1_BASE + STM32_USART_CR2_OFFSET)
+#  define STM32_USART1_CR3           (STM32_USART1_BASE + STM32_USART_CR3_OFFSET)
+#  define STM32_USART1_BRR           (STM32_USART1_BASE + STM32_USART_BRR_OFFSET)
+#  define STM32_USART1_GTPR          (STM32_USART1_BASE + STM32_USART_GTPR_OFFSET)
+#  define STM32_USART1_RTOR          (STM32_USART1_BASE + STM32_USART_RTOR_OFFSET)
+#  define STM32_USART1_RQR           (STM32_USART1_BASE + STM32_USART_RQR_OFFSET)
+#  define STM32_USART1_ISR           (STM32_USART1_BASE + STM32_USART_ISR_OFFSET)
+#  define STM32_USART1_ICR           (STM32_USART1_BASE + STM32_USART_ICR_OFFSET)
+#  define STM32_USART1_RDR           (STM32_USART1_BASE + STM32_USART_RDR_OFFSET)
+#  define STM32_USART1_TDR           (STM32_USART1_BASE + STM32_USART_TDR_OFFSET)
+#  define STM32_USART1_PRESC         (STM32_USART1_BASE + STM32_USART_PRESC_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ********************************************/

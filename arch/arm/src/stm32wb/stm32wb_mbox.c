@@ -44,12 +44,12 @@
  * the beginning of SRAM2a.
  */
 
-#define STM32WB_MBOX_SHARED_BASE      STM32WB_SRAM2A_BASE
+#define STM32_MBOX_SHARED_BASE      STM32_SRAM2A_BASE
 
 /* Mailbox shared buffer fields */
 
 #define stm32wb_mbox_shared \
-  (*(struct stm32wb_mbox_shared_buffer_s *)STM32WB_MBOX_SHARED_BASE)
+  (*(struct stm32wb_mbox_shared_buffer_s *)STM32_MBOX_SHARED_BASE)
 
 #define stm32wb_mbox_ref_table        (stm32wb_mbox_shared.ref_table)
 #define stm32wb_mbox_di_table         (stm32wb_mbox_shared.dev_info_table)
@@ -59,12 +59,12 @@
 
 /* Mailbox buffer sizes */
 
-#define STM32WB_MBOX_CS_BUF_SIZE      16
-#define STM32WB_MBOX_CMDPKT_BUF_SIZE  268
-#define STM32WB_MBOX_ACLPKT_BUF_SIZE  264
+#define STM32_MBOX_CS_BUF_SIZE      16
+#define STM32_MBOX_CMDPKT_BUF_SIZE  268
+#define STM32_MBOX_ACLPKT_BUF_SIZE  264
 
-#define STM32WB_MBOX_RX_BUF_SIZE \
-  (CONFIG_STM32WB_MBOX_RX_EVT_QUEUE_LEN * STM32WB_MBOX_CMDPKT_BUF_SIZE)
+#define STM32_MBOX_RX_BUF_SIZE \
+  (CONFIG_STM32WB_MBOX_RX_EVT_QUEUE_LEN * STM32_MBOX_CMDPKT_BUF_SIZE)
 
 /****************************************************************************
  * Private Types
@@ -156,15 +156,15 @@ struct stm32wb_mbox_shared_buffer_s
   aligned_data(4) stm32wb_mbox_list_t  sys_evt_queue;
 
 #ifdef CONFIG_STM32WB_BLE
-  aligned_data(4) uint8_t ble_cs_buffer[STM32WB_MBOX_CS_BUF_SIZE];
+  aligned_data(4) uint8_t ble_cs_buffer[STM32_MBOX_CS_BUF_SIZE];
 #endif
-  aligned_data(4) uint8_t evtpool_buffer[STM32WB_MBOX_RX_BUF_SIZE];
-  aligned_data(4) uint8_t sys_cmd_buffer[STM32WB_MBOX_CMDPKT_BUF_SIZE];
-  aligned_data(4) uint8_t sys_spare_buffer[STM32WB_MBOX_CMDPKT_BUF_SIZE];
+  aligned_data(4) uint8_t evtpool_buffer[STM32_MBOX_RX_BUF_SIZE];
+  aligned_data(4) uint8_t sys_cmd_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
+  aligned_data(4) uint8_t sys_spare_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
 #ifdef CONFIG_STM32WB_BLE
-  aligned_data(4) uint8_t ble_spare_buffer[STM32WB_MBOX_CMDPKT_BUF_SIZE];
-  aligned_data(4) uint8_t ble_cmd_buffer[STM32WB_MBOX_CMDPKT_BUF_SIZE];
-  aligned_data(4) uint8_t ble_acl_buffer[STM32WB_MBOX_ACLPKT_BUF_SIZE];
+  aligned_data(4) uint8_t ble_spare_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
+  aligned_data(4) uint8_t ble_cmd_buffer[STM32_MBOX_CMDPKT_BUF_SIZE];
+  aligned_data(4) uint8_t ble_acl_buffer[STM32_MBOX_ACLPKT_BUF_SIZE];
 #endif
 };
 
@@ -205,7 +205,7 @@ static struct work_s g_tx_cmd_work;
 static stm32wb_mbox_list_t g_rx_evt_queue;
 static stm32wb_mbox_list_t g_tx_evtfree_queue;
 static uint8_t g_free_buffers[CONFIG_STM32WB_MBOX_TX_CMD_QUEUE_LEN]
-                             [STM32WB_MBOX_CMDPKT_BUF_SIZE];
+                             [STM32_MBOX_CMDPKT_BUF_SIZE];
 static stm32wb_mbox_list_t g_free_buffers_pool;
 
 static struct stm32wb_mbox_channel_s g_syscmd_channel;
@@ -235,24 +235,24 @@ static void stm32wb_ipcc_rxoisr(int irq, uint32_t *regs, void *arg)
 
   /* Pull events from system channel into processing queue */
 
-  if (stm32wb_ipcc_rxactive(STM32WB_MBOX_SYSEVT_CHANNEL))
+  if (stm32wb_ipcc_rxactive(STM32_MBOX_SYSEVT_CHANNEL))
     {
       stm32wb_mbox_list_moveall(&stm32wb_mbox_shared.sys_evt_queue,
                                 &g_rx_evt_queue);
 
-      clrmask |= IPCC_C1SCR_CLR_BIT(STM32WB_MBOX_SYSEVT_CHANNEL);
+      clrmask |= IPCC_C1SCR_CLR_BIT(STM32_MBOX_SYSEVT_CHANNEL);
     }
 
 #ifdef CONFIG_STM32WB_BLE
 
   /* Pull events from BLE channel into processing queue */
 
-  if (stm32wb_ipcc_rxactive(STM32WB_MBOX_BLEEVT_CHANNEL))
+  if (stm32wb_ipcc_rxactive(STM32_MBOX_BLEEVT_CHANNEL))
     {
       stm32wb_mbox_list_moveall(&stm32wb_mbox_shared.ble_evt_queue,
                                 &g_rx_evt_queue);
 
-      clrmask |= IPCC_C1SCR_CLR_BIT(STM32WB_MBOX_BLEEVT_CHANNEL);
+      clrmask |= IPCC_C1SCR_CLR_BIT(STM32_MBOX_BLEEVT_CHANNEL);
     }
 #endif
 
@@ -265,7 +265,7 @@ static void stm32wb_ipcc_rxoisr(int irq, uint32_t *regs, void *arg)
 
   /* Clear active statuses */
 
-  putreg32(clrmask, STM32WB_IPCC_C1SCR);
+  putreg32(clrmask, STM32_IPCC_C1SCR);
 }
 
 /****************************************************************************
@@ -279,7 +279,7 @@ static void stm32wb_ipcc_rxoisr(int irq, uint32_t *regs, void *arg)
 
 static void stm32wb_ipcc_txfisr(int irq, uint32_t *regs, void *arg)
 {
-  uint32_t c1mr = getreg32(STM32WB_IPCC_C1MR);
+  uint32_t c1mr = getreg32(STM32_IPCC_C1MR);
   uint32_t txfsrc;
 
   /* TXF interrupt can be triggered by not masked channels and active status
@@ -287,12 +287,12 @@ static void stm32wb_ipcc_txfisr(int irq, uint32_t *regs, void *arg)
    * channels and rise other C1MR bits to highlight needed channels.
    */
 
-  txfsrc = ~(c1mr | (getreg32(STM32WB_IPCC_C1TOC2SR) << IPCC_C1MR_FM_SHIFT))
+  txfsrc = ~(c1mr | (getreg32(STM32_IPCC_C1TOC2SR) << IPCC_C1MR_FM_SHIFT))
            & IPCC_C1MR_FM_MASK;
 
   /* Check if the release channel triggered the interrupt */
 
-  if (txfsrc & IPCC_C1MR_FM_BIT(STM32WB_MBOX_EVT_RELEASE_CHANNEL))
+  if (txfsrc & IPCC_C1MR_FM_BIT(STM32_MBOX_EVT_RELEASE_CHANNEL))
     {
       /* Move all released events (if any) into transmission mailbox */
 
@@ -303,17 +303,17 @@ static void stm32wb_ipcc_txfisr(int irq, uint32_t *regs, void *arg)
 
           /* Start release channel transmission */
 
-          stm32wb_ipcc_settxactive(STM32WB_MBOX_EVT_RELEASE_CHANNEL);
+          stm32wb_ipcc_settxactive(STM32_MBOX_EVT_RELEASE_CHANNEL);
         }
     }
 
   /* Check other channels, except the release channel */
 
-  if (txfsrc & ~IPCC_C1MR_FM_BIT(STM32WB_MBOX_EVT_RELEASE_CHANNEL))
+  if (txfsrc & ~IPCC_C1MR_FM_BIT(STM32_MBOX_EVT_RELEASE_CHANNEL))
     {
       /* Check if the system channel triggered the interrupt */
 
-      if (txfsrc & IPCC_C1MR_FM_BIT(STM32WB_MBOX_SYSCMD_CHANNEL))
+      if (txfsrc & IPCC_C1MR_FM_BIT(STM32_MBOX_SYSCMD_CHANNEL))
         {
           /* System channel works in 'half-duplex' mode and acks
            * immediately on each command before TXF, so it needs
@@ -333,7 +333,7 @@ static void stm32wb_ipcc_txfisr(int irq, uint32_t *regs, void *arg)
 
   /* Mask triggered channels */
 
-  putreg32(c1mr | txfsrc, STM32WB_IPCC_C1MR);
+  putreg32(c1mr | txfsrc, STM32_IPCC_C1MR);
 }
 
 /****************************************************************************
@@ -350,7 +350,7 @@ static void stm32wb_mbox_txworker(void *arg)
     {
       handled = false;
 
-      if (!stm32wb_ipcc_txactive(STM32WB_MBOX_SYSCMD_CHANNEL))
+      if (!stm32wb_ipcc_txactive(STM32_MBOX_SYSCMD_CHANNEL))
         {
           /* Process ack response before send new command */
 
@@ -364,12 +364,12 @@ static void stm32wb_mbox_txworker(void *arg)
         }
 
 #ifdef CONFIG_STM32WB_BLE
-      if (!stm32wb_ipcc_txactive(STM32WB_MBOX_BLECMD_CHANNEL))
+      if (!stm32wb_ipcc_txactive(STM32_MBOX_BLECMD_CHANNEL))
         {
           handled |= stm32wb_mbox_txnext(&g_blecmd_channel);
         }
 
-      if (!stm32wb_ipcc_txactive(STM32WB_MBOX_BLEACL_CHANNEL))
+      if (!stm32wb_ipcc_txactive(STM32_MBOX_BLEACL_CHANNEL))
         {
           handled |= stm32wb_mbox_txnext(&g_bleacl_channel);
         }
@@ -467,7 +467,7 @@ static int stm32wb_mbox_txdata(struct stm32wb_mbox_channel_s *chan,
       stm32wb_ipcc_settxactive(chan->ch_num);
 
       if (!stm32wb_mbox_list_is_empty(&chan->cmd_buf_queue) ||
-          chan->ch_num == STM32WB_MBOX_SYSCMD_CHANNEL)
+          chan->ch_num == STM32_MBOX_SYSCMD_CHANNEL)
         {
           /* There are more commands awaiting, so unmask interrupt to get
            * notified when channel gets ready to process a next one.
@@ -512,7 +512,7 @@ static bool stm32wb_mbox_txnext(struct stm32wb_mbox_channel_s *chan)
     {
       chan->cmd_buf->type = pkt_buf->type;
 
-      if (chan->ch_num == STM32WB_MBOX_BLEACL_CHANNEL)
+      if (chan->ch_num == STM32_MBOX_BLEACL_CHANNEL)
         {
           memcpy(&chan->cmd_buf->acl_hdr, &pkt_buf->acl_hdr,
                  sizeof(pkt_buf->acl_hdr) + pkt_buf->acl_hdr.len);
@@ -562,7 +562,7 @@ static void stm32wb_mbox_eventfree(stm32wb_mbox_list_t *evt)
 
   /* Check if release channel is ready to process now */
 
-  if (!stm32wb_ipcc_txactive(STM32WB_MBOX_EVT_RELEASE_CHANNEL))
+  if (!stm32wb_ipcc_txactive(STM32_MBOX_EVT_RELEASE_CHANNEL))
     {
       /* Move all collected events into transmission queue */
 
@@ -571,13 +571,13 @@ static void stm32wb_mbox_eventfree(stm32wb_mbox_list_t *evt)
 
       /* Start transmission */
 
-      stm32wb_ipcc_settxactive(STM32WB_MBOX_EVT_RELEASE_CHANNEL);
+      stm32wb_ipcc_settxactive(STM32_MBOX_EVT_RELEASE_CHANNEL);
     }
   else
     {
       /* Unmask interrupt to get notified when channel gets free */
 
-      stm32wb_ipcc_unmasktxf(STM32WB_MBOX_EVT_RELEASE_CHANNEL);
+      stm32wb_ipcc_unmasktxf(STM32_MBOX_EVT_RELEASE_CHANNEL);
     }
 
   leave_critical_section(flags);
@@ -600,7 +600,7 @@ static void stm32wb_mbox_acksyscmd(void)
    */
 
   evt = (struct stm32wb_mbox_evt_s *)(&g_syscmd_channel.cmd_buf);
-  evt->type = STM32WB_MBOX_SYSACK;
+  evt->type = STM32_MBOX_SYSACK;
 
   receive_evt_handler(evt);
 }
@@ -662,7 +662,7 @@ void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler)
 
   /* Init system channel data */
 
-  g_syscmd_channel.ch_num =  STM32WB_MBOX_SYSCMD_CHANNEL;
+  g_syscmd_channel.ch_num =  STM32_MBOX_SYSCMD_CHANNEL;
   g_syscmd_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                               stm32wb_mbox_shared.sys_cmd_buffer;
   stm32wb_mbox_list_initialize(&g_syscmd_channel.cmd_buf_queue);
@@ -670,14 +670,14 @@ void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler)
 #ifdef CONFIG_STM32WB_BLE
   /* Init BLE command channel data */
 
-  g_blecmd_channel.ch_num =  STM32WB_MBOX_BLECMD_CHANNEL;
+  g_blecmd_channel.ch_num =  STM32_MBOX_BLECMD_CHANNEL;
   g_blecmd_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                              stm32wb_mbox_shared.ble_cmd_buffer;
   stm32wb_mbox_list_initialize(&g_blecmd_channel.cmd_buf_queue);
 
   /* Init BLE ACL channel data */
 
-  g_bleacl_channel.ch_num =  STM32WB_MBOX_BLEACL_CHANNEL;
+  g_bleacl_channel.ch_num =  STM32_MBOX_BLEACL_CHANNEL;
   g_bleacl_channel.cmd_buf = (struct stm32wb_mbox_cmd_s *)
                              stm32wb_mbox_shared.ble_acl_buffer;
   stm32wb_mbox_list_initialize(&g_bleacl_channel.cmd_buf_queue);
@@ -715,21 +715,21 @@ void stm32wb_mboxenable(void)
 
   /* Setup RXO and TXF interrupts */
 
-  irq_attach(STM32WB_IRQ_IPCCRX, (xcpt_t)stm32wb_ipcc_rxoisr, NULL);
-  up_enable_irq(STM32WB_IRQ_IPCCRX);
+  irq_attach(STM32_IRQ_IPCCRX, (xcpt_t)stm32wb_ipcc_rxoisr, NULL);
+  up_enable_irq(STM32_IRQ_IPCCRX);
 
-  irq_attach(STM32WB_IRQ_IPCCTX, (xcpt_t)stm32wb_ipcc_txfisr, NULL);
-  up_enable_irq(STM32WB_IRQ_IPCCTX);
+  irq_attach(STM32_IRQ_IPCCTX, (xcpt_t)stm32wb_ipcc_txfisr, NULL);
+  up_enable_irq(STM32_IRQ_IPCCTX);
 
-  regval = getreg32(STM32WB_IPCC_C1CR);
+  regval = getreg32(STM32_IPCC_C1CR);
   regval |= IPCC_C1CR_RXOIE | IPCC_C1CR_TXFIE;
-  putreg32(regval, STM32WB_IPCC_C1CR);
+  putreg32(regval, STM32_IPCC_C1CR);
 
   /* Unmask system channel RXO interrupt.  Once CPU2 started we expect
    * to receive C2READY event via system channel.
    */
 
-  stm32wb_ipcc_unmaskrxo(STM32WB_MBOX_SYSEVT_CHANNEL);
+  stm32wb_ipcc_unmaskrxo(STM32_MBOX_SYSEVT_CHANNEL);
 
   /* Enable IPCC hardware and boot up CPU2 */
 
@@ -747,7 +747,7 @@ void stm32wb_mboxenable(void)
 
 int stm32wb_mbox_syscmd(void *data, size_t len)
 {
-  return stm32wb_mbox_txdata(&g_syscmd_channel, STM32WB_MBOX_SYSCMD,
+  return stm32wb_mbox_txdata(&g_syscmd_channel, STM32_MBOX_SYSCMD,
                              data, len);
 }
 
@@ -763,7 +763,7 @@ int stm32wb_mbox_syscmd(void *data, size_t len)
 
 int stm32wb_mbox_blecmd(void *data, size_t len)
 {
-  return stm32wb_mbox_txdata(&g_blecmd_channel, STM32WB_MBOX_HCICMD,
+  return stm32wb_mbox_txdata(&g_blecmd_channel, STM32_MBOX_HCICMD,
                              data, len);
 }
 
@@ -778,7 +778,7 @@ int stm32wb_mbox_blecmd(void *data, size_t len)
 
 int stm32wb_mbox_bleacl(void *data, size_t len)
 {
-  return stm32wb_mbox_txdata(&g_bleacl_channel, STM32WB_MBOX_HCIACL,
+  return stm32wb_mbox_txdata(&g_bleacl_channel, STM32_MBOX_HCIACL,
                              data, len);
 }
 
@@ -800,7 +800,7 @@ void stm32wb_mbox_bleinit(struct stm32wb_shci_ble_init_cfg_s *params)
 
   /* Prepare command data */
 
-  cmd->opcode = STM32WB_SHCI_BLE_INIT;
+  cmd->opcode = STM32_SHCI_BLE_INIT;
   cmd->param_len = sizeof(*cmd);
   memcpy(cmd + 1, params, sizeof(*params));
 
@@ -810,6 +810,6 @@ void stm32wb_mbox_bleinit(struct stm32wb_shci_ble_init_cfg_s *params)
 
   /* Unmask BLE event channel RXO interrupt */
 
-  stm32wb_ipcc_unmaskrxo(STM32WB_MBOX_BLEEVT_CHANNEL);
+  stm32wb_ipcc_unmaskrxo(STM32_MBOX_BLEEVT_CHANNEL);
 }
 #endif /* CONFIG_STM32WB_BLE */

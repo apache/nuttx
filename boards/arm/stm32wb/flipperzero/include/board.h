@@ -84,13 +84,13 @@
 
 /* LCD */
 
-#define STM32WB_LCD_SPINO 2 /* SPI2 */
+#define STM32_LCD_SPINO 2 /* SPI2 */
 
-#define STM32WB_LCD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN11)
-#define STM32WB_LCD_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
-#define STM32WB_LCD_A0    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_A0    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
 
 /****************************************************************************

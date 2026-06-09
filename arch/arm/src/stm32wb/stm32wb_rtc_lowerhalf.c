@@ -45,7 +45,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32WB_NALARMS 2
+#define STM32_NALARMS 2
 
 /****************************************************************************
  * Private Types
@@ -81,7 +81,7 @@ struct stm32wb_lowerhalf_s
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
 
-  struct stm32wb_cbinfo_s cbinfo[STM32WB_NALARMS];
+  struct stm32wb_cbinfo_s cbinfo[STM32_NALARMS];
 #endif
 
 #ifdef CONFIG_RTC_PERIODIC

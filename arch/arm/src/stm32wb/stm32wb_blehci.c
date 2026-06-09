@@ -45,61 +45,61 @@
 
 /* HCI event header fields helpers */
 
-#define STM32WB_BLEHCI_CCEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 3))
-#define STM32WB_BLEHCI_CCEVT_STATUS(e)  (*((uint8_t *)(e) + 5))
+#define STM32_BLEHCI_CCEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 3))
+#define STM32_BLEHCI_CCEVT_STATUS(e)  (*((uint8_t *)(e) + 5))
 
-#define STM32WB_BLEHCI_CSEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 4))
-#define STM32WB_BLEHCI_CSEVT_STATUS(e)  (*((uint8_t *)(e) + 2))
+#define STM32_BLEHCI_CSEVT_OPCODE(e)  (*(uint16_t *)((uint8_t *)(e) + 4))
+#define STM32_BLEHCI_CSEVT_STATUS(e)  (*((uint8_t *)(e) + 2))
 
 /* BLE init configuration params */
 
-#define STM32WB_BLE_PREP_WRITE_NUM \
-  STM32WB_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU)
+#define STM32_BLE_PREP_WRITE_NUM \
+  STM32_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU)
 
-#define STM32WB_C2_MEM_BLOCK_NUM \
-  STM32WB_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU, \
+#define STM32_C2_MEM_BLOCK_NUM \
+  STM32_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(CONFIG_STM32WB_BLE_MAX_ATT_MTU, \
                                         CONFIG_STM32WB_BLE_MAX_CONN, \
-                                        STM32WB_BLE_PREP_WRITE_NUM)
+                                        STM32_BLE_PREP_WRITE_NUM)
 
 #ifdef CONFIG_STM32WB_BLE_C2HOST
-#  define STM32WB_BLE_C2HOST              STM32WB_SHCI_BLE_INIT_OPT_STACK_LL_HOST
+#  define STM32_BLE_C2HOST              STM32_SHCI_BLE_INIT_OPT_STACK_LL_HOST
 #else
-#  define STM32WB_BLE_C2HOST              STM32WB_SHCI_BLE_INIT_OPT_STACK_LL
+#  define STM32_BLE_C2HOST              STM32_SHCI_BLE_INIT_OPT_STACK_LL
 #endif
 
 #ifdef CONFIG_STM32WB_BLE_SVC_CHANGED_CHAR
-#  define STM32WB_BLE_SVC_CHANGED_CHAR    STM32WB_SHCI_BLE_INIT_OPT_SVC_CHCHAR_ENABLED
+#  define STM32_BLE_SVC_CHANGED_CHAR    STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_ENABLED
 #else
-#  define STM32WB_BLE_SVC_CHANGED_CHAR    STM32WB_SHCI_BLE_INIT_OPT_SVC_CHCHAR_DISABLED
+#  define STM32_BLE_SVC_CHANGED_CHAR    STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_DISABLED
 #endif
 
 #ifdef CONFIG_STM32WB_BLE_WRITABLE_DEVICE_NAME
-#  define STM32WB_BLE_DEVICE_NAME_MODE    STM32WB_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RW
+#  define STM32_BLE_DEVICE_NAME_MODE    STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RW
 #else
-#  define STM32WB_BLE_DEVICE_NAME_MODE    STM32WB_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RO
+#  define STM32_BLE_DEVICE_NAME_MODE    STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RO
 #endif
 
 #ifdef CONFIG_STM32WB_BLE_CHAN_SEL_ALG2
-#  define STM32WB_BLE_CS_ALG2             STM32WB_SHCI_BLE_INIT_OPT_CS_ALG2_ENABLED
+#  define STM32_BLE_CS_ALG2             STM32_SHCI_BLE_INIT_OPT_CS_ALG2_ENABLED
 #else
-#  define STM32WB_BLE_CS_ALG2             STM32WB_SHCI_BLE_INIT_OPT_CS_ALG2_DISABLED
+#  define STM32_BLE_CS_ALG2             STM32_SHCI_BLE_INIT_OPT_CS_ALG2_DISABLED
 #endif
 
 #ifdef CONFIG_STM32WB_BLE_POWER_CLASS_1
-#  define STM32WB_BLE_POWER_CLASS         STM32WB_SHCI_BLE_INIT_OPT_POWER_CLASS_1
+#  define STM32_BLE_POWER_CLASS         STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_1
 #else
-#  define STM32WB_BLE_POWER_CLASS         STM32WB_SHCI_BLE_INIT_OPT_POWER_CLASS_2_3
+#  define STM32_BLE_POWER_CLASS         STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_2_3
 #endif
 
-#define STM32WB_BLE_INIT_OPTIONS \
-  (STM32WB_BLE_C2HOST | STM32WB_BLE_SVC_CHANGED_CHAR | \
-   STM32WB_BLE_DEVICE_NAME_MODE | STM32WB_BLE_CS_ALG2 | \
-   STM32WB_BLE_POWER_CLASS)
+#define STM32_BLE_INIT_OPTIONS \
+  (STM32_BLE_C2HOST | STM32_BLE_SVC_CHANGED_CHAR | \
+   STM32_BLE_DEVICE_NAME_MODE | STM32_BLE_CS_ALG2 | \
+   STM32_BLE_POWER_CLASS)
 
 #ifdef CONFIG_STM32WB_BLE_AGC_RSSI_IMPROVED
-#  define STM32WB_BLE_RXMOD_AGC_RSSI      STM32WB_SHCI_BLE_INIT_RXMOD_AGC_RSSI_IMPROVED
+#  define STM32_BLE_RXMOD_AGC_RSSI      STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_IMPROVED
 #else
-#  define STM32WB_BLE_RXMOD_AGC_RSSI      STM32WB_SHCI_BLE_INIT_RXMOD_AGC_RSSI_LEGACY
+#  define STM32_BLE_RXMOD_AGC_RSSI      STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_LEGACY
 #endif
 
 /****************************************************************************
@@ -200,21 +200,21 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
 
   switch (evt->type)
     {
-      case STM32WB_MBOX_HCIEVT:
+      case STM32_MBOX_HCIEVT:
         len = sizeof(evt->evt_hdr) + evt->evt_hdr.len;
         if (evt->evt_hdr.evt == BT_HCI_EVT_CMD_COMPLETE)
           {
             wlinfo("received command COMPLETE event from mailbox "
                    "(opcode: 0x%04x, status: %u)\n",
-                   STM32WB_BLEHCI_CCEVT_OPCODE(&evt->evt_hdr),
-                   STM32WB_BLEHCI_CCEVT_STATUS(&evt->evt_hdr));
+                   STM32_BLEHCI_CCEVT_OPCODE(&evt->evt_hdr),
+                   STM32_BLEHCI_CCEVT_STATUS(&evt->evt_hdr));
           }
         else if (evt->evt_hdr.evt == BT_HCI_EVT_CMD_STATUS)
           {
             wlinfo("received command STATUS event from mailbox "
                    "(opcode: 0x%04x, status: %u)\n",
-                   STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
-                   STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
+                   STM32_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
+                   STM32_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
 
 #ifdef CONFIG_NIMBLE
             /* During initialisation NimBLE host stack sends unsupported
@@ -223,18 +223,18 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
              * with minimal impact we shim the response as succeeded.
              */
 
-            if (STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) != 0 &&
-                (STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr) ==
+            if (STM32_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) != 0 &&
+                (STM32_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr) ==
                  BT_OP(BT_OGF_BASEBAND, 0x0063)))
               {
                 wlwarn("suppress FAILED command STATUS event from mailbox, "
                        "(opcode: 0x%04x, status: %u) \n",
-                       STM32WB_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
-                       STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
+                       STM32_BLEHCI_CSEVT_OPCODE(&evt->evt_hdr),
+                       STM32_BLEHCI_CSEVT_STATUS(&evt->evt_hdr));
 
                 /* Suppress status field error value */
 
-                STM32WB_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) = 0;
+                STM32_BLEHCI_CSEVT_STATUS(&evt->evt_hdr) = 0;
               }
 #endif
           }
@@ -247,29 +247,29 @@ static int stm32wb_blehci_rxevt(struct stm32wb_mbox_evt_s *evt)
         bt_netdev_receive(&g_blehci_driver, BT_EVT, &evt->evt_hdr, len);
         break;
 
-      case STM32WB_MBOX_HCIACL:
+      case STM32_MBOX_HCIACL:
         len = sizeof(evt->acl_hdr) + evt->acl_hdr.len;
         wlinfo("received HCI ACL from mailbox (handle: 0x%04x, len: %u)\n",
                evt->acl_hdr.handle, evt->acl_hdr.len);
         bt_netdev_receive(&g_blehci_driver, BT_ACL_IN, &evt->acl_hdr, len);
         break;
 
-      case STM32WB_MBOX_SYSEVT:
+      case STM32_MBOX_SYSEVT:
         wlinfo("received SYS EVT 0x%02x from mailbox\n", evt->evt_hdr.evt);
-        if (evt->evt_hdr.evt == STM32WB_SHCI_ASYNC_EVT &&
-            *(uint16_t *)(&evt->evt_hdr + 1) == STM32WB_SHCI_ASYNC_EVT_C2RDY)
+        if (evt->evt_hdr.evt == STM32_SHCI_ASYNC_EVT &&
+            *(uint16_t *)(&evt->evt_hdr + 1) == STM32_SHCI_ASYNC_EVT_C2RDY)
           {
             stm32wb_blehci_bleinit();
           }
         break;
 
-      case STM32WB_MBOX_SYSACK:
+      case STM32_MBOX_SYSACK:
 
         /* CPU2 Ready is the only expected response */
 
-        DEBUGASSERT(evt->evt_hdr.evt == STM32WB_SHCI_ACK_EVT_C2RDY);
+        DEBUGASSERT(evt->evt_hdr.evt == STM32_SHCI_ACK_EVT_C2RDY);
 
-        if (evt->evt_hdr.evt == STM32WB_SHCI_ACK_EVT_C2RDY)
+        if (evt->evt_hdr.evt == STM32_SHCI_ACK_EVT_C2RDY)
           {
             wlinfo("system command ACK response");
 
@@ -304,8 +304,8 @@ static void stm32wb_blehci_bleinit(void)
     .gatt_attr_buf_size =   CONFIG_STM32WB_BLE_GATT_ATTR_BUF_SIZE,
     .max_conn =             CONFIG_STM32WB_BLE_MAX_CONN,
     .dle_enable =           CONFIG_STM32WB_BLE_DLE,
-    .prep_write_op_num =    STM32WB_BLE_PREP_WRITE_NUM,
-    .mem_block_num =        STM32WB_C2_MEM_BLOCK_NUM,
+    .prep_write_op_num =    STM32_BLE_PREP_WRITE_NUM,
+    .mem_block_num =        STM32_C2_MEM_BLOCK_NUM,
     .att_max_mtu_size =     CONFIG_STM32WB_BLE_MAX_ATT_MTU,
     .slave_sca =            CONFIG_STM32WB_BLE_SLAVE_SCA,
     .master_sca_range =     CONFIG_STM32WB_BLE_MASTER_SCA,
@@ -313,12 +313,12 @@ static void stm32wb_blehci_bleinit(void)
     .conn_event_length =    CONFIG_STM32WB_BLE_MAX_CONN_EVT_LENGTH,
     .hse_startup =          CONFIG_STM32WB_BLE_HSE_STARTUP,
     .viterbi_enable =       CONFIG_STM32WB_BLE_VITERBI,
-    .options =              STM32WB_BLE_INIT_OPTIONS,
+    .options =              STM32_BLE_INIT_OPTIONS,
     .hw_version =           0,
     .max_initor_coc_num =   CONFIG_STM32WB_BLE_MAX_INITOR_COC_NUM,
     .tx_power_min =         CONFIG_STM32WB_BLE_MIN_TX_POWER,
     .tx_power_max =         CONFIG_STM32WB_BLE_MAX_TX_POWER,
-    .rx_model_config =      STM32WB_BLE_RXMOD_AGC_RSSI
+    .rx_model_config =      STM32_BLE_RXMOD_AGC_RSSI
   };
 
   /* Initialise BLE */

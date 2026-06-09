@@ -83,23 +83,23 @@ static struct st7565_lcd_s g_st7565_dev =
 
 static void stm32wb_st7565_reset(struct st7565_lcd_s *lcd, bool on)
 {
-  stm32wb_gpiowrite(STM32WB_LCD_RST, !on);
+  stm32wb_gpiowrite(STM32_LCD_RST, !on);
 }
 
 static void stm32wb_st7565_select(struct st7565_lcd_s *lcd)
 {
-  stm32wb_gpiowrite(STM32WB_LCD_CS, 0);
+  stm32wb_gpiowrite(STM32_LCD_CS, 0);
 }
 
 static void stm32wb_st7565_deselect(struct st7565_lcd_s *lcd)
 {
-  stm32wb_gpiowrite(STM32WB_LCD_CS, 1);
+  stm32wb_gpiowrite(STM32_LCD_CS, 1);
 }
 
 static void stm32wb_st7565_cmddata(struct st7565_lcd_s *lcd,
                                    const uint8_t cmd)
 {
-  stm32wb_gpiowrite(STM32WB_LCD_A0, !cmd);
+  stm32wb_gpiowrite(STM32_LCD_A0, !cmd);
 }
 
 static int stm32wb_st7565_senddata(struct st7565_lcd_s *lcd,
@@ -124,14 +124,14 @@ static int stm32wb_st7565_backlight(struct st7565_lcd_s *lcd, int level)
 
 int board_lcd_initialize(void)
 {
-  stm32wb_configgpio(STM32WB_LCD_RST);
-  stm32wb_configgpio(STM32WB_LCD_A0);
+  stm32wb_configgpio(STM32_LCD_RST);
+  stm32wb_configgpio(STM32_LCD_A0);
 
-  g_spidev = stm32wb_spibus_initialize(STM32WB_LCD_SPINO);
+  g_spidev = stm32wb_spibus_initialize(STM32_LCD_SPINO);
 
   if (!g_spidev)
     {
-      lcderr("ERROR: Failed to initialize SPI port %d\n", STM32WB_LCD_SPINO);
+      lcderr("ERROR: Failed to initialize SPI port %d\n", STM32_LCD_SPINO);
       return -ENODEV;
     }
 
@@ -139,9 +139,9 @@ int board_lcd_initialize(void)
   g_spidev->ops->setbits(g_spidev, 8);
   g_spidev->ops->setfrequency(g_spidev, 1000000);
 
-  stm32wb_gpiowrite(STM32WB_LCD_RST, 0);
+  stm32wb_gpiowrite(STM32_LCD_RST, 0);
   up_mdelay(1);
-  stm32wb_gpiowrite(STM32WB_LCD_RST, 1);
+  stm32wb_gpiowrite(STM32_LCD_RST, 1);
 
   return OK;
 }
@@ -156,12 +156,12 @@ struct lcd_dev_s *board_lcd_getdev(int lcddev)
   if (!g_lcddev)
     {
       lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n",
-             STM32WB_LCD_SPINO, lcddev);
+             STM32_LCD_SPINO, lcddev);
     }
   else
     {
       lcdinfo("SPI port %d bound to LCD %d\n",
-              STM32WB_LCD_SPINO, lcddev);
+              STM32_LCD_SPINO, lcddev);
 
       /* And turn the LCD on (CONFIG_LCD_MAXPOWER should be 1) */
 

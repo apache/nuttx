@@ -29,25 +29,25 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_IPCC_C1CR_OFFSET      0x0000  /* CPU1 control register */
-#define STM32WB_IPCC_C1MR_OFFSET      0x0004  /* CPU1 mask register */
-#define STM32WB_IPCC_C1SCR_OFFSET     0x0008  /* CPU1 status set/clear register */
-#define STM32WB_IPCC_C1TOC2SR_OFFSET  0x000c  /* CPU1 to CPU2 status register */
-#define STM32WB_IPCC_C2CR_OFFSET      0x0010  /* CPU2 control register */
-#define STM32WB_IPCC_C2MR_OFFSET      0x0014  /* CPU2 mask register */
-#define STM32WB_IPCC_C2SCR_OFFSET     0x0018  /* CPU2 status set/clear register */
-#define STM32WB_IPCC_C2TOC1SR_OFFSET  0x001c  /* CPU2 to CPU1 status register */
+#define STM32_IPCC_C1CR_OFFSET      0x0000  /* CPU1 control register */
+#define STM32_IPCC_C1MR_OFFSET      0x0004  /* CPU1 mask register */
+#define STM32_IPCC_C1SCR_OFFSET     0x0008  /* CPU1 status set/clear register */
+#define STM32_IPCC_C1TOC2SR_OFFSET  0x000c  /* CPU1 to CPU2 status register */
+#define STM32_IPCC_C2CR_OFFSET      0x0010  /* CPU2 control register */
+#define STM32_IPCC_C2MR_OFFSET      0x0014  /* CPU2 mask register */
+#define STM32_IPCC_C2SCR_OFFSET     0x0018  /* CPU2 status set/clear register */
+#define STM32_IPCC_C2TOC1SR_OFFSET  0x001c  /* CPU2 to CPU1 status register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_IPCC_C1CR             (STM32WB_IPCC_BASE + STM32WB_IPCC_C1CR_OFFSET)
-#define STM32WB_IPCC_C1MR             (STM32WB_IPCC_BASE + STM32WB_IPCC_C1MR_OFFSET)
-#define STM32WB_IPCC_C1SCR            (STM32WB_IPCC_BASE + STM32WB_IPCC_C1SCR_OFFSET)
-#define STM32WB_IPCC_C1TOC2SR         (STM32WB_IPCC_BASE + STM32WB_IPCC_C1TOC2SR_OFFSET)
-#define STM32WB_IPCC_C2CR             (STM32WB_IPCC_BASE + STM32WB_IPCC_C2CR_OFFSET)
-#define STM32WB_IPCC_C2MR             (STM32WB_IPCC_BASE + STM32WB_IPCC_C2MR_OFFSET)
-#define STM32WB_IPCC_C2SCR            (STM32WB_IPCC_BASE + STM32WB_IPCC_C2SCR_OFFSET)
-#define STM32WB_IPCC_C2TOC1SR         (STM32WB_IPCC_BASE + STM32WB_IPCC_C2TOC1SR_OFFSET)
+#define STM32_IPCC_C1CR             (STM32_IPCC_BASE + STM32_IPCC_C1CR_OFFSET)
+#define STM32_IPCC_C1MR             (STM32_IPCC_BASE + STM32_IPCC_C1MR_OFFSET)
+#define STM32_IPCC_C1SCR            (STM32_IPCC_BASE + STM32_IPCC_C1SCR_OFFSET)
+#define STM32_IPCC_C1TOC2SR         (STM32_IPCC_BASE + STM32_IPCC_C1TOC2SR_OFFSET)
+#define STM32_IPCC_C2CR             (STM32_IPCC_BASE + STM32_IPCC_C2CR_OFFSET)
+#define STM32_IPCC_C2MR             (STM32_IPCC_BASE + STM32_IPCC_C2MR_OFFSET)
+#define STM32_IPCC_C2SCR            (STM32_IPCC_BASE + STM32_IPCC_C2SCR_OFFSET)
+#define STM32_IPCC_C2TOC1SR         (STM32_IPCC_BASE + STM32_IPCC_C2TOC1SR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

@@ -36,41 +36,41 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_EXTI_RTSR1_OFFSET   0x0000  /* Rising trigger selection register 1 */
-#define STM32WB_EXTI_FTSR1_OFFSET   0x0004  /* Falling trigger selection register 1 */
-#define STM32WB_EXTI_SWIER1_OFFSET  0x0008  /* Software interrupt event register 1 */
-#define STM32WB_EXTI_PR1_OFFSET     0x000c  /* Pending register 1 */
-#define STM32WB_EXTI_RTSR2_OFFSET   0x0020  /* Rising trigger selection register 2 */
-#define STM32WB_EXTI_FTSR2_OFFSET   0x0024  /* Falling trigger selection register 2 */
-#define STM32WB_EXTI_SWIER2_OFFSET  0x0028  /* Software interrupt event register 2 */
-#define STM32WB_EXTI_PR2_OFFSET     0x002c  /* Pending register 2 */
-#define STM32WB_EXTI_C1IMR1_OFFSET  0x0080  /* CPU1 wakeup with interrupt mask register 1 */
-#define STM32WB_EXTI_C1EMR1_OFFSET  0x0084  /* CPU1 wakeup with event mask register  1 */
-#define STM32WB_EXTI_C1IMR2_OFFSET  0x0090  /* CPU1 wakeup with interrupt mask register 2 */
-#define STM32WB_EXTI_C1EMR2_OFFSET  0x0094  /* CPU1 wakeup with event mask register 2 */
-#define STM32WB_EXTI_C2IMR1_OFFSET  0x00c0  /* CPU2 wakeup with interrupt mask register 1 */
-#define STM32WB_EXTI_C2EMR1_OFFSET  0x00c4  /* CPU2 wakeup with event mask register 1 */
-#define STM32WB_EXTI_C2IMR2_OFFSET  0x00d0  /* CPU2 wakeup with interrupt mask register 2 */
-#define STM32WB_EXTI_C2EMR2_OFFSET  0x00d4  /* CPU2 wakeup with event mask register 2 */
+#define STM32_EXTI_RTSR1_OFFSET   0x0000  /* Rising trigger selection register 1 */
+#define STM32_EXTI_FTSR1_OFFSET   0x0004  /* Falling trigger selection register 1 */
+#define STM32_EXTI_SWIER1_OFFSET  0x0008  /* Software interrupt event register 1 */
+#define STM32_EXTI_PR1_OFFSET     0x000c  /* Pending register 1 */
+#define STM32_EXTI_RTSR2_OFFSET   0x0020  /* Rising trigger selection register 2 */
+#define STM32_EXTI_FTSR2_OFFSET   0x0024  /* Falling trigger selection register 2 */
+#define STM32_EXTI_SWIER2_OFFSET  0x0028  /* Software interrupt event register 2 */
+#define STM32_EXTI_PR2_OFFSET     0x002c  /* Pending register 2 */
+#define STM32_EXTI_C1IMR1_OFFSET  0x0080  /* CPU1 wakeup with interrupt mask register 1 */
+#define STM32_EXTI_C1EMR1_OFFSET  0x0084  /* CPU1 wakeup with event mask register  1 */
+#define STM32_EXTI_C1IMR2_OFFSET  0x0090  /* CPU1 wakeup with interrupt mask register 2 */
+#define STM32_EXTI_C1EMR2_OFFSET  0x0094  /* CPU1 wakeup with event mask register 2 */
+#define STM32_EXTI_C2IMR1_OFFSET  0x00c0  /* CPU2 wakeup with interrupt mask register 1 */
+#define STM32_EXTI_C2EMR1_OFFSET  0x00c4  /* CPU2 wakeup with event mask register 1 */
+#define STM32_EXTI_C2IMR2_OFFSET  0x00d0  /* CPU2 wakeup with interrupt mask register 2 */
+#define STM32_EXTI_C2EMR2_OFFSET  0x00d4  /* CPU2 wakeup with event mask register 2 */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_EXTI_RTSR1          (STM32WB_EXTI_BASE + STM32WB_EXTI_RTSR1_OFFSET)
-#define STM32WB_EXTI_FTSR1          (STM32WB_EXTI_BASE + STM32WB_EXTI_FTSR1_OFFSET)
-#define STM32WB_EXTI_SWIER1         (STM32WB_EXTI_BASE + STM32WB_EXTI_SWIER1_OFFSET)
-#define STM32WB_EXTI_PR1            (STM32WB_EXTI_BASE + STM32WB_EXTI_PR1_OFFSET)
-#define STM32WB_EXTI_RTSR2          (STM32WB_EXTI_BASE + STM32WB_EXTI_RTSR2_OFFSET)
-#define STM32WB_EXTI_FTSR2          (STM32WB_EXTI_BASE + STM32WB_EXTI_FTSR2_OFFSET)
-#define STM32WB_EXTI_SWIER2         (STM32WB_EXTI_BASE + STM32WB_EXTI_SWIER2_OFFSET)
-#define STM32WB_EXTI_PR2            (STM32WB_EXTI_BASE + STM32WB_EXTI_PR2_OFFSET)
-#define STM32WB_EXTI_C1IMR1         (STM32WB_EXTI_BASE + STM32WB_EXTI_C1IMR1_OFFSET)
-#define STM32WB_EXTI_C1EMR1         (STM32WB_EXTI_BASE + STM32WB_EXTI_C1EMR1_OFFSET)
-#define STM32WB_EXTI_C1IMR2         (STM32WB_EXTI_BASE + STM32WB_EXTI_C1IMR2_OFFSET)
-#define STM32WB_EXTI_C1EMR2         (STM32WB_EXTI_BASE + STM32WB_EXTI_C1EMR2_OFFSET)
-#define STM32WB_EXTI_C2IMR1         (STM32WB_EXTI_BASE + STM32WB_EXTI_C2IMR1_OFFSET)
-#define STM32WB_EXTI_C2EMR1         (STM32WB_EXTI_BASE + STM32WB_EXTI_C2EMR1_OFFSET)
-#define STM32WB_EXTI_C2IMR2         (STM32WB_EXTI_BASE + STM32WB_EXTI_C2IMR2_OFFSET)
-#define STM32WB_EXTI_C2EMR2         (STM32WB_EXTI_BASE + STM32WB_EXTI_C2EMR2_OFFSET)
+#define STM32_EXTI_RTSR1          (STM32_EXTI_BASE + STM32_EXTI_RTSR1_OFFSET)
+#define STM32_EXTI_FTSR1          (STM32_EXTI_BASE + STM32_EXTI_FTSR1_OFFSET)
+#define STM32_EXTI_SWIER1         (STM32_EXTI_BASE + STM32_EXTI_SWIER1_OFFSET)
+#define STM32_EXTI_PR1            (STM32_EXTI_BASE + STM32_EXTI_PR1_OFFSET)
+#define STM32_EXTI_RTSR2          (STM32_EXTI_BASE + STM32_EXTI_RTSR2_OFFSET)
+#define STM32_EXTI_FTSR2          (STM32_EXTI_BASE + STM32_EXTI_FTSR2_OFFSET)
+#define STM32_EXTI_SWIER2         (STM32_EXTI_BASE + STM32_EXTI_SWIER2_OFFSET)
+#define STM32_EXTI_PR2            (STM32_EXTI_BASE + STM32_EXTI_PR2_OFFSET)
+#define STM32_EXTI_C1IMR1         (STM32_EXTI_BASE + STM32_EXTI_C1IMR1_OFFSET)
+#define STM32_EXTI_C1EMR1         (STM32_EXTI_BASE + STM32_EXTI_C1EMR1_OFFSET)
+#define STM32_EXTI_C1IMR2         (STM32_EXTI_BASE + STM32_EXTI_C1IMR2_OFFSET)
+#define STM32_EXTI_C1EMR2         (STM32_EXTI_BASE + STM32_EXTI_C1EMR2_OFFSET)
+#define STM32_EXTI_C2IMR1         (STM32_EXTI_BASE + STM32_EXTI_C2IMR1_OFFSET)
+#define STM32_EXTI_C2EMR1         (STM32_EXTI_BASE + STM32_EXTI_C2EMR1_OFFSET)
+#define STM32_EXTI_C2IMR2         (STM32_EXTI_BASE + STM32_EXTI_C2IMR2_OFFSET)
+#define STM32_EXTI_C2EMR2         (STM32_EXTI_BASE + STM32_EXTI_C2EMR2_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
