@@ -54,31 +54,31 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /* Base addresses for each GPIO block */
 
-const uint32_t g_gpiobase[STM32L5_NPORTS] =
+const uint32_t g_gpiobase[STM32_NPORTS] =
 {
-#if STM32L5_NPORTS > 0
-  STM32L5_GPIOA_BASE,
+#if STM32_NPORTS > 0
+  STM32_GPIOA_BASE,
 #endif
-#if STM32L5_NPORTS > 1
-  STM32L5_GPIOB_BASE,
+#if STM32_NPORTS > 1
+  STM32_GPIOB_BASE,
 #endif
-#if STM32L5_NPORTS > 2
-  STM32L5_GPIOC_BASE,
+#if STM32_NPORTS > 2
+  STM32_GPIOC_BASE,
 #endif
-#if STM32L5_NPORTS > 3
-  STM32L5_GPIOD_BASE,
+#if STM32_NPORTS > 3
+  STM32_GPIOD_BASE,
 #endif
-#if STM32L5_NPORTS > 4
-  STM32L5_GPIOE_BASE,
+#if STM32_NPORTS > 4
+  STM32_GPIOE_BASE,
 #endif
-#if STM32L5_NPORTS > 5
-  STM32L5_GPIOF_BASE,
+#if STM32_NPORTS > 5
+  STM32_GPIOF_BASE,
 #endif
-#if STM32L5_NPORTS > 6
-  STM32L5_GPIOG_BASE,
+#if STM32_NPORTS > 6
+  STM32_GPIOG_BASE,
 #endif
-#if STM32L5_NPORTS > 7
-  STM32L5_GPIOH_BASE,
+#if STM32_NPORTS > 7
+  STM32_GPIOH_BASE,
 #endif
 };
 
@@ -141,7 +141,7 @@ int stm32l5_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32L5_NPORTS)
+  if (port >= STM32_NPORTS)
     {
       return -EINVAL;
     }
@@ -190,10 +190,10 @@ int stm32l5_configgpio(uint32_t cfgset)
 
   /* Now apply the configuration to the mode register */
 
-  regval  = getreg32(base + STM32L5_GPIO_MODER_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_MODER_OFFSET);
   regval &= ~GPIO_MODER_MASK(pin);
   regval |= ((uint32_t)pinmode << GPIO_MODER_SHIFT(pin));
-  putreg32(regval, base + STM32L5_GPIO_MODER_OFFSET);
+  putreg32(regval, base + STM32_GPIO_MODER_OFFSET);
 
   /* Set up the pull-up/pull-down configuration (all but analog pins) */
 
@@ -216,10 +216,10 @@ int stm32l5_configgpio(uint32_t cfgset)
         }
     }
 
-  regval  = getreg32(base + STM32L5_GPIO_PUPDR_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_PUPDR_OFFSET);
   regval &= ~GPIO_PUPDR_MASK(pin);
   regval |= (setting << GPIO_PUPDR_SHIFT(pin));
-  putreg32(regval, base + STM32L5_GPIO_PUPDR_OFFSET);
+  putreg32(regval, base + STM32_GPIO_PUPDR_OFFSET);
 
   /* Set the alternate function (Only alternate function pins) */
 
@@ -234,12 +234,12 @@ int stm32l5_configgpio(uint32_t cfgset)
 
   if (pin < 8)
     {
-      regoffset = STM32L5_GPIO_AFRL_OFFSET;
+      regoffset = STM32_GPIO_AFRL_OFFSET;
       pos       = pin;
     }
   else
     {
-      regoffset = STM32L5_GPIO_AFRH_OFFSET;
+      regoffset = STM32_GPIO_AFRH_OFFSET;
       pos       = pin - 8;
     }
 
@@ -277,14 +277,14 @@ int stm32l5_configgpio(uint32_t cfgset)
       setting = 0;
     }
 
-  regval  = getreg32(base + STM32L5_GPIO_OSPEED_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_OSPEED_OFFSET);
   regval &= ~GPIO_OSPEED_MASK(pin);
   regval |= (setting << GPIO_OSPEED_SHIFT(pin));
-  putreg32(regval, base + STM32L5_GPIO_OSPEED_OFFSET);
+  putreg32(regval, base + STM32_GPIO_OSPEED_OFFSET);
 
   /* Set push-pull/open-drain (Only outputs and alternate function pins) */
 
-  regval  = getreg32(base + STM32L5_GPIO_OTYPER_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_OTYPER_OFFSET);
   setting = GPIO_OTYPER_OD(pin);
 
   if ((pinmode == GPIO_MODER_OUTPUT || pinmode == GPIO_MODER_ALT) &&
@@ -297,7 +297,7 @@ int stm32l5_configgpio(uint32_t cfgset)
       regval &= ~setting;
     }
 
-  putreg32(regval, base + STM32L5_GPIO_OTYPER_OFFSET);
+  putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
   spin_unlock_irqrestore(&g_configgpio_lock, flags);
   return OK;
@@ -352,7 +352,7 @@ void stm32l5_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L5_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
@@ -373,7 +373,7 @@ void stm32l5_gpiowrite(uint32_t pinset, bool value)
           bit = GPIO_BSRR_RESET(pin);
         }
 
-      putreg32(bit, base + STM32L5_GPIO_BSRR_OFFSET);
+      putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
     }
 }
 
@@ -392,7 +392,7 @@ bool stm32l5_gpioread(uint32_t pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L5_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
@@ -401,7 +401,7 @@ bool stm32l5_gpioread(uint32_t pinset)
       /* Get the pin number and return the input state of that pin */
 
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      return ((getreg32(base + STM32L5_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
+      return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
 
   return 0;
