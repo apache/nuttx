@@ -794,8 +794,7 @@ bool pn532_set_rf_config(struct pn532_dev_s * dev,
 
   pn532_frame_init(f, PN532_COMMAND_RFCONFIGURATION);
   f->data[1] = conf->cfg_item;
-  /* 16 bytes max, minus 1 byte for cmd and cfg_item */
-  DEBUGASSERT(conf->data_size <= 16 - 2);
+  DEBUGASSERT(conf->data_size <= 16 - 2); /*minus 2 bytes(cmd, cfg_item)*/
   memcpy(&f->data[2], conf->config, conf->data_size);
   f->len += conf->data_size + 1;
   pn532_frame_finish(f);
