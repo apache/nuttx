@@ -65,7 +65,7 @@
 
 /* Total number of possible serial devices */
 
-#define STM32_NSERIAL (STM32H7_NUSART + STM32H7_NUART)
+#define STM32_NSERIAL (STM32_NUSART + STM32_NUART)
 
 /* DMA configuration */
 
@@ -1952,7 +1952,7 @@ static void up_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32H7_NUSART + STM32H7_NUART; n++)
+  for (n = 0; n < STM32_NUSART + STM32_NUART; n++)
     {
       struct up_dev_s *priv = g_uart_devs[n];
 
@@ -3761,7 +3761,7 @@ static int up_pm_prepare(struct pm_callback_s *cb, int domain,
        * buffers.
        */
 
-      for (n = 0; n < STM32H7_NUSART + STM32H7_NUART; n++)
+      for (n = 0; n < STM32_NUSART + STM32_NUART; n++)
         {
           struct up_dev_s *priv = g_uart_devs[n];
 

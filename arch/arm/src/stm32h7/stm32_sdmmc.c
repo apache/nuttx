@@ -135,9 +135,9 @@
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
 #elif defined(CONFIG_STM32H7_SDMMC1)
 #  define SRAM123_START STM32_SRAM123_BASE
-#  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+#  define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
 #  define SRAM4_START   STM32_SRAM4_BASE
-#  define SRAM4_END     (SRAM4_START + STM32H7_SRAM4_SIZE)
+#  define SRAM4_END     (SRAM4_START + STM32_SRAM4_SIZE)
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)

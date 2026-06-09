@@ -42,7 +42,7 @@
 #if (STM32_RCC_D2CCIP2R_USBSRC == RCC_D2CCIP2R_USBSEL_HSI48) && \
     !defined(CONFIG_STM32H7_HSI48)
 #  error board.h selected HSI48 as USB clock source, but HSI48 is not \
-         enabled. Enable STM32H7_HSI48
+         enabled. Enable STM32_HSI48
 #endif
 
 #if defined(CONFIG_STM32H7_OTGHS) && !defined(CONFIG_STM32H7_OTGHS_FS) && \

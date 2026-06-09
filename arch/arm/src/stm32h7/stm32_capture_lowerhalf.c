@@ -47,35 +47,35 @@
 
 /* 32-Bit Timers ************************************************************/
 
-#define STM32H7_TIM2_RES  32
-#define STM32H7_TIM5_RES  32
+#define STM32_TIM2_RES  32
+#define STM32_TIM5_RES  32
 
 /* 16-Bit Timers ************************************************************/
 
 /* Advanced-Control Timers */
-#define STM32H7_TIM1_RES  16
-#define STM32H7_TIM8_RES  16
+#define STM32_TIM1_RES  16
+#define STM32_TIM8_RES  16
 
 /* General-Purpose Timers */
-#define STM32H7_TIM3_RES  16
-#define STM32H7_TIM4_RES  16
-#define STM32H7_TIM12_RES 16
-#define STM32H7_TIM13_RES 16
-#define STM32H7_TIM14_RES 16
-#define STM32H7_TIM15_RES 16
-#define STM32H7_TIM16_RES 16
-#define STM32H7_TIM17_RES 16
+#define STM32_TIM3_RES  16
+#define STM32_TIM4_RES  16
+#define STM32_TIM12_RES 16
+#define STM32_TIM13_RES 16
+#define STM32_TIM14_RES 16
+#define STM32_TIM15_RES 16
+#define STM32_TIM16_RES 16
+#define STM32_TIM17_RES 16
 
 /* Basic Timers */
-#define STM32H7_TIM6_RES  16
-#define STM32H7_TIM7_RES  16
+#define STM32_TIM6_RES  16
+#define STM32_TIM7_RES  16
 
 /* Low-Power Timers */
-#define STM32H7_LPTIM1_RES 16
-#define STM32H7_LPTIM2_RES 16
-#define STM32H7_LPTIM3_RES 16
-#define STM32H7_LPTIM4_RES 16
-#define STM32H7_LPTIM5_RES 16
+#define STM32_LPTIM1_RES 16
+#define STM32_LPTIM2_RES 16
+#define STM32_LPTIM3_RES 16
+#define STM32_LPTIM4_RES 16
+#define STM32_LPTIM5_RES 16
 
 /****************************************************************************
  * Private Types
@@ -129,7 +129,7 @@ static const struct cap_ops_s g_cap_ops =
 static struct stm32_lowerhalf_s g_cap1_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM1_RES,
+  .resolution  = STM32_TIM1_RES,
   .channel     = CONFIG_STM32H7_TIM1_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM1_CLOCK,
 };
@@ -139,7 +139,7 @@ static struct stm32_lowerhalf_s g_cap1_lowerhalf =
 static struct stm32_lowerhalf_s g_cap2_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM2_RES,
+  .resolution  = STM32_TIM2_RES,
   .channel     = CONFIG_STM32H7_TIM2_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM2_CLOCK,
 };
@@ -149,7 +149,7 @@ static struct stm32_lowerhalf_s g_cap2_lowerhalf =
 static struct stm32_lowerhalf_s g_cap3_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM3_RES,
+  .resolution  = STM32_TIM3_RES,
   .channel     = CONFIG_STM32H7_TIM3_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM3_CLOCK,
 };
@@ -159,7 +159,7 @@ static struct stm32_lowerhalf_s g_cap3_lowerhalf =
 static struct stm32_lowerhalf_s g_cap4_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM4_RES,
+  .resolution  = STM32_TIM4_RES,
   .channel     = CONFIG_STM32H7_TIM4_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM4_CLOCK,
 };
@@ -169,7 +169,7 @@ static struct stm32_lowerhalf_s g_cap4_lowerhalf =
 static struct stm32_lowerhalf_s g_cap5_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM5_RES,
+  .resolution  = STM32_TIM5_RES,
   .channel     = CONFIG_STM32H7_TIM5_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM5_CLOCK,
 };
@@ -179,7 +179,7 @@ static struct stm32_lowerhalf_s g_cap5_lowerhalf =
 static struct stm32_lowerhalf_s g_cap8_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM8_RES,
+  .resolution  = STM32_TIM8_RES,
   .channel     = CONFIG_STM32H7_TIM8_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM8_CLOCK,
 };
@@ -189,7 +189,7 @@ static struct stm32_lowerhalf_s g_cap8_lowerhalf =
 static struct stm32_lowerhalf_s g_cap12_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM12_RES,
+  .resolution  = STM32_TIM12_RES,
   .channel     = CONFIG_STM32H7_TIM12_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM12_CLOCK,
 };
@@ -199,7 +199,7 @@ static struct stm32_lowerhalf_s g_cap12_lowerhalf =
 static struct stm32_lowerhalf_s g_cap13_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM13_RES,
+  .resolution  = STM32_TIM13_RES,
   .channel     = CONFIG_STM32H7_TIM13_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM13_CLOCK,
 };
@@ -209,7 +209,7 @@ static struct stm32_lowerhalf_s g_cap13_lowerhalf =
 static struct stm32_lowerhalf_s g_cap14_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM14_RES,
+  .resolution  = STM32_TIM14_RES,
   .channel     = CONFIG_STM32H7_TIM14_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM14_CLOCK,
 };
@@ -219,7 +219,7 @@ static struct stm32_lowerhalf_s g_cap14_lowerhalf =
 static struct stm32_lowerhalf_s g_cap15_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM15_RES,
+  .resolution  = STM32_TIM15_RES,
   .channel     = CONFIG_STM32H7_TIM15_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM15_CLOCK,
 };
@@ -229,7 +229,7 @@ static struct stm32_lowerhalf_s g_cap15_lowerhalf =
 static struct stm32_lowerhalf_s g_cap16_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM16_RES,
+  .resolution  = STM32_TIM16_RES,
   .channel     = CONFIG_STM32H7_TIM16_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM16_CLOCK,
 };
@@ -239,7 +239,7 @@ static struct stm32_lowerhalf_s g_cap16_lowerhalf =
 static struct stm32_lowerhalf_s g_cap17_lowerhalf =
 {
   .ops         = &g_cap_ops,
-  .resolution  = STM32H7_TIM17_RES,
+  .resolution  = STM32_TIM17_RES,
   .channel     = CONFIG_STM32H7_TIM17_CHANNEL,
   .clock       = CONFIG_STM32H7_TIM17_CLOCK,
 };
