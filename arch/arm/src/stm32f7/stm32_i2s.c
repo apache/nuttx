@@ -232,9 +232,9 @@
 #endif
 
 #if CONFIG_STM32F7_I2S1_DATALEN == 8
-#  define STM32F7_I2S1_DATAMASK  0
+#  define STM32_I2S1_DATAMASK  0
 #elif CONFIG_STM32F7_I2S1_DATALEN == 16
-#  define STM32F7_I2S1_DATAMASK  1
+#  define STM32_I2S1_DATAMASK  1
 #elif  CONFIG_STM32F7_I2S1_DATALEN < 8 || CONFIG_STM32F7_I2S1_DATALEN > 16
 #  error Invalid value for CONFIG_STM32F7_I2S1_DATALEN
 #else
@@ -242,9 +242,9 @@
 #endif
 
 #if CONFIG_STM32F7_I2S2_DATALEN == 8
-#  define STM32F7_I2S2_DATAMASK  0
+#  define STM32_I2S2_DATAMASK  0
 #elif CONFIG_STM32F7_I2S2_DATALEN == 16
-#  define STM32F7_I2S2_DATAMASK  1
+#  define STM32_I2S2_DATAMASK  1
 #elif  CONFIG_STM32F7_I2S2_DATALEN < 8 || CONFIG_STM32F7_I2S2_DATALEN > 16
 #  error Invalid value for CONFIG_STM32F7_I2S2_DATALEN
 #else
@@ -252,9 +252,9 @@
 #endif
 
 #if CONFIG_STM32F7_I2S3_DATALEN == 8
-#  define STM32F7_I2S3_DATAMASK  0
+#  define STM32_I2S3_DATAMASK  0
 #elif CONFIG_STM32F7_I2S3_DATALEN == 16
-#  define STM32F7_I2S3_DATAMASK  1
+#  define STM32_I2S3_DATAMASK  1
 #elif  CONFIG_STM32F7_I2S3_DATALEN < 8 || CONFIG_STM32F7_I2S3_DATALEN > 16
 #  error Invalid value for CONFIG_STM32F7_I2S3_DATALEN
 #else
@@ -2486,7 +2486,7 @@ static void i2s1_configure(struct stm32_i2s_s *priv)
 
   priv->datalen = CONFIG_STM32F7_I2S1_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S2_DATAMASK;
+  priv->align   = STM32_I2S2_DATAMASK;
 #endif
 }
 #endif /* CONFIG_STM32F7_I2S1 */
@@ -2551,7 +2551,7 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
 
   priv->datalen = CONFIG_STM32F7_I2S2_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S2_DATAMASK;
+  priv->align   = STM32_I2S2_DATAMASK;
 #endif
 }
 #endif /* CONFIG_STM32F7_I2S2 */
@@ -2616,7 +2616,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
 
   priv->datalen = CONFIG_STM32F7_I2S3_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S3_DATAMASK;
+  priv->align   = STM32_I2S3_DATAMASK;
 #endif
 }
 #endif /* CONFIG_STM32F7_I2S3 */

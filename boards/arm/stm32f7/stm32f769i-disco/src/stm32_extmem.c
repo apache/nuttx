@@ -47,7 +47,7 @@
 #  warning "FMC is not enabled"
 #endif
 
-#if STM32F7_NGPIO < 8
+#if STM32_NGPIO < 8
 #  error "Required GPIO ports not enabled"
 #endif
 

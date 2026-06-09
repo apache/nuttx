@@ -127,7 +127,7 @@ int stm32_spidev_bus_test(void)
       return -ENODEV;
     }
 
-  /* Default SPI1 to STM32F7_SPI1_FREQ and mode */
+  /* Default SPI1 to STM32_SPI1_FREQ and mode */
 
   SPI_SETFREQUENCY(g_spi1, CONFIG_STM32F7_SPI1_TEST_FREQ);
   SPI_SETBITS(g_spi1, CONFIG_STM32F7_SPI1_TEST_BITS);
@@ -145,7 +145,7 @@ int stm32_spidev_bus_test(void)
       return -ENODEV;
     }
 
-  /* Default SPI2 to STM32F7_SPI2_FREQ and mode */
+  /* Default SPI2 to STM32_SPI2_FREQ and mode */
 
   SPI_SETFREQUENCY(g_spi2, CONFIG_STM32F7_SPI2_TEST_FREQ);
   SPI_SETBITS(g_spi2, CONFIG_STM32F7_SPI2_TEST_BITS);
@@ -163,7 +163,7 @@ int stm32_spidev_bus_test(void)
       return -ENODEV;
     }
 
-  /* Default SPI3 to STM32F7_SPI3_FREQ and mode */
+  /* Default SPI3 to STM32_SPI3_FREQ and mode */
 
   SPI_SETFREQUENCY(g_spi3, CONFIG_STM32F7_SPI3_TEST_FREQ);
   SPI_SETBITS(g_spi3, CONFIG_STM32F7_SPI3_TEST_BITS);

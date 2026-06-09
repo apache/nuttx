@@ -376,9 +376,9 @@
 
 /* ADC1 + ADC2 + ADC3 interrupt */
 
-#define STM32F7_IRQ_ADC1_FOC  STM32_IRQ_ADC
-#define STM32F7_IRQ_ADC2_FOC  STM32_IRQ_ADC
-#define STM32F7_IRQ_ADC3_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC1_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC2_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC3_FOC  STM32_IRQ_ADC
 
 /* ADC common ***************************************************************/
 
@@ -392,38 +392,38 @@
 
 #ifdef CONFIG_STM32F7_FOC_FOC0
 #  ifdef CONFIG_STM32F7_FOC_FOC0_ADC1
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC1_FOC
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC1_FOC
 #    define FOC0_ADC_CMN FOC_ADC1_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC0_ADC2
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC2_FOC
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC2_FOC
 #    define FOC0_ADC_CMN FOC_ADC2_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC0_ADC3
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC3_FOC
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC3_FOC
 #    define FOC0_ADC_CMN FOC_ADC3_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC0_ADC4
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC4_FOC
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC4_FOC
 #    define FOC0_ADC_CMN FOC_ADC4_CMN
 #  endif
 #endif
 
 #ifdef CONFIG_STM32F7_FOC_FOC1
 #  ifdef CONFIG_STM32F7_FOC_FOC1_ADC1
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC1_FOC
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC1_FOC
 #    define FOC1_ADC_CMN FOC_ADC1_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC1_ADC2
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC2_FOC
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC2_FOC
 #    define FOC1_ADC_CMN FOC_ADC2_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC1_ADC3
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC3_FOC
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC3_FOC
 #    define FOC1_ADC_CMN FOC_ADC3_CMN
 #  endif
 #  ifdef CONFIG_STM32F7_FOC_FOC1_ADC4
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC4_FOC
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC4_FOC
 #    define FOC1_ADC_CMN FOC_ADC4_CMN
 #  endif
 #endif
@@ -772,7 +772,7 @@ void stm32_foc_sync_all(void)
 
       /* Store EGR register address */
 
-      egr_reg[i] = foc_dev->pwm_base + STM32F7_GTIM_EGR_OFFSET;
+      egr_reg[i] = foc_dev->pwm_base + STM32_GTIM_EGR_OFFSET;
     }
 
   /* Write all registers at once */

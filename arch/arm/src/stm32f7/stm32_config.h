@@ -46,19 +46,19 @@
 #  undef CONFIG_STM32F7_GPIOE_IRQ
 #endif
 
-#if STM32F7_NPORTS < 1
+#if STM32_NPORTS < 1
 #  undef CONFIG_STM32F7_GPIOA_IRQ
 #endif
-#if STM32F7_NPORTS < 2
+#if STM32_NPORTS < 2
 #  undef CONFIG_STM32F7_GPIOB_IRQ
 #endif
-#if STM32F7_NPORTS < 3
+#if STM32_NPORTS < 3
 #  undef CONFIG_STM32F7_GPIOC_IRQ
 #endif
-#if STM32F7_NPORTS < 4
+#if STM32_NPORTS < 4
 #  undef CONFIG_STM32F7_GPIOD_IRQ
 #endif
-#if STM32F7_NPORTS < 5
+#if STM32_NPORTS < 5
 #  undef CONFIG_STM32F7_GPIOE_IRQ
 #endif
 
@@ -66,25 +66,25 @@
 
 /* Don't enable UARTs not supported by the chip. */
 
-#if STM32F7_NUART < 1
+#if STM32_NUART < 1
 #  undef CONFIG_STM32F7_UART0
 #  undef CONFIG_STM32F7_UART1
 #  undef CONFIG_STM32F7_UART2
 #  undef CONFIG_STM32F7_UART3
 #  undef CONFIG_STM32F7_UART4
-#elif STM32F7_NUART < 2
+#elif STM32_NUART < 2
 #  undef CONFIG_STM32F7_UART1
 #  undef CONFIG_STM32F7_UART2
 #  undef CONFIG_STM32F7_UART3
 #  undef CONFIG_STM32F7_UART4
-#elif STM32F7_NUART < 3
+#elif STM32_NUART < 3
 #  undef CONFIG_STM32F7_UART2
 #  undef CONFIG_STM32F7_UART3
 #  undef CONFIG_STM32F7_UART4
-#elif STM32F7_NUART < 4
+#elif STM32_NUART < 4
 #  undef CONFIG_STM32F7_UART3
 #  undef CONFIG_STM32F7_UART4
-#elif STM32F7_NUART < 5
+#elif STM32_NUART < 5
 #  undef CONFIG_STM32F7_UART4
 #endif
 
@@ -115,14 +115,14 @@
 
 /* Don't enable USARTs not supported by the chip. */
 
-#if STM32F7_NUSART < 1
+#if STM32_NUSART < 1
 #  undef CONFIG_STM32F7_USART0
 #  undef CONFIG_STM32F7_USART1
 #  undef CONFIG_STM32F7_USART2
-#elif STM32F7_NUSART < 2
+#elif STM32_NUSART < 2
 #  undef CONFIG_STM32F7_USART1
 #  undef CONFIG_STM32F7_USART2
-#elif STM32F7_NUSART < 3
+#elif STM32_NUSART < 3
 #  undef CONFIG_STM32F7_USART2
 #endif
 
@@ -158,8 +158,8 @@
 
 /* Is there a serial console?  There should be no more than one defined.
  * It could be on any:
- * UARTn, n=1..STM32F7_NUART, or
- * USARTn, n=1..STM32F7_NUSART
+ * UARTn, n=1..STM32_NUART, or
+ * USARTn, n=1..STM32_NUSART
  */
 
 #undef HAVE_SERIAL_CONSOLE

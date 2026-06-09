@@ -130,7 +130,7 @@ static int     stm32_bbsram_unlink(struct inode *inode);
  ****************************************************************************/
 
 #if defined(CONFIG_BBSRAM_DEBUG)
-static uint8_t debug[STM32F7_BBSRAM_SIZE];
+static uint8_t debug[STM32_BBSRAM_SIZE];
 #endif
 
 static const struct file_operations g_stm32_bbsram_fops =
@@ -544,7 +544,7 @@ static int stm32_bbsram_ioctl(struct file *filep, int cmd,
   DEBUGASSERT(inode->i_private);
   bbr = inode->i_private;
 
-  if (cmd == STM32F7_BBSRAM_GETDESC_IOCTL)
+  if (cmd == STM32_BBSRAM_GETDESC_IOCTL)
     {
       struct bbsramd_s *bbrr = (struct bbsramd_s *)((uintptr_t)arg);
 
@@ -627,7 +627,7 @@ static int stm32_bbsram_unlink(struct inode *inode)
 static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 {
   int i;
-  int avail = STM32F7_BBSRAM_SIZE;
+  int avail = STM32_BBSRAM_SIZE;
   int alloc;
   int size;
   int ret = -EFBIG;
