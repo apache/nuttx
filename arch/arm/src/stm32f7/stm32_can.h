@@ -151,4 +151,4 @@ int stm32_cansockinitialize(int port);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_CAN_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32F7_CAN_H */

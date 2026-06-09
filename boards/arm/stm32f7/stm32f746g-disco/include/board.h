@@ -152,8 +152,8 @@
 /* SAIx input frequency = 25 / M * N / Q / P
  *   25000000 / 25 * 192 / 2 / 1
  */
-#define STM32F7_SAI1_FREQUENCY           (49142857)
-#define STM32F7_SAI2_FREQUENCY           (49142857)
+#define STM32_SAI1_FREQUENCY           (49142857)
+#define STM32_SAI2_FREQUENCY           (49142857)
 
 /* Configure Dedicated Clock Configuration Register */
 
