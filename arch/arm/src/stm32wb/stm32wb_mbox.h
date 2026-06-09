@@ -42,34 +42,34 @@
 
 /* Mailbox channels */
 
-#define STM32WB_MBOX_BLEEVT_CHANNEL       1
-#define STM32WB_MBOX_BLECMD_CHANNEL       1
-#define STM32WB_MBOX_SYSEVT_CHANNEL       2
-#define STM32WB_MBOX_SYSCMD_CHANNEL       2
-#define STM32WB_MBOX_EVT_RELEASE_CHANNEL  4
-#define STM32WB_MBOX_BLEACL_CHANNEL       6
+#define STM32_MBOX_BLEEVT_CHANNEL       1
+#define STM32_MBOX_BLECMD_CHANNEL       1
+#define STM32_MBOX_SYSEVT_CHANNEL       2
+#define STM32_MBOX_SYSCMD_CHANNEL       2
+#define STM32_MBOX_EVT_RELEASE_CHANNEL  4
+#define STM32_MBOX_BLEACL_CHANNEL       6
 
 /* Mailbox packet types */
 
-#define STM32WB_MBOX_HCICMD               0x01
-#define STM32WB_MBOX_HCIACL               0x02
-#define STM32WB_MBOX_HCIEVT               0x04
-#define STM32WB_MBOX_SYSCMD               0x10
-#define STM32WB_MBOX_SYSEVT               0x12
-#define STM32WB_MBOX_SYSACK               0xe0
+#define STM32_MBOX_HCICMD               0x01
+#define STM32_MBOX_HCIACL               0x02
+#define STM32_MBOX_HCIEVT               0x04
+#define STM32_MBOX_SYSCMD               0x10
+#define STM32_MBOX_SYSEVT               0x12
+#define STM32_MBOX_SYSACK               0xe0
 
 /* Mailbox configuration helpers */
 
-#define STM32WB_MBOX_BLE_ATT_DEFAULT_MTU  23
-#define STM32WB_MBOX_C2_MEM_BLOCK_SZ      32
+#define STM32_MBOX_BLE_ATT_DEFAULT_MTU  23
+#define STM32_MBOX_C2_MEM_BLOCK_SZ      32
 
 #define DIV_UP(a, b)    (((a) + (b) - 1) / (b))
 
-#define STM32WB_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(max_mtu) \
-  (DIV_UP((max_mtu), STM32WB_MBOX_BLE_ATT_DEFAULT_MTU - 5) * 2)
+#define STM32_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(max_mtu) \
+  (DIV_UP((max_mtu), STM32_MBOX_BLE_ATT_DEFAULT_MTU - 5) * 2)
 
-#define STM32WB_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(max_mtu, max_conn, pw) \
-  ((pw) + ((max_conn) + 1) * (DIV_UP((max_mtu) + 4, STM32WB_MBOX_C2_MEM_BLOCK_SZ) + 2))
+#define STM32_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(max_mtu, max_conn, pw) \
+  ((pw) + ((max_conn) + 1) * (DIV_UP((max_mtu) + 4, STM32_MBOX_C2_MEM_BLOCK_SZ) + 2))
 
 /****************************************************************************
  * Public Types

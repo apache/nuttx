@@ -98,7 +98,7 @@ int stm32wb_pmstop(bool lpds)
    * register CR1.
    */
 
-  regval  = getreg32(STM32WB_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
 
   /* Select Stop 1 mode with low-power regulator if so requested */
@@ -108,7 +108,7 @@ int stm32wb_pmstop(bool lpds)
       regval |= PWR_CR1_LPMS_STOP1;
     }
 
-  putreg32(regval, STM32WB_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 
   return do_stop();
 }
@@ -135,10 +135,10 @@ int stm32wb_pmstop2(void)
 
   /* Select Stop 2 mode in power control register 1. */
 
-  regval  = getreg32(STM32WB_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
   regval |= PWR_CR1_LPMS_STOP2;
-  putreg32(regval, STM32WB_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 
   return do_stop();
 }

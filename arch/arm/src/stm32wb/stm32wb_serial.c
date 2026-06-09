@@ -379,13 +379,13 @@ static struct stm32wb_serial_s g_lpuart1priv =
       .priv      = &g_lpuart1priv,
     },
 
-  .irq           = STM32WB_IRQ_LPUART1,
+  .irq           = STM32_IRQ_LPUART1,
   .parity        = CONFIG_LPUART1_PARITY,
   .bits          = CONFIG_LPUART1_BITS,
   .stopbits2     = CONFIG_LPUART1_2STOP,
   .baud          = CONFIG_LPUART1_BAUD,
-  .apbclock      = STM32WB_PCLK1_FREQUENCY,
-  .usartbase     = STM32WB_LPUART1_BASE,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_LPUART1_BASE,
   .tx_gpio       = GPIO_LPUART1_TX,
   .rx_gpio       = GPIO_LPUART1_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
@@ -441,13 +441,13 @@ static struct stm32wb_serial_s g_usart1priv =
       .priv      = &g_usart1priv,
     },
 
-  .irq           = STM32WB_IRQ_USART1,
+  .irq           = STM32_IRQ_USART1,
   .parity        = CONFIG_USART1_PARITY,
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32WB_PCLK2_FREQUENCY,
-  .usartbase     = STM32WB_USART1_BASE,
+  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
@@ -478,7 +478,7 @@ static struct stm32wb_serial_s g_usart1priv =
 /* This table lets us iterate over the configured USARTs */
 
 static struct stm32wb_serial_s *
-const g_uart_devs[STM32WB_NLPUART + STM32WB_NUSART] =
+const g_uart_devs[STM32_NLPUART + STM32_NUSART] =
 {
 #ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
   [0] = &g_lpuart1priv,
@@ -542,15 +542,15 @@ void stm32wb_serial_setusartint(struct stm32wb_serial_s *priv, uint16_t ie)
    * enable/usage table above)
    */
 
-  cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  cr = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   cr &= ~(USART_CR1_USED_INTS);
   cr |= (ie & (USART_CR1_USED_INTS));
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr);
 
-  cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  cr = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   cr &= ~USART_CR3_EIE;
   cr |= (ie & USART_CR3_EIE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, cr);
+  stm32wb_serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
 }
 
 /****************************************************************************
@@ -610,8 +610,8 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
        * USART_CR3_CTSIE    USART_ISR_CTS    CTS flag          (not used)
        */
 
-      cr1 = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-      cr3 = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+      cr1 = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+      cr3 = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
 
       /* Return the current interrupt mask value for the used interrupts.
        * Notice that this depends on the fact that none of the used interrupt
@@ -686,8 +686,8 @@ static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
 
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
-  cr1 = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-  brr = stm32wb_serial_getreg(priv, STM32WB_USART_BRR_OFFSET);
+  cr1 = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  brr = stm32wb_serial_getreg(priv, STM32_USART_BRR_OFFSET);
   brr &= ~(USART_BRR_MANT_MASK | USART_BRR_FRAC_MASK);
 
   if (usartdiv8 > 100)
@@ -713,8 +713,8 @@ static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
       cr1 |= USART_CR1_OVER8;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
-  stm32wb_serial_putreg(priv, STM32WB_USART_BRR_OFFSET, brr);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+  stm32wb_serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 }
 #endif
 
@@ -750,7 +750,7 @@ static void stm32wb_serial_setbaud_lpuart(struct stm32wb_serial_s *priv)
       brr = LPUART_BRR_MIN;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_BRR_OFFSET, brr);
+  stm32wb_serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 }
 #endif
 #endif
@@ -772,7 +772,7 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
   /* Set baud rate */
 
 #ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-  if (priv->usartbase == STM32WB_LPUART1_BASE)
+  if (priv->usartbase == STM32_LPUART1_BASE)
     {
       stm32wb_serial_setbaud_lpuart(priv);
     }
@@ -784,7 +784,7 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
 
   /* Configure parity mode */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
 
   if (priv->parity == 1)       /* Odd parity */
@@ -822,11 +822,11 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
    *              1 start, 8 data (no parity), n stop.
    */
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure STOP bits */
 
-  regval = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+  regval = stm32wb_serial_getreg(priv, STM32_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK);
 
   if (priv->stopbits2)
@@ -834,11 +834,11 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
       regval |= USART_CR2_STOP2;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure hardware flow control */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32WB_FLOWCONTROL_BROKEN)
@@ -855,7 +855,7 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
     }
 #endif
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -900,7 +900,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 
       /* Wait last Tx to complete. */
 
-      while ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+      while ((stm32wb_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
               USART_ISR_TC) == 0);
 
 #ifdef SERIAL_HAVE_RXDMA
@@ -1008,7 +1008,7 @@ static void stm32wb_serial_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32WB_NLPUART + STM32WB_NUSART; n++)
+  for (n = 0; n < STM32_NLPUART + STM32_NUSART; n++)
     {
       struct stm32wb_serial_s *priv = g_uart_devs[n];
 
@@ -1045,15 +1045,15 @@ static void stm32wb_serial_setapbclock(struct uart_dev_s *dev, bool on)
       default:
         return;
 #ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-      case STM32WB_LPUART1_BASE:
+      case STM32_LPUART1_BASE:
         rcc_en = RCC_APB1ENR2_LPUART1EN;
-        regaddr = STM32WB_RCC_APB1ENR2;
+        regaddr = STM32_RCC_APB1ENR2;
         break;
 #endif
 #ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
-      case STM32WB_USART1_BASE:
+      case STM32_USART1_BASE:
         rcc_en = RCC_APB2ENR_USART1EN;
-        regaddr = STM32WB_RCC_APB2ENR;
+        regaddr = STM32_RCC_APB2ENR;
         break;
 #endif
     }
@@ -1139,7 +1139,7 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
 
   /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
               USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
 
@@ -1150,26 +1150,26 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
       regval |= USART_CR2_STOP2;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure CR1 */
 
   /* Clear TE, REm and all interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure CR3 */
 
   /* Clear CTSE, RTSE, and all interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
               USART_CR3_EIE);
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
   /* Configure the USART line format and speed. */
 
@@ -1177,9 +1177,9 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
 
   /* Enable Rx, Tx, and the USART */
 
-  regval      = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval      = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -1231,7 +1231,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
       /* Configure for non-circular DMA reception into the RX FIFO */
 
       stm32wb_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32WB_USART_RDR_OFFSET,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
                      SERIAL_DMA_IFLOW_CONTROL_WORD);
@@ -1242,7 +1242,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
       /* Configure for circular DMA reception into the RX FIFO */
 
       stm32wb_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32WB_USART_RDR_OFFSET,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
                      SERIAL_DMA_CONTROL_WORD);
@@ -1256,9 +1256,9 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
 
   /* Enable receive DMA for the UART */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
@@ -1315,9 +1315,9 @@ static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
 
   /* Disable Rx, Tx, and the UART */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Release pins. "If the serial-attached device is powered down, the TX
    * pin causes back-powering, potentially confusing the device to the point
@@ -1478,7 +1478,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Get the masked USART status word. */
 
-      priv->sr = stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET);
+      priv->sr = stm32wb_serial_getreg(priv, STM32_USART_ISR_OFFSET);
 
       /* USART interrupts:
        *
@@ -1550,7 +1550,7 @@ static int up_interrupt(int irq, void *context, void *arg)
            * interrupt clear register (ICR).
            */
 
-          stm32wb_serial_putreg(priv, STM32WB_USART_ICR_OFFSET,
+          stm32wb_serial_putreg(priv, STM32_USART_ICR_OFFSET,
                                 (USART_ICR_NCF | USART_ICR_ORECF |
                                  USART_ICR_FECF));
         }
@@ -1619,19 +1619,19 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, HDSEL can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Change the TX port to be open-drain/push-pull and enable/disable
          * half-duplex mode.
          */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+        uint32_t cr = stm32wb_serial_getreg(priv, STM32_USART_CR3_OFFSET);
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
@@ -1667,11 +1667,11 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR3_HDSEL;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, cr);
+        stm32wb_serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
@@ -1688,17 +1688,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, {R,T}XINV can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Enable/disable signal inversion. */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+        uint32_t cr = stm32wb_serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
         if (arg & SER_INVERT_ENABLED_RX)
           {
@@ -1718,11 +1718,11 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR2_TXINV;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, cr);
+        stm32wb_serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
@@ -1739,17 +1739,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, SWAP can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Enable/disable Swap mode. */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+        uint32_t cr = stm32wb_serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
         if (arg == SER_SWAP_ENABLED)
           {
@@ -1760,11 +1760,11 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR2_SWAP;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, cr);
+        stm32wb_serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
@@ -1921,8 +1921,8 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET,
+        cr1   = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET,
                               cr1 | USART_CR1_SBK);
         leave_critical_section(flags);
       }
@@ -1934,8 +1934,8 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET,
+        cr1   = stm32wb_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+        stm32wb_serial_putreg(priv, STM32_USART_CR1_OFFSET,
                               cr1 & ~USART_CR1_SBK);
         leave_critical_section(flags);
       }
@@ -1970,7 +1970,7 @@ static int stm32wb_serial_receive(struct uart_dev_s *dev,
 
   /* Get the Rx byte */
 
-  rdr      = stm32wb_serial_getreg(priv, STM32WB_USART_RDR_OFFSET);
+  rdr      = stm32wb_serial_getreg(priv, STM32_USART_RDR_OFFSET);
 
   /* Get the Rx byte plux error information.  Return those in status */
 
@@ -2058,7 +2058,7 @@ static bool stm32wb_serial_rxavailable(struct uart_dev_s *dev)
 {
   struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
 
-  return ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+  return ((stm32wb_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_RXNE) != 0);
 }
 #endif
@@ -2219,7 +2219,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
       /* Configure for non-circular DMA reception into the RX FIFO */
 
       stm32wb_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32WB_USART_RDR_OFFSET,
+                       priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
                        SERIAL_DMA_IFLOW_CONTROL_WORD);
@@ -2230,7 +2230,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
       /* Configure for circular DMA reception into the RX FIFO */
 
       stm32wb_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32WB_USART_RDR_OFFSET,
+                       priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
                        SERIAL_DMA_CONTROL_WORD);
@@ -2396,7 +2396,7 @@ static void stm32wb_serial_send(struct uart_dev_s *dev, int ch)
     }
 #endif
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_TDR_OFFSET, (uint32_t)ch);
+  stm32wb_serial_putreg(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -2482,7 +2482,7 @@ static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable)
 static bool stm32wb_serial_txready(struct uart_dev_s *dev)
 {
   struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
-  return ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+  return ((stm32wb_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_TXE) != 0);
 }
 
@@ -2525,11 +2525,11 @@ static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
    * will release Rx DMA.
    */
 
-  priv->sr = stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET);
+  priv->sr = stm32wb_serial_getreg(priv, STM32_USART_ISR_OFFSET);
 
   if ((priv->sr & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE)) != 0)
     {
-      stm32wb_serial_putreg(priv, STM32WB_USART_ICR_OFFSET,
+      stm32wb_serial_putreg(priv, STM32_USART_ICR_OFFSET,
                             (USART_ICR_NCF | USART_ICR_ORECF |
                              USART_ICR_FECF));
     }
@@ -2655,7 +2655,7 @@ static int stm32wb_serial_pmprepare(struct pm_callback_s *cb, int domain,
          * buffers.
          */
 
-        for (n = 0; n < STM32WB_NLPUART + STM32WB_NUSART; n++)
+        for (n = 0; n < STM32_NLPUART + STM32_NUSART; n++)
           {
             struct stm32wb_serial_s *priv = g_uart_devs[n];
 
@@ -2723,7 +2723,7 @@ void arm_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32WB_NLPUART + STM32WB_NUSART; i++)
+  for (i = 0; i < STM32_NLPUART + STM32_NUSART; i++)
     {
       if (g_uart_devs[i])
         {
@@ -2787,7 +2787,7 @@ void arm_serialinit(void)
 
   strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
-  for (i = 0; i < STM32WB_NLPUART + STM32WB_NUSART; i++)
+  for (i = 0; i < STM32_NLPUART + STM32_NUSART; i++)
     {
       /* Don't create a device for non-configured ports. */
 

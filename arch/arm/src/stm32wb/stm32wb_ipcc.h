@@ -88,7 +88,7 @@ void stm32wb_ipccenable(void);
 
 static inline bool stm32wb_ipcc_rxactive(uint8_t chan)
 {
-  return (getreg32(STM32WB_IPCC_C2TOC1SR) & IPCC_C2TOC1SR_BIT(chan)) != 0;
+  return (getreg32(STM32_IPCC_C2TOC1SR) & IPCC_C2TOC1SR_BIT(chan)) != 0;
 }
 
 /****************************************************************************
@@ -101,7 +101,7 @@ static inline bool stm32wb_ipcc_rxactive(uint8_t chan)
 
 static inline bool stm32wb_ipcc_txactive(uint8_t chan)
 {
-  return (getreg32(STM32WB_IPCC_C1TOC2SR) & IPCC_C1TOC2SR_BIT(chan)) != 0;
+  return (getreg32(STM32_IPCC_C1TOC2SR) & IPCC_C1TOC2SR_BIT(chan)) != 0;
 }
 
 /****************************************************************************
@@ -114,7 +114,7 @@ static inline bool stm32wb_ipcc_txactive(uint8_t chan)
 
 static inline void stm32wb_ipcc_settxactive(uint8_t chan)
 {
-  putreg32(IPCC_C1SCR_SET_BIT(chan), STM32WB_IPCC_C1SCR);
+  putreg32(IPCC_C1SCR_SET_BIT(chan), STM32_IPCC_C1SCR);
 }
 
 /****************************************************************************
@@ -127,9 +127,9 @@ static inline void stm32wb_ipcc_settxactive(uint8_t chan)
 
 static inline void stm32wb_ipcc_masktxf(uint8_t chan)
 {
-  uint32_t regval = getreg32(STM32WB_IPCC_C1MR);
+  uint32_t regval = getreg32(STM32_IPCC_C1MR);
   regval |= IPCC_C1MR_FM_BIT(chan);
-  putreg32(regval, STM32WB_IPCC_C1MR);
+  putreg32(regval, STM32_IPCC_C1MR);
 }
 
 /****************************************************************************
@@ -142,9 +142,9 @@ static inline void stm32wb_ipcc_masktxf(uint8_t chan)
 
 static inline void stm32wb_ipcc_unmasktxf(uint8_t chan)
 {
-  uint32_t regval = getreg32(STM32WB_IPCC_C1MR);
+  uint32_t regval = getreg32(STM32_IPCC_C1MR);
   regval &= ~IPCC_C1MR_FM_BIT(chan);
-  putreg32(regval, STM32WB_IPCC_C1MR);
+  putreg32(regval, STM32_IPCC_C1MR);
 }
 
 /****************************************************************************
@@ -157,9 +157,9 @@ static inline void stm32wb_ipcc_unmasktxf(uint8_t chan)
 
 static inline void stm32wb_ipcc_maskrxo(uint8_t chan)
 {
-  uint32_t regval = getreg32(STM32WB_IPCC_C1MR);
+  uint32_t regval = getreg32(STM32_IPCC_C1MR);
   regval |= IPCC_C1MR_OM_BIT(chan);
-  putreg32(regval, STM32WB_IPCC_C1MR);
+  putreg32(regval, STM32_IPCC_C1MR);
 }
 
 /****************************************************************************
@@ -172,9 +172,9 @@ static inline void stm32wb_ipcc_maskrxo(uint8_t chan)
 
 static inline void stm32wb_ipcc_unmaskrxo(uint8_t chan)
 {
-  uint32_t regval = getreg32(STM32WB_IPCC_C1MR);
+  uint32_t regval = getreg32(STM32_IPCC_C1MR);
   regval &= ~IPCC_C1MR_OM_BIT(chan);
-  putreg32(regval, STM32WB_IPCC_C1MR);
+  putreg32(regval, STM32_IPCC_C1MR);
 }
 
 #undef EXTERN

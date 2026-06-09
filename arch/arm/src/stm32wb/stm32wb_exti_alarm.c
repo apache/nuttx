@@ -71,7 +71,7 @@ static int stm32wb_exti_alarm_isr(int irq, void *context, void *arg)
 
   /* Clear the pending EXTI interrupt */
 
-  putreg32(EXTI_PR1_PIF(EXTI_EVT_RTCALARM), STM32WB_EXTI_PR1);
+  putreg32(EXTI_PR1_PIF(EXTI_EVT_RTCALARM), STM32_EXTI_PR1);
 
   return ret;
 }
@@ -107,29 +107,29 @@ int stm32wb_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32WB_IRQ_RTCALRM, stm32wb_exti_alarm_isr, NULL);
-      up_enable_irq(STM32WB_IRQ_RTCALRM);
+      irq_attach(STM32_IRQ_RTCALRM, stm32wb_exti_alarm_isr, NULL);
+      up_enable_irq(STM32_IRQ_RTCALRM);
     }
   else
     {
-      up_disable_irq(STM32WB_IRQ_RTCALRM);
+      up_disable_irq(STM32_IRQ_RTCALRM);
     }
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32WB_EXTI_RTSR1,
+  modifyreg32(STM32_EXTI_RTSR1,
               risingedge ? 0 : EXTI_RTSR1_RT(EXTI_EVT_RTCALARM),
               risingedge ? EXTI_RTSR1_RT(EXTI_EVT_RTCALARM) : 0);
-  modifyreg32(STM32WB_EXTI_FTSR1,
+  modifyreg32(STM32_EXTI_FTSR1,
               fallingedge ? 0 : EXTI_FTSR1_FT(EXTI_EVT_RTCALARM),
               fallingedge ? EXTI_FTSR1_FT(EXTI_EVT_RTCALARM) : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32WB_EXTI_C1EMR1,
+  modifyreg32(STM32_EXTI_C1EMR1,
               event ? 0 : EXTI_C1EMR1_EM(EXTI_EVT_RTCALARM),
               event ? EXTI_C1EMR1_EM(EXTI_EVT_RTCALARM) : 0);
-  modifyreg32(STM32WB_EXTI_C1IMR1,
+  modifyreg32(STM32_EXTI_C1IMR1,
               func ? 0 : EXTI_C1IMR1_IM(EXTI_EVT_RTCALARM),
               func ? EXTI_C1IMR1_IM(EXTI_EVT_RTCALARM) : 0);
 

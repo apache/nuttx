@@ -60,20 +60,20 @@
 
 /* Set the range of system SRAM1 */
 
-#define SRAM1_START     STM32WB_SRAM1_BASE
-#define SRAM1_END       (SRAM1_START + STM32WB_SRAM1_SIZE)
+#define SRAM1_START     STM32_SRAM1_BASE
+#define SRAM1_END       (SRAM1_START + STM32_SRAM1_SIZE)
 
 /* Set the range of SRAM2a as well, requires a second memory region */
 
 #ifdef CONFIG_STM32WB_SRAM2A_HEAP
-#  define SRAM2A_START  (STM32WB_SRAM2A_BASE + CONFIG_STM32WB_SRAM2A_USER_BASE_OFFSET)
+#  define SRAM2A_START  (STM32_SRAM2A_BASE + CONFIG_STM32WB_SRAM2A_USER_BASE_OFFSET)
 #  define SRAM2A_END    (SRAM2A_START + CONFIG_STM32WB_SRAM2A_USER_SIZE)
 #endif
 
 /* Set the range of SRAM2b as well, requires a third memory region */
 
 #ifdef CONFIG_STM32WB_SRAM2B_HEAP
-#  define SRAM2B_START  STM32WB_SRAM2B_BASE
+#  define SRAM2B_START  STM32_SRAM2B_BASE
 #  define SRAM2B_END    (SRAM2B_START + CONFIG_STM32WB_SRAM2B_USER_SIZE)
 #endif
 
@@ -83,13 +83,13 @@
  */
 
 #ifdef CONFIG_STM32WB_SRAM2A_HEAP
-#  if SRAM2A_END > STM32WB_SRAM2A_BASE + STM32WB_SRAM2A_SIZE
+#  if SRAM2A_END > STM32_SRAM2A_BASE + STM32_SRAM2A_SIZE
 #    error "SRAM2a heap memory region is out of it's physical address space"
 #  endif
 #endif
 
 #ifdef CONFIG_STM32WB_SRAM2B_HEAP
-#  if SRAM2B_END > STM32WB_SRAM2B_BASE + STM32WB_SRAM2B_SIZE
+#  if SRAM2B_END > STM32_SRAM2B_BASE + STM32_SRAM2B_SIZE
 #    error "SRAM2b heap memory region is out of it's physical address space"
 #  endif
 #endif
