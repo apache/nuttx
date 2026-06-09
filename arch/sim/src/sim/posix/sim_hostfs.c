@@ -443,6 +443,8 @@ int host_readdir(void *dirp, struct nuttx_dirent_s *entry)
       strncpy(entry->d_name, ent->d_name, sizeof(entry->d_name) - 1);
       entry->d_name[sizeof(entry->d_name) - 1] = 0;
 
+      entry->d_ino = ent->d_ino;
+
       /* Map the type */
 
       if (ent->d_type == DT_REG)

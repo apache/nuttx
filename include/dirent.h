@@ -107,11 +107,12 @@
  * of char containing at least {NAME_MAX} plus one elements.
  *
  * POSIX also requires the field d_ino (type ino_t) that provides the file
- * serial number.  This functionality is not implemented in NuttX.
+ * serial number.
  */
 
 struct dirent
 {
+  ino_t    d_ino;                 /* File serial number */
   uint8_t  d_type;                /* Type of file */
   char     d_name[NAME_MAX + 1];  /* File name */
 };
