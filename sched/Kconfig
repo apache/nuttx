@@ -534,9 +534,9 @@ endif # INIT_FILE
 menuconfig ETC_ROMFS
 	bool "Auto-mount etc baked-in ROMFS image"
 	default n
-	depends on !DISABLE_MOUNTPOINT && FS_ROMFS
+	depends on !DISABLE_MOUNTPOINT && (FS_ROMFS || FS_CROMFS)
 	---help---
-		Mount a ROMFS filesystem at /etc and provide a system init
+		Mount a ROMFS or a CROMFS filesystem at /etc and provide a system init
 		script at /etc/init.d/rc.sysinit and a startup script
 		at /etc/init.d/rcS.  The default system init script mounts
 		/tmp as TMPFS when FS_TMPFS is enabled, otherwise it can
