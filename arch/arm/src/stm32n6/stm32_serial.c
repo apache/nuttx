@@ -274,7 +274,7 @@ static struct stm32_serial_s g_usart1priv =
 /* This table lets us iterate over the configured USARTs */
 
 static struct stm32_serial_s * const
-  g_uart_devs[STM32N6_NUSART] =
+  g_uart_devs[STM32_NUSART] =
 {
 #ifdef CONFIG_STM32N6_USART1_SERIALDRIVER
   [0] = &g_usart1priv,
@@ -639,7 +639,7 @@ static void stm32serial_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32N6_NUSART; n++)
+  for (n = 0; n < STM32_NUSART; n++)
     {
       struct stm32_serial_s *priv = g_uart_devs[n];
 
@@ -1559,7 +1559,7 @@ static int stm32serial_pmprepare(struct pm_callback_s *cb, int domain,
        * buffers.
        */
 
-      for (n = 0; n < STM32N6_NUSART; n++)
+      for (n = 0; n < STM32_NUSART; n++)
         {
           struct stm32_serial_s *priv = g_uart_devs[n];
 
@@ -1629,7 +1629,7 @@ void arm_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32N6_NUSART; i++)
+  for (i = 0; i < STM32_NUSART; i++)
     {
       if (g_uart_devs[i])
         {
@@ -1694,7 +1694,7 @@ void arm_serialinit(void)
 
   strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
-  for (i = 0; i < STM32N6_NUSART; i++)
+  for (i = 0; i < STM32_NUSART; i++)
     {
       /* Don't create a device for non-configured ports. */
 
