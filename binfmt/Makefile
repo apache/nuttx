@@ -28,6 +28,10 @@ CSRCS  = binfmt_globals.c binfmt_initialize.c binfmt_register.c binfmt_unregiste
 CSRCS += binfmt_loadmodule.c binfmt_unloadmodule.c binfmt_execmodule.c
 CSRCS += binfmt_exec.c binfmt_copyargv.c binfmt_copyactions.c binfmt_dumpmodule.c
 
+ifeq ($(CONFIG_SCHED_USER_IDENTITY),y)
+CSRCS += binfmt_checkexec.c
+endif
+
 ifeq ($(CONFIG_BINFMT_LOADABLE),y)
 CSRCS += binfmt_exit.c
 endif
