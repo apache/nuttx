@@ -241,7 +241,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32L5_NPORTS];
+EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes

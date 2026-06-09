@@ -61,9 +61,9 @@
 #undef CONFIG_STM32L5_SYSTICK_HCLKd8
 
 #ifdef CONFIG_STM32L5_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32L5_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
-#  define SYSTICK_RELOAD ((STM32L5_HCLK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
 #endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
@@ -137,7 +137,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  irq_attach(STM32L5_IRQ_SYSTICK, (xcpt_t)stm32l5_timerisr, NULL);
+  irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32l5_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -146,5 +146,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(STM32L5_IRQ_SYSTICK);
+  up_enable_irq(STM32_IRQ_SYSTICK);
 }

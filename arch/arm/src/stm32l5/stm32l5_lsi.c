@@ -46,11 +46,11 @@ void stm32l5_rcc_enablelsi(void)
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32L5_RCC_CSR, 0, RCC_CSR_LSION);
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSION);
 
   /* Wait for the internal LSI oscillator to be stable. */
 
-  while ((getreg32(STM32L5_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSIRDY) == 0);
 }
 
 /****************************************************************************
@@ -67,7 +67,7 @@ void stm32l5_rcc_disablelsi(void)
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32L5_RCC_CSR, RCC_CSR_LSION, 0);
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSION, 0);
 
   /* LSIRDY should go low after 3 LSI clock cycles */
 }
