@@ -309,11 +309,14 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 int weak_function up_timer_gettime(struct timespec *ts)
 {
   int ret = -EAGAIN;
+  uint64_t usec;
 
   if (g_timer.lower != NULL)
     {
-      ts->tv_sec  = current_usec() / USEC_PER_SEC;
-      ts->tv_nsec = (current_usec() % USEC_PER_SEC) * NSEC_PER_USEC;
+      usec = current_usec();
+
+      ts->tv_sec  = usec / USEC_PER_SEC;
+      ts->tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
       ret = OK;
     }
 
