@@ -462,6 +462,8 @@ struct task_group_s
   gid_t   tg_gid;                   /* User group identity                      */
   uid_t   tg_euid;                  /* Effective user identity                  */
   gid_t   tg_egid;                  /* Effective user group identity            */
+  uid_t   tg_suid;                  /* Saved set-user identity                  */
+  gid_t   tg_sgid;                  /* Saved set-group identity                 */
 #endif
 
   /* Group membership *******************************************************/
