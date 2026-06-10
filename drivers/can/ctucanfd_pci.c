@@ -651,10 +651,19 @@ static int ctucanfd_chrdev_send(FAR struct can_dev_s *dev,
       bytes = MIN(msg->cm_hdr.ch_dlc, CAN_MAX_DLEN);
     }
 
-  for (i = 0; i < bytes; i++)
+  /* Pack bytes into aligned register writes and pad the final word. */
+
+  for (i = 0; i < bytes; i += 4)
     {
-      ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i,
-                      msg->cm_data[i]);
+      regval  = (uint32_t)msg->cm_data[i];
+      regval |= (uint32_t)(i + 1 < bytes ? msg->cm_data[i + 1] : 0)
+                << 8;
+      regval |= (uint32_t)(i + 2 < bytes ? msg->cm_data[i + 2] : 0)
+                << 16;
+      regval |= (uint32_t)(i + 3 < bytes ? msg->cm_data[i + 3] : 0)
+                << 24;
+
+      ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i, regval);
     }
 
   /* Set TX ready */
@@ -1170,10 +1179,19 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSL, 0);
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSU, 0);
 
-      for (i = 0; i < frame->can_dlc; i++)
+      /* Pack bytes into aligned register writes and pad the final word. */
+
+      for (i = 0; i < frame->can_dlc; i += 4)
         {
-          ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i,
-                          frame->data[i]);
+          regval  = (uint32_t)frame->data[i];
+          regval |= (uint32_t)(i + 1 < frame->can_dlc ?
+                               frame->data[i + 1] : 0) << 8;
+          regval |= (uint32_t)(i + 2 < frame->can_dlc ?
+                               frame->data[i + 2] : 0) << 16;
+          regval |= (uint32_t)(i + 3 < frame->can_dlc ?
+                               frame->data[i + 3] : 0) << 24;
+
+          ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i, regval);
         }
     }
 #ifdef CONFIG_NET_CAN_CANFD
@@ -1216,10 +1234,19 @@ static int ctucanfd_sock_transmit(FAR struct netdev_lowerhalf_s *dev,
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSL, 0);
       ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_TSU, 0);
 
-      for (i = 0; i < frame->len; i++)
+      /* Pack bytes into aligned register writes and pad the final word. */
+
+      for (i = 0; i < frame->len; i += 4)
         {
-          ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i,
-                          frame->data[i]);
+          regval  = (uint32_t)frame->data[i];
+          regval |= (uint32_t)(i + 1 < frame->len ? frame->data[i + 1] : 0)
+                    << 8;
+          regval |= (uint32_t)(i + 2 < frame->len ? frame->data[i + 2] : 0)
+                    << 16;
+          regval |= (uint32_t)(i + 3 < frame->len ? frame->data[i + 3] : 0)
+                    << 24;
+
+          ctucanfd_putreg(priv, offset + CTUCANFD_TXBUF_DATA + i, regval);
         }
     }
 #endif
