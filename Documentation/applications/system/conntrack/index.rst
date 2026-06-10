@@ -1,10 +1,9 @@
-============================
-``conntrack`` connection tracking
-============================
+==============================
+``conntrack`` connection track
+==============================
 
-The ``conntrack`` command is used to list and monitor connection tracking
-entries in the NuttX kernel, similar to the Linux conntrack tool. It
-communicates with the kernel via Netlink (``NETLINK_NETFILTER``).
+The ``conntrack`` command is used to display and monitor connection tracking
+entries in the NuttX kernel. It is similar to Linux's ``conntrack`` tool.
 
 Configuration
 =============
@@ -27,23 +26,26 @@ Usage
    conntrack -L [-f family]
    conntrack -E
 
+Commands
+========
+
+``-L, --dump``
+   List all connection tracking entries.
+
+``-E, --event``
+   Display a real-time event log of connection tracking changes.
+   Press Ctrl+C to stop monitoring.
+
 Options
 =======
 
-``-L, --dump``
-   List all connection tracking entries. For each entry, the protocol,
-   original tuple (source, destination, ports), and reply tuple are
-   displayed.
-
-``-E, --event``
-   Display a real-time event log of connection tracking changes. New
-   connections are shown with ``[NEW]`` and destroyed connections with
-   ``[DESTROY]``. Press Ctrl+C to stop monitoring.
-
 ``-f, --family PROTO``
-   Specify the L3 protocol family for the ``-L`` (dump) option. Valid
-   values are ``ipv4`` (default) and ``ipv6``. This option is only
-   valid with ``-L``.
+   Specify the L3 protocol family. Only valid with ``-L``.
+
+   Supported values:
+
+   - ``ipv4`` (default): Show IPv4 connection tracking entries.
+   - ``ipv6``: Show IPv6 connection tracking entries.
 
 Output Format
 =============
@@ -52,17 +54,19 @@ Each connection tracking entry is displayed in the following format:
 
 .. code-block:: text
 
-   proto orig reply
+   PROTO src=SRC_ADDR dst=DST_ADDR sport=SPORT dport=DPORT src=REPLY_SRC dst=REPLY_DST sport=REPLY_SPORT dport=REPLY_DPORT
 
-Where:
+For ICMP/ICMPv6 entries, the format uses ``type``, ``code``, and ``id``
+instead of ``sport`` and ``dport``:
 
-- ``proto``: Protocol name (``tcp``, ``udp``, ``icmp``, or ``icmp6``)
-- ``orig``: Original direction tuple (``src=``, ``dst=``, ``sport=``/``type=``,
-  ``dport=``/``code=``/``id=``)
-- ``reply``: Reply direction tuple (same format as orig)
+.. code-block:: text
 
-For TCP/UDP entries, the port numbers are shown. For ICMP/ICMPv6 entries,
-the type, code, and id are shown instead.
+   icmp src=SRC_ADDR dst=DST_ADDR type=TYPE code=CODE id=ID src=REPLY_SRC dst=REPLY_DST type=REPLY_TYPE code=REPLY_CODE id=REPLY_ID
+
+Event mode prefixes each entry with an event type:
+
+- ``[NEW]``: A new connection tracking entry was created.
+- ``[DESTROY]``: A connection tracking entry was removed.
 
 Examples
 ========
@@ -84,21 +88,8 @@ Monitor connection tracking events in real-time:
 .. code-block:: text
 
    nsh> conntrack -E
-
-Sample output for ``conntrack -L``:
-
-.. code-block:: text
-
-   tcp   src=10.0.0.1 dst=10.0.0.2 sport=12345 dport=80 src=10.0.0.2 dst=10.0.0.1 sport=80 dport=12345
-   udp   src=10.0.0.1 dst=10.0.0.2 sport=54321 dport=53 src=10.0.0.2 dst=10.0.0.1 sport=53 dport=54321
-   conntrack: 2 flow entries have been shown.
-
-Sample output for ``conntrack -E``:
-
-.. code-block:: text
-
-       [NEW] tcp   src=10.0.0.1 dst=10.0.0.2 sport=12345 dport=80 src=10.0.0.2 dst=10.0.0.1 sport=80 dport=12345
-   [DESTROY] tcp   src=10.0.0.1 dst=10.0.0.2 sport=12345 dport=80 src=10.0.0.2 dst=10.0.0.1 sport=80 dport=12345
+       [NEW] tcp src=10.0.0.1 dst=10.0.0.2 sport=12345 dport=80 src=10.0.0.2 dst=10.0.0.1 sport=80 dport=12345
+   [DESTROY] tcp src=10.0.0.1 dst=10.0.0.2 sport=12345 dport=80 src=10.0.0.2 dst=10.0.0.1 sport=80 dport=12345
 
 See Also
 ========
