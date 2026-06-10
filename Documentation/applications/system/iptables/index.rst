@@ -8,17 +8,17 @@ tables of IPv4 packet filter rules in the NuttX kernel.
 Configuration
 =============
 
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES`
-- :kconfig:option:`CONFIG_NET_IPTABLES`
-- :kconfig:option:`CONFIG_NET_IPv4`
+- ``CONFIG_SYSTEM_IPTABLES``
+- ``CONFIG_NET_IPTABLES``
+- ``CONFIG_NET_IPv4``
 
 The following additional options are available:
 
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES_PRIORITY` - Task priority
+- ``CONFIG_SYSTEM_IPTABLES_PRIORITY`` - Task priority
   (default: 100)
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES_STACKSIZE` - Stack size
+- ``CONFIG_SYSTEM_IPTABLES_STACKSIZE`` - Stack size
   (default: ``DEFAULT_TASK_STACKSIZE``)
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES_LOCK_FILE_PATH` - Lock file
+- ``CONFIG_SYSTEM_IPTABLES_LOCK_FILE_PATH`` - Lock file
   path to prevent concurrent overwrite (default: ``/tmp/iptables.lock``)
 
 Usage
@@ -67,9 +67,9 @@ Options
    The following tables are available:
 
    - ``filter``: The default table for packet filtering (requires
-     :kconfig:option:`CONFIG_NET_IPFILTER`).
+     ``CONFIG_NET_IPFILTER``).
    - ``nat``: Used for Network Address Translation (requires
-     :kconfig:option:`CONFIG_NET_NAT`). Only supports the
+     ``CONFIG_NET_NAT``). Only supports the
      ``MASQUERADE`` target with ``-o`` option.
 
 ``-j, --jump target``
