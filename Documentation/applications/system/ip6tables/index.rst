@@ -8,15 +8,15 @@ tables of IPv6 packet filter rules in the NuttX kernel.
 Configuration
 =============
 
-- :kconfig:option:`CONFIG_SYSTEM_IP6TABLES`
-- :kconfig:option:`CONFIG_NET_IPTABLES`
-- :kconfig:option:`CONFIG_NET_IPv6`
+- ``CONFIG_SYSTEM_IP6TABLES``
+- ``CONFIG_NET_IPTABLES``
+- ``CONFIG_NET_IPv6``
 
 The following additional options are available:
 
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES_PRIORITY` - Task priority
+- ``CONFIG_SYSTEM_IPTABLES_PRIORITY`` - Task priority
   (default: 100)
-- :kconfig:option:`CONFIG_SYSTEM_IPTABLES_STACKSIZE` - Stack size
+- ``CONFIG_SYSTEM_IPTABLES_STACKSIZE`` - Stack size
   (default: ``DEFAULT_TASK_STACKSIZE``)
 
 Usage
@@ -63,7 +63,7 @@ Options
    Specify the table to manipulate. The default table is ``filter``.
 
    Only the ``filter`` table is currently supported (requires
-   :kconfig:option:`CONFIG_NET_IPFILTER`).
+   ``CONFIG_NET_IPFILTER``).
 
 ``-j, --jump target``
    Specify the target of the rule; i.e., what to do if the packet
@@ -157,4 +157,4 @@ Use negation to match all protocols except TCP:
 See Also
 ========
 
-- :doc:`../iptables/index`
+- :doc:`../iptables/index``
