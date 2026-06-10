@@ -78,9 +78,20 @@ int setegid(gid_t gid)
   rtcb   = this_task();
   rgroup = rtcb->group;
 
-  /* Set the task group's group identity. */
-
   DEBUGASSERT(rgroup != NULL);
-  rgroup->tg_egid = gid;
+
+  if (rgroup->tg_egid == 0 ||
+      gid == rgroup->tg_gid || gid == rgroup->tg_sgid)
+    {
+      /* Root may set any value; non-root may only set to real or saved. */
+
+      rgroup->tg_egid = gid;
+    }
+  else
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
   return OK;
 }
