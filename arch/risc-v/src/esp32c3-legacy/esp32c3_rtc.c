@@ -3383,6 +3383,7 @@ int up_rtc_rdalarm(struct timespec *tp, uint32_t alarmid)
 {
   irqstate_t flags;
   struct alm_cbinfo_s *cbinfo;
+  uint64_t time_us;
   DEBUGASSERT(tp != NULL);
   DEBUGASSERT((RTC_ALARM0 <= alarmid) &&
               (alarmid < RTC_ALARM_LAST));
@@ -3393,10 +3394,11 @@ int up_rtc_rdalarm(struct timespec *tp, uint32_t alarmid)
 
   cbinfo = &g_alarmcb[alarmid];
 
-  tp->tv_sec = (rt_timer_time_us() + g_rtc_save->offset +
-              cbinfo->deadline_us) / USEC_PER_SEC;
-  tp->tv_nsec = ((rt_timer_time_us() + g_rtc_save->offset +
-              cbinfo->deadline_us) % USEC_PER_SEC) * NSEC_PER_USEC;
+  time_us = rt_timer_time_us() + g_rtc_save->offset +
+            cbinfo->deadline_us;
+
+  tp->tv_sec = time_us / USEC_PER_SEC;
+  tp->tv_nsec = (time_us % USEC_PER_SEC) * NSEC_PER_USEC;
 
   spin_unlock_irqrestore(&g_rtc_lock, flags);
 
