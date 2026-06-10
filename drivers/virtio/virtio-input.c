@@ -47,7 +47,7 @@
 
 #define VIRTIO_INPUT_EVENT           0
 #define VIRTIO_INPUT_NUM             1
-#define VIRTIO_INPUT_EVT_NUM         8
+#define VIRTIO_INPUT_EVT_NUM         64
 
 /****************************************************************************
  * Private Types
@@ -257,6 +257,68 @@ virtio_input_send_touch_event(FAR struct virtio_input_priv *priv,
 }
 
 /****************************************************************************
+ * Name: virtio_input_send_tablet_event
+ ****************************************************************************/
+
+static void
+virtio_input_send_tablet_event(FAR struct virtio_input_priv *priv,
+                               FAR struct virtio_input_event *event)
+{
+  FAR struct touch_point_s *point = &priv->touchsample.point[0];
+
+  if (event->type == EV_ABS)
+    {
+      switch (event->code)
+        {
+          case ABS_X:
+            point->x = event->value;
+            break;
+
+          case ABS_Y:
+            point->y = event->value;
+            break;
+        }
+    }
+  else if (event->type == EV_KEY)
+    {
+      if (event->code == BTN_LEFT || event->code == BTN_TOUCH)
+        {
+          if (!event->value)
+            {
+              point->flags = TOUCH_UP;
+            }
+          else if (point->flags == TOUCH_UP)
+            {
+              point->flags = TOUCH_DOWN;
+            }
+          else
+            {
+              point->flags = TOUCH_MOVE;
+            }
+        }
+    }
+  else if (event->type == EV_SYN && event->code == SYN_REPORT)
+    {
+      if (point->flags & TOUCH_UP)
+        {
+          point->flags = TOUCH_UP | TOUCH_ID_VALID;
+        }
+      else
+        {
+          point->flags |= TOUCH_ID_VALID | TOUCH_POS_VALID;
+        }
+
+      priv->touchsample.npoints = 1;
+      point->timestamp = touch_get_time();
+      touch_event(priv->touchlower.priv, &priv->touchsample);
+
+      /* Reset flags: keep UP as idle, DOWN transitions to MOVE */
+
+      point->flags = (point->flags & TOUCH_UP) ? TOUCH_UP : TOUCH_MOVE;
+    }
+}
+
+/****************************************************************************
  * Name: virtio_input_worker
  ****************************************************************************/
 
@@ -354,7 +416,18 @@ static void virtio_input_register(FAR struct virtio_input_priv *priv)
       touch_register(&(priv->touchlower),
                      priv->name,
                      priv->evtnum);
-      priv->eventhandler = virtio_input_send_touch_event;
+
+      /* Tablet (BTN_LEFT) vs real touchscreen (ABS_PRESSURE) */
+
+      if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_KEY))
+        {
+          priv->touchsample.point[0].flags = TOUCH_UP;
+          priv->eventhandler = virtio_input_send_tablet_event;
+        }
+      else
+        {
+          priv->eventhandler = virtio_input_send_touch_event;
+        }
     }
   else if (virtio_input_select_cfg(priv, VIRTIO_INPUT_CFG_EV_BITS, EV_REL))
     {
@@ -446,7 +519,8 @@ static void virtio_input_remove(FAR struct virtio_device *vdev)
     {
       mouse_unregister(&(priv->mouselower), priv->name);
     }
-  else if (priv->eventhandler == virtio_input_send_touch_event)
+  else if (priv->eventhandler == virtio_input_send_touch_event ||
+           priv->eventhandler == virtio_input_send_tablet_event)
     {
       touch_unregister(&(priv->touchlower), priv->name);
     }
