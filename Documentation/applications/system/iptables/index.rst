@@ -166,7 +166,3 @@ Use negation to match all protocols except TCP:
 
    nsh> iptables -A INPUT ! -p tcp -j ACCEPT
 
-See Also
-========
-
-- :doc:`../ip6tables/index`
