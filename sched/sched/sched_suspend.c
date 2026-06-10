@@ -103,12 +103,15 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
 {
   irqstate_t flags;
   bool switch_needed;
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   FAR sq_entry_t *entry;
+#endif
 
   DEBUGASSERT(tcb != NULL);
 
   flags = enter_critical_section();
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Check if received SIGCONT */
 
   sq_for_every(&tcb->sigpendactionq, entry)
@@ -120,6 +123,7 @@ void nxsched_suspend(FAR struct tcb_s *tcb)
           return;
         }
     }
+#endif
 
   /* Check the current state of the task */
 
