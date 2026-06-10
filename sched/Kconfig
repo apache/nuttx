@@ -1601,6 +1601,16 @@ config DISABLE_ALL_SIGNALS
 
 endchoice
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
+	depends on !DISABLE_ALL_SIGNALS
+	---help---
+		The number of pre-allocated irq action structures.
+
+if ENABLE_ALL_SIGNALS
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
@@ -1614,13 +1624,6 @@ config SIG_ALLOC_ACTIONS
 		The number of sigactions to allocate per time. Note that
 		if this number is larger than 1, the allocation won't be
 		returned to the heap but kept in a free list for reuse.
-
-config SIG_PREALLOC_IRQ_ACTIONS
-	int "Number of pre-allocated irq actions"
-	default 4 if DEFAULT_SMALL
-	default 8 if !DEFAULT_SMALL
-	---help---
-		The number of pre-allocated irq action structures.
 
 config SIG_EVTHREAD
 	bool "Support SIGEV_THREAD"
@@ -1735,6 +1738,8 @@ config SIG_SIGURG_ACTION
 		sigaction() to ignore SIGURG.
 
 endif # SIG_DEFAULT
+
+endif # ENABLE_ALL_SIGNALS
 
 endmenu # Signal Configuration
 
