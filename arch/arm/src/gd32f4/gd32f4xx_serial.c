@@ -1142,25 +1142,47 @@ static void up_disableusartint(struct up_dev_s *priv, uint32_t *ie)
     {
       uint32_t ctl;
 
+      ctl_ie = 0;
+
       /* Save interrupt in CTL0 register */
 
       ctl = up_serialin(priv, GD32_USART_CTL0_OFFSET);
-      ctl_ie = ((ctl & USART_CTL0_USED_INTS) >> USART_CFG_CTL0_INT_SHIFT);
+      if (ctl & USART_CTL0_USED_INTS)
+        {
+          ctl_ie |= ((ctl & USART_CTL0_USED_INTS) >>
+                       USART_CFG_CTL0_INT_SHIFT);
+          ctl_ie |= (USART_CFG_CTL0_INT << USART_CFG_SHIFT);
+        }
 
       /* Save interrupt in CTL1 register */
 
       ctl = up_serialin(priv, GD32_USART_CTL1_OFFSET);
-      ctl_ie |= ((ctl & USART_CTL1_USED_INTS) >> USART_CFG_CTL1_INT_SHIFT);
+      if (ctl & USART_CTL1_USED_INTS)
+        {
+          ctl_ie |= ((ctl & USART_CTL1_USED_INTS) >>
+                       USART_CFG_CTL1_INT_SHIFT);
+          ctl_ie |= (USART_CFG_CTL1_INT << USART_CFG_SHIFT);
+        }
 
       /* Save interrupt in CTL2 register */
 
       ctl = up_serialin(priv, GD32_USART_CTL2_OFFSET);
-      ctl_ie |= ((ctl & USART_CTL2_USED_INTS) << USART_CFG_CTL2_INT_SHIFT);
+      if (ctl & USART_CTL2_USED_INTS)
+        {
+          ctl_ie |= ((ctl & USART_CTL2_USED_INTS) <<
+                       USART_CFG_CTL2_INT_SHIFT);
+          ctl_ie |= (USART_CFG_CTL2_INT << USART_CFG_SHIFT);
+        }
 
       /* Save interrupt in CTL3 register */
 
       ctl = up_serialin(priv, GD32_USART_CTL3_OFFSET);
-      ctl_ie |= ((ctl & USART_CTL3_USED_INTS) << USART_CFG_CTL3_INT_SHIFT);
+      if (ctl & USART_CTL3_USED_INTS)
+        {
+          ctl_ie |= ((ctl & USART_CTL3_USED_INTS) <<
+                       USART_CFG_CTL3_INT_SHIFT);
+          ctl_ie |= (USART_CFG_CTL3_INT << USART_CFG_SHIFT);
+        }
 
       *ie = ctl_ie;
     }
