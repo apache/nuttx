@@ -132,12 +132,6 @@ if(CONFIG_STM32F7_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32F7_RTC)
-  if(CONFIG_RTC_ALARM)
-    list(APPEND SRCS stm32_exti_alarm.c)
-  endif()
-endif()
-
 if(CONFIG_STM32F7_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
