@@ -119,10 +119,8 @@ static void nxtask_reset_task(FAR struct tcb_s *tcb, bool remove)
 
   /* Deallocate anything left in the TCB's signal queues */
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
-  nxsig_cleanup(tcb);             /* Deallocate Signal lists */
-#endif
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
+  nxsig_cleanup(tcb);             /* Deallocate Signal lists */
   sigemptyset(&tcb->sigprocmask); /* Reset sigprocmask */
 #endif
 

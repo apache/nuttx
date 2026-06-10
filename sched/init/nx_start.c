@@ -643,7 +643,7 @@ void nx_start(void)
 
   /* Initialize the signal facility (if in link) */
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_initialize();
 #endif
 

@@ -195,7 +195,7 @@ int riscv_swint(int irq, void *context, void *arg)
        *   A4 = ucontext
        */
 
-#ifndef CONFIG_BUILD_FLAT
+#if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       case SYS_signal_handler:
         {
           struct tcb_s *rtcb   = this_task();
@@ -272,7 +272,7 @@ int riscv_swint(int irq, void *context, void *arg)
        *   R0 = SYS_signal_handler_return
        */
 
-#ifndef CONFIG_BUILD_FLAT
+#if !defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       case SYS_signal_handler_return:
         {
           struct tcb_s *rtcb   = this_task();

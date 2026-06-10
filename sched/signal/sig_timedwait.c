@@ -103,10 +103,8 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                     FAR const struct timespec *timeout)
 {
   FAR struct tcb_s *rtcb;
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
   sigset_t intersection;
   FAR sigpendq_t *sigpend;
-#endif
   irqstate_t flags;
   siginfo_t unbinfo;
   int ret;
@@ -122,7 +120,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   flags = enter_critical_section();
   rtcb  = this_task();
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
   /* Check if there is a pending signal corresponding to one of the
    * signals in the pending signal set argument.
    */
@@ -159,7 +156,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   /* We will have to wait for a signal to be posted to this task. */
 
   else
-#endif
     {
       rtcb->sigunbinfo = (info == NULL) ? &unbinfo : info;
 

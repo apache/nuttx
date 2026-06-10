@@ -217,8 +217,10 @@ SYSCALL_LOOKUP(pwrite,                     4)
 #endif
   SYSCALL_LOOKUP(poll,                     3)
   SYSCALL_LOOKUP(select,                   5)
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   SYSCALL_LOOKUP(ppoll,                    4)
   SYSCALL_LOOKUP(pselect,                  6)
+#endif
 #ifdef CONFIG_EVENT_FD
   SYSCALL_LOOKUP(eventfd,                  2)
 #endif
@@ -397,7 +399,9 @@ SYSCALL_LOOKUP(settimeofday,               2)
 
 /* ANSI C signal handling */
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 SYSCALL_LOOKUP(signal,                     2)
+#endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
   SYSCALL_LOOKUP(sched_note_vprintf_ip,    5)

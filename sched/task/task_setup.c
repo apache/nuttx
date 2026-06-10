@@ -403,7 +403,6 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
                                     start_t start, CODE void *entry,
                                     uint8_t ttype)
 {
-  FAR struct tcb_s *rtcb = this_task();
   irqstate_t flags;
   int ret;
 
@@ -462,7 +461,7 @@ static int nxthread_setup_scheduler(FAR struct tcb_s *tcb, int priority,
        */
 
 #ifndef CONFIG_DISABLE_ALL_SIGNALS
-      tcb->sigprocmask = rtcb->sigprocmask;
+      tcb->sigprocmask = this_task()->sigprocmask;
 #endif
 
       /* Initialize the task state.  It does not get a valid state
