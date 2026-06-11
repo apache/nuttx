@@ -69,6 +69,8 @@ reside within the task group structure struct ``task_group_s``:
 * Opened message queues.
 * ``pthread`` keys.
 * Support data for ``atexit()``, ``on_exit()``, and/or ``waitpid()``.
+* User and group identity when ``CONFIG_SCHED_USER_IDENTITY`` is enabled
+  (see :ref:`user-identity`).
 
 The exception is the PIC address space used with NXFLAT.
 It currently has its own data structure (struct ``dspace_s``,
