@@ -50,8 +50,8 @@
 #define GPIOTE_CHANNELS 8
 
 /* Use the GPIOTE instance (and its interrupt) for the build's security
- * domain: GPIOTE1 when non-secure, GPIOTE0 when secure.  The register base is
- * selected in hardware/nrf91_gpiote.h.
+ * domain: GPIOTE1 when non-secure, GPIOTE0 when secure. The register base
+ * is selected in hardware/nrf91_gpiote.h.
  */
 
 #ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE

@@ -1455,6 +1455,7 @@ config ARCH_BOARD_THINGY91
 	bool "Nordic Thingy:91 cellular IoT prototyping platform - nRF9160"
 	depends on ARCH_CHIP_NRF91
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This option selects the Thingy:91 cellular IoT prototyping platform - nRF9160 chip
 
