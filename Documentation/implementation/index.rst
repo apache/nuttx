@@ -38,4 +38,5 @@ Implementation Details
    tasks_vs_threads.rst
    tickless_os.rst
    tls.rst
+   user_identity.rst
    usb.rst

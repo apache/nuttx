@@ -455,13 +455,13 @@ struct task_group_s
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
-  /* User identity **********************************************************/
+  /* User identity (POSIX real, effective, and saved-set IDs) ***************/
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
-  uid_t   tg_uid;                   /* User identity                            */
-  gid_t   tg_gid;                   /* User group identity                      */
+  uid_t   tg_uid;                   /* Real user identity                       */
+  gid_t   tg_gid;                   /* Real group identity                      */
   uid_t   tg_euid;                  /* Effective user identity                  */
-  gid_t   tg_egid;                  /* Effective user group identity            */
+  gid_t   tg_egid;                  /* Effective group identity                 */
   uid_t   tg_suid;                  /* Saved set-user identity                  */
   gid_t   tg_sgid;                  /* Saved set-group identity                 */
 #endif

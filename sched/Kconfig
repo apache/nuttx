@@ -789,12 +789,19 @@ config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
 	---help---
-		This selection enables functionality of getuid(), setuid(), getgid(),
-		setgid().  If this option is not selected, then stub, root-only
-		versions of these interfaces are available.  When selected, these
-		interfaces will associate a UID and/or GID with each task group.
-		Those can then be managed using the interfaces.  Child tasks will
-		inherit the UID and GID of its parent.
+		Enable per-task-group POSIX user and group credentials.
+
+		When selected, each task group tracks real, effective, and saved-set
+		UID/GID values and provides getuid(), getgid(), geteuid(),
+		getegid(), setuid(), setgid(), seteuid(), and setegid().
+
+		Child tasks inherit all credential fields from the parent task
+		group.  setuid()/setgid() update real, effective, and saved-set
+		IDs when called with effective privileges; seteuid()/setegid()
+		implement the standard POSIX privilege transition rules.
+
+		If this option is not selected, stub root-only versions of these
+		interfaces are available instead.
 
 config SCHED_THREAD_LOCAL
 	bool "Support __thread/thread_local keyword"
