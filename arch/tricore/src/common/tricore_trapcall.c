@@ -306,7 +306,7 @@ int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
 void tricore_trapcall(volatile void *trap)
 {
   uintptr_t *regs;
-  bool was_interrupt_context;
+  bool from_task;
 
   struct tricore_trap_s *ctrap = (struct tricore_trap_s *)trap;
   uint8_t tclass = ctrap->tclass;
@@ -316,8 +316,8 @@ void tricore_trapcall(volatile void *trap)
 
   regs = tricore_csa2addr(tricore_mfcr(TRICORE_CPU_PCXI));
 
-  was_interrupt_context = up_interrupt_context();
-  if (!was_interrupt_context)
+  from_task = !(tricore_csa2addr(regs[REG_LPCXI])[REG_PSW] & PSW_IS);
+  if (from_task)
     {
       /* Update the current task's regs */
 
@@ -337,7 +337,7 @@ void tricore_trapcall(volatile void *trap)
   if (tclass == TRICORE_TRAP_CLASS_BUS && g_bustrap_hook != NULL &&
       g_bustrap_hook(tid, regs) == OK)
     {
-      if (!was_interrupt_context)
+      if (from_task)
         {
           /* g_running_tasks[]->xcp.regs is about to become invalid
            * and will be marked as NULL to avoid misusage.
