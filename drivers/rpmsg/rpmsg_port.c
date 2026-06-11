@@ -930,6 +930,37 @@ static void rpmsg_port_dump_buffer(FAR struct rpmsg_device *rdev,
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_dump_retx
+ ****************************************************************************/
+
+#ifdef CONFIG_RPMSG_PORT_RETX
+static void rpmsg_port_dump_retx(FAR struct rpmsg_port_s *port)
+{
+  FAR struct rpmsg_port_retx_s *retx = &port->retx;
+  irqstate_t flags;
+  size_t pending;
+  uint16_t tx_next;
+  uint16_t rx_next;
+  uint16_t last_ackno;
+
+  flags = spin_lock_irqsave(&retx->lock);
+  pending = list_length(&retx->queue);
+  tx_next = retx->tx_next;
+  rx_next = retx->rx_next;
+  last_ackno = retx->last_ackno;
+  spin_unlock_irqrestore(&retx->lock, flags);
+
+  _emerg("retx pending: %zu ackdup: %" PRId32 "\n",
+         pending, atomic_read(&retx->ackdup_count));
+  _emerg("retx tx_next: %u rx_next: %u last_ackno: %u\n",
+         tx_next, rx_next, last_ackno);
+  _emerg("retx max_retry: %u\n", retx->retx_max_retry);
+}
+#else
+#  define rpmsg_port_dump_retx(port)
+#endif
+
+/****************************************************************************
  * Name: rpmsg_port_dump
  ****************************************************************************/
 
@@ -950,6 +981,8 @@ static void rpmsg_port_dump(FAR struct rpmsg_s *rpmsg, bool verbose)
     }
 
   metal_mutex_release(&rdev->lock);
+
+  rpmsg_port_dump_retx(port);
 
   if (port->ops->dump)
     {

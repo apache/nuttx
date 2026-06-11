@@ -101,6 +101,7 @@ struct rpmsg_port_spi_s
   FAR struct rpmsg_port_header_s *rxhdr;
 
   rpmsg_port_rx_cb_t             rxcb;
+  pid_t                          tid;
   volatile uint8_t               state;
   spinlock_t                     lock;
 #ifdef CONFIG_PM
@@ -142,6 +143,7 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 static size_t
 rpmsg_port_spi_slave_getrecvbuf(FAR struct spi_slave_dev_s *dev,
                                 FAR void **buffer);
+static void rpmsg_port_spi_dump(FAR struct rpmsg_port_s *port, bool verbose);
 
 /****************************************************************************
  * Private Data
@@ -153,6 +155,7 @@ static const struct rpmsg_port_ops_s g_rpmsg_port_spi_ops =
   rpmsg_port_spi_notify_rx_free,
   NULL,
   rpmsg_port_spi_register_cb,
+  rpmsg_port_spi_dump,
 };
 
 static const struct spi_slave_devops_s g_rpmsg_port_spi_slave_ops =
@@ -368,6 +371,43 @@ static void rpmsg_port_spi_register_cb(FAR struct rpmsg_port_s *port,
     container_of(port, struct rpmsg_port_spi_s, port);
 
   rpspi->rxcb = callback;
+}
+
+/****************************************************************************
+ * Name: rpmsg_port_spi_dump
+ ****************************************************************************/
+
+static void rpmsg_port_spi_dump(FAR struct rpmsg_port_s *port, bool verbose)
+{
+  FAR struct rpmsg_port_spi_s *rpspi =
+    container_of(port, struct rpmsg_port_spi_s, port);
+  bool mreqval = false;
+  bool sreqval = false;
+
+  IOEXP_READPIN(rpspi->ioe, rpspi->mreq, &mreqval);
+  IOEXP_READPIN(rpspi->ioe, rpspi->sreq, &sreqval);
+
+  _emerg("Dump rpmsg port spi slave:\n");
+  _emerg("state: %u bound: %d shutdown: %d transferring: %" PRId32 "\n",
+         rpspi->state, rpspi->bound, rpspi->shutdown,
+         atomic_read(&rpspi->transferring));
+  _emerg("txavail: %u rxavail: %u rxthres: %u\n",
+         rpspi->txavail, rpspi->rxavail, rpspi->rxthres);
+  _emerg("mreq pin: %u level: %d sreq pin: %u level: %d\n",
+         rpspi->mreq, mreqval, rpspi->sreq, sreqval);
+  _emerg("mode: %d nbits: %d\n", rpspi->mode, rpspi->nbits);
+  _emerg("cmdhdr: %p txhdr: %p rxhdr: %p\n",
+         rpspi->cmdhdr, rpspi->txhdr, rpspi->rxhdr);
+
+  if (rpspi->tid != 0)
+    {
+      _emerg("Dump rpmsg-spi-slv thread: %d\n", rpspi->tid);
+      sched_dumpstack(rpspi->tid);
+    }
+  else
+    {
+      _emerg("rpmsg-spi-slv thread not running\n");
+    }
 }
 
 /****************************************************************************
@@ -711,6 +751,7 @@ static int rpmsg_port_spi_thread(int argc, FAR char *argv[])
   FAR struct rpmsg_port_queue_s *queue = &rpspi->port.rxq;
   FAR struct rpmsg_port_header_s *rxhdr;
 
+  rpspi->tid = nxsched_getpid();
   rpmsg_port_spi_connect(rpspi);
   for (; ; )
     {
