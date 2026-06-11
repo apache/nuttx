@@ -170,5 +170,18 @@ int nrf91_i2ctool(void);
 void nrf91_spidev_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: nrf91_rgbled_initialize
+ *
+ * Description:
+ *   Register the on-board RGB LED (PWM0 channels 0-2, P0.29/30/31) as
+ *   /dev/rgbled0.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_RGBLED
+int nrf91_rgbled_initialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF91_THINGY91_SRC_THINGY91_H */
