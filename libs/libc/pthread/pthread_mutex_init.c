@@ -86,7 +86,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
   mutex->flags = attr && attr->robust == PTHREAD_MUTEX_ROBUST ?
                  _PTHREAD_MFLAGS_ROBUST : 0;
 #  else
-  mutex->flags = 0;
+  mutex->flags = _PTHREAD_MFLAGS_ROBUST;
 #  endif
 #endif
 
