@@ -296,12 +296,12 @@ void tricore_trapcall(volatile void *trap)
 {
   struct tricore_trap_s *ctrap = (struct tricore_trap_s *)trap;
   uintptr_t *regs;
-  bool was_interrupt_context;
+  bool from_task;
 
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
-  was_interrupt_context = up_interrupt_context();
-  if (!was_interrupt_context)
+  from_task = !(tricore_csa2addr(regs[REG_LPCXI])[REG_PSW] & PSW_IS);
+  if (from_task)
     {
       /* Update the current task's regs */
 
@@ -331,7 +331,7 @@ void tricore_trapcall(volatile void *trap)
         break;
     }
 
-  if (!was_interrupt_context)
+  if (from_task)
     {
       /* g_running_tasks[]->xcp.regs is about to become invalid
        * and will be marked as NULL to avoid misusage.
