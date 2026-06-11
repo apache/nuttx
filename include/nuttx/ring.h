@@ -339,12 +339,13 @@
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
 #define ring_space(r)       (ring_capacity(r) - ring_count(r))
 
-/* Check whether cons_index is still valid (not overwritten).
- * Returns true if cons_index >= current cons_tail (data still valid).
+/* Check whether cons_index is still live (not lapped by the writer).
+ * Indices are 24-bit (RTS_IDX_MASK); the << 8 aligns bit 23 with the
+ * 32-bit sign bit so the signed compare works correctly modulo 2^24.
  */
 
 #define ring_is_valid_cons(cons_index, cons_tail) \
-  ((int32_t)((cons_index) - (cons_tail)) >= 0)
+  ((int32_t)(((cons_index) - (cons_tail)) << 8) >= 0)
 
 /* Clamp an external index if it fell behind cons_tail (overwritten).
  * Returns the effective read position.
