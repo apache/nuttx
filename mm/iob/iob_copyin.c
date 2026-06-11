@@ -200,8 +200,14 @@ static int iob_copyin_internal(FAR struct iob_s *iob, FAR const uint8_t *src,
               return -ENOMEM;
             }
 
-          /* Add the new, empty I/O buffer to the end of the buffer chain. */
+          /* Add the new, empty I/O buffer to the end of the buffer chain.
+           * Carry over any queue flags (e.g. IOB_CHAIN_END) from the
+           * current tail to the new tail so that the chain boundary is
+           * preserved, then clear the flags on the old tail since it is
+           * no longer the last buffer in the chain.
+           */
 
+          IOB_FLAG_SET(next, NULL, IOB_FLAG_GET(iob));
           iob->io_flink = next;
           iobinfo("iob=%p added to the chain\n", iob);
         }
