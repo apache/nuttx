@@ -285,6 +285,12 @@
 
 #define ring_init(buf, buflen)   ring_init_magic(buf, buflen)
 
+/* ring_data - return pointer to the embedded data buffer that immediately
+ * follows the ring_s header in memory.
+ */
+
+#define ring_data(r)  ((FAR char *)((FAR struct ring_s *)(r) + 1))
+
 /* ring_spsc_init - lightweight initialization for SPSC mode.
  *
  * Unlike ring_init (which uses atomic CAS for multi-core safe
@@ -520,10 +526,6 @@ struct ring_s
   atomic_t     cons_head;         /* SC: unused; MC: RTS CAS */
   atomic_t     cons_tail;         /* SC: store_release; MC: RTS CAS */
   uint8_t      pad2[CACHELINE_SIZE - sizeof(atomic_t) * 2];
-
-  /* Flexible array for embedded buffer */
-
-  char         ring[];            /* Flexible array for embedded buffer */
 };
 
 struct ring_buf_s
@@ -772,16 +774,16 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
 
   if (first >= count)
     {
-      buf->ptr1 = (FAR char *)r->ring + idx * elem_size;
+      buf->ptr1 = ring_data(r) + idx * elem_size;
       buf->len1 = count;
       buf->ptr2 = NULL;
       buf->len2 = 0;
     }
   else
     {
-      buf->ptr1 = (FAR char *)r->ring + idx * elem_size;
+      buf->ptr1 = ring_data(r) + idx * elem_size;
       buf->len1 = first;
-      buf->ptr2 = r->ring;
+      buf->ptr2 = ring_data(r);
       buf->len2 = count - first;
     }
 }
