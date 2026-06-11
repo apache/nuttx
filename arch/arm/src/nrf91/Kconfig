@@ -203,6 +203,11 @@ config NRF91_PWM2
 	select NRF91_PWM
 	default n
 
+config NRF91_PWM3
+	bool "PWM3"
+	select NRF91_PWM
+	default n
+
 config NRF91_SAADC
 	bool "SAADC"
 	default n
@@ -568,6 +573,34 @@ config NRF91_PWM2_CH3
 
 endif # NRF91_PWM2
 
+if NRF91_PWM3
+
+config NRF91_PWM3_CH0
+	bool "PWM3 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF91_PWM3_CH1
+	bool "PWM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF91_PWM3_CH2
+	bool "PWM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF91_PWM3_CH3
+	bool "PWM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF91_PWM3
+
 endif # !NRF91_PWM_MULTICHAN
 
 if !NRF91_PWM_MULTICHAN
@@ -587,6 +620,12 @@ config NRF91_PWM1_CHANNEL
 config NRF91_PWM2_CHANNEL
 	int "PWM2 Output Channel"
 	depends on NRF91_PWM2
+	default 0
+	range 0 3
+
+config NRF91_PWM3_CHANNEL
+	int "PWM3 Output Channel"
+	depends on NRF91_PWM3
 	default 0
 	range 0 3
 
