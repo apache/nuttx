@@ -87,6 +87,11 @@ static void nrf91_spu_periph(void)
               SPU_PERIPHID_PERM_SECATTR, 0);
 #endif
 
+#ifdef CONFIG_NRF91_GPIOTE1_NS
+  modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_GPIOTE1_ID),
+              SPU_PERIPHID_PERM_SECATTR, 0);
+#endif
+
 #ifdef CONFIG_NRF91_NVMC_NS
   modifyreg32(NRF91_SPU_PERIPHIDPERM(NRF91_NVMC_ID),
               SPU_PERIPHID_PERM_SECATTR, 0);

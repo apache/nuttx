@@ -258,6 +258,13 @@ config NRF91_GPIO0_NS
 	bool "GPIO0 non-secure"
 	default n
 
+config NRF91_GPIOTE1_NS
+	bool "GPIOTE1 non-secure"
+	default n
+	---help---
+		Grant the non-secure GPIOTE instance (GPIOTE1) to the non-secure
+		domain, so a non-secure application can use GPIO interrupts.
+
 config NRF91_NVMC_NS
 	bool "NVMC non-secure"
 	default n
