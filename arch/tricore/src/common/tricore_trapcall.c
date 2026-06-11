@@ -382,7 +382,7 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
 void tricore_trapcall(volatile void *trap)
 {
   uintptr_t *regs;
-  bool was_interrupt_context;
+  bool from_task;
 
   IfxCpu_Trap *ctrap = (IfxCpu_Trap *)trap;
   IfxCpu_Trap_Class tclass = (IfxCpu_Trap_Class)ctrap->tClass;
@@ -392,8 +392,8 @@ void tricore_trapcall(volatile void *trap)
 
   regs = tricore_csa2addr(tricore_mfcr(CPU_PCXI));
 
-  was_interrupt_context = up_interrupt_context();
-  if (!was_interrupt_context)
+  from_task = !(tricore_csa2addr(regs[REG_LPCXI])[REG_PSW] & PSW_IS);
+  if (from_task)
     {
       /* Update the current task's regs */
 
@@ -436,7 +436,7 @@ void tricore_trapcall(volatile void *trap)
         {
           /* Bus trap was handled by hook */
 
-          if (!was_interrupt_context)
+          if (from_task)
             {
               /* g_running_tasks[]->xcp.regs is about to become invalid
                * and will be marked as NULL to avoid misusage.
