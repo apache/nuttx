@@ -28,7 +28,10 @@
 
 #include <nuttx/kthread.h>
 
+#include <nuttx/clock.h>
 #include <nuttx/debug.h>
+#include <nuttx/semaphore.h>
+#include <errno.h>
 #include <string.h>
 #include <sys/param.h>
 #include <time.h>
@@ -70,6 +73,12 @@
 
 /* Shorten some names */
 
+/* While a start is deferred (modem not yet GNSS-capable), the GNSS thread
+ * re-checks the modem functional mode at this interval.
+ */
+
+#define NRF91_GNSS_CFUN_POLL_TICKS (SEC2TICK(2))
+
 #define NRF_GNSS_PVT_FRAME_LEN  (sizeof(struct nrf_modem_gnss_pvt_data_frame))
 #define NRF_GNSS_NMEA_FRAME_LEN (sizeof(struct nrf_modem_gnss_nmea_data_frame))
 #define NRF_GNSS_AGPS_FRAME_LEN (sizeof(struct nrf_modem_gnss_agps_data_frame))
@@ -84,6 +93,7 @@ struct nrf91_gnss_s
 
   struct gnss_lowerhalf_s               lower;
   bool                                  running;
+  bool                                  pending;
   bool                                  singlefix;
   int                                   notime_cntr;
   sem_t                                 rx_sem;
@@ -208,6 +218,40 @@ static bool nrf91_gnss_isactive(int cfun)
  * Name: nrf91_gnss_enable
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: nrf91_gnss_start
+ *
+ * Description:
+ *   Configure and start the GNSS engine. The caller must have verified that
+ *   the modem is in a GNSS-capable functional mode (see nrf91_gnss_isactive).
+ *
+ ****************************************************************************/
+
+static int nrf91_gnss_start(struct nrf91_gnss_s *priv)
+{
+  int ret;
+
+  /* Configure GNSS modem */
+
+  ret = nrf91_gnss_configure();
+  if (ret < 0)
+    {
+      snerr("nrf91_gnss_configure failed %d\n", ret);
+      return ret;
+    }
+
+  ret = nrf_modem_gnss_start();
+  if (ret < 0)
+    {
+      snerr("nrf_modem_gnss_start failed %d", ret);
+      return ret;
+    }
+
+  priv->pending = false;
+  priv->running = true;
+  return OK;
+}
+
 static int nrf91_gnss_enable(struct nrf91_gnss_s *priv, bool enable)
 {
   int ret  = OK;
@@ -224,43 +268,44 @@ static int nrf91_gnss_enable(struct nrf91_gnss_s *priv, bool enable)
           goto errout;
         }
 
-      /* GNSS must be active */
+      /* The modem must be in a GNSS-capable functional mode before GNSS can
+       * be started. When the sensor is opened early (e.g. before the LTE
+       * stack has powered the modem on), it is not yet active. Rather than
+       * failing the open, remember the request and let the GNSS thread start
+       * GNSS once the modem reaches a GNSS-capable mode (see CFUN poll in
+       * nrf91_gnss_thread). The LTE stack keeps ownership of modem power.
+       */
 
       if (!nrf91_gnss_isactive(cfun))
         {
-          snerr("GNSS is not activated!");
-          ret = -EACCES;
-          goto errout;
+          sninfo("GNSS not yet active (CFUN=%d); deferring start\n", cfun);
+          priv->pending = true;
+
+          /* Kick the thread so it enters its CFUN-poll wait */
+
+          nxsem_post(&priv->rx_sem);
+          return OK;
         }
 
-      /* Configure GNSS modem */
-
-      ret = nrf91_gnss_configure();
-      if (ret < 0)
-        {
-          snerr("nrf91_gnss_configure failed %d\n", ret);
-          return ret;
-        }
-
-      ret = nrf_modem_gnss_start();
-      if (ret < 0)
-        {
-          snerr("nrf_modem_gnss_start failed %d", ret);
-          goto errout;
-        }
-
-      priv->running = true;
+      ret = nrf91_gnss_start(priv);
     }
   else
     {
-      ret = nrf_modem_gnss_stop();
-      if (ret < 0)
-        {
-          snerr("nrf_modem_gnss_stop failed %d", ret);
-          goto errout;
-        }
+      /* Cancel any pending deferred start */
 
-      priv->running = false;
+      priv->pending = false;
+
+      if (priv->running)
+        {
+          ret = nrf_modem_gnss_stop();
+          if (ret < 0)
+            {
+              snerr("nrf_modem_gnss_stop failed %d", ret);
+              goto errout;
+            }
+
+          priv->running = false;
+        }
     }
 
 errout:
@@ -624,9 +669,38 @@ static int nrf91_gnss_thread(int argc, char** argv)
 
   while (true)
     {
-      /* Read data */
+      /* While a start is deferred, wait with a timeout and poll the modem
+       * functional mode; start GNSS once the modem becomes GNSS-capable
+       * (e.g. after the LTE stack has powered it on). Otherwise wait
+       * indefinitely for the next GNSS event.
+       */
 
-      ret = nxsem_wait(&priv->rx_sem);
+      if (priv->pending && !priv->running)
+        {
+          ret = nxsem_tickwait(&priv->rx_sem, NRF91_GNSS_CFUN_POLL_TICKS);
+          if (ret == -ETIMEDOUT)
+            {
+              int cfun = 0;
+
+              if (priv->pending && !priv->running &&
+                  nrf_modem_at_scanf("AT+CFUN?", "+CFUN: %d", &cfun) >= 0 &&
+                  nrf91_gnss_isactive(cfun))
+                {
+                  sninfo("modem GNSS-capable (CFUN=%d); starting GNSS\n",
+                         cfun);
+                  nrf91_gnss_start(priv);
+                }
+
+              continue;
+            }
+        }
+      else
+        {
+          /* Read data */
+
+          ret = nxsem_wait(&priv->rx_sem);
+        }
+
       if (ret < 0)
         {
           return ret;
