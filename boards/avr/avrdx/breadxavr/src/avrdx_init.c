@@ -32,9 +32,15 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_BREADXAVR_TC74AX_SENSOR
+#  include <nuttx/sensors/tc74ax.h>
+#endif
+
+#include <assert.h>
 #include <avr/io.h>
 
 #include "avrdx_gpio.h"
+#include "avrdx_twi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -77,15 +83,64 @@
 #ifdef CONFIG_BOARD_EARLY_INITIALIZE
 void board_early_initialize(void)
 {
+#  ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
   int ret = OK;
+#  endif
 
 #  ifdef CONFIG_BREADXAVR_BUTTONS_DRIVER
   ret = btn_lower_initialize("/dev/buttons");
   if (ret != OK)
     {
-      return;
+      PANIC();
     }
 #  endif
 }
 
 #endif /* CONFIG_BOARD_EARLY_INITIALIZE */
+
+/****************************************************************************
+ * Name: board_late_initialize
+ *
+ * Description:
+ *  Function called by the OS when BOARD_LATE_INITIALIZE is set.
+ *  Called after up_initialize, OS has been initialized at this point
+ *  and it is okay to initialize drivers. Running in special kernel
+ *  thread so waiting is allowed. Executed just before application code.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+void board_late_initialize(void)
+{
+#  ifdef CONFIG_BREADXAVR_TC74AX_SENSOR
+  FAR struct i2c_master_s *i2c;
+#  endif
+  int ret = OK;
+
+#  ifdef CONFIG_BREADXAVR_TC74AX_SENSOR
+
+#    if  (CONFIG_BREADXAVR_TC74AX_SENSOR_VARIANT < 0) || \
+         (CONFIG_BREADXAVR_TC74AX_SENSOR_VARIANT > 7)
+#      error Incorrect setting of variant, Kconfig should not allow this
+#    endif
+
+  i2c = avrdx_initialize_twi(0);
+  if (i2c)
+    {
+      ret = tc74ax_register("/dev/tc74ax",
+                            i2c,
+                            72 + CONFIG_BREADXAVR_TC74AX_SENSOR_VARIANT);
+      if (ret != OK)
+        {
+          PANIC();
+        }
+    }
+  else
+    {
+      PANIC();
+    }
+
+#  endif /* ifdef CONFIG_BREADXAVR_TC74AX_SENSOR */
+}
+
+#endif /* CONFIG_BOARD_LATE_INITIALIZE */
