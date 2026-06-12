@@ -186,8 +186,10 @@ static void btn_enable(FAR struct btn_upperhalf_s *priv)
 
       /* OR in the signal events */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
       press   |= opriv->bo_notify.bn_press;
       release |= opriv->bo_notify.bn_release;
+#endif
     }
 
   /* Enable/disable button interrupts */
@@ -430,7 +432,9 @@ static int btn_close(FAR struct file *filep)
 
   /* Cancel any pending notification */
 
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_cancel_notification(&opriv->bo_work);
+#endif
 
   /* And free the open structure */
 
@@ -629,6 +633,7 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
     case BTNIOC_REGISTER:
       {
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
         FAR struct btn_notify_s *notify =
           (FAR struct btn_notify_s *)((uintptr_t)arg);
 
@@ -646,6 +651,9 @@ static int btn_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             btn_enable(priv);
             ret = OK;
           }
+#else
+        ret = -ENOSYS;
+#endif
       }
       break;
 
