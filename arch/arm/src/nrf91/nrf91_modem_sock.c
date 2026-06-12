@@ -848,6 +848,38 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
         break;
       }
 
+      case LTE_CMDID_GETCELL:
+      {
+        lte_cellinfo_t **cell =
+          (lte_cellinfo_t **)(ltecmd->outparam + 1);
+        int band = 0;
+
+        (*cell)->valid = false;
+        (*cell)->phycell_id = 0;
+        (*cell)->earfcn = 0;
+        (*cell)->option = 0;
+        (*cell)->nr_neighbor = 0;
+
+        /* The modem AT set does not expose the raw EARFCN in a form the
+         * scanf parser here can extract from AT%XMONITOR (quoted fields), so
+         * report the serving band number via AT%XCBAND in the earfcn field.
+         */
+
+        ret = nrf_modem_at_scanf("AT%XCBAND", "%%XCBAND: %d", &band);
+        if (ret > 0)
+          {
+            (*cell)->earfcn = (uint32_t)band;
+            (*cell)->valid = true;
+          }
+        else
+          {
+            nerr("AT%%XCBAND failed %d\n", ret);
+          }
+
+        ret = OK;
+        break;
+      }
+
       case LTE_CMDID_SETPSM:
         {
           lte_psm_setting_t **psm =
