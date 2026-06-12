@@ -47,6 +47,15 @@
  ****************************************************************************/
 
 #define RPMSG_VIRTIO_TIMEOUT_MS      20
+
+/* The tx buffer acquisition gives up after the buffer has been
+ * unavailable for RPMSG_VIRTIO_TIMEOUTTX_COUNT consecutive timeout slices,
+ * i.e. ~15s (RPMSG_TICK_COUNT usec / per-slice wait time).
+ */
+
+#define RPMSG_VIRTIO_TIMEOUTTX_COUNT \
+  (RPMSG_TICK_COUNT / (RPMSG_VIRTIO_TIMEOUT_MS * USEC_PER_MSEC))
+
 #define RPMSG_VIRTIO_FEATURES        (1 << VIRTIO_RPMSG_F_NS | \
                                       1 << VIRTIO_RPMSG_F_ACK | \
                                       1 << VIRTIO_RPMSG_F_BUFSZ | \
@@ -76,6 +85,7 @@ struct rpmsg_virtio_priv_s
   uint16_t                        headrx;
   uint16_t                        headtx;
   int                             sleepertx;
+  int                             timeouttx;  /* Consecutive tx wait slices */
   struct work_s                   startwork;
 #ifdef CONFIG_RPMSG_VIRTIO_PM
   spinlock_t                      lock;
@@ -741,8 +751,33 @@ static int rpmsg_virtio_notify_wait(FAR struct rpmsg_device *rdev,
       virtqueue_disable_cb(vq);
     }
 
+  /* Track how long the tx buffer stays unavailable. A non-timeout wakeup
+   * means the peer returned a buffer (progress), so reset the counter.
+   * A timeout is normally swallowed (return 0) so the OpenAMP wait loop
+   * retries and pending recursive work can complete. Only after ~15s of
+   * consecutive timeouts do we surface -ETIMEDOUT, which makes the
+   * OpenAMP layer break out and assert on the lost tx buffer.
+   */
+
+  if (ret != -ETIMEDOUT)
+    {
+      priv->timeouttx = 0;
+    }
+  else if (++priv->timeouttx < RPMSG_VIRTIO_TIMEOUTTX_COUNT)
+    {
+      ret = 0;
+    }
+  else
+    {
+      /* Surface the timeout to the OpenAMP wait loop and re-arm the
+       * counter so a later send attempt gets a full budget again.
+       */
+
+      priv->timeouttx = 0;
+    }
+
   metal_mutex_release(&rdev->lock);
-  return ret == -ETIMEDOUT ? 0 : ret;
+  return ret;
 }
 
 /****************************************************************************
