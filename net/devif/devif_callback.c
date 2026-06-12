@@ -455,12 +455,26 @@ uint32_t devif_conn_event(FAR struct net_driver_s *dev, uint32_t flags,
 
       if (list->event != NULL && devif_event_trigger(flags, list->flags))
         {
+          list->free_flags |= DEVIF_CB_DONT_FREE;
+
           /* Yes.. perform the callback.  Actions perform by the callback
            * may delete the current list entry or add a new list entry to
            * beginning of the list (which will be ignored on this pass)
            */
 
           flags = list->event(dev, list->priv, flags);
+          list->free_flags &= ~DEVIF_CB_DONT_FREE;
+
+          /* update the next callback to prevent previously recorded the
+           * next callback from being deleted
+           */
+
+          next = list->nxtconn;
+          if ((list->free_flags & DEVIF_CB_PEND_FREE) != 0)
+            {
+              list->free_flags &= ~DEVIF_CB_PEND_FREE;
+              devif_callback_free(dev, list, NULL, NULL);
+            }
         }
 
       /* Set up for the next time through the loop */
