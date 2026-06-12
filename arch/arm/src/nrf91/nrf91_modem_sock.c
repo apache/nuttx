@@ -801,10 +801,19 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
       {
         lte_quality_t **quality =
           (lte_quality_t **)(ltecmd->outparam + 1);
+        bool valid = false;
+        int cresult;
         int tmp;
         int rsrp;
         int rsrq;
-        int rssi;
+        int snr;
+
+        (*quality)->rsrp = 0;
+        (*quality)->rsrq = 0;
+        (*quality)->rssi = 0;
+        (*quality)->sinr = 0;
+
+        /* RSRP/RSRQ via AT+CESQ - available whenever the modem is camped. */
 
         ret = nrf_modem_at_scanf("AT+CESQ",
                                  "+CESQ: %d,%d,%d,%d,%d,%d",
@@ -812,28 +821,30 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
                                  &rsrq, &rsrp);
         if (ret > 0)
           {
-            (*quality)->rsrq  = (rsrq / 2) - 19;
-            (*quality)->rsrp  = rsrp - 140;
+            (*quality)->rsrq = (rsrq / 2) - 19;
+            (*quality)->rsrp = rsrp - 140;
+            valid = true;
           }
         else
           {
             nerr("AT+CESQ failed %d\n", ret);
           }
 
-        ret = nrf_modem_at_scanf("AT+CSQ",
-                                 "+CSQ: %d,%d",
-                                 &rssi, &tmp);
-        if (ret > 0)
+        /* SNR via AT%CONEVAL - the only SNR source on this modem (AT+CSQ is
+         * not answered and carries no SNR). Reported SNR is the raw
+         * value - 24.
+         */
+
+        ret = nrf_modem_at_scanf("AT%CONEVAL",
+                                 "%%CONEVAL: %d,%d,%d,%d,%d,%d",
+                                 &cresult, &tmp, &tmp, &tmp, &tmp, &snr);
+        if (ret >= 6 && cresult == 0)
           {
-            (*quality)->rssi  = rssi;
-            (*quality)->sinr  = 0;
-          }
-        else
-          {
-            nerr("AT+CSQ failed %d\n", ret);
+            (*quality)->sinr = snr - 24;
           }
 
-        (*quality)->valid = true;
+        (*quality)->valid = valid;
+        ret = OK;
         break;
       }
 
