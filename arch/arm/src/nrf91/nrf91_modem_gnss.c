@@ -223,7 +223,8 @@ static bool nrf91_gnss_isactive(int cfun)
  *
  * Description:
  *   Configure and start the GNSS engine. The caller must have verified that
- *   the modem is in a GNSS-capable functional mode (see nrf91_gnss_isactive).
+ *   the modem is in a GNSS-capable functional mode
+ *   (see nrf91_gnss_isactive).
  *
  ****************************************************************************/
 
@@ -510,7 +511,12 @@ static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
       tm.tm_isdst = 0;
 
       gps.timestamp          = timestamp;
-      gps.time_utc           = mktime(&tm);
+
+      /* The GNSS datetime is UTC; use timegm() (not mktime(), which would
+       * apply the local timezone) to convert it to epoch seconds.
+       */
+
+      gps.time_utc           = timegm(&tm);
       gps.latitude           = priv->pvt.latitude;
       gps.longitude          = priv->pvt.longitude;
       gps.altitude           = priv->pvt.altitude;
