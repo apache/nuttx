@@ -37,6 +37,7 @@
 #include <time.h>
 
 #include <nuttx/sensors/gnss.h>
+#include <nuttx/sensors/ioctl.h>
 #include <nuttx/sensors/sensor.h>
 
 #include "nrf_modem.h"
@@ -61,6 +62,7 @@
 
 #define NRF91_GNSS_USE_CASE     NRF_MODEM_GNSS_USE_CASE_MULTIPLE_HOT_START
 #define NRF91_GNSS_POWER_MODE   NRF_MODEM_GNSS_PSM_DISABLED
+
 #ifdef NRF91_GNSS_NMEA
 #  define NRF91_GNSS_NMEA_MASK  (NRF_MODEM_GNSS_NMEA_GGA_MASK | \
                                  NRF_MODEM_GNSS_NMEA_GLL_MASK | \
@@ -95,7 +97,6 @@ struct nrf91_gnss_s
   bool                                  running;
   bool                                  pending;
   bool                                  singlefix;
-  int                                   notime_cntr;
   sem_t                                 rx_sem;
 
   /* PVT support */
@@ -141,9 +142,6 @@ static ssize_t nrf91_gnss_inject_data(struct gnss_lowerhalf_s *lower,
 static int nrf91_gnss_configure(void);
 static bool nrf91_gnss_isactive(int cfun);
 static int nrf91_gnss_enable(struct nrf91_gnss_s *priv, bool enable);
-#ifdef CONFIG_NRF91_MODEM_GNSS_BOOST_PRIO
-static void nrf91_gnss_boost_prio(struct nrf91_gnss_s *priv);
-#endif
 static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv);
 static void nrf91_gnss_event_handler(int event);
 static int nrf91_gnss_thread(int argc, char** argv);
@@ -398,9 +396,30 @@ static int nrf91_gnss_control(struct gnss_lowerhalf_s *lower,
                               struct file *filep,
                               int cmd, unsigned long arg)
 {
-  /* TODO */
+  int ret;
 
-  return 0;
+  switch (cmd)
+    {
+      case SNIOC_GNSS_SET_PRIORITY:
+
+        /* Give GNSS priority over LTE idle (the "boost") or drop it. */
+
+        if (arg != 0)
+          {
+            ret = nrf_modem_gnss_prio_mode_enable();
+          }
+        else
+          {
+            ret = nrf_modem_gnss_prio_mode_disable();
+          }
+        break;
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -415,33 +434,6 @@ static ssize_t nrf91_gnss_inject_data(struct gnss_lowerhalf_s *lower,
 
   return 0;
 }
-
-#ifdef CONFIG_NRF91_MODEM_GNSS_BOOST_PRIO
-/****************************************************************************
- * Name: nrf91_gnss_boost_prio
- ****************************************************************************/
-
-static void nrf91_gnss_boost_prio(struct nrf91_gnss_s *priv)
-{
-  int ret;
-
-  /* Boost GNSS priority only once - we don't want to block LTE too long */
-
-  if (priv->notime_cntr != -1)
-    {
-      if (priv->notime_cntr > 5)
-        {
-          ret = nrf_modem_gnss_prio_mode_enable();
-          if (ret < 0)
-            {
-              snerr("nrf_modem_gnss_prio_mode_enable failed %d!", ret);
-            }
-
-          priv->notime_cntr = -1;
-        }
-    }
-}
-#endif
 
 /****************************************************************************
  * Name: nrf91_gnss_pvt_event
@@ -546,25 +538,6 @@ static void nrf91_gnss_pvt_event(struct nrf91_gnss_s *priv)
   if (priv->pvt.flags & NRF_MODEM_GNSS_PVT_FLAG_DEADLINE_MISSED)
     {
       snerr("GNSS DEADLINE_MISSED!");
-    }
-
-  if (priv->pvt.flags & NRF_MODEM_GNSS_PVT_FLAG_NOT_ENOUGH_WINDOW_TIME)
-    {
-      snerr("GNSS NOT_ENOUGH_WINDOW_TIME!");
-
-#ifdef CONFIG_NRF91_MODEM_GNSS_BOOST_PRIO
-      /* GNSS priority boost over LTE idle */
-
-      nrf91_gnss_boost_prio(priv);
-#endif
-
-      priv->notime_cntr++;
-    }
-  else
-    {
-      /* Reset counter */
-
-      priv->notime_cntr = 0;
     }
 }
 
