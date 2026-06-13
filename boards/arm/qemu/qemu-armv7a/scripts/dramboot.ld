@@ -34,21 +34,6 @@ MEMORY
 SECTIONS
 {
 
-  /* where the global variable out-of-bounds detection information located */
-
-#ifdef CONFIG_MM_KASAN_GLOBAL
-  .kasan.unused : {
-    *(.data..LASANLOC*)
-  }
-  .kasan.global : {
-    KEEP (*(.data..LASAN0))
-    KEEP (*(.data.rel.local..LASAN0))
-  }
-  .kasan.shadows : {
-    *(.kasan.shadows)
-  }
-#endif
-
   .text : {
       _stext = .;            /* Text section */
       __text_start = .;
@@ -92,6 +77,19 @@ SECTIONS
       . = ALIGN(4096);
       _erodata = .;
   } > ROM
+
+#ifdef CONFIG_MM_KASAN_GLOBAL
+  .kasan.shadows : {
+      KEEP(*(.kasan.shadows))
+  } > ROM
+  .kasan.unused : {
+    *(.data..LASANLOC*)
+  } > RAM
+  .kasan.global : {
+    KEEP (*(.data..LASAN0))
+    KEEP (*(.data.rel.local..LASAN0))
+  } > RAM
+#endif
 
   _eronly = LOADADDR(.data);
   .data : {                    /* Data */
