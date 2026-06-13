@@ -19,7 +19,7 @@ Buttons                            Yes
 LEDs                               No
 NFC                                No
 MX25R6435F                         No      Dual line SPI
-PMIC                               No
+PMIC                               Yes     nPM1100 CHG/ERR status
 Battery monitoring                 No
 Buzzer                             No
 PDM microphone (VM3011)            No

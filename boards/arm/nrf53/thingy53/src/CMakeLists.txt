@@ -54,6 +54,10 @@ if(CONFIG_ADC)
   list(APPEND SRCS nrf53_adc.c)
 endif()
 
+if(CONFIG_NPM1100)
+  list(APPEND SRCS nrf53_npm1100.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_ARCH_BOARD_COMMON)
