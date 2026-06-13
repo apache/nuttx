@@ -1,0 +1,29 @@
+==============================
+Nordic nPM1100 battery charger
+==============================
+
+Nordic nPM1100 PMIC charger status, enabled with ``CONFIG_NPM1100`` (needs
+``CONFIG_BATTERY_CHARGER``).
+
+The chip has no register interface. Charge and error state come from its
+open-drain, active-low ``CHG`` and ``ERR`` pins, which the board reads
+through two callbacks:
+
+.. code-block:: c
+
+   #include <nuttx/power/npm1100.h>
+
+   struct npm1100_config_s
+   {
+     CODE bool (*read_chg)(void);  /* CHG pin level, low = charging */
+     CODE bool (*read_err)(void);  /* ERR pin level, low = error */
+   };
+
+   FAR struct battery_charger_dev_s *
+     npm1100_initialize(FAR const struct npm1100_config_s *config);
+
+The returned instance is registered with ``battery_charger_register()``.
+``BATIOC_STATE`` reports ``BATTERY_CHARGING``, ``BATTERY_IDLE`` or
+``BATTERY_FAULT``; ``BATIOC_HEALTH`` reports ``BATTERY_HEALTH_GOOD`` or
+``BATTERY_HEALTH_UNSPEC_FAIL``. Voltage, current and operate requests are
+not supported.

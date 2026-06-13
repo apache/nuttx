@@ -38,6 +38,12 @@ ifeq ($(CONFIG_LTC4013),y)
 CSRCS += ltc4013.c
 endif
 
+# Add the Nordic nPM1100 PMIC battery charger driver
+
+ifeq ($(CONFIG_NPM1100),y)
+CSRCS += npm1100.c
+endif
+
 # Add the BQ2425x I2C-based battery charger driver
 
 ifeq ($(CONFIG_I2C_BQ2425X),y)

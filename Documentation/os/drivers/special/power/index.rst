@@ -11,6 +11,7 @@ Power-related Drivers
   smps.rst
   lm51772.rst
   battery/ltc4013.rst
+  battery/npm1100.rst
 
 .. toctree::
    :maxdepth: 1
