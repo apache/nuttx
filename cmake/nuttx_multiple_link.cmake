@@ -134,6 +134,19 @@ define_multiple_link_target(final_nuttx second_link final)
 
 # fixing timing dependencies
 add_dependencies(nuttx_post final_nuttx)
+
+# Strip .kasan.unused and .kasan.global sections from the final binary. These
+# sections are only needed during the intermediate link passes for
+# kasan_global.py to extract global variable descriptors. At runtime they sit at
+# the start of RAM (0x40000000) and conflict with QEMU's DTB placement.
+if(CONFIG_MM_KASAN_GLOBAL)
+  add_custom_command(
+    TARGET final_nuttx
+    POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -R .kasan.unused -R .kasan.global final_nuttx
+    COMMENT "Stripping .kasan.unused and .kasan.global sections")
+endif()
+
 # finally use final_nuttx to overwrite the already generated nuttx
 add_custom_command(
   TARGET final_nuttx
