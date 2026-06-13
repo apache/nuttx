@@ -54,6 +54,10 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += nrf53_adc.c
 endif
 
+ifeq ($(CONFIG_NPM1100),y)
+CSRCS += nrf53_npm1100.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

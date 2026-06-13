@@ -261,6 +261,16 @@ int nrf53_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_NPM1100
+  /* Register the nPM1100 PMIC charge-status driver */
+
+  ret = nrf53_npm1100_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf53_npm1100_init failed: %d\n", ret);
+    }
+#endif
+
   /* Initialize on-board sensors */
 
   ret = nrf53_sensors_init();
