@@ -951,15 +951,6 @@ int ftl_initialize_by_path(FAR const char *path, FAR struct mtd_dev_s *mtd,
 
   finfo("path=\"%s\"\n", path);
 
-#ifndef CONFIG_FTL_BBM
-  /* It is likely a configuration error if the mtd driver implements
-   * the bad block management, but it is still disabled by the
-   * configuration.
-   */
-
-  DEBUGASSERT(mtd->isbad == NULL && mtd->markbad == NULL);
-#endif
-
   /* Allocate a FTL device structure */
 
   dev = kmm_zalloc(sizeof(struct ftl_struct_s));
