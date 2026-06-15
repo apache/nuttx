@@ -1112,7 +1112,7 @@ config STM32_QSPI
 
 config STM32_ETHMAC
 	bool "Ethernet MAC"
-	depends on STM32_HAVE_ETHERNET
+	depends on STM32_HAVE_ETHERNET && NET
 	select NETDEVICES
 	select ARCH_HAVE_PHY
 	select STM32_PHY_HAVE_POLLED if !STM32_COMMON_LEGACY
