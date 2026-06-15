@@ -2007,7 +2007,8 @@ static int fdcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
           uint8_t state;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud < STM32_FDCANCLK_FREQUENCY);
+          DEBUGASSERT(bt->bt_baud > 0 &&
+            bt->bt_baud < STM32_FDCANCLK_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
           DEBUGASSERT(bt->bt_tseg1 > 1 && bt->bt_tseg1 <= 64);
           DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <= 16);

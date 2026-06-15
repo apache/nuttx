@@ -1526,7 +1526,8 @@ static int mcp2515_ioctl(FAR struct can_dev_s *dev, int cmd,
           uint8_t regval;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud < MCP2515_CANCLK_FREQUENCY);
+          DEBUGASSERT(bt->bt_baud > 0 &&
+            bt->bt_baud < MCP2515_CANCLK_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
           DEBUGASSERT(bt->bt_tseg1 > 1 && bt->bt_tseg1 <= 16);
           DEBUGASSERT(bt->bt_tseg2 > 1 && bt->bt_tseg2 <= 8);
