@@ -140,6 +140,7 @@ endchoice # "FOC0 device ADC selection"
 menuconfig STM32_FOC
 	bool "STM32 lower-half FOC support"
 	depends on STM32_HAVE_COMMON_FOC || ARCH_CHIP_STM32F7
+	depends on MOTOR_FOC
 	select ARCH_IRQPRIO
 	select STM32_ADC
 	select STM32_PWM_MULTICHAN
