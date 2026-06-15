@@ -103,8 +103,10 @@ static struct progmem_dev_s g_progmem =
     progmem_write,
 #endif
     progmem_ioctl,
+#ifdef CONFIG_FTL_BBM
     NULL,
     NULL,
+#endif
     "progmem",
   }
 };
