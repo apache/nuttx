@@ -181,6 +181,15 @@ int can_datahandler(FAR struct net_driver_s *dev,
 #  endif
   /* Check the frame count pending on conn->readahead */
 
+  /* __res0 indicates if the frame is a confirmation
+   * in that case adjust the limit if configured
+   */
+
+  if (iob && ((struct can_frame *)IOB_DATA(iob))->__res0)
+    {
+      bufnum += CONFIG_NET_CAN_IOB_CONFIRM;
+    }
+
   if (iob_get_queue_entry_count(&conn->readahead) >= bufnum)
     {
       nwarn("WARNING: There are no free receive buffer to retain the data. "
