@@ -30,6 +30,7 @@
 #include <arch/board/board.h>
 
 #include "tricore_internal.h"
+#include "tricore_vectors.h"
 
 /****************************************************************************
  * Public Data

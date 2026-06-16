@@ -119,7 +119,6 @@ set(SDK_CSRCS
     "${CONFIG_DIR}/Ifx_Cfg_Ssw.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Asclin/Std/IfxAsclin.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Cpu/Std/IfxCpu.c"
-    "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/Cpu/Trap/IfxCpu_Trap.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxAsclin_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxCpu_cfg.c"
     "${ILLD_DIR}/Libraries/iLLD/TC3xx/Tricore/_Impl/IfxStm_cfg.c"
