@@ -124,6 +124,14 @@ GRAN_HANDLE gran_initialize(FAR void *heapstart, size_t heapsize,
   alignedsize  = (heapend - alignedstart) & ~mask;
   ngranules    = alignedsize >> log2gran;
 
+  /* Reject oversized pools. */
+
+  DEBUGASSERT(ngranules > 0 && ngranules <= UINT16_MAX);
+  if (ngranules == 0 || ngranules > UINT16_MAX)
+    {
+      return NULL;
+    }
+
   /* Allocate the information structure with a granule table of the
    * correct size.
    */
