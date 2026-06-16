@@ -2421,7 +2421,7 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
 #  elif defined(CONFIG_STM32_I2C2_CLK_PCLK1)
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C2SEL_MASK,
-                  RCC_CCIPR4_I2C2SEL_PCLK1);
+                  RCC_CCIPR4_I2C2SEL_RCCPCLK1);
 #  else
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C2SEL_MASK,
@@ -2442,7 +2442,7 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
 #  elif defined(CONFIG_STM32_I2C3_CLK_PCLK3)
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C3SEL_MASK,
-                  RCC_CCIPR4_I2C3SEL_PCLK3);
+                  RCC_CCIPR4_I2C3SEL_RCCPCLK3);
 #  else
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C3SEL_MASK,
@@ -2463,7 +2463,7 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
 #  elif defined(CONFIG_STM32_I2C4_CLK_PCLK3)
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C4SEL_MASK,
-                  RCC_CCIPR4_I2C4SEL_PCLK3);
+                  RCC_CCIPR4_I2C4SEL_RCCPCLK3);
 #  else
       modifyreg32(STM32_RCC_CCIPR4,
                   RCC_CCIPR4_I2C4SEL_MASK,
