@@ -65,10 +65,10 @@ if(CONFIG_ARCH_HAVE_DEBUG)
   list(APPEND SRCS tricore_hwdebug.c)
 endif()
 
-set(IFXFLAGS -DIFX_CFG_EXTEND_TRAP_HOOKS -DIFX_USE_SW_MANAGED_INT)
+set(IFXFLAGS -DIFX_USE_SW_MANAGED_INT)
 
 target_sources(arch PRIVATE ${SRCS})
-target_sources(nuttx PRIVATE tricore_doirq.c)
+target_sources(nuttx PRIVATE tricore_doirq.c tricore_vectors.c)
 target_compile_options(arch PRIVATE ${IFXFLAGS})
 target_compile_options(nuttx PRIVATE ${IFXFLAGS})
 target_include_directories(

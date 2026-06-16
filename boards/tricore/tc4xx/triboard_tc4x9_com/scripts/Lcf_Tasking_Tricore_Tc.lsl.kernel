@@ -297,19 +297,7 @@ derivative tc4D
             {
                 section "trapvec_tc" (size=0x100, attributes=rx, fill=0)
                 {
-#if CONFIG_CPU_COREID == 0
-                    select "(.text.traptab_cpu0*)";
-#elif CONFIG_CPU_COREID == 1
-                    select "(.text.traptab_cpu1*)";
-#elif CONFIG_CPU_COREID == 2
-                    select "(.text.traptab_cpu2*)";
-#elif CONFIG_CPU_COREID == 3
-                    select "(.text.traptab_cpu3*)";
-#elif CONFIG_CPU_COREID == 4
-                    select "(.text.traptab_cpu4*)";
-#elif CONFIG_CPU_COREID == 5
-                    select "(.text.traptab_cpu5*)";
-#endif
+                    select "(.text.traptab*)";
                 }
             }
             "__TRAPTAB_CPU0" := LCF_TRAPVEC_START;
