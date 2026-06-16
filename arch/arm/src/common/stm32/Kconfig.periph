@@ -1131,7 +1131,7 @@ config STM32_FMAC
 
 config STM32_DTS
 	bool "DTS"
-	depends on STM32_HAVE_DTS
+	depends on STM32_HAVE_DTS && SENSORS
 	default n
 	---help---
 		Enable support for the on‑die digital temperature sensor (DTS)
