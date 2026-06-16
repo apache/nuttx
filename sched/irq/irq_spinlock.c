@@ -25,6 +25,16 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+/* When the inline spinlock helpers are disabled, emit callable non-inline
+ * versions of the helpers defined in <nuttx/spinlock.h> from this file.
+ */
+
+#ifndef CONFIG_SPINLOCK_INLINE
+#  define CONFIG_SPINLOCK_INLINE
+#  define SPINLOCK_INLINE
+#endif
+
 #include <nuttx/spinlock.h>
 
 #include <assert.h>
@@ -43,135 +53,4 @@
  * Public Functions
  ****************************************************************************/
 
-#ifdef CONFIG_RW_SPINLOCK
-
-/****************************************************************************
- * Name: read_lock_irqsave
- *
- * Description:
- *   If SMP is enabled:
- *     The argument lock should be specified,
- *     disable local interrupts and take the lock spinlock and return
- *     the interrupt state.
- *
- *     NOTE: This API is very simple to protect data (e.g. H/W register
- *     or internal data structure) in SMP mode. Do not use this API
- *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_save().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock, not NULL.
- *
- * Returned Value:
- *   An opaque, architecture-specific value that represents the state of
- *   the interrupts prior to the call to write_lock_irqsave(lock);
- *
- ****************************************************************************/
-
-irqstate_t read_lock_irqsave(FAR rwlock_t *lock)
-{
-  irqstate_t ret;
-  ret = up_irq_save();
-
-  read_lock(lock);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: read_unlock_irqrestore
- *
- * Description:
- *   If SMP is enabled:
- *     The argument lock should be specified, release the lock and
- *     restore the interrupt state as it was prior to the previous call to
- *     read_lock_irqsave(lock).
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_restore().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock, not NULL.
- *
- *   flags - The architecture-specific value that represents the state of
- *           the interrupts prior to the call to read_lock_irqsave(lock);
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void read_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
-{
-  read_unlock(lock);
-  up_irq_restore(flags);
-}
-
-/****************************************************************************
- * Name: write_lock_irqsave
- *
- * Description:
- *   If SMP is enabled:
- *     The argument lock should be specified,
- *     disable local interrupts and take the lock spinlock and return
- *     the interrupt state.
- *
- *     NOTE: This API is very simple to protect data (e.g. H/W register
- *     or internal data structure) in SMP mode. But do not use this API
- *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_save().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock, not NULL.
- *
- * Returned Value:
- *   An opaque, architecture-specific value that represents the state of
- *   the interrupts prior to the call to write_lock_irqsave(lock);
- *
- ****************************************************************************/
-
-irqstate_t write_lock_irqsave(rwlock_t *lock)
-{
-  irqstate_t ret;
-  ret = up_irq_save();
-
-  write_lock(lock);
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: write_unlock_irqrestore
- *
- * Description:
- *   If SMP is enabled:
- *     The argument lock should be specified, release the lock and
- *     restore the interrupt state as it was prior to the previous call to
- *     write_lock_irqsave(lock).
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_restore().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock, not NULL.
- *
- *   flags - The architecture-specific value that represents the state of
- *           the interrupts prior to the call to write_lock_irqsave(lock);
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void write_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
-{
-  write_unlock(lock);
-
-  up_irq_restore(flags);
-}
-#endif /* CONFIG_RW_SPINLOCK */
 #endif /* CONFIG_SPINLOCK */

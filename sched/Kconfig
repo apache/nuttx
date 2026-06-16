@@ -298,6 +298,14 @@ config RW_SPINLOCK
 		Reader can take read lock simultaneously and only one writer
 		can take write lock.
 
+config SPINLOCK_INLINE
+	bool "Inline spinlock helpers"
+	default !DEFAULT_SMALL
+	---help---
+		Inline spinlock helper functions to improve performance.  Disable
+		this option to emit callable non-inline versions and reduce
+		header-inline code growth.
+
 endif # SPINLOCK
 
 config IRQCHAIN
