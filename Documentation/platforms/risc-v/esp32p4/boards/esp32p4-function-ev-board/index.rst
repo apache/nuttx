@@ -483,6 +483,12 @@ watchdog
 
 Demonstrates MWDT/RWDT watchdog timers via the ``wdog`` app.
 
+webpanel
+--------
+
+This configuration enables the NuttX Web Panel for ESP32-P4.
+Please refer to the :doc:`Web Panel </applications/examples/webpanel/index>` page.
+
 Related Documentation
 =====================
 
