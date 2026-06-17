@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include <stddef.h>
 #include <stdint.h>
 
 /****************************************************************************
@@ -144,6 +145,7 @@ void tricore_svcall(volatile void *trap);
 void tricore_trapcall(volatile void *trap);
 void tricore_trapinit(void);
 void tricore_bustrap_register_hook(tricore_bustrap_hook_t hook);
+void tricore_fcu_register_pool(void *base, size_t num);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_TRICORE_SRC_COMMON_TRICORE_VECTORS_H */
