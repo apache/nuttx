@@ -25,6 +25,58 @@ login, the user will have access to the NSH session::
   NuttShell (NSH)
   nsh>
 
+When ``CONFIG_NSH_LOGIN_SETUID`` is enabled (the default when
+``CONFIG_SCHED_USER_IDENTITY`` is selected), NSH looks up the
+authenticated user name in the passwd database and sets the session
+identity after a successful login. See also ```id`` <#cmdid>`__,
+```su`` <#cmdsu>`__, and ```whoami`` <#cmdwhoami>`__.
+
+Session Identity and Prompt
+===========================
+
+When ``CONFIG_SCHED_USER_IDENTITY`` is enabled, NSH tracks the calling
+task's real and effective UID/GID for the shell session. File
+permission checks use the **effective** identity.
+
+**Prompt markers.** After login or a successful ``su``, NSH updates the
+command prompt to show the effective privilege level of the session:
+
+===================  ================================================
+Prompt marker        Meaning
+===================  ================================================
+``#``                Effective UID is zero (root session)
+``$``                Effective UID is non-zero (non-root session)
+===================  ================================================
+
+The marker replaces the character before the closing ``>`` in the
+default prompt (for example, ``nsh>`` becomes ``nsh#`` or ``nsh$``), or
+is appended when the configured prompt does not end with ``>``. The
+prompt is refreshed by ``nsh_update_prompt()`` after ``su`` and after
+login when ``CONFIG_NSH_LOGIN_SETUID`` is enabled.
+
+**Flat builds.** NSH may retain a real UID of zero while only the
+effective UID/GID are changed. In that case ``id`` can report
+``uid=0 euid=1000`` after logging in as a normal user. Permission
+checks and the prompt marker follow the effective identity.
+
+**Example**::
+
+  login: testuser
+  password:
+  User Logged-in!
+
+  NuttShell (NSH)
+  nsh$ id
+  uid=0 euid=1000 gid=0 egid=1000
+  nsh$ whoami
+  testuser
+  nsh$ su root
+  Password:
+  nsh# id
+  uid=0 euid=0 gid=0 egid=0
+  nsh# whoami
+  root
+
 After each failed login attempt, a delay can be set up. The purpose of
 this delay is to discourage attempts to crack the password by brute
 force. That delay is configured with::
