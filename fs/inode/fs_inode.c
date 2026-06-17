@@ -53,27 +53,22 @@ static rw_semaphore_t g_inode_lock = RWSEM_INITIALIZER;
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_FS_PERMISSION
 /****************************************************************************
- * Name: _inode_checkmode
+ * Name: fs_checkmode
  *
  * Description:
- *   Test effective credentials against 'inode' for 'amode' access.
- *   Kernel threads always pass.
- *
- * Returned Value:
- *   Zero (OK) or -EACCES.
+ *   Test the calling task's effective credentials against the owner, group,
+ *   and mode of a file or directory.  Kernel threads always pass.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
-static int _inode_checkmode(FAR struct inode *inode, int amode)
+int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode)
 {
   FAR struct tcb_s *rtcb;
   mode_t perm;
   uid_t uid;
   gid_t gid;
-
-  /* Kernel threads are always granted access */
 
   rtcb = nxsched_self();
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
@@ -81,28 +76,22 @@ static int _inode_checkmode(FAR struct inode *inode, int amode)
       return OK;
     }
 
-  /* Use effective credentials */
-
   DEBUGASSERT(rtcb->group != NULL);
   uid = rtcb->group->tg_euid;
   gid = rtcb->group->tg_egid;
 
-  /* Select the applicable permission-bit triplet */
-
-  if (uid == inode->i_owner)
+  if (uid == owner)
     {
-      perm = (inode->i_mode >> 6) & 7;
+      perm = (mode >> 6) & 7;
     }
-  else if (gid == inode->i_group)
+  else if (gid == group)
     {
-      perm = (inode->i_mode >> 3) & 7;
+      perm = (mode >> 3) & 7;
     }
   else
     {
-      perm = inode->i_mode & 7;
+      perm = mode & 7;
     }
-
-  /* Every requested bit must be present in the selected triplet */
 
   if ((amode & perm) != amode)
     {
@@ -111,7 +100,45 @@ static int _inode_checkmode(FAR struct inode *inode, int amode)
 
   return OK;
 }
-#endif /* CONFIG_PSEUDOFS_ATTRIBUTES && CONFIG_SCHED_USER_IDENTITY */
+
+/****************************************************************************
+ * Name: fs_open_amode
+ *
+ * Description:
+ *   Map open flags to a permission access mode bitmask.
+ *
+ ****************************************************************************/
+
+int fs_open_amode(int oflags)
+{
+  int amode = 0;
+
+  if ((oflags & O_RDOK) != 0)
+    {
+      amode |= R_OK;
+    }
+
+  if ((oflags & O_WROK) != 0)
+    {
+      amode |= W_OK;
+    }
+
+  return amode;
+}
+
+/****************************************************************************
+ * Name: fs_checkopenperm
+ *
+ * Description:
+ *   Test open access for the calling task against owner, group, and mode.
+ *
+ ****************************************************************************/
+
+int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags)
+{
+  return fs_checkmode(owner, group, mode, fs_open_amode(oflags));
+}
+#endif /* CONFIG_FS_PERMISSION */
 
 /****************************************************************************
  * Public Functions
@@ -189,6 +216,43 @@ void inode_runlock(void)
  * Name: inode_checkperm
  *
  * Description:
+ *   Check 'inode' for 'amode' access on pseudo-filesystem inodes.
+ *   NULL 'inode' (root) and mountpoints are exempt.
+ *
+ * Input Parameters:
+ *   inode - Inode to check, or NULL for a root-level path
+ *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -EACCES if permission is denied.
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int amode)
+{
+#ifdef CONFIG_FS_PERMISSION
+
+  if (inode == NULL)
+    {
+      return OK;
+    }
+
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      return OK;
+    }
+
+  return fs_checkmode(inode->i_owner, inode->i_group, inode->i_mode, amode);
+
+#else
+  return OK;
+#endif /* CONFIG_FS_PERMISSION */
+}
+
+/****************************************************************************
+ * Name: inode_checkopenperm
+ *
+ * Description:
  *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
  *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
  *   are exempt from mode checks.
@@ -202,29 +266,14 @@ void inode_runlock(void)
  *
  ****************************************************************************/
 
-int inode_checkperm(FAR struct inode *inode, int oflags)
+int inode_checkopenperm(FAR struct inode *inode, int oflags)
 {
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
-  int amode = 0;
-#endif
   FAR const struct file_operations *ops;
-
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
-  if ((oflags & O_RDOK) != 0)
-    {
-      amode |= R_OK;
-    }
-
-  if ((oflags & O_WROK) != 0)
-    {
-      amode |= W_OK;
-    }
-#endif
 
   if (INODE_IS_PSEUDODIR(inode))
     {
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
-      return _inode_checkmode(inode, amode);
+#ifdef CONFIG_FS_PERMISSION
+      return inode_checkperm(inode, fs_open_amode(oflags));
 #else
       return OK;
 #endif
@@ -244,53 +293,11 @@ int inode_checkperm(FAR struct inode *inode, int oflags)
       return -EACCES;
     }
 
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
+#ifdef CONFIG_FS_PERMISSION
 
-  if (INODE_IS_MOUNTPT(inode))
-    {
-      return OK;
-    }
-
-  return _inode_checkmode(inode, amode);
-
-#endif /* CONFIG_PSEUDOFS_ATTRIBUTES && CONFIG_SCHED_USER_IDENTITY */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: inode_checkdirperm
- *
- * Description:
- *   Check parent directory 'dir' for 'amode' access on pseudo-filesystem
- *   inodes.  NULL 'dir' (root) and mountpoints are exempt.
- *
- * Input Parameters:
- *   dir   - Parent directory inode, or NULL for a root-level path
- *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
- *
- * Returned Value:
- *   Zero (OK) on success, or -EACCES if permission is denied.
- *
- ****************************************************************************/
-
-int inode_checkdirperm(FAR struct inode *dir, int amode)
-{
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
-
-  if (dir == NULL)
-    {
-      return OK;
-    }
-
-  if (INODE_IS_MOUNTPT(dir))
-    {
-      return OK;
-    }
-
-  return _inode_checkmode(dir, amode);
+  return inode_checkperm(inode, fs_open_amode(oflags));
 
 #else
   return OK;
-#endif /* CONFIG_PSEUDOFS_ATTRIBUTES && CONFIG_SCHED_USER_IDENTITY */
+#endif /* CONFIG_FS_PERMISSION */
 }
