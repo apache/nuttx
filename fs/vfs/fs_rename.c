@@ -86,7 +86,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
 
   /* Verify source parent write permission. */
 
-  ret = inode_checkdirperm(oldparent, W_OK);
+  ret = inode_checkperm(oldparent, W_OK);
   if (ret < 0)
     {
       goto errout;
@@ -177,7 +177,7 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
   inode_find(&pardesc);   /* pardesc.parent valid even if node not found */
   parnode = pardesc.node;
 
-  ret = inode_checkdirperm(pardesc.parent, W_OK);
+  ret = inode_checkperm(pardesc.parent, W_OK);
 
   /* inode_find() holds a reference on parnode; RELEASE_SEARCH() only
    * frees pardesc.buffer.
