@@ -762,7 +762,7 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
 
       /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
 
-      if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]))
+      if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
         {
           canerr("ERROR: CAN read/write count is too large.  Dropped\n");
           return;
@@ -1259,7 +1259,7 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
 
   /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
 
-  if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]))
+  if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
     {
       canerr("ERROR: CAN read/write count is too large.  Dropped\n");
       return NULL;
