@@ -570,20 +570,35 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
       return ret;
     }
 
-  /* Determine the new, requested file position */
+  /* Determine the new, requested file position
+   * For EEPROM sparse files are not allowed.
+   * "offset" can be negative, "newpos" must be between 0 and eedev->size
+   */
 
   switch (whence)
     {
     case SEEK_CUR:
       newpos = filep->f_pos + offset;
+      if (newpos < 0 || newpos > eedev->size)
+        {
+          return -EINVAL;
+        }
       break;
 
     case SEEK_SET:
       newpos = offset;
+      if (newpos < 0 || newpos > eedev->size)
+        {
+          return -EINVAL;
+        }
       break;
 
     case SEEK_END:
       newpos = eedev->size + offset;
+      if (newpos < 0 || newpos > eedev->size)
+        {
+          return -EINVAL;
+        }
       break;
 
     default:
