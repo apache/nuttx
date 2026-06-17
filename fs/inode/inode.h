@@ -422,6 +422,24 @@ void inode_release(FAR struct inode *inode);
  * Name: inode_checkperm
  *
  * Description:
+ *   Check 'inode' for 'amode' access on pseudo-filesystem inodes.
+ *   NULL 'inode' (root) and mountpoints are exempt.
+ *
+ * Input Parameters:
+ *   inode - Inode to check, or NULL for a root-level path
+ *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -EACCES if permission is denied.
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int amode);
+
+/****************************************************************************
+ * Name: inode_checkopenperm
+ *
+ * Description:
  *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
  *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
  *   are exempt from mode checks.
@@ -435,25 +453,13 @@ void inode_release(FAR struct inode *inode);
  *
  ****************************************************************************/
 
-int inode_checkperm(FAR struct inode *inode, int oflags);
+int inode_checkopenperm(FAR struct inode *inode, int oflags);
 
-/****************************************************************************
- * Name: inode_checkdirperm
- *
- * Description:
- *   Check parent directory 'dir' for 'amode' access on pseudo-filesystem
- *   inodes.  NULL 'dir' (root) and mountpoints are exempt.
- *
- * Input Parameters:
- *   dir   - Parent directory inode, or NULL for a root-level path
- *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
- *
- * Returned Value:
- *   Zero (OK) on success, or -EACCES if permission is denied.
- *
- ****************************************************************************/
-
-int inode_checkdirperm(FAR struct inode *dir, int amode);
+#ifdef CONFIG_FS_PERMISSION
+int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode);
+int fs_open_amode(int oflags);
+int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
+#endif
 
 /****************************************************************************
  * Name: foreach_inode

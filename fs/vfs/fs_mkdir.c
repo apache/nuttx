@@ -142,7 +142,7 @@ int mkdir(const char *pathname, mode_t mode)
        * both W_OK and X_OK to create a directory entry.
        */
 
-      ret = inode_checkdirperm(desc.parent, W_OK | X_OK);
+      ret = inode_checkperm(desc.parent, W_OK | X_OK);
       if (ret < 0)
         {
           errcode = -ret;

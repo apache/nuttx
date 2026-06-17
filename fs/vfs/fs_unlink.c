@@ -123,7 +123,7 @@ int nx_unlink(FAR const char *pathname)
 
       /* Verify parent-directory write permission before unlink. */
 
-      ret = inode_checkdirperm(desc.parent, W_OK);
+      ret = inode_checkperm(desc.parent, W_OK);
       if (ret < 0)
         {
           goto errout_with_inode;
