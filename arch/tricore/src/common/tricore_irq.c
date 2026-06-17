@@ -213,6 +213,32 @@ int tricore_srpn_to_irq(int srpn)
 }
 
 /****************************************************************************
+ * Name: tricore_register_irq_srpn
+ *
+ * Description:
+ *   Register the SRPN->IRQ mapping for an SRC that was configured
+ *   externally (e.g., by MCAL IrqDma_Init / IrqAsclin_Init). Reads
+ *   SRPN directly from the SRC register and records it in the NuttX
+ *   dispatch table.
+ *
+ * Note:
+ *   This function conflicts with `tricore_irq_to_srpn`, therefore only one
+ *   of these two functions can be chosen.
+ *
+ ****************************************************************************/
+
+void tricore_register_irq_srpn(int irq)
+{
+  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  int srpn = src->B.SRPN;
+
+  DEBUGASSERT(srpn >= TRICORE_IRQ_MIN_PRIORITY &&
+              srpn <= TRICORE_IRQ_MAX_PRIORITY);
+
+  g_srpn_to_irq[srpn] = irq;
+}
+
+/****************************************************************************
  * Name: up_irq_enable
  *
  * Description:
