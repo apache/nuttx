@@ -363,7 +363,7 @@ const struct clk_ops_s g_clk_divider_ops =
 
 FAR struct clk_s *clk_register_divider(FAR const char *name,
                                        FAR const char *parent_name,
-                                       uint8_t flags, uint32_t reg,
+                                       uint8_t flags, uintptr_t reg,
                                        uint8_t shift, uint8_t width,
                                        uint16_t clk_divider_flags)
 {

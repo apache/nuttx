@@ -227,7 +227,7 @@ const struct clk_ops_s g_clk_multiplier_ops =
 
 FAR struct clk_s *clk_register_multiplier(FAR const char *name,
                                           FAR const char *parent_name,
-                                          uint8_t flags, uint32_t reg,
+                                          uint8_t flags, uintptr_t reg,
                                           uint8_t shift,
                                           uint8_t width,
                                           uint8_t clk_multiplier_flags)
