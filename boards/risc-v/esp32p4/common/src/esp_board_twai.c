@@ -98,6 +98,17 @@ int board_twai_setup(int port)
     }
 #endif /* CONFIG_ESPRESSIF_TWAI1 */
 
+#ifdef CONFIG_ESPRESSIF_TWAI2
+  /* Register the TWAI driver at "/dev/can2" */
+
+  ret = can_register("/dev/can2", twai);
+  if (ret < 0)
+    {
+      canerr("ERROR: TWAI2 register failed: %d\n", ret);
+      return ret;
+    }
+#endif /* CONFIG_ESPRESSIF_TWAI2 */
+
   return OK;
 #else
   return -ENODEV;
