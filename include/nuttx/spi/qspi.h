@@ -216,11 +216,13 @@
 #define QSPIMEM_RANDOM        (1 << 6)  /* Bit 6: Use random key in scrambler  */
 #define QSPIMEM_IDUAL         (1 << 7)  /* Bit 7: Instruction on two lines     */
 #define QSPIMEM_IQUAD         (1 << 0)  /* Bit 0: Instruction on four lines    */
+#define QSPIMEM_QUADDATA      (1 << 1)  /* Bit 1: Quad data, single-line addr  */
 
 #define QSPIMEM_ISREAD(f)     (((f) & QSPIMEM_WRITE) == 0)
 #define QSPIMEM_ISWRITE(f)    (((f) & QSPIMEM_WRITE) != 0)
 #define QSPIMEM_ISDUALIO(f)   (((f) & QSPIMEM_DUALIO) != 0)
 #define QSPIMEM_ISQUADIO(f)   (((f) & QSPIMEM_QUADIO) != 0)
+#define QSPIMEM_ISQUADDATA(f) (((f) & QSPIMEM_QUADDATA) != 0)
 #define QSPIMEM_ISSCRAMBLE(f) (((f) & QSPIMEM_SCRAMBLE) != 0)
 #define QSPIMEM_ISIDUAL(f)    (((f) & QSPIMEM_IDUAL) != 0)
 #define QSPIMEM_ISIQUAD(f)    (((f) & QSPIMEM_IQUAD) != 0)
