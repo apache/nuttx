@@ -649,8 +649,13 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_GD25_QSPI
+FAR struct mtd_dev_s *gd25_initialize(FAR struct qspi_dev_s *qspi,
+                                      bool unprotect);
+#else
 FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
+#endif
 
 /****************************************************************************
  * Name: gd55_initialize

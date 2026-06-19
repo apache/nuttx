@@ -1393,19 +1393,39 @@ config W25_DEBUG
 endif # MTD_W25
 
 config MTD_GD25
-	bool "SPI-based GD25 FLASH"
+	bool "SPI/QuadSPI-based GigaDevice GD25 FLASH"
 	default n
-	select SPI
 
 if MTD_GD25
+
+config GD25_QSPI
+	bool "Use QuadSPI interface for GD25"
+	default n
+	select QSPI
+	---help---
+		Enable to use the QuadSPI (QSPI) interface instead of SPI.
+		When enabled, gd25_initialize() accepts a qspi_dev_s pointer
+		and bool unprotect. When disabled (default), SPI is used.
 
 config GD25_SPIMODE
 	int "GD25 SPI Mode"
 	default 0
+	depends on !GD25_QSPI
 
 config GD25_SPIFREQUENCY
 	int "GD25 SPI Frequency"
 	default 20000000
+	depends on !GD25_QSPI
+
+config GD25_QSPIMODE
+	int "GD25 QuadSPI Mode"
+	default 0
+	depends on GD25_QSPI
+
+config GD25_QSPIFREQUENCY
+	int "GD25 QuadSPI Frequency"
+	default 20000000
+	depends on GD25_QSPI
 
 config GD25_READONLY
 	bool "GD25 Read-Only FLASH"
