@@ -1645,6 +1645,14 @@ config ESPRESSIF_TWAI1
 	select ARCH_HAVE_CAN_ERRORS
 	select CAN
 
+config ESPRESSIF_TWAI2
+	bool "TWAI2 (CAN)"
+	default n
+	depends on ARCH_CHIP_ESP32P4
+	select ESPRESSIF_TWAI
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
 config ESPRESSIF_USBSERIAL
 	bool "USB-Serial-JTAG Driver"
 	default n
@@ -3437,6 +3445,48 @@ config ESPRESSIF_TWAI1_SAM
 		to spikes on the bus-line).
 
 endif # ESPRESSIF_TWAI1
+
+if ESPRESSIF_TWAI2
+
+config ESPRESSIF_TWAI2_TXPIN
+	int "TWAI2 TX Pin"
+	default 6
+
+config ESPRESSIF_TWAI2_RXPIN
+	int "TWAI2 RX Pin"
+	default 7
+
+choice ESPRESSIF_TWAI2_TIMING
+	prompt "TWAI2 Timing config"
+	default TWAI2_TIMING_100KBITS
+	---help---
+		These options control timing of TWAI2.
+
+config TWAI2_TIMING_100KBITS
+	bool "100 KBits"
+
+config TWAI2_TIMING_125KBITS
+	bool "125 KBits"
+
+config TWAI2_TIMING_250KBITS
+	bool "250 KBits"
+
+config TWAI2_TIMING_500KBITS
+	bool "500 KBits"
+
+config TWAI2_TIMING_800KBITS
+	bool "800 KBits"
+
+endchoice # ESPRESSIF_TWAI2_TIMING
+
+config ESPRESSIF_TWAI2_SAM
+	bool "TWAI2 sampling"
+	default n
+	---help---
+		The bus is sampled 3 times (recommended for low to medium speed buses
+		to spikes on the bus-line).
+
+endif # ESPRESSIF_TWAI2
 
 config ESPRESSIF_TWAI_TEST_MODE
 	bool "TWAI character driver loopback test mode (for testing only)"
