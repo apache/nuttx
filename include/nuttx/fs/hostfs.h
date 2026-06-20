@@ -122,7 +122,7 @@ typedef intptr_t     nuttx_ssize_t;
 typedef unsigned int nuttx_gid_t;
 typedef unsigned int nuttx_uid_t;
 typedef uint32_t     nuttx_dev_t;
-typedef uint16_t     nuttx_ino_t;
+typedef uint32_t     nuttx_ino_t;
 typedef uint16_t     nuttx_nlink_t;
 
 #  ifdef CONFIG_FS_LARGEFILE
