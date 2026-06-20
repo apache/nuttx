@@ -75,7 +75,7 @@ int rpi4b_bringup(void)
 
   /* Initialize I2C character drivers. */
 
-#if defined(CONFIG_BCM2711_I2C)
+#if defined(CONFIG_BCM2711_I2C_DRIVER)
 
 #if defined(CONFIG_BCM2711_I2C0)
   ret = bcm2711_i2cdev_initialize(0);
