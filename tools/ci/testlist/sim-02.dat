@@ -1,6 +1,9 @@
 /sim/*/*/*/c[j-z]*
 /sim/*/*/*/[d-n]*
 
+# FTDI lib doesn't work on CI
+-sim:ft2232h_gpio
+
 # cURL error 60 SSL certificate expired
 -sim:cxxtest
 
