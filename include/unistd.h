@@ -494,6 +494,8 @@ gid_t   getegid(void);
 int     setreuid(uid_t ruid, uid_t euid);
 int     setregid(gid_t rgid, gid_t egid);
 
+int     getgroups(int, gid_t[]);
+
 int     getentropy(FAR void *buffer, size_t length);
 
 void    sync(void);
