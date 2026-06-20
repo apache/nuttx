@@ -65,6 +65,7 @@ set(SRCS
     lib_getpgrp.c
     lib_getpgid.c
     lib_getsid.c
+    lib_getgroups.c
     lib_setpgid.c
     lib_setsid.c
     lib_lockf.c
