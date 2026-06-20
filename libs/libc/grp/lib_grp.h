@@ -83,6 +83,8 @@ int grp_findby_name(FAR const char *gname, FAR struct group *entry,
                     FAR char *buffer, size_t buflen);
 int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
                    size_t buflen);
+int grp_findby_user(FAR const char *user, gid_t group,
+                    FAR gid_t *grouplist, int maxgroups, FAR int *count);
 #endif
 
 #undef EXTERN
