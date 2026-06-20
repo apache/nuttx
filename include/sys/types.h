@@ -144,7 +144,7 @@ typedef uint32_t     dev_t;
 
 /* ino_t is used for file serial numbers */
 
-typedef uint16_t     ino_t;
+typedef uint32_t     ino_t;
 
 /* nlink_t is used for link counts */
 
