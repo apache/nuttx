@@ -335,7 +335,10 @@ struct uart_dev_s
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
     defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
-  pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
+  pid_t                pid;          /* Foreground process group / controlling-tty
+                                      * owner that receives tty signals. With no
+                                      * process-group support, pgrp == pid.
+                                      * (-1 if none) */
 #endif
 
 #ifdef CONFIG_TTY_FORCE_PANIC

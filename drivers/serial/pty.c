@@ -43,6 +43,7 @@
 #include <nuttx/ascii.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mutex.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/serial/pty.h>
@@ -838,16 +839,21 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       /* Make the controlling terminal of the calling process */
 
       case TIOCSCTTY:
+      case TIOCSPGRP:
         {
-          /* Save the PID of the recipient of the SIGINT signal. */
+          /* Save the PID of the foreground process group that is to receive
+           * tty-generated signals.  A zero 'arg' selects the calling task
+           * (POSIX flag semantics); a positive 'arg' is honored as the
+           * target PID (NuttX historical semantics).
+           */
 
-          if ((int)arg < 0 || dev->pd_pid >= 0)
+          if ((int)arg < 0)
             {
               ret = -EINVAL;
             }
           else
             {
-              dev->pd_pid = (pid_t)arg;
+              dev->pd_pid = arg > 0 ? (pid_t)arg : nxsched_getpid();
               ret = 0;
             }
         }
@@ -857,6 +863,23 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           dev->pd_pid = INVALID_PROCESS_ID;
           ret = 0;
+        }
+        break;
+
+      /* Get the foreground process group / session leader.  pgrp == pid. */
+
+      case TIOCGPGRP:
+      case TIOCGSID:
+        {
+          if (dev->pd_pid < 0)
+            {
+              ret = -ENOTTY;
+            }
+          else
+            {
+              *(FAR pid_t *)((uintptr_t)arg) = dev->pd_pid;
+              ret = 0;
+            }
         }
         break;
 #endif
