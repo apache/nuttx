@@ -41,5 +41,17 @@ Block device drivers have these properties:
    *Example*: See the ``cmd_dd()`` implementation in
    ``apps/nshlib/nsh_ddcmd.c``.
 
+-  **Caching Block Driver** Any instantiated block device can
+   be encapsulated in secondary device which uses a predefined
+   amount of available RAM to provide read-ahead and write buffering.
+   The secondary block driver then becomes the mountpoint for
+   the target filesystem. Beware that any data not flushed to the
+   underlying device, through ``umount`` or other filesystem
+   mechanisms will be lost if the device is removed unexpectedly.
+
+   See ``boards/risc-v/litex/arty_a7/src/litex_sdio.c`` and
+   ``nuttx/nuttx/boards/risc-v/litex/arty_a7/Kconfig`` for example
+   usage and configuration.
+
 -  **Examples**. ``drivers/loop.c``,
    ``drivers/mmcsd/mmcsd_spi.c``, ``drivers/ramdisk.c``, etc.

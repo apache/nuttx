@@ -57,6 +57,10 @@ else ifeq ($(CONFIG_DRVR_READAHEAD),y)
   CSRCS += rwbuffer.c
 endif
 
+ifeq ($(CONFIG_BLOCK_CACHE),y)
+  CSRCS += block_cache.c
+endif
+
 ifeq ($(CONFIG_DEV_RPMSG),y)
   CSRCS += rpmsgdev.c
 endif
