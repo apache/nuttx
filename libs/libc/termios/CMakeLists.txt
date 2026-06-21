@@ -32,4 +32,7 @@ target_sources(
           lib_tcsetattr.c
           lib_tcsendbreak.c
           lib_ttyname.c
-          lib_ttynamer.c)
+          lib_ttynamer.c
+          lib_tcgetpgrp.c
+          lib_tcsetpgrp.c
+          lib_tcgetsid.c)
