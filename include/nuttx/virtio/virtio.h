@@ -229,6 +229,17 @@ int virtio_unregister_device(FAR struct virtio_device *device);
 
 void virtio_register_drivers(void);
 
+/* Buffer map ops for MMIO/PCI with per-process address environments */
+
+#ifdef CONFIG_ARCH_ADDRENV
+size_t virtio_addrenv_free_largest(FAR struct virtio_device *vdev);
+FAR void *virtio_addrenv_map(FAR struct virtio_device *vdev, FAR void *buf,
+                             size_t len, enum virtio_dma_map dir);
+void virtio_addrenv_unmap(FAR struct virtio_device *vdev, FAR void *buf,
+                          size_t len, enum virtio_dma_map dir,
+                          FAR void *mapped);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
