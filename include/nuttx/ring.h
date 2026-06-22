@@ -493,6 +493,24 @@
 #define ring_spmc_peek(r, items, count, index) \
   ring_mc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
 
+/* Peek at a fixed offset from the oldest element (cons_tail), without
+ * advancing.  Unlike the external-index peek above, the read position is
+ * expressed relative to the consumer tail, so the caller never handles
+ * absolute ring indices.
+ */
+
+#define ring_mpsc_peek_at(r, items, count, offset) \
+  ring_sc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+
+#define ring_spsc_peek_at(r, items, count, offset) \
+  ring_sc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+
+#define ring_mpmc_peek_at(r, items, count, offset) \
+  ring_mc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+
+#define ring_spmc_peek_at(r, items, count, offset) \
+  ring_mc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -1199,6 +1217,61 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
     }
 
   return n;
+}
+
+/****************************************************************************
+ * Name: ring_sc_peek_at
+ *
+ * Description:
+ *   Single-consumer peek at a byte/element offset measured from the oldest
+ *   element (cons_tail), without advancing.  The caller works purely in the
+ *   relative offset space and never sees an absolute ring index.
+ *
+ * Returned Value:
+ *   Number of elements peeked (0 if offset is out of range).
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
+                size_t elem_size, uint32_t offset)
+{
+  uint32_t index;
+
+  if (offset >= ring_count(r))
+    {
+      return 0;
+    }
+
+  index = RTS_IDX(RING_FIELD(&r->cons_tail) + offset);
+  return ring_sc_peek(r, items, count, elem_size, &index);
+}
+
+/****************************************************************************
+ * Name: ring_mc_peek_at
+ *
+ * Description:
+ *   Multi-consumer counterpart of ring_sc_peek_at.  Peeks at an offset from
+ *   cons_tail with the same overwrite-safe semantics as ring_mc_peek.
+ *
+ * Returned Value:
+ *   Number of elements peeked (0 if offset is out of range).
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
+                size_t elem_size, uint32_t offset)
+{
+  uint32_t index;
+
+  if (offset >= ring_count(r))
+    {
+      return 0;
+    }
+
+  index = RTS_IDX(atomic_read_acquire(&r->cons_tail) + offset);
+  return ring_mc_peek(r, items, count, elem_size, &index);
 }
 
 /****************************************************************************
