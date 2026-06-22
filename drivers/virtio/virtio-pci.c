@@ -79,8 +79,23 @@ static struct pci_driver_s g_virtio_pci_drv =
 
 static const struct virtio_memory_ops g_virtio_pci_mmops =
 {
-  virtio_pci_alloc_buf, /* Alloc */
-  virtio_pci_free_buf,  /* Free */
+  .alloc        = virtio_pci_alloc_buf,
+  .free         = virtio_pci_free_buf,
+
+  /* The host (QEMU) can access arbitrary guest memory, so buffers are used
+   * as is (zero copy), except user buffers of a per-process address
+   * environment, which are not physically contiguous.
+   */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  .free_largest = virtio_addrenv_free_largest,
+  .map          = virtio_addrenv_map,
+  .unmap        = virtio_addrenv_unmap,
+#else
+  .free_largest = NULL,
+  .map          = NULL,
+  .unmap        = NULL,
+#endif
 };
 
 /****************************************************************************
