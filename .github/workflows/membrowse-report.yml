@@ -104,6 +104,9 @@ jobs:
           MEMBROWSE_API_KEY: ${{ secrets.MEMBROWSE_API_KEY }}
           MEMBROWSE_API_URL: ${{ vars.MEMBROWSE_API_URL }}
           TARGET_NAME: ${{ matrix.target_name }}
+          # Base on the previous branch tip, not the (often unreported mid-PR)
+          # git parent.
+          BEFORE_SHA: ${{ github.event.before }}
         run: |
           ARGS=(--upload --github
                 --target-name "$TARGET_NAME"
@@ -111,6 +114,10 @@ jobs:
                 --identical)
           if [ -n "$MEMBROWSE_API_URL" ]; then
             ARGS+=(--api-url "$MEMBROWSE_API_URL")
+          fi
+          # Override parent with previous tip; skip on branch creation (0s).
+          if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            ARGS+=(--base-sha "$BEFORE_SHA")
           fi
           membrowse report "${ARGS[@]}"
 
@@ -210,6 +217,10 @@ jobs:
           LD_PATHS: ${{ steps.ld.outputs.paths }}
           MAP_FILE: ${{ matrix.map_file != '' && format('sources/nuttx/{0}', matrix.map_file) || '' }}
           LINKER_VARS: ${{ matrix.linker_vars }}
+          # Push only: base on the previous branch tip, not the (often
+          # unreported mid-PR) git parent. Empty on PRs (--github bases on the
+          # PR target tip).
+          BEFORE_SHA: ${{ github.event_name == 'push' && github.event.before || '' }}
         run: |
           set -o pipefail
           ARGS=("$ELF" "$LD_PATHS"
@@ -218,6 +229,10 @@ jobs:
                 --api-key "$MEMBROWSE_API_KEY")
           if [ -n "$MEMBROWSE_API_URL" ]; then
             ARGS+=(--api-url "$MEMBROWSE_API_URL")
+          fi
+          # Override parent with previous tip; skip on branch creation (0s).
+          if [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            ARGS+=(--base-sha "$BEFORE_SHA")
           fi
           if [ -n "$MAP_FILE" ]; then
             ARGS+=(--map-file "$MAP_FILE")
