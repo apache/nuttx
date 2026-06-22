@@ -26,6 +26,9 @@
 
 #include <nuttx/debug.h>
 
+#include <string.h>
+
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/mutex.h>
 #include <nuttx/kmalloc.h>
@@ -40,6 +43,14 @@
 #include "virtio-rpmsg.h"
 #include "virtio-serial.h"
 #include "virtio-snd.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Largest buffer virtio_addrenv_map() is asked to bounce at once */
+
+#define VIRTIO_ADDRENV_MAP_MAX (64 * 1024)
 
 /****************************************************************************
  * Private Types
@@ -356,3 +367,108 @@ int virtio_unregister_device(FAR struct virtio_device *device)
   nxmutex_unlock(&g_virtio_bus.lock);
   return ret;
 }
+
+#ifdef CONFIG_ARCH_ADDRENV
+
+/****************************************************************************
+ * Name: virtio_addrenv_free_largest
+ *
+ * Description:
+ *   Return the largest buffer to pass to virtio_addrenv_map() at once, for
+ *   a transport whose device reaches guest physical memory directly.
+ *
+ * Input Parameters:
+ *   vdev - The virtio device
+ *
+ * Returned Value:
+ *   The largest mappable length in bytes.
+ *
+ ****************************************************************************/
+
+size_t virtio_addrenv_free_largest(FAR struct virtio_device *vdev)
+{
+  /* A fixed limit: walking the heap here would take the heap lock on
+   * every request, which fails in interrupt and panic context.
+   */
+
+  return VIRTIO_ADDRENV_MAP_MAX;
+}
+
+/****************************************************************************
+ * Name: virtio_addrenv_map
+ *
+ * Description:
+ *   Map a buffer for a transport whose device reaches guest physical memory
+ *   directly. A user address is only virtually contiguous, while the device
+ *   accesses len bytes from the physical address of its first byte, so it
+ *   is bounced through the kernel heap. A kernel address is linearly
+ *   mapped and used as is.
+ *
+ * Input Parameters:
+ *   vdev - The virtio device
+ *   buf  - The buffer to map
+ *   len  - The buffer length in bytes
+ *   dir  - The transfer direction
+ *
+ * Returned Value:
+ *   The address to give the device, or NULL when out of memory.
+ *
+ ****************************************************************************/
+
+FAR void *virtio_addrenv_map(FAR struct virtio_device *vdev, FAR void *buf,
+                             size_t len, enum virtio_dma_map dir)
+{
+  FAR void *bounce;
+
+  if (!up_addrenv_user_vaddr((uintptr_t)buf))
+    {
+      return buf;
+    }
+
+  bounce = kmm_malloc(len);
+  if (bounce != NULL && dir != VIRTIO_DMA_FROM_DEVICE)
+    {
+      memcpy(bounce, buf, len);
+    }
+
+  return bounce;
+}
+
+/****************************************************************************
+ * Name: virtio_addrenv_unmap
+ *
+ * Description:
+ *   Release a buffer mapped by virtio_addrenv_map(), copying the data the
+ *   device wrote back to the user buffer. Must run in the address
+ *   environment the buffer was mapped in.
+ *
+ * Input Parameters:
+ *   vdev   - The virtio device
+ *   buf    - The buffer passed to virtio_addrenv_map()
+ *   len    - The buffer length in bytes
+ *   dir    - The transfer direction passed to virtio_addrenv_map()
+ *   mapped - The address virtio_addrenv_map() returned
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void virtio_addrenv_unmap(FAR struct virtio_device *vdev, FAR void *buf,
+                          size_t len, enum virtio_dma_map dir,
+                          FAR void *mapped)
+{
+  if (mapped == buf)
+    {
+      return;
+    }
+
+  if (dir != VIRTIO_DMA_TO_DEVICE)
+    {
+      memcpy(buf, mapped, len);
+    }
+
+  kmm_free(mapped);
+}
+
+#endif /* CONFIG_ARCH_ADDRENV */
