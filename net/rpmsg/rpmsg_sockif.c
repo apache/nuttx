@@ -382,6 +382,12 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
       conn->sconn.s_flags |= _SF_CONNECTED;
       _SO_CONN_SETERRNO(conn, OK);
 
+      /* SYNC means the peer (re)established the connection.  Clear any
+       * stale unbind flag left by a previous NS_DESTROY so that connect()
+       * does not wrongly fail.
+       */
+
+      atomic_set_release(&conn->unbind, 0);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_poll_notify(conn, POLLOUT);
       nxmutex_unlock(&conn->sendlock);
