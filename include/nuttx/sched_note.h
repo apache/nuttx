@@ -655,15 +655,19 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
-void sched_note_preemption(FAR struct tcb_s *tcb, bool locked);
+void sched_note_preempt_lock(FAR struct tcb_s *tcb);
+void sched_note_preempt_unlock(FAR struct tcb_s *tcb);
 #else
-#  define sched_note_preemption(t,l)
+#  define sched_note_preempt_lock(t)
+#  define sched_note_preempt_unlock(t)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-void sched_note_csection(FAR struct tcb_s *tcb, bool enter);
+void sched_note_csection_enter(FAR struct tcb_s *tcb);
+void sched_note_csection_leave(FAR struct tcb_s *tcb);
 #else
-#  define sched_note_csection(t,e)
+#  define sched_note_csection_enter(t)
+#  define sched_note_csection_leave(t)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
@@ -683,22 +687,39 @@ void sched_note_syscall_leave(int nr, uintptr_t result);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
-void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+void sched_note_irq_enter(int irq, FAR void *handler);
+void sched_note_irq_leave(int irq, FAR void *handler);
 #else
-#  define sched_note_irqhandler(i,h,e)
+#  define sched_note_irq_enter(i,h)
+#  define sched_note_irq_leave(i,h)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
-void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg);
+void sched_note_wdog_start(FAR void *handler, FAR const void *arg);
+void sched_note_wdog_cancel(FAR void *handler, FAR const void *arg);
+void sched_note_wdog_enter(FAR void *handler, FAR const void *arg);
+void sched_note_wdog_leave(FAR void *handler, FAR const void *arg);
 #else
-#  define sched_note_wdog(e,h,a)
+#  define sched_note_wdog_start(h,a)
+#  define sched_note_wdog_cancel(h,a)
+#  define sched_note_wdog_enter(h,a)
+#  define sched_note_wdog_leave(h,a)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HEAP
-void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
-                     size_t size, size_t used);
+void sched_note_heap_add(FAR void *heap, FAR void *mem,
+                         size_t size, size_t used);
+void sched_note_heap_remove(FAR void *heap, FAR void *mem,
+                            size_t size, size_t used);
+void sched_note_heap_alloc(FAR void *heap, FAR void *mem,
+                           size_t size, size_t used);
+void sched_note_heap_free(FAR void *heap, FAR void *mem,
+                          size_t size, size_t used);
 #else
-#  define sched_note_heap(e,h,m,s,c)
+#  define sched_note_heap_add(h,m,s,c)
+#  define sched_note_heap_remove(h,m,s,c)
+#  define sched_note_heap_alloc(h,m,s,c)
+#  define sched_note_heap_free(h,m,s,c)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP

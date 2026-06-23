@@ -57,11 +57,11 @@
        { \
          clock_t start; \
          clock_t elapsed; \
-         sched_note_wdog(NOTE_WDOG_ENTER, func, (FAR void *)arg); \
+         sched_note_wdog_enter(func, (FAR void *)arg); \
          start = perf_gettime(); \
          func(arg); \
          elapsed = perf_gettime() - start; \
-         sched_note_wdog(NOTE_WDOG_LEAVE, func, (FAR void *)arg); \
+         sched_note_wdog_leave(func, (FAR void *)arg); \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WDOG) \
            { \
              CRITMONITOR_PANIC("WDOG %p, %s IRQ, execute too long %ju\n", \
@@ -74,9 +74,9 @@
 #  define CALL_FUNC(func, arg) \
       do \
         { \
-          sched_note_wdog(NOTE_WDOG_ENTER, func, (FAR void *)arg); \
+          sched_note_wdog_enter(func, (FAR void *)arg); \
           func(arg); \
-          sched_note_wdog(NOTE_WDOG_LEAVE, func, (FAR void *)arg); \
+          sched_note_wdog_leave(func, (FAR void *)arg); \
         } \
       while (0)
 
@@ -347,8 +347,8 @@ int wd_start_abstick(FAR struct wdog_s *wdog, clock_t ticks,
       wd_insert(wdog, ticks, wdentry, arg);
 #endif
       leave_critical_section(flags);
-      sched_note_wdog(NOTE_WDOG_START, wdentry,
-                      (FAR void *)(uintptr_t)ticks);
+      sched_note_wdog_start(wdentry,
+                            (FAR void *)(uintptr_t)ticks);
       ret = OK;
     }
 

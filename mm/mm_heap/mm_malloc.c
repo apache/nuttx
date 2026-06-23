@@ -325,8 +325,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, ret, nodesize,
-                      heap->mm_curused);
+      sched_note_heap_alloc(heap, ret, nodesize,
+                            heap->mm_curused);
     }
 
   kasan_bypass(false);

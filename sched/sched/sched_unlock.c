@@ -80,7 +80,7 @@ void sched_unlock(void)
           /* Note that we no longer have pre-emption disabled. */
 
           nxsched_critmon_preemption(rtcb, false, return_address(0));
-          sched_note_preemption(rtcb, false);
+          sched_note_preempt_unlock(rtcb);
 
           /* Release any ready-to-run tasks that have collected in
            * g_pendingtasks (or in g_readytorun for SMP)

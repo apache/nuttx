@@ -461,7 +461,7 @@ static void forcefree(FAR struct mm_heap_s *heap, FAR void *mem)
   /* Update heap statistics */
 
   heap->mm_curused -= size;
-  sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, heap->mm_curused);
+  sched_note_heap_free(heap, mem, size, heap->mm_curused);
   tlsf_free(heap->mm_tlsf, mem);
   mm_unlock(heap);
 }
@@ -806,8 +806,8 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   /* Add memory to the tlsf pool */
 
   tlsf_add_pool(heap->mm_tlsf, heapstart, heapsize);
-  sched_note_heap(NOTE_HEAP_ADD, heap, heapstart, heapsize,
-                  heap->mm_curused);
+  sched_note_heap_add(heap, heapstart, heapsize,
+                      heap->mm_curused);
   mm_unlock(heap);
 }
 
@@ -1524,8 +1524,8 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, ret, nodesize,
-                      heap->mm_curused);
+      sched_note_heap_alloc(heap, ret, nodesize,
+                            heap->mm_curused);
     }
 
   mm_unlock(heap);
@@ -1619,8 +1619,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (ret)
     {
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, ret, nodesize,
-                      heap->mm_curused);
+      sched_note_heap_alloc(heap, ret, nodesize,
+                            heap->mm_curused);
     }
 
   mm_unlock(heap);
@@ -1755,10 +1755,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   if (newmem)
     {
-      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize,
-                      heap->mm_curused - newsize);
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
-                      heap->mm_curused);
+      sched_note_heap_free(heap, oldmem, oldsize,
+                           heap->mm_curused - newsize);
+      sched_note_heap_alloc(heap, newmem, newsize,
+                            heap->mm_curused);
     }
 
   mm_unlock(heap);
@@ -1816,9 +1816,10 @@ void mm_uninitialize(FAR struct mm_heap_s *heap)
           kasan_unregister(heap->mm_heapstart[i]);
         }
 
-      sched_note_heap(NOTE_HEAP_REMOVE, heap, heap->mm_heapstart[i],
-                      (uintptr_t)heap->mm_heapend[i] -
-                      (uintptr_t)heap->mm_heapstart[i], heap->mm_curused);
+      sched_note_heap_remove(heap, heap->mm_heapstart[i],
+                             (uintptr_t)heap->mm_heapend[i] -
+                             (uintptr_t)heap->mm_heapstart[i],
+                             heap->mm_curused);
     }
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
