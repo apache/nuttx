@@ -1116,6 +1116,16 @@ void sched_note_preemption(FAR struct tcb_s *tcb, bool locked)
 
   spin_unlock_irqrestore_notrace(&g_note_lock, flags);
 }
+
+void sched_note_preempt_lock(FAR struct tcb_s *tcb)
+{
+  sched_note_preemption(tcb, true);
+}
+
+void sched_note_preempt_unlock(FAR struct tcb_s *tcb)
+{
+  sched_note_preemption(tcb, false);
+}
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
@@ -1158,6 +1168,16 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
 
       note_add(*driver, &note, note.ncs_cmn.nc_length);
     }
+}
+
+void sched_note_csection_enter(FAR struct tcb_s *tcb)
+{
+  sched_note_csection(tcb, true);
+}
+
+void sched_note_csection_leave(FAR struct tcb_s *tcb)
+{
+  sched_note_csection(tcb, false);
 }
 #endif
 
@@ -1416,6 +1436,16 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
       note_add(*driver, &note, note.nih_cmn.nc_length);
     }
 }
+
+void sched_note_irq_enter(int irq, FAR void *handler)
+{
+  sched_note_irqhandler(irq, handler, true);
+}
+
+void sched_note_irq_leave(int irq, FAR void *handler)
+{
+  sched_note_irqhandler(irq, handler, false);
+}
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_WDOG
@@ -1454,6 +1484,26 @@ void sched_note_wdog(uint8_t event, FAR void *handler, FAR const void *arg)
     }
 
   leave_critical_section_notrace(flags);
+}
+
+void sched_note_wdog_start(FAR void *handler, FAR const void *arg)
+{
+  sched_note_wdog(NOTE_WDOG_START, handler, arg);
+}
+
+void sched_note_wdog_cancel(FAR void *handler, FAR const void *arg)
+{
+  sched_note_wdog(NOTE_WDOG_CANCEL, handler, arg);
+}
+
+void sched_note_wdog_enter(FAR void *handler, FAR const void *arg)
+{
+  sched_note_wdog(NOTE_WDOG_ENTER, handler, arg);
+}
+
+void sched_note_wdog_leave(FAR void *handler, FAR const void *arg)
+{
+  sched_note_wdog(NOTE_WDOG_LEAVE, handler, arg);
 }
 #endif
 
@@ -1497,6 +1547,30 @@ void sched_note_heap(uint8_t event, FAR void *heap, FAR void *mem,
 
       note_add(*driver, &note, note.nhp_cmn.nc_length);
     }
+}
+
+void sched_note_heap_add(FAR void *heap, FAR void *mem,
+                         size_t size, size_t used)
+{
+  sched_note_heap(NOTE_HEAP_ADD, heap, mem, size, used);
+}
+
+void sched_note_heap_remove(FAR void *heap, FAR void *mem,
+                            size_t size, size_t used)
+{
+  sched_note_heap(NOTE_HEAP_REMOVE, heap, mem, size, used);
+}
+
+void sched_note_heap_alloc(FAR void *heap, FAR void *mem,
+                           size_t size, size_t used)
+{
+  sched_note_heap(NOTE_HEAP_ALLOC, heap, mem, size, used);
+}
+
+void sched_note_heap_free(FAR void *heap, FAR void *mem,
+                          size_t size, size_t used)
+{
+  sched_note_heap(NOTE_HEAP_FREE, heap, mem, size, used);
 }
 #endif
 

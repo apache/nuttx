@@ -311,7 +311,7 @@ irqstate_t enter_critical_section(void)
       if (rtcb->irqcount == 1)
         {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-          sched_note_csection(rtcb, true);
+          sched_note_csection_enter(rtcb);
 #endif
         }
     }
@@ -469,7 +469,7 @@ void leave_critical_section(irqstate_t flags)
       if (rtcb->irqcount == 1)
         {
 #  ifdef CONFIG_SCHED_INSTRUMENTATION_CSECTION
-          sched_note_csection(rtcb, false);
+          sched_note_csection_leave(rtcb);
 #  endif
         }
     }

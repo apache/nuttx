@@ -387,10 +387,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           heap->mm_maxused = heap->mm_curused;
         }
 
-      sched_note_heap(NOTE_HEAP_FREE, heap, oldmem, oldsize,
-                      heap->mm_curused - newsize);
-      sched_note_heap(NOTE_HEAP_ALLOC, heap, newmem, newsize,
-                      heap->mm_curused);
+      sched_note_heap_free(heap, oldmem, oldsize,
+                           heap->mm_curused - newsize);
+      sched_note_heap_alloc(heap, newmem, newsize,
+                            heap->mm_curused);
 
       size = MM_SIZEOF_NODE(oldnode);
 

@@ -107,8 +107,8 @@ int wd_cancel(FAR struct wdog_s *wdog)
         }
 
       leave_critical_section(flags);
-      sched_note_wdog(NOTE_WDOG_CANCEL, (FAR void *)wdog->func,
-                      (FAR void *)(uintptr_t)wdog->expired);
+      sched_note_wdog_cancel((FAR void *)wdog->func,
+                             (FAR void *)(uintptr_t)wdog->expired);
     }
 
   return ret;

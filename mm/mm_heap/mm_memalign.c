@@ -289,8 +289,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
       heap->mm_maxused = heap->mm_curused;
     }
 
-  sched_note_heap(NOTE_HEAP_ALLOC, heap, (FAR void *)alignedchunk, size,
-                  heap->mm_curused);
+  sched_note_heap_alloc(heap, (FAR void *)alignedchunk, size,
+                        heap->mm_curused);
 
   kasan_bypass(false);
   mm_unlock(heap);

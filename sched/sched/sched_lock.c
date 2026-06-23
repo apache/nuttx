@@ -91,7 +91,7 @@ void sched_lock(void)
           /* Note that we have pre-emption locked */
 
           nxsched_critmon_preemption(rtcb, true, return_address(0));
-          sched_note_preemption(rtcb, true);
+          sched_note_preempt_lock(rtcb);
           leave_critical_section_notrace(flags);
 #endif
         }
