@@ -37,7 +37,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   gawk \
   git \
   gperf \
-  libftdi1-dev \
   libncurses5-dev \
   make \
   ninja-build \
@@ -359,6 +358,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" TZ=Etc/UTC apt-get in
   libpython2.7 \
   libtinfo5 \
   libusb-1.0-0-dev libusb-1.0-0-dev:i386 \
+  libftdi1-dev \
   libv4l-dev libv4l-dev:i386 \
   libx11-dev libx11-dev:i386 \
   libxext-dev libxext-dev:i386 \

@@ -921,8 +921,15 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
     {
       xctn->datamode = CCR_DMODE_DUAL;
     }
-  else if (QSPIMEM_ISQUADIO(meminfo->flags))
+  else if (QSPIMEM_ISQUADIO(meminfo->flags) ||
+           QSPIMEM_ISQUADDATA(meminfo->flags))
     {
+      /* QUADDATA selects quad data width while leaving the address phase
+       * single-line (1-1-4), which QUADIO cannot express. The address-mode
+       * block above intentionally ignores QUADDATA, so addrmode stays
+       * single.
+       */
+
       xctn->datamode = CCR_DMODE_QUAD;
     }
   else

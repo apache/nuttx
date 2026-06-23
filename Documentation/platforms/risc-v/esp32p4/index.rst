@@ -341,7 +341,7 @@ Bit Scrambler      No
 SD/MMC Host        No
 H264 Encoder       No
 2D-DMA             No
-TWAI (CAN)         Yes     TWAI0/1
+TWAI (CAN)         Yes     TWAI0/1/2
 Pulse Counter      Yes     Implemented as Quadrature Encoder
 RMT                Yes
 USB Serial/JTAG    Yes

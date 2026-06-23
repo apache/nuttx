@@ -172,7 +172,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Validate operation support and pseudo-filesystem permissions */
 
-  ret = inode_checkperm(inode, oflags);
+  ret = inode_checkopenperm(inode, oflags);
   if (ret < 0)
     {
       goto errout_with_inode;
