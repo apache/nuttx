@@ -107,7 +107,7 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
   syslog_write_t write;
   syslog_putc_t  putc;
   size_t nwritten = 0;
-  size_t nwritten_max = 0;
+  ssize_t nwritten_max = -EIO;
   ssize_t ret;
   int i;
 
@@ -153,7 +153,7 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
 
                   if (ret < 0)
                     {
-                      return ret;
+                      continue;
                     }
 
                   nwritten = head + 1;
@@ -166,7 +166,7 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
               ret = write(channel, buffer + nwritten, buflen - nwritten);
               if (ret < 0)
                 {
-                  return ret;
+                  continue;
                 }
               else
                 {
