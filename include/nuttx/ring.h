@@ -1430,8 +1430,8 @@ ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
  *   if needed, then initialize ring_buf_s for zero-copy write.
  *   Caller writes data into buf, then calls ring_sp_finish.
  *
- *   Returns the number of elements evicted from the ring to make room
- *   for the request; zero if the ring had enough free space.
+ *   Returns the number of elements that did not stay in the ring (the
+ *   request beyond capacity plus evicted old data); zero otherwise.
  *
  ****************************************************************************/
 
@@ -1442,12 +1442,14 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
   uint32_t prod_idx;
   uint32_t cons_idx;
   uint32_t free_space;
-  uint32_t discard = 0;
+  uint32_t discard;
+  uint32_t all_discard = 0;
   uint32_t old_cons;
   uint32_t new_cons;
 
   if (count > r->capacity)
     {
+      all_discard = count - r->capacity;
       count = r->capacity;
     }
 
@@ -1471,23 +1473,22 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
         {
           ring_buf_init(buf, r, cons_idx, discard, elem_size);
           ring_mc_finish(r, buf);
+          all_discard += discard;
           break;
         }
     }
 
   ring_buf_init(buf, r, prod_idx, count, elem_size);
-  return discard;
+  return all_discard;
 }
 
 /****************************************************************************
  * Name: ring_sp_overwrite
  *
  * Description:
- *   Single-producer overwrite (copy variant).  Returns the net
- *   number of elements added to the ring (count - discarded);
- *   when the ring was full, the count of evicted elements is subtracted
- *   from the inserted count so the caller sees the true delta in
- *   ring occupancy.
+ *   Single-producer overwrite (copy variant).  Returns the number of
+ *   elements that did not stay in the ring (the request beyond capacity
+ *   plus evicted old data); zero when the request fit.
  *
  ****************************************************************************/
 
@@ -1504,7 +1505,7 @@ ring_sp_overwrite(FAR struct ring_s *r, FAR const void *items,
                  elem_size);
   ring_sp_finish(r, &buf);
 
-  return buf.cnt - discard;
+  return discard;
 }
 
 /****************************************************************************
@@ -1516,8 +1517,8 @@ ring_sp_overwrite(FAR struct ring_s *r, FAR const void *items,
  *   ring_buf_s for zero-copy write. Caller writes data into buf,
  *   then calls ring_mp_finish.
  *
- *   Returns the total number of elements evicted from the ring across
- *   all retry rounds; zero if the ring had enough free space.
+ *   Returns the number of elements that did not stay in the ring (the
+ *   request beyond capacity plus evicted old data); zero otherwise.
  *
  ****************************************************************************/
 
@@ -1537,6 +1538,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
 
   if (count > r->capacity)
     {
+      all_discard = count - r->capacity;
       count = r->capacity;
     }
 
@@ -1595,11 +1597,9 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
  * Name: ring_mp_overwrite
  *
  * Description:
- *   Multi-producer overwrite (copy variant).  Returns the net
- *   number of elements added to the ring (count - discarded);
- *   when the ring was full, the count of evicted elements is subtracted
- *   from the inserted count so the caller sees the true delta in
- *   ring occupancy.
+ *   Multi-producer overwrite (copy variant).  Returns the number of
+ *   elements that did not stay in the ring (the request beyond capacity
+ *   plus evicted old data); zero when the request fit.
  *
  ****************************************************************************/
 
@@ -1616,7 +1616,7 @@ ring_mp_overwrite(FAR struct ring_s *r, FAR const void *items,
                  elem_size);
   ring_mp_finish(r, &buf);
 
-  return buf.cnt - discard;
+  return discard;
 }
 
 #endif /* __INCLUDE_NUTTX_RING_H */
