@@ -1,0 +1,126 @@
+config AVR_AVRDX_DRIVER_WS2812
+	bool "Enable driver for WS2812 LEDs"
+	default false
+	depends on AVR_AVRDX_SWINT
+	depends on AVRDX_HIGH_PRIO_INTERRUPTS
+	depends on WS2812
+	depends on WS2812_NON_SPI_DRIVER
+	depends on BOARD_LATE_INITIALIZE
+	---help---
+		Enable this to build lower-half driver for WS2812 LED.
+
+		This driver uses a concept of "lanes". A lane is a set of WS2812
+		LEDs connected serially and driven from single hardware device
+		(peripheral) on the MCU side.
+
+		You need to select at least one peripheral to use this driver.
+		Selected peripheral cannot be used by its regular driver and
+		high priority interrupts will be enabled for it. (Or at least
+		for its output-related interrupt.)
+
+config AVR_AVRDX_WS2812_USART0
+	bool "Enable WS2812 lane on USART0"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_2
+	depends on !AVR_USART0
+	select AVRDX_HIGH_PRIO_USART0_DRE
+
+config AVR_AVRDX_WS2812_USART1
+	bool "Enable WS2812 lane on USART1"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_2
+	depends on !AVR_USART1
+	select AVRDX_HIGH_PRIO_USART1_DRE
+
+config AVR_AVRDX_WS2812_USART2
+	bool "Enable WS2812 lane on USART2"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_2
+	depends on !AVR_USART2
+	select AVRDX_HIGH_PRIO_USART2_DRE
+
+config AVR_AVRDX_WS2812_USART3
+	bool "Enable WS2812 lane on USART3"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_4 # this is correct, means 3 and 4
+	depends on !AVR_USART3
+	select AVRDX_HIGH_PRIO_USART3_DRE
+
+config AVR_AVRDX_WS2812_USART4
+	bool "Enable WS2812 lane on USART4"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_4
+	depends on !AVR_USART4
+	select AVRDX_HIGH_PRIO_USART4_DRE
+
+config AVR_AVRDX_WS2812_USART5
+	bool "Enable WS2812 lane on USART5"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on AVR_HAVE_USART_5
+	depends on !AVR_USART5
+	select AVRDX_HIGH_PRIO_USART5_DRE
+
+config AVR_AVRDX_WS2812_SHORT_LANE
+	bool "Limit number of LEDs in lane for faster execution"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	---help---
+		When the LED data is submitted by the application, the bits
+		are converted to whatever data the hardware needs to be able
+		to transmit those bits. Generally, that means using more
+		memory - for example, the UART lanes convert each 3 bytes
+		of LED data into 8 + 1 bytes of UART data (more if the LEDs
+		have white component.) Walking through this data needs
+		an iterator variable (index) - data type needed for this
+		variable is determined by LED count.
+
+		If you select this option, the LED count is limited to make
+		uint8_t large enough to hold the index. The limitation is
+		31 LEDs without support for white LED (see WS2812_HAS_WHITE)
+		or 21 LEDs with it.
+
+		If you do not select it, the LED count is limited to a hardcoded
+		limit of 255 LEDs (per lane.)
+
+config AVR_AVRDX_WS2812_NO_READS
+	bool "Disable reading the pixel buffer"
+	default false
+	depends on AVR_AVRDX_DRIVER_WS2812
+	---help---
+		The upper half driver expects to be able to read data present
+		in the pixel buffer. That means that the lower half driver
+		needs to store what it receives in write call.
+
+		The data is, however, also stored in the form suitable
+		for transmission by the hardware. In essence, everything
+		is stored twice.
+
+		If your application never reads data from the pixel buffer,
+		you can enable this option. Any attempt to read will return
+		ENOSYS and the pixel buffer will not be allocated.
+
+config AVR_AVRDX_WS2812_NO_WHITE_LED
+	bool "Suppress warning for white LED"
+	depends on AVR_AVRDX_DRIVER_WS2812
+	depends on WS2812_HAS_WHITE
+	default false
+	---help---
+		This driver implements support for LEDs with white component
+		but the author of the code did not have any such device
+		to test. Therefore, support for these LEDs is disabled
+		and the compiler will issue a warning. Any attempt to register
+		LED with has_white set will return an error.
+
+		It is preferred to disable WS2812_HAS_WHITE altogether but
+		if you need it on (for example because the system has some other
+		WS2812 device using different lower-half), you can use this
+		option to suppress the compile-time warning and reduce
+		code size.
+
+		The code will be compiled as if WS2812_HAS_WHITE was unset.

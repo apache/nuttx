@@ -54,7 +54,7 @@ ignore-words-list =
   parm,
   parms,
   pres,
-  RCALL,
+  rcall,
   REGONS,
   SAIs,
   sie,

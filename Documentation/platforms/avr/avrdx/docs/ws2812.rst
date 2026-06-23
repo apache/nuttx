@@ -1,0 +1,321 @@
+=========================================
+WS2812 RGB LED driver for AVR DA/DB chips
+=========================================
+
+This is a description of driver for WS2812 programmable RGB LED
+on AVR DA/DB chips.
+
+Developer notes - driver design philosophy
+==========================================
+
+The datasheets for various WS2812 devices differ slightly but
+in all of them, zero data bit starts with logical 1 pulse with 220-380ns
+length. The rest varies slightly across datasheets but overall, the LED
+operates at 800kHz frequency so the logical 0 state duration should be
+1250ns (period) minus length of log. 1 pulse.
+
+To put things into perspective - the maximum clock speed of the chip
+is 24MHz. Transmission of each data bit therefore takes 30 clock ticks
+of the CPU. Even with most instructions only taking one clock tick,
+that is not much time.
+
+**Using this driver with slower clock speed is therefore unsupported.**
+
+There are multiple options how to implement this. One of them is manual
+bit flipping with timing being achieved by instruction count. This would
+require the code to run with interrupts disabled (any interruption breaks
+the timing.)
+
+Considering that an RGB LED needs 24 bits of data (or 32bit for LED
+with white light) and each bit takes 1.25 microseconds, transmitting
+data to single LED ties up the CPU for 30/40 microseconds. This time
+increases with LED count which may cause latency problems. (Some of
+which can be alleviated by enabling interrupts between data bits
+where you can pause the transmission (for up to 280us, that is
+considered to be a reset interval by the LEDs.)
+
+Another option is to use some integrated peripheral to take care
+of the actual data transmission, the CPU would only be used to prepare
+the data. There are multiple options for hardware that can be chosen -
+the requirement is that the hardware must be able to generate
+a waveform interpreted as a valid bit by the LED.
+
+Naming note
+-----------
+
+This driver uses the word **lane** as a term for interconnected chain
+of LEDs.
+
+
+UART driver
+-----------
+
+For this, we split the 1.25us period to 4 time segments, each 312.5ns
+long. Logical 0 bit is then encoded as 1 segment high, 3 segments low,
+vice versa for logical 1.
+
+This waveform presents an issue for the UART because UART transmission
+starts with logical 0 pulse (the start bit) and the idle state
+on the line is logical 1. This is solved in the hardware using
+internal inverter.
+
+Since the LED does not recognize any start bit, the driver needs
+to include the start bit into the waveform. Not a problem, (inverted)
+start bit puts logical 1 on the line which is what the LED wants.
+
+Data bit waveform is then sent as a byte of data from the UART's
+perspective - the waveform needs to be mapped to a byte. The simplest
+way to do this would be to simply stretch the 4 time segments over
+8 UART bits. Since the start bit is a part of the transmission,
+this would only use 7 UART data bits - 8th bit would be left set,
+simply increasing the time the line stays in logical 0 (that time
+is also increased by stop bit) - since the LEDs only reset
+after a 280us delay, slight delay by trailing log. 1 bits is
+inconsequential.
+
+The problematic part of this solution is that UART bit length
+needs to be 312.5/2 nanoseconds, yielding 6.4Mbaud UART transfer
+rate - well beyond the capabilities of the chip.
+
+The solution is to only map each time segment to a single UART bit,
+using only the start bit and three data bits, injecting a delay
+when the remaining bits keep the line in logical 0 (inverting log. 1.)
+This can be done because first time segment, which maps to start bit,
+is always logical 1. This halves the required baud rate to 3.2Mbaud
+which is still too much for the hardware. The maximum achievable
+baud rate is 3Mbaud, making time segment 333.3 nanoseconds long
+and the overall waveform 1.33 microseconds long.
+
+This is within the device's (LED's) tolerances. Delay between bits
+is also acceptable.
+
+This solution only uses first 3 UART data bits (and the start bit),
+leaving 5 additional UART bits unused. Each LED bit consumes 4 UART
+data bits so it is even possible to pack second LED data bit
+into the same UART data byte. The only UART bits left unused
+after that are UART bit 7 and stop bit. Both need to be set
+to logical 1 (stop bit always is.) This will cause slight delay
+between LED bits but that should not be a problem - the LEDs only
+reset the transmission after 280 microseconds of logical 0.
+
+With 8 UART data bits,
+there is nothing more to be done. However, the chip has the ability
+to transmit (and receive) 9 data bits. With parity and stop bit added,
+that's 4 additional UART bits that can hold third LED data bit. We
+only need to be able to set the required value in parity bit and
+that can be done because each LED bit always differs in two UART bits
+and parity value therefore only depends on last LED bit. Stop bit
+is always set to one, even parity is in use.
+
+Complete UART frames look like this (LED bits shown in order in which
+they appear on the line.)
+
+.. code-block:: text
+
+ LED     UART St 0  1  2  3  4  5  6  7  8  P  Sp
+ 0 0 0        0  1  1  1  0  1  1  1  0  1  1  1
+ 0 0 1        0  1  1  1  0  1  1  1  0  0  0  1
+ 0 1 0        0  1  1  1  0  0  0  1  0  1  1  1
+ 0 1 1        0  1  1  1  0  0  0  1  0  0  0  1
+ 1 0 0        0  0  0  1  0  1  1  1  0  1  1  1
+ 1 0 1        0  0  0  1  0  1  1  1  0  0  0  1
+ 1 1 0        0  0  0  1  0  0  0  1  0  1  1  1
+ 1 1 1        0  0  0  1  0  0  0  1  0  0  0  1
+
+This is used for RGB LEDs (ie. LEDs without white component) because those
+have 24 total data bits, number divisible by 3 without remainder. For LEDs
+with white color component, the situation is different. Those have 32 data
+bits so there is nothing to be placed into the last 4 bits of the last frame.
+We need to make the line idle which is impossible:
+
+.. code-block:: text
+
+ LED     UART St 0  1  2  3  4  5  6  7  8  P  Sp
+ 0 0 X        0  1  1  1  0  1  1  1  1  1  0  1
+
+The line output will contain an unwanted logical 1 pulse in parity
+bit. This could possibly be solved by pushing bits from the next
+LED in the lane into the previous UART block. That complicates things
+significantly and depending on the LED count, it may not be a solution
+either.
+
+For this reason, only two bits per UART frame are sent. There is no need
+to use 9th bit nor stop bit.
+
+.. code-block:: text
+
+ LED     UART St 0  1  2  3  4  5  6  7  Sp
+ 0 0          0  1  1  1  0  1  1  1  1  1
+ 0 1          0  1  1  1  0  0  0  1  1  1
+ 1 0          0  0  0  1  0  1  1  1  1  1
+ 1 1          0  0  0  1  0  0  0  1  1  1
+
+This driver needs to enable ``DRE`` interrupt for the USART device in use.
+
+Limitations
+===========
+
+One transmission at a time
+--------------------------
+
+While this CPU is able to control these LEDs, it is a very demanding task
+for it. Even when using a peripheral to send the bits, simply pushing more
+data to that peripheral's I/O registers takes a lot of time. (For example,
+pushing bits via an UART peripheral takes 96 clock ticks of time and it takes
+over 50 clock ticks worth of instructions to make that happen.)
+
+For this reason, even when using multiple lanes connected to different
+peripheral, only one is being transmitted at a time. Lanes are serviced
+in round-robin fashion.
+
+Even with this, expect relatively high (50-80% for UART) CPU load during
+transmission.
+
+RGB vs BGR bit order
+--------------------
+
+The driver was tested with a WS2812 LED which requires data bits to be
+sent in RGB order (despite datasheet provided by the retailer claiming
+that the order is GBR.) It should be working correctly with the GBR-variant
+though - it is the RGB variant that is going to have red and green colors
+swapped.
+
+(RGB order on the LED was confirmed by a simple non-NuttX application
+that simply bitbanged the bits and used ``nop`` instruction for timing.)
+
+Configuration
+=============
+
+Driver is enabled using
+:menuselection:`System Type --> AVR DA/DB Drivers --> Enable driver for WS2812 LEDs`.
+
+To be able to enable this option, it is first needed to enable:
+  - :menuselection:`System Type --> Enable software interrupt emulation`
+    (needs additional settings described in :doc:`software_interrupt`)
+  - :menuselection:`System Type --> Enable high priority interrupts`
+    (enable appropriate interrupt for the chosen peripheral)
+  - :menuselection:`Device Drivers --> LED Support --> WS2812 LED Driver`,
+    the driver needs to be configured as :menuselection:`New non-SPI driver`
+    in :menuselection:`WS2812 driver variant`
+  - :menuselection:`RTOS Features --> RTOS hooks --> Custom board late initialization`
+
+After the driver is enabled, it is also needed to choose the peripheral
+which is connected to the LED chain
+in :menuselection:`AVR DA/DB Drivers`. The driver currently supports UART
+peripherals. For example, select
+:menuselection:`Enable WS2812 lane on USART0` to use USART0 peripheral.
+
+Note that the peripheral must not be used by other drivers. Choosing
+an option also selects corresponding high priority interrupt handling.
+
+If you want to use alternative pinout for the selected peripheral,
+use configuration options in :menuselection:`AVR DA/DB Peripheral Selections`
+
+Upper-half options
+------------------
+
+:menuselection:`ws2812s have white LED` option in the upper-half driver
+enables support for WS2812-alike LEDs that have white component. The code
+supporting this option is present in the driver but disabled - author
+of the driver did not have any such device to use for testing.
+
+Also note that using this option increases code size of the driver
+to take care of necessary branching. Also increased is RAM
+usage - for example, the UART peripheral converts RGB data to 8 bytes
+of UART data without white component but to 12 bytes with white component
+(per LED.)
+
+Additional options
+------------------
+
+:menuselection:`Limit number of LEDs in lane for faster execution` reduces
+LED count limit to speed the ISR execution up. When pixel data is submitted
+to the driver, the pixels are converted to a format that allows the ISR
+to just load next byte from an array and send it. Loading next byte involves
+an index to the array - selecting this option
+reduces this index to a single byte, saving few instructions. This imposes
+LED count limit for a lane - 31 LEDs without the white component and 21 LEDs
+with the white component.
+
+Note that the driver also imposes hardcoded limit of 255 LEDs per lane.
+Keep in mind that each LED's RGB data expands into more than 24(32) bits
+of converted data and that the device is memory-constrained.
+
+:menuselection:`Disable reading the pixel buffer` reduces memory usage
+of the driver by not allocating memory to store RGB data. The upper-half
+driver provides both ``write`` and ``read`` syscalls, ``read`` allows
+the user to read RGB data written previously.
+
+If this option is selected, that ability is removed and ``read()``
+returns ``ENOSYS``.
+
+:menuselection:`Suppress warning for white LED`. As mentioned above, code
+supporting LEDs with white component is present in the driver but disabled.
+If the WS2812 upper-half driver enables support for such LEDs, the compiler
+will issue a warning.
+
+Use this option if you need to have the setting enabled in the upper-half.
+
+Usage
+=====
+
+Initialization
+--------------
+
+Lane is initialized by a call to ``avrdx_ws2812_register()``
+
+.. c:function:: int avrdx_ws2812_register (const char *path, uint8_t count, enum avrdx_ws2812_lane_e lane, bool has_white)
+
+  ``avrdx_ws2812_register()`` initializes a Lane, that is a set of WS2812
+  LEDs connected serially and driven from single hardware device
+  on the MCU side.
+
+  :param path: device path for this LED lane, for example ``"/dev/led0"``
+  :param count: LED count. Limited to 255 regardless of upper half setting
+  :param lane: enum that identifies peripheral to which are the LEDs connected
+     on the board
+  :param has_white: True if the lane has LEDs with white component.
+     (Ignored if CONFIG_WS2812_HAS_WHITE is unset.)
+
+  :return: ``OK`` or negated ``errno``. In particular, ``errno`` can be set
+     to:
+
+     -  ``ENOMEM`` - memory allocation failures
+     -  ``EINVAL`` - count parameter too high
+     -  ``ENOTSUP`` - parameter ``has_white`` was set and is not ignored
+
+Note that the driver will reset the LEDs connected to the peripheral
+automatically during boot and driver initialization. This accounts
+for a possibility that the system was already
+running and it was only the MCU that reset. In such case, it is not known
+how much time elapsed after last transmission and if enough time elapsed
+so the LEDs consider the transmission reset (see the datasheet for details.)
+
+For this reason, the driver will check for the uptime. If the uptime is lower
+than 330 microseconds, the ``avrdx_ws2812_register()`` will sleep (for as much
+time as needed for the uptime to exceed this value.)
+
+The possibility that the driver will sleep requires
+:menuselection:`Custom board late initialization` (``BOARD_LATE_INITIALIZE``)
+to be enabled.
+
+Example initialization:
+
+.. code-block:: c
+
+ ret = avrdx_ws2812_register("/dev/led0", 24, AVRDX_WS2812_LANE_USART0, false);
+
+Writing and reading pixel data
+------------------------------
+
+This does not differ from other platforms - open the character device file
+and write the data to it.
+
+.. code-block:: c
+
+ uint32_t pixels[4];
+
+ led0fd = open("/dev/led0", O_RDWR);
+ write(led0fd, pixels, sizeof(uint32_t) * 4);
+
+Ability to read the data may be restricted by configuration - see above.
