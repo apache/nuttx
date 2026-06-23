@@ -33,6 +33,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if (CONFIG_AVRDX_SWINT_MAX_VECTORS <= 8)
+#  define AVRDX_SWINT_VECTORS_SIZE 1
+#elif (CONFIG_AVRDX_SWINT_MAX_VECTORS <= 16)
+#  define AVRDX_SWINT_VECTORS_SIZE 2
+#elif (CONFIG_AVRDX_SWINT_MAX_VECTORS <= 24)
+#  define AVRDX_SWINT_VECTORS_SIZE 3
+#elif (CONFIG_AVRDX_SWINT_MAX_VECTORS <= 32)
+#  define AVRDX_SWINT_VECTORS_SIZE 4
+#else
+#  error Kconfig should allow 32 vectors at most
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

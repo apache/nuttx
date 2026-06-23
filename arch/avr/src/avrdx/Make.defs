@@ -77,3 +77,8 @@ endif
 ifeq ($(CONFIG_AVR_AVRDX_SWINT),y)
 CHIP_CSRCS += avrdx_swint.c
 endif
+
+ifeq ($(CONFIG_AVR_AVRDX_DRIVER_WS2812),y)
+CHIP_CSRCS += avrdx_ws2812.c
+CHIP_ASRCS += avrdx_ws2812_uart_store.S avrdx_ws2812_uart_xmit.S
+endif

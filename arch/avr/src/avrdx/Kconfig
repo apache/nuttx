@@ -165,7 +165,7 @@ config AVR_USART0
 
 choice AVR_USART0_MUX
 	prompt "USART0 pin selection"
-	depends on AVR_USART0
+	depends on AVR_USART0 || AVR_AVRDX_WS2812_USART0
 	default AVR_USART0_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART0 interface.
@@ -199,7 +199,7 @@ config AVR_USART1
 
 choice AVR_USART1_MUX
 	prompt "USART1 pin selection"
-	depends on AVR_USART1
+	depends on AVR_USART1 || AVR_AVRDX_WS2812_USART1
 	default AVR_USART1_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART1 interface.
@@ -234,7 +234,7 @@ config AVR_USART2
 
 choice AVR_USART2_MUX
 	prompt "USART2 pin selection"
-	depends on AVR_USART2
+	depends on AVR_USART2 || AVR_AVRDX_WS2812_USART2
 	default AVR_USART2_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART2 interface.
@@ -269,7 +269,7 @@ config AVR_USART3
 
 choice AVR_USART3_MUX
 	prompt "USART3 pin selection"
-	depends on AVR_USART3
+	depends on AVR_USART3 || AVR_AVRDX_WS2812_USART3
 	default AVR_USART3_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART3 interface.
@@ -304,7 +304,7 @@ config AVR_USART4
 
 choice AVR_USART4_MUX
 	prompt "USART4 pin selection"
-	depends on AVR_USART4
+	depends on AVR_USART4 || AVR_AVRDX_WS2812_USART4
 	default AVR_USART4_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART4 interface.
@@ -339,7 +339,7 @@ config AVR_USART5
 
 choice AVR_USART5_MUX
 	prompt "USART5 pin selection"
-	depends on AVR_USART5
+	depends on AVR_USART5 || AVR_AVRDX_WS2812_USART5
 	default AVR_USART5_DEFAULT
 	---help---
 		Select which I/O pins will be driven by USART5 interface.
@@ -541,6 +541,12 @@ config AVR_TWI_FORBID_NOSTART
 endif
 
 endmenu # AVR DA/DB Peripheral Selections
+
+menu "AVR DA/DB Drivers"
+
+source "arch/avr/src/avrdx/Kconfig-drivers"
+
+endmenu # AVR DA/DB Drivers
 
 config AVR_AVRDX_SWINT
 	bool "Enable software interrupt emulation"
