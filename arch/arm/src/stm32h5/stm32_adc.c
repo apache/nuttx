@@ -203,6 +203,7 @@ static uint32_t adc_sqrbits(struct stm32_dev_s *priv, int first,
                             int last, int offset);
 static int  adc_set_ch(struct adc_dev_s *dev, uint8_t ch);
 static bool adc_internal(struct stm32_dev_s * priv, uint32_t *adc_ccr);
+static void adc_enable_optreg(struct stm32_dev_s * priv);
 static void adc_startconv(struct stm32_dev_s *priv, bool enable);
 #ifdef ADC_HAVE_WDG1
 static void adc_wdog1_enable(struct stm32_dev_s *priv);
@@ -1481,6 +1482,8 @@ static int adc_setup(struct adc_dev_s *dev)
 
   adc_set_ch(dev, 0);
 
+  adc_enable_optreg(priv);
+
   /* ADC CCR configuration */
 
   clrbits = ADC_CCR_PRESC_MASK | ADC_CCR_VREFEN |
@@ -1645,6 +1648,41 @@ static bool adc_internal(struct stm32_dev_s * priv, uint32_t *adc_ccr)
     }
 
   return internal;
+}
+
+/****************************************************************************
+ * Name: adc_enable_optreg
+ *
+ * Description:
+ *   Connects ADC1_INP0/ADC1_INN1 to the ADC mux if necessary.
+ *
+ * Input Parameters:
+ *   priv - A reference to the ADC block status
+ *
+ ****************************************************************************/
+
+static void adc_enable_optreg(struct stm32_dev_s * priv)
+{
+  int i;
+
+  /* ADC1.OR.OP0 (RM0481 26.6.23)
+   * Enables the GPIO switch connecting ADC1_INP0/ADC1_INN1 to the ADC mux.
+   * This bit must be set when channel ADC1_INP0 or ADCx_INN1 is selected.
+   */
+
+  if (priv->intf == 1)
+    {
+      for (i = 0; i < priv->cchannels; i++)
+        {
+          uint8_t ch = priv->chanlist[i];
+
+          if (ch == 0 || (ch == 1 && (priv->difsel & ADC_DIFSEL_CH(1))))
+            {
+              adc_putreg(priv, STM32_ADC_OR_OFFSET, ADC_OR_OP0);
+              return;
+            }
+        }
+    }
 }
 
 /****************************************************************************
