@@ -128,6 +128,13 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 static FAR void *rptun_alloc_buf(FAR struct virtio_device *vdev,
                                  size_t size, size_t align);
 static void rptun_free_buf(FAR struct virtio_device *vdev, FAR void *buf);
+static size_t rptun_free_largest(FAR struct virtio_device *vdev);
+static FAR void *rptun_map_buf(FAR struct virtio_device *vdev,
+                               FAR void *buf, size_t len,
+                               enum virtio_dma_map dir);
+static void rptun_unmap_buf(FAR struct virtio_device *vdev,
+                            FAR void *buf, size_t len,
+                            enum virtio_dma_map dir, FAR void *mapped);
 
 static void rptun_send_command(FAR struct rptun_priv_s *priv,
                                uint32_t cmd, bool wait);
@@ -170,8 +177,11 @@ static const struct image_store_ops g_rptun_store_ops =
 
 static const struct virtio_memory_ops g_rptun_mmops =
 {
-  .alloc = rptun_alloc_buf,
-  .free  = rptun_free_buf,
+  .alloc        = rptun_alloc_buf,
+  .free         = rptun_free_buf,
+  .free_largest = rptun_free_largest,
+  .map          = rptun_map_buf,
+  .unmap        = rptun_unmap_buf,
 };
 
 static struct metal_list g_rptun_priv = METAL_INIT_LIST(g_rptun_priv);
@@ -306,6 +316,139 @@ static void rptun_free_buf(FAR struct virtio_device *vdev, FAR void *buf)
     (FAR struct rptun_carveout_s *)vdev->mm_priv;
 
   mm_free(carveout->heap, buf);
+}
+
+/****************************************************************************
+ * Name: rptun_map_align
+ *
+ * Description:
+ *   Return the alignment used for bounce buffers. Use the dcache line size
+ *   so a bounce buffer never shares a cache line with a neighbour (avoids
+ *   clobbering adjacent data on invalidate). Fall back to MM_ALIGN when the
+ *   arch has no dcache, so the value is never zero.
+ *
+ ****************************************************************************/
+
+static inline_function size_t rptun_map_align(void)
+{
+  size_t linesize = up_get_dcache_linesize();
+
+  return linesize > MM_ALIGN ? linesize : MM_ALIGN;
+}
+
+/****************************************************************************
+ * Name: rptun_free_largest
+ *
+ * Description:
+ *   Return the largest buffer a single rptun_map_buf call can satisfy.
+ *   mm_heapfree_largest gives the largest mm_malloc allocation; subtract the
+ *   extra space mm_memalign consumes for alignment so a map of the returned
+ *   size is guaranteed to succeed.
+ *
+ ****************************************************************************/
+
+static size_t rptun_free_largest(FAR struct virtio_device *vdev)
+{
+  FAR struct rptun_carveout_s *carveout =
+    (FAR struct rptun_carveout_s *)vdev->mm_priv;
+  size_t align = rptun_map_align();
+  size_t largest = mm_heapfree_largest(carveout->heap);
+
+  /* mm_memalign over-allocates by up to 2 * align to find an aligned point,
+   * and map rounds len up to align. Reserve 3 * align to stay safe.
+   */
+
+  size_t overhead = 3 * align;
+
+  return largest > overhead ? largest - overhead : 0;
+}
+
+/****************************************************************************
+ * Name: rptun_map_buf
+ *
+ * Description:
+ *   Map a buffer so the remote side can access it. The remote can only
+ *   touch the carveout shared memory, so a buffer outside the carveout is
+ *   bounced through a buffer allocated from the carveout heap. Returns NULL
+ *   when the carveout heap cannot satisfy the allocation; the caller may
+ *   query rptun_free_largest and retry with a smaller length.
+ *
+ ****************************************************************************/
+
+static FAR void *rptun_map_buf(FAR struct virtio_device *vdev,
+                               FAR void *buf, size_t len,
+                               enum virtio_dma_map dir)
+{
+  FAR struct rptun_carveout_s *carveout =
+    (FAR struct rptun_carveout_s *)vdev->mm_priv;
+  size_t align = rptun_map_align();
+  FAR void *bounce;
+  size_t maplen;
+
+  /* Already inside the carveout heap: the remote can access it directly. */
+
+  if (mm_heapmember(carveout->heap, buf))
+    {
+      return buf;
+    }
+
+  maplen = ALIGN_UP(len, align);
+  bounce = mm_memalign(carveout->heap, align, maplen);
+  if (bounce == NULL)
+    {
+      /* Out of shared memory: the caller decides whether to query
+       * rptun_free_largest and retry with a smaller length.
+       */
+
+      return NULL;
+    }
+
+  if (dir != VIRTIO_DMA_FROM_DEVICE)
+    {
+      memcpy(bounce, buf, len);
+    }
+
+  /* Flush for every direction: a dirty line left by an earlier user of
+   * this carveout block must not be written back over the peer's data.
+   */
+
+  RPTUN_FLUSH(bounce, maplen);
+  return bounce;
+}
+
+/****************************************************************************
+ * Name: rptun_unmap_buf
+ *
+ * Description:
+ *   Release a buffer mapped by rptun_map_buf, copying the device-written
+ *   data back to the original buffer when the direction requires it. Pass
+ *   the same direction that was given to rptun_map_buf.
+ *
+ ****************************************************************************/
+
+static void rptun_unmap_buf(FAR struct virtio_device *vdev,
+                            FAR void *buf, size_t len,
+                            enum virtio_dma_map dir, FAR void *mapped)
+{
+  FAR struct rptun_carveout_s *carveout =
+    (FAR struct rptun_carveout_s *)vdev->mm_priv;
+
+  /* Not bounced (buffer was already inside the carveout): nothing to do. */
+
+  if (mapped == buf)
+    {
+      return;
+    }
+
+  if (dir != VIRTIO_DMA_TO_DEVICE)
+    {
+      /* Device wrote data: drop stale cache lines, then copy it back. */
+
+      RPTUN_INVALIDATE(mapped, ALIGN_UP(len, rptun_map_align()));
+      memcpy(buf, mapped, len);
+    }
+
+  mm_free(carveout->heap, mapped);
 }
 
 /****************************************************************************
