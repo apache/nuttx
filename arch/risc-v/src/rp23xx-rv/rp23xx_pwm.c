@@ -359,9 +359,9 @@ int pwm_start(struct pwm_lowerhalf_s  * dev,
         }
     }
 #else
-  if (priv->duty != info[0].duty)
+  if (priv->duty != info->channels[0].duty)
     {
-      priv->duty = info[0].duty;
+      priv->duty = info->channels[0].duty;
     }
 #endif
 
@@ -465,51 +465,77 @@ int pwm_ioctl(struct pwm_lowerhalf_s  * dev,
  *
  ****************************************************************************/
 
-void setup_period(struct rp23xx_pwm_lowerhalf_s  * priv)
+void setup_period(struct rp23xx_pwm_lowerhalf_s *priv)
 {
   irqstate_t flags;
-  uint32_t max_freq = BOARD_SYS_FREQ / 0x10000; /* initially, with full range count */
   uint32_t frequency = priv->frequency;
+  uint32_t top;
+  uint32_t div16;
 
-  /* If we are running phase correct we double the frequency value
-   * since the PWM will generate a pulse chain at half what it
-   * would be in normal (non-phase correct) mode
-   */
+  /* Phase-correct mode halves output frequency */
 
   if (priv->flags & RP23XX_RV_PWM_CSR_PH_CORRECT)
     {
       frequency *= 2;
     }
 
-  pwminfo("PWM%d freq %ld max %ld\n", priv->num, priv->frequency, max_freq);
+  /* Try to keep maximum resolution first */
 
-  if (frequency <= max_freq)
+  top = 0xffff;
+
+  /* Divider is 8.4 fixed-point:
+   *
+   *   div16 = divider * 16
+   *
+   * PWM frequency:
+   *
+   *   f_pwm = clk_sys / (divider * (TOP + 1))
+   *
+   * therefore:
+   *
+   *   div16 = (16 * clk_sys) / (f_pwm * (TOP + 1))
+   */
+
+  div16 = (16ULL * BOARD_SYS_FREQ) /
+          ((uint64_t)frequency * (top + 1));
+
+  /* Divider must be in valid hardware range:
+   * 1.0 -> 255.9375
+   * represented as:
+   * 0x10 -> 0xFFF
+   */
+
+  if (div16 < 0x10)
     {
-      /* We can keep full range count and slow clock down with divisor */
+      /* Divider too small:
+       * reduce TOP to increase frequency
+       */
 
-      priv->top = 0xffff;
+      div16 = 0x10;
+      top = (BOARD_SYS_FREQ /
+            ((div16 / 16.0) * frequency)) - 1;
+      if (top > 0xffff)
+        {
+          top = 0xffff;
+        }
     }
-    else
+  else if (div16 > 0xfff)
     {
-      /* we need to speed things up by reducing top */
-
-      priv->top = 0xffff / (frequency / max_freq);
-
-      /* compute new maximum frequency */
-
-      max_freq  = BOARD_SYS_FREQ / (priv->top + 1);
+      div16 = 0xfff;
     }
 
-  priv->divisor = 16 * max_freq / frequency;
+  priv->top     = top;
+  priv->divisor = div16;
 
-  pwminfo("PWM%d top 0x%08X div 0x%08lX\n",
-          priv->num,
-          priv->top,
-          priv->divisor);
+  pwminfo("PWM%d freq=%lu top=%lu div=%lu\n",
+         priv->num,
+         priv->frequency,
+         priv->top,
+         priv->divisor);
 
   flags = enter_critical_section();
 
-  putreg32(priv->top,     RP23XX_RV_PWM_TOP(priv->num));
+  putreg32(priv->top, RP23XX_RV_PWM_TOP(priv->num));
   putreg32(priv->divisor, RP23XX_RV_PWM_DIV(priv->num));
 
   leave_critical_section(flags);
@@ -526,19 +552,43 @@ void setup_period(struct rp23xx_pwm_lowerhalf_s  * priv)
  *
  ****************************************************************************/
 
-void setup_pulse(struct rp23xx_pwm_lowerhalf_s  * priv)
+void setup_pulse(struct rp23xx_pwm_lowerhalf_s *priv)
 {
   irqstate_t flags;
 
 #if defined(CONFIG_PWM_NCHANNELS) && CONFIG_PWM_NCHANNELS == 2
-  uint32_t compare =
-             (0xffff * (uint32_t)priv->duty[0] / priv->top)
-          + ((0xffff * (uint32_t)priv->duty[1] / priv->top) << 16);
+
+  uint32_t level_a =
+      ((uint64_t)priv->duty[0] * (priv->top + 1)) / 65535;
+
+  uint32_t level_b =
+      ((uint64_t)priv->duty[1] * (priv->top + 1)) / 65535;
+
+  if (level_a > priv->top)
+    {
+      level_a = priv->top;
+    }
+
+  if (level_b > priv->top)
+    {
+      level_b = priv->top;
+    }
+
+  uint32_t compare = level_a | (level_b << 16);
+
 #else
-  uint32_t compare = 0xffff * (uint32_t)priv->duty / priv->top;
+
+  uint32_t compare =
+      ((uint64_t)priv->duty * (priv->top + 1)) / 65535;
+
+  if (compare > priv->top)
+    {
+      compare = priv->top;
+    }
+
 #endif
 
-  pwminfo("PWM%d compare 0x%08lX  flags 0x%08lX\n",
+  pwminfo("PWM%d compare=0x%08lx flags=0x%08lx\n",
           priv->num,
           compare,
           priv->flags);
@@ -548,11 +598,11 @@ void setup_pulse(struct rp23xx_pwm_lowerhalf_s  * priv)
   putreg32(compare, RP23XX_RV_PWM_CC(priv->num));
 
   modreg32(priv->flags,
-            RP23XX_RV_PWM_CSR_DIVMODE_MASK
-          | RP23XX_RV_PWM_CSR_B_INV
-          | RP23XX_RV_PWM_CSR_A_INV
-          | RP23XX_RV_PWM_CSR_PH_CORRECT,
-          RP23XX_RV_PWM_CSR(priv->num));
+           RP23XX_RV_PWM_CSR_DIVMODE_MASK |
+           RP23XX_RV_PWM_CSR_B_INV |
+           RP23XX_RV_PWM_CSR_A_INV |
+           RP23XX_RV_PWM_CSR_PH_CORRECT,
+           RP23XX_RV_PWM_CSR(priv->num));
 
   leave_critical_section(flags);
 }
