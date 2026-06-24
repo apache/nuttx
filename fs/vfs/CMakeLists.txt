@@ -51,7 +51,8 @@ set(SRCS
     fs_dir.c
     fs_fsync.c
     fs_syncfs.c
-    fs_truncate.c)
+    fs_truncate.c
+    fs_link.c)
 
 # File notify support
 
@@ -66,7 +67,7 @@ if(NOT "${CONFIG_FS_LOCK_BUCKET_SIZE}" STREQUAL "0")
 endif()
 
 if(NOT "${CONFIG_PSEUDOFS_SOFTLINKS}" STREQUAL "0")
-  list(APPEND SRCS fs_link.c fs_symlink.c fs_readlink.c)
+  list(APPEND SRCS fs_symlink.c fs_readlink.c)
 endif()
 
 # Pseudofile support
