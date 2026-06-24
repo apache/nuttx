@@ -26,13 +26,9 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <unistd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
+#include <errno.h>
 
 /****************************************************************************
  * Public Functions
@@ -42,10 +38,8 @@
  * Name: link
  *
  * Description:
- *  The link function provides a wrapper to symlink. Solely to provide
- *  compatibility to posix compatibility layer.
- *
- *  See symlink for details on limitations.
+ *   Create a hard link.  The NuttX VFS does not support hard links, so this
+ *   always fails with ENOSYS rather than silently creating a symbolic link.
  *
  * Input Parameters:
  *   path1 - Points to a pathname naming an existing file.
@@ -53,14 +47,15 @@
  *           created.
  *
  * Returned Value:
- *   On success, zero (OK) is returned.  Otherwise, -1 (ERROR) is returned
- *   the errno variable is set appropriately.
+ *   -1 (ERROR) is always returned with the errno set to ENOSYS.
  *
  ****************************************************************************/
 
 int link(FAR const char *path1, FAR const char *path2)
 {
-  return symlink(path1, path2);
-}
+  (void)path1;
+  (void)path2;
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+  set_errno(ENOSYS);
+  return ERROR;
+}
