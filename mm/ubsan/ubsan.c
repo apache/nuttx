@@ -390,6 +390,16 @@ void __ubsan_handle_dynamic_type_cache_miss(FAR void *data,
   ubsan_prologue_epilogue(data, "dynamic-type-cache-miss");
 }
 
+void __ubsan_handle_vla_bound_not_positive(FAR void *data, FAR void *bound)
+{
+  ubsan_prologue_epilogue(data, "vla-bound-not-positive");
+}
+
+void __ubsan_handle_nonnull_return_v1(FAR void *data, FAR void *loc)
+{
+  ubsan_prologue_epilogue(data, "nonnull-return");
+}
+
 #else
 void __ubsan_handle_out_of_bounds(FAR void *data, FAR void *index)
 {
@@ -462,6 +472,14 @@ void __ubsan_handle_invalid_builtin(FAR void *data)
 
 void __ubsan_handle_dynamic_type_cache_miss(FAR void *data,
                                             FAR void *ptr, FAR void *hash)
+{
+}
+
+void __ubsan_handle_vla_bound_not_positive(FAR void *data, FAR void *bound)
+{
+}
+
+void __ubsan_handle_nonnull_return_v1(FAR void *data, FAR void *loc)
 {
 }
 #endif
