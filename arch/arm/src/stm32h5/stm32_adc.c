@@ -1445,7 +1445,18 @@ static int adc_setup(struct adc_dev_s *dev)
         {
           setbits |= ADC_CFGR_OVRMOD; /* overwrite on overrun */
           setbits |= ADC_CFGR_DMACFG;
+#  ifdef ADC_HAVE_TIMER
+          if (priv->tbase != 0)
+            {
+              clrbits |= ADC_CFGR_CONT;
+            }
+          else
+            {
+              setbits |= ADC_CFGR_CONT;
+            }
+#  else
           setbits |= ADC_CFGR_CONT;
+#  endif
         }
       else
         {
