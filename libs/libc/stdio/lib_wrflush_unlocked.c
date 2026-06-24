@@ -70,7 +70,7 @@ int lib_wrflush_unlocked(FAR FILE *stream)
    * that case.
    */
 
-  if ((stream->fs_oflags & O_WROK) == 0)
+  if ((stream->fs_oflags & O_WRONLY) == 0)
     {
       /* Report that the success was successful if we attempt to flush a
        * read-only stream.

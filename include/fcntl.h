@@ -39,10 +39,8 @@
 /* open flag settings for open() (and related APIs) */
 
 #define O_RDONLY     (1 << 0)        /* Open for read access (only) */
-#define O_RDOK       O_RDONLY        /* Read access is permitted (non-standard) */
 #define O_WRONLY     (1 << 1)        /* Open for write access (only) */
-#define O_WROK       O_WRONLY        /* Write access is permitted (non-standard) */
-#define O_RDWR       (O_RDOK|O_WROK) /* Open for both read & write access */
+#define O_RDWR       (3 << 0)        /* Open for both read & write access */
 #define O_CREAT      (1 << 2)        /* Create file/sem/mq object */
 #define O_EXCL       (1 << 3)        /* Name must not exist when opened  */
 #define O_APPEND     (1 << 4)        /* Keep contents, append to end */

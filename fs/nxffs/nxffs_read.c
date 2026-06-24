@@ -168,7 +168,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   /* Check if the file was opened with read access */
 
-  if ((ofile->oflags & O_RDOK) == 0)
+  if ((ofile->oflags & O_RDONLY) == 0)
     {
       ferr("ERROR: File not open for read access\n");
       ret = -EACCES;

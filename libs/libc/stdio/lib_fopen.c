@@ -229,7 +229,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Open for read access */
 
-                oflags = O_RDOK | O_TEXT;
+                oflags = O_RDONLY | O_TEXT;
                 state  = MODE_R;
               }
             else
@@ -245,7 +245,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Open for write access, truncating any existing file */
 
-                oflags = O_WROK | O_CREAT | O_TRUNC | O_TEXT;
+                oflags = O_WRONLY | O_CREAT | O_TRUNC | O_TEXT;
                 state  = MODE_W;
               }
             else
@@ -261,7 +261,7 @@ int lib_mode2oflags(FAR const char *mode)
               {
                 /* Write to the end of the file */
 
-                oflags = O_WROK | O_CREAT | O_APPEND | O_TEXT;
+                oflags = O_WRONLY | O_CREAT | O_APPEND | O_TEXT;
                 state  = MODE_A;
               }
             else

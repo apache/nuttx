@@ -122,7 +122,7 @@ static int nxterm_open(FAR struct file *filep)
   /* Verify that the driver is opened for write-only access */
 
 #ifndef CONFIG_NXTERM_NXKBDIN
-  if ((filep->f_oflags & O_RDOK) != 0)
+  if ((filep->f_oflags & O_RDONLY) != 0)
     {
       gerr("ERROR: Attempted open with read access\n");
       return -EACCES;
