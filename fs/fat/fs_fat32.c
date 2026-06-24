@@ -802,7 +802,7 @@ static ssize_t fat_read(FAR struct file *filep, FAR char *buffer,
 
   /* Check if the file was opened with read access */
 
-  if ((ff->ff_oflags & O_RDOK) == 0)
+  if ((ff->ff_oflags & O_RDONLY) == 0)
     {
       ret = -EACCES;
       goto errout_with_lock;
@@ -1020,7 +1020,7 @@ static ssize_t fat_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Check if the file was opened for write access */
 
-  if ((ff->ff_oflags & O_WROK) == 0)
+  if ((ff->ff_oflags & O_WRONLY) == 0)
     {
       ret = -EACCES;
       goto errout_with_lock;
@@ -2289,7 +2289,7 @@ static int fat_truncate(FAR struct file *filep, off_t length)
 
   /* Check if the file was opened for write access */
 
-  if ((ff->ff_oflags & O_WROK) == 0)
+  if ((ff->ff_oflags & O_WRONLY) == 0)
     {
       ret = -EACCES;
       goto errout_with_lock;

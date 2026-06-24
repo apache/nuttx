@@ -113,12 +113,12 @@ int fs_open_amode(int oflags)
 {
   int amode = 0;
 
-  if ((oflags & O_RDOK) != 0)
+  if ((oflags & O_RDONLY) != 0)
     {
       amode |= R_OK;
     }
 
-  if ((oflags & O_WROK) != 0)
+  if ((oflags & O_WRONLY) != 0)
     {
       amode |= W_OK;
     }
@@ -285,9 +285,9 @@ int inode_checkopenperm(FAR struct inode *inode, int oflags)
       return -ENXIO;
     }
 
-  if (((oflags & O_RDOK) != 0 &&
+  if (((oflags & O_RDONLY) != 0 &&
        !ops->readv && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WROK) != 0 &&
+      ((oflags & O_WRONLY) != 0 &&
        !ops->writev && !ops->write && !ops->ioctl))
     {
       return -EACCES;
