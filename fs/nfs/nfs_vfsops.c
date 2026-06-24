@@ -581,7 +581,7 @@ static int nfs_fileopen(FAR struct nfsmount *nmp, FAR struct nfsnode *np,
 
   /* Check if the caller has sufficient privileges to open the file */
 
-  if ((oflags & O_WRONLY) != 0)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       /* Check if anyone has privileges to write to the file -- owner,
        * group, or other (we are probably "other" and may still not be
@@ -737,7 +737,7 @@ static int nfs_open(FAR struct file *filep, FAR const char *relpath,
    * the file.
    */
 
-  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+  if ((oflags & O_APPEND) && (oflags & O_ACCMODE) != O_RDONLY)
     {
       filep->f_pos = (off_t)np->n_size;
     }

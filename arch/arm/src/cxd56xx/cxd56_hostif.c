@@ -209,20 +209,19 @@ static int hif_open(struct file *filep)
 
   /* Check parameters */
 
-  if ((filep->f_oflags & O_WRONLY) != 0 &&
-      (filep->f_oflags & O_RDONLY) != 0)
+  if ((filep->f_oflags & O_ACCMODE) == O_RDWR)
     {
       return -EACCES;
     }
 
-  if ((filep->f_oflags & O_RDONLY) &&
-      ((priv->flags & HOSTIF_BUFF_ATTR_READ) == 0))
+  if ((filep->f_oflags & O_ACCMODE) != O_WRONLY &&
+      (priv->flags & HOSTIF_BUFF_ATTR_READ) == 0)
     {
       return -EINVAL;
     }
 
-  if ((filep->f_oflags & O_WRONLY) &&
-      ((priv->flags & HOSTIF_BUFF_ATTR_READ) != 0))
+  if ((filep->f_oflags & O_ACCMODE) != O_RDONLY &&
+      (priv->flags & HOSTIF_BUFF_ATTR_READ) != 0)
     {
       return -EINVAL;
     }
@@ -292,7 +291,7 @@ static ssize_t hif_read(struct file *filep, char *buffer, size_t len)
 
   DEBUGASSERT(buffer);
 
-  if ((filep->f_oflags & O_RDONLY) == 0)
+  if ((filep->f_oflags & O_ACCMODE) == O_WRONLY)
     {
       return -EACCES;
     }
@@ -323,7 +322,7 @@ static ssize_t hif_write(struct file *filep,
 
   DEBUGASSERT(buffer);
 
-  if ((filep->f_oflags & O_WRONLY) == 0)
+  if ((filep->f_oflags & O_ACCMODE) == O_RDONLY)
     {
       return -EACCES;
     }

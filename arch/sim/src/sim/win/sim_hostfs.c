@@ -89,17 +89,19 @@ int host_open(const char *pathname, int flags, int mode)
 
   /* Perform flag mapping */
 
-  if ((flags & NUTTX_O_RDWR) == NUTTX_O_RDWR)
+  switch (flags & NUTTX_O_ACCMODE)
     {
-      mapflags = O_RDWR;
-    }
-  else if (flags & NUTTX_O_RDONLY)
-    {
-      mapflags = O_RDONLY;
-    }
-  else if (flags & NUTTX_O_WRONLY)
-    {
-      mapflags = O_WRONLY;
+      case NUTTX_O_RDONLY:
+        mapflags = O_RDONLY;
+        break;
+
+      case NUTTX_O_WRONLY:
+        mapflags = O_WRONLY;
+        break;
+
+      case NUTTX_O_RDWR:
+        mapflags = O_RDWR;
+        break;
     }
 
   if (flags & NUTTX_O_APPEND)
