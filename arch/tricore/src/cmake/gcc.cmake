@@ -147,6 +147,14 @@ endif()
 
 add_link_options(-Wl,--no-warn-rwx-segments)
 
+if(CONFIG_MM_UBSAN_ALL)
+  add_compile_options(${CONFIG_MM_UBSAN_OPTION})
+endif()
+
+if(CONFIG_MM_UBSAN_TRAP_ON_ERROR)
+  add_compile_options(-fsanitize-undefined-trap-on-error)
+endif()
+
 if(CONFIG_MM_KASAN_INSTRUMENT_ALL)
   add_compile_options(-fsanitize=kernel-address)
   add_compile_options(--param=asan-stack=0)
