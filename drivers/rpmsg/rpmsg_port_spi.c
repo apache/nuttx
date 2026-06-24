@@ -530,6 +530,10 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
             spin_unlock_irqrestore(&rpspi->lock, flags);
             rpmsg_port_register(&rpspi->port, (FAR const char *)(rxhdr + 1));
           }
+        else
+          {
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+          }
 
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
         break;
@@ -553,6 +557,10 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
             rpspi->state = RPMSG_PORT_SPI_STATE_UNCONNECTED;
             spin_unlock_irqrestore(&rpspi->lock, flags);
             IOEXP_WRITEPIN(rpspi->ioe, rpspi->mreq, 1);
+          }
+        else
+          {
+            spin_unlock_irqrestore(&rpspi->lock, flags);
           }
 
         rpmsg_port_queue_return_buffer(&rpspi->port.rxq, rxhdr);
