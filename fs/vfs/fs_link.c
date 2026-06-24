@@ -26,13 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <unistd.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
 
 /****************************************************************************
  * Public Functions
@@ -42,10 +37,8 @@
  * Name: link
  *
  * Description:
- *  The link function provides a wrapper to symlink. Solely to provide
- *  compatibility to posix compatibility layer.
- *
- *  See symlink for details on limitations.
+ *  The link function provides a wrapper to symlink when pseudo filesystem
+ *  softlinks are enabled. Otherwise, hard links are unsupported.
  *
  * Input Parameters:
  *   path1 - Points to a pathname naming an existing file.
@@ -60,7 +53,13 @@
 
 int link(FAR const char *path1, FAR const char *path2)
 {
+#ifdef CONFIG_PSEUDOFS_SOFTLINKS
   return symlink(path1, path2);
-}
+#else
+  (void)path1;
+  (void)path2;
 
-#endif /* CONFIG_PSEUDOFS_SOFTLINKS */
+  set_errno(ENOSYS);
+  return ERROR;
+#endif
+}
