@@ -245,7 +245,7 @@ FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode)
    * by the size argument.
    */
 
-  if ((oflags & O_RDWR) == O_RDOK)
+  if ((oflags & O_RDWR) == O_RDONLY)
     {
       fmemopen_cookie->end = size;
     }

@@ -155,7 +155,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
 #ifdef CONFIG_BCH_DEVICE_READONLY
       oflags &= ~O_RDWR;
-      oflags |= O_RDOK;
+      oflags |= O_RDONLY;
 #endif
 
       ret = block_proxy(filep, path, oflags);

@@ -66,7 +66,7 @@ ssize_t lib_fflush_unlocked(FAR FILE *stream)
 
   /* Return EBADF if the file is not opened for writing */
 
-  if ((stream->fs_oflags & O_WROK) == 0)
+  if ((stream->fs_oflags & O_WRONLY) == 0)
     {
       return -EBADF;
     }

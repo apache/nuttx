@@ -1255,7 +1255,7 @@ int inotify_init1(int flags)
       goto exit_set_errno;
     }
 
-  ret = file_allocate_from_inode(&g_inotify_inode, O_RDOK | flags,
+  ret = file_allocate_from_inode(&g_inotify_inode, O_RDONLY | flags,
                                  0, dev, 0);
   if (ret < 0)
     {
@@ -1349,7 +1349,7 @@ void notify_open(FAR const char *path, int oflags)
 
 void notify_close(FAR const char *path, int oflags)
 {
-  if (oflags & O_WROK)
+  if (oflags & O_WRONLY)
     {
       notify_queue_path_event(path, IN_CLOSE_WRITE);
     }

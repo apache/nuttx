@@ -433,7 +433,7 @@ static int spiffs_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   offset = 0;
-  if ((oflags & (O_APPEND | O_WROK)) == (O_APPEND | O_WROK))
+  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
     {
       offset = fobj->size == SPIFFS_UNDEFINED_LEN ? 0 : fobj->size;
     }
@@ -629,7 +629,7 @@ static ssize_t spiffs_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Verify that the file was opened with write access */
 
-  if ((fobj->oflags & O_WROK) == 0)
+  if ((fobj->oflags & O_WRONLY) == 0)
     {
       ret = -EACCES;
       goto errout_with_lock;

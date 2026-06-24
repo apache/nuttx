@@ -516,7 +516,7 @@ static ssize_t hostfs_write(FAR struct file *filep, const char *buffer,
    * write flags.
    */
 
-  if ((hf->oflags & O_WROK) == 0)
+  if ((hf->oflags & O_WRONLY) == 0)
     {
       ret = -EACCES;
       goto errout_with_lock;

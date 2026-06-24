@@ -64,7 +64,7 @@ ssize_t lib_fwrite_unlocked(FAR const void *ptr, size_t count,
 
   /* Check if write access is permitted */
 
-  if ((stream->fs_oflags & O_WROK) == 0)
+  if ((stream->fs_oflags & O_WRONLY) == 0)
     {
       set_errno(EBADF);
       goto errout;

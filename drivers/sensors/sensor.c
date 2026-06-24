@@ -728,7 +728,7 @@ static int sensor_open(FAR struct file *filep)
    * allowing for direct I/O operations.
    */
 
-  if (filep->f_oflags & O_RDOK)
+  if (filep->f_oflags & O_RDONLY)
     {
       if (upper->state.nsubscribers == 0 && lower->ops->activate)
         {
@@ -743,7 +743,7 @@ static int sensor_open(FAR struct file *filep)
       upper->state.nsubscribers++;
     }
 
-  if (filep->f_oflags & O_WROK)
+  if (filep->f_oflags & O_WRONLY)
     {
       user->role |= SENSOR_ROLE_WR;
       upper->state.nadvertisers++;
@@ -820,7 +820,7 @@ static int sensor_close(FAR struct file *filep)
    * allowing for direct I/O operations.
    */
 
-  if (filep->f_oflags & O_RDOK)
+  if (filep->f_oflags & O_RDONLY)
     {
       upper->state.nsubscribers--;
       if (upper->state.nsubscribers == 0 && lower->ops->activate)
@@ -829,7 +829,7 @@ static int sensor_close(FAR struct file *filep)
         }
     }
 
-  if (filep->f_oflags & O_WROK)
+  if (filep->f_oflags & O_WRONLY)
     {
       upper->state.nadvertisers--;
     }

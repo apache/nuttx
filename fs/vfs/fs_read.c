@@ -192,7 +192,7 @@ ssize_t file_readv(FAR struct file *filep,
 
   /* Was this file opened for read access? */
 
-  if ((filep->f_oflags & O_RDOK) == 0)
+  if ((filep->f_oflags & O_RDONLY) == 0)
     {
       /* No.. File is not read-able */
 

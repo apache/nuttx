@@ -57,7 +57,7 @@ int file_truncate(FAR struct file *filep, off_t length)
 
   /* Was this file opened for write access? */
 
-  if ((filep->f_oflags & O_WROK) == 0)
+  if ((filep->f_oflags & O_WRONLY) == 0)
     {
       fwarn("WARNING: Cannot truncate a file opened read-only\n");
       return -EINVAL;
