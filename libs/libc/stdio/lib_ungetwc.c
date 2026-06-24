@@ -64,7 +64,7 @@ wint_t ungetwc_unlocked(wint_t wc, FAR FILE *f)
 
   /* Stream must be open for read access */
 
-  if ((f->fs_oflags & O_RDONLY) == 0)
+  if ((f->fs_oflags & O_ACCMODE) == O_WRONLY)
     {
       return WEOF;
     }

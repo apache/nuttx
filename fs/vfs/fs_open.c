@@ -220,7 +220,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
   FS_PROFILE_STOP(start_time, g_fs_profile.total_open_time,
                   g_fs_profile.opens);
 
-  if (ret == -EISDIR && ((oflags & O_WRONLY) == 0))
+  if (ret == -EISDIR && (oflags & O_ACCMODE) == O_RDONLY)
     {
       ret = dir_allocate(filep, desc.relpath);
     }

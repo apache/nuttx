@@ -276,7 +276,7 @@ static int can_open(FAR struct file *filep)
 
           reader = init_can_reader(filep);
 
-          if ((filep->f_oflags & O_RDONLY) != 0)
+          if ((filep->f_oflags & O_ACCMODE) != O_WRONLY)
             {
               list_add_head(&dev->cd_readers,
                             (FAR struct list_node *)reader);
