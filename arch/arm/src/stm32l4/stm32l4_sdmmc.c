@@ -1177,7 +1177,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
            * padding with zero as necessary to extend to a full word.
            */
 
-          uint8_t *ptr = (uint8_t *)priv->remaining;
+          uint8_t *ptr = (uint8_t *)priv->buffer;
           int i;
 
           data.w = 0;
