@@ -90,7 +90,7 @@ static int nxmq_verify_receive(FAR struct file *mq,
       return -EINVAL;
     }
 
-  if ((mq->f_oflags & O_RDONLY) == 0)
+  if ((mq->f_oflags & O_ACCMODE) == O_WRONLY)
     {
       return -EBADF;
     }

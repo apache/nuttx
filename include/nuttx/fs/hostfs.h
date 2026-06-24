@@ -76,20 +76,34 @@
 
 /* These must exactly match the definitions from include/fcntl.h: */
 
-#define NUTTX_O_RDONLY          (1 << 0)  /* Open for read access (only) */
-#define NUTTX_O_WRONLY          (1 << 1)  /* Open for write access (only) */
-#define NUTTX_O_CREAT           (1 << 2)  /* Create file/sem/mq object */
-#define NUTTX_O_EXCL            (1 << 3)  /* Name must not exist when opened  */
-#define NUTTX_O_APPEND          (1 << 4)  /* Keep contents, append to end */
-#define NUTTX_O_TRUNC           (1 << 5)  /* Delete contents */
-#define NUTTX_O_NONBLOCK        (1 << 6)  /* Don't wait for data */
-#define NUTTX_O_SYNC            (1 << 7)  /* Synchronize output on write */
-#define NUTTX_O_TEXT            (1 << 8)  /* Open the file in text (translated) mode. */
-#define NUTTX_O_DIRECT          (1 << 9)  /* Avoid caching, write directly to hardware */
-#define NUTTX_O_CLOEXEC         (1 << 10) /* Close on execute */
-#define NUTTX_O_DIRECTORY       (1 << 11) /* Must be a directory */
+#define NUTTX_O_RDONLY          (0 << 0)       /* Open for read access (only) */
+#define NUTTX_O_WRONLY          (1 << 0)       /* Open for write access (only) */
+#define NUTTX_O_RDWR            (2 << 0)       /* Open for both read & write access */
+#define NUTTX_O_ACCMODE         (3 << 0)       /* Mask for access mode */
+#define NUTTX_O_TEXT            (1 << 5)       /* Open the file in text (translated) mode. */
+#define NUTTX_O_CREAT           (1 << 6)       /* Create file/sem/mq object */
+#define NUTTX_O_EXCL            (1 << 7)       /* Name must not exist when opened  */
+#define NUTTX_O_NOCTTY          (1 << 8)       /* Don't assign a controlling terminal */
+#define NUTTX_O_TRUNC           (1 << 9)       /* Delete contents */
+#define NUTTX_O_APPEND          (1 << 10)      /* Keep contents, append to end */
+#define NUTTX_O_NONBLOCK        (1 << 11)      /* Don't wait for data */
+#define NUTTX_O_DSYNC           (1 << 12)      /* Synchronize data on write */
+#define NUTTX_O_ASYNC           (1 << 13)      /* Enable signal-driven I/O */
+#define NUTTX_O_DIRECT          (1 << 14)      /* Avoid caching, write directly to hardware */
+#define NUTTX_O_LARGEFILE       (1 << 15)      /* Large File */
+#define NUTTX_O_DIRECTORY       (1 << 16)      /* Must be a directory */
+#define NUTTX_O_NOFOLLOW        (1 << 17)      /* Don't follow links */
+#define NUTTX_O_NOATIME         (1 << 18)      /* Don't update the file last access time */
+#define NUTTX_O_CLOEXEC         (1 << 19)      /* Close on execute */
+#define NUTTX___O_SYNC          (1 << 20)      /* Synchronize file (data+metadata) */
+#define NUTTX_O_PATH            (1 << 21)      /* Obtain a path-only fd (no I/O) */
+#define NUTTX___O_TMPFILE       (1 << 22)      /* Create an unnamed temporary file */
 
-#define NUTTX_O_RDWR            (NUTTX_O_RDONLY | NUTTX_O_WRONLY)
+#define NUTTX_O_NDELAY          NUTTX_O_NONBLOCK                        /* Synonym for O_NONBLOCK */
+#define NUTTX_O_SYNC            (NUTTX___O_SYNC | NUTTX_O_DSYNC)        /* Synchronize output on write */
+#define NUTTX_O_RSYNC           NUTTX_O_SYNC                            /* Synchronize input on read */
+#define NUTTX_O_TMPFILE         (NUTTX___O_TMPFILE | NUTTX_O_DIRECTORY) /* Create a temporary file */
+#define NUTTX_O_BINARY          0                                       /* Open the file in binary mode */
 
 /* Should match definition in include/nuttx/fs/fs.h */
 

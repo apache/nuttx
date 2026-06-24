@@ -680,7 +680,7 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
     }
 
   sensor_rpmsg_lock(dev);
-  if (filep->f_oflags & O_WRONLY)
+  if ((filep->f_oflags & O_ACCMODE) != O_RDONLY)
     {
       if (dev->nadvertisers++ == 0)
         {
@@ -688,7 +688,7 @@ static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
         }
     }
 
-  if (filep->f_oflags & O_RDONLY)
+  if ((filep->f_oflags & O_ACCMODE) != O_WRONLY)
     {
       if (dev->nsubscribers++ == 0)
         {
@@ -722,7 +722,7 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
     }
 
   sensor_rpmsg_lock(dev);
-  if (filep->f_oflags & O_WRONLY)
+  if ((filep->f_oflags & O_ACCMODE) != O_RDONLY)
     {
       if (dev->nadvertisers == 1)
         {
@@ -737,7 +737,7 @@ static int sensor_rpmsg_close(FAR struct sensor_lowerhalf_s *lower,
       dev->nadvertisers--;
     }
 
-  if (filep->f_oflags & O_RDONLY)
+  if ((filep->f_oflags & O_ACCMODE) != O_WRONLY)
     {
       if (dev->nsubscribers == 1)
         {

@@ -111,19 +111,20 @@ int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode)
 
 int fs_open_amode(int oflags)
 {
-  int amode = 0;
-
-  if ((oflags & O_RDONLY) != 0)
+  switch (oflags & O_ACCMODE)
     {
-      amode |= R_OK;
-    }
+      case O_RDONLY:
+        return R_OK;
 
-  if ((oflags & O_WRONLY) != 0)
-    {
-      amode |= W_OK;
-    }
+      case O_WRONLY:
+        return W_OK;
 
-  return amode;
+      case O_RDWR:
+        return R_OK | W_OK;
+
+      default:
+        return 0;
+    }
 }
 
 /****************************************************************************
@@ -285,9 +286,9 @@ int inode_checkopenperm(FAR struct inode *inode, int oflags)
       return -ENXIO;
     }
 
-  if (((oflags & O_RDONLY) != 0 &&
+  if (((oflags & O_ACCMODE) != O_WRONLY &&
        !ops->readv && !ops->read && !ops->ioctl) ||
-      ((oflags & O_WRONLY) != 0 &&
+      ((oflags & O_ACCMODE) != O_RDONLY &&
        !ops->writev && !ops->write && !ops->ioctl))
     {
       return -EACCES;

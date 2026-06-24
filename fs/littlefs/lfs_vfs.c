@@ -285,14 +285,19 @@ static int littlefs_convert_oflags(int oflags)
 {
   int ret = 0;
 
-  if ((oflags & O_RDONLY) != 0)
+  switch (oflags & O_ACCMODE)
     {
-      ret |= LFS_O_RDONLY;
-    }
+      case O_RDONLY:
+        ret |= LFS_O_RDONLY;
+        break;
 
-  if ((oflags & O_WRONLY) != 0)
-    {
-      ret |= LFS_O_WRONLY;
+      case O_WRONLY:
+        ret |= LFS_O_WRONLY;
+        break;
+
+      case O_RDWR:
+        ret |= LFS_O_RDWR;
+        break;
     }
 
   if ((oflags & O_CREAT) != 0)

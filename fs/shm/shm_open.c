@@ -113,8 +113,8 @@ static int file_shm_open(FAR struct file *shm, FAR const char *name,
         }
 
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
-      if (((oflags & O_WRONLY) && !(inode->i_mode & S_IWUSR)) ||
-          ((oflags & O_RDONLY) && !(inode->i_mode & S_IRUSR))
+      if (((oflags & O_ACCMODE) != O_RDONLY && !(inode->i_mode & S_IWUSR)) ||
+          ((oflags & O_ACCMODE) != O_WRONLY && !(inode->i_mode & S_IRUSR)))
         {
           ret = -EACCES;
           inode_release(inode);

@@ -1349,7 +1349,7 @@ void notify_open(FAR const char *path, int oflags)
 
 void notify_close(FAR const char *path, int oflags)
 {
-  if (oflags & O_WRONLY)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       notify_queue_path_event(path, IN_CLOSE_WRITE);
     }

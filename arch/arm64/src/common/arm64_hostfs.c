@@ -78,7 +78,7 @@ static ssize_t host_flen(long fd)
 
 static int host_flags_to_mode(int flags)
 {
-  static const int modemasks = O_RDONLY | O_WRONLY | O_TEXT | O_RDWR |
+  static const int modemasks = O_ACCMODE | O_TEXT |
                                O_CREAT | O_TRUNC | O_APPEND;
   static const int modeflags[] =
   {
