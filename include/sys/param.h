@@ -62,6 +62,14 @@
 #  define MAX(a,b)      (((a) > (b)) ? (a) : (b))
 #endif  /* MAX */
 
+#ifndef MIN3
+#  define MIN3(a,b,c)   MIN(MIN(a,b),(c))
+#endif  /* MIN3 */
+
+#ifndef MAX3
+#  define MAX3(a,b,c)   MAX(MAX(a,b),(c))
+#endif  /* MAX3 */
+
 #ifndef CLAMP
 /* inclusively clamping a value into a given range */
 #  define CLAMP(x, min, max) ((x) <= (min) ? (min) : MIN(x, max))
