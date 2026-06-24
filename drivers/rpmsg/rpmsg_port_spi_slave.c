@@ -603,8 +603,14 @@ rpmsg_port_spi_process_packet(FAR struct rpmsg_port_spi_s *rpspi,
         break;
 
       case RPMSG_PORT_SPI_CMD_SHUTDOWN:
-        rpmsg_port_unregister(&rpspi->port);
         flags = spin_lock_irqsave(&rpspi->lock);
+        if (rpspi->state != RPMSG_PORT_SPI_STATE_UNCONNECTED)
+          {
+            spin_unlock_irqrestore(&rpspi->lock, flags);
+            rpmsg_port_unregister(&rpspi->port);
+            flags = spin_lock_irqsave(&rpspi->lock);
+          }
+
         if (rpspi->state == RPMSG_PORT_SPI_STATE_DISCONNECTING)
           {
             SPIS_CTRLR_UNBIND(rpspi->spictrlr);
