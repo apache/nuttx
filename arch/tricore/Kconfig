@@ -16,7 +16,7 @@ config TRICORE_TOOLCHAIN_TASKING
 
 config TRICORE_TOOLCHAIN_GNU
 	bool "Generic GNU toolchain"
-	select ARCH_TOOLCHAIN_GNU
+	select ARCH_TOOLCHAIN_GCC
 	---help---
 		This option should work for any modern GNU toolchain (GCC 4.5 or newer)
 
