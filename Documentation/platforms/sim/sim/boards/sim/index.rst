@@ -1903,12 +1903,13 @@ This is a configuration with login password protection for NSH.
 
 .. note::
 
-   This config has password protection enabled. The default login info is:
+   This config has password protection enabled. Before building, set a
+   password via ``make menuconfig`` at: **Board Selection** →
+   **Auto-generate /etc/passwd at build time** → **Root password**, or
+   enter it when ``make`` prompts.  The default username is ``root``.
+   The password must meet complexity rules (8+ chars, upper, lower, digit,
+   special).  Only the PBKDF2-HMAC-SHA256 hash is stored in ``/etc/passwd``.
 
-   * USERNAME: root
-   * PASSWORD: Administrator
-
-   The encrypted password is retained in ``/etc/passwd``.
    You can disable the password protection by
    de-selecting ``CONFIG_NSH_CONSOLE_LOGIN=y``.
 
@@ -2030,13 +2031,15 @@ credentials via ``make menuconfig``:
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
 * ``CONFIG_NSH_CONSOLE_LOGIN=y`` (required, otherwise login is not enforced)
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``root``)
-* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty or shorter than 8 characters)
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required; minimum 8 characters
+  with uppercase, lowercase, digit, and special character.  See
+  :ref:`mkpasswd_autogen`)
 
-The password is hashed with TEA at build time by the host tool
+The password is hashed with PBKDF2-HMAC-SHA256 at build time by the host tool
 ``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
 
 For the full description of the build-time password generation mechanism,
-TEA key configuration, file format, and verification steps, see
+file format, and verification steps, see
 :ref:`mkpasswd_autogen`.
 
 The format of the password file is:
@@ -2048,12 +2051,12 @@ The format of the password file is:
 Where:
 
 * user: User name
-* x: Encrypted password
+* x: PBKDF2-HMAC-SHA256 hash (modular crypt format)
 * uid: User ID (0 for now)
 * gid: Group ID (0 for now)
 * home: Login directory (/ for now)
 
-For configuration, verification steps, and TEA key details, see
+For configuration, verification steps, and password complexity rules, see
 :ref:`mkpasswd_autogen`.
 
 Login test inside the simulator
@@ -2073,7 +2076,7 @@ Login test inside the simulator
 .. code:: console
 
    nsh> cat /etc/group
-   root:*:0:root,admin
+   root:*:0:root
 
 The format of the group file is:
 
