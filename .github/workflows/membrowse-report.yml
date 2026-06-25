@@ -10,8 +10,13 @@ on:
 permissions:
   contents: read
 
+# Per-PR group so superseded PR pushes cancel; per-SHA on push so master
+# commits never share a group. A shared refs/heads/master group lets a burst
+# of pushes evict each other while pending (GitHub keeps only one pending run
+# per group), leaving a commit with no report and breaking the MemBrowse
+# parent chain for every commit that bases on it.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
