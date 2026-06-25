@@ -1748,6 +1748,22 @@ void up_putc(int ch)
 
   u16550_putc(priv, ch);
 }
+
+/****************************************************************************
+ * Name: u16550_consoledev
+ *
+ * Description:
+ *   Return a pointer to the console uart_dev_t. Used by board logic that
+ *   needs to drive the console RX via polling (e.g. AMP secondary cores
+ *   where the UART RX interrupt cannot be delivered reliably through a GIC
+ *   distributor shared with another OS).
+ *
+ ****************************************************************************/
+
+FAR uart_dev_t *u16550_consoledev(void)
+{
+  return &CONSOLE_DEV;
+}
 #endif
 
 /****************************************************************************
