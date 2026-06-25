@@ -1063,6 +1063,11 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
           return -EINPROGRESS;
         }
 
+      if (!conn->ept.rdev)
+        {
+          return -ECONNREFUSED;
+        }
+
       ret = net_sem_timedwait(&conn->sendsem,
                               _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (!conn->ept.rdev || atomic_read(&conn->unbind))
