@@ -66,10 +66,6 @@ struct onewire_slave_s
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Additional CRC helpers from 1wire_crc.c */
-
-bool onewire_valid_rom(uint64_t rom);
-
 /* Rest are from 1wire.c */
 
 int onewire_addslave(FAR struct onewire_master_s *master,
