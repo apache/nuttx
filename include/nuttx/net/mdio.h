@@ -60,12 +60,37 @@ struct mdio_ops_s
   int (*write)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr,
                uint8_t regaddr, uint16_t value);
 
-  #ifdef CONFIG_MDIO_CLAUSE_45
-  #endif
+#ifdef CONFIG_MDIO_CLAUSE_45
+  /* Native Clause 45 MDIO read.  Optional: when NULL, mdio_c45_read()
+   * falls back to indirect access via Clause 22 registers 13/14.
+   */
 
-  /* PHY Reset. Optional. */
+  int (*read_c45)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr,
+                  uint8_t devad, uint16_t regaddr, FAR uint16_t *value);
 
-  int (*reset)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr);
+  /* Native Clause 45 MDIO write.  Optional: when NULL, mdio_c45_write()
+   * falls back to indirect access via Clause 22 registers 13/14.
+   */
+
+  int (*write_c45)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr,
+                   uint8_t devad, uint16_t regaddr, uint16_t value);
+#endif
+
+  /* PHY hardware reset line control. Optional.
+   *
+   * controls the PHY's RESET_N line by
+   * logical value rather than performing a one-shot pulse:
+   *   value != 0 -> assert reset  (drive the PHY into reset)
+   *   value == 0 -> deassert reset (release the PHY)
+   * The lower half owns pin polarity (active-low RESET_N is handled inside),
+   * and may sleep for the datasheet-mandated assert/deassert settle time
+   * before returning.  A single MDIO bus may host several PHYs at different
+   * addresses, so any idempotency (skipping a redundant assert/deassert for
+   * a given phyaddr) is the lower half's responsibility.
+   */
+
+  int (*reset)(FAR struct mdio_lowerhalf_s *lower, uint8_t phyaddr,
+               int value);
 };
 
 /* This structure defines the state of the MDIO lower-half driver.
@@ -165,21 +190,60 @@ int mdio_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr, uint8_t regaddr,
                uint16_t value);
 
 /****************************************************************************
- * Name: mdio_reset
+ * Name: mdio_c45_read / mdio_c45_write
  *
  * Description:
- *   Reset a PHY on the MDIO bus.
+ *   Clause 45 MMD register access.  Uses the lower-half native C45 ops if
+ *   provided; otherwise falls back to indirect access over Clause 22
+ *   registers 13/14.  Only available when CONFIG_MDIO_CLAUSE_45 is set.
  *
  * Input Parameters:
  *   dev     - The MDIO bus handle.
- *   phyaddr - The PHY address (0-31) to reset.
+ *   phyaddr - The PHY address (0-31).
+ *   devad   - The MMD device address.
+ *   regaddr - The 16-bit MMD register address.
+ *   value   - Read: pointer to store the value.  Write: value to write.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mdio_reset(FAR struct mdio_bus_s *dev, uint8_t phyaddr);
+#ifdef CONFIG_MDIO_CLAUSE_45
+int mdio_c45_read(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                  uint8_t devad, uint16_t regaddr, FAR uint16_t *value);
+
+int mdio_c45_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                   uint8_t devad, uint16_t regaddr, uint16_t value);
+#endif
+
+/****************************************************************************
+ * Name: mdio_reset
+ *
+ * Description:
+ *   Control the hardware reset line of a PHY on the MDIO bus. This is a
+ *   level control, not a one-shot pulse.  Callers assert then deassert
+ *   to perform a full reset:
+ *
+ *     mdio_reset(dev, phyaddr, 1);   // assert (into reset)
+ *     mdio_reset(dev, phyaddr, 0);   // deassert (release)
+ *
+ *   The request is always forwarded to the lower-half driver, which owns
+ *   the per-PHY assert/deassert settle delay and any idempotency (a single
+ *   MDIO bus may host several PHYs at different addresses).
+ *
+ * Input Parameters:
+ *   dev     - The MDIO bus handle.
+ *   phyaddr - The PHY address (0-31) to reset.
+ *   value   - Reset line state: 1 to assert reset, 0 to deassert.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; -ENOSYS if no reset op is provided; a negated
+ *   errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_reset(FAR struct mdio_bus_s *dev, uint8_t phyaddr, int value);
 
 #ifdef __cplusplus
 }
