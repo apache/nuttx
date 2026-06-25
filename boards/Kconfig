@@ -5554,41 +5554,48 @@ config BOARD_ETC_ROMFS_PASSWD_ENABLE
 		is configured, forcing each build to set its own credentials.
 
 		The password is hashed at build time by the host tool
-		tools/mkpasswd (compiled from tools/mkpasswd.c) using the Tiny
-		Encryption Algorithm (TEA) — the same algorithm used at runtime
-		in libs/libc/misc/lib_tea_encrypt.c.  The plaintext password is
+		tools/mkpasswd (compiled from tools/mkpasswd.c) using
+		PBKDF2-HMAC-SHA256 — the same algorithm used at runtime in
+		apps/fsutils/passwd/passwd_encrypt.c.  The plaintext password is
 		never stored in the firmware image.
 
-		See Documentation/components/passwd_autogen.rst for details.
+		The iteration count is taken from
+		CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS (default 10000).  Higher
+		values slow brute-force attacks but increase login latency on
+		low-MHz MCUs.
+
+		See Documentation/components/tools/index.rst (mkpasswd section) for
+		details.
 
 if BOARD_ETC_ROMFS_PASSWD_ENABLE
 
 config BOARD_ETC_ROMFS_PASSWD_USER
-	string "Admin username"
+	string "Root username"
 	default "root"
 	---help---
 		The username for the auto-generated /etc/passwd entry.
 
 config BOARD_ETC_ROMFS_PASSWD_PASSWORD
-	string "Admin password (required)"
-	default "Administrator"
+	string "Root password (required)"
 	---help---
 		The plaintext password for the auto-generated /etc/passwd entry.
-		This value is hashed with TEA at build time; the plaintext is NOT
-		stored in the firmware image.  The build will fail if this is left
-		empty or shorter than 8 characters.  Set this via
-		'make menuconfig'.
+		This value is hashed with PBKDF2-HMAC-SHA256 at build time; the
+		plaintext is NOT stored in the firmware image.  There is no default;
+		set CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD in the board defconfig,
+		via menuconfig, or enter it when prompted during an interactive
+		build.  Password must be at least 8 characters and contain:
+		uppercase letter, lowercase letter, digit, and special character.
 
 config BOARD_ETC_ROMFS_PASSWD_UID
-	int "Admin user ID"
+	int "Root user ID"
 	default 0
 
 config BOARD_ETC_ROMFS_PASSWD_GID
-	int "Admin group ID"
+	int "Root group ID"
 	default 0
 
 config BOARD_ETC_ROMFS_PASSWD_HOME
-	string "Admin home directory"
+	string "Root home directory"
 	default "/"
 
 endif # BOARD_ETC_ROMFS_PASSWD_ENABLE

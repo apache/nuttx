@@ -292,6 +292,12 @@ function(process_all_directory_romfs)
           "to set a password.")
     endif()
 
+    if(CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS)
+      set(MKPASSWD_ITERATIONS ${CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS})
+    else()
+      set(MKPASSWD_ITERATIONS 10000)
+    endif()
+
     # Determine host executable suffix (.exe on Windows, empty elsewhere)
     if(CMAKE_HOST_WIN32)
       set(HOST_EXE_SUFFIX .exe)
@@ -317,21 +323,6 @@ function(process_all_directory_romfs)
       add_custom_target(build_host_mkpasswd DEPENDS ${MKPASSWD_BIN})
     endif()
 
-    # Pass TEA key overrides when the user has changed them from defaults
-    set(MKPASSWD_KEY_ARGS "")
-    if(CONFIG_FSUTILS_PASSWD_KEY1)
-      list(APPEND MKPASSWD_KEY_ARGS --key1 ${CONFIG_FSUTILS_PASSWD_KEY1})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY2)
-      list(APPEND MKPASSWD_KEY_ARGS --key2 ${CONFIG_FSUTILS_PASSWD_KEY2})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY3)
-      list(APPEND MKPASSWD_KEY_ARGS --key3 ${CONFIG_FSUTILS_PASSWD_KEY3})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY4)
-      list(APPEND MKPASSWD_KEY_ARGS --key4 ${CONFIG_FSUTILS_PASSWD_KEY4})
-    endif()
-
     set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
     add_custom_command(
       OUTPUT ${GENPASSWD_OUTPUT}
@@ -341,8 +332,8 @@ function(process_all_directory_romfs)
         --password "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" --uid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_UID} --gid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_GID} --home
-        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" ${MKPASSWD_KEY_ARGS} -o
-        ${GENPASSWD_OUTPUT}
+        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" --iterations
+        ${MKPASSWD_ITERATIONS} -o ${GENPASSWD_OUTPUT}
       DEPENDS ${MKPASSWD_BIN} ${NUTTX_DIR}/.config
       COMMENT "Generating /etc/passwd from Kconfig values")
     add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
