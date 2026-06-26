@@ -139,9 +139,10 @@ void s32k3xx_start(void)
   register uint64_t *src;
   register uint64_t *dest;
 
-  /* Technically startup.S did initialize SRAM
-   * but if don't set init value here again
-   * then on a cold boot we go into a bootloop somehow
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+  /* Reinitialize SRAM ECC - required on cold boot when running from flash.
+   * Skipped for SRAM boot: the loader already wrote ECC-correct data and
+   * zeroing here would destroy live code.
    */
 
   dest = (uint64_t *)SRAM_BASE_ADDR;
@@ -149,6 +150,7 @@ void s32k3xx_start(void)
     {
       *dest++ = STARTUP_ECC_INITVALUE;
     }
+#endif
 
   /* ITCM */
 
