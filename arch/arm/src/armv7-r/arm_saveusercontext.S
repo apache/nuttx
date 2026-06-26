@@ -53,7 +53,6 @@
  ****************************************************************************/
 
 	.globl	up_saveusercontext
-	.globl	up_saveusercontext
 	.type	up_saveusercontext, %function
 
 up_saveusercontext:
