@@ -141,30 +141,41 @@ static uint8_t g_bitbucket[UNCOMP_MAXHDR];
  *   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
  *
  * Input Parameters:
+ *   iob   - Pointer to the iob struct
  *   fptr  - Pointer to the beginning of the frame under construction
  *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
  *           may be redirected to g_bitbucket on the case of FRAGN frames.
- *   proto - True: Copy the protocol header following the IPv6 header too.
  *
  * Returned Value:
- *   None
+ *   On success returns 0 and a negative error otherwise
  *
  ****************************************************************************/
 
-static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr,
-                                         FAR uint8_t *bptr)
+static int sixlowpan_uncompress_ipv6hdr(FAR struct iob_s *iob,
+                                        FAR uint8_t *fptr,
+                                        FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
+  FAR uint8_t *endofframe = fptr + iob->io_len;
 
   /* Put uncompressed IPv6 header in d_buf. */
 
   g_frame_hdrlen  += SIXLOWPAN_IPV6_HDR_LEN;
+
+  if (fptr + g_frame_hdrlen + IPv6_HDRLEN > endofframe)
+    {
+      nerr("ERROR: Frame too short for IPv6 header\n");
+      return -EINVAL;
+    }
+
   memcpy(ipv6, fptr + g_frame_hdrlen, IPv6_HDRLEN);
 
   /* Update g_uncomp_hdrlen and g_frame_hdrlen. */
 
   g_frame_hdrlen  += IPv6_HDRLEN;
   g_uncomp_hdrlen += IPv6_HDRLEN;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -174,20 +185,22 @@ static void sixlowpan_uncompress_ipv6hdr(FAR uint8_t *fptr,
  *   Copy the protocol header following the IPv4 header
  *
  * Input Parameters:
+ *   iob   - Pointer to the iob struct
  *   fptr  - Pointer to the beginning of the frame under construction
  *   bptr  - Output goes here.  Normally this is a known offset into d_buf,
  *           may be redirected to g_bitbucket on the case of FRAGN frames.
- *   proto - True: Copy the protocol header following the IPv6 header too.
  *
  * Returned Value:
- *   The size of the protocol header that was copied.
+ *   The size of the protocol header that was copied or a negative error.
  *
  ****************************************************************************/
 
-static uint16_t sixlowpan_uncompress_ipv6proto(FAR uint8_t *fptr,
-                                               FAR uint8_t *bptr)
+static int sixlowpan_uncompress_ipv6proto(FAR struct iob_s *iob,
+                                          FAR uint8_t *fptr,
+                                          FAR uint8_t *bptr)
 {
   FAR struct ipv6_hdr_s *ipv6 = (FAR struct ipv6_hdr_s *)bptr;
+  FAR uint8_t *endofframe = fptr + iob->io_len;
   uint16_t protosize = 0;
 
   /* Copy the following protocol header. */
@@ -199,6 +212,14 @@ static uint16_t sixlowpan_uncompress_ipv6proto(FAR uint8_t *fptr,
       {
         FAR struct tcp_hdr_s *tcp =
           (FAR struct tcp_hdr_s *)(fptr + g_frame_hdrlen);
+
+        /* Check if the frame is too short */
+
+        if (fptr + g_frame_hdrlen + sizeof(struct tcp_hdr_s) > endofframe)
+          {
+            nerr("ERROR: Frame too short for TCP header\n");
+            return -EINVAL;
+          }
 
         /* The TCP header length is encoded in the top 4 bits of the
          * tcpoffset field (in units of 32-bit words).
@@ -226,6 +247,14 @@ static uint16_t sixlowpan_uncompress_ipv6proto(FAR uint8_t *fptr,
       return 0;
     }
 
+  /* Check if the TCP header exceeds the frame size */
+
+  if (fptr + g_frame_hdrlen + protosize > endofframe)
+    {
+      nerr("ERROR: TCP header size from tcpoffset exceeds frame bounds\n");
+      return -EINVAL;
+    }
+
   /* Copy the protocol header. */
 
   memcpy((FAR uint8_t *)ipv6 + g_uncomp_hdrlen, fptr + g_frame_hdrlen,
@@ -233,7 +262,8 @@ static uint16_t sixlowpan_uncompress_ipv6proto(FAR uint8_t *fptr,
 
   g_frame_hdrlen   += protosize;
   g_uncomp_hdrlen  += protosize;
-  return protosize;
+
+  return (int)protosize;
 }
 
 /****************************************************************************
@@ -288,7 +318,7 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
   uint16_t paysize;           /* Size of the data payload */
   uint16_t fragtag   = 0;     /* Tag of the fragment */
   uint8_t fragoffset = 0;     /* Offset of the fragment in the IP packet */
-  uint8_t protosize  = 0;     /* Length of the protocol header (treated like payload) */
+  uint16_t protosize  = 0;    /* Length of the protocol header (treated like payload) */
   bool isfrag        = false; /* true: Frame is a fragment */
   bool isfrag1       = false; /* true: Frame is the first fragment of the series */
   int reqsize;                /* Required buffer size */
@@ -485,7 +515,13 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
       /* Uncompress the IPv6 header */
 
-      sixlowpan_uncompress_ipv6hdr(fptr, bptr);
+      ret = sixlowpan_uncompress_ipv6hdr(iob, fptr, bptr);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to uncompress IPv6 header: %d\n",
+               ret);
+          goto errout_with_reass;
+        }
 
       /* A protocol header will follow the IPv6 header only on a non-
        * fragmented packet or on the first fragment of a fragmented
@@ -494,7 +530,15 @@ static int sixlowpan_frame_process(FAR struct radio_driver_s *radio,
 
       if (!isfrag || isfrag1)
         {
-          protosize = sixlowpan_uncompress_ipv6proto(fptr, bptr);
+          ret = sixlowpan_uncompress_ipv6proto(iob, fptr, bptr);
+          if (ret < 0)
+            {
+              nerr("ERROR: Failed to uncompress IPv6 proto header: %d\n",
+                   ret);
+              goto errout_with_reass;
+            }
+
+          protosize = (uint8_t) ret;
         }
     }
   else
