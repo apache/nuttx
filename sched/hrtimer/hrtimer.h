@@ -639,8 +639,10 @@ static inline_function void hrtimer_wait(FAR hrtimer_t *timer)
             {
               nxsched_usleep(HRTIMER_CANCEL_SYNC_DELAY_US);
             }
-
-          /* Otherwise, spin-wait is enough. */
+          else
+            {
+              UP_WFE();
+            }
         }
     }
 
@@ -739,6 +741,7 @@ static inline_function void hrtimer_process(uint64_t now)
         }
 
       hrtimer_unmark_running(cpu);
+      UP_SEV();
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
