@@ -394,7 +394,7 @@ Peripheral        Support NOTES
 SHA                Yes
 RSA                No
 ECC                No
-HMAC               No
+HMAC               Yes
 TRNG               No
 ECDSA              No
 TEE                No
