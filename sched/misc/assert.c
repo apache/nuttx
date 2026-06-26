@@ -228,11 +228,23 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
 
       _alert("    sp: %p\n", (FAR void *)sp);
 
-      /* Get more information */
+      /* Back off before the current sp so the dump also covers the
+       * hardware exception frame that sits just below it.  When an assert
+       * is taken from an interrupt, the reconstructed user sp points above
+       * that frame; dumping only one stride back omits it, which prevents
+       * an offline DWARF/CFI unwinder from crossing the exception boundary
+       * into the faulting userspace context.  Backing off a whole register
+       * context (sizeof(last_regs_t) == XCPTCONTEXT byte size) is enough to
+       * include the frame on any architecture, clamped to the stack base.
+       */
 
-      if (sp - DUMP_STRIDE >= base)
+      if (sp - sizeof(last_regs_t) >= base)
         {
-          sp -= DUMP_STRIDE;
+          sp -= sizeof(last_regs_t);
+        }
+      else
+        {
+          sp = base;
         }
 
 #if CONFIG_ARCH_STACKDUMP_MAX_LENGTH > 0
