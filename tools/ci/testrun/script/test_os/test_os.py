@@ -77,6 +77,13 @@ def test_stdio(p):
     assert ret == 0
 
 
+def test_stdbit(p):
+    if p.board in do_not_support:
+        pytest.skip("unsupported at {}".format(p.board))
+    ret = p.sendCommand("stdbit_test", "stdbit tests: SUCCESSFUL: 14; FAILED: 0")
+    assert ret == 0
+
+
 @pytest.mark.run(order=-2)
 def test_fs_test(p):
     if p.board in do_not_support:
