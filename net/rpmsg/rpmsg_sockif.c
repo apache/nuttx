@@ -331,29 +331,61 @@ static void rpmsg_socket_free(FAR struct rpmsg_socket_conn_s *conn)
 
 static int rpmsg_socket_wakeup(FAR struct rpmsg_socket_conn_s *conn)
 {
-  struct rpmsg_socket_data_s msg;
+  FAR struct rpmsg_socket_data_s *msg;
+  uint32_t len = sizeof(*msg);
   uint32_t space;
-  int ret = 0;
+  int ret;
 
   if (!conn->ept.rdev || atomic_read(&conn->unbind))
     {
-      return ret;
+      return 0;
     }
 
   nxmutex_lock(&conn->recvlock);
   space = conn->recvpos - conn->lastpos;
+  nxmutex_unlock(&conn->recvlock);
 
-  if (space > circbuf_size(&conn->recvbuf) / 2)
+  if (space <= circbuf_size(&conn->recvbuf) / 2)
     {
-      conn->lastpos = conn->recvpos;
-      msg.cmd = RPMSG_SOCKET_CMD_DATA;
-      msg.pos = conn->recvpos;
-      msg.len = 0;
-      ret = 1;
+      return 0;
     }
 
+  /* Reserve the tx buffer without holding recvlock, since it may block
+   * waiting for a free vring buffer.
+   */
+
+  msg = rpmsg_get_tx_payload_buffer(&conn->ept, &len, true);
+  if (msg == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  DEBUGASSERT(len >= sizeof(*msg));
+  nxmutex_lock(&conn->recvlock);
+
+  /* The peer may have destroyed its endpoint meanwhile.  rpmsg_send()
+   * would then wait the whole RPMSG_TICK_COUNT for dest_addr to become
+   * valid again, so check and send under recvlock, which
+   * rpmsg_socket_ns_unbind() takes too.
+   */
+
+  if (!is_rpmsg_ept_ready(&conn->ept) || atomic_read(&conn->unbind))
+    {
+      nxmutex_unlock(&conn->recvlock);
+      rpmsg_release_tx_buffer(&conn->ept, msg);
+      return -ECONNRESET;
+    }
+
+  conn->lastpos = conn->recvpos;
+  msg->cmd = RPMSG_SOCKET_CMD_DATA;
+  msg->pos = conn->recvpos;
+  msg->len = 0;
+  ret = rpmsg_send_offchannel_nocopy(&conn->ept, conn->ept.addr,
+                                     conn->ept.dest_addr, msg,
+                                     sizeof(*msg));
+
   nxmutex_unlock(&conn->recvlock);
-  return ret ? rpmsg_send(&conn->ept, &msg, sizeof(msg)) : 0;
+  return ret;
 }
 
 static inline uint32_t
