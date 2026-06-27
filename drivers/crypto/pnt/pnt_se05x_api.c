@@ -308,6 +308,12 @@ int pnt_se05x_create_signature(
 {
   create_signature_args->signature.buffer_content_size =
       create_signature_args->signature.buffer_size;
+
+  if (create_signature_args->algorithm >= SE05X_ALGORITHM_SIZE)
+    {
+      return -EINVAL;
+    }
+
   int result =
       Se05x_API_ECDSASign(
           &(se05x->pnt->session), create_signature_args->key_id,
@@ -327,6 +333,12 @@ int pnt_se05x_verify_signature(
     FAR struct se05x_signature_s *verify_signature_args)
 {
   SE05x_Result_t se05x_result;
+
+  if (verify_signature_args->algorithm >= SE05X_ALGORITHM_SIZE)
+    {
+      return -EINVAL;
+    }
+
   int result =
       Se05x_API_ECDSAVerify(
           &(se05x->pnt->session), verify_signature_args->key_id,
