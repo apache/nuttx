@@ -70,8 +70,9 @@
 riscv_vpuconfig:
   li           a0, MSTATUS_VS_INIT
   csrs         CSR_STATUS, a0
-
+#ifdef CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI
   fence.i
+#endif
   ret
 
 /****************************************************************************

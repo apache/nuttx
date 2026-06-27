@@ -224,7 +224,9 @@ static inline void mmu_write_satp(uintptr_t reg)
       "csrw satp, %0\n"
       "sfence.vma x0, x0\n"
       "fence rw, rw\n"
+#ifdef CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI
       "fence.i\n"
+#endif
       :
       : "rK" (reg)
       : "memory"

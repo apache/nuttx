@@ -172,7 +172,9 @@ __start:
   csrw CSR_MIE, a2     /* Set MSIE bit to receive IPI */
 
   /* flush the instruction cache */
+#ifdef CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI
   fence.i
+#endif
 
 .wait_boot:
   wfi

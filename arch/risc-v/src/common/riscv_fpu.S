@@ -72,8 +72,9 @@ riscv_fpuconfig:
   csrs         CSR_STATUS, a0
 
   fscsr        zero
-
+#ifdef CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI
   fence.i
+#endif
   ret
 
 /****************************************************************************
