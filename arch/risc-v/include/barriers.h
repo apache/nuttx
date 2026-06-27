@@ -39,6 +39,10 @@
 
 /* UP_ISB() is used to synchronize the instruction and data streams */
 
-#define UP_ISB()       __asm__ __volatile__ ("fence.i" ::: "memory")
+#ifdef CONFIG_ARCH_RV_ISA_ZICSR_ZIFENCEI
+#  define UP_ISB()       __asm__ __volatile__ ("fence.i" ::: "memory")
+#else
+#  define UP_ISB()       
+#endif
 
 #endif /* __ARCH_RISCV_INCLUDE_BARRIERS_H */
