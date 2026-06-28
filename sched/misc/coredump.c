@@ -290,6 +290,7 @@ static int elf_get_info_note_size(void)
  *
  ****************************************************************************/
 
+noinline_function
 static void elf_emit_tcb_note(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb)
 {
@@ -418,6 +419,7 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
  *
  ****************************************************************************/
 
+noinline_function
 static void elf_emit_tcb_stack(FAR struct elf_dumpinfo_s *cinfo,
                                FAR struct tcb_s *tcb)
 {
@@ -603,6 +605,7 @@ static void elf_emit_info_note(FAR struct elf_dumpinfo_s *cinfo)
  *
  ****************************************************************************/
 
+noinline_function
 static void elf_emit_tcb_phdr(FAR struct elf_dumpinfo_s *cinfo,
                               FAR struct tcb_s *tcb,
                               FAR Elf_Phdr *phdr, off_t *offset)
@@ -858,6 +861,7 @@ static void coredump_dump_dev(pid_t pid)
  *
  ****************************************************************************/
 
+noinline_function
 static int coredump_initialize_memory_region(void)
 {
 #ifdef CONFIG_BOARD_MEMORY_RANGE
