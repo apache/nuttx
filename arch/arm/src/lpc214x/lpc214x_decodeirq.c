@@ -41,15 +41,6 @@
  * Private Data
  ****************************************************************************/
 
-/* This array maps 4 bits into the bit number of the lowest bit that it set */
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
-static uint8_t g_nibblemap[16] =
-{
-  0, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
-};
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -78,42 +69,22 @@ static uint8_t g_nibblemap[16] =
  *
  ****************************************************************************/
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 uint32_t *arm_decodeirq(uint32_t *regs)
-#else
-static uint32_t *lpc214x_decodeirq(uint32_t *regs)
-#endif
 {
-  struct tcb_s *tcb = this_task();
-
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  tcb->xcp.regs = regs;
-  up_set_interrupt_context(true);
   err("ERROR: Unexpected IRQ\n");
   PANIC();
-  return NULL;
 #else
 
-  /* Decode the interrupt. We have to do this by search for the lowest
-   * numbered non-zero bit in the interrupt status register.
-   */
+  /* Check which IRQ fires */
 
-  uint32_t pending = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0x007fffff;
-  unsigned int nibble;
-  unsigned int irq_base;
-  unsigned int irq = NR_IRQS;
+  uint32_t irqbits = vic_getreg(LPC214X_VIC_IRQSTATUS_OFFSET) & 0xffffffff;
+  unsigned int irq;
 
-  /* Search in groups of four bits.  For 22 sources, this is at most six
-   * times through the loop.
-   */
-
-  for (nibble = pending & 0x0f, irq_base = 0;
-       pending && irq_base < NR_IRQS;
-       pending >>= 4, nibble = pending & 0x0f, irq_base += 4)
+  for (irq = 0; irq < NR_IRQS; irq++)
     {
-      if (nibble)
+      if (irqbits & (uint32_t) (1 << irq))
         {
-          irq = irq_base + g_nibblemap[nibble];
           break;
         }
     }
@@ -122,34 +93,11 @@ static uint32_t *lpc214x_decodeirq(uint32_t *regs)
 
   if (irq < NR_IRQS)
     {
-      uint32_t *saveregs;
-      bool savestate;
-
-      savestate = up_interrupt_context();
-      saveregs = tcb->xcp.regs;
-      up_set_interrupt_context(true);
-      tcb->xcp.regs = regs;
-
       /* Deliver the IRQ */
 
-      irq_dispatch(irq, regs);
-
-      /* Restore the previous value of saveregs. */
-
-      up_set_interrupt_context(savestate);
-      tcb->xcp.regs = saveregs;
+      regs = arm_doirq(irq, regs);
     }
-
-  return NULL;  /* Return not used in this architecture */
 #endif
-}
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
-uint32_t *arm_decodeirq(uint32_t *regs)
-{
-  vic_vector_t vector =
-               (vic_vector_t)vic_getreg(LPC214X_VIC_VECTADDR_OFFSET);
-  vector(regs);
-  return NULL;  /* Return not used in this architecture */
+  return regs;
 }
-#endif
