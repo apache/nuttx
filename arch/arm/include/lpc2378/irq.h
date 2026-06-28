@@ -119,10 +119,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 void up_attach_vector(int irq, int priority, vic_vector_t handler);
 void up_detach_vector(int vector);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -91,11 +91,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
-static int lpc23xx_timerisr(uint32_t * regs)
-#else
 static int lpc23xx_timerisr(int irq, uint32_t * regs, void *arg)
-#endif
 {
   static uint32_t tick;
 
@@ -109,11 +105,9 @@ static int lpc23xx_timerisr(int irq, uint32_t * regs, void *arg)
 
   /* Reset the VIC as well */
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
   /* write any value to VICAddress to acknowledge the interrupt */
 
   vic_putreg(0, VIC_ADDRESS_OFFSET);
-#endif
 
   if (tick++ > 100)
     {
@@ -186,11 +180,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
-  up_attach_vector(IRQ_SYSTIMER, ???, (vic_vector_t) lpc23xx_timerisr);
-#else
   irq_attach(IRQ_SYSTIMER, (xcpt_t)lpc23xx_timerisr, NULL);
-#endif
 
   /* And enable the system timer interrupt */
 
