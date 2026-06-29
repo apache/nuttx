@@ -379,6 +379,41 @@ static const char *g_white_content_list[] =
   "SEGGER_RTT",
 
   /* Ref:
+   * drivers/crypto/pnt/pnt_se05x_api.c
+   */
+
+  "smStatus_t",
+  "Se05xSession_t",
+  "SE05x_ECSignatureAlgo_t",
+  "kSE05x_ECSignatureAlgo_NA",
+  "kSE05x_ECSignatureAlgo_PLAIN",
+  "kSE05x_ECSignatureAlgo_SHA",
+  "kSE05x_ECSignatureAlgo_SHA_224",
+  "kSE05x_ECSignatureAlgo_SHA_256",
+  "kSE05x_ECSignatureAlgo_SHA_384",
+  "kSE05x_ECSignatureAlgo_SHA_512",
+  "kSE05x_ECCurve_NIST_P256"
+  "SE05x_Result_t",
+  "kSE05x_Result_NA",
+  "kSE05x_Result_SUCCESS",
+  "kSE05x_INS_NA",
+  "kSE05x_KeyPart_Pair",
+  "kSE05x_KeyPart_Public",
+  "pScp03_enc_key",
+  "pScp03_mac_key",
+  "pScp03_dek_key",
+  "Se05x_API_SessionOpen",
+  "Se05x_API_SessionClose",
+  "Se05x_API_CheckObjectExists",
+  "Se05x_API_ReadObject",
+  "Se05x_API_WriteECKey",
+  "Se05x_API_WriteBinary",
+  "Se05x_API_ReadSize",
+  "Se05x_API_DeleteSecureObject",
+  "Se05x_API_ECDHGenerateSharedSecret",
+  "Se05x_API_ECDSAVerify",
+
+  /* Ref:
    * fs/nfs/rpc.h
    * fs/nfs/nfs_proto.h
    * fs/nfs/nfs_mount.h
