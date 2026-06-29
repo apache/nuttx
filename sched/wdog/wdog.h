@@ -148,7 +148,7 @@ static inline_function clock_t wd_adjust_next_tick(clock_t tick)
   next_tick         = g_wdexpired + interval;
 #endif
 
-#if CONFIG_TIMER_ADJUST_USEC > 0
+#if CONFIG_TIMER_ADJUST_NSEC > 0
   /* Normally, timer event cannot triggered on exact time due to the
    * existence of interrupt latency.
    * Assuming that the interrupt latency is distributed within
@@ -161,7 +161,7 @@ static inline_function clock_t wd_adjust_next_tick(clock_t tick)
    * interrupt, which may result in a much larger timer interrupt latency.
    */
 
-  next_tick -= CONFIG_TIMER_ADJUST_USEC / USEC_PER_TICK;
+  next_tick -= CONFIG_TIMER_ADJUST_NSEC / NSEC_PER_TICK;
 #endif
 
   return next_tick;
