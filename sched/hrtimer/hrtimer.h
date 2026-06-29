@@ -191,10 +191,12 @@ static inline_function uint64_t hrtimer_last_expired(void)
  * Description:
  *   Reprogram the hardware timer to expire at a specified nanosecond time.
  *   Converts the nanosecond time to timespec and calls the platform-specific
- *   timer start function.
+ *   timer start function. If CONFIG_TIMER_ADJUST_NSEC is set, the expiration
+ *   time is adjusted earlier by that amount to compensate for interrupt
+ *   latency.
  *
  * Input Parameters:
- *   ns - Expiration time in nanoseconds.
+ *   next_expired - Expiration time in nanoseconds.
  *
  * Returned Value:
  *   None.
@@ -234,6 +236,12 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
   delay = delay < TICK2NSEC((uint64_t)g_oneshot_maxticks) ?
           delay : TICK2NSEC((uint64_t)g_oneshot_maxticks);
 #  endif
+
+  /* Even if overflow occurs here, the functional correctness
+   * should still be fine.
+   */
+
+  delay -= CONFIG_TIMER_ADJUST_NSEC;
 
   clock_nsec2time(&ts, expired + delay);
 
