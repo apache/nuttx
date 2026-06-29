@@ -73,10 +73,25 @@ int iob_add_queue(FAR struct iob_s *iob, FAR struct iob_queue_s *iobq)
     }
   else
     {
-      /* Link after current tail, setting the chain end flag */
+      /* Link after current tail, setting the chain end flag.
+       *
+       * The chain that is currently at the tail of the queue may have been
+       * extended (e.g. via iob_copyin()) after it was enqueued.  In that
+       * case the IOB_CHAIN_END flag has been carried forward to the new
+       * last IOB while qh_tail still points at the original (now mid-chain)
+       * IOB.  Advance to the real end of the tail chain so that we do not
+       * overwrite its io_flink and corrupt/truncate the chain.
+       */
 
-      DEBUGASSERT(iobq->qh_tail != NULL);
-      IOB_FLAG_SET(iobq->qh_tail, iob, IOB_CHAIN_END);
+      FAR struct iob_s *tail = iobq->qh_tail;
+
+      DEBUGASSERT(tail != NULL);
+      while (!IOB_FLAG_TEST(tail, IOB_CHAIN_END))
+        {
+          tail = IOB_LINK_GET(tail);
+        }
+
+      IOB_FLAG_SET(tail, iob, IOB_CHAIN_END);
       iobq->qh_tail = last;
     }
 
@@ -131,10 +146,21 @@ int iob_concat_queue(FAR struct iob_queue_s *dest,
         }
       else
         {
-          /* Link source to destination tail, preserving CHAIN_END flag */
+          /* Link source to destination tail, preserving CHAIN_END flag.
+           * The tail chain may have been extended after being enqueued, so
+           * advance to its real end (marked by IOB_CHAIN_END) before
+           * linking to avoid corrupting/truncating that chain.
+           */
 
-          DEBUGASSERT(dest->qh_tail != NULL);
-          IOB_FLAG_SET(dest->qh_tail, iob, IOB_CHAIN_END);
+          FAR struct iob_s *dtail = dest->qh_tail;
+
+          DEBUGASSERT(dtail != NULL);
+          while (!IOB_FLAG_TEST(dtail, IOB_CHAIN_END))
+            {
+              dtail = IOB_LINK_GET(dtail);
+            }
+
+          IOB_FLAG_SET(dtail, iob, IOB_CHAIN_END);
           dest->qh_tail = tail;
         }
     }
