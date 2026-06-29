@@ -2174,4 +2174,23 @@ config HRTIMER_TREE
 
 endchoice
 
+config HRTIMER_PRECISION_SHIFT
+	int "HRTimer precision shift (0 = full precision)"
+	default 0
+	range 0 20
+	---help---
+		Reduce hrtimer precision to decrease interrupt frequency.
+		The value N defines the left-shift bits of the precision unit:
+		precision = 1 << N nanoseconds, and the mask = precision - 1.
+
+		The programmed expiration time is ceiling-aligned to the
+		precision boundary via (expired + mask) & ~mask in
+		hrtimer_reprogram().
+
+		Examples:
+		  0  - full nanosecond precision (default, no alignment)
+		  10 - 1024 ns (~1 us) precision
+		  15 - 32768 ns (~32 us) precision
+		  20 - 1048576 ns (~1 ms) precision
+
 endif # HRTIMER

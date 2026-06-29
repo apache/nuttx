@@ -61,6 +61,14 @@
 #define HRTIMER_TIME_BEFORE(t1, t2)    ((int64_t)((t2) - (t1)) > 0)
 #define HRTIMER_TIME_BEFORE_EQ(t1, t2) ((int64_t)((t2) - (t1)) >= 0)
 
+/* Precision mask for reducing hrtimer resolution.
+ * When CONFIG_HRTIMER_PRECISION_SHIFT > 0, the programmed expiration
+ * time is ceiling-aligned to (1 << SHIFT) nanosecond boundaries.
+ */
+
+#define HRTIMER_PRECISION_MASK \
+  ((1ull << CONFIG_HRTIMER_PRECISION_SHIFT) - 1u)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -208,6 +216,16 @@ static inline_function void hrtimer_reprogram(uint64_t next_expired)
   struct timespec ts;
   uint64_t        delay;
   uint64_t        expired = hrtimer_last_expired();
+
+#if CONFIG_HRTIMER_PRECISION_SHIFT > 0
+  /* Ceiling-align the target expiration time to the precision boundary.
+   * This coarsens the timer resolution to (1 << SHIFT) nanoseconds,
+   * reducing the frequency of hardware timer reprogramming.
+   */
+
+  next_expired = (next_expired + HRTIMER_PRECISION_MASK) &
+                 ~HRTIMER_PRECISION_MASK;
+#endif
 
   delay = HRTIMER_TIME_BEFORE_EQ(expired, next_expired) ?
           next_expired - expired : 0u;
