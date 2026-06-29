@@ -172,16 +172,26 @@ int openpty(FAR int *master, FAR int *slave, FAR char *name,
 
   if (term != NULL)
     {
-      tcsetattr(*slave, TCSAFLUSH, term);
+      ret = tcsetattr(*slave, TCSAFLUSH, term);
+      if (ret < 0)
+        {
+          goto err_slave;
+        }
     }
 
   if (win != NULL)
     {
-      ioctl(*slave, TIOCSWINSZ, win);
+      ret = ioctl(*slave, TIOCSWINSZ, win);
+      if (ret < 0)
+        {
+          goto err_slave;
+        }
     }
 
   return 0;
 
+err_slave:
+  close(*slave);
 err:
   close(*master);
   return ret;
