@@ -71,6 +71,18 @@ int pocketbeagle2_bringup(void);
 void pocketbeagle2_led_initialize(void);
 #endif
 
+/****************************************************************************
+ * Name: pocketbeagle2_gpio_initialize
+ *
+ * Description:
+ *   Register board GPIO test devices under /dev/gpioN.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)
+int pocketbeagle2_gpio_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
