@@ -27,6 +27,7 @@
 #include <nuttx/debug.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sys/param.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -57,6 +58,9 @@ struct virtio_blk_priv_s
 
 /* BLK block_operations functions and they helper function */
 
+static ssize_t virtio_blk_rdwr_one(FAR struct virtio_blk_priv_s *priv,
+                                   FAR void *buf, blkcnt_t sector,
+                                   size_t nsectors, bool write);
 static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
                                FAR void *buffer, blkcnt_t startsector,
                                unsigned int nsectors, bool write);
@@ -147,6 +151,165 @@ static void virtio_blk_wait_complete(FAR struct virtqueue *vq,
 }
 
 /****************************************************************************
+ * Name: virtio_blk_rdwr_one
+ *
+ * Description:
+ *   Transfer a single chunk, sized to the shared memory a bounce transport
+ *   can map at once. Map req/data/resp, submit, wait, then unmap.
+ *
+ * Returned Value:
+ *   The number of sectors transferred (> 0) on success, or a negated errno
+ *   on failure (-ENOMEM when the buffers cannot be mapped).
+ *
+ ****************************************************************************/
+
+static ssize_t virtio_blk_rdwr_one(FAR struct virtio_blk_priv_s *priv,
+                                   FAR void *buf, blkcnt_t sector,
+                                   size_t nsectors, bool write)
+{
+  FAR struct virtio_device *vdev = priv->vdev;
+  FAR struct virtqueue *vq = vdev->vrings_info[0].vq;
+  FAR struct virtqueue_buf vb[3];
+  struct virtio_blk_resp_s resp;
+  struct virtio_blk_req_s req;
+  enum virtio_dma_map datadir;
+  FAR void *reqmap;
+  FAR void *respmap;
+  FAR void *datamap;
+  size_t maxsectors;
+  size_t datalen;
+  size_t chunk;
+  irqstate_t flags;
+  sem_t respsem;
+  ssize_t ret;
+  int readnum;
+
+  datadir = write ? VIRTIO_DMA_TO_DEVICE : VIRTIO_DMA_FROM_DEVICE;
+
+  /* Build the block request for this chunk */
+
+  req.type     = write ? VIRTIO_BLK_T_OUT : VIRTIO_BLK_T_IN;
+  req.reserved = 0;
+  req.sector   = (sector * priv->block_size) >> VIRTIO_BLK_SECTOR_BITS;
+  resp.status  = VIRTIO_BLK_S_IOERR;
+
+  /* Map the data payload first, reserving one block for the tiny req/resp
+   * headers. The data buffer is the largest and the one likely to fail
+   * under carveout contention, so mapping it first means a failure costs no
+   * header bounce alloc/free churn. The reserved block (one sector, far
+   * larger than the two headers plus their alignment) keeps the later
+   * header maps from failing. A bounce transport returns -ENOMEM when it
+   * cannot satisfy a map.
+   */
+
+  maxsectors = virtio_free_largest(vdev) / priv->block_size;
+  if (maxsectors <= 1)
+    {
+      /* Need at least one sector for data plus one block for headers */
+
+      return -ENOMEM;
+    }
+
+  maxsectors -= 1;
+  chunk   = MIN(nsectors, maxsectors);
+  datalen = chunk * priv->block_size;
+  ret = virtio_map_buf(vdev, buf, datalen, datadir, &datamap);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = virtio_map_buf(vdev, &req, sizeof(req), VIRTIO_DMA_TO_DEVICE,
+                       &reqmap);
+  if (ret < 0)
+    {
+      goto out_data;
+    }
+
+  ret = virtio_map_buf(vdev, &resp, sizeof(resp), VIRTIO_DMA_FROM_DEVICE,
+                       &respmap);
+  if (ret < 0)
+    {
+      goto out_req;
+    }
+
+  nxsem_init(&respsem, 0, 0);
+
+  /* Fill the virtqueue buffer:
+   * Buffer 0: the block out header;
+   * Buffer 1: the read/write buffer;
+   * Buffer 2: the block in header, return the status.
+   */
+
+  vb[0].buf = reqmap;
+  vb[0].len = VIRTIO_BLK_REQ_HEADER_SIZE;
+  vb[1].buf = datamap;
+  vb[1].len = datalen;
+  vb[2].buf = respmap;
+  vb[2].len = VIRTIO_BLK_RESP_HEADER_SIZE;
+  readnum = write ? 2 : 1;
+
+  flags = spin_lock_irqsave(&priv->lock);
+  if (up_interrupt_context())
+    {
+      virtqueue_disable_cb(vq);
+    }
+
+  ret = virtqueue_add_buffer(vq, vb, readnum, 3 - readnum, &respsem);
+  if (ret < 0)
+    {
+      if (up_interrupt_context())
+        {
+          virtqueue_enable_cb(vq);
+        }
+
+      spin_unlock_irqrestore(&priv->lock, flags);
+      vrterr("virtqueue_add_buffer failed, ret=%zd\n", ret);
+      goto out_resp;
+    }
+
+  virtqueue_kick(vq);
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  /* Wait for the request completion */
+
+  virtio_blk_wait_complete(vq, &respsem);
+
+  if (up_interrupt_context())
+    {
+      virtqueue_enable_cb_lock(vq, &priv->lock);
+    }
+
+  ret = chunk;
+
+out_resp:
+
+  /* unmap copies the device-written status back into resp; only after that
+   * is resp.status valid (on a bouncing transport resp is a bounce buffer).
+   */
+
+  virtio_unmap_buf(vdev, &resp, sizeof(resp), VIRTIO_DMA_FROM_DEVICE,
+                   respmap);
+out_req:
+  virtio_unmap_buf(vdev, &req, sizeof(req), VIRTIO_DMA_TO_DEVICE, reqmap);
+
+  if (ret >= 0 && resp.status != VIRTIO_BLK_S_OK)
+    {
+      vrterr("%s Error\n", write ? "Write" : "Read");
+      ret = -EIO;
+    }
+
+out_data:
+
+  /* On failure copy nothing back: a bounce holds no device data then, and
+   * the caller's buffer must stay as it was.
+   */
+
+  virtio_unmap_buf(vdev, buf, ret >= 0 ? datalen : 0, datadir, datamap);
+  return ret;
+}
+
+/****************************************************************************
  * Name: virtio_blk_rdwr
  *
  * Description:
@@ -158,73 +321,33 @@ static ssize_t virtio_blk_rdwr(FAR struct virtio_blk_priv_s *priv,
                                FAR void *buffer, blkcnt_t startsector,
                                unsigned int nsectors, bool write)
 {
-  FAR struct virtio_device *vdev = priv->vdev;
-  FAR struct virtqueue *vq = vdev->vrings_info[0].vq;
-  FAR struct virtqueue_buf vb[3];
-  struct virtio_blk_resp_s resp;
-  struct virtio_blk_req_s req;
-  irqstate_t flags;
-  sem_t respsem;
-  ssize_t ret;
-  int readnum;
+  blkcnt_t sector = startsector;
+  FAR uint8_t *buf = buffer;
+  ssize_t ret = 0;
 
-  nxsem_init(&respsem, 0, 0);
-
-  /* Build the block request */
-
-  req.type     = write ? VIRTIO_BLK_T_OUT : VIRTIO_BLK_T_IN;
-  req.reserved = 0;
-  req.sector   = startsector * priv->block_size >> VIRTIO_BLK_SECTOR_BITS;
-  resp.status  = VIRTIO_BLK_S_IOERR;
-
-  /* Fill the virtqueue buffer:
-   * Buffer 0: the block out header;
-   * Buffer 1: the read/write buffer;
-   * Buffer 2: the block in header, return the status.
+  /* The data payload may exceed what the transport can map at once, so
+   * transfer it in chunks of virtio_free_largest(). Without a limit (MMIO/
+   * PCI without CONFIG_ARCH_ADDRENV) this runs as a single pass.
    */
 
-  vb[0].buf = &req;
-  vb[0].len = VIRTIO_BLK_REQ_HEADER_SIZE;
-  vb[1].buf = buffer;
-  vb[1].len = nsectors * priv->block_size;
-  vb[2].buf = &resp;
-  vb[2].len = VIRTIO_BLK_RESP_HEADER_SIZE;
-  readnum = write ? 2 : 1;
-
-  if (up_interrupt_context())
+  while (nsectors > 0)
     {
-      virtqueue_disable_cb_lock(vq, &priv->lock);
+      /* Return the error even after good chunks: bchlib counts any
+       * non-negative result as all nsectors done.
+       */
+
+      ret = virtio_blk_rdwr_one(priv, buf, sector, nsectors, write);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      buf      += ret * priv->block_size;
+      sector   += ret;
+      nsectors -= ret;
     }
 
-  flags = spin_lock_irqsave(&priv->lock);
-  ret = virtqueue_add_buffer(vq, vb, readnum, 3 - readnum, &respsem);
-  if (ret < 0)
-    {
-      spin_unlock_irqrestore(&priv->lock, flags);
-      vrterr("virtqueue_add_buffer failed, ret=%zd\n", ret);
-      goto err;
-    }
-
-  virtqueue_kick(vq);
-  spin_unlock_irqrestore(&priv->lock, flags);
-
-  /* Wait for the request completion */
-
-  virtio_blk_wait_complete(vq, &respsem);
-
-  if (resp.status != VIRTIO_BLK_S_OK)
-    {
-      vrterr("%s Error\n", write ? "Write" : "Read");
-      ret = -EIO;
-    }
-
-err:
-  if (up_interrupt_context())
-    {
-      virtqueue_enable_cb_lock(vq, &priv->lock);
-    }
-
-  return ret >= 0 ? nsectors : ret;
+  return sector - startsector;
 }
 
 /****************************************************************************
@@ -329,7 +452,7 @@ static int virtio_blk_geometry(FAR struct inode *inode,
 }
 
 /****************************************************************************
- * Name: virtio_blk_ioctl
+ * Name: virtio_blk_flush
  ****************************************************************************/
 
 static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
@@ -339,11 +462,11 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   FAR struct virtqueue_buf vb[2];
   struct virtio_blk_resp_s resp;
   struct virtio_blk_req_s req;
+  FAR void *reqmap;
+  FAR void *respmap;
   irqstate_t flags;
   sem_t respsem;
   int ret;
-
-  nxsem_init(&respsem, 0, 0);
 
   /* Build the block request */
 
@@ -352,9 +475,27 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   req.sector   = 0;
   resp.status  = VIRTIO_BLK_S_IOERR;
 
-  vb[0].buf = &req;
+  /* Map the headers so a bouncing transport can reach them */
+
+  ret = virtio_map_buf(vdev, &req, sizeof(req), VIRTIO_DMA_TO_DEVICE,
+                       &reqmap);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = virtio_map_buf(vdev, &resp, sizeof(resp), VIRTIO_DMA_FROM_DEVICE,
+                       &respmap);
+  if (ret < 0)
+    {
+      goto out_req;
+    }
+
+  nxsem_init(&respsem, 0, 0);
+
+  vb[0].buf = reqmap;
   vb[0].len = VIRTIO_BLK_REQ_HEADER_SIZE;
-  vb[1].buf = &resp;
+  vb[1].buf = respmap;
   vb[1].len = VIRTIO_BLK_RESP_HEADER_SIZE;
 
   flags = spin_lock_irqsave(&priv->lock);
@@ -362,7 +503,7 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   if (ret < 0)
     {
       spin_unlock_irqrestore(&priv->lock, flags);
-      return ret;
+      goto out_resp;
     }
 
   virtqueue_kick(vq);
@@ -371,7 +512,19 @@ static int virtio_blk_flush(FAR struct virtio_blk_priv_s *priv)
   /* Wait for the request completion */
 
   virtio_blk_wait_complete(vq, &respsem);
-  if (resp.status != VIRTIO_BLK_S_OK)
+
+out_resp:
+
+  /* unmap copies the device-written status back into resp; only after that
+   * is resp.status valid (on a bouncing transport resp is a bounce buffer).
+   */
+
+  virtio_unmap_buf(vdev, &resp, sizeof(resp), VIRTIO_DMA_FROM_DEVICE,
+                   respmap);
+out_req:
+  virtio_unmap_buf(vdev, &req, sizeof(req), VIRTIO_DMA_TO_DEVICE, reqmap);
+
+  if (ret >= 0 && resp.status != VIRTIO_BLK_S_OK)
     {
       vrterr("Flush Error\n");
       ret = -EIO;
