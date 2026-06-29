@@ -946,6 +946,17 @@ Of course, this configuration can only be used in environments that support X11!
       -CONFIG_EXAMPLES_NXTERM=n
       +CONFIG_EXAMPLES_NXTERM=y
 
+nxdoom
+------
+
+Play :doc:`NXDoom </applications/games/nxdoom/index>` on the Simulator using X11
+keyboard input and graphics. Read the docs for NXDoom to see how to play.
+
+.. warning::
+
+   X11 keyboard codes are not perfectly translated to the NuttX codec currently,
+   so some controls will not work properly.
+
 nxffs
 -----
 
