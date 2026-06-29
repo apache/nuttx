@@ -118,6 +118,12 @@
 #include "rp2040_ads7046.h"
 #endif
 
+#ifdef CONFIG_USBPD_HUSB238
+#include <nuttx/power/husb238.h>
+#include "rp2040_husb238.h"
+#include "rp2040_i2c.h"
+#endif
+
 #if defined(CONFIG_RP2040_BOARD_HAS_WS2812) && defined(CONFIG_WS2812)
 #include "rp2040_ws2812.h"
 #endif
@@ -797,5 +803,17 @@ int rp2040_common_bringup(void)
     }
 
 #endif
+
+#ifdef CONFIG_USBPD_HUSB238
+  /* Try to register HUSB238 device at I2C0 */
+
+  ret = board_husb238_initialize(rp2040_i2cbus_initialize(0), 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize HUSB238 driver: %d\n", ret);
+    }
+#endif
+
   return ret;
 }
