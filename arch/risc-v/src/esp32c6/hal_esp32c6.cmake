@@ -157,6 +157,8 @@ target_include_directories(
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_dma/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/include
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s
+    ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/include
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src
     ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/include
@@ -505,7 +507,7 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_lp_timer_shared.c
 )
 
-# Upper HAL RMT / GPIO
+# Upper HAL RMT / GPIO / I2S
 list(
   APPEND
   HAL_SRCS
@@ -518,6 +520,12 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_rmt/src/rmt_tx.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/gpio.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_gpio/src/rtc_io.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_common.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_etm.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_pdm.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_platform.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_std.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_i2s/i2s_tdm.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_uart/src/uart_wakeup.c)
 
 # Sleep ASM
