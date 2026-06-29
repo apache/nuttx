@@ -45,9 +45,12 @@ jobs:
       - name: Determine Target Branches
         id: gittargets
         shell: bash
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           OS_REF=""
           APPS_REF=""
+          DEPENDS_ON=""
 
           REF=$GITHUB_REF
 
@@ -91,8 +94,35 @@ jobs:
             esac
           fi
 
+          # Parse cross-repo PR dependencies from PR body
+          # Format: depends-on: [apache/nuttx-apps/pull/1234 https://github.com/apache/nuttx/pull/5678]
+          if [ -n "$PR_BODY" ]; then
+            ARRAY_DEPS=$(echo "$PR_BODY" | grep -oE 'depends-on:[[:space:]]*\[[^]]+\]' | head -1) || true
+            if [ -n "$ARRAY_DEPS" ]; then
+              DEPS=$(echo "$ARRAY_DEPS" | grep -oE '(https://github.com/)?apache/nuttx(-apps)?/pull/[0-9]+') || true
+            else
+              DEPS=$(echo "$PR_BODY" | grep -oE 'depends-on:[[:space:]]*(https://github.com/)?apache/nuttx(-apps)?/pull/[0-9]+' | sed 's/depends-on:[[:space:]]*//' | head -1) || true
+            fi
+
+            for DEP in $DEPS; do
+              DEP=$(echo "$DEP" | sed 's|https://github.com/||')
+              DEP_REPO=$(echo "$DEP" | awk -F'/pull/' '{print $1}')
+              DEP_PR_NUM=$(echo "$DEP" | awk -F'/pull/' '{print $2}')
+
+              if [[ "$DEP_REPO" != "apache/nuttx" && "$DEP_REPO" != "apache/nuttx-apps" ]]; then
+                echo "::warning::Ignoring unsupported dependency repo: $DEP_REPO"
+                continue
+              fi
+
+              DEPENDS_ON="$DEPENDS_ON ${DEP_REPO}/pull/${DEP_PR_NUM}"
+            done
+
+            DEPENDS_ON=$(echo "$DEPENDS_ON" | tr ' ' '\n' | awk 'NF && !a[$0]++' | xargs)
+          fi
+
           echo "os_ref=$OS_REF" >> $GITHUB_OUTPUT
           echo "apps_ref=$APPS_REF" >> $GITHUB_OUTPUT
+          echo "depends_on=$DEPENDS_ON" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
         uses: actions/checkout@v7
@@ -111,6 +141,65 @@ jobs:
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
+
+      - name: Apply depends-on PRs
+        if: ${{ steps.gittargets.outputs.depends_on != '' }}
+        shell: bash
+        env:
+          DEPENDS_ON: ${{ steps.gittargets.outputs.depends_on }}
+        run: |
+          set -euo pipefail
+
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+
+          for DEPENDENCY in $DEPENDS_ON; do
+            DEP_REPO=$(echo "$DEPENDENCY" | awk -F'/pull/' '{print $1}')
+            DEP_PR_NUM=$(echo "$DEPENDENCY" | awk -F'/pull/' '{print $2}')
+
+            case "$DEP_REPO" in
+              "apache/nuttx")
+                REPO_PATH="sources/nuttx"
+                ;;
+              "apache/nuttx-apps")
+                REPO_PATH="sources/apps"
+                ;;
+              *)
+                echo "::error::Unsupported dependency repo: $DEP_REPO"
+                exit 1
+                ;;
+            esac
+
+            echo "Applying dependency ${DEP_REPO}/pull/${DEP_PR_NUM}"
+            if [ -f "$REPO_PATH/.git/shallow" ]; then
+              git -C "$REPO_PATH" fetch --unshallow origin
+            fi
+            git -C "$REPO_PATH" fetch origin "pull/${DEP_PR_NUM}/head:dep-${DEP_PR_NUM}"
+
+            COMMON_BASE=$(git -C "$REPO_PATH" merge-base "dep-${DEP_PR_NUM}" HEAD || true)
+            if [ -z "$COMMON_BASE" ]; then
+              echo "::error::Could not find common base for ${DEP_REPO}/pull/${DEP_PR_NUM}"
+              exit 1
+            fi
+
+            COMMITS=$(git -C "$REPO_PATH" rev-list --reverse "HEAD..dep-${DEP_PR_NUM}") || {
+              echo "::error::Could not list commits for ${DEP_REPO}/pull/${DEP_PR_NUM}"
+              exit 1
+            }
+
+            if [ -z "$COMMITS" ]; then
+              echo "Dependency ${DEP_REPO}/pull/${DEP_PR_NUM} is already included"
+              continue
+            fi
+
+            # shellcheck disable=SC2086
+            if ! git -C "$REPO_PATH" cherry-pick $COMMITS; then
+              echo "::error::cherry-pick failed for ${DEP_REPO}/pull/${DEP_PR_NUM}."
+              echo "::error::If your PR contains merge commits, please rebase instead of merge."
+              git -C "$REPO_PATH" cherry-pick --abort || true
+              exit 1
+            fi
+          done
 
       - name: Tar sources
         run: tar zcf sources.tar.gz sources
