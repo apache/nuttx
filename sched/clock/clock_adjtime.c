@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/hrtimer.h>
 #include <nuttx/timers/ptp_clock.h>
 
 #include "clock/clock.h"
@@ -53,7 +54,7 @@
 /* CLOCK_TIMEKEEPING provides its own software-based adjtime(). */
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-static struct wdog_s g_adjtime_wdog;
+static hrtimer_t g_adjtime_timer;
 static long g_adjtime_ppb;
 static spinlock_t g_adjtime_lock = SP_UNLOCKED;
 
@@ -63,24 +64,26 @@ static spinlock_t g_adjtime_lock = SP_UNLOCKED;
 
 /* Restore default rate after adjustment period expires */
 
-static void adjtime_wdog_callback(wdparm_t arg)
+static uint64_t adjtime_timer_callback(FAR const hrtimer_t *timer,
+                                       uint64_t expired)
 {
-  irqstate_t flags;
+  irqstate_t flags = spin_lock_irqsave(&g_adjtime_lock);
 
-  UNUSED(arg);
-
-  flags = spin_lock_irqsave(&g_adjtime_lock);
-
+  if (g_adjtime_ppb != 0)
+    {
 #ifdef CONFIG_ARCH_HAVE_ADJTIME
-  up_adjtime(0);
+      up_adjtime(0);
 #endif
 
 #ifdef CONFIG_RTC_ADJTIME
-  up_rtc_adjtime(0);
+      up_rtc_adjtime(0);
 #endif
 
-  g_adjtime_ppb = 0;
+      g_adjtime_ppb = 0;
+    }
+
   spin_unlock_irqrestore(&g_adjtime_lock, flags);
+  return 0;
 }
 
 /* Query remaining adjustment in microseconds */
@@ -88,8 +91,7 @@ static void adjtime_wdog_callback(wdparm_t arg)
 static long long adjtime_remaining_usec(void)
 {
   return (long long)g_adjtime_ppb
-    * TICK2MSEC(wd_gettime(&g_adjtime_wdog))
-    / (MSEC_PER_SEC * NSEC_PER_USEC);
+    * (hrtimer_gettime(&g_adjtime_timer) / NSEC_PER_USEC);
 }
 
 /* Start new adjustment period */
@@ -138,12 +140,13 @@ static int adjtime_start(long long adjust_usec)
 
   if (g_adjtime_ppb != 0)
     {
-      wd_start(&g_adjtime_wdog, MSEC2TICK(CONFIG_CLOCK_ADJTIME_PERIOD_MS),
-               adjtime_wdog_callback, 0);
+      hrtimer_start(&g_adjtime_timer, adjtime_timer_callback,
+                    (uint64_t)CONFIG_CLOCK_ADJTIME_PERIOD_MS *
+                    (uint64_t)NSEC_PER_MSEC, HRTIMER_MODE_REL);
     }
   else
     {
-      wd_cancel(&g_adjtime_wdog);
+      hrtimer_cancel(&g_adjtime_timer);
     }
 
   spin_unlock_irqrestore_nopreempt(&g_adjtime_lock, flags);
