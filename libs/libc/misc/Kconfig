@@ -186,6 +186,9 @@ config LIBC_BACKTRACE_LOAD_FACTOR
 	default 75
 	---help---
 		The load factor of the backtrace record.
+		When the pool usage reaches this percentage, the pool will be
+		expanded dynamically.  Set to 100 to disable dynamic expansion
+		and use only the pre-allocated static pool.
 
 config LIBC_MUTEX_BACKTRACE
 	int "The depth of mutex backtrace"
