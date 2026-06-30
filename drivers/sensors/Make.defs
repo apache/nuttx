@@ -492,6 +492,10 @@ ifeq ($(CONFIG_SENSORS_CXD5602PWBIMU),y)
   CSRCS += cxd5602pwbimu.c
 endif
 
+ifeq ($(CONFIG_SENSORS_SHTC3),y)
+  CSRCS += shtc3_uorb.c
+endif
+
 # Include sensor driver build support
 
 DEPPATH += --dep-path sensors

@@ -555,5 +555,6 @@ Implemented Drivers
 - :doc:`nau7802`
 - :doc:`qmi8658`
 - :doc:`sht4x`
+- :doc:`shtc3`
 - :doc:`lsm6dso32`
 - wtgahrs2
