@@ -22,9 +22,9 @@
 
 # Toolchain
 
-if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  include(${CMAKE_CURRENT_LIST_DIR}/ToolchainTasking.cmake)
-elseif(CONFIG_TRICORE_TOOLCHAIN_GNU)
+if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+  include(${CMAKE_CURRENT_LIST_DIR}/ToolchainLLVM.cmake)
+else()
   include(${CMAKE_CURRENT_LIST_DIR}/ToolchainGnuc.cmake)
 endif()
 

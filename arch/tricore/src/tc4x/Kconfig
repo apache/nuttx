@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Infineon AURIX TC4X Chip"
+
+choice
+	prompt "Infineon AURIX TC4X Chip selection"
+	default TC4X_CHIP_TC4D7
+
+config TC4X_CHIP_TC4D7
+	bool "TC4D7 SoC"
+	---help---
+		Infineon AURIX TC4D7.
+
+endchoice

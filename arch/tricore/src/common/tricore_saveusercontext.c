@@ -26,14 +26,14 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
+#include <arch/arch.h>
+
 #include "tricore_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -51,29 +51,10 @@
 int up_saveusercontext(void *saveregs)
 {
   uintptr_t *regs;
-  uintptr_t pcxi;
-  int csa_size = TC_CONTEXT_REGS * sizeof(uintptr_t);
+  uint32_t val;
 
-  pcxi = __mfcr(CPU_PCXI);
-  regs = tricore_csa2addr(pcxi);
-  memcpy((char *)saveregs + csa_size, regs, csa_size);
-
-  /* to unify the trap processing, extra save lowcsa */
-
-  __asm("svlcx");
-
-  regs = tricore_csa2addr(__mfcr(CPU_PCXI));
-  memcpy(saveregs, regs, csa_size);
-
-  /* lowcsa[REG_LPCXI] saves the upcsa's pcxi, but if lowcsa and upcsa is
-   * stored at continuous addresses, pcxi has no meaning. Use PCXI_UL
-   * without marking whether it is lowcsa or upcsa, but to mark whether
-   * lowcsa and upcsa is stored at continuous addresses.
-   */
-
-  ((uintptr_t *)saveregs)[REG_LPCXI] = pcxi & (~PCXI_UL);
-
-  __asm("rslcx");
-
+  TRICORE_MFCR(TRICORE_CPU_FCX, val);
+  regs = tricore_csa2addr(val);
+  memcpy(saveregs, regs, XCPTCONTEXT_SIZE);
   return 0;
 }

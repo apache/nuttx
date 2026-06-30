@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/tricore/src/cmake/tc3xx.cmake
+# arch/tricore/src/cmake/chip.cmake
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -22,19 +22,19 @@
 
 set(PLATFORM_FLAGS)
 
-if(CONFIG_ARCH_CHIP_TC3XX)
-  if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-    add_compile_options(--cpu=tc39xb)
-    add_link_options(-Ctc39xb)
+if(CONFIG_ARCH_CHIP_FAMILY_TC3X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc162 -mcpu=tc3xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
   else()
-    list(APPEND PLATFORM_FLAGS -mcpu=tc39xx -mtc162)
+    list(APPEND PLATFORM_FLAGS -mtc162)
   endif()
-elseif(CONFIG_ARCH_CHIP_TC4XX)
-  if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-    add_compile_options(--cpu=tc4DAx)
-    add_link_options(-Ctc4DAx)
+elseif(CONFIG_ARCH_CHIP_FAMILY_TC4X)
+  if(CONFIG_TRICORE_TOOLCHAIN_LLVM)
+    list(APPEND PLATFORM_FLAGS -march=tc18 -mcpu=tc4xx)
+    list(APPEND PLATFORM_FLAGS -Wno-error=implicit-function-declaration)
   else()
-    list(APPEND PLATFORM_FLAGS -mcpu=tc4DAx -mtc18)
+    list(APPEND PLATFORM_FLAGS -mtc18)
   endif()
 endif()
 

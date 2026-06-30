@@ -28,266 +28,104 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include <nuttx/debug.h>
+#include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/bits.h>
 #include <nuttx/irq.h>
-#include <nuttx/spinlock.h>
 
+#include <sys/types.h>
+#include "tricore_irq.h"
 #include "tricore_internal.h"
-
-#include "IfxSrc.h"
-#include "IfxCpu.h"
-#include "IfxInt_reg.h"
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: tricore_color_intstack
- *
- * Description:
- *   Set the interrupt stack to a value so that later we can determine how
- *   much stack space was used by interrupt handling logic
- *
- ****************************************************************************/
-
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
-static inline void tricore_color_intstack(void)
-{
-  uint32_t *ptr = (uint32_t *)g_intstackalloc;
-  ssize_t size;
-
-  for (size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-       size > 0;
-       size -= sizeof(uint32_t))
-    {
-      *ptr++ = INTSTACK_COLOR;
-    }
-}
-#else
-#  define tricore_color_intstack()
-#endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static spinlock_t g_irqlock = SP_UNLOCKED;
-static int g_irqmap_count = 1;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-/****************************************************************************
- * Name: tricore_gpsrinitialize
- *
- * Description:
- *   Perform gpsr initialization for the CPU
- *
- ****************************************************************************/
-
-static void tricore_gpsrinitialize(void)
-{
-  volatile Ifx_SRC_SRCR *src = &SRC_GPSR00 + up_cpu_index();
-  int i;
-
-  /* Cpux gpsr init */
-
-  for (i = 0; i < 6; i++)
-    {
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
-                  IRQ_TO_NDX(TRICORE_SRC2IRQ(src)));
-#else
-      IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
-                  IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
-                  IfxSrc_VmId_none);
-#endif
-
-      src += TRICORE_SRCNUM_PER_GPSR;
-    }
-
-  /* Cpucs gpsr init */
-
-#ifndef CONFIG_ARCH_CHIP_TC3XX
-  src = &SRC_GPSR6_SR0 + up_cpu_index();
-  IfxSrc_init(src, IfxSrc_Tos_cpu0 + up_cpu_index(),
-              IRQ_TO_NDX(TRICORE_SRC2IRQ(src)),
-              IfxSrc_VmId_none);
-#endif
-}
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_irq_enable
- *
- * Description:
- *   Enable interrupts globally.
- *
- ****************************************************************************/
+static inline uint32_t tricore_srcr_read(int irq)
+{
+  return getreg32(TRICORE_IR_GET_SRC(irq));
+}
+
+static inline void tricore_srcr_write(int irq, uint32_t val)
+{
+  putreg32(val, TRICORE_IR_GET_SRC(irq));
+}
 
 void up_irq_enable(void)
 {
-  IfxCpu_enableInterrupts();
+  TRICORE_IRQ_ENABLE();
 }
-
-/****************************************************************************
- * Name: up_irqinitialize
- ****************************************************************************/
 
 void up_irqinitialize(void)
 {
-#ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-  tricore_gpsrinitialize();
-#endif
-
-  tricore_color_intstack();
-  up_irq_enable();
+  TRICORE_IRQ_ENABLE();
 }
-
-/****************************************************************************
- * Name: up_disable_irq
- *
- * Description:
- *   Disable the IRQ specified by 'irq'
- *
- ****************************************************************************/
 
 void up_disable_irq(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  Ifx_SRC_SRCR srctmp;
+  uint32_t regval = tricore_srcr_read(irq);
 
-  IfxSrc_disable(src);
-
-  /* Clear, keep SRPN */
-
-  srctmp.U      = 0U;
-  srctmp.B.TOS  = ~0;
-  srctmp.B.SRPN = src->B.SRPN;
-  src->U = srctmp.U;
+  regval &= ~SRCR_SRE;
+  tricore_srcr_write(irq, regval);
 }
-
-/****************************************************************************
- * Name: up_enable_irq
- *
- * Description:
- *   Enable the IRQ specified by 'irq'
- *
- ****************************************************************************/
 
 void up_enable_irq(int irq)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
+  uint32_t regval = tricore_srcr_read(irq);
 
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq));
-#else
-  IfxSrc_init(src, IfxSrc_Tos_cpu0, IRQ_TO_NDX(irq), IfxSrc_VmId_none);
+  regval |= SRCR_CLRR | SRCR_IOVCLR;
+
+#if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
+  regval |= SRCR_SWSCLR;
 #endif
 
-  IfxSrc_enable(src);
-}
+  regval &= ~SRCR_SRPN_MASK;
+  regval |= ((uint32_t)irq << SRCR_SRPN_SHIFT) & SRCR_SRPN_MASK;
 
-/****************************************************************************
- * Name: up_affinity_irq
- *
- * Description:
- *   Set an IRQ affinity by software.
- *
- ****************************************************************************/
+  regval &= ~SRCR_TOS_MASK;
+  regval |= (TRICORE_DEFAULT_IR_TOS << SRCR_TOS_SHIFT) & SRCR_TOS_MASK;
 
-void up_affinity_irq(int irq, cpu_set_t cpuset)
-{
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  int irq_prio = src->B.SRPN;
-
-  IfxSrc_disable(src);
-
-  /* Only support interrupt routing mode 0,
-   * so routing to the first cpu in cpuset.
-   */
-
-#ifdef CONFIG_ARCH_CHIP_TC3XX
-  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio);
-#else
-  IfxSrc_init(src, ffs(cpuset) - 1, irq_prio, IfxSrc_VmId_none);
-#endif
-
-  IfxSrc_enable(src);
-}
-
-/****************************************************************************
- * Name: tricore_ack_irq
- *
- * Description:
- *   Acknowledge the IRQ
- *
- ****************************************************************************/
-
-void tricore_ack_irq(int irq)
-{
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  IfxSrc_clearRequest(src);
+  regval |= SRCR_SRE;
+  tricore_srcr_write(irq, regval);
 }
 
 #ifdef CONFIG_ARCH_HAVE_IRQTRIGGER
-/****************************************************************************
- * Name: up_trigger_irq
- *
- * Description:
- *   Trigger an IRQ by software. May not be supported by all architectures.
- *
- ****************************************************************************/
-
 void up_trigger_irq(int irq, cpu_set_t cpuset)
 {
-  volatile Ifx_INT_SRB *srb = &INT_SRB0 + up_cpu_index();
-  srb->U = cpuset;
+  uint32_t regval;
+
+  (void)cpuset;
+
+  regval = tricore_srcr_read(irq);
+  regval |= SRCR_SETR;
+  tricore_srcr_write(irq, regval);
 }
-#endif
 
-/****************************************************************************
- * Name: up_irq_to_ndx
- *
- * Description:
- *   Irq to ndx
- *
- ****************************************************************************/
+#endif /* CONFIG_ARCH_HAVE_IRQTRIGGER */
 
-int up_irq_to_ndx(int irq)
+void up_affinity_irq(int irq, cpu_set_t cpuset)
 {
-  volatile Ifx_SRC_SRCR *src = &SRC_CPU_CPU0_SB + irq;
-  Ifx_SRC_SRCR srctmp;
-  irqstate_t flags;
-  int ndx;
+  uint32_t regval;
 
-  ndx = src->B.SRPN;
-  if (ndx != 0)
-    {
-      return ndx;
-    }
+  up_disable_irq(irq);
 
-  flags = spin_lock_irqsave(&g_irqlock);
-  ndx = src->B.SRPN;
-  if (ndx == 0)
-    {
-      ndx = g_irqmap_count++;
-      g_irqrevmap[ndx] = irq;
-      srctmp.U = src->U;
-      srctmp.B.SRPN = ndx;
-      src->U = srctmp.U;
-    }
+  regval = tricore_srcr_read(irq);
+  regval &= ~SRCR_TOS_MASK;
+  regval |= ((uint32_t)cpuset << SRCR_TOS_SHIFT) & SRCR_TOS_MASK;
+  tricore_srcr_write(irq, regval);
 
-  spin_unlock_irqrestore(&g_irqlock, flags);
+  up_enable_irq(irq);
+}
 
-  return ndx;
+int up_prioritize_irq(int irq, int priority)
+{
+  uint32_t regval;
+
+  regval = tricore_srcr_read(irq);
+  regval &= ~SRCR_SRPN_MASK;
+  regval |= ((uint32_t)priority << SRCR_SRPN_SHIFT) & SRCR_SRPN_MASK;
+  tricore_srcr_write(irq, regval);
+
+  return 0;
 }
