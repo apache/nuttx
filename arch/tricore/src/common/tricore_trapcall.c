@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
@@ -39,6 +41,46 @@
 
 #include "tricore_internal.h"
 #include "tricore_vectors.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* TriCore trap panic message contract.
+ *
+ * When a trap escalates to a panic, the trap class and identification
+ * number (TIN) are encoded into the panic message string, which then flows
+ * unchanged through _assert() into panic_notifier_s.msg.  A module on the
+ * panic notifier chain can recover them by scanning the message, e.g.
+ * sscanf(msg, "Trap c=%u t=%" SCNu32, &cls, &tid).  A non-trap
+ * software panic uses a different message and simply will not match.
+ *
+ * The panic notifier chain runs synchronously on the trapping CPU and
+ * _assert() never returns on a trap panic (it ends in reset_board()), so a
+ * buffer on the trapping CPU's stack stays valid for the whole notify ->
+ * dump -> reset_board() sequence.  Consumers must parse the message inside
+ * their notifier callback and must not retain the pointer.
+ */
+
+#define TRICORE_TRAP_MSG_LEN  24
+
+/* Encode the trap class / id into a stack buffer and panic with it.
+ * Kept as a macro so PANIC_WITH_REGS() captures the caller's __FILE__ /
+ * __LINE__ instead of this file's.
+ */
+
+#define PANIC_WITH_TRAP(cls, tid, regs) \
+  do \
+    { \
+      char buf[TRICORE_TRAP_MSG_LEN]; \
+      snprintf(buf, sizeof(buf), "Trap c=%u t=%" PRIu32, (cls), (tid)); \
+      PANIC_WITH_REGS(buf, (regs)); \
+    } \
+  while (0)
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
@@ -96,7 +138,7 @@ int weak_function tricore_nmitrap(uint32_t tid, void *context, void *arg)
          TRICORE_TRAP_CLASS_NMI, tid, context);
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_NMI, tid, context);
   return OK;
 }
 
@@ -119,7 +161,7 @@ int tricore_mmutrap(uint32_t tid, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_MMU, tid, context);
   return OK;
 }
 
@@ -166,7 +208,7 @@ int tricore_internalprotrape(uint32_t tid, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_INTPROT, tid, context);
   return OK;
 }
 
@@ -216,7 +258,7 @@ int tricore_insterrorstrap(uint32_t tid, void *context, void *arg)
 #endif
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_INSTERR, tid, context);
   return OK;
 }
 
@@ -263,7 +305,7 @@ int tricore_contexmnttrap(uint32_t tid, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_CTXMGMT, tid, context);
   return OK;
 }
 
@@ -334,7 +376,7 @@ int tricore_bustrap(uint32_t tid, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_BUS, tid, context);
   return OK;
 }
 
@@ -357,7 +399,7 @@ int tricore_assertiontrap(uint32_t tid, void *context, void *arg)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("panic", context);
+  PANIC_WITH_TRAP(TRICORE_TRAP_CLASS_ASSERT, tid, context);
   return OK;
 }
 
@@ -377,7 +419,7 @@ void tricore_trapcall(volatile void *trap)
   struct tricore_trap_s *ctrap = (struct tricore_trap_s *)trap;
   enum tricore_trap_class_e tclass =
     (enum tricore_trap_class_e)ctrap->tClass;
-  unsigned int tid = ctrap->tId;
+  uint32_t tid = ctrap->tId;
 
   tricore_trapinfo(trap);
 
@@ -452,7 +494,7 @@ void tricore_trapcall(volatile void *trap)
     }
 
   up_irq_save();
-  PANIC_WITH_REGS("Trap", regs);
+  PANIC_WITH_TRAP(tclass, tid, regs);
 }
 
 /****************************************************************************
