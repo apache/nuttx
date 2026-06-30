@@ -73,6 +73,8 @@ include wctype/Make.defs
 include wqueue/Make.defs
 include fdt/Make.defs
 
+CSRCS += limits_check.c
+
 # Use double delim to fix windows native build and give an error:
 # makefile:132: *** target mode do not include“%”. stop.
 #
