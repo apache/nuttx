@@ -80,12 +80,18 @@ struct backtrace_pool_s
 #endif
   size_t capacity;
   size_t used;
+  size_t overflow;
   bool expanding;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static struct backtrace_entry_s
+g_backtrace_entries[CONFIG_LIBC_BACKTRACE_INIT_SIZE];
+static FAR struct backtrace_entry_s *
+g_backtrace_bucket[CONFIG_LIBC_BACKTRACE_INIT_SIZE];
 
 static struct backtrace_pool_s g_backtrace_pool =
 {
@@ -149,6 +155,7 @@ static uint32_t backtrace_hash(FAR const void *backtrace, int depth)
  * Name: backtrace_rehash
  ****************************************************************************/
 
+#if CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100
 static void backtrace_rehash(FAR struct backtrace_pool_s *bp,
                              FAR struct backtrace_entry_s **bucket)
 {
@@ -175,77 +182,103 @@ static void backtrace_rehash(FAR struct backtrace_pool_s *bp,
         }
     }
 }
+#endif /* CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100 */
 
 /****************************************************************************
  * Name: backtrace_expand
+ *
+ * Description:
+ *   Expand the backtrace pool. The pool lock is held on entry and is held on
+ *   return. The lock is released around the sleeping allocation path so that
+ *   a second thread recording a backtrace can still make progress: it skips
+ *   expansion because bp->expanding is true and falls back to the remaining
+ *   headroom in the current pool.
+ *
+ * Input Parameters:
+ *   bp    - The backtrace pool
+ *   flags - The irqstate_t saved by the caller when the lock was acquired;
+ *           updated in place whenever the lock is released and reacquired
+ *           inside this function.
  ****************************************************************************/
 
-static int backtrace_expand(FAR struct backtrace_pool_s *bp)
+static int backtrace_expand(FAR struct backtrace_pool_s *bp,
+                            FAR irqstate_t *flags)
 {
-  FAR struct backtrace_entry_s **oldbucket;
-  FAR struct backtrace_entry_s **bucket;
-  FAR struct backtrace_entry_s *pool;
-  size_t capacity = bp->capacity;
-  size_t poolsize;
-  irqstate_t flags;
   size_t i;
 
   /* If the capacity is 0, it means that the backtrace record is not
-   * initialized, we will initialize it with the default size
+   * initialized, we will initialize it with the static pool.
    */
 
-  if (capacity == 0)
+  if (bp->capacity == 0)
     {
-      poolsize = CONFIG_LIBC_BACKTRACE_INIT_SIZE;
-      capacity = CONFIG_LIBC_BACKTRACE_INIT_SIZE;
-    }
-  else
-    {
-      /* When expanding, double the capacity of the bunket and release
-       * the old bunket.
+      /* No allocation is needed for the static pool, so the lock is held
+       * throughout the initialization to make bp->capacity visible to any
+       * waiting thread before it observes the pool.
        */
 
-      poolsize = capacity;
-      capacity = capacity * 2;
-    }
-
-  bucket = lib_zalloc(sizeof(FAR struct backtrace_entry_s *) * capacity);
-  pool = lib_zalloc(sizeof(struct backtrace_entry_s) * poolsize);
-  if (bucket == NULL || pool == NULL)
-    {
-      lib_free(bucket);
-      lib_free(pool);
-      return -ENOMEM;
-    }
-
-  /* Rehash the backtrace record, and move the backtrace record to the new
-   * bucket
-   */
-
-  flags = backtrace_lock(bp);
-  if (bp->capacity)
-    {
-      backtrace_rehash(bp, bucket);
-    }
-  else
-    {
       sq_init(&bp->freelist);
+      for (i = 0; i < CONFIG_LIBC_BACKTRACE_INIT_SIZE; i++)
+        {
+          sq_addlast(&g_backtrace_entries[i].freenode, &bp->freelist);
+        }
+
+      bp->bucket = g_backtrace_bucket;
+      bp->capacity = CONFIG_LIBC_BACKTRACE_INIT_SIZE;
+      return 0;
     }
 
-  /* Expand the backtrace entry pool, and add the new backtrace entry
-   * to the free list
-   */
-
-  for (i = 0; i < poolsize; i++)
+#if CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100
     {
-      sq_addlast(&pool[i].freenode, &bp->freelist);
-    }
+      /* When expanding, double the capacity of the bucket and release
+       * the old bucket.
+       */
 
-  oldbucket = bp->bucket;
-  bp->bucket = bucket;
-  bp->capacity = capacity;
-  backtrace_unlock(bp, flags);
-  lib_free(oldbucket);
+      FAR struct backtrace_entry_s **oldbucket;
+      FAR struct backtrace_entry_s **bucket;
+      FAR struct backtrace_entry_s *pool;
+      size_t poolsize = bp->capacity;
+      size_t capacity = bp->capacity * 2;
+
+      /* Drop the lock before the sleeping allocation so we neither deadlock
+       * on the pool spinlock nor block IRQs across heap allocation.
+       */
+
+      backtrace_unlock(bp, *flags);
+      bucket = lib_zalloc(sizeof(FAR struct backtrace_entry_s *) * capacity);
+      pool = lib_zalloc(sizeof(struct backtrace_entry_s) * poolsize);
+      if (bucket == NULL || pool == NULL)
+        {
+          lib_free(bucket);
+          lib_free(pool);
+          *flags = backtrace_lock(bp);
+          return -ENOMEM;
+        }
+
+      *flags = backtrace_lock(bp);
+      backtrace_rehash(bp, bucket);
+
+      for (i = 0; i < poolsize; i++)
+        {
+          sq_addlast(&pool[i].freenode, &bp->freelist);
+        }
+
+      oldbucket = bp->bucket;
+      bp->bucket = bucket;
+      bp->capacity = capacity;
+      backtrace_unlock(bp, *flags);
+
+      if (oldbucket != g_backtrace_bucket)
+        {
+          lib_free(oldbucket);
+        }
+
+      *flags = backtrace_lock(bp);
+    }
+#else
+    (void)flags;
+#endif /* CONFIG_LIBC_BACKTRACE_LOAD_FACTOR < 100 */
+
   return 0;
 }
 
@@ -325,6 +358,7 @@ backtrace_alloc(FAR struct backtrace_pool_s *bp, uint32_t slot,
   entry = (FAR struct backtrace_entry_s *)sq_remfirst(&bp->freelist);
   if (entry == NULL)
     {
+      bp->overflow++;
       return NULL;
     }
 
@@ -390,9 +424,7 @@ FAR void *backtrace_record(int skip)
      )
     {
       bp->expanding = true;
-      backtrace_unlock(bp, flags);
-      backtrace_expand(bp);
-      flags = backtrace_lock(bp);
+      backtrace_expand(bp, &flags);
       bp->expanding = false;
     }
 
@@ -531,10 +563,11 @@ void backtrace_dump(void)
         }
     }
 
-  syslog(LOG_INFO, "capacity: %zu, used: %zu, conflict: %zu\n",
-         bp->capacity, bp->used, conflict);
+  syslog(LOG_INFO,
+         "capacity: %zu, used: %zu, conflict: %zu, overflow: %zu\n",
+         bp->capacity, bp->used, conflict, bp->overflow);
 }
-#endif
+#endif /* CONFIG_LIBC_BACKTRACE_DEPTH > 0 */
 
 FAR char **backtrace_symbols(FAR void *const *buffer, int size)
 {
