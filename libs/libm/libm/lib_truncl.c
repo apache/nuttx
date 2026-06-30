@@ -35,6 +35,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <float.h>
 #include <math.h>
@@ -44,9 +45,18 @@
  ****************************************************************************/
 
 #ifdef CONFIG_HAVE_LONG_DOUBLE
-static const long double toint = 1 / LDBL_EPSILON;
+#if LDBL_MANT_DIG == DBL_MANT_DIG
 
-/* FIXME This will only work if long double is 64 bit and little endian */
+/* Cover case when double is the same as long double (64 bit ieee754). */
+
+long double truncl(long double x)
+{
+  return trunc(x);
+}
+
+#elif LDBL_MANT_DIG == 64
+
+static const long double toint = 1 / LDBL_EPSILON;
 
 union ldshape
 {
@@ -100,4 +110,13 @@ long double truncl(long double x)
   x += y;
   return s ? -x : x;
 }
+
+#else
+
+long double truncl(long double x)
+{
+  PANIC();  /* FIX ME */
+}
+
+#endif
 #endif
