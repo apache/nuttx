@@ -44,6 +44,7 @@
 #  define STM32_NATIM                    1   /* One advanced timer TIM1 */
 #  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
 #  define STM32_NGTIM16                  2   /* 16-bit general timers TIM16 and 17 with DMA */
+#  define STM32_NBTIM                    0   /* No basic timers */
 #  define STM32_NLPTIM                   3   /* Three low-power timer, LPTIM1-3 */
 #  define STM32_NRNG                     1   /* Random number generator (RNG) */
 #  define STM32_NUSART                   2   /* USART 1-2 */

@@ -62,10 +62,6 @@ if(CONFIG_TIMER)
   list(APPEND SRCS stm32_timer.c)
 endif()
 
-if(CONFIG_STM32_ROMFS)
-  list(APPEND SRCS stm32_romfs_initialize.c)
-endif()
-
 if(CONFIG_BOARDCTL_UNIQUEID)
   list(APPEND SRCS stm32_uid.c)
 endif()

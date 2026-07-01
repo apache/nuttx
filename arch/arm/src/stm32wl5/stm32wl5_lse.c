@@ -32,7 +32,7 @@
 
 #include "stm32wl5_pwr.h"
 #include "stm32wl5_rcc.h"
-#include "stm32wl5_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions

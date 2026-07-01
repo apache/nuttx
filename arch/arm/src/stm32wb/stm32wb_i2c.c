@@ -186,7 +186,7 @@
 #include "stm32wb_gpio.h"
 #include "stm32wb_rcc.h"
 #include "stm32wb_i2c.h"
-#include "stm32wb_waste.h"
+#include "stm32_waste.h"
 
 /* At least one I2C peripheral must be enabled */
 

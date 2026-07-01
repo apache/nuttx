@@ -32,8 +32,7 @@ list(
   stm32_start.c
   stm32_rcc.c
   stm32_lowputc.c
-  stm32_serial.c
-  stm32_uid.c)
+  stm32_serial.c)
 
 if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
@@ -55,10 +54,6 @@ if(CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS stm32_tickless.c)
 else()
   list(APPEND SRCS stm32_timerisr.c)
-endif()
-
-if(CONFIG_STM32_ONESHOT)
-  list(APPEND SRCS stm32_oneshot.c stm32_oneshot_lowerhalf.c)
 endif()
 
 if(CONFIG_ARM_MPU)
@@ -95,10 +90,6 @@ endif()
 
 if(CONFIG_STM32_RNG)
   list(APPEND SRCS stm32_rng.c)
-endif()
-
-if(CONFIG_STM32_IWDG OR CONFIG_STM32_RTC_LSICLOCK)
-  list(APPEND SRCS stm32_lsi.c)
 endif()
 
 if(CONFIG_STM32_RTC_LSECLOCK)
@@ -142,10 +133,6 @@ if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
-
 if(CONFIG_STM32_TIMX_CAP)
   list(APPEND SRCS stm32_capture.c)
 endif()
@@ -173,10 +160,6 @@ if(CONFIG_USBHOST)
   endif()
 endif()
 
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
-endif()
-
 if(CONFIG_STM32_LPTIM)
   list(APPEND SRCS stm32_lptim.c)
 endif()
@@ -185,20 +168,12 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_PULSECOUNT)
-  list(APPEND SRCS stm32_pulsecount.c)
-endif()
-
 if(CONFIG_STM32_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
 
 if(CONFIG_MDIO_BUS)
   list(APPEND SRCS stm32_mdio.c)
-endif()
-
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
 endif()
 
 if(CONFIG_PM)
@@ -225,3 +200,5 @@ if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE AND CONFIG_STM32_HAVE_IP_CRYPTO_H7)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

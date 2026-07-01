@@ -40,9 +40,7 @@ list(
   stm32_start.c
   stm32_pwr.c
   stm32_timerisr.c
-  stm32_lse.c
-  stm32_lsi.c
-  stm32_uid.c)
+  stm32_lse.c)
 
 if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
@@ -50,10 +48,6 @@ endif()
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
 endif()
 
 if(CONFIG_STM32_I2C)
@@ -84,10 +78,6 @@ if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
-endif()
-
 if(CONFIG_STM32_HAVE_HSI48)
   list(APPEND SRCS stm32_hsi48.c)
 endif()
@@ -116,10 +106,6 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_PULSECOUNT)
-  list(APPEND SRCS stm32_pulsecount.c)
-endif()
-
 # Required chip type specific files
 
 if(CONFIG_STM32_STM32H5XXXX)
@@ -127,3 +113,5 @@ if(CONFIG_STM32_STM32H5XXXX)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

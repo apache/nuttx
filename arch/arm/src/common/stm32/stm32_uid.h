@@ -35,10 +35,10 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_HAVE_IP_UID_M0_V1)
-void stm32_get_uniqueid(uint32_t *uid);
-#elif defined(CONFIG_STM32_HAVE_IP_UID_M3M4_V1)
+/* Read the 96-bit STM32 unique device ID into a 12-byte buffer.  This
+ * interface is common to all STM32 families.
+ */
+
 void stm32_get_uniqueid(uint8_t uniqueid[12]);
-#endif
 
 #endif /* __ARCH_ARM_SRC_COMMON_COMPAT_STM32_UID_H */

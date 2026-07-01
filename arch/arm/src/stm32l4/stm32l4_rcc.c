@@ -38,7 +38,7 @@
 #include "stm32l4_rcc.h"
 #include "stm32l4_flash.h"
 #include "stm32.h"
-#include "stm32l4_waste.h"
+#include "stm32_waste.h"
 #include "stm32l4_rtc.h"
 
 /* Include chip-specific clocking initialization logic */

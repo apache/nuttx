@@ -47,6 +47,8 @@
 #  define STM32_NGTIM16           0   /* No 16-bit general timers */
 #endif
 
+#define STM32_NGTIM               (STM32_NGTIM16 + STM32_NGTIM32)
+
 #if defined(CONFIG_STM32_STM32WB35) || defined(CONFIG_STM32_STM32WB55)
 #  define STM32_NDMA              2   /* DMA1-2 with 7 channels each */
 #  define STM32_NI2S              1   /* SAI1 (dual channel high quality audio) */

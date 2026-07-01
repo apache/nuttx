@@ -33,22 +33,14 @@ list(
   stm32l5_rcc.c
   stm32l5_serial.c
   stm32l5_start.c
-  stm32l5_waste.c
-  stm32l5_uid.c
   stm32l5_spi.c
   stm32l5_lse.c
-  stm32l5_lsi.c
   stm32l5_pwr.c
-  stm32l5_tim.c
   stm32l5_flash.c
   stm32l5_timerisr.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l5_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32l5_tim_lowerhalf.c)
 endif()
 
 if(CONFIG_BUILD_PROTECTED)
@@ -66,3 +58,5 @@ if(CONFIG_STM32_STM32L562XX)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

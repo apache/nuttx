@@ -26,12 +26,13 @@
 # Common ARM and Cortex-M7 files
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32F7 files
 
-CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
+CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_serial.c
-CHIP_CSRCS += stm32_start.c stm32_capture.c stm32_uid.c stm32_waste.c
+CHIP_CSRCS += stm32_start.c stm32_capture.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_timerisr.c
@@ -83,10 +84,6 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(filter y,$(CONFIG_STM32_IWDG) $(CONFIG_STM32_RTC_LSICLOCK)),y)
-CHIP_CSRCS += stm32_lsi.c
-endif
-
 ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
 endif
@@ -122,10 +119,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
@@ -158,9 +151,6 @@ ifeq ($(CONFIG_STM32_DMA2D),y)
 CHIP_CSRCS += stm32_dma2d.c
 endif
 
-ifeq ($(CONFIG_SENSORS_QENCODER),y)
-CHIP_CSRCS += stm32_qencoder.c
-endif
 
 ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c
@@ -176,10 +166,6 @@ endif
 
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_STM32_PULSECOUNT),y)
-CHIP_CSRCS += stm32_pulsecount.c
 endif
 
 ifeq ($(CONFIG_STM32_FOC),y)

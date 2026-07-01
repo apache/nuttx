@@ -33,34 +33,22 @@ set(SRCS
     stm32wb_serial.c
     stm32wb_i2c.c
     stm32wb_start.c
-    stm32wb_waste.c
     stm32wb_rcc_lse.c
-    stm32wb_rcc_lsi.c
     stm32wb_pwr.c
-    stm32wb_tim.c
-    stm32wb_flash.c
-    stm32wb_uid.c)
+    stm32wb_flash.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32wb_idle.c)
 endif()
 
 if(CONFIG_TIMER)
-  list(APPEND SRCS stm32wb_tim_lowerhalf.c)
+
 endif()
 
 if(NOT CONFIG_SCHED_TICKLESS)
   list(APPEND SRCS stm32wb_timerisr.c)
 else()
   list(APPEND SRCS stm32wb_tickless.c)
-endif()
-
-if(CONFIG_STM32_ONESHOT)
-  list(APPEND SRCS stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c)
-endif()
-
-if(CONFIG_STM32_FREERUN)
-  list(APPEND SRCS stm32wb_freerun.c)
 endif()
 
 if(CONFIG_BUILD_PROTECTED)
@@ -117,3 +105,5 @@ if(CONFIG_DEBUG_FEATURES)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

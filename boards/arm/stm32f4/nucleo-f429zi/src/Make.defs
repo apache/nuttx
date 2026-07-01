@@ -62,14 +62,6 @@ ifeq ($(CONFIG_STM32_BBSRAM),y)
 CSRCS += stm32_bbsram.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL_RESET),y)
-CSRCS += stm32_reset.c
-endif
-
-ifeq ($(CONFIG_STM32_ROMFS),y)
-CSRCS += stm32_romfs_initialize.c
-endif
-
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board

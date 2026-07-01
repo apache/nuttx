@@ -33,9 +33,7 @@ list(
   stm32_rcc.c
   stm32_serial.c
   stm32_start.c
-  stm32_capture.c
-  stm32_uid.c
-  stm32_waste.c)
+  stm32_capture.c)
 
 if(CONFIG_STM32_TICKLESS_TIMER)
   list(APPEND SRCS stm32_tickless.c)
@@ -87,10 +85,6 @@ if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_fmc.c)
 endif()
 
-if(CONFIG_STM32_IWDG OR CONFIG_STM32_RTC_LSICLOCK)
-  list(APPEND SRCS stm32_lsi.c)
-endif()
-
 if(CONFIG_STM32_RTC_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
 endif()
@@ -122,10 +116,6 @@ if(CONFIG_USBHOST)
   elseif(CONFIG_DEBUG_USB)
     list(APPEND SRCS stm32_usbhost.c)
   endif()
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c stm32_tim_lowerhalf.c)
 endif()
 
 if(CONFIG_STM32_ADC)
@@ -160,10 +150,6 @@ if(CONFIG_STM32_DMA2D)
   list(APPEND SRCS stm32_dma2d.c)
 endif()
 
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
-endif()
-
 if(CONFIG_STM32_CAN_CHARDRIVER)
   list(APPEND SRCS stm32_can.c)
 endif()
@@ -180,12 +166,10 @@ if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
-if(CONFIG_PULSECOUNT)
-  list(APPEND SRCS stm32_pulsecount.c)
-endif()
-
 if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

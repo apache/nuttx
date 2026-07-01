@@ -28,6 +28,7 @@ HEAD_ASRC =
 # Common ARM and Cortex-M33 files
 
 include armv8-m/Make.defs
+include common/stm32/Make.defs
 
 ifeq ($(CONFIG_STM32_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
@@ -37,8 +38,7 @@ endif
 
 CHIP_CSRCS += stm32_gpio.c stm32_irq.c stm32_lowputc.c stm32_rcc.c
 CHIP_CSRCS += stm32_start.c stm32_pwr.c stm32_timerisr.c
-CHIP_CSRCS += stm32_lse.c stm32_lsi.c
-CHIP_CSRCS += stm32_uid.c
+CHIP_CSRCS += stm32_lse.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
@@ -46,10 +46,6 @@ endif
 
 ifeq ($(CONFIG_STM32_USART),y)
 CHIP_CSRCS += stm32_serial.c
-endif
-
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_STM32_I2C),y)
@@ -80,10 +76,6 @@ ifeq ($(CONFIG_STM32_QSPI1),y)
 CHIP_CSRCS += stm32_qspi.c
 endif
 
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c
-endif
-
 ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
 CHIP_CSRCS += stm32_hsi48.c
 endif
@@ -110,10 +102,6 @@ endif
 
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_STM32_PULSECOUNT),y)
-CHIP_CSRCS += stm32_pulsecount.c
 endif
 
 # Required chip type specific files

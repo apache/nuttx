@@ -26,36 +26,28 @@
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32WB files
 
-CHIP_CSRCS  = stm32wb_allocateheap.c stm32wb_exti_gpio.c stm32wb_gpio.c
+CHIP_CSRCS += stm32wb_allocateheap.c stm32wb_exti_gpio.c stm32wb_gpio.c
 CHIP_CSRCS += stm32wb_irq.c stm32wb_lowputc.c stm32wb_rcc.c stm32wb_spi.c
-CHIP_CSRCS += stm32wb_serial.c stm32wb_i2c.c stm32wb_start.c stm32wb_waste.c
-CHIP_CSRCS += stm32wb_rcc_lse.c stm32wb_rcc_lsi.c
-CHIP_CSRCS += stm32wb_pwr.c stm32wb_tim.c
-CHIP_CSRCS += stm32wb_flash.c stm32wb_uid.c
+CHIP_CSRCS += stm32wb_serial.c stm32wb_i2c.c stm32wb_start.c
+CHIP_CSRCS += stm32wb_rcc_lse.c
+CHIP_CSRCS += stm32wb_pwr.c
+CHIP_CSRCS += stm32wb_flash.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32wb_idle.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32wb_tim_lowerhalf.c
 endif
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32wb_timerisr.c
 else
 CHIP_CSRCS += stm32wb_tickless.c
-endif
-
-ifeq ($(CONFIG_STM32_ONESHOT),y)
-CHIP_CSRCS += stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c
-endif
-
-ifeq ($(CONFIG_STM32_FREERUN),y)
-CHIP_CSRCS += stm32wb_freerun.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

@@ -22,10 +22,6 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
-if(CONFIG_BOARDCTL_RESET)
-  list(APPEND SRCS stm32_reset.c)
-endif()
-
 if(CONFIG_ARCH_BUTTONS)
   list(APPEND SRCS stm32_buttons.c)
 endif()
