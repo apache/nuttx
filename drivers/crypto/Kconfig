@@ -43,12 +43,10 @@ config DEV_URANDOM_XORSHIFT128
 config DEV_URANDOM_CONGRUENTIAL
 	bool "Congruential"
 	---help---
-		Use the same congruential general used with srand().  This algorithm
-		is computationally more intense and uses double precision floating
-		point.  NOTE: Good randomness from the congruential generator also
-		requires that you also select CONFIG_LIBC_RAND_ORDER > 2
+		Use the same PRNG used with srand()/rand().  Uses the system
+		random number generator (xorshift32).
 
-		NOTE: Not cyptographically secure
+		NOTE: Not cryptographically secure
 
 config DEV_URANDOM_RANDOM_POOL
 	bool "Entropy pool"
