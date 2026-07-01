@@ -100,10 +100,21 @@ nsh
 
 Basic NuttShell configuration (console enabled in UART0, at 115200 bps).
 
-userled
--------
+userleds
+--------
 
 This is an nsh configuration with added support for user LEDs.
+
+gpio
+----
+
+Basic nsh configuration with GPIO driver support and the :doc:`gpio example
+</applications/examples/gpio/index>`.
+
+ws2812
+------
+
+Basic nsh configuration with WS2812 driver and example enabled.
 
 usbnsh
 ------
