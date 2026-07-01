@@ -116,6 +116,30 @@ uint32_t crc32hf4acfb13_part(FAR const uint8_t *src,
 
 uint32_t crc32hf4acfb13(FAR const uint8_t *src, size_t len);
 
+/****************************************************************************
+ * Name: crc32_ieeepart
+ *
+ * Description:
+ *   Continue IEEE CRC32 calculation on a part of the buffer.
+ *   Compatible with Linux/zlib crc32(). Uses init value 0xFFFFFFFF and
+ *   final XOR with 0xFFFFFFFF.
+ *
+ ****************************************************************************/
+
+uint32_t crc32_ieeepart(FAR const uint8_t *src,
+                        size_t len, uint32_t crc32val);
+
+/****************************************************************************
+ * Name: crc32_ieee
+ *
+ * Description:
+ *   Return an IEEE-standard 32-bit CRC compatible with Linux/zlib crc32().
+ *   Uses init value 0xFFFFFFFF and final XOR with 0xFFFFFFFF.
+ *
+ ****************************************************************************/
+
+uint32_t crc32_ieee(FAR const uint8_t *src, size_t len);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
