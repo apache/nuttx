@@ -395,6 +395,7 @@ config ARCH_CHIP_RP23XX
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_CUSTOM_TESTSET
 	select ARCH_BOARD_COMMON
+	select ARCH_HAVE_TEXT_HEAP
 	---help---
 		Raspberry Pi RP23XX architectures (ARM dual Cortex-M33 or RISC-V).
 
