@@ -855,6 +855,28 @@ config ARCH_CHIP_MPS
 	---help---
 		MPS platform (MPS2 MPS3)
 
+config ARCH_CHIP_RTL8721DX
+	bool "Realtek RTL8721Dx"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARMV8M_HAVE_STACKCHECK
+	select OTHER_UART_SERIALDRIVER
+	---help---
+		Realtek RTL8721Dx (KM4 application core, ARMv8-M.main /
+		Cortex-M33)
+
+config ARCH_CHIP_RTL8720F
+	bool "Realtek RTL8720F"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_FPU
+	select ARMV8M_HAVE_STACKCHECK
+	select OTHER_UART_SERIALDRIVER
+	---help---
+		Realtek RTL8720F (km4tz application/host core, ARMv8-M.main /
+		Cortex-M33).  Dual-core WHC like the RTL8721Dx; the WiFi MAC/PHY
+		runs on the km4ns network-processor core.  Shares the IC-agnostic
+		ameba glue in arch/arm/src/common/ameba.
+
 config ARCH_CHIP_QEMU_ARM
 	bool "QEMU virt platform (ARMv7a)"
 	select ARCH_HAVE_POWEROFF
@@ -1345,6 +1367,8 @@ config ARCH_CHIP
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
 	default "mps"		if ARCH_CHIP_MPS
+	default "rtl8721dx"	if ARCH_CHIP_RTL8721DX
+	default "rtl8720f"	if ARCH_CHIP_RTL8720F
 	default "goldfish"	if ARCH_CHIP_GOLDFISH_ARM
 	default "at32"		if ARCH_CHIP_AT32
 	default "cxd32xx"	if ARCH_CHIP_CXD32XX
@@ -1913,6 +1937,12 @@ source "arch/arm/src/qemu/Kconfig"
 endif
 if ARCH_CHIP_MPS
 source "arch/arm/src/mps/Kconfig"
+endif
+if ARCH_CHIP_RTL8721DX
+source "arch/arm/src/rtl8721dx/Kconfig"
+endif
+if ARCH_CHIP_RTL8720F
+source "arch/arm/src/rtl8720f/Kconfig"
 endif
 if ARCH_CHIP_GOLDFISH_ARM
 source "arch/arm/src/goldfish/Kconfig"
