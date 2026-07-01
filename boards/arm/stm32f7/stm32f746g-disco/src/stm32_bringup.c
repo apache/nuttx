@@ -138,6 +138,14 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_MTD_W25QXXXJV
+  ret = stm32_w25qxxx_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_w25qxxx_setup failed: %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_SDIO
   ret = stm32_sdio_initialize();
   if (ret < 0)
