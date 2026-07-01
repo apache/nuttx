@@ -58,6 +58,10 @@ ifeq ($(CONFIG_MTD_N25QXXX),y)
 CSRCS += stm32_n25q.c
 endif
 
+ifeq ($(CONFIG_MTD_W25QXXXJV),y)
+CSRCS += stm32_w25q.c
+endif
+
 ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 else ifeq ($(CONFIG_STM32_OTGFSHS),y)

@@ -253,6 +253,18 @@ int stm32_tsc_setup(int minor);
 int stm32_n25qxxx_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_w25qxxx_setup
+ *
+ * Description:
+ *   Initialize and register the Flash for W25QXXX driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_W25QXXXJV
+int stm32_w25qxxx_setup(void);
+#endif
+
 #ifdef HAVE_SDIO
 int stm32_sdio_initialize(void);
 #endif
