@@ -621,6 +621,12 @@
 
 #  endif
 
+/* Use compiler definition to define long double mantisa digits */
+
+#  ifdef CONFIG_HAVE_LONG_DOUBLE
+#    define LDBL_MANT_DIG __LDBL_MANT_DIG__
+#  endif
+
 /* Indicate that a local variable is not used */
 
 #  ifndef UNUSED
@@ -1200,6 +1206,10 @@
 /* Memory barrier. */
 
 #  define memory_barrier()
+
+/* long double is suppose to be same as double on MSVC. */
+
+#  define LDBL_MANT_DIG 53
 
 /* TASKING (Infineon AURIX C/C++)-specific definitions **********************/
 
