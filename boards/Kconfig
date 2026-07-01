@@ -2452,6 +2452,22 @@ config ARCH_BOARD_MPS3_AN547
 		This options selects support for NuttX on the MPS3 AN547
 		board featuring the Cortex-M55.
 
+config ARCH_BOARD_PKE8721DAF
+	bool "Realtek pke8721daf"
+	depends on ARCH_CHIP_RTL8721DX
+	---help---
+		This options selects support for NuttX on the pke8721daf
+		board featuring the Realtek RTL8721Dx (KM4,
+		Cortex-M33).
+
+config ARCH_BOARD_RTL8720F_EVB
+	bool "Realtek RTL8720F_EVB"
+	depends on ARCH_CHIP_RTL8720F
+	---help---
+		This options selects support for NuttX on the RTL8720F_EVB
+		board featuring the Realtek RTL8720F (km4tz application/host
+		core, Cortex-M33).
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -3899,6 +3915,8 @@ config ARCH_BOARD
 	default "mps2-an500"                   if ARCH_BOARD_MPS2_AN500
 	default "mps2-an521"                   if ARCH_BOARD_MPS2_AN521
 	default "mps3-an547"                   if ARCH_BOARD_MPS3_AN547
+	default "pke8721daf"                   if ARCH_BOARD_PKE8721DAF
+	default "rtl8720f_evb"                 if ARCH_BOARD_RTL8720F_EVB
 	default "rv32m1-vega"                  if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                      if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                       if ARCH_BOARD_JH7110_STAR64
@@ -4142,6 +4160,12 @@ source "boards/arm/mps/mps2-an521/Kconfig"
 endif
 if ARCH_BOARD_MPS3_AN547
 source "boards/arm/mps/mps3-an547/Kconfig"
+endif
+if ARCH_BOARD_PKE8721DAF
+source "boards/arm/rtl8721dx/pke8721daf/Kconfig"
+endif
+if ARCH_BOARD_RTL8720F_EVB
+source "boards/arm/rtl8720f/rtl8720f_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
