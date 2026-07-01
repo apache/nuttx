@@ -43,6 +43,19 @@ config TRICORE_TOOLCHAIN_GNU
 
 endchoice # Tricore Toolchain Selection
 
+config ARCH_TASKING_TRADEOFF
+	int "Tasking compiler tradeoff level"
+	default 2
+	range 0 4
+	---help---
+		Selects the Tasking compiler --tradeoff=<n> option, which controls
+		the balance between execution speed and code size:
+		  0 - maximum speed (largest code)
+		  1
+		  2 - balanced (default)
+		  3
+		  4 - minimum size (slowest code)
+
 config ARCH_TC1V6
 	bool
 	select ARCH_HAVE_DEBUG

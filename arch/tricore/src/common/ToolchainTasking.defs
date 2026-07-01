@@ -93,7 +93,7 @@ ARCHOPTIMIZATION += --integer-enumeration
 
 # tradeoff between speed (-t0) and size (-t4) (default: 4)
 
-ARCHOPTIMIZATION += --tradeoff=2
+ARCHOPTIMIZATION += --tradeoff=$(CONFIG_ARCH_TASKING_TRADEOFF)
 
 # enable symbolic debug information
 

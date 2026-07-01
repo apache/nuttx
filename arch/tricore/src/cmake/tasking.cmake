@@ -178,7 +178,7 @@ add_compile_options(--integer-enumeration)
 
 # tradeoff between speed (-t0) and size (-t4) (default: 4)
 
-add_compile_options(--tradeoff=2)
+add_compile_options(--tradeoff=${CONFIG_ARCH_TASKING_TRADEOFF})
 
 # mergering of sections
 
