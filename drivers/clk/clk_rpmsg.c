@@ -86,7 +86,6 @@ struct clk_rpmsg_cookie_s
 begin_packed_struct struct clk_rpmsg_header_s
 {
   uint32_t                  command;
-  uint32_t                  response;
   int64_t                   result;
   uint64_t                  cookie;
 } end_packed_struct;
@@ -486,7 +485,6 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
   int ret;
 
   msg->command  = command;
-  msg->response = 0;
   msg->cookie   = (uintptr_t)&cookie;
 
   nxsem_init(&cookie.sem, 0, 0);
@@ -610,7 +608,6 @@ static int clk_rpmsg_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 
   if (cmd < nitems(g_clk_rpmsg_handler) && g_clk_rpmsg_handler[cmd])
     {
-      hdr->response = 1;
       ret = g_clk_rpmsg_handler[cmd](ept, data, len, src, priv);
     }
 
@@ -629,7 +626,7 @@ static int clk_rpmsg_client_ept_cb(FAR struct rpmsg_endpoint *ept,
   FAR struct clk_rpmsg_cookie_s *cookie =
     (FAR struct clk_rpmsg_cookie_s *)(uintptr_t)hdr->cookie;
 
-  if (hdr->response && cookie)
+  if (cookie)
     {
       cookie->result = hdr->result;
       nxsem_post(&cookie->sem);
