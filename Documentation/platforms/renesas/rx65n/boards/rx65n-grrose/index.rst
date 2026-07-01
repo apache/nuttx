@@ -499,13 +499,15 @@ credentials via ``make menuconfig``:
 
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``root``)
-* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty)
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required; minimum 8 characters
+  with uppercase, lowercase, digit, and special character.  See
+  :ref:`mkpasswd_autogen`)
 
-The password is hashed with TEA at build time by the host tool
+The password is hashed with PBKDF2-HMAC-SHA256 at build time by the host tool
 ``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
 
-For the full description of the mechanism, TEA key configuration, file format,
-and verification steps, see :ref:`mkpasswd_autogen`.
+For the full description of the mechanism, file format, and verification
+steps, see :ref:`mkpasswd_autogen`.
 
 The format of the password file is:
 
@@ -515,7 +517,7 @@ The format of the password file is:
 
    Where:
    user:  User name
-   x:     Encrypted password
+   x:     PBKDF2-HMAC-SHA256 hash (modular crypt format)
    uid:   User ID (0 for now)
    gid:   Group ID (0 for now)
    home:  Login directory (/ for now)
@@ -525,7 +527,7 @@ The format of the password file is:
 .. code:: console
 
    nsh> cat /etc/group
-   root:*:0:root,admin
+   root:*:0:root
 
 The format of the group file is:
 
