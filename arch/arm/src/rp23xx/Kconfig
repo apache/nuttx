@@ -1059,3 +1059,44 @@ config RP23XX_BOARD_HAS_WS2812
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.
+
+#####################################################################
+#  On-chip Flash File System Configuration
+#####################################################################
+
+config RP23XX_FLASH_FILE_SYSTEM
+	bool "Configure a read/write LittleFS filesystem on unused flash"
+	default n
+	select MTD
+	select FS_LITTLEFS
+	---help---
+		Create an MTD device over the region of the on-chip QSPI flash
+		that lies beyond the NuttX image, and mount a LittleFS
+		filesystem on it for persistent local storage.  Uses the RP2350
+		bootrom flash programming functions.
+
+if RP23XX_FLASH_FILE_SYSTEM
+
+config RP23XX_FLASH_LENGTH
+	int "Total size of the on-chip flash (bytes)"
+	default 4194304
+	---help---
+		Size of the board's QSPI flash chip in bytes.  The Raspberry Pi
+		Pico 2 / Pico 2 W have 4 MiB = 4194304 bytes.
+
+config RP23XX_FLASH_FS_OFFSET
+	int "Filesystem region offset from start of flash (bytes)"
+	default 1048576
+	---help---
+		The filesystem occupies flash from this offset to the end of the
+		chip.  Must be a multiple of 4096 and lie safely beyond the end of
+		the NuttX image.  The default (1 MiB) leaves room for the image
+		and gives a 3 MiB filesystem on a 4 MiB chip.
+
+config RP23XX_FLASH_MOUNT_POINT
+	string "Mount point for the flash file system"
+	default "/data"
+	---help---
+		Where to mount the filesystem.  Leave empty to skip auto-mounting.
+
+endif # RP23XX_FLASH_FILE_SYSTEM

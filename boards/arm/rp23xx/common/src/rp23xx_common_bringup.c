@@ -36,6 +36,11 @@
 #include "rp23xx_common_pico.h"
 #include "rp23xx_common_bringup.h"
 
+#ifdef CONFIG_RP23XX_FLASH_FILE_SYSTEM
+#  include <nuttx/mtd/mtd.h>
+#  include "rp23xx_flash_mtd.h"
+#endif
+
 #ifdef CONFIG_RP23XX_PWM
 #include "rp23xx_pwm.h"
 #include "rp23xx_pwmdev.h"
@@ -73,6 +78,9 @@
 int rp23xx_common_bringup(void)
 {
   int ret = 0;
+#ifdef CONFIG_RP23XX_FLASH_FILE_SYSTEM
+  FAR struct mtd_dev_s *mtd;
+#endif
 
 #ifdef CONFIG_RP23XX_I2C_DRIVER
   #ifdef CONFIG_RP23XX_I2C0
@@ -402,6 +410,54 @@ int rp23xx_common_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_FLASH_FILE_SYSTEM
+  /* Create an MTD over the unused on-chip flash and mount a LittleFS
+   * filesystem on it.
+   */
+
+  mtd = rp23xx_flash_mtd_initialize();
+  if (mtd == NULL)
+    {
+      serr("ERROR: rp23xx_flash_mtd_initialize failed\n");
+    }
+  else
+    {
+      ret = register_mtddriver("/dev/rpflash", mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          serr("ERROR: register_mtddriver(/dev/rpflash) failed: %d\n", ret);
+        }
+      else if (CONFIG_RP23XX_FLASH_MOUNT_POINT[0] != '\0')
+        {
+          /* Mount an EXISTING LittleFS on the flash MTD.  We deliberately do
+           * NOT pass "autoformat": formatting writes flash, and a flash
+           * erase/program this early in bringup (interrupts disabled, XIP
+           * exited, USB not up) can hang the boot.  A blank or corrupt
+           * filesystem simply fails to mount and is logged; the board still
+           * boots.  Format it once from NSH:
+           *   mount -t littlefs -o autoformat /dev/rpflash /data
+           */
+
+          ret = nx_mount("/dev/rpflash", CONFIG_RP23XX_FLASH_MOUNT_POINT,
+                         "littlefs", 0, NULL);
+          if (ret < 0)
+            {
+              serr("flash: %s not mounted (format with 'mount -t littlefs "
+                   "-o autoformat /dev/rpflash %s'): %d\n",
+                   CONFIG_RP23XX_FLASH_MOUNT_POINT,
+                   CONFIG_RP23XX_FLASH_MOUNT_POINT, ret);
+
+              /* A blank/corrupt optional filesystem is non-fatal: log and
+               * continue bringup rather than returning the error (which
+               * would abort the rest of board bringup, e.g. networking).
+               */
+
+              ret = OK;
+            }
+        }
     }
 #endif
 
