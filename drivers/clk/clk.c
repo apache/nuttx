@@ -141,7 +141,7 @@ static int clk_procfs_open(FAR struct file *filep, FAR const char *relpath,
 {
   FAR struct procfs_file_s *priv;
 
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       return -EACCES;
     }

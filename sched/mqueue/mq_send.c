@@ -91,7 +91,7 @@ static int nxmq_verify_send(FAR FAR struct file *mq, FAR const char *msg,
       return -EINVAL;
     }
 
-  if ((mq->f_oflags & O_WROK) == 0)
+  if ((mq->f_oflags & O_ACCMODE) == O_RDONLY)
     {
       return -EBADF;
     }

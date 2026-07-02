@@ -102,7 +102,7 @@ int fclose(FAR FILE *stream)
 
       /* If the stream was opened for writing, then flush the stream */
 
-      if ((stream->fs_oflags & O_WROK) != 0)
+      if ((stream->fs_oflags & O_ACCMODE) != O_RDONLY)
         {
           ret = lib_fflush(stream);
           errcode = get_errno();

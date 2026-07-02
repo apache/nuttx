@@ -59,7 +59,7 @@ int bchlib_setup(FAR const char *blkdev, int oflags, FAR void **handle)
 {
   FAR struct bchlib_s *bch;
   struct geometry geo;
-  bool readonly = (oflags & O_WROK) == 0;
+  bool readonly = (oflags & O_ACCMODE) == O_RDONLY;
   int ret;
 
   DEBUGASSERT(blkdev);

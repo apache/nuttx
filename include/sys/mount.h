@@ -40,16 +40,16 @@
 
 /* Mount flags */
 
-#define MS_RDONLY       O_RDONLY    /* Mount file system read-only */
-#define MS_SYNCHRONOUS  O_SYNC      /* Writes are synced at once */
-#define MS_NOSYMFOLLOW  O_NOFOLLOW  /* Do not follow symlinks */
-#define MS_NOATIME      O_NOATIME   /* Do not update access times. */
-#define MS_NOSUID       O_RESERVE14 /* Ignore suid and sgid bits */
-#define MS_NODEV        O_RESERVE15 /* Disallow access to device special files */
-#define MS_DIRSYNC      O_RESERVE16 /* Directory modifications are synchronous */
-#define MS_REMOUNT      O_RESERVE17 /* Alter flags of a mounted FS */
-#define MS_MANDLOCK     O_RESERVE19 /* Allow mandatory locks on an FS */
-#define MS_NOEXEC       O_RESERVE20 /* Disallow program execution */
+#define MS_RDONLY       0x0001 /* Mount file system read-only */
+#define MS_NOSUID       0x0002 /* Ignore suid and sgid bits */
+#define MS_NODEV        0x0004 /* Disallow access to device special files */
+#define MS_NOEXEC       0x0008 /* Disallow program execution */
+#define MS_SYNCHRONOUS  0x0010 /* Writes are synced at once */
+#define MS_REMOUNT      0x0020 /* Alter flags of a mounted FS */
+#define MS_MANDLOCK     0x0040 /* Allow mandatory locks on an FS */
+#define MS_DIRSYNC      0x0080 /* Directory modifications are synchronous */
+#define MS_NOSYMFOLLOW  0x0100 /* Do not follow symlinks */
+#define MS_NOATIME      0x0400 /* Do not update access times. */
 
 /* Un-mount flags
  *

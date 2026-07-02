@@ -153,7 +153,7 @@ ssize_t file_writev(FAR struct file *filep,
 
   /* Was this file opened for write access? */
 
-  if ((filep->f_oflags & O_WROK) == 0)
+  if ((filep->f_oflags & O_ACCMODE) == O_RDONLY)
     {
       return -EACCES;
     }

@@ -195,7 +195,7 @@ FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode)
        * include a '+'.
        */
 
-      if ((oflags & O_RDWR) != O_RDWR)
+      if ((oflags & O_ACCMODE) != O_RDWR)
         {
           lib_free(fmemopen_cookie);
           set_errno(EINVAL);
@@ -245,7 +245,7 @@ FAR FILE *fmemopen(FAR void *buf, size_t size, FAR const char *mode)
    * by the size argument.
    */
 
-  if ((oflags & O_RDWR) == O_RDOK)
+  if ((oflags & O_ACCMODE) == O_RDONLY)
     {
       fmemopen_cookie->end = size;
     }
