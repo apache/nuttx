@@ -1221,6 +1221,14 @@ int mfrc522_mifare_read(FAR struct mfrc522_dev_s *dev,
   uint8_t validbits = 0;
   int     ret       = OK;
 
+  /* Validate expected tag size (only pages 0x0, ..., 0xf are valid. */
+
+  if (data->address > 15)
+    {
+      ret = -ERANGE;
+      goto errout;
+    }
+
   /* Read block from address */
 
   command[0] = PICC_CMD_MF_READ;
