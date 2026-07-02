@@ -170,6 +170,10 @@ int main(int argc, char **argv, char **envp)
   g_argc = argc;
   g_argv = argv;
 
+#ifndef CONFIG_WINDOWS_NATIVE
+  host_stdio_nonblock();
+#endif
+
   /* Parse simulator-specific options before handing control to NuttX.
    * --sim-rt-ratio=<percent>  Set simulated-to-real time ratio in percent
    *   (default 100).  Values > 100 speed up simulated time; < 100 slow down.

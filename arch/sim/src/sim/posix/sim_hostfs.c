@@ -125,6 +125,30 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: host_stdio_nonblock
+ ****************************************************************************/
+
+void host_stdio_nonblock(void)
+{
+  const int fds[] =
+    {
+      STDOUT_FILENO,
+      STDERR_FILENO,
+    };
+  size_t i;
+
+  for (i = 0; i < sizeof(fds) / sizeof(fds[0]); i++)
+    {
+      int flags = fcntl(fds[i], F_GETFL, 0);
+
+      if (flags >= 0)
+        {
+          (void)fcntl(fds[i], F_SETFL, flags | O_NONBLOCK);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: host_open
  ****************************************************************************/
 

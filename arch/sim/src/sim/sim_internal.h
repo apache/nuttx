@@ -225,6 +225,9 @@ pid_t host_posix_spawn(const char *path,
                        char *const argv[], char *const envp[]);
 int   host_waitpid(pid_t pid);
 int   host_kill(pid_t pid, int sig);
+#ifndef CONFIG_WINDOWS_NATIVE
+void  host_stdio_nonblock(void);
+#endif
 
 /* sim_hostmemory.c *********************************************************/
 
