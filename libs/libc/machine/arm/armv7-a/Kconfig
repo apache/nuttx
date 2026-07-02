@@ -29,11 +29,17 @@ config ARMV7A_STRING_FUNCTION
 	default n
 	depends on ARCH_TOOLCHAIN_GNU
 	select ARMV7A_MEMCHR
+	select ARMV7A_MEMCMP
 	select ARMV7A_MEMCPY
 	select ARMV7A_MEMMOVE
 	select ARMV7A_MEMSET
+	select ARMV7A_STRCHR
+	select ARMV7A_STRCHRNUL
 	select ARMV7A_STRCMP
 	select ARMV7A_STRLEN
+	select ARMV7A_STRNCMP
+	select ARMV7A_STRNLEN
+	select ARMV7A_STRRCHR
 
 config ARMV7A_MEMCHR
 	bool "Enable optimized memchr() for ARMv7-A"
@@ -81,3 +87,52 @@ config ARMV7A_STRLEN
 	depends on ARCH_TOOLCHAIN_GNU
 	---help---
 		Enable optimized ARMv7-A specific strlen() library function
+
+config ARMV7A_MEMCMP
+	bool "Enable optimized memcmp() for ARMv7-A"
+	default n
+	select LIBC_ARCH_MEMCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific memcmp() library function
+
+config ARMV7A_STRCHR
+	bool "Enable optimized strchr() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strchr() library function
+
+config ARMV7A_STRCHRNUL
+	bool "Enable optimized strchrnul() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strchrnul() library function
+
+config ARMV7A_STRNCMP
+	bool "Enable optimized strncmp() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRNCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strncmp() library function
+
+config ARMV7A_STRNLEN
+	bool "Enable optimized strnlen() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRNLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strnlen() library function
+
+config ARMV7A_STRRCHR
+	bool "Enable optimized strrchr() for ARMv7-A"
+	default n
+	select LIBC_ARCH_STRRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized ARMv7-A specific strrchr() library function
+
