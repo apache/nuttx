@@ -20,4 +20,48 @@ endchoice # FVP Chip Selection
 
 endmenu # "FVP Chip Selection"
 
+#####################################################################
+#  UART Configuration
+#####################################################################
+
+menu "FVP ARMv8-R Peripheral Selection"
+
+config FVP_ARMV8R_UART0
+	bool "UART0"
+	default n
+	select UART_PL011
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART0.
+
+config FVP_ARMV8R_UART1
+	bool "UART1"
+	default y
+	select UART_PL011
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART1.
+
+config FVP_ARMV8R_UART2
+	bool "UART2"
+	default n
+	select UART_PL011
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART2.
+
+config FVP_ARMV8R_UART3
+	bool "UART3"
+	default n
+	select UART_PL011
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Select to enable support for UART3.
+
+endmenu # FVP ARMv8-R Peripheral Selection
+
 endif # ARCH_CHIP_FVP_ARMV8R
