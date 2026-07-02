@@ -44,6 +44,30 @@ ifeq ($(CONFIG_ARMV7A_STRLEN),y)
 ASRCS += arch_strlen.S
 endif
 
+ifeq ($(CONFIG_ARMV7A_MEMCMP),y)
+ASRCS += arch_memcmp.S
+endif
+
+ifeq ($(CONFIG_ARMV7A_STRCHR),y)
+ASRCS += arch_strchr.S
+endif
+
+ifeq ($(CONFIG_ARMV7A_STRCHRNUL),y)
+ASRCS += arch_strchrnul.S
+endif
+
+ifeq ($(CONFIG_ARMV7A_STRNCMP),y)
+ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_ARMV7A_STRNLEN),y)
+ASRCS += arch_strnlen.S
+endif
+
+ifeq ($(CONFIG_ARMV7A_STRRCHR),y)
+ASRCS += arch_strrchr.S
+endif
+
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
