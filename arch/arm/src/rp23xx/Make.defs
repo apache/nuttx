@@ -92,3 +92,7 @@ endif
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 CHIP_CSRCS += rp23xx_crypto.c
 endif
+
+ifeq ($(CONFIG_ARCH_USE_TEXT_HEAP),y)
+CHIP_CSRCS += rp23xx_textheap.c
+endif
