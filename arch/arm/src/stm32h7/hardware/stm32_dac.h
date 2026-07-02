@@ -87,22 +87,22 @@
 
 #define DAC_CR_EN1                  (1 << 0)  /* Bit 0: ch1 enable */
 #define DAC_CR_TEN1                 (1 << 1)  /* Bit 1: ch1 trigger enable */
-#define DAC_CR_TSEL1_SHIFT          (1 << 2)  /* Bits 5-2: ch1 trigger sel */
+#define DAC_CR_TSEL1_SHIFT          (2)       /* Bits 5-2: ch1 trigger sel */
 #define DAC_CR_TSEL1_MASK           (15 << DAC_CR_TSEL1_SHIFT)
-#define DAC_CR_WAVE1_SHIFT          (1 << 6)  /* Bits 7-6: ch1 wave enable */
+#define DAC_CR_WAVE1_SHIFT          (6)       /* Bits 7-6: ch1 wave enable */
 #define DAC_CR_WAVE1_MASK           (3 << DAC_CR_WAVE1_SHIFT)
-#define DAC_CR_MAMP1_SHIFT          (1 << 8)  /* Bits 11-8: ch1 mask/amplitude */
+#define DAC_CR_MAMP1_SHIFT          (8)       /* Bits 11-8: ch1 mask/amplitude */
 #define DAC_CR_MAMP1_MASK           (15 << DAC_CR_MAMP1_SHIFT)
 #define DAC_CR_DMAEN1               (1 << 12)  /* Bit 12: ch1 dma enable */
 #define DAC_CR_DMAUDRIE1            (1 << 13)  /* Bit 13: ch1 dma underrun interrupt enable */
 #define DAC_CR_CEN1                 (1 << 14)  /* Bit 14: ch1 calibration enable */
 #define DAC_CR_EN2                  (1 << 16)  /* Bit 16: ch2 enable */
 #define DAC_CR_TEN2                 (1 << 17)  /* Bit 17: ch2 trigger enable */
-#define DAC_CR_TSEL2_SHIFT          (1 << 18)  /* Bits 28-21: ch2 trigger sel */
+#define DAC_CR_TSEL2_SHIFT          (8)        /* Bits 28-21: ch2 trigger sel */
 #define DAC_CR_TSEL2_MASK           (15 << DAC_CR_TSEL2_SHIFT)
-#define DAC_CR_WAVE2_SHIFT          (1 << 22)  /* Bits 23-22: ch2 wave enable */
+#define DAC_CR_WAVE2_SHIFT          (22)       /* Bits 23-22: ch2 wave enable */
 #define DAC_CR_WAVE2_MASK           (3 << DAC_CR_WAVE2_SHIFT)
-#define DAC_CR_MAMP2_SHIFT          (1 << 24)  /* Bits 27-24: ch2 mask/amplitude */
+#define DAC_CR_MAMP2_SHIFT          (24)       /* Bits 27-24: ch2 mask/amplitude */
 #define DAC_CR_MAMP2_MASK           (15 << DAC_CR_MAMP2_SHIFT)
 #define DAC_CR_DMAEN2               (1 << 28) /* Bit 28: ch2 dma enable */
 #define DAC_CR_DMAUDRIE2            (1 << 29) /* Bit 29: ch2 dma underrun interrupt enable */
@@ -123,19 +123,19 @@
 #define DAC_SR_BWST2                (1 << 31)  /* Bit 31: ch2 busy writing */
 
 /* DAC mode control register */
-#define DAC_MCR_MODE1_SHIFT         (1 << 0)                   /* Bits 2-0: ch1 mode */
+#define DAC_MCR_MODE1_SHIFT         (0)                        /* Bits 2-0: ch1 mode */
 #define DAC_MCR_MODE1_MASK          (7 << DAC_MCR_MODE1_SHIFT)
 #define DAC_MCR_MODE1_NORM          (4 << DAC_MCR_MODE1_SHIFT) /* ch1 normal mode */
 #define DAC_MCR_MODE1_SAMPLE_HOLD   (0 << DAC_MCR_MODE1_SHIFT) /* ch1 sample and hold mode */
 #define DAC_MCR_MODE1_DIS_BUFFER    (2 << DAC_MCR_MODE1_SHIFT) /* ch1 buffer disabled */
-#define DAC_MCR_MODE1_EXT           (0 << DAC_MCR_MODE1_SHIFT) /* ch1 to external pin */
-#define DAC_MCR_MODE1_ON_CHIP       (1 << DAC_MCR_MODE1_SHIFT) /* ch1 to on chip and external */
-#define DAC_MCR_MODE2_SHIFT         (1 << 16)                  /* Bits 18-16: ch2 mode */
+#define DAC_MCR_MODE1_EXT           (1 << DAC_MCR_MODE1_SHIFT) /* ch1 to external pin */
+#define DAC_MCR_MODE1_ON_CHIP       (5 << DAC_MCR_MODE1_SHIFT) /* ch1 to on chip and external */
+#define DAC_MCR_MODE2_SHIFT         (16)                       /* Bits 18-16: ch2 mode */
 #define DAC_MCR_MODE2_MASK          (7 << DAC_MCR_MODE2_SHIFT)
 #define DAC_MCR_MODE2_NORM          (4 << DAC_MCR_MODE2_SHIFT) /* ch2 normal mode */
 #define DAC_MCR_MODE2_SAMPLE_HOLD   (0 << DAC_MCR_MODE2_SHIFT) /* ch2 sample and hold mode */
 #define DAC_MCR_MODE2_DIS_BUFFER    (2 << DAC_MCR_MODE2_SHIFT) /* ch2 buffer disabled */
-#define DAC_MCR_MODE2_EXT           (0 << DAC_MCR_MODE2_SHIFT) /* ch2 to external pin */
-#define DAC_MCR_MODE2_ON_CHIP       (1 << DAC_MCR_MODE2_SHIFT) /* ch2 to on chip and external */
+#define DAC_MCR_MODE2_EXT           (1 << DAC_MCR_MODE2_SHIFT) /* ch2 to external pin */
+#define DAC_MCR_MODE2_ON_CHIP       (5 << DAC_MCR_MODE2_SHIFT) /* ch2 to on chip and external */
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_DAC_H */

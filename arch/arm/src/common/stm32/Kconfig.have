@@ -946,6 +946,7 @@ config STM32_HAVE_TIM_DAC_TRIGGER
 	default y if STM32_COMMON_LEGACY
 	default y if ARCH_CHIP_STM32F7
 	default y if STM32_COMMON_L4_L5_U5
+	default y if ARCH_CHIP_STM32H7
 
 config STM32_HAVE_TIM1
 	bool
