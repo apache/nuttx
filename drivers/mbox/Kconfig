@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig MBOX
+	bool "MBOX Driver Support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" MBOX driver.
+		See include/nuttx/mbox/mbox.h for further MBOX driver information.
+
+if MBOX
+
+config MBOX_TRACE
+	bool "Enable MBOX trace debug"
+	default n
+
+menuconfig MBOX_PL320
+	bool "PL320 Chip support"
+	default n
+	---help---
+		ARM PL320 Inter-Processor Communications Module (IPCM) driver.
+		The PL320 provides up to 32 mailbox channels for inter-core
+		messaging with interrupt-driven notification and acknowledgment.
+
+endif
