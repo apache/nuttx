@@ -637,6 +637,13 @@ uint32_t pn532_write_passive_data(FAR struct pn532_dev_s *dev,
   uint8_t resp[20];
   uint32_t res = -EIO;
 
+  /* Validate expected tag size (only pages 0x0, ..., 0xf are valid. */
+
+  if (address > 15)
+    {
+      return -ERANGE;
+    }
+
   pn532_frame_init(f, PN532_COMMAND_INDATAEXCHANGE);
   f->data[1] = 1;       /* max n cards at once */
   f->data[2] = 0xa2;    /* command WRITE */
@@ -676,6 +683,13 @@ uint32_t pn532_read_passive_data(FAR struct pn532_dev_s *dev,
   FAR struct pn532_frame *f = (FAR struct pn532_frame *) cmd_buffer;
   uint8_t resp[30];
   uint32_t res = -1;
+
+  /* Validate against expected tag size */
+
+  if (address > 15)
+    {
+      return -ERANGE;
+    }
 
   pn532_frame_init(f, PN532_COMMAND_INDATAEXCHANGE);
   f->data[1] = 1;       /* max n cards at once */
