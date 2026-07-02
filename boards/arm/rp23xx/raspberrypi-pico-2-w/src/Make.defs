@@ -1,0 +1,95 @@
+############################################################################
+# boards/arm/rp23xx/raspberrypi-pico-2-w/src/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/Make.defs
+
+CSRCS = rp23xx_boardinitialize.c
+CSRCS += rp23xx_appinit.c
+CSRCS += rp23xx_bringup.c
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += rp23xx_gpio.c
+endif
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += rp23xx_autoleds.c
+else
+CSRCS += rp23xx_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += rp23xx_buttons.c
+endif
+
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
+endif
+
+CSRCS += rp23xx_firmware.c
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
+
+############################################################################
+# The rules below copy the cyw43439 blob from the pico-sdk.  The firmware
+# source path is configured via CONFIG_CYW43439_FIRMWARE_BIN_PATH.
+############################################################################
+
+ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
+
+# When CONFIG_ARCH_BOARD_COMMON is selected, the libboard build runs from
+# the common board directory and reaches these board-specific sources via
+# the "board" symlink (arch/arm/src/board/board -> this src dir).  The
+# firmware blob is therefore generated alongside rp23xx_firmware.c so that
+# the assembler's ".incbin" (which searches the source file's directory)
+# can find it, and the object is made to depend on it so generation always
+# runs before the compile.
+
+FIRMWARE = board$(DELIM)cyw43439.firmware.image
+
+# --- If PICO_SDK_PATH is not defined set a dummy path. --------------------
+#     See comment below.
+
+ifeq ($(PICO_SDK_PATH),)
+	PICO_SDK_PATH = /tmp
+endif
+
+FIRMWARE_SRC := $(patsubst "%",%,$(CONFIG_CYW43439_FIRMWARE_BIN_PATH))
+
+# --- If the firmware source does not exist create a dummy file. -----------
+#     NuttX built with the cyw43439 driver will not run successfully
+#     when built with this dummy file.  The sole purpose of adding
+#     this dummy is so the build (and GitHub's validation tests) will
+#     not fail when the real firmware blob is not present.
+
+$(FIRMWARE_SRC):
+	mkdir -p `dirname $(FIRMWARE_SRC)`
+	echo "dummy" >$(FIRMWARE_SRC)
+
+$(FIRMWARE): $(FIRMWARE_SRC)
+	$(call CATFILE, $(FIRMWARE), $(FIRMWARE_SRC))
+
+rp23xx_firmware$(OBJEXT): $(FIRMWARE)
+
+distclean::
+	$(call DELFILE, board$(DELIM)cyw43439.firmware.image)
+
+endif

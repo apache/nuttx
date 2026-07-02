@@ -2225,6 +2225,15 @@ config ARCH_BOARD_RASPBERRYPI_PICO_2
 	---help---
 		This is a port to the Raspberry Pi Pico 2 board.
 
+config ARCH_BOARD_RASPBERRYPI_PICO_2_W
+	bool "Raspberry Pi Pico 2 W board"
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	---help---
+		This is a port to the Raspberry Pi Pico 2 W board.  It adds support
+		for the onboard Infineon CYW43439 Wi-Fi device, driven over a
+		PIO-based gSPI bus (see arch/arm/src/rp23xx/rp23xx_cyw43439.c).
+
 config ARCH_BOARD_RASPBERRYPI_PICO_2_RV
 	bool "Raspberry Pi Pico 2 board RISC-V (not Pico, not W)"
 	depends on ARCH_CHIP_RP23XX_RV
@@ -3907,6 +3916,7 @@ config ARCH_BOARD
 	default "adafruit-qt-py-rp2040"        if ARCH_BOARD_ADAFRUIT_QT_PY_RP2040
 	default "waveshare-rp2040-lcd-1.28"    if ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 	default "raspberrypi-pico-2"           if ARCH_BOARD_RASPBERRYPI_PICO_2
+	default "raspberrypi-pico-2-w"         if ARCH_BOARD_RASPBERRYPI_PICO_2_W
 	default "raspberrypi-pico-2-rv"        if ARCH_BOARD_RASPBERRYPI_PICO_2_RV
 	default "xiao-rp2350"                  if ARCH_BOARD_XIAO_RP2350
 	default "pimoroni-pico-2-plus"         if ARCH_BOARD_PIMORONI_PICO_2_PLUS
@@ -4433,6 +4443,9 @@ source "boards/arm/rp2040/waveshare-rp2040-zero/Kconfig"
 endif
 if ARCH_BOARD_RASPBERRYPI_PICO_2
 source "boards/arm/rp23xx/raspberrypi-pico-2/Kconfig"
+endif
+if ARCH_BOARD_RASPBERRYPI_PICO_2_W
+source "boards/arm/rp23xx/raspberrypi-pico-2-w/Kconfig"
 endif
 if ARCH_BOARD_XIAO_RP2350
 source "boards/arm/rp23xx/xiao-rp2350/Kconfig"
