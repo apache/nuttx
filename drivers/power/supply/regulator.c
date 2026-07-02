@@ -1353,8 +1353,7 @@ regulator_register(FAR const struct regulator_desc_s *regulator_desc,
           goto out;
         }
     }
-  else if (!rdev->desc->boot_on && !rdev->desc->always_on
-           && _regulator_is_enabled(rdev))
+  else if (_regulator_is_enabled(rdev))
     {
       _regulator_do_disable(rdev);
     }
