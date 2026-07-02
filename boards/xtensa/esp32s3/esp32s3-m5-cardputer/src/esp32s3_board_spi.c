@@ -93,6 +93,25 @@ int esp32s3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 /****************************************************************************
+ * Name: esp32s3_spi3_cmddata
+ *
+ * Description:
+ *   SPI3 only drives the microSD card, which does not use the SPI cmd/data
+ *   line.  This stub is required to link when CONFIG_SPI_CMDDATA is enabled
+ *   for the ST7789 display on SPI2 while SPI3 is also in use.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ESP32S3_SPI3) && defined(CONFIG_SPI_CMDDATA)
+
+int esp32s3_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  return -ENODEV;
+}
+
+#endif
+
+/****************************************************************************
  * Name: esp32s3_spi3_status
  *
  * Description:

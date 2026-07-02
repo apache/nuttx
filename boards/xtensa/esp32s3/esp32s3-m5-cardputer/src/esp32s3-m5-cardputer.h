@@ -87,5 +87,25 @@ int esp32s3_bringup(void);
 int board_i2c_init(void);
 #endif
 
+/****************************************************************************
+ * Name: esp32s3_kbd_initialize
+ *
+ * Description:
+ *   Initialize and register the M5Stack Cardputer matrix keyboard driver as
+ *   a NuttX keyboard device (/dev/kbdN).
+ *
+ * Input Parameters:
+ *   devpath - The full path to the keyboard device, e.g. "/dev/kbd0".
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_M5_CARDPUTER_KEYBOARD
+int esp32s3_kbd_initialize(FAR const char *devpath);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_M5_CARDPUTER_SRC_ESP32S3_M5_CARDPUTER_H */

@@ -14,9 +14,9 @@ M5Stack Cardputer
 
 The `M5Stack Cardputer <https://docs.m5stack.com/en/core/Cardputer>`_ is a
 pocket-sized computer kit built around an M5Stamp S3 module (ESP32-S3FN8, dual
-Xtensa LX7 @ 240 MHz, 8 MB flash, no PSRAM).  It integrates a 1.14" ST7789
-TFT, an NS4168 I2S speaker, an SPM1423 microphone, an IR transmitter, a
-microSD slot and a Grove port.
+Xtensa LX7 @ 240 MHz, 8 MB flash, no PSRAM).  It integrates a 56-key keyboard,
+a 1.14" ST7789 TFT, an NS4168 I2S speaker, an SPM1423 microphone, an IR
+transmitter, a microSD slot and a Grove port.
 
 .. figure:: esp32-cardputer-image-2.png
    :align: center
@@ -29,6 +29,7 @@ Features
 
 * ESP32-S3FN8 (dual Xtensa LX7 @ 240 MHz), 8 MB flash, no PSRAM
 * Wi-Fi 4 (2.4 GHz) and Bluetooth LE (native ESP32-S3 radio)
+* 56-key keyboard (8x7 matrix behind a 74HC138 demultiplexer)
 * 1.14" 240x135 ST7789v2 TFT on SPI2
 * NS4168 mono I2S Class-D speaker amplifier
 * SPM1423 PDM microphone
@@ -43,12 +44,33 @@ By default the NSH console runs over the **USB-Serial-JTAG** peripheral exposed
 on the USB Type-C connector.  It enumerates on the host as ``/dev/ttyACM0``
 (Linux).  No external USB-to-UART bridge is required.
 
+Keyboard
+========
+
+The 56-key keyboard is an 8x7 matrix driven by a 74HC138 3-to-8 demultiplexer:
+three select lines (GPIO8/9/11) choose one of eight rows and seven column lines
+(GPIO13/15/3/4/5/6/7) are read back.  The ``esp32s3_kbd.c`` driver scans the
+matrix on the low-priority work queue and registers a keyboard device at
+``/dev/kbd0``, reporting ASCII key codes with SHIFT/CTRL handling.  Enable it
+with ``CONFIG_ESP32S3_M5_CARDPUTER_KEYBOARD`` (the ``lvglterm`` configuration
+turns it on).
+
+.. note::
+
+   The key-position-to-character table follows the M5Cardputer layout; verify
+   it against the printed legends on first bring-up.  Applications read
+   ``/dev/kbd0`` for key events (for example the ``lvglterm`` example, built
+   with its physical-keyboard input variant, feeds it into an on-screen
+   shell).
+
 Pin Mapping
 ===========
 
 =========================== ==========================================
 Peripheral                  ESP32-S3 GPIO
 =========================== ==========================================
+Keyboard demux select       8 (A0), 9 (A1), 11 (A2)
+Keyboard columns            13, 15, 3, 4, 5, 6, 7
 ST7789 SPI2 SCLK/MOSI/CS    36 / 35 / 37
 ST7789 DC/RST/backlight     34 / 33 / 38
 microSD SPI3 SCK/MISO       40 / 39
@@ -116,3 +138,13 @@ lvgl
     Graphics support with LVGL on the ST7789 display.  Run the LVGL demo::
 
         nsh> lvgldemo
+
+lvglterm
+    On-screen NuttShell terminal with LVGL and the physical keyboard.  Runs
+    the ``lvglterm`` example built with its physical-keyboard input variant:
+    NSH output is rendered in an LVGL text area and the keyboard
+    (``/dev/kbd0``) feeds the input.  Wi-Fi is included, so the on-screen
+    shell can associate with an access point using ``wapi``.  ``Fn`` + ``;`` /
+    ``.`` scroll the output::
+
+        nsh> lvglterm
