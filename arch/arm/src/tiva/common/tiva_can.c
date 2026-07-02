@@ -971,11 +971,13 @@ static int tivacan_ioctl(struct can_dev_s *dev, int cmd,
           timing.tseg1 = bt->bt_tseg1;
           timing.tseg2 = bt->bt_tseg2;
           timing.sjw   = bt->bt_sjw;
+          DEBUGASSERT(timing.tseg1 <= 16 && timing.tseg1 >= 1);
+          DEBUGASSERT(timing.tseg2 <= 8 && timing.tseg2 >= 1);
+          DEBUGASSERT(timing.sjw <= 4 && timing.sjw >= 1);
+          DEBUGASSERT(bt->bt_baud > 0);
+
           timing.prescaler = SYSCLK_FREQUENCY
             / (bt->bt_baud * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
-          DEBUGASSERT(timing.tseg1 <= 16 && timing.tseg1 >= 1);
-          DEBUGASSERT(timing.tseg2 <= 8 && timing.tseg1 >= 1);
-          DEBUGASSERT(timing.sjw <= 4 && timing.sjw >= 1);
           DEBUGASSERT(timing.prescaler <= 1024 && timing.prescaler >= 1);
 
           tivacan_bittiming_set(dev, &timing);
