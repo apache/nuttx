@@ -36,6 +36,19 @@ config DRIVERS_NOTECTL
 		If this option is selected, the instrumentation filter control device
 		/dev/notectl is provided.
 
+config NOTE_GET_PERF_TIME
+	bool "Note get time config"
+	default y
+	---help---
+		If this option is selected, then note get time from perf time
+
+config NOTE_GET_CLOCK_TIME
+	bool "Note get time config"
+	default n
+	depends on !NOTE_GET_PERF_TIME
+	---help---
+		If this option is selected, then note get time from clock time
+
 config DRIVERS_NOTERAM
 	bool "Note RAM driver"
 	default y
