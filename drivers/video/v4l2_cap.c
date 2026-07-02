@@ -4043,6 +4043,13 @@ static int capture_open(FAR struct file *filep)
     }
 
   nxmutex_lock(&cmng->mutex);
+
+  if (cmng->unlinked)
+    {
+      nxmutex_unlock(&cmng->mutex);
+      return -ENODEV;
+    }
+
   if (cmng->open_num == 0)
     {
       /* Only in first execution, open device */
@@ -4093,10 +4100,10 @@ static int capture_close(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
       if (cmng->unlinked)
         {
+          inode->i_private = NULL;
           nxmutex_unlock(&cmng->mutex);
           nxmutex_destroy(&cmng->mutex);
           kmm_free(cmng);
-          inode->i_private = NULL;
           return OK;
         }
 
@@ -4200,16 +4207,17 @@ static int capture_unlink(FAR struct inode *inode)
     }
 
   nxmutex_lock(&cmng->mutex);
+  cmng->unlinked = true;
+
   if (cmng->open_num == 0)
     {
+      inode->i_private = NULL;
       nxmutex_unlock(&cmng->mutex);
       nxmutex_destroy(&cmng->mutex);
       kmm_free(cmng);
-      inode->i_private = NULL;
     }
   else
     {
-      cmng->unlinked = true;
       nxmutex_unlock(&cmng->mutex);
     }
 
