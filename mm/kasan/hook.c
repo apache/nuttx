@@ -25,6 +25,8 @@
 #include <nuttx/mm/kasan.h>
 #include <nuttx/compiler.h>
 
+#include <sanitizer/asan_interface.h>
+
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <execinfo.h>
@@ -376,6 +378,55 @@ void __asan_register_globals(void *ptr, size_t size)
 void __asan_unregister_globals(void *ptr, size_t size)
 {
   /* Shut up compiler complaints */
+}
+
+/****************************************************************************
+ * Name: __asan_poison_memory_region
+ *
+ * Description:
+ *   Compiler-rt AddressSanitizer public interface. User-space code built for
+ *   ASan (for example the mbedtls test framework) includes
+ *   <sanitizer/asan_interface.h> and calls this to mark a region as
+ *   unaddressable. NuttX has no compiler-rt user-space ASan runtime, so on a
+ *   KASAN target this bridges the standard entry point to the in-kernel
+ *   KASAN shadow. Regions not registered with KASAN are ignored by
+ *   kasan_poison().
+ *
+ * Input Parameters:
+ *   addr - range start address
+ *   size - range size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void __asan_poison_memory_region(FAR void const volatile *addr, size_t size)
+{
+  kasan_poison((FAR const void *)addr, size);
+}
+
+/****************************************************************************
+ * Name: __asan_unpoison_memory_region
+ *
+ * Description:
+ *   Compiler-rt AddressSanitizer public interface, the counterpart of
+ *   __asan_poison_memory_region(). Marks a region as addressable again by
+ *   bridging to the in-kernel KASAN shadow.
+ *
+ * Input Parameters:
+ *   addr - range start address
+ *   size - range size
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void __asan_unpoison_memory_region(FAR void const volatile *addr,
+                                   size_t size)
+{
+  kasan_unpoison((FAR const void *)addr, size);
 }
 
 void __sanitizer_annotate_contiguous_container(FAR const void *beg,
