@@ -895,6 +895,20 @@ Once the **fd** command works, run the lvgl examples. ::
 
 **WARNING:** For this example, the total SDRAM size was reduced from 8M to 6M and the LTDC base address was moved to address 0xC0600000 to avoid video memory invasion since the SDRAM was mapped to use the nuttx heap. If using the example with 2 layers, the reserved value will need to be doubled.
 
+lvglterm
+--------
+
+Runs the ``lvglterm`` example: an interactive NuttShell (NSH) terminal on the
+display. This board uses the touch input variant -- an on-screen LVGL keyboard,
+driven by the FT5X06 touchscreen, feeds the commands while the NSH output is
+rendered in an LVGL text area.::
+
+  nsh> lvglterm
+
+Type a command on the on-screen keyboard and press Enter; the command line
+``nsh> <command>`` and its output appear in the terminal area above the
+keyboard.
+
 tone
 ----
 
