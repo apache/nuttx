@@ -441,7 +441,9 @@
  *            the spi sequences being exchanged.
  *
  * Returned Value:
- *   0 on success; negated errno on failure.
+ *   0 on success; negated errno on failure.  -ENOTSUP declines the
+ *   request and spi_transfer()/spi_transferseqs() fall back to their
+ *   generic loops; it must be returned before any transfer is started.
  *
  ****************************************************************************/
 

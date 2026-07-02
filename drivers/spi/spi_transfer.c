@@ -66,7 +66,15 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
   if (spi->ops->exchangeseqs)
     {
-      return SPI_EXCHANGESEQS(spi, seq, 1, NULL);
+      /* -ENOTSUP means: not handled, use the generic loop below */
+
+      ret = SPI_EXCHANGESEQS(spi, seq, 1, NULL);
+      if (ret != -ENOTSUP)
+        {
+          return ret;
+        }
+
+      ret = OK;
     }
 
   /* Get exclusive access to the SPI bus */
@@ -203,7 +211,13 @@ int spi_transferseqs(FAR struct spi_dev_s *spi,
 
   if (spi->ops->exchangeseqs)
     {
-      return SPI_EXCHANGESEQS(spi, seqs, nseqs, cookie);
+      /* -ENOTSUP means: not handled, use the generic loop below */
+
+      ret = SPI_EXCHANGESEQS(spi, seqs, nseqs, cookie);
+      if (ret != -ENOTSUP)
+        {
+          return ret;
+        }
     }
 
   for (i = 0; i < nseqs; i++, seq++)
