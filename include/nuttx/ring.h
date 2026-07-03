@@ -38,8 +38,10 @@
  *     struct ring_s *r = ring_alloc(64, sizeof(uint32_t));
  *     ring_free(r);
  *
- *   Multi-core safe init (SMP, uses atomic CAS):
- *     ring_init(&g_ring, 64);
+ *   Multi-core safe init (SMP, uses atomic CAS).
+ *     ring_mpmc_init(&g_ring, 64);
+ *     ring_mpsc_init(&g_ring, 64);
+ *     ring_spmc_init(&g_ring, 64);
  *
  *   Single-side init (AMP/SPSC, no atomic needed):
  *     ring_spsc_init(&g_ring, 64);
@@ -187,7 +189,7 @@
 /* Magic values for warm-restart detection.
  *
  * When a ring resides in memory that survives reboot (e.g. shared
- * SRAM), ring_init() uses an atomic magic field to decide whether
+ * SRAM), ring_mpmc_init() uses an atomic magic field to decide whether
  * to perform a fresh initialization or recover the previous state.
  *
  * Three-state protocol (multi-core safe):
@@ -217,11 +219,11 @@
   }
 
 /* RING_DECLARE - declare a ring variable (uninitialized).
- * Must call ring_init() or RING_INIT() before use.
+ * Must call ring_mpmc_init() or RING_INIT() before use.
  *
  * Usage:
  *   RING_DECLARE(g_my_ring, uint32_t, 64);
- *   ring_init(g_my_ring, 64);
+ *   ring_mpmc_init(g_my_ring, 64);
  *   or
  *   RING_DECLARE(g_my_ring, uint32_t, 64) = RING_INIT(64);
  *
@@ -275,26 +277,6 @@
 
 #define ring_reset(r)       ring_reset_indices(RING_BASE(r))
 
-/* ring_init - runtime initialization with warm-restart recovery.
- *
- * If the ring resides in memory that survives reboot (shared SRAM,
- * battery-backed RAM), ring_init detects prior initialization via
- * an atomic magic field and attempts to recover the previous state
- * instead of zeroing everything.
- *
- * Multi-core safe: concurrent ring_init calls from different cores
- * are serialized via CAS on the magic field. Cores that lose the
- * race spin-wait until the winner finishes, so no core can use the
- * ring before initialization is complete.
- *
- * Protocol:
- *   magic == 0 / garbage  -> fresh init (zero all indices)
- *   magic == RING_MAGIC_INIT  -> another core is initializing; spin
- *   magic == RING_MAGIC_READY -> warm restart; validate & recover
- */
-
-#define ring_init(buf, buflen)   ring_init_magic(buf, buflen)
-
 /* ring_data - return pointer to the embedded data buffer that immediately
  * follows the ring_s header in memory.
  */
@@ -311,7 +293,7 @@
 
 /* ring_spsc_init - lightweight initialization for SPSC mode.
  *
- * Unlike ring_init (which uses atomic CAS for multi-core safe
+ * Unlike ring_mpmc_init (which uses atomic CAS for multi-core safe
  * concurrent initialization), ring_spsc_init uses only volatile
  * writes. It can be called by either the producer or consumer
  * side, but NOT concurrently from both — the caller must ensure
@@ -320,7 +302,7 @@
  *
  * Use ring_spsc_init for AMP/SHM scenarios where atomic
  * instructions are unavailable on shared memory.
- * Use ring_init for SMP/BMP scenarios where multiple cores may
+ * Use ring_mpmc_init for SMP/BMP scenarios where multiple cores may
  * race to initialize the same ring.
  */
 
@@ -343,6 +325,9 @@
       irq_restore(flags);                                \
     }                                                    \
   while (0)
+
+#define ring_mpsc_init(r, cap)  ring_mpmc_init(r, cap)
+#define ring_spmc_init(r, cap)  ring_mpmc_init(r, cap)
 
 #define ring_is_ready(r) \
   (RING_FIELD(&RING_BASE(r)->magic) == RING_MAGIC_READY)
@@ -601,8 +586,7 @@ static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
  *   before the reset (i.e. the number of elements discarded by the reset
  *   operation).  Called by the ring_reset() macro after RING_BASE()
  *   conversion, and may also be invoked directly when the caller already
- *   holds a FAR struct ring_s * (e.g. from inside other inline helpers
- *   such as ring_init_magic).
+ *   holds a FAR struct ring_s *.
  *
  *   Callers may either use the return value (e.g. to bump a "dropped"
  *   counter) or discard it.  Safe to call on a freshly-zeroed ring whose
@@ -630,11 +614,12 @@ static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
 }
 
 /****************************************************************************
- * Name: ring_init_magic
+ * Name: ring_mpmc_init
  *
  * Description:
  *   Runtime initialization with warm-restart recovery and multi-core
- *   safety.  Called by the ring_init() macro after capacity is set.
+ *   safety.  This is the unified init entry point; the ring_mpmc_init /
+ *   ring_mpsc_init / ring_spmc_init macros are thin wrappers around it.
  *
  *   Three outcomes based on the magic field:
  *     1. Uninitialized (magic != READY and != INIT):
@@ -649,7 +634,7 @@ static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
  ****************************************************************************/
 
 static inline_function FAR struct ring_s *
-ring_init_magic(FAR void *buf, uint32_t buflen)
+ring_mpmc_init(FAR void *buf, uint32_t buflen)
 {
   FAR struct ring_s *r = (FAR struct ring_s *)buf;
   irqstate_t flags;
@@ -759,7 +744,7 @@ static inline_function FAR struct ring_s *ring_alloc(uint32_t cap,
       return NULL;
     }
 
-  ring_init(r, cap);
+  ring_spsc_init(r, cap);
   return r;
 }
 
