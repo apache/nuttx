@@ -1059,6 +1059,47 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           break;
         }
 
+      /* Command:     GPIOC_TOGGLE
+       * Description: Toggle the value of an output GPIO.
+       * Argument:    A pointer to a bool value to receive the new level.
+       */
+
+      case GPIOC_TOGGLE:
+        if (dev->gp_pintype == GPIO_OUTPUT_PIN ||
+            dev->gp_pintype == GPIO_OUTPUT_PIN_OPENDRAIN)
+          {
+            FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
+
+            DEBUGASSERT(ptr != NULL);
+
+            if (dev->gp_ops->go_toggle != NULL)
+              {
+                ret = dev->gp_ops->go_toggle(dev, ptr);
+              }
+            else
+              {
+                bool val;
+
+                DEBUGASSERT(dev->gp_ops->go_read != NULL);
+                DEBUGASSERT(dev->gp_ops->go_write != NULL);
+                ret = dev->gp_ops->go_read(dev, &val);
+                if (ret >= 0)
+                  {
+                    val = !val;
+                    ret = dev->gp_ops->go_write(dev, val);
+                    if (ret >= 0)
+                      {
+                        *ptr = val;
+                      }
+                  }
+              }
+          }
+        else
+          {
+            ret = -EACCES;
+          }
+        break;
+
       /* Unrecognized command */
 
       default:
