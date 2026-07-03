@@ -952,6 +952,19 @@ nxdoom
 Play :doc:`NXDoom </applications/games/nxdoom/index>` on the Simulator using X11
 keyboard input and graphics. Read the docs for NXDoom to see how to play.
 
+By default this NuttX board config mounts the current directory from the host where it was executed, making the files visible internally at /data directory.
+So you can copy the DOOM1.WAD (or other WAD file) to the current directory where
+you compiled NuttX and run Doom from there:
+
+.. code:: console
+
+   $ cp ~/Download/DOOM1.WAD .
+   $ ./nuttx
+   NuttShell (NSH) NuttX-13.0.0
+   nsh> ls -l /data/DOOM1.WAD
+   -rw-rw-r--     4196020 2026-07-03 12:32 /data/DOOM1.WAD
+   nsh> nxdoom -iwad /data/DOOM1.WAD
+
 .. warning::
 
    X11 keyboard codes are not perfectly translated to the NuttX codec currently,
