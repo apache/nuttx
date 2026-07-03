@@ -256,7 +256,7 @@ static int _inode_checkpath(const char *path)
 
   /* Check each segment of the path */
 
-  while (*path != '\0' && namelen <= NAME_MAX && pathlen < PATH_MAX)
+  while (*path != '\0' && pathlen < PATH_MAX)
     {
       if (*path == '/')
         {
@@ -264,14 +264,17 @@ static int _inode_checkpath(const char *path)
         }
       else
         {
-          namelen++;
+          if (++namelen > NAME_MAX)
+            {
+              return -ENAMETOOLONG;
+            }
         }
 
       path++;
       pathlen++;
     }
 
-  return *path != '\0' ? -ENAMETOOLONG : OK;
+  return pathlen >= PATH_MAX ? -ENAMETOOLONG : OK;
 }
 
 /****************************************************************************
