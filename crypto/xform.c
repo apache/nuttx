@@ -357,6 +357,15 @@ const struct auth_hash auth_hash_hmac_ripemd_160_96 =
   (void (*)(FAR uint8_t *, FAR void *)) rmd160final
 };
 
+const struct auth_hash auth_hash_hmac_sha2_224_114 =
+{
+  CRYPTO_SHA2_256_HMAC, "HMAC-SHA2-224",
+  HMAC_SHA2_224_BLOCK_LEN, 28, 14, sizeof(SHA2_CTX), HMAC_SHA2_224_BLOCK_LEN,
+  (void (*)(FAR void *)) sha224init, NULL, NULL,
+  sha224update_int,
+  (void (*)(FAR uint8_t *, FAR void *)) sha224final
+};
+
 const struct auth_hash auth_hash_hmac_sha2_256_128 =
 {
   CRYPTO_SHA2_256_HMAC, "HMAC-SHA2-256",
