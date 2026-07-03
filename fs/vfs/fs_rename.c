@@ -405,17 +405,50 @@ static int mountptrename(FAR const char *oldpath, FAR struct inode *oldinode,
 
       if (ret >= 0)
         {
+          /* If old and new refer to the same file (same st_dev and
+           * st_ino), POSIX requires rename() to return success without
+           * doing anything.  Both names must remain intact.
+           *
+           * Guard: only trust st_ino when it is non-zero.  Several
+           * filesystems (tmpfs, littlefs, fat) do not populate st_ino,
+           * leaving it 0 for every file.  Without this guard, any two
+           * distinct files would be mistaken for hard links to the same
+           * inode, causing rename() to skip the actual operation.
+           */
+
+          if (oldbuf.st_ino != 0 &&
+              oldbuf.st_dev == newbuf.st_dev &&
+              oldbuf.st_ino == newbuf.st_ino)
+            {
+              ret = OK;
+              goto errout_with_newinode;
+            }
+
           newisdir = S_ISDIR(newbuf.st_mode);
 
           /* Is the new path a directory? */
 
           if (newisdir)
             {
+              size_t oldlen;
+
               /* It is an error to rename a file to a directory */
 
               if (!oldisdir)
                 {
                   ret = -EISDIR;
+                  goto errout_with_newinode;
+                }
+
+              /* It is an error to rename a directory into one of its
+               * own subdirectories (new is below old).
+               */
+
+              oldlen = strlen(oldrelpath);
+              if (strncmp(newrelpath, oldrelpath, oldlen) == 0 &&
+                  newrelpath[oldlen] == '/')
+                {
+                  ret = -EINVAL;
                   goto errout_with_newinode;
                 }
 
