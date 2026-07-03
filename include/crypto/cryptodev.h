@@ -73,6 +73,7 @@
 #define HMAC_MD5_BLOCK_LEN       64
 #define HMAC_SHA1_BLOCK_LEN      64
 #define HMAC_RIPEMD160_BLOCK_LEN 64
+#define HMAC_SHA2_224_BLOCK_LEN  64
 #define HMAC_SHA2_256_BLOCK_LEN  64
 #define HMAC_SHA2_384_BLOCK_LEN  128
 #define HMAC_SHA2_512_BLOCK_LEN  128
@@ -138,7 +139,8 @@
 #define CRYPTO_PBKDF2_HMAC_SHA1 38
 #define CRYPTO_PBKDF2_HMAC_SHA256 39
 #define CRYPTO_ESN              40 /* Support for Extended Sequence Numbers */
-#define CRYPTO_ALGORITHM_MAX    40 /* Keep updated */
+#define CRYPTO_SHA2_224_HMAC    41
+#define CRYPTO_ALGORITHM_MAX    41 /* Keep updated */
 
 /* Algorithm flags */
 
