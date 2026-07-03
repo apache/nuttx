@@ -511,7 +511,35 @@ DEFINE_HRTIMER_READ(32, uint32_t)
 #else
 #  define hrtimer_mark_running(timer, cpu) UNUSED(cpu)
 #endif
-#define hrtimer_unmark_running(cpu) hrtimer_mark_running(NULL, cpu)
+
+/****************************************************************************
+ * Name: hrtimer_unmark_running
+ *
+ * Description:
+ *   Mark the timer as not running and signal any CPU waiting for the
+ *   running timer to complete.
+ *
+ * Input Parameters:
+ *   cpu - The CPU core Id.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumption:
+ *   The caller must hold the lock.
+ *
+ ****************************************************************************/
+
+static inline_function
+void hrtimer_unmark_running(int cpu)
+{
+#ifdef CONFIG_SMP
+  hrtimer_mark_running(NULL, cpu);
+  UP_SEV();
+#else
+  UNUSED(cpu);
+#endif
+}
 
 /****************************************************************************
  * Name: hrtimer_is_running
@@ -741,7 +769,6 @@ static inline_function void hrtimer_process(uint64_t now)
         }
 
       hrtimer_unmark_running(cpu);
-      UP_SEV();
     }
 
   /* Release the lock and give up the ownership of the hrtimer queue. */
