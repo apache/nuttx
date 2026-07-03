@@ -48,6 +48,7 @@ static int _inode_linktarget(FAR struct inode *inode,
 #endif
 static int _inode_search(FAR struct inode_search_s *desc);
 static FAR const char *_inode_getcwd(void);
+static int _inode_canonicalize(FAR char *path);
 
 /****************************************************************************
  * Public Data
@@ -241,6 +242,103 @@ static int _compute_path_depth(FAR const char *path)
 }
 
 /****************************************************************************
+ * Name: _inode_canonicalize
+ *
+ * Description:
+ *   Remove "." and ".." segments from an absolute path in-place.
+ *   The path MUST start with '/'.  Returns -EINVAL if ".." attempts
+ *   to ascend beyond the root directory, or -ENAMETOOLONG if the
+ *   canonicalized result is >= PATH_MAX bytes.
+ *
+ ****************************************************************************/
+
+static int _inode_canonicalize(FAR char *path)
+{
+  /* Skip the initial '/' -- caller guarantees absolute path */
+
+  FAR char *src = path + 1;
+  FAR char *dst = path + 1;
+
+  while (*src != '\0')
+    {
+      /* Skip duplicate slashes */
+
+      if (*src == '/')
+        {
+          src++;
+          continue;
+        }
+
+      /* Check for "." (current directory) */
+
+      if (src[0] == '.' && (src[1] == '/' || src[1] == '\0'))
+        {
+          src += (src[1] == '/') ? 2 : 1;
+          continue;
+        }
+
+      /* Check for ".." (parent directory) */
+
+      if (src[0] == '.' && src[1] == '.' &&
+          (src[2] == '/' || src[2] == '\0'))
+        {
+          /* Cannot go above root */
+
+          if (dst <= path + 1)
+            {
+              return -EINVAL;
+            }
+
+          /* Remove trailing slash first */
+
+          dst--;
+
+          /* Scan backward to find the previous '/' */
+
+          while (dst > path + 1 && *(dst - 1) != '/')
+            {
+              dst--;
+            }
+
+          src += (src[2] == '/') ? 3 : 2;
+          continue;
+        }
+
+      /* Regular path component: copy until end of segment (including '/') */
+
+      do
+        {
+          if (dst != src)
+            {
+              *dst = *src;
+            }
+
+          dst++;
+          src++;
+        }
+      while (*src != '\0' && *(src - 1) != '/');
+    }
+
+  /* Remove trailing slash (unless root "/") */
+
+  if (dst > path + 1 && *(dst - 1) == '/')
+    {
+      dst--;
+    }
+
+  *dst = '\0';
+
+  /* After canonicalization, check if the resolved path exceeds PATH_MAX */
+
+  if ((dst - path) >= PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: _inode_checkpath
  ****************************************************************************/
 
@@ -313,9 +411,9 @@ static int _inode_search(FAR struct inode_search_s *desc)
       return ret;
     }
 
-  /* Convert the relative path to the absolute path */
+  /* Ensure we have a writable buffer for path manipulation */
 
-  if (*desc->path != '/')
+  if (desc->buffer == NULL)
     {
       desc->buffer = lib_get_tempbuffer(PATH_MAX);
       if (desc->buffer == NULL)
@@ -323,8 +421,33 @@ static int _inode_search(FAR struct inode_search_s *desc)
           return -ENOMEM;
         }
 
-      snprintf(desc->buffer, PATH_MAX, "%s/%s", _inode_getcwd(), desc->path);
+      /* Convert relative path to absolute, or just copy absolute path.
+       * Use desc->path directly (points to caller's string) as source
+       * to avoid overlap with desc->buffer.
+       */
+
+      if (*desc->path != '/')
+        {
+          snprintf(desc->buffer, PATH_MAX, "%s/%s",
+                   _inode_getcwd(), desc->path);
+        }
+      else
+        {
+          strlcpy(desc->buffer, desc->path, PATH_MAX);
+        }
+
       desc->path = desc->buffer;
+    }
+
+  /* Canonicalize the path to remove "." and ".." segments.  This ensures
+   * that mountpoint relpath never contains ".." which most filesystems
+   * (tmpfs, romfs, etc.) cannot resolve.
+   */
+
+  ret = _inode_canonicalize(desc->buffer);
+  if (ret < 0)
+    {
+      return ret;
     }
 
   name = desc->path;
