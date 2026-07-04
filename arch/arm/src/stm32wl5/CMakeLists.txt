@@ -34,7 +34,6 @@ set(SRCS
     stm32wl5_lse.c
     stm32wl5_idle.c
     stm32wl5_pwr.c
-    stm32wl5_tim.c
     stm32wl5_flash.c
     stm32wl5_timerisr.c
     stm32wl5_spi.c)

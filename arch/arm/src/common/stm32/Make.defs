@@ -43,6 +43,13 @@ CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
 CHIP_CSRCS += stm32_lsi.c
 
+ifeq ($(CONFIG_TIMER)$(CONFIG_STM32_TIM),yy)
+CHIP_CSRCS += stm32_tim_lowerhalf.c
+endif
+ifeq ($(CONFIG_STM32_TIM),y)
+CHIP_CSRCS += stm32_tim.c
+endif
+
 ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
 endif
@@ -90,9 +97,6 @@ CHIP_CSRCS += stm32_i2s_m3m4_v1.c
 endif
 ifeq ($(CONFIG_STM32_HAVE_IP_SDIO_M3M4_V1),y)
 CHIP_CSRCS += stm32_sdio_m3m4_v1.c
-endif
-ifeq ($(CONFIG_STM32_HAVE_IP_TIMERS),y)
-CHIP_CSRCS += stm32_tim_m3m4_v1v2v3.c
 endif
 ifeq ($(CONFIG_STM32_HAVE_IP_CCM_M3M4_V1),y)
 CHIP_CSRCS += stm32_ccm_m3m4_v1.c
@@ -150,10 +154,6 @@ CHIP_CSRCS += stm32_dma_m3m4_v1_8ch.c
 else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V2_STREAM),y)
 CHIP_CSRCS += stm32_dma_m3m4_v2_stream.c
 endif
-endif
-
-ifeq ($(CONFIG_TIMER)$(CONFIG_STM32_HAVE_IP_TIMERS),yy)
-CHIP_CSRCS += stm32_tim_m3m4_v1v2v3_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_STM32_ONESHOT),y)
@@ -510,9 +510,6 @@ ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_M0_V1),yy)
 CHIP_CSRCS += stm32_rng_m0_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_TIM)$(CONFIG_STM32_HAVE_IP_TIMERS_M0_V1),yy)
-CHIP_CSRCS += stm32_tim_m0_v1.c stm32_tim_m0_v1_lowerhalf.c
-endif
 
 ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
 CHIP_CSRCS += stm32_iwdg_m0_v1.c

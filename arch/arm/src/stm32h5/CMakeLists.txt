@@ -50,10 +50,6 @@ if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
-
 if(CONFIG_STM32_I2C)
   list(APPEND SRCS stm32_i2c.c)
 endif()
@@ -80,10 +76,6 @@ endif()
 
 if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
 endif()
 
 if(CONFIG_STM32_HAVE_HSI48)
