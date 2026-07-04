@@ -407,14 +407,14 @@ static void     i2s_txdma_callback(DMA_HANDLE handle, uint8_t result,
 
 static int      i2s_checkwidth(struct stm32_i2s_s *priv, int bits);
 
-static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
 static int      stm32_i2s_receive(struct i2s_dev_s *dev,
                                   struct ap_buffer_s *apb,
                                   i2s_callback_t callback,
                                   void *arg, uint32_t timeout);
-static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
 static int      stm32_i2s_send(struct i2s_dev_s *dev,
                                struct ap_buffer_s *apb,
                                i2s_callback_t callback, void *arg,
@@ -1723,7 +1723,7 @@ static int i2s_checkwidth(struct stm32_i2s_s *priv, int bits)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_RX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -1759,7 +1759,7 @@ static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef I2S_HAVE_RX
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -1928,7 +1928,7 @@ static int stm32_i2s_roundf(float num)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_TX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -1965,7 +1965,7 @@ static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef I2S_HAVE_TX
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
