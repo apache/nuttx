@@ -715,66 +715,66 @@ static int stm32_tim_setfreq(struct stm32_tim_dev_s *dev,
     {
 #ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
-        freqin = BOARD_TIM1_FREQUENCY;
+        freqin = STM32_TIM1_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
-        freqin = BOARD_TIM2_FREQUENCY;
+        freqin = STM32_TIM2_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
-        freqin = BOARD_TIM3_FREQUENCY;
+        freqin = STM32_TIM3_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
-        freqin = BOARD_TIM4_FREQUENCY;
+        freqin = STM32_TIM4_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
-        freqin = BOARD_TIM5_FREQUENCY;
+        freqin = STM32_TIM5_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
-        freqin = BOARD_TIM6_FREQUENCY;
+        freqin = STM32_TIM6_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
-        freqin = BOARD_TIM7_FREQUENCY;
+        freqin = STM32_TIM7_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
-        freqin = BOARD_TIM8_FREQUENCY;
+        freqin = STM32_TIM8_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
-        freqin = BOARD_TIM15_FREQUENCY;
+        freqin = STM32_TIM15_CLKIN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
-        freqin = BOARD_TIM16_FREQUENCY;
+        freqin = STM32_TIM16_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
-        freqin = BOARD_TIM17_FREQUENCY;
+        freqin = STM32_TIM17_CLKIN;
         break;
 #endif
 
@@ -874,66 +874,66 @@ static int stm32_tim_setclock(struct stm32_tim_dev_s *dev,
     {
 #ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
-        freqin = BOARD_TIM1_FREQUENCY;
+        freqin = STM32_TIM1_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
-        freqin = BOARD_TIM2_FREQUENCY;
+        freqin = STM32_TIM2_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
-        freqin = BOARD_TIM3_FREQUENCY;
+        freqin = STM32_TIM3_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
-        freqin = BOARD_TIM4_FREQUENCY;
+        freqin = STM32_TIM4_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
-        freqin = BOARD_TIM5_FREQUENCY;
+        freqin = STM32_TIM5_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
-        freqin = BOARD_TIM6_FREQUENCY;
+        freqin = STM32_TIM6_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
-        freqin = BOARD_TIM7_FREQUENCY;
+        freqin = STM32_TIM7_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
-        freqin = BOARD_TIM8_FREQUENCY;
+        freqin = STM32_TIM8_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
-        freqin = BOARD_TIM15_FREQUENCY;
+        freqin = STM32_TIM15_CLKIN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
-        freqin = BOARD_TIM16_FREQUENCY;
+        freqin = STM32_TIM16_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
-        freqin = BOARD_TIM17_FREQUENCY;
+        freqin = STM32_TIM17_CLKIN;
         break;
 #endif
 
@@ -988,64 +988,64 @@ static uint32_t stm32_tim_getclock(struct stm32_tim_dev_s *dev)
     {
 #ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
-        freqin = BOARD_TIM1_FREQUENCY;
+        freqin = STM32_TIM1_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
-        freqin = BOARD_TIM2_FREQUENCY;
+        freqin = STM32_TIM2_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
-        freqin = BOARD_TIM3_FREQUENCY;
+        freqin = STM32_TIM3_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
-        freqin = BOARD_TIM4_FREQUENCY;
+        freqin = STM32_TIM4_CLKIN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
-        freqin = BOARD_TIM5_FREQUENCY;
+        freqin = STM32_TIM5_CLKIN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
-        freqin = BOARD_TIM6_FREQUENCY;
+        freqin = STM32_TIM6_CLKIN;
         break;
 #endif
 #ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
-        freqin = BOARD_TIM7_FREQUENCY;
+        freqin = STM32_TIM7_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
-        freqin = BOARD_TIM8_FREQUENCY;
+        freqin = STM32_TIM8_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
-        freqin = BOARD_TIM15_FREQUENCY;
+        freqin = STM32_TIM15_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
-        freqin = BOARD_TIM16_FREQUENCY;
+        freqin = STM32_TIM16_CLKIN;
         break;
 #endif
 
 #ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
-        freqin = BOARD_TIM17_FREQUENCY;
+        freqin = STM32_TIM17_CLKIN;
         break;
 #endif
       default:
