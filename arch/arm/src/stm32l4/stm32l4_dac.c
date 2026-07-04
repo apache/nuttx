@@ -44,6 +44,7 @@
 #include "stm32l4_dac.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_dma.h"
+#include "hardware/stm32l4_tim.h"
 
 #ifdef CONFIG_DAC
 

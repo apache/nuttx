@@ -48,10 +48,6 @@ ifeq ($(CONFIG_STM32_USART),y)
 CHIP_CSRCS += stm32_serial.c
 endif
 
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32_tim_lowerhalf.c
-endif
-
 ifeq ($(CONFIG_STM32_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
@@ -78,10 +74,6 @@ endif
 
 ifeq ($(CONFIG_STM32_QSPI1),y)
 CHIP_CSRCS += stm32_qspi.c
-endif
-
-ifeq ($(CONFIG_STM32_TIM),y)
-CHIP_CSRCS += stm32_tim.c
 endif
 
 ifeq ($(CONFIG_STM32_HAVE_HSI48),y)

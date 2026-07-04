@@ -57,7 +57,6 @@
 #include "stm32_sdio_m3m4_v1.h"
 #include "stm32_spi.h"
 #include "stm32_i2s.h"
-#include "stm32_tim.h"
 #include "stm32_uart.h"
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
 #  include "stm32_usbdev.h"

@@ -137,10 +137,6 @@ if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
-
 if(CONFIG_STM32_TIMX_CAP)
   list(APPEND SRCS stm32_capture.c)
 endif()
@@ -166,10 +162,6 @@ if(CONFIG_USBHOST)
       list(APPEND SRCS stm32_usbhost.c)
     endif()
   endif()
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
 endif()
 
 if(CONFIG_STM32_LPTIM)

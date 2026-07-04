@@ -42,7 +42,7 @@
 #include "arm_internal.h"
 #include "stm32.h"
 #include "stm32l4_gpio.h"
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 #include "stm32l4_qencoder.h"
 
 #ifdef CONFIG_SENSORS_QENCODER
