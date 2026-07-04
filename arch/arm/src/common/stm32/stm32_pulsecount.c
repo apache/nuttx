@@ -40,6 +40,7 @@
 #include "chip.h"
 #include "stm32_pulsecount.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 
 /* Generalized pulse count support for all STM32 families */
 

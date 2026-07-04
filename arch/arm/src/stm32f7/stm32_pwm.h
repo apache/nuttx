@@ -41,7 +41,7 @@
 
 #ifdef CONFIG_STM32_PWM
 #  include <arch/board/board.h>
-#  include "hardware/stm32_tim.h"
+#  include "hardware/stm32f7_tim.h"
 #endif
 
 /****************************************************************************

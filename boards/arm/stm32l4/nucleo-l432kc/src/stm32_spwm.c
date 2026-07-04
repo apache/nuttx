@@ -44,7 +44,7 @@
 #include "ram_vectors.h"
 
 #include "stm32l4_pwm.h"
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 
 #ifdef CONFIG_NUCLEOL432KC_SPWM
 

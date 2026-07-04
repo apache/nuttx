@@ -40,7 +40,7 @@
 
 #include <arch/board/board.h>
 
-#include "stm32wb_tim.h"
+#include "stm32_tim.h"
 
 #ifdef CONFIG_RTC_DRIVER
 #  include <nuttx/timers/rtc.h>
