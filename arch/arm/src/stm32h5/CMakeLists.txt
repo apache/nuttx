@@ -36,10 +36,6 @@ endif()
 
 list(APPEND SRCS stm32_rcc.c stm32_pwr.c stm32_lse.c stm32_sdmmc.c)
 
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
-endif()
-
 if(CONFIG_STM32_I2C)
   list(APPEND SRCS stm32_i2c.c)
 endif()
@@ -70,10 +66,6 @@ endif()
 
 if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
 endif()
 
 if(CONFIG_STM32_LPTIM)

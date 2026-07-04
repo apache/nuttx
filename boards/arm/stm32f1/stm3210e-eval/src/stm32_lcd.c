@@ -64,6 +64,7 @@
 
 #include "arm_internal.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 #include "stm3210e-eval.h"
 
 /****************************************************************************
@@ -799,31 +800,31 @@ static int stm3210e_getrun(struct lcd_dev_s *dev,
   /* Configure according to the LCD type */
 
   switch (g_lcddev.type)
-   {
+    {
 #ifndef CONFIG_STM3210E_SPFD5408B_DISABLE
-     case LCD_TYPE_SPFD5408B:
-       readsetup = stm3210e_readsetup;
-       readgram  = stm3210e_readshift;
-       break;
+      case LCD_TYPE_SPFD5408B:
+        readsetup = stm3210e_readsetup;
+        readgram  = stm3210e_readshift;
+        break;
 #endif
 
 #ifndef CONFIG_STM3210E_R61580_DISABLE
-     case LCD_TYPE_R61580:
-       readsetup = stm3210e_readsetup;
-       readgram  = stm3210e_readnoshift;
-       break;
+      case LCD_TYPE_R61580:
+        readsetup = stm3210e_readsetup;
+        readgram  = stm3210e_readnoshift;
+        break;
 #endif
 
 #ifndef CONFIG_STM3210E_AM240320_DISABLE
-     case LCD_TYPE_AM240320:
-       readsetup = stm3210e_readnosetup;
-       readgram  = stm3210e_readnoshift;
-       break;
+      case LCD_TYPE_AM240320:
+        readsetup = stm3210e_readnosetup;
+        readgram  = stm3210e_readnoshift;
+        break;
 #endif
 
-     default:  /* Shouldn't happen */
-       return -ENOSYS;
-   }
+      default:  /* Shouldn't happen */
+        return -ENOSYS;
+    }
 
   /* Read the run from GRAM. */
 

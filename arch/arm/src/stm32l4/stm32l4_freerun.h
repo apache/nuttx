@@ -33,7 +33,7 @@
 #include <time.h>
 #include <nuttx/debug.h>
 
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 
 #ifdef CONFIG_STM32_FREERUN
 

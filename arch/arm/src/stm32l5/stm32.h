@@ -43,7 +43,6 @@
 #include "stm32l5_pwr.h"
 #include "stm32_rcc.h"
 #include "stm32l5_spi.h"
-#include "stm32l5_tim.h"
 #include "stm32_uart.h"
 #include "stm32_lowputc.h"
 

@@ -35,15 +35,10 @@ set(SRCS
     stm32wb_start.c
     stm32wb_rcc_lse.c
     stm32wb_pwr.c
-    stm32wb_tim.c
     stm32wb_flash.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32wb_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32wb_tim_lowerhalf.c)
 endif()
 
 if(NOT CONFIG_SCHED_TICKLESS)

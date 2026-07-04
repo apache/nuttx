@@ -46,7 +46,7 @@
 
 #include "chip.h"
 #include "stm32l4_rcc.h"
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_adc.h"
 
@@ -2754,8 +2754,7 @@ struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
 #  endif
           dev = &g_adcdev1;
         }
-
-      break;
+        break;
 #endif
 #ifdef CONFIG_STM32_ADC2
       case 2:
@@ -2773,8 +2772,7 @@ struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
 #  endif
           dev = &g_adcdev2;
         }
-
-      break;
+        break;
 #endif
 #ifdef CONFIG_STM32_ADC3
       case 3:
@@ -2792,8 +2790,7 @@ struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
 #  endif
           dev = &g_adcdev3;
         }
-
-      break;
+        break;
 #endif
       default:
         aerr("ERROR: No ADC interface defined\n");

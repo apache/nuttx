@@ -52,7 +52,6 @@
 #include "stm32_sdmmc.h"
 #include "stm32_spi.h"
 #include "stm32_i2s.h"
-#include "stm32_tim.h"
 #include "stm32_uart.h"
 #include "stm32_lowputc.h"
 #include "stm32_ethernet.h"

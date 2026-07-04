@@ -34,7 +34,7 @@
 
 #include <nuttx/irq.h>
 
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 
 #ifdef CONFIG_STM32_ONESHOT
 
