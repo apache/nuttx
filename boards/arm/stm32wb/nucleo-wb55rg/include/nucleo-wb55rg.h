@@ -212,25 +212,15 @@
 #define STM32_RCC_CFGR_PPRE2      RCC_CFGR_PPRE2_HCLK1
 #define STM32_PCLK2_FREQUENCY     (STM32_HCLK_FREQUENCY / 1)
 
-/* Timer Frequencies, if APB prescaler is set to 1, frequency is same to APBx
- * otherwise frequency is 2xAPBx.
- * Note: TIM1,16,17 are on APB2, TIM2 is on APB1
- */
-
 /* Timers driven from APB1 will be the same frequency as PCLK1 */
 
-#define STM32_APB1_TIM2_CLKIN     (1 * STM32_PCLK1_FREQUENCY)
+#define STM32_TIM2_CLKIN     (STM32_PCLK1_FREQUENCY)
 
 /* Timers driven from APB2 will be the same frequency as PCLK2 */
 
-#define STM32_APB2_TIM1_CLKIN     (1 * STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM16_CLKIN    (1 * STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM17_CLKIN    (1 * STM32_PCLK2_FREQUENCY)
-
-#define BOARD_TIM1_FREQUENCY        STM32_APB2_TIM1_CLKIN
-#define BOARD_TIM2_FREQUENCY        STM32_APB1_TIM2_CLKIN
-#define BOARD_TIM16_FREQUENCY       STM32_APB2_TIM16_CLKIN
-#define BOARD_TIM17_FREQUENCY       STM32_APB2_TIM17_CLKIN
+#define STM32_TIM1_CLKIN     (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM16_CLKIN    (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM17_CLKIN    (STM32_PCLK2_FREQUENCY)
 
 /* Higher SYSCLK requires more flash wait states. */
 

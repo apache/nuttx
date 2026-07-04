@@ -87,7 +87,7 @@
  * same frequency as that of the APB domain. Otherwise they are set to twice.
  */
 
-#define STM32_APB1_TIM2_CLKIN     (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM2_CLKIN     (STM32_PCLK1_FREQUENCY)
 
 /* Configure the APB2 prescaler */
 
@@ -99,9 +99,9 @@
  * same frequency as that of the APB domain. Otherwise they are set to twice.
  */
 
-#define STM32_APB2_TIM1_CLKIN     STM32_PCLK2_FREQUENCY
-#define STM32_APB2_TIM16_CLKIN    STM32_PCLK2_FREQUENCY
-#define STM32_APB2_TIM17_CLKIN    STM32_PCLK2_FREQUENCY
+#define STM32_TIM1_CLKIN     STM32_PCLK2_FREQUENCY
+#define STM32_TIM16_CLKIN    STM32_PCLK2_FREQUENCY
+#define STM32_TIM17_CLKIN    STM32_PCLK2_FREQUENCY
 
 /* The timer clock frequencies are automatically defined by hardware. If the
  * APB prescaler equals 1, the timer clock frequencies are set to the same
@@ -109,13 +109,9 @@
  * Note: TIM1,15,16 are on APB2, others on APB1
  */
 
-#define BOARD_TIM1_FREQUENCY         STM32_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY         STM32_HCLK_FREQUENCY
-#define BOARD_TIM16_FREQUENCY        STM32_HCLK_FREQUENCY
-#define BOARD_TIM17_FREQUENCY        STM32_HCLK_FREQUENCY
-#define BOARD_LPTIM1_FREQUENCY       STM32_HCLK_FREQUENCY
-#define BOARD_LPTIM2_FREQUENCY       STM32_HCLK_FREQUENCY
-#define BOARD_LPTIM3_FREQUENCY       STM32_HCLK_FREQUENCY
+#define STM32_LPTIM1_CLKIN           STM32_HCLK_FREQUENCY
+#define STM32_LPTIM2_CLKIN           STM32_HCLK_FREQUENCY
+#define STM32_LPTIM3_CLKIN           STM32_HCLK_FREQUENCY
 
 /****************************************************************************
  * Pre-processor Definitions

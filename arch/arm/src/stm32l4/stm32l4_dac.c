@@ -930,44 +930,44 @@ static int dac_timinit(struct stm32_chan_s *chan)
 #ifdef NEED_TIM2
       case 2:
         setbits = RCC_APB1ENR1_TIM2EN;
-        pclk    = BOARD_TIM2_FREQUENCY;
+        pclk    = STM32_TIM2_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM3
       case 3:
         setbits = RCC_APB1ENR1_TIM3EN;
-        pclk    = BOARD_TIM3_FREQUENCY;
+        pclk    = STM32_TIM3_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM4
       case 4:
         setbits = RCC_APB1ENR1_TIM4EN;
-        pclk    = BOARD_TIM4_FREQUENCY;
+        pclk    = STM32_TIM4_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM5
       case 5:
         setbits = RCC_APB1ENR1_TIM5EN;
-        pclk    = BOARD_TIM5_FREQUENCY;
+        pclk    = STM32_TIM5_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM6
       case 6:
         setbits = RCC_APB1ENR1_TIM6EN;
-        pclk    = BOARD_TIM6_FREQUENCY;
+        pclk    = STM32_TIM6_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM7
       case 7:
         setbits = RCC_APB1ENR1_TIM7EN;
-        pclk    = BOARD_TIM7_FREQUENCY;
+        pclk    = STM32_TIM7_CLKIN;
         break;
 #endif
 #ifdef NEED_TIM8
       case 8:
         regaddr = STM32_RCC_APB2ENR;
         setbits = RCC_APB2ENR_TIM8EN;
-        pclk    = BOARD_TIM8_FREQUENCY;
+        pclk    = STM32_TIM8_CLKIN;
         break;
 #endif
       default:

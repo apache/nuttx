@@ -455,7 +455,7 @@ static struct stm32_pwmtimer_s g_pwm1dev =
   .trgo        = STM32_TIM1_TRGO,
 #endif
   .base        = STM32_TIM1_BASE,
-  .pclk        = STM32_APB2_TIM1_CLKIN,
+  .pclk        = STM32_TIM1_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM1_PWM */
 
@@ -551,7 +551,7 @@ static struct stm32_pwmtimer_s g_pwm2dev =
   .trgo        = STM32_TIM2_TRGO,
 #endif
   .base        = STM32_TIM2_BASE,
-  .pclk        = STM32_APB1_TIM2_CLKIN,
+  .pclk        = STM32_TIM2_CLKIN,
 };
 
 #endif /* CONFIG_STM32_TIM2_PWM */
@@ -648,7 +648,7 @@ static struct stm32_pwmtimer_s g_pwm3dev =
   .trgo        = STM32_TIM3_TRGO,
 #endif
   .base        = STM32_TIM3_BASE,
-  .pclk        = STM32_APB1_TIM3_CLKIN,
+  .pclk        = STM32_TIM3_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM3_PWM */
 
@@ -744,7 +744,7 @@ static struct stm32_pwmtimer_s g_pwm4dev =
   .trgo        = STM32_TIM4_TRGO,
 #endif
   .base        = STM32_TIM4_BASE,
-  .pclk        = STM32_APB1_TIM4_CLKIN,
+  .pclk        = STM32_TIM4_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM4_PWM */
 
@@ -838,7 +838,7 @@ static struct stm32_pwmtimer_s g_pwm5dev =
   .trgo        = STM32_TIM5_TRGO
 #endif
   .base        = STM32_TIM5_BASE,
-  .pclk        = STM32_APB1_TIM5_CLKIN,
+  .pclk        = STM32_TIM5_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM5_PWM */
 
@@ -1001,7 +1001,7 @@ static struct stm32_pwmtimer_s g_pwm8dev =
   .trgo        = STM32_TIM8_TRGO,
 #endif
   .base        = STM32_TIM8_BASE,
-  .pclk        = STM32_APB2_TIM8_CLKIN,
+  .pclk        = STM32_TIM8_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM8_PWM */
 
@@ -1083,7 +1083,7 @@ static struct stm32_pwmtimer_s g_pwm15dev =
   .trgo        = STM32_TIM15_TRGO,
 #endif
   .base        = STM32_TIM15_BASE,
-  .pclk        = STM32_APB2_TIM15_CLKIN,
+  .pclk        = STM32_TIM15_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM15_PWM */
 
@@ -1149,7 +1149,7 @@ static struct stm32_pwmtimer_s g_pwm16dev =
   .trgo        = 0,             /* TRGO not supported for TIM16 */
 #endif
   .base        = STM32_TIM16_BASE,
-  .pclk        = STM32_APB2_TIM16_CLKIN,
+  .pclk        = STM32_TIM16_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM16_PWM */
 
@@ -1215,7 +1215,7 @@ static struct stm32_pwmtimer_s g_pwm17dev =
   .trgo        = 0,             /* TRGO not supported for TIM17 */
 #endif
   .base        = STM32_TIM17_BASE,
-  .pclk        = STM32_APB2_TIM17_CLKIN,
+  .pclk        = STM32_TIM17_CLKIN,
 };
 #endif /* CONFIG_STM32_TIM17_PWM */
 

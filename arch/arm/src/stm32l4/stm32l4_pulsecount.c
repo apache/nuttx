@@ -235,7 +235,7 @@ static struct stm32_tim_s g_pulsecount1dev =
   .t_dts       = CONFIG_STM32_TIM1_PULSECOUNT_TDTS,
   .irq         = STM32_IRQ_TIM1UP,
   .base        = STM32_TIM1_BASE,
-  .pclk        = STM32_APB2_TIM1_CLKIN,
+  .pclk        = STM32_TIM1_CLKIN,
 };
 
 #endif /* CONFIG_STM32_TIM1_PULSECOUNT */
@@ -286,7 +286,7 @@ static struct stm32_tim_s g_pulsecount8dev =
   .t_dts       = CONFIG_STM32_TIM8_PULSECOUNT_TDTS,
   .irq         = STM32_IRQ_TIM8UP,
   .base        = STM32_TIM8_BASE,
-  .pclk        = STM32_APB2_TIM8_CLKIN,
+  .pclk        = STM32_TIM8_CLKIN,
 };
 
 #endif /* CONFIG_STM32_TIM8_PULSECOUNT */

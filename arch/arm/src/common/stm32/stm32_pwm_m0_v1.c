@@ -280,7 +280,7 @@ static struct stm32_pwmtimer_s g_pwm1dev =
   .timtype     = TIMTYPE_TIM1,
   .mode        = CONFIG_STM32_TIM1_MODE,
   .base        = STM32_TIM1_BASE,
-  .pclk        = STM32_APB2_TIM1_CLKIN,
+  .pclk        = STM32_TIM1_CLKIN,
 };
 #endif
 
@@ -327,7 +327,7 @@ static struct stm32_pwmtimer_s g_pwm2dev =
   .timtype     = TIMTYPE_TIM2,
   .mode        = CONFIG_STM32_TIM2_MODE,
   .base        = STM32_TIM2_BASE,
-  .pclk        = STM32_APB1_TIM2_CLKIN,
+  .pclk        = STM32_TIM2_CLKIN,
 };
 #endif
 
@@ -374,7 +374,7 @@ static struct stm32_pwmtimer_s g_pwm3dev =
   .timtype     = TIMTYPE_TIM3,
   .mode        = CONFIG_STM32_TIM3_MODE,
   .base        = STM32_TIM3_BASE,
-  .pclk        = STM32_APB1_TIM3_CLKIN,
+  .pclk        = STM32_TIM3_CLKIN,
 };
 #endif
 
@@ -397,7 +397,7 @@ static struct stm32_pwmtimer_s g_pwm14dev =
   .timtype     = TIMTYPE_TIM14,
   .mode        = STM32_TIMMODE_COUNTUP,
   .base        = STM32_TIM14_BASE,
-  .pclk        = STM32_APB2_TIM14_CLKIN,
+  .pclk        = STM32_TIM14_CLKIN,
 };
 #endif
 
@@ -428,7 +428,7 @@ static struct stm32_pwmtimer_s g_pwm15dev =
   .timtype     = TIMTYPE_TIM15,
   .mode        = STM32_TIMMODE_COUNTUP,
   .base        = STM32_TIM15_BASE,
-  .pclk        = STM32_APB2_TIM15_CLKIN,
+  .pclk        = STM32_TIM15_CLKIN,
 };
 #endif
 
@@ -451,7 +451,7 @@ static struct stm32_pwmtimer_s g_pwm16dev =
   .timtype     = TIMTYPE_TIM16,
   .mode        = STM32_TIMMODE_COUNTUP,
   .base        = STM32_TIM16_BASE,
-  .pclk        = STM32_APB2_TIM16_CLKIN,
+  .pclk        = STM32_TIM16_CLKIN,
 };
 #endif
 
@@ -474,7 +474,7 @@ static struct stm32_pwmtimer_s g_pwm17dev =
   .timtype     = TIMTYPE_TIM17,
   .mode        = STM32_TIMMODE_COUNTUP,
   .base        = STM32_TIM17_BASE,
-  .pclk        = STM32_APB2_TIM17_CLKIN,
+  .pclk        = STM32_TIM17_CLKIN,
 };
 #endif
 

@@ -749,7 +749,7 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
    */
 
   freq = spwm->samples * spwm->waveform_freq;
-  per = BOARD_TIM6_FREQUENCY / freq;
+  per = STM32_TIM6_CLKIN / freq;
   if (per > 0xffff)
     {
       printf("ERROR: can not achieve TIM6 frequency\n");
@@ -759,7 +759,7 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
 
   /* TODO: TIM_SETFREQ */
 
-  STM32_TIM_SETCLOCK(tim, BOARD_TIM6_FREQUENCY);
+  STM32_TIM_SETCLOCK(tim, STM32_TIM6_CLKIN);
   STM32_TIM_SETPERIOD(tim, per);
 
   /* Attach TIM6 ram vector */

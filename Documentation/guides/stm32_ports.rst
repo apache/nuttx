@@ -135,6 +135,24 @@ prefix replace is safe)::
     STM32WL5_  ->  STM32_
     STM32N6_   ->  STM32_
 
+Board timer input clock unified to ``STM32_TIMn_CLKIN``
+-------------------------------------------------------
+
+The board-provided timer input clock frequency macros were unified to a
+single convention: every board defines ``STM32_TIMn_CLKIN`` for the TIM
+peripherals, ``STM32_LPTIMn_CLKIN`` for the LPTIM peripherals and
+``STM32_HRTIM1_CLKIN`` for HRTIM.  The APB bus is no longer encoded in the
+macro name.  Update out-of-tree board headers and drivers (drop the bus
+from the name, keep the value)::
+
+    STM32_APBx_TIMn_CLKIN     ->  STM32_TIMn_CLKIN
+    BOARD_TIMn_FREQUENCY      ->  STM32_TIMn_CLKIN
+    STM32_APBx_LPTIMn_CLKIN   ->  STM32_LPTIMn_CLKIN
+    BOARD_LPTIMn_FREQUENCY    ->  STM32_LPTIMn_CLKIN
+    STM32_LPTIMn_FREQUENCY    ->  STM32_LPTIMn_CLKIN
+    STM32_APB1_THRTIM1_CLKIN  ->  STM32_HRTIM1_CLKIN
+    BOARD_HRTIM1_FREQUENCY    ->  STM32_HRTIM1_CLKIN
+
 Public API names unified to ``stm32_*``
 ---------------------------------------
 

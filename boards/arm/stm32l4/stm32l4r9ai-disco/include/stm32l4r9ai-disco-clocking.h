@@ -158,34 +158,10 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
-/* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the
- * same frequency as that of the APB domain. Otherwise they are set to twice.
- *
- * REVISIT : this can be configured
- */
-
-#define STM32_APB1_TIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM4_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM5_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
-
 /* APB2 clock (PCLK2) is HCLK (120 MHz) */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
-
-/* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the
- * same frequency as that of the APB domain. Otherwise they are set to twice.
- *
- * REVISIT : this can be configured
- */
-
-#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
 
 #elif defined(HSE_CLOCK_CONFIG)
 
@@ -268,20 +244,10 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
-#define STM32_APB1_TIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM4_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM5_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
-
 /* Configure the APB2 prescaler */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
-
-#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
 
 #elif defined(MSI_CLOCK_CONFIG)
 
@@ -365,42 +331,28 @@
 #define STM32_RCC_CFGR_PPRE1    RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
 #define STM32_PCLK1_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
-#define STM32_APB1_TIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM4_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM5_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
-#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
-
 /* Configure the APB2 prescaler */
 
 #define STM32_RCC_CFGR_PPRE2    RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
 #define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
-#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
-#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
-
 #endif /* clock selection */
 
-/* The timer clock frequencies are automatically defined by hardware.
- * If the APB prescaler equals 1, the timer clock frequencies are set to the
- * same frequency as that of the APB domain. Otherwise they are set to twice.
- * Note: TIM1,8,15,16,17 are on APB2, others on APB1
- */
+/* Timer input clock frequencies */
 
-#define BOARD_TIM1_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM3_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM4_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM5_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM6_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM7_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM8_FREQUENCY    STM32_HCLK_FREQUENCY
-#define BOARD_TIM15_FREQUENCY   STM32_HCLK_FREQUENCY
-#define BOARD_TIM16_FREQUENCY   STM32_HCLK_FREQUENCY
-#define BOARD_TIM17_FREQUENCY   STM32_HCLK_FREQUENCY
-#define BOARD_LPTIM1_FREQUENCY  STM32_HCLK_FREQUENCY
-#define BOARD_LPTIM2_FREQUENCY  STM32_HCLK_FREQUENCY
+#define STM32_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM4_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM5_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM15_CLKIN   STM32_HCLK_FREQUENCY
+#define STM32_TIM16_CLKIN   STM32_HCLK_FREQUENCY
+#define STM32_TIM17_CLKIN   STM32_HCLK_FREQUENCY
+#define STM32_LPTIM1_CLKIN      STM32_HCLK_FREQUENCY
+#define STM32_LPTIM2_CLKIN      STM32_HCLK_FREQUENCY
 
 /****************************************************************************
  * Public Data
