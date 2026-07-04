@@ -243,8 +243,8 @@ static void     sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 
 /* I2S methods */
 
-static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  sai_datawidth(struct i2s_dev_s *dev, int bits);
 static int      sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                   i2s_callback_t callback, void *arg, uint32_t timeout);
 static int      sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
@@ -1102,7 +1102,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)dev;
 
@@ -1143,7 +1143,7 @@ static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
+static int32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)dev;
   uint32_t setbits;
