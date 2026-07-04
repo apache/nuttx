@@ -58,6 +58,8 @@ config STM32_STM32L562XX
 	select STM32_HAVE_USART3
 	select STM32_HAVE_UART4
 	select STM32_HAVE_UART5
+	select STM32_HAVE_TIM2_32BITS
+	select STM32_HAVE_TIM5_32BITS
 
 # Pin/package configurations
 

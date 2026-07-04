@@ -72,7 +72,7 @@
 #include <nuttx/debug.h>
 
 #include "arm_internal.h"
-#include "stm32wb_tim.h"
+#include "stm32_tim.h"
 
 #ifdef CONFIG_SCHED_TICKLESS
 
@@ -166,7 +166,7 @@ static inline void stm32_modifyreg16(uint8_t offset, uint16_t clearbits,
 
 static inline void stm32_tickless_enableint(int channel)
 {
-  stm32_modifyreg16(STM32_TIM_DIER_OFFSET, 0, 1 << channel);
+  stm32_modifyreg16(STM32_GTIM_DIER_OFFSET, 0, 1 << channel);
 }
 
 /****************************************************************************
@@ -175,7 +175,7 @@ static inline void stm32_tickless_enableint(int channel)
 
 static inline void stm32_tickless_disableint(int channel)
 {
-  stm32_modifyreg16(STM32_TIM_DIER_OFFSET, 1 << channel, 0);
+  stm32_modifyreg16(STM32_GTIM_DIER_OFFSET, 1 << channel, 0);
 }
 
 /****************************************************************************
@@ -184,7 +184,7 @@ static inline void stm32_tickless_disableint(int channel)
 
 static inline void stm32_tickless_ackint(int channel)
 {
-  stm32_putreg16(STM32_TIM_SR_OFFSET, ~(1 << channel));
+  stm32_putreg16(STM32_GTIM_SR_OFFSET, ~(1 << channel));
 }
 
 /****************************************************************************
@@ -193,7 +193,7 @@ static inline void stm32_tickless_ackint(int channel)
 
 static inline void stm32_tickless_trigint(int channel)
 {
-  stm32_putreg16(STM32_TIM_EGR_OFFSET, 1 << channel);
+  stm32_putreg16(STM32_GTIM_EGR_OFFSET, 1 << channel);
 }
 
 /****************************************************************************
@@ -202,7 +202,7 @@ static inline void stm32_tickless_trigint(int channel)
 
 static inline uint16_t stm32_tickless_getint(void)
 {
-  return stm32_getreg16(STM32_TIM_SR_OFFSET);
+  return stm32_getreg16(STM32_GTIM_SR_OFFSET);
 }
 
 /****************************************************************************
@@ -214,7 +214,7 @@ static int stm32_tickless_setchannel(uint8_t channel)
   uint16_t ccmr_orig = 0;
   uint16_t ccmr_val = 0;
   uint16_t ccer_val;
-  uint8_t ccmr_offset = STM32_TIM_CCMR1_OFFSET;
+  uint8_t ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
 
   /* Further we use range as 0..3; if channel=0 it will also overflow here */
 
@@ -225,29 +225,32 @@ static int stm32_tickless_setchannel(uint8_t channel)
 
   /* Assume that channel is disabled and polarity is active high */
 
-  ccer_val = stm32_getreg16(STM32_TIM_CCER_OFFSET);
-  ccer_val &= ~(GTIM_CCER_CCXE(channel) | GTIM_CCER_CCXP(channel));
+  ccer_val = stm32_getreg16(STM32_GTIM_CCER_OFFSET);
+  ccer_val &= ~((GTIM_CCER_CC1E | GTIM_CCER_CC1P) <<
+                GTIM_CCER_CCXBASE(channel));
 
   /* Frozen mode because we don't want to change the GPIO, preload register
    * disabled.
    */
 
-  ccmr_val = GTIM_CCMR_OCXM_FRZN(channel);
+  ccmr_val = (GTIM_CCMR_MODE_FRZN << GTIM_CCMR1_OC1M_SHIFT) <<
+             ((channel & 1) << 3);
 
   /* Set polarity */
 
-  ccer_val |= GTIM_CCER_CCXP(channel);
+  ccer_val |= GTIM_CCER_CC1P << GTIM_CCER_CCXBASE(channel);
 
   if (channel > 1)
     {
-      ccmr_offset = STM32_TIM_CCMR2_OFFSET;
+      ccmr_offset = STM32_GTIM_CCMR2_OFFSET;
     }
 
   ccmr_orig  = stm32_getreg16(ccmr_offset);
-  ccmr_orig &= ~(GTIM_CCMR_OCXM_MASK(channel) | GTIM_CCMR_OCXPE(channel));
+  ccmr_orig &= ~((GTIM_CCMR1_OC1M_MASK | GTIM_CCMR1_OC1PE) <<
+                 ((channel & 1) << 3));
   ccmr_orig |= ccmr_val;
   stm32_putreg16(ccmr_offset, ccmr_orig);
-  stm32_putreg16(STM32_TIM_CCER_OFFSET, ccer_val);
+  stm32_putreg16(STM32_GTIM_CCER_OFFSET, ccer_val);
 
   return OK;
 }

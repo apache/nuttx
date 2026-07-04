@@ -29,7 +29,7 @@
 
 #include <nuttx/debug.h>
 
-#include "stm32l4_tim.h"
+#include "stm32_tim.h"
 #include "nucleo-l432kc.h"
 
 #ifdef CONFIG_TIMER

@@ -199,7 +199,7 @@ int stm32_freerun_counter(struct stm32_freerun_s *freerun,
 
   overflow = freerun->overflow;
   counter  = STM32_TIM_GETCOUNTER(freerun->tch);
-  pending  = STM32_TIM_CHECKINT(freerun->tch, 0);
+  pending  = STM32_TIM_CHECKINT(freerun->tch, GTIM_SR_UIF);
   verify   = STM32_TIM_GETCOUNTER(freerun->tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,

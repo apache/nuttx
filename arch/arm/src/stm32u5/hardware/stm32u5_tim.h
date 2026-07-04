@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32_tim.h
+ * arch/arm/src/stm32u5/hardware/stm32u5_tim.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *

@@ -35,11 +35,7 @@ include common/stm32/Make.defs
 CHIP_ASRCS  =
 CHIP_CSRCS += stm32l5_rcc.c
 CHIP_CSRCS += stm32l5_spi.c stm32l5_lse.c
-CHIP_CSRCS += stm32l5_pwr.c stm32l5_tim.c stm32l5_flash.c
-
-ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS += stm32l5_tim_lowerhalf.c
-endif
+CHIP_CSRCS += stm32l5_pwr.c stm32l5_flash.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32l5_userspace.c stm32l5_mpuinit.c

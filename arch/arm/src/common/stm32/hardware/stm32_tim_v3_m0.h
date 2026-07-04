@@ -34,21 +34,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Timer Capabilities *******************************************************/
-
-/* TIM2 is 16-bit on STM32L0, but 32-bit on STM32F0, STM32G0 and STM32C0 */
-
-#if defined(CONFIG_ARCH_CHIP_STM32L0)
-#  define HAVE_TIM2_16BIT  1
-#  undef  HAVE_TIM2_32BIT
-#elif defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_STM32_STM32F09X)
-#  define HAVE_TIM2_32BIT  1
-#  undef  HAVE_TIM2_16BIT
-#else
-#  define HAVE_TIM2_32BIT  1
-#  undef  HAVE_TIM2_16BIT
-#endif
-
 /* TODO Missing TIM2 definitions available on STM32G0x1 */
 
 /* Register Offsets *********************************************************/
