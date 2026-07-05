@@ -324,7 +324,8 @@ int pci_epc_map_msi_irq(FAR struct pci_epc_ctrl_s *epc, uint8_t funcno,
 {
   int ret;
 
-  if (epc == NULL && epc->ops->map_msi_irq == NULL)
+  if (epc == NULL || funcno >= epc->max_functions ||
+      epc->ops->map_msi_irq == NULL)
     {
       return -EINVAL;
     }
