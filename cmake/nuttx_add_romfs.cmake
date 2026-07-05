@@ -287,9 +287,17 @@ function(process_all_directory_romfs)
     if("${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" STREQUAL "")
       message(
         FATAL_ERROR
-          "CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD must be set when "
-          "BOARD_ETC_ROMFS_PASSWD_ENABLE is enabled. Run 'make menuconfig' "
-          "to set a password.")
+          "\n"
+          "  BUILD ERROR: Admin password not set.\n"
+          "\n"
+          "  Run make menuconfig and set:\n"
+          "    Board Selection -> Auto-generate /etc/passwd -> Admin password\n"
+          "\n"
+          "  For TEA keys, either enable random generation in the same menu,\n"
+          "  or set CONFIG_FSUTILS_PASSWD_KEY1..4 under Application Configuration\n"
+          "  -> File System Utilities -> Password file support.\n"
+          "\n"
+          "  Password and keys are not saved in defconfig.\n")
     endif()
 
     # Determine host executable suffix (.exe on Windows, empty elsewhere)
@@ -317,22 +325,77 @@ function(process_all_directory_romfs)
       add_custom_target(build_host_mkpasswd DEPENDS ${MKPASSWD_BIN})
     endif()
 
-    # Pass TEA key overrides when the user has changed them from defaults
-    set(MKPASSWD_KEY_ARGS "")
-    if(CONFIG_FSUTILS_PASSWD_KEY1)
-      list(APPEND MKPASSWD_KEY_ARGS --key1 ${CONFIG_FSUTILS_PASSWD_KEY1})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY2)
-      list(APPEND MKPASSWD_KEY_ARGS --key2 ${CONFIG_FSUTILS_PASSWD_KEY2})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY3)
-      list(APPEND MKPASSWD_KEY_ARGS --key3 ${CONFIG_FSUTILS_PASSWD_KEY3})
-    endif()
-    if(CONFIG_FSUTILS_PASSWD_KEY4)
-      list(APPEND MKPASSWD_KEY_ARGS --key4 ${CONFIG_FSUTILS_PASSWD_KEY4})
+    set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
+
+    # Delegate detection and generation to the shell helpers so the logic is
+    # testable outside of cmake.  check_passwd_keys.sh prints "yes" when keys
+    # are absent or at insecure defaults; gen_passwd_keys.sh writes fresh
+    # /dev/urandom values in-place.
+    #
+    # RANDOMIZE_KEYS — single-invocation path: 1. gen_passwd_keys.sh writes new
+    # keys to .config at configure time. 2. We re-read .config below so
+    # CONFIG_FSUTILS_PASSWD_KEY1..4 carry the new values for the rest of this
+    # cmake configure run. 3. add_custom_command is registered with the updated
+    # key values, so both mkpasswd (passwd hash) and the firmware use the same
+    # keys — login works without a second cmake invocation.
+    #
+    # Note: config.h is regenerated at build time from .config (its dependency),
+    # so the firmware uses the correct keys automatically.
+
+    execute_process(
+      COMMAND "${NUTTX_DIR}/tools/check_passwd_keys.sh" "${NUTTX_DIR}/.config"
+      OUTPUT_VARIABLE _passwd_keys_need_setup
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      RESULT_VARIABLE _check_rc)
+    if(NOT _check_rc EQUAL 0)
+      message(
+        FATAL_ERROR
+          "check_passwd_keys.sh failed — check ${NUTTX_DIR}/tools/check_passwd_keys.sh"
+      )
     endif()
 
-    set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
+    if(_passwd_keys_need_setup STREQUAL "yes")
+      if(CONFIG_BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS)
+        # Generate keys and write to .config (no key values printed here)
+        execute_process(
+          COMMAND "${NUTTX_DIR}/tools/gen_passwd_keys.sh" "${NUTTX_DIR}/.config"
+          RESULT_VARIABLE _gen_rc
+          OUTPUT_QUIET)
+        if(NOT _gen_rc EQUAL 0)
+          message(
+            FATAL_ERROR
+              "gen_passwd_keys.sh failed — check ${NUTTX_DIR}/.config permissions"
+          )
+        endif()
+        message(
+          STATUS
+            "[passwd] TEA keys written to .config (search for CONFIG_FSUTILS_PASSWD_KEY to view)"
+        )
+
+        # Re-read .config so the new key values are live for this configure run
+        # (mirrors Board.mk's second -include).
+        file(STRINGS "${NUTTX_DIR}/.config" _fresh_config
+             REGEX "^CONFIG_FSUTILS_PASSWD_KEY[1-4]=")
+        foreach(_line ${_fresh_config})
+          if(_line MATCHES "^CONFIG_FSUTILS_PASSWD_KEY([1-4])=(.+)$")
+            set(CONFIG_FSUTILS_PASSWD_KEY${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+          endif()
+        endforeach()
+      else()
+        message(
+          FATAL_ERROR
+            "\n"
+            "  BUILD ERROR: TEA encryption keys not configured.\n"
+            "\n"
+            "  Run make menuconfig and either:\n"
+            "    - enable Generate random TEA keys automatically, or\n"
+            "    - set CONFIG_FSUTILS_PASSWD_KEY1..4 under Application Configuration\n"
+            "      -> File System Utilities -> Password file support\n")
+      endif()
+    endif()
+
+    # At this point KEY1..4 are guaranteed to be correct (either freshly
+    # generated above, or manually set by the user).
     add_custom_command(
       OUTPUT ${GENPASSWD_OUTPUT}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
@@ -341,10 +404,13 @@ function(process_all_directory_romfs)
         --password "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" --uid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_UID} --gid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_GID} --home
-        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" ${MKPASSWD_KEY_ARGS} -o
-        ${GENPASSWD_OUTPUT}
+        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" --key1
+        ${CONFIG_FSUTILS_PASSWD_KEY1} --key2 ${CONFIG_FSUTILS_PASSWD_KEY2}
+        --key3 ${CONFIG_FSUTILS_PASSWD_KEY3} --key4
+        ${CONFIG_FSUTILS_PASSWD_KEY4} -o ${GENPASSWD_OUTPUT}
       DEPENDS ${MKPASSWD_BIN} ${NUTTX_DIR}/.config
-      COMMENT "Generating /etc/passwd from Kconfig values")
+      COMMENT "Generating /etc/passwd from .config TEA keys")
+
     add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
     add_dependencies(generate_passwd build_host_mkpasswd)
     list(APPEND RCRAWS ${GENPASSWD_OUTPUT})
