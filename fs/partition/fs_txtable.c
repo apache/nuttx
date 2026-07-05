@@ -30,6 +30,7 @@
 #include <stdio.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/macro.h>
 
 #include "partition.h"
 #include "fs_heap.h"
@@ -44,6 +45,7 @@
 
 #define TXTABLE_MAGIC   "TXTABLE0"
 #define TXTABLE_LENGTH  (state->erasesize + 1)
+#define TXTABLE_NAME_FMT "%" STRINGIFY(NAME_MAX) "s"
 
 /****************************************************************************
  * Public Functions
@@ -157,12 +159,13 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
           break;
         }
 
-      ret = sscanf(token, "%s %zx %zx",
+      ret = sscanf(token, TXTABLE_NAME_FMT " %zx %zx",
                    part[i].name,
                    &part[i].nblocks,
                    &part[i].firstblock);
-      if (ret < 0)
+      if (ret != 3)
         {
+          ret = -EFTYPE;
           goto out;
         }
 
