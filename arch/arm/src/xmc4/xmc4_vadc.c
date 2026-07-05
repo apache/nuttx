@@ -434,7 +434,7 @@ void xmc4_vadc_global_background_initialize(const vadc_background_config_t *conf
 int xmc4_vadc_group_channel_initialize(vadc_group_t *const group_ptr, const uint32_t ch_num,
                                         const vadc_channel_config_t *config)
 {
-  if (!xmc_vadc_check_group_ptr(group_ptr) || (ch_num > XMC_VADC_NUM_CHANNELS_PER_GROUP))
+  if (!xmc_vadc_check_group_ptr(group_ptr) || (ch_num >= XMC_VADC_NUM_CHANNELS_PER_GROUP))
     {
       return -EINVAL;
     }
@@ -498,7 +498,7 @@ int xmc4_vadc_group_channel_initialize(vadc_group_t *const group_ptr, const uint
 int xmc4_vadc_global_background_add_channel_to_sequence(const uint32_t grp_num,
                                                         const uint32_t ch_num)
 {
-  if ((grp_num > XMC_VADC_MAXIMUM_NUM_GROUPS) || (ch_num > XMC_VADC_NUM_CHANNELS_PER_GROUP))
+  if ((grp_num >= XMC_VADC_MAXIMUM_NUM_GROUPS) || (ch_num >= XMC_VADC_NUM_CHANNELS_PER_GROUP))
     {
       return -EINVAL;
     }
@@ -556,7 +556,7 @@ int xmc4_vadc_group_get_result(vadc_group_t *const group_ptr,
                                 const uint32_t res_reg,
                                 uint16_t *result_ptr)
 {
-  if (!xmc_vadc_check_group_ptr(group_ptr) || (res_reg > XMC_VADC_NUM_RESULT_REGISTERS))
+  if (!xmc_vadc_check_group_ptr(group_ptr) || (res_reg >= XMC_VADC_NUM_RESULT_REGISTERS))
     {
       return -EINVAL;
     }
@@ -583,7 +583,7 @@ int xmc4_vadc_group_get_channel_result(vadc_group_t *const group_ptr,
                                         const uint32_t ch_num,
                                         uint16_t *result_ptr)
 {
-  if (!xmc_vadc_check_group_ptr(group_ptr) || (ch_num > XMC_VADC_NUM_CHANNELS_PER_GROUP))
+  if (!xmc_vadc_check_group_ptr(group_ptr) || (ch_num >= XMC_VADC_NUM_CHANNELS_PER_GROUP))
     {
       return -EINVAL;
     }
