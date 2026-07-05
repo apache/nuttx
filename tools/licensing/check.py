@@ -51,7 +51,7 @@ def commit_attributions(c):
 
 
 def get_headers(s):
-    return re.findall("(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/", s, re.DOTALL)
+    return re.findall(r"(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/", s, re.DOTALL)
 
 
 def get_file(blob):
@@ -131,7 +131,7 @@ def author_has_cla(author):
 
 def header_copyrights(header):
     results = re.findall(
-        " \* *[Cc]opyright:?(?: ?.[Cc].)? *(?:[12][0-9]{3}[,-]? ?)* *(.+)", header
+        r" \* *[Cc]opyright:?(?: ?.[Cc].)? *(?:[12][0-9]{3}[,-]? ?)* *(.+)", header
     )
     return [re.sub("(. )?[Aa]ll rights reserved.?", "", result) for result in results]
 
@@ -139,7 +139,7 @@ def header_copyrights(header):
 def report_cla(author):
     cla = author_has_cla(author)
     if cla:
-        (apacheid, name) = cla
+        apacheid, name = cla
         print(colored("✓", "green"), end=" ")
     else:
         apacheid = None
