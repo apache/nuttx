@@ -1270,7 +1270,7 @@ static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
 
       memset(addr, 0, sizeof(addr));
       memset(port, 0, sizeof(port));
-      n = sscanf((FAR const char *)pkt_ctx->ptr, "%s %s\t", addr, port);
+      n = sscanf((FAR const char *)pkt_ctx->ptr, "%16s %5s\t", addr, port);
       ASSERT(2 == n);
 
       wlinfo("from (%s:%s)\n", addr, port);
@@ -1716,7 +1716,7 @@ static enum pkt_type_e gs2200m_join_network(FAR struct gs2200m_dev_s *dev,
   ASSERT(3 == pkt_dat.n);
 
   n = sscanf(pkt_dat.msg[1] + 1,
-             " %[^:]:%[^:]:%[^ ]",
+             " %16[^:]:%16[^:]:%16[^ ]",
              addr[0], addr[1], addr[2]);
   ASSERT(3 == n);
 
@@ -2793,7 +2793,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
           goto errout;
         }
 
-      n = sscanf(pkt_dat.msg[2], "BSSID=%c:%c:%c:%c:%c:%c %s",
+      n = sscanf(pkt_dat.msg[2], "BSSID=%c:%c:%c:%c:%c:%c %63s",
                  &res->u.ap_addr.sa_data[0], &res->u.ap_addr.sa_data[1],
                  &res->u.ap_addr.sa_data[2], &res->u.ap_addr.sa_data[3],
                  &res->u.ap_addr.sa_data[4], &res->u.ap_addr.sa_data[5],
@@ -2812,7 +2812,7 @@ static int gs2200m_ioctl_iwreq(FAR struct gs2200m_dev_s *dev,
           goto errout;
         }
 
-      n = sscanf(pkt_dat.msg[2], "%s CHANNEL=%" SCNd32 " %s",
+      n = sscanf(pkt_dat.msg[2], "%63s CHANNEL=%" SCNd32 " %63s",
                  cmd, &res->u.freq.m, cmd2);
       ASSERT(3 == n);
       wlinfo("CHANNEL:%" PRId32 "\n", res->u.freq.m);
