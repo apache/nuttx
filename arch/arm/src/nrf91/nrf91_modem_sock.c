@@ -451,20 +451,20 @@ static int nrf91_usrsock_event_callback(int16_t usockid, uint16_t events)
 
 static int nrf91_modem_getver(lte_version_t *version)
 {
-  char buffer1[16];
-  char buffer2[16];
+  char buffer1[LTE_VER_FIRMWARE_LEN];
+  char buffer2[LTE_VER_NP_PACKAGE_LEN];
   int  ret = OK;
 
   memset(version, 0, sizeof(*version));
-  ret = nrf_modem_at_scanf("AT%HWVERSION", "%%HWVERSION: %s %s",
+  ret = nrf_modem_at_scanf("AT%HWVERSION", "%%HWVERSION: %31s %31s",
                            buffer1, buffer2);
-  if (ret > 0)
+  if (ret == 2)
     {
       strncpy(version->bb_product, buffer1, LTE_VER_BB_PRODUCT_LEN);
       strncpy(version->np_package, buffer2, LTE_VER_NP_PACKAGE_LEN);
     }
 
-  ret = nrf_modem_at_scanf("AT+CGMR", "%s", buffer1);
+  ret = nrf_modem_at_scanf("AT+CGMR", "%31s", buffer1);
   if (ret > 0)
     {
       strncpy(version->fw_version, buffer1, LTE_VER_FIRMWARE_LEN);
