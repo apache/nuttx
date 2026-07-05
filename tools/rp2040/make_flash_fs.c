@@ -237,12 +237,6 @@ int scan_dir(int in_sector)
   struct stat    stat;
   int            name_len;
 
-  if (name_len > max_name_len)
-    {
-      fprintf(stderr, "directory name to big. skipped. (%s)\n", path);
-      return -1;
-    }
-
   input_dir = opendir(path);
 
   if (input_dir == NULL)
