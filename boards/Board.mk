@@ -36,9 +36,6 @@ $(ETCSRC): $(foreach raw,$(RCRAWS), $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DEL
 	  $(shell mkdir -p $(dir $(ETCDIR)$(DELIM)$(raw))) \
 	  $(shell cp -rfp $(if $(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw)), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw), $(if $(wildcard $(BOARD_COMMON_DIR)$(DELIM)$(raw)), $(BOARD_COMMON_DIR)$(DELIM)$(raw), $(BOARD_DIR)$(DELIM)src$(DELIM)$(raw))) $(ETCDIR)$(DELIM)$(raw)))
 ifeq ($(CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE),y)
-ifeq ($(strip $(patsubst "%",%,$(CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD))),)
-	$(error CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD must be set when BOARD_ETC_ROMFS_PASSWD_ENABLE is enabled. Run 'make menuconfig' and select a password at: Board Selection ---> Auto-generate /etc/passwd at build time ---> Admin password)
-endif
 	$(Q) mkdir -p $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT)
 	$(Q) $(TOPDIR)$(DELIM)tools$(DELIM)mkpasswd$(HOSTEXEEXT) \
 		--user $(CONFIG_BOARD_ETC_ROMFS_PASSWD_USER) \
@@ -46,10 +43,10 @@ endif
 		--uid $(CONFIG_BOARD_ETC_ROMFS_PASSWD_UID) \
 		--gid $(CONFIG_BOARD_ETC_ROMFS_PASSWD_GID) \
 		--home $(CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME) \
-		$(if $(CONFIG_FSUTILS_PASSWD_KEY1),--key1 $(CONFIG_FSUTILS_PASSWD_KEY1)) \
-		$(if $(CONFIG_FSUTILS_PASSWD_KEY2),--key2 $(CONFIG_FSUTILS_PASSWD_KEY2)) \
-		$(if $(CONFIG_FSUTILS_PASSWD_KEY3),--key3 $(CONFIG_FSUTILS_PASSWD_KEY3)) \
-		$(if $(CONFIG_FSUTILS_PASSWD_KEY4),--key4 $(CONFIG_FSUTILS_PASSWD_KEY4)) \
+		--key1 $(CONFIG_FSUTILS_PASSWD_KEY1) \
+		--key2 $(CONFIG_FSUTILS_PASSWD_KEY2) \
+		--key3 $(CONFIG_FSUTILS_PASSWD_KEY3) \
+		--key4 $(CONFIG_FSUTILS_PASSWD_KEY4) \
 		-o $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT)$(DELIM)passwd
 endif
 	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_ETC_ROMFSMOUNTPT) -V "NSHInitVol"
