@@ -529,7 +529,10 @@ int main(int argc, char **argv)
 
   if (password[0] == '\0')
     {
-      fprintf(stderr, "mkpasswd: --password must not be empty\n");
+      fprintf(stderr,
+              "mkpasswd: ERROR: password must not be empty.\n"
+              "  Set it in menuconfig: Board Selection -> "
+              "Auto-generate /etc/passwd -> Admin password\n");
       return 1;
     }
 
@@ -541,30 +544,35 @@ int main(int argc, char **argv)
       return 1;
     }
 
-  /* Warn if the board Kconfig default password is still being used. */
+  /* Reject the well-known default password.  The build system should have
+   * caught this already; mkpasswd is the last line of defence.
+   */
 
   if (strcmp(password, "Administrator") == 0)
     {
       fprintf(stderr,
-              ">>>> WARNING: YOU ARE USING THE DEFAULT ADMIN PASSWORD "
-              "(CONFIG_BOARD_ETC_ROMFS_"
-              "PASSWD_PASSWORD=\"Administrator\")!!! PLEASE CHANGE "
-              "IT!!! <<<<\n");
+              "mkpasswd: ERROR: password \"Administrator\" is not allowed.\n"
+              "  Set a unique password in menuconfig: Board Selection -> "
+              "Auto-generate /etc/passwd -> Admin password\n");
+      return 1;
     }
 
-  /* Warn when the user has not changed the default TEA keys.
-   * The default values are identical across all NuttX builds, so any
-   * attacker with access to the firmware image can recover the plaintext
-   * password.  This is a warning only; the build is not aborted.
+  /* Reject the default TEA keys.  Using the published defaults means any
+   * attacker who has a copy of the NuttX source can decrypt the password
+   * hash directly from the firmware image (CWE-321).
    */
 
   if (key[0] == DEFAULT_KEY1 && key[1] == DEFAULT_KEY2 &&
       key[2] == DEFAULT_KEY3 && key[3] == DEFAULT_KEY4)
     {
       fprintf(stderr,
-              ">>>> WARNING: YOU ARE USING DEFAULT PASSWORD KEYS "
-              "(CONFIG_FSUTILS_"
-              "PASSWD_KEY1-4)!!! PLEASE CHANGE IT!!! <<<<\n");
+              "mkpasswd: ERROR: default TEA encryption keys "
+              "are not allowed.\n"
+              "  Set keys in menuconfig: Application Configuration -> "
+              "File System Utilities -> Password file support\n"
+              "  Or enable random key generation under Board Selection -> "
+              "Auto-generate /etc/passwd\n");
+      return 1;
     }
 
   /* Encrypt the password using TEA + custom base64.
