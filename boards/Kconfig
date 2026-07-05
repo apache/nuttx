@@ -5544,20 +5544,22 @@ config BOARD_ETC_ROMFS_PASSWD_ENABLE
 	default n
 	depends on ETC_ROMFS
 	---help---
-		Generate the /etc/passwd file at build time from a user-supplied
-		password.  This avoids shipping a hard-coded default password
-		(CWE-798).  When enabled, the build will fail if no password
-		is configured, forcing each build to set its own credentials.
+		Generate /etc/passwd at build time. The password is hashed with TEA
+		by tools/mkpasswd; the plaintext is not stored in the firmware.
 
-		The password is hashed at build time by the host tool
-		tools/mkpasswd (compiled from tools/mkpasswd.c) using the Tiny
-		Encryption Algorithm (TEA) — the same algorithm used at runtime
-		in libs/libc/misc/lib_tea_encrypt.c.  The plaintext password is
-		never stored in the firmware image.
+		Before building, set:
+		  1. Admin password (below)
+		  2. TEA keys — enable random generation below, or set
+		     CONFIG_FSUTILS_PASSWD_KEY1..4 in Application Configuration ->
+		     File System Utilities -> Password file support
 
-		See Documentation/components/passwd_autogen.rst for details.
+		Also enable NSH login with "Encrypted password file" verification.
+
+		Password and keys are not saved in defconfig. Do not commit them.
 
 if BOARD_ETC_ROMFS_PASSWD_ENABLE
+
+comment "--- Step 1: set the admin password below ---"
 
 config BOARD_ETC_ROMFS_PASSWD_USER
 	string "Admin username"
@@ -5566,14 +5568,39 @@ config BOARD_ETC_ROMFS_PASSWD_USER
 		The username for the auto-generated /etc/passwd entry.
 
 config BOARD_ETC_ROMFS_PASSWD_PASSWORD
-	string "Admin password (required)"
-	default "Administrator"
+	string "Admin password (required, no default)"
 	---help---
-		The plaintext password for the auto-generated /etc/passwd entry.
-		This value is hashed with TEA at build time; the plaintext is NOT
-		stored in the firmware image.  The build will fail if this is left
-		empty or shorter than 8 characters.  Set this via
-		'make menuconfig'.
+		The plaintext password for the /etc/passwd entry. No default is
+		provided. The build fails if this is empty or shorter than 8
+		characters.
+
+		Not saved in defconfig.
+
+comment "--- Step 2: choose how to supply the TEA encryption keys ---"
+
+config BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
+	bool "Generate random TEA encryption keys automatically"
+	default n
+	---help---
+		Generate four random TEA keys from /dev/urandom and write them
+		to .config on the first build. The same keys are used for the
+		/etc/passwd hash and the firmware.
+
+		  make menuconfig   # set password, enable this option
+		  make
+
+		Key values are not printed in the build log. Search .config for
+		CONFIG_FSUTILS_PASSWD_KEY to view them.
+
+		Do not copy keys or the password into a defconfig or commit
+		them to version control.
+
+		If disabled, set CONFIG_FSUTILS_PASSWD_KEY1..4 manually under
+		Application Configuration -> File System Utilities ->
+		Password file support.
+
+comment "  If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
+	depends on !BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 
 config BOARD_ETC_ROMFS_PASSWD_UID
 	int "Admin user ID"
