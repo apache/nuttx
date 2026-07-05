@@ -702,6 +702,12 @@ static char *read_line(FILE *stream)
           g_line[len] = '\0';
         }
 
+      if (len == 0)
+        {
+          g_lnptr = g_line;
+          return g_line;
+        }
+
       /* Does this continue on the next line?  Note that this check
        * could erroneoulsy combine two lines if a comment line ends with
        * a line continuation... Don't do that!
