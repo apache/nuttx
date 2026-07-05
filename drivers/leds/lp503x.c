@@ -829,6 +829,12 @@ static int lp503x_ioctl(struct file *filep, int cmd,
         break;
 
       case PWMIOC_ENABLE_LED_BANK_MODE: /* led(0..11), mode required */
+        if (lp503x_ioctl_args->lednum > MAX_RGB_LEDS)
+          {
+            ret = -EINVAL;
+            break;
+          }
+
         ledinfo("INFO: setting LED %d mode to %" PRIx32 "\n",
                 lp503x_ioctl_args->lednum,
                 lp503x_ioctl_args->param);
