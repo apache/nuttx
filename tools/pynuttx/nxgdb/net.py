@@ -310,8 +310,7 @@ class NetCheck(gdb.Command):
             result = max(result, NetCheckResult.FAILED)
             message.append("[FAILED] Failed to check IOB: %s" % e)
 
-        finally:
-            return result, message
+        return result, message
 
     def invoke(self, args, from_tty):
         if utils.get_symbol_value("CONFIG_MM_IOB"):
