@@ -172,6 +172,14 @@
 #define RTS_PACK(cnt, idx) \
   ((((uint32_t)(cnt) & 0xff) << RTS_CNT_SHIFT) | ((uint32_t)(idx) & RTS_IDX_MASK))
 
+/* Sentinel *index value for the peek helpers: a real index never exceeds
+ * RTS_IDX_MASK (24 bits), so this out-of-range value asks the peek to start
+ * from the oldest readable position (the live cons_tail) instead of clamping
+ * a caller-supplied index.
+ */
+
+#define RING_IDX_OLDEST  UINT32_MAX
+
 #ifndef CACHELINE_SIZE
 #  define CACHELINE_SIZE 64
 #endif
@@ -1182,7 +1190,7 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
       uint32_t available;
 
       cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
-      if (index)
+      if (index && *index != RING_IDX_OLDEST)
         {
           cons_index = ring_clamp_cons(*index, cons_index);
         }
