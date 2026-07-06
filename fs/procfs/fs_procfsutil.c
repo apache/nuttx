@@ -33,8 +33,6 @@
 
 #include <nuttx/fs/procfs.h>
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -212,5 +210,3 @@ void procfs_sprintf(FAR char *buf, size_t size, FAR off_t *offset,
 
   *offset -= copysize;
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

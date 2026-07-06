@@ -68,7 +68,6 @@
 #  include <nuttx/clock.h>
 #endif
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
 
 /****************************************************************************
@@ -2303,4 +2302,3 @@ static int proc_stat(const char *relpath, struct stat *buf)
  ****************************************************************************/
 
 #endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
-#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */
