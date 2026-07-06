@@ -193,7 +193,15 @@ For details see :doc:`/components/openamp`.
 ``nuttx/pass1``
 ===============
 
-TODO
+This directory provides support for the two-pass build
+(``CONFIG_BUILD_2PASS=y``). In a two-pass build, the application logic
+is built during pass 1 and the operating system kernel during pass 2.
+Applications may generate and install source files into this directory
+during pass 1; those files are then compiled and linked into the kernel
+address space during pass 2.
+
+The primary use of this mechanism is to generate kernel symbol tables
+required for loadable kernel module support.
 
 ``nuttx/sched``
 ===============
