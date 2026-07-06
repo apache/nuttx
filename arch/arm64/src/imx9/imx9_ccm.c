@@ -270,7 +270,7 @@ int imx9_ccm_configure_root_clock(int root, int src, uint32_t div)
   uint32_t value;
   int i;
 
-  if (root >= CCM_CR_COUNT || div == 0 || div > 255)
+  if (root > CCM_CR_COUNT || div == 0 || div > 255)
     {
       return -EINVAL;
     }
@@ -321,7 +321,7 @@ int imx9_ccm_configure_root_clock(int root, int src, uint32_t div)
 
 int imx9_ccm_root_clock_on(int root, bool enabled)
 {
-  if (root >= CCM_CR_COUNT)
+  if (root > CCM_CR_COUNT)
     {
       return -EINVAL;
     }
