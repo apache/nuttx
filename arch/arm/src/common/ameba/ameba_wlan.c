@@ -26,15 +26,21 @@
  * The NP runs the WiFi MAC/PHY and delivers/accepts 802.3 (Ethernet)
  * frames over the WHC IPC, so this is a plain Ethernet-style netdev
  * (NET_LL_IEEE80211).
+ *
+ * This driver uses the NuttX network "lower-half" framework
+ * (include/nuttx/net/netdev_lowerhalf.h + drivers/net/netdev_upperhalf.c):
+ * we implement struct netdev_ops_s (ifup/ifdown/transmit/receive/ioctl) and
+ * the generic upper half owns the poll loop, the RX/TX worker, the IOB
+ * (netpkt) accounting and the quota-based flow control.  See the guide
+ * in Documentation/components/net/netdriver.rst.
+ *
  * The data path crosses to the SDK-header side through a thin byte-buffer
  * ABI (the SDK's lwIP/pbuf headers collide with NuttX's, so they cannot
- * share a
- * translation unit):
+ * share a translation unit):
  *
- *   TX:  ameba_wlan_txpoll -> ameba_wifi_txframe()  [ameba_wifi_depend.c]
- *   RX:  netif_adapter_wifi_recv_whc() -> ameba_wlan_rxframe()  (this file)
+ *   TX: ameba_wlan_transmit() -> ameba_wifi_txframe() [ameba_wifi_depend.c]
+ *   RX: netif_adapter_wifi_recv_whc() -> ameba_wlan_rxframe() (this file)
  *
- * Follows the standard NuttX Ethernet-style netdev (devif) RX/TX idiom.
  * IW (wireless-extension) ioctls drive scan / connect / SoftAP via wapi.
  ****************************************************************************/
 
@@ -57,10 +63,8 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/net/netdev.h>
+#include <nuttx/net/netdev_lowerhalf.h>
 #include <nuttx/mm/iob.h>
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
 #ifdef CONFIG_NETDEV_IOCTL
 #  include <nuttx/wireless/wireless.h>
 #endif
@@ -79,16 +83,24 @@
 
 #define AMEBA_WLAN_BUFSIZE  (CONFIG_NET_ETH_PKTSIZE + CONFIG_NET_GUARDSIZE)
 
+/* Quotas: the WHC send copies the frame synchronously, so a single in-flight
+ * TX buffer is enough.  The RX quota bounds how many staged frames
+ * (netpkts) the driver may hold before the upper half
+ * drains them; keep it well under the IOB pool.
+ */
+
+#define AMEBA_WLAN_TX_QUOTA 1
+#define AMEBA_WLAN_RX_QUOTA 16
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct ameba_wlan_s
 {
-  struct net_driver_s dev;         /* Interface understood by the network   */
-  struct work_s       pollwork;    /* For deferring TX poll work to LPWORK   */
-  struct work_s       rxwork;      /* For deferring RX processing to LPWORK   */
-  struct iob_queue_s  rxq;         /* Frames queued by the WHC RX callback    */
+  struct netdev_lowerhalf_s dev;   /* Lower-half interface to the upper half */
+  struct iob_queue_s  rxq;         /* Frames staged by the WHC RX callback    */
+  spinlock_t          rx_lock;     /* Guards rxq (producer WHC task vs worker) */
   bool                bifup;       /* true: ifup; false: ifdown               */
   uint8_t             devnum;      /* NP interface index                      */
 
@@ -113,13 +125,13 @@ struct ameba_wlan_s
 
 static struct ameba_wlan_s g_ameba_wlan;
 
-/* TX work buffer (network stack fills it during devif_poll) and RX work
- * buffer (incoming frame copied in, with room for an in-place reply).
+/* Flat, contiguous TX staging buffer.  The WHC send ABI takes a single
+ * (buf, len) scatter entry, so a possibly-fragmented netpkt is copied out
+ * here before it is handed to the NP.  Only touched from transmit(), which
+ * the upper half serialises under the network lock.
  */
 
 static uint8_t g_txbuf[AMEBA_WLAN_BUFSIZE]
-                 aligned_data(4);
-static uint8_t g_rxbuf[AMEBA_WLAN_BUFSIZE]
                  aligned_data(4);
 
 /****************************************************************************
@@ -178,195 +190,75 @@ static unsigned char ameba_wlan_is_dhcp(const uint8_t *frame,
  * Name: ameba_wlan_transmit
  *
  * Description:
- *   Hand the frame currently in dev->d_buf/d_len to the NP over WHC.
- *   Called with the network locked.
+ *   netdev_ops_s::transmit -- hand one packet to the NP over WHC.
+ *   Non-blocking; called by the upper half under the network lock, gated by
+ *   the TX quota.  The netpkt (possibly IOB-fragmented) is copied out into
+ *   the flat g_txbuf because the WHC send ABI wants a contiguous buffer.
+ *
+ *   On success we own the packet and free it (which restores TX quota).  On
+ *   failure (e.g. whc_ipc_host_send returns -2 when the NP skb pool is
+ *   exhausted) we return a negated errno WITHOUT freeing: the upper half
+ *   recycles the packet and stops the poll, which is genuine backpressure.
  *
  ****************************************************************************/
 
-static int ameba_wlan_transmit(struct ameba_wlan_s *priv)
+static int ameba_wlan_transmit(struct netdev_lowerhalf_s *dev,
+                               netpkt_t *pkt)
 {
-  struct net_driver_s *dev = &priv->dev;
+  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev;
+  unsigned int len = netpkt_getdatalen(dev, pkt);
   int ret;
 
-  NETDEV_TXPACKETS(dev);
+  if (len == 0 || len > AMEBA_WLAN_BUFSIZE)
+    {
+      /* Malformed: drop it (free -> quota restored) and report consumed. */
 
-  ret = ameba_wifi_txframe(priv->devnum, dev->d_buf, dev->d_len,
-                           ameba_wlan_is_dhcp(dev->d_buf, dev->d_len));
-  ninfo("tx len=%u type=0x%04x ret=%d\n",
-        (unsigned)dev->d_len,
-        (unsigned)((dev->d_buf[12] << 8) | dev->d_buf[13]), ret);
+      netpkt_free(dev, pkt, NETPKT_TX);
+      return OK;
+    }
+
+  netpkt_copyout(dev, g_txbuf, pkt, len, 0);
+
+  ret = ameba_wifi_txframe(priv->devnum, g_txbuf, len,
+                           ameba_wlan_is_dhcp(g_txbuf, len));
+  ninfo("tx len=%u type=0x%04x ret=%d\n", len,
+        (unsigned)((g_txbuf[12] << 8) | g_txbuf[13]), ret);
+
   if (ret != 0)
     {
-      NETDEV_TXERRORS(dev);
+      /* NP skb pool full: let the upper half recycle the packet and pause
+       * the poll (backpressure).  Do NOT free here.
+       */
+
       return -EIO;
     }
 
-  NETDEV_TXDONE(dev);
+  netpkt_free(dev, pkt, NETPKT_TX);
   return OK;
 }
 
 /****************************************************************************
- * Name: ameba_wlan_txpoll
+ * Name: ameba_wlan_receive
  *
  * Description:
- *   devif_poll() callback: transmit one prepared packet.  whc_host_send()
- *   copies the frame, so the work buffer is immediately reusable -> return 0
- *   to keep draining the queued packets.
+ *   netdev_ops_s::receive -- return one staged RX frame, or NULL when the
+ *   queue is empty.  The upper half calls this repeatedly (after
+ *   netdev_lower_rxready) and feeds each packet into the network stack,
+ *   including generating and transmitting any reply.
  *
  ****************************************************************************/
 
-static int ameba_wlan_txpoll(struct net_driver_s *dev)
+static netpkt_t *ameba_wlan_receive(struct netdev_lowerhalf_s *dev)
 {
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev->d_private;
-
-  if (dev->d_len > 0)
-    {
-      ameba_wlan_transmit(priv);
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: ameba_wlan_reply
- *
- * Description:
- *   Send the response, if any, that the network stack produced while
- *   handling a received frame.
- *
- *   NuttX processes RX packets IN PLACE and SYNCHRONOUSLY: ipv4_input() /
- *   ipv6_input() / arp_input() consume the frame in dev->d_buf and, when
- *   the protocol requires an immediate answer, build that answer into the
- *   SAME buffer and set dev->d_len to its length.  So after *_input()
- *   returns:
- *     - d_len > 0  -> the stack left a reply to send (e.g. an ARP reply to
- *                     an ARP request, an ICMP echo reply to a ping, a TCP
- *                     ACK) -> transmit it.
- *     - d_len == 0 -> nothing to send (e.g. a UDP datagram delivered to a
- *                     socket) -> do nothing.
- *
- *   This is NOT an echo/loopback of the received frame; it is the stack's
- *   own response.  It is the standard NuttX devif RX-then-maybe-TX idiom
- *   used by every NuttX Ethernet driver.
- *
- ****************************************************************************/
-
-static void ameba_wlan_reply(struct ameba_wlan_s *priv)
-{
-  if (priv->dev.d_len > 0)
-    {
-      ameba_wlan_transmit(priv);
-    }
-}
-
-/****************************************************************************
- * Name: ameba_wlan_rxdispatch
- *
- * Description:
- *   Feed one staged frame (already in dev->d_buf/d_len) into the network
- *   stack by EtherType and transmit any in-place reply it produced (see
- *   ameba_wlan_reply): <proto>_input() may turn the RX buffer into a
- *   response (ARP/ICMP/TCP) with d_len set.  Called from ameba_wlan_rxwork
- *   with the network locked.
- *
- ****************************************************************************/
-
-static void ameba_wlan_rxdispatch(struct ameba_wlan_s *priv)
-{
-  struct net_driver_s *dev = &priv->dev;
-  struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
-
-  NETDEV_RXPACKETS(dev);
-
-#ifdef CONFIG_NET_PKT
-  pkt_input(dev);
-#endif
-
-  if (eth->type == HTONS(ETHTYPE_IP))
-    {
-#ifdef CONFIG_NET_IPv4
-      NETDEV_RXIPV4(dev);
-      ipv4_input(dev);
-      ameba_wlan_reply(priv);
-#else
-      NETDEV_RXDROPPED(dev);
-#endif
-    }
-  else if (eth->type == HTONS(ETHTYPE_IP6))
-    {
-#ifdef CONFIG_NET_IPv6
-      NETDEV_RXIPV6(dev);
-      ipv6_input(dev);
-      ameba_wlan_reply(priv);
-#else
-      NETDEV_RXDROPPED(dev);
-#endif
-    }
-  else if (eth->type == HTONS(ETHTYPE_ARP))
-    {
-#ifdef CONFIG_NET_ARP
-      NETDEV_RXARP(dev);
-      arp_input(dev);
-      ameba_wlan_reply(priv);
-#else
-      NETDEV_RXDROPPED(dev);
-#endif
-    }
-  else
-    {
-      NETDEV_RXDROPPED(dev);
-    }
-}
-
-/****************************************************************************
- * Name: ameba_wlan_rxwork
- *
- * Description:
- *   Deferred RX processing (HPWORK).  Drains the frames queued by
- *   ameba_wlan_rxframe and runs each through the network stack.
- *
- *   Decoupling stack processing from the WHC RX callback is the whole point:
- *   the callback now returns immediately, so the WHC layer recycles its NP
- *   RX buffer (sends RECV_DONE) at once instead of waiting for ipv4_input()
- *   and the in-place reply TX.  Otherwise the NP RX ring drains and the NP
- *   drops the bulk of an incoming stream (iperf collapsed to <1 Mbps).  This
- *   is the standard NuttX WiFi netdev idiom and matches what the vendor lwIP
- *   adapter does via its tcpip mailbox.
- *
- ****************************************************************************/
-
-static void ameba_wlan_rxwork(void *arg)
-{
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)arg;
-  struct net_driver_s *dev = &priv->dev;
-  struct iob_s *iob;
+  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev;
+  netpkt_t *pkt;
   irqstate_t flags;
 
-  net_lock();
+  flags = spin_lock_irqsave(&priv->rx_lock);
+  pkt = netpkt_remove_queue(&priv->rxq);
+  spin_unlock_irqrestore(&priv->rx_lock, flags);
 
-  for (; ; )
-    {
-      flags = enter_critical_section();
-      iob = iob_remove_queue(&priv->rxq);
-      leave_critical_section(flags);
-
-      if (iob == NULL)
-        {
-          break;
-        }
-
-      /* Copy the queued frame out into the flat work buffer (room for an
-       * in-place reply) and run it through the stack.
-       */
-
-      dev->d_len = iob_copyout(g_rxbuf, iob, iob->io_pktlen, 0);
-      dev->d_buf = g_rxbuf;
-      iob_free_chain(iob);
-
-      ameba_wlan_rxdispatch(priv);
-    }
-
-  net_unlock();
+  return pkt;
 }
 
 /****************************************************************************
@@ -374,16 +266,18 @@ static void ameba_wlan_rxwork(void *arg)
  *
  * Description:
  *   RX entry from the WHC host RX path (SDK side).  Runs in the WHC RX task
- *   context: copy the frame into a pooled IOB, queue it, and schedule the
- *   deferred worker -- then return at once so the WHC layer can recycle the
- *   NP buffer (RECV_DONE) without waiting for stack processing.
+ *   context: copy the frame into a fresh netpkt, queue it, and notify the
+ *   upper half (netdev_lower_rxready) -- then return at once so the WHC
+ *   layer can recycle the NP buffer (RECV_DONE) without waiting for stack
+ *   processing.  If no RX resource is available the frame is dropped (never
+ *   block the WHC RX task, which would stall the NP).
  *
  ****************************************************************************/
 
 void ameba_wlan_rxframe(int idx, const unsigned char *buf, unsigned int len)
 {
   struct ameba_wlan_s *priv = &g_ameba_wlan;
-  struct iob_s *iob;
+  netpkt_t *pkt;
   irqstate_t flags;
   int ret;
 
@@ -394,100 +288,53 @@ void ameba_wlan_rxframe(int idx, const unsigned char *buf, unsigned int len)
       return;
     }
 
-  /* Backpressure: drop if the IOB pool cannot hold the frame.  Dropping here
-   * is far better than blocking the WHC RX task, which would stall the NP.
-   */
-
-  if (len > iob_navail(false) * CONFIG_IOB_BUFSIZE)
+  pkt = netpkt_alloc(&priv->dev, NETPKT_RX);
+  if (pkt == NULL)
     {
-      NETDEV_RXDROPPED(&priv->dev);
       return;
     }
 
-  iob = iob_tryalloc(false);
-  if (iob == NULL)
+  ret = netpkt_copyin(&priv->dev, pkt, buf, len, 0);
+  if (ret < 0)
     {
-      NETDEV_RXDROPPED(&priv->dev);
+      netpkt_free(&priv->dev, pkt, NETPKT_RX);
       return;
     }
 
-  ret = iob_trycopyin(iob, buf, len, 0, false);
-  if (ret != (int)len)
-    {
-      iob_free_chain(iob);
-      NETDEV_RXDROPPED(&priv->dev);
-      return;
-    }
-
-  flags = enter_critical_section();
-  ret = iob_tryadd_queue(iob, &priv->rxq);
-  leave_critical_section(flags);
+  flags = spin_lock_irqsave(&priv->rx_lock);
+  ret = netpkt_tryadd_queue(pkt, &priv->rxq);
+  spin_unlock_irqrestore(&priv->rx_lock, flags);
 
   if (ret < 0)
     {
-      iob_free_chain(iob);
-      NETDEV_RXDROPPED(&priv->dev);
+      netpkt_free(&priv->dev, pkt, NETPKT_RX);
       return;
     }
 
-  if (work_available(&priv->rxwork))
-    {
-      work_queue(HPWORK, &priv->rxwork, ameba_wlan_rxwork, priv, 0);
-    }
-}
-
-/****************************************************************************
- * Name: ameba_wlan_txavail_work / ameba_wlan_txavail
- ****************************************************************************/
-
-static void ameba_wlan_txavail_work(void *arg)
-{
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)arg;
-
-  net_lock();
-  if (priv->bifup)
-    {
-      priv->dev.d_buf = g_txbuf;
-      priv->dev.d_len = 0;
-      devif_poll(&priv->dev, ameba_wlan_txpoll);
-    }
-
-  net_unlock();
-}
-
-static int ameba_wlan_txavail(struct net_driver_s *dev)
-{
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev->d_private;
-
-  if (work_available(&priv->pollwork))
-    {
-      work_queue(LPWORK, &priv->pollwork, ameba_wlan_txavail_work, priv, 0);
-    }
-
-  return OK;
+  netdev_lower_rxready(&priv->dev);
 }
 
 /****************************************************************************
  * Name: ameba_wlan_ifup / ameba_wlan_ifdown
  ****************************************************************************/
 
-static int ameba_wlan_ifup(struct net_driver_s *dev)
+static int ameba_wlan_ifup(struct netdev_lowerhalf_s *dev)
 {
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev->d_private;
+  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev;
   uint8_t mac[IFHWADDRLEN];
 
   if (ameba_wifi_get_mac(priv->devnum, mac) == 0)
     {
-      memcpy(dev->d_mac.ether.ether_addr_octet, mac, IFHWADDRLEN);
+      memcpy(dev->netdev.d_mac.ether.ether_addr_octet, mac, IFHWADDRLEN);
     }
 
   ninfo("Bringing up wlan%d %02x:%02x:%02x:%02x:%02x:%02x\n", priv->devnum,
-        dev->d_mac.ether.ether_addr_octet[0],
-        dev->d_mac.ether.ether_addr_octet[1],
-        dev->d_mac.ether.ether_addr_octet[2],
-        dev->d_mac.ether.ether_addr_octet[3],
-        dev->d_mac.ether.ether_addr_octet[4],
-        dev->d_mac.ether.ether_addr_octet[5]);
+        dev->netdev.d_mac.ether.ether_addr_octet[0],
+        dev->netdev.d_mac.ether.ether_addr_octet[1],
+        dev->netdev.d_mac.ether.ether_addr_octet[2],
+        dev->netdev.d_mac.ether.ether_addr_octet[3],
+        dev->netdev.d_mac.ether.ether_addr_octet[4],
+        dev->netdev.d_mac.ether.ether_addr_octet[5]);
 
   priv->bifup = true;
 
@@ -496,30 +343,27 @@ static int ameba_wlan_ifup(struct net_driver_s *dev)
    * which is what blocked DHCP DISCOVER from ever being transmitted).
    */
 
-  netdev_carrier_on(dev);
+  netdev_lower_carrier_on(dev);
   return OK;
 }
 
-static int ameba_wlan_ifdown(struct net_driver_s *dev)
+static int ameba_wlan_ifdown(struct netdev_lowerhalf_s *dev)
 {
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev->d_private;
+  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
   priv->bifup = false;
-  leave_critical_section(flags);
 
-  /* Stop the deferred RX worker and drop any frames it had not yet drained
-   * so the IOBs are not leaked across an ifdown/ifup cycle.
+  /* Drop any frames the upper half had not yet drained so the IOBs are not
+   * leaked across an ifdown/ifup cycle.  The upper half has already stopped
+   * the RX worker before calling us.
    */
 
-  work_cancel(HPWORK, &priv->rxwork);
+  flags = spin_lock_irqsave(&priv->rx_lock);
+  netpkt_free_queue(&priv->rxq);
+  spin_unlock_irqrestore(&priv->rx_lock, flags);
 
-  flags = enter_critical_section();
-  iob_free_queue(&priv->rxq);
-  leave_critical_section(flags);
-
-  netdev_carrier_off(dev);
+  netdev_lower_carrier_off(dev);
   return OK;
 }
 
@@ -662,10 +506,10 @@ static uint8_t ameba_wlan_freq2channel(const struct iw_freq *f)
   return 0;
 }
 
-static int ameba_wlan_ioctl(struct net_driver_s *dev, int cmd,
+static int ameba_wlan_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
                             unsigned long arg)
 {
-  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev->d_private;
+  struct ameba_wlan_s *priv = (struct ameba_wlan_s *)dev;
   struct iwreq *iwr = (struct iwreq *)((uintptr_t)arg);
   int ret = OK;
 
@@ -751,7 +595,7 @@ static int ameba_wlan_ioctl(struct net_driver_s *dev, int cmd,
 
               priv->devnum = AMEBA_WLAN_AP_IDX;
               ameba_wifi_get_mac(priv->devnum,
-                                 dev->d_mac.ether.ether_addr_octet);
+                        dev->netdev.d_mac.ether.ether_addr_octet);
               return OK;
             }
 
@@ -804,26 +648,47 @@ static int ameba_wlan_ioctl(struct net_driver_s *dev, int cmd,
 #endif
 
 /****************************************************************************
+ * Network Device Operations
+ ****************************************************************************/
+
+static const struct netdev_ops_s g_ameba_wlan_ops =
+{
+  .ifup     = ameba_wlan_ifup,
+  .ifdown   = ameba_wlan_ifdown,
+  .transmit = ameba_wlan_transmit,
+  .receive  = ameba_wlan_receive,
+#ifdef CONFIG_NETDEV_IOCTL
+  .ioctl    = ameba_wlan_ioctl,
+#endif
+};
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 int ameba_wlan_initialize(void)
 {
   struct ameba_wlan_s *priv = &g_ameba_wlan;
-  struct net_driver_s *dev  = &priv->dev;
+  struct netdev_lowerhalf_s *dev = &priv->dev;
 
   memset(priv, 0, sizeof(*priv));
   priv->devnum   = AMEBA_WLAN_DEVNUM;
   priv->mode     = IW_MODE_INFRA;   /* STA by default; wapi can switch to AP */
+  spin_lock_init(&priv->rx_lock);
 
-  dev->d_ifup    = ameba_wlan_ifup;
-  dev->d_ifdown  = ameba_wlan_ifdown;
-  dev->d_txavail = ameba_wlan_txavail;
-#ifdef CONFIG_NETDEV_IOCTL
-  dev->d_ioctl   = ameba_wlan_ioctl;
-#endif
-  dev->d_private = priv;
-  dev->d_buf     = g_txbuf;
+  dev->ops              = &g_ameba_wlan_ops;
+  dev->quota[NETPKT_TX] = AMEBA_WLAN_TX_QUOTA;
+  dev->quota[NETPKT_RX] = AMEBA_WLAN_RX_QUOTA;
 
-  return netdev_register(dev, NET_LL_IEEE80211);
+  /* Dedicated RX/TX thread at a moderate priority (not HPWORK/192): HPWORK
+   * would preempt the prebuilt WHC IPC RX-delivery task, which then cannot
+   * drain the NP->AP ring in time and the NP silently drops incoming frames
+   * upstream of ameba_wlan_rxframe (measured ~11% loss -> TCP RX collapse).
+   * A lower priority lets the WHC RX task keep the NP ring drained.
+   */
+
+  dev->rxtype           = NETDEV_RX_THREAD;
+  dev->priority         = 100;
+
+  return netdev_lower_register(dev, NET_LL_IEEE80211);
 }

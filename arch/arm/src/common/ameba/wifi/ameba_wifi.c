@@ -108,6 +108,19 @@ int ameba_wifi_start(void)
       g_rtw_task_size.ipc_unblk_api_task = 4096;
     }
 
+  /* Host TX skb pool: the SDK default (4) is too small for sustained TCP
+   * TX.  The pool drains, whc_ipc_host_send() returns -2 (drops the frame),
+   * TCP retransmits, and under load the retransmits exhaust and the link is
+   * torn down (send -> ENOTCONN).  UDP tolerates the drops so is unaffected.
+   * A modest pool keeps TCP TX stable; 16 skbs ~= 27 KB of AP heap (vs 53 KB
+   * at 32).
+   */
+
+  if (wifi_user_config.skb_num_ap < 16)
+    {
+      wifi_user_config.skb_num_ap = 16;
+    }
+
   whc_ipc_host_init();
 
   /* Keep the vendor's default power-save (IPS) config: the WHC driver wakes
