@@ -28,27 +28,28 @@ config ARM64_STRING_FUNCTION
 	bool "Enable optimized ARM64 specific string function"
 	default n
 	depends on ARCH_TOOLCHAIN_GNU
-	select ARM64_MEMCHR
+	select ARM64_MEMCHR if ARCH_FPU
 	select ARM64_MEMCMP
-	select ARM64_MEMCPY
-	select ARM64_MEMSET
-	select ARM64_MEMMOVE
-	select ARM64_STRCHR
-	select ARM64_STRCHRNUL
+	select ARM64_MEMCPY if ARCH_FPU
+	select ARM64_MEMSET if ARCH_FPU
+	select ARM64_MEMMOVE if ARCH_FPU
+	select ARM64_STRCHR if ARCH_FPU
+	select ARM64_STRCHRNUL if ARCH_FPU
 	select ARM64_STRCMP
 	select ARM64_STRCPY
 	select ARM64_STRLEN
 	select ARM64_STRNCMP
 	select ARM64_STRNLEN
-	select ARM64_STRRCHR
+	select ARM64_STRRCHR if ARCH_FPU
 
 config ARM64_MEMCHR
 	bool "Enable optimized memchr() for ARM64"
 	default n
 	select LIBC_ARCH_MEMCHR
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific memchr() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
 
 config ARM64_MEMCMP
 	bool "Enable optimized memcmp() for ARM64"
@@ -60,41 +61,47 @@ config ARM64_MEMCMP
 config ARM64_MEMCPY
 	bool "Enable optimized memcpy() for ARM64"
 	select LIBC_ARCH_MEMCPY
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific memcpy() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
 
 config ARM64_MEMSET
 	bool "Enable optimized memset() for ARM64"
 	default n
 	select LIBC_ARCH_MEMSET
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific memset() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
 
 config ARM64_MEMMOVE
 	bool "Enable optimized memmove() for ARM64"
 	default n
 	select LIBC_ARCH_MEMMOVE
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARM64_MEMCPY
 	---help---
 		Enable optimized ARM64 specific memmove() library function
+		(relies on the overlap handling of the ARM64 memcpy(), so it
+		requires ARM64_MEMCPY).
 
 config ARM64_STRCHR
 	bool "Enable optimized strchr() for ARM64"
 	default n
 	select LIBC_ARCH_STRCHR
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific strchr() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
 
 config ARM64_STRCHRNUL
 	bool "Enable optimized strchrnul() for ARM64"
 	default n
 	select LIBC_ARCH_STRCHRNUL
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific strchrnul() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
 
 config ARM64_STRCMP
 	bool "Enable optimized strcmp() for ARM64"
@@ -140,6 +147,7 @@ config ARM64_STRRCHR
 	bool "Enable optimized strrchr() for ARM64"
 	default n
 	select LIBC_ARCH_STRRCHR
-	depends on ARCH_TOOLCHAIN_GNU
+	depends on ARCH_TOOLCHAIN_GNU && ARCH_FPU
 	---help---
 		Enable optimized ARM64 specific strrchr() library function
+		(uses Advanced SIMD, requires ARCH_FPU).
