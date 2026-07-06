@@ -140,7 +140,7 @@ static ssize_t stream_send(int fd, FAR const void *buf, size_t len)
           break;
         }
 
-      buf = (FAR const uint8_t *)buf + len;
+      buf = (FAR const uint8_t *)buf + ret;
       len -= ret;
       total += ret;
     }
@@ -186,7 +186,7 @@ static ssize_t stream_recv(int fd, FAR void *buf, size_t len)
           break;
         }
 
-      buf = (FAR uint8_t *)buf + len;
+      buf = (FAR uint8_t *)buf + ret;
       len -= ret;
       total += ret;
     }
