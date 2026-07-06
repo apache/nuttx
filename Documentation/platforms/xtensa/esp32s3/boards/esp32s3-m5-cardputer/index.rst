@@ -60,7 +60,7 @@ turns it on).
    The key-position-to-character table follows the M5Cardputer layout; verify
    it against the printed legends on first bring-up.  Applications read
    ``/dev/kbd0`` for key events (for example the ``lvglterm`` example, built
-   with its physical-keyboard input variant, feeds it into an on-screen
+   with its matrix-keyboard input variant, feeds it into an on-screen
    shell).
 
 Pin Mapping
@@ -141,7 +141,7 @@ lvgl
 
 lvglterm
     On-screen NuttShell terminal with LVGL and the physical keyboard.  Runs
-    the ``lvglterm`` example built with its physical-keyboard input variant:
+    the ``lvglterm`` example built with its matrix-keyboard input variant:
     NSH output is rendered in an LVGL text area and the keyboard
     (``/dev/kbd0``) feeds the input.  Wi-Fi is included, so the on-screen
     shell can associate with an access point using ``wapi``.  ``Fn`` + ``;`` /

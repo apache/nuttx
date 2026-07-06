@@ -391,6 +391,15 @@
 #define GPIO_OTGFS_DM  (GPIO_OTGFS_DM_0|GPIO_SPEED_100MHz) /* PA11 */
 #define GPIO_OTGFS_DP  (GPIO_OTGFS_DP_0|GPIO_SPEED_100MHz) /* PA12 */
 
+/* The Linum board wires the USB connector for host/device use without an
+ * OTG_FS_ID pin (mode is forced by the driver), so PA10 is NOT used as
+ * OTG_FS_ID.  The OTG host driver still configures GPIO_OTGFS_ID
+ * unconditionally, so map it to a harmless floating input instead of the
+ * OTG_FS_ID alternate function to keep PA10 free.
+ */
+
+#define GPIO_OTGFS_ID  (GPIO_INPUT|GPIO_FLOAT|GPIO_PORTA|GPIO_PIN10)
+
 /* SDMMC1 - Used SD Card memory */
 
 /* Init 400 kHz, PLL1Q/(2*300) = 240 MHz / (2*300) = 400 Khz */
@@ -502,7 +511,10 @@
  * this value will need to be doubled.
  */
 
-#ifdef CONFIG_STM32_LTDC
+#if defined(CONFIG_STM32_LTDC) && defined(CONFIG_STM32_LTDC_L1_ARGB8888)
+/* A 32-bpp ARGB8888 framebuffer (1024x600x4 = 2.4M) needs the last 3M */
+#  define BOARD_SDRAM1_SIZE        (5*1024*1024)
+#elif defined(CONFIG_STM32_LTDC)
 #  define BOARD_SDRAM1_SIZE        (6*1024*1024)
 #else
 #  define BOARD_SDRAM1_SIZE        (8*1024*1024)

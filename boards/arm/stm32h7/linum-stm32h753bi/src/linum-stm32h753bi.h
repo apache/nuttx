@@ -305,4 +305,22 @@ int board_tone_initialize(int devno);
 int stm32_tsc_setup(int minor);
 #endif
 
+/****************************************************************************
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host
+ *   functionality.  This function will start a thread that will monitor for
+ *   device connection/disconnection events.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBHOST
+int stm32_usbhost_initialize(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32H7_LINUM_STM32H753BI_SRC_LINUM_STM32H753BI_H */

@@ -359,5 +359,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_USBHOST
+  /* Initialize USB host to support an external HID keyboard (e.g. as the
+   * NXDoom game controller) plugged into the OTG FS service port.
+   */
+
+  ret = stm32_usbhost_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_usbhost_initialize() failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }

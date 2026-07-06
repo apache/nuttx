@@ -55,6 +55,14 @@ void stm32_boardinitialize(void)
 
   board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_STM32_OTGFS
+  /* Initialize USB-related GPIOs (VBUS sensing, power switch enable and
+   * over-current) so the OTG FS port can drive VBUS in host mode.
+   */
+
+  stm32_usbinitialize();
+#endif
 }
 
 /****************************************************************************
