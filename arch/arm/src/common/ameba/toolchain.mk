@@ -24,9 +24,21 @@
 
 AMEBA_TOOLCHAIN_DIR ?= $(HOME)/rtk-toolchain
 
+# The asdk version is declared PER SoC-project (component/soc/<soc>/project/
+# CMakeLists.txt: "set(v_ASDK_VER ...)"), which OVERRIDES the top-level
+# cmake/global_define.cmake default.  RTL8720F pins 12.3.1 there while the
+# amebadplus default (and its own project) is 10.3.1 -- so read the per-SoC
+# file FIRST (AMEBA_SOC_NAME is set by the chip Make.defs before this include)
+# and fall back to the global default only when the SoC has no project file.
+# Getting this wrong links the NuttX image2 with the wrong ld and trips the
+# SDK's ROM-overlay ASSERT ("__romlib_bss_end__ is changed") on 8720F.
+AMEBA_ASDK_VER_SRC := $(wildcard \
+  $(AMEBA_SDK)/component/soc/$(AMEBA_SOC_NAME)/project/CMakeLists.txt) \
+  $(AMEBA_SDK)/cmake/global_define.cmake
+
 AMEBA_ASDK_VER := $(strip $(shell sed -n \
   's/.*v_ASDK_VER[ \t][ \t]*\([0-9.][0-9.]*\).*/\1/p' \
-  $(AMEBA_SDK)/cmake/global_define.cmake 2>/dev/null))
+  $(firstword $(AMEBA_ASDK_VER_SRC)) 2>/dev/null))
 
 ifneq ($(AMEBA_ASDK_VER),)
   AMEBA_ASDK_BUILD := $(strip $(shell sed -n \
