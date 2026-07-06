@@ -11,18 +11,19 @@ PKE8721DAF
 
    The PKE8721DAF development board.
 
-The PKE8721DAF is a Realtek RTL8721Dx (dual-core Wi-Fi Host Controller)
-development board. NuttX runs on the KM4 (Cortex-M33) application core as the
-Wi-Fi host; the KM0 network processor runs the prebuilt vendor Wi-Fi firmware.
-See the :doc:`RTL8721Dx chip documentation <../../index>` for the SoC
-architecture, memory map and vendor-SDK dependency.
+The PKE8721DAF is a Realtek RTL8721Dx development board built around the
+RTL8721DAF (QFN48, 4 MB NOR flash). NuttX runs on the KM4 application core —
+an Arm Cortex-M55-compatible core running at up to 345 MHz. See the
+:doc:`RTL8721Dx chip documentation <../../index>` for the full SoC
+specifications and the vendor-SDK dependency.
 
 Features
 ========
 
-* RTL8721Dx dual-core Wi-Fi Host Controller (KM4 Cortex-M33 host + KM0 NP)
-* 2.4 GHz Wi-Fi (station and SoftAP)
-* SPI NOR flash (shared with the NP, XIP)
+* RTL8721DAF: Arm Cortex-M55-compatible KM4 core up to 345 MHz, 512 KB SRAM,
+  4 MB NOR flash
+* Wi-Fi 4 dual-band (2.4 / 5 GHz) station and SoftAP
+* SPI NOR flash (XIP)
 * LOG-UART console
 
 Supported in this NuttX port:
@@ -32,12 +33,6 @@ Supported in this NuttX port:
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
 * DHCP client (STA) and DHCP server (SoftAP)
-
-.. note::
-
-   The Wi-Fi MAC/PHY is driven by the prebuilt vendor firmware on the KM0
-   network processor. NuttX is the Wi-Fi host and exchanges frames with the NP
-   over the on-chip IPC transport; see the chip documentation.
 
 Buttons and LEDs
 ================
@@ -90,8 +85,9 @@ Realtek ``arm-none-eabi`` toolchain must be on ``PATH``; see the
    $ ./tools/configure.sh pke8721daf:nsh
    $ make
 
-This produces ``nuttx/app.bin`` (the NuttX KM4 image2), ``boot.bin`` and the
-NP (KM0) image in the build directory.
+This produces the two flashable images in the build directory: ``app.bin``
+(the NuttX application image, which also bundles the prebuilt Wi-Fi firmware)
+and ``boot.bin`` (the bootloader).
 
 After a successful build, flash via one of these methods:
 
@@ -125,6 +121,6 @@ License Exceptions
 This board depends on Realtek vendor code that is not part of NuttX and is
 subject to its own license:
 
-* The prebuilt KM0 (NP) Wi-Fi firmware image and the Realtek ``ameba-rtos``
+* The prebuilt Wi-Fi / Bluetooth firmware image and the Realtek ``ameba-rtos``
   SDK libraries/headers linked into the image. See the SDK's own license; the
   SDK is auto-fetched and is not redistributed in the NuttX tree.

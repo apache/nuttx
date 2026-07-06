@@ -9,36 +9,28 @@ RTL8720F EVB
    Add a photo of the RTL8720F EVB board here as ``rtl8720f_evb.png`` in this
    directory, referenced with a ``.. figure::`` directive.
 
-The RTL8720F EVB is a Realtek RTL8720F (dual-core Wi-Fi Host Controller)
-evaluation board. NuttX runs on the KM4TZ (Cortex-M33, secure world)
-application core as the Wi-Fi host; the KM4NS network processor runs the
-prebuilt vendor Wi-Fi firmware. See the
-:doc:`RTL8720F chip documentation <../../index>` for the SoC architecture,
-memory map and vendor-SDK dependency.
+The RTL8720F EVB is a Realtek RTL8720F evaluation board built around the
+RTL8720FBF (QFN40, 4 MB NOR flash). NuttX runs on the KM4TZ application core —
+an Arm Cortex-M55-compatible core running at up to 320 MHz. See the
+:doc:`RTL8720F chip documentation <../../index>` for the full SoC
+specifications and the vendor-SDK dependency.
 
 Features
 ========
 
-* RTL8720F dual-core Wi-Fi Host Controller (KM4TZ Cortex-M33 secure host +
-  KM4NS NP)
-* 2.4 GHz Wi-Fi (station and SoftAP)
-* SPI NOR flash (shared with the NP, XIP)
+* RTL8720FBF: Arm Cortex-M55-compatible KM4TZ core up to 320 MHz, 512 KB SRAM,
+  4 MB NOR flash
+* Wi-Fi 6 (802.11 b/g/n/ax), 2.4 GHz station and SoftAP
+* SPI NOR flash (XIP)
 * LOG-UART console
 
 Supported in this NuttX port:
 
-* NSH shell over the LOG-UART console (NuttX owns LOG-UART RX directly; the NP
-  shell is disabled)
+* NSH shell over the LOG-UART console
 * littlefs persistent storage mounted at ``/data`` (a dedicated SPI NOR flash
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
 * DHCP client (STA) and DHCP server (SoftAP)
-
-.. note::
-
-   The Wi-Fi MAC/PHY is driven by the prebuilt vendor firmware on the KM4NS
-   network processor. NuttX is the Wi-Fi host and exchanges frames with the NP
-   over the on-chip IPC transport; see the chip documentation.
 
 Buttons and LEDs
 ================
@@ -91,8 +83,9 @@ Realtek ``arm-none-eabi`` toolchain must be on ``PATH``; see the
    $ ./tools/configure.sh rtl8720f_evb:nsh
    $ make
 
-This produces ``nuttx/app.bin`` (the NuttX KM4TZ image2), ``boot.bin`` and the
-NP (KM4NS) image in the build directory.
+This produces the two flashable images in the build directory: ``app.bin``
+(the NuttX application image, which also bundles the prebuilt Wi-Fi firmware)
+and ``boot.bin`` (the bootloader).
 
 After a successful build, flash via one of these methods:
 
@@ -126,6 +119,6 @@ License Exceptions
 This board depends on Realtek vendor code that is not part of NuttX and is
 subject to its own license:
 
-* The prebuilt KM4NS (NP) Wi-Fi firmware image and the Realtek ``ameba-rtos``
+* The prebuilt Wi-Fi / Bluetooth firmware image and the Realtek ``ameba-rtos``
   SDK libraries/headers linked into the image. See the SDK's own license; the
   SDK is auto-fetched and is not redistributed in the NuttX tree.

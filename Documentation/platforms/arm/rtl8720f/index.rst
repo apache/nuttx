@@ -2,55 +2,70 @@
 Realtek RTL8720F
 ================
 
-The Realtek RTL8720F is a dual-core Wi-Fi Host Controller (WHC) SoC, similar in
-scheme to the :doc:`RTL8721Dx <../rtl8721dx/index>`:
+The Realtek RTL8720F is a low-power multi-protocol wireless SoC from the
+Realtek Ameba IoT family, combining 2.4 GHz Wi-Fi 6, Bluetooth LE and Thread
+(IEEE 802.15.4) connectivity, and 2.4 GHz Wi-Fi radar sensing.
 
-- **KM4TZ** — an ARM Cortex-M33 (ARMv8-M.main, with FPU) application/host core
-  running in the TrustZone secure world. NuttX runs here.
-- **KM4NS** — the non-secure network-processor (NP) core that owns the Wi-Fi
-  MAC/PHY and runs a prebuilt vendor firmware image.
+NuttX runs on the **KM4TZ application core** — an Arm Cortex-M55-compatible
+core (Real-M300, Armv8.1-M) running at up to **320 MHz**, with a
+single-precision FPU, DSP extensions and Arm TrustZone-M.
 
-NuttX is the Wi-Fi *host*: it talks to the NP over the on-chip IPC transport
-(WHC) while the NP drives the radio. The IC-agnostic glue (os_wrapper backend,
-netdev, key-value store, flash MTD, WHC Wi-Fi glue) is shared from
-``arch/arm/src/common/ameba`` with the other Ameba WHC parts; only the
-register-level drivers are IC-specific.
-
-Memory Map
+Highlights
 ==========
 
-============ ============= ======
-Block Name   Start Address Length
-============ ============= ======
-SRAM         0x20000000    512K
-============ ============= ======
+- **CPU:** Arm Cortex-M55-compatible application core, up to 320 MHz, with
+  FPU + DSP instructions, TrustZone-M and instruction/data caches.
+- **Memory:** 512 KB on-chip SRAM; external QSPI NOR flash (up to 104 MHz)
+  and/or DDR PSRAM (up to 200 MHz), depending on the part number.
+- **Wireless:** Wi-Fi 6 (802.11 b/g/n/ax), 2.4 GHz, up to 114.7 Mbps,
+  WPA/WPA2/WPA3; Bluetooth LE 5.x; Thread (IEEE 802.15.4); and 2.4 GHz Wi-Fi
+  radar sensing (CSI/RSSI).
+- **Peripherals:** UART, SPI, I2C, I2S, SDIO, PWM, ADC, IR, GDMA, RTC and
+  watchdogs (count varies by package); some I/O groups support 5 V levels.
+- **Security:** Secure Boot, TrustZone-M, AES/SHA and ECDSA/RSA crypto
+  engines, Flash decryption, OTP, and a true random number generator.
+- **Package:** QFN40.
 
-The KM4TZ runs in the secure world, so the SRAM is also visible through the
-secure alias at ``0x30000000``. The KM4TZ image2 RAM window is a slice of that
-SRAM; the flash is a SPI NOR shared with the NP.
+Memory
+======
+
+============ ============= =======
+Block        Start Address Length
+============ ============= =======
+SRAM         0x2000_0000   512 KB
+============ ============= =======
+
+The on-chip SRAM holds the system heap and application. The flash is an SPI
+NOR accessed through the SDK XIP path. The exact flash / PSRAM size depends on
+the part number — for example the RTL8720FBF has 4 MB of NOR flash and no
+PSRAM.
 
 Vendor SDK Dependency
 =====================
 
 The build depends on Realtek's open ``ameba-rtos`` SDK, which is **not** part
-of the NuttX tree. The first build auto-fetches the pinned revision (a shallow
-``git clone`` of ``https://gitee.com/ameba-aiot/ameba-rtos.git``) into
-``arch/arm/src/common/ameba/ameba-rtos`` (git-ignored) and applies the
-out-of-SDK build patch under ``arch/arm/src/common/ameba/patches``. To use a
-local checkout instead of auto-fetching, export ``AMEBA_SDK`` to its path.
+of the NuttX tree. It provides the Wi-Fi / Bluetooth firmware and the
+low-level chip libraries. The first build auto-fetches the pinned revision (a
+shallow ``git clone`` of ``https://github.com/Ameba-AIoT/ameba-rtos.git``) into
+``arch/arm/src/common/ameba/ameba-rtos`` (git-ignored) and builds against it
+unmodified. To use a local checkout instead of auto-fetching, export
+``AMEBA_SDK`` to its path.
+
+Toolchain
+=========
 
 A matching Realtek ARM toolchain (``arm-none-eabi`` from the Realtek asdk
-release) is required; NuttX links its own libc/libm and reuses the SDK's
-``app_start()`` as the image2 entry point.
+release) is required and is fetched automatically by the board build. NuttX
+links its own libc / libm and reuses the SDK's ``app_start()`` as the image
+entry point.
 
 Supported Features
 ==================
 
-- NSH over the LOG-UART console (NuttX owns LOG-UART RX directly; the NP shell
-  is disabled)
-- littlefs persistent storage at ``/data`` on the SPI NOR
-- Wi-Fi STA (scan / connect) and SoftAP via the ``wapi`` tool
-- Networking over the WHC netdev (NuttX TCP/IP stack), DHCP client and server
+- NSH over the LOG-UART console
+- littlefs persistent storage at ``/data`` on the SPI NOR flash
+- Wi-Fi station (scan / connect) and SoftAP via the ``wapi`` tool
+- Networking on NuttX's own TCP/IP stack, with DHCP client and DHCP server
 
 Boards
 ======
