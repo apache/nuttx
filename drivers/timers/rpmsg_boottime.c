@@ -206,8 +206,8 @@ void rpmsg_boottime_update_local(FAR struct rpmsg_boottime_client_s *client)
 
       /* Account for the adjustment previously made */
 
-      drift_ppb += client->last_adjtime_ns * MSEC_PER_SEC /
-                   CONFIG_CLOCK_ADJTIME_PERIOD_MS;
+      drift_ppb += client->last_adjtime_ns * NSEC_PER_SEC /
+                   CONFIG_CLOCK_ADJTIME_PERIOD_NS;
 
       if (drift_ppb > CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM * 1000 ||
           drift_ppb < -CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM * 1000)
@@ -235,8 +235,8 @@ void rpmsg_boottime_update_local(FAR struct rpmsg_boottime_client_s *client)
        * drift rate.
        */
 
-      adjustment_ns = client->drift_ppb * CONFIG_CLOCK_ADJTIME_PERIOD_MS /
-                      MSEC_PER_SEC;
+      adjustment_ns = client->drift_ppb * CONFIG_CLOCK_ADJTIME_PERIOD_NS /
+                      NSEC_PER_SEC;
 
       /* Drift estimation ensures local clock runs at same rate as remote.
        *
