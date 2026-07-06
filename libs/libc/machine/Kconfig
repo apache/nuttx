@@ -826,4 +826,8 @@ if ARCH_SPARC
 source "libs/libc/machine/sparc/Kconfig"
 endif
 
+if ARCH_TRICORE
+source "libs/libc/machine/tricore/Kconfig"
+endif
+
 endmenu # Architecture-Specific Support

@@ -28,5 +28,81 @@ ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 CSRCS += arch_setjmp.c
 endif
 
+ifeq ($(CONFIG_TRICORE_TOOLCHAIN_TASKING),y)
+TRICORE_SUBDIR = tasking
+else
+TRICORE_SUBDIR = gnu
+endif
+
+AFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)machine$(DELIM)tricore
+
+# The optimized assembly routines use TC1.8 instructions (e.g. ld.dd/st.dd
+# quad-word access).  Force the assembler to target TC1.8 so the build does
+# not depend on the board's ambient platform flags.
+
+AFLAGS += -Wa,-mtc18
+
+ifeq ($(CONFIG_LIBC_ARCH_MEMCPY),y)
+ASRCS += arch_memcpy.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_MEMSET),y)
+ASRCS += arch_memset.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_MEMMOVE),y)
+ASRCS += arch_memmove.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_MEMCMP),y)
+ASRCS += arch_memcmp.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_MEMCHR),y)
+ASRCS += arch_memchr.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRCPY),y)
+ASRCS += arch_strcpy.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRLEN),y)
+ASRCS += arch_strlen.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRCHR),y)
+ASRCS += arch_strchr.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRCHRNUL),y)
+ASRCS += arch_strchrnul.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRNCMP),y)
+ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRNLEN),y)
+ASRCS += arch_strnlen.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRRCHR),y)
+ASRCS += arch_strrchr.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STRNCPY),y)
+ASRCS += arch_strncpy.S
+endif
+
+ifeq ($(CONFIG_LIBC_ARCH_STPCPY),y)
+ASRCS += arch_stpcpy.S
+endif
+
+DEPPATH += --dep-path machine/tricore/$(TRICORE_SUBDIR)
 DEPPATH += --dep-path machine/tricore
+VPATH += :machine/tricore/$(TRICORE_SUBDIR)
 VPATH += :machine/tricore

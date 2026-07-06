@@ -2,3 +2,132 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config TRICORE_STRING_FUNCTION
+	bool "Enable optimized TriCore specific string/memory functions"
+	default n
+	select TRICORE_MEMCPY
+	select TRICORE_MEMSET
+	select TRICORE_MEMMOVE
+	select TRICORE_MEMCMP
+	select TRICORE_STRCMP
+	---help---
+		Enable the confirmed-win TriCore assembly library functions as a
+		group: memcpy/memset/memmove/memcmp/strcmp.  Real on-board
+		benchmarks (lzcu B2, TC4Z9) show them ahead of the BSD C versions.
+		The block-move routines (memcpy/memset/memmove) align to an 8-byte
+		boundary before issuing quad ld.dd/st.dd so that stores to DLMU
+		shared memory (0xB0/0x90, 64-bit ECC granularity) always write whole
+		ECC words; memcmp/strcmp are read-only (ld.w) and carry no ECC risk.
+		strlen and the remaining functions are enabled individually once
+		their assembly proves faster than the C baseline.
+
+config TRICORE_MEMCPY
+	bool "Enable optimized memcpy() for TriCore"
+	default n
+	select LIBC_ARCH_MEMCPY
+	---help---
+		Enable the optimized TriCore specific memcpy() library function.
+		Uses ld.d/st.d block moves and the hardware loop instruction.
+
+config TRICORE_MEMSET
+	bool "Enable optimized memset() for TriCore"
+	default n
+	select LIBC_ARCH_MEMSET
+	---help---
+		Enable the optimized TriCore specific memset() library function.
+
+config TRICORE_MEMMOVE
+	bool "Enable optimized memmove() for TriCore"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	---help---
+		Enable the optimized TriCore specific memmove() library function.
+
+config TRICORE_MEMCMP
+	bool "Enable optimized memcmp() for TriCore"
+	default n
+	select LIBC_ARCH_MEMCMP
+	---help---
+		Enable the optimized TriCore specific memcmp() library function.
+
+config TRICORE_MEMCHR
+	bool "Enable optimized memchr() for TriCore"
+	default n
+	select LIBC_ARCH_MEMCHR
+	---help---
+		Enable the optimized TriCore specific memchr() library function.
+
+config TRICORE_STRCPY
+	bool "Enable optimized strcpy() for TriCore"
+	default n
+	select LIBC_ARCH_STRCPY
+	---help---
+		Enable the optimized TriCore specific strcpy() library function.
+
+config TRICORE_STRCMP
+	bool "Enable optimized strcmp() for TriCore"
+	default n
+	select LIBC_ARCH_STRCMP
+	---help---
+		Enable the optimized TriCore specific strcmp() library function.
+		On-board benchmarks show a 1.13-1.71x win for strings >= 32 bytes.
+
+config TRICORE_STRLEN
+	bool "Enable optimized strlen() for TriCore"
+	default n
+	select LIBC_ARCH_STRLEN
+	---help---
+		Enable the optimized TriCore specific strlen() library function.
+		Note: the BSD C word-at-a-time strlen currently outperforms a
+		byte-scanning assembly version on long strings, so this is left
+		off by default until a word-at-a-time assembly proves faster.
+
+config TRICORE_STRCHR
+	bool "Enable optimized strchr() for TriCore"
+	default n
+	select LIBC_ARCH_STRCHR
+	---help---
+		Enable the optimized TriCore specific strchr() library function.
+
+config TRICORE_STRCHRNUL
+	bool "Enable optimized strchrnul() for TriCore"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	---help---
+		Enable the optimized TriCore specific strchrnul() library function.
+
+config TRICORE_STRNCMP
+	bool "Enable optimized strncmp() for TriCore"
+	default n
+	select LIBC_ARCH_STRNCMP
+	---help---
+		Enable the optimized TriCore specific strncmp() library function.
+
+config TRICORE_STRNLEN
+	bool "Enable optimized strnlen() for TriCore"
+	default n
+	select LIBC_ARCH_STRNLEN
+	---help---
+		Enable the optimized TriCore specific strnlen() library function.
+
+config TRICORE_STRRCHR
+	bool "Enable optimized strrchr() for TriCore"
+	default n
+	select LIBC_ARCH_STRRCHR
+	---help---
+		Enable the optimized TriCore specific strrchr() library function.
+
+config TRICORE_STRNCPY
+	bool "Enable optimized strncpy() for TriCore"
+	default n
+	select LIBC_ARCH_STRNCPY
+	---help---
+		Enable the optimized TriCore specific strncpy() library function.
+
+config TRICORE_STPCPY
+	bool "Enable optimized stpcpy() for TriCore"
+	default n
+	select LIBC_ARCH_STPCPY
+	---help---
+		Enable the optimized TriCore specific stpcpy() library function.
