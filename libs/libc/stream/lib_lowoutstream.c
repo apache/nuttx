@@ -86,7 +86,7 @@ static ssize_t lowoutstream_puts(FAR struct lib_outstream_s *self,
   size_t idx          = 0;
   DEBUGASSERT(self);
 
-  while (str[idx] != 0 && idx < len)
+  while (idx < len && str[idx] != 0)
     {
       lowoutstream_putc(self, str[idx]);
       idx++;
