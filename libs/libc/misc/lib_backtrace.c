@@ -361,11 +361,15 @@ backtrace_find(FAR struct backtrace_pool_s *bp, uint32_t slot,
  * Name: backtrace_alloc
  ****************************************************************************/
 
+nosanitize_address no_builtin("memcpy")
 static FAR struct backtrace_entry_s *
 backtrace_alloc(FAR struct backtrace_pool_s *bp, uint32_t slot,
                 const FAR void *stack, int depth)
 {
   FAR struct backtrace_entry_s *entry;
+  FAR const uintptr_t *src = (FAR const uintptr_t *)stack;
+  FAR uintptr_t *dst;
+  int i;
 
   /* Get the first entry from the free list */
 
@@ -382,7 +386,23 @@ backtrace_alloc(FAR struct backtrace_pool_s *bp, uint32_t slot,
   /* Copy the backtrace to the entry */
 
   bp->used++;
-  memcpy(entry->stack, stack, depth * sizeof(FAR void *));
+
+  /* Inline word-by-word copy to avoid the per-byte KASAN shadow checks
+   * inside memcpy().  This function is on the hot path of every recorded
+   * allocation when CONFIG_MM_RECORD_STACK is on; on KASAN-enabled debug
+   * builds the per-byte instrumentation in memcpy() multiplies the cost
+   * of each insertion and can stretch heavy allocation phases (e.g. WAMR
+   * AOT module loading) past the test framework's busy-loop threshold.
+   * The stack array stores word-aligned function pointers, so word
+   * copying is semantically equivalent to memcpy().
+   */
+
+  dst = (FAR uintptr_t *)entry->stack;
+  for (i = 0; i < depth; i++)
+    {
+      dst[i] = src[i];
+    }
+
   entry->depth = depth;
   entry->ref = 1;
 
