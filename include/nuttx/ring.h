@@ -134,6 +134,7 @@
 #include <nuttx/atomic.h>
 #include <nuttx/irq.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/nuttx.h>
 
 #include <assert.h>
 #include <string.h>
@@ -150,6 +151,18 @@
 /* Maximum ring capacity (fits in 24-bit index space) */
 
 #define RING_SIZE_MAX    RING_IDX_MASK
+
+/* RING_WRAPPOINT - logical index wrap period: the largest multiple of the
+ * capacity not exceeding 2^24, i.e. ALIGN_DOWN(2^24, cap). Power-of-2
+ * capacities divide 2^24 exactly and so yield 2^24 (RING_IDX_MASK + 1),
+ * keeping the fast bitmask path; other capacities yield a smaller
+ * capacity multiple to keep ring_idx continuous across the wrap.
+ *
+ * Macro form (vs the former inline helper) evaluates cap multiple times;
+ * all callers pass side-effect-free capacities.
+ */
+
+#define RING_WRAPPOINT(cap) ALIGN_DOWN(RING_IDX_MASK + 1, (cap))
 
 /* Extract data capacity from total buffer size (total - header) */
 
@@ -209,13 +222,11 @@
  *   RING_DECLARE(g_my_ring, uint32_t, 64) = RING_INIT(64);
  */
 
-#define RING_INIT(buflen)                                \
-  {                                                      \
-    .base.magic    = RING_MAGIC_READY,                   \
-    .base.capacity = RING_CAPACITY(buflen),              \
-    .base.mask     = (RING_CAPACITY(buflen) &            \
-                     (RING_CAPACITY(buflen) - 1))        \
-                     ? 0 : RING_CAPACITY(buflen) - 1,    \
+#define RING_INIT(buflen)                                     \
+  {                                                           \
+    .base.magic     = RING_MAGIC_READY,                       \
+    .base.capacity  = RING_CAPACITY(buflen),                  \
+    .base.wrappoint = RING_WRAPPOINT(RING_CAPACITY(buflen)),  \
   }
 
 /* RING_DECLARE - declare a ring variable (uninitialized).
@@ -283,14 +294,6 @@
 
 #define ring_data(r)  ((FAR char *)((FAR struct ring_s *)(r) + 1))
 
-/* Wrap a linear (unwrapped) position into the ring's 24-bit index space,
- * matching the index the peek helpers return through their *index argument.
- * Lets a caller compare an expected next position against the value a peek
- * reported without reaching into the internal packed layout.
- */
-
-#define ring_wrap(pos)   ((uint32_t)(pos) & RING_IDX_MASK)
-
 /* ring_spsc_init - lightweight initialization for SPSC mode.
  *
  * Unlike ring_mpmc_init (which uses atomic CAS for multi-core safe
@@ -316,8 +319,7 @@
           RING_FIELD(&ring->magic) = RING_MAGIC_INIT;    \
           UP_WMB();                                      \
           ring->capacity = (cap);                        \
-          ring->mask = ((cap) & ((cap) - 1)) ? 0 :       \
-                       (cap) - 1;                        \
+          ring->wrappoint = RING_WRAPPOINT(cap);         \
           ring_reset(r);                                 \
           UP_WMB();                                      \
           RING_FIELD(&ring->magic) = RING_MAGIC_READY;   \
@@ -332,28 +334,13 @@
 #define ring_is_ready(r) \
   (RING_FIELD(&RING_BASE(r)->magic) == RING_MAGIC_READY)
 
-#define ring_count(r)                                    \
-  ((RTS_IDX(RING_FIELD(&RING_BASE(r)->prod_tail)) -      \
-    RTS_IDX(RING_FIELD(&RING_BASE(r)->cons_tail))) &     \
-   RING_IDX_MASK)
+#define ring_count(r)                                     \
+  ring_dist(RING_BASE(r),                                 \
+            RTS_IDX(RING_FIELD(&RING_BASE(r)->prod_tail)),\
+            RTS_IDX(RING_FIELD(&RING_BASE(r)->cons_tail)))
 
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
 #define ring_space(r)       (ring_capacity(r) - ring_count(r))
-
-/* Check whether cons_index is still live (not lapped by the writer).
- * Indices are 24-bit (RTS_IDX_MASK); the << 8 aligns bit 23 with the
- * 32-bit sign bit so the signed compare works correctly modulo 2^24.
- */
-
-#define ring_is_valid_cons(cons_index, cons_tail) \
-  ((int32_t)(((cons_index) - (cons_tail)) << 8) >= 0)
-
-/* Clamp an external index if it fell behind cons_tail (overwritten).
- * Returns the effective read position.
- */
-
-#define ring_clamp_cons(cons_index, cons_tail) \
-  (ring_is_valid_cons(cons_index, cons_tail) ? (cons_index) : (cons_tail))
 
 #define ring_spsc_enqueue(r, items, count)               \
   (ring_is_ready(r) ?                                    \
@@ -533,7 +520,7 @@ struct ring_s
 
   atomic_t     magic;             /* Warm-restart detection */
   uint32_t     capacity;          /* Max 16777215 */
-  uint32_t     mask;              /* capacity-1 if power-of-2, else 0 (use modulo) */
+  uint32_t     wrappoint;         /* Largest multiple of capacity <= 2^24 */
   uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) -
                     sizeof(uint32_t) * 2];
 
@@ -565,6 +552,21 @@ struct ring_buf_s
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: ring_is_pow2
+ *
+ * Description:
+ *   True when the capacity is a power of two.  Such capacities divide 2^24
+ *   exactly, so RING_WRAPPOINT() yields the full 2^24 wrap period; any
+ *   other capacity yields a strictly smaller wrap.
+ *
+ ****************************************************************************/
+
+static inline_function bool ring_is_pow2(FAR struct ring_s *r)
+{
+  return r->wrappoint == RING_IDX_MASK + 1;
+}
+
+/****************************************************************************
  * Name: ring_idx
  *
  * Description:
@@ -575,7 +577,78 @@ struct ring_buf_s
 
 static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
 {
-  return r->mask ? (idx & r->mask) : (idx % r->capacity);
+  return ring_is_pow2(r) ? (idx & (r->capacity - 1)) : (idx % r->capacity);
+}
+
+/****************************************************************************
+ * Name: ring_advance
+ *
+ * Description:
+ *   Advance a logical index by n, wrapping at the ring's wrap period.
+ *   Power-of-2 rings use the fast 24-bit mask; others wrap modulo
+ *   r->wrappoint so the physical mapping stays continuous.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_advance(FAR struct ring_s *r, uint32_t idx, uint32_t n)
+{
+  return ring_is_pow2(r) ? ((idx + n) & RING_IDX_MASK) :
+                           ((idx + n) % r->wrappoint);
+}
+
+/****************************************************************************
+ * Name: ring_dist
+ *
+ * Description:
+ *   Compute the forward distance from b to a in logical index space,
+ *   respecting the ring's wrap period. Power-of-2 rings use the fast
+ *   24-bit mask; others reduce modulo r->wrappoint.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_dist(FAR struct ring_s *r, uint32_t a, uint32_t b)
+{
+  return ring_is_pow2(r) ? ((a - b) & RING_IDX_MASK) :
+                           ((a + r->wrappoint - b) % r->wrappoint);
+}
+
+/****************************************************************************
+ * Name: ring_is_valid_cons
+ *
+ * Description:
+ *   Check whether cons_index is still live (not lapped by the writer).
+ *   Power-of-2 rings shift bit 23 to the 32-bit sign bit so the signed
+ *   compare works modulo 2^24. Non-power-of-2 rings treat an index within
+ *   the first half of the wrap window (measured from cons_tail) as live.
+ *
+ ****************************************************************************/
+
+static inline_function bool
+ring_is_valid_cons(FAR struct ring_s *r, uint32_t cons_index,
+                   uint32_t cons_tail)
+{
+  return ring_is_pow2(r) ?
+         ((int32_t)((cons_index - cons_tail) << 8) >= 0) :
+         (ring_dist(r, cons_index, cons_tail) < (r->wrappoint >> 1));
+}
+
+/****************************************************************************
+ * Name: ring_clamp_cons
+ *
+ * Description:
+ *   Clamp an external index if it fell behind cons_tail (overwritten).
+ *   Returns the effective read position.
+ *
+ ****************************************************************************/
+
+static inline_function uint32_t
+ring_clamp_cons(FAR struct ring_s *r, uint32_t cons_index,
+                uint32_t cons_tail)
+{
+  return ring_is_valid_cons(r, cons_index, cons_tail) ?
+         cons_index : cons_tail;
 }
 
 /****************************************************************************
@@ -668,7 +741,7 @@ ring_mpmc_init(FAR void *buf, uint32_t buflen)
   while (!atomic_cmpxchg(&r->magic, &old_magic, RING_MAGIC_INIT));
 
   r->capacity = buflen;
-  r->mask = (buflen & (buflen - 1)) ? 0 : buflen - 1;
+  r->wrappoint = RING_WRAPPOINT(buflen);
 
   if (old_magic == RING_MAGIC_READY)
     {
@@ -681,7 +754,7 @@ ring_mpmc_init(FAR void *buf, uint32_t buflen)
 
       uint32_t prod_index = RTS_IDX(atomic_read(&r->prod_tail));
       uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
-      uint32_t count = (prod_index - cons_index) & RING_IDX_MASK;
+      uint32_t count = ring_dist(r, prod_index, cons_index);
 
       if (count > r->capacity)
         {
@@ -920,8 +993,7 @@ ring_sp_start(FAR struct ring_s *r, uint32_t count,
 
   UP_RMB();
   cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
-  free_space = r->capacity -
-               ((prod_index - cons_index) & RING_IDX_MASK);
+  free_space = r->capacity - ring_dist(r, prod_index, cons_index);
   n = count < free_space ? count : free_space;
 
   ring_buf_init(buf, r, prod_index, n, elem_size);
@@ -949,7 +1021,7 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count,
     {
       uint32_t cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
       uint32_t free_space = r->capacity -
-        ((RTS_IDX(old_head) - cons_index) & RING_IDX_MASK);
+        ring_dist(r, RTS_IDX(old_head), cons_index);
 
       n = count < free_space ? count : free_space;
       if (n == 0)
@@ -957,7 +1029,8 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count,
           break;
         }
 
-      new_head = RTS_PACK(RTS_CNT(old_head) + 1, RTS_IDX(old_head) + n);
+      new_head = RTS_PACK(RTS_CNT(old_head) + 1,
+                          ring_advance(r, RTS_IDX(old_head), n));
     }
   while (!atomic_cmpxchg_relaxed(&r->prod_head, &old_head, new_head));
 
@@ -984,7 +1057,7 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count,
 
   UP_RMB();
   prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
-  available = (prod_index - cons_index) & RING_IDX_MASK;
+  available = ring_dist(r, prod_index, cons_index);
 
   /* available > capacity is physically impossible for a consistent ring;
    * it can only result from a torn snapshot where prod_tail is stale and
@@ -1023,7 +1096,7 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
     {
       uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
       uint32_t available =
-        (prod_index - RTS_IDX(old_head)) & RING_IDX_MASK;
+        ring_dist(r, prod_index, RTS_IDX(old_head));
 
       /* available > capacity is physically impossible for a consistent
        * ring; it can only result from a torn snapshot where prod_tail is
@@ -1044,7 +1117,8 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
           break;
         }
 
-      new_head = RTS_PACK(RTS_CNT(old_head) + 1, RTS_IDX(old_head) + n);
+      new_head = RTS_PACK(RTS_CNT(old_head) + 1,
+                          ring_advance(r, RTS_IDX(old_head), n));
     }
   while (!atomic_cmpxchg_relaxed(&r->cons_head, &old_head, new_head));
 
@@ -1064,7 +1138,7 @@ ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
   if (buf->cnt != 0)
     {
-      uint32_t prod_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
+      uint32_t prod_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
       RING_FIELD(&r->prod_tail) = RTS_PACK(0, prod_index);
@@ -1123,7 +1197,7 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
   if (buf->cnt != 0)
     {
-      uint32_t cons_index = (buf->idx + buf->cnt) & RING_IDX_MASK;
+      uint32_t cons_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
       RING_FIELD(&r->cons_tail) = RTS_PACK(0, cons_index);
@@ -1155,12 +1229,12 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
   cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
   if (index)
     {
-      cons_index = ring_clamp_cons(*index, cons_index);
+      cons_index = ring_clamp_cons(r, *index, cons_index);
     }
 
   UP_RMB();
   prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
-  available = RTS_IDX(prod_index - cons_index);
+  available = ring_dist(r, prod_index, cons_index);
   n = count < available ? count : available;
 
   if (items)
@@ -1169,7 +1243,7 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
 
       ring_buf_init(&buf, r, cons_index, n, elem_size);
       ring_copy_to(&buf, items, elem_size);
-      cons_index = RTS_IDX(cons_index + n);
+      cons_index = ring_advance(r, cons_index, n);
     }
 
   if (index)
@@ -1209,11 +1283,11 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
       cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
       if (index && *index != RING_IDX_OLDEST)
         {
-          cons_index = ring_clamp_cons(*index, cons_index);
+          cons_index = ring_clamp_cons(r, *index, cons_index);
         }
 
       prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
-      available = RTS_IDX(prod_index - cons_index);
+      available = ring_dist(r, prod_index, cons_index);
       n = count < available ? count : available;
 
       if (n == 0 || !items)
@@ -1228,12 +1302,12 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
        * If cons_tail advanced past our read position, retry.
        */
     }
-  while (!ring_is_valid_cons(cons_index,
+  while (!ring_is_valid_cons(r, cons_index,
                              RTS_IDX(atomic_read_acquire(&r->cons_tail))));
 
   if (items)
     {
-      cons_index = RTS_IDX(cons_index + n);
+      cons_index = ring_advance(r, cons_index, n);
     }
 
   if (index)
@@ -1268,7 +1342,7 @@ ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
       return 0;
     }
 
-  index = RTS_IDX(RING_FIELD(&r->cons_tail) + offset);
+  index = ring_advance(r, offset, RTS_IDX(RING_FIELD(&r->cons_tail)));
   return ring_sc_peek(r, items, count, elem_size, &index);
 }
 
@@ -1295,7 +1369,8 @@ ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
       return 0;
     }
 
-  index = RTS_IDX(atomic_read_acquire(&r->cons_tail) + offset);
+  index = ring_advance(r, offset,
+                       RTS_IDX(atomic_read_acquire(&r->cons_tail)));
   return ring_mc_peek(r, items, count, elem_size, &index);
 }
 
@@ -1464,8 +1539,8 @@ ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 static inline_function uint32_t
 ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
 {
-  uint32_t cons_index = RING_FIELD(&r->cons_tail);
-  uint32_t count = RTS_IDX(target - cons_index);
+  uint32_t cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  uint32_t count = ring_dist(r, target, cons_index);
 
   if (count != 0)
     {
@@ -1510,7 +1585,7 @@ static inline_function uint32_t
 ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
 {
   uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
-  uint32_t count = RTS_IDX(target - cons_index);
+  uint32_t count = ring_dist(r, target, cons_index);
 
   if (count != 0)
     {
@@ -1557,8 +1632,7 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
     {
       old_cons = atomic_read_acquire(&r->cons_head);
       cons_idx = RTS_IDX(old_cons);
-      free_space = r->capacity -
-                   ((prod_idx - cons_idx) & RING_IDX_MASK);
+      free_space = r->capacity - ring_dist(r, prod_idx, cons_idx);
 
       if (free_space >= count)
         {
@@ -1566,7 +1640,8 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
         }
 
       discard = count - free_space;
-      new_cons = RTS_PACK(RTS_CNT(old_cons) + 1, cons_idx + discard);
+      new_cons = RTS_PACK(RTS_CNT(old_cons) + 1,
+                          ring_advance(r, cons_idx, discard));
       if (atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
         {
           ring_buf_init(buf, r, cons_idx, discard, elem_size);
@@ -1662,7 +1737,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
       prod_idx = RTS_IDX(old_prod);
       cons_idx = RTS_IDX(old_cons);
 
-      free_space = (prod_idx - cons_idx) & RING_IDX_MASK;
+      free_space = ring_dist(r, prod_idx, cons_idx);
       free_space = free_space < r->capacity ?
                    r->capacity - free_space : 0;
 
@@ -1670,7 +1745,7 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
         {
           uint32_t committed;
 
-          committed = (prod_tail_idx - cons_idx) & RING_IDX_MASK;
+          committed = ring_dist(r, prod_tail_idx, cons_idx);
           discard = count - free_space;
           if (discard > committed)
             {
@@ -1678,7 +1753,8 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
               continue;
             }
 
-          new_cons = RTS_PACK(RTS_CNT(old_cons) + 1, cons_idx + discard);
+          new_cons = RTS_PACK(RTS_CNT(old_cons) + 1,
+                              ring_advance(r, cons_idx, discard));
           if (!atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
             {
               old_prod = atomic_read(&r->prod_head);
@@ -1693,7 +1769,8 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
           prod_idx = RTS_IDX(old_prod);
         }
 
-      new_prod = RTS_PACK(RTS_CNT(old_prod) + 1, prod_idx + count);
+      new_prod = RTS_PACK(RTS_CNT(old_prod) + 1,
+                          ring_advance(r, prod_idx, count));
       if (atomic_cmpxchg_relaxed(&r->prod_head, &old_prod, new_prod))
         {
           break;
