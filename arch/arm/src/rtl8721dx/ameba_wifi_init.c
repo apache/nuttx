@@ -103,38 +103,6 @@ static int ameba_ipc_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: ameba_wifi_start_task
- *
- * Description:
- *   Task entry running the blocking WHC host bring-up once the scheduler and
- *   IPC are up.
- *
- ****************************************************************************/
-
-static int ameba_wifi_start_task(int argc, char *argv[])
-{
-  UNUSED(argc);
-  UNUSED(argv);
-
-  /* Power on the WHC host stack (blocks on the NP round-trip), then register
-   * the wlan0 network device.
-   */
-
-  int ret = ameba_wifi_start();
-
-  syslog(LOG_INFO, "[ameba-wifi] ameba_wifi_start -> %d\n", ret);
-  if (ret == 0)
-    {
-#ifdef CONFIG_NET
-      ret = ameba_wlan_initialize();
-      syslog(LOG_INFO, "[ameba-wifi] ameba_wlan_initialize -> %d\n", ret);
-#endif
-    }
-
-  return 0;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -142,17 +110,25 @@ static int ameba_wifi_start_task(int argc, char *argv[])
  * Name: rtl8721dx_wifi_initialize
  *
  * Description:
- *   Bring up the KM4 IPC transport for WiFi and start the WHC host stack.
- *   Call from board bring-up after the scheduler is running.
+ *   Bring up the KM4 IPC transport for WiFi, start the WHC host stack and
+ *   register the wlan0 network device.  Call from board bring-up after the
+ *   scheduler is running.
+ *
+ *   Done synchronously (no worker task) so that wlan0 is registered before
+ *   the network initialisation (netinit) runs -- the standard NuttX flow
+ *   where the WiFi netdev already exists when board bring-up returns, so
+ *   netinit can associate + DHCP automatically.  wifi_on() blocks on the NP
+ *   IPC round-trip; the NP is already running and IPC is initialised just
+ *   above, so the wait is bounded.
  *
  * Returned Value:
- *   0 on success; a negated errno on failure to spawn the bring-up task.
+ *   0 on success; a negated errno on failure.
  *
  ****************************************************************************/
 
 int rtl8721dx_wifi_initialize(void)
 {
-  int pid;
+  int ret;
 
   /* Route the KM4 IPC interrupt to the SDK dispatcher and register every
    * channel the linked objects contributed (WHC WiFi TRX channels included).
@@ -162,9 +138,21 @@ int rtl8721dx_wifi_initialize(void)
   up_enable_irq(RTL8721DX_IRQ_IPC_KM4);
   ipc_table_init(IPCKM4_DEV);
 
-  /* wifi_on() blocks on the NP round-trip, so run it off the init path. */
+  /* Power on the WHC host stack (blocks on the NP round-trip). */
 
-  pid = kthread_create("ameba_wifi", SCHED_PRIORITY_DEFAULT, 8192,
-                       ameba_wifi_start_task, NULL);
-  return pid < 0 ? pid : 0;
+  ret = ameba_wifi_start();
+  syslog(LOG_INFO, "[ameba-wifi] ameba_wifi_start -> %d\n", ret);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+#ifdef CONFIG_NET
+  /* Register wlan0 before returning so netinit sees it at bring-up. */
+
+  ret = ameba_wlan_initialize();
+  syslog(LOG_INFO, "[ameba-wifi] ameba_wlan_initialize -> %d\n", ret);
+#endif
+
+  return ret;
 }
