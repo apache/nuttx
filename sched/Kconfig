@@ -223,12 +223,12 @@ config CLOCK_ADJTIME_SLEWLIMIT_PPM
 		For example CLOCK_ADJTIME_SLEWLIMIT=1000 will slow or speed the timer
 		tick period by at most 0.1 percent of the nominal value.
 
-config CLOCK_ADJTIME_PERIOD_MS
+config CLOCK_ADJTIME_PERIOD_NS
 	int "Adjtime period"
-	default 970
-	range 1 3600000
+	default 970000000
+	range 1000000 2000000000
 	---help---
-		Define system clock adjustment period in milliseconds.
+		Define system clock adjustment period in nanoseconds.
 		The adjustment commanded by adjtime() call is applied over this time period.
 
 endif

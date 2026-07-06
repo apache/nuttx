@@ -90,29 +90,28 @@ static uint64_t adjtime_timer_callback(FAR const hrtimer_t *timer,
 
 static long long adjtime_remaining_usec(void)
 {
-  return (long long)g_adjtime_ppb
-    * (hrtimer_gettime(&g_adjtime_timer) / NSEC_PER_USEC);
+  return g_adjtime_ppb * hrtimer_gettime(&g_adjtime_timer) /
+         NSEC_PER_SEC / NSEC_PER_USEC;
 }
 
 /* Start new adjustment period */
 
-static int adjtime_start(long long adjust_usec)
+static int adjtime_start(long long adjust_us)
 {
+  long long ppb_limit = CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM * 1000ll;
   long long ppb;
-  long long ppb_limit;
   irqstate_t flags;
   int ret = OK;
 
-  /* Calculate rate adjustmend to get adjust_usec change over the
-   * CONFIG_CLOCK_ADJTIME_PERIOD_MS.
+  /* Calculate rate adjustment to apply adjust_us over the
+   * CONFIG_CLOCK_ADJTIME_PERIOD_NS.
    */
 
-  ppb = adjust_usec * NSEC_PER_USEC;
-  ppb = ppb * MSEC_PER_SEC / CONFIG_CLOCK_ADJTIME_PERIOD_MS;
+  ppb = adjust_us * NSEC_PER_USEC * NSEC_PER_SEC /
+        CONFIG_CLOCK_ADJTIME_PERIOD_NS;
 
   /* Limit to maximum rate adjustment */
 
-  ppb_limit = CONFIG_CLOCK_ADJTIME_SLEWLIMIT_PPM * 1000;
   if (ppb > ppb_limit)
     {
       ppb = ppb_limit;
@@ -141,8 +140,7 @@ static int adjtime_start(long long adjust_usec)
   if (g_adjtime_ppb != 0)
     {
       hrtimer_start(&g_adjtime_timer, adjtime_timer_callback,
-                    (uint64_t)CONFIG_CLOCK_ADJTIME_PERIOD_MS *
-                    (uint64_t)NSEC_PER_MSEC, HRTIMER_MODE_REL);
+                    CONFIG_CLOCK_ADJTIME_PERIOD_NS, HRTIMER_MODE_REL);
     }
   else
     {
@@ -201,9 +199,9 @@ int adjtime(FAR const struct timeval *delta, FAR struct timeval *olddelta)
 
   if (olddelta)
     {
-      adjust_usec_old = adjtime_remaining_usec();
+      adjust_usec_old   = adjtime_remaining_usec();
       olddelta->tv_sec  = adjust_usec_old / USEC_PER_SEC;
-      olddelta->tv_usec = adjust_usec_old;
+      olddelta->tv_usec = adjust_usec_old % USEC_PER_SEC;
     }
 
   if (delta)
