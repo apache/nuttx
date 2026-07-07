@@ -55,6 +55,46 @@ if(CONFIG_XTENSA_STRCMP)
   list(APPEND CSRCS arch_strcmp.S)
 endif()
 
+if(CONFIG_XTENSA_MEMCMP)
+  list(APPEND CSRCS arch_memcmp.S)
+endif()
+
+if(CONFIG_XTENSA_MEMCHR)
+  list(APPEND CSRCS arch_memchr.S)
+endif()
+
+if(CONFIG_XTENSA_STRCHR)
+  list(APPEND CSRCS arch_strchr.S)
+endif()
+
+if(CONFIG_XTENSA_STRRCHR)
+  list(APPEND CSRCS arch_strrchr.S)
+endif()
+
+if(CONFIG_XTENSA_STRNCMP)
+  list(APPEND CSRCS arch_strncmp.S)
+endif()
+
+if(CONFIG_XTENSA_STRNLEN)
+  list(APPEND CSRCS arch_strnlen.S)
+endif()
+
+if(CONFIG_XTENSA_STRCHRNUL)
+  list(APPEND CSRCS arch_strchrnul.S)
+endif()
+
+if(CONFIG_XTENSA_STPCPY)
+  list(APPEND CSRCS arch_stpcpy.S)
+endif()
+
+if(CONFIG_XTENSA_STPNCPY)
+  list(APPEND CSRCS arch_stpncpy.S)
+endif()
+
+if(CONFIG_XTENSA_STRCAT)
+  list(APPEND CSRCS arch_strcat.S)
+endif()
+
 if(NOT CONFIG_PROFILE_NONE)
   list(APPEND CSRCS arch_mcount.c)
 endif()

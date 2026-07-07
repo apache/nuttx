@@ -56,6 +56,46 @@ ifeq ($(CONFIG_XTENSA_STRCMP),y)
 ASRCS += arch_strcmp.S
 endif
 
+ifeq ($(CONFIG_XTENSA_MEMCMP),y)
+ASRCS += arch_memcmp.S
+endif
+
+ifeq ($(CONFIG_XTENSA_MEMCHR),y)
+ASRCS += arch_memchr.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRCHR),y)
+ASRCS += arch_strchr.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRRCHR),y)
+ASRCS += arch_strrchr.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRNCMP),y)
+ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRNLEN),y)
+ASRCS += arch_strnlen.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRCHRNUL),y)
+ASRCS += arch_strchrnul.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STPCPY),y)
+ASRCS += arch_stpcpy.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STPNCPY),y)
+ASRCS += arch_stpncpy.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRCAT),y)
+ASRCS += arch_strcat.S
+endif
+
 ifeq ($(CONFIG_PROFILE_NONE),)
 CSRCS += arch_mcount.c
 endif
