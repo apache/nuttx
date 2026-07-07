@@ -127,6 +127,24 @@ struct sensor_upperhalf_s
   struct circbuf_s   buffer;             /* The circular buffer of data */
   rmutex_t           lock;               /* Manages exclusive access to file operations */
   struct list_node   userlist;           /* List of users */
+
+  /* The aggregated interval last handed to the lower half set_interval
+   * (the requested value, captured before the call, not the value the
+   * lower half may write back). It is the dedup base for interval updates.
+   *
+   * Some lower halves program the interval asynchronously: set_interval
+   * only records the request and applies it later (e.g. on the next FIFO
+   * interrupt), then reports the effective rate via notify_interval. During
+   * that window state.min_interval (the downsampling time base) still holds
+   * the stale effective rate. Dedup against state.min_interval would drop a
+   * newly aggregated request that happens to equal that stale value, so the
+   * device stays at the wrong rate. Dedup against pending instead, which
+   * tracks what upper half actually requested, is immune to that window and
+   * to ODR rounding, and needs no knowledge of whether the driver is sync
+   * or async. UINT32_MAX means nothing has been pushed.
+   */
+
+  uint32_t           pending;
   char               name[NAME_MAX];     /* Upper topic name */
 };
 
@@ -292,14 +310,16 @@ static int sensor_update_interval(FAR struct file *filep,
   uint32_t orig_min_interval = upper->state.min_interval;
   uint32_t orig_min_latency;
   uint32_t min_interval;
+  uint32_t requested;
   int ret = 0;
 
+  nxrmutex_lock(&upper->lock);
   if (interval == user->state.interval)
     {
+      nxrmutex_unlock(&upper->lock);
       return 0;
     }
 
-  nxrmutex_lock(&upper->lock);
 again:
   min_interval = interval;
   list_for_every_entry(&upper->userlist, tmp, struct sensor_user_s, node)
@@ -322,9 +342,26 @@ again:
 
   if (lower->ops->set_interval)
     {
+      /* Dedup against pending (what upper half last requested), not against
+       * state.min_interval (the device's effective rate). An asynchronous
+       * lower half applies the interval later and reports its effective
+       * rate via notify_interval, so state.min_interval can lag the real
+       * request; a request equal to that stale value must still reach the
+       * driver. Comparing against pending is immune to that window and to
+       * ODR rounding, and needs no knowledge of sync vs async drivers.
+       */
+
       if (min_interval != UINT32_MAX &&
-          min_interval != upper->state.min_interval)
+          min_interval != upper->pending)
         {
+          /* Capture the requested value before the call: set_interval may
+           * overwrite min_interval with the rounded effective value, but
+           * pending must record what we asked for so a later identical
+           * request is correctly deduped (and an unreachable rate does not
+           * loop).
+           */
+
+          requested = min_interval;
           orig_min_interval = upper->state.min_interval;
           nxrmutex_unlock(&upper->lock);
           ret = lower->ops->set_interval(lower, filep, &min_interval);
@@ -334,6 +371,7 @@ again:
             }
 
           nxrmutex_lock(&upper->lock);
+          upper->pending = requested;
           sminfo(upper->name, "update interval %" PRIu32, min_interval);
 
           /* The upper min_interval is updated by other threads, set to
@@ -384,6 +422,16 @@ again:
    *   -> upper->state.min_interval is updated, mini interval still old value
    * This logic will set the wrong interval for the driver.
    */
+
+  if (min_interval == UINT32_MAX)
+    {
+      /* No active user remains: invalidate pending so a future request
+       * re-programs the (possibly re-activated) device even when it equals
+       * the last pushed value.
+       */
+
+      upper->pending = UINT32_MAX;
+    }
 
   if (upper->state.min_interval != min_interval &&
       orig_min_interval != min_interval)
@@ -1508,6 +1556,7 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
   upper->state.min_interval = UINT32_MAX;
+  upper->pending = UINT32_MAX;
   upper->state.wakeup = false;
   if (lower->ops->activate)
     {
