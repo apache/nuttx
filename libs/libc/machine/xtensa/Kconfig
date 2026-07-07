@@ -30,10 +30,20 @@ config XTENSA_STRING_FUNCTION
 	select XTENSA_MEMCPY
 	select XTENSA_MEMMOVE
 	select XTENSA_MEMSET
+	select XTENSA_MEMCMP
+	select XTENSA_MEMCHR
 	select XTENSA_STRCMP
 	select XTENSA_STRCPY
 	select XTENSA_STRLEN
 	select XTENSA_STRNCPY
+	select XTENSA_STRCHR
+	select XTENSA_STRRCHR
+	select XTENSA_STRNCMP
+	select XTENSA_STRNLEN
+	select XTENSA_STRCHRNUL
+	select XTENSA_STPCPY
+	select XTENSA_STPNCPY
+	select XTENSA_STRCAT
 
 config XTENSA_MEMCPY
 	bool "Enable optimized memcpy() for XTENSA"
@@ -76,4 +86,64 @@ config XTENSA_STRNCPY
 	select LIBC_ARCH_STRNCPY
 	---help---
 		Enable optimized XTENSA specific strncpy() library function
+
+config XTENSA_MEMCMP
+	bool "Enable optimized memcmp() for XTENSA"
+	select LIBC_ARCH_MEMCMP
+	---help---
+		Enable optimized XTENSA specific memcmp() library function
+
+config XTENSA_MEMCHR
+	bool "Enable optimized memchr() for XTENSA"
+	select LIBC_ARCH_MEMCHR
+	---help---
+		Enable optimized XTENSA specific memchr() library function
+
+config XTENSA_STRCHR
+	bool "Enable optimized strchr() for XTENSA"
+	select LIBC_ARCH_STRCHR
+	---help---
+		Enable optimized XTENSA specific strchr() library function
+
+config XTENSA_STRRCHR
+	bool "Enable optimized strrchr() for XTENSA"
+	select LIBC_ARCH_STRRCHR
+	---help---
+		Enable optimized XTENSA specific strrchr() library function
+
+config XTENSA_STRNCMP
+	bool "Enable optimized strncmp() for XTENSA"
+	select LIBC_ARCH_STRNCMP
+	---help---
+		Enable optimized XTENSA specific strncmp() library function
+
+config XTENSA_STRNLEN
+	bool "Enable optimized strnlen() for XTENSA"
+	select LIBC_ARCH_STRNLEN
+	---help---
+		Enable optimized XTENSA specific strnlen() library function
+
+config XTENSA_STRCHRNUL
+	bool "Enable optimized strchrnul() for XTENSA"
+	select LIBC_ARCH_STRCHRNUL
+	---help---
+		Enable optimized XTENSA specific strchrnul() library function
+
+config XTENSA_STPCPY
+	bool "Enable optimized stpcpy() for XTENSA"
+	select LIBC_ARCH_STPCPY
+	---help---
+		Enable optimized XTENSA specific stpcpy() library function
+
+config XTENSA_STPNCPY
+	bool "Enable optimized stpncpy() for XTENSA"
+	select LIBC_ARCH_STPNCPY
+	---help---
+		Enable optimized XTENSA specific stpncpy() library function
+
+config XTENSA_STRCAT
+	bool "Enable optimized strcat() for XTENSA"
+	select LIBC_ARCH_STRCAT
+	---help---
+		Enable optimized XTENSA specific strcat() library function
 
