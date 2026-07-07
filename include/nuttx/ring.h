@@ -301,6 +301,14 @@
 
 #define ring_data(r)  ((FAR char *)((FAR struct ring_s *)(r) + 1))
 
+/* Wrap a linear (unwrapped) position into the ring's 24-bit index space,
+ * matching the index the peek helpers return through their *index argument.
+ * Lets a caller compare an expected next position against the value a peek
+ * reported without reaching into the internal packed layout.
+ */
+
+#define ring_wrap(pos)   ((uint32_t)(pos) & RING_IDX_MASK)
+
 /* ring_spsc_init - lightweight initialization for SPSC mode.
  *
  * Unlike ring_init (which uses atomic CAS for multi-core safe
