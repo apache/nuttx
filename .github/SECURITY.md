@@ -4,6 +4,7 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 12.0.x  | :heavy_check_mark: |
 | 11.0.x  | :heavy_check_mark: |
 | 10.3.x  | :heavy_check_mark: |
 | 10.2.x  | :heavy_check_mark: |
@@ -14,8 +15,10 @@
 
 ## Reporting a Vulnerability
 
-If you think you have found a possible vulnerability please reach out to the _private_ project mailing list
-private@nuttx.apache.org or the Apache Security list security@apache.org.
+If you think you have found a possible vulnerability please reach out to the _security_ project mailing list
+security@nuttx.apache.org or the Apache Security list security@apache.org.
 
 Please **DO NOT** create a GitHub issue or email the project dev list as they are public.
 This project follows the Apache Vulnerability Handling Policy documented [here](https://www.apache.org/security/committers.html#vulnerability-handling).
+
+Please read our [Security Documentation](https://nuttx.apache.org/docs/latest/security.html) for more details.
