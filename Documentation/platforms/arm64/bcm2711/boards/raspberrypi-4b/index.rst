@@ -293,6 +293,27 @@ colourful rectangles on the screen.
    ``CONFIG_BCM2711_FB_FORCE_RESOLUTION=y`` to force the request of your
    configured default resolution instead.
 
+nxdoom
+------
+
+This configuration combines features from the ``sd`` and ``fb`` configurations,
+and includes the NuttX port of DOOM, :doc:`/applications/games/nxdoom/index`.
+Place the WAD file you wish to play on the SD card partition with the NuttX
+kernel and other files. You can then play via
+
+.. code:: console
+
+   nsh> nxdoom -iwad /sd/doom1.wad
+
+.. warning::
+
+   There are currently no input devices on the Raspberry Pi 4B which make DOOM
+   playable, so you can only stare at the menu for now. Patches welcome!
+
+   The Pi's framebuffer rendering causes some small artifacts in the player
+   window. This would need DMA-based rendering or double-buffered rendering to
+   improve most likely. Patches also welcome!
+
 lvgl
 ----
 
