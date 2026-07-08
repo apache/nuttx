@@ -66,7 +66,7 @@ endif
 # own).  This folds the prototype scripts (nuttx-ameba-ext/link_img2.sh and
 # package_app.sh) into NuttX's native build: the linked `nuttx` ELF *is* the
 # AP (km4tz) image2 .axf, and POSTBUILD (board scripts/Make.defs) packages it
-# into a flashable app.bin.
+# into a flashable nuttx.bin.
 #
 # The vendor SDK (ameba-rtos) is treated as a referenced 3rd-party checkout:
 # its sources, ROM symbol files and linker scripts are referenced at build time

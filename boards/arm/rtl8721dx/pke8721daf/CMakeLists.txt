@@ -23,10 +23,10 @@
 # The RTL8721Dx (Ameba WHC) port currently builds via the make-based build only.
 # The CMake path does not yet wire up the vendor-SDK machinery (SDK fetch,
 # libameba_fwlib.a/libameba_wifi.a, the image2 entry ameba_app_start.c, the SDK
-# image2 linker-script generation, the NP-image build and the app.bin packaging)
-# that boards/.../scripts/Make.defs -> arch/.../ameba_board.mk provides, so a
-# CMake configure would not produce a flashable image.  Fail fast with a clear
-# message instead of half-building.
+# image2 linker-script generation, the NP-image build and the nuttx.bin
+# packaging) that boards/.../scripts/Make.defs -> arch/.../ameba_board.mk
+# provides, so a CMake configure would not produce a flashable image.  Fail fast
+# with a clear message instead of half-building.
 message(
   FATAL_ERROR
     "pke8721daf (RTL8721Dx, Ameba WHC) currently supports the make build "

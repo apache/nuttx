@@ -319,7 +319,7 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(D
 LDNXFLATFLAGS = -e main -s 2048
 
 ############################################################################
-# POSTBUILD -- package the linked image2 into a flashable app.bin
+# POSTBUILD -- package the linked image2 into a flashable nuttx.bin
 #
 # Runs after `nuttx` (== the KM4 image2 .axf) is linked.  This folds the
 # prototype package_app.sh into NuttX's build:
@@ -328,7 +328,8 @@ LDNXFLATFLAGS = -e main -s 2048
 #   2. Run the SDK km4tz image2 postbuild.cmake (axf2bin) -> km4tz_image2_all.bin.
 #   3. Run the SDK project firmware_package postbuild.cmake combining the
 #      freshly built AP (km4tz) image2 with the freshly built NP (km4ns) image2
-#      -> app.bin, copied into $(TOPDIR).
+#      into the packed app image, copied into $(TOPDIR) as nuttx.bin.  boot.bin
+#      is a prebuilt bootloader and stays in prebuilt/ (flashed from there).
 #
 # The NP (km4ns) image2 is rebuilt from the pinned SDK source every build (by
 # AMEBA_NP_POSTBUILD, fed the AP disassembly), so the two cores never drift.
@@ -361,7 +362,7 @@ AMEBA_KM4_PROJ = $(AMEBA_SOC_PROJ)/project_km4tz
 AMEBA_PKGDIR = $(AMEBA_PREBUILT)$(DELIM)pkg
 
 define POSTBUILD
-	$(Q) echo "PACK: app.bin (Ameba AP km4tz image2 + NP km4ns image2)"
+	$(Q) echo "PACK: nuttx.bin (Ameba AP km4tz image2 + NP km4ns image2)"
 	$(Q) test -n "$(AMEBA_SDK)" || \
 	  { echo "ERROR: AMEBA_SDK is not set"; exit 1; }
 	$(Q) $(AMEBA_SETUP_ENV) $(AMEBA_SDK) $(AMEBA_TOOLCHAIN_DIR)
@@ -408,11 +409,10 @@ define POSTBUILD
 	  -Dc_IMAGE1_ALL_FILES= \
 	  -Dc_IMAGE2_ALL_FILES="$(AMEBA_PKGDIR)/km4ns_image2_all.bin;$(AMEBA_PKGDIR)/km4tz_image2_all.bin" \
 	  -Dc_IMAGE3_ALL_FILES= \
-	  -DFINAL_IMAGE_DIR=$(TOPDIR) \
+	  -DFINAL_IMAGE_DIR=$(AMEBA_PKGDIR) \
 	  -DANALYZE_MP_IMG=0 -DEXTERN_DIR=$(AMEBA_PKGDIR) \
 	  -P $(AMEBA_SOC_PROJ)/postbuild.cmake
-	$(Q) cp $(AMEBA_PREBUILT)$(DELIM)boot.bin $(TOPDIR)$(DELIM)boot.bin
-	$(Q) cp $(AMEBA_PREBUILT)$(DELIM)km4ns_image2_all.bin \
-	  $(TOPDIR)$(DELIM)km4ns_image2_all.bin
-	$(Q) echo "PACK: wrote $(TOPDIR)$(DELIM){app.bin,boot.bin,km4ns_image2_all.bin}"
+	$(Q) cp $(AMEBA_PKGDIR)$(DELIM)app.bin $(TOPDIR)$(DELIM)nuttx.bin
+	$(Q) echo "PACK: wrote $(TOPDIR)$(DELIM)nuttx.bin"
+	$(Q) echo "      Flash with: make flash AMEBA_PORT=/dev/ttyUSB0"
 endef

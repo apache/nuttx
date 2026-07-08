@@ -83,9 +83,11 @@ Realtek ``arm-none-eabi`` toolchain must be on ``PATH``; see the
    $ ./tools/configure.sh rtl8720f_evb:nsh
    $ make
 
-This produces the two flashable images in the build directory: ``app.bin``
-(the NuttX application image, which also bundles the prebuilt Wi-Fi firmware)
-and ``boot.bin`` (the bootloader).
+This produces ``nuttx.bin`` in the top-level build directory: the NuttX
+application image, which also bundles the prebuilt Wi-Fi firmware.  The
+bootloader ``boot.bin`` is a prebuilt binary kept under the board's
+``prebuilt/`` directory; ``make flash`` writes both at the flash offsets
+taken from the generated flash layout, so no offsets are entered by hand.
 
 After a successful build, flash via one of these methods:
 
@@ -99,8 +101,8 @@ built-in ``make flash`` target:
 The baud rate defaults to 1500000; override with ``AMEBA_BAUD`` if needed.
 
 **GUI (Windows)** — use the Realtek AmebaImageTool (``AmebaImageTool.exe``
-under ``tools/ameba/ImageTool/`` in the SDK tree) to select ``boot.bin`` and
-``app.bin``.
+under ``tools/ameba/ImageTool/`` in the SDK tree) to select ``boot.bin`` (from
+the board's ``prebuilt/`` directory) and ``nuttx.bin``.
 
 See the `Realtek Ameba ImageTool guide
 <https://aiot.realmcu.com/en/latest/tools/image_tool/index.html>`_ for the
