@@ -160,6 +160,10 @@ int rpi4b_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_BCM2711_PWM
+  ret = rpi4b_pwm_initialize();
+#endif
+
 #ifdef CONFIG_RPI4B_BMP280
   struct i2c_master_s *i2c1 = bcm2711_i2cbus_initialize(1);
   if (i2c1 == NULL)

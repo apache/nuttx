@@ -29,11 +29,15 @@ if(CONFIG_DEV_GPIO)
 endif()
 
 if(CONFIG_RPI4B_SDMMC)
-  list(APPEND rpi4b_sdmmc.c)
+  list(APPEND SRCS rpi4b_sdmmc.c)
 endif()
 
 if(CONFIG_BCM2711_I2C_DRIVER)
   list(APPEND SRCS bcm2711_i2cdev.c)
+endif()
+
+if(CONFIG_BCM2711_PWM)
+  list(APPEND SRCS rpi4b_pwm.c)
 endif()
 
 target_sources(board PRIVATE ${SRCS})

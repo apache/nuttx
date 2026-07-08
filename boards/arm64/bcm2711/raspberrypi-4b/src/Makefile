@@ -38,6 +38,10 @@ ifeq ($(CONFIG_BCM2711_I2C_DRIVER),y)
 CSRCS += bcm2711_i2cdev.c
 endif
 
+ifeq ($(CONFIG_BCM2711_PWM),y)
+CSRCS += rpi4b_pwm.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
 
 .PHONY: distclean
