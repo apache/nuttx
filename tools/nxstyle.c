@@ -283,6 +283,7 @@ static const char *g_white_prefix[] =
   "SYSTIMER_",
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
+  "MQTTErrors",	      /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */
   NULL
 };
 
