@@ -536,6 +536,20 @@ static int rp2040_epread(struct rp2040_ep_s *privep, uint16_t nbytes)
   uint32_t val;
   irqstate_t flags;
 
+  /* The hardware receives a single USB packet into the buffer, and the
+   * buffer-control LEN field is only 10 bits wide.  Arm the buffer for at
+   * most one maximum-size packet; rp2040_rxcomplete accumulates the request
+   * across multiple packets and re-arms until it is satisfied or a short
+   * packet arrives.  Passing the full (possibly multi-kByte) request length
+   * would overflow LEN and corrupt the neighbouring control bits, making the
+   * transfer complete immediately with zero bytes.
+   */
+
+  if (nbytes > privep->ep.maxpacket)
+    {
+      nbytes = privep->ep.maxpacket;
+    }
+
   val = nbytes |
         RP2040_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL |
         (privep->next_pid ?
