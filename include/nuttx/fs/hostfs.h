@@ -32,9 +32,11 @@
 #  include <sys/stat.h>
 #  include <sys/statfs.h>
 #  include <dirent.h>
+#  include <stdio.h>
 #  include <time.h>
 #else
 #  include <config.h>
+#  include <stddef.h>
 #  include <stdint.h>
 #endif
 
@@ -113,6 +115,21 @@
 #define NUTTX_CH_STAT_ATIME     (1 << 3)
 #define NUTTX_CH_STAT_MTIME     (1 << 4)
 
+/* These must exactly match the definitions from include/fcntl.h: */
+
+#define NUTTX_F_DUPFD           0
+#define NUTTX_F_GETFD           1
+#define NUTTX_F_GETFL           2
+#define NUTTX_F_GETLK           4
+#define NUTTX_F_SETFD           8
+#define NUTTX_F_SETFL           9
+#define NUTTX_F_SETLK           11
+#define NUTTX_F_SETLKW          12
+
+#define NUTTX_F_RDLCK           0
+#define NUTTX_F_WRLCK           1
+#define NUTTX_F_UNLCK           2
+
 #endif /* __SIM__ */
 
 /****************************************************************************
@@ -149,6 +166,7 @@ typedef uint32_t     nuttx_blkcnt_t;
 
 typedef unsigned int nuttx_mode_t;
 typedef int          nuttx_fsid_t[2];
+typedef uintptr_t    nuttx_file_t;
 
 /* These must match the definition in include/time.h */
 
@@ -203,6 +221,15 @@ struct nuttx_stat_s
   nuttx_blkcnt_t        st_blocks;  /* Number of blocks allocated */
 };
 
+struct nuttx_flock_s
+{
+  int16_t      l_type;
+  int16_t      l_whence;
+  nuttx_off_t  l_start;
+  nuttx_off_t  l_len;
+  int32_t      l_pid;
+};
+
 #endif /* __SIM__ */
 
 /****************************************************************************
@@ -214,10 +241,16 @@ int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
 nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count);
 nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count);
+nuttx_ssize_t host_pread(int fd, void *buf, nuttx_size_t count,
+                         nuttx_off_t offset);
+nuttx_ssize_t host_pwrite(int fd, const void *buf, nuttx_size_t count,
+                          nuttx_off_t offset);
 nuttx_off_t   host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
                          int whence);
+int           host_fcntl(int fd, int cmd, ...);
 int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
+int           host_fsync(int fd);
 int           host_dup(int fd);
 int           host_fstat(int fd, struct nuttx_stat_s *buf);
 int           host_fchstat(int fd, const struct nuttx_stat_s *buf,
@@ -229,20 +262,31 @@ void          host_rewinddir(void *dirp);
 int           host_closedir(void *dirp);
 int           host_statfs(const char *path, struct nuttx_statfs_s *buf);
 int           host_unlink(const char *pathname);
+int           host_remove(const char *pathname);
 int           host_mkdir(const char *pathname, int mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct nuttx_stat_s *buf);
+int           host_access(const char *path, int mode);
 int           host_chstat(const char *path,
                           const struct nuttx_stat_s *buf, int flags);
+nuttx_file_t  host_popen(const char *command, const char *mode);
+char         *host_fgets(char *buf, nuttx_size_t len, nuttx_file_t stream);
+int           host_pclose(nuttx_file_t stream);
+int           host_system(char *buf, size_t len, const char *fmt, ...);
 #else
 int           host_open(const char *pathname, int flags, int mode);
 int           host_close(int fd);
 ssize_t       host_read(int fd, void *buf, size_t count);
 ssize_t       host_write(int fd, const void *buf, size_t count);
+ssize_t       host_pread(int fd, void *buf, size_t count, off_t offset);
+ssize_t       host_pwrite(int fd, const void *buf, size_t count,
+                          off_t offset);
 off_t         host_lseek(int fd, off_t pos, off_t offset, int whence);
+int           host_fcntl(int fd, int cmd, ...);
 int           host_ioctl(int fd, int request, unsigned long arg);
 void          host_sync(int fd);
+int           host_fsync(int fd);
 int           host_dup(int fd);
 int           host_fstat(int fd, struct stat *buf);
 int           host_fchstat(int fd, const struct stat *buf, int flags);
@@ -253,12 +297,18 @@ void          host_rewinddir(void *dirp);
 int           host_closedir(void *dirp);
 int           host_statfs(const char *path, struct statfs *buf);
 int           host_unlink(const char *pathname);
+int           host_remove(const char *pathname);
 int           host_mkdir(const char *pathname, int mode);
 int           host_rmdir(const char *pathname);
 int           host_rename(const char *oldpath, const char *newpath);
 int           host_stat(const char *path, struct stat *buf);
+int           host_access(const char *path, int mode);
 int           host_chstat(const char *path,
                           const struct stat *buf, int flags);
+FILE         *host_popen(const char *command, const char *mode);
+char         *host_fgets(char *buf, size_t len, FILE *stream);
+int           host_pclose(FILE *stream);
+int           host_system(char *buf, size_t len, const char *fmt, ...);
 #endif /* __SIM__ */
 
 #endif /* __INCLUDE_NUTTX_FS_HOSTFS_H */

@@ -35,6 +35,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <stdarg.h>
 
 #include "hostfs.h"
 #include "sim_internal.h"
@@ -42,6 +43,189 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_oflags_convert
+ ****************************************************************************/
+
+static int host_oflags_convert(int flags)
+{
+  int mapflags = 0;
+
+  switch (flags & NUTTX_O_ACCMODE)
+    {
+      case NUTTX_O_RDONLY:
+        mapflags = O_RDONLY;
+        break;
+
+      case NUTTX_O_WRONLY:
+        mapflags = O_WRONLY;
+        break;
+
+      case NUTTX_O_RDWR:
+        mapflags = O_RDWR;
+        break;
+    }
+
+  if (flags & NUTTX_O_APPEND)
+    {
+      mapflags |= O_APPEND;
+    }
+
+  if (flags & NUTTX_O_CREAT)
+    {
+      mapflags |= O_CREAT;
+    }
+
+  if (flags & NUTTX_O_EXCL)
+    {
+      mapflags |= O_EXCL;
+    }
+
+  if (flags & NUTTX_O_TRUNC)
+    {
+      mapflags |= O_TRUNC;
+    }
+
+  if (flags & NUTTX_O_NONBLOCK)
+    {
+      mapflags |= O_NONBLOCK;
+    }
+
+  if (flags & NUTTX_O_SYNC)
+    {
+      mapflags |= O_SYNC;
+    }
+
+#ifdef O_DIRECT
+  if (flags & NUTTX_O_DIRECT)
+    {
+      mapflags |= O_DIRECT;
+    }
+#endif
+
+  if (flags & NUTTX_O_CLOEXEC)
+    {
+      mapflags |= O_CLOEXEC;
+    }
+
+  if (flags & NUTTX_O_DIRECTORY)
+    {
+      mapflags |= O_DIRECTORY;
+    }
+
+  return mapflags;
+}
+
+/****************************************************************************
+ * Name: host_oflags_revert
+ ****************************************************************************/
+
+static int host_oflags_revert(int flags)
+{
+  int mapflags = 0;
+
+  switch (flags & O_ACCMODE)
+    {
+      case O_RDONLY:
+        mapflags = NUTTX_O_RDONLY;
+        break;
+
+      case O_WRONLY:
+        mapflags = NUTTX_O_WRONLY;
+        break;
+
+      case O_RDWR:
+        mapflags = NUTTX_O_RDWR;
+        break;
+    }
+
+  if (flags & O_APPEND)
+    {
+      mapflags |= NUTTX_O_APPEND;
+    }
+
+  if (flags & O_CREAT)
+    {
+      mapflags |= NUTTX_O_CREAT;
+    }
+
+  if (flags & O_EXCL)
+    {
+      mapflags |= NUTTX_O_EXCL;
+    }
+
+  if (flags & O_TRUNC)
+    {
+      mapflags |= NUTTX_O_TRUNC;
+    }
+
+  if (flags & O_NONBLOCK)
+    {
+      mapflags |= NUTTX_O_NONBLOCK;
+    }
+
+  if (flags & O_SYNC)
+    {
+      mapflags |= NUTTX_O_SYNC;
+    }
+
+#ifdef O_DIRECT
+  if (flags & O_DIRECT)
+    {
+      mapflags |= NUTTX_O_DIRECT;
+    }
+#endif
+
+  if (flags & O_CLOEXEC)
+    {
+      mapflags |= NUTTX_O_CLOEXEC;
+    }
+
+  if (flags & O_DIRECTORY)
+    {
+      mapflags |= NUTTX_O_DIRECTORY;
+    }
+
+  return mapflags;
+}
+
+/****************************************************************************
+ * Name: host_fcntl_cmd_convert
+ ****************************************************************************/
+
+static int host_fcntl_cmd_convert(int cmd)
+{
+  switch (cmd)
+    {
+      case NUTTX_F_DUPFD:
+        return F_DUPFD;
+
+      case NUTTX_F_GETFD:
+        return F_GETFD;
+
+      case NUTTX_F_GETFL:
+        return F_GETFL;
+
+      case NUTTX_F_GETLK:
+        return F_GETLK;
+
+      case NUTTX_F_SETFD:
+        return F_SETFD;
+
+      case NUTTX_F_SETFL:
+        return F_SETFL;
+
+      case NUTTX_F_SETLK:
+        return F_SETLK;
+
+      case NUTTX_F_SETLKW:
+        return F_SETLKW;
+
+      default:
+        return -EINVAL;
+    }
+}
 
 /****************************************************************************
  * Name: host_stat_convert
@@ -130,71 +314,7 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 
 int host_open(const char *pathname, int flags, int mode)
 {
-  int mapflags = 0;
-
-  /* Perform flag mapping */
-
-  switch (flags & NUTTX_O_ACCMODE)
-    {
-      case NUTTX_O_RDONLY:
-        mapflags = O_RDONLY;
-        break;
-
-      case NUTTX_O_WRONLY:
-        mapflags = O_WRONLY;
-        break;
-
-      case NUTTX_O_RDWR:
-        mapflags = O_RDWR;
-        break;
-    }
-
-  if (flags & NUTTX_O_APPEND)
-    {
-      mapflags |= O_APPEND;
-    }
-
-  if (flags & NUTTX_O_CREAT)
-    {
-      mapflags |= O_CREAT;
-    }
-
-  if (flags & NUTTX_O_EXCL)
-    {
-      mapflags |= O_EXCL;
-    }
-
-  if (flags & NUTTX_O_TRUNC)
-    {
-      mapflags |= O_TRUNC;
-    }
-
-  if (flags & NUTTX_O_NONBLOCK)
-    {
-      mapflags |= O_NONBLOCK;
-    }
-
-  if (flags & NUTTX_O_SYNC)
-    {
-      mapflags |= O_SYNC;
-    }
-
-#ifdef O_DIRECT
-  if (flags & NUTTX_O_DIRECT)
-    {
-      mapflags |= O_DIRECT;
-    }
-#endif
-
-  if (flags & NUTTX_O_CLOEXEC)
-    {
-      mapflags |= O_CLOEXEC;
-    }
-
-  if (flags & NUTTX_O_DIRECTORY)
-    {
-      mapflags |= O_DIRECTORY;
-    }
+  int mapflags = host_oflags_convert(flags);
 
   int ret = open(pathname, mapflags, mode);
   if (ret == -1)
@@ -257,6 +377,38 @@ nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
 }
 
 /****************************************************************************
+ * Name: host_pread
+ ****************************************************************************/
+
+nuttx_ssize_t host_pread(int fd, void *buf, nuttx_size_t count,
+                         nuttx_off_t offset)
+{
+  nuttx_ssize_t ret = pread(fd, buf, count, offset);
+  if (ret == -1)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_pwrite
+ ****************************************************************************/
+
+nuttx_ssize_t host_pwrite(int fd, const void *buf, nuttx_size_t count,
+                          nuttx_off_t offset)
+{
+  nuttx_ssize_t ret = pwrite(fd, buf, count, offset);
+  if (ret == -1)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: host_lseek
  ****************************************************************************/
 
@@ -269,6 +421,89 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
   if (ret == (nuttx_off_t)-1)
     {
       ret =  host_errno_convert(-errno);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: host_fcntl
+ ****************************************************************************/
+
+int host_fcntl(int fd, int cmd, ...)
+{
+  struct nuttx_flock_s *lock;
+  struct flock hostlock;
+  int hostcmd = host_fcntl_cmd_convert(cmd);
+  va_list ap;
+  int arg;
+  int ret;
+
+  if (hostcmd < 0)
+    {
+      return hostcmd;
+    }
+
+  va_start(ap, cmd);
+
+  switch (cmd)
+    {
+      case NUTTX_F_GETFD:
+        ret = fcntl(fd, hostcmd);
+        break;
+
+      case NUTTX_F_GETFL:
+        ret = fcntl(fd, hostcmd);
+        if (ret >= 0)
+          {
+            ret = host_oflags_revert(ret);
+          }
+
+        break;
+
+      case NUTTX_F_DUPFD:
+      case NUTTX_F_SETFD:
+      case NUTTX_F_SETFL:
+        arg = va_arg(ap, int);
+        if (cmd == NUTTX_F_SETFL)
+          {
+            arg = host_oflags_convert(arg);
+          }
+
+        ret = fcntl(fd, hostcmd, arg);
+        break;
+
+      case NUTTX_F_GETLK:
+      case NUTTX_F_SETLK:
+      case NUTTX_F_SETLKW:
+        lock = va_arg(ap, struct nuttx_flock_s *);
+        hostlock.l_type = lock->l_type;
+        hostlock.l_whence = lock->l_whence;
+        hostlock.l_start = lock->l_start;
+        hostlock.l_len = lock->l_len;
+        hostlock.l_pid = lock->l_pid;
+
+        ret = fcntl(fd, hostcmd, &hostlock);
+        if (ret >= 0)
+          {
+            lock->l_type = hostlock.l_type;
+            lock->l_whence = hostlock.l_whence;
+            lock->l_start = hostlock.l_start;
+            lock->l_len = hostlock.l_len;
+            lock->l_pid = hostlock.l_pid;
+          }
+        break;
+
+      default:
+        ret = -1;
+        errno = EINVAL;
+        break;
+    }
+
+  va_end(ap);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
     }
 
   return ret;
@@ -300,6 +535,21 @@ void host_sync(int fd)
   /* Just call the sync routine */
 
   fsync(fd);
+}
+
+/****************************************************************************
+ * Name: host_fsync
+ ****************************************************************************/
+
+int host_fsync(int fd)
+{
+  int ret = fsync(fd);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -561,6 +811,21 @@ int host_unlink(const char *pathname)
 }
 
 /****************************************************************************
+ * Name: host_remove
+ ****************************************************************************/
+
+int host_remove(const char *pathname)
+{
+  int ret = remove(pathname);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: host_mkdir
  ****************************************************************************/
 
@@ -631,6 +896,21 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
 }
 
 /****************************************************************************
+ * Name: host_access
+ ****************************************************************************/
+
+int host_access(const char *path, int mode)
+{
+  int ret = access(path, mode);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: host_chstat
  ****************************************************************************/
 
@@ -689,4 +969,37 @@ int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
     }
 
   return 0;
+}
+
+/****************************************************************************
+ * Name: host_popen
+ ****************************************************************************/
+
+nuttx_file_t host_popen(const char *command, const char *mode)
+{
+  return (nuttx_file_t)(uintptr_t)popen(command, mode);
+}
+
+/****************************************************************************
+ * Name: host_fgets
+ ****************************************************************************/
+
+char *host_fgets(char *buf, nuttx_size_t len, nuttx_file_t stream)
+{
+  return fgets(buf, len, (FILE *)(uintptr_t)stream);
+}
+
+/****************************************************************************
+ * Name: host_pclose
+ ****************************************************************************/
+
+int host_pclose(nuttx_file_t stream)
+{
+  int ret = pclose((FILE *)(uintptr_t)stream);
+  if (ret < 0)
+    {
+      ret = host_errno_convert(-errno);
+    }
+
+  return ret;
 }
