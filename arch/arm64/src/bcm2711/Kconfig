@@ -282,6 +282,51 @@ config BCM2711_SPI6
 endif # BCM2711_SPI
 
 #####################################################################
+# PWM
+#####################################################################
+
+config BCM2711_PWM
+	bool "PWM"
+	select PWM
+	default n
+	---help---
+		Enable PWM support on the BCM2711.
+
+if BCM2711_PWM
+
+config BCM2711_PWM0
+	bool "PWM0"
+	default n
+	---help---
+		Enable support for the PWM0 interface.
+
+if BCM2711_PWM0
+
+config BCM2711_PWM0_CHAN1_PIN
+	int "PWM0 Channel 1 GPIO pin"
+	default 12
+	---help---
+		Configure PWM0_0 (channel 1) GPIO pin. Valid options are 12, 18.
+
+config BCM2711_PWM0_CHAN2_PIN
+	int "PWM0 Channel 2 GPIO pin"
+	default 13
+	---help---
+		Configure PWM0_1 (channel 2) GPIO pin. Valid options are 13, 19, 45.
+
+endif # BCM2711_PWM0
+
+config BCM2711_PWM1
+	bool "PWM1"
+	default n
+	---help---
+		Enable support for the PWM1 interface. Note that PWM1 can only be mapped
+		to GPIO 40 for channel 1, and 41 for channel 2. This corresponds to the
+		audio jack on the RPi4B, where channel 1 is RIGHT and 2 is LEFT.
+
+endif # BCM2711_PWM
+
+#####################################################################
 # SDMMC Configuration
 #####################################################################
 

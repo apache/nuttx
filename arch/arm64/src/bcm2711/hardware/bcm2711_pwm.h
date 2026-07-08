@@ -29,14 +29,15 @@
 
 #include <nuttx/config.h>
 
+#include "bcm2711_memmap.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Base addresses */
+/* TODO: Explanation for PWM div val */
 
-#define BCM_PWM0_BASEADDR 0x7e20c000
-#define BCM_PWM1_BASEADDR 0x7e20c800
+#define BCM_PWMCLK_DIV_VAL (2 << 12)
 
 /* PWM register offsets */
 
@@ -51,23 +52,14 @@
 
 /* PWM register addresses */
 
-#define BCM_PWM0_CTL (BCM_PWM0_BASEADDR + BCM_PWM_CTL_OFFSET)
-#define BCM_PWM0_STA (BCM_PWM0_BASEADDR + BCM_PWM_STA_OFFSET)
-#define BCM_PWM0_DMAC (BCM_PWM0_BASEADDR + BCM_PWM_DMAC_OFFSET)
-#define BCM_PWM0_RNG1 (BCM_PWM0_BASEADDR + BCM_PWM_RNG1_OFFSET)
-#define BCM_PWM0_DAT1 (BCM_PWM0_BASEADDR + BCM_PWM_DAT1_OFFSET)
-#define BCM_PWM0_FIF1 (BCM_PWM0_BASEADDR + BCM_PWM_FIF1_OFFSET)
-#define BCM_PWM0_RNG2 (BCM_PWM0_BASEADDR + BCM_PWM_RNG2_OFFSET)
-#define BCM_PWM0_DAT2 (BCM_PWM0_BASEADDR + BCM_PWM_DAT2_OFFSET)
-
-#define BCM_PWM1_CTL (BCM_PWM0_BASEADDR + BCM_PWM_CTL_OFFSET)
-#define BCM_PWM1_STA (BCM_PWM0_BASEADDR + BCM_PWM_STA_OFFSET)
-#define BCM_PWM1_DMAC (BCM_PWM0_BASEADDR + BCM_PWM_DMAC_OFFSET)
-#define BCM_PWM1_RNG1 (BCM_PWM0_BASEADDR + BCM_PWM_RNG1_OFFSET)
-#define BCM_PWM1_DAT1 (BCM_PWM0_BASEADDR + BCM_PWM_DAT1_OFFSET)
-#define BCM_PWM1_FIF1 (BCM_PWM0_BASEADDR + BCM_PWM_FIF1_OFFSET)
-#define BCM_PWM1_RNG2 (BCM_PWM0_BASEADDR + BCM_PWM_RNG2_OFFSET)
-#define BCM_PWM1_DAT2 (BCM_PWM0_BASEADDR + BCM_PWM_DAT2_OFFSET)
+#define BCM_PWM_CTL(base)  ((base) + BCM_PWM_CTL_OFFSET)
+#define BCM_PWM_STA(base)  ((base) + BCM_PWM_STA_OFFSET)
+#define BCM_PWM_DMAC(base) ((base) + BCM_PWM_DMAC_OFFSET)
+#define BCM_PWM_RNG1(base) ((base) + BCM_PWM_RNG1_OFFSET)
+#define BCM_PWM_DAT1(base) ((base) + BCM_PWM_DAT1_OFFSET)
+#define BCM_PWM_FIF1(base) ((base) + BCM_PWM_FIF1_OFFSET)
+#define BCM_PWM_RNG2(base) ((base) + BCM_PWM_RNG2_OFFSET)
+#define BCM_PWM_DAT2(base) ((base) + BCM_PWM_DAT2_OFFSET)
 
 /* PWM register bit definitions */
 

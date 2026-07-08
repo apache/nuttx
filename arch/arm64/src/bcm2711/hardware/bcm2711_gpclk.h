@@ -53,7 +53,7 @@
 
 /* General purpose clock bit definitions */
 
-#define BCM_GPCLK_PASSWD 0x5a /* Clock manager password */
+#define BCM_GPCLK_PASSWD (0x5a << 24) /* Clock manager password */
 
 #define BCM_GPCLK_CM_CTL_PASSWD (0xff << 24) /* CLK manager password mask */
 #define BCM_GPCLK_CM_CTL_MASH (0x3 << 9)     /* MASH control */

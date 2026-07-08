@@ -53,7 +53,7 @@
 
 #define BCM_PERIPHERAL_BASEADDR 0x47e000000
 
-#endif // defined(CONFIG_BCM2711_LOW_PERIPHERAL)
+#endif /* defined(CONFIG_BCM2711_LOW_PERIPHERAL) */
 
 /* Base addresses for chip registers */
 
@@ -69,6 +69,10 @@
   (BCM_PERIPHERAL_BASEADDR + 0x000203000) /* PCM */
 #define BCM_SYST_BASEADDR                                                    \
   (BCM_PERIPHERAL_BASEADDR + 0x000003000) /* System timer */
+#define BCM_PWM0_BASEADDR                                                    \
+  (BCM_PERIPHERAL_BASEADDR + 0x00020c000) /* PWM0 */
+#define BCM_PWM1_BASEADDR                                                    \
+  (BCM_PERIPHERAL_BASEADDR + 0x00020c800) /* PWM1 */
 
 /* SPI interface register base addresses */
 

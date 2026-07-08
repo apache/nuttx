@@ -44,6 +44,10 @@ if(CONFIG_BCM2711_SPI)
   list(APPEND SRCS bcm2711_spi.c)
 endif()
 
+if(CONFIG_BCM2711_PWM)
+  list(APPEND SRCS bcm2711_pwm.c)
+endif()
+
 # EMMC interfaces
 
 if(CONFIG_BCM2711_EMMC)

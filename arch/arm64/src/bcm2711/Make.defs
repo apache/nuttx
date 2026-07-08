@@ -49,6 +49,12 @@ ifeq ($(CONFIG_BCM2711_SPI),y)
 CHIP_CSRCS += bcm2711_spi.c
 endif
 
+# PWM interfaces
+
+ifeq ($(CONFIG_BCM2711_PWM),y)
+CHIP_CSRCS += bcm2711_pwm.c
+endif
+
 # EMMC interfaces
 
 ifeq ($(CONFIG_BCM2711_EMMC),y)
