@@ -201,9 +201,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   else
     {
       _alert("PANIC!!! virtual address not mappable: %" PRIxPTR "\n", vaddr);
-      up_irq_save();
-      up_set_interrupt_context(true);
-      PANIC_WITH_REGS("panic", regs);
+      goto access_fault;
     }
 
   satp    = READ_CSR(CSR_SATP);
@@ -234,6 +232,21 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     }
 
   ptlast = riscv_pgvaddr(paddr);
+
+  /* LOADPF/STOREPF is also raised when the leaf PTE already exists but its
+   * permission bits don't satisfy the access (e.g. a store to a .text page
+   * whose write access was revoked).  That is not a fault this function
+   * should handle: allocating a fresh page here would silently discard the
+   * existing mapping's page.
+   */
+
+  if (mmu_ln_getentry(ARCH_PGT_MAX_LEVELS, ptlast, vaddr) & PTE_VALID)
+    {
+      _alert("PANIC!!! page already mapped, permission violation: %"
+             PRIxPTR "\n", vaddr);
+      goto access_fault;
+    }
+
   paddr = mm_pgalloc(1);
   if (!paddr)
     {
@@ -249,6 +262,12 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   mmu_ln_setentry(ARCH_PGT_MAX_LEVELS, ptlast, paddr, vaddr, mmuflags);
 
   return 0;
+
+access_fault:
+  up_irq_save();
+  up_set_interrupt_context(true);
+  PANIC_WITH_REGS("panic", regs);
+  return -EINVAL;
 }
 #endif /* CONFIG_PAGING */
 
