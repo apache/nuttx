@@ -101,15 +101,23 @@ collect() {
   cp "$src" "$OUT/$name"
 }
 
-"$VENV_PY" "$SDK/ameba.py" soc "$SOC"
-# --set needs an existing .config; -r generates the default one first (so this
-# works on a clean tree).  Result is deterministic: default config + SHELL=n.
-"$VENV_PY" "$SDK/ameba.py" menuconfig "$SOC" -r
-"$VENV_PY" "$SDK/ameba.py" menuconfig "$SOC" --set SHELL=n
+# Materialize the SDK config = default + the board overlay ($AMEBA_SDK_CONF,
+# e.g. CONFIG_SHELL=n).  Guarded so it only regenerates when the SDK revision
+# or the overlay changed; otherwise reused as-is, so a steady-state build does
+# NOT rewrite .config (which would make the SDK reconfigure and rebuild most of
+# the NP/boot image).  See ameba_sdk_config.sh.
+"$(dirname "$0")/ameba_sdk_config.sh" "$SDK" "$SOC" "${AMEBA_SDK_CONF:-}"
+
+# Silence -Wint-conversion for the vendored SDK build: the SDK passes NULL to
+# irq_register()'s u32 "Data" (interrupt context) argument in many places -- an
+# intentional NULL-as-context idiom.  Injected via CMAKE_C_FLAGS so no SDK
+# source or flag file is edited and every current + future SDK source is
+# covered.  Kept constant so it does not churn the cmake cache between builds.
+SDK_BUILD_DEFS="-D CMAKE_C_FLAGS=-Wno-int-conversion"
 
 # Build the NP/device image2 (with AMEBA_AP_ASM-driven noused, so it stays
 # aligned with exactly the host WiFi APIs NuttX references).
-"$VENV_PY" "$SDK/ameba.py" build "$SOC" --core "$NP_TARGET"
+"$VENV_PY" "$SDK/ameba.py" build "$SOC" --core "$NP_TARGET" $SDK_BUILD_DEFS
 
 # Collect the NP image2 NOW, before the boot build: an isolated `-g boot` (which
 # succeeds on amebadplus) reconfigures and cleans the OTHER core's image dir,
@@ -125,10 +133,10 @@ collect "${NP_TARGET}_image2_all.bin" "project_${NP_TARGET}/image/${NP_TARGET}_i
 # noused set (the SDK's own AP image is built too and simply discarded).  Both
 # the NP and boot are therefore freshly rebuilt every NuttX build; nothing is
 # reused stale across the two cores.
-if ! "$VENV_PY" "$SDK/ameba.py" build "$SOC" -g boot; then
+if ! "$VENV_PY" "$SDK/ameba.py" build "$SOC" -g boot $SDK_BUILD_DEFS; then
   echo "ameba_build_np.sh: '-g boot' not buildable in isolation on $SOC;" \
        "doing a full SoC build to produce boot (AMEBA_AP_ASM kept)" >&2
-  "$VENV_PY" "$SDK/ameba.py" build "$SOC"
+  "$VENV_PY" "$SDK/ameba.py" build "$SOC" $SDK_BUILD_DEFS
 fi
 
 collect boot.bin project_km4/image/boot.bin

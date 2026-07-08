@@ -60,10 +60,13 @@ unset MAKEFLAGS MAKELEVEL MFLAGS MAKEOVERRIDES 2>/dev/null || true
 # ameba.py resolves build_<SOC>/ relative to the CWD, so run from the SDK root.
 cd "$SDK" || { echo "ameba_gen_autoconf.sh: cannot cd to $SDK" >&2; exit 1; }
 
-# Select the SoC and write the default config + regenerate the per-core headers.
-# -r is deterministic (default config), so a clean clone reproduces it exactly.
-"$VENV_PY" "$SDK/ameba.py" soc "$SOC" >/dev/null
-"$VENV_PY" "$SDK/ameba.py" menuconfig "$SOC" -r >/dev/null
+# Materialize the SDK config (default + the board overlay $AMEBA_SDK_CONF) and
+# regenerate the per-core headers.  Guarded (ameba_sdk_config.sh) so it only
+# runs when the SDK revision or the overlay changed; a steady-state build reuses
+# the existing config and headers.  --apply-file re-resolves the config (which
+# regenerates project_<core>/platform_autoconf.h), so $GEN below is fresh.
+# Deterministic, so a clean clone reproduces it exactly.
+"$(dirname "$0")/ameba_sdk_config.sh" "$SDK" "$SOC" "${AMEBA_SDK_CONF:-}"
 
 GEN="$SDK/build_$SOC/menuconfig/project_$AP_PROJECT/platform_autoconf.h"
 if [ ! -f "$GEN" ]; then

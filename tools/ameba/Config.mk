@@ -72,3 +72,30 @@ define FLASH
 			--baudrate "$(or $(AMEBA_BAUD),1500000)" \
 			--log-level info
 endef
+
+# ameba_menuconfig -- edit the vendor SDK menuconfig for this board using the
+# SDK's own native menuconfig UI, and save the result as the board overlay
+# fragment (boards/.../ameba_sdk.conf).  The counterpart to NuttX's own
+# `make menuconfig`, for the SDK-side options (Wi-Fi/BT firmware, flash layout,
+# feature switches).  The next build applies the change automatically (the
+# fragment is hashed into the SDK-config stamp; see ameba_sdk_config.sh).
+#
+# Reachable as a top-level target because this fragment is included via the
+# board scripts/Make.defs (the $(TOPDIR)/Make.defs symlink), like the flash
+# target's FLASH macro.  The logic lives in the standalone script so it can
+# also be run directly.
+
+# This fragment is pulled in (via the board Make.defs / the $(TOPDIR)/Make.defs
+# symlink) BEFORE the main build makefile defines its `all` rule, so a plain
+# target here would become make's default goal and `make` with no argument
+# would run it instead of building.  Save the default goal, define the target,
+# then restore it (falling back to `all`, NuttX's default, when nothing was set
+# yet).  The flash target avoids this because it lives in tools/Unix.mk, after
+# `all`; this one lives here, so it must guard the default goal itself.
+AMEBA_PREV_GOAL := $(.DEFAULT_GOAL)
+
+.PHONY: ameba_menuconfig
+ameba_menuconfig:
+	$(Q) $(TOPDIR)$(DELIM)tools$(DELIM)ameba$(DELIM)ameba_menuconfig.sh
+
+.DEFAULT_GOAL := $(or $(AMEBA_PREV_GOAL),all)
