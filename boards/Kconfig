@@ -5571,7 +5571,9 @@ config BOARD_ETC_ROMFS_PASSWD_PASSWORD
 		provided. The build fails if this is empty or shorter than 8
 		characters.
 
-		Not saved in defconfig.
+		Not saved in defconfig.  For CI or scripted builds, set the
+		environment variable NUTTX_ROMFS_PASSWD_PASSWORD instead (see
+		tools/update_romfs_password.sh).
 
 comment "--- Step 2: choose how to supply the TEA encryption keys ---"
 
@@ -5587,10 +5589,12 @@ config BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 		  make
 
 		Key values are not printed in the build log. Search .config for
-		CONFIG_FSUTILS_PASSWD_KEY to view them.
+		CONFIG_FSUTILS_PASSWD_KEY to view them. A build warning is printed
+		when keys are first generated.
 
 		Do not copy keys or the password into a defconfig or commit
-		them to version control.
+		them to version control. CONFIG_BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
+		may remain in defconfig; the password and KEY1..4 may not.
 
 		If disabled, set CONFIG_FSUTILS_PASSWD_KEY1..4 manually under
 		Application Configuration -> File System Utilities ->
