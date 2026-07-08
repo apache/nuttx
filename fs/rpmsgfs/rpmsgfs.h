@@ -123,8 +123,7 @@ begin_packed_struct struct rpmsgfs_stat_priv_s
   uint32_t dev;       /* Device ID of device containing file */
   uint32_t mode;      /* File type, attributes, and access mode bits */
   uint32_t rdev;      /* Device ID (if file is character or block special) */
-  uint16_t ino;       /* File serial number */
-  uint16_t nlink;     /* Number of hard links to the file */
+  uint32_t ino;       /* File serial number */
   int64_t  size;      /* Size of file/directory, in bytes */
   int64_t  atim_sec;  /* Time of last access, seconds */
   int64_t  atim_nsec; /* Time of last access, nanoseconds */
@@ -136,7 +135,7 @@ begin_packed_struct struct rpmsgfs_stat_priv_s
   int16_t  uid;       /* User ID of file */
   int16_t  gid;       /* Group ID of file */
   int16_t  blksize;   /* Block size used for filesystem I/O */
-  uint16_t reserved;  /* Reserved space */
+  uint16_t nlink;     /* Number of hard links to the file */
 } end_packed_struct;
 
 begin_packed_struct struct rpmsgfs_fstat_s
@@ -167,6 +166,7 @@ begin_packed_struct struct rpmsgfs_readdir_s
 {
   struct rpmsgfs_header_s header;
   int32_t                 fd;
+  uint32_t                ino;
   uint32_t                type;
   char                    name[0];
 } end_packed_struct;

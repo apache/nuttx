@@ -33,8 +33,6 @@ list(
   stm32l5_rcc.c
   stm32l5_serial.c
   stm32l5_start.c
-  stm32l5_waste.c
-  stm32l5_uid.c
   stm32l5_spi.c
   stm32l5_lse.c
   stm32l5_lsi.c
@@ -61,8 +59,10 @@ endif()
 
 # Required chip type specific files
 
-if(CONFIG_STM32L5_STM32L562XX)
+if(CONFIG_STM32_STM32L562XX)
   list(APPEND SRCS stm32l562xx_rcc.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

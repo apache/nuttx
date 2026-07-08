@@ -38,40 +38,40 @@
 
 /* General Characteristics **************************************************/
 
-#define STM32L4_QSPI_MINBITS            8         /* Minimum word width */
-#define STM32L4_QSPI_MAXBITS            32        /* Maximum word width */
+#define STM32_QSPI_MINBITS            8         /* Minimum word width */
+#define STM32_QSPI_MAXBITS            32        /* Maximum word width */
 
 /* QSPI register offsets ****************************************************/
 
-#define STM32L4_QUADSPI_CR_OFFSET       0x0000    /* Control Register */
-#define STM32L4_QUADSPI_DCR_OFFSET      0x0004    /* Device Configuration Register */
-#define STM32L4_QUADSPI_SR_OFFSET       0x0008    /* Status Register */
-#define STM32L4_QUADSPI_FCR_OFFSET      0x000c    /* Flag Clear Register */
-#define STM32L4_QUADSPI_DLR_OFFSET      0x0010    /* Data Length Register */
-#define STM32L4_QUADSPI_CCR_OFFSET      0x0014    /* Communication Configuration Register */
-#define STM32L4_QUADSPI_AR_OFFSET       0x0018    /* Address Register */
-#define STM32L4_QUADSPI_ABR_OFFSET      0x001c    /* Alternate Bytes Register */
-#define STM32L4_QUADSPI_DR_OFFSET       0x0020    /* Data Register */
-#define STM32L4_QUADSPI_PSMKR_OFFSET    0x0024    /* Polling Status mask Register */
-#define STM32L4_QUADSPI_PSMAR_OFFSET    0x0028    /* Polling Status match Register */
-#define STM32L4_QUADSPI_PIR_OFFSET      0x002c    /* Polling Interval Register */
-#define STM32L4_QUADSPI_LPTR_OFFSET     0x0030    /* Low-Power Timeout Register */
+#define STM32_QUADSPI_CR_OFFSET       0x0000    /* Control Register */
+#define STM32_QUADSPI_DCR_OFFSET      0x0004    /* Device Configuration Register */
+#define STM32_QUADSPI_SR_OFFSET       0x0008    /* Status Register */
+#define STM32_QUADSPI_FCR_OFFSET      0x000c    /* Flag Clear Register */
+#define STM32_QUADSPI_DLR_OFFSET      0x0010    /* Data Length Register */
+#define STM32_QUADSPI_CCR_OFFSET      0x0014    /* Communication Configuration Register */
+#define STM32_QUADSPI_AR_OFFSET       0x0018    /* Address Register */
+#define STM32_QUADSPI_ABR_OFFSET      0x001c    /* Alternate Bytes Register */
+#define STM32_QUADSPI_DR_OFFSET       0x0020    /* Data Register */
+#define STM32_QUADSPI_PSMKR_OFFSET    0x0024    /* Polling Status mask Register */
+#define STM32_QUADSPI_PSMAR_OFFSET    0x0028    /* Polling Status match Register */
+#define STM32_QUADSPI_PIR_OFFSET      0x002c    /* Polling Interval Register */
+#define STM32_QUADSPI_LPTR_OFFSET     0x0030    /* Low-Power Timeout Register */
 
 /* QSPI register addresses **************************************************/
 
-#define STM32L4_QUADSPI_CR       (STM32L4_QSPI_BASE+STM32L4_QUADSPI_CR_OFFSET)    /* Control Register */
-#define STM32L4_QUADSPI_DCR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_DCR_OFFSET)   /* Device Configuration Register */
-#define STM32L4_QUADSPI_SR       (STM32L4_QSPI_BASE+STM32L4_QUADSPI_SR_OFFSET)    /* Status Register */
-#define STM32L4_QUADSPI_FCR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_FCR_OFFSET)   /* Flag Clear Register */
-#define STM32L4_QUADSPI_DLR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_DLR_OFFSET)   /* Data Length Register */
-#define STM32L4_QUADSPI_CCR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_CCR_OFFSET)   /* Communication Configuration Register */
-#define STM32L4_QUADSPI_AR       (STM32L4_QSPI_BASE+STM32L4_QUADSPI_AR_OFFSET)    /* Address Register */
-#define STM32L4_QUADSPI_ABR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_ABR_OFFSET)   /* Alternate Bytes Register */
-#define STM32L4_QUADSPI_DR       (STM32L4_QSPI_BASE+STM32L4_QUADSPI_DR_OFFSET)    /* Data Register */
-#define STM32L4_QUADSPI_PSMKR    (STM32L4_QSPI_BASE+STM32L4_QUADSPI_PSMKR_OFFSET) /* Polling Status mask Register */
-#define STM32L4_QUADSPI_PSMAR    (STM32L4_QSPI_BASE+STM32L4_QUADSPI_PSMAR_OFFSET) /* Polling Status match Register */
-#define STM32L4_QUADSPI_PIR      (STM32L4_QSPI_BASE+STM32L4_QUADSPI_PIR_OFFSET)   /* Polling Interval Register */
-#define STM32L4_QUADSPI_LPTR     (STM32L4_QSPI_BASE+STM32L4_QUADSPI_LPTR_OFFSET)  /* Low-Power Timeout Register */
+#define STM32_QUADSPI_CR       (STM32_QSPI_BASE+STM32_QUADSPI_CR_OFFSET)    /* Control Register */
+#define STM32_QUADSPI_DCR      (STM32_QSPI_BASE+STM32_QUADSPI_DCR_OFFSET)   /* Device Configuration Register */
+#define STM32_QUADSPI_SR       (STM32_QSPI_BASE+STM32_QUADSPI_SR_OFFSET)    /* Status Register */
+#define STM32_QUADSPI_FCR      (STM32_QSPI_BASE+STM32_QUADSPI_FCR_OFFSET)   /* Flag Clear Register */
+#define STM32_QUADSPI_DLR      (STM32_QSPI_BASE+STM32_QUADSPI_DLR_OFFSET)   /* Data Length Register */
+#define STM32_QUADSPI_CCR      (STM32_QSPI_BASE+STM32_QUADSPI_CCR_OFFSET)   /* Communication Configuration Register */
+#define STM32_QUADSPI_AR       (STM32_QSPI_BASE+STM32_QUADSPI_AR_OFFSET)    /* Address Register */
+#define STM32_QUADSPI_ABR      (STM32_QSPI_BASE+STM32_QUADSPI_ABR_OFFSET)   /* Alternate Bytes Register */
+#define STM32_QUADSPI_DR       (STM32_QSPI_BASE+STM32_QUADSPI_DR_OFFSET)    /* Data Register */
+#define STM32_QUADSPI_PSMKR    (STM32_QSPI_BASE+STM32_QUADSPI_PSMKR_OFFSET) /* Polling Status mask Register */
+#define STM32_QUADSPI_PSMAR    (STM32_QSPI_BASE+STM32_QUADSPI_PSMAR_OFFSET) /* Polling Status match Register */
+#define STM32_QUADSPI_PIR      (STM32_QSPI_BASE+STM32_QUADSPI_PIR_OFFSET)   /* Polling Interval Register */
+#define STM32_QUADSPI_LPTR     (STM32_QSPI_BASE+STM32_QUADSPI_LPTR_OFFSET)  /* Low-Power Timeout Register */
 
 /* QSPI register bit definitions ********************************************/
 

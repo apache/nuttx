@@ -191,6 +191,9 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" -o "X$host" == "Xbsd" ]; then
     if [ "X$cpu" == "Xarm64" ]; then
       echo "  Select CONFIG_HOST_ARM64=y"
       kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM64
+    else
+      echo "  Select CONFIG_HOST_X86_64=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_X86_64
     fi
   fi
 

@@ -91,7 +91,7 @@
 
 /* Debug option */
 
-#ifdef CONFIG_STM32F7_DMA2D_REGDEBUG
+#ifdef CONFIG_STM32_DMA2D_REGDEBUG
 #  define regerr                            lcderr
 #  define reginfo                           lcdinfo
 #else
@@ -109,7 +109,7 @@ struct stm32_dma2d_s
 {
   struct dma2d_layer_s dma2d;  /* Public dma2d interface */
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   uint32_t *clut;              /* Color lookup table */
 #endif
 
@@ -172,7 +172,7 @@ static const uintptr_t stm32_color_layer_t[DMA2D_NLAYERS] =
   STM32_DMA2D_OCOLR
 };
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 /* DMA2D clut memory address register */
 
 static const uintptr_t stm32_cmar_layer_t[DMA2D_NLAYERS - 1] =
@@ -192,7 +192,7 @@ static void stm32_dma2d_control(uint32_t setbits, uint32_t clrbits);
 static int stm32_dma2dirq(int irq, void *context, void *arg);
 static int stm32_dma2d_waitforirq(void);
 static int stm32_dma2d_start(void);
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_loadclut(uintptr_t reg);
 #endif
 static uint32_t
@@ -212,7 +212,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
 /* Public Functions */
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap);
 #endif
 static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
@@ -239,15 +239,15 @@ static bool g_initialized;
 
 /* Allocate clut */
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static uint32_t g_clut[STM32_DMA2D_NCLUT *
-#  ifdef CONFIG_STM32F7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
                       4
 #  else
                       3
 #  endif
                       / 4];
-#endif /* CONFIG_STM32F7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /* The DMA2D mutex that enforces mutually exclusive access */
 
@@ -270,14 +270,14 @@ static struct stm32_dma2d_s g_dma2ddev =
 {
   .dma2d =
   {
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
     .setclut   = stm32_dma2d_setclut,
 #endif
     .fillcolor = stm32_dma2d_fillcolor,
     .blit      = stm32_dma2d_blit,
     .blend     = stm32_dma2d_blend
   },
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   .clut = g_clut,
 #endif
   .lock = &g_lock
@@ -344,7 +344,7 @@ static int stm32_dma2dirq(int irq, void *context, void *arg)
       putreg32(DMA2D_IFCR_CTCIF, STM32_DMA2D_IFCR);
       priv->error = OK;
     }
-#ifdef CONFIG_STM32F7_DMA2D_L8
+#ifdef CONFIG_STM32_DMA2D_L8
   else if (regval & DMA2D_ISR_CTCIF)
     {
       /* CLUT transfer complete interrupt */
@@ -461,7 +461,7 @@ static int stm32_dma2d_waitforirq(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_DMA2D_L8
+#ifdef CONFIG_STM32_DMA2D_L8
 static int stm32_dma2d_loadclut(uintptr_t pfcreg)
 {
   int      ret;
@@ -681,7 +681,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
   pfccrreg = DMA2D_XGPFCCR_CM(fmt);
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (fmt == DMA2D_PF_L8)
     {
       struct stm32_dma2d_s *layer = &g_dma2ddev;
@@ -692,7 +692,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
       /* Set the CLUT color mode */
 
-#  ifndef CONFIG_STM32F7_FB_TRANSPARENCY
+#  ifndef CONFIG_STM32_FB_TRANSPARENCY
       pfccrreg |= DMA2D_XGPFCCR_CCM;
 #  endif
 
@@ -708,7 +708,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
 
       stm32_dma2d_loadclut(stm32_pfccr_layer_t[lid]);
     }
-#endif /* CONFIG_STM32F7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
   /* Set alpha blend mode */
 
@@ -744,7 +744,7 @@ static void stm32_dma2d_lpfc(int lid, uint32_t blendmode, uint8_t alpha,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
 {
   int n;
@@ -760,7 +760,7 @@ static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
        * blit operation becomes active
        */
 
-#  ifndef CONFIG_STM32F7_FB_TRANSPARENCY
+#  ifndef CONFIG_STM32_FB_TRANSPARENCY
       uint8_t *clut   = (uint8_t *)g_dma2ddev.clut;
       uint16_t offset = 3 * n;
 
@@ -789,7 +789,7 @@ static int stm32_dma2d_setclut(const struct fb_cmap_s *cmap)
   nxmutex_unlock(priv->lock);
   return OK;
 }
-#endif /* CONFIG_STM32F7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /****************************************************************************
  * Name: stm32_dma2d_fillcolor
@@ -822,7 +822,7 @@ static int stm32_dma2d_fillcolor(struct stm32_dma2d_overlay_s *oinfo,
 
   lcdinfo("oinfo=%p, argb=%08" PRIx32 "\n", oinfo, argb);
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (oinfo->fmt == DMA2D_PF_L8)
     {
       /* CLUT output not supported */
@@ -1006,7 +1006,7 @@ static int stm32_dma2d_blend(struct stm32_dma2d_overlay_s *doverlay,
           "barea.h=%d\n", doverlay, destxpos, destypos, foverlay, forexpos,
           foreypos, boverlay, barea, barea->x, barea->y, barea->w, barea->h);
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   if (doverlay->fmt == DMA2D_PF_L8)
     {
       /* CLUT output not supported */
@@ -1095,7 +1095,7 @@ int stm32_dma2dinitialize(void)
        * arch/arm/src/stm32f7/stm32f7xxxx_rcc.c
        */
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
       /* Enable dma2d transfer and clut loading interrupts only */
 
       stm32_dma2d_control(DMA2D_CR_TCIE | DMA2D_CR_CTCIE, DMA2D_CR_TEIE |

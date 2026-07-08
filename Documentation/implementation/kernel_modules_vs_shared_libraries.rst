@@ -87,7 +87,7 @@ two address spaces: The kernel address space and the user address space.
 But all applications still share the same user address spaces.
 
 As a result ``.text`` along with ``.data`` and ``.bss`` are naturally shared.
-This requires using two copies of the the module logic: One residing in kernel
+This requires using two copies of the module logic: One residing in kernel
 address space and using the kernel symbol table and one residing in user space
 using the user space symbol table.
 The first provides only kernel module support; the second only PROTECTED mode
@@ -139,7 +139,7 @@ In the PROTECTED build, this would require some special start-up logic
 in the user address space as the initial steps of the newly started task.
 Some kind of dynamic loader, such as ``ld.so``, would have to integrate
 with ``crt0`` logic to automatically bind user space tasks to shared libraries
-as they are loaded into and memory before the programs ``main()`` function
+as they are loaded into memory before the programs ``main()`` function
 is called.
 
 
@@ -147,7 +147,7 @@ KERNEL Build
 ============
 
 The KERNEL build, however, is a completely different creature.
-In that build, the kernel and each process has its own adress space.
+In that build, the kernel and each process has its own address space.
 
 This means that a shared library in the kernel build has to be considerably
 more complex: In order to be shared, the ``.text`` portion of the module

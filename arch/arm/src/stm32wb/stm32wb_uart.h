@@ -39,28 +39,28 @@
 
 /* Sanity checks */
 
-#if !defined(CONFIG_STM32WB_LPUART1)
-#  undef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-#  undef CONFIG_STM32WB_LPUART1_1WIREDRIVER
+#if !defined(CONFIG_STM32_LPUART1)
+#  undef CONFIG_STM32_LPUART1_SERIALDRIVER
+#  undef CONFIG_STM32_LPUART1_1WIREDRIVER
 #endif
-#if !defined(CONFIG_STM32WB_USART1)
-#  undef CONFIG_STM32WB_USART1_SERIALDRIVER
-#  undef CONFIG_STM32WB_USART1_1WIREDRIVER
+#if !defined(CONFIG_STM32_USART1)
+#  undef CONFIG_STM32_USART1_SERIALDRIVER
+#  undef CONFIG_STM32_USART1_1WIREDRIVER
 #endif
 
 /* Is there a USART enabled? */
 
-#if defined(CONFIG_STM32WB_LPUART1) || defined(CONFIG_STM32WB_USART1)
+#if defined(CONFIG_STM32_LPUART1) || defined(CONFIG_STM32_USART1)
 #  define HAVE_UART 1
 #endif
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_LPUART1_SERIAL_CONSOLE) && defined(CONFIG_STM32WB_LPUART1_SERIALDRIVER)
+#if defined(CONFIG_LPUART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_LPUART1_SERIALDRIVER)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  define CONSOLE_UART  1
 #  define HAVE_CONSOLE  1
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32WB_USART1_SERIALDRIVER)
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1_SERIALDRIVER)
 #  undef CONFIG_LPUART1_SERIAL_CONSOLE
 #  define CONSOLE_UART  2
 #  define HAVE_CONSOLE  1
@@ -82,11 +82,11 @@
 
 /* Disable the DMA configuration on all unused USARTs */
 
-#ifndef CONFIG_STM32WB_LPUART1_SERIALDRIVER
+#ifndef CONFIG_STM32_LPUART1_SERIALDRIVER
 #  undef CONFIG_LPUART1_RXDMA
 #endif
 
-#ifndef CONFIG_STM32WB_USART1_SERIALDRIVER
+#ifndef CONFIG_STM32_USART1_SERIALDRIVER
 #  undef CONFIG_USART1_RXDMA
 #endif
 
@@ -109,9 +109,9 @@
 /* Is DMA used on all (enabled) USARTs */
 
 #define SERIAL_HAVE_ONLY_DMA 1
-#if defined(CONFIG_STM32WB_LPUART1_SERIALDRIVER) && !defined(CONFIG_LPUART1_RXDMA)
+#if defined(CONFIG_STM32_LPUART1_SERIALDRIVER) && !defined(CONFIG_LPUART1_RXDMA)
 #  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32WB_USART1_SERIALDRIVER) && !defined(CONFIG_USART1_RXDMA)
+#elif defined(CONFIG_STM32_USART1_SERIALDRIVER) && !defined(CONFIG_USART1_RXDMA)
 #  undef SERIAL_HAVE_ONLY_DMA
 #endif
 
@@ -151,7 +151,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_serial_dma_poll
+ * Name: stm32_serial_dma_poll
  *
  * Description:
  *   Must be called periodically if any STM32WB UART is configured for DMA.
@@ -164,7 +164,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-void stm32wb_serial_dma_poll(void);
+void stm32_serial_dma_poll(void);
 #endif
 
 #undef EXTERN

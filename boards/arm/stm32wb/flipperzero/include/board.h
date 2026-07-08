@@ -84,13 +84,13 @@
 
 /* LCD */
 
-#define STM32WB_LCD_SPINO 2 /* SPI2 */
+#define STM32_LCD_SPINO 2 /* SPI2 */
 
-#define STM32WB_LCD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_CS    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN11)
-#define STM32WB_LCD_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_RST   (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN0)
-#define STM32WB_LCD_A0    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
+#define STM32_LCD_A0    (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_5MHz |\
                            GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN1)
 
 /****************************************************************************
@@ -113,7 +113,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WB architectures must provide the following entry point.
@@ -123,7 +123,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32wb_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

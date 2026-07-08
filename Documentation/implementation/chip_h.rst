@@ -12,16 +12,16 @@ If you wonder about the purpose of the two ``chip.h`` files in each arm chip.
 .. code:: sh
 
    $ find arch/arm -name chip.h | grep stm32
-   arch/arm/include/stm32/chip.h
-   arch/arm/src/stm32/chip.h
+   arch/arm/include/stm32f4/chip.h
+   arch/arm/src/stm32f4/chip.h
 
-The reason behind ``arch/arm/src/stm32/chip.h`` file was a bad idea
+The reason behind ``arch/arm/src/stm32f4/chip.h`` file was a bad idea
 that happened a long time ago.
 
 Right now, I believe that its only required when ``CONFIG_ARMV7M_CMNVECTOR``
-is selected in the configuration. In that case, ``arch/arm/src/stm32/chip.h``
+is selected in the configuration. In that case, ``arch/arm/src/stm32f4/chip.h``
 is included by ``arch/arm/src/armv7-m/up_vectors.c`` in order provide
-the number of interrupt vectors. In stm32, ``arch/arm/src/stm32/chip.h``
+the number of interrupt vectors. In stm32, ``arch/arm/src/stm32f4/chip.h``
 provides the number of vectors indirectly by including the correct,
 chip-specific vectors.h file.
 This function is a little more obvious in ``arch/arm/srch/lpc43xx/chip.h``.

@@ -54,34 +54,34 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /* Base addresses for each GPIO block */
 
-const uint32_t g_gpiobase[STM32L4_NPORTS] =
+const uint32_t g_gpiobase[STM32_NPORTS] =
 {
-#if STM32L4_NPORTS > 0
-  STM32L4_GPIOA_BASE,
+#if STM32_NPORTS > 0
+  STM32_GPIOA_BASE,
 #endif
-#if STM32L4_NPORTS > 1
-  STM32L4_GPIOB_BASE,
+#if STM32_NPORTS > 1
+  STM32_GPIOB_BASE,
 #endif
-#if STM32L4_NPORTS > 2
-  STM32L4_GPIOC_BASE,
+#if STM32_NPORTS > 2
+  STM32_GPIOC_BASE,
 #endif
-#if STM32L4_NPORTS > 3
-  STM32L4_GPIOD_BASE,
+#if STM32_NPORTS > 3
+  STM32_GPIOD_BASE,
 #endif
-#if STM32L4_NPORTS > 4
-  STM32L4_GPIOE_BASE,
+#if STM32_NPORTS > 4
+  STM32_GPIOE_BASE,
 #endif
-#if STM32L4_NPORTS > 5
-  STM32L4_GPIOF_BASE,
+#if STM32_NPORTS > 5
+  STM32_GPIOF_BASE,
 #endif
-#if STM32L4_NPORTS > 6
-  STM32L4_GPIOG_BASE,
+#if STM32_NPORTS > 6
+  STM32_GPIOG_BASE,
 #endif
-#if STM32L4_NPORTS > 7
-  STM32L4_GPIOH_BASE,
+#if STM32_NPORTS > 7
+  STM32_GPIOH_BASE,
 #endif
-#if STM32L4_NPORTS > 8
-  STM32L4_GPIOI_BASE,
+#if STM32_NPORTS > 8
+  STM32_GPIOI_BASE,
 #endif
 };
 
@@ -94,13 +94,13 @@ const uint32_t g_gpiobase[STM32L4_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32l4_gpioinit
+ * Function:  stm32_gpioinit
  *
  * Description:
  *   Based on configuration within the .config file, it does:
  *    - Remaps positions of alternative functions.
  *
- *   Typically called from stm32l4_start().
+ *   Typically called from stm32_start().
  *
  * Assumptions:
  *   This function is called early in the initialization sequence so that
@@ -108,17 +108,17 @@ const uint32_t g_gpiobase[STM32L4_NPORTS] =
  *
  ****************************************************************************/
 
-void stm32l4_gpioinit(void)
+void stm32_gpioinit(void)
 {
 }
 
 /****************************************************************************
- * Name: stm32l4_configgpio
+ * Name: stm32_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32l4_unconfiggpio() with
+ *   function, it must be unconfigured with stm32_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returned Value:
@@ -129,7 +129,7 @@ void stm32l4_gpioinit(void)
  * To-Do: Auto Power Enable
  ****************************************************************************/
 
-int stm32l4_configgpio(uint32_t cfgset)
+int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
   uint32_t regval;
@@ -144,7 +144,7 @@ int stm32l4_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32L4_NPORTS)
+  if (port >= STM32_NPORTS)
     {
       return -EINVAL;
     }
@@ -177,7 +177,7 @@ int stm32l4_configgpio(uint32_t cfgset)
 
         /* Set the initial output value */
 
-        stm32l4_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
+        stm32_gpiowrite(cfgset, (cfgset & GPIO_OUTPUT_SET) != 0);
         pinmode = GPIO_MODER_OUTPUT;
         break;
 
@@ -202,10 +202,10 @@ int stm32l4_configgpio(uint32_t cfgset)
 
   /* Now apply the configuration to the mode register */
 
-  regval  = getreg32(base + STM32L4_GPIO_MODER_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_MODER_OFFSET);
   regval &= ~GPIO_MODER_MASK(pin);
   regval |= ((uint32_t)pinmode << GPIO_MODER_SHIFT(pin));
-  putreg32(regval, base + STM32L4_GPIO_MODER_OFFSET);
+  putreg32(regval, base + STM32_GPIO_MODER_OFFSET);
 
   /* Set up the pull-up/pull-down configuration (all but analog pins) */
 
@@ -228,10 +228,10 @@ int stm32l4_configgpio(uint32_t cfgset)
         }
     }
 
-  regval  = getreg32(base + STM32L4_GPIO_PUPDR_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_PUPDR_OFFSET);
   regval &= ~GPIO_PUPDR_MASK(pin);
   regval |= (setting << GPIO_PUPDR_SHIFT(pin));
-  putreg32(regval, base + STM32L4_GPIO_PUPDR_OFFSET);
+  putreg32(regval, base + STM32_GPIO_PUPDR_OFFSET);
 
   /* Set the alternate function (Only alternate function pins) */
 
@@ -246,12 +246,12 @@ int stm32l4_configgpio(uint32_t cfgset)
 
   if (pin < 8)
     {
-      regoffset = STM32L4_GPIO_AFRL_OFFSET;
+      regoffset = STM32_GPIO_AFRL_OFFSET;
       pos       = pin;
     }
   else
     {
-      regoffset = STM32L4_GPIO_AFRH_OFFSET;
+      regoffset = STM32_GPIO_AFRH_OFFSET;
       pos       = pin - 8;
     }
 
@@ -289,14 +289,14 @@ int stm32l4_configgpio(uint32_t cfgset)
       setting = 0;
     }
 
-  regval  = getreg32(base + STM32L4_GPIO_OSPEED_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_OSPEED_OFFSET);
   regval &= ~GPIO_OSPEED_MASK(pin);
   regval |= (setting << GPIO_OSPEED_SHIFT(pin));
-  putreg32(regval, base + STM32L4_GPIO_OSPEED_OFFSET);
+  putreg32(regval, base + STM32_GPIO_OSPEED_OFFSET);
 
   /* Set push-pull/open-drain (Only outputs and alternate function pins) */
 
-  regval  = getreg32(base + STM32L4_GPIO_OTYPER_OFFSET);
+  regval  = getreg32(base + STM32_GPIO_OTYPER_OFFSET);
   setting = GPIO_OTYPER_OD(pin);
 
   if ((pinmode == GPIO_MODER_OUTPUT || pinmode == GPIO_MODER_ALT) &&
@@ -309,7 +309,7 @@ int stm32l4_configgpio(uint32_t cfgset)
       regval &= ~setting;
     }
 
-  putreg32(regval, base + STM32L4_GPIO_OTYPER_OFFSET);
+  putreg32(regval, base + STM32_GPIO_OTYPER_OFFSET);
 
   /* Otherwise, it is an input pin.  Should it configured as an
    * EXTI interrupt?
@@ -331,7 +331,7 @@ int stm32l4_configgpio(uint32_t cfgset)
 
       /* Set the bits in the SYSCFG EXTICR register */
 
-      regaddr = STM32L4_SYSCFG_EXTICR(pin);
+      regaddr = STM32_SYSCFG_EXTICR(pin);
       regval  = getreg32(regaddr);
       shift   = SYSCFG_EXTICR_EXTI_SHIFT(pin);
       regval &= ~(SYSCFG_EXTICR_PORT_MASK << shift);
@@ -344,18 +344,18 @@ int stm32l4_configgpio(uint32_t cfgset)
    * (RM0351 Rev 7, p521)
    */
 
-#if defined(CONFIG_STM32L4_STM32L471XX) || \
-    defined(CONFIG_STM32L4_STM32L475XX) || \
-    defined(CONFIG_STM32L4_STM32L476XX) || \
-    defined(CONFIG_STM32L4_STM32L486XX)
+#if defined(CONFIG_STM32_STM32L471XX) || \
+    defined(CONFIG_STM32_STM32L475XX) || \
+    defined(CONFIG_STM32_STM32L476XX) || \
+    defined(CONFIG_STM32_STM32L486XX)
 
   if (pinmode == GPIO_MODER_ANALOG)
     {
-      modifyreg32(base + STM32L4_GPIO_ASCR_OFFSET, 0, GPIO_ASCR(pin));
+      modifyreg32(base + STM32_GPIO_ASCR_OFFSET, 0, GPIO_ASCR(pin));
     }
   else
     {
-      modifyreg32(base + STM32L4_GPIO_ASCR_OFFSET, GPIO_ASCR(pin), 0);
+      modifyreg32(base + STM32_GPIO_ASCR_OFFSET, GPIO_ASCR(pin), 0);
     }
 #endif
 
@@ -364,7 +364,7 @@ int stm32l4_configgpio(uint32_t cfgset)
 }
 
 /****************************************************************************
- * Name: stm32l4_unconfiggpio
+ * Name: stm32_unconfiggpio
  *
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
@@ -384,7 +384,7 @@ int stm32l4_configgpio(uint32_t cfgset)
  * To-Do: Auto Power Disable
  ****************************************************************************/
 
-int stm32l4_unconfiggpio(uint32_t cfgset)
+int stm32_unconfiggpio(uint32_t cfgset)
 {
   /* Reuse port and pin number and set it to default HiZ INPUT */
 
@@ -393,18 +393,18 @@ int stm32l4_unconfiggpio(uint32_t cfgset)
 
   /* To-Do: Mark its unuse for automatic power saving options */
 
-  return stm32l4_configgpio(cfgset);
+  return stm32_configgpio(cfgset);
 }
 
 /****************************************************************************
- * Name: stm32l4_gpiowrite
+ * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void stm32l4_gpiowrite(uint32_t pinset, bool value)
+void stm32_gpiowrite(uint32_t pinset, bool value)
 {
   uint32_t base;
   uint32_t bit;
@@ -412,7 +412,7 @@ void stm32l4_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L4_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
@@ -433,26 +433,26 @@ void stm32l4_gpiowrite(uint32_t pinset, bool value)
           bit = GPIO_BSRR_RESET(pin);
         }
 
-      putreg32(bit, base + STM32L4_GPIO_BSRR_OFFSET);
+      putreg32(bit, base + STM32_GPIO_BSRR_OFFSET);
     }
 }
 
 /****************************************************************************
- * Name: stm32l4_gpioread
+ * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ****************************************************************************/
 
-bool stm32l4_gpioread(uint32_t pinset)
+bool stm32_gpioread(uint32_t pinset)
 {
   uint32_t base;
   unsigned int port;
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32L4_NPORTS)
+  if (port < STM32_NPORTS)
     {
       /* Get the port base address */
 
@@ -461,7 +461,7 @@ bool stm32l4_gpioread(uint32_t pinset)
       /* Get the pin number and return the input state of that pin */
 
       pin = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
-      return ((getreg32(base + STM32L4_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
+      return ((getreg32(base + STM32_GPIO_IDR_OFFSET) & (1 << pin)) != 0);
     }
 
   return 0;

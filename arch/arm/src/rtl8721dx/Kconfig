@@ -1,0 +1,85 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_RTL8721DX
+
+menu "RTL8721Dx Chip Selection"
+
+config RTL8721DX_KM4
+	bool
+	default y
+	---help---
+		The Realtek RTL8721Dx KM4 application core
+		(ARMv8-M.main / Cortex-M33).
+
+endmenu # RTL8721Dx Chip Selection
+
+menu "RTL8721Dx Bring-up Options"
+
+config RTL8721DX_HEAP_SIZE
+	hex "NuttX reserved heap size (bytes)"
+	default 0x10000
+	---help---
+		During bring-up NuttX runs as a guest on the Realtek SDK image and
+		must not touch RAM that the SDK owns.  Instead of claiming all SRAM
+		from the end of NuttX's BSS to the end of memory (which overlaps the
+		SDK heap), NuttX uses a self-contained, statically reserved heap of
+		this size placed in NuttX's own .bss.  up_allocate_heap() returns
+		this buffer.  Keep it within the 288KB KM4 SRAM budget after NuttX
+		text/data/bss.
+
+config RTL8721DX_LOGUART_RXBUFSIZE
+	int "LOG-UART console RX buffer size"
+	default 256
+	---help---
+		Size of the NuttX receive buffer for the LOG-UART console.
+
+config RTL8721DX_LOGUART_TXBUFSIZE
+	int "LOG-UART console TX buffer size"
+	default 256
+	---help---
+		Size of the NuttX transmit buffer for the LOG-UART console.
+
+endmenu # RTL8721Dx Bring-up Options
+
+menu "RTL8721Dx WiFi"
+
+config RTL8721DX_WIFI
+	bool "WiFi (WHC host) support"
+	default n
+	---help---
+		Link the Realtek WHC (WiFi Host Controller) host stack so the AP can
+		drive the WiFi MAC/PHY that runs on the NP network processor.  The
+		AP-side host WiFi control libraries (lib_wifi_whc_ap and friends)
+		are linked from the pinned SDK; the lwIP / event glue they expect is
+		provided by NuttX (arch/arm/src/common/ameba/wifi/), routing frames
+		into NuttX's native network stack instead of lwIP.
+
+		M3.1 brings up the control plane only (wifi_on + scan); the data
+		path and netdev/wireless-extension wiring follow.
+
+endmenu # RTL8721Dx WiFi
+
+menu "RTL8721Dx Storage"
+
+config RTL8721DX_FLASH_FS
+	bool "On-chip SPI NOR data filesystem (littlefs)"
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select FS_LITTLEFS
+	---help---
+		Expose the SDK "VFS1" data partition (the last 128 KiB of the
+		on-chip SPI NOR flash, which does not overlap the NP/AP firmware
+		images) as a NuttX MTD device and mount a littlefs filesystem on it
+		at /data.  This provides persistent storage for application data and
+		backs the WiFi fast-connect / PMK key-value store (rt_kv_*).
+
+		The MTD backend wraps the SDK's dual-core-locked FLASH_xxx flash
+		primitives (ameba_flash_mtd.c).
+
+endmenu # RTL8721Dx Storage
+
+endif # ARCH_CHIP_RTL8721DX

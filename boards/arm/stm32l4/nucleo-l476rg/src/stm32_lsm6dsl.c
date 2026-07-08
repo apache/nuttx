@@ -31,7 +31,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/board.h>
-#include "stm32l4.h"
+#include "stm32.h"
 #include <nucleo-l476rg.h>
 #include <nuttx/sensors/lsm6dsl.h>
 
@@ -39,8 +39,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_I2C1
-#  error "LSM6DSL driver requires CONFIG_STM32L4_I2C1 to be enabled"
+#ifndef CONFIG_STM32_I2C1
+#  error "LSM6DSL driver requires CONFIG_STM32_I2C1 to be enabled"
 #endif
 
 /****************************************************************************
@@ -48,13 +48,13 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_lsm6dsl_initialize
+ * Name: stm32_lsm6dsl_initialize
  *
  * Description:
  *   Initialize I2C-based LSM6DSL.
  ****************************************************************************/
 
-int stm32l4_lsm6dsl_initialize(char *devpath)
+int stm32_lsm6dsl_initialize(char *devpath)
 {
   struct i2c_master_s *i2c;
   int ret = OK;
@@ -63,10 +63,10 @@ int stm32l4_lsm6dsl_initialize(char *devpath)
 
   /* Configure the GPIO interrupt */
 
-  stm32l4_configgpio(GPIO_HTS221_INT); /* IS THE SAME AS HTS221 FOR IKS01_A2 SHIELD */
+  stm32_configgpio(GPIO_HTS221_INT); /* IS THE SAME AS HTS221 FOR IKS01_A2 SHIELD */
 
-#if defined(CONFIG_STM32L4_I2C1)
-  i2c = stm32l4_i2cbus_initialize(1);
+#if defined(CONFIG_STM32_I2C1)
+  i2c = stm32_i2cbus_initialize(1);
   if (i2c == NULL)
     {
       return -ENODEV;

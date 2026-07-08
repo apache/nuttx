@@ -50,17 +50,17 @@
  *
  ****************************************************************************/
 
-int stm32l4_qencoder_initialize(const char *devpath, int timer)
+int stm32_qencoder_initialize(const char *devpath, int timer)
 {
   int ret;
 
   /* Initialize a quadrature encoder interface. */
 
   sninfo("Initializing the quadrature encoder using TIM%d\n", timer);
-  ret = stm32l4_qeinitialize(devpath, timer);
+  ret = stm32_qeinitialize(devpath, timer);
   if (ret < 0)
     {
-      snerr("ERROR: stm32l4_qeinitialize failed: %d\n", ret);
+      snerr("ERROR: stm32_qeinitialize failed: %d\n", ret);
     }
 
   return ret;

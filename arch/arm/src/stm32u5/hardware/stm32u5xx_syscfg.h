@@ -31,9 +31,9 @@
 #include "chip.h"
 
 #if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX) || \
-    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32U5_STM32U585XX) || \
+    defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX) || \
     defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX)  || \
-    defined(CONFIG_STM32U5_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+    defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -41,31 +41,31 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32U5_SYSCFG_SECCFGR_OFFSET   0x0000 /* SYSCFG secure configuration register */
-#define STM32U5_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
-#define STM32U5_SYSCFG_FPUIMR_OFFSET    0x0008 /* SYSCFG FPU interrupt mask register */
-#define STM32U5_SYSCFG_CNSLCKR_OFFSET   0x000c /* SYSCFG CPU non-secure lock register */
-#define STM32U5_SYSCFG_CSLCKR_OFFSET    0x0010 /* SYSCFG CPU secure lock register */
-#define STM32U5_SYSCFG_CFGR2_OFFSET     0x0014 /* SYSCFG configuration register 2 */
-#define STM32U5_SYSCFG_SCSR_OFFSET      0x0018 /* SYSCFG SRAM2 control and status register */
-#define STM32U5_SYSCFG_SKR_OFFSET       0x001c /* SYSCFG SRAM2 key register */
-#define STM32U5_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
-#define STM32U5_SYSCFG_SWPR2_OFFSET     0x0024 /* SYSCFG SRAM2 write protection register 2 */
-#define STM32U5_SYSCFG_RSSCMDR_OFFSET   0x002c /* SYSCFG RSS command register */
+#define STM32_SYSCFG_SECCFGR_OFFSET   0x0000 /* SYSCFG secure configuration register */
+#define STM32_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
+#define STM32_SYSCFG_FPUIMR_OFFSET    0x0008 /* SYSCFG FPU interrupt mask register */
+#define STM32_SYSCFG_CNSLCKR_OFFSET   0x000c /* SYSCFG CPU non-secure lock register */
+#define STM32_SYSCFG_CSLCKR_OFFSET    0x0010 /* SYSCFG CPU secure lock register */
+#define STM32_SYSCFG_CFGR2_OFFSET     0x0014 /* SYSCFG configuration register 2 */
+#define STM32_SYSCFG_SCSR_OFFSET      0x0018 /* SYSCFG SRAM2 control and status register */
+#define STM32_SYSCFG_SKR_OFFSET       0x001c /* SYSCFG SRAM2 key register */
+#define STM32_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
+#define STM32_SYSCFG_SWPR2_OFFSET     0x0024 /* SYSCFG SRAM2 write protection register 2 */
+#define STM32_SYSCFG_RSSCMDR_OFFSET   0x002c /* SYSCFG RSS command register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32U5_SYSCFG_SECCFGR          (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_SECCFGR_OFFSET)
-#define STM32U5_SYSCFG_CFGR1            (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_CFGR1_OFFSET)
-#define STM32U5_SYSCFG_FPUIMR           (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_FPUIMR_OFFSET)
-#define STM32U5_SYSCFG_CNSLCKR          (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_CNSLCKR_OFFSET)
-#define STM32U5_SYSCFG_CSLCKR           (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_CSLCKR_OFFSET)
-#define STM32U5_SYSCFG_CFGR2            (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_CFGR2_OFFSET)
-#define STM32U5_SYSCFG_SCSR             (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_SCSR_OFFSET)
-#define STM32U5_SYSCFG_SKR              (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_SKR_OFFSET)
-#define STM32U5_SYSCFG_SWPR             (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_SWPR_OFFSET)
-#define STM32U5_SYSCFG_SWPR2            (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_SWPR2_OFFSET)
-#define STM32U5_SYSCFG_RSSCMDR          (STM32U5_SYSCFG_BASE + STM32U5_SYSCFG_RSSCMDR_OFFSET)
+#define STM32_SYSCFG_SECCFGR          (STM32_SYSCFG_BASE + STM32_SYSCFG_SECCFGR_OFFSET)
+#define STM32_SYSCFG_CFGR1            (STM32_SYSCFG_BASE + STM32_SYSCFG_CFGR1_OFFSET)
+#define STM32_SYSCFG_FPUIMR           (STM32_SYSCFG_BASE + STM32_SYSCFG_FPUIMR_OFFSET)
+#define STM32_SYSCFG_CNSLCKR          (STM32_SYSCFG_BASE + STM32_SYSCFG_CNSLCKR_OFFSET)
+#define STM32_SYSCFG_CSLCKR           (STM32_SYSCFG_BASE + STM32_SYSCFG_CSLCKR_OFFSET)
+#define STM32_SYSCFG_CFGR2            (STM32_SYSCFG_BASE + STM32_SYSCFG_CFGR2_OFFSET)
+#define STM32_SYSCFG_SCSR             (STM32_SYSCFG_BASE + STM32_SYSCFG_SCSR_OFFSET)
+#define STM32_SYSCFG_SKR              (STM32_SYSCFG_BASE + STM32_SYSCFG_SKR_OFFSET)
+#define STM32_SYSCFG_SWPR             (STM32_SYSCFG_BASE + STM32_SYSCFG_SWPR_OFFSET)
+#define STM32_SYSCFG_SWPR2            (STM32_SYSCFG_BASE + STM32_SYSCFG_SWPR2_OFFSET)
+#define STM32_SYSCFG_RSSCMDR          (STM32_SYSCFG_BASE + STM32_SYSCFG_RSSCMDR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

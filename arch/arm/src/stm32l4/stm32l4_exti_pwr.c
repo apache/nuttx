@@ -58,20 +58,20 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_pvd_isr
+ * Name: stm32_exti_pvd_isr
  *
  * Description:
  *   EXTI PVD interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
+static int stm32_exti_pvd_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
   /* Clear the pending EXTI interrupt */
 
-  putreg32(EXTI1_PVD_LINE, STM32L4_EXTI1_PR);
+  putreg32(EXTI1_PVD_LINE, STM32_EXTI1_PR);
 
   /* And dispatch the interrupt to the handler */
 
@@ -88,7 +88,7 @@ static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_pvd
+ * Name: stm32_exti_pvd
  *
  * Description:
  *   Sets/clears EXTI PVD interrupt.
@@ -104,7 +104,7 @@ static int stm32l4_exti_pvd_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_pvd(bool risingedge, bool fallingedge, bool event,
                         xcpt_t func, void *arg)
 {
   /* Get the previous GPIO IRQ handler; Save the new IRQ handler. */
@@ -116,29 +116,29 @@ int stm32l4_exti_pvd(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_PVD, stm32l4_exti_pvd_isr, NULL);
-      up_enable_irq(STM32L4_IRQ_PVD);
+      irq_attach(STM32_IRQ_PVD, stm32_exti_pvd_isr, NULL);
+      up_enable_irq(STM32_IRQ_PVD);
     }
   else
     {
-      up_disable_irq(STM32L4_IRQ_PVD);
+      up_disable_irq(STM32_IRQ_PVD);
     }
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L4_EXTI1_RTSR,
+  modifyreg32(STM32_EXTI1_RTSR,
               risingedge ? 0 : EXTI1_PVD_LINE,
               risingedge ? EXTI1_PVD_LINE : 0);
-  modifyreg32(STM32L4_EXTI1_FTSR,
+  modifyreg32(STM32_EXTI1_FTSR,
               fallingedge ? 0 : EXTI1_PVD_LINE,
               fallingedge ? EXTI1_PVD_LINE : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32L4_EXTI1_EMR,
+  modifyreg32(STM32_EXTI1_EMR,
               event ? 0 : EXTI1_PVD_LINE,
               event ? EXTI1_PVD_LINE : 0);
-  modifyreg32(STM32L4_EXTI1_IMR,
+  modifyreg32(STM32_EXTI1_IMR,
               func ? 0 : EXTI1_PVD_LINE,
               func ? EXTI1_PVD_LINE : 0);
 

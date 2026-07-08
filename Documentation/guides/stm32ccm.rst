@@ -34,7 +34,7 @@ This memory allocator is automatically enabled when the following options are se
 * ``CONFIG_MM_MULTIHEAP`` Support for multiple heaps is enabled.
 
 Under those conditions, the CCM memory allocator is enabled and the allocator
-interfaces prototyped in the ``arch/arm/src/stm32/stm32_ccm.h`` are available.
+interfaces prototyped in the ``arch/arm/src/common/stm32/stm32_ccm.h`` are available.
 
 NOTE: These interfaces are, technically, not prototyped since they are really
 provided via C pre-processor macros.

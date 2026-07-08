@@ -52,10 +52,10 @@
  * HSI48 - 48 MHz fine-granularity trimmable RC with CRS
  */
 
-#define STM32WB_HSI_FREQUENCY           16000000ul
-#define STM32WB_LSI_FREQUENCY           32000
-#define STM32WB_LSE_FREQUENCY           32768
-#define STM32WB_HSE_FREQUENCY           32000000ul
+#define STM32_HSI_FREQUENCY           16000000ul
+#define STM32_LSI_FREQUENCY           32000
+#define STM32_LSE_FREQUENCY           32768
+#define STM32_HSE_FREQUENCY           32000000ul
 
 /* XXX there needs to be independent selections for the System Clock Mux and
  * the PLL Source Mux; currently System Clock Mux always is PLL, and PLL
@@ -72,165 +72,155 @@
 #endif
 
 #if 0
-#  define STM32WB_BOARD_RFWKP_USEHSE    1 /* CPU2 use HSE/1024 on RF wakeup */
+#  define STM32_BOARD_RFWKP_USEHSE    1 /* CPU2 use HSE/1024 on RF wakeup */
 #elif 1
-#  define STM32WB_BOARD_RFWKP_USELSE    1 /* CPU2 use LSE on RF wakeup */
+#  define STM32_BOARD_RFWKP_USELSE    1 /* CPU2 use LSE on RF wakeup */
 #endif
 
 #if defined(HSI_CLOCK_CONFIG)
 
-#define STM32WB_BOARD_USEHSI            1
+#define STM32_BOARD_USEHSI            1
 
-#define STM32WB_SYSCLK_FREQUENCY        64000000ul
+#define STM32_SYSCLK_FREQUENCY        64000000ul
 
 /* Prescaler common to all PLL inputs; will be 1 */
 
-#define STM32WB_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
+#define STM32_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as (((16MHz / 1) * 8) / 2) = 64MHz
  */
 
-#define STM32WB_PLLCFG_PLLN             RCC_PLLCFG_PLLN(8)
-#define STM32WB_PLLCFG_PLLR_ENABLED
-#define STM32WB_PLLCFG_PLLR             RCC_PLLCFG_PLLR(2)
+#define STM32_PLLCFG_PLLN             RCC_PLLCFG_PLLN(8)
+#define STM32_PLLCFG_PLLR_ENABLED
+#define STM32_PLLCFG_PLLR             RCC_PLLCFG_PLLR(2)
 
 /* 'SAIPLL1' is not used */
 
-#define STM32WB_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
+#define STM32_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
 
 /* CLK48 will come from HSI48 */
 
-#define STM32WB_USE_CLK48               1
-#define STM32WB_CLK48_SEL               RCC_CCIPR_CLK48SEL_HSI48
-#define STM32WB_HSI48_SYNCSRC           SYNCSRC_LSE
+#define STM32_USE_CLK48               1
+#define STM32_CLK48_SEL               RCC_CCIPR_CLK48SEL_HSI48
+#define STM32_HSI48_SYNCSRC           SYNCSRC_LSE
 
 /* Enable LSE oscillator, used automatically trim the HSI48, and for RTC */
 
-#define STM32WB_USE_LSE                 1
+#define STM32_USE_LSE                 1
 
 #elif defined(HSE_CLOCK_CONFIG)
 
 /* Use the HSE */
 
-#define STM32WB_BOARD_USEHSE            1
+#define STM32_BOARD_USEHSE            1
 
-#define STM32WB_SYSCLK_FREQUENCY        64000000ul
+#define STM32_SYSCLK_FREQUENCY        64000000ul
 
 /* Prescaler common to all PLL inputs; will be 2 */
 
-#define STM32WB_PLLCFG_PLLM             RCC_PLLCFG_PLLM(2)
+#define STM32_PLLCFG_PLLM             RCC_PLLCFG_PLLM(2)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as (((32MHz / 2) * 12) / 3) = 64MHz
  *  And the Q output is set as (((32MHz / 2) * 12) / 4) = 48MHz
  */
 
-#define STM32WB_PLLCFG_PLLN             RCC_PLLCFG_PLLN(12)
-#define STM32WB_PLLCFG_PLLR_ENABLED
-#define STM32WB_PLLCFG_PLLR             RCC_PLLCFG_PLLR(3)
-#define STM32WB_PLLCFG_PLLQ_ENABLED
-#define STM32WB_PLLCFG_PLLQ             RCC_PLLCFG_PLLQ(4)
+#define STM32_PLLCFG_PLLN             RCC_PLLCFG_PLLN(12)
+#define STM32_PLLCFG_PLLR_ENABLED
+#define STM32_PLLCFG_PLLR             RCC_PLLCFG_PLLR(3)
+#define STM32_PLLCFG_PLLQ_ENABLED
+#define STM32_PLLCFG_PLLQ             RCC_PLLCFG_PLLQ(4)
 
 /* 'SAIPLL1' is not used */
 
-#define STM32WB_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
+#define STM32_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
 
 /* CLK48 will come from the PLLMAIN via the Q output */
 
-#define STM32WB_USE_CLK48               1
-#define STM32WB_CLK48_SEL               RCC_CCIPR_CLK48SEL_PLLMAIN
-#define STM32WB_HSI48_SYNCSRC           SYNCSRC_NONE
+#define STM32_USE_CLK48               1
+#define STM32_CLK48_SEL               RCC_CCIPR_CLK48SEL_PLLMAIN
+#define STM32_HSI48_SYNCSRC           SYNCSRC_NONE
 
 /* Enable LSE (for the RTC) */
 
-#define STM32WB_USE_LSE                 1
+#define STM32_USE_LSE                 1
 
 #elif defined(MSI_CLOCK_CONFIG)
 
 /* Use the MSI */
 
-#define STM32WB_BOARD_USEMSI            1
+#define STM32_BOARD_USEMSI            1
 
-#define STM32WB_BOARD_MSIRANGE          RCC_CR_MSIRANGE_4M
+#define STM32_BOARD_MSIRANGE          RCC_CR_MSIRANGE_4M
 
-#define STM32WB_SYSCLK_FREQUENCY        64000000ul
+#define STM32_SYSCLK_FREQUENCY        64000000ul
 
 /* Prescaler common to all PLL inputs; will be 1 */
 
-#define STM32WB_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
+#define STM32_PLLCFG_PLLM             RCC_PLLCFG_PLLM(1)
 
 /* 'main' PLL config; we use this to generate our system clock via the R
  *  output.  We set it up as (((4MHz / 1) * 48) / 3) = 64MHz
  *  And the Q output is set as (((4MHz / 1) * 48) / 4) = 48MHz
  */
 
-#define STM32WB_PLLCFG_PLLN             RCC_PLLCFG_PLLN(48)
-#define STM32WB_PLLCFG_PLLR_ENABLED
-#define STM32WB_PLLCFG_PLLR             RCC_PLLCFG_PLLR(3)
-#define STM32WB_PLLCFG_PLLQ_ENABLED
-#define STM32WB_PLLCFG_PLLQ             RCC_PLLCFG_PLLQ(4)
+#define STM32_PLLCFG_PLLN             RCC_PLLCFG_PLLN(48)
+#define STM32_PLLCFG_PLLR_ENABLED
+#define STM32_PLLCFG_PLLR             RCC_PLLCFG_PLLR(3)
+#define STM32_PLLCFG_PLLQ_ENABLED
+#define STM32_PLLCFG_PLLQ             RCC_PLLCFG_PLLQ(4)
 
 /* 'SAIPLL1' is not used */
 
-#define STM32WB_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
+#define STM32_PLLSAI1CFG_PLLN         RCC_PLLSAI1CFG_PLLN(8)
 
 /* CLK48 will come from the PLLMAIN via the Q output */
 
-#define STM32WB_USE_CLK48               1
-#define STM32WB_CLK48_SEL               RCC_CCIPR_CLK48SEL_PLLMAIN
-#define STM32WB_HSI48_SYNCSRC           SYNCSRC_NONE
+#define STM32_USE_CLK48               1
+#define STM32_CLK48_SEL               RCC_CCIPR_CLK48SEL_PLLMAIN
+#define STM32_HSI48_SYNCSRC           SYNCSRC_NONE
 
 /* Enable the LSE oscillator, used automatically trim the MSI, and for RTC */
 
-#define STM32WB_USE_LSE                 1
+#define STM32_USE_LSE                 1
 
 #endif
 
 /* AHB clock (HCLK) is SYSCLK (64MHz) */
 
-#define BOARD_AHB_FREQUENCY         STM32WB_SYSCLK_FREQUENCY
+#define BOARD_AHB_FREQUENCY         STM32_SYSCLK_FREQUENCY
 
-#define STM32WB_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK
-#define STM32WB_HCLK_FREQUENCY      STM32WB_SYSCLK_FREQUENCY
+#define STM32_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK
+#define STM32_HCLK_FREQUENCY      STM32_SYSCLK_FREQUENCY
 
 /* CPU2 clock (HCLK2) is SYSCLK/2 (32MHz) */
 
-#define STM32WB_RCC_EXTCFGR_C2HPRE  RCC_EXTCFGR_C2HPRE_2
+#define STM32_RCC_EXTCFGR_C2HPRE  RCC_EXTCFGR_C2HPRE_2
 
 /* AHB4 clock (HCLK4) is SYSCLK (64MHz) */
 
-#define STM32WB_RCC_EXTCFGR_SHDHPRE RCC_EXTCFGR_SHDHPRE_1
+#define STM32_RCC_EXTCFGR_SHDHPRE RCC_EXTCFGR_SHDHPRE_1
 
 /* APB1 clock (PCLK1) is HCLK/1 (64MHz) */
 
-#define STM32WB_RCC_CFGR_PPRE1      RCC_CFGR_PPRE1_HCLK1
-#define STM32WB_PCLK1_FREQUENCY     (STM32WB_HCLK_FREQUENCY / 1)
+#define STM32_RCC_CFGR_PPRE1      RCC_CFGR_PPRE1_HCLK1
+#define STM32_PCLK1_FREQUENCY     (STM32_HCLK_FREQUENCY / 1)
 
 /* APB2 clock (PCLK2) is HCLK/1 (64MHz) */
 
-#define STM32WB_RCC_CFGR_PPRE2      RCC_CFGR_PPRE2_HCLK1
-#define STM32WB_PCLK2_FREQUENCY     (STM32WB_HCLK_FREQUENCY / 1)
-
-/* Timer Frequencies, if APB prescaler is set to 1, frequency is same to APBx
- * otherwise frequency is 2xAPBx.
- * Note: TIM1,16,17 are on APB2, TIM2 is on APB1
- */
+#define STM32_RCC_CFGR_PPRE2      RCC_CFGR_PPRE2_HCLK1
+#define STM32_PCLK2_FREQUENCY     (STM32_HCLK_FREQUENCY / 1)
 
 /* Timers driven from APB1 will be the same frequency as PCLK1 */
 
-#define STM32WB_APB1_TIM2_CLKIN     (1 * STM32WB_PCLK1_FREQUENCY)
+#define STM32_TIM2_CLKIN     (STM32_PCLK1_FREQUENCY)
 
 /* Timers driven from APB2 will be the same frequency as PCLK2 */
 
-#define STM32WB_APB2_TIM1_CLKIN     (1 * STM32WB_PCLK2_FREQUENCY)
-#define STM32WB_APB2_TIM16_CLKIN    (1 * STM32WB_PCLK2_FREQUENCY)
-#define STM32WB_APB2_TIM17_CLKIN    (1 * STM32WB_PCLK2_FREQUENCY)
-
-#define BOARD_TIM1_FREQUENCY        STM32WB_APB2_TIM1_CLKIN
-#define BOARD_TIM2_FREQUENCY        STM32WB_APB1_TIM2_CLKIN
-#define BOARD_TIM16_FREQUENCY       STM32WB_APB2_TIM16_CLKIN
-#define BOARD_TIM17_FREQUENCY       STM32WB_APB2_TIM17_CLKIN
+#define STM32_TIM1_CLKIN     (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM16_CLKIN    (STM32_PCLK2_FREQUENCY)
+#define STM32_TIM17_CLKIN    (STM32_PCLK2_FREQUENCY)
 
 /* Higher SYSCLK requires more flash wait states. */
 

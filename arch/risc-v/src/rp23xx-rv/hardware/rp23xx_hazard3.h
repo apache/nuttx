@@ -27,11 +27,13 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/rp23xx_memorymap.h"
+#include "rp23xx_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+#define hazard3_block()   __asm__ volatile ("slt x0, x0, x0" ::: "memory")
+#define hazard3_unblock() __asm__ volatile ("slt x0, x0, x1" ::: "memory")
 
 #define hazard3_irqarray_read(csr, index) (READ_AND_SET_CSR(csr, (index)) >> 16)
 #define hazard3_irqarray_write(csr, index, data) (WRITE_CSR(csr, (index) | ((uint32_t)(data) << 16)))

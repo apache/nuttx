@@ -37,7 +37,7 @@
 #include "stm32_pwr.h"
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32H7_PWR)
+#if defined(CONFIG_STM32_PWR)
 
 #define BREG_WAIT_USTIMEOUT 1000 /* uS to wait for regulator to come ready */
 

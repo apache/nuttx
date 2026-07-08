@@ -166,7 +166,7 @@
  *   channel - The I2S channel num
  *
  * Returned Value:
- *   Returns the number of RX channels
+ *   Returns the number of RX channels or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -187,7 +187,7 @@
  *   rate - The I2S sample rate in samples (not bits) per second
  *
  * Returned Value:
- *   Returns the resulting bitrate
+ *   Returns the resulting bitrate or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -206,7 +206,7 @@
  *   width - The I2S data with in bits.
  *
  * Returned Value:
- *   Returns the resulting bitrate
+ *   Returns the resulting bitrate or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -258,7 +258,7 @@
  *   channel - The I2S channel num
  *
  * Returned Value:
- *   Returns the number of TX channels
+ *   Returns the number of TX channels or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -279,7 +279,7 @@
  *   rate - The I2S sample rate in samples (not bits) per second
  *
  * Returned Value:
- *   Returns the resulting bitrate
+ *   Returns the resulting bitrate or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -298,7 +298,7 @@
  *   width - The I2S data with in bits.
  *
  * Returned Value:
- *   Returns the resulting bitrate
+ *   Returns the resulting bitrate or negated errno on failure.
  *
  ****************************************************************************/
 
@@ -418,10 +418,10 @@ struct i2s_ops_s
 
   CODE int      (*i2s_rxchannels)(FAR struct i2s_dev_s *dev,
                                   uint8_t channels);
-  CODE uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev,
+  CODE int32_t  (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev,
                                     uint32_t rate);
-  CODE uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev,
-                                   int bits);
+  CODE int32_t  (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev,
+                                  int bits);
   CODE int      (*i2s_receive)(FAR struct i2s_dev_s *dev,
                                FAR struct ap_buffer_s *apb,
                                i2s_callback_t callback,
@@ -432,9 +432,9 @@ struct i2s_ops_s
 
   CODE int      (*i2s_txchannels)(FAR struct i2s_dev_s *dev,
                                   uint8_t channels);
-  CODE uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev,
+  CODE int32_t  (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev,
                                     uint32_t rate);
-  CODE uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev,
+  CODE int32_t  (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev,
                                    int bits);
   CODE int      (*i2s_send)(FAR struct i2s_dev_s *dev,
                             FAR struct ap_buffer_s *apb,
@@ -444,8 +444,8 @@ struct i2s_ops_s
 
   /* Master Clock methods */
 
-  CODE uint32_t (*i2s_getmclkfrequency)(FAR struct i2s_dev_s *dev);
-  CODE uint32_t (*i2s_setmclkfrequency)(FAR struct i2s_dev_s *dev,
+  CODE int32_t  (*i2s_getmclkfrequency)(FAR struct i2s_dev_s *dev);
+  CODE int32_t  (*i2s_setmclkfrequency)(FAR struct i2s_dev_s *dev,
                                         uint32_t frequency);
 
   /* Ioctl */

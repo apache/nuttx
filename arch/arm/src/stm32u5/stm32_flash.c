@@ -50,13 +50,13 @@
 #include "stm32_flash.h"
 #include "arm_internal.h"
 
-#if !defined(CONFIG_STM32U5_STM32U585XX)
-#elif !defined(CONFIG_STM32U5_STM32U5A5XX)
+#if !defined(CONFIG_STM32_STM32U585XX)
+#elif !defined(CONFIG_STM32_STM32U5A5XX)
 #else
 #  error "Unrecognized STM32 chip"
 #endif
 
-#if !defined(CONFIG_STM32U5_FLASH_OVERRIDE_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
 #  warning "Flash Configuration has been overridden - make sure it is correct"
 #endif
 

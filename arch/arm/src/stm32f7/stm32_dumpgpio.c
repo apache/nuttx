@@ -44,9 +44,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Private Data
@@ -54,31 +54,31 @@
 
 /* Port letters for prettier debug output */
 
-static const char g_portchar[STM32F7_NGPIO] =
+static const char g_portchar[STM32_NGPIO] =
 {
-#if STM32F7_NGPIO > 11
+#if STM32_NGPIO > 11
 #  error "Additional support required for this number of GPIOs"
-#elif STM32F7_NGPIO > 10
+#elif STM32_NGPIO > 10
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'
-#elif STM32F7_NGPIO > 9
+#elif STM32_NGPIO > 9
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'
-#elif STM32F7_NGPIO > 8
+#elif STM32_NGPIO > 8
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
-#elif STM32F7_NGPIO > 7
+#elif STM32_NGPIO > 7
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
-#elif STM32F7_NGPIO > 6
+#elif STM32_NGPIO > 6
   'A', 'B', 'C', 'D', 'E', 'F', 'G'
-#elif STM32F7_NGPIO > 5
+#elif STM32_NGPIO > 5
   'A', 'B', 'C', 'D', 'E', 'F'
-#elif STM32F7_NGPIO > 4
+#elif STM32_NGPIO > 4
   'A', 'B', 'C', 'D', 'E'
-#elif STM32F7_NGPIO > 3
+#elif STM32_NGPIO > 3
   'A', 'B', 'C', 'D'
-#elif STM32F7_NGPIO > 2
+#elif STM32_NGPIO > 2
   'A', 'B', 'C'
-#elif STM32F7_NGPIO > 1
+#elif STM32_NGPIO > 1
   'A', 'B'
-#elif STM32F7_NGPIO > 0
+#elif STM32_NGPIO > 0
   'A'
 #else
 #  error "Bad number of GPIOs"
@@ -112,7 +112,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  DEBUGASSERT(port < STM32F7_NGPIO);
+  DEBUGASSERT(port < STM32_NGPIO);
 
   gpioinfo("GPIO%c pinset: %08" PRIx32 " base: %08" PRIx32 " -- %s\n",
         g_portchar[port], pinset, base, msg);
@@ -144,5 +144,5 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   return OK;
 }
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */
 #endif /* CONFIG_DEBUG_GPIO_INFO */

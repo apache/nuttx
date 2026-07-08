@@ -42,34 +42,34 @@
 
 /* Mailbox channels */
 
-#define STM32WB_MBOX_BLEEVT_CHANNEL       1
-#define STM32WB_MBOX_BLECMD_CHANNEL       1
-#define STM32WB_MBOX_SYSEVT_CHANNEL       2
-#define STM32WB_MBOX_SYSCMD_CHANNEL       2
-#define STM32WB_MBOX_EVT_RELEASE_CHANNEL  4
-#define STM32WB_MBOX_BLEACL_CHANNEL       6
+#define STM32_MBOX_BLEEVT_CHANNEL       1
+#define STM32_MBOX_BLECMD_CHANNEL       1
+#define STM32_MBOX_SYSEVT_CHANNEL       2
+#define STM32_MBOX_SYSCMD_CHANNEL       2
+#define STM32_MBOX_EVT_RELEASE_CHANNEL  4
+#define STM32_MBOX_BLEACL_CHANNEL       6
 
 /* Mailbox packet types */
 
-#define STM32WB_MBOX_HCICMD               0x01
-#define STM32WB_MBOX_HCIACL               0x02
-#define STM32WB_MBOX_HCIEVT               0x04
-#define STM32WB_MBOX_SYSCMD               0x10
-#define STM32WB_MBOX_SYSEVT               0x12
-#define STM32WB_MBOX_SYSACK               0xe0
+#define STM32_MBOX_HCICMD               0x01
+#define STM32_MBOX_HCIACL               0x02
+#define STM32_MBOX_HCIEVT               0x04
+#define STM32_MBOX_SYSCMD               0x10
+#define STM32_MBOX_SYSEVT               0x12
+#define STM32_MBOX_SYSACK               0xe0
 
 /* Mailbox configuration helpers */
 
-#define STM32WB_MBOX_BLE_ATT_DEFAULT_MTU  23
-#define STM32WB_MBOX_C2_MEM_BLOCK_SZ      32
+#define STM32_MBOX_BLE_ATT_DEFAULT_MTU  23
+#define STM32_MBOX_C2_MEM_BLOCK_SZ      32
 
 #define DIV_UP(a, b)    (((a) + (b) - 1) / (b))
 
-#define STM32WB_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(max_mtu) \
-  (DIV_UP((max_mtu), STM32WB_MBOX_BLE_ATT_DEFAULT_MTU - 5) * 2)
+#define STM32_MBOX_DEFAULT_BLE_PREP_WRITE_NUM(max_mtu) \
+  (DIV_UP((max_mtu), STM32_MBOX_BLE_ATT_DEFAULT_MTU - 5) * 2)
 
-#define STM32WB_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(max_mtu, max_conn, pw) \
-  ((pw) + ((max_conn) + 1) * (DIV_UP((max_mtu) + 4, STM32WB_MBOX_C2_MEM_BLOCK_SZ) + 2))
+#define STM32_MBOX_DEFAULT_C2_MEM_BLOCK_NUM(max_mtu, max_conn, pw) \
+  ((pw) + ((max_conn) + 1) * (DIV_UP((max_mtu) + 4, STM32_MBOX_C2_MEM_BLOCK_SZ) + 2))
 
 /****************************************************************************
  * Public Types
@@ -77,7 +77,7 @@
 
 /* Mailbox data transfer packets */
 
-begin_packed_struct struct stm32wb_mbox_evt_s
+begin_packed_struct struct stm32_mbox_evt_s
 {
   uint8_t                       type;
   union
@@ -87,9 +87,9 @@ begin_packed_struct struct stm32wb_mbox_evt_s
     };
 } end_packed_struct;
 
-begin_packed_struct struct stm32wb_mbox_cmd_s
+begin_packed_struct struct stm32_mbox_cmd_s
 {
-  stm32wb_mbox_list_t           list_hdr;
+  stm32_mbox_list_t           list_hdr;
   uint8_t                       type;
   union
   {
@@ -100,14 +100,14 @@ begin_packed_struct struct stm32wb_mbox_cmd_s
 
 /* Mailbox receive event handler type */
 
-typedef int (*stm32wb_mbox_evt_handler_t)(struct stm32wb_mbox_evt_s *);
+typedef int (*stm32_mbox_evt_handler_t)(struct stm32_mbox_evt_s *);
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_mboxinitialize
+ * Name: stm32_mboxinitialize
  *
  * Description:
  *   Initialize mailbox driver memory.
@@ -117,10 +117,10 @@ typedef int (*stm32wb_mbox_evt_handler_t)(struct stm32wb_mbox_evt_s *);
  *
  ****************************************************************************/
 
-void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler);
+void stm32_mboxinitialize(stm32_mbox_evt_handler_t evt_handler);
 
 /****************************************************************************
- * Name: stm32wb_mboxenable
+ * Name: stm32_mboxenable
  *
  * Description:
  *   Enable mailbox hardware and start communication.  The CPU2 responses
@@ -128,10 +128,10 @@ void stm32wb_mboxinitialize(stm32wb_mbox_evt_handler_t evt_handler);
  *
  ****************************************************************************/
 
-void stm32wb_mboxenable(void);
+void stm32_mboxenable(void);
 
 /****************************************************************************
- * Name: stm32wb_mbox_syscmd
+ * Name: stm32_mbox_syscmd
  *
  * Description:
  *   Send command over mailbox system channel.  Command data must be
@@ -139,10 +139,10 @@ void stm32wb_mboxenable(void);
  *
  ****************************************************************************/
 
-int stm32wb_mbox_syscmd(void *data, size_t len);
+int stm32_mbox_syscmd(void *data, size_t len);
 
 /****************************************************************************
- * Name: stm32wb_mbox_blecmd
+ * Name: stm32_mbox_blecmd
  *
  * Description:
  *   Send command over mailbox BLE channel.  Command data must be
@@ -150,10 +150,10 @@ int stm32wb_mbox_syscmd(void *data, size_t len);
  *
  ****************************************************************************/
 
-int stm32wb_mbox_blecmd(void *data, size_t len);
+int stm32_mbox_blecmd(void *data, size_t len);
 
 /****************************************************************************
- * Name: stm32wb_mbox_bleacl
+ * Name: stm32_mbox_bleacl
  *
  * Description:
  *   Send BLE ACL data over mailbox BLE ACL channel.  Data must be
@@ -161,16 +161,16 @@ int stm32wb_mbox_blecmd(void *data, size_t len);
  *
  ****************************************************************************/
 
-int stm32wb_mbox_bleacl(void *data, size_t len);
+int stm32_mbox_bleacl(void *data, size_t len);
 
 /****************************************************************************
- * Name: stm32wb_mbox_bleinit
+ * Name: stm32_mbox_bleinit
  *
  * Description:
  *   Initialize and start BLE subsystem with provided configuration params.
  *
  ****************************************************************************/
 
-void stm32wb_mbox_bleinit(struct stm32wb_shci_ble_init_cfg_s *params);
+void stm32_mbox_bleinit(struct stm32_shci_ble_init_cfg_s *params);
 
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_MBOX_H */

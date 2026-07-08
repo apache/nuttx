@@ -1,0 +1,69 @@
+#
+# STM32 common LPUART options.
+#
+
+config LPUART1_RXDMA
+	bool
+	depends on STM32_LPUART1 && LPUART1_SERIALDRIVER && STM32_DMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	depends on STM32_LPUART1
+	default STM32_LPUART1_SERIALDRIVER
+
+config STM32_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_LPUART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+config LPUART1_RS485
+	bool "RS-485 on LPUART1"
+	depends on STM32_LPUART1 && LPUART1_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on LPUART1. Your board config will have to
+		provide GPIO_LPUART1_RS485_DIR pin definition. Currently it cannot be
+		used with LPUART1_RXDMA.
+
+if LPUART1_RS485
+
+config LPUART1_RS485_DIR_POLARITY
+	int "LPUART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # LPUART1_RS485
+
+if STM32_LPUART1_SERIALDRIVER
+
+config LPUART1_TXDMA
+	bool "LPUART1 Tx DMA"
+	default n
+	depends on STM32_DMA1
+	---help---
+		In high data rate usage, Tx DMA may reduce CPU load
+
+endif # STM32_LPUART1_SERIALDRIVER
+
+config LPUART1_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure LPUART1 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && LPUART1_SERIALDRIVER
+
+config LPUART1_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure LPUART1 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && LPUART1_SERIALDRIVER
+
+config LPUART1_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure LPUART1 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && LPUART1_SERIALDRIVER && LPUART1_RS485

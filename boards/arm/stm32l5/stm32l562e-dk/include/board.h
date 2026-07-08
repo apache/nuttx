@@ -67,15 +67,15 @@
  * LSE - 32.768 kHz installed
  */
 
-#define STM32L5_HSI_FREQUENCY     16000000ul
-#define STM32L5_LSI_FREQUENCY     32000
-#define STM32L5_MSI_FREQUENCY     4000000ul
-#define STM32L5_LSE_FREQUENCY     32768
+#define STM32_HSI_FREQUENCY     16000000ul
+#define STM32_LSI_FREQUENCY     32000
+#define STM32_MSI_FREQUENCY     4000000ul
+#define STM32_LSE_FREQUENCY     32768
 
-#define STM32L5_SYSCLK_FREQUENCY  110000000ul
-#define STM32L5_HCLK_FREQUENCY    STM32L5_SYSCLK_FREQUENCY
-#define STM32L5_PCLK1_FREQUENCY   STM32L5_HCLK_FREQUENCY
-#define STM32L5_PCLK2_FREQUENCY   (STM32L5_HCLK_FREQUENCY / 1)
+#define STM32_SYSCLK_FREQUENCY  110000000ul
+#define STM32_HCLK_FREQUENCY    STM32_SYSCLK_FREQUENCY
+#define STM32_PCLK1_FREQUENCY   STM32_HCLK_FREQUENCY
+#define STM32_PCLK2_FREQUENCY   (STM32_HCLK_FREQUENCY / 1)
 
 /* The timer clock frequencies are automatically defined by hardware.  If the
  * APB prescaler equals 1, the timer clock frequencies are set to the same
@@ -83,17 +83,17 @@
  * Note: TIM1,15,16 are on APB2, others on APB1
  */
 
-#define BOARD_TIM1_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM3_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM4_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM5_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM6_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM7_FREQUENCY    STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM15_FREQUENCY   STM32L5_HCLK_FREQUENCY
-#define BOARD_TIM16_FREQUENCY   STM32L5_HCLK_FREQUENCY
-#define BOARD_LPTIM1_FREQUENCY  STM32L5_HCLK_FREQUENCY
-#define BOARD_LPTIM2_FREQUENCY  STM32L5_HCLK_FREQUENCY
+#define STM32_TIM1_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM2_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM3_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM4_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM5_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM6_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM7_CLKIN    STM32_HCLK_FREQUENCY
+#define STM32_TIM15_CLKIN   STM32_HCLK_FREQUENCY
+#define STM32_TIM16_CLKIN   STM32_HCLK_FREQUENCY
+#define STM32_LPTIM1_CLKIN      STM32_HCLK_FREQUENCY
+#define STM32_LPTIM2_CLKIN      STM32_HCLK_FREQUENCY
 
 /* DMA Channel/Stream Selections ********************************************/
 
@@ -185,7 +185,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L5 architectures must provide the following entry point.
@@ -195,7 +195,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l5_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

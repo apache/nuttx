@@ -124,9 +124,9 @@ static inline void stm32_mco2config(uint32_t source, uint32_t div)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_STM32H7_CUSTOM_CLOCKCONFIG is defined, then clocking will be
- *   enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -157,7 +157,7 @@ void stm32_stdclockconfig(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_CUSTOM_CLOCKCONFIG
+#ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_board_clockconfig(void);
 #endif
 
@@ -174,9 +174,9 @@ void stm32_board_clockconfig(void);
  *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_STM32H7_CUSTOM_CLOCKCONFIG is defined, then clocking will be
- *   enabled by an externally provided, board-specific function called
- *   stm32_board_clockconfig().
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then clocking
+ *   will be enabled by an externally provided, board-specific function
+ *   called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None

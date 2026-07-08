@@ -48,9 +48,9 @@ uint32_t board_userled_initialize(void)
 #ifndef CONFIG_ARCH_LEDS
   /* Configure LED GPIOs for output */
 
-  stm32l4_configgpio(GPIO_LED_RED);
-  stm32l4_configgpio(GPIO_LED_GREEN);
-  stm32l4_configgpio(GPIO_LED_WHITE);
+  stm32_configgpio(GPIO_LED_RED);
+  stm32_configgpio(GPIO_LED_GREEN);
+  stm32_configgpio(GPIO_LED_WHITE);
 #endif
   return BOARD_NLEDS;
 }
@@ -63,16 +63,16 @@ void board_userled(int led, bool ledon)
 {
   if (led == BOARD_RED_LED)
     {
-      stm32l4_gpiowrite(GPIO_LED_RED, !ledon); /* Low illuminates */
+      stm32_gpiowrite(GPIO_LED_RED, !ledon); /* Low illuminates */
     }
   else if (led == BOARD_GREEN_LED)
     {
-      stm32l4_gpiowrite(GPIO_LED_GREEN, !ledon); /* Low illuminates */
+      stm32_gpiowrite(GPIO_LED_GREEN, !ledon); /* Low illuminates */
     }
 #ifndef CONFIG_ARCH_LEDS
   else if (led == BOARD_WHITE_LED)
     {
-      stm32l4_gpiowrite(GPIO_LED_WHITE, !ledon); /* Low illuminates */
+      stm32_gpiowrite(GPIO_LED_WHITE, !ledon); /* Low illuminates */
     }
 #endif
 }
@@ -85,9 +85,9 @@ void board_userled_all(uint32_t ledset)
 {
   /* Low illuminates */
 
-  stm32l4_gpiowrite(GPIO_LED_RED,   (ledset & BOARD_RED_LED_BIT)   == 0);
-  stm32l4_gpiowrite(GPIO_LED_GREEN, (ledset & BOARD_GREEN_LED_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED_RED,   (ledset & BOARD_RED_LED_BIT)   == 0);
+  stm32_gpiowrite(GPIO_LED_GREEN, (ledset & BOARD_GREEN_LED_BIT) == 0);
 #ifndef CONFIG_ARCH_LEDS
-  stm32l4_gpiowrite(GPIO_LED_WHITE, (ledset & BOARD_WHITE_LED_BIT) == 0);
+  stm32_gpiowrite(GPIO_LED_WHITE, (ledset & BOARD_WHITE_LED_BIT) == 0);
 #endif
 }

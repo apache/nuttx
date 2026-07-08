@@ -1,2 +1,3 @@
 /risc-v/qemu-rv/rv-virt/configs/python
 /risc-v/esp32p4/esp32p4-function-ev-board/configs/python
+/risc-v/esp32p4/esp32p4-function-ev-board/configs/webpanel

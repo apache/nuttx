@@ -46,16 +46,16 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM33F75XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32F7_STM33F75XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define DMA1_NSTREAMS    8
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
 #  define DMA2_NSTREAMS  8
 #  define DMA_NSTREAMS   (DMA1_NSTREAMS+DMA2_NSTREAMS)
 #else
@@ -148,7 +148,7 @@ static struct stm32_dma_s g_dma[DMA_NSTREAMS] =
     .sem      = SEM_INITIALIZER(1),
     .base     = STM32_DMA1_BASE + STM32_DMA_OFFSET(7),
   },
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   {
     .stream   = 0,
     .irq      = STM32_IRQ_DMA2S0,
@@ -268,13 +268,13 @@ static inline struct stm32_dma_s *stm32_dmastream(unsigned int stream,
 {
   int index;
 
-  DEBUGASSERT(stream < DMA_NSTREAMS && controller < STM32F7_NDMA);
+  DEBUGASSERT(stream < DMA_NSTREAMS && controller < STM32_NDMA);
 
   /* Convert the controller + stream based on the fact that there are
    * 8 streams per controller.
    */
 
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   index = controller << 3 | stream;
 #else
   index = stream;
@@ -376,7 +376,7 @@ static int stm32_dmainterrupt(int irq, void *context, void *arg)
       controller = DMA1;
     }
   else
-#if STM32F7_NDMA > 1
+#if STM32_NDMA > 1
   if (irq >= STM32_IRQ_DMA2S0 && irq <= STM32_IRQ_DMA2S4)
     {
       stream     = irq - STM32_IRQ_DMA2S0;
@@ -596,7 +596,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
           " ntransfers: %zu scr: %08" PRIx32 "\n",
           paddr, maddr, ntransfers, scr);
 
-#ifdef CONFIG_STM32F7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(stm32_dmacapable(maddr, ntransfers, scr));
 #endif
 
@@ -895,7 +895,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
 {
   uint32_t transfer_size;
@@ -958,7 +958,7 @@ bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr)
       dmawarn("stm32_dmacapable:"
               " dcache unaligned maddr:0x%08" PRIxPTR " mend:0x%08"
               PRIx32 "\n", maddr, mend);
-#if !defined(CONFIG_STM32F7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
+#if !defined(CONFIG_STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
     }
@@ -1121,4 +1121,4 @@ void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
 }
 #endif
 
-#endif /* CONFIG_STM32F7_STM32F74XX || CONFIG_STM32F7_STM32F75XX */
+#endif /* CONFIG_STM32_STM32F74XX || CONFIG_STM32_STM32F75XX */

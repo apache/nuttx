@@ -37,27 +37,27 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_IWDG_KR_OFFSET     0x0000  /* Key register (32-bit) */
-#define STM32L4_IWDG_PR_OFFSET     0x0004  /* Prescaler register (32-bit) */
-#define STM32L4_IWDG_RLR_OFFSET    0x0008  /* Reload register (32-bit) */
-#define STM32L4_IWDG_SR_OFFSET     0x000c  /* Status register (32-bit) */
-#define STM32L4_IWDG_WINR_OFFSET   0x0010  /* Window register (32-bit) */
+#define STM32_IWDG_KR_OFFSET     0x0000  /* Key register (32-bit) */
+#define STM32_IWDG_PR_OFFSET     0x0004  /* Prescaler register (32-bit) */
+#define STM32_IWDG_RLR_OFFSET    0x0008  /* Reload register (32-bit) */
+#define STM32_IWDG_SR_OFFSET     0x000c  /* Status register (32-bit) */
+#define STM32_IWDG_WINR_OFFSET   0x0010  /* Window register (32-bit) */
 
-#define STM32L4_WWDG_CR_OFFSET     0x0000  /* Control Register (32-bit) */
-#define STM32L4_WWDG_CFR_OFFSET    0x0004  /* Configuration register (32-bit) */
-#define STM32L4_WWDG_SR_OFFSET     0x0008  /* Status register (32-bit) */
+#define STM32_WWDG_CR_OFFSET     0x0000  /* Control Register (32-bit) */
+#define STM32_WWDG_CFR_OFFSET    0x0004  /* Configuration register (32-bit) */
+#define STM32_WWDG_SR_OFFSET     0x0008  /* Status register (32-bit) */
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_IWDG_KR            (STM32L4_IWDG_BASE+STM32L4_IWDG_KR_OFFSET)
-#define STM32L4_IWDG_PR            (STM32L4_IWDG_BASE+STM32L4_IWDG_PR_OFFSET)
-#define STM32L4_IWDG_RLR           (STM32L4_IWDG_BASE+STM32L4_IWDG_RLR_OFFSET)
-#define STM32L4_IWDG_SR            (STM32L4_IWDG_BASE+STM32L4_IWDG_SR_OFFSET)
-#define STM32L4_IWDG_WINR          (STM32L4_IWDG_BASE+STM32L4_IWDG_WINR_OFFSET)
+#define STM32_IWDG_KR            (STM32_IWDG_BASE+STM32_IWDG_KR_OFFSET)
+#define STM32_IWDG_PR            (STM32_IWDG_BASE+STM32_IWDG_PR_OFFSET)
+#define STM32_IWDG_RLR           (STM32_IWDG_BASE+STM32_IWDG_RLR_OFFSET)
+#define STM32_IWDG_SR            (STM32_IWDG_BASE+STM32_IWDG_SR_OFFSET)
+#define STM32_IWDG_WINR          (STM32_IWDG_BASE+STM32_IWDG_WINR_OFFSET)
 
-#define STM32L4_WWDG_CR            (STM32L4_WWDG_BASE+STM32L4_WWDG_CR_OFFSET)
-#define STM32L4_WWDG_CFR           (STM32L4_WWDG_BASE+STM32L4_WWDG_CFR_OFFSET)
-#define STM32L4_WWDG_SR            (STM32L4_WWDG_BASE+STM32L4_WWDG_SR_OFFSET)
+#define STM32_WWDG_CR            (STM32_WWDG_BASE+STM32_WWDG_CR_OFFSET)
+#define STM32_WWDG_CFR           (STM32_WWDG_BASE+STM32_WWDG_CFR_OFFSET)
+#define STM32_WWDG_SR            (STM32_WWDG_BASE+STM32_WWDG_SR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

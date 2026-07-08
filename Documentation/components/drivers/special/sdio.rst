@@ -29,7 +29,7 @@ SDIO Device Drivers
    #. Provide that instance to the initialization method of the
       higher level device driver.
 
--  **Examples**: ``arch/arm/src/stm32/stm32_sdio.c`` and
+-  **Examples**: ``arch/arm/src/common/stm32/stm32_sdio_m3m4_v1.c`` and
    ``drivers/mmcsd/mmcsd_sdio.c``
 
 Implementing an SDIO lower-half

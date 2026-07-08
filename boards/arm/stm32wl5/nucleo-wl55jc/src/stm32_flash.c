@@ -91,7 +91,7 @@
 #   warning "There is unused space on flash"
 #endif
 
-#define FLASH_PAGE_SIZE    STM32WL5_FLASH_PAGESIZE
+#define FLASH_PAGE_SIZE    STM32_FLASH_PAGESIZE
 
 /****************************************************************************
  * Private Definitions
@@ -173,7 +173,7 @@ static const struct part_table part_table[] =
  * Public Functions
  ****************************************************************************/
 
-int stm32wl5_flash_init(void)
+int stm32_flash_init(void)
 {
   struct mtd_dev_s *mtd;
   struct mtd_dev_s *mtd_part;

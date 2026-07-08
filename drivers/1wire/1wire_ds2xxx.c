@@ -793,7 +793,7 @@ int ds2xxx_initialize(FAR struct onewire_dev_s *dev,
 {
   FAR struct ds2xxx_dev_s *priv;
 
-  if (devtype < 0 || devtype > EEPROM_DS_COUNT)
+  if (devtype < 0 || devtype >= EEPROM_DS_COUNT)
     {
       return -EINVAL;
     }

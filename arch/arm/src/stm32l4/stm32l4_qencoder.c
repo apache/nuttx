@@ -40,7 +40,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_gpio.h"
 #include "stm32l4_tim.h"
 #include "stm32l4_qencoder.h"
@@ -62,14 +62,14 @@
 
 /* If TIM2 or TIM5 are enabled, then we have 32-bit timers */
 
-#if defined(CONFIG_STM32L4_TIM2_QE) || defined(CONFIG_STM32L4_TIM5_QE)
+#if defined(CONFIG_STM32_TIM2_QE) || defined(CONFIG_STM32_TIM5_QE)
 #  define HAVE_32BIT_TIMERS   1
 #endif
 
 /* If TIM1,3,4, or 8 are enabled, then we have 16-bit timers */
 
-#if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM3_QE) || \
-    defined(CONFIG_STM32L4_TIM4_QE) || defined(CONFIG_STM32L4_TIM8_QE)
+#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM3_QE) || \
+    defined(CONFIG_STM32_TIM4_QE) || defined(CONFIG_STM32_TIM8_QE)
 #  define HAVE_16BIT_TIMERS   1
 #endif
 
@@ -91,65 +91,65 @@
 
 /* Input filter *************************************************************/
 
-#ifdef CONFIG_STM32L4_QENCODER_FILTER
-#  if defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_1)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
+#ifdef CONFIG_STM32_QENCODER_FILTER
+#  if defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_1)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_CKINT)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_2)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FCKINT2
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_4)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FCKINT4
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FCKINT8
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_CKINT)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_2)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT2
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_4)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT4
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FCKINT8
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS_2)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_6)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd26
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd28
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_2)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd26
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd28
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS_4)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_6)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd46
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd48
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_4)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd46
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd48
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS_8)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_6)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd86
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd88
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_8)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd86
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd88
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS_16)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_5)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd165
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_6)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd166
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd168
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_16)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd165
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd166
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd168
 #    endif
-#  elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_FDTS_32)
-#    if defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_5)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd325
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_6)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd326
-#    elif defined(CONFIG_STM32L4_QENCODER_SAMPLE_EVENT_8)
-#      define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_FDTSd328
+#  elif defined(CONFIG_STM32_QENCODER_SAMPLE_FDTS_32)
+#    if defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_5)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd325
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_6)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd326
+#    elif defined(CONFIG_STM32_QENCODER_SAMPLE_EVENT_8)
+#      define STM32_QENCODER_ICF GTIM_CCMR_ICF_FDTSd328
 #    endif
 #  endif
 
-#  ifndef STM32L4_QENCODER_ICF
+#  ifndef STM32_QENCODER_ICF
 #    warning "Invalid encoder filter combination, filter disabled"
 #  endif
 #endif
 
-#ifndef STM32L4_QENCODER_ICF
-#  define STM32L4_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
+#ifndef STM32_QENCODER_ICF
+#  define STM32_QENCODER_ICF GTIM_CCMR_ICF_NOFILT
 #endif
 
-#define STM32L4_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
+#define STM32_GPIO_INPUT_FLOAT (GPIO_INPUT | GPIO_FLOAT)
 
 /* Debug ********************************************************************/
 
@@ -163,7 +163,7 @@
 
 #ifdef CONFIG_DEBUG_SENSORS
 #  ifdef CONFIG_DEBUG_INFO
-#    define qe_dumpgpio(p,m)    stm32l4_dumpgpio(p,m)
+#    define qe_dumpgpio(p,m)    stm32_dumpgpio(p,m)
 #  else
 #    define qe_dumpgpio(p,m)
 #  endif
@@ -177,7 +177,7 @@
 
 /* Constant configuration structure that is retained in FLASH */
 
-struct stm32l4_qeconfig_s
+struct stm32_qeconfig_s
 {
   uint8_t  timid;   /* Timer ID {1,2,3,4,5,8} */
   uint8_t  irq;     /* Timer update IRQ */
@@ -192,7 +192,7 @@ struct stm32l4_qeconfig_s
 
 /* Overall, RAM-based state structure */
 
-struct stm32l4_lowerhalf_s
+struct stm32_lowerhalf_s
 {
   /* The first field of this state structure must be a pointer to the lower-
    * half callback structure:
@@ -202,7 +202,7 @@ struct stm32l4_lowerhalf_s
 
   /* STM32 driver-specific fields: */
 
-  const struct stm32l4_qeconfig_s *config; /* static onfiguration */
+  const struct stm32_qeconfig_s *config; /* static onfiguration */
 
   bool             inuse;    /* True: The lower-half driver is in-use */
 
@@ -218,38 +218,38 @@ struct stm32l4_lowerhalf_s
 
 /* Helper functions */
 
-static uint16_t stm32l4_getreg16(struct stm32l4_lowerhalf_s *priv,
+static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv,
                                  int offset);
-static void stm32l4_putreg16(struct stm32l4_lowerhalf_s *priv,
+static void stm32_putreg16(struct stm32_lowerhalf_s *priv,
                              int offset, uint16_t value);
-static uint32_t stm32l4_getreg32(struct stm32l4_lowerhalf_s *priv,
+static uint32_t stm32_getreg32(struct stm32_lowerhalf_s *priv,
                                  int offset);
-static void stm32l4_putreg32(struct stm32l4_lowerhalf_s *priv,
+static void stm32_putreg32(struct stm32_lowerhalf_s *priv,
                              int offset, uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32l4_dumpregs(struct stm32l4_lowerhalf_s *priv,
+static void stm32_dumpregs(struct stm32_lowerhalf_s *priv,
                              const char *msg);
 #else
-#  define stm32l4_dumpregs(priv,msg)
+#  define stm32_dumpregs(priv,msg)
 #endif
 
-static struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim);
+static struct stm32_lowerhalf_s *stm32_tim2lower(int tim);
 
 /* Interrupt handling */
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32l4_interrupt(int irq, void *context, void *arg);
+static int stm32_interrupt(int irq, void *context, void *arg);
 #endif
 
 /* Lower-half Quadrature Encoder Driver Methods */
 
-static int stm32l4_setup(struct qe_lowerhalf_s *lower);
-static int stm32l4_shutdown(struct qe_lowerhalf_s *lower);
-static int stm32l4_position(struct qe_lowerhalf_s *lower,
+static int stm32_setup(struct qe_lowerhalf_s *lower);
+static int stm32_shutdown(struct qe_lowerhalf_s *lower);
+static int stm32_position(struct qe_lowerhalf_s *lower,
                             int32_t *pos);
-static int stm32l4_reset(struct qe_lowerhalf_s *lower);
-static int stm32l4_ioctl(struct qe_lowerhalf_s *lower, int cmd,
+static int stm32_reset(struct qe_lowerhalf_s *lower);
+static int stm32_ioctl(struct qe_lowerhalf_s *lower, int cmd,
                          unsigned long arg);
 
 /****************************************************************************
@@ -260,32 +260,32 @@ static int stm32l4_ioctl(struct qe_lowerhalf_s *lower, int cmd,
 
 static const struct qe_ops_s g_qecallbacks =
 {
-  .setup     = stm32l4_setup,
-  .shutdown  = stm32l4_shutdown,
-  .position  = stm32l4_position,
+  .setup     = stm32_setup,
+  .shutdown  = stm32_shutdown,
+  .position  = stm32_position,
   .setposmax = NULL,            /* not supported yet */
-  .reset     = stm32l4_reset,
+  .reset     = stm32_reset,
   .setindex  = NULL,            /* not supported yet */
-  .ioctl     = stm32l4_ioctl,
+  .ioctl     = stm32_ioctl,
 };
 
 /* Per-timer state structures */
 
-#ifdef CONFIG_STM32L4_TIM1_QE
-static const struct stm32l4_qeconfig_s g_tim1config =
+#ifdef CONFIG_STM32_TIM1_QE
+static const struct stm32_qeconfig_s g_tim1config =
 {
   .timid    = 1,
-  .irq      = STM32L4_IRQ_TIM1UP,
+  .irq      = STM32_IRQ_TIM1UP,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM1_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM1_BASE,
-  .psc      = CONFIG_STM32L4_TIM1_QEPSC,
+  .base     = STM32_TIM1_BASE,
+  .psc      = CONFIG_STM32_TIM1_QEPSC,
   .ti1cfg   = GPIO_TIM1_CH1IN,
   .ti2cfg   = GPIO_TIM1_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim1lower =
+static struct stm32_lowerhalf_s g_tim1lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim1config,
@@ -295,21 +295,21 @@ static struct stm32l4_lowerhalf_s g_tim1lower =
 
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2_QE
-static const struct stm32l4_qeconfig_s g_tim2config =
+#ifdef CONFIG_STM32_TIM2_QE
+static const struct stm32_qeconfig_s g_tim2config =
 {
   .timid    = 2,
-  .irq      = STM32L4_IRQ_TIM2,
+  .irq      = STM32_IRQ_TIM2,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM2_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM2_BASE,
-  .psc      = CONFIG_STM32L4_TIM2_QEPSC,
+  .base     = STM32_TIM2_BASE,
+  .psc      = CONFIG_STM32_TIM2_QEPSC,
   .ti1cfg   = GPIO_TIM2_CH1IN,
   .ti2cfg   = GPIO_TIM2_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim2lower =
+static struct stm32_lowerhalf_s g_tim2lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim2config,
@@ -319,21 +319,21 @@ static struct stm32l4_lowerhalf_s g_tim2lower =
 
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3_QE
-static const struct stm32l4_qeconfig_s g_tim3config =
+#ifdef CONFIG_STM32_TIM3_QE
+static const struct stm32_qeconfig_s g_tim3config =
 {
   .timid    = 3,
-  .irq      = STM32L4_IRQ_TIM3,
+  .irq      = STM32_IRQ_TIM3,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM3_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM3_BASE,
-  .psc      = CONFIG_STM32L4_TIM3_QEPSC,
+  .base     = STM32_TIM3_BASE,
+  .psc      = CONFIG_STM32_TIM3_QEPSC,
   .ti1cfg   = GPIO_TIM3_CH1IN,
   .ti2cfg   = GPIO_TIM3_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim3lower =
+static struct stm32_lowerhalf_s g_tim3lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim3config,
@@ -343,21 +343,21 @@ static struct stm32l4_lowerhalf_s g_tim3lower =
 
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4_QE
-static const struct stm32l4_qeconfig_s g_tim4config =
+#ifdef CONFIG_STM32_TIM4_QE
+static const struct stm32_qeconfig_s g_tim4config =
 {
   .timid    = 4,
-  .irq      = STM32L4_IRQ_TIM4,
+  .irq      = STM32_IRQ_TIM4,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM4_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM4_BASE,
-  .psc      = CONFIG_STM32L4_TIM4_QEPSC,
+  .base     = STM32_TIM4_BASE,
+  .psc      = CONFIG_STM32_TIM4_QEPSC,
   .ti1cfg   = GPIO_TIM4_CH1IN,
   .ti2cfg   = GPIO_TIM4_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim4lower =
+static struct stm32_lowerhalf_s g_tim4lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim4config,
@@ -367,21 +367,21 @@ static struct stm32l4_lowerhalf_s g_tim4lower =
 
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5_QE
-static const struct stm32l4_qeconfig_s g_tim5config =
+#ifdef CONFIG_STM32_TIM5_QE
+static const struct stm32_qeconfig_s g_tim5config =
 {
   .timid    = 5,
-  .irq      = STM32L4_IRQ_TIM5,
+  .irq      = STM32_IRQ_TIM5,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM5_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM5_BASE,
-  .psc      = CONFIG_STM32L4_TIM5_QEPSC,
+  .base     = STM32_TIM5_BASE,
+  .psc      = CONFIG_STM32_TIM5_QEPSC,
   .ti1cfg   = GPIO_TIM5_CH1IN,
   .ti2cfg   = GPIO_TIM5_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim5lower =
+static struct stm32_lowerhalf_s g_tim5lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim5config,
@@ -391,21 +391,21 @@ static struct stm32l4_lowerhalf_s g_tim5lower =
 
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_QE
-static const struct stm32l4_qeconfig_s g_tim8config =
+#ifdef CONFIG_STM32_TIM8_QE
+static const struct stm32_qeconfig_s g_tim8config =
 {
   .timid    = 8,
-  .irq      = STM32L4_IRQ_TIM8UP,
+  .irq      = STM32_IRQ_TIM8UP,
 #ifdef HAVE_MIXEDWIDTH_TIMERS
   .width    = TIM8_BITWIDTH,
 #endif
-  .base     = STM32L4_TIM8_BASE,
-  .psc      = CONFIG_STM32L4_TIM8_QEPSC,
+  .base     = STM32_TIM8_BASE,
+  .psc      = CONFIG_STM32_TIM8_QEPSC,
   .ti1cfg   = GPIO_TIM8_CH1IN,
   .ti2cfg   = GPIO_TIM8_CH2IN,
 };
 
-static struct stm32l4_lowerhalf_s g_tim8lower =
+static struct stm32_lowerhalf_s g_tim8lower =
 {
   .ops      = &g_qecallbacks,
   .config   = &g_tim8config,
@@ -420,7 +420,7 @@ static struct stm32l4_lowerhalf_s g_tim8lower =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_getreg16
+ * Name: stm32_getreg16
  *
  * Description:
  *   Read the value of a 16-bit timer register.
@@ -434,14 +434,14 @@ static struct stm32l4_lowerhalf_s g_tim8lower =
  *
  ****************************************************************************/
 
-static uint16_t stm32l4_getreg16(struct stm32l4_lowerhalf_s *priv,
+static uint16_t stm32_getreg16(struct stm32_lowerhalf_s *priv,
                                  int offset)
 {
   return getreg16(priv->config->base + offset);
 }
 
 /****************************************************************************
- * Name: stm32l4_putreg16
+ * Name: stm32_putreg16
  *
  * Description:
  *   Write a value to a 16-bit timer register.
@@ -455,7 +455,7 @@ static uint16_t stm32l4_getreg16(struct stm32l4_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static void stm32l4_putreg16(struct stm32l4_lowerhalf_s *priv,
+static void stm32_putreg16(struct stm32_lowerhalf_s *priv,
                              int offset,
                              uint16_t value)
 {
@@ -463,7 +463,7 @@ static void stm32l4_putreg16(struct stm32l4_lowerhalf_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32l4_getreg32
+ * Name: stm32_getreg32
  *
  * Description:
  *   Read the value of a 32-bit timer register.
@@ -480,14 +480,14 @@ static void stm32l4_putreg16(struct stm32l4_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static uint32_t stm32l4_getreg32(struct stm32l4_lowerhalf_s *priv,
+static uint32_t stm32_getreg32(struct stm32_lowerhalf_s *priv,
                                  int offset)
 {
   return getreg32(priv->config->base + offset);
 }
 
 /****************************************************************************
- * Name: stm32l4_putreg16
+ * Name: stm32_putreg16
  *
  * Description:
  *   Write a value to a 32-bit timer register.
@@ -504,7 +504,7 @@ static uint32_t stm32l4_getreg32(struct stm32l4_lowerhalf_s *priv,
  *
  ****************************************************************************/
 
-static void stm32l4_putreg32(struct stm32l4_lowerhalf_s *priv,
+static void stm32_putreg32(struct stm32_lowerhalf_s *priv,
                              int offset,
                              uint32_t value)
 {
@@ -512,7 +512,7 @@ static void stm32l4_putreg32(struct stm32l4_lowerhalf_s *priv,
 }
 
 /****************************************************************************
- * Name: stm32l4_dumpregs
+ * Name: stm32_dumpregs
  *
  * Description:
  *   Dump all timer registers.
@@ -526,85 +526,85 @@ static void stm32l4_putreg32(struct stm32l4_lowerhalf_s *priv,
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
-static void stm32l4_dumpregs(struct stm32l4_lowerhalf_s *priv,
+static void stm32_dumpregs(struct stm32_lowerhalf_s *priv,
                              const char *msg)
 {
   sninfo("%s:\n", msg);
   sninfo("  CR1: %04x CR2:  %04x SMCR:  %08" PRIx32 " DIER:  %04x\n",
-         stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_CR2_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET));
+         stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET),
+         stm32_getreg16(priv, STM32_GTIM_CR2_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_SMCR_OFFSET),
+         stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET));
   sninfo("   SR: %04x EGR:  %04x CCMR1: %08" PRIx32
          " CCMR2: %08" PRIx32 "\n",
-         stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_EGR_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCMR2_OFFSET));
+         stm32_getreg16(priv, STM32_GTIM_SR_OFFSET),
+         stm32_getreg16(priv, STM32_GTIM_EGR_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_CCMR2_OFFSET));
   sninfo(" CCER: %04x CNT:  %08" PRIx32 " PSC:   %04x"
          " ARR:   %08" PRIx32 "\n",
-         stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET),
-         stm32l4_getreg16(priv, STM32L4_GTIM_PSC_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_ARR_OFFSET));
+         stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET),
+         stm32_getreg16(priv, STM32_GTIM_PSC_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_ARR_OFFSET));
   sninfo(" CCR1: %08" PRIx32 " CCR2: %08" PRIx32 "\n",
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCR1_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCR2_OFFSET));
+         stm32_getreg32(priv, STM32_GTIM_CCR1_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_CCR2_OFFSET));
   sninfo(" CCR3: %08" PRIx32 " CCR4: %08" PRIx32 "\n",
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCR3_OFFSET),
-         stm32l4_getreg32(priv, STM32L4_GTIM_CCR4_OFFSET));
-#if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM8_QE)
+         stm32_getreg32(priv, STM32_GTIM_CCR3_OFFSET),
+         stm32_getreg32(priv, STM32_GTIM_CCR4_OFFSET));
+#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
     {
       sninfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-             stm32l4_getreg16(priv, STM32L4_ATIM_RCR_OFFSET),
-             stm32l4_getreg16(priv, STM32L4_ATIM_BDTR_OFFSET),
-             stm32l4_getreg16(priv, STM32L4_ATIM_DCR_OFFSET),
-             stm32l4_getreg16(priv, STM32L4_ATIM_DMAR_OFFSET));
+             stm32_getreg16(priv, STM32_ATIM_RCR_OFFSET),
+             stm32_getreg16(priv, STM32_ATIM_BDTR_OFFSET),
+             stm32_getreg16(priv, STM32_ATIM_DCR_OFFSET),
+             stm32_getreg16(priv, STM32_ATIM_DMAR_OFFSET));
     }
   else
 #endif
     {
       sninfo("  DCR: %04x DMAR: %04x\n",
-             stm32l4_getreg16(priv, STM32L4_GTIM_DCR_OFFSET),
-             stm32l4_getreg16(priv, STM32L4_GTIM_DMAR_OFFSET));
+             stm32_getreg16(priv, STM32_GTIM_DCR_OFFSET),
+             stm32_getreg16(priv, STM32_GTIM_DMAR_OFFSET));
     }
 }
 #endif
 
 /****************************************************************************
- * Name: stm32l4_tim2lower
+ * Name: stm32_tim2lower
  *
  * Description:
  *   Map a timer number to a device structure
  *
  ****************************************************************************/
 
-static struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim)
+static struct stm32_lowerhalf_s *stm32_tim2lower(int tim)
 {
   switch (tim)
     {
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
     case 1:
       return &g_tim1lower;
 #endif
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
     case 2:
       return &g_tim2lower;
 #endif
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
     case 3:
       return &g_tim3lower;
 #endif
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
     case 4:
       return &g_tim4lower;
 #endif
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
     case 5:
       return &g_tim5lower;
 #endif
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
     case 8:
       return &g_tim8lower;
 #endif
@@ -614,7 +614,7 @@ static struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim)
 }
 
 /****************************************************************************
- * Name: stm32l4_interrupt
+ * Name: stm32_interrupt
  *
  * Description:
  *   Common timer interrupt handling.  NOTE: Only 16-bit timers require timer
@@ -623,10 +623,10 @@ static struct stm32l4_lowerhalf_s *stm32l4_tim2lower(int tim)
  ****************************************************************************/
 
 #ifdef HAVE_16BIT_TIMERS
-static int stm32l4_interrupt(int irq, void *context, void *arg)
+static int stm32_interrupt(int irq, void *context, void *arg)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                              (struct stm32l4_lowerhalf_s *)arg;
+  struct stm32_lowerhalf_s *priv =
+                              (struct stm32_lowerhalf_s *)arg;
   uint16_t regval;
 
   DEBUGASSERT(priv != NULL);
@@ -635,18 +635,18 @@ static int stm32l4_interrupt(int irq, void *context, void *arg)
    * Nothing else is expected.
    */
 
-  regval = stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET);
+  regval = stm32_getreg16(priv, STM32_GTIM_SR_OFFSET);
   DEBUGASSERT((regval & ATIM_SR_UIF) != 0);
 
   /* Clear the UIF interrupt bit */
 
-  stm32l4_putreg16(priv, STM32L4_GTIM_SR_OFFSET, regval & ~GTIM_SR_UIF);
+  stm32_putreg16(priv, STM32_GTIM_SR_OFFSET, regval & ~GTIM_SR_UIF);
 
   /* Check the direction bit in the CR1 register and add or subtract the
    * maximum value, as appropriate.
    */
 
-  regval = stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET);
+  regval = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
   if ((regval & ATIM_CR1_DIR) != 0)
     {
       priv->position -= (int32_t)0x0000ffff;
@@ -661,7 +661,7 @@ static int stm32l4_interrupt(int irq, void *context, void *arg)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_setup
+ * Name: stm32_setup
  *
  * Description:
  *   This method is called when the driver is opened.  The lower half driver
@@ -670,10 +670,10 @@ static int stm32l4_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32l4_setup(struct qe_lowerhalf_s *lower)
+static int stm32_setup(struct qe_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                                  (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                                  (struct stm32_lowerhalf_s *)lower;
   uint16_t dier;
   uint32_t smcr;
   uint32_t ccmr1;
@@ -690,7 +690,7 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
 
   /* Timer base configuration */
 
-  cr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
 
   /* Clear the direction bit (0=count up) and select the Counter Mode
    * (0=Edge aligned)
@@ -698,23 +698,23 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
    */
 
   cr1 &= ~(GTIM_CR1_DIR | GTIM_CR1_CMS_MASK);
-  stm32l4_putreg16(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
   /* Set the Autoreload value */
 
 #if defined(HAVE_MIXEDWIDTH_TIMERS)
   if (priv->config->width == 32)
     {
-      stm32l4_putreg32(priv, STM32L4_GTIM_ARR_OFFSET, 0xffffffff);
+      stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffffffff);
     }
   else
     {
-      stm32l4_putreg16(priv, STM32L4_GTIM_ARR_OFFSET, 0xffff);
+      stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
     }
 #elif defined(HAVE_32BIT_TIMERS)
-  stm32l4_putreg32(priv, STM32L4_GTIM_ARR_OFFSET, 0xffffffff);
+  stm32_putreg32(priv, STM32_GTIM_ARR_OFFSET, 0xffffffff);
 #else
-  stm32l4_putreg16(priv, STM32L4_GTIM_ARR_OFFSET, 0xffff);
+  stm32_putreg16(priv, STM32_GTIM_ARR_OFFSET, 0xffff);
 #endif
 
   /* Set the timer prescaler value.
@@ -736,15 +736,15 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
    * on the encoder resolution.
    */
 
-  stm32l4_putreg16(priv,
-                   STM32L4_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
+  stm32_putreg16(priv,
+                   STM32_GTIM_PSC_OFFSET, (uint16_t)priv->config->psc);
 
-#if defined(CONFIG_STM32L4_TIM1_QE) || defined(CONFIG_STM32L4_TIM8_QE)
+#if defined(CONFIG_STM32_TIM1_QE) || defined(CONFIG_STM32_TIM8_QE)
   if (priv->config->timid == 1 || priv->config->timid == 8)
     {
       /* Clear the Repetition Counter value */
 
-      stm32l4_putreg16(priv, STM32L4_ATIM_RCR_OFFSET, 0);
+      stm32_putreg16(priv, STM32_ATIM_RCR_OFFSET, 0);
     }
 #endif
 
@@ -752,36 +752,36 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
    * and the repetition counter (only for TIM1 and TIM8) value immediately
    */
 
-  stm32l4_putreg16(priv, STM32L4_GTIM_EGR_OFFSET, GTIM_EGR_UG);
+  stm32_putreg16(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
 
   /* GPIO pin configuration */
 
-  stm32l4_configgpio(priv->config->ti1cfg);
-  stm32l4_configgpio(priv->config->ti2cfg);
+  stm32_configgpio(priv->config->ti1cfg);
+  stm32_configgpio(priv->config->ti2cfg);
 
   /* Set the encoder Mode 3 */
 
-  smcr = stm32l4_getreg32(priv, STM32L4_GTIM_SMCR_OFFSET);
+  smcr = stm32_getreg32(priv, STM32_GTIM_SMCR_OFFSET);
   smcr &= ~GTIM_SMCR_SMS_MASK;
   smcr |= GTIM_SMCR_ENCMD3;
-  stm32l4_putreg32(priv, STM32L4_GTIM_SMCR_OFFSET, smcr);
+  stm32_putreg32(priv, STM32_GTIM_SMCR_OFFSET, smcr);
 
   /* TI1 Channel Configuration */
 
   /* Disable the Channel 1: Reset the CC1E Bit */
 
-  ccer  = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
   ccer &= ~GTIM_CCER_CC1E;
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
-  ccer = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccmr1 = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccer = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Select the Input IC1=TI1 and set the filter fSAMPLING=fDTS/4, N=6 */
 
   ccmr1 &= ~(GTIM_CCMR1_CC1S_MASK | GTIM_CCMR1_IC1F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC1S_SHIFT;
-  ccmr1 |= STM32L4_QENCODER_ICF << GTIM_CCMR1_IC1F_SHIFT;
+  ccmr1 |= STM32_QENCODER_ICF << GTIM_CCMR1_IC1F_SHIFT;
 
   /* Select the Polarity=rising and set the CC1E Bit */
 
@@ -790,34 +790,34 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC1PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC1PSC_SHIFT);
-  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* TI2 Channel Configuration */
 
   /* Disable the Channel 2: Reset the CC2E Bit */
 
-  ccer  = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
   ccer &= ~GTIM_CCER_CC2E;
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
-  ccmr1 = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
-  ccer  = stm32l4_getreg16(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccmr1 = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccer  = stm32_getreg16(priv, STM32_GTIM_CCER_OFFSET);
 
   /* Select the Input IC2=TI2 and set the filter fSAMPLING=fDTS/4, N=6 */
 
   ccmr1 &= ~(GTIM_CCMR1_CC2S_MASK | GTIM_CCMR1_IC2F_MASK);
   ccmr1 |= GTIM_CCMR_CCS_CCIN1 << GTIM_CCMR1_CC2S_SHIFT;
-  ccmr1 |= STM32L4_QENCODER_ICF << GTIM_CCMR1_IC2F_SHIFT;
+  ccmr1 |= STM32_QENCODER_ICF << GTIM_CCMR1_IC2F_SHIFT;
 
   /* Select the Polarity=rising and set the CC2E Bit */
 
@@ -826,23 +826,23 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
 
   /* Write to TIM CCMR1 and CCER registers */
 
-  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
-  stm32l4_putreg16(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg16(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   /* Set the Input Capture Prescaler value: Capture performed each time an
    * edge is detected on the capture input.
    */
 
-  ccmr1  = stm32l4_getreg32(priv, STM32L4_GTIM_CCMR1_OFFSET);
+  ccmr1  = stm32_getreg32(priv, STM32_GTIM_CCMR1_OFFSET);
   ccmr1 &= ~GTIM_CCMR1_IC2PSC_MASK;
   ccmr1 |= (GTIM_CCMR_ICPSC_NOPSC << GTIM_CCMR1_IC2PSC_SHIFT);
-  stm32l4_putreg32(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
+  stm32_putreg32(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
 
   /* Disable the update interrupt */
 
-  dier = stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET);
+  dier = stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET);
   dier &= ~GTIM_DIER_UIE;
-  stm32l4_putreg16(priv, STM32L4_GTIM_DIER_OFFSET, dier);
+  stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, dier);
 
   /* There is no need for interrupts with 32-bit timers */
 
@@ -853,10 +853,10 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
     {
       /* Attach the interrupt handler */
 
-      ret = irq_attach(priv->config->irq, stm32l4_interrupt, priv);
+      ret = irq_attach(priv->config->irq, stm32_interrupt, priv);
       if (ret < 0)
         {
-          stm32l4_shutdown(lower);
+          stm32_shutdown(lower);
           return ret;
         }
 
@@ -868,14 +868,14 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
 
   /* Reset the Update Disable Bit */
 
-  cr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
   cr1 &= ~GTIM_CR1_UDIS;
-  stm32l4_putreg16(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
   /* Reset the URS Bit */
 
   cr1 &= ~GTIM_CR1_URS;
-  stm32l4_putreg16(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
   /* There is no need for interrupts with 32-bit timers */
 
@@ -886,30 +886,30 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
     {
       /* Clear any pending update interrupts */
 
-      regval = stm32l4_getreg16(priv, STM32L4_GTIM_SR_OFFSET);
-      stm32l4_putreg16(priv, STM32L4_GTIM_SR_OFFSET, regval & ~GTIM_SR_UIF);
+      regval = stm32_getreg16(priv, STM32_GTIM_SR_OFFSET);
+      stm32_putreg16(priv, STM32_GTIM_SR_OFFSET, regval & ~GTIM_SR_UIF);
 
       /* Then enable the update interrupt */
 
-      dier = stm32l4_getreg16(priv, STM32L4_GTIM_DIER_OFFSET);
+      dier = stm32_getreg16(priv, STM32_GTIM_DIER_OFFSET);
       dier |= GTIM_DIER_UIE;
-      stm32l4_putreg16(priv, STM32L4_GTIM_DIER_OFFSET, dier);
+      stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, dier);
     }
 #endif
 
   /* Enable the TIM Counter */
 
-  cr1 = stm32l4_getreg16(priv, STM32L4_GTIM_CR1_OFFSET);
+  cr1 = stm32_getreg16(priv, STM32_GTIM_CR1_OFFSET);
   cr1 |= GTIM_CR1_CEN;
-  stm32l4_putreg16(priv, STM32L4_GTIM_CR1_OFFSET, cr1);
+  stm32_putreg16(priv, STM32_GTIM_CR1_OFFSET, cr1);
 
-  stm32l4_dumpregs(priv, "After setup");
+  stm32_dumpregs(priv, "After setup");
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32l4_shutdown
+ * Name: stm32_shutdown
  *
  * Description:
  *   This method is called when the driver is closed.  The lower half driver
@@ -918,10 +918,10 @@ static int stm32l4_setup(struct qe_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
+static int stm32_shutdown(struct qe_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                                 (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                                 (struct stm32_lowerhalf_s *)lower;
   irqstate_t flags;
   uint32_t regaddr;
   uint32_t regval;
@@ -943,46 +943,46 @@ static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
 
   /* Disable further interrupts and stop the timer */
 
-  stm32l4_putreg16(priv, STM32L4_GTIM_DIER_OFFSET, 0);
-  stm32l4_putreg16(priv, STM32L4_GTIM_SR_OFFSET, 0);
+  stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, 0);
+  stm32_putreg16(priv, STM32_GTIM_SR_OFFSET, 0);
 
   /* Determine which timer to reset */
 
   switch (priv->config->timid)
     {
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
       case 1:
-        regaddr  = STM32L4_RCC_APB2RSTR;
+        regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM1RST;
         break;
 #endif
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
       case 2:
-        regaddr  = STM32L4_RCC_APB1RSTR1;
+        regaddr  = STM32_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR1_TIM2RST;
         break;
 #endif
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
       case 3:
-        regaddr  = STM32L4_RCC_APB1RSTR1;
+        regaddr  = STM32_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR1_TIM3RST;
         break;
 #endif
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
       case 4:
-        regaddr  = STM32L4_RCC_APB1RSTR1;
+        regaddr  = STM32_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR1_TIM4RST;
         break;
 #endif
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
       case 5:
-        regaddr  = STM32L4_RCC_APB1RSTR1;
+        regaddr  = STM32_RCC_APB1RSTR1;
         resetbit = RCC_APB1RSTR1_TIM5RST;
         break;
 #endif
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
       case 8:
-        regaddr  = STM32L4_RCC_APB2RSTR;
+        regaddr  = STM32_RCC_APB2RSTR;
         resetbit = RCC_APB2RSTR_TIM8RST;
         break;
 #endif
@@ -992,7 +992,7 @@ static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
     }
 
   /* Reset the timer - stopping the output and putting the timer back
-   * into a state where stm32l4_start() can be called.
+   * into a state where stm32_start() can be called.
    */
 
   regval  = getreg32(regaddr);
@@ -1005,37 +1005,37 @@ static int stm32l4_shutdown(struct qe_lowerhalf_s *lower)
 
   sninfo("regaddr: %08" PRIx32 " resetbit: %08" PRIx32 "\n",
          regaddr, resetbit);
-  stm32l4_dumpregs(priv, "After stop");
+  stm32_dumpregs(priv, "After stop");
 
   /* Put the TI1 GPIO pin back to its default state */
 
   pincfg  = priv->config->ti1cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-  pincfg |= STM32L4_GPIO_INPUT_FLOAT;
+  pincfg |= STM32_GPIO_INPUT_FLOAT;
 
-  stm32l4_configgpio(pincfg);
+  stm32_configgpio(pincfg);
 
   /* Put the TI2 GPIO pin back to its default state */
 
   pincfg  = priv->config->ti2cfg & (GPIO_PORT_MASK | GPIO_PIN_MASK);
-  pincfg |= STM32L4_GPIO_INPUT_FLOAT;
+  pincfg |= STM32_GPIO_INPUT_FLOAT;
 
-  stm32l4_configgpio(pincfg);
+  stm32_configgpio(pincfg);
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32l4_position
+ * Name: stm32_position
  *
  * Description:
  *   Return the current position measurement.
  *
  ****************************************************************************/
 
-static int stm32l4_position(struct qe_lowerhalf_s *lower,
+static int stm32_position(struct qe_lowerhalf_s *lower,
                             int32_t *pos)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                              (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                              (struct stm32_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS
   irqstate_t flags;
   int32_t position;
@@ -1050,7 +1050,7 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
   do
     {
       position = priv->position;
-      count    = stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET);
+      count    = stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);
       verify   = priv->position;
     }
   while (position != verify);
@@ -1062,23 +1062,23 @@ static int stm32l4_position(struct qe_lowerhalf_s *lower,
 #else
   /* Return the counter value */
 
-  *pos = (int32_t)stm32l4_getreg32(priv, STM32L4_GTIM_CNT_OFFSET);
+  *pos = (int32_t)stm32_getreg32(priv, STM32_GTIM_CNT_OFFSET);
 #endif
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32l4_reset
+ * Name: stm32_reset
  *
  * Description:
  *   Reset the position measurement to zero.
  *
  ****************************************************************************/
 
-static int stm32l4_reset(struct qe_lowerhalf_s *lower)
+static int stm32_reset(struct qe_lowerhalf_s *lower)
 {
-  struct stm32l4_lowerhalf_s *priv =
-                                 (struct stm32l4_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv =
+                                 (struct stm32_lowerhalf_s *)lower;
 #ifdef HAVE_16BIT_TIMERS
   irqstate_t flags;
 
@@ -1090,7 +1090,7 @@ static int stm32l4_reset(struct qe_lowerhalf_s *lower)
    */
 
   flags = spin_lock_irqsave(&priv->lock);
-  stm32l4_putreg32(priv, STM32L4_GTIM_CNT_OFFSET, 0);
+  stm32_putreg32(priv, STM32_GTIM_CNT_OFFSET, 0);
   priv->position = 0;
   spin_unlock_irqrestore(&priv->lock, flags);
 #else
@@ -1099,20 +1099,20 @@ static int stm32l4_reset(struct qe_lowerhalf_s *lower)
 
   /* Reset the counter to zero */
 
-  stm32l4_putreg32(priv, STM32L4_GTIM_CNT_OFFSET, 0);
+  stm32_putreg32(priv, STM32_GTIM_CNT_OFFSET, 0);
 #endif
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32l4_ioctl
+ * Name: stm32_ioctl
  *
  * Description:
  *   Lower-half logic may support platform-specific ioctl commands
  *
  ****************************************************************************/
 
-static int stm32l4_ioctl(struct qe_lowerhalf_s *lower,
+static int stm32_ioctl(struct qe_lowerhalf_s *lower,
                          int cmd, unsigned long arg)
 {
   /* No ioctl commands supported */
@@ -1127,7 +1127,7 @@ static int stm32l4_ioctl(struct qe_lowerhalf_s *lower,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_qeinitialize
+ * Name: stm32_qeinitialize
  *
  * Description:
  *   Initialize a quadrature encoder interface.
@@ -1143,16 +1143,16 @@ static int stm32l4_ioctl(struct qe_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int stm32l4_qeinitialize(const char *devpath, int tim)
+int stm32_qeinitialize(const char *devpath, int tim)
 {
-  struct stm32l4_lowerhalf_s *priv;
+  struct stm32_lowerhalf_s *priv;
   int ret;
 
   /* Find the pre-allocated timer state structure corresponding to this
    * timer
    */
 
-  priv = stm32l4_tim2lower(tim);
+  priv = stm32_tim2lower(tim);
   if (!priv)
     {
       snerr("ERROR: TIM%d support not configured\n", tim);
@@ -1178,7 +1178,7 @@ int stm32l4_qeinitialize(const char *devpath, int tim)
 
   /* Make sure that the timer is in the shutdown state */
 
-  stm32l4_shutdown((struct qe_lowerhalf_s *)priv);
+  stm32_shutdown((struct qe_lowerhalf_s *)priv);
 
   /* The driver is now in-use */
 

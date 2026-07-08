@@ -40,11 +40,11 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "arm_internal.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_otgfs.h"
 #include "stm32l476vg-disco.h"
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +53,7 @@
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32L4_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  warning "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
 #  undef HAVE_USB
 #endif
 
@@ -119,15 +119,15 @@ static int usbhost_waiter(int argc, char *argv[])
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32l4_usbinitialize very early in initialization to
+ *   Called from stm32_usbinitialize very early in initialization to
  *   setup USB-related GPIO pins for the STM32L4Discovery board.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void)
+void stm32_usbinitialize(void)
 {
   /* The OTG FS has an internal soft pull-up.
    * No GPIO configuration is required
@@ -137,15 +137,15 @@ void stm32l4_usbinitialize(void)
    * Power On, and Over current GPIOs
    */
 
-#ifdef CONFIG_STM32L4_OTGFS
-  stm32l4_configgpio(GPIO_OTGFS_VBUS);
-  stm32l4_configgpio(GPIO_OTGFS_PWRON);
-  stm32l4_configgpio(GPIO_OTGFS_OVER);
+#ifdef CONFIG_STM32_OTGFS
+  stm32_configgpio(GPIO_OTGFS_VBUS);
+  stm32_configgpio(GPIO_OTGFS_PWRON);
+  stm32_configgpio(GPIO_OTGFS_OVER);
 #endif
 }
 
 /****************************************************************************
- * Name: stm32l4_usbhost_initialize
+ * Name: stm32_usbhost_initialize
  *
  * Description:
  *   Called at application startup time to initialize the USB host
@@ -156,7 +156,7 @@ void stm32l4_usbinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
-int stm32l4_usbhost_initialize(void)
+int stm32_usbhost_initialize(void)
 {
   int ret;
 
@@ -219,7 +219,7 @@ int stm32l4_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uvdbg("Initialize USB host\n");
-  g_usbconn = stm32l4_otgfshost_initialize(0);
+  g_usbconn = stm32_otgfshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
@@ -237,7 +237,7 @@ int stm32l4_usbhost_initialize(void)
 #endif
 
 /****************************************************************************
- * Name: stm32l4_usbhost_vbusdrive
+ * Name: stm32_usbhost_vbusdrive
  *
  * Description:
  *   Enable/disable driving of VBUS 5V output. This function must be provided
@@ -265,7 +265,7 @@ int stm32l4_usbhost_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
-void stm32l4_usbhost_vbusdrive(int iface, bool enable)
+void stm32_usbhost_vbusdrive(int iface, bool enable)
 {
   DEBUGASSERT(iface == 0);
 
@@ -273,19 +273,19 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable)
     {
       /* Enable the Power Switch by driving the enable pin low */
 
-      stm32l4_gpiowrite(GPIO_OTGFS_PWRON, false);
+      stm32_gpiowrite(GPIO_OTGFS_PWRON, false);
     }
   else
     {
       /* Disable the Power Switch by driving the enable pin high */
 
-      stm32l4_gpiowrite(GPIO_OTGFS_PWRON, true);
+      stm32_gpiowrite(GPIO_OTGFS_PWRON, true);
     }
 }
 #endif
 
 /****************************************************************************
- * Name: stm32l4_setup_overcurrent
+ * Name: stm32_setup_overcurrent
  *
  * Description:
  *   Setup to receive an interrupt-level callback if an over current
@@ -300,18 +300,18 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
-xcpt_t stm32l4_setup_overcurrent(xcpt_t handler)
+xcpt_t stm32_setup_overcurrent(xcpt_t handler)
 {
-  stm32l4_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, NULL);
+  stm32_gpiosetevent(GPIO_OTGFS_OVER, true, true, true, handler, NULL);
   return NULL;
 }
 #endif
 
 /****************************************************************************
- * Name:  stm32l4_usbsuspend
+ * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the USBDEV
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
  *   driver is used.  This function is called whenever the USB enters or
  *   leaves suspend mode. This is an opportunity for the board logic to
  *   shutdown clocks, power, etc. while the USB is suspended.
@@ -319,10 +319,10 @@ xcpt_t stm32l4_setup_overcurrent(xcpt_t handler)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
-void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }
 #endif
 
-#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */

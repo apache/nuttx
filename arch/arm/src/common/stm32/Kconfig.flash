@@ -1,0 +1,162 @@
+#
+# STM32 flash configuration options.
+#
+
+# Common STM32 flash size designator options.
+
+config STM32_FLASH_CONFIG_DEFAULT
+	bool "Default or device-derived flash size"
+	default n
+
+config STM32_FLASH_CONFIG_4
+	bool "Flash size designator 4, 16 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_6
+	bool "Flash size designator 6, 32 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_8
+	bool "Flash size designator 8, 64 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_B
+	bool "Flash size designator B, 128 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_C
+	bool "Flash size designator C, 256 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_C_320
+	bool "STM32WB flash size designator C, 320 KiB variant"
+	default n
+
+config STM32_FLASH_CONFIG_D
+	bool "Flash size designator D, 384 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_E
+	bool "Flash size designator E, 512 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_F
+	bool "Flash size designator F, 768 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_G
+	bool "Flash size designator G, 1024 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_I
+	bool "Flash size designator I, 2048 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_Y
+	bool "Flash size designator Y, 640 KiB"
+	default n
+
+config STM32_FLASH_CONFIG_Z
+	bool "Legacy STM32 flash size designator Z"
+	default n
+
+config STM32_FLASH_OVERRIDE
+	bool "Override Flash Designator" if ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
+	default y if ARCH_CHIP_STM32F7 || STM32_COMMON_F7_H7_H5
+	default y if STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	default y if ARCH_CHIP_STM32WL5
+	default n
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on STM32_FLASH_OVERRIDE
+	default STM32_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32 parts numbering ends with a number or letter that designates
+		the internal FLASH size.  Select "Default" to use the size from
+		the selected chip.  Select another designator only when the part
+		variant differs from the listed chip selection.
+
+config STM32_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32_FLASH_OVERRIDE_6
+	bool "6 32KiB"
+
+config STM32_FLASH_OVERRIDE_8
+	bool "8 64KiB"
+
+config STM32_FLASH_OVERRIDE_B
+	bool "B 128KiB"
+
+config STM32_FLASH_OVERRIDE_C
+	bool "C 256KiB"
+
+config STM32_FLASH_OVERRIDE_C_320
+	bool "C 320KiB"
+
+config STM32_FLASH_OVERRIDE_E
+	bool "E 512KiB"
+
+config STM32_FLASH_OVERRIDE_G
+	bool "G 1024KiB"
+
+config STM32_FLASH_OVERRIDE_I
+	bool "I 2048KiB"
+
+config STM32_FLASH_OVERRIDE_Y
+	bool "Y 640KiB"
+
+endchoice # Override Flash Size Designator
+
+config STM32_FLASH_ART_ACCELERATOR
+	bool "Flash ART Accelerator"
+	depends on STM32_HAVE_FLASH_ART_ACCELERATOR
+	default n
+	---help---
+		ART Accelerator on the flash memory ITCM interface accelerates code execution
+		with a system of instruction prefetch and cache lines.
+
+		Enable if code and/or read-only data is accessed through ITCM bus instead of
+		AXIM bus.
+
+config STM32_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	depends on STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	default STM32_STM32F427 || STM32_STM32F429 || STM32_STM32F446
+	default y
+	---help---
+		Enable FLASH prefetch in F2 and F4 parts (FLASH pre-fetch is always enabled
+		on F1 parts).  Some early revisions of F4 parts do not support FLASH pre-fetch
+		properly and enabling this option may interfere with ADC accuracy.
+
+config STM32_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
+	bool "Workaround for FLASH data cache corruption"
+	depends on STM32_FLASH_DCACHE && (STM32_STM32F20XX || STM32_STM32F4XXX || (ARCH_CHIP_STM32L4 && (STM32_STM32L4X5 || STM32_STM32L4X6 || STM32_STM32L4XR)))
+	---help---
+		Enable the workaround to fix flash data cache corruption when reading
+		from one flash bank while writing on other flash bank.  See your STM32
+		errata to check if your STM32 is affected by this problem.
+
+config STM32_PROGMEM
+	bool "Flash PROGMEM support"
+	depends on STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM || STM32_COMMON_F7_H7_H5
+	select MTD if STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM
+	select MTD_PROGMEM if STM32_COMMON_F0_L0_G0_C0 && ARCH_HAVE_PROGMEM
+	---help---
+		Add progmem support, start block and end block options are provided to
+		obtain a uniform flash memory mapping.
+
+config STM32_FLASH_ICACHE
+	bool "Enable FLASH Instruction Cache"
+	default y
+	depends on STM32_HAVE_FLASH_ICACHE
+	---help---
+		Enable the FLASH instruction cache.
+
+config STM32_FLASH_DCACHE
+	bool "Enable FLASH Data Cache"
+	default y
+	depends on STM32_HAVE_FLASH_DCACHE
+	---help---
+		Enable the FLASH data cache.

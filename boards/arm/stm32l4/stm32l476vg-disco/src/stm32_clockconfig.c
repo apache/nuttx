@@ -52,122 +52,122 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
-void stm32l4_board_clockconfig(void)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+void stm32_board_clockconfig(void)
 {
   uint32_t regval;
 
   /* Enable Internal High-Speed Clock (HSI) */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_HSION;           /* Enable HSI */
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the HSI is ready */
 
-  while ((getreg32(STM32L4_RCC_CR) & RCC_CR_HSIRDY) == 0)
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) == 0)
     {
     }
 
   /* Set the HCLK source/divider */
 
-  regval  = getreg32(STM32L4_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_HPRE_MASK;
-  regval |= STM32L4_RCC_CFGR_HPRE;
-  putreg32(regval, STM32L4_RCC_CFGR);
+  regval |= STM32_RCC_CFGR_HPRE;
+  putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PCLK2 divider */
 
-  regval  = getreg32(STM32L4_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_PPRE2_MASK;
-  regval |= STM32L4_RCC_CFGR_PPRE2;
-  putreg32(regval, STM32L4_RCC_CFGR);
+  regval |= STM32_RCC_CFGR_PPRE2;
+  putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PCLK1 divider */
 
-  regval  = getreg32(STM32L4_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_PPRE1_MASK;
-  regval |= STM32L4_RCC_CFGR_PPRE1;
-  putreg32(regval, STM32L4_RCC_CFGR);
+  regval |= STM32_RCC_CFGR_PPRE1;
+  putreg32(regval, STM32_RCC_CFGR);
 
   /* Set the PLL source and main divider */
 
-  regval  = getreg32(STM32L4_RCC_PLLCFG);
+  regval  = getreg32(STM32_RCC_PLLCFG);
 
   /* Configure Main PLL */
 
   /* Set the PLL dividers and multipliers to configure the main PLL */
 
-  regval = (STM32L4_PLLCFG_PLLM | STM32L4_PLLCFG_PLLN | STM32L4_PLLCFG_PLLP
-             | STM32L4_PLLCFG_PLLQ | STM32L4_PLLCFG_PLLR);
+  regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN | STM32_PLLCFG_PLLP
+             | STM32_PLLCFG_PLLQ | STM32_PLLCFG_PLLR);
   regval |= RCC_PLLCFG_PLLQEN;
   regval |= RCC_PLLCFG_PLLREN;
 
   /* XXX The choice of clock source to PLL (all three) is independent
-   * of the sys clock source choice, review the STM32L4_BOARD_USEHSI
+   * of the sys clock source choice, review the STM32_BOARD_USEHSI
    * name; probably split it into two, one for PLL source and one
    * for sys clock source.
    */
 
   regval |= RCC_PLLCFG_PLLSRC_HSI;
-  putreg32(regval, STM32L4_RCC_PLLCFG);
+  putreg32(regval, STM32_RCC_PLLCFG);
 
   /* Enable the main PLL */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_PLLON;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the PLL is ready */
 
-  while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLRDY) == 0)
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
     {
     }
 
   /* Configure SAI1 PLL */
 
-  regval  = getreg32(STM32L4_RCC_PLLSAI1CFG);
+  regval  = getreg32(STM32_RCC_PLLSAI1CFG);
 
   /* Set the PLL dividers and multipliers to configure the SAI1 PLL */
 
-  regval  = (STM32L4_PLLSAI1CFG_PLLN | STM32L4_PLLSAI1CFG_PLLP |
-             STM32L4_PLLSAI1CFG_PLLQ | STM32L4_PLLSAI1CFG_PLLR);
+  regval  = (STM32_PLLSAI1CFG_PLLN | STM32_PLLSAI1CFG_PLLP |
+             STM32_PLLSAI1CFG_PLLQ | STM32_PLLSAI1CFG_PLLR);
   regval |= RCC_PLLSAI1CFG_PLLQEN;
-  putreg32(regval, STM32L4_RCC_PLLSAI1CFG);
+  putreg32(regval, STM32_RCC_PLLSAI1CFG);
 
   /* Enable the SAI1 PLL */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_PLLSAI1ON;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the PLL is ready */
 
-  while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLSAI1RDY) == 0)
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAI1RDY) == 0)
     {
     }
 
   /* Configure SAI2 PLL */
 
-  regval  = getreg32(STM32L4_RCC_PLLSAI2CFG);
+  regval  = getreg32(STM32_RCC_PLLSAI2CFG);
 
   /* Enable the SAI2 PLL */
 
   /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
 
-  regval = (STM32L4_PLLSAI2CFG_PLLN | STM32L4_PLLSAI2CFG_PLLP |
-            STM32L4_PLLSAI2CFG_PLLR);
-  putreg32(regval, STM32L4_RCC_PLLSAI2CFG);
+  regval = (STM32_PLLSAI2CFG_PLLN | STM32_PLLSAI2CFG_PLLP |
+            STM32_PLLSAI2CFG_PLLR);
+  putreg32(regval, STM32_RCC_PLLSAI2CFG);
 
   /* Enable the SAI1 PLL */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_PLLSAI2ON;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the PLL is ready */
 
-  while ((getreg32(STM32L4_RCC_CR) & RCC_CR_PLLSAI2RDY) == 0)
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAI2RDY) == 0)
     {
     }
 
@@ -175,36 +175,36 @@ void stm32l4_board_clockconfig(void)
    * and 5 wait states
    */
 
-#ifdef CONFIG_STM32L4_FLASH_PREFETCH
+#ifdef CONFIG_STM32_FLASH_PREFETCH
   regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN |
             FLASH_ACR_PRFTEN);
 #else
   regval = (FLASH_ACR_LATENCY_4 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
 #endif
-  putreg32(regval, STM32L4_FLASH_ACR);
+  putreg32(regval, STM32_FLASH_ACR);
 
   /* Select the main PLL as system clock source */
 
-  regval  = getreg32(STM32L4_RCC_CFGR);
+  regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_SW_MASK;
   regval |= RCC_CFGR_SW_PLL;
-  putreg32(regval, STM32L4_RCC_CFGR);
+  putreg32(regval, STM32_RCC_CFGR);
 
   /* Wait until the PLL source is used as the system clock source */
 
-  while ((getreg32(STM32L4_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
            RCC_CFGR_SWS_PLL)
     {
     }
 
-#if defined(CONFIG_STM32L4_IWDG) || defined(CONFIG_STM32L4_RTC_LSICLOCK)
+#if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
 
   /* Low speed internal clock source LSI */
 
-  stm32l4_rcc_enablelsi();
+  stm32_rcc_enablelsi();
 #endif
 
-#if defined(STM32L4_USE_LSE)
+#if defined(STM32_USE_LSE)
 
   /* Low speed external clock source LSE
    *
@@ -212,8 +212,8 @@ void stm32l4_board_clockconfig(void)
    * be enabled: if the MCO1 pin selects LSE as source.
    */
 
-  stm32l4_pwr_enableclk(true);
-  stm32l4_rcc_enablelse();
+  stm32_pwr_enableclk(true);
+  stm32_rcc_enablelse();
 #endif
 }
 #endif

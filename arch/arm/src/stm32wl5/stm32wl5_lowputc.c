@@ -34,7 +34,7 @@
 
 #include "chip.h"
 
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_rcc.h"
 #include "stm32wl5_gpio.h"
 #include "stm32wl5_uart.h"
@@ -47,70 +47,70 @@
 
 #ifdef HAVE_CONSOLE
 #  if defined(CONFIG_LPUART1_SERIAL_CONSOLE)
-#    define STM32WL5_CONSOLE_BASE     STM32WL5_LPUART1_BASE
-#    define STM32WL5_APBCLOCK         STM32WL5_PCLK1_FREQUENCY
-#    define STM32WL5_CONSOLE_APBREG   STM32WL5_RCC_APB1ENR2
-#    define STM32WL5_CONSOLE_APBEN    RCC_APB1ENR2_LPUART1EN
-#    define STM32WL5_CONSOLE_BAUD     CONFIG_LPUART1_BAUD
-#    define STM32WL5_CONSOLE_BITS     CONFIG_LPUART1_BITS
-#    define STM32WL5_CONSOLE_PARITY   CONFIG_LPUART1_PARITY
-#    define STM32WL5_CONSOLE_2STOP    CONFIG_LPUART1_2STOP
-#    define STM32WL5_CONSOLE_TX       GPIO_LPUART1_TX
-#    define STM32WL5_CONSOLE_RX       GPIO_LPUART1_RX
+#    define STM32_CONSOLE_BASE     STM32_LPUART1_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_APBREG   STM32_RCC_APB1ENR2
+#    define STM32_CONSOLE_APBEN    RCC_APB1ENR2_LPUART1EN
+#    define STM32_CONSOLE_BAUD     CONFIG_LPUART1_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_LPUART1_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_LPUART1_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_LPUART1_2STOP
+#    define STM32_CONSOLE_TX       GPIO_LPUART1_TX
+#    define STM32_CONSOLE_RX       GPIO_LPUART1_RX
 #    ifdef CONFIG_LPUART1_RS485
-#      define STM32WL5_CONSOLE_RS485_DIR GPIO_LPUART1_RS485_DIR
+#      define STM32_CONSOLE_RS485_DIR GPIO_LPUART1_RS485_DIR
 #      if (CONFIG_LPUART1_RS485_DIR_POLARITY == 0)
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY false
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
 #      else
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY true
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
 #      endif
 #    endif
 #  elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#    define STM32WL5_CONSOLE_BASE     STM32WL5_USART1_BASE
-#    define STM32WL5_APBCLOCK         STM32WL5_PCLK2_FREQUENCY
-#    define STM32WL5_CONSOLE_APBREG   STM32WL5_RCC_APB2ENR
-#    define STM32WL5_CONSOLE_APBEN    RCC_APB2ENR_USART1EN
-#    define STM32WL5_CONSOLE_BAUD     CONFIG_USART1_BAUD
-#    define STM32WL5_CONSOLE_BITS     CONFIG_USART1_BITS
-#    define STM32WL5_CONSOLE_PARITY   CONFIG_USART1_PARITY
-#    define STM32WL5_CONSOLE_2STOP    CONFIG_USART1_2STOP
-#    define STM32WL5_CONSOLE_TX       GPIO_USART1_TX
-#    define STM32WL5_CONSOLE_RX       GPIO_USART1_RX
+#    define STM32_CONSOLE_BASE     STM32_USART1_BASE
+#    define STM32_APBCLOCK         STM32_PCLK2_FREQUENCY
+#    define STM32_CONSOLE_APBREG   STM32_RCC_APB2ENR
+#    define STM32_CONSOLE_APBEN    RCC_APB2ENR_USART1EN
+#    define STM32_CONSOLE_BAUD     CONFIG_USART1_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART1_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART1_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART1_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART1_TX
+#    define STM32_CONSOLE_RX       GPIO_USART1_RX
 #    ifdef CONFIG_USART1_RS485
-#      define STM32WL5_CONSOLE_RS485_DIR GPIO_USART1_RS485_DIR
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART1_RS485_DIR
 #      if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY false
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
 #      else
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY true
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
 #      endif
 #    endif
 #  elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#    define STM32WL5_CONSOLE_BASE     STM32WL5_USART2_BASE
-#    define STM32WL5_APBCLOCK         STM32WL5_PCLK1_FREQUENCY
-#    define STM32WL5_CONSOLE_APBREG   STM32WL5_RCC_APB1ENR1
-#    define STM32WL5_CONSOLE_APBEN    RCC_APB1ENR1_USART2EN
-#    define STM32WL5_CONSOLE_BAUD     CONFIG_USART2_BAUD
-#    define STM32WL5_CONSOLE_BITS     CONFIG_USART2_BITS
-#    define STM32WL5_CONSOLE_PARITY   CONFIG_USART2_PARITY
-#    define STM32WL5_CONSOLE_2STOP    CONFIG_USART2_2STOP
-#    define STM32WL5_CONSOLE_TX       GPIO_USART2_TX
-#    define STM32WL5_CONSOLE_RX       GPIO_USART2_RX
+#    define STM32_CONSOLE_BASE     STM32_USART2_BASE
+#    define STM32_APBCLOCK         STM32_PCLK1_FREQUENCY
+#    define STM32_CONSOLE_APBREG   STM32_RCC_APB1ENR1
+#    define STM32_CONSOLE_APBEN    RCC_APB1ENR1_USART2EN
+#    define STM32_CONSOLE_BAUD     CONFIG_USART2_BAUD
+#    define STM32_CONSOLE_BITS     CONFIG_USART2_BITS
+#    define STM32_CONSOLE_PARITY   CONFIG_USART2_PARITY
+#    define STM32_CONSOLE_2STOP    CONFIG_USART2_2STOP
+#    define STM32_CONSOLE_TX       GPIO_USART2_TX
+#    define STM32_CONSOLE_RX       GPIO_USART2_RX
 #    ifdef CONFIG_USART2_RS485
-#      define STM32WL5_CONSOLE_RS485_DIR GPIO_USART2_RS485_DIR
+#      define STM32_CONSOLE_RS485_DIR GPIO_USART2_RS485_DIR
 #      if (CONFIG_USART2_RS485_DIR_POLARITY == 0)
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY false
+#        define STM32_CONSOLE_RS485_DIR_POLARITY false
 #      else
-#        define STM32WL5_CONSOLE_RS485_DIR_POLARITY true
+#        define STM32_CONSOLE_RS485_DIR_POLARITY true
 #      endif
 #    endif
 #  endif
 
   /* CR1 settings */
 
-#  if STM32WL5_CONSOLE_BITS == 9
+#  if STM32_CONSOLE_BITS == 9
 #    define USART_CR1_M0_VALUE USART_CR1_M0
 #    define USART_CR1_M1_VALUE 0
-#  elif STM32WL5_CONSOLE_BITS == 7
+#  elif STM32_CONSOLE_BITS == 7
 #    define USART_CR1_M0_VALUE 0
 #    define USART_CR1_M1_VALUE USART_CR1_M1
 #  else /* 8 bits */
@@ -118,9 +118,9 @@
 #    define USART_CR1_M1_VALUE 0
 #  endif
 
-#  if STM32WL5_CONSOLE_PARITY == 1 /* odd parity */
+#  if STM32_CONSOLE_PARITY == 1 /* odd parity */
 #    define USART_CR1_PARITY_VALUE (USART_CR1_PCE|USART_CR1_PS)
-#  elif STM32WL5_CONSOLE_PARITY == 2 /* even parity */
+#  elif STM32_CONSOLE_PARITY == 2 /* even parity */
 #    define USART_CR1_PARITY_VALUE USART_CR1_PCE
 #  else /* no parity */
 #    define USART_CR1_PARITY_VALUE 0
@@ -136,7 +136,7 @@
 
   /* CR2 settings */
 
-#  if STM32WL5_CONSOLE_2STOP != 0
+#  if STM32_CONSOLE_2STOP != 0
 #    define USART_CR2_STOP2_VALUE USART_CR2_STOP2
 #  else
 #    define USART_CR2_STOP2_VALUE 0
@@ -178,24 +178,24 @@
    *   UARTDIV = 2 * fCK / baud
    */
 
-#  define STM32WL5_USARTDIV8 \
-      (((STM32WL5_APBCLOCK << 1) + (STM32WL5_CONSOLE_BAUD >> 1)) / STM32WL5_CONSOLE_BAUD)
-#  define STM32WL5_USARTDIV16 \
-      ((STM32WL5_APBCLOCK + (STM32WL5_CONSOLE_BAUD >> 1)) / STM32WL5_CONSOLE_BAUD)
+#  define STM32_USARTDIV8 \
+      (((STM32_APBCLOCK << 1) + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
+#  define STM32_USARTDIV16 \
+      ((STM32_APBCLOCK + (STM32_CONSOLE_BAUD >> 1)) / STM32_CONSOLE_BAUD)
 
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
 #  if defined(CONFIG_LPUART1_SERIAL_CONSOLE)
      /* lpuart has different formula for baud rate than normal uart */
-#    define STM32WL5_BRR_VALUE \
-         (((256ull * STM32WL5_APBCLOCK) / STM32WL5_CONSOLE_BAUD) & LPUART_BRR_MASK)
+#    define STM32_BRR_VALUE \
+         (((256ull * STM32_APBCLOCK) / STM32_CONSOLE_BAUD) & LPUART_BRR_MASK)
 #  else /* CONFIG_LPUART1_SERIAL_CONSOLE */
-#    if STM32WL5_USARTDIV8 > 2000
-#      define STM32WL5_BRR_VALUE STM32WL5_USARTDIV16
+#    if STM32_USARTDIV8 > 2000
+#      define STM32_BRR_VALUE STM32_USARTDIV16
 #    else
 #      define USE_OVER8 1
-#      define STM32WL5_BRR_VALUE \
-          ((STM32WL5_USARTDIV8 & 0xfff0) | ((STM32WL5_USARTDIV8 & 0x000f) >> 1))
+#      define STM32_BRR_VALUE \
+          ((STM32_USARTDIV8 & 0xfff0) | ((STM32_USARTDIV8 & 0x000f) >> 1))
 #    endif
 #  endif /* CONFIG_LPUART1_SERIAL_CONSOLE */
 
@@ -238,29 +238,29 @@ void arm_lowputc(char ch)
 #ifdef HAVE_CONSOLE
   /* Wait until the TX data register is empty */
 
-  while ((getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_ISR_OFFSET) &
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
          USART_ISR_TXE) == 0);
-#ifdef STM32WL5_CONSOLE_RS485_DIR
-  stm32wl5_gpiowrite(STM32WL5_CONSOLE_RS485_DIR,
-                    STM32WL5_CONSOLE_RS485_DIR_POLARITY);
+#ifdef STM32_CONSOLE_RS485_DIR
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                    STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Then send the character */
 
-  putreg32((uint32_t)ch, STM32WL5_CONSOLE_BASE + STM32WL5_USART_TDR_OFFSET);
+  putreg32((uint32_t)ch, STM32_CONSOLE_BASE + STM32_USART_TDR_OFFSET);
 
-#ifdef STM32WL5_CONSOLE_RS485_DIR
-  while ((getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_ISR_OFFSET) &
+#ifdef STM32_CONSOLE_RS485_DIR
+  while ((getreg32(STM32_CONSOLE_BASE + STM32_USART_ISR_OFFSET) &
          USART_ISR_TC) == 0);
-  stm32wl5_gpiowrite(STM32WL5_CONSOLE_RS485_DIR,
-                    !STM32WL5_CONSOLE_RS485_DIR_POLARITY);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                    !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
 #endif /* HAVE_CONSOLE */
 }
 
 /****************************************************************************
- * Name: stm32wl5_lowsetup
+ * Name: stm32_lowsetup
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -269,7 +269,7 @@ void arm_lowputc(char ch)
  *
  ****************************************************************************/
 
-void stm32wl5_lowsetup(void)
+void stm32_lowsetup(void)
 {
 #if defined(HAVE_UART)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
@@ -279,26 +279,26 @@ void stm32wl5_lowsetup(void)
 #if defined(HAVE_CONSOLE)
   /* Enable USART APB1/2 clock */
 
-  modifyreg32(STM32WL5_CONSOLE_APBREG, 0, STM32WL5_CONSOLE_APBEN);
+  modifyreg32(STM32_CONSOLE_APBREG, 0, STM32_CONSOLE_APBEN);
 #endif
 
   /* Enable the console USART and configure GPIO pins needed for rx/tx.
    *
    * NOTE: Clocking for selected U[S]ARTs was already provided in
-   * stm32wl5_rcc.c
+   * stm32_rcc.c
    */
 
-#ifdef STM32WL5_CONSOLE_TX
-  stm32wl5_configgpio(STM32WL5_CONSOLE_TX);
+#ifdef STM32_CONSOLE_TX
+  stm32_configgpio(STM32_CONSOLE_TX);
 #endif
-#ifdef STM32WL5_CONSOLE_RX
-  stm32wl5_configgpio(STM32WL5_CONSOLE_RX);
+#ifdef STM32_CONSOLE_RX
+  stm32_configgpio(STM32_CONSOLE_RX);
 #endif
 
-#ifdef STM32WL5_CONSOLE_RS485_DIR
-  stm32wl5_configgpio(STM32WL5_CONSOLE_RS485_DIR);
-  stm32wl5_gpiowrite(STM32WL5_CONSOLE_RS485_DIR,
-                    !STM32WL5_CONSOLE_RS485_DIR_POLARITY);
+#ifdef STM32_CONSOLE_RS485_DIR
+  stm32_configgpio(STM32_CONSOLE_RS485_DIR);
+  stm32_gpiowrite(STM32_CONSOLE_RS485_DIR,
+                    !STM32_CONSOLE_RS485_DIR_POLARITY);
 #endif
 
   /* Enable and configure the selected console device */
@@ -306,42 +306,42 @@ void stm32wl5_lowsetup(void)
 #if defined(HAVE_CONSOLE) && !defined(CONFIG_SUPPRESS_UART_CONFIG)
   /* Configure CR2 */
 
-  cr  = getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR2_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
   cr &= ~USART_CR2_CLRBITS;
   cr |= USART_CR2_SETBITS;
-  putreg32(cr, STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR2_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR2_OFFSET);
 
   /* Configure CR1 */
 
-  cr  = getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR1_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
   cr &= ~USART_CR1_CLRBITS;
   cr |= USART_CR1_SETBITS;
-  putreg32(cr, STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR1_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
   /* Configure CR3 */
 
-  cr  = getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR3_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
   cr &= ~USART_CR3_CLRBITS;
   cr |= USART_CR3_SETBITS;
-  putreg32(cr, STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR3_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR3_OFFSET);
 
   /* Configure the USART Baud Rate */
 
-  putreg32(STM32WL5_BRR_VALUE,
-           STM32WL5_CONSOLE_BASE + STM32WL5_USART_BRR_OFFSET);
+  putreg32(STM32_BRR_VALUE,
+           STM32_CONSOLE_BASE + STM32_USART_BRR_OFFSET);
 
   /* Select oversampling by 8 */
 
-  cr  = getreg32(STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR1_OFFSET);
+  cr  = getreg32(STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 #ifdef USE_OVER8
   cr |= USART_CR1_OVER8;
-  putreg32(cr, STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR1_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 #endif
 
   /* Enable Rx, Tx, and the USART */
 
   cr |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  putreg32(cr, STM32WL5_CONSOLE_BASE + STM32WL5_USART_CR1_OFFSET);
+  putreg32(cr, STM32_CONSOLE_BASE + STM32_USART_CR1_OFFSET);
 
 #endif /* HAVE_CONSOLE && !CONFIG_SUPPRESS_UART_CONFIG */
 #endif /* HAVE_UART */

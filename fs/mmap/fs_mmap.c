@@ -137,15 +137,15 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       return -EBADF;
     }
 
-  if ((flags & MAP_SHARED) &&
-      (filep->f_oflags & O_WROK) == 0 && prot == PROT_WRITE)
+  if ((flags & MAP_SHARED) && (prot & PROT_WRITE) &&
+      (filep->f_oflags & O_ACCMODE) == O_RDONLY)
     {
       ferr("ERROR: Unsupported options for read-only file descriptor,"
            "prot=%x flags=%04x\n", prot, flags);
       return -EACCES;
     }
 
-  if ((filep->f_oflags & O_RDOK) == 0)
+  if ((filep->f_oflags & O_ACCMODE) == O_WRONLY)
     {
       ferr("ERROR: File descriptor does not have read permission\n");
       return -EACCES;

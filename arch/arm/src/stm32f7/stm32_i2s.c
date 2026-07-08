@@ -76,7 +76,7 @@
 #include "stm32_spi.h"
 #include "stm32_rcc.h"
 
-#if defined(CONFIG_STM32F7_I2S1) || defined(CONFIG_STM32F7_I2S2) || defined(CONFIG_STM32F7_I2S3)
+#if defined(CONFIG_STM32_I2S1) || defined(CONFIG_STM32_I2S2) || defined(CONFIG_STM32_I2S3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,8 +92,8 @@
 #  error CONFIG_AUDIO required by this driver
 #endif
 
-#ifndef CONFIG_STM32F7_I2S_MAXINFLIGHT
-#  define CONFIG_STM32F7_I2S_MAXINFLIGHT 16
+#ifndef CONFIG_STM32_I2S_MAXINFLIGHT
+#  define CONFIG_STM32_I2S_MAXINFLIGHT 16
 #endif
 
 /* Assume no RX/TX support until we learn better */
@@ -103,28 +103,28 @@
 
 /* Check for I2S RX support */
 
-#  if defined(CONFIG_STM32F7_I2S1_RX)
+#  if defined(CONFIG_STM32_I2S1_RX)
 #    define I2S_HAVE_RX 1
 
-#    ifdef CONFIG_STM32F7_I2S1_MCK
+#    ifdef CONFIG_STM32_I2S1_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
 #  endif
 
-#  if defined(CONFIG_STM32F7_I2S2_RX)
+#  if defined(CONFIG_STM32_I2S2_RX)
 #    define I2S_HAVE_RX 1
 
-#    ifdef CONFIG_STM32F7_I2S2_MCK
+#    ifdef CONFIG_STM32_I2S2_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
 #  endif
 
-#  if defined(CONFIG_STM32F7_I2S3_RX)
+#  if defined(CONFIG_STM32_I2S3_RX)
 #    define I2S_HAVE_RX 1
 
-#    ifdef CONFIG_STM32F7_I2S3_MCK
+#    ifdef CONFIG_STM32_I2S3_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
@@ -132,28 +132,28 @@
 
 /* Check for I2S3 TX support */
 
-#  if defined(CONFIG_STM32F7_I2S1_TX)
+#  if defined(CONFIG_STM32_I2S1_TX)
 #    define I2S_HAVE_TX 1
 
-#    ifdef CONFIG_STM32F7_I2S1_MCK
+#    ifdef CONFIG_STM32_I2S1_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
 #  endif
 
-#  if defined(CONFIG_STM32F7_I2S2_TX)
+#  if defined(CONFIG_STM32_I2S2_TX)
 #    define I2S_HAVE_TX 1
 
-#    ifdef CONFIG_STM32F7_I2S2_MCK
+#    ifdef CONFIG_STM32_I2S2_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
 #  endif
 
-#  if defined(CONFIG_STM32F7_I2S3_TX)
+#  if defined(CONFIG_STM32_I2S3_TX)
 #    define I2S_HAVE_TX 1
 
-#    ifdef CONFIG_STM32F7_I2S3_MCK
+#    ifdef CONFIG_STM32_I2S3_MCK
 #      define I2S_HAVE_MCK  1
 #    endif
 
@@ -163,19 +163,19 @@
 
 /* I2S interrupts */
 
-#ifdef CONFIG_STM32F7_SPI_INTERRUPTS
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
 #  error "Interrupt driven I2S not yet supported"
 #endif
 
 /* Can't have both interrupt driven SPI and SPI DMA */
 
-#if defined(CONFIG_STM32F7_SPI_INTERRUPTS) && defined(CONFIG_STM32F7_SPI_DMA)
+#if defined(CONFIG_STM32_SPI_INTERRUPTS) && defined(CONFIG_STM32_SPI_DMA)
 #  error "Cannot enable both interrupt mode and DMA mode for SPI"
 #endif
 
 /* SPI DMA priority */
 
-#ifdef CONFIG_STM32F7_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
@@ -200,7 +200,7 @@
 #  define SPI_TXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_16BITS             |DMA_SCR_DIR_M2P)
 #  define SPI_TXDMA8NULL_CONFIG     (SPI_DMA_PRIO|DMA_SCR_MSIZE_8BITS |DMA_SCR_PSIZE_8BITS              |DMA_SCR_DIR_M2P)
 
-#endif /* CONFIG_STM32F7_SPI_DMA */
+#endif /* CONFIG_STM32_SPI_DMA */
 
 /* Debug ********************************************************************/
 
@@ -209,8 +209,8 @@
  */
 
 #ifndef CONFIG_DEBUG_I2S_INFO
-#  undef CONFIG_STM32F7_I2S_DMADEBUG
-#  undef CONFIG_STM32F7_I2S_REGDEBUG
+#  undef CONFIG_STM32_I2S_DMADEBUG
+#  undef CONFIG_STM32_I2S_REGDEBUG
 #  undef CONFIG_STM32F7_I2S_QDEBUG
 #  undef CONFIG_STM32F7_I2S_DUMPBUFFERS
 #endif
@@ -219,46 +219,46 @@
  * logic here is constrained to byte, half-word, and word sizes.
  */
 
-#ifndef CONFIG_STM32F7_I2S1_DATALEN
-#  define CONFIG_STM32F7_I2S1_DATALEN 16
+#ifndef CONFIG_STM32_I2S1_DATALEN
+#  define CONFIG_STM32_I2S1_DATALEN 16
 #endif
 
-#ifndef CONFIG_STM32F7_I2S2_DATALEN
-#  define CONFIG_STM32F7_I2S2_DATALEN 16
+#ifndef CONFIG_STM32_I2S2_DATALEN
+#  define CONFIG_STM32_I2S2_DATALEN 16
 #endif
 
-#ifndef CONFIG_STM32F7_I2S3_DATALEN
-#  define CONFIG_STM32F7_I2S3_DATALEN 16
+#ifndef CONFIG_STM32_I2S3_DATALEN
+#  define CONFIG_STM32_I2S3_DATALEN 16
 #endif
 
-#if CONFIG_STM32F7_I2S1_DATALEN == 8
-#  define STM32F7_I2S1_DATAMASK  0
-#elif CONFIG_STM32F7_I2S1_DATALEN == 16
-#  define STM32F7_I2S1_DATAMASK  1
-#elif  CONFIG_STM32F7_I2S1_DATALEN < 8 || CONFIG_STM32F7_I2S1_DATALEN > 16
-#  error Invalid value for CONFIG_STM32F7_I2S1_DATALEN
+#if CONFIG_STM32_I2S1_DATALEN == 8
+#  define STM32_I2S1_DATAMASK  0
+#elif CONFIG_STM32_I2S1_DATALEN == 16
+#  define STM32_I2S1_DATAMASK  1
+#elif  CONFIG_STM32_I2S1_DATALEN < 8 || CONFIG_STM32_I2S1_DATALEN > 16
+#  error Invalid value for CONFIG_STM32_I2S1_DATALEN
 #else
-#  error Valid but supported value for CONFIG_STM32F7_I2S1_DATALEN
+#  error Valid but supported value for CONFIG_STM32_I2S1_DATALEN
 #endif
 
-#if CONFIG_STM32F7_I2S2_DATALEN == 8
-#  define STM32F7_I2S2_DATAMASK  0
-#elif CONFIG_STM32F7_I2S2_DATALEN == 16
-#  define STM32F7_I2S2_DATAMASK  1
-#elif  CONFIG_STM32F7_I2S2_DATALEN < 8 || CONFIG_STM32F7_I2S2_DATALEN > 16
-#  error Invalid value for CONFIG_STM32F7_I2S2_DATALEN
+#if CONFIG_STM32_I2S2_DATALEN == 8
+#  define STM32_I2S2_DATAMASK  0
+#elif CONFIG_STM32_I2S2_DATALEN == 16
+#  define STM32_I2S2_DATAMASK  1
+#elif  CONFIG_STM32_I2S2_DATALEN < 8 || CONFIG_STM32_I2S2_DATALEN > 16
+#  error Invalid value for CONFIG_STM32_I2S2_DATALEN
 #else
-#  error Valid but supported value for CONFIG_STM32F7_I2S1_DATALEN
+#  error Valid but supported value for CONFIG_STM32_I2S1_DATALEN
 #endif
 
-#if CONFIG_STM32F7_I2S3_DATALEN == 8
-#  define STM32F7_I2S3_DATAMASK  0
-#elif CONFIG_STM32F7_I2S3_DATALEN == 16
-#  define STM32F7_I2S3_DATAMASK  1
-#elif  CONFIG_STM32F7_I2S3_DATALEN < 8 || CONFIG_STM32F7_I2S3_DATALEN > 16
-#  error Invalid value for CONFIG_STM32F7_I2S3_DATALEN
+#if CONFIG_STM32_I2S3_DATALEN == 8
+#  define STM32_I2S3_DATAMASK  0
+#elif CONFIG_STM32_I2S3_DATALEN == 16
+#  define STM32_I2S3_DATAMASK  1
+#elif  CONFIG_STM32_I2S3_DATALEN < 8 || CONFIG_STM32_I2S3_DATALEN > 16
+#  error Invalid value for CONFIG_STM32_I2S3_DATALEN
 #else
-#  error Valid but supported value for CONFIG_STM32F7_I2S3_DATALEN
+#  error Valid but supported value for CONFIG_STM32_I2S3_DATALEN
 #endif
 
 /* Check if we need to build RX and/or TX support */
@@ -266,7 +266,7 @@
 #if defined(I2S_HAVE_RX) || defined(I2S_HAVE_TX)
 
 #ifndef CONFIG_DEBUG_DMA
-#  undef CONFIG_STM32F7_I2S_DMADEBUG
+#  undef CONFIG_STM32_I2S_DMADEBUG
 #endif
 
 #define DMA_INITIAL      0
@@ -309,7 +309,7 @@ struct stm32_transport_s
   sq_queue_t done;              /* A queue of completed transfers */
   struct work_s work;           /* Supports worker thread operations */
 
-#ifdef CONFIG_STM32F7_I2S_DMADEBUG
+#ifdef CONFIG_STM32_I2S_DMADEBUG
   struct stm32_dmaregs_s dmaregs[DMA_NSAMPLES];
 #endif
 };
@@ -344,11 +344,11 @@ struct stm32_i2s_s
 
   sem_t bufsem;                    /* Buffer wait semaphore */
   struct stm32_buffer_s *freelist; /* A list a free buffer containers */
-  struct stm32_buffer_s containers[CONFIG_STM32F7_I2S_MAXINFLIGHT];
+  struct stm32_buffer_s containers[CONFIG_STM32_I2S_MAXINFLIGHT];
 
   /* Debug stuff */
 
-#ifdef CONFIG_STM32F7_I2S_REGDEBUG
+#ifdef CONFIG_STM32_I2S_REGDEBUG
   bool     wr;                     /* Last was a write */
   uint32_t regaddr;                /* Last address */
   uint16_t regval;                 /* Last value */
@@ -362,7 +362,7 @@ struct stm32_i2s_s
 
 /* Register helpers */
 
-#ifdef CONFIG_STM32F7_I2S_REGDEBUG
+#ifdef CONFIG_STM32_I2S_REGDEBUG
 static bool     i2s_checkreg(struct stm32_i2s_s *priv, bool wr,
                              uint16_t regval, uint32_t regaddr);
 #else
@@ -397,12 +397,12 @@ static void     i2s_buf_initialize(struct stm32_i2s_s *priv);
 
 /* DMA support */
 
-#ifdef CONFIG_STM32F7_I2S_DMADEBUG
+#ifdef CONFIG_STM32_I2S_DMADEBUG
 static void     i2s_dma_sampleinit(struct stm32_i2s_s *priv,
                   struct stm32_transport_s *xpt);
 #endif
 
-#if defined(CONFIG_STM32F7_I2S_DMADEBUG) && defined(I2S_HAVE_RX)
+#if defined(CONFIG_STM32_I2S_DMADEBUG) && defined(I2S_HAVE_RX)
 #  define       i2s_rxdma_sample(s,i) stm32_dmasample((s)->rx.dma, &(s)->rx.dmaregs[i])
 #  define       i2s_rxdma_sampleinit(s) i2s_dma_sampleinit(s, &(s)->rx)
 static void     i2s_rxdma_sampledone(struct stm32_i2s_s *priv, int result);
@@ -414,7 +414,7 @@ static void     i2s_rxdma_sampledone(struct stm32_i2s_s *priv, int result);
 
 #endif
 
-#if defined(CONFIG_STM32F7_I2S_DMADEBUG) && defined(I2S_HAVE_TX)
+#if defined(CONFIG_STM32_I2S_DMADEBUG) && defined(I2S_HAVE_TX)
 #  define       i2s_txdma_sample(s,i) stm32_dmasample((s)->tx.dma, &(s)->tx.dmaregs[i])
 #  define       i2s_txdma_sampleinit(s) i2s_dma_sampleinit(s, &(s)->tx)
 static void     i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result);
@@ -447,14 +447,14 @@ static void     i2s_txdma_callback(DMA_HANDLE handle, uint8_t result,
 
 static int      i2s_checkwidth(struct stm32_i2s_s *priv, int bits);
 
-static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits);
 static int      stm32_i2s_receive(struct i2s_dev_s *dev,
                                   struct ap_buffer_s *apb,
                                   i2s_callback_t callback,
                                   void *arg, uint32_t timeout);
-static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
 static int      stm32_i2s_send(struct i2s_dev_s *dev,
                                struct ap_buffer_s *apb,
                                i2s_callback_t callback, void *arg,
@@ -467,15 +467,15 @@ static int      i2s_dma_flags(struct stm32_i2s_s *priv);
 static int      i2s_dma_allocate(struct stm32_i2s_s *priv);
 static void     i2s_dma_free(struct stm32_i2s_s *priv);
 
-#ifdef CONFIG_STM32F7_I2S1
+#ifdef CONFIG_STM32_I2S1
 static void     i2s1_configure(struct stm32_i2s_s *priv);
 #endif
 
-#ifdef CONFIG_STM32F7_I2S2
+#ifdef CONFIG_STM32_I2S2
 static void     i2s2_configure(struct stm32_i2s_s *priv);
 #endif
 
-#ifdef CONFIG_STM32F7_I2S3
+#ifdef CONFIG_STM32_I2S3
 static void     i2s3_configure(struct stm32_i2s_s *priv);
 #endif
 
@@ -520,7 +520,7 @@ static const struct i2s_ops_s g_i2sops =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2S_REGDEBUG
+#ifdef CONFIG_STM32_I2S_REGDEBUG
 static bool i2s_checkreg(struct stm32_i2s_s *priv, bool wr, uint16_t regval,
                          uint32_t regaddr)
 {
@@ -579,7 +579,7 @@ static inline uint16_t i2s_getreg(struct stm32_i2s_s *priv,
   uint32_t regaddr = priv->base + offset;
   uint16_t regval = getreg16(regaddr);
 
-#ifdef CONFIG_STM32F7_I2S_REGDEBUG
+#ifdef CONFIG_STM32_I2S_REGDEBUG
   if (i2s_checkreg(priv, false, regval, regaddr))
     {
       i2sinfo("%08" PRIx32 "->%04x\n", regaddr, regval);
@@ -610,7 +610,7 @@ static inline void i2s_putreg(struct stm32_i2s_s *priv, uint8_t offset,
 {
   uint32_t regaddr = priv->base + offset;
 
-#ifdef CONFIG_STM32F7_I2S_REGDEBUG
+#ifdef CONFIG_STM32_I2S_REGDEBUG
   if (i2s_checkreg(priv, true, regval, regaddr))
     {
       i2sinfo("%08" PRIx32 "<-%04x\n", regaddr, regval);
@@ -759,9 +759,9 @@ static void i2s_buf_initialize(struct stm32_i2s_s *priv)
   int i;
 
   priv->freelist = NULL;
-  nxsem_init(&priv->bufsem, 0, CONFIG_STM32F7_I2S_MAXINFLIGHT);
+  nxsem_init(&priv->bufsem, 0, CONFIG_STM32_I2S_MAXINFLIGHT);
 
-  for (i = 0; i < CONFIG_STM32F7_I2S_MAXINFLIGHT; i++)
+  for (i = 0; i < CONFIG_STM32_I2S_MAXINFLIGHT; i++)
     {
       i2s_buf_free(priv, &priv->containers[i]);
     }
@@ -771,7 +771,7 @@ static void i2s_buf_initialize(struct stm32_i2s_s *priv)
  * Name: i2s_dma_sampleinit
  *
  * Description:
- *   Initialize sampling of DMA registers (if CONFIG_STM32F7_I2S_DMADEBUG)
+ *   Initialize sampling of DMA registers (if CONFIG_STM32_I2S_DMADEBUG)
  *
  * Input Parameters:
  *   priv - I2S state instance
@@ -781,7 +781,7 @@ static void i2s_buf_initialize(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_I2S_DMADEBUG)
+#if defined(CONFIG_STM32_I2S_DMADEBUG)
 static void i2s_dma_sampleinit(struct stm32_i2s_s *priv,
                                struct stm32_transport_s *xpt)
 {
@@ -809,7 +809,7 @@ static void i2s_dma_sampleinit(struct stm32_i2s_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_I2S_DMADEBUG) && defined(I2S_HAVE_RX)
+#if defined(CONFIG_STM32_I2S_DMADEBUG) && defined(I2S_HAVE_RX)
 static void i2s_rxdma_sampledone(struct stm32_i2s_s *priv, int result)
 {
   i2sinfo("result: %d\n", result);
@@ -875,7 +875,7 @@ static void i2s_rxdma_sampledone(struct stm32_i2s_s *priv, int result)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_I2S_DMADEBUG) && defined(I2S_HAVE_TX)
+#if defined(CONFIG_STM32_I2S_DMADEBUG) && defined(I2S_HAVE_TX)
 static void i2s_txdma_sampledone(struct stm32_i2s_s *priv, int result)
 {
   i2sinfo("result: %d\n", result);
@@ -1145,7 +1145,7 @@ static void i2s_rx_worker(void *arg)
 
   if (sq_empty(&priv->rx.act))
     {
-#ifdef CONFIG_STM32F7_I2S_DMADEBUG
+#ifdef CONFIG_STM32_I2S_DMADEBUG
       bfcontainer = (struct stm32_buffer_s *)sq_peek(&priv->rx.done);
       if (bfcontainer)
         {
@@ -1543,7 +1543,7 @@ static void i2s_tx_worker(void *arg)
 
   if (sq_empty(&priv->tx.act))
     {
-#ifdef CONFIG_STM32F7_I2S_DMADEBUG
+#ifdef CONFIG_STM32_I2S_DMADEBUG
       bfcontainer = (struct stm32_buffer_s *)sq_peek(&priv->tx.done);
       if (bfcontainer)
         {
@@ -1770,7 +1770,7 @@ static int i2s_checkwidth(struct stm32_i2s_s *priv, int bits)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_RX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -1806,7 +1806,7 @@ static uint32_t stm32_i2s_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t stm32_i2s_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef I2S_HAVE_RX
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -1975,7 +1975,7 @@ static int stm32_i2s_roundf(float num)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(I2S_HAVE_TX) && defined(I2S_HAVE_MCK)
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -2012,7 +2012,7 @@ static uint32_t stm32_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t stm32_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef I2S_HAVE_TX
   struct stm32_i2s_s *priv = (struct stm32_i2s_s *)dev;
@@ -2441,7 +2441,7 @@ static void i2s_dma_free(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2S1
+#ifdef CONFIG_STM32_I2S1
 static void i2s1_configure(struct stm32_i2s_s *priv)
 {
   /* Configure multiplexed pins as connected on the board.  Chip
@@ -2450,7 +2450,7 @@ static void i2s1_configure(struct stm32_i2s_s *priv)
 
   priv->base  = STM32_I2S1_BASE;
 
-#ifdef CONFIG_STM32F7_I2S1_RX
+#ifdef CONFIG_STM32_I2S1_RX
   priv->rxenab = true;
 
   if (!priv->initialized)
@@ -2463,9 +2463,9 @@ static void i2s1_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S1_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S1_RX */
+#endif /* CONFIG_STM32_I2S1_RX */
 
-#ifdef CONFIG_STM32F7_I2S1_TX
+#ifdef CONFIG_STM32_I2S1_TX
   priv->txenab = true;
 
   /* Only configure if the port is not already configured */
@@ -2480,16 +2480,16 @@ static void i2s1_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S1_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S1_TX */
+#endif /* CONFIG_STM32_I2S1_TX */
 
   /* Configure driver state specific to this I2S peripheral */
 
-  priv->datalen = CONFIG_STM32F7_I2S1_DATALEN;
+  priv->datalen = CONFIG_STM32_I2S1_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S2_DATAMASK;
+  priv->align   = STM32_I2S2_DATAMASK;
 #endif
 }
-#endif /* CONFIG_STM32F7_I2S1 */
+#endif /* CONFIG_STM32_I2S1 */
 
 /****************************************************************************
  * Name: i2s2_configure
@@ -2506,7 +2506,7 @@ static void i2s1_configure(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2S2
+#ifdef CONFIG_STM32_I2S2
 static void i2s2_configure(struct stm32_i2s_s *priv)
 {
   /* Configure multiplexed pins as connected on the board.  Chip
@@ -2515,7 +2515,7 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
 
   priv->base  = STM32_I2S2_BASE;
 
-#ifdef CONFIG_STM32F7_I2S2_RX
+#ifdef CONFIG_STM32_I2S2_RX
   priv->rxenab = true;
 
   if (!priv->initialized)
@@ -2528,9 +2528,9 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S2_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S2_RX */
+#endif /* CONFIG_STM32_I2S2_RX */
 
-#ifdef CONFIG_STM32F7_I2S2_TX
+#ifdef CONFIG_STM32_I2S2_TX
   priv->txenab = true;
 
   /* Only configure if the port is not already configured */
@@ -2545,16 +2545,16 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S2_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S2_TX */
+#endif /* CONFIG_STM32_I2S2_TX */
 
   /* Configure driver state specific to this I2S peripheral */
 
-  priv->datalen = CONFIG_STM32F7_I2S2_DATALEN;
+  priv->datalen = CONFIG_STM32_I2S2_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S2_DATAMASK;
+  priv->align   = STM32_I2S2_DATAMASK;
 #endif
 }
-#endif /* CONFIG_STM32F7_I2S2 */
+#endif /* CONFIG_STM32_I2S2 */
 
 /****************************************************************************
  * Name: i2s3_configure
@@ -2571,7 +2571,7 @@ static void i2s2_configure(struct stm32_i2s_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_I2S3
+#ifdef CONFIG_STM32_I2S3
 static void i2s3_configure(struct stm32_i2s_s *priv)
 {
   /* Configure multiplexed pins as connected on the board.  Chip
@@ -2580,7 +2580,7 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
 
   priv->base    = STM32_I2S3_BASE;
 
-#ifdef CONFIG_STM32F7_I2S3_RX
+#ifdef CONFIG_STM32_I2S3_RX
   priv->rxenab = true;
 
   if (!priv->initialized)
@@ -2593,9 +2593,9 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S3_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S3_RX */
+#endif /* CONFIG_STM32_I2S3_RX */
 
-#ifdef CONFIG_STM32F7_I2S3_TX
+#ifdef CONFIG_STM32_I2S3_TX
   priv->txenab = true;
 
   /* Only configure if the port is not already configured */
@@ -2610,16 +2610,16 @@ static void i2s3_configure(struct stm32_i2s_s *priv)
       stm32_configgpio(GPIO_I2S3_WS);
       priv->initialized = true;
     }
-#endif /* CONFIG_STM32F7_I2S3_TX */
+#endif /* CONFIG_STM32_I2S3_TX */
 
   /* Configure driver state specific to this I2S peripheral */
 
-  priv->datalen = CONFIG_STM32F7_I2S3_DATALEN;
+  priv->datalen = CONFIG_STM32_I2S3_DATALEN;
 #ifdef CONFIG_DEBUG
-  priv->align   = STM32F7_I2S3_DATAMASK;
+  priv->align   = STM32_I2S3_DATAMASK;
 #endif
 }
-#endif /* CONFIG_STM32F7_I2S3 */
+#endif /* CONFIG_STM32_I2S3 */
 
 /****************************************************************************
  * Public Functions
@@ -2677,7 +2677,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_STM32F7_I2S1
+#ifdef CONFIG_STM32_I2S1
   if (port == 1)
     {
       /* Select I2S1 */
@@ -2686,7 +2686,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_I2S2
+#ifdef CONFIG_STM32_I2S2
   if (port == 2)
     {
       /* Select I2S2 */
@@ -2695,7 +2695,7 @@ struct i2s_dev_s *stm32_i2sbus_initialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_I2S3
+#ifdef CONFIG_STM32_I2S3
   if (port == 3)
     {
       /* Select I2S3 */
@@ -2736,4 +2736,4 @@ errout_with_alloc:
 }
 #endif /* I2S_HAVE_RX || I2S_HAVE_TX */
 
-#endif /* CONFIG_STM32F7_I2S1 || CONFIG_STM32F7_I2S2 || CONFIG_STM32F7_I2S3 */
+#endif /* CONFIG_STM32_I2S1 || CONFIG_STM32_I2S2 || CONFIG_STM32_I2S3 */

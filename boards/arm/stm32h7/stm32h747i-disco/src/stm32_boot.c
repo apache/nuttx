@@ -58,13 +58,13 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG_STM32H7_OTGHS) || defined(CONFIG_STM32H7_HOST)
+#if defined(CONFIG_STM32_OTGHS) || defined(CONFIG_STM32H7_HOST)
   /* Initialize USB */
 
   stm32_usbinitialize();
 #endif
 
-#ifdef CONFIG_STM32H7_SPI
+#ifdef CONFIG_STM32_SPI
   /* Configure SPI chip selects */
 
   stm32_spidev_initialize();

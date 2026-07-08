@@ -62,6 +62,7 @@ Authentication and Hashing Algorithms
   - CRYPTO_SHA1_HMAC
 
 - SHA-2 HMAC:
+  - CRYPTO_SHA2_224_HMAC (224-bit)
   - CRYPTO_SHA2_256_HMAC (256-bit)
   - CRYPTO_SHA2_384_HMAC (384-bit)
   - CRYPTO_SHA2_512_HMAC (512-bit)

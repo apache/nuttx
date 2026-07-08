@@ -49,7 +49,7 @@
 #include "stm32_rcc.h"
 #include "stm32_can.h"
 
-/* Ported form arch/arm/src/stm32/stm32_can_sock.c */
+/* Ported form arch/arm/src/common/stm32/stm32_can_m3m4_v1_sock.c */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,10 +63,10 @@
 
 /* Bit timing ***************************************************************/
 
-#define CAN_BIT_QUANTA (CONFIG_STM32F7_CAN_TSEG1 + CONFIG_STM32F7_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_STM32_CAN_TSEG1 + CONFIG_STM32_CAN_TSEG2 + 1)
 
 #ifndef CONFIG_DEBUG_CAN_INFO
-#  undef CONFIG_STM32F7_CAN_REGDEBUG
+#  undef CONFIG_STM32_CAN_REGDEBUG
 #endif
 
 /* Pool configuration *******************************************************/
@@ -146,7 +146,7 @@ static void stm32can_putreg(struct stm32_can_s *priv, int offset,
                             uint32_t value);
 static void stm32can_putfreg(struct stm32_can_s *priv, int offset,
                              uint32_t value);
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpctrlregs(struct stm32_can_s *priv,
                                   const char *msg);
 static void stm32can_dumpmbregs(struct stm32_can_s *priv,
@@ -233,7 +233,7 @@ static int  stm32can_netdev_ioctl(struct net_driver_s *dev, int cmd,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
 
 static struct stm32_can_s g_can1priv =
 {
@@ -250,12 +250,12 @@ static struct stm32_can_s g_can1priv =
   .filter           = 0,
   .base             = STM32_CAN1_BASE,
   .fbase            = STM32_CAN1_BASE,
-  .baud             = CONFIG_STM32F7_CAN1_BAUD,
+  .baud             = CONFIG_STM32_CAN1_BAUD,
 };
 
 #endif
 
-#ifdef CONFIG_STM32F7_CAN2
+#ifdef CONFIG_STM32_CAN2
 
 static struct stm32_can_s g_can2priv =
 {
@@ -272,12 +272,12 @@ static struct stm32_can_s g_can2priv =
   .filter           = CAN_NFILTERS / 2,
   .base             = STM32_CAN2_BASE,
   .fbase            = STM32_CAN1_BASE,
-  .baud             = CONFIG_STM32F7_CAN2_BAUD,
+  .baud             = CONFIG_STM32_CAN2_BAUD,
 };
 
 #endif
 
-#ifdef CONFIG_STM32F7_CAN3
+#ifdef CONFIG_STM32_CAN3
 
 static struct stm32_can_s g_can3priv =
 {
@@ -294,7 +294,7 @@ static struct stm32_can_s g_can3priv =
   .filter           = CAN_NFILTERS / 2,
   .base             = STM32_CAN3_BASE,
   .fbase            = STM32_CAN3_BASE,
-  .baud             = CONFIG_STM32F7_CAN3_BAUD,
+  .baud             = CONFIG_STM32_CAN3_BAUD,
 };
 
 #endif
@@ -312,7 +312,7 @@ static struct stm32_can_s g_can3priv =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static uint32_t stm32can_vgetreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -398,7 +398,7 @@ static uint32_t stm32can_getfreg(struct stm32_can_s *priv, int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
@@ -451,7 +451,7 @@ static void stm32can_putfreg(struct stm32_can_s *priv, int offset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpctrlregs(struct stm32_can_s *priv,
                                   const char *msg)
 {
@@ -497,7 +497,7 @@ static void stm32can_dumpctrlregs(struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpmbregs(struct stm32_can_s *priv,
                                 const char *msg)
 {
@@ -564,7 +564,7 @@ static void stm32can_dumpmbregs(struct stm32_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32can_dumpfiltregs(struct stm32_can_s *priv,
                                   const char *msg)
 {
@@ -729,7 +729,7 @@ static void stm32can_errint(struct stm32_can_s *priv, bool enable)
     }
   else
     {
-      regval &= ~STM32F7_CAN_ERRINT;
+      regval &= ~STM32_CAN_ERRINT;
     }
 
   stm32can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
@@ -1860,15 +1860,15 @@ static int stm32can_bittiming(struct stm32_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32F7_CAN_TSEG1,
-   * ts2 is CONFIG_STM32F7_CAN_TSEG2 and we calculate brp to achieve
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32_CAN_TSEG1,
+   * ts2 is CONFIG_STM32_CAN_TSEG2 and we calculate brp to achieve
    * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
     {
-      ts1 = CONFIG_STM32F7_CAN_TSEG1;
-      ts2 = CONFIG_STM32F7_CAN_TSEG2;
+      ts1 = CONFIG_STM32_CAN_TSEG1;
+      ts2 = CONFIG_STM32_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
@@ -2036,21 +2036,21 @@ static void stm32can_reset(struct stm32_can_s *priv)
 
   /* Get the bits in the AHB1RSTR register needed to reset this CAN device */
 
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
       regbit = RCC_APB1RSTR_CAN1RST;
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_CAN2
+#ifdef CONFIG_STM32_CAN2
   if (priv->port == 2)
     {
       regbit = RCC_APB1RSTR_CAN2RST;
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_CAN3
+#ifdef CONFIG_STM32_CAN3
   if (priv->port == 3)
     {
       regbit = RCC_APB1RSTR_CAN3RST;
@@ -2298,9 +2298,9 @@ static int stm32can_filterinit(struct stm32_can_s *priv)
 
   /* Assign half the filters to CAN1, half to CAN2 */
 
-#if defined(CONFIG_STM32F7_CONNECTIVITYLINE) || \
-    defined(CONFIG_STM32F7_STM32F20XX) || \
-    defined(CONFIG_STM32F7_STM32F4XXX)
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || \
+    defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F4XXX)
   regval  = stm32can_getfreg(priv, STM32_CAN_FMR_OFFSET);
   regval &= CAN_FMR_CAN2SB_MASK;
   regval |= (CAN_NFILTERS / 2) << CAN_FMR_CAN2SB_SHIFT;
@@ -2432,7 +2432,7 @@ int stm32_cansockinitialize(int port)
    * by stm32_clockconfig() early in the reset sequence.
    */
 
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (port == 1)
     {
       /* Select the CAN1 device structure */
@@ -2448,7 +2448,7 @@ int stm32_cansockinitialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_CAN2
+#ifdef CONFIG_STM32_CAN2
   if (port == 2)
     {
       /* Select the CAN2 device structure */
@@ -2464,7 +2464,7 @@ int stm32_cansockinitialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_STM32F7_CAN3
+#ifdef CONFIG_STM32_CAN3
   if (port == 3)
     {
       /* Select the CAN3 device structure */
@@ -2526,15 +2526,15 @@ errout:
 #if !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void)
 {
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
   stm32_cansockinitialize(1);
 #endif
 
-#ifdef CONFIG_STM32F7_CAN2
+#ifdef CONFIG_STM32_CAN2
   stm32_cansockinitialize(2);
 #endif
 
-#ifdef CONFIG_STM32F7_CAN3
+#ifdef CONFIG_STM32_CAN3
   stm32_cansockinitialize(3);
 #endif
 }

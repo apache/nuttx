@@ -30,7 +30,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_ETHMAC_REGDEBUG
+#ifdef CONFIG_STM32_ETHMAC_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr);
 static void stm32_putreg(uint32_t val, uint32_t addr);
 static void stm32_checksetup(void);

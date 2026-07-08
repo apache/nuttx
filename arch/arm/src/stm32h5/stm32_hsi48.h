@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32H5_HAVE_HSI48
+#ifdef CONFIG_STM32_HAVE_HSI48
 
 /****************************************************************************
  * Public Types
@@ -48,7 +48,7 @@ enum syncsrc_e
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_enable_hsi48
+ * Name: stm32_enable_hsi48
  *
  * Description:
  *   On STM32H5X3, STM32H596xx/4A6xx and STM32H5XR devices only, the HSI48
@@ -74,10 +74,10 @@ enum syncsrc_e
  *
  ****************************************************************************/
 
-void stm32h5_enable_hsi48(enum syncsrc_e syncsrc);
+void stm32_enable_hsi48(enum syncsrc_e syncsrc);
 
 /****************************************************************************
- * Name: stm32h5_disable_hsi48
+ * Name: stm32_disable_hsi48
  *
  * Description:
  *   Disable the HSI48 clock.
@@ -90,7 +90,7 @@ void stm32h5_enable_hsi48(enum syncsrc_e syncsrc);
  *
  ****************************************************************************/
 
-void stm32h5_disable_hsi48(void);
+void stm32_disable_hsi48(void);
 
-#endif /* CONFIG_STM32H5_HAVE_HSI48 */
+#endif /* CONFIG_STM32_HAVE_HSI48 */
 #endif /* __ARCH_ARM_SRC_STM32H5_STM32_HSI48_H */

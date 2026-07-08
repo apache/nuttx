@@ -31,6 +31,9 @@
 #include <string.h>
 #include <grp.h>
 #include <assert.h>
+#include <errno.h>
+
+#include <nuttx/lib/lib.h>
 
 #include "grp/lib_grp.h"
 
@@ -40,6 +43,19 @@
 
 typedef CODE int (grp_foreach_match_t)(FAR const struct group *entry,
                                        uintptr_t arg);
+
+/* Context used by grp_match_user() to accumulate the group IDs of all the
+ * groups that a given user is a member of.
+ */
+
+struct grp_user_s
+{
+  FAR const char *user;       /* User name to search for */
+  gid_t           group;      /* Primary group to skip (avoid duplicate) */
+  FAR gid_t      *grouplist;  /* Output array of group IDs */
+  int             maxgroups;  /* Number of slots in grouplist */
+  int             count;      /* Number of group IDs found so far */
+};
 
 /****************************************************************************
  * Private Functions
@@ -91,6 +107,61 @@ static int grp_match_gid(FAR const struct group *entry, uintptr_t arg)
 {
   int match_gid = (int)arg;
   return match_gid == entry->gr_gid ? 1 : 0;
+}
+
+/****************************************************************************
+ * Name: grp_match_user
+ *
+ * Description:
+ *   Called for each record in the group file.  If the user (passed via the
+ *   context in arg) is a member of the group, its group ID is appended to
+ *   the caller's output array.  Always returns 0 so that every record in
+ *   the file is visited and the total number of matching groups is counted.
+ *
+ * Input Parameters:
+ *   entry  - The parsed group file record
+ *   arg    - A pointer to the grp_user_s search context
+ *
+ * Returned Value:
+ *   = 0 :  Always, so that iteration continues to the end of the file.
+ *
+ ****************************************************************************/
+
+static int grp_match_user(FAR const struct group *entry, uintptr_t arg)
+{
+  FAR struct grp_user_s *ctx = (FAR struct grp_user_s *)arg;
+  FAR char **member;
+
+  /* The primary group has already been accounted for by the caller.  Skip
+   * it here to avoid reporting it twice.
+   */
+
+  if (entry->gr_gid == ctx->group)
+    {
+      return 0;
+    }
+
+  /* Check whether the user is listed as a member of this group. */
+
+  for (member = entry->gr_mem; *member != NULL; member++)
+    {
+      if (strcmp(*member, ctx->user) == 0)
+        {
+          /* Append the group ID if there is room in the output array.  Keep
+           * counting regardless so the caller learns the required size.
+           */
+
+          if (ctx->count < ctx->maxgroups)
+            {
+              ctx->grouplist[ctx->count] = entry->gr_gid;
+            }
+
+          ctx->count++;
+          break;
+        }
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -336,4 +407,55 @@ int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
     }
 
   return grp_foreach(grp_match_gid, (uintptr_t)gid, entry, buffer, buflen);
+}
+
+/****************************************************************************
+ * Name: grp_findby_user
+ *
+ * Description:
+ *   Scan the group file and collect the group IDs of all groups that have
+ *   'user' as a member, excluding the primary group 'group'.
+ *
+ * Input Parameters:
+ *   user      - The user name to search for
+ *   group     - The primary group ID to exclude from the search
+ *   grouplist - Location to return the matching group IDs
+ *   maxgroups - The number of slots available in grouplist
+ *   count     - On input, the number of group IDs already stored in
+ *               grouplist.  On output, the total number of group IDs found
+ *               (which may exceed maxgroups).
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  A negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int grp_findby_user(FAR const char *user, gid_t group,
+                    FAR gid_t *grouplist, int maxgroups, FAR int *count)
+{
+  struct grp_user_s ctx;
+  struct group entry;
+  FAR char *buffer;
+  int ret;
+
+  buffer = lib_get_tempbuffer(GRPBUF_RESERVE_SIZE);
+  if (buffer == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ctx.user      = user;
+  ctx.group     = group;
+  ctx.grouplist = grouplist;
+  ctx.maxgroups = maxgroups;
+  ctx.count     = *count;
+
+  ret = grp_foreach(grp_match_user, (uintptr_t)&ctx, &entry, buffer,
+                    GRPBUF_RESERVE_SIZE);
+
+  *count = ctx.count;
+  lib_put_tempbuffer(buffer);
+
+  return ret < 0 ? ret : 0;
 }

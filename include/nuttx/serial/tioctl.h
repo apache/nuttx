@@ -87,7 +87,7 @@
 
 /* Controlling TTY */
 
-#define TIOCSCTTY       _TIOC(0x0018)  /* Make controlling TTY: int */
+#define TIOCSCTTY       _TIOC(0x0018)  /* Make controlling TTY: int (0 == caller) */
 #define TIOCNOTTY       _TIOC(0x0019)  /* Give up controllinog TTY: void */
 
 /* Exclusive mode */
@@ -199,6 +199,12 @@
 #define TIOCGSWAP       _TIOC(0x0036)  /* Get RX/TX Swap */
 
 #define SER_SWAP_ENABLED   (1 << 0) /* Enable/disable RX/TX swap */
+
+/* Process group / session (job control) */
+
+#define TIOCGPGRP       _TIOC(0x0037) /* Get foreground process group: FAR pid_t* */
+#define TIOCSPGRP       _TIOC(0x0038) /* Set foreground process group: FAR const pid_t* */
+#define TIOCGSID        _TIOC(0x0039) /* Get session leader: FAR pid_t* */
 
 /****************************************************************************
  * Public Type Definitions

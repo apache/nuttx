@@ -79,6 +79,6 @@ package as flexible as, say, an STM32F4 Discovery board.
 Build Instructions
 ==================
 
-The boards/arm/stm32/omnibusf4/nsh/defconfig file creates a basic setup, and
+The boards/arm/stm32f4/omnibusf4/nsh/defconfig file creates a basic setup, and
 includes drivers for all supported onboard chips. The console and
 command prompt are sent to USART3.

@@ -40,8 +40,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32H5_ICACHE_INTERRUPT  (defined(CONFIG_STM32H5_ICACHE_INV_INT) ||\
-                                   defined(CONFIG_STM32H5_ICACHE_ERR_INT))
+#define STM32_ICACHE_INTERRUPT  (defined(CONFIG_STM32_ICACHE_INV_INT) ||\
+                                   defined(CONFIG_STM32_ICACHE_ERR_INT))
 
 /****************************************************************************
  * Private Types
@@ -82,51 +82,51 @@ static struct stm32_icache_s icache1 =
   .lock                = SP_UNLOCKED,
 };
 
-#ifdef CONFIG_STM32H5_ICACHE_REGION0
+#ifdef CONFIG_STM32_ICACHE_REGION0
 static struct stm32_icache_region region0 =
 {
   .num = 0,
-  .baseaddr = CONFIG_STM32H5_ICACHE_REGION0_BADDR,
-  .rsize = CONFIG_STM32H5_ICACHE_REGION0_RSIZE,
-  .remapaddr = CONFIG_STM32H5_ICACHE_REGION0_REMAPADDR,
-  .mstsel = CONFIG_STM32H5_ICACHE_REGION0_MSTSEL,
-  .hburst = CONFIG_STM32H5_ICACHE_REGION0_HBURST,
+  .baseaddr = CONFIG_STM32_ICACHE_REGION0_BADDR,
+  .rsize = CONFIG_STM32_ICACHE_REGION0_RSIZE,
+  .remapaddr = CONFIG_STM32_ICACHE_REGION0_REMAPADDR,
+  .mstsel = CONFIG_STM32_ICACHE_REGION0_MSTSEL,
+  .hburst = CONFIG_STM32_ICACHE_REGION0_HBURST,
 };
 #endif
 
-#ifdef CONFIG_STM32H5_ICACHE_REGION1
+#ifdef CONFIG_STM32_ICACHE_REGION1
 static struct stm32_icache_region region1 =
 {
   .num = 1,
-  .baseaddr = CONFIG_STM32H5_ICACHE_REGION1_BADDR,
-  .rsize = CONFIG_STM32H5_ICACHE_REGION1_RSIZE,
-  .remapaddr = CONFIG_STM32H5_ICACHE_REGION1_REMAPADDR,
-  .mstsel = CONFIG_STM32H5_ICACHE_REGION1_MSTSEL,
-  .hburst = CONFIG_STM32H5_ICACHE_REGION1_HBURST,
+  .baseaddr = CONFIG_STM32_ICACHE_REGION1_BADDR,
+  .rsize = CONFIG_STM32_ICACHE_REGION1_RSIZE,
+  .remapaddr = CONFIG_STM32_ICACHE_REGION1_REMAPADDR,
+  .mstsel = CONFIG_STM32_ICACHE_REGION1_MSTSEL,
+  .hburst = CONFIG_STM32_ICACHE_REGION1_HBURST,
 };
 #endif
 
-#ifdef CONFIG_STM32H5_ICACHE_REGION2
+#ifdef CONFIG_STM32_ICACHE_REGION2
 static struct stm32_icache_region region2 =
 {
   .num = 2,
-  .baseaddr = CONFIG_STM32H5_ICACHE_REGION2_BADDR,
-  .rsize = CONFIG_STM32H5_ICACHE_REGION2_RSIZE,
-  .remapaddr = CONFIG_STM32H5_ICACHE_REGION2_REMAPADDR,
-  .mstsel = CONFIG_STM32H5_ICACHE_REGION2_MSTSEL,
-  .hburst = CONFIG_STM32H5_ICACHE_REGION2_HBURST,
+  .baseaddr = CONFIG_STM32_ICACHE_REGION2_BADDR,
+  .rsize = CONFIG_STM32_ICACHE_REGION2_RSIZE,
+  .remapaddr = CONFIG_STM32_ICACHE_REGION2_REMAPADDR,
+  .mstsel = CONFIG_STM32_ICACHE_REGION2_MSTSEL,
+  .hburst = CONFIG_STM32_ICACHE_REGION2_HBURST,
 };
 #endif
 
-#ifdef CONFIG_STM32H5_ICACHE_REGION3
+#ifdef CONFIG_STM32_ICACHE_REGION3
 static struct stm32_icache_region region3 =
 {
   .num = 3,
-  .baseaddr = CONFIG_STM32H5_ICACHE_REGION3_BADDR,
-  .rsize = CONFIG_STM32H5_ICACHE_REGION3_RSIZE,
-  .remapaddr = CONFIG_STM32H5_ICACHE_REGION3_REMAPADDR,
-  .mstsel = CONFIG_STM32H5_ICACHE_REGION3_MSTSEL,
-  .hburst = CONFIG_STM32H5_ICACHE_REGION3_HBURST,
+  .baseaddr = CONFIG_STM32_ICACHE_REGION3_BADDR,
+  .rsize = CONFIG_STM32_ICACHE_REGION3_RSIZE,
+  .remapaddr = CONFIG_STM32_ICACHE_REGION3_REMAPADDR,
+  .mstsel = CONFIG_STM32_ICACHE_REGION3_MSTSEL,
+  .hburst = CONFIG_STM32_ICACHE_REGION3_HBURST,
 };
 #endif
 
@@ -235,7 +235,7 @@ void stm32_icache_initialize(void)
 
   /* Set associativity */
 
-#ifdef CONFIG_STM32H5_ICACHE_DIRECT
+#ifdef CONFIG_STM32_ICACHE_DIRECT
   regval = getreg32(STM32_ICACHE_CR);
   regval &= ~(ICACHE_CR_WAYSEL);
   putreg32(regval, STM32_ICACHE_CR);
@@ -246,27 +246,27 @@ void stm32_icache_initialize(void)
  * Reset Monitors on Initialization
  */
 
-#ifdef CONFIG_STM32H5_ICACHE_MONITOR_EN
+#ifdef CONFIG_STM32_ICACHE_MONITOR_EN
   stm32_icache_enable_monitors();
   stm32_icache_reset_monitors();
 #endif
 
   /* Set up region configuration registers */
 
-#ifdef CONFIG_STM32H5_ICACHE_REGION0
+#ifdef CONFIG_STM32_ICACHE_REGION0
   stm32_icache_setup_region(region0);
 #endif
-#ifdef CONFIG_STM32H5_ICACHE_REGION1
+#ifdef CONFIG_STM32_ICACHE_REGION1
   stm32_icache_setup_region(region1);
 #endif
-#ifdef CONFIG_STM32H5_ICACHE_REGION2
+#ifdef CONFIG_STM32_ICACHE_REGION2
   stm32_icache_setup_region(region2);
 #endif
-#ifdef CONFIG_STM32H5_ICACHE_REGION3
+#ifdef CONFIG_STM32_ICACHE_REGION3
   stm32_icache_setup_region(region3);
 #endif
 
-#if STM32H5_ICACHE_INTERRUPT 
+#if STM32_ICACHE_INTERRUPT
   /* Attach ISR */
 
   int ret;
@@ -278,10 +278,10 @@ void stm32_icache_initialize(void)
   if (ret == OK)
     {
       regval = 0;
-#  ifdef CONFIG_STM32H5_ICACHE_INV_INT
+#  ifdef CONFIG_STM32_ICACHE_INV_INT
       regval |= ICACHE_IER_BSYENDIE;
 #  endif
-#  ifdef CONFIG_STM32H5_ICACHE_ERR_INT
+#  ifdef CONFIG_STM32_ICACHE_ERR_INT
       regval |= ICACHE_IER_ERRIE;
 #  endif
       stm32_icache_set_ier(regval);
@@ -358,7 +358,7 @@ void stm32_invalidate_icache(void)
   regval |= ICACHE_CR_CACHEINV;
   putreg32(regval, STM32_ICACHE_CR);
 
-#if defined(CONFIG_STM32H5_ICACHE_INV_INT)
+#if defined(CONFIG_STM32_ICACHE_INV_INT)
   stm32_icache_invf_interrupt();
 #else
   stm32_icache_invf_poll();

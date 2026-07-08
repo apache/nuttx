@@ -28,7 +28,10 @@
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <nuttx/crc16.h>
 #include <nuttx/fs/fs.h>
@@ -37,7 +40,6 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mutex.h>
 
-#include <sys/stat.h>
 #include <sys/statfs.h>
 
 #include "inode/inode.h"
@@ -285,14 +287,19 @@ static int littlefs_convert_oflags(int oflags)
 {
   int ret = 0;
 
-  if ((oflags & O_RDONLY) != 0)
+  switch (oflags & O_ACCMODE)
     {
-      ret |= LFS_O_RDONLY;
-    }
+      case O_RDONLY:
+        ret |= LFS_O_RDONLY;
+        break;
 
-  if ((oflags & O_WRONLY) != 0)
-    {
-      ret |= LFS_O_WRONLY;
+      case O_WRONLY:
+        ret |= LFS_O_WRONLY;
+        break;
+
+      case O_RDWR:
+        ret |= LFS_O_RDWR;
+        break;
     }
 
   if ((oflags & O_CREAT) != 0)
@@ -336,6 +343,193 @@ static FAR const char *littlefs_convert_path(FAR const char *path)
   return path;
 }
 
+#if defined(CONFIG_FS_PERMISSION) && defined(CONFIG_FS_LITTLEFS_ATTR_UPDATE)
+
+/****************************************************************************
+ * Name: littlefs_statbuf_locked
+ ****************************************************************************/
+
+static int littlefs_statbuf_locked(FAR struct littlefs_mountpt_s *fs,
+                                   FAR const char *relpath,
+                                   FAR struct stat *buf)
+{
+  struct lfs_info info;
+  struct littlefs_attr_s attr;
+  int ret;
+
+  memset(buf, 0, sizeof(*buf));
+
+  ret = lfs_stat(&fs->lfs, relpath, &info);
+  if (ret < 0)
+    {
+      return littlefs_convert_result(ret);
+    }
+
+  ret = littlefs_convert_result(lfs_getattr(&fs->lfs, relpath, 0,
+                                            &attr, sizeof(attr)));
+  if (ret < 0)
+    {
+      if (ret != -ENODATA)
+        {
+          return ret;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
+  buf->st_mode         = attr.at_mode;
+  buf->st_uid          = attr.at_uid;
+  buf->st_gid          = attr.at_gid;
+  buf->st_atim.tv_sec  = attr.at_atim / 1000000000ull;
+  buf->st_atim.tv_nsec = attr.at_atim % 1000000000ull;
+  buf->st_mtim.tv_sec  = attr.at_mtim / 1000000000ull;
+  buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
+  buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
+  buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+  buf->st_blksize      = fs->cfg.block_size;
+
+  if (info.type == LFS_TYPE_REG)
+    {
+      buf->st_mode |= S_IFREG;
+      buf->st_size = info.size;
+    }
+  else
+    {
+      buf->st_mode |= S_IFDIR;
+      buf->st_size = 0;
+    }
+
+  buf->st_blocks = (buf->st_size + buf->st_blksize - 1) / buf->st_blksize;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: littlefs_check_pathperm_locked
+ ****************************************************************************/
+
+static int littlefs_check_pathperm_locked(FAR struct littlefs_mountpt_s *fs,
+                                          FAR const char *relpath,
+                                          int final_amode)
+{
+  struct stat st;
+  char subpath[PATH_MAX];
+  size_t begin = 0;
+  size_t end;
+  int ret;
+
+  while (relpath[begin] == '/')
+    {
+      begin++;
+    }
+
+  if (relpath[begin] == '\0')
+    {
+      return OK;
+    }
+
+  for (end = begin; ; end++)
+    {
+      if (relpath[end] != '\0' && relpath[end] != '/')
+        {
+          continue;
+        }
+
+      if (relpath[end] == '\0')
+        {
+          break;
+        }
+
+      if (end - begin >= PATH_MAX)
+        {
+          return -ENAMETOOLONG;
+        }
+
+      memcpy(subpath, relpath + begin, end - begin);
+      subpath[end - begin] = '\0';
+
+      ret = littlefs_statbuf_locked(fs, subpath, &st);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      ret = fs_checkmode(st.st_uid, st.st_gid, st.st_mode, X_OK);
+      if (ret < 0)
+        {
+          return ret;
+        }
+    }
+
+  /* Check permission on the final path component */
+
+  ret = littlefs_statbuf_locked(fs, &relpath[begin], &st);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fs_checkmode(st.st_uid, st.st_gid, st.st_mode, final_amode);
+}
+
+/****************************************************************************
+ * Name: littlefs_check_openperm_locked
+ ****************************************************************************/
+
+static int littlefs_check_openperm_locked(FAR struct littlefs_mountpt_s *fs,
+                                          FAR const char *relpath,
+                                          int oflags)
+{
+  return littlefs_check_pathperm_locked(fs, relpath,
+                                        fs_open_amode(oflags));
+}
+
+/****************************************************************************
+ * Name: littlefs_check_parentperm_locked
+ ****************************************************************************/
+
+static int littlefs_check_parentperm_locked(
+                FAR struct littlefs_mountpt_s *fs,
+                FAR const char *relpath, int amode)
+{
+  FAR const char *slash;
+  char parent[PATH_MAX + 1];
+  struct stat st;
+  size_t pathlen;
+  int ret;
+
+  slash = strrchr(relpath, '/');
+  if (slash == NULL || slash == relpath)
+    {
+      ret = littlefs_statbuf_locked(fs, "/", &st);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      return fs_checkmode(st.st_uid, st.st_gid, st.st_mode, amode);
+    }
+
+  pathlen = slash - relpath;
+  if (pathlen > PATH_MAX)
+    {
+      return -ENAMETOOLONG;
+    }
+
+  memcpy(parent, relpath, pathlen);
+  parent[pathlen] = '\0';
+
+  ret = littlefs_statbuf_locked(fs, parent, &st);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fs_checkmode(st.st_uid, st.st_gid, st.st_mode, amode);
+}
+
+#endif /* CONFIG_FS_PERMISSION && CONFIG_FS_LITTLEFS_ATTR_UPDATE */
+
 /****************************************************************************
  * Name: littlefs_open
  ****************************************************************************/
@@ -346,6 +540,9 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+#if defined(CONFIG_FS_PERMISSION) && defined(CONFIG_FS_LITTLEFS_ATTR_UPDATE)
+  struct lfs_info info;
+#endif
   int ret;
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -376,6 +573,27 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
   /* Try to open the file */
 
   relpath = littlefs_convert_path(relpath);
+
+#if defined(CONFIG_FS_PERMISSION) && defined(CONFIG_FS_LITTLEFS_ATTR_UPDATE)
+  ret = lfs_stat(&fs->lfs, relpath, &info);
+  if (ret == 0)
+    {
+      ret = littlefs_check_openperm_locked(fs, relpath, oflags);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+  else if (ret == LFS_ERR_NOENT && (oflags & O_CREAT) != 0)
+    {
+      ret = littlefs_check_parentperm_locked(fs, relpath, W_OK | X_OK);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+#endif
+
   oflags = littlefs_convert_oflags(oflags);
   if (fs->readonly)
     {
@@ -404,6 +622,10 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
       clock_gettime(CLOCK_REALTIME, &time);
       memset(&attr, 0, sizeof(attr));
       attr.at_mode = mode;
+#ifdef CONFIG_FS_PERMISSION
+      attr.at_uid = geteuid();
+      attr.at_gid = getegid();
+#endif
       attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
       attr.at_atim = attr.at_ctim;
       attr.at_mtim = attr.at_ctim;
@@ -1018,6 +1240,15 @@ static int littlefs_opendir(FAR struct inode *mountpt,
   /* Call the LFS's opendir function */
 
   relpath = littlefs_convert_path(relpath);
+
+#if defined(CONFIG_FS_PERMISSION) && defined(CONFIG_FS_LITTLEFS_ATTR_UPDATE)
+  ret = littlefs_check_pathperm_locked(fs, relpath, R_OK | X_OK);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+#endif
+
   ret = littlefs_convert_result(lfs_dir_open(&fs->lfs, &ldir->dir, relpath));
   if (ret < 0)
     {
@@ -1342,6 +1573,9 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 {
   FAR struct littlefs_mountpt_s *fs;
   int ret;
+  int block_size_factor = CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR;
+  bool autoformat = false;
+  bool forceformat = false;
 
   /* Open the block driver */
 
@@ -1415,6 +1649,38 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
       goto errout_with_fs;
     }
 
+  /* Parse comma-separated mount options. Recognised tokens:
+   *   autoformat           - format if mount fails
+   *   forceformat          - always format before mounting
+   *   block_size_factor=N  - override CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR
+   */
+
+  if (data != NULL)
+    {
+      FAR const char *p = data;
+
+      while (*p != '\0')
+        {
+          FAR const char *end = strchrnul(p, ',');
+          size_t len = end - p;
+
+          if (strncmp(p, "autoformat", len) == 0)
+            {
+              autoformat = true;
+            }
+          else if (strncmp(p, "forceformat", len) == 0)
+            {
+              forceformat = true;
+            }
+          else
+            {
+              sscanf(p, "block_size_factor=%d", &block_size_factor);
+            }
+
+          p = (*end != '\0') ? end + 1 : end;
+        }
+    }
+
   /* Initialize lfs_config structure */
 
   fs->cfg.context        = fs;
@@ -1426,10 +1692,8 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
                            CONFIG_FS_LITTLEFS_READ_SIZE_FACTOR;
   fs->cfg.prog_size      = fs->geo.blocksize *
                            CONFIG_FS_LITTLEFS_PROGRAM_SIZE_FACTOR;
-  fs->cfg.block_size     = fs->geo.erasesize *
-                           CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR;
-  fs->cfg.block_count    = fs->geo.neraseblocks /
-                           CONFIG_FS_LITTLEFS_BLOCK_SIZE_FACTOR;
+  fs->cfg.block_size     = fs->geo.erasesize * block_size_factor;
+  fs->cfg.block_count    = fs->geo.neraseblocks / block_size_factor;
   fs->cfg.block_cycles   = CONFIG_FS_LITTLEFS_BLOCK_CYCLE;
   fs->cfg.cache_size     = fs->geo.blocksize *
                            CONFIG_FS_LITTLEFS_CACHE_SIZE_FACTOR;
@@ -1451,7 +1715,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
   /* Force format the device if -o forceformat */
 
-  if (data && strcmp(data, "forceformat") == 0)
+  if (forceformat)
     {
       ret = littlefs_convert_result(lfs_format(&fs->lfs, &fs->cfg));
       if (ret < 0)
@@ -1470,7 +1734,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
     {
       /* Auto format the device if -o autoformat */
 
-      if (ret != -EFAULT || !data || strcmp(data, "autoformat"))
+      if (ret != -EFAULT || !autoformat)
         {
           goto errout_with_fs;
         }
@@ -1706,6 +1970,10 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
       clock_gettime(CLOCK_REALTIME, &time);
       memset(&attr, 0, sizeof(attr));
       attr.at_mode = mode;
+#ifdef CONFIG_FS_PERMISSION
+      attr.at_uid = geteuid();
+      attr.at_gid = getegid();
+#endif
       attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
       attr.at_atim = attr.at_ctim;
       attr.at_mtim = attr.at_ctim;

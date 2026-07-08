@@ -39,7 +39,15 @@
 /* If no value is given, we proceed with 0 since a one-shot timer is used for
  * accurate delays. A runtime DEBUGASSERT catches the case where the one-shot
  * timer lower-half isn't registered in time.
+ *
+ * If ARCH_HAVE_DYNAMIC_UDELAY is set, BOARD_LOOPSPERMSEC is unset.
+ * Considering the above, it should not be used. Set a default value of -1,
+ * turning this case into an already handled one.
  */
+
+#ifndef CONFIG_BOARD_LOOPSPERMSEC
+#  define CONFIG_BOARD_LOOPSPERMSEC -1
+#endif
 
 #if CONFIG_BOARD_LOOPSPERMSEC == -1
 #  undef  CONFIG_BOARD_LOOPSPERMSEC
@@ -181,12 +189,20 @@ void weak_function up_mdelay(unsigned int milliseconds)
  *   Delay inline for the requested number of microseconds.
  *   WARNING: NOT multi-tasking friendly
  *
+ *   This function is both compiled optionally based on ARCH_HAVE_UDELAY
+ *   and declared with weak attribute. See comment of up_udelay
+ *   implementation in sched/clock/clock_delay.c for explanation.
+ *
  ****************************************************************************/
+
+#ifndef CONFIG_ARCH_HAVE_UDELAY
 
 void weak_function up_udelay(useconds_t microseconds)
 {
   up_ndelay(NSEC_PER_USEC * microseconds);
 }
+
+#endif
 
 /****************************************************************************
  * Name: up_ndelay

@@ -56,12 +56,12 @@
  * And I don't know now to re-configure it yet
  */
 
-#undef CONFIG_STM32WB_SYSTICK_HCLKd8
+#undef CONFIG_STM32_SYSTICK_HCLKd8
 
-#ifdef CONFIG_STM32WB_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32WB_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#ifdef CONFIG_STM32_SYSTICK_HCLKd8
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
-#  define SYSTICK_RELOAD ((STM32WB_HCLK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
 #endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
@@ -77,7 +77,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32wb_timerisr
+ * Function:  stm32_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -85,7 +85,7 @@
  *
  ****************************************************************************/
 
-static int stm32wb_timerisr(int irq, uint32_t *regs, void *arg)
+static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -121,7 +121,7 @@ void up_timer_initialize(void)
 
 #if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
   regval = getreg32(NVIC_SYSTICK_CTRL);
-#ifdef CONFIG_STM32WB_SYSTICK_HCLKd8
+#ifdef CONFIG_STM32_SYSTICK_HCLKd8
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
 #else
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
@@ -135,7 +135,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  irq_attach(STM32WB_IRQ_SYSTICK, (xcpt_t)stm32wb_timerisr, NULL);
+  irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -144,5 +144,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(STM32WB_IRQ_SYSTICK);
+  up_enable_irq(STM32_IRQ_SYSTICK);
 }

@@ -40,16 +40,16 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_I2C1)
+#if defined(CONFIG_STM32_I2C1)
 struct i2c_master_s *i2c1;
 #endif
-#if defined(CONFIG_STM32L4_I2C2)
+#if defined(CONFIG_STM32_I2C2)
 struct i2c_master_s *i2c2;
 #endif
-#if defined(CONFIG_STM32L4_I2C3)
+#if defined(CONFIG_STM32_I2C3)
 struct i2c_master_s *i2c3;
 #endif
-#if defined(CONFIG_STM32L4_I2C4)
+#if defined(CONFIG_STM32_I2C4)
 struct i2c_master_s *i2c4;
 #endif
 
@@ -102,7 +102,7 @@ int stm32_bringup(void)
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32_DFSDM
   /* Initialize DFSDM and register its filters as additional ADC devices. */
 
   ret = stm32_dfsdm_setup();
@@ -148,7 +148,7 @@ int stm32_bringup(void)
 
   /* Initialize the SDIO block driver */
 
-  ret = stm32l4_sdio_initialize();
+  ret = stm32_sdio_initialize();
   if (ret != OK)
     {
       ferr("ERROR: Failed to initialize MMC/SD driver: %d\n", ret);
@@ -161,29 +161,29 @@ int stm32_bringup(void)
 
   /* REVISIT: this is ugly! */
 
-#if defined(CONFIG_STM32L4_I2C1)
-  i2c1 = stm32l4_i2cbus_initialize(1);
+#if defined(CONFIG_STM32_I2C1)
+  i2c1 = stm32_i2cbus_initialize(1);
 #endif
-#if defined(CONFIG_STM32L4_I2C2)
-  i2c2 = stm32l4_i2cbus_initialize(2);
+#if defined(CONFIG_STM32_I2C2)
+  i2c2 = stm32_i2cbus_initialize(2);
 #endif
-#if defined(CONFIG_STM32L4_I2C3)
-  i2c3 = stm32l4_i2cbus_initialize(3);
+#if defined(CONFIG_STM32_I2C3)
+  i2c3 = stm32_i2cbus_initialize(3);
 #endif
-#if defined(CONFIG_STM32L4_I2C4)
-  i2c4 = stm32l4_i2cbus_initialize(4);
+#if defined(CONFIG_STM32_I2C4)
+  i2c4 = stm32_i2cbus_initialize(4);
 #endif
 #ifdef CONFIG_I2C_DRIVER
-#if defined(CONFIG_STM32L4_I2C1)
+#if defined(CONFIG_STM32_I2C1)
   i2c_register(i2c1, 1);
 #endif
-#if defined(CONFIG_STM32L4_I2C2)
+#if defined(CONFIG_STM32_I2C2)
   i2c_register(i2c2, 2);
 #endif
-#if defined(CONFIG_STM32L4_I2C3)
+#if defined(CONFIG_STM32_I2C3)
   i2c_register(i2c3, 3);
 #endif
-#if defined(CONFIG_STM32L4_I2C4)
+#if defined(CONFIG_STM32_I2C4)
   i2c_register(i2c4, 4);
 #endif
 #endif

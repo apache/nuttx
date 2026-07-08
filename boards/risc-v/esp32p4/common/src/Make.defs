@@ -80,6 +80,10 @@ ifeq ($(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN),y)
   include $(TOPDIR)$(DELIM)arch$(DELIM)risc-v$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)ulp_makefile
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS  = etc/init.d/rc.sysinit etc/init.d/rcS
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

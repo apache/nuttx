@@ -185,8 +185,10 @@ static struct rp2040_flash_dev_s my_dev =
     NULL,
 #endif
     rp2040_flash_ioctl,
+#ifdef CONFIG_FTL_BBM
     NULL,
     NULL,
+#endif
     "rp_flash"
   },
   .lock = NXMUTEX_INITIALIZER,

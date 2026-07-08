@@ -47,7 +47,7 @@
 
 /* SDCard validation */
 
-#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 #  define HAVE_SDIO
 #endif
 
@@ -165,7 +165,7 @@ void arch_sporadic_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_sdram_initialize(void);
 void stm32_disablefmc(void);
 #endif
@@ -178,7 +178,7 @@ void stm32_disablefmc(void);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32F7_SDMMC2)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDMMC2)
 int stm32_sdio_initialize(void);
 #endif
 

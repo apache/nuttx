@@ -35,11 +35,11 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int stm32wb_flash_lock(void);
-int stm32wb_flash_unlock(void);
+int stm32_flash_lock(void);
+int stm32_flash_unlock(void);
 
 /****************************************************************************
- * Name: stm32wb_flash_user_optbytes
+ * Name: stm32_flash_user_optbytes
  *
  * Description:
  *   Modify the contents of the user option bytes (USR OPT) on the flash.
@@ -55,6 +55,6 @@ int stm32wb_flash_unlock(void);
  *
  ****************************************************************************/
 
-uint32_t stm32wb_flash_user_optbytes(uint32_t clrbits, uint32_t setbits);
+uint32_t stm32_flash_user_optbytes(uint32_t clrbits, uint32_t setbits);
 
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_FLASH_H */

@@ -22,7 +22,7 @@
 
 set(SRCS stm32_boot.c stm32_spi.c stm32_userleds.c)
 
-if(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
+if(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
   list(APPEND SRCS stm32_clockconfig.c)
 endif()
 

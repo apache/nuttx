@@ -96,3 +96,44 @@ They should be set to suit your board name and directory location.
 .. Note::
    If you subsequently run a ``make distclean`` operation, then these settings will be lost.
    They should be added back before building, and/or before running ``make menuconfig``.
+
+Kconfig flags
+-------------
+
+Some boards make using of Kconfig ``ARCH_HAVE_*`` flags in order to be able to
+select certain features. For example, ``ARCH_HAVE_LEDS`` is a necessary flag for
+enabling ``CONFIG_ARCH_LEDS=y`` because it tells the build system that the board
+has LEDs. Selecting ``ARCH_HAVE_*`` flags happens inside the NuttX build
+system, so it is not accessible to custom boards. If you need to enable these
+flags, then you should select them manually with the ``BOARD_CUSTOM_*`` options:
+
+* ``BOARD_CUSTOM_LEDS`` selects ``ARCH_HAVE_LEDS``
+* ``BOARD_CUSTOM_BUTTONS`` selects ``ARCH_HAVE_BUTTONS``
+* ``BOARD_CUSTOM_IRQBUTTONS`` selects ``ARCH_HAVE_IRQBUTTONS``
+* ``BOARD_CUSTOM_INTERRUPT`` selects ``ARCH_PHY_INTERRUPT``
+
+If there are any other ``ARCH_HAVE_*`` selectors you cannot access but need for
+your custom board, please open an issue!
+
+Kconfig file
+------------
+
+You may have noticed that in-tree boards typically surround their board-level
+Kconfig logic with something like:
+
+.. code:: kconfig
+
+   if ARCH_BOARD_BOARDNAME
+   endif # ARCH_BOARD_BOARDAME
+
+You should **not** do this for custom boards; just write your Kconfig logic
+without the guard. However, it is still good practice to prefix your custom
+Kconfig options with the board name:
+
+.. code:: kconfig
+
+   config BOARDNAME_MYOPTION
+       bool "My custom option"
+       default n
+       ---help---
+           This is my custom option for my custom board.

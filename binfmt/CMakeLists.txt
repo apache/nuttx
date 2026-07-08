@@ -41,6 +41,10 @@ list(
   binfmt_copyactions.c
   binfmt_dumpmodule.c)
 
+if(CONFIG_SCHED_USER_IDENTITY)
+  list(APPEND SRCS binfmt_checkexec.c)
+endif()
+
 if(CONFIG_BINFMT_LOADABLE)
   list(APPEND SRCS binfmt_exit.c)
 endif()

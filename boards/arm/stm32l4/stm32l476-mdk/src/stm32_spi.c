@@ -35,7 +35,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include <stm32l4.h>
+#include <stm32.h>
 
 #include "stm32l476-mdk.h"
 

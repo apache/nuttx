@@ -35,11 +35,39 @@ Serial Device Drivers
    Also, you can customize:
    ``TTY_LAUNCH_ARGS`` ``TTY_LAUNCH_PRIORITY`` ``TTY_LAUNCH_STACKSIZE``
 
+-  **Job control / controlling terminal**. When ``CONFIG_TTY_SIGINT``
+   or ``CONFIG_TTY_SIGTSTP`` is enabled, the TTY layer can generate
+   ``SIGINT`` (Ctrl-C) and ``SIGTSTP`` (Ctrl-Z) for a foreground task.
+   NuttX does not implement POSIX sessions or process groups, so the
+   foreground process group is collapsed onto a single PID stored in
+   the driver (``pgrp == pid``, one member per group); the signal is
+   delivered with ``nxsig_kill(pid, signo)``.
+
+   The following terminal ``ioctl`` commands manage this PID:
+
+   -  ``TIOCSCTTY`` makes the terminal the controlling terminal.  The
+      ``arg`` is treated as a flag: a value of ``0`` selects the
+      calling task (the POSIX convention used by, e.g., dropbear and
+      socat), while a positive value is honored as the target PID (the
+      NuttX convention used by NSH to register a foreground command it
+      has just spawned).
+   -  ``TIOCNOTTY`` gives up the controlling terminal.
+   -  ``TIOCGPGRP`` / ``TIOCGSID`` return the foreground process group /
+      session leader PID.
+   -  ``TIOCSPGRP`` sets the foreground process group PID (a value of
+      ``0`` selects the calling task).
+
+   The C library exposes these through ``tcgetpgrp()``, ``tcsetpgrp()``,
+   ``tcgetsid()``, ``setsid()``, ``getsid()`` and ``setpgid()``.  Because
+   sending a signal to a process group (``kill(-pgrp, signo)``) is not
+   supported, TTY signals always target the single foreground PID rather
+   than an entire group.
+
 -  **User Access**. Serial drivers are, ultimately, normal
    `character drivers <#chardrivers>`__ and are accessed as other
    character drivers.
 
--  **Examples**: ``arch/arm/src/stm32/stm32_serial.c``,
+-  **Examples**: ``arch/arm/src/common/stm32/stm32_serial_m3m4_v1v2v3v4.c``,
    ``arch/arm/src/lpc214x/lpc214x_serial.c``,
    ``arch/z16/src/z16f/z16f_serial.c``, etc.
 

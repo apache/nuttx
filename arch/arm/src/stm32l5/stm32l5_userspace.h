@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_userspace
+ * Name: stm32_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void stm32l5_userspace(void);
+void stm32_userspace(void);
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32L5_STM32L5_USERSPACE_H */

@@ -108,7 +108,7 @@ void weak_function stm32_spidev_initialize(void);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32F7_SDMMC1)
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_STM32_SDMMC1)
 int stm32_sdio_initialize(void);
 #endif
 

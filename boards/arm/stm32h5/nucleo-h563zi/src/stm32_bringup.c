@@ -107,7 +107,7 @@ int stm32_bringup(void)
     }
 #endif /* CONFIG_ADC*/
 
-#ifdef CONFIG_STM32H5_DTS
+#ifdef CONFIG_STM32_DTS
   /* devno == 0 creates /dev/sensor_temp0 */
 
   ret = stm32_dts_setup(0);
@@ -117,9 +117,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32H5_FDCAN_CHARDRIVER
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
-# ifdef CONFIG_STM32H5_FDCAN1
+# ifdef CONFIG_STM32_FDCAN1
   ret = stm32_can_setup(1);
   if (ret < 0)
     {
@@ -127,7 +127,7 @@ int stm32_bringup(void)
     }
 # endif
 
-# ifdef CONFIG_STM32H5_FDCAN2
+# ifdef CONFIG_STM32_FDCAN2
   ret = stm32_can_setup(2);
   if (ret < 0)
     {

@@ -42,7 +42,7 @@
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 
-#ifdef CONFIG_STM32F7_PWM
+#ifdef CONFIG_STM32_PWM
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,62 +82,62 @@
  * RCC RST offset, reset bit to use
  */
 
-#define TIMCLK_TIM1      STM32_APB2_TIM1_CLKIN
+#define TIMCLK_TIM1      STM32_TIM1_CLKIN
 #define TIMRCCEN_TIM1    STM32_RCC_APB2ENR
 #define TIMEN_TIM1       RCC_APB2ENR_TIM1EN
 #define TIMRCCRST_TIM1   STM32_RCC_APB2RSTR
 #define TIMRST_TIM1      RCC_APB2RSTR_TIM1RST
-#define TIMCLK_TIM2      STM32_APB1_TIM2_CLKIN
+#define TIMCLK_TIM2      STM32_TIM2_CLKIN
 #define TIMRCCEN_TIM2    STM32_RCC_APB1ENR
 #define TIMEN_TIM2       RCC_APB1ENR_TIM2EN
 #define TIMRCCRST_TIM2   STM32_RCC_APB1RSTR
 #define TIMRST_TIM2      RCC_APB1RSTR_TIM2RST
-#define TIMCLK_TIM3      STM32_APB1_TIM3_CLKIN
+#define TIMCLK_TIM3      STM32_TIM3_CLKIN
 #define TIMRCCEN_TIM3    STM32_RCC_APB1ENR
 #define TIMEN_TIM3       RCC_APB1ENR_TIM3EN
 #define TIMRCCRST_TIM3   STM32_RCC_APB1RSTR
 #define TIMRST_TIM3      RCC_APB1RSTR_TIM3RST
-#define TIMCLK_TIM4      STM32_APB1_TIM4_CLKIN
+#define TIMCLK_TIM4      STM32_TIM4_CLKIN
 #define TIMRCCEN_TIM4    STM32_RCC_APB1ENR
 #define TIMEN_TIM4       RCC_APB1ENR_TIM4EN
 #define TIMRCCRST_TIM4   STM32_RCC_APB1RSTR
 #define TIMRST_TIM4      RCC_APB1RSTR_TIM4RST
-#define TIMCLK_TIM5      STM32_APB1_TIM5_CLKIN
+#define TIMCLK_TIM5      STM32_TIM5_CLKIN
 #define TIMRCCEN_TIM5    STM32_RCC_APB1ENR
 #define TIMEN_TIM5       RCC_APB1ENR_TIM5EN
 #define TIMRCCRST_TIM5   STM32_RCC_APB1RSTR
 #define TIMRST_TIM5      RCC_APB1RSTR_TIM5RST
-#define TIMCLK_TIM8      STM32_APB2_TIM8_CLKIN
+#define TIMCLK_TIM8      STM32_TIM8_CLKIN
 #define TIMRCCEN_TIM8    STM32_RCC_APB2ENR
 #define TIMEN_TIM8       RCC_APB2ENR_TIM8EN
 #define TIMRCCRST_TIM8   STM32_RCC_APB2RSTR
 #define TIMRST_TIM8      RCC_APB2RSTR_TIM8RST
-#define TIMCLK_TIM9      STM32_APB2_TIM9_CLKIN
+#define TIMCLK_TIM9      STM32_TIM9_CLKIN
 #define TIMRCCEN_TIM9    STM32_RCC_APB2ENR
 #define TIMEN_TIM9       RCC_APB2ENR_TIM9EN
 #define TIMRCCRST_TIM9   STM32_RCC_APB2RSTR
 #define TIMRST_TIM9      RCC_APB2RSTR_TIM9RST
-#define TIMCLK_TIM10     STM32_APB2_TIM10_CLKIN
+#define TIMCLK_TIM10     STM32_TIM10_CLKIN
 #define TIMRCCEN_TIM10   STM32_RCC_APB2ENR
 #define TIMEN_TIM10      RCC_APB2ENR_TIM10EN
 #define TIMRCCRST_TIM10  STM32_RCC_APB2RSTR
 #define TIMRST_TIM10     RCC_APB2RSTR_TIM10RST
-#define TIMCLK_TIM11     STM32_APB2_TIM11_CLKIN
+#define TIMCLK_TIM11     STM32_TIM11_CLKIN
 #define TIMRCCEN_TIM11   STM32_RCC_APB2ENR
 #define TIMEN_TIM11      RCC_APB2ENR_TIM11EN
 #define TIMRCCRST_TIM11  STM32_RCC_APB2RSTR
 #define TIMRST_TIM11     RCC_APB2RSTR_TIM11RST
-#define TIMCLK_TIM12     STM32_APB1_TIM12_CLKIN
+#define TIMCLK_TIM12     STM32_TIM12_CLKIN
 #define TIMRCCEN_TIM12   STM32_RCC_APB1ENR
 #define TIMEN_TIM12      RCC_APB1ENR_TIM12EN
 #define TIMRCCRST_TIM12  STM32_RCC_APB1RSTR
 #define TIMRST_TIM12     RCC_APB1RSTR_TIM12RST
-#define TIMCLK_TIM13     STM32_APB1_TIM13_CLKIN
+#define TIMCLK_TIM13     STM32_TIM13_CLKIN
 #define TIMRCCEN_TIM13   STM32_RCC_APB1ENR
 #define TIMEN_TIM13      RCC_APB1ENR_TIM13EN
 #define TIMRCCRST_TIM13  STM32_RCC_APB1RSTR
 #define TIMRST_TIM13     RCC_APB1RSTR_TIM13RST
-#define TIMCLK_TIM14     STM32_APB1_TIM14_CLKIN
+#define TIMCLK_TIM14     STM32_TIM14_CLKIN
 #define TIMRCCEN_TIM14   STM32_RCC_APB1ENR
 #define TIMEN_TIM14      RCC_APB1ENR_TIM14EN
 #define TIMRCCRST_TIM14  STM32_RCC_APB1RSTR
@@ -149,7 +149,7 @@
 
 /* Advanced Timer support */
 
-#if defined(CONFIG_STM32F7_TIM1_PWM) || defined(CONFIG_STM32F7_TIM8_PWM)
+#if defined(CONFIG_STM32_TIM1_PWM) || defined(CONFIG_STM32_TIM8_PWM)
 #  define HAVE_ADVTIM
 #else
 #  undef HAVE_ADVTIM
@@ -157,7 +157,7 @@
 
 /* TRGO/TRGO2 support */
 
-#ifdef CONFIG_STM32F7_PWM_TRGO
+#ifdef CONFIG_STM32_PWM_TRGO
 #  define HAVE_TRGO
 #endif
 
@@ -225,7 +225,7 @@ struct stm32_pwmchan_s
 struct stm32_pwmtimer_s
 {
   const struct pwm_ops_s *ops;      /* PWM operations */
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   const struct stm32_pwm_ops_s *llops; /* Low-level PWM ops */
 #endif
   struct stm32_pwmchan_s *channels; /* Channels configuration */
@@ -298,10 +298,10 @@ static int pwm_break_dt_configure(struct stm32_pwmtimer_s *priv);
 static int pwm_trgo_configure(struct pwm_lowerhalf_s *dev,
                               uint8_t trgo);
 #endif
-#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32F7_PWM_LL_OPS)
+#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
 static int pwm_deadtime_update(struct pwm_lowerhalf_s *dev, uint8_t dt);
 #endif
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
 static uint32_t pwm_ccr_get(struct pwm_lowerhalf_s *dev, uint8_t index);
 static uint16_t pwm_rcr_get(struct pwm_lowerhalf_s *dev);
 #endif
@@ -342,7 +342,7 @@ static const struct pwm_ops_s g_pwmops =
   .ioctl       = pwm_ioctl,
 };
 
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
 static const struct stm32_pwm_ops_s g_llpwmops =
 {
   .configure       = pwm_configure,
@@ -372,16 +372,16 @@ static const struct stm32_pwm_ops_s g_llpwmops =
 };
 #endif
 
-#ifdef CONFIG_STM32F7_TIM1_PWM
+#ifdef CONFIG_STM32_TIM1_PWM
 
 static struct stm32_pwmchan_s g_pwm1channels[] =
 {
   /* TIM1 has 4 channels, 4 complementary */
 
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL1
+#ifdef CONFIG_STM32_TIM1_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM1_CH1MODE,
+    .mode    = CONFIG_STM32_TIM1_CH1MODE,
 #ifdef HAVE_BREAK
     .brk =
     {
@@ -396,114 +396,114 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 #endif
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CH1OUT
+#ifdef CONFIG_STM32_TIM1_CH1OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH1POL,
+      .idle    = CONFIG_STM32_TIM1_CH1IDLE,
       .pincfg  = PWM_TIM1_CH1CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CH1NOUT
+#ifdef CONFIG_STM32_TIM1_CH1NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH1NPOL,
-      .idle    = CONFIG_STM32F7_TIM1_CH1NIDLE,
+      .pol     = CONFIG_STM32_TIM1_CH1NPOL,
+      .idle    = CONFIG_STM32_TIM1_CH1NIDLE,
       .pincfg  = PWM_TIM1_CH1NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL2
+#ifdef CONFIG_STM32_TIM1_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM1_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM1_CH2OUT
+    .mode    = CONFIG_STM32_TIM1_CH2MODE,
+#ifdef CONFIG_STM32_TIM1_CH2OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH2POL,
+      .idle    = CONFIG_STM32_TIM1_CH2IDLE,
       .pincfg  = PWM_TIM1_CH2CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CH2NOUT
+#ifdef CONFIG_STM32_TIM1_CH2NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH2NPOL,
-      .idle    = CONFIG_STM32F7_TIM1_CH2NIDLE,
+      .pol     = CONFIG_STM32_TIM1_CH2NPOL,
+      .idle    = CONFIG_STM32_TIM1_CH2NIDLE,
       .pincfg  = PWM_TIM1_CH2NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL3
+#ifdef CONFIG_STM32_TIM1_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM1_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM1_CH3OUT
+    .mode    = CONFIG_STM32_TIM1_CH3MODE,
+#ifdef CONFIG_STM32_TIM1_CH3OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH3POL,
+      .idle    = CONFIG_STM32_TIM1_CH3IDLE,
       .pincfg  = PWM_TIM1_CH3CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CH3NOUT
+#ifdef CONFIG_STM32_TIM1_CH3NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH3NPOL,
-      .idle    = CONFIG_STM32F7_TIM1_CH3NIDLE,
+      .pol     = CONFIG_STM32_TIM1_CH3NPOL,
+      .idle    = CONFIG_STM32_TIM1_CH3NIDLE,
       .pincfg  = PWM_TIM1_CH3NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL4
+#ifdef CONFIG_STM32_TIM1_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM1_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM1_CH4OUT
+    .mode    = CONFIG_STM32_TIM1_CH4MODE,
+#ifdef CONFIG_STM32_TIM1_CH4OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH4POL,
+      .idle    = CONFIG_STM32_TIM1_CH4IDLE,
       .pincfg  = PWM_TIM1_CH4CFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL5
+#ifdef CONFIG_STM32_TIM1_CHANNEL5
   {
     .channel = 5,
-    .mode    = CONFIG_STM32F7_TIM1_CH5MODE,
-#ifdef CONFIG_STM32F7_TIM1_CH5OUT
+    .mode    = CONFIG_STM32_TIM1_CH5MODE,
+#ifdef CONFIG_STM32_TIM1_CH5OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH5POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH5IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH5POL,
+      .idle    = CONFIG_STM32_TIM1_CH5IDLE,
       .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM1_CHANNEL6
+#ifdef CONFIG_STM32_TIM1_CHANNEL6
   {
     .channel = 6,
-    .mode    = CONFIG_STM32F7_TIM1_CH6MODE,
-#ifdef CONFIG_STM32F7_TIM1_CH6OUT
+    .mode    = CONFIG_STM32_TIM1_CH6MODE,
+#ifdef CONFIG_STM32_TIM1_CH6OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM1_CH6POL,
-      .idle    = CONFIG_STM32F7_TIM1_CH6IDLE,
+      .pol     = CONFIG_STM32_TIM1_CH6POL,
+      .idle    = CONFIG_STM32_TIM1_CH6IDLE,
       .pincfg  = 0,    /* Not available externally */
     }
 #endif
@@ -514,18 +514,18 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 static struct stm32_pwmtimer_s g_pwm1dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 1,
   .chan_num    = PWM_TIM1_NCHANNELS,
   .channels    = g_pwm1channels,
   .timtype     = TIMTYPE_TIM1,
-  .mode        = CONFIG_STM32F7_TIM1_MODE,
-  .lock        = CONFIG_STM32F7_TIM1_LOCK,
-  .t_dts       = CONFIG_STM32F7_TIM1_TDTS,
+  .mode        = CONFIG_STM32_TIM1_MODE,
+  .lock        = CONFIG_STM32_TIM1_LOCK,
+  .t_dts       = CONFIG_STM32_TIM1_TDTS,
 #ifdef HAVE_PWM_COMPLEMENTARY
-  .deadtime    = CONFIG_STM32F7_TIM1_DEADTIME,
+  .deadtime    = CONFIG_STM32_TIM1_DEADTIME,
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM1_TRGO)
   .trgo        = STM32_TIM1_TRGO,
@@ -533,72 +533,72 @@ static struct stm32_pwmtimer_s g_pwm1dev =
   .base        = STM32_TIM1_BASE,
   .pclk        = TIMCLK_TIM1,
 };
-#endif /* CONFIG_STM32F7_TIM1_PWM */
+#endif /* CONFIG_STM32_TIM1_PWM */
 
-#ifdef CONFIG_STM32F7_TIM2_PWM
+#ifdef CONFIG_STM32_TIM2_PWM
 
 static struct stm32_pwmchan_s g_pwm2channels[] =
 {
   /* TIM2 has 4 channels */
 
-#ifdef CONFIG_STM32F7_TIM2_CHANNEL1
+#ifdef CONFIG_STM32_TIM2_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM2_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM2_CH1OUT
+    .mode    = CONFIG_STM32_TIM2_CH1MODE,
+#ifdef CONFIG_STM32_TIM2_CH1OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM2_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM2_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM2_CH1POL,
+      .idle    = CONFIG_STM32_TIM2_CH1IDLE,
       .pincfg  = PWM_TIM2_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM2_CHANNEL2
+#ifdef CONFIG_STM32_TIM2_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM2_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM2_CH2OUT
+    .mode    = CONFIG_STM32_TIM2_CH2MODE,
+#ifdef CONFIG_STM32_TIM2_CH2OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM2_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM2_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM2_CH2POL,
+      .idle    = CONFIG_STM32_TIM2_CH2IDLE,
       .pincfg  = PWM_TIM2_CH2CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM2_CHANNEL3
+#ifdef CONFIG_STM32_TIM2_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM2_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM2_CH3OUT
+    .mode    = CONFIG_STM32_TIM2_CH3MODE,
+#ifdef CONFIG_STM32_TIM2_CH3OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM2_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM2_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM2_CH3POL,
+      .idle    = CONFIG_STM32_TIM2_CH3IDLE,
       .pincfg  = PWM_TIM2_CH3CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM2_CHANNEL4
+#ifdef CONFIG_STM32_TIM2_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM2_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM2_CH4OUT
+    .mode    = CONFIG_STM32_TIM2_CH4MODE,
+#ifdef CONFIG_STM32_TIM2_CH4OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM2_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM2_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM2_CH4POL,
+      .idle    = CONFIG_STM32_TIM2_CH4IDLE,
       .pincfg  = PWM_TIM2_CH4CFG,
     }
 #endif
@@ -610,14 +610,14 @@ static struct stm32_pwmchan_s g_pwm2channels[] =
 static struct stm32_pwmtimer_s g_pwm2dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 2,
   .chan_num    = PWM_TIM2_NCHANNELS,
   .channels    = g_pwm2channels,
   .timtype     = TIMTYPE_TIM2,
-  .mode        = CONFIG_STM32F7_TIM2_MODE,
+  .mode        = CONFIG_STM32_TIM2_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -629,72 +629,72 @@ static struct stm32_pwmtimer_s g_pwm2dev =
   .base        = STM32_TIM2_BASE,
   .pclk        = TIMCLK_TIM2,
 };
-#endif /* CONFIG_STM32F7_TIM2_PWM */
+#endif /* CONFIG_STM32_TIM2_PWM */
 
-#ifdef CONFIG_STM32F7_TIM3_PWM
+#ifdef CONFIG_STM32_TIM3_PWM
 
 static struct stm32_pwmchan_s g_pwm3channels[] =
 {
   /* TIM3 has 4 channels */
 
-#ifdef CONFIG_STM32F7_TIM3_CHANNEL1
+#ifdef CONFIG_STM32_TIM3_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM3_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM3_CH1OUT
+    .mode    = CONFIG_STM32_TIM3_CH1MODE,
+#ifdef CONFIG_STM32_TIM3_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM3_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM3_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM3_CH1POL,
+      .idle    = CONFIG_STM32_TIM3_CH1IDLE,
       .pincfg  = PWM_TIM3_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM3_CHANNEL2
+#ifdef CONFIG_STM32_TIM3_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM3_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM3_CH2OUT
+    .mode    = CONFIG_STM32_TIM3_CH2MODE,
+#ifdef CONFIG_STM32_TIM3_CH2OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM3_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM3_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM3_CH2POL,
+      .idle    = CONFIG_STM32_TIM3_CH2IDLE,
       .pincfg  = PWM_TIM3_CH2CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM3_CHANNEL3
+#ifdef CONFIG_STM32_TIM3_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM3_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM3_CH3OUT
+    .mode    = CONFIG_STM32_TIM3_CH3MODE,
+#ifdef CONFIG_STM32_TIM3_CH3OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM3_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM3_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM3_CH3POL,
+      .idle    = CONFIG_STM32_TIM3_CH3IDLE,
       .pincfg  = PWM_TIM3_CH3CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM3_CHANNEL4
+#ifdef CONFIG_STM32_TIM3_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM3_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM3_CH4OUT
+    .mode    = CONFIG_STM32_TIM3_CH4MODE,
+#ifdef CONFIG_STM32_TIM3_CH4OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM3_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM3_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM3_CH4POL,
+      .idle    = CONFIG_STM32_TIM3_CH4IDLE,
       .pincfg  = PWM_TIM3_CH4CFG,
     }
 #endif
@@ -706,14 +706,14 @@ static struct stm32_pwmchan_s g_pwm3channels[] =
 static struct stm32_pwmtimer_s g_pwm3dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 3,
   .chan_num    = PWM_TIM3_NCHANNELS,
   .channels    = g_pwm3channels,
   .timtype     = TIMTYPE_TIM3,
-  .mode        = CONFIG_STM32F7_TIM3_MODE,
+  .mode        = CONFIG_STM32_TIM3_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -725,72 +725,72 @@ static struct stm32_pwmtimer_s g_pwm3dev =
   .base        = STM32_TIM3_BASE,
   .pclk        = TIMCLK_TIM3,
 };
-#endif /* CONFIG_STM32F7_TIM3_PWM */
+#endif /* CONFIG_STM32_TIM3_PWM */
 
-#ifdef CONFIG_STM32F7_TIM4_PWM
+#ifdef CONFIG_STM32_TIM4_PWM
 
 static struct stm32_pwmchan_s g_pwm4channels[] =
 {
   /* TIM4 has 4 channels */
 
-#ifdef CONFIG_STM32F7_TIM4_CHANNEL1
+#ifdef CONFIG_STM32_TIM4_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM4_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM4_CH1OUT
+    .mode    = CONFIG_STM32_TIM4_CH1MODE,
+#ifdef CONFIG_STM32_TIM4_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM4_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM4_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM4_CH1POL,
+      .idle    = CONFIG_STM32_TIM4_CH1IDLE,
       .pincfg  = PWM_TIM4_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM4_CHANNEL2
+#ifdef CONFIG_STM32_TIM4_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM4_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM4_CH2OUT
+    .mode    = CONFIG_STM32_TIM4_CH2MODE,
+#ifdef CONFIG_STM32_TIM4_CH2OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM4_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM4_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM4_CH2POL,
+      .idle    = CONFIG_STM32_TIM4_CH2IDLE,
       .pincfg  = PWM_TIM4_CH2CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM4_CHANNEL3
+#ifdef CONFIG_STM32_TIM4_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM4_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM4_CH3OUT
+    .mode    = CONFIG_STM32_TIM4_CH3MODE,
+#ifdef CONFIG_STM32_TIM4_CH3OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM4_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM4_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM4_CH3POL,
+      .idle    = CONFIG_STM32_TIM4_CH3IDLE,
       .pincfg  = PWM_TIM4_CH3CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM4_CHANNEL4
+#ifdef CONFIG_STM32_TIM4_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM4_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM4_CH4OUT
+    .mode    = CONFIG_STM32_TIM4_CH4MODE,
+#ifdef CONFIG_STM32_TIM4_CH4OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM4_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM4_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM4_CH4POL,
+      .idle    = CONFIG_STM32_TIM4_CH4IDLE,
       .pincfg  = PWM_TIM4_CH4CFG,
     }
 #endif
@@ -802,14 +802,14 @@ static struct stm32_pwmchan_s g_pwm4channels[] =
 static struct stm32_pwmtimer_s g_pwm4dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 4,
   .chan_num    = PWM_TIM4_NCHANNELS,
   .channels    = g_pwm4channels,
   .timtype     = TIMTYPE_TIM4,
-  .mode        = CONFIG_STM32F7_TIM4_MODE,
+  .mode        = CONFIG_STM32_TIM4_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -821,71 +821,71 @@ static struct stm32_pwmtimer_s g_pwm4dev =
   .base        = STM32_TIM4_BASE,
   .pclk        = TIMCLK_TIM4,
 };
-#endif /* CONFIG_STM32F7_TIM4_PWM */
+#endif /* CONFIG_STM32_TIM4_PWM */
 
-#ifdef CONFIG_STM32F7_TIM5_PWM
+#ifdef CONFIG_STM32_TIM5_PWM
 
 static struct stm32_pwmchan_s g_pwm5channels[] =
 {
   /* TIM5 has 4 channels */
 
-#ifdef CONFIG_STM32F7_TIM5_CHANNEL1
+#ifdef CONFIG_STM32_TIM5_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM5_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM5_CH1OUT
+    .mode    = CONFIG_STM32_TIM5_CH1MODE,
+#ifdef CONFIG_STM32_TIM5_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM5_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM5_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM5_CH1POL,
+      .idle    = CONFIG_STM32_TIM5_CH1IDLE,
       .pincfg  = PWM_TIM5_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM5_CHANNEL2
+#ifdef CONFIG_STM32_TIM5_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM5_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM5_CH2OUT
+    .mode    = CONFIG_STM32_TIM5_CH2MODE,
+#ifdef CONFIG_STM32_TIM5_CH2OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM5_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM5_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM5_CH2POL,
+      .idle    = CONFIG_STM32_TIM5_CH2IDLE,
       .pincfg  = PWM_TIM5_CH2CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM5_CHANNEL3
+#ifdef CONFIG_STM32_TIM5_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM5_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM5_CH3OUT
+    .mode    = CONFIG_STM32_TIM5_CH3MODE,
+#ifdef CONFIG_STM32_TIM5_CH3OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM5_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM5_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM5_CH3POL,
+      .idle    = CONFIG_STM32_TIM5_CH3IDLE,
       .pincfg  = PWM_TIM5_CH3CFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM5_CHANNEL4
+#ifdef CONFIG_STM32_TIM5_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM5_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM5_CH4OUT
+    .mode    = CONFIG_STM32_TIM5_CH4MODE,
+#ifdef CONFIG_STM32_TIM5_CH4OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM5_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM5_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM5_CH4POL,
+      .idle    = CONFIG_STM32_TIM5_CH4IDLE,
       .pincfg  = PWM_TIM5_CH4CFG,
     }
 #endif
@@ -896,14 +896,14 @@ static struct stm32_pwmchan_s g_pwm5channels[] =
 static struct stm32_pwmtimer_s g_pwm5dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 5,
   .chan_num    = PWM_TIM5_NCHANNELS,
   .channels    = g_pwm5channels,
   .timtype     = TIMTYPE_TIM5,
-  .mode        = CONFIG_STM32F7_TIM5_MODE,
+  .mode        = CONFIG_STM32_TIM5_MODE,
   .lock        = 0,             /* No lock */
   .t_dts       = 0,             /* No t_dts */
 #ifdef HAVE_PWM_COMPLEMENTARY
@@ -915,18 +915,18 @@ static struct stm32_pwmtimer_s g_pwm5dev =
   .base        = STM32_TIM5_BASE,
   .pclk        = TIMCLK_TIM5,
 };
-#endif /* CONFIG_STM32F7_TIM5_PWM */
+#endif /* CONFIG_STM32_TIM5_PWM */
 
-#ifdef CONFIG_STM32F7_TIM8_PWM
+#ifdef CONFIG_STM32_TIM8_PWM
 
 static struct stm32_pwmchan_s g_pwm8channels[] =
 {
   /* TIM8 has 4 channels, 4 complementary */
 
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL1
+#ifdef CONFIG_STM32_TIM8_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM8_CH1MODE,
+    .mode    = CONFIG_STM32_TIM8_CH1MODE,
 #ifdef HAVE_BREAK
     .brk =
     {
@@ -941,114 +941,114 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 #endif
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CH1OUT
+#ifdef CONFIG_STM32_TIM8_CH1OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH1POL,
+      .idle    = CONFIG_STM32_TIM8_CH1IDLE,
       .pincfg  = PWM_TIM8_CH1CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CH1NOUT
+#ifdef CONFIG_STM32_TIM8_CH1NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH1NPOL,
-      .idle    = CONFIG_STM32F7_TIM8_CH1NIDLE,
+      .pol     = CONFIG_STM32_TIM8_CH1NPOL,
+      .idle    = CONFIG_STM32_TIM8_CH1NIDLE,
       .pincfg  = PWM_TIM8_CH1NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL2
+#ifdef CONFIG_STM32_TIM8_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM8_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM8_CH2OUT
+    .mode    = CONFIG_STM32_TIM8_CH2MODE,
+#ifdef CONFIG_STM32_TIM8_CH2OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH2POL,
+      .idle    = CONFIG_STM32_TIM8_CH2IDLE,
       .pincfg  = PWM_TIM8_CH2CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CH2NOUT
+#ifdef CONFIG_STM32_TIM8_CH2NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH2NPOL,
-      .idle    = CONFIG_STM32F7_TIM8_CH2NIDLE,
+      .pol     = CONFIG_STM32_TIM8_CH2NPOL,
+      .idle    = CONFIG_STM32_TIM8_CH2NIDLE,
       .pincfg  = PWM_TIM8_CH2NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL3
+#ifdef CONFIG_STM32_TIM8_CHANNEL3
   {
     .channel = 3,
-    .mode    = CONFIG_STM32F7_TIM8_CH3MODE,
-#ifdef CONFIG_STM32F7_TIM8_CH3OUT
+    .mode    = CONFIG_STM32_TIM8_CH3MODE,
+#ifdef CONFIG_STM32_TIM8_CH3OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH3POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH3IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH3POL,
+      .idle    = CONFIG_STM32_TIM8_CH3IDLE,
       .pincfg  = PWM_TIM8_CH3CFG,
     },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CH3NOUT
+#ifdef CONFIG_STM32_TIM8_CH3NOUT
     .out2 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH3NPOL,
-      .idle    = CONFIG_STM32F7_TIM8_CH3NIDLE,
+      .pol     = CONFIG_STM32_TIM8_CH3NPOL,
+      .idle    = CONFIG_STM32_TIM8_CH3NIDLE,
       .pincfg  = PWM_TIM8_CH3NCFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL4
+#ifdef CONFIG_STM32_TIM8_CHANNEL4
   {
     .channel = 4,
-    .mode    = CONFIG_STM32F7_TIM8_CH4MODE,
-#ifdef CONFIG_STM32F7_TIM8_CH4OUT
+    .mode    = CONFIG_STM32_TIM8_CH4MODE,
+#ifdef CONFIG_STM32_TIM8_CH4OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH4POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH4IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH4POL,
+      .idle    = CONFIG_STM32_TIM8_CH4IDLE,
       .pincfg  = PWM_TIM8_CH4CFG,
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL5
+#ifdef CONFIG_STM32_TIM8_CHANNEL5
   {
     .channel = 5,
-    .mode    = CONFIG_STM32F7_TIM8_CH5MODE,
-#ifdef CONFIG_STM32F7_TIM8_CH5OUT
+    .mode    = CONFIG_STM32_TIM8_CH5MODE,
+#ifdef CONFIG_STM32_TIM8_CH5OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH5POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH5IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH5POL,
+      .idle    = CONFIG_STM32_TIM8_CH5IDLE,
       .pincfg  = 0,    /* Not available externally */
     }
 #endif
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM8_CHANNEL6
+#ifdef CONFIG_STM32_TIM8_CHANNEL6
   {
     .channel = 6,
-    .mode    = CONFIG_STM32F7_TIM8_CH6MODE,
-#ifdef CONFIG_STM32F7_TIM8_CH6OUT
+    .mode    = CONFIG_STM32_TIM8_CH6MODE,
+#ifdef CONFIG_STM32_TIM8_CH6OUT
     .out1 =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM8_CH6POL,
-      .idle    = CONFIG_STM32F7_TIM8_CH6IDLE,
+      .pol     = CONFIG_STM32_TIM8_CH6POL,
+      .idle    = CONFIG_STM32_TIM8_CH6IDLE,
       .pincfg  = 0,    /* Not available externally */
     }
 #endif
@@ -1059,18 +1059,18 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 static struct stm32_pwmtimer_s g_pwm8dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 8,
   .chan_num    = PWM_TIM8_NCHANNELS,
   .channels    = g_pwm8channels,
   .timtype     = TIMTYPE_TIM8,
-  .mode        = CONFIG_STM32F7_TIM8_MODE,
-  .lock        = CONFIG_STM32F7_TIM8_LOCK,
-  .t_dts       = CONFIG_STM32F7_TIM8_TDTS,
+  .mode        = CONFIG_STM32_TIM8_MODE,
+  .lock        = CONFIG_STM32_TIM8_LOCK,
+  .t_dts       = CONFIG_STM32_TIM8_TDTS,
 #ifdef HAVE_PWM_COMPLEMENTARY
-  .deadtime    = CONFIG_STM32F7_TIM8_DEADTIME,
+  .deadtime    = CONFIG_STM32_TIM8_DEADTIME,
 #endif
 #if defined(HAVE_TRGO) && defined(STM32_TIM8_TRGO)
   .trgo        = STM32_TIM8_TRGO,
@@ -1078,40 +1078,40 @@ static struct stm32_pwmtimer_s g_pwm8dev =
   .base        = STM32_TIM8_BASE,
   .pclk        = TIMCLK_TIM8,
 };
-#endif /* CONFIG_STM32F7_TIM8_PWM */
+#endif /* CONFIG_STM32_TIM8_PWM */
 
-#ifdef CONFIG_STM32F7_TIM9_PWM
+#ifdef CONFIG_STM32_TIM9_PWM
 
 static struct stm32_pwmchan_s g_pwm9channels[] =
 {
   /* TIM9 has 2 channels */
 
-#ifdef CONFIG_STM32F7_TIM9_CHANNEL1
+#ifdef CONFIG_STM32_TIM9_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM9_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM9_CH1OUT
+    .mode    = CONFIG_STM32_TIM9_CH1MODE,
+#ifdef CONFIG_STM32_TIM9_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM9_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM9_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM9_CH1POL,
+      .idle    = CONFIG_STM32_TIM9_CH1IDLE,
       .pincfg  = PWM_TIM9_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM9_CHANNEL2
+#ifdef CONFIG_STM32_TIM9_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM9_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM9_CH2OUT
+    .mode    = CONFIG_STM32_TIM9_CH2MODE,
+#ifdef CONFIG_STM32_TIM9_CH2OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM9_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM9_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM9_CH2POL,
+      .idle    = CONFIG_STM32_TIM9_CH2IDLE,
       .pincfg  = PWM_TIM9_CH2CFG,
     }
 #endif
@@ -1123,7 +1123,7 @@ static struct stm32_pwmchan_s g_pwm9channels[] =
 static struct stm32_pwmtimer_s g_pwm9dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 9,
@@ -1142,24 +1142,24 @@ static struct stm32_pwmtimer_s g_pwm9dev =
   .base        = STM32_TIM9_BASE,
   .pclk        = TIMCLK_TIM9,
 };
-#endif /* CONFIG_STM32F7_TIM9_PWM */
+#endif /* CONFIG_STM32_TIM9_PWM */
 
-#ifdef CONFIG_STM32F7_TIM10_PWM
+#ifdef CONFIG_STM32_TIM10_PWM
 
 static struct stm32_pwmchan_s g_pwm10channels[] =
 {
   /* TIM10 has 1 channel */
 
-#ifdef CONFIG_STM32F7_TIM10_CHANNEL1
+#ifdef CONFIG_STM32_TIM10_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM10_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM10_CH1OUT
+    .mode    = CONFIG_STM32_TIM10_CH1MODE,
+#ifdef CONFIG_STM32_TIM10_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM10_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM10_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM10_CH1POL,
+      .idle    = CONFIG_STM32_TIM10_CH1IDLE,
       .pincfg  = PWM_TIM10_CH1CFG,
     }
 #endif
@@ -1171,7 +1171,7 @@ static struct stm32_pwmchan_s g_pwm10channels[] =
 static struct stm32_pwmtimer_s g_pwm10dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 10,
@@ -1190,24 +1190,24 @@ static struct stm32_pwmtimer_s g_pwm10dev =
   .base        = STM32_TIM10_BASE,
   .pclk        = TIMCLK_TIM10,
 };
-#endif /* CONFIG_STM32F7_TIM10_PWM */
+#endif /* CONFIG_STM32_TIM10_PWM */
 
-#ifdef CONFIG_STM32F7_TIM11_PWM
+#ifdef CONFIG_STM32_TIM11_PWM
 
 static struct stm32_pwmchan_s g_pwm11channels[] =
 {
   /* TIM11 has 1 channel */
 
-#ifdef CONFIG_STM32F7_TIM11_CHANNEL1
+#ifdef CONFIG_STM32_TIM11_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM11_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM11_CH1OUT
+    .mode    = CONFIG_STM32_TIM11_CH1MODE,
+#ifdef CONFIG_STM32_TIM11_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM11_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM11_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM11_CH1POL,
+      .idle    = CONFIG_STM32_TIM11_CH1IDLE,
       .pincfg  = PWM_TIM11_CH1CFG,
     }
 #endif
@@ -1219,7 +1219,7 @@ static struct stm32_pwmchan_s g_pwm11channels[] =
 static struct stm32_pwmtimer_s g_pwm11dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 11,
@@ -1238,40 +1238,40 @@ static struct stm32_pwmtimer_s g_pwm11dev =
   .base        = STM32_TIM11_BASE,
   .pclk        = TIMCLK_TIM11,
 };
-#endif /* CONFIG_STM32F7_TIM11_PWM */
+#endif /* CONFIG_STM32_TIM11_PWM */
 
-#ifdef CONFIG_STM32F7_TIM12_PWM
+#ifdef CONFIG_STM32_TIM12_PWM
 
 static struct stm32_pwmchan_s g_pwm12channels[] =
 {
   /* TIM12 has 2 channels */
 
-#ifdef CONFIG_STM32F7_TIM12_CHANNEL1
+#ifdef CONFIG_STM32_TIM12_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM12_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM12_CH1OUT
+    .mode    = CONFIG_STM32_TIM12_CH1MODE,
+#ifdef CONFIG_STM32_TIM12_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM12_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM12_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM12_CH1POL,
+      .idle    = CONFIG_STM32_TIM12_CH1IDLE,
       .pincfg  = PWM_TIM12_CH1CFG,
     }
 #endif
     /* No complementary outputs */
   },
 #endif
-#ifdef CONFIG_STM32F7_TIM12_CHANNEL2
+#ifdef CONFIG_STM32_TIM12_CHANNEL2
   {
     .channel = 2,
-    .mode    = CONFIG_STM32F7_TIM12_CH2MODE,
-#ifdef CONFIG_STM32F7_TIM12_CH2OUT
+    .mode    = CONFIG_STM32_TIM12_CH2MODE,
+#ifdef CONFIG_STM32_TIM12_CH2OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM12_CH2POL,
-      .idle    = CONFIG_STM32F7_TIM12_CH2IDLE,
+      .pol     = CONFIG_STM32_TIM12_CH2POL,
+      .idle    = CONFIG_STM32_TIM12_CH2IDLE,
       .pincfg  = PWM_TIM12_CH2CFG,
     }
 #endif
@@ -1283,7 +1283,7 @@ static struct stm32_pwmchan_s g_pwm12channels[] =
 static struct stm32_pwmtimer_s g_pwm12dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 12,
@@ -1302,24 +1302,24 @@ static struct stm32_pwmtimer_s g_pwm12dev =
   .base        = STM32_TIM12_BASE,
   .pclk        = TIMCLK_TIM12,
 };
-#endif /* CONFIG_STM32F7_TIM12_PWM */
+#endif /* CONFIG_STM32_TIM12_PWM */
 
-#ifdef CONFIG_STM32F7_TIM13_PWM
+#ifdef CONFIG_STM32_TIM13_PWM
 
 static struct stm32_pwmchan_s g_pwm13channels[] =
 {
   /* TIM13 has 1 channel */
 
-#ifdef CONFIG_STM32F7_TIM13_CHANNEL1
+#ifdef CONFIG_STM32_TIM13_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM13_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM13_CH1OUT
+    .mode    = CONFIG_STM32_TIM13_CH1MODE,
+#ifdef CONFIG_STM32_TIM13_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM13_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM13_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM13_CH1POL,
+      .idle    = CONFIG_STM32_TIM13_CH1IDLE,
       .pincfg  = PWM_TIM13_CH1CFG,
     }
 #endif
@@ -1331,7 +1331,7 @@ static struct stm32_pwmchan_s g_pwm13channels[] =
 static struct stm32_pwmtimer_s g_pwm13dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 13,
@@ -1350,24 +1350,24 @@ static struct stm32_pwmtimer_s g_pwm13dev =
   .base        = STM32_TIM13_BASE,
   .pclk        = TIMCLK_TIM13,
 };
-#endif /* CONFIG_STM32F7_TIM13_PWM */
+#endif /* CONFIG_STM32_TIM13_PWM */
 
-#ifdef CONFIG_STM32F7_TIM14_PWM
+#ifdef CONFIG_STM32_TIM14_PWM
 
 static struct stm32_pwmchan_s g_pwm14channels[] =
 {
   /* TIM14 has 1 channel */
 
-#ifdef CONFIG_STM32F7_TIM14_CHANNEL1
+#ifdef CONFIG_STM32_TIM14_CHANNEL1
   {
     .channel = 1,
-    .mode    = CONFIG_STM32F7_TIM14_CH1MODE,
-#ifdef CONFIG_STM32F7_TIM14_CH1OUT
+    .mode    = CONFIG_STM32_TIM14_CH1MODE,
+#ifdef CONFIG_STM32_TIM14_CH1OUT
     .out1    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32F7_TIM14_CH1POL,
-      .idle    = CONFIG_STM32F7_TIM14_CH1IDLE,
+      .pol     = CONFIG_STM32_TIM14_CH1POL,
+      .idle    = CONFIG_STM32_TIM14_CH1IDLE,
       .pincfg  = PWM_TIM14_CH1CFG,
     }
 #endif
@@ -1379,7 +1379,7 @@ static struct stm32_pwmchan_s g_pwm14channels[] =
 static struct stm32_pwmtimer_s g_pwm14dev =
 {
   .ops         = &g_pwmops,
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
   .llops       = &g_llpwmops,
 #endif
   .timid       = 14,
@@ -1398,7 +1398,7 @@ static struct stm32_pwmtimer_s g_pwm14dev =
   .base        = STM32_TIM14_BASE,
   .pclk        = TIMCLK_TIM14,
 };
-#endif /* CONFIG_STM32F7_TIM14_PWM */
+#endif /* CONFIG_STM32_TIM14_PWM */
 
 /****************************************************************************
  * Private Functions
@@ -1698,7 +1698,7 @@ static int pwm_ccr_update(struct pwm_lowerhalf_s *dev, uint8_t index,
  * Name: pwm_ccr_get
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
 static uint32_t pwm_ccr_get(struct pwm_lowerhalf_s *dev, uint8_t index)
 {
   struct stm32_pwmtimer_s *priv = (struct stm32_pwmtimer_s *)dev;
@@ -1753,7 +1753,7 @@ static uint32_t pwm_ccr_get(struct pwm_lowerhalf_s *dev, uint8_t index)
 
   return pwm_getreg(priv, offset);
 }
-#endif /* CONFIG_STM32F7_PWM_LL_OPS */
+#endif /* CONFIG_STM32_PWM_LL_OPS */
 
 /****************************************************************************
  * Name: pwm_arr_update
@@ -1798,7 +1798,7 @@ static int pwm_rcr_update(struct pwm_lowerhalf_s *dev, uint16_t rcr)
 }
 #endif
 
-#ifdef CONFIG_STM32F7_PWM_LL_OPS
+#ifdef CONFIG_STM32_PWM_LL_OPS
 /****************************************************************************
  * Name: pwm_rcr_get
  ****************************************************************************/
@@ -2486,7 +2486,7 @@ static int pwm_outputs_enable(struct pwm_lowerhalf_s *dev,
   return OK;
 }
 
-#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32F7_PWM_LL_OPS)
+#if defined(HAVE_PWM_COMPLEMENTARY) && defined(CONFIG_STM32_PWM_LL_OPS)
 
 /****************************************************************************
  * Name: pwm_deadtime_update
@@ -3033,7 +3033,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
 
   switch (priv->timid)
     {
-#ifdef CONFIG_STM32F7_TIM1_PWM
+#ifdef CONFIG_STM32_TIM1_PWM
       case 1:
         {
           regaddr = TIMRCCEN_TIM1;
@@ -3042,7 +3042,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM2_PWM
+#ifdef CONFIG_STM32_TIM2_PWM
       case 2:
         {
           regaddr = TIMRCCEN_TIM2;
@@ -3051,7 +3051,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM3_PWM
+#ifdef CONFIG_STM32_TIM3_PWM
       case 3:
         {
           regaddr = TIMRCCEN_TIM3;
@@ -3060,7 +3060,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM4_PWM
+#ifdef CONFIG_STM32_TIM4_PWM
       case 4:
         {
           regaddr = TIMRCCEN_TIM4;
@@ -3069,7 +3069,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM5_PWM
+#ifdef CONFIG_STM32_TIM5_PWM
       case 5:
         {
           regaddr = TIMRCCEN_TIM5;
@@ -3078,7 +3078,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM8_PWM
+#ifdef CONFIG_STM32_TIM8_PWM
       case 8:
         {
           regaddr = TIMRCCEN_TIM8;
@@ -3087,7 +3087,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM9_PWM
+#ifdef CONFIG_STM32_TIM9_PWM
       case 9:
         {
           regaddr = TIMRCCEN_TIM9;
@@ -3096,7 +3096,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM10_PWM
+#ifdef CONFIG_STM32_TIM10_PWM
       case 10:
         {
           regaddr = TIMRCCEN_TIM10;
@@ -3105,7 +3105,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM11_PWM
+#ifdef CONFIG_STM32_TIM11_PWM
       case 11:
         {
           regaddr = TIMRCCEN_TIM11;
@@ -3114,7 +3114,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM12_PWM
+#ifdef CONFIG_STM32_TIM12_PWM
       case 12:
         {
           regaddr = TIMRCCEN_TIM12;
@@ -3123,7 +3123,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM13_PWM
+#ifdef CONFIG_STM32_TIM13_PWM
       case 13:
         {
           regaddr = TIMRCCEN_TIM13;
@@ -3132,7 +3132,7 @@ static int pwm_set_apb_clock(struct stm32_pwmtimer_s *priv, bool on)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM14_PWM
+#ifdef CONFIG_STM32_TIM14_PWM
       case 14:
         {
           regaddr = TIMRCCEN_TIM14;
@@ -3520,7 +3520,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32F7_TIM1_PWM
+#ifdef CONFIG_STM32_TIM1_PWM
       case 1:
         {
           lower = &g_pwm1dev;
@@ -3531,7 +3531,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM2_PWM
+#ifdef CONFIG_STM32_TIM2_PWM
       case 2:
         {
           lower = &g_pwm2dev;
@@ -3539,7 +3539,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM3_PWM
+#ifdef CONFIG_STM32_TIM3_PWM
       case 3:
         {
           lower = &g_pwm3dev;
@@ -3547,7 +3547,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM4_PWM
+#ifdef CONFIG_STM32_TIM4_PWM
       case 4:
         {
           lower = &g_pwm4dev;
@@ -3555,7 +3555,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM5_PWM
+#ifdef CONFIG_STM32_TIM5_PWM
       case 5:
         {
           lower = &g_pwm5dev;
@@ -3563,7 +3563,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM8_PWM
+#ifdef CONFIG_STM32_TIM8_PWM
       case 8:
         {
           lower = &g_pwm8dev;
@@ -3574,7 +3574,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM9_PWM
+#ifdef CONFIG_STM32_TIM9_PWM
       case 9:
         {
           lower = &g_pwm9dev;
@@ -3582,7 +3582,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM10_PWM
+#ifdef CONFIG_STM32_TIM10_PWM
       case 10:
         {
           lower = &g_pwm10dev;
@@ -3591,7 +3591,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
 
 #endif
 
-#ifdef CONFIG_STM32F7_TIM11_PWM
+#ifdef CONFIG_STM32_TIM11_PWM
       case 11:
         {
           lower = &g_pwm11dev;
@@ -3599,7 +3599,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM12_PWM
+#ifdef CONFIG_STM32_TIM12_PWM
       case 12:
         {
           lower = &g_pwm12dev;
@@ -3607,7 +3607,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM13_PWM
+#ifdef CONFIG_STM32_TIM13_PWM
       case 13:
         {
           lower = &g_pwm13dev;
@@ -3615,7 +3615,7 @@ struct pwm_lowerhalf_s *stm32_pwminitialize(int timer)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_TIM14_PWM
+#ifdef CONFIG_STM32_TIM14_PWM
       case 14:
         {
           lower = &g_pwm14dev;
@@ -3635,4 +3635,4 @@ errout:
   return (struct pwm_lowerhalf_s *)lower;
 }
 
-#endif /* CONFIG_STM32F7_PWM */
+#endif /* CONFIG_STM32_PWM */

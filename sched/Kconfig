@@ -534,9 +534,9 @@ endif # INIT_FILE
 menuconfig ETC_ROMFS
 	bool "Auto-mount etc baked-in ROMFS image"
 	default n
-	depends on !DISABLE_MOUNTPOINT && FS_ROMFS
+	depends on !DISABLE_MOUNTPOINT && (FS_ROMFS || FS_CROMFS)
 	---help---
-		Mount a ROMFS filesystem at /etc and provide a system init
+		Mount a ROMFS or a CROMFS filesystem at /etc and provide a system init
 		script at /etc/init.d/rc.sysinit and a startup script
 		at /etc/init.d/rcS.  The default system init script mounts
 		/tmp as TMPFS when FS_TMPFS is enabled, otherwise it can
@@ -789,12 +789,19 @@ config SCHED_USER_IDENTITY
 	bool "Support per-task User Identity"
 	default n
 	---help---
-		This selection enables functionality of getuid(), setuid(), getgid(),
-		setgid().  If this option is not selected, then stub, root-only
-		versions of these interfaces are available.  When selected, these
-		interfaces will associate a UID and/or GID with each task group.
-		Those can then be managed using the interfaces.  Child tasks will
-		inherit the UID and GID of its parent.
+		Enable per-task-group POSIX user and group credentials.
+
+		When selected, each task group tracks real, effective, and saved-set
+		UID/GID values and provides getuid(), getgid(), geteuid(),
+		getegid(), setuid(), setgid(), seteuid(), and setegid().
+
+		Child tasks inherit all credential fields from the parent task
+		group.  setuid()/setgid() update real, effective, and saved-set
+		IDs when called with effective privileges; seteuid()/setegid()
+		implement the standard POSIX privilege transition rules.
+
+		If this option is not selected, stub root-only versions of these
+		interfaces are available instead.
 
 config SCHED_THREAD_LOCAL
 	bool "Support __thread/thread_local keyword"
@@ -1594,6 +1601,16 @@ config DISABLE_ALL_SIGNALS
 
 endchoice
 
+config SIG_PREALLOC_IRQ_ACTIONS
+	int "Number of pre-allocated irq actions"
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
+	depends on !DISABLE_ALL_SIGNALS
+	---help---
+		The number of pre-allocated irq action structures.
+
+if ENABLE_ALL_SIGNALS
+
 config SIG_PREALLOC_ACTIONS
 	int "Number of pre-allocated sigactions"
 	default 4
@@ -1607,13 +1624,6 @@ config SIG_ALLOC_ACTIONS
 		The number of sigactions to allocate per time. Note that
 		if this number is larger than 1, the allocation won't be
 		returned to the heap but kept in a free list for reuse.
-
-config SIG_PREALLOC_IRQ_ACTIONS
-	int "Number of pre-allocated irq actions"
-	default 4 if DEFAULT_SMALL
-	default 8 if !DEFAULT_SMALL
-	---help---
-		The number of pre-allocated irq action structures.
 
 config SIG_EVTHREAD
 	bool "Support SIGEV_THREAD"
@@ -1728,6 +1738,8 @@ config SIG_SIGURG_ACTION
 		sigaction() to ignore SIGURG.
 
 endif # SIG_DEFAULT
+
+endif # ENABLE_ALL_SIGNALS
 
 endmenu # Signal Configuration
 

@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -756,5 +756,5 @@
 #  define RCC_DCKCFGR2_DSISEL_PHY       (0 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* DSI PHY sources DSI clock */
 #  define RCC_DCKCFGR2_DSISEL_SYSCLK    (1 << RCC_DCKCFGR2_DSISEL_SHIFT)  /* System clock is selected as DSI clock */
 
-#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F76XX || CONFIG_STM32_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F76XX77XX_RCC_H */

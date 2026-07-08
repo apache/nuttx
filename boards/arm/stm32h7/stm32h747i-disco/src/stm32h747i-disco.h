@@ -95,7 +95,7 @@
 
 /* SD/TF Card'detected pin */
 
-#if defined(CONFIG_STM32H7_SDMMC1)
+#if defined(CONFIG_STM32_SDMMC1)
 #  define HAVE_SDIO
 #endif
 
@@ -129,7 +129,7 @@ int stm32_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SPI
+#ifdef CONFIG_STM32_SPI
 void stm32_spidev_initialize(void);
 #endif
 

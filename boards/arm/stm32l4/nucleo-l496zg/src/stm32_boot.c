@@ -46,7 +46,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.
@@ -56,7 +56,7 @@
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void)
+void stm32_board_initialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
@@ -64,7 +64,7 @@ void stm32l4_board_initialize(void)
   board_autoled_initialize();
 #endif
 
-#if defined(CONFIG_STM32L4_OTGFS) || defined(CONFIG_STM32L4_HOST)
+#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32L4_HOST)
   stm32_usbinitialize();
 #endif
 

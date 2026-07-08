@@ -32,7 +32,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WL5 architectures must provide the following entry point.  This
@@ -42,6 +42,6 @@
  *
  ****************************************************************************/
 
-void stm32wl5_board_initialize(void);
+void stm32_board_initialize(void);
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_STM32WL5_START_H */

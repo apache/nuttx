@@ -60,7 +60,7 @@
 #include "stm32_otg.h"
 #include "stm32_usbhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32H7_OTGFS)
+#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_OTGFS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -68,7 +68,7 @@
 
 /* OTG host selection *******************************************************/
 
-#if defined(CONFIG_STM32H7_OTGFS_HOST)
+#if defined(CONFIG_STM32_OTGFS_HOST)
 #  define STM32_IRQ_OTG         STM32_IRQ_OTGFS
 #  define STM32_OTG_BASE        STM32_OTGFS_BASE
 #  define GPIO_OTG_DM           GPIO_OTGFS_DM
@@ -89,7 +89,7 @@
 #  error Not selected USBDEV peripheral
 #endif
 
-#if defined(CONFIG_STM32H7_OTGFS_HOST) && defined(CONFIG_STM32H7_OTGHS_HOST)
+#if defined(CONFIG_STM32_OTGFS_HOST) && defined(CONFIG_STM32H7_OTGHS_HOST)
 #  error Only one HOST role supported
 #endif
 
@@ -100,8 +100,8 @@
  * Pre-requisites
  *
  *  CONFIG_USBHOST      - Enable general USB host support
- *  CONFIG_STM32H7_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32H7_SYSCFG - Needed
+ *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32_SYSCFG - Needed
  *
  * Options:
  *
@@ -114,16 +114,16 @@
  *  CONFIG_STM32H7_OTG_DESCSIZE - Maximum size of a descriptor.  Default: 128
  *  CONFIG_STM32H7_OTG_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
- *  CONFIG_STM32H7_USBHOST_REGDEBUG - Enable very low-level register access
+ *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
  *    debug.  Depends on CONFIG_DEBUG_FEATURES.
- *  CONFIG_STM32H7_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
+ *  CONFIG_STM32_USBHOST_PKTDUMP - Dump all incoming and outgoing USB
  *    packets. Depends on CONFIG_DEBUG_FEATURES.
  */
 
 /* Pre-requisites (partial) */
 
-#ifndef CONFIG_STM32H7_SYSCFG
-#  error "CONFIG_STM32H7_SYSCFG is required"
+#ifndef CONFIG_STM32_SYSCFG
+#  error "CONFIG_STM32_SYSCFG is required"
 #endif
 
 /* Default RxFIFO size */
@@ -153,8 +153,8 @@
 /* Register/packet debug depends on CONFIG_DEBUG_FEATURES */
 
 #ifndef CONFIG_DEBUG_FEATURES
-#  undef CONFIG_STM32H7_USBHOST_REGDEBUG
-#  undef CONFIG_STM32H7_USBHOST_PKTDUMP
+#  undef CONFIG_STM32_USBHOST_REGDEBUG
+#  undef CONFIG_STM32_USBHOST_PKTDUMP
 #endif
 
 /* HCD Setup ****************************************************************/
@@ -299,7 +299,7 @@ struct stm32_usbhost_s
 
 /* Register operations ******************************************************/
 
-#ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
+#ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite);
 static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite);
 static uint32_t stm32_getreg(uint32_t addr);
@@ -312,7 +312,7 @@ static void stm32_putreg(uint32_t addr, uint32_t value);
 static inline void stm32_modifyreg(uint32_t addr, uint32_t clrbits,
                                    uint32_t setbits);
 
-#ifdef CONFIG_STM32H7_USBHOST_PKTDUMP
+#ifdef CONFIG_STM32_USBHOST_PKTDUMP
 #  define stm32_pktdump(m,b,n) lib_dumpbuffer(m,b,n)
 #else
 #  define stm32_pktdump(m,b,n)
@@ -523,7 +523,7 @@ static struct usbhost_connection_s g_usbconn =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
+#ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
 {
   uinfo("%08" PRIx32 "%s%08" PRIx32 "\n", addr, iswrite ? "<-" : "->", val);
@@ -538,7 +538,7 @@ static void stm32_printreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
+#ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
 {
   static uint32_t prevaddr = 0;
@@ -602,7 +602,7 @@ static void stm32_checkreg(uint32_t addr, uint32_t val, bool iswrite)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
+#ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static uint32_t stm32_getreg(uint32_t addr)
 {
   /* Read the value from the register */
@@ -624,7 +624,7 @@ static uint32_t stm32_getreg(uint32_t addr)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_USBHOST_REGDEBUG
+#ifdef CONFIG_STM32_USBHOST_REGDEBUG
 static void stm32_putreg(uint32_t addr, uint32_t val)
 {
   /* Check if we need to print this value */
@@ -5414,7 +5414,7 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   /* Enable USB regulator if configured */
 
-#ifdef CONFIG_STM32H7_OTG_USBREGEN
+#ifdef CONFIG_STM32_OTG_USBREGEN
   regval |= STM32_PWR_CR3_USBREGEN;
 #else
   regval &= ~STM32_PWR_CR3_USBREGEN;
@@ -5458,7 +5458,7 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
 
   /* SOF output pin configuration is configurable */
 
-#ifdef CONFIG_STM32H7_OTG_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   stm32_configgpio(GPIO_OTG_SOF);
 #endif
 
@@ -5484,4 +5484,4 @@ struct usbhost_connection_s *stm32_otgfshost_initialize(int controller)
   return &g_usbconn;
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_STM32H7_OTGFS */
+#endif /* CONFIG_USBHOST && CONFIG_STM32_OTGFS */

@@ -54,7 +54,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_gpiosetevent
+ * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
@@ -73,11 +73,11 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                          bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
- * Name: stm32l4_exti_alarm
+ * Name: stm32_exti_alarm
  *
  * Description:
  *   Sets/clears EXTI alarm interrupt.
@@ -95,12 +95,12 @@ int stm32l4_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
                        xcpt_t func, void *arg);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_exti_wakeup
+ * Name: stm32_exti_wakeup
  *
  * Description:
  *   Sets/clears EXTI wakeup interrupt.
@@ -118,12 +118,12 @@ int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-int stm32l4_exti_wakeup(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
                         xcpt_t func, void *arg);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_exti_comp
+ * Name: stm32_exti_comp
  *
  * Description:
  *   Sets/clears comparator based events and interrupt triggers.
@@ -141,8 +141,8 @@ int stm32l4_exti_wakeup(bool risingedge, bool fallingedge, bool event,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_COMP
-int stm32l4_exti_comp(int cmp, bool risingedge, bool fallingedge,
+#ifdef CONFIG_STM32_COMP
+int stm32_exti_comp(int cmp, bool risingedge, bool fallingedge,
                       bool event, xcpt_t func, void *arg);
 #endif
 

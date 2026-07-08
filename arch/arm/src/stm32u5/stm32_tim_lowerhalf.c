@@ -41,28 +41,28 @@
 #include "stm32_tim.h"
 
 #if defined(CONFIG_TIMER) && \
-    (defined(CONFIG_STM32U5_TIM1)  || defined(CONFIG_STM32U5_TIM2)  || \
-     defined(CONFIG_STM32U5_TIM3)  || defined(CONFIG_STM32U5_TIM4)  || \
-     defined(CONFIG_STM32U5_TIM5)  || defined(CONFIG_STM32U5_TIM6)  || \
-     defined(CONFIG_STM32U5_TIM7)  || defined(CONFIG_STM32U5_TIM8)  || \
-     defined(CONFIG_STM32U5_TIM15) || defined(CONFIG_STM32U5_TIM16) || \
-     defined(CONFIG_STM32U5_TIM17))
+    (defined(CONFIG_STM32_TIM1)  || defined(CONFIG_STM32_TIM2)  || \
+     defined(CONFIG_STM32_TIM3)  || defined(CONFIG_STM32_TIM4)  || \
+     defined(CONFIG_STM32_TIM5)  || defined(CONFIG_STM32_TIM6)  || \
+     defined(CONFIG_STM32_TIM7)  || defined(CONFIG_STM32_TIM8)  || \
+     defined(CONFIG_STM32_TIM15) || defined(CONFIG_STM32_TIM16) || \
+     defined(CONFIG_STM32_TIM17))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32U5_TIM1_RES   16
-#define STM32U5_TIM2_RES   32
-#define STM32U5_TIM3_RES   16
-#define STM32U5_TIM4_RES   16
-#define STM32U5_TIM5_RES   32
-#define STM32U5_TIM6_RES   16
-#define STM32U5_TIM7_RES   16
-#define STM32U5_TIM8_RES   16
-#define STM32U5_TIM15_RES  16
-#define STM32U5_TIM16_RES  16
-#define STM32U5_TIM17_RES  16
+#define STM32_TIM1_RES   16
+#define STM32_TIM2_RES   32
+#define STM32_TIM3_RES   16
+#define STM32_TIM4_RES   16
+#define STM32_TIM5_RES   32
+#define STM32_TIM6_RES   16
+#define STM32_TIM7_RES   16
+#define STM32_TIM8_RES   16
+#define STM32_TIM15_RES  16
+#define STM32_TIM16_RES  16
+#define STM32_TIM17_RES  16
 
 /****************************************************************************
  * Private Types
@@ -118,91 +118,91 @@ static const struct timer_ops_s g_timer_ops =
   .ioctl       = NULL,
 };
 
-#ifdef CONFIG_STM32U5_TIM1
+#ifdef CONFIG_STM32_TIM1
 static struct stm32_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM1_RES,
+  .resolution  = STM32_TIM1_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM2
+#ifdef CONFIG_STM32_TIM2
 static struct stm32_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM2_RES,
+  .resolution  = STM32_TIM2_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM3
+#ifdef CONFIG_STM32_TIM3
 static struct stm32_lowerhalf_s g_tim3_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM3_RES,
+  .resolution  = STM32_TIM3_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM4
+#ifdef CONFIG_STM32_TIM4
 static struct stm32_lowerhalf_s g_tim4_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM4_RES,
+  .resolution  = STM32_TIM4_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM5
+#ifdef CONFIG_STM32_TIM5
 static struct stm32_lowerhalf_s g_tim5_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM5_RES,
+  .resolution  = STM32_TIM5_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM6
+#ifdef CONFIG_STM32_TIM6
 static struct stm32_lowerhalf_s g_tim6_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM6_RES,
+  .resolution  = STM32_TIM6_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM7
+#ifdef CONFIG_STM32_TIM7
 static struct stm32_lowerhalf_s g_tim7_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM7_RES,
+  .resolution  = STM32_TIM7_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM8
+#ifdef CONFIG_STM32_TIM8
 static struct stm32_lowerhalf_s g_tim8_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM8_RES,
+  .resolution  = STM32_TIM8_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM15
+#ifdef CONFIG_STM32_TIM15
 static struct stm32_lowerhalf_s g_tim15_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM15_RES,
+  .resolution  = STM32_TIM15_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM16
+#ifdef CONFIG_STM32_TIM16
 static struct stm32_lowerhalf_s g_tim16_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM16_RES,
+  .resolution  = STM32_TIM16_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32U5_TIM17
+#ifdef CONFIG_STM32_TIM17
 static struct stm32_lowerhalf_s g_tim17_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32U5_TIM17_RES,
+  .resolution  = STM32_TIM17_RES,
 };
 #endif
 
@@ -228,13 +228,13 @@ static int stm32_timer_handler(int irq, void *context, void *arg)
     (struct stm32_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
-  STM32U5_TIM_ACKINT(lower->tim, 0);
+  STM32_TIM_ACKINT(lower->tim, 0);
 
   if (lower->callback(&next_interval_us, lower->arg))
     {
       if (next_interval_us > 0)
         {
-          STM32U5_TIM_SETPERIOD(lower->tim, next_interval_us);
+          STM32_TIM_SETPERIOD(lower->tim, next_interval_us);
         }
     }
   else
@@ -267,12 +267,12 @@ static int stm32_start(struct timer_lowerhalf_s *lower)
 
   if (!priv->started)
     {
-      STM32U5_TIM_SETMODE(priv->tim, STM32U5_TIM_MODE_UP);
+      STM32_TIM_SETMODE(priv->tim, STM32_TIM_MODE_UP);
 
       if (priv->callback != NULL)
         {
-          STM32U5_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
-          STM32U5_TIM_ENABLEINT(priv->tim, 0);
+          STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
+          STM32_TIM_ENABLEINT(priv->tim, 0);
         }
 
       priv->started = true;
@@ -306,9 +306,9 @@ static int stm32_stop(struct timer_lowerhalf_s *lower)
 
   if (priv->started)
     {
-      STM32U5_TIM_SETMODE(priv->tim, STM32U5_TIM_MODE_DISABLED);
-      STM32U5_TIM_DISABLEINT(priv->tim, 0);
-      STM32U5_TIM_SETISR(priv->tim, NULL, NULL, 0);
+      STM32_TIM_SETMODE(priv->tim, STM32_TIM_MODE_DISABLED);
+      STM32_TIM_DISABLEINT(priv->tim, 0);
+      STM32_TIM_SETISR(priv->tim, NULL, NULL, 0);
       priv->started = false;
       return OK;
     }
@@ -363,8 +363,8 @@ static int stm32_getstatus(struct timer_lowerhalf_s *lower,
   /* Get timeout */
 
   maxtimeout = (1 << priv->resolution) - 1;
-  clock      = STM32U5_TIM_GETCLOCK(priv->tim);
-  period     = STM32U5_TIM_GETPERIOD(priv->tim);
+  clock      = STM32_TIM_GETCLOCK(priv->tim);
+  period     = STM32_TIM_GETPERIOD(priv->tim);
 
   if (clock == 1000000)
     {
@@ -380,7 +380,7 @@ static int stm32_getstatus(struct timer_lowerhalf_s *lower,
   /* Get the time remaining until the timer expires (in microseconds) */
 
   clock_factor     = (clock == 1000000) ? 1 : (clock / 1000000);
-  status->timeleft = (timeout - STM32U5_TIM_GETCOUNTER(priv->tim)) *
+  status->timeleft = (timeout - STM32_TIM_GETCOUNTER(priv->tim)) *
                      clock_factor;
   return OK;
 }
@@ -417,13 +417,13 @@ static int stm32_settimeout(struct timer_lowerhalf_s *lower,
   if (timeout > maxtimeout)
     {
       uint64_t freq = (maxtimeout * 1000000) / timeout;
-      STM32U5_TIM_SETCLOCK(priv->tim, freq);
-      STM32U5_TIM_SETPERIOD(priv->tim, maxtimeout);
+      STM32_TIM_SETCLOCK(priv->tim, freq);
+      STM32_TIM_SETPERIOD(priv->tim, maxtimeout);
     }
   else
     {
-      STM32U5_TIM_SETCLOCK(priv->tim, 1000000);
-      STM32U5_TIM_SETPERIOD(priv->tim, timeout);
+      STM32_TIM_SETCLOCK(priv->tim, 1000000);
+      STM32_TIM_SETPERIOD(priv->tim, timeout);
     }
 
   return OK;
@@ -463,13 +463,13 @@ static void stm32_setcallback(struct timer_lowerhalf_s *lower,
 
   if (callback != NULL && priv->started)
     {
-      STM32U5_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
-      STM32U5_TIM_ENABLEINT(priv->tim, 0);
+      STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
+      STM32_TIM_ENABLEINT(priv->tim, 0);
     }
   else
     {
-      STM32U5_TIM_DISABLEINT(priv->tim, 0);
-      STM32U5_TIM_SETISR(priv->tim, NULL, NULL, 0);
+      STM32_TIM_DISABLEINT(priv->tim, 0);
+      STM32_TIM_SETISR(priv->tim, NULL, NULL, 0);
     }
 
   leave_critical_section(flags);
@@ -503,66 +503,66 @@ int stm32_timer_initialize(const char *devpath, int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32U5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         lower = &g_tim1_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         lower = &g_tim2_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case 3:
         lower = &g_tim3_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case 4:
         lower = &g_tim4_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case 5:
         lower = &g_tim5_lowerhalf;
         break;
 #endif
-#ifdef CONFIG_STM32U5_TIM6
+#ifdef CONFIG_STM32_TIM6
       case 6:
         lower = &g_tim6_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM7
+#ifdef CONFIG_STM32_TIM7
       case 7:
         lower = &g_tim7_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case 8:
         lower = &g_tim8_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case 15:
         lower = &g_tim15_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         lower = &g_tim16_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32U5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         lower = &g_tim17_lowerhalf;
         break;

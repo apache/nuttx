@@ -5,7 +5,7 @@
 
 if ARCH_BOARD_NUCLEO_H563ZI
 
-config STM32H5_USE_HSE
+config STM32_USE_HSE
 	bool "Use on-board HSE"
 	default n
 	---help---

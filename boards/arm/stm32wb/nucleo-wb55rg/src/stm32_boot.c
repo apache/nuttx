@@ -47,7 +47,7 @@
 #  include "stm32wb_rtc.h"
 #endif
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
 #  include "stm32wb_blehci.h"
 #endif
 
@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WB architectures must provide the following entry point.  This
@@ -68,7 +68,7 @@
  *
  ****************************************************************************/
 
-void stm32wb_board_initialize(void)
+void stm32_board_initialize(void)
 {
   /* Configure on-board LEDs if LED support has been selected. */
 
@@ -131,7 +131,7 @@ void board_late_initialize(void)
 #ifdef CONFIG_RTC_DRIVER
   /* Instantiate the STM32WB lower-half RTC driver */
 
-  rtclower = stm32wb_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
@@ -155,7 +155,7 @@ void board_late_initialize(void)
 #ifdef CONFIG_TIMER
   /* Initialize and register the timer driver */
 
-  ret = stm32wb_timer_initialize("/dev/timer0", 1);
+  ret = stm32_timer_initialize("/dev/timer0", 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the timer driver: %d\n",
@@ -164,10 +164,10 @@ void board_late_initialize(void)
     }
 #endif
 
-#ifdef CONFIG_STM32WB_BLE
+#ifdef CONFIG_STM32_BLE
   /* Initialize and register BLE HCI driver */
 
-  stm32wb_blehci_initialize();
+  stm32_blehci_initialize();
 #endif
   UNUSED(ret);
 }
@@ -188,7 +188,7 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
-  stm32wb_get_uniqueid(uniqueid);
+  stm32_get_uniqueid(uniqueid);
   return OK;
 }
 #endif

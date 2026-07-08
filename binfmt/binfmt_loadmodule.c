@@ -134,6 +134,14 @@ static int load_absmodule(FAR struct binary_s *bin, FAR const char *filename,
           binfmt_dumpmodule(bin);
           break;
         }
+      else if (ret == -EACCES)
+        {
+          /* Access explicitly denied -- stop here; do not let a fallback
+           * loader bypass the execute-permission check that already ran.
+           */
+
+          break;
+        }
     }
 
   return ret;

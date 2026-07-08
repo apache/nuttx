@@ -422,31 +422,50 @@ void inode_release(FAR struct inode *inode);
  * Name: inode_checkperm
  *
  * Description:
- *   Validate that 'inode' can be opened with the access described by
- *   'oflags'.  Two sequential checks are performed:
+ *   Check 'inode' for 'amode' access on pseudo-filesystem inodes.
+ *   NULL 'inode' (root) and mountpoints are exempt.
  *
- *   1. Operation-support check (all inode types):
- *      Ensures the driver exposes the read/write entry points required by
- *      'oflags'.  Pseudo-directory inodes are exempted.
+ * Input Parameters:
+ *   inode - Inode to check, or NULL for a root-level path
+ *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
  *
- *   2. UNIX permission check (pseudo-filesystem inodes only):
- *      Compares effective uid/gid against i_mode owner/group/other bits.
- *      Mountpoint inodes and kernel threads are unconditionally exempted.
- *      Active only when CONFIG_PSEUDOFS_ATTRIBUTES and
- *      CONFIG_SCHED_USER_IDENTITY are both enabled.
+ * Returned Value:
+ *   Zero (OK) on success, or -EACCES if permission is denied.
+ *
+ ****************************************************************************/
+
+int inode_checkperm(FAR struct inode *inode, int amode);
+
+/****************************************************************************
+ * Name: inode_checkopenperm
+ *
+ * Description:
+ *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
+ *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
+ *   are exempt from mode checks.
  *
  * Input Parameters:
  *   inode  - The inode to check
  *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
  *
  * Returned Value:
- *   Zero (OK) on success.  Negated errno on failure:
- *     -ENXIO   ops pointer is NULL
- *     -EACCES  required operation not supported, or permission denied
+ *   Zero (OK) on success, or a negated errno on failure.
  *
  ****************************************************************************/
 
-int inode_checkperm(FAR struct inode *inode, int oflags);
+int inode_checkopenperm(FAR struct inode *inode, int oflags);
+
+#ifdef CONFIG_FS_PERMISSION
+int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode);
+int fs_open_amode(int oflags);
+int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
+#endif
+
+#ifdef CONFIG_FS_PERMISSION
+int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode);
+int fs_open_amode(int oflags);
+int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
+#endif
 
 /****************************************************************************
  * Name: foreach_inode

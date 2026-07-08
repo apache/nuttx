@@ -10,6 +10,7 @@ Implementation Details
    cancellation_points.rst
    chip_h.rst
    context_switches.rst
+   crc.rst
    critical_sections.rst
    device_drivers.rst
    device_nodes.rst
@@ -38,4 +39,5 @@ Implementation Details
    tasks_vs_threads.rst
    tickless_os.rst
    tls.rst
+   user_identity.rst
    usb.rst

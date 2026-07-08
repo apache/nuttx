@@ -1,0 +1,36 @@
+{
+  "arch": "x86_64",
+  "archive-format": "darwin",
+  "binary-format": "mach-o",
+  "cpu": "x86-64",
+  "crt-objects-fallback": "false",
+  "data-layout": "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
+  "debuginfo-kind": "dwarf",
+  "default-uwtable": true,
+  "disable-redzone": true,
+  "emit-debug-gdb-scripts": false,
+  "frame-pointer": "always",
+  "function-sections": false,
+  "linker-flavor": "gnu-lld",
+  "lld-flavor": "darwin",
+  "llvm-target": "x86_64-apple-macosx",
+  "max-atomic-width": 64,
+  "metadata": {
+    "description": "x86_64 Mach-O target for NuttX sim on macOS",
+    "host_tools": false,
+    "std": true,
+    "tier": 3
+  },
+  "os": "nuttx",
+  "panic-strategy": "abort",
+  "relocation-model": "pic",
+  "split-debuginfo": "off",
+  "stack-probes": {
+    "kind": "inline"
+  },
+  "target-family": [
+    "unix"
+  ],
+  "target-pointer-width": 64,
+  "vendor": "unknown"
+}

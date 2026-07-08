@@ -36,51 +36,51 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_DAC_CR_OFFSET       0x0000 /* DAC control register */
-#define STM32L4_DAC_SWTRIGR_OFFSET  0x0004 /* DAC software trigger register */
-#define STM32L4_DAC_DHR12R1_OFFSET  0x0008 /* DAC channel 1 12-bit right-aligned data holding register */
-#define STM32L4_DAC_DHR12L1_OFFSET  0x000c /* DAC channel 1 12-bit left aligned data holding register */
-#define STM32L4_DAC_DHR8R1_OFFSET   0x0010 /* DAC channel 1 8-bit right aligned data holding register */
-#define STM32L4_DAC_DHR12R2_OFFSET  0x0014 /* DAC channel 2 12-bit right aligned data holding register */
-#define STM32L4_DAC_DHR12L2_OFFSET  0x0018 /* DAC channel 2 12-bit left aligned data holding register */
-#define STM32L4_DAC_DHR8R2_OFFSET   0x001c /* DAC channel 2 8-bit right-aligned data holding register */
-#define STM32L4_DAC_DHR12RD_OFFSET  0x0020 /* Dual DAC 12-bit right-aligned data holding register */
-#define STM32L4_DAC_DHR12LD_OFFSET  0x0024 /* DUAL DAC 12-bit left aligned data holding register */
-#define STM32L4_DAC_DHR8RD_OFFSET   0x0028 /* DUAL DAC 8-bit right aligned data holding register */
-#define STM32L4_DAC_DOR1_OFFSET     0x002c /* DAC channel 1 data output register */
-#define STM32L4_DAC_DOR2_OFFSET     0x0030 /* DAC channel 2 data output register */
-#define STM32L4_DAC_SR_OFFSET       0x0034 /* DAC status register */
+#define STM32_DAC_CR_OFFSET       0x0000 /* DAC control register */
+#define STM32_DAC_SWTRIGR_OFFSET  0x0004 /* DAC software trigger register */
+#define STM32_DAC_DHR12R1_OFFSET  0x0008 /* DAC channel 1 12-bit right-aligned data holding register */
+#define STM32_DAC_DHR12L1_OFFSET  0x000c /* DAC channel 1 12-bit left aligned data holding register */
+#define STM32_DAC_DHR8R1_OFFSET   0x0010 /* DAC channel 1 8-bit right aligned data holding register */
+#define STM32_DAC_DHR12R2_OFFSET  0x0014 /* DAC channel 2 12-bit right aligned data holding register */
+#define STM32_DAC_DHR12L2_OFFSET  0x0018 /* DAC channel 2 12-bit left aligned data holding register */
+#define STM32_DAC_DHR8R2_OFFSET   0x001c /* DAC channel 2 8-bit right-aligned data holding register */
+#define STM32_DAC_DHR12RD_OFFSET  0x0020 /* Dual DAC 12-bit right-aligned data holding register */
+#define STM32_DAC_DHR12LD_OFFSET  0x0024 /* DUAL DAC 12-bit left aligned data holding register */
+#define STM32_DAC_DHR8RD_OFFSET   0x0028 /* DUAL DAC 8-bit right aligned data holding register */
+#define STM32_DAC_DOR1_OFFSET     0x002c /* DAC channel 1 data output register */
+#define STM32_DAC_DOR2_OFFSET     0x0030 /* DAC channel 2 data output register */
+#define STM32_DAC_SR_OFFSET       0x0034 /* DAC status register */
 
                                     /* New registers not in STM32L1: */
-#define STM32L4_DAC_CCR_OFFSET      0x0038 /* DAC calibration control register */
-#define STM32L4_DAC_MCR_OFFSET      0x003c /* DAC mode control register */
-#define STM32L4_DAC_SHSR1_OFFSET    0x0040 /* DAC Sample and Hold sample time register 1 */
-#define STM32L4_DAC_SHSR2_OFFSET    0x0044 /* DAC Sample and Hold sample time register 2 */
-#define STM32L4_DAC_SHHR_OFFSET     0x0048 /* DAC Sample and Hold hold time register */
-#define STM32L4_DAC_SHRR_OFFSET     0x004c /* DAC Sample and Hold refresh time register */
+#define STM32_DAC_CCR_OFFSET      0x0038 /* DAC calibration control register */
+#define STM32_DAC_MCR_OFFSET      0x003c /* DAC mode control register */
+#define STM32_DAC_SHSR1_OFFSET    0x0040 /* DAC Sample and Hold sample time register 1 */
+#define STM32_DAC_SHSR2_OFFSET    0x0044 /* DAC Sample and Hold sample time register 2 */
+#define STM32_DAC_SHHR_OFFSET     0x0048 /* DAC Sample and Hold hold time register */
+#define STM32_DAC_SHRR_OFFSET     0x004c /* DAC Sample and Hold refresh time register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_DAC_CR              (STM32L4_DAC_BASE+STM32L4_DAC_CR_OFFSET)
-#define STM32L4_DAC_SWTRIGR         (STM32L4_DAC_BASE+STM32L4_DAC_SWTRIGR_OFFSET)
-#define STM32L4_DAC_DHR12R1         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12R1_OFFSET)
-#define STM32L4_DAC_DHR12L1         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12L1_OFFSET)
-#define STM32L4_DAC_DHR8R1          (STM32L4_DAC_BASE+STM32L4_DAC_DHR8R1_OFFSET)
-#define STM32L4_DAC_DHR12R2         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12R2_OFFSET)
-#define STM32L4_DAC_DHR12L2         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12L2_OFFSET)
-#define STM32L4_DAC_DHR8R2          (STM32L4_DAC_BASE+STM32L4_DAC_DHR8R2_OFFSET)
-#define STM32L4_DAC_DHR12RD         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12RD_OFFSET)
-#define STM32L4_DAC_DHR12LD         (STM32L4_DAC_BASE+STM32L4_DAC_DHR12LD_OFFSET)
-#define STM32L4_DAC_DHR8RD          (STM32L4_DAC_BASE+STM32L4_DAC_DHR8RD_OFFSET)
-#define STM32L4_DAC_DOR1            (STM32L4_DAC_BASE+STM32L4_DAC_DOR1_OFFSET)
-#define STM32L4_DAC_DOR2            (STM32L4_DAC_BASE+STM32L4_DAC_DOR2_OFFSET)
-#define STM32L4_DAC_SR              (STM32L4_DAC_BASE+STM32L4_DAC_SR_OFFSET)
-#define STM32L4_DAC_CCR             (STM32L4_DAC_BASE+STM32L4_DAC_CCR_OFFSET)
-#define STM32L4_DAC_MCR             (STM32L4_DAC_BASE+STM32L4_DAC_MCR_OFFSET)
-#define STM32L4_DAC_SHSR1           (STM32L4_DAC_BASE+STM32L4_DAC_SHSR1_OFFSET)
-#define STM32L4_DAC_SHSR2           (STM32L4_DAC_BASE+STM32L4_DAC_SHSR2_OFFSET)
-#define STM32L4_DAC_SHHR            (STM32L4_DAC_BASE+STM32L4_DAC_SHHR_OFFSET)
-#define STM32L4_DAC_SHRR            (STM32L4_DAC_BASE+STM32L4_DAC_SHRR_OFFSET)
+#define STM32_DAC_CR              (STM32_DAC_BASE+STM32_DAC_CR_OFFSET)
+#define STM32_DAC_SWTRIGR         (STM32_DAC_BASE+STM32_DAC_SWTRIGR_OFFSET)
+#define STM32_DAC_DHR12R1         (STM32_DAC_BASE+STM32_DAC_DHR12R1_OFFSET)
+#define STM32_DAC_DHR12L1         (STM32_DAC_BASE+STM32_DAC_DHR12L1_OFFSET)
+#define STM32_DAC_DHR8R1          (STM32_DAC_BASE+STM32_DAC_DHR8R1_OFFSET)
+#define STM32_DAC_DHR12R2         (STM32_DAC_BASE+STM32_DAC_DHR12R2_OFFSET)
+#define STM32_DAC_DHR12L2         (STM32_DAC_BASE+STM32_DAC_DHR12L2_OFFSET)
+#define STM32_DAC_DHR8R2          (STM32_DAC_BASE+STM32_DAC_DHR8R2_OFFSET)
+#define STM32_DAC_DHR12RD         (STM32_DAC_BASE+STM32_DAC_DHR12RD_OFFSET)
+#define STM32_DAC_DHR12LD         (STM32_DAC_BASE+STM32_DAC_DHR12LD_OFFSET)
+#define STM32_DAC_DHR8RD          (STM32_DAC_BASE+STM32_DAC_DHR8RD_OFFSET)
+#define STM32_DAC_DOR1            (STM32_DAC_BASE+STM32_DAC_DOR1_OFFSET)
+#define STM32_DAC_DOR2            (STM32_DAC_BASE+STM32_DAC_DOR2_OFFSET)
+#define STM32_DAC_SR              (STM32_DAC_BASE+STM32_DAC_SR_OFFSET)
+#define STM32_DAC_CCR             (STM32_DAC_BASE+STM32_DAC_CCR_OFFSET)
+#define STM32_DAC_MCR             (STM32_DAC_BASE+STM32_DAC_MCR_OFFSET)
+#define STM32_DAC_SHSR1           (STM32_DAC_BASE+STM32_DAC_SHSR1_OFFSET)
+#define STM32_DAC_SHSR2           (STM32_DAC_BASE+STM32_DAC_SHSR2_OFFSET)
+#define STM32_DAC_SHHR            (STM32_DAC_BASE+STM32_DAC_SHHR_OFFSET)
+#define STM32_DAC_SHRR            (STM32_DAC_BASE+STM32_DAC_SHRR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 

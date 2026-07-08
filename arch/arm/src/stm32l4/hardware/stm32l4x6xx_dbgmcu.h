@@ -81,14 +81,14 @@
 #define DBGMCU_APB1_I2C2STOP      (1 << 22)  /* Bit 22: I2C2 SMBUS timeout mode stopped when Core is halted */
 #define DBGMCU_APB1_I2C3STOP      (1 << 23)  /* Bit 23: I2C3 SMBUS timeout mode stopped when Core is halted */
 #define DBGMCU_APB1_CAN1STOP      (1 << 25)  /* Bit 25: CAN1 stopped when core is halted */
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define DBGMCU_APB1_CAN2STOP    (1 << 26)  /* Bit 26: CAN2 stopped when core is halted */
 #endif
 #define DBGMCU_APB1_LPTIM1STOP    (1 << 31)  /* Bit 31: LPTIM1 stopper when core is halted */
 
 /* Debug MCU APB1 freeze register 2 */
 
-#if defined(CONFIG_STM32L4_STM32L496XX)
+#if defined(CONFIG_STM32_STM32L496XX)
 #  define DBGMCU_APB1_FZ2_I2C4STOP  (1 << 1) /* Bit 1: I2C4 SMBUS timeout mode stopped when Core is halted */
 #endif
 #define DBGMCU_APB1_FZ2_LPTIM2STOP  (1 << 5) /* Bit 5: LPTIM2 stopper when core is halted */

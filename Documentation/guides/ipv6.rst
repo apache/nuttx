@@ -218,7 +218,7 @@ Board Configurations
 
 At present, there are three board configuration that are pre-configured to 
 use IPv6: ``nuttx/boards/arm/tiva/dk-tm4c129x/configs/ipv6``, 
-``nuttx/boards/arm/stm32/stm32f4discovery/ipv6``, and 
+``nuttx/boards/arm/stm32f4/stm32f4discovery/ipv6``, and
 ``nuttx/boards/arm/tiva/tm4c1294-launchpad/configs/ipv6``. These default 
 configurations have only IPv6 enabled. But the `README` files at in those 
 board directories describes how to enable `both` IPv4 and IPv6 simultaneously.

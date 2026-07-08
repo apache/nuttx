@@ -23,3 +23,7 @@
 if(CONFIG_DEV_URANDOM AND NOT CONFIG_DEV_URANDOM_ARCH)
   target_sources(drivers PRIVATE dev_urandom.c)
 endif()
+
+if(CONFIG_DEV_RNG90)
+  target_sources(drivers PRIVATE rng90.c)
+endif()

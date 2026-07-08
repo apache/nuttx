@@ -26,16 +26,17 @@
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32WL5 files
 
-CHIP_CSRCS  = stm32wl5_allocateheap.c stm32wl5_exti_gpio.c stm32wl5_gpio.c
+CHIP_CSRCS += stm32wl5_allocateheap.c stm32wl5_exti_gpio.c stm32wl5_gpio.c
 CHIP_CSRCS += stm32wl5_irq.c stm32wl5_lowputc.c stm32wl5_rcc.c
-CHIP_CSRCS += stm32wl5_serial.c stm32wl5_start.c stm32wl5_waste.c stm32wl5_uid.c
+CHIP_CSRCS += stm32wl5_serial.c stm32wl5_start.c
 CHIP_CSRCS += stm32wl5_lse.c stm32wl5_lsi.c stm32wl5_idle.c
 CHIP_CSRCS += stm32wl5_pwr.c stm32wl5_tim.c stm32wl5_flash.c stm32wl5_timerisr.c
 CHIP_CSRCS += stm32wl5_spi.c
 
-CSRCS-$(CONFIG_STM32WL5_IPCC) = stm32wl5_ipcc.c
+CSRCS-$(CONFIG_STM32_IPCC) = stm32wl5_ipcc.c
 
 CHIP_CSRCS += $(CSRCS-y)

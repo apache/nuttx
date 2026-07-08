@@ -141,7 +141,7 @@ int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32U5_COMP
+#ifdef CONFIG_STM32_COMP
 int stm32_exti_comp(int cmp, bool risingedge, bool fallingedge,
                       bool event, xcpt_t func, void *arg);
 #endif

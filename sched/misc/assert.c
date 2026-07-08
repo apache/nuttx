@@ -118,7 +118,7 @@ static spinlock_t g_assert_lock = SP_UNLOCKED;
 static uintptr_t g_last_regs[CONFIG_SMP_NCPUS][XCPTCONTEXT_REGS]
                  aligned_data(XCPTCONTEXT_ALIGN);
 
-#ifdef CONFIG_DEBUG_ALERT
+#ifdef CONFIG_SCHED_DUMP_TASKS
 static FAR const char * const g_policy[4] =
 {
   "FIFO", "RR", "SPORADIC"
@@ -168,6 +168,12 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 #ifdef CONFIG_ARCH_STACKDUMP
 
+static void sp_out_of_range(uintptr_t sp)
+{
+  _alert("ERROR: Stack pointer %" PRIxPTR " is not within the stack\n", sp);
+}
+
+#ifdef CONFIG_SCHED_DUMP_STACK
 /****************************************************************************
  * Name: stack_dump
  ****************************************************************************/
@@ -187,6 +193,7 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
              DUMP_PTR(ptr, 5), DUMP_PTR(ptr , 6), DUMP_PTR(ptr, 7));
     }
 }
+#endif
 
 /****************************************************************************
  * Name: dump_stackinfo
@@ -195,14 +202,14 @@ static void stack_dump(uintptr_t sp, uintptr_t stack_top)
 static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
                            uintptr_t base, size_t size, size_t used)
 {
-  uintptr_t top = base + size;
-
   _alert("%s Stack:\n", tag);
   _alert("  base: %p\n", (FAR void *)base);
   _alert("  size: %08zu\n", size);
 
+#ifdef CONFIG_SCHED_DUMP_STACK
   if (sp != 0)
     {
+      uintptr_t top = base + size;
       _alert("    sp: %p\n", (FAR void *)sp);
 
       /* Get more information */
@@ -232,6 +239,7 @@ static void dump_stackinfo(FAR const char *tag, uintptr_t sp,
 
       stack_dump(base, base + size);
     }
+#endif
 }
 
 /****************************************************************************
@@ -285,8 +293,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
   else
     {
       force = true;
-      _alert("ERROR: Stack pointer %" PRIxPTR "is not within the stack\n",
-             sp);
+      sp_out_of_range(sp);
     }
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
@@ -309,8 +316,7 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                     up_getusrsp((FAR void *)running_regs()) : 0;
       if (tcbstack_sp < tcbstack_base || tcbstack_sp >= tcbstack_top)
         {
-          _alert("ERROR: Stack pointer %" PRIxPTR " is not within the"
-                 " stack\n", tcbstack_sp);
+          sp_out_of_range(tcbstack_sp);
 
           tcbstack_sp = 0;
           force = true;
@@ -343,10 +349,9 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
                      );
     }
 }
-
 #endif
 
-#ifdef CONFIG_DEBUG_ALERT
+#ifdef CONFIG_SCHED_DUMP_TASKS
 /****************************************************************************
  * Name: dump_task
  ****************************************************************************/
@@ -436,7 +441,7 @@ static void dump_task(FAR struct tcb_s *tcb, FAR void *arg)
          , tcb->stack_base_ptr
          , tcb->adj_stack_size
 #ifdef CONFIG_STACK_COLORATION
-         , up_check_tcbstack(tcb, tcb->adj_stack_size)
+         , stack_used
          , stack_filled / 10, stack_filled % 10
          , (stack_filled >= 10 * 80 ? '!' : ' ')
 #endif
@@ -478,6 +483,7 @@ static void dump_fdlist(FAR struct tcb_s *tcb, FAR void *arg)
 
 static void dump_tasks(void)
 {
+#ifdef CONFIG_SCHED_DUMP_TASKS
 #if CONFIG_ARCH_INTERRUPTSTACK > 0
   int cpu;
 #endif
@@ -548,9 +554,8 @@ static void dump_tasks(void)
     }
 #endif
 
-#ifdef CONFIG_DEBUG_ALERT
   nxsched_foreach(dump_task, NULL);
-#endif
+#endif /* CONFIG_SCHED_DUMP_TASKS */
 
 #ifdef CONFIG_SCHED_BACKTRACE
   nxsched_foreach(dump_backtrace, NULL);

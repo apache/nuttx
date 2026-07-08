@@ -119,12 +119,12 @@ static void up_idlepm(void)
           /* Enter STOP mode */
 
           BEGIN_IDLE();
-          stm32l4_pmstop(true);
+          stm32_pmstop(true);
           END_IDLE();
 
           /* Set correct clock again after returning from STOP */
 
-          stm32l4_clockenable();
+          stm32_clockenable();
 
           /* Inform of all drivers of the new state */
 
@@ -137,7 +137,7 @@ static void up_idlepm(void)
           break;
 
         case PM_SLEEP:
-          stm32l4_pmstandby();
+          stm32_pmstandby();
           break;
 
         default:
@@ -184,7 +184,7 @@ void up_idle(void)
 
   /* Sleep until an interrupt occurs to save power. */
 
-#if !(defined(CONFIG_DEBUG_SYMBOLS) && defined(CONFIG_STM32L4_DISABLE_IDLE_SLEEP_DURING_DEBUG))
+#if !(defined(CONFIG_DEBUG_SYMBOLS) && defined(CONFIG_STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG))
   BEGIN_IDLE();
   asm("WFI");
   END_IDLE();

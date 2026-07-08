@@ -81,10 +81,10 @@
 /* Phase 1 is TIM1 CH1 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 0
-#    ifndef CONFIG_STM32L4_TIM1_CH1OUT
+#    ifndef CONFIG_STM32_TIM1_CH1OUT
 #      error
 #    endif
-#    ifndef CONFIG_STM32L4_TIM6
+#    ifndef CONFIG_STM32_TIM6
 #      error
 #    endif
 #  endif
@@ -92,7 +92,7 @@
 /* Phase 2 is TIM1 CH2 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 1
-#    ifndef CONFIG_STM32L4_TIM1_CH2OUT
+#    ifndef CONFIG_STM32_TIM1_CH2OUT
 #      error
 #    endif
 #  endif
@@ -100,7 +100,7 @@
 /* Phase 3 is TIM1 CH3 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 2
-#    ifndef CONFIG_STM32L4_TIM1_CH3OUT
+#    ifndef CONFIG_STM32_TIM1_CH3OUT
 #      error
 #    endif
 #  endif
@@ -108,7 +108,7 @@
 /* Phase 4 is TIM1 CH4 */
 
 #  if CONFIG_NUCLEOL432KC_SPWM_PHASE_NUM > 3
-#    ifndef CONFIG_STM32L4_TIM1_CH4OUT
+#    ifndef CONFIG_STM32_TIM1_CH4OUT
 #      error
 #    endif
 #  endif
@@ -138,9 +138,9 @@
 
 struct spwm_s
 {
-  struct stm32l4_pwm_dev_s *pwm;
+  struct stm32_pwm_dev_s *pwm;
 #ifdef CONFIG_NUCLEOL432KC_SPWM_USE_TIM1
-  struct stm32l4_tim_dev_s *tim;
+  struct stm32_tim_dev_s *tim;
 #endif
   float waveform[SAMPLES_NUM];               /* Waveform samples */
   float phase_step;                          /* Waveform phase step */
@@ -314,8 +314,8 @@ static int spwm_stop(struct spwm_s *spwm)
 static void tim6_handler(void)
 {
   struct spwm_s *spwm = &g_spwm;
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_tim_dev_s *tim = spwm->tim;
   uint8_t i = 0;
 
   for (i = 0; i < spwm->phases; i += 1)
@@ -336,7 +336,7 @@ static void tim6_handler(void)
 
   /* TODO: Software update */
 
-  STM32L4_TIM_ACKINT(tim, ATIM_SR_UIF);
+  STM32_TIM_ACKINT(tim, ATIM_SR_UIF);
 }
 
 /****************************************************************************
@@ -345,13 +345,13 @@ static void tim6_handler(void)
 
 static int spwm_tim6_setup(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = NULL;
+  struct stm32_tim_dev_s *tim = NULL;
   uint64_t freq = 0;
   int ret = OK;
 
   /* Get TIM6 interface */
 
-  tim = stm32l4_tim_init(6);
+  tim = stm32_tim_init(6);
   if (tim == NULL)
     {
       printf("ERROR: Failed to get TIM6 interface\n");
@@ -368,12 +368,12 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
 
   freq = spwm->samples * spwm->waveform_freq;
 
-  STM32L4_TIM_SETFREQ(tim, freq);
-  STM32L4_TIM_ENABLE(tim);
+  STM32_TIM_SETFREQ(tim, freq);
+  STM32_TIM_ENABLE(tim);
 
   /* Attach TIM6 ram vector */
 
-  ret = arm_ramvec_attach(STM32L4_IRQ_TIM6, tim6_handler);
+  ret = arm_ramvec_attach(STM32_IRQ_TIM6, tim6_handler);
   if (ret < 0)
     {
       printf("ERROR: arm_ramvec_attach failed: %d\n", ret);
@@ -383,7 +383,7 @@ static int spwm_tim6_setup(struct spwm_s *spwm)
 
   /* Set the priority of the TIM6 interrupt vector */
 
-  ret = up_prioritize_irq(STM32L4_IRQ_TIM6, NVIC_SYSH_HIGH_PRIORITY);
+  ret = up_prioritize_irq(STM32_IRQ_TIM6, NVIC_SYSH_HIGH_PRIORITY);
   if (ret < 0)
     {
       printf("ERROR: up_prioritize_irq failed: %d\n", ret);
@@ -403,12 +403,12 @@ errout:
 
 static int spwm_tim6_start(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Enable the timer interrupt at the NVIC and at TIM6 */
 
-  up_enable_irq(STM32L4_IRQ_TIM6);
-  STM32L4_TIM_ENABLEINT(tim, BTIM_DIER_UIE);
+  up_enable_irq(STM32_IRQ_TIM6);
+  STM32_TIM_ENABLEINT(tim, BTIM_DIER_UIE);
 
   return OK;
 }
@@ -419,12 +419,12 @@ static int spwm_tim6_start(struct spwm_s *spwm)
 
 static int spwm_tim6_stop(struct spwm_s *spwm)
 {
-  struct stm32l4_tim_dev_s *tim = spwm->tim;
+  struct stm32_tim_dev_s *tim = spwm->tim;
 
   /* Disable the timer interrupt at the NVIC and at TIM6 */
 
-  up_disable_irq(STM32L4_IRQ_TIM6);
-  STM32L4_TIM_DISABLEINT(tim, BTIM_DIER_UIE);
+  up_disable_irq(STM32_IRQ_TIM6);
+  STM32_TIM_DISABLEINT(tim, BTIM_DIER_UIE);
 
   return OK;
 }
@@ -435,12 +435,12 @@ static int spwm_tim6_stop(struct spwm_s *spwm)
 
 static int spwm_tim1_setup(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = NULL;
+  struct stm32_pwm_dev_s *pwm = NULL;
   int ret = OK;
 
   /* Get TIM1 PWM interface */
 
-  pwm = (struct stm32l4_pwm_dev_s *)stm32l4_pwminitialize(1);
+  pwm = (struct stm32_pwm_dev_s *)stm32_pwminitialize(1);
   if (pwm == NULL)
     {
       printf("ERROR: Failed to get TIM1 PWM interface\n");
@@ -486,7 +486,7 @@ errout:
 
 static int spwm_tim1_start(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
   int i = 0;
 
@@ -514,7 +514,7 @@ static int spwm_tim1_start(struct spwm_s *spwm)
 
 static int spwm_tim1_stop(struct spwm_s *spwm)
 {
-  struct stm32l4_pwm_dev_s *pwm = spwm->pwm;
+  struct stm32_pwm_dev_s *pwm = spwm->pwm;
   uint16_t outputs = 0;
   int i = 0;
 

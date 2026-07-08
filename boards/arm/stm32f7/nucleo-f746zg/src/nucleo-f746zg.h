@@ -100,7 +100,7 @@
 #define GPIO_SPI3_CS2  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN6)
 #define GPIO_SPI3_CS3  (GPIO_SPI_CS | GPIO_PORTG | GPIO_PIN7)
 
-#if defined(CONFIG_STM32F7_SDMMC1) || defined(CONFIG_STM32F7_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 #  define HAVE_SDIO
 #endif
 
@@ -111,7 +111,7 @@
 #define SDIO_SLOTNO 0  /* Only one slot */
 
 #ifdef HAVE_SDIO
-#  if defined(CONFIG_STM32F7_SDMMC1)
+#  if defined(CONFIG_STM32_SDMMC1)
 #    define GPIO_SDMMC1_NCD (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI | GPIO_PORTC | GPIO_PIN6)
 #  endif
 
@@ -153,9 +153,9 @@
 /* GPIO pins used by the GPIO Subsystem */
 
 #define BOARD_NGPIOIN     4   /* Amount of GPIO Input pins */
-#if defined(CONFIG_STM32F7_TIM1_CH1NOUT) && defined (CONFIG_STM32F7_TIM1_CH2NOUT)
+#if defined(CONFIG_STM32_TIM1_CH1NOUT) && defined (CONFIG_STM32_TIM1_CH2NOUT)
 #define BOARD_NGPIOOUT    8   /* Amount of GPIO Output pins */
-#elif defined(CONFIG_STM32F7_TIM1_CH1NOUT) || defined (CONFIG_STM32F7_TIM1_CH2NOUT)
+#elif defined(CONFIG_STM32_TIM1_CH1NOUT) || defined (CONFIG_STM32_TIM1_CH2NOUT)
 #define BOARD_NGPIOOUT    9   /* Amount of GPIO Output pins */
 #else
 #define BOARD_NGPIOOUT    10   /* Amount of GPIO Output pins */
@@ -179,11 +179,11 @@
                                 GPIO_OUTPUT_SET | GPIO_PORTA |GPIO_PIN5)
 #define GPIO_OUT5         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
                                 GPIO_OUTPUT_SET | GPIO_PORTF | GPIO_PIN12)
-#if !defined(CONFIG_STM32F7_TIM1_CH1NOUT)
+#if !defined(CONFIG_STM32_TIM1_CH1NOUT)
 #define GPIO_OUT6         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
                                 GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN8)
 #endif
-#if !defined(CONFIG_STM32F7_TIM1_CH2NOUT)
+#if !defined(CONFIG_STM32_TIM1_CH2NOUT)
 #define GPIO_OUT7         (GPIO_OUTPUT | GPIO_SPEED_50MHz | \
                                 GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN10)
 #endif
@@ -276,7 +276,7 @@ int stm32_sdio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 void stm32_usbinitialize(void);
 #endif
 
@@ -308,7 +308,7 @@ int stm32_adc_setup(void);
  * Name: stm32_bbsram_int
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
 int stm32_bbsram_int(void);
 #endif
 

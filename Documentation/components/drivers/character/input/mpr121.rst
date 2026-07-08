@@ -53,7 +53,7 @@ kbd-codec layer.
      ``board_mpr121_initialize(0, 1)`` for ``/dev/keymap0`` and ``i2c1``).
 
 **Reference Implementation (STM32F4Discovery)**. The current reference
-is in ``boards/arm/stm32/common/src/stm32_mpr121.c``:
+is in ``boards/arm/common/stm32/src/stm32_mpr121.c``:
 
 - Keymap: 4x3 keypad layout
 - Registration: ``board_mpr121_initialize()`` calls

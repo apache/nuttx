@@ -83,10 +83,10 @@
  */
 
 #define SRAM2_START  STM32_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32H5_SRAM2_SIZE)
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 #define SRAM3_START  STM32_SRAM3_BASE
-#define SRAM3_END    (SRAM3_START + STM32H5_SRAM3_SIZE)
+#define SRAM3_END    (SRAM3_START + STM32_SRAM3_SIZE)
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
@@ -176,7 +176,7 @@ void __start(void)
       *dest++ = *src++;
     }
 
-#ifdef CONFIG_STM32H5_SRAM2_INIT
+#ifdef CONFIG_STM32_SRAM2_INIT
   /* NOTE:  this is optional because this may be inappropriate, especially
    * if the memory is being used for it's battery backed purpose.  In that
    * case, the first-time initialization needs to be performed by the board
@@ -225,7 +225,7 @@ void __start(void)
   stm32_board_initialize();
   showprogress('C');
 
-#ifdef CONFIG_STM32H5_ICACHE
+#ifdef CONFIG_STM32_ICACHE
   stm32_enable_icache();
 #endif
   showprogress('G');

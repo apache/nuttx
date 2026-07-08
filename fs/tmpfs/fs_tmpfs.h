@@ -30,6 +30,8 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/mutex.h>
@@ -82,6 +84,11 @@ struct tmpfs_object_s
   uint8_t  to_type;      /* See enum tmpfs_objtype_e */
   uint8_t  to_refs;      /* Reference count */
   FAR struct tmpfs_directory_s *to_parent;
+#ifdef CONFIG_FS_PERMISSION
+  mode_t   to_mode;      /* File mode (permission bits) */
+  uid_t    to_uid;       /* Owner user ID */
+  gid_t    to_gid;       /* Owner group ID */
+#endif
 };
 
 /* The form of a directory memory object */
@@ -96,6 +103,11 @@ struct tmpfs_directory_s
   uint8_t  tdo_type;     /* See enum tmpfs_objtype_e */
   uint8_t  tdo_refs;     /* Reference count */
   FAR struct tmpfs_directory_s *tdo_parent;
+#ifdef CONFIG_FS_PERMISSION
+  mode_t   tdo_mode;     /* Directory mode (permission bits) */
+  uid_t    tdo_uid;      /* Owner user ID */
+  gid_t    tdo_gid;      /* Owner group ID */
+#endif
 
   /* Remaining fields are unique to a directory object */
 
@@ -123,6 +135,11 @@ struct tmpfs_file_s
   uint8_t  tfo_type;     /* See enum tmpfs_objtype_e */
   uint8_t  tfo_refs;     /* Reference count */
   FAR struct tmpfs_directory_s *tfo_parent;
+#ifdef CONFIG_FS_PERMISSION
+  mode_t   tfo_mode;     /* File mode (permission bits) */
+  uid_t    tfo_uid;      /* Owner user ID */
+  gid_t    tfo_gid;      /* Owner group ID */
+#endif
 
   /* Remaining fields are unique to a directory object */
 

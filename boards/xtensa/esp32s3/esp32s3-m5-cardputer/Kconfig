@@ -1,0 +1,37 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_ESP32S3_M5_CARDPUTER
+
+config ESP32S3_M5_CARDPUTER_KEYBOARD
+	bool "Cardputer matrix keyboard"
+	default n
+	select INPUT
+	select INPUT_KEYBOARD
+	select SCHED_LPWORK
+	---help---
+		Enable the M5Stack Cardputer 56-key matrix keyboard driver.  The
+		driver scans the 74HC138-multiplexed key matrix and registers a
+		keyboard device (/dev/kbdN).
+
+if ESP32S3_M5_CARDPUTER_KEYBOARD
+
+config ESP32S3_M5_CARDPUTER_KBD_BUFNUM
+	int "Cardputer keyboard event buffer size"
+	default 8
+	---help---
+		Number of key events buffered by the Cardputer matrix keyboard
+		driver before the oldest events are overwritten.
+
+config ESP32S3_M5_CARDPUTER_KBD_DEBUG
+	bool "Cardputer keyboard scan debug logging"
+	default n
+	---help---
+		Log every detected key matrix transition to the syslog.  Useful to
+		bring up the keyboard and to verify the key map.
+
+endif # ESP32S3_M5_CARDPUTER_KEYBOARD
+
+endif # ARCH_BOARD_ESP32S3_M5_CARDPUTER

@@ -1,0 +1,212 @@
+#
+# Common STM32 Kconfig options shared by STM32 families.
+#
+
+menu "STM32 Configuration Options"
+	depends on ARCH_CHIP_STM32
+
+config STM32_COMMON_LEGACY
+	bool
+	default y if ARCH_CHIP_STM32F1
+	default y if ARCH_CHIP_STM32F2
+	default y if ARCH_CHIP_STM32F3
+	default y if ARCH_CHIP_STM32F4
+	default y if ARCH_CHIP_STM32G4
+	default y if ARCH_CHIP_STM32L1
+
+config STM32_COMMON_F0_L0_G0_C0
+	bool
+	default y if ARCH_CHIP_STM32F0
+	default y if ARCH_CHIP_STM32L0
+	default y if ARCH_CHIP_STM32G0
+	default y if ARCH_CHIP_STM32C0
+
+config STM32_COMMON_F7_H7
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_COMMON_H7_H5
+	bool
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_COMMON_F7_H7_H5
+	bool
+	default y if STM32_COMMON_F7_H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_COMMON_L4_L5_U5
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_COMMON_L5_U5
+	bool
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_COMMON_L4_H5_L5_U5
+	bool
+	default y if STM32_COMMON_L4_L5_U5
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_COMMON_FULL_FEATURED
+	bool
+	default y if STM32_COMMON_LEGACY
+	default y if STM32_COMMON_F0_L0_G0_C0
+	default y if STM32_COMMON_F7_H7_H5
+	default y if STM32_COMMON_L4_L5_U5
+
+config STM32_COMMON_SRAM2_OPTIONS
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5 && STM32_SRAM2
+
+source "arch/arm/src/common/stm32/Kconfig.have"
+
+source "arch/arm/src/common/stm32/Kconfig.periph"
+
+menu "ADC Configuration"
+	depends on STM32_ADC
+source "arch/arm/src/common/stm32/Kconfig.adc"
+endmenu # ADC Configuration
+
+menu "SDADC Configuration"
+	depends on STM32_SDADC
+source "arch/arm/src/common/stm32/Kconfig.sdadc"
+endmenu # SDADC Configuration
+
+menu "Cache Configuration"
+source "arch/arm/src/common/stm32/Kconfig.cache"
+endmenu # Cache Configuration
+
+menu "CAN Configuration"
+	depends on STM32_CAN
+source "arch/arm/src/common/stm32/Kconfig.can"
+endmenu # CAN Configuration
+
+menu "FDCAN Configuration"
+	depends on STM32_FDCAN
+source "arch/arm/src/common/stm32/Kconfig.fdcan"
+endmenu # FDCAN Configuration
+
+menu "DAC Configuration"
+	depends on STM32_DAC
+source "arch/arm/src/common/stm32/Kconfig.dac"
+endmenu # DAC Configuration
+
+menu "DFSDM Configuration"
+	depends on STM32_DFSDM1 || STM32_MDF1 || STM32_ADF1
+source "arch/arm/src/common/stm32/Kconfig.dfsdm"
+endmenu # DFSDM Configuration
+
+menu "DMA Configuration"
+	depends on STM32_DMA || STM32_DMA2D
+source "arch/arm/src/common/stm32/Kconfig.dma"
+endmenu # DMA Configuration
+
+menu "Ethernet Configuration"
+	depends on STM32_ETHMAC
+source "arch/arm/src/common/stm32/Kconfig.eth"
+endmenu # Ethernet Configuration
+
+menu "Flash Configuration"
+source "arch/arm/src/common/stm32/Kconfig.flash"
+endmenu # Flash Configuration
+
+menu "FOC Configuration"
+	depends on STM32_HAVE_COMMON_FOC
+source "arch/arm/src/common/stm32/Kconfig.foc"
+endmenu # FOC Configuration
+
+menu "GPIO Configuration"
+source "arch/arm/src/common/stm32/Kconfig.gpio"
+endmenu # GPIO Configuration
+
+menu "I2C Configuration"
+	depends on STM32_I2C
+source "arch/arm/src/common/stm32/Kconfig.i2c"
+endmenu # I2C Configuration
+
+menu "IPCC Configuration"
+	depends on STM32_IPCC || STM32_HAVE_HSEM
+source "arch/arm/src/common/stm32/Kconfig.ipcc"
+endmenu # IPCC Configuration
+
+menu "BLE Configuration"
+	depends on STM32_BLE || STM32_MBOX
+source "arch/arm/src/common/stm32/Kconfig.ble"
+endmenu # BLE Configuration
+
+menu "LTDC Configuration"
+	depends on STM32_LTDC
+source "arch/arm/src/common/stm32/Kconfig.ltdc"
+endmenu # LTDC Configuration
+
+menu "Memory Configuration"
+source "arch/arm/src/common/stm32/Kconfig.memory"
+endmenu # Memory Configuration
+
+menu "QSPI/OCTOSPI Configuration"
+	depends on STM32_QSPI || STM32_QSPI1 || STM32_OCTOSPI1 || STM32_OCTOSPI2
+source "arch/arm/src/common/stm32/Kconfig.qspi"
+endmenu # QSPI/OCTOSPI Configuration
+
+menu "RTC Configuration"
+	depends on STM32_RTC
+source "arch/arm/src/common/stm32/Kconfig.rtc"
+endmenu # RTC Configuration
+
+menu "SAI Configuration"
+source "arch/arm/src/common/stm32/Kconfig.sai"
+endmenu # SAI Configuration
+
+menu "SDIO/SDMMC Configuration"
+	depends on STM32_SDIO || STM32_SDMMC
+source "arch/arm/src/common/stm32/Kconfig.sdio"
+endmenu # SDIO/SDMMC Configuration
+
+menu "COMP Configuration"
+	depends on STM32_COMP
+source "arch/arm/src/common/stm32/Kconfig.comp"
+endmenu # COMP Configuration
+
+menu "DTS Configuration"
+	depends on STM32_DTS
+source "arch/arm/src/common/stm32/Kconfig.dts"
+endmenu # DTS Configuration
+
+menu "U[S]ART Configuration"
+	depends on STM32_USART
+source "arch/arm/src/common/stm32/Kconfig.uart"
+endmenu # U[S]ART Configuration
+
+menu "SPI/I2S Configuration"
+	depends on STM32_SPI || STM32_I2S
+source "arch/arm/src/common/stm32/Kconfig.spi"
+endmenu # SPI/I2S Configuration
+
+menu "System Configuration"
+source "arch/arm/src/common/stm32/Kconfig.system"
+endmenu # System Configuration
+
+menu "Timer Configuration"
+	depends on STM32_TIM || STM32_LPTIM
+source "arch/arm/src/common/stm32/Kconfig.tim"
+endmenu # Timer Configuration
+
+menu "HRTIM Configuration"
+	depends on STM32_HRTIM
+source "arch/arm/src/common/stm32/Kconfig.hrtim"
+endmenu # HRTIM Configuration
+
+menu "USB Configuration"
+	depends on STM32_USB || STM32_USBFS || STM32_OTGFS || STM32_OTGHS || STM32_OTGFSHS
+source "arch/arm/src/common/stm32/Kconfig.usb"
+endmenu # USB Configuration
+
+endmenu # Common STM32 Configuration Options

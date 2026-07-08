@@ -22,7 +22,7 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c)
 
-if(CONFIG_STM32F7_FOC)
+if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()
 

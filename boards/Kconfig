@@ -496,6 +496,17 @@ config ARCH_BOARD_ESP32S3_DEVKIT
 		ESP32-S3-DevKitC-1 version may be based either on ESP32-S3-WROOM-1/1U or
 		ESP32-S3-WROOM-2/2U.
 
+config ARCH_BOARD_ESP32S3_M5_CARDPUTER
+	bool "M5Stack Cardputer (ESP32-S3)"
+	depends on ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM1N8R2 || ARCH_CHIP_ESP32S3WROOM1N8R8 || ARCH_CHIP_ESP32S3CUSTOM
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESPRESSIF_GPIO_IRQ
+	---help---
+		The M5Stack Cardputer is a portable computer kit built around the
+		ESP32-S3FN8 (dual Xtensa LX7 @ 240 MHz, 8 MB flash, no PSRAM).  It
+		integrates a 56-key keyboard, a 1.14" ST7789 TFT, an NS4168 I2S
+		speaker, an SPM1423 microphone, an IR transmitter and a microSD slot.
+
 config ARCH_BOARD_ESP32S3_8048S043
 	bool "ESP32-S3 8048S043"
 	depends on ARCH_CHIP_ESP32S3WROOM1N4 || ARCH_CHIP_ESP32S3MINI1N8 || ARCH_CHIP_ESP32S3WROOM1N8R2 || ARCH_CHIP_ESP32S3WROOM1N16R8 || ARCH_CHIP_ESP32S3WROOM2N16R8V || ARCH_CHIP_ESP32S3WROOM2N32R8V || ARCH_CHIP_ESP32S3CUSTOM || ARCH_CHIP_ESP32S3WROOM1N8R8
@@ -672,6 +683,13 @@ config ARCH_BOARD_ESP32P4_PICO_WIFI_WARESHARE
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The Waveshare ESP32-P4-PICO-WIFI features the ESP32-P4 CPU with two RISC-V cores.
+
+config ARCH_BOARD_ESP32P4_TAB5
+	bool "M5Stack Tab5 (ESP32-P4)"
+	depends on ARCH_CHIP_ESP32P4
+	---help---
+		The M5Stack Tab5 features the ESP32-P4 (dual RISC-V) plus an ESP32-C6
+		wireless companion.  This port brings up NSH and the I2C0 bus.
 
 config ARCH_BOARD_ET_STM32_STAMP
 	bool "Futurlec: ET-STM32 Stamp"
@@ -1455,6 +1473,7 @@ config ARCH_BOARD_THINGY91
 	bool "Nordic Thingy:91 cellular IoT prototyping platform - nRF9160"
 	depends on ARCH_CHIP_NRF91
 	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This option selects the Thingy:91 cellular IoT prototyping platform - nRF9160 chip
 
@@ -2443,6 +2462,22 @@ config ARCH_BOARD_MPS3_AN547
 	---help---
 		This options selects support for NuttX on the MPS3 AN547
 		board featuring the Cortex-M55.
+
+config ARCH_BOARD_PKE8721DAF
+	bool "Realtek pke8721daf"
+	depends on ARCH_CHIP_RTL8721DX
+	---help---
+		This options selects support for NuttX on the pke8721daf
+		board featuring the Realtek RTL8721Dx (KM4,
+		Cortex-M33).
+
+config ARCH_BOARD_RTL8720F_EVB
+	bool "Realtek RTL8720F_EVB"
+	depends on ARCH_CHIP_RTL8720F
+	---help---
+		This options selects support for NuttX on the RTL8720F_EVB
+		board featuring the Realtek RTL8720F (km4tz application/host
+		core, Cortex-M33).
 
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
@@ -3691,6 +3726,7 @@ config ARCH_BOARD
 	default "esp32s2-saola-1"              if ARCH_BOARD_ESP32S2_SAOLA_1
 	default "franzininho-wifi"             if ARCH_BOARD_FRANZININHO_WIFI
 	default "esp32s3-devkit"               if ARCH_BOARD_ESP32S3_DEVKIT
+	default "esp32s3-m5-cardputer"         if ARCH_BOARD_ESP32S3_M5_CARDPUTER
 	default "esp32s3-8048S043"             if ARCH_BOARD_ESP32S3_8048S043
 	default "esp32s3-eye"                  if ARCH_BOARD_ESP32S3_EYE
 	default "esp32s3-meadow"               if ARCH_BOARD_ESP32S3_MEADOW
@@ -3707,6 +3743,7 @@ config ARCH_BOARD
 	default "esp32h2-devkit"               if ARCH_BOARD_ESP32H2_DEVKIT
 	default "esp32p4-function-ev-board"    if ARCH_BOARD_ESP32P4_FUNCTION_EV_BOARD
 	default "esp32p4-pico-wifi-wareshare"  if ARCH_BOARD_ESP32P4_PICO_WIFI_WARESHARE
+	default "esp32p4-tab5"                 if ARCH_BOARD_ESP32P4_TAB5
 	default "et-stm32-stamp"               if ARCH_BOARD_ET_STM32_STAMP
 	default "tlsr8278adk80d"               if ARCH_BOARD_TLSR8278ADK80D
 	default "ez80f910200kitg"              if ARCH_BOARD_EZ80F910200KITG
@@ -3890,6 +3927,8 @@ config ARCH_BOARD
 	default "mps2-an500"                   if ARCH_BOARD_MPS2_AN500
 	default "mps2-an521"                   if ARCH_BOARD_MPS2_AN521
 	default "mps3-an547"                   if ARCH_BOARD_MPS3_AN547
+	default "pke8721daf"                   if ARCH_BOARD_PKE8721DAF
+	default "rtl8720f_evb"                 if ARCH_BOARD_RTL8720F_EVB
 	default "rv32m1-vega"                  if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                      if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                       if ARCH_BOARD_JH7110_STAR64
@@ -4133,6 +4172,12 @@ source "boards/arm/mps/mps2-an521/Kconfig"
 endif
 if ARCH_BOARD_MPS3_AN547
 source "boards/arm/mps/mps3-an547/Kconfig"
+endif
+if ARCH_BOARD_PKE8721DAF
+source "boards/arm/rtl8721dx/pke8721daf/Kconfig"
+endif
+if ARCH_BOARD_RTL8720F_EVB
+source "boards/arm/rtl8720f/rtl8720f_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
@@ -4486,52 +4531,52 @@ if ARCH_BOARD_PIC32CZCA70_CURIOSITY
 source "boards/arm/samv7/pic32czca70-curiosity/Kconfig"
 endif
 if ARCH_BOARD_B_G474E_DPOW1
-source "boards/arm/stm32/b-g474e-dpow1/Kconfig"
+source "boards/arm/stm32g4/b-g474e-dpow1/Kconfig"
 endif
 if ARCH_BOARD_B_G431B_ESC1
-source "boards/arm/stm32/b-g431b-esc1/Kconfig"
+source "boards/arm/stm32g4/b-g431b-esc1/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G431KB
-source "boards/arm/stm32/nucleo-g431kb/Kconfig"
+source "boards/arm/stm32g4/nucleo-g431kb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G431RB
-source "boards/arm/stm32/nucleo-g431rb/Kconfig"
+source "boards/arm/stm32g4/nucleo-g431rb/Kconfig"
 endif
 if ARCH_BOARD_B_L072Z_LRWAN1
-source "boards/arm/stm32f0l0g0/b-l072z-lrwan1/Kconfig"
+source "boards/arm/stm32l0/b-l072z-lrwan1/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F072RB
-source "boards/arm/stm32f0l0g0/nucleo-f072rb/Kconfig"
+source "boards/arm/stm32f0/nucleo-f072rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F091RC
-source "boards/arm/stm32f0l0g0/nucleo-f091rc/Kconfig"
+source "boards/arm/stm32f0/nucleo-f091rc/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G070RB
-source "boards/arm/stm32f0l0g0/nucleo-g070rb/Kconfig"
+source "boards/arm/stm32g0/nucleo-g070rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G071RB
-source "boards/arm/stm32f0l0g0/nucleo-g071rb/Kconfig"
+source "boards/arm/stm32g0/nucleo-g071rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_G0B1RE
-source "boards/arm/stm32f0l0g0/nucleo-g0b1re/Kconfig"
+source "boards/arm/stm32g0/nucleo-g0b1re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L073RZ
-source "boards/arm/stm32f0l0g0/nucleo-l073rz/Kconfig"
+source "boards/arm/stm32l0/nucleo-l073rz/Kconfig"
 endif
 if ARCH_BOARD_STM32F051_DISCOVERY
-source "boards/arm/stm32f0l0g0/stm32f051-discovery/Kconfig"
+source "boards/arm/stm32f0/stm32f051-discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32L0538_DISCO
-source "boards/arm/stm32f0l0g0/stm32l0538-disco/Kconfig"
+source "boards/arm/stm32l0/stm32l0538-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F072_DISCOVERY
-source "boards/arm/stm32f0l0g0/stm32f072-discovery/Kconfig"
+source "boards/arm/stm32f0/stm32f072-discovery/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_C071RB
-source "boards/arm/stm32f0l0g0/nucleo-c071rb/Kconfig"
+source "boards/arm/stm32c0/nucleo-c071rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_C092RC
-source "boards/arm/stm32f0l0g0/nucleo-c092rc/Kconfig"
+source "boards/arm/stm32c0/nucleo-c092rc/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F722ZE
 source "boards/arm/stm32f7/nucleo-f722ze/Kconfig"
@@ -4651,151 +4696,151 @@ if ARCH_BOARD_NUCLEO_WB55RG
 source "boards/arm/stm32wb/nucleo-wb55rg/Kconfig"
 endif
 if ARCH_BOARD_AXOLOTI
-source "boards/arm/stm32/axoloti/Kconfig"
+source "boards/arm/stm32f4/axoloti/Kconfig"
 endif
 if ARCH_BOARD_CLICKER2_STM32
-source "boards/arm/stm32/clicker2-stm32/Kconfig"
+source "boards/arm/stm32f4/clicker2-stm32/Kconfig"
 endif
 if ARCH_BOARD_CLOUDCTRL
-source "boards/arm/stm32/cloudctrl/Kconfig"
+source "boards/arm/stm32f1/cloudctrl/Kconfig"
 endif
 if ARCH_BOARD_EMW3162
-source "boards/arm/stm32/emw3162/Kconfig"
+source "boards/arm/stm32f2/emw3162/Kconfig"
 endif
 if ARCH_BOARD_FIRE_STM32
-source "boards/arm/stm32/fire-stm32v2/Kconfig"
+source "boards/arm/stm32f1/fire-stm32v2/Kconfig"
 endif
 if ARCH_BOARD_HYMINI_STM32V
-source "boards/arm/stm32/hymini-stm32v/Kconfig"
+source "boards/arm/stm32f1/hymini-stm32v/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
-source "boards/arm/stm32/maple/Kconfig"
+source "boards/arm/stm32f1/maple/Kconfig"
 endif
 if ARCH_BOARD_ET_STM32_STAMP
-source "boards/arm/stm32/et-stm32-stamp/Kconfig"
+source "boards/arm/stm32f1/et-stm32-stamp/Kconfig"
 endif
 if ARCH_BOARD_MIKROE_STM32F4
-source "boards/arm/stm32/mikroe-stm32f4/Kconfig"
+source "boards/arm/stm32f4/mikroe-stm32f4/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F103RB
-source "boards/arm/stm32/nucleo-f103rb/Kconfig"
+source "boards/arm/stm32f1/nucleo-f103rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F207ZG
-source "boards/arm/stm32/nucleo-f207zg/Kconfig"
+source "boards/arm/stm32f2/nucleo-f207zg/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F302R8
-source "boards/arm/stm32/nucleo-f302r8/Kconfig"
+source "boards/arm/stm32f3/nucleo-f302r8/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F303RE
-source "boards/arm/stm32/nucleo-f303re/Kconfig"
+source "boards/arm/stm32f3/nucleo-f303re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F303ZE
-source "boards/arm/stm32/nucleo-f303ze/Kconfig"
+source "boards/arm/stm32f3/nucleo-f303ze/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F334R8
-source "boards/arm/stm32/nucleo-f334r8/Kconfig"
+source "boards/arm/stm32f3/nucleo-f334r8/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F410RB
-source "boards/arm/stm32/nucleo-f410rb/Kconfig"
+source "boards/arm/stm32f4/nucleo-f410rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F412ZG
-source "boards/arm/stm32/nucleo-f412zg/Kconfig"
+source "boards/arm/stm32f4/nucleo-f412zg/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F446RE
-source "boards/arm/stm32/nucleo-f446re/Kconfig"
+source "boards/arm/stm32f4/nucleo-f446re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F401RE
-source "boards/arm/stm32/nucleo-f401re/Kconfig"
+source "boards/arm/stm32f4/nucleo-f401re/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F411RE
-source "boards/arm/stm32/nucleo-f411re/Kconfig"
+source "boards/arm/stm32f4/nucleo-f411re/Kconfig"
 endif
 if ARCH_BOARD_STM32F401RC_RS485
-source "boards/arm/stm32/stm32f401rc-rs485/Kconfig"
+source "boards/arm/stm32f4/stm32f401rc-rs485/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F429ZI
-source "boards/arm/stm32/nucleo-f429zi/Kconfig"
+source "boards/arm/stm32f4/nucleo-f429zi/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L152RE
-source "boards/arm/stm32/nucleo-l152re/Kconfig"
+source "boards/arm/stm32l1/nucleo-l152re/Kconfig"
 endif
 if ARCH_BOARD_ODRIVE36
-source "boards/arm/stm32/odrive36/Kconfig"
+source "boards/arm/stm32f4/odrive36/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32E407
-source "boards/arm/stm32/olimex-stm32-e407/Kconfig"
+source "boards/arm/stm32f4/olimex-stm32-e407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32H405
-source "boards/arm/stm32/olimex-stm32-h405/Kconfig"
+source "boards/arm/stm32f4/olimex-stm32-h405/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32H407
-source "boards/arm/stm32/olimex-stm32-h407/Kconfig"
+source "boards/arm/stm32f4/olimex-stm32-h407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
-source "boards/arm/stm32/olimex-stm32-p107/Kconfig"
+source "boards/arm/stm32f1/olimex-stm32-p107/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P207
-source "boards/arm/stm32/olimex-stm32-p207/Kconfig"
+source "boards/arm/stm32f2/olimex-stm32-p207/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P407
-source "boards/arm/stm32/olimex-stm32-p407/Kconfig"
+source "boards/arm/stm32f4/olimex-stm32-p407/Kconfig"
 endif
 if ARCH_BOARD_OLIMEXINO_STM32
-source "boards/arm/stm32/olimexino-stm32/Kconfig"
+source "boards/arm/stm32f1/olimexino-stm32/Kconfig"
 endif
 if ARCH_BOARD_OMNIBUSF4
-source "boards/arm/stm32/omnibusf4/Kconfig"
+source "boards/arm/stm32f4/omnibusf4/Kconfig"
 endif
 if ARCH_BOARD_PHOTON
-source "boards/arm/stm32/photon/Kconfig"
+source "boards/arm/stm32f2/photon/Kconfig"
 endif
 if ARCH_BOARD_SHENZHOU
-source "boards/arm/stm32/shenzhou/Kconfig"
+source "boards/arm/stm32f1/shenzhou/Kconfig"
 endif
 if ARCH_BOARD_STM3210E_EVAL
-source "boards/arm/stm32/stm3210e-eval/Kconfig"
+source "boards/arm/stm32f1/stm3210e-eval/Kconfig"
 endif
 if ARCH_BOARD_STM3220G_EVAL
-source "boards/arm/stm32/stm3220g-eval/Kconfig"
+source "boards/arm/stm32f2/stm3220g-eval/Kconfig"
 endif
 if ARCH_BOARD_STM3240G_EVAL
-source "boards/arm/stm32/stm3240g-eval/Kconfig"
+source "boards/arm/stm32f4/stm3240g-eval/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
-source "boards/arm/stm32/stm32_tiny/Kconfig"
+source "boards/arm/stm32f1/stm32_tiny/Kconfig"
 endif
 if ARCH_BOARD_STM32_BUTTERFLY2
-source "boards/arm/stm32/stm32butterfly2/Kconfig"
+source "boards/arm/stm32f1/stm32butterfly2/Kconfig"
 endif
 if ARCH_BOARD_STM32F103_MINIMUM
-source "boards/arm/stm32/stm32f103-minimum/Kconfig"
+source "boards/arm/stm32f1/stm32f103-minimum/Kconfig"
 endif
 if ARCH_BOARD_STM32F411_MINIMUM
-source "boards/arm/stm32/stm32f411-minimum/Kconfig"
+source "boards/arm/stm32f4/stm32f411-minimum/Kconfig"
 endif
 if ARCH_BOARD_STM32F334_DISCO
-source "boards/arm/stm32/stm32f334-disco/Kconfig"
+source "boards/arm/stm32f3/stm32f334-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F3_DISCOVERY
-source "boards/arm/stm32/stm32f3discovery/Kconfig"
+source "boards/arm/stm32f3/stm32f3discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32F411E_DISCO
-source "boards/arm/stm32/stm32f411e-disco/Kconfig"
+source "boards/arm/stm32f4/stm32f411e-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F429I_DISCO
-source "boards/arm/stm32/stm32f429i-disco/Kconfig"
+source "boards/arm/stm32f4/stm32f429i-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
-source "boards/arm/stm32/stm32f4discovery/Kconfig"
+source "boards/arm/stm32f4/stm32f4discovery/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
-source "boards/arm/stm32/stm32ldiscovery/Kconfig"
+source "boards/arm/stm32l1/stm32ldiscovery/Kconfig"
 endif
 if ARCH_BOARD_STM32VL_DISCOVERY
-source "boards/arm/stm32/stm32vldiscovery/Kconfig"
+source "boards/arm/stm32f1/stm32vldiscovery/Kconfig"
 endif
 if ARCH_BOARD_VIEWTOOL_STM32F107
-source "boards/arm/stm32/viewtool-stm32f107/Kconfig"
+source "boards/arm/stm32f1/viewtool-stm32f107/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STRP711
 source "boards/arm/str71x/olimex-strp711/Kconfig"
@@ -4995,6 +5040,9 @@ endif
 if ARCH_BOARD_ESP32S3_DEVKIT
 source "boards/xtensa/esp32s3/esp32s3-devkit/Kconfig"
 endif
+if ARCH_BOARD_ESP32S3_M5_CARDPUTER
+source "boards/xtensa/esp32s3/esp32s3-m5-cardputer/Kconfig"
+endif
 if ARCH_BOARD_ESP32S3_8048S043
 source "boards/xtensa/esp32s3/esp32s3-8048S043/Kconfig"
 endif
@@ -5042,6 +5090,9 @@ source "boards/risc-v/esp32p4/esp32p4-function-ev-board/Kconfig"
 endif
 if ARCH_BOARD_ESP32P4_PICO_WIFI_WARESHARE
 source "boards/risc-v/esp32p4/esp32p4-pico-wifi-wareshare/Kconfig"
+endif
+if ARCH_BOARD_ESP32P4_TAB5
+source "boards/risc-v/esp32p4/esp32p4-tab5/Kconfig"
 endif
 if ARCH_BOARD_SIM
 source "boards/sim/sim/sim/Kconfig"
@@ -5206,14 +5257,11 @@ endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
 endif
-if ARCH_CHIP_STM32
-source "boards/arm/stm32/common/Kconfig"
-endif
 if ARCH_CHIP_STM32F7
 source "boards/arm/stm32f7/common/Kconfig"
 endif
-if ARCH_CHIP_STM32F0L0G0
-source "boards/arm/stm32f0l0g0/common/Kconfig"
+if ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32L1
+source "boards/arm/common/stm32/Kconfig"
 endif
 if ARCH_CHIP_RP2040
 source "boards/arm/rp2040/common/Kconfig"

@@ -5,6 +5,9 @@
 
 comment "RP23XX Configuration Options"
 
+config ARCH_RV_ISA_VENDOR_EXTENSIONS
+	default "zba_zbb_zbs_zbkb_zcb_zcmp"
+
 config RP23XX_RV_RP2350B
 	bool "Use RP2350B variant (QFN-80)"
 	default n

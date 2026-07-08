@@ -279,7 +279,7 @@ typedef struct pthread_cond_s pthread_cond_t;
 #  define __PTHREAD_COND_T_DEFINED 1
 #endif
 
-#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0), CLOCK_REALTIME }
+#define PTHREAD_COND_INITIALIZER {SEM_INITIALIZER(0), CLOCK_REALTIME, 0}
 
 struct pthread_mutexattr_s
 {

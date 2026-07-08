@@ -71,14 +71,14 @@ typedef void *DMA_HANDLE;
 typedef void (*dma_callback_t)(DMA_HANDLE handle, uint8_t status, void *arg);
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-struct stm32wb_dmaregs_s
+struct stm32_dmaregs_s
 {
   uint32_t isr;       /* Interrupt Status Register; each channel gets 4 bits */
   uint32_t ccr;       /* Channel Configuration Register; determines functionality */
   uint32_t cndtr;     /* Channel Count Register; determines number of transfers */
   uint32_t cpar;      /* Channel Peripheral Address Register; determines start */
   uint32_t cmar;      /* Channel Memory Address Register; determines start */
-#ifndef CONFIG_STM32WB_HAVE_DMAMUX
+#ifndef CONFIG_STM32_HAVE_DMAMUX
   uint32_t cselr;     /* Channel Selection Register; chooses peripheral bound */
 #else
   struct
@@ -139,18 +139,18 @@ extern "C"
  *
  ****************************************************************************/
 
-DMA_HANDLE stm32wb_dmachannel(unsigned int dmamap);
+DMA_HANDLE stm32_dmachannel(unsigned int dmamap);
 
 /****************************************************************************
- * Name: stm32wb_dmafree
+ * Name: stm32_dmafree
  *
  * Description:
  *   Release a DMA channel.  If another thread is waiting for this DMA
- *   channel in a call to stm32wb_dmachannel, then this function will
+ *   channel in a call to stm32_dmachannel, then this function will
  *   re-assign the DMA channel to that thread and wake it up.
  *
  *   NOTE:  The 'handle' used in this argument must NEVER be used again
- *          until stm32wb_dmachannel() is called again to re-gain access to
+ *          until stm32_dmachannel() is called again to re-gain access to
  *          the channel.
  *
  * Returned Value:
@@ -162,64 +162,64 @@ DMA_HANDLE stm32wb_dmachannel(unsigned int dmamap);
  *
  ****************************************************************************/
 
-void stm32wb_dmafree(DMA_HANDLE handle);
+void stm32_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32wb_dmasetup
+ * Name: stm32_dmasetup
  *
  * Description:
  *   Configure DMA before using
  *
  ****************************************************************************/
 
-void stm32wb_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
                       size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
- * Name: stm32wb_dmastart
+ * Name: stm32_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
  * Assumptions:
- *   - DMA handle allocated by stm32wb_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *   - No DMA in progress
  *
  ****************************************************************************/
 
-void stm32wb_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
                       bool half);
 
 /****************************************************************************
- * Name: stm32wb_dmastop
+ * Name: stm32_dmastop
  *
  * Description:
- *   Cancel the DMA.  After stm32wb_dmastop() is called, the DMA channel is
- *   reset and stm32wb_dmasetup() must be called before stm32wb_dmastart()
+ *   Cancel the DMA.  After stm32_dmastop() is called, the DMA channel is
+ *   reset and stm32_dmasetup() must be called before stm32_dmastart()
  *   can be called again
  *
  * Assumptions:
- *   - DMA handle allocated by stm32wb_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-void stm32wb_dmastop(DMA_HANDLE handle);
+void stm32_dmastop(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32wb_dmaresidual
+ * Name: stm32_dmaresidual
  *
  * Description:
  *   Returns the number of bytes remaining to be transferred
  *
  * Assumptions:
- *   - DMA handle allocated by stm32wb_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
-size_t stm32wb_dmaresidual(DMA_HANDLE handle);
+size_t stm32_dmaresidual(DMA_HANDLE handle);
 
 /****************************************************************************
- * Name: stm32wb_dmacapable
+ * Name: stm32_dmacapable
  *
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
@@ -233,45 +233,45 @@ size_t stm32wb_dmaresidual(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_DMACAPABLE
-bool stm32wb_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
+#ifdef CONFIG_STM32_DMACAPABLE
+bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
-#  define stm32wb_dmacapable(maddr, count, ccr) (true)
+#  define stm32_dmacapable(maddr, count, ccr) (true)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_dmasample
+ * Name: stm32_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32wb_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32wb_dmasample(DMA_HANDLE handle, struct stm32wb_dmaregs_s *regs);
+void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 #else
-#  define stm32wb_dmasample(handle,regs) ((void)0)
+#  define stm32_dmasample(handle,regs) ((void)0)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_dmadump
+ * Name: stm32_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by stm32wb_dmachannel()
+ *   - DMA handle allocated by stm32_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA_INFO
-void stm32wb_dmadump(DMA_HANDLE handle, const struct stm32wb_dmaregs_s *regs,
+void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
                      const char *msg);
 #else
-#  define stm32wb_dmadump(handle,regs,msg) ((void)0)
+#  define stm32_dmadump(handle,regs,msg) ((void)0)
 #endif
 
 #undef EXTERN

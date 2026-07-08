@@ -31,8 +31,6 @@ set(SRCS
     stm32wl5_rcc.c
     stm32wl5_serial.c
     stm32wl5_start.c
-    stm32wl5_waste.c
-    stm32wl5_uid.c
     stm32wl5_lse.c
     stm32wl5_lsi.c
     stm32wl5_idle.c
@@ -42,8 +40,10 @@ set(SRCS
     stm32wl5_timerisr.c
     stm32wl5_spi.c)
 
-if(CONFIG_STM32WL5_IPCC)
+if(CONFIG_STM32_IPCC)
   list(APPEND SRCS stm32wl5_ipcc.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

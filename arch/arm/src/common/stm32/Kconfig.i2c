@@ -1,0 +1,313 @@
+#
+# STM32 I2C configuration options.
+#
+
+# TODO: generalize H5 specific options !
+
+config STM32_I2C_SLAVE
+	bool
+	default n
+
+menu "I2C Configuration H5-specific"
+	depends on STM32_HAVE_I2C_H5
+
+menu "Clock Selection"
+
+choice
+	depends on STM32_I2C1
+	prompt "I2C1 Input Clock Selection"
+	default STM32_I2C1_CLK_PCLK1
+
+config STM32_I2C1_CLK_CSI
+	bool "CSI"
+
+config STM32_I2C1_CLK_HSI
+	bool "HSI"
+
+config STM32_I2C1_CLK_PCLK1
+	bool "PCLK1"
+
+config STM32_I2C1_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C1 Input Clock Selection
+
+choice
+	depends on STM32_I2C2
+	prompt "I2C2 Input Clock Selection"
+	default STM32_I2C2_CLK_PCLK1
+
+config STM32_I2C2_CLK_CSI
+	bool "CSI"
+
+config STM32_I2C2_CLK_HSI
+	bool "HSI"
+
+config STM32_I2C2_CLK_PCLK1
+	bool "PCLK1"
+
+config STM32_I2C2_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C2 Input Clock Selection
+
+choice
+	depends on STM32_I2C3
+	prompt "I2C3 Input Clock Selection"
+	default STM32_I2C3_CLK_PCLK3
+
+config STM32_I2C3_CLK_CSI
+	bool "CSI"
+
+config STM32_I2C3_CLK_HSI
+	bool "HSI"
+
+config STM32_I2C3_CLK_PCLK3
+	bool "PCLK3"
+
+config STM32_I2C3_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C3 Input Clock Selection
+
+choice
+	depends on STM32_I2C4
+	prompt "I2C4 Input Clock Selection"
+	default STM32_I2C4_CLK_PCLK3
+
+config STM32_I2C4_CLK_CSI
+	bool "CSI"
+
+config STM32_I2C4_CLK_HSI
+	bool "HSI"
+
+config STM32_I2C4_CLK_PCLK3
+	bool "PCLK3"
+
+config STM32_I2C4_CLK_PLL3R
+	bool "PLL3R"
+
+endchoice # I2C4 Input Clock Selection
+
+endmenu # Clock Selection
+
+menu "Rise/Fall Override"
+
+config STM32_I2C1_RF_OVERRIDE
+	bool "I2C1"
+	default n
+	depends on STM32_I2C1
+
+config STM32_I2C2_RF_OVERRIDE
+	bool "I2C2"
+	default n
+	depends on STM32_I2C2
+
+config STM32_I2C3_RF_OVERRIDE
+	bool "I2C3"
+	default n
+	depends on STM32_I2C3
+
+config STM32_I2C4_RF_OVERRIDE
+	bool "I2C4"
+	default n
+	depends on STM32_I2C4
+
+menu "Rise/Fall Values"
+
+config STM32_I2C1_RISE
+	int "I2C1 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32_I2C1_RF_OVERRIDE
+
+config STM32_I2C1_FALL
+	int "I2C1 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32_I2C1_RF_OVERRIDE
+
+config STM32_I2C2_RISE
+	int "I2C2 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32_I2C2_RF_OVERRIDE
+
+config STM32_I2C2_FALL
+	int "I2C2 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32_I2C2_RF_OVERRIDE
+
+config STM32_I2C3_RISE
+	int "I2C3 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32_I2C3_RF_OVERRIDE
+
+config STM32_I2C3_FALL
+	int "I2C3 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32_I2C3_RF_OVERRIDE
+
+config STM32_I2C4_RISE
+	int "I2C4 Rise Time (ns)"
+	range 0 1000
+	default 20
+	depends on STM32_I2C4_RF_OVERRIDE
+
+config STM32_I2C4_FALL
+	int "I2C4 Fall Time (ns)"
+	range 0 300
+	default 20
+	depends on STM32_I2C4_RF_OVERRIDE
+
+endmenu # Rise/Fall Values
+
+endmenu # Rise/Fall Override
+
+menu "Filtering"
+
+menu "Digital Filters"
+
+config STM32_I2C1_DNF
+	int "I2C1 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32_I2C1
+
+config STM32_I2C2_DNF
+	int "I2C2 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32_I2C2
+
+config STM32_I2C3_DNF
+	int "I2C3 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32_I2C3
+
+config STM32_I2C4_DNF
+	int "I2C4 Digital Noise Filter"
+	range 0 15
+	default 0
+	depends on STM32_I2C4
+
+endmenu # Digital Filters
+
+menu "Analog Filters"
+
+config STM32_I2C1_ANFOFF
+	int "Turn off I2C1 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32_I2C1
+
+config STM32_I2C2_ANFOFF
+	int "Turn off I2C2 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32_I2C2
+
+config STM32_I2C3_ANFOFF
+	int "Turn off I2C3 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32_I2C3
+
+config STM32_I2C4_ANFOFF
+	int "Turn off I2C4 Analog Filter (0=on, 1=off)"
+	default 1
+	range 0 1
+	depends on STM32_I2C4
+
+endmenu # Analog Filters
+
+endmenu # Filtering
+
+endmenu # "I2C Configuration"
+
+if !STM32_HAVE_I2C_H5
+
+config STM32_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	depends on STM32_I2C
+
+config STM32_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	depends on STM32_I2C && STM32_I2C_DYNTIMEO
+	default 500
+
+config STM32_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	depends on STM32_I2C && STM32_I2C_DYNTIMEO
+	default 1000
+
+config STM32_I2CTIMEOSEC
+	int "Timeout seconds"
+	depends on STM32_I2C
+	default 0
+
+config STM32_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	depends on STM32_I2C && !STM32_I2C_DYNTIMEO
+	default 500
+
+config STM32_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	depends on STM32_I2C && !STM32_I2C_DYNTIMEO
+	default 500
+
+config STM32_I2C_ALT
+	bool "Alternate I2C implementation"
+	default STM32F1_PERFORMANCELINE
+	depends on !STM32_STM32F30XX && STM32_COMMON_LEGACY
+	---help---
+		This selection enables an alternative I2C driver.  This alternate
+		driver implements some rather complex workarounds for errata against
+		the STM32 F103 "Performance Line".  This selection is an option
+		because: (1) It has not yet been fully verified and (2) It is not
+		certain that he scope of this workaround is needed only for the F103.
+
+config STM32_I2C_DUTY16_9
+	bool "Frequency with Tlow/Thigh = 16/9"
+	default n
+	depends on STM32_I2C && STM32_COMMON_LEGACY
+
+config STM32_I2C_DMA
+	bool "I2C DMA Support"
+	default n
+	depends on STM32_I2C && STM32_STM32F4XXX && STM32_DMA1 && !I2C_POLLED
+	---help---
+		This option enables the DMA for I2C transfers.
+		Note: The user can define CONFIG_I2C_DMAPRIO: a custom priority value for the
+		I2C dma streams, else the default priority level is set to medium.
+
+menu "I2C Slave Configuration"
+	depends on STM32_I2C_SLAVE
+
+config STM32_I2C_SLAVE_DEFAULT_TX
+	hex "Default TX byte to be sent when the TX buffer is empty"
+	default 0xFF
+
+config STM32_I2C_SLAVE_USEWQ
+	bool "Use work queue to delegate the isr completion status"
+	default n
+	---help---
+		With the current upperhalf I2C slave driver implementation, the user
+		should delegate the callback completion status using a work queue.
+		However, work queues introduce a delay, so in certain scenarios
+		it is better to use a custom driver without using a work queue.
+
+config STM32_I2C_SLAVE_RETRANSFER
+	bool "The frame is retransferred when stop is issued beforehand"
+	default n
+	---help---
+		If stop is issued before the whole frame is transferred,
+		the tx pointer is reset to 0.
+
+endmenu
+
+endif # !STM32_HAVE_I2C_H5

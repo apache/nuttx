@@ -2615,7 +2615,16 @@ static int usbclass_setup(FAR struct usbdevclass_driver_s *driver,
                       (struct rndis_response_header *)priv->response_queue;
                     ret = priv->response_queue_words * sizeof(uint32_t);
                     if (ret > len)
-                      ret = hdr->msglen;
+                      {
+                        if (hdr->msglen > len)
+                          {
+                            ret = -EMSGSIZE;
+                            break;
+                          }
+
+                        ret = hdr->msglen;
+                      }
+
                     memcpy(ctrlreq->buf, hdr, ret);
                     ctrlreq->priv = priv;
                   }

@@ -37,9 +37,9 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 
-#include <stm32l4.h>
+#include <stm32.h>
 #include <stm32l4_uart.h>
-#include <stm32l4_uid.h>
+#include <stm32_uid.h>
 
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>
@@ -65,10 +65,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_I2C
-#  ifdef CONFIG_STM32L4_I2C1
+#  ifdef CONFIG_STM32_I2C1
 static struct i2c_master_s *g_i2c1;
 #  endif
-#  ifdef CONFIG_STM32L4_I2C3
+#  ifdef CONFIG_STM32_I2C3
 static struct i2c_master_s *g_i2c3;
 #  endif
 #endif
@@ -112,7 +112,7 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
 
-  rtclower = stm32l4_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
@@ -135,15 +135,15 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_I2C
   i2cinfo("Initializing I2C buses\n");
-#ifdef CONFIG_STM32L4_I2C1
-  g_i2c1 = stm32l4_i2cbus_initialize(1);
+#ifdef CONFIG_STM32_I2C1
+  g_i2c1 = stm32_i2cbus_initialize(1);
 #ifdef CONFIG_I2C_DRIVER
   i2c_register(g_i2c1, 1);
 #endif
 #endif
 
-#ifdef CONFIG_STM32L4_I2C3
-  g_i2c3 = stm32l4_i2cbus_initialize(3);
+#ifdef CONFIG_STM32_I2C3
+  g_i2c3 = stm32_i2cbus_initialize(3);
 #ifdef CONFIG_I2C_DRIVER
   i2c_register(g_i2c3, 3);
 #endif
@@ -151,11 +151,11 @@ int stm32_bringup(void)
 #endif /* CONFIG_I2C */
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
    * thread that will monitor for USB connection and disconnection events.
    */
 
-  ret = stm32l4_usbhost_initialize();
+  ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
       udbg("ERROR: Failed to initialize USB host: %d\n", ret);
@@ -177,8 +177,8 @@ int stm32_bringup(void)
 #ifdef CONFIG_ADC
   ainfo("Initializing ADC\n");
 
-  stm32l4_adc_setup();
-#ifdef CONFIG_STM32L4_DFSDM
+  stm32_adc_setup();
+#ifdef CONFIG_STM32_DFSDM
   /* Initialize DFSDM and register its filters as additional ADC devices. */
 
   ret = stm32_dfsdm_setup();
@@ -192,7 +192,7 @@ int stm32_bringup(void)
 #ifdef CONFIG_DAC
   ainfo("Initializing DAC\n");
 
-  stm32l4_dac_setup();
+  stm32_dac_setup();
 #endif
 
   return ret;

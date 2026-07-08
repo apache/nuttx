@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.  This
@@ -52,28 +52,28 @@
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void)
+void stm32_board_initialize(void)
 {
   /* Initialize USB if the 1) OTG FS controller is in the configuration and
-   * 2) disabled, and 3) the weak function stm32l4_usbinitialize() has been
+   * 2) disabled, and 3) the weak function stm32_usbinitialize() has been
    * brought into the build. Presumably either CONFIG_USBDEV is also
    * selected.
    */
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   /* Enable Vddusb - mandatory to use the USB OTG FS peripheral */
 
-  stm32l4_pwr_enableusv(true);
+  stm32_pwr_enableusv(true);
 
-  if (stm32l4_usbinitialize)
+  if (stm32_usbinitialize)
     {
-      stm32l4_usbinitialize();
+      stm32_usbinitialize();
     }
 #endif
 
   /* Enable Vddio2 - mandatory to use the PG2 - PG15 I/Os. */
 
-  stm32l4_pwr_vddio2_valid(true);
+  stm32_pwr_vddio2_valid(true);
 
   /* Configure on-board LEDs if LED support has been selected. */
 
@@ -101,6 +101,6 @@ void board_late_initialize(void)
 {
   /* Perform board-specific initialization */
 
-  stm32l4_bringup();
+  stm32_bringup();
 }
 #endif

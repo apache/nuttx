@@ -167,19 +167,21 @@ Flashing locked device
 
 1. Unlock the network core::
 
-    nrfjprog --recover --coprocessor CP_NETWORK
+    nrfutil device recover --core network
 
 2. Unlock the application core::
 
-    nrfjprog --recover
+    nrfutil device recover --core application
 
 3. Flash the network core::
 
-    nrfjprog --coprocessor CP_NETWORK --program nuttx_net.hex --verify --chiperase
+    nrfutil device erase --core network
+    nrfutil device program --firmware nuttx_net.hex --core network
 
 4. Flash the application core::
 
-    nrfjprog --program nuttx_app.hex --verify --chiperase
+    nrfutil device erase --core application
+    nrfutil device program --firmware nuttx_app.hex --core application
 
 
 Supported Boards

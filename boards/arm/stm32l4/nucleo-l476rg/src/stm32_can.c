@@ -43,11 +43,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_STM32_CAN1)
 #  warning "Both CAN1 and CAN2 are enabled.  Only CAN1 is connected."
 #endif
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
 #  define CAN_PORT 1
 #endif
 
@@ -56,22 +56,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_can_setup
+ * Name: stm32_can_setup
  *
  * Description:
  *  Initialize CAN and register the CAN device
  *
  ****************************************************************************/
 
-int stm32l4_can_setup(void)
+int stm32_can_setup(void)
 {
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   struct can_dev_s *can;
   int ret;
 
-  /* Call stm32l4can_initialize() to get an instance of the CAN interface */
+  /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-  can = stm32l4can_initialize(CAN_PORT);
+  can = stm32_caninitialize(CAN_PORT);
   if (can == NULL)
     {
       canerr("ERROR: Failed to get CAN interface\n");

@@ -50,7 +50,7 @@
  * heap.
  */
 
-#ifndef CONFIG_STM32H7_DTCMEXCLUDE
+#ifndef CONFIG_STM32_DTCMEXCLUDE
 #  undef HAVE_DTCM_HEAP
 #endif
 

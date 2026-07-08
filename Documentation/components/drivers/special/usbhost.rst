@@ -17,7 +17,7 @@ USB Host-Side Drivers
 
 
    **Examples**: ``arch/arm/src/lpc17xx_40xx/lpc17_40_usbhost.c``,
-   ``arch/arm/src/stm32/stm32_otgfshost.c``,
+   ``arch/arm/src/common/stm32/stm32_otgfshost_m3m4_v1.c``,
    ``arch/arm/src/sama5/sam_ohci.c``, and
    ``arch/arm/src/sama5/sam_ehci.c``.
 

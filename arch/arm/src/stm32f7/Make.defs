@@ -26,12 +26,13 @@
 # Common ARM and Cortex-M7 files
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32F7 files
 
-CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
+CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c stm32_rcc.c stm32_serial.c
-CHIP_CSRCS += stm32_start.c stm32_capture.c stm32_uid.c stm32_waste.c
+CHIP_CSRCS += stm32_start.c stm32_capture.c
 
 ifneq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_timerisr.c
@@ -39,7 +40,7 @@ else
 CHIP_CSRCS += stm32_tickless.c
 endif
 
-ifeq ($(CONFIG_STM32F7_PROGMEM),y)
+ifeq ($(CONFIG_STM32_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
 endif
 
@@ -51,11 +52,11 @@ ifeq ($(CONFIG_ARMV7M_DTCM),y)
 CHIP_CSRCS += stm32_dtcm.c
 endif
 
-ifeq ($(CONFIG_STM32F7_DMA),y)
+ifeq ($(CONFIG_STM32_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
-ifeq ($(CONFIG_STM32F7_FMC),y)
+ifeq ($(CONFIG_STM32_FMC),y)
 CHIP_CSRCS += stm32_fmc.c
 endif
 
@@ -66,11 +67,11 @@ CHIP_CSRCS += stm32_pminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32F7_PWR),y)
+ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32_pwr.c stm32_exti_pwr.c
 endif
 
-ifeq ($(CONFIG_STM32F7_RTC),y)
+ifeq ($(CONFIG_STM32_RTC),y)
 CHIP_CSRCS += stm32_rtc.c
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32_exti_alarm.c
@@ -83,27 +84,27 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(filter y,$(CONFIG_STM32F7_IWDG) $(CONFIG_STM32F7_RTC_LSICLOCK)),y)
+ifeq ($(filter y,$(CONFIG_STM32_IWDG) $(CONFIG_STM32_RTC_LSICLOCK)),y)
 CHIP_CSRCS += stm32_lsi.c
 endif
 
-ifeq ($(CONFIG_STM32F7_RTC_LSECLOCK),y)
+ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
 endif
 
-ifeq ($(CONFIG_STM32F7_I2C),y)
+ifeq ($(CONFIG_STM32_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
 
-ifeq ($(CONFIG_STM32F7_I2S),y)
+ifeq ($(CONFIG_STM32_I2S),y)
 CHIP_CSRCS += stm32_i2s.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SPI),y)
+ifeq ($(CONFIG_STM32_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SDMMC),y)
+ifeq ($(CONFIG_STM32_SDMMC),y)
 CHIP_CSRCS += stm32_sdmmc.c
 endif
 
@@ -122,25 +123,19 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32F7_TIM),y)
+ifeq ($(CONFIG_STM32_TIM),y)
 CHIP_CSRCS += stm32_tim.c stm32_tim_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32F7_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_STM32F7_QUADSPI),y)
+ifeq ($(CONFIG_STM32_QSPI),y)
 CHIP_CSRCS += stm32_qspi.c
 endif
 
-ifeq ($(CONFIG_STM32F7_RTC),y)
-ifeq ($(CONFIG_RTC_ALARM),y)
-CHIP_CSRCS += stm32_exti_alarm.c
-endif
-endif
-
-ifeq ($(CONFIG_STM32F7_ETHMAC),y)
+ifeq ($(CONFIG_STM32_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif
 
@@ -148,19 +143,19 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32_dumpgpio.c
 endif
 
-ifeq ($(CONFIG_STM32F7_BBSRAM),y)
+ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif
 
-ifeq ($(CONFIG_STM32F7_RNG),y)
+ifeq ($(CONFIG_STM32_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif
 
-ifeq ($(CONFIG_STM32F7_LTDC),y)
+ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
 
-ifeq ($(CONFIG_STM32F7_DMA2D),y)
+ifeq ($(CONFIG_STM32_DMA2D),y)
 CHIP_CSRCS += stm32_dma2d.c
 endif
 
@@ -168,26 +163,26 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32_qencoder.c
 endif
 
-ifeq ($(CONFIG_STM32F7_CAN_CHARDRIVER),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c
 endif
 
-ifeq ($(CONFIG_STM32F7_CAN_SOCKET),y)
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
 CHIP_CSRCS += stm32_can_sock.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SAI),y)
+ifeq ($(CONFIG_STM32_SAI),y)
 CHIP_CSRCS += stm32_sai.c
 endif
 
-ifeq ($(CONFIG_STM32F7_PWM),y)
+ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_STM32F7_PULSECOUNT),y)
+ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
 endif
 
-ifeq ($(CONFIG_STM32F7_FOC),y)
+ifeq ($(CONFIG_STM32_FOC),y)
 CHIP_CSRCS += stm32_foc.c
 endif

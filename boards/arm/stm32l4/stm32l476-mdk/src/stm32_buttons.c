@@ -76,7 +76,7 @@ uint32_t board_button_initialize(void)
 
   for (i = 0; i < NUM_BUTTONS; i++)
     {
-      stm32l4_configgpio(g_buttons[i]);
+      stm32_configgpio(g_buttons[i]);
     }
 
   return NUM_BUTTONS;
@@ -97,7 +97,7 @@ uint32_t board_buttons(void)
     {
       /* A LOW value means that the key is pressed. */
 
-      bool released = stm32l4_gpioread(g_buttons[i]);
+      bool released = stm32_gpioread(g_buttons[i]);
 
       /* Accumulate the set of depressed (not released) keys */
 
@@ -139,7 +139,7 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
   if (id >= MIN_IRQBUTTON && id <= MAX_IRQBUTTON)
     {
-      ret = stm32l4_gpiosetevent(g_buttons[id], true, true, true,
+      ret = stm32_gpiosetevent(g_buttons[id], true, true, true,
                                  irqhandler, arg);
     }
 

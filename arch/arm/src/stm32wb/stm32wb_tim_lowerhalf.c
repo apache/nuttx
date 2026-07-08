@@ -37,17 +37,17 @@
 #include "stm32wb_tim.h"
 
 #if defined(CONFIG_TIMER) && \
-    (defined(CONFIG_STM32WB_TIM1) || defined(CONFIG_STM32WB_TIM2) || \
-     defined(CONFIG_STM32WB_TIM16) || defined(CONFIG_STM32WB_TIM17))
+    (defined(CONFIG_STM32_TIM1) || defined(CONFIG_STM32_TIM2) || \
+     defined(CONFIG_STM32_TIM16) || defined(CONFIG_STM32_TIM17))
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32WB_TIM1_RES   16
-#define STM32WB_TIM2_RES   32
-#define STM32WB_TIM16_RES  16
-#define STM32WB_TIM17_RES  16
+#define STM32_TIM1_RES   16
+#define STM32_TIM2_RES   32
+#define STM32_TIM16_RES  16
+#define STM32_TIM17_RES  16
 
 /****************************************************************************
  * Private Types
@@ -58,10 +58,10 @@
  * timer_lowerhalf_s structure.
  */
 
-struct stm32wb_lowerhalf_s
+struct stm32_lowerhalf_s
 {
   const struct timer_ops_s *ops;        /* Lower half operations */
-  struct stm32wb_tim_dev_s *tim;        /* stm32 timer driver */
+  struct stm32_tim_dev_s   *tim;        /* stm32 timer driver */
   tccb_t                    callback;   /* Current upper half interrupt callback */
   void                     *arg;        /* Argument passed to upper half callback */
   bool                      started;    /* True: Timer has been started */
@@ -74,17 +74,17 @@ struct stm32wb_lowerhalf_s
 
 /* Interrupt handling *******************************************************/
 
-static int stm32wb_timer_handler(int irq, void *context, void *arg);
+static int stm32_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int stm32wb_start(struct timer_lowerhalf_s *lower);
-static int stm32wb_stop(struct timer_lowerhalf_s *lower);
-static int stm32wb_getstatus(struct timer_lowerhalf_s *lower,
+static int stm32_start(struct timer_lowerhalf_s *lower);
+static int stm32_stop(struct timer_lowerhalf_s *lower);
+static int stm32_getstatus(struct timer_lowerhalf_s *lower,
                              struct timer_status_s *status);
-static int stm32wb_settimeout(struct timer_lowerhalf_s *lower,
+static int stm32_settimeout(struct timer_lowerhalf_s *lower,
                               uint32_t timeout);
-static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
+static void stm32_setcallback(struct timer_lowerhalf_s *lower,
                                 tccb_t callback, void *arg);
 
 /****************************************************************************
@@ -95,43 +95,43 @@ static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
 
 static const struct timer_ops_s g_timer_ops =
 {
-  .start       = stm32wb_start,
-  .stop        = stm32wb_stop,
-  .getstatus   = stm32wb_getstatus,
-  .settimeout  = stm32wb_settimeout,
-  .setcallback = stm32wb_setcallback,
+  .start       = stm32_start,
+  .stop        = stm32_stop,
+  .getstatus   = stm32_getstatus,
+  .settimeout  = stm32_settimeout,
+  .setcallback = stm32_setcallback,
   .ioctl       = NULL,
 };
 
-#ifdef CONFIG_STM32WB_TIM1
-static struct stm32wb_lowerhalf_s g_tim1_lowerhalf =
+#ifdef CONFIG_STM32_TIM1
+static struct stm32_lowerhalf_s g_tim1_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32WB_TIM1_RES,
+  .resolution  = STM32_TIM1_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM2
-static struct stm32wb_lowerhalf_s g_tim2_lowerhalf =
+#ifdef CONFIG_STM32_TIM2
+static struct stm32_lowerhalf_s g_tim2_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32WB_TIM2_RES,
+  .resolution  = STM32_TIM2_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM16
-static struct stm32wb_lowerhalf_s g_tim16_lowerhalf =
+#ifdef CONFIG_STM32_TIM16
+static struct stm32_lowerhalf_s g_tim16_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32WB_TIM16_RES,
+  .resolution  = STM32_TIM16_RES,
 };
 #endif
 
-#ifdef CONFIG_STM32WB_TIM17
-static struct stm32wb_lowerhalf_s g_tim17_lowerhalf =
+#ifdef CONFIG_STM32_TIM17
+static struct stm32_lowerhalf_s g_tim17_lowerhalf =
 {
   .ops         = &g_timer_ops,
-  .resolution  = STM32WB_TIM17_RES,
+  .resolution  = STM32_TIM17_RES,
 };
 #endif
 
@@ -140,7 +140,7 @@ static struct stm32wb_lowerhalf_s g_tim17_lowerhalf =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_timer_handler
+ * Name: stm32_timer_handler
  *
  * Description:
  *   timer interrupt handler
@@ -151,30 +151,30 @@ static struct stm32wb_lowerhalf_s g_tim17_lowerhalf =
  *
  ****************************************************************************/
 
-static int stm32wb_timer_handler(int irq, void *context, void *arg)
+static int stm32_timer_handler(int irq, void *context, void *arg)
 {
-  struct stm32wb_lowerhalf_s *lower = (struct stm32wb_lowerhalf_s *)arg;
+  struct stm32_lowerhalf_s *lower = (struct stm32_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
-  STM32WB_TIM_ACKINT(lower->tim, GTIM_DIER_UIE);
+  STM32_TIM_ACKINT(lower->tim, GTIM_DIER_UIE);
 
   if (lower->callback(&next_interval_us, lower->arg))
     {
       if (next_interval_us > 0)
         {
-          STM32WB_TIM_SETPERIOD(lower->tim, next_interval_us);
+          STM32_TIM_SETPERIOD(lower->tim, next_interval_us);
         }
     }
   else
     {
-      stm32wb_stop((struct timer_lowerhalf_s *)lower);
+      stm32_stop((struct timer_lowerhalf_s *)lower);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32wb_start
+ * Name: stm32_start
  *
  * Description:
  *   Start the timer, resetting the time to the current timeout,
@@ -188,18 +188,18 @@ static int stm32wb_timer_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32wb_start(struct timer_lowerhalf_s *lower)
+static int stm32_start(struct timer_lowerhalf_s *lower)
 {
-  struct stm32wb_lowerhalf_s *priv = (struct stm32wb_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 
   if (!priv->started)
     {
-      STM32WB_TIM_SETMODE(priv->tim, STM32WB_TIM_MODE_UP);
+      STM32_TIM_SETMODE(priv->tim, STM32_TIM_MODE_UP);
 
       if (priv->callback != NULL)
         {
-          STM32WB_TIM_SETISR(priv->tim, stm32wb_timer_handler, priv, 0);
-          STM32WB_TIM_ENABLEINT(priv->tim, GTIM_DIER_UIE);
+          STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
+          STM32_TIM_ENABLEINT(priv->tim, GTIM_DIER_UIE);
         }
 
       priv->started = true;
@@ -212,7 +212,7 @@ static int stm32wb_start(struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: stm32wb_stop
+ * Name: stm32_stop
  *
  * Description:
  *   Stop the timer
@@ -226,15 +226,15 @@ static int stm32wb_start(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32wb_stop(struct timer_lowerhalf_s *lower)
+static int stm32_stop(struct timer_lowerhalf_s *lower)
 {
-  struct stm32wb_lowerhalf_s *priv = (struct stm32wb_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
 
   if (priv->started)
     {
-      STM32WB_TIM_SETMODE(priv->tim, STM32WB_TIM_MODE_DISABLED);
-      STM32WB_TIM_DISABLEINT(priv->tim, GTIM_DIER_UIE);
-      STM32WB_TIM_SETISR(priv->tim, NULL, NULL, 0);
+      STM32_TIM_SETMODE(priv->tim, STM32_TIM_MODE_DISABLED);
+      STM32_TIM_DISABLEINT(priv->tim, GTIM_DIER_UIE);
+      STM32_TIM_SETISR(priv->tim, NULL, NULL, 0);
       priv->started = false;
       return OK;
     }
@@ -245,7 +245,7 @@ static int stm32wb_stop(struct timer_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: stm32wb_getstatus
+ * Name: stm32_getstatus
  *
  * Description:
  *   get timer status
@@ -260,10 +260,10 @@ static int stm32wb_stop(struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int stm32wb_getstatus(struct timer_lowerhalf_s *lower,
+static int stm32_getstatus(struct timer_lowerhalf_s *lower,
                              struct timer_status_s *status)
 {
-  struct stm32wb_lowerhalf_s *priv = (struct stm32wb_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   uint64_t maxtimeout;
   uint32_t timeout;
   uint32_t clock;
@@ -288,8 +288,8 @@ static int stm32wb_getstatus(struct timer_lowerhalf_s *lower,
   /* Get timeout */
 
   maxtimeout = (1 << priv->resolution) - 1;
-  clock      = STM32WB_TIM_GETCLOCK(priv->tim);
-  period     = STM32WB_TIM_GETPERIOD(priv->tim);
+  clock      = STM32_TIM_GETCLOCK(priv->tim);
+  period     = STM32_TIM_GETPERIOD(priv->tim);
 
   if (clock == 1000000)
     {
@@ -305,13 +305,13 @@ static int stm32wb_getstatus(struct timer_lowerhalf_s *lower,
   /* Get the time remaining until the timer expires (in microseconds) */
 
   clock_factor     = clock / 1000000;
-  status->timeleft = (timeout - STM32WB_TIM_GETCOUNTER(priv->tim)) *
+  status->timeleft = (timeout - STM32_TIM_GETCOUNTER(priv->tim)) *
                      clock_factor;
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32wb_settimeout
+ * Name: stm32_settimeout
  *
  * Description:
  *   Set a new timeout value (and reset the timer)
@@ -326,10 +326,10 @@ static int stm32wb_getstatus(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int stm32wb_settimeout(struct timer_lowerhalf_s *lower,
+static int stm32_settimeout(struct timer_lowerhalf_s *lower,
                               uint32_t timeout)
 {
-  struct stm32wb_lowerhalf_s *priv = (struct stm32wb_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   uint64_t maxtimeout;
 
   if (priv->started)
@@ -341,20 +341,20 @@ static int stm32wb_settimeout(struct timer_lowerhalf_s *lower,
   if (timeout > maxtimeout)
     {
       uint64_t freq = (maxtimeout * 1000000) / timeout;
-      STM32WB_TIM_SETCLOCK(priv->tim, freq);
-      STM32WB_TIM_SETPERIOD(priv->tim, maxtimeout);
+      STM32_TIM_SETCLOCK(priv->tim, freq);
+      STM32_TIM_SETPERIOD(priv->tim, maxtimeout);
     }
   else
     {
-      STM32WB_TIM_SETCLOCK(priv->tim, 1000000);
-      STM32WB_TIM_SETPERIOD(priv->tim, timeout);
+      STM32_TIM_SETCLOCK(priv->tim, 1000000);
+      STM32_TIM_SETPERIOD(priv->tim, timeout);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32wb_sethandler
+ * Name: stm32_sethandler
  *
  * Description:
  *   Call this user provided timeout handler.
@@ -373,10 +373,10 @@ static int stm32wb_settimeout(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
+static void stm32_setcallback(struct timer_lowerhalf_s *lower,
                                 tccb_t callback, void *arg)
 {
-  struct stm32wb_lowerhalf_s *priv = (struct stm32wb_lowerhalf_s *)lower;
+  struct stm32_lowerhalf_s *priv = (struct stm32_lowerhalf_s *)lower;
   irqstate_t flags = enter_critical_section();
 
   /* Save the new callback */
@@ -386,13 +386,13 @@ static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
 
   if (callback != NULL && priv->started)
     {
-      STM32WB_TIM_SETISR(priv->tim, stm32wb_timer_handler, priv, 0);
-      STM32WB_TIM_ENABLEINT(priv->tim, GTIM_DIER_UIE);
+      STM32_TIM_SETISR(priv->tim, stm32_timer_handler, priv, 0);
+      STM32_TIM_ENABLEINT(priv->tim, GTIM_DIER_UIE);
     }
   else
     {
-      STM32WB_TIM_DISABLEINT(priv->tim, GTIM_DIER_UIE);
-      STM32WB_TIM_SETISR(priv->tim, NULL, NULL, 0);
+      STM32_TIM_DISABLEINT(priv->tim, GTIM_DIER_UIE);
+      STM32_TIM_SETISR(priv->tim, NULL, NULL, 0);
     }
 
   leave_critical_section(flags);
@@ -403,7 +403,7 @@ static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_timer_initialize
+ * Name: stm32_timer_initialize
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and
@@ -420,31 +420,31 @@ static void stm32wb_setcallback(struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int stm32wb_timer_initialize(const char *devpath, int timer)
+int stm32_timer_initialize(const char *devpath, int timer)
 {
-  struct stm32wb_lowerhalf_s *lower;
+  struct stm32_lowerhalf_s *lower;
 
   switch (timer)
     {
-#ifdef CONFIG_STM32WB_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         lower = &g_tim1_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         lower = &g_tim2_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         lower = &g_tim16_lowerhalf;
         break;
 #endif
 
-#ifdef CONFIG_STM32WB_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         lower = &g_tim17_lowerhalf;
         break;
@@ -458,7 +458,7 @@ int stm32wb_timer_initialize(const char *devpath, int timer)
 
   lower->started  = false;
   lower->callback = NULL;
-  lower->tim      = stm32wb_tim_init(timer);
+  lower->tim      = stm32_tim_init(timer);
 
   if (lower->tim == NULL)
     {

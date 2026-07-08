@@ -47,6 +47,10 @@
  * Public Data
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
+extern void rp23xx_send_irqreq(int irqreq);
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -91,6 +95,17 @@ void up_irqinitialize(void)
 
 void up_enable_irq(int irq)
 {
+#ifdef CONFIG_SMP
+  if (irq >= RP23XX_IRQ_EXTINT && irq != RP23XX_SIO_IRQ_FIFO &&
+      this_cpu() != 0)
+    {
+      /* Must be handled by Core 0 */
+
+      rp23xx_send_irqreq(irq);
+      return;
+    }
+#endif
+
   if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
@@ -114,6 +129,8 @@ void up_enable_irq(int irq)
       hazard3_irqarray_set(RVCSR_MEIEA_OFFSET, 2 * n, mask & 0xffffu);
       hazard3_irqarray_set(RVCSR_MEIEA_OFFSET, 2 * n + 1, mask >> 16);
     }
+
+  UP_DMB();
 }
 
 /****************************************************************************
@@ -126,6 +143,17 @@ void up_enable_irq(int irq)
 
 void up_disable_irq(int irq)
 {
+#ifdef CONFIG_SMP
+  if (irq >= RP23XX_IRQ_EXTINT && irq != RP23XX_SIO_IRQ_FIFO &&
+      this_cpu() != 0)
+    {
+      /* Must be handled by Core 0 */
+
+      rp23xx_send_irqreq(-irq);
+      return;
+    }
+#endif
+
   if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
@@ -147,6 +175,8 @@ void up_disable_irq(int irq)
       hazard3_irqarray_clear(RVCSR_MEIEA_OFFSET, 2 * n, mask & 0xffffu);
       hazard3_irqarray_clear(RVCSR_MEIEA_OFFSET, 2 * n + 1, mask >> 16);
     }
+
+  UP_DMB();
 }
 
 /****************************************************************************

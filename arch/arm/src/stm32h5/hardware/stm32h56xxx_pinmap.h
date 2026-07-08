@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32H5_STM32H563XX) || \
+#if defined(CONFIG_STM32_STM32H563XX) || \
     defined(CONFIG_STM32H5_STM32H562XX)
 /****************************************************************************
  * Pre-processor Definitions
@@ -786,5 +786,5 @@
 #define GPIO_ADC2_INN18_0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 #define GPIO_ADC2_INP19_0  (GPIO_ANALOG | GPIO_PORTA | GPIO_PIN5)
 
-#endif /* CONFIG_STM32H5_STM32H563XX*/
+#endif /* CONFIG_STM32_STM32H563XX*/
 #endif /* __ARCH_ARM_SRC_STM32H5_HARDWARE_STM32H56XXX_PINMAP_H */

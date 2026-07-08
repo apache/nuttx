@@ -131,9 +131,7 @@ if(NOT CONFIG_DISABLE_PTHREAD)
     list(APPEND SRCS pthread_spinlock.c)
   endif()
 
-  if(NOT CONFIG_DISABLE_ALL_SIGNALS)
-    list(APPEND SRCS pthread_kill.c)
-  endif()
+  list(APPEND SRCS pthread_kill.c)
 
   if(NOT CONFIG_TLS_NCLEANUP EQUAL 0)
     list(APPEND SRCS pthread_cleanup.c)

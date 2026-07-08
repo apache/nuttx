@@ -119,7 +119,7 @@ const struct clk_ops_s g_clk_gate_ops =
 
 FAR struct clk_s *clk_register_gate(FAR const char *name,
                                     FAR const char *parent_name,
-                                    uint8_t flags, uint32_t reg,
+                                    uint8_t flags, uintptr_t reg,
                                     uint8_t bit_idx,
                                     uint8_t clk_gate_flags)
 {

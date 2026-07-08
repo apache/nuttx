@@ -341,7 +341,7 @@ static int rpmsgfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  if ((oflags & (O_APPEND | O_WRONLY)) == (O_APPEND | O_WRONLY))
+  if ((oflags & O_APPEND) && (oflags & O_ACCMODE) != O_RDONLY)
     {
       ret = rpmsgfs_client_lseek(fs->handle, hf->fd, 0, SEEK_END);
       if (ret >= 0)
@@ -553,7 +553,7 @@ static ssize_t rpmsgfs_write(FAR struct file *filep, const char *buffer,
    * write flags.
    */
 
-  if ((hf->oflags & O_WROK) == 0)
+  if ((hf->oflags & O_ACCMODE) == O_RDONLY)
     {
       ret = -EACCES;
       goto errout_with_lock;

@@ -37,19 +37,19 @@
 #include "chip.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_flash.h"
-#include "stm32l4.h"
-#include "stm32l4_waste.h"
+#include "stm32.h"
+#include "stm32_waste.h"
 #include "stm32l4_rtc.h"
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  include "stm32l4x3xx_rcc.c"
-#elif defined(CONFIG_STM32L4_STM32L4X5)
+#elif defined(CONFIG_STM32_STM32L4X5)
 #  include "stm32l4x5xx_rcc.c"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32_STM32L4X6)
 #  include "stm32l4x6xx_rcc.c"
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 #  include "stm32l4xrxx_rcc.c"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -98,52 +98,52 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_PWR) && defined(CONFIG_STM32L4_RTC)
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_STM32_RTC)
 static inline void rcc_resetbkp(void)
 {
   bool init_stat;
 
   /* Check if the RTC is already configured */
 
-  init_stat = stm32l4_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
-      uint32_t bkregs[STM32L4_RTC_BKCOUNT];
+      uint32_t bkregs[STM32_RTC_BKCOUNT];
       int i;
 
       /* Backup backup-registers before RTC reset. */
 
-      for (i = 0; i < STM32L4_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          bkregs[i] = getreg32(STM32L4_RTC_BKR(i));
+          bkregs[i] = getreg32(STM32_RTC_BKR(i));
         }
 
       /* Enable write access to the backup domain (RTC registers, RTC
        * backup data registers and backup SRAM).
        */
 
-      stm32l4_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
        */
 
-      modifyreg32(STM32L4_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32L4_RCC_BDCR, RCC_BDCR_BDRST, 0);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
       /* Restore backup-registers, except RTC related. */
 
-      for (i = 0; i < STM32L4_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          if (RTC_MAGIC_REG == STM32L4_RTC_BKR(i))
+          if (RTC_MAGIC_REG == STM32_RTC_BKR(i))
             {
               continue;
             }
 
-           putreg32(bkregs[i], STM32L4_RTC_BKR(i));
+           putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
-      stm32l4_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 }
 #else
@@ -155,7 +155,7 @@ static inline void rcc_resetbkp(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -163,9 +163,9 @@ static inline void rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -175,7 +175,7 @@ static inline void rcc_resetbkp(void)
  *
  ****************************************************************************/
 
-void stm32l4_clockconfig(void)
+void stm32_clockconfig(void)
 {
   /* Make sure that we are starting in the reset state */
 
@@ -185,11 +185,11 @@ void stm32l4_clockconfig(void)
 
   rcc_resetbkp();
 
-#if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l4_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -197,7 +197,7 @@ void stm32l4_clockconfig(void)
    * board.h
    */
 
-  stm32l4_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 
@@ -207,7 +207,7 @@ void stm32l4_clockconfig(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -217,12 +217,12 @@ void stm32l4_clockconfig(void)
  *   re-enable/re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32l4_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l4_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -233,13 +233,13 @@ void stm32l4_clockconfig(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32l4_clockenable(void)
+void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32L4_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l4_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -247,7 +247,7 @@ void stm32l4_clockenable(void)
    * board.h
    */
 
-  stm32l4_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 }

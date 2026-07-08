@@ -26,12 +26,13 @@
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
 # Required STM32L4 files
 
-CHIP_CSRCS  = stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
+CHIP_CSRCS += stm32l4_allocateheap.c stm32l4_exti_gpio.c stm32l4_gpio.c
 CHIP_CSRCS += stm32l4_irq.c stm32l4_lowputc.c stm32l4_rcc.c
-CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c stm32l4_waste.c stm32l4_uid.c
+CHIP_CSRCS += stm32l4_serial.c stm32l4_start.c
 CHIP_CSRCS += stm32l4_spi.c stm32l4_i2c.c stm32l4_lse.c stm32l4_lsi.c
 CHIP_CSRCS += stm32l4_pwr.c stm32l4_tim.c stm32l4_flash.c
 CHIP_CSRCS += stm32l4_dfumode.c
@@ -50,11 +51,11 @@ else
 CHIP_CSRCS += stm32l4_tickless.c
 endif
 
-ifeq ($(CONFIG_STM32L4_ONESHOT),y)
+ifeq ($(CONFIG_STM32_ONESHOT),y)
 CHIP_CSRCS += stm32l4_oneshot.c stm32l4_oneshot_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32L4_FREERUN),y)
+ifeq ($(CONFIG_STM32_FREERUN),y)
 CHIP_CSRCS += stm32l4_freerun.c
 endif
 
@@ -62,37 +63,37 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CHIP_CSRCS += stm32l4_userspace.c stm32l4_mpuinit.c
 endif
 
-ifeq ($(CONFIG_STM32L4_HAVE_HSI48),y)
+ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
 CHIP_CSRCS += stm32l4_hsi48.c
 endif
 
-ifeq ($(CONFIG_STM32L4_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32l4_adc.c
 endif
 
-ifeq ($(CONFIG_STM32L4_DAC),y)
+ifeq ($(CONFIG_STM32_DAC),y)
 CHIP_CSRCS += stm32l4_dac.c
 endif
 
-ifeq ($(CONFIG_STM32L4_DFSDM),y)
+ifeq ($(CONFIG_STM32_DFSDM),y)
 CHIP_CSRCS += stm32l4_dfsdm.c
 endif
 
-ifeq ($(CONFIG_STM32L4_DMA),y)
+ifeq ($(CONFIG_STM32_DMA),y)
 CHIP_CSRCS += stm32l4_dma.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-ifeq ($(CONFIG_STM32L4_USBFS),y)
+ifeq ($(CONFIG_STM32_USBFS),y)
 CHIP_CSRCS += stm32l4_usbdev.c
 endif
-ifeq ($(CONFIG_STM32L4_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32l4_otgfsdev.c
 endif
 endif
 
 ifeq ($(CONFIG_USBHOST),y)
-ifeq ($(CONFIG_STM32L4_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CHIP_CSRCS += stm32l4_otgfshost.c
 endif
 endif
@@ -116,11 +117,11 @@ CHIP_CSRCS += stm32l4_pminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32L4_PWR),y)
+ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32l4_exti_pwr.c
 endif
 
-ifeq ($(CONFIG_STM32L4_RTC),y)
+ifeq ($(CONFIG_STM32_RTC),y)
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32l4_exti_alarm.c
 endif
@@ -137,27 +138,27 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CHIP_CSRCS += stm32l4_dumpgpio.c
 endif
 
-ifeq ($(CONFIG_STM32L4_COMP),y)
+ifeq ($(CONFIG_STM32_COMP),y)
 CHIP_CSRCS += stm32l4_comp.c stm32l4_exti_comp.c
 endif
 
-ifeq ($(CONFIG_STM32L4_RNG),y)
+ifeq ($(CONFIG_STM32_RNG),y)
 CHIP_CSRCS += stm32l4_rng.c
 endif
 
-ifeq ($(CONFIG_STM32L4_SAI),y)
+ifeq ($(CONFIG_STM32_SAI),y)
 CHIP_CSRCS += stm32l4_sai.c
 endif
 
-ifeq ($(CONFIG_STM32L4_LPTIM),y)
+ifeq ($(CONFIG_STM32_LPTIM),y)
 CHIP_CSRCS += stm32l4_lptim.c
 endif
 
-ifeq ($(CONFIG_STM32L4_PWM),y)
+ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32l4_pwm.c
 endif
 
-ifeq ($(CONFIG_STM32L4_PULSECOUNT),y)
+ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32l4_pulsecount.c
 endif
 
@@ -165,26 +166,26 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
 CHIP_CSRCS += stm32l4_qencoder.c
 endif
 
-ifeq ($(CONFIG_STM32L4_QSPI),y)
+ifeq ($(CONFIG_STM32_QSPI),y)
 CHIP_CSRCS += stm32l4_qspi.c
 endif
 
-ifeq ($(CONFIG_STM32L4_CAN),y)
+ifeq ($(CONFIG_STM32_CAN),y)
 CHIP_CSRCS += stm32l4_can.c
 endif
 
-ifeq ($(CONFIG_STM32L4_FIREWALL),y)
+ifeq ($(CONFIG_STM32_FIREWALL),y)
 CHIP_CSRCS += stm32l4_firewall.c
 endif
 
-ifeq ($(CONFIG_STM32L4_IWDG),y)
+ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32l4_iwdg.c
 endif
 
-ifeq ($(CONFIG_STM32L4_SDMMC1),y)
+ifeq ($(CONFIG_STM32_SDMMC1),y)
 CHIP_CSRCS += stm32l4_sdmmc.c
 endif
 
-ifeq ($(CONFIG_STM32L4_1WIREDRIVER),y)
+ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
 CHIP_CSRCS += stm32l4_1wire.c
 endif

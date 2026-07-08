@@ -33,6 +33,7 @@
 #include <libgen.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/lib/lib.h>
@@ -66,21 +67,35 @@
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
+                        FAR struct inode *oldparent,
                         FAR const char *newpath)
 {
   struct inode_search_s newdesc;
+  struct inode_search_s pardesc;
   FAR struct inode *newinode;
+  FAR struct inode *parnode;
   FAR char *subdir = NULL;
 #ifdef CONFIG_FS_NOTIFY
   bool isdir = INODE_IS_PSEUDODIR(oldinode);
 #endif
   int ret;
 
+  /* SETUP_SEARCH early so RELEASE_SEARCH at errout is safe. */
+
+  SETUP_SEARCH(&newdesc, newpath, true);
+
+  /* Verify source parent write permission. */
+
+  ret = inode_checkperm(oldparent, W_OK);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
   /* According to POSIX, any new inode at this path should be removed
    * first, provided that it is not a directory.
    */
 
-  SETUP_SEARCH(&newdesc, newpath, true);
   ret = inode_find(&newdesc);
   if (ret >= 0)
     {
@@ -154,6 +169,30 @@ static int pseudorename(FAR const char *oldpath, FAR struct inode *oldinode,
         }
 
       inode_release(newinode);
+    }
+
+  /* Re-resolve the final destination parent after path rewrite. */
+
+  SETUP_SEARCH(&pardesc, newpath, true);
+  inode_find(&pardesc);   /* pardesc.parent valid even if node not found */
+  parnode = pardesc.node;
+
+  ret = inode_checkperm(pardesc.parent, W_OK);
+
+  /* inode_find() holds a reference on parnode; RELEASE_SEARCH() only
+   * frees pardesc.buffer.
+   */
+
+  if (parnode != NULL)
+    {
+      inode_release(parnode);
+    }
+
+  RELEASE_SEARCH(&pardesc);
+
+  if (ret < 0)
+    {
+      goto errout;
     }
 
   /* Create a new, empty inode at the destination location.
@@ -505,7 +544,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     {
-      ret = pseudorename(oldpath, oldinode, newpath);
+      ret = pseudorename(oldpath, oldinode, olddesc.parent, newpath);
     }
 #else
     {

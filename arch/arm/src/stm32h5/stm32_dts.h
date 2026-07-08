@@ -65,7 +65,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-int stm32h5_dts_register(int devno);
+int stm32_dts_register(int devno);
 
 #undef EXTERN
 #if defined(__cplusplus)

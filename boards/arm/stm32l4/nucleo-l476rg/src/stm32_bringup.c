@@ -39,7 +39,7 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include <stm32l4.h>
+#include <stm32.h>
 #include <stm32l4_uart.h>
 
 #include <arch/board/board.h>
@@ -95,7 +95,7 @@ static void stm32_i2c_register(int bus)
   struct i2c_master_s *i2c;
   int ret;
 
-  i2c = stm32l4_i2cbus_initialize(bus);
+  i2c = stm32_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
       syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", bus);
@@ -107,7 +107,7 @@ static void stm32_i2c_register(int bus)
         {
           syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
                 bus, ret);
-          stm32l4_i2cbus_uninitialize(i2c);
+          stm32_i2cbus_uninitialize(i2c);
         }
     }
 }
@@ -178,7 +178,7 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32L4 lower-half RTC driver */
 
-  rtclower = stm32l4_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
@@ -261,28 +261,28 @@ int stm32_bringup(void)
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
-  ret = stm32l4_pwm_setup();
+  ret = stm32_pwm_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_pwm_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
 #ifdef CONFIG_ADC
   /* Initialize ADC and register the ADC driver. */
 
-  ret = stm32l4_adc_setup();
+  ret = stm32_adc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 
 #ifdef CONFIG_CAN
-  ret = stm32l4_can_setup();
+  ret = stm32_can_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_can_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -290,7 +290,7 @@ int stm32_bringup(void)
   /* Initialize MMC and register the MMC driver. */
 
 #ifdef HAVE_MMCSD_SPI
-  ret = stm32l4_mmcsd_initialize(MMCSD_MINOR);
+  ret = stm32_mmcsd_initialize(MMCSD_MINOR);
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot %d: %d\n", ret);
@@ -327,9 +327,9 @@ int stm32_bringup(void)
 
   index = 0;
 
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 1);
+  ret = stm32_qencoder_initialize(buf, 1);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -338,9 +338,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 2);
+  ret = stm32_qencoder_initialize(buf, 2);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -349,9 +349,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 3);
+  ret = stm32_qencoder_initialize(buf, 3);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -360,9 +360,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 4);
+  ret = stm32_qencoder_initialize(buf, 4);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -371,9 +371,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 5);
+  ret = stm32_qencoder_initialize(buf, 5);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -382,9 +382,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 8);
+  ret = stm32_qencoder_initialize(buf, 8);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -395,7 +395,7 @@ int stm32_bringup(void)
 #endif /* CONFIG_SENSORS_QENCODER */
 
 #ifdef CONFIG_SENSORS_HTS221
-  ret = stm32l4_hts221_initialize("/dev/hts221");
+  ret = stm32_hts221_initialize("/dev/hts221");
   if (ret < 0)
     {
       serr("ERROR: Failed to initialize HTC221 driver: %d\n", ret);
@@ -403,7 +403,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_LSM6DSL
-  ret = stm32l4_lsm6dsl_initialize("/dev/lsm6dsl0");
+  ret = stm32_lsm6dsl_initialize("/dev/lsm6dsl0");
   if (ret < 0)
     {
       serr("ERROR: Failed to initialize LSM6DSL driver: %d\n", ret);
@@ -411,7 +411,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SENSORS_LSM303AGR
-  ret = stm32l4_lsm303agr_initialize("/dev/lsm303mag0");
+  ret = stm32_lsm303agr_initialize("/dev/lsm303mag0");
   if (ret < 0)
     {
       serr("ERROR: Failed to initialize LSM303AGR driver: %d\n", ret);
@@ -419,7 +419,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_DEV_GPIO
-  ret = stm32l4_gpio_initialize();
+  ret = stm32_gpio_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
@@ -430,10 +430,10 @@ int stm32_bringup(void)
 #ifdef CONFIG_WL_CC1101
   /* Initialize and register the cc1101 radio */
 
-  ret = stm32l4_cc1101_initialize();
+  ret = stm32_cc1101_initialize();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_cc1101_initialize failed: %d\n",
+      syslog(LOG_ERR, "ERROR: stm32_cc1101_initialize failed: %d\n",
              ret);
       return ret;
     }

@@ -35,24 +35,24 @@
 
 #include "stm32wb_tim.h"
 
-#ifdef CONFIG_STM32WB_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /* The freerun client must allocate an instance of this structure and called
- * stm32wb_freerun_initialize() before using the freerun facilities.  The
+ * stm32_freerun_initialize() before using the freerun facilities.  The
  * client should not access the contents of this structure directly since
  * the contents are subject to change.
  */
 
-struct stm32wb_freerun_s
+struct stm32_freerun_s
 {
   uint8_t chan;                      /* The timer/counter in use */
   uint8_t width;                     /* Width of timer (16- or 32-bits) */
-  struct stm32wb_tim_dev_s *tch;     /* Pointer returned by
-                                      * stm32wb_tim_init() */
+  struct stm32_tim_dev_s *tch;       /* Pointer returned by
+                                      * stm32_tim_init() */
   uint32_t frequency;
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
@@ -82,7 +82,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_freerun_initialize
+ * Name: stm32_freerun_initialize
  *
  * Description:
  *   Initialize the freerun timer wrapper
@@ -100,11 +100,11 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
+int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
                                uint16_t resolution);
 
 /****************************************************************************
- * Name: stm32wb_freerun_counter
+ * Name: stm32_freerun_counter
  *
  * Description:
  *   Read the counter register of the free-running timer.
@@ -112,7 +112,7 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_freerun_initialize();
+ *           stm32_freerun_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.
  *
@@ -124,18 +124,18 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 
-int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                             struct timespec *ts);
 
 #else /* CONFIG_CLOCK_TIMEKEEPING */
 
-int stm32wb_freerun_counter(struct stm32_freerun_s *freerun,
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                             uint64_t *counter);
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
- * Name: stm32wb_freerun_uninitialize
+ * Name: stm32_freerun_uninitialize
  *
  * Description:
  *   Stop the free-running timer and release all resources that it uses.
@@ -143,7 +143,7 @@ int stm32wb_freerun_counter(struct stm32_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_freerun_initialize();
+ *           stm32_freerun_initialize();
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -151,12 +151,12 @@ int stm32wb_freerun_counter(struct stm32_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32wb_freerun_uninitialize(struct stm32wb_freerun_s *freerun);
+int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_STM32WB_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */
 #endif /* __ARCH_ARM_SRC_STM32WB_STM32WB_FREERUN_H */

@@ -36,7 +36,7 @@
 #include "linum-stm32h753bi.h"
 #include "stm32_spi.h"
 
-#if defined(CONFIG_SPI) && defined(CONFIG_STM32H7_SPI4) && defined(CONFIG_CL_MFRC522)
+#if defined(CONFIG_SPI) && defined(CONFIG_STM32_SPI4) && defined(CONFIG_CL_MFRC522)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,4 +83,4 @@ int stm32_mfrc522initialize(const char *devpath)
   return ret;
 }
 
-#endif /* CONFIG_SPI && CONFIG_STM32H7_SPI4 && CONFIG_MFRC522 */
+#endif /* CONFIG_SPI && CONFIG_STM32_SPI4 && CONFIG_MFRC522 */

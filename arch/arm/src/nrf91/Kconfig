@@ -203,6 +203,11 @@ config NRF91_PWM2
 	select NRF91_PWM
 	default n
 
+config NRF91_PWM3
+	bool "PWM3"
+	select NRF91_PWM
+	default n
+
 config NRF91_SAADC
 	bool "SAADC"
 	default n
@@ -252,6 +257,13 @@ config NRF91_POWERCLOCK_NS
 config NRF91_GPIO0_NS
 	bool "GPIO0 non-secure"
 	default n
+
+config NRF91_GPIOTE1_NS
+	bool "GPIOTE1 non-secure"
+	default n
+	---help---
+		Grant the non-secure GPIOTE instance (GPIOTE1) to the non-secure
+		domain, so a non-secure application can use GPIO interrupts.
 
 config NRF91_NVMC_NS
 	bool "NVMC non-secure"
@@ -568,6 +580,34 @@ config NRF91_PWM2_CH3
 
 endif # NRF91_PWM2
 
+if NRF91_PWM3
+
+config NRF91_PWM3_CH0
+	bool "PWM3 Channel 0 Output"
+	default n
+	---help---
+		Enables channel 0 output.
+
+config NRF91_PWM3_CH1
+	bool "PWM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config NRF91_PWM3_CH2
+	bool "PWM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config NRF91_PWM3_CH3
+	bool "PWM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # NRF91_PWM3
+
 endif # !NRF91_PWM_MULTICHAN
 
 if !NRF91_PWM_MULTICHAN
@@ -587,6 +627,12 @@ config NRF91_PWM1_CHANNEL
 config NRF91_PWM2_CHANNEL
 	int "PWM2 Output Channel"
 	depends on NRF91_PWM2
+	default 0
+	range 0 3
+
+config NRF91_PWM3_CHANNEL
+	int "PWM3 Output Channel"
+	depends on NRF91_PWM3
 	default 0
 	range 0 3
 
@@ -768,17 +814,5 @@ config NRF91_MODEM_PREFERENCE
 
 		For details look at "nRF9160 AT Commands Command Reference Guid" from Nordic,
 		section "5.27 System mode"
-
-if NRF91_MODEM_GNSS
-
-config NRF91_MODEM_GNSS_BOOST_PRIO
-	bool "Modem GNSS support for priority boost"
-	default y
-	---help---
-		Enables GNSS priority boos over LTE idle mode.
-		For details look at nrf_modem_gnss_prio_mode_enable() documentation
-		in sdk-nrfxlib/nrf_modem/include/nrf_modem_gnss.h
-
-endif # NRF91_MODEM_GNSS
 
 endif # NRF91_MODEM

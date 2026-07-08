@@ -184,37 +184,37 @@
 
 #define GPIO_PORT_SHIFT               (4)                        /* Bit 4-7:  Port number */
 #define GPIO_PORT_MASK                (15 << GPIO_PORT_SHIFT)
-#if STM32H7_NGPIO > 0
+#if STM32_NGPIO > 0
 #  define GPIO_PORTA                  (0 << GPIO_PORT_SHIFT)     /*   GPIOA */
 #endif
-#if STM32H7_NGPIO > 1
+#if STM32_NGPIO > 1
 #  define GPIO_PORTB                  (1 << GPIO_PORT_SHIFT)     /*   GPIOB */
 #endif
-#if STM32H7_NGPIO > 2
+#if STM32_NGPIO > 2
 #  define GPIO_PORTC                  (2 << GPIO_PORT_SHIFT)     /*   GPIOC */
 #endif
-#if STM32H7_NGPIO > 3
+#if STM32_NGPIO > 3
 #  define GPIO_PORTD                  (3 << GPIO_PORT_SHIFT)     /*   GPIOD */
 #endif
-#if STM32H7_NGPIO > 4
+#if STM32_NGPIO > 4
 #  define GPIO_PORTE                  (4 << GPIO_PORT_SHIFT)     /*   GPIOE */
 #endif
-#if (STM32H7_NGPIO > 5) && (defined(CONFIG_STM32H7_HAVE_GPIOF))
+#if (STM32_NGPIO > 5) && (defined(CONFIG_STM32_HAVE_GPIOF))
 #  define GPIO_PORTF                  (5 << GPIO_PORT_SHIFT)     /*   GPIOF */
 #endif
-#if (STM32H7_NGPIO > 6) && (defined(CONFIG_STM32H7_HAVE_GPIOG))
+#if (STM32_NGPIO > 6) && (defined(CONFIG_STM32_HAVE_GPIOG))
 #  define GPIO_PORTG                  (6 << GPIO_PORT_SHIFT)     /*   GPIOG */
 #endif
-#if STM32H7_NGPIO > 7
+#if STM32_NGPIO > 7
 #  define GPIO_PORTH                  (7 << GPIO_PORT_SHIFT)     /*   GPIOH */
 #endif
-#if STM32H7_NGPIO > 8
+#if STM32_NGPIO > 8
 #  define GPIO_PORTI                  (8 << GPIO_PORT_SHIFT)     /*   GPIOI */
 #endif
-#if STM32H7_NGPIO > 9
+#if STM32_NGPIO > 9
 #  define GPIO_PORTJ                  (9 << GPIO_PORT_SHIFT)     /*   GPIOJ */
 #endif
-#if STM32H7_NGPIO > 10
+#if STM32_NGPIO > 10
 #  define GPIO_PORTK                  (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
 #endif
 
@@ -262,7 +262,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32H7_NGPIO];
+EXTERN const uint32_t g_gpiobase[STM32_NGPIO];
 
 /****************************************************************************
  * Public Function Prototypes
@@ -350,7 +350,7 @@ bool stm32_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SYSCFG_IOCOMPENSATION
+#ifdef CONFIG_STM32_SYSCFG_IOCOMPENSATION
 void stm32_iocompensation(void);
 #endif
 

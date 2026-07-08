@@ -155,7 +155,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
 #ifdef CONFIG_BCH_DEVICE_READONLY
       oflags &= ~O_RDWR;
-      oflags |= O_RDOK;
+      oflags |= O_RDONLY;
 #endif
 
       ret = block_proxy(filep, path, oflags);
@@ -172,7 +172,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Validate operation support and pseudo-filesystem permissions */
 
-  ret = inode_checkperm(inode, oflags);
+  ret = inode_checkopenperm(inode, oflags);
   if (ret < 0)
     {
       goto errout_with_inode;
@@ -220,7 +220,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
   FS_PROFILE_STOP(start_time, g_fs_profile.total_open_time,
                   g_fs_profile.opens);
 
-  if (ret == -EISDIR && ((oflags & O_WRONLY) == 0))
+  if (ret == -EISDIR && (oflags & O_ACCMODE) == O_RDONLY)
     {
       ret = dir_allocate(filep, desc.relpath);
     }

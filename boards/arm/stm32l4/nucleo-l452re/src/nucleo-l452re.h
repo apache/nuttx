@@ -58,22 +58,22 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-#if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_MMCSD
 #endif
 
 /* How many SPI modules does this chip support? */
 
-#if STM32L4_NSPI < 1
-#  undef CONFIG_STM32L4_SPI1
-#  undef CONFIG_STM32L4_SPI2
-#  undef CONFIG_STM32L4_SPI3
-#elif STM32L4_NSPI < 2
-#  undef CONFIG_STM32L4_SPI2
-#  undef CONFIG_STM32L4_SPI3
-#elif STM32L4_NSPI < 3
-#  undef CONFIG_STM32L4_SPI3
+#if STM32_NSPI < 1
+#  undef CONFIG_STM32_SPI1
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
+#elif STM32_NSPI < 2
+#  undef CONFIG_STM32_SPI2
+#  undef CONFIG_STM32_SPI3
+#elif STM32_NSPI < 3
+#  undef CONFIG_STM32_SPI3
 #endif
 
 /* Nucleo-L452RE GPIOs ******************************************************/
@@ -118,36 +118,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
  *
  ****************************************************************************/
 
-int stm32l4_adc_setup(void);
+int stm32_adc_setup(void);
 
 /****************************************************************************
- * Name: stm32l4_adc_measure_voltages
+ * Name: stm32_adc_measure_voltages
  *
  * Description:
  *   Read internal reference voltage, internal VBAT and one external voltage.
  *
  ****************************************************************************/
 
-int stm32l4_adc_measure_voltages(uint32_t *vrefint,
+int stm32_adc_measure_voltages(uint32_t *vrefint,
                                  uint32_t *vbat,
                                  uint32_t *vext);
 
 /****************************************************************************
- * Name: stm32l4_dac_setup
+ * Name: stm32_dac_setup
  *
  * Description:
  *   Initialize DAC and register the DAC driver.
  *
  ****************************************************************************/
 
-int stm32l4_dac_setup(void);
+int stm32_dac_setup(void);
 
 /****************************************************************************
  * Name: stm32_bringup

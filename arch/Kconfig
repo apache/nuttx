@@ -560,6 +560,36 @@ config ARCH_LDST_16BIT_NOT_ATOMIC
 	(The same applies for non-interrupt context write and interrupt
 	context read.)
 
+config ARCH_HAVE_UDELAY
+	bool
+	default n
+	---help---
+		This configuration option is set for architectures that define
+		their own version of up_udelay. That function is defined as weak
+		but due to linker behaviour with regards to static libraries,
+		it was found that the overriding definition is not included
+		in the resulting binary, the default (weak) one is still used.
+
+		(Found with GCC 14.2 on AVR and Risc-V but likely present
+		elsewhere too. Manifests when up_udelay override is the only
+		function in the source file.)
+
+		If set, the default up_udelay function is excluded from build.
+
+config ARCH_HAVE_DYNAMIC_UDELAY
+	bool
+	default n
+	depends on ARCH_HAVE_UDELAY
+	---help---
+		This configuration option is set if architecture-specific up_udelay
+		function does not use CONFIG_BOARD_LOOPSPERMSEC. This should be used
+		for architectures/boards where the user has the option to choose
+		clock frequency of the CPU.
+
+		(Keep in mind that up_udelay function may also be used in situations
+		after a failure - the implementation should always re-read current
+		hardware settings as anything stored in memory may be corrupted.)
+
 config ARCH_HAVE_TESTSET
 	bool
 	default n
@@ -1366,6 +1396,7 @@ comment "Board Settings"
 
 config BOARD_LOOPSPERMSEC
 	int "Delay loops per millisecond"
+	depends on !ARCH_HAVE_DYNAMIC_UDELAY
 	default -1
 	---help---
 		Simple delay loops are used by some logic, especially during boot-up,

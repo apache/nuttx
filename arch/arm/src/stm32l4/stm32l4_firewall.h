@@ -36,13 +36,13 @@
  * family
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  include "hardware/stm32l4x3xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4X5)
+#elif defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32_STM32L4X6)
 #  include "hardware/stm32l4x6xx_firewall.h"
-#elif defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4XR)
 #  include "hardware/stm32l4xrxx_firewall.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -52,7 +52,7 @@
  * Public Types
  ****************************************************************************/
 
-struct stm32l4_firewall_t
+struct stm32_firewall_t
 {
   uintptr_t  codestart;
   size_t     codelen;
@@ -84,7 +84,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_firewallsetup
+ * Name: stm32_firewallsetup
  *
  * Description:
  *   Configure the STM32L4 firewall. After this, protected code will only
@@ -95,7 +95,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup);
+int stm32_firewallsetup(struct stm32_firewall_t *setup);
 
 #undef EXTERN
 #if defined(__cplusplus)

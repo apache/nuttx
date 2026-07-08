@@ -51,8 +51,6 @@
 #include "chip.h"
 #include "hardware/bcm2711_bsc.h"
 
-#if defined(CONFIG_BCM2711_I2C)
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -210,13 +208,13 @@ static int bcm2711_i2c_interrupted(struct bcm2711_i2cdev_s *priv);
 static void bcm2711_i2c_disable(struct bcm2711_i2cdev_s *priv);
 static void bcm2711_i2c_enable(struct bcm2711_i2cdev_s *priv);
 static size_t bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv,
-                                      FAR uint8_t *buf, size_t n);
+                                      uint8_t *buf, size_t n);
 static size_t bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv,
-                                     FAR uint8_t *buf, size_t n);
-static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, FAR void *buf,
-                            size_t n);
-static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
-                               size_t n);
+                                     uint8_t *buf, size_t n);
+static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv,
+                            struct i2c_msg_s *msgs, size_t n);
+static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv,
+                               struct i2c_msg_s *msgs, size_t n);
 static int bcm2711_i2c_secondary_handler(struct bcm2711_i2cdev_s *priv);
 
 static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
@@ -390,6 +388,77 @@ static struct bcm2711_i2cdev_s *g_i2c_devices[BCM_BSCS_NUM] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: merge_messages
+ *
+ * Description:
+ *   The BCM2711 I2C interface does not natively support I2C_M_NOSTART and
+ *   I2C_M_NOSTOP. However, the NuttX I2C driver requires that a message with
+ *   the I2C_M_NOSTOP flag followed by a message with I2C_M_NOSTART should be
+ *   sent as one, homogeneous message.
+ *
+ *   This function greedily merges as many sequential I2C messages as
+ *   possible that have these flags. This way, the I2C messages will be sent
+ *   as one larger I2C message via the BCM2711.
+ *
+ *   For two messages to be merged, they must:
+ *   - Both have the same message type (READ/WRITE)
+ *   - The first message must have the NOSTOP flag
+ *   - The second message must have the NOSTART flag
+ *
+ *   If we have three READ messages with the following flags:
+ *   1) NOSTOP
+ *   2) NOSTOP | NOSTART
+ *   3) NOSTART
+ *
+ *   They will be merged as one message, with the size returned being their
+ *   combined sizes.
+ *
+ * Input Parameters:
+ *     msgs - A list of messages to try to merge, starting from the first
+ *            message
+ *     count - The number of messages in `msgs` (NOTE: assumed >= 1)
+ *
+ * Return Value:
+ *     The total length (in bytes) of the full message (composed of
+ *     fragments) starting from the first message component in `msg`.
+ *
+ ****************************************************************************/
+
+static size_t merge_messages(struct i2c_msg_s *msgs, int count)
+{
+  const uint16_t type = msgs[0].flags & I2C_M_READ;
+  const uint16_t addr = msgs[0].addr;
+  const uint32_t freq = msgs[0].frequency;
+  size_t combined_size = msgs[0].length;
+
+  for (int i = 1; i < count; i++)
+    {
+      /* Check that the message has the same core attributes or break */
+
+      if ((msgs[i].flags & I2C_M_READ) != type && msgs[i].addr != addr &&
+          msgs[i].frequency != freq)
+        {
+          break;
+        }
+
+      /* This message has the same core attributes as our merge. If it is
+       * NOSTART and the previous message was NOSTOP, add its length.
+       */
+
+      if (msgs[i].flags & I2C_M_NOSTART && msgs[i - 1].flags & I2C_M_NOSTOP)
+        {
+          combined_size += msgs[i].length;
+        }
+      else
+        {
+          break; /* We've reached the end of the merge */
+        }
+    }
+
+  return combined_size;
+}
+
+/****************************************************************************
  * Name: bcm2711_i2c_clearfifos
  *
  * Description:
@@ -559,7 +628,7 @@ static void bcm2711_i2c_enable(struct bcm2711_i2cdev_s *priv)
  ****************************************************************************/
 
 static size_t bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv,
-                                      FAR uint8_t *buf, size_t n)
+                                      uint8_t *buf, size_t n)
 {
   uint8_t to_read = n < FIFO_DEPTH ? n : FIFO_DEPTH;
   uint8_t i = 0;
@@ -587,16 +656,17 @@ static size_t bcm2711_i2c_drainrxfifo(struct bcm2711_i2cdev_s *priv,
  *
  * Input Parameters:
  *     dev - The I2C interface to receive on.
- *     buf - The buffer to receive into
- *     n - The buffer size in bytes
- *     stop - Whether to send a stop condition at the end of the transfer.
+ *     buf - The I2C messages list
+ *     n - The total transfer size in bytes
  ****************************************************************************/
 
-static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
-                               size_t n)
+static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv,
+                               struct i2c_msg_s *msgs, size_t n)
 {
-  size_t remaining = n;
+  size_t total_remaining = n;
   size_t bread;
+  size_t msg_remaining = msgs->length;
+  void *buf = msgs->buffer;
   int ret = 0;
 
   /* Start transfer. */
@@ -607,7 +677,7 @@ static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
    * indicated as done.
    */
 
-  while (remaining > 0 || !priv->done)
+  while (total_remaining > 0 || !priv->done)
     {
       /* Wait here for interrupt handler to signal that RX FIFO has data
        * (RXR). We can then continue reading.
@@ -625,23 +695,38 @@ static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
 
       /* Check if we are done and there's no data left to read. */
 
-      if (priv->done && remaining == 0)
+      if (priv->done && total_remaining == 0)
         {
           break; /* Leave loop and return */
         }
 
-      /* The remaining message length is the current remainder minus how far
-       * into the message we are. We also move forward the buffer pointer by
-       * how many bytes were just read so it starts at the correct location
-       * next iteration.
-       *
-       * We still have to read this if we received the "DONE" indicator but
-       * have the tail-end of the data in the RX FIFO.
+      /* Drain as much as possible from the FIFO into the respective messages
        */
 
-      bread = bcm2711_i2c_drainrxfifo(priv, buf, remaining);
-      remaining -= bread;
-      buf += bread;
+      do
+        {
+          if (msg_remaining == 0)
+            {
+              msgs++;
+              msg_remaining = msgs->length;
+              buf = msgs->buffer;
+            }
+
+          /* The remaining message length is the current remainder minus how
+           * far into the message we are. We also move forward the buffer
+           * pointer by how many bytes were just read so it starts at the
+           * correct location next iteration.
+           *
+           * We still have to read this if we received the "DONE" indicator
+           * but have the tail-end of the data in the RX FIFO.
+           */
+
+          bread = bcm2711_i2c_drainrxfifo(priv, buf, msg_remaining);
+          msg_remaining -= bread;
+          total_remaining -= bread;
+          buf += bread;
+        }
+      while (msg_remaining == 0 && total_remaining > 0);
     }
 
   priv->done = false; /* Reset done indicator */
@@ -664,7 +749,7 @@ static int bcm2711_i2c_receive(struct bcm2711_i2cdev_s *priv, FAR void *buf,
  ****************************************************************************/
 
 static size_t bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv,
-                                     FAR uint8_t *buf, size_t n)
+                                     uint8_t *buf, size_t n)
 {
   uint8_t to_send = n < FIFO_DEPTH ? n : FIFO_DEPTH;
   uint8_t i = 0;
@@ -691,30 +776,67 @@ static size_t bcm2711_i2c_filltxfifo(struct bcm2711_i2cdev_s *priv,
  *
  * Input Parameters:
  *     dev - The I2C interface to send on.
- *     buf - The buffer to send data from.
- *     n - The size of the buffer in bytes.
- *     stop - Whether to send a stop condition at the end of the transfer.
+ *     msgs - The I2C messages list
+ *     n - The total transfer size in bytes
  ****************************************************************************/
 
-static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, FAR void *buf,
-                            size_t n)
+static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv,
+                            struct i2c_msg_s *msgs, size_t n)
 {
-  size_t remaining = n;
+  size_t total_remaining = n;
+  size_t msg_remaining;
   size_t bwrote;
+  void *buf;
   int ret = OK;
 
-  DEBUGASSERT(buf != NULL || (buf == NULL && n == 0));
+  DEBUGASSERT(msgs != NULL || (msgs == NULL && n == 0));
 
-  while (remaining > 0 || !priv->done)
+  /* Populate vars with first message information */
+
+  msg_remaining = msgs->length;
+  buf = msgs->buffer;
+
+  while (total_remaining > 0 || !priv->done)
     {
-      /* Write data to FIFO. The remaining message length is the total
-       * remaining before, minus how far into the message we are. The `buf`
-       * pointer is incremented to point to data that hasn't been sent yet.
+      /* Fill the TX FIFO as much as possible across all message components.
+       *
+       * This always executes for the first message.
+       *
+       * On subsequent messages, we continue to fill the FIFO with their data
+       * until we run out of space in the FIFO or data to send.
+       *
+       * Then, we start the transfer. If we need to send more data, after
+       * receiving the TXW interrupt we return here to complete the same
+       * process of maximally filling the FIFO. Otherwise, the transfer is
+       * done and we exit.
        */
 
-      bwrote = bcm2711_i2c_filltxfifo(priv, buf, remaining);
-      remaining -= bwrote;
-      buf += bwrote;
+      do
+        {
+          /* Acquire the length and buffer of the next message if this one is
+           * done.
+           */
+
+          if (msg_remaining == 0)
+            {
+              msgs++;
+              msg_remaining = msgs->length;
+              buf = msgs->buffer;
+            }
+
+          /* Write data to FIFO. The remaining message length is the total
+           * remaining before, minus how far into the message we are. The
+           * `buf` pointer is incremented to point to data that hasn't been
+           * sent yet. We also increment the `total_remaining` size of the
+           * overall transfer (could be multiple messages).
+           */
+
+          bwrote = bcm2711_i2c_filltxfifo(priv, buf, msg_remaining);
+          msg_remaining -= bwrote;
+          total_remaining -= bwrote;
+          buf += bwrote;
+        }
+      while (msg_remaining == 0 && total_remaining > 0);
 
       /* Start the transfer if it's not running already */
 
@@ -756,7 +878,7 @@ static int bcm2711_i2c_send(struct bcm2711_i2cdev_s *priv, FAR void *buf,
            * failure.
            */
 
-          DEBUGASSERT(remaining == 0);
+          DEBUGASSERT(total_remaining == 0);
           break;
         }
     }
@@ -783,7 +905,7 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
   struct bcm2711_i2cdev_s *priv = (struct bcm2711_i2cdev_s *)dev;
   int i;
   int ret;
-  bool stop = true;
+  size_t transfer_size;
 
   DEBUGASSERT(dev != NULL);
   DEBUGASSERT(msgs != NULL);
@@ -809,21 +931,14 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
       bcm2711_i2c_clearfifos(priv);
       bcm2711_i2c_setfrequency(priv, msgs->frequency);
       bcm2711_i2c_setaddr(priv, msgs->addr);
-      putreg32(msgs->length, BCM_BSC_DLEN(priv->base)); /* Set transfer len */
+
+      /* Try to merge as many sequential messages as possible to respect
+       * I2C_M_NOSTOP/I2C_M_NOSTART.
+       */
+
+      transfer_size = merge_messages(msgs, count);
+      putreg32(transfer_size, BCM_BSC_DLEN(priv->base)); /* Set transfer len */
       bcm2711_i2c_enable(priv);
-
-      /* TODO: do I need to support I2C_M_NOSTART? */
-
-      /* TODO: Support restart condition (no stop) */
-
-      if (msgs->flags & I2C_M_NOSTOP)
-        {
-          stop = false;
-        }
-      else
-        {
-          stop = true;
-        }
 
       /* Perform the operation corresponding to whether the user wanted to
        * send or receive on this transfer.
@@ -832,12 +947,12 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
       if (msgs->flags & I2C_M_READ)
         {
           modreg32(BCM_BSC_C_READ, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
-          ret = bcm2711_i2c_receive(priv, msgs->buffer, msgs->length);
+          ret = bcm2711_i2c_receive(priv, msgs, transfer_size);
         }
       else
         {
           modreg32(0, BCM_BSC_C_READ, BCM_BSC_C(priv->base));
-          ret = bcm2711_i2c_send(priv, msgs->buffer, msgs->length);
+          ret = bcm2711_i2c_send(priv, msgs, transfer_size);
         }
 
       /* Check if there was an error during the send/receive operation and
@@ -856,15 +971,7 @@ static int bcm2711_i2c_transfer(struct i2c_master_s *dev,
         }
     }
 
-  /* If our last message had a stop condition, we can safely disable this I2C
-   * interface until it's used again.
-   */
-
-  if (stop)
-    {
-      bcm2711_i2c_disable(priv);
-    }
-
+  bcm2711_i2c_disable(priv); /* Transfer done */
   nxmutex_unlock(&priv->lock);
   return ret;
 }
@@ -1170,5 +1277,3 @@ int bcm2711_i2cbus_uninitialize(struct i2c_master_s *dev)
   nxmutex_unlock(&priv->lock);
   return ret;
 }
-
-#endif // defined(CONFIG_BCM2711_I2C)

@@ -78,7 +78,8 @@
  *
  * Currently, up to two FOC instances are supported.
  *
- * This implementation is based on arch/arm/src/stm32/stm32_foc.c
+ * This implementation is based on
+ * arch/arm/src/common/stm32/stm32_foc_m3m4_v1.c
  */
 
 /* Verify system configuration **********************************************/
@@ -89,22 +90,22 @@
 
 /* PWM lower-half ops and ADC lower-half ops must be enabled */
 
-#ifndef CONFIG_STM32F7_PWM_LL_OPS
+#ifndef CONFIG_STM32_PWM_LL_OPS
 #  error PWM low-level operations interface must be enabled
 #endif
-#ifndef CONFIG_STM32F7_ADC_LL_OPS
+#ifndef CONFIG_STM32_ADC_LL_OPS
 #  error ADC low-level operations interface must be enabled
 #endif
 
 /* We don't want start conversion during ADC setup */
 
-#ifndef CONFIG_STM32F7_ADC_NO_STARTUP_CONV
+#ifndef CONFIG_STM32_ADC_NO_STARTUP_CONV
 #  error ADC startup conversion must be disabled
 #endif
 
 /* We need interface to change ADC sample-time */
 
-#ifndef CONFIG_STM32F7_ADC_CHANGE_SAMPLETIME
+#ifndef CONFIG_STM32_ADC_CHANGE_SAMPLETIME
 #  error ADC sample-time configuration interface must be enabled
 #endif
 
@@ -114,35 +115,35 @@
 
 /* FOC0 always use TIMER1 for PWM */
 
-#ifdef CONFIG_STM32F7_FOC_FOC0
+#ifdef CONFIG_STM32_FOC_FOC0
 #  define FOC0_PWM           (1)
 #  define FOC0_PWM_NCHANNELS (PWM_TIM1_NCHANNELS)
 #  define FOC0_PWM_BASE      (STM32_TIM1_BASE)
 #  define FOC0_PWM_FZ_BIT    (DBGMCU_APB2_TIM1STOP)
-#  if CONFIG_STM32F7_TIM1_MODE != 2
+#  if CONFIG_STM32_TIM1_MODE != 2
 #    error TIM1 must be configured in center-aligned mode 1
 #  endif
-#endif  /* CONFIG_STM32F7_FOC_FOC0 */
+#endif  /* CONFIG_STM32_FOC_FOC0 */
 
 /* FOC1 always use TIMER8 for PWM */
 
-#ifdef CONFIG_STM32F7_FOC_FOC1
+#ifdef CONFIG_STM32_FOC_FOC1
 #  define FOC1_PWM           (8)
 #  define FOC1_PWM_NCHANNELS (PWM_TIM8_NCHANNELS)
 #  define FOC1_PWM_BASE      (STM32_TIM8_BASE)
 #  define FOC1_PWM_FZ_BIT    (DBGMCU_APB2_TIM8STOP)
-#  if CONFIG_STM32F7_TIM8_MODE != 2
+#  if CONFIG_STM32_TIM8_MODE != 2
 #    error TIM8 must be configured in center-aligned mode 1
 #  endif
 #endif
 
 /* The maximum supported number of phases depends on the ADC trigger */
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
 #  if CONFIG_MOTOR_FOC_PHASES > 3
 #    error max 3 phases supported
 #  endif
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
 #  if CONFIG_MOTOR_FOC_PHASES > 4
 #    error max 4 phases supported
 #  endif
@@ -158,7 +159,7 @@
 
 /* Only one ADC trigger must be selected */
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4) && defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4) && defined(CONFIG_STM32_FOC_ADC_TRGO)
 #  error Invalid ADC trigger configuration
 #endif
 
@@ -174,7 +175,7 @@
  *   V0 for CNTR = 0
  */
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
 
 /* FOC ADC trigger on CCR4 **************************************************/
 
@@ -183,12 +184,12 @@
  *   - 1 channel for ADC injection sequence trigger (CCR4)
  */
 
-#  if defined(CONFIG_STM32F7_FOC_FOC0)
+#  if defined(CONFIG_STM32_FOC_FOC0)
 #    if FOC0_PWM_NCHANNELS != (CONFIG_MOTOR_FOC_PHASES + 1)
 #      error Invalid channels configuration
 #    endif
 #  endif
-#  if defined(CONFIG_STM32F7_FOC_FOC1)
+#  if defined(CONFIG_STM32_FOC_FOC1)
 #    if FOC1_PWM_NCHANNELS != (CONFIG_MOTOR_FOC_PHASES + 1)
 #      error Invalid channels configuration
 #    endif
@@ -202,10 +203,10 @@
  *   TIMx CCR4 = (ARR - trigger_offset)
  */
 
-#ifdef CONFIG_STM32F7_FOC_USE_TIM1
+#ifdef CONFIG_STM32_FOC_USE_TIM1
 #  define ADC_JEXTSEL_T1CC4  (ADC_CR2_JEXTSEL_T1CC4)
 #endif
-#ifdef CONFIG_STM32F7_FOC_USE_TIM8
+#ifdef CONFIG_STM32_FOC_USE_TIM8
 #  define ADC_JEXTSEL_T8CC4  (ADC_CR2_JEXTSEL_T8CC4)
 #endif
 
@@ -213,20 +214,20 @@
 
 #  define ADC_TRIGGER_OFFSET (1)
 
-#  ifdef CONFIG_STM32F7_FOC_FOC0
+#  ifdef CONFIG_STM32_FOC_FOC0
 #    define FOC0_ADC_JEXTSEL  (ADC_JEXTSEL_T1CC4)
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1
+#  ifdef CONFIG_STM32_FOC_FOC1
 #    define FOC1_ADC_JEXTSEL  (ADC_JEXTSEL_T8CC4)
 #  endif
 
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
 
 /* FOC ADC trigger on TRGO **************************************************/
 
 /* PWM TRGO support must be enabled */
 
-#  ifndef CONFIG_STM32F7_PWM_TRGO
+#  ifndef CONFIG_STM32_PWM_TRGO
 #    error PWM TRGO support must be enabled
 #  endif
 
@@ -238,12 +239,12 @@
  *   - n channels for phases PWM (CCR1, CCR2, CCR3, CCR4)
  */
 
-#  if defined(CONFIG_STM32F7_FOC_FOC0)
+#  if defined(CONFIG_STM32_FOC_FOC0)
 #    if FOC0_PWM_NCHANNELS != (CONFIG_MOTOR_FOC_PHASES)
 #      error Invalid channels configuration
 #    endif
 #  endif
-#  if defined(CONFIG_STM32F7_FOC_FOC1)
+#  if defined(CONFIG_STM32_FOC_FOC1)
 #    if FOC1_PWM_NCHANNELS != (CONFIG_MOTOR_FOC_PHASES)
 #      error Invalid channels configuration
 #    endif
@@ -257,17 +258,17 @@
  *   TIMx TRGO = (ARR)
  */
 
-#ifdef CONFIG_STM32F7_FOC_USE_TIM1
+#ifdef CONFIG_STM32_FOC_USE_TIM1
 #  define ADC_JEXTSEL_T1TRGO  (ADC_CR2_JEXTSEL_T1TRGO)
 #endif
-#ifdef CONFIG_STM32F7_FOC_USE_TIM8
+#ifdef CONFIG_STM32_FOC_USE_TIM8
 #  error TIM8 and TRGO trigger not supported for ADC IPv1
 #endif
 
-#  ifdef CONFIG_STM32F7_FOC_FOC0
+#  ifdef CONFIG_STM32_FOC_FOC0
 #    define FOC0_ADC_JEXTSEL  (ADC_JEXTSEL_T1TRGO)
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1
+#  ifdef CONFIG_STM32_FOC_FOC1
 #    define FOC1_ADC_JEXTSEL  (ADC_JEXTSEL_T8TRGO)
 #  endif
 
@@ -280,28 +281,28 @@
 
 /* Phase current samples for FOC0 */
 
-#ifdef CONFIG_STM32F7_FOC_FOC0
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC1
+#ifdef CONFIG_STM32_FOC_FOC0
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC1
 #    define FOC0_ADC 1
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC2
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC2
 #    define FOC0_ADC 2
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC3
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC3
 #    define FOC0_ADC 3
 #  endif
 #endif
 
 /* Phase current samples for FOC1 */
 
-#ifdef CONFIG_STM32F7_FOC_FOC1
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC1
+#ifdef CONFIG_STM32_FOC_FOC1
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC1
 #    define FOC1_ADC 1
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC2
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC2
 #    define FOC1_ADC 2
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC3
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC3
 #    define FOC1_ADC 3
 #  endif
 #endif
@@ -316,55 +317,55 @@
  *   3. ADC software trigger starts only regular conversion.
  */
 
-#ifdef CONFIG_STM32F7_FOC_USE_ADC1
-#  ifndef CONFIG_STM32F7_ADC1
+#ifdef CONFIG_STM32_FOC_USE_ADC1
+#  ifndef CONFIG_STM32_ADC1
 #    error ADC1 not supported !
 #  endif
 #  ifndef ADC1_HAVE_JEXTCFG
 #    error ADC1 must support JEXTCFG
 #  endif
-#  if CONFIG_STM32F7_ADC1_ANIOC_TRIGGER != 1
-#    error CONFIG_STM32F7_ADC1_ANIOC_TRIGGER must be 1
+#  if CONFIG_STM32_ADC1_ANIOC_TRIGGER != 1
+#    error CONFIG_STM32_ADC1_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32F7_ADC1_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
+#  if CONFIG_STM32_ADC1_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC1 injected channels
 #  endif
 #endif
-#ifdef CONFIG_STM32F7_FOC_USE_ADC2
-#  ifndef CONFIG_STM32F7_ADC2
+#ifdef CONFIG_STM32_FOC_USE_ADC2
+#  ifndef CONFIG_STM32_ADC2
 #    error ADC2 not supported !
 #  endif
 #  ifndef ADC2_HAVE_JEXTCFG
 #    error ADC2 must support JEXTCFG
 #  endif
-#  if CONFIG_STM32F7_ADC2_ANIOC_TRIGGER != 1
-#    error CONFIG_STM32F7_ADC2_ANIOC_TRIGGER must be 1
+#  if CONFIG_STM32_ADC2_ANIOC_TRIGGER != 1
+#    error CONFIG_STM32_ADC2_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32F7_ADC2_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
+#  if CONFIG_STM32_ADC2_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC2 injected channels
 #  endif
 #endif
-#ifdef CONFIG_STM32F7_FOC_USE_ADC3
-#  ifndef CONFIG_STM32F7_ADC3
+#ifdef CONFIG_STM32_FOC_USE_ADC3
+#  ifndef CONFIG_STM32_ADC3
 #    error ADC3 not supported !
 #  endif
 #  ifndef ADC3_HAVE_JEXTCFG
 #    error ADC3 must support JEXTCFG
 #  endif
-#  if CONFIG_STM32F7_ADC3_ANIOC_TRIGGER != 1
-#    error CONFIG_STM32F7_ADC3_ANIOC_TRIGGER must be 1
+#  if CONFIG_STM32_ADC3_ANIOC_TRIGGER != 1
+#    error CONFIG_STM32_ADC3_ANIOC_TRIGGER must be 1
 #  endif
-#  if CONFIG_STM32F7_ADC3_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
+#  if CONFIG_STM32_ADC3_INJECTED_CHAN != FOC_ADC_INJ_CHAN_REQUIRED
 #    error Invalid configuration for ADC3 injected channels
 #  endif
 #endif
 
 /* Combine JEXTSEL with JEXTEN default */
 
-#ifdef CONFIG_STM32F7_FOC_FOC0
+#ifdef CONFIG_STM32_FOC_FOC0
 #  define FOC0_ADC_JEXT (ADC_JEXTREG_JEXTEN_DEFAULT | FOC0_ADC_JEXTSEL)
 #endif
-#ifdef CONFIG_STM32F7_FOC_FOC1
+#ifdef CONFIG_STM32_FOC_FOC1
 #  define FOC1_ADC_JEXT (ADC_JEXTREG_JEXTEN_DEFAULT | FOC1_ADC_JEXTSEL)
 #endif
 
@@ -376,9 +377,9 @@
 
 /* ADC1 + ADC2 + ADC3 interrupt */
 
-#define STM32F7_IRQ_ADC1_FOC  STM32_IRQ_ADC
-#define STM32F7_IRQ_ADC2_FOC  STM32_IRQ_ADC
-#define STM32F7_IRQ_ADC3_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC1_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC2_FOC  STM32_IRQ_ADC
+#define STM32_IRQ_ADC3_FOC  STM32_IRQ_ADC
 
 /* ADC common ***************************************************************/
 
@@ -390,40 +391,40 @@
 
 /* FOC ADC configuration ****************************************************/
 
-#ifdef CONFIG_STM32F7_FOC_FOC0
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC1
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC1_FOC
+#ifdef CONFIG_STM32_FOC_FOC0
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC1
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC1_FOC
 #    define FOC0_ADC_CMN FOC_ADC1_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC2
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC2_FOC
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC2
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC2_FOC
 #    define FOC0_ADC_CMN FOC_ADC2_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC3
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC3_FOC
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC3
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC3_FOC
 #    define FOC0_ADC_CMN FOC_ADC3_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC0_ADC4
-#    define FOC0_ADC_IRQ STM32F7_IRQ_ADC4_FOC
+#  ifdef CONFIG_STM32_FOC_FOC0_ADC4
+#    define FOC0_ADC_IRQ STM32_IRQ_ADC4_FOC
 #    define FOC0_ADC_CMN FOC_ADC4_CMN
 #  endif
 #endif
 
-#ifdef CONFIG_STM32F7_FOC_FOC1
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC1
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC1_FOC
+#ifdef CONFIG_STM32_FOC_FOC1
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC1
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC1_FOC
 #    define FOC1_ADC_CMN FOC_ADC1_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC2
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC2_FOC
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC2
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC2_FOC
 #    define FOC1_ADC_CMN FOC_ADC2_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC3
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC3_FOC
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC3
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC3_FOC
 #    define FOC1_ADC_CMN FOC_ADC3_CMN
 #  endif
-#  ifdef CONFIG_STM32F7_FOC_FOC1_ADC4
-#    define FOC1_ADC_IRQ STM32F7_IRQ_ADC4_FOC
+#  ifdef CONFIG_STM32_FOC_FOC1_ADC4
+#    define FOC1_ADC_IRQ STM32_IRQ_ADC4_FOC
 #    define FOC1_ADC_CMN FOC_ADC4_CMN
 #  endif
 #endif
@@ -502,7 +503,7 @@
 
 /* Define PWM all outputs */
 
-#ifdef CONFIG_STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+#ifdef CONFIG_STM32_FOC_HAS_PWM_COMPLEMENTARY
 #  define PMW_OUTPUTS_ALL_COMP (STM32_PWM_OUT1N|  \
                                 STM32_PWM_OUT2N|  \
                                 STM32_PWM_OUT3N)
@@ -510,7 +511,7 @@
 #  define PMW_OUTPUTS_ALL_COMP (0)
 #endif
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4) || (CONFIG_MOTOR_FOC_PHASES > 3)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4) || (CONFIG_MOTOR_FOC_PHASES > 3)
 #  define PMW_OUTPUTS_ALL_OUT4 (STM32_PWM_OUT4)
 #else
 #  define PMW_OUTPUTS_ALL_OUT4 (0)
@@ -683,10 +684,10 @@ static int stm32_foc_adc_start(struct foc_dev_s *dev, bool state);
 static int stm32_foc_calibration_start(struct foc_dev_s *dev);
 static int stm32_foc_pwm_freq_set(struct foc_dev_s *dev, uint32_t freq);
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
 static void stm32_foc_adc_ccr4_trg_set(struct foc_dev_s *dev,
                                        uint32_t offset);
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
 static void stm32_foc_adc_trgo_trg_set(struct foc_dev_s *dev,
                                        uint8_t rcr);
 #else
@@ -772,7 +773,7 @@ void stm32_foc_sync_all(void)
 
       /* Store EGR register address */
 
-      egr_reg[i] = foc_dev->pwm_base + STM32F7_GTIM_EGR_OFFSET;
+      egr_reg[i] = foc_dev->pwm_base + STM32_GTIM_EGR_OFFSET;
     }
 
   /* Write all registers at once */
@@ -813,7 +814,7 @@ static int stm32_foc_pwm_cfg(struct foc_dev_s *dev, uint32_t freq)
       goto errout;
     }
 
-#ifdef CONFIG_STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+#ifdef CONFIG_STM32_FOC_HAS_PWM_COMPLEMENTARY
   /* Configure deadtime */
 
   PWM_DT_UPDATE(pwm, (uint8_t)board->data->pwm_dt);
@@ -1015,7 +1016,7 @@ static int stm32_foc_adc_cfg(struct foc_dev_s *dev)
   return OK;
 }
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
 
 /****************************************************************************
  * Name: stm32_foc_adc_ccr4_trg_set
@@ -1047,7 +1048,7 @@ static void stm32_foc_adc_ccr4_trg_set(struct foc_dev_s *dev,
   PWM_CCR_UPDATE(pwm, STM32_PWM_CHAN4, offset);
 }
 
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
 
 /****************************************************************************
  * Name: stm32_foc_adc_trgo_trg_set
@@ -1140,9 +1141,9 @@ static int stm32_foc_configure(struct foc_dev_s *dev,
 
   DEBUGASSERT(priv->data.per != 0);
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
   stm32_foc_adc_ccr4_trg_set(dev, (priv->data.per - ADC_TRIGGER_OFFSET));
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
   stm32_foc_adc_trgo_trg_set(dev, (dev->cfg.pwm_freq /
                                    priv->data.adc_freq) * 2);
 #else
@@ -1156,7 +1157,7 @@ static int stm32_foc_configure(struct foc_dev_s *dev,
   /* REVISIT: synchronise instances if TRGO trigger selected */
 
 #if (CONFIG_MOTOR_FOC_INST > 1)
-#  if defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#  if defined(CONFIG_STM32_FOC_ADC_TRGO)
 #    error stm32_foc_sync_all breaks TRGO event on V0 vector
 #  endif
 
@@ -1704,9 +1705,9 @@ static int stm32_foc_calibration_start(struct foc_dev_s *dev)
 
   DEBUGASSERT(priv->data.per != 0);
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
   stm32_foc_adc_ccr4_trg_set(dev, (priv->data.per - ADC_TRIGGER_OFFSET));
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
   stm32_foc_adc_trgo_trg_set(dev, 1);
 #else
 #  error Invalid FOC ADC trigger
@@ -2039,7 +2040,7 @@ static int stm32_foc_notifier_cfg(struct foc_dev_s *dev, uint32_t freq)
       goto errout;
     }
 
-#if defined(CONFIG_STM32F7_FOC_ADC_CCR4)
+#if defined(CONFIG_STM32_FOC_ADC_CCR4)
   /* ADC interrupts frequency is PWM frequency */
 
   priv->data.adc_freq = dev->cfg.pwm_freq;
@@ -2048,7 +2049,7 @@ static int stm32_foc_notifier_cfg(struct foc_dev_s *dev, uint32_t freq)
 
   priv->data.notifier_div = (dev->cfg.pwm_freq / freq);
 
-#elif defined(CONFIG_STM32F7_FOC_ADC_TRGO)
+#elif defined(CONFIG_STM32_FOC_ADC_TRGO)
   /* Call work on every ADC interrupt */
 
   priv->data.notifier_div = 1;
@@ -2250,7 +2251,7 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
 
   switch (inst)
     {
-#ifdef CONFIG_STM32F7_FOC_FOC0
+#ifdef CONFIG_STM32_FOC_FOC0
       case 0:
         {
           pwm_inst = FOC0_PWM;
@@ -2264,7 +2265,7 @@ stm32_foc_initialize(int inst, struct stm32_foc_board_s *board)
         }
 #endif
 
-#ifdef CONFIG_STM32F7_FOC_FOC1
+#ifdef CONFIG_STM32_FOC_FOC1
       case 1:
         {
           pwm_inst = FOC1_PWM;

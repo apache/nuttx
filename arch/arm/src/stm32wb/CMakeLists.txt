@@ -33,13 +33,11 @@ set(SRCS
     stm32wb_serial.c
     stm32wb_i2c.c
     stm32wb_start.c
-    stm32wb_waste.c
     stm32wb_rcc_lse.c
     stm32wb_rcc_lsi.c
     stm32wb_pwr.c
     stm32wb_tim.c
-    stm32wb_flash.c
-    stm32wb_uid.c)
+    stm32wb_flash.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32wb_idle.c)
@@ -55,11 +53,11 @@ else()
   list(APPEND SRCS stm32wb_tickless.c)
 endif()
 
-if(CONFIG_STM32WB_ONESHOT)
+if(CONFIG_STM32_ONESHOT)
   list(APPEND SRCS stm32wb_oneshot.c stm32wb_oneshot_lowerhalf.c)
 endif()
 
-if(CONFIG_STM32WB_FREERUN)
+if(CONFIG_STM32_FREERUN)
   list(APPEND SRCS stm32wb_freerun.c)
 endif()
 
@@ -67,11 +65,11 @@ if(CONFIG_BUILD_PROTECTED)
   list(APPEND SRCS stm32wb_userspace.c stm32wb_mpuinit.c)
 endif()
 
-if(CONFIG_STM32WB_HAVE_HSI48)
+if(CONFIG_STM32_HAVE_HSI48)
   list(APPEND SRCS stm32wb_rcc_hsi48.c)
 endif()
 
-if(CONFIG_STM32WB_DMA)
+if(CONFIG_STM32_DMA)
   list(APPEND SRCS stm32wb_dma.c)
 endif()
 
@@ -84,11 +82,11 @@ if(CONFIG_PM)
   endif()
 endif()
 
-if(CONFIG_STM32WB_PWR)
+if(CONFIG_STM32_PWR)
   list(APPEND SRCS stm32wb_exti_pwr.c)
 endif()
 
-if(CONFIG_STM32WB_RTC)
+if(CONFIG_STM32_RTC)
   if(CONFIG_RTC_ALARM)
     list(APPEND SRCS stm32wb_exti_alarm.c)
   endif()
@@ -100,15 +98,15 @@ if(CONFIG_STM32WB_RTC)
   endif()
 endif()
 
-if(CONFIG_STM32WB_IPCC)
+if(CONFIG_STM32_IPCC)
   list(APPEND SRCS stm32wb_ipcc.c)
 endif()
 
-if(CONFIG_STM32WB_MBOX)
+if(CONFIG_STM32_MBOX)
   list(APPEND SRCS stm32wb_mbox.c)
 endif()
 
-if(CONFIG_STM32WB_BLE)
+if(CONFIG_STM32_BLE)
   list(APPEND SRCS stm32wb_blehci.c)
 endif()
 
@@ -117,3 +115,5 @@ if(CONFIG_DEBUG_FEATURES)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

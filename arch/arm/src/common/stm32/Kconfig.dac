@@ -1,0 +1,363 @@
+#
+# STM32 DAC configuration options.
+#
+
+config STM32_DAC_LL_OPS
+	bool "DAC low-level operations"
+	default n
+	---help---
+		Enable low-level DAC ops.
+
+config STM32_DAC1_DMA
+	bool "DAC1 DMA"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+config STM32_DAC1_TIMER
+	int "DAC1 timer"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	range 2 8
+
+config STM32_DAC1_TIMER_FREQUENCY
+	int "DAC1 timer frequency"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	default 100
+	---help---
+		DAC1 output frequency.  Default:  100Hz
+
+config STM32_DAC1_DMA_BUFFER_SIZE
+	int "DAC1 DMA buffer size"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC1_DMA
+	default 1
+
+config STM32_DAC2_DMA
+	bool "DAC2 DMA"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+config STM32_DAC2_TIMER
+	int "DAC2 timer"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	default 0
+	range 2 8
+
+config STM32_DAC2_TIMER_FREQUENCY
+	int "DAC2 timer frequency"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	default 100
+	---help---
+		DAC2 output frequency.  Default:  100Hz
+
+config STM32_DAC2_DMA_BUFFER_SIZE
+	int "DAC2 DMA buffer size"
+	depends on STM32_COMMON_L4_L5_U5 && STM32_DAC2_DMA
+	default 1
+
+menu "DAC Configuration"
+	depends on STM32_DAC1 || STM32_DAC2 || STM32_DAC3 || STM32_DAC4
+
+config STM32_DAC1CH1_MODE
+	int "DAC1CH1 channel mode"
+	depends on STM32_DAC1CH1 && STM32_HAVE_IP_DAC_M3M4_V2
+	default 0
+	range 0 7
+	---help---
+		– DAC channel in Normal mode
+			0: DAC channel is connected to external pin with Buffer enabled
+			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
+			2: DAC channel2 is connected to external pin with buffer disabled
+			3: DAC channel is connected to on chip peripherals with Buffer disabled
+		- DAC channel in Sample and hold mode
+			4: DAC channel is connected to external pin with Buffer enabled
+			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
+			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
+			7: DAC channel is connected to on chip peripherals with Buffer disabled
+
+config STM32_DAC1CH1_DMA
+	bool "DAC1CH1 DMA"
+	depends on STM32_DAC1CH1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC1CH1_DMA
+
+config STM32_DAC1CH1_DMA_BUFFER_SIZE
+	int "DAC1CH1 DMA buffer size"
+	default 256
+
+config STM32_DAC1CH1_DMA_EXTERNAL
+	bool "DAC1CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC1CH1_HRTIM_TRG1
+	bool "DAC1CH1 HRTIM Trigger 1"
+	default n
+
+config STM32_DAC1CH1_HRTIM_TRG2
+	bool "DAC1CH1 HRTIM Trigger 2"
+	default n
+
+endif # STM32_HRTIM_DAC
+
+config STM32_DAC1CH1_TIMER
+	int "DAC1CH1 timer"
+	depends on !STM32_DAC1CH1_DMA_EXTERNAL
+	range 2 8
+
+config STM32_DAC1CH1_TIMER_FREQUENCY
+	int "DAC1CH1 timer frequency"
+	depends on !STM32_DAC1CH1_DMA_EXTERNAL
+	default 0
+
+endif
+
+config STM32_DAC1CH2_MODE
+	int "DAC1CH2 channel mode"
+	depends on STM32_DAC1CH2 && STM32_HAVE_IP_DAC_M3M4_V2
+	default 0
+	range 0 7
+	---help---
+		– DAC channel in Normal mode
+			0: DAC channel is connected to external pin with Buffer enabled
+			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
+			2: DAC channel2 is connected to external pin with buffer disabled
+			3: DAC channel is connected to on chip peripherals with Buffer disabled
+		- DAC channel in Sample and hold mode
+			4: DAC channel is connected to external pin with Buffer enabled
+			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
+			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
+			7: DAC channel is connected to on chip peripherals with Buffer disabled
+
+config STM32_DAC1CH2_DMA
+	bool "DAC1CH2 DMA"
+	depends on STM32_DAC1CH2
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC1CH2_DMA
+
+config STM32_DAC1CH2_DMA_BUFFER_SIZE
+	int "DAC1CH2 DMA buffer size"
+	default 256
+
+config STM32_DAC1CH2_DMA_EXTERNAL
+	bool "DAC1CH2 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC1CH2_HRTIM_TRG1
+	bool "DAC1CH2 HRTIM Trigger 1"
+	default n
+
+config STM32_DAC1CH2_HRTIM_TRG2
+	bool "DAC1CH2 HRTIM Trigger 2"
+	default n
+
+endif # STM32_HRTIM_DAC
+
+config STM32_DAC1CH2_TIMER
+	int "DAC1CH2 timer"
+	depends on !STM32_DAC1CH2_DMA_EXTERNAL
+	range 2 8
+
+config STM32_DAC1CH2_TIMER_FREQUENCY
+	int "DAC1CH2 timer frequency"
+	depends on !STM32_DAC1CH2_DMA_EXTERNAL
+	default 0
+
+endif
+
+config STM32_DAC2CH1_MODE
+	int "DAC2CH1 channel mode"
+	depends on STM32_DAC2CH1 && STM32_HAVE_IP_DAC_M3M4_V2
+	default 0
+	range 0 7
+	---help---
+		– DAC channel in Normal mode
+			0: DAC channel is connected to external pin with Buffer enabled
+			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
+			2: DAC channel2 is connected to external pin with buffer disabled
+			3: DAC channel is connected to on chip peripherals with Buffer disabled
+		- DAC channel in Sample and hold mode
+			4: DAC channel is connected to external pin with Buffer enabled
+			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
+			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
+			7: DAC channel is connected to on chip peripherals with Buffer disabled
+
+config STM32_DAC2CH1_DMA
+	bool "DAC2CH1 DMA"
+	depends on STM32_DAC2CH1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC2CH1_DMA
+
+config STM32_DAC2CH1_DMA_BUFFER_SIZE
+	int "DAC2CH1 DMA buffer size"
+	default 256
+
+config STM32_DAC2CH1_DMA_EXTERNAL
+	bool "DAC2CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC2CH1_HRTIM_TRG3
+	bool "DAC2CH1 HRTIM Trigger 3"
+	default n
+
+endif # STM32_HRTIM_DAC
+
+config STM32_DAC2CH1_TIMER
+	int "DAC2CH1 timer"
+	depends on !STM32_DAC2CH1_DMA_EXTERNAL
+	default 0
+	range 2 8
+
+config STM32_DAC2CH1_TIMER_FREQUENCY
+	int "DAC2CH1 timer frequency"
+	depends on !STM32_DAC2CH1_DMA_EXTERNAL
+	default 0
+
+endif
+
+config STM32_DAC3CH1_MODE
+	int "DAC3CH1 channel mode"
+	depends on STM32_DAC3CH1 && STM32_HAVE_IP_DAC_M3M4_V2
+	default 0
+	range 0 7
+	---help---
+		– DAC channel in Normal mode
+			0: DAC channel is connected to external pin with Buffer enabled
+			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
+			2: DAC channel is connected to external pin with buffer disabled
+			3: DAC channel is connected to on chip peripherals with Buffer disabled
+		- DAC channel in Sample and hold mode
+			4: DAC channel is connected to external pin with Buffer enabled
+			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
+			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
+			7: DAC channel is connected to on chip peripherals with Buffer disabled
+
+config STM32_DAC3CH1_DMA
+	bool "DAC3CH1 DMA"
+	depends on STM32_DAC3CH1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer. The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC3CH1_DMA
+
+config STM32_DAC3CH1_DMA_BUFFER_SIZE
+	int "DAC3CH1 DMA buffer size"
+	default 256
+
+config STM32_DAC3CH1_DMA_EXTERNAL
+	bool "DAC3CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC3CH1_HRTIM_TRG3
+	bool "DAC3CH1 HRTIM Trigger 3"
+	default n
+
+endif # STM32_HRTIM_DAC
+
+config STM32_DAC3CH1_TIMER
+	int "DAC3CH1 timer"
+	depends on !STM32_DAC3CH1_DMA_EXTERNAL
+	default 0
+	range 2 8
+
+config STM32_DAC3CH1_TIMER_FREQUENCY
+	int "DAC3CH1 timer frequency"
+	depends on !STM32_DAC3CH1_DMA_EXTERNAL
+	default 0
+
+endif
+
+config STM32_DAC3CH2_MODE
+	int "DAC3CH2 channel mode"
+	depends on STM32_DAC3CH2 && STM32_HAVE_IP_DAC_M3M4_V2
+	default 0
+	range 0 7
+	---help---
+		– DAC channel in Normal mode
+			0: DAC channel is connected to external pin with Buffer enabled
+			1: DAC channel is connected to external pin and to on chip peripherals with buffer enabled
+			2: DAC channel2 is connected to external pin with buffer disabled
+			3: DAC channel is connected to on chip peripherals with Buffer disabled
+		- DAC channel in Sample and hold mode
+			4: DAC channel is connected to external pin with Buffer enabled
+			5: DAC channel is connected to external pin and to on chip peripherals with Buffer enabled
+			6: DAC channel is connected to external pin and to on chip peripherals with Buffer disabled
+			7: DAC channel is connected to on chip peripherals with Buffer disabled
+
+config STM32_DAC3CH2_DMA
+	bool "DAC3CH2 DMA"
+	depends on STM32_DAC3CH2
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer. The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC3CH2_DMA
+
+config STM32_DAC3CH2_DMA_BUFFER_SIZE
+	int "DAC3CH2 DMA buffer size"
+	default 256
+
+config STM32_DAC3CH2_DMA_EXTERNAL
+	bool "DAC3CH1 DMA External Trigger"
+	default n
+
+if STM32_HRTIM_DAC
+
+config STM32_DAC3CH2_HRTIM_TRG3
+	bool "DAC3CH2 HRTIM Trigger 3"
+	default n
+
+endif # STM32_HRTIM_DAC
+
+config STM32_DAC3CH2_TIMER
+	int "DAC3CH2 timer"
+	depends on !STM32_DAC3CH2_DMA_EXTERNAL
+	default 0
+	range 2 8
+
+config STM32_DAC3CH2_TIMER_FREQUENCY
+	int "DAC3CH2 timer frequency"
+	depends on !STM32_DAC3CH2_DMA_EXTERNAL
+	default 0
+
+endif
+
+endmenu

@@ -35,7 +35,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "nucleo-wl55jc.h"
 
 #include <stdio.h>
@@ -64,17 +64,17 @@ static void led_state(int state, unsigned int leds)
 {
   if (leds & BOARD_LED_BLUE_BIT)
     {
-      stm32wl5_gpiowrite(GPIO_LED_BLUE, state);
+      stm32_gpiowrite(GPIO_LED_BLUE, state);
     }
 
   if (leds & BOARD_LED_RED_BIT)
     {
-      stm32wl5_gpiowrite(GPIO_LED_RED, state);
+      stm32_gpiowrite(GPIO_LED_RED, state);
     }
 
   if (leds & BOARD_LED_GREEN_BIT)
     {
-      stm32wl5_gpiowrite(GPIO_LED_GREEN, state);
+      stm32_gpiowrite(GPIO_LED_GREEN, state);
     }
 }
 
@@ -93,12 +93,12 @@ static int button3_led(int irq, void *context, void *arg)
   (void)arg;
   int state;
 
-  state = stm32wl5_gpioread(GPIO_LED_RED);
+  state = stm32_gpioread(GPIO_LED_RED);
 
   /* toggle state */
 
   state = !state;
-  stm32wl5_gpiowrite(GPIO_LED_RED, state);
+  stm32_gpiowrite(GPIO_LED_RED, state);
   return 0;
 }
 #endif
@@ -113,9 +113,9 @@ static int button3_led(int irq, void *context, void *arg)
 
 void board_leds_initialize(void)
 {
-  stm32wl5_configgpio(GPIO_LED_BLUE);
-  stm32wl5_configgpio(GPIO_LED_RED);
-  stm32wl5_configgpio(GPIO_LED_GREEN);
+  stm32_configgpio(GPIO_LED_BLUE);
+  stm32_configgpio(GPIO_LED_RED);
+  stm32_configgpio(GPIO_LED_GREEN);
 }
 
 /****************************************************************************
@@ -222,7 +222,7 @@ uint32_t board_userled_initialize(void)
 #ifdef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
   /* Configure B3 button to fire an interrupt on falling edge (on press)  */
 
-  stm32wl5_gpiosetevent(GPIO_BUTTON3, false, true, false, button3_led, NULL);
+  stm32_gpiosetevent(GPIO_BUTTON3, false, true, false, button3_led, NULL);
 #endif
 
   return BOARD_NLEDS;

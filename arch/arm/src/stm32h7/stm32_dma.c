@@ -51,22 +51,22 @@
 #define DMAMUX_NUM      2
 #define DMA_CONTROLLERS 4
 
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
 #  define MDMA_NCHAN     16
 #else
 #  define MDMA_NCHAN     0
 #endif
-#ifdef CONFIG_STM32H7_DMA1
+#ifdef CONFIG_STM32_DMA1
 #  define DMA1_NSTREAMS  8
 #else
 #  define DMA1_NSTREAMS  0
 #endif
-#ifdef CONFIG_STM32H7_DMA2
+#ifdef CONFIG_STM32_DMA2
 #  define DMA2_NSTREAMS  8
 #else
 #  define DMA2_NSTREAMS  0
 #endif
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
 #  define BDMA_NCHAN     8
 #else
 #  define BDMA_NCHAN     0
@@ -185,7 +185,7 @@ struct stm32_dma_ops_s
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
 static void stm32_mdma_disable(DMA_CHANNEL dmachan);
 static int stm32_mdma_interrupt(int irq, void *context, void *arg);
 static void stm32_mdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
@@ -193,7 +193,7 @@ static void stm32_mdma_free(DMA_HANDLE handle);
 static void stm32_mdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_mdma_residual(DMA_HANDLE handle);
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_mdma_capable(stm32_dmacfg_t *cfg);
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -201,7 +201,7 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg);
 #endif
 #endif
 
-#if defined(CONFIG_STM32H7_DMA1) || defined(CONFIG_STM32H7_DMA2)
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
 static void stm32_sdma_disable(DMA_CHANNEL dmachan);
 static int stm32_sdma_interrupt(int irq, void *context, void *arg);
 static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
@@ -209,7 +209,7 @@ static void stm32_sdma_free(DMA_HANDLE handle);
 static void stm32_sdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_sdma_residual(DMA_HANDLE handle);
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_sdma_capable(stm32_dmacfg_t *cfg);
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -217,7 +217,7 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg);
 #endif
 #endif
 
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
 static void stm32_bdma_disable(DMA_CHANNEL dmachan);
 static int stm32_bdma_interrupt(int irq, void *context, void *arg);
 static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
@@ -225,7 +225,7 @@ static void stm32_bdma_free(DMA_HANDLE handle);
 static void stm32_bdma_start(DMA_HANDLE handle, dma_callback_t callback,
                              void *arg, bool half);
 static size_t stm32_bdma_residual(DMA_HANDLE handle);
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_bdma_capable(stm32_dmacfg_t *cfg);
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -265,7 +265,7 @@ static inline void dmachan_modifyreg32(DMA_CHANNEL dmachan,
 
 struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
 {
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
   /* 0 - MDMA */
 
     {
@@ -275,7 +275,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_free      = stm32_mdma_free,
       .dma_start     = stm32_mdma_start,
       .dma_residual  = stm32_mdma_residual,
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
       .dma_capable   = stm32_mdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -288,7 +288,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA1
+#ifdef CONFIG_STM32_DMA1
   /* 1 - DMA1 */
 
     {
@@ -298,7 +298,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_free      = stm32_sdma_free,
       .dma_start     = stm32_sdma_start,
       .dma_residual  = stm32_sdma_residual,
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
       .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -311,7 +311,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2
+#ifdef CONFIG_STM32_DMA2
   /* 2 - DMA2 */
 
     {
@@ -321,7 +321,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_free      = stm32_sdma_free,
       .dma_start     = stm32_sdma_start,
       .dma_residual  = stm32_sdma_residual,
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
       .dma_capable   = stm32_sdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -334,7 +334,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
   /* 3 - BDMA */
 
     {
@@ -344,7 +344,7 @@ struct stm32_dma_ops_s g_dma_ops[DMA_CONTROLLERS] =
       .dma_free      = stm32_bdma_free,
       .dma_start     = stm32_bdma_start,
       .dma_residual  = stm32_bdma_residual,
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
       .dma_capable   = stm32_bdma_capable,
 #endif
 #ifdef CONFIG_DEBUG_DMA_INFO
@@ -427,7 +427,7 @@ struct stm32_dma_s g_dma[DMA_NCHANNELS] =
 
 static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
 {
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
   /* MDMA */
 
     {
@@ -559,7 +559,7 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA1
+#ifdef CONFIG_STM32_DMA1
   /* DMA1 */
 
     {
@@ -627,7 +627,7 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2
+#ifdef CONFIG_STM32_DMA2
   /* DMA2 */
 
     {
@@ -695,7 +695,7 @@ static struct stm32_dmach_s g_dmach[DMA_NCHANNELS] =
     },
 #endif
 
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
   /* BDMA */
 
     {
@@ -920,7 +920,7 @@ static void stm32_gdma_limits_get(uint8_t controller, uint8_t *first,
  * Master DMA functions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
 
 /****************************************************************************
  * Name: stm32_mdma_disable
@@ -1028,7 +1028,7 @@ static size_t stm32_mdma_residual(DMA_HANDLE handle)
  * Name: stm32_mdma_capable
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_mdma_capable(stm32_dmacfg_t *cfg)
 {
   uint32_t transfer_size;
@@ -1084,13 +1084,13 @@ static void stm32_mdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif /* CONFIG_STM32H7_MDMA */
+#endif /* CONFIG_STM32_MDMA */
 
 /****************************************************************************
  * Standard DMA functions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_DMA1) || defined(CONFIG_STM32H7_DMA2)
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
 
 /****************************************************************************
  * Name: stm32_sdma_disable
@@ -1158,7 +1158,7 @@ static int stm32_sdma_interrupt(int irq, void *context, void *arg)
 
   /* Get the stream and the controller that generated the interrupt */
 
-#ifdef CONFIG_STM32H7_DMA1
+#ifdef CONFIG_STM32_DMA1
   if (irq >= STM32_IRQ_DMA1S0 && irq <= STM32_IRQ_DMA1S6)
     {
       stream     = irq - STM32_IRQ_DMA1S0;
@@ -1171,7 +1171,7 @@ static int stm32_sdma_interrupt(int irq, void *context, void *arg)
     }
   else
 #endif
-#ifdef CONFIG_STM32H7_DMA2
+#ifdef CONFIG_STM32_DMA2
   if (irq >= STM32_IRQ_DMA2S0 && irq <= STM32_IRQ_DMA2S4)
     {
       stream     = irq - STM32_IRQ_DMA2S0;
@@ -1258,7 +1258,7 @@ static void stm32_sdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
           "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(stm32_sdma_capable(cfg));
 #endif
 
@@ -1530,7 +1530,7 @@ static size_t stm32_sdma_residual(DMA_HANDLE handle)
  * Name: stm32_sdma_capable
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_sdma_capable(stm32_dmacfg_t *cfg)
 {
   uint32_t transfer_size;
@@ -1604,7 +1604,7 @@ static bool stm32_sdma_capable(stm32_dmacfg_t *cfg)
           dmainfo("stm32_dmacapable: dcache unaligned "
                   "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
                   cfg->maddr, mend);
-#if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
+#if !defined(CONFIG_STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
         }
@@ -1766,13 +1766,13 @@ static void stm32_sdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif /* CONFIG_STM32H7_DMA1 || CONFIG_STM32H7_DMA2 */
+#endif /* CONFIG_STM32_DMA1 || CONFIG_STM32_DMA2 */
 
 /****************************************************************************
  * Basic DMA functions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
 
 /****************************************************************************
  * Name: stm32_bdma_channel_disable
@@ -1898,7 +1898,7 @@ static void stm32_bdma_setup(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
           "scr: %08" PRIx32 "\n",
           cfg->paddr, cfg->maddr, cfg->ndata, cfg->cfg1);
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   DEBUGASSERT(stm32_bdma_capable(cfg));
 #endif
 
@@ -2106,7 +2106,7 @@ static size_t stm32_bdma_residual(DMA_HANDLE handle)
  * Name: stm32_bdma_capable
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 static bool stm32_bdma_capable(stm32_dmacfg_t *cfg)
 {
   uint32_t transfer_size;
@@ -2177,7 +2177,7 @@ static bool stm32_bdma_capable(stm32_dmacfg_t *cfg)
       dmainfo("stm32_dmacapable: dcache unaligned "
               "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
               cfg->maddr, mend);
-#if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
+#if !defined(CONFIG_STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
 #endif
     }
@@ -2253,7 +2253,7 @@ static void stm32_bdma_dump(DMA_HANDLE handle, const char *msg)
 }
 #endif
 
-#endif /* CONFIG_STM32H7_BDMA */
+#endif /* CONFIG_STM32_BDMA */
 
 /****************************************************************************
  * Name: stm32_dmamux_dump
@@ -2341,30 +2341,30 @@ void weak_function arm_dma_initialize(void)
 #ifdef CONFIG_ARCH_IRQPRIO
       switch (controller)
         {
-#if defined(CONFIG_STM32H7_DMA1) || defined(CONFIG_STM32H7_DMA2)
+#if defined(CONFIG_STM32_DMA1) || defined(CONFIG_STM32_DMA2)
           case DMA1:
           case DMA2:
             {
               up_prioritize_irq(dmachan->irq, CONFIG_DMA_PRI);
               break;
             }
-#endif /* CONFIG_STM32H7_DMA1 && CONFIG_STM32H7_DMA2 */
+#endif /* CONFIG_STM32_DMA1 && CONFIG_STM32_DMA2 */
 
-#ifdef CONFIG_STM32H7_MDMA
+#ifdef CONFIG_STM32_MDMA
           case MDMA:
             {
               up_prioritize_irq(dmachan->irq, CONFIG_MDMA_PRI);
               break;
             }
-#endif /* CONFIG_STM32H7_MDMA */
+#endif /* CONFIG_STM32_MDMA */
 
-#ifdef CONFIG_STM32H7_BDMA
+#ifdef CONFIG_STM32_BDMA
           case BDMA:
             {
               up_prioritize_irq(dmachan->irq, CONFIG_BDMA_PRI);
               break;
             }
-#endif /* CONFIG_STM32H7_BDMA */
+#endif /* CONFIG_STM32_BDMA */
 
           default:
             {
@@ -2666,7 +2666,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(DMA_HANDLE handle, stm32_dmacfg_t *cfg)
 {
   DMA_CHANNEL dmachan    = (DMA_CHANNEL)handle;

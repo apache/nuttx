@@ -1,0 +1,182 @@
+menu "Alternate Pin Mapping"
+	depends on STM32_STM32F10XX
+
+choice
+	prompt "CAN1 Alternate Pin Mappings"
+	depends on STM32_STM32F10XX && STM32_CAN1
+	default STM32_CAN1_NO_REMAP
+
+config STM32_CAN1_NO_REMAP
+	bool "No pin remapping"
+
+config STM32_CAN1_REMAP1
+	bool "CAN1 alternate pin remapping #1"
+
+config STM32_CAN1_REMAP2
+	bool "CAN1 alternate pin remapping #2"
+
+endchoice
+
+config STM32_CAN2_REMAP
+	bool "CAN2 Alternate Pin Mapping"
+	default n
+	depends on STM32F1_CONNECTIVITYLINE && STM32_CAN2
+
+config STM32_CEC_REMAP
+	bool "CEC Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_CEC
+
+config STM32_ETH_REMAP
+	bool "Ethernet Alternate Pin Mapping"
+	default n
+	depends on STM32F1_CONNECTIVITYLINE && STM32_ETHMAC
+
+config STM32_I2C1_REMAP
+	bool "I2C1 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_I2C1
+
+config STM32_SPI1_REMAP
+	bool "SPI1 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_SPI1
+
+config STM32_SPI3_REMAP
+	bool "SPI3 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_SPI3 && !STM32F1_VALUELINE
+
+config STM32_I2S3_REMAP
+	bool "I2S3 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_I2S3 && !STM32F1_VALUELINE
+
+choice
+	prompt "TIM1 Alternate Pin Mappings"
+	depends on STM32_STM32F10XX && STM32_TIM1
+	default STM32_TIM1_NO_REMAP
+
+config STM32_TIM1_NO_REMAP
+	bool "No pin remapping"
+
+config STM32_TIM1_FULL_REMAP
+	bool "Full pin remapping"
+
+config STM32_TIM1_PARTIAL_REMAP
+	bool "Partial pin remapping"
+
+endchoice
+
+choice
+	prompt "TIM2 Alternate Pin Mappings"
+	depends on STM32_STM32F10XX && STM32_TIM2
+	default STM32_TIM2_NO_REMAP
+
+config STM32_TIM2_NO_REMAP
+	bool "No pin remapping"
+
+config STM32_TIM2_FULL_REMAP
+	bool "Full pin remapping"
+
+config STM32_TIM2_PARTIAL_REMAP_1
+	bool "Partial pin remapping #1"
+
+config STM32_TIM2_PARTIAL_REMAP_2
+	bool "Partial pin remapping #2"
+
+endchoice
+
+choice
+	prompt "TIM3 Alternate Pin Mappings"
+	depends on STM32_STM32F10XX && STM32_TIM3
+	default STM32_TIM3_NO_REMAP
+
+config STM32_TIM3_NO_REMAP
+	bool "No pin remapping"
+
+config STM32_TIM3_FULL_REMAP
+	bool "Full pin remapping"
+
+config STM32_TIM3_PARTIAL_REMAP
+	bool "Partial pin remapping"
+
+endchoice
+
+config STM32_TIM4_REMAP
+	bool "TIM4 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM4
+
+config STM32_TIM9_REMAP
+	bool "TIM9 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM9
+
+config STM32_TIM10_REMAP
+	bool "TIM10 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM10
+
+config STM32_TIM11_REMAP
+	bool "TIM11 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM11
+
+config STM32_TIM12_REMAP
+	bool "TIM12 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM12
+
+config STM32_TIM13_REMAP
+	bool "TIM13 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM13
+
+config STM32_TIM14_REMAP
+	bool "TIM14 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM14
+
+config STM32_TIM15_REMAP
+	bool "TIM15 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM15
+
+config STM32_TIM16_REMAP
+	bool "TIM16 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM16
+
+config STM32_TIM17_REMAP
+	bool "TIM17 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_TIM17
+
+config STM32_USART1_REMAP
+	bool "USART1 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_USART1
+
+config STM32_USART2_REMAP
+	bool "USART2 Alternate Pin Mapping"
+	default n
+	depends on STM32_STM32F10XX && STM32_USART2
+
+choice
+	prompt "USART3 Alternate Pin Mappings"
+	depends on STM32_STM32F10XX && STM32_USART3
+	default STM32_USART3_NO_REMAP
+
+config STM32_USART3_NO_REMAP
+	bool "No pin remapping"
+
+config STM32_USART3_FULL_REMAP
+	bool "Full pin remapping"
+
+config STM32_USART3_PARTIAL_REMAP
+	bool "Partial pin remapping"
+
+endchoice
+
+endmenu

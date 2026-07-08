@@ -47,7 +47,7 @@
 #include <nuttx/video/fb.h>
 #endif
 
-#include <stm32wl5.h>
+#include <stm32.h>
 #include <stm32wl5_uart.h>
 #include <stm32wl5_pwr.h>
 
@@ -73,7 +73,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WL5 architectures must provide the following entry point.
@@ -83,7 +83,7 @@
  *
  ****************************************************************************/
 
-void stm32wl5_board_initialize(void)
+void stm32_board_initialize(void)
 {
   /* Configure on-board LEDs, which are always enabled */
 
@@ -108,8 +108,8 @@ void board_late_initialize(void)
 {
   int ret;
 
-#if defined(CONFIG_STM32WL5_SPI1) || defined(CONFIG_STM32WL5_SPI2S2)
-  stm32wl5_spidev_initialize();
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
+  stm32_spidev_initialize();
 #endif
 
 #if defined(CONFIG_LCD_SSD1680) && !defined(CONFIG_VIDEO_FB)
@@ -161,10 +161,10 @@ void board_late_initialize(void)
 #if defined(CONFIG_ARCH_BOARD_FLASH_MOUNT)
   /* Register partition table for on-board FLASH memory */
 
-  ret = stm32wl5_flash_init();
+  ret = stm32_flash_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32wl5_flash_init() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_flash_init() failed: %d\n", ret);
     }
 #endif
 
@@ -181,7 +181,7 @@ void board_late_initialize(void)
 #if defined(CONFIG_ARCH_BOARD_ENABLE_CPU2)
   /* Start second CPU */
 
-  stm32wl5_pwr_boot_c2();
+  stm32_pwr_boot_c2();
 #endif
 
   UNUSED(ret);
@@ -203,7 +203,7 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
-  stm32wl5_get_uniqueid(uniqueid);
+  stm32_get_uniqueid(uniqueid);
   return OK;
 }
 #endif

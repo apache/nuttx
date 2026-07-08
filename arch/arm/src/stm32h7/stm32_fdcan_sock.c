@@ -90,9 +90,9 @@
  * critical Rx/Tx transactions on the CAN bus.
  */
 
-#  if defined(CONFIG_STM32H7_FDCAN_HPWORK)
+#  if defined(CONFIG_STM32_FDCAN_HPWORK)
 #    define CANWORK HPWORK
-#  elif defined(CONFIG_STM32H7_FDCAN_LPWORK)
+#  elif defined(CONFIG_STM32_FDCAN_LPWORK)
 #    define CANWORK LPWORK
 #  else
 #    define CANWORK LPWORK
@@ -326,7 +326,7 @@ struct fdcan_message_ram
 
 /* FDCAN device structures **************************************************/
 
-#ifdef CONFIG_STM32H7_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 static const struct fdcan_config_s stm32_fdcan0_config =
 {
   .tx_pin      = GPIO_CAN1_TX,
@@ -339,7 +339,7 @@ static const struct fdcan_config_s stm32_fdcan0_config =
 };
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
 static const struct fdcan_config_s stm32_fdcan1_config =
 {
   .tx_pin      = GPIO_CAN2_TX,
@@ -352,7 +352,7 @@ static const struct fdcan_config_s stm32_fdcan1_config =
 };
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN3
+#ifdef CONFIG_STM32_FDCAN3
 static const struct fdcan_config_s stm32_fdcan2_config =
 {
   .tx_pin      = GPIO_CAN3_TX,
@@ -411,15 +411,15 @@ struct fdcan_driver_s
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 static struct fdcan_driver_s g_fdcan0;
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
 static struct fdcan_driver_s g_fdcan1;
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN3
+#ifdef CONFIG_STM32_FDCAN3
 static struct fdcan_driver_s g_fdcan2;
 #endif
 
@@ -437,7 +437,7 @@ static int  fdcan_txpoll(struct net_driver_s *dev);
 
 /* Helper functions */
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct fdcan_driver_s *priv);
 #endif
 
@@ -511,7 +511,7 @@ static void fdcan_errint(struct fdcan_driver_s *priv, bool enable);
  * Dump common register values to the console for debugging purposes.
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct fdcan_driver_s *priv)
 {
   printf("-------------- FDCAN Reg Dump ----------------\n");
@@ -685,7 +685,7 @@ int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
       return 3; /* Solution not found */
     }
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   ninfo("[fdcan] CLK_FREQ %lu, target_bitrate %lu, prescaler %lu, bs1 %d"
         ", bs2 %d\n", CLK_FREQ, target_bitrate, prescaler_bs, bs1 - 1,
         bs2 - 1);
@@ -1803,7 +1803,7 @@ static int fdcan_ifup(struct net_driver_s *dev)
 
   fdcan_setinit(priv->base, 0);
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   fdcan_dumpregs(priv);
 #endif
 
@@ -2092,7 +2092,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
       return -EIO;
     }
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   const struct fdcan_bitseg *tim = &priv->arbi_timing;
   ninfo("[fdcan][arbi] Timings: presc=%u sjw=%u bs1=%u bs2=%u\r\n",
         tim->prescaler, tim->sjw, tim->bs1, tim->bs2);
@@ -2116,7 +2116,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
       return -EIO;
     }
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   tim = &priv->data_timing;
   ninfo("[fdcan][data] Timings: presc=%u sjw=%u bs1=%u bs2=%u\r\n",
         tim->prescaler, tim->sjw, tim->bs1, tim->bs2);
@@ -2136,14 +2136,14 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
 
   /* Operation Configuration */
 
-#ifdef CONFIG_STM32H7_FDCAN_LOOPBACK
+#ifdef CONFIG_STM32_FDCAN_LOOPBACK
   /* Enable External Loopback Mode (Rx pin disconnected) (RM0433 pg 2494) */
 
   modifyreg32(priv->base + STM32_FDCAN_CCCR_OFFSET, 0, FDCAN_CCCR_TEST);
   modifyreg32(priv->base + STM32_FDCAN_TEST_OFFSET, 0, FDCAN_TEST_LBCK);
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN_LOOPBACK_INTERNAL
+#ifdef CONFIG_STM32_FDCAN_LOOPBACK_INTERNAL
   /* Enable Bus Monitoring / Restricted Op Mode (RM0433 pg 2492, 2494) */
 
   modifyreg32(priv->base + STM32_FDCAN_CCCR_OFFSET, 0, FDCAN_CCCR_MON);
@@ -2331,7 +2331,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
   regval &= ~FDCAN_GFC_ANFE;  /* Accept non-matching extid frames into FIFO0 */
   putreg32(regval, priv->base + STM32_FDCAN_GFC_OFFSET);
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   fdcan_dumpregs(priv);
 #endif
 
@@ -2339,7 +2339,7 @@ int fdcan_initialize(struct fdcan_driver_s *priv)
 
   fdcan_setinit(priv->base, 0);
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   fdcan_dumpregs(priv);
 #endif
 
@@ -2395,7 +2395,7 @@ static void fdcan_reset(struct fdcan_driver_s *priv)
     {
       for (uint32_t i = 0; i < NUM_RX_FIFO0; i++)
         {
-    #ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+    #ifdef CONFIG_STM32_FDCAN_REGDEBUG
           ninfo("[fdcan] MB RX %i %p\r\n", i, &priv->rx[i]);
     #endif
           priv->rx[i].header.w1 = 0x0;
@@ -2411,7 +2411,7 @@ static void fdcan_reset(struct fdcan_driver_s *priv)
     {
       for (uint32_t i = 0; i < NUM_TX_FIFO; i++)
         {
-    #ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+    #ifdef CONFIG_STM32_FDCAN_REGDEBUG
           ninfo("[fdcan] MB TX %i %p\r\n", i, &priv->tx[i]);
     #endif
           priv->tx[i].header.w1 = 0x0;
@@ -2458,7 +2458,7 @@ int stm32_fdcansockinitialize(int intf)
 
   switch (intf)
     {
-#ifdef CONFIG_STM32H7_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
     case 0:
       priv             = &g_fdcan0;
       memset(priv, 0, sizeof(struct fdcan_driver_s));
@@ -2477,7 +2477,7 @@ int stm32_fdcansockinitialize(int intf)
       break;
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
     case 1:
       priv             = &g_fdcan1;
       memset(priv, 0, sizeof(struct fdcan_driver_s));
@@ -2496,7 +2496,7 @@ int stm32_fdcansockinitialize(int intf)
       break;
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN3
+#ifdef CONFIG_STM32_FDCAN3
     case 2:
       priv             = &g_fdcan2;
       memset(priv, 0, sizeof(struct fdcan_driver_s));
@@ -2579,7 +2579,7 @@ int stm32_fdcansockinitialize(int intf)
 
   netdev_register(&priv->dev, NET_LL_CAN);
 
-#ifdef CONFIG_STM32H7_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   fdcan_dumpregs(priv);
 #endif
 
@@ -2600,15 +2600,15 @@ int stm32_fdcansockinitialize(int intf)
 #if !defined(CONFIG_NETDEV_LATEINIT)
 void arm_netinitialize(void)
 {
-#ifdef CONFIG_STM32H7_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
   stm32_fdcansockinitialize(0);
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
   stm32_fdcansockinitialize(1);
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN3
+#ifdef CONFIG_STM32_FDCAN3
   stm32_fdcansockinitialize(2);
 #endif
 }

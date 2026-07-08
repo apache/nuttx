@@ -227,7 +227,7 @@ squash before submitting the Pull Request:
 
     .. code-block:: bash
 
-       arch/arm/stm32/: Add arch support for stm32 platform
+       arch/arm/stm32f4/: Add arch support for stm32f4 platform
 
        This patch adds initial support for stm32 platform. Please read
        the documentation included for more details how to wire the display.

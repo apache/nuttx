@@ -61,7 +61,7 @@
 
 /* Check if we can support AT45DB FLASH file system */
 
-#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MTD_AT45DB)
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MTD_AT45DB)
 #  undef HAVE_AT45DB
 #endif
 
@@ -108,10 +108,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 
@@ -133,7 +133,7 @@ extern struct spi_dev_s *g_spi2;
 int stm32_bringup(void);
 
 /****************************************************************************
- * Name: stm32l4_gpio_initialize
+ * Name: stm32_gpio_initialize
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio
@@ -141,11 +141,11 @@ int stm32_bringup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_GPIO
-int stm32l4_gpio_initialize(void);
+int stm32_gpio_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spiregister
+ * Name: stm32_spiregister
  *
  * Description:
  *   Called to register spi character driver of initialized
@@ -153,30 +153,30 @@ int stm32l4_gpio_initialize(void);
  *
  ****************************************************************************/
 
-void stm32l4_spiregister(void);
+void stm32_spiregister(void);
 
 /****************************************************************************
- * Name: stm32l4_spiinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_spiinitialize(void);
+void stm32_spiinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void);
+void stm32_usbinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
@@ -184,11 +184,11 @@ void stm32l4_usbinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PWM
-int stm32l4_pwm_setup(void);
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
@@ -196,11 +196,11 @@ int stm32l4_pwm_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ADC
-int stm32l4_adc_setup(void);
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dac_setup
+ * Name: stm32_dac_setup
  *
  * Description:
  *   Initialize DAC and register the DAC driver.
@@ -208,7 +208,7 @@ int stm32l4_adc_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DAC
-int stm32l4_dac_setup(void);
+int stm32_dac_setup(void);
 #endif
 
 /****************************************************************************
@@ -284,7 +284,7 @@ int board_timer_driver_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_qencoder_initialize
+ * Name: stm32_qencoder_initialize
  *
  * Description:
  *   Initialize and register a qencoder
@@ -292,7 +292,7 @@ int board_timer_driver_initialize(const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32l4_qencoder_initialize(const char *devpath, int timer);
+int stm32_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 #endif /* __BOARDS_ARM_STM32L4_NUCLEO_L432KC_SRC_NUCLEO_L432KC_H */

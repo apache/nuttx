@@ -1,0 +1,551 @@
+############################################################################
+# arch/arm/src/common/stm32/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+STM32_COMMON_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)stm32
+
+VPATH += common$(DELIM)stm32
+INCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
+ARCHINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
+ARCHXXINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
+
+# IP-core driver selection notes (see arch/arm/src/common/stm32/Kconfig.have):
+#  - Some peripherals use a "register-set" symbol that picks the hardware header
+#    plus a "driver-variant" symbol that picks the .c file below (e.g. FLASH:
+#    STM32_HAVE_IP_FLASH_M3M4_V1 header + STM32_HAVE_IP_FLASH_M3M4_F2F4 driver).
+#  - This file is split into a legacy Cortex-M3/M4 block (the F1/F2/F3/F4/G4/L1
+#    families, STM32_COMMON_LEGACY) and a Cortex-M0 block (F0/L0/G0/C0,
+#    ARCH_CORTEXM0).  STM32_COMMON_LEGACY -- not a plain Cortex symbol -- gates
+#    the M3/M4 block because the other Cortex-M4 families (L4/WB/WL5) include
+#    this file too but provide their own implementation.
+
+# Architecture-neutral sources used by every STM32 family
+
+CHIP_CSRCS += stm32_waste.c
+CHIP_CSRCS += stm32_uid.c
+
+ifeq ($(CONFIG_STM32_COMMON_LEGACY),y)
+
+CHIP_CSRCS += stm32_allocateheap_m3m4_v1.c
+CHIP_CSRCS += stm32_start_m3m4_v1.c
+CHIP_CSRCS += stm32_lse_m3m4_v1.c
+CHIP_CSRCS += stm32_lsi_m3m4_v1.c
+CHIP_CSRCS += stm32_irq_m3m4_v1.c
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_USART_V1) \
+            $(CONFIG_STM32_HAVE_IP_USART_V2) \
+            $(CONFIG_STM32_HAVE_IP_USART_V3) \
+            $(CONFIG_STM32_HAVE_IP_USART_V4)),)
+CHIP_CSRCS += stm32_lowputc_usart_m3m4_v1v2v3v4.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1),y)
+CHIP_CSRCS += stm32_gpio_m3m4_v1v2.c
+endif
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_EXTI_V1) \
+            $(CONFIG_STM32_HAVE_IP_EXTI_V2)),)
+CHIP_CSRCS += stm32_exti_gpio_m3m4_v1v2.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_L1),y)
+CHIP_CSRCS += stm32_flash_m3m4_l1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_F1F3),y)
+CHIP_CSRCS += stm32_flash_m3m4_f1f3.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_F2F4),y)
+CHIP_CSRCS += stm32_flash_m3m4_f2f4.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_G4),y)
+CHIP_CSRCS += stm32_flash_m3m4_g4.c
+endif
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_SPI_V1) \
+            $(CONFIG_STM32_HAVE_IP_SPI_V2) \
+            $(CONFIG_STM32_HAVE_IP_SPI_V3) \
+            $(CONFIG_STM32_HAVE_IP_SPI_V4)),)
+CHIP_CSRCS += stm32_spi_m3m4_v2v3v4.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_I2S_M3M4_V1),y)
+CHIP_CSRCS += stm32_i2s_m3m4_v1.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_SDIO_M3M4_V1),y)
+CHIP_CSRCS += stm32_sdio_m3m4_v1.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_TIMERS),y)
+CHIP_CSRCS += stm32_tim_m3m4_v1v2v3.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_CCM_M3M4_V1),y)
+CHIP_CSRCS += stm32_ccm_m3m4_v1.c
+endif
+CHIP_CSRCS += stm32_capture_m3m4_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_DFUMODE_M3M4_V1),y)
+CHIP_CSRCS += stm32_dfumode_m3m4_v1.c
+endif
+
+ifdef CONFIG_STM32_TICKLESS_TIMER
+CHIP_CSRCS += stm32_tickless_m3m4_v1.c
+else
+ifeq ($(CONFIG_ARCH_ARMV6M),y)
+CHIP_CSRCS += stm32_timerisr_armv6m.c
+else
+CHIP_CSRCS += stm32_timerisr_armv7m.c
+endif
+endif
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += stm32_userspace_m3m4_v1.c
+CHIP_CSRCS += stm32_mpuinit_m3m4_v1.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += stm32_idle_m3m4_v1.c
+endif
+
+CHIP_CSRCS += stm32_pmstop_m3m4_v1.c
+CHIP_CSRCS += stm32_pmstandby_m3m4_v1.c
+CHIP_CSRCS += stm32_pmsleep_m3m4_v1.c
+
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += stm32_pminitialize_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_USART),y)
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_USART_V1) \
+            $(CONFIG_STM32_HAVE_IP_USART_V2) \
+            $(CONFIG_STM32_HAVE_IP_USART_V3) \
+            $(CONFIG_STM32_HAVE_IP_USART_V4)),)
+CHIP_CSRCS += stm32_serial_m3m4_v1v2v3v4.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_DMA),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_7CH_DMAMUX),y)
+CHIP_CSRCS += stm32_dma_m0_v1_7ch_dmamux.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_7CH),y)
+CHIP_CSRCS += stm32_dma_m0_v1_7ch.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_8CH_DMAMUX),y)
+CHIP_CSRCS += stm32_dma_m3m4_v1_8ch_dmamux.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_8CH),y)
+CHIP_CSRCS += stm32_dma_m3m4_v1_8ch.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V2_STREAM),y)
+CHIP_CSRCS += stm32_dma_m3m4_v2_stream.c
+endif
+endif
+
+ifeq ($(CONFIG_TIMER)$(CONFIG_STM32_HAVE_IP_TIMERS),yy)
+CHIP_CSRCS += stm32_tim_m3m4_v1v2v3_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32_ONESHOT),y)
+CHIP_CSRCS += stm32_oneshot_m3m4_v1.c
+CHIP_CSRCS += stm32_oneshot_m3m4_v1_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32_FREERUN),y)
+CHIP_CSRCS += stm32_freerun_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1),y)
+ifeq ($(CONFIG_STM32_I2C_ALT),y)
+CHIP_CSRCS += stm32_i2c_m3m4_v1_alt.c
+else ifeq ($(CONFIG_STM32_STM32F4XXX),y)
+CHIP_CSRCS += stm32_i2c_m3m4_v1_f40xxx.c
+else
+CHIP_CSRCS += stm32_i2c_m3m4_v1.c
+endif
+else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2),y)
+CHIP_CSRCS += stm32_i2c_m3m4_v2.c
+ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
+CHIP_CSRCS += stm32_i2c_m3m4_v2_slave.c
+endif
+endif
+
+ifeq ($(CONFIG_USBDEV),y)
+ifeq ($(CONFIG_STM32_USB),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_USBDEV_M3M4_V1),y)
+CHIP_CSRCS += stm32_usbdev_m3m4_v1.c
+endif
+endif
+ifeq ($(CONFIG_STM32_USBFS),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_USBFS_M3M4_V1),y)
+CHIP_CSRCS += stm32_usbfs_m3m4_v1.c
+endif
+endif
+ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_OTGFS_M3M4_V1),y)
+CHIP_CSRCS += stm32_otgfsdev_m3m4_v1.c
+endif
+endif
+ifeq ($(CONFIG_STM32_OTGHS),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_OTGHS_M3M4_V1),y)
+CHIP_CSRCS += stm32_otghsdev_m3m4_v1.c
+endif
+endif
+endif
+
+ifeq ($(CONFIG_STM32_USBHOST),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_OTGFS_M3M4_V1),y)
+CHIP_CSRCS += stm32_otgfshost_m3m4_v1.c
+endif
+endif
+ifeq ($(CONFIG_STM32_OTGHS),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_OTGHS_M3M4_V1),y)
+CHIP_CSRCS += stm32_otghshost_m3m4_v1.c
+endif
+endif
+ifeq ($(CONFIG_STM32_HAVE_COMMON_USBHOST_DEBUG),y)
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += stm32_usbhost_m3m4_v1.c
+else
+ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += stm32_usbhost_m3m4_v1.c
+endif
+endif
+endif
+endif
+
+ifeq ($(CONFIG_STM32_ETHMAC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_ETHMAC_M3M4_V1),y)
+CHIP_CSRCS += stm32_eth_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_PWR)$(CONFIG_STM32_HAVE_IP_PWR_M3M4_V1),yy)
+CHIP_CSRCS += stm32_pwr_m3m4_v1.c stm32_exti_pwr_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_RTC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_RTC_COUNTER_M3M4_V1),y)
+CHIP_CSRCS += stm32_rtcounter_m3m4_v1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_RTCC_M3M4_L1),y)
+CHIP_CSRCS += stm32_rtcc_m3m4_l1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_RTCC_M3M4_F4),y)
+CHIP_CSRCS += stm32_rtcc_m3m4_f4.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_RTCC_M3M4_V1),y)
+CHIP_CSRCS += stm32_rtcc_m3m4_v1.c
+endif
+ifeq ($(CONFIG_RTC_ALARM),y)
+CHIP_CSRCS += stm32_exti_alarm_m3m4_v1.c
+endif
+ifeq ($(CONFIG_RTC_PERIODIC),y)
+CHIP_CSRCS += stm32_exti_wakeup_m3m4_v1.c
+endif
+ifeq ($(CONFIG_RTC_DRIVER)$(CONFIG_STM32_HAVE_IP_RTC_M3M4_V1),yy)
+CHIP_CSRCS += stm32_rtc_m3m4_v1_lowerhalf.c
+endif
+endif
+
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_ADC_M3M4_V1) \
+            $(CONFIG_STM32_HAVE_IP_ADC_M3M4_V2)),)
+ifeq ($(CONFIG_STM32_ADC),y)
+CHIP_CSRCS += stm32_adc_m3m4_v1v2.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_SDADC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_SDADC_M3M4_V1),y)
+CHIP_CSRCS += stm32_sdadc_m3m4_v1.c
+endif
+endif
+
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_DAC_M3M4_V1) \
+            $(CONFIG_STM32_HAVE_IP_DAC_M3M4_V2)),)
+ifeq ($(CONFIG_STM32_DAC),y)
+CHIP_CSRCS += stm32_dac_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_COMP),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_COMP_M3M4_V1),y)
+CHIP_CSRCS += stm32_comp_m3m4_v1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_COMP_M3M4_V2),y)
+CHIP_CSRCS += stm32_comp_m3m4_v2.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_OPAMP)$(CONFIG_STM32_HAVE_IP_OPAMP_M3M4_V1),yy)
+CHIP_CSRCS += stm32_opamp_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_HRTIM),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_HRTIM_M3M4_V1),y)
+CHIP_CSRCS += stm32_hrtim_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
+CHIP_CSRCS += stm32_1wire_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_HCIUART),y)
+CHIP_CSRCS += stm32_hciuart_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_M3M4_V1),yy)
+CHIP_CSRCS += stm32_rng_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_LTDC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1),y)
+CHIP_CSRCS += stm32_ltdc_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_DMA2D),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_M3M4_V1),y)
+CHIP_CSRCS += stm32_dma2d_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_PWM),y)
+CHIP_CSRCS += stm32_pwm_m3m4_v1v2v3.c
+endif
+
+ifeq ($(CONFIG_STM32_PULSECOUNT),y)
+CHIP_CSRCS += stm32_pulsecount_m3m4_v1v2v3.c
+endif
+
+ifeq ($(CONFIG_STM32_CAP),y)
+CHIP_CSRCS += stm32_capture_m3m4_v1_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER)$(CONFIG_STM32_QE),yy)
+CHIP_CSRCS += stm32_qencoder_m3m4_v1v2v3.c
+endif
+
+ifeq ($(CONFIG_STM32_CAN)$(CONFIG_STM32_HAVE_IP_CAN_BXCAN_M3M4_V1),yy)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_can_m3m4_v1.c
+endif
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+CHIP_CSRCS += stm32_can_m3m4_v1_sock.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_FDCAN),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1),y)
+ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan_m3m4_v1.c
+endif
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_m3m4_v1_sock.c
+endif
+endif
+endif
+
+ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
+CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
+CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1) \
+            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) \
+            $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)),)
+CHIP_CSRCS += stm32_dumpgpio_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_AES)$(CONFIG_STM32_HAVE_IP_AES_M3M4_V1),yy)
+CHIP_CSRCS += stm32_aes_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)$(CONFIG_STM32_HAVE_IP_CRYPTO_M3M4_V1),yy)
+CHIP_CSRCS += stm32_crypto_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_BBSRAM),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_BBSRAM_M3M4_V1),y)
+CHIP_CSRCS += stm32_bbsram_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_FMC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_FMC_M3M4_V1),y)
+CHIP_CSRCS += stm32_fmc_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_FSMC),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_FSMC_M3M4_V1),y)
+CHIP_CSRCS += stm32_fsmc_m3m4_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_FOC),y)
+CHIP_CSRCS += stm32_foc_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_CORDIC)$(CONFIG_STM32_HAVE_IP_CORDIC_M3M4_V1),yy)
+CHIP_CSRCS += stm32_cordic_m3m4_v1.c
+endif
+
+endif
+
+ifeq ($(CONFIG_ARCH_CORTEXM0),y)
+
+CHIP_CSRCS += stm32_irq_m0_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_USART_V3),y)
+CHIP_CSRCS += stm32_lowputc_usart_m0_v3.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_USART_V4),y)
+CHIP_CSRCS += stm32_lowputc_usart_m0_v4.c
+endif
+CHIP_CSRCS += stm32_start_m0_v1.c
+CHIP_CSRCS += stm32_lsi_m0_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M0_V1),y)
+CHIP_CSRCS += stm32_gpio_m0_v1.c
+endif
+ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_EXTI_V1) \
+            $(CONFIG_STM32_HAVE_IP_EXTI_V2)),)
+CHIP_CSRCS += stm32_exti_gpio_m0_v1.c
+endif
+ifeq ($(CONFIG_STM32_HAVE_IP_USART_V3),y)
+CHIP_CSRCS += stm32_serial_m0_v3.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_USART_V4),y)
+CHIP_CSRCS += stm32_serial_m0_v4.c
+endif
+
+ifneq ($(CONFIG_STM32_RTC_LSECLOCK)$(CONFIG_LCD_LSECLOCK),)
+CHIP_CSRCS += stm32_lse_m0_v1.c
+endif
+
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += stm32_idle_m0_v1.c
+endif
+
+ifneq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_ARCH_ARMV6M),y)
+CHIP_CSRCS += stm32_timerisr_armv6m.c
+else
+CHIP_CSRCS += stm32_timerisr_armv7m.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_PWR),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_PWR_M0_V1),y)
+CHIP_CSRCS += stm32_pwr_m0_v1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_PWR_G0),y)
+CHIP_CSRCS += stm32_pwr_m0_g0.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_DMA),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_7CH_DMAMUX),y)
+CHIP_CSRCS += stm32_dma_m0_v1_7ch_dmamux.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_7CH),y)
+CHIP_CSRCS += stm32_dma_m0_v1_7ch.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_8CH_DMAMUX),y)
+CHIP_CSRCS += stm32_dma_m3m4_v1_8ch_dmamux.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V1_8CH),y)
+CHIP_CSRCS += stm32_dma_m3m4_v1_8ch.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_DMA_V2_STREAM),y)
+CHIP_CSRCS += stm32_dma_m3m4_v2_stream.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_PROGMEM),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M0_G0C0),y)
+CHIP_CSRCS += stm32_flash_m0_g0c0.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_L1),y)
+CHIP_CSRCS += stm32_flash_m3m4_l1.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_F1F3),y)
+CHIP_CSRCS += stm32_flash_m3m4_f1f3.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_F2F4),y)
+CHIP_CSRCS += stm32_flash_m3m4_f2f4.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_FLASH_M3M4_G4),y)
+CHIP_CSRCS += stm32_flash_m3m4_g4.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_HAVE_HSI48),y)
+CHIP_CSRCS += stm32_hsi48_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_USB),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_USBDEV_M0_V1),y)
+CHIP_CSRCS += stm32_usbdev_m0_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_I2C),y)
+CHIP_CSRCS += stm32_i2c_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_SPI),y)
+CHIP_CSRCS += stm32_spi_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_PWM),y)
+CHIP_CSRCS += stm32_pwm_m0_v1.c
+endif
+
+ifeq ($(CONFIG_PULSECOUNT),y)
+ifeq ($(CONFIG_STM32_TIM1_PULSECOUNT),y)
+CHIP_CSRCS += stm32_pulsecount_m0_v1.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_ADC)$(CONFIG_STM32_HAVE_IP_ADC_M0_V1),yy)
+CHIP_CSRCS += stm32_adc_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_AES)$(CONFIG_STM32_HAVE_IP_AES_M0_V1),yy)
+CHIP_CSRCS += stm32_aes_m0_v1.c
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)$(CONFIG_STM32_AES)$(CONFIG_STM32_HAVE_IP_AES_M0_V1),yyy)
+CHIP_CSRCS += stm32_crypto_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_M0_V1),yy)
+CHIP_CSRCS += stm32_rng_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_TIM)$(CONFIG_STM32_HAVE_IP_TIMERS_M0_V1),yy)
+CHIP_CSRCS += stm32_tim_m0_v1.c stm32_tim_m0_v1_lowerhalf.c
+endif
+
+ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
+CHIP_CSRCS += stm32_iwdg_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M0_V1),yy)
+CHIP_CSRCS += stm32_wwdg_m0_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_FDCAN),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_FDCAN_MCAN_M0_V1),y)
+ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan_m0_v1.c
+endif
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_m0_v1_sock.c
+endif
+endif
+endif
+
+ifeq ($(CONFIG_SENSORS_QENCODER),y)
+CHIP_CSRCS += stm32_qencoder_m0_v1.c
+endif
+
+endif
+
+ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
+CHIP_CSRCS += stm32_hall3ph.c
+endif

@@ -23,7 +23,7 @@ It uses a kind of "polymorphism" in C to allow the driver to get
 access to the functions responsible to attach and enable the
 interrupt and to get the status of the pin.
 See ``include/nuttx/input/sbutton.h``
-and ``boards/arm/stm32/common/src/stm32_sbutton.c`` to understand
+and ``boards/arm/common/stm32/src/stm32_sbutton.c`` to understand
 better how it works. But basically the board file (config data)
 creates a struct when the first field (variable) is the config
 struct used the but SButton driver (``drivers/input/sbutton.c``).

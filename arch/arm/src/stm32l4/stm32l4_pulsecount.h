@@ -34,6 +34,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-struct pulsecount_lowerhalf_s *stm32l4_pulsecountinitialize(int timer);
+struct pulsecount_lowerhalf_s *stm32_pulsecountinitialize(int timer);
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_PULSECOUNT_H */

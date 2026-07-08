@@ -51,14 +51,14 @@
 #include "stm32_pwr.h"
 #include "stm32_rtc.h"
 
-#ifdef CONFIG_STM32F7_BBSRAM
+#ifdef CONFIG_STM32_BBSRAM
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32F7_BKPSRAM)
-#error Driver Requires CONFIG_STM32F7_BKPSRAM to be enabled
+#if !defined(CONFIG_STM32_BKPSRAM)
+#error Driver Requires CONFIG_STM32_BKPSRAM to be enabled
 #endif
 
 #define MAX_OPENCNT           (255) /* Limit of uint8_t */
@@ -130,7 +130,7 @@ static int     stm32_bbsram_unlink(struct inode *inode);
  ****************************************************************************/
 
 #if defined(CONFIG_BBSRAM_DEBUG)
-static uint8_t debug[STM32F7_BBSRAM_SIZE];
+static uint8_t debug[STM32_BBSRAM_SIZE];
 #endif
 
 static const struct file_operations g_stm32_bbsram_fops =
@@ -147,7 +147,7 @@ static const struct file_operations g_stm32_bbsram_fops =
 #endif
 };
 
-static struct stm32_bbsram_s g_bbsram[CONFIG_STM32F7_BBSRAM_FILES];
+static struct stm32_bbsram_s g_bbsram[CONFIG_STM32_BBSRAM_FILES];
 
 /****************************************************************************
  * Private Functions
@@ -544,7 +544,7 @@ static int stm32_bbsram_ioctl(struct file *filep, int cmd,
   DEBUGASSERT(inode->i_private);
   bbr = inode->i_private;
 
-  if (cmd == STM32F7_BBSRAM_GETDESC_IOCTL)
+  if (cmd == STM32_BBSRAM_GETDESC_IOCTL)
     {
       struct bbsramd_s *bbrr = (struct bbsramd_s *)((uintptr_t)arg);
 
@@ -627,13 +627,13 @@ static int stm32_bbsram_unlink(struct inode *inode)
 static int stm32_bbsram_probe(int *ent, struct stm32_bbsram_s pdev[])
 {
   int i;
-  int avail = STM32F7_BBSRAM_SIZE;
+  int avail = STM32_BBSRAM_SIZE;
   int alloc;
   int size;
   int ret = -EFBIG;
   struct bbsramfh_s *pf = (struct bbsramfh_s *) STM32_BKPSRAM_BASE;
 
-  for (i = 0; (i < CONFIG_STM32F7_BBSRAM_FILES) && ent[i] && (avail > 0);
+  for (i = 0; (i < CONFIG_STM32_BBSRAM_FILES) && ent[i] && (avail > 0);
        i++)
     {
       /* Validate the actual allocations against what is in the BBSRAM */
@@ -784,7 +784,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_SAVE_CRASHDUMP)
+#if defined(CONFIG_STM32_SAVE_CRASHDUMP)
 int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
 {
   struct bbsramfh_s *bbf;
@@ -802,7 +802,7 @@ int stm32_bbsram_savepanic(int fileno, uint8_t *context, int length)
     {
       once = true;
 
-      DEBUGASSERT(fileno > 0 && fileno < CONFIG_STM32F7_BBSRAM_FILES);
+      DEBUGASSERT(fileno > 0 && fileno < CONFIG_STM32_BBSRAM_FILES);
 
       bbf = g_bbsram[fileno].bbf;
 

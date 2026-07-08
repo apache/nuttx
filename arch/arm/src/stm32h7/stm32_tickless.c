@@ -89,23 +89,23 @@
 
 #undef HAVE_32BIT_TICKLESS
 
-#if (CONFIG_STM32H7_TICKLESS_TIMER == 2) || \
-    (CONFIG_STM32H7_TICKLESS_TIMER == 5)
+#if (CONFIG_STM32_TICKLESS_TIMER == 2) || \
+    (CONFIG_STM32_TICKLESS_TIMER == 5)
  #define HAVE_32BIT_TICKLESS 1
 #endif
 
-#if (CONFIG_STM32H7_TICKLESS_TIMER == 6) || \
-    (CONFIG_STM32H7_TICKLESS_TIMER == 7)
+#if (CONFIG_STM32_TICKLESS_TIMER == 6) || \
+    (CONFIG_STM32_TICKLESS_TIMER == 7)
 # error Basic timers not supported by the tickless driver
 #endif
 
-#if CONFIG_STM32H7_TICKLESS_CHANNEL == 1
+#if CONFIG_STM32_TICKLESS_CHANNEL == 1
 #define DIER_CAPT_IE          GTIM_DIER_CC1IE
-#elif CONFIG_STM32H7_TICKLESS_CHANNEL == 2
+#elif CONFIG_STM32_TICKLESS_CHANNEL == 2
 #define DIER_CAPT_IE          GTIM_DIER_CC2IE
-#elif CONFIG_STM32H7_TICKLESS_CHANNEL == 3
+#elif CONFIG_STM32_TICKLESS_CHANNEL == 3
 #define DIER_CAPT_IE          GTIM_DIER_CC3IE
-#elif CONFIG_STM32H7_TICKLESS_CHANNEL == 4
+#elif CONFIG_STM32_TICKLESS_CHANNEL == 4
 #define DIER_CAPT_IE          GTIM_DIER_CC4IE
 #endif
 
@@ -413,50 +413,50 @@ static uint64_t stm32_get_counter(void)
 
 void up_timer_initialize(void)
 {
-  switch (CONFIG_STM32H7_TICKLESS_TIMER)
+  switch (CONFIG_STM32_TICKLESS_TIMER)
     {
-#ifdef CONFIG_STM32H7_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         g_tickless.base = STM32_TIM1_BASE;
         modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM1STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         g_tickless.base = STM32_TIM2_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM2STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM3
+#ifdef CONFIG_STM32_TIM3
       case 3:
         g_tickless.base = STM32_TIM3_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM3STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM4
+#ifdef CONFIG_STM32_TIM4
       case 4:
         g_tickless.base = STM32_TIM4_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM4STOP);
         break;
 #endif
-#ifdef CONFIG_STM32H7_TIM5
+#ifdef CONFIG_STM32_TIM5
       case 5:
         g_tickless.base = STM32_TIM5_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM5STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM8
+#ifdef CONFIG_STM32_TIM8
       case 8:
         g_tickless.base = STM32_TIM8_BASE;
         modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM8STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM9
+#ifdef CONFIG_STM32_TIM9
       case 9:
         g_tickless.base = STM32_TIM9_BASE;
 
@@ -464,7 +464,7 @@ void up_timer_initialize(void)
 
         break;
 #endif
-#ifdef CONFIG_STM32H7_TIM10
+#ifdef CONFIG_STM32_TIM10
       case 10:
         g_tickless.base = STM32_TIM10_BASE;
 
@@ -473,7 +473,7 @@ void up_timer_initialize(void)
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM11
+#ifdef CONFIG_STM32_TIM11
       case 11:
         g_tickless.base = STM32_TIM11_BASE;
 
@@ -481,40 +481,40 @@ void up_timer_initialize(void)
 
         break;
 #endif
-#ifdef CONFIG_STM32H7_TIM12
+#ifdef CONFIG_STM32_TIM12
       case 12:
         g_tickless.base = STM32_TIM12_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM12STOP);
         break;
 #endif
-#ifdef CONFIG_STM32H7_TIM13
+#ifdef CONFIG_STM32_TIM13
       case 13:
         g_tickless.base = STM32_TIM13_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM13STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM14
+#ifdef CONFIG_STM32_TIM14
       case 14:
         g_tickless.base = STM32_TIM14_BASE;
         modifyreg32(STM32_DBGMCU_APB1LFZ1, 0, DBGMCU_APB1L_TIM14STOP);
         break;
 #endif
-#ifdef CONFIG_STM32H7_TIM15
+#ifdef CONFIG_STM32_TIM15
       case 15:
         g_tickless.base = STM32_TIM15_BASE;
         modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM15STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         g_tickless.base = STM32_TIM16_BASE;
         modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM16STOP);
         break;
 #endif
 
-#ifdef CONFIG_STM32H7_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         g_tickless.base = STM32_TIM17_BASE;
         modifyreg32(STM32_DBGMCU_APB2FZ1, 0, DBGMCU_APB2Z1_TIM17STOP);
@@ -528,8 +528,8 @@ void up_timer_initialize(void)
   /* Get the TC frequency that corresponds to the requested resolution */
 
   g_tickless.frequency = USEC_PER_SEC / (uint32_t)CONFIG_USEC_PER_TICK;
-  g_tickless.timer     = CONFIG_STM32H7_TICKLESS_TIMER;
-  g_tickless.channel   = CONFIG_STM32H7_TICKLESS_CHANNEL;
+  g_tickless.timer     = CONFIG_STM32_TICKLESS_TIMER;
+  g_tickless.channel   = CONFIG_STM32_TICKLESS_CHANNEL;
   g_tickless.pending   = false;
   g_tickless.period    = 0;
   g_tickless.overflow  = 0;
@@ -1001,10 +1001,10 @@ int up_alarm_start(const struct timespec *ts)
 
   flags = enter_critical_section();
 
-  STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32H7_TICKLESS_CHANNEL, tm);
+  STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32_TICKLESS_CHANNEL, tm);
 
   stm32_tickless_ackint(g_tickless.channel);
-  stm32_tickless_enableint(CONFIG_STM32H7_TICKLESS_CHANNEL);
+  stm32_tickless_enableint(CONFIG_STM32_TICKLESS_CHANNEL);
 
   g_tickless.pending = true;
 
@@ -1021,7 +1021,7 @@ int up_alarm_start(const struct timespec *ts)
   while (tm <= stm32_get_counter())
     {
       tm = stm32_get_counter() + offset++;
-      STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32H7_TICKLESS_CHANNEL,
+      STM32_TIM_SETCOMPARE(g_tickless.tch, CONFIG_STM32_TICKLESS_CHANNEL,
                            tm);
     }
 
@@ -1042,7 +1042,7 @@ int up_alarm_cancel(struct timespec *ts)
   ts->tv_sec = nsecs / NSEC_PER_SEC;
   ts->tv_nsec = nsecs - ts->tv_sec * NSEC_PER_SEC;
 
-  stm32_tickless_disableint(CONFIG_STM32H7_TICKLESS_CHANNEL);
+  stm32_tickless_disableint(CONFIG_STM32_TICKLESS_CHANNEL);
 
   return 0;
 }

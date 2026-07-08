@@ -183,7 +183,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WB architectures must provide the following entry point.
@@ -193,7 +193,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32wb_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

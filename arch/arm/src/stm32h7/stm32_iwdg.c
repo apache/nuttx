@@ -41,7 +41,7 @@
 #include "stm32_rcc.h"
 #include "stm32_wdg.h"
 
-#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32H7_IWDG)
+#if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_IWDG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -681,9 +681,9 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
    * on DBG_IWDG_STOP configuration bit in DBG module.
    */
 
-#if defined(CONFIG_STM32H7_JTAG_FULL_ENABLE) || \
-    defined(CONFIG_STM32H7_JTAG_NOJNTRST_ENABLE) || \
-    defined(CONFIG_STM32H7_JTAG_SW_ENABLE)
+#if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
+    defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
       uint32_t cr = getreg32(STM32_DBGMCU_APB4_FZ1);
       cr |= DBGMCU_APB4_WDGLSD1;
@@ -692,4 +692,4 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
 #endif
 }
 
-#endif /* CONFIG_WATCHDOG && CONFIG_STM32H7_IWDG */
+#endif /* CONFIG_WATCHDOG && CONFIG_STM32_IWDG */

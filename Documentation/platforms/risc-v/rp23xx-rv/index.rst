@@ -13,7 +13,7 @@ This is RISC-V version of the chip configuration.
 
 This port is experimental and still a work in progress. Use with caution.
 
-SMP (dual core configuration not supported yet)
+SMP is supported, two cores available.
 
 Peripheral Support
 ==================

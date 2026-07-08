@@ -1,0 +1,39 @@
+#
+# STM32 common SDADC options.
+#
+
+config STM32_SDADC1_HAVE_DMA
+	bool
+
+config STM32_SDADC2_HAVE_DMA
+	bool
+
+config STM32_SDADC3_HAVE_DMA
+	bool
+
+config STM32_SDADC1_DMA
+	bool "SDADC1 DMA"
+	depends on STM32_SDADC1 && STM32_SDADC1_HAVE_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_SDADC2_DMA
+	bool "SDADC2 DMA"
+	depends on STM32_SDADC2 && STM32_SDADC2_HAVE_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32_SDADC3_DMA
+	bool "SDADC3 DMA"
+	depends on STM32_SDADC3 && STM32_SDADC3_HAVE_DMA
+	default n
+	---help---
+		If DMA is selected, then the SDADC may be configured to support
+		DMA transfer, which is advisable if multiple channels are read
+		or if very high trigger frequencies are used.

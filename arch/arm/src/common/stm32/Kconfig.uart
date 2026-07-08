@@ -1,0 +1,1245 @@
+#
+# STM32 USART/UART configuration options.
+#
+
+config STM32_USART1_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA2)
+	default y if STM32_STM32F0 && (STM32_DMA2)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA2)
+	default y if STM32_STM32F37XX && (STM32_DMA2)
+	default y if STM32_STM32F4XXX && (STM32_DMA2)
+	default y if STM32_STM32F779AX && (STM32_DMA2)
+	default y if STM32_STM32G0 && (STM32_DMA2)
+	default y if STM32_STM32G4XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA2)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+	default y if STM32_STM32L4S9XX && (STM32_DMA1 || STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32L562XX && (STM32_DMA1 || STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32U585XX && (STM32_DMA1 || STM32_DMA2 || STM32_DMAMUX)
+	default y if ARCH_CHIP_STM32WB && (STM32_DMA)
+
+config STM32_USART1_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA2)
+	default y if STM32_STM32F0 && (STM32_DMA2)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA2)
+	default y if STM32_STM32F37XX && (STM32_DMA2)
+	default y if STM32_STM32F4XXX && (STM32_DMA2)
+	default y if STM32_STM32F779AX && (STM32_DMA2)
+	default y if STM32_STM32G0 && (STM32_DMA2)
+	default y if STM32_STM32G4XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA2)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+
+config STM32_USART2_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+	default y if STM32_STM32L4S9XX && (STM32_DMA1 || STM32_DMAMUX)
+	default y if STM32_STM32L562XX && (STM32_DMA1 || STM32_DMAMUX)
+	default y if STM32_STM32U585XX && (STM32_DMA1 || STM32_DMAMUX)
+
+config STM32_USART2_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+
+config STM32_USART3_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+	default y if STM32_STM32L4S9XX && (STM32_DMA1 || STM32_DMAMUX)
+	default y if STM32_STM32L562XX && (STM32_DMA1 || STM32_DMAMUX)
+	default y if STM32_STM32U585XX && (STM32_DMA1 || STM32_DMAMUX)
+
+config STM32_USART3_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+
+config STM32_UART4_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+	default y if STM32_STM32L4S9XX && (STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32L562XX && (STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32U585XX && (STM32_DMA2 || STM32_DMAMUX)
+
+config STM32_UART4_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+
+config STM32_UART5_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+	default y if STM32_STM32L4S9XX && (STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32L562XX && (STM32_DMA2 || STM32_DMAMUX)
+	default y if STM32_STM32U585XX && (STM32_DMA2 || STM32_DMAMUX)
+
+config STM32_UART5_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F10XX && (STM32_DMA1)
+	default y if STM32_STM32F20XX && (STM32_DMA1)
+	default y if STM32_STM32F37XX && (STM32_DMA1)
+	default y if STM32_STM32F4XXX && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32G4XXX && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+	default y if STM32_STM32L15XX && (STM32_DMA1)
+
+config STM32_USART6_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA2)
+	default y if STM32_STM32F0 && (STM32_DMA2)
+	default y if STM32_STM32F20XX && (STM32_DMA2)
+	default y if STM32_STM32F4XXX && (STM32_DMA2)
+	default y if STM32_STM32F779AX && (STM32_DMA2)
+	default y if STM32_STM32G0 && (STM32_DMA2)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA2)
+
+config STM32_USART6_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA2)
+	default y if STM32_STM32F0 && (STM32_DMA2)
+	default y if STM32_STM32F20XX && (STM32_DMA2)
+	default y if STM32_STM32F4XXX && (STM32_DMA2)
+	default y if STM32_STM32F779AX && (STM32_DMA2)
+	default y if STM32_STM32G0 && (STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA2)
+
+config STM32_UART7_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+
+config STM32_UART7_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+
+config STM32_UART8_HAVE_RXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if STM32_STM32H56XXX && (STM32_DMA1 || STM32_DMA2)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1 || STM32_DMA2)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+
+config STM32_UART8_HAVE_TXDMA
+	bool
+	default y if STM32_STM32C0 && (STM32_DMA1)
+	default y if STM32_STM32F0 && (STM32_DMA1)
+	default y if STM32_STM32F779AX && (STM32_DMA1)
+	default y if STM32_STM32G0 && (STM32_DMA1)
+	default y if ARCH_CHIP_STM32H755XI && (STM32_DMA1)
+	default y if STM32_STM32L0 && (STM32_DMA1)
+
+config STM32_1WIREDRIVER
+	bool
+
+config USART1_RXDMA
+	bool
+	depends on STM32_USART1 && USART1_SERIALDRIVER && STM32_USART1_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART1_TXDMA
+	bool
+	depends on STM32_USART1 && USART1_SERIALDRIVER && STM32_USART1_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config USART2_RXDMA
+	bool
+	depends on STM32_USART2 && USART2_SERIALDRIVER && STM32_USART2_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART2_TXDMA
+	bool
+	depends on STM32_USART2 && USART2_SERIALDRIVER && STM32_USART2_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config USART3_RXDMA
+	bool
+	depends on STM32_USART3 && USART3_SERIALDRIVER && STM32_USART3_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART3_TXDMA
+	bool
+	depends on STM32_USART3 && USART3_SERIALDRIVER && STM32_USART3_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config UART4_RXDMA
+	bool
+	depends on STM32_UART4 && UART4_SERIALDRIVER && STM32_UART4_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART4_TXDMA
+	bool
+	depends on STM32_UART4 && UART4_SERIALDRIVER && STM32_UART4_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config UART5_RXDMA
+	bool
+	depends on STM32_UART5 && UART5_SERIALDRIVER && STM32_UART5_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART5_TXDMA
+	bool
+	depends on STM32_UART5 && UART5_SERIALDRIVER && STM32_UART5_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config USART6_RXDMA
+	bool
+	depends on STM32_USART6 && USART6_SERIALDRIVER && STM32_USART6_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config USART6_TXDMA
+	bool
+	depends on STM32_USART6 && USART6_SERIALDRIVER && STM32_USART6_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config UART7_RXDMA
+	bool
+	depends on STM32_UART7 && UART7_SERIALDRIVER && STM32_UART7_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART7_TXDMA
+	bool
+	depends on STM32_UART7 && UART7_SERIALDRIVER && STM32_UART7_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config UART8_RXDMA
+	bool
+	depends on STM32_UART8 && UART8_SERIALDRIVER && STM32_UART8_HAVE_RXDMA
+	---help---
+	In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+config UART8_TXDMA
+	bool
+	depends on STM32_UART8 && UART8_SERIALDRIVER && STM32_UART8_HAVE_TXDMA
+	---help---
+	In high data rate usage, Tx DMA may reduce CPU load
+
+config STM32_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32_USART
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+choice
+	prompt "USART1 Driver Configuration"
+	depends on STM32_USART1
+	default STM32_USART1_SERIALDRIVER
+
+config STM32_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART1_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART1 Driver Configuration
+
+choice
+	prompt "USART2 Driver Configuration"
+	depends on STM32_USART2
+	default STM32_USART2_SERIALDRIVER
+
+config STM32_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART2_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART2 Driver Configuration
+
+choice
+	prompt "USART3 Driver Configuration"
+	depends on STM32_USART3
+	default STM32_USART3_SERIALDRIVER
+
+config STM32_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART3_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART3 Driver Configuration
+
+choice
+	prompt "UART4 Driver Configuration"
+	depends on STM32_UART4
+	default STM32_UART4_SERIALDRIVER
+
+config STM32_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART1 Driver Configuration
+
+choice
+	prompt "UART5 Driver Configuration"
+	depends on STM32_UART5
+	default STM32_UART5_SERIALDRIVER
+
+config STM32_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+choice
+	prompt "USART6 Driver Configuration"
+	depends on STM32_USART6
+	default STM32_USART6_SERIALDRIVER
+
+config STM32_USART6_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART6_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART6_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_USART6_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # USART6 Driver Configuration
+
+choice
+	prompt "USART4 Driver Configuration"
+	depends on STM32_USART4
+	default STM32_USART4_SERIALDRIVER
+
+config STM32_USART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART4 Driver Configuration
+
+choice
+	prompt "USART5 Driver Configuration"
+	depends on STM32_USART5
+	default STM32_USART5_SERIALDRIVER
+
+config STM32_USART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART5 Driver Configuration
+
+choice
+	prompt "USART7 Driver Configuration"
+	depends on STM32_USART7
+	default STM32_USART7_SERIALDRIVER
+
+config STM32_USART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART7 Driver Configuration
+
+choice
+	prompt "USART8 Driver Configuration"
+	depends on STM32_USART8
+	default STM32_USART8_SERIALDRIVER
+
+config STM32_USART8_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART8_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_USART8_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+endchoice # USART8 Driver Configuration
+
+choice
+	prompt "UART7 Driver Configuration"
+	depends on STM32_HAVE_IP_USART && STM32_UART7
+	default STM32_UART7_SERIALDRIVER
+
+config STM32_UART7_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART7_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART7_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_UART7_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART7 Driver Configuration
+
+choice
+	prompt "UART8 Driver Configuration"
+	depends on STM32_HAVE_IP_USART && STM32_UART8
+	default STM32_UART8_SERIALDRIVER
+
+config STM32_UART8_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART8_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32_SERIALDRIVER
+
+config STM32_UART8_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32_1WIREDRIVER
+
+config STM32_UART8_HCIUART
+	bool "Bluetooth HCI-UART"
+	select STM32_HCIUART
+	depends on WIRELESS_BLUETOOTH
+
+endchoice # UART8 Driver Configuration
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	depends on STM32_USART1 && USART1_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+if USART1_RS485
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART1_RS485
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	depends on STM32_USART2 && USART2_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+if USART2_RS485
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART2_RS485
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	depends on STM32_USART3 && USART3_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+if USART3_RS485
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART3_RS485
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	depends on STM32_UART4 && UART4_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+if UART4_RS485
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART4_RS485
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	depends on STM32_UART5 && UART5_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+if UART5_RS485
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART5_RS485
+
+config USART6_RS485
+	bool "RS-485 on USART6"
+	depends on STM32_USART6 && USART6_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on USART6. Your board config will have to
+		provide GPIO_USART6_RS485_DIR pin definition. Currently it cannot be
+		used with USART6_RXDMA.
+
+if USART6_RS485
+
+config USART6_RS485_DIR_POLARITY
+	int "USART6 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # USART6_RS485
+
+config UART7_RS485
+	bool "RS-485 on UART7"
+	depends on STM32_UART7 && UART7_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
+
+if UART7_RS485
+
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART7_RS485
+
+config UART8_RS485
+	bool "RS-485 on UART8"
+	depends on STM32_UART8 && UART8_SERIALDRIVER
+	---help---
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
+
+if UART8_RS485
+
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	---help---
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+endif # UART8_RS485
+
+if UART9_SERIALDRIVER
+
+config UART9_RS485
+	bool "RS-485 on UART9"
+	default n
+	depends on STM32_UART9
+	---help---
+		Enable RS-485 interface on UART9. Your board config will have to
+		provide GPIO_UART9_RS485_DIR pin definition. Currently it cannot be
+		used with UART9_RXDMA.
+
+config UART9_RS485_DIR_POLARITY
+	int "UART9 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART9_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART9. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART9_RXDMA
+	bool "UART9 RX DMA"
+	default n
+	depends on STM32_UART9 && (STM32_DMA1 || STM32_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # UART9_SERIALDRIVER
+
+if USART10_SERIALDRIVER
+
+config USART10_RS485
+	bool "RS-485 on USART10"
+	default n
+	depends on STM32_USART10
+	---help---
+		Enable RS-485 interface on USART10. Your board config will have to
+		provide GPIO_USART10_RS485_DIR pin definition. Currently it cannot be
+		used with USART10_RXDMA.
+
+config USART10_RS485_DIR_POLARITY
+	int "USART10 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART10_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART10. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART10_RXDMA
+	bool "USART10 RX DMA"
+	default n
+	depends on STM32_USART10 && (STM32_DMA1 || STM32_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART10_SERIALDRIVER
+
+if USART11_SERIALDRIVER
+
+config USART11_RS485
+	bool "RS-485 on USART11"
+	default n
+	depends on STM32_USART11
+	---help---
+		Enable RS-485 interface on USART11. Your board config will have to
+		provide GPIO_USART11_RS485_DIR pin definition. Currently it cannot be
+		used with USART11_RXDMA.
+
+config USART11_RS485_DIR_POLARITY
+	int "USART11 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART11_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART11. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART11_RXDMA
+	bool "USART11 RX DMA"
+	default n
+	depends on STM32_USART11 && (STM32_DMA1 || STM32_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART11_SERIALDRIVER
+
+if UART12_SERIALDRIVER
+
+config UART12_RS485
+	bool "RS-485 on UART12"
+	default n
+	depends on STM32_UART12
+	---help---
+		Enable RS-485 interface on UART12. Your board config will have to
+		provide GPIO_UART12_RS485_DIR pin definition. Currently it cannot be
+		used with UART12_RXDMA.
+
+config UART12_RS485_DIR_POLARITY
+	int "UART12 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART12_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART12. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART12_RXDMA
+	bool "UART12 RX DMA"
+	default n
+	depends on STM32_UART12 && (STM32_DMA1 || STM32_DMA2)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # UART12_SERIALDRIVER
+
+config STM32_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	depends on STM32_USART && SERIAL_RXDMA
+	range 32 4096
+	default 32
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half or this number of bytes.
+
+		Value given here will be rounded up to next multiple of 4 bytes.
+
+config STM32_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32_USART
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by using software based management of RTS
+
+config STM32_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32_USART
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32_USART_BREAKS
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break on
+		(TX=LOW) because software starts the break and then the hardware
+		automatically clears the break. This makes it difficult to send
+		a long break.
+
+config STM32_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	depends on STM32_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32 serial driver.
+
+config STM32_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	depends on PM
+	depends on STM32_USART
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+config USART1_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART1 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART1_SERIALDRIVER
+
+config USART1_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART1 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART1_SERIALDRIVER
+
+config USART1_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART1 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART1_SERIALDRIVER && USART1_RS485
+
+config USART2_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART2 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART2_SERIALDRIVER
+
+config USART2_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART2 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART2_SERIALDRIVER
+
+config USART2_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART2 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART2_SERIALDRIVER && USART2_RS485
+
+config USART3_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART3 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART3_SERIALDRIVER
+
+config USART3_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART3 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART3_SERIALDRIVER
+
+config USART3_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART3 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART3_SERIALDRIVER && USART3_RS485
+
+config UART4_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART4 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART4_SERIALDRIVER
+
+config UART4_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART4 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART4_SERIALDRIVER
+
+config UART4_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART4 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART4_SERIALDRIVER && UART4_RS485
+
+config UART5_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART5 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART5_SERIALDRIVER
+
+config UART5_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART5 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART5_SERIALDRIVER
+
+config UART5_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART5 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART5_SERIALDRIVER && UART5_RS485
+
+config USART6_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART6 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART6_SERIALDRIVER
+
+config USART6_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART6 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART6_SERIALDRIVER
+
+config USART6_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART6 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART6_SERIALDRIVER && USART6_RS485
+
+config UART7_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART7 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART7_SERIALDRIVER
+
+config UART7_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART7 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART7_SERIALDRIVER
+
+config UART7_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART7 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART7_SERIALDRIVER && UART7_RS485
+
+config UART8_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART8 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART8_SERIALDRIVER
+
+config UART8_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART8 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART8_SERIALDRIVER
+
+config UART8_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART8 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART8_SERIALDRIVER && UART8_RS485
+
+config UART9_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART9 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART9_SERIALDRIVER
+
+config UART9_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART9 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART9_SERIALDRIVER
+
+config UART9_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART9 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART9_SERIALDRIVER && UART9_RS485
+
+config USART10_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART10 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART10_SERIALDRIVER
+
+config USART10_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART10 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART10_SERIALDRIVER
+
+config USART10_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART10 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART10_SERIALDRIVER && USART10_RS485
+
+config USART11_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure USART11 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART11_SERIALDRIVER
+
+config USART11_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure USART11 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART11_SERIALDRIVER
+
+config USART11_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure USART11 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && USART11_SERIALDRIVER && USART11_RS485
+
+config UART12_UNCONFIG_RX_ON_CLOSE
+	bool "Unconfigure UART12 RX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART12_SERIALDRIVER
+
+config UART12_UNCONFIG_TX_ON_CLOSE
+	bool "Unconfigure UART12 TX pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART12_SERIALDRIVER
+
+config UART12_UNCONFIG_DIR_ON_CLOSE
+	bool "Unconfigure UART12 DIR pin on close"
+	depends on STM32_HAVE_USART_UNCONFIG_ON_CLOSE && UART12_SERIALDRIVER && UART12_RS485
+
+config USART1_RXFIFO_THRES
+	int "USART1 Rx FIFO Threshold"
+	depends on STM32_HAVE_USART_RXFIFO_THRESHOLD && STM32_USART && STM32_USART1_SERIALDRIVER
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+config USART2_RXFIFO_THRES
+	int "USART2 Rx FIFO Threshold"
+	depends on STM32_HAVE_USART_RXFIFO_THRESHOLD && STM32_USART && STM32_USART2_SERIALDRIVER
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+if STM32_USART3
+
+config USART3_RXFIFO_THRES
+	int "USART3 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_USART3
+
+if STM32_UART4
+
+config UART4_RXFIFO_THRES
+	int "UART4 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_UART4
+
+if STM32_UART5
+
+config UART5_RXFIFO_THRES
+	int "UART5 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_UART5
+
+if STM32_USART6
+
+config USART6_RXFIFO_THRES
+	int "USART6 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_USART
+
+if STM32_UART7
+
+config UART7_RXFIFO_THRES
+	int "UART7 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_UART7
+
+if STM32_UART8
+
+config UART8_RXFIFO_THRES
+	int "UART8 Rx FIFO Threshold"
+	default 3
+	range 0 5
+	---help---
+		Select the Rx FIFO threshold:
+
+		  0 -> 1/8 full
+		  1 -> 1/4 full
+		  2 -> 1/2 full
+		  3 -> 3/4 full
+		  4 -> 7/8 full
+		  5 -> Full
+
+		Higher values mean lower interrupt rates and better CPU performance.
+		Lower values may be needed at high BAUD rates to prevent Rx data
+		overrun errors.
+
+endif # STM32_UART8
+
+config STM32_USART_INVERT
+	bool "Signal Invert Support"
+	depends on STM32_USART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the STM32F7 serial driver.
+
+config STM32_USART_SWAP
+	bool "Swap RX/TX pins support"
+	depends on STM32_USART
+	---help---
+		Enable RX/TX pin swapping support. The option enables support for the
+		TIOCSSWAP ioctl in the STM32F7 serial driver.
+
+source "arch/arm/src/common/stm32/Kconfig.lpuart"
+source "arch/arm/src/common/stm32/Kconfig.hciuart"

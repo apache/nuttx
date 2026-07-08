@@ -34,41 +34,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lsi
+ * Name: stm32_rcc_enable_lsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lsi(void)
+void stm32_rcc_enable_lsi(void)
 {
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32WB_RCC_CSR, 0, RCC_CSR_LSI1ON);
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSI1ON);
 
   /* Wait for the internal LSI oscillator to be stable. */
 
-  while ((getreg32(STM32WB_RCC_CSR) & RCC_CSR_LSI1RDY) == 0);
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSI1RDY) == 0);
 }
 
 /****************************************************************************
- * Name: stm32wb_rcc_disable_lsi
+ * Name: stm32_rcc_disable_lsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_disable_lsi(void)
+void stm32_rcc_disable_lsi(void)
 {
   /* Enable the Internal Low-Speed (LSI) RC Oscillator by setting the LSION
    * bit the RCC CSR register.
    */
 
-  modifyreg32(STM32WB_RCC_CSR, RCC_CSR_LSI1ON, 0);
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_LSI1ON, 0);
 
   /* LSIRDY should go low after 3 LSI clock cycles */
 }

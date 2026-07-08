@@ -41,17 +41,17 @@
 
 /* channel 1 configuration **************************************************/
 
-#define IPCC_CHAN1_RX_SIZE   (CONFIG_STM32WL5_IPCC_CHAN1_RX_SIZE)
-#define IPCC_CHAN1_TX_SIZE   (CONFIG_STM32WL5_IPCC_CHAN1_TX_SIZE)
+#define IPCC_CHAN1_RX_SIZE   (CONFIG_STM32_IPCC_CHAN1_RX_SIZE)
+#define IPCC_CHAN1_TX_SIZE   (CONFIG_STM32_IPCC_CHAN1_TX_SIZE)
 #define IPCC_CHAN1_START     (IPCC_START)
 #define IPCC_CHAN1_SIZE      (IPCC_CHAN1_RX_SIZE + IPCC_CHAN1_TX_SIZE)
 #define IPCC_CHAN1           (1)
 
 /* channel 2 configuration **************************************************/
 
-#if defined(CONFIG_STM32WL5_IPCC_CHAN2)
-#  define IPCC_CHAN2_RX_SIZE (CONFIG_STM32WL5_IPCC_CHAN2_RX_SIZE)
-#  define IPCC_CHAN2_TX_SIZE (CONFIG_STM32WL5_IPCC_CHAN2_TX_SIZE)
+#if defined(CONFIG_STM32_IPCC_CHAN2)
+#  define IPCC_CHAN2_RX_SIZE (CONFIG_STM32_IPCC_CHAN2_RX_SIZE)
+#  define IPCC_CHAN2_TX_SIZE (CONFIG_STM32_IPCC_CHAN2_TX_SIZE)
 #  define IPCC_CHAN2_START   (IPCC_CHAN1_START + IPCC_CHAN1_SIZE)
 #  define IPCC_CHAN2_SIZE    (IPCC_CHAN2_RX_SIZE + IPCC_CHAN2_TX_SIZE)
 #  define IPCC_CHAN2         (1)
@@ -62,9 +62,9 @@
 
 /* channel 3 configuration **************************************************/
 
-#if defined(CONFIG_STM32WL5_IPCC_CHAN3)
-#  define IPCC_CHAN3_RX_SIZE (CONFIG_STM32WL5_IPCC_CHAN3_RX_SIZE)
-#  define IPCC_CHAN3_TX_SIZE (CONFIG_STM32WL5_IPCC_CHAN3_TX_SIZE)
+#if defined(CONFIG_STM32_IPCC_CHAN3)
+#  define IPCC_CHAN3_RX_SIZE (CONFIG_STM32_IPCC_CHAN3_RX_SIZE)
+#  define IPCC_CHAN3_TX_SIZE (CONFIG_STM32_IPCC_CHAN3_TX_SIZE)
 #  define IPCC_CHAN3_START   (IPCC_CHAN2_START + IPCC_CHAN2_SIZE)
 #  define IPCC_CHAN3_SIZE    (IPCC_CHAN3_RX_SIZE + IPCC_CHAN3_TX_SIZE)
 #  define IPCC_CHAN3         (1)
@@ -75,9 +75,9 @@
 
 /* channel 4 configuration **************************************************/
 
-#if defined(CONFIG_STM32WL5_IPCC_CHAN4)
-#  define IPCC_CHAN4_RX_SIZE (CONFIG_STM32WL5_IPCC_CHAN4_RX_SIZE)
-#  define IPCC_CHAN4_TX_SIZE (CONFIG_STM32WL5_IPCC_CHAN4_TX_SIZE)
+#if defined(CONFIG_STM32_IPCC_CHAN4)
+#  define IPCC_CHAN4_RX_SIZE (CONFIG_STM32_IPCC_CHAN4_RX_SIZE)
+#  define IPCC_CHAN4_TX_SIZE (CONFIG_STM32_IPCC_CHAN4_TX_SIZE)
 #  define IPCC_CHAN4_START   (IPCC_CHAN3_START + IPCC_CHAN3_SIZE)
 #  define IPCC_CHAN4_SIZE    (IPCC_CHAN4_RX_SIZE + IPCC_CHAN4_TX_SIZE)
 #  define IPCC_CHAN4         (1)
@@ -88,9 +88,9 @@
 
 /* channel 5 configuration **************************************************/
 
-#if defined(CONFIG_STM32WL5_IPCC_CHAN5)
-#  define IPCC_CHAN5_RX_SIZE (CONFIG_STM32WL5_IPCC_CHAN5_RX_SIZE)
-#  define IPCC_CHAN5_TX_SIZE (CONFIG_STM32WL5_IPCC_CHAN5_TX_SIZE)
+#if defined(CONFIG_STM32_IPCC_CHAN5)
+#  define IPCC_CHAN5_RX_SIZE (CONFIG_STM32_IPCC_CHAN5_RX_SIZE)
+#  define IPCC_CHAN5_TX_SIZE (CONFIG_STM32_IPCC_CHAN5_TX_SIZE)
 #  define IPCC_CHAN5_START   (IPCC_CHAN4_START + IPCC_CHAN4_SIZE)
 #  define IPCC_CHAN5_SIZE    (IPCC_CHAN5_RX_SIZE + IPCC_CHAN5_TX_SIZE)
 #  define IPCC_CHAN5         (1)
@@ -101,9 +101,9 @@
 
 /* channel 6 configuration **************************************************/
 
-#if defined(CONFIG_STM32WL5_IPCC_CHAN6)
-#  define IPCC_CHAN6_RX_SIZE (CONFIG_STM32WL5_IPCC_CHAN6_RX_SIZE)
-#  define IPCC_CHAN6_TX_SIZE (CONFIG_STM32WL5_IPCC_CHAN6_TX_SIZE)
+#if defined(CONFIG_STM32_IPCC_CHAN6)
+#  define IPCC_CHAN6_RX_SIZE (CONFIG_STM32_IPCC_CHAN6_RX_SIZE)
+#  define IPCC_CHAN6_TX_SIZE (CONFIG_STM32_IPCC_CHAN6_TX_SIZE)
 #  define IPCC_CHAN6_START   (IPCC_CHAN5_START + IPCC_CHAN5_SIZE)
 #  define IPCC_CHAN6_SIZE    (IPCC_CHAN6_RX_SIZE + IPCC_CHAN6_TX_SIZE)
 #  define IPCC_CHAN6         (1)
@@ -135,13 +135,13 @@
  * of SRAM2. SRAM2 region will be right after IPCC reserved memory
  */
 
-#define IPCC_START      STM32WL5_SRAM2_BASE
+#define IPCC_START      STM32_SRAM2_BASE
 #define IPCC_NCHAN     (IPCC_CHAN1 + IPCC_CHAN2 + IPCC_CHAN3 + \
                         IPCC_CHAN4 + IPCC_CHAN5 + IPCC_CHAN6)
 #define IPCC_END       (IPCC_START + IPCC_CHAN1_SIZE + IPCC_CHAN2_SIZE + \
                         IPCC_CHAN3_SIZE + IPCC_CHAN4_SIZE + \
                         IPCC_CHAN5_SIZE + IPCC_CHAN6_SIZE)
 
-struct ipcc_lower_s *stm32wl5_ipcc_init(int chan);
+struct ipcc_lower_s *stm32_ipcc_init(int chan);
 
 #endif /* __ARCH_ARM_SRC_STM32WL5_IPCC_H */

@@ -54,7 +54,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_mcoconfig
+ * Name: stm32_mcoconfig
  *
  * Description:
  *   Selects the clock source to output on MC pin (PA8) for stm32wl562xx
@@ -71,16 +71,16 @@ extern "C"
  *
  ****************************************************************************/
 
-static inline void stm32wl5_mcoconfig(uint32_t source)
+static inline void stm32_mcoconfig(uint32_t source)
 {
   uint32_t regval;
 
   /* Set MCO source */
 
-  regval = getreg32(STM32WL5_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
   regval &= ~(RCC_CFGR_MCOSEL_MASK);
   regval |= (source & RCC_CFGR_MCOSEL_MASK);
-  putreg32(regval, STM32WL5_RCC_CFGR);
+  putreg32(regval, STM32_RCC_CFGR);
 }
 
 /****************************************************************************
@@ -88,7 +88,7 @@ static inline void stm32wl5_mcoconfig(uint32_t source)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -96,9 +96,9 @@ static inline void stm32wl5_mcoconfig(uint32_t source)
  *   and enable peripheral clocking for all periperipherals enabled in the
  *   NuttX configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wl5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -108,10 +108,10 @@ static inline void stm32wl5_mcoconfig(uint32_t source)
  *
  ****************************************************************************/
 
-void stm32wl5_clockconfig(void);
+void stm32_clockconfig(void);
 
 /****************************************************************************
- * Name: stm32wl5_board_clockconfig
+ * Name: stm32_board_clockconfig
  *
  * Description:
  *   Any STM32WL5 board may replace the "standard" board clock configuration
@@ -119,12 +119,12 @@ void stm32wl5_clockconfig(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG
-void stm32wl5_board_clockconfig(void);
+#ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+void stm32_board_clockconfig(void);
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_stdclockconfig
+ * Name: stm32_stdclockconfig
  *
  * Description:
  *   The standard logic to configure the clocks based on settings in board.h.
@@ -134,12 +134,12 @@ void stm32wl5_board_clockconfig(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG
-void stm32wl5_stdclockconfig(void);
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+void stm32_stdclockconfig(void);
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -148,12 +148,12 @@ void stm32wl5_stdclockconfig(void);
  *   re-enable/re-start the PLL
  *
  *   This function performs a subset of the operations performed by
- *   stm32wl5_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32WL5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wl5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -164,11 +164,11 @@ void stm32wl5_stdclockconfig(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32wl5_clockenable(void);
+void stm32_clockenable(void);
 #endif
 
 /****************************************************************************
- * Name: stm32wl5_rcc_enablelse
+ * Name: stm32_rcc_enablelse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) Oscillator.
@@ -181,30 +181,30 @@ void stm32wl5_clockenable(void);
  *
  ****************************************************************************/
 
-void stm32wl5_rcc_enablelse(void);
+void stm32_rcc_enablelse(void);
 
 /****************************************************************************
- * Name: stm32wl5_rcc_enablelsi
+ * Name: stm32_rcc_enablelsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wl5_rcc_enablelsi(void);
+void stm32_rcc_enablelsi(void);
 
 /****************************************************************************
- * Name: stm32wl5_rcc_disablelsi
+ * Name: stm32_rcc_disablelsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wl5_rcc_disablelsi(void);
+void stm32_rcc_disablelsi(void);
 
 /****************************************************************************
- * Name: stm32wl5_rcc_enableperipherals
+ * Name: stm32_rcc_enableperipherals
  *
  * Description:
  *   Enable all the chip peripherals according to configuration.  This is
@@ -213,7 +213,7 @@ void stm32wl5_rcc_disablelsi(void);
  *
  ****************************************************************************/
 
-void stm32wl5_rcc_enableperipherals(void);
+void stm32_rcc_enableperipherals(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

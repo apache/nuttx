@@ -57,10 +57,10 @@ uint32_t board_button_initialize(void)
    * also configured for the pin.
    */
 
-  stm32wl5_configgpio(GPIO_BUTTON1);
-  stm32wl5_configgpio(GPIO_BUTTON2);
+  stm32_configgpio(GPIO_BUTTON1);
+  stm32_configgpio(GPIO_BUTTON2);
 #ifndef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
-  stm32wl5_configgpio(GPIO_BUTTON3);
+  stm32_configgpio(GPIO_BUTTON3);
   return 3; /* number of buttons */
 #else
   return 2; /* number of buttons */
@@ -81,18 +81,18 @@ uint32_t board_buttons(void)
 
   state = 0;
 
-  if (stm32wl5_gpioread(GPIO_BUTTON1) == 0)
+  if (stm32_gpioread(GPIO_BUTTON1) == 0)
     {
       state |= BUTTON1_BIT;
     }
 
-  if (stm32wl5_gpioread(GPIO_BUTTON2) == 0)
+  if (stm32_gpioread(GPIO_BUTTON2) == 0)
     {
       state |= BUTTON2_BIT;
     }
 
 #ifndef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
-  if (stm32wl5_gpioread(GPIO_BUTTON3) == 0)
+  if (stm32_gpioread(GPIO_BUTTON3) == 0)
     {
       state |= BUTTON3_BIT;
     }
@@ -130,20 +130,20 @@ int board_button_irq(int id, xcpt_t irqhandler, void *arg)
 
   if (id == BOARD_BUTTON1)
     {
-      ret = stm32wl5_gpiosetevent(GPIO_BUTTON1, true, true, false,
+      ret = stm32_gpiosetevent(GPIO_BUTTON1, true, true, false,
                                   irqhandler, arg);
     }
 
   if (id == BOARD_BUTTON2)
     {
-      ret = stm32wl5_gpiosetevent(GPIO_BUTTON2, true, true, false,
+      ret = stm32_gpiosetevent(GPIO_BUTTON2, true, true, false,
                                   irqhandler, arg);
     }
 
 #ifndef CONFIG_ARCH_BOARD_NUCLEO_WL55JC_DEMO_LED_IRQ
   if (id == BOARD_BUTTON3)
     {
-      ret = stm32wl5_gpiosetevent(GPIO_BUTTON3, true, true, false,
+      ret = stm32_gpiosetevent(GPIO_BUTTON3, true, true, false,
                                   irqhandler, arg);
     }
 #endif

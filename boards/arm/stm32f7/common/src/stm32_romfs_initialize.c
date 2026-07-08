@@ -54,20 +54,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32F7_ROMFS
-#  error "CONFIG_STM32F7_ROMFS must be defined"
+#ifndef CONFIG_STM32_ROMFS
+#  error "CONFIG_STM32_ROMFS must be defined"
 #endif
 
-#ifndef CONFIG_STM32F7_ROMFS_IMAGEFILE
-#  error "CONFIG_STM32F7_ROMFS_IMAGEFILE must be defined"
+#ifndef CONFIG_STM32_ROMFS_IMAGEFILE
+#  error "CONFIG_STM32_ROMFS_IMAGEFILE must be defined"
 #endif
 
-#ifndef CONFIG_STM32F7_ROMFS_DEV_MINOR
-#  error "CONFIG_STM32F7_ROMFS_DEV_MINOR must be defined"
+#ifndef CONFIG_STM32_ROMFS_DEV_MINOR
+#  error "CONFIG_STM32_ROMFS_DEV_MINOR must be defined"
 #endif
 
-#ifndef CONFIG_STM32F7_ROMFS_MOUNTPOINT
-#  error "CONFIG_STM32F7_ROMFS_MOUNTPOINT must be defined"
+#ifndef CONFIG_STM32_ROMFS_MOUNTPOINT
+#  error "CONFIG_STM32_ROMFS_MOUNTPOINT must be defined"
 #endif
 
 #define NSECTORS(size) (((size) + ROMFS_SECTOR_SIZE - 1)/ROMFS_SECTOR_SIZE)
@@ -76,7 +76,7 @@
 #define STR(m) STR2(m)
 
 #define MKMOUNT_DEVNAME(m) "/dev/ram" STR(m)
-#define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_STM32F7_ROMFS_DEV_MINOR)
+#define MOUNT_DEVNAME      MKMOUNT_DEVNAME(CONFIG_STM32_ROMFS_DEV_MINOR)
 
 /****************************************************************************
  * Private Data
@@ -87,7 +87,7 @@ __asm__ (
     ".balign  16\n"
     ".globl   romfs_data_begin\n"
 "romfs_data_begin:\n"
-    ".incbin " STR(CONFIG_STM32F7_ROMFS_IMAGEFILE) "\n"\
+    ".incbin " STR(CONFIG_STM32_ROMFS_IMAGEFILE) "\n"\
     \
     ".balign " STR(ROMFS_SECTOR_SIZE) "\n"
     ".globl   romfs_data_end\n"
@@ -125,7 +125,7 @@ int stm32_romfs_initialize(void)
 
   romfs_data_len = romfs_data_end - romfs_data_begin;
 
-  ret = romdisk_register(CONFIG_STM32F7_ROMFS_DEV_MINOR, romfs_data_begin,
+  ret = romdisk_register(CONFIG_STM32_ROMFS_DEV_MINOR, romfs_data_begin,
                          NSECTORS(romfs_data_len), ROMFS_SECTOR_SIZE);
   if (ret < 0)
     {
@@ -136,14 +136,14 @@ int stm32_romfs_initialize(void)
   /* Mount the file system */
 
   finfo("Mounting ROMFS filesystem at target=%s with source=%s\n",
-        CONFIG_STM32F7_ROMFS_MOUNTPOINT, MOUNT_DEVNAME);
+        CONFIG_STM32_ROMFS_MOUNTPOINT, MOUNT_DEVNAME);
 
-  ret = nx_mount(MOUNT_DEVNAME, CONFIG_STM32F7_ROMFS_MOUNTPOINT,
+  ret = nx_mount(MOUNT_DEVNAME, CONFIG_STM32_ROMFS_MOUNTPOINT,
               "romfs", MS_RDONLY, NULL);
   if (ret < 0)
     {
       ferr("ERROR: nx_mount(%s,%s,romfs) failed: %d\n",
-           MOUNT_DEVNAME, CONFIG_STM32F7_ROMFS_MOUNTPOINT, ret);
+           MOUNT_DEVNAME, CONFIG_STM32_ROMFS_MOUNTPOINT, ret);
       return ret;
     }
 

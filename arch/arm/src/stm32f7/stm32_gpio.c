@@ -44,9 +44,9 @@
  * families
  */
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX) \
-  || defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX) \
-  || defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX) \
+  || defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX) \
+  || defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Private Data
@@ -60,39 +60,39 @@ static spinlock_t g_configgpio_lock = SP_UNLOCKED;
 
 /* Base addresses for each GPIO block */
 
-const uint32_t g_gpiobase[STM32F7_NGPIO] =
+const uint32_t g_gpiobase[STM32_NGPIO] =
 {
-#if STM32F7_NGPIO > 0
+#if STM32_NGPIO > 0
   STM32_GPIOA_BASE,
 #endif
-#if STM32F7_NGPIO > 1
+#if STM32_NGPIO > 1
   STM32_GPIOB_BASE,
 #endif
-#if STM32F7_NGPIO > 2
+#if STM32_NGPIO > 2
   STM32_GPIOC_BASE,
 #endif
-#if STM32F7_NGPIO > 3
+#if STM32_NGPIO > 3
   STM32_GPIOD_BASE,
 #endif
-#if STM32F7_NGPIO > 4
+#if STM32_NGPIO > 4
   STM32_GPIOE_BASE,
 #endif
-#if STM32F7_NGPIO > 5
+#if STM32_NGPIO > 5
   STM32_GPIOF_BASE,
 #endif
-#if STM32F7_NGPIO > 6
+#if STM32_NGPIO > 6
   STM32_GPIOG_BASE,
 #endif
-#if STM32F7_NGPIO > 7
+#if STM32_NGPIO > 7
   STM32_GPIOH_BASE,
 #endif
-#if STM32F7_NGPIO > 8
+#if STM32_NGPIO > 8
   STM32_GPIOI_BASE,
 #endif
-#if STM32F7_NGPIO > 9
+#if STM32_NGPIO > 9
   STM32_GPIOJ_BASE,
 #endif
-#if STM32F7_NGPIO > 10
+#if STM32_NGPIO > 10
   STM32_GPIOK_BASE,
 #endif
 };
@@ -134,7 +134,7 @@ int stm32_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32F7_NGPIO)
+  if (port >= STM32_NGPIO)
     {
       return -EINVAL;
     }
@@ -409,7 +409,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32F7_NGPIO)
+  if (port < STM32_NGPIO)
     {
       /* Get the port base address */
 
@@ -449,7 +449,7 @@ bool stm32_gpioread(uint32_t pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32F7_NGPIO)
+  if (port < STM32_NGPIO)
     {
       /* Get the port base address */
 
@@ -502,4 +502,4 @@ void stm32_iocompensation(void)
     }
 }
 
-#endif /* CONFIG_STM32F7_STM32F72XX || ... || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F72XX || ... || CONFIG_STM32_STM32F77XX */

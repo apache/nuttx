@@ -42,9 +42,9 @@ CHIP_CSRCS += rp23xx_xosc.c
 CHIP_CSRCS += rp23xx_pll.c
 
 ifeq ($(CONFIG_SMP),y)
+CMN_CSRCS := $(filter-out riscv_smpcall.c riscv_cpustart.c, $(CMN_CSRCS))
 CHIP_CSRCS += rp23xx_cpustart.c
 CHIP_CSRCS += rp23xx_smpcall.c
-CHIP_CSRCS += rp23xx_cpuidlestack.c
 endif
 
 ifeq ($(CONFIG_RP23XX_RV_DMAC),y)

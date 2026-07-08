@@ -95,7 +95,7 @@ capable of operating as a device or host.
 Pre-requisites:
 
 - CONFIG_USBHOST         - Enable USB host support
-- CONFIG_STM32H5_USBFS_HOST  - Enable the STM32 USB OTG FS block in host mode
+- CONFIG_STM32_USBFS_HOST  - Enable the STM32 USB OTG FS block in host mode
 
 USB host requires a stable 48MHz clock. This should come from a PLL driven by the HSE.
 HSI48 cannot be reliably used in host mode due to drift. It can only be used in device mode.

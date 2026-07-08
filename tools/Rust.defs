@@ -46,6 +46,8 @@ ifeq ($(CONFIG_ARCH_SIM),y)
   else ifeq ($(CONFIG_HOST_MACOS),y)
     ifeq ($(LLVM_ARCHTYPE),aarch64)
       RUSTFLAGS += --target $(TOPDIR)/tools/aarch64-unknown-nuttx-macho.json
+    else ifeq ($(LLVM_ARCHTYPE),x86_64)
+      RUSTFLAGS += --target $(TOPDIR)/tools/x86_64-unknown-nuttx-macho.json
     else
       $(error Unsupported Rust SIM target on macOS: LLVM_ARCHTYPE=$(LLVM_ARCHTYPE))
     endif

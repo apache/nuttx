@@ -31,7 +31,7 @@
 #include "arm_internal.h"
 #include "stm32l5_pwr.h"
 #include "stm32l5_rcc.h"
-#include "stm32l5_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -42,9 +42,9 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 #define LSERDY_TIMEOUT (500 * CONFIG_BOARD_LOOPSPERMSEC)
 
-#ifdef CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
-#  if CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
@@ -53,7 +53,7 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
 static const uint32_t drives[4] =
 {
     RCC_BDCR_LSEDRV_LOW,
@@ -68,19 +68,19 @@ static const uint32_t drives[4] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_rcc_enablelse
+ * Name: stm32_rcc_enablelse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) oscillator and the LSE system clock.
  *
  ****************************************************************************/
 
-void stm32l5_rcc_enablelse(void)
+void stm32_rcc_enablelse(void)
 {
   bool writable;
   uint32_t regval;
   volatile int32_t timeout;
-#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
   volatile int32_t drive = 0;
 #endif
 
@@ -88,7 +88,7 @@ void stm32l5_rcc_enablelse(void)
    * clock are already running.
    */
 
-  regval = getreg32(STM32L5_RCC_BDCR);
+  regval = getreg32(STM32_RCC_BDCR);
 
   if ((regval & (RCC_BDCR_LSEON | RCC_BDCR_LSERDY |
                  RCC_BDCR_LSESYSEN | RCC_BDCR_LSESYSEN)) !=
@@ -100,7 +100,7 @@ void stm32l5_rcc_enablelse(void)
        * the PWR CR register before to configuring the LSE.
        */
 
-      writable = stm32l5_pwr_enablebkp(true);
+      writable = stm32_pwr_enablebkp(true);
 
       /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON
        * bit the RCC BDCR register.
@@ -108,28 +108,28 @@ void stm32l5_rcc_enablelse(void)
 
       regval |= RCC_BDCR_LSEON;
 
-#ifdef CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
       /* Set start-up drive capability for LSE oscillator.  LSE must be OFF
        * to change drive strength.
        */
 
       regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
-      regval |= CONFIG_STM32L5_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+      regval |= CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
-      putreg32(regval, STM32L5_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
       regval |= RCC_BDCR_LSEON;
 #endif
 
-#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
       do
         {
           regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
           regval |= drives[drive++];
-          putreg32(regval, STM32L5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
           regval |= RCC_BDCR_LSEON;
 #endif
 
-          putreg32(regval, STM32L5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
 
           /* Wait for the LSE clock to be ready (or until a timeout elapsed)
            */
@@ -138,7 +138,7 @@ void stm32l5_rcc_enablelse(void)
             {
               /* Check if the LSERDY flag is the set in the BDCR */
 
-              regval = getreg32(STM32L5_RCC_BDCR);
+              regval = getreg32(STM32_RCC_BDCR);
 
               if (regval & RCC_BDCR_LSERDY)
                 {
@@ -148,7 +148,7 @@ void stm32l5_rcc_enablelse(void)
                 }
             }
 
-#ifdef CONFIG_STM32L5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
           if (timeout != 0)
             {
               break;
@@ -166,28 +166,28 @@ void stm32l5_rcc_enablelse(void)
 
           regval |= RCC_BDCR_LSESYSEN;
 
-          putreg32(regval, STM32L5_RCC_BDCR);
+          putreg32(regval, STM32_RCC_BDCR);
 
           /* Wait for the LSE system clock to be ready */
 
-          while (!((regval = getreg32(STM32L5_RCC_BDCR)) &
+          while (!((regval = getreg32(STM32_RCC_BDCR)) &
                    RCC_BDCR_LSESYSRDY))
             {
-              stm32l5_waste();
+              stm32_waste();
             }
         }
 
-#ifdef CONFIG_STM32L5_RTC_LSECLOCK_LOWER_RUN_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_LSECLOCK_LOWER_RUN_DRV_CAPABILITY
 
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
       regval |= RCC_BDCR_LSEDRV_LOW << RCC_BDCR_LSEDRV_SHIFT;
-      putreg32(regval, STM32L5_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
 #endif
 
       /* Disable backup domain access if it was disabled on entry */
 
-      stm32l5_pwr_enablebkp(writable);
+      stm32_pwr_enablebkp(writable);
     }
 }

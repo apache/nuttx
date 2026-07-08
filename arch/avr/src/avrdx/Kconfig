@@ -583,4 +583,63 @@ config AVRDX_HFO_CLOCK_FREQ
 	default 20000000 if AVRDX_HFO_CLOCK_20MHZ
 	default 24000000 if AVRDX_HFO_CLOCK_24MHZ
 
-endif
+config AVRDX_ARCH_UDELAY
+	bool "Use AVR DA/DB implementation of up_udelay"
+	default y
+	select ARCH_HAVE_UDELAY
+	---help---
+		This option enables architecture-specific implementation
+		of up_udelay.
+
+		The implementation is still a busy wait that runs a loop
+		as many times as needed for requested delay period. It is
+		"dynamic" meaning that it calculates number of loops needed
+		from current CPU frequency.
+
+		If disabled, BOARD_LOOPSPERMSEC needs to be configured.
+
+config AVRDX_ARCH_UDELAY_NO_EXTCLK
+	bool "External clock is not supported in up_udelay"
+	default y
+	depends on AVRDX_ARCH_UDELAY
+	select ARCH_HAVE_DYNAMIC_UDELAY
+	---help---
+		Selecting this option indicates that the board does not use
+		external clock source (EXTCLK setting in CLKCTRL.MCLKCTRLA.)
+
+		The implementation of up_udelay is able to determine CPU
+		clock frequency of the other sources but not this one.
+		If external clock is in use, the implementation needs to fall
+		back to the value of BOARD_LOOPSPERMSEC which must
+		be specified.
+
+		If external clock is not in use (and this option is set),
+		BOARD_LOOPSPERMSEC must be set to its default value of -1.
+
+		Note that this option does not apply to the XOSC32K setting.
+		We are able to determine CPU clock frequency rather easily
+		when driven by external 32.768 kHz crystal oscillator.
+
+		Also note that if this option is enabled and the board uses
+		external clock (EXTCLK), up_udelay will fail and wait for
+		maximum amount of time.
+
+		Say Y if your board does not use external clock.
+
+config AVRDX_ARCH_UDELAY_NO_OSC32K
+	bool "32.768kHz oscillator is not supported in up_udelay"
+	default y
+	depends on AVRDX_ARCH_UDELAY
+	---help---
+		Selecting this option indicates that the board does not use
+		either of OSC32K and XOSC32K settings in CLKCTRL.MCLKCTRLA.
+		In other words - neither source of 32.768kHz clock is used.
+
+		If this is set, the implementation of up_udelay will skip
+		support for these frequencies to save flash space. Note that
+		if one of these clock sources is used anyway, up_udelay
+		will fail and wait for maximum amount of time.
+
+		Say Y if your board does not use 32.768kHz clock.
+
+endif # if ARCH_CHIP_AVRDX

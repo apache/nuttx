@@ -82,7 +82,7 @@ Installation
   $ git clone https://github.com/apache/nuttx-apps.git apps
   $ cd nuttx
   $ make distclean
-  $ ./tools/configure.sh xiao-esp32s3:usbnsh
+  $ ./tools/configure.sh esp32s3-xiao:usbnsh
   $ make V=1
 
 2. Connect the Seeed Studio XIAO ESP32S3, and enter "Bootloader" mode,
@@ -98,6 +98,14 @@ Example command:
 
 Configurations
 ==============
+
+Configurations can be selected using
+
+.. code:: console
+
+   $ ./tools/configure.sh esp32s3-xiao:<config>
+
+where ``<config>`` is the name of one of the configurations listed below.
 
 usbnsh
 ------

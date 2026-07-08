@@ -45,7 +45,7 @@
 #include "stm32l4_otgfs.h"
 #include "nucleo-144.h"
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -138,10 +138,10 @@ void stm32_usbinitialize(void)
    * Power On, and Overcurrent GPIOs
    */
 
-#ifdef CONFIG_STM32L4_OTGFS
-  stm32l4_configgpio(GPIO_OTGFS_VBUS);
-  stm32l4_configgpio(GPIO_OTGFS_PWRON);
-  stm32l4_configgpio(GPIO_OTGFS_OVER);
+#ifdef CONFIG_STM32_OTGFS
+  stm32_configgpio(GPIO_OTGFS_VBUS);
+  stm32_configgpio(GPIO_OTGFS_PWRON);
+  stm32_configgpio(GPIO_OTGFS_OVER);
 #endif
 }
 
@@ -220,7 +220,7 @@ int stm32_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uinfo("Initialize USB host\n");
-  g_usbconn = stm32l4_otgfshost_initialize(0);
+  g_usbconn = stm32_otgfshost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
@@ -273,7 +273,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 
   /* Set the Power Switch by driving the active low enable pin */
 
-  stm32l4_gpiowrite(GPIO_OTGFS_PWRON, !enable);
+  stm32_gpiowrite(GPIO_OTGFS_PWRON, !enable);
 }
 #endif
 
@@ -297,7 +297,7 @@ void stm32_usbhost_vbusdrive(int iface, bool enable)
 #ifdef CONFIG_USBHOST
 int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 {
-  return stm32l4_gpiosetevent(GPIO_OTGFS_OVER,
+  return stm32_gpiosetevent(GPIO_OTGFS_OVER,
                               true, true, true, handler, arg);
 }
 #endif
@@ -314,7 +314,7 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
-void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }

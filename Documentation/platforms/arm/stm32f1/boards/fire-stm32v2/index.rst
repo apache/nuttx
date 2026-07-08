@@ -228,13 +228,13 @@ OpenOCD
 =======
 
 I have also used OpenOCD with the M3 Wildfire.  In this case, I used
-the Olimex USB ARM OCD.  See the script in boards/arm/stm32/fire-stm32v2/tools/oocd.sh
+the Olimex USB ARM OCD.  See the script in boards/arm/stm32f1/fire-stm32v2/tools/oocd.sh
 for more information.  Using the script:
 
 - Start the OpenOCD GDB server::
 
     cd <nuttx-build-directory>
-    boards/arm/stm32/fire-stm32v2/tools/oocd.sh $PWD
+    boards/arm/stm32f1/fire-stm32v2/tools/oocd.sh $PWD
 
 - Load NuttX::
 
@@ -324,7 +324,7 @@ M3 Wildfire-specific Configuration Options
 
    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact chip:
 
-   CONFIG_ARCH_CHIP_STM32
+   CONFIG_ARCH_CHIP_STM32F1
    CONFIG_ARCH_CHIP_STM32F103VE
 
    CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG - Enables special STM32 clock

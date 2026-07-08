@@ -80,9 +80,20 @@ int seteuid(uid_t uid)
   rtcb   = this_task();
   rgroup = rtcb->group;
 
-  /* Set the task group's group identity. */
-
   DEBUGASSERT(rgroup != NULL);
-  rgroup->tg_euid = uid;
+
+  if (rgroup->tg_euid == 0 ||
+      uid == rgroup->tg_uid || uid == rgroup->tg_suid)
+    {
+      /* Root may set any value; non-root may only set to real or saved. */
+
+      rgroup->tg_euid = uid;
+    }
+  else
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
   return OK;
 }

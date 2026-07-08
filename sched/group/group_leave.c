@@ -86,7 +86,7 @@ static inline void group_release(FAR struct task_group_s *group)
 
   /* Release pending signals */
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_release(group);
 #endif
 

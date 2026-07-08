@@ -41,18 +41,18 @@
 #include "hardware/stm32l4_rng.h"
 #include "arm_internal.h"
 
-#if defined(CONFIG_STM32L4_RNG)
+#if defined(CONFIG_STM32_RNG)
 #if defined(CONFIG_DEV_RANDOM) || defined(CONFIG_DEV_URANDOM_ARCH)
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32l4_rng_initialize(void);
-static int stm32l4_rnginterrupt(int irq, void *context, void *arg);
-static void stm32l4_rngenable(void);
-static void stm32l4_rngdisable(void);
-static ssize_t stm32l4_rngread(struct file *filep, char *buffer, size_t);
+static int stm32_rng_initialize(void);
+static int stm32_rnginterrupt(int irq, void *context, void *arg);
+static void stm32_rngenable(void);
+static void stm32_rngdisable(void);
+static ssize_t stm32_rngread(struct file *filep, char *buffer, size_t);
 
 /****************************************************************************
  * Private Types
@@ -82,18 +82,18 @@ static const struct file_operations g_rngops =
 {
   NULL,            /* open */
   NULL,            /* close */
-  stm32l4_rngread, /* read */
+  stm32_rngread,   /* read */
 };
 
 /****************************************************************************
  * Private functions
  ****************************************************************************/
 
-static int stm32l4_rng_initialize(void)
+static int stm32_rng_initialize(void)
 {
   _info("Initializing RNG\n");
 
-  if (irq_attach(STM32L4_IRQ_RNG, stm32l4_rnginterrupt, NULL))
+  if (irq_attach(STM32_IRQ_RNG, stm32_rnginterrupt, NULL))
     {
       /* We could not attach the ISR to the interrupt */
 
@@ -105,7 +105,7 @@ static int stm32l4_rng_initialize(void)
   return OK;
 }
 
-static void stm32l4_rngenable(void)
+static void stm32_rngenable(void)
 {
   uint32_t regval;
 
@@ -113,37 +113,37 @@ static void stm32l4_rngenable(void)
 
   /* Enable generation and interrupts */
 
-  regval  = getreg32(STM32L4_RNG_CR);
+  regval  = getreg32(STM32_RNG_CR);
   regval |= RNG_CR_RNGEN;
   regval |= RNG_CR_IE;
-  putreg32(regval, STM32L4_RNG_CR);
+  putreg32(regval, STM32_RNG_CR);
 
-  up_enable_irq(STM32L4_IRQ_RNG);
+  up_enable_irq(STM32_IRQ_RNG);
 }
 
-static void stm32l4_rngdisable(void)
+static void stm32_rngdisable(void)
 {
   uint32_t regval;
 
-  up_disable_irq(STM32L4_IRQ_RNG);
+  up_disable_irq(STM32_IRQ_RNG);
 
-  regval  =  getreg32(STM32L4_RNG_CR);
+  regval  =  getreg32(STM32_RNG_CR);
   regval &= ~RNG_CR_IE;
   regval &= ~RNG_CR_RNGEN;
-  putreg32(regval, STM32L4_RNG_CR);
+  putreg32(regval, STM32_RNG_CR);
 }
 
-static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
+static int stm32_rnginterrupt(int irq, void *context, void *arg)
 {
   uint32_t rngsr;
   uint32_t data;
 
-  rngsr = getreg32(STM32L4_RNG_SR);
+  rngsr = getreg32(STM32_RNG_SR);
   if (rngsr & RNG_SR_CEIS) /* Check for clock error int stat */
     {
       /* Clear it, we will try again. */
 
-      putreg32(rngsr & ~RNG_SR_CEIS, STM32L4_RNG_SR);
+      putreg32(rngsr & ~RNG_SR_CEIS, STM32_RNG_SR);
       return OK;
     }
 
@@ -153,12 +153,12 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
 
       /* Clear seed error, then disable/enable the rng and try again. */
 
-      putreg32(rngsr & ~RNG_SR_SEIS, STM32L4_RNG_SR);
-      crval = getreg32(STM32L4_RNG_CR);
+      putreg32(rngsr & ~RNG_SR_SEIS, STM32_RNG_SR);
+      crval = getreg32(STM32_RNG_CR);
       crval &= ~RNG_CR_RNGEN;
-      putreg32(crval, STM32L4_RNG_CR);
+      putreg32(crval, STM32_RNG_CR);
       crval |= RNG_CR_RNGEN;
-      putreg32(crval, STM32L4_RNG_CR);
+      putreg32(crval, STM32_RNG_CR);
       return OK;
     }
 
@@ -169,7 +169,7 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
       return OK;
     }
 
-  data = getreg32(STM32L4_RNG_DR);
+  data = getreg32(STM32_RNG_DR);
 
   /* As required by the FIPS PUB (Federal Information Processing Standard
    * Publication) 140-2, the first random number generated after setting the
@@ -216,7 +216,7 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
     {
       /* Buffer filled, stop further interrupts. */
 
-      stm32l4_rngdisable();
+      stm32_rngdisable();
       nxsem_post(&g_rngdev.rd_readsem);
     }
 
@@ -224,10 +224,10 @@ static int stm32l4_rnginterrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32l4_rngread
+ * Name: stm32_rngread
  ****************************************************************************/
 
-static ssize_t stm32l4_rngread(struct file *filep,
+static ssize_t stm32_rngread(struct file *filep,
                                char *buffer, size_t buflen)
 {
   int ret;
@@ -251,7 +251,7 @@ static ssize_t stm32l4_rngread(struct file *filep,
 
   /* Enable RNG with interrupts */
 
-  stm32l4_rngenable();
+  stm32_rngenable();
 
   /* Wait until the buffer is filled */
 
@@ -285,7 +285,7 @@ static ssize_t stm32l4_rngread(struct file *filep,
 #ifdef CONFIG_DEV_RANDOM
 void devrandom_register(void)
 {
-  stm32l4_rng_initialize();
+  stm32_rng_initialize();
   register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
@@ -308,11 +308,11 @@ void devrandom_register(void)
 void devurandom_register(void)
 {
 #ifndef CONFIG_DEV_RANDOM
-  stm32l4_rng_initialize();
+  stm32_rng_initialize();
 #endif
   register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 
 #endif /* CONFIG_DEV_RANDOM || CONFIG_DEV_URANDOM_ARCH */
-#endif /* CONFIG_STM32L4_RNG */
+#endif /* CONFIG_STM32_RNG */

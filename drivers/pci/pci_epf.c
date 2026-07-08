@@ -298,7 +298,7 @@ int pci_epf_device_register(FAR struct pci_epf_device_s *epf)
   FAR struct pci_epc_ctrl_s *epc;
   int ret;
 
-  DEBUGASSERT(epf != NULL || epf->name != NULL);
+  DEBUGASSERT(epf != NULL && epf->name != NULL);
 
   ret = nxmutex_lock(&g_pci_epf_lock);
   if (ret < 0)
@@ -499,7 +499,7 @@ int pci_epf_unregister_driver(FAR struct pci_epf_driver_s *drv)
   FAR struct pci_epf_device_s *epf;
   int ret;
 
-  DEBUGASSERT(drv != NULL || drv->remove != NULL);
+  DEBUGASSERT(drv != NULL && drv->remove != NULL);
 
   ret = nxmutex_lock(&g_pci_epf_lock);
   if (ret < 0)

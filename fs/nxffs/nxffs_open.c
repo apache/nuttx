@@ -706,7 +706,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
        * Limitation:  Files cannot be open both for reading and writing.
        */
 
-      if ((ofile->oflags & O_WROK) != 0)
+      if ((ofile->oflags & O_ACCMODE) != O_RDONLY)
         {
           ferr("ERROR: File is open for writing\n");
           ret = -ENOSYS;
@@ -740,7 +740,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       /* Initialize the open file state structure */
 
       ofile->crefs  = 1;
-      ofile->oflags = O_RDOK;
+      ofile->oflags = O_RDONLY;
 
       /* Find the file on this volume associated with this file name */
 
@@ -1013,22 +1013,21 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
    * extension is supported.
    */
 
-  switch (oflags & (O_WROK | O_RDOK))
+  switch (oflags & O_ACCMODE)
     {
-      case 0:
       default:
         ferr("ERROR: One of O_WRONLY/O_RDONLY must be provided\n");
         return -EINVAL;
 
-      case O_WROK:
+      case O_WRONLY:
         ret = nxffs_wropen(volume, relpath, oflags, &ofile);
         break;
 
-      case O_RDOK:
+      case O_RDONLY:
         ret = nxffs_rdopen(volume, relpath, &ofile);
         break;
 
-      case O_WROK | O_RDOK:
+      case O_RDWR:
         ferr("ERROR: O_RDWR is not supported\n");
         return -ENOSYS;
     }
@@ -1156,7 +1155,7 @@ int nxffs_close(FAR struct file *filep)
 
       /* Handle special finalization of the write operation. */
 
-      if ((ofile->oflags & O_WROK) != 0)
+      if ((ofile->oflags & O_ACCMODE) != O_RDONLY)
         {
           ret = nxffs_wrclose(volume, (FAR struct nxffs_wrfile_s *)ofile);
         }

@@ -83,7 +83,7 @@ static void rp23xx_handle_irqreq(int irqreq)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rp23xx_smp_call_handler
+ * Name: riscv_smp_call_handler
  *
  * Description:
  *   This is the handler for SMP_CALL.
@@ -93,7 +93,7 @@ static void rp23xx_handle_irqreq(int irqreq)
  *
  ****************************************************************************/
 
-int rp23xx_smp_call_handler(int irq, void *c, void *arg)
+int riscv_smp_call_handler(int irq, void *c, void *arg)
 {
   int cpu = this_cpu();
   int irqreq;

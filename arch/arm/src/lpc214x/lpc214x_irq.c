@@ -131,6 +131,59 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
+ * Name: arm_ack_irq
+ *
+ * Description:
+ *   Acknowledge the interrupt
+ *
+ ****************************************************************************/
+
+void arm_ack_irq(int irq)
+{
+  uint32_t reg32;
+
+  if ((unsigned)irq < NR_IRQS)
+    {
+      /* Mask the IRQ by clearing the associated bit in Software Priority
+       * Mask register
+       */
+
+      reg32 = vic_getreg(LPC214X_VIC_PRIORITY_MASK_OFFSET);
+      reg32 &= ~(1 << irq);
+      vic_putreg(reg32, LPC214X_VIC_PRIORITY_MASK_OFFSET);
+    }
+
+  /* Clear interrupt */
+
+  vic_putreg((1 << irq), LPC214X_VIC_SOFTINTCLEAR_OFFSET);
+  vic_putreg(0, LPC214X_VIC_ADDRESS_OFFSET);    /* dummy write to clear VICADDRESS */
+}
+
+/****************************************************************************
+ * Name: up_prioritize_irq
+ *
+ * Description:
+ *   set interrupt priority
+ * MOD
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_IRQPRIO
+int up_prioritize_irq(int irq, int priority)
+{
+  /* The default priority on reset is 16 */
+
+  if (irq < NR_IRQS && priority > 0 && priority < 16)
+    {
+      int offset = irq << 2;
+      vic_putreg(priority, LPC214X_VIC_VECTPRIORITY0_OFFSET + offset);
+      return OK;
+    }
+
+  return -EINVAL;
+}
+#endif
+
+/****************************************************************************
  * Name: up_attach_vector
  *
  * Description:
@@ -138,7 +191,6 @@ void up_enable_irq(int irq)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 void up_attach_vector(int irq, int vector, vic_vector_t handler)
 {
   /* Verify that the IRQ number and vector number are within range */
@@ -163,7 +215,6 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
       leave_critical_section(flags);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: up_detach_vector
@@ -173,7 +224,6 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 void up_detach_vector(int vector)
 {
   /* Verify that the vector number is within range */
@@ -186,4 +236,3 @@ void up_detach_vector(int vector)
       vic_putreg(0, LPC214X_VIC_VECTCNTL0_OFFSET + offset);
     }
 }
-#endif

@@ -38,7 +38,7 @@
 #  include <nuttx/usb/usbmonitor.h>
 #endif
 
-#ifdef CONFIG_STM32H7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 #  include "stm32_usbhost.h"
 #endif
 
@@ -62,7 +62,7 @@
 #  include "stm32_capture.h"
 #endif
 
-#ifdef CONFIG_STM32H7_IWDG
+#ifdef CONFIG_STM32_IWDG
 #  include "stm32_wdg.h"
 #endif
 
@@ -96,40 +96,40 @@ static int stm32_capture_setup(void)
   int ret;
   struct cap_lowerhalf_s *lower[] =
     {
-#if defined(CONFIG_STM32H7_TIM1_CAP)
+#if defined(CONFIG_STM32_TIM1_CAP)
       stm32_cap_initialize(1),
 #endif
-#if defined(CONFIG_STM32H7_TIM2_CAP)
+#if defined(CONFIG_STM32_TIM2_CAP)
       stm32_cap_initialize(2),
 #endif
-#if defined(CONFIG_STM32H7_TIM3_CAP)
+#if defined(CONFIG_STM32_TIM3_CAP)
       stm32_cap_initialize(3),
 #endif
-#if defined(CONFIG_STM32H7_TIM4_CAP)
+#if defined(CONFIG_STM32_TIM4_CAP)
       stm32_cap_initialize(4),
 #endif
-#if defined(CONFIG_STM32H7_TIM5_CAP)
+#if defined(CONFIG_STM32_TIM5_CAP)
       stm32_cap_initialize(5),
 #endif
-#if defined(CONFIG_STM32H7_TIM8_CAP)
+#if defined(CONFIG_STM32_TIM8_CAP)
       stm32_cap_initialize(8),
 #endif
-#if defined(CONFIG_STM32H7_TIM12_CAP)
+#if defined(CONFIG_STM32_TIM12_CAP)
       stm32_cap_initialize(12),
 #endif
-#if defined(CONFIG_STM32H7_TIM13_CAP)
+#if defined(CONFIG_STM32_TIM13_CAP)
       stm32_cap_initialize(13),
 #endif
-#if defined(CONFIG_STM32H7_TIM14_CAP)
+#if defined(CONFIG_STM32_TIM14_CAP)
       stm32_cap_initialize(14),
 #endif
-#if defined(CONFIG_STM32H7_TIM15_CAP)
+#if defined(CONFIG_STM32_TIM15_CAP)
       stm32_cap_initialize(15),
 #endif
-#if defined(CONFIG_STM32H7_TIM16_CAP)
+#if defined(CONFIG_STM32_TIM16_CAP)
       stm32_cap_initialize(16),
 #endif
-#if defined(CONFIG_STM32H7_TIM17_CAP)
+#if defined(CONFIG_STM32_TIM17_CAP)
       stm32_cap_initialize(17),
 #endif
       /* TODO: LPTIMy_CAP */
@@ -216,16 +216,16 @@ static void stm32_i2c_register(int bus)
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2ctool(void)
 {
-#ifdef CONFIG_STM32H7_I2C1
+#ifdef CONFIG_STM32_I2C1
   stm32_i2c_register(1);
 #endif
-#ifdef CONFIG_STM32H7_I2C2
+#ifdef CONFIG_STM32_I2C2
   stm32_i2c_register(2);
 #endif
-#ifdef CONFIG_STM32H7_I2C3
+#ifdef CONFIG_STM32_I2C3
   stm32_i2c_register(3);
 #endif
-#ifdef CONFIG_STM32H7_I2C4
+#ifdef CONFIG_STM32_I2C4
   stm32_i2c_register(4);
 #endif
 }
@@ -487,7 +487,7 @@ int stm32_bringup(void)
 #endif /* HAVE_PROGMEM_CHARDEV */
 #endif /* CONFIG_MTD */
 
-#ifdef CONFIG_STM32H7_IWDG
+#ifdef CONFIG_STM32_IWDG
   /* Initialize the watchdog timer */
 
   stm32_iwdginitialize("/dev/watchdog0", STM32_LSI_FREQUENCY);

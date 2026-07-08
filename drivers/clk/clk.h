@@ -49,14 +49,14 @@
  * Inline Functions
  ****************************************************************************/
 
-static inline void clk_write(uint32_t reg, uint32_t value)
+static inline void clk_write(uintptr_t reg, uint32_t value)
 {
-  *((volatile uint32_t *)(uintptr_t)reg) = value;
+  *((volatile uint32_t *)reg) = value;
 }
 
-static inline uint32_t clk_read(uint32_t reg)
+static inline uint32_t clk_read(uintptr_t reg)
 {
-  return *((volatile uint32_t *)(uintptr_t)reg);
+  return *((volatile uint32_t *)reg);
 }
 
 static inline bool clk_is_best_rate_closest(uint32_t rate, uint32_t now,

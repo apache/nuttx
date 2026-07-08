@@ -269,14 +269,14 @@ static int can_open(FAR struct file *filep)
           dev->cd_crefs++;
 
           /* Per-file context (msgalign, optional ioctl FIFO).  Always
-           * allocated: write-only needs msgalign / CANIOC_* without O_RDOK.
-           * Receive path and poll() only use readers that are also queued
-           * on cd_readers (see below).
+           * allocated: write-only path needs msgalign / CANIOC_* even
+           * without O_RDONLY.  Receive path and poll() only use readers
+           * that are also queued on cd_readers (see below).
            */
 
           reader = init_can_reader(filep);
 
-          if ((filep->f_oflags & O_RDOK) != 0)
+          if ((filep->f_oflags & O_ACCMODE) != O_WRONLY)
             {
               list_add_head(&dev->cd_readers,
                             (FAR struct list_node *)reader);

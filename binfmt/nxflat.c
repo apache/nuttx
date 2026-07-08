@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/param.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
@@ -36,9 +37,12 @@
 
 #include <arpa/inet.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/binfmt/nxflat.h>
+
+#include "binfmt.h"
 
 #ifdef CONFIG_NXFLAT
 
@@ -142,6 +146,9 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
                              int nexports)
 {
   struct nxflat_loadinfo_s loadinfo;  /* Contains globals for libnxflat */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  struct stat              st;
+#endif
   int                      ret;
 
   binfo("Loading file: %s\n", filename);
@@ -155,6 +162,25 @@ static int nxflat_loadbinary(FAR struct binary_s *binp,
       berr("Failed to initialize for load of NXFLAT program: %d\n", ret);
       goto errout;
     }
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  ret = file_fstat(&loadinfo.file, &st);
+  if (ret < 0)
+    {
+      berr("Failed to stat NXFLAT program binary: %d\n", ret);
+      goto errout_with_init;
+    }
+
+  binp->uid  = st.st_uid;
+  binp->gid  = st.st_gid;
+  binp->mode = st.st_mode;
+
+  ret = binfmt_checkexecperm(binp);
+  if (ret < 0)
+    {
+      goto errout_with_init;
+    }
+#endif
 
   /* Load the program binary */
 

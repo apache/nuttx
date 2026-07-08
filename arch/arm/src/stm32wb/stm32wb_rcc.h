@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 
+#include "arm_internal.h"
 #include "chip.h"
 #include "hardware/stm32wb_rcc.h"
 
@@ -68,7 +69,7 @@ typedef enum crs_syncsrc_e crs_syncsrc_t;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_mcoconfig
+ * Name: stm32_mcoconfig
  *
  * Description:
  *   Selects the clock source to output and clock divider on MC pin
@@ -84,11 +85,11 @@ typedef enum crs_syncsrc_e crs_syncsrc_t;
  *
  ****************************************************************************/
 
-static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
+static inline void stm32_mcoconfig(uint32_t source, uint32_t divider)
 {
   uint32_t regval;
 
-  regval = getreg32(STM32WB_RCC_CFGR);
+  regval = getreg32(STM32_RCC_CFGR);
 
     /* Set MCO source */
 
@@ -99,7 +100,7 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
 
   regval &= ~(RCC_CFGR_MCOPRE_MASK);
   regval |= (divider & RCC_CFGR_MCOPRE_MASK);
-  putreg32(regval, STM32WB_RCC_CFGR);
+  putreg32(regval, STM32_RCC_CFGR);
 }
 
 /****************************************************************************
@@ -107,7 +108,7 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_clockconfig
+ * Name: stm32_clockconfig
  *
  * Description:
  *   Called to establish the clock settings based on the values in board.h.
@@ -115,9 +116,9 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
  *   and enable peripheral clocking for all periperipherals enabled in the
  *   NuttX configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wb_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -127,10 +128,10 @@ static inline void stm32wb_mcoconfig(uint32_t source, uint32_t divider)
  *
  ****************************************************************************/
 
-void stm32wb_clockconfig(void);
+void stm32_clockconfig(void);
 
 /****************************************************************************
- * Name: stm32wb_board_clockconfig
+ * Name: stm32_board_clockconfig
  *
  * Description:
  *   Any STM32WB board may replace the "standard" board clock configuration
@@ -138,12 +139,12 @@ void stm32wb_clockconfig(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG
-void stm32wb_board_clockconfig(void);
+#ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+void stm32_board_clockconfig(void);
 #endif
 
 /****************************************************************************
- * Name: stm32wb_clockenable
+ * Name: stm32_clockenable
  *
  * Description:
  *   Re-enable the clock and restore the clock settings based on settings in
@@ -153,12 +154,12 @@ void stm32wb_board_clockconfig(void);
  *   re-start the PLL
  *
  *   This functional performs a subset of the operations performed by
- *   stm32wb_clockconfig():  It does not reset any devices, and it does not
+ *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32WB_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32wb_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters:
  *   None
@@ -169,11 +170,11 @@ void stm32wb_board_clockconfig(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32wb_clockenable(void);
+void stm32_clockenable(void);
 #endif
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lse
+ * Name: stm32_rcc_enable_lse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) Oscillator.
@@ -186,30 +187,30 @@ void stm32wb_clockenable(void);
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lse(void);
+void stm32_rcc_enable_lse(void);
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lsi
+ * Name: stm32_rcc_enable_lsi
  *
  * Description:
  *   Enable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lsi(void);
+void stm32_rcc_enable_lsi(void);
 
 /****************************************************************************
- * Name: stm32wb_rcc_disable_lsi
+ * Name: stm32_rcc_disable_lsi
  *
  * Description:
  *   Disable the Internal Low-Speed (LSI) RC Oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_disable_lsi(void);
+void stm32_rcc_disable_lsi(void);
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_hsi48
+ * Name: stm32_rcc_enable_hsi48
  *
  * Description:
  *   HSI48 clock signal is generated from an internal 48 MHz RC oscillator
@@ -235,10 +236,10 @@ void stm32wb_rcc_disable_lsi(void);
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc);
+void stm32_rcc_enable_hsi48(crs_syncsrc_t syncsrc);
 
 /****************************************************************************
- * Name: stm32wb_rcc_disable_hsi48
+ * Name: stm32_rcc_disable_hsi48
  *
  * Description:
  *   Disable the HSI48 clock.
@@ -251,7 +252,7 @@ void stm32wb_rcc_enable_hsi48(crs_syncsrc_t syncsrc);
  *
  ****************************************************************************/
 
-void stm32wb_rcc_disable_hsi48(void);
+void stm32_rcc_disable_hsi48(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

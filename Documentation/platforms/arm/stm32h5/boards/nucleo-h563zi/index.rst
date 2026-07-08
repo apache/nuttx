@@ -182,7 +182,7 @@ This configuration enables USB Host support with the Mass Storage Class
 USB mass-storage device (e.g. a USB flash drive) to the board's USB-C
 connector.  Key options enabled:
 
-- ``CONFIG_STM32H5_USBFS_HOST`` — STM32H5 USB full-speed host controller
+- ``CONFIG_STM32_USBFS_HOST`` — STM32H5 USB full-speed host controller
 - ``CONFIG_USBHOST_MSC`` — USB Mass Storage Class host driver
 - ``CONFIG_USBHOST_HUB`` — USB hub support
 - ``CONFIG_FS_FAT`` — FAT filesystem for mounting the storage device
@@ -196,7 +196,7 @@ configured in this build.
    USB Host requires a stable 48 MHz clock.  HSI48 is not accurate enough
    for reliable USB operation, so this configuration uses the external
    high-speed oscillator (HSE) as the USB clock source
-   (``CONFIG_STM32H5_USE_HSE=y``).  On the Nucleo-H563ZI development board
+   (``CONFIG_STM32_USE_HSE=y``).  On the Nucleo-H563ZI development board
    HSE is not connected by default; to enable it you must:
 
    - **Connect** solder bridges **SB3** and **SB4**
@@ -214,7 +214,7 @@ full networking support and the CDC-ECM USB Ethernet host driver.  It is
 intended to test USB Host operation with a USB-to-Ethernet adapter that
 uses the CDC-ECM (Ethernet Control Model) protocol.  Key options enabled:
 
-- ``CONFIG_STM32H5_USBFS_HOST`` — STM32H5 USB full-speed host controller
+- ``CONFIG_STM32_USBFS_HOST`` — STM32H5 USB full-speed host controller
 - ``CONFIG_USBHOST_CDCECM`` — USB CDC-ECM Ethernet host driver
 - ``CONFIG_USBHOST_COMPOSITE`` — composite USB device support
 - ``CONFIG_USBHOST_HUB`` — USB hub support
@@ -233,7 +233,7 @@ verify network connectivity.
    USB Host requires a stable 48 MHz clock.  HSI48 is not accurate enough
    for reliable USB operation, so this configuration uses the external
    high-speed oscillator (HSE) as the USB clock source
-   (``CONFIG_STM32H5_USE_HSE=y``).  On the Nucleo-H563ZI development board
+   (``CONFIG_STM32_USE_HSE=y``).  On the Nucleo-H563ZI development board
    HSE is not connected by default; to enable it you must:
 
    - **Connect** solder bridges **SB3** and **SB4**

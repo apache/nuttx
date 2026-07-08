@@ -22,7 +22,7 @@
 
 include $(TOPDIR)/Make.defs
 
-CSRCS = nrf91_boot.c nrf91_bringup.c
+CSRCS = nrf91_boot.c nrf91_bringup.c nrf91_sensors.c
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += nrf91_buttons.c
@@ -30,6 +30,14 @@ endif
 
 ifeq ($(CONFIG_NRF91_MODEM),y)
 CSRCS += nrf91_modem.c
+endif
+
+ifeq ($(CONFIG_NRF91_SPI_MASTER),y)
+CSRCS += nrf91_spi.c
+endif
+
+ifeq ($(CONFIG_I2C),y)
+CSRCS += nrf91_i2c.c
 endif
 
 DEPPATH += --dep-path board

@@ -1,11 +1,11 @@
-/arm/stm32/stm32f4discovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32f4/stm32f4discovery,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 -stm32f4discovery:winbuild
 
-/arm/stm32/stm32ldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32l1/stm32ldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/stm32vldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f1/stm32vldiscovery,CONFIG_ARM_TOOLCHAIN_CLANG
 
-/arm/stm32/viewtool-stm32f107,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f1/viewtool-stm32f107,CONFIG_ARM_TOOLCHAIN_CLANG
 
 # cURL error 60 SSL certificate expired
 -stm32f4discovery:cxxtest

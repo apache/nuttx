@@ -38,6 +38,22 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
   CSRCS += nrf91_reset.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BH1749NUC),y)
+  CSRCS += nrf91_bh1749nuc.c
+endif
+
+ifeq ($(CONFIG_SENSORS_BME680),y)
+  CSRCS += nrf91_bme680.c
+endif
+
+ifeq ($(CONFIG_SENSORS_ADXL372),y)
+  CSRCS += nrf91_adxl372.c
+endif
+
+ifeq ($(CONFIG_SENSORS_ADXL362),y)
+  CSRCS += nrf91_adxl362.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

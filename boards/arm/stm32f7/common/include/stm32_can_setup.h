@@ -61,7 +61,7 @@ extern "C"
  * Name: stm32_can_setup
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
 int stm32_can_setup(void);
 #endif
 

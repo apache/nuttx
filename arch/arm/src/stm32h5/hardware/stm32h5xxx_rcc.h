@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32H5_STM32H5XXXX)
+#if defined(CONFIG_STM32_STM32H5XXXX)
 
 /****************************************************************************
  * Pre-processor Definitions

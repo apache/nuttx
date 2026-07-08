@@ -43,8 +43,8 @@
 #include <nuttx/drivers/drivers.h>
 
 #include "arm_internal.h"
-#include "stm32l4.h"
-#include "stm32l4_uid.h"
+#include "stm32.h"
+#include "stm32_uid.h"
 #include "stm32l476-mdk.h"
 
 /* Conditional logic in stm32l476-mdk.h will determine if certain features
@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.  This
@@ -76,7 +76,7 @@
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void)
+void stm32_board_initialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
@@ -90,7 +90,7 @@ void stm32l4_board_initialize(void)
    * stm32_spiinitialize() has been brought into the link.
    */
 
-  stm32l4_spiinitialize();
+  stm32_spiinitialize();
 #endif
 }
 
@@ -133,7 +133,7 @@ void board_late_initialize(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
 
-  rtclower = stm32l4_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       syslog(LOG_ERR,
@@ -181,7 +181,7 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
-  stm32l4_get_uniqueid(uniqueid);
+  stm32_get_uniqueid(uniqueid);
   return OK;
 }
 #endif

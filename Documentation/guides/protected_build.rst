@@ -177,10 +177,10 @@ Files and Directories
 Here is a summary of directories and files used by the STM32F4Discovery
 protected build:
 
-* ``boards/arm/stm32/stm32f4discovery/configs/kostest``. This is the kernel
+* ``boards/arm/stm32f4/stm32f4discovery/configs/kostest``. This is the kernel
   mode OS test configuration. The two standard configuration files
   can be found in this directory: (1) ``defconfig`` and (2) ``Make.defs``.
-* ``boards/arm/stm32/stm32f4discovery/kernel``. This is the first past
+* ``boards/arm/stm32f4/stm32f4discovery/kernel``. This is the first past
   build directory. The Makefile in this directory is invoked to
   produce the pass1 object (``nuttx_user.elf`` in this case). The
   second pass object is created by ``arch/arm/src/Makefile``. Also
@@ -188,7 +188,7 @@ protected build:
   contains a header that includes information need by the kernel
   blob in order to interface with the user-code. That header is
   defined in by this file.
-* ``boards/arm/stm32/stm32f4discovery/scripts``. Linker scripts for
+* ``boards/arm/stm32f4/stm32f4discovery/scripts``. Linker scripts for
   the kernel mode build are found in this directory. This includes
   (1) ``memory.ld`` which hold the common memory map, (2) ``user-space.ld``
   that is used for linking the pass1 user-mode blob, and (3)
@@ -314,11 +314,11 @@ Comparing the "Flat" Build Configuration with the Protected Build Configuration
 ===============================================================================
 
 Compare, for example the configuration
-``boards/arm/stm32/stm32f4discovery/configs/ostest`` and the
-configuration ``boards/arm/stm32/stm32f4discovery/configs/kostest``.
+``boards/arm/stm32f4/stm32f4discovery/configs/ostest`` and the
+configuration ``boards/arm/stm32f4/stm32f4discovery/configs/kostest``.
 These two configurations are identical except that one builds a
 "flat" version of OS test and the other builds a kernel version
-of the OS test. See the file ``boards/arm/stm32/stm32f4discovery/README.txt``
+of the OS test. See the file ``boards/arm/stm32f4/stm32f4discovery/README.txt``
 for more details about those configurations.
 
 The configurations can be compared using the ``cmpconfig`` tool:
@@ -328,7 +328,7 @@ The configurations can be compared using the ``cmpconfig`` tool:
     cd tools
     make -f Makefile.host cmpconfig
     cd ..
-    tools/cmpconfig boards/arm/stm32/stm32f4discovery/configs/ostest/defconfig boards/arm/stm32/stm32f4discovery/configs/kostest/defconfig
+    tools/cmpconfig boards/arm/stm32f4/stm32f4discovery/configs/ostest/defconfig boards/arm/stm32f4/stm32f4discovery/configs/kostest/defconfig
 
 Here is a summary of the meaning of all of the important differences in the
 configurations. This should be enough information for you to convert any
@@ -337,7 +337,7 @@ configuration from a "flat" to a protected build:
 * ``CONFIG_BUILD_2PASS=y``. This enables the two pass build.
 * ``CONFIG_BUILD_PROTECTED=y``. This option enables the "two pass"
   protected build.
-* ``CONFIG_PASS1_BUILDIR="boards/arm/stm32/stm32f4discovery/kernel"``.
+* ``CONFIG_PASS1_BUILDIR="boards/arm/stm32f4/stm32f4discovery/kernel"``.
   This tells the build system the (relative) location of the pass1 build directory.
 * ``CONFIG_PASS1_OBJECT=""``. In some "two pass" build configurations,
   the build system need to know the name of the first pass object.
@@ -382,7 +382,7 @@ configuration from a "flat" to a protected build:
   These includes such things as initializing device drivers.
   These same initialization steps must be performed in kernel
   mode for the protected build and ``CONFIG_BOARD_LATE_INITIALIZE``.
-  See ``boards/arm/stm32/stm32f4discovery/src/up_boot.c`` for an
+  See ``boards/arm/stm32f4/stm32f4discovery/src/up_boot.c`` for an
   example of such board initialization code.
 
 Architecture-Specific Options:
@@ -409,8 +409,8 @@ Size Expansion
 The protected build will, or course, result in a FLASH image that is
 larger than that of the corresponding "flat" build. How much larger?
 I don't have the numbers in hand, but you can build
-``boards/arm/stm32/stm32f4discovery/configs/nsh`` and
-``boards/arm/stm32/stm32f4discovery/configs/kostest`` and compare
+``boards/arm/stm32f4/stm32f4discovery/configs/nsh`` and
+``boards/arm/stm32f4/stm32f4discovery/configs/kostest`` and compare
 the resulting binaries for yourself using the ``size`` command.
 
 Increases in size are expected because:

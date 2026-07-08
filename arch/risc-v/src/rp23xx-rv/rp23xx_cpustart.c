@@ -26,21 +26,15 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <assert.h>
 #include <nuttx/debug.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/init.h>
 #include <nuttx/sched_note.h>
 
-#include "nvic.h"
 #include "sched/sched.h"
 #include "init/init.h"
-#include "riscv_internal.h"
-#include "hardware/rp23xx_memorymap.h"
+#include "hardware/rp23xx_hazard3.h"
 #include "hardware/rp23xx_sio.h"
 #include "hardware/rp23xx_psm.h"
 
@@ -62,13 +56,13 @@
 #  define showprogress(c)
 #endif
 
+#define CORE1_BOOT_MSG_LEN  6
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
 static volatile bool g_core1_boot;
-
-extern int rp23xx_smp_call_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Private Functions
@@ -90,7 +84,7 @@ static void fifo_drain(void)
       getreg32(RP23XX_SIO_FIFO_RD);
     }
 
-  __asm__ volatile ("sev");
+  hazard3_unblock();
 }
 
 /****************************************************************************
@@ -114,14 +108,14 @@ static int fifo_comm(uint32_t msg)
   while (!(getreg32(RP23XX_SIO_FIFO_ST) & RP23XX_SIO_FIFO_ST_RDY))
     ;
   putreg32(msg, RP23XX_SIO_FIFO_WR);
-  __asm__ volatile ("sev");
+  hazard3_unblock();
 
   while (!(getreg32(RP23XX_SIO_FIFO_ST) & RP23XX_SIO_FIFO_ST_VLD))
-    __asm__ volatile ("wfe");
+  hazard3_block();
 
   rcv = getreg32(RP23XX_SIO_FIFO_RD);
 
-  return msg == rcv;
+  return (msg == rcv);
 }
 
 /****************************************************************************
@@ -138,24 +132,22 @@ static int fifo_comm(uint32_t msg)
 
 static void core1_boot(void)
 {
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
-  /* Initializes the stack pointer */
-
-  riscv_initialize_stack();
-#endif
-
   fifo_drain();
-
-  /* Setup NVIC */
 
   up_irqinitialize();
 
+  /* Per-core timer: enable MTIMER interrupt */
+
+  up_timer_initialize();
+
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP23XX_SIO_IRQ_FIFO, rp23xx_smp_call_handler, NULL);
+  irq_attach(RP23XX_SIO_IRQ_FIFO, riscv_smp_call_handler, NULL);
   up_enable_irq(RP23XX_SIO_IRQ_FIFO);
 
   g_core1_boot = true;
+
+  UP_DMB();
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -203,7 +195,7 @@ int up_cpu_start(int cpu)
 {
   int i;
   struct tcb_s *tcb = current_task(cpu);
-  uint32_t core1_boot_msg[5];
+  uint32_t core1_boot_msg[CORE1_BOOT_MSG_LEN];
 
   DPRINTF("cpu=%d\n", cpu);
 
@@ -220,19 +212,18 @@ int up_cpu_start(int cpu)
     ;
   clrbits_reg32(RP23XX_PSM_PROC1, RP23XX_PSM_FRCE_OFF);
 
-  /* Send initial VTOR, MSP, PC for Core 1 boot */
-
   core1_boot_msg[0] = 0;
-  core1_boot_msg[1] = 1;
-  core1_boot_msg[2] = getreg32(NVIC_VECTAB);
-  core1_boot_msg[3] = (uint32_t)tcb->stack_base_ptr +
+  core1_boot_msg[1] = 0;
+  core1_boot_msg[2] = 1;
+  core1_boot_msg[3] = READ_CSR(CSR_MTVEC);
+  core1_boot_msg[4] = (uint32_t)tcb->stack_base_ptr +
                                 tcb->adj_stack_size;
-  core1_boot_msg[4] = (uint32_t)core1_boot;
+  core1_boot_msg[5] = (uint32_t)core1_boot;
 
   do
     {
       fifo_drain();
-      for (i = 0; i < 5; i++)
+      for (i = 0; i < CORE1_BOOT_MSG_LEN; i++)
         {
           if (!fifo_comm(core1_boot_msg[i]))
             {
@@ -240,14 +231,16 @@ int up_cpu_start(int cpu)
             }
         }
     }
-  while (i < 5);
+  while (i < CORE1_BOOT_MSG_LEN);
 
   fifo_drain();
 
   /* Enable inter-processor FIFO interrupt */
 
-  irq_attach(RP23XX_SIO_IRQ_FIFO, rp23xx_smp_call_handler, NULL);
+  irq_attach(RP23XX_SIO_IRQ_FIFO, riscv_smp_call_handler, NULL);
   up_enable_irq(RP23XX_SIO_IRQ_FIFO);
+
+  /* Spin until Core 1 signals that it has finished its initialisation */
 
   while (!g_core1_boot);
 

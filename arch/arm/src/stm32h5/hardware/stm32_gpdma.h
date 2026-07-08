@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32H5_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32H5_STM32H57XXX)
 #  include "stm32h56x_dmasigmap.h"
 #else
 # error "Unsupported STM32 H5 DMA map"

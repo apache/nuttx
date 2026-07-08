@@ -92,6 +92,7 @@ void umm_initialize(FAR void *heap_start, size_t heap_size)
   config.start = heap_start;
   config.size  = heap_size;
 #ifdef CONFIG_BUILD_KERNEL
+  config.nokasan = true;
   USR_HEAP = mm_initialize_pool(&config, NULL);
 #else
   config.name = "Umem";

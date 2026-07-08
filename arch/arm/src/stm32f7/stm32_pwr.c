@@ -35,7 +35,7 @@
 #include "arm_internal.h"
 #include "stm32_pwr.h"
 
-#if defined(CONFIG_STM32F7_PWR)
+#if defined(CONFIG_STM32_PWR)
 
 /****************************************************************************
  * Private Data

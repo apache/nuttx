@@ -194,9 +194,9 @@ static int      i2s_checkwidth(struct rp23xx_i2s_s *priv, int bits);
 
 static int      rp23xx_i2s_txchannels(struct i2s_dev_s *dev,
                                       uint8_t channels);
-static uint32_t rp23xx_i2s_txsamplerate(struct i2s_dev_s *dev,
-                                        uint32_t rate);
-static uint32_t rp23xx_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  rp23xx_i2s_txsamplerate(struct i2s_dev_s *dev,
+                                         uint32_t rate);
+static int32_t  rp23xx_i2s_txdatawidth(struct i2s_dev_s *dev, int bits);
 static int      rp23xx_i2s_send(struct i2s_dev_s *dev,
                                 struct ap_buffer_s *apb,
                                 i2s_callback_t callback, void *arg,
@@ -749,7 +749,7 @@ static int rp23xx_i2s_txchannels(struct i2s_dev_s *dev, uint8_t channels)
  *
  ****************************************************************************/
 
-static uint32_t rp23xx_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t rp23xx_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct rp23xx_i2s_s *priv = (struct rp23xx_i2s_s *)dev;
 
@@ -780,7 +780,7 @@ static uint32_t rp23xx_i2s_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t rp23xx_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t rp23xx_i2s_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
   struct rp23xx_i2s_s *priv = (struct rp23xx_i2s_s *)dev;
   int ret;

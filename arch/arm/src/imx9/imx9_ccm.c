@@ -67,7 +67,7 @@ int imx9_ccm_configure_root_clock(int root, int mux, uint32_t div)
 {
   uint32_t value;
 
-  if (root >= CCM_CR_COUNT || div == 0 || div > 255 || mux >= ROOT_MUX_MAX)
+  if (root > CCM_CR_COUNT || div == 0 || div > 255 || mux >= ROOT_MUX_MAX)
     {
       return -EINVAL;
     }
@@ -103,7 +103,7 @@ int imx9_ccm_configure_root_clock(int root, int mux, uint32_t div)
 
 int imx9_ccm_root_clock_on(int root, bool enabled)
 {
-  if (root >= CCM_CR_COUNT)
+  if (root > CCM_CR_COUNT)
     {
       return -EINVAL;
     }

@@ -114,7 +114,7 @@ The selection of the core for which the image is build is made using options:
   - ``CONFIG_ARCH_CHIP_STM32H7_CORTEXM4`` - selects Cortex-M4 core
 
 Support for the CM7 core is always enabled, support for the CM4 core is controlled
-with the ``CONFIG_STM32H7_CORTEXM4_ENABLED`` option.
+with the ``CONFIG_STM32_CORTEXM4_ENABLED`` option.
 
 Interprocessor communication between cores is realized with the NuttX RPTUN
 device based on the OpenAMP framework. ``HSEM`` is used for synchronization and

@@ -493,7 +493,7 @@
  * Description:  Sets the baud rate of the sensor.
  */
 
-#define SNIOC_SET_BAUD                _SNIOC(0x00A4)      
+#define SNIOC_SET_BAUD                _SNIOC(0x00A4)
 
 /* IOCTL commands unique to the L86XXX and other GNSS modules */
 
@@ -508,6 +508,15 @@
  */
 
 #define SNIOC_SET_NONWAKEUP           _SNIOC(0x00A9)
+
+/* Command:      SNIOC_GNSS_SET_PRIORITY
+ * Description:  Give GNSS priority over other radio activity (e.g. LTE idle)
+ *               so it can acquire satellite window time. The decision of
+ *               when to use it is left to the application.
+ * Argument:     Non-zero enables GNSS priority, zero disables it.
+ */
+
+#define SNIOC_GNSS_SET_PRIORITY       _SNIOC(0x00AA)
 
 /****************************************************************************
  * Public types

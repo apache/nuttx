@@ -52,7 +52,7 @@ In order to build the task into the OS as a kernel thread, you simply have to:
 (1) place the kernel thread code in your board source code directory, and (2) 
 start it with ``kthread_create()`` in your board bring-up logic. There a few 
 examples of this in the NuttX source tree. Here is one: 
-`https://github.com/apache/nuttx/blob/master/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri.c <https://github.com/apache/nuttx/blob/master/boards/arm/stm32/viewtool-stm32f107/src/stm32_highpri.c>`_
+`https://github.com/apache/nuttx/blob/master/boards/arm/stm32f1/viewtool-stm32f107/src/stm32_highpri.c <https://github.com/apache/nuttx/blob/master/boards/arm/stm32f1/viewtool-stm32f107/src/stm32_highpri.c>`_
 
 So that is another trick that you can use to architecture optimal solutions: 
 Create parts of your applications as kernel threads: They need to reside in 

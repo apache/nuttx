@@ -61,7 +61,7 @@
 
 /* Sub-sensor definitions */
 
-#ifdef CONFIG_BME680_DISABLE_PRESS_MEAS
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
 #  define BME680_TEMP_IDX (0)
 #else
 #  define BME680_TEMP_IDX (-1)
@@ -373,12 +373,14 @@ static int bme680_putreg8(FAR struct bme680_dev_s *priv, uint8_t regaddr,
 static int bme680_getregs(FAR struct bme680_dev_s *priv, uint8_t regaddr,
                           uint8_t *rxbuffer, uint8_t length);
 
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
+                                 FAR struct bme680_data_s *data);
+#endif
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
 static int bme680_push_press_data(FAR struct bme680_dev_s *priv,
                                   FAR struct bme680_data_s *data);
-#else
-static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
-                                 FAR struct bme680_data_s *data);
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
@@ -402,24 +404,27 @@ static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
 static int bme680_control(FAR struct sensor_lowerhalf_s *lower,
                           FAR struct file *filep,
                           int cmd, unsigned long arg);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static const push_data_func deliver_data[BME680_SENSORS_COUNT] =
 {
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+  bme680_push_temp_data,
+#endif
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
-  bme680_push_press_data
-#else
-  bme680_push_temp_data
+  bme680_push_press_data,
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
-  , bme680_push_hum_data
+  bme680_push_hum_data,
 #endif
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-  , bme680_push_gas_data
+  bme680_push_gas_data,
 #endif
 };
 
@@ -790,7 +795,39 @@ static int bme680_set_oversamp(FAR struct bme680_dev_s *priv)
   return OK;
 }
 
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+/****************************************************************************
+ * Name: bme680_push_temp_data
+ ****************************************************************************/
+
+static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
+                                 FAR struct bme680_data_s *data)
+{
+  struct sensor_temp temp_data;
+  int ret;
+
+  struct sensor_lowerhalf_s lower = priv->dev.lower[BME680_TEMP_IDX];
+
+  temp_data.timestamp = data->timestamp;
+  temp_data.temperature = data->temperature;
+
+  ret = lower.push_event(lower.priv, &temp_data, sizeof(struct sensor_temp));
+
+  if (ret < 0)
+    {
+      snerr("Pushing temperature data failed\n");
+      return ret;
+    }
+
+  return OK;
+}
+#endif /* !CONFIG_BME680_DISABLE_TEMP_MEAS */
+
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
+/****************************************************************************
+ * Name: bme680_push_press_data
+ ****************************************************************************/
+
 static int bme680_push_press_data(FAR struct bme680_dev_s *priv,
                                   FAR struct bme680_data_s *data)
 {
@@ -814,31 +851,13 @@ static int bme680_push_press_data(FAR struct bme680_dev_s *priv,
 
   return OK;
 }
-#else
-static int bme680_push_temp_data(FAR struct bme680_dev_s *priv,
-                                 FAR struct bme680_data_s *data)
-{
-  struct sensor_temp temp_data;
-  int ret;
-
-  struct sensor_lowerhalf_s lower = priv->dev.lower[BME680_TEMP_IDX];
-
-  temp_data.timestamp = data->timestamp;
-  temp_data.temperature = data->temperature;
-
-  ret = lower.push_event(lower.priv, &temp_data, sizeof(struct sensor_temp));
-
-  if (ret < 0)
-    {
-      snerr("Pushing temperature data failed\n");
-      return ret;
-    }
-
-  return OK;
-}
 #endif /* !CONFIG_BME680_DISABLE_PRESS_MEAS */
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
+/****************************************************************************
+ * Name: bme680_push_hum_data
+ ****************************************************************************/
+
 static int bme680_push_hum_data(FAR struct bme680_dev_s *priv,
                                 FAR struct bme680_data_s *data)
 {
@@ -863,6 +882,10 @@ static int bme680_push_hum_data(FAR struct bme680_dev_s *priv,
 #endif /* !CONFIG_BME680_DISABLE_HUM_MEAS */
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
+/****************************************************************************
+ * Name: bme680_push_gas_data
+ ****************************************************************************/
+
 static int bme680_push_gas_data(FAR struct bme680_dev_s *priv,
                                 FAR struct bme680_data_s *data)
 {
@@ -964,6 +987,10 @@ static uint8_t calc_heater_dur(FAR const struct bme680_dev_s *priv)
 
   return gas_wait_val;
 }
+
+/****************************************************************************
+ * Name: bme680_set_gas_config
+ ****************************************************************************/
 
 static int bme680_set_gas_config(FAR struct bme680_dev_s *priv)
 {
@@ -1081,6 +1108,77 @@ err_out:
   return ret;
 }
 
+/****************************************************************************
+ * Name: bme680_configure
+ ****************************************************************************/
+
+static int bme680_configure(FAR struct bme680_dev_s *priv,
+                            FAR struct bme680_config_s *config)
+{
+  int ret;
+
+  /* Sanity checks */
+
+  if (!CHECK_OS_BOUNDS(config->temp_os))
+    {
+      return -EINVAL;
+    }
+
+#ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
+  if (!CHECK_OS_BOUNDS(config->press_os))
+    {
+      return -EINVAL;
+    }
+#endif
+
+#ifndef CONFIG_BME680_DISABLE_HUM_MEAS
+  if (!CHECK_OS_BOUNDS(config->hum_os))
+    {
+      return -EINVAL;
+    }
+#endif
+
+#ifdef CONFIG_BME680_ENABLE_IIR_FILTER
+  if (config->filter_coef < BME680_FILTER_COEF0 ||
+      config->filter_coef > BME680_FILTER_COEF127)
+    {
+      return -EINVAL;
+    }
+#endif
+
+#ifndef CONFIG_BME680_DISABLE_GAS_MEAS
+  if (config->target_temp < MIN_HOT_PLATE_TEMP ||
+      config->target_temp > MAX_HOT_PLATE_TEMP)
+    {
+      return -EINVAL;
+    }
+
+  if (config->nb_conv > 9)
+    {
+      return -EINVAL;
+    }
+#endif
+
+  /* Update config in priv */
+
+  memcpy(&priv->dev.config, config, sizeof(struct bme680_config_s));
+
+  ret = bme680_write_config(priv);
+  if (ret < 0)
+    {
+      snerr("Failed to calibrate sensor.\n");
+      return ret;
+    }
+
+  priv->dev.calibrated = true;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: bme680_comp_temp
+ ****************************************************************************/
+
 static float bme680_comp_temp(FAR struct bme680_dev_s *priv,
                               uint32_t adc_temp)
 {
@@ -1107,6 +1205,10 @@ static float bme680_comp_temp(FAR struct bme680_dev_s *priv,
 }
 
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
+/****************************************************************************
+ * Name: bme680_comp_press
+ ****************************************************************************/
+
 static float bme680_comp_press(FAR struct bme680_dev_s *priv,
                                uint32_t adc_press)
 {
@@ -1144,6 +1246,10 @@ static float bme680_comp_press(FAR struct bme680_dev_s *priv,
 #endif /* !CONFIG_BME680_DISABLE_PRESS_MEAS */
 
 #ifndef CONFIG_BME680_DISABLE_HUM_MEAS
+/****************************************************************************
+ * Name: bme680_comp_hum
+ ****************************************************************************/
+
 static float bme680_comp_hum(FAR struct bme680_dev_s *priv,
                              uint16_t adc_hum)
 {
@@ -1187,6 +1293,10 @@ static float bme680_comp_hum(FAR struct bme680_dev_s *priv,
 #endif /* !CONFIG_BME680_DISABLE_HUM_MEAS */
 
 #ifndef CONFIG_BME680_DISABLE_GAS_MEAS
+/****************************************************************************
+ * Name: bme680_calc_gas_res
+ ****************************************************************************/
+
 static float bme680_calc_gas_res(FAR struct bme680_dev_s *priv,
                                  uint16_t adc_gas_res, uint8_t gas_range)
 {
@@ -1209,7 +1319,7 @@ static float bme680_calc_gas_res(FAR struct bme680_dev_s *priv,
  *
  * Description:
  *   Reads the raw data from the sensor and computes the compensated
- * values, storing them in the data struct.
+ *   values, storing them in the data struct.
  *
  ****************************************************************************/
 
@@ -1239,7 +1349,6 @@ static int bme680_read_measurements(FAR struct bme680_dev_s *priv,
   uint8_t data_regs[BME680_DATA_LEN];
 
   ret = bme680_getregs(priv, BME680_DATA_ADDR, data_regs, BME680_DATA_LEN);
-
   if (ret < 0)
     {
       snerr("Failed to read data registers.\n");
@@ -1285,7 +1394,6 @@ static int bme680_read_measurements(FAR struct bme680_dev_s *priv,
   /* Is measured gas valid? */
 
   gas_valid = data_regs[14] & BME680_GASM_VALID_MSK;
-
   if (!gas_valid)
     {
       sninfo("Invalid gas measurement.\n");
@@ -1293,7 +1401,6 @@ static int bme680_read_measurements(FAR struct bme680_dev_s *priv,
     }
 
   heat_stab = data_regs[14] & BME680_HEAT_STAB_MSK;
-
   if (!heat_stab)
     {
       sninfo("The heater did not stabilize.\n");
@@ -1313,7 +1420,7 @@ static int bme680_read_measurements(FAR struct bme680_dev_s *priv,
  *
  * Description:
  *   Compute the duration of a tphg cycle in us, taking into consideration
- * the settings of the sensor.
+ *   the settings of the sensor.
  *
  ****************************************************************************/
 
@@ -1362,6 +1469,10 @@ static uint16_t bme680_get_tphg_dur(FAR struct bme680_dev_s *priv)
   return duration;
 }
 
+/****************************************************************************
+ * Name: bme680_activate
+ ****************************************************************************/
+
 static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep, bool enable)
 {
@@ -1405,7 +1516,6 @@ static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (!priv->enabled && enable)
     {
-      dev->calibrated = false;
       priv->enabled = enable;
 
       /* Wake up the polling thread */
@@ -1420,6 +1530,10 @@ static int bme680_activate(FAR struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
+/****************************************************************************
+ * Name: bme680_calibrate
+ ****************************************************************************/
+
 static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
                             FAR struct file *filep, unsigned long arg)
 {
@@ -1427,7 +1541,6 @@ static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
   FAR struct bme680_sensor_s *dev;
   FAR struct bme680_dev_s *priv;
   FAR struct bme680_config_s *calibval = (FAR struct bme680_config_s *)arg;
-  int ret;
 
   /* Get offset inside array of lowerhalfs */
 
@@ -1459,64 +1572,12 @@ static int bme680_calibrate(FAR struct sensor_lowerhalf_s *lower,
 
   priv = container_of(dev, FAR struct bme680_dev_s, dev);
 
-  /* Sanity checks */
-
-  if (!CHECK_OS_BOUNDS(calibval->temp_os))
-    {
-      return -EINVAL;
-    }
-
-#ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
-  if (!CHECK_OS_BOUNDS(calibval->press_os))
-    {
-      return -EINVAL;
-    }
-#endif
-
-#ifndef CONFIG_BME680_DISABLE_HUM_MEAS
-  if (!CHECK_OS_BOUNDS(calibval->hum_os))
-    {
-      return -EINVAL;
-    }
-#endif
-
-#ifdef CONFIG_BME680_ENABLE_IIR_FILTER
-  if (calibval->filter_coef < BME680_FILTER_COEF0 ||
-      calibval->filter_coef > BME680_FILTER_COEF127)
-    {
-      return -EINVAL;
-    }
-#endif
-
-#ifndef CONFIG_BME680_DISABLE_GAS_MEAS
-  if (calibval->target_temp < MIN_HOT_PLATE_TEMP ||
-      calibval->target_temp > MAX_HOT_PLATE_TEMP)
-    {
-      return -EINVAL;
-    }
-
-  if (calibval->nb_conv > 9)
-    {
-      return -EINVAL;
-    }
-#endif
-
-  /* Update config in priv */
-
-  memcpy(&priv->dev.config, calibval, sizeof(struct bme680_config_s));
-
-  ret = bme680_write_config(priv);
-
-  if (ret < 0)
-    {
-      snerr("Failed to calibrate sensor.\n");
-      return ret;
-    }
-
-  priv->dev.calibrated = true;
-
-  return ret;
+  return bme680_configure(priv, calibval);
 }
+
+/****************************************************************************
+ * Name: bme680_control
+ ****************************************************************************/
 
 static int bme680_control(FAR struct sensor_lowerhalf_s *lower,
                           FAR struct file *filep,
@@ -1556,6 +1617,10 @@ static int bme680_control(FAR struct sensor_lowerhalf_s *lower,
 
   return OK;
 }
+
+/****************************************************************************
+ * Name: bme680_thread
+ ****************************************************************************/
 
 static int bme680_thread(int argc, char **argv)
 {
@@ -1623,15 +1688,20 @@ static int bme680_thread(int argc, char **argv)
  *
  * Description:
  *   Register the BME680 character device
- *   @devno - The user-specified device number, starting from 0
- *   @i2c   - An instance of the I2C interface to use to communicate with
+ *
+ * Input Parameters:
+ *   devno - The user-specified device number, starting from 0
+ *   i2c   - An instance of the I2C interface to use to communicate with
  *           BME680
+ *   config - optional sensor initial configuration
  *
  * Return value:
  *   Zero (OK) on success; a negated errno value on failure
+ *
  ****************************************************************************/
 
-int bme680_register(int devno, FAR struct i2c_master_s *i2c)
+int bme680_register(int devno, FAR struct i2c_master_s *i2c,
+                    FAR struct bme680_config_s *config)
 {
   FAR struct sensor_lowerhalf_s *lower;
   FAR struct bme680_dev_s *priv;
@@ -1668,12 +1738,41 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   /* Get Calibration Data */
 
   ret = bme680_get_calib_data(priv);
-
   if (ret < 0)
     {
       snerr("Failed to read calib data from bme680:%d\n", ret);
       goto err_init;
     }
+
+  /* Sensor configuration */
+
+  priv->dev.calibrated = false;
+
+  if (config)
+    {
+      ret = bme680_configure(priv, config);
+      if (ret < 0)
+        {
+          snerr("Failed to configure bme680:%d\n", ret);
+          goto err_init;
+        }
+    }
+
+#ifndef CONFIG_BME680_DISABLE_TEMP_MEAS
+  /* Register the temperature driver */
+
+  lower = &priv->dev.lower[BME680_TEMP_IDX];
+  lower->ops = &g_sensor_ops;
+  lower->type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
+
+  ret = sensor_register(lower, devno);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to register temperature driver (err = %d)\n",
+            ret);
+      goto err_init;
+    }
+#endif
 
 #ifndef CONFIG_BME680_DISABLE_PRESS_MEAS
   /* Register the barometer driver */
@@ -1686,20 +1785,6 @@ int bme680_register(int devno, FAR struct i2c_master_s *i2c)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register barometer driver (err = %d)\n",
-            ret);
-      goto err_init;
-    }
-#else
-  /* Register the temperature driver */
-
-  lower = &priv->dev.lower[BME680_TEMP_IDX];
-  lower->ops = &g_sensor_ops;
-  lower->type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-
-  ret = sensor_register(lower, devno);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to register temperature driver (err = %d)\n",
             ret);
       goto err_init;
     }

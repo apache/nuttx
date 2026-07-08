@@ -46,7 +46,7 @@
 
 /* SPSGRF support depends on:
  *
- *   CONFIG_STM32L4_SPI3  - SPI3 support
+ *   CONFIG_STM32_SPI3  - SPI3 support
  *   CONFIG_WL_SPIRIT     - Spirit wireless library
  *   CONFIG_SPIRIT_NETDEV - Spirit network driver
  *   CONFIG_SCHED_HPWORK  - HP work queue support
@@ -57,7 +57,7 @@
  * And probably a few other things.
  */
 
-#if !defined(CONFIG_STM32L4_SPI3)
+#if !defined(CONFIG_STM32_SPI3)
 #  undef HAVE_SPSGRF
 #endif
 
@@ -73,7 +73,7 @@
 #  undef HAVE_SPSGRF
 #endif
 
-#if !defined(CONFIG_MTD_MX25RXX) || !defined(CONFIG_STM32L4_QSPI)
+#if !defined(CONFIG_MTD_MX25RXX) || !defined(CONFIG_STM32_QSPI)
 #  undef HAVE_MX25R6435F
 #endif
 
@@ -133,7 +133,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_bringup
+ * Name: stm32_bringup
  *
  * Description:
  *   This function initializes and configures all on-board features
@@ -142,11 +142,11 @@
  ****************************************************************************/
 
 #if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
-int stm32l4_bringup(void);
+int stm32_bringup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spidev_initialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-F401RE and
@@ -154,9 +154,9 @@ int stm32l4_bringup(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2) || \
-    defined(CONFIG_STM32L4_SPI3)
-void weak_function stm32l4_spidev_initialize(void);
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3)
+void weak_function stm32_spidev_initialize(void);
 #endif
 
 /****************************************************************************
@@ -175,11 +175,11 @@ void weak_function stm32l4_spidev_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32l4_timer_driver_setup(void);
+int stm32_timer_driver_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spirit_initialize
+ * Name: stm32_spirit_initialize
  *
  * Description:
  *   Initialize the Spirit device.
@@ -191,7 +191,7 @@ int stm32l4_timer_driver_setup(void);
  ****************************************************************************/
 
 #ifdef HAVE_SPSGRF
-int stm32l4_spirit_initialize(void);
+int stm32_spirit_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

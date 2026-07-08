@@ -36,7 +36,7 @@
 #include "arm_internal.h"
 #include "nvic.h"
 
-#include "stm32l5.h"
+#include "stm32.h"
 #include "stm32l5_gpio.h"
 #include "stm32l5_userspace.h"
 #include "stm32l5_start.h"
@@ -62,8 +62,8 @@
  * 0x2003:ffff - End of internal SRAM2
  */
 
-#define SRAM2_START  STM32L5_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32L5_SRAM2_SIZE)
+#define SRAM2_START  STM32_SRAM2_BASE
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
@@ -131,7 +131,7 @@ void __start(void)
     ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
-#ifdef CONFIG_STM32L5_SRAM2_INIT
+#ifdef CONFIG_STM32_SRAM2_INIT
   /* The SRAM2 region is parity checked, but upon power up, it will be in
    * a random state and probably invalid with respect to parity, potentially
    * generating faults if accessed.  If elected, we will write zeros to the
@@ -151,10 +151,10 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32l5_clockconfig();
+  stm32_clockconfig();
   arm_fpuconfig();
-  stm32l5_lowsetup();
-  stm32l5_gpioinit();
+  stm32_lowsetup();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -205,13 +205,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  stm32l5_userspace();
+  stm32_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  stm32l5_board_initialize();
+  stm32_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */

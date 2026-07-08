@@ -37,11 +37,23 @@
 
 #include <arch/rp23xx-rv/chip.h>
 
+#include "riscv_internal.h"
+
 /****************************************************************************
  * Macro Definitions
  ****************************************************************************/
 
 #ifdef __ASSEMBLY__
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+.macro  setintstack tmp0, tmp1
+  up_cpu_index \tmp0
+  li    \tmp1, STACKFRAME_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK)
+  mul   \tmp1, \tmp0, \tmp1
+  la    \tmp0, g_intstacktop
+  sub   sp, \tmp0, \tmp1
+.endm
+#endif /* CONFIG_SMP && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 #endif /* __ASSEMBLY__  */
 #endif /* __ARCH_RISCV_SRC_RP23XX_RV_CHIP_H */

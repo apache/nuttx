@@ -36,36 +36,36 @@
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
-#define STM32WB_SPI_CLK_MAX         32000000ul
+#define STM32_SPI_CLK_MAX         32000000ul
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
-#define STM32WB_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 (16-bit) */
-#define STM32WB_SPI_SR_OFFSET       0x0008  /* SPI status register (16-bit) */
-#define STM32WB_SPI_DR_OFFSET       0x000c  /* SPI data register (16-bit) */
-#define STM32WB_SPI_CRCPR_OFFSET    0x0010  /* SPI CRC polynomial register (16-bit) */
-#define STM32WB_SPI_RXCRCR_OFFSET   0x0014  /* SPI Rx CRC register (16-bit) */
-#define STM32WB_SPI_TXCRCR_OFFSET   0x0018  /* SPI Tx CRC register (16-bit) */
+#define STM32_SPI_CR1_OFFSET      0x0000  /* SPI Control Register 1 (16-bit) */
+#define STM32_SPI_CR2_OFFSET      0x0004  /* SPI control register 2 (16-bit) */
+#define STM32_SPI_SR_OFFSET       0x0008  /* SPI status register (16-bit) */
+#define STM32_SPI_DR_OFFSET       0x000c  /* SPI data register (16-bit) */
+#define STM32_SPI_CRCPR_OFFSET    0x0010  /* SPI CRC polynomial register (16-bit) */
+#define STM32_SPI_RXCRCR_OFFSET   0x0014  /* SPI Rx CRC register (16-bit) */
+#define STM32_SPI_TXCRCR_OFFSET   0x0018  /* SPI Tx CRC register (16-bit) */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_SPI1_CR1            (STM32WB_SPI1_BASE + STM32WB_SPI_CR1_OFFSET)
-#define STM32WB_SPI1_CR2            (STM32WB_SPI1_BASE + STM32WB_SPI_CR2_OFFSET)
-#define STM32WB_SPI1_SR             (STM32WB_SPI1_BASE + STM32WB_SPI_SR_OFFSET)
-#define STM32WB_SPI1_DR             (STM32WB_SPI1_BASE + STM32WB_SPI_DR_OFFSET)
-#define STM32WB_SPI1_CRCPR          (STM32WB_SPI1_BASE + STM32WB_SPI_CRCPR_OFFSET)
-#define STM32WB_SPI1_RXCRCR         (STM32WB_SPI1_BASE + STM32WB_SPI_RXCRCR_OFFSET)
-#define STM32WB_SPI1_TXCRCR         (STM32WB_SPI1_BASE + STM32WB_SPI_TXCRCR_OFFSET)
+#define STM32_SPI1_CR1            (STM32_SPI1_BASE + STM32_SPI_CR1_OFFSET)
+#define STM32_SPI1_CR2            (STM32_SPI1_BASE + STM32_SPI_CR2_OFFSET)
+#define STM32_SPI1_SR             (STM32_SPI1_BASE + STM32_SPI_SR_OFFSET)
+#define STM32_SPI1_DR             (STM32_SPI1_BASE + STM32_SPI_DR_OFFSET)
+#define STM32_SPI1_CRCPR          (STM32_SPI1_BASE + STM32_SPI_CRCPR_OFFSET)
+#define STM32_SPI1_RXCRCR         (STM32_SPI1_BASE + STM32_SPI_RXCRCR_OFFSET)
+#define STM32_SPI1_TXCRCR         (STM32_SPI1_BASE + STM32_SPI_TXCRCR_OFFSET)
 
-#if CONFIG_STM32WB_HAVE_SPI2
-#  define STM32WB_SPI2_CR1          (STM32WB_SPI2_BASE + STM32WB_SPI_CR1_OFFSET)
-#  define STM32WB_SPI2_CR2          (STM32WB_SPI2_BASE + STM32WB_SPI_CR2_OFFSET)
-#  define STM32WB_SPI2_SR           (STM32WB_SPI2_BASE + STM32WB_SPI_SR_OFFSET)
-#  define STM32WB_SPI2_DR           (STM32WB_SPI2_BASE + STM32WB_SPI_DR_OFFSET)
-#  define STM32WB_SPI2_CRCPR        (STM32WB_SPI2_BASE + STM32WB_SPI_CRCPR_OFFSET)
-#  define STM32WB_SPI2_RXCRCR       (STM32WB_SPI2_BASE + STM32WB_SPI_RXCRCR_OFFSET)
-#  define STM32WB_SPI2_TXCRCR       (STM32WB_SPI2_BASE + STM32WB_SPI_TXCRCR_OFFSET)
+#if CONFIG_STM32_HAVE_SPI2
+#  define STM32_SPI2_CR1          (STM32_SPI2_BASE + STM32_SPI_CR1_OFFSET)
+#  define STM32_SPI2_CR2          (STM32_SPI2_BASE + STM32_SPI_CR2_OFFSET)
+#  define STM32_SPI2_SR           (STM32_SPI2_BASE + STM32_SPI_SR_OFFSET)
+#  define STM32_SPI2_DR           (STM32_SPI2_BASE + STM32_SPI_DR_OFFSET)
+#  define STM32_SPI2_CRCPR        (STM32_SPI2_BASE + STM32_SPI_CRCPR_OFFSET)
+#  define STM32_SPI2_RXCRCR       (STM32_SPI2_BASE + STM32_SPI_RXCRCR_OFFSET)
+#  define STM32_SPI2_TXCRCR       (STM32_SPI2_BASE + STM32_SPI_TXCRCR_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ********************************************/

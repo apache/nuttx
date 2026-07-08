@@ -62,7 +62,7 @@
  * the FMC.  In order to use FMC RAM, the following additional things need
  * to be present in the NuttX configuration file:
  *
- * CONFIG_STM32F7_FMC=y         : Enables the FMC
+ * CONFIG_STM32_FMC=y         : Enables the FMC
  * CONFIG_STM32F7_FMC_S[D]RAM=y : SRAM and/or SDRAM is available via the FMC.
  *                                Either of these autoselects
  *                                CONFIG_ARCH_HAVE_HEAP2
@@ -79,10 +79,10 @@
 /* Set the start and end of SRAM1 and SRAM2 */
 
 #define SRAM1_START  STM32_SRAM1_BASE
-#define SRAM1_END    (SRAM1_START + STM32F7_SRAM1_SIZE)
+#define SRAM1_END    (SRAM1_START + STM32_SRAM1_SIZE)
 
 #define SRAM2_START  STM32_SRAM2_BASE
-#define SRAM2_END    (SRAM2_START + STM32F7_SRAM2_SIZE)
+#define SRAM2_END    (SRAM2_START + STM32_SRAM2_SIZE)
 
 /* The STM32 F7 has DTCM memory */
 
@@ -94,15 +94,15 @@
 
 /* DTCM to be excluded from the main heap. */
 
-#ifdef CONFIG_STM32F7_DTCMEXCLUDE
+#ifdef CONFIG_STM32_DTCMEXCLUDE
 #  undef HAVE_DTCM
 #endif
 
 /* We can't possibly have FMC external RAM if the FMC is not enabled */
 
-#ifndef CONFIG_STM32F7_FMC
+#ifndef CONFIG_STM32_FMC
 #  ifdef CONFIG_ARCH_HAVE_HEAP2
-#    error CONFIG_ARCH_HAVE_HEAP2 but not CONFIG_STM32F7_FMC! Kconfig flawed?
+#    error CONFIG_ARCH_HAVE_HEAP2 but not CONFIG_STM32_FMC! Kconfig flawed?
 #  endif
 #  undef CONFIG_ARCH_HAVE_HEAP2
 #endif

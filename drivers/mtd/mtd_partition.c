@@ -116,8 +116,10 @@ static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset,
 #endif
 static int     part_ioctl(FAR struct mtd_dev_s *dev, int cmd,
                   unsigned long arg);
+#ifdef CONFIG_FTL_BBM
 static int     part_isbad(FAR struct mtd_dev_s *dev, off_t block);
 static int     part_markbad(FAR struct mtd_dev_s *dev, off_t block);
+#endif
 
 /* File system methods */
 
@@ -495,6 +497,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FTL_BBM
 static int part_isbad(FAR struct mtd_dev_s *dev, off_t block)
 {
   FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)dev;
@@ -540,6 +543,7 @@ static int part_markbad(FAR struct mtd_dev_s *dev, off_t block)
 
   return -ENOSYS;
 }
+#endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
 
@@ -560,7 +564,7 @@ static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
    * REVISIT:  Write-able proc files could be quite useful.
    */
 
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       ferr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;
@@ -906,8 +910,10 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
   part->child.bwrite  = part_bwrite;
   part->child.read    = mtd->read ? part_read : NULL;
   part->child.ioctl   = part_ioctl;
+#ifdef CONFIG_FTL_BBM
   part->child.isbad   = part_isbad;
   part->child.markbad = part_markbad;
+#endif
 #ifdef CONFIG_MTD_BYTE_WRITE
   part->child.write   = mtd->write ? part_write : NULL;
 #endif

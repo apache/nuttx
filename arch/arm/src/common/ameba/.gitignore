@@ -1,0 +1,4 @@
+# Auto-fetched ameba-rtos SDK (one shared checkout for all ameba ARM ICs,
+# fetched by tools/ameba_fetch_sdk.sh when AMEBA_SDK is unset).  Vendor source
+# + its python venv; never committed (vendor cache, not a build artifact).
+/ameba-rtos/

@@ -43,23 +43,23 @@
  * timer "n" is intended to be used for as a quadrature encoder.
  */
 
-#ifndef CONFIG_STM32L4_TIM1
-#  undef CONFIG_STM32L4_TIM1_QE
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_QE
 #endif
-#ifndef CONFIG_STM32L4_TIM2
-#  undef CONFIG_STM32L4_TIM2_QE
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_QE
 #endif
-#ifndef CONFIG_STM32L4_TIM3
-#  undef CONFIG_STM32L4_TIM3_QE
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_QE
 #endif
-#ifndef CONFIG_STM32L4_TIM4
-#  undef CONFIG_STM32L4_TIM4_QE
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_QE
 #endif
-#ifndef CONFIG_STM32L4_TIM5
-#  undef CONFIG_STM32L4_TIM5_QE
+#ifndef CONFIG_STM32_TIM5
+#  undef CONFIG_STM32_TIM5_QE
 #endif
-#ifndef CONFIG_STM32L4_TIM8
-#  undef CONFIG_STM32L4_TIM8_QE
+#ifndef CONFIG_STM32_TIM8
+#  undef CONFIG_STM32_TIM8_QE
 #endif
 
 /* Only timers 2-5, and 1 & 8 can be used as a quadrature encoder
@@ -79,7 +79,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_qeinitialize
+ * Name: stm32_qeinitialize
  *
  * Description:
  *   Initialize a quadrature encoder interface.
@@ -95,7 +95,7 @@
  *
  ****************************************************************************/
 
-int stm32l4_qeinitialize(const char *devpath, int tim);
+int stm32_qeinitialize(const char *devpath, int tim);
 
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_QENCODER_H */

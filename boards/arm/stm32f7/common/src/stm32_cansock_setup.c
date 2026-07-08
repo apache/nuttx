@@ -36,7 +36,7 @@
 
 /* Configuration ************************************************************/
 
-#if !defined(CONFIG_STM32F7_CAN1) && !defined(CONFIG_STM32F7_CAN2)
+#if !defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN2)
 #  error "No CAN is enable. Please enable at least one CAN device"
 #endif
 
@@ -58,7 +58,7 @@ int stm32_cansock_setup(void)
 
   UNUSED(ret);
 
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
   /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
   ret = stm32_cansockinitialize(1);
@@ -69,7 +69,7 @@ int stm32_cansock_setup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32F7_CAN2
+#ifdef CONFIG_STM32_CAN2
   /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
   ret = stm32_cansockinitialize(2);

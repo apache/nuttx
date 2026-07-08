@@ -1,0 +1,58 @@
+#
+# STM32 CAN configuration options.
+#
+
+choice
+	prompt "CAN character driver or SocketCAN support"
+	default STM32_CAN_CHARDRIVER
+
+config STM32_CAN_CHARDRIVER
+	bool "STM32 CAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32_CAN_SOCKET
+	bool "STM32 CAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # CAN character driver or SocketCAN support
+
+config STM32_CAN1_BAUD
+	int "CAN1 BAUD"
+	depends on STM32_CAN1
+	default 250000
+	---help---
+		CAN1 BAUD rate.  Required if CONFIG_STM32_CAN1 is defined.
+
+config STM32_CAN2_BAUD
+	int "CAN2 BAUD"
+	depends on STM32_CAN2
+	default 250000
+	---help---
+		CAN2 BAUD rate.  Required if CONFIG_STM32_CAN2 is defined.
+
+config STM32_CAN3_BAUD
+	int "CAN3 BAUD"
+	depends on STM32_CAN3
+	default 250000
+	---help---
+		CAN3 BAUD rate. Required if CONFIG_STM32_CAN3 is defined.
+
+config STM32_CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config STM32_CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.

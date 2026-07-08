@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include <chip.h>
 
-#if defined(CONFIG_STM32L4_STM32L4X2)
+#if defined(CONFIG_STM32_STM32L4X2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -40,71 +40,71 @@
 
 /* Endpoint Registers */
 
-#define STM32L4_USB_EPR_OFFSET(n)    ((n) << 2) /* USB endpoint n register (16-bits) */
+#define STM32_USB_EPR_OFFSET(n)    ((n) << 2) /* USB endpoint n register (16-bits) */
 
-#define STM32L4_USB_EP0R_OFFSET      0x0000  /* USB endpoint 0 register (16-bits) */
-#define STM32L4_USB_EP1R_OFFSET      0x0004  /* USB endpoint 1 register (16-bits) */
-#define STM32L4_USB_EP2R_OFFSET      0x0008  /* USB endpoint 2 register (16-bits) */
-#define STM32L4_USB_EP3R_OFFSET      0x000c  /* USB endpoint 3 register (16-bits) */
-#define STM32L4_USB_EP4R_OFFSET      0x0010  /* USB endpoint 4 register (16-bits) */
-#define STM32L4_USB_EP5R_OFFSET      0x0014  /* USB endpoint 5 register (16-bits) */
-#define STM32L4_USB_EP6R_OFFSET      0x0018  /* USB endpoint 6 register (16-bits) */
-#define STM32L4_USB_EP7R_OFFSET      0x001c  /* USB endpoint 7 register (16-bits) */
+#define STM32_USB_EP0R_OFFSET      0x0000  /* USB endpoint 0 register (16-bits) */
+#define STM32_USB_EP1R_OFFSET      0x0004  /* USB endpoint 1 register (16-bits) */
+#define STM32_USB_EP2R_OFFSET      0x0008  /* USB endpoint 2 register (16-bits) */
+#define STM32_USB_EP3R_OFFSET      0x000c  /* USB endpoint 3 register (16-bits) */
+#define STM32_USB_EP4R_OFFSET      0x0010  /* USB endpoint 4 register (16-bits) */
+#define STM32_USB_EP5R_OFFSET      0x0014  /* USB endpoint 5 register (16-bits) */
+#define STM32_USB_EP6R_OFFSET      0x0018  /* USB endpoint 6 register (16-bits) */
+#define STM32_USB_EP7R_OFFSET      0x001c  /* USB endpoint 7 register (16-bits) */
 
 /* Common Registers */
 
-#define STM32L4_USB_CNTR_OFFSET      0x0040  /* USB control register (16-bits) */
-#define STM32L4_USB_ISTR_OFFSET      0x0044  /* USB interrupt status register (16-bits) */
-#define STM32L4_USB_FNR_OFFSET       0x0048  /* USB frame number register (16-bits) */
-#define STM32L4_USB_DADDR_OFFSET     0x004c  /* USB device address (16-bits) */
-#define STM32L4_USB_BTABLE_OFFSET    0x0050  /* Buffer table address (16-bits) */
-#define STM32L4_USB_LPMCSR_OFFSET    0x0054  /* LPM control and status register */
-#define STM32L4_USB_BCDR_OFFSET      0x0058  /* Battery charging detector */
+#define STM32_USB_CNTR_OFFSET      0x0040  /* USB control register (16-bits) */
+#define STM32_USB_ISTR_OFFSET      0x0044  /* USB interrupt status register (16-bits) */
+#define STM32_USB_FNR_OFFSET       0x0048  /* USB frame number register (16-bits) */
+#define STM32_USB_DADDR_OFFSET     0x004c  /* USB device address (16-bits) */
+#define STM32_USB_BTABLE_OFFSET    0x0050  /* Buffer table address (16-bits) */
+#define STM32_USB_LPMCSR_OFFSET    0x0054  /* LPM control and status register */
+#define STM32_USB_BCDR_OFFSET      0x0058  /* Battery charging detector */
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
-#define STM32L4_USB_ADDR_TX_WOFFSET   (0)    /* Transmission buffer address n (16-bits) */
-#define STM32L4_USB_COUNT_TX_WOFFSET  (2)    /* Transmission byte count n (16-bits) */
-#define STM32L4_USB_ADDR_RX_WOFFSET   (4)    /* Reception buffer address n (16-bits) */
-#define STM32L4_USB_COUNT_RX_WOFFSET  (6)    /* Reception byte count n (16-bits) */
+#define STM32_USB_ADDR_TX_WOFFSET   (0)    /* Transmission buffer address n (16-bits) */
+#define STM32_USB_COUNT_TX_WOFFSET  (2)    /* Transmission byte count n (16-bits) */
+#define STM32_USB_ADDR_RX_WOFFSET   (4)    /* Reception buffer address n (16-bits) */
+#define STM32_USB_COUNT_RX_WOFFSET  (6)    /* Reception byte count n (16-bits) */
 
-#define STM32L4_USB_BTABLE_RADDR(ep,o)  (((uint32_t)getreg16(STM32L4_USB_BTABLE) + ((ep) << 3)) + (o))
-#define STM32L4_USB_ADDR_TX_OFFSET(ep)  STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_ADDR_TX_WOFFSET)
-#define STM32L4_USB_COUNT_TX_OFFSET(ep) STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_COUNT_TX_WOFFSET)
-#define STM32L4_USB_ADDR_RX_OFFSET(ep)  STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_ADDR_RX_WOFFSET)
-#define STM32L4_USB_COUNT_RX_OFFSET(ep) STM32L4_USB_BTABLE_RADDR(ep,STM32L4_USB_COUNT_RX_WOFFSET)
+#define STM32_USB_BTABLE_RADDR(ep,o)  (((uint32_t)getreg16(STM32_USB_BTABLE) + ((ep) << 3)) + (o))
+#define STM32_USB_ADDR_TX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
+#define STM32_USB_COUNT_TX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
+#define STM32_USB_ADDR_RX_OFFSET(ep)  STM32_USB_BTABLE_RADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
+#define STM32_USB_COUNT_RX_OFFSET(ep) STM32_USB_BTABLE_RADDR(ep,STM32_USB_COUNT_RX_WOFFSET)
 
 /* Register Addresses *******************************************************/
 
 /* Endpoint Registers */
 
-#define STM32L4_USB_EPR(n)           (STM32L4_USB_FS_BASE + STM32L4_USB_EPR_OFFSET(n))
-#define STM32L4_USB_EP0R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP0R_OFFSET)
-#define STM32L4_USB_EP1R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP1R_OFFSET)
-#define STM32L4_USB_EP2R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP2R_OFFSET)
-#define STM32L4_USB_EP3R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP3R_OFFSET)
-#define STM32L4_USB_EP4R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP4R_OFFSET)
-#define STM32L4_USB_EP5R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP5R_OFFSET)
-#define STM32L4_USB_EP6R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP6R_OFFSET)
-#define STM32L4_USB_EP7R             (STM32L4_USB_FS_BASE + STM32L4_USB_EP7R_OFFSET)
+#define STM32_USB_EPR(n)           (STM32_USB_FS_BASE + STM32_USB_EPR_OFFSET(n))
+#define STM32_USB_EP0R             (STM32_USB_FS_BASE + STM32_USB_EP0R_OFFSET)
+#define STM32_USB_EP1R             (STM32_USB_FS_BASE + STM32_USB_EP1R_OFFSET)
+#define STM32_USB_EP2R             (STM32_USB_FS_BASE + STM32_USB_EP2R_OFFSET)
+#define STM32_USB_EP3R             (STM32_USB_FS_BASE + STM32_USB_EP3R_OFFSET)
+#define STM32_USB_EP4R             (STM32_USB_FS_BASE + STM32_USB_EP4R_OFFSET)
+#define STM32_USB_EP5R             (STM32_USB_FS_BASE + STM32_USB_EP5R_OFFSET)
+#define STM32_USB_EP6R             (STM32_USB_FS_BASE + STM32_USB_EP6R_OFFSET)
+#define STM32_USB_EP7R             (STM32_USB_FS_BASE + STM32_USB_EP7R_OFFSET)
 
 /* Common Registers */
 
-#define STM32L4_USB_CNTR             (STM32L4_USB_FS_BASE + STM32L4_USB_CNTR_OFFSET)
-#define STM32L4_USB_ISTR             (STM32L4_USB_FS_BASE + STM32L4_USB_ISTR_OFFSET)
-#define STM32L4_USB_FNR              (STM32L4_USB_FS_BASE + STM32L4_USB_FNR_OFFSET)
-#define STM32L4_USB_DADDR            (STM32L4_USB_FS_BASE + STM32L4_USB_DADDR_OFFSET)
-#define STM32L4_USB_BTABLE           (STM32L4_USB_FS_BASE + STM32L4_USB_BTABLE_OFFSET)
-#define STM32L4_USB_LPMCSR           (STM32L4_USB_FS_BASE + STM32L4_USB_LPMCSR_OFFSET)
-#define STM32L4_USB_BCDR             (STM32L4_USB_FS_BASE + STM32L4_USB_BCDR_OFFSET)
+#define STM32_USB_CNTR             (STM32_USB_FS_BASE + STM32_USB_CNTR_OFFSET)
+#define STM32_USB_ISTR             (STM32_USB_FS_BASE + STM32_USB_ISTR_OFFSET)
+#define STM32_USB_FNR              (STM32_USB_FS_BASE + STM32_USB_FNR_OFFSET)
+#define STM32_USB_DADDR            (STM32_USB_FS_BASE + STM32_USB_DADDR_OFFSET)
+#define STM32_USB_BTABLE           (STM32_USB_FS_BASE + STM32_USB_BTABLE_OFFSET)
+#define STM32_USB_LPMCSR           (STM32_USB_FS_BASE + STM32_USB_LPMCSR_OFFSET)
+#define STM32_USB_BCDR             (STM32_USB_FS_BASE + STM32_USB_BCDR_OFFSET)
 
 /* Buffer Descriptor Table (Relatative to BTABLE address) */
 
-#define STM32L4_USB_BTABLE_ADDR(ep,o)  (STM32L4_USB_SRAM_BASE + STM32L4_USB_BTABLE_RADDR(ep,o))
-#define STM32L4_USB_ADDR_TX(ep)        STM32L4_USB_BTABLE_ADDR(ep,STM32L4_USB_ADDR_TX_WOFFSET)
-#define STM32L4_USB_COUNT_TX(ep)       STM32L4_USB_BTABLE_ADDR(ep,STM32L4_USB_COUNT_TX_WOFFSET)
-#define STM32L4_USB_ADDR_RX(ep)        STM32L4_USB_BTABLE_ADDR(ep,STM32L4_USB_ADDR_RX_WOFFSET)
-#define STM32L4_USB_COUNT_RX(ep)       STM32L4_USB_BTABLE_ADDR(ep,STM32L4_USB_COUNT_RX_WOFFSET)
+#define STM32_USB_BTABLE_ADDR(ep,o)  (STM32_USB_SRAM_BASE + STM32_USB_BTABLE_RADDR(ep,o))
+#define STM32_USB_ADDR_TX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_TX_WOFFSET)
+#define STM32_USB_COUNT_TX(ep)       STM32_USB_BTABLE_ADDR(ep,STM32_USB_COUNT_TX_WOFFSET)
+#define STM32_USB_ADDR_RX(ep)        STM32_USB_BTABLE_ADDR(ep,STM32_USB_ADDR_RX_WOFFSET)
+#define STM32_USB_COUNT_RX(ep)       STM32_USB_BTABLE_ADDR(ep,STM32_USB_COUNT_RX_WOFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -251,5 +251,5 @@
 #define USB_BCDR_PS2DET              (1 << 7)  /* Bit 7: DM pull-up detection status */
 #define USB_BCDR_DPPU                (1 << 15) /* Bit 15: DP pull-up control */
 
-#endif /* CONFIG_STM32L4_STM32L4X2 */
+#endif /* CONFIG_STM32_STM32L4X2 */
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_USBDEV_H */

@@ -46,6 +46,9 @@ in :menuselection:`RTOS Features --> Clocks and Timers --> Support tick-less OS`
 changed to value of at least 300. Higher value is recommended though,
 300us is not going to be precise at all.
 
+Architecture code for this CPU family provides custom ``up_udelay`` function.
+More information can be found in :doc:`docs/up_udelay` document
+
 Peripheral Support
 ==================
 

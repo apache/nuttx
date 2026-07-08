@@ -280,7 +280,7 @@ int aio_write(FAR struct aiocb *aiocbp)
    */
 
   flags = fcntl(aiocbp->aio_fildes, F_GETFL);
-  if ((flags & O_WRONLY) == 0)
+  if ((flags & O_ACCMODE) == O_RDONLY)
     {
       aiocbp->aio_result = -EBADF;
       return OK;

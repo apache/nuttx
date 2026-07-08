@@ -186,7 +186,7 @@ instead of 64KiB as documented in the datasheet and reported by its internal
 register.
 
 In order to enable 128KiB you need modify the linker script to reflect this
-new size. Open the boards/arm/stm32/stm32f103-minimum/scripts/ld.script and replace::
+new size. Open the boards/arm/stm32f1/stm32f103-minimum/scripts/ld.script and replace::
 
     flash (rx) : ORIGIN = 0x08000000, LENGTH = 64K
 
@@ -358,7 +358,7 @@ enable/disable these options using "make menuconfig" ::
   Memory Management  --->
       [*] Small memory model
 
-  Also change the boards/arm/stm32/stm32f103-minimum/scripts/ld.script file to use 128KB
+  Also change the boards/arm/stm32f1/stm32f103-minimum/scripts/ld.script file to use 128KB
   of Flash instead 64KB (since this board has a hidden 64KB flash) :
 
   MEMORY

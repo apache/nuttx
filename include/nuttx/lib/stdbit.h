@@ -132,19 +132,55 @@ static inline unsigned int stdc_trailing_zeros_ull(unsigned long long x)
  * Leading / trailing ones (C23: zero input returns 0)
  ****************************************************************************/
 
-#  define stdc_leading_ones_uc(x)  stdc_leading_zeros_uc((unsigned char)~(x))
-#  define stdc_leading_ones_us(x)  stdc_leading_zeros_us((unsigned short)~(x))
-#  define stdc_leading_ones_ui(x)  stdc_leading_zeros_ui(~(x))
-#  define stdc_leading_ones_ul(x)  stdc_leading_zeros_ul(~(x))
-#  define stdc_leading_ones_ull(x) stdc_leading_zeros_ull(~(x))
+static inline unsigned int stdc_leading_ones_uc(unsigned char x)
+{
+  return stdc_leading_zeros_uc((unsigned char)~(x));
+}
 
-#  define stdc_trailing_ones_uc(x)  \
-    stdc_trailing_zeros_uc((unsigned char)~(x))
-#  define stdc_trailing_ones_us(x)  \
-    stdc_trailing_zeros_us((unsigned short)~(x))
-#  define stdc_trailing_ones_ui(x)  stdc_trailing_zeros_ui(~(x))
-#  define stdc_trailing_ones_ul(x)  stdc_trailing_zeros_ul(~(x))
-#  define stdc_trailing_ones_ull(x) stdc_trailing_zeros_ull(~(x))
+static inline unsigned int stdc_leading_ones_us(unsigned short x)
+{
+  return stdc_leading_zeros_us((unsigned short)~(x));
+}
+
+static inline unsigned int stdc_leading_ones_ui(unsigned int x)
+{
+  return stdc_leading_zeros_ui(~(x));
+}
+
+static inline unsigned int stdc_leading_ones_ul(unsigned long x)
+{
+  return stdc_leading_zeros_ul(~(x));
+}
+
+static inline unsigned int stdc_leading_ones_ull(unsigned long long x)
+{
+  return stdc_leading_zeros_ull(~(x));
+}
+
+static inline unsigned int stdc_trailing_ones_uc(unsigned char x)
+{
+  return stdc_trailing_zeros_uc((unsigned char)~(x));
+}
+
+static inline unsigned int  stdc_trailing_ones_us(unsigned short x)
+{
+  return stdc_trailing_zeros_us((unsigned short)~(x));
+}
+
+static inline unsigned int stdc_trailing_ones_ui(unsigned int x)
+{
+  return stdc_trailing_zeros_ui(~(x));
+}
+
+static inline unsigned int stdc_trailing_ones_ul(unsigned long x)
+{
+  return stdc_trailing_zeros_ul(~(x));
+}
+
+static inline unsigned int stdc_trailing_ones_ull(unsigned long long x)
+{
+  return stdc_trailing_zeros_ull(~(x));
+}
 
 /****************************************************************************
  * First leading zero/one (bit index from MSB; C23: 0 returns bit width)
@@ -262,50 +298,115 @@ static inline unsigned int stdc_first_trailing_one_ull(unsigned long long x)
  * Count zeros / ones
  ****************************************************************************/
 
-#  define stdc_count_ones_uc(x) \
-    ((unsigned int)__builtin_popcount((unsigned)(x)))
-#  define stdc_count_ones_us(x) \
-    ((unsigned int)__builtin_popcount((unsigned)(x)))
-#  define stdc_count_ones_ui(x)  ((unsigned int)__builtin_popcount(x))
-#  define stdc_count_ones_ul(x)  ((unsigned int)__builtin_popcountl(x))
-#  define stdc_count_ones_ull(x) ((unsigned int)__builtin_popcountll(x))
+static inline unsigned int stdc_count_ones_uc(unsigned char x)
+{
+  return ((unsigned int)__builtin_popcount((unsigned)(x)));
+}
 
-#  define stdc_count_zeros_uc(x) \
-    ((unsigned int)((8*sizeof(unsigned char)) - stdc_count_ones_uc(x)))
-#  define stdc_count_zeros_us(x) \
-    ((unsigned int)((8*sizeof(unsigned short)) - stdc_count_ones_us(x)))
-#  define stdc_count_zeros_ui(x) \
-    ((unsigned int)((8*sizeof(unsigned int)) - stdc_count_ones_ui(x)))
-#  define stdc_count_zeros_ul(x)  \
-    ((unsigned int)((8*sizeof(unsigned long)) - stdc_count_ones_ul(x)))
-#  define stdc_count_zeros_ull(x) \
-    ((unsigned int)((8*sizeof(unsigned long long)) - stdc_count_ones_ull(x)))
+static inline unsigned int stdc_count_ones_us(unsigned short x)
+{
+  return ((unsigned int)__builtin_popcount((unsigned)(x)));
+}
+
+static inline unsigned int stdc_count_ones_ui(unsigned int x)
+{
+  return ((unsigned int)__builtin_popcount(x));
+}
+
+static inline unsigned int stdc_count_ones_ul(unsigned long x)
+{
+  return ((unsigned int)__builtin_popcountl(x));
+}
+static inline unsigned int stdc_count_ones_ull(unsigned long long x)
+{
+  return ((unsigned int)__builtin_popcountll(x));
+}
+
+static inline unsigned int stdc_count_zeros_uc(unsigned char x)
+{
+  return ((unsigned int)((8*sizeof(unsigned char)) - stdc_count_ones_uc(x)));
+}
+
+static inline unsigned int stdc_count_zeros_us(unsigned short x)
+{
+  return ((unsigned int)((8*sizeof(unsigned short))
+        - stdc_count_ones_us(x)));
+}
+
+static inline unsigned int stdc_count_zeros_ui(unsigned int x)
+{
+  return ((unsigned int)((8*sizeof(unsigned int)) - stdc_count_ones_ui(x)));
+}
+
+static inline unsigned int stdc_count_zeros_ul(unsigned long x)
+{
+  return ((unsigned int)((8*sizeof(unsigned long)) - stdc_count_ones_ul(x)));
+}
+
+static inline unsigned int stdc_count_zeros_ull(unsigned long long x)
+{
+  return ((unsigned int)((8*sizeof(unsigned long long))
+        - stdc_count_ones_ull(x)));
+}
 
 /****************************************************************************
  * Single-bit test, bit width, bit floor, bit ceil
  ****************************************************************************/
 
-#  define stdc_has_single_bit_uc(x)  (stdc_count_ones_uc(x) == 1)
-#  define stdc_has_single_bit_us(x)   (stdc_count_ones_us(x) == 1)
-#  define stdc_has_single_bit_ui(x)   (stdc_count_ones_ui(x) == 1)
-#  define stdc_has_single_bit_ul(x)   (stdc_count_ones_ul(x) == 1)
-#  define stdc_has_single_bit_ull(x)  (stdc_count_ones_ull(x) == 1)
+static inline bool stdc_has_single_bit_uc(unsigned char x)
+{
+  return (stdc_count_ones_uc(x) == 1);
+}
 
-#  define stdc_bit_width_uc(x) \
-    ((unsigned int)((unsigned char)(x) == 0 ? 0 : \
-    8 - stdc_leading_zeros_uc(x)))
-#  define stdc_bit_width_us(x) \
-    ((unsigned int)((unsigned short)(x) == 0 ? 0 : \
-    16 - stdc_leading_zeros_us(x)))
-#  define stdc_bit_width_ui(x) \
-    ((unsigned int)((x) == 0 ? 0 : \
-    (8*sizeof(unsigned int)) - stdc_leading_zeros_ui(x)))
-#  define stdc_bit_width_ul(x) \
-    ((unsigned int)((x) == 0 ? 0 : \
-    (8*sizeof(unsigned long) - stdc_leading_zeros_ul(x))))
-#  define stdc_bit_width_ull(x) \
-    ((unsigned int)((x) == 0 ? 0 : \
-    (8*sizeof(unsigned long long) - stdc_leading_zeros_ull(x))))
+static inline bool stdc_has_single_bit_us(unsigned short x)
+{
+  return (stdc_count_ones_us(x) == 1);
+}
+
+static inline bool stdc_has_single_bit_ui(unsigned int x)
+{
+  return (stdc_count_ones_ui(x) == 1);
+}
+
+static inline bool stdc_has_single_bit_ul(unsigned long x)
+{
+  return (stdc_count_ones_ul(x) == 1);
+}
+
+static inline bool stdc_has_single_bit_ull(unsigned long long x)
+{
+  return (stdc_count_ones_ull(x) == 1);
+}
+
+static inline unsigned int stdc_bit_width_uc(unsigned char x)
+{
+  return ((unsigned int)((unsigned char)(x) == 0 ?
+        0 : 8 - stdc_leading_zeros_uc(x)));
+}
+
+static inline unsigned int stdc_bit_width_us(unsigned short x)
+{
+  return ((unsigned int)((unsigned short)(x) == 0 ?
+        0 : 16 - stdc_leading_zeros_us(x)));
+}
+
+static inline unsigned int stdc_bit_width_ui(unsigned int x)
+{
+  return ((unsigned int)((x) == 0 ?
+        0 : (8*sizeof(unsigned int)) - stdc_leading_zeros_ui(x)));
+}
+
+static inline unsigned int stdc_bit_width_ul(unsigned long x)
+{
+  return ((unsigned int)((x) == 0 ?
+        0 : (8*sizeof(unsigned long) - stdc_leading_zeros_ul(x))));
+}
+
+static inline unsigned int stdc_bit_width_ull(unsigned long long x)
+{
+  return ((unsigned int)((x) == 0 ?
+        0 : (8*sizeof(unsigned long long) - stdc_leading_zeros_ull(x))));
+}
 
 /****************************************************************************
  * bit_floor / bit_ceil: inline functions to avoid double evaluation of x

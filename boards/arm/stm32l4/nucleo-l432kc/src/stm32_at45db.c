@@ -42,7 +42,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_SPI1
+#ifndef CONFIG_STM32_SPI1
 #  error "AT45DB driver requires CONFIG_STM32_SPI1 to be enabled"
 #endif
 
@@ -79,7 +79,7 @@ int stm32_at45dbinitialize(int minor)
 
       finfo("INFO: Initializing AT45DB\n");
 
-      spi = stm32l4_spibus_initialize(AT45DB_SPI_PORT);
+      spi = stm32_spibus_initialize(AT45DB_SPI_PORT);
       if (spi == NULL)
         {
           ferr("ERROR: Failed to initialize SPI port %d\n", AT45DB_SPI_PORT);

@@ -36,7 +36,7 @@
 
 #include "stm32f777zit6-meadow.h"
 
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32_QSPI
 #  include "stm32_qspi.h"
 
 #  ifdef CONFIG_FS_FAT
@@ -46,7 +46,7 @@
 
 /* MEADOW FIXME: header clash? */
 
-extern struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
+extern struct qspi_dev_s *stm32_qspi_initialize(int intf);
 #endif
 
 /****************************************************************************
@@ -74,9 +74,9 @@ extern struct qspi_dev_s *stm32f7_qspi_initialize(int intf);
 
 void stm32_boardinitialize(void)
 {
-#if defined(CONFIG_STM32F7_SPI1) || defined(CONFIG_STM32F7_SPI2) || \
-    defined(CONFIG_STM32F7_SPI3) || defined(CONFIG_STM32F7_SPI4) || \
-    defined(CONFIG_STM32F7_SPI5)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || \
+    defined(CONFIG_STM32_SPI3) || defined(CONFIG_STM32_SPI4) || \
+    defined(CONFIG_STM32_SPI5)
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
    * function stm32_spidev_initialize() has been brought into the link.
    */
@@ -102,7 +102,7 @@ void stm32_boardinitialize(void)
   board_autoled_initialize();
 #endif
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
   stm32_sdram_initialize();
 #endif
 }
@@ -124,7 +124,7 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifdef CONFIG_STM32F7_QUADSPI
+#ifdef CONFIG_STM32_QSPI
   struct qspi_dev_s *qspi;
   struct mtd_dev_s *mtd;
 
@@ -132,7 +132,7 @@ void board_late_initialize(void)
 
   int ret;
 
-  qspi = stm32f7_qspi_initialize(0);
+  qspi = stm32_qspi_initialize(0);
   if (!qspi)
     {
       syslog(LOG_ERR, "ERROR: sam_qspi_initialize failed\n");
@@ -159,7 +159,7 @@ void board_late_initialize(void)
   meminfo.buflen = 0;
   meminfo.buffer = NULL;
 
-  stm32f7_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
+  stm32_qspi_enter_memorymapped(qspi, &meminfo, 80000000);
 
   /* FIXME: stm32_mpu_uheap depends on PROTECTED && MPU
    *

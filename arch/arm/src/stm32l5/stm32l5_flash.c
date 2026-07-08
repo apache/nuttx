@@ -46,15 +46,15 @@
 #include <nuttx/mutex.h>
 
 #include "stm32l5_rcc.h"
-#include "stm32l5_waste.h"
+#include "stm32_waste.h"
 #include "stm32l5_flash.h"
 #include "arm_internal.h"
 
-#if !defined(CONFIG_STM32L5_STM32L562XX)
+#if !defined(CONFIG_STM32_STM32L562XX)
 #  error "Unrecognized STM32 chip"
 #endif
 
-#if !defined(CONFIG_STM32L5_FLASH_OVERRIDE_DEFAULT)
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
 #  warning "Flash Configuration has been overridden - make sure it is correct"
 #endif
 
@@ -69,7 +69,7 @@
 #define OPTBYTES_KEY1      0x08192A3B
 #define OPTBYTES_KEY2      0x4C5D6E7F
 
-#define FLASH_PAGE_SIZE    STM32L5_FLASH_PAGESIZE
+#define FLASH_PAGE_SIZE    STM32_FLASH_PAGESIZE
 #define FLASH_PAGE_WORDS   (FLASH_PAGE_SIZE / 4)
 #define FLASH_PAGE_MASK    (FLASH_PAGE_SIZE - 1)
 #if FLASH_PAGE_SIZE == 2048
@@ -79,7 +79,7 @@
 #elif FLASH_PAGE_SIZE == 8192
 #  define FLASH_PAGE_SHIFT   (13)    /* 2**13  = 8192B */
 #else
-#  error Unsupported STM32L5_FLASH_PAGESIZE
+#  error Unsupported STM32_FLASH_PAGESIZE
 #endif
 #define FLASH_BYTE2PAGE(o) ((o) >> FLASH_PAGE_SHIFT)
 
@@ -105,35 +105,35 @@ static uint32_t g_page_buffer[FLASH_PAGE_WORDS];
 
 static void flash_unlock(void)
 {
-  while (getreg32(STM32L5_FLASH_NSSR) & FLASH_SR_BSY)
+  while (getreg32(STM32_FLASH_NSSR) & FLASH_SR_BSY)
     {
-      stm32l5_waste();
+      stm32_waste();
     }
 
-  if (getreg32(STM32L5_FLASH_NSCR) & FLASH_CR_LOCK)
+  if (getreg32(STM32_FLASH_NSCR) & FLASH_CR_LOCK)
     {
       /* Unlock sequence */
 
-      putreg32(FLASH_KEY1, STM32L5_FLASH_NSKEYR);
-      putreg32(FLASH_KEY2, STM32L5_FLASH_NSKEYR);
+      putreg32(FLASH_KEY1, STM32_FLASH_NSKEYR);
+      putreg32(FLASH_KEY2, STM32_FLASH_NSKEYR);
     }
 }
 
 static void flash_lock(void)
 {
-  modifyreg32(STM32L5_FLASH_NSCR, 0, FLASH_CR_LOCK);
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_CR_LOCK);
 }
 
 static void flash_optbytes_unlock(void)
 {
   flash_unlock();
 
-  if (getreg32(STM32L5_FLASH_NSCR) & FLASH_CR_OPTLOCK)
+  if (getreg32(STM32_FLASH_NSCR) & FLASH_CR_OPTLOCK)
     {
       /* Unlock Option Bytes sequence */
 
-      putreg32(OPTBYTES_KEY1, STM32L5_FLASH_OPTKEYR);
-      putreg32(OPTBYTES_KEY2, STM32L5_FLASH_OPTKEYR);
+      putreg32(OPTBYTES_KEY1, STM32_FLASH_OPTKEYR);
+      putreg32(OPTBYTES_KEY2, STM32_FLASH_OPTKEYR);
     }
 }
 
@@ -150,30 +150,30 @@ static inline void flash_erase(size_t page)
 {
   finfo("erase page %u\n", page);
 
-  modifyreg32(STM32L5_FLASH_NSCR, 0, FLASH_CR_PAGE_ERASE);
-  modifyreg32(STM32L5_FLASH_NSCR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
-  modifyreg32(STM32L5_FLASH_NSCR, 0, FLASH_CR_START);
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_CR_PAGE_ERASE);
+  modifyreg32(STM32_FLASH_NSCR, FLASH_CR_PNB_MASK, FLASH_CR_PNB(page));
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_CR_START);
 
-  while (getreg32(STM32L5_FLASH_NSSR) & FLASH_SR_BSY)
+  while (getreg32(STM32_FLASH_NSSR) & FLASH_SR_BSY)
     {
-      stm32l5_waste();
+      stm32_waste();
     }
 
-  modifyreg32(STM32L5_FLASH_NSCR, FLASH_CR_PAGE_ERASE, 0);
+  modifyreg32(STM32_FLASH_NSCR, FLASH_CR_PAGE_ERASE, 0);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void stm32l5_flash_unlock(void)
+void stm32_flash_unlock(void)
 {
   nxmutex_lock(&g_lock);
   flash_unlock();
   nxmutex_unlock(&g_lock);
 }
 
-void stm32l5_flash_lock(void)
+void stm32_flash_lock(void)
 {
   nxmutex_lock(&g_lock);
   flash_lock();
@@ -181,7 +181,7 @@ void stm32l5_flash_lock(void)
 }
 
 /****************************************************************************
- * Name: stm32l5_flash_user_optbytes
+ * Name: stm32_flash_user_optbytes
  *
  * Description:
  *   Modify the contents of the user option bytes (USR OPT) on the flash.
@@ -197,7 +197,7 @@ void stm32l5_flash_lock(void)
  *
  ****************************************************************************/
 
-uint32_t stm32l5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
+uint32_t stm32_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 {
   uint32_t regval;
 
@@ -214,22 +214,22 @@ uint32_t stm32l5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
   /* Modify Option Bytes in register. */
 
-  regval = getreg32(STM32L5_FLASH_OPTR);
+  regval = getreg32(STM32_FLASH_OPTR);
 
   finfo("Flash option bytes before: 0x%x\n", (unsigned)regval);
 
   regval = (regval & ~clrbits) | setbits;
-  putreg32(regval, STM32L5_FLASH_OPTR);
+  putreg32(regval, STM32_FLASH_OPTR);
 
   finfo("Flash option bytes after:  0x%x\n", (unsigned)regval);
 
   /* Start Option Bytes programming and wait for completion. */
 
-  modifyreg32(STM32L5_FLASH_NSCR, 0, FLASH_CR_OPTSTRT);
+  modifyreg32(STM32_FLASH_NSCR, 0, FLASH_CR_OPTSTRT);
 
-  while (getreg32(STM32L5_FLASH_NSSR) & FLASH_SR_BSY)
+  while (getreg32(STM32_FLASH_NSSR) & FLASH_SR_BSY)
     {
-      stm32l5_waste();
+      stm32_waste();
     }
 
   flash_optbytes_lock();
@@ -240,42 +240,42 @@ uint32_t stm32l5_flash_user_optbytes(uint32_t clrbits, uint32_t setbits)
 
 size_t up_progmem_pagesize(size_t page)
 {
-  return STM32L5_FLASH_PAGESIZE;
+  return STM32_FLASH_PAGESIZE;
 }
 
 size_t up_progmem_erasesize(size_t block)
 {
-  return STM32L5_FLASH_PAGESIZE;
+  return STM32_FLASH_PAGESIZE;
 }
 
 ssize_t up_progmem_getpage(size_t addr)
 {
-  if (addr >= STM32L5_FLASH_BASE)
+  if (addr >= STM32_FLASH_BASE)
     {
-      addr -= STM32L5_FLASH_BASE;
+      addr -= STM32_FLASH_BASE;
     }
 
-  if (addr >= STM32L5_FLASH_SIZE)
+  if (addr >= STM32_FLASH_SIZE)
     {
       return -EFAULT;
     }
 
-  return addr / STM32L5_FLASH_PAGESIZE;
+  return addr / STM32_FLASH_PAGESIZE;
 }
 
 size_t up_progmem_getaddress(size_t page)
 {
-  if (page >= STM32L5_FLASH_NPAGES)
+  if (page >= STM32_FLASH_NPAGES)
     {
       return SIZE_MAX;
     }
 
-  return page * STM32L5_FLASH_PAGESIZE + STM32L5_FLASH_BASE;
+  return page * STM32_FLASH_PAGESIZE + STM32_FLASH_BASE;
 }
 
 size_t up_progmem_neraseblocks(void)
 {
-  return STM32L5_FLASH_NPAGES;
+  return STM32_FLASH_NPAGES;
 }
 
 bool up_progmem_isuniform(void)
@@ -285,7 +285,7 @@ bool up_progmem_isuniform(void)
 
 ssize_t up_progmem_eraseblock(size_t block)
 {
-  if (block >= STM32L5_FLASH_NPAGES)
+  if (block >= STM32_FLASH_NPAGES)
     {
       return -EFAULT;
     }
@@ -318,7 +318,7 @@ ssize_t up_progmem_ispageerased(size_t page)
   size_t count;
   size_t bwritten = 0;
 
-  if (page >= STM32L5_FLASH_NPAGES)
+  if (page >= STM32_FLASH_NPAGES)
     {
       return -EFAULT;
     }
@@ -351,12 +351,12 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
   /* Check for valid address range. */
 
   offset = addr;
-  if (addr >= STM32L5_FLASH_BASE)
+  if (addr >= STM32_FLASH_BASE)
     {
-      offset -= STM32L5_FLASH_BASE;
+      offset -= STM32_FLASH_BASE;
     }
 
-  if (offset + buflen > STM32L5_FLASH_SIZE)
+  if (offset + buflen > STM32_FLASH_SIZE)
     {
       return -EFAULT;
     }
@@ -422,23 +422,23 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
 
       /* Write the page. Must be with double-words. */
 
-      modifyreg32(STM32L5_FLASH_NSCR, 0, FLASH_CR_PG);
+      modifyreg32(STM32_FLASH_NSCR, 0, FLASH_CR_PG);
 
       for (i = 0; i < FLASH_PAGE_WORDS; i += 2)
         {
           *dest++ = *src++;
           *dest++ = *src++;
 
-          while (getreg32(STM32L5_FLASH_NSSR) & FLASH_SR_BSY)
+          while (getreg32(STM32_FLASH_NSSR) & FLASH_SR_BSY)
             {
-              stm32l5_waste();
+              stm32_waste();
             }
 
           /* Verify */
 
-          if (getreg32(STM32L5_FLASH_NSSR) & FLASH_SR_WRITE_PROTECTION_ERROR)
+          if (getreg32(STM32_FLASH_NSSR) & FLASH_SR_WRITE_PROTECTION_ERROR)
             {
-              modifyreg32(STM32L5_FLASH_NSCR, FLASH_CR_PG, 0);
+              modifyreg32(STM32_FLASH_NSCR, FLASH_CR_PG, 0);
               ret = -EROFS;
               goto out;
             }
@@ -446,13 +446,13 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t buflen)
           if (getreg32(dest - 1) != *(src - 1) ||
               getreg32(dest - 2) != *(src - 2))
             {
-              modifyreg32(STM32L5_FLASH_NSCR, FLASH_CR_PG, 0);
+              modifyreg32(STM32_FLASH_NSCR, FLASH_CR_PG, 0);
               ret = -EIO;
               goto out;
             }
         }
 
-      modifyreg32(STM32L5_FLASH_NSCR, FLASH_CR_PG, 0);
+      modifyreg32(STM32_FLASH_NSCR, FLASH_CR_PG, 0);
 
       /* Adjust pointers and counts for the next time through the loop */
 
@@ -473,8 +473,8 @@ out:
   if (ret != OK)
     {
       ferr("flash write error: %d, status: 0x%x\n", ret,
-           (unsigned)getreg32(STM32L5_FLASH_NSSR));
-      modifyreg32(STM32L5_FLASH_NSSR, 0, FLASH_SR_ALLERRS);
+           (unsigned)getreg32(STM32_FLASH_NSSR));
+      modifyreg32(STM32_FLASH_NSSR, 0, FLASH_SR_ALLERRS);
     }
 
   flash_lock();

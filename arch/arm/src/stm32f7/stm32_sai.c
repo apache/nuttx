@@ -68,7 +68,7 @@
 #include "stm32_sai.h"
 #include "stm32_pwr.h"
 
-#ifdef CONFIG_STM32F7_SAI
+#ifdef CONFIG_STM32_SAI
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,11 +86,11 @@
 #  error CONFIG_I2S required by this driver
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_POLLING
+#ifdef CONFIG_STM32_SAI_POLLING
 #  error "Polling SAI not yet supported"
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_INTERRUPTS
+#ifdef CONFIG_STM32_SAI_INTERRUPTS
 #  error "Interrupt driven SAI not yet supported"
 #endif
 
@@ -106,19 +106,19 @@
 #  define CONFIG_STM32F7_SAI_MAXINFLIGHT         (16)
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1
-#ifndef STM32F7_SAI1_FREQUENCY
-#  error "Please define STM32F7_SAI1_FREQUENCY in board.h"
+#ifdef CONFIG_STM32_SAI1
+#ifndef STM32_SAI1_FREQUENCY
+#  error "Please define STM32_SAI1_FREQUENCY in board.h"
 #endif
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2
-#ifndef STM32F7_SAI2_FREQUENCY
-#  error "Please define STM32F7_SAI1_FREQUENCY in board.h"
+#ifdef CONFIG_STM32_SAI2
+#ifndef STM32_SAI2_FREQUENCY
+#  error "Please define STM32_SAI1_FREQUENCY in board.h"
 #endif
 #endif
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 /* SAI DMA priority */
 
 #  if defined(CONFIG_STM32F7_SAI_DMAPRIO)
@@ -194,7 +194,7 @@ struct stm32f7_sai_s
   mutex_t lock;                /* Assures mutually exclusive access to SAI */
   uint32_t frequency;          /* SAI clock frequency */
   uint32_t syncen;             /* Synchronization setting */
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   uint16_t dma_ch;             /* DMA channel number */
   DMA_HANDLE dma;              /* DMA channel handle */
   uint32_t dma_ccr;            /* DMA control register */
@@ -236,15 +236,15 @@ static void     sai_buf_initialize(struct stm32f7_sai_s *priv);
 
 /* DMA support */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static void     sai_schedule(struct stm32f7_sai_s *priv, int result);
 static void     sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg);
 #endif
 
 /* I2S methods */
 
-static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  sai_samplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  sai_datawidth(struct i2s_dev_s *dev, int bits);
 static int      sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                   i2s_callback_t callback, void *arg, uint32_t timeout);
 static int      sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
@@ -274,19 +274,19 @@ static const struct i2s_ops_s g_i2sops =
 
 /* SAI1 state */
 
-#ifdef CONFIG_STM32F7_SAI1_A
+#ifdef CONFIG_STM32_SAI1_A
 static struct stm32f7_sai_s g_sai1a_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32F7_SAI1_A_BASE,
+  .base        = STM32_SAI1_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32F7_SAI1_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI1_A_SYNC_WITH_B
+  .frequency   = STM32_SAI1_FREQUENCY,
+#ifdef CONFIG_STM32_SAI1_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_A,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -295,19 +295,19 @@ static struct stm32f7_sai_s g_sai1a_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1_B
+#ifdef CONFIG_STM32_SAI1_B
 static struct stm32f7_sai_s g_sai1b_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32F7_SAI1_B_BASE,
+  .base        = STM32_SAI1_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32F7_SAI1_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI1_B_SYNC_WITH_A
+  .frequency   = STM32_SAI1_FREQUENCY,
+#ifdef CONFIG_STM32_SAI1_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI1_B,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -318,19 +318,19 @@ static struct stm32f7_sai_s g_sai1b_priv =
 
 /* SAI2 state */
 
-#ifdef CONFIG_STM32F7_SAI2_A
+#ifdef CONFIG_STM32_SAI2_A
 static struct stm32f7_sai_s g_sai2a_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32F7_SAI2_A_BASE,
+  .base        = STM32_SAI2_A_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32F7_SAI2_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI2_A_SYNC_WITH_B
+  .frequency   = STM32_SAI2_FREQUENCY,
+#ifdef CONFIG_STM32_SAI2_A_SYNC_WITH_B
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_A,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -339,19 +339,19 @@ static struct stm32f7_sai_s g_sai2a_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_B
+#ifdef CONFIG_STM32_SAI2_B
 static struct stm32f7_sai_s g_sai2b_priv =
 {
   .dev.ops     = &g_i2sops,
-  .base        = STM32F7_SAI2_B_BASE,
+  .base        = STM32_SAI2_B_BASE,
   .lock        = NXMUTEX_INITIALIZER,
-  .frequency   = STM32F7_SAI2_FREQUENCY,
-#ifdef CONFIG_STM32F7_SAI2_B_SYNC_WITH_A
+  .frequency   = STM32_SAI2_FREQUENCY,
+#ifdef CONFIG_STM32_SAI2_B_SYNC_WITH_A
   .syncen      = SAI_CR1_SYNCEN_INTERNAL,
 #else
   .syncen      = SAI_CR1_SYNCEN_ASYNCH,
 #endif
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   .dma_ch      = DMACHAN_SAI2_B,
 #endif
   .datalen     = CONFIG_STM32F7_SAI_DEFAULT_DATALEN,
@@ -479,30 +479,30 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 #if 0
   i2sinfo("CR1:%08" PRIx32 " CR2:%08" PRIx32
           "  FRCR:%08" PRIx32 " SLOTR:%08" PRIx32 "\n",
-          sai_getreg(priv, STM32F7_SAI_CR1_OFFSET),
-          sai_getreg(priv, STM32F7_SAI_CR2_OFFSET),
-          sai_getreg(priv, STM32F7_SAI_FRCR_OFFSET),
-          sai_getreg(priv, STM32F7_SAI_SLOTR_OFFSET));
+          sai_getreg(priv, STM32_SAI_CR1_OFFSET),
+          sai_getreg(priv, STM32_SAI_CR2_OFFSET),
+          sai_getreg(priv, STM32_SAI_FRCR_OFFSET),
+          sai_getreg(priv, STM32_SAI_SLOTR_OFFSET));
   i2sinfo(" IM:%08" PRIx32 "  SR:%08" PRIx32
           " CLRFR:%08" PRIx32 "\n",
-          sai_getreg(priv, STM32F7_SAI_IM_OFFSET),
-          sai_getreg(priv, STM32F7_SAI_SR_OFFSET),
-          sai_getreg(priv, STM32F7_SAI_CLRFR_OFFSET));
+          sai_getreg(priv, STM32_SAI_IM_OFFSET),
+          sai_getreg(priv, STM32_SAI_SR_OFFSET),
+          sai_getreg(priv, STM32_SAI_CLRFR_OFFSET));
 #else
   /* GCR */
 
-#ifdef CONFIG_STM32F7_SAI1
-  uint32_t gcr = getreg32(STM32F7_SAI1_GCR);
-  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI1_GCR, gcr);
+#ifdef CONFIG_STM32_SAI1
+  uint32_t gcr = getreg32(STM32_SAI1_GCR);
+  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32_SAI1_GCR, gcr);
 #else
-  uint32_t gcr = getreg32(STM32F7_SAI2_GCR);
-  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI2_GCR, gcr);
+  uint32_t gcr = getreg32(STM32_SAI2_GCR);
+  i2sinfo("GCR: *%08x = %08" PRIx32 "\n", STM32_SAI2_GCR, gcr);
 #endif
 
   /* CR1 */
 
-  uint32_t cr1 = sai_getreg(priv, STM32F7_SAI_CR1_OFFSET);
-  i2sinfo("CR1: *%08" PRIx32 " = %08x\n", STM32F7_SAI_CR1_OFFSET, cr1);
+  uint32_t cr1 = sai_getreg(priv, STM32_SAI_CR1_OFFSET);
+  i2sinfo("CR1: *%08" PRIx32 " = %08x\n", STM32_SAI_CR1_OFFSET, cr1);
 
   uint32_t mode = (cr1 & SAI_CR1_MODE_MASK) >> SAI_CR1_MODE_SHIFT;
   const char *mode_string[] =
@@ -584,8 +584,8 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   /* CR2 */
 
-  uint32_t cr2 = sai_getreg(priv, STM32F7_SAI_CR2_OFFSET);
-  i2sinfo("CR2: *%08x = %08" PRIx32 "\n", STM32F7_SAI_CR2_OFFSET, cr2);
+  uint32_t cr2 = sai_getreg(priv, STM32_SAI_CR2_OFFSET);
+  i2sinfo("CR2: *%08x = %08" PRIx32 "\n", STM32_SAI_CR2_OFFSET, cr2);
   uint32_t fth = (cr2 & SAI_CR2_FTH_MASK) >> SAI_CR2_FTH_SHIFT;
   const char *fth_string[] =
   { "FIFO empty",
@@ -638,8 +638,8 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   /* FRCR */
 
-  uint32_t frcr = sai_getreg(priv, STM32F7_SAI_FRCR_OFFSET);
-  i2sinfo("FRCR: *%08x = %08" PRIx32 "\n", STM32F7_SAI_FRCR_OFFSET, frcr);
+  uint32_t frcr = sai_getreg(priv, STM32_SAI_FRCR_OFFSET);
+  i2sinfo("FRCR: *%08x = %08" PRIx32 "\n", STM32_SAI_FRCR_OFFSET, frcr);
 
   uint32_t frl = (frcr & SAI_FRCR_FRL_MASK) >> SAI_FRCR_FRL_SHIFT;
   i2sinfo("\t\tFRCR: FRL[7:0] = %d\n", frl);
@@ -662,8 +662,8 @@ static void sai_dump_regs(struct stm32f7_sai_s *priv, const char *msg)
 
   /* SLOTR */
 
-  uint32_t slotr = sai_getreg(priv, STM32F7_SAI_SLOTR_OFFSET);
-  i2sinfo("SLOTR: *%08x = %08" PRIx32 "\n", STM32F7_SAI_SLOTR_OFFSET, slotr);
+  uint32_t slotr = sai_getreg(priv, STM32_SAI_SLOTR_OFFSET);
+  i2sinfo("SLOTR: *%08x = %08" PRIx32 "\n", STM32_SAI_SLOTR_OFFSET, slotr);
 
   uint32_t fboff = (slotr & SAI_SLOTR_FBOFF_MASK) >> SAI_SLOTR_FBOFF_SHIFT;
   i2sinfo("\t\tSLOTR: FBOFF[4:0] = %d\n", fboff);
@@ -731,7 +731,7 @@ static void sai_mckdivider(struct stm32f7_sai_s *priv)
       mckdiv += 1;
     }
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, SAI_CR1_MCKDIV_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MCKDIV_MASK,
                 mckdiv << SAI_CR1_MCKDIV_SHIFT);
 }
 
@@ -757,7 +757,7 @@ static void sai_timeout(wdparm_t arg)
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
   DEBUGASSERT(priv != NULL);
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   /* Cancel the DMA */
 
   stm32_dmastop(priv->dma);
@@ -787,7 +787,7 @@ static void sai_timeout(wdparm_t arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static int sai_dma_setup(struct stm32f7_sai_s *priv)
 {
   struct sai_buffer_s *bfcontainer;
@@ -878,7 +878,7 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
 
   DEBUGASSERT(ntransfers > 0);
 
-  stm32_dmasetup(priv->dma, priv->base + STM32F7_SAI_DR_OFFSET,
+  stm32_dmasetup(priv->dma, priv->base + STM32_SAI_DR_OFFSET,
                  samp, ntransfers, priv->dma_ccr);
 
   /* Add the container to the list of active DMAs */
@@ -891,7 +891,7 @@ static int sai_dma_setup(struct stm32f7_sai_s *priv)
 
   /* Enable the transmitter */
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
 
   /* Start a watchdog to catch DMA timeouts */
 
@@ -959,7 +959,7 @@ static void sai_worker(void *arg)
        */
 
       flags = enter_critical_section();
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
       sai_dma_setup(priv);
 #endif
       leave_critical_section(flags);
@@ -1071,7 +1071,7 @@ static void sai_schedule(struct stm32f7_sai_s *priv, int result)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
 static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)arg;
@@ -1102,7 +1102,7 @@ static void sai_dma_callback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)dev;
 
@@ -1143,7 +1143,7 @@ static uint32_t sai_samplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
+static int32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
 {
   struct stm32f7_sai_s *priv = (struct stm32f7_sai_s *)dev;
   uint32_t setbits;
@@ -1169,9 +1169,9 @@ static uint32_t sai_datawidth(struct i2s_dev_s *dev, int bits)
         return 0;
     }
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, SAI_CR1_DS_MASK, setbits);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_DS_MASK, setbits);
 
-  sai_modifyreg(priv, STM32F7_SAI_FRCR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_FRCR_OFFSET,
                 SAI_FRCR_FSALL_MASK | SAI_FRCR_FRL_MASK,
                 SAI_FRCR_FSALL(bits) | SAI_FRCR_FRL(bits * 2));
 
@@ -1244,7 +1244,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_RX : SAI_CR1_MODE_MASTER_RX;
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
   priv->rxenab = true;
 
   /* Add a reference to the audio buffer */
@@ -1268,7 +1268,7 @@ static int sai_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    * progress, then this will do nothing.
    */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   ret = sai_dma_setup(priv);
 #endif
   DEBUGASSERT(ret == OK);
@@ -1344,7 +1344,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
     }
 
   mode = priv->syncen ? SAI_CR1_MODE_SLAVE_TX : SAI_CR1_MODE_MASTER_TX;
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_MODE_MASK, mode);
   priv->txenab = true;
 
   /* Add a reference to the audio buffer */
@@ -1368,7 +1368,7 @@ static int sai_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
    * progress, then this will do nothing.
    */
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   ret = sai_dma_setup(priv);
 #endif
   DEBUGASSERT(ret == OK);
@@ -1522,34 +1522,34 @@ static void sai_portinitialize(struct stm32f7_sai_s *priv)
   sai_datawidth((struct i2s_dev_s *)priv,
                 CONFIG_STM32F7_SAI_DEFAULT_DATALEN);
 
-#ifdef CONFIG_STM32F7_SAI_DMA
+#ifdef CONFIG_STM32_SAI_DMA
   /* Get DMA channel */
 
   priv->dma = stm32_dmachannel(priv->dma_ch);
   DEBUGASSERT(priv->dma);
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, 0, SAI_CR1_DMAEN);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_DMAEN);
 #endif
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, SAI_CR1_SYNCEN_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, SAI_CR1_SYNCEN_MASK,
                 priv->syncen);
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, 0, SAI_CR1_OUTDRIV);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_OUTDRIV);
 
-  sai_modifyreg(priv, STM32F7_SAI_CR2_OFFSET, SAI_CR2_FTH_MASK,
+  sai_modifyreg(priv, STM32_SAI_CR2_OFFSET, SAI_CR2_FTH_MASK,
                 SAI_CR2_FTH_1QF);
 
-  sai_modifyreg(priv, STM32F7_SAI_FRCR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_FRCR_OFFSET,
                 SAI_FRCR_FSDEF | SAI_FRCR_FSPOL | SAI_FRCR_FSOFF,
                 SAI_FRCR_FSDEF_CHID | SAI_FRCR_FSPOL_LOW |
                   SAI_FRCR_FSOFF_BFB);
 
-  sai_modifyreg(priv, STM32F7_SAI_SLOTR_OFFSET,
+  sai_modifyreg(priv, STM32_SAI_SLOTR_OFFSET,
                 SAI_SLOTR_NBSLOT_MASK | SAI_SLOTR_SLOTEN_MASK,
                 SAI_SLOTR_NBSLOT(2) | SAI_SLOTR_SLOTEN_0 |
                   SAI_SLOTR_SLOTEN_1);
 
-  sai_modifyreg(priv, STM32F7_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
+  sai_modifyreg(priv, STM32_SAI_CR1_OFFSET, 0, SAI_CR1_SAIEN);
   sai_dump_regs(priv, "After initialization");
 }
 
@@ -1581,7 +1581,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
 
   switch (intf)
     {
-#ifdef CONFIG_STM32F7_SAI1_A
+#ifdef CONFIG_STM32_SAI1_A
       case SAI1_BLOCK_A:
         {
           i2sinfo("SAI1 Block A Selected\n");
@@ -1589,7 +1589,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_A);
-#  ifndef CONFIG_STM32F7_SAI1_A_SYNC_WITH_B
+#  ifndef CONFIG_STM32_SAI1_A_SYNC_WITH_B
           stm32_configgpio(GPIO_SAI1_FS_A);
           stm32_configgpio(GPIO_SAI1_SCK_A);
           stm32_configgpio(GPIO_SAI1_MCLK_A);
@@ -1598,7 +1598,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI1_B
+#ifdef CONFIG_STM32_SAI1_B
       case SAI1_BLOCK_B:
         {
           i2sinfo("SAI1 Block B Selected\n");
@@ -1606,7 +1606,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI1_SD_B);
-#  ifndef CONFIG_STM32F7_SAI1_B_SYNC_WITH_A
+#  ifndef CONFIG_STM32_SAI1_B_SYNC_WITH_A
           stm32_configgpio(GPIO_SAI1_FS_B);
           stm32_configgpio(GPIO_SAI1_SCK_B);
           stm32_configgpio(GPIO_SAI1_MCLK_B);
@@ -1615,7 +1615,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_A
+#ifdef CONFIG_STM32_SAI2_A
       case SAI2_BLOCK_A:
         {
           i2sinfo("SAI2 Block A Selected\n");
@@ -1623,7 +1623,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_A);
-#  ifndef CONFIG_STM32F7_SAI2_A_SYNC_WITH_B
+#  ifndef CONFIG_STM32_SAI2_A_SYNC_WITH_B
           stm32_configgpio(GPIO_SAI2_FS_A);
           stm32_configgpio(GPIO_SAI2_SCK_A);
           stm32_configgpio(GPIO_SAI2_MCLK_A);
@@ -1632,7 +1632,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
         }
 #endif
 
-#ifdef CONFIG_STM32F7_SAI2_B
+#ifdef CONFIG_STM32_SAI2_B
       case SAI2_BLOCK_B:
         {
           i2sinfo("SAI2 Block B Selected\n");
@@ -1640,7 +1640,7 @@ struct i2s_dev_s *stm32_sai_initialize(int intf,
           priv->sampleratecb = sampleratecb;
 
           stm32_configgpio(GPIO_SAI2_SD_B);
-#  ifndef CONFIG_STM32F7_SAI2_B_SYNC_WITH_A
+#  ifndef CONFIG_STM32_SAI2_B_SYNC_WITH_A
           stm32_configgpio(GPIO_SAI2_FS_B);
           stm32_configgpio(GPIO_SAI2_SCK_B);
           stm32_configgpio(GPIO_SAI2_MCLK_B);

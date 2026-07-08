@@ -57,11 +57,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32F7_FMC
+#ifndef CONFIG_STM32_FMC
 #  warning "FMC is not enabled"
 #endif
 
-#if STM32F7_NGPIO < 7
+#if STM32_NGPIO < 7
 #  error "Required GPIO ports not enabled"
 #endif
 

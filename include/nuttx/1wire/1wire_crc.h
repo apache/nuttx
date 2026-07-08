@@ -83,6 +83,22 @@ uint16_t onewire_crc16(FAR const uint8_t *input, uint16_t len,
                        uint16_t initial_crc);
 
 /****************************************************************************
+ * Name: onewire_valid_rom
+ *
+ * Description:
+ *   Check CRC-8 of received input
+ *
+ * Input Parameters:
+ *   rom   - 64-bit rom code
+ *
+ * Returned Value:
+ *   true if CRC-8 of rom matches
+ *
+ ****************************************************************************/
+
+bool onewire_valid_rom(uint64_t rom);
+
+/****************************************************************************
  * Name: onewire_check_crc16
  *
  * Description:

@@ -32,11 +32,11 @@ else
   endif
 endif
 
-ifeq ($(CONFIG_STM32H7_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
-ifeq ($(CONFIG_STM32H7_SDMMC),y)
+ifeq ($(CONFIG_STM32_SDMMC),y)
 CSRCS += stm32_sdmmc.c
 endif
 
@@ -68,7 +68,7 @@ ifeq ($(CONFIG_CL_MFRC522),y)
   CSRCS += stm32_mfrc522.c
 endif
 
-ifeq ($(CONFIG_STM32H7_LTDC),y)
+ifeq ($(CONFIG_STM32_LTDC),y)
 CSRCS += stm32_lcd.c
 endif
 

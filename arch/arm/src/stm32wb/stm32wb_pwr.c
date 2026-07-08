@@ -39,20 +39,20 @@
  * Private Functions
  ****************************************************************************/
 
-static inline uint16_t stm32wb_pwr_getreg(uint8_t offset)
+static inline uint16_t stm32_pwr_getreg(uint8_t offset)
 {
-  return (uint16_t)getreg32(STM32WB_PWR_BASE + (uint32_t)offset);
+  return (uint16_t)getreg32(STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32wb_pwr_putreg(uint8_t offset, uint16_t value)
+static inline void stm32_pwr_putreg(uint8_t offset, uint16_t value)
 {
-  putreg32((uint32_t)value, STM32WB_PWR_BASE + (uint32_t)offset);
+  putreg32((uint32_t)value, STM32_PWR_BASE + (uint32_t)offset);
 }
 
-static inline void stm32wb_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
+static inline void stm32_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
                                          uint16_t setbits)
 {
-  modifyreg32(STM32WB_PWR_BASE + (uint32_t)offset,
+  modifyreg32(STM32_PWR_BASE + (uint32_t)offset,
               (uint32_t)clearbits, (uint32_t)setbits);
 }
 
@@ -61,7 +61,7 @@ static inline void stm32wb_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_pwr_enablebkp
+ * Name: stm32_pwr_enablebkp
  *
  * Description:
  *   Enables access to the backup domain (RTC registers and backup
@@ -75,14 +75,14 @@ static inline void stm32wb_pwr_modifyreg(uint8_t offset, uint16_t clearbits,
  *
  ****************************************************************************/
 
-bool stm32wb_pwr_enablebkp(bool writable)
+bool stm32_pwr_enablebkp(bool writable)
 {
   uint16_t regval;
   bool waswritable;
 
   /* Get the current state of the STM32WB PWR control register 1 */
 
-  regval      = stm32wb_pwr_getreg(STM32WB_PWR_CR1_OFFSET);
+  regval      = stm32_pwr_getreg(STM32_PWR_CR1_OFFSET);
   waswritable = ((regval & PWR_CR1_DBP) != 0);
 
   /* Enable or disable the ability to write */
@@ -92,14 +92,14 @@ bool stm32wb_pwr_enablebkp(bool writable)
       /* Disable backup domain access */
 
       regval &= ~PWR_CR1_DBP;
-      stm32wb_pwr_putreg(STM32WB_PWR_CR1_OFFSET, regval);
+      stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
     }
   else if (!waswritable && writable)
     {
       /* Enable backup domain access */
 
       regval |= PWR_CR1_DBP;
-      stm32wb_pwr_putreg(STM32WB_PWR_CR1_OFFSET, regval);
+      stm32_pwr_putreg(STM32_PWR_CR1_OFFSET, regval);
 
       /* Enable does not happen right away */
 
@@ -110,7 +110,7 @@ bool stm32wb_pwr_enablebkp(bool writable)
 }
 
 /****************************************************************************
- * Name: stm32wb_pwr_enableusv
+ * Name: stm32_pwr_enableusv
  *
  * Description:
  *   Enables or disables the USB Supply Valid monitoring.  Setting this bit
@@ -125,14 +125,14 @@ bool stm32wb_pwr_enablebkp(bool writable)
  *
  ****************************************************************************/
 
-bool stm32wb_pwr_enableusv(bool set)
+bool stm32_pwr_enableusv(bool set)
 {
   uint32_t regval;
   bool was_set;
 
   /* Get the current state of the STM32WB PWR control register 2 */
 
-  regval  = stm32wb_pwr_getreg(STM32WB_PWR_CR2_OFFSET);
+  regval  = stm32_pwr_getreg(STM32_PWR_CR2_OFFSET);
   was_set = ((regval & PWR_CR2_USV) != 0);
 
   /* Enable or disable the ability to write */
@@ -142,14 +142,14 @@ bool stm32wb_pwr_enableusv(bool set)
       /* Disable the Vddusb monitoring */
 
       regval &= ~PWR_CR2_USV;
-      stm32wb_pwr_putreg(STM32WB_PWR_CR2_OFFSET, regval);
+      stm32_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
   else if (!was_set && set)
     {
       /* Enable the Vddusb monitoring */
 
       regval |= PWR_CR2_USV;
-      stm32wb_pwr_putreg(STM32WB_PWR_CR2_OFFSET, regval);
+      stm32_pwr_putreg(STM32_PWR_CR2_OFFSET, regval);
     }
 
   return was_set;
@@ -183,7 +183,7 @@ void stm32_pwr_setvos(int vos)
       return;
     }
 
-  regval  = getreg32(STM32WB_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval &= ~PWR_CR1_VOS_MASK;
 
   if (vos == 1)
@@ -195,5 +195,5 @@ void stm32_pwr_setvos(int vos)
       regval |= PWR_CR1_VOS_RANGE2;
     }
 
-  putreg32(regval, STM32WB_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 }

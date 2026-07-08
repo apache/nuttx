@@ -60,4 +60,12 @@ config RPI4B_FRAMEBUFFER
 	---help---
 		Registers a frame buffer character driver for graphical output.
 
+config RPI4B_BMP280
+	bool "BMP280 driver registration"
+	default n
+	depends on BCM2711_I2C1
+	depends on SENSORS_BMP280
+	---help---
+		Registers the driver for the BMP280 sensor on I2C1 for experimenting.
+
 endif # ARCH_BOARD_RASPBERRYPI_4B

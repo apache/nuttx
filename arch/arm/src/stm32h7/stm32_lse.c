@@ -42,16 +42,16 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 #define LSERDY_TIMEOUT (500 * CONFIG_BOARD_LOOPSPERMSEC)
 
-#ifdef CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
-#  if CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
 
-#ifdef CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-#  if CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
@@ -96,7 +96,7 @@ void stm32_rcc_enablelse(void)
 {
   uint32_t         regval;
   volatile int32_t timeout;
-#ifdef CONFIG_STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
   volatile int32_t drive = 0;
 #endif
   const uint32_t   *drives = drives_rev_y;
@@ -131,18 +131,18 @@ void stm32_rcc_enablelse(void)
 
       regval |= RCC_BDCR_LSEON;
 
-#ifdef CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
       /* Set start-up drive capability for LSE oscillator. With the
        * enable off
        */
 
       regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
-      regval |= drives[CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY];
+      regval |= drives[CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY];
       putreg32(regval, STM32_RCC_BDCR);
       regval |= RCC_BDCR_LSEON;
 #endif
 
-#ifdef CONFIG_STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
       do
         {
           regval &= ~(RCC_BDCR_LSEDRV_MASK | RCC_BDCR_LSEON);
@@ -170,7 +170,7 @@ void stm32_rcc_enablelse(void)
                 }
             }
 
-#ifdef CONFIG_STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
           if (timeout != 0)
             {
               break;
@@ -179,13 +179,13 @@ void stm32_rcc_enablelse(void)
       while (drive < sizeof(drives_rev_y) / sizeof(drives_rev_y[0]));
 
 #endif
-#if defined(CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
-    CONFIG_STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY != \
-    CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#if defined(CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
+    CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY != \
+    CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= drives[CONFIG_STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY];
+      regval |= drives[CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY];
       putreg32(regval, STM32_RCC_BDCR);
 #endif
 

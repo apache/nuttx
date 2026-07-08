@@ -129,9 +129,9 @@ configuration no builtin applications are selected.
 
        And these for enabling the STM32 timer PWM channel:
 
-       CONFIG_STM32F7_TIM1=y
-       CONFIG_STM32F7_TIM1_PWM=y
-       CONFIG_STM32F7_TIM1_CHANNEL=4
+       CONFIG_STM32_TIM1=y
+       CONFIG_STM32_TIM1_PWM=y
+       CONFIG_STM32_TIM1_CHANNEL=4
 
 nsh-ehternet
 ------------

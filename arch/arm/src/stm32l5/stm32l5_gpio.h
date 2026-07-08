@@ -39,7 +39,7 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 #  include "hardware/stm32l5_gpio.h"
 #else
 #  error "Unsupported STM32L5 chip"
@@ -49,7 +49,7 @@
  * Pre-Processor Declarations
  ****************************************************************************/
 
-/* Bit-encoded input to stm32l5_configgpio() */
+/* Bit-encoded input to stm32_configgpio() */
 
 /* Each port bit of the general-purpose I/O (GPIO) ports can be individually
  * configured by software in several modes:
@@ -241,19 +241,19 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32L5_NPORTS];
+EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_configgpio
+ * Name: stm32_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
- *   function, it must be unconfigured with stm32l5_unconfiggpio() with
+ *   function, it must be unconfigured with stm32_unconfiggpio() with
  *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returned Value:
@@ -262,10 +262,10 @@ EXTERN const uint32_t g_gpiobase[STM32L5_NPORTS];
  *
  ****************************************************************************/
 
-int stm32l5_configgpio(uint32_t cfgset);
+int stm32_configgpio(uint32_t cfgset);
 
 /****************************************************************************
- * Name: stm32l5_unconfiggpio
+ * Name: stm32_unconfiggpio
  *
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
@@ -284,30 +284,30 @@ int stm32l5_configgpio(uint32_t cfgset);
  *
  ****************************************************************************/
 
-int stm32l5_unconfiggpio(uint32_t cfgset);
+int stm32_unconfiggpio(uint32_t cfgset);
 
 /****************************************************************************
- * Name: stm32l5_gpiowrite
+ * Name: stm32_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void stm32l5_gpiowrite(uint32_t pinset, bool value);
+void stm32_gpiowrite(uint32_t pinset, bool value);
 
 /****************************************************************************
- * Name: stm32l5_gpioread
+ * Name: stm32_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ****************************************************************************/
 
-bool stm32l5_gpioread(uint32_t pinset);
+bool stm32_gpioread(uint32_t pinset);
 
 /****************************************************************************
- * Name: stm32l5_gpiosetevent
+ * Name: stm32_gpiosetevent
  *
  * Description:
  *   Sets/clears GPIO based event and interrupt triggers.
@@ -326,11 +326,11 @@ bool stm32l5_gpioread(uint32_t pinset);
  *
  ****************************************************************************/
 
-int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
                          bool event, xcpt_t func, void *arg);
 
 /****************************************************************************
- * Function:  stm32l5_dumpgpio
+ * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
@@ -338,23 +338,23 @@ int stm32l5_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FEATURES
-int stm32l5_dumpgpio(uint32_t pinset, const char *msg);
+int stm32_dumpgpio(uint32_t pinset, const char *msg);
 #else
-#  define stm32l5_dumpgpio(p,m)
+#  define stm32_dumpgpio(p,m)
 #endif
 
 /****************************************************************************
- * Function:  stm32l5_gpioinit
+ * Function:  stm32_gpioinit
  *
  * Description:
  *   Based on configuration within the .config file, it does:
  *    - Remaps positions of alternative functions.
  *
- *   Typically called from stm32l5_start().
+ *   Typically called from stm32_start().
  *
  ****************************************************************************/
 
-void stm32l5_gpioinit(void);
+void stm32_gpioinit(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -56,7 +56,7 @@
 
 #define STM32_SYSCFG_UR_OFFSET(n)     (0x0300 + ((n) << 2))
 #define STM32_SYSCFG_UR0_OFFSET       0x0300 /* User register 0 */
-#ifdef CONFIG_STM32H7_HAVE_CM4
+#ifdef CONFIG_STM32_HAVE_CM4
 #  define STM32_SYSCFG_UR1_OFFSET     0x0304 /* User register 2 */
 #endif
 #define STM32_SYSCFG_UR2_OFFSET       0x0308 /* User register 2 */
@@ -92,7 +92,7 @@
 #define STM32_SYSCFG_PWRCR            (STM32_SYSCFG_BASE + STM32_SYSCFG_PWRCR_OFFSET)
 
 #define STM32_SYSCFG_UR0              (STM32_SYSCFG_BASE + STM32_SYSCFG_UR0_OFFSET)
-#ifdef CONFIG_STM32H7_HAVE_CM4
+#ifdef CONFIG_STM32_HAVE_CM4
 #  define STM32_SYSCFG_UR1            (STM32_SYSCFG_BASE + STM32_SYSCFG_UR1_OFFSET)
 #endif
 #define STM32_SYSCFG_UR2              (STM32_SYSCFG_BASE + STM32_SYSCFG_UR2_OFFSET)
@@ -220,7 +220,7 @@
 
 /* User register 1 */
 
-#ifdef CONFIG_STM32H7_HAVE_CM4
+#ifdef CONFIG_STM32_HAVE_CM4
 #  define SYSCFG_UR1_BCM4            (1 << 0)  /* Bit 0: Boot Cortex-M4 */
 #  define SYSCFG_UR1_BCM7            (1 << 16) /* Bit 16: Boot Cortex-M7 */
 #endif

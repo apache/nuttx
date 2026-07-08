@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#ifdef CONFIG_MM_KASAN_GLOBAL
+#if defined(CONFIG_MM_KASAN_GLOBAL) && defined(__KERNEL__)
 #  include "global.c"
 #else
 #  define kasan_global_is_poisoned(addr, size) false

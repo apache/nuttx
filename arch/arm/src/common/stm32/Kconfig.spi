@@ -1,0 +1,300 @@
+#
+# STM32 common SPI options.
+#
+
+config STM32_SPI_DMA
+	bool
+	depends on STM32_HAVE_SPI_CORE_DMA
+
+config STM32_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	depends on STM32_SPI
+	depends on STM32_COMMON_FULL_FEATURED || ARCH_CHIP_STM32WL5 || ARCH_CHIP_STM32WB && (STM32_SPI1 || STM32_SPI2)
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32_SPI1_DMA
+	bool "SPI1 DMA"
+	depends on STM32_SPI && STM32_SPI1
+	depends on STM32_HAVE_SPI_DMA_FAMILY_WL5 && !STM32_SPI_INTERRUPT || STM32_COMMON_F0_L0_G0_C0 && !STM32_SPI_INTERRUPTS
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI1_DMA_BUFFER
+	int "SPI1 DMA buffer size"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WL5) && STM32_SPI1_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
+
+config STM32_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WL5) && STM32_SPI_DMA
+	default 4
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.
+
+config STM32_SPI2_DMA
+	bool "SPI2 DMA"
+	depends on STM32_SPI && STM32_SPI2
+	depends on STM32_HAVE_SPI_DMA_FAMILY && !STM32_SPI_INTERRUPT || STM32_COMMON_F0_L0_G0_C0 && !STM32_SPI_INTERRUPTS
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI2_DMA_BUFFER
+	int "SPI2 DMA buffer size"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI2_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
+
+config STM32_SPI3_DMA
+	bool "SPI3 DMA"
+	depends on STM32_SPI && STM32_SPI3
+	depends on STM32_HAVE_SPI_DMA_FAMILY && !STM32_SPI_INTERRUPT || STM32_COMMON_F0_L0_G0_C0 && !STM32_SPI_INTERRUPTS
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI3_DMA_BUFFER
+	int "SPI3 DMA buffer size"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI3_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
+
+config STM32_SPI4_DMA
+	bool "SPI4 DMA"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI && STM32_SPI4 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI4_DMA_BUFFER
+	int "SPI4 DMA buffer size"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI4_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
+
+config STM32_SPI5_DMA
+	bool "SPI5 DMA"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI && STM32_SPI5 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI5_DMA_BUFFER
+	int "SPI5 DMA buffer size"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI5_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
+
+config STM32_SPI6_DMA
+	bool "SPI6 DMA"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7_H5) && STM32_SPI && STM32_SPI6 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32_SPI_INTERRUPT.
+
+config STM32_SPI1_COMMTYPE
+	int "SPI1 Operation mode"
+	depends on (STM32_COMMON_F0_L0_G0_C0 || STM32_COMMON_H7_H5) && STM32_SPI && STM32_SPI1
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32_SPI2_COMMTYPE
+	int "SPI2 Operation mode"
+	depends on (STM32_COMMON_F0_L0_G0_C0 || STM32_COMMON_H7_H5) && STM32_SPI && STM32_SPI2
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32_SPI3_COMMTYPE
+	int "SPI3 Operation mode"
+	depends on (STM32_COMMON_F0_L0_G0_C0 || STM32_COMMON_H7_H5) && STM32_SPI && STM32_SPI3
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32_SPI6_DMA_BUFFER
+	int "SPI6 DMA buffer size"
+	depends on (STM32_COMMON_F7_H7_H5) && STM32_SPI6_DMA
+	default 0
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
+
+config STM32_SPI4_COMMTYPE
+	int "SPI4 Operation mode"
+	depends on STM32_COMMON_H7_H5 && STM32_SPI && STM32_SPI4
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32_SPI5_COMMTYPE
+	int "SPI5 Operation mode"
+	depends on STM32_COMMON_H7_H5 && STM32_SPI && STM32_SPI5
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+config STM32_SPI6_COMMTYPE
+	int "SPI6 Operation mode"
+	depends on STM32_COMMON_H7_H5 && STM32_SPI && STM32_SPI6
+	default 0
+	range 0 3
+	---help---
+		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
+
+menu "I2S Configuration"
+	depends on STM32_I2S
+
+config STM32_SPI2S2_DMA
+	bool "SPI2S2 DMA"
+	depends on STM32_SPI2 && !STM32_SPI_INTERRUPT
+	select STM32_SPI_DMA
+	---help---
+		Use DMA to improve SPI2S2 transfer performance. Cannot be used with
+		STM32_SPI_INTERRUPT.
+
+config STM32_SPI2S2_DMA_BUFFER
+	int "SPI2S2 DMA buffer size"
+	default 0
+	depends on STM32_SPI2S2_DMA
+	---help---
+		Add a properly aligned DMA buffer for RX and TX DMA for SPI2S2.
+
+config STM32_I2S_MAXINFLIGHT
+	int "I2S queue size"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3) || (ARCH_CHIP_STM32F7 && STM32_I2S)
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
+config STM32_I2S3_DATALEN
+	int "Data width (bits)"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3) || (ARCH_CHIP_STM32F7 && STM32_I2S && STM32_I2S3)
+	default 16
+	---help---
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
+
+config STM32_I2S1_MCK
+	bool "I2S1_MCK"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S1
+	---help---
+		TBD.
+
+config STM32_I2S1_RX
+	bool "Enable I2S1 receiver"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S1
+	---help---
+		Enable I2S receipt logic
+
+config STM32_I2S1_TX
+	bool "Enable I2S1 transmitter"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S1
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S1_DATALEN
+	int "I2S1 Data width (bits)"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S1
+	default 16
+	---help---
+		Data width in bits. This is a default value and may be changed via
+		the I2S interface.
+
+config STM32_I2S2_MCK
+	bool "I2S2_MCK"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S2
+	---help---
+		TBD.
+
+config STM32_I2S2_RX
+	bool "Enable I2S2 receiver"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S2
+	---help---
+		Enable I2S receipt logic
+
+config STM32_I2S2_TX
+	bool "Enable I2S2 transmitter"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S2
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S2_DATALEN
+	int "I2S2 Data width (bits)"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S2
+	default 16
+	---help---
+		Data width in bits. This is a default value and may be changed via
+		the I2S interface.
+
+config STM32_I2S3_MCK
+	bool "I2S3_MCK"
+	depends on ARCH_CHIP_STM32F7 && STM32_I2S3
+	---help---
+		TBD.
+
+config STM32_I2S3_RX
+	bool "Enable I2S receiver"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3) || (ARCH_CHIP_STM32F7 && STM32_I2S && STM32_I2S3)
+	---help---
+		Enable I2S receipt logic
+
+config STM32_I2S3_TX
+	bool "Enable I2S transmitter"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3) || (ARCH_CHIP_STM32F7 && STM32_I2S && STM32_I2S3)
+	---help---
+		Enable I2S transmission logic
+
+config STM32_I2S_DMADEBUG
+	bool "I2S DMA transfer debug"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3 && DEBUG_DMA) || (ARCH_CHIP_STM32F7 && STM32_I2S && DEBUG_DMA)
+	---help---
+		Enable special debug instrumentation analyze I2S DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config STM32_I2S_REGDEBUG
+	bool "SSC Register level debug"
+	depends on (STM32_COMMON_LEGACY && STM32_I2S3 && DEBUG) || (ARCH_CHIP_STM32F7 && STM32_I2S && DEBUG)
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+config STM32_I2SPLL
+	bool "I2SPLL"
+	default n
+	depends on STM32_HAVE_I2SPLL
+	---help---
+		The STM32F446 has a separate PLL for the I2S block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32_I2S_MCK
+	bool "I2S_MCK"
+	depends on STM32_I2S3
+	default n
+	---help---
+		TBD.
+
+endmenu # I2S Configuration

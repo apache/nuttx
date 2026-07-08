@@ -35,11 +35,11 @@
 #include <nuttx/debug.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_otgfs.h"
 #include "steval-stlcs01v1.h"
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -48,7 +48,7 @@
 #if defined(CONFIG_USBDEV)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32L4_OTGFS is enabled but not CONFIG_USBDEV"
+#  warning "CONFIG_STM32_OTGFS is enabled but not CONFIG_USBDEV"
 #  undef HAVE_USB
 #endif
 
@@ -65,15 +65,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
- *   Called from stm32l4_usbinitialize very early in initialization to setup
+ *   Called from stm32_usbinitialize very early in initialization to setup
  *   USB-related GPIO pins for the board.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void)
+void stm32_usbinitialize(void)
 {
   /* The OTG FS has an internal soft pull-up.
    * No GPIO configuration is required
@@ -81,10 +81,10 @@ void stm32l4_usbinitialize(void)
 }
 
 /****************************************************************************
- * Name:  stm32l4_usbsuspend
+ * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the USBDEV
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV
  *   driver is used.  This function is called whenever the USB enters or
  *   leaves suspend mode.
  *   This is an opportunity for the board logic to shutdown clocks, power,
@@ -93,10 +93,10 @@ void stm32l4_usbinitialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
-void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume)
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 {
   uinfo("resume: %d\n", resume);
 }
 #endif
 
-#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */

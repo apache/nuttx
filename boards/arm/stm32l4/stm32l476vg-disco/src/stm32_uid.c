@@ -38,7 +38,7 @@
 
 #include <arch/board/board.h>
 
-#include "stm32l4_uid.h"
+#include "stm32_uid.h"
 #include "stm32l476vg-disco.h"
 
 /****************************************************************************
@@ -56,6 +56,6 @@ int board_uniqueid(uint8_t *uniqueid)
       return -EINVAL;
     }
 
-  stm32l4_get_uniqueid(uniqueid);
+  stm32_get_uniqueid(uniqueid);
   return OK;
 }

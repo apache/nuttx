@@ -38,7 +38,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += stm32_idle.c
 endif
 
-ifeq ($(CONFIG_STM32N6_USART),y)
+ifeq ($(CONFIG_STM32_USART),y)
 CHIP_CSRCS += stm32_serial.c
 endif
 

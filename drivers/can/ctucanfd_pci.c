@@ -760,6 +760,14 @@ static void ctucanfd_chardev_receive(FAR struct ctucanfd_can_s *priv)
 
       buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
 
+      /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
+
+      if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
+        {
+          canerr("ERROR: CAN read/write count is too large.  Dropped\n");
+          return;
+        }
+
       /* Read the rest of data */
 
       for (i = 0; i < frame->fmt.rwcnt; i++)
@@ -1248,6 +1256,14 @@ static FAR netpkt_t *ctucanfd_sock_recv(FAR struct netdev_lowerhalf_s *dev)
   /* RX buffer in automatic mode */
 
   buff[0] = ctucanfd_getreg(priv, CTUCANFD_RXDATA);
+
+  /* buff[0] populated the frame->fmt.rwcnt. Check before use. */
+
+  if (frame->fmt.rwcnt > sizeof(buff) / sizeof(buff[0]) - 1)
+    {
+      canerr("ERROR: CAN read/write count is too large.  Dropped\n");
+      return NULL;
+    }
 
   /* Read the rest of data */
 

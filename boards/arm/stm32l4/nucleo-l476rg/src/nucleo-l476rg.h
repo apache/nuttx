@@ -61,12 +61,12 @@
 #  undef HAVE_RTC_DRIVER
 #endif
 
-#if !defined(CONFIG_STM32L4_SPI1) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SPI1) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SPI)
 #  undef  HAVE_MMCSD_SPI
 #endif
 
-#if !defined(CONFIG_STM32L4_SDIO) || !defined(CONFIG_MMCSD) || \
+#if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
 #  undef HAVE_MMCSD_SDIO
 #endif
@@ -265,10 +265,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 extern struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 extern struct spi_dev_s *g_spi2;
 #endif
 #ifdef HAVE_MMCSD_SDIO
@@ -293,27 +293,27 @@ extern struct sdio_dev_s *g_sdio;
 int stm32_bringup(void);
 
 /****************************************************************************
- * Name: stm32l4_spiinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_spiinitialize(void);
+void stm32_spiinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_usbinitialize
+ * Name: stm32_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins.
  *
  ****************************************************************************/
 
-void stm32l4_usbinitialize(void);
+void stm32_usbinitialize(void);
 
 /****************************************************************************
- * Name: stm32l4_gpio_initialize
+ * Name: stm32_gpio_initialize
  *
  * Description:
  *   Initialize GPIO drivers for use with /apps/examples/gpio
@@ -322,11 +322,11 @@ void stm32l4_usbinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_DEV_GPIO
-int stm32l4_gpio_initialize(void);
+int stm32_gpio_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_can_setup -- DisruptiveNL
+ * Name: stm32_can_setup -- DisruptiveNL
  *
  * Description:
  *   Initialize CAN and register the CAN device.
@@ -335,11 +335,11 @@ int stm32l4_gpio_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_CAN
-int stm32l4_can_setup(void);
+int stm32_can_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_pwm_setup
+ * Name: stm32_pwm_setup
  *
  * Description:
  *   Initialize PWM and register the PWM device.
@@ -347,11 +347,11 @@ int stm32l4_can_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PWM
-int stm32l4_pwm_setup(void);
+int stm32_pwm_setup(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_adc_setup
+ * Name: stm32_adc_setup
  *
  * Description:
  *   Initialize ADC and register the ADC driver.
@@ -359,7 +359,7 @@ int stm32l4_pwm_setup(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ADC
-int stm32l4_adc_setup(void);
+int stm32_adc_setup(void);
 #endif
 
 /****************************************************************************
@@ -375,7 +375,7 @@ int board_ajoy_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_mmcsd_initialize
+ * Name: stm32_mmcsd_initialize
  *
  * Description:
  *   Initializes SPI-based SD card
@@ -383,7 +383,7 @@ int board_ajoy_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_MMCSD_SPI
-int stm32l4_mmcsd_initialize(int minor);
+int stm32_mmcsd_initialize(int minor);
 #endif
 
 /****************************************************************************
@@ -399,7 +399,7 @@ int board_timer_driver_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_qencoder_initialize
+ * Name: stm32_qencoder_initialize
  *
  * Description:
  *   Initialize and register a qencoder
@@ -407,11 +407,11 @@ int board_timer_driver_initialize(const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_QENCODER
-int stm32l4_qencoder_initialize(const char *devpath, int timer);
+int stm32_qencoder_initialize(const char *devpath, int timer);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_cc1101_initialize
+ * Name: stm32_cc1101_initialize
  *
  * Description:
  *   Initialize and register the cc1101 radio driver
@@ -419,7 +419,7 @@ int stm32l4_qencoder_initialize(const char *devpath, int timer);
  ****************************************************************************/
 
 #ifdef CONFIG_WL_CC1101
-int stm32l4_cc1101_initialize(void);
+int stm32_cc1101_initialize(void);
 #endif
 
 /****************************************************************************

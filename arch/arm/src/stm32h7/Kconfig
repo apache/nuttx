@@ -7,6 +7,51 @@ if ARCH_CHIP_STM32H7
 
 comment "STM32 H7 Configuration Options"
 
+config STM32_H7_PERIPHERALS
+	bool
+	default ARCH_CHIP_STM32H7
+	select STM32_HAVE_DMA1
+	select STM32_HAVE_DMA2
+	select STM32_HAVE_I2C1
+	select STM32_HAVE_I2C2
+	select STM32_HAVE_I2C3
+	select STM32_HAVE_I2C4
+	select STM32_HAVE_IOCOMPENSATION
+	select STM32_HAVE_LPTIM1
+	select STM32_HAVE_LPTIM3
+	select STM32_HAVE_LPTIM4
+	select STM32_HAVE_OTGFS
+	select STM32_HAVE_RTC_SUBSECONDS
+	select STM32_HAVE_RTC_MAGIC
+	select STM32_HAVE_RTC
+	select STM32_HAVE_CRC
+	select STM32_HAVE_PWR
+	select STM32_HAVE_BKPSRAM
+	select STM32_HAVE_SDMMC1
+	select STM32_HAVE_SDMMC2
+	select STM32_HAVE_SPI1
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
+	select STM32_HAVE_SYSCFG
+	select STM32_HAVE_UART4
+	select STM32_HAVE_UART5
+	select STM32_HAVE_UART7
+	select STM32_HAVE_UART8
+	select STM32_HAVE_USART1
+	select STM32_HAVE_USART2
+	select STM32_HAVE_USART3
+	select STM32_HAVE_USART6
+	select STM32_HAVE_HSEM
+	select STM32_HAVE_CSI
+	select STM32_HAVE_HSI48
+	select STM32_HAVE_MDMA
+	select STM32_HAVE_BDMA
+	select STM32_HAVE_OTG_H7
+	select STM32_HAVE_OTGHS
+	select STM32_HAVE_USART_RXFIFO_THRESHOLD
+	select STM32_HAVE_FDCAN_H7
+	select STM32_HAVE_IP_WDG_M3M4_V1
+
 choice
 	prompt "STM32 H7 Chip Selection"
 	default ARCH_CHIP_STM32H743ZI
@@ -14,34 +59,34 @@ choice
 
 config ARCH_CHIP_STM32H723VG
 	bool "STM32H723VG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_STM32H72XXX_OR_STM32H73XXX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_STM32H72XXX_OR_STM32H73XXX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_FDCAN1
-	select STM32H7_HAVE_FDCAN2
-	select STM32H7_HAVE_FDCAN3
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_FDCAN3
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 564K Kb SRAM,
 		LQFP144
 
 config ARCH_CHIP_STM32H723ZG
 	bool "STM32H723ZG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_STM32H72XXX_OR_STM32H73XXX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_STM32H72XXX_OR_STM32H73XXX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_Z
-	select STM32H7_HAVE_FDCAN1
-	select STM32H7_HAVE_FDCAN2
-	select STM32H7_HAVE_FDCAN3
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_FDCAN3
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 564K Kb SRAM,
 		LQFP144
 
 config ARCH_CHIP_STM32H743AG
 	bool "STM32H743AG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_A
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -49,8 +94,8 @@ config ARCH_CHIP_STM32H743AG
 
 config ARCH_CHIP_STM32H743AI
 	bool "STM32H743AI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_A
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -58,8 +103,8 @@ config ARCH_CHIP_STM32H743AI
 
 config ARCH_CHIP_STM32H743BG
 	bool "STM32H743BG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_B
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -67,8 +112,8 @@ config ARCH_CHIP_STM32H743BG
 
 config ARCH_CHIP_STM32H743BI
 	bool "STM32H743BI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_B
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -76,8 +121,8 @@ config ARCH_CHIP_STM32H743BI
 
 config ARCH_CHIP_STM32H743IG
 	bool "STM32H743IG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_I
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -85,8 +130,8 @@ config ARCH_CHIP_STM32H743IG
 
 config ARCH_CHIP_STM32H743II
 	bool "STM32H743II"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -94,8 +139,8 @@ config ARCH_CHIP_STM32H743II
 
 config ARCH_CHIP_STM32H743VG
 	bool "STM32H743VG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_V
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -103,8 +148,8 @@ config ARCH_CHIP_STM32H743VG
 
 config ARCH_CHIP_STM32H743VI
 	bool "STM32H743VI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_V
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -112,8 +157,8 @@ config ARCH_CHIP_STM32H743VI
 
 config ARCH_CHIP_STM32H743XG
 	bool "STM32H743XG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_X
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -121,8 +166,8 @@ config ARCH_CHIP_STM32H743XG
 
 config ARCH_CHIP_STM32H743XI
 	bool "STM32H743XI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -130,8 +175,8 @@ config ARCH_CHIP_STM32H743XI
 
 config ARCH_CHIP_STM32H743ZG
 	bool "STM32H743ZG"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_Z
 	---help---
 		STM32 H7 Cortex M7, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -139,8 +184,8 @@ config ARCH_CHIP_STM32H743ZG
 
 config ARCH_CHIP_STM32H743ZI
 	bool "STM32H743ZI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -148,8 +193,8 @@ config ARCH_CHIP_STM32H743ZI
 
 config ARCH_CHIP_STM32H745BG
 	bool "STM32H745BG"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_B
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -157,8 +202,8 @@ config ARCH_CHIP_STM32H745BG
 
 config ARCH_CHIP_STM32H745BI
 	bool "STM32H745BI"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_B
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -166,8 +211,8 @@ config ARCH_CHIP_STM32H745BI
 
 config ARCH_CHIP_STM32H745IG
 	bool "STM32H745IG"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_I
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -175,8 +220,8 @@ config ARCH_CHIP_STM32H745IG
 
 config ARCH_CHIP_STM32H745II
 	bool "STM32H745II"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -184,8 +229,8 @@ config ARCH_CHIP_STM32H745II
 
 config ARCH_CHIP_STM32H745XG
 	bool "STM32H745XG"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_X
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -193,8 +238,8 @@ config ARCH_CHIP_STM32H745XG
 
 config ARCH_CHIP_STM32H745XI
 	bool "STM32H745XI"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -202,8 +247,8 @@ config ARCH_CHIP_STM32H745XI
 
 config ARCH_CHIP_STM32H745ZG
 	bool "STM32H745ZG"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_G
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_G
 	select STM32H7_IO_CONFIG_Z
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 1024 Kb FLASH, 1024K Kb SRAM,
@@ -211,8 +256,8 @@ config ARCH_CHIP_STM32H745ZG
 
 config ARCH_CHIP_STM32H745ZI
 	bool "STM32H745ZI"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM,
@@ -220,165 +265,170 @@ config ARCH_CHIP_STM32H745ZI
 
 config ARCH_CHIP_STM32H747XI
 	bool "STM32H747XI"
-	select STM32H7_STM32H7X7XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X7XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
-	select STM32H7_HAVE_SMPS
+	select STM32_HAVE_SMPS
 	---help---
 		Dual core STM32 H7 Cortex M7+M4, 2048 Kb FLASH, 1024K Kb SRAM
 		TFBGA240
 
 config ARCH_CHIP_STM32H750VB
 	bool "STM32H750VB"
-	select STM32H7_STM32H7X0XX
-	select STM32H7_FLASH_CONFIG_B
+	select STM32_STM32H7X0XX
+	select STM32_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP100
 
 config ARCH_CHIP_STM32H750ZB
 	bool "STM32H750ZB"
-	select STM32H7_STM32H7X0XX
-	select STM32H7_FLASH_CONFIG_B
+	select STM32_STM32H7X0XX
+	select STM32_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_Z
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
 
 config ARCH_CHIP_STM32H750IB
 	bool "STM32H750IB"
-	select STM32H7_STM32H7X0XX
-	select STM32H7_FLASH_CONFIG_B
+	select STM32_STM32H7X0XX
+	select STM32_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_I
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176 or UFBGA176+25
 
 config ARCH_CHIP_STM32H750XB
 	bool "STM32H750XB"
-	select STM32H7_STM32H7X0XX
-	select STM32H7_FLASH_CONFIG_B
+	select STM32_STM32H7X0XX
+	select STM32_FLASH_CONFIG_B
 	select STM32H7_IO_CONFIG_X
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7+M4, 128 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, TFBGA240+25
 
 config ARCH_CHIP_STM32H753AI
 	bool "STM32H753AI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_A
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, UFBGA169
 
 config ARCH_CHIP_STM32H753BI
 	bool "STM32H753BI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_B
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP208
 
 config ARCH_CHIP_STM32H753II
 	bool "STM32H753II"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
 
 config ARCH_CHIP_STM32H753VI
 	bool "STM32H753VI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP100/TFBGA100
 
 config ARCH_CHIP_STM32H753XI
 	bool "STM32H753XI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, TFBGA240
 
 config ARCH_CHIP_STM32H753ZI
 	bool "STM32H753ZI"
-	select STM32H7_STM32H7X3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_Z
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP144
 
 config ARCH_CHIP_STM32H7B3LI
 	bool "STM32H7B3LI"
-	select STM32H7_STM32H7B3XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7B3XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_L
-	select STM32H7_HAVE_SMPS
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_SMPS
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1376 Kb SRAM,
 		with cryptographic accelerator, TFBGA225
 
 config ARCH_CHIP_STM32H755II
 	bool "STM32H755II"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_I
-	select STM32H7_HAVE_FDCAN1
-	select STM32H7_HAVE_FDCAN2
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, LQFP176/UFBGA176
 
 config ARCH_CHIP_STM32H755XI
 	bool "STM32H755XI"
-	select STM32H7_STM32H7X5XX
-	select STM32H7_FLASH_CONFIG_I
+	select STM32_STM32H7X5XX
+	select STM32_FLASH_CONFIG_I
 	select STM32H7_IO_CONFIG_X
-	select STM32H7_HAVE_FDCAN1
-	select STM32H7_HAVE_FDCAN2
-	select STM32H7_HAVE_CRYP
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_CRYP
+	select STM32_HAVE_IP_CRYPTO_H7
 	---help---
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, TFBGA240
 
 endchoice # STM32 H7 Chip Selection
 
-config STM32H7_HAVE_SMPS
-	bool
-	default n
-
-config STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
-	bool
-	default n
-
-config STM32H7_PWR_DIRECT_SMPS_SUPPLY
+config STM32_PWR_DIRECT_SMPS_SUPPLY
 	bool "Use direct SMPS supply mode"
-	depends on STM32H7_HAVE_SMPS
+	depends on STM32_HAVE_SMPS
 	default n
 
-config STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY
+config STM32_PWR_EXTERNAL_SOURCE_SUPPLY
 	bool "Use external source as power supply"
 	default n
 	---help---
@@ -386,8 +436,8 @@ config STM32H7_PWR_EXTERNAL_SOURCE_SUPPLY
 
 choice
 	prompt "STM32 H7 Power Supply Selection"
-	default STM32H7_PWR_DEFAULT_SUPPLY
-	depends on STM32H7_HAVE_SMPS && !STM32H7_HAVE_PWR_DIRECT_SMPS_SUPPLY
+	default STM32_PWR_DEFAULT_SUPPLY
+	depends on STM32_HAVE_SMPS && !STM32_HAVE_PWR_DIRECT_SMPS_SUPPLY
 	---help---
 		The STM32H7x5 and STM32H7x7 support power supply configurations for the VCORE core domain and an external supply,
 		by configuring the SMPS step-down converter and voltage regulator.
@@ -395,15 +445,15 @@ choice
 
 		Currently the only supported modes are Direct SMPS supply and LDO supply.
 
-config STM32H7_PWR_DEFAULT_SUPPLY
+config STM32_PWR_DEFAULT_SUPPLY
 	bool "Default"
 
-config STM32H7_PWR_LDO_SUPPLY
+config STM32_PWR_LDO_SUPPLY
 	bool "Use LDO supply mode"
 
 endchoice # "STM32 H7 Power Supply Selection"
 
-config STM32H7_PWR_IGNORE_ACTVOSRDY
+config STM32_PWR_IGNORE_ACTVOSRDY
 	bool "Ignore PWR_CSR1_ACTVOSRDY bit"
 	default n
 	---help---
@@ -411,38 +461,45 @@ config STM32H7_PWR_IGNORE_ACTVOSRDY
 		This is workaround for Renode simulation that doesn't implement this feature.
 
 config STM32H7_IO_CONFIG_A
+	# Package designator A
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_B
+	# Package designator B
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_I
+	# Package designator I
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_L
+	# Package designator L
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_V
+	# Package designator V
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_X
+	# Package designator X
 	bool
 	default n
 
 config STM32H7_IO_CONFIG_Z
+	# Package designator Z
 	bool
 	default n
 
 config ARCH_STM32H7_DUALCORE
 	bool
 	default n
-	select STM32H7_HSEM if !STM32H7_CORTEXM4_DISABLED
-	select STM32H7_HAVE_CM4
+	select STM32_HSEM if !STM32_CORTEXM4_DISABLED
+	select STM32_HAVE_CM4
 
 choice
 	prompt "STM32 H7 Core selection"
@@ -463,141 +520,165 @@ config ARCH_CHIP_STM32H7_CORTEXM4
 
 endchoice # STM32 H7 Core selection
 
-config STM32H7_STM32H7X0XX
+config STM32_STM32H7X0XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select STM32H7_HAVE_LTDC
-	select STM32H7_HAVE_ETHERNET
-	select STM32H7_HAVE_FMC
-	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI6
-	select STM32H7_HAVE_RNG
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_LTDC
+	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_FMC
+	select STM32_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI6
+	select STM32_HAVE_RNG
 
-config STM32H7_STM32H7X3XX
+config STM32_STM32H7X3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select STM32H7_HAVE_LTDC
-	select STM32H7_HAVE_ETHERNET
-	select STM32H7_HAVE_FMC
-	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI6
-	select STM32H7_HAVE_RNG
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_LTDC
+	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_FMC
+	select STM32_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI6
+	select STM32_HAVE_RNG
 
-config STM32H7_STM32H7B3XX
+config STM32_STM32H7B3XX
 	bool
 	default n
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select STM32H7_HAVE_ETHERNET
-	select STM32H7_HAVE_FMC
-	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI6
-	select STM32H7_HAVE_RNG
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_FMC
+	select STM32_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI6
+	select STM32_HAVE_RNG
 
-config STM32H7_STM32H7X5XX
+config STM32_STM32H7X5XX
 	bool
 	default n
 	select ARCH_STM32H7_DUALCORE
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select STM32H7_HAVE_LTDC
-	select STM32H7_HAVE_ETHERNET
-	select STM32H7_HAVE_FMC
-	select STM32H7_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
-	select STM32H7_HAVE_SPI6
-	select STM32H7_HAVE_SMPS
-	select STM32H7_HAVE_RNG
+	select STM32_HAVE_FDCAN1
+	select STM32_HAVE_FDCAN2
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_LTDC
+	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_FMC
+	select STM32_HAVE_GPIOF if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_GPIOG if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5 if !STM32H7_IO_CONFIG_V
+	select STM32_HAVE_SPI6
+	select STM32_HAVE_SMPS
+	select STM32_HAVE_RNG
 
-config STM32H7_STM32H7X7XX
+config STM32_STM32H7X7XX
 	bool
 	default n
 	select ARCH_STM32H7_DUALCORE
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
-	select STM32H7_HAVE_LTDC
-	select STM32H7_HAVE_ETHERNET
-	select STM32H7_HAVE_FMC
-	select STM32H7_HAVE_GPIOF
-	select STM32H7_HAVE_GPIOG
-	select STM32H7_HAVE_SPI4
-	select STM32H7_HAVE_SPI5
-	select STM32H7_HAVE_SPI6
-	select STM32H7_HAVE_RNG
+	select STM32_HAVE_TIM1
+	select STM32_HAVE_TIM2
+	select STM32_HAVE_TIM3
+	select STM32_HAVE_TIM4
+	select STM32_HAVE_TIM5
+	select STM32_HAVE_TIM6
+	select STM32_HAVE_TIM7
+	select STM32_HAVE_TIM8
+	select STM32_HAVE_TIM12
+	select STM32_HAVE_TIM13
+	select STM32_HAVE_TIM14
+	select STM32_HAVE_TIM15
+	select STM32_HAVE_TIM16
+	select STM32_HAVE_TIM17
+	select STM32_HAVE_LTDC
+	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_FMC
+	select STM32_HAVE_GPIOF
+	select STM32_HAVE_GPIOG
+	select STM32_HAVE_SPI4
+	select STM32_HAVE_SPI5
+	select STM32_HAVE_SPI6
+	select STM32_HAVE_RNG
 
 # The reduced SRAM configuration STM32H72X and STM32H73X
-config STM32H7_STM32H72XXX_OR_STM32H73XXX
+config STM32_STM32H72XXX_OR_STM32H73XXX
 	bool
 	default n
 
-config STM32H7_FLASH_CONFIG_B
-	bool
-	default n
-
-config STM32H7_FLASH_CONFIG_G
-	bool
-	default n
-
-config STM32H7_FLASH_CONFIG_I
-	bool
-	default n
-
-choice
-	prompt "Override Flash Size Designator"
-	depends on ARCH_CHIP_STM32H7
-	default STM32H7_FLASH_OVERRIDE_DEFAULT
-	---help---
-		STM32H7 series parts numbering (sans the package type) ends with a
-		letter that designates the FLASH size.
-
-			Designator  Size in KiB
-				B	128
-				G	1024
-				I	2048
-
-		This configuration option defaults to using the configuration based
-		on that designator or the default smaller size if there is no last
-		character designator is present in the STM32 Chip Selection.
-
-		Examples:
-
-			If the STM32H743ZI is chosen, the Flash configuration would be
-			'I', if a variant of the part is released in the future one
-			could simply select another designator here.
-
-			If an STM32H7xxx Series parts is chosen the default Flash
-			configuration will be set herein and can be changed.
-
-config STM32H7_FLASH_OVERRIDE_DEFAULT
-	bool "Default"
-
-config STM32H7_FLASH_OVERRIDE_B
-	bool "B 128KiB"
-
-config STM32H7_FLASH_OVERRIDE_G
-	bool "G 1048KiB"
-
-config STM32H7_FLASH_OVERRIDE_I
-	bool "I 2048KiB"
-
-endchoice # "Override Flash Size Designator"
-
-config STM32H7_FLASH_CR_PSIZE
+config STM32_FLASH_CR_PSIZE
 	int "Flash program size width"
 	depends on ARCH_CHIP_STM32H7
 	default 3
@@ -611,7 +692,7 @@ config STM32H7_FLASH_CR_PSIZE
 		2: 32 bits
 		3: 64 bits (default)
 
-config STM32H7_AXI_SRAM_CORRUPTION_WAR
+config STM32_AXI_SRAM_CORRUPTION_WAR
 	bool "Errata 2.2.9 Reading from AXI SRAM data read corruption Workaround"
 	default y
 	---help---
@@ -631,46 +712,35 @@ if ARCH_STM32H7_DUALCORE
 
 if ARCH_CHIP_STM32H7_CORTEXM7
 
-config STM32H7_CORTEXM4_ENABLED
+config STM32_CORTEXM4_ENABLED
 	bool "Enable support for M4 core"
 	default y
 
-config STM32H7_CORTEXM7_BOOTM4
+config STM32_CORTEXM7_BOOTM4
 	bool "Boot M4 core"
-	select STM32H7_SYSCFG
-	default y if STM32H7_CORTEXM4_ENABLED
+	select STM32_SYSCFG
+	default y if STM32_CORTEXM4_ENABLED
 	default n
 
 endif # ARCH_CHIP_STM32H7_CORTEXM7
 
-config STM32H7_CORTEXM7_FLASH_SIZE
+config STM32_CORTEXM7_FLASH_SIZE
 	int "Flash reserved for M7 core"
-	default 1048576 if STM32H7_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
+	default 1048576 if STM32_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
 	default 2097152
 
-config STM32H7_CORTEXM7_SHMEM
+config STM32_CORTEXM7_SHMEM
 	bool
 	select ARM_MPU if ARCH_CHIP_STM32H7_CORTEXM7
-	default y if STM32H7_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
+	default y if STM32_CORTEXM4_ENABLED || ARCH_CHIP_STM32H7_CORTEXM4
 	default n
 
-config STM32H7_SHMEM_SRAM3
+config STM32_SHMEM_SRAM3
 	bool "Use SRAM3 as shared memory"
-	depends on STM32H7_CORTEXM7_SHMEM
+	depends on STM32_CORTEXM7_SHMEM
 	default y
 
 endif # ARCH_STM32H7_DUALCORE
-
-config STM32_HAVE_OTA_PARTITION
-	bool
-	default n
-
-config STM32H7_PROGMEM
-	bool "Flash progmem support"
-	default n
-	---help---
-		Add progmem support, start block and end block options are provided to
-		obtain an uniform flash memory mapping.
 
 menu "Application Image Configuration"
 choice
@@ -711,1650 +781,7 @@ endchoice # Application Image Format
 
 endmenu # Application Image Configuration
 
-menu "STM32H7 Peripheral Selection"
-
-# These "hidden" settings determine whether a peripheral option is available
-# for the selected MCU
-
-config STM32H7_HAVE_CM4
-	bool
-	default n
-
-config STM32H7_HAVE_LTDC
-	bool
-	default n
-
-config STM32H7_HAVE_ETHERNET
-	bool
-	default n
-
-config STM32H7_HAVE_PHY_POLLED
-	bool
-	default n
-
-config STM32H7_HAVE_FMC
-	bool
-	default n
-
-config STM32H7_HAVE_GPIOF
-	bool
-	default n
-
-config STM32H7_HAVE_GPIOG
-	bool
-	default n
-
-config STM32H7_HAVE_SPI4
-	bool
-	default n
-
-config STM32H7_HAVE_SPI5
-	bool
-	default n
-
-config STM32H7_HAVE_SPI6
-	bool
-	default n
-
-config STM32H7_HAVE_FDCAN1
-	bool
-	default n
-
-config STM32H7_HAVE_FDCAN2
-	bool
-	default n
-
-config STM32H7_HAVE_FDCAN3
-	bool
-	default n
-
-config STM32H7_HAVE_RNG
-	bool
-	default n
-
-config STM32H7_HAVE_CRYP
-	bool
-	default n
-
-# These "hidden" settings are the OR of individual peripheral selections
-# indicating that the general capability is required.
-
-config STM32H7_ADC
-	bool
-	default n
-
-config STM32H7_FDCAN
-	bool
-	select NET_CAN_HAVE_ERRORS
-	select NET_CAN_HAVE_CANFD
-	select NET_CAN_EXTID
-	select NET_CAN_HAVE_TX_DEADLINE
-	default n
-
-config STM32H7_DAC
-	bool
-	default n
-
-config STM32H7_DMA
-	bool
-	default n
-
-config STM32H7_I2C
-	bool
-	default n
-
-config STM32H7_SAI
-	bool
-	default n
-
-config STM32H7_SDMMC
-	bool
-	default n
-
-config STM32H7_SPI
-	bool
-	default n
-
-config STM32H7_SPI_DMA
-	bool
-	default n
-
-config STM32H7_TIM
-	bool
-	default n
-
-config STM32H7_LPTIM
-	bool
-	default n
-
-config STM32H7_HSEM
-	bool "Hardware semaphore"
-	default n
-
-config STM32H7_RTC
-	bool "RTC"
-	default n
-	select RTC
-
-config STM32H7_CSI
-	bool "CSI Low-speed internal oscillator (4MHz)"
-	default n
-
-config STM32H7_HSI48
-	bool "HSI48 High-speed 48MHz internal oscillator"
-	default n
-
-config STM32H7_PWR
-	bool "PWR"
-	default n
-
-config STM32H7_PWM
-	bool
-	default n
-
-config STM32H7_USART
-	bool
-	default n
-
-# These are the peripheral selections proper
-config STM32H7_ADC1
-	bool "ADC1"
-	default n
-	select STM32H7_ADC
-
-config STM32H7_ADC2
-	bool "ADC2"
-	default n
-	select STM32H7_ADC
-
-config STM32H7_ADC3
-	bool "ADC3"
-	default n
-	select STM32H7_ADC
-
-config STM32H7_RNG
-	bool "RNG"
-	default n
-	depends on STM32H7_HAVE_RNG
-	select ARCH_HAVE_RNG
-
-config STM32H7_CRC
-	bool "CRC"
-	default n
-
-config STM32H7_CRYP
-	bool "CRYP"
-	default n
-	depends on STM32H7_HAVE_CRYP
-
-config STM32H7_BKPSRAM
-	bool "Enable BKP RAM Domain"
-	select STM32H7_PWR
-	default n
-
-config STM32H7_DMA1
-	bool "DMA1"
-	default n
-	select STM32H7_DMA
-	select ARCH_DMA
-
-config STM32H7_DMA2
-	bool "DMA2"
-	default n
-	select STM32H7_DMA
-	select ARCH_DMA
-
-config STM32H7_MDMA
-	bool "MDMA"
-	default n
-	depends on EXPERIMENTAL
-	select STM32H7_DMA
-	select ARCH_DMA
-
-config STM32H7_BDMA
-	bool "BDMA"
-	default n
-	depends on EXPERIMENTAL
-	select STM32H7_DMA
-	select ARCH_DMA
-
-config STM32H7_ETHMAC
-	bool "Ethernet MAC"
-	default n
-	depends on STM32H7_HAVE_ETHERNET
-	select NETDEVICES
-	select ARCH_HAVE_PHY
-	select STM32H7_HAVE_PHY_POLLED
-
-config STM32H7_FMC
-	bool "FMC"
-	default n
-	depends on STM32H7_HAVE_FMC
-	---help---
-		Enable Flexible Memory Controller.
-		To correctly configure FMC for your hardware, you will have to define
-		a number of macros in your board.h file. See stm32_fmc.c for directions.
-
-config STM32H7_OTGFS
-	bool "OTG FS"
-	default n
-	select USBHOST_HAVE_ASYNCH if USBHOST
-
-config STM32H7_OTGHS
-	bool "OTG FS/HS"
-	default n
-	depends on EXPERIMENTAL
-	select USBHOST_HAVE_ASYNCH if USBHOST
-
-config STM32H7_OTG_SOFOUTPUT
-	bool "OTG SOF output"
-	default n
-
-config STM32H7_OTG_USBREGEN
-	bool "Enable USB voltage regulator"
-	default n
-
-config STM32H7_QUADSPI
-	bool "QuadSPI"
-	default n
-
-config STM32H7_USBDEV_REGDEBUG
-	bool "OTG USBDEV REGDEBUG"
-	default n
-	depends on USBDEV
-
-config STM32H7_USBHOST_REGDEBUG
-	bool "OTG USBHOST REGDEBUG"
-	default n
-	depends on USBHOST
-
-config STM32H7_USBHOST_PKTDUMP
-	bool "OTG USBHOST PKTDUMP"
-	default n
-	depends on USBHOST
-
-config STM32H7_SDMMC1
-	bool "SDMMC1"
-	default n
-	select STM32H7_SDMMC
-	select ARCH_HAVE_SDIO
-	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
-	select ARCH_HAVE_SDIO_PREFLIGHT
-	select SDIO_BLOCKSETUP
-
-config STM32H7_SDMMC2
-	bool "SDMMC2"
-	default n
-	select STM32H7_SDMMC
-	select ARCH_HAVE_SDIO
-	select ARCH_HAVE_SDIOWAIT_WRCOMPLETE
-	select ARCH_HAVE_SDIO_PREFLIGHT
-	select SDIO_BLOCKSETUP
-
-config STM32H7_IWDG
-	bool "IWDG"
-	default n
-	select WATCHDOG
-
-config STM32H7_WWDG
-	bool "WWDG"
-	default n
-	select WATCHDOG
-
-menu "STM32H7 FDCAN Selection"
-
-config STM32H7_FDCAN1
-	bool "FDCAN1"
-	default n
-	select STM32H7_FDCAN
-
-config STM32H7_FDCAN2
-	bool "FDCAN2"
-	default n
-	select STM32H7_FDCAN
-
-config STM32H7_FDCAN3
-	bool "FDCAN3"
-	default n
-	select STM32H7_FDCAN
-
-endmenu # STM32H7 FDCAN Selection
-
-menu "STM32H7 I2C Selection"
-
-config STM32H7_I2C1
-	bool "I2C1"
-	default n
-	select STM32H7_I2C
-
-config STM32H7_I2C2
-	bool "I2C2"
-	default n
-	select STM32H7_I2C
-
-config STM32H7_I2C3
-	bool "I2C3"
-	default n
-	select STM32H7_I2C
-
-config STM32H7_I2C4
-	bool "I2C4"
-	default n
-	select STM32H7_I2C
-
-endmenu # STM32H7 I2C Selection
-
-config STM32H7_LTDC
-	bool "LTDC"
-	default n
-	select FB
-	depends on STM32H7_HAVE_LTDC
-	---help---
-		The STM32 LTDC is an LCD-TFT Display Controller available on
-		the STM32H7 devices.
-		It features a standard RGB888 parallel video interface (along
-		with HSYNC, VSYNC, etc.) for controlling TFT LCD displays.
-		In some STM32H7 devices the graphics signals can optionally
-		be output via DSI instead of the parallel interface:
-		See config options STM32H7_DSIHOST and STM32H7_LTDC_USE_DSI.
-
-menu "STM32H7 SPI Selection"
-
-config STM32H7_SPI1
-	bool "SPI1"
-	default n
-	select SPI
-	select STM32H7_SPI
-
-config STM32H7_SPI2
-	bool "SPI2"
-	default n
-	select SPI
-	select STM32H7_SPI
-
-config STM32H7_SPI3
-	bool "SPI3"
-	default n
-	select SPI
-	select STM32H7_SPI
-
-config STM32H7_SPI4
-	bool "SPI4"
-	default n
-	depends on STM32H7_HAVE_SPI4
-	select SPI
-	select STM32H7_SPI
-
-config STM32H7_SPI5
-	bool "SPI5"
-	default n
-	depends on STM32H7_HAVE_SPI5
-	select SPI
-	select STM32H7_SPI
-
-config STM32H7_SPI6
-	bool "SPI6"
-	default n
-	depends on STM32H7_HAVE_SPI6
-	select SPI
-	select STM32H7_SPI
-
-endmenu # STM32H7 SPI Selection
-
-config STM32H7_SYSCFG
-	bool "SYSCFG"
-	default y
-
-menu "STM32H7 Timer Selection"
-
-config STM32H7_TIM1
-	bool "TIM1"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM2
-	bool "TIM2"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM3
-	bool "TIM3"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM4
-	bool "TIM4"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM5
-	bool "TIM5"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM6
-	bool "TIM6"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM7
-	bool "TIM7"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM8
-	bool "TIM8"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM12
-	bool "TIM12"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM13
-	bool "TIM13"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM14
-	bool "TIM14"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM15
-	bool "TIM15"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM16
-	bool "TIM16"
-	default n
-	select STM32H7_TIM
-
-config STM32H7_TIM17
-	bool "TIM17"
-	default n
-	select STM32H7_TIM
-
-endmenu # STM32H7 Timer Selection
-
-menu "STM32H7 Low-power Timer Selection"
-
-config STM32H7_LPTIM1
-	bool "LPTIM1"
-	default n
-	select STM32H7_LPTIM
-
-config STM32H7_LPTIM2
-	bool "LPTIM2"
-	default n
-	select STM32H7_LPTIM
-
-config STM32H7_LPTIM3
-	bool "LPTIM3"
-	default n
-	select STM32H7_LPTIM
-
-config STM32H7_LPTIM4
-	bool "LPTIM4"
-	default n
-	select STM32H7_LPTIM
-
-config STM32H7_LPTIM5
-	bool "LPTIM5"
-	default n
-	select STM32H7_LPTIM
-
-endmenu # STM32H7 Low-power Timer Selection
-
-menu "STM32H7 U[S]ART Selection"
-
-config STM32H7_USART1
-	bool "USART1"
-	default n
-	select USART1_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H7_USART
-
-config STM32H7_USART2
-	bool "USART2"
-	default n
-	select USART2_SERIALDRIVER
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select STM32H7_USART
-
-config STM32H7_USART3
-	bool "USART3"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART3_SERIALDRIVER
-	select STM32H7_USART
-
-config STM32H7_UART4
-	bool "UART4"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART4_SERIALDRIVER
-	select STM32H7_USART
-
-config STM32H7_UART5
-	bool "UART5"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART5_SERIALDRIVER
-	select STM32H7_USART
-
-config STM32H7_USART6
-	bool "USART6"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select USART6_SERIALDRIVER
-	select STM32H7_USART
-
-config STM32H7_UART7
-	bool "UART7"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART7_SERIALDRIVER
-	select STM32H7_USART
-
-config STM32H7_UART8
-	bool "UART8"
-	default n
-	select ARCH_HAVE_SERIAL_TERMIOS
-	select UART8_SERIALDRIVER
-	select STM32H7_USART
-
-endmenu # STM32H7 U[S]ART Selection
-endmenu # STM32H7 Peripheral Selection
-
-config STM32H7_SYSCFG_IOCOMPENSATION
-	bool "SYSCFG I/O Compensation"
-	default n
-	select STM32H7_CSI
-	---help---
-		By default the I/O compensation cell is not used. However when the I/O
-		output buffer speed is configured in 50 MHz or 100 MHz mode, it is
-		recommended to use the compensation cell for slew rate control on I/O
-		tf(IO)out)/tr(IO)out commutation to reduce the I/O noise on power supply.
-
-		The I/O compensation cell can be used only when the supply voltage ranges
-		from 2.4 to 3.6 V
-
-menu "OTG_HS Configuration"
-	depends on STM32H7_OTGHS
-
-config STM32H7_OTGHS_FS
-	bool "OTGHS in FS mode"
-	default n
-
-choice
-	prompt "ULPI Selection"
-	default STM32H7_OTGHS_NO_ULPI
-
-config STM32H7_OTGHS_NO_ULPI
-	bool "No External ULPI on board."
-	---help---
-	Select to indicate that there is no external ULPI PHY. This means the OTG_HS
-	peripheral must use the internal full-speed PHY and will be limited to
-	full-speed mode.
-
-config STM32H7_OTGHS_EXTERNAL_ULPI
-	bool "External ULPI"
-	---help---
-		Select to indicate the presence of an external ULPI PHY and use it.
-
-endchoice #"ULPI Selection"
-
-endmenu # OTG_HS Config
-
-menu "I2C Configuration"
-	depends on STM32H7_I2C
-
-config STM32H7_I2C_DYNTIMEO
-	bool "Use dynamic timeouts"
-	default n
-	depends on STM32H7_I2C
-
-config STM32H7_I2C_DYNTIMEO_USECPERBYTE
-	int "Timeout Microseconds per Byte"
-	default 500
-	depends on STM32H7_I2C_DYNTIMEO
-
-config STM32H7_I2C_DYNTIMEO_STARTSTOP
-	int "Timeout for Start/Stop (Milliseconds)"
-	default 1000
-	depends on STM32H7_I2C_DYNTIMEO
-
-config STM32H7_I2CTIMEOSEC
-	int "Timeout seconds"
-	default 0
-	depends on STM32H7_I2C
-
-config STM32H7_I2CTIMEOMS
-	int "Timeout Milliseconds"
-	default 500
-	depends on STM32H7_I2C && !STM32H7_I2C_DYNTIMEO
-
-config STM32H7_I2CTIMEOTICKS
-	int "Timeout for Done and Stop (ticks)"
-	default 500
-	depends on STM32H7_I2C && !STM32H7_I2C_DYNTIMEO
-
-endmenu # "I2C Configuration"
-
-menu "OTG Configuration"
-	depends on STM32H7_OTGFS || STM32H7_OTGHS
-
-config OTG_ID_GPIO_DISABLE
-	bool "Disable the use of GPIO_OTG_ID pin."
-	default n
-	---help---
-		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
-		cases to reuse this GPIO pin and ensure it is not set incorrectlty
-		during OS boot.
-
-choice
-	prompt "STM32H7 OTGFS role"
-	depends on STM32H7_OTGFS
-	default STM32H7_OTGFS_USBDEV if USBDEV
-	default STM32H7_OTGFS_HOST if !USBDEV && USBHOST
-
-config STM32H7_OTGFS_USBDEV
-	bool "OTGFS as USBDEV"
-	depends on USBDEV
-
-config STM32H7_OTGFS_HOST
-	bool "OTGFS as HOST"
-	depends on USBHOST
-
-endchoice # "STM32H7 OTGFS role"
-
-choice
-	prompt "STM32H7 OTGHS role (only USBDEV supported for now)"
-	depends on STM32H7_OTGHS
-	default STM32H7_OTGHS_USBDEV if USBDEV
-
-config STM32H7_OTGHS_USBDEV
-	bool "OTGHS as USBDEV"
-	depends on USBDEV
-
-endchoice # "STM32H7 OTGHS role"
-
-endmenu # OTG Configuration
-
-menu "SPI Configuration"
-	depends on STM32H7_SPI
-
-config STM32H7_SPI_INTERRUPTS
-	bool "Interrupt driver SPI"
-	default n
-	---help---
-		Select to enable interrupt driven SPI support. Non-interrupt-driven,
-		poll-waiting is recommended if the interrupt rate would be to high in
-		the interrupt driven case.
-
-config STM32H7_SPI_DMATHRESHOLD
-	int "SPI DMA threshold"
-	default 4
-	depends on STM32H7_SPI_DMA
-	---help---
-		When SPI DMA is enabled, small DMA transfers will still be performed
-		by polling logic.  But we need a threshold value to determine what
-		is small.
-
-config STM32H7_SPI1_DMA
-	bool "SPI1 DMA"
-	default n
-	depends on STM32H7_SPI1 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI1 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI1_DMA_BUFFER
-	int "SPI1 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI1_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI1.
-
-config STM32H7_SPI1_COMMTYPE
-	int "SPI1 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI1
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32H7_SPI2_DMA
-	bool "SPI2 DMA"
-	default n
-	depends on STM32H7_SPI2 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI2 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI2_DMA_BUFFER
-	int "SPI2 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI2_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI2.
-
-config STM32H7_SPI2_COMMTYPE
-	int "SPI2 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI2
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32H7_SPI3_DMA
-	bool "SPI3 DMA"
-	default n
-	depends on STM32H7_SPI3 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI3 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI3_DMA_BUFFER
-	int "SPI3 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI3_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI3.
-
-config STM32H7_SPI3_COMMTYPE
-	int "SPI3 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI3
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32H7_SPI4_DMA
-	bool "SPI4 DMA"
-	default n
-	depends on STM32H7_SPI4 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI4 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI4_DMA_BUFFER
-	int "SPI4 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI4_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI4.
-
-config STM32H7_SPI4_COMMTYPE
-	int "SPI4 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI4
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32H7_SPI5_DMA
-	bool "SPI5 DMA"
-	default n
-	depends on STM32H7_SPI5 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI5 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI5_DMA_BUFFER
-	int "SPI5 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI5_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI5.
-
-config STM32H7_SPI5_COMMTYPE
-	int "SPI5 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI5
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-config STM32H7_SPI6_DMA
-	bool "SPI6 DMA"
-	default n
-	depends on STM32H7_SPI6 && !STM32H7_SPI_INTERRUPT
-	select STM32H7_SPI_DMA
-	---help---
-		Use DMA to improve SPI6 transfer performance.  Cannot be used with STM32H7_SPI_INTERRUPT
-
-config STM32H7_SPI6_DMA_BUFFER
-	int "SPI6 DMA buffer size"
-	default 0
-	depends on STM32H7_SPI6_DMA
-	---help---
-		Add a properly aligned DMA buffer for RX and TX DMA for SPI6.
-
-config STM32H7_SPI6_COMMTYPE
-	int "SPI6 Operation mode"
-	default 0
-	range 0 3
-	depends on STM32H7_SPI6
-	---help---
-		Select full-duplex (0), simplex tx (1), simplex rx (2) or half-duplex (3)
-
-endmenu # "SPI Configuration"
-
-menu "U[S]ART Configuration"
-	depends on STM32H7_USART
-
-if STM32H7_USART1
-
-config USART1_RS485
-	bool "RS-485 on USART1"
-	default n
-	---help---
-		Enable RS-485 interface on USART1. Your board config will have to
-		provide GPIO_USART1_RS485_DIR pin definition.
-
-config USART1_RS485_DIR_POLARITY
-	int "USART1 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on USART1_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config USART1_RXFIFO_THRES
-	int "USART1 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_USART1
-
-if STM32H7_USART2
-
-config USART2_RS485
-	bool "RS-485 on USART2"
-	default n
-	---help---
-		Enable RS-485 interface on USART2. Your board config will have to
-		provide GPIO_USART2_RS485_DIR pin definition.
-
-config USART2_RS485_DIR_POLARITY
-	int "USART2 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on USART2_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config USART2_RXFIFO_THRES
-	int "USART2 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_USART2
-
-if STM32H7_USART3
-
-config USART3_RS485
-	bool "RS-485 on USART3"
-	default n
-	---help---
-		Enable RS-485 interface on USART3. Your board config will have to
-		provide GPIO_USART3_RS485_DIR pin definition.
-
-config USART3_RS485_DIR_POLARITY
-	int "USART3 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on USART3_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config USART3_RXFIFO_THRES
-	int "USART3 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_USART3
-
-if STM32H7_UART4
-
-config UART4_RS485
-	bool "RS-485 on UART4"
-	default n
-	---help---
-		Enable RS-485 interface on UART4. Your board config will have to
-		provide GPIO_UART4_RS485_DIR pin definition.
-
-config UART4_RS485_DIR_POLARITY
-	int "UART4 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on UART4_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config UART4_RXFIFO_THRES
-	int "UART4 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_UART4
-
-if STM32H7_UART5
-
-config UART5_RS485
-	bool "RS-485 on UART5"
-	default n
-	---help---
-		Enable RS-485 interface on UART5. Your board config will have to
-		provide GPIO_UART5_RS485_DIR pin definition.
-
-config UART5_RS485_DIR_POLARITY
-	int "UART5 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on UART5_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config UART5_RXFIFO_THRES
-	int "UART5 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_UART5
-
-if STM32H7_USART6
-
-config USART6_RS485
-	bool "RS-485 on USART6"
-	default n
-	---help---
-		Enable RS-485 interface on USART6. Your board config will have to
-		provide GPIO_USART6_RS485_DIR pin definition.
-
-config USART6_RS485_DIR_POLARITY
-	int "USART6 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on USART6_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on USART6. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config USART6_RXFIFO_THRES
-	int "USART6 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_USART
-
-if STM32H7_UART7
-
-config UART7_RS485
-	bool "RS-485 on UART7"
-	default n
-	---help---
-		Enable RS-485 interface on UART7. Your board config will have to
-		provide GPIO_UART7_RS485_DIR pin definition.
-
-config UART7_RS485_DIR_POLARITY
-	int "UART7 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on UART7_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config UART7_RXFIFO_THRES
-	int "UART7 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_UART7
-
-if STM32H7_UART8
-
-config UART8_RS485
-	bool "RS-485 on UART8"
-	default n
-	---help---
-		Enable RS-485 interface on UART8. Your board config will have to
-		provide GPIO_UART8_RS485_DIR pin definition.
-
-config UART8_RS485_DIR_POLARITY
-	int "UART8 RS-485 DIR pin polarity"
-	default 1
-	range 0 1
-	depends on UART8_RS485
-	---help---
-		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).
-
-config UART8_RXFIFO_THRES
-	int "UART8 Rx FIFO Threshold"
-	default 3
-	range 0 5
-	---help---
-		Select the Rx FIFO threshold:
-
-		  0 -> 1/8 full
-		  1 -> 1/4 full
-		  2 -> 1/2 full
-		  3 -> 3/4 full
-		  4 -> 7/8 full
-		  5 -> Full
-
-		Higher values mean lower interrupt rates and better CPU performance.
-		Lower values may be needed at high BAUD rates to prevent Rx data
-		overrun errors.
-
-endif # STM32H7_UART8
-
-config STM32H7_SERIAL_RXDMA_BUFFER_SIZE
-	int "Rx DMA buffer size"
-	default 32
-	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA || USART6_RXDMA || UART7_RXDMA || UART8_RXDMA
-	---help---
-		The DMA buffer size when using RX DMA to emulate a FIFO.
-
-		When streaming data, the generic serial layer will be called
-		every time the FIFO receives half this number of bytes.
-
-		Value given here will be rounded up to next multiple of 32 bytes.
-
-config STM32H7_SERIAL_DISABLE_REORDERING
-	bool "Disable reordering of ttySx devices."
-	default n
-	---help---
-		NuttX per default reorders the serial ports (/dev/ttySx) so that the
-		console is always on /dev/ttyS0. If more than one UART is in use this
-		can, however, have the side-effect that all port mappings
-		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
-		UART. This is in particular relevant if a project uses the USB console
-		in some boards and a serial console in other boards, but does not
-		want the side effect of having all serial port names change when just
-		the console is moved from serial to USB.
-
-config STM32H7_FLOWCONTROL_BROKEN
-	bool "Use Software UART RTS flow control"
-	depends on SERIAL_IFLOWCONTROL_WATERMARKS
-	default n
-	---help---
-		Enable UART RTS flow control using Software. Because STM
-		Current STM32 have broken HW based RTS behavior (they assert
-		nRTS after every byte received)  Enable this setting workaround
-		this issue by using software based management of RTS
-
-config STM32H7_USART_BREAKS
-	bool "Add TIOxSBRK to support sending Breaks"
-	default n
-	---help---
-		Add TIOCxBRK routines to send a line break per the STM32 manual, the
-		break will be a pulse based on the value M. This is not a BSD compatible
-		break.
-
-config STM32H7_SERIALBRK_BSDCOMPAT
-	bool "Use GPIO To send Break"
-	depends on STM32H7_USART_BREAKS
-	default n
-	---help---
-		Enable using GPIO on the TX pin to send a BSD compatible break:
-		TIOCSBRK will start the break and TIOCCBRK will end the break.
-		The current STM32H7 U[S]ARTS have no way to leave the break on
-		(TX=LOW) because software starts the break and then the hardware
-		automatically clears the break. This makes it difficult to send
-		a long break.
-
-config STM32H7_USART_SINGLEWIRE
-	bool "Single Wire Support"
-	default n
-	depends on STM32H7_USART
-	---help---
-		Enable single wire UART support.  The option enables support for the
-		TIOCSSINGLEWIRE ioctl in the STM32H7 serial driver.
-
-config STM32H7_USART_INVERT
-	bool "Signal Invert Support"
-	default n
-	depends on STM32H7_USART
-	---help---
-		Enable signal inversion UART support. The option enables support for the
-		TIOCSINVERT ioctl in the STM32H7 serial driver.
-
-config STM32H7_USART_SWAP
-	bool "Swap RX/TX pins support"
-	default n
-	depends on STM32H7_USART
-	---help---
-		Enable RX/TX pin swapping support. The option enables support for the
-		TIOCSSWAP ioctl in the STM32H7 serial driver.
-
-if PM
-
-config STM32H7_PM_SERIAL_ACTIVITY
-	int "PM serial activity"
-	default 10
-	---help---
-		PM activity reported to power management logic on every serial
-		interrupt.
-
-endif # PM
-endmenu # U[S]ART Configuration
-
-menu "ADC Configuration"
-	depends on STM32H7_ADC
-
-config STM32H7_ADC_MAX_SAMPLES
-	int "The maximum number of channels that can be sampled"
-	default 16
-	---help---
-		The maximum number of samples which can be handled without
-		overrun depends on various factors. This is the user's
-		responsibility to correctly select this value.
-		Since the interface to update the sampling time is available
-		for all supported devices, the user can change the default
-		values in the board initialization logic and avoid ADC overrun.
-
-config STM32H7_ADC1_DMA
-	bool "ADC1 DMA (not supported yet)"
-	depends on STM32H7_ADC1 && EXPERIMENTAL
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32H7_ADC1_DMA_BATCH
-	int "ADC1 DMA number of conversions"
-	depends on STM32H7_ADC1 && STM32H7_ADC1_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-config STM32H7_ADC2_DMA
-	bool "ADC2 DMA (not supported yet)"
-	depends on STM32H7_ADC2 && EXPERIMENTAL
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32H7_ADC2_DMA_BATCH
-	int "ADC2 DMA number of conversions"
-	depends on STM32H7_ADC2 && STM32H7_ADC2_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-config STM32H7_ADC3_DMA
-	bool "ADC3 DMA (not supported yet)"
-	depends on STM32H7_ADC3 && EXPERIMENTAL
-	default n
-	---help---
-		If DMA is selected, then the ADC may be configured to support
-		DMA transfer, which is necessary if multiple channels are read
-		or if very high trigger frequencies are used.
-
-config STM32H7_ADC3_DMA_BATCH
-	int "ADC3 DMA number of conversions"
-	depends on STM32H7_ADC3 && STM32H7_ADC3_DMA
-	default 1
-	---help---
-		This option allows you to select the number of regular group conversions
-		that will trigger a DMA callback transerring data to the upper-half driver.
-		By default, this value is 1, which means that data is transferred after
-		each group conversion.
-
-endmenu # ADC Configuration
-
-menu "SD/MMC Configuration"
-	depends on STM32H7_SDMMC
-
-config STM32H7_SDMMC_XFRDEBUG
-	bool "SDMMC transfer debug"
-	depends on DEBUG_FS_INFO
-	default n
-	---help---
-		Enable special debug instrumentation analyze SDMMC data transfers.
-		This logic is as non-invasive as possible:  It samples SDMMC
-		registers at key points in the data transfer and then dumps all of
-		the registers at the end of the transfer.  If DEBUG_DMA is also
-		enabled, then DMA register will be collected as well.  Requires also
-		DEBUG_FS and CONFIG_DEBUG_INFO.
-
-config STM32H7_SDMMC_IDMA
-	bool "Support IDMA data transfers"
-	default y
-	select SDIO_DMA
-	---help---
-		Support IDMA data transfers.
-
-menu "SDMMC1 Configuration"
-	depends on STM32H7_SDMMC1
-
-config SDMMC1_WIDTH_D1_ONLY
-	bool "Use D1 only on SDMMC1"
-	default n
-	---help---
-		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
-
-config SDMMC1_SDIO_MODE
-	bool "SDIO Card Support"
-	default n
-	---help---
-		Build in additional support needed only for SDIO cards (vs. SD
-		memory cards)
-
-config SDMMC1_SDIO_PULLUP
-	bool "Enable internal Pull-Ups"
-	default n
-	---help---
-		If you are using an external SDCard module that does not have the
-		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
-		Module) then enable this option to activate the internal pull-up
-		resistors.
-
-endmenu # "SDMMC1 Configuration"
-
-menu "SDMMC2 Configuration"
-	depends on STM32H7_SDMMC2
-
-config SDMMC2_WIDTH_D1_ONLY
-	bool "Use D1 only on SDMMC2"
-	default n
-	---help---
-		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
-
-config SDMMC2_SDIO_MODE
-	bool "SDIO Card Support"
-	default n
-	---help---
-		Build in additional support needed only for SDIO cards (vs. SD
-		memory cards)
-
-config SDMMC2_SDIO_PULLUP
-	bool "Enable internal Pull-Ups"
-	default n
-	---help---
-		If you are using an external SDCard module that does not have the
-		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
-		Module) then enable this option to activate the internal pull-up
-		resistors.
-
-endmenu # "SDMMC2 Configuration"
-endmenu # "SD/MMC Configuration"
-
-if STM32H7_BKPSRAM
-
-config STM32H7_BBSRAM
-	bool "BBSRAM File Support"
-	default n
-	select ARM_MPU
-
-config STM32H7_BBSRAM_FILES
-	int "Max Files to support in BBSRAM"
-	default 4
-	depends on STM32H7_BBSRAM
-
-config STM32H7_SAVE_CRASHDUMP
-	bool "Enable Saving Panic to BBSRAM"
-	default n
-	depends on STM32H7_BBSRAM
-
-endif # STM32H7_BKPSRAM
-
-config STM32H7_HAVE_RTC_SUBSECONDS
-	bool
-	select ARCH_HAVE_RTC_SUBSECONDS
-	default y
-
-menu "RTC Configuration"
-	depends on STM32H7_RTC
-
-config STM32H7_RTC_MAGIC_REG
-	int "BKP register"
-	default 0
-	range 0 31
-	---help---
-		The BKP register used to store/check the Magic value to determine if
-		RTC is already setup
-
-config STM32H7_RTC_MAGIC
-	hex "RTC Magic 1"
-	default 0xfacefeed
-	---help---
-		Value used as Magic to determine if the RTC is already setup
-
-config STM32H7_RTC_MAGIC_TIME_SET
-	hex "RTC Magic 2"
-	default 0xf00dface
-	---help---
-		Value used as Magic to determine if the RTC has been setup and has
-		time set
-
-choice
-	prompt "RTC clock source"
-	default STM32H7_RTC_LSECLOCK
-
-config STM32H7_RTC_HSECLOCK
-	bool "HSE clock"
-	---help---
-		Drive the RTC with the HSE clock, divided down to 1MHz.
-
-config STM32H7_RTC_LSECLOCK
-	bool "LSE clock"
-	---help---
-		Drive the RTC with the LSE clock
-
-config STM32H7_RTC_LSICLOCK
-	bool "LSI clock"
-	---help---
-		Drive the RTC with the LSI clock
-
-endchoice #"RTC clock source"
-
-if STM32H7_RTC_LSECLOCK
-
-config STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
-	default n
-	---help---
-		This will cycle through the correct* values from low to high. To
-		avoid damaging the crystal, we want to use the lowest setting that
-		gets the OSC running. See app note AN2867
-
-			0 = Low drive capability (default)
-			1 = Medium low drive capability
-			2 = Medium high drive capability
-			3 = High drive capability
-
-		*It will take into account the revision of the silicon and use
-		the correct code points to achieve the drive strength.
-		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
-		selection bits are swapped.
-
-config STM32H7_RTC_LSECLOCK_START_DRV_CAPABILITY
-	int "LSE oscillator drive capability level at LSE start-up"
-	default 0
-	range 0 3
-	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	---help---
-		0 = Low drive capability (default)
-		1 = Medium low drive capability
-		2 = Medium high drive capability
-		3 = High drive capability
-
-		It will take into account the revision of the silicon and use
-		the correct code points to achieve the drive strength.
-		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
-		selection bits are swapped.
-
-config STM32H7_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-	int "LSE oscillator drive capability level after LSE start-up"
-	default 0
-	range 0 3
-	depends on !STM32H7_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
-	---help---
-		0 = Low drive capability (default)
-		1 = Medium low drive capability
-		2 = Medium high drive capability
-		3 = High drive capability
-
-		It will take into account the revision of the silicon and use
-		the correct code points to achieve the drive strength.
-		See Errata ES0392 Rev 7 2.2.14 LSE oscillator driving capability
-		selection bits are swapped.
-
-		WARNING this RUN setting does not appear to work! It appears
-		that the LSEDRV bits cannot be changed once the OSC is running.
-
-endif # STM32H7_RTC_LSECLOCK
-
-endmenu # RTC Configuration
-
-menu "QuadSPI Configuration"
-	depends on STM32H7_QUADSPI
-
-config STM32H7_QSPI_FLASH_SIZE
-	int "Size of attached serial flash, bytes"
-	default 16777216
-	range 1 2147483648
-	---help---
-		The STM32H7 QSPI peripheral requires the size of the Flash be specified
-
-config STM32H7_QSPI_FIFO_THESHOLD
-	int "Number of bytes before asserting FIFO threshold flag"
-	default 4
-	range 1 16
-	---help---
-		The STM32H7 QSPI peripheral requires that the FIFO threshold be specified
-		I would leave it at the default value of 4 unless you know what you are doing.
-
-config STM32H7_QSPI_CSHT
-	int "Number of cycles Chip Select must be inactive between transactions"
-	default 1
-	range 1 8
-	---help---
-		The STM32H7 QSPI peripheral requires that it be specified the minimum number
-		of AHB cycles that Chip Select be held inactive between transactions.
-
-choice
-	prompt "Transfer technique"
-	default STM32H7_QSPI_DMA
-	---help---
-		You can choose between using polling, interrupts, or DMA to transfer data
-		over the QSPI interface.
-
-config STM32H7_QSPI_POLLING
-	bool "Polling"
-	---help---
-		Use conventional register I/O with status polling to transfer data.
-
-config STM32H7_QSPI_INTERRUPTS
-	bool "Interrupts"
-	---help---
-		User interrupt driven I/O transfers.
-
-config STM32H7_QSPI_DMA
-	bool "DMA"
-	depends on STM32H7_DMA
-	---help---
-		Use DMA to improve QSPI transfer performance.
-
-endchoice # Transfer technique
-
-choice
-	prompt "Bank selection"
-	default STM32H7_QSPI_MODE_BANK1
-	---help---
-		You can choose between using polling, interrupts, or DMA to transfer data
-		over the QSPI interface.
-
-config STM32H7_QSPI_MODE_BANK1
-	bool "Bank 1"
-
-config STM32H7_QSPI_MODE_BANK2
-	bool "Bank 2"
-
-config STM32H7_QSPI_MODE_DUAL
-	bool "Dual Bank"
-
-endchoice # Bank selection
-
-choice
-	prompt "DMA Priority"
-	default STM32H7_QSPI_DMAPRIORITY_MEDIUM
-	depends on STM32H7_DMA
-	---help---
-		The DMA controller supports priority levels.  You are probably fine
-		with the default of 'medium' except for special cases.  In the event
-		of contention between to channels at the same priority, the lower
-		numbered channel has hardware priority over the higher numbered one.
-
-config STM32H7_QSPI_DMAPRIORITY_VERYHIGH
-	bool "Very High priority"
-	depends on STM32H7_DMA
-	---help---
-		'Highest' priority.
-
-config STM32H7_QSPI_DMAPRIORITY_HIGH
-	bool "High priority"
-	depends on STM32H7_DMA
-	---help---
-		'High' priority.
-
-config STM32H7_QSPI_DMAPRIORITY_MEDIUM
-	bool "Medium priority"
-	depends on STM32H7_DMA
-	---help---
-		'Medium' priority.
-
-config STM32H7_QSPI_DMAPRIORITY_LOW
-	bool "Low priority"
-	depends on STM32H7_DMA
-	---help---
-		'Low' priority.
-
-endchoice # DMA Priority
-
-config STM32H7_QSPI_DMATHRESHOLD
-	int "QSPI DMA threshold"
-	default 4
-	depends on STM32H7_QSPI_DMA
-	---help---
-		When QSPI DMA is enabled, small DMA transfers will still be performed
-		by polling logic.  This value is the threshold below which transfers
-		will still be performed by conventional register status polling.
-
-config STM32H7_QSPI_DMADEBUG
-	bool "QSPI DMA transfer debug"
-	depends on STM32H7_QSPI_DMA && DEBUG_SPI && DEBUG_DMA
-	default n
-	---help---
-		Enable special debug instrumentation to analyze QSPI DMA data transfers.
-		This logic is as non-invasive as possible:  It samples DMA
-		registers at key points in the data transfer and then dumps all of
-		the registers at the end of the transfer.
-
-config STM32H7_QSPI_REGDEBUG
-	bool "QSPI Register level debug"
-	depends on DEBUG_SPI_INFO
-	default n
-	---help---
-		Output detailed register-level QSPI device debug information.
-		Requires also CONFIG_DEBUG_SPI_INFO.
-
-endmenu # QuadSPI Configuration
-
-config STM32H7_BYPASS_CLOCKCONFIG
+config STM32_BYPASS_CLOCKCONFIG
 	bool "Bypass clock configuration"
 	depends on ARCH_STM32H7_DUALCORE
 	default n if ARCH_CHIP_STM32H7_CORTEXM7
@@ -2363,4293 +790,13 @@ config STM32H7_BYPASS_CLOCKCONFIG
 		Bypass clock configuration. For dual core chips only one core
 		should configure clocks
 
-config STM32H7_CUSTOM_CLOCKCONFIG
-	bool "Custom clock configuration"
-	default n
-	---help---
-		Enables special, board-specific STM32 clock configuration.
-
-config STM32H7_SRAM4EXCLUDE
+config STM32_SRAM4EXCLUDE
 	bool "Exclude SRAM4 from the heap"
 	default y if RPTUN
 	default n
 	---help---
 		Exclude SRAM4 from the HEAP in order to use this 64 KB region
 		for other uses, such as DMA buffers, etc.
-
-config STM32H7_DTCMEXCLUDE
-	bool "Exclude DTCM SRAM from the heap"
-	default LIBC_ARCH_ELF
-	depends on ARMV7M_HAVE_DTCM
-	---help---
-		Exclude DTCM SRAM from the HEAP because it appears to be impossible
-		to execute ELF modules from DTCM RAM (REVISIT!).
-
-config STM32H7_DTCM_PROCFS
-	bool "DTCM SRAM PROCFS support"
-	default n
-	depends on ARMV7M_DTCM && FS_PROCFS
-	---help---
-		Select to build in support for /proc/dtcm.  Reading from /proc/dtcm
-		will provide statistics about DTCM memory use similar to what you
-		would get from mallinfo() for the user heap.
-
-config STM32H7_DMACAPABLE
-	bool "Workaround non-DMA capable memory"
-	depends on ARCH_DMA
-	default n
-	---help---
-		This option enables the DMA interface stm32_dmacapable that can be
-		used to check if it is possible to do DMA from the selected address.
-		Drivers then may use this information to determine if they should
-		attempt the DMA or fall back to a different transfer method.
-
-config STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED
-	bool "Do not disqualify DMA capability based on cache alignment"
-	depends on STM32H7_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
-	default n
-	---help---
-		This option configures the stm32_dmacapable to not disqualify
-		DMA operations on memory that is not dcache aligned based solely
-		on the starting address and byte count.
-
-		Use this when ALL buffer extents are known to be aligned, but the
-		the count does not use the complete buffer.
-
-menu "Timer Configuration"
-
-if SCHED_TICKLESS
-
-config STM32H7_TICKLESS_TIMER
-	int "Tickless hardware timer"
-	default 2
-	range 1 17
-	---help---
-		If the Tickless OS feature is enabled, then one clock must be
-		assigned to provided the timer needed by the OS.
-
-config STM32H7_TICKLESS_CHANNEL
-	int "Tickless timer channel"
-	default 1
-	range 1 4
-	---help---
-		If the Tickless OS feature is enabled, the one clock must be
-		assigned to provided the free-running timer needed by the OS
-		and one channel on that clock is needed to handle intervals.
-
-endif # SCHED_TICKLESS
-
-config STM32H7_ONESHOT
-	bool "TIM one-shot wrapper"
-	default n
-	---help---
-		Enable a wrapper around the low level timer/counter functions to
-		support one-shot timer.
-
-config STM32H7_ONESHOT_MAXTIMERS
-	int "Maximum number of oneshot timers"
-	default 1
-	range 1 8
-	depends on STM32H7_ONESHOT
-	---help---
-		Determines the maximum number of oneshot timers that can be
-		supported.  This setting pre-allocates some minimal support for each
-		of the timers and places an upper limit on the number of oneshot
-		timers that you can use.
-
-config STM32H7_PWM_LL_OPS
-	bool "PWM low-level operations"
-	default n
-	---help---
-		Enable low-level PWM ops.
-
-config STM32H7_TIM1_PWM
-	bool "TIM1 PWM"
-	default n
-	depends on STM32H7_TIM1
-	select STM32H7_PWM
-	---help---
-		Reserve timer 1 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM1
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM1_PWM
-
-config STM32H7_TIM1_MODE
-	int "TIM1 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-config STM32H7_TIM1_LOCK
-	int "TIM1 Lock Level Configuration"
-	default 0
-	range 0 3
-	---help---
-		Timer 1 lock level configuration
-
-config STM32H7_TIM1_TDTS
-	int "TIM1 t_DTS Division"
-	default 0
-	range 0 2
-	---help---
-		Timer 1 dead-time and sampling clock (t_DTS) division
-
-config STM32H7_TIM1_DEADTIME
-	int "TIM1 Initial Dead-time"
-	default 0
-	range 0 255
-	---help---
-		Timer 1 initial dead-time
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM1_CHANNEL1
-	bool "TIM1 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM1_CHANNEL1
-
-config STM32H7_TIM1_CH1MODE
-	int "TIM1 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH1OUT
-	bool "TIM1 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM1_CH1NOUT
-	bool "TIM1 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL1
-
-config STM32H7_TIM1_CHANNEL2
-	bool "TIM1 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM1_CHANNEL2
-
-config STM32H7_TIM1_CH2MODE
-	int "TIM1 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH2OUT
-	bool "TIM1 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-config STM32H7_TIM1_CH2NOUT
-	bool "TIM1 Channel 2 Complementary Output"
-	default n
-	---help---
-		Enables channel 2 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL2
-
-config STM32H7_TIM1_CHANNEL3
-	bool "TIM1 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM1_CHANNEL3
-
-config STM32H7_TIM1_CH3MODE
-	int "TIM1 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH3OUT
-	bool "TIM1 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-config STM32H7_TIM1_CH3NOUT
-	bool "TIM1 Channel 3 Complementary Output"
-	default n
-	---help---
-		Enables channel 3 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL3
-
-config STM32H7_TIM1_CHANNEL4
-	bool "TIM1 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM1_CHANNEL4
-
-config STM32H7_TIM1_CH4MODE
-	int "TIM1 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH4OUT
-	bool "TIM1 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM1_CHANNEL4
-
-config STM32H7_TIM1_CHANNEL5
-	bool "TIM1 Channel 5 (internal)"
-	default n
-	---help---
-		Enables channel 5 (not available externally)
-
-if STM32H7_TIM1_CHANNEL5
-
-config STM32H7_TIM1_CH5MODE
-	int "TIM1 Channel 5 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH5OUT
-	bool "TIM1 Channel 5 Output"
-	default n
-	---help---
-		Enables channel 5 output.
-
-endif # STM32H7_TIM1_CHANNEL5
-
-config STM32H7_TIM1_CHANNEL6
-	bool "TIM1 Channel 6 (internal)"
-	default n
-	---help---
-		Enables channel 6 (not available externally)
-
-if STM32H7_TIM1_CHANNEL6
-
-config STM32H7_TIM1_CH6MODE
-	int "TIM1 Channel 6 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM1_CH6OUT
-	bool "TIM1 Channel 6 Output"
-	default n
-	---help---
-		Enables channel 6 output.
-
-endif # STM32H7_TIM1_CHANNEL6
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM1_CHANNEL
-	int "TIM1 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM1 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM1_CHANNEL = 1
-
-config STM32H7_TIM1_CH1OUT
-	bool "TIM1 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM1_CH1NOUT
-	bool "TIM1 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL = 1
-
-if STM32H7_TIM1_CHANNEL = 2
-
-config STM32H7_TIM1_CH2OUT
-	bool "TIM1 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-config STM32H7_TIM1_CH2NOUT
-	bool "TIM1 Channel 2 Complementary Output"
-	default n
-	---help---
-		Enables channel 2 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL = 2
-
-if STM32H7_TIM1_CHANNEL = 3
-
-config STM32H7_TIM1_CH3OUT
-	bool "TIM1 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-config STM32H7_TIM1_CH3NOUT
-	bool "TIM1 Channel 3 Complementary Output"
-	default n
-	---help---
-		Enables channel 3 Complementary Output.
-
-endif # STM32H7_TIM1_CHANNEL = 3
-
-if STM32H7_TIM1_CHANNEL = 4
-
-config STM32H7_TIM1_CH4OUT
-	bool "TIM1 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM1_CHANNEL = 4
-
-config STM32H7_TIM1_CHMODE
-	int "TIM1 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM1_PWM
-
-config STM32H7_TIM2_PWM
-	bool "TIM2 PWM"
-	default n
-	depends on STM32H7_TIM2
-	select STM32H7_PWM
-	---help---
-		Reserve timer 2 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM2
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM2_PWM
-
-config STM32H7_TIM2_MODE
-	int "TIM2 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM2_CHANNEL1
-	bool "TIM2 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM2_CHANNEL1
-
-config STM32H7_TIM2_CH1MODE
-	int "TIM2 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM2_CH1OUT
-	bool "TIM2 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM2_CHANNEL1
-
-config STM32H7_TIM2_CHANNEL2
-	bool "TIM2 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM2_CHANNEL2
-
-config STM32H7_TIM2_CH2MODE
-	int "TIM2 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM2_CH2OUT
-	bool "TIM2 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM2_CHANNEL2
-
-config STM32H7_TIM2_CHANNEL3
-	bool "TIM2 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM2_CHANNEL3
-
-config STM32H7_TIM2_CH3MODE
-	int "TIM2 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM2_CH3OUT
-	bool "TIM2 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM2_CHANNEL3
-
-config STM32H7_TIM2_CHANNEL4
-	bool "TIM2 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM2_CHANNEL4
-
-config STM32H7_TIM2_CH4MODE
-	int "TIM2 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM2_CH4OUT
-	bool "TIM2 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM2_CHANNEL4
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM2_CHANNEL
-	int "TIM2 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM2 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM2_CHANNEL = 1
-
-config STM32H7_TIM2_CH1OUT
-	bool "TIM2 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM2_CHANNEL = 1
-
-if STM32H7_TIM2_CHANNEL = 2
-
-config STM32H7_TIM2_CH2OUT
-	bool "TIM2 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM2_CHANNEL = 2
-
-if STM32H7_TIM2_CHANNEL = 3
-
-config STM32H7_TIM2_CH3OUT
-	bool "TIM2 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM2_CHANNEL = 3
-
-if STM32H7_TIM2_CHANNEL = 4
-
-config STM32H7_TIM2_CH4OUT
-	bool "TIM2 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM2_CHANNEL = 4
-
-config STM32H7_TIM2_CHMODE
-	int "TIM2 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM2_PWM
-
-config STM32H7_TIM3_PWM
-	bool "TIM3 PWM"
-	default n
-	depends on STM32H7_TIM3
-	select STM32H7_PWM
-	---help---
-		Reserve timer 3 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM3
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM3_PWM
-
-config STM32H7_TIM3_MODE
-	int "TIM3 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM3_CHANNEL1
-	bool "TIM3 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM3_CHANNEL1
-
-config STM32H7_TIM3_CH1MODE
-	int "TIM3 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM3_CH1OUT
-	bool "TIM3 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM3_CHANNEL1
-
-config STM32H7_TIM3_CHANNEL2
-	bool "TIM3 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM3_CHANNEL2
-
-config STM32H7_TIM3_CH2MODE
-	int "TIM3 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM3_CH2OUT
-	bool "TIM3 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM3_CHANNEL2
-
-config STM32H7_TIM3_CHANNEL3
-	bool "TIM3 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM3_CHANNEL3
-
-config STM32H7_TIM3_CH3MODE
-	int "TIM3 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM3_CH3OUT
-	bool "TIM3 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM3_CHANNEL3
-
-config STM32H7_TIM3_CHANNEL4
-	bool "TIM3 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM3_CHANNEL4
-
-config STM32H7_TIM3_CH4MODE
-	int "TIM3 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM3_CH4OUT
-	bool "TIM3 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM3_CHANNEL4
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM3_CHANNEL
-	int "TIM3 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM3 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM3_CHANNEL = 1
-
-config STM32H7_TIM3_CH1OUT
-	bool "TIM3 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM3_CHANNEL = 1
-
-if STM32H7_TIM3_CHANNEL = 2
-
-config STM32H7_TIM3_CH2OUT
-	bool "TIM3 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM3_CHANNEL = 2
-
-if STM32H7_TIM3_CHANNEL = 3
-
-config STM32H7_TIM3_CH3OUT
-	bool "TIM3 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM3_CHANNEL = 3
-
-if STM32H7_TIM3_CHANNEL = 4
-
-config STM32H7_TIM3_CH4OUT
-	bool "TIM3 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM3_CHANNEL = 4
-
-config STM32H7_TIM3_CHMODE
-	int "TIM3 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM3_PWM
-
-config STM32H7_TIM4_PWM
-	bool "TIM4 PWM"
-	default n
-	depends on STM32H7_TIM4
-	select STM32H7_PWM
-	---help---
-		Reserve timer 4 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM4
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM4_PWM
-
-config STM32H7_TIM4_MODE
-	int "TIM4 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM4_CHANNEL1
-	bool "TIM4 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM4_CHANNEL1
-
-config STM32H7_TIM4_CH1MODE
-	int "TIM4 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM4_CH1OUT
-	bool "TIM4 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM4_CHANNEL1
-
-config STM32H7_TIM4_CHANNEL2
-	bool "TIM4 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM4_CHANNEL2
-
-config STM32H7_TIM4_CH2MODE
-	int "TIM4 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM4_CH2OUT
-	bool "TIM4 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM4_CHANNEL2
-
-config STM32H7_TIM4_CHANNEL3
-	bool "TIM4 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM4_CHANNEL3
-
-config STM32H7_TIM4_CH3MODE
-	int "TIM4 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM4_CH3OUT
-	bool "TIM4 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM4_CHANNEL3
-
-config STM32H7_TIM4_CHANNEL4
-	bool "TIM4 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM4_CHANNEL4
-
-config STM32H7_TIM4_CH4MODE
-	int "TIM4 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM4_CH4OUT
-	bool "TIM4 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM4_CHANNEL4
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM4_CHANNEL
-	int "TIM4 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM4 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM4_CHANNEL = 1
-
-config STM32H7_TIM4_CH1OUT
-	bool "TIM4 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM4_CHANNEL = 1
-
-if STM32H7_TIM4_CHANNEL = 2
-
-config STM32H7_TIM4_CH2OUT
-	bool "TIM4 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM4_CHANNEL = 2
-
-if STM32H7_TIM4_CHANNEL = 3
-
-config STM32H7_TIM4_CH3OUT
-	bool "TIM4 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM4_CHANNEL = 3
-
-if STM32H7_TIM4_CHANNEL = 4
-
-config STM32H7_TIM4_CH4OUT
-	bool "TIM4 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM4_CHANNEL = 4
-
-config STM32H7_TIM4_CHMODE
-	int "TIM4 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM4_PWM
-
-config STM32H7_TIM5_PWM
-	bool "TIM5 PWM"
-	default n
-	depends on STM32H7_TIM5
-	select STM32H7_PWM
-	---help---
-		Reserve timer 5 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM5
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM5_PWM
-
-config STM32H7_TIM5_MODE
-	int "TIM5 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM5_CHANNEL1
-	bool "TIM5 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM5_CHANNEL1
-
-config STM32H7_TIM5_CH1MODE
-	int "TIM5 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM5_CH1OUT
-	bool "TIM5 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM5_CHANNEL1
-
-config STM32H7_TIM5_CHANNEL2
-	bool "TIM5 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM5_CHANNEL2
-
-config STM32H7_TIM5_CH2MODE
-	int "TIM5 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM5_CH2OUT
-	bool "TIM5 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM5_CHANNEL2
-
-config STM32H7_TIM5_CHANNEL3
-	bool "TIM5 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM5_CHANNEL3
-
-config STM32H7_TIM5_CH3MODE
-	int "TIM5 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM5_CH3OUT
-	bool "TIM5 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM5_CHANNEL3
-
-config STM32H7_TIM5_CHANNEL4
-	bool "TIM5 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM5_CHANNEL4
-
-config STM32H7_TIM5_CH4MODE
-	int "TIM5 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM5_CH4OUT
-	bool "TIM5 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM5_CHANNEL4
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM5_CHANNEL
-	int "TIM5 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM5 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM5_CHANNEL = 1
-
-config STM32H7_TIM5_CH1OUT
-	bool "TIM5 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM5_CHANNEL = 1
-
-if STM32H7_TIM5_CHANNEL = 2
-
-config STM32H7_TIM5_CH2OUT
-	bool "TIM5 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM5_CHANNEL = 2
-
-if STM32H7_TIM5_CHANNEL = 3
-
-config STM32H7_TIM5_CH3OUT
-	bool "TIM5 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-endif # STM32H7_TIM5_CHANNEL = 3
-
-if STM32H7_TIM5_CHANNEL = 4
-
-config STM32H7_TIM5_CH4OUT
-	bool "TIM5 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM5_CHANNEL = 4
-
-config STM32H7_TIM5_CHMODE
-	int "TIM5 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM5_PWM
-
-config STM32H7_TIM8_PWM
-	bool "TIM8 PWM"
-	default n
-	depends on STM32H7_TIM8
-	select STM32H7_PWM
-	---help---
-		Reserve timer 8 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM8
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM8_PWM
-
-config STM32H7_TIM8_MODE
-	int "TIM8 Mode"
-	default 0
-	range 0 4
-	---help---
-		Specifies the timer mode.
-
-config STM32H7_TIM8_LOCK
-	int "TIM8 Lock Level Configuration"
-	default 0
-	range 0 3
-	---help---
-		Timer 8 lock level configuration
-
-config STM32H7_TIM8_DEADTIME
-	int "TIM8 Initial Dead-time"
-	default 0
-	range 0 255
-	---help---
-		Timer 8 initial dead-time
-
-config STM32H7_TIM8_TDTS
-	int "TIM8 t_DTS Division"
-	default 0
-	range 0 2
-	---help---
-		Timer 8 dead-time and sampling clock (t_DTS) division
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM8_CHANNEL1
-	bool "TIM8 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM8_CHANNEL1
-
-config STM32H7_TIM8_CH1MODE
-	int "TIM8 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH1OUT
-	bool "TIM8 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM8_CH1NOUT
-	bool "TIM8 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL1
-
-config STM32H7_TIM8_CHANNEL2
-	bool "TIM8 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM8_CHANNEL2
-
-config STM32H7_TIM8_CH2MODE
-	int "TIM8 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH2OUT
-	bool "TIM8 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-config STM32H7_TIM8_CH2NOUT
-	bool "TIM8 Channel 2 Complementary Output"
-	default n
-	---help---
-		Enables channel 2 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL2
-
-config STM32H7_TIM8_CHANNEL3
-	bool "TIM8 Channel 3"
-	default n
-	---help---
-		Enables channel 3.
-
-if STM32H7_TIM8_CHANNEL3
-
-config STM32H7_TIM8_CH3MODE
-	int "TIM8 Channel 3 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH3OUT
-	bool "TIM8 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-config STM32H7_TIM8_CH3NOUT
-	bool "TIM8 Channel 3 Complementary Output"
-	default n
-	---help---
-		Enables channel 3 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL3
-
-config STM32H7_TIM8_CHANNEL4
-	bool "TIM8 Channel 4"
-	default n
-	---help---
-		Enables channel 4.
-
-if STM32H7_TIM8_CHANNEL4
-
-config STM32H7_TIM8_CH4MODE
-	int "TIM8 Channel 4 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH4OUT
-	bool "TIM8 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM8_CHANNEL4
-
-config STM32H7_TIM8_CHANNEL5
-	bool "TIM8 Channel 5 (internal)"
-	default n
-	---help---
-		Enables channel 5 (not available externally)
-
-if STM32H7_TIM8_CHANNEL5
-
-config STM32H7_TIM8_CH5MODE
-	int "TIM8 Channel 5 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH5OUT
-	bool "TIM8 Channel 5 Output"
-	default n
-	---help---
-		Enables channel 5 output.
-
-endif # STM32H7_TIM8_CHANNEL5
-
-config STM32H7_TIM8_CHANNEL6
-	bool "TIM8 Channel 6 (internal)"
-	default n
-	---help---
-		Enables channel 6 (not available externally)
-
-if STM32H7_TIM8_CHANNEL6
-
-config STM32H7_TIM8_CH6MODE
-	int "TIM8 Channel 6 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM8_CH6OUT
-	bool "TIM8 Channel 6 Output"
-	default n
-	---help---
-		Enables channel 6 output.
-
-endif # STM32H7_TIM8_CHANNEL6
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM8_CHANNEL
-	int "TIM8 PWM Output Channel"
-	default 1
-	range 1 4
-	---help---
-		If TIM8 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,..,4}
-
-if STM32H7_TIM8_CHANNEL = 1
-
-config STM32H7_TIM8_CH1OUT
-	bool "TIM8 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM8_CH1NOUT
-	bool "TIM8 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL = 1
-
-if STM32H7_TIM8_CHANNEL = 2
-
-config STM32H7_TIM8_CH2OUT
-	bool "TIM8 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-config STM32H7_TIM8_CH2NOUT
-	bool "TIM8 Channel 2 Complementary Output"
-	default n
-	---help---
-		Enables channel 2 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL = 2
-
-if STM32H7_TIM8_CHANNEL = 3
-
-config STM32H7_TIM8_CH3OUT
-	bool "TIM8 Channel 3 Output"
-	default n
-	---help---
-		Enables channel 3 output.
-
-config STM32H7_TIM8_CH3NOUT
-	bool "TIM8 Channel 3 Complementary Output"
-	default n
-	---help---
-		Enables channel 3 Complementary Output.
-
-endif # STM32H7_TIM8_CHANNEL = 3
-
-if STM32H7_TIM8_CHANNEL = 4
-
-config STM32H7_TIM8_CH4OUT
-	bool "TIM8 Channel 4 Output"
-	default n
-	---help---
-		Enables channel 4 output.
-
-endif # STM32H7_TIM8_CHANNEL = 4
-
-config STM32H7_TIM8_CHMODE
-	int "TIM8 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM8_PWM
-
-config STM32H7_TIM12_PWM
-	bool "TIM12 PWM"
-	default n
-	depends on STM32H7_TIM12
-	select STM32H7_PWM
-	---help---
-		Reserve timer 12 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM12
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM12_PWM
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM12_CHANNEL1
-	bool "TIM12 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM12_CHANNEL1
-
-config STM32H7_TIM12_CH1MODE
-	int "TIM12 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM12_CH1OUT
-	bool "TIM12 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM12_CHANNEL1
-
-config STM32H7_TIM12_CHANNEL2
-	bool "TIM12 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM12_CHANNEL2
-
-config STM32H7_TIM12_CH2MODE
-	int "TIM12 Channel 2 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM12_CH2OUT
-	bool "TIM12 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM12_CHANNEL2
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM12_CHANNEL
-	int "TIM12 PWM Output Channel"
-	default 1
-	range 1 2
-	---help---
-		If TIM12 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,2}
-
-if STM32H7_TIM12_CHANNEL = 1
-
-config STM32H7_TIM12_CH1OUT
-	bool "TIM12 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM12_CHANNEL = 1
-
-if STM32H7_TIM12_CHANNEL = 2
-
-config STM32H7_TIM12_CH2OUT
-	bool "TIM12 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM12_CHANNEL = 2
-
-config STM32H7_TIM12_CHMODE
-	int "TIM12 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM12_PWM
-
-config STM32H7_TIM13_PWM
-	bool "TIM13 PWM"
-	default n
-	depends on STM32H7_TIM13
-	select STM32H7_PWM
-	---help---
-		Reserve timer 13 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM13
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM13_PWM
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM13_CHANNEL1
-	bool "TIM13 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM13_CHANNEL1
-
-config STM32H7_TIM13_CH1MODE
-	int "TIM13 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM13_CH1OUT
-	bool "TIM13 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM13_CHANNEL1
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM13_CHANNEL
-	int "TIM13 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM13 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-if STM32H7_TIM13_CHANNEL = 1
-
-config STM32H7_TIM13_CH1OUT
-	bool "TIM13 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM13_CHANNEL = 1
-
-config STM32H7_TIM13_CHMODE
-	int "TIM13 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM13_PWM
-
-config STM32H7_TIM14_PWM
-	bool "TIM14 PWM"
-	default n
-	depends on STM32H7_TIM14
-	select STM32H7_PWM
-	---help---
-		Reserve timer 14 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM14
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM14_PWM
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM14_CHANNEL1
-	bool "TIM14 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM14_CHANNEL1
-
-config STM32H7_TIM14_CH1MODE
-	int "TIM14 Channel 1 Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM14_CH1OUT
-	bool "TIM14 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM14_CHANNEL1
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM14_CHANNEL
-	int "TIM14 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM14 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-if STM32H7_TIM14_CHANNEL = 1
-
-config STM32H7_TIM14_CH1OUT
-	bool "TIM14 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM14_CHANNEL = 1
-
-config STM32H7_TIM14_CHMODE
-	int "TIM14 Channel Mode"
-	default 6
-	range 0 11
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM14_PWM
-
-config STM32H7_TIM15_PWM
-	bool "TIM15 PWM"
-	default n
-	depends on STM32H7_TIM15
-	select STM32H7_PWM
-	---help---
-		Reserve timer 15 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM15
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM15_PWM
-
-config STM32H7_TIM15_LOCK
-	int "TIM15 Lock Level Configuration"
-	default 0
-	range 0 3
-	---help---
-		Timer 15 lock level configuration
-
-config STM32H7_TIM15_TDTS
-	int "TIM15 t_DTS Division"
-	default 0
-	range 0 2
-	---help---
-		Timer 15 dead-time and sampling clock (t_DTS) division
-
-config STM32H7_TIM15_DEADTIME
-	int "TIM15 Initial Dead-time"
-	default 0
-	range 0 255
-	---help---
-		Timer 15 initial dead-time
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM15_CHANNEL1
-	bool "TIM15 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM15_CHANNEL1
-
-config STM32H7_TIM15_CH1MODE
-	int "TIM15 Channel 1 Mode"
-	default 6
-	range 0 9
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM15_CH1OUT
-	bool "TIM15 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM15_CH1NOUT
-	bool "TIM15 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM15_CHANNEL1
-
-config STM32H7_TIM15_CHANNEL2
-	bool "TIM15 Channel 2"
-	default n
-	---help---
-		Enables channel 2.
-
-if STM32H7_TIM15_CHANNEL2
-
-config STM32H7_TIM15_CH2MODE
-	int "TIM15 Channel 2 Mode"
-	default 6
-	range 0 9
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM15_CH2OUT
-	bool "TIM15 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-endif # STM32H7_TIM15_CHANNEL2
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM15_CHANNEL
-	int "TIM15 PWM Output Channel"
-	default 1
-	range 1 2
-	---help---
-		If TIM15 is enabled for PWM usage, you also need specifies the timer output
-		channel {1,2}
-
-if STM32H7_TIM15_CHANNEL = 1
-
-config STM32H7_TIM15_CH1OUT
-	bool "TIM15 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-config STM32H7_TIM15_CH1NOUT
-	bool "TIM15 Channel 1 Complementary Output"
-	default n
-	---help---
-		Enables channel 1 Complementary Output.
-
-endif # STM32H7_TIM15_CHANNEL = 1
-
-if STM32H7_TIM15_CHANNEL = 2
-
-config STM32H7_TIM15_CH2OUT
-	bool "TIM15 Channel 2 Output"
-	default n
-	---help---
-		Enables channel 2 output.
-
-config STM32H7_TIM15_CH2NOUT
-	bool "TIM15 Channel 2 Complementary Output"
-	default n
-	---help---
-		Enables channel 2 Complementary Output.
-
-endif # STM32H7_TIM15_CHANNEL = 2
-
-config STM32H7_TIM15_CHMODE
-	int "TIM15 Channel Mode"
-	default 6
-	range 0 9
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM15_PWM
-
-config STM32H7_TIM16_PWM
-	bool "TIM16 PWM"
-	default n
-	depends on STM32H7_TIM16
-	select STM32H7_PWM
-	---help---
-		Reserve timer 16 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM16
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM16_PWM
-
-config STM32H7_TIM16_LOCK
-	int "TIM16 Lock Level Configuration"
-	default 0
-	range 0 3
-	---help---
-		Timer 16 lock level configuration
-
-config STM32H7_TIM16_TDTS
-	int "TIM16 t_DTS division"
-	default 0
-	range 0 2
-	---help---
-		Timer 16 dead-time and sampling clock (t_DTS) division
-
-config STM32H7_TIM16_DEADTIME
-	int "TIM16 Initial Dead-time"
-	default 0
-	range 0 255
-	---help---
-		Timer 16 initial dead-time
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM16_CHANNEL1
-	bool "TIM16 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM16_CHANNEL1
-
-config STM32H7_TIM16_CH1MODE
-	int "TIM16 Channel 1 Mode"
-	default 6
-	range 0 7
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM16_CH1OUT
-	bool "TIM16 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM16_CHANNEL1
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM16_CHANNEL
-	int "TIM16 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM16 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-if STM32H7_TIM16_CHANNEL = 1
-
-config STM32H7_TIM16_CH1OUT
-	bool "TIM16 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM16_CHANNEL = 1
-
-config STM32H7_TIM16_CHMODE
-	int "TIM16 Channel Mode"
-	default 6
-	range 0 7
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM16_PWM
-
-config STM32H7_TIM17_PWM
-	bool "TIM17 PWM"
-	default n
-	depends on STM32H7_TIM17
-	select STM32H7_PWM
-	---help---
-		Reserve timer 17 for use by PWM
-
-		Timer devices may be used for different purposes.  One special purpose is
-		to generate modulated outputs for such things as motor control.  If STM32H7_TIM17
-		is defined then THIS following may also be defined to indicate that
-		the timer is intended to be used for pulsed output modulation.
-
-if STM32H7_TIM17_PWM
-
-config STM32H7_TIM17_LOCK
-	int "TIM17 Lock Level Configuration"
-	default 0
-	range 0 3
-	---help---
-		Timer 17 lock level configuration
-
-config STM32H7_TIM17_TDTS
-	int "TIM17 t_DTS Division"
-	default 0
-	range 0 2
-	---help---
-		Timer 17 dead-time and sampling clock (t_DTS) division
-
-config STM32H7_TIM17_DEADTIME
-	int "TIM17 Initial Dead-time"
-	default 0
-	range 0 255
-	---help---
-		Timer 17 initial dead-time
-
-if STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM17_CHANNEL1
-	bool "TIM17 Channel 1"
-	default n
-	---help---
-		Enables channel 1.
-
-if STM32H7_TIM17_CHANNEL1
-
-config STM32H7_TIM17_CH1MODE
-	int "TIM17 Channel 1 Mode"
-	default 6
-	range 0 7
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-config STM32H7_TIM17_CH1OUT
-	bool "TIM17 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM17_CHANNEL1
-
-endif # STM32H7_PWM_MULTICHAN
-
-if !STM32H7_PWM_MULTICHAN
-
-config STM32H7_TIM17_CHANNEL
-	int "TIM17 PWM Output Channel"
-	default 1
-	range 1 1
-	---help---
-		If TIM17 is enabled for PWM usage, you also need specifies the timer output
-		channel {1}
-
-if STM32H7_TIM17_CHANNEL = 1
-
-config STM32H7_TIM17_CH1OUT
-	bool "TIM17 Channel 1 Output"
-	default n
-	---help---
-		Enables channel 1 output.
-
-endif # STM32H7_TIM17_CHANNEL = 1
-
-config STM32H7_TIM17_CHMODE
-	int "TIM17 Channel Mode"
-	default 6
-	range 0 7
-	---help---
-		Specifies the channel mode. See enum stm32_pwm_chanmode_e in stm32_pwm.h.
-
-endif # !STM32H7_PWM_MULTICHAN
-
-endif # STM32H7_TIM17_PWM
-
-config STM32H7_PWM_MULTICHAN
-	bool "PWM Multiple Output Channels"
-	default n
-	depends on STM32H7_PWM
-	---help---
-		Specifies that the PWM driver supports multiple output
-		channels per timer.
-
-config STM32H7_PULSECOUNT
-	bool
-	default n
-	select ARCH_HAVE_PULSECOUNT
-	select PULSECOUNT
-
-config STM32H7_TIM1_PULSECOUNT
-	bool "TIM1 pulse count"
-	default n
-	depends on STM32H7_TIM1
-	select STM32H7_PULSECOUNT
-	---help---
-		Reserve timer 1 for pulse count output.
-
-if STM32H7_TIM1_PULSECOUNT
-
-config STM32H7_TIM1_PULSECOUNT_TDTS
-	int "TIM1 pulse count clock division"
-	default 0
-	range 0 2
-
-config STM32H7_TIM1_PULSECOUNT_CHANNEL
-	int "TIM1 pulse count channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer channel {1,..,4}.
-
-config STM32H7_TIM1_PULSECOUNT_POL
-	int "TIM1 pulse count output polarity"
-	default 0
-	range 0 1
-
-config STM32H7_TIM1_PULSECOUNT_IDLE
-	int "TIM1 pulse count idle state"
-	default 0
-	range 0 1
-
-endif # STM32H7_TIM1_PULSECOUNT
-
-config STM32H7_TIM8_PULSECOUNT
-	bool "TIM8 pulse count"
-	default n
-	depends on STM32H7_TIM8
-	select STM32H7_PULSECOUNT
-	---help---
-		Reserve timer 8 for pulse count output.
-
-if STM32H7_TIM8_PULSECOUNT
-
-config STM32H7_TIM8_PULSECOUNT_TDTS
-	int "TIM8 pulse count clock division"
-	default 0
-	range 0 2
-
-config STM32H7_TIM8_PULSECOUNT_CHANNEL
-	int "TIM8 pulse count channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer channel {1,..,4}.
-
-config STM32H7_TIM8_PULSECOUNT_POL
-	int "TIM8 pulse count output polarity"
-	default 0
-	range 0 1
-
-config STM32H7_TIM8_PULSECOUNT_IDLE
-	int "TIM8 pulse count idle state"
-	default 0
-	range 0 1
-
-endif # STM32H7_TIM8_PULSECOUNT
-config STM32H7_TIM1_ADC
-	bool "TIM1 ADC"
-	default n
-	depends on STM32H7_TIM1 && STM32H7_ADC
-	---help---
-		Reserve timer 1 for use by an ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM1 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM1"
-	default STM32H7_TIM1_ADC1
-	depends on STM32H7_TIM1_ADC
-
-config STM32H7_TIM1_ADC1
-	bool "Use TIM1 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM1 to trigger ADC1
-
-config STM32H7_TIM1_ADC2
-	bool "Use TIM1 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM1 to trigger ADC2
-
-config STM32H7_TIM1_ADC3
-	bool "Use TIM1 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM1 to trigger ADC3
-
-endchoice # Select ADC for use with TIM1
-
-config STM32H7_TIM2_ADC
-	bool "TIM2 ADC"
-	default n
-	depends on STM32H7_TIM2 && STM32H7_ADC
-	---help---
-		Reserve timer 2 for use by an ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM2 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM2"
-	default STM32H7_TIM2_ADC1
-	depends on STM32H7_TIM2_ADC
-
-config STM32H7_TIM2_ADC1
-	bool "Use TIM2 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM2 to trigger ADC1
-
-config STM32H7_TIM2_ADC2
-	bool "Use TIM2 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM2 to trigger ADC2
-
-config STM32H7_TIM2_ADC3
-	bool "Use TIM2 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM2 to trigger ADC3
-
-endchoice # Select ADC for use with TIM2
-
-config STM32H7_TIM3_ADC
-	bool "TIM3 ADC"
-	default n
-	depends on STM32H7_TIM3 && STM32H7_ADC
-	---help---
-		Reserve timer 3 for use by an ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM3 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM3"
-	default STM32H7_TIM3_ADC1
-	depends on STM32H7_TIM3_ADC
-
-config STM32H7_TIM3_ADC1
-	bool "Use TIM3 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM3 to trigger ADC1
-
-config STM32H7_TIM3_ADC2
-	bool "Use TIM3 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM3 to trigger ADC2
-
-config STM32H7_TIM3_ADC3
-	bool "Use TIM3 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM3 to trigger ADC3
-
-endchoice # Select ADC for use with TIM3
-
-config STM32H7_TIM4_ADC
-	bool "TIM4 ADC"
-	default n
-	depends on STM32H7_TIM4 && STM32H7_ADC
-	---help---
-		Reserve timer 4 for use by ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM4 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM4"
-	default STM32H7_TIM4_ADC1
-	depends on STM32H7_TIM4_ADC
-
-config STM32H7_TIM4_ADC1
-	bool "Use TIM4 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM4 to trigger ADC1
-
-config STM32H7_TIM4_ADC2
-	bool "Use TIM4 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM4 to trigger ADC2
-
-config STM32H7_TIM4_ADC3
-	bool "Use TIM4 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM4 to trigger ADC3
-
-endchoice # Select ADC for use with TIM4
-
-config STM32H7_TIM6_ADC
-	bool "TIM6 ADC"
-	default n
-	depends on STM32H7_TIM6 && STM32H7_ADC
-	---help---
-		Reserve timer 6 for use by ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM6 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM6"
-	default STM32H7_TIM6_ADC1
-	depends on STM32H7_TIM6_ADC
-
-config STM32H7_TIM6_ADC1
-	bool "Use TIM6 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM6 to trigger ADC1
-
-config STM32H7_TIM6_ADC2
-	bool "Use TIM6 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM6 to trigger ADC2
-
-config STM32H7_TIM6_ADC3
-	bool "Use TIM6 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM6 to trigger ADC3
-
-endchoice # Select ADC for use with TIM6
-
-config STM32H7_TIM8_ADC
-	bool "TIM8 ADC"
-	default n
-	depends on STM32H7_TIM8 && STM32H7_ADC
-	---help---
-		Reserve timer 8 for use by ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM8 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM8"
-	default STM32H7_TIM8_ADC1
-	depends on STM32H7_TIM8_ADC
-
-config STM32H7_TIM8_ADC1
-	bool "Use TIM8 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM8 to trigger ADC1
-
-config STM32H7_TIM8_ADC2
-	bool "Use TIM8 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM8 to trigger ADC2
-
-config STM32H7_TIM8_ADC3
-	bool "Use TIM8 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM8 to trigger ADC3
-
-endchoice # Select ADC for use with TIM8
-
-config STM32H7_TIM15_ADC
-	bool "TIM15 ADC"
-	default n
-	depends on STM32H7_TIM15 && STM32H7_ADC
-	---help---
-		Reserve timer 15 for use by ADC
-
-		Timer devices may be used for different purposes.  If STM32H7_TIM15 is
-		defined then the following may also be defined to indicate that the
-		timer is intended to be used for ADC conversion. Note that ADC usage
-		requires two definition:  Not only do you have to assign the timer
-		for used by the ADC, but then you also have to configure which ADC
-		channel it is assigned to.
-
-choice
-	prompt "Select ADC for use with TIM15"
-	default STM32H7_TIM15_ADC1
-	depends on STM32H7_TIM15_ADC
-
-config STM32H7_TIM15_ADC1
-	bool "Use TIM15 for ADC1"
-	depends on STM32H7_ADC1
-	select STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Reserve TIM15 to trigger ADC1
-
-config STM32H7_TIM15_ADC2
-	bool "Use TIM15 for ADC2"
-	depends on STM32H7_ADC2
-	select STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Reserve TIM15 to trigger ADC2
-
-config STM32H7_TIM15_ADC3
-	bool "Use TIM15 for ADC3"
-	depends on STM32H7_ADC3
-	select STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Reserve TIM15 to trigger ADC3
-
-endchoice # Select ADC for use with TIM15
-
-config STM32H7_HAVE_ADC1_TIMER
-	bool
-
-config STM32H7_HAVE_ADC2_TIMER
-	bool
-
-config STM32H7_HAVE_ADC3_TIMER
-	bool
-
-config STM32H7_ADC1_SAMPLE_FREQUENCY
-	int "ADC1 Sampling Frequency"
-	default 100
-	depends on STM32H7_HAVE_ADC1_TIMER
-	---help---
-		ADC1 sampling frequency.  Default:  100Hz
-
-config STM32H7_ADC1_TIMTRIG
-	int "ADC1 Timer Trigger"
-	default 0
-	range 0 4
-	depends on STM32H7_HAVE_ADC1_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
-config STM32H7_ADC2_SAMPLE_FREQUENCY
-	int "ADC2 Sampling Frequency"
-	default 100
-	depends on STM32H7_HAVE_ADC2_TIMER
-	---help---
-		ADC2 sampling frequency.  Default:  100Hz
-
-config STM32H7_ADC2_TIMTRIG
-	int "ADC2 Timer Trigger"
-	default 0
-	range 0 4
-	depends on STM32H7_HAVE_ADC2_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
-config STM32H7_ADC3_SAMPLE_FREQUENCY
-	int "ADC3 Sampling Frequency"
-	default 100
-	depends on STM32H7_HAVE_ADC3_TIMER
-	---help---
-		ADC3 sampling frequency.  Default:  100Hz
-
-config STM32H7_ADC3_TIMTRIG
-	int "ADC3 Timer Trigger"
-	default 0
-	range 0 4
-	depends on STM32H7_HAVE_ADC3_TIMER
-	---help---
-		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
-
-config STM32H7_TIMX_CAP
-	default n
-	bool "Helpers for Capture Drivers"
-
-config STM32H7_TIM1_CAP
-	bool "TIM1 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM1
-	---help---
-		Reserve timer 1 for use by the capture driver.
-
-if STM32H7_TIM1_CAP
-
-config STM32H7_TIM1_CHANNEL
-	int "TIM1 Capture Input Channel"
-	default 1
-	range 1 6
-	---help---
-		Specifies the timer input channel {1..6} for TIM1.
-
-config STM32H7_TIM1_CLOCK
-	int "TIM1 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM1_CAP
-
-config STM32H7_TIM8_CAP
-	bool "TIM8 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM8
-	---help---
-		Reserve timer 8 for use by the capture driver.
-
-if STM32H7_TIM8_CAP
-
-config STM32H7_TIM8_CHANNEL
-	int "TIM8 Capture Input Channel"
-	default 1
-	range 1 6
-	---help---
-		Specifies the timer input channel {1..6} for TIM8.
-
-config STM32H7_TIM8_CLOCK
-	int "TIM8 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM8_CAP
-
-#
-# General-Purpose Timers (4 Channels)
-#
-
-config STM32H7_TIM2_CAP
-	bool "TIM2 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM2
-	---help---
-		Reserve timer 2 for use by the capture driver.
-
-if STM32H7_TIM2_CAP
-
-config STM32H7_TIM2_CHANNEL
-	int "TIM2 Capture Input Channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer input channel {1..4} for TIM2.
-
-config STM32H7_TIM2_CLOCK
-	int "TIM2 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM2_CAP
-
-config STM32H7_TIM3_CAP
-	bool "TIM3 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM3
-	---help---
-		Reserve timer 3 for use by the capture driver.
-
-if STM32H7_TIM3_CAP
-
-config STM32H7_TIM3_CHANNEL
-	int "TIM3 Capture Input Channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer input channel {1..4} for TIM3.
-
-config STM32H7_TIM3_CLOCK
-	int "TIM3 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM3_CAP
-
-config STM32H7_TIM4_CAP
-	bool "TIM4 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM4
-	---help---
-		Reserve timer 4 for use by the capture driver.
-
-if STM32H7_TIM4_CAP
-
-config STM32H7_TIM4_CHANNEL
-	int "TIM4 Capture Input Channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer input channel {1..4} for TIM4.
-
-config STM32H7_TIM4_CLOCK
-	int "TIM4 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM4_CAP
-
-config STM32H7_TIM5_CAP
-	bool "TIM5 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM5
-	---help---
-		Reserve timer 5 for use by the capture driver.
-
-if STM32H7_TIM5_CAP
-
-config STM32H7_TIM5_CHANNEL
-	int "TIM5 Capture Input Channel"
-	default 1
-	range 1 4
-	---help---
-		Specifies the timer input channel {1..4} for TIM5.
-
-config STM32H7_TIM5_CLOCK
-	int "TIM5 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM5_CAP
-
-#
-# General-Purpose Timers (2 Channels)
-#
-
-config STM32H7_TIM12_CAP
-	bool "TIM12 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM12
-	---help---
-		Reserve timer 12 for use by the capture driver.
-
-if STM32H7_TIM12_CAP
-
-config STM32H7_TIM12_CHANNEL
-	int "TIM12 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1..2} for TIM12.
-
-config STM32H7_TIM12_CLOCK
-	int "TIM12 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM12_CAP
-
-config STM32H7_TIM15_CAP
-	bool "TIM15 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM15
-	---help---
-		Reserve timer 15 for use by the capture driver.
-
-if STM32H7_TIM15_CAP
-
-config STM32H7_TIM15_CHANNEL
-	int "TIM15 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1..2} for TIM15.
-
-config STM32H7_TIM15_CLOCK
-	int "TIM15 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM15_CAP
-
-#
-# General-Purpose Timers (1 Channel)
-#
-
-config STM32H7_TIM13_CAP
-	bool "TIM13 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM13
-	---help---
-		Reserve timer 13 for use by the capture driver.
-
-if STM32H7_TIM13_CAP
-
-config STM32H7_TIM13_CHANNEL
-	int "TIM13 Capture Input Channel"
-	default 1
-	range 1 1
-	---help---
-		Specifies the timer input channel {1} for TIM13.
-
-config STM32H7_TIM13_CLOCK
-	int "TIM13 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM13_CAP
-
-config STM32H7_TIM14_CAP
-	bool "TIM14 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM14
-	---help---
-		Reserve timer 14 for use by the capture driver.
-
-if STM32H7_TIM14_CAP
-
-config STM32H7_TIM14_CHANNEL
-	int "TIM14 Capture Input Channel"
-	default 1
-	range 1 1
-	---help---
-		Specifies the timer input channel {1} for TIM14.
-
-config STM32H7_TIM14_CLOCK
-	int "TIM14 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM14_CAP
-
-config STM32H7_TIM16_CAP
-	bool "TIM16 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM16
-	---help---
-		Reserve timer 16 for use by the capture driver.
-
-if STM32H7_TIM16_CAP
-
-config STM32H7_TIM16_CHANNEL
-	int "TIM16 Capture Input Channel"
-	default 1
-	range 1 1
-	---help---
-		Specifies the timer input channel {1} for TIM16.
-
-config STM32H7_TIM16_CLOCK
-	int "TIM16 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM16_CAP
-
-config STM32H7_TIM17_CAP
-	bool "TIM17 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_TIM17
-	---help---
-		Reserve timer 17 for use by the capture driver.
-
-if STM32H7_TIM17_CAP
-
-config STM32H7_TIM17_CHANNEL
-	int "TIM17 Capture Input Channel"
-	default 1
-	range 1 1
-	---help---
-		Specifies the timer input channel {1} for TIM17.
-
-config STM32H7_TIM17_CLOCK
-	int "TIM17 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_TIM17_CAP
-
-#
-# Low-Power Timers
-#
-
-config STM32H7_LPTIM1_CAP
-	bool "LPTIM1 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_LPTIM1
-	---help---
-		Reserve low-power timer 1 for use by the capture driver.
-
-if STM32H7_LPTIM1_CAP
-
-config STM32H7LPTIM1_CHANNEL
-	int "LPTIM1 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1,2} for LPTIM1.
-
-config STM32H7LPTIM1_CLOCK
-	int "LPTIM1 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_LPTIM1_CAP
-
-config STM32H7_LPTIM2_CAP
-	bool "LPTIM2 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_LPTIM2
-	---help---
-		Reserve low-power timer 2 for use by the capture driver.
-
-if STM32H7_LPTIM2_CAP
-
-config STM32H7LPTIM2_CHANNEL
-	int "LPTIM2 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1,2} for LPTIM2.
-
-config STM32H7LPTIM2_CLOCK
-	int "LPTIM2 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_LPTIM2_CAP
-
-config STM32H7_LPTIM3_CAP
-	bool "LPTIM3 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_LPTIM3
-	---help---
-		Reserve low-power timer 3 for use by the capture driver.
-
-if STM32H7_LPTIM3_CAP
-
-config STM32H7LPTIM3_CHANNEL
-	int "LPTIM3 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1,2} for LPTIM3.
-
-config STM32H7LPTIM3_CLOCK
-	int "LPTIM3 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_LPTIM3_CAP
-
-config STM32H7_LPTIM4_CAP
-	bool "LPTIM4 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_LPTIM4
-	---help---
-		Reserve low-power timer 4 for use by the capture driver.
-
-if STM32H7_LPTIM4_CAP
-
-config STM32H7LPTIM4_CHANNEL
-	int "LPTIM4 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1,2} for LPTIM4.
-
-config STM32H7LPTIM4_CLOCK
-	int "LPTIM4 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_LPTIM4_CAP
-
-config STM32H7_LPTIM5_CAP
-	bool "LPTIM5 Capture"
-	default n
-	select STM32H7_TIMX_CAP
-	depends on STM32H7_LPTIM5
-	---help---
-		Reserve low-power timer 5 for use by the capture driver.
-
-if STM32H7_LPTIM5_CAP
-
-config STM32H7LPTIM5_CHANNEL
-	int "LPTIM5 Capture Input Channel"
-	default 1
-	range 1 2
-	---help---
-		Specifies the timer input channel {1,2} for LPTIM5.
-
-config STM32H7LPTIM5_CLOCK
-	int "LPTIM5 capture frequency (Hz)"
-	default 100000
-	---help---
-		This clock frequency determines the timer's counting rate.
-
-endif # STM32H7_LPTIM5_CAP
-
-menu "STM32 TIMx Outputs Configuration"
-
-config STM32H7_TIM1_CH1POL
-	int "TIM1 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH1OUT
-	---help---
-		TIM1 Channel 1 output polarity
-
-config STM32H7_TIM1_CH1IDLE
-	int "TIM1 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH1OUT
-	---help---
-		TIM1 Channel 1 output IDLE
-
-config STM32H7_TIM1_CH1NPOL
-	int "TIM1 Channel 1 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH1NOUT
-	---help---
-		TIM1 Channel 1 Complementary Output polarity
-
-config STM32H7_TIM1_CH1NIDLE
-	int "TIM1 Channel 1 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH1NOUT
-	---help---
-		TIM1 Channel 1 Complementary Output IDLE
-
-config STM32H7_TIM1_CH2POL
-	int "TIM1 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH2OUT
-	---help---
-		TIM1 Channel 2 output polarity
-
-config STM32H7_TIM1_CH2IDLE
-	int "TIM1 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH2OUT
-	---help---
-		TIM1 Channel 2 output IDLE
-
-config STM32H7_TIM1_CH2NPOL
-	int "TIM1 Channel 2 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH2NOUT
-	---help---
-		TIM1 Channel 2 Complementary Output polarity
-
-config STM32H7_TIM1_CH2NIDLE
-	int "TIM1 Channel 2 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH2NOUT
-	---help---
-		TIM1 Channel 2 Complementary Output IDLE
-
-config STM32H7_TIM1_CH3POL
-	int "TIM1 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH3OUT
-	---help---
-		TIM1 Channel 3 output polarity
-
-config STM32H7_TIM1_CH3IDLE
-	int "TIM1 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH3OUT
-	---help---
-		TIM1 Channel 3 output IDLE
-
-config STM32H7_TIM1_CH3NPOL
-	int "TIM1 Channel 3 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH3NOUT
-	---help---
-		TIM1 Channel 3 Complementary Output polarity
-
-config STM32H7_TIM1_CH3NIDLE
-	int "TIM1 Channel 3 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH3NOUT
-	---help---
-		TIM1 Channel 3 Complementary Output IDLE
-
-config STM32H7_TIM1_CH4POL
-	int "TIM1 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH4OUT
-	---help---
-		TIM1 Channel 4 output polarity
-
-config STM32H7_TIM1_CH4IDLE
-	int "TIM1 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH4OUT
-	---help---
-		TIM1 Channel 4 output IDLE
-
-config STM32H7_TIM1_CH5POL
-	int "TIM1 Channel 5 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH5OUT
-	---help---
-		TIM1 Channel 5 output polarity
-
-config STM32H7_TIM1_CH5IDLE
-	int "TIM1 Channel 5 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH5OUT
-	---help---
-		TIM1 Channel 5 output IDLE
-
-config STM32H7_TIM1_CH6POL
-	int "TIM1 Channel 6 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH6OUT
-	---help---
-		TIM1 Channel 6 output polarity
-
-config STM32H7_TIM1_CH6IDLE
-	int "TIM1 Channel 6 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM1_CH6OUT
-	---help---
-		TIM1 Channel 6 output IDLE
-
-config STM32H7_TIM2_CH1POL
-	int "TIM2 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH1OUT
-	---help---
-		TIM2 Channel 1 output polarity
-
-config STM32H7_TIM2_CH1IDLE
-	int "TIM2 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH1OUT
-	---help---
-		TIM2 Channel 1 output IDLE
-
-config STM32H7_TIM2_CH2POL
-	int "TIM2 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH2OUT
-	---help---
-		TIM2 Channel 2 output polarity
-
-config STM32H7_TIM2_CH2IDLE
-	int "TIM2 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH2OUT
-	---help---
-		TIM2 Channel 2 output IDLE
-
-config STM32H7_TIM2_CH3POL
-	int "TIM2 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH3OUT
-	---help---
-		TIM2 Channel 3 output polarity
-
-config STM32H7_TIM2_CH3IDLE
-	int "TIM2 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH3OUT
-	---help---
-		TIM2 Channel 3 output IDLE
-
-config STM32H7_TIM2_CH4POL
-	int "TIM2 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH4OUT
-	---help---
-		TIM2 Channel 4 output polarity
-
-config STM32H7_TIM2_CH4IDLE
-	int "TIM2 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM2_CH4OUT
-	---help---
-		TIM2 Channel 4 output IDLE
-
-config STM32H7_TIM3_CH1POL
-	int "TIM3 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH1OUT
-	---help---
-		TIM3 Channel 1 output polarity
-
-config STM32H7_TIM3_CH1IDLE
-	int "TIM3 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH1OUT
-	---help---
-		TIM3 Channel 1 output IDLE
-
-config STM32H7_TIM3_CH2POL
-	int "TIM3 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH2OUT
-	---help---
-		TIM3 Channel 2 output polarity
-
-config STM32H7_TIM3_CH2IDLE
-	int "TIM3 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH2OUT
-	---help---
-		TIM3 Channel 2 output IDLE
-
-config STM32H7_TIM3_CH3POL
-	int "TIM3 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH3OUT
-	---help---
-		TIM3 Channel 3 output polarity
-
-config STM32H7_TIM3_CH3IDLE
-	int "TIM3 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH3OUT
-	---help---
-		TIM3 Channel 3 output IDLE
-
-config STM32H7_TIM3_CH4POL
-	int "TIM3 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH4OUT
-	---help---
-		TIM3 Channel 4 output polarity
-
-config STM32H7_TIM3_CH4IDLE
-	int "TIM3 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM3_CH4OUT
-	---help---
-		TIM3 Channel 4 output IDLE
-
-config STM32H7_TIM4_CH1POL
-	int "TIM4 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH1OUT
-	---help---
-		TIM4 Channel 1 output polarity
-
-config STM32H7_TIM4_CH1IDLE
-	int "TIM4 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH1OUT
-	---help---
-		TIM4 Channel 1 output IDLE
-
-config STM32H7_TIM4_CH2POL
-	int "TIM4 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH2OUT
-	---help---
-		TIM4 Channel 2 output polarity
-
-config STM32H7_TIM4_CH2IDLE
-	int "TIM4 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH2OUT
-	---help---
-		TIM4 Channel 2 output IDLE
-
-config STM32H7_TIM4_CH3POL
-	int "TIM4 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH3OUT
-	---help---
-		TIM4 Channel 3 output polarity
-
-config STM32H7_TIM4_CH3IDLE
-	int "TIM4 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH3OUT
-	---help---
-		TIM4 Channel 3 output IDLE
-
-config STM32H7_TIM4_CH4POL
-	int "TIM4 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH4OUT
-	---help---
-		TIM4 Channel 4 output polarity
-
-config STM32H7_TIM4_CH4IDLE
-	int "TIM4 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM4_CH4OUT
-	---help---
-		TIM4 Channel 4 output IDLE
-
-config STM32H7_TIM5_CH1POL
-	int "TIM5 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH1OUT
-	---help---
-		TIM5 Channel 1 output polarity
-
-config STM32H7_TIM5_CH1IDLE
-	int "TIM5 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH1OUT
-	---help---
-		TIM5 Channel 1 output IDLE
-
-config STM32H7_TIM5_CH2POL
-	int "TIM5 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH2OUT
-	---help---
-		TIM5 Channel 2 output polarity
-
-config STM32H7_TIM5_CH2IDLE
-	int "TIM5 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH2OUT
-	---help---
-		TIM5 Channel 2 output IDLE
-
-config STM32H7_TIM5_CH3POL
-	int "TIM5 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH3OUT
-	---help---
-		TIM5 Channel 3 output polarity
-
-config STM32H7_TIM5_CH3IDLE
-	int "TIM5 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH3OUT
-	---help---
-		TIM5 Channel 3 output IDLE
-
-config STM32H7_TIM5_CH4POL
-	int "TIM5 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH4OUT
-	---help---
-		TIM5 Channel 4 output polarity
-
-config STM32H7_TIM5_CH4IDLE
-	int "TIM5 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM5_CH4OUT
-	---help---
-		TIM5 Channel 4 output IDLE
-
-config STM32H7_TIM8_CH1POL
-	int "TIM8 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH1OUT
-	---help---
-		TIM8 Channel 1 output polarity
-
-config STM32H7_TIM8_CH1IDLE
-	int "TIM8 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH1OUT
-	---help---
-		TIM8 Channel 1 output IDLE
-
-config STM32H7_TIM8_CH1NPOL
-	int "TIM8 Channel 1 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH1NOUT
-	---help---
-		TIM8 Channel 1 Complementary Output polarity
-
-config STM32H7_TIM8_CH1NIDLE
-	int "TIM8 Channel 1 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH1NOUT
-	---help---
-		TIM8 Channel 1 Complementary Output IDLE
-
-config STM32H7_TIM8_CH2POL
-	int "TIM8 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH2OUT
-	---help---
-		TIM8 Channel 2 output polarity
-
-config STM32H7_TIM8_CH2IDLE
-	int "TIM8 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH2OUT
-	---help---
-		TIM8 Channel 2 output IDLE
-
-config STM32H7_TIM8_CH2NPOL
-	int "TIM8 Channel 2 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH2NOUT
-	---help---
-		TIM8 Channel 2 Complementary Output polarity
-
-config STM32H7_TIM8_CH2NIDLE
-	int "TIM8 Channel 2 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH2NOUT
-	---help---
-		TIM8 Channel 2 Complementary Output IDLE
-
-config STM32H7_TIM8_CH3POL
-	int "TIM8 Channel 3 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH3OUT
-	---help---
-		TIM8 Channel 3 output polarity
-
-config STM32H7_TIM8_CH3IDLE
-	int "TIM8 Channel 3 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH3OUT
-	---help---
-		TIM8 Channel 3 output IDLE
-
-config STM32H7_TIM8_CH3NPOL
-	int "TIM8 Channel 3 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH3NOUT
-	---help---
-		TIM8 Channel 3 Complementary Output polarity
-
-config STM32H7_TIM8_CH3NIDLE
-	int "TIM8 Channel 3 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH3NOUT
-	---help---
-		TIM8 Channel 3 Complementary Output IDLE
-
-config STM32H7_TIM8_CH4POL
-	int "TIM8 Channel 4 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH4OUT
-	---help---
-		TIM8 Channel 4 output polarity
-
-config STM32H7_TIM8_CH4IDLE
-	int "TIM8 Channel 4 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH4OUT
-	---help---
-		TIM8 Channel 4 output IDLE
-
-config STM32H7_TIM8_CH5POL
-	int "TIM8 Channel 5 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH5OUT
-	---help---
-		TIM8 Channel 5 output polarity
-
-config STM32H7_TIM8_CH5IDLE
-	int "TIM8 Channel 5 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH5OUT
-	---help---
-		TIM8 Channel 5 output IDLE
-
-config STM32H7_TIM8_CH6POL
-	int "TIM8 Channel 6 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH6OUT
-	---help---
-		TIM8 Channel 6 output polarity
-
-config STM32H7_TIM8_CH6IDLE
-	int "TIM8 Channel 6 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM8_CH6OUT
-	---help---
-		TIM8 Channel 6 output IDLE
-
-config STM32H7_TIM12_CH1POL
-	int "TIM12 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM12_CH1OUT
-	---help---
-		TIM12 Channel 1 output polarity
-
-config STM32H7_TIM12_CH1IDLE
-	int "TIM12 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM12_CH1OUT
-	---help---
-		TIM12 Channel 1 output IDLE
-
-config STM32H7_TIM12_CH2POL
-	int "TIM12 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM12_CH2OUT
-	---help---
-		TIM12 Channel 2 output polarity
-
-config STM32H7_TIM12_CH2IDLE
-	int "TIM12 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM12_CH2OUT
-	---help---
-		TIM12 Channel 2 output IDLE
-
-config STM32H7_TIM13_CH1POL
-	int "TIM13 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM13_CH1OUT
-	---help---
-		TIM13 Channel 1 output polarity
-
-config STM32H7_TIM13_CH1IDLE
-	int "TIM13 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM13_CH1OUT
-	---help---
-		TIM13 Channel 1 output IDLE
-
-config STM32H7_TIM14_CH1POL
-	int "TIM14 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM14_CH1OUT
-	---help---
-		TIM14 Channel 1 output polarity
-
-config STM32H7_TIM14_CH1IDLE
-	int "TIM14 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM14_CH1OUT
-	---help---
-		TIM14 Channel 1 output IDLE
-
-config STM32H7_TIM15_CH1POL
-	int "TIM15 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH1OUT
-	---help---
-		TIM15 Channel 1 output polarity
-
-config STM32H7_TIM15_CH1IDLE
-	int "TIM15 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH1OUT
-	---help---
-		TIM15 Channel 1 output IDLE
-
-config STM32H7_TIM15_CH1NPOL
-	int "TIM15 Channel 1 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH1NOUT
-	---help---
-		TIM15 Channel 1 Complementary Output polarity
-
-config STM32H7_TIM15_CH1NIDLE
-	int "TIM15 Channel 1 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH1NOUT
-	---help---
-		TIM15 Channel 1 Complementary Output IDLE
-
-config STM32H7_TIM15_CH2POL
-	int "TIM15 Channel 2 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH2OUT
-	---help---
-		TIM15 Channel 2 output polarity
-
-config STM32H7_TIM15_CH2IDLE
-	int "TIM15 Channel 2 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH2OUT
-	---help---
-		TIM15 Channel 2 output IDLE
-
-config STM32H7_TIM15_CH2NPOL
-	int "TIM15 Channel 2 Complementary Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH2NOUT
-	---help---
-		TIM15 Channel 2 Complementary Output polarity
-
-config STM32H7_TIM15_CH2NIDLE
-	int "TIM15 Channel 2 Complementary Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM15_CH2NOUT
-	---help---
-		TIM15 Channel 2 Complementary Output IDLE
-
-config STM32H7_TIM16_CH1POL
-	int "TIM16 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM16_CH1OUT
-	---help---
-		TIM16 Channel 1 output polarity
-
-config STM32H7_TIM16_CH1IDLE
-	int "TIM16 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM16_CH1OUT
-	---help---
-		TIM16 Channel 1 output IDLE
-
-config STM32H7_TIM17_CH1POL
-	int "TIM17 Channel 1 Output polarity"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM17_CH1OUT
-	---help---
-		TIM17 Channel 1 output polarity
-
-config STM32H7_TIM17_CH1IDLE
-	int "TIM17 Channel 1 Output IDLE"
-	default 0
-	range 0 1
-	depends on STM32H7_TIM17_CH1OUT
-	---help---
-		TIM17 Channel 1 output IDLE
-
-endmenu #STM32 TIMx Outputs Configuration
-
-endmenu # Timer Configuration
-
-menu "Ethernet MAC configuration"
-	depends on STM32H7_ETHMAC
-
-config STM32H7_PHYADDR
-	int "PHY address"
-	default 0
-	---help---
-		The 5-bit address of the PHY on the board.  Default: 1
-
-config STM32H7_PHYINIT
-	bool "Board-specific PHY Initialization"
-	default n
-	---help---
-		Some boards require specialized initialization of the PHY before it can be used.
-		This may include such things as configuring GPIOs, resetting the PHY, etc.  If
-		STM32H7_PHYINIT is defined in the configuration then the board specific logic must
-		provide stm32_phyinitialize();  The STM32 Ethernet driver will call this function
-		one time before it first uses the PHY.
-
-config STM32H7_PHY_POLLING
-	bool "Support network monitoring by polling the PHY"
-	default n
-	depends on STM32H7_HAVE_PHY_POLLED
-	select ARCH_PHY_POLLED
-	---help---
-		Some boards may not have an interrupt connected to the PHY.
-		This option allows the network monitor to be used by polling the
-		the PHY for status.
-
-config STM32H7_MII
-	bool "Use MII interface"
-	default n
-	---help---
-		Support Ethernet MII interface.
-
-choice
-	prompt "MII clock configuration"
-	default STM32H7_MII_EXTCLK
-	depends on STM32H7_MII
-
-config STM32H7_MII_MCO1
-	bool "Use MC01 as MII clock"
-	---help---
-		Use MCO1 to clock the MII interface.
-
-config STM32H7_MII_MCO2
-	bool "Use MC02 as MII clock"
-	---help---
-		Use MCO2 to clock the MII interface.
-
-config STM32H7_MII_EXTCLK
-	bool "External MII clock"
-	---help---
-		Clocking is provided by external logic.
-
-endchoice # MII clock configuration
-
-config STM32H7_AUTONEG
-	bool "Use autonegotiation"
-	default y
-	---help---
-		Use PHY autonegotiation to determine speed and mode
-
-config STM32H7_ETH_NRXDESC
-	int "Number of RX descriptors"
-	default 8
-	---help---
-		Number of RX DMA descriptors to use.
-
-config STM32H7_ETH_NTXDESC
-	int "Number of TX descriptors"
-	default 4
-	---help---
-		Number of TX DMA descriptors to use.
-
-config STM32H7_ETHFD
-	bool "Full duplex"
-	default n
-	depends on !STM32H7_AUTONEG
-	---help---
-		If STM32H7_AUTONEG is not defined, then this may be defined to select full duplex
-		mode. Default: half-duplex
-
-config STM32H7_ETH100MBPS
-	bool "100 Mbps"
-	default n
-	depends on !STM32H7_AUTONEG
-	---help---
-		If STM32H7_AUTONEG is not defined, then this may be defined to select 100 MBps
-		speed.  Default: 10 Mbps
-
-config STM32H7_PHYSR
-	int "PHY Status Register Address (decimal)"
-	depends on STM32H7_AUTONEG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  The PHY status register
-		address may diff from PHY to PHY.  This configuration sets the address of
-		the PHY status register.
-
-config STM32H7_PHYSR_ALTCONFIG
-	bool "PHY Status Alternate Bit Layout"
-	default n
-	depends on STM32H7_AUTONEG
-	---help---
-		Different PHYs present speed and mode information in different ways.  Some
-		will present separate information for speed and mode (this is the default).
-		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
-		full/half duplex indication. This options selects an alternative representation
-		where speed and mode information are combined.  This might mean, for example,
-		separate bits for 10HD, 100HD, 10FD and 100FD.
-
-config STM32H7_PHYSR_SPEED
-	hex "PHY Speed Mask"
-	depends on STM32H7_AUTONEG && !STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This provides bit mask
-		for isolating the 10 or 100MBps speed indication.
-
-config STM32H7_PHYSR_100MBPS
-	hex "PHY 100Mbps Speed Value"
-	depends on STM32H7_AUTONEG && !STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This provides the value
-		of the speed bit(s) indicating 100MBps speed.
-
-config STM32H7_PHYSR_MODE
-	hex "PHY Mode Mask"
-	depends on STM32H7_AUTONEG && !STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This provide bit mask
-		for isolating the full or half duplex mode bits.
-
-config STM32H7_PHYSR_FULLDUPLEX
-	hex "PHY Full Duplex Mode Value"
-	depends on STM32H7_AUTONEG && !STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This provides the
-		value of the mode bits indicating full duplex mode.
-
-config STM32H7_PHYSR_ALTMODE
-	hex "PHY Mode Mask"
-	depends on STM32H7_AUTONEG && STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This provide bit mask
-		for isolating the speed and full/half duplex mode bits.
-
-config STM32H7_PHYSR_10HD
-	hex "10MBase-T Half Duplex Value"
-	depends on STM32H7_AUTONEG && STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 10Mbps, half duplex setting.
-
-config STM32H7_PHYSR_100HD
-	hex "100Base-T Half Duplex Value"
-	depends on STM32H7_AUTONEG && STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 100Mbps, half duplex setting.
-
-config STM32H7_PHYSR_10FD
-	hex "10Base-T Full Duplex Value"
-	depends on STM32H7_AUTONEG && STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 10Mbps, full duplex setting.
-
-config STM32H7_PHYSR_100FD
-	hex "100Base-T Full Duplex Value"
-	depends on STM32H7_AUTONEG && STM32H7_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if STM32H7_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 100Mbps, full duplex setting.
-
-config STM32H7_ETH_PTP
-	bool "Precision Time Protocol (PTP)"
-	default n
-	---help---
-		Precision Time Protocol (PTP).  Not supported but some hooks are indicated
-		with this condition.
-
-config STM32H7_RMII
-	bool
-	default !STM32H7_MII
-
-choice
-	prompt "RMII clock configuration"
-	default STM32H7_RMII_EXTCLK
-	depends on STM32H7_RMII
-
-config STM32H7_RMII_MCO1
-	bool "Use MC01 as RMII clock"
-	---help---
-		Use MCO1 to clock the RMII interface.
-
-config STM32H7_RMII_MCO2
-	bool "Use MC02 as RMII clock"
-	---help---
-		Use MCO2 to clock the RMII interface.
-
-config STM32H7_RMII_EXTCLK
-	bool "External RMII clock"
-	---help---
-		Clocking is provided by external logic.
-
-endchoice # RMII clock configuration
-
-config STM32H7_ETHMAC_REGDEBUG
-	bool "Register-Level Debug"
-	default n
-	depends on DEBUG_NET_INFO
-	---help---
-		Enable very low-level register access debug.  Depends on
-		CONFIG_DEBUG_FEATURES.
-
-config STM32H7_NO_PHY
-	bool "MAC has no PHY"
-	default n
-
-endmenu # Ethernet MAC configuration
-
-if STM32H7_LTDC
-
-menu "LTDC Configuration"
-
-config STM32H7_LTDC_USE_DSI
-	bool "Use DSI as display connection"
-	default n
-	depends on STM32H7_DSIHOST
-	---help---
-		Select this if your display is connected via DSI.
-		Deselect option if your display is connected via digital
-		RGB+HSYNC+VSYNC
-
-config STM32H7_LTDC_BACKLIGHT
-	bool "Backlight support"
-	default y
-
-config STM32H7_LTDC_DEFBACKLIGHT
-	hex "Default backlight level"
-	default 0xf0
-
-config STM32H7_LTDC_BACKCOLOR
-	hex "Background color"
-	default 0x0
-	---help---
-		This is the background color that will be used as the LTDC
-		background layer color.  It is an RGB888 format value,
-		which gets written unmodified to register LTDC_BCCR.
-
-config STM32H7_LTDC_DITHER
-	bool "Dither support"
-	default n
-
-config STM32H7_LTDC_DITHER_RED
-	depends on STM32H7_LTDC_DITHER
-	int "Dither red width"
-	range 0 7
-	default 2
-	---help---
-		This is the dither red width.
-
-config STM32H7_LTDC_DITHER_GREEN
-	depends on STM32H7_LTDC_DITHER
-	int "Dither green width"
-	range 0 7
-	default 2
-	---help---
-		This is the dither green width.
-
-config STM32H7_LTDC_DITHER_BLUE
-	depends on STM32H7_LTDC_DITHER
-	int "Dither blue width"
-	range 0 7
-	default 2
-	---help---
-		This is the dither blue width.
-
-config STM32H7_LTDC_FB_BASE
-	hex "Framebuffer memory start address"
-	default 0
-	---help---
-		If you are using the LTDC, then you must provide the address
-		of the start of the framebuffer.  This address will typically
-		be in the SRAM or SDRAM memory region of the FMC.
-
-config STM32H7_LTDC_FB_SIZE
-	int "Framebuffer memory size (bytes)"
-	default 0
-	---help---
-		Must be the whole size of the active LTDC layer.
-
-config STM32H7_LTDC_FB_DOUBLE_BUFFER
-	bool "Enable double buffering"
-	default n
-	---help---
-		Enable double buffering to allow updates to the framebuffer while the display is being refreshed.
-		This configuration requires two framebuffers: one active and one inactive.
-		When the display refreshes, the active and inactive framebuffers are swapped,
-		enabling smooth and flicker-free updates.
-
-config STM32H7_LTDC_L1_CHROMAKEYEN
-	bool "Enable chromakey support for layer 1"
-	default y
-
-config STM32H7_LTDC_L1_CHROMAKEY
-	hex "Layer L1 initial chroma key"
-	default 0x00000000
-
-config STM32H7_LTDC_L1_COLOR
-	hex "Layer L1 default color"
-	default 0x00000000
-
-choice
-	prompt "Layer 1 color format"
-	default STM32H7_LTDC_L1_RGB565
-
-config STM32H7_LTDC_L1_L8
-	bool "8 bpp L8 (8-bit CLUT)"
-	depends on STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_AL44
-	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
-	depends on STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_AL88
-	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
-	depends on STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_RGB565
-	bool "16 bpp RGB 565"
-	depends on !STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_ARGB4444
-	bool "16 bpp ARGB 4444"
-	depends on !STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_ARGB1555
-	bool "16 bpp ARGB 1555"
-	depends on !STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_RGB888
-	bool "24 bpp RGB 888"
-	depends on !STM32H7_FB_CMAP
-
-config STM32H7_LTDC_L1_ARGB8888
-	bool "32 bpp ARGB 8888"
-	depends on !STM32H7_FB_CMAP
-
-endchoice # Layer 1 color format
-
-config STM32H7_LTDC_L2
-	bool "Enable Layer 2 support"
-	default y
-
-if STM32H7_LTDC_L2
-
-config STM32H7_LTDC_L2_COLOR
-	hex "Layer L2 default color"
-	default 0x00000000
-
-config STM32H7_LTDC_L2_CHROMAKEYEN
-	bool "Enable chromakey support for layer 2"
-	default y
-
-config STM32H7_LTDC_L2_CHROMAKEY
-	hex "Layer L2 initial chroma key"
-	default 0x00000000
-
-choice
-	prompt "Layer 2 (top layer) color format"
-	default STM32H7_LTDC_L2_RGB565
-
-config STM32H7_LTDC_L2_L8
-	depends on STM32H7_LTDC_L1_L8
-	bool "8 bpp L8 (8-bit CLUT)"
-
-config STM32H7_LTDC_L2_AL44
-	depends on STM32H7_LTDC_L1_AL44
-	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
-
-config STM32H7_LTDC_L2_AL88
-	depends on STM32H7_LTDC_L1_AL88
-	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
-
-config STM32H7_LTDC_L2_RGB565
-	depends on STM32H7_LTDC_L1_RGB565
-	bool "16 bpp RGB 565"
-
-config STM32H7_LTDC_L2_ARGB4444
-	depends on STM32H7_LTDC_L1_ARGB4444
-	bool "16 bpp ARGB 4444"
-
-config STM32H7_LTDC_L2_ARGB1555
-	depends on STM32H7_LTDC_L1_ARGB1555
-	bool "16 bpp ARGB 1555"
-
-config STM32H7_LTDC_L2_RGB888
-	depends on STM32H7_LTDC_L1_RGB888
-	bool "24 bpp RGB 888"
-
-config STM32H7_LTDC_L2_ARGB8888
-	depends on STM32H7_LTDC_L1_ARGB8888
-	bool "32 bpp ARGB 8888"
-
-endchoice # Layer 2 color format
-
-endif # STM32H7_LTDC_L2
-
-config STM32H7_FB_CMAP
-	bool "Color map support"
-	default y
-	select FB_CMAP
-	---help---
-		EnablingEnablescolor map support is necessary for ltdc L8 format.
-
-config STM32H7_FB_TRANSPARENCY
-	bool "Transparency color map support"
-	default y
-	depends on STM32H7_FB_CMAP
-	select FB_TRANSPARENCY
-	---help---
-		Enables transparency color map support is necessary for ltdc L8 format.
-
-config STM32H7_LTDC_REGDEBUG
-	bool "Enable LTDC register value debug messages"
-	default n
-	---help---
-		This gives additional messages for LTDC related register values.
-		Additionally, you have to select "Low-level LCD Debug Features"
-		to enable the debug messages.
-
-endmenu # LTDC Configuration
-
-endif # STM32H7_LTDC
-
-menu "QEncoder Driver"
-	depends on SENSORS_QENCODER
-	depends on STM32H7_TIM1 || STM32H7_TIM2 || STM32H7_TIM3 || STM32H7_TIM4 || STM32H7_TIM5 || STM32H7_TIM8
-
-config STM32H7_TIM1_QE
-	bool "TIM1"
-	default n
-	depends on STM32H7_TIM1
-	---help---
-		Reserve TIM1 for use by QEncoder.
-
-if STM32H7_TIM1_QE
-
-config STM32H7_TIM1_QEPSC
-	int "TIM1 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM1_QE
-
-config STM32H7_TIM2_QE
-	bool "TIM2"
-	default n
-	depends on STM32H7_TIM2
-	---help---
-		Reserve TIM2 for use by QEncoder.
-
-if STM32H7_TIM2_QE
-
-config STM32H7_TIM2_QEPSC
-	int "TIM2 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM2_QE
-
-config STM32H7_TIM3_QE
-	bool "TIM3"
-	default n
-	depends on STM32H7_TIM3
-	---help---
-		Reserve TIM3 for use by QEncoder.
-
-if STM32H7_TIM3_QE
-
-config STM32H7_TIM3_QEPSC
-	int "TIM3 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM3_QE
-
-config STM32H7_TIM4_QE
-	bool "TIM4"
-	default n
-	depends on STM32H7_TIM4
-	---help---
-		Reserve TIM4 for use by QEncoder.
-
-if STM32H7_TIM4_QE
-
-config STM32H7_TIM4_QEPSC
-	int "TIM4 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM4_QE
-
-config STM32H7_TIM5_QE
-	bool "TIM5"
-	default n
-	depends on STM32H7_TIM5
-	---help---
-		Reserve TIM5 for use by QEncoder.
-
-if STM32H7_TIM5_QE
-
-config STM32H7_TIM5_QEPSC
-	int "TIM5 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM5_QE
-
-config STM32H7_TIM8_QE
-	bool "TIM8"
-	default n
-	depends on STM32H7_TIM8
-	---help---
-		Reserve TIM8 for use by QEncoder.
-
-if STM32H7_TIM8_QE
-
-config STM32H7_TIM8_QEPSC
-	int "TIM8 pulse prescaler"
-	default 1
-	---help---
-		This prescaler divides the number of recorded encoder pulses,
-		limiting the count rate at the expense of resolution.
-
-endif # STM32H7_TIM8_QE
-
-config STM32H7_QENCODER_FILTER
-	bool "Enable filtering on STM32 QEncoder input"
-	default y
-
-choice
-	depends on STM32H7_QENCODER_FILTER
-	prompt "Input channel sampling frequency"
-	default STM32H7_QENCODER_SAMPLE_FDTS_4
-
-config STM32H7_QENCODER_SAMPLE_FDTS
-	bool "fDTS"
-
-config STM32H7_QENCODER_SAMPLE_CKINT
-	bool "fCK_INT"
-
-config STM32H7_QENCODER_SAMPLE_FDTS_2
-	bool "fDTS/2"
-
-config STM32H7_QENCODER_SAMPLE_FDTS_4
-	bool "fDTS/4"
-
-config STM32H7_QENCODER_SAMPLE_FDTS_8
-	bool "fDTS/8"
-
-config STM32H7_QENCODER_SAMPLE_FDTS_16
-	bool "fDTS/16"
-
-config STM32H7_QENCODER_SAMPLE_FDTS_32
-	bool "fDTS/32"
-
-endchoice # Input channel sampling frequency
-
-choice
-	depends on STM32H7_QENCODER_FILTER
-	prompt "Input channel event count"
-	default STM32H7_QENCODER_SAMPLE_EVENT_6
-
-config STM32H7_QENCODER_SAMPLE_EVENT_1
-	depends on STM32H7_QENCODER_SAMPLE_FDTS
-	bool "1"
-
-config STM32H7_QENCODER_SAMPLE_EVENT_2
-	depends on STM32H7_QENCODER_SAMPLE_CKINT
-	bool "2"
-
-config STM32H7_QENCODER_SAMPLE_EVENT_4
-	depends on STM32H7_QENCODER_SAMPLE_CKINT
-	bool "4"
-
-config STM32H7_QENCODER_SAMPLE_EVENT_5
-	depends on STM32H7_QENCODER_SAMPLE_FDTS_16 || STM32H7_QENCODER_SAMPLE_FDTS_32
-	bool "5"
-
-config STM32H7_QENCODER_SAMPLE_EVENT_6
-	depends on !STM32H7_QENCODER_SAMPLE_FDTS && !STM32H7_QENCODER_SAMPLE_CKINT
-	bool "6"
-
-config STM32H7_QENCODER_SAMPLE_EVENT_8
-	depends on !STM32H7_QENCODER_SAMPLE_FDTS
-	bool "8"
-
-endchoice # Input channel event count
-
-endmenu # QEncoder Driver
-
-menu "FDCAN Driver Configuration"
-	depends on STM32H7_FDCAN1 || STM32H7_FDCAN2 || STM32H7_FDCAN3
-
-menu "FDCAN1 Configuration"
-	depends on STM32H7_FDCAN1
-
-config FDCAN1_BITRATE
-	int "CAN bitrate"
-	depends on !NET_CAN_CANFD
-	default 100000
-
-config FDCAN1_ARBI_BITRATE
-	int "CAN FD Arbitration phase bitrate"
-	depends on NET_CAN_CANFD
-	default 100000
-
-config FDCAN1_DATA_BITRATE
-	int "CAN FD Data phase bitrate"
-	depends on NET_CAN_CANFD
-	default 4000000
-
-endmenu # STM32H7_FDCAN1
-
-menu "FDCAN2 Configuration"
-	depends on STM32H7_FDCAN2
-
-config FDCAN2_BITRATE
-	int "CAN bitrate"
-	depends on !NET_CAN_CANFD
-	default 100000
-
-config FDCAN2_ARBI_BITRATE
-	int "CAN FD Arbitration phase bitrate"
-	depends on NET_CAN_CANFD
-	default 100000
-
-config FDCAN2_DATA_BITRATE
-	int "CAN FD Data phase bitrate"
-	depends on NET_CAN_CANFD
-	default 4000000
-
-endmenu # STM32H7_FDCAN2
-
-menu "FDCAN3 Configuration"
-	depends on STM32H7_FDCAN3
-
-config FDCAN3_BITRATE
-	int "CAN bitrate"
-	depends on !NET_CAN_CANFD
-	default 1000000
-
-config FDCAN3_ARBI_BITRATE
-	int "CAN FD Arbitration phase bitrate"
-	depends on NET_CAN_CANFD
-	default 1000000
-
-config FDCAN3_DATA_BITRATE
-	int "CAN FD Data phase bitrate"
-	depends on NET_CAN_CANFD
-	default 4000000
-
-endmenu # STM32H7_FDCAN3
-
-config STM32H7_FDCAN_REGDEBUG
-	bool "Enable register dump debugging"
-	depends on DEBUG_NET_INFO
-	default n
-	---help---
-		Output detailed register-level CAN device debug information.
-		Requires also CONFIG_DEBUG_CAN_INFO and CONFIG_DEBUG_NET_INFO.
-
-config STM32H7_FDCAN_LOOPBACK
-	bool "Enable FDCAN loopback mode"
-	default n
-	---help---
-		Enable the FDCAN local loopback mode for testing purposes.
-		Requires a further choice of internal or external loopback mode.
-
-		TODO: Enable separately for FDCAN1 and FDCAN2
-
-choice
-	prompt "FDCAN Loopback Mode"
-	depends on STM32H7_FDCAN_LOOPBACK
-	default STM32H7_FDCAN_LOOPBACK_INTERNAL
-
-config STM32H7_FDCAN_LOOPBACK_INTERNAL
-	bool "Internal loopback mode"
-	---help---
-		Enable internal loopback mode, where both Tx and Rx are
-		disconnected from the CAN bus.  This can be used for a "Hot Selftest",
-		meaning the FDCAN can be used without affecting a running CAN bus.
-
-		All transmitted frames are treated as received frames and processed
-		accordingly.
-
-config STM32H7_FDCAN_LOOPBACK_EXTERNAL
-	bool "External loopback mode"
-	---help---
-		Enable external loopback mode, where the Rx pin is disconnected from
-		the CAN bus but the Tx pin remains connected.
-
-		All transmitted frames are treated as received frames and processed
-		accordingly.
-
-endchoice # FDCAN Loopback Mode
-
-choice
-	prompt "FDCAN WorkQueue Selection"
-	default STM32H7_FDCAN_LPWORK
-
-config STM32H7_FDCAN_LPWORK
-	bool "Use LP work queue"
-	---help---
-		Use the low-priority (LP) work queue for reception and transmission
-		of new frames and for processing of transmission timeouts.
-
-config STM32H7_FDCAN_HPWORK
-	bool "Use HP work queue"
-	---help---
-		Use the high-priority (HP) work queue for reception and transmission
-		of new frames and for processing of transmission timeouts.
-
-endchoice # FDCAN WorkQueue Selection
-
-endmenu # FDCAN Driver
 
 menu "Progmem MTD configuration"
 
@@ -6665,7 +812,7 @@ config STM32_PROGMEM_OTA_PARTITION
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
 	select MTD_PROGMEM
-	select STM32H7_PROGMEM
+	select STM32_PROGMEM
 	---help---
 		Initialize an MTD driver for the Flash, which will
 		add an entry at /dev for application access from userspace.

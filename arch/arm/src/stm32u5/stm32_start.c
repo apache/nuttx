@@ -131,7 +131,7 @@ void __start(void)
     ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
-#ifdef CONFIG_STM32U5_SRAM2_INIT
+#ifdef CONFIG_STM32_SRAM2_INIT
   /* The SRAM2 region is parity checked, but upon power up, it will be in
    * a random state and probably invalid with respect to parity, potentially
    * generating faults if accessed.  If elected, we will write zeros to the

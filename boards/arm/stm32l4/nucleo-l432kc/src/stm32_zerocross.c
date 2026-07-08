@@ -98,7 +98,7 @@ static void zcross_enable(const struct zc_lowerhalf_s *lower,
       g_zcrossarg     = arg;
     }
 
-  stm32l4_gpiosetevent(GPIO_ZEROCROSS, rising, falling,
+  stm32_gpiosetevent(GPIO_ZEROCROSS, rising, falling,
                        true, zcross_interrupt, NULL);
 
   leave_critical_section(flags);
@@ -120,7 +120,7 @@ static void zcross_disable(void)
 
   flags = enter_critical_section();
 
-  stm32l4_gpiosetevent(GPIO_ZEROCROSS, false, false, false, NULL, NULL);
+  stm32_gpiosetevent(GPIO_ZEROCROSS, false, false, false, NULL, NULL);
 
   leave_critical_section(flags);
 
@@ -164,10 +164,10 @@ static int zcross_interrupt(int irq, void *context, void *arg)
 int stm32_zerocross_initialize(void)
 {
   /* Configure the GPIO pin as input.    NOTE: This is unnecessary for
-   * interrupting pins since it will also be done by stm32l4_gpiosetevent().
+   * interrupting pins since it will also be done by stm32_gpiosetevent().
    */
 
-  stm32l4_configgpio(GPIO_ZEROCROSS);
+  stm32_configgpio(GPIO_ZEROCROSS);
 
   /* Make sure that all interrupts are disabled */
 

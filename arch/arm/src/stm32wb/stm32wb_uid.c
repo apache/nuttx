@@ -29,20 +29,20 @@
 #include "hardware/stm32wb_memorymap.h"
 #include "stm32wb_uid.h"
 
-#ifdef STM32WB_SYSMEM_UID
+#ifdef STM32_SYSMEM_UID
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-void stm32wb_get_uniqueid(uint8_t uniqueid[12])
+void stm32_get_uniqueid(uint8_t uniqueid[12])
 {
   int i;
 
   for (i = 0; i < 12; i++)
     {
-      uniqueid[i] = *((uint8_t *)(STM32WB_SYSMEM_UID) + i);
+      uniqueid[i] = *((uint8_t *)(STM32_SYSMEM_UID) + i);
     }
 }
 
-#endif /* STM32WB_SYSMEM_UID */
+#endif /* STM32_SYSMEM_UID */

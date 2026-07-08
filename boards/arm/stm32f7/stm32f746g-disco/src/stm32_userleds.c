@@ -25,6 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/board/board.h>
 
 #include <stdbool.h>
 #include <nuttx/debug.h>
@@ -67,9 +68,9 @@ uint32_t board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == BOARD_STATUS_LED)
+  if (led == BOARD_LED1)
     {
-      stm32_gpiowrite(GPIO_LD1, !ledon);
+      stm32_gpiowrite(GPIO_LD1, ledon);
     }
 }
 
@@ -86,7 +87,7 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  stm32_gpiowrite(GPIO_LD1, (ledset & BOARD_STATUS_LED_BIT) != 0);
+  stm32_gpiowrite(GPIO_LD1, (ledset & BOARD_LED1_BIT) != 0);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

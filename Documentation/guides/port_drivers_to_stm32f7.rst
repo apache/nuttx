@@ -191,7 +191,7 @@ An Example
 There is a good example in the STM32 Ethernet driver. The STM32 F7 
 Ethernet driver (``arch/arm/src/stm32f7/stm32_ethernet.c``) derives 
 directly from the STM32 F4 Ethernet driver 
-(``arch/arm/src/stm32/stm32_eth.c``). These two Ethernet MAC peripherals 
+(``arch/arm/src/common/stm32/stm32_eth_m3m4_v1.c``). These two Ethernet MAC peripherals
 are nearly identical. Only changes that are a direct consequence of the 
 STM32 F7 D-Cache were required to make the driver work on the STM32 F7. 
 Those changes are summarized below.
@@ -262,7 +262,7 @@ the buffers to the Cortex-M7 D-Cache line size:
     #define DMA_ALIGN_UP(n)    (((n) + DMA_BUFFER_MASK) & ~DMA_BUFFER_MASK)
     #define DMA_ALIGN_DOWN(n)  ((n) & ~DMA_BUFFER_MASK)
     
-    #ifndef CONFIG_STM32F7_ETH_ENHANCEDDESC
+    #ifndef CONFIG_STM32_ETH_ENHANCEDDESC
     #  define RXDESC_SIZE       16
     #  define TXDESC_SIZE       16
     #else
@@ -274,10 +274,10 @@ the buffers to the Cortex-M7 D-Cache line size:
     #define TXDESC_PADSIZE      DMA_ALIGN_UP(TXDESC_SIZE)
     #define ALIGNED_BUFSIZE     DMA_ALIGN_UP(ETH_BUFSIZE)
     
-    #define RXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NRXDESC)
-    #define TXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32F7_ETH_NTXDESC)
+    #define RXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32_ETH_NRXDESC)
+    #define TXTABLE_SIZE        (STM32F7_NETHERNET * CONFIG_STM32_ETH_NTXDESC)
     
-    #define RXBUFFER_SIZE       (CONFIG_STM32F7_ETH_NRXDESC * ALIGNED_BUFSIZE)
+    #define RXBUFFER_SIZE       (CONFIG_STM32_ETH_NRXDESC * ALIGNED_BUFSIZE)
     #define RXBUFFER_ALLOC      (STM32F7_NETHERNET * RXBUFFER_SIZE)
     
     #define TXBUFFER_SIZE       (STM32_ETH_NFREEBUFFERS * ALIGNED_BUFSIZE)
@@ -366,8 +366,8 @@ Here is an example where the RX descriptors are invalidated:
     
     for (i = 0;
         (rxdesc->rdes0 & ETH_RDES0_OWN) == 0 &&
-            i < CONFIG_STM32F7_ETH_NRXDESC &&
-            priv->inflight < CONFIG_STM32F7_ETH_NTXDESC;
+            i < CONFIG_STM32_ETH_NRXDESC &&
+            priv->inflight < CONFIG_STM32_ETH_NTXDESC;
         i++)
         {
         ...

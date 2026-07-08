@@ -87,44 +87,44 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_ONESHOT
-#  error CONFIG_STM32L4_ONESHOT must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_ONESHOT
+#  error CONFIG_STM32_ONESHOT must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_FREERUN
-#  error CONFIG_STM32L4_FREERUN must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_FREERUN
+#  error CONFIG_STM32_FREERUN must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_TICKLESS_FREERUN
-#  error CONFIG_STM32L4_TICKLESS_FREERUN must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_TICKLESS_FREERUN
+#  error CONFIG_STM32_TICKLESS_FREERUN must be selected for the Tickless OS option
 #endif
 
-#ifndef CONFIG_STM32L4_TICKLESS_ONESHOT
-#  error CONFIG_STM32L4_TICKLESS_ONESHOT must be selected for the Tickless OS option
+#ifndef CONFIG_STM32_TICKLESS_ONESHOT
+#  error CONFIG_STM32_TICKLESS_ONESHOT must be selected for the Tickless OS option
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct stm32l4_tickless_s
+struct stm32_tickless_s
 {
-  struct stm32l4_oneshot_s oneshot;
-  struct stm32l4_freerun_s freerun;
+  struct stm32_oneshot_s oneshot;
+  struct stm32_freerun_s freerun;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct stm32l4_tickless_s g_tickless;
+static struct stm32_tickless_s g_tickless;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_oneshot_handler
+ * Name: stm32_oneshot_handler
  *
  * Description:
  *   Called when the one shot timer expires
@@ -141,7 +141,7 @@ static struct stm32l4_tickless_s g_tickless;
  *
  ****************************************************************************/
 
-static void stm32l4_oneshot_handler(void *arg)
+static void stm32_oneshot_handler(void *arg)
 {
   tmrinfo("Expired...\n");
   nxsched_process_timer();
@@ -185,22 +185,22 @@ void up_timer_initialize(void)
 
   /* Initialize the one-shot timer */
 
-  ret = stm32l4_oneshot_initialize(&g_tickless.oneshot,
-                                 CONFIG_STM32L4_TICKLESS_ONESHOT,
+  ret = stm32_oneshot_initialize(&g_tickless.oneshot,
+                                 CONFIG_STM32_TICKLESS_ONESHOT,
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32l4_oneshot_initialize failed\n");
+      tmrerr("ERROR: stm32_oneshot_initialize failed\n");
       DEBUGPANIC();
     }
 
 #ifdef CONFIG_SCHED_TICKLESS_LIMIT_MAX_SLEEP
   /* Get the maximum delay of the one-shot timer in microseconds */
 
-  ret = stm32l4_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
+  ret = stm32_oneshot_max_delay(&g_tickless.oneshot, &max_delay);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32l4_oneshot_max_delay failed\n");
+      tmrerr("ERROR: stm32_oneshot_max_delay failed\n");
       DEBUGPANIC();
     }
 
@@ -219,12 +219,12 @@ void up_timer_initialize(void)
 
   /* Initialize the free-running timer */
 
-  ret = stm32l4_freerun_initialize(&g_tickless.freerun,
-                                 CONFIG_STM32L4_TICKLESS_FREERUN,
+  ret = stm32_freerun_initialize(&g_tickless.freerun,
+                                 CONFIG_STM32_TICKLESS_FREERUN,
                                  CONFIG_USEC_PER_TICK);
   if (ret < 0)
     {
-      tmrerr("ERROR: stm32l4_freerun_initialize failed\n");
+      tmrerr("ERROR: stm32_freerun_initialize failed\n");
       DEBUGPANIC();
     }
 }
@@ -264,7 +264,7 @@ void up_timer_initialize(void)
 
 int up_timer_gettime(struct timespec *ts)
 {
-  return stm32l4_freerun_counter(&g_tickless.freerun, ts);
+  return stm32_freerun_counter(&g_tickless.freerun, ts);
 }
 
 /****************************************************************************
@@ -305,7 +305,7 @@ int up_timer_gettime(struct timespec *ts)
 
 int up_timer_cancel(struct timespec *ts)
 {
-  return stm32l4_oneshot_cancel(&g_tickless.oneshot, ts);
+  return stm32_oneshot_cancel(&g_tickless.oneshot, ts);
 }
 
 /****************************************************************************
@@ -335,7 +335,7 @@ int up_timer_cancel(struct timespec *ts)
 
 int up_timer_start(const struct timespec *ts)
 {
-  return stm32l4_oneshot_start(&g_tickless.oneshot,
-                               stm32l4_oneshot_handler, NULL, ts);
+  return stm32_oneshot_start(&g_tickless.oneshot,
+                               stm32_oneshot_handler, NULL, ts);
 }
 #endif /* CONFIG_SCHED_TICKLESS */

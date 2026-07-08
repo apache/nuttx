@@ -48,9 +48,9 @@
 
 /* Up to 3 ADC interfaces are supported */
 
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2) || \
-    defined(CONFIG_STM32H7_ADC3)
-#ifndef CONFIG_STM32H7_ADC1
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
+    defined(CONFIG_STM32_ADC3)
+#ifndef CONFIG_STM32_ADC1
 #  warning "Channel information only available for ADC1"
 #endif
 
@@ -63,7 +63,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_ADC1
+#ifdef CONFIG_STM32_ADC1
 /* Identifying number of each ADC channel: Variable Resistor.
  *
  * ADC1: {5, 10, 12, 13, 15};
@@ -91,7 +91,7 @@ static const uint32_t g_adc1_pinlist[ADC1_NCHANNELS] =
 };
 #endif
 
-#ifdef CONFIG_STM32H7_ADC3
+#ifdef CONFIG_STM32_ADC3
 /* Identifying number of each ADC channel: Variable Resistor.
  *
  * ADC3: {6,};
@@ -132,7 +132,7 @@ static const uint32_t g_adc3_pinlist[ADC3_NCHANNELS] =
 
 int stm32_adc_setup(void)
 {
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC3)
   static bool initialized = false;
   struct adc_dev_s *adc;
   int ret;
@@ -144,7 +144,7 @@ int stm32_adc_setup(void)
   if (!initialized)
     {
 #endif
-#if defined(CONFIG_STM32H7_ADC1)
+#if defined(CONFIG_STM32_ADC1)
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < ADC1_NCHANNELS; i++)
@@ -157,7 +157,7 @@ int stm32_adc_setup(void)
 
       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      adc = stm32h7_adc_initialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
+      adc = stm32_adc_initialize(1, g_adc1_chanlist, ADC1_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC1 interface\n");
@@ -175,7 +175,7 @@ int stm32_adc_setup(void)
 
       devname[8]++;
 #endif
-#if defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32_ADC3)
       /* Configure the pins as analog inputs for the selected channels */
 
       for (i = 0; i < ADC3_NCHANNELS; i++)
@@ -188,7 +188,7 @@ int stm32_adc_setup(void)
 
       /* Call stm32_adcinitialize() to get an instance of the ADC interface */
 
-      adc = stm32h7_adc_initialize(3, g_adc3_chanlist, ADC3_NCHANNELS);
+      adc = stm32_adc_initialize(3, g_adc3_chanlist, ADC3_NCHANNELS);
       if (adc == NULL)
         {
           aerr("ERROR: Failed to get ADC3 interface\n");
@@ -205,7 +205,7 @@ int stm32_adc_setup(void)
         }
 #endif
 
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC3)
       /* Now we are initialized */
 
       initialized = true;
@@ -217,5 +217,5 @@ int stm32_adc_setup(void)
 #endif
 }
 
-#endif /* CONFIG_STM32H7_ADC1 || CONFIG_STM32H7_ADC2 || CONFIG_STM32H7_ADC3 */
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */

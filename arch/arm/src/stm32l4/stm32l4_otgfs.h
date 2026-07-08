@@ -31,13 +31,13 @@
 
 #include <stdint.h>
 
-#include "stm32l4.h"
+#include "stm32.h"
 
-#if defined(CONFIG_STM32L4_OTGFS)
+#if defined(CONFIG_STM32_OTGFS)
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_otgfs.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#elif defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
 #  include "hardware/stm32l4x6xx_otgfs.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -49,7 +49,7 @@
 
 /* Number of endpoints */
 
-#define STM32L4_NENDPOINTS  (6)          /* ep0-5 x 2 for IN and OUT */
+#define STM32_NENDPOINTS  (6)          /* ep0-5 x 2 for IN and OUT */
 
 /****************************************************************************
  * Public Functions Prototypes
@@ -67,7 +67,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_otgfshost_initialize
+ * Name: stm32_otgfshost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -94,21 +94,21 @@ extern "C"
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
 struct
-usbhost_connection_s *stm32l4_otgfshost_initialize(int controller);
+usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 #endif
 
 /****************************************************************************
- * Name:  stm32l4_usbsuspend
+ * Name:  stm32_usbsuspend
  *
  * Description:
- *   Board logic must provide the stm32l4_usbsuspend logic if the OTG FS
+ *   Board logic must provide the stm32_usbsuspend logic if the OTG FS
  *   device driver is used.  This function is called whenever the USB enters
  *   or leaves suspend mode. This is an opportunity for the board logic to
  *   shutdown clocks, power, etc. while the USB is suspended.
  *
  ****************************************************************************/
 
-void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume);
+void stm32_usbsuspend(struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -116,5 +116,5 @@ void stm32l4_usbsuspend(struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32L4_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_OTGFS_H */

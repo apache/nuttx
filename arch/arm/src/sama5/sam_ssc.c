@@ -590,12 +590,12 @@ static void     ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result);
 
 static int      ssc_checkwidth(struct sam_ssc_s *priv, int bits);
 
-static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  ssc_rxdatawidth(struct i2s_dev_s *dev, int bits);
 static int      ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                   i2s_callback_t callback, void *arg, uint32_t timeout);
-static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int32_t  ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static int32_t  ssc_txdatawidth(struct i2s_dev_s *dev, int bits);
 static int      ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
                   i2s_callback_t callback, void *arg,
                   uint32_t timeout);
@@ -2012,7 +2012,7 @@ static int ssc_checkwidth(struct sam_ssc_s *priv, int bits)
  *
  ****************************************************************************/
 
-static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(SSC_HAVE_RX) && defined(SSC_HAVE_MCK2)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -2048,7 +2048,7 @@ static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_RX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -2229,7 +2229,7 @@ errout_with_buf:
  *
  ****************************************************************************/
 
-static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
+static int32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(SSC_HAVE_TX) && defined(SSC_HAVE_MCK2)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -2265,7 +2265,7 @@ static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
+static int32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_TX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;

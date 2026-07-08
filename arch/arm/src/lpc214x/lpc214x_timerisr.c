@@ -70,11 +70,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
 static int lpc214x_timerisr(uint32_t *regs)
-#else
-static int lpc214x_timerisr(int irq, uint32_t *regs, void *arg)
-#endif
 {
   /* Process timer interrupt */
 
@@ -86,9 +82,8 @@ static int lpc214x_timerisr(int irq, uint32_t *regs, void *arg)
 
   /* Reset the VIC as well */
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
   vic_putreg(0, LPC214X_VIC_VECTADDR_OFFSET);
-#endif
+
   return 0;
 }
 
@@ -139,12 +134,8 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
   up_attach_vector(LPC214X_IRQ_SYSTIMER, LPC214X_SYSTIMER_VEC,
                    (vic_vector_t)lpc214x_timerisr);
-#else
-  irq_attach(LPC214X_IRQ_SYSTIMER, (xcpt_t)lpc214x_timerisr, NULL);
-#endif
 
   /* And enable the timer interrupt */
 

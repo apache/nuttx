@@ -42,7 +42,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32L4 architectures must provide the following entry point.  This
@@ -52,7 +52,7 @@
  *
  ****************************************************************************/
 
-void stm32l4_board_initialize(void)
+void stm32_board_initialize(void)
 {
   /* Configure on-board LEDs if LED support has been selected. */
 
@@ -64,11 +64,11 @@ void stm32l4_board_initialize(void)
    * function stm32_spiinitialize() has been brought into the link.
    */
 
-#ifdef CONFIG_STM32L4_SPI
+#ifdef CONFIG_STM32_SPI
   stm32_spiinitialize();
 #endif
 
-#ifdef CONFIG_STM32L4_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   /* Initialize USB if the
    * 1) OTG FS controller is in the configuration and
    * 2) disabled, and
@@ -77,7 +77,7 @@ void stm32l4_board_initialize(void)
    * also selected.
    */
 
-  stm32l4_usbinitialize();
+  stm32_usbinitialize();
 #endif
 }
 

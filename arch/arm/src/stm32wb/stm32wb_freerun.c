@@ -37,14 +37,14 @@
 
 #include "stm32wb_freerun.h"
 
-#ifdef CONFIG_STM32WB_FREERUN
+#ifdef CONFIG_STM32_FREERUN
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_freerun_handler
+ * Name: stm32_freerun_handler
  *
  * Description:
  *   Timer interrupt callback.  When the freerun timer counter overflows,
@@ -62,14 +62,14 @@
  ****************************************************************************/
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-static int stm32wb_freerun_handler(int irq, void *context, void *arg)
+static int stm32_freerun_handler(int irq, void *context, void *arg)
 {
-  struct stm32wb_freerun_s *freerun = (struct stm32wb_freerun_s *)arg;
+  struct stm32_freerun_s *freerun = (struct stm32_freerun_s *)arg;
 
   DEBUGASSERT(freerun != NULL && freerun->overflow < UINT32_MAX);
   freerun->overflow++;
 
-  STM32WB_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
+  STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
   return OK;
 }
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
@@ -79,7 +79,7 @@ static int stm32wb_freerun_handler(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_freerun_initialize
+ * Name: stm32_freerun_initialize
  *
  * Description:
  *   Initialize the freerun timer wrapper
@@ -97,7 +97,7 @@ static int stm32wb_freerun_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
+int stm32_freerun_initialize(struct stm32_freerun_s *freerun, int chan,
                                uint16_t resolution)
 {
   uint32_t frequency;
@@ -110,21 +110,21 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
   frequency = USEC_PER_SEC / (uint32_t)resolution;
   freerun->frequency = frequency;
 
-  freerun->tch = stm32wb_tim_init(chan);
+  freerun->tch = stm32_tim_init(chan);
   if (!freerun->tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", chan);
       return -EBUSY;
     }
 
-  STM32WB_TIM_SETCLOCK(freerun->tch, frequency);
+  STM32_TIM_SETCLOCK(freerun->tch, frequency);
 
   /* Initialize the remaining fields in the state structure and return
    * success.
    */
 
   freerun->chan         = chan;
-  freerun->width        = STM32WB_TIM_GETWIDTH(freerun->tch);
+  freerun->width        = STM32_TIM_GETWIDTH(freerun->tch);
 
 #ifdef CONFIG_CLOCK_TIMEKEEPING
   freerun->counter_mask = 0xffffffff;
@@ -135,28 +135,28 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  STM32WB_TIM_SETISR(freerun->tch, stm32wb_freerun_handler, freerun, 0);
+  STM32_TIM_SETISR(freerun->tch, stm32_freerun_handler, freerun, 0);
 #endif
 
   /* Set timer period */
 
-  STM32WB_TIM_SETPERIOD(freerun->tch,
+  STM32_TIM_SETPERIOD(freerun->tch,
                         (uint32_t)((1ull << freerun->width) - 1));
 
   /* Start the counter */
 
-  STM32WB_TIM_SETMODE(freerun->tch, STM32WB_TIM_MODE_UP);
+  STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_UP);
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
-  STM32WB_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
-  STM32WB_TIM_ENABLEINT(freerun->tch, GTIM_DIER_UIE);
+  STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
+  STM32_TIM_ENABLEINT(freerun->tch, GTIM_DIER_UIE);
 #endif
 
   return OK;
 }
 
 /****************************************************************************
- * Name: stm32wb_freerun_counter
+ * Name: stm32_freerun_counter
  *
  * Description:
  *   Read the counter register of the free-running timer.
@@ -164,7 +164,7 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_freerun_initialize();
+ *           stm32_freerun_initialize();
  *   ts      The location in which to return the time from the free-running
  *           timer.
  *
@@ -176,7 +176,7 @@ int stm32wb_freerun_initialize(struct stm32wb_freerun_s *freerun, int chan,
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
 
-int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                             struct timespec *ts)
 {
   uint64_t usec;
@@ -190,7 +190,7 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
   DEBUGASSERT(freerun && freerun->tch && ts);
 
   /* Temporarily disable the overflow counter.  NOTE that we have to be
-   * careful here because  stm32wb_tc_getpending() will reset the pending
+   * careful here because  stm32_tc_getpending() will reset the pending
    * interrupt status.  If we do not handle the overflow here then, it will
    * be lost.
    */
@@ -198,9 +198,9 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
   flags    = enter_critical_section();
 
   overflow = freerun->overflow;
-  counter  = STM32WB_TIM_GETCOUNTER(freerun->tch);
-  pending  = STM32WB_TIM_CHECKINT(freerun->tch, 0);
-  verify   = STM32WB_TIM_GETCOUNTER(freerun->tch);
+  counter  = STM32_TIM_GETCOUNTER(freerun->tch);
+  pending  = STM32_TIM_CHECKINT(freerun->tch, 0);
+  verify   = STM32_TIM_GETCOUNTER(freerun->tch);
 
   /* If an interrupt was pending before we re-enabled interrupts,
    * then the overflow needs to be incremented.
@@ -208,7 +208,7 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
 
   if (pending)
     {
-      STM32WB_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
+      STM32_TIM_ACKINT(freerun->tch, GTIM_SR_UIF);
 
       /* Increment the overflow count and use the value of the
        * guaranteed to be AFTER the overflow occurred.
@@ -253,17 +253,17 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
 
 #else /* CONFIG_CLOCK_TIMEKEEPING */
 
-int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
+int stm32_freerun_counter(struct stm32_freerun_s *freerun,
                             uint64_t *counter)
 {
-  *counter = STM32WB_TIM_GETCOUNTER(freerun->tch);
+  *counter = STM32_TIM_GETCOUNTER(freerun->tch);
   return OK;
 }
 
 #endif /* CONFIG_CLOCK_TIMEKEEPING */
 
 /****************************************************************************
- * Name: stm32wb_freerun_uninitialize
+ * Name: stm32_freerun_uninitialize
  *
  * Description:
  *   Stop the free-running timer and release all resources that it uses.
@@ -271,7 +271,7 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
  * Input Parameters:
  *   freerun Caller allocated instance of the freerun state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32wb_freerun_initialize();
+ *           stm32_freerun_initialize();
  *
  * Returned Value:
  *   Zero (OK) is returned on success; a negated errno value is returned
@@ -279,22 +279,22 @@ int stm32wb_freerun_counter(struct stm32wb_freerun_s *freerun,
  *
  ****************************************************************************/
 
-int stm32wb_freerun_uninitialize(struct stm32wb_freerun_s *freerun)
+int stm32_freerun_uninitialize(struct stm32_freerun_s *freerun)
 {
   DEBUGASSERT(freerun && freerun->tch);
 
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  STM32WB_TIM_DISABLEINT(freerun->tch, GTIM_DIER_UIE);
-  STM32WB_TIM_SETMODE(freerun->tch, STM32WB_TIM_MODE_DISABLED);
-  STM32WB_TIM_SETISR(freerun->tch, NULL, NULL, 0);
+  STM32_TIM_DISABLEINT(freerun->tch, GTIM_DIER_UIE);
+  STM32_TIM_SETMODE(freerun->tch, STM32_TIM_MODE_DISABLED);
+  STM32_TIM_SETISR(freerun->tch, NULL, NULL, 0);
 
   /* Free the timer */
 
-  stm32wb_tim_deinit(freerun->tch);
+  stm32_tim_deinit(freerun->tch);
   freerun->tch = NULL;
 
   return OK;
 }
 
-#endif /* CONFIG_STM32WB_FREERUN */
+#endif /* CONFIG_STM32_FREERUN */

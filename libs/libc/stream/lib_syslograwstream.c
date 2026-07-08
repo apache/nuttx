@@ -123,7 +123,12 @@ static void syslograwstream_addchar(FAR struct lib_syslograwstream_s *stream,
 
       /* Yes.. then flush the buffer */
 
-      syslograwstream_flush(&stream->common);
+      int ret = syslograwstream_flush(&stream->common);
+      if (ret < 0)
+        {
+          stream->offset = 0;
+          stream->common.nput = 0;
+        }
     }
 }
 
@@ -136,7 +141,6 @@ syslograwstream_addstring(FAR struct lib_syslograwstream_s *stream,
                           FAR const char *buff, size_t len)
 {
   ssize_t ret = 0;
-
   do
     {
       size_t remain = CONFIG_SYSLOG_BUFSIZE - stream->offset;
@@ -155,7 +159,13 @@ syslograwstream_addstring(FAR struct lib_syslograwstream_s *stream,
 
           /* Yes.. then flush the buffer */
 
-          syslograwstream_flush(&stream->common);
+          int ret_flush = syslograwstream_flush(&stream->common);
+          if (ret_flush < 0)
+            {
+               stream->offset = 0;
+               stream->common.nput = 0;
+               break;
+            }
         }
     }
   while (ret < len);

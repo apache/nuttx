@@ -58,45 +58,45 @@
 #define FLASH_BLOCK_SIZE _K(8)
 #define FLASH_PAGE_SIZE     16
 
-#if !defined(CONFIG_STM32H5_FLASH_OVERRIDE_DEFAULT) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_B) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_C) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_E) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_G) && \
-    !defined(CONFIG_STM32H5_FLASH_OVERRIDE_I) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_B) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_C) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_E) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_G) && \
-    !defined(CONFIG_STM32H5_FLASH_CONFIG_I)
-#  define CONFIG_STM32H5_FLASH_OVERRIDE_E
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_B) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_C) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_E) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_G) && \
+    !defined(CONFIG_STM32_FLASH_OVERRIDE_I) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_B) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_C) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_E) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_G) && \
+    !defined(CONFIG_STM32_FLASH_CONFIG_I)
+#  define CONFIG_STM32_FLASH_OVERRIDE_E
 #  warning "Flash size not defined defaulting to 512KiB (E)"
 #endif
 
 /* Override of the Flash has been chosen */
 
-#if !defined(CONFIG_STM32H5_FLASH_OVERRIDE_DEFAULT)
-#  undef CONFIG_STM32H5_FLASH_CONFIG_C
-#  undef CONFIG_STM32H5_FLASH_CONFIG_E
-#  if defined(CONFIG_STM32H5_FLASH_OVERRIDE_C)
-#    define CONFIG_STM32H5_FLASH_CONFIG_C
-#  elif defined(CONFIG_STM32H5_FLASH_OVERRIDE_E)
-#    define CONFIG_STM32H5_FLASH_CONFIG_E
+#if !defined(CONFIG_STM32_FLASH_OVERRIDE_DEFAULT)
+#  undef CONFIG_STM32_FLASH_CONFIG_C
+#  undef CONFIG_STM32_FLASH_CONFIG_E
+#  if defined(CONFIG_STM32_FLASH_OVERRIDE_C)
+#    define CONFIG_STM32_FLASH_CONFIG_C
+#  elif defined(CONFIG_STM32_FLASH_OVERRIDE_E)
+#    define CONFIG_STM32_FLASH_CONFIG_E
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_FLASH_CONFIG_I)
+#if defined(CONFIG_STM32_FLASH_CONFIG_I)
 #  define H5_FLASH_BANK_NBLOCKS    128
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_G)
+#elif defined(CONFIG_STM32_FLASH_CONFIG_G)
 #  define H5_FLASH_BANK_NBLOCKS    64
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_E)
+#elif defined(CONFIG_STM32_FLASH_CONFIG_E)
 #  define H5_FLASH_BANK_NBLOCKS    32
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_C)
+#elif defined(CONFIG_STM32_FLASH_CONFIG_C)
 #  define H5_FLASH_BANK_NBLOCKS    16
-#elif defined(CONFIG_STM32H5_FLASH_CONFIG_B)
+#elif defined(CONFIG_STM32_FLASH_CONFIG_B)
 #  define H5_FLASH_BANK_NBLOCKS    8
 #else
-#  warning "No valid STM32H5_FLASH_CONFIG_x defined."
+#  warning "No valid STM32_FLASH_CONFIG_x defined."
 #endif
 
 #define H5_FLASH_BANKSIZE   (FLASH_BLOCK_SIZE * H5_FLASH_BANK_NBLOCKS)
@@ -344,14 +344,14 @@ static void flash_lock_opt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_flash_unlock
+ * Name: stm32_flash_unlock
  *
  * Description:
  *   Unlock non-secure flash control
  *
  ****************************************************************************/
 
-void stm32h5_flash_unlock(void)
+void stm32_flash_unlock(void)
 {
   nxmutex_lock(&g_lock);
   flash_unlock_nscr();
@@ -359,14 +359,14 @@ void stm32h5_flash_unlock(void)
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_lock
+ * Name: stm32_flash_lock
  *
  * Description:
  *   Lock non-secure flash control
  *
  ****************************************************************************/
 
-void stm32h5_flash_lock(void)
+void stm32_flash_lock(void)
 {
   nxmutex_lock(&g_lock);
   flash_lock_nscr();
@@ -374,7 +374,7 @@ void stm32h5_flash_lock(void)
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_getopt
+ * Name: stm32_flash_getopt
  *
  * Description:
  *   Read the current flash option bytes from FLASH_OPTSR_CUR and
@@ -386,14 +386,14 @@ void stm32h5_flash_lock(void)
  *
  ****************************************************************************/
 
-void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2)
+void stm32_flash_getopt(uint32_t *opt1, uint32_t *opt2)
 {
   *opt1 = getreg32(STM32_FLASH_OPTSR_CUR);
   *opt2 = getreg32(STM32_FLASH_OPTSR2_CUR);
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_optmodify
+ * Name: stm32_flash_optmodify
  *
  * Description:
  *   Modifies the current flash option bytes, given bits to set and clear.
@@ -412,8 +412,8 @@ void stm32h5_flash_getopt(uint32_t *opt1, uint32_t *opt2)
  *
  ****************************************************************************/
 
-int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
-                             uint32_t clear2, uint32_t set2)
+int stm32_flash_optmodify(uint32_t clear1, uint32_t set1,
+                          uint32_t clear2, uint32_t set2)
 {
   int ret;
   uint32_t reg;
@@ -451,7 +451,7 @@ int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
 }
 
 /****************************************************************************
- * Name: stm32h5_flash_swapbanks
+ * Name: stm32_flash_swapbanks
  *
  * Description:
  *   Swaps banks 1 and 2 in the processor's memory map.  Takes effect
@@ -464,7 +464,7 @@ int stm32h5_flash_optmodify(uint32_t clear1, uint32_t set1,
  *
  ****************************************************************************/
 
-int stm32h5_flash_swapbanks(void)
+int stm32_flash_swapbanks(void)
 {
   uint32_t reg;
   bool was_locked;

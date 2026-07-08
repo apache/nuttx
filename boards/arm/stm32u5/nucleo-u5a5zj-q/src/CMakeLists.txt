@@ -22,7 +22,7 @@
 
 set(SRCS stm32_boot.c stm32_bringup.c stm32_spi.c)
 
-if(CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG)
+if(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
   list(APPEND SRCS stm32_clockconfig.c)
 endif()
 

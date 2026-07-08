@@ -46,37 +46,37 @@
  * is intended to be used for that purpose.
  */
 
-#ifndef CONFIG_STM32L4_TIM1
-#  undef CONFIG_STM32L4_TIM1_DAC
+#ifndef CONFIG_STM32_TIM1
+#  undef CONFIG_STM32_TIM1_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM2
-#  undef CONFIG_STM32L4_TIM2_DAC
+#ifndef CONFIG_STM32_TIM2
+#  undef CONFIG_STM32_TIM2_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM3
-#  undef CONFIG_STM32L4_TIM3_DAC
+#ifndef CONFIG_STM32_TIM3
+#  undef CONFIG_STM32_TIM3_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM4
-#  undef CONFIG_STM32L4_TIM4_DAC
+#ifndef CONFIG_STM32_TIM4
+#  undef CONFIG_STM32_TIM4_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM5
-#  undef CONFIG_STM32L4_TIM5_DAC
+#ifndef CONFIG_STM32_TIM5
+#  undef CONFIG_STM32_TIM5_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM6
-#  undef CONFIG_STM32L4_TIM6_DAC
+#ifndef CONFIG_STM32_TIM6
+#  undef CONFIG_STM32_TIM6_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM7
-#  undef CONFIG_STM32L4_TIM7_DAC
+#ifndef CONFIG_STM32_TIM7
+#  undef CONFIG_STM32_TIM7_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM8
-#  undef CONFIG_STM32L4_TIM8_DAC
+#ifndef CONFIG_STM32_TIM8
+#  undef CONFIG_STM32_TIM8_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM15
+#ifndef CONFIG_STM32_TIM15
 #  undef CONFIG_STM32L4_TIM15_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM16
+#ifndef CONFIG_STM32_TIM16
 #  undef CONFIG_STM32L4_TIM16_DAC
 #endif
-#ifndef CONFIG_STM32L4_TIM17
+#ifndef CONFIG_STM32_TIM17
 #  undef CONFIG_STM32L4_TIM17_DAC
 #endif
 
@@ -97,7 +97,7 @@
  * Public Types
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_DAC_LL_OPS
+#ifdef CONFIG_STM32_DAC_LL_OPS
 
 /* This structure provides the publicly visible representation of the
  * "lower-half" DAC driver structure.
@@ -137,17 +137,17 @@ struct stm32_dac_ops_s
   void (*dump_regs)(struct stm32_dac_dev_s *dev);
 };
 
-#endif /* CONFIG_STM32L4_DAC_LL_OPS */
+#endif /* CONFIG_STM32_DAC_LL_OPS */
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_DAC1_DMA
-extern uint16_t stm32l4_dac1_dmabuffer[];
+#ifdef CONFIG_STM32_DAC1_DMA
+extern uint16_t stm32_dac1_dmabuffer[];
 #endif
-#ifdef CONFIG_STM32L4_DAC2_DMA
-extern uint16_t stm32l4_dac2_dmabuffer[];
+#ifdef CONFIG_STM32_DAC2_DMA
+extern uint16_t stm32_dac2_dmabuffer[];
 #endif
 
 /****************************************************************************
@@ -164,7 +164,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dacinitialize
+ * Name: stm32_dacinitialize
  *
  * Description:
  *   Initialize the DAC
@@ -178,7 +178,7 @@ extern "C"
  ****************************************************************************/
 
 struct dac_dev_s;
-struct dac_dev_s *stm32l4_dacinitialize(int intf);
+struct dac_dev_s *stm32_dacinitialize(int intf);
 
 #undef EXTERN
 #ifdef __cplusplus

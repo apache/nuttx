@@ -240,7 +240,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32F7_NGPIO];
+EXTERN const uint32_t g_gpiobase[STM32_NGPIO];
 
 /****************************************************************************
  * Public Function Prototypes

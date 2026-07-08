@@ -29,44 +29,44 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_I2C_CR1_OFFSET      0x0000 /* Control register 1 (32-bit) */
-#define STM32WB_I2C_CR2_OFFSET      0x0004 /* Control register 2 (32-bit) */
-#define STM32WB_I2C_OAR1_OFFSET     0x0008 /* Own address register 1 (16-bit) */
-#define STM32WB_I2C_OAR2_OFFSET     0x000c /* Own address register 2 (16-bit) */
-#define STM32WB_I2C_TIMINGR_OFFSET  0x0010 /* Timing register */
-#define STM32WB_I2C_TIMEOUTR_OFFSET 0x0014 /* Timeout register */
-#define STM32WB_I2C_ISR_OFFSET      0x0018 /* Interrupt and Status register */
-#define STM32WB_I2C_ICR_OFFSET      0x001c /* Interrupt clear register */
-#define STM32WB_I2C_PECR_OFFSET     0x0020 /* Packet error checking register */
-#define STM32WB_I2C_RXDR_OFFSET     0x0024 /* Receive data register */
-#define STM32WB_I2C_TXDR_OFFSET     0x0028 /* Transmit data register */
+#define STM32_I2C_CR1_OFFSET      0x0000 /* Control register 1 (32-bit) */
+#define STM32_I2C_CR2_OFFSET      0x0004 /* Control register 2 (32-bit) */
+#define STM32_I2C_OAR1_OFFSET     0x0008 /* Own address register 1 (16-bit) */
+#define STM32_I2C_OAR2_OFFSET     0x000c /* Own address register 2 (16-bit) */
+#define STM32_I2C_TIMINGR_OFFSET  0x0010 /* Timing register */
+#define STM32_I2C_TIMEOUTR_OFFSET 0x0014 /* Timeout register */
+#define STM32_I2C_ISR_OFFSET      0x0018 /* Interrupt and Status register */
+#define STM32_I2C_ICR_OFFSET      0x001c /* Interrupt clear register */
+#define STM32_I2C_PECR_OFFSET     0x0020 /* Packet error checking register */
+#define STM32_I2C_RXDR_OFFSET     0x0024 /* Receive data register */
+#define STM32_I2C_TXDR_OFFSET     0x0028 /* Transmit data register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WB_I2C1_CR1            (STM32WB_I2C1_BASE + STM32WB_I2C_CR1_OFFSET)
-#define STM32WB_I2C1_CR2            (STM32WB_I2C1_BASE + STM32WB_I2C_CR2_OFFSET)
-#define STM32WB_I2C1_OAR1           (STM32WB_I2C1_BASE + STM32WB_I2C_OAR1_OFFSET)
-#define STM32WB_I2C1_OAR2           (STM32WB_I2C1_BASE + STM32WB_I2C_OAR2_OFFSET)
-#define STM32WB_I2C1_TIMINGR        (STM32WB_I2C1_BASE + STM32WB_I2C_TIMINGR_OFFSET)
-#define STM32WB_I2C1_TIMEOUTR       (STM32WB_I2C1_BASE + STM32WB_I2C_TIMEOUTR_OFFSET)
-#define STM32WB_I2C1_ISR            (STM32WB_I2C1_BASE + STM32WB_I2C_ISR_OFFSET)
-#define STM32WB_I2C1_ICR            (STM32WB_I2C1_BASE + STM32WB_I2C_ICR_OFFSET)
-#define STM32WB_I2C1_PECR           (STM32WB_I2C1_BASE + STM32WB_I2C_PECR_OFFSET)
-#define STM32WB_I2C1_RXDR           (STM32WB_I2C1_BASE + STM32WB_I2C_RXDR_OFFSET)
-#define STM32WB_I2C1_TXDR           (STM32WB_I2C1_BASE + STM32WB_I2C_TXDR_OFFSET)
+#define STM32_I2C1_CR1            (STM32_I2C1_BASE + STM32_I2C_CR1_OFFSET)
+#define STM32_I2C1_CR2            (STM32_I2C1_BASE + STM32_I2C_CR2_OFFSET)
+#define STM32_I2C1_OAR1           (STM32_I2C1_BASE + STM32_I2C_OAR1_OFFSET)
+#define STM32_I2C1_OAR2           (STM32_I2C1_BASE + STM32_I2C_OAR2_OFFSET)
+#define STM32_I2C1_TIMINGR        (STM32_I2C1_BASE + STM32_I2C_TIMINGR_OFFSET)
+#define STM32_I2C1_TIMEOUTR       (STM32_I2C1_BASE + STM32_I2C_TIMEOUTR_OFFSET)
+#define STM32_I2C1_ISR            (STM32_I2C1_BASE + STM32_I2C_ISR_OFFSET)
+#define STM32_I2C1_ICR            (STM32_I2C1_BASE + STM32_I2C_ICR_OFFSET)
+#define STM32_I2C1_PECR           (STM32_I2C1_BASE + STM32_I2C_PECR_OFFSET)
+#define STM32_I2C1_RXDR           (STM32_I2C1_BASE + STM32_I2C_RXDR_OFFSET)
+#define STM32_I2C1_TXDR           (STM32_I2C1_BASE + STM32_I2C_TXDR_OFFSET)
 
-#ifdef CONFIG_STM32WB_HAVE_I2C3
-#  define STM32WB_I2C3_CR1          (STM32WB_I2C3_BASE + STM32WB_I2C_CR1_OFFSET)
-#  define STM32WB_I2C3_CR2          (STM32WB_I2C3_BASE + STM32WB_I2C_CR2_OFFSET)
-#  define STM32WB_I2C3_OAR1         (STM32WB_I2C3_BASE + STM32WB_I2C_OAR1_OFFSET)
-#  define STM32WB_I2C3_OAR2         (STM32WB_I2C3_BASE + STM32WB_I2C_OAR2_OFFSET)
-#  define STM32WB_I2C3_TIMINGR      (STM32WB_I2C3_BASE + STM32WB_I2C_TIMINGR_OFFSET)
-#  define STM32WB_I2C3_TIMEOUTR     (STM32WB_I2C3_BASE + STM32WB_I2C_TIMEOUTR_OFFSET)
-#  define STM32WB_I2C3_ISR          (STM32WB_I2C3_BASE + STM32WB_I2C_ISR_OFFSET)
-#  define STM32WB_I2C3_ICR          (STM32WB_I2C3_BASE + STM32WB_I2C_ICR_OFFSET)
-#  define STM32WB_I2C3_PECR         (STM32WB_I2C3_BASE + STM32WB_I2C_PECR_OFFSET)
-#  define STM32WB_I2C3_RXDR         (STM32WB_I2C3_BASE + STM32WB_I2C_RXDR_OFFSET)
-#  define STM32WB_I2C3_TXDR         (STM32WB_I2C3_BASE + STM32WB_I2C_TXDR_OFFSET)
+#ifdef CONFIG_STM32_HAVE_I2C3
+#  define STM32_I2C3_CR1          (STM32_I2C3_BASE + STM32_I2C_CR1_OFFSET)
+#  define STM32_I2C3_CR2          (STM32_I2C3_BASE + STM32_I2C_CR2_OFFSET)
+#  define STM32_I2C3_OAR1         (STM32_I2C3_BASE + STM32_I2C_OAR1_OFFSET)
+#  define STM32_I2C3_OAR2         (STM32_I2C3_BASE + STM32_I2C_OAR2_OFFSET)
+#  define STM32_I2C3_TIMINGR      (STM32_I2C3_BASE + STM32_I2C_TIMINGR_OFFSET)
+#  define STM32_I2C3_TIMEOUTR     (STM32_I2C3_BASE + STM32_I2C_TIMEOUTR_OFFSET)
+#  define STM32_I2C3_ISR          (STM32_I2C3_BASE + STM32_I2C_ISR_OFFSET)
+#  define STM32_I2C3_ICR          (STM32_I2C3_BASE + STM32_I2C_ICR_OFFSET)
+#  define STM32_I2C3_PECR         (STM32_I2C3_BASE + STM32_I2C_PECR_OFFSET)
+#  define STM32_I2C3_RXDR         (STM32_I2C3_BASE + STM32_I2C_RXDR_OFFSET)
+#  define STM32_I2C3_TXDR         (STM32_I2C3_BASE + STM32_I2C_TXDR_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ********************************************/

@@ -50,31 +50,31 @@
 
 /* Port letters for prettier debug output */
 
-static const char g_portchar[STM32L4_NPORTS] =
+static const char g_portchar[STM32_NPORTS] =
 {
-#if STM32L4_NPORTS > 11
+#if STM32_NPORTS > 11
 #  error "Additional support required for this number of GPIOs"
-#elif STM32L4_NPORTS > 10
+#elif STM32_NPORTS > 10
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'
-#elif STM32L4_NPORTS > 9
+#elif STM32_NPORTS > 9
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'
-#elif STM32L4_NPORTS > 8
+#elif STM32_NPORTS > 8
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'
-#elif STM32L4_NPORTS > 7
+#elif STM32_NPORTS > 7
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
-#elif STM32L4_NPORTS > 6
+#elif STM32_NPORTS > 6
   'A', 'B', 'C', 'D', 'E', 'F', 'G'
-#elif STM32L4_NPORTS > 5
+#elif STM32_NPORTS > 5
   'A', 'B', 'C', 'D', 'E', 'F'
-#elif STM32L4_NPORTS > 4
+#elif STM32_NPORTS > 4
   'A', 'B', 'C', 'D', 'E'
-#elif STM32L4_NPORTS > 3
+#elif STM32_NPORTS > 3
   'A', 'B', 'C', 'D'
-#elif STM32L4_NPORTS > 2
+#elif STM32_NPORTS > 2
   'A', 'B', 'C'
-#elif STM32L4_NPORTS > 1
+#elif STM32_NPORTS > 1
   'A', 'B'
-#elif STM32L4_NPORTS > 0
+#elif STM32_NPORTS > 0
   'A'
 #else
 #  error "Bad number of GPIOs"
@@ -86,14 +86,14 @@ static const char g_portchar[STM32L4_NPORTS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32l4_dumpgpio
+ * Function:  stm32_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the provided base address
  *
  ****************************************************************************/
 
-int stm32l4_dumpgpio(uint32_t pinset, const char *msg)
+int stm32_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t   flags;
   uint32_t     base;
@@ -108,33 +108,33 @@ int stm32l4_dumpgpio(uint32_t pinset, const char *msg)
 
   flags = enter_critical_section();
 
-  DEBUGASSERT(port < STM32L4_NPORTS);
+  DEBUGASSERT(port < STM32_NPORTS);
 
   _info("GPIO%c pinset: %08" PRIx32 " base: %08" PRIx32 " -- %s\n",
         g_portchar[port], pinset, base, msg);
 
-  if ((getreg32(STM32L4_RCC_AHB2ENR) & RCC_AHB2ENR_GPIOEN(port)) != 0)
+  if ((getreg32(STM32_RCC_AHB2ENR) & RCC_AHB2ENR_GPIOEN(port)) != 0)
     {
       _info(" MODE: %08" PRIx32 " OTYPE: %04" PRIx32
             "     OSPEED: %08" PRIx32 " PUPDR: %08" PRIx32 "\n",
-            getreg32(base + STM32L4_GPIO_MODER_OFFSET),
-            getreg32(base + STM32L4_GPIO_OTYPER_OFFSET),
-            getreg32(base + STM32L4_GPIO_OSPEED_OFFSET),
-            getreg32(base + STM32L4_GPIO_PUPDR_OFFSET));
+            getreg32(base + STM32_GPIO_MODER_OFFSET),
+            getreg32(base + STM32_GPIO_OTYPER_OFFSET),
+            getreg32(base + STM32_GPIO_OSPEED_OFFSET),
+            getreg32(base + STM32_GPIO_PUPDR_OFFSET));
       _info("  IDR: %04" PRIx32 "       ODR: %04" PRIx32
             "       BSRR: %08" PRIx32 "  LCKR: %04x\n",
-            getreg32(base + STM32L4_GPIO_IDR_OFFSET),
-            getreg32(base + STM32L4_GPIO_ODR_OFFSET),
-            getreg32(base + STM32L4_GPIO_BSRR_OFFSET),
-            getreg32(base + STM32L4_GPIO_LCKR_OFFSET));
+            getreg32(base + STM32_GPIO_IDR_OFFSET),
+            getreg32(base + STM32_GPIO_ODR_OFFSET),
+            getreg32(base + STM32_GPIO_BSRR_OFFSET),
+            getreg32(base + STM32_GPIO_LCKR_OFFSET));
       _info(" AFRH: %08" PRIx32 "  AFRL: %08" PRIx32 "\n",
-            getreg32(base + STM32L4_GPIO_AFRH_OFFSET),
-            getreg32(base + STM32L4_GPIO_AFRL_OFFSET));
+            getreg32(base + STM32_GPIO_AFRH_OFFSET),
+            getreg32(base + STM32_GPIO_AFRL_OFFSET));
     }
   else
     {
       _info("  GPIO%c not enabled: AHB2ENR: %08" PRIx32 "\n",
-            g_portchar[port], getreg32(STM32L4_RCC_AHB2ENR));
+            g_portchar[port], getreg32(STM32_RCC_AHB2ENR));
     }
 
   leave_critical_section(flags);

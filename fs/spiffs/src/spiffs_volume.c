@@ -371,7 +371,7 @@ ssize_t spiffs_fobj_read(FAR struct spiffs_s *fs,
 
   /* Make sure that read access is supported */
 
-  if ((fobj->oflags & O_RDONLY) == 0)
+  if ((fobj->oflags & O_ACCMODE) == O_WRONLY)
     {
       return -EACCES;
     }

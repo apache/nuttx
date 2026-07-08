@@ -34,15 +34,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  stm32l4_dfumode
+ * Name:  stm32_dfumode
  *
  * Description:
  *   Reboot the part in DFU mode.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
-void stm32l4_dfumode(void) noreturn_function;
+#if defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
+void stm32_dfumode(void) noreturn_function;
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_DFUMODE_H */

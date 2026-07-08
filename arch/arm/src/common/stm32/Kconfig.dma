@@ -1,0 +1,118 @@
+#
+# STM32 DMA configuration options.
+#
+
+config STM32_DMA1_HAVE_CHAN8
+	bool
+	default y if STM32_STM32G47XX
+
+config STM32_DMA2_HAVE_CHAN678
+	bool
+	default y if STM32_STM32G47XX
+
+config STM32_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7) && ARCH_DMA
+	default STM32_STM32F4XXX && !STM32_CCMEXCLUDE if STM32_COMMON_LEGACY && ARCH_DMA
+	---help---
+		This option enables the DMA interface stm32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
+
+if STM32_DMA2D
+
+config STM32_DMA2D_NLAYERS
+	int "Number DMA2D overlays"
+	default 1
+	range 1 256
+	---help---
+		Number of supported DMA2D layer.
+
+config STM32_DMA2D_LAYER_SHARED
+	bool "Overlays shared memory region"
+	---help---
+		Several overlays can share the same memory region.
+		Setup a whole memory area (usually multiple size of the visible screen)
+		allows image preprocessing before they become visible by blit operation.
+
+config STM32_DMA2D_LAYER_PPLINE
+	int "Pixel per line"
+	default 1
+	range 1 65535
+	---help---
+		If you are using the DMA2D, then you must provide the pixel per line or
+		width of the overlay.
+
+config STM32_DMA2D_FB_BASE
+	hex "Framebuffer memory start address"
+	default 0
+	---help---
+		If you are using the DMA2D, then you must provide the address
+		of the start of the DMA2D overlays framebuffer. This address will typically
+		be in the SRAM or SDRAM memory region of the FSMC/FMC.
+
+config STM32_DMA2D_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+	---help---
+		Must be the whole size of all DMA2D overlays.
+
+config STM32_DMA2D_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_L8
+	default y
+
+config STM32_DMA2D_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_AL44
+	default y
+
+config STM32_DMA2D_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+	depends on STM32_FB_CMAP && STM32_LTDC_L1_AL88
+	default y
+
+config STM32_DMA2D_RGB565
+	bool "16 bpp RGB 565"
+	depends on STM32_LTDC_L1_RGB565
+	default y
+
+config STM32_DMA2D_ARGB4444
+	bool "16 bpp ARGB 4444"
+	depends on STM32_LTDC_L1_ARGB4444
+	default y
+
+config STM32_DMA2D_ARGB1555
+	bool "16 bpp ARGB 1555"
+	depends on STM32_LTDC_L1_ARGB15555
+	default y
+
+config STM32_DMA2D_RGB888
+	bool "24 bpp RGB 888"
+	depends on STM32_LTDC_L1_RGB888
+	default y
+
+config STM32_DMA2D_ARGB8888
+	bool "32 bpp ARGB 8888"
+	depends on STM32_LTDC_L1_ARGB8888
+	default y
+
+config STM32_DMA2D_REGDEBUG
+	bool "DMA2D Register level debug"
+	depends on DEBUG_INFO && DEBUG_LCD
+	---help---
+		Output detailed register-level DMA2D device debug information.
+
+endif # STM32_DMA2D
+
+config STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED
+	bool "Do not disqualify DMA capability based on cache alignment"
+	depends on STM32_COMMON_F7_H7 && STM32_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
+	---help---
+		This option configures the stm32_dmacapable to not disqualify
+		DMA operations on memory that is not dcache aligned based solely
+		on the starting address and byte count.
+
+		Use this when ALL buffer extents are known to be aligned, but the
+		the count does not use the complete buffer.

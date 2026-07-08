@@ -33,7 +33,7 @@
 #include <nuttx/sensors/bmp280.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_i2c.h"
 #include "stm32_bmp280.h"
 
@@ -89,7 +89,7 @@ int board_bmp280_initialize(int devno, int busno)
 
   /* Initialize BMP280 */
 
-  i2c = stm32l4_i2cbus_initialize(busno);
+  i2c = stm32_i2cbus_initialize(busno);
 
   if (i2c)
     {

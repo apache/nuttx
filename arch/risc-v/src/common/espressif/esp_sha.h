@@ -85,6 +85,22 @@ struct esp_sha256_context_s
     enum esp_sha_state_e sha_state;
 };
 
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+
+/* SHA-512 context structure */
+
+struct esp_sha512_context_s
+{
+    uint64_t total[2];          /* number of bytes processed  */
+    uint64_t state[8];          /* intermediate digest state  */
+    unsigned char buffer[128];  /* data block being processed */
+    bool first_block;           /* if first then true, else false */
+    enum esp_sha_type_e mode;
+    enum esp_sha_state_e sha_state;
+};
+
+#endif /* CONFIG_ARCH_CHIP_ESP32P4 */
+
 /****************************************************************************
  * Name: esp_sha_init
  *
@@ -248,6 +264,69 @@ int esp_sha256_update(struct esp_sha256_context_s *ctx,
 
 int esp_sha256_finish(struct esp_sha256_context_s *ctx,
                       unsigned char output[32]);
+
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+
+/****************************************************************************
+ * Name: esp_sha512_starts
+ *
+ * Description:
+ *   Starts a SHA-384 or SHA-512 checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx   - The SHA-512 context to initialize
+ *   is384 - Determines which function to use
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *
+ ****************************************************************************/
+
+int esp_sha512_starts(struct esp_sha512_context_s *ctx, bool is384);
+
+/****************************************************************************
+ * Name: esp_sha512_update
+ *
+ * Description:
+ *   Feeds an input buffer into an ongoing SHA-384 or SHA-512
+ *   checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx   - The SHA-512 context to use
+ *   input - The buffer holding the input data
+ *   ilen  - The length of the input data in Bytes
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp_sha512_update(struct esp_sha512_context_s *ctx,
+                      const unsigned char *input,
+                      size_t ilen);
+
+/****************************************************************************
+ * Name: esp_sha512_finish
+ *
+ * Description:
+ *   Finishes the SHA-384 or SHA-512 operation, and writes the result to
+ *   the output buffer.
+ *
+ * Input Parameters:
+ *   ctx    - The SHA-512 context to use
+ *   output - The SHA-512 checksum result
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp_sha512_finish(struct esp_sha512_context_s *ctx,
+                      unsigned char output[64]);
+
+#endif /* CONFIG_ARCH_CHIP_ESP32P4 */
 
 #ifdef __cplusplus
 }

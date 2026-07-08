@@ -221,6 +221,23 @@ This configuration boots directly into the :doc:`coremark
 </applications/benchmarks/coremark/index>` benchmark and displays the results of
 the test over the serial console.
 
+i2c1
+----
+
+This configuration enables the I2C1 bus on GPIO 2 and 3 (the standard I2C bus
+for the Raspberry Pi 4B). It includes the :doc:`i2ctool
+</applications/system/i2c/index>` application for playing with the bus. Note
+that you will want to pass the `-b 1` flag to the tool the first time you use
+it, as the default bus is 0.
+
+bmp280
+------
+
+This configuration is the same as the I2C1 configuration, but it registers the
+BMP280 device driver on I2C1. You can use the :doc:`bmp280
+</applications/examples/bmp280/index>` example program or the ``uorb_listener``
+program to interact with the sensor.
+
 ostest
 ------
 

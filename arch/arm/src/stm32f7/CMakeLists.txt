@@ -33,17 +33,15 @@ list(
   stm32_rcc.c
   stm32_serial.c
   stm32_start.c
-  stm32_capture.c
-  stm32_uid.c
-  stm32_waste.c)
+  stm32_capture.c)
 
-if(CONFIG_STM32F7_TICKLESS_TIMER)
+if(CONFIG_STM32_TICKLESS_TIMER)
   list(APPEND SRCS stm32_tickless.c)
 else()
   list(APPEND SRCS stm32_timerisr.c)
 endif()
 
-if(CONFIG_STM32F7_PROGMEM)
+if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_flash.c)
 endif()
 
@@ -55,7 +53,7 @@ if(CONFIG_ARMV7M_DTCM)
   list(APPEND SRCS stm32_dtcm.c)
 endif()
 
-if(CONFIG_STM32F7_DMA)
+if(CONFIG_STM32_DMA)
   list(APPEND SRCS stm32_dma.c)
 endif()
 
@@ -66,11 +64,11 @@ if(CONFIG_PM)
   endif()
 endif()
 
-if(CONFIG_STM32F7_PWR)
+if(CONFIG_STM32_PWR)
   list(APPEND SRCS stm32_pwr.c stm32_exti_pwr.c)
 endif()
 
-if(CONFIG_STM32F7_RTC)
+if(CONFIG_STM32_RTC)
   list(APPEND SRCS stm32_rtc.c)
   if(CONFIG_RTC_ALARM)
     list(APPEND SRCS stm32_exti_alarm.c)
@@ -83,27 +81,31 @@ if(CONFIG_STM32F7_RTC)
   endif()
 endif()
 
-if(CONFIG_STM32F7_IWDG OR CONFIG_STM32F7_RTC_LSICLOCK)
+if(CONFIG_STM32_FMC)
+  list(APPEND SRCS stm32_fmc.c)
+endif()
+
+if(CONFIG_STM32_IWDG OR CONFIG_STM32_RTC_LSICLOCK)
   list(APPEND SRCS stm32_lsi.c)
 endif()
 
-if(CONFIG_STM32F7_RTC_LSECLOCK)
+if(CONFIG_STM32_RTC_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
 endif()
 
-if(CONFIG_STM32F7_I2C)
+if(CONFIG_STM32_I2C)
   list(APPEND SRCS stm32_i2c.c)
 endif()
 
-if(CONFIG_STM32F7_I2S)
+if(CONFIG_STM32_I2S)
   list(APPEND SRCS stm32_i2s.c)
 endif()
 
-if(CONFIG_STM32F7_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_STM32F7_SDMMC)
+if(CONFIG_STM32_SDMMC)
   list(APPEND SRCS stm32_sdmmc.c)
 endif()
 
@@ -120,25 +122,19 @@ if(CONFIG_USBHOST)
   endif()
 endif()
 
-if(CONFIG_STM32F7_TIM)
+if(CONFIG_STM32_TIM)
   list(APPEND SRCS stm32_tim.c stm32_tim_lowerhalf.c)
 endif()
 
-if(CONFIG_STM32F7_ADC)
+if(CONFIG_STM32_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_STM32F7_QUADSPI)
+if(CONFIG_STM32_QSPI)
   list(APPEND SRCS stm32_qspi.c)
 endif()
 
-if(CONFIG_STM32F7_RTC)
-  if(CONFIG_RTC_ALARM)
-    list(APPEND SRCS stm32_exti_alarm.c)
-  endif()
-endif()
-
-if(CONFIG_STM32F7_ETHMAC)
+if(CONFIG_STM32_ETHMAC)
   list(APPEND SRCS stm32_ethernet.c)
 endif()
 
@@ -146,19 +142,19 @@ if(CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS stm32_dumpgpio.c)
 endif()
 
-if(CONFIG_STM32F7_BBSRAM)
+if(CONFIG_STM32_BBSRAM)
   list(APPEND SRCS stm32_bbsram.c)
 endif()
 
-if(CONFIG_STM32F7_RNG)
+if(CONFIG_STM32_RNG)
   list(APPEND SRCS stm32_rng.c)
 endif()
 
-if(CONFIG_STM32F7_LTDC)
+if(CONFIG_STM32_LTDC)
   list(APPEND SRCS stm32_ltdc.c)
 endif()
 
-if(CONFIG_STM32F7_DMA2D)
+if(CONFIG_STM32_DMA2D)
   list(APPEND SRCS stm32_dma2d.c)
 endif()
 
@@ -166,19 +162,19 @@ if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
 endif()
 
-if(CONFIG_STM32F7_CAN_CHARDRIVER)
+if(CONFIG_STM32_CAN_CHARDRIVER)
   list(APPEND SRCS stm32_can.c)
 endif()
 
-if(CONFIG_STM32F7_CAN_SOCKET)
+if(CONFIG_STM32_CAN_SOCKET)
   list(APPEND SRCS stm32_can_sock.c)
 endif()
 
-if(CONFIG_STM32F7_SAI)
+if(CONFIG_STM32_SAI)
   list(APPEND SRCS stm32_sai.c)
 endif()
 
-if(CONFIG_STM32F7_PWM)
+if(CONFIG_STM32_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()
 
@@ -186,8 +182,10 @@ if(CONFIG_PULSECOUNT)
   list(APPEND SRCS stm32_pulsecount.c)
 endif()
 
-if(CONFIG_STM32F7_FOC)
+if(CONFIG_STM32_FOC)
   list(APPEND SRCS stm32_foc.c)
 endif()
 
 target_sources(arch PRIVATE ${SRCS})
+
+add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

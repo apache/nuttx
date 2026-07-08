@@ -55,11 +55,11 @@
 #include "stm32_rcc.h"
 #include "hardware/stm32_qspi.h"
 
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
 #include "stm32_dma.h"
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI1
+#ifdef CONFIG_STM32_QSPI1
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,7 +70,7 @@
 /* Check if QSPI debug is enabled */
 
 #ifndef CONFIG_DEBUG_DMA
-#  undef CONFIG_STM32H5_QSPI_DMADEBUG
+#  undef CONFIG_STM32_QSPI_DMADEBUG
 #endif
 
 #define DMA_INITIAL      0
@@ -83,7 +83,7 @@
 
 /* Can't have both interrupt-driven QSPI and DMA QSPI */
 
-#if defined(CONFIG_STM32H5_QSPI_INTERRUPTS) && defined(CONFIG_STM32H5_QSPI_DMA)
+#if defined(CONFIG_STM32_QSPI_INTERRUPTS) && defined(CONFIG_STM32_QSPI_DMA)
 #  error "Cannot enable both interrupt mode and DMA mode for QSPI"
 #endif
 
@@ -95,7 +95,7 @@
     GPIO_QSPI_IO1 GPIO_QSPI_IO2 GPIO_QSPI_IO3 GPIO_QSPI_SCK in your board.h
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
 
 #  ifdef DMAMAP_QUADSPI
 
@@ -107,26 +107,26 @@
 #    define DMACHAN_QUADSPI           DMAMAP_QUADSPI
 #  endif
 
-#  if defined(CONFIG_STM32H5_QSPI_DMAPRIORITY_LOW)
+#  if defined(CONFIG_STM32_QSPI_DMAPRIORITY_LOW)
 #    define QSPI_DMA_PRIO  DMA_SCR_PRILO
-#  elif defined(CONFIG_STM32H5_QSPI_DMAPRIORITY_MEDIUM)
+#  elif defined(CONFIG_STM32_QSPI_DMAPRIORITY_MEDIUM)
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
-#  elif defined(CONFIG_STM32H5_QSPI_DMAPRIORITY_HIGH)
+#  elif defined(CONFIG_STM32_QSPI_DMAPRIORITY_HIGH)
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIHI
-#  elif defined(CONFIG_STM32H5_QSPI_DMAPRIORITY_VERYHIGH)
+#  elif defined(CONFIG_STM32_QSPI_DMAPRIORITY_VERYHIGH)
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIVERYHI
 #  else
 #    define QSPI_DMA_PRIO  DMA_SCR_PRIMED
 #  endif
 
-#endif /* CONFIG_STM32H5_QSPI_DMA */
+#endif /* CONFIG_STM32_QSPI_DMA */
 
 #ifndef STM32_SYSCLK_FREQUENCY
 #  error your board.h needs to define the value of STM32_SYSCLK_FREQUENCY
 #endif
 
-#if !defined(CONFIG_STM32H5_QSPI_FLASH_SIZE) || 0 == CONFIG_STM32H5_QSPI_FLASH_SIZE
-#  error you must specify a positive flash size via CONFIG_STM32H5_QSPI_FLASH_SIZE
+#if !defined(CONFIG_STM32_QSPI_FLASH_SIZE) || 0 == CONFIG_STM32_QSPI_FLASH_SIZE
+#  error you must specify a positive flash size via CONFIG_STM32_QSPI_FLASH_SIZE
 #endif
 
 /* DMA timeout.  The value is not critical; we just don't want the system to
@@ -144,11 +144,11 @@
  * QUADSPI clock defaults to HCLK.
  */
 
-#if defined(CONFIG_STM32H5_QSPI1) && !defined(STM32_RCC_CCIPR4_OCTOSPI1SEL)
+#if defined(CONFIG_STM32_QSPI1) && !defined(STM32_RCC_CCIPR4_OCTOSPI1SEL)
 #  error your board.h needs to define STM32_RCC_CCIPR4_OCTOSPI1SEL
 #endif
 
-#if defined(CONFIG_STM32H5_QSPI1) && !defined(STM32_QSPI_FREQUENCY)
+#if defined(CONFIG_STM32_QSPI1) && !defined(STM32_QSPI_FREQUENCY)
 #  error your board.h needs to defined STM32_QSPI_FREQUENCY
 #else
 #  define QSPI_CLK_FREQUENCY STM32_QSPI_FREQUENCY
@@ -183,14 +183,14 @@ struct stm32_qspidev_s
   mutex_t lock;                 /* Assures mutually exclusive access to QSPI */
   bool memmap;                  /* TRUE: Controller is in memory mapped mode */
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   xcpt_t handler;               /* Interrupt handler */
   uint8_t irq;                  /* Interrupt number */
   sem_t op_sem;                 /* Block until complete */
   struct qspi_xctnspec_s *xctn; /* context of transaction in progress */
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
   bool candma;                  /* DMA is supported */
   sem_t dmawait;                /* Used to wait for DMA completion */
   int result;                   /* DMA result */
@@ -200,11 +200,11 @@ struct stm32_qspidev_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_STM32H5_QSPI_DMADEBUG
+#ifdef CONFIG_STM32_QSPI_DMADEBUG
   struct stm32_dmaregs_s dmaregs[DMA_NSAMPLES];
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI_REGDEBUG
+#ifdef CONFIG_STM32_QSPI_REGDEBUG
   bool     wrlast;              /* Last was a write */
   uint32_t addresslast;         /* Last address */
   uint32_t valuelast;           /* Last value */
@@ -240,7 +240,7 @@ struct qspi_xctnspec_s
 
   uint8_t isddr;          /* true if 'double data rate' */
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   uint8_t function;       /* functional mode; to distinguish a read or write */
   int8_t disposition;     /* how it all turned out */
   uint32_t idxnow;        /* index into databuffer of current byte in transfer */
@@ -253,7 +253,7 @@ struct qspi_xctnspec_s
 
 /* Helpers */
 
-#ifdef CONFIG_STM32H5_QSPI_REGDEBUG
+#ifdef CONFIG_STM32_QSPI_REGDEBUG
 static bool     qspi_checkreg(struct stm32_qspidev_s *priv, bool wr,
                   uint32_t value, uint32_t address);
 #else
@@ -280,16 +280,16 @@ static void     qspi_dumpgpioconfig(const char *msg);
 
 /* Interrupts */
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
 static int     qspi0_interrupt(int irq, void *context, void *arg);
 
 #endif
 
 /* DMA support */
 
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
 
-#  ifdef CONFIG_STM32H5_QSPI_DMADEBUG
+#  ifdef CONFIG_STM32_QSPI_DMADEBUG
 #    define qspi_dma_sample(s,i) stm32_dmasample((s)->dmach, &(s)->dmaregs[i])
 static void     qspi_dma_sampleinit(struct stm32_qspidev_s *priv);
 static void     qspi_dma_sampledone(struct stm32_qspidev_s *priv);
@@ -299,8 +299,8 @@ static void     qspi_dma_sampledone(struct stm32_qspidev_s *priv);
 #    define qspi_dma_sampledone(s)
 #  endif
 
-#  ifndef CONFIG_STM32H5_QSPI_DMATHRESHOLD
-#    define CONFIG_STM32H5_QSPI_DMATHRESHOLD 4
+#  ifndef CONFIG_STM32_QSPI_DMATHRESHOLD
+#    define CONFIG_STM32_QSPI_DMATHRESHOLD 4
 #  endif
 
 #endif
@@ -354,13 +354,13 @@ static struct stm32_qspidev_s g_qspi0dev =
   },
   .base              = STM32_OCTOSPI1_BASE,
   .lock              = NXMUTEX_INITIALIZER,
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   .handler           = qspi0_interrupt,
   .irq               = STM32_IRQ_OCTOSPI1,
   .op_sem            = SEM_INITIALIZER(0),
 #endif
   .intf              = 0,
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
   .candma            = true,
   .dmawait           = SEM_INITIALIZER(0),
 #endif
@@ -386,7 +386,7 @@ static struct stm32_qspidev_s g_qspi0dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_QSPI_REGDEBUG
+#ifdef CONFIG_STM32_QSPI_REGDEBUG
 static bool qspi_checkreg(struct stm32_qspidev_s *priv, bool wr,
                           uint32_t value, uint32_t address)
 {
@@ -438,7 +438,7 @@ static inline uint32_t qspi_getreg(struct stm32_qspidev_s *priv,
   uint32_t address = priv->base + offset;
   uint32_t value = getreg32(address);
 
-#ifdef CONFIG_STM32H5_QSPI_REGDEBUG
+#ifdef CONFIG_STM32_QSPI_REGDEBUG
   if (qspi_checkreg(priv, false, value, address))
     {
       spiinfo("%08" PRIx32 "->%08" PRIx32 "\n", address, value);
@@ -461,7 +461,7 @@ static inline void qspi_putreg(struct stm32_qspidev_s *priv,
 {
   uint32_t address = priv->base + offset;
 
-#ifdef CONFIG_STM32H5_QSPI_REGDEBUG
+#ifdef CONFIG_STM32_QSPI_REGDEBUG
   if (qspi_checkreg(priv, true, value, address))
     {
       spiinfo("%08" PRIx32 "<-%08" PRIx32 "\n", address, value);
@@ -583,7 +583,7 @@ static void qspi_dumpgpioconfig(const char *msg)
 }
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI_DMADEBUG
+#ifdef CONFIG_STM32_QSPI_DMADEBUG
 /****************************************************************************
  * Name: qspi_dma_sampleinit
  *
@@ -797,7 +797,7 @@ static int qspi_setupxctnfromcmd(struct qspi_xctnspec_s *xctn,
       xctn->isddr = 0;
     }
 
-#if defined(CONFIG_STM32H5_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32_QSPI_INTERRUPTS)
   xctn->function = QSPICMD_ISWRITE(cmdinfo->flags) ? CR_FMODE_INDWR :
                                                      CR_FMODE_INDRD;
   xctn->disposition = - EIO;
@@ -921,8 +921,15 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
     {
       xctn->datamode = CCR_DMODE_DUAL;
     }
-  else if (QSPIMEM_ISQUADIO(meminfo->flags))
+  else if (QSPIMEM_ISQUADIO(meminfo->flags) ||
+           QSPIMEM_ISQUADDATA(meminfo->flags))
     {
+      /* QUADDATA selects quad data width while leaving the address phase
+       * single-line (1-1-4), which QUADIO cannot express. The address-mode
+       * block above intentionally ignores QUADDATA, so addrmode stays
+       * single.
+       */
+
       xctn->datamode = CCR_DMODE_QUAD;
     }
   else
@@ -936,7 +943,7 @@ static int qspi_setupxctnfrommem(struct qspi_xctnspec_s *xctn,
 
   xctn->isddr = 0;
 
-#if defined(CONFIG_STM32H5_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32_QSPI_INTERRUPTS)
   xctn->function = QSPIMEM_ISWRITE(meminfo->flags) ? CR_FMODE_INDWR :
                                                      CR_FMODE_INDRD;
   xctn->disposition = - EIO;
@@ -1075,7 +1082,7 @@ static void qspi_ccrconfig(struct stm32_qspidev_s *priv,
     }
 }
 
-#if defined(CONFIG_STM32H5_QSPI_INTERRUPTS)
+#if defined(CONFIG_STM32_QSPI_INTERRUPTS)
 /****************************************************************************
  * Name: qspi0_interrupt
  *
@@ -1298,7 +1305,7 @@ static int qspi0_interrupt(int irq, void *context, void *arg)
   return OK;
 }
 
-#elif defined(CONFIG_STM32H5_QSPI_DMA)
+#elif defined(CONFIG_STM32_QSPI_DMA)
 /****************************************************************************
  * Name: qspi_dma_timeout
  *
@@ -1571,7 +1578,7 @@ static int qspi_memory_dma(struct stm32_qspidev_s *priv,
 }
 #endif
 
-#if !defined(CONFIG_STM32H5_QSPI_INTERRUPTS)
+#if !defined(CONFIG_STM32_QSPI_INTERRUPTS)
 /****************************************************************************
  * Name: qspi_receive_blocking
  *
@@ -2017,7 +2024,7 @@ static int qspi_command(struct qspi_dev_s *dev,
               QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
               STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   /* interrupt mode will need access to the transaction context */
 
   priv->xctn = &xctn;
@@ -2198,7 +2205,7 @@ static int qspi_memory(struct qspi_dev_s *dev,
               QSPI_FCR_CTEF | QSPI_FCR_CTCF | QSPI_FCR_CSMF | QSPI_FCR_CTOF,
               STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   /* interrupt mode will need access to the transaction context */
 
   priv->xctn = &xctn;
@@ -2257,11 +2264,11 @@ static int qspi_memory(struct qspi_dev_s *dev,
 
   ret = xctn.disposition;
 
-#elif defined(CONFIG_STM32H5_QSPI_DMA)
+#elif defined(CONFIG_STM32_QSPI_DMA)
   /* Can we perform DMA?  Should we perform DMA? */
 
   if (priv->candma &&
-      meminfo->buflen > CONFIG_STM32H5_QSPI_DMATHRESHOLD &&
+      meminfo->buflen > CONFIG_STM32_QSPI_DMATHRESHOLD &&
       IS_ALIGNED((uintptr_t)meminfo->buffer, 4) &&
       IS_ALIGNED(meminfo->buflen, 4))
     {
@@ -2423,18 +2430,18 @@ static int qspi_hw_initialize(struct stm32_qspidev_s *priv)
   regval &= ~(QSPI_CR_TEIE | QSPI_CR_TCIE | QSPI_CR_FTIE | QSPI_CR_SMIE |
               QSPI_CR_TOIE | QSPI_CR_MSEL | QSPI_CR_DMM);
 
-#if defined(CONFIG_STM32H5_QSPI_MODE_BANK2)
+#if defined(CONFIG_STM32_QSPI_MODE_BANK2)
   regval |= QSPI_CR_MSEL;
 #endif
 
-#if defined(CONFIG_STM32H5_QSPI_MODE_DUAL)
+#if defined(CONFIG_STM32_QSPI_MODE_DUAL)
   regval |= QSPI_CR_DMM;
 #endif
 
   /* Configure QSPI FIFO Threshold */
 
   regval &= ~(QSPI_CR_FTHRES_MASK);
-  regval |= ((CONFIG_STM32H5_QSPI_FIFO_THESHOLD - 1) <<
+  regval |= ((CONFIG_STM32_QSPI_FIFO_THESHOLD - 1) <<
     QSPI_CR_FTHRES_SHIFT);
   qspi_putreg(priv, regval, STM32_QUADSPI_CR_OFFSET);
 
@@ -2460,10 +2467,10 @@ static int qspi_hw_initialize(struct stm32_qspidev_s *priv)
               QSPI_DCR1_CSHT_MASK |
               QSPI_DCR1_DEVSIZE_MASK);
 
-  regval |= ((CONFIG_STM32H5_QSPI_CSHT - 1) << QSPI_DCR1_CSHT_SHIFT);
-  if (0 != CONFIG_STM32H5_QSPI_FLASH_SIZE)
+  regval |= ((CONFIG_STM32_QSPI_CSHT - 1) << QSPI_DCR1_CSHT_SHIFT);
+  if (0 != CONFIG_STM32_QSPI_FLASH_SIZE)
     {
-      unsigned int nsize = CONFIG_STM32H5_QSPI_FLASH_SIZE;
+      unsigned int nsize = CONFIG_STM32_QSPI_FLASH_SIZE;
       int nlog2size = 31;
 
       while ((nsize & 0x80000000) == 0)
@@ -2569,7 +2576,7 @@ struct qspi_dev_s *stm32_qspi_initialize(int intf)
     {
       /* Now perform one time initialization. */
 
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
       /* Pre-allocate DMA channels. */
 
       if (priv->candma)
@@ -2583,7 +2590,7 @@ struct qspi_dev_s *stm32_qspi_initialize(int intf)
         }
 #endif
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
       /* Attach the interrupt handler */
 
       ret = irq_attach(priv->irq, priv->handler, NULL);
@@ -2609,7 +2616,7 @@ struct qspi_dev_s *stm32_qspi_initialize(int intf)
 
       priv->initialized = true;
       priv->memmap = false;
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
       up_enable_irq(priv->irq);
 #endif
     }
@@ -2617,12 +2624,12 @@ struct qspi_dev_s *stm32_qspi_initialize(int intf)
   return &priv->qspi;
 
 errout_with_irq:
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   irq_detach(priv->irq);
 
 errout_with_dmach:
 #endif
-#ifdef CONFIG_STM32H5_QSPI_DMA
+#ifdef CONFIG_STM32_QSPI_DMA
   if (priv->dmach)
     {
       stm32_dmafree(priv->dmach);
@@ -2688,7 +2695,7 @@ void stm32_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 
       qspi_putreg(&g_qspi0dev, QSPI_FCR_CTOF, STM32_QUADSPI_FCR_OFFSET);
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
       /* Enable Timeout interrupt */
 
       regval  = qspi_getreg(priv, STM32_QUADSPI_CR_OFFSET);
@@ -2707,7 +2714,7 @@ void stm32_qspi_enter_memorymapped(struct qspi_dev_s *dev,
 
   qspi_setupxctnfrommem(&xctn, meminfo);
 
-#ifdef CONFIG_STM32H5_QSPI_INTERRUPTS
+#ifdef CONFIG_STM32_QSPI_INTERRUPTS
   priv->xctn = NULL;
 #endif
 
@@ -2753,4 +2760,4 @@ void stm32_qspi_exit_memorymapped(struct qspi_dev_s *dev)
   qspi_lock(dev, false);
 }
 
-#endif /* CONFIG_STM32H5_QSPI */
+#endif /* CONFIG_STM32_QSPI */

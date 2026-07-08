@@ -354,6 +354,11 @@ pid_t   getpgid(pid_t pid);
 pid_t   getpgrp(void);
 pid_t   gettid(void);
 pid_t   getppid(void);
+pid_t   getsid(pid_t pid);
+int     setpgid(pid_t pid, pid_t pgid);
+pid_t   setsid(void);
+pid_t   tcgetpgrp(int fd);
+int     tcsetpgrp(int fd, pid_t pgrp);
 void    _exit(int status) noreturn_function;
 unsigned int sleep(unsigned int seconds);
 int     usleep(useconds_t usec);
@@ -488,6 +493,8 @@ gid_t   getegid(void);
 
 int     setreuid(uid_t ruid, uid_t euid);
 int     setregid(gid_t rgid, gid_t egid);
+
+int     getgroups(int, gid_t[]);
 
 int     getentropy(FAR void *buffer, size_t length);
 

@@ -70,10 +70,10 @@ extern "C"
  *
  ****************************************************************************/
 
-bool stm32l4_pwr_enableclk(bool enable);
+bool stm32_pwr_enableclk(bool enable);
 
 /****************************************************************************
- * Name: stm32l4_pwr_enablebkp
+ * Name: stm32_pwr_enablebkp
  *
  * Description:
  *   Enables access to the backup domain (RTC registers, RTC backup data
@@ -87,10 +87,10 @@ bool stm32l4_pwr_enableclk(bool enable);
  *
  ****************************************************************************/
 
-bool stm32l4_pwr_enablebkp(bool writable);
+bool stm32_pwr_enablebkp(bool writable);
 
 /****************************************************************************
- * Name: stm32l4_pwr_enableusv
+ * Name: stm32_pwr_enableusv
  *
  * Description:
  *   Enables or disables the USB Supply Valid monitoring.  Setting this bit
@@ -105,10 +105,10 @@ bool stm32l4_pwr_enablebkp(bool writable);
  *
  ****************************************************************************/
 
-bool stm32l4_pwr_enableusv(bool set);
+bool stm32_pwr_enableusv(bool set);
 
 /****************************************************************************
- * Name: stm32l4_pwr_enable_pvme2
+ * Name: stm32_pwr_enable_pvme2
  *
  * Description:
  *   Enables or disables the peripheral voltage monitoring for Vddio2.
@@ -121,12 +121,12 @@ bool stm32l4_pwr_enableusv(bool set);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
-bool stm32l4_pwr_enable_pvme2(bool set);
+#if !defined(CONFIG_STM32_STM32L4X3)
+bool stm32_pwr_enable_pvme2(bool set);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_pwr_get_pvmo2
+ * Name: stm32_pwr_get_pvmo2
  *
  * Description:
  *   Get value of peripheral voltage monitor output 2 (Vddio2).
@@ -137,12 +137,12 @@ bool stm32l4_pwr_enable_pvme2(bool set);
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
-bool stm32l4_pwr_get_pvmo2(void);
+#if !defined(CONFIG_STM32_STM32L4X3)
+bool stm32_pwr_get_pvmo2(void);
 #endif
 
 /****************************************************************************
- * Name: stm32l4_pwr_vddio2_valid
+ * Name: stm32_pwr_vddio2_valid
  *
  * Description:
  *   Report that the Vddio2 independent I/Os supply voltage is valid or not.
@@ -156,8 +156,8 @@ bool stm32l4_pwr_get_pvmo2(void);
  *   True: The bit was previously set.
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32L4_STM32L4X3)
-bool stm32l4_pwr_vddio2_valid(bool set);
+#if !defined(CONFIG_STM32_STM32L4X3)
+bool stm32_pwr_vddio2_valid(bool set);
 #endif
 
 /****************************************************************************

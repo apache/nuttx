@@ -34,7 +34,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32wb.h"
+#include "stm32.h"
 #include "nucleo-wb55rg.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -51,9 +51,9 @@ void board_autoled_initialize(void)
 {
   /* Configure LEDs GPIO for output. Initial state is OFF */
 
-  stm32wb_configgpio(GPIO_LED1);
-  stm32wb_configgpio(GPIO_LED2);
-  stm32wb_configgpio(GPIO_LED3);
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
 }
 
 /****************************************************************************
@@ -68,15 +68,15 @@ void board_autoled_on(int led)
         break;
 
       case BOARD_LED1:
-        stm32wb_gpiowrite(GPIO_LED1, true);
+        stm32_gpiowrite(GPIO_LED1, true);
         break;
 
       case BOARD_LED2:
-        stm32wb_gpiowrite(GPIO_LED2, true);
+        stm32_gpiowrite(GPIO_LED2, true);
         break;
 
       case BOARD_LED3:
-        stm32wb_gpiowrite(GPIO_LED3, true);
+        stm32_gpiowrite(GPIO_LED3, true);
         break;
     }
 }
@@ -93,15 +93,15 @@ void board_autoled_off(int led)
         break;
 
       case BOARD_LED1:
-        stm32wb_gpiowrite(GPIO_LED1, false);
+        stm32_gpiowrite(GPIO_LED1, false);
         break;
 
       case BOARD_LED2:
-        stm32wb_gpiowrite(GPIO_LED2, false);
+        stm32_gpiowrite(GPIO_LED2, false);
         break;
 
       case BOARD_LED3:
-        stm32wb_gpiowrite(GPIO_LED3, false);
+        stm32_gpiowrite(GPIO_LED3, false);
         break;
     }
 }

@@ -34,16 +34,16 @@ ifeq ($(CONFIG_AUDIO_CS4344),y)
   CSRCS += stm32_cs4344.c
 endif
 
-ifeq ($(CONFIG_STM32F7_CAN),y)
-ifeq ($(CONFIG_STM32F7_CAN_CHARDRIVER),y)
+ifeq ($(CONFIG_STM32_CAN),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CSRCS += stm32_can_setup.c
 endif
-ifeq ($(CONFIG_STM32F7_CAN_SOCKET),y)
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
 CSRCS += stm32_cansock_setup.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32F7_ROMFS),y)
+ifeq ($(CONFIG_STM32_ROMFS),y)
 CSRCS += stm32_romfs_initialize.c
 endif
 
@@ -51,7 +51,7 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += stm32_reset.c
 endif
 
-ifeq ($(CONFIG_STM32F7_SPI_TEST),y)
+ifeq ($(CONFIG_STM32_SPI_TEST),y)
 CSRCS += stm32_spitest.c
 endif
 

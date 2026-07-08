@@ -51,29 +51,29 @@ extern "C"
 #endif
 
 #if defined(CONFIG_ARCH_CHIP_STM32H7_CORTEXM7) && \
-    defined(CONFIG_STM32H7_CORTEXM4_ENABLED)
+    defined(CONFIG_STM32_CORTEXM4_ENABLED)
 
 /****************************************************************************
- * Name: stm32h7_start_cm4
+ * Name: stm32_start_cm4
  *
  * Description:
  *   Start CM4 core
  *
  ****************************************************************************/
 
-void stm32h7_start_cm4(void);
+void stm32_start_cm4(void);
 #endif
 
 #ifdef CONFIG_ARCH_CHIP_STM32H7_CORTEXM4
 /****************************************************************************
- * Name: stm32h7_waitfor_cm7
+ * Name: stm32_waitfor_cm7
  *
  * Description:
  *   Wait for CM7 core initialization
  *
  ****************************************************************************/
 
-void stm32h7_waitfor_cm7(void);
+void stm32_waitfor_cm7(void);
 #endif
 
 #undef EXTERN

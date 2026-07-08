@@ -194,7 +194,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  * Name: stm32_dmacapable
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 bool stm32_dmacapable(DMA_HANDLE handle, stm32_dmacfg_t *cfg);
 #else
 #  define stm32_dmacapable(handle, cfg) (true)

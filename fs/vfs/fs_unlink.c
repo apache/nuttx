@@ -121,6 +121,14 @@ int nx_unlink(FAR const char *pathname)
           goto errout_with_inode;
         }
 
+      /* Verify parent-directory write permission before unlink. */
+
+      ret = inode_checkperm(desc.parent, W_OK);
+      if (ret < 0)
+        {
+          goto errout_with_inode;
+        }
+
       /* Notify the driver that it has been unlinked.  If there are no
        * open references to the driver instance, then the driver should
        * release all resources because it is no longer accessible.

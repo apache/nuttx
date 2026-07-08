@@ -31,7 +31,7 @@
 #include <nuttx/compiler.h>
 
 #include <stdint.h>
-#include <stm32wl5.h>
+#include <stm32.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -148,24 +148,24 @@
 void board_leds_initialize(void);
 
 /****************************************************************************
- * Name: stm32wl5_flash_init
+ * Name: stm32_flash_init
  *
  * Description:
  *   Initialize on-board FLASH partition table
  *
  ****************************************************************************/
 
-int stm32wl5_flash_init(void);
+int stm32_flash_init(void);
 
 /****************************************************************************
- * Name: stm32wl5_spidev_initialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Initialize SPIs
  *
  ****************************************************************************/
 
-void stm32wl5_spidev_initialize(void);
+void stm32_spidev_initialize(void);
 
 /****************************************************************************
  * Name: ipcc_init

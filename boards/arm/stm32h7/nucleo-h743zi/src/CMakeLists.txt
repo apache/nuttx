@@ -40,11 +40,11 @@ if(CONFIG_STM32_ROMFS)
   list(APPEND SRCS stm32_romfs_initialize.c)
 endif()
 
-if(CONFIG_STM32H7_SPI)
+if(CONFIG_STM32_SPI)
   list(APPEND SRCS stm32_spi.c)
 endif()
 
-if(CONFIG_STM32H7_OTGFS)
+if(CONFIG_STM32_OTGFS)
   list(APPEND SRCS stm32_usb.c)
 endif()
 
@@ -72,7 +72,7 @@ if(CONFIG_LCD_SSD1306)
   list(APPEND SRCS stm32_ssd1306.c)
 endif()
 
-if(CONFIG_STM32H7_PROGMEM)
+if(CONFIG_STM32_PROGMEM)
   list(APPEND SRCS stm32_progmem.c)
 endif()
 

@@ -47,7 +47,7 @@
 #  include "stm32_rtc.h"
 #endif
 
-#ifdef CONFIG_STM32H7_FDCAN
+#ifdef CONFIG_STM32_FDCAN
 #include "stm32_fdcan_sock.h"
 #endif
 
@@ -132,10 +132,10 @@ static void stm32_i2c_register(int bus)
 #if defined(CONFIG_I2C) && defined(CONFIG_SYSTEM_I2CTOOL)
 static void stm32_i2ctool(void)
 {
-#ifdef CONFIG_STM32H7_I2C3
+#ifdef CONFIG_STM32_I2C3
   stm32_i2c_register(3);
 #endif
-#ifdef CONFIG_STM32H7_I2C4
+#ifdef CONFIG_STM32_I2C4
   stm32_i2c_register(4);
 #endif
 }
@@ -166,7 +166,7 @@ int stm32_bringup(void)
   struct rtc_lowerhalf_s *lower;
 #endif
 
-#ifdef CONFIG_STM32H7_RMII
+#ifdef CONFIG_STM32_RMII
   /* Reset Ethernet PHY */
 
   stm32_configgpio(GPIO_ETH_RESET);
@@ -289,7 +289,7 @@ int stm32_bringup(void)
 
 #ifdef CONFIG_NETDEV_LATEINIT
 
-#  ifdef CONFIG_STM32H7_FDCAN1
+#  ifdef CONFIG_STM32_FDCAN1
 
   /* Enable and configure CAN1 */
 
@@ -298,7 +298,7 @@ int stm32_bringup(void)
   stm32_fdcansockinitialize(0);
 #  endif
 
-#  ifdef CONFIG_STM32H7_FDCAN2
+#  ifdef CONFIG_STM32_FDCAN2
 
   /* Enable and configure CAN2 */
 

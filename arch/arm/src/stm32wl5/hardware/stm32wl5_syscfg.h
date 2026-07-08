@@ -36,43 +36,43 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WL5_SYSCFG_MEMRMP_OFFSET    0x0000 /* SYSCFG memory remap register */
-#define STM32WL5_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
+#define STM32_SYSCFG_MEMRMP_OFFSET    0x0000 /* SYSCFG memory remap register */
+#define STM32_SYSCFG_CFGR1_OFFSET     0x0004 /* SYSCFG configuration register 1 */
 
-#define STM32WL5_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
+#define STM32_SYSCFG_EXTICR_OFFSET(p) (0x0008 + ((p) & 0x000c)) /* Registers are displaced by 4! */
 
-#define STM32WL5_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
-#define STM32WL5_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
-#define STM32WL5_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
-#define STM32WL5_SYSCFG_EXTICR4_OFFSET   0x0014 /* SYSCFG external interrupt configuration register 4 */
-#define STM32WL5_SYSCFG_SCSR_OFFSET      0x0018 /* SYSCFG SRAM2 control and status register */
-#define STM32WL5_SYSCFG_CFGR2_OFFSET     0x001c /* SYSCFG configuration register 2 */
-#define STM32WL5_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
-#define STM32WL5_SYSCFG_SKR_OFFSET       0x0024 /* SYSCFG SRAM2 key register */
-#define STM32WL5_SYSCFG_IMR1_OFFSET      0x0100 /* SYSCFG cpu1 interrupt mask register 1 */
-#define STM32WL5_SYSCFG_IMR2_OFFSET      0x0104 /* SYSCFG cpu1 interrupt mask register 2 */
-#define STM32WL5_SYSCFG_C2IMR1_OFFSET    0x0108 /* SYSCFG cpu2 interrupt mask register 1 */
-#define STM32WL5_SYSCFG_C2IMR2_OFFSET    0x010c /* SYSCFG cpu2 interrupt mask register 2 */
-#define STM32WL5_SYSCFG_RFDCR_OFFSET     0x0208 /* SYSCFG radio debug control register */
+#define STM32_SYSCFG_EXTICR1_OFFSET   0x0008 /* SYSCFG external interrupt configuration register 1 */
+#define STM32_SYSCFG_EXTICR2_OFFSET   0x000c /* SYSCFG external interrupt configuration register 2 */
+#define STM32_SYSCFG_EXTICR3_OFFSET   0x0010 /* SYSCFG external interrupt configuration register 3 */
+#define STM32_SYSCFG_EXTICR4_OFFSET   0x0014 /* SYSCFG external interrupt configuration register 4 */
+#define STM32_SYSCFG_SCSR_OFFSET      0x0018 /* SYSCFG SRAM2 control and status register */
+#define STM32_SYSCFG_CFGR2_OFFSET     0x001c /* SYSCFG configuration register 2 */
+#define STM32_SYSCFG_SWPR_OFFSET      0x0020 /* SYSCFG SRAM2 write protection register */
+#define STM32_SYSCFG_SKR_OFFSET       0x0024 /* SYSCFG SRAM2 key register */
+#define STM32_SYSCFG_IMR1_OFFSET      0x0100 /* SYSCFG cpu1 interrupt mask register 1 */
+#define STM32_SYSCFG_IMR2_OFFSET      0x0104 /* SYSCFG cpu1 interrupt mask register 2 */
+#define STM32_SYSCFG_C2IMR1_OFFSET    0x0108 /* SYSCFG cpu2 interrupt mask register 1 */
+#define STM32_SYSCFG_C2IMR2_OFFSET    0x010c /* SYSCFG cpu2 interrupt mask register 2 */
+#define STM32_SYSCFG_RFDCR_OFFSET     0x0208 /* SYSCFG radio debug control register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32WL5_SYSCFG_MEMRMP          (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_MEMRMP_OFFSET)
-#define STM32WL5_SYSCFG_CFGR1           (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_CFGR1_OFFSET)
-#define STM32WL5_SYSCFG_EXTICR(p)       (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_EXTICR_OFFSET(p))
-#define STM32WL5_SYSCFG_EXTICR1         (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_EXTICR1)
-#define STM32WL5_SYSCFG_EXTICR2         (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_EXTICR2)
-#define STM32WL5_SYSCFG_EXTICR3         (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_EXTICR3)
-#define STM32WL5_SYSCFG_EXTICR4         (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_EXTICR4)
-#define STM32WL5_SYSCFG_SCSR            (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_SCSR)
-#define STM32WL5_SYSCFG_CFGR2           (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_CFGR2)
-#define STM32WL5_SYSCFG_SWPR            (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_SWPR)
-#define STM32WL5_SYSCFG_SKR             (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_SKR)
-#define STM32WL5_SYSCFG_IMR1            (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_IMR1)
-#define STM32WL5_SYSCFG_IMR2            (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_IMR2)
-#define STM32WL5_SYSCFG_C2IMR1          (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_C2IMR1)
-#define STM32WL5_SYSCFG_C2IMR2          (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_C2IMR2)
-#define STM32WL5_SYSCFG_RFDCR           (STM32WL5_SYSCFG_BASE+STM32WL5_SYSCFG_RFDCR)
+#define STM32_SYSCFG_MEMRMP          (STM32_SYSCFG_BASE+STM32_SYSCFG_MEMRMP_OFFSET)
+#define STM32_SYSCFG_CFGR1           (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR1_OFFSET)
+#define STM32_SYSCFG_EXTICR(p)       (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR_OFFSET(p))
+#define STM32_SYSCFG_EXTICR1         (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR1)
+#define STM32_SYSCFG_EXTICR2         (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR2)
+#define STM32_SYSCFG_EXTICR3         (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR3)
+#define STM32_SYSCFG_EXTICR4         (STM32_SYSCFG_BASE+STM32_SYSCFG_EXTICR4)
+#define STM32_SYSCFG_SCSR            (STM32_SYSCFG_BASE+STM32_SYSCFG_SCSR)
+#define STM32_SYSCFG_CFGR2           (STM32_SYSCFG_BASE+STM32_SYSCFG_CFGR2)
+#define STM32_SYSCFG_SWPR            (STM32_SYSCFG_BASE+STM32_SYSCFG_SWPR)
+#define STM32_SYSCFG_SKR             (STM32_SYSCFG_BASE+STM32_SYSCFG_SKR)
+#define STM32_SYSCFG_IMR1            (STM32_SYSCFG_BASE+STM32_SYSCFG_IMR1)
+#define STM32_SYSCFG_IMR2            (STM32_SYSCFG_BASE+STM32_SYSCFG_IMR2)
+#define STM32_SYSCFG_C2IMR1          (STM32_SYSCFG_BASE+STM32_SYSCFG_C2IMR1)
+#define STM32_SYSCFG_C2IMR2          (STM32_SYSCFG_BASE+STM32_SYSCFG_C2IMR2)
+#define STM32_SYSCFG_RFDCR           (STM32_SYSCFG_BASE+STM32_SYSCFG_RFDCR)
 
 /* Register Bitfield Definitions ********************************************/
 

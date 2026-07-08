@@ -68,7 +68,7 @@ specified by several settings in the NuttX configuration file.
    sub-directories and are discussed in a paragraph
    `below <#boards-subdirectory-structure>`__.
 
-   The directory ``boards/arm/stm32/stm32f4disovery/``, as an
+   The directory ``boards/arm/stm32f4/stm32f4discovery/``, as an
    example, holds board-specific logic for the STM32F4 Discovery
    board and is selected via the
    ``CONFIG_ARCH_BOARD="stm32f4discovery"`` configuration setting.
@@ -193,7 +193,15 @@ For details see :doc:`/components/openamp`.
 ``nuttx/pass1``
 ===============
 
-TODO
+This directory provides support for the two-pass build
+(``CONFIG_BUILD_2PASS=y``). In a two-pass build, the application logic
+is built during pass 1 and the operating system kernel during pass 2.
+Applications may generate and install source files into this directory
+during pass 1; those files are then compiled and linked into the kernel
+address space during pass 2.
+
+The primary use of this mechanism is to generate kernel symbol tables
+required for loadable kernel module support.
 
 ``nuttx/sched``
 ===============

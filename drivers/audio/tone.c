@@ -86,6 +86,7 @@ struct tone_upperhalf_s
   uint8_t channel;                     /* Output channel that drives the tone. */
   volatile bool started;               /* True: pulsed output is being generated */
   mutex_t lock;                        /* Supports mutual exclusion */
+  sem_t  busysem;                      /* Don't accept new writes if busy */
   struct pwm_info_s tone;              /* Pulsed output for Audio Tone */
   struct pwm_lowerhalf_s *devtone;
   struct oneshot_lowerhalf_s *oneshot;
@@ -665,6 +666,10 @@ tune_end:
   else
     {
       g_tune = NULL;
+
+      /* Now the user can play again */
+
+      nxsem_post(&upper->busysem);
     }
 }
 
@@ -860,6 +865,7 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct tone_upperhalf_s *upper = inode->i_private;
+  int ret;
 
   /* We need to receive a string #RRGGBB = 7 bytes */
 
@@ -875,6 +881,15 @@ static ssize_t tone_write(FAR struct file *filep, FAR const char *buffer,
       /* Too big to it inside internal buffer (with extra NUL terminator) */
 
       return -EINVAL;
+    }
+
+  /* If it is playing, then ignore new write attempts */
+
+  ret = nxsem_wait_uninterruptible(&upper->busysem);
+  if (ret < 0)
+    {
+      auderr("ERROR: Audio Tone is already playing, try again later!\n");
+      return -EAGAIN;
     }
 
   /* Copy music to internal buffer */
@@ -940,6 +955,7 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
    */
 
   nxmutex_init(&upper->lock);
+  nxsem_init(&upper->busysem, 0, 1);
   upper->devtone = tone;
   upper->oneshot = oneshot;
   upper->channel = (uint8_t)channel;

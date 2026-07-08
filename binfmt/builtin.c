@@ -34,6 +34,8 @@
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/lib/builtin.h>
 
+#include "binfmt.h"
+
 #ifdef CONFIG_BUILTIN
 
 /****************************************************************************
@@ -76,6 +78,9 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   FAR const struct builtin_s *builtin;
   FAR char *name;
   int index;
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  int chk;
+#endif
 
   binfo("Loading file: %s\n", filename);
 
@@ -105,14 +110,21 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
       return -ENOENT;
     }
 
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  binp->uid  = builtin->uid;
+  binp->gid  = builtin->gid;
+  binp->mode = builtin->mode;
+
+  chk = binfmt_checkexecperm(binp);
+  if (chk < 0)
+    {
+      return chk;
+    }
+#endif
+
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  binp->uid       = builtin->uid;
-  binp->gid       = builtin->gid;
-  binp->mode      = builtin->mode;
-#endif
 
   return OK;
 }

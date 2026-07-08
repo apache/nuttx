@@ -40,7 +40,7 @@
 #include <nuttx/mmcsd.h>
 #include <nuttx/leds/userled.h>
 
-#include <stm32l4.h>
+#include <stm32.h>
 #include <stm32l4_uart.h>
 #include <stm32l4_i2c.h>
 
@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 #undef HAVE_I2C_DRIVER
-#if (defined(CONFIG_STM32L4_I2C1) || defined(CONFIG_STM32L4_I2C3)) && defined(CONFIG_I2C_DRIVER)
+#if (defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C3)) && defined(CONFIG_I2C_DRIVER)
 #  define HAVE_I2C_DRIVER 1
 #endif
 
@@ -82,10 +82,10 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   struct rtc_lowerhalf_s *rtclower;
 #endif
-#ifdef CONFIG_STM32L4_I2C1
+#ifdef CONFIG_STM32_I2C1
   struct i2c_master_s *i2c1;
 #endif
-#ifdef CONFIG_STM32L4_I2C3
+#ifdef CONFIG_STM32_I2C3
   struct i2c_master_s *i2c3;
 #endif
 #ifdef CONFIG_SENSORS_QENCODER
@@ -119,7 +119,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_DEV_GPIO
-  ret = stm32l4_gpio_initialize();
+  ret = stm32_gpio_initialize();
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
@@ -130,7 +130,7 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32L4 lower-half RTC driver */
 
-  rtclower = stm32l4_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
@@ -151,10 +151,10 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_I2C1
+#ifdef CONFIG_STM32_I2C1
   /* Get the I2C lower half instance */
 
-  i2c1 = stm32l4_i2cbus_initialize(1);
+  i2c1 = stm32_i2cbus_initialize(1);
   if (i2c1 == NULL)
     {
       i2cerr("ERROR: Initialize I2C1: %d\n", ret);
@@ -171,10 +171,10 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_I2C3
+#ifdef CONFIG_STM32_I2C3
   /* Get the I2C lower half instance */
 
-  i2c3 = stm32l4_i2cbus_initialize(3);
+  i2c3 = stm32_i2cbus_initialize(3);
   if (i2c3 == NULL)
     {
       i2cerr("ERROR: Initialize I2C3: %d\n", ret);
@@ -192,7 +192,7 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_SPI_DRIVER
-  stm32l4_spiregister();
+  stm32_spiregister();
   /* If called it during board_init,
    * registering failed due to heap doesn't be initialized yet.
    */
@@ -213,30 +213,30 @@ int stm32_bringup(void)
 #ifdef CONFIG_PWM
   /* Initialize PWM and register the PWM device. */
 
-  ret = stm32l4_pwm_setup();
+  ret = stm32_pwm_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_pwm_setup() failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_pwm_setup() failed: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_STM32L4_ADC
+#ifdef CONFIG_STM32_ADC
   /* Initialize ADC and register the ADC driver. */
 
-  ret = stm32l4_adc_setup();
+  ret = stm32_adc_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_adc_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_STM32L4_DAC
+#ifdef CONFIG_STM32_DAC
   /* Initialize DAC and register the DAC driver. */
 
-  ret = stm32l4_dac_setup();
+  ret = stm32_dac_setup();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: stm32l4_dac_setup failed: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: stm32_dac_setup failed: %d\n", ret);
     }
 #endif
 
@@ -298,9 +298,9 @@ int stm32_bringup(void)
 
   index = 0;
 
-#ifdef CONFIG_STM32L4_TIM1_QE
+#ifdef CONFIG_STM32_TIM1_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 1);
+  ret = stm32_qencoder_initialize(buf, 1);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -309,9 +309,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM2_QE
+#ifdef CONFIG_STM32_TIM2_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 2);
+  ret = stm32_qencoder_initialize(buf, 2);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -320,9 +320,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM3_QE
+#ifdef CONFIG_STM32_TIM3_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 3);
+  ret = stm32_qencoder_initialize(buf, 3);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -331,9 +331,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM4_QE
+#ifdef CONFIG_STM32_TIM4_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 4);
+  ret = stm32_qencoder_initialize(buf, 4);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -342,9 +342,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM5_QE
+#ifdef CONFIG_STM32_TIM5_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 5);
+  ret = stm32_qencoder_initialize(buf, 5);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",
@@ -353,9 +353,9 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_STM32L4_TIM8_QE
+#ifdef CONFIG_STM32_TIM8_QE
   snprintf(buf, sizeof(buf), "/dev/qe%d", index++);
-  ret = stm32l4_qencoder_initialize(buf, 8);
+  ret = stm32_qencoder_initialize(buf, 8);
   if (ret != OK)
     {
       syslog(LOG_ERR, "ERROR: Failed to register the qencoder: %d\n",

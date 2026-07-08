@@ -30,15 +30,15 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32H7_STM32H7X0XX)
+#if defined(CONFIG_STM32_STM32H7X0XX)
 #  include "hardware/stm32h7x3xx_memorymap.h"
-#elif defined(CONFIG_STM32H7_STM32H7X3XX)
+#elif defined(CONFIG_STM32_STM32H7X3XX)
 #  include "hardware/stm32h7x3xx_memorymap.h"
-#elif defined(CONFIG_STM32H7_STM32H7B3XX)
+#elif defined(CONFIG_STM32_STM32H7B3XX)
 #  include "hardware/stm32h7x3xx_memorymap.h"
-#elif defined(CONFIG_STM32H7_STM32H7X5XX)
+#elif defined(CONFIG_STM32_STM32H7X5XX)
 #  include "hardware/stm32h7x3xx_memorymap.h"
-#elif defined(CONFIG_STM32H7_STM32H7X7XX)
+#elif defined(CONFIG_STM32_STM32H7X7XX)
 #  include "hardware/stm32h7x3xx_memorymap.h"
 #else
 #  error "Unsupported STM32 H7 memory map"

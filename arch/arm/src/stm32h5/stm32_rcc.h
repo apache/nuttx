@@ -32,7 +32,7 @@
 #include "arm_internal.h"
 #include "chip.h"
 
-#if defined(CONFIG_STM32H5_STM32H5XXXX)
+#if defined(CONFIG_STM32_STM32H5XXXX)
 #  include "hardware/stm32_rcc.h"
 #else
 #  error "Unsupported STM32H5 chip"
@@ -126,7 +126,7 @@ static inline void stm32_mco2config(uint32_t source)
  *   and enable peripheral clocking for all periperipherals enabled in the
  *   NuttX configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -149,7 +149,7 @@ void stm32_clockconfig(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
+#ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_board_clockconfig(void);
 #endif
 
@@ -164,7 +164,7 @@ void stm32_board_clockconfig(void);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_stdclockconfig(void);
 #endif
 
@@ -181,7 +181,7 @@ void stm32_stdclockconfig(void);
  *   stm32_clockconfig():  It does not reset any devices, and it does not
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32H5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *

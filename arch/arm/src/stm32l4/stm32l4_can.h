@@ -42,39 +42,39 @@
 
 /* Up to 1 CAN interfaces are supported */
 
-#if STM32L4_NCAN < 1
-#  undef CONFIG_STM32L4_CAN1
+#if STM32_NCAN < 1
+#  undef CONFIG_STM32_CAN1
 #endif
 
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
 
 /* CAN BAUD */
 
-#if defined(CONFIG_STM32L4_CAN1) && !defined(CONFIG_STM32L4_CAN1_BAUD)
-#  error "CONFIG_STM32L4_CAN1_BAUD is not defined"
+#if defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN1_BAUD)
+#  error "CONFIG_STM32_CAN1_BAUD is not defined"
 #endif
 
 /* User-defined TSEG1 and TSEG2 settings may be used.
  *
- * CONFIG_STM32L4_CAN_TSEG1 = the number of CAN time quanta in segment 1
- * CONFIG_STM32L4_CAN_TSEG2 = the number of CAN time quanta in segment 2
+ * CONFIG_STM32_CAN_TSEG1 = the number of CAN time quanta in segment 1
+ * CONFIG_STM32_CAN_TSEG2 = the number of CAN time quanta in segment 2
  * CAN_BIT_QUANTA   = The number of CAN time quanta in on bit time
  */
 
-#ifndef CONFIG_STM32L4_CAN_TSEG1
-#  define CONFIG_STM32L4_CAN_TSEG1 6
+#ifndef CONFIG_STM32_CAN_TSEG1
+#  define CONFIG_STM32_CAN_TSEG1 6
 #endif
 
-#if CONFIG_STM32L4_CAN_TSEG1 < 1 || CONFIG_STM32L4_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
-#  error "CONFIG_STM32L4_CAN_TSEG1 is out of range"
+#if CONFIG_STM32_CAN_TSEG1 < 1 || CONFIG_STM32_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
+#  error "CONFIG_STM32_CAN_TSEG1 is out of range"
 #endif
 
-#ifndef CONFIG_STM32L4_CAN_TSEG2
-#  define CONFIG_STM32L4_CAN_TSEG2 7
+#ifndef CONFIG_STM32_CAN_TSEG2
+#  define CONFIG_STM32_CAN_TSEG2 7
 #endif
 
-#if CONFIG_STM32L4_CAN_TSEG2 < 1 || CONFIG_STM32L4_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
-#  error "CONFIG_STM32L4_CAN_TSEG2 is out of range"
+#if CONFIG_STM32_CAN_TSEG2 < 1 || CONFIG_STM32_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
+#  error "CONFIG_STM32_CAN_TSEG2 is out of range"
 #endif
 
 /****************************************************************************
@@ -101,7 +101,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4can_initialize
+ * Name: stm32_caninitialize
  *
  * Description:
  *   Initialize the selected CAN port
@@ -115,7 +115,7 @@ extern "C"
  ****************************************************************************/
 
 struct can_dev_s;
-struct can_dev_s *stm32l4can_initialize(int port);
+struct can_dev_s *stm32_caninitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -123,5 +123,5 @@ struct can_dev_s *stm32l4can_initialize(int port);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_CAN && CONFIG_STM32L4_CAN1 */
+#endif /* CONFIG_CAN && CONFIG_STM32_CAN1 */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_CAN_H */

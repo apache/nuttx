@@ -56,7 +56,7 @@
 #include "stm32_rcc.h"
 #include "stm32_sdmmc.h"
 
-#if defined(CONFIG_STM32H7_SDMMC1) || defined(CONFIG_STM32H7_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC1) || defined(CONFIG_STM32_SDMMC2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,14 +101,14 @@
  *   CONFIG_SDIO_MUXBUS - Setting this configuration enables some locking
  *     APIs to manage concurrent accesses on the SDMMC bus.  This is not
  *     needed for the simple case of a single SD card, for example.
- *   CONFIG_STM32H7_SDMMC_IDMA - Enable SDMMC IDMA.
+ *   CONFIG_STM32_SDMMC_IDMA - Enable SDMMC IDMA.
  *     DMA support for SDMMC. If disabled, the SDMMC will work in
  *     interrupt mode and still use the IDMA to a local buffer for data
  *     lengths less the 32 bytes due to the FIFO limitations.
  *   CONFIG_SDMMC1/2_WIDTH_D1_ONLY - This may be selected to force the driver
  *     operate with only a single data line (the default is to use all
  *     4 SD data lines).
- *   CONFIG_STM32H7_SDMMC_XFRDEBUG - Enables some very low-level debug
+ *   CONFIG_STM32_SDMMC_XFRDEBUG - Enables some very low-level debug
  *     output This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  *   CONFIG_SDMMC1/2_SDIO_MODE
  *     Build ins additional support needed only for SDIO cards (vs. SD memory
@@ -125,19 +125,19 @@
  * hence, if only SDMMC2 is defined it will be slot 0.
  */
 
-#if !defined(CONFIG_STM32H7_SDMMC1)
+#if !defined(CONFIG_STM32_SDMMC1)
 #  define SDMMC2_SLOT  0
 #else
 #  define SDMMC2_SLOT  1
 #endif
 
-#if !defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if !defined(CONFIG_STM32_SDMMC_IDMA)
 #  warning "Large Non-DMA transfer may result in RX overrun failures"
-#elif defined(CONFIG_STM32H7_SDMMC1)
+#elif defined(CONFIG_STM32_SDMMC1)
 #  define SRAM123_START STM32_SRAM123_BASE
-#  define SRAM123_END   (SRAM123_START + STM32H7_SRAM123_SIZE)
+#  define SRAM123_END   (SRAM123_START + STM32_SRAM123_SIZE)
 #  define SRAM4_START   STM32_SRAM4_BASE
-#  define SRAM4_END     (SRAM4_START + STM32H7_SRAM4_SIZE)
+#  define SRAM4_END     (SRAM4_START + STM32_SRAM4_SIZE)
 #endif
 
 #if !defined(CONFIG_SCHED_WORKQUEUE) || !defined(CONFIG_SCHED_HPWORK)
@@ -150,7 +150,7 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_FEATURES)
-#  undef CONFIG_STM32H7_SDMMC_XFRDEBUG
+#  undef CONFIG_STM32_SDMMC_XFRDEBUG
 #endif
 
 #ifdef CONFIG_SDMMC1_SDIO_PULLUP
@@ -316,7 +316,7 @@
 
 /* Register logging support */
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 #  define SAMPLENDX_BEFORE_SETUP  0
 #  define SAMPLENDX_AFTER_SETUP   1
 #  define SAMPLENDX_END_TRANSFER  2
@@ -381,7 +381,7 @@ struct stm32_dev_s
 
   uint32_t           blocksize;       /* Current block size */
   uint32_t           receivecnt;      /* Real count to receive */
-#if !defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if !defined(CONFIG_STM32_SDMMC_IDMA)
   struct work_s      cbfifo;          /* Monitor for Lame FIFO */
 #endif
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA and support un-alinged buffers */
@@ -389,7 +389,7 @@ struct stm32_dev_s
   bool               unaligned_rx; /* read buffer is not cache-line or 32 bit aligned */
 
   /* Input dma buffer for unaligned transfers */
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
   uint8_t sdmmc_rxbuffer[SDMMC_MAX_BLOCK_SIZE]
           aligned_data(ARMV7M_DCACHE_LINESIZE);
 #endif
@@ -397,7 +397,7 @@ struct stm32_dev_s
 
 /* Register logging support */
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 struct stm32_sdioregs_s
 {
   uint8_t  power;
@@ -434,7 +434,7 @@ static void stm32_setpwrctrl(struct stm32_dev_s *priv, uint32_t pwrctrl);
 
 /* Debug Helpers ************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_sampleinit(void);
 static void stm32_sdiosample(struct stm32_dev_s *priv,
                              struct stm32_sdioregs_s *regs);
@@ -456,7 +456,7 @@ static uint8_t stm32_log2(uint16_t value);
 static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
                              uint32_t dlen, bool receive);
 static void stm32_datadisable(struct stm32_dev_s *priv);
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
 static void stm32_sendfifo(struct stm32_dev_s *priv);
 static void stm32_recvfifo(struct stm32_dev_s *priv);
 #else
@@ -499,7 +499,7 @@ static int  stm32_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
                           uint32_t arg);
 static void stm32_blocksetup(struct sdio_dev_s *dev,
               unsigned int blocksize, unsigned int nblocks);
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
 static int  stm32_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                             size_t nbytes);
 static int  stm32_sendsetup(struct sdio_dev_s *dev,
@@ -527,7 +527,7 @@ static int  stm32_registercallback(struct sdio_dev_s *dev,
 
 /* DMA */
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 #  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 static int  stm32_dmapreflight(struct sdio_dev_s *dev,
                                const uint8_t *buffer, size_t buflen);
@@ -546,7 +546,7 @@ static void stm32_default(struct stm32_dev_s *priv);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-#if defined(CONFIG_STM32H7_SDMMC1)
+#if defined(CONFIG_STM32_SDMMC1)
 struct stm32_dev_s g_sdmmcdev1 =
 {
   .dev =
@@ -562,7 +562,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
     .blocksetup       = stm32_blocksetup,
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
     .recvsetup        = stm32_dmarecvsetup,
     .sendsetup        = stm32_dmasendsetup,
 #else
@@ -582,7 +582,7 @@ struct stm32_dev_s g_sdmmcdev1 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 #  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
     .dmapreflight     = stm32_dmapreflight,
 #  endif
@@ -601,7 +601,7 @@ struct stm32_dev_s g_sdmmcdev1 =
 #endif
 };
 #endif
-#if defined(CONFIG_STM32H7_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC2)
 struct stm32_dev_s g_sdmmcdev2 =
 {
   .dev =
@@ -617,7 +617,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
     .blocksetup       = stm32_blocksetup,
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
     .recvsetup        = stm32_dmarecvsetup,
     .sendsetup        = stm32_dmasendsetup,
 #else
@@ -637,7 +637,7 @@ struct stm32_dev_s g_sdmmcdev2 =
     .eventwait        = stm32_eventwait,
     .callbackenable   = stm32_callbackenable,
     .registercallback = stm32_registercallback,
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 #  if defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
     .dmapreflight     = stm32_dmapreflight,
 #  endif
@@ -658,7 +658,7 @@ struct stm32_dev_s g_sdmmcdev2 =
 #endif
 /* Register logging support */
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 #endif
 
@@ -899,7 +899,7 @@ static void stm32_setpwrctrl(struct stm32_dev_s *priv, uint32_t pwrctrl)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_sampleinit(void)
 {
   memset(g_sampleregs, 0xff, DEBUG_NSAMPLES *
@@ -915,7 +915,7 @@ static void stm32_sampleinit(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_sdiosample(struct stm32_dev_s *priv,
                              struct stm32_sdioregs_s *regs)
 {
@@ -938,7 +938,7 @@ static void stm32_sdiosample(struct stm32_dev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_sample(struct stm32_dev_s *priv, int index)
 {
   struct stm32_sampleregs_s *regs = &g_sampleregs[index];
@@ -954,7 +954,7 @@ static void stm32_sample(struct stm32_dev_s *priv, int index)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
 {
   mcinfo("SDIO Registers: %s\n", msg);
@@ -985,7 +985,7 @@ static void stm32_sdiodump(struct stm32_sdioregs_s *regs, const char *msg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_dumpsample(struct stm32_dev_s *priv,
                              struct stm32_sampleregs_s *regs,
                              const char *msg)
@@ -1002,7 +1002,7 @@ static void stm32_dumpsample(struct stm32_dev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_XFRDEBUG)
+#if defined(CONFIG_STM32_SDMMC_XFRDEBUG)
 static void stm32_dumpsamples(struct stm32_dev_s *priv)
 {
   stm32_dumpsample(priv, &g_sampleregs[SAMPLENDX_BEFORE_SETUP],
@@ -1104,7 +1104,7 @@ static void stm32_dataconfig(struct stm32_dev_s *priv, uint32_t timeout,
     {
       DEBUGASSERT((dlen % priv->blocksize) == 0);
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
       /* If this is an unaligned receive, then receive one block at a
        * time to the internal buffer
        */
@@ -1202,7 +1202,7 @@ static void stm32_datadisable(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if !defined(CONFIG_STM32_SDMMC_IDMA)
 static void stm32_sendfifo(struct stm32_dev_s *priv)
 {
   union
@@ -1232,7 +1232,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
            * padding with zero as necessary to extend to a full word.
            */
 
-          uint8_t *ptr = (uint8_t *)priv->remaining;
+          uint8_t *ptr = (uint8_t *)priv->buffer;
           int i;
 
           data.w = 0;
@@ -1267,7 +1267,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if !defined(CONFIG_STM32_SDMMC_IDMA)
 static void stm32_recvfifo(struct stm32_dev_s *priv)
 {
   union
@@ -1328,7 +1328,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
  *
  ****************************************************************************/
 
-#if defined (CONFIG_STM32H7_SDMMC_IDMA)
+#if defined (CONFIG_STM32_SDMMC_IDMA)
 static void stm32_recvdma(struct stm32_dev_s *priv)
 {
   uint32_t dctrl;
@@ -1547,7 +1547,7 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if !defined(CONFIG_STM32_SDMMC_IDMA)
 static void stm32_sdmmc_fifo_monitor(void *arg)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)arg;
@@ -1643,7 +1643,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
       pending  = enabled & priv->xfrmask;
       if (pending != 0)
         {
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
           /* Is the RX FIFO half full or more?  Is so then we must be
            * processing a receive transaction.
            */
@@ -1689,7 +1689,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
                * half-full interrupt will be received.
                */
 
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
 
               /* If the transfer would not trigger fifo half full
                * we used IDMA to manage the lame fifo
@@ -1909,7 +1909,7 @@ static void stm32_reset(struct sdio_dev_s *dev)
 
   flags = enter_critical_section();
 
-#if defined(CONFIG_STM32H7_SDMMC1)
+#if defined(CONFIG_STM32_SDMMC1)
   if (priv->base == STM32_SDMMC1_BASE)
     {
       regaddress = STM32_RCC_AHB3RSTR;
@@ -1917,7 +1917,7 @@ static void stm32_reset(struct sdio_dev_s *dev)
     }
 #endif
 
-#if defined CONFIG_STM32H7_SDMMC2
+#if defined CONFIG_STM32_SDMMC2
   if (priv->base == STM32_SDMMC2_BASE)
     {
       regaddress = STM32_RCC_AHB2RSTR;
@@ -1998,7 +1998,7 @@ static sdio_capset_t stm32_capabilities(struct sdio_dev_s *dev)
 
   caps |= SDIO_CAPS_DMABEFOREWRITE;
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
   caps |= SDIO_CAPS_DMASUPPORTED;
 #endif
 
@@ -2305,7 +2305,7 @@ static void stm32_blocksetup(struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
 static int stm32_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                            size_t nbytes)
 {
@@ -2381,7 +2381,7 @@ static int stm32_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_STM32H7_SDMMC_IDMA
+#ifndef CONFIG_STM32_SDMMC_IDMA
 static int stm32_sendsetup(struct sdio_dev_s *dev, const
                            uint8_t *buffer, size_t nbytes)
 {
@@ -3065,7 +3065,7 @@ static int stm32_registercallback(struct sdio_dev_s *dev,
  *   OK on success; a negated errno on failure
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
+#if defined(CONFIG_STM32_SDMMC_IDMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
 static int stm32_dmapreflight(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
@@ -3074,7 +3074,7 @@ static int stm32_dmapreflight(struct sdio_dev_s *dev,
 
   /* IDMA must be possible to the buffer */
 
-#if defined(CONFIG_STM32H7_SDMMC1)
+#if defined(CONFIG_STM32_SDMMC1)
   if (priv->base == STM32_SDMMC1_BASE)
     {
       /* For SDMMC1, IDMA cannot access SRAM123 or SRAM4. */
@@ -3134,7 +3134,7 @@ static int stm32_dmapreflight(struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
                               uint8_t *buffer, size_t buflen)
 {
@@ -3239,7 +3239,7 @@ static int stm32_dmarecvsetup(struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_SDMMC_IDMA)
+#if defined(CONFIG_STM32_SDMMC_IDMA)
 static int stm32_dmasendsetup(struct sdio_dev_s *dev,
                               const uint8_t *buffer, size_t buflen)
 {
@@ -3423,7 +3423,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
 {
   struct stm32_dev_s *priv = NULL;
 
-#if defined(CONFIG_STM32H7_SDMMC1)
+#if defined(CONFIG_STM32_SDMMC1)
   if (slotno == 0)
     {
       /* Select SDMMC 1 */
@@ -3456,7 +3456,7 @@ struct sdio_dev_s *sdio_initialize(int slotno)
     }
   else
 #endif
-#if defined(CONFIG_STM32H7_SDMMC2)
+#if defined(CONFIG_STM32_SDMMC2)
   if (slotno == SDMMC2_SLOT)
     {
       /* Select SDMMC 2 */
@@ -3629,4 +3629,4 @@ void sdio_set_sdio_card_isr(struct sdio_dev_s *dev,
 }
 #endif
 
-#endif /* CONFIG_STM32H7_SDMMC1 || CONFIG_STM32H7_SDMMC2 */
+#endif /* CONFIG_STM32_SDMMC1 || CONFIG_STM32_SDMMC2 */

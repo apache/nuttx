@@ -2,9 +2,9 @@
 
 # ARM
 
-/arm/stm32/nucleo-l152re/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
+/arm/stm32l1/nucleo-l152re/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 
-/arm/stm32/nucleo-f411re/configs/nsh,CONFIG_ARM_TOOLCHAIN_CLANG
+/arm/stm32f4/nucleo-f411re/configs/nsh,CONFIG_ARM_TOOLCHAIN_CLANG
 
 /arm/rp2040/raspberrypi-pico/configs/nsh,CONFIG_ARM_TOOLCHAIN_GNU_EABI
 

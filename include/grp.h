@@ -72,6 +72,8 @@ int getgrgid_r(gid_t gid, FAR struct group *grp,
                FAR char *buf, size_t buflen,
                FAR struct group **result);
 int initgroups(FAR const char *user, gid_t group);
+int getgrouplist(FAR const char *user, gid_t group, FAR gid_t *groups,
+                 FAR int *ngroups);
 
 #undef EXTERN
 #if defined(__cplusplus)

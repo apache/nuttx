@@ -455,7 +455,7 @@ void nxtask_exithook(FAR struct tcb_s *tcb, int status)
 
   /* Deallocate anything left in the TCB's queues */
 
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   nxsig_cleanup(tcb); /* Deallocate Signal lists */
 #endif
 

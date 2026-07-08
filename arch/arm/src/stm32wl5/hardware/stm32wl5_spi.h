@@ -45,7 +45,7 @@
 #undef HAVE_SPI_FIFOS             /* No Tx/Rx FIFOs */
 #undef HAVE_SPI_NSSP              /* No NSS Pulse Management in master mode */
 
-#if defined(STM32WL5_HAVE_IP_SPI_V2)
+#if defined(STM32_HAVE_IP_SPI_V2)
 #  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
 #  undef HAVE_SPI_I2S_ASTRT       /* No I2S asynchronous start capability */
 #  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
@@ -54,7 +54,7 @@
 #  undef HAVE_SPI_NSSP            /* No NSS Pulse Management in master mode */
 #endif
 
-#if defined(STM32WL5_HAVE_IP_SPI_V3)
+#if defined(STM32_HAVE_IP_SPI_V3)
 #  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
 #  undef HAVE_SPI_I2S_ASTRT       /* No I2S asynchronous start capability */
 #  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
@@ -63,7 +63,7 @@
 #  undef HAVE_SPI_NSSP            /* No NSS Pulse Management in master mode */
 #endif
 
-#if defined(STM32WL5_HAVE_IP_SPI_V4)
+#if defined(STM32_HAVE_IP_SPI_V4)
 #  define HAVE_SPI_I2S            /* Some SPI peripherals have I2S mode */
 #  define HAVE_SPI_I2S_ASTRT      /* Supports I2S asynchronous start capability */
 #  define HAVE_SPI_TI_MODE        /* Have Motorola and TI frame modes */
@@ -74,66 +74,66 @@
 
 /* Maximum allowed speed as per specifications for all SPIs */
 
-#if defined(CONFIG_STM32WL5_STM32F4XXX)
-#  define STM32WL5_SPI_CLK_MAX     37500000UL
+#if defined(CONFIG_STM32_STM32F4XXX)
+#  define STM32_SPI_CLK_MAX     37500000UL
 #else
-#  define STM32WL5_SPI_CLK_MAX     18000000UL
+#  define STM32_SPI_CLK_MAX     18000000UL
 #endif
 
 /* Register Offsets *********************************************************/
 
-#define STM32WL5_SPI_CR1_OFFSET       0x0000  /* SPI Control Register 1 (16-bit) */
-#define STM32WL5_SPI_CR2_OFFSET       0x0004  /* SPI control register 2 (16-bit) */
-#define STM32WL5_SPI_SR_OFFSET        0x0008  /* SPI status register (16-bit) */
-#define STM32WL5_SPI_DR_OFFSET        0x000c  /* SPI data register (16-bit) */
-#define STM32WL5_SPI_CRCPR_OFFSET     0x0010  /* SPI CRC polynomial register (16-bit) */
-#define STM32WL5_SPI_RXCRCR_OFFSET    0x0014  /* SPI Rx CRC register (16-bit) */
-#define STM32WL5_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
+#define STM32_SPI_CR1_OFFSET       0x0000  /* SPI Control Register 1 (16-bit) */
+#define STM32_SPI_CR2_OFFSET       0x0004  /* SPI control register 2 (16-bit) */
+#define STM32_SPI_SR_OFFSET        0x0008  /* SPI status register (16-bit) */
+#define STM32_SPI_DR_OFFSET        0x000c  /* SPI data register (16-bit) */
+#define STM32_SPI_CRCPR_OFFSET     0x0010  /* SPI CRC polynomial register (16-bit) */
+#define STM32_SPI_RXCRCR_OFFSET    0x0014  /* SPI Rx CRC register (16-bit) */
+#define STM32_SPI_TXCRCR_OFFSET    0x0018  /* SPI Tx CRC register (16-bit) */
 
 #if defined(HAVE_SPI_I2S)
-#  define STM32WL5_SPI_I2SCFGR_OFFSET 0x001c  /* I2S configuration register */
-#  define STM32WL5_SPI_I2SPR_OFFSET   0x0020  /* I2S prescaler register */
+#  define STM32_SPI_I2SCFGR_OFFSET 0x001c  /* I2S configuration register */
+#  define STM32_SPI_I2SPR_OFFSET   0x0020  /* I2S prescaler register */
 #endif
 
 /* Register Addresses *******************************************************/
 
-#if STM32WL5_NSPI > 0
-#  define STM32WL5_SPI1_CR1          \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_CR1_OFFSET)
-#  define STM32WL5_SPI1_CR2          \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_CR2_OFFSET)
-#  define STM32WL5_SPI1_SR           \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_SR_OFFSET)
-#  define STM32WL5_SPI1_DR           \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_DR_OFFSET)
-#  define STM32WL5_SPI1_CRCPR        \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_CRCPR_OFFSET)
-#  define STM32WL5_SPI1_RXCRCR       \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_RXCRCR_OFFSET)
-#  define STM32WL5_SPI1_TXCRCR       \
-  (STM32WL5_SPI1_BASE + STM32WL5_SPI_TXCRCR_OFFSET)
+#if STM32_NSPI > 0
+#  define STM32_SPI1_CR1          \
+  (STM32_SPI1_BASE + STM32_SPI_CR1_OFFSET)
+#  define STM32_SPI1_CR2          \
+  (STM32_SPI1_BASE + STM32_SPI_CR2_OFFSET)
+#  define STM32_SPI1_SR           \
+  (STM32_SPI1_BASE + STM32_SPI_SR_OFFSET)
+#  define STM32_SPI1_DR           \
+  (STM32_SPI1_BASE + STM32_SPI_DR_OFFSET)
+#  define STM32_SPI1_CRCPR        \
+  (STM32_SPI1_BASE + STM32_SPI_CRCPR_OFFSET)
+#  define STM32_SPI1_RXCRCR       \
+  (STM32_SPI1_BASE + STM32_SPI_RXCRCR_OFFSET)
+#  define STM32_SPI1_TXCRCR       \
+  (STM32_SPI1_BASE + STM32_SPI_TXCRCR_OFFSET)
 #endif
 
-#if STM32WL5_NSPI > 1
-#  define STM32WL5_SPI2S2_CR1        \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_CR1_OFFSET)
-#  define STM32WL5_SPI2S2_CR2        \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_CR2_OFFSET)
-#  define STM32WL5_SPI2S2_SR         \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_SR_OFFSET)
-#  define STM32WL5_SPI2S2_DR         \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_DR_OFFSET)
-#  define STM32WL5_SPI2S2_CRCPR      \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_CRCPR_OFFSET)
-#  define STM32WL5_SPI2S2_RXCRCR     \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_RXCRCR_OFFSET)
-#  define STM32WL5_SPI2S2_TXCRCR     \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_TXCRCR_OFFSET)
+#if STM32_NSPI > 1
+#  define STM32_SPI2S2_CR1        \
+  (STM32_SPI2S2_BASE + STM32_SPI_CR1_OFFSET)
+#  define STM32_SPI2S2_CR2        \
+  (STM32_SPI2S2_BASE + STM32_SPI_CR2_OFFSET)
+#  define STM32_SPI2S2_SR         \
+  (STM32_SPI2S2_BASE + STM32_SPI_SR_OFFSET)
+#  define STM32_SPI2S2_DR         \
+  (STM32_SPI2S2_BASE + STM32_SPI_DR_OFFSET)
+#  define STM32_SPI2S2_CRCPR      \
+  (STM32_SPI2S2_BASE + STM32_SPI_CRCPR_OFFSET)
+#  define STM32_SPI2S2_RXCRCR     \
+  (STM32_SPI2S2_BASE + STM32_SPI_RXCRCR_OFFSET)
+#  define STM32_SPI2S2_TXCRCR     \
+  (STM32_SPI2S2_BASE + STM32_SPI_TXCRCR_OFFSET)
 #  if defined(HAVE_SPI_I2S)
-#    define STM32WL5_SPI2S2_I2SCFGR  \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_I2SCFGR_OFFSET)
-#    define STM32WL5_SPI2S2_I2SPR    \
-  (STM32WL5_SPI2S2_BASE + STM32WL5_SPI_I2SPR_OFFSET)
+#    define STM32_SPI2S2_I2SCFGR  \
+  (STM32_SPI2S2_BASE + STM32_SPI_I2SCFGR_OFFSET)
+#    define STM32_SPI2S2_I2SPR    \
+  (STM32_SPI2S2_BASE + STM32_SPI_I2SPR_OFFSET)
 #  endif
 #endif
 

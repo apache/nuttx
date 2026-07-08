@@ -37,7 +37,7 @@
 #include "clock/clock.h"
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4.h"
+#include "stm32.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -58,9 +58,9 @@
                                    /* And I don't know now to re-configure it yet */
 
 #ifdef CONFIG_STM32L4_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((STM32L4_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
-#  define SYSTICK_RELOAD ((STM32L4_HCLK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((STM32_HCLK_FREQUENCY / CLK_TCK) - 1)
 #endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
@@ -76,7 +76,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function:  stm32l4_timerisr
+ * Function:  stm32_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions
@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-static int stm32l4_timerisr(int irq, uint32_t *regs, void *arg)
+static int stm32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
 
@@ -134,7 +134,7 @@ void up_timer_initialize(void)
 
   /* Attach the timer interrupt vector */
 
-  irq_attach(STM32L4_IRQ_SYSTICK, (xcpt_t)stm32l4_timerisr, NULL);
+  irq_attach(STM32_IRQ_SYSTICK, (xcpt_t)stm32_timerisr, NULL);
 
   /* Enable SysTick interrupts */
 
@@ -143,5 +143,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(STM32L4_IRQ_SYSTICK);
+  up_enable_irq(STM32_IRQ_SYSTICK);
 }

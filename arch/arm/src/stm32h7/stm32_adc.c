@@ -77,8 +77,8 @@
 
 /* Some ADC peripheral must be enabled */
 
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2) || \
-    defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2) || \
+    defined(CONFIG_STM32_ADC3)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -92,9 +92,9 @@
 /* ADC Channels/DMA *********************************************************/
 
 #ifdef ADC_HAVE_DMA
-#  if !defined(CONFIG_STM32H7_DMA1) && !defined(CONFIG_STM32H7_DMA2)
+#  if !defined(CONFIG_STM32_DMA1) && !defined(CONFIG_STM32_DMA2)
 #    /* REVISIT: check accordingly to which one is configured in board.h */
-#    error "STM32H7 ADC DMA support requires CONFIG_STM32H7_DMA1 or CONFIG_STM32H7_DMA2"
+#    error "STM32H7 ADC DMA support requires CONFIG_STM32_DMA1 or CONFIG_STM32_DMA2"
 #  endif
 #endif
 
@@ -191,7 +191,7 @@ struct stm32_dev_s
 
   /* List of selected ADC channels to sample */
 
-  uint8_t  chanlist[CONFIG_STM32H7_ADC_MAX_SAMPLES];
+  uint8_t  chanlist[CONFIG_STM32_ADC_MAX_SAMPLES];
 };
 
 /****************************************************************************
@@ -254,10 +254,10 @@ static int adc_pm_prepare(struct pm_callback_s *cb, int domain,
 /* ADC Interrupt Handler */
 
 static int adc_interrupt(struct adc_dev_s *dev, uint32_t regval);
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
 static int adc12_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32H7_ADC3)
+#if defined(CONFIG_STM32_ADC3)
 static int adc3_interrupt(int irq, void *context, void *arg);
 #endif
 
@@ -289,11 +289,11 @@ static const struct adc_ops_s g_adcops =
 
 /* ADC1 state */
 
-#ifdef CONFIG_STM32H7_ADC1
+#ifdef CONFIG_STM32_ADC1
 
 #ifdef ADC1_HAVE_DMA
-static uint16_t g_adc1_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
-                                 CONFIG_STM32H7_ADC1_DMA_BATCH];
+static uint16_t g_adc1_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC1_DMA_BATCH];
 #endif
 
 static struct stm32_dev_s g_adcpriv1 =
@@ -305,19 +305,19 @@ static struct stm32_dev_s g_adcpriv1 =
   .mbase       = STM32_ADC1_BASE,
   .initialized = false,
 #ifdef ADC1_HAVE_TIMER
-  .trigger     = CONFIG_STM32H7_ADC1_TIMTRIG,
+  .trigger     = CONFIG_STM32_ADC1_TIMTRIG,
   .tbase       = ADC1_TIMER_BASE,
   .trcc_enr    = ADC1_TIMER_RCC_ENR,
   .trcc_en     = ADC1_TIMER_RCC_EN,
   .extsel      = ADC1_EXTSEL_VALUE,
   .pclck       = ADC1_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32H7_ADC1_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_ADC1_SAMPLE_FREQUENCY,
 #endif
 #ifdef ADC1_HAVE_DMA
   .dmachan     = ADC1_DMA_CHAN,
   .hasdma      = true,
   .r_dmabuffer = g_adc1_dmabuffer,
-  .dmabatch    = CONFIG_STM32H7_ADC1_DMA_BATCH,
+  .dmabatch    = CONFIG_STM32_ADC1_DMA_BATCH,
 #endif
 #ifdef ADC1_HAVE_DFSDM
   .hasdfsdm    = true,
@@ -339,11 +339,11 @@ static struct adc_dev_s g_adcdev1 =
 
 /* ADC2 state */
 
-#ifdef CONFIG_STM32H7_ADC2
+#ifdef CONFIG_STM32_ADC2
 
 #ifdef ADC2_HAVE_DMA
-static uint16_t g_adc2_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
-                                 CONFIG_STM32H7_ADC2_DMA_BATCH];
+static uint16_t g_adc2_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC2_DMA_BATCH];
 #endif
 
 static struct stm32_dev_s g_adcpriv2 =
@@ -355,19 +355,19 @@ static struct stm32_dev_s g_adcpriv2 =
   .mbase       = STM32_ADC1_BASE,
   .initialized = false,
 #ifdef ADC2_HAVE_TIMER
-  .trigger     = CONFIG_STM32H7_ADC2_TIMTRIG,
+  .trigger     = CONFIG_STM32_ADC2_TIMTRIG,
   .tbase       = ADC2_TIMER_BASE,
   .trcc_enr    = ADC2_TIMER_RCC_ENR,
   .trcc_en     = ADC2_TIMER_RCC_EN,
   .extsel      = ADC2_EXTSEL_VALUE,
   .pclck       = ADC2_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32H7_ADC2_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_ADC2_SAMPLE_FREQUENCY,
 #endif
 #ifdef ADC2_HAVE_DMA
   .dmachan     = ADC2_DMA_CHAN,
   .hasdma      = true,
   .r_dmabuffer = g_adc2_dmabuffer,
-  .dmabatch    = CONFIG_STM32H7_ADC2_DMA_BATCH,
+  .dmabatch    = CONFIG_STM32_ADC2_DMA_BATCH,
 #endif
 #ifdef ADC2_HAVE_DFSDM
   .hasdfsdm    = true,
@@ -389,11 +389,11 @@ static struct adc_dev_s g_adcdev2 =
 
 /* ADC3 state */
 
-#ifdef CONFIG_STM32H7_ADC3
+#ifdef CONFIG_STM32_ADC3
 
 #ifdef ADC3_HAVE_DMA
-static uint16_t g_adc3_dmabuffer[CONFIG_STM32H7_ADC_MAX_SAMPLES *
-                                 CONFIG_STM32H7_ADC3_DMA_BATCH];
+static uint16_t g_adc3_dmabuffer[CONFIG_STM32_ADC_MAX_SAMPLES *
+                                 CONFIG_STM32_ADC3_DMA_BATCH];
 #endif
 
 static struct stm32_dev_s g_adcpriv3 =
@@ -405,19 +405,19 @@ static struct stm32_dev_s g_adcpriv3 =
   .mbase       = STM32_ADC3_BASE,
   .initialized = false,
 #ifdef ADC3_HAVE_TIMER
-  .trigger     = CONFIG_STM32H7_ADC3_TIMTRIG,
+  .trigger     = CONFIG_STM32_ADC3_TIMTRIG,
   .tbase       = ADC3_TIMER_BASE,
   .trcc_enr    = ADC3_TIMER_RCC_ENR,
   .trcc_en     = ADC3_TIMER_RCC_EN,
   .extsel      = ADC3_EXTSEL_VALUE,
   .pclck       = ADC3_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32H7_ADC3_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_ADC3_SAMPLE_FREQUENCY,
 #endif
 #ifdef ADC3_HAVE_DMA
   .dmachan     = ADC3_DMA_CHAN,
   .hasdma      = true,
   .r_dmabuffer = g_adc3_dmabuffer,
-  .dmabatch    = CONFIG_STM32H7_ADC3_DMA_BATCH,
+  .dmabatch    = CONFIG_STM32_ADC3_DMA_BATCH,
 #endif
 #ifdef ADC3_HAVE_DFSDM
   .hasdfsdm    = true,
@@ -1381,7 +1381,7 @@ static int adc_setup(struct adc_dev_s *dev)
    * ADC1 and ADC2 are enabled.)
    */
 
-#if defined(CONFIG_STM32H7_ADC1) && defined(CONFIG_STM32H7_ADC2)
+#if defined(CONFIG_STM32_ADC1) && defined(CONFIG_STM32_ADC2)
   if ((dev == &g_adcdev1 &&
       !((struct stm32_dev_s *)g_adcdev2.ad_priv)->initialized) ||
      (dev == &g_adcdev2 &&
@@ -1880,7 +1880,7 @@ static int adc_set_ch(struct adc_dev_s *dev, uint8_t ch)
       priv->rnchannels = 1;
     }
 
-  DEBUGASSERT(priv->rnchannels <= CONFIG_STM32H7_ADC_MAX_SAMPLES);
+  DEBUGASSERT(priv->rnchannels <= CONFIG_STM32_ADC_MAX_SAMPLES);
 
   bits = adc_sqrbits(priv, ADC_SQR4_FIRST, ADC_SQR4_LAST,
                      ADC_SQR4_SQ_OFFSET);
@@ -2163,13 +2163,13 @@ static int adc_interrupt(struct adc_dev_s *dev, uint32_t adcisr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_ADC1) || defined(CONFIG_STM32H7_ADC2)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
 static int adc12_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
   uint32_t pending;
 
-#ifdef CONFIG_STM32H7_ADC1
+#ifdef CONFIG_STM32_ADC1
   regval  = getreg32(STM32_ADC1_ISR);
   pending = regval & ADC_INT_MASK;
   if (pending != 0)
@@ -2178,7 +2178,7 @@ static int adc12_interrupt(int irq, void *context, void *arg)
     }
 #endif
 
-#ifdef CONFIG_STM32H7_ADC2
+#ifdef CONFIG_STM32_ADC2
   regval  = getreg32(STM32_ADC2_ISR);
   pending = regval & ADC_INT_MASK;
   if (pending != 0)
@@ -2203,7 +2203,7 @@ static int adc12_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_ADC3
+#ifdef CONFIG_STM32_ADC3
 static int adc3_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
@@ -2277,7 +2277,7 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h7_adc_initialize
+ * Name: stm32_adc_initialize
  *
  * Description:
  *   Initialize the ADC.
@@ -2302,9 +2302,8 @@ static void adc_dmaconvcallback(DMA_HANDLE handle, uint8_t isr,
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32h7_adc_initialize(int intf,
-                                         const uint8_t *chanlist,
-                                         int cchannels)
+struct adc_dev_s *stm32_adc_initialize(int intf, const uint8_t *chanlist,
+                                       int cchannels)
 {
   struct adc_dev_s   *dev;
   struct stm32_dev_s *priv;
@@ -2313,19 +2312,19 @@ struct adc_dev_s *stm32h7_adc_initialize(int intf,
 
   switch (intf)
     {
-#ifdef CONFIG_STM32H7_ADC1
+#ifdef CONFIG_STM32_ADC1
       case 1:
         ainfo("ADC1 selected\n");
         dev = &g_adcdev1;
         break;
 #endif
-#ifdef CONFIG_STM32H7_ADC2
+#ifdef CONFIG_STM32_ADC2
       case 2:
         ainfo("ADC2 selected\n");
         dev = &g_adcdev2;
         break;
 #endif
-#ifdef CONFIG_STM32H7_ADC3
+#ifdef CONFIG_STM32_ADC3
       case 3:
         ainfo("ADC3 selected\n");
         dev = &g_adcdev3;
@@ -2341,10 +2340,10 @@ struct adc_dev_s *stm32h7_adc_initialize(int intf,
   priv = (struct stm32_dev_s *)dev->ad_priv;
   priv->cb = NULL;
 
-  DEBUGASSERT(cchannels <= CONFIG_STM32H7_ADC_MAX_SAMPLES);
-  if (cchannels > CONFIG_STM32H7_ADC_MAX_SAMPLES)
+  DEBUGASSERT(cchannels <= CONFIG_STM32_ADC_MAX_SAMPLES);
+  if (cchannels > CONFIG_STM32_ADC_MAX_SAMPLES)
     {
-      cchannels = CONFIG_STM32H7_ADC_MAX_SAMPLES;
+      cchannels = CONFIG_STM32_ADC_MAX_SAMPLES;
     }
 
   priv->cchannels = cchannels;
@@ -2361,5 +2360,5 @@ struct adc_dev_s *stm32h7_adc_initialize(int intf,
   return dev;
 }
 
-#endif /* CONFIG_STM32H7_ADC1 || CONFIG_STM32H7_ADC2 || CONFIG_STM32H7_ADC3 */
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 || CONFIG_STM32_ADC3 */
 #endif /* CONFIG_ADC */

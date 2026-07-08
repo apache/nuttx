@@ -42,7 +42,7 @@
 #include "stm32.h"
 #include "stm32_usbdrdhost.h"
 
-#ifdef CONFIG_STM32H5_USBFS_HOST
+#ifdef CONFIG_STM32_USBFS_HOST
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -185,7 +185,7 @@ int stm32_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uinfo("Initialize USB host\n");
-  g_usbconn = stm32h5_usbhost_initialize();
+  g_usbconn = stm32_usbdrdhost_initialize();
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
@@ -203,7 +203,7 @@ int stm32_usbhost_initialize(void)
 #endif
 
 /****************************************************************************
- * Name: stm32_usbhost_vbusdrive
+ * Name: stm32_usbdrdhost_vbusdrive
  *
  * Description:
  *   Enable/disable driving of VBUS 5V output.  This function must be
@@ -232,7 +232,7 @@ int stm32_usbhost_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_USBHOST
-void stm32h5_usbhost_vbusdrive(int port, bool enable)
+void stm32_usbdrdhost_vbusdrive(int port, bool enable)
 {
   /* The Nucleo-h563zi doesn't have hardware for a vbus drive.
    * Instead to get host working, you need to put an extra jumper
@@ -265,4 +265,4 @@ int board_usbhost_select_configuration(FAR struct usbhost_hubport_s *hport,
 }
 #endif
 
-#endif /* CONFIG_STM32H5_USBFS_HOST */
+#endif /* CONFIG_STM32_USBFS_HOST */

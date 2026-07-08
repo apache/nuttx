@@ -113,13 +113,14 @@ To get this configuration working with miniboot bootloader follow these steps:
 
 #. flash bootloader::
 
-     nrfjprog --program build_boot/nuttx.hex --chiperase --verify
+    nrfutil device erase
+    nrfutil device program --firmware build_boot/nuttx.hex
 
 #. flash modem image::
 
-     nrfjprog --program build_modem/nuttx.hex
+    nrfutil device program --firmware build_modem/nuttx.hex
 
 #. reset chip::
 
-     nrfjprog --reset
+    nrfutil device reset
 

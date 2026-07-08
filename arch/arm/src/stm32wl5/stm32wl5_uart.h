@@ -42,42 +42,42 @@
  * device.
  */
 
-#if !defined(CONFIG_STM32WL5_HAVE_USART2)
-#  undef CONFIG_STM32WL5_USART2
+#if !defined(CONFIG_STM32_HAVE_USART2)
+#  undef CONFIG_STM32_USART2
 #endif
-#if !defined(CONFIG_STM32WL5_HAVE_USART1)
-#  undef CONFIG_STM32WL5_USART1
+#if !defined(CONFIG_STM32_HAVE_USART1)
+#  undef CONFIG_STM32_USART1
 #endif
-#if !defined(CONFIG_STM32WL5_HAVE_LPUART1)
-#  undef CONFIG_STM32WL5_LPUART1
+#if !defined(CONFIG_STM32_HAVE_LPUART1)
+#  undef CONFIG_STM32_LPUART1
 #endif
 
 /* Sanity checks */
 
-#if !defined(CONFIG_STM32WL5_LPUART1)
-#  undef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
-#  undef CONFIG_STM32WL5_LPUART1_1WIREDRIVER
+#if !defined(CONFIG_STM32_LPUART1)
+#  undef CONFIG_STM32_LPUART1_SERIALDRIVER
+#  undef CONFIG_STM32_LPUART1_1WIREDRIVER
 #endif
-#if !defined(CONFIG_STM32WL5_USART1)
-#  undef CONFIG_STM32WL5_USART1_SERIALDRIVER
-#  undef CONFIG_STM32WL5_USART1_1WIREDRIVER
+#if !defined(CONFIG_STM32_USART1)
+#  undef CONFIG_STM32_USART1_SERIALDRIVER
+#  undef CONFIG_STM32_USART1_1WIREDRIVER
 #endif
-#if !defined(CONFIG_STM32WL5_USART2)
-#  undef CONFIG_STM32WL5_USART2_SERIALDRIVER
-#  undef CONFIG_STM32WL5_USART2_1WIREDRIVER
+#if !defined(CONFIG_STM32_USART2)
+#  undef CONFIG_STM32_USART2_SERIALDRIVER
+#  undef CONFIG_STM32_USART2_1WIREDRIVER
 #endif
 
 /* Is there a USART enabled? */
 
-#if defined(CONFIG_STM32WL5_LPUART1) || \
-    defined(CONFIG_STM32WL5_USART1) || \
-    defined(CONFIG_STM32WL5_USART2)
+#if defined(CONFIG_STM32_LPUART1) || \
+    defined(CONFIG_STM32_USART1) || \
+    defined(CONFIG_STM32_USART2)
 #  define HAVE_UART 1
 #endif
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_LPUART1_SERIAL_CONSOLE) && defined(CONFIG_STM32WL5_LPUART1_SERIALDRIVER)
+#if defined(CONFIG_LPUART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_LPUART1_SERIALDRIVER)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
@@ -85,7 +85,7 @@
 #  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define CONSOLE_UART 1
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32WL5_USART1_SERIALDRIVER)
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART1_SERIALDRIVER)
 #  undef CONFIG_LPUART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
@@ -93,7 +93,7 @@
 #  undef CONFIG_UART5_SERIAL_CONSOLE
 #  define CONSOLE_UART 2
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32WL5_USART2_SERIALDRIVER)
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_STM32_USART2_SERIALDRIVER)
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  undef CONFIG_UART4_SERIAL_CONSOLE
@@ -121,15 +121,15 @@
 
 /* Disable the DMA configuration on all unused USARTs */
 
-#ifndef CONFIG_STM32WL5_LPUART1_SERIALDRIVER
+#ifndef CONFIG_STM32_LPUART1_SERIALDRIVER
 #  undef CONFIG_LPUART1_RXDMA
 #endif
 
-#ifndef CONFIG_STM32WL5_USART1_SERIALDRIVER
+#ifndef CONFIG_STM32_USART1_SERIALDRIVER
 #  undef CONFIG_USART1_RXDMA
 #endif
 
-#ifndef CONFIG_STM32WL5_USART2_SERIALDRIVER
+#ifndef CONFIG_STM32_USART2_SERIALDRIVER
 #  undef CONFIG_USART2_RXDMA
 #endif
 
@@ -156,11 +156,11 @@
 /* Is DMA used on all (enabled) USARTs */
 
 #define SERIAL_HAVE_ONLY_DMA 1
-#if defined(CONFIG_STM32WL5_LPUART1_SERIALDRIVER) && !defined(CONFIG_LPUART1_RXDMA)
+#if defined(CONFIG_STM32_LPUART1_SERIALDRIVER) && !defined(CONFIG_LPUART1_RXDMA)
 #  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32WL5_USART1_SERIALDRIVER) && !defined(CONFIG_USART1_RXDMA)
+#elif defined(CONFIG_STM32_USART1_SERIALDRIVER) && !defined(CONFIG_USART1_RXDMA)
 #  undef SERIAL_HAVE_ONLY_DMA
-#elif defined(CONFIG_STM32WL5_USART2_SERIALDRIVER) && !defined(CONFIG_USART2_RXDMA)
+#elif defined(CONFIG_STM32_USART2_SERIALDRIVER) && !defined(CONFIG_USART2_RXDMA)
 #  undef SERIAL_HAVE_ONLY_DMA
 #endif
 
@@ -202,7 +202,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_serial_dma_poll
+ * Name: stm32_serial_dma_poll
  *
  * Description:
  *   Must be called periodically if any STM32 UART is configured for DMA.
@@ -215,7 +215,7 @@ extern "C"
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-void stm32wl5_serial_dma_poll(void);
+void stm32_serial_dma_poll(void);
 #endif
 
 #undef EXTERN

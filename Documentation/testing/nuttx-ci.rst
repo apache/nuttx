@@ -41,6 +41,8 @@ When a PR is opened, the following CI actions take place:
 * Build tests are performed based on which files were modified
 * Some CI runtime tests are performed on simulators/emulators through
   :doc:`/testing/ntfc`.
+* Memory footprint of a set of representative targets is tracked using
+  `MemBrowse <https://membrowse.com>`_ (see `Memory Footprint Tracking`_).
 
 Pull Request Labelling
 ======================
@@ -148,3 +150,25 @@ resulting ``nuttx.bin``, ``nuttx.elf``, ``nuttx.hex``, etc., binaries. You
 should be able to download the artifact, flash the NuttX image(s) to your target
 device and test them that way if you'd like to avoid building all of the images
 yourself!
+
+Memory Footprint Tracking
+=========================
+
+Dashboard: `<https://membrowse.com/public/apache/nuttx>`_
+
+The memory footprint of a set of representative targets is tracked over time
+using `MemBrowse <https://membrowse.com>`_. This makes flash/RAM usage changes
+visible on a per-section and per-symbol basis and helps catch unintended size
+regressions. It:
+
+* provides a trend graph of the builds across commits
+* lets you compare the footprint between any two uploaded commits
+* posts a footprint summary comment on each pull request
+
+.. image:: image/membrowse-targets.png
+   :alt: MemBrowse targets page showing the current memory usage of each tracked NuttX target
+
+The integration consists of:
+
+* the set of tracked targets, configured in ``.github/membrowse-targets.json``
+* the ``membrowse-*.yml`` workflows under ``.github/workflows/`` that drive it

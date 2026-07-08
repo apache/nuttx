@@ -47,7 +47,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32wb_lowsetup
+ * Name: stm32_lowsetup
  *
  * Description:
  *   Called at the very beginning of _start.
@@ -55,7 +55,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32wb_lowsetup(void);
+void stm32_lowsetup(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

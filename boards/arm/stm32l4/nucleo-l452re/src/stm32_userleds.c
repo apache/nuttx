@@ -155,7 +155,7 @@ uint32_t board_userled_initialize(void)
 {
   /* Configure LD2 GPIO for output */
 
-  stm32l4_configgpio(GPIO_LD2);
+  stm32_configgpio(GPIO_LD2);
   return BOARD_NLEDS;
 }
 
@@ -167,7 +167,7 @@ void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LD2)
     {
-      stm32l4_gpiowrite(GPIO_LD2, ledon);
+      stm32_gpiowrite(GPIO_LD2, ledon);
     }
 }
 
@@ -177,15 +177,15 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  stm32l4_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
+  stm32_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
 }
 
 /****************************************************************************
- * Name: stm32l4_led_pminitialize
+ * Name: stm32_led_pminitialize
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32l4_led_pminitialize(void)
+void stm32_led_pminitialize(void)
 {
   /* Register to receive power management callbacks */
 

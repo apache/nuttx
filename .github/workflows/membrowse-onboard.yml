@@ -1,0 +1,98 @@
+name: Onboard to MemBrowse
+
+on:
+  workflow_dispatch:
+    inputs:
+      num_commits:
+        description: 'Number of commits to process'
+        required: true
+        default: '100'
+        type: string
+
+jobs:
+  load-targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: set-matrix
+        run: echo "matrix=$(jq -c '.' .github/membrowse-targets.json)" >> $GITHUB_OUTPUT
+
+  onboard:
+    needs: load-targets
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/apache/nuttx/apache-nuttx-ci-linux
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.load-targets.outputs.matrix) }}
+
+    steps:
+      - name: Checkout nuttx
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Clone nuttx-apps
+        run: |
+          git config --global --add safe.directory '*'
+          git clone --depth=1 https://github.com/apache/nuttx-apps.git ../apps
+
+      - name: Install membrowse
+        run: python3 -m pip install --no-cache-dir membrowse
+
+      - name: Fetch full git history
+        run: |
+          git fetch --unshallow || true
+          git fetch --all
+
+      - name: Run MemBrowse Onboard
+        env:
+          MEMBROWSE_API_KEY: ${{ secrets.MEMBROWSE_API_KEY }}
+          MEMBROWSE_API_URL: ${{ vars.MEMBROWSE_API_URL }}
+          NUM_COMMITS: ${{ github.event.inputs.num_commits }}
+          TARGET_NAME: ${{ matrix.target_name }}
+          ELF: ${{ matrix.elf }}
+          LD: ${{ matrix.ld }}
+          MAP_FILE: ${{ matrix.map_file }}
+          LINKER_VARS: ${{ matrix.linker_vars }}
+        run: |
+          BUILD_SCRIPT=$(cat <<'BUILD_EOF'
+          ./tools/configure.sh -l ${{ matrix.board_config }}
+          echo CONFIG_DEBUG_SYMBOLS=y >> .config
+          echo CONFIG_DEBUG_LINK_MAP=y >> .config
+          if [ -n "${{ matrix.config_overrides }}" ]; then
+            kconfig-tweak ${{ matrix.config_overrides }}
+          fi
+          make olddefconfig
+          find arch -name Makefile -exec sed -i '/DELFILE, $(addsuffix .tmp,$(ARCHSCRIPT))/d' {} +
+          trap 'git checkout -- arch/' EXIT
+          make -j$(nproc)
+          BUILD_EOF
+          )
+
+          ARGS=("$NUM_COMMITS" "$BUILD_SCRIPT" "$ELF" "$TARGET_NAME" "$MEMBROWSE_API_KEY")
+          if [ -n "$MEMBROWSE_API_URL" ]; then
+            ARGS+=(--api-url "$MEMBROWSE_API_URL")
+          fi
+          if [ -n "$LD" ]; then
+            ARGS+=(--ld-scripts "$LD")
+          fi
+          if [ -n "$LINKER_VARS" ]; then
+            set -f
+            for var in $LINKER_VARS; do
+              ARGS+=(--def "$var")
+            done
+            set +f
+          fi
+          if [ -n "$MAP_FILE" ]; then
+            ARGS+=(--map-file "$MAP_FILE")
+          fi
+          ARGS+=(--binary-search)
+
+          membrowse onboard "${ARGS[@]}"

@@ -65,8 +65,21 @@
   (b)[(i) + 3] = (unsigned char) ((n));           \
 }
 
+#define PUT_UINT64_BE(n,b,i)                          \
+{                                                     \
+  (b)[(i)    ] = (unsigned char) ( (n) >> 56 );       \
+  (b)[(i) + 1] = (unsigned char) ( (n) >> 48 );       \
+  (b)[(i) + 2] = (unsigned char) ( (n) >> 40 );       \
+  (b)[(i) + 3] = (unsigned char) ( (n) >> 32 );       \
+  (b)[(i) + 4] = (unsigned char) ( (n) >> 24 );       \
+  (b)[(i) + 5] = (unsigned char) ( (n) >> 16 );       \
+  (b)[(i) + 6] = (unsigned char) ( (n) >>  8 );       \
+  (b)[(i) + 7] = (unsigned char) ( (n)       );       \
+}
+
 #define SHA1_BLK_SIZE                    (20)
 #define SHA2_BLK_SIZE                    (32)
+#define SHA224_BLK_SIZE                  (28)
 
 /****************************************************************************
  * Private Data
@@ -81,6 +94,22 @@ static const unsigned char esp_sha_padding[64] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+
+static const unsigned char sha512_padding[128] =
+{
+    0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+#endif /* CONFIG_ARCH_CHIP_ESP32P4 */
 
 /****************************************************************************
  * Private Functions
@@ -107,7 +136,7 @@ static const unsigned char esp_sha_padding[64] =
  ****************************************************************************/
 
 static int esp_sha_hash_block(enum esp_sha_type_e type,
-                              bool *first_block, uint32_t *state,
+                              bool *first_block, void *state,
                               const uint8_t *data, size_t len,
                               uint8_t *buf, size_t buf_len)
 {
@@ -118,7 +147,16 @@ static int esp_sha_hash_block(enum esp_sha_type_e type,
   int i;
   int j;
 
-  blk_len = 64;
+  if (type < ESP_SHA3_384)
+
+    {
+      blk_len = 64;
+    }
+  else
+    {
+      blk_len = 128;
+    }
+
   blk_word_len =  blk_len / 4;
   num_block = len / blk_len;
 
@@ -551,7 +589,14 @@ int esp_sha256_finish(struct esp_sha256_context_s *ctx,
       return ret;
     }
 
-  memcpy(output, ctx->state, SHA2_BLK_SIZE);
+  if (ctx->mode == ESP_SHA2_224)
+    {
+      memcpy(output, ctx->state, SHA224_BLK_SIZE);
+    }
+  else
+    {
+      memcpy(output, ctx->state, SHA2_BLK_SIZE);
+    }
 
   return ret;
 }
@@ -578,6 +623,187 @@ void esp_sha256_free(struct esp_sha256_context_s *ctx)
 
   memset(ctx, 0, sizeof(struct esp_sha256_context_s));
 }
+
+#ifdef CONFIG_ARCH_CHIP_ESP32P4
+
+/****************************************************************************
+ * Name: esp_sha512_starts
+ *
+ * Description:
+ *   Starts a SHA-384 or SHA-512 checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx   - The SHA-512 context to initialize
+ *   is384 - Determines which function to use
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *
+ ****************************************************************************/
+
+int esp_sha512_starts(struct esp_sha512_context_s *ctx, bool is384)
+{
+  memset(ctx, 0, sizeof(struct esp_sha512_context_s));
+
+  if (is384)
+    {
+      ctx->mode = ESP_SHA3_384;
+    }
+  else
+    {
+      ctx->mode = ESP_SHA3_512;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_sha512_update
+ *
+ * Description:
+ *   Feeds an input buffer into an ongoing SHA-384 or SHA-512
+ *   checksum calculation.
+ *
+ * Input Parameters:
+ *   ctx   - The SHA-512 context to use
+ *   input - The buffer holding the input data
+ *   ilen  - The length of the input data in Bytes
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp_sha512_update(struct esp_sha512_context_s *ctx,
+                      const unsigned char *input,
+                      size_t ilen)
+{
+  int ret = 0;
+  size_t fill;
+  uint32_t left;
+  uint32_t len;
+  uint32_t local_len = 0;
+
+  if (ilen == 0)
+    {
+      return OK;
+    }
+
+  left = ctx->total[0] & 0x7f;
+  fill = 128 - left;
+
+  ctx->total[0] += ilen;
+
+  if (ctx->total[0] < ilen)
+    {
+      ctx->total[1]++;
+    }
+
+  if (left && ilen >= fill)
+    {
+      memcpy((void *) (ctx->buffer + left), input, fill);
+
+      input    += fill;
+      ilen     -= fill;
+      left      = 0;
+      local_len = 128;
+    }
+
+  len = (ilen / 128) * 128;
+
+  if (len || local_len)
+    {
+      ret = nxmutex_lock(&g_sha_lock);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      sha_hal_set_mode(ctx->mode);
+      if (ctx->sha_state == ESP_SHA_STATE_INIT)
+        {
+          ctx->first_block = true;
+          ctx->sha_state = ESP_SHA_STATE_IN_PROCESS;
+        }
+      else if (ctx->sha_state == ESP_SHA_STATE_IN_PROCESS)
+        {
+          ctx->first_block = false;
+          sha_hal_write_digest(ctx->mode, ctx->state);
+        }
+
+      ret = esp_sha_hash_block(ctx->mode, &ctx->first_block, ctx->state,
+                               input, len, ctx->buffer, local_len);
+      ret |= nxmutex_unlock(&g_sha_lock);
+
+      if (ret != 0)
+        {
+          return ret;
+        }
+    }
+
+  if (ilen > 0)
+    {
+      memcpy((void *) (ctx->buffer + left), input + len, ilen - len);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: esp_sha512_finish
+ *
+ * Description:
+ *   Finishes the SHA-384 or SHA-512 operation, and writes the result to
+ *   the output buffer.
+ *
+ * Input Parameters:
+ *   ctx    - The SHA-512 context to use
+ *   output - The SHA-512 checksum result
+ *
+ * Returned Value:
+ *   OK is returned on success.
+ *   Otherwise, a negated errno value is returned.
+ *
+ ****************************************************************************/
+
+int esp_sha512_finish(struct esp_sha512_context_s *ctx,
+                      unsigned char output[64])
+{
+  int ret;
+  uint32_t last;
+  uint32_t padn;
+  uint64_t high;
+  uint64_t low;
+  unsigned char msglen[16];
+
+  high = (ctx->total[0] >> 61) | (ctx->total[1] << 3);
+  low  = (ctx->total[0] << 3);
+
+  PUT_UINT64_BE(high, msglen, 0);
+  PUT_UINT64_BE(low,  msglen, 8);
+
+  last = ctx->total[0] & 0x7f;
+  padn = (last < 112) ? (112 - last) : (240 - last);
+
+  ret = esp_sha512_update(ctx, sha512_padding, padn);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  ret = esp_sha512_update(ctx, msglen, 16);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  memcpy(output, ctx->state, 64);
+
+  return ret;
+}
+
+#endif /* CONFIG_ARCH_CHIP_ESP32P4 */
 
 /****************************************************************************
  * Name: esp_sha_init

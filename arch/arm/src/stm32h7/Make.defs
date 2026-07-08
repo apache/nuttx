@@ -26,8 +26,9 @@
 # Common ARM and Cortex-M7 files
 
 include armv7-m/Make.defs
+include common/stm32/Make.defs
 
-ifeq ($(CONFIG_STM32H7_PROGMEM),y)
+ifeq ($(CONFIG_STM32_PROGMEM),y)
 CHIP_CSRCS += stm32_flash.c
 endif
 
@@ -35,7 +36,7 @@ ifeq ($(CONFIG_ARCH_STM32H7_DUALCORE),y)
 CHIP_CSRCS += stm32_dualcore.c
 endif
 
-ifeq ($(CONFIG_STM32H7_HSEM),y)
+ifeq ($(CONFIG_STM32_HSEM),y)
 CHIP_CSRCS += stm32_hsem.c
 endif
 
@@ -47,7 +48,6 @@ endif
 
 CHIP_CSRCS += stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
-CHIP_CSRCS += stm32_uid.c
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += stm32_tickless.c
@@ -55,7 +55,7 @@ else
 CHIP_CSRCS += stm32_timerisr.c
 endif
 
-ifeq ($(CONFIG_STM32H7_ONESHOT),y)
+ifeq ($(CONFIG_STM32_ONESHOT),y)
 CHIP_CSRCS += stm32_oneshot.c stm32_oneshot_lowerhalf.c
 endif
 
@@ -71,51 +71,51 @@ ifeq ($(CONFIG_ARMV7M_DTCM),y)
 CHIP_CSRCS += stm32_dtcm.c
 endif
 
-ifeq ($(CONFIG_STM32H7_ADC),y)
+ifeq ($(CONFIG_STM32_ADC),y)
 CHIP_CSRCS += stm32_adc.c
 endif
 
-ifeq ($(CONFIG_STM32H7_FDCAN),y)
+ifeq ($(CONFIG_STM32_FDCAN),y)
 CHIP_CSRCS += stm32_fdcan_sock.c
 endif
 
-ifeq ($(CONFIG_STM32H7_RNG),y)
+ifeq ($(CONFIG_STM32_RNG),y)
 CHIP_CSRCS += stm32_rng.c
 endif
 
-ifeq ($(CONFIG_STM32H7_BBSRAM),y)
+ifeq ($(CONFIG_STM32_BBSRAM),y)
 CHIP_CSRCS += stm32_bbsram.c
 endif
 
-ifeq ($(CONFIG_STM32H7_DMA),y)
+ifeq ($(CONFIG_STM32_DMA),y)
 CHIP_CSRCS += stm32_dma.c
 endif
 
-ifeq ($(CONFIG_STM32H7_FMC),y)
+ifeq ($(CONFIG_STM32_FMC),y)
 CHIP_CSRCS += stm32_fmc.c
 endif
 
-ifeq ($(filter y,$(CONFIG_STM32H7_IWDG) $(CONFIG_STM32H7_RTC_LSICLOCK)),y)
+ifeq ($(filter y,$(CONFIG_STM32_IWDG) $(CONFIG_STM32_RTC_LSICLOCK)),y)
 CHIP_CSRCS += stm32_lsi.c
 endif
 
-ifeq ($(CONFIG_STM32H7_RTC_LSECLOCK),y)
+ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
 endif
 
-ifeq ($(CONFIG_STM32H7_I2C),y)
+ifeq ($(CONFIG_STM32_I2C),y)
 CHIP_CSRCS += stm32_i2c.c
 endif
 
-ifeq ($(CONFIG_STM32H7_PWR),y)
+ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32_pwr.c
 endif
 
-ifeq ($(CONFIG_STM32H7_QUADSPI),y)
+ifeq ($(CONFIG_STM32_QSPI),y)
 CHIP_CSRCS += stm32_qspi.c
 endif
 
-ifeq ($(CONFIG_STM32H7_RTC),y)
+ifeq ($(CONFIG_STM32_RTC),y)
 CHIP_CSRCS += stm32_rtc.c
 ifeq ($(CONFIG_RTC_ALARM),y)
 CHIP_CSRCS += stm32_exti_alarm.c
@@ -128,7 +128,7 @@ CHIP_CSRCS += stm32_rtc_lowerhalf.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32H7_SPI),y)
+ifeq ($(CONFIG_STM32_SPI),y)
 CHIP_CSRCS += stm32_spi.c
 endif
 
@@ -136,7 +136,7 @@ ifeq ($(CONFIG_SPI_SLAVE),y)
 CHIP_CSRCS += stm32_spi_slave.c
 endif
 
-ifeq ($(CONFIG_STM32H7_SDMMC),y)
+ifeq ($(CONFIG_STM32_SDMMC),y)
 CHIP_CSRCS += stm32_sdmmc.c
 endif
 
@@ -144,7 +144,7 @@ ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += stm32_tim_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32H7_TIMX_CAP),y)
+ifeq ($(CONFIG_STM32_TIMX_CAP),y)
 CHIP_CSRCS += stm32_capture.c
 endif
 
@@ -152,7 +152,7 @@ ifeq ($(CONFIG_CAPTURE),y)
 CHIP_CSRCS += stm32_capture_lowerhalf.c
 endif
 
-ifeq ($(CONFIG_STM32H7_LTDC),y)
+ifeq ($(CONFIG_STM32_LTDC),y)
 CHIP_CSRCS += stm32_ltdc.c
 endif
 
@@ -171,23 +171,23 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32H7_TIM),y)
+ifeq ($(CONFIG_STM32_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
-ifeq ($(CONFIG_STM32H7_LPTIM),y)
+ifeq ($(CONFIG_STM32_LPTIM),y)
 CHIP_CSRCS += stm32_lptim.c
 endif
 
-ifeq ($(CONFIG_STM32H7_PWM),y)
+ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
 
-ifeq ($(CONFIG_STM32H7_PULSECOUNT),y)
+ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
 endif
 
-ifeq ($(CONFIG_STM32H7_ETHMAC),y)
+ifeq ($(CONFIG_STM32_ETHMAC),y)
 CHIP_CSRCS += stm32_ethernet.c
 endif
 
@@ -206,22 +206,22 @@ CHIP_CSRCS += stm32_pminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32H7_IWDG),y)
+ifeq ($(CONFIG_STM32_IWDG),y)
 CHIP_CSRCS += stm32_iwdg.c
 endif
 
-ifeq ($(CONFIG_STM32H7_WWDG),y)
+ifeq ($(CONFIG_STM32_WWDG),y)
 CHIP_CSRCS += stm32_wwdg.c
 endif
 
-#ifeq ($(CONFIG_STM32H7_HASH),y)
-#CHIP_CSRCS += stm32_hash.c
-#endif
-
-ifeq ($(CONFIG_STM32H7_CRYP),y)
+ifeq ($(CONFIG_STM32_CRYP),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_CRYPTO_H7),y)
 CHIP_CSRCS += stm32_aes.c
+endif
 endif
 
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_CRYPTO_H7),y)
 CHIP_CSRCS += stm32_crypto.c
+endif
 endif

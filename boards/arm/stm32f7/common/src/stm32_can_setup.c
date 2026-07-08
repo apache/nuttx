@@ -40,7 +40,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN1
+#ifdef CONFIG_STM32_CAN1
 #  define CAN_PORT 1
 #else
 #  define CAN_PORT 2
@@ -60,7 +60,7 @@
 
 int stm32_can_setup(void)
 {
-#if defined(CONFIG_STM32F7_CAN1)
+#if defined(CONFIG_STM32_CAN1)
   struct can_dev_s *can;
   int ret;
 
@@ -85,7 +85,7 @@ int stm32_can_setup(void)
   return OK;
 #endif
 
-#if defined(CONFIG_STM32F7_CAN2)
+#if defined(CONFIG_STM32_CAN2)
   struct can_dev_s *can;
   int ret;
 

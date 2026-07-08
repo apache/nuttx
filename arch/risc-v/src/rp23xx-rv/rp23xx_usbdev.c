@@ -33,11 +33,13 @@
 #include <string.h>
 #include <errno.h>
 #include <assert.h>
+#include <sys/param.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -45,6 +47,7 @@
 #include "chip.h"
 #include "riscv_internal.h"
 #include "rp23xx_usbdev.h"
+#include "hardware/rp23xx_hazard3.h"
 
 #include "hardware/rp23xx_resets.h"
 
@@ -320,7 +323,10 @@ static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes);
 static void rp23xx_abortrequest(struct rp23xx_ep_s *privep,
                                 struct rp23xx_req_s *privreq,
                                 int16_t result);
-static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result);
+static struct rp23xx_req_s *
+rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result);
+static void rp23xx_callback(struct rp23xx_ep_s  *privep,
+                            struct rp23xx_req_s *callback_req);
 static void rp23xx_txcomplete(struct rp23xx_ep_s *privep);
 static int rp23xx_wrrequest(struct rp23xx_ep_s *privep);
 static void rp23xx_rxcomplete(struct rp23xx_ep_s *privep);
@@ -471,19 +477,15 @@ static void rp23xx_update_buffer_control(struct rp23xx_ep_s *privep,
                                          uint32_t and_mask,
                                          uint32_t or_mask)
 {
-  uint32_t value = 0;
-
-  if (and_mask)
+  if (and_mask == 0)
     {
-      value = getreg32(privep->buf_ctrl) & and_mask;
+      putreg32(or_mask, privep->buf_ctrl);
     }
-
-  if (or_mask)
+  else
     {
-      value |= or_mask;
+      uint32_t value = getreg32(privep->buf_ctrl);
+      putreg32((value & and_mask) | or_mask, privep->buf_ctrl);
     }
-
-  putreg32(value, privep->buf_ctrl);
 }
 
 /****************************************************************************
@@ -498,11 +500,15 @@ static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
                           uint16_t nbytes)
 {
   uint32_t val;
-  irqstate_t flags;
 
   /* Copy the transmit data into DPSRAM */
 
-  memcpy(privep->data_buf, buf, nbytes);
+  if (nbytes > 0)
+    {
+      memcpy(privep->data_buf, buf, nbytes);
+    }
+
+  UP_DMB();
 
   val = nbytes |
         RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL |
@@ -510,13 +516,11 @@ static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
         (privep->next_pid ?
          RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_DATA1_PID : 0);
 
-  privep->next_pid = 1 - privep->next_pid;    /* Invert DATA0 <-> DATA1 */
-
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  privep->next_pid = 1 - privep->next_pid;
+
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return nbytes;
 }
@@ -532,20 +536,17 @@ static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
 static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes)
 {
   uint32_t val;
-  irqstate_t flags;
 
   val = nbytes |
         RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL |
         (privep->next_pid ?
          RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_DATA1_PID : 0);
 
-  privep->next_pid = 1 - privep->next_pid;    /* Invert DATA0 <-> DATA1 */
-
   /* Start the transfer */
 
-  flags = spin_lock_irqsave(&g_usbdev.lock);
+  privep->next_pid = 1 - privep->next_pid;
+
   rp23xx_update_buffer_control(privep, 0, val);
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return OK;
 }
@@ -582,29 +583,17 @@ static void rp23xx_abortrequest(struct rp23xx_ep_s *privep,
  *
  ****************************************************************************/
 
-static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
+static struct rp23xx_req_s *
+rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
 {
   struct rp23xx_req_s *privreq;
-  int stalled = privep->stalled;
-  irqstate_t flags;
 
   /* Remove the completed request at the head of the endpoint request list */
 
-  flags = enter_critical_section();
   privreq = rp23xx_rqdequeue(privep);
-  leave_critical_section(flags);
 
   if (privreq)
     {
-      /* If endpoint 0, temporarily reflect the state of protocol stalled
-       * in the callback.
-       */
-
-      if (privep->epphy == 0)
-        {
-          privep->stalled = privep->dev->stalled;
-        }
-
       /* Save the result in the request structure */
 
       privreq->req.result = result;
@@ -612,12 +601,9 @@ static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
       /* Callback to the request completion handler */
 
       privreq->flink = NULL;
-      privreq->req.callback(&privep->ep, &privreq->req);
-
-      /* Restore the stalled indication */
-
-      privep->stalled = stalled;
     }
+
+  return privreq;
 }
 
 /****************************************************************************
@@ -631,8 +617,14 @@ static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
 static void rp23xx_txcomplete(struct rp23xx_ep_s *privep)
 {
   struct rp23xx_req_s *privreq;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
   privreq = rp23xx_rqpeek(privep);
+
+  struct rp23xx_req_s *callback_req = NULL;
+
   if (!privreq)
     {
       usbtrace(TRACE_DEVERROR(RP23XX_TRACEERR_TXREQLOST), privep->epphy);
@@ -646,11 +638,42 @@ static void rp23xx_txcomplete(struct rp23xx_ep_s *privep)
         {
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           privep->txnullpkt = 0;
-          rp23xx_reqcomplete(privep, OK);
+          callback_req = rp23xx_reqcomplete(privep, OK);
         }
     }
 
   rp23xx_wrrequest(privep);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+
+  rp23xx_callback(privep, callback_req);
+}
+
+/****************************************************************************
+ * Name: rp23xx_callback
+ *
+ * Description:
+ *   Call req callback
+ *
+ ****************************************************************************/
+
+static void rp23xx_callback(struct rp23xx_ep_s *privep,
+                            struct rp23xx_req_s *callback_req)
+{
+  irqstate_t flags;
+
+  if (callback_req && callback_req->req.callback)
+    {
+      /* Pass protocol stall state to EP0 callbacks */
+
+      if (privep->epphy == 0)
+        {
+          flags = spin_lock_irqsave(&g_usbdev.lock);
+          privep->stalled = privep->dev->stalled;
+          spin_unlock_irqrestore(&g_usbdev.lock, flags);
+        }
+
+      callback_req->req.callback(&privep->ep, &callback_req->req);
+    }
 }
 
 /****************************************************************************
@@ -677,22 +700,6 @@ static int rp23xx_wrrequest(struct rp23xx_ep_s *privep)
       return OK;
     }
 
-  /* Ignore any attempt to send a zero length packet on anything but EP0IN */
-
-  if (privreq->req.len == 0)
-    {
-      if (privep->epphy == 0)
-        {
-          rp23xx_epwrite(privep, NULL, 0);
-        }
-      else
-        {
-          usbtrace(TRACE_DEVERROR(RP23XX_TRACEERR_NULLPACKET), 0);
-        }
-
-      return OK;
-    }
-
   /* Get the number of bytes left to be sent in the packet */
 
   bytesleft = privreq->req.len - privreq->req.xfrd;
@@ -702,7 +709,7 @@ static int rp23xx_wrrequest(struct rp23xx_ep_s *privep)
    */
 
   usbtrace(TRACE_WRITE(privep->epphy), (uint16_t)bytesleft);
-  if (bytesleft > 0 || privep->txnullpkt)
+  if (bytesleft > 0 || privep->txnullpkt || privreq->req.len == 0)
     {
       /* Try to send maxpacketsize -- unless we don't have that many
        * bytes to send.
@@ -743,29 +750,48 @@ static void rp23xx_rxcomplete(struct rp23xx_ep_s *privep)
 {
   struct rp23xx_req_s *privreq;
   uint16_t nrxbytes;
+  uint16_t available;
+  uint16_t copy_len;
+  irqstate_t flags;
+  struct rp23xx_req_s *callback_req = NULL;
 
   nrxbytes = getreg32(privep->buf_ctrl)
              & RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_LEN_MASK;
 
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+
   privreq = rp23xx_rqpeek(privep);
   if (!privreq)
     {
+      spin_unlock_irqrestore(&g_usbdev.lock, flags);
       usbtrace(TRACE_DEVERROR(RP23XX_TRACEERR_RXREQLOST), privep->epphy);
       return;
     }
 
-  memcpy(privreq->req.buf + privreq->req.xfrd, privep->data_buf, nrxbytes);
+  available = privreq->req.len - privreq->req.xfrd;
+  copy_len = MIN(nrxbytes, available);
 
-  privreq->req.xfrd += nrxbytes;
+  memcpy(privreq->req.buf + privreq->req.xfrd, privep->data_buf, copy_len);
+  privreq->req.xfrd += copy_len;
+
+  if (nrxbytes > available)
+    {
+      usbtrace(TRACE_DEVERROR(RP23XX_TRACEERR_EPREAD), privep->epphy);
+      privreq->req.result = -EIO;
+    }
 
   if (privreq->req.xfrd >= privreq->req.len ||
       nrxbytes < privep->ep.maxpacket)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
-      rp23xx_reqcomplete(privep, OK);
+      callback_req =
+      rp23xx_reqcomplete(privep, privreq->req.result == -EIO ? -EIO : OK);
     }
 
   rp23xx_rdrequest(privep);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+
+  rp23xx_callback(privep, callback_req);
 }
 
 /****************************************************************************
@@ -846,6 +872,35 @@ static void rp23xx_handle_zlp(struct rp23xx_usbdev_s *priv)
   priv->zlp_stat = RP23XX_ZLP_NONE;
 }
 
+static void rp23xx_drain_queue(struct rp23xx_ep_s *privep,
+                               struct rp23xx_req_s **list_head)
+{
+  struct rp23xx_req_s *privreq;
+  struct rp23xx_req_s *tail = NULL;
+
+  while (!rp23xx_rqempty(privep))
+    {
+      usbtrace(TRACE_COMPLETE(privep->epphy),
+               (rp23xx_rqpeek(privep))->req.xfrd);
+      privreq = rp23xx_rqdequeue(privep);
+      if (privreq)
+        {
+          privreq->req.result = -ESHUTDOWN;
+          privreq->flink = NULL;
+          if (!*list_head)
+            {
+              *list_head = privreq;
+            }
+          else
+            {
+              tail->flink = privreq;
+            }
+
+          tail = privreq;
+        }
+    }
+}
+
 /****************************************************************************
  * Name: rp23xx_cancelrequests
  *
@@ -856,11 +911,23 @@ static void rp23xx_handle_zlp(struct rp23xx_usbdev_s *priv)
 
 static void rp23xx_cancelrequests(struct rp23xx_ep_s *privep)
 {
-  while (!rp23xx_rqempty(privep))
+  struct rp23xx_req_s *local_list = NULL;
+  struct rp23xx_req_s *next;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_usbdev.lock);
+  rp23xx_drain_queue(privep, &local_list);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+
+  while (local_list)
     {
-      usbtrace(TRACE_COMPLETE(privep->epphy),
-               (rp23xx_rqpeek(privep))->req.xfrd);
-      rp23xx_reqcomplete(privep, -ESHUTDOWN);
+      next = local_list->flink;
+      if (local_list->req.callback)
+        {
+          local_list->req.callback(&privep->ep, &local_list->req);
+        }
+
+      local_list = next;
     }
 }
 
@@ -1209,16 +1276,17 @@ static void rp23xx_usbintr_setup(struct rp23xx_usbdev_s *priv)
 
   /* Read USB control request data */
 
+  UP_DMB();
   memcpy(&priv->ctrl, (void *)RP23XX_USBCTRL_DPSRAM_SETUP_PACKET,
          USB_SIZEOF_CTRLREQ);
   len = GETUINT16(priv->ctrl.len);
 
   /* Reset PID and stall status in setup stage */
 
+  rp23xx_epstall(&priv->eplist[0].ep, true);
+  rp23xx_epstall(&priv->eplist[1].ep, true);
   priv->eplist[0].next_pid = 1;
   priv->eplist[1].next_pid = 1;
-  priv->eplist[0].stalled = false;
-  priv->eplist[1].stalled = false;
 
   /* ZLP type in status stage */
 
@@ -1264,6 +1332,7 @@ static void rp23xx_usbintr_ep0out(struct rp23xx_usbdev_s *priv,
       return;
     }
 
+  UP_DMB();
   memcpy(priv->ep0data + priv->ep0datlen, privep->data_buf, len);
   priv->ep0datlen += len;
 
@@ -1307,7 +1376,7 @@ static bool rp23xx_usbintr_buffstat(struct rp23xx_usbdev_s *priv)
     {
       if (stat & bit)
         {
-          clrbits_reg32(bit, RP23XX_USBCTRL_REGS_BUFF_STATUS);
+          putreg32(bit, RP23XX_USBCTRL_REGS_BUFF_STATUS);
           privep = &priv->eplist[RP23XX_DPTOEP(i)];
 
           if (i == 1)
@@ -1382,7 +1451,7 @@ static void rp23xx_usbintr_busreset(struct rp23xx_usbdev_s *priv)
       CLASS_DISCONNECT(priv->driver, &priv->usbdev);
     }
 
-  clrbits_reg32(RP23XX_USBCTRL_REGS_SIE_STATUS_BUS_RESET,
+  putreg32(RP23XX_USBCTRL_REGS_SIE_STATUS_BUS_RESET,
                 RP23XX_USBCTRL_REGS_SIE_STATUS);
 }
 
@@ -1411,7 +1480,7 @@ static int rp23xx_usbinterrupt(int irq, void *context, void *arg)
 
   if (stat & RP23XX_USBCTRL_REGS_INTR_SETUP_REQ)
     {
-      clrbits_reg32(RP23XX_USBCTRL_REGS_SIE_STATUS_SETUP_REC,
+      putreg32(RP23XX_USBCTRL_REGS_SIE_STATUS_SETUP_REC,
                     RP23XX_USBCTRL_REGS_SIE_STATUS);
 
       rp23xx_usbintr_setup(priv);
@@ -1419,7 +1488,7 @@ static int rp23xx_usbinterrupt(int irq, void *context, void *arg)
 
   if (stat & RP23XX_USBCTRL_REGS_INTR_BUS_RESET)
     {
-      clrbits_reg32(RP23XX_USBCTRL_REGS_SIE_STATUS_BUS_RESET,
+      putreg32(RP23XX_USBCTRL_REGS_SIE_STATUS_BUS_RESET,
                     RP23XX_USBCTRL_REGS_SIE_STATUS);
 
       rp23xx_usbintr_busreset(priv);
@@ -1466,10 +1535,7 @@ static int rp23xx_epconfigure(struct usbdev_ep_s *ep,
   uinfo("config: EP%d %s %d maxpacket=%d\n", privep->epphy,
         privep->in ? "IN" : "OUT", eptype, maxpacket);
 
-  if (desc)
-    {
-      privep->ep.maxpacket = GETUINT16(desc->mxpacketsize);
-    }
+  privep->ep.maxpacket = GETUINT16(desc->mxpacketsize);
 
   if (privep->epphy != 0)
     {
@@ -1477,10 +1543,14 @@ static int rp23xx_epconfigure(struct usbdev_ep_s *ep,
        * (No need for EP0 because it has the dedicated buffer)
        */
 
-      privep->data_buf = (uint8_t *)(RP23XX_USBCTRL_DPSRAM_BASE +
-                                     priv->next_offset);
-      priv->next_offset =
-                     (priv->next_offset + privep->ep.maxpacket + 63) & ~63;
+      if (privep->data_buf == NULL)
+        {
+          privep->data_buf = (uint8_t *)(RP23XX_USBCTRL_DPSRAM_BASE +
+                                          priv->next_offset);
+          priv->next_offset =
+                          (priv->next_offset +
+                           privep->ep.maxpacket + 63) & ~63;
+        }
 
       /* Enable EP */
 
@@ -1506,6 +1576,8 @@ static int rp23xx_epconfigure(struct usbdev_ep_s *ep,
 static int rp23xx_epdisable(struct usbdev_ep_s *ep)
 {
   struct rp23xx_ep_s *privep = (struct rp23xx_ep_s *)ep;
+  struct rp23xx_req_s *local_list = NULL;
+  struct rp23xx_req_s *next;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1519,18 +1591,28 @@ static int rp23xx_epdisable(struct usbdev_ep_s *ep)
   usbtrace(TRACE_EPDISABLE, privep->epphy);
   uinfo("EP%d\n", privep->epphy);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
-  privep->ep.maxpacket = 64;
+  privep->ep.maxpacket = RP23XX_EP0MAXPACKET;
   privep->stalled = false;
   privep->next_pid = 0;
   putreg32(0, privep->buf_ctrl);
 
   /* Cancel all queued requests */
 
-  rp23xx_cancelrequests(privep);
+  rp23xx_drain_queue(privep, &local_list);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
-  leave_critical_section(flags);
+  while (local_list)
+    {
+      next = local_list->flink;
+      if (local_list->req.callback)
+        {
+          local_list->req.callback(&privep->ep, &local_list->req);
+        }
+
+      local_list = next;
+    }
 
   return OK;
 }
@@ -1623,12 +1705,13 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
   req->result = -EINPROGRESS;
   req->xfrd = 0;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
   if (privep->stalled && privep->in)
     {
+      spin_unlock_irqrestore(&g_usbdev.lock, flags);
       rp23xx_abortrequest(privep, privreq, -EBUSY);
-      ret = -EBUSY;
+      return -EBUSY;
     }
 
   /* Handle IN (device-to-host) requests */
@@ -1668,7 +1751,7 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
   return ret;
 }
 
@@ -1676,14 +1759,18 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
  * Name: rp23xx_epcancel
  *
  * Description:
- *   Cancel an I/O request previously sent to an endpoint
+ * Cancel an I/O request previously sent to an endpoint
  *
  ****************************************************************************/
 
-static int rp23xx_epcancel(struct usbdev_ep_s *ep,
-                           struct usbdev_req_s *req)
+static int rp23xx_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct rp23xx_ep_s *privep = (struct rp23xx_ep_s *)ep;
+  struct rp23xx_req_s *privreq = (struct rp23xx_req_s *)req;
+  struct rp23xx_req_s *curr;
+  struct rp23xx_req_s *prev = NULL;
+  bool found = false;
+  bool is_head = false;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -1696,12 +1783,64 @@ static int rp23xx_epcancel(struct usbdev_ep_s *ep,
 
   usbtrace(TRACE_EPCANCEL, privep->epphy);
 
-  /* Remove request from req_queue */
+  flags = spin_lock_irqsave(&g_usbdev.lock);
 
-  flags = enter_critical_section();
-  rp23xx_cancelrequests(privep);
-  leave_critical_section(flags);
-  return OK;
+  for (curr = privep->head; curr != NULL; prev = curr, curr = curr->flink)
+    {
+      if (curr == privreq)
+        {
+          found = true;
+          break;
+        }
+    }
+
+  if (found)
+    {
+      if (curr == privep->head)
+        {
+          is_head = true;
+
+          putreg32(0, privep->buf_ctrl);
+
+          privep->head = curr->flink;
+          if (!privep->head)
+            {
+              privep->tail = NULL;
+            }
+        }
+      else
+        {
+          prev->flink = curr->flink;
+          if (privep->tail == curr)
+            {
+              privep->tail = prev;
+            }
+        }
+
+      curr->flink = NULL;
+      curr->req.result = -ECANCELED;
+
+      if (is_head && privep->head != NULL)
+        {
+          if (privep->in)
+            {
+              rp23xx_wrrequest(privep);
+            }
+          else
+            {
+              rp23xx_rdrequest(privep);
+            }
+        }
+    }
+
+  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+
+  if (found && privreq->req.callback)
+    {
+      privreq->req.callback(&privep->ep, &privreq->req);
+    }
+
+  return found ? OK : -ENOENT;
 }
 
 /****************************************************************************
@@ -1985,7 +2124,7 @@ static int rp23xx_pullup(struct usbdev_s *dev, bool enable)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_usbinitialize
+ * Name: rp23xx_usbinitialize
  *
  * Description:
  *   Initialize the USB driver
@@ -2020,7 +2159,7 @@ void rp23xx_usbinitialize(void)
   for (i = 0; i < RP23XX_NENDPOINTS; i++)
     {
       g_usbdev.eplist[i].ep.ops = &g_epops;
-      g_usbdev.eplist[i].ep.maxpacket = 64;
+      g_usbdev.eplist[i].ep.maxpacket = RP23XX_EP0MAXPACKET;
       g_usbdev.eplist[i].dev = &g_usbdev;
       g_usbdev.eplist[i].epphy = 0;
       g_usbdev.eplist[i].head = NULL;
@@ -2075,12 +2214,28 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   memset((void *)RP23XX_USBCTRL_DPSRAM_BASE, 0, 0x1000);
 
-  putreg32(RP23XX_USBCTRL_REGS_USB_MUXING_SOFTCON |
+  /* Enable interrupt */
+
+  up_enable_irq(RP23XX_USBCTRL_IRQ);
+
+  setbits_reg32(RP23XX_USBCTRL_REGS_USB_MUXING_SOFTCON |
            RP23XX_USBCTRL_REGS_USB_MUXING_TO_PHY,
            RP23XX_USBCTRL_REGS_USB_MUXING);
-  putreg32(RP23XX_USBCTRL_REGS_USB_PWR_VBUS_DETECT |
+
+  setbits_reg32(RP23XX_USBCTRL_REGS_USB_PWR_VBUS_DETECT |
            RP23XX_USBCTRL_REGS_USB_PWR_VBUS_DETECT_OVERRIDE_EN,
            RP23XX_USBCTRL_REGS_USB_PWR);
+
+  setbits_reg32(RP23XX_USBCTRL_REGS_MAIN_CTRL_CONTROLLER_EN,
+           RP23XX_USBCTRL_REGS_MAIN_CTRL);
+
+  setbits_reg32(RP23XX_USBCTRL_REGS_SIE_CTRL_EP0_INT_1BUF,
+           RP23XX_USBCTRL_REGS_SIE_CTRL);
+
+  setbits_reg32(RP23XX_USBCTRL_REGS_INTR_BUFF_STATUS |
+           RP23XX_USBCTRL_REGS_INTR_BUS_RESET |
+           RP23XX_USBCTRL_REGS_INTR_SETUP_REQ,
+           RP23XX_USBCTRL_REGS_INTE);
 
   rp23xx_allocep(&g_usbdev.usbdev, 0x00, 0, USB_EP_ATTR_XFER_CONTROL);
   rp23xx_allocep(&g_usbdev.usbdev, 0x80, 1, USB_EP_ATTR_XFER_CONTROL);
@@ -2099,20 +2254,6 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   modifyreg32(RP23XX_USBCTRL_REGS_MAIN_CTRL,
               RP23XX_USBCTRL_REGS_MAIN_CTRL_PHY_ISO, 0);
-
-  putreg32(RP23XX_USBCTRL_REGS_MAIN_CTRL_CONTROLLER_EN,
-           RP23XX_USBCTRL_REGS_MAIN_CTRL);
-
-  /* Enable interrupt */
-
-  putreg32(RP23XX_USBCTRL_REGS_SIE_CTRL_EP0_INT_1BUF,
-           RP23XX_USBCTRL_REGS_SIE_CTRL);
-  putreg32(RP23XX_USBCTRL_REGS_INTR_BUFF_STATUS |
-           RP23XX_USBCTRL_REGS_INTR_BUS_RESET |
-           RP23XX_USBCTRL_REGS_INTR_SETUP_REQ,
-           RP23XX_USBCTRL_REGS_INTE);
-
-  up_enable_irq(RP23XX_USBCTRL_IRQ);
 
   return OK;
 }

@@ -83,7 +83,7 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32U5_PWR) && defined(CONFIG_STM32U5_RTC)
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_STM32_RTC)
 static inline void rcc_resetbkp(void)
 {
   bool init_stat;
@@ -93,14 +93,14 @@ static inline void rcc_resetbkp(void)
   init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
-      uint32_t bkregs[STM32U5_RTC_BKCOUNT];
+      uint32_t bkregs[STM32_RTC_BKCOUNT];
       int i;
 
       /* Backup backup-registers before RTC reset. */
 
-      for (i = 0; i < STM32U5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          bkregs[i] = getreg32(STM32U5_RTC_BKR(i));
+          bkregs[i] = getreg32(STM32_RTC_BKR(i));
         }
 
       /* Enable write access to the backup domain (RTC registers, RTC
@@ -113,19 +113,19 @@ static inline void rcc_resetbkp(void)
        * reset the backup domain (having backed up the RTC_MAGIC token)
        */
 
-      modifyreg32(STM32U5_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32U5_RCC_BDCR, RCC_BDCR_BDRST, 0);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
       /* Restore backup-registers, except RTC related. */
 
-      for (i = 0; i < STM32U5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          if (RTC_MAGIC_REG == STM32U5_RTC_BKR(i))
+          if (RTC_MAGIC_REG == STM32_RTC_BKR(i))
             {
               continue;
             }
 
-          putreg32(bkregs[i], STM32U5_RTC_BKR(i));
+          putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
       stm32_pwr_enablebkp(false);
@@ -148,7 +148,7 @@ static inline void rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -171,7 +171,7 @@ void stm32_clockconfig(void)
 
   rcc_resetbkp();
 #endif
-#if defined(CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
@@ -205,7 +205,7 @@ void stm32_clockconfig(void)
  *   stm32_clockconfig()
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
  *   function called stm32_board_clockconfig().
  *
@@ -220,7 +220,7 @@ void stm32_clockconfig(void)
 #ifdef CONFIG_PM
 void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 

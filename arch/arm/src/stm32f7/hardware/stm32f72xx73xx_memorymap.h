@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -188,5 +188,5 @@
 
 #define STM32_DEBUGMCU_BASE 0xe0042000
 
-#endif /* CONFIG_STM32F7_STM32F72XX || CONFIG_STM32F7_STM32F73XX */
+#endif /* CONFIG_STM32_STM32F72XX || CONFIG_STM32_STM32F73XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_MEMORYMAP_H */

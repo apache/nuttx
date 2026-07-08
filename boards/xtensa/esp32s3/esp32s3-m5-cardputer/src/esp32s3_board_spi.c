@@ -1,0 +1,136 @@
+/****************************************************************************
+ * boards/xtensa/esp32s3/esp32s3-m5-cardputer/src/esp32s3_board_spi.c
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <inttypes.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <nuttx/debug.h>
+
+#include <nuttx/spi/spi.h>
+
+#include "espressif/esp_gpio.h"
+#include "esp32s3-m5-cardputer.h"
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_spi2_status
+ *
+ * Description:
+ *   The ST7789 display is the only device on SPI2.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPI2
+
+uint8_t esp32s3_spi2_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
+
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      status |= SPI_STATUS_PRESENT;
+    }
+
+  return status;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_spi2_cmddata
+ *
+ * Description:
+ *   Drive the ST7789 data/command (DC) line.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ESP32S3_SPI2) && defined(CONFIG_SPI_CMDDATA)
+
+int esp32s3_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /* Low selects command, high selects data. */
+
+      esp_gpiowrite(DISPLAY_DC, !cmd);
+
+      return OK;
+    }
+
+  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" : "data");
+
+  return -ENODEV;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_spi3_cmddata
+ *
+ * Description:
+ *   SPI3 only drives the microSD card, which does not use the SPI cmd/data
+ *   line.  This stub is required to link when CONFIG_SPI_CMDDATA is enabled
+ *   for the ST7789 display on SPI2 while SPI3 is also in use.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ESP32S3_SPI3) && defined(CONFIG_SPI_CMDDATA)
+
+int esp32s3_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+{
+  return -ENODEV;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_spi3_status
+ *
+ * Description:
+ *   The microSD card is the only device on SPI3.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_SPI3
+
+uint8_t esp32s3_spi3_status(struct spi_dev_s *dev, uint32_t devid)
+{
+  uint8_t status = 0;
+
+  if (devid == SPIDEV_MMCSD(0))
+    {
+      status |= SPI_STATUS_PRESENT;
+    }
+
+  return status;
+}
+
+#endif

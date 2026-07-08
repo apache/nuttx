@@ -36,64 +36,64 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */
-#define STM32L4_PWR_CR2_OFFSET   0x0004  /* Power control register 2 */
-#define STM32L4_PWR_CR3_OFFSET   0x0008  /* Power control register 3 */
-#define STM32L4_PWR_CR4_OFFSET   0x000C  /* Power control register 4 */
-#define STM32L4_PWR_SR1_OFFSET   0x0010  /* Power status register 1 */
-#define STM32L4_PWR_SR2_OFFSET   0x0014  /* Power status register 2 */
-#define STM32L4_PWR_SCR_OFFSET   0x0018  /* Power status clear register */
-#define STM32L4_PWR_PUCRA_OFFSET 0x0020  /* Power Port A pull-up control register */
-#define STM32L4_PWR_PDCRA_OFFSET 0x0024  /* Power Port A pull-down control register */
-#define STM32L4_PWR_PUCRB_OFFSET 0x0028  /* Power Port B pull-up control register */
-#define STM32L4_PWR_PDCRB_OFFSET 0x002C  /* Power Port B pull-down control register */
-#define STM32L4_PWR_PUCRC_OFFSET 0x0030  /* Power Port C pull-up control register */
-#define STM32L4_PWR_PDCRC_OFFSET 0x0034  /* Power Port C pull-down control register */
-#define STM32L4_PWR_PUCRD_OFFSET 0x0038  /* Power Port D pull-up control register */
-#define STM32L4_PWR_PDCRD_OFFSET 0x003C  /* Power Port D pull-down control register */
-#define STM32L4_PWR_PUCRE_OFFSET 0x0040  /* Power Port E pull-up control register */
-#define STM32L4_PWR_PDCRE_OFFSET 0x0044  /* Power Port E pull-down control register */
-#define STM32L4_PWR_PUCRF_OFFSET 0x0048  /* Power Port F pull-up control register */
-#define STM32L4_PWR_PDCRF_OFFSET 0x004C  /* Power Port F pull-down control register */
-#define STM32L4_PWR_PUCRG_OFFSET 0x0050  /* Power Port G pull-up control register */
-#define STM32L4_PWR_PDCRG_OFFSET 0x0054  /* Power Port G pull-down control register */
-#define STM32L4_PWR_PUCRH_OFFSET 0x0058  /* Power Port H pull-up control register */
-#define STM32L4_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
-#define STM32L4_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
-#define STM32L4_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
-#if defined(CONFIG_STM32L4_STM32L4XR)
-#  define STM32L4_PWR_CR5_OFFSET 0x0080  /* Power control register 5 */
+#define STM32_PWR_CR1_OFFSET   0x0000  /* Power control register 1 */
+#define STM32_PWR_CR2_OFFSET   0x0004  /* Power control register 2 */
+#define STM32_PWR_CR3_OFFSET   0x0008  /* Power control register 3 */
+#define STM32_PWR_CR4_OFFSET   0x000C  /* Power control register 4 */
+#define STM32_PWR_SR1_OFFSET   0x0010  /* Power status register 1 */
+#define STM32_PWR_SR2_OFFSET   0x0014  /* Power status register 2 */
+#define STM32_PWR_SCR_OFFSET   0x0018  /* Power status clear register */
+#define STM32_PWR_PUCRA_OFFSET 0x0020  /* Power Port A pull-up control register */
+#define STM32_PWR_PDCRA_OFFSET 0x0024  /* Power Port A pull-down control register */
+#define STM32_PWR_PUCRB_OFFSET 0x0028  /* Power Port B pull-up control register */
+#define STM32_PWR_PDCRB_OFFSET 0x002C  /* Power Port B pull-down control register */
+#define STM32_PWR_PUCRC_OFFSET 0x0030  /* Power Port C pull-up control register */
+#define STM32_PWR_PDCRC_OFFSET 0x0034  /* Power Port C pull-down control register */
+#define STM32_PWR_PUCRD_OFFSET 0x0038  /* Power Port D pull-up control register */
+#define STM32_PWR_PDCRD_OFFSET 0x003C  /* Power Port D pull-down control register */
+#define STM32_PWR_PUCRE_OFFSET 0x0040  /* Power Port E pull-up control register */
+#define STM32_PWR_PDCRE_OFFSET 0x0044  /* Power Port E pull-down control register */
+#define STM32_PWR_PUCRF_OFFSET 0x0048  /* Power Port F pull-up control register */
+#define STM32_PWR_PDCRF_OFFSET 0x004C  /* Power Port F pull-down control register */
+#define STM32_PWR_PUCRG_OFFSET 0x0050  /* Power Port G pull-up control register */
+#define STM32_PWR_PDCRG_OFFSET 0x0054  /* Power Port G pull-down control register */
+#define STM32_PWR_PUCRH_OFFSET 0x0058  /* Power Port H pull-up control register */
+#define STM32_PWR_PDCRH_OFFSET 0x005C  /* Power Port H pull-down control register */
+#define STM32_PWR_PUCRI_OFFSET 0x0060  /* Power Port I pull-up control register */
+#define STM32_PWR_PDCRI_OFFSET 0x0064  /* Power Port I pull-down control register */
+#if defined(CONFIG_STM32_STM32L4XR)
+#  define STM32_PWR_CR5_OFFSET 0x0080  /* Power control register 5 */
 #endif
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_PWR_CR1          (STM32L4_PWR_BASE+STM32L4_PWR_CR1_OFFSET)
-#define STM32L4_PWR_CR2          (STM32L4_PWR_BASE+STM32L4_PWR_CR2_OFFSET)
-#define STM32L4_PWR_CR3          (STM32L4_PWR_BASE+STM32L4_PWR_CR3_OFFSET)
-#define STM32L4_PWR_CR4          (STM32L4_PWR_BASE+STM32L4_PWR_CR4_OFFSET)
-#define STM32L4_PWR_SR1          (STM32L4_PWR_BASE+STM32L4_PWR_SR1_OFFSET)
-#define STM32L4_PWR_SR2          (STM32L4_PWR_BASE+STM32L4_PWR_SR2_OFFSET)
-#define STM32L4_PWR_SCR          (STM32L4_PWR_BASE+STM32L4_PWR_SCR_OFFSET)
-#define STM32L4_PWR_PUCRA        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRA_OFFSET)
-#define STM32L4_PWR_PDCRA        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRA_OFFSET)
-#define STM32L4_PWR_PUCRB        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRB_OFFSET)
-#define STM32L4_PWR_PDCRB        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRB_OFFSET)
-#define STM32L4_PWR_PUCRC        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRC_OFFSET)
-#define STM32L4_PWR_PDCRC        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRC_OFFSET)
-#define STM32L4_PWR_PUCRD        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRD_OFFSET)
-#define STM32L4_PWR_PDCRD        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRD_OFFSET)
-#define STM32L4_PWR_PUCRE        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRE_OFFSET)
-#define STM32L4_PWR_PDCRE        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRE_OFFSET)
-#define STM32L4_PWR_PUCRF        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRF_OFFSET)
-#define STM32L4_PWR_PDCRF        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRF_OFFSET)
-#define STM32L4_PWR_PUCRG        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRG_OFFSET)
-#define STM32L4_PWR_PDCRG        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRG_OFFSET)
-#define STM32L4_PWR_PUCRH        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRH_OFFSET)
-#define STM32L4_PWR_PDCRH        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRH_OFFSET)
-#define STM32L4_PWR_PUCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PUCRI_OFFSET)
-#define STM32L4_PWR_PDCRI        (STM32L4_PWR_BASE+STM32L4_PWR_PDCRI_OFFSET)
-#if defined(CONFIG_STM32L4_STM32L4XR)
-#  define STM32L4_PWR_CR5        (STM32L4_PWR_BASE+STM32L4_PWR_CR5_OFFSET)
+#define STM32_PWR_CR1          (STM32_PWR_BASE+STM32_PWR_CR1_OFFSET)
+#define STM32_PWR_CR2          (STM32_PWR_BASE+STM32_PWR_CR2_OFFSET)
+#define STM32_PWR_CR3          (STM32_PWR_BASE+STM32_PWR_CR3_OFFSET)
+#define STM32_PWR_CR4          (STM32_PWR_BASE+STM32_PWR_CR4_OFFSET)
+#define STM32_PWR_SR1          (STM32_PWR_BASE+STM32_PWR_SR1_OFFSET)
+#define STM32_PWR_SR2          (STM32_PWR_BASE+STM32_PWR_SR2_OFFSET)
+#define STM32_PWR_SCR          (STM32_PWR_BASE+STM32_PWR_SCR_OFFSET)
+#define STM32_PWR_PUCRA        (STM32_PWR_BASE+STM32_PWR_PUCRA_OFFSET)
+#define STM32_PWR_PDCRA        (STM32_PWR_BASE+STM32_PWR_PDCRA_OFFSET)
+#define STM32_PWR_PUCRB        (STM32_PWR_BASE+STM32_PWR_PUCRB_OFFSET)
+#define STM32_PWR_PDCRB        (STM32_PWR_BASE+STM32_PWR_PDCRB_OFFSET)
+#define STM32_PWR_PUCRC        (STM32_PWR_BASE+STM32_PWR_PUCRC_OFFSET)
+#define STM32_PWR_PDCRC        (STM32_PWR_BASE+STM32_PWR_PDCRC_OFFSET)
+#define STM32_PWR_PUCRD        (STM32_PWR_BASE+STM32_PWR_PUCRD_OFFSET)
+#define STM32_PWR_PDCRD        (STM32_PWR_BASE+STM32_PWR_PDCRD_OFFSET)
+#define STM32_PWR_PUCRE        (STM32_PWR_BASE+STM32_PWR_PUCRE_OFFSET)
+#define STM32_PWR_PDCRE        (STM32_PWR_BASE+STM32_PWR_PDCRE_OFFSET)
+#define STM32_PWR_PUCRF        (STM32_PWR_BASE+STM32_PWR_PUCRF_OFFSET)
+#define STM32_PWR_PDCRF        (STM32_PWR_BASE+STM32_PWR_PDCRF_OFFSET)
+#define STM32_PWR_PUCRG        (STM32_PWR_BASE+STM32_PWR_PUCRG_OFFSET)
+#define STM32_PWR_PDCRG        (STM32_PWR_BASE+STM32_PWR_PDCRG_OFFSET)
+#define STM32_PWR_PUCRH        (STM32_PWR_BASE+STM32_PWR_PUCRH_OFFSET)
+#define STM32_PWR_PDCRH        (STM32_PWR_BASE+STM32_PWR_PDCRH_OFFSET)
+#define STM32_PWR_PUCRI        (STM32_PWR_BASE+STM32_PWR_PUCRI_OFFSET)
+#define STM32_PWR_PDCRI        (STM32_PWR_BASE+STM32_PWR_PDCRI_OFFSET)
+#if defined(CONFIG_STM32_STM32L4XR)
+#  define STM32_PWR_CR5        (STM32_PWR_BASE+STM32_PWR_CR5_OFFSET)
 #endif
 
 /* Register Bitfield Definitions ********************************************/
@@ -107,7 +107,7 @@
 #  define PWR_CR1_LPMS_STOP2     (2 << PWR_CR1_LPMS_SHIFT) /* 010: Stop 2 mode */
 #  define PWR_CR1_LPMS_STANDBY   (3 << PWR_CR1_LPMS_SHIFT) /* 011: Standby mode */
 #  define PWR_CR1_LPMS_SHUTDOWN  (4 << PWR_CR1_LPMS_SHIFT) /* 1xx: Shutdown mode */
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR1_RRSTP          (1 <<  4) /* Bit  4: SRAM3 retention in Stop 2 mode */
 #endif
 #define PWR_CR1_DBP              (1 <<  8) /* Bit  8: Disable Backup domain write protection */
@@ -133,12 +133,12 @@
 #  define PWR_CR2_PLS_EXT        (7 << PWR_CR2_PLS_SHIFT) /* 111: External input analog voltage PVD_IN */
 
 #define PWR_CR2_PVME1            (1 <<  4) /* Bit  4: Peripheral voltage monitoring 1 enable (VDDUSB vs 1.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_CR2_PVME2          (1 <<  5) /* Bit  5: Peripheral voltage monitoring 2 enable (VDDIO2 vs 0.9V) */
 #endif
 #define PWR_CR2_PVME3            (1 <<  6) /* Bit  6: Peripheral voltage monitoring 3 enable (VDDA vs 1.62V) */
 #define PWR_CR2_PVME4            (1 <<  7) /* Bit  7: Peripheral voltage monitoring 4 enable (VDDA vs 2.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_CR2_IOSV           (1 <<  9) /* Bit  9: VDDIO2 Independent I/Os supply valid */
 #endif
 #define PWR_CR2_USV              (1 << 10) /* Bit 10: VDDUSB USB supply valid */
@@ -152,7 +152,7 @@
 #define PWR_CR3_EWUP5            (1 <<  4) /* Bit  4: Enable Wakeup pin WKUP5 */
 #define PWR_CR3_RRS              (1 <<  8) /* Bit  8: SRAM2 retention in Standby mode */
 #define PWR_CR3_APC              (1 << 10) /* Bit 10: Apply pull-up and pull-down configuration */
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR3_DSIPDEN        (1 << 12) /* Bit 12: Enable Pull-down activation on DSI pins */
 #endif
 #define PWR_CR3_EIWUL            (1 << 15) /* Bit 15: Enable internal wakeup line */
@@ -187,7 +187,7 @@
 #define PWR_SR2_VOSF             (1 << 10) /* Bit 10: Voltage scaling flag */
 #define PWR_SR2_PVDO             (1 << 11) /* Bit 11: Power voltage detector output */
 #define PWR_SR2_PVMO1            (1 << 12) /* Bit 12: Peripheral voltage monitoring output 1 (VDDUSB vs 1.2V) */
-#if !defined(CONFIG_STM32L4_STM32L4X3)
+#if !defined(CONFIG_STM32_STM32L4X3)
 #  define PWR_SR2_PVMO2          (1 << 13) /* Bit 13: Peripheral voltage monitoring output 2 (VDDIO2 vs 0.9V) */
 #endif
 #define PWR_SR2_PVMO3            (1 << 14) /* Bit 14: Peripheral voltage monitoring output 3 (VDDA vs 1.62V) */
@@ -208,7 +208,7 @@
 
 /* Power control register 5 */
 
-#if defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4XR)
 #  define PWR_CR5_R1MODE         (1 <<  8) /* Bit  8: Main regulator in Range 1 normal mode. */
 #endif
 

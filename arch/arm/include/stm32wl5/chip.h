@@ -33,30 +33,30 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX)
-#  define STM32WL5_SRAM1_SIZE       (32*1024)   /* 32kB SRAM1 on AHB bus Matrix */
-#  define STM32WL5_SRAM2_SIZE       (32*1024)   /* 32kB SRAM2 on AHB bus Matrix */
+#if defined(CONFIG_STM32_STM32WL5XXX)
+#  define STM32_SRAM1_SIZE       (32*1024)   /* 32kB SRAM1 on AHB bus Matrix */
+#  define STM32_SRAM2_SIZE       (32*1024)   /* 32kB SRAM2 on AHB bus Matrix */
 #else
 #  error "Unsupported STM32L5 chip"
 #endif
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1)
-#  define STM32WL5_NATIM                    1   /* One advanced timer TIM1 */
-#  define STM32WL5_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
-#  define STM32WL5_NGTIM16                  2   /* 16-bit general timers TIM16 and 17 with DMA */
-#  define STM32WL5_NLPTIM                   3   /* Three low-power timer, LPTIM1-3 */
-#  define STM32WL5_NRNG                     1   /* Random number generator (RNG) */
-#  define STM32WL5_NUSART                   2   /* USART 1-2 */
-#  define STM32WL5_NLPUART                  1   /* LPUART 1 */
-#  define STM32WL5_NSPI                     2   /* SPI1 and SPI2S2 (spi2 shared with i2s) */
-#  define STM32WL5_NI2C                     3   /* I2C1-3 */
-#  define STM32WL5_NDMA                     2   /* Two DMA channels DMA1-2 */
-#  define STM32WL5_NPORTS                   4   /* GPIO{A,B,C,H} */
-#  define STM32WL5_NADC                     1   /* ADC1 */
-#  define STM32WL5_NDAC                     1   /* DAC1 */
-#  define STM32WL5_NCRC                     1   /* CRC1 */
-#  define STM32WL5_NCOMP                    1   /* COMP1 */
-#endif /* CONFIG_STM32WL5_STM32WL5XXX */
+#if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
+#  define STM32_NATIM                    1   /* One advanced timer TIM1 */
+#  define STM32_NGTIM32                  1   /* 32-bit general timer TIM2 with DMA */
+#  define STM32_NGTIM16                  2   /* 16-bit general timers TIM16 and 17 with DMA */
+#  define STM32_NLPTIM                   3   /* Three low-power timer, LPTIM1-3 */
+#  define STM32_NRNG                     1   /* Random number generator (RNG) */
+#  define STM32_NUSART                   2   /* USART 1-2 */
+#  define STM32_NLPUART                  1   /* LPUART 1 */
+#  define STM32_NSPI                     2   /* SPI1 and SPI2S2 (spi2 shared with i2s) */
+#  define STM32_NI2C                     3   /* I2C1-3 */
+#  define STM32_NDMA                     2   /* Two DMA channels DMA1-2 */
+#  define STM32_NPORTS                   4   /* GPIO{A,B,C,H} */
+#  define STM32_NADC                     1   /* ADC1 */
+#  define STM32_NDAC                     1   /* DAC1 */
+#  define STM32_NCRC                     1   /* CRC1 */
+#  define STM32_NCOMP                    1   /* COMP1 */
+#endif /* CONFIG_STM32_STM32WL5XXX */
 
 /* NVIC priority levels *****************************************************/
 

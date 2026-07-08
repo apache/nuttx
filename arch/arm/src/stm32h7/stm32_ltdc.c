@@ -127,8 +127,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32H7_LTDC_DEFBACKLIGHT
-#  define CONFIG_STM32H7_LTDC_DEFBACKLIGHT 0xf0
+#ifndef CONFIG_STM32_LTDC_DEFBACKLIGHT
+#  define CONFIG_STM32_LTDC_DEFBACKLIGHT 0xf0
 #endif
 #define STM32_LTDC_BACKLIGHT_OFF 0x00
 
@@ -136,23 +136,23 @@
 
 /* Layer 1 format */
 
-#if defined(CONFIG_STM32H7_LTDC_L1_L8)
+#if defined(CONFIG_STM32_LTDC_L1_L8)
 #  define STM32_LTDC_L1_BPP         8
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB8
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_L8)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_L8
 #  define STM32_LTDC_L1CMAP
-#elif defined(CONFIG_STM32H7_LTDC_L1_RGB565)
+#elif defined(CONFIG_STM32_LTDC_L1_RGB565)
 #  define STM32_LTDC_L1_BPP         16
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB16_565
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB565)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_RGB565
-#elif defined(CONFIG_STM32H7_LTDC_L1_RGB888)
+#elif defined(CONFIG_STM32_LTDC_L1_RGB888)
 #  define STM32_LTDC_L1_BPP         24
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB24
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB888)
 #  define STM32_LTDC_L1_DMA2D_PF    DMA2D_PF_RGB888
-#elif defined(CONFIG_STM32H7_LTDC_L1_ARGB8888)
+#elif defined(CONFIG_STM32_LTDC_L1_ARGB8888)
 #  define STM32_LTDC_L1_BPP         32
 #  define STM32_LTDC_L1_COLOR_FMT   FB_FMT_RGB32
 #  define STM32_LTDC_L1PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_ARGB8888)
@@ -163,24 +163,24 @@
 
 /* Layer 2 format */
 
-#ifdef CONFIG_STM32H7_LTDC_L2
-#  if defined(CONFIG_STM32H7_LTDC_L2_L8)
+#ifdef CONFIG_STM32_LTDC_L2
+#  if defined(CONFIG_STM32_LTDC_L2_L8)
 #   define STM32_LTDC_L2_BPP         8
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB8
 #   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_L8)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_L8
 #   define STM32_LTDC_L2CMAP
-#  elif defined(CONFIG_STM32H7_LTDC_L2_RGB565)
+#  elif defined(CONFIG_STM32_LTDC_L2_RGB565)
 #   define STM32_LTDC_L2_BPP         16
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB16_565
 #   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB565)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_RGB565
-#  elif defined(CONFIG_STM32H7_LTDC_L2_RGB888)
+#  elif defined(CONFIG_STM32_LTDC_L2_RGB888)
 #   define STM32_LTDC_L2_BPP         24
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB24
 #   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_RGB888)
 #   define STM32_LTDC_L2_DMA2D_PF    DMA2D_PF_RGB888
-#  elif defined(CONFIG_STM32H7_LTDC_L2_ARGB8888)
+#  elif defined(CONFIG_STM32_LTDC_L2_ARGB8888)
 #   define STM32_LTDC_L2_BPP         32
 #   define STM32_LTDC_L2_COLOR_FMT   FB_FMT_RGB32
 #   define STM32_LTDC_L2PFCR_PF      LTDC_LXPFCR_PF(LTDC_PF_ARGB8888)
@@ -188,7 +188,7 @@
 #  else
 #   error "LTDC pixel format not supported"
 #  endif
-#endif /* CONFIG_STM32H7_LTDC_L2 */
+#endif /* CONFIG_STM32_LTDC_L2 */
 
 /* Framebuffer sizes in bytes */
 
@@ -208,13 +208,13 @@
 
 #define STM32_LTDC_LX_BYPP(n)       ((n) / 8)
 
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
 #define STM32_LTDC_L1_FBSIZE        (STM32_LTDC_L1_STRIDE * STM32_LTDC_HEIGHT * 2)
 #else
 #define STM32_LTDC_L1_FBSIZE        (STM32_LTDC_L1_STRIDE * STM32_LTDC_HEIGHT)
 #endif
 
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
 #  ifndef CONFIG_STM32H7_LTDC_L2_WIDTH
 #    define CONFIG_STM32H7_LTDC_L2_WIDTH STM32_LTDC_WIDTH
 #  endif
@@ -258,7 +258,7 @@
 
 /* Debug option */
 
-#ifdef CONFIG_STM32H7_LTDC_REGDEBUG
+#ifdef CONFIG_STM32_LTDC_REGDEBUG
 #  define regerr       lcderr
 #  define reginfo      lcdinfo
 #else
@@ -273,10 +273,10 @@
  * against wild framebuffer writes.
  */
 
-#define STM32_LTDC_BUFFER_SIZE      CONFIG_STM32H7_LTDC_FB_SIZE
+#define STM32_LTDC_BUFFER_SIZE      CONFIG_STM32_LTDC_FB_SIZE
 #define STM32_LTDC_BUFFER_FREE      (STM32_LTDC_BUFFER_SIZE - \
                                     STM32_LTDC_TOTAL_FBSIZE)
-#define STM32_LTDC_BUFFER_START     (CONFIG_STM32H7_LTDC_FB_BASE + \
+#define STM32_LTDC_BUFFER_START     (CONFIG_STM32_LTDC_FB_BASE + \
                                     STM32_LTDC_BUFFER_FREE/2)
 
 #if STM32_LTDC_BUFFER_FREE < 0
@@ -289,7 +289,7 @@
 #define STM32_LTDC_ENDBUF_L1        (STM32_LTDC_BUFFER_L1 + \
                                      STM32_LTDC_L1_FBSIZE)
 
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
 #  define STM32_LTDC_BUFFER_L2      STM32_LTDC_ENDBUF_L1
 #  define STM32_LTDC_ENDBUF_L2      (STM32_LTDC_BUFFER_L2 + \
                                      STM32_LTDC_L2_FBSIZE)
@@ -299,7 +299,7 @@
 
 /* LTDC layer */
 
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
 #  define LTDC_NLAYERS 2
 #else
 #  define LTDC_NLAYERS 1
@@ -307,27 +307,27 @@
 
 /* DMA2D layer */
 
-#ifdef CONFIG_STM32H7_DMA2D
-#  define DMA2D_NLAYERS             CONFIG_STM32H7_DMA2D_NLAYERS
+#ifdef CONFIG_STM32_DMA2D
+#  define DMA2D_NLAYERS             CONFIG_STM32_DMA2D_NLAYERS
 #  if DMA2D_NLAYERS < 1
 #    error "DMA2D must at least support 1 overlay"
 #  endif
 
-#define STM32_DMA2D_WIDTH           CONFIG_STM32H7_DMA2D_LAYER_PPLINE
+#define STM32_DMA2D_WIDTH           CONFIG_STM32_DMA2D_LAYER_PPLINE
 
-#  if defined(CONFIG_STM32H7_DMA2D_L8)
+#  if defined(CONFIG_STM32_DMA2D_L8)
 #    define STM32_DMA2D_STRIDE      (STM32_DMA2D_WIDTH)
 #    define STM32_DMA2D_BPP         8
 #    define STM32_DMA2D_COLOR_FMT   DMA2D_PF_L8
-#  elif defined(CONFIG_STM32H7_DMA2D_RGB565)
+#  elif defined(CONFIG_STM32_DMA2D_RGB565)
 #    define STM32_DMA2D_STRIDE      ((STM32_DMA2D_WIDTH * 16 + 7) / 8)
 #    define STM32_DMA2D_BPP         16
 #    define STM32_DMA2D_COLOR_FMT   DMA2D_PF_RGB565
-#  elif defined(CONFIG_STM32H7_DMA2D_RGB888)
+#  elif defined(CONFIG_STM32_DMA2D_RGB888)
 #    define STM32_DMA2D_STRIDE      ((STM32_DMA2D_WIDTH * 24 + 7) / 8)
 #    define STM32_DMA2D_BPP         24
 #    define STM32_DMA2D_COLOR_FMT   DMA2D_PF_RGB888
-#  elif defined(CONFIG_STM32H7_DMA2D_ARGB8888)
+#  elif defined(CONFIG_STM32_DMA2D_ARGB8888)
 #    define STM32_DMA2D_STRIDE      ((STM32_DMA2D_WIDTH * 32 + 7) / 8)
 #    define STM32_DMA2D_BPP         32
 #    define STM32_DMA2D_COLOR_FMT   DMA2D_PF_ARGB8888
@@ -335,63 +335,63 @@
 #    error "DMA2D pixel format not supported"
 #  endif
 
-#  ifdef CONFIG_STM32H7_DMA2D_LAYER_SHARED
-#    define STM32_DMA2D_FBSIZE      CONFIG_STM32H7_DMA2D_FB_SIZE
+#  ifdef CONFIG_STM32_DMA2D_LAYER_SHARED
+#    define STM32_DMA2D_FBSIZE      CONFIG_STM32_DMA2D_FB_SIZE
 #    define STM32_DMA2D_LAYER_SIZE  0
 #  else
-#    define STM32_DMA2D_FBSIZE      CONFIG_STM32H7_DMA2D_FB_SIZE / DMA2D_NLAYERS
+#    define STM32_DMA2D_FBSIZE      CONFIG_STM32_DMA2D_FB_SIZE / DMA2D_NLAYERS
 #    define STM32_DMA2D_LAYER_SIZE  STM32_DMA2D_FBSIZE
-#    if STM32_DMA2D_FBSIZE * DMA2D_NLAYERS > CONFIG_STM32H7_DMA2D_FB_SIZE
+#    if STM32_DMA2D_FBSIZE * DMA2D_NLAYERS > CONFIG_STM32_DMA2D_FB_SIZE
 #      error "DMA2D framebuffer size to small for configured number of overlays"
 #    endif
-#  endif /* CONFIG_STM32H7_DMA2D_LAYER_SHARED */
+#  endif /* CONFIG_STM32_DMA2D_LAYER_SHARED */
 
 #  define STM32_DMA2D_HEIGHT         STM32_DMA2D_FBSIZE / STM32_DMA2D_STRIDE
 
-#  define STM32_DMA2D_BUFFER_START   CONFIG_STM32H7_DMA2D_FB_BASE
+#  define STM32_DMA2D_BUFFER_START   CONFIG_STM32_DMA2D_FB_BASE
 #else
 #  define DMA2D_NLAYERS              0
-#endif /* CONFIG_STM32H7_DMA2D */
+#endif /* CONFIG_STM32_DMA2D */
 
 #define LTDC_NOVERLAYS              LTDC_NLAYERS + DMA2D_NLAYERS
 
 /* Dithering */
 
-#ifndef CONFIG_STM32H7_LTDC_DITHER_RED
+#ifndef CONFIG_STM32_LTDC_DITHER_RED
 #  define STM32_LTDC_DITHER_RED     0
 #else
-#  define STM32_LTDC_DITHER_RED     CONFIG_STM32H7_LTDC_DITHER_RED
+#  define STM32_LTDC_DITHER_RED     CONFIG_STM32_LTDC_DITHER_RED
 #endif
-#ifndef CONFIG_STM32H7_LTDC_DITHER_GREEN
+#ifndef CONFIG_STM32_LTDC_DITHER_GREEN
 #  define STM32_LTDC_DITHER_GREEN   0
 #else
-#  define STM32_LTDC_DITHER_GREEN   CONFIG_STM32H7_LTDC_DITHER_GREEN
+#  define STM32_LTDC_DITHER_GREEN   CONFIG_STM32_LTDC_DITHER_GREEN
 #endif
-#ifndef CONFIG_STM32H7_LTDC_DITHER_BLUE
+#ifndef CONFIG_STM32_LTDC_DITHER_BLUE
 #  define STM32_LTDC_DITHER_BLUE    0
 #else
-#  define STM32_LTDC_DITHER_BLUE    CONFIG_STM32H7_LTDC_DITHER_BLUE
+#  define STM32_LTDC_DITHER_BLUE    CONFIG_STM32_LTDC_DITHER_BLUE
 #endif
 
 /* Background color */
 
-#ifndef CONFIG_STM32H7_LTDC_BACKCOLOR
+#ifndef CONFIG_STM32_LTDC_BACKCOLOR
 #  define STM32_LTDC_BACKCOLOR      0
 #else
-#  define STM32_LTDC_BACKCOLOR      CONFIG_STM32H7_LTDC_BACKCOLOR
+#  define STM32_LTDC_BACKCOLOR      CONFIG_STM32_LTDC_BACKCOLOR
 #endif
 
 /* Layer default color */
 
-#ifdef CONFIG_STM32H7_LTDC_L1_COLOR
-#  define STM32_LTDC_L1_COLOR        CONFIG_STM32H7_LTDC_L1_COLOR
+#ifdef CONFIG_STM32_LTDC_L1_COLOR
+#  define STM32_LTDC_L1_COLOR        CONFIG_STM32_LTDC_L1_COLOR
 #else
 #  define STM32_LTDC_L1_COLOR        0x000000
 #endif
 
-#ifdef CONFIG_STM32H7_LTDC_L2
-#  ifdef CONFIG_STM32H7_LTDC_L2_COLOR
-#    define STM32_LTDC_L2_COLOR        CONFIG_STM32H7_LTDC_L2_COLOR
+#ifdef CONFIG_STM32_LTDC_L2
+#  ifdef CONFIG_STM32_LTDC_L2_COLOR
+#    define STM32_LTDC_L2_COLOR        CONFIG_STM32_LTDC_L2_COLOR
 #  else
 #    define STM32_LTDC_L2_COLOR        0x000000
 #  endif
@@ -425,28 +425,28 @@
 
 /* Check pixel format support by DMA2D driver */
 
-#ifdef CONFIG_STM32H7_DMA2D
-#  if defined(CONFIG_STM32H7_LTDC_L1_L8) || \
-      defined(CONFIG_STM32H7_LTDC_L2_L8)
-#    if !defined(CONFIG_STM32H7_DMA2D_L8)
+#ifdef CONFIG_STM32_DMA2D
+#  if defined(CONFIG_STM32_LTDC_L1_L8) || \
+      defined(CONFIG_STM32_LTDC_L2_L8)
+#    if !defined(CONFIG_STM32_DMA2D_L8)
 #      error "DMA2D must support FB_FMT_RGB8 pixel format"
 #    endif
 #  endif
-#  if defined(CONFIG_STM32H7_LTDC_L1_RGB565) || \
-      defined(CONFIG_STM32H7_LTDC_L2_RGB565)
-#    if !defined(CONFIG_STM32H7_DMA2D_RGB565)
+#  if defined(CONFIG_STM32_LTDC_L1_RGB565) || \
+      defined(CONFIG_STM32_LTDC_L2_RGB565)
+#    if !defined(CONFIG_STM32_DMA2D_RGB565)
 #      error "DMA2D must support FB_FMT_RGB16_565 pixel format"
 #    endif
 #  endif
-#  if defined(CONFIG_STM32H7_LTDC_L1_RGB888) || \
-      defined(CONFIG_STM32H7_LTDC_L2_RGB888)
-#    if !defined(CONFIG_STM32H7_DMA2D_RGB888)
+#  if defined(CONFIG_STM32_LTDC_L1_RGB888) || \
+      defined(CONFIG_STM32_LTDC_L2_RGB888)
+#    if !defined(CONFIG_STM32_DMA2D_RGB888)
 #      error "DMA2D must support FB_FMT_RGB24 pixel format"
 #    endif
 #  endif
-#  if defined(CONFIG_STM32H7_LTDC_L1_ARGB8888) || \
-      defined(CONFIG_STM32H7_LTDC_L2_ARGB8888)
-#    if !defined(CONFIG_STM32H7_DMA2D_ARGB8888)
+#  if defined(CONFIG_STM32_LTDC_L1_ARGB8888) || \
+      defined(CONFIG_STM32_LTDC_L2_ARGB8888)
+#    if !defined(CONFIG_STM32_DMA2D_ARGB8888)
 #      error "DMA2D must support FB_FMT_RGB32 pixel format"
 #    endif
 #  endif
@@ -454,12 +454,12 @@
 
 /* Calculate the size of the layers clut table */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
-#  if defined(CONFIG_STM32H7_DMA2D) && !defined(CONFIG_STM32H7_DMA2D_L8)
+#ifdef CONFIG_STM32_FB_CMAP
+#  if defined(CONFIG_STM32_DMA2D) && !defined(CONFIG_STM32_DMA2D_L8)
 #    error "DMA2D must also support L8 CLUT pixel format if supported by LTDC"
 #  endif
 #  ifdef STM32_LTDC_L1CMAP
-#    ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#    ifdef CONFIG_STM32_FB_TRANSPARENCY
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * sizeof(uint32_t)
 #    else
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * 3 * sizeof(uint8_t)
@@ -467,7 +467,7 @@
 #  endif
 #  ifdef STM32_LTDC_L2CMAP
 #    undef  STM32_LAYER_CLUT_SIZE
-#    ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#    ifdef CONFIG_STM32_FB_TRANSPARENCY
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * sizeof(uint32_t) * 2
 #    else
 #      define STM32_LAYER_CLUT_SIZE STM32_LTDC_NCLUT * 3 * sizeof(uint8_t) * 2
@@ -475,7 +475,7 @@
 #  endif
 #endif
 
-#ifndef CONFIG_STM32H7_FB_CMAP
+#ifndef CONFIG_STM32_FB_CMAP
 #  if defined(STM32_LTDC_L1CMAP) || defined(STM32_LTDC_L2CMAP)
 #    undef STM32_LTDC_L1CMAP
 #    undef STM32_LTDC_L2CMAP
@@ -512,9 +512,9 @@
 
 /* Acceleration support for LTDC overlays */
 
-#ifdef CONFIG_STM32H7_LTDC_L1_CHROMAKEYEN
+#ifdef CONFIG_STM32_LTDC_L1_CHROMAKEYEN
 #  define STM32_LTDC_L1_CHROMAEN    true
-#  define STM32_LTDC_L1_CHROMAKEY   CONFIG_STM32H7_LTDC_L1_CHROMAKEY
+#  define STM32_LTDC_L1_CHROMAKEY   CONFIG_STM32_LTDC_L1_CHROMAKEY
 #  define LTDC_LTDC_ACCL_L1         FB_ACCL_TRANSP | FB_ACCL_CHROMA
 #else
 #  define STM32_LTDC_L1_CHROMAEN    false
@@ -522,9 +522,9 @@
 #  define LTDC_LTDC_ACCL_L1         FB_ACCL_TRANSP
 #endif
 
-#ifdef CONFIG_STM32H7_LTDC_L2_CHROMAKEYEN
+#ifdef CONFIG_STM32_LTDC_L2_CHROMAKEYEN
 #  define STM32_LTDC_L2_CHROMAEN    true
-#  define STM32_LTDC_L2_CHROMAKEY   CONFIG_STM32H7_LTDC_L2_CHROMAKEY
+#  define STM32_LTDC_L2_CHROMAKEY   CONFIG_STM32_LTDC_L2_CHROMAKEY
 #  define LTDC_LTDC_ACCL_L2         FB_ACCL_TRANSP | FB_ACCL_CHROMA
 #else
 #  define STM32_LTDC_L2_CHROMAEN    false
@@ -532,34 +532,34 @@
 #  define LTDC_LTDC_ACCL_L2         FB_ACCL_TRANSP
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
 #  ifdef CONFIG_FB_OVERLAY_BLIT
-#    ifdef CONFIG_STM32H7_FB_CMAP
+#    ifdef CONFIG_STM32_FB_CMAP
 #      define LTDC_BLIT_ACCL        FB_ACCL_BLIT
 #    else
 #      define LTDC_BLIT_ACCL        FB_ACCL_BLIT | FB_ACCL_BLEND
-#    endif /* CONFIG_STM32H7_FB_CMAP */
+#    endif /* CONFIG_STM32_FB_CMAP */
 #  else
 #    define LTDC_BLIT_ACCL          0
 #  endif /* CONFIG_FB_OVERLAY_BLIT */
 
-#  ifdef CONFIG_STM32H7_FB_CMAP
+#  ifdef CONFIG_STM32_FB_CMAP
 #    define LTDC_DMA2D_ACCL         LTDC_BLIT_ACCL
 #  else
 #    define LTDC_DMA2D_ACCL         FB_ACCL_COLOR | LTDC_BLIT_ACCL
-#  endif /* CONFIG_STM32H7_FB_CMAP */
+#  endif /* CONFIG_STM32_FB_CMAP */
 #else
 #  define LTDC_DMA2D_ACCL           0
-#endif /* CONFIG_STM32H7_DMA2D */
+#endif /* CONFIG_STM32_DMA2D */
 
 #define LTDC_L1_ACCL                LTDC_LTDC_ACCL_L1 | LTDC_DMA2D_ACCL
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
 #  define LTDC_L2_ACCL              LTDC_LTDC_ACCL_L2 | LTDC_DMA2D_ACCL
 #endif
 
 /* Acceleration support for DMA2D overlays */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 #  ifdef CONFIG_FB_OVERLAY_BLIT
 #    define DMA2D_ACCL              FB_ACCL_BLIT | FB_ACCL_AREA
 #  else
@@ -585,7 +585,7 @@
 
 /* Color normalization */
 
-#if defined(CONFIG_STM32H7_LTDC_L1_RGB565)
+#if defined(CONFIG_STM32_LTDC_L1_RGB565)
 #  define RGB888_R(x)               (((((x) >> 11) & 0x1f) * 527 + 23) >> 6)
 #  define RGB888_G(x)               (((((x) >> 5) & 0x3f) * 259 + 33) >> 6)
 #  define RGB888_B(x)               ((((x) & 0x1f) * 527 + 23) >> 6)
@@ -618,7 +618,7 @@ struct stm32_ltdc_s
   struct   fb_overlayinfo_s oinfo;            /* Overlay info */
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   struct stm32_dma2d_overlay_s dma2dinfo;     /* Overlay info for DMA2D */
 #endif
 
@@ -643,7 +643,7 @@ struct stm32_ltdcdev_s
 
   /* Cmap information */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   struct fb_cmap_s cmap;
 #endif
 
@@ -651,7 +651,7 @@ struct stm32_ltdcdev_s
 
   struct stm32_ltdc_s layer[LTDC_NOVERLAYS];
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   /* Interface to the dma2d controller */
 
   struct dma2d_layer_s *dma2d;
@@ -699,7 +699,7 @@ static void stm32_ltdc_lchromakeyenable(struct stm32_ltdc_s *layer,
                                         bool enable);
 static void stm32_ltdc_linit(uint8_t lid);
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
 static void stm32_ltdc_dma2dlinit(void);
 
 #  ifdef CONFIG_FB_OVERLAY_BLIT
@@ -708,7 +708,7 @@ static bool stm32_ltdc_lvalidate(const struct stm32_ltdc_s *layer,
 #  endif
 #endif
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static void stm32_ltdc_lputclut(struct stm32_ltdc_s *layer,
                                 const struct fb_cmap_s *cmap);
 static void stm32_ltdc_lgetclut(struct stm32_ltdc_s *layer,
@@ -731,7 +731,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable,
  * mapping
  */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_getcmap(struct fb_vtable_s *vtable,
                          struct fb_cmap_s *cmap);
 static int stm32_putcmap(struct fb_vtable_s *vtable,
@@ -746,7 +746,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
 static int stm32_waitforvsync(struct fb_vtable_s *vtable);
 #endif
 
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
 static int stm32_pandisplay(struct fb_vtable_s *vtable,
                             struct fb_planeinfo_s *pinfo);
 #endif
@@ -806,16 +806,16 @@ static const uint32_t g_ltdcpins[] =
 
 #define STM32_LTDC_NPINCONFIGS (sizeof(g_ltdcpins) / sizeof(uint32_t))
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 /* The layers clut table entries */
 
 static uint8_t g_redclut[STM32_LTDC_NCLUT];
 static uint8_t g_greenclut[STM32_LTDC_NCLUT];
 static uint8_t g_blueclut[STM32_LTDC_NCLUT];
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
 static uint8_t g_transpclut[STM32_LTDC_NCLUT];
 #  endif
-#endif /* CONFIG_STM32H7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /* The LTDC semaphore that enforces mutually exclusive access */
 
@@ -847,12 +847,12 @@ static struct stm32_ltdcdev_s g_vtable =
       .waitforvsync    = stm32_waitforvsync
 #endif
 
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
       ,
       .pandisplay = stm32_pandisplay
 #endif
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
       ,
       .getcmap         = stm32_getcmap,
       .putcmap         = stm32_putcmap
@@ -873,7 +873,7 @@ static struct stm32_ltdcdev_s g_vtable =
 #  endif
 #endif /* CONFIG_FB_OVERLAY */
   },
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   .pinfo =
     {
       .fbmem           = (uint8_t *)STM32_LTDC_BUFFER_L2,
@@ -901,7 +901,7 @@ static struct stm32_ltdcdev_s g_vtable =
       .display         = 0,
       .bpp             = STM32_LTDC_L1_BPP,
       .xres_virtual    = STM32_LTDC_WIDTH,
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
       .yres_virtual    = STM32_LTDC_HEIGHT * 2,
 #else
       .yres_virtual    = STM32_LTDC_HEIGHT,
@@ -919,9 +919,9 @@ static struct stm32_ltdcdev_s g_vtable =
       .noverlays       = LTDC_NOVERLAYS
 #  endif
     }
-#endif /* CONFIG_STM32H7_LTDC_L2 */
+#endif /* CONFIG_STM32_LTDC_L2 */
   ,
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   .cmap =
     {
       .first           = 0,
@@ -929,7 +929,7 @@ static struct stm32_ltdcdev_s g_vtable =
       .red             = g_redclut,
       .green           = g_greenclut,
       .blue            = g_blueclut,
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
       .transp          = g_transpclut
 #  endif
     }
@@ -965,7 +965,7 @@ static struct stm32_ltdcdev_s g_vtable =
         },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
       .dma2dinfo =
         {
             .fmt            = STM32_LTDC_L1_DMA2D_PF,
@@ -977,7 +977,7 @@ static struct stm32_ltdcdev_s g_vtable =
 #endif
       .lock = &g_lock
     }
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   ,
   .layer[LTDC_LAYER_L2] =
     {
@@ -1009,7 +1009,7 @@ static struct stm32_ltdcdev_s g_vtable =
         },
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
       .dma2dinfo =
         {
             .fmt            = STM32_LTDC_L2_DMA2D_PF,
@@ -1031,7 +1031,7 @@ static struct stm32_ltdcdev_s g_vtable =
 static const uint32_t stm32_width_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_WIDTH
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_WIDTH
 #endif
 };
@@ -1041,7 +1041,7 @@ static const uint32_t stm32_width_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_height_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_HEIGHT
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_HEIGHT
 #endif
 };
@@ -1051,7 +1051,7 @@ static const uint32_t stm32_height_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_stride_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_STRIDE
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_STRIDE
 #endif
 };
@@ -1061,7 +1061,7 @@ static const uint32_t stm32_stride_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_bpp_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_BPP
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_BPP
 #endif
 };
@@ -1071,7 +1071,7 @@ static const uint32_t stm32_bpp_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_fblen_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_FBSIZE
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_FBSIZE
 #endif
 };
@@ -1081,7 +1081,7 @@ static const uint32_t stm32_fblen_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_fbmem_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_BUFFER_L1
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_BUFFER_L2
 #endif
 };
@@ -1091,7 +1091,7 @@ static const uint32_t stm32_fbmem_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_defaultcolor_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_COLOR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_COLOR
 #endif
 };
@@ -1101,7 +1101,7 @@ static const uint32_t stm32_defaultcolor_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_chromakey_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_CHROMAKEY
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_CHROMAKEY
 #endif
 };
@@ -1111,7 +1111,7 @@ static const uint32_t stm32_chromakey_layer_t[LTDC_NLAYERS] =
 static const bool stm32_chromakeyen_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1_CHROMAEN
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2_CHROMAEN
 #endif
 };
@@ -1121,7 +1121,7 @@ static const bool stm32_chromakeyen_layer_t[LTDC_NLAYERS] =
 static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1PFCR_PF
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2PFCR_PF
 #endif
 };
@@ -1133,7 +1133,7 @@ static const uint32_t stm32_fmt_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CR
 #endif
 };
@@ -1143,7 +1143,7 @@ static const uintptr_t stm32_cr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_whpcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1WHPCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2WHPCR
 #endif
 };
@@ -1153,7 +1153,7 @@ static const uintptr_t stm32_whpcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_wvpcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1WVPCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2WVPCR
 #endif
 };
@@ -1163,7 +1163,7 @@ static const uintptr_t stm32_wvpcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_pfcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1PFCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2PFCR
 #endif
 };
@@ -1173,7 +1173,7 @@ static const uintptr_t stm32_pfcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_dccr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1DCCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2DCCR
 #endif
 };
@@ -1183,7 +1183,7 @@ static const uintptr_t stm32_dccr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_ckcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CKCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CKCR
 #endif
 };
@@ -1193,7 +1193,7 @@ static const uintptr_t stm32_ckcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cacr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CACR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CACR
 #endif
 };
@@ -1203,7 +1203,7 @@ static const uintptr_t stm32_cacr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_bfcr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1BFCR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2BFCR
 #endif
 };
@@ -1213,7 +1213,7 @@ static const uintptr_t stm32_bfcr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfbar_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBAR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CFBAR
 #endif
 };
@@ -1223,7 +1223,7 @@ static const uintptr_t stm32_cfbar_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfblr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBLR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CFBLR
 #endif
 };
@@ -1233,22 +1233,22 @@ static const uintptr_t stm32_cfblr_layer_t[LTDC_NLAYERS] =
 static const uintptr_t stm32_cfblnr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CFBLNR
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CFBLNR
 #endif
 };
 
 /* LTDC_LxCLUTWR */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static const uintptr_t stm32_clutwr_layer_t[LTDC_NLAYERS] =
 {
   STM32_LTDC_L1CLUTWR
-#  ifdef CONFIG_STM32H7_LTDC_L2
+#  ifdef CONFIG_STM32_LTDC_L2
   , STM32_LTDC_L2CLUTWR
 #  endif
 };
-#endif /* CONFIG_STM32H7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /* The initialized state of the driver */
 
@@ -1501,7 +1501,7 @@ static int stm32_ltdcirq(int irq, void *context, void *arg)
       putreg32(LTDC_ICR_CRRIF, STM32_LTDC_ICR);
       priv->error = OK;
 
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
       fb_remove_paninfo(&g_vtable.vtable, FB_NO_OVERLAY);
 #endif
     }
@@ -1681,7 +1681,7 @@ static void stm32_ltdc_globalconfig(void)
   /* Configure dither */
 
   stm32_ltdc_dither(
-#ifdef CONFIG_STM32H7_LTDC_DITHER
+#ifdef CONFIG_STM32_LTDC_DITHER
                     true,
 #else
                     false,
@@ -1953,7 +1953,7 @@ static void stm32_ltdc_lchromakey(struct stm32_ltdc_s *layer,
 
   /* Set chromakey */
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   uint8_t r = g_vtable.cmap.red[chroma];
   uint8_t g = g_vtable.cmap.green[chroma];
   uint8_t b = g_vtable.cmap.blue[chroma];
@@ -2023,7 +2023,7 @@ static void stm32_ltdc_lchromakeyenable(struct stm32_ltdc_s *layer,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static void stm32_ltdc_lclutenable(struct stm32_ltdc_s *layer, bool enable)
 {
   uint32_t regval;
@@ -2127,7 +2127,7 @@ static void stm32_ltdc_lgetclut(struct stm32_ltdc_s *layer,
 
   for (n = cmap->first; n < cmap->len && n < STM32_LTDC_NCLUT; n++)
     {
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
       cmap->transp[n] = priv_cmap->transp[n];
 #  endif
       cmap->red[n]    = priv_cmap->red[n];
@@ -2136,7 +2136,7 @@ static void stm32_ltdc_lgetclut(struct stm32_ltdc_s *layer,
 
       reginfo("color = %d, transp=%02x, red=%02x, green=%02x, blue=%02x\n",
               n,
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
               cmap->transp[n],
 #  endif
               cmap->red[n],
@@ -2144,7 +2144,7 @@ static void stm32_ltdc_lgetclut(struct stm32_ltdc_s *layer,
               cmap->blue[n]);
     }
 }
-#endif /* CONFIG_STM32H7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /****************************************************************************
  * Name: stm32_ltdc_lclear
@@ -2176,7 +2176,7 @@ static void stm32_ltdc_lclear(uint8_t overlayno)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32H7_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT)
+#if defined(CONFIG_STM32_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT)
 static bool stm32_ltdc_lvalidate(const struct stm32_ltdc_s *layer,
                                  const struct fb_area_s *area)
 {
@@ -2187,7 +2187,7 @@ static bool stm32_ltdc_lvalidate(const struct stm32_ltdc_s *layer,
 
   return (offset <= layer->oinfo.fblen && area->w > 0 && area->h > 0);
 }
-#endif /* defined(CONFIG_STM32H7_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT) */
+#endif /* defined(CONFIG_STM32_DMA2D) && defined(CONFIG_FB_OVERLAY_BLIT) */
 
 /****************************************************************************
  * Name: stm32_ltdc_linit
@@ -2247,7 +2247,7 @@ static void stm32_ltdc_linit(uint8_t overlay)
 
   stm32_ltdc_lchromakeyenable(layer, stm32_chromakeyen_layer_t[overlay]);
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   /* Disable clut by default */
 
   if (dev->vinfo.fmt == FB_FMT_RGB8)
@@ -2287,7 +2287,7 @@ static void stm32_ltdc_linit(uint8_t overlay)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
 static void stm32_ltdc_dma2dlinit(void)
 {
   int n;
@@ -2323,7 +2323,7 @@ static void stm32_ltdc_dma2dlinit(void)
       layer->dma2dinfo.oinfo          = &layer->oinfo;
     }
 }
-#endif /* CONFIG_STM32H7_DMA2D */
+#endif /* CONFIG_STM32_DMA2D */
 
 /****************************************************************************
  * Public Functions
@@ -2410,7 +2410,7 @@ static int stm32_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
 static int stm32_getcmap(struct fb_vtable_s *vtable,
                          struct fb_cmap_s *cmap)
 {
@@ -2440,7 +2440,7 @@ static int stm32_getcmap(struct fb_vtable_s *vtable,
        */
 
       struct stm32_ltdc_s *layer;
-#  ifdef CONFIG_STM32H7_LTDC_L2
+#  ifdef CONFIG_STM32_LTDC_L2
       layer = &priv->layer[LTDC_LAYER_L2];
 #  else
       layer = &priv->layer[LTDC_LAYER_L1];
@@ -2510,7 +2510,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
           priv_cmap->red[n] = cmap->red[n];
           priv_cmap->green[n] = cmap->green[n];
           priv_cmap->blue[n] = cmap->blue[n];
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
           /* Not supported by LTDC */
 
           priv_cmap->transp[n] = cmap->transp[n];
@@ -2530,7 +2530,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
           stm32_ltdc_lputclut(layer, priv_cmap);
         }
 
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
       /* Update dma2d cmap */
 
       priv->dma2d->setclut(cmap);
@@ -2542,7 +2542,7 @@ static int stm32_putcmap(struct fb_vtable_s *vtable,
 
   return ret;
 }
-#endif /* CONFIG_STM32H7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
 /****************************************************************************
  * Name: stm32_ioctl_waitforvsync
@@ -2570,7 +2570,7 @@ static int stm32_waitforvsync(struct fb_vtable_s *vtable)
  * Description:
  *   Entrypoint ioctl FBIOPAN_DISPLAY
  ****************************************************************************/
-#if defined(CONFIG_STM32H7_LTDC_FB_DOUBLE_BUFFER)
+#if defined(CONFIG_STM32_LTDC_FB_DOUBLE_BUFFER)
 static int stm32_pandisplay(struct fb_vtable_s *vtable,
                             struct fb_planeinfo_s *pinfo)
 {
@@ -2647,7 +2647,7 @@ static int stm32_settransp(struct fb_vtable_s *vtable,
       layer->oinfo.transp.transp      = oinfo->transp.transp;
       layer->oinfo.transp.transp_mode = oinfo->transp.transp_mode;
 
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
       if (layer->oinfo.transp.transp_mode == 0)
         {
           layer->dma2dinfo.transp_mode = STM32_DMA2D_PFCCR_AM_CONST;
@@ -2694,14 +2694,14 @@ static int stm32_setchromakey(struct fb_vtable_s *vtable,
       int ret;
       struct stm32_ltdc_s *layer = &priv->layer[oinfo->overlay];
 
-#  ifndef CONFIG_STM32H7_LTDC_L1_CHROMAKEY
+#  ifndef CONFIG_STM32_LTDC_L1_CHROMAKEY
       if (oinfo->overlay == LTDC_LAYER_L1)
         {
           return -ENOSYS;
         }
 #  endif
 
-#  ifndef CONFIG_STM32H7_LTDC_L2_CHROMAKEY
+#  ifndef CONFIG_STM32_LTDC_L2_CHROMAKEY
       if (oinfo->overlay == LTDC_LAYER_L2)
         {
           return -ENOSYS;
@@ -2709,7 +2709,7 @@ static int stm32_setchromakey(struct fb_vtable_s *vtable,
 #  endif
 
       nxsem_wait(layer->lock);
-#  ifdef CONFIG_STM32H7_FB_CMAP
+#  ifdef CONFIG_STM32_FB_CMAP
       if (oinfo->chromakey >= g_vtable.cmap.len)
         {
           lcderr("ERROR: Clut index %d is out of range\n", oinfo->chromakey);
@@ -2729,7 +2729,7 @@ static int stm32_setchromakey(struct fb_vtable_s *vtable,
       nxsem_post(layer->lock);
       return ret;
     }
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
   else if (oinfo->overlay < LTDC_NOVERLAYS)
     {
       /* Chromakey not supported by DMA2D */
@@ -2757,7 +2757,7 @@ static int stm32_setcolor(struct fb_vtable_s *vtable,
 
   if (oinfo->overlay < LTDC_NOVERLAYS)
     {
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
 
       /* Set color within the active overlay is not supported by LTDC. So use
        * DMA2D controller instead when configured.
@@ -2817,7 +2817,7 @@ static int stm32_setblank(struct fb_vtable_s *vtable,
 
       return OK;
     }
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
   else if (oinfo->overlay < LTDC_NOVERLAYS)
     {
       /* DMA2D overlays are non visible */
@@ -2851,7 +2851,7 @@ static int stm32_setarea(struct fb_vtable_s *vtable,
       return -ENOSYS;
     }
 
-#  ifdef CONFIG_STM32H7_DMA2D
+#  ifdef CONFIG_STM32_DMA2D
   if (oinfo->overlay < LTDC_NOVERLAYS)
     {
       struct stm32_ltdcdev_s *priv = (struct stm32_ltdcdev_s *)vtable;
@@ -2885,7 +2885,7 @@ static int stm32_blit(struct fb_vtable_s *vtable,
   if (blit->dest.overlay < LTDC_NOVERLAYS &&
       blit->src.overlay < LTDC_NOVERLAYS)
     {
-#    ifdef CONFIG_STM32H7_DMA2D
+#    ifdef CONFIG_STM32_DMA2D
       int ret;
       struct fb_area_s sarea;
       const struct fb_area_s *darea = &blit->dest.area;
@@ -2944,7 +2944,7 @@ static int stm32_blend(struct fb_vtable_s *vtable,
       blend->foreground.overlay < LTDC_NOVERLAYS &&
       blend->background.overlay < LTDC_NOVERLAYS)
     {
-#    ifdef CONFIG_STM32H7_DMA2D
+#    ifdef CONFIG_STM32_DMA2D
       int ret;
       struct fb_area_s barea;
       const struct fb_area_s *darea = &blend->dest.area;
@@ -3055,7 +3055,7 @@ int stm32_ltdcinitialize(void)
   lcdinfo("Configure global register\n");
   stm32_ltdc_globalconfig();
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   /* Initialize the dma2d controller */
 
   ret = stm32_dma2dinitialize();
@@ -3071,26 +3071,26 @@ int stm32_ltdcinitialize(void)
   DEBUGASSERT(g_vtable.dma2d != NULL);
 #endif
 
-#ifdef CONFIG_STM32H7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   /* Cleanup clut */
 
   memset(&g_redclut, 0, STM32_LTDC_NCLUT);
   memset(&g_blueclut, 0, STM32_LTDC_NCLUT);
   memset(&g_greenclut, 0, STM32_LTDC_NCLUT);
-#  ifdef CONFIG_STM32H7_FB_TRANSPARENCY
+#  ifdef CONFIG_STM32_FB_TRANSPARENCY
   memset(&g_transpclut, 0, STM32_LTDC_NCLUT);
 #  endif
-#endif /* CONFIG_STM32H7_FB_CMAP */
+#endif /* CONFIG_STM32_FB_CMAP */
 
   /* Initialize ltdc layer */
 
   lcdinfo("Initialize ltdc layer\n");
   stm32_ltdc_linit(LTDC_LAYER_L1);
-#ifdef CONFIG_STM32H7_LTDC_L2
+#ifdef CONFIG_STM32_LTDC_L2
   stm32_ltdc_linit(LTDC_LAYER_L2);
 #endif
 
-#ifdef CONFIG_STM32H7_DMA2D
+#ifdef CONFIG_STM32_DMA2D
   stm32_ltdc_dma2dlinit();
 #endif
   /* Enable the backlight */
@@ -3184,7 +3184,7 @@ void stm32_ltdcuninitialize(void)
 #ifdef CONFIG_STM32H7_LCD_BACKLIGHT
 void stm32_backlight(bool blon)
 {
-  /* Set default backlight level CONFIG_STM32H7_LTDC_DEFBACKLIGHT */
+  /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
 
   lcderr("ERROR: Not supported\n");
 }

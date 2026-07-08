@@ -31,7 +31,7 @@
 
 #include "hardware/stm32_ethernet.h"
 
-#if STM32F7_NETHERNET > 0
+#if STM32_NETHERNET > 0
 #ifndef __ASSEMBLY__
 
 /****************************************************************************
@@ -67,7 +67,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if STM32F7_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
+#if STM32_NETHERNET > 1 || defined(CONFIG_NETDEV_LATEINIT)
 int stm32_ethinitialize(int intf);
 #endif
 
@@ -77,7 +77,7 @@ int stm32_ethinitialize(int intf);
  * Description:
  *   Some boards require specialized initialization of the PHY before it can
  *   be used. This may include such things as configuring GPIOs, resetting
- *   the PHY, etc.  If CONFIG_STM32F7_PHYINIT is defined in the
+ *   the PHY, etc.  If CONFIG_STM32_PHYINIT is defined in the
  *   configuration then the board specific logic must provide
  *   stm32_phyinitialize();  The STM32 Ethernet driver will call this
  *   function one time before it first uses the PHY.
@@ -92,7 +92,7 @@ int stm32_ethinitialize(int intf);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_PHYINIT
+#ifdef CONFIG_STM32_PHYINIT
 int stm32_phy_boardinitialize(int intf);
 #endif
 
@@ -102,5 +102,5 @@ int stm32_phy_boardinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* STM32F7_NETHERNET > 0 */
+#endif /* STM32_NETHERNET > 0 */
 #endif /* __ARCH_ARM_SRC_STM32F7_STM32_ETHERNET_H */

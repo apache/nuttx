@@ -612,6 +612,7 @@ static int esp_rtc_rdalarm(struct rtc_lowerhalf_s *lower,
   struct timespec ts;
   struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
+  uint64_t time_us;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarminfo != NULL);
@@ -625,10 +626,11 @@ static int esp_rtc_rdalarm(struct rtc_lowerhalf_s *lower,
 
   cbinfo = &priv->alarmcb[alarminfo->id];
 
-  ts.tv_sec = (esp_hr_timer_time_us() + g_rtc_save->offset +
-              cbinfo->deadline_us) / USEC_PER_SEC;
-  ts.tv_nsec = ((esp_hr_timer_time_us() + g_rtc_save->offset +
-              cbinfo->deadline_us) % USEC_PER_SEC) * NSEC_PER_USEC;
+  time_us = esp_hr_timer_time_us() + g_rtc_save->offset +
+            cbinfo->deadline_us;
+
+  ts.tv_sec = time_us / USEC_PER_SEC;
+  ts.tv_nsec = (time_us % USEC_PER_SEC) * NSEC_PER_USEC;
 
   localtime_r(&ts.tv_sec, (struct tm *)alarminfo->time);
 

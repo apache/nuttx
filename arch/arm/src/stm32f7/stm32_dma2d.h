@@ -65,7 +65,7 @@ struct dma2d_layer_s
    *   On error   - -EINVAL
    */
 
-#ifdef CONFIG_STM32F7_FB_CMAP
+#ifdef CONFIG_STM32_FB_CMAP
   int (*setclut)(const struct fb_cmap_s * cmap);
 #endif
 

@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * arm_decodeirq() and/or lpc23xx_decodeirq()
+ * arm_decodeirq()
  *
  * Description:
  *   The vectored interrupt controller (VIC) takes 32 interrupt request
@@ -84,21 +84,11 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 uint32_t *arm_decodeirq(uint32_t *regs)
-#else
-static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
-#endif
 {
-  struct tcb_s *tcb = this_task();
-
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   err("ERROR: Unexpected IRQ\n");
-
-  tcb->xcp.regs = regs;
-  up_set_interrupt_context(true);
   PANIC();
-  return NULL;
 #else
 
   /* Check which IRQ fires */
@@ -116,50 +106,13 @@ static uint32_t *lpc23xx_decodeirq(uint32_t *regs)
 
   /* Verify that the resulting IRQ number is valid */
 
-  if (irq < NR_IRQS)            /* redundant check ?? */
+  if (irq < NR_IRQS)
     {
-      uint32_t *saveregs;
-      bool savestate;
-
-      savestate = up_interrupt_context();
-      saveregs = tcb->xcp.regs;
-      up_set_interrupt_context(true);
-      tcb->xcp.regs = regs;
-
-      /* Acknowledge the interrupt */
-
-      arm_ack_irq(irq);
-
       /* Deliver the IRQ */
 
-      irq_dispatch(irq, regs);
-
-      /* Restore the previous value of saveregs. */
-
-      up_set_interrupt_context(savestate);
-      tcb->xcp.regs = saveregs;
+      regs = arm_doirq(irq, regs);
     }
-
-  return NULL;  /* Return not used in this architecture */
 #endif
+
+  return regs;
 }
-
-#ifdef CONFIG_VECTORED_INTERRUPTS
-uint32_t *arm_decodeirq(uint32_t *regs)
-{
-  vic_vector_t vector = (vic_vector_t) vic_getreg(VIC_ADDRESS_OFFSET);
-
-  /* Acknowledge the interrupt */
-
-  arm_ack_irq(irq);
-
-  /* Valid Interrupt */
-
-  if (vector != NULL)
-    {
-      (vector)(regs);
-    }
-
-  return NULL;  /* Return not used in this architecture */
-}
-#endif

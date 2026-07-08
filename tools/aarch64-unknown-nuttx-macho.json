@@ -23,6 +23,7 @@
   },
   "os": "nuttx",
   "panic-strategy": "abort",
+  "relocation-model": "pic",
   "split-debuginfo": "off",
   "stack-probes": {
     "kind": "inline"

@@ -41,7 +41,8 @@ list(
   rp23xx_pll.c)
 
 if(CONFIG_SMP)
-  list(APPEND SRCS rp23xx_cpustart.c rp23xx_smpcall.c rp23xx_cpuidlestack.c)
+  list(REMOVE_ITEM SRCS riscv_smpcall.c riscv_cpustart.c)
+  list(APPEND SRCS rp23xx_cpustart.c rp23xx_smpcall.c)
 endif()
 
 if(CONFIG_RP23XX_RV_DMAC)

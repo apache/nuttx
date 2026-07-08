@@ -37,9 +37,9 @@
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 
-#include <stm32l4.h>
+#include <stm32.h>
 #include <stm32l4_uart.h>
-#include <stm32l4_uid.h>
+#include <stm32_uid.h>
 
 #include <arch/board/board.h>
 #include <arch/board/boardctl.h>
@@ -124,7 +124,7 @@ int stm32_bringup(void)
 #ifdef HAVE_RTC_DRIVER
   /* Instantiate the STM32 lower-half RTC driver */
 
-  rtclower = stm32l4_rtc_lowerhalf();
+  rtclower = stm32_rtc_lowerhalf();
   if (!rtclower)
     {
       serr("ERROR: Failed to instantiate the RTC lower-half driver\n");
@@ -148,10 +148,10 @@ int stm32_bringup(void)
 #ifdef HAVE_N25QXXX
   /* Create an instance of the STM32L4 QSPI device driver */
 
-  g_qspi = stm32l4_qspi_initialize(0);
+  g_qspi = stm32_qspi_initialize(0);
   if (!g_qspi)
     {
-      _err("ERROR: stm32l4_qspi_initialize failed\n");
+      _err("ERROR: stm32_qspi_initialize failed\n");
       return ret;
     }
   else
@@ -242,11 +242,11 @@ int stm32_bringup(void)
 #endif
 
 #ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  stm32l4_usbhost_initialize() starts a
+  /* Initialize USB host operation.  stm32_usbhost_initialize() starts a
    * thread that will monitor for USB connection and disconnection events.
    */
 
-  ret = stm32l4_usbhost_initialize();
+  ret = stm32_usbhost_initialize();
   if (ret != OK)
     {
       udbg("ERROR: Failed to initialize USB host: %d\n", ret);

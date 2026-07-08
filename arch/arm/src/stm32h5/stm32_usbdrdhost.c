@@ -62,7 +62,7 @@
 #include "hardware/stm32h5xxx_pwr.h"
 #include "stm32_usbdrdhost.h"
 
-#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32H5_USBFS_HOST)
+#if defined(CONFIG_USBHOST) && defined(CONFIG_STM32_USBFS_HOST)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,12 +70,12 @@
 
 /* Configuration */
 
-#ifndef CONFIG_STM32H5_USBDRD_NCHANNELS
-#  define CONFIG_STM32H5_USBDRD_NCHANNELS 8
+#ifndef CONFIG_STM32_USBDRD_NCHANNELS
+#  define CONFIG_STM32_USBDRD_NCHANNELS 8
 #endif
 
-#ifndef CONFIG_STM32H5_USBDRD_DESCSIZE
-#  define CONFIG_STM32H5_USBDRD_DESCSIZE 128
+#ifndef CONFIG_STM32_USBDRD_DESCSIZE
+#  define CONFIG_STM32_USBDRD_DESCSIZE 128
 #endif
 
 #ifndef CONFIG_STM32H5_USBDRD_TRANSFER_TIMEOUT
@@ -84,28 +84,28 @@
 
 /* Hardware definitions */
 
-#define STM32H5_NHOST_CHANNELS    CONFIG_STM32H5_USBDRD_NCHANNELS
-#define STM32H5_EP0_MAX_PACKET_SIZE 64
-#define STM32H5_RETRY_COUNT       3   /* Control transfer retries */
+#define STM32_NHOST_CHANNELS    CONFIG_STM32_USBDRD_NCHANNELS
+#define STM32_EP0_MAX_PACKET_SIZE 64
+#define STM32_RETRY_COUNT       3   /* Control transfer retries */
 
 /* PMA Buffer allocation (fixed-size bitmap allocator) */
 
-#define STM32H5_PMA_BUFFER_SIZE        64          /* Fixed buffer size (bytes) */
-#define STM32H5_PMA_NBUFFERS           30          /* Total allocatable buffers */
-#define STM32H5_PMA_BUFFER_ALLSET      0x3fffffff  /* All 30 buffers available */
-#define STM32H5_PMA_BUFFER_BIT(bn)     (1U << (bn))
-#define STM32H5_PMA_BUFNO2ADDR(bn)     (USB_DRD_PMA_START_ADDR + ((bn) * STM32H5_PMA_BUFFER_SIZE))
-#define STM32H5_PMA_BUFFER_NONE        0xFF   /* Invalid buffer number */
+#define STM32_PMA_BUFFER_SIZE        64          /* Fixed buffer size (bytes) */
+#define STM32_PMA_NBUFFERS           30          /* Total allocatable buffers */
+#define STM32_PMA_BUFFER_ALLSET      0x3fffffff  /* All 30 buffers available */
+#define STM32_PMA_BUFFER_BIT(bn)     (1U << (bn))
+#define STM32_PMA_BUFNO2ADDR(bn)     (USB_DRD_PMA_START_ADDR + ((bn) * STM32_PMA_BUFFER_SIZE))
+#define STM32_PMA_BUFFER_NONE        0xFF   /* Invalid buffer number */
 
 /* Delays */
 
-#define STM32H5_DATANAK_DELAY     SEC2TICK(5)
-#define STM32H5_RESET_DELAY       100 /* ms */
+#define STM32_DATANAK_DELAY     SEC2TICK(5)
+#define STM32_RESET_DELAY       100 /* ms */
 
 /* USB DRD base addresses */
 
-#define STM32H5_USBDRD_BASE       STM32_USB_FS_BASE
-#define STM32H5_USBDRD_PMA_BASE   STM32_USB_FS_RAM_BASE
+#define STM32_USBDRD_BASE       STM32_USB_FS_BASE
+#define STM32_USBDRD_PMA_BASE   STM32_USB_FS_RAM_BASE
 
 /* Register access helpers */
 
@@ -115,7 +115,7 @@
 
 /* Channel register access */
 
-#define STM32H5_USB_CHEP(n)       (STM32H5_USBDRD_BASE + ((n) << 2))
+#define STM32_USB_CHEP(n)       (STM32_USBDRD_BASE + ((n) << 2))
 
 /* Host channel data PID values */
 
@@ -227,7 +227,7 @@ struct stm32_usbhost_s
 
   /* Host channels */
 
-  struct stm32_chan_s chan[STM32H5_NHOST_CHANNELS];
+  struct stm32_chan_s chan[STM32_NHOST_CHANNELS];
 
   /* PMA allocation */
 
@@ -416,7 +416,7 @@ static void stm32_pma_write(const uint8_t *buffer, uint16_t pmaaddr,
   uint32_t count;
   uint32_t remaining;
 
-  pdwval = (volatile uint32_t *)(STM32H5_USBDRD_PMA_BASE + pmaaddr);
+  pdwval = (volatile uint32_t *)(STM32_USBDRD_PMA_BASE + pmaaddr);
   count = nbytes >> 2;          /* Number of 32-bit words */
   remaining = nbytes & 0x03;    /* Remaining bytes */
 
@@ -466,7 +466,7 @@ static void stm32_pma_read(uint8_t *buffer, uint16_t pmaaddr,
 
   UP_DSB();
 
-  pdwval = (volatile uint32_t *)(STM32H5_USBDRD_PMA_BASE + pmaaddr);
+  pdwval = (volatile uint32_t *)(STM32_USBDRD_PMA_BASE + pmaaddr);
   count = nbytes >> 2;
   remaining = nbytes & 0x03;
 
@@ -508,9 +508,9 @@ static int stm32_pma_alloc_buffer(struct stm32_usbhost_s *priv)
 
   flags = enter_critical_section();
 
-  for (bufndx = 0; bufndx < STM32H5_PMA_NBUFFERS; bufndx++)
+  for (bufndx = 0; bufndx < STM32_PMA_NBUFFERS; bufndx++)
     {
-      uint32_t bit = STM32H5_PMA_BUFFER_BIT(bufndx);
+      uint32_t bit = STM32_PMA_BUFFER_BIT(bufndx);
       if ((priv->pma_bufavail & bit) != 0)
         {
           priv->pma_bufavail &= ~bit;  /* Mark allocated */
@@ -524,12 +524,12 @@ static int stm32_pma_alloc_buffer(struct stm32_usbhost_s *priv)
   if (bufno >= 0)
     {
       uinfo("PMA buffer allocated: bufno=%d addr=0x%04x\n",
-            bufno, STM32H5_PMA_BUFNO2ADDR(bufno));
+            bufno, STM32_PMA_BUFNO2ADDR(bufno));
     }
   else
     {
       uerr("ERROR: PMA buffer allocation failed, all %d buffers in use\n",
-           STM32H5_PMA_NBUFFERS);
+           STM32_PMA_NBUFFERS);
     }
 
   return bufno;
@@ -548,14 +548,14 @@ static void stm32_pma_free_buffer(struct stm32_usbhost_s *priv,
 {
   irqstate_t flags;
 
-  DEBUGASSERT(bufno < STM32H5_PMA_NBUFFERS);
+  DEBUGASSERT(bufno < STM32_PMA_NBUFFERS);
 
   flags = enter_critical_section();
-  priv->pma_bufavail |= STM32H5_PMA_BUFFER_BIT(bufno);  /* Mark available */
+  priv->pma_bufavail |= STM32_PMA_BUFFER_BIT(bufno);  /* Mark available */
   leave_critical_section(flags);
 
   uinfo("PMA buffer freed: bufno=%d addr=0x%04x\n",
-        bufno, STM32H5_PMA_BUFNO2ADDR(bufno));
+        bufno, STM32_PMA_BUFNO2ADDR(bufno));
 }
 
 /****************************************************************************
@@ -570,7 +570,7 @@ static int stm32_chan_alloc(struct stm32_usbhost_s *priv)
 {
   int chidx;
 
-  for (chidx = 0; chidx < STM32H5_NHOST_CHANNELS; chidx++)
+  for (chidx = 0; chidx < STM32_NHOST_CHANNELS; chidx++)
     {
       if (!priv->chan[chidx].inuse)
         {
@@ -582,7 +582,7 @@ static int stm32_chan_alloc(struct stm32_usbhost_s *priv)
 
           priv->chan[chidx].inuse = true;
           priv->chan[chidx].pmabufno = (uint8_t)bufno;
-          priv->chan[chidx].pmaaddr = STM32H5_PMA_BUFNO2ADDR(bufno);
+          priv->chan[chidx].pmaaddr = STM32_PMA_BUFNO2ADDR(bufno);
           uinfo("Channel allocated: chidx=%d\n", chidx);
           return chidx;
         }
@@ -604,18 +604,18 @@ static inline void stm32_chan_free(struct stm32_usbhost_s *priv,
 {
   struct stm32_chan_s *chan;
 
-  DEBUGASSERT((unsigned)chidx < STM32H5_NHOST_CHANNELS);
+  DEBUGASSERT((unsigned)chidx < STM32_NHOST_CHANNELS);
 
   chan = &priv->chan[chidx];
 
   /* Free PMA buffer if allocated */
 
-  if (chan->pmabufno != STM32H5_PMA_BUFFER_NONE)
+  if (chan->pmabufno != STM32_PMA_BUFFER_NONE)
     {
       stm32_set_chep_rx_status(priv, chidx, USB_CHEP_RX_STRX_DIS);
       stm32_set_chep_tx_status(priv, chidx, USB_CHEP_TX_STTX_DIS);
       stm32_pma_free_buffer(priv, chan->pmabufno);
-      chan->pmabufno = STM32H5_PMA_BUFFER_NONE;
+      chan->pmabufno = STM32_PMA_BUFFER_NONE;
       chan->pmaaddr = 0;
       uinfo("Channel freed: chidx=%d\n", chidx);
     }
@@ -639,7 +639,7 @@ static void stm32_set_chep_tx_status(struct stm32_usbhost_s *priv,
 
   /* Status changes work by toggling the DTOG bits */
 
-  regval = stm32_getreg(STM32H5_USB_CHEP(priv->chan[chidx].chidx))
+  regval = stm32_getreg(STM32_USB_CHEP(priv->chan[chidx].chidx))
                         & USB_CHEP_TX_DTOGMASK;
   if (status & USB_CHEP_TX_DTOG1)
     {
@@ -651,7 +651,7 @@ static void stm32_set_chep_tx_status(struct stm32_usbhost_s *priv,
       regval ^= USB_CHEP_TX_DTOG2;
     }
 
-  stm32_putreg(STM32H5_USB_CHEP(priv->chan[chidx].chidx),
+  stm32_putreg(STM32_USB_CHEP(priv->chan[chidx].chidx),
                regval | USB_CHEP_VTRX | USB_CHEP_VTTX);
 }
 
@@ -671,7 +671,7 @@ static void stm32_set_chep_rx_status(struct stm32_usbhost_s *priv,
 
   /* Status changes work by toggling the DTOG bits */
 
-  regval = stm32_getreg(STM32H5_USB_CHEP(priv->chan[chidx].chidx))
+  regval = stm32_getreg(STM32_USB_CHEP(priv->chan[chidx].chidx))
                         & USB_CHEP_RX_DTOGMASK;
   if (status & USB_CHEP_RX_DTOG1)
     {
@@ -683,7 +683,7 @@ static void stm32_set_chep_rx_status(struct stm32_usbhost_s *priv,
       regval ^= USB_CHEP_RX_DTOG2;
     }
 
-  stm32_putreg(STM32H5_USB_CHEP(priv->chan[chidx].chidx),
+  stm32_putreg(STM32_USB_CHEP(priv->chan[chidx].chidx),
                regval | USB_CHEP_VTRX | USB_CHEP_VTTX);
 }
 
@@ -701,7 +701,7 @@ static inline void stm32_chan_freeall(struct stm32_usbhost_s *priv)
 
   /* Free all host channels */
 
-  for (chidx = 0; chidx < STM32H5_NHOST_CHANNELS; chidx++)
+  for (chidx = 0; chidx < STM32_NHOST_CHANNELS; chidx++)
     {
       if (priv->chan[chidx].inuse)
         {
@@ -748,7 +748,7 @@ static void stm32_chan_configure(struct stm32_usbhost_s *priv,
 
   /* Read current register value and mask toggleable bits */
 
-  regval = stm32_getreg(STM32H5_USB_CHEP(chidx)) & USB_CH_T_MASK;
+  regval = stm32_getreg(STM32_USB_CHEP(chidx)) & USB_CH_T_MASK;
 
   /* Set endpoint type */
 
@@ -772,7 +772,7 @@ static void stm32_chan_configure(struct stm32_usbhost_s *priv,
 
   /* Write the channel register with VT bits preserved */
 
-  stm32_putreg(STM32H5_USB_CHEP(chidx),
+  stm32_putreg(STM32_USB_CHEP(chidx),
                  regval | USB_CHEP_VTRX | USB_CHEP_VTTX);
 }
 
@@ -944,7 +944,7 @@ static int stm32_ctrlchan_alloc(struct stm32_usbhost_s *priv,
   chan->eptype = USB_EP_ATTR_XFER_CONTROL;
   chan->funcaddr = funcaddr;
   chan->speed = speed;
-  chan->maxpacket = STM32H5_EP0_MAX_PACKET_SIZE;
+  chan->maxpacket = STM32_EP0_MAX_PACKET_SIZE;
   chan->indata1 = false;
   chan->outdata1 = false;
 
@@ -956,7 +956,7 @@ static int stm32_ctrlchan_alloc(struct stm32_usbhost_s *priv,
   chan->eptype = USB_EP_ATTR_XFER_CONTROL;
   chan->funcaddr = funcaddr;
   chan->speed = speed;
-  chan->maxpacket = STM32H5_EP0_MAX_PACKET_SIZE;
+  chan->maxpacket = STM32_EP0_MAX_PACKET_SIZE;
   chan->indata1 = false;
   chan->outdata1 = false;
 
@@ -1092,7 +1092,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
           bdval |= (nblocks << USB_PMA_RXBD_NUM_BLOCK_SHIFT);
         }
 
-      pbd = (volatile uint32_t *)(STM32H5_USBDRD_PMA_BASE +
+      pbd = (volatile uint32_t *)(STM32_USBDRD_PMA_BASE +
                                   USB_PMA_RXBD_OFFSET(chidx));
       *pbd = bdval;
 
@@ -1104,7 +1104,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
       /* Clear data toggle if starting new transfer */
 
-      regval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+      regval = stm32_getreg(STM32_USB_CHEP(chidx));
       if ((regval & USB_CHEP_DTOG_RX) != 0)
         {
           if (!chan->indata1)
@@ -1113,7 +1113,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
               regval = (regval & USB_CHEP_REG_MASK) |
                        USB_CHEP_VTRX | USB_CHEP_VTTX | USB_CHEP_DTOG_RX;
-              stm32_putreg(STM32H5_USB_CHEP(chidx), regval);
+              stm32_putreg(STM32_USB_CHEP(chidx), regval);
             }
         }
       else
@@ -1124,7 +1124,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
               regval = (regval & USB_CHEP_REG_MASK) |
                        USB_CHEP_VTRX | USB_CHEP_VTTX | USB_CHEP_DTOG_RX;
-              stm32_putreg(STM32H5_USB_CHEP(chidx), regval);
+              stm32_putreg(STM32_USB_CHEP(chidx), regval);
             }
         }
 
@@ -1146,7 +1146,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
       bdval = chan->pmaaddr;  /* chan->pmaaddr is already 4 byte aligned */
       bdval |= ((uint32_t)len << USB_PMA_TXBD_COUNT_SHIFT);
 
-      pbd = (volatile uint32_t *)(STM32H5_USBDRD_PMA_BASE +
+      pbd = (volatile uint32_t *)(STM32_USBDRD_PMA_BASE +
                                   USB_PMA_TXBD_OFFSET(chidx));
       *pbd = bdval;
 
@@ -1154,8 +1154,8 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
       if (chan->pid == HC_PID_SETUP)
         {
-          regval = stm32_getreg(STM32H5_USB_CHEP(chidx)) & USB_CHEP_REG_MASK;
-          stm32_putreg(STM32H5_USB_CHEP(chidx),
+          regval = stm32_getreg(STM32_USB_CHEP(chidx)) & USB_CHEP_REG_MASK;
+          stm32_putreg(STM32_USB_CHEP(chidx),
                          regval | USB_CHEP_SETUP |
                          USB_CHEP_VTRX | USB_CHEP_VTTX);
         }
@@ -1164,7 +1164,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
        * hardware auto-toggles after successful transmit)
        */
 
-      regval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+      regval = stm32_getreg(STM32_USB_CHEP(chidx));
       if ((regval & USB_CHEP_DTOG_TX) != 0)
         {
           if (!chan->outdata1)
@@ -1173,7 +1173,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
               regval = (regval & USB_CHEP_REG_MASK) |
                        USB_CHEP_VTRX | USB_CHEP_VTTX | USB_CHEP_DTOG_TX;
-              stm32_putreg(STM32H5_USB_CHEP(chidx), regval);
+              stm32_putreg(STM32_USB_CHEP(chidx), regval);
             }
         }
       else
@@ -1184,7 +1184,7 @@ static void stm32_transfer_start(struct stm32_usbhost_s *priv,
 
               regval = (regval & USB_CHEP_REG_MASK) |
                        USB_CHEP_VTRX | USB_CHEP_VTTX | USB_CHEP_DTOG_TX;
-              stm32_putreg(STM32H5_USB_CHEP(chidx), regval);
+              stm32_putreg(STM32_USB_CHEP(chidx), regval);
             }
         }
 
@@ -1460,13 +1460,13 @@ static void stm32_gint_disconnected(struct stm32_usbhost_s *priv)
 static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
 {
   struct stm32_chan_s *chan = &priv->chan[chidx];
-  uint32_t chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+  uint32_t chepval = stm32_getreg(STM32_USB_CHEP(chidx));
   uint32_t rx_status = chepval & USB_CHEP_RX_STRX_MASK;
   bool wakeup = false;
 
   if ((chepval & USB_CHEP_ERRRX) != 0)
     {
-      chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+      chepval = stm32_getreg(STM32_USB_CHEP(chidx));
       uerr("ERRRX chidx=%d chepval=0x%08x rx_status=%d nak=%d\n",
            chidx, (unsigned int)chepval,
            (int)((chepval & USB_CHEP_RX_STRX_MASK) >>
@@ -1479,7 +1479,7 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
 
       chepval = (chepval & (0xffff7fff & USB_CHEP_REG_MASK) &
                  ~USB_CHEP_ERRRX) | USB_CHEP_VTTX;
-      stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+      stm32_putreg(STM32_USB_CHEP(chidx), chepval);
 
       chan->result = EIO;
       chan->chreason = CHREASON_TXERR;
@@ -1500,7 +1500,7 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
       uint16_t count;
       bool transfer_complete;
 
-      pbd = (volatile uint32_t *)(STM32H5_USBDRD_PMA_BASE +
+      pbd = (volatile uint32_t *)(STM32_USBDRD_PMA_BASE +
                                   USB_PMA_RXBD_OFFSET(chidx));
       count = (*pbd >> USB_PMA_RXBD_COUNT_SHIFT) & 0x3ff;
 
@@ -1546,10 +1546,10 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
            * (toggle bit, write 1 keeps, write 0 clears)
            */
 
-          chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+          chepval = stm32_getreg(STM32_USB_CHEP(chidx));
           chepval = (chepval &
                     (0xffff7fff & USB_CHEP_REG_MASK)) | USB_CHEP_VTTX;
-          stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+          stm32_putreg(STM32_USB_CHEP(chidx), chepval);
 
           /* More data expected - reactivate channel for next packet */
 
@@ -1598,9 +1598,9 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
    * (toggle bit, write 1 keeps, write 0 clears)
    */
 
-  chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+  chepval = stm32_getreg(STM32_USB_CHEP(chidx));
   chepval = (chepval & (0xffff7fff & USB_CHEP_REG_MASK)) | USB_CHEP_VTTX;
-  stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+  stm32_putreg(STM32_USB_CHEP(chidx), chepval);
 
   if (wakeup)
     {
@@ -1620,7 +1620,7 @@ static void stm32_hc_in_irq(struct stm32_usbhost_s *priv, int chidx)
 static void stm32_hc_out_irq(struct stm32_usbhost_s *priv, int chidx)
 {
   struct stm32_chan_s *chan = &priv->chan[chidx];
-  uint32_t chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+  uint32_t chepval = stm32_getreg(STM32_USB_CHEP(chidx));
   uint32_t tx_status = chepval & USB_CHEP_TX_STTX_MASK;
   bool wakeup = false;
 
@@ -1630,10 +1630,10 @@ static void stm32_hc_out_irq(struct stm32_usbhost_s *priv, int chidx)
        * write 1 to VTRX/VTTX to preserve
        */
 
-      chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+      chepval = stm32_getreg(STM32_USB_CHEP(chidx));
       chepval = (chepval & USB_CHEP_REG_MASK & ~USB_CHEP_ERRTX) |
                 USB_CHEP_VTRX | USB_CHEP_VTTX;
-      stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+      stm32_putreg(STM32_USB_CHEP(chidx), chepval);
 
       chan->result = EIO;
       chan->chreason = CHREASON_TXERR;
@@ -1699,10 +1699,10 @@ static void stm32_hc_out_irq(struct stm32_usbhost_s *priv, int chidx)
 
       if ((chepval & USB_CHEP_NAK) != 0)
         {
-          chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+          chepval = stm32_getreg(STM32_USB_CHEP(chidx));
           chepval = (chepval & USB_CHEP_REG_MASK & ~USB_CHEP_NAK) |
                     USB_CHEP_VTRX | USB_CHEP_VTTX;
-          stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+          stm32_putreg(STM32_USB_CHEP(chidx), chepval);
         }
 
       if (!chan->waiter && !chan->callback)
@@ -1728,9 +1728,9 @@ static void stm32_hc_out_irq(struct stm32_usbhost_s *priv, int chidx)
 
   /* Clear VTTX by writing 0 to it */
 
-  chepval = stm32_getreg(STM32H5_USB_CHEP(chidx));
+  chepval = stm32_getreg(STM32_USB_CHEP(chidx));
   chepval = (chepval & (0xffffff7f & USB_CHEP_REG_MASK)) | USB_CHEP_VTRX;
-  stm32_putreg(STM32H5_USB_CHEP(chidx), chepval);
+  stm32_putreg(STM32_USB_CHEP(chidx), chepval);
 
   if (wakeup)
     {
@@ -2132,11 +2132,11 @@ static int stm32_epfree(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
     }
 
   /* A single channel is represent by an index in the range of 0 to
-   * STM32H5_NHOST_CHANNELS.  Otherwise, the ep must be a pointer to
+   * STM32_NHOST_CHANNELS.  Otherwise, the ep must be a pointer to
    * an allocated control endpoint structure.
    */
 
-  if ((uintptr_t)ep < STM32H5_NHOST_CHANNELS)
+  if ((uintptr_t)ep < STM32_NHOST_CHANNELS)
     {
       /* Halt the channel and mark the channel available */
 
@@ -2176,14 +2176,14 @@ static int stm32_alloc(struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(drvr && buffer && maxlen);
 
-  alloc = kmm_malloc(CONFIG_STM32H5_USBDRD_DESCSIZE);
+  alloc = kmm_malloc(CONFIG_STM32_USBDRD_DESCSIZE);
   if (!alloc)
     {
       return -ENOMEM;
     }
 
   *buffer = alloc;
-  *maxlen = CONFIG_STM32H5_USBDRD_DESCSIZE;
+  *maxlen = CONFIG_STM32_USBDRD_DESCSIZE;
   return OK;
 }
 
@@ -2275,7 +2275,7 @@ static int stm32_ctrlin(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       return ret;
     }
 
-  for (retries = 0; retries < STM32H5_RETRY_COUNT; retries++)
+  for (retries = 0; retries < STM32_RETRY_COUNT; retries++)
     {
       /* Send SETUP */
 
@@ -2351,7 +2351,7 @@ static int stm32_ctrlout(struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
       return ret;
     }
 
-  for (retries = 0; retries < STM32H5_RETRY_COUNT; retries++)
+  for (retries = 0; retries < STM32_RETRY_COUNT; retries++)
     {
       /* Send SETUP */
 
@@ -2409,7 +2409,7 @@ static ssize_t stm32_transfer(struct usbhost_driver_s *drvr,
   ssize_t nbytes;
   int ret;
 
-  DEBUGASSERT(priv && buffer && chidx < STM32H5_NHOST_CHANNELS);
+  DEBUGASSERT(priv && buffer && chidx < STM32_NHOST_CHANNELS);
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
@@ -2461,7 +2461,7 @@ static int stm32_asynch(struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   struct stm32_chan_s *chan;
   int ret;
 
-  DEBUGASSERT(priv && buffer && chidx < STM32H5_NHOST_CHANNELS);
+  DEBUGASSERT(priv && buffer && chidx < STM32_NHOST_CHANNELS);
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
@@ -2499,7 +2499,7 @@ static int stm32_cancel(struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   struct stm32_chan_s *chan;
   irqstate_t flags;
 
-  DEBUGASSERT(priv && chidx < STM32H5_NHOST_CHANNELS);
+  DEBUGASSERT(priv && chidx < STM32_NHOST_CHANNELS);
 
   chan = &priv->chan[chidx];
 
@@ -2595,7 +2595,7 @@ static void stm32_portreset(struct stm32_usbhost_s *priv)
 
   /* Wait for reset */
 
-  nxsched_usleep(STM32H5_RESET_DELAY * 1000);
+  nxsched_usleep(STM32_RESET_DELAY * 1000);
 
   /* Release reset */
 
@@ -2722,15 +2722,15 @@ static void stm32_sw_initialize(struct stm32_usbhost_s *priv)
 
   /* Initialize PMA allocation - all buffers available */
 
-  priv->pma_bufavail = STM32H5_PMA_BUFFER_ALLSET;
+  priv->pma_bufavail = STM32_PMA_BUFFER_ALLSET;
 
   /* Initialize channels */
 
-  for (i = 0; i < STM32H5_NHOST_CHANNELS; i++)
+  for (i = 0; i < STM32_NHOST_CHANNELS; i++)
     {
       priv->chan[i].chidx = i;
       priv->chan[i].inuse = false;
-      priv->chan[i].pmabufno = STM32H5_PMA_BUFFER_NONE;
+      priv->chan[i].pmabufno = STM32_PMA_BUFFER_NONE;
       nxsem_init(&priv->chan[i].waitsem, 0, 0);
     }
 }
@@ -2829,7 +2829,7 @@ static int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 
   /* Enable VBUS drive */
 
-  stm32h5_usbhost_vbusdrive(0, true);
+  stm32_usbdrdhost_vbusdrive(0, true);
 
   uinfo("USB Host initialized\n");
 
@@ -2841,14 +2841,14 @@ static int stm32_hw_initialize(struct stm32_usbhost_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32h5_usbhost_initialize
+ * Name: stm32_usbdrdhost_initialize
  *
  * Description:
  *   Initialize USB host controller
  *
  ****************************************************************************/
 
-struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
+struct usbhost_connection_s *stm32_usbdrdhost_initialize(void)
 {
   struct stm32_usbhost_s *priv = &g_usbhost;
   int ret;
@@ -2872,7 +2872,7 @@ struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
 }
 
 /****************************************************************************
- * Name: stm32_usbhost_vbusdrive
+ * Name: stm32_usbdrdhost_vbusdrive
  *
  * Description:
  *   Control VBUS power
@@ -2881,7 +2881,7 @@ struct usbhost_connection_s *stm32h5_usbhost_initialize(void)
  ****************************************************************************/
 
 __attribute__((weak))
-void stm32_usbhost_vbusdrive(int port, bool enable)
+void stm32_usbdrdhost_vbusdrive(int port, bool enable)
 {
   /* Default implementation - do nothing.
    * Board-specific code should override this to control VBUS power.
@@ -2890,4 +2890,4 @@ void stm32_usbhost_vbusdrive(int port, bool enable)
   uinfo("VBUS drive port=%d enable=%d (default - no-op)\n", port, enable);
 }
 
-#endif /* CONFIG_USBHOST && CONFIG_STM32H5_USBFS_HOST */
+#endif /* CONFIG_USBHOST && CONFIG_STM32_USBFS_HOST */

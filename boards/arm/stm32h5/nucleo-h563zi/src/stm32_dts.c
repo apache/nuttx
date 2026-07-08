@@ -34,7 +34,7 @@
 
 #include "stm32.h"
 
-#if defined(CONFIG_STM32H5_DTS)
+#if defined(CONFIG_STM32_DTS)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,7 +75,7 @@ int stm32_dts_setup(int devno)
     {
       /* Register the DTS driver at "/dev/sensor_temp0" */
 
-      ret = stm32h5_dts_register(0);
+      ret = stm32_dts_register(0);
       if (ret < 0)
         {
           aerr("ERROR: dts_register /dev/dts0 failed: %d\n", ret);

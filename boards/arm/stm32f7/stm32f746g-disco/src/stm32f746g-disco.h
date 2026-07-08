@@ -43,7 +43,7 @@
 
 /* Can't support USB host or device features if USB OTG FS is not enabled */
 
-#ifndef CONFIG_STM32F7_OTGFS
+#ifndef CONFIG_STM32_OTGFS
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #endif
@@ -84,7 +84,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_STM32F7_SDMMC
+#ifdef CONFIG_STM32_SDMMC
 #define HAVE_SDIO
 #else
 #undef HAVE_SDIO
@@ -212,7 +212,7 @@ void arch_sporadic_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_enablefmc(void);
 #endif
 
@@ -224,7 +224,7 @@ void stm32_enablefmc(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_FMC
+#ifdef CONFIG_STM32_FMC
 void stm32_disablefmc(void);
 #endif
 
@@ -251,6 +251,18 @@ int stm32_tsc_setup(int minor);
 
 #ifdef CONFIG_MTD_N25QXXX
 int stm32_n25qxxx_setup(void);
+#endif
+
+/****************************************************************************
+ * Name: stm32_w25qxxx_setup
+ *
+ * Description:
+ *   Initialize and register the Flash for W25QXXX driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_W25QXXXJV
+int stm32_w25qxxx_setup(void);
 #endif
 
 #ifdef HAVE_SDIO

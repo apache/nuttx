@@ -44,7 +44,7 @@
 #include "stm32_gpio.h"
 #include "stm32f746-ws.h"
 
-#ifdef CONFIG_STM32F7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,7 +53,7 @@
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)
 #  define HAVE_USB 1
 #else
-#  warning "CONFIG_STM32F7_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
+#  warning "CONFIG_STM32_OTGFS is enabled but neither CONFIG_USBDEV nor CONFIG_USBHOST"
 #  undef HAVE_USB
 #endif
 
@@ -137,7 +137,7 @@ void stm32_usbinitialize(void)
    * Power On, and Overcurrent GPIOs
    */
 
-#ifdef CONFIG_STM32F7_OTGFS
+#ifdef CONFIG_STM32_OTGFS
   stm32_configgpio(GPIO_OTGFS_VBUS);
 
 #ifdef CONFIG_USBHOST
@@ -330,4 +330,4 @@ void stm32_usbsuspend(struct usbdev_s *dev, bool resume)
 }
 #endif
 
-#endif /* CONFIG_STM32F7_OTGFS */
+#endif /* CONFIG_STM32_OTGFS */

@@ -28,7 +28,7 @@ Custom Clock Configuration
 The ``configs/vsn/`` configuration does something like you say. It skips the 
 initial clock configuration by defining 
 ``CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=y``. Then the normal clock 
-configuration logic in ``arch/arm/src/stm32/stm32_rcc.c`` is not executed.
+configuration logic in ``arch/arm/src/stm32f4/stm32_rcc.c`` is not executed.
 Instead, the "custom" clock initialization at ``configs/vsn/src/sysclock.c``
 is called:
 
@@ -83,7 +83,7 @@ are hardcoded in the board.h header file. So you have two options:
 
 2. **Variable Peripheral Clocking**. You can make the peripheral clocking 
    variable. I had to do this for the SAMA5Dx family. Look at 
-   ``boards/arm/stm32/sama5d4-ek/include/board_sdram.h`` for example. Notice 
+   ``boards/arm/sama5/sama5d4-ek/include/board_sdram.h`` for example. Notice
    that the frequencies are not constants, but function calls:
 
 .. code-block:: c

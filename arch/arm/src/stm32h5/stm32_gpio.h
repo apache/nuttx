@@ -39,7 +39,7 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32H5_STM32H5XXXX)
+#if defined(CONFIG_STM32_STM32H5XXXX)
 #  include "hardware/stm32_gpio.h"
 #else
 #  error "Unsupported STM32H5 chip"
@@ -242,7 +242,7 @@ extern "C"
 
 /* Base addresses for each GPIO block */
 
-EXTERN const uint32_t g_gpiobase[STM32H5_NPORTS];
+EXTERN const uint32_t g_gpiobase[STM32_NPORTS];
 
 /****************************************************************************
  * Public Function Prototypes

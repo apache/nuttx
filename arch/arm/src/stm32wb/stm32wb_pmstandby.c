@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_pmstandby
+ * Name: stm32_pmstandby
  *
  * Description:
  *   Enter STANDBY mode.
@@ -53,7 +53,7 @@
  *
  ****************************************************************************/
 
-int stm32wb_pmstandby(void)
+int stm32_pmstandby(void)
 {
   uint32_t regval;
 
@@ -63,15 +63,15 @@ int stm32wb_pmstandby(void)
 
   regval = PWR_SCR_CWUF1 | PWR_SCR_CWUF2 | PWR_SCR_CWUF3 |
            PWR_SCR_CWUF4 | PWR_SCR_CWUF5;
-  putreg32(regval, STM32WB_PWR_SCR);
+  putreg32(regval, STM32_PWR_SCR);
 
   /* Select Standby mode */
 
-  regval  = getreg32(STM32WB_PWR_CR1);
+  regval  = getreg32(STM32_PWR_CR1);
   regval &= ~PWR_CR1_LPMS_MASK;
   regval |= PWR_CR1_LPMS_STANDBY;
 
-  putreg32(regval, STM32WB_PWR_CR1);
+  putreg32(regval, STM32_PWR_CR1);
 
   /* Set SLEEPDEEP bit of Cortex System Control Register */
 

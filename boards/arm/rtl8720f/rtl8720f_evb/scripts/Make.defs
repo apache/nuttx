@@ -1,0 +1,33 @@
+############################################################################
+# boards/arm/rtl8720f/rtl8720f_evb/scripts/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# All RTL8720F board-build definitions (SDK include sets, fwlib/WiFi source
+# lists, image2 linker-script generation, PREBUILD/POSTBUILD) live in the
+# shared per-IC fragment so every board on this IC uses one copy.  This board's
+# own paths (prebuilt/ staging) derive from $(BOARD_DIR) inside it.
+
+include $(TOPDIR)/arch/arm/src/rtl8720f/ameba_board.mk
+
+# Flashing via the SDK AmebaFlash.py (make flash AMEBA_PORT=/dev/ttyUSB0)
+
+AMEBA_FLASH_PROFILE = RTL8720F
+include $(TOPDIR)/tools/ameba/Config.mk

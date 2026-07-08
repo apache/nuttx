@@ -29,22 +29,22 @@
 #include "arm_internal.h"
 #include "stm32wb_pwr.h"
 #include "stm32wb_rcc.h"
-#include "stm32wb_waste.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY
-#  if CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY
-#  if CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
-      CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
+#ifdef CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#  if CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY < 0 || \
+      CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY > 3
 #    error "Invalid LSE drive capability setting"
 #  endif
 #endif
@@ -54,21 +54,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_rcc_enable_lse
+ * Name: stm32_rcc_enable_lse
  *
  * Description:
  *   Enable the External Low-Speed (LSE) oscillator.
  *
  ****************************************************************************/
 
-void stm32wb_rcc_enable_lse(void)
+void stm32_rcc_enable_lse(void)
 {
   bool writable;
   uint32_t regval;
 
   /* Check if the External Low-Speed (LSE) oscillator is already running. */
 
-  regval = getreg32(STM32WB_RCC_BDCR);
+  regval = getreg32(STM32_RCC_BDCR);
 
   if ((regval & (RCC_BDCR_LSEON | RCC_BDCR_LSERDY)) !=
                 (RCC_BDCR_LSEON | RCC_BDCR_LSERDY))
@@ -78,7 +78,7 @@ void stm32wb_rcc_enable_lse(void)
        * in the PWR CR register before to configuring the LSE.
        */
 
-      writable = stm32wb_pwr_enablebkp(true);
+      writable = stm32_pwr_enablebkp(true);
 
       /* Enable the External Low-Speed (LSE) oscillator by setting the
        * LSEON bit the RCC BDCR register.
@@ -86,41 +86,41 @@ void stm32wb_rcc_enable_lse(void)
 
       regval |= RCC_BDCR_LSEON;
 
-#ifdef CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY
+#ifdef CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY
       /* Set start-up drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY <<
+      regval |= CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
 #endif
 
-      putreg32(regval, STM32WB_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
 
       /* Wait for the LSE clock to be ready */
 
-      while (((regval = getreg32(STM32WB_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
+      while (((regval = getreg32(STM32_RCC_BDCR)) & RCC_BDCR_LSERDY) == 0)
         {
-          stm32wb_waste();
+          stm32_waste();
         }
 
-#if defined(CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
-    CONFIG_STM32WB_RTC_LSECLOCK_START_DRV_CAPABILITY != \
-    CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY
+#if defined(CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY) && \
+    CONFIG_STM32_RTC_LSECLOCK_START_DRV_CAPABILITY != \
+    CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY
 
-#  if CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
+#  if CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY != 0
 #    error "STM32WB only allows lowering LSE drive capability to zero"
 #  endif
 
       /* Set running drive capability for LSE oscillator. */
 
       regval &= ~RCC_BDCR_LSEDRV_MASK;
-      regval |= CONFIG_STM32WB_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
+      regval |= CONFIG_STM32_RTC_LSECLOCK_RUN_DRV_CAPABILITY <<
                 RCC_BDCR_LSEDRV_SHIFT;
-      putreg32(regval, STM32WB_RCC_BDCR);
+      putreg32(regval, STM32_RCC_BDCR);
 #endif
 
       /* Disable backup domain access if it was disabled on entry */
 
-      stm32wb_pwr_enablebkp(writable);
+      stm32_pwr_enablebkp(writable);
     }
 }

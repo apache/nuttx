@@ -36,72 +36,72 @@
 
 /* nucleo-wl55jc has installed 32Mhz HSE oscillator */
 
-#define STM32WL5_XTAL_FREQ           32000000ul
+#define STM32_XTAL_FREQ           32000000ul
 
 /* Use the HSE */
 
-#define STM32WL5_BOARD_USEHSE        1
+#define STM32_BOARD_USEHSE        1
 
 /* HSE source is a TCXO crystal which needs to be first powered on */
 
-#define STM32WL5_BOARD_USETCXO
+#define STM32_BOARD_USETCXO
 
 /* Prescaler common to all PLL inputs */
 
-#define STM32WL5_PLLCFG_PLLM         RCC_PLLCFG_PLLM(2)  /* 32MHz / 2 = 16MHz */
+#define STM32_PLLCFG_PLLM         RCC_PLLCFG_PLLM(2)  /* 32MHz / 2 = 16MHz */
 
 /* 'main' PLL config; we use this to generate our system clock */
 
 /* disable unused pll clocks */
 
-#define STM32WL5_PLLCFG_PLLP         0
-#undef  STM32WL5_PLLCFG_PLLP_ENABLED
-#define STM32WL5_PLLCFG_PLLQ         0
-#undef  STM32WL5_PLLCFG_PLLQ_ENABLED
+#define STM32_PLLCFG_PLLP         0
+#undef  STM32_PLLCFG_PLLP_ENABLED
+#define STM32_PLLCFG_PLLQ         0
+#undef  STM32_PLLCFG_PLLQ_ENABLED
 
 /* further multiplicate source for system clock */
 
-#define STM32WL5_PLLCFG_PLLN         RCC_PLLCFG_PLLN(6)  /* 16MHz * 6 = 96MHz */
-#define STM32WL5_PLLCFG_PLLR         RCC_PLLCFG_PLLR(2)  /* 96MHz / 2 = 48MHz */
-#define STM32WL5_PLLCFG_PLLR_ENABLED
+#define STM32_PLLCFG_PLLN         RCC_PLLCFG_PLLN(6)  /* 16MHz * 6 = 96MHz */
+#define STM32_PLLCFG_PLLR         RCC_PLLCFG_PLLR(2)  /* 96MHz / 2 = 48MHz */
+#define STM32_PLLCFG_PLLR_ENABLED
 
 /* Resulting system clock is 48MHz */
-#define STM32WL5_SYSCLK_FREQUENCY    48000000ul
+#define STM32_SYSCLK_FREQUENCY    48000000ul
 
 /* Configure the HCLK divisor (for the AHB bus, core, memory, and DMA */
 
-#define STM32WL5_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
-#define STM32WL5_HCLK_FREQUENCY      STM32WL5_SYSCLK_FREQUENCY
+#define STM32_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK      /* HCLK  = SYSCLK / 1 */
+#define STM32_HCLK_FREQUENCY      STM32_SYSCLK_FREQUENCY
 
 /* Configure the HCLK3 divisor (for flash and sram2) */
-#define STM32WL5_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK      /* HCLK3  = SYSCLK / 1 */
-#define STM32WL5_HCLK3_FREQUENCY     STM32WL5_SYSCLK_FREQUENCY
+#define STM32_RCC_CFGR_HPRE       RCC_CFGR_HPRE_SYSCLK      /* HCLK3  = SYSCLK / 1 */
+#define STM32_HCLK3_FREQUENCY     STM32_SYSCLK_FREQUENCY
 
 /* Configure the APB1 prescaler */
 
-#define STM32WL5_RCC_CFGR_PPRE1      RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
-#define STM32WL5_PCLK1_FREQUENCY     (STM32WL5_HCLK_FREQUENCY / 1)
+#define STM32_RCC_CFGR_PPRE1      RCC_CFGR_PPRE1_HCLK       /* PCLK1 = HCLK / 1 */
+#define STM32_PCLK1_FREQUENCY     (STM32_HCLK_FREQUENCY / 1)
 
 /* The timer clock frequencies are automatically defined by hardware.
  * If the APB prescaler equals 1, the timer clock frequencies are set to the
  * same frequency as that of the APB domain. Otherwise they are set to twice.
  */
 
-#define STM32WL5_APB1_TIM2_CLKIN     (STM32WL5_PCLK1_FREQUENCY)
+#define STM32_TIM2_CLKIN     (STM32_PCLK1_FREQUENCY)
 
 /* Configure the APB2 prescaler */
 
-#define STM32WL5_RCC_CFGR_PPRE2      RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
-#define STM32WL5_PCLK2_FREQUENCY     (STM32WL5_HCLK_FREQUENCY / 1)
+#define STM32_RCC_CFGR_PPRE2      RCC_CFGR_PPRE2_HCLK       /* PCLK2 = HCLK / 1 */
+#define STM32_PCLK2_FREQUENCY     (STM32_HCLK_FREQUENCY / 1)
 
 /* The timer clock frequencies are automatically defined by hardware.
  * If the APB prescaler equals 1, the timer clock frequencies are set to the
  * same frequency as that of the APB domain. Otherwise they are set to twice.
  */
 
-#define STM32WL5_APB2_TIM1_CLKIN     STM32WL5_PCLK2_FREQUENCY
-#define STM32WL5_APB2_TIM16_CLKIN    STM32WL5_PCLK2_FREQUENCY
-#define STM32WL5_APB2_TIM17_CLKIN    STM32WL5_PCLK2_FREQUENCY
+#define STM32_TIM1_CLKIN     STM32_PCLK2_FREQUENCY
+#define STM32_TIM16_CLKIN    STM32_PCLK2_FREQUENCY
+#define STM32_TIM17_CLKIN    STM32_PCLK2_FREQUENCY
 
 /* The timer clock frequencies are automatically defined by hardware. If the
  * APB prescaler equals 1, the timer clock frequencies are set to the same
@@ -109,13 +109,9 @@
  * Note: TIM1,15,16 are on APB2, others on APB1
  */
 
-#define BOARD_TIM1_FREQUENCY         STM32WL5_HCLK_FREQUENCY
-#define BOARD_TIM2_FREQUENCY         STM32WL5_HCLK_FREQUENCY
-#define BOARD_TIM16_FREQUENCY        STM32WL5_HCLK_FREQUENCY
-#define BOARD_TIM17_FREQUENCY        STM32WL5_HCLK_FREQUENCY
-#define BOARD_LPTIM1_FREQUENCY       STM32WL5_HCLK_FREQUENCY
-#define BOARD_LPTIM2_FREQUENCY       STM32WL5_HCLK_FREQUENCY
-#define BOARD_LPTIM3_FREQUENCY       STM32WL5_HCLK_FREQUENCY
+#define STM32_LPTIM1_CLKIN           STM32_HCLK_FREQUENCY
+#define STM32_LPTIM2_CLKIN           STM32_HCLK_FREQUENCY
+#define STM32_LPTIM3_CLKIN           STM32_HCLK_FREQUENCY
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -231,7 +227,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_board_initialize
+ * Name: stm32_board_initialize
  *
  * Description:
  *   All STM32WL5 architectures must provide the following entry point.
@@ -241,7 +237,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32wl5_board_initialize(void);
+void stm32_board_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

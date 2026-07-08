@@ -29,150 +29,150 @@
 
 /* Register Offsets *********************************************************/
 
-#define STM32WB_TIM_CR1_OFFSET      0x0000  /* Control register 1 */
-#define STM32WB_TIM_CR2_OFFSET      0x0004  /* Control register 2 */
-#define STM32WB_TIM_SMCR_OFFSET     0x0008  /* Slave mode control register (TIM1, TIM2) */
-#define STM32WB_TIM_DIER_OFFSET     0x000c  /* DMA / Interrupt enable register */
-#define STM32WB_TIM_SR_OFFSET       0x0010  /* Status register */
-#define STM32WB_TIM_EGR_OFFSET      0x0014  /* Event generation register */
-#define STM32WB_TIM_CCMR1_OFFSET    0x0018  /* Capture/compare mode register 1 */
-#define STM32WB_TIM_CCMR2_OFFSET    0x001c  /* Capture/compare mode register 2 (TIM1, TIM2) */
-#define STM32WB_TIM_CCER_OFFSET     0x0020  /* Capture/compare enable register */
-#define STM32WB_TIM_CNT_OFFSET      0x0024  /* Counter */
-#define STM32WB_TIM_PSC_OFFSET      0x0028  /* Prescaler */
-#define STM32WB_TIM_ARR_OFFSET      0x002c  /* Auto-reload register */
-#define STM32WB_TIM_RCR_OFFSET      0x0030  /* Repetition counter register (TIM1, TIM16/TIM17) */
-#define STM32WB_TIM_CCR1_OFFSET     0x0034  /* Capture/compare register 1 */
-#define STM32WB_TIM_CCR2_OFFSET     0x0038  /* Capture/compare register 2 (TIM1, TIM2) */
-#define STM32WB_TIM_CCR3_OFFSET     0x003c  /* Capture/compare register 3 (TIM1, TIM2) */
-#define STM32WB_TIM_CCR4_OFFSET     0x0040  /* Capture/compare register 4 (TIM1, TIM2) */
-#define STM32WB_TIM_BDTR_OFFSET     0x0044  /* Break and dead-time register (TIM1, TIM16/17) */
-#define STM32WB_TIM_DCR_OFFSET      0x0048  /* DMA control register */
-#define STM32WB_TIM_DMAR_OFFSET     0x004c  /* DMA address for burst mode */
-#define STM32WB_TIM_OR1_OFFSET      0x0050  /* Option register 1 */
-#define STM32WB_TIM_CCMR3_OFFSET    0x0054  /* Capture/compare mode register 3 (TIM1) */
-#define STM32WB_TIM_CCR5_OFFSET     0x0058  /* Capture/compare register 5 (TIM1) */
-#define STM32WB_TIM_CCR6_OFFSET     0x005C  /* Capture/compare register 6 (TIM1) */
-#define STM32WB_TIM_AF1_OFFSET      0x0060  /* Alternate function register 1 */
-#define STM32WB_TIM_AF2_OFFSET      0x0064  /* Alternate function register 2 (TIM1) */
-#define STM32WB_TIM_TISEL_OFFSET    0x0068  /* Input selector register */
+#define STM32_TIM_CR1_OFFSET      0x0000  /* Control register 1 */
+#define STM32_TIM_CR2_OFFSET      0x0004  /* Control register 2 */
+#define STM32_TIM_SMCR_OFFSET     0x0008  /* Slave mode control register (TIM1, TIM2) */
+#define STM32_TIM_DIER_OFFSET     0x000c  /* DMA / Interrupt enable register */
+#define STM32_TIM_SR_OFFSET       0x0010  /* Status register */
+#define STM32_TIM_EGR_OFFSET      0x0014  /* Event generation register */
+#define STM32_TIM_CCMR1_OFFSET    0x0018  /* Capture/compare mode register 1 */
+#define STM32_TIM_CCMR2_OFFSET    0x001c  /* Capture/compare mode register 2 (TIM1, TIM2) */
+#define STM32_TIM_CCER_OFFSET     0x0020  /* Capture/compare enable register */
+#define STM32_TIM_CNT_OFFSET      0x0024  /* Counter */
+#define STM32_TIM_PSC_OFFSET      0x0028  /* Prescaler */
+#define STM32_TIM_ARR_OFFSET      0x002c  /* Auto-reload register */
+#define STM32_TIM_RCR_OFFSET      0x0030  /* Repetition counter register (TIM1, TIM16/TIM17) */
+#define STM32_TIM_CCR1_OFFSET     0x0034  /* Capture/compare register 1 */
+#define STM32_TIM_CCR2_OFFSET     0x0038  /* Capture/compare register 2 (TIM1, TIM2) */
+#define STM32_TIM_CCR3_OFFSET     0x003c  /* Capture/compare register 3 (TIM1, TIM2) */
+#define STM32_TIM_CCR4_OFFSET     0x0040  /* Capture/compare register 4 (TIM1, TIM2) */
+#define STM32_TIM_BDTR_OFFSET     0x0044  /* Break and dead-time register (TIM1, TIM16/17) */
+#define STM32_TIM_DCR_OFFSET      0x0048  /* DMA control register */
+#define STM32_TIM_DMAR_OFFSET     0x004c  /* DMA address for burst mode */
+#define STM32_TIM_OR1_OFFSET      0x0050  /* Option register 1 */
+#define STM32_TIM_CCMR3_OFFSET    0x0054  /* Capture/compare mode register 3 (TIM1) */
+#define STM32_TIM_CCR5_OFFSET     0x0058  /* Capture/compare register 5 (TIM1) */
+#define STM32_TIM_CCR6_OFFSET     0x005C  /* Capture/compare register 6 (TIM1) */
+#define STM32_TIM_AF1_OFFSET      0x0060  /* Alternate function register 1 */
+#define STM32_TIM_AF2_OFFSET      0x0064  /* Alternate function register 2 (TIM1) */
+#define STM32_TIM_TISEL_OFFSET    0x0068  /* Input selector register */
 
 /* Register Addresses *******************************************************/
 
 /* Advanced Timer TIM1 */
 
-#define STM32WB_TIM1_CR1            (STM32WB_TIM1_BASE + STM32WB_TIM_CR1_OFFSET)
-#define STM32WB_TIM1_CR2            (STM32WB_TIM1_BASE + STM32WB_TIM_CR2_OFFSET)
-#define STM32WB_TIM1_SMCR           (STM32WB_TIM1_BASE + STM32WB_TIM_SMCR_OFFSET)
-#define STM32WB_TIM1_DIER           (STM32WB_TIM1_BASE + STM32WB_TIM_DIER_OFFSET)
-#define STM32WB_TIM1_SR             (STM32WB_TIM1_BASE + STM32WB_TIM_SR_OFFSET)
-#define STM32WB_TIM1_EGR            (STM32WB_TIM1_BASE + STM32WB_TIM_EGR_OFFSET)
-#define STM32WB_TIM1_CCMR1          (STM32WB_TIM1_BASE + STM32WB_TIM_CCMR1_OFFSET)
-#define STM32WB_TIM1_CCMR2          (STM32WB_TIM1_BASE + STM32WB_TIM_CCMR2_OFFSET)
-#define STM32WB_TIM1_CCER           (STM32WB_TIM1_BASE + STM32WB_TIM_CCER_OFFSET)
-#define STM32WB_TIM1_CNT            (STM32WB_TIM1_BASE + STM32WB_TIM_CNT_OFFSET)
-#define STM32WB_TIM1_PSC            (STM32WB_TIM1_BASE + STM32WB_TIM_PSC_OFFSET)
-#define STM32WB_TIM1_ARR            (STM32WB_TIM1_BASE + STM32WB_TIM_ARR_OFFSET)
-#define STM32WB_TIM1_RCR            (STM32WB_TIM1_BASE + STM32WB_TIM_RCR_OFFSET)
-#define STM32WB_TIM1_CCR1           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR1_OFFSET)
-#define STM32WB_TIM1_CCR2           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR2_OFFSET)
-#define STM32WB_TIM1_CCR3           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR3_OFFSET)
-#define STM32WB_TIM1_CCR4           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR4_OFFSET)
-#define STM32WB_TIM1_BDTR           (STM32WB_TIM1_BASE + STM32WB_TIM_BDTR_OFFSET)
-#define STM32WB_TIM1_DCR            (STM32WB_TIM1_BASE + STM32WB_TIM_DCR_OFFSET)
-#define STM32WB_TIM1_DMAR           (STM32WB_TIM1_BASE + STM32WB_TIM_DMAR_OFFSET)
-#define STM32WB_TIM1_OR1            (STM32WB_TIM1_BASE + STM32WB_TIM_OR1_OFFSET)
-#define STM32WB_TIM1_CCMR3          (STM32WB_TIM1_BASE + STM32WB_TIM_CCMR3_OFFSET)
-#define STM32WB_TIM1_CCR5           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR5_OFFSET)
-#define STM32WB_TIM1_CCR6           (STM32WB_TIM1_BASE + STM32WB_TIM_CCR6_OFFSET)
-#define STM32WB_TIM1_AF1            (STM32WB_TIM1_BASE + STM32WB_TIM_AF1_OFFSET)
-#define STM32WB_TIM1_AF2            (STM32WB_TIM1_BASE + STM32WB_TIM_AF2_OFFSET)
-#define STM32WB_TIM1_TISEL          (STM32WB_TIM1_BASE + STM32WB_TIM_TISEL_OFFSET)
+#define STM32_TIM1_CR1            (STM32_TIM1_BASE + STM32_TIM_CR1_OFFSET)
+#define STM32_TIM1_CR2            (STM32_TIM1_BASE + STM32_TIM_CR2_OFFSET)
+#define STM32_TIM1_SMCR           (STM32_TIM1_BASE + STM32_TIM_SMCR_OFFSET)
+#define STM32_TIM1_DIER           (STM32_TIM1_BASE + STM32_TIM_DIER_OFFSET)
+#define STM32_TIM1_SR             (STM32_TIM1_BASE + STM32_TIM_SR_OFFSET)
+#define STM32_TIM1_EGR            (STM32_TIM1_BASE + STM32_TIM_EGR_OFFSET)
+#define STM32_TIM1_CCMR1          (STM32_TIM1_BASE + STM32_TIM_CCMR1_OFFSET)
+#define STM32_TIM1_CCMR2          (STM32_TIM1_BASE + STM32_TIM_CCMR2_OFFSET)
+#define STM32_TIM1_CCER           (STM32_TIM1_BASE + STM32_TIM_CCER_OFFSET)
+#define STM32_TIM1_CNT            (STM32_TIM1_BASE + STM32_TIM_CNT_OFFSET)
+#define STM32_TIM1_PSC            (STM32_TIM1_BASE + STM32_TIM_PSC_OFFSET)
+#define STM32_TIM1_ARR            (STM32_TIM1_BASE + STM32_TIM_ARR_OFFSET)
+#define STM32_TIM1_RCR            (STM32_TIM1_BASE + STM32_TIM_RCR_OFFSET)
+#define STM32_TIM1_CCR1           (STM32_TIM1_BASE + STM32_TIM_CCR1_OFFSET)
+#define STM32_TIM1_CCR2           (STM32_TIM1_BASE + STM32_TIM_CCR2_OFFSET)
+#define STM32_TIM1_CCR3           (STM32_TIM1_BASE + STM32_TIM_CCR3_OFFSET)
+#define STM32_TIM1_CCR4           (STM32_TIM1_BASE + STM32_TIM_CCR4_OFFSET)
+#define STM32_TIM1_BDTR           (STM32_TIM1_BASE + STM32_TIM_BDTR_OFFSET)
+#define STM32_TIM1_DCR            (STM32_TIM1_BASE + STM32_TIM_DCR_OFFSET)
+#define STM32_TIM1_DMAR           (STM32_TIM1_BASE + STM32_TIM_DMAR_OFFSET)
+#define STM32_TIM1_OR1            (STM32_TIM1_BASE + STM32_TIM_OR1_OFFSET)
+#define STM32_TIM1_CCMR3          (STM32_TIM1_BASE + STM32_TIM_CCMR3_OFFSET)
+#define STM32_TIM1_CCR5           (STM32_TIM1_BASE + STM32_TIM_CCR5_OFFSET)
+#define STM32_TIM1_CCR6           (STM32_TIM1_BASE + STM32_TIM_CCR6_OFFSET)
+#define STM32_TIM1_AF1            (STM32_TIM1_BASE + STM32_TIM_AF1_OFFSET)
+#define STM32_TIM1_AF2            (STM32_TIM1_BASE + STM32_TIM_AF2_OFFSET)
+#define STM32_TIM1_TISEL          (STM32_TIM1_BASE + STM32_TIM_TISEL_OFFSET)
 
 /* General 32-bit Timer TIM2 */
 
-#define STM32WB_TIM2_CR1            (STM32WB_TIM2_BASE + STM32WB_TIM_CR1_OFFSET)
-#define STM32WB_TIM2_CR2            (STM32WB_TIM2_BASE + STM32WB_TIM_CR2_OFFSET)
-#define STM32WB_TIM2_SMCR           (STM32WB_TIM2_BASE + STM32WB_TIM_SMCR_OFFSET)
-#define STM32WB_TIM2_DIER           (STM32WB_TIM2_BASE + STM32WB_TIM_DIER_OFFSET)
-#define STM32WB_TIM2_SR             (STM32WB_TIM2_BASE + STM32WB_TIM_SR_OFFSET)
-#define STM32WB_TIM2_EGR            (STM32WB_TIM2_BASE + STM32WB_TIM_EGR_OFFSET)
-#define STM32WB_TIM2_CCMR1          (STM32WB_TIM2_BASE + STM32WB_TIM_CCMR1_OFFSET)
-#define STM32WB_TIM2_CCMR2          (STM32WB_TIM2_BASE + STM32WB_TIM_CCMR2_OFFSET)
-#define STM32WB_TIM2_CCER           (STM32WB_TIM2_BASE + STM32WB_TIM_CCER_OFFSET)
-#define STM32WB_TIM2_CNT            (STM32WB_TIM2_BASE + STM32WB_TIM_CNT_OFFSET)
-#define STM32WB_TIM2_PSC            (STM32WB_TIM2_BASE + STM32WB_TIM_PSC_OFFSET)
-#define STM32WB_TIM2_ARR            (STM32WB_TIM2_BASE + STM32WB_TIM_ARR_OFFSET)
-#define STM32WB_TIM2_CCR1           (STM32WB_TIM2_BASE + STM32WB_TIM_CCR1_OFFSET)
-#define STM32WB_TIM2_CCR2           (STM32WB_TIM2_BASE + STM32WB_TIM_CCR2_OFFSET)
-#define STM32WB_TIM2_CCR3           (STM32WB_TIM2_BASE + STM32WB_TIM_CCR3_OFFSET)
-#define STM32WB_TIM2_CCR4           (STM32WB_TIM2_BASE + STM32WB_TIM_CCR4_OFFSET)
-#define STM32WB_TIM2_DCR            (STM32WB_TIM2_BASE + STM32WB_TIM_DCR_OFFSET)
-#define STM32WB_TIM2_DMAR           (STM32WB_TIM2_BASE + STM32WB_TIM_DMAR_OFFSET)
-#define STM32WB_TIM2_OR1            (STM32WB_TIM2_BASE + STM32WB_TIM_OR1_OFFSET)
-#define STM32WB_TIM2_AF1            (STM32WB_TIM2_BASE + STM32WB_TIM_AF1_OFFSET)
-#define STM32WB_TIM2_TISEL          (STM32WB_TIM2_BASE + STM32WB_TIM_TISEL_OFFSET)
+#define STM32_TIM2_CR1            (STM32_TIM2_BASE + STM32_TIM_CR1_OFFSET)
+#define STM32_TIM2_CR2            (STM32_TIM2_BASE + STM32_TIM_CR2_OFFSET)
+#define STM32_TIM2_SMCR           (STM32_TIM2_BASE + STM32_TIM_SMCR_OFFSET)
+#define STM32_TIM2_DIER           (STM32_TIM2_BASE + STM32_TIM_DIER_OFFSET)
+#define STM32_TIM2_SR             (STM32_TIM2_BASE + STM32_TIM_SR_OFFSET)
+#define STM32_TIM2_EGR            (STM32_TIM2_BASE + STM32_TIM_EGR_OFFSET)
+#define STM32_TIM2_CCMR1          (STM32_TIM2_BASE + STM32_TIM_CCMR1_OFFSET)
+#define STM32_TIM2_CCMR2          (STM32_TIM2_BASE + STM32_TIM_CCMR2_OFFSET)
+#define STM32_TIM2_CCER           (STM32_TIM2_BASE + STM32_TIM_CCER_OFFSET)
+#define STM32_TIM2_CNT            (STM32_TIM2_BASE + STM32_TIM_CNT_OFFSET)
+#define STM32_TIM2_PSC            (STM32_TIM2_BASE + STM32_TIM_PSC_OFFSET)
+#define STM32_TIM2_ARR            (STM32_TIM2_BASE + STM32_TIM_ARR_OFFSET)
+#define STM32_TIM2_CCR1           (STM32_TIM2_BASE + STM32_TIM_CCR1_OFFSET)
+#define STM32_TIM2_CCR2           (STM32_TIM2_BASE + STM32_TIM_CCR2_OFFSET)
+#define STM32_TIM2_CCR3           (STM32_TIM2_BASE + STM32_TIM_CCR3_OFFSET)
+#define STM32_TIM2_CCR4           (STM32_TIM2_BASE + STM32_TIM_CCR4_OFFSET)
+#define STM32_TIM2_DCR            (STM32_TIM2_BASE + STM32_TIM_DCR_OFFSET)
+#define STM32_TIM2_DMAR           (STM32_TIM2_BASE + STM32_TIM_DMAR_OFFSET)
+#define STM32_TIM2_OR1            (STM32_TIM2_BASE + STM32_TIM_OR1_OFFSET)
+#define STM32_TIM2_AF1            (STM32_TIM2_BASE + STM32_TIM_AF1_OFFSET)
+#define STM32_TIM2_TISEL          (STM32_TIM2_BASE + STM32_TIM_TISEL_OFFSET)
 
 /* General Timers TIM16/TIM17 */
 
-#define STM32WB_TIM16_CR1           (STM32WB_TIM16_BASE + STM32WB_TIM_CR1_OFFSET)
-#define STM32WB_TIM16_CR2           (STM32WB_TIM16_BASE + STM32WB_TIM_CR2_OFFSET)
-#define STM32WB_TIM16_DIER          (STM32WB_TIM16_BASE + STM32WB_TIM_DIER_OFFSET)
-#define STM32WB_TIM16_SR            (STM32WB_TIM16_BASE + STM32WB_TIM_SR_OFFSET)
-#define STM32WB_TIM16_EGR           (STM32WB_TIM16_BASE + STM32WB_TIM_EGR_OFFSET)
-#define STM32WB_TIM16_CCMR1         (STM32WB_TIM16_BASE + STM32WB_TIM_CCMR1_OFFSET)
-#define STM32WB_TIM16_CCER          (STM32WB_TIM16_BASE + STM32WB_TIM_CCER_OFFSET)
-#define STM32WB_TIM16_CNT           (STM32WB_TIM16_BASE + STM32WB_TIM_CNT_OFFSET)
-#define STM32WB_TIM16_PSC           (STM32WB_TIM16_BASE + STM32WB_TIM_PSC_OFFSET)
-#define STM32WB_TIM16_ARR           (STM32WB_TIM16_BASE + STM32WB_TIM_ARR_OFFSET)
-#define STM32WB_TIM16_RCR           (STM32WB_TIM16_BASE + STM32WB_TIM_RCR_OFFSET)
-#define STM32WB_TIM16_CCR1          (STM32WB_TIM16_BASE + STM32WB_TIM_CCR1_OFFSET)
-#define STM32WB_TIM16_BDTR          (STM32WB_TIM16_BASE + STM32WB_TIM_BDTR_OFFSET)
-#define STM32WB_TIM16_DCR           (STM32WB_TIM16_BASE + STM32WB_TIM_DCR_OFFSET)
-#define STM32WB_TIM16_DMAR          (STM32WB_TIM16_BASE + STM32WB_TIM_DMAR_OFFSET)
-#define STM32WB_TIM16_OR1           (STM32WB_TIM16_BASE + STM32WB_TIM_OR1_OFFSET)
-#define STM32WB_TIM16_AF1           (STM32WB_TIM16_BASE + STM32WB_TIM_AF1_OFFSET)
-#define STM32WB_TIM16_TISEL         (STM32WB_TIM16_BASE + STM32WB_TIM_TISEL_OFFSET)
+#define STM32_TIM16_CR1           (STM32_TIM16_BASE + STM32_TIM_CR1_OFFSET)
+#define STM32_TIM16_CR2           (STM32_TIM16_BASE + STM32_TIM_CR2_OFFSET)
+#define STM32_TIM16_DIER          (STM32_TIM16_BASE + STM32_TIM_DIER_OFFSET)
+#define STM32_TIM16_SR            (STM32_TIM16_BASE + STM32_TIM_SR_OFFSET)
+#define STM32_TIM16_EGR           (STM32_TIM16_BASE + STM32_TIM_EGR_OFFSET)
+#define STM32_TIM16_CCMR1         (STM32_TIM16_BASE + STM32_TIM_CCMR1_OFFSET)
+#define STM32_TIM16_CCER          (STM32_TIM16_BASE + STM32_TIM_CCER_OFFSET)
+#define STM32_TIM16_CNT           (STM32_TIM16_BASE + STM32_TIM_CNT_OFFSET)
+#define STM32_TIM16_PSC           (STM32_TIM16_BASE + STM32_TIM_PSC_OFFSET)
+#define STM32_TIM16_ARR           (STM32_TIM16_BASE + STM32_TIM_ARR_OFFSET)
+#define STM32_TIM16_RCR           (STM32_TIM16_BASE + STM32_TIM_RCR_OFFSET)
+#define STM32_TIM16_CCR1          (STM32_TIM16_BASE + STM32_TIM_CCR1_OFFSET)
+#define STM32_TIM16_BDTR          (STM32_TIM16_BASE + STM32_TIM_BDTR_OFFSET)
+#define STM32_TIM16_DCR           (STM32_TIM16_BASE + STM32_TIM_DCR_OFFSET)
+#define STM32_TIM16_DMAR          (STM32_TIM16_BASE + STM32_TIM_DMAR_OFFSET)
+#define STM32_TIM16_OR1           (STM32_TIM16_BASE + STM32_TIM_OR1_OFFSET)
+#define STM32_TIM16_AF1           (STM32_TIM16_BASE + STM32_TIM_AF1_OFFSET)
+#define STM32_TIM16_TISEL         (STM32_TIM16_BASE + STM32_TIM_TISEL_OFFSET)
 
-#define STM32WB_TIM17_CR1           (STM32WB_TIM17_BASE + STM32WB_TIM_CR1_OFFSET)
-#define STM32WB_TIM17_CR2           (STM32WB_TIM17_BASE + STM32WB_TIM_CR2_OFFSET)
-#define STM32WB_TIM17_DIER          (STM32WB_TIM17_BASE + STM32WB_TIM_DIER_OFFSET)
-#define STM32WB_TIM17_SR            (STM32WB_TIM17_BASE + STM32WB_TIM_SR_OFFSET)
-#define STM32WB_TIM17_EGR           (STM32WB_TIM17_BASE + STM32WB_TIM_EGR_OFFSET)
-#define STM32WB_TIM17_CCMR1         (STM32WB_TIM17_BASE + STM32WB_TIM_CCMR1_OFFSET)
-#define STM32WB_TIM17_CCER          (STM32WB_TIM17_BASE + STM32WB_TIM_CCER_OFFSET)
-#define STM32WB_TIM17_CNT           (STM32WB_TIM17_BASE + STM32WB_TIM_CNT_OFFSET)
-#define STM32WB_TIM17_PSC           (STM32WB_TIM17_BASE + STM32WB_TIM_PSC_OFFSET)
-#define STM32WB_TIM17_ARR           (STM32WB_TIM17_BASE + STM32WB_TIM_ARR_OFFSET)
-#define STM32WB_TIM17_RCR           (STM32WB_TIM17_BASE + STM32WB_TIM_RCR_OFFSET)
-#define STM32WB_TIM17_CCR1          (STM32WB_TIM17_BASE + STM32WB_TIM_CCR1_OFFSET)
-#define STM32WB_TIM17_BDTR          (STM32WB_TIM17_BASE + STM32WB_TIM_BDTR_OFFSET)
-#define STM32WB_TIM17_DCR           (STM32WB_TIM17_BASE + STM32WB_TIM_DCR_OFFSET)
-#define STM32WB_TIM17_DMAR          (STM32WB_TIM17_BASE + STM32WB_TIM_DMAR_OFFSET)
-#define STM32WB_TIM17_OR1           (STM32WB_TIM17_BASE + STM32WB_TIM_OR1_OFFSET)
-#define STM32WB_TIM17_AF1           (STM32WB_TIM17_BASE + STM32WB_TIM_AF1_OFFSET)
-#define STM32WB_TIM17_TISEL         (STM32WB_TIM17_BASE + STM32WB_TIM_TISEL_OFFSET)
+#define STM32_TIM17_CR1           (STM32_TIM17_BASE + STM32_TIM_CR1_OFFSET)
+#define STM32_TIM17_CR2           (STM32_TIM17_BASE + STM32_TIM_CR2_OFFSET)
+#define STM32_TIM17_DIER          (STM32_TIM17_BASE + STM32_TIM_DIER_OFFSET)
+#define STM32_TIM17_SR            (STM32_TIM17_BASE + STM32_TIM_SR_OFFSET)
+#define STM32_TIM17_EGR           (STM32_TIM17_BASE + STM32_TIM_EGR_OFFSET)
+#define STM32_TIM17_CCMR1         (STM32_TIM17_BASE + STM32_TIM_CCMR1_OFFSET)
+#define STM32_TIM17_CCER          (STM32_TIM17_BASE + STM32_TIM_CCER_OFFSET)
+#define STM32_TIM17_CNT           (STM32_TIM17_BASE + STM32_TIM_CNT_OFFSET)
+#define STM32_TIM17_PSC           (STM32_TIM17_BASE + STM32_TIM_PSC_OFFSET)
+#define STM32_TIM17_ARR           (STM32_TIM17_BASE + STM32_TIM_ARR_OFFSET)
+#define STM32_TIM17_RCR           (STM32_TIM17_BASE + STM32_TIM_RCR_OFFSET)
+#define STM32_TIM17_CCR1          (STM32_TIM17_BASE + STM32_TIM_CCR1_OFFSET)
+#define STM32_TIM17_BDTR          (STM32_TIM17_BASE + STM32_TIM_BDTR_OFFSET)
+#define STM32_TIM17_DCR           (STM32_TIM17_BASE + STM32_TIM_DCR_OFFSET)
+#define STM32_TIM17_DMAR          (STM32_TIM17_BASE + STM32_TIM_DMAR_OFFSET)
+#define STM32_TIM17_OR1           (STM32_TIM17_BASE + STM32_TIM_OR1_OFFSET)
+#define STM32_TIM17_AF1           (STM32_TIM17_BASE + STM32_TIM_AF1_OFFSET)
+#define STM32_TIM17_TISEL         (STM32_TIM17_BASE + STM32_TIM_TISEL_OFFSET)
 
 /* Register Value Constants *************************************************/
 
 /* Digital Filter options */
 
-#define STM32WB_DF_NOFILT           (0x0) /* 0000: No filter */
-#define STM32WB_DF_FCKINTn2         (0x1) /* 0001: fSAMPLING = fCK_INT, N=2 */
-#define STM32WB_DF_FCKINTn4         (0x2) /* 0010: fSAMPLING = fCK_INT, N=4 */
-#define STM32WB_DF_FCKINTn8         (0x3) /* 0011: fSAMPLING = fCK_INT, N=8 */
-#define STM32WB_DF_FDTSd2n6         (0x4) /* 0100: fSAMPLING = fDTS/2, N=6 */
-#define STM32WB_DF_FDTSd2n8         (0x5) /* 0101: fSAMPLING = fDTS/2, N=8 */
-#define STM32WB_DF_FDTSd4n6         (0x6) /* 0110: fSAMPLING = fDTS/4, N=6 */
-#define STM32WB_DF_FDTSd4n8         (0x7) /* 0111: fSAMPLING = fDTS/4, N=8 */
-#define STM32WB_DF_FDTSd8n6         (0x8) /* 1000: fSAMPLING = fDTS/8, N=6 */
-#define STM32WB_DF_FDTSd8n8         (0x9) /* 1001: fSAMPLING = fDTS/8, N=8 */
-#define STM32WB_DF_FDTSd16n5        (0xa) /* 1010: fSAMPLING = fDTS/16, N=5 */
-#define STM32WB_DF_FDTSd16n6        (0xb) /* 1011: fSAMPLING = fDTS/16, N=6 */
-#define STM32WB_DF_FDTSd16n8        (0xc) /* 1100: fSAMPLING = fDTS/16, N=8 */
-#define STM32WB_DF_FDTSd32n5        (0xd) /* 1101: fSAMPLING = fDTS/32, N=5 */
-#define STM32WB_DF_FDTSd32n6        (0xe) /* 1110: fSAMPLING = fDTS/32, N=6 */
-#define STM32WB_DF_FDTSd32n8        (0xf) /* 1111: fSAMPLING = fDTS/32, N=8 */
+#define STM32_DF_NOFILT           (0x0) /* 0000: No filter */
+#define STM32_DF_FCKINTn2         (0x1) /* 0001: fSAMPLING = fCK_INT, N=2 */
+#define STM32_DF_FCKINTn4         (0x2) /* 0010: fSAMPLING = fCK_INT, N=4 */
+#define STM32_DF_FCKINTn8         (0x3) /* 0011: fSAMPLING = fCK_INT, N=8 */
+#define STM32_DF_FDTSd2n6         (0x4) /* 0100: fSAMPLING = fDTS/2, N=6 */
+#define STM32_DF_FDTSd2n8         (0x5) /* 0101: fSAMPLING = fDTS/2, N=8 */
+#define STM32_DF_FDTSd4n6         (0x6) /* 0110: fSAMPLING = fDTS/4, N=6 */
+#define STM32_DF_FDTSd4n8         (0x7) /* 0111: fSAMPLING = fDTS/4, N=8 */
+#define STM32_DF_FDTSd8n6         (0x8) /* 1000: fSAMPLING = fDTS/8, N=6 */
+#define STM32_DF_FDTSd8n8         (0x9) /* 1001: fSAMPLING = fDTS/8, N=8 */
+#define STM32_DF_FDTSd16n5        (0xa) /* 1010: fSAMPLING = fDTS/16, N=5 */
+#define STM32_DF_FDTSd16n6        (0xb) /* 1011: fSAMPLING = fDTS/16, N=6 */
+#define STM32_DF_FDTSd16n8        (0xc) /* 1100: fSAMPLING = fDTS/16, N=8 */
+#define STM32_DF_FDTSd32n5        (0xd) /* 1101: fSAMPLING = fDTS/32, N=5 */
+#define STM32_DF_FDTSd32n6        (0xe) /* 1110: fSAMPLING = fDTS/32, N=6 */
+#define STM32_DF_FDTSd32n8        (0xf) /* 1111: fSAMPLING = fDTS/32, N=8 */
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -397,7 +397,7 @@
 #define TIM1_SMCR_MSM               (1 << 7)  /* Bit 7: Master/slave mode */
 #define TIM1_SMCR_ETF_SHIFT         (8)       /* Bits 8-11: External trigger filter */
 #define TIM1_SMCR_ETF_MASK          (0xf << TIM1_SMCR_ETF_SHIFT)
-#  define TIM1_SMCR_ETF(f)          ((f) << TIM1_SMCR_ETF_SHIFT) /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_SMCR_ETF(f)          ((f) << TIM1_SMCR_ETF_SHIFT) /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_SMCR_ETPS_SHIFT        (12)      /* Bits 12-13: External trigger prescaler */
 #define TIM1_SMCR_ETPS_MASK         (0x3 << TIM1_SMCR_ETPS_SHIFT)
@@ -450,7 +450,7 @@
 #define TIM2_SMCR_MSM               (1 << 7)  /* Bit 7: Master/slave mode */
 #define TIM2_SMCR_ETF_SHIFT         (8)       /* Bits 8-11: External trigger filter */
 #define TIM2_SMCR_ETF_MASK          (0xf << TIM2_SMCR_ETF_SHIFT)
-#  define TIM2_SMCR_ETF(f)          ((f) << TIM2_SMCR_ETF_SHIFT) /* f = STM32WB_DF_[digital filter option] */
+#  define TIM2_SMCR_ETF(f)          ((f) << TIM2_SMCR_ETF_SHIFT) /* f = STM32_DF_[digital filter option] */
 
 #define TIM2_SMCR_ETPS_SHIFT        (12)      /* Bits 12-13: External trigger prescaler */
 #define TIM2_SMCR_ETPS_MASK         (0x3 << TIM2_SMCR_ETPS_SHIFT)
@@ -920,7 +920,7 @@
 
 #define TIM1_CCMR1_IC1F_SHIFT       (4)       /* Bits 4-7: Input Capture 1 Filter */
 #define TIM1_CCMR1_IC1F_MASK        (0xf << TIM1_CCMR1_IC1F_SHIFT)
-#  define TIM1_CCMR1_IC1F(f)        ((f) << TIM1_CCMR1_IC1F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_CCMR1_IC1F(f)        ((f) << TIM1_CCMR1_IC1F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_CCMR1_IC2PSC_SHIFT     (10)      /* Bits 10-11: Input Capture 2 Prescaler */
 #define TIM1_CCMR1_IC2PSC_MASK      (0x3 << TIM1_CCMR1_IC2PSC_SHIFT)
@@ -931,7 +931,7 @@
 
 #define TIM1_CCMR1_IC2F_SHIFT       (12)      /* Bits 12-15: Input Capture 2 Filter */
 #define TIM1_CCMR1_IC2F_MASK        (0xf << TIM1_CCMR1_IC2F_SHIFT)
-#  define TIM1_CCMR1_IC2F(f)        ((f) << TIM1_CCMR1_IC2F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_CCMR1_IC2F(f)        ((f) << TIM1_CCMR1_IC2F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_CCMR2_IC3PSC_SHIFT     (2)       /* Bits 2-3: Input Capture 3 Prescaler */
 #define TIM1_CCMR2_IC3PSC_MASK      (0x3 << TIM1_CCMR2_IC3PSC_SHIFT)
@@ -942,7 +942,7 @@
 
 #define TIM1_CCMR2_IC3F_SHIFT       (4)       /* Bits 4-7: Input Capture 3 Filter */
 #define TIM1_CCMR2_IC3F_MASK        (0xf << TIM1_CCMR2_IC3F_SHIFT)
-#  define TIM1_CCMR2_IC3F(f)        ((f) << TIM1_CCMR2_IC3F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_CCMR2_IC3F(f)        ((f) << TIM1_CCMR2_IC3F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_CCMR2_IC4PSC_SHIFT     (10)      /* Bits 10-11: Input Capture 4 Prescaler */
 #define TIM1_CCMR2_IC4PSC_MASK      (0x3 << TIM1_CCMR2_IC4PSC_SHIFT)
@@ -953,7 +953,7 @@
 
 #define TIM1_CCMR2_IC4F_SHIFT       (12)      /* Bits 12-15: Input Capture 4 Filter */
 #define TIM1_CCMR2_IC4F_MASK        (0xf << TIM1_CCMR2_IC4F_SHIFT)
-#  define TIM1_CCMR2_IC4F(f)        ((f) << TIM1_CCMR2_IC4F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_CCMR2_IC4F(f)        ((f) << TIM1_CCMR2_IC4F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM2_CCMR1_IC1PSC_SHIFT     (2)       /* Bits 2-3: Input Capture 1 Prescaler */
 #define TIM2_CCMR1_IC1PSC_MASK      (0x3 << TIM2_CCMR1_IC1PSC_SHIFT)
@@ -964,7 +964,7 @@
 
 #define TIM2_CCMR1_IC1F_SHIFT       (4)       /* Bits 4-7: Input Capture 1 Filter */
 #define TIM2_CCMR1_IC1F_MASK        (0xf << TIM2_CCMR1_IC1F_SHIFT)
-#  define TIM2_CCMR1_IC1F(f)        ((f) << TIM2_CCMR1_IC1F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM2_CCMR1_IC1F(f)        ((f) << TIM2_CCMR1_IC1F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM2_CCMR1_IC2PSC_SHIFT     (10)      /* Bits 10-11: Input Capture 2 Prescaler */
 #define TIM2_CCMR1_IC2PSC_MASK      (0x3 << TIM2_CCMR1_IC2PSC_SHIFT)
@@ -975,7 +975,7 @@
 
 #define TIM2_CCMR1_IC2F_SHIFT       (12)      /* Bits 12-15: Input Capture 2 Filter */
 #define TIM2_CCMR1_IC2F_MASK        (0xf << TIM2_CCMR1_IC2F_SHIFT)
-#  define TIM2_CCMR1_IC2F(f)        ((f) << TIM2_CCMR1_IC2F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM2_CCMR1_IC2F(f)        ((f) << TIM2_CCMR1_IC2F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM2_CCMR2_IC3PSC_SHIFT     (2)       /* Bits 2-3: Input Capture 3 Prescaler */
 #define TIM2_CCMR2_IC3PSC_MASK      (0x3 << TIM2_CCMR2_IC3PSC_SHIFT)
@@ -986,7 +986,7 @@
 
 #define TIM2_CCMR2_IC3F_SHIFT       (4)       /* Bits 4-7: Input Capture 3 Filter */
 #define TIM2_CCMR2_IC3F_MASK        (0xf << TIM2_CCMR2_IC3F_SHIFT)
-#  define TIM2_CCMR2_IC3F(f)        ((f) << TIM2_CCMR2_IC3F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM2_CCMR2_IC3F(f)        ((f) << TIM2_CCMR2_IC3F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM2_CCMR2_IC4PSC_SHIFT     (10)      /* Bits 10-11: Input Capture 4 Prescaler */
 #define TIM2_CCMR2_IC4PSC_MASK      (0x3 << TIM2_CCMR2_IC4PSC_SHIFT)
@@ -997,7 +997,7 @@
 
 #define TIM2_CCMR2_IC4F_SHIFT       (12)      /* Bits 12-15: Input Capture 4 Filter */
 #define TIM2_CCMR2_IC4F_MASK        (0xf << TIM2_CCMR2_IC4F_SHIFT)
-#  define TIM2_CCMR2_IC4F(f)        ((f) << TIM2_CCMR2_IC4F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM2_CCMR2_IC4F(f)        ((f) << TIM2_CCMR2_IC4F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM16_CCMR1_IC1PSC_SHIFT    (2)       /* Bits 2-3: Input Capture 1 Prescaler */
 #define TIM16_CCMR1_IC1PSC_MASK     (0x3 << TIM16_CCMR1_IC1PSC_SHIFT)
@@ -1008,7 +1008,7 @@
 
 #define TIM16_CCMR1_IC1F_SHIFT      (4)       /* Bits 4-7: Input Capture 1 Filter */
 #define TIM16_CCMR1_IC1F_MASK       (0xf << TIM16_CCMR1_IC1F_SHIFT)
-#  define TIM16_CCMR1_IC1F(f)       ((f) << TIM16_CCMR1_IC1F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM16_CCMR1_IC1F(f)       ((f) << TIM16_CCMR1_IC1F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 #define TIM17_CCMR1_IC1PSC_SHIFT    (2)       /* Bits 2-3: Input Capture 1 Prescaler */
 #define TIM17_CCMR1_IC1PSC_MASK     (0x3 << TIM17_CCMR1_IC1PSC_SHIFT)
@@ -1019,7 +1019,7 @@
 
 #define TIM17_CCMR1_IC1F_SHIFT      (4)       /* Bits 4-7: Input Capture 1 Filter */
 #define TIM17_CCMR1_IC1F_MASK       (0xf << TIM17_CCMR1_IC1F_SHIFT)
-#  define TIM17_CCMR1_IC1F(f)       ((f) << TIM17_CCMR1_IC1F_SHIFT)   /* f = STM32WB_DF_[digital filter option] */
+#  define TIM17_CCMR1_IC1F(f)       ((f) << TIM17_CCMR1_IC1F_SHIFT)   /* f = STM32_DF_[digital filter option] */
 
 /* Capture/compare enable register */
 
@@ -1178,11 +1178,11 @@
 #define TIM1_BDTR_MOE               (1 << 15) /* Bit 15: Main Output enable */
 #define TIM1_BDTR_BKF_SHIFT         (16)      /* Bits 16-19: Break filter */
 #define TIM1_BDTR_BKF_MASK          (0xf << TIM1_BDTR_BKF_SHIFT)
-#  define TIM1_BDTR_BKF(f)          ((f) << TIM1_BDTR_BKF_SHIFT) /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_BDTR_BKF(f)          ((f) << TIM1_BDTR_BKF_SHIFT) /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_BDTR_BK2F_SHIFT        (20)      /* Bits 20-23: Break 2 filter */
 #define TIM1_BDTR_BK2F_MASK         (0xf << TIM1_BDTR_BK2F_SHIFT)
-#  define TIM1_BDTR_BK2F(f)         ((f) << TIM1_BDTR_BK2F_SHIFT) /* f = STM32WB_DF_[digital filter option] */
+#  define TIM1_BDTR_BK2F(f)         ((f) << TIM1_BDTR_BK2F_SHIFT) /* f = STM32_DF_[digital filter option] */
 
 #define TIM1_BDTR_BK2E              (1 << 24) /* Bit 24: Break 2 enable */
 #define TIM1_BDTR_BK2P              (1 << 25) /* Bit 25: Break 2 polarity */

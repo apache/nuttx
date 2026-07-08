@@ -37,89 +37,89 @@
 
 /* SHCI event types *********************************************************/
 
-#define STM32WB_SHCI_ASYNC_EVT              0xff
+#define STM32_SHCI_ASYNC_EVT              0xff
 
 /* SHCI async event subtypes */
 
-#define STM32WB_SHCI_ASYNC_EVT_C2RDY        0x9200
+#define STM32_SHCI_ASYNC_EVT_C2RDY        0x9200
 
 /* SHCI system command acknowledgement events */
 
-#define STM32WB_SHCI_ACK_EVT_C2RDY          0x05
+#define STM32_SHCI_ACK_EVT_C2RDY          0x05
 
 /* SHCI command opcodes *****************************************************/
 
-#define STM32WB_SHCI_OGF                    0x3f
-#define STM32WB_SHCI_OP(ogf, ocf)           (((ogf) << 10) | (ocf))
+#define STM32_SHCI_OGF                    0x3f
+#define STM32_SHCI_OP(ogf, ocf)           (((ogf) << 10) | (ocf))
 
-#define STM32WB_SHCI_FUS_GET_STATE          STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x52)
-#define STM32WB_SHCI_FUS_FW_UPGRADE         STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x54)
-#define STM32WB_SHCI_FUS_FW_DELETE          STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x55)
-#define STM32WB_SHCI_FUS_UPDATE_AUTH_KEY    STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x56)
-#define STM32WB_SHCI_FUS_LOCK_AUTH_KEY      STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x57)
-#define STM32WB_SHCI_FUS_STORE_USR_KEY      STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x58)
-#define STM32WB_SHCI_FUS_LOAD_USR_KEY       STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x59)
-#define STM32WB_SHCI_FUS_START_WS           STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x5a)
-#define STM32WB_SHCI_FUS_LOCK_USR_KEY       STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x5d)
-#define STM32WB_SHCI_FUS_UNLOAD_USR_KEY     STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x5e)
-#define STM32WB_SHCI_FUS_ANTIROLLBACK       STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x5f)
-#define STM32WB_SHCI_BLE_INIT               STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x66)
-#define STM32WB_SHCI_THREAD_INIT            STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x67)
-#define STM32WB_SHCI_DEBUG_INIT             STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x68)
-#define STM32WB_SHCI_FLASH_ERASE_ACTIVITY   STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x69)
-#define STM32WB_SHCI_CONCURRENT_SET_MODE    STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6a)
-#define STM32WB_SHCI_FLASH_STORE_DATA       STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6b)
-#define STM32WB_SHCI_FLASH_ERASE_DATA       STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6c)
-#define STM32WB_SHCI_RADIO_ALLOW_LOW_POWER  STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6d)
-#define STM32WB_SHCI_MAC_802154_INIT        STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6e)
-#define STM32WB_SHCI_REINIT                 STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x6f)
-#define STM32WB_SHCI_ZIGBEE_INIT            STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x70)
-#define STM32WB_SHCI_LLD_TESTS_INIT         STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x71)
-#define STM32WB_SHCI_EXTPA_CONFIG           STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x72)
-#define STM32WB_SHCI_SET_FLASH_CONTROL      STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x73)
-#define STM32WB_SHCI_BLE_LLD_INIT           STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x74)
-#define STM32WB_SHCI_CONFIG                 STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x75)
-#define STM32WB_SHCI_GET_NEXT_BLE_EVT_TIME  STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x76)
-#define STM32WB_SHCI_ENABLE_NEXT_802154_NF  STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x77)
-#define STM32WB_SHCI_802_15_4_DEINIT        STM32WB_SHCI_OP(STM32WB_SHCI_OGF, 0x78)
+#define STM32_SHCI_FUS_GET_STATE          STM32_SHCI_OP(STM32_SHCI_OGF, 0x52)
+#define STM32_SHCI_FUS_FW_UPGRADE         STM32_SHCI_OP(STM32_SHCI_OGF, 0x54)
+#define STM32_SHCI_FUS_FW_DELETE          STM32_SHCI_OP(STM32_SHCI_OGF, 0x55)
+#define STM32_SHCI_FUS_UPDATE_AUTH_KEY    STM32_SHCI_OP(STM32_SHCI_OGF, 0x56)
+#define STM32_SHCI_FUS_LOCK_AUTH_KEY      STM32_SHCI_OP(STM32_SHCI_OGF, 0x57)
+#define STM32_SHCI_FUS_STORE_USR_KEY      STM32_SHCI_OP(STM32_SHCI_OGF, 0x58)
+#define STM32_SHCI_FUS_LOAD_USR_KEY       STM32_SHCI_OP(STM32_SHCI_OGF, 0x59)
+#define STM32_SHCI_FUS_START_WS           STM32_SHCI_OP(STM32_SHCI_OGF, 0x5a)
+#define STM32_SHCI_FUS_LOCK_USR_KEY       STM32_SHCI_OP(STM32_SHCI_OGF, 0x5d)
+#define STM32_SHCI_FUS_UNLOAD_USR_KEY     STM32_SHCI_OP(STM32_SHCI_OGF, 0x5e)
+#define STM32_SHCI_FUS_ANTIROLLBACK       STM32_SHCI_OP(STM32_SHCI_OGF, 0x5f)
+#define STM32_SHCI_BLE_INIT               STM32_SHCI_OP(STM32_SHCI_OGF, 0x66)
+#define STM32_SHCI_THREAD_INIT            STM32_SHCI_OP(STM32_SHCI_OGF, 0x67)
+#define STM32_SHCI_DEBUG_INIT             STM32_SHCI_OP(STM32_SHCI_OGF, 0x68)
+#define STM32_SHCI_FLASH_ERASE_ACTIVITY   STM32_SHCI_OP(STM32_SHCI_OGF, 0x69)
+#define STM32_SHCI_CONCURRENT_SET_MODE    STM32_SHCI_OP(STM32_SHCI_OGF, 0x6a)
+#define STM32_SHCI_FLASH_STORE_DATA       STM32_SHCI_OP(STM32_SHCI_OGF, 0x6b)
+#define STM32_SHCI_FLASH_ERASE_DATA       STM32_SHCI_OP(STM32_SHCI_OGF, 0x6c)
+#define STM32_SHCI_RADIO_ALLOW_LOW_POWER  STM32_SHCI_OP(STM32_SHCI_OGF, 0x6d)
+#define STM32_SHCI_MAC_802154_INIT        STM32_SHCI_OP(STM32_SHCI_OGF, 0x6e)
+#define STM32_SHCI_REINIT                 STM32_SHCI_OP(STM32_SHCI_OGF, 0x6f)
+#define STM32_SHCI_ZIGBEE_INIT            STM32_SHCI_OP(STM32_SHCI_OGF, 0x70)
+#define STM32_SHCI_LLD_TESTS_INIT         STM32_SHCI_OP(STM32_SHCI_OGF, 0x71)
+#define STM32_SHCI_EXTPA_CONFIG           STM32_SHCI_OP(STM32_SHCI_OGF, 0x72)
+#define STM32_SHCI_SET_FLASH_CONTROL      STM32_SHCI_OP(STM32_SHCI_OGF, 0x73)
+#define STM32_SHCI_BLE_LLD_INIT           STM32_SHCI_OP(STM32_SHCI_OGF, 0x74)
+#define STM32_SHCI_CONFIG                 STM32_SHCI_OP(STM32_SHCI_OGF, 0x75)
+#define STM32_SHCI_GET_NEXT_BLE_EVT_TIME  STM32_SHCI_OP(STM32_SHCI_OGF, 0x76)
+#define STM32_SHCI_ENABLE_NEXT_802154_NF  STM32_SHCI_OP(STM32_SHCI_OGF, 0x77)
+#define STM32_SHCI_802_15_4_DEINIT        STM32_SHCI_OP(STM32_SHCI_OGF, 0x78)
 
 /* Command params bitfield definitions **************************************/
 
 /* BLE init command option flags */
 
-#define STM32WB_SHCI_BLE_INIT_OPT_STACK_MASK              (1 << 0) /* Bit 0: BLE stack select */
-#  define STM32WB_SHCI_BLE_INIT_OPT_STACK_LL_HOST         (0 << 0) /* 0x0: Link Layer and Host */
-#  define STM32WB_SHCI_BLE_INIT_OPT_STACK_LL              (1 << 0) /* 0x1: Link Layer only */
+#define STM32_SHCI_BLE_INIT_OPT_STACK_MASK              (1 << 0) /* Bit 0: BLE stack select */
+#  define STM32_SHCI_BLE_INIT_OPT_STACK_LL_HOST         (0 << 0) /* 0x0: Link Layer and Host */
+#  define STM32_SHCI_BLE_INIT_OPT_STACK_LL              (1 << 0) /* 0x1: Link Layer only */
 
-#define STM32WB_SHCI_BLE_INIT_OPT_SVC_CHCHAR_MASK         (1 << 1) /* Bit 1: Service Changed characteristic */
-#  define STM32WB_SHCI_BLE_INIT_OPT_SVC_CHCHAR_ENABLED    (0 << 1) /* 0x0: Characteristic enabled */
-#  define STM32WB_SHCI_BLE_INIT_OPT_SVC_CHCHAR_DISABLED   (1 << 1) /* 0x1: Characteristic disabled */
+#define STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_MASK         (1 << 1) /* Bit 1: Service Changed characteristic */
+#  define STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_ENABLED    (0 << 1) /* 0x0: Characteristic enabled */
+#  define STM32_SHCI_BLE_INIT_OPT_SVC_CHCHAR_DISABLED   (1 << 1) /* 0x1: Characteristic disabled */
 
-#define STM32WB_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_MASK   (1 << 2) /* Bit 2: Device Name mode */
-#  define STM32WB_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RW   (0 << 2) /* 0x0: Read-Write mode */
-#  define STM32WB_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RO   (1 << 2) /* 0x1: Read-Only mode */
+#define STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_MASK   (1 << 2) /* Bit 2: Device Name mode */
+#  define STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RW   (0 << 2) /* 0x0: Read-Write mode */
+#  define STM32_SHCI_BLE_INIT_OPT_DEVICE_NAME_MODE_RO   (1 << 2) /* 0x1: Read-Only mode */
 
-#define STM32WB_SHCI_BLE_INIT_OPT_CS_ALG2_MASK            (1 << 4) /* Bit 4: Channel selection algorithm 2 enabled */
-#  define STM32WB_SHCI_BLE_INIT_OPT_CS_ALG2_DISABLED      (0 << 4) /* 0x0: Algorithm 2 disabled */
-#  define STM32WB_SHCI_BLE_INIT_OPT_CS_ALG2_ENABLED       (1 << 4) /* 0x1: Algorithm 2 enabled */
+#define STM32_SHCI_BLE_INIT_OPT_CS_ALG2_MASK            (1 << 4) /* Bit 4: Channel selection algorithm 2 enabled */
+#  define STM32_SHCI_BLE_INIT_OPT_CS_ALG2_DISABLED      (0 << 4) /* 0x0: Algorithm 2 disabled */
+#  define STM32_SHCI_BLE_INIT_OPT_CS_ALG2_ENABLED       (1 << 4) /* 0x1: Algorithm 2 enabled */
 
-#define STM32WB_SHCI_BLE_INIT_OPT_POWER_CLASS_MASK        (1 << 7) /* Bit 7: Power class */
-#  define STM32WB_SHCI_BLE_INIT_OPT_POWER_CLASS_2_3       (0 << 7) /* 0x0: Power Class 2-3 */
-#  define STM32WB_SHCI_BLE_INIT_OPT_POWER_CLASS_1         (1 << 7) /* 0x1: Power Class 1 */
+#define STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_MASK        (1 << 7) /* Bit 7: Power class */
+#  define STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_2_3       (0 << 7) /* 0x0: Power Class 2-3 */
+#  define STM32_SHCI_BLE_INIT_OPT_POWER_CLASS_1         (1 << 7) /* 0x1: Power Class 1 */
 
 /* BLE init command rx_model_config flags */
 
-#define STM32WB_SHCI_BLE_INIT_RXMOD_AGC_RSSI_MASK         (1 << 0) /* Bit 0: AGC RSSI model */
-#  define STM32WB_SHCI_BLE_INIT_RXMOD_AGC_RSSI_LEGACY     (0 << 0) /* 0x0: AGC RSSI Legacy */
-#  define STM32WB_SHCI_BLE_INIT_RXMOD_AGC_RSSI_IMPROVED   (1 << 0) /* 0x1: AGC RSSI Improved */
+#define STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_MASK         (1 << 0) /* Bit 0: AGC RSSI model */
+#  define STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_LEGACY     (0 << 0) /* 0x0: AGC RSSI Legacy */
+#  define STM32_SHCI_BLE_INIT_RXMOD_AGC_RSSI_IMPROVED   (1 << 0) /* 0x1: AGC RSSI Improved */
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* STM32WB_SHCI_BLE_INIT command params */
+/* STM32_SHCI_BLE_INIT command params */
 
-begin_packed_struct struct stm32wb_shci_ble_init_cfg_s
+begin_packed_struct struct stm32_shci_ble_init_cfg_s
 {
   void     *ble_buf;              /* Not used, must be NULL. */
   uint32_t ble_buf_size;          /* Not used, must be 0. */

@@ -41,8 +41,10 @@
 
 struct sigpool_s
 {
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   sigq_t sigq[NUM_PENDING_ACTIONS +
               CONFIG_SIG_PREALLOC_IRQ_ACTIONS];
+#endif
   sigpendq_t sigpendq[NUM_SIGNALS_PENDING +
                       CONFIG_SIG_PREALLOC_IRQ_ACTIONS];
 };
@@ -53,9 +55,8 @@ struct sigpool_s
 
 /* This is a pool of pre-allocated signal action structures buffers */
 
-#if CONFIG_SIG_PREALLOC_ACTIONS > 0
+#if defined(CONFIG_ENABLE_ALL_SIGNALS) && CONFIG_SIG_PREALLOC_ACTIONS > 0
 sigactq_t  g_sigactions[CONFIG_SIG_PREALLOC_ACTIONS];
-#endif
 
 /* The g_sigfreeaction data structure is a list of available signal
  * action structures.
@@ -74,6 +75,7 @@ sq_queue_t  g_sigpendingaction;
  */
 
 sq_queue_t  g_sigpendingirqaction;
+#endif
 
 /* The g_sigpendingsignal data structure is a list of available pending
  * signal structures.
@@ -100,7 +102,7 @@ static struct sigpool_s g_sigpool;
  * Private Functions
  ****************************************************************************/
 
-#if CONFIG_SIG_PREALLOC_ACTIONS > 0
+#if defined(CONFIG_ENABLE_ALL_SIGNALS) && CONFIG_SIG_PREALLOC_ACTIONS > 0
 static void nxsig_init_signalactionblock(sq_queue_t *siglist,
                                          FAR sigactq_t *sigact,
                                          uint16_t nsigs)
@@ -125,6 +127,7 @@ static void nxsig_init_signalactionblock(sq_queue_t *siglist,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
 static void *nxsig_init_block(sq_queue_t *siglist, FAR sigq_t *sigq,
                               uint16_t nsigs, uint8_t sigtype)
 {
@@ -138,6 +141,7 @@ static void *nxsig_init_block(sq_queue_t *siglist, FAR sigq_t *sigq,
 
   return sigq;
 }
+#endif
 
 /****************************************************************************
  * Name: nxsig_init_pendingsignalblock
@@ -184,12 +188,15 @@ void nxsig_initialize(void)
 
   /* Initialize free lists */
 
+#if defined(CONFIG_ENABLE_ALL_SIGNALS) && CONFIG_SIG_PREALLOC_ACTIONS > 0
   sq_init(&g_sigfreeaction);
   sq_init(&g_sigpendingaction);
   sq_init(&g_sigpendingirqaction);
+#endif
   sq_init(&g_sigpendingsignal);
   sq_init(&g_sigpendingirqsignal);
 
+#ifdef CONFIG_ENABLE_ALL_SIGNALS
   nxsig_init_signalactionblock(&g_sigfreeaction,
                                g_sigactions,
                                CONFIG_SIG_PREALLOC_ACTIONS);
@@ -198,6 +205,8 @@ void nxsig_initialize(void)
   sigpool = nxsig_init_block(&g_sigpendingirqaction, sigpool,
                              CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
                              SIG_ALLOC_IRQ);
+#endif
+
   sigpool = nxsig_init_pendingsignalblock(&g_sigpendingsignal, sigpool,
                                           NUM_SIGNALS_PENDING,
                                           SIG_ALLOC_FIXED);

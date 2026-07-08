@@ -39,16 +39,22 @@
 /* If no value is given, we proceed with 0 since a timer is used for accurate
  * delays. A runtime DEBUGASSERT catches the case where the timer lower-half
  * isn't registered in time.
+ *
+ * Value is unset if ARCH_HAVE_DYNAMIC_UDELAY is set. In that case,
+ * ARCH_HAVE_UDELAY is also set and the only user of these values
+ * (udelay_coarse) is excluded from the build.
  */
 
-#if CONFIG_BOARD_LOOPSPERMSEC == -1
-#  undef  CONFIG_BOARD_LOOPSPERMSEC
-#  define CONFIG_BOARD_LOOPSPERMSEC 0
-#endif
+#ifndef CONFIG_ARCH_HAVE_UDELAY
+#  if CONFIG_BOARD_LOOPSPERMSEC == -1
+#    undef  CONFIG_BOARD_LOOPSPERMSEC
+#    define CONFIG_BOARD_LOOPSPERMSEC 0
+#  endif
 
-#define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
-#define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
-#define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+#  define CONFIG_BOARD_LOOPSPER100USEC ((CONFIG_BOARD_LOOPSPERMSEC+5)/10)
+#  define CONFIG_BOARD_LOOPSPER10USEC  ((CONFIG_BOARD_LOOPSPERMSEC+50)/100)
+#  define CONFIG_BOARD_LOOPSPERUSEC    ((CONFIG_BOARD_LOOPSPERMSEC+500)/1000)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -127,6 +133,18 @@ static void udelay_accurate(useconds_t microseconds)
     }
 }
 
+#ifndef CONFIG_ARCH_HAVE_UDELAY
+
+/****************************************************************************
+ * Name: udelay_coarse
+ *
+ * Description:
+ *   Wait loop called (only) by up_udelay if udelay_accurate
+ *   is not available. (Excluded from the build if up_udelay is also
+ *   excluded from the build.)
+ *
+ ****************************************************************************/
+
 static void udelay_coarse(useconds_t microseconds)
 {
   volatile int i;
@@ -175,6 +193,8 @@ static void udelay_coarse(useconds_t microseconds)
       microseconds--;
     }
 }
+
+#endif /* ifndef CONFIG_ARCH_HAVE_UDELAY */
 
 static bool timer_callback(FAR uint32_t *next_interval, FAR void *arg)
 {
@@ -289,11 +309,14 @@ int weak_function up_timer_gettick(FAR clock_t *ticks)
 int weak_function up_timer_gettime(struct timespec *ts)
 {
   int ret = -EAGAIN;
+  uint64_t usec;
 
   if (g_timer.lower != NULL)
     {
-      ts->tv_sec  = current_usec() / USEC_PER_SEC;
-      ts->tv_nsec = (current_usec() % USEC_PER_SEC) * NSEC_PER_USEC;
+      usec = current_usec();
+
+      ts->tv_sec  = usec / USEC_PER_SEC;
+      ts->tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
       ret = OK;
     }
 
@@ -461,7 +484,13 @@ void weak_function up_mdelay(unsigned int milliseconds)
  *
  *   *** NOT multi-tasking friendly ***
  *
+ *   This function is both compiled optionally based on ARCH_HAVE_UDELAY
+ *   and declared with weak attribute. See comment of up_udelay
+ *   implementation in sched/clock/clock_delay.c for explanation.
+ *
  ****************************************************************************/
+
+#ifndef CONFIG_ARCH_HAVE_UDELAY
 
 void weak_function up_udelay(useconds_t microseconds)
 {
@@ -474,6 +503,8 @@ void weak_function up_udelay(useconds_t microseconds)
       udelay_coarse(microseconds);
     }
 }
+
+#endif
 
 /****************************************************************************
  * Name: up_ndelay

@@ -33,83 +33,83 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#define STM32WB_NFSMC               0   /* No FSMC */
-#define STM32WB_NBTIM               0   /* No basic timers */
-#define STM32WB_NATIM               1   /* One advanced timers TIM1 */
-#define STM32WB_NGTIM32             1   /* 32-bit general timers TIM2 with DMA */
-#define STM32WB_NLPTIM              2   /* Two low-power timers, LPTIM1-2 */
-#define STM32WB_NGTIMNDMA           0   /* No general timers without DMA */
+#define STM32_NFSMC               0   /* No FSMC */
+#define STM32_NBTIM               0   /* No basic timers */
+#define STM32_NATIM               1   /* One advanced timers TIM1 */
+#define STM32_NGTIM32             1   /* 32-bit general timers TIM2 with DMA */
+#define STM32_NLPTIM              2   /* Two low-power timers, LPTIM1-2 */
+#define STM32_NGTIMNDMA           0   /* No general timers without DMA */
 
-#if defined(CONFIG_STM32WB_STM32WB30) || defined(CONFIG_STM32WB_STM32WB50) \
-    || defined(CONFIG_STM32WB_STM32WB35) || defined(CONFIG_STM32WB_STM32WB55)
-#  define STM32WB_NGTIM16           2   /* 16-bit general timers TIM16-17 with DMA */
+#if defined(CONFIG_STM32_STM32WB30) || defined(CONFIG_STM32_STM32WB50) \
+    || defined(CONFIG_STM32_STM32WB35) || defined(CONFIG_STM32_STM32WB55)
+#  define STM32_NGTIM16           2   /* 16-bit general timers TIM16-17 with DMA */
 #else
-#  define STM32WB_NGTIM16           0   /* No 16-bit general timers */
+#  define STM32_NGTIM16           0   /* No 16-bit general timers */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB35) || defined(CONFIG_STM32WB_STM32WB55)
-#  define STM32WB_NDMA              2   /* DMA1-2 with 7 channels each */
-#  define STM32WB_NI2S              1   /* SAI1 (dual channel high quality audio) */
-#  define STM32WB_NI2C              2   /* I2C1, I2C3 */
-#  define STM32WB_NUSBOTG           1   /* USB 2.0 FS */
-#  define STM32WB_NCMP              2   /* Two Comparators */
+#if defined(CONFIG_STM32_STM32WB35) || defined(CONFIG_STM32_STM32WB55)
+#  define STM32_NDMA              2   /* DMA1-2 with 7 channels each */
+#  define STM32_NI2S              1   /* SAI1 (dual channel high quality audio) */
+#  define STM32_NI2C              2   /* I2C1, I2C3 */
+#  define STM32_NUSBOTG           1   /* USB 2.0 FS */
+#  define STM32_NCMP              2   /* Two Comparators */
 #  if defined(CONFIG_STM32WB_IO_CONFIG_R) || defined(CONFIG_STM32WB_IO_CONFIG_V)
-#    define STM32WB_NSPI            3   /* SPI1-2, QSPI */
+#    define STM32_NSPI            3   /* SPI1-2, QSPI */
 #  else
-#    define STM32WB_NSPI            2   /* SPI1, QSPI */
+#    define STM32_NSPI            2   /* SPI1, QSPI */
 #  endif
 #else
-#  define STM32WB_NDMA              1   /* DMA1 with 7 channels */
-#  define STM32WB_NI2S              0   /* No SAI */
-#  define STM32WB_NI2C              1   /* I2C1 */
-#  define STM32WB_NUSBOTG           0   /* No USB */
-#  define STM32WB_NCMP              0   /* No Comparators */
-#  define STM32WB_NSPI              1   /* SPI1 */
+#  define STM32_NDMA              1   /* DMA1 with 7 channels */
+#  define STM32_NI2S              0   /* No SAI */
+#  define STM32_NI2C              1   /* I2C1 */
+#  define STM32_NUSBOTG           0   /* No USB */
+#  define STM32_NCMP              0   /* No Comparators */
+#  define STM32_NSPI              1   /* SPI1 */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB15) || defined(CONFIG_STM32WB_STM32WB35) \
-    || defined(CONFIG_STM32WB_STM32WB55)
-#  define STM32WB_NLPUART           1   /* LPUART1 */
+#if defined(CONFIG_STM32_STM32WB15) || defined(CONFIG_STM32_STM32WB35) \
+    || defined(CONFIG_STM32_STM32WB55)
+#  define STM32_NLPUART           1   /* LPUART1 */
 #else
-#  define STM32WB_NLPUART           0   /* No LPUART */
+#  define STM32_NLPUART           0   /* No LPUART */
 #endif
 
 #if defined(CONFIG_STM32WB_IO_CONFIG_R) || defined(CONFIG_STM32WB_IO_CONFIG_V)
-#  define STM32WB_NCAPSENSE         18  /* Capacitive sensing channels */
+#  define STM32_NCAPSENSE         18  /* Capacitive sensing channels */
 #else
-#  define STM32WB_NCAPSENSE         0   /* No Capacitive sensing */
+#  define STM32_NCAPSENSE         0   /* No Capacitive sensing */
 #endif
 
-#if defined(CONFIG_STM32WB_STM32WB55)
-#  define STM32WB_NLCD              1   /* One LCD controller with up to 8x40
+#if defined(CONFIG_STM32_STM32WB55)
+#  define STM32_NLCD              1   /* One LCD controller with up to 8x40
                                          * terminals, depending on subfamily.
                                          * 55Cx: 4x13
                                          * 55Rx: 4x28
                                          * 55Vx: 4x44, 8x40 */
 #else
-#  define STM32WB_NLCD              0   /* No LCD */
+#  define STM32_NLCD              0   /* No LCD */
 #endif
 
-#define STM32WB_NUSART              1   /* USART1 */
-#define STM32WB_NCAN                0   /* No CAN */
-#define STM32WB_NSDIO               0   /* No SDIO interface */
-#define STM32WB_NADC                1   /* ADC1, up to 19-channels */
-#define STM32WB_NDAC                0   /* No DAC */
-#define STM32WB_NCRC                1   /* CRC */
-#define STM32WB_NETHERNET           0   /* No ethernet */
-#define STM32WB_NRNG                1   /* Random number generator (RNG) */
-#define STM32WB_NDCMI               0   /* No digital camera interface (DCMI) */
+#define STM32_NUSART              1   /* USART1 */
+#define STM32_NCAN                0   /* No CAN */
+#define STM32_NSDIO               0   /* No SDIO interface */
+#define STM32_NADC                1   /* ADC1, up to 19-channels */
+#define STM32_NDAC                0   /* No DAC */
+#define STM32_NCRC                1   /* CRC */
+#define STM32_NETHERNET           0   /* No ethernet */
+#define STM32_NRNG                1   /* Random number generator (RNG) */
+#define STM32_NDCMI               0   /* No digital camera interface (DCMI) */
 
 #if defined(CONFIG_STM32WB_IO_CONFIG_C)
-#  define STM32WB_NGPIO             30  /* GPIO[A,B,C,E,H] */
+#  define STM32_NGPIO             30  /* GPIO[A,B,C,E,H] */
 #elif defined(CONFIG_STM32WB_IO_CONFIG_C_48E)
-#  define STM32WB_NGPIO             37  /* GPIO[A,B,C,E,H] */
+#  define STM32_NGPIO             37  /* GPIO[A,B,C,E,H] */
 #elif defined(CONFIG_STM32WB_IO_CONFIG_C_49)
-#  define STM32WB_NGPIO             25  /* GPIO[A,B,C,H] */
+#  define STM32_NGPIO             25  /* GPIO[A,B,C,H] */
 #elif defined(CONFIG_STM32WB_IO_CONFIG_R)
-#  define STM32WB_NGPIO             49  /* GPIO[A,B,C,D,E,H] */
+#  define STM32_NGPIO             49  /* GPIO[A,B,C,D,E,H] */
 #elif defined(CONFIG_STM32WB_IO_CONFIG_V)
-#  define STM32WB_NGPIO             72  /* GPIO[A,B,C,D,E,H] */
+#  define STM32_NGPIO             72  /* GPIO[A,B,C,D,E,H] */
 #else
 #  error "Unsupported STM32WB chip"
 #endif
@@ -138,24 +138,24 @@
  *   3) 32 KiB of SRAM2b beginning at address 0x2003:8000 - 0x2004:0000
  */
 
-#if defined(CONFIG_STM32WB_STM32WB10) || defined(CONFIG_STM32WB_STM32WB15)
-#  define STM32WB_SRAM1_SIZE        (12*1024)
-#  define STM32WB_SRAM2A_SIZE       (32*1024)
-#  define STM32WB_SRAM2B_SIZE       (4*1024)
-#elif defined(CONFIG_STM32WB_STM32WB30) || defined(CONFIG_STM32WB_STM32WB35)
-#  define STM32WB_SRAM1_SIZE        (32*1024)
-#  define STM32WB_SRAM2A_SIZE       (32*1024)
-#  define STM32WB_SRAM2B_SIZE       (32*1024)
-#elif (defined(CONFIG_STM32WB_STM32WB50) || defined(CONFIG_STM32WB_STM32WB55)) \
+#if defined(CONFIG_STM32_STM32WB10) || defined(CONFIG_STM32_STM32WB15)
+#  define STM32_SRAM1_SIZE        (12*1024)
+#  define STM32_SRAM2A_SIZE       (32*1024)
+#  define STM32_SRAM2B_SIZE       (4*1024)
+#elif defined(CONFIG_STM32_STM32WB30) || defined(CONFIG_STM32_STM32WB35)
+#  define STM32_SRAM1_SIZE        (32*1024)
+#  define STM32_SRAM2A_SIZE       (32*1024)
+#  define STM32_SRAM2B_SIZE       (32*1024)
+#elif (defined(CONFIG_STM32_STM32WB50) || defined(CONFIG_STM32_STM32WB55)) \
       && defined(CONFIG_STM32WB_IO_CONFIG_C)
-#  define STM32WB_SRAM1_SIZE        (64*1024)
-#  define STM32WB_SRAM2A_SIZE       (32*1024)
-#  define STM32WB_SRAM2B_SIZE       (32*1024)
-#elif defined(CONFIG_STM32WB_STM32WB55) && \
+#  define STM32_SRAM1_SIZE        (64*1024)
+#  define STM32_SRAM2A_SIZE       (32*1024)
+#  define STM32_SRAM2B_SIZE       (32*1024)
+#elif defined(CONFIG_STM32_STM32WB55) && \
       (defined(CONFIG_STM32WB_IO_CONFIG_R) || defined(CONFIG_STM32WB_IO_CONFIG_V))
-#  define STM32WB_SRAM1_SIZE        (192*1024)
-#  define STM32WB_SRAM2A_SIZE       (32*1024)
-#  define STM32WB_SRAM2B_SIZE       (32*1024)
+#  define STM32_SRAM1_SIZE        (192*1024)
+#  define STM32_SRAM2A_SIZE       (32*1024)
+#  define STM32_SRAM2B_SIZE       (32*1024)
 #else
 #  error "Unsupported STM32WB chip"
 #endif

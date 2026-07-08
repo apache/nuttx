@@ -12,10 +12,23 @@ config STM32F746GDISCO_FLASH
 	select MTD_N25QXXX
 	select MTD_SMART
 	select FS_SMARTFS
-	select STM32F7_QUADSPI
+	select STM32_QSPI
 	select MTD_BYTE_WRITE
 	---help---
 		Configures an MTD device for use with the onboard flash
+		Micron N25Q.
+
+config STM32F746GDISCO_FLASH_WINBOND
+	bool "MTD driver for external 16Mbyte W25Q128JVEQ FLASH on QSPI port"
+	default n
+	select MTD
+	select MTD_W25QXXXJV
+	select FS_NXFFS
+	select STM32_QSPI
+	---help---
+		Configures an MTD device for use with the onboard flash
+		Winbond W25Q. Set CONFIG_W25QXXXJV_QSPI_FREQUENCY to
+		100MHz for correct operation.
 
 config STM32F746GDISCO_TOUCHSCREEN_SWAPXY
 	bool "STM32F746G DISCO Touchscreen sway X/Y"

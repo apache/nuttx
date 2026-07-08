@@ -42,11 +42,11 @@ ifeq ($(CONFIG_STM32_ROMFS),y)
 CSRCS += stm32_romfs_initialize.c
 endif
 
-ifeq ($(CONFIG_STM32H7_SPI),y)
+ifeq ($(CONFIG_STM32_SPI),y)
 CSRCS += stm32_spi.c
 endif
 
-ifeq ($(CONFIG_STM32H7_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y)
 CSRCS += stm32_usb.c
 endif
 
@@ -74,7 +74,7 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
 CSRCS += stm32_ssd1306.c
 endif
 
-ifeq ($(CONFIG_STM32H7_PROGMEM),y)
+ifeq ($(CONFIG_STM32_PROGMEM),y)
 CSRCS += stm32_progmem.c
 endif
 

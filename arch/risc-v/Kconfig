@@ -448,13 +448,15 @@ config ARCH_CHIP_RP23XX_RV
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ARCH_HAVE_I2CRESET
 	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_DEBUG
+	select RISCV_STRING_FUNCTION
 	select ONESHOT
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
-	select ARCH_HAVE_I2CRESET
 	select ARCH_BOARD_COMMON
 	---help---
 		Raspberry Pi RP23XX architectures (RISC-V dual Hazard3).

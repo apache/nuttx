@@ -56,6 +56,12 @@ void nrf91_board_initialize(void)
 #ifdef CONFIG_ARCH_LEDS
   board_autoled_initialize();
 #endif
+
+#ifdef CONFIG_NRF91_SPI_MASTER
+  /* Configure SPI chip selects */
+
+  nrf91_spidev_initialize();
+#endif
 }
 
 /****************************************************************************

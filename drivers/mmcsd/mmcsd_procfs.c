@@ -180,7 +180,7 @@ static int mmcsd_open(FAR struct file *filep, FAR const char *relpath,
    * is not permitted.
    */
 
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       finfo("ERROR: Only O_RDONLY supported\n");
       return -EACCES;

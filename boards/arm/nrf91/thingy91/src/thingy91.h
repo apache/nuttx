@@ -67,12 +67,13 @@
 /* Supported devices ********************************************************/
 
 /* ADXL372
- *   INT1 - P0.09
- *   CS   - P0.08
+ *   INT1 - P0.06
+ *   CS   - P0.07
  */
 
 #define GPIO_ADXL372_INT1 (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(6))
 #define GPIO_ADXL372_CS   (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(7))
+#define ADXL372_SPI_DEVNO 0
 
 /* ADXL362
  *   INT1 - P0.09
@@ -81,8 +82,9 @@
 
 #define GPIO_ADXL362_INT1 (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(9))
 #define GPIO_ADXL362_CS   (GPIO_OUTPUT | GPIO_PORT0 | GPIO_PIN(8))
+#define ADXL362_SPI_DEVNO 1
 
-/* BH1749
+/* BH1749NUC
  *   INT  - P0.27
  */
 
@@ -120,6 +122,53 @@
  ****************************************************************************/
 
 int nrf91_bringup(void);
+
+/****************************************************************************
+ * Name: nrf91_sensors_init
+ *
+ * Description:
+ *   Initialzie on-board sensors
+ *
+ ****************************************************************************/
+
+int nrf91_sensors_init(void);
+
+/****************************************************************************
+ * Name: nrf91_i2c_register
+ *
+ * Description:
+ *   Register one I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_I2C
+int nrf91_i2c_register(int bus);
+#endif
+
+/****************************************************************************
+ * Name: nrf91_i2ctool
+ *
+ * Description:
+ *   Register I2C drivers for the I2C tool.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSTEM_I2CTOOL
+int nrf91_i2ctool(void);
+#endif
+
+/****************************************************************************
+ * Name: nrf91_spidev_initialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins for the
+ *   thingy91 board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NRF91_SPI_MASTER
+void nrf91_spidev_initialize(void);
+#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_NRF91_THINGY91_SRC_THINGY91_H */

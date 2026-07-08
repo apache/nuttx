@@ -54,61 +54,61 @@
 
 /* CAN control and status registers */
 
-#define STM32L4_CAN_MCR_OFFSET      0x0000  /* CAN master control register */
-#define STM32L4_CAN_MSR_OFFSET      0x0004  /* CAN master status register */
-#define STM32L4_CAN_TSR_OFFSET      0x0008  /* CAN transmit status register */
-#define STM32L4_CAN_RFR_OFFSET(m)   (0x000c + ((m) << 2))
-#define STM32L4_CAN_RF0R_OFFSET     0x000c  /* CAN receive FIFO 0 register */
-#define STM32L4_CAN_RF1R_OFFSET     0x0010  /* CAN receive FIFO 1 register */
-#define STM32L4_CAN_IER_OFFSET      0x0014  /* CAN interrupt enable register */
-#define STM32L4_CAN_ESR_OFFSET      0x0018  /* CAN error status register */
-#define STM32L4_CAN_BTR_OFFSET      0x001c  /* CAN bit timing register */
+#define STM32_CAN_MCR_OFFSET      0x0000  /* CAN master control register */
+#define STM32_CAN_MSR_OFFSET      0x0004  /* CAN master status register */
+#define STM32_CAN_TSR_OFFSET      0x0008  /* CAN transmit status register */
+#define STM32_CAN_RFR_OFFSET(m)   (0x000c + ((m) << 2))
+#define STM32_CAN_RF0R_OFFSET     0x000c  /* CAN receive FIFO 0 register */
+#define STM32_CAN_RF1R_OFFSET     0x0010  /* CAN receive FIFO 1 register */
+#define STM32_CAN_IER_OFFSET      0x0014  /* CAN interrupt enable register */
+#define STM32_CAN_ESR_OFFSET      0x0018  /* CAN error status register */
+#define STM32_CAN_BTR_OFFSET      0x001c  /* CAN bit timing register */
 
 /* CAN mailbox registers (3 TX and 2 RX) */
 
-#define STM32L4_CAN_TIR_OFFSET(m)   (0x0180 + ((m) << 4))
-#define STM32L4_CAN_TI0R_OFFSET     0x0180  /* TX mailbox identifier register 0 */
-#define STM32L4_CAN_TI1R_OFFSET     0x0190  /* TX mailbox identifier register 1 */
-#define STM32L4_CAN_TI2R_OFFSET     0x01a0  /* TX mailbox identifier register 2 */
+#define STM32_CAN_TIR_OFFSET(m)   (0x0180 + ((m) << 4))
+#define STM32_CAN_TI0R_OFFSET     0x0180  /* TX mailbox identifier register 0 */
+#define STM32_CAN_TI1R_OFFSET     0x0190  /* TX mailbox identifier register 1 */
+#define STM32_CAN_TI2R_OFFSET     0x01a0  /* TX mailbox identifier register 2 */
 
-#define STM32L4_CAN_TDTR_OFFSET(m)  (0x0184 + ((m) << 4))
-#define STM32L4_CAN_TDT0R_OFFSET    0x0184  /* Mailbox data length control and time stamp register 0 */
-#define STM32L4_CAN_TDT1R_OFFSET    0x0194  /* Mailbox data length control and time stamp register 1 */
-#define STM32L4_CAN_TDT2R_OFFSET    0x01a4  /* Mailbox data length control and time stamp register 2 */
+#define STM32_CAN_TDTR_OFFSET(m)  (0x0184 + ((m) << 4))
+#define STM32_CAN_TDT0R_OFFSET    0x0184  /* Mailbox data length control and time stamp register 0 */
+#define STM32_CAN_TDT1R_OFFSET    0x0194  /* Mailbox data length control and time stamp register 1 */
+#define STM32_CAN_TDT2R_OFFSET    0x01a4  /* Mailbox data length control and time stamp register 2 */
 
-#define STM32L4_CAN_TDLR_OFFSET(m)  (0x0188 + ((m) << 4))
-#define STM32L4_CAN_TDL0R_OFFSET    0x0188  /* Mailbox data low register 0 */
-#define STM32L4_CAN_TDL1R_OFFSET    0x0198  /* Mailbox data low register 1 */
-#define STM32L4_CAN_TDL2R_OFFSET    0x01a8  /* Mailbox data low register 2 */
+#define STM32_CAN_TDLR_OFFSET(m)  (0x0188 + ((m) << 4))
+#define STM32_CAN_TDL0R_OFFSET    0x0188  /* Mailbox data low register 0 */
+#define STM32_CAN_TDL1R_OFFSET    0x0198  /* Mailbox data low register 1 */
+#define STM32_CAN_TDL2R_OFFSET    0x01a8  /* Mailbox data low register 2 */
 
-#define STM32L4_CAN_TDHR_OFFSET(m)  (0x018c + ((m) << 4))
-#define STM32L4_CAN_TDH0R_OFFSET    0x018c  /* Mailbox data high register 0 */
-#define STM32L4_CAN_TDH1R_OFFSET    0x019c  /* Mailbox data high register 1 */
-#define STM32L4_CAN_TDH2R_OFFSET    0x01ac  /* Mailbox data high register 2 */
+#define STM32_CAN_TDHR_OFFSET(m)  (0x018c + ((m) << 4))
+#define STM32_CAN_TDH0R_OFFSET    0x018c  /* Mailbox data high register 0 */
+#define STM32_CAN_TDH1R_OFFSET    0x019c  /* Mailbox data high register 1 */
+#define STM32_CAN_TDH2R_OFFSET    0x01ac  /* Mailbox data high register 2 */
 
-#define STM32L4_CAN_RIR_OFFSET(m)   (0x01b0 + ((m) << 4))
-#define STM32L4_CAN_RI0R_OFFSET     0x01b0  /* Rx FIFO mailbox identifier register 0 */
-#define STM32L4_CAN_RI1R_OFFSET     0x01c0  /* Rx FIFO mailbox identifier register 1 */
+#define STM32_CAN_RIR_OFFSET(m)   (0x01b0 + ((m) << 4))
+#define STM32_CAN_RI0R_OFFSET     0x01b0  /* Rx FIFO mailbox identifier register 0 */
+#define STM32_CAN_RI1R_OFFSET     0x01c0  /* Rx FIFO mailbox identifier register 1 */
 
-#define STM32L4_CAN_RDTR_OFFSET(m)  (0x01b4 + ((m) << 4))
-#define STM32L4_CAN_RDT0R_OFFSET    0x01b4  /* Rx FIFO mailbox data length control and time stamp register 0 */
-#define STM32L4_CAN_RDT1R_OFFSET    0x01c4  /* Rx FIFO mailbox data length control and time stamp register 1 */
+#define STM32_CAN_RDTR_OFFSET(m)  (0x01b4 + ((m) << 4))
+#define STM32_CAN_RDT0R_OFFSET    0x01b4  /* Rx FIFO mailbox data length control and time stamp register 0 */
+#define STM32_CAN_RDT1R_OFFSET    0x01c4  /* Rx FIFO mailbox data length control and time stamp register 1 */
 
-#define STM32L4_CAN_RDLR_OFFSET(m)  (0x01b8 + ((m) << 4))
-#define STM32L4_CAN_RDL0R_OFFSET    0x01b8  /* Receive FIFO mailbox data low register 0 */
-#define STM32L4_CAN_RDL1R_OFFSET    0x01c8  /* Receive FIFO mailbox data low register 1 */
+#define STM32_CAN_RDLR_OFFSET(m)  (0x01b8 + ((m) << 4))
+#define STM32_CAN_RDL0R_OFFSET    0x01b8  /* Receive FIFO mailbox data low register 0 */
+#define STM32_CAN_RDL1R_OFFSET    0x01c8  /* Receive FIFO mailbox data low register 1 */
 
-#define STM32L4_CAN_RDHR_OFFSET(m)  (0x01bc + ((m) << 4))
-#define STM32L4_CAN_RDH0R_OFFSET    0x01bc  /* Receive FIFO mailbox data high register 0 */
-#define STM32L4_CAN_RDH1R_OFFSET    0x01cc  /* Receive FIFO mailbox data high register 1 */
+#define STM32_CAN_RDHR_OFFSET(m)  (0x01bc + ((m) << 4))
+#define STM32_CAN_RDH0R_OFFSET    0x01bc  /* Receive FIFO mailbox data high register 0 */
+#define STM32_CAN_RDH1R_OFFSET    0x01cc  /* Receive FIFO mailbox data high register 1 */
 
 /* CAN filter registers */
 
-#define STM32L4_CAN_FMR_OFFSET      0x0200  /* CAN filter master register */
-#define STM32L4_CAN_FM1R_OFFSET     0x0204  /* CAN filter mode register */
-#define STM32L4_CAN_FS1R_OFFSET     0x020c  /* CAN filter scale register */
-#define STM32L4_CAN_FFA1R_OFFSET    0x0214  /* CAN filter FIFO assignment register */
-#define STM32L4_CAN_FA1R_OFFSET     0x021c  /* CAN filter activation register */
+#define STM32_CAN_FMR_OFFSET      0x0200  /* CAN filter master register */
+#define STM32_CAN_FM1R_OFFSET     0x0204  /* CAN filter mode register */
+#define STM32_CAN_FS1R_OFFSET     0x020c  /* CAN filter scale register */
+#define STM32_CAN_FFA1R_OFFSET    0x0214  /* CAN filter FIFO assignment register */
+#define STM32_CAN_FA1R_OFFSET     0x021c  /* CAN filter activation register */
 
 /* There are 14 filter banks on the device.  Each filter bank is
  * composed of two 32-bit registers, CAN_FiR:
@@ -119,63 +119,63 @@
  *  ...
  */
 
-#define STM32L4_CAN_FIR_OFFSET(f,i) (0x240+((f)<<3)+(((i)-1)<<2))
+#define STM32_CAN_FIR_OFFSET(f,i) (0x240+((f)<<3)+(((i)-1)<<2))
 
 /* Register Addresses *******************************************************/
 
-#if STM32L4_NCAN > 0
-#  define STM32L4_CAN1_MCR          (STM32L4_CAN1_BASE+STM32L4_CAN_MCR_OFFSET)
-#  define STM32L4_CAN1_MSR          (STM32L4_CAN1_BASE+STM32L4_CAN_MSR_OFFSET)
-#  define STM32L4_CAN1_TSR          (STM32L4_CAN1_BASE+STM32L4_CAN_TSR_OFFSET)
-#  define STM32L4_CAN1_RFR(m)       (STM32L4_CAN1_BASE+STM32L4_CAN_RFR_OFFSET(m))
-#  define STM32L4_CAN1_RF0R         (STM32L4_CAN1_BASE+STM32L4_CAN_RF0R_OFFSET)
-#  define STM32L4_CAN1_RF1R         (STM32L4_CAN1_BASE+STM32L4_CAN_RF1R_OFFSET)
-#  define STM32L4_CAN1_IER          (STM32L4_CAN1_BASE+STM32L4_CAN_IER_OFFSET)
-#  define STM32L4_CAN1_ESR          (STM32L4_CAN1_BASE+STM32L4_CAN_ESR_OFFSET)
-#  define STM32L4_CAN1_BTR          (STM32L4_CAN1_BASE+STM32L4_CAN_BTR_OFFSET)
+#if STM32_NCAN > 0
+#  define STM32_CAN1_MCR          (STM32_CAN1_BASE+STM32_CAN_MCR_OFFSET)
+#  define STM32_CAN1_MSR          (STM32_CAN1_BASE+STM32_CAN_MSR_OFFSET)
+#  define STM32_CAN1_TSR          (STM32_CAN1_BASE+STM32_CAN_TSR_OFFSET)
+#  define STM32_CAN1_RFR(m)       (STM32_CAN1_BASE+STM32_CAN_RFR_OFFSET(m))
+#  define STM32_CAN1_RF0R         (STM32_CAN1_BASE+STM32_CAN_RF0R_OFFSET)
+#  define STM32_CAN1_RF1R         (STM32_CAN1_BASE+STM32_CAN_RF1R_OFFSET)
+#  define STM32_CAN1_IER          (STM32_CAN1_BASE+STM32_CAN_IER_OFFSET)
+#  define STM32_CAN1_ESR          (STM32_CAN1_BASE+STM32_CAN_ESR_OFFSET)
+#  define STM32_CAN1_BTR          (STM32_CAN1_BASE+STM32_CAN_BTR_OFFSET)
 
-#  define STM32L4_CAN1_TIR(m)       (STM32L4_CAN1_BASE+STM32L4_CAN_TIR_OFFSET(m))
-#  define STM32L4_CAN1_TI0R         (STM32L4_CAN1_BASE+STM32L4_CAN_TI0R_OFFSET)
-#  define STM32L4_CAN1_TI1R         (STM32L4_CAN1_BASE+STM32L4_CAN_TI1R_OFFSET)
-#  define STM32L4_CAN1_TI2R         (STM32L4_CAN1_BASE+STM32L4_CAN_TI2R_OFFSET)
+#  define STM32_CAN1_TIR(m)       (STM32_CAN1_BASE+STM32_CAN_TIR_OFFSET(m))
+#  define STM32_CAN1_TI0R         (STM32_CAN1_BASE+STM32_CAN_TI0R_OFFSET)
+#  define STM32_CAN1_TI1R         (STM32_CAN1_BASE+STM32_CAN_TI1R_OFFSET)
+#  define STM32_CAN1_TI2R         (STM32_CAN1_BASE+STM32_CAN_TI2R_OFFSET)
 
-#  define STM32L4_CAN1_TDTR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_TDTR_OFFSET(m))
-#  define STM32L4_CAN1_TDT0R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDT0R_OFFSET)
-#  define STM32L4_CAN1_TDT1R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDT1R_OFFSET)
-#  define STM32L4_CAN1_TDT2R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDT2R_OFFSET)
+#  define STM32_CAN1_TDTR(m)      (STM32_CAN1_BASE+STM32_CAN_TDTR_OFFSET(m))
+#  define STM32_CAN1_TDT0R        (STM32_CAN1_BASE+STM32_CAN_TDT0R_OFFSET)
+#  define STM32_CAN1_TDT1R        (STM32_CAN1_BASE+STM32_CAN_TDT1R_OFFSET)
+#  define STM32_CAN1_TDT2R        (STM32_CAN1_BASE+STM32_CAN_TDT2R_OFFSET)
 
-#  define STM32L4_CAN1_TDLR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_TDLR_OFFSET(m))
-#  define STM32L4_CAN1_TDL0R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDL0R_OFFSET)
-#  define STM32L4_CAN1_TDL1R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDL1R_OFFSET)
-#  define STM32L4_CAN1_TDL2R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDL2R_OFFSET)
+#  define STM32_CAN1_TDLR(m)      (STM32_CAN1_BASE+STM32_CAN_TDLR_OFFSET(m))
+#  define STM32_CAN1_TDL0R        (STM32_CAN1_BASE+STM32_CAN_TDL0R_OFFSET)
+#  define STM32_CAN1_TDL1R        (STM32_CAN1_BASE+STM32_CAN_TDL1R_OFFSET)
+#  define STM32_CAN1_TDL2R        (STM32_CAN1_BASE+STM32_CAN_TDL2R_OFFSET)
 
-#  define STM32L4_CAN1_TDHR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_TDHR_OFFSET(m))
-#  define STM32L4_CAN1_TDH0R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDH0R_OFFSET)
-#  define STM32L4_CAN1_TDH1R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDH1R_OFFSET)
-#  define STM32L4_CAN1_TDH2R        (STM32L4_CAN1_BASE+STM32L4_CAN_TDH2R_OFFSET)
+#  define STM32_CAN1_TDHR(m)      (STM32_CAN1_BASE+STM32_CAN_TDHR_OFFSET(m))
+#  define STM32_CAN1_TDH0R        (STM32_CAN1_BASE+STM32_CAN_TDH0R_OFFSET)
+#  define STM32_CAN1_TDH1R        (STM32_CAN1_BASE+STM32_CAN_TDH1R_OFFSET)
+#  define STM32_CAN1_TDH2R        (STM32_CAN1_BASE+STM32_CAN_TDH2R_OFFSET)
 
-#  define STM32L4_CAN1_RIR(m)       (STM32L4_CAN1_BASE+STM32L4_CAN_RIR_OFFSET(m))
-#  define STM32L4_CAN1_RI0R         (STM32L4_CAN1_BASE+STM32L4_CAN_RI0R_OFFSET)
-#  define STM32L4_CAN1_RI1R         (STM32L4_CAN1_BASE+STM32L4_CAN_RI1R_OFFSET)
+#  define STM32_CAN1_RIR(m)       (STM32_CAN1_BASE+STM32_CAN_RIR_OFFSET(m))
+#  define STM32_CAN1_RI0R         (STM32_CAN1_BASE+STM32_CAN_RI0R_OFFSET)
+#  define STM32_CAN1_RI1R         (STM32_CAN1_BASE+STM32_CAN_RI1R_OFFSET)
 
-#  define STM32L4_CAN1_RDTR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_RDTR_OFFSET(m))
-#  define STM32L4_CAN1_RDT0R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDT0R_OFFSET)
-#  define STM32L4_CAN1_RDT1R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDT1R_OFFSET)
+#  define STM32_CAN1_RDTR(m)      (STM32_CAN1_BASE+STM32_CAN_RDTR_OFFSET(m))
+#  define STM32_CAN1_RDT0R        (STM32_CAN1_BASE+STM32_CAN_RDT0R_OFFSET)
+#  define STM32_CAN1_RDT1R        (STM32_CAN1_BASE+STM32_CAN_RDT1R_OFFSET)
 
-#  define STM32L4_CAN1_RDLR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_RDLR_OFFSET(m))
-#  define STM32L4_CAN1_RDL0R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDL0R_OFFSET)
-#  define STM32L4_CAN1_RDL1R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDL1R_OFFSET)
+#  define STM32_CAN1_RDLR(m)      (STM32_CAN1_BASE+STM32_CAN_RDLR_OFFSET(m))
+#  define STM32_CAN1_RDL0R        (STM32_CAN1_BASE+STM32_CAN_RDL0R_OFFSET)
+#  define STM32_CAN1_RDL1R        (STM32_CAN1_BASE+STM32_CAN_RDL1R_OFFSET)
 
-#  define STM32L4_CAN1_RDHR(m)      (STM32L4_CAN1_BASE+STM32L4_CAN_RDHR_OFFSET(m))
-#  define STM32L4_CAN1_RDH0R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDH0R_OFFSET)
-#  define STM32L4_CAN1_RDH1R        (STM32L4_CAN1_BASE+STM32L4_CAN_RDH1R_OFFSET)
+#  define STM32_CAN1_RDHR(m)      (STM32_CAN1_BASE+STM32_CAN_RDHR_OFFSET(m))
+#  define STM32_CAN1_RDH0R        (STM32_CAN1_BASE+STM32_CAN_RDH0R_OFFSET)
+#  define STM32_CAN1_RDH1R        (STM32_CAN1_BASE+STM32_CAN_RDH1R_OFFSET)
 
-#  define STM32L4_CAN1_FMR          (STM32L4_CAN1_BASE+STM32L4_CAN_FMR_OFFSET)
-#  define STM32L4_CAN1_FM1R         (STM32L4_CAN1_BASE+STM32L4_CAN_FM1R_OFFSET)
-#  define STM32L4_CAN1_FS1R         (STM32L4_CAN1_BASE+STM32L4_CAN_FS1R_OFFSET)
-#  define STM32L4_CAN1_FFA1R        (STM32L4_CAN1_BASE+STM32L4_CAN_FFA1R_OFFSET)
-#  define STM32L4_CAN1_FA1R         (STM32L4_CAN1_BASE+STM32L4_CAN_FA1R_OFFSET)
-#  define STM32L4_CAN1_FIR(b,i)     (STM32L4_CAN1_BASE+STM32L4_CAN_FIR_OFFSET(b,i))
+#  define STM32_CAN1_FMR          (STM32_CAN1_BASE+STM32_CAN_FMR_OFFSET)
+#  define STM32_CAN1_FM1R         (STM32_CAN1_BASE+STM32_CAN_FM1R_OFFSET)
+#  define STM32_CAN1_FS1R         (STM32_CAN1_BASE+STM32_CAN_FS1R_OFFSET)
+#  define STM32_CAN1_FFA1R        (STM32_CAN1_BASE+STM32_CAN_FFA1R_OFFSET)
+#  define STM32_CAN1_FA1R         (STM32_CAN1_BASE+STM32_CAN_FA1R_OFFSET)
+#  define STM32_CAN1_FIR(b,i)     (STM32_CAN1_BASE+STM32_CAN_FIR_OFFSET(b,i))
 #endif
 
 /* Register Bitfield Definitions ********************************************/

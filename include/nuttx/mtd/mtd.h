@@ -97,8 +97,14 @@
 #define MTD_READ(d,s,n,b)  ((d)->read    ? (d)->read(d,s,n,b)   : (-ENOSYS))
 #define MTD_WRITE(d,s,n,b) ((d)->write   ? (d)->write(d,s,n,b)  : (-ENOSYS))
 #define MTD_IOCTL(d,c,a)   ((d)->ioctl   ? (d)->ioctl(d,c,a)    : (-ENOSYS))
-#define MTD_ISBAD(d,b)     ((d)->isbad   ? (d)->isbad(d,b)      : (-ENOSYS))
-#define MTD_MARKBAD(d,b)   ((d)->markbad ? (d)->markbad(d,b)    : (-ENOSYS))
+
+#ifdef CONFIG_FTL_BBM
+#  define MTD_ISBAD(d,b)   ((d)->isbad   ? (d)->isbad(d,b)      : (-ENOSYS))
+#  define MTD_MARKBAD(d,b) ((d)->markbad ? (d)->markbad(d,b)    : (-ENOSYS))
+#else
+#  define MTD_ISBAD(d,b)   (-ENOSYS)
+#  define MTD_MARKBAD(d,b) (-ENOSYS)
+#endif
 
 /* If any of the low-level device drivers declare they want sub-sector erase
  * support, then define MTD_SUBSECTOR_ERASE.
@@ -220,8 +226,10 @@ struct mtd_dev_s
 
   /* Check/Mark bad block for the specified block number */
 
+#ifdef CONFIG_FTL_BBM
   CODE int (*isbad)(FAR struct mtd_dev_s *dev, off_t block);
   CODE int (*markbad)(FAR struct mtd_dev_s *dev, off_t block);
+#endif
 
   /* Name of this MTD device */
 
@@ -641,8 +649,13 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_GD25_QSPI
+FAR struct mtd_dev_s *gd25_initialize(FAR struct qspi_dev_s *qspi,
+                                      bool unprotect);
+#else
 FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *dev,
                                       uint32_t spi_devid);
+#endif
 
 /****************************************************************************
  * Name: gd55_initialize

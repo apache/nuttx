@@ -71,7 +71,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_IWDG
+#ifdef CONFIG_STM32_IWDG
 void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq);
 #endif
 
@@ -92,7 +92,7 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_WWDG
+#ifdef CONFIG_STM32_WWDG
 void stm32_wwdginitialize(const char *devpath);
 #endif
 

@@ -37,8 +37,8 @@
 #include "chip.h"
 #include "stm32l5_rcc.h"
 #include "stm32l5_flash.h"
-#include "stm32l5.h"
-#include "stm32l5_waste.h"
+#include "stm32.h"
+#include "stm32_waste.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,52 +83,52 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L5_PWR) && defined(CONFIG_STM32L5_RTC)
+#if defined(CONFIG_STM32_PWR) && defined(CONFIG_STM32_RTC)
 static inline void rcc_resetbkp(void)
 {
   bool init_stat;
 
   /* Check if the RTC is already configured */
 
-  init_stat = stm32l5_rtc_is_initialized();
+  init_stat = stm32_rtc_is_initialized();
   if (!init_stat)
     {
-      uint32_t bkregs[STM32L5_RTC_BKCOUNT];
+      uint32_t bkregs[STM32_RTC_BKCOUNT];
       int i;
 
       /* Backup backup-registers before RTC reset. */
 
-      for (i = 0; i < STM32L5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          bkregs[i] = getreg32(STM32L5_RTC_BKR(i));
+          bkregs[i] = getreg32(STM32_RTC_BKR(i));
         }
 
       /* Enable write access to the backup domain (RTC registers, RTC
        * backup data registers and backup SRAM).
        */
 
-      stm32l5_pwr_enablebkp(true);
+      stm32_pwr_enablebkp(true);
 
       /* We might be changing RTCSEL - to ensure such changes work, we must
        * reset the backup domain (having backed up the RTC_MAGIC token)
        */
 
-      modifyreg32(STM32L5_RCC_BDCR, 0, RCC_BDCR_BDRST);
-      modifyreg32(STM32L5_RCC_BDCR, RCC_BDCR_BDRST, 0);
+      modifyreg32(STM32_RCC_BDCR, 0, RCC_BDCR_BDRST);
+      modifyreg32(STM32_RCC_BDCR, RCC_BDCR_BDRST, 0);
 
       /* Restore backup-registers, except RTC related. */
 
-      for (i = 0; i < STM32L5_RTC_BKCOUNT; i++)
+      for (i = 0; i < STM32_RTC_BKCOUNT; i++)
         {
-          if (RTC_MAGIC_REG == STM32L5_RTC_BKR(i))
+          if (RTC_MAGIC_REG == STM32_RTC_BKR(i))
             {
               continue;
             }
 
-          putreg32(bkregs[i], STM32L5_RTC_BKR(i));
+          putreg32(bkregs[i], STM32_RTC_BKR(i));
         }
 
-      stm32l5_pwr_enablebkp(false);
+      stm32_pwr_enablebkp(false);
     }
 }
 #else
@@ -148,9 +148,9 @@ static inline void rcc_resetbkp(void)
  *   and enable peripheral clocking for all peripherals enabled in the NuttX
  *   configuration file.
  *
- *   If CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters
  *   None
@@ -160,7 +160,7 @@ static inline void rcc_resetbkp(void)
  *
  ****************************************************************************/
 
-void stm32l5_clockconfig(void)
+void stm32_clockconfig(void)
 {
 #if 0
   /* Make sure that we are starting in the reset state */
@@ -171,11 +171,11 @@ void stm32l5_clockconfig(void)
 
   rcc_resetbkp();
 #endif
-#if defined(CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l5_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -183,13 +183,13 @@ void stm32l5_clockconfig(void)
    * board.h
    */
 
-  stm32l5_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 
   /* Enable peripheral clocking */
 
-  stm32l5_rcc_enableperipherals();
+  stm32_rcc_enableperipherals();
 }
 
 /****************************************************************************
@@ -202,12 +202,12 @@ void stm32l5_clockconfig(void)
  *   re-enable/re-start the PLL
  *
  *   This function performs a subset of the operations performed by
- *   stm32l5_clockconfig()
+ *   stm32_clockconfig()
  *   reset the currently enabled peripheral clocks.
  *
- *   If CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG is defined, then
+ *   If CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific
- *   function called stm32l5_board_clockconfig().
+ *   function called stm32_board_clockconfig().
  *
  * Input Parameters
  *   None
@@ -218,13 +218,13 @@ void stm32l5_clockconfig(void)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void stm32l5_clockenable(void)
+void stm32_clockenable(void)
 {
-#if defined(CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
 
   /* Invoke Board Custom Clock Configuration */
 
-  stm32l5_board_clockconfig();
+  stm32_board_clockconfig();
 
 #else
 
@@ -232,7 +232,7 @@ void stm32l5_clockenable(void)
    * board.h
    */
 
-  stm32l5_stdclockconfig();
+  stm32_stdclockconfig();
 
 #endif
 }

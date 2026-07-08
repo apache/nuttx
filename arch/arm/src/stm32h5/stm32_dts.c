@@ -59,7 +59,7 @@ static int stm32_dts_set_interval    (struct sensor_lowerhalf_s *lower,
                                       struct file *filep,
                                       uint32_t *period_us);
 
-#if CONFIG_STM32H5_DTS_TRIGGER == 0
+#if CONFIG_STM32_DTS_TRIGGER == 0
 static ssize_t stm32_dts_fetch       (struct sensor_lowerhalf_s *lower,
                                       struct file *filep,
                                       char *buffer, size_t buflen);
@@ -75,7 +75,7 @@ static int stm32_dts_isr             (int irq, void *context, void *arg);
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if CONFIG_STM32H5_DTS_TRIGGER != 0
+#if CONFIG_STM32_DTS_TRIGGER != 0
 # error "Hardware triggers not implemented. Need LP Timers first."
 #endif
 
@@ -112,7 +112,7 @@ static const struct sensor_ops_s g_dts_ops =
   .activate       = stm32_dts_activate,
   .set_interval   = stm32_dts_set_interval,
   .batch          = NULL,
-#if CONFIG_STM32H5_DTS_TRIGGER == 0
+#if CONFIG_STM32_DTS_TRIGGER == 0
   .fetch          = stm32_dts_fetch,
 #else
   .fetch          = NULL,
@@ -230,7 +230,7 @@ static void dts_configure_cfgr1(void)
 {
   /* Compute PCLK prescaler <= 1MHz */
 
-#if !defined(CONFIG_STM32H5_DTS_REFCLK_LSE)
+#if !defined(CONFIG_STM32_DTS_REFCLK_LSE)
   uint32_t div = (STM32_PCLK1_FREQUENCY + 1000000 - 1) / 1000000;
 
   if (div > 127)
@@ -245,13 +245,13 @@ static void dts_configure_cfgr1(void)
 
   uint32_t cfgr1 =
       DTS_CFGR1_TS1_EN
-    | DTS_CFGR1_TS1_SMP_TIME(CONFIG_STM32H5_DTS_SMP_TIME)
-#if !defined(CONFIG_STM32H5_DTS_REFCLK_LSE)
+    | DTS_CFGR1_TS1_SMP_TIME(CONFIG_STM32_DTS_SMP_TIME)
+#if !defined(CONFIG_STM32_DTS_REFCLK_LSE)
     | DTS_CFGR1_HSREF_CLK_DIV_RATIO(div)
 #else
     | DTS_CFGR1_REFCLK_SEL
 #endif
-    | DTS_CFGR1_TS1_INTRIG(CONFIG_STM32H5_DTS_TRIGGER);
+    | DTS_CFGR1_TS1_INTRIG(CONFIG_STM32_DTS_TRIGGER);
 
   putreg32(cfgr1, STM32_DTS_CFGR1);
 }
@@ -295,7 +295,7 @@ static void dts_get_cfg_data(void)
 {
   uint32_t cfgr1 = getreg32(STM32_DTS_CFGR1);
 
-#if defined(CONFIG_STM32H5_DTS_REFCLK_LSE)
+#if defined(CONFIG_STM32_DTS_REFCLK_LSE)
   g_dts_cfg.lse = true;
 #else
   g_dts_cfg.lse = false;
@@ -324,23 +324,23 @@ static void dts_configure_interrupts(struct sensor_lowerhalf_s *lower)
 {
   uint32_t itenr = 0;
 
-#ifdef CONFIG_STM32H5_DTS_ITEN_ITEF
+#ifdef CONFIG_STM32_DTS_ITEN_ITEF
   itenr |= DTS_ITENR_ITEEN;
 #endif
-#ifdef CONFIG_STM32H5_DTS_ITEN_ITLF
+#ifdef CONFIG_STM32_DTS_ITEN_ITLF
   itenr |= DTS_ITENR_ITLEN;
 #endif
-#ifdef CONFIG_STM32H5_DTS_ITEN_ITHF
+#ifdef CONFIG_STM32_DTS_ITEN_ITHF
   itenr |= DTS_ITENR_ITHEN;
 #endif
 
-#ifdef CONFIG_STM32H5_DTS_AITEN_AITEF
+#ifdef CONFIG_STM32_DTS_AITEN_AITEF
   itenr |= DTS_ITENR_AITEEN;
 #endif
-#ifdef CONFIG_STM32H5_DTS_AITEN_AITLF
+#ifdef CONFIG_STM32_DTS_AITEN_AITLF
   itenr |= DTS_ITENR_AITLEN;
 #endif
-#ifdef CONFIG_STM32H5_DTS_AITEN_AITHF
+#ifdef CONFIG_STM32_DTS_AITEN_AITHF
   itenr |= DTS_ITENR_AITHEN;
 #endif
 
@@ -392,7 +392,7 @@ static int stm32_dts_activate(struct sensor_lowerhalf_s *lower,
   return OK;
 }
 
-#if CONFIG_STM32H5_DTS_TRIGGER == 0
+#if CONFIG_STM32_DTS_TRIGGER == 0
 /****************************************************************************
  * Name: stm32_dts_fetch
  *
@@ -538,7 +538,7 @@ static int stm32_dts_isr(int irq, void *context, void *arg)
  * Name: stm32_dts_register
  ****************************************************************************/
 
-int stm32h5_dts_register(int devno)
+int stm32_dts_register(int devno)
 {
   int ret;
 

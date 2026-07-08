@@ -78,7 +78,7 @@ void stm32_usbinitialize(void)
    * Power On, and Overcurrent GPIOs
    */
 
-#ifdef CONFIG_STM32H7_OTGHS
+#ifdef CONFIG_STM32_OTGHS
   stm32_configgpio(GPIO_OTGHS_VBUS);
   stm32_configgpio(GPIO_OTGHS_PWRON);
   stm32_configgpio(GPIO_OTGHS_OVER);

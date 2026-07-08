@@ -69,11 +69,11 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_STM32F7_STM32F72XX) || defined(CONFIG_STM32F7_STM32F73XX)
+#if defined(CONFIG_STM32_STM32F72XX) || defined(CONFIG_STM32_STM32F73XX)
 #  include <arch/stm32f7/stm32f72xx73xx_irq.h>
-#elif defined(CONFIG_STM32F7_STM32F74XX) || defined(CONFIG_STM32F7_STM32F75XX)
+#elif defined(CONFIG_STM32_STM32F74XX) || defined(CONFIG_STM32_STM32F75XX)
 #  include <arch/stm32f7/stm32f74xx75xx_irq.h>
-#elif defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#elif defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 #  include <arch/stm32f7/stm32f76xx77xx_irq.h>
 #else
 #  error "Unsupported STM32 F7 chip"

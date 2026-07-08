@@ -36,7 +36,7 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "nucleo-l432kc.h"
 
 #ifndef CONFIG_ARCH_LEDS
@@ -154,7 +154,7 @@ uint32_t board_userled_initialize(void)
 {
   /* Configure LD3 GPIO for output */
 
-  stm32l4_configgpio(GPIO_LD3);
+  stm32_configgpio(GPIO_LD3);
   return BOARD_NLEDS;
 }
 
@@ -166,7 +166,7 @@ void board_userled(int led, bool ledon)
 {
   if (led == BOARD_LD3)
     {
-      stm32l4_gpiowrite(GPIO_LD3, ledon);
+      stm32_gpiowrite(GPIO_LD3, ledon);
     }
 }
 
@@ -176,7 +176,7 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  stm32l4_gpiowrite(GPIO_LD3, (ledset & BOARD_LD3_BIT) != 0);
+  stm32_gpiowrite(GPIO_LD3, (ledset & BOARD_LD3_BIT) != 0);
 }
 
 /****************************************************************************

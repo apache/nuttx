@@ -455,13 +455,15 @@ struct task_group_s
   pid_t tg_ppid;                    /* This is the ID of the parent thread      */
   uint8_t tg_flags;                 /* See GROUP_FLAG_* definitions             */
 
-  /* User identity **********************************************************/
+  /* User identity (POSIX real, effective, and saved-set IDs) ***************/
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
-  uid_t   tg_uid;                   /* User identity                            */
-  gid_t   tg_gid;                   /* User group identity                      */
+  uid_t   tg_uid;                   /* Real user identity                       */
+  gid_t   tg_gid;                   /* Real group identity                      */
   uid_t   tg_euid;                  /* Effective user identity                  */
-  gid_t   tg_egid;                  /* Effective user group identity            */
+  gid_t   tg_egid;                  /* Effective group identity                 */
+  uid_t   tg_suid;                  /* Saved set-user identity                  */
+  gid_t   tg_sgid;                  /* Saved set-group identity                 */
 #endif
 
   /* Group membership *******************************************************/
@@ -517,8 +519,10 @@ struct task_group_s
 
 #ifdef CONFIG_ENABLE_ALL_SIGNALS
   sq_queue_t tg_sigactionq;         /* List of actions for signals              */
-  sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
 #endif /* CONFIG_ENABLE_ALL_SIGNALS */
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
+  sq_queue_t tg_sigpendingq;        /* List of pending signals                  */
+#endif /* !CONFIG_DISABLE_ALL_SIGNALS */
 #ifdef CONFIG_SIG_DEFAULT
   sigset_t tg_sigdefault;           /* Set of signals set to the default action */
 #endif

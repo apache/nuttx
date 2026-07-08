@@ -153,7 +153,7 @@ You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL::
 
 Use make menuconfig to configure USART3 as the console::
 
-    CONFIG_STM32L4_USART3=y
+    CONFIG_STM32_USART3=y
     CONFIG_USART3_SERIALDRIVER=y
     CONFIG_USART3_SERIAL_CONSOLE=y
     CONFIG_USART3_RXBUFSIZE=256

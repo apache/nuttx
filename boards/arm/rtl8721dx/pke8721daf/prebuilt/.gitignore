@@ -1,0 +1,22 @@
+# Realtek RTL8721Dx vendor blobs and build artefacts.
+#
+# These are NOT NuttX source and must never be committed upstream (vendor
+# blobs are kept out of the NuttX tree).  They are vendor outputs from the
+# ameba-rtos SDK, placed here by the integrator:
+#
+#   libs/*.a              pre-compiled chip archives (fwlib/hal/swlib/misc/...)
+#   km0_image2_all.bin    prebuilt NP (WiFi/LP core) image2 blob
+#   platform_autoconf.h   regenerated each build from the SDK menuconfig by
+#                         ameba_gen_autoconf.sh (single source of truth)
+#   config_km4 / config_fw  vendored SDK kconfig snapshots for axf2bin packaging
+#
+# Generated at build time:
+#
+#   ld.script.gen[.tmp]   combined image2 linker script
+#   project_km4/          staged include dir for ld preprocessing
+#   pkg/                  axf2bin / firmware_package staging area
+#
+# Everything in this directory is ignored.
+
+*
+!.gitignore

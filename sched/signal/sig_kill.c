@@ -77,10 +77,12 @@
 
 int nxsig_kill(pid_t pid, int signo)
 {
-#ifdef CONFIG_SCHED_HAVE_PARENT
+#if !defined(CONFIG_DISABLE_ALL_SIGNALS) && defined(CONFIG_SCHED_HAVE_PARENT)
   FAR struct tcb_s *rtcb = this_task();
 #endif
+#ifndef CONFIG_DISABLE_ALL_SIGNALS
   siginfo_t info;
+#endif
 
   /* We do not support sending signals to process groups */
 
@@ -89,6 +91,14 @@ int nxsig_kill(pid_t pid, int signo)
       return -ENOSYS;
     }
 
+  if (signo == 0)
+    {
+      return (nxsched_get_tcb(pid) != NULL) ? 0 : -ESRCH;
+    }
+
+#ifdef CONFIG_DISABLE_ALL_SIGNALS
+  return -ENOSYS;
+#else
   /* Make sure that the signal is valid */
 
   if (!GOOD_SIGNO(signo))
@@ -110,6 +120,7 @@ int nxsig_kill(pid_t pid, int signo)
   /* Send the signal */
 
   return nxsig_dispatch(pid, &info, false);
+#endif
 }
 
 /****************************************************************************

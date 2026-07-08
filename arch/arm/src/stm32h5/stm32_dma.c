@@ -118,7 +118,7 @@ static int gpdma_dmainterrupt(int irq, void *context, void *arg);
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_DMA1
+#ifdef CONFIG_STM32_DMA1
 static struct gpdma_ch_s g_chan[] =
 {
   {
@@ -150,7 +150,7 @@ static struct gpdma_ch_s g_chan[] =
     .base = STM32_DMA1_BASE + CH_BASE_OFFSET(3)
   },
 #endif
-#ifdef CONFIG_STM32H5_DMA2
+#ifdef CONFIG_STM32_DMA2
   {
     .dma_instance = 2,
     .channel = 0,
@@ -703,7 +703,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
   return (size_t)(br1 & GPDMA_CXBR1_BNDT_MASK);
 }
 
-#ifdef CONFIG_STM32H5_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
 /****************************************************************************
  * Name: stm32_dmacapable
  *

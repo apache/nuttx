@@ -41,7 +41,7 @@
 #include "linum-stm32h753bi.h"
 #include <arch/board/board.h>
 
-#ifdef CONFIG_STM32H7_SPI
+#ifdef CONFIG_STM32_SPI
 
 /****************************************************************************
  * Public Functions
@@ -89,7 +89,7 @@ void stm32_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H7_SPI4
+#ifdef CONFIG_STM32_SPI4
 void stm32_spi4select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
@@ -132,7 +132,7 @@ uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32H7_SPI4
+#ifdef CONFIG_STM32_SPI4
 int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return -ENODEV;
@@ -140,4 +140,4 @@ int stm32_spi4cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 #endif
 
 #endif /* CONFIG_SPI_CMDDATA */
-#endif /* CONFIG_STM32H7_SPI4 */
+#endif /* CONFIG_STM32_SPI4 */

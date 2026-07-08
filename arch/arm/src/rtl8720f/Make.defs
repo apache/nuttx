@@ -1,0 +1,217 @@
+############################################################################
+# arch/arm/src/rtl8720f/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include armv8-m/Make.defs
+
+# IC-agnostic Ameba glue (os_wrapper backend, netdev, KV, flash MTD, ...) is
+# shared by every ameba ARM chip from arch/arm/src/common/ameba/.  Put it on
+# VPATH + the include path so the CHIP_CSRCS filenames below resolve there
+# (single source, no per-IC duplication).  Truly IC-specific files (register
+# drivers, IPC wiring, chip.h) stay in this chip directory.
+
+AMEBA_COMMON_SRC = $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
+VPATH    += common$(DELIM)ameba
+INCLUDES += ${INCDIR_PREFIX}$(AMEBA_COMMON_SRC)
+
+CHIP_CSRCS = ameba_start.c ameba_loguart.c ameba_irq.c ameba_timerisr.c
+CHIP_CSRCS += ameba_allocateheap.c
+CHIP_CSRCS += ameba_os_wrap.c
+
+# km4tz<->km4ns IPC bring-up.  Needed by the SDK flash erase/program path
+# (inter-core XIP pause) AND by WiFi, so compile it whenever either is enabled.
+ifneq ($(CONFIG_RTL8720F_WIFI)$(CONFIG_RTL8720F_FLASH_FS),)
+CHIP_CSRCS += ameba_ipc.c
+endif
+
+ifeq ($(CONFIG_RTL8720F_WIFI),y)
+CHIP_CSRCS += ameba_wifi_init.c
+# rt_kv_* symbols are referenced by the WHC host WiFi libraries -- always
+# provide them (backed by the data filesystem, or stubbed if it is disabled).
+CHIP_CSRCS += ameba_kv.c
+ifeq ($(CONFIG_NET),y)
+CHIP_CSRCS += ameba_wlan.c
+endif
+endif
+
+ifeq ($(CONFIG_RTL8720F_FLASH_FS),y)
+CHIP_CSRCS += ameba_flash_mtd.c
+endif
+
+############################################################################
+# Realtek RTL8720F SDK integration
+#
+# Direction A (vendored-SDK model): NuttX owns the AP image2 and is the
+# *primary* linker.  The reduced image2 link reuses the vendor SDK chip
+# libraries + ROM symbols + linker scripts; FreeRTOS / lwIP / mbedTLS /
+# WiFi / BT / file-system / at_cmd / ota are all dropped (NuttX provides its
+# own).  This folds the prototype scripts (nuttx-ameba-ext/link_img2.sh and
+# package_app.sh) into NuttX's native build: the linked `nuttx` ELF *is* the
+# AP (km4tz) image2 .axf, and POSTBUILD (board scripts/Make.defs) packages it
+# into a flashable app.bin.
+#
+# The vendor SDK (ameba-rtos) is treated as a referenced 3rd-party checkout:
+# its sources, ROM symbol files and linker scripts are referenced at build time
+# and never committed to NuttX.  The pre-compiled chip archives + the build
+# staging area are kept under boards/arm/rtl8720f/rtl8720f_evb/prebuilt/
+# (gitignored, not part of the NuttX source tree, as vendor blobs are kept
+# out of NuttX).
+############################################################################
+
+# This IC (RTL8720F) maps to the SDK's RTL8720F SoC subtree.  Set before
+# including the shared locator so future chips can reuse the one SDK checkout
+# by selecting their own AMEBA_SOC_NAME.
+
+AMEBA_SOC_NAME = RTL8720F
+
+# Locate (and, when unset, auto-fetch) the one shared ameba-rtos SDK.  Shared
+# with the board's scripts/Make.defs via common/ameba/ameba_sdk.mk so both make
+# instances resolve $(AMEBA_SDK) identically.  See that file for the two modes.
+
+include $(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba$(DELIM)ameba_sdk.mk
+
+# SDK sub-trees referenced by the image2 link.
+
+# NOTE (8720F vs amebadplus): the AP/host core is km4tz (TrustZone secure) on
+# RTL8720F, vs km4 on amebadplus.  So the application-core project subtree is
+# project_km4tz (NP/device core is km4ns, the prebuilt-blob core -- analogous
+# to amebadplus's km0).
+AMEBA_SOC      = $(AMEBA_SDK)/component/soc/$(AMEBA_SOC_NAME)
+AMEBA_PROJ     = $(AMEBA_SOC)/project
+AMEBA_KM4_PROJ = $(AMEBA_PROJ)/project_km4tz
+AMEBA_SOC_LIB  = $(AMEBA_KM4_PROJ)/lib/soc
+
+# Vendored prebuilt area inside the board (gitignored vendor blobs).
+
+AMEBA_PREBUILT = $(BOARD_DIR)$(DELIM)prebuilt
+AMEBA_PREBUILT_LIBS = $(AMEBA_PREBUILT)$(DELIM)libs
+
+# --- Pre-compiled chip libraries kept in the reduced image2 ----------------
+#
+# Vendor chip archives produced by a full SDK build, vendored under
+# prebuilt/libs/.  The chipinfo / pmc soc archives ship pre-compiled inside the
+# SDK source tree, so they are taken directly from $(AMEBA_SDK).  These are
+# normal archives (members pulled on demand) and are appended to EXTRA_LIBS so
+# they sit inside NuttX's standard --start-group/--end-group, resolving against
+# each other and the NuttX libs.  Everything unreferenced is dropped by
+# --gc-sections, so listing an archive only costs link time, not image size.
+#
+# NOTE: the mbed-style "hal" layer (serial_api/gpio_api/...) is intentionally
+# NOT linked -- NuttX provides its own uart_ops/ioexpander drivers, so the SDK
+# hal is dead weight here (it contributed 0 objects).  NuttX drivers sit
+# directly on the fwlib register layer instead.
+
+# fwlib register-layer objects NuttX actually uses are compiled FROM SDK SOURCE
+# into libameba_fwlib.a by the board PREBUILD (see scripts/Make.defs:
+# AMEBA_FWLIB_SRCS), not vendored as a prebuilt blob -- so a bare checkout that
+# only auto-fetched the SDK source can still link.  --gc-sections keeps only the
+# referenced members.  Add fwlib sources there as new drivers need them.
+EXTRA_LIBS += $(AMEBA_PREBUILT_LIBS)$(DELIM)libameba_fwlib.a
+
+# chipinfo / pmc ship pre-compiled INSIDE the SDK source tree (lib/soc), so a
+# fresh SDK clone already has them -- linked directly from $(AMEBA_SDK), no
+# vendored blob needed.  (0 members pulled today, but kept for chip-init use.)
+EXTRA_LIBS += $(AMEBA_SOC_LIB)$(DELIM)lib_chipinfo.a
+EXTRA_LIBS += $(AMEBA_SOC_LIB)$(DELIM)lib_pmc.a
+
+# --- WiFi (WHC host) chip libraries (CONFIG_RTL8720F_WIFI) -----------------
+#
+# KM4-side host WiFi control libs from the pinned SDK.  STA-PSK reduced set:
+# the host controller (whc_ap), rtk_app helpers, security/crypto, the WPA-lite
+# supplicant and coexistence -- eap/p2p/wps are NOT linked.  The lwIP / event
+# glue these expect is supplied by NuttX in libameba_wifi.a (built from a few
+# SDK config sources + arch/.../wifi/ameba_wifi_depend.c by the board PREBUILD).
+# Everything unreferenced is dropped by --gc-sections; all of these sit inside
+# NuttX's --start-group so they resolve against each other and the NuttX libs.
+
+ifeq ($(CONFIG_RTL8720F_WIFI),y)
+AMEBA_APP_LIB = $(AMEBA_KM4_PROJ)/lib/application
+EXTRA_LIBS += $(AMEBA_APP_LIB)$(DELIM)lib_wifi_whc_ap.a
+EXTRA_LIBS += $(AMEBA_APP_LIB)$(DELIM)lib_wifi_rtk_app.a
+EXTRA_LIBS += $(AMEBA_APP_LIB)$(DELIM)lib_wifi_com_sec.a
+EXTRA_LIBS += $(AMEBA_APP_LIB)$(DELIM)lib_wpa_lite.a
+# NOTE: unlike RTL8721Dx (where lib_coex.a is an AP-side lib), on RTL8720F the
+# WiFi/BT coexistence lib lives on the NP (km4ns/lib/application/lib_coex.a) and
+# is linked into the NP prebuilt image -- the AP (NuttX host) must NOT link it.
+EXTRA_LIBS += $(AMEBA_PREBUILT_LIBS)$(DELIM)libameba_wifi.a
+endif
+
+# crtbegin.o / crtend.o (asdk gcc runtime) and -lm / -lstdc++ from the SDK
+# image2 link rule.  crtbegin/crtend must be positional objects, so they are
+# added via EXTRA_LIBS (which the link rule places inside the group, after the
+# archives); the C++ / math libs are name-spec'd through EXTRA_LIBS too.
+
+CRT_DIR := $(dir $(shell $(CC) $(ARCHCPUFLAGS) -print-file-name=crtbegin.o))
+
+EXTRA_LIBS += $(CRT_DIR)crtbegin.o
+EXTRA_LIBS += $(CRT_DIR)crtend.o
+
+# --- Link flags reproducing link_img2.sh -----------------------------------
+#
+# -u/-e app_start       : force-pull the SDK's app_start object (runs silicon
+#                         init then calls NuttX's main()); NuttX provides the
+#                         Img2EntryFun0 entry descriptor pointing at it.
+# --gc-sections         : drop everything unreferenced (this is what removes
+#                         FreeRTOS / lwIP / mbedTLS members of the chip libs).
+# --defsym aliases      : map NuttX's _sbss/_ebss/_sdata/_edata/_eronly onto
+#                         the SDK linker-script symbols (the SDK ld owns the
+#                         section layout).
+# --no-enum-size-warning / --warn-common / --build-id=none / --cref: match the
+#                         SDK link rule.
+
+LDFLAGS += -u app_start
+LDFLAGS += -e app_start
+LDFLAGS += --gc-sections
+
+# ROM library (rom_common/*.c incl. ameba_systimer_rom.c -> SYSTIMER_Init, etc.,
+# real code running from XIP/RAM).  The SDK links it whole-archived so its fixed
+# .romlib.bss is fully populated (the SDK __romlib_bss_end__ ASSERT depends on
+# it).  TrustZone is off in this config -> lib_rom.a (else lib_rom_tz.a).
+# --gc-sections still drops the unreferenced ROM .text afterwards.
+LDFLAGS += --whole-archive $(AMEBA_SOC_LIB)$(DELIM)lib_rom.a --no-whole-archive
+LDFLAGS += --no-enum-size-warning
+LDFLAGS += --warn-common
+LDFLAGS += --build-id=none
+LDFLAGS += --cref
+LDFLAGS += --defsym=_sbss=__bss_start__
+LDFLAGS += --defsym=_ebss=__bss_end__
+LDFLAGS += --defsym=_sdata=__sram_image2_start__
+LDFLAGS += --defsym=_edata=__sram_image2_start__
+LDFLAGS += --defsym=_eronly=__sram_image2_start__
+
+# Emit a fresh map next to the ELF for verification (mirrors text.map).
+
+LDFLAGS += -Map=$(TOPDIR)$(DELIM)nuttx.map
+
+# -lm / -lstdc++ are name-spec libs: add them through LIBPATHS/EXTRA_LIBS so the
+# linker pulls libstdc++ (C++ static-init support that crtbegin/crtend expect)
+# and libm.  They go last in the group via EXTRA_LIBS ordering above is fine
+# because they are searched as archives.
+
+LDLIBS += -lm -lstdc++
+
+# --- Auto-fetched SDK: intentionally NOT removed on distclean --------------
+#
+# sdk.mk clones the pinned ameba-rtos into arch/arm/src/common/ameba/ameba-rtos
+# (gitignored) when AMEBA_SDK is unset.  It is a cache shared by all ameba ICs,
+# NOT a build artifact, so it must SURVIVE `make distclean`: switching ICs does
+# distclean + reconfigure + build, and re-cloning the multi-GB SDK every time is
+# unacceptable.  A pristine reset is a manual `rm -rf` of the checkout.

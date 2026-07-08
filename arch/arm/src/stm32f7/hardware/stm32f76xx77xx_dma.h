@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32F7_STM32F76XX) || defined(CONFIG_STM32F7_STM32F77XX)
+#if defined(CONFIG_STM32_STM32F76XX) || defined(CONFIG_STM32_STM32F77XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -585,5 +585,5 @@
 #define DMAMAP_QUADSPI_1           STM32_DMA_MAP(DMA2,DMA_STREAM2,DMA_CHAN11)
 #define DMAMAP_SDMMC2_2            STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN11)
 
-#endif /* CONFIG_STM32F7_STM32F76XX || CONFIG_STM32F7_STM32F77XX */
+#endif /* CONFIG_STM32_STM32F76XX || CONFIG_STM32_STM32F77XX */
 #endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F76XX77XX_DMA_H */

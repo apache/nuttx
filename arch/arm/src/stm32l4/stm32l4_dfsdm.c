@@ -53,7 +53,7 @@
 
 /* The peripheral must be enabled */
 
-#ifdef CONFIG_STM32L4_DFSDM
+#ifdef CONFIG_STM32_DFSDM
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -61,35 +61,35 @@
 
 /* Sanity checking **********************************************************/
 
-#if !defined(CONFIG_STM32L4_DFSDM1_FLT0) && \
-    !defined(CONFIG_STM32L4_DFSDM1_FLT1) && \
-    !defined(CONFIG_STM32L4_DFSDM1_FLT2) && !defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if !defined(CONFIG_STM32_DFSDM1_FLT0) && \
+    !defined(CONFIG_STM32_DFSDM1_FLT1) && \
+    !defined(CONFIG_STM32_DFSDM1_FLT2) && !defined(CONFIG_STM32_DFSDM1_FLT3)
 #  error "At least one DFSDM filter must be defined"
 #endif
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
-#  if defined(CONFIG_STM32L4_DFSDM1_FLT2) || defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_STM32L4X3)
+#  if defined(CONFIG_STM32_DFSDM1_FLT2) || defined(CONFIG_STM32_DFSDM1_FLT3)
 #    error "Non-existent DFSDM filter defined"
 #  endif
 #endif
 
 /* Abbreviated register access **********************************************/
 
-#define CHCFGR1_OFFSET(priv)   STM32L4_DFSDM_CHCFGR1_OFFSET((priv)->current)
-#define CHCFGR2_OFFSET(priv)   STM32L4_DFSDM_CHCFGR2_OFFSET((priv)->current)
+#define CHCFGR1_OFFSET(priv)   STM32_DFSDM_CHCFGR1_OFFSET((priv)->current)
+#define CHCFGR2_OFFSET(priv)   STM32_DFSDM_CHCFGR2_OFFSET((priv)->current)
 
-#define FLTCR1_OFFSET(priv)    STM32L4_DFSDM_FLTCR1_OFFSET((priv)->intf)
-#define FLTCR2_OFFSET(priv)    STM32L4_DFSDM_FLTCR2_OFFSET((priv)->intf)
-#define FLTISR_OFFSET(priv)    STM32L4_DFSDM_FLTISR_OFFSET((priv)->intf)
-#define FLTICR_OFFSET(priv)    STM32L4_DFSDM_FLTICR_OFFSET((priv)->intf)
-#define FLTFCR_OFFSET(priv)    STM32L4_DFSDM_FLTFCR_OFFSET((priv)->intf)
-#define FLTRDATAR_OFFSET(priv) STM32L4_DFSDM_FLTRDATAR_OFFSET((priv)->intf)
-#define FLTAWHTR_OFFSET(priv)  STM32L4_DFSDM_FLTAWHTR_OFFSET((priv)->intf)
-#define FLTAWLTR_OFFSET(priv)  STM32L4_DFSDM_FLTAWLTR_OFFSET((priv)->intf)
-#define FLTAWSR_OFFSET(priv)   STM32L4_DFSDM_FLTAWSR_OFFSET((priv)->intf)
-#define FLTAWCFR_OFFSET(priv)  STM32L4_DFSDM_FLTAWCFR_OFFSET((priv)->intf)
-#define FLTEXMAX_OFFSET(priv)  STM32L4_DFSDM_FLTEXMAX_OFFSET((priv)->intf)
-#define FLTEXMIN_OFFSET(priv)  STM32L4_DFSDM_FLTEXMIN_OFFSET((priv)->intf)
+#define FLTCR1_OFFSET(priv)    STM32_DFSDM_FLTCR1_OFFSET((priv)->intf)
+#define FLTCR2_OFFSET(priv)    STM32_DFSDM_FLTCR2_OFFSET((priv)->intf)
+#define FLTISR_OFFSET(priv)    STM32_DFSDM_FLTISR_OFFSET((priv)->intf)
+#define FLTICR_OFFSET(priv)    STM32_DFSDM_FLTICR_OFFSET((priv)->intf)
+#define FLTFCR_OFFSET(priv)    STM32_DFSDM_FLTFCR_OFFSET((priv)->intf)
+#define FLTRDATAR_OFFSET(priv) STM32_DFSDM_FLTRDATAR_OFFSET((priv)->intf)
+#define FLTAWHTR_OFFSET(priv)  STM32_DFSDM_FLTAWHTR_OFFSET((priv)->intf)
+#define FLTAWLTR_OFFSET(priv)  STM32_DFSDM_FLTAWLTR_OFFSET((priv)->intf)
+#define FLTAWSR_OFFSET(priv)   STM32_DFSDM_FLTAWSR_OFFSET((priv)->intf)
+#define FLTAWCFR_OFFSET(priv)  STM32_DFSDM_FLTAWCFR_OFFSET((priv)->intf)
+#define FLTEXMAX_OFFSET(priv)  STM32_DFSDM_FLTEXMAX_OFFSET((priv)->intf)
+#define FLTEXMIN_OFFSET(priv)  STM32_DFSDM_FLTEXMIN_OFFSET((priv)->intf)
 
 /* DFSDM Filter interrupts **************************************************/
 
@@ -122,7 +122,7 @@
  * without, although there is a risk of overrun.
  */
 
-#if defined(CONFIG_STM32L4_STM32L4X3)
+#if defined(CONFIG_STM32_STM32L4X3)
 #  define DFSDM_MAX_CHANNELS 4
 #  define DFSDM_MAX_FILTERS  2
 #else
@@ -131,8 +131,8 @@
 #endif
 
 #ifdef DFSDM_HAVE_DMA
-#  if !defined(CONFIG_STM32L4_DMA1) && !defined(CONFIG_STM32L4_DMAMUX)
-#    error "STM32L4 DFSDM DMA support requires CONFIG_STM32L4_DMA1"
+#  if !defined(CONFIG_STM32_DMA1) && !defined(CONFIG_STM32_DMAMUX)
+#    error "STM32L4 DFSDM DMA support requires CONFIG_STM32_DMA1"
 #  endif
 #endif
 
@@ -232,16 +232,16 @@ static void dfsdm_startconv(struct stm32_dev_s *priv, bool enable);
 /* Interrupt Handler */
 
 static int dfsdm_interrupt(struct adc_dev_s *dev, uint32_t regval);
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static int dfsdm_flt0_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static int dfsdm_flt1_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static int dfsdm_flt2_interrupt(int irq, void *context, void *arg);
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static int dfsdm_flt3_interrupt(int irq, void *context, void *arg);
 #endif
 
@@ -274,13 +274,13 @@ static const struct adc_ops_s g_adcops =
 
 /* DFSDM FLT0 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static struct stm32_dev_s g_dfsdmpriv0 =
 {
-  .irq         = STM32L4_IRQ_DFSDM0,
+  .irq         = STM32_IRQ_DFSDM0,
   .isr         = dfsdm_flt0_interrupt,
   .intf        = 0,
-  .base        = STM32L4_DFSDM_BASE,
+  .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
@@ -303,13 +303,13 @@ static struct adc_dev_s g_dfsdmdev0 =
 
 /* DFSDM FLT1 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static struct stm32_dev_s g_dfsdmpriv1 =
 {
-  .irq         = STM32L4_IRQ_DFSDM1,
+  .irq         = STM32_IRQ_DFSDM1,
   .isr         = dfsdm_flt1_interrupt,
   .intf        = 1,
-  .base        = STM32L4_DFSDM_BASE,
+  .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
@@ -332,13 +332,13 @@ static struct adc_dev_s g_dfsdmdev1 =
 
 /* DFSDM FLT2 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static struct stm32_dev_s g_dfsdmpriv2 =
 {
-  .irq         = STM32L4_IRQ_DFSDM2,
+  .irq         = STM32_IRQ_DFSDM2,
   .isr         = dfsdm_flt2_interrupt,
   .intf        = 0,
-  .base        = STM32L4_DFSDM_BASE,
+  .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
@@ -361,13 +361,13 @@ static struct adc_dev_s g_dfsdmdev2 =
 
 /* DFSDM FLT3 */
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static struct stm32_dev_s g_dfsdmpriv3 =
 {
-  .irq         = STM32L4_IRQ_DFSDM3,
+  .irq         = STM32_IRQ_DFSDM3,
   .isr         = dfsdm_flt3_interrupt,
   .intf        = 0,
-  .base        = STM32L4_DFSDM_BASE,
+  .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
   .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
@@ -548,38 +548,38 @@ static void tim_dumpregs(struct stm32_dev_s *priv, const char *msg)
 {
   ainfo("%s:\n", msg);
   ainfo("  CR1: %04x CR2:  %04x SMCR:  %04x DIER:  %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CR2_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_SMCR_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_DIER_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CR2_OFFSET),
+        tim_getreg(priv, STM32_GTIM_SMCR_OFFSET),
+        tim_getreg(priv, STM32_GTIM_DIER_OFFSET));
   ainfo("   SR: %04x EGR:  0000 CCMR1: %04x CCMR2: %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_SR_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET));
+        tim_getreg(priv, STM32_GTIM_SR_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCMR2_OFFSET));
   ainfo(" CCER: %04x CNT:  %04x PSC:   %04x ARR:   %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CNT_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_PSC_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_ARR_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CCER_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CNT_OFFSET),
+        tim_getreg(priv, STM32_GTIM_PSC_OFFSET),
+        tim_getreg(priv, STM32_GTIM_ARR_OFFSET));
   ainfo(" CCR1: %04x CCR2: %04x CCR3:  %04x CCR4:  %04x\n",
-        tim_getreg(priv, STM32L4_GTIM_CCR1_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR2_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR3_OFFSET),
-        tim_getreg(priv, STM32L4_GTIM_CCR4_OFFSET));
+        tim_getreg(priv, STM32_GTIM_CCR1_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR2_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR3_OFFSET),
+        tim_getreg(priv, STM32_GTIM_CCR4_OFFSET));
 
-  if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
       ainfo("  RCR: %04x BDTR: %04x DCR:   %04x DMAR:  %04x\n",
-            tim_getreg(priv, STM32L4_ATIM_RCR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_BDTR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_DCR_OFFSET),
-            tim_getreg(priv, STM32L4_ATIM_DMAR_OFFSET));
+            tim_getreg(priv, STM32_ATIM_RCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_BDTR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_ATIM_DMAR_OFFSET));
     }
   else
     {
       ainfo("  DCR: %04x DMAR: %04x\n",
-            tim_getreg(priv, STM32L4_GTIM_DCR_OFFSET),
-            tim_getreg(priv, STM32L4_GTIM_DMAR_OFFSET));
+            tim_getreg(priv, STM32_GTIM_DCR_OFFSET),
+            tim_getreg(priv, STM32_GTIM_DMAR_OFFSET));
     }
 }
 #endif
@@ -607,13 +607,13 @@ static void dfsdm_timstart(struct stm32_dev_s *priv, bool enable)
     {
       /* Start the counter */
 
-      tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
+      tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_CEN);
     }
   else
     {
       /* Disable the counter */
 
-      tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
+      tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, GTIM_CR1_CEN, 0);
     }
 }
 #endif
@@ -747,24 +747,24 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
 
   clrbits = GTIM_CR1_DIR | GTIM_CR1_CMS_MASK | GTIM_CR1_CKD_MASK;
   setbits = GTIM_CR1_EDGE;
-  tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, clrbits, setbits);
+  tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, clrbits, setbits);
 
   /* Set the reload and prescaler values */
 
-  tim_putreg(priv, STM32L4_GTIM_PSC_OFFSET, prescaler - 1);
-  tim_putreg(priv, STM32L4_GTIM_ARR_OFFSET, reload);
+  tim_putreg(priv, STM32_GTIM_PSC_OFFSET, prescaler - 1);
+  tim_putreg(priv, STM32_GTIM_ARR_OFFSET, reload);
 
   /* Clear the advanced timers repetition counter in TIM1 */
 
-  if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
-      tim_putreg(priv, STM32L4_ATIM_RCR_OFFSET, 0);
-      tim_putreg(priv, STM32L4_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE); /* Check me */
+      tim_putreg(priv, STM32_ATIM_RCR_OFFSET, 0);
+      tim_putreg(priv, STM32_ATIM_BDTR_OFFSET, ATIM_BDTR_MOE); /* Check me */
     }
 
   /* TIMx event generation: Bit 0 UG: Update generation */
 
-  tim_putreg(priv, STM32L4_GTIM_EGR_OFFSET, GTIM_EGR_UG);
+  tim_putreg(priv, STM32_GTIM_EGR_OFFSET, GTIM_EGR_UG);
 
   /* Handle channel specific setup */
 
@@ -788,7 +788,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR1_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR1_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -808,7 +808,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR2_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR2_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -828,7 +828,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR3_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR3_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -848,7 +848,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR4_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -866,7 +866,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
            * channel
            */
 
-          tim_putreg(priv, STM32L4_GTIM_CCR4_OFFSET,
+          tim_putreg(priv, STM32_GTIM_CCR4_OFFSET,
                     (uint16_t)(reload >> 1));
         }
         break;
@@ -878,15 +878,15 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
 
   /* Disable the Channel by resetting the CCxE Bit in the CCER register */
 
-  ccer = tim_getreg(priv, STM32L4_GTIM_CCER_OFFSET);
+  ccer = tim_getreg(priv, STM32_GTIM_CCER_OFFSET);
   ccer &= ~ccenable;
-  tim_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
+  tim_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
 
   /* Fetch the CR2, CCMR1, and CCMR2 register (already have ccer) */
 
-  cr2   = tim_getreg(priv, STM32L4_GTIM_CR2_OFFSET);
-  ccmr1 = tim_getreg(priv, STM32L4_GTIM_CCMR1_OFFSET);
-  ccmr2 = tim_getreg(priv, STM32L4_GTIM_CCMR2_OFFSET);
+  cr2   = tim_getreg(priv, STM32_GTIM_CR2_OFFSET);
+  ccmr1 = tim_getreg(priv, STM32_GTIM_CCMR1_OFFSET);
+  ccmr2 = tim_getreg(priv, STM32_GTIM_CCMR2_OFFSET);
 
   /* Reset the Output Compare Mode Bits and set the select output compare
    * mode
@@ -912,7 +912,7 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
             ATIM_CCER_CC3E | ATIM_CCER_CC4E);
   ccer |= ccenable;
 
-  if (priv->tbase == STM32L4_TIM1_BASE || priv->tbase == STM32L4_TIM8_BASE)
+  if (priv->tbase == STM32_TIM1_BASE || priv->tbase == STM32_TIM8_BASE)
     {
       /* Reset output N polarity level, output N state, output compare state,
        * output compare N idle state.
@@ -937,15 +937,15 @@ static int dfsdm_timinit(struct stm32_dev_s *priv)
 
   /* Save the modified register values */
 
-  tim_putreg(priv, STM32L4_GTIM_CR2_OFFSET, cr2);
-  tim_putreg(priv, STM32L4_GTIM_CCMR1_OFFSET, ccmr1);
-  tim_putreg(priv, STM32L4_GTIM_CCMR2_OFFSET, ccmr2);
-  tim_putreg(priv, STM32L4_GTIM_CCER_OFFSET, ccer);
-  tim_putreg(priv, STM32L4_GTIM_EGR_OFFSET, egr);
+  tim_putreg(priv, STM32_GTIM_CR2_OFFSET, cr2);
+  tim_putreg(priv, STM32_GTIM_CCMR1_OFFSET, ccmr1);
+  tim_putreg(priv, STM32_GTIM_CCMR2_OFFSET, ccmr2);
+  tim_putreg(priv, STM32_GTIM_CCER_OFFSET, ccer);
+  tim_putreg(priv, STM32_GTIM_EGR_OFFSET, egr);
 
   /* Set the ARR Preload Bit */
 
-  tim_modifyreg(priv, STM32L4_GTIM_CR1_OFFSET, 0, GTIM_CR1_ARPE);
+  tim_modifyreg(priv, STM32_GTIM_CR1_OFFSET, 0, GTIM_CR1_ARPE);
 
   /* Enable the timer counter */
 
@@ -1050,7 +1050,7 @@ static void dfsdm_rccreset(struct stm32_dev_s *priv, bool reset)
 
   /* Set or clear the selected bit in the APB2 reset register */
 
-  regval = getreg32(STM32L4_RCC_APB2RSTR);
+  regval = getreg32(STM32_RCC_APB2RSTR);
   if (reset)
     {
       regval |= RCC_APB2RSTR_DFSDMRST;
@@ -1060,7 +1060,7 @@ static void dfsdm_rccreset(struct stm32_dev_s *priv, bool reset)
       regval &= ~RCC_APB2RSTR_DFSDMRST;
     }
 
-  putreg32(regval, STM32L4_RCC_APB2RSTR);
+  putreg32(regval, STM32_RCC_APB2RSTR);
   leave_critical_section(flags);
 }
 
@@ -1079,12 +1079,12 @@ static void dfsdm_enable(struct stm32_dev_s *priv)
 {
   uint32_t regval;
 
-  regval = dfsdm_getreg(priv, STM32L4_DFSDM_CH0CFGR1_OFFSET);
+  regval = dfsdm_getreg(priv, STM32_DFSDM_CH0CFGR1_OFFSET);
 
   /* Enable DFSMDM */
 
   regval |= DFSDM_CH0CFGR1_DFSDMEN;
-  dfsdm_putreg(priv, STM32L4_DFSDM_CH0CFGR1_OFFSET, regval);
+  dfsdm_putreg(priv, STM32_DFSDM_CH0CFGR1_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1204,19 +1204,19 @@ static int dfsdm_setup(struct adc_dev_s *dev)
 
       if (priv->dma != NULL)
         {
-          stm32l4_dmastop(priv->dma);
-          stm32l4_dmafree(priv->dma);
+          stm32_dmastop(priv->dma);
+          stm32_dmafree(priv->dma);
         }
 
-      priv->dma = stm32l4_dmachannel(priv->dmachan);
+      priv->dma = stm32_dmachannel(priv->dmachan);
 
-      stm32l4_dmasetup(priv->dma,
+      stm32_dmasetup(priv->dma,
                        priv->base + FLTRDATAR_OFFSET(priv),
                        (uint32_t)priv->dmabuffer,
                        priv->nchannels,
                        DFSDM_DMA_CONTROL_WORD);
 
-      stm32l4_dmastart(priv->dma, dfsdm_dmaconvcallback, dev, false);
+      stm32_dmastart(priv->dma, dfsdm_dmaconvcallback, dev, false);
     }
 #endif
 
@@ -1582,13 +1582,13 @@ static int dfsdm_interrupt(struct adc_dev_s *dev, uint32_t isr)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
 static int dfsdm_flt0_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
   uint32_t pending;
 
-  regval = getreg32(STM32L4_DFSDM_FLTISR(0));
+  regval = getreg32(STM32_DFSDM_FLTISR(0));
   pending = regval & DFSDM_ISR_MASK;
   if (pending != 0)
     {
@@ -1607,13 +1607,13 @@ static int dfsdm_flt0_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
 static int dfsdm_flt1_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
   uint32_t pending;
 
-  regval = getreg32(STM32L4_DFSDM_FLTISR(1));
+  regval = getreg32(STM32_DFSDM_FLTISR(1));
   pending = regval & DFSDM_ISR_MASK;
   if (pending != 0)
     {
@@ -1632,13 +1632,13 @@ static int dfsdm_flt1_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
 static int dfsdm_flt2_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
   uint32_t pending;
 
-  regval = getreg32(STM32L4_DFSDM_FLTISR(2));
+  regval = getreg32(STM32_DFSDM_FLTISR(2));
   pending = regval & DFSDM_ISR_MASK;
   if (pending != 0)
     {
@@ -1657,13 +1657,13 @@ static int dfsdm_flt2_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
 static int dfsdm_flt3_interrupt(int irq, void *context, void *arg)
 {
   uint32_t regval;
   uint32_t pending;
 
-  regval = getreg32(STM32L4_DFSDM_FLTISR(3));
+  regval = getreg32(STM32_DFSDM_FLTISR(3));
   pending = regval & DFSDM_ISR_MASK;
   if (pending != 0)
     {
@@ -1735,7 +1735,7 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_dfsdm_initialize
+ * Name: stm32_dfsdm_initialize
  *
  * Description:
  *   Initialize the DFSDM.
@@ -1750,9 +1750,8 @@ static void dfsdm_dmaconvcallback(DMA_HANDLE handle,
  *
  ****************************************************************************/
 
-struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
-                                           const uint8_t *chanlist,
-                                           int cchannels)
+struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
+                                         int cchannels)
 {
   struct adc_dev_s   *dev;
   struct stm32_dev_s *priv;
@@ -1761,25 +1760,25 @@ struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
 
   switch (intf)
     {
-#if defined(CONFIG_STM32L4_DFSDM1_FLT0)
+#if defined(CONFIG_STM32_DFSDM1_FLT0)
       case 0:
         ainfo("DFSDM FLT0 selected\n");
         dev = &g_dfsdmdev0;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT1)
+#if defined(CONFIG_STM32_DFSDM1_FLT1)
       case 1:
         ainfo("DFSDM FLT1 selected\n");
         dev = &g_dfsdmdev1;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT2)
+#if defined(CONFIG_STM32_DFSDM1_FLT2)
       case 2:
         ainfo("DFSDM FLT2 selected\n");
         dev = &g_dfsdmdev2;
         break;
 #endif
-#if defined(CONFIG_STM32L4_DFSDM1_FLT3)
+#if defined(CONFIG_STM32_DFSDM1_FLT3)
       case 3:
         ainfo("DFSDM FLT3 selected\n");
         dev = &g_dfsdmdev3;
@@ -1818,5 +1817,5 @@ struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
   return dev;
 }
 
-#endif /* CONFIG_STM32L4_DFSDM */
+#endif /* CONFIG_STM32_DFSDM */
 #endif /* CONFIG_ADC */

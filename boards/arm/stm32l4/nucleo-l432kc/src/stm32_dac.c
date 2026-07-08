@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_DAC1
+#ifdef CONFIG_STM32_DAC1
 static struct dac_dev_s *g_dac;
 #endif
 
@@ -50,19 +50,19 @@ static struct dac_dev_s *g_dac;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_dac_setup
+ * Name: stm32_dac_setup
  ****************************************************************************/
 
-int stm32l4_dac_setup(void)
+int stm32_dac_setup(void)
 {
   static bool initialized = false;
 
   if (!initialized)
     {
-#ifdef CONFIG_STM32L4_DAC1
+#ifdef CONFIG_STM32_DAC1
       int ret;
 
-      g_dac = stm32l4_dacinitialize(0);
+      g_dac = stm32_dacinitialize(0);
       if (g_dac == NULL)
         {
           aerr("ERROR: Failed to get DAC1 interface\n");

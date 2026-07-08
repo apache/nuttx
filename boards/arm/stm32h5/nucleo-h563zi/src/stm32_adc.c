@@ -37,7 +37,7 @@
 #include "stm32.h"
 
 #if defined(CONFIG_ADC)
-#if defined(CONFIG_STM32H5_ADC1) || defined(CONFIG_STM32H5_ADC2)
+#if defined(CONFIG_STM32_ADC1) || defined(CONFIG_STM32_ADC2)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,7 +67,7 @@
 
 /* Identifying number of each ADC channel (even if NCHANNELS is less ) */
 
-#ifdef CONFIG_STM32H5_ADC1
+#ifdef CONFIG_STM32_ADC1
 
 static const uint8_t g_chanlist1[ADC1_NCHANNELS] =
 {
@@ -101,10 +101,10 @@ static uint32_t g_pinlist1[ADC1_NPINS] =
 int stm32_adc_setup(void)
 {
   static bool initialized = false;
-#ifdef CONFIG_STM32H5_ADC1
+#ifdef CONFIG_STM32_ADC1
   struct adc_dev_s *adc1;
 #endif
-#ifdef CONFIG_STM32H5_ADC2
+#ifdef CONFIG_STM32_ADC2
   struct adc_dev_s *adc2;
 #endif
   int ret;
@@ -116,13 +116,13 @@ int stm32_adc_setup(void)
     {
       /* Configure the pins as analog inputs for the selected channels */
 
-#ifdef CONFIG_STM32H5_ADC1
+#ifdef CONFIG_STM32_ADC1
       for (i = 0; i < ADC1_NCHANNELS; i++)
         {
           stm32_configgpio(g_pinlist1[i]);
         }
 
-      adc1 = stm32h5_adc_initialize(1, g_chanlist1, ADC1_NCHANNELS);
+      adc1 = stm32_adc_initialize(1, g_chanlist1, ADC1_NCHANNELS);
       if (adc1 == NULL)
         {
           aerr("ERROR: Failed to get ADC interface 1\n");
@@ -139,13 +139,13 @@ int stm32_adc_setup(void)
         }
 #endif
 
-#ifdef CONFIG_STM32H5_ADC2
+#ifdef CONFIG_STM32_ADC2
       for (i = 0; i < ADC2_NCHANNELS; i++)
         {
           stm32_configgpio(g_pinlist2[i]);
         }
 
-      adc2 = stm32h5_adc_initialize(2, g_chanlist2, ADC2_NCHANNELS);
+      adc2 = stm32_adc_initialize(2, g_chanlist2, ADC2_NCHANNELS);
       if (adc2 == NULL)
         {
           aerr("ERROR: Failed to get ADC interface 1\n");
@@ -168,5 +168,5 @@ int stm32_adc_setup(void)
   return OK;
 }
 
-#endif /* CONFIG_STM32H5_ADC1 || CONFIG_STM32H5_ADC2 */
+#endif /* CONFIG_STM32_ADC1 || CONFIG_STM32_ADC2 */
 #endif /* CONFIG_ADC */

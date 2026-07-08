@@ -37,6 +37,8 @@
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/kmalloc.h>
 
+#include "binfmt.h"
+
 #ifdef CONFIG_ELF
 
 /****************************************************************************
@@ -109,6 +111,20 @@ static int elf_loadbinary(FAR struct binary_s *binp,
       berr("Failed to initialize to load ELF program binary: %d\n", ret);
       goto errout_with_init;
     }
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  /* Save IDs and mode from file system before loading segments */
+
+  binp->uid  = loadinfo.fileuid;
+  binp->gid  = loadinfo.filegid;
+  binp->mode = loadinfo.filemode;
+
+  ret = binfmt_checkexecperm(binp);
+  if (ret < 0)
+    {
+      goto errout_with_init;
+    }
+#endif
 
   /* Load the program binary */
 
@@ -199,14 +215,6 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   binp->mod.finiarr = loadinfo.finiarr;
   binp->mod.nfini   = loadinfo.nfini;
-#endif
-
-#ifdef CONFIG_SCHED_USER_IDENTITY
-  /* Save IDs and mode from file system */
-
-  binp->uid  = loadinfo.fileuid;
-  binp->gid  = loadinfo.filegid;
-  binp->mode = loadinfo.filemode;
 #endif
 
   libelf_dumpentrypt(&loadinfo);

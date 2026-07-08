@@ -1749,16 +1749,25 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Make the controlling terminal of the calling process */
 
           case TIOCSCTTY:
+          case TIOCSPGRP:
             {
-              /* Save the PID of the recipient of the SIGINT signal. */
+              /* Save the PID of the foreground process group that is to
+               * receive tty-generated signals (SIGINT/SIGTSTP).
+               *
+               * POSIX passes a flag in 'arg' and uses the caller's PID, so
+               * a zero 'arg' selects the calling task.  NuttX historically
+               * passes the target PID directly in 'arg' (e.g. NSH registers
+               * the foreground command it just spawned), so a positive
+               * 'arg' is honored as the target PID.
+               */
 
-              if ((int)arg < 0 || dev->pid >= 0)
+              if ((int)arg < 0)
                 {
                   ret = -EINVAL;
                 }
               else
                 {
-                  dev->pid = (pid_t)arg;
+                  dev->pid = arg > 0 ? (pid_t)arg : nxsched_getpid();
                   ret = 0;
                 }
             }
@@ -1768,6 +1777,26 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               dev->pid = INVALID_PROCESS_ID;
               ret = 0;
+            }
+            break;
+
+          /* Get the foreground process group.  Since NuttX has no real
+           * process-group abstraction, the controlling task's PID doubles
+           * as the (single-member) foreground process group.
+           */
+
+          case TIOCGPGRP:
+          case TIOCGSID:
+            {
+              if (dev->pid < 0)
+                {
+                  ret = -ENOTTY;
+                }
+              else
+                {
+                  *(FAR pid_t *)((uintptr_t)arg) = dev->pid;
+                  ret = 0;
+                }
             }
             break;
 #endif

@@ -1,0 +1,1183 @@
+#
+# STM32 hidden hardware-capability flags (single source of truth).
+#
+
+# All STM32_HAVE_* / STM32_HAVE_IP_* symbols are defined here.  They are
+# prompt-less bool selectors describing what hardware exists on a chip and
+# which IP-core version a peripheral uses.  Family Kconfig files
+# (arch/arm/src/stm32<fam>/Kconfig) "select" these symbols to describe their
+# silicon; never add a prompt here.  User-visible peripheral selection lives
+# in Kconfig.periph and per-peripheral options in Kconfig.<periph>.
+#
+# Naming: an STM32_HAVE_IP_<periph>_V<n> symbol names the IP-core VERSION only;
+# it must NOT encode the CPU core, because a given IP version is the same
+# silicon regardless of whether it sits next to a Cortex-M0 or M3/M4 core (e.g.
+# SPI v2 is SPI v2 on both STM32F0 and STM32F4).  When a core-specific driver
+# .c file or register header has to be chosen, use the standard NuttX core
+# symbols (CONFIG_ARCH_CORTEXM0 for M0, CONFIG_ARCH_CORTEXM3 / ARCH_CORTEXM4
+# otherwise) -- not an STM32_HAVE_IP_* symbol.
+#
+# Two-level selection is intentional and must NOT be "cleaned up" as a
+# duplicate: some peripherals use a "register-set" symbol that picks the
+# hardware header (e.g. STM32_HAVE_IP_FLASH_M3M4_V1 -> hardware/stm32_flash.h,
+# STM32_HAVE_IP_DMA_V1/_V2 -> hardware/stm32_dma.h) AND a separate
+# "driver-variant" symbol that picks the .c file in Make.defs (e.g.
+# STM32_HAVE_IP_FLASH_M3M4_F2F4, STM32_HAVE_IP_DMA_V2_STREAM).  A family
+# legitimately selects one of each.
+#
+# Within a single mutually-exclusive group (the #elif dispatch in
+# hardware/stm32_<periph>.h and the else-if chain in Make.defs), a family must
+# select exactly one member; the dispatch headers carry #error guards that
+# enforce this at build time.
+#
+
+# ADC capabilities
+
+config STM32_HAVE_ADC_TIMTRIG_TRGO2
+	bool
+	default y if (STM32_HAVE_IP_ADC_M3M4_V1 || STM32_HAVE_IP_ADC_M3M4_V2) || STM32_HAVE_IP_ADC_M0_V1 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32H5
+
+config STM32_HAVE_ADC_TIMTRIG_TRGO
+	bool
+	default y if ARCH_CHIP_STM32H7 || STM32_COMMON_L5_U5
+
+config STM32_HAVE_TIM_ADC_CHANNEL
+	bool
+
+config STM32_HAVE_ADC_L4
+	bool
+
+config STM32_HAVE_ADC_H5
+	bool
+
+config STM32_HAVE_ADC2
+	bool
+
+config STM32_HAVE_ADC3
+	bool
+
+config STM32_HAVE_ADC4
+	bool
+
+config STM32_HAVE_ADC5
+	bool
+
+config STM32_HAVE_ADC_OVERSAMPLE
+	bool
+	default STM32_STM32L0 || STM32_STM32G0 || STM32_STM32C0
+
+config STM32_HAVE_SDADC1
+	bool
+
+config STM32_HAVE_SDADC2
+	bool
+
+config STM32_HAVE_SDADC3
+	bool
+
+config STM32_HAVE_IP_SDADC_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_ADC_M3M4_V1
+	bool
+	select STM32_HAVE_ADC1
+
+config STM32_HAVE_IP_ADC_M3M4_V1_BASIC
+	bool
+	select STM32_HAVE_IP_ADC_M3M4_V1
+
+config STM32_HAVE_IP_ADC_M3M4_V2
+	bool
+	select STM32_HAVE_ADC1
+
+config STM32_HAVE_IP_ADC_M3M4_V2_BASIC
+	bool
+	select STM32_HAVE_IP_ADC_M3M4_V2
+
+config STM32_HAVE_IP_ADC_M0_V1
+	bool
+
+config STM32_HAVE_ADC1
+	bool
+
+# BLE capabilities
+
+config STM32_HAVE_BLE
+	bool
+
+# CACHE capabilities
+
+config STM32_HAVE_DCACHE1
+	bool
+
+config STM32_HAVE_ICACHE
+	bool
+
+# CAN capabilities
+
+config STM32_HAVE_CAN1
+	bool
+
+config STM32_HAVE_CAN2
+	bool
+
+config STM32_HAVE_CAN3
+	bool
+
+config STM32_HAVE_IP_CAN_BXCAN_M0_V1
+	bool
+
+config STM32_HAVE_IP_CAN_BXCAN_M3M4_V1
+	bool
+
+# CEC capabilities
+
+config STM32_HAVE_CEC
+	bool
+
+# CLOCK capabilities
+
+config STM32_HAVE_CSI
+	bool
+
+config STM32_HAVE_CRS
+	bool
+
+config STM32_HAVE_HSI48
+	bool
+
+config STM32_HAVE_IP_HSI48_M0_V1
+	bool
+
+# COMP capabilities
+
+config STM32_HAVE_COMP1
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP2
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP3
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP4
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP5
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP6
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_COMP7
+	bool
+	select STM32_HAVE_COMP
+
+config STM32_HAVE_IP_COMP_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_COMP_M3M4_V2
+	bool
+
+config STM32_HAVE_IP_COMP_M0_V1
+	bool
+
+config STM32_HAVE_COMP
+	bool
+	select STM32_HAVE_SYSCFG
+
+# CORDIC capabilities
+
+config STM32_HAVE_CORDIC
+	bool
+
+config STM32_HAVE_FMAC
+	bool
+
+config STM32_HAVE_IP_CORDIC_M3M4_V1
+	bool
+
+# DAC capabilities
+
+config STM32_HAVE_DAC_LL_OPS
+	bool
+
+config STM32_HAVE_IP_DAC_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_DAC_M3M4_V2
+	bool
+
+config STM32_HAVE_IP_DAC_M0_V1
+	bool
+
+config STM32_HAVE_DAC1
+	bool
+
+config STM32_HAVE_DAC2
+	bool
+
+config STM32_HAVE_DAC3
+	bool
+
+config STM32_HAVE_DAC4
+	bool
+
+# DBGMCU capabilities
+
+config STM32_HAVE_IP_DBGMCU_M0_V1
+	bool
+
+config STM32_HAVE_IP_DBGMCU_M3M4_V1
+	bool
+	select STM32_DBGMCU_HAVE_TIM_FZ_IN_CR
+
+config STM32_HAVE_IP_DBGMCU_M3M4_V2
+	bool
+	select STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ
+
+config STM32_HAVE_IP_DBGMCU_M3M4_V3
+	bool
+	select STM32_DBGMCU_HAVE_TIM_FZ_IN_APB2_FZ
+
+# DCMI capabilities
+
+config STM32_HAVE_DCMI_PSSI
+	bool
+
+config STM32_HAVE_DCMI
+	bool
+
+config STM32_HAVE_IP_DCMI_V1
+	bool
+
+# DFSDM capabilities
+
+config STM32_HAVE_MDF1
+	bool
+
+config STM32_HAVE_ADF1
+	bool
+
+config STM32_HAVE_DFSDM1
+	bool
+
+# DMA capabilities
+
+config STM32_HAVE_MDMA
+	bool
+
+config STM32_HAVE_BDMA
+	bool
+
+config STM32_HAVE_GPADMA1
+	bool
+
+config STM32_HAVE_LPDMA1
+	bool
+
+config STM32_HAVE_DMA1
+	bool
+
+config STM32_HAVE_DMA2
+	bool
+
+config STM32_HAVE_DMA2D
+	bool
+
+config STM32_HAVE_DMAMUX
+	bool
+
+config STM32_HAVE_IP_DMA_V1
+	bool
+
+config STM32_HAVE_IP_DMA_V2
+	bool
+
+config STM32_HAVE_IP_DMA_V1_7CH
+	bool
+
+config STM32_HAVE_IP_DMA_V1_7CH_DMAMUX
+	bool
+
+config STM32_HAVE_IP_DMA_V1_8CH
+	bool
+
+config STM32_HAVE_IP_DMA_V1_8CH_DMAMUX
+	bool
+
+config STM32_HAVE_IP_DMA_V2_STREAM
+	bool
+
+config STM32_HAVE_IP_DMA2D_M3M4_V1
+	bool
+
+# DTS capabilities
+
+config STM32_HAVE_DTS
+	bool
+
+# ETH capabilities
+
+config STM32_HAVE_ETHMAC
+	bool
+
+config STM32_HAVE_IP_ETHMAC_M3M4_V1
+	bool
+
+config STM32_HAVE_ETHRNET
+	bool
+
+config STM32_HAVE_ETHERNET
+	bool
+
+# FDCAN capabilities
+
+config STM32_HAVE_FDCAN_H7
+	bool
+
+config STM32_HAVE_FDCAN1
+	bool
+
+config STM32_HAVE_FDCAN2
+	bool
+
+config STM32_HAVE_FDCAN3
+	bool
+
+config STM32_HAVE_IP_FDCAN_MCAN_M0_V1
+	bool
+
+config STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1
+	bool
+
+# FLASH capabilities
+
+config STM32_HAVE_FLASH_ART_ACCELERATOR
+	bool
+
+config STM32_HAVE_FLASH
+	bool
+
+config STM32_HAVE_OTA_PARTITION
+	bool
+
+config STM32_HAVE_IP_FLASH_M0_V1
+	bool
+
+config STM32_HAVE_IP_FLASH_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_FLASH_M0_G0C0
+	bool
+
+config STM32_HAVE_IP_FLASH_M3M4_L1
+	bool
+
+config STM32_HAVE_IP_FLASH_M3M4_F1F3
+	bool
+
+config STM32_HAVE_IP_FLASH_M3M4_F2F4
+	bool
+
+config STM32_HAVE_IP_FLASH_M3M4_G4
+	bool
+
+config STM32_HAVE_OTFDEC1
+	bool
+
+config STM32_HAVE_OTFDEC2
+	bool
+
+config STM32_HAVE_FLASH_ICACHE
+	bool
+
+config STM32_HAVE_FLASH_DCACHE
+	bool
+
+# FOC capabilities
+
+config STM32_HAVE_COMMON_FOC
+	bool
+
+# GPIO capabilities
+
+config STM32_HAVE_LPGPIO1
+	bool
+
+config STM32_HAVE_GPIOF
+	bool
+
+config STM32_HAVE_GPIOG
+	bool
+
+# HRTIM capabilities
+
+config STM32_HAVE_HRTIM1
+	bool
+
+config STM32_HAVE_IP_HRTIM_M3M4_V1
+	bool
+
+# I2C capabilities
+
+config STM32_HAVE_I2C_H5
+	bool
+
+config STM32_HAVE_I2C5
+	bool
+
+config STM32_HAVE_I2C6
+	bool
+
+config STM32_HAVE_IP_I2C_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_I2C_M3M4_V2
+	bool
+
+config STM32_HAVE_IP_I2C_M0_V1
+	bool
+
+config STM32_HAVE_I2C1
+	bool
+
+config STM32_HAVE_I2C2
+	bool
+
+config STM32_HAVE_I2C3
+	bool
+
+config STM32_HAVE_I2C4
+	bool
+
+# IPCC capabilities
+
+config STM32_HAVE_HSEM
+	bool
+
+config STM32_HAVE_CM4
+	bool
+
+config STM32_HAVE_MBOX
+	bool
+
+config STM32_HAVE_IPCC
+	bool
+
+# JPEG capabilities
+
+config STM32_HAVE_JPEG
+	bool
+
+# LPUART capabilities
+
+config STM32_HAVE_LPUART1
+	bool
+
+config STM32_HAVE_LPUART2
+	bool
+
+config STM32_HAVE_LPUART
+	bool
+
+# LTDC capabilities
+
+config STM32_HAVE_LTDC
+	bool
+
+config STM32_HAVE_IP_LTDC_M3M4_V1
+	bool
+
+config STM32_HAVE_DSIHOST
+	bool
+
+config STM32_HAVE_LCD
+	bool
+
+# MEMORY capabilities
+
+config STM32_HAVE_RAMCFG
+	bool
+
+config STM32_HAVE_SRAM1
+	bool
+
+config STM32_HAVE_SRAM2
+	bool
+
+config STM32_HAVE_SRAM3
+	bool
+
+config STM32_HAVE_SRAM5
+	bool
+
+config STM32_HAVE_CCM
+	bool
+
+config STM32_HAVE_FMC
+	bool
+
+config STM32_HAVE_FSMC
+	bool
+
+config STM32_HAVE_IP_CCM_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_FMC_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_FSMC_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_BBSRAM_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_BKP_M3M4_V1
+	bool
+
+config STM32_HAVE_BKPSRAM
+	bool
+
+config STM32_HAVE_BKP
+	bool
+
+config STM32_HAVE_COMMON_WASTE
+	bool
+	default y if STM32_COMMON_LEGACY
+
+config STM32_HAVE_IP_DFUMODE_M3M4_V1
+	bool
+
+config STM32_HAVE_SRAM2A
+	bool
+
+config STM32_HAVE_SRAM2B
+	bool
+
+# OPAMP capabilities
+
+config STM32_HAVE_OPAMP1
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_OPAMP2
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_OPAMP3
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_OPAMP4
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_OPAMP5
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_OPAMP6
+	bool
+	select STM32_HAVE_SYSCFG
+
+config STM32_HAVE_IP_OPAMP_M3M4_V1
+	bool
+
+# POWER capabilities
+
+config STM32_HAVE_PWR
+	bool
+
+config STM32_HAVE_OVERDRIVE
+	bool
+
+config STM32_HAVE_VREF
+	bool
+
+config STM32_HAVE_VREFINT
+	bool
+
+config STM32_HAVE_PWR_DIRECT_SMPS_SUPPLY
+	bool
+
+config STM32_HAVE_IP_PWR_M0_V1
+	bool
+
+config STM32_HAVE_IP_PWR_G0
+	bool
+
+config STM32_HAVE_IP_PWR_M3M4_V1
+	bool
+
+config STM32_HAVE_SMPS
+	bool
+
+# QSPI capabilities
+
+config STM32_HAVE_QSPI1
+	bool
+
+config STM32_HAVE_OCTOSPIM
+	bool
+
+config STM32_HAVE_OCTOSPI1
+	bool
+
+config STM32_HAVE_OCTOSPI2
+	bool
+
+config STM32_HAVE_QSPI
+	bool
+
+# CRC capabilities
+
+config STM32_HAVE_CRC
+	bool
+
+# RNG capabilities
+
+config STM32_HAVE_RNG
+	bool
+
+config STM32_HAVE_IP_RNG_M0_V1
+	bool
+
+config STM32_HAVE_IP_RNG_M3M4_V1
+	bool
+
+# RTC capabilities
+
+config STM32_HAVE_RTC
+	bool
+
+config STM32_HAVE_RTC_MAGIC
+	bool
+
+config STM32_HAVE_RTCAPB
+	bool
+
+config STM32_HAVE_RTC_COUNTER
+	bool
+
+config STM32_HAVE_IP_RTC_COUNTER_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_RTCC_M0_V1
+	bool
+
+config STM32_HAVE_IP_RTCC_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_RTCC_M3M4_L1
+	bool
+
+config STM32_HAVE_IP_RTCC_M3M4_F4
+	bool
+
+config STM32_HAVE_IP_RTC_M3M4_V1
+	bool
+
+config STM32_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+
+# SAI capabilities
+
+config STM32_HAVE_SAIPLL
+	bool
+
+config STM32_HAVE_SAI
+	bool
+
+config STM32_HAVE_I2S3
+	bool
+
+config STM32_HAVE_I2S2
+	bool
+
+config STM32_HAVE_SPI2S2
+	bool
+
+config STM32_HAVE_I2SPLL
+	bool
+
+config STM32_HAVE_IP_I2S_M3M4_V1
+	bool
+
+config STM32_HAVE_SAI1
+	bool
+
+config STM32_HAVE_SAI2
+	bool
+
+# SDIO capabilities
+
+config STM32_HAVE_SDIO
+	bool
+
+config STM32_HAVE_SDMMC1
+	bool
+
+config STM32_HAVE_SDMMC2
+	bool
+
+config STM32_HAVE_IP_SDIO_M3M4_V1
+	bool
+
+# SECURITY capabilities
+
+config STM32_HAVE_FIREWALL
+	bool
+
+config STM32_HAVE_GTZC1
+	bool
+
+config STM32_HAVE_GTZC2
+	bool
+
+config STM32_HAVE_PKA
+	bool
+
+config STM32_HAVE_SAES
+	bool
+
+config STM32_HAVE_AES
+	bool
+
+config STM32_HAVE_CRYP
+	bool
+
+config STM32_HAVE_IP_AES_M0_V1
+	bool
+
+config STM32_HAVE_IP_AES_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_CRYPTO_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_CRYPTO_H7
+	bool
+
+config STM32_HAVE_HASH
+	bool
+
+# SPI capabilities
+
+config STM32_HAVE_SPI_CORE_DMA
+	bool
+	default y if STM32_COMMON_LEGACY || STM32_COMMON_F0_L0_G0_C0
+	default y if STM32_COMMON_F7_H7_H5
+	default y if ARCH_CHIP_STM32WL5
+	default y if STM32_COMMON_L4_L5_U5 && STM32_SPI
+	default y if ARCH_CHIP_STM32WB && (STM32_SPI1 || STM32_SPI2) && STM32_DMA
+
+config STM32_HAVE_SPI_DMA_FAMILY_WL5
+	bool
+	default y if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
+	default y if STM32_COMMON_H7_H5 || ARCH_CHIP_STM32WL5
+
+config STM32_HAVE_SPI_DMA_FAMILY
+	bool
+	default y if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
+	default y if STM32_COMMON_H7_H5
+
+config STM32_HAVE_IP_SPI_V1
+	bool
+
+config STM32_HAVE_IP_SPI_V2
+	bool
+
+config STM32_HAVE_IP_SPI_V3
+	bool
+
+config STM32_HAVE_IP_SPI_V4
+	bool
+
+config STM32_HAVE_SPI1
+	bool
+
+config STM32_HAVE_SPI2
+	bool
+
+config STM32_HAVE_SPI3
+	bool
+
+config STM32_HAVE_SPI4
+	bool
+
+config STM32_HAVE_SPI5
+	bool
+
+config STM32_HAVE_SPI6
+	bool
+
+# SYSTEM capabilities
+
+config STM32_HAVE_IP_EXTI_V1
+	bool
+
+config STM32_HAVE_IP_EXTI_V2
+	bool
+
+config STM32_HAVE_IP_GPIO_M0_V1
+	bool
+
+config STM32_HAVE_IP_GPIO_M3M4_V1
+	bool
+
+config STM32_HAVE_SYSCFG
+	bool
+
+config STM32_HAVE_IP_SYSCFG_M3M4_V1
+	bool
+
+config STM32_HAVE_IOCOMPENSATION
+	bool
+
+# TIM capabilities
+
+config STM32_HAVE_TIM_PWM
+	bool
+	default y if STM32_COMMON_FULL_FEATURED
+
+config STM32_HAVE_TIM_PWM_NO_F0
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7 || STM32_COMMON_L4_H5_L5_U5
+
+config STM32_HAVE_TIM_PWM_ADVANCED
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_SINGLECHAN
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_INTERNAL
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7_H5
+
+config STM32_HAVE_TIM_PWM_STM32PWM
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32U5
+
+config STM32_HAVE_TIM_PWM_CHMODE_EXTENDED
+	bool
+	default y if (STM32_HAVE_IP_TIMERS && STM32_HAVE_IP_TIMERS_M3M4_V2) || STM32_COMMON_F7_H7 || ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_CHMODE_LEGACY
+	bool
+	default y if STM32_HAVE_IP_TIMERS && !STM32_HAVE_IP_TIMERS_M3M4_V2
+
+config STM32_HAVE_TIM_PWM_CHMODE_LIMITED
+	bool
+	default y if STM32_HAVE_IP_TIMERS_M0_V1 || STM32_COMMON_L5_U5
+
+config STM32_HAVE_TIM_PWM_CHMODE_TIM16_17_EXTENDED
+	bool
+	default y if STM32_HAVE_IP_TIMERS || ARCH_CHIP_STM32H7 || STM32_COMMON_L4_H5_L5_U5
+
+config STM32_HAVE_TIM_PWM_NOUT_REQUIRES_OUT
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_L4_L5_U5
+
+config STM32_HAVE_PWM_MULTICHAN
+	bool
+	default y if STM32_HAVE_IP_TIMERS && STM32_TIM && STM32_PWM
+	default y if (STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7) && STM32_PWM
+	default y if (ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32U5) && STM32_PWM
+	default y if ARCH_CHIP_STM32L5 && STM32_PWM_MULTICHAN_L5_TIMERS
+
+config STM32_HAVE_QENCODER_MAIN
+	bool
+	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7
+	default y if STM32_COMMON_L4_L5_U5
+
+config STM32_HAVE_QENCODER_16BIT
+	bool
+	default y if STM32_QENCODER_STM32 || STM32_QENCODER_F0
+
+config STM32_ENERGYLITE
+	bool
+	select STM32_HAVE_TIM6 if STM32_HAVE_IP_TIMERS
+	select STM32_HAVE_TIM7 if STM32_HAVE_IP_TIMERS
+
+config STM32_HAVE_LPTIM_CHANNEL
+	bool
+
+config STM32_HAVE_IP_TIMERS
+	bool
+
+config STM32_HAVE_IP_TIMERS_M3M4_V1
+	bool
+	select STM32_HAVE_IP_TIMERS
+
+config STM32_HAVE_IP_TIMERS_M3M4_V2
+	bool
+	select STM32_HAVE_IP_TIMERS
+
+config STM32_HAVE_IP_TIMERS_M3M4_V3
+	bool
+	select STM32_HAVE_IP_TIMERS
+
+config STM32_HAVE_IP_TIMERS_M0_V1
+	bool
+	select STM32_HAVE_IP_TIMERS
+
+config STM32_HAVE_TIM_ADC_TRIGGER
+	bool
+	default y if STM32_HAVE_IP_ADC_M3M4_V1
+	default y if STM32_HAVE_IP_ADC_M3M4_V2
+	default y if STM32_HAVE_IP_ADC_M0_V1
+	default y if STM32_COMMON_F7_H7
+	default y if STM32_COMMON_L4_H5_L5_U5
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_HAVE_TIM_DAC_TRIGGER
+	bool
+	default y if STM32_COMMON_LEGACY
+	default y if ARCH_CHIP_STM32F7
+	default y if STM32_COMMON_L4_L5_U5
+
+config STM32_HAVE_TIM1
+	bool
+
+config STM32_HAVE_TIM2
+	bool
+
+config STM32_HAVE_TIM3
+	bool
+
+config STM32_HAVE_TIM4
+	bool
+
+config STM32_HAVE_TIM5
+	bool
+
+config STM32_HAVE_TIM6
+	bool
+
+config STM32_HAVE_TIM7
+	bool
+
+config STM32_HAVE_TIM8
+	bool
+
+config STM32_HAVE_TIM9
+	bool
+
+config STM32_HAVE_TIM10
+	bool
+
+config STM32_HAVE_TIM11
+	bool
+
+config STM32_HAVE_TIM12
+	bool
+
+config STM32_HAVE_TIM13
+	bool
+
+config STM32_HAVE_TIM14
+	bool
+
+config STM32_HAVE_TIM15
+	bool
+
+config STM32_HAVE_TIM16
+	bool
+
+config STM32_HAVE_TIM17
+	bool
+
+config STM32_HAVE_TIM18
+	bool
+
+config STM32_HAVE_TIM19
+	bool
+
+config STM32_HAVE_TIM20
+	bool
+
+config STM32_HAVE_LPTIM1
+	bool
+
+config STM32_HAVE_LPTIM2
+	bool
+
+config STM32_HAVE_LPTIM3
+	bool
+
+config STM32_HAVE_LPTIM4
+	bool
+
+config STM32_HAVE_IP_ONESHOT_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_FREERUN_M3M4_V1
+	bool
+
+# TSC capabilities
+
+config STM32_HAVE_TSC
+	bool
+
+# UART capabilities
+
+config STM32_HAVE_SWPMI
+	bool
+
+config STM32_HAVE_USART_H5
+	bool
+
+config STM32_HAVE_USART_RXFIFO_THRESHOLD
+	bool
+
+config STM32_HAVE_USART_UNCONFIG_ON_CLOSE
+	bool
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32N6
+
+config STM32_HAVE_USART2
+	bool
+
+config STM32_HAVE_USART3
+	bool
+
+config STM32_HAVE_UART4
+	bool
+
+config STM32_HAVE_UART5
+	bool
+
+config STM32_HAVE_USART6
+	bool
+
+config STM32_HAVE_UART7
+	bool
+
+config STM32_HAVE_UART8
+	bool
+
+config STM32_HAVE_IP_USART
+	bool
+
+config STM32_HAVE_IP_USART_V1
+	bool
+	select STM32_HAVE_IP_USART
+
+config STM32_HAVE_IP_USART_V2
+	bool
+	select STM32_HAVE_IP_USART
+
+config STM32_HAVE_IP_USART_V3
+	bool
+	select STM32_HAVE_IP_USART
+
+config STM32_HAVE_IP_USART_V4
+	bool
+	select STM32_HAVE_IP_USART
+	select STM32_HAVE_USART_RXFIFO_THRESHOLD
+
+config STM32_HAVE_USART4
+	bool
+
+config STM32_HAVE_USART5
+	bool
+
+config STM32_HAVE_USART7
+	bool
+
+config STM32_HAVE_USART8
+	bool
+
+config STM32_HAVE_UART9
+	bool
+
+config STM32_HAVE_USART10
+	bool
+
+config STM32_HAVE_USART11
+	bool
+
+config STM32_HAVE_UART12
+	bool
+
+config STM32_HAVE_USART1
+	bool
+
+# USB capabilities
+
+config STM32_HAVE_USBFS_MODE
+	bool
+
+config STM32_HAVE_USBDRD_HOST
+	bool
+
+config STM32_HAVE_OTG_H7
+	bool
+
+config STM32_HAVE_INTERNAL_ULPI
+	bool
+
+config STM32_HAVE_EXTERNAL_ULPI
+	bool
+
+config STM32_HAVE_UCPD
+	bool
+
+config STM32_HAVE_UCPD1
+	bool
+
+config STM32_HAVE_UCPD2
+	bool
+
+config STM32_HAVE_USBDEV
+	bool
+
+config STM32_HAVE_IP_USBDEV_M0_V1
+	bool
+
+config STM32_HAVE_IP_USBDEV_M3M4_V1
+	bool
+
+config STM32_HAVE_USBFS
+	bool
+
+config STM32_HAVE_IP_USBFS_M3M4_V1
+	bool
+
+config STM32_HAVE_OTGFS
+	bool
+
+config STM32_HAVE_OTGHS
+	bool
+
+config STM32_HAVE_IP_OTGFS_M3M4_V1
+	bool
+
+config STM32_HAVE_IP_OTGHS_M3M4_V1
+	bool
+
+config STM32_HAVE_COMMON_USBHOST_DEBUG
+	bool
+	default y if STM32_COMMON_LEGACY
+
+config STM32_HAVE_USB
+	bool
+
+# WDG capabilities
+
+config STM32_HAVE_IP_WDG_M0_V1
+	bool
+
+config STM32_HAVE_IP_WDG_M3M4_V1
+	bool

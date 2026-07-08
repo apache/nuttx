@@ -64,9 +64,26 @@
 
 void up_timer_initialize(void)
 {
+#ifdef CONFIG_SMP
+  if (this_cpu() != 0)
+    {
+      up_enable_irq(RISCV_IRQ_MTIMER);
+      return;
+    }
+#endif
+
+  /* Core 0: full timer initialisation */
+
+  /* Stop the timer and reset the counter while we configure it */
+
   putreg32(0, RP23XX_SIO_BASE + RP23XX_SIO_MTIME_CTRL_OFFSET);
   putreg32(0, RP23XX_SIO_BASE + RP23XX_SIO_MTIME_OFFSET);
   putreg32(0, RP23XX_SIO_BASE + RP23XX_SIO_MTIMEH_OFFSET);
+
+  /* Initialise compare registers to maximum so no interrupts fire
+   *  before the alarm subsystem sets the first real deadline.
+   */
+
   putreg32(RP23XX_SIO_MTIMECMP_MASK,
            RP23XX_SIO_BASE + RP23XX_SIO_MTIMECMP_OFFSET);
   putreg32(RP23XX_SIO_MTIMECMPH_MASK,
@@ -80,6 +97,8 @@ void up_timer_initialize(void)
   DEBUGASSERT(lower);
 
   up_alarm_set_lowerhalf(lower);
+
+  /* Start the counter at full system-clock rate */
 
   putreg32(RP23XX_SIO_MTIME_CTRL_EN | RP23XX_SIO_MTIME_CTRL_FULLSPEED,
            RP23XX_SIO_BASE + RP23XX_SIO_MTIME_CTRL_OFFSET);

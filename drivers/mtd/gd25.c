@@ -41,7 +41,11 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/spi/spi.h>
+#ifdef CONFIG_GD25_QSPI
+#  include <nuttx/spi/qspi.h>
+#else
+#  include <nuttx/spi/spi.h>
+#endif
 #include <nuttx/mtd/mtd.h>
 
 /***************************************************************************
@@ -56,6 +60,14 @@
 #  define CONFIG_GD25_SPIFREQUENCY 20000000
 #endif
 
+#ifndef CONFIG_GD25_QSPIMODE
+#  define CONFIG_GD25_QSPIMODE 0
+#endif
+
+#ifndef CONFIG_GD25_QSPIFREQUENCY
+#  define CONFIG_GD25_QSPIFREQUENCY 20000000
+#endif
+
 /***************************************************************************
  * GD25 Instructions
  ***************************************************************************/
@@ -65,20 +77,36 @@
 #define GD25_WREN                   0x06    /* Write enable               */
 #define GD25_WRDI                   0x04    /* Write Disable              */
 #define GD25_RDSR                   0x05    /* Read status register       */
-#define GD25_RDSR1                  0x35    /* Read status register-1     */
+#define GD25_RDSR1                  0x35    /* Read status register-2     */
 #define GD25_WRSR                   0x01    /* Write Status Register      */
 #define GD25_RDDATA                 0x03    /* Read data bytes            */
-#define GD25_FRD                    0x0b    /* Higher speed read          */
+#define GD25_FRD                    0x0b    /* Fast read (1-wire)         */
 #define GD25_FRDD                   0x3b    /* Fast read, dual output     */
-#define GD25_PP                     0x02    /* Program page               */
-#define GD25_SE                     0x20    /* Sector erase (4KB)         */
-#define GD25_BE                     0xd8    /* Block Erase (64KB)         */
+#define GD25_QOFRD                  0x6b    /* Quad output fast read      */
+#define GD25_QIOFRD                 0xeb    /* Quad I/O fast read, 3-byte */
+#define GD25_QIOFRD4B               0xec    /* Quad I/O fast read, 4-byte */
+#define GD25_PP                     0x02    /* Program page (1-1-1), 3-byte */
+#define GD25_PP4B                   0x12    /* Program page (1-1-1), 4-byte */
+#define GD25_QPP                    0x32    /* Quad page program (1-1-4), 3-byte */
+#define GD25_QPP4B                  0x34    /* Quad page program (1-1-4), 4-byte */
+#define GD25_SE                     0x20    /* Sector erase (4KB), 3-byte */
+#define GD25_SE4B                   0x21    /* Sector erase (4KB), 4-byte */
+#define GD25_BE                     0xd8    /* Block Erase (64KB), 3-byte */
+#define GD25_BE4B                   0xdc    /* Block Erase (64KB), 4-byte */
 #define GD25_CE                     0xc7    /* Chip erase                 */
 #define GD25_PD                     0xb9    /* Power down                 */
 #define GD25_PURDID                 0xab    /* Release PD, Device ID      */
 #define GD25_RDMFID                 0x90    /* Read Manufacturer / Device */
 #define GD25_JEDEC_ID               0x9f    /* JEDEC ID read              */
 #define GD25_4BEN                   0xb7    /* Enable 4-byte Mode         */
+#define GD25_4BEXT                  0xe9    /* Exit 4-byte Mode           */
+
+/* Dummy clock cycles for Quad I/O Fast Read (EBh/ECh).
+ * Mode byte (2 clocks on 4-wire) + 4 additional = 6 total, matching
+ * the MX25RXX driver's default and safe up to ~80MHz at VCC=3.3V.
+ */
+
+#define GD25_QIOFRD_DUMMIES         6
 
 /***************************************************************************
  * GD25 Registers
@@ -112,6 +140,11 @@
 #define GD25_SR1_EN4B               (1 << 3)  /* Bit 3: Enable 4byte address */
 #define GD25Q_SR1_EN4B              (1 << 0)  /* Bit 0: Enable 4byte address GD25Q memories */
 
+/* Status Register 2 (SR2) bit definitions */
+
+#define GD25_SR2_QE                 (1 << 1)  /* Bit 1 of SR2 (S9): Quad Enable, non-volatile */
+#define GD25_SR2_PRESERVE_MASK      0x78      /* Preserve SRP1 (bit6) and LB3-LB1 (bits5-3) */
+
 #define GD25_DUMMY                  0x00
 
 /***************************************************************************
@@ -138,13 +171,18 @@
 
 struct gd25_dev_s
 {
-  struct mtd_dev_s      mtd;         /* MTD interface */
-  FAR struct spi_dev_s *spi;         /* Saved SPI interface instance */
-  uint32_t              spi_devid;   /* Chip select inputs */
-  uint16_t              nsectors;    /* Number of erase sectors */
-  uint8_t               prev_instr;  /* Previous instruction given to GD25 device */
-  bool                  addr_4byte;  /* True: Use Four-byte address */
-  uint8_t               memory;      /* memory type read from device */
+  struct mtd_dev_s       mtd;         /* MTD interface */
+#ifdef CONFIG_GD25_QSPI
+  FAR struct qspi_dev_s *qspi;        /* Saved QSPI interface instance */
+  FAR uint8_t           *cmdbuf;      /* DMA-safe command buffer */
+#else
+  FAR struct spi_dev_s  *spi;         /* Saved SPI interface instance */
+  uint32_t               spi_devid;   /* Chip select inputs */
+#endif
+  uint16_t               nsectors;    /* Number of erase sectors */
+  uint8_t                prev_instr;  /* Previous instruction given to GD25 device */
+  bool                   addr_4byte;  /* True: Use Four-byte address */
+  uint8_t                memory;      /* memory type read from device */
 };
 
 /***************************************************************************
@@ -153,10 +191,13 @@ struct gd25_dev_s
 
 /* Helpers */
 
-static inline void gd25_purdid(FAR struct gd25_dev_s *priv);
-static inline void gd25_pd(FAR struct gd25_dev_s *priv);
+#ifdef CONFIG_GD25_QSPI
+static void gd25_lock(FAR struct qspi_dev_s *qspi);
+static inline void gd25_unlock(FAR struct qspi_dev_s *qspi);
+#else
 static void gd25_lock(FAR struct spi_dev_s *spi);
 static inline void gd25_unlock(FAR struct spi_dev_s *spi);
+#endif
 static inline int gd25_readid(FAR struct gd25_dev_s *priv);
 #ifndef CONFIG_GD25_READONLY
 static void gd25_unprotect(FAR struct gd25_dev_s *priv);
@@ -199,32 +240,23 @@ static ssize_t gd25_write(FAR struct mtd_dev_s *dev, off_t offset,
  ***************************************************************************/
 
 /***************************************************************************
- * Name: gd25_purdid
- ***************************************************************************/
-
-static inline void gd25_purdid(FAR struct gd25_dev_s *priv)
-{
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
-  SPI_SEND(priv->spi, GD25_PURDID);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
-  up_udelay(20);
-}
-
-/***************************************************************************
- * Name: gd25_pd
- ***************************************************************************/
-
-static inline void gd25_pd(FAR struct gd25_dev_s *priv)
-{
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
-  SPI_SEND(priv->spi, GD25_PD);
-  SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
-}
-
-/***************************************************************************
  * Name: gd25_lock
  ***************************************************************************/
 
+#ifdef CONFIG_GD25_QSPI
+static void gd25_lock(FAR struct qspi_dev_s *qspi)
+{
+  QSPI_LOCK(qspi, true);
+  QSPI_SETMODE(qspi, CONFIG_GD25_QSPIMODE);
+  QSPI_SETBITS(qspi, 8);
+  QSPI_SETFREQUENCY(qspi, CONFIG_GD25_QSPIFREQUENCY);
+}
+
+static inline void gd25_unlock(FAR struct qspi_dev_s *qspi)
+{
+  QSPI_LOCK(qspi, false);
+}
+#else
 static void gd25_lock(FAR struct spi_dev_s *spi)
 {
   SPI_LOCK(spi, true);
@@ -239,14 +271,11 @@ static void gd25_lock(FAR struct spi_dev_s *spi)
 #endif
 }
 
-/***************************************************************************
- * Name: gd25_unlock
- ***************************************************************************/
-
 static inline void gd25_unlock(FAR struct spi_dev_s *spi)
 {
   SPI_LOCK(spi, false);
 }
+#endif /* CONFIG_GD25_QSPI */
 
 /***************************************************************************
  * Name: gd25_readid
@@ -259,10 +288,26 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
   uint16_t capacity;
   int ret = -ENODEV;
 
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+
+  gd25_lock(priv->qspi);
+
+  cmdinfo.flags   = QSPICMD_READDATA;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_JEDEC_ID;
+  cmdinfo.buflen  = 3;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = priv->cmdbuf;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+
+  manufacturer = priv->cmdbuf[0];
+  memory       = priv->cmdbuf[1];
+  capacity     = priv->cmdbuf[2];
+#else
   /* Lock and configure the SPI bus */
 
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
 
   /* Select this FLASH part. */
 
@@ -278,6 +323,7 @@ static inline int gd25_readid(FAR struct gd25_dev_s *priv)
   /* Deselect the FLASH and unlock the bus */
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
 
   finfo("manufacturer: %02x memory: %02x capacity: %02x\n",
         manufacturer, memory, capacity);
@@ -344,8 +390,11 @@ out:
    * Or success.
    */
 
-  gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+  gd25_unlock(priv->qspi);
+#else
   gd25_unlock(priv->spi);
+#endif
   return ret;
 }
 
@@ -356,10 +405,39 @@ out:
 #ifndef CONFIG_GD25_READONLY
 static void gd25_unprotect(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+  uint8_t sr2;
+
+  gd25_lock(priv->qspi);
+  gd25_waitwritecomplete(priv);
+
+  /* Read SR2 to preserve OTP/SRP bits before writing */
+
+  sr2 = gd25_rdsr(priv, 1);
+
+  gd25_wren(priv);
+
+  /* SR1 = 0 (clear all block-protect bits); SR2 = preserve non-OTP bits,
+   * set QE (S9 = bit1 of SR2) so quad I/O pins are active.
+   */
+
+  priv->cmdbuf[0] = 0;
+  priv->cmdbuf[1] = (sr2 & GD25_SR2_PRESERVE_MASK) | GD25_SR2_QE;
+  cmdinfo.flags   = QSPICMD_WRITEDATA;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_WRSR;
+  cmdinfo.buflen  = 2;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = priv->cmdbuf;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+
+  gd25_waitwritecomplete(priv);
+  gd25_unlock(priv->qspi);
+#else
   /* Lock and configure the SPI bus */
 
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
 
   /* Wait for any preceding write or erase operation to complete. */
 
@@ -384,8 +462,8 @@ static void gd25_unprotect(FAR struct gd25_dev_s *priv)
 
   /* Unlock the SPI bus */
 
-  gd25_pd(priv);
   gd25_unlock(priv->spi);
+#endif /* CONFIG_GD25_QSPI */
 }
 #endif
 
@@ -400,11 +478,19 @@ static uint8_t gd25_waitwritecomplete(FAR struct gd25_dev_s *priv)
   do
     {
       status = gd25_rdsr(priv, 0);
-      if (priv->prev_instr != GD25_PP && (status & GD25_SR_WIP) != 0)
+      if (priv->prev_instr != GD25_PP && priv->prev_instr != GD25_PP4B &&
+          priv->prev_instr != GD25_QPP && priv->prev_instr != GD25_QPP4B &&
+          (status & GD25_SR_WIP) != 0)
         {
+#ifdef CONFIG_GD25_QSPI
+          gd25_unlock(priv->qspi);
+          nxsig_usleep(1000);
+          gd25_lock(priv->qspi);
+#else
           gd25_unlock(priv->spi);
-          nxsched_usleep(1000);
+          nxsig_usleep(1000);
           gd25_lock(priv->spi);
+#endif
         }
     }
   while ((status & GD25_SR_WIP) != 0);
@@ -418,18 +504,29 @@ static uint8_t gd25_waitwritecomplete(FAR struct gd25_dev_s *priv)
 
 static inline uint8_t gd25_rdsr(FAR struct gd25_dev_s *priv, uint32_t id)
 {
-  uint8_t status;
   uint8_t rdsr[2] =
   {
     GD25_RDSR, GD25_RDSR1
   };
 
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+  cmdinfo.flags   = QSPICMD_READDATA;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = rdsr[id];
+  cmdinfo.buflen  = 1;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = priv->cmdbuf;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+  return priv->cmdbuf[0];
+#else
+  uint8_t status;
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, rdsr[id]);
   status = SPI_SEND(priv->spi, GD25_DUMMY);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
-
   return status;
+#endif
 }
 
 /***************************************************************************
@@ -442,9 +539,20 @@ static inline uint8_t gd25_rdsr(FAR struct gd25_dev_s *priv, uint32_t id)
 
 static inline bool gd25_4ben(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_4BEN;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, GD25_4BEN);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif
   if (priv->memory == GD25Q_JEDEC_MEMORY_TYPE)
     {
       return ((gd25_rdsr(priv, 1) & GD25Q_SR1_EN4B) == GD25Q_SR1_EN4B);
@@ -461,9 +569,20 @@ static inline bool gd25_4ben(FAR struct gd25_dev_s *priv)
 
 static inline void gd25_wren(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_WREN;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, GD25_WREN);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif
 }
 
 /***************************************************************************
@@ -472,9 +591,20 @@ static inline void gd25_wren(FAR struct gd25_dev_s *priv)
 
 static inline void gd25_wrdi(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_WRDI;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
   SPI_SEND(priv->spi, GD25_WRDI);
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif
 }
 
 /***************************************************************************
@@ -526,6 +656,9 @@ static bool gd25_is_erased(FAR struct gd25_dev_s *priv, off_t address,
 static void gd25_sectorerase(FAR struct gd25_dev_s *priv, off_t sector)
 {
   off_t address = sector << GD25_SECTOR_SHIFT;
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+#endif
 
   finfo("sector: %08lx\n", (long)sector);
 
@@ -546,6 +679,16 @@ static void gd25_sectorerase(FAR struct gd25_dev_s *priv, off_t sector)
 
   gd25_wren(priv);
 
+#ifdef CONFIG_GD25_QSPI
+  cmdinfo.flags   = QSPICMD_ADDRESS;
+  cmdinfo.addrlen = priv->addr_4byte ? 4 : 3;
+  cmdinfo.cmd     = priv->addr_4byte ? GD25_SE4B : GD25_SE;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = address;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+  priv->prev_instr = cmdinfo.cmd;
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
 
   /* Send the "Sector Erase (SE)" instruction */
@@ -567,6 +710,7 @@ static void gd25_sectorerase(FAR struct gd25_dev_s *priv, off_t sector)
   SPI_SEND(priv->spi, address & 0xff);
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
 }
 
 /***************************************************************************
@@ -575,6 +719,10 @@ static void gd25_sectorerase(FAR struct gd25_dev_s *priv, off_t sector)
 
 static inline int gd25_chiperase(FAR struct gd25_dev_s *priv)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_cmdinfo_s cmdinfo;
+#endif
+
   /* Wait for any preceding write or erase operation to complete. */
 
   gd25_waitwritecomplete(priv);
@@ -583,6 +731,16 @@ static inline int gd25_chiperase(FAR struct gd25_dev_s *priv)
 
   gd25_wren(priv);
 
+#ifdef CONFIG_GD25_QSPI
+  cmdinfo.flags   = 0;
+  cmdinfo.addrlen = 0;
+  cmdinfo.cmd     = GD25_CE;
+  cmdinfo.buflen  = 0;
+  cmdinfo.addr    = 0;
+  cmdinfo.buffer  = NULL;
+  QSPI_COMMAND(priv->qspi, &cmdinfo);
+  priv->prev_instr = GD25_CE;
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
 
   /* Send the "Chip Erase (CE)" instruction */
@@ -591,6 +749,7 @@ static inline int gd25_chiperase(FAR struct gd25_dev_s *priv)
   priv->prev_instr = GD25_CE;
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
   return OK;
 }
 
@@ -601,6 +760,10 @@ static inline int gd25_chiperase(FAR struct gd25_dev_s *priv)
 static void gd25_byteread(FAR struct gd25_dev_s *priv, FAR uint8_t *buffer,
                           off_t address, size_t nbytes)
 {
+#ifdef CONFIG_GD25_QSPI
+  struct qspi_meminfo_s meminfo;
+#endif
+
   finfo("address: %08lx nbytes: %d\n", (long)address, (int)nbytes);
 
   /* Wait for any preceding write or erase operation to complete. */
@@ -611,6 +774,17 @@ static void gd25_byteread(FAR struct gd25_dev_s *priv, FAR uint8_t *buffer,
 
   gd25_wrdi(priv);
 
+#ifdef CONFIG_GD25_QSPI
+  meminfo.flags   = QSPIMEM_READ | QSPIMEM_QUADIO;
+  meminfo.addrlen = priv->addr_4byte ? 4 : 3;
+  meminfo.dummies = GD25_QIOFRD_DUMMIES;
+  meminfo.buflen  = nbytes;
+  meminfo.cmd     = priv->addr_4byte ? GD25_QIOFRD4B : GD25_QIOFRD;
+  meminfo.addr    = address;
+  meminfo.buffer  = buffer;
+  QSPI_MEMORY(priv->qspi, &meminfo);
+  priv->prev_instr = meminfo.cmd;
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
 
   /* Send "Read from Memory " instruction */
@@ -645,6 +819,7 @@ static void gd25_byteread(FAR struct gd25_dev_s *priv, FAR uint8_t *buffer,
   SPI_RECVBLOCK(priv->spi, buffer, nbytes);
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
 }
 
 /***************************************************************************
@@ -656,6 +831,17 @@ static void gd25_pagewrite(FAR struct gd25_dev_s *priv,
                            FAR const uint8_t *buffer, off_t address,
                            size_t nbytes)
 {
+#ifdef CONFIG_GD25_QSPI
+  /* GD25 Quad Page Program (0x32/0x34) is a 1-1-4 transfer: the address
+   * is clocked on a single line and only the data is quad.
+   * QSPIMEM_QUADIO cannot express this (it forces the address quad too),
+   * so use QSPIMEM_QUADDATA, which sets the data phase quad while leaving
+   * the address phase single-line.
+   */
+
+  struct qspi_meminfo_s meminfo;
+#endif
+
   finfo("address: %08lx nwords: %d\n", (long)address, (int)nbytes);
   DEBUGASSERT(priv && buffer && (address & 0xff) == 0 &&
               (nbytes & 0xff) == 0);
@@ -670,6 +856,17 @@ static void gd25_pagewrite(FAR struct gd25_dev_s *priv,
 
       gd25_wren(priv);
 
+#ifdef CONFIG_GD25_QSPI
+      meminfo.flags   = QSPIMEM_WRITE | QSPIMEM_QUADDATA;
+      meminfo.cmd     = priv->addr_4byte ? GD25_QPP4B : GD25_QPP;
+      meminfo.addrlen = priv->addr_4byte ? 4 : 3;
+      meminfo.buflen  = GD25_PAGE_SIZE;
+      meminfo.dummies = 0;
+      meminfo.addr    = address;
+      meminfo.buffer  = (FAR void *)buffer;
+      QSPI_MEMORY(priv->qspi, &meminfo);
+      priv->prev_instr = meminfo.cmd;
+#else
       SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
 
       /* Send the "Page Program (GD25_PP)" Command */
@@ -693,6 +890,7 @@ static void gd25_pagewrite(FAR struct gd25_dev_s *priv,
       SPI_SNDBLOCK(priv->spi, buffer, GD25_PAGE_SIZE);
 
       SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
 
       /* Update addresses */
 
@@ -711,6 +909,14 @@ static inline void gd25_bytewrite(FAR struct gd25_dev_s *priv,
                                   FAR const uint8_t *buffer, off_t offset,
                                   uint16_t count)
 {
+#ifdef CONFIG_GD25_QSPI
+  /* See gd25_pagewrite: GD25 Quad Page Program (0x32/0x34) is 1-1-4.
+   * QSPIMEM_QUADDATA selects quad data with a single-line address.
+   */
+
+  struct qspi_meminfo_s meminfo;
+#endif
+
   finfo("offset: %08lx  count:%d\n", (long)offset, count);
 
   /* Wait for any preceding write to complete.  We could simplify things by
@@ -725,6 +931,17 @@ static inline void gd25_bytewrite(FAR struct gd25_dev_s *priv,
 
   gd25_wren(priv);
 
+#ifdef CONFIG_GD25_QSPI
+  meminfo.flags   = QSPIMEM_WRITE | QSPIMEM_QUADDATA;
+  meminfo.cmd     = priv->addr_4byte ? GD25_QPP4B : GD25_QPP;
+  meminfo.addrlen = priv->addr_4byte ? 4 : 3;
+  meminfo.buflen  = count;
+  meminfo.dummies = 0;
+  meminfo.addr    = offset;
+  meminfo.buffer  = (FAR void *)buffer;
+  QSPI_MEMORY(priv->qspi, &meminfo);
+  priv->prev_instr = meminfo.cmd;
+#else
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), true);
 
   /* Send "Page Program (PP)" command */
@@ -748,6 +965,7 @@ static inline void gd25_bytewrite(FAR struct gd25_dev_s *priv,
   SPI_SNDBLOCK(priv->spi, buffer, count);
 
   SPI_SELECT(priv->spi, SPIDEV_FLASH(priv->spi_devid), false);
+#endif /* CONFIG_GD25_QSPI */
   finfo("Written\n");
 }
 #endif /* defined(CONFIG_MTD_BYTE_WRITE) && !defined(CONFIG_GD25_READONLY) */
@@ -767,10 +985,13 @@ static int gd25_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* Lock access to the SPI bus until we complete the erase */
+  /* Lock access to the bus until we complete the erase */
 
+#ifdef CONFIG_GD25_QSPI
+  gd25_lock(priv->qspi);
+#else
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
+#endif
 
   while (blocksleft-- > 0)
     {
@@ -780,8 +1001,11 @@ static int gd25_erase(FAR struct mtd_dev_s *dev, off_t startblock,
       startblock++;
     }
 
-  gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+  gd25_unlock(priv->qspi);
+#else
   gd25_unlock(priv->spi);
+#endif
   return (int)nblocks;
 #endif
 }
@@ -821,14 +1045,20 @@ static ssize_t gd25_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-  /* Lock the SPI bus and write all of the pages to FLASH */
+  /* Lock the bus and write all of the pages to FLASH */
 
+#ifdef CONFIG_GD25_QSPI
+  gd25_lock(priv->qspi);
+#else
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
+#endif
   gd25_pagewrite(priv, buffer, startblock << GD25_PAGE_SHIFT,
                  nblocks << GD25_PAGE_SHIFT);
-  gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+  gd25_unlock(priv->qspi);
+#else
   gd25_unlock(priv->spi);
+#endif
 
   return nblocks;
 #endif
@@ -845,13 +1075,19 @@ static ssize_t gd25_read(FAR struct mtd_dev_s *dev, off_t offset,
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
-  /* Lock the SPI bus and select this FLASH part */
+  /* Lock the bus and select this FLASH part */
 
+#ifdef CONFIG_GD25_QSPI
+  gd25_lock(priv->qspi);
+#else
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
+#endif
   gd25_byteread(priv, buffer, offset, nbytes);
-  gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+  gd25_unlock(priv->qspi);
+#else
   gd25_unlock(priv->spi);
+#endif
 
   finfo("return nbytes: %d,%x,%x\n", (int)nbytes, buffer[0], buffer[1]);
   return nbytes;
@@ -885,8 +1121,11 @@ static ssize_t gd25_write(FAR struct mtd_dev_s *dev, off_t offset,
   startpage = offset / GD25_PAGE_SIZE;
   endpage = (offset + nbytes) / GD25_PAGE_SIZE;
 
+#ifdef CONFIG_GD25_QSPI
+  gd25_lock(priv->qspi);
+#else
   gd25_lock(priv->spi);
-  gd25_purdid(priv);
+#endif
   if (startpage == endpage)
     {
       /* All bytes within one programmable page.  Just do the write. */
@@ -928,8 +1167,11 @@ static ssize_t gd25_write(FAR struct mtd_dev_s *dev, off_t offset,
         }
     }
 
-  gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+  gd25_unlock(priv->qspi);
+#else
   gd25_unlock(priv->spi);
+#endif
   return nbytes;
 #endif
 }
@@ -988,11 +1230,17 @@ static int gd25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire device */
 
+#ifdef CONFIG_GD25_QSPI
+          gd25_lock(priv->qspi);
+#else
           gd25_lock(priv->spi);
-          gd25_purdid(priv);
+#endif
           ret = gd25_chiperase(priv);
-          gd25_pd(priv);
+#ifdef CONFIG_GD25_QSPI
+          gd25_unlock(priv->qspi);
+#else
           gd25_unlock(priv->spi);
+#endif
         }
         break;
 
@@ -1028,6 +1276,83 @@ static int gd25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ***************************************************************************/
 
+#ifdef CONFIG_GD25_QSPI
+FAR struct mtd_dev_s *gd25_initialize(FAR struct qspi_dev_s *qspi,
+                                      bool unprotect)
+{
+  FAR struct gd25_dev_s *priv;
+  int ret;
+
+  priv = (FAR struct gd25_dev_s *)kmm_zalloc(sizeof(struct gd25_dev_s));
+  if (priv)
+    {
+      priv->mtd.erase  = gd25_erase;
+      priv->mtd.bread  = gd25_bread;
+      priv->mtd.bwrite = gd25_bwrite;
+      priv->mtd.read   = gd25_read;
+      priv->mtd.ioctl  = gd25_ioctl;
+#ifdef CONFIG_MTD_BYTE_WRITE
+      priv->mtd.write  = gd25_write;
+#endif
+      priv->mtd.name   = "gd25";
+      priv->qspi       = qspi;
+
+      priv->cmdbuf = (FAR uint8_t *)QSPI_ALLOC(qspi, 4);
+      if (!priv->cmdbuf)
+        {
+          kmm_free(priv);
+          return NULL;
+        }
+
+      ret = gd25_readid(priv);
+      if (ret != OK)
+        {
+          ferr("ERROR: Unrecognized\n");
+          QSPI_FREE(qspi, priv->cmdbuf);
+          kmm_free(priv);
+          return NULL;
+        }
+
+      /* QE (Quad Enable) must be set before any quad I/O command is issued.
+       * It is non-volatile, so only write if currently clear to avoid
+       * unnecessary write cycles.
+       */
+
+      if (!(gd25_rdsr(priv, 1) & GD25_SR2_QE))
+        {
+          uint8_t sr2 = gd25_rdsr(priv, 1);
+
+          gd25_lock(priv->qspi);
+          gd25_waitwritecomplete(priv);
+          gd25_wren(priv);
+
+          priv->cmdbuf[0] = 0;
+          priv->cmdbuf[1] = (sr2 & GD25_SR2_PRESERVE_MASK) | GD25_SR2_QE;
+
+          struct qspi_cmdinfo_s cmdinfo;
+          cmdinfo.flags   = QSPICMD_WRITEDATA;
+          cmdinfo.addrlen = 0;
+          cmdinfo.cmd     = GD25_WRSR;
+          cmdinfo.buflen  = 2;
+          cmdinfo.addr    = 0;
+          cmdinfo.buffer  = priv->cmdbuf;
+          QSPI_COMMAND(priv->qspi, &cmdinfo);
+
+          gd25_waitwritecomplete(priv);
+          gd25_unlock(priv->qspi);
+        }
+
+#ifndef CONFIG_GD25_READONLY
+      if (unprotect)
+        {
+          gd25_unprotect(priv);
+        }
+#endif
+    }
+
+  return (FAR struct mtd_dev_s *)priv;
+}
+#else
 FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
                                       uint32_t spi_devid)
 {
@@ -1082,3 +1407,4 @@ FAR struct mtd_dev_s *gd25_initialize(FAR struct spi_dev_s *spi,
 
   return (FAR struct mtd_dev_s *)priv;
 }
+#endif /* CONFIG_GD25_QSPI */

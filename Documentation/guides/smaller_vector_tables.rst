@@ -202,7 +202,7 @@ Most ARMv7-M architectures support two mechanism for handling interrupts:
   ``CONFIG_ARMV7M_CMNVECTOR=y`` that can be found in 
   ``arch/arm/src/armv7-m/``, and
 * MCU-specific interrupt handling logic. For the 
-  STM32, this logic can be found at ``arch/arm/src/stm32/gnu/stm32_vectors.S``.
+  STM32, this logic can be found at ``arch/arm/src/stm32f4/gnu/stm32_vectors.S``.
 
 The `common` vector logic is slightly more efficient, 
 the MCU-specific logic is slightly more flexible.
@@ -229,7 +229,7 @@ This technical approach requires changes to three files:
   define ``only`` the small set of 20 ``mapped`` IRQ numbers in 
   the range from 0 through 19. It would also set ``NR_IRQS`` 
   to the value 20.
-* A new header file at ``arch/arm/src/stm32/hardware``, say 
+* A new header file at ``arch/arm/src/stm32f4/hardware``, say
   ``xyz_vector.h``. It would be similar to the other vector 
   definitions files in that directory: It will consist 
   of a sequence of 100 ``VECTOR`` and ``UNUSED`` macros. It will 
@@ -248,7 +248,7 @@ This has all been replaced with the common vector handling at
 Vector Definitions
 ==================
 
-In ``arch/arm/src/stm32/gnu/stm32_vector.S``, notice that the 
+In ``arch/arm/src/stm32f4/gnu/stm32_vectors.S``, notice that the
 ``xyz_vector.h`` file will be included twice. Before each 
 inclusion, the macros ``VECTOR`` and ``UNUSED`` are defined.
 
@@ -290,7 +290,7 @@ file like this:
     ...
 
 Where the value of ``STM32_IRQ_USART1`` was defined to 
-be 12 in the ``arch/arm/include/stm32/xyz_irq.h`` header 
+be 12 in the ``arch/arm/include/stm32f4/xyz_irq.h`` header
 file. When ``xyz_vector.h`` is included by ``stm32_vectors.S`` 
 with the above definitions for ``VECTOR`` and ``UNUSED``, the 
 following would result:
@@ -349,7 +349,7 @@ second time the ``xzy_vector.h`` is included by ``stm32_vectors.S``:
 In the above USART1 example, a single handler would be 
 generated that will provide the IRQ number 12. Remember 
 that 12 is the expansion of the macro ``STM32_IRQ_USART1`` 
-that is provided in the ``arch/arm/include/stm32/xyz_irq.h`` 
+that is provided in the ``arch/arm/include/stm32f4/xyz_irq.h``
 header file:
 
 .. code-block:: asm 

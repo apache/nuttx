@@ -118,7 +118,7 @@ int stm32_bringup(void)
       return -1;
     }
 
-#if defined(STM32U5_I2C2)
+#if defined(STM32_I2C2)
   i2c2_m = stm32_i2cbus_initialize(2);
   if (i2c2_m == NULL)
     {

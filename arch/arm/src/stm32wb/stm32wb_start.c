@@ -63,14 +63,14 @@
 
 #define HEAP_BASE  ((uintptr_t)_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 
-#ifdef CONFIG_STM32WB_SRAM2A_HEAP
-#  define SRAM2A_START  (STM32WB_SRAM2A_BASE + CONFIG_STM32WB_SRAM2A_USER_BASE_OFFSET)
-#  define SRAM2A_END    (SRAM2A_START + CONFIG_STM32WB_SRAM2A_USER_SIZE)
+#ifdef CONFIG_STM32_SRAM2A_HEAP
+#  define SRAM2A_START  (STM32_SRAM2A_BASE + CONFIG_STM32_SRAM2A_USER_BASE_OFFSET)
+#  define SRAM2A_END    (SRAM2A_START + CONFIG_STM32_SRAM2A_USER_SIZE)
 #endif
 
-#ifdef CONFIG_STM32WB_SRAM2B_HEAP
-#  define SRAM2B_START  STM32WB_SRAM2B_BASE
-#  define SRAM2B_END    (SRAM2B_START + CONFIG_STM32WB_SRAM2B_USER_SIZE)
+#ifdef CONFIG_STM32_SRAM2B_HEAP
+#  define SRAM2B_START  STM32_SRAM2B_BASE
+#  define SRAM2B_END    (SRAM2B_START + CONFIG_STM32_SRAM2B_USER_SIZE)
 #endif
 
 /* g_idle_topstack: _sbss is the start of the BSS region as defined by the
@@ -148,14 +148,14 @@ void __start(void)
    * using this memory for, say, additional heap space, then this is handy.
    */
 
-#ifdef CONFIG_STM32WB_SRAM2A_INIT
+#ifdef CONFIG_STM32_SRAM2A_INIT
   for (dest = (uint32_t *)SRAM2A_START; dest < (uint32_t *)SRAM2A_END; )
     {
       *dest++ = 0;
     }
 #endif
 
-#ifdef CONFIG_STM32WB_SRAM2B_INIT
+#ifdef CONFIG_STM32_SRAM2B_INIT
   for (dest = (uint32_t *)SRAM2B_START; dest < (uint32_t *)SRAM2B_END; )
     {
       *dest++ = 0;
@@ -164,15 +164,15 @@ void __start(void)
 
   /* Configure the UART so that we can get debug output as soon as possible */
 
-  stm32wb_clockconfig();
-#ifdef CONFIG_STM32WB_IPCC
-  stm32wb_ipccreset();
+  stm32_clockconfig();
+#ifdef CONFIG_STM32_IPCC
+  stm32_ipccreset();
 #endif
   arm_fpuconfig();
 
-  /* Todo: stm32wb_lowsetup(); */
+  /* Todo: stm32_lowsetup(); */
 
-  stm32wb_gpioinit();
+  stm32_gpioinit();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -223,13 +223,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  stm32wb_userspace();
+  stm32_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  stm32wb_board_initialize();
+  stm32_board_initialize();
   showprogress('F');
 
   /* Then start NuttX */

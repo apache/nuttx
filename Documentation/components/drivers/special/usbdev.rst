@@ -19,7 +19,7 @@ USB Device-Side Drivers
    ``arch/arm/src/lpc17xx_40xx/lpc17_40_usbdev.c``,
    ``arch/arm/src/lpc214x/lpc214x_usbdev.c``,
    ``arch/arm/src/lpc313x/lpc313x_usbdev.c``, and
-   ``arch/arm/src/stm32/stm32_usbdev.c``.
+   ``arch/arm/src/common/stm32/stm32_usbdev_m3m4_v1.c``.
 
 -  ``struct usbdevclass_driver_s``. Each USB device class
    driver must implement an instance of

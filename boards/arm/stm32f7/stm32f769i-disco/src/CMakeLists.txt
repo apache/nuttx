@@ -40,7 +40,7 @@ if(CONFIG_SPORADIC_INSTRUMENTATION)
   list(APPEND SRCS stm32_sporadic.c)
 endif()
 
-if(CONFIG_STM32F7_FMC)
+if(CONFIG_STM32_FMC)
   list(APPEND SRCS stm32_extmem.c)
 endif()
 

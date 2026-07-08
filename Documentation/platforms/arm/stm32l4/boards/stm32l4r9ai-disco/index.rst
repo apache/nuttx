@@ -130,7 +130,7 @@ Pins and Connectors::
 
   To configure USART1 as the console::
 
-    CONFIG_STM32L4_USART1=y
+    CONFIG_STM32_USART1=y
     CONFIG_USART1_SERIALDRIVER=y
     CONFIG_USART1_SERIAL_CONSOLE=y
     CONFIG_USART1_RXBUFSIZE=256
@@ -172,7 +172,7 @@ Pins and Connectors::
 
   To configure USART2 as the console::
 
-    CONFIG_STM32L4_USART2=y
+    CONFIG_STM32_USART2=y
     CONFIG_USART2_SERIALDRIVER=y
     CONFIG_USART2_SERIAL_CONSOLE=y
     CONFIG_USART2_RXBUFSIZE=256
@@ -192,7 +192,7 @@ Pins and Connectors::
 
 To configure USART4 as the console::
 
-    CONFIG_STM32L4_UART4=y
+    CONFIG_STM32_UART4=y
     CONFIG_USART4_SERIALDRIVER=y
     CONFIG_USART4_SERIAL_CONSOLE=y
     CONFIG_USART4_RXBUFSIZE=512
@@ -357,7 +357,7 @@ NOTES:
    not enabled in the default configuration but can be enabled with the
    following settings: (TODO: need to test!)::
 
-         CONFIG_STM32L4_OTGFS=y
+         CONFIG_STM32_OTGFS=y
 
          CONFIG_USBDEV=y
          CONFIG_USBDEV_SELFPOWERED=y

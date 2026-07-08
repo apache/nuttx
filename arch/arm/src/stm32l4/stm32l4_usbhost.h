@@ -34,11 +34,11 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32L4_OTGFS) && defined(CONFIG_USBHOST)
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 
-#if defined(CONFIG_STM32L4_STM32L4X5)
+#if defined(CONFIG_STM32_STM32L4X5)
 #  include "hardware/stm32l4x5xx_otgfs.h"
-#elif defined(CONFIG_STM32L4_STM32L4X6)
+#elif defined(CONFIG_STM32_STM32L4X6)
 #  include "hardware/stm32l4x6xx_otgfs.h"
 #else
 #  error "Unsupported STM32L4 chip"
@@ -134,21 +134,21 @@ enum usbhost_trace1codes_e
  * Pre-requisites
  *
  *  CONFIG_USBHOST        - Enable general USB host support
- *  CONFIG_STM32L4_OTGFS  - Enable the STM32 USB OTG FS block
- *  CONFIG_STM32L4_SYSCFG - Needed
+ *  CONFIG_STM32_OTGFS  - Enable the STM32 USB OTG FS block
+ *  CONFIG_STM32_SYSCFG - Needed
  *
  * Options:
  *
- *  CONFIG_STM32L4_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
+ *  CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
  *    Default 128 (512 bytes)
- *  CONFIG_STM32L4_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
+ *  CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
  *    in 32-bit words.  Default 96 (384 bytes)
- *  CONFIG_STM32L4_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in
+ *  CONFIG_STM32_OTGFS_PTXFIFO_SIZE - Size of the periodic Tx FIFO in
  *    32-bit words.  Default 96 (384 bytes)
- *  CONFIG_STM32L4_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
+ *  CONFIG_STM32_OTGFS_SOFINTR - Enable SOF interrupts.  Why would you ever
  *    want to do that?
  *
- *  CONFIG_STM32L4_USBHOST_REGDEBUG - Enable very low-level register access
+ *  CONFIG_STM32_USBHOST_REGDEBUG - Enable very low-level register access
  *    debug.  Depends on CONFIG_DEBUG.
  */
 
@@ -168,7 +168,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_usbhost_vbusdrive
+ * Name: stm32_usbhost_vbusdrive
  *
  * Description:
  *   Enable/disable driving of VBUS 5V output.  This function must be
@@ -196,7 +196,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32l4_usbhost_vbusdrive(int iface, bool enable);
+void stm32_usbhost_vbusdrive(int iface, bool enable);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -204,5 +204,5 @@ void stm32l4_usbhost_vbusdrive(int iface, bool enable);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32L4_OTGFS && CONFIG_USBHOST */
+#endif /* CONFIG_STM32_OTGFS && CONFIG_USBHOST */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_USBHOST_H */

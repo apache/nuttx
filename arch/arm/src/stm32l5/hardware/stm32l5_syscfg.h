@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32L5_STM32L562XX)
+#if defined(CONFIG_STM32_STM32L562XX)
 #  include "hardware/stm32l562xx_syscfg.h"
 #else
 #  error "Unsupported STM32 L5 chip"

@@ -27,7 +27,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/rp23xx_memorymap.h"
+#include "rp23xx_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions

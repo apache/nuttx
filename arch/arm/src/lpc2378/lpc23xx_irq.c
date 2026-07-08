@@ -193,9 +193,7 @@ void arm_ack_irq(int irq)
   /* Clear interrupt */
 
   vic_putreg((1 << irq), VIC_SOFTINTCLEAR_OFFSET);
-#ifdef CONFIG_VECTORED_INTERRUPTS
   vic_putreg(0, VIC_ADDRESS_OFFSET);    /* dummy write to clear VICADDRESS */
-#endif
 }
 
 /****************************************************************************
@@ -230,7 +228,6 @@ int up_prioritize_irq(int irq, int priority)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_VECTORED_INTERRUPTS
 void up_attach_vector(int irq, int vector, vic_vector_t handler)
 {
   /* Verify that the IRQ number and vector number are within range */
@@ -255,7 +252,6 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
       leave_critical_section(flags);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: up_detach_vector
@@ -265,7 +261,6 @@ void up_attach_vector(int irq, int vector, vic_vector_t handler)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_VECTORED_INTERRUPTS
 void up_detach_vector(int vector)
 {
   /* Verify that the vector number is within range */
@@ -278,4 +273,3 @@ void up_detach_vector(int vector)
       vic_putreg(0, (VIC_VECTADDR0_OFFSET + offset));
     }
 }
-#endif

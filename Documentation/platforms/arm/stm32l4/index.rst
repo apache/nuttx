@@ -28,9 +28,9 @@ STM32L4X6     Yes     RM0351
 STM32L4XR     Yes     RM0432 (STM32L4+)
 ============  ======= ====== ================================
 
-[1]: Please avoid depending on CONFIG_STM32L4_STM32L4X1 and
-CONFIG_STM32L4_STM32L4X2 as the MCUs are of the same subfamily
-as CONFIG_STM32L4_STM32L4X3.
+[1]: Please avoid depending on CONFIG_STM32_STM32L4X1 and
+CONFIG_STM32_STM32L4X2 as the MCUs are of the same subfamily
+as CONFIG_STM32_STM32L4X3.
 
 Peripheral Support
 ==================

@@ -36,11 +36,11 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include <stm32l4.h>
+#include <stm32.h>
 
 #include "nucleo-l432kc.h"
 
-#if defined(CONFIG_STM32L4_SPI1) || defined(CONFIG_STM32L4_SPI2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
 
 /****************************************************************************
  * Public Data
@@ -48,10 +48,10 @@
 
 /* Global driver instances */
 
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
 struct spi_dev_s *g_spi1;
 #endif
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
 struct spi_dev_s *g_spi2;
 #endif
 
@@ -60,7 +60,7 @@ struct spi_dev_s *g_spi2;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_spiregister
+ * Name: stm32_spiregister
  *
  * Description:
  *   Called to register spi character driver of
@@ -68,9 +68,9 @@ struct spi_dev_s *g_spi2;
  *
  ****************************************************************************/
 
-void stm32l4_spiregister(void)
+void stm32_spiregister(void)
 {
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
       int ret = spi_register(g_spi1, 1);
       if (ret < 0)
         {
@@ -78,7 +78,7 @@ void stm32l4_spiregister(void)
         }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
       int ret = spi_register(g_spi2, 2);
       if (ret < 0)
         {
@@ -88,7 +88,7 @@ void stm32l4_spiregister(void)
 }
 
 /****************************************************************************
- * Name: stm32l4_spiinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the Nucleo-L432KC
@@ -96,12 +96,12 @@ void stm32l4_spiregister(void)
  *
  ****************************************************************************/
 
-void stm32l4_spiinitialize(void)
+void stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32L4_SPI1
+#ifdef CONFIG_STM32_SPI1
   /* Configure SPI1-based devices */
 
-  g_spi1 = stm32l4_spibus_initialize(1);
+  g_spi1 = stm32_spibus_initialize(1);
   if (!g_spi1)
     {
       spierr("ERROR: FAILED to initialize SPI port 1\n");
@@ -114,14 +114,14 @@ void stm32l4_spiinitialize(void)
   /* Setup CS, EN & IRQ line IOs */
 
 #ifdef CONFIG_MTD_AT45DB
-  stm32l4_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
+  stm32_configgpio(AT45DB_SPI1_CS);      /* FLASH chip select */
 #endif
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
+#ifdef CONFIG_STM32_SPI2
   /* Configure SPI2-based devices */
 
-  g_spi2 = stm32l4_spibus_initialize(2);
+  g_spi2 = stm32_spibus_initialize(2);
   if (!g_spi2)
     {
       spierr("ERROR: FAILED to initialize SPI port 2\n");
@@ -136,19 +136,19 @@ void stm32l4_spiinitialize(void)
 }
 
 /****************************************************************************
- * Name:  stm32l4_spi1/2select and stm32l4_spi1/2status
+ * Name:  stm32_spi1/2select and stm32_spi1/2status
  *
  * Description:
- *   The external functions, stm32l4_spi1/2select and stm32l4_spi1/2status
+ *   The external functions, stm32_spi1/2select and stm32_spi1/2status
  *   must be provided by board-specific logic.  They are implementations of
  *   the select and status methods of the SPI interface defined by struct
  *   spi_ops_s (see include/nuttx/spi/spi.h). All other methods (including
  *   up_spiinitialize()) are provided by common STM32 logic.  To use this
  *   common SPI logic on your board:
  *
- *   1. Provide logic in stm32l4_board_initialize() to configure SPI chip
+ *   1. Provide logic in stm32_board_initialize() to configure SPI chip
  *      select pins.
- *   2. Provide stm32l4_spi1/2select() and stm32l4_spi1/2status() functions
+ *   2. Provide stm32_spi1/2select() and stm32_spi1/2status() functions
  *      in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
@@ -161,8 +161,8 @@ void stm32l4_spiinitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_SPI1
-void stm32l4_spi1select(struct spi_dev_s *dev, uint32_t devid,
+#ifdef CONFIG_STM32_SPI1
+void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   spiinfo("devid: %08X CS: %s\n", (int)devid,
@@ -171,33 +171,33 @@ void stm32l4_spi1select(struct spi_dev_s *dev, uint32_t devid,
 #ifdef CONFIG_MTD_AT45DB
   if (devid == SPIDEV_FLASH(0))
     {
-      stm32l4_gpiowrite(AT45DB_SPI1_CS, !selected);
+      stm32_gpiowrite(AT45DB_SPI1_CS, !selected);
     }
 #endif
 }
 
-uint8_t stm32l4_spi1status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
-void stm32l4_spi2select(struct spi_dev_s *dev, uint32_t devid,
+#ifdef CONFIG_STM32_SPI2
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid,
                         bool selected)
 {
   spiinfo("devid: %d CS: %s\n", (int)devid,
           selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32l4_spi2status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32l4_spi1cmddata
+ * Name: stm32_spi1cmddata
  *
  * Description:
  *   Set or clear the SH1101A A0 or SD1306 D/C n bit to select data (true)
@@ -220,19 +220,19 @@ uint8_t stm32l4_spi2status(struct spi_dev_s *dev, uint32_t devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-#ifdef CONFIG_STM32L4_SPI1
-int stm32l4_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+#ifdef CONFIG_STM32_SPI1
+int stm32_spi1cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 
-#ifdef CONFIG_STM32L4_SPI2
-int stm32l4_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
+#ifdef CONFIG_STM32_SPI2
+int stm32_spi2cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return OK;
 }
 #endif
 #endif /* CONFIG_SPI_CMDDATA */
 
-#endif /* CONFIG_STM32L4_SPI1 || CONFIG_STM32L4_SPI2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

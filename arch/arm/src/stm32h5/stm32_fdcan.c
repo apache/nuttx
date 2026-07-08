@@ -75,7 +75,7 @@
 #  define STM32_CANRAM1_BASE         (STM32_FDCAN_SRAM_BASE + 0x0000)
 #  define STM32_CANRAM2_BASE         (STM32_FDCAN_SRAM_BASE + 1*(FDCAN_MSGRAM_WORDS * 4))
 
-#  ifdef CONFIG_STM32H5_FDCAN1
+#  ifdef CONFIG_STM32_FDCAN1
 #    define FDCAN1_STDFILTER_SIZE    (28)
 #    define FDCAN1_EXTFILTER_SIZE    (8)
 #    define FDCAN1_RXFIFO0_SIZE      (3)
@@ -90,7 +90,7 @@
 #    define FDCAN1_TXEVENTFIFO_WORDS (6)
 #    define FDCAN1_TXFIFIOQ_WORDS    (54)
 #  endif
-#  ifdef CONFIG_STM32H5_FDCAN2
+#  ifdef CONFIG_STM32_FDCAN2
 #    define FDCAN2_STDFILTER_SIZE    (28)
 #    define FDCAN2_EXTFILTER_SIZE    (8)
 #    define FDCAN2_RXFIFO0_SIZE      (3)
@@ -108,18 +108,18 @@
 
 /* FDCAN1 Configuration *****************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 
 /* Bit timing */
 
-#  ifndef CONFIG_STM32H5_FDCAN1_AUTO_BIT_TIMING
+#  ifndef CONFIG_STM32_FDCAN1_AUTO_BIT_TIMING
 
-#    define FDCAN1_NTSEG1  (CONFIG_STM32H5_FDCAN1_NTSEG1 - 1)
-#    define FDCAN1_NTSEG2  (CONFIG_STM32H5_FDCAN1_NTSEG2 - 1)
+#    define FDCAN1_NTSEG1  (CONFIG_STM32_FDCAN1_NTSEG1 - 1)
+#    define FDCAN1_NTSEG2  (CONFIG_STM32_FDCAN1_NTSEG2 - 1)
 #    define FDCAN1_NBRP    ((STM32_FDCANCLK_FREQUENCY /             \
                              ((FDCAN1_NTSEG1 + FDCAN1_NTSEG2 + 3) * \
-                              CONFIG_STM32H5_FDCAN1_BITRATE)) - 1)
-#    define FDCAN1_NSJW    (CONFIG_STM32H5_FDCAN1_NSJW - 1)
+                              CONFIG_STM32_FDCAN1_BITRATE)) - 1)
+#    define FDCAN1_NSJW    (CONFIG_STM32_FDCAN1_NSJW - 1)
 
 #    if FDCAN1_NTSEG1 > FDCAN_NBTP_NTSEG1_MAX
 #      error Invalid FDCAN1 NTSEG1
@@ -134,13 +134,13 @@
 #      error Invalid FDCAN1 NBRP
 #    endif
 
-#    ifdef CONFIG_STM32H5_FDCAN1_FD_BRS
-#      define FDCAN1_DTSEG1 (CONFIG_STM32H5_FDCAN1_DTSEG1 - 1)
-#      define FDCAN1_DTSEG2 (CONFIG_STM32H5_FDCAN1_DTSEG2 - 1)
+#    ifdef CONFIG_STM32_FDCAN1_FD_BRS
+#      define FDCAN1_DTSEG1 (CONFIG_STM32_FDCAN1_DTSEG1 - 1)
+#      define FDCAN1_DTSEG2 (CONFIG_STM32_FDCAN1_DTSEG2 - 1)
 #      define FDCAN1_DBRP   ((STM32_FDCANCLK_FREQUENCY /             \
                               ((FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
-                               CONFIG_STM32H5_FDCAN1_DBITRATE)) - 1)
-#      define FDCAN1_DSJW   (CONFIG_STM32H5_FDCAN1_DSJW - 1)
+                               CONFIG_STM32_FDCAN1_DBITRATE)) - 1)
+#      define FDCAN1_DSJW   (CONFIG_STM32_FDCAN1_DSJW - 1)
 #    else
 #      define FDCAN1_DTSEG1 1
 #      define FDCAN1_DTSEG2 1
@@ -174,22 +174,22 @@
 #  define FDCAN1_TXFIFOQ_INDEX     (FDCAN1_TXEVENTFIFO_INDEX + FDCAN1_TXEVENTFIFO_WORDS)
 #  define FDCAN1_MSGRAM_WORDS      (FDCAN1_TXFIFOQ_INDEX + FDCAN1_TXFIFIOQ_WORDS)
 
-#endif /* CONFIG_STM32H5_FDCAN1 */
+#endif /* CONFIG_STM32_FDCAN1 */
 
 /* FDCAN2 Configuration *****************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
 
 /* Bit timing */
 
-#  ifndef CONFIG_STM32H5_FDCAN2_AUTO_BIT_TIMING
+#  ifndef CONFIG_STM32_FDCAN2_AUTO_BIT_TIMING
 
-#    define FDCAN2_NTSEG1  (CONFIG_STM32H5_FDCAN2_NTSEG1 - 1)
-#    define FDCAN2_NTSEG2  (CONFIG_STM32H5_FDCAN2_NTSEG2 - 1)
+#    define FDCAN2_NTSEG1  (CONFIG_STM32_FDCAN2_NTSEG1 - 1)
+#    define FDCAN2_NTSEG2  (CONFIG_STM32_FDCAN2_NTSEG2 - 1)
 #    define FDCAN2_NBRP    (((STM32_FDCANCLK_FREQUENCY /              \
                             ((FDCAN2_NTSEG1 + FDCAN2_NTSEG2 + 3) *  \
-                             CONFIG_STM32H5_FDCAN2_BITRATE)) - 1))
-#    define FDCAN2_NSJW    (CONFIG_STM32H5_FDCAN2_NSJW - 1)
+                             CONFIG_STM32_FDCAN2_BITRATE)) - 1))
+#    define FDCAN2_NSJW    (CONFIG_STM32_FDCAN2_NSJW - 1)
 
 #    if FDCAN2_NTSEG1 > FDCAN_NBTP_NTSEG1_MAX
 #      error Invalid FDCAN2 NTSEG1
@@ -204,13 +204,13 @@
 #      error Invalid FDCAN1 NBRP
 #    endif
 
-#    ifdef CONFIG_STM32H5_FDCAN2_FD_BRS
-#      define FDCAN2_DTSEG1 (CONFIG_STM32H5_FDCAN2_DTSEG1 - 1)
-#      define FDCAN2_DTSEG2 (CONFIG_STM32H5_FDCAN2_DTSEG2 - 1)
+#    ifdef CONFIG_STM32_FDCAN2_FD_BRS
+#      define FDCAN2_DTSEG1 (CONFIG_STM32_FDCAN2_DTSEG1 - 1)
+#      define FDCAN2_DTSEG2 (CONFIG_STM32_FDCAN2_DTSEG2 - 1)
 #      define FDCAN2_DBRP   (((STM32_FDCANCLK_FREQUENCY /                 \
                              ((FDCAN2_DTSEG1 + FDCAN2_DTSEG2 + 3) *     \
-                              CONFIG_STM32H5_FDCAN2_DBITRATE)) - 1))
-#      define FDCAN2_DSJW   (CONFIG_STM32H5_FDCAN2_DSJW - 1)
+                              CONFIG_STM32_FDCAN2_DBITRATE)) - 1))
+#      define FDCAN2_DSJW   (CONFIG_STM32_FDCAN2_DSJW - 1)
 #    else
 #      define FDCAN2_DTSEG1 1
 #      define FDCAN2_DTSEG2 1
@@ -245,7 +245,7 @@
 #  define FDCAN2_TXFIFOQ_INDEX     (FDCAN2_TXEVENTFIFO_INDEX + FDCAN2_TXEVENTFIFO_WORDS)
 #  define FDCAN2_MSGRAM_WORDS      (FDCAN2_TXFIFOQ_INDEX + FDCAN2_TXFIFIOQ_WORDS)
 
-#endif /* CONFIG_STM32H5_FDCAN2 */
+#endif /* CONFIG_STM32_FDCAN2 */
 
 /* Interrupts ***************************************************************/
 
@@ -325,13 +325,13 @@
 /* Debug configurations that may be enabled just for testing FDCAN */
 
 #ifndef CONFIG_DEBUG_CAN_INFO
-#  undef CONFIG_STM32H5_FDCAN_REGDEBUG
+#  undef CONFIG_STM32_FDCAN_REGDEBUG
 #endif
 
-#undef STM32H5_FDCAN_LOOPBACK
-#if defined(CONFIG_STM32H5_FDCAN1_LOOPBACK) ||   \
-    defined(CONFIG_STM32H5_FDCAN2_LOOPBACK)
-#  define STM32H5_FDCAN_LOOPBACK 1
+#undef STM32_FDCAN_LOOPBACK
+#if defined(CONFIG_STM32_FDCAN1_LOOPBACK) ||   \
+    defined(CONFIG_STM32_FDCAN2_LOOPBACK)
+#  define STM32_FDCAN_LOOPBACK 1
 #endif
 
 /****************************************************************************
@@ -403,7 +403,7 @@ struct stm32_config_s
   uint8_t rxfifo1esize;     /* RX FIFO1 element size (words) */
   uint8_t txeventesize;     /* TXevent element size (words) */
   uint8_t txbufferesize;    /* TX buffer element size (words) */
-#ifdef STM32H5_FDCAN_LOOPBACK
+#ifdef STM32_FDCAN_LOOPBACK
   bool loopback;            /* True: Loopback mode */
 #endif
 
@@ -435,7 +435,7 @@ struct stm32_fdcan_s
 #endif
   uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   uintptr_t regaddr;        /* Last register address read */
   uint32_t regval;          /* Last value read from the register */
   unsigned int count;       /* Number of times that the value was read */
@@ -460,7 +460,7 @@ struct fdcan_bitseg
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset);
 static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval);
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
                            const char *msg);
 static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
@@ -537,7 +537,7 @@ static const struct can_ops_s g_fdcanops =
   .co_txempty       = fdcan_txempty,
 };
 
-#ifdef CONFIG_STM32H5_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
 /* Message RAM allocation */
 
 /* Constant configuration */
@@ -547,11 +547,11 @@ static const struct stm32_config_s g_fdcan1const =
   .rxpinset         = GPIO_FDCAN1_RX,
   .txpinset         = GPIO_FDCAN1_TX,
   .base             = STM32_FDCAN1_BASE,
-  .baud             = CONFIG_STM32H5_FDCAN1_BITRATE,
-#if defined(CONFIG_STM32H5_FDCAN1_FD_BRS)
-  .data_baud        = CONFIG_STM32H5_FDCAN1_DBITRATE,
+  .baud             = CONFIG_STM32_FDCAN1_BITRATE,
+#if defined(CONFIG_STM32_FDCAN1_FD_BRS)
+  .data_baud        = CONFIG_STM32_FDCAN1_DBITRATE,
 #endif
-#ifndef CONFIG_STM32H5_FDCAN1_AUTO_BIT_TIMING
+#ifndef CONFIG_STM32_FDCAN1_AUTO_BIT_TIMING
   .nbtp             = FDCAN_NBTP_NBRP(FDCAN1_NBRP) |
                       FDCAN_NBTP_NTSEG1(FDCAN1_NTSEG1) |
                       FDCAN_NBTP_NTSEG2(FDCAN1_NTSEG2) |
@@ -564,14 +564,14 @@ static const struct stm32_config_s g_fdcan1const =
   .port             = 1,
   .irq0             = STM32_IRQ_FDCAN1_IT0,
   .irq1             = STM32_IRQ_FDCAN1_IT1,
-#if defined(CONFIG_STM32H5_FDCAN1_CLASSIC)
+#if defined(CONFIG_STM32_FDCAN1_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
-#elif defined(CONFIG_STM32H5_FDCAN1_FD)
+#elif defined(CONFIG_STM32_FDCAN1_FD)
   .mode             = FDCAN_FD_MODE,
 #else
   .mode             = FDCAN_FD_BRS_MODE,
 #endif
-#if defined(CONFIG_STM32H5_FDCAN1_NONISO_FORMAT)
+#if defined(CONFIG_STM32_FDCAN1_NONISO_FORMAT)
   .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
 #else
   .format           = FDCAN_ISO11898_1_FORMAT,
@@ -587,7 +587,7 @@ static const struct stm32_config_s g_fdcan1const =
   .txeventesize     = (FDCAN1_TXEVENTFIFO_WORDS / FDCAN1_TXEVENTFIFO_SIZE),
   .txbufferesize    = (FDCAN1_TXFIFIOQ_WORDS / FDCAN1_TXFIFIOQ_SIZE),
 
-#ifdef CONFIG_STM32H5_FDCAN1_LOOPBACK
+#ifdef CONFIG_STM32_FDCAN1_LOOPBACK
   .loopback         = true,
 #endif
 
@@ -609,9 +609,9 @@ static const struct stm32_config_s g_fdcan1const =
 static struct stm32_fdcan_s g_fdcan1priv;
 static struct can_dev_s g_fdcan1dev;
 
-#endif /* CONFIG_STM32H5_FDCAN1 */
+#endif /* CONFIG_STM32_FDCAN1 */
 
-#ifdef CONFIG_STM32H5_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
 /* FDCAN2 message RAM allocation */
 
 /* FDCAN2 constant configuration */
@@ -621,11 +621,11 @@ static const struct stm32_config_s g_fdcan2const =
   .rxpinset         = GPIO_FDCAN2_RX,
   .txpinset         = GPIO_FDCAN2_TX,
   .base             = STM32_FDCAN2_BASE,
-  .baud             = CONFIG_STM32H5_FDCAN2_BITRATE,
-#if defined(CONFIG_STM32H5_FDCAN2_FD_BRS)
-  .data_baud        = CONFIG_STM32H5_FDCAN2_DBITRATE,
+  .baud             = CONFIG_STM32_FDCAN2_BITRATE,
+#if defined(CONFIG_STM32_FDCAN2_FD_BRS)
+  .data_baud        = CONFIG_STM32_FDCAN2_DBITRATE,
 #endif
-#ifndef CONFIG_STM32H5_FDCAN2_AUTO_BIT_TIMING
+#ifndef CONFIG_STM32_FDCAN2_AUTO_BIT_TIMING
   .nbtp             = FDCAN_NBTP_NBRP(FDCAN2_NBRP) |
                       FDCAN_NBTP_NTSEG1(FDCAN2_NTSEG1) |
                       FDCAN_NBTP_NTSEG2(FDCAN2_NTSEG2) |
@@ -638,14 +638,14 @@ static const struct stm32_config_s g_fdcan2const =
   .port             = 2,
   .irq0             = STM32_IRQ_FDCAN2_IT0,
   .irq1             = STM32_IRQ_FDCAN2_IT1,
-#if defined(CONFIG_STM32H5_FDCAN2_CLASSIC)
+#if defined(CONFIG_STM32_FDCAN2_CLASSIC)
   .mode             = FDCAN_CLASSIC_MODE,
-#elif defined(CONFIG_STM32H5_FDCAN2_FD)
+#elif defined(CONFIG_STM32_FDCAN2_FD)
   .mode             = FDCAN_FD_MODE,
 #else
   .mode             = FDCAN_FD_BRS_MODE,
 #endif
-#if defined(CONFIG_STM32H5_FDCAN2_NONISO_FORMAT)
+#if defined(CONFIG_STM32_FDCAN2_NONISO_FORMAT)
   .format           = FDCAN_NONISO_BOSCH_V1_FORMAT,
 #else
   .format           = FDCAN_ISO11898_1_FORMAT,
@@ -661,7 +661,7 @@ static const struct stm32_config_s g_fdcan2const =
   .txeventesize     = (FDCAN2_TXEVENTFIFO_WORDS / FDCAN2_TXEVENTFIFO_SIZE),
   .txbufferesize    = (FDCAN2_TXFIFIOQ_WORDS / FDCAN2_TXFIFIOQ_SIZE),
 
-#ifdef CONFIG_STM32H5_FDCAN2_LOOPBACK
+#ifdef CONFIG_STM32_FDCAN2_LOOPBACK
   .loopback         = true,
 #endif
 
@@ -683,7 +683,7 @@ static const struct stm32_config_s g_fdcan2const =
 static struct stm32_fdcan_s g_fdcan2priv;
 static struct can_dev_s g_fdcan2dev;
 
-#endif /* CONFIG_STM32H5_FDCAN2 */
+#endif /* CONFIG_STM32_FDCAN2 */
 
 /****************************************************************************
  * Private Functions
@@ -703,7 +703,7 @@ static struct can_dev_s g_fdcan2dev;
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
 {
   const struct stm32_config_s *config  = priv->config;
@@ -783,7 +783,7 @@ static uint32_t fdcan_getreg(struct stm32_fdcan_s *priv, int offset)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
                          uint32_t regval)
 {
@@ -823,7 +823,7 @@ static void fdcan_putreg(struct stm32_fdcan_s *priv, int offset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
                            const char *msg)
 {
@@ -869,7 +869,7 @@ static void fdcan_dumpregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
                              const char *msg)
 {
@@ -912,7 +912,7 @@ static void fdcan_dumprxregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
                              const char *msg)
 {
@@ -961,7 +961,7 @@ static void fdcan_dumptxregs(struct stm32_fdcan_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpramlayout(struct stm32_fdcan_s *priv)
 {
   const struct stm32_config_s *config = priv->config;
@@ -2007,7 +2007,8 @@ static int fdcan_ioctl(struct can_dev_s *dev, int cmd, unsigned long arg)
           uint8_t state;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud < STM32_FDCANCLK_FREQUENCY);
+          DEBUGASSERT(bt->bt_baud > 0 &&
+            bt->bt_baud < STM32_FDCANCLK_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 16);
           DEBUGASSERT(bt->bt_tseg1 > 1 && bt->bt_tseg1 <= 64);
           DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <= 16);
@@ -2406,7 +2407,7 @@ static bool fdcan_txempty(struct can_dev_s *dev)
 {
   struct stm32_fdcan_s *priv   = dev->cd_priv;
   uint32_t              regval = 0;
-#ifndef CONFIG_STM32H5_FDCAN_QUEUE_MODE
+#ifndef CONFIG_STM32_FDCAN_QUEUE_MODE
   int                   tffl   = 0;
   bool                  empty  = false;
 #endif
@@ -2426,7 +2427,7 @@ static bool fdcan_txempty(struct can_dev_s *dev)
 
   /* Tx FIFO Free Level */
 
-#ifndef CONFIG_STM32H5_FDCAN_QUEUE_MODE
+#ifndef CONFIG_STM32_FDCAN_QUEUE_MODE
   tffl  = (regval & FDCAN_TXFQS_TFFL_MASK) >> FDCAN_TXFQS_TFFL_SHIFT;
   empty = (tffl >= priv->config->ntxfifoq);
   return empty;
@@ -3275,14 +3276,14 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
   /* Enable FIFO/Queue mode */
 
   regval  = fdcan_getreg(priv, STM32_FDCAN_TXBC_OFFSET);
-#ifdef CONFIG_STM32H5_FDCAN_QUEUE_MODE
+#ifdef CONFIG_STM32_FDCAN_QUEUE_MODE
   regval |= FDCAN_TXBC_TFQM;
 #else
   regval &= ~FDCAN_TXBC_TFQM;
 #endif
   fdcan_putreg(priv, STM32_FDCAN_TXBC_OFFSET, regval);
 
-#ifdef STM32H5_FDCAN_LOOPBACK
+#ifdef STM32_FDCAN_LOOPBACK
   /* Is loopback mode selected for this peripheral? */
 
   if (config->loopback)
@@ -3461,7 +3462,7 @@ int32_t fdcan_bittiming(struct fdcan_bitseg *timing)
       return 3; /* Solution not found */
     }
 
-#ifdef CONFIG_STM32H5_FDCAN_REGDEBUG
+#ifdef CONFIG_STM32_FDCAN_REGDEBUG
   ninfo("[fdcan] CLK_FREQ %lu, target_bitrate %lu, prescaler %lu, bs1 %d"
         ", bs2 %d\n", CLK_FREQ, target_bitrate, prescaler_bs, bs1 - 1,
         bs2 - 1);
@@ -3506,7 +3507,7 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
 
   /* Select FDCAN peripheral to be initialized */
 
-#ifdef CONFIG_STM32H5_FDCAN1
+#ifdef CONFIG_STM32_FDCAN1
   if (port == FDCAN1)
     {
       /* Select the FDCAN1 device structure */
@@ -3514,13 +3515,13 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
       dev    = &g_fdcan1dev;
       priv   = &g_fdcan1priv;
       config = &g_fdcan1const;
-#ifndef CONFIG_STM32H5_FDCAN1_AUTO_BIT_TIMING
+#ifndef CONFIG_STM32_FDCAN1_AUTO_BIT_TIMING
       auto_bit_timing = false;
 #endif
     }
   else
 #endif
-#ifdef CONFIG_STM32H5_FDCAN2
+#ifdef CONFIG_STM32_FDCAN2
   if (port == FDCAN2)
     {
       /* Select the FDCAN2 device structure */
@@ -3528,7 +3529,7 @@ struct can_dev_s *stm32_fdcaninitialize(int port)
       dev    = &g_fdcan2dev;
       priv   = &g_fdcan2priv;
       config = &g_fdcan2const;
-#ifndef CONFIG_STM32H5_FDCAN2_AUTO_BIT_TIMING
+#ifndef CONFIG_STM32_FDCAN2_AUTO_BIT_TIMING
       auto_bit_timing = false;
 #endif
     }

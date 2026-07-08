@@ -202,7 +202,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * access is not permitted.
    */
 
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       ferr("ERROR: Only O_RDONLY supported\n");
       ret = -EACCES;

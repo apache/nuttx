@@ -34,44 +34,44 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STM32L4_NEXTI1         31
-#define STM32L4_EXTI1_MASK     0xffffffff
-#define STM32L4_NEXTI2         9
-#define STM32L4_EXTI2_MASK     0x000001ff
+#define STM32_NEXTI1         31
+#define STM32_EXTI1_MASK     0xffffffff
+#define STM32_NEXTI2         9
+#define STM32_EXTI2_MASK     0x000001ff
 
-#define STM32L4_EXTI1_BIT(n)        (1 << (n))
-#define STM32L4_EXTI2_BIT(n)        (1 << (n))
+#define STM32_EXTI1_BIT(n)        (1 << (n))
+#define STM32_EXTI2_BIT(n)        (1 << (n))
 
 /* Register Offsets *********************************************************/
 
-#define STM32L4_EXTI1_OFFSET       0x0000  /* Offset to EXTI1 registers */
-#define STM32L4_EXTI2_OFFSET       0x0020  /* Offset to EXTI2 registers */
+#define STM32_EXTI1_OFFSET       0x0000  /* Offset to EXTI1 registers */
+#define STM32_EXTI2_OFFSET       0x0020  /* Offset to EXTI2 registers */
 
-#define STM32L4_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */
-#define STM32L4_EXTI_EMR_OFFSET    0x0004  /* Event mask register */
-#define STM32L4_EXTI_RTSR_OFFSET   0x0008  /* Rising Trigger selection register */
-#define STM32L4_EXTI_FTSR_OFFSET   0x000c  /* Falling Trigger selection register */
-#define STM32L4_EXTI_SWIER_OFFSET  0x0010  /* Software interrupt event register */
-#define STM32L4_EXTI_PR_OFFSET     0x0014  /* Pending register */
+#define STM32_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */
+#define STM32_EXTI_EMR_OFFSET    0x0004  /* Event mask register */
+#define STM32_EXTI_RTSR_OFFSET   0x0008  /* Rising Trigger selection register */
+#define STM32_EXTI_FTSR_OFFSET   0x000c  /* Falling Trigger selection register */
+#define STM32_EXTI_SWIER_OFFSET  0x0010  /* Software interrupt event register */
+#define STM32_EXTI_PR_OFFSET     0x0014  /* Pending register */
 
 /* Register Addresses *******************************************************/
 
-#define STM32L4_EXTI1_BASE       (STM32L4_EXTI_BASE+STM32L4_EXTI1_OFFSET)
-#define STM32L4_EXTI2_BASE       (STM32L4_EXTI_BASE+STM32L4_EXTI2_OFFSET)
+#define STM32_EXTI1_BASE       (STM32_EXTI_BASE+STM32_EXTI1_OFFSET)
+#define STM32_EXTI2_BASE       (STM32_EXTI_BASE+STM32_EXTI2_OFFSET)
 
-#define STM32L4_EXTI1_IMR        (STM32L4_EXTI1_BASE+STM32L4_EXTI_IMR_OFFSET)
-#define STM32L4_EXTI1_EMR        (STM32L4_EXTI1_BASE+STM32L4_EXTI_EMR_OFFSET)
-#define STM32L4_EXTI1_RTSR       (STM32L4_EXTI1_BASE+STM32L4_EXTI_RTSR_OFFSET)
-#define STM32L4_EXTI1_FTSR       (STM32L4_EXTI1_BASE+STM32L4_EXTI_FTSR_OFFSET)
-#define STM32L4_EXTI1_SWIER      (STM32L4_EXTI1_BASE+STM32L4_EXTI_SWIER_OFFSET)
-#define STM32L4_EXTI1_PR         (STM32L4_EXTI1_BASE+STM32L4_EXTI_PR_OFFSET)
+#define STM32_EXTI1_IMR        (STM32_EXTI1_BASE+STM32_EXTI_IMR_OFFSET)
+#define STM32_EXTI1_EMR        (STM32_EXTI1_BASE+STM32_EXTI_EMR_OFFSET)
+#define STM32_EXTI1_RTSR       (STM32_EXTI1_BASE+STM32_EXTI_RTSR_OFFSET)
+#define STM32_EXTI1_FTSR       (STM32_EXTI1_BASE+STM32_EXTI_FTSR_OFFSET)
+#define STM32_EXTI1_SWIER      (STM32_EXTI1_BASE+STM32_EXTI_SWIER_OFFSET)
+#define STM32_EXTI1_PR         (STM32_EXTI1_BASE+STM32_EXTI_PR_OFFSET)
 
-#define STM32L4_EXTI2_IMR        (STM32L4_EXTI2_BASE+STM32L4_EXTI_IMR_OFFSET)
-#define STM32L4_EXTI2_EMR        (STM32L4_EXTI2_BASE+STM32L4_EXTI_EMR_OFFSET)
-#define STM32L4_EXTI2_RTSR       (STM32L4_EXTI2_BASE+STM32L4_EXTI_RTSR_OFFSET)
-#define STM32L4_EXTI2_FTSR       (STM32L4_EXTI2_BASE+STM32L4_EXTI_FTSR_OFFSET)
-#define STM32L4_EXTI2_SWIER      (STM32L4_EXTI2_BASE+STM32L4_EXTI_SWIER_OFFSET)
-#define STM32L4_EXTI2_PR         (STM32L4_EXTI2_BASE+STM32L4_EXTI_PR_OFFSET)
+#define STM32_EXTI2_IMR        (STM32_EXTI2_BASE+STM32_EXTI_IMR_OFFSET)
+#define STM32_EXTI2_EMR        (STM32_EXTI2_BASE+STM32_EXTI_EMR_OFFSET)
+#define STM32_EXTI2_RTSR       (STM32_EXTI2_BASE+STM32_EXTI_RTSR_OFFSET)
+#define STM32_EXTI2_FTSR       (STM32_EXTI2_BASE+STM32_EXTI_FTSR_OFFSET)
+#define STM32_EXTI2_SWIER      (STM32_EXTI2_BASE+STM32_EXTI_SWIER_OFFSET)
+#define STM32_EXTI2_PR         (STM32_EXTI2_BASE+STM32_EXTI_PR_OFFSET)
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -105,62 +105,62 @@
 
 /* Interrupt mask register */
 
-#define EXTI_IMR1_BIT(n)          STM32L4_EXTI1_BIT(n) /* 1=Interrupt request from line x is not masked */
+#define EXTI_IMR1_BIT(n)          STM32_EXTI1_BIT(n)   /* 1=Interrupt request from line x is not masked */
 #define EXTI_IMR1_SHIFT           (0)                  /* Bits 0-X: Interrupt Mask for all lines */
-#define EXTI_IMR1_MASK            STM32L4_EXTI1_MASK
+#define EXTI_IMR1_MASK            STM32_EXTI1_MASK
 
-#define EXTI_IMR2_BIT(n)          STM32L4_EXTI2_BIT(n) /* 1=Interrupt request from line x is not masked */
+#define EXTI_IMR2_BIT(n)          STM32_EXTI2_BIT(n)   /* 1=Interrupt request from line x is not masked */
 #define EXTI_IMR2_SHIFT           (0)                  /* Bits 0-X: Interrupt Mask for all lines */
-#define EXTI_IMR2_MASK            STM32L4_EXTI2_MASK
+#define EXTI_IMR2_MASK            STM32_EXTI2_MASK
 
 /* Event mask register */
 
-#define EXTI_EMR1_BIT(n)          STM32L4_EXTI1_BIT(n) /* 1=Event request from line x is not mask */
+#define EXTI_EMR1_BIT(n)          STM32_EXTI1_BIT(n)   /* 1=Event request from line x is not mask */
 #define EXTI_EMR1_SHIFT           (0)                  /* Bits Bits 0-X:  Event Mask for all lines */
-#define EXTI_EMR1_MASK            STM32L4_EXTI1_MASK
+#define EXTI_EMR1_MASK            STM32_EXTI1_MASK
 
-#define EXTI_EMR2_BIT(n)          STM32L4_EXTI2_BIT(n) /* 1=Event request from line x is not mask */
+#define EXTI_EMR2_BIT(n)          STM32_EXTI2_BIT(n)   /* 1=Event request from line x is not mask */
 #define EXTI_EMR2_SHIFT           (0)                  /* Bits Bits 0-X:  Event Mask for all lines */
-#define EXTI_EMR2_MASK            STM32L4_EXTI2_MASK
+#define EXTI_EMR2_MASK            STM32_EXTI2_MASK
 
 /* Rising Trigger selection register */
 
-#define EXTI_RTSR1_BIT(n)         STM32L4_EXTI1_BIT(n) /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_RTSR1_BIT(n)         STM32_EXTI1_BIT(n)   /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
 #define EXTI_RTSR1_SHIFT          (0)                  /* Bits 0-X: Rising trigger event configuration bit for all lines */
-#define EXTI_RTSR1_MASK           STM32L4_EXTI1_MASK
+#define EXTI_RTSR1_MASK           STM32_EXTI1_MASK
 
-#define EXTI_RTSR2_BIT(n)         STM32L4_EXTI2_BIT(n) /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_RTSR2_BIT(n)         STM32_EXTI2_BIT(n)   /* 1=Rising trigger enabled (for Event and Interrupt) for input line */
 #define EXTI_RTSR2_SHIFT          (0)                  /* Bits 0-X: Rising trigger event configuration bit for all lines */
-#define EXTI_RTSR2_MASK           STM32L4_EXTI2_MASK
+#define EXTI_RTSR2_MASK           STM32_EXTI2_MASK
 
 /* Falling Trigger selection register */
 
-#define EXTI_FTSR1_BIT(n)         STM32L4_EXTI1_BIT(n)  /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
-#define EXTI_FTSR1_SHIFT          (0)                   /* Bits 0-X: Falling trigger event configuration bitfor all lines */
-#define EXTI_FTSR1_MASK           STM32L4_EXTI1_MASK
+#define EXTI_FTSR1_BIT(n)         STM32_EXTI1_BIT(n)  /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_FTSR1_SHIFT          (0)                 /* Bits 0-X: Falling trigger event configuration bitfor all lines */
+#define EXTI_FTSR1_MASK           STM32_EXTI1_MASK
 
-#define EXTI_FTSR2_BIT(n)         STM32L4_EXTI2_BIT(n)  /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
-#define EXTI_FTSR2_SHIFT          (0)                   /* Bits 0-X: Falling trigger event configuration bitfor all lines */
-#define EXTI_FTSR2_MASK           STM32L4_EXTI2_MASK
+#define EXTI_FTSR2_BIT(n)         STM32_EXTI2_BIT(n)  /* 1=Falling trigger enabled (for Event and Interrupt) for input line */
+#define EXTI_FTSR2_SHIFT          (0)                 /* Bits 0-X: Falling trigger event configuration bitfor all lines */
+#define EXTI_FTSR2_MASK           STM32_EXTI2_MASK
 
 /* Software interrupt event register  */
 
-#define EXTI_SWIER1_BIT(n)        STM32L4_EXTI1_BIT(n)  /* 1=Sets the corresponding pending bit in EXTI_PR */
-#define EXTI_SWIER1_SHIFT         (0)                   /* Bits 0-X: Software Interrupt for all lines */
-#define EXTI_SWIER1_MASK          STM32L4_EXTI1_MASK
+#define EXTI_SWIER1_BIT(n)        STM32_EXTI1_BIT(n)  /* 1=Sets the corresponding pending bit in EXTI_PR */
+#define EXTI_SWIER1_SHIFT         (0)                 /* Bits 0-X: Software Interrupt for all lines */
+#define EXTI_SWIER1_MASK          STM32_EXTI1_MASK
 
-#define EXTI_SWIER2_BIT(n)        STM32L4_EXTI2_BIT(n)  /* 1=Sets the corresponding pending bit in EXTI_PR */
-#define EXTI_SWIER2_SHIFT         (0)                   /* Bits 0-X: Software Interrupt for all lines */
-#define EXTI_SWIER2_MASK          STM32L4_EXTI2_MASK
+#define EXTI_SWIER2_BIT(n)        STM32_EXTI2_BIT(n)  /* 1=Sets the corresponding pending bit in EXTI_PR */
+#define EXTI_SWIER2_SHIFT         (0)                 /* Bits 0-X: Software Interrupt for all lines */
+#define EXTI_SWIER2_MASK          STM32_EXTI2_MASK
 
 /* Pending register */
 
-#define EXTI_PR1_BIT(n)           STM32L4_EXTI1_BIT(n)  /* 1=Selected trigger request occurred */
-#define EXTI_PR1_SHIFT            (0)                   /* Bits 0-X: Pending bit for all lines */
-#define EXTI_PR1_MASK             STM32L4_EXTI1_MASK
+#define EXTI_PR1_BIT(n)           STM32_EXTI1_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_PR1_SHIFT            (0)                 /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR1_MASK             STM32_EXTI1_MASK
 
-#define EXTI_PR2_BIT(n)           STM32L4_EXTI2_BIT(n)  /* 1=Selected trigger request occurred */
-#define EXTI_PR2_SHIFT            (0)                   /* Bits 0-X: Pending bit for all lines */
-#define EXTI_PR2_MASK             STM32L4_EXTI2_MASK
+#define EXTI_PR2_BIT(n)           STM32_EXTI2_BIT(n)  /* 1=Selected trigger request occurred */
+#define EXTI_PR2_SHIFT            (0)                 /* Bits 0-X: Pending bit for all lines */
+#define EXTI_PR2_MASK             STM32_EXTI2_MASK
 
 #endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_EXTI_H */

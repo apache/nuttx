@@ -64,25 +64,25 @@
 
 /* Helpers ******************************************************************/
 
-#define STM32WB_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
-#define STM32WB_TIM_SETFREQ(d,freq)       ((d)->ops->setfreq(d,freq))
-#define STM32WB_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
-#define STM32WB_TIM_GETCLOCK(d)           ((d)->ops->getclock(d))
-#define STM32WB_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
-#define STM32WB_TIM_GETPERIOD(d)          ((d)->ops->getperiod(d))
-#define STM32WB_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
-#define STM32WB_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
-#define STM32WB_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
-#define STM32WB_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
-#define STM32WB_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
-#define STM32WB_TIM_SETISR(d,hnd,arg,s)   ((d)->ops->setisr(d,hnd,arg,s))
-#define STM32WB_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
-#define STM32WB_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
-#define STM32WB_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
-#define STM32WB_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
-#define STM32WB_TIM_ENABLE(d)             ((d)->ops->enable(d))
-#define STM32WB_TIM_DISABLE(d)            ((d)->ops->disable(d))
-#define STM32WB_TIM_DUMPREGS(d)           ((d)->ops->dump_regs(d))
+#define STM32_TIM_SETMODE(d,mode)       ((d)->ops->setmode(d,mode))
+#define STM32_TIM_SETFREQ(d,freq)       ((d)->ops->setfreq(d,freq))
+#define STM32_TIM_SETCLOCK(d,freq)      ((d)->ops->setclock(d,freq))
+#define STM32_TIM_GETCLOCK(d)           ((d)->ops->getclock(d))
+#define STM32_TIM_SETPERIOD(d,period)   ((d)->ops->setperiod(d,period))
+#define STM32_TIM_GETPERIOD(d)          ((d)->ops->getperiod(d))
+#define STM32_TIM_GETCOUNTER(d)         ((d)->ops->getcounter(d))
+#define STM32_TIM_GETWIDTH(d)           ((d)->ops->getwidth(d))
+#define STM32_TIM_SETCHANNEL(d,ch,mode) ((d)->ops->setchannel(d,ch,mode))
+#define STM32_TIM_SETCOMPARE(d,ch,comp) ((d)->ops->setcompare(d,ch,comp))
+#define STM32_TIM_GETCAPTURE(d,ch)      ((d)->ops->getcapture(d,ch))
+#define STM32_TIM_SETISR(d,hnd,arg,s)   ((d)->ops->setisr(d,hnd,arg,s))
+#define STM32_TIM_ENABLEINT(d,s)        ((d)->ops->enableint(d,s))
+#define STM32_TIM_DISABLEINT(d,s)       ((d)->ops->disableint(d,s))
+#define STM32_TIM_ACKINT(d,s)           ((d)->ops->ackint(d,s))
+#define STM32_TIM_CHECKINT(d,s)         ((d)->ops->checkint(d,s))
+#define STM32_TIM_ENABLE(d)             ((d)->ops->enable(d))
+#define STM32_TIM_DISABLE(d)            ((d)->ops->disable(d))
+#define STM32_TIM_DUMPREGS(d)           ((d)->ops->dump_regs(d))
 
 /****************************************************************************
  * Public Types
@@ -101,43 +101,43 @@ extern "C"
 
 /* TIM Device Structure */
 
-struct stm32wb_tim_dev_s
+struct stm32_tim_dev_s
 {
-  struct stm32wb_tim_ops_s *ops;
+  struct stm32_tim_ops_s *ops;
 };
 
 /* TIM Modes of Operation */
 
-enum stm32wb_tim_mode_e
+enum stm32_tim_mode_e
 {
-  STM32WB_TIM_MODE_UNUSED       = -1,
+  STM32_TIM_MODE_UNUSED       = -1,
 
   /* One of the following */
 
-  STM32WB_TIM_MODE_MASK         = 0x0310,
-  STM32WB_TIM_MODE_DISABLED     = 0x0000,
-  STM32WB_TIM_MODE_UP           = 0x0100,
-  STM32WB_TIM_MODE_DOWN         = 0x0110,
-  STM32WB_TIM_MODE_UPDOWN       = 0x0200,
-  STM32WB_TIM_MODE_PULSE        = 0x0300,
+  STM32_TIM_MODE_MASK         = 0x0310,
+  STM32_TIM_MODE_DISABLED     = 0x0000,
+  STM32_TIM_MODE_UP           = 0x0100,
+  STM32_TIM_MODE_DOWN         = 0x0110,
+  STM32_TIM_MODE_UPDOWN       = 0x0200,
+  STM32_TIM_MODE_PULSE        = 0x0300,
 
   /* One of the following */
 
-  STM32WB_TIM_MODE_CK_INT       = 0x0000,
+  STM32_TIM_MODE_CK_INT       = 0x0000,
 #if 0
-  STM32WB_TIM_MODE_CK_INT_TRIG  = 0x0400,
-  STM32WB_TIM_MODE_CK_EXT       = 0x0800,
-  STM32WB_TIM_MODE_CK_EXT_TRIG  = 0x0c00,
+  STM32_TIM_MODE_CK_INT_TRIG  = 0x0400,
+  STM32_TIM_MODE_CK_EXT       = 0x0800,
+  STM32_TIM_MODE_CK_EXT_TRIG  = 0x0c00,
 #endif
 
   /* Clock sources, OR'ed with CK_EXT */
 
 #if 0
-  STM32WB_TIM_MODE_CK_CHINVALID = 0x0000,
-  STM32WB_TIM_MODE_CK_CH1       = 0x0001,
-  STM32WB_TIM_MODE_CK_CH2       = 0x0002,
-  STM32WB_TIM_MODE_CK_CH3       = 0x0003,
-  STM32WB_TIM_MODE_CK_CH4       = 0x0004
+  STM32_TIM_MODE_CK_CHINVALID = 0x0000,
+  STM32_TIM_MODE_CK_CH1       = 0x0001,
+  STM32_TIM_MODE_CK_CH2       = 0x0002,
+  STM32_TIM_MODE_CK_CH3       = 0x0003,
+  STM32_TIM_MODE_CK_CH4       = 0x0004
 #endif
 
   /* Todo: external trigger block */
@@ -145,70 +145,70 @@ enum stm32wb_tim_mode_e
 
 /* TIM Channel Modes */
 
-enum stm32wb_tim_channel_e
+enum stm32_tim_channel_e
 {
-  STM32WB_TIM_CH_DISABLED       = 0x00,
+  STM32_TIM_CH_DISABLED       = 0x00,
 
   /* Common configuration */
 
-  STM32WB_TIM_CH_POLARITY_POS   = 0x00,
-  STM32WB_TIM_CH_POLARITY_NEG   = 0x01,
+  STM32_TIM_CH_POLARITY_POS   = 0x00,
+  STM32_TIM_CH_POLARITY_NEG   = 0x01,
 
   /* MODES: */
 
-  STM32WB_TIM_CH_MODE_MASK      = 0x06,
+  STM32_TIM_CH_MODE_MASK      = 0x06,
 
   /* Output Compare Modes */
 
-  STM32WB_TIM_CH_OUTPWM         = 0x04,  /* Enable standard PWM mode, active
+  STM32_TIM_CH_OUTPWM         = 0x04,  /* Enable standard PWM mode, active
                                           * high when counter < compare
                                           */
 #if 0
-  STM32WB_TIM_CH_OUTCOMPARE     = 0x06,
+  STM32_TIM_CH_OUTCOMPARE     = 0x06,
 #endif
 
   /* TODO other modes ... as PWM capture, ENCODER and Hall Sensor */
 
 #if 0
-  STM32WB_TIM_CH_INCAPTURE      = 0x10,
-  STM32WB_TIM_CH_INPWM          = 0x20
-  STM32WB_TIM_CH_DRIVE_OC                /* Open collector mode */
+  STM32_TIM_CH_INCAPTURE      = 0x10,
+  STM32_TIM_CH_INPWM          = 0x20
+  STM32_TIM_CH_DRIVE_OC                /* Open collector mode */
 #endif
 };
 
 /* TIM Operations */
 
-struct stm32wb_tim_ops_s
+struct stm32_tim_ops_s
 {
-  void     (*enable)(struct stm32wb_tim_dev_s *dev);
-  void     (*disable)(struct stm32wb_tim_dev_s *dev);
-  int      (*setmode)(struct stm32wb_tim_dev_s *dev,
-                      enum stm32wb_tim_mode_e mode);
-  int      (*setfreq)(struct stm32wb_tim_dev_s *dev, uint32_t freq);
-  int      (*setclock)(struct stm32wb_tim_dev_s *dev, uint32_t freq);
-  uint32_t (*getclock)(struct stm32wb_tim_dev_s *dev);
-  void     (*setperiod)(struct stm32wb_tim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(struct stm32wb_tim_dev_s *dev);
-  uint32_t (*getcounter)(struct stm32wb_tim_dev_s *dev);
-  uint32_t (*getwidth)(struct stm32wb_tim_dev_s *dev);
-  int      (*setchannel)(struct stm32wb_tim_dev_s *dev, uint8_t channel,
-                         enum stm32wb_tim_channel_e mode);
-  int      (*setcompare)(struct stm32wb_tim_dev_s *dev, uint8_t channel,
+  void     (*enable)(struct stm32_tim_dev_s *dev);
+  void     (*disable)(struct stm32_tim_dev_s *dev);
+  int      (*setmode)(struct stm32_tim_dev_s *dev,
+                      enum stm32_tim_mode_e mode);
+  int      (*setfreq)(struct stm32_tim_dev_s *dev, uint32_t freq);
+  int      (*setclock)(struct stm32_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getclock)(struct stm32_tim_dev_s *dev);
+  void     (*setperiod)(struct stm32_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct stm32_tim_dev_s *dev);
+  uint32_t (*getcounter)(struct stm32_tim_dev_s *dev);
+  uint32_t (*getwidth)(struct stm32_tim_dev_s *dev);
+  int      (*setchannel)(struct stm32_tim_dev_s *dev, uint8_t channel,
+                         enum stm32_tim_channel_e mode);
+  int      (*setcompare)(struct stm32_tim_dev_s *dev, uint8_t channel,
                          uint32_t compare);
-  uint32_t (*getcapture)(struct stm32wb_tim_dev_s *dev, uint8_t channel);
+  uint32_t (*getcapture)(struct stm32_tim_dev_s *dev, uint8_t channel);
 
   /* Timer interrupts */
 
-  int      (*setisr)(struct stm32wb_tim_dev_s *dev,
+  int      (*setisr)(struct stm32_tim_dev_s *dev,
                      xcpt_t handler, void *arg, int source);
-  void     (*enableint)(struct stm32wb_tim_dev_s *dev, int source);
-  void     (*disableint)(struct stm32wb_tim_dev_s *dev, int source);
-  void     (*ackint)(struct stm32wb_tim_dev_s *dev, int source);
-  int      (*checkint)(struct stm32wb_tim_dev_s *dev, int source);
+  void     (*enableint)(struct stm32_tim_dev_s *dev, int source);
+  void     (*disableint)(struct stm32_tim_dev_s *dev, int source);
+  void     (*ackint)(struct stm32_tim_dev_s *dev, int source);
+  int      (*checkint)(struct stm32_tim_dev_s *dev, int source);
 
   /* Debug */
 
-  void     (*dump_regs)(struct stm32wb_tim_dev_s *dev);
+  void     (*dump_regs)(struct stm32_tim_dev_s *dev);
 };
 
 /****************************************************************************
@@ -217,14 +217,14 @@ struct stm32wb_tim_ops_s
 
 /* Power-up timer and get its structure */
 
-struct stm32wb_tim_dev_s *stm32wb_tim_init(int timer);
+struct stm32_tim_dev_s *stm32_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int stm32wb_tim_deinit(struct stm32wb_tim_dev_s *dev);
+int stm32_tim_deinit(struct stm32_tim_dev_s *dev);
 
 /****************************************************************************
- * Name: stm32wb_timer_initialize
+ * Name: stm32_timer_initialize
  *
  * Description:
  *   Bind the configuration timer to a timer lower half instance and
@@ -242,7 +242,7 @@ int stm32wb_tim_deinit(struct stm32wb_tim_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int stm32wb_timer_initialize(const char *devpath, int timer);
+int stm32_timer_initialize(const char *devpath, int timer);
 #endif
 
 #undef EXTERN

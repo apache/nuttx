@@ -60,7 +60,7 @@
 #define VRING_NR                 (8)           /* Number of descriptors */
 #define VRING_SIZE               (512)         /* Size of one descriptor */
 
-#ifdef CONFIG_STM32H7_SHMEM_SRAM3
+#ifdef CONFIG_STM32_SHMEM_SRAM3
 /* Use 32kB of the SRAM3 as a shared memory */
 
 #  define VRING_SHMEM            STM32_SRAM3_BASE

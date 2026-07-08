@@ -99,6 +99,20 @@
 #  endif
 #endif
 
+#ifdef CONFIG_ESPRESSIF_TWAI2
+#  ifdef CONFIG_TWAI2_TIMING_100KBITS
+#    define TWAI2_TIMING_CONFIG TWAI_TIMING_CONFIG_100KBITS()
+#  elif CONFIG_TWAI2_TIMING_125KBITS
+#    define TWAI2_TIMING_CONFIG TWAI_TIMING_CONFIG_125KBITS()
+#  elif CONFIG_TWAI2_TIMING_250KBITS
+#    define TWAI2_TIMING_CONFIG TWAI_TIMING_CONFIG_250KBITS()
+#  elif CONFIG_TWAI2_TIMING_500KBITS
+#    define TWAI2_TIMING_CONFIG TWAI_TIMING_CONFIG_500KBITS()
+#  else
+#    define TWAI2_TIMING_CONFIG TWAI_TIMING_CONFIG_800KBITS()
+#  endif
+#endif
+
 #if defined(CONFIG_ARCH_CHIP_ESP32C3)
 #  define INT_ENA_REG(hw)       hw->interrupt_enable_reg.val
 #elif defined(CONFIG_ARCH_CHIP_ESP32P4)
@@ -225,6 +239,24 @@ static struct can_dev_s g_twai1dev =
   .cd_priv          = &g_twai1priv,
 };
 #endif /* CONFIG_ESPRESSIF_TWAI1 */
+
+#ifdef CONFIG_ESPRESSIF_TWAI2
+static struct esp_twai_dev_s g_twai2priv =
+{
+  .port             = 2,
+  .cpuint           = -ENOMEM,
+  .t_config         = TWAI2_TIMING_CONFIG,
+#ifdef CONFIG_PM
+  .pm_lock          = NULL,
+#endif
+};
+
+static struct can_dev_s g_twai2dev =
+{
+  .cd_ops           = &g_twaiops,
+  .cd_priv          = &g_twai2priv,
+};
+#endif /* CONFIG_ESPRESSIF_TWAI2 */
 
 static const twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
 
@@ -861,6 +893,25 @@ struct can_dev_s *esp_twaiinitialize(int port)
       esp_configgpio(CONFIG_ESPRESSIF_TWAI1_RXPIN, RX_PIN_ATTR);
 
       dev = &g_twai1dev;
+    }
+  else
+#endif
+
+#ifdef CONFIG_ESPRESSIF_TWAI2
+  if (port == 2)
+    {
+      int tx_sig = twai_periph_signals[2].tx_sig;
+      int rx_sig = twai_periph_signals[2].rx_sig;
+
+      /* Configure CAN GPIO pins */
+
+      esp_gpio_matrix_out(CONFIG_ESPRESSIF_TWAI2_TXPIN, tx_sig, 0, 0);
+      esp_configgpio(CONFIG_ESPRESSIF_TWAI2_TXPIN, TX_PIN_ATTR);
+
+      esp_gpio_matrix_in(CONFIG_ESPRESSIF_TWAI2_RXPIN, rx_sig, 0);
+      esp_configgpio(CONFIG_ESPRESSIF_TWAI2_RXPIN, RX_PIN_ATTR);
+
+      dev = &g_twai2dev;
     }
   else
 #endif

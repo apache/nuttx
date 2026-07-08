@@ -72,12 +72,12 @@ int board_lcd_initialize(void)
 {
   /* Configure the GPIO pins */
 
-  stm32l4_configgpio(STM32_LCD_RST);
-  stm32l4_configgpio(STM32_LCD_CD);
-  stm32l4_gpiowrite(STM32_LCD_RST, 1);
-  stm32l4_gpiowrite(STM32_LCD_CD, 1);
+  stm32_configgpio(STM32_LCD_RST);
+  stm32_configgpio(STM32_LCD_CD);
+  stm32_gpiowrite(STM32_LCD_RST, 1);
+  stm32_gpiowrite(STM32_LCD_CD, 1);
 
-  g_spidev = stm32l4_spibus_initialize(LCD_SPI_PORTNO);
+  g_spidev = stm32_spibus_initialize(LCD_SPI_PORTNO);
 
   if (!g_spidev)
     {
@@ -85,9 +85,9 @@ int board_lcd_initialize(void)
       return -ENODEV;
     }
 
-  stm32l4_gpiowrite(STM32_LCD_RST, 0);
+  stm32_gpiowrite(STM32_LCD_RST, 0);
   up_mdelay(10);
-  stm32l4_gpiowrite(STM32_LCD_RST, 1);
+  stm32_gpiowrite(STM32_LCD_RST, 1);
   return OK;
 }
 

@@ -87,11 +87,11 @@
  * The buffer size should be an even multiple of ARMV7M_DCACHE_LINESIZE.
  */
 
-#  if !defined(CONFIG_STM32WB_SERIAL_RXDMA_BUFFER_SIZE) || \
-      CONFIG_STM32WB_SERIAL_RXDMA_BUFFER_SIZE == 0
+#  if !defined(CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE) || \
+      CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE == 0
 #    define RXDMA_BUFFER_SIZE 32
 #  else
-#    define RXDMA_BUFFER_SIZE ((CONFIG_STM32WB_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
+#    define RXDMA_BUFFER_SIZE ((CONFIG_STM32_SERIAL_RXDMA_BUFFER_SIZE + 31) & ~31)
 #  endif
 
 /* DMA priority */
@@ -123,8 +123,8 @@
 
 /* Power management definitions */
 
-#if defined(CONFIG_PM) && !defined(CONFIG_STM32WB_PM_SERIAL_ACTIVITY)
-#  define CONFIG_STM32WB_PM_SERIAL_ACTIVITY  10
+#if defined(CONFIG_PM) && !defined(CONFIG_STM32_PM_SERIAL_ACTIVITY)
+#  define CONFIG_STM32_PM_SERIAL_ACTIVITY  10
 #endif
 #if defined(CONFIG_PM)
 #  define PM_IDLE_DOMAIN             0 /* Revisit */
@@ -138,10 +138,10 @@
  *    register. It must not collide with USART_CR1_USED_INTS or USART_CR3_EIE
  * 2) USART_CR3_EIE is also carried in the up_dev_s ie member.
  *
- * See stm32wb_serial_restoreusartint where the masking is done.
+ * See stm32_serial_restoreusartint where the masking is done.
  */
 
-#ifdef CONFIG_STM32WB_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
 #  define USART_CR1_IE_BREAK_INPROGRESS_SHFTS 15
 #  define USART_CR1_IE_BREAK_INPROGRESS (1 << USART_CR1_IE_BREAK_INPROGRESS_SHFTS)
 #endif
@@ -153,7 +153,7 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32wb_serial_s
+struct stm32_serial_s
 {
   struct uart_dev_s dev;       /* Generic UART device */
   uint16_t          ie;        /* Saved interrupt mask bits value */
@@ -239,51 +239,51 @@ struct stm32wb_serial_s
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void stm32wb_serial_setformat(struct uart_dev_s *dev);
+static void stm32_serial_setformat(struct uart_dev_s *dev);
 #endif
-static int  stm32wb_serial_setup(struct uart_dev_s *dev);
-static void stm32wb_serial_shutdown(struct uart_dev_s *dev);
-static int  stm32wb_serial_attach(struct uart_dev_s *dev);
-static void stm32wb_serial_detach(struct uart_dev_s *dev);
+static int  stm32_serial_setup(struct uart_dev_s *dev);
+static void stm32_serial_shutdown(struct uart_dev_s *dev);
+static int  stm32_serial_attach(struct uart_dev_s *dev);
+static void stm32_serial_detach(struct uart_dev_s *dev);
 static int  up_interrupt(int irq, void *context, void *arg);
-static int  stm32wb_serial_ioctl(struct file *filep, int cmd,
+static int  stm32_serial_ioctl(struct file *filep, int cmd,
                                  unsigned long arg);
 #ifndef SERIAL_HAVE_ONLY_DMA
-static int  stm32wb_serial_receive(struct uart_dev_s *dev,
+static int  stm32_serial_receive(struct uart_dev_s *dev,
                                    unsigned int *status);
-static void stm32wb_serial_rxint(struct uart_dev_s *dev, bool enable);
-static bool stm32wb_serial_rxavailable(struct uart_dev_s *dev);
+static void stm32_serial_rxint(struct uart_dev_s *dev, bool enable);
+static bool stm32_serial_rxavailable(struct uart_dev_s *dev);
 #endif
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool stm32wb_serial_rxflowcontrol(struct uart_dev_s *dev,
+static bool stm32_serial_rxflowcontrol(struct uart_dev_s *dev,
                                          unsigned int nbuffered, bool upper);
 #endif
-static void stm32wb_serial_send(struct uart_dev_s *dev, int ch);
-static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable);
-static bool stm32wb_serial_txready(struct uart_dev_s *dev);
+static void stm32_serial_send(struct uart_dev_s *dev, int ch);
+static void stm32_serial_txint(struct uart_dev_s *dev, bool enable);
+static bool stm32_serial_txready(struct uart_dev_s *dev);
 
 #ifdef SERIAL_HAVE_RXDMA
-static int  stm32wb_serial_dmasetup(struct uart_dev_s *dev);
-static void stm32wb_serial_dmashutdown(struct uart_dev_s *dev);
-static int  stm32wb_serial_dmareceive(struct uart_dev_s *dev,
+static int  stm32_serial_dmasetup(struct uart_dev_s *dev);
+static void stm32_serial_dmashutdown(struct uart_dev_s *dev);
+static int  stm32_serial_dmareceive(struct uart_dev_s *dev,
                                       unsigned int *status);
-static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv);
+static void stm32_serial_dmareenable(struct stm32_serial_s *priv);
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool stm32wb_serial_dmaiflowrestart(struct stm32wb_serial_s *priv);
+static bool stm32_serial_dmaiflowrestart(struct stm32_serial_s *priv);
 #endif
-static void stm32wb_serial_dmarxint(struct uart_dev_s *dev, bool enable);
-static bool stm32wb_serial_dmarxavailable(struct uart_dev_s *dev);
+static void stm32_serial_dmarxint(struct uart_dev_s *dev, bool enable);
+static bool stm32_serial_dmarxavailable(struct uart_dev_s *dev);
 
-static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
+static void stm32_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
                                          void *arg);
 #endif
 
 #ifdef CONFIG_PM
-static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend);
-static void stm32wb_serial_pm_setsuspend(bool suspend);
-static void stm32wb_serial_pmnotify(struct pm_callback_s *cb,
+static void stm32_serial_setsuspend(struct uart_dev_s *dev, bool suspend);
+static void stm32_serial_pm_setsuspend(bool suspend);
+static void stm32_serial_pmnotify(struct pm_callback_s *cb,
                                     int domain, enum pm_state_e pmstate);
-static int  stm32wb_serial_pmprepare(struct pm_callback_s *cb,
+static int  stm32_serial_pmprepare(struct pm_callback_s *cb,
                                      int domain, enum pm_state_e pmstate);
 #endif
 
@@ -294,48 +294,48 @@ static int  stm32wb_serial_pmprepare(struct pm_callback_s *cb,
 #ifndef SERIAL_HAVE_ONLY_DMA
 static const struct uart_ops_s g_uart_ops =
 {
-  .setup          = stm32wb_serial_setup,
-  .shutdown       = stm32wb_serial_shutdown,
-  .attach         = stm32wb_serial_attach,
-  .detach         = stm32wb_serial_detach,
-  .ioctl          = stm32wb_serial_ioctl,
-  .receive        = stm32wb_serial_receive,
-  .rxint          = stm32wb_serial_rxint,
-  .rxavailable    = stm32wb_serial_rxavailable,
+  .setup          = stm32_serial_setup,
+  .shutdown       = stm32_serial_shutdown,
+  .attach         = stm32_serial_attach,
+  .detach         = stm32_serial_detach,
+  .ioctl          = stm32_serial_ioctl,
+  .receive        = stm32_serial_receive,
+  .rxint          = stm32_serial_rxint,
+  .rxavailable    = stm32_serial_rxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = stm32wb_serial_rxflowcontrol,
+  .rxflowcontrol  = stm32_serial_rxflowcontrol,
 #endif
-  .send           = stm32wb_serial_send,
-  .txint          = stm32wb_serial_txint,
-  .txready        = stm32wb_serial_txready,
-  .txempty        = stm32wb_serial_txready,
+  .send           = stm32_serial_send,
+  .txint          = stm32_serial_txint,
+  .txready        = stm32_serial_txready,
+  .txempty        = stm32_serial_txready,
 };
 #endif
 
 #ifdef SERIAL_HAVE_RXDMA
 static const struct uart_ops_s g_uart_dma_ops =
 {
-  .setup          = stm32wb_serial_dmasetup,
-  .shutdown       = stm32wb_serial_dmashutdown,
-  .attach         = stm32wb_serial_attach,
-  .detach         = stm32wb_serial_detach,
-  .ioctl          = stm32wb_serial_ioctl,
-  .receive        = stm32wb_serial_dmareceive,
-  .rxint          = stm32wb_serial_dmarxint,
-  .rxavailable    = stm32wb_serial_dmarxavailable,
+  .setup          = stm32_serial_dmasetup,
+  .shutdown       = stm32_serial_dmashutdown,
+  .attach         = stm32_serial_attach,
+  .detach         = stm32_serial_detach,
+  .ioctl          = stm32_serial_ioctl,
+  .receive        = stm32_serial_dmareceive,
+  .rxint          = stm32_serial_dmarxint,
+  .rxavailable    = stm32_serial_dmarxavailable,
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-  .rxflowcontrol  = stm32wb_serial_rxflowcontrol,
+  .rxflowcontrol  = stm32_serial_rxflowcontrol,
 #endif
-  .send           = stm32wb_serial_send,
-  .txint          = stm32wb_serial_txint,
-  .txready        = stm32wb_serial_txready,
-  .txempty        = stm32wb_serial_txready,
+  .send           = stm32_serial_send,
+  .txint          = stm32_serial_txint,
+  .txready        = stm32_serial_txready,
+  .txempty        = stm32_serial_txready,
 };
 #endif
 
 /* I/O buffers */
 
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
 static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
 static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
 #  ifdef CONFIG_LPUART1_RXDMA
@@ -343,7 +343,7 @@ static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #  ifdef CONFIG_USART1_RXDMA
@@ -353,8 +353,8 @@ static char g_usart1rxfifo[RXDMA_BUFFER_SIZE];
 
 /* This describes the state of the STM32WB LPUART1 port. */
 
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-static struct stm32wb_serial_s g_lpuart1priv =
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static struct stm32_serial_s g_lpuart1priv =
 {
   .dev =
     {
@@ -379,13 +379,13 @@ static struct stm32wb_serial_s g_lpuart1priv =
       .priv      = &g_lpuart1priv,
     },
 
-  .irq           = STM32WB_IRQ_LPUART1,
+  .irq           = STM32_IRQ_LPUART1,
   .parity        = CONFIG_LPUART1_PARITY,
   .bits          = CONFIG_LPUART1_BITS,
   .stopbits2     = CONFIG_LPUART1_2STOP,
   .baud          = CONFIG_LPUART1_BAUD,
-  .apbclock      = STM32WB_PCLK1_FREQUENCY,
-  .usartbase     = STM32WB_LPUART1_BASE,
+  .apbclock      = STM32_PCLK1_FREQUENCY,
+  .usartbase     = STM32_LPUART1_BASE,
   .tx_gpio       = GPIO_LPUART1_TX,
   .rx_gpio       = GPIO_LPUART1_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
@@ -415,8 +415,8 @@ static struct stm32wb_serial_s g_lpuart1priv =
 
 /* This describes the state of the STM32WB USART1 port. */
 
-#ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
-static struct stm32wb_serial_s g_usart1priv =
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
+static struct stm32_serial_s g_usart1priv =
 {
   .dev =
     {
@@ -441,13 +441,13 @@ static struct stm32wb_serial_s g_usart1priv =
       .priv      = &g_usart1priv,
     },
 
-  .irq           = STM32WB_IRQ_USART1,
+  .irq           = STM32_IRQ_USART1,
   .parity        = CONFIG_USART1_PARITY,
   .bits          = CONFIG_USART1_BITS,
   .stopbits2     = CONFIG_USART1_2STOP,
   .baud          = CONFIG_USART1_BAUD,
-  .apbclock      = STM32WB_PCLK2_FREQUENCY,
-  .usartbase     = STM32WB_USART1_BASE,
+  .apbclock      = STM32_PCLK2_FREQUENCY,
+  .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
 #if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
@@ -477,13 +477,13 @@ static struct stm32wb_serial_s g_usart1priv =
 
 /* This table lets us iterate over the configured USARTs */
 
-static struct stm32wb_serial_s *
-const g_uart_devs[STM32WB_NLPUART + STM32WB_NUSART] =
+static struct stm32_serial_s *
+const g_uart_devs[STM32_NLPUART + STM32_NUSART] =
 {
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
   [0] = &g_lpuart1priv,
 #endif
-#ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
   [1] = &g_usart1priv,
 #endif
 };
@@ -495,8 +495,8 @@ static struct
   bool serial_suspended;
 } g_serialpm =
   {
-    .pm_cb.notify  = stm32wb_serial_pmnotify,
-    .pm_cb.prepare = stm32wb_serial_pmprepare,
+    .pm_cb.notify  = stm32_serial_pmnotify,
+    .pm_cb.prepare = stm32_serial_pmprepare,
     .serial_suspended = false
   };
 #endif
@@ -506,31 +506,31 @@ static struct
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_serial_getreg
+ * Name: stm32_serial_getreg
  ****************************************************************************/
 
 static inline
-uint32_t stm32wb_serial_getreg(struct stm32wb_serial_s *priv, int offset)
+uint32_t stm32_serial_getreg(struct stm32_serial_s *priv, int offset)
 {
   return getreg32(priv->usartbase + offset);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_putreg
+ * Name: stm32_serial_putreg
  ****************************************************************************/
 
-static inline void stm32wb_serial_putreg(struct stm32wb_serial_s *priv,
+static inline void stm32_serial_putreg(struct stm32_serial_s *priv,
                                          int offset, uint32_t value)
 {
   putreg32(value, priv->usartbase + offset);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_setusartint
+ * Name: stm32_serial_setusartint
  ****************************************************************************/
 
 static inline
-void stm32wb_serial_setusartint(struct stm32wb_serial_s *priv, uint16_t ie)
+void stm32_serial_setusartint(struct stm32_serial_s *priv, uint16_t ie)
 {
   uint32_t cr;
 
@@ -542,38 +542,38 @@ void stm32wb_serial_setusartint(struct stm32wb_serial_s *priv, uint16_t ie)
    * enable/usage table above)
    */
 
-  cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  cr = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   cr &= ~(USART_CR1_USED_INTS);
   cr |= (ie & (USART_CR1_USED_INTS));
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr);
 
-  cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  cr = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   cr &= ~USART_CR3_EIE;
   cr |= (ie & USART_CR3_EIE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, cr);
+  stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
 }
 
 /****************************************************************************
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void stm32wb_serial_restoreusartint(struct stm32wb_serial_s *priv,
+static void stm32_serial_restoreusartint(struct stm32_serial_s *priv,
                                            uint16_t ie)
 {
   irqstate_t flags;
 
   flags = spin_lock_irqsave(&priv->lock);
 
-  stm32wb_serial_setusartint(priv, ie);
+  stm32_serial_setusartint(priv, ie);
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_disableusartint
+ * Name: stm32_serial_disableusartint
  ****************************************************************************/
 
-static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
+static void stm32_serial_disableusartint(struct stm32_serial_s *priv,
                                            uint16_t *ie)
 {
   irqstate_t flags;
@@ -610,8 +610,8 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
        * USART_CR3_CTSIE    USART_ISR_CTS    CTS flag          (not used)
        */
 
-      cr1 = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-      cr3 = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+      cr1 = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+      cr3 = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
 
       /* Return the current interrupt mask value for the used interrupts.
        * Notice that this depends on the fact that none of the used interrupt
@@ -624,13 +624,13 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
 
   /* Disable all interrupts */
 
-  stm32wb_serial_setusartint(priv, 0);
+  stm32_serial_setusartint(priv, 0);
 
   spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_dmanextrx
+ * Name: stm32_serial_dmanextrx
  *
  * Description:
  *   Returns the index into the RX FIFO where the DMA will place the next
@@ -639,18 +639,18 @@ static void stm32wb_serial_disableusartint(struct stm32wb_serial_s *priv,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static int stm32wb_serial_dmanextrx(struct stm32wb_serial_s *priv)
+static int stm32_serial_dmanextrx(struct stm32_serial_s *priv)
 {
   size_t dmaresidual;
 
-  dmaresidual = stm32wb_dmaresidual(priv->rxdma);
+  dmaresidual = stm32_dmaresidual(priv->rxdma);
 
   return (RXDMA_BUFFER_SIZE - (int)dmaresidual);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_setbaud_usart
+ * Name: stm32_serial_setbaud_usart
  *
  * Description:
  *   Set the serial line baud rate (USART only).
@@ -658,7 +658,7 @@ static int stm32wb_serial_dmanextrx(struct stm32wb_serial_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
+static void stm32_serial_setbaud_usart(struct stm32_serial_s *priv)
 {
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
@@ -686,8 +686,8 @@ static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
 
   /* Use oversamply by 8 only if the divisor is small.  But what is small? */
 
-  cr1 = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-  brr = stm32wb_serial_getreg(priv, STM32WB_USART_BRR_OFFSET);
+  cr1 = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+  brr = stm32_serial_getreg(priv, STM32_USART_BRR_OFFSET);
   brr &= ~(USART_BRR_MANT_MASK | USART_BRR_FRAC_MASK);
 
   if (usartdiv8 > 100)
@@ -713,13 +713,13 @@ static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
       cr1 |= USART_CR1_OVER8;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
-  stm32wb_serial_putreg(priv, STM32WB_USART_BRR_OFFSET, brr);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
+  stm32_serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_setbaud_lpuart
+ * Name: stm32_serial_setbaud_lpuart
  *
  * Description:
  *   Set the serial line baud rate (LPUART only).
@@ -727,8 +727,8 @@ static void stm32wb_serial_setbaud_usart(struct stm32wb_serial_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-static void stm32wb_serial_setbaud_lpuart(struct stm32wb_serial_s *priv)
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+static void stm32_serial_setbaud_lpuart(struct stm32_serial_s *priv)
 {
   uint32_t brr;
 
@@ -750,13 +750,13 @@ static void stm32wb_serial_setbaud_lpuart(struct stm32wb_serial_s *priv)
       brr = LPUART_BRR_MIN;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_BRR_OFFSET, brr);
+  stm32_serial_putreg(priv, STM32_USART_BRR_OFFSET, brr);
 }
 #endif
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_setformat
+ * Name: stm32_serial_setformat
  *
  * Description:
  *   Set the serial line format and speed.
@@ -764,27 +764,27 @@ static void stm32wb_serial_setbaud_lpuart(struct stm32wb_serial_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void stm32wb_serial_setformat(struct uart_dev_s *dev)
+static void stm32_serial_setformat(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
 
   /* Set baud rate */
 
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-  if (priv->usartbase == STM32WB_LPUART1_BASE)
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+  if (priv->usartbase == STM32_LPUART1_BASE)
     {
-      stm32wb_serial_setbaud_lpuart(priv);
+      stm32_serial_setbaud_lpuart(priv);
     }
   else
 #endif
     {
-      stm32wb_serial_setbaud_usart(priv);
+      stm32_serial_setbaud_usart(priv);
     }
 
   /* Configure parity mode */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
 
   if (priv->parity == 1)       /* Odd parity */
@@ -822,11 +822,11 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
    *              1 start, 8 data (no parity), n stop.
    */
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure STOP bits */
 
-  regval = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+  regval = stm32_serial_getreg(priv, STM32_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK);
 
   if (priv->stopbits2)
@@ -834,14 +834,14 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
       regval |= USART_CR2_STOP2;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure hardware flow control */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSE | USART_CR3_RTSE);
 
-#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32WB_FLOWCONTROL_BROKEN)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && !defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       regval |= USART_CR3_RTSE;
@@ -855,12 +855,12 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
     }
 #endif
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 }
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
 /****************************************************************************
- * Name: stm32wb_serial_setsuspend
+ * Name: stm32_serial_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripheral.
@@ -868,9 +868,9 @@ static void stm32wb_serial_setformat(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
+static void stm32_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 #ifdef SERIAL_HAVE_RXDMA
   bool dmarestored = false;
 #endif
@@ -889,18 +889,18 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
         {
           /* Force RTS high to prevent further Rx. */
 
-          stm32wb_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
+          stm32_configgpio((priv->rts_gpio & ~GPIO_MODE_MASK)
                              | (GPIO_OUTPUT | GPIO_OUTPUT_SET));
         }
 #endif
 
       /* Disable interrupts to prevent Tx. */
 
-      stm32wb_serial_disableusartint(priv, &priv->suspended_ie);
+      stm32_serial_disableusartint(priv, &priv->suspended_ie);
 
       /* Wait last Tx to complete. */
 
-      while ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+      while ((stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
               USART_ISR_TC) == 0);
 
 #ifdef SERIAL_HAVE_RXDMA
@@ -918,7 +918,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
             {
               /* Suspend Rx DMA. */
 
-              stm32wb_dmastop(priv->rxdma);
+              stm32_dmastop(priv->rxdma);
               priv->rxdmasusp = true;
             }
         }
@@ -932,7 +932,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
           if (priv->iflow)
             {
-              stm32wb_serial_dmaiflowrestart(priv);
+              stm32_serial_dmaiflowrestart(priv);
             }
           else
 #endif
@@ -942,7 +942,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
                * to DMA buffer before suspending).
                */
 
-              stm32wb_serial_dmareenable(priv);
+              stm32_serial_dmareenable(priv);
               priv->rxdmasusp = false;
             }
 
@@ -952,14 +952,14 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 
       /* Re-enable interrupts to resume Tx. */
 
-      stm32wb_serial_restoreusartint(priv, priv->suspended_ie);
+      stm32_serial_restoreusartint(priv, priv->suspended_ie);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
       if (priv->iflow)
         {
           /* Restore peripheral RTS control. */
 
-          stm32wb_configgpio(priv->rts_gpio);
+          stm32_configgpio(priv->rts_gpio);
         }
 #endif
     }
@@ -977,7 +977,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 
       if (priv->rxdma != NULL)
         {
-          stm32wb_serial_dmarxcallback(priv->rxdma, 0, priv);
+          stm32_serial_dmarxcallback(priv->rxdma, 0, priv);
         }
 
       leave_critical_section(flags);
@@ -987,7 +987,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_pm_setsuspend
+ * Name: stm32_serial_pm_setsuspend
  *
  * Description:
  *   Suspend or resume serial peripherals for/from deep-sleep/stop modes.
@@ -995,7 +995,7 @@ static void stm32wb_serial_setsuspend(struct uart_dev_s *dev, bool suspend)
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void stm32wb_serial_pm_setsuspend(bool suspend)
+static void stm32_serial_pm_setsuspend(bool suspend)
 {
   int n;
 
@@ -1008,20 +1008,20 @@ static void stm32wb_serial_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32WB_NLPUART + STM32WB_NUSART; n++)
+  for (n = 0; n < STM32_NLPUART + STM32_NUSART; n++)
     {
-      struct stm32wb_serial_s *priv = g_uart_devs[n];
+      struct stm32_serial_s *priv = g_uart_devs[n];
 
       if (priv != NULL && priv->initialized != NULL)
         {
-          stm32wb_serial_setsuspend(&priv->dev, suspend);
+          stm32_serial_setsuspend(&priv->dev, suspend);
         }
     }
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_setapbclock
+ * Name: stm32_serial_setapbclock
  *
  * Description:
  *   Enable or disable APB clock for the USART peripheral
@@ -1032,9 +1032,9 @@ static void stm32wb_serial_pm_setsuspend(bool suspend)
  *
  ****************************************************************************/
 
-static void stm32wb_serial_setapbclock(struct uart_dev_s *dev, bool on)
+static void stm32_serial_setapbclock(struct uart_dev_s *dev, bool on)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t rcc_en;
   uint32_t regaddr;
 
@@ -1044,16 +1044,16 @@ static void stm32wb_serial_setapbclock(struct uart_dev_s *dev, bool on)
     {
       default:
         return;
-#ifdef CONFIG_STM32WB_LPUART1_SERIALDRIVER
-      case STM32WB_LPUART1_BASE:
+#ifdef CONFIG_STM32_LPUART1_SERIALDRIVER
+      case STM32_LPUART1_BASE:
         rcc_en = RCC_APB1ENR2_LPUART1EN;
-        regaddr = STM32WB_RCC_APB1ENR2;
+        regaddr = STM32_RCC_APB1ENR2;
         break;
 #endif
-#ifdef CONFIG_STM32WB_USART1_SERIALDRIVER
-      case STM32WB_USART1_BASE:
+#ifdef CONFIG_STM32_USART1_SERIALDRIVER
+      case STM32_USART1_BASE:
         rcc_en = RCC_APB2ENR_USART1EN;
-        regaddr = STM32WB_RCC_APB2ENR;
+        regaddr = STM32_RCC_APB2ENR;
         break;
 #endif
     }
@@ -1071,7 +1071,7 @@ static void stm32wb_serial_setapbclock(struct uart_dev_s *dev, bool on)
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_setup
+ * Name: stm32_serial_setup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
@@ -1079,37 +1079,37 @@ static void stm32wb_serial_setapbclock(struct uart_dev_s *dev, bool on)
  *
  ****************************************************************************/
 
-static int stm32wb_serial_setup(struct uart_dev_s *dev)
+static int stm32_serial_setup(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
 
   /* Note: The logic here depends on the fact that that the USART module
-   * was enabled in stm32wb_lowsetup().
+   * was enabled in stm32_lowsetup().
    */
 
   /* Enable USART APB1/2 clock */
 
-  stm32wb_serial_setapbclock(dev, true);
+  stm32_serial_setapbclock(dev, true);
 
   /* Configure pins for USART use */
 
   if (priv->tx_gpio != 0)
     {
-      stm32wb_configgpio(priv->tx_gpio);
+      stm32_configgpio(priv->tx_gpio);
     }
 
   if (priv->rx_gpio != 0)
     {
-      stm32wb_configgpio(priv->rx_gpio);
+      stm32_configgpio(priv->rx_gpio);
     }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
-      stm32wb_configgpio(priv->cts_gpio);
+      stm32_configgpio(priv->cts_gpio);
     }
 #endif
 
@@ -1118,20 +1118,20 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
     {
       uint32_t config = priv->rts_gpio;
 
-#ifdef CONFIG_STM32WB_FLOWCONTROL_BROKEN
+#ifdef CONFIG_STM32_FLOWCONTROL_BROKEN
       /* Instead of letting hw manage this pin, we will bitbang */
 
       config = (config & ~GPIO_MODE_MASK) | GPIO_OUTPUT;
 #endif
-      stm32wb_configgpio(config);
+      stm32_configgpio(config);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32wb_configgpio(priv->rs485_dir_gpio);
-      stm32wb_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+      stm32_configgpio(priv->rs485_dir_gpio);
+      stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
     }
 #endif
 
@@ -1139,7 +1139,7 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
 
   /* Clear STOP, CLKEN, CPOL, CPHA, LBCL, and interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
               USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
 
@@ -1150,36 +1150,36 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
       regval |= USART_CR2_STOP2;
     }
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure CR1 */
 
   /* Clear TE, REm and all interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS);
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure CR3 */
 
   /* Clear CTSE, RTSE, and all interrupt enable bits */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
               USART_CR3_EIE);
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
   /* Configure the USART line format and speed. */
 
-  stm32wb_serial_setformat(dev);
+  stm32_serial_setformat(dev);
 
   /* Enable Rx, Tx, and the USART */
 
-  regval      = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval      = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval     |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
 #endif /* CONFIG_SUPPRESS_UART_CONFIG */
 
@@ -1195,7 +1195,7 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_dmasetup
+ * Name: stm32_serial_dmasetup
  *
  * Description:
  *   Configure the USART baud, bits, parity, etc. This method is called the
@@ -1204,9 +1204,9 @@ static int stm32wb_serial_setup(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
+static int stm32_serial_dmasetup(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   int result;
   uint32_t regval;
 
@@ -1214,7 +1214,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
 
   if (!dev->isconsole)
     {
-      result = stm32wb_serial_setup(dev);
+      result = stm32_serial_setup(dev);
       if (result != OK)
         {
           return result;
@@ -1223,15 +1223,15 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
 
   /* Acquire the DMA channel.  This should always succeed. */
 
-  priv->rxdma = stm32wb_dmachannel(priv->rxdma_channel);
+  priv->rxdma = stm32_dmachannel(priv->rxdma_channel);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
       /* Configure for non-circular DMA reception into the RX FIFO */
 
-      stm32wb_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32WB_USART_RDR_OFFSET,
+      stm32_dmasetup(priv->rxdma,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
                      SERIAL_DMA_IFLOW_CONTROL_WORD);
@@ -1241,8 +1241,8 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
     {
       /* Configure for circular DMA reception into the RX FIFO */
 
-      stm32wb_dmasetup(priv->rxdma,
-                     priv->usartbase + STM32WB_USART_RDR_OFFSET,
+      stm32_dmasetup(priv->rxdma,
+                     priv->usartbase + STM32_USART_RDR_OFFSET,
                      (uint32_t)priv->rxfifo,
                      RXDMA_BUFFER_SIZE,
                      SERIAL_DMA_CONTROL_WORD);
@@ -1256,9 +1256,9 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
 
   /* Enable receive DMA for the UART */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
   regval |= USART_CR3_DMAR;
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, regval);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
@@ -1268,7 +1268,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
        * in and DMA transfer is stopped.
        */
 
-      stm32wb_dmastart(priv->rxdma, stm32wb_serial_dmarxcallback, priv,
+      stm32_dmastart(priv->rxdma, stm32_serial_dmarxcallback, priv,
                        false);
     }
   else
@@ -1279,7 +1279,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32wb_dmastart(priv->rxdma, stm32wb_serial_dmarxcallback, priv,
+      stm32_dmastart(priv->rxdma, stm32_serial_dmarxcallback, priv,
                        true);
     }
 
@@ -1288,7 +1288,7 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_shutdown
+ * Name: stm32_serial_shutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
@@ -1296,9 +1296,9 @@ static int stm32wb_serial_dmasetup(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
+static void stm32_serial_shutdown(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t regval;
 
   /* Mark device as uninitialized. */
@@ -1307,17 +1307,17 @@ static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
 
   /* Disable all interrupts */
 
-  stm32wb_serial_disableusartint(priv, NULL);
+  stm32_serial_disableusartint(priv, NULL);
 
   /* Disable USART APB1/2 clock */
 
-  stm32wb_serial_setapbclock(dev, false);
+  stm32_serial_setapbclock(dev, false);
 
   /* Disable Rx, Tx, and the UART */
 
-  regval  = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+  regval  = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, regval);
+  stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Release pins. "If the serial-attached device is powered down, the TX
    * pin causes back-powering, potentially confusing the device to the point
@@ -1329,38 +1329,38 @@ static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
 
   if (priv->tx_gpio != 0)
     {
-      stm32wb_unconfiggpio(priv->tx_gpio);
+      stm32_unconfiggpio(priv->tx_gpio);
     }
 
   if (priv->rx_gpio != 0)
     {
-      stm32wb_unconfiggpio(priv->rx_gpio);
+      stm32_unconfiggpio(priv->rx_gpio);
     }
 
 #ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
-      stm32wb_unconfiggpio(priv->cts_gpio);
+      stm32_unconfiggpio(priv->cts_gpio);
     }
 #endif
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rts_gpio != 0)
     {
-      stm32wb_unconfiggpio(priv->rts_gpio);
+      stm32_unconfiggpio(priv->rts_gpio);
     }
 #endif
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32wb_unconfiggpio(priv->rs485_dir_gpio);
+      stm32_unconfiggpio(priv->rs485_dir_gpio);
     }
 #endif
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_dmashutdown
+ * Name: stm32_serial_dmashutdown
  *
  * Description:
  *   Disable the USART.  This method is called when the serial
@@ -1369,27 +1369,27 @@ static void stm32wb_serial_shutdown(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static void stm32wb_serial_dmashutdown(struct uart_dev_s *dev)
+static void stm32_serial_dmashutdown(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
   /* Perform the normal UART shutdown */
 
-  stm32wb_serial_shutdown(dev);
+  stm32_serial_shutdown(dev);
 
   /* Stop the DMA channel */
 
-  stm32wb_dmastop(priv->rxdma);
+  stm32_dmastop(priv->rxdma);
 
   /* Release the DMA channel */
 
-  stm32wb_dmafree(priv->rxdma);
+  stm32_dmafree(priv->rxdma);
   priv->rxdma = NULL;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_attach
+ * Name: stm32_serial_attach
  *
  * Description:
  *   Configure the USART to operation in interrupt driven mode.  This method
@@ -1404,9 +1404,9 @@ static void stm32wb_serial_dmashutdown(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int stm32wb_serial_attach(struct uart_dev_s *dev)
+static int stm32_serial_attach(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   int ret;
 
   /* Attach and enable the IRQ */
@@ -1425,7 +1425,7 @@ static int stm32wb_serial_attach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_detach
+ * Name: stm32_serial_detach
  *
  * Description:
  *   Detach USART interrupts.  This method is called when the serial port is
@@ -1434,9 +1434,9 @@ static int stm32wb_serial_attach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static void stm32wb_serial_detach(struct uart_dev_s *dev)
+static void stm32_serial_detach(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   up_disable_irq(priv->irq);
   irq_detach(priv->irq);
 }
@@ -1455,7 +1455,7 @@ static void stm32wb_serial_detach(struct uart_dev_s *dev)
 
 static int up_interrupt(int irq, void *context, void *arg)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)arg;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
   int  passes;
   bool handled;
 
@@ -1463,8 +1463,8 @@ static int up_interrupt(int irq, void *context, void *arg)
 
   /* Report serial activity to the power management logic */
 
-#if defined(CONFIG_PM) && CONFIG_STM32WB_PM_SERIAL_ACTIVITY > 0
-  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32WB_PM_SERIAL_ACTIVITY);
+#if defined(CONFIG_PM) && CONFIG_STM32_PM_SERIAL_ACTIVITY > 0
+  pm_activity(PM_IDLE_DOMAIN, CONFIG_STM32_PM_SERIAL_ACTIVITY);
 #endif
 
   /* Loop until there are no characters to be transferred or,
@@ -1478,7 +1478,7 @@ static int up_interrupt(int irq, void *context, void *arg)
 
       /* Get the masked USART status word. */
 
-      priv->sr = stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET);
+      priv->sr = stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET);
 
       /* USART interrupts:
        *
@@ -1520,8 +1520,8 @@ static int up_interrupt(int irq, void *context, void *arg)
           (priv->ie & USART_CR1_TCIE) != 0 &&
           (priv->ie & USART_CR1_TXEIE) == 0)
         {
-          stm32wb_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
-          stm32wb_serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
+          stm32_gpiowrite(priv->rs485_dir_gpio, !priv->rs485_dir_polarity);
+          stm32_serial_restoreusartint(priv, priv->ie & ~USART_CR1_TCIE);
         }
 #endif
 
@@ -1550,7 +1550,7 @@ static int up_interrupt(int irq, void *context, void *arg)
            * interrupt clear register (ICR).
            */
 
-          stm32wb_serial_putreg(priv, STM32WB_USART_ICR_OFFSET,
+          stm32_serial_putreg(priv, STM32_USART_ICR_OFFSET,
                                 (USART_ICR_NCF | USART_ICR_ORECF |
                                  USART_ICR_FECF));
         }
@@ -1571,44 +1571,44 @@ static int up_interrupt(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_ioctl
+ * Name: stm32_serial_ioctl
  *
  * Description:
  *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int stm32wb_serial_ioctl(struct file *filep, int cmd,
+static int stm32_serial_ioctl(struct file *filep, int cmd,
                                 unsigned long arg)
 {
-#if defined(CONFIG_SERIAL_TERMIOS) || defined(CONFIG_SERIAL_TIOCSERGSTRUCT)
-  struct inode      *inode = filep->f_inode;
-  struct uart_dev_s *dev   = inode->i_private;
-#endif
-#if defined(CONFIG_SERIAL_TERMIOS)
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
-#endif
-  int                ret    = OK;
+  struct inode          *inode = filep->f_inode;
+  struct uart_dev_s     *dev   = inode->i_private;
+  struct stm32_serial_s *priv  = (struct stm32_serial_s *)dev->priv;
+  int                    ret   = OK;
+
+  UNUSED(inode);
+  UNUSED(dev);
+  UNUSED(priv);
 
   switch (cmd)
     {
 #ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
     case TIOCSERGSTRUCT:
       {
-        struct stm32wb_serial_s *user = (struct stm32wb_serial_s *)arg;
+        struct stm32_serial_s *user = (struct stm32_serial_s *)arg;
         if (!user)
           {
             ret = -EINVAL;
           }
         else
           {
-            memcpy(user, dev, sizeof(struct stm32wb_serial_s));
+            memcpy(user, dev, sizeof(struct stm32_serial_s));
           }
       }
       break;
 #endif
 
-#ifdef CONFIG_STM32WB_USART_SINGLEWIRE
+#ifdef CONFIG_STM32_USART_SINGLEWIRE
     case TIOCSSINGLEWIRE:
       {
         uint32_t cr1;
@@ -1619,19 +1619,19 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, HDSEL can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Change the TX port to be open-drain/push-pull and enable/disable
          * half-duplex mode.
          */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR3_OFFSET);
+        uint32_t cr = stm32_serial_getreg(priv, STM32_USART_CR3_OFFSET);
 
         if ((arg & SER_SINGLEWIRE_ENABLED) != 0)
           {
@@ -1648,7 +1648,7 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
             if (priv->tx_gpio != 0)
               {
-                stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
+                stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
                                                       GPIO_OPENDRAIN)) |
                                                       gpio_val);
               }
@@ -1659,7 +1659,7 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
           {
             if (priv->tx_gpio != 0)
               {
-                stm32wb_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
+                stm32_configgpio((priv->tx_gpio & ~(GPIO_PUPD_MASK |
                                                       GPIO_OPENDRAIN)) |
                                                       GPIO_PUSHPULL);
               }
@@ -1667,17 +1667,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR3_HDSEL;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR3_OFFSET, cr);
+        stm32_serial_putreg(priv, STM32_USART_CR3_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
 #endif
 
-#ifdef CONFIG_STM32WB_USART_INVERT
+#ifdef CONFIG_STM32_USART_INVERT
     case TIOCSINVERT:
       {
         uint32_t cr1;
@@ -1688,17 +1688,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, {R,T}XINV can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Enable/disable signal inversion. */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+        uint32_t cr = stm32_serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
         if (arg & SER_INVERT_ENABLED_RX)
           {
@@ -1718,17 +1718,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR2_TXINV;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, cr);
+        stm32_serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
 #endif
 
-#ifdef CONFIG_STM32WB_USART_SWAP
+#ifdef CONFIG_STM32_USART_SWAP
     case TIOCSSWAP:
       {
         uint32_t cr1;
@@ -1739,17 +1739,17 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         /* Get the original state of UE */
 
-        cr1    = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
+        cr1    = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
         cr1_ue = cr1 & USART_CR1_UE;
         cr1   &= ~USART_CR1_UE;
 
         /* Disable UE, SWAP can only be written when UE=0 */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1);
 
         /* Enable/disable Swap mode. */
 
-        uint32_t cr = stm32wb_serial_getreg(priv, STM32WB_USART_CR2_OFFSET);
+        uint32_t cr = stm32_serial_getreg(priv, STM32_USART_CR2_OFFSET);
 
         if (arg == SER_SWAP_ENABLED)
           {
@@ -1760,11 +1760,11 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
             cr &= ~USART_CR2_SWAP;
           }
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR2_OFFSET, cr);
+        stm32_serial_putreg(priv, STM32_USART_CR2_OFFSET, cr);
 
         /* Re-enable UE if appropriate */
 
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET, cr1 | cr1_ue);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET, cr1 | cr1_ue);
         leave_critical_section(flags);
       }
      break;
@@ -1860,13 +1860,13 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
          * TCSADRAIN / TCSAFLUSH
          */
 
-        stm32wb_serial_setformat(dev);
+        stm32_serial_setformat(dev);
       }
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
 
-#ifdef CONFIG_STM32WB_USART_BREAKS
-#  ifdef CONFIG_STM32WB_SERIALBRK_BSDCOMPAT
+#ifdef CONFIG_STM32_USART_BREAKS
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
     case TIOCSBRK:  /* BSD compatibility: Turn break on, unconditionally */
       {
         irqstate_t flags;
@@ -1877,7 +1877,7 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         priv->ie |= USART_CR1_IE_BREAK_INPROGRESS;
 
-        stm32wb_serial_txint(dev, false);
+        stm32_serial_txint(dev, false);
 
         /* Configure TX as a GPIO output pin and Send a break signal */
 
@@ -1885,7 +1885,7 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
           {
             uint32_t tx_break = GPIO_OUTPUT |
                     (~(GPIO_MODE_MASK | GPIO_OUTPUT_SET) & priv->tx_gpio);
-            stm32wb_configgpio(tx_break);
+            stm32_configgpio(tx_break);
           }
 
         leave_critical_section(flags);
@@ -1902,14 +1902,14 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 
         if (priv->tx_gpio != 0)
           {
-            stm32wb_configgpio(priv->tx_gpio);
+            stm32_configgpio(priv->tx_gpio);
           }
 
         priv->ie &= ~USART_CR1_IE_BREAK_INPROGRESS;
 
         /* Enable further tx activity */
 
-        stm32wb_serial_txint(dev, true);
+        stm32_serial_txint(dev, true);
 
         leave_critical_section(flags);
       }
@@ -1921,8 +1921,8 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET,
+        cr1   = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET,
                               cr1 | USART_CR1_SBK);
         leave_critical_section(flags);
       }
@@ -1934,8 +1934,8 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
         irqstate_t flags;
 
         flags = enter_critical_section();
-        cr1   = stm32wb_serial_getreg(priv, STM32WB_USART_CR1_OFFSET);
-        stm32wb_serial_putreg(priv, STM32WB_USART_CR1_OFFSET,
+        cr1   = stm32_serial_getreg(priv, STM32_USART_CR1_OFFSET);
+        stm32_serial_putreg(priv, STM32_USART_CR1_OFFSET,
                               cr1 & ~USART_CR1_SBK);
         leave_critical_section(flags);
       }
@@ -1952,7 +1952,7 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_receive
+ * Name: stm32_serial_receive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -1962,15 +1962,15 @@ static int stm32wb_serial_ioctl(struct file *filep, int cmd,
  ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
-static int stm32wb_serial_receive(struct uart_dev_s *dev,
+static int stm32_serial_receive(struct uart_dev_s *dev,
                                   unsigned int *status)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   uint32_t rdr;
 
   /* Get the Rx byte */
 
-  rdr      = stm32wb_serial_getreg(priv, STM32WB_USART_RDR_OFFSET);
+  rdr      = stm32_serial_getreg(priv, STM32_USART_RDR_OFFSET);
 
   /* Get the Rx byte plux error information.  Return those in status */
 
@@ -1984,7 +1984,7 @@ static int stm32wb_serial_receive(struct uart_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_rxint
+ * Name: stm32_serial_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
@@ -1992,9 +1992,9 @@ static int stm32wb_serial_receive(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
-static void stm32wb_serial_rxint(struct uart_dev_s *dev, bool enable)
+static void stm32_serial_rxint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   irqstate_t flags;
   uint16_t ie;
 
@@ -2040,13 +2040,13 @@ static void stm32wb_serial_rxint(struct uart_dev_s *dev, bool enable)
 
   /* Then set the new interrupt state */
 
-  stm32wb_serial_restoreusartint(priv, ie);
+  stm32_serial_restoreusartint(priv, ie);
   leave_critical_section(flags);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_rxavailable
+ * Name: stm32_serial_rxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
@@ -2054,17 +2054,17 @@ static void stm32wb_serial_rxint(struct uart_dev_s *dev, bool enable)
  ****************************************************************************/
 
 #ifndef SERIAL_HAVE_ONLY_DMA
-static bool stm32wb_serial_rxavailable(struct uart_dev_s *dev)
+static bool stm32_serial_rxavailable(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
-  return ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+  return ((stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_RXNE) != 0);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_rxflowcontrol
+ * Name: stm32_serial_rxflowcontrol
  *
  * Description:
  *   Called when Rx buffer is full (or exceeds configured watermark levels
@@ -2087,18 +2087,18 @@ static bool stm32wb_serial_rxavailable(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
-static bool stm32wb_serial_rxflowcontrol(struct uart_dev_s *dev,
+static bool stm32_serial_rxflowcontrol(struct uart_dev_s *dev,
                                          unsigned int nbuffered, bool upper)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
 #if defined(CONFIG_SERIAL_IFLOWCONTROL_WATERMARKS) && \
-    defined(CONFIG_STM32WB_FLOWCONTROL_BROKEN)
+    defined(CONFIG_STM32_FLOWCONTROL_BROKEN)
   if (priv->iflow && (priv->rts_gpio != 0))
     {
       /* Assert/de-assert nRTS set it high resume/stop sending */
 
-      stm32wb_gpiowrite(priv->rts_gpio, upper);
+      stm32_gpiowrite(priv->rts_gpio, upper);
 
       if (upper)
         {
@@ -2160,7 +2160,7 @@ static bool stm32wb_serial_rxflowcontrol(struct uart_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_dmareceive
+ * Name: stm32_serial_dmareceive
  *
  * Description:
  *   Called (usually) from the interrupt level to receive one
@@ -2170,13 +2170,13 @@ static bool stm32wb_serial_rxflowcontrol(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static int stm32wb_serial_dmareceive(struct uart_dev_s *dev,
+static int stm32_serial_dmareceive(struct uart_dev_s *dev,
                                      unsigned int *status)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
   int c = 0;
 
-  if (stm32wb_serial_dmanextrx(priv) != priv->rxdmanext)
+  if (stm32_serial_dmanextrx(priv) != priv->rxdmanext)
     {
       c = priv->rxfifo[priv->rxdmanext];
 
@@ -2203,7 +2203,7 @@ static int stm32wb_serial_dmareceive(struct uart_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_dmareenable
+ * Name: stm32_serial_dmareenable
  *
  * Description:
  *   Call to re-enable RX DMA.
@@ -2211,15 +2211,15 @@ static int stm32wb_serial_dmareceive(struct uart_dev_s *dev,
  ****************************************************************************/
 
 #if defined(SERIAL_HAVE_RXDMA)
-static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
+static void stm32_serial_dmareenable(struct stm32_serial_s *priv)
 {
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->iflow)
     {
       /* Configure for non-circular DMA reception into the RX FIFO */
 
-      stm32wb_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32WB_USART_RDR_OFFSET,
+      stm32_dmasetup(priv->rxdma,
+                       priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
                        SERIAL_DMA_IFLOW_CONTROL_WORD);
@@ -2229,8 +2229,8 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
     {
       /* Configure for circular DMA reception into the RX FIFO */
 
-      stm32wb_dmasetup(priv->rxdma,
-                       priv->usartbase + STM32WB_USART_RDR_OFFSET,
+      stm32_dmasetup(priv->rxdma,
+                       priv->usartbase + STM32_USART_RDR_OFFSET,
                        (uint32_t)priv->rxfifo,
                        RXDMA_BUFFER_SIZE,
                        SERIAL_DMA_CONTROL_WORD);
@@ -2250,7 +2250,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
        * in and DMA transfer is stopped.
        */
 
-      stm32wb_dmastart(priv->rxdma, stm32wb_serial_dmarxcallback, priv,
+      stm32_dmastart(priv->rxdma, stm32_serial_dmarxcallback, priv,
                        false);
     }
   else
@@ -2261,7 +2261,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
        * worth of time to claim bytes before they are overwritten.
        */
 
-      stm32wb_dmastart(priv->rxdma, stm32wb_serial_dmarxcallback, priv,
+      stm32_dmastart(priv->rxdma, stm32_serial_dmarxcallback, priv,
                        true);
     }
 
@@ -2274,7 +2274,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_dmaiflowrestart
+ * Name: stm32_serial_dmaiflowrestart
  *
  * Description:
  *   Call to restart RX DMA for input flow-controlled USART
@@ -2282,7 +2282,7 @@ static void stm32wb_serial_dmareenable(struct stm32wb_serial_s *priv)
  ****************************************************************************/
 
 #if defined(SERIAL_HAVE_RXDMA) && defined(CONFIG_SERIAL_IFLOWCONTROL)
-static bool stm32wb_serial_dmaiflowrestart(struct stm32wb_serial_s *priv)
+static bool stm32_serial_dmaiflowrestart(struct stm32_serial_s *priv)
 {
   if (!priv->rxenable)
     {
@@ -2298,7 +2298,7 @@ static bool stm32wb_serial_dmaiflowrestart(struct stm32wb_serial_s *priv)
         {
           /* Rx DMA in suspended state. */
 
-          if (stm32wb_serial_dmarxavailable(&priv->dev))
+          if (stm32_serial_dmarxavailable(&priv->dev))
             {
               /* DMA buffer has unprocessed data, do not re-enable yet. */
 
@@ -2316,14 +2316,14 @@ static bool stm32wb_serial_dmaiflowrestart(struct stm32wb_serial_s *priv)
    * re-enabling without data loss is now safe.
    */
 
-  stm32wb_serial_dmareenable(priv);
+  stm32_serial_dmareenable(priv);
 
   return true;
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_dmarxint
+ * Name: stm32_serial_dmarxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
@@ -2331,9 +2331,9 @@ static bool stm32wb_serial_dmaiflowrestart(struct stm32wb_serial_s *priv)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static void stm32wb_serial_dmarxint(struct uart_dev_s *dev, bool enable)
+static void stm32_serial_dmarxint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
   /* En/disable DMA reception.
    *
@@ -2350,14 +2350,14 @@ static void stm32wb_serial_dmarxint(struct uart_dev_s *dev, bool enable)
     {
       /* Re-enable RX DMA. */
 
-      stm32wb_serial_dmaiflowrestart(priv);
+      stm32_serial_dmaiflowrestart(priv);
     }
 #endif
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_dmarxavailable
+ * Name: stm32_serial_dmarxavailable
  *
  * Description:
  *   Return true if the receive register is not empty
@@ -2365,51 +2365,51 @@ static void stm32wb_serial_dmarxint(struct uart_dev_s *dev, bool enable)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static bool stm32wb_serial_dmarxavailable(struct uart_dev_s *dev)
+static bool stm32_serial_dmarxavailable(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
   /* Compare our receive pointer to the current DMA pointer, if they
    * do not match, then there are bytes to be received.
    */
 
-  return (stm32wb_serial_dmanextrx(priv) != priv->rxdmanext);
+  return (stm32_serial_dmanextrx(priv) != priv->rxdmanext);
 }
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_send
+ * Name: stm32_serial_send
  *
  * Description:
  *   This method will send one byte on the USART
  *
  ****************************************************************************/
 
-static void stm32wb_serial_send(struct uart_dev_s *dev, int ch)
+static void stm32_serial_send(struct uart_dev_s *dev, int ch)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
 #ifdef HAVE_RS485
   if (priv->rs485_dir_gpio != 0)
     {
-      stm32wb_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
+      stm32_gpiowrite(priv->rs485_dir_gpio, priv->rs485_dir_polarity);
     }
 #endif
 
-  stm32wb_serial_putreg(priv, STM32WB_USART_TDR_OFFSET, (uint32_t)ch);
+  stm32_serial_putreg(priv, STM32_USART_TDR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_txint
+ * Name: stm32_serial_txint
  *
  * Description:
  *   Call to enable or disable TX interrupts
  *
  ****************************************************************************/
 
-static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable)
+static void stm32_serial_txint(struct uart_dev_s *dev, bool enable)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
 
   irqstate_t flags;
 
@@ -2444,7 +2444,7 @@ static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable)
         }
 #  endif
 
-#  ifdef CONFIG_STM32WB_SERIALBRK_BSDCOMPAT
+#  ifdef CONFIG_STM32_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {
           leave_critical_section(flags);
@@ -2452,7 +2452,7 @@ static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable)
         }
 #  endif
 
-      stm32wb_serial_restoreusartint(priv, ie);
+      stm32_serial_restoreusartint(priv, ie);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
@@ -2465,29 +2465,29 @@ static void stm32wb_serial_txint(struct uart_dev_s *dev, bool enable)
     {
       /* Disable the TX interrupt */
 
-      stm32wb_serial_restoreusartint(priv, priv->ie & ~USART_CR1_TXEIE);
+      stm32_serial_restoreusartint(priv, priv->ie & ~USART_CR1_TXEIE);
     }
 
   leave_critical_section(flags);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_txready
+ * Name: stm32_serial_txready
  *
  * Description:
  *   Return true if the transmit data register is empty
  *
  ****************************************************************************/
 
-static bool stm32wb_serial_txready(struct uart_dev_s *dev)
+static bool stm32_serial_txready(struct uart_dev_s *dev)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)dev->priv;
-  return ((stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET) &
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)dev->priv;
+  return ((stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET) &
            USART_ISR_TXE) != 0);
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_dmarxcallback
+ * Name: stm32_serial_dmarxcallback
  *
  * Description:
  *   This function checks the current DMA state and calls the generic
@@ -2496,12 +2496,12 @@ static bool stm32wb_serial_txready(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
+static void stm32_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
                                          void *arg)
 {
-  struct stm32wb_serial_s *priv = (struct stm32wb_serial_s *)arg;
+  struct stm32_serial_s *priv = (struct stm32_serial_s *)arg;
 
-  if (priv->rxenable && stm32wb_serial_dmarxavailable(&priv->dev))
+  if (priv->rxenable && stm32_serial_dmarxavailable(&priv->dev))
     {
       uart_recvchars(&priv->dev);
 
@@ -2510,7 +2510,7 @@ static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
         {
           /* Re-enable RX DMA. */
 
-          stm32wb_serial_dmaiflowrestart(priv);
+          stm32_serial_dmaiflowrestart(priv);
         }
 #endif
     }
@@ -2525,11 +2525,11 @@ static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
    * will release Rx DMA.
    */
 
-  priv->sr = stm32wb_serial_getreg(priv, STM32WB_USART_ISR_OFFSET);
+  priv->sr = stm32_serial_getreg(priv, STM32_USART_ISR_OFFSET);
 
   if ((priv->sr & (USART_ISR_ORE | USART_ISR_NE | USART_ISR_FE)) != 0)
     {
-      stm32wb_serial_putreg(priv, STM32WB_USART_ICR_OFFSET,
+      stm32_serial_putreg(priv, STM32_USART_ICR_OFFSET,
                             (USART_ICR_NCF | USART_ICR_ORECF |
                              USART_ICR_FECF));
     }
@@ -2537,7 +2537,7 @@ static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_pmnotify
+ * Name: stm32_serial_pmnotify
  *
  * Description:
  *   Notify the driver of new power state. This callback is  called after
@@ -2559,17 +2559,17 @@ static void stm32wb_serial_dmarxcallback(DMA_HANDLE handle, uint8_t status,
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void stm32wb_serial_pmnotify(struct pm_callback_s *cb, int domain,
+static void stm32_serial_pmnotify(struct pm_callback_s *cb, int domain,
                                     enum pm_state_e pmstate)
 {
   switch (pmstate)
     {
       case PM_NORMAL:
-        stm32wb_serial_pm_setsuspend(false);
+        stm32_serial_pm_setsuspend(false);
         break;
 
       case PM_IDLE:
-        stm32wb_serial_pm_setsuspend(false);
+        stm32_serial_pm_setsuspend(false);
         break;
 
       case PM_STANDBY:
@@ -2579,11 +2579,11 @@ static void stm32wb_serial_pmnotify(struct pm_callback_s *cb, int domain,
          *       Rx/Tx buffers are empty (checked in pmprepare).
          */
 
-        stm32wb_serial_pm_setsuspend(true);
+        stm32_serial_pm_setsuspend(true);
         break;
 
       case PM_SLEEP:
-        stm32wb_serial_pm_setsuspend(true);
+        stm32_serial_pm_setsuspend(true);
         break;
 
       default:
@@ -2594,7 +2594,7 @@ static void stm32wb_serial_pmnotify(struct pm_callback_s *cb, int domain,
 #endif
 
 /****************************************************************************
- * Name: stm32wb_serial_pmprepare
+ * Name: stm32_serial_pmprepare
  *
  * Description:
  *   Request the driver to prepare for a new power state. This is a warning
@@ -2627,7 +2627,7 @@ static void stm32wb_serial_pmnotify(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static int stm32wb_serial_pmprepare(struct pm_callback_s *cb, int domain,
+static int stm32_serial_pmprepare(struct pm_callback_s *cb, int domain,
                                     enum pm_state_e pmstate)
 {
   int n;
@@ -2648,16 +2648,16 @@ static int stm32wb_serial_pmprepare(struct pm_callback_s *cb, int domain,
          * buffers.
          */
 
-        stm32wb_serial_dma_poll();
+        stm32_serial_dma_poll();
 #endif
 
         /* Check if any of the active ports have data pending on Tx/Rx
          * buffers.
          */
 
-        for (n = 0; n < STM32WB_NLPUART + STM32WB_NUSART; n++)
+        for (n = 0; n < STM32_NLPUART + STM32_NUSART; n++)
           {
-            struct stm32wb_serial_s *priv = g_uart_devs[n];
+            struct stm32_serial_s *priv = g_uart_devs[n];
 
             if (!priv || !priv->initialized)
               {
@@ -2723,18 +2723,18 @@ void arm_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32WB_NLPUART + STM32WB_NUSART; i++)
+  for (i = 0; i < STM32_NLPUART + STM32_NUSART; i++)
     {
       if (g_uart_devs[i])
         {
-          stm32wb_serial_disableusartint(g_uart_devs[i], NULL);
+          stm32_serial_disableusartint(g_uart_devs[i], NULL);
         }
     }
 
   /* Configure whichever one is the console */
 
 #if CONSOLE_UART > 0
-  stm32wb_serial_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
+  stm32_serial_setup(&g_uart_devs[CONSOLE_UART - 1]->dev);
 #endif
 #endif /* HAVE UART */
 }
@@ -2767,7 +2767,7 @@ void arm_serialinit(void)
 #if CONSOLE_UART > 0
   uart_register("/dev/console", &g_uart_devs[CONSOLE_UART - 1]->dev);
 
-#ifndef CONFIG_STM32WB_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
   /* If not disabled, register the console UART to ttyS0 and exclude
    * it from initializing it further down
    */
@@ -2779,7 +2779,7 @@ void arm_serialinit(void)
 #ifdef SERIAL_HAVE_CONSOLE_DMA
   /* If we need to re-initialise the console to enable DMA do that here. */
 
-  stm32wb_serial_dmasetup(&g_uart_devs[CONSOLE_UART - 1]->dev);
+  stm32_serial_dmasetup(&g_uart_devs[CONSOLE_UART - 1]->dev);
 #endif
 #endif /* CONSOLE_UART > 0 */
 
@@ -2787,7 +2787,7 @@ void arm_serialinit(void)
 
   strlcpy(devname, "/dev/ttySx", sizeof(devname));
 
-  for (i = 0; i < STM32WB_NLPUART + STM32WB_NUSART; i++)
+  for (i = 0; i < STM32_NLPUART + STM32_NUSART; i++)
     {
       /* Don't create a device for non-configured ports. */
 
@@ -2796,7 +2796,7 @@ void arm_serialinit(void)
           continue;
         }
 
-#ifndef CONFIG_STM32WB_SERIAL_DISABLE_REORDERING
+#ifndef CONFIG_STM32_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
       if (g_uart_devs[i]->dev.isconsole)
@@ -2814,7 +2814,7 @@ void arm_serialinit(void)
 }
 
 /****************************************************************************
- * Name: stm32wb_serial_dma_poll
+ * Name: stm32_serial_dma_poll
  *
  * Description:
  *   Checks receive DMA buffers for received bytes that have not accumulated
@@ -2825,7 +2825,7 @@ void arm_serialinit(void)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_RXDMA
-void stm32wb_serial_dma_poll(void)
+void stm32_serial_dma_poll(void)
 {
     irqstate_t flags;
 
@@ -2834,14 +2834,14 @@ void stm32wb_serial_dma_poll(void)
 #ifdef CONFIG_LPUART1_RXDMA
   if (g_lpuart1priv.rxdma != NULL)
     {
-      stm32wb_serial_dmarxcallback(g_lpuart1priv.rxdma, 0, &g_lpuart1priv);
+      stm32_serial_dmarxcallback(g_lpuart1priv.rxdma, 0, &g_lpuart1priv);
     }
 #endif
 
 #ifdef CONFIG_USART1_RXDMA
   if (g_usart1priv.rxdma != NULL)
     {
-      stm32wb_serial_dmarxcallback(g_usart1priv.rxdma, 0, &g_usart1priv);
+      stm32_serial_dmarxcallback(g_usart1priv.rxdma, 0, &g_usart1priv);
     }
 #endif
 
@@ -2860,12 +2860,12 @@ void stm32wb_serial_dma_poll(void)
 void up_putc(int ch)
 {
 #if CONSOLE_UART > 0
-  struct stm32wb_serial_s *priv = g_uart_devs[CONSOLE_UART - 1];
+  struct stm32_serial_s *priv = g_uart_devs[CONSOLE_UART - 1];
   uint16_t ie;
 
-  stm32wb_serial_disableusartint(priv, &ie);
+  stm32_serial_disableusartint(priv, &ie);
   arm_lowputc(ch);
-  stm32wb_serial_restoreusartint(priv, ie);
+  stm32_serial_restoreusartint(priv, ie);
 #endif
 }
 

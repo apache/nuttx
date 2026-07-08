@@ -451,20 +451,20 @@ static int nrf91_usrsock_event_callback(int16_t usockid, uint16_t events)
 
 static int nrf91_modem_getver(lte_version_t *version)
 {
-  char buffer1[16];
-  char buffer2[16];
+  char buffer1[LTE_VER_FIRMWARE_LEN];
+  char buffer2[LTE_VER_NP_PACKAGE_LEN];
   int  ret = OK;
 
   memset(version, 0, sizeof(*version));
-  ret = nrf_modem_at_scanf("AT%HWVERSION", "%%HWVERSION: %s %s",
+  ret = nrf_modem_at_scanf("AT%HWVERSION", "%%HWVERSION: %31s %31s",
                            buffer1, buffer2);
-  if (ret > 0)
+  if (ret == 2)
     {
       strncpy(version->bb_product, buffer1, LTE_VER_BB_PRODUCT_LEN);
       strncpy(version->np_package, buffer2, LTE_VER_NP_PACKAGE_LEN);
     }
 
-  ret = nrf_modem_at_scanf("AT+CGMR", "%s", buffer1);
+  ret = nrf_modem_at_scanf("AT+CGMR", "%31s", buffer1);
   if (ret > 0)
     {
       strncpy(version->fw_version, buffer1, LTE_VER_FIRMWARE_LEN);
@@ -472,6 +472,256 @@ static int nrf91_modem_getver(lte_version_t *version)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_actpdn
+ *
+ * Description:
+ *   Activate the default packet data network: optionally (re)configure the
+ *   APN, attach to the network (AT+CFUN=1), wait for registration and read
+ *   the assigned IP address.
+ *
+ ****************************************************************************/
+
+static int nrf91_modem_actpdn(FAR lte_apn_setting_t *apn,
+                              FAR lte_pdn_t *pdn)
+{
+  FAR const char *pdptype = "IP";
+  char resp[64];
+  FAR char *p;
+  FAR char *q;
+  size_t n;
+  int stat = 0;
+  int tmp = 0;
+  int elapsed = 0;
+  int ret;
+
+  switch (apn->ip_type)
+    {
+      case LTE_IPTYPE_V6:
+        pdptype = "IPV6";
+        break;
+      case LTE_IPTYPE_V4V6:
+        pdptype = "IPV4V6";
+        break;
+      default:
+        pdptype = "IP";
+        break;
+    }
+
+  /* (Re)configure the default PDN context when an APN is provided.  Toggle
+   * the radio off first so the new context is used on (re)attach.
+   */
+
+  if (apn->apn != NULL && apn->apn[0] != '\0')
+    {
+      nrf_modem_at_printf("AT+CFUN=4");
+
+      ret = nrf_modem_at_printf("AT+CGDCONT=0,\"%s\",\"%s\"",
+                                pdptype, apn->apn);
+      if (ret < 0)
+        {
+          nerr("AT+CGDCONT failed %d\n", ret);
+          return ret;
+        }
+
+      if (apn->auth_type != LTE_APN_AUTHTYPE_NONE &&
+          apn->user_name != NULL && apn->password != NULL)
+        {
+          ret = nrf_modem_at_printf("AT+CGAUTH=0,%u,\"%s\",\"%s\"",
+                                    (unsigned)apn->auth_type,
+                                    apn->user_name, apn->password);
+          if (ret < 0)
+            {
+              nerr("AT+CGAUTH failed %d\n", ret);
+              return ret;
+            }
+        }
+    }
+
+  /* Attach to the network */
+
+  ret = nrf_modem_at_printf("AT+CFUN=1");
+  if (ret < 0)
+    {
+      nerr("AT+CFUN=1 failed %d\n", ret);
+      return ret;
+    }
+
+  /* Wait for network registration (1 = home, 5 = roaming) */
+
+  while (elapsed < 120)
+    {
+      ret = nrf_modem_at_scanf("AT+CEREG?", "+CEREG: %d,%d", &tmp, &stat);
+      if (ret >= 2 && (stat == 1 || stat == 5))
+        {
+          break;
+        }
+
+      nxsig_usleep(1000 * 1000);
+      elapsed++;
+    }
+
+  if (stat != 1 && stat != 5)
+    {
+      nerr("LTE registration timed out, CEREG stat=%d\n", stat);
+      return -ETIMEDOUT;
+    }
+
+  /* Fill the PDN info and read the assigned IP address from
+   * "+CGPADDR: 0,\"a.b.c.d\"".
+   */
+
+  memset(pdn, 0, sizeof(*pdn));
+  pdn->session_id = 0;
+  pdn->active     = LTE_PDN_ACTIVE;
+  pdn->apn_type   = apn->apn_type;
+  pdn->ipaddr_num = 0;
+
+  ret = nrf_modem_at_cmd(resp, sizeof(resp), "AT+CGPADDR=0");
+  if (ret == 0)
+    {
+      p = strchr(resp, '"');
+      if (p != NULL)
+        {
+          p++;
+          q = strchr(p, '"');
+          if (q != NULL)
+            {
+              n = (size_t)(q - p);
+              if (n >= LTE_IPADDR_MAX_LEN)
+                {
+                  n = LTE_IPADDR_MAX_LEN - 1;
+                }
+
+              pdn->address[0].ip_type = apn->ip_type;
+              memcpy(pdn->address[0].address, p, n);
+              pdn->address[0].address[n] = '\0';
+              pdn->ipaddr_num = 1;
+            }
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_bits
+ *
+ * Description:
+ *   Format the low 'nbits' of 'value' as a binary string (MSB first), as
+ *   used by the 3GPP timer fields of AT+CPSMS and AT+CEDRXS.
+ *
+ * Input Parameters:
+ *   value - Value to format.
+ *   nbits - Number of low-order bits to emit.
+ *   out   - Output buffer (must hold at least nbits + 1 bytes).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void nrf91_modem_bits(uint8_t value, int nbits, FAR char *out)
+{
+  int i;
+
+  for (i = 0; i < nbits; i++)
+    {
+      out[i] = (value & (1 << (nbits - 1 - i))) ? '1' : '0';
+    }
+
+  out[nbits] = '\0';
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_setpsm
+ *
+ * Description:
+ *   Apply PSM settings (LTE_CMDID_SETPSM) by translating the LAPI
+ *   lte_psm_setting_t into the AT+CPSMS command.
+ *
+ * Input Parameters:
+ *   psm - PSM settings to apply.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nrf91_modem_setpsm(FAR lte_psm_setting_t *psm)
+{
+  /* LAPI timer-unit enums -> 3GPP encoded unit bits (TS 24.008 GPRS timers).
+   * T3412 extended (periodic TAU) and T3324 (active time).
+   */
+
+  static const uint8_t t3412[] =
+    {
+      3, 4, 5, 0, 1, 2, 6, 7  /* 2s,30s,1m,10m,1h,10h,320h,deact */
+    };
+
+  static const uint8_t t3324[] =
+    {
+      0, 1, 2, 7              /* 2s,1m,6m,deact */
+    };
+
+  char tau[9];
+  char act[9];
+  uint8_t b;
+
+  if (!psm->enable)
+    {
+      return nrf_modem_at_printf("AT+CPSMS=0");
+    }
+
+  b = (uint8_t)((t3412[psm->ext_periodic_tau_time.unit & 0x7] << 5) |
+                (psm->ext_periodic_tau_time.time_val & 0x1f));
+  nrf91_modem_bits(b, 8, tau);
+
+  b = (uint8_t)((t3324[psm->req_active_time.unit & 0x3] << 5) |
+                (psm->req_active_time.time_val & 0x1f));
+  nrf91_modem_bits(b, 8, act);
+
+  return nrf_modem_at_printf("AT+CPSMS=1,,,\"%s\",\"%s\"", tau, act);
+}
+
+/****************************************************************************
+ * Name: nrf91_modem_setedrx
+ *
+ * Description:
+ *   Apply eDRX settings (LTE_CMDID_SETEDRX) by translating the LAPI
+ *   lte_edrx_setting_t into the AT+CEDRXS command.
+ *
+ * Input Parameters:
+ *   edrx - eDRX settings to apply.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nrf91_modem_setedrx(FAR lte_edrx_setting_t *edrx)
+{
+  char value[5];
+  int  acttype;
+
+  if (!edrx->enable || edrx->act_type == LTE_EDRX_ACTTYPE_NOTUSE)
+    {
+      /* Disable eDRX and discard any stored value */
+
+      return nrf_modem_at_printf("AT+CEDRXS=3");
+    }
+
+  /* AT+CEDRXS access technology: 4 = E-UTRAN WB-S1 (LTE-M),
+   * 5 = E-UTRAN NB-S1 (NB-IoT). The LAPI eDRX cycle enum matches the 4-bit
+   * 3GPP requested-eDRX value directly.
+   */
+
+  acttype = (edrx->act_type == LTE_EDRX_ACTTYPE_NBS1) ? 5 : 4;
+  nrf91_modem_bits((uint8_t)(edrx->edrx_cycle & 0xf), 4, value);
+
+  return nrf_modem_at_printf("AT+CEDRXS=2,%d,\"%s\"", acttype, value);
 }
 
 /****************************************************************************
@@ -500,6 +750,32 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
           break;
         }
 
+      case LTE_CMDID_RADIOON:
+        {
+          /* The radio is enabled by AT+CFUN=1 at power-on / PDN
+           * activation, so there is nothing extra to do here.
+           */
+
+          ret = OK;
+          break;
+        }
+
+      case LTE_CMDID_RADIOOFF:
+        {
+          ret = nrf_modem_at_printf("AT+CFUN=4");
+          break;
+        }
+
+      case LTE_CMDID_ACTPDN:
+        {
+          lte_apn_setting_t **apn =
+            (lte_apn_setting_t **)(ltecmd->inparam);
+          lte_pdn_t **pdn =
+            (lte_pdn_t **)(ltecmd->outparam + 1);
+          ret = nrf91_modem_actpdn(*apn, *pdn);
+          break;
+        }
+
       case LTE_CMDID_GETVER:
         {
           lte_version_t **version =
@@ -525,10 +801,19 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
       {
         lte_quality_t **quality =
           (lte_quality_t **)(ltecmd->outparam + 1);
+        bool valid = false;
+        int cresult;
         int tmp;
         int rsrp;
         int rsrq;
-        int rssi;
+        int snr;
+
+        (*quality)->rsrp = 0;
+        (*quality)->rsrq = 0;
+        (*quality)->rssi = 0;
+        (*quality)->sinr = 0;
+
+        /* RSRP/RSRQ via AT+CESQ - available whenever the modem is camped. */
 
         ret = nrf_modem_at_scanf("AT+CESQ",
                                  "+CESQ: %d,%d,%d,%d,%d,%d",
@@ -536,29 +821,80 @@ static int nrf91_ioctl_ltecmd(int fd, int cmd, unsigned long arg)
                                  &rsrq, &rsrp);
         if (ret > 0)
           {
-            (*quality)->rsrq  = (rsrq / 2) - 19;
-            (*quality)->rsrp  = rsrp - 140;
+            (*quality)->rsrq = (rsrq / 2) - 19;
+            (*quality)->rsrp = rsrp - 140;
+            valid = true;
           }
         else
           {
             nerr("AT+CESQ failed %d\n", ret);
           }
 
-        ret = nrf_modem_at_scanf("AT+CSQ",
-                                 "+CSQ: %d,%d",
-                                 &rssi, &tmp);
+        /* SNR via AT%CONEVAL - the only SNR source on this modem (AT+CSQ is
+         * not answered and carries no SNR). Reported SNR is the raw
+         * value - 24.
+         */
+
+        ret = nrf_modem_at_scanf("AT%CONEVAL",
+                                 "%%CONEVAL: %d,%d,%d,%d,%d,%d",
+                                 &cresult, &tmp, &tmp, &tmp, &tmp, &snr);
+        if (ret >= 6 && cresult == 0)
+          {
+            (*quality)->sinr = snr - 24;
+          }
+
+        (*quality)->valid = valid;
+        ret = OK;
+        break;
+      }
+
+      case LTE_CMDID_GETCELL:
+      {
+        lte_cellinfo_t **cell =
+          (lte_cellinfo_t **)(ltecmd->outparam + 1);
+        int band = 0;
+
+        (*cell)->valid = false;
+        (*cell)->phycell_id = 0;
+        (*cell)->earfcn = 0;
+        (*cell)->option = 0;
+        (*cell)->nr_neighbor = 0;
+
+        /* The modem AT set does not expose the raw EARFCN in a form the
+         * scanf parser here can extract from AT%XMONITOR (quoted fields), so
+         * report the serving band number via AT%XCBAND in the earfcn field.
+         */
+
+        ret = nrf_modem_at_scanf("AT%XCBAND", "%%XCBAND: %d", &band);
         if (ret > 0)
           {
-            (*quality)->rssi  = rssi;
-            (*quality)->sinr  = 0;
+            (*cell)->earfcn = (uint32_t)band;
+            (*cell)->valid = true;
           }
         else
           {
-            nerr("AT+CSQ failed %d\n", ret);
+            nerr("AT%%XCBAND failed %d\n", ret);
           }
 
-        (*quality)->valid = true;
+        ret = OK;
+        break;
       }
+
+      case LTE_CMDID_SETPSM:
+        {
+          lte_psm_setting_t **psm =
+            (lte_psm_setting_t **)(ltecmd->inparam);
+          ret = nrf91_modem_setpsm(*psm);
+          break;
+        }
+
+      case LTE_CMDID_SETEDRX:
+        {
+          lte_edrx_setting_t **edrx =
+            (lte_edrx_setting_t **)(ltecmd->inparam);
+          ret = nrf91_modem_setedrx(*edrx);
+          break;
+        }
 
       /* TODO: commands from include/nuttx/wireless/lte/lte.h */
 

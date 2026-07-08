@@ -44,32 +44,32 @@
 
 /* Processor Exceptions (vectors 0-15) */
 
-#define STM32WL5_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
-                                        /* Vector  0: Reset stack pointer value */
-                                        /* Vector  1: Reset (not handler as an IRQ) */
-#define STM32WL5_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
-#define STM32WL5_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
-#define STM32WL5_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
-#define STM32WL5_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
-#define STM32WL5_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
-                                        /* Vectors 7-10: Reserved */
-#define STM32WL5_IRQ_SVCALL        (11) /* Vector 11: SVC call */
-#define STM32WL5_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
-                                        /* Vector 13: Reserved */
-#define STM32WL5_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
-#define STM32WL5_IRQ_SYSTICK       (15) /* Vector 15: System tick */
+#define STM32_IRQ_RESERVED       (0) /* Reserved vector (only used with CONFIG_DEBUG_FEATURES) */
+                                     /* Vector  0: Reset stack pointer value */
+                                     /* Vector  1: Reset (not handler as an IRQ) */
+#define STM32_IRQ_NMI            (2) /* Vector  2: Non-Maskable Interrupt (NMI) */
+#define STM32_IRQ_HARDFAULT      (3) /* Vector  3: Hard fault */
+#define STM32_IRQ_MEMFAULT       (4) /* Vector  4: Memory management (MPU) */
+#define STM32_IRQ_BUSFAULT       (5) /* Vector  5: Bus fault */
+#define STM32_IRQ_USAGEFAULT     (6) /* Vector  6: Usage fault */
+                                     /* Vectors 7-10: Reserved */
+#define STM32_IRQ_SVCALL        (11) /* Vector 11: SVC call */
+#define STM32_IRQ_DBGMONITOR    (12) /* Vector 12: Debug Monitor */
+                                     /* Vector 13: Reserved */
+#define STM32_IRQ_PENDSV        (14) /* Vector 14: Pendable system service request */
+#define STM32_IRQ_SYSTICK       (15) /* Vector 15: System tick */
 
 /* External interrupts (vectors >= 16).  These definitions are
  * chip-specific
  */
 
-#define STM32WL5_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
+#define STM32_IRQ_FIRST         (16) /* Vector number of the first external interrupt */
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1)
+#if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
 #  include <arch/stm32wl5/stm32wl5xxx_cpu1_irq.h>
 #else
 #  error "Unsupported STM32 L5 chip"

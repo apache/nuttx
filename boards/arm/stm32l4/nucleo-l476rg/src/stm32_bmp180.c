@@ -32,7 +32,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/sensors/bmp180.h>
 
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_i2c.h"
 #include "nucleo-l476rg.h"
 
@@ -65,7 +65,7 @@ int stm32_bmp180initialize(const char *devpath)
 
   /* Initialize I2C */
 
-  i2c = stm32l4_i2cbus_initialize(BMP180_I2C_PORTNO);
+  i2c = stm32_i2cbus_initialize(BMP180_I2C_PORTNO);
 
   if (!i2c)
     {

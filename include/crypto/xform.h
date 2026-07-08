@@ -118,6 +118,7 @@ extern const struct enc_xform enc_xform_null;
 extern const struct auth_hash auth_hash_hmac_md5_96;
 extern const struct auth_hash auth_hash_hmac_sha1_96;
 extern const struct auth_hash auth_hash_hmac_ripemd_160_96;
+extern const struct auth_hash auth_hash_hmac_sha2_224_114;
 extern const struct auth_hash auth_hash_hmac_sha2_256_128;
 extern const struct auth_hash auth_hash_hmac_sha2_384_192;
 extern const struct auth_hash auth_hash_hmac_sha2_512_256;

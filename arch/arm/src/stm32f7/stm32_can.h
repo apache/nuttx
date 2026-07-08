@@ -40,45 +40,45 @@
 
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_CAN) && (defined(CONFIG_STM32F7_CAN1) || \
-    defined(CONFIG_STM32F7_CAN2) || defined(CONFIG_STM32F7_CAN3))
+#if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || \
+    defined(CONFIG_STM32_CAN2) || defined(CONFIG_STM32_CAN3))
 
 /* CAN BAUD */
 
-#if defined(CONFIG_STM32F7_CAN1) && !defined(CONFIG_STM32F7_CAN1_BAUD)
-#  error "CONFIG_STM32F7_CAN1_BAUD is not defined"
+#if defined(CONFIG_STM32_CAN1) && !defined(CONFIG_STM32_CAN1_BAUD)
+#  error "CONFIG_STM32_CAN1_BAUD is not defined"
 #endif
 
-#if defined(CONFIG_STM32F7_CAN2) && !defined(CONFIG_STM32F7_CAN2_BAUD)
-#  error "CONFIG_STM32F7_CAN2_BAUD is not defined"
+#if defined(CONFIG_STM32_CAN2) && !defined(CONFIG_STM32_CAN2_BAUD)
+#  error "CONFIG_STM32_CAN2_BAUD is not defined"
 #endif
 
-#if defined(CONFIG_STM32F7_CAN3) && !defined(CONFIG_STM32F7_CAN3_BAUD)
-#  error "CONFIG_STM32F7_CAN3_BAUD is not defined"
+#if defined(CONFIG_STM32_CAN3) && !defined(CONFIG_STM32_CAN3_BAUD)
+#  error "CONFIG_STM32_CAN3_BAUD is not defined"
 #endif
 
 /* User-defined TSEG1 and TSEG2 settings may be used.
  *
- * CONFIG_STM32F7_CAN_TSEG1 = the number of CAN time quanta in segment 1
- * CONFIG_STM32F7_CAN_TSEG2 = the number of CAN time quanta in segment 2
+ * CONFIG_STM32_CAN_TSEG1 = the number of CAN time quanta in segment 1
+ * CONFIG_STM32_CAN_TSEG2 = the number of CAN time quanta in segment 2
  * CAN_BIT_QUANTA   = The number of CAN time quanta in on bit time
  */
 
-#ifndef CONFIG_STM32F7_CAN_TSEG1
-#  define CONFIG_STM32F7_CAN_TSEG1 6
+#ifndef CONFIG_STM32_CAN_TSEG1
+#  define CONFIG_STM32_CAN_TSEG1 6
 #endif
 
-#if CONFIG_STM32F7_CAN_TSEG1 < 1 || \
-    CONFIG_STM32F7_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
+#if CONFIG_STM32_CAN_TSEG1 < 1 || \
+    CONFIG_STM32_CAN_TSEG1 > CAN_BTR_TSEG1_MAX
 #  error "CONFIG_STM32_CAN_TSEG1 is out of range"
 #endif
 
-#ifndef CONFIG_STM32F7_CAN_TSEG2
-#  define CONFIG_STM32F7_CAN_TSEG2 7
+#ifndef CONFIG_STM32_CAN_TSEG2
+#  define CONFIG_STM32_CAN_TSEG2 7
 #endif
 
-#if CONFIG_STM32F7_CAN_TSEG2 < 1 || \
-    CONFIG_STM32F7_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
+#if CONFIG_STM32_CAN_TSEG2 < 1 || \
+    CONFIG_STM32_CAN_TSEG2 > CAN_BTR_TSEG2_MAX
 #  error "CONFIG_STM32_CAN_TSEG2 is out of range"
 #endif
 
@@ -105,7 +105,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_STM32F7_CAN_CHARDRIVER
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
 
 /****************************************************************************
  * Name: stm32_caninitialize
@@ -125,7 +125,7 @@ struct can_dev_s;
 struct can_dev_s *stm32_caninitialize(int port);
 #endif
 
-#ifdef CONFIG_STM32F7_CAN_SOCKET
+#ifdef CONFIG_STM32_CAN_SOCKET
 
 /****************************************************************************
  * Name: stm32_cansockinitialize
@@ -151,4 +151,4 @@ int stm32_cansockinitialize(int port);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_CAN_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32F7_CAN_H */

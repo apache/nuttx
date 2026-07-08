@@ -60,21 +60,21 @@
 
 /* Set the range of system SRAM1 */
 
-#define SRAM1_START     STM32WB_SRAM1_BASE
-#define SRAM1_END       (SRAM1_START + STM32WB_SRAM1_SIZE)
+#define SRAM1_START     STM32_SRAM1_BASE
+#define SRAM1_END       (SRAM1_START + STM32_SRAM1_SIZE)
 
 /* Set the range of SRAM2a as well, requires a second memory region */
 
-#ifdef CONFIG_STM32WB_SRAM2A_HEAP
-#  define SRAM2A_START  (STM32WB_SRAM2A_BASE + CONFIG_STM32WB_SRAM2A_USER_BASE_OFFSET)
-#  define SRAM2A_END    (SRAM2A_START + CONFIG_STM32WB_SRAM2A_USER_SIZE)
+#ifdef CONFIG_STM32_SRAM2A_HEAP
+#  define SRAM2A_START  (STM32_SRAM2A_BASE + CONFIG_STM32_SRAM2A_USER_BASE_OFFSET)
+#  define SRAM2A_END    (SRAM2A_START + CONFIG_STM32_SRAM2A_USER_SIZE)
 #endif
 
 /* Set the range of SRAM2b as well, requires a third memory region */
 
-#ifdef CONFIG_STM32WB_SRAM2B_HEAP
-#  define SRAM2B_START  STM32WB_SRAM2B_BASE
-#  define SRAM2B_END    (SRAM2B_START + CONFIG_STM32WB_SRAM2B_USER_SIZE)
+#ifdef CONFIG_STM32_SRAM2B_HEAP
+#  define SRAM2B_START  STM32_SRAM2B_BASE
+#  define SRAM2B_END    (SRAM2B_START + CONFIG_STM32_SRAM2B_USER_SIZE)
 #endif
 
 /* Some sanity checking.  If multiple memory regions are defined, verify
@@ -82,25 +82,25 @@
  * that we have been asked to add to the heap.
  */
 
-#ifdef CONFIG_STM32WB_SRAM2A_HEAP
-#  if SRAM2A_END > STM32WB_SRAM2A_BASE + STM32WB_SRAM2A_SIZE
+#ifdef CONFIG_STM32_SRAM2A_HEAP
+#  if SRAM2A_END > STM32_SRAM2A_BASE + STM32_SRAM2A_SIZE
 #    error "SRAM2a heap memory region is out of it's physical address space"
 #  endif
 #endif
 
-#ifdef CONFIG_STM32WB_SRAM2B_HEAP
-#  if SRAM2B_END > STM32WB_SRAM2B_BASE + STM32WB_SRAM2B_SIZE
+#ifdef CONFIG_STM32_SRAM2B_HEAP
+#  if SRAM2B_END > STM32_SRAM2B_BASE + STM32_SRAM2B_SIZE
 #    error "SRAM2b heap memory region is out of it's physical address space"
 #  endif
 #endif
 
-#if CONFIG_MM_REGIONS < defined(CONFIG_STM32WB_SRAM2A_HEAP) + \
-                        defined(CONFIG_STM32WB_SRAM2B_HEAP) + 1
+#if CONFIG_MM_REGIONS < defined(CONFIG_STM32_SRAM2A_HEAP) + \
+                        defined(CONFIG_STM32_SRAM2B_HEAP) + 1
 #  error "You need more memory manager regions to support selected heap components"
 #endif
 
-#if CONFIG_MM_REGIONS > defined(CONFIG_STM32WB_SRAM2A_HEAP) + \
-                        defined(CONFIG_STM32WB_SRAM2B_HEAP) + 1
+#if CONFIG_MM_REGIONS > defined(CONFIG_STM32_SRAM2A_HEAP) + \
+                        defined(CONFIG_STM32_SRAM2B_HEAP) + 1
 #  warning "CONFIG_MM_REGIONS large enough but I do not know what some of the region(s) are"
 #endif
 
@@ -201,7 +201,7 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-  stm32wb_mpu_uheap((uintptr_t)ubase, usize);
+  stm32_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -283,13 +283,13 @@ void arm_addregion(void)
    * from the release notes for STM32WB coprocessor wireless binaries.
    */
 
-#ifdef CONFIG_STM32WB_SRAM2A_HEAP
+#ifdef CONFIG_STM32_SRAM2A_HEAP
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the SRAM2a heap */
 
-  stm32wb_mpu_uheap((uintptr_t)SRAM2A_START, SRAM2A_END - SRAM2A_START);
+  stm32_mpu_uheap((uintptr_t)SRAM2A_START, SRAM2A_END - SRAM2A_START);
 
 #endif
 
@@ -301,15 +301,15 @@ void arm_addregion(void)
 
   kumm_addregion((void *)SRAM2A_START, SRAM2A_END - SRAM2A_START);
 
-#endif /* CONFIG_STM32WB_SRAM2A_HEAP */
+#endif /* CONFIG_STM32_SRAM2A_HEAP */
 
-#ifdef CONFIG_STM32WB_SRAM2B_HEAP
+#ifdef CONFIG_STM32_SRAM2B_HEAP
 
 #if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_MM_KERNEL_HEAP)
 
   /* Allow user-mode access to the SRAM2b heap */
 
-  stm32wb_mpu_uheap((uintptr_t)SRAM2B_START, SRAM2B_END - SRAM2B_START);
+  stm32_mpu_uheap((uintptr_t)SRAM2B_START, SRAM2B_END - SRAM2B_START);
 
 #endif
 
@@ -321,6 +321,6 @@ void arm_addregion(void)
 
   kumm_addregion((void *)SRAM2B_START, SRAM2B_END - SRAM2B_START);
 
-#endif /* CONFIG_STM32WB_SRAM2B_HEAP */
+#endif /* CONFIG_STM32_SRAM2B_HEAP */
 }
 #endif

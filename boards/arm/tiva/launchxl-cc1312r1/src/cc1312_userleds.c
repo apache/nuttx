@@ -62,7 +62,7 @@ void board_userled(int led, bool ledon)
     {
       pinconfig = &g_gpio_gled;
     }
-  else if (led = BOARD_RLED)
+  else if (led == BOARD_RLED)
     {
       pinconfig = &g_gpio_rled;
     }

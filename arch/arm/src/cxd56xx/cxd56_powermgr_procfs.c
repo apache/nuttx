@@ -488,7 +488,7 @@ static int cxd56_powermgr_procfs_open(struct file *filep,
    * REVISIT:  Write-able proc files could be quite useful.
    */
 
-  if (((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0))
+  if ((oflags & O_ACCMODE) != O_RDONLY)
     {
       pmerr("ERROR: Only O_RDONLY supported\n");
       return -EACCES;

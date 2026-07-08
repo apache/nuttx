@@ -72,77 +72,77 @@
  * In any of these cases, the timer will not be used by this timer module.
  */
 
-#if defined(CONFIG_STM32H5_TIM1_PWM) || defined (CONFIG_STM32H5_TIM1_ADC) || \
-    defined(CONFIG_STM32H5_TIM1_DAC) || defined(CONFIG_STM32H5_TIM1_QE)
-#  undef CONFIG_STM32H5_TIM1
+#if defined(CONFIG_STM32_TIM1_PWM) || defined (CONFIG_STM32_TIM1_ADC) || \
+    defined(CONFIG_STM32_TIM1_DAC) || defined(CONFIG_STM32_TIM1_QE)
+#  undef CONFIG_STM32_TIM1
 #endif
 
-#if defined(CONFIG_STM32H5_TIM2_PWM) || defined (CONFIG_STM32H5_TIM2_ADC) || \
-    defined(CONFIG_STM32H5_TIM2_DAC) || defined(CONFIG_STM32H5_TIM2_QE)
-#  undef CONFIG_STM32H5_TIM2
+#if defined(CONFIG_STM32_TIM2_PWM) || defined (CONFIG_STM32_TIM2_ADC) || \
+    defined(CONFIG_STM32_TIM2_DAC) || defined(CONFIG_STM32_TIM2_QE)
+#  undef CONFIG_STM32_TIM2
 #endif
 
-#if defined(CONFIG_STM32H5_TIM3_PWM) || defined (CONFIG_STM32H5_TIM3_ADC) || \
-    defined(CONFIG_STM32H5_TIM3_DAC) || defined(CONFIG_STM32H5_TIM3_QE)
-#  undef CONFIG_STM32H5_TIM3
+#if defined(CONFIG_STM32_TIM3_PWM) || defined (CONFIG_STM32_TIM3_ADC) || \
+    defined(CONFIG_STM32_TIM3_DAC) || defined(CONFIG_STM32_TIM3_QE)
+#  undef CONFIG_STM32_TIM3
 #endif
 
-#if defined(CONFIG_STM32H5_TIM4_PWM) || defined (CONFIG_STM32H5_TIM4_ADC) || \
-    defined(CONFIG_STM32H5_TIM4_DAC) || defined(CONFIG_STM32H5_TIM4_QE)
-#  undef CONFIG_STM32H5_TIM4
+#if defined(CONFIG_STM32_TIM4_PWM) || defined (CONFIG_STM32_TIM4_ADC) || \
+    defined(CONFIG_STM32_TIM4_DAC) || defined(CONFIG_STM32_TIM4_QE)
+#  undef CONFIG_STM32_TIM4
 #endif
 
-#if defined(CONFIG_STM32H5_TIM5_PWM) || defined (CONFIG_STM32H5_TIM5_ADC) || \
-    defined(CONFIG_STM32H5_TIM5_DAC) || defined(CONFIG_STM32H5_TIM5_QE)
-#  undef CONFIG_STM32H5_TIM5
+#if defined(CONFIG_STM32_TIM5_PWM) || defined (CONFIG_STM32_TIM5_ADC) || \
+    defined(CONFIG_STM32_TIM5_DAC) || defined(CONFIG_STM32_TIM5_QE)
+#  undef CONFIG_STM32_TIM5
 #endif
 
-#if defined(CONFIG_STM32H5_TIM6_PWM) || defined (CONFIG_STM32H5_TIM6_ADC) || \
-    defined(CONFIG_STM32H5_TIM6_DAC) || defined(CONFIG_STM32H5_TIM6_QE)
-#  undef CONFIG_STM32H5_TIM6
+#if defined(CONFIG_STM32H5_TIM6_PWM) || defined (CONFIG_STM32_TIM6_ADC) || \
+    defined(CONFIG_STM32_TIM6_DAC) || defined(CONFIG_STM32H5_TIM6_QE)
+#  undef CONFIG_STM32_TIM6
 #endif
 
 #if defined(CONFIG_STM32H5_TIM7_PWM) || defined (CONFIG_STM32H5_TIM7_ADC) || \
-    defined(CONFIG_STM32H5_TIM7_DAC) || defined(CONFIG_STM32H5_TIM7_QE)
-#  undef CONFIG_STM32H5_TIM7
+    defined(CONFIG_STM32_TIM7_DAC) || defined(CONFIG_STM32H5_TIM7_QE)
+#  undef CONFIG_STM32_TIM7
 #endif
 
-#if defined(CONFIG_STM32H5_TIM8_PWM) || defined (CONFIG_STM32H5_TIM8_ADC) || \
-    defined(CONFIG_STM32H5_TIM8_DAC) || defined(CONFIG_STM32H5_TIM8_QE)
-#  undef CONFIG_STM32H5_TIM8
+#if defined(CONFIG_STM32_TIM8_PWM) || defined (CONFIG_STM32_TIM8_ADC) || \
+    defined(CONFIG_STM32_TIM8_DAC) || defined(CONFIG_STM32_TIM8_QE)
+#  undef CONFIG_STM32_TIM8
 #endif
 
-#if defined(CONFIG_STM32H5_TIM12_PWM) || defined (CONFIG_STM32H5_TIM12_ADC) || \
-    defined(CONFIG_STM32H5_TIM12_DAC) || defined(CONFIG_STM32H5_TIM12_QE)
-#  undef CONFIG_STM32H5_TIM12
+#if defined(CONFIG_STM32_TIM12_PWM) || defined (CONFIG_STM32H5_TIM12_ADC) || \
+    defined(CONFIG_STM32_TIM12_DAC) || defined(CONFIG_STM32H5_TIM12_QE)
+#  undef CONFIG_STM32_TIM12
 #endif
 
-#if defined(CONFIG_STM32H5_TIM13_PWM) || defined (CONFIG_STM32H5_TIM13_ADC) || \
-    defined(CONFIG_STM32H5_TIM13_DAC) || defined(CONFIG_STM32H5_TIM13_QE)
-#  undef CONFIG_STM32H5_TIM13
+#if defined(CONFIG_STM32_TIM13_PWM) || defined (CONFIG_STM32H5_TIM13_ADC) || \
+    defined(CONFIG_STM32_TIM13_DAC) || defined(CONFIG_STM32H5_TIM13_QE)
+#  undef CONFIG_STM32_TIM13
 #endif
 
-#if defined(CONFIG_STM32H5_TIM14_PWM) || defined (CONFIG_STM32H5_TIM14_ADC) || \
-    defined(CONFIG_STM32H5_TIM14_DAC) || defined(CONFIG_STM32H5_TIM14_QE)
-#  undef CONFIG_STM32H5_TIM14
+#if defined(CONFIG_STM32_TIM14_PWM) || defined (CONFIG_STM32H5_TIM14_ADC) || \
+    defined(CONFIG_STM32_TIM14_DAC) || defined(CONFIG_STM32H5_TIM14_QE)
+#  undef CONFIG_STM32_TIM14
 #endif
 
-#if defined(CONFIG_STM32H5_TIM15_PWM) || defined (CONFIG_STM32H5_TIM15_ADC) || \
+#if defined(CONFIG_STM32_TIM15_PWM) || defined (CONFIG_STM32_TIM15_ADC) || \
     defined(CONFIG_STM32H5_TIM15_DAC) || defined(CONFIG_STM32H5_TIM15_QE)
-#  undef CONFIG_STM32H5_TIM15
+#  undef CONFIG_STM32_TIM15
 #endif
 
-#if defined(CONFIG_STM32H5_TIM16_PWM) || defined (CONFIG_STM32H5_TIM16_ADC) || \
+#if defined(CONFIG_STM32_TIM16_PWM) || defined (CONFIG_STM32H5_TIM16_ADC) || \
     defined(CONFIG_STM32H5_TIM16_DAC) || defined(CONFIG_STM32H5_TIM16_QE)
-#  undef CONFIG_STM32H5_TIM16
+#  undef CONFIG_STM32_TIM16
 #endif
 
-#if defined(CONFIG_STM32H5_TIM17_PWM) || defined (CONFIG_STM32H5_TIM17_ADC) || \
+#if defined(CONFIG_STM32_TIM17_PWM) || defined (CONFIG_STM32H5_TIM17_ADC) || \
     defined(CONFIG_STM32H5_TIM17_DAC) || defined(CONFIG_STM32H5_TIM17_QE)
-#  undef CONFIG_STM32H5_TIM17
+#  undef CONFIG_STM32_TIM17
 #endif
 
-#if defined(CONFIG_STM32H5_TIM1)
+#if defined(CONFIG_STM32_TIM1)
 #  if defined(GPIO_TIM1_CH1OUT) ||defined(GPIO_TIM1_CH2OUT)||\
       defined(GPIO_TIM1_CH3OUT) ||defined(GPIO_TIM1_CH4OUT)||\
       defined(GPIO_TIM1_CH5OUT) ||defined(GPIO_TIM1_CH6OUT)
@@ -150,35 +150,35 @@
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM2)
+#if defined(CONFIG_STM32_TIM2)
 #  if defined(GPIO_TIM2_CH1OUT) ||defined(GPIO_TIM2_CH2OUT)||\
       defined(GPIO_TIM2_CH3OUT) ||defined(GPIO_TIM2_CH4OUT)
 #    define HAVE_TIM2_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM3)
+#if defined(CONFIG_STM32_TIM3)
 #  if defined(GPIO_TIM3_CH1OUT) ||defined(GPIO_TIM3_CH2OUT)||\
       defined(GPIO_TIM3_CH3OUT) ||defined(GPIO_TIM3_CH4OUT)
 #    define HAVE_TIM3_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM4)
+#if defined(CONFIG_STM32_TIM4)
 #  if defined(GPIO_TIM4_CH1OUT) ||defined(GPIO_TIM4_CH2OUT)||\
       defined(GPIO_TIM4_CH3OUT) ||defined(GPIO_TIM4_CH4OUT)
 #    define HAVE_TIM4_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM5)
+#if defined(CONFIG_STM32_TIM5)
 #  if defined(GPIO_TIM5_CH1OUT) ||defined(GPIO_TIM5_CH2OUT)||\
       defined(GPIO_TIM5_CH3OUT) ||defined(GPIO_TIM5_CH4OUT)
 #    define HAVE_TIM5_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM8)
+#if defined(CONFIG_STM32_TIM8)
 #  if defined(GPIO_TIM8_CH1OUT) ||defined(GPIO_TIM8_CH2OUT)||\
       defined(GPIO_TIM8_CH3OUT) ||defined(GPIO_TIM8_CH4OUT)||\
       defined(GPIO_TIM8_CH5OUT) ||defined(GPIO_TIM8_CH6OUT)
@@ -186,37 +186,37 @@
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM12)
+#if defined(CONFIG_STM32_TIM12)
 #  if defined(GPIO_TIM12_CH1OUT) ||defined(GPIO_TIM12_CH2OUT)
 #    define HAVE_TIM12_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM13)
+#if defined(CONFIG_STM32_TIM13)
 #  if defined(GPIO_TIM13_CH1OUT)
 #    define HAVE_TIM13_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM14)
+#if defined(CONFIG_STM32_TIM14)
 #  if defined(GPIO_TIM14_CH1OUT)
 #    define HAVE_TIM14_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM15)
+#if defined(CONFIG_STM32_TIM15)
 #  if defined(GPIO_TIM15_CH1OUT) ||defined(GPIO_TIM15_CH2OUT)
 #    define HAVE_TIM15_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM16)
+#if defined(CONFIG_STM32_TIM16)
 #  if defined(GPIO_TIM16_CH1OUT)
 #    define HAVE_TIM16_GPIOCONFIG 1
 #  endif
 #endif
 
-#if defined(CONFIG_STM32H5_TIM17)
+#if defined(CONFIG_STM32_TIM17)
 #  if defined(GPIO_TIM17_CH1OUT)
 #    define HAVE_TIM17_GPIOCONFIG 1
 #  endif
@@ -226,13 +226,13 @@
  * intended for some other purpose.
  */
 
-#if defined(CONFIG_STM32H5_TIM1)  || defined(CONFIG_STM32H5_TIM2)  || \
-    defined(CONFIG_STM32H5_TIM3)  || defined(CONFIG_STM32H5_TIM4)  || \
-    defined(CONFIG_STM32H5_TIM5)  || defined(CONFIG_STM32H5_TIM6)  || \
-    defined(CONFIG_STM32H5_TIM7)  || defined(CONFIG_STM32H5_TIM8)  || \
-    defined(CONFIG_STM32H5_TIM12) || defined(CONFIG_STM32H5_TIM13) || \
-    defined(CONFIG_STM32H5_TIM14) || defined(CONFIG_STM32H5_TIM15) || \
-    defined(CONFIG_STM32H5_TIM16) || defined(CONFIG_STM32H5_TIM17)
+#if defined(CONFIG_STM32_TIM1)  || defined(CONFIG_STM32_TIM2)  || \
+    defined(CONFIG_STM32_TIM3)  || defined(CONFIG_STM32_TIM4)  || \
+    defined(CONFIG_STM32_TIM5)  || defined(CONFIG_STM32_TIM6)  || \
+    defined(CONFIG_STM32_TIM7)  || defined(CONFIG_STM32_TIM8)  || \
+    defined(CONFIG_STM32_TIM12) || defined(CONFIG_STM32_TIM13) || \
+    defined(CONFIG_STM32_TIM14) || defined(CONFIG_STM32_TIM15) || \
+    defined(CONFIG_STM32_TIM16) || defined(CONFIG_STM32_TIM17)
 
 /****************************************************************************
  * Private Types
@@ -307,7 +307,7 @@ static const struct stm32_tim_ops_s stm32_tim_ops =
   .checkint       = &stm32_tim_checkint,
 };
 
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
 struct stm32_tim_priv_s stm32_tim1_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -315,7 +315,7 @@ struct stm32_tim_priv_s stm32_tim1_priv =
   .base       = STM32_TIM1_BASE,
 };
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
 struct stm32_tim_priv_s stm32_tim2_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -324,7 +324,7 @@ struct stm32_tim_priv_s stm32_tim2_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
 struct stm32_tim_priv_s stm32_tim3_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -333,7 +333,7 @@ struct stm32_tim_priv_s stm32_tim3_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
 struct stm32_tim_priv_s stm32_tim4_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -342,7 +342,7 @@ struct stm32_tim_priv_s stm32_tim4_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
 struct stm32_tim_priv_s stm32_tim5_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -351,7 +351,7 @@ struct stm32_tim_priv_s stm32_tim5_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM6
+#ifdef CONFIG_STM32_TIM6
 struct stm32_tim_priv_s stm32_tim6_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -360,7 +360,7 @@ struct stm32_tim_priv_s stm32_tim6_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM7
+#ifdef CONFIG_STM32_TIM7
 struct stm32_tim_priv_s stm32_tim7_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -369,7 +369,7 @@ struct stm32_tim_priv_s stm32_tim7_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
 struct stm32_tim_priv_s stm32_tim8_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -378,7 +378,7 @@ struct stm32_tim_priv_s stm32_tim8_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
 struct stm32_tim_priv_s stm32_tim12_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -387,7 +387,7 @@ struct stm32_tim_priv_s stm32_tim12_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
 struct stm32_tim_priv_s stm32_tim13_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -396,7 +396,7 @@ struct stm32_tim_priv_s stm32_tim13_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
 struct stm32_tim_priv_s stm32_tim14_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -405,7 +405,7 @@ struct stm32_tim_priv_s stm32_tim14_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
 struct stm32_tim_priv_s stm32_tim15_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -414,7 +414,7 @@ struct stm32_tim_priv_s stm32_tim15_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
 struct stm32_tim_priv_s stm32_tim16_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -423,7 +423,7 @@ struct stm32_tim_priv_s stm32_tim16_priv =
 };
 #endif
 
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
 struct stm32_tim_priv_s stm32_tim17_priv =
 {
   .ops        = &stm32_tim_ops,
@@ -514,12 +514,12 @@ static int stm32_tim_getwidth(struct stm32_tim_dev_s *dev)
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#if defined(CONFIG_STM32H5_TIM2)
+#if defined(CONFIG_STM32_TIM2)
       case STM32_TIM2_BASE:
         return 32;
 #endif
 
-#if defined(CONFIG_STM32H5_TIM5)
+#if defined(CONFIG_STM32_TIM5)
       case STM32_TIM5_BASE:
         return 32;
 #endif
@@ -621,74 +621,74 @@ static int stm32_tim_setclock(struct stm32_tim_dev_s *dev, uint32_t freq)
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
-        freqin = STM32_APB2_TIM1_CLKIN;
+        freqin = STM32_TIM1_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
-        freqin = STM32_APB1_TIM2_CLKIN;
+        freqin = STM32_TIM2_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
-        freqin = STM32_APB1_TIM3_CLKIN;
+        freqin = STM32_TIM3_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
-        freqin = STM32_APB1_TIM4_CLKIN;
+        freqin = STM32_TIM4_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
-        freqin = STM32_APB1_TIM5_CLKIN;
+        freqin = STM32_TIM5_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM6
+#ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
-        freqin = STM32_APB1_TIM6_CLKIN;
+        freqin = STM32_TIM6_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM7
+#ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
-        freqin = STM32_APB1_TIM7_CLKIN;
+        freqin = STM32_TIM7_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
-        freqin = STM32_APB2_TIM8_CLKIN;
+        freqin = STM32_TIM8_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
       case STM32_TIM12_BASE:
-        freqin = STM32_APB1_TIM12_CLKIN;
+        freqin = STM32_TIM12_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
       case STM32_TIM13_BASE:
-        freqin = STM32_APB1_TIM13_CLKIN;
+        freqin = STM32_TIM13_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
       case STM32_TIM14_BASE:
-        freqin = STM32_APB1_TIM14_CLKIN;
+        freqin = STM32_TIM14_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
-        freqin = STM32_APB2_TIM15_CLKIN;
+        freqin = STM32_TIM15_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
-        freqin = STM32_APB2_TIM16_CLKIN;
+        freqin = STM32_TIM16_CLKIN;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
-        freqin = STM32_APB2_TIM17_CLKIN;
+        freqin = STM32_TIM17_CLKIN;
         break;
 #endif
       default:
@@ -740,72 +740,72 @@ static int stm32_tim_setisr(struct stm32_tim_dev_s *dev,
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         vectorno = STM32_IRQ_TIM1_UP;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         vectorno = STM32_IRQ_TIM2;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         vectorno = STM32_IRQ_TIM3;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         vectorno = STM32_IRQ_TIM4;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         vectorno = STM32_IRQ_TIM5;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM6
+#ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
         vectorno = STM32_IRQ_TIM6;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM7
+#ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
         vectorno = STM32_IRQ_TIM7;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         vectorno = STM32_IRQ_TIM8_UP;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
       case STM32_TIM12_BASE:
         vectorno = STM32_IRQ_TIM12;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
       case STM32_TIM13_BASE:
         vectorno = STM32_IRQ_TIM13;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
       case STM32_TIM14_BASE:
         vectorno = STM32_IRQ_TIM14;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
         vectorno = STM32_IRQ_TIM15;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
         vectorno = STM32_IRQ_TIM16;
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
         vectorno = STM32_IRQ_TIM17;
         break;
@@ -1011,7 +1011,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         switch (channel)
           {
@@ -1044,7 +1044,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         switch (channel)
           {
@@ -1073,7 +1073,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         switch (channel)
           {
@@ -1102,7 +1102,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         switch (channel)
           {
@@ -1131,7 +1131,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         switch (channel)
           {
@@ -1160,7 +1160,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         switch (channel)
           {
@@ -1194,7 +1194,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
         break;
 #endif
 
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
       case STM32_TIM12_BASE:
         switch (channel)
           {
@@ -1213,7 +1213,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
       case STM32_TIM13_BASE:
         switch (channel)
           {
@@ -1227,7 +1227,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
       case STM32_TIM14_BASE:
         switch (channel)
           {
@@ -1242,7 +1242,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
         break;
 #endif
 
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
         switch (channel)
           {
@@ -1261,7 +1261,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
         switch (channel)
           {
@@ -1275,7 +1275,7 @@ static int stm32_tim_setchannel(struct stm32_tim_dev_s *dev,
           }
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
         switch (channel)
           {
@@ -1359,85 +1359,85 @@ struct stm32_tim_dev_s *stm32_tim_init(int timer)
 
   switch (timer)
     {
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case 1:
         dev = (struct stm32_tim_dev_s *)&stm32_tim1_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM1EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case 2:
         dev = (struct stm32_tim_dev_s *)&stm32_tim2_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM2EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case 3:
         dev = (struct stm32_tim_dev_s *)&stm32_tim3_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM3EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case 4:
         dev = (struct stm32_tim_dev_s *)&stm32_tim4_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM4EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case 5:
         dev = (struct stm32_tim_dev_s *)&stm32_tim5_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM5EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM6
+#ifdef CONFIG_STM32_TIM6
       case 6:
         dev = (struct stm32_tim_dev_s *)&stm32_tim6_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM6EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM7
+#ifdef CONFIG_STM32_TIM7
       case 7:
         dev = (struct stm32_tim_dev_s *)&stm32_tim7_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM7EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case 8:
         dev = (struct stm32_tim_dev_s *)&stm32_tim8_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM8EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
       case 12:
         dev = (struct stm32_tim_dev_s *)&stm32_tim12_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM12EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
       case 13:
         dev = (struct stm32_tim_dev_s *)&stm32_tim13_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM13EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
       case 14:
         dev = (struct stm32_tim_dev_s *)&stm32_tim14_priv;
         modifyreg32(STM32_RCC_APB1LENR, 0, RCC_APB1LENR_TIM14EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case 15:
         dev = (struct stm32_tim_dev_s *)&stm32_tim15_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM15EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case 16:
         dev = (struct stm32_tim_dev_s *)&stm32_tim16_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM16EN);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case 17:
         dev = (struct stm32_tim_dev_s *)&stm32_tim17_priv;
         modifyreg32(STM32_RCC_APB2ENR, 0, RCC_APB2ENR_TIM17EN);
@@ -1469,72 +1469,72 @@ int stm32_tim_deinit(struct stm32_tim_dev_s * dev)
 
   switch (((struct stm32_tim_priv_s *)dev)->base)
     {
-#ifdef CONFIG_STM32H5_TIM1
+#ifdef CONFIG_STM32_TIM1
       case STM32_TIM1_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM1EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM2
+#ifdef CONFIG_STM32_TIM2
       case STM32_TIM2_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM2EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM3
+#ifdef CONFIG_STM32_TIM3
       case STM32_TIM3_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM3EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM4
+#ifdef CONFIG_STM32_TIM4
       case STM32_TIM4_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM4EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM5
+#ifdef CONFIG_STM32_TIM5
       case STM32_TIM5_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM5EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM6
+#ifdef CONFIG_STM32_TIM6
       case STM32_TIM6_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM6EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM7
+#ifdef CONFIG_STM32_TIM7
       case STM32_TIM7_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM7EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM8
+#ifdef CONFIG_STM32_TIM8
       case STM32_TIM8_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM8EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM12
+#ifdef CONFIG_STM32_TIM12
       case STM32_TIM12_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM12EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM13
+#ifdef CONFIG_STM32_TIM13
       case STM32_TIM13_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM13EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM14
+#ifdef CONFIG_STM32_TIM14
       case STM32_TIM14_BASE:
         modifyreg32(STM32_RCC_APB1LENR, RCC_APB1LENR_TIM14EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM15
+#ifdef CONFIG_STM32_TIM15
       case STM32_TIM15_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM15EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM16
+#ifdef CONFIG_STM32_TIM16
       case STM32_TIM16_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM16EN, 0);
         break;
 #endif
-#ifdef CONFIG_STM32H5_TIM17
+#ifdef CONFIG_STM32_TIM17
       case STM32_TIM17_BASE:
         modifyreg32(STM32_RCC_APB2ENR, RCC_APB2ENR_TIM17EN, 0);
         break;
@@ -1550,4 +1550,4 @@ int stm32_tim_deinit(struct stm32_tim_dev_s * dev)
   return OK;
 }
 
-#endif /* defined(CONFIG_STM32H5_TIM1 || ... || TIM17) */
+#endif /* defined(CONFIG_STM32_TIM1 || ... || TIM17) */

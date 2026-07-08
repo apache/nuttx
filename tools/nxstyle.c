@@ -257,6 +257,32 @@ static const char *g_white_prefix[] =
    */
 
   "uxrCustom",           /* uxrCustomTransport */
+
+  /* Ref:  arch/arm/src/common/ameba, arch/arm/src/rtl8721dx,
+   * arch/arm/src/rtl8720f and the matching boards.
+   * Realtek Ameba SDK ROM/HAL symbols and ARM CMSE intrinsics referenced
+   * by the port; renaming them would break linkage against the vendor blob.
+   */
+
+  "ADC_",
+  "APBPeriph_",
+  "BOOT_",
+  "BOR_",
+  "Cache_",
+  "DCache_",
+  "ChipInfo_",
+  "FLASH_",
+  "IPC_",
+  "LOGUART_",
+  "OSC2M_",
+  "OSC4M_",
+  "OSC131K_",
+  "RCC_",
+  "RTCIO_",
+  "SYSCFG_",
+  "SYSTIMER_",
+  "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
+  "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
   NULL
 };
 
@@ -290,6 +316,17 @@ static const char *g_white_content_list[] =
 
   "NativeSymbol",
   "RuntimeInitArgs",
+
+  /* Ref:  arch/arm/src/common/ameba, arch/arm/src/rtl8721dx,
+   * arch/arm/src/rtl8720f.  Standalone Realtek Ameba SDK ROM symbols.
+   */
+
+  "DelayUs",
+  "DiagPrintf",
+  "Img2EntryFun0",
+  "NewVectorTable",
+  "RomVectorTable",
+  "PutChar",
 
   /* Ref:  gnu_unwind_find_exidx.c */
 

@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l5_mpuinitialize
+ * Name: stm32_mpuinitialize
  *
  * Description:
  *   Configure the MPU to permit user-space access to only restricted SAM3U
@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-void stm32l5_mpuinitialize(void)
+void stm32_mpuinitialize(void)
 {
   uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
   uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
@@ -74,7 +74,7 @@ void stm32l5_mpuinitialize(void)
 }
 
 /****************************************************************************
- * Name: stm32l5_mpu_uheap
+ * Name: stm32_mpu_uheap
  *
  * Description:
  *  Map the user-heap region.
@@ -83,7 +83,7 @@ void stm32l5_mpuinitialize(void)
  *
  ****************************************************************************/
 
-void stm32l5_mpu_uheap(uintptr_t start, size_t size)
+void stm32_mpu_uheap(uintptr_t start, size_t size)
 {
   mpu_user_intsram(start, size);
 }

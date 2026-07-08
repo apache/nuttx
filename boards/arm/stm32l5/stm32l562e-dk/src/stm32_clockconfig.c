@@ -37,14 +37,14 @@
  *   Currently the STM32L562E-DK board support is restricted to running NuttX
  *   in the Non-Secure domain together with TrustedFirmware-M (TFM).  In this
  *   setup the clock configuration is done by TFM, not by NuttX.  Thus, the
- *   board's configuration sets CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG
+ *   board's configuration sets CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
  *   to avoid the standard clock config logic to run and instead do just
  *   nothing in this function.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG)
-void stm32l5_board_clockconfig(void)
+#if defined(CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG)
+void stm32_board_clockconfig(void)
 {
 }
 #endif

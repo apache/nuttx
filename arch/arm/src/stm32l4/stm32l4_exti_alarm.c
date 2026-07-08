@@ -53,14 +53,14 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_alarm_isr
+ * Name: stm32_exti_alarm_isr
  *
  * Description:
  *   EXTI ALARM interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
+static int stm32_exti_alarm_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -73,7 +73,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
 
   /* Clear the pending EXTI interrupt */
 
-  putreg32(EXTI1_RTC_ALARM, STM32L4_EXTI1_PR);
+  putreg32(EXTI1_RTC_ALARM, STM32_EXTI1_PR);
 
   return ret;
 }
@@ -83,7 +83,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_alarm
+ * Name: stm32_exti_alarm
  *
  * Description:
  *   Sets/clears EXTI alarm interrupt.
@@ -99,7 +99,7 @@ static int stm32l4_exti_alarm_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_alarm(bool risingedge, bool fallingedge, bool event,
                        xcpt_t func, void *arg)
 {
   g_alarm_callback = func;
@@ -109,29 +109,29 @@ int stm32l4_exti_alarm(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_RTCALRM, stm32l4_exti_alarm_isr, NULL);
-      up_enable_irq(STM32L4_IRQ_RTCALRM);
+      irq_attach(STM32_IRQ_RTCALRM, stm32_exti_alarm_isr, NULL);
+      up_enable_irq(STM32_IRQ_RTCALRM);
     }
   else
     {
-      up_disable_irq(STM32L4_IRQ_RTCALRM);
+      up_disable_irq(STM32_IRQ_RTCALRM);
     }
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L4_EXTI1_RTSR,
+  modifyreg32(STM32_EXTI1_RTSR,
               risingedge ? 0 : EXTI1_RTC_ALARM,
               risingedge ? EXTI1_RTC_ALARM : 0);
-  modifyreg32(STM32L4_EXTI1_FTSR,
+  modifyreg32(STM32_EXTI1_FTSR,
               fallingedge ? 0 : EXTI1_RTC_ALARM,
               fallingedge ? EXTI1_RTC_ALARM : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32L4_EXTI1_EMR,
+  modifyreg32(STM32_EXTI1_EMR,
               event ? 0 : EXTI1_RTC_ALARM,
               event ? EXTI1_RTC_ALARM : 0);
-  modifyreg32(STM32L4_EXTI1_IMR,
+  modifyreg32(STM32_EXTI1_IMR,
               func ? 0 : EXTI1_RTC_ALARM,
               func ? EXTI1_RTC_ALARM : 0);
 

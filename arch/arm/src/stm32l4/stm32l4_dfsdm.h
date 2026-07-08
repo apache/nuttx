@@ -45,43 +45,43 @@
  * on STM32L4X3, while STM32L4X6 adds support for timers 4,7 and 8 as well.
  */
 
-#ifndef CONFIG_STM32L4_TIM1
+#ifndef CONFIG_STM32_TIM1
 #  undef CONFIG_STM32L4_TIM1_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM3
+#ifndef CONFIG_STM32_TIM3
 #  undef CONFIG_STM32L4_TIM3_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM4
+#ifndef CONFIG_STM32_TIM4
 #  undef CONFIG_STM32L4_TIM4_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM6
+#ifndef CONFIG_STM32_TIM6
 #  undef CONFIG_STM32L4_TIM6_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM7
+#ifndef CONFIG_STM32_TIM7
 #  undef CONFIG_STM32L4_TIM7_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM8
+#ifndef CONFIG_STM32_TIM8
 #  undef CONFIG_STM32L4_TIM8_DFSDM
 #endif
-#ifndef CONFIG_STM32L4_TIM16
+#ifndef CONFIG_STM32_TIM16
 #  undef CONFIG_STM32L4_TIM16_DFSDM
 #endif
 
-#if defined(CONFIG_STM32L4_DFSDM)
+#if defined(CONFIG_STM32_DFSDM)
 
 /* DMA support */
 
 #undef DFSDM_HAVE_DMA
-#if defined(CONFIG_STM32L4_DFSDM1_DMA)
+#if defined(CONFIG_STM32_DFSDM1_DMA)
 #  define DFSDM_HAVE_DMA  1
 #endif
 
 /* ADC output to DFSDM support */
 
 #undef ADC_HAVE_DFSDM
-#if defined(CONFIG_STM32L4_ADC1_OUTPUT_DFSDM) || \
-    defined(CONFIG_STM32L4_ADC2_OUTPUT_DFSDM) || \
-    defined(CONFIG_STM32L4_ADC3_OUTPUT_DFSDM)
+#if defined(CONFIG_STM32_ADC1_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32_ADC2_OUTPUT_DFSDM) || \
+    defined(CONFIG_STM32_ADC3_OUTPUT_DFSDM)
 #  define ADC_HAVE_DFSDM
 #endif
 
@@ -91,32 +91,32 @@
 
 #if defined(CONFIG_STM32L4_TIM1_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM1_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM1_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM1_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM1_CLKIN
 #elif defined(CONFIG_STM32L4_TIM3_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM3_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM3_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM3_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM3_CLKIN
 #elif defined(CONFIG_STM32L4_TIM4_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM4_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM4_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM4_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM4_CLKIN
 #elif defined(CONFIG_STM32L4_TIM6_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM6_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM6_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM6_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM6_CLKIN
 #elif defined(CONFIG_STM32L4_TIM7_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM7_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB1_TIM7_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM7_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM7_CLKIN
 #elif defined(CONFIG_STM32L4_TIM8_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM8_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM8_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM8_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM8_CLKIN
 #elif defined(CONFIG_STM32L4_TIM16_DFSDM)
 #    define DFSDM_HAVE_TIMER           1
-#    define DFSDM_TIMER_BASE           STM32L4_TIM16_BASE
-#    define DFSDM_TIMER_PCLK_FREQUENCY STM32L4_APB2_TIM16_CLKIN
+#    define DFSDM_TIMER_BASE           STM32_TIM16_BASE
+#    define DFSDM_TIMER_PCLK_FREQUENCY STM32_TIM16_CLKIN
 #else
 #    undef  DFSDM_HAVE_TIMER
 #endif
@@ -306,7 +306,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: stm32l4_dfsdm_initialize
+ * Name: stm32_dfsdm_initialize
  *
  * Description:
  *   Initialize the DFSDM.
@@ -322,14 +322,13 @@ extern "C"
  ****************************************************************************/
 
 struct adc_dev_s;
-struct adc_dev_s *stm32l4_dfsdm_initialize(int intf,
-                                           const uint8_t *chanlist,
-                                           int nchannels);
+struct adc_dev_s *stm32_dfsdm_initialize(int intf, const uint8_t *chanlist,
+                                         int nchannels);
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* CONFIG_STM32L4_DFSDM */
+#endif /* CONFIG_STM32_DFSDM */
 #endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_DFSDM_H */

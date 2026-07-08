@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_userspace
+ * Name: stm32_userspace
  *
  * Description:
  *   For the case of the separate user-/kernel-space build, perform whatever
@@ -45,7 +45,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_BUILD_PROTECTED
-void stm32wb_userspace(void);
+void stm32_userspace(void);
 #endif
 
 #endif /* __ARCH_ARM_SRC_STM32W_STM32W_USERSPACE_H */

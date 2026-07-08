@@ -43,7 +43,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_STM32F7_ROMFS
+#ifdef CONFIG_STM32_ROMFS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,6 +72,6 @@
 
 int stm32_romfs_initialize(void);
 
-#endif /* CONFIG_STM32F7_ROMFS */
+#endif /* CONFIG_STM32_ROMFS */
 
 #endif /* __BOARDS_ARM_STM32F7_COMMON_INCLUDE_STM32_ROMFS_H */

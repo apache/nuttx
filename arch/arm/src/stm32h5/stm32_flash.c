@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32H5_STM32H563XX)
+#if defined(CONFIG_STM32_STM32H563XX)
 #  include "stm32h563xx_flash.c"
 #else
 #  error "Unsupported STM32 H5 chip"

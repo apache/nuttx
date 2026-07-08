@@ -35,6 +35,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/1wire/1wire_master.h>
 #include <nuttx/1wire/1wire.h>
+#include <nuttx/1wire/1wire_crc.h>
 
 #include "1wire_internal.h"
 

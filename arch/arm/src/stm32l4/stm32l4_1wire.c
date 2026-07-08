@@ -172,14 +172,14 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
 
 /* 1-Wire device structures */
 
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire1_config =
 {
-  .usartbase  = STM32L4_USART1_BASE,
-  .apbclock   = STM32L4_PCLK2_FREQUENCY,
+  .usartbase  = STM32_USART1_BASE,
+  .apbclock   = STM32_PCLK2_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART1_TX),
-  .irq        = STM32L4_IRQ_USART1,
+  .irq        = STM32_IRQ_USART1,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire1_priv =
@@ -196,14 +196,14 @@ static struct stm32_1wire_priv_s stm32_1wire1_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire2_config =
 {
-  .usartbase  = STM32L4_USART2_BASE,
-  .apbclock   = STM32L4_PCLK1_FREQUENCY,
+  .usartbase  = STM32_USART2_BASE,
+  .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART2_TX),
-  .irq        = STM32L4_IRQ_USART2,
+  .irq        = STM32_IRQ_USART2,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire2_priv =
@@ -220,14 +220,14 @@ static struct stm32_1wire_priv_s stm32_1wire2_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire3_config =
 {
-  .usartbase  = STM32L4_USART3_BASE,
-  .apbclock   = STM32L4_PCLK1_FREQUENCY,
+  .usartbase  = STM32_USART3_BASE,
+  .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_USART3_TX),
-  .irq        = STM32L4_IRQ_USART3,
+  .irq        = STM32_IRQ_USART3,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire3_priv =
@@ -244,14 +244,14 @@ static struct stm32_1wire_priv_s stm32_1wire3_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire4_config =
 {
-  .usartbase  = STM32L4_UART4_BASE,
-  .apbclock   = STM32L4_PCLK1_FREQUENCY,
+  .usartbase  = STM32_UART4_BASE,
+  .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART4_TX),
-  .irq        = STM32L4_IRQ_UART4,
+  .irq        = STM32_IRQ_UART4,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire4_priv =
@@ -268,14 +268,14 @@ static struct stm32_1wire_priv_s stm32_1wire4_priv =
 
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
 
 static const struct stm32_1wire_config_s stm32_1wire5_config =
 {
-  .usartbase  = STM32L4_UART5_BASE,
-  .apbclock   = STM32L4_PCLK1_FREQUENCY,
+  .usartbase  = STM32_UART5_BASE,
+  .apbclock   = STM32_PCLK1_FREQUENCY,
   .data_pin   = PIN_OPENDRAIN(GPIO_UART5_TX),
-  .irq        = STM32L4_IRQ_UART5,
+  .irq        = STM32_IRQ_UART5,
 };
 
 static struct stm32_1wire_priv_s stm32_1wire5_priv =
@@ -338,7 +338,7 @@ static inline void stm32_1wire_out(struct stm32_1wire_priv_s *priv,
 
 static int stm32_1wire_recv(struct stm32_1wire_priv_s *priv)
 {
-  return stm32_1wire_in(priv, STM32L4_USART_RDR_OFFSET) & 0xff;
+  return stm32_1wire_in(priv, STM32_USART_RDR_OFFSET) & 0xff;
 }
 
 /****************************************************************************
@@ -351,7 +351,7 @@ static int stm32_1wire_recv(struct stm32_1wire_priv_s *priv)
 
 static void stm32_1wire_send(struct stm32_1wire_priv_s *priv, int ch)
 {
-  stm32_1wire_out(priv, STM32L4_USART_TDR_OFFSET, (uint32_t)(ch & 0xff));
+  stm32_1wire_out(priv, STM32_USART_TDR_OFFSET, (uint32_t)(ch & 0xff));
 }
 
 /****************************************************************************
@@ -377,13 +377,13 @@ static void stm32_1wire_set_baud(struct stm32_1wire_priv_s *priv)
    * for baud changing.
    */
 
-  cr1 = stm32_1wire_in(priv, STM32L4_USART_CR1_OFFSET);
+  cr1 = stm32_1wire_in(priv, STM32_USART_CR1_OFFSET);
 
   enabled = cr1 & USART_CR1_UE;
   if (enabled)
     {
       cr1 &= ~USART_CR1_UE;
-      stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1);
+      stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, cr1);
     }
 
   /* In case of oversampling by 8, the equation is:
@@ -428,12 +428,12 @@ static void stm32_1wire_set_baud(struct stm32_1wire_priv_s *priv)
       cr1 |= USART_CR1_OVER8;
     }
 
-  stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1);
-  stm32_1wire_out(priv, STM32L4_USART_BRR_OFFSET, brr);
+  stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, cr1);
+  stm32_1wire_out(priv, STM32_USART_BRR_OFFSET, brr);
 
   if (enabled)
     {
-      stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, cr1 | USART_CR1_UE);
+      stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, cr1 | USART_CR1_UE);
     }
 }
 
@@ -463,38 +463,38 @@ static void stm32_1wire_set_apb_clock(struct stm32_1wire_priv_s *priv,
     default:
       return;
 
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
-    case STM32L4_USART1_BASE:
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
+    case STM32_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
-      regaddr = STM32L4_RCC_APB2ENR;
+      regaddr = STM32_RCC_APB2ENR;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
-    case STM32L4_USART2_BASE:
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
+    case STM32_USART2_BASE:
       rcc_en = RCC_APB1ENR1_USART2EN;
-      regaddr = STM32L4_RCC_APB1ENR1;
+      regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
-    case STM32L4_USART3_BASE:
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
+    case STM32_USART3_BASE:
       rcc_en = RCC_APB1ENR1_USART3EN;
-      regaddr = STM32L4_RCC_APB1ENR1;
+      regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
-    case STM32L4_UART4_BASE:
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
+    case STM32_UART4_BASE:
       rcc_en = RCC_APB1ENR1_UART4EN;
-      regaddr = STM32L4_RCC_APB1ENR1;
+      regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
-    case STM32L4_UART5_BASE:
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
+    case STM32_UART5_BASE:
       rcc_en = RCC_APB1ENR1_UART5EN;
-      regaddr = STM32L4_RCC_APB1ENR1;
+      regaddr = STM32_RCC_APB1ENR1;
       break;
 #endif
     }
@@ -534,33 +534,33 @@ static int stm32_1wire_init(struct stm32_1wire_priv_s *priv)
    * Set LBDIE
    */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR2_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR2_OFFSET);
   regval &= ~(USART_CR2_STOP_MASK | USART_CR2_CLKEN | USART_CR2_CPOL |
               USART_CR2_CPHA | USART_CR2_LBCL | USART_CR2_LBDIE);
   regval |= USART_CR2_LBDIE;
-  stm32_1wire_out(priv, STM32L4_USART_CR2_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Configure CR1
    * Clear TE, REm, all interrupt enable bits, PCE, PS and M
    * Set RXNEIE
    */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR1_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_TE | USART_CR1_RE | USART_CR1_ALLINTS |
               USART_CR1_PCE | USART_CR1_PS | USART_CR1_M0 | USART_CR1_M1);
   regval |= USART_CR1_RXNEIE;
-  stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure CR3
    * Clear CTSE, RTSE, and all interrupt enable bits
    * Set ONEBIT, HDSEL and EIE
    */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR3_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_CTSIE | USART_CR3_CTSE | USART_CR3_RTSE |
               USART_CR3_EIE);
   regval |= (USART_CR3_ONEBIT | USART_CR3_HDSEL | USART_CR3_EIE);
-  stm32_1wire_out(priv, STM32L4_USART_CR3_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR3_OFFSET, regval);
 
   /* Set baud rate */
 
@@ -569,13 +569,13 @@ static int stm32_1wire_init(struct stm32_1wire_priv_s *priv)
 
   /* Enable Rx, Tx, and the USART */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR1_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR1_OFFSET);
   regval |= (USART_CR1_UE | USART_CR1_TE | USART_CR1_RE);
-  stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Configure pins for USART use */
 
-  stm32l4_configgpio(config->data_pin);
+  stm32_configgpio(config->data_pin);
 
   ret = irq_attach(config->irq, stm32_1wire_isr, priv);
   if (ret == OK)
@@ -604,25 +604,25 @@ static int stm32_1wire_deinit(struct stm32_1wire_priv_s *priv)
 
   /* Unconfigure GPIO pins */
 
-  stm32l4_unconfiggpio(config->data_pin);
+  stm32_unconfiggpio(config->data_pin);
 
   /* Disable RXNEIE, Rx, Tx, and the USART */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR1_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR1_OFFSET);
   regval &= ~(USART_CR1_UE | USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE);
-  stm32_1wire_out(priv, STM32L4_USART_CR1_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR1_OFFSET, regval);
 
   /* Clear LBDIE */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR2_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR2_OFFSET);
   regval &= ~USART_CR2_LBDIE;
-  stm32_1wire_out(priv, STM32L4_USART_CR2_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR2_OFFSET, regval);
 
   /* Clear ONEBIT, HDSEL and EIE */
 
-  regval  = stm32_1wire_in(priv, STM32L4_USART_CR3_OFFSET);
+  regval  = stm32_1wire_in(priv, STM32_USART_CR3_OFFSET);
   regval &= ~(USART_CR3_ONEBIT | USART_CR3_HDSEL | USART_CR3_EIE);
-  stm32_1wire_out(priv, STM32L4_USART_CR3_OFFSET, regval);
+  stm32_1wire_out(priv, STM32_USART_CR3_OFFSET, regval);
 
   /* Disable USART APB1/2 clock */
 
@@ -765,7 +765,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
 
   /* Get the masked USART status word. */
 
-  sr = stm32_1wire_in(priv, STM32L4_USART_ISR_OFFSET);
+  sr = stm32_1wire_in(priv, STM32_USART_ISR_OFFSET);
 
   /* Receive loop */
 
@@ -858,7 +858,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
        * interrupt clear register (ICR).
        */
 
-      stm32_1wire_out(priv, STM32L4_USART_ICR_OFFSET,
+      stm32_1wire_out(priv, STM32_USART_ICR_OFFSET,
                       (USART_ICR_NCF | USART_ICR_ORECF | USART_ICR_FECF));
 
       if (priv->msgs != NULL)
@@ -873,7 +873,7 @@ static int stm32_1wire_isr(int irq, void *context, void *arg)
 
   if ((sr & USART_ISR_LBDF) != 0)
     {
-      stm32_1wire_out(priv, STM32L4_USART_ICR_OFFSET, USART_ICR_LBDCF);
+      stm32_1wire_out(priv, STM32_USART_ICR_OFFSET, USART_ICR_LBDCF);
 
       if (priv->msgs != NULL)
         {
@@ -1125,7 +1125,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_1wireinitialize
+ * Name: stm32_1wireinitialize
  *
  * Description:
  *   Initialize the selected 1-Wire port. And return a unique instance of
@@ -1141,7 +1141,7 @@ static int stm32_1wire_pm_prepare(struct pm_callback_s *cb, int domain,
  *
  ****************************************************************************/
 
-struct onewire_dev_s *stm32l4_1wireinitialize(int port)
+struct onewire_dev_s *stm32_1wireinitialize(int port)
 {
   struct stm32_1wire_priv_s *priv = NULL;  /* Private data of device with multiple instances */
   struct stm32_1wire_inst_s *inst = NULL;  /* Device, single instance */
@@ -1150,31 +1150,31 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 
   switch (port)
     {
-#ifdef CONFIG_STM32L4_USART1_1WIREDRIVER
+#ifdef CONFIG_STM32_USART1_1WIREDRIVER
     case 1:
       priv = &stm32_1wire1_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART2_1WIREDRIVER
+#ifdef CONFIG_STM32_USART2_1WIREDRIVER
     case 2:
       priv = &stm32_1wire2_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_USART3_1WIREDRIVER
+#ifdef CONFIG_STM32_USART3_1WIREDRIVER
     case 3:
       priv = &stm32_1wire3_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART4_1WIREDRIVER
+#ifdef CONFIG_STM32_UART4_1WIREDRIVER
     case 4:
       priv = &stm32_1wire4_priv;
       break;
 #endif
 
-#ifdef CONFIG_STM32L4_UART5_1WIREDRIVER
+#ifdef CONFIG_STM32_UART5_1WIREDRIVER
     case 5:
       priv = &stm32_1wire5_priv;
       break;
@@ -1218,13 +1218,13 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
 }
 
 /****************************************************************************
- * Name: stm32l4_1wireuninitialize
+ * Name: stm32_1wireuninitialize
  *
  * Description:
  *   De-initialize the selected 1-Wire port, and power down the device.
  *
  * Input Parameters:
- *   Device structure as returned by the stm32l4_1wireinitialize()
+ *   Device structure as returned by the stm32_1wireinitialize()
  *
  * Returned Value:
  *   OK on success, ERROR when internal reference count mismatch or dev
@@ -1232,7 +1232,7 @@ struct onewire_dev_s *stm32l4_1wireinitialize(int port)
  *
  ****************************************************************************/
 
-int stm32l4_1wireuninitialize(struct onewire_dev_s *dev)
+int stm32_1wireuninitialize(struct onewire_dev_s *dev)
 {
   struct stm32_1wire_priv_s *priv = ((struct stm32_1wire_inst_s *)dev)->priv;
 

@@ -356,7 +356,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
@@ -438,7 +438,7 @@ uint32_t *arm_syscall(uint32_t *regs)
         break;
 #endif
 
-#ifdef CONFIG_BUILD_PROTECTED
+#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_ENABLE_ALL_SIGNALS)
       /* R0=SYS_signal_handler_return:  This a user signal handler callback
        *
        *   void signal_handler_return(void);

@@ -40,63 +40,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_spidev_initialize
+ * Name: stm32_spidev_initialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins.
  *
  ****************************************************************************/
 
-void weak_function stm32wb_spidev_initialize(void)
+void weak_function stm32_spidev_initialize(void)
 {
-  /* NOTE: Clocking was already provided in stm32wb_rcc.c.
+  /* NOTE: Clocking was already provided in stm32_rcc.c.
    *       Here, we only initialize chip select pins unique to the board
    *       architecture.
    */
 
 #ifdef CONFIG_LCD_ST7565
-  stm32wb_configgpio(STM32WB_LCD_CS);       /* ST7565 chip select */
+  stm32_configgpio(STM32_LCD_CS);       /* ST7565 chip select */
 #endif
 }
 
 /****************************************************************************
- * Name:  stm32wb_spi1/2select and stm32wb_spi1/2status
+ * Name:  stm32_spi1/2select and stm32_spi1/2status
  *
  * Description:
- *   The external functions, stm32wb_spi1/2select and stm32wb_spi1/2status
+ *   The external functions, stm32_spi1/2select and stm32_spi1/2status
  *   must be provided by board-specific logic.  They are implementations of
  *   the select and status methods of the SPI interface defined by struct
  *   spi_ops_s (see include/nuttx/spi/spi.h). All other methods (including
- *   stm32wb_spibus_initialize()) are provided by common STM32 logic.
+ *   stm32_spibus_initialize()) are provided by common STM32 logic.
  *   To use this common SPI logic on your board:
  *
- *   1. Provide logic in stm32wb_boardinitialize() to configure SPI chip
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip
  *      select pins.
- *   2. Provide stm32wb_spi1/2select() and stm32wb_spi1/2status() functions
+ *   2. Provide stm32_spi1/2select() and stm32_spi1/2status() functions
  *      in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
- *   3. Add a calls to stm32wb_spibus_initialize() in your low level
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
  *      application initialization logic
- *   4. The handle returned by stm32wb_spibus_initialize() may then be used
+ *   4. The handle returned by stm32_spibus_initialize() may then be used
  *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WB_SPI2
-void stm32wb_spi2select(struct spi_dev_s *dev, uint32_t devid, bool selected)
+#ifdef CONFIG_STM32_SPI2
+void stm32_spi2select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
 #ifdef CONFIG_LCD_ST7565
   if (devid == SPIDEV_DISPLAY(0))
     {
-      stm32wb_gpiowrite(STM32WB_LCD_CS, !selected);
+      stm32_gpiowrite(STM32_LCD_CS, !selected);
     }
 #endif
 }
 
-uint8_t stm32wb_spi2status(struct spi_dev_s *dev, uint32_t devid)
+uint8_t stm32_spi2status(struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }

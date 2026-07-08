@@ -24,7 +24,7 @@ config ARCH_BOARD_ENABLE_CPU2
 menuconfig ARCH_BOARD_IPCC
 	bool "Enabled IPCC"
 	select IPCC
-	select STM32WL5_IPCC
+	select STM32_IPCC
 	default n
 	---help---
 		Enables IPCC (inter processor communication controller)
@@ -52,7 +52,7 @@ config ARCH_BOARD_IPCC_CHAN1_TXBUF
 config ARCH_BOARD_IPCC_CHAN2
 	bool "Enable channel 2"
 	default n
-	select STM32WL5_IPCC_CHAN2
+	select STM32_IPCC_CHAN2
 
 if ARCH_BOARD_IPCC_CHAN2
 
@@ -69,7 +69,7 @@ config ARCH_BOARD_IPCC_CHAN2_TXBUF
 config ARCH_BOARD_IPCC_CHAN3
 	bool "Enable channel 3"
 	default n
-	select STM32WL5_IPCC_CHAN3
+	select STM32_IPCC_CHAN3
 
 if ARCH_BOARD_IPCC_CHAN3
 
@@ -86,7 +86,7 @@ config ARCH_BOARD_IPCC_CHAN3_TXBUF
 config ARCH_BOARD_IPCC_CHAN4
 	bool "Enable channel 4"
 	default n
-	select STM32WL5_IPCC_CHAN4
+	select STM32_IPCC_CHAN4
 
 if ARCH_BOARD_IPCC_CHAN4
 
@@ -103,7 +103,7 @@ config ARCH_BOARD_IPCC_CHAN4_TXBUF
 config ARCH_BOARD_IPCC_CHAN5
 	bool "Enable channel 5"
 	default n
-	select STM32WL5_IPCC_CHAN5
+	select STM32_IPCC_CHAN5
 
 if ARCH_BOARD_IPCC_CHAN5
 
@@ -120,7 +120,7 @@ config ARCH_BOARD_IPCC_CHAN5_TXBUF
 config ARCH_BOARD_IPCC_CHAN6
 	bool "Enable channel 6"
 	default n
-	select STM32WL5_IPCC_CHAN6
+	select STM32_IPCC_CHAN6
 
 if ARCH_BOARD_IPCC_CHAN6
 

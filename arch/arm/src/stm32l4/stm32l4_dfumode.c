@@ -44,74 +44,74 @@ typedef void (*boot_call_t)(void);
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
+#if defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
 static inline void rcc_reset(void)
 {
   uint32_t regval;
 
   /* Enable the MSI clock */
 
-  regval = getreg32(STM32L4_RCC_CR);
+  regval = getreg32(STM32_RCC_CR);
   regval |= RCC_CR_MSION;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
-  while (!(getreg32(STM32L4_RCC_CR) & RCC_CR_MSIRDY));
+  while (!(getreg32(STM32_RCC_CR) & RCC_CR_MSIRDY));
 
   /* Set MSI to 4MHz */
 
-  regval = getreg32(STM32L4_RCC_CR);
+  regval = getreg32(STM32_RCC_CR);
   regval &= ~RCC_CR_MSIRANGE_MASK;
   regval |= RCC_CR_MSIRANGE_4M | RCC_CR_MSIRGSEL;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Reset CFGR register */
 
-  putreg32(0x00000000, STM32L4_RCC_CFGR);
+  putreg32(0x00000000, STM32_RCC_CFGR);
 
   /* Reset enable bits for other clocks than MSI */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval &= ~(RCC_CR_HSION | RCC_CR_HSIKERON | RCC_CR_HSEON |
               RCC_CR_HSIASFS | RCC_CR_CSSON | RCC_CR_PLLON |
               RCC_CR_PLLSAI1ON | RCC_CR_PLLSAI2ON);
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Reset PLLCFGR register to reset default */
 
-  putreg32(RCC_PLLCFG_RESET, STM32L4_RCC_PLLCFG);
+  putreg32(RCC_PLLCFG_RESET, STM32_RCC_PLLCFG);
 
-  putreg32(0, STM32L4_RCC_PLLSAI1CFG);
-  putreg32(RCC_PLLSAI1CFG_PLLN(16), STM32L4_RCC_PLLSAI1CFG);
+  putreg32(0, STM32_RCC_PLLSAI1CFG);
+  putreg32(RCC_PLLSAI1CFG_PLLN(16), STM32_RCC_PLLSAI1CFG);
 
-  putreg32(0, STM32L4_RCC_PLLSAI2CFG);
-  putreg32(RCC_PLLSAI2CFG_PLLN(16), STM32L4_RCC_PLLSAI1CFG);
+  putreg32(0, STM32_RCC_PLLSAI2CFG);
+  putreg32(RCC_PLLSAI2CFG_PLLN(16), STM32_RCC_PLLSAI1CFG);
 
   /* Reset HSEBYP bit */
 
-  regval  = getreg32(STM32L4_RCC_CR);
+  regval  = getreg32(STM32_RCC_CR);
   regval &= ~RCC_CR_HSEBYP;
-  putreg32(regval, STM32L4_RCC_CR);
+  putreg32(regval, STM32_RCC_CR);
 
   /* Disable all interrupts */
 
-  putreg32(0x00000000, STM32L4_RCC_CIER);
+  putreg32(0x00000000, STM32_RCC_CIER);
 }
 
 static inline void apb_reset(void)
 {
-  putreg32(0xffffffff, STM32L4_RCC_APB1RSTR1);
-  putreg32(0xffffffff, STM32L4_RCC_APB1RSTR2);
-  putreg32(0xffffffff, STM32L4_RCC_APB2RSTR);
-  putreg32(0xffffffff, STM32L4_RCC_AHB1RSTR);
-  putreg32(0xffffffff, STM32L4_RCC_AHB2RSTR);
-  putreg32(0xffffffff, STM32L4_RCC_AHB3RSTR);
+  putreg32(0xffffffff, STM32_RCC_APB1RSTR1);
+  putreg32(0xffffffff, STM32_RCC_APB1RSTR2);
+  putreg32(0xffffffff, STM32_RCC_APB2RSTR);
+  putreg32(0xffffffff, STM32_RCC_AHB1RSTR);
+  putreg32(0xffffffff, STM32_RCC_AHB2RSTR);
+  putreg32(0xffffffff, STM32_RCC_AHB3RSTR);
 
-  putreg32(0, STM32L4_RCC_APB1RSTR1);
-  putreg32(0, STM32L4_RCC_APB1RSTR2);
-  putreg32(0, STM32L4_RCC_APB2RSTR);
-  putreg32(0, STM32L4_RCC_AHB1RSTR);
-  putreg32(0, STM32L4_RCC_AHB2RSTR);
-  putreg32(0, STM32L4_RCC_AHB3RSTR);
+  putreg32(0, STM32_RCC_APB1RSTR1);
+  putreg32(0, STM32_RCC_APB1RSTR2);
+  putreg32(0, STM32_RCC_APB2RSTR);
+  putreg32(0, STM32_RCC_AHB1RSTR);
+  putreg32(0, STM32_RCC_AHB2RSTR);
+  putreg32(0, STM32_RCC_AHB3RSTR);
 }
 #endif
 
@@ -120,15 +120,15 @@ static inline void apb_reset(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  stm32l4_dfumode
+ * Name:  stm32_dfumode
  *
  * Description:
  *   Reboot the part in DFU mode (GCC only).
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
-void stm32l4_dfumode(void)
+#if defined(CONFIG_STM32_STM32L4X6) || defined(CONFIG_STM32_STM32L4XR)
+void stm32_dfumode(void)
 {
   uint32_t regval;
   boot_call_t boot;
@@ -144,10 +144,10 @@ void stm32l4_dfumode(void)
 
   /* remap ROM at address zero */
 
-  regval = getreg32(STM32L4_RCC_APB2ENR);
+  regval = getreg32(STM32_RCC_APB2ENR);
   regval |= RCC_APB2ENR_SYSCFGEN;
-  putreg32(regval, STM32L4_RCC_APB2ENR);
-  putreg32(SYSCFG_MEMRMP_SYSTEM, STM32L4_SYSCFG_MEMRMP);
+  putreg32(regval, STM32_RCC_APB2ENR);
+  putreg32(SYSCFG_MEMRMP_SYSTEM, STM32_SYSCFG_MEMRMP);
 
   /* set stack pointer and program-counter to ROM values */
 

@@ -41,10 +41,10 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32l4.h"
+#include "stm32.h"
 #include "stm32l4_can.h"
 
-#if defined(CONFIG_CAN) && defined(CONFIG_STM32L4_CAN1)
+#if defined(CONFIG_CAN) && defined(CONFIG_STM32_CAN1)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,17 +62,17 @@
 
 /* Bit timing ***************************************************************/
 
-#define CAN_BIT_QUANTA (CONFIG_STM32L4_CAN_TSEG1 + CONFIG_STM32L4_CAN_TSEG2 + 1)
+#define CAN_BIT_QUANTA (CONFIG_STM32_CAN_TSEG1 + CONFIG_STM32_CAN_TSEG2 + 1)
 
 #ifndef CONFIG_DEBUG_CAN_INFO
-#  undef CONFIG_STM32L4_CAN_REGDEBUG
+#  undef CONFIG_STM32_CAN_REGDEBUG
 #endif
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-struct stm32l4_can_s
+struct stm32_can_s
 {
   uint8_t  port;     /* CAN port number (1 or 2) */
   uint8_t  canrx[2]; /* CAN RX FIFO 0/1 IRQ number */
@@ -89,20 +89,20 @@ struct stm32l4_can_s
 
 /* CAN Register access */
 
-static uint32_t stm32l4can_getreg(struct stm32l4_can_s *priv,
+static uint32_t stm32l4can_getreg(struct stm32_can_s *priv,
                                   int offset);
-static uint32_t stm32l4can_getfreg(struct stm32l4_can_s *priv,
+static uint32_t stm32l4can_getfreg(struct stm32_can_s *priv,
                                    int offset);
-static void stm32l4can_putreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putreg(struct stm32_can_s *priv, int offset,
                               uint32_t value);
-static void stm32l4can_putfreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putfreg(struct stm32_can_s *priv, int offset,
                                uint32_t value);
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
-static void stm32l4can_dumpctrlregs(struct stm32l4_can_s *priv,
+#ifdef CONFIG_STM32_CAN_REGDEBUG
+static void stm32l4can_dumpctrlregs(struct stm32_can_s *priv,
                                     const char *msg);
-static void stm32l4can_dumpmbregs(struct stm32l4_can_s *priv,
+static void stm32l4can_dumpmbregs(struct stm32_can_s *priv,
                                   const char *msg);
-static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
+static void stm32l4can_dumpfiltregs(struct stm32_can_s *priv,
                                     const char *msg);
 #else
 #  define stm32l4can_dumpctrlregs(priv,msg)
@@ -113,14 +113,14 @@ static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
 /* Filtering (todo) */
 
 #ifdef CONFIG_CAN_EXTID
-static int  stm32l4can_addextfilter(struct stm32l4_can_s *priv,
+static int  stm32l4can_addextfilter(struct stm32_can_s *priv,
                                     struct canioc_extfilter_s *arg);
-static int  stm32l4can_delextfilter(struct stm32l4_can_s *priv,
+static int  stm32l4can_delextfilter(struct stm32_can_s *priv,
                                     int arg);
 #endif
-static int  stm32l4can_addstdfilter(struct stm32l4_can_s *priv,
+static int  stm32l4can_addstdfilter(struct stm32_can_s *priv,
                                     struct canioc_stdfilter_s *arg);
-static int  stm32l4can_delstdfilter(struct stm32l4_can_s *priv,
+static int  stm32l4can_delstdfilter(struct stm32_can_s *priv,
                                     int arg);
 
 /* CAN driver methods */
@@ -151,11 +151,11 @@ static int  stm32l4can_txinterrupt(int irq, void *context,
 
 /* Initialization */
 
-static int  stm32l4can_enterinitmode(struct stm32l4_can_s *priv);
-static int  stm32l4can_exitinitmode(struct stm32l4_can_s *priv);
-static int  stm32l4can_bittiming(struct stm32l4_can_s *priv);
-static int  stm32l4can_cellinit(struct stm32l4_can_s *priv);
-static int  stm32l4can_filterinit(struct stm32l4_can_s *priv);
+static int  stm32l4can_enterinitmode(struct stm32_can_s *priv);
+static int  stm32l4can_exitinitmode(struct stm32_can_s *priv);
+static int  stm32l4can_bittiming(struct stm32_can_s *priv);
+static int  stm32l4can_cellinit(struct stm32_can_s *priv);
+static int  stm32l4can_filterinit(struct stm32_can_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -175,20 +175,20 @@ static const struct can_ops_s g_canops =
   .co_txempty       = stm32l4can_txempty,
 };
 
-#ifdef CONFIG_STM32L4_CAN1
-static struct stm32l4_can_s g_can1priv =
+#ifdef CONFIG_STM32_CAN1
+static struct stm32_can_s g_can1priv =
 {
   .port             = 1,
   .canrx            =
   {
-                      STM32L4_IRQ_CAN1RX0,
-                      STM32L4_IRQ_CAN1RX1,
+                      STM32_IRQ_CAN1RX0,
+                      STM32_IRQ_CAN1RX1,
   },
-  .cantx            = STM32L4_IRQ_CAN1TX,
+  .cantx            = STM32_IRQ_CAN1TX,
   .filter           = 0,
-  .base             = STM32L4_CAN1_BASE,
-  .fbase            = STM32L4_CAN1_BASE,
-  .baud             = CONFIG_STM32L4_CAN1_BAUD,
+  .base             = STM32_CAN1_BASE,
+  .fbase            = STM32_CAN1_BASE,
+  .baud             = CONFIG_STM32_CAN1_BAUD,
 };
 
 static struct can_dev_s g_can1dev =
@@ -217,7 +217,7 @@ static struct can_dev_s g_can1dev =
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static uint32_t stm32l4can_vgetreg(uint32_t addr)
 {
   static uint32_t prevaddr = 0;
@@ -271,24 +271,24 @@ static uint32_t stm32l4can_vgetreg(uint32_t addr)
   return val;
 }
 
-static uint32_t stm32l4can_getreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getreg(struct stm32_can_s *priv, int offset)
 {
   return stm32l4can_vgetreg(priv->base + offset);
 }
 
-static uint32_t stm32l4can_getfreg(struct stm32l4_can_s *priv,
+static uint32_t stm32l4can_getfreg(struct stm32_can_s *priv,
                                    int offset)
 {
   return stm32l4can_vgetreg(priv->fbase + offset);
 }
 
 #else
-static uint32_t stm32l4can_getreg(struct stm32l4_can_s *priv, int offset)
+static uint32_t stm32l4can_getreg(struct stm32_can_s *priv, int offset)
 {
   return getreg32(priv->base + offset);
 }
 
-static uint32_t stm32l4can_getfreg(struct stm32l4_can_s *priv,
+static uint32_t stm32l4can_getfreg(struct stm32_can_s *priv,
                                    int offset)
 {
   return getreg32(priv->fbase + offset);
@@ -313,7 +313,7 @@ static uint32_t stm32l4can_getfreg(struct stm32l4_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
+#ifdef CONFIG_STM32_CAN_REGDEBUG
 static void stm32l4can_vputreg(uint32_t addr, uint32_t value)
 {
   /* Show the register value being written */
@@ -325,26 +325,26 @@ static void stm32l4can_vputreg(uint32_t addr, uint32_t value)
   putreg32(value, addr);
 }
 
-static void stm32l4can_putreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putreg(struct stm32_can_s *priv, int offset,
                               uint32_t value)
 {
   stm32l4can_vputreg(priv->base + offset, value);
 }
 
-static void stm32l4can_putfreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putfreg(struct stm32_can_s *priv, int offset,
                                uint32_t value)
 {
   stm32l4can_vputreg(priv->fbase + offset, value);
 }
 
 #else
-static void stm32l4can_putreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putreg(struct stm32_can_s *priv, int offset,
                               uint32_t value)
 {
   putreg32(value, priv->base + offset);
 }
 
-static void stm32l4can_putfreg(struct stm32l4_can_s *priv, int offset,
+static void stm32l4can_putfreg(struct stm32_can_s *priv, int offset,
                                uint32_t value)
 {
   putreg32(value, priv->fbase + offset);
@@ -365,8 +365,8 @@ static void stm32l4can_putfreg(struct stm32l4_can_s *priv, int offset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
-static void stm32l4can_dumpctrlregs(struct stm32l4_can_s *priv,
+#ifdef CONFIG_STM32_CAN_REGDEBUG
+static void stm32l4can_dumpctrlregs(struct stm32_can_s *priv,
                                     const char *msg)
 {
   if (msg)
@@ -381,18 +381,18 @@ static void stm32l4can_dumpctrlregs(struct stm32l4_can_s *priv,
   /* CAN control and status registers */
 
   caninfo("  MCR: %08" PRIx32 "   MSR: %08" PRIx32 "   TSR: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_MCR_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_MSR_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TSR_OFFSET));
+          getreg32(priv->base + STM32_CAN_MCR_OFFSET),
+          getreg32(priv->base + STM32_CAN_MSR_OFFSET),
+          getreg32(priv->base + STM32_CAN_TSR_OFFSET));
 
   caninfo(" RF0R: %08" PRIx32 "  RF1R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_RF0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RF1R_OFFSET));
+          getreg32(priv->base + STM32_CAN_RF0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RF1R_OFFSET));
 
   caninfo("  IER: %08" PRIx32 "   ESR: %08" PRIx32 "   BTR: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_IER_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_ESR_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_BTR_OFFSET));
+          getreg32(priv->base + STM32_CAN_IER_OFFSET),
+          getreg32(priv->base + STM32_CAN_ESR_OFFSET),
+          getreg32(priv->base + STM32_CAN_BTR_OFFSET));
 }
 #endif
 
@@ -410,8 +410,8 @@ static void stm32l4can_dumpctrlregs(struct stm32l4_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
-static void stm32l4can_dumpmbregs(struct stm32l4_can_s *priv,
+#ifdef CONFIG_STM32_CAN_REGDEBUG
+static void stm32l4can_dumpmbregs(struct stm32_can_s *priv,
                                   const char *msg)
 {
   if (msg)
@@ -427,38 +427,38 @@ static void stm32l4can_dumpmbregs(struct stm32l4_can_s *priv,
 
   caninfo(" TI0R: %08" PRIx32 " TDT0R: %08" PRIx32
           " TDL0R: %08" PRIx32 " TDH0R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_TI0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDT0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDL0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDH0R_OFFSET));
+          getreg32(priv->base + STM32_CAN_TI0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDT0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDL0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDH0R_OFFSET));
 
   caninfo(" TI1R: %08" PRIx32 " TDT1R: %08" PRIx32
           " TDL1R: %08" PRIx32 " TDH1R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_TI1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDT1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDL1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDH1R_OFFSET));
+          getreg32(priv->base + STM32_CAN_TI1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDT1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDL1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDH1R_OFFSET));
 
   caninfo(" TI2R: %08" PRIx32 " TDT2R: %08" PRIx32
           " TDL2R: %08" PRIx32 " TDH2R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_TI2R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDT2R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDL2R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_TDH2R_OFFSET));
+          getreg32(priv->base + STM32_CAN_TI2R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDT2R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDL2R_OFFSET),
+          getreg32(priv->base + STM32_CAN_TDH2R_OFFSET));
 
   caninfo(" RI0R: %08" PRIx32 " RDT0R: %08" PRIx32
           " RDL0R: %08" PRIx32 " RDH0R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_RI0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDT0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDL0R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDH0R_OFFSET));
+          getreg32(priv->base + STM32_CAN_RI0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDT0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDL0R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDH0R_OFFSET));
 
   caninfo(" RI1R: %08" PRIx32 " RDT1R: %08" PRIx32
           " RDL1R: %08" PRIx32 " RDH1R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_RI1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDT1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDL1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_RDH1R_OFFSET));
+          getreg32(priv->base + STM32_CAN_RI1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDT1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDL1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_RDH1R_OFFSET));
 }
 #endif
 
@@ -476,8 +476,8 @@ static void stm32l4can_dumpmbregs(struct stm32l4_can_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32L4_CAN_REGDEBUG
-static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
+#ifdef CONFIG_STM32_CAN_REGDEBUG
+static void stm32l4can_dumpfiltregs(struct stm32_can_s *priv,
                                     const char *msg)
 {
   int i;
@@ -494,17 +494,17 @@ static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
   caninfo(" FMR: %08" PRIx32 "   FM1R: %08" PRIx32
           "  FS1R: %08" PRIx32 " FFA1R: %08" PRIx32
           "  FA1R: %08" PRIx32 "\n",
-          getreg32(priv->base + STM32L4_CAN_FMR_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_FM1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_FS1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_FFA1R_OFFSET),
-          getreg32(priv->base + STM32L4_CAN_FA1R_OFFSET));
+          getreg32(priv->base + STM32_CAN_FMR_OFFSET),
+          getreg32(priv->base + STM32_CAN_FM1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_FS1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_FFA1R_OFFSET),
+          getreg32(priv->base + STM32_CAN_FA1R_OFFSET));
 
   for (i = 0; i < CAN_NFILTERS; i++)
     {
       caninfo(" F%dR1: %08" PRIx32 " F%dR2: %08" PRIx32 "\n",
-              i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 1)),
-              i, getreg32(priv->base + STM32L4_CAN_FIR_OFFSET(i, 2)));
+              i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 1)),
+              i, getreg32(priv->base + STM32_CAN_FIR_OFFSET(i, 2)));
     }
 }
 #endif
@@ -526,7 +526,7 @@ static void stm32l4can_dumpfiltregs(struct stm32l4_can_s *priv,
 
 static void stm32l4can_reset(struct can_dev_s *dev)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
   uint32_t regbit = 0;
   irqstate_t flags;
@@ -535,7 +535,7 @@ static void stm32l4can_reset(struct can_dev_s *dev)
 
   /* Get the bits in the AHB1RSTR1 register needed to reset this CAN device */
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (priv->port == 1)
     {
       regbit = RCC_APB1RSTR1_CAN1RST;
@@ -555,12 +555,12 @@ static void stm32l4can_reset(struct can_dev_s *dev)
 
   /* Reset the CAN */
 
-  regval  = getreg32(STM32L4_RCC_APB1RSTR1);
+  regval  = getreg32(STM32_RCC_APB1RSTR1);
   regval |= regbit;
-  putreg32(regval, STM32L4_RCC_APB1RSTR1);
+  putreg32(regval, STM32_RCC_APB1RSTR1);
 
   regval &= ~regbit;
-  putreg32(regval, STM32L4_RCC_APB1RSTR1);
+  putreg32(regval, STM32_RCC_APB1RSTR1);
   leave_critical_section(flags);
 }
 
@@ -583,7 +583,7 @@ static void stm32l4can_reset(struct can_dev_s *dev)
 
 static int stm32l4can_setup(struct can_dev_s *dev)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   int ret;
 
   caninfo("CAN%d RX0 irq: %d RX1 irq: %d TX irq: %d\n",
@@ -670,7 +670,7 @@ static int stm32l4can_setup(struct can_dev_s *dev)
 
 static void stm32l4can_shutdown(struct can_dev_s *dev)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
 
   caninfo("CAN%d\n", priv->port);
 
@@ -707,14 +707,14 @@ static void stm32l4can_shutdown(struct can_dev_s *dev)
 
 static void stm32l4can_rxint(struct can_dev_s *dev, bool enable)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   caninfo("CAN%d enable: %d\n", priv->port, enable);
 
   /* Enable/disable the FIFO 0/1 message pending interrupt */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32_CAN_IER_OFFSET);
   if (enable)
     {
       regval |= CAN_IER_FMPIE0 | CAN_IER_FMPIE1;
@@ -724,7 +724,7 @@ static void stm32l4can_rxint(struct can_dev_s *dev, bool enable)
       regval &= ~(CAN_IER_FMPIE0 | CAN_IER_FMPIE1);
     }
 
-  stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -743,7 +743,7 @@ static void stm32l4can_rxint(struct can_dev_s *dev, bool enable)
 
 static void stm32l4can_txint(struct can_dev_s *dev, bool enable)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   caninfo("CAN%d enable: %d\n", priv->port, enable);
@@ -752,9 +752,9 @@ static void stm32l4can_txint(struct can_dev_s *dev, bool enable)
 
   if (!enable)
     {
-      regval  = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+      regval  = stm32l4can_getreg(priv, STM32_CAN_IER_OFFSET);
       regval &= ~CAN_IER_TMEIE;
-      stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+      stm32l4can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
     }
 }
 
@@ -775,7 +775,7 @@ static void stm32l4can_txint(struct can_dev_s *dev, bool enable)
 static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
                             unsigned long arg)
 {
-  struct stm32l4_can_s *priv;
+  struct stm32_can_s *priv;
   int ret = -ENOTTY;
 
   caninfo("cmd=%04x arg=%lu\n", cmd, arg);
@@ -806,7 +806,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
           uint32_t brp;
 
           DEBUGASSERT(bt != NULL);
-          regval       = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+          regval       = stm32l4can_getreg(priv, STM32_CAN_BTR_OFFSET);
           bt->bt_sjw   = ((regval & CAN_BTR_SJW_MASK) >>
                            CAN_BTR_SJW_SHIFT) + 1;
           bt->bt_tseg1 = ((regval & CAN_BTR_TS1_MASK) >>
@@ -815,7 +815,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
                            CAN_BTR_TS2_SHIFT) + 1;
           brp          = ((regval & CAN_BTR_BRP_MASK) >>
                            CAN_BTR_BRP_SHIFT) + 1;
-          bt->bt_baud  = STM32L4_PCLK1_FREQUENCY /
+          bt->bt_baud  = STM32_PCLK1_FREQUENCY /
                          (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
           ret = OK;
         }
@@ -848,18 +848,19 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
           uint32_t regval;
 
           DEBUGASSERT(bt != NULL);
-          DEBUGASSERT(bt->bt_baud < STM32L4_PCLK1_FREQUENCY);
+          DEBUGASSERT(bt->bt_baud > 0 &&
+            bt->bt_baud < STM32_PCLK1_FREQUENCY);
           DEBUGASSERT(bt->bt_sjw > 0 && bt->bt_sjw <= 4);
           DEBUGASSERT(bt->bt_tseg1 > 0 && bt->bt_tseg1 <= 16);
           DEBUGASSERT(bt->bt_tseg2 > 0 && bt->bt_tseg2 <=  8);
 
-          regval = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_BTR_OFFSET);
 
           /* Extract bit timing data.
            * tmp is in clocks per bit time.
            */
 
-          tmp = STM32L4_PCLK1_FREQUENCY / bt->bt_baud;
+          tmp = STM32_PCLK1_FREQUENCY / bt->bt_baud;
 
           /* This value is dynamic as requested by user */
 
@@ -904,12 +905,12 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               break;
             }
 
-          stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+          stm32l4can_putreg(priv, STM32_CAN_BTR_OFFSET, regval);
 
           ret = stm32l4can_exitinitmode(priv);
           if (ret >= 0)
             {
-              priv->baud  = STM32L4_PCLK1_FREQUENCY /
+              priv->baud  = STM32_PCLK1_FREQUENCY /
                 (brp * (bt->bt_tseg1 + bt->bt_tseg2 + 1));
             }
         }
@@ -934,7 +935,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
 
           DEBUGASSERT(bm != NULL);
 
-          regval          = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+          regval          = stm32l4can_getreg(priv, STM32_CAN_BTR_OFFSET);
 
           bm->bm_loopback = ((regval & CAN_BTR_LBKM) == CAN_BTR_LBKM);
           bm->bm_silent   = ((regval & CAN_BTR_SILM) == CAN_BTR_SILM);
@@ -961,7 +962,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
 
           DEBUGASSERT(bm != NULL);
 
-          regval = stm32l4can_getreg(priv, STM32L4_CAN_BTR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_BTR_OFFSET);
 
           if (bm->bm_loopback)
             {
@@ -989,7 +990,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               break;
             }
 
-          stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, regval);
+          stm32l4can_putreg(priv, STM32_CAN_BTR_OFFSET, regval);
 
           ret = stm32l4can_exitinitmode(priv);
         }
@@ -1078,7 +1079,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               return ret;
             }
 
-          regval = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_NART;
@@ -1088,7 +1089,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               regval &= ~CAN_MCR_NART;
             }
 
-          stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+          stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
           return stm32l4can_exitinitmode(priv);
         }
         break;
@@ -1102,7 +1103,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               return ret;
             }
 
-          regval = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+          regval = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_ABOM;
@@ -1112,7 +1113,7 @@ static int stm32l4can_ioctl(struct can_dev_s *dev, int cmd,
               regval &= ~CAN_MCR_ABOM;
             }
 
-          stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+          stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
           return stm32l4can_exitinitmode(priv);
         }
         break;
@@ -1173,7 +1174,7 @@ static int stm32l4can_remoterequest(struct can_dev_s *dev, uint16_t id)
 static int stm32l4can_send(struct can_dev_s *dev,
                            struct can_msg_s *msg)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint8_t *ptr;
   uint32_t regval;
   uint32_t tmp;
@@ -1185,7 +1186,7 @@ static int stm32l4can_send(struct can_dev_s *dev,
 
   /* Select one empty transmit mailbox */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32_CAN_TSR_OFFSET);
   if ((regval & CAN_TSR_TME0) != 0 && (regval & CAN_TSR_RQCP0) == 0)
     {
       txmb = 0;
@@ -1206,10 +1207,10 @@ static int stm32l4can_send(struct can_dev_s *dev,
 
   /* Clear TXRQ, RTR, IDE, EXID, and STID fields */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_TIR_OFFSET(txmb));
   regval &= ~(CAN_TIR_TXRQ | CAN_TIR_RTR | CAN_TIR_IDE |
               CAN_TIR_EXID_MASK | CAN_TIR_STID_MASK);
-  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
 
   /* Set up the ID, standard 11-bit or extended 29-bit. */
 
@@ -1233,15 +1234,15 @@ static int stm32l4can_send(struct can_dev_s *dev,
   regval |= (msg->cm_hdr.ch_rtr ? CAN_TIR_RTR : 0);
 #endif
 #endif
-  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
 
   /* Set up the DLC */
 
   dlc     = msg->cm_hdr.ch_dlc;
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_TDTR_OFFSET(txmb));
   regval &= ~(CAN_TDTR_DLC_MASK | CAN_TDTR_TGT);
   regval |= (uint32_t)dlc << CAN_TDTR_DLC_SHIFT;
-  stm32l4can_putreg(priv, STM32L4_CAN_TDTR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TDTR_OFFSET(txmb), regval);
 
   /* Set up the data fields */
 
@@ -1272,7 +1273,7 @@ static int stm32l4can_send(struct can_dev_s *dev,
         }
     }
 
-  stm32l4can_putreg(priv, STM32L4_CAN_TDLR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TDLR_OFFSET(txmb), regval);
 
   regval = 0;
   if (dlc > 4)
@@ -1299,19 +1300,19 @@ static int stm32l4can_send(struct can_dev_s *dev,
         }
     }
 
-  stm32l4can_putreg(priv, STM32L4_CAN_TDHR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TDHR_OFFSET(txmb), regval);
 
   /* Enable the transmit mailbox empty interrupt (may already be enabled) */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_IER_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32_CAN_IER_OFFSET);
   regval |= CAN_IER_TMEIE;
-  stm32l4can_putreg(priv, STM32L4_CAN_IER_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
 
   /* Request transmission */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_TIR_OFFSET(txmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_TIR_OFFSET(txmb));
   regval |= CAN_TIR_TXRQ;  /* Transmit Mailbox Request */
-  stm32l4can_putreg(priv, STM32L4_CAN_TIR_OFFSET(txmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_TIR_OFFSET(txmb), regval);
 
   stm32l4can_dumpmbregs(priv, "After send");
   return OK;
@@ -1333,12 +1334,12 @@ static int stm32l4can_send(struct can_dev_s *dev,
 
 static bool stm32l4can_txready(struct can_dev_s *dev)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   /* Return true if any mailbox is available */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32_CAN_TSR_OFFSET);
   caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return (regval & CAN_ALL_MAILBOXES) != 0;
@@ -1364,12 +1365,12 @@ static bool stm32l4can_txready(struct can_dev_s *dev)
 
 static bool stm32l4can_txempty(struct can_dev_s *dev)
 {
-  struct stm32l4_can_s *priv = dev->cd_priv;
+  struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
   /* Return true if all mailboxes are available */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32_CAN_TSR_OFFSET);
   caninfo("CAN%d TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return (regval & CAN_ALL_MAILBOXES) == CAN_ALL_MAILBOXES;
@@ -1394,7 +1395,7 @@ static bool stm32l4can_txempty(struct can_dev_s *dev)
 static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 {
   struct can_dev_s *dev = NULL;
-  struct stm32l4_can_s *priv;
+  struct stm32_can_s *priv;
   struct can_hdr_s hdr;
   uint8_t data[CAN_MAXDATALEN];
   uint32_t regval;
@@ -1406,7 +1407,7 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 
   /* Verify that a message is pending in the FIFO */
 
-  regval   = stm32l4can_getreg(priv, STM32L4_CAN_RFR_OFFSET(rxmb));
+  regval   = stm32l4can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb));
   npending = (regval & CAN_RFR_FMP_MASK) >> CAN_RFR_FMP_SHIFT;
   if (npending < 1)
     {
@@ -1425,7 +1426,7 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 
   /* Get the CAN identifier. */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_RIR_OFFSET(rxmb));
+  regval = stm32l4can_getreg(priv, STM32_CAN_RIR_OFFSET(rxmb));
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & CAN_RIR_IDE) != 0)
@@ -1462,18 +1463,18 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 
   /* Get the DLC */
 
-  regval     = stm32l4can_getreg(priv, STM32L4_CAN_RDTR_OFFSET(rxmb));
+  regval     = stm32l4can_getreg(priv, STM32_CAN_RDTR_OFFSET(rxmb));
   hdr.ch_dlc = (regval & CAN_RDTR_DLC_MASK) >> CAN_RDTR_DLC_SHIFT;
 
   /* Save the message data */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RDLR_OFFSET(rxmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_RDLR_OFFSET(rxmb));
   data[0] = (regval & CAN_RDLR_DATA0_MASK) >> CAN_RDLR_DATA0_SHIFT;
   data[1] = (regval & CAN_RDLR_DATA1_MASK) >> CAN_RDLR_DATA1_SHIFT;
   data[2] = (regval & CAN_RDLR_DATA2_MASK) >> CAN_RDLR_DATA2_SHIFT;
   data[3] = (regval & CAN_RDLR_DATA3_MASK) >> CAN_RDLR_DATA3_SHIFT;
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RDHR_OFFSET(rxmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_RDHR_OFFSET(rxmb));
   data[4] = (regval & CAN_RDHR_DATA4_MASK) >> CAN_RDHR_DATA4_SHIFT;
   data[5] = (regval & CAN_RDHR_DATA5_MASK) >> CAN_RDHR_DATA5_SHIFT;
   data[6] = (regval & CAN_RDHR_DATA6_MASK) >> CAN_RDHR_DATA6_SHIFT;
@@ -1488,9 +1489,9 @@ static int stm32l4can_rxinterrupt(int irq, void *context, int rxmb)
 #ifndef CONFIG_CAN_EXTID
 errout:
 #endif
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_RFR_OFFSET(rxmb));
+  regval  = stm32l4can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb));
   regval |= CAN_RFR_RFOM;
-  stm32l4can_putreg(priv, STM32L4_CAN_RFR_OFFSET(rxmb), regval);
+  stm32l4can_putreg(priv, STM32_CAN_RFR_OFFSET(rxmb), regval);
   return ret;
 }
 
@@ -1552,7 +1553,7 @@ static int stm32l4can_rx1interrupt(int irq, void *context, void *arg)
 static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = NULL;
-  struct stm32l4_can_s *priv;
+  struct stm32_can_s *priv;
   uint32_t regval;
 
   dev = &g_can1dev;
@@ -1560,7 +1561,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
 
   /* Get the transmit status */
 
-  regval = stm32l4can_getreg(priv, STM32L4_CAN_TSR_OFFSET);
+  regval = stm32l4can_getreg(priv, STM32_CAN_TSR_OFFSET);
 
   /* Check for RQCP0: Request completed mailbox 0 */
 
@@ -1570,7 +1571,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
        * ALST0 and TERR0) for Mailbox 0.
        */
 
-      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
+      stm32l4can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
 
       /* Check for errors */
 
@@ -1590,7 +1591,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
        * ALST1 and TERR1) for Mailbox 1.
        */
 
-      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
+      stm32l4can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
 
       /* Check for errors */
 
@@ -1610,7 +1611,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
        * ALST2 and TERR2) for Mailbox 2.
        */
 
-      stm32l4can_putreg(priv, STM32L4_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
+      stm32l4can_putreg(priv, STM32_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
 
       /* Check for errors */
 
@@ -1682,7 +1683,7 @@ static int stm32l4can_txinterrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
+static int stm32l4can_bittiming(struct stm32_can_s *priv)
 {
   uint32_t tmp;
   uint32_t brp;
@@ -1690,7 +1691,7 @@ static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
   uint32_t ts2;
 
   caninfo("CAN%d PCLK1: %d baud: %d\n",
-          priv->port, STM32L4_PCLK1_FREQUENCY, priv->baud);
+          priv->port, STM32_PCLK1_FREQUENCY, priv->baud);
 
   /* Try to get CAN_BIT_QUANTA quanta in one bit_time.
    *
@@ -1708,7 +1709,7 @@ static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
    *   PCLK1 = 42,000,000 baud =   700,000 nquanta = 14 : brp = 4
    */
 
-  tmp = STM32L4_PCLK1_FREQUENCY / priv->baud;
+  tmp = STM32_PCLK1_FREQUENCY / priv->baud;
   if (tmp < CAN_BIT_QUANTA)
     {
       /* At the smallest brp value (1), there are already too few bit times
@@ -1729,15 +1730,15 @@ static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
         }
     }
 
-  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32L4_CAN_TSEG1,
-   * ts2 is CONFIG_STM32L4_CAN_TSEG2 and we calculate brp to achieve
+  /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_STM32_CAN_TSEG1,
+   * ts2 is CONFIG_STM32_CAN_TSEG2 and we calculate brp to achieve
    * CAN_BIT_QUANTA quanta in the bit time
    */
 
   else
     {
-      ts1 = CONFIG_STM32L4_CAN_TSEG1;
-      ts2 = CONFIG_STM32L4_CAN_TSEG2;
+      ts1 = CONFIG_STM32_CAN_TSEG1;
+      ts2 = CONFIG_STM32_CAN_TSEG2;
       brp = (tmp + (CAN_BIT_QUANTA / 2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >= 1 && brp <= CAN_BTR_BRP_MAX);
     }
@@ -1762,7 +1763,7 @@ static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
   tmp |= CAN_BTR_LBKM;
 #endif
 
-  stm32l4can_putreg(priv, STM32L4_CAN_BTR_OFFSET, tmp);
+  stm32l4can_putreg(priv, STM32_CAN_BTR_OFFSET, tmp);
   return OK;
 }
 
@@ -1782,7 +1783,7 @@ static int stm32l4can_bittiming(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32l4can_enterinitmode(struct stm32l4_can_s *priv)
+static int stm32l4can_enterinitmode(struct stm32_can_s *priv)
 {
   uint32_t regval;
   volatile uint32_t timeout;
@@ -1791,15 +1792,15 @@ static int stm32l4can_enterinitmode(struct stm32l4_can_s *priv)
 
   /* Enter initialization mode */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval |= CAN_MCR_INRQ;
-  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   /* Wait until initialization mode is acknowledged */
 
   for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
     {
-      regval = stm32l4can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
+      regval = stm32l4can_getreg(priv, STM32_CAN_MSR_OFFSET);
       if ((regval & CAN_MSR_INAK) != 0)
         {
           /* We are in initialization mode */
@@ -1833,22 +1834,22 @@ static int stm32l4can_enterinitmode(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32l4can_exitinitmode(struct stm32l4_can_s *priv)
+static int stm32l4can_exitinitmode(struct stm32_can_s *priv)
 {
   uint32_t regval;
   volatile uint32_t timeout;
 
   /* Exit Initialization mode, enter Normal mode */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval &= ~CAN_MCR_INRQ;
-  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   /* Wait until the initialization mode exit is acknowledged */
 
   for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
     {
-      regval = stm32l4can_getreg(priv, STM32L4_CAN_MSR_OFFSET);
+      regval = stm32l4can_getreg(priv, STM32_CAN_MSR_OFFSET);
       if ((regval & CAN_MSR_INAK) == 0)
         {
           /* We are out of initialization mode */
@@ -1884,7 +1885,7 @@ static int stm32l4can_exitinitmode(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32l4can_cellinit(struct stm32l4_can_s *priv)
+static int stm32l4can_cellinit(struct stm32_can_s *priv)
 {
   uint32_t regval;
   int ret;
@@ -1893,9 +1894,9 @@ static int stm32l4can_cellinit(struct stm32l4_can_s *priv)
 
   /* Exit from sleep mode */
 
-  regval  = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval  = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval &= ~CAN_MCR_SLEEP;
-  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   ret = stm32l4can_enterinitmode(priv);
   if (ret != 0)
@@ -1913,10 +1914,10 @@ static int stm32l4can_cellinit(struct stm32l4_can_s *priv)
    *  - Transmit FIFO priority
    */
 
-  regval   = stm32l4can_getreg(priv, STM32L4_CAN_MCR_OFFSET);
+  regval   = stm32l4can_getreg(priv, STM32_CAN_MCR_OFFSET);
   regval &= ~(CAN_MCR_TXFP | CAN_MCR_RFLM | CAN_MCR_NART |
               CAN_MCR_AWUM | CAN_MCR_ABOM | CAN_MCR_TTCM);
-  stm32l4can_putreg(priv, STM32L4_CAN_MCR_OFFSET, regval);
+  stm32l4can_putreg(priv, STM32_CAN_MCR_OFFSET, regval);
 
   /* Configure bit timing. */
 
@@ -1962,7 +1963,7 @@ static int stm32l4can_cellinit(struct stm32l4_can_s *priv)
  *
  ****************************************************************************/
 
-static int stm32l4can_filterinit(struct stm32l4_can_s *priv)
+static int stm32l4can_filterinit(struct stm32_can_s *priv)
 {
   uint32_t regval;
   uint32_t bitmask;
@@ -1975,52 +1976,52 @@ static int stm32l4can_filterinit(struct stm32l4_can_s *priv)
 
   /* Enter filter initialization mode */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FMR_OFFSET);
   regval |= CAN_FMR_FINIT;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
 
   /* Disable the filter */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FA1R_OFFSET);
   regval &= ~bitmask;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FA1R_OFFSET, regval);
 
   /* Select the 32-bit scale for the filter */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FS1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FS1R_OFFSET);
   regval |= bitmask;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FS1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FS1R_OFFSET, regval);
 
   /* There are 14 or 28 filter banks (depending) on the device.
    * Each filter bank is composed of two 32-bit registers, CAN_FiR:
    */
 
-  stm32l4can_putfreg(priv, STM32L4_CAN_FIR_OFFSET(priv->filter, 1), 0);
-  stm32l4can_putfreg(priv, STM32L4_CAN_FIR_OFFSET(priv->filter, 2), 0);
+  stm32l4can_putfreg(priv, STM32_CAN_FIR_OFFSET(priv->filter, 1), 0);
+  stm32l4can_putfreg(priv, STM32_CAN_FIR_OFFSET(priv->filter, 2), 0);
 
   /* Set Id/Mask mode for the filter */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FM1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FM1R_OFFSET);
   regval &= ~bitmask;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FM1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FM1R_OFFSET, regval);
 
   /* Assign FIFO 0 for the filter */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FFA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FFA1R_OFFSET);
   regval &= ~bitmask;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FFA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FFA1R_OFFSET, regval);
 
   /* Enable the filter */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FA1R_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FA1R_OFFSET);
   regval |= bitmask;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FA1R_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FA1R_OFFSET, regval);
 
   /* Exit filter initialization mode */
 
-  regval  = stm32l4can_getfreg(priv, STM32L4_CAN_FMR_OFFSET);
+  regval  = stm32l4can_getfreg(priv, STM32_CAN_FMR_OFFSET);
   regval &= ~CAN_FMR_FINIT;
-  stm32l4can_putfreg(priv, STM32L4_CAN_FMR_OFFSET, regval);
+  stm32l4can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
   return OK;
 }
 
@@ -2042,7 +2043,7 @@ static int stm32l4can_filterinit(struct stm32l4_can_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_EXTID
-static int stm32l4can_addextfilter(struct stm32l4_can_s *priv,
+static int stm32l4can_addextfilter(struct stm32_can_s *priv,
                                    struct canioc_extfilter_s *arg)
 {
   return -ENOTTY;
@@ -2068,7 +2069,7 @@ static int stm32l4can_addextfilter(struct stm32l4_can_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_CAN_EXTID
-static int stm32l4can_delextfilter(struct stm32l4_can_s *priv, int arg)
+static int stm32l4can_delextfilter(struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
 }
@@ -2091,7 +2092,7 @@ static int stm32l4can_delextfilter(struct stm32l4_can_s *priv, int arg)
  *
  ****************************************************************************/
 
-static int stm32l4can_addstdfilter(struct stm32l4_can_s *priv,
+static int stm32l4can_addstdfilter(struct stm32_can_s *priv,
                                    struct canioc_stdfilter_s *arg)
 {
   return -ENOTTY;
@@ -2115,7 +2116,7 @@ static int stm32l4can_addstdfilter(struct stm32l4_can_s *priv,
  *
  ****************************************************************************/
 
-static int stm32l4can_delstdfilter(struct stm32l4_can_s *priv, int arg)
+static int stm32l4can_delstdfilter(struct stm32_can_s *priv, int arg)
 {
   return -ENOTTY;
 }
@@ -2125,7 +2126,7 @@ static int stm32l4can_delstdfilter(struct stm32l4_can_s *priv, int arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4can_initialize
+ * Name: stm32_caninitialize
  *
  * Description:
  *   Initialize the selected CAN port
@@ -2138,17 +2139,17 @@ static int stm32l4can_delstdfilter(struct stm32l4_can_s *priv, int arg)
  *
  ****************************************************************************/
 
-struct can_dev_s *stm32l4can_initialize(int port)
+struct can_dev_s *stm32_caninitialize(int port)
 {
   struct can_dev_s *dev = NULL;
 
   caninfo("CAN%d\n", port);
 
   /* NOTE:  Peripherical clocking for CAN1 and/or CAN2 was already provided
-   * by stm32l4_clockconfig() early in the reset sequence.
+   * by stm32_clockconfig() early in the reset sequence.
    */
 
-#ifdef CONFIG_STM32L4_CAN1
+#ifdef CONFIG_STM32_CAN1
   if (port == 1)
     {
       /* Select the CAN1 device structure */
@@ -2159,8 +2160,8 @@ struct can_dev_s *stm32l4can_initialize(int port)
        * file must have been disambiguated in the board.h file.
        */
 
-      stm32l4_configgpio(GPIO_CAN1_RX);
-      stm32l4_configgpio(GPIO_CAN1_TX);
+      stm32_configgpio(GPIO_CAN1_RX);
+      stm32_configgpio(GPIO_CAN1_TX);
     }
   else
 #endif
@@ -2172,4 +2173,4 @@ struct can_dev_s *stm32l4can_initialize(int port)
   return dev;
 }
 
-#endif /* CONFIG_CAN && (CONFIG_STM32L4_CAN1 || CONFIG_STM32L4_CAN2) */
+#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */

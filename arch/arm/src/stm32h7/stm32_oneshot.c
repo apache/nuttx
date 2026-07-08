@@ -39,7 +39,7 @@
 
 #include "stm32_oneshot.h"
 
-#ifdef CONFIG_STM32H7_ONESHOT
+#ifdef CONFIG_STM32_ONESHOT
 
 /****************************************************************************
  * Private Function Prototypes
@@ -51,7 +51,7 @@ static int stm32_oneshot_handler(int irg_num, void * context, void *arg);
  * Private Data
  ****************************************************************************/
 
-static struct stm32_oneshot_s *g_oneshot[CONFIG_STM32H7_ONESHOT_MAXTIMERS];
+static struct stm32_oneshot_s *g_oneshot[CONFIG_STM32_ONESHOT_MAXTIMERS];
 
 /****************************************************************************
  * Private Functions
@@ -117,19 +117,19 @@ static int stm32_oneshot_handler(int irg_num, void * context, void *arg)
  *
  * Returned Value:
  *   Returns zero (OK) on success.  This can only fail if the number of
- *   timers exceeds CONFIG_STM32H7_ONESHOT_MAXTIMERS.
+ *   timers exceeds CONFIG_STM32_ONESHOT_MAXTIMERS.
  *
  ****************************************************************************/
 
 static inline int stm32_allocate_handler(struct stm32_oneshot_s *oneshot)
 {
-#if CONFIG_STM32H7_ONESHOT_MAXTIMERS > 1
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
   int ret = -EBUSY;
   int i;
 
   /* Search for an unused handler */
 
-  for (i = 0; i < CONFIG_STM32H7_ONESHOT_MAXTIMERS; i++)
+  for (i = 0; i < CONFIG_STM32_ONESHOT_MAXTIMERS; i++)
     {
       /* Is this handler available? */
 
@@ -401,4 +401,4 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
   return OK;
 }
 
-#endif /* CONFIG_STM32H7_ONESHOT */
+#endif /* CONFIG_STM32_ONESHOT */

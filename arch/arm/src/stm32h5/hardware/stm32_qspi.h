@@ -36,8 +36,8 @@
 
 /* General Characteristics **************************************************/
 
-#define STM32H5_QSPI_MINBITS          8         /* Minimum word width */
-#define STM32H5_QSPI_MAXBITS          32        /* Maximum word width */
+#define STM32_QSPI_MINBITS          8         /* Minimum word width */
+#define STM32_QSPI_MAXBITS          32        /* Maximum word width */
 
 /* QSPI register offsets ****************************************************/
 

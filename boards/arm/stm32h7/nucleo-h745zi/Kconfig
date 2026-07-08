@@ -11,7 +11,7 @@ choice
 
 config NUCLEOH745ZI_SMPS
 	bool "Internal SMPS only (default)"
-	select STM32H7_PWR_DIRECT_SMPS_SUPPLY
+	select STM32_PWR_DIRECT_SMPS_SUPPLY
 
 config NUCLEOH745ZI_LDO
 	bool "Internal LDO only"

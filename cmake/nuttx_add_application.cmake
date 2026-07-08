@@ -195,7 +195,6 @@ function(nuttx_add_application)
       # loadable build requires applying ELF flags to all applications
 
       if(CONFIG_MODULES)
-        add_dependencies(nuttx_apps_mksymtab ${TARGET})
         target_compile_options(
           ${TARGET}
           PRIVATE

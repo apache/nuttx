@@ -288,8 +288,12 @@
 #define LPC214X_VIC_SOFTINTCLEAR_OFFSET 0x1c   /* W: Software Interrupt Clear Register */
 #define LPC214X_VIC_PROTECTION_OFFSET   0x20   /* Protection Enable Register */
 
+#define LPC214X_VIC_PRIORITY_MASK_OFFSET 0x024  /* Priority Mask Register */
+
 #define LPC214X_VIC_VECTADDR_OFFSET     0x30   /* RW: Vector Address Register */
 #define LPC214X_VIC_DEFVECTADDR_OFFSET  0x34   /* RW: Default Vector Address Register */
+
+#define LPC214X_VIC_ADDRESS_OFFSET      0xF00  /* RW: Vector Address Register */
 
 #define LPC214X_VIC_VECTADDR0_OFFSET    0x100  /* RW: Vector Address 0 Register */
 #define LPC214X_VIC_VECTADDR1_OFFSET    0x104  /* RW: Vector Address 1 Register */

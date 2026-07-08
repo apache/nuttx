@@ -46,6 +46,7 @@ namespace std
   using ::clock_settime;
   using ::clock_gettime;
   using ::mktime;
+  using ::localtime;
   using ::gmtime_r;
   using ::gmtime;
   using ::strftime;

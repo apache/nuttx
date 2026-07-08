@@ -39,26 +39,26 @@
 
 #include "stm32l4_oneshot.h"
 
-#ifdef CONFIG_STM32L4_ONESHOT
+#ifdef CONFIG_STM32_ONESHOT
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int stm32l4_oneshot_handler(int irq, void *context, void *arg);
+static int stm32_oneshot_handler(int irq, void *context, void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static struct stm32l4_oneshot_s *g_oneshot[CONFIG_STM32L4_ONESHOT_MAXTIMERS];
+static struct stm32_oneshot_s *g_oneshot[CONFIG_STM32_ONESHOT_MAXTIMERS];
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_oneshot_handler
+ * Name: stm32_oneshot_handler
  *
  * Description:
  *   Common timer interrupt callback.  When any oneshot timer interrupt
@@ -73,9 +73,9 @@ static struct stm32l4_oneshot_s *g_oneshot[CONFIG_STM32L4_ONESHOT_MAXTIMERS];
  *
  ****************************************************************************/
 
-static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
+static int stm32_oneshot_handler(int irq, void *context, void *arg)
 {
-  struct stm32l4_oneshot_s *oneshot = (struct stm32l4_oneshot_s *) arg;
+  struct stm32_oneshot_s *oneshot = (struct stm32_oneshot_s *) arg;
   oneshot_handler_t oneshot_handler;
   void *oneshot_arg;
 
@@ -86,10 +86,10 @@ static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
    * Disable the TC now and disable any further interrupts.
    */
 
-  STM32L4_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32L4_TIM_DISABLEINT(oneshot->tch, 0);
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_DISABLED);
-  STM32L4_TIM_ACKINT(oneshot->tch, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
+  STM32_TIM_ACKINT(oneshot->tch, 0);
 
   /* The timer is no longer running */
 
@@ -107,7 +107,7 @@ static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
 }
 
 /****************************************************************************
- * Name: stm32l4_allocate_handler
+ * Name: stm32_allocate_handler
  *
  * Description:
  *   Allocate a timer callback handler for the oneshot instance.
@@ -117,19 +117,19 @@ static int stm32l4_oneshot_handler(int irq, void *context, void *arg)
  *
  * Returned Value:
  *   Returns zero (OK) on success.  This can only fail if the number of
- *   timers exceeds CONFIG_STM32L4_ONESHOT_MAXTIMERS.
+ *   timers exceeds CONFIG_STM32_ONESHOT_MAXTIMERS.
  *
  ****************************************************************************/
 
-static inline int stm32l4_allocate_handler(struct stm32l4_oneshot_s *oneshot)
+static inline int stm32_allocate_handler(struct stm32_oneshot_s *oneshot)
 {
-#if CONFIG_STM32L4_ONESHOT_MAXTIMERS > 1
+#if CONFIG_STM32_ONESHOT_MAXTIMERS > 1
   int ret = -EBUSY;
   int i;
 
   /* Search for an unused handler */
 
-  for (i = 0; i < CONFIG_STM32L4_ONESHOT_MAXTIMERS; i++)
+  for (i = 0; i < CONFIG_STM32_ONESHOT_MAXTIMERS; i++)
     {
       /* Is this handler available? */
 
@@ -162,7 +162,7 @@ static inline int stm32l4_allocate_handler(struct stm32l4_oneshot_s *oneshot)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_oneshot_initialize
+ * Name: stm32_oneshot_initialize
  *
  * Description:
  *   Initialize the oneshot timer wrapper
@@ -180,7 +180,7 @@ static inline int stm32l4_allocate_handler(struct stm32l4_oneshot_s *oneshot)
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot,
+int stm32_oneshot_initialize(struct stm32_oneshot_s *oneshot,
                                int chan, uint16_t resolution)
 {
   uint32_t frequency;
@@ -193,14 +193,14 @@ int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot,
   frequency = USEC_PER_SEC / (uint32_t)resolution;
   oneshot->frequency = frequency;
 
-  oneshot->tch = stm32l4_tim_init(chan);
+  oneshot->tch = stm32_tim_init(chan);
   if (!oneshot->tch)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", chan);
       return -EBUSY;
     }
 
-  STM32L4_TIM_SETCLOCK(oneshot->tch, frequency);
+  STM32_TIM_SETCLOCK(oneshot->tch, frequency);
 
   /* Initialize the remaining fields in the state structure. */
 
@@ -211,18 +211,18 @@ int stm32l4_oneshot_initialize(struct stm32l4_oneshot_s *oneshot,
 
   /* Assign a callback handler to the oneshot */
 
-  return stm32l4_allocate_handler(oneshot);
+  return stm32_allocate_handler(oneshot);
 }
 
 /****************************************************************************
- * Name: stm32l4_oneshot_max_delay
+ * Name: stm32_oneshot_max_delay
  *
  * Description:
  *   Determine the maximum delay of the one-shot timer (in microseconds)
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
+int stm32_oneshot_max_delay(struct stm32_oneshot_s *oneshot,
                               uint64_t *usec)
 {
   DEBUGASSERT(oneshot != NULL && usec != NULL);
@@ -233,7 +233,7 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
 }
 
 /****************************************************************************
- * Name: stm32l4_oneshot_start
+ * Name: stm32_oneshot_start
  *
  * Description:
  *   Start the oneshot timer
@@ -241,7 +241,7 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32l4_oneshot_initialize();
+ *           stm32_oneshot_initialize();
  *   handler The function to call when when the oneshot timer expires.
  *   arg     An opaque argument that will accompany the callback.
  *   ts      Provides the duration of the one shot timer.
@@ -252,7 +252,7 @@ int stm32l4_oneshot_max_delay(struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
+int stm32_oneshot_start(struct stm32_oneshot_s *oneshot,
                           oneshot_handler_t handler, void *arg,
                           const struct timespec *ts)
 {
@@ -273,7 +273,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
       /* Yes.. then cancel it */
 
       tmrinfo("Already running... cancelling\n");
-      stm32l4_oneshot_cancel(oneshot, NULL);
+      stm32_oneshot_cancel(oneshot, NULL);
     }
 
   /* Save the new handler and its argument */
@@ -302,19 +302,19 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  STM32L4_TIM_SETISR(oneshot->tch, stm32l4_oneshot_handler, oneshot, 0);
+  STM32_TIM_SETISR(oneshot->tch, stm32_oneshot_handler, oneshot, 0);
 
   /* Set timer period */
 
   oneshot->period = (uint32_t)period;
-  STM32L4_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
+  STM32_TIM_SETPERIOD(oneshot->tch, (uint32_t)period);
 
   /* Start the counter */
 
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_PULSE);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_PULSE);
 
-  STM32L4_TIM_ACKINT(oneshot->tch, 0);
-  STM32L4_TIM_ENABLEINT(oneshot->tch, 0);
+  STM32_TIM_ACKINT(oneshot->tch, 0);
+  STM32_TIM_ENABLEINT(oneshot->tch, 0);
 
   /* Enable interrupts.  We should get the callback when the interrupt
    * occurs.
@@ -326,7 +326,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
 }
 
 /****************************************************************************
- * Name: stm32l4_oneshot_cancel
+ * Name: stm32_oneshot_cancel
  *
  * Description:
  *   Cancel the oneshot timer and return the time remaining on the timer.
@@ -337,7 +337,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
  * Input Parameters:
  *   oneshot Caller allocated instance of the oneshot state structure.  This
  *           structure must have been previously initialized via a call to
- *           stm32l4_oneshot_initialize();
+ *           stm32_oneshot_initialize();
  *   ts      The location in which to return the time remaining on the
  *           oneshot timer.  A time of zero is returned if the timer is
  *           not running.  ts may be zero in which case the time remaining
@@ -350,7 +350,7 @@ int stm32l4_oneshot_start(struct stm32l4_oneshot_s *oneshot,
  *
  ****************************************************************************/
 
-int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
+int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
                            struct timespec *ts)
 {
   irqstate_t flags;
@@ -389,14 +389,14 @@ int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
 
   tmrinfo("Cancelling...\n");
 
-  count  = STM32L4_TIM_GETCOUNTER(oneshot->tch);
+  count  = STM32_TIM_GETCOUNTER(oneshot->tch);
   period = oneshot->period;
 
   /* Now we can disable the interrupt and stop the timer. */
 
-  STM32L4_TIM_DISABLEINT(oneshot->tch, 0);
-  STM32L4_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
-  STM32L4_TIM_SETMODE(oneshot->tch, STM32L4_TIM_MODE_DISABLED);
+  STM32_TIM_DISABLEINT(oneshot->tch, 0);
+  STM32_TIM_SETISR(oneshot->tch, NULL, NULL, 0);
+  STM32_TIM_SETMODE(oneshot->tch, STM32_TIM_MODE_DISABLED);
 
   oneshot->running = false;
   oneshot->handler = NULL;
@@ -457,4 +457,4 @@ int stm32l4_oneshot_cancel(struct stm32l4_oneshot_s *oneshot,
   return OK;
 }
 
-#endif /* CONFIG_STM32L4_ONESHOT */
+#endif /* CONFIG_STM32_ONESHOT */

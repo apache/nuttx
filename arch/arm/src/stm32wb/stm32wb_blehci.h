@@ -50,7 +50,7 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wb_blehci_initialize
+ * Name: stm32_blehci_initialize
  *
  * Description:
  *   Initialize and register BLE HCI driver which interfaces a BLE host
@@ -59,7 +59,7 @@ extern "C"
  *
  ****************************************************************************/
 
-void stm32wb_blehci_initialize(void);
+void stm32_blehci_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

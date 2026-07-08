@@ -54,33 +54,33 @@
  *   2. PWM complementary channels must have positive polarity
  */
 
-#ifndef CONFIG_STM32F7_FOC_HAS_PWM_COMPLEMENTARY
+#ifndef CONFIG_STM32_FOC_HAS_PWM_COMPLEMENTARY
 #  error
 #endif
 
-#if CONFIG_STM32F7_TIM1_CH1POL != 0
+#if CONFIG_STM32_TIM1_CH1POL != 0
 #  error
 #endif
-#if CONFIG_STM32F7_TIM1_CH2POL != 0
+#if CONFIG_STM32_TIM1_CH2POL != 0
 #  error
 #endif
-#if CONFIG_STM32F7_TIM1_CH3POL != 0
+#if CONFIG_STM32_TIM1_CH3POL != 0
 #  error
 #endif
-#if CONFIG_STM32F7_TIM1_CH1NPOL != 0
+#if CONFIG_STM32_TIM1_CH1NPOL != 0
 #  error
 #endif
-#if CONFIG_STM32F7_TIM1_CH2NPOL != 0
+#if CONFIG_STM32_TIM1_CH2NPOL != 0
 #  error
 #endif
-#if CONFIG_STM32F7_TIM1_CH3NPOL != 0
+#if CONFIG_STM32_TIM1_CH3NPOL != 0
 #  error
 #endif
 
 /* Aux ADC needs DMA enabled  */
 
 #ifdef CONFIG_ADC
-#  ifndef CONFIG_STM32F7_ADC1_DMA
+#  ifndef CONFIG_STM32_ADC1_DMA
 #    error
 #  endif
 #endif
@@ -122,7 +122,7 @@
 
 #define ADC1_INJECTED  (CONFIG_MOTOR_FOC_SHUNTS)
 
-#ifdef CONFIG_BOARD_STM32F7_STEVALETH001V1_FOC_VBUS
+#ifdef CONFIG_BOARD_STM32_STEVALETH001V1_FOC_VBUS
 #  define STEVALETH001V1_FOC_VBUS 1
 #else
 #  define STEVALETH001V1_FOC_VBUS 0
@@ -133,11 +133,11 @@
 
 /* Check ADC1 configuration */
 
-#if ADC1_INJECTED != CONFIG_STM32F7_ADC1_INJECTED_CHAN
+#if ADC1_INJECTED != CONFIG_STM32_ADC1_INJECTED_CHAN
 #  error
 #endif
 
-#if CONFIG_STM32F7_ADC1_RESOLUTION != 0
+#if CONFIG_STM32_ADC1_RESOLUTION != 0
 #  error
 #endif
 
@@ -186,7 +186,7 @@ static void board_foc_trace(struct foc_dev_s *dev, int type, bool state);
 
 static uint8_t g_adc1_chan[] =
 {
-#ifdef CONFIG_BOARD_STM32F7_STEVALETH001V1_FOC_VBUS
+#ifdef CONFIG_BOARD_STM32_STEVALETH001V1_FOC_VBUS
   14,                           /* ADC1 REG - VBUS */
 #endif
   15,                           /* ADC1 INJ1 - PHASE 1 */
@@ -196,7 +196,7 @@ static uint8_t g_adc1_chan[] =
 
 static uint32_t g_adc1_pins[] =
 {
-#ifdef CONFIG_BOARD_STM32F7_STEVALETH001V1_FOC_VBUS
+#ifdef CONFIG_BOARD_STM32_STEVALETH001V1_FOC_VBUS
   GPIO_ADC1_IN14,
 #endif
   GPIO_ADC1_IN15,
@@ -208,7 +208,7 @@ static uint32_t g_adc1_pins[] =
 
 static adc_channel_t g_adc1_stime[] =
 {
-#ifdef CONFIG_BOARD_STM32F7_STEVALETH001V1_FOC_VBUS
+#ifdef CONFIG_BOARD_STM32_STEVALETH001V1_FOC_VBUS
   {
     .channel     = 14,
     .sample_time = VBUS_SAMPLE_TIME

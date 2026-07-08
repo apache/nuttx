@@ -53,14 +53,14 @@ static void  *g_callback_arg;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_wakeup_isr
+ * Name: stm32_exti_wakeup_isr
  *
  * Description:
  *   EXTI periodic WAKEUP interrupt service routine/dispatcher
  *
  ****************************************************************************/
 
-static int stm32l4_exti_wakeup_isr(int irq, void *context, void *arg)
+static int stm32_exti_wakeup_isr(int irq, void *context, void *arg)
 {
   int ret = OK;
 
@@ -73,7 +73,7 @@ static int stm32l4_exti_wakeup_isr(int irq, void *context, void *arg)
 
   /* Clear the pending EXTI interrupt */
 
-  putreg32(EXTI1_RTC_WAKEUP, STM32L4_EXTI1_PR);
+  putreg32(EXTI1_RTC_WAKEUP, STM32_EXTI1_PR);
 
   return ret;
 }
@@ -83,7 +83,7 @@ static int stm32l4_exti_wakeup_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_exti_wakeup
+ * Name: stm32_exti_wakeup
  *
  * Description:
  *   Sets/clears EXTI wakeup interrupt.
@@ -99,7 +99,7 @@ static int stm32l4_exti_wakeup_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int stm32l4_exti_wakeup(bool risingedge, bool fallingedge, bool event,
+int stm32_exti_wakeup(bool risingedge, bool fallingedge, bool event,
                         xcpt_t func, void *arg)
 {
   g_wakeup_callback = func;
@@ -109,29 +109,29 @@ int stm32l4_exti_wakeup(bool risingedge, bool fallingedge, bool event,
 
   if (func)
     {
-      irq_attach(STM32L4_IRQ_RTC_WKUP, stm32l4_exti_wakeup_isr, NULL);
-      up_enable_irq(STM32L4_IRQ_RTC_WKUP);
+      irq_attach(STM32_IRQ_RTC_WKUP, stm32_exti_wakeup_isr, NULL);
+      up_enable_irq(STM32_IRQ_RTC_WKUP);
     }
   else
     {
-      up_disable_irq(STM32L4_IRQ_RTC_WKUP);
+      up_disable_irq(STM32_IRQ_RTC_WKUP);
     }
 
   /* Configure rising/falling edges */
 
-  modifyreg32(STM32L4_EXTI1_RTSR,
+  modifyreg32(STM32_EXTI1_RTSR,
               risingedge ? 0 : EXTI1_RTC_WAKEUP,
               risingedge ? EXTI1_RTC_WAKEUP : 0);
-  modifyreg32(STM32L4_EXTI1_FTSR,
+  modifyreg32(STM32_EXTI1_FTSR,
               fallingedge ? 0 : EXTI1_RTC_WAKEUP,
               fallingedge ? EXTI1_RTC_WAKEUP : 0);
 
   /* Enable Events and Interrupts */
 
-  modifyreg32(STM32L4_EXTI1_EMR,
+  modifyreg32(STM32_EXTI1_EMR,
               event ? 0 : EXTI1_RTC_WAKEUP,
               event ? EXTI1_RTC_WAKEUP : 0);
-  modifyreg32(STM32L4_EXTI1_IMR,
+  modifyreg32(STM32_EXTI1_IMR,
               func ? 0 : EXTI1_RTC_WAKEUP,
               func ? EXTI1_RTC_WAKEUP : 0);
 

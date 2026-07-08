@@ -76,7 +76,7 @@ uint32_t board_userled_initialize(void)
 
   for (i = 0; i < nitems(g_ledcfg); i++)
     {
-      stm32l5_configgpio(g_ledcfg[i]);
+      stm32_configgpio(g_ledcfg[i]);
     }
 
   return BOARD_NLEDS;
@@ -96,7 +96,7 @@ void board_userled(int led, bool ledon)
 {
   if ((unsigned)led < nitems(g_ledcfg))
     {
-      stm32l5_gpiowrite(g_ledcfg[led], !ledon);
+      stm32_gpiowrite(g_ledcfg[led], !ledon);
     }
 }
 
@@ -118,7 +118,7 @@ void board_userled_all(uint32_t ledset)
 
   for (i = 0; i < nitems(g_ledcfg); i++)
     {
-      stm32l5_gpiowrite(g_ledcfg[i], !(ledset & (1 << i)));
+      stm32_gpiowrite(g_ledcfg[i], !(ledset & (1 << i)));
     }
 }
 

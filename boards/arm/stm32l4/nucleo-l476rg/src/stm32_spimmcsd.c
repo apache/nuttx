@@ -33,14 +33,14 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <stm32l4.h>
+#include <stm32.h>
 #include "stm32l4_spi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_STM32L4_SPI1
+#ifndef CONFIG_STM32_SPI1
 #  error "SD driver requires CONFIG_STM32_SPI1 to be enabled"
 #endif
 
@@ -68,14 +68,14 @@ static const int SD_SLOT_NO  = 0; /* There is only one SD slot */
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32l4_spi1register
+ * Name: stm32_spi1register
  *
  * Description:
  *   Registers media change callback
  *
  ****************************************************************************/
 
-int stm32l4_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
+int stm32_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
                          void *arg)
 {
   spiinfo("INFO: Registering spi1 device\n");
@@ -83,21 +83,21 @@ int stm32l4_spi1register(struct spi_dev_s *dev, spi_mediachange_t callback,
 }
 
 /****************************************************************************
- * Name: stm32l4_mmcsd_initialize
+ * Name: stm32_mmcsd_initialize
  *
  * Description:
  *   Initialize SPI-based SD card and card detect thread.
  *
  ****************************************************************************/
 
-int stm32l4_mmcsd_initialize(int minor)
+int stm32_mmcsd_initialize(int minor)
 {
   struct spi_dev_s *spi;
   int rv;
 
   mcinfo("INFO: Initializing mmcsd card\n");
 
-  spi = stm32l4_spibus_initialize(SD_SPI_PORT);
+  spi = stm32_spibus_initialize(SD_SPI_PORT);
   if (spi == NULL)
     {
       mcerr("ERROR: Failed to initialize SPI port %d\n", SD_SPI_PORT);

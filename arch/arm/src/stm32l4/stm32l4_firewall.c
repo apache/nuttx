@@ -39,7 +39,7 @@
  * Public Functions
  ****************************************************************************/
 
-int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup)
+int stm32_firewallsetup(struct stm32_firewall_t *setup)
 {
   uint32_t reg;
 
@@ -67,34 +67,34 @@ int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup)
    * data must be in SRAM1
    */
 
-  if ((setup->codestart & STM32L4_FLASH_MASK) != STM32L4_FLASH_BASE)
+  if ((setup->codestart & STM32_FLASH_MASK) != STM32_FLASH_BASE)
     {
       return -EINVAL;
     }
 
-  if ((setup->nvdatastart & STM32L4_FLASH_MASK) != STM32L4_FLASH_BASE)
+  if ((setup->nvdatastart & STM32_FLASH_MASK) != STM32_FLASH_BASE)
     {
       return -EINVAL;
     }
 
   /* Define address and length registers */
 
-  modifyreg32(STM32L4_FIREWALL_CSSA, FIREWALL_CSSADD_MASK,
+  modifyreg32(STM32_FIREWALL_CSSA, FIREWALL_CSSADD_MASK,
               setup->codestart);
-  modifyreg32(STM32L4_FIREWALL_CSL, FIREWALL_CSSLENG_MASK,
+  modifyreg32(STM32_FIREWALL_CSL, FIREWALL_CSSLENG_MASK,
               setup->codelen);
-  modifyreg32(STM32L4_FIREWALL_NVDSSA, FIREWALL_NVDSADD_MASK,
+  modifyreg32(STM32_FIREWALL_NVDSSA, FIREWALL_NVDSADD_MASK,
               setup->nvdatastart);
-  modifyreg32(STM32L4_FIREWALL_NVDSL, FIREWALL_NVDSLENG_MASK,
+  modifyreg32(STM32_FIREWALL_NVDSL, FIREWALL_NVDSLENG_MASK,
               setup->nvdatalen);
-  modifyreg32(STM32L4_FIREWALL_VDSSA, FIREWALL_VDSADD_MASK,
+  modifyreg32(STM32_FIREWALL_VDSSA, FIREWALL_VDSADD_MASK,
               setup->datastart);
-  modifyreg32(STM32L4_FIREWALL_VDSL, FIREWALL_VDSLENG_MASK,
+  modifyreg32(STM32_FIREWALL_VDSL, FIREWALL_VDSLENG_MASK,
               setup->datalen);
 
   /* Define access options */
 
-  reg = getreg32(STM32L4_FIREWALL_CR);
+  reg = getreg32(STM32_FIREWALL_CR);
   if (setup->datashared)
     {
       reg |= FIREWALL_CR_VDS;
@@ -105,13 +105,13 @@ int stm32l4_firewallsetup(struct stm32l4_firewall_t *setup)
       reg |= FIREWALL_CR_VDE;
     }
 
-  putreg32(reg, STM32L4_FIREWALL_CR);
+  putreg32(reg, STM32_FIREWALL_CR);
 
   /* Enable firewall */
 
-  reg  = getreg32(STM32L4_SYSCFG_CFGR1);
+  reg  = getreg32(STM32_SYSCFG_CFGR1);
   reg &= ~SYSCFG_CFGR1_FWDIS;
-  putreg32(reg, STM32L4_SYSCFG_CFGR1);
+  putreg32(reg, STM32_SYSCFG_CFGR1);
 
   /* Now protected code can only be accessed by jumping to the FW gate */
 

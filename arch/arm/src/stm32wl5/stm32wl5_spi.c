@@ -21,22 +21,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The external functions, stm32wl5_spi1/2select and stm32wl5_spi1/2status
+ * The external functions, stm32_spi1/2select and stm32_spi1/2status
  * must be provided by board-specific logic.  They are implementations of the
  * select and status methods of the SPI interface defined by struct spi_ops_s
  * (see include/nuttx/spi/spi.h).
- * All other methods (including stm32wl5_spibus_initialize())  are provided
+ * All other methods (including stm32_spibus_initialize())  are provided
  * by common STM32 logic.  To use this common SPI logic on your board:
  *
- *   1. Provide logic in stm32wl5_boardinitialize() to configure SPI chip
+ *   1. Provide logic in stm32_boardinitialize() to configure SPI chip
  *      select pins.
- *   2. Provide stm32wl5_spi1/2select() and stm32wl5_spi1/2() functions
+ *   2. Provide stm32_spi1/2select() and stm32_spi1/2() functions
  *      in your board-specific logic.  These functions will perform chip
  *      selection and status operations using GPIOs in the way your board is
  *      configured.
- *   3. Add a calls to stm32wl5_spibus_initialize() in your low level
+ *   3. Add a calls to stm32_spibus_initialize() in your low level
  *      application initialization logic
- *   4. The handle returned by stm32wl5_spibus_initialize() may then be used
+ *   4. The handle returned by stm32_spibus_initialize() may then be used
  *      to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
@@ -67,14 +67,14 @@
 
 #include "arm_internal.h"
 #include "chip.h"
-#include "stm32wl5.h"
+#include "stm32.h"
 #include "stm32wl5_gpio.h"
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 #include "stm32wl5_dma.h"
 #endif
 #include "stm32wl5_spi.h"
 
-#if defined(CONFIG_STM32WL5_SPI1) || defined(CONFIG_STM32WL5_SPI2S2)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2S2)
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -83,34 +83,34 @@
 
 /* SPI interrupts */
 
-#ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
 #  error "Interrupt driven SPI not yet supported"
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 #  error "DMA driven SPI not yet supported"
 #endif
 
 /* Can't have both interrupt driven SPI and SPI DMA */
 
-#if defined(CONFIG_STM32WL5_SPI_INTERRUPTS) && defined(CONFIG_STM32WL5_SPI_DMA)
+#if defined(CONFIG_STM32_SPI_INTERRUPTS) && defined(CONFIG_STM32_SPI_DMA)
 #  error "Cannot enable both interrupt mode and DMA mode for SPI"
 #endif
 
 /* SPI DMA priority */
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 
 #  if defined(CONFIG_SPI_DMAPRIO)
 #    define SPI_DMA_PRIO  CONFIG_SPI_DMAPRIO
-#  elif defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1
+#  elif defined(CONFIG_STM32_STM32WL5XXX_CPU1
 #warning "Verify, read doc and Implement"
 #    define SPI_DMA_PRIO  DMA_CCR_PRIMED
 #  else
 #    error "Unknown STM32WL5 DMA"
 #  endif
 
-#  if defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1)
+#  if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
 #    if (SPI_DMA_PRIO & ~DMA_CCR_PL_MASK) != 0
 #      error "Illegal value for CONFIG_SPI_DMAPRIO"
 #    endif
@@ -120,7 +120,7 @@
 
 /* DMA channel configuration */
 
-#if defined(CONFIG_STM32WL5_STM32WL5XXX_CPU1)
+#if defined(CONFIG_STM32_STM32WL5XXX_CPU1)
 #  define SPI_RXDMA16_CONFIG        (SPI_DMA_PRIO|DMA_CCR_MSIZE_16BITS|DMA_CCR_PSIZE_16BITS|DMA_CCR_MINC            )
 #  define SPI_RXDMA8_CONFIG         (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_8BITS |DMA_CCR_MINC            )
 #  define SPI_RXDMA16NULL_CONFIG    (SPI_DMA_PRIO|DMA_CCR_MSIZE_8BITS |DMA_CCR_PSIZE_16BITS                         )
@@ -137,15 +137,15 @@
 #  define SPIDMA_SIZE(b) (((b) + SPIDMA_BUFFER_MASK) & ~SPIDMA_BUFFER_MASK)
 #  define SPIDMA_BUF_ALIGN   aligned_data(4)
 
-#  if defined(CONFIG_STM32WL5_SPI1_DMA_BUFFER) && \
-            CONFIG_STM32WL5_SPI1_DMA_BUFFER > 0
-#    define SPI1_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32WL5_SPI1_DMA_BUFFER)
+#  if defined(CONFIG_STM32_SPI1_DMA_BUFFER) && \
+            CONFIG_STM32_SPI1_DMA_BUFFER > 0
+#    define SPI1_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI1_DMA_BUFFER)
 #    define SPI1_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
 #  endif
 
-#  if defined(CONFIG_STM32WL5_SPI2S2_DMA_BUFFER) && \
-            CONFIG_STM32WL5_SPI2S2_DMA_BUFFER > 0
-#    define SPI2S2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32WL5_SPI2S2_DMA_BUFFER)
+#  if defined(CONFIG_STM32_SPI2S2_DMA_BUFFER) && \
+            CONFIG_STM32_SPI2S2_DMA_BUFFER > 0
+#    define SPI2S2_DMABUFSIZE_ADJUSTED SPIDMA_SIZE(CONFIG_STM32_SPI2S2_DMA_BUFFER)
 #    define SPI2S2_DMABUFSIZE_ALGN SPIDMA_BUF_ALIGN
 #  endif
 
@@ -155,15 +155,15 @@
  * Private Types
  ****************************************************************************/
 
-struct stm32wl5_spidev_s
+struct stm32_spidev_s
 {
   struct spi_dev_s spidev;       /* Externally visible part of the SPI interface */
   uint32_t         spibase;      /* SPIn base address */
   uint32_t         spiclock;     /* Clocking for the SPI module */
-#ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
   uint8_t          spiirq;       /* SPI IRQ number */
 #endif
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
   volatile uint8_t rxresult;     /* Result of the RX DMA */
   volatile uint8_t txresult;     /* Result of the RX DMA */
 #ifdef CONFIG_SPI_TRIGGER
@@ -196,45 +196,45 @@ struct stm32wl5_spidev_s
 
 /* Helpers */
 
-static inline uint16_t spi_getreg(struct stm32wl5_spidev_s *priv,
+static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
                                   uint8_t offset);
 
-static inline uint8_t spi_getreg8(struct stm32wl5_spidev_s *priv,
+static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
                                   uint8_t offset);
 
-static inline void spi_putreg(struct stm32wl5_spidev_s *priv,
+static inline void spi_putreg(struct stm32_spidev_s *priv,
                               uint8_t offset,
                               uint16_t value);
 
-static inline void spi_putreg8(struct stm32wl5_spidev_s *priv,
+static inline void spi_putreg8(struct stm32_spidev_s *priv,
                                uint8_t offset,
                                uint8_t value);
 
-static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv);
-static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
+static inline uint16_t spi_readword(struct stm32_spidev_s *priv);
+static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t byte);
 
 /* DMA support */
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static int         spi_dmarxwait(struct stm32wl5_spidev_s *priv);
-static int         spi_dmatxwait(struct stm32wl5_spidev_s *priv);
-static inline void spi_dmarxwakeup(struct stm32wl5_spidev_s *priv);
-static inline void spi_dmatxwakeup(struct stm32wl5_spidev_s *priv);
+#ifdef CONFIG_STM32_SPI_DMA
+static int         spi_dmarxwait(struct stm32_spidev_s *priv);
+static int         spi_dmatxwait(struct stm32_spidev_s *priv);
+static inline void spi_dmarxwakeup(struct stm32_spidev_s *priv);
+static inline void spi_dmatxwakeup(struct stm32_spidev_s *priv);
 static void        spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr,
                                      void *arg);
 static void        spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr,
                                      void *arg);
-static void        spi_dmarxsetup(struct stm32wl5_spidev_s *priv,
+static void        spi_dmarxsetup(struct stm32_spidev_s *priv,
                                   void *rxbuffer,
                                   void *rxdummy,
                                   size_t nwords);
-static void        spi_dmatxsetup(struct stm32wl5_spidev_s *priv,
+static void        spi_dmatxsetup(struct stm32_spidev_s *priv,
                                   const void *txbuffer,
                                   const void *txdummy,
                                   size_t nwords);
-static inline void spi_dmarxstart(struct stm32wl5_spidev_s *priv);
-static inline void spi_dmatxstart(struct stm32wl5_spidev_s *priv);
+static inline void spi_dmarxstart(struct stm32_spidev_s *priv);
+static inline void spi_dmatxstart(struct stm32_spidev_s *priv);
 #endif
 
 /* SPI methods */
@@ -267,26 +267,26 @@ static void        spi_recvblock(struct spi_dev_s *dev,
 
 /* Initialization */
 
-static void        spi_bus_initialize(struct stm32wl5_spidev_s *priv);
+static void        spi_bus_initialize(struct stm32_spidev_s *priv);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
 static const struct spi_ops_s g_sp1iops =
 {
   .lock              = spi_lock,
-  .select            = stm32wl5_spi1select,
+  .select            = stm32_spi1select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures        = spi_hwfeatures,
 #endif
-  .status            = stm32wl5_spi1status,
+  .status            = stm32_spi1status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = stm32wl5_spi1cmddata,
+  .cmddata           = stm32_spi1cmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -299,7 +299,7 @@ static const struct spi_ops_s g_sp1iops =
   .trigger           = spi_trigger,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32wl5_spi1register,  /* Provided externally */
+  .registercallback  = stm32_spi1register,  /* Provided externally */
 #else
   .registercallback  = 0,                   /* Not implemented */
 #endif
@@ -310,19 +310,19 @@ static uint8_t g_spi1_txbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
 static uint8_t g_spi1_rxbuf[SPI1_DMABUFSIZE_ADJUSTED] SPI1_DMABUFSIZE_ALGN;
 #endif
 
-static struct stm32wl5_spidev_s g_spi1dev =
+static struct stm32_spidev_s g_spi1dev =
 {
   .spidev   =
   {
     .ops    = &g_sp1iops,
   },
-  .spibase  = STM32WL5_SPI1_BASE,
-  .spiclock = STM32WL5_PCLK2_FREQUENCY,
-#ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
-  .spiirq   = STM32WL5_IRQ_SPI1,
+  .spibase  = STM32_SPI1_BASE,
+  .spiclock = STM32_PCLK2_FREQUENCY,
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI1,
 #endif
-#ifdef CONFIG_STM32WL5_SPI_DMA
-#  ifdef CONFIG_STM32WL5_SPI1_DMA
+#ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI1_DMA
   .rxch     = DMACHAN_SPI1_RX,
   .txch     = DMACHAN_SPI1_TX,
 #if defined(SPI1_DMABUFSIZE_ADJUSTED)
@@ -341,20 +341,20 @@ static struct stm32wl5_spidev_s g_spi1dev =
 };
 #endif
 
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
 static const struct spi_ops_s g_sp2iops =
 {
   .lock              = spi_lock,
-  .select            = stm32wl5_spi2s2select,
+  .select            = stm32_spi2s2select,
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures        = spi_hwfeatures,
 #endif
-  .status            = stm32wl5_spi2s2status,
+  .status            = stm32_spi2s2status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = stm32wl5_spi2s2cmddata,
+  .cmddata           = stm32_spi2s2cmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -367,7 +367,7 @@ static const struct spi_ops_s g_sp2iops =
   .trigger           = spi_trigger,
 #endif
 #ifdef CONFIG_SPI_CALLBACK
-  .registercallback  = stm32wl5_s2register,  /* provided externally */
+  .registercallback  = stm32_s2register,  /* provided externally */
 #else
   .registercallback  = 0,                   /* not implemented */
 #endif
@@ -380,19 +380,19 @@ static uint8_t g_spi2s2_rxbuf[SPI2S2_DMABUFSIZE_ADJUSTED]
   SPI2S2_DMABUFSIZE_ALGN;
 #endif
 
-static struct stm32wl5_spidev_s g_spi2s2dev =
+static struct stm32_spidev_s g_spi2s2dev =
 {
   .spidev   =
     {
       &g_sp2iops
     },
-  .spibase  = STM32WL5_SPI2S2_BASE,
-  .spiclock = STM32WL5_PCLK1_FREQUENCY,
-#ifdef CONFIG_STM32WL5_SPI_INTERRUPTS
-  .spiirq   = STM32WL5_IRQ_SPI2S2,
+  .spibase  = STM32_SPI2S2_BASE,
+  .spiclock = STM32_PCLK1_FREQUENCY,
+#ifdef CONFIG_STM32_SPI_INTERRUPTS
+  .spiirq   = STM32_IRQ_SPI2S2,
 #endif
-#ifdef CONFIG_STM32WL5_SPI_DMA
-#  ifdef CONFIG_STM32WL5_SPI2S2_DMA
+#ifdef CONFIG_STM32_SPI_DMA
+#  ifdef CONFIG_STM32_SPI2S2_DMA
   .rxch     = DMACHAN_SPI2S2_RX,
   .txch     = DMACHAN_SPI2S2_TX,
 #if defined(SPI2S2_DMABUFSIZE_ADJUSTED)
@@ -427,7 +427,7 @@ static struct stm32wl5_spidev_s g_spi2s2dev =
  *
  ****************************************************************************/
 
-static inline uint8_t spi_getreg8(struct stm32wl5_spidev_s *priv,
+static inline uint8_t spi_getreg8(struct stm32_spidev_s *priv,
                                   uint8_t offset)
 {
   return getreg8(priv->spibase + offset);
@@ -448,7 +448,7 @@ static inline uint8_t spi_getreg8(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline uint16_t spi_getreg(struct stm32wl5_spidev_s *priv,
+static inline uint16_t spi_getreg(struct stm32_spidev_s *priv,
                                   uint8_t offset)
 {
   return getreg16(priv->spibase + offset);
@@ -470,7 +470,7 @@ static inline uint16_t spi_getreg(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg(struct stm32wl5_spidev_s *priv,
+static inline void spi_putreg(struct stm32_spidev_s *priv,
                               uint8_t offset,
                               uint16_t value)
 {
@@ -493,7 +493,7 @@ static inline void spi_putreg(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg8(struct stm32wl5_spidev_s *priv,
+static inline void spi_putreg8(struct stm32_spidev_s *priv,
                                uint8_t offset,
                                uint8_t value)
 {
@@ -514,11 +514,11 @@ static inline void spi_putreg8(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv)
+static inline uint16_t spi_readword(struct stm32_spidev_s *priv)
 {
   /* Wait until the receive buffer is not empty */
 
-  while ((spi_getreg(priv, STM32WL5_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_RXNE) == 0)
     {
     }
 
@@ -539,11 +539,11 @@ static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv)
 
   if (priv->nbits < 9)
     {
-      return (uint16_t)spi_getreg8(priv, STM32WL5_SPI_DR_OFFSET);
+      return (uint16_t)spi_getreg8(priv, STM32_SPI_DR_OFFSET);
     }
   else
     {
-      return spi_getreg(priv, STM32WL5_SPI_DR_OFFSET);
+      return spi_getreg(priv, STM32_SPI_DR_OFFSET);
     }
 }
 
@@ -563,12 +563,12 @@ static inline uint16_t spi_readword(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
+static inline void spi_writeword(struct stm32_spidev_s *priv,
                                  uint16_t word)
 {
   /* Wait until the transmit buffer is empty */
 
-  while ((spi_getreg(priv, STM32WL5_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
+  while ((spi_getreg(priv, STM32_SPI_SR_OFFSET) & SPI_SR_TXE) == 0)
     {
     }
 
@@ -576,11 +576,11 @@ static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
 
   if (priv->nbits < 9)
     {
-      spi_putreg8(priv, STM32WL5_SPI_DR_OFFSET, (uint8_t)word);
+      spi_putreg8(priv, STM32_SPI_DR_OFFSET, (uint8_t)word);
     }
   else
     {
-      spi_putreg(priv, STM32WL5_SPI_DR_OFFSET, word);
+      spi_putreg(priv, STM32_SPI_DR_OFFSET, word);
     }
 }
 
@@ -592,8 +592,8 @@ static inline void spi_writeword(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static int spi_dmarxwait(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static int spi_dmarxwait(struct stm32_spidev_s *priv)
 {
   int ret;
 
@@ -625,8 +625,8 @@ static int spi_dmarxwait(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static int spi_dmatxwait(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static int spi_dmatxwait(struct stm32_spidev_s *priv)
 {
   int ret;
 
@@ -658,8 +658,8 @@ static int spi_dmatxwait(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static inline void spi_dmarxwakeup(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static inline void spi_dmarxwakeup(struct stm32_spidev_s *priv)
 {
   nxsem_post(&priv->rxsem);
 }
@@ -673,8 +673,8 @@ static inline void spi_dmarxwakeup(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static inline void spi_dmatxwakeup(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static inline void spi_dmatxwakeup(struct stm32_spidev_s *priv)
 {
   nxsem_post(&priv->txsem);
 }
@@ -688,10 +688,10 @@ static inline void spi_dmatxwakeup(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)arg;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)arg;
 
   /* Wake-up the SPI driver */
 
@@ -708,10 +708,10 @@ static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)arg;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)arg;
 
   /* Wake-up the SPI driver */
 
@@ -728,8 +728,8 @@ static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t isr, void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static void spi_dmarxsetup(struct stm32wl5_spidev_s *priv,
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmarxsetup(struct stm32_spidev_s *priv,
                            void *rxbuffer,
                            void *rxdummy, size_t nwords)
 {
@@ -766,7 +766,7 @@ static void spi_dmarxsetup(struct stm32wl5_spidev_s *priv,
 
   /* Configure the RX DMA */
 
-  stm32wl5_dmasetup(priv->rxdma, priv->spibase + STM32WL5_SPI_DR_OFFSET,
+  stm32_dmasetup(priv->rxdma, priv->spibase + STM32_SPI_DR_OFFSET,
                     (uint32_t)rxbuffer, nwords, priv->rxccr);
 }
 #endif
@@ -779,8 +779,8 @@ static void spi_dmarxsetup(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static void spi_dmatxsetup(struct stm32wl5_spidev_s *priv,
+#ifdef CONFIG_STM32_SPI_DMA
+static void spi_dmatxsetup(struct stm32_spidev_s *priv,
                            const void *txbuffer,
                            const void *txdummy, size_t nwords)
 {
@@ -817,7 +817,7 @@ static void spi_dmatxsetup(struct stm32wl5_spidev_s *priv,
 
   /* Setup the TX DMA */
 
-  stm32wl5_dmasetup(priv->txdma, priv->spibase + STM32WL5_SPI_DR_OFFSET,
+  stm32_dmasetup(priv->txdma, priv->spibase + STM32_SPI_DR_OFFSET,
                     (uint32_t)txbuffer, nwords, priv->txccr);
 }
 #endif
@@ -830,11 +830,11 @@ static void spi_dmatxsetup(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static inline void spi_dmarxstart(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static inline void spi_dmarxstart(struct stm32_spidev_s *priv)
 {
   priv->rxresult = 0;
-  stm32wl5_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
+  stm32_dmastart(priv->rxdma, spi_dmarxcallback, priv, false);
 }
 #endif
 
@@ -846,11 +846,11 @@ static inline void spi_dmarxstart(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
-static inline void spi_dmatxstart(struct stm32wl5_spidev_s *priv)
+#ifdef CONFIG_STM32_SPI_DMA
+static inline void spi_dmatxstart(struct stm32_spidev_s *priv)
 {
   priv->txresult = 0;
-  stm32wl5_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
+  stm32_dmastart(priv->txdma, spi_dmatxcallback, priv, false);
 }
 #endif
 
@@ -870,17 +870,17 @@ static inline void spi_dmatxstart(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-static void spi_modifycr1(struct stm32wl5_spidev_s *priv,
+static void spi_modifycr1(struct stm32_spidev_s *priv,
                           uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr1;
-  cr1 = spi_getreg(priv, STM32WL5_SPI_CR1_OFFSET);
+  cr1 = spi_getreg(priv, STM32_SPI_CR1_OFFSET);
   cr1 &= ~clrbits;
   cr1 |= setbits;
-  spi_putreg(priv, STM32WL5_SPI_CR1_OFFSET, cr1);
+  spi_putreg(priv, STM32_SPI_CR1_OFFSET, cr1);
 
-  spiinfo("CR1 (0x%lx) = 0x%04x\n", priv->spibase + STM32WL5_SPI_CR1_OFFSET,
+  spiinfo("CR1 (0x%lx) = 0x%04x\n", priv->spibase + STM32_SPI_CR1_OFFSET,
           cr1);
 }
 
@@ -900,15 +900,15 @@ static void spi_modifycr1(struct stm32wl5_spidev_s *priv,
  *
  ****************************************************************************/
 
-static void spi_modifycr2(struct stm32wl5_spidev_s *priv, uint16_t setbits,
+static void spi_modifycr2(struct stm32_spidev_s *priv, uint16_t setbits,
                           uint16_t clrbits)
 {
   uint16_t cr2;
-  cr2  = spi_getreg(priv, STM32WL5_SPI_CR2_OFFSET);
+  cr2  = spi_getreg(priv, STM32_SPI_CR2_OFFSET);
   cr2 &= ~clrbits;
   cr2 |= setbits;
-  spi_putreg(priv, STM32WL5_SPI_CR2_OFFSET, cr2);
-  spiinfo("CR2 (0x%lx) = 0x%04x\n", priv->spibase + STM32WL5_SPI_CR2_OFFSET,
+  spi_putreg(priv, STM32_SPI_CR2_OFFSET, cr2);
+  spiinfo("CR2 (0x%lx) = 0x%04x\n", priv->spibase + STM32_SPI_CR2_OFFSET,
           cr2);
 }
 
@@ -935,7 +935,7 @@ static void spi_modifycr2(struct stm32wl5_spidev_s *priv, uint16_t setbits,
 
 static int spi_lock(struct spi_dev_s *dev, bool lock)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   int ret;
 
   if (lock)
@@ -968,7 +968,7 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(struct spi_dev_s *dev,
                                  uint32_t frequency)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint32_t actual;
 
@@ -1069,7 +1069,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev,
 
 static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
@@ -1168,7 +1168,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
 
 static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint16_t setbits;
   uint16_t clrbits;
 
@@ -1237,7 +1237,7 @@ static int spi_hwfeatures(struct spi_dev_s *dev,
                           spi_hwfeatures_t features)
 {
 #if defined(CONFIG_SPI_BITORDER) || defined(CONFIG_SPI_TRIGGER)
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 #endif
 
 #ifdef CONFIG_SPI_BITORDER
@@ -1301,7 +1301,7 @@ static int spi_hwfeatures(struct spi_dev_s *dev,
 
 static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   uint32_t regval;
   uint32_t ret;
 
@@ -1314,7 +1314,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
    * (Reading from the SR clears the error flags)
    */
 
-  regval = spi_getreg(priv, STM32WL5_SPI_SR_OFFSET);
+  regval = spi_getreg(priv, STM32_SPI_SR_OFFSET);
 
   spiinfo("Sent: %04" PRIx32 " Return: %04" PRIx32
           " Status: %02" PRIx32 "\n", wd, ret, regval);
@@ -1348,9 +1348,9 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_STM32WL5_SPI_DMA) || defined(CONFIG_STM32WL5_DMACAPABLE) || \
-     defined(CONFIG_STM32WL5_SPI_DMATHRESHOLD)
-#if !defined(CONFIG_STM32WL5_SPI_DMA)
+#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_DMACAPABLE) || \
+     defined(CONFIG_STM32_SPI_DMATHRESHOLD)
+#if !defined(CONFIG_STM32_SPI_DMA)
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 #else
@@ -1359,7 +1359,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
                                void *rxbuffer, size_t nwords)
 #endif
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
 
   spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
@@ -1433,7 +1433,7 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
         }
     }
 }
-#endif /* !CONFIG_STM32WL5_SPI_DMA || CONFIG_STM32WL5_DMACAPABLE || CONFIG_STM32WL5_SPI_DMATHRESHOLD */
+#endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE || CONFIG_STM32_SPI_DMATHRESHOLD */
 
 /****************************************************************************
  * Name: spi_exchange (with DMA capability)
@@ -1456,11 +1456,11 @@ static void spi_exchange_nodma(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                          void *rxbuffer, size_t nwords)
 {
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
   void *xbuffer = rxbuffer;
   int ret;
 
@@ -1470,12 +1470,12 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
   size_t nbytes = (priv->nbits > 8) ? nwords << 1 : nwords;
 
-#ifdef CONFIG_STM32WL5_SPI_DMATHRESHOLD
+#ifdef CONFIG_STM32_SPI_DMATHRESHOLD
   /* If this is a small SPI transfer, then let spi_exchange_nodma() do the
    * work.
    */
 
-  if (nbytes <= CONFIG_STM32WL5_SPI_DMATHRESHOLD)
+  if (nbytes <= CONFIG_STM32_SPI_DMATHRESHOLD)
     {
       spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
       return;
@@ -1493,11 +1493,11 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
       return;
     }
 
-#ifdef CONFIG_STM32WL5_DMACAPABLE
+#ifdef CONFIG_STM32_DMACAPABLE
   if ((txbuffer != NULL && priv->txbuf == NULL &&
-      !stm32wl5_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
+      !stm32_dmacapable((uintptr_t)txbuffer, nwords, priv->txccr)) ||
       (rxbuffer != NULL && priv->rxbuf == NULL &&
-       !stm32wl5_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
+       !stm32_dmacapable((uintptr_t)rxbuffer, nwords, priv->rxccr)))
     {
       /* Unsupported memory region fall back to non-DMA method. */
 
@@ -1580,7 +1580,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 #endif
     }
 }
-#endif /* CONFIG_STM32WL5_SPI_DMA */
+#endif /* CONFIG_STM32_SPI_DMA */
 
 /****************************************************************************
  * Name: spi_trigger
@@ -1601,8 +1601,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 #ifdef CONFIG_SPI_TRIGGER
 static int spi_trigger(struct spi_dev_s *dev)
 {
-#ifdef CONFIG_STM32WL5_SPI_DMA
-  struct stm32wl5_spidev_s *priv = (struct stm32wl5_spidev_s *)dev;
+#ifdef CONFIG_STM32_SPI_DMA
+  struct stm32_spidev_s *priv = (struct stm32_spidev_s *)dev;
 
   if (!priv->trigarmed)
     {
@@ -1695,7 +1695,7 @@ static void spi_recvblock(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
+static void spi_bus_initialize(struct stm32_spidev_s *priv)
 {
   uint16_t setbits;
   uint16_t clrbits;
@@ -1731,23 +1731,23 @@ static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
 
   /* CRCPOLY configuration */
 
-  spi_putreg(priv, STM32WL5_SPI_CRCPR_OFFSET, 7);
+  spi_putreg(priv, STM32_SPI_CRCPR_OFFSET, 7);
 
-#ifdef CONFIG_STM32WL5_SPI_DMA
+#ifdef CONFIG_STM32_SPI_DMA
   if (priv->rxch && priv->txch)
     {
-      /* Get DMA channels.  NOTE: stm32wl5_dmachannel() will always assign
+      /* Get DMA channels.  NOTE: stm32_dmachannel() will always assign
        * the DMA channel.  If the channel is not available, then
-       * stm32wl5_dmachannel() will block and wait until the channel becomes
+       * stm32_dmachannel() will block and wait until the channel becomes
        * available.
        * WARNING: If you have another device sharing a DMA channel with
        * SPI and the code never releases that channel, then the call to
-       * stm32wl5_dmachannel()  will hang forever in this function!
+       * stm32_dmachannel()  will hang forever in this function!
        *  Don't let your design do that!
        */
 
-      priv->rxdma = stm32wl5_dmachannel(priv->rxch);
-      priv->txdma = stm32wl5_dmachannel(priv->txch);
+      priv->rxdma = stm32_dmachannel(priv->rxch);
+      priv->txdma = stm32_dmachannel(priv->txch);
       DEBUGASSERT(priv->rxdma && priv->txdma);
 
       spi_modifycr2(priv, SPI_CR2_RXDMAEN | SPI_CR2_TXDMAEN, 0);
@@ -1769,7 +1769,7 @@ static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32wl5_spibus_initialize
+ * Name: stm32_spibus_initialize
  *
  * Description:
  *   Initialize the selected SPI bus
@@ -1782,13 +1782,13 @@ static void spi_bus_initialize(struct stm32wl5_spidev_s *priv)
  *
  ****************************************************************************/
 
-struct spi_dev_s *stm32wl5_spibus_initialize(int bus)
+struct spi_dev_s *stm32_spibus_initialize(int bus)
 {
-  struct stm32wl5_spidev_s *priv = NULL;
+  struct stm32_spidev_s *priv = NULL;
 
   irqstate_t flags = enter_critical_section();
 
-#ifdef CONFIG_STM32WL5_SPI1
+#ifdef CONFIG_STM32_SPI1
   if (bus == 1)
     {
       /* Select SPI1 */
@@ -1801,9 +1801,9 @@ struct spi_dev_s *stm32wl5_spibus_initialize(int bus)
         {
           /* Configure SPI1 pins: SCK, MISO, and MOSI */
 
-          stm32wl5_configgpio(GPIO_SPI1_SCK);
-          stm32wl5_configgpio(GPIO_SPI1_MISO);
-          stm32wl5_configgpio(GPIO_SPI1_MOSI);
+          stm32_configgpio(GPIO_SPI1_SCK);
+          stm32_configgpio(GPIO_SPI1_MISO);
+          stm32_configgpio(GPIO_SPI1_MOSI);
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
@@ -1813,7 +1813,7 @@ struct spi_dev_s *stm32wl5_spibus_initialize(int bus)
     }
   else
 #endif
-#ifdef CONFIG_STM32WL5_SPI2S2
+#ifdef CONFIG_STM32_SPI2S2
   if (bus == 2)
     {
       /* Select SPI2S2 */
@@ -1826,9 +1826,9 @@ struct spi_dev_s *stm32wl5_spibus_initialize(int bus)
         {
           /* Configure SPI2S2 pins: SCK, MISO, and MOSI */
 
-          stm32wl5_configgpio(GPIO_SPI2S2_SCK);
-          stm32wl5_configgpio(GPIO_SPI2S2_MISO);
-          stm32wl5_configgpio(GPIO_SPI2S2_MOSI);
+          stm32_configgpio(GPIO_SPI2S2_SCK);
+          stm32_configgpio(GPIO_SPI2S2_MISO);
+          stm32_configgpio(GPIO_SPI2S2_MOSI);
 
           /* Set up default configuration: Master, 8-bit, etc. */
 
@@ -1846,4 +1846,4 @@ struct spi_dev_s *stm32wl5_spibus_initialize(int bus)
   return (struct spi_dev_s *)priv;
 }
 
-#endif /* CONFIG_STM32WL5_SPI1 || CONFIG_STM32WL5_SPI2S2 */
+#endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2S2 */
