@@ -284,8 +284,23 @@ function(process_all_directory_romfs)
 
   # Auto-generate /etc/passwd at build time if configured
   if(CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE)
-    execute_process(COMMAND "${NUTTX_DIR}/tools/update_romfs_password.sh"
-                            "${NUTTX_DIR}/.config" RESULT_VARIABLE _cred_rc)
+    # Host tools are POSIX shell scripts (same as Make/configure.sh).  Invoke
+    # them via an explicit interpreter so CMake works on Linux, macOS, MSYS2,
+    # and Cygwin — not only when the script path is marked executable.
+    if(NOT NUTTX_POSIX_SHELL)
+      find_program(NUTTX_POSIX_SHELL NAMES sh bash)
+    endif()
+    if(NOT NUTTX_POSIX_SHELL)
+      message(
+        FATAL_ERROR
+          "ROMFS passwd generation requires a POSIX shell (sh or bash). "
+          "On Windows, configure and build from the MSYS2 or Cygwin environment."
+      )
+    endif()
+
+    execute_process(
+      COMMAND ${NUTTX_POSIX_SHELL} "${NUTTX_DIR}/tools/update_romfs_password.sh"
+              "${NUTTX_DIR}/.config" RESULT_VARIABLE _cred_rc)
     if(NOT _cred_rc EQUAL 0)
       message(FATAL_ERROR "update_romfs_password.sh failed (rc=${_cred_rc})")
     endif()
@@ -362,7 +377,8 @@ function(process_all_directory_romfs)
     # so the firmware uses the correct keys automatically.
 
     execute_process(
-      COMMAND "${NUTTX_DIR}/tools/check_passwd_keys.sh" "${NUTTX_DIR}/.config"
+      COMMAND ${NUTTX_POSIX_SHELL} "${NUTTX_DIR}/tools/check_passwd_keys.sh"
+              "${NUTTX_DIR}/.config"
       OUTPUT_VARIABLE _passwd_keys_need_setup
       OUTPUT_STRIP_TRAILING_WHITESPACE
       RESULT_VARIABLE _check_rc)
@@ -377,7 +393,8 @@ function(process_all_directory_romfs)
       if(CONFIG_BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS)
         # Generate keys and write to .config (no key values printed here)
         execute_process(
-          COMMAND "${NUTTX_DIR}/tools/gen_passwd_keys.sh" "${NUTTX_DIR}/.config"
+          COMMAND ${NUTTX_POSIX_SHELL} "${NUTTX_DIR}/tools/gen_passwd_keys.sh"
+                  "${NUTTX_DIR}/.config"
           RESULT_VARIABLE _gen_rc
           OUTPUT_QUIET ERROR_QUIET)
         if(NOT _gen_rc EQUAL 0)
