@@ -31,6 +31,10 @@ endif
 ifeq ($(CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE),y)
 ifeq ($(_PASSWD_ENFORCE),y)
 
+# Apply NUTTX_ROMFS_PASSWD_PASSWORD when defconfig omitted the secret.
+$(shell $(TOPDIR)/tools/update_romfs_password.sh $(TOPDIR)/.config >/dev/null 2>&1)
+include $(TOPDIR)/.config
+
 # --- password check ---
 ifeq ($(strip $(patsubst "%",%,$(CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD))),)
 $(info )
@@ -55,7 +59,6 @@ _PASSWD_KEYS_NEED_SETUP := $(shell \
 ifneq ($(_PASSWD_KEYS_NEED_SETUP),no)
 ifeq ($(CONFIG_BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS),y)
 $(shell $(TOPDIR)/tools/gen_passwd_keys.sh $(TOPDIR)/.config >/dev/null)
-$(info [passwd] TEA keys written to .config (search for CONFIG_FSUTILS_PASSWD_KEY to view))
 include $(TOPDIR)/.config
 else
 $(info )

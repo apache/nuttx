@@ -85,5 +85,8 @@ else
   }
 fi
 
-printf 'TEA keys generated and written to %s.\nSearch %s for CONFIG_FSUTILS_PASSWD_KEY to view if needed.\n' \
-  "${CONFIG}" "${CONFIG}"
+# User-visible notice (stderr): key values are never printed.
+printf 'WARNING: [passwd] TEA keys auto-generated in %s\n' "${CONFIG}" >&2
+printf 'WARNING: [passwd] View: search .config for CONFIG_FSUTILS_PASSWD_KEY\n' >&2
+printf 'WARNING: [passwd] Change: make menuconfig -> Application Configuration\n' >&2
+printf 'WARNING: [passwd]         -> File System Utilities -> Password file support\n' >&2
