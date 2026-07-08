@@ -980,12 +980,23 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count,
   uint32_t cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
   uint32_t prod_index;
   uint32_t available;
-  uint32_t n;
+  uint32_t n = 0;
 
   UP_RMB();
   prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
   available = (prod_index - cons_index) & RING_IDX_MASK;
-  n = count < available ? count : available;
+
+  /* available > capacity is physically impossible for a consistent ring;
+   * it can only result from a torn snapshot where prod_tail is stale and
+   * the consumer indices were advanced past it by an overwrite eviction.
+   * Treat it as no data this round; the next pass re-reads a coherent
+   * snapshot without losing entries.
+   */
+
+  if (available <= r->capacity)
+    {
+      n = count < available ? count : available;
+    }
 
   ring_buf_init(buf, r, cons_index, n, elem_size);
 }
@@ -1013,6 +1024,19 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
       uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
       uint32_t available =
         (prod_index - RTS_IDX(old_head)) & RING_IDX_MASK;
+
+      /* available > capacity is physically impossible for a consistent
+       * ring; it can only result from a torn snapshot where prod_tail is
+       * stale and the consumer indices were advanced past it by an
+       * overwrite eviction. Treat it as no data this round; the next pass
+       * re-reads a coherent snapshot without losing entries.
+       */
+
+      if (available > r->capacity)
+        {
+          n = 0;
+          break;
+        }
 
       n = count < available ? count : available;
       if (n == 0)
@@ -1638,8 +1662,9 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
       prod_idx = RTS_IDX(old_prod);
       cons_idx = RTS_IDX(old_cons);
 
-      free_space = r->capacity -
-                   ((prod_idx - cons_idx) & RING_IDX_MASK);
+      free_space = (prod_idx - cons_idx) & RING_IDX_MASK;
+      free_space = free_space < r->capacity ?
+                   r->capacity - free_space : 0;
 
       if (free_space < count)
         {
