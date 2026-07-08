@@ -500,73 +500,122 @@ static int i2schar_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case I2SIOC_GRXDATAWIDTH:
         {
-          *(FAR uint32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, 0);
+          *(FAR int32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, 0);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
+
           break;
         }
 
       case I2SIOC_GTXDATAWIDTH:
         {
-          *(FAR uint32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, 0);
+          *(FAR int32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, 0);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
       case I2SIOC_GRXCHANNELS:
         {
           *(FAR int *)arg = I2S_RXCHANNELS(priv->i2s, 0);
+          if (*(FAR int *)arg < 0)
+            {
+              ret = *(FAR int *)arg;
+            }
         }
         break;
 
       case I2SIOC_GTXCHANNELS:
         {
           *(FAR int *)arg = I2S_TXCHANNELS(priv->i2s, 0);
+          if (*(FAR int *)arg < 0)
+            {
+              ret = *(FAR int *)arg;
+            }
         }
         break;
 
       case I2SIOC_GRXSAMPLERATE:
         {
-          *(FAR uint32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, 0);
+          *(FAR int32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, 0);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
       case I2SIOC_GTXSAMPLERATE:
         {
-          *(FAR uint32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, 0);
+          *(FAR int32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, 0);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
       case I2SIOC_SRXDATAWIDTH:
         {
-          *(FAR uint32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, arg);
+          *(FAR int32_t *)arg = I2S_RXDATAWIDTH(priv->i2s, arg);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
           break;
         }
 
       case I2SIOC_STXDATAWIDTH:
         {
-          *(FAR uint32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, arg);
+          *(FAR int32_t *)arg = I2S_TXDATAWIDTH(priv->i2s, arg);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
       case I2SIOC_SRXCHANNELS:
         {
           *(FAR int *)arg = I2S_RXCHANNELS(priv->i2s, arg);
+          if (*(FAR int *)arg < 0)
+            {
+              ret = *(FAR int *)arg;
+            }
         }
         break;
 
       case I2SIOC_STXCHANNELS:
         {
           *(FAR int *)arg = I2S_TXCHANNELS(priv->i2s, arg);
+          if (*(FAR int *)arg < 0)
+            {
+              ret = *(FAR int *)arg;
+            }
         }
         break;
 
       case I2SIOC_SRXSAMPLERATE:
         {
-          *(FAR uint32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, arg);
+          *(FAR int32_t *)arg = I2S_RXSAMPLERATE(priv->i2s, arg);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
       case I2SIOC_STXSAMPLERATE:
         {
-          *(FAR uint32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, arg);
+          *(FAR int32_t *)arg = I2S_TXSAMPLERATE(priv->i2s, arg);
+          if (*(FAR int32_t *)arg < 0)
+            {
+              ret = *(FAR int32_t *)arg;
+            }
         }
         break;
 
