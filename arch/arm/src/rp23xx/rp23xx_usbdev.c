@@ -218,6 +218,7 @@ struct rp23xx_req_s
 {
   struct usbdev_req_s req;        /* Standard USB request */
   struct rp23xx_req_s *flink;     /* Supports a singly linked list */
+  bool armed;                     /* Hardware buffer armed for this request */
 };
 
 /* This is the internal representation of an endpoint */
@@ -472,6 +473,7 @@ static void rp23xx_update_buffer_control(struct rp23xx_ep_s *privep,
                                          uint32_t or_mask)
 {
   uint32_t value = 0;
+  int i;
 
   if (and_mask)
     {
@@ -481,6 +483,25 @@ static void rp23xx_update_buffer_control(struct rp23xx_ep_s *privep,
   if (or_mask)
     {
       value |= or_mask;
+
+      if (or_mask & RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL)
+        {
+          /* The AVAILABLE bit must be set after the rest of the buffer
+           * control register has been written and had time to settle
+           * across the clock domain crossing, or the controller may act
+           * on a stale length/PID (RP2350 datasheet, USB buffer control;
+           * same semantics as RP2040 datasheet 4.1.2.5.1).  12 CPU cycles
+           * covers system clocks up to 12x clk_usb.
+           */
+
+          putreg32(value & ~RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL,
+                   privep->buf_ctrl);
+
+          for (i = 0; i < 12; i++)
+            {
+              __asm__ volatile("nop");
+            }
+        }
     }
 
   putreg32(value, privep->buf_ctrl);
@@ -533,6 +554,20 @@ static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes)
 {
   uint32_t val;
   irqstate_t flags;
+
+  /* The hardware receives a single USB packet into the buffer, and the
+   * buffer-control LEN field is only 10 bits wide.  Arm the buffer for at
+   * most one maximum-size packet; rp23xx_rxcomplete accumulates the request
+   * across multiple packets and re-arms until it is satisfied or a short
+   * packet arrives.  Passing the full (possibly multi-kByte) request length
+   * would overflow LEN and corrupt the neighbouring control bits, making the
+   * transfer complete immediately with zero bytes.
+   */
+
+  if (nbytes > privep->ep.maxpacket)
+    {
+      nbytes = privep->ep.maxpacket;
+    }
 
   val = nbytes |
         RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL |
@@ -631,6 +666,7 @@ static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result)
 static void rp23xx_txcomplete(struct rp23xx_ep_s *privep)
 {
   struct rp23xx_req_s *privreq;
+  bool completed = false;
 
   privreq = rp23xx_rqpeek(privep);
   if (!privreq)
@@ -647,10 +683,31 @@ static void rp23xx_txcomplete(struct rp23xx_ep_s *privep)
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           privep->txnullpkt = 0;
           rp23xx_reqcomplete(privep, OK);
+          completed = true;
         }
     }
 
-  rp23xx_wrrequest(privep);
+  if (completed)
+    {
+      /* Start the next queued request -- unless it was already armed.  The
+       * completion callback above may have submitted a new request on the
+       * now idle endpoint; epsubmit then armed the hardware buffer itself,
+       * and arming it a second time here would toggle the data PID twice
+       * and make the host silently discard the packet as a retransmission.
+       */
+
+      privreq = rp23xx_rqpeek(privep);
+      if (privreq && !privreq->armed)
+        {
+          rp23xx_wrrequest(privep);
+        }
+    }
+  else if (privreq)
+    {
+      /* Continue with the next packet of the in-progress request */
+
+      rp23xx_wrrequest(privep);
+    }
 }
 
 /****************************************************************************
@@ -683,6 +740,7 @@ static int rp23xx_wrrequest(struct rp23xx_ep_s *privep)
     {
       if (privep->epphy == 0)
         {
+          privreq->armed = true;
           rp23xx_epwrite(privep, NULL, 0);
         }
       else
@@ -708,6 +766,7 @@ static int rp23xx_wrrequest(struct rp23xx_ep_s *privep)
        * bytes to send.
        */
 
+      privreq->armed = true;
       privep->txnullpkt = 0;
       if (bytesleft > privep->ep.maxpacket)
         {
@@ -763,6 +822,16 @@ static void rp23xx_rxcomplete(struct rp23xx_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
       rp23xx_reqcomplete(privep, OK);
+
+      /* Re-arm only if the completion callback didn't already do it by
+       * resubmitting a request (see rp23xx_txcomplete).
+       */
+
+      privreq = rp23xx_rqpeek(privep);
+      if (privreq && privreq->armed)
+        {
+          return;
+        }
     }
 
   rp23xx_rdrequest(privep);
@@ -793,6 +862,7 @@ static int rp23xx_rdrequest(struct rp23xx_ep_s *privep)
 
   usbtrace(TRACE_READ(privep->epphy), privreq->req.len);
 
+  privreq->armed = true;
   return rp23xx_epread(privep, privreq->req.len);
 }
 
@@ -1622,6 +1692,7 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd = 0;
+  privreq->armed = false;
 
   flags = enter_critical_section();
 
