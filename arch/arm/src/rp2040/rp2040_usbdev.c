@@ -473,6 +473,7 @@ static void rp2040_update_buffer_control(struct rp2040_ep_s *privep,
                                          uint32_t or_mask)
 {
   uint32_t value = 0;
+  int i;
 
   if (and_mask)
     {
@@ -482,6 +483,24 @@ static void rp2040_update_buffer_control(struct rp2040_ep_s *privep,
   if (or_mask)
     {
       value |= or_mask;
+
+      if (or_mask & RP2040_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL)
+        {
+          /* RP2040 datasheet 4.1.2.5.1: the AVAILABLE bit must be set
+           * after the rest of the buffer control register has been
+           * written and had time to settle across the clock domain
+           * crossing, or the controller may act on a stale length/PID.
+           * 12 CPU cycles covers system clocks up to 12x clk_usb.
+           */
+
+          putreg32(value & ~RP2040_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL,
+                   privep->buf_ctrl);
+
+          for (i = 0; i < 12; i++)
+            {
+              __asm__ volatile("nop");
+            }
+        }
     }
 
   putreg32(value, privep->buf_ctrl);
