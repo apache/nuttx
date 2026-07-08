@@ -356,6 +356,9 @@ echo "CONFIG_BASE_DEFCONFIG=\"$posboardconfig\"" >> "${dest_config}"
 
 ${TOPDIR}/tools/sethost.sh $host $*
 
+# Supply ROMFS admin password from NUTTX_ROMFS_PASSWD_PASSWORD when absent
+"${TOPDIR}/tools/update_romfs_password.sh" "${dest_config}"
+
 # Save the original configuration file without CONFIG_BASE_DEFCONFIG
 # for later comparison
 

@@ -1927,10 +1927,14 @@ This is a configuration with login password protection for NSH.
 
 .. note::
 
-   This config has password protection enabled. The default login info is:
+   This config has password protection enabled.  After configuring from
+   defconfig, set the admin password in menuconfig (Board Selection →
+   Auto-generate /etc/passwd) or export ``NUTTX_ROMFS_PASSWD_PASSWORD``
+   before building.  NuttX CI uses the documented test password
+   ``NuttXSimLogin1`` for this configuration.
 
-   * USERNAME: root
-   * PASSWORD: Administrator
+   * USERNAME: root (default)
+   * PASSWORD: set at build time (not stored in defconfig)
 
    The encrypted password is retained in ``/etc/passwd``.
    You can disable the password protection by
@@ -2133,40 +2137,29 @@ mounted at ``/etc`` and will look like this at run-time:
 start-up script; ``/etc/passwd`` is the password file.
 
 The ``/etc/passwd`` file is auto-generated at build time when
-``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  Enable the option and set
-credentials via ``make menuconfig``:
+``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  Configure credentials in
+``make menuconfig`` (see :ref:`mkpasswd_autogen`):
 
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
-* ``CONFIG_NSH_CONSOLE_LOGIN=y`` (required, otherwise login is not enforced)
+* ``CONFIG_NSH_CONSOLE_LOGIN=y`` with **Encrypted password file** verification
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``root``)
-* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty or shorter than 8 characters)
+* Admin password — required in menuconfig or via ``NUTTX_ROMFS_PASSWD_PASSWORD``
+  (minimum 8 characters; not saved in defconfig)
+* TEA keys — enable **Generate random TEA encryption keys automatically**, or
+  set ``CONFIG_FSUTILS_PASSWD_KEY1`` … ``KEY4`` manually
 
-The password is hashed with TEA at build time by the host tool
-``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
+The password is hashed with TEA by ``tools/mkpasswd``; the plaintext is **not**
+stored in the firmware.
 
-For the full description of the build-time password generation mechanism,
-TEA key configuration, file format, and verification steps, see
-:ref:`mkpasswd_autogen`.
-
-The format of the password file is:
-
-.. code:: text
-
-   user:x:uid:gid:home
-
-Where:
-
-* user: User name
-* x: Encrypted password
-* uid: User ID (0 for now)
-* gid: Group ID (0 for now)
-* home: Login directory (/ for now)
-
-For configuration, verification steps, and TEA key details, see
+For the full build flow, CI credentials, and verification steps, see
 :ref:`mkpasswd_autogen`.
 
 Login test inside the simulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use the admin password you set at build time (menuconfig or
+``NUTTX_ROMFS_PASSWD_PASSWORD``).  For ``sim/login``, CI uses the documented
+test password ``NuttXSimLogin1``; see :ref:`mkpasswd_autogen`.
 
 .. code:: console
 

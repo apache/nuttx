@@ -494,31 +494,28 @@ mounted at /etc and will look like this at run-time:
 start-up script; ``/etc/passwd`` is the password file.
 
 The ``/etc/passwd`` file is auto-generated at build time when
-``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  Enable the option and set
-credentials via ``make menuconfig``:
+``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  See :ref:`mkpasswd_autogen`
+for the full setup (admin password, TEA keys, NSH encrypted-password login).
 
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``root``)
-* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required, build fails if empty)
+* Admin password and TEA keys — set in menuconfig (not saved in defconfig)
 
-The password is hashed with TEA at build time by the host tool
-``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
-
-For the full description of the mechanism, TEA key configuration, file format,
-and verification steps, see :ref:`mkpasswd_autogen`.
+The password is hashed with TEA by ``tools/mkpasswd``; the plaintext is **not**
+stored in the firmware.
 
 The format of the password file is:
 
 .. code:: text
 
-   user:x:uid:gid:home
+   user:encrypted_hash:uid:gid:home
 
    Where:
    user:  User name
-   x:     Encrypted password
-   uid:   User ID (0 for now)
-   gid:   Group ID (0 for now)
-   home:  Login directory (/ for now)
+   encrypted_hash:  TEA-encrypted password (base64)
+   uid:   User ID
+   gid:   Group ID
+   home:  Login directory
 
 ``/etc/group`` is a group file. It is not currently used.
 

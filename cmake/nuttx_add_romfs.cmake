@@ -284,6 +284,25 @@ function(process_all_directory_romfs)
 
   # Auto-generate /etc/passwd at build time if configured
   if(CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE)
+    execute_process(COMMAND "${NUTTX_DIR}/tools/update_romfs_password.sh"
+                            "${NUTTX_DIR}/.config" RESULT_VARIABLE _cred_rc)
+    if(NOT _cred_rc EQUAL 0)
+      message(FATAL_ERROR "update_romfs_password.sh failed (rc=${_cred_rc})")
+    endif()
+
+    file(
+      STRINGS "${NUTTX_DIR}/.config" _passwd_line
+      REGEX "^CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD="
+      LIMIT_COUNT 1)
+    if(_passwd_line MATCHES "^CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD=(.*)$")
+      set(CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD "${CMAKE_MATCH_1}")
+      string(STRIP "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}"
+                   CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD)
+      string(REGEX
+             REPLACE "^\"(.*)\"$" "\\1" CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD
+                     "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}")
+    endif()
+
     if("${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" STREQUAL "")
       message(
         FATAL_ERROR
@@ -360,7 +379,7 @@ function(process_all_directory_romfs)
         execute_process(
           COMMAND "${NUTTX_DIR}/tools/gen_passwd_keys.sh" "${NUTTX_DIR}/.config"
           RESULT_VARIABLE _gen_rc
-          OUTPUT_QUIET)
+          OUTPUT_QUIET ERROR_QUIET)
         if(NOT _gen_rc EQUAL 0)
           message(
             FATAL_ERROR
@@ -368,9 +387,10 @@ function(process_all_directory_romfs)
           )
         endif()
         message(
-          STATUS
-            "[passwd] TEA keys written to .config (search for CONFIG_FSUTILS_PASSWD_KEY to view)"
-        )
+          WARNING "[passwd] TEA keys auto-generated in .config. "
+                  "View: search .config for CONFIG_FSUTILS_PASSWD_KEY. "
+                  "Change: menuconfig -> Application Configuration -> "
+                  "File System Utilities -> Password file support.")
 
         # Re-read .config so the new key values are live for this configure run
         # (mirrors Board.mk's second -include).
