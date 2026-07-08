@@ -218,6 +218,7 @@ struct rp2040_req_s
 {
   struct usbdev_req_s req;        /* Standard USB request */
   struct rp2040_req_s *flink;     /* Supports a singly linked list */
+  bool armed;                     /* Hardware buffer armed for this request */
 };
 
 /* This is the internal representation of an endpoint */
@@ -647,6 +648,7 @@ static void rp2040_reqcomplete(struct rp2040_ep_s *privep, int16_t result)
 static void rp2040_txcomplete(struct rp2040_ep_s *privep)
 {
   struct rp2040_req_s *privreq;
+  bool completed = false;
 
   privreq = rp2040_rqpeek(privep);
   if (!privreq)
@@ -663,10 +665,31 @@ static void rp2040_txcomplete(struct rp2040_ep_s *privep)
           usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
           privep->txnullpkt = 0;
           rp2040_reqcomplete(privep, OK);
+          completed = true;
         }
     }
 
-  rp2040_wrrequest(privep);
+  if (completed)
+    {
+      /* Start the next queued request -- unless it was already armed.  The
+       * completion callback above may have submitted a new request on the
+       * now idle endpoint; epsubmit then armed the hardware buffer itself,
+       * and arming it a second time here would toggle the data PID twice
+       * and make the host silently discard the packet as a retransmission.
+       */
+
+      privreq = rp2040_rqpeek(privep);
+      if (privreq && !privreq->armed)
+        {
+          rp2040_wrrequest(privep);
+        }
+    }
+  else if (privreq)
+    {
+      /* Continue with the next packet of the in-progress request */
+
+      rp2040_wrrequest(privep);
+    }
 }
 
 /****************************************************************************
@@ -699,6 +722,7 @@ static int rp2040_wrrequest(struct rp2040_ep_s *privep)
     {
       if (privep->epphy == 0)
         {
+          privreq->armed = true;
           rp2040_epwrite(privep, NULL, 0);
         }
       else
@@ -724,6 +748,7 @@ static int rp2040_wrrequest(struct rp2040_ep_s *privep)
        * bytes to send.
        */
 
+      privreq->armed = true;
       privep->txnullpkt = 0;
       if (bytesleft > privep->ep.maxpacket)
         {
@@ -779,6 +804,16 @@ static void rp2040_rxcomplete(struct rp2040_ep_s *privep)
     {
       usbtrace(TRACE_COMPLETE(privep->epphy), privreq->req.xfrd);
       rp2040_reqcomplete(privep, OK);
+
+      /* Re-arm only if the completion callback didn't already do it by
+       * resubmitting a request (see rp2040_txcomplete).
+       */
+
+      privreq = rp2040_rqpeek(privep);
+      if (privreq && privreq->armed)
+        {
+          return;
+        }
     }
 
   rp2040_rdrequest(privep);
@@ -809,6 +844,7 @@ static int rp2040_rdrequest(struct rp2040_ep_s *privep)
 
   usbtrace(TRACE_READ(privep->epphy), privreq->req.len);
 
+  privreq->armed = true;
   return rp2040_epread(privep, privreq->req.len);
 }
 
@@ -1635,6 +1671,7 @@ static int rp2040_epsubmit(struct usbdev_ep_s *ep,
 
   req->result = -EINPROGRESS;
   req->xfrd = 0;
+  privreq->armed = false;
 
   flags = enter_critical_section();
 
