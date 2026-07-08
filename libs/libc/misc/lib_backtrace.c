@@ -137,6 +137,20 @@ static FAR char **backtrace_malloc(FAR void *const *buffer, int size)
  * Name: backtrace_hash
  ****************************************************************************/
 
+/* nosanitize_address: backtrace_hash is on the hot path of every recorded
+ * allocation/free (called by backtrace_record and backtrace_remove when
+ * CONFIG_MM_RECORD_STACK is on).  On KASAN-enabled debug builds each
+ * data[i] load would otherwise trip a per-access __asan_load4_noabort
+ * shadow check; multiplied across a heavy allocation phase (e.g. C++
+ * static initialization) this stretches the wall time past the test
+ * framework's busy-loop threshold and surfaces as a no-output hang.  The
+ * same reasoning was applied to backtrace_find(); this covers the
+ * remaining uninstrumented reader on the same path.  The buffer is either
+ * the caller's stack array (filled by sched_backtrace) or a pool entry's
+ * stack array, both always valid, so skipping the shadow check is safe.
+ */
+
+nosanitize_address
 static uint32_t backtrace_hash(FAR const void *backtrace, int depth)
 {
   FAR const uintptr_t *data = backtrace;
