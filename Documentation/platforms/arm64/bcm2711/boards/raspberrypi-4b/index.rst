@@ -322,3 +322,15 @@ This configuration leverages all four A72 cores of the BCM2711. It comes with
 the standard NSH shell, :doc:`/applications/testing/getprime/index`,
 :doc:`/applications/testing/ostest/index`, and
 :doc:`/applications/testing/smp/index` tests.
+
+audio_tone
+----------
+
+This configuration enables PWM0 and PWM1 interfaces and provides examples like
+:doc:`/applications/examples/pwm/index` for playing with sound. The audio jack
+right and left channels are channel 1 and 2 of ``/dev/pwm1``.
+
+.. warning::
+
+   Audio output over the jack is very loud. DO NOT plug in earbuds until first
+   assessing the sound level with them out of your ears.
