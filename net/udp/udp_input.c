@@ -336,6 +336,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     }
 
                   netdev_iob_replace(dev, iob);
+                  dev->d_len -= udpiplen;
                   udp  = IPBUF(iplen);
                   conn = nextconn;
                 }
