@@ -83,26 +83,27 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_exception
+ * Name: riscv_fault_handler
  *
  * Description:
- *   This is the exception handler.
+ *   Handle a fault caused by the running task. If the task is a user task
+ *   not currently in a syscall, kill it with SIGSEGV instead of
+ *   taking down the whole system. Otherwise (kernel thread, or a fault
+ *   while already in kernel context on behalf of a syscall) there is no
+ *   safe task to kill, so panic.
+ *
+ * Input Parameters:
+ *   cause - The (masked) machine cause of the exception, used for the
+ *     panic message only.
+ *   regs  - A pointer to the register state at the time of the exception.
  *
  ****************************************************************************/
 
-int riscv_exception(int mcause, void *regs, void *args)
+static void riscv_fault_handler(uintreg_t cause, void *regs)
 {
 #ifdef CONFIG_ARCH_KERNEL_STACK
   struct tcb_s *tcb = this_task();
-#endif
-  uintreg_t cause = mcause & RISCV_IRQ_MASK;
 
-  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
-         ", MTVAL: %" PRIxREG "\n",
-         mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
-         cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
-
-#ifdef CONFIG_ARCH_KERNEL_STACK
   if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
       ((tcb->flags & TCB_FLAG_SYSCALL) == false))
     {
@@ -124,15 +125,34 @@ int riscv_exception(int mcause, void *regs, void *args)
        */
 
       running_regs()[REG_SP] = tcb->xcp.ktopstk;
+      return;
     }
-  else
 #endif
-    {
-      _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
-      up_irq_save();
-      up_set_interrupt_context(true);
-      PANIC_WITH_REGS("panic", regs);
-    }
+
+  _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
+  up_irq_save();
+  up_set_interrupt_context(true);
+  PANIC_WITH_REGS("panic", regs);
+}
+
+/****************************************************************************
+ * Name: riscv_exception
+ *
+ * Description:
+ *   This is the exception handler.
+ *
+ ****************************************************************************/
+
+int riscv_exception(int mcause, void *regs, void *args)
+{
+  uintreg_t cause = mcause & RISCV_IRQ_MASK;
+
+  _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG ", EPC: %" PRIxREG
+         ", MTVAL: %" PRIxREG "\n",
+         mcause > RISCV_MAX_EXCEPTION ? "Unknown" : g_reasons_str[cause],
+         cause, READ_CSR(CSR_EPC), READ_CSR(CSR_TVAL));
+
+  riscv_fault_handler(cause, regs);
 
   return 0;
 }
@@ -200,7 +220,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
     }
   else
     {
-      _alert("PANIC!!! virtual address not mappable: %" PRIxPTR "\n", vaddr);
+      _alert("Virtual address not mappable: %" PRIxPTR "\n", vaddr);
       goto access_fault;
     }
 
@@ -242,7 +262,7 @@ int riscv_fillpage(int mcause, void *regs, void *args)
 
   if (mmu_ln_getentry(ARCH_PGT_MAX_LEVELS, ptlast, vaddr) & PTE_VALID)
     {
-      _alert("PANIC!!! page already mapped, permission violation: %"
+      _alert("Page already mapped, permission violation: %"
              PRIxPTR "\n", vaddr);
       goto access_fault;
     }
@@ -264,10 +284,8 @@ int riscv_fillpage(int mcause, void *regs, void *args)
   return 0;
 
 access_fault:
-  up_irq_save();
-  up_set_interrupt_context(true);
-  PANIC_WITH_REGS("panic", regs);
-  return -EINVAL;
+  riscv_fault_handler(cause, regs);
+  return 0;
 }
 #endif /* CONFIG_PAGING */
 
