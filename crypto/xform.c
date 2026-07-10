@@ -318,6 +318,17 @@ const struct enc_xform enc_xform_chacha20 =
   chacha20_reinit
 };
 
+const struct enc_xform enc_xform_chacha20_djb =
+{
+  CRYPTO_CHACHA20_DJB, "CHACHA20-DJB",
+  64, 16, 32, 32,
+  sizeof(struct chacha20_ctx),
+  chacha20_crypt,
+  chacha20_crypt,
+  chacha20_djb_setkey,
+  chacha20_djb_reinit
+};
+
 const struct enc_xform enc_xform_chacha20_poly1305 =
 {
   CRYPTO_CHACHA20_POLY1305, "CHACHA20-POLY1305",

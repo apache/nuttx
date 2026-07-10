@@ -84,6 +84,32 @@ void chachapoly_reinit(caddr_t key, FAR uint8_t *iv)
   chacha_ivsetup((FAR chacha_ctx *)ctx->block, iv, ctx->nonce);
 }
 
+int chacha20_djb_setkey(FAR void *sched, FAR uint8_t *key, int len)
+{
+  FAR struct chacha20_ctx *ctx = (FAR struct chacha20_ctx *)sched;
+
+  if (len != CHACHA20_KEYSIZE)
+    {
+      return -1;
+    }
+
+  chacha_keysetup((FAR chacha_ctx *)ctx->block, key, CHACHA20_KEYSIZE * 8);
+  return 0;
+}
+
+void chacha20_djb_reinit(caddr_t key, FAR uint8_t *iv)
+{
+  FAR struct chacha20_ctx *ctx = (FAR struct chacha20_ctx *)key;
+
+  /* Original DJB ChaCha20 layout, as used by chacha20-poly1305@openssh.com
+   * (libtomcrypt chacha_ivctr64): the 16-byte IV is loaded verbatim into
+   * state words 12..15 as a 64-bit little-endian block counter followed by
+   * a 64-bit nonce.
+   */
+
+  chacha_ivsetup((FAR chacha_ctx *)ctx->block, iv + 4, iv);
+}
+
 void chacha20_poly1305_init(FAR void *xctx)
 {
   FAR CHACHA20_POLY1305_CTX *ctx = xctx;
