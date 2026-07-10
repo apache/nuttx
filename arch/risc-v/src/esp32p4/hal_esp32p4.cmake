@@ -225,10 +225,12 @@ list(
   ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld
   ${ESP_RISCV_LD_DIR}/rom.api.ld)
 
-# Review the path below when ULP core is implemented on CMake
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  list(APPEND _esp32p4_rom_ld_files
-       ${TOPDIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
+  list(
+    APPEND
+    _esp32p4_rom_ld_files
+    ${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CHIP_SERIES}/common/scripts/ulp_aliases.ld
+  )
 endif()
 
 # Add these files to the GLOBAL PROPERTY LD_SCRIPT

@@ -199,10 +199,10 @@ if(CONFIG_COMP)
 endif()
 
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  message(
-    WARNING
-      "LP Core is not supported on CMake. Use Make to build the image instead.")
+  list(APPEND SRCS esp_ulp.c)
 endif()
+
+# if(CONFIG_ESPRESSIF_LP_MAILBOX) list(APPEND SRCS esp_lp_mailbox.c) endif()
 
 if(CONFIG_PM)
   if(NOT CONFIG_ARCH_CUSTOM_PMINIT)
@@ -469,14 +469,6 @@ add_custom_target(
   VERBATIM)
 
 # ##############################################################################
-# ULP Support (TODO)
-# ##############################################################################
-
-if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  list(APPEND ESP_CLEAN_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../chip/ulp)
-endif()
-
-# ##############################################################################
 # Clean hook - replicate Make.defs distclean behavior
 # ##############################################################################
 
@@ -484,6 +476,15 @@ set(ESP_CLEAN_FILES
     ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}/gpio_sig_map.h
     ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}/irq.h
     ${NUTTX_DIR}/vefuse.bin)
+
+if(CONFIG_ESPRESSIF_USE_LP_CORE)
+  list(
+    APPEND
+    ESP_CLEAN_FILES
+    ${NUTTX_CHIP_ABS_DIR}/ulp
+    ${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CHIP_SERIES}/common/scripts/ulp_aliases.ld
+  )
+endif()
 
 set_property(
   DIRECTORY ${CMAKE_SOURCE_DIR}

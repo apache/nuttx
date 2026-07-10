@@ -197,11 +197,6 @@ set(_esp32h2_rom_ld_files
     ${ESP_RISCV_LD_DIR}/rom.api.ld
     ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld)
 
-if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  list(APPEND _esp32h2_rom_ld_files
-       ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
-endif()
-
 if(CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE)
   list(APPEND _esp32h2_rom_ld_files
        ${ESP_ROM_LD_DIR}/${CHIP_SERIES}.rom.spiflash.ld)

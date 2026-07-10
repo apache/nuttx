@@ -199,8 +199,11 @@ set(_esp32c6_rom_ld_files
     ${ESP_SOC_LD_DIR}/${CHIP_SERIES}.peripherals.ld)
 
 if(CONFIG_ESPRESSIF_USE_LP_CORE)
-  list(APPEND _esp32c6_rom_ld_files
-       ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/board/scripts/ulp_aliases.ld)
+  list(
+    APPEND
+    _esp32c6_rom_ld_files
+    ${NUTTX_DIR}/boards/${CONFIG_ARCH}/${CHIP_SERIES}/common/scripts/ulp_aliases.ld
+  )
 endif()
 
 if(CONFIG_ESPRESSIF_SPI_FLASH_USE_ROM_CODE)
