@@ -46,6 +46,7 @@
 #  include <time.h>
 #endif
 
+#include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
@@ -155,6 +156,9 @@ struct proc_envinfo_s
   size_t buflen;
   size_t remaining;
   size_t totalsize;
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct tcb_s *tcb;
+#endif
 };
 
 /****************************************************************************
@@ -1433,8 +1437,17 @@ static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
   size_t linesize;
   size_t copysize;
   int namelen;
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct addrenv_s *targetenv;
+#endif
 
   DEBUGASSERT(arg != NULL && pair != NULL);
+
+  /* This callback is invoked by env_foreach() with info->tcb's own address
+   * environment selected, since "pair" points into info->tcb's user heap
+   * (tg_envp).  Parse "pair" and format the result into the kernel-heap-
+   * backed procfile->line first, all done under info->tcb's environment.
+   */
 
   /* Parse the name from the name/value pair */
 
@@ -1470,9 +1483,30 @@ static int proc_groupenv_callback(FAR void *arg, FAR const char *pair)
   linesize        = procfs_snprintf(info->procfile->line,
                                     STATUS_LINELEN, "%s=%s\n",
                                     name, value);
+
+  /* info->buffer is the caller's receive buffer, not info->tcb's, so
+   * switch back to the caller's own address environment before touching
+   * it, then switch back to info->tcb's so the next env_foreach()
+   * iteration can dereference the next tg_envp[] entry correctly.
+   */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (info->tcb->addrenv_own != NULL)
+    {
+      addrenv_select(nxsched_self()->addrenv_own, &targetenv);
+    }
+#endif
+
   copysize        = procfs_memcpy(info->procfile->line, linesize,
                                   info->buffer, info->remaining,
                                   &info->offset);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (info->tcb->addrenv_own != NULL)
+    {
+      addrenv_restore(targetenv);
+    }
+#endif
 
   info->totalsize += copysize;
   info->buffer    += copysize;
@@ -1498,6 +1532,9 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
 {
   FAR struct task_group_s *group = tcb->group;
   struct proc_envinfo_s info;
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct addrenv_s *oldenv;
+#endif
 
   DEBUGASSERT(group != NULL);
 
@@ -1509,10 +1546,37 @@ static ssize_t proc_groupenv(FAR struct proc_file_s *procfile,
   info.buflen     = buflen;
   info.remaining  = buflen;
   info.totalsize  = 0;
+#ifdef CONFIG_ARCH_ADDRENV
+  info.tcb        = tcb;
+#endif
+
+  /* tg_envp holds addresses in tcb's own address space.  Temporarily
+   * switch to it so the strings it points to are actually reachable,
+   * since the caller (e.g. nsh reading another task's /proc node) may
+   * be running under a different address environment.  The caller's own
+   * environment is recovered on demand via nxsched_self()->addrenv_own
+   * in proc_groupenv_callback(), since whichever task runs that callback
+   * is by definition the caller.
+   */
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_select(tcb->addrenv_own, &oldenv);
+    }
+#endif
 
   /* Generate output for each environment variable */
 
   env_foreach(group, proc_groupenv_callback, &info);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (tcb->addrenv_own != NULL)
+    {
+      addrenv_restore(oldenv);
+    }
+#endif
+
   return info.totalsize;
 }
 #endif
