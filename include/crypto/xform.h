@@ -76,8 +76,8 @@ struct enc_xform
   uint16_t minkey;
   uint16_t maxkey;
   uint16_t ctxsize;
-  CODE void (*encrypt)(caddr_t, FAR uint8_t *);
-  CODE void (*decrypt)(caddr_t, FAR uint8_t *);
+  CODE void (*encrypt)(caddr_t, FAR uint8_t *, size_t);
+  CODE void (*decrypt)(caddr_t, FAR uint8_t *, size_t);
   CODE int  (*setkey)(FAR void *, FAR uint8_t *, int len);
   CODE void (*reinit)(caddr_t, FAR uint8_t *);
 };
@@ -112,6 +112,7 @@ extern const struct enc_xform enc_xform_aes_xts;
 extern const struct enc_xform enc_xform_aes_ofb;
 extern const struct enc_xform enc_xform_aes_cfb_8;
 extern const struct enc_xform enc_xform_aes_cfb_128;
+extern const struct enc_xform enc_xform_chacha20;
 extern const struct enc_xform enc_xform_chacha20_poly1305;
 extern const struct enc_xform enc_xform_null;
 

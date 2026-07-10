@@ -91,7 +91,7 @@
 #define BLOWFISH_BLOCK_LEN    8
 #define CAST128_BLOCK_LEN     8
 #define RIJNDAEL128_BLOCK_LEN 16
-#define EALG_MAX_BLOCK_LEN    16
+#define EALG_MAX_BLOCK_LEN    64
 
 /* Keep this updated */
 
@@ -140,7 +140,8 @@
 #define CRYPTO_PBKDF2_HMAC_SHA256 39
 #define CRYPTO_ESN              40 /* Support for Extended Sequence Numbers */
 #define CRYPTO_SHA2_224_HMAC    41
-#define CRYPTO_ALGORITHM_MAX    41 /* Keep updated */
+#define CRYPTO_CHACHA20         42
+#define CRYPTO_ALGORITHM_MAX    42 /* Keep updated */
 
 /* Algorithm flags */
 

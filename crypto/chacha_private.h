@@ -141,9 +141,9 @@ static void chacha_ivsetup(FAR chacha_ctx *x,
                            FAR const uint8_t *counter)
 {
   x->input[12] = counter == NULL ? 0 : U8TO32_LITTLE(counter + 0);
-  x->input[13] = counter == NULL ? 0 : U8TO32_LITTLE(counter + 4);
-  x->input[14] = U8TO32_LITTLE(iv + 0);
-  x->input[15] = U8TO32_LITTLE(iv + 4);
+  x->input[13] = U8TO32_LITTLE(iv + 0);
+  x->input[14] = U8TO32_LITTLE(iv + 4);
+  x->input[15] = U8TO32_LITTLE(iv + 8);
 }
 
 static void chacha_encrypt_bytes(FAR chacha_ctx *x,
