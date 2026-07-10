@@ -76,6 +76,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS esp_board_pcnt.c)
   endif()
 
+  if(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN)
+    include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/ulp.cmake)
+  endif()
+
 endif()
 
 target_sources(board PRIVATE ${SRCS})

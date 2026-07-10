@@ -112,6 +112,10 @@ if(CONFIG_ARCH_BOARD_COMMON)
     target_link_libraries(board PRIVATE romfs_etc)
   endif()
 
+  if(CONFIG_ESPRESSIF_ULP_USE_TEST_BIN)
+    include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/ulp.cmake)
+  endif()
+
 endif()
 
 target_sources(board PRIVATE ${SRCS})
