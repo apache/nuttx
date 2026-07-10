@@ -77,14 +77,18 @@ int nxtask_exit(void)
   FAR struct tcb_s *dtcb;
   FAR struct tcb_s *rtcb;
   int ret;
-#ifdef CONFIG_SMP
   /* Avoid using this_task() because it may assume a state that is not
-   * appropriate for an exiting task.
+   * appropriate for an exiting task: if a higher-priority task became
+   * ready and was placed at the head of the ready-to-run list while
+   * the context switch away from the exiting task is still deferred,
+   * this_task() (the ready-to-run head) no longer identifies the task
+   * that is actually exiting.
    */
 
+#ifdef CONFIG_SMP
   dtcb = current_task(this_cpu());
 #else
-  dtcb = this_task();
+  dtcb = g_running_tasks[this_cpu()];
 #endif
 
   sinfo("%s pid=%d,TCB=%p\n", get_task_name(dtcb),
