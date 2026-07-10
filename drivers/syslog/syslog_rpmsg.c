@@ -129,7 +129,15 @@ static void syslog_rpmsg_init_buffer(FAR struct syslog_rpmsg_s *priv)
   header->size = CONFIG_SYSLOG_RPMSG_BUFSIZE -
                  sizeof(struct syslog_rpmsg_buffer_header_s);
 #endif
-  if (header->magic != SYSLOG_RPMSG_MAGIC_NUMBER)
+  /* Reset the buffer when it is uninitialized (bad magic), or when the
+   * head/tail indices are out of range.  The shared buffer may have been
+   * left corrupted by another firmware; a bad head/tail would make
+   * syslog_rpmsg_transfer() memcpy from a wild source address, so discard
+   * the content and start clean rather than replaying a corrupted buffer.
+   */
+
+  if (header->magic != SYSLOG_RPMSG_MAGIC_NUMBER ||
+      header->head >= header->size || header->tail >= header->size)
     {
       header->head = 0;
       header->tail = 0;
