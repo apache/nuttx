@@ -3814,7 +3814,7 @@ config STM32_QENCODER_INDEX_PIN
 config STM32_TIM1_QE
 	bool "TIM1 QE"
 	depends on (STM32_QENCODER_MAIN && STM32_TIM1) || (STM32_HAVE_IP_TIMERS && STM32_TIM1)
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM1
+	select STM32_QE
 	---help---
 		Reserve TIM1 for use by QEncoder.
 
@@ -3829,7 +3829,7 @@ config STM32_TIM1_QEPSC
 config STM32_TIM2_QE
 	bool "TIM2 QE"
 	depends on (STM32_QENCODER_MAIN && STM32_TIM2) || (STM32_HAVE_IP_TIMERS && STM32_TIM2)
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM2
+	select STM32_QE
 	---help---
 		Reserve TIM2 for use by QEncoder.
 
@@ -3844,7 +3844,7 @@ config STM32_TIM2_QEPSC
 config STM32_TIM3_QE
 	bool "TIM3 QE"
 	depends on (STM32_QENCODER_MAIN && STM32_TIM3) || (STM32_HAVE_IP_TIMERS && STM32_TIM3)
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM3
+	select STM32_QE
 	---help---
 		Reserve TIM3 for use by QEncoder.
 
@@ -3859,7 +3859,7 @@ config STM32_TIM3_QEPSC
 config STM32_TIM4_QE
 	bool "TIM4 QE"
 	depends on (STM32_QENCODER_MAIN && STM32_TIM4) || (STM32_HAVE_IP_TIMERS && STM32_TIM4)
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM4
+	select STM32_QE
 	---help---
 		Reserve TIM4 for use by QEncoder.
 
@@ -3874,7 +3874,7 @@ config STM32_TIM4_QEPSC
 config STM32_TIM5_QE
 	bool "TIM5 QE"
 	depends on STM32_QENCODER_MAIN && STM32_TIM5
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM5
+	select STM32_QE
 	---help---
 		Reserve TIM5 for use by QEncoder.
 
@@ -3889,7 +3889,7 @@ config STM32_TIM5_QEPSC
 config STM32_TIM8_QE
 	bool "TIM8 QE"
 	depends on STM32_QENCODER_MAIN && STM32_TIM8
-	select STM32_QE if STM32_QENCODER_STM32 && STM32_TIM8
+	select STM32_QE
 	---help---
 		Reserve TIM8 for use by QEncoder.
 
