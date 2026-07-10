@@ -1348,7 +1348,7 @@ static void w5500_receive(FAR struct w5500_driver_s *self)
         {
           nerr("Bad packet size dropped (%"PRIu16")\n", self->w_dev.d_len);
           self->w_dev.d_len = 0;
-          NETDEV_RXERRORS(&priv->dev);
+          NETDEV_RXERRORS(&self->w_dev);
           continue;
         }
 
@@ -2066,7 +2066,7 @@ int w5500_initialize(FAR struct spi_dev_s *spi_dev,
 #ifdef CONFIG_NETDEV_IOCTL
   self->w_dev.d_ioctl   = w5500_ioctl;                    /* Handle network IOCTL commands */
 #endif
-  self->w_dev.d_private = g_w5500;                        /* Used to recover private state from dev */
+  self->w_dev.d_private = self;                           /* Used to recover private state from dev */
   self->spi_dev         = spi_dev;                        /* SPI hardware interconnect */
   self->lower           = lower;                          /* Low-level MCU specific support */
 
