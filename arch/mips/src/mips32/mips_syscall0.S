@@ -60,6 +60,39 @@
  *   up_syscall2 - System call SYS_ argument and two additional parameters.
  *   up_syscall3 - System call SYS_ argument and three additional parameters.
  *
+ ****************************************************************************/
+
+#ifdef CONFIG_MIPS32_USE_SYSCALL_INSTRUCTION
+
+	.text
+	.set	noreorder
+	.set	nomips16
+#ifdef CONFIG_MIPS_MICROMIPS
+	.set	micromips
+#endif
+	.ent	sys_call0
+
+sys_call0:
+sys_call1:
+sys_call2:
+sys_call3:
+
+	syscall
+
+	j		ra
+	nop
+
+#else
+
+/****************************************************************************
+ * Name: up_syscall0, up_syscall1, up_syscall2, up_syscall3
+ *
+ * Description:
+ *   up_syscall0 - System call SYS_ argument and no additional parameters.
+ *   up_syscall1 - System call SYS_ argument and one additional parameter.
+ *   up_syscall2 - System call SYS_ argument and two additional parameters.
+ *   up_syscall3 - System call SYS_ argument and three additional parameters.
+ *
  * Assumption:
  *   All interrupts are disabled except for the software interrupts.
  *
@@ -102,4 +135,6 @@ sys_call3:	/* r4 holds the syscall number, arguments in r5, r6, and r7 */
 
 	j		ra
 	nop
+#endif
+
 	.end	sys_call0

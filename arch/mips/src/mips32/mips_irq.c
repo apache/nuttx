@@ -56,7 +56,9 @@ irqstate_t up_irq_save(void)
   status  = cp0_getstatus();       /* Get CP0 status */
   ret     = status;                /* Save the status */
   status &= ~CP0_STATUS_INT_MASK;  /* Clear all interrupt mask bits */
+#ifndef CONFIG_MIPS32_USE_SYSCALL_INSTRUCTION
   status |= CP0_STATUS_INT_SW0;    /* Enable only the SW0 interrupt */
+#endif
   cp0_putstatus(status);           /* Disable the rest of interrupts */
   return ret;                      /* Return saved status */
 }

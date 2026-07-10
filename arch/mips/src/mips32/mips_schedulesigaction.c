@@ -106,7 +106,9 @@ void up_schedule_sigaction(struct tcb_s *tcb)
       up_current_regs()[REG_EPC] = (uint32_t)mips_sigdeliver;
       status  = up_current_regs()[REG_STATUS];
       status &= ~CP0_STATUS_INT_MASK;
+#ifndef CONFIG_MIPS32_USE_SYSCALL_INSTRUCTION
       status |= CP0_STATUS_INT_SW0;
+#endif
       up_current_regs()[REG_STATUS]  = status;
 
       /* And make sure that the saved context in the TCB
@@ -145,7 +147,9 @@ void up_schedule_sigaction(struct tcb_s *tcb)
       tcb->xcp.regs[REG_EPC]     = (uint32_t)mips_sigdeliver;
       status                     = tcb->xcp.regs[REG_STATUS];
       status                    &= ~CP0_STATUS_INT_MASK;
+#ifndef CONFIG_MIPS32_USE_SYSCALL_INSTRUCTION
       status                    |= CP0_STATUS_INT_SW0;
+#endif
       tcb->xcp.regs[REG_STATUS]  = status;
 
       sinfo("PC/STATUS Saved: %08" PRIx32 "/%08" PRIx32
