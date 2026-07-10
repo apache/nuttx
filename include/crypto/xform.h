@@ -113,6 +113,7 @@ extern const struct enc_xform enc_xform_aes_ofb;
 extern const struct enc_xform enc_xform_aes_cfb_8;
 extern const struct enc_xform enc_xform_aes_cfb_128;
 extern const struct enc_xform enc_xform_chacha20;
+extern const struct enc_xform enc_xform_chacha20_djb;
 extern const struct enc_xform enc_xform_chacha20_poly1305;
 extern const struct enc_xform enc_xform_null;
 

@@ -1645,6 +1645,9 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
           case CRYPTO_CHACHA20:
             txf = &enc_xform_chacha20;
             goto enccommon;
+          case CRYPTO_CHACHA20_DJB:
+            txf = &enc_xform_chacha20_djb;
+            goto enccommon;
           case CRYPTO_CHACHA20_POLY1305:
             txf = &enc_xform_chacha20_poly1305;
             goto enccommon;
@@ -1908,6 +1911,7 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_AES_CFB_8:
           case CRYPTO_AES_CFB_128:
           case CRYPTO_CHACHA20:
+          case CRYPTO_CHACHA20_DJB:
           case CRYPTO_CHACHA20_POLY1305:
           case CRYPTO_NULL:
             txf = swd->sw_exf;
@@ -2047,6 +2051,7 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_AES_CFB_8:
           case CRYPTO_AES_CFB_128:
           case CRYPTO_CHACHA20:
+          case CRYPTO_CHACHA20_DJB:
             txf = sw->sw_exf;
 
             if (crp->crp_iv)
@@ -2452,6 +2457,7 @@ void swcr_init(void)
   algs[CRYPTO_AES_CFB_8] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_CFB_128] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CHACHA20] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_CHACHA20_DJB] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CHACHA20_POLY1305] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_CHACHA20_POLY1305_MAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_MD5] = CRYPTO_ALG_FLAG_SUPPORTED;

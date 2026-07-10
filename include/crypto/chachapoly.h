@@ -36,6 +36,8 @@ int chacha20_setkey(FAR void *, FAR uint8_t *, int);
 void chacha20_reinit(caddr_t, FAR uint8_t *);
 void chacha20_crypt(caddr_t, FAR uint8_t *, size_t);
 void chachapoly_reinit(caddr_t, FAR uint8_t *);
+int chacha20_djb_setkey(FAR void *, FAR uint8_t *, int);
+void chacha20_djb_reinit(caddr_t, FAR uint8_t *);
 
 #define POLY1305_KEYLEN 64
 #define POLY1305_TAGLEN 16

@@ -237,6 +237,7 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_AES_CFB_8:
             case CRYPTO_AES_CFB_128:
             case CRYPTO_CHACHA20:
+            case CRYPTO_CHACHA20_DJB:
             case CRYPTO_CHACHA20_POLY1305:
             case CRYPTO_NULL:
               txform = true;
