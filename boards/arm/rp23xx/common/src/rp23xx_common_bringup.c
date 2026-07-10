@@ -36,6 +36,10 @@
 #include "rp23xx_common_pico.h"
 #include "rp23xx_common_bringup.h"
 
+#ifdef CONFIG_RP23XX_FLASH_MTD
+#  include "rp23xx_flash_mtd.h"
+#endif
+
 #ifdef CONFIG_RP23XX_PWM
 #include "rp23xx_pwm.h"
 #include "rp23xx_pwmdev.h"
@@ -73,6 +77,13 @@
 int rp23xx_common_bringup(void)
 {
   int ret = 0;
+#ifdef CONFIG_RP23XX_FLASH_MTD
+  FAR struct mtd_dev_s *mtd;
+#endif
+#ifdef CONFIG_RP23XX_FLASH_MTD_DATA
+  FAR struct mtd_dev_s *part;
+  struct mtd_geometry_s geo;
+#endif
 
 #ifdef CONFIG_RP23XX_I2C_DRIVER
   #ifdef CONFIG_RP23XX_I2C0
@@ -402,6 +413,89 @@ int rp23xx_common_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_FLASH_MTD
+  /* Create a whole-flash MTD and register it as /dev/rpflash.  Keeping the
+   * MTD over the entire chip leaves the NuttX image region addressable (e.g.
+   * for a firmware/OTA update); a data filesystem is layered on top as a
+   * bounded partition below.
+   */
+
+  mtd = rp23xx_flash_mtd_initialize();
+  if (mtd == NULL)
+    {
+      serr("ERROR: rp23xx_flash_mtd_initialize failed\n");
+    }
+  else
+    {
+      ret = register_mtddriver("/dev/rpflash", mtd, 0755, NULL);
+      if (ret < 0)
+        {
+          serr("ERROR: register_mtddriver(/dev/rpflash) failed: %d\n", ret);
+        }
+
+#ifdef CONFIG_RP23XX_FLASH_MTD_DATA
+      /* Carve a data partition out of the whole-flash MTD and mount a
+       * LittleFS on it.  mtd_partition() takes its offset/size in blocksize
+       * (page) units, so convert from the configured byte values using the
+       * MTD's own geometry.  Bounding LittleFS to this partition keeps it
+       * clear of the firmware / OTA region.
+       */
+
+      if (ret >= 0 &&
+          MTD_IOCTL(mtd, MTDIOC_GEOMETRY, (unsigned long)&geo) >= 0)
+        {
+          part = mtd_partition(mtd,
+                   CONFIG_RP23XX_FLASH_MTD_DATA_OFFSET / geo.blocksize,
+                   CONFIG_RP23XX_FLASH_MTD_DATA_SIZE / geo.blocksize);
+          if (part == NULL)
+            {
+              serr("ERROR: flash data mtd_partition failed\n");
+            }
+          else
+            {
+              ret = register_mtddriver("/dev/rpdata", part, 0755, NULL);
+              if (ret < 0)
+                {
+                  serr("ERROR: register_mtddriver(/dev/rpdata) failed: %d\n",
+                       ret);
+                }
+              else if (CONFIG_RP23XX_FLASH_MTD_DATA_MOUNTPOINT[0] != '\0')
+                {
+                  /* Mount an EXISTING LittleFS on the data partition.  We
+                   * deliberately do NOT pass "autoformat": formatting writes
+                   * flash, and a flash erase/program this early in bringup
+                   * (interrupts disabled, XIP exited, USB not up) can hang
+                   * the boot.  A blank or corrupt filesystem simply fails to
+                   * mount and is logged; the board still boots.  Format it
+                   * once from NSH:
+                   *   mount -t littlefs -o autoformat /dev/rpdata /data
+                   */
+
+                  ret = nx_mount("/dev/rpdata",
+                                 CONFIG_RP23XX_FLASH_MTD_DATA_MOUNTPOINT,
+                                 "littlefs", 0, NULL);
+                  if (ret < 0)
+                    {
+                      serr("flash: %s not mounted (format with 'mount -t "
+                           "littlefs -o autoformat /dev/rpdata %s'): %d\n",
+                           CONFIG_RP23XX_FLASH_MTD_DATA_MOUNTPOINT,
+                           CONFIG_RP23XX_FLASH_MTD_DATA_MOUNTPOINT, ret);
+
+                      /* A blank/corrupt optional filesystem is non-fatal:
+                       * log and continue bringup rather than returning the
+                       * error (which would abort the rest of board bringup,
+                       * e.g. networking).
+                       */
+
+                      ret = OK;
+                    }
+                }
+            }
+        }
+#endif
     }
 #endif
 

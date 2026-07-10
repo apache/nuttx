@@ -1059,3 +1059,69 @@ config RP23XX_BOARD_HAS_WS2812
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.
+
+#####################################################################
+#  On-chip Flash File System Configuration
+#####################################################################
+
+config RP23XX_FLASH_MTD
+	bool "MTD device over the on-chip QSPI flash"
+	default n
+	select MTD
+	---help---
+		Create an MTD device spanning the entire on-chip QSPI flash,
+		using the RP2350 bootrom flash programming functions.  It is
+		registered as /dev/rpflash.  Because the MTD covers the whole
+		chip, the region the NuttX image lives in stays addressable (for
+		example, for a firmware/OTA update).  Filesystem and OTA
+		partitions are layered on top with mtd_partition().
+
+if RP23XX_FLASH_MTD
+
+config RP23XX_FLASH_SIZE
+	int "Total size of the on-chip flash (bytes)"
+	default 4194304
+	---help---
+		Size of the board's QSPI flash chip in bytes.  The MTD spans this
+		entire region.  The Raspberry Pi Pico 2 / Pico 2 W have
+		4 MiB = 4194304 bytes.
+
+config RP23XX_FLASH_MTD_DATA
+	bool "LittleFS data partition on the flash MTD"
+	default n
+	select MTD_PARTITION
+	select FS_LITTLEFS
+	---help---
+		Carve a partition out of the flash MTD (registered as /dev/rpdata)
+		and mount a LittleFS filesystem on it for persistent local
+		storage.  Bounding LittleFS to this partition keeps it clear of
+		the NuttX image / OTA region.
+
+if RP23XX_FLASH_MTD_DATA
+
+config RP23XX_FLASH_MTD_DATA_OFFSET
+	int "Data partition offset from start of flash (bytes)"
+	default 1048576
+	---help---
+		Offset of the LittleFS data partition from the start of flash.
+		Must be a multiple of 4096 and lie safely beyond the end of the
+		NuttX image.  The default (1 MiB) leaves room for the image.
+
+config RP23XX_FLASH_MTD_DATA_SIZE
+	int "Data partition size (bytes)"
+	default 3145728
+	---help---
+		Size of the LittleFS data partition in bytes.  Must be a multiple
+		of 4096, and OFFSET + SIZE must not exceed RP23XX_FLASH_SIZE.
+		The default (3 MiB) fills the rest of a 4 MiB chip after a 1 MiB
+		image region.
+
+config RP23XX_FLASH_MTD_DATA_MOUNTPOINT
+	string "Mount point for the data partition"
+	default "/data"
+	---help---
+		Where to mount the LittleFS.  Leave empty to register the
+		partition (/dev/rpdata) without auto-mounting.
+
+endif # RP23XX_FLASH_MTD_DATA
+endif # RP23XX_FLASH_MTD
