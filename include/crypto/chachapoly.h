@@ -23,7 +23,7 @@
 #define CHACHA20_KEYSIZE   32
 #define CHACHA20_CTR       4
 #define CHACHA20_SALT      4
-#define CHACHA20_NONCE     8
+#define CHACHA20_NONCE     4
 #define CHACHA20_BLOCK_LEN 64
 
 struct chacha20_ctx
@@ -34,9 +34,10 @@ struct chacha20_ctx
 
 int chacha20_setkey(FAR void *, FAR uint8_t *, int);
 void chacha20_reinit(caddr_t, FAR uint8_t *);
-void chacha20_crypt(caddr_t, FAR uint8_t *);
+void chacha20_crypt(caddr_t, FAR uint8_t *, size_t);
+void chachapoly_reinit(caddr_t, FAR uint8_t *);
 
-#define POLY1305_KEYLEN 32
+#define POLY1305_KEYLEN 64
 #define POLY1305_TAGLEN 16
 #define POLY1305_BLOCK_LEN 16
 
