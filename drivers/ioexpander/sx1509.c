@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -886,6 +887,7 @@ static void sx1509_irqworker(void *arg)
               /* Did any of the requested pin interrupts occur? */
 
               ioe_pinset_t match = pinset & priv->cb[i].pinset;
+
               if (match != 0)
                 {
                   /* Yes.. perform the callback */
