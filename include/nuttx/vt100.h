@@ -225,6 +225,15 @@
 #define VT100_FMT_HVPOS      "\033[%d;%df"                    /* Move cursor to screen location v,h */
 #define VT52_FMT_CURSORPOS   "\033%d%d"                       /* Move cursor to v,h location */
 
+/* VT100 escape sequences as strings, suitable for printf-style output */
+
+#define VT100_STR_CLEARSCREEN "\033[2J"                       /* Clear entire screen */
+#define VT100_STR_CURSORHOME  "\033[1;1H"                     /* Move cursor to upper left corner */
+#define VT100_STR_CLEAREOL    "\033[K"                        /* Erase to end of current line */
+#define VT100_STR_CLEAREOS    "\033[J"                        /* Erase to end of screen */
+#define VT100_STR_BOLD        "\033[1m"                       /* Turn bold mode on */
+#define VT100_STR_MODESOFF    "\033[0m"                       /* Turn off character attributes */
+
 /* VT100 Special Key Codes
  *
  * These are sent from the terminal back to the computer when the particular

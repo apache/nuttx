@@ -1857,6 +1857,47 @@ command is run in background with the sleep command::
   nsh>
   2.0100 sec
 
+.. _cmdtop:
+
+``top`` Monitor Tasks
+=====================
+
+**Command Syntax**::
+
+  top [ -n <num>] [ -d <delay>] [ -p <pidlist>] [ -h ]
+
+**Synopsis**. Live task monitor similar to the UNIX ``top`` command. It
+periodically shows a summary header (uptime, task counts, CPU busy/idle
+and memory usage) followed by the same per-task information reported by
+the :ref:`ps <cmdps>` command, sorted by CPU load. The screen is
+refreshed in place. Press ``q``, ``ESC`` or ``Ctrl-C`` to exit.
+
+Options:
+
+========================= =================================================
+``-n <num>``              Show at most ``<num>`` tasks (highest CPU first)
+``-d <delay>``            Refresh interval in seconds (default 3)
+``-p <pidlist>``          Show only the given PIDs, comma-separated
+                          (e.g. ``-p 0,2``)
+``-h``                    Show the per-task heap usage column
+========================= =================================================
+
+**Example**::
+
+  nsh> top
+  top - up 00:01:01
+  Tasks: 2 total, 2 running, 0 sleeping
+  %Cpu(s):  9.2 busy, 90.8 idle
+  Mem :  1004876 total,     8140 used,   996736 free
+
+    TID   PID  PPID PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK            STACK    USED FILLED    CPU COMMAND
+      0     0     0   0 FIFO     Kthread   - Ready              0000000000000000 0002024 0000500  24.7%  90.7% Idle_Task
+      2     2     0 100 RR       Task      - Running            0000000000000000 0004048 0001952  48.2%   9.2% nsh_main
+
+NOTE: This command depends upon the *procfs* file system and CPU load
+measurement (``CONFIG_SCHED_CPULOAD``). The stack usage columns require
+``CONFIG_STACK_COLORATION``.
+
 .. _cmdtruncate:
 
 ``truncate`` Set the Size of a File

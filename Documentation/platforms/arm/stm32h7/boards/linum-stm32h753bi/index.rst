@@ -380,6 +380,20 @@ nsh
 Configures the NuttShell (nsh) located at apps/examples/nsh. This
 configuration enables a serial console on UART1.
 
+The procfs file system, CPU load measurement and stack coloration are
+enabled, so the system can be monitored live with the ``top`` command
+(press ``q`` to exit)::
+
+    nsh> top
+    top - up 00:00:19
+    Tasks: 2 total, 2 running, 0 sleeping
+    %Cpu(s):  8.1 busy, 91.9 idle
+    Mem :  1004876 total,     8140 used,   996736 free
+
+      TID   PID  PPID PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK            STACK    USED FILLED    CPU COMMAND
+        0     0     0   0 FIFO     Kthread   - Ready              0000000000000000 0002024 0000500  24.7%  91.8% Idle_Task
+        2     2     0 100 RR       Task      - Running            0000000000000000 0004048 0001952  48.2%   8.1% nsh_main
+
 usbnsh
 ------
 
