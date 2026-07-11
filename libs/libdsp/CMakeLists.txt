@@ -24,6 +24,7 @@ if(CONFIG_LIBDSP)
     dsp
     lib_pid.c
     lib_svm.c
+    lib_matrix.c
     lib_transform.c
     lib_observer.c
     lib_observer_b16.c

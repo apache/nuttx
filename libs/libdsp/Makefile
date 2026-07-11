@@ -26,6 +26,7 @@ ifeq ($(CONFIG_LIBDSP),y)
 CSRCS += lib_avg.c
 CSRCS += lib_pid.c
 CSRCS += lib_svm.c
+CSRCS += lib_matrix.c
 CSRCS += lib_transform.c
 CSRCS += lib_observer.c
 CSRCS += lib_foc.c

@@ -8696,3 +8696,10 @@ http://www.opensource.org/licenses. Any Red Hat trademarks that are
 incorporated in the source code or documentation are not subject to
 the BSD License and may only be used or replicated with the express
 permission of Red Hat, Inc.
+
+libs/libdsp/lib_matrix.c
+========================
+
+ Copyright (C) 2026 Djordje Vulovic
+
+ SPDX-License-Identifier: Apache-2.0

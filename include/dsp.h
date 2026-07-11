@@ -619,6 +619,155 @@ void avg_filter_data_init(FAR struct avg_filter_data_s *data,
                           float prev_avg, float k);
 float avg_filter(FAR struct avg_filter_data_s *data, float x);
 
+/****************************************************************************
+ * Name: matrix_add
+ *
+ * Description:
+ *   Matrix addition
+ *
+ *   C (m x n) = A (m x n) + B (m x n)
+ *
+ *     A   Pointer to the first matrix (m x n)
+ *     B   Pointer to the second matrix (m x n)
+ *     C   Pointer to the result matrix (m x n)
+ *     m   Number of rows
+ *     n   Number of columns
+ *
+ ****************************************************************************/
+
+void matrix_add(const float *A, const float *B, float *C,
+                uint8_t m, uint8_t n);
+
+/****************************************************************************
+ * Name: matrix_sub
+ *
+ * Description:
+ *   Matrix subtraction
+ *     C (m x n) = A (m x n) - B (m x n)
+ *
+ *     A   Pointer to the first matrix (m x n)
+ *     B   Pointer to the second matrix (m x n)
+ *     C   Pointer to the result matrix (m x n)
+ *     m   Number of rows
+ *     n   Number of columns
+ *
+ ****************************************************************************/
+
+void matrix_sub(const float *A, const float *B, float *C,
+                uint8_t m, uint8_t n);
+
+/****************************************************************************
+ * Name: matrix_mul
+ *
+ * Description:
+ *   Matrix multiplication
+ *
+ *   C (m x n) = A (m x n) * B (m x n)
+ *
+ *     A   Pointer to the first matrix (m x n)
+ *     B   Pointer to the second matrix (m x n)
+ *     C   Pointer to the result matrix (m x n)
+ *     m   Number of rows
+ *     n   Number of columns
+ *
+ ****************************************************************************/
+
+void matrix_mul(const float *A, const float *B, float *C,
+                uint8_t m, uint8_t n, uint8_t p);
+
+/****************************************************************************
+ * Name: matrix_mul_transpose
+ *
+ * Description:
+ *   Matrix multiplication with a transposed matrix
+ *
+ *   C (m x n) = A (m x n) * B (p x n)^T
+ *
+ *     A   Pointer to the first matrix (m x n)
+ *     B   Pointer to the second matrix (p x n) - will be transposed
+ *     C   Pointer to the result matrix (m x p)
+ *     m   Number of rows in matrix A
+ *     n   Number of columns in matrices A and B
+ *     p   Number of rows in matrix B (becomes the number of columns
+ *         in the result)
+ *
+ ****************************************************************************/
+
+void matrix_mul_transpose(const float *A, const float *B, float *C,
+                          uint8_t m, uint8_t n, uint8_t p);
+
+/****************************************************************************
+ * Name: matrix_transpose
+ *
+ * Description:
+ *   Matrix transposed
+ *
+ *   B (m x n) = A^T (m x n)^T
+ *
+ *     A   Pointer to the input matrix (m x n)
+ *     B   Pointer to the output matrix (n x m)
+ *     m   Number of rows in the input matrix
+ *     n   Number of columns in the input matrix
+ *
+ ****************************************************************************/
+
+void matrix_transpose(const float *A, float *B, uint8_t m, uint8_t n);
+
+/****************************************************************************
+ * Name: matrix_scalar_mul
+ *
+ * Description:
+ *   Matrix-scalar multiplication
+ *
+ *   B (m x n) = A (m x n) * s
+ *
+ *     A   Pointer to the input matrix (m x n)
+ *     s   Scalar value (float)
+ *     B   Pointer to the output matrix (m x n)
+ *     m   Number of rows
+ *     n   Number of columns
+ *
+ ****************************************************************************/
+
+void matrix_scalar_mul(const float *A, float s, float *B,
+                       uint8_t m, uint8_t n);
+
+/****************************************************************************
+ * Name: matrix_copy
+ *
+ * Description:
+ *   Matrix copy
+ *
+ *   B (m x n) = A (m x n)
+ *
+ *     A   Pointer to the source matrix (m x n)
+ *     B   Pointer to the destination matrix (m x n)
+ *     m   Number of rows
+ *     n   Number of columns
+ *
+ ****************************************************************************/
+
+void matrix_copy(const float *A, float *B, uint8_t m, uint8_t n);
+
+/****************************************************************************
+ * Name: matrix_copy
+ *
+ * Description:
+ *   3x3 matrix inversion
+ *
+ *   inv (3x3) = A^-1 (3x3)
+ *
+ *     A   Input matrix (3x3)
+ *     inv Output matrix (3x3) - inverse matrix
+ *
+ * Returns:
+ *   1 if the inversion was successful,
+ *   0 if the matrix is singular.
+ *
+ ****************************************************************************/
+
+uint8_t matrix_inv_3x3(const float A[3][3], float inv[3][3]);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
