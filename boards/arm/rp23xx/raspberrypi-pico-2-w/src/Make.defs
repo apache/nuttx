@@ -89,3 +89,7 @@ distclean::
 	$(call DELFILE, board$(DELIM)cyw43439.firmware.image)
 
 endif
+
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += rp23xx_composite.c
+endif

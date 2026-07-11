@@ -38,6 +38,10 @@ if(CONFIG_BOARDCTL)
   list(APPEND SRCS rp23xx_appinit.c)
 endif()
 
+if(CONFIG_USBDEV_COMPOSITE)
+  list(APPEND SRCS rp23xx_composite.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_BOOT_RUNFROMFLASH)

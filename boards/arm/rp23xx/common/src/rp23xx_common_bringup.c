@@ -28,6 +28,11 @@
 #include <stddef.h>
 #include <string.h>
 #include <sys/stat.h>
+#ifdef CONFIG_EXAMPLES_PORTALUP
+#  include <spawn.h>
+#  include <syslog.h>
+#  include <errno.h>
+#endif
 
 #include <nuttx/fs/fs.h>
 
@@ -73,6 +78,11 @@
 int rp23xx_common_bringup(void)
 {
   int ret = 0;
+
+#ifdef CONFIG_EXAMPLES_PORTALUP
+  FAR char *portalup_argv[2];
+  pid_t portalup_pid;
+#endif
 
 #ifdef CONFIG_RP23XX_I2C_DRIVER
   #ifdef CONFIG_RP23XX_I2C0
@@ -520,5 +530,21 @@ int rp23xx_common_bringup(void)
     }
 
 #endif
+
+#ifdef CONFIG_EXAMPLES_PORTALUP
+  /* Autostart the access-device boot helper: bring up wlan0 and start the
+   * mDNS responder so the board is reachable by name at boot.
+   */
+
+  portalup_argv[0] = "portalup";
+  portalup_argv[1] = NULL;
+
+  if (posix_spawn(&portalup_pid, "portalup", NULL, NULL,
+                  portalup_argv, NULL) != 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to spawn portalup: %d\n", errno);
+    }
+#endif
+
   return ret;
 }
