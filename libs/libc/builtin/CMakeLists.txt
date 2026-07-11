@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-if(CONFIG_BUILTIN)
+if(CONFIG_APP_REGISTRY)
   set(SRCS lib_builtin_getname.c lib_builtin_isavail.c lib_builtin_forindex.c)
 
   if(CONFIG_BUILD_PROTECTED)

@@ -20,7 +20,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_BUILTIN),y)
+ifneq ($(CONFIG_APP_REGISTRY),)
 
 # Builtin library files
 

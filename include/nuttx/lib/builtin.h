@@ -30,11 +30,15 @@
 #include <nuttx/config.h>
 #include <sys/types.h>
 
-#ifdef CONFIG_BUILTIN
+#ifdef CONFIG_APP_REGISTRY
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Under CONFIG_BUILD_KERNEL, only priority/stacksize are consumed; main
+ * (and uid/gid/mode, if enabled) are populated but unused.
+ */
 
 struct builtin_s
 {
@@ -241,5 +245,5 @@ int builtin_getmode(int index);
 }
 #endif
 
-#endif /* CONFIG_BUILTIN */
+#endif /* CONFIG_APP_REGISTRY */
 #endif /* __INCLUDE_NUTTX_LIB_BUILTIN_H */

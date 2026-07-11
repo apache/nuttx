@@ -13,3 +13,15 @@ config BUILTIN
 		those names in a file system from which they can be executed.  This feature
 		is also the underlying requirement to support built-in applications in the
 		NuttShell (NSH).
+
+config APP_REGISTRY
+	bool
+	default y if BUILTIN || BUILD_KERNEL
+	---help---
+		Hidden option indicating that the compile-time name/priority/stacksize
+		registry table for applications (struct builtin_s / g_builtins[]) is
+		available.  This is a broader condition than BUILTIN: BUILD_KERNEL
+		cannot select BUILTIN (main_t dispatch is meaningless when the caller
+		and the application are in different address spaces), but it still
+		needs this table so that posix_spawn() can pick up each application's
+		configured priority and stack size.
