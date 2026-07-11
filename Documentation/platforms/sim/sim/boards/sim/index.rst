@@ -645,6 +645,57 @@ test is used to verify the uClibc++ port to NuttX.
    To really use this example, I will have to think of some way to postpone
    running C++ static initializers until NuttX has been initialized.
 
+dropbear
+--------
+
+This configuration runs the `Dropbear <https://matt.ucc.asn.au/dropbear/dropbear.html>`__
+SSH server (see :doc:`/applications/netutils/dropbear/index`) on the simulator,
+so it can be tested without real hardware. NSH starts the daemon automatically
+at boot (``CONFIG_NSH_DROPBEAR``).
+
+The simulator reaches the host network through the TAP device
+(``CONFIG_SIM_NETDEV``); see :doc:`/platforms/sim/network_linux` for the
+details. In short, build and prepare the host with:
+
+.. code:: console
+
+   $ ./tools/configure.sh sim:dropbear
+   $ make
+   $ # necessary on recent Linux distributions
+   $ sudo setcap cap_net_admin+ep ./nuttx
+   $ # replace eth0 with your Ethernet or wireless interface
+   $ sudo ./tools/simhostroute.sh eth0 on
+   $ ./nuttx
+
+The defconfig preconfigures the simulation address ``10.0.1.2`` with default
+router ``10.0.1.1``, matching the network that ``simhostroute.sh`` creates on
+the host, so no manual ``ifconfig`` is needed. Add a user account (the
+password file is created on the first ``useradd``):
+
+.. code:: console
+
+   nsh> useradd admin mypassword
+
+Then open an SSH session from the host — Dropbear listens on port 2222
+(``CONFIG_NETUTILS_DROPBEAR_PORT``) — and run NSH commands remotely over a
+pseudo-terminal (``CONFIG_PSEUDOTERM``):
+
+.. code:: console
+
+   $ ssh -p 2222 admin@10.0.1.2
+   admin@10.0.1.2's password:
+   nsh>
+
+.. note::
+
+   The host key (``/tmp/dropbear_ecdsa_host_key``) and the user database
+   (``/tmp/passwd``) live on the volatile ``/tmp`` file system, so both are
+   recreated on every run: the ``useradd`` step must be repeated after each
+   boot, and OpenSSH clients will warn that the host key changed between
+   runs. For local testing the check can be relaxed with::
+
+      $ ssh -p 2222 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no admin@10.0.1.2
+
 fb
 --
 
