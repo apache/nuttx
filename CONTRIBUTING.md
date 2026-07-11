@@ -109,6 +109,30 @@ Git commit message consists of:
     lines, short sentences, or bullet points (see 1.3).
  4. Blank line.
  5. Signature (created with `git commit -s`).
+ 6. `Assisted-by: ` above the signature (see below)
+
+The `Assisted-by: ` field is required to be present for any and all commits in
+which generative tooling/AI tools were used in the assistance of development,
+writing commit messages, etc. This field may be omitted if no generative tooling
+was used. This follows the [Apache Software Foundation generative tooling
+guidance](https://www.apache.org/legal/generative-tooling.html), modifying the
+recommended `Generated-by:` tag to `Assisted-by`. This is in line with other
+major projects, such as [the Linux kernel
+guidelines](https://docs.kernel.org/process/coding-assistants.html).
+
+AI agents **MUST NOT** add `Signed-off-by` tags. Only humans can legally certify
+the commit.
+
+The format of this field should follow the following format:
+```
+Assisted-by: AGENT_NAME:MODEL_VERSION [TOOL1] [TOOL2]
+```
+where
+* `AGENT_NAME` is the name of the AI tool or framework
+* `MODEL_VERSION` is the specific model version used (if available)
+* `[TOOL1] [TOOL2]` are optional specialized analysis tools
+
+For example: `Assisted-by: Claude:claude-3-opus coccinelle sparse`
 
 Valid git commit example:
 
@@ -133,6 +157,7 @@ auto-rejected until fixed:
  1. topic.
  2. description.
  3. signature (`git commit -s`).
+ 4. `Assisted-by:`, if applicable (see section 1.5)
 
 Although this seems to repeat rule 1.5, it clearly filters out commits
 with no topic, description, or signature.
