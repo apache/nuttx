@@ -367,11 +367,11 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
           nxmutex_lock(&conn->recvlock);
           if (conn->recvdata)
             {
-              conn->recvlen = MIN(conn->recvlen, msg->len);
               if (len == msg->len)
                 {
                   /* SOCK_STREAM */
 
+                  conn->recvlen = MIN(conn->recvlen, len);
                   conn->recvpos += conn->recvlen;
                   memcpy(conn->recvdata, buf, conn->recvlen);
                   buf += conn->recvlen;
@@ -381,6 +381,9 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
                 {
                   /* SOCK_DGRAM */
 
+                  conn->recvlen = MIN(conn->recvlen,
+                                      len > sizeof(uint32_t) ?
+                                      len - sizeof(uint32_t) : 0);
                   conn->recvpos += len;
                   memcpy(conn->recvdata, buf + sizeof(uint32_t),
                          conn->recvlen);
