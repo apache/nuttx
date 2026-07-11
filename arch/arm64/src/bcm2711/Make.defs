@@ -26,6 +26,7 @@ CHIP_CSRCS += bcm2711_boot.c
 CHIP_CSRCS += bcm2711_mailbox.c
 CHIP_CSRCS += bcm2711_serial.c
 CHIP_CSRCS += bcm2711_gpio.c
+CHIP_CSRCS += bcm2711_oneshot.c
 
 ifeq ($(CONFIG_SMP),y)
 CHIP_CSRCS += bcm2711_cpustart.c

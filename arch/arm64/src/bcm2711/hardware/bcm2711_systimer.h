@@ -33,6 +33,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define BCM_SYST_NUMCHANS (4)
+#define BCM_SYST_FREQ (1000000) /* 1MHz */
+
 /* System timer register offsets */
 
 #define BCM_SYST_CS_OFFSET 0x00
@@ -50,6 +53,7 @@
 #define BCM_SYST_CS _BCM_SYST(BCM_SYST_CS_OFFSET)
 #define BCM_SYST_CLO _BCM_SYST(BCM_SYST_CLO_OFFSET)
 #define BCM_SYST_CHI _BCM_SYST(BCM_SYST_CHI_OFFSET)
+#define BCM_SYST_C(n) _BCM_SYST(BCM_SYST_C0_OFFSET + 0x4 * (n))
 #define BCM_SYST_C0 _BCM_SYST(BCM_SYST_C0_OFFSET)
 #define BCM_SYST_C1 _BCM_SYST(BCM_SYST_C1_OFFSET)
 #define BCM_SYST_C2 _BCM_SYST(BCM_SYST_C2_OFFSET)
@@ -57,6 +61,7 @@
 
 /* System timer register bit definitions */
 
+#define BCM_SYST_CS_M(n) (1 << (n))
 #define BCM_SYST_CS_M3 (1 << 3)
 #define BCM_SYST_CS_M2 (1 << 2)
 #define BCM_SYST_CS_M1 (1 << 1)

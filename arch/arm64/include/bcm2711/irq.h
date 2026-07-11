@@ -57,6 +57,8 @@
 #define BCM_IRQ_VC_BASE 96
 #define BCM_IRQ_VC(n) (BCM_IRQ_VC_BASE + n)
 
+#define BCM_IRQ_VC_TIMER(n) BCM_IRQ_VC((n))
+
 #define BCM_IRQ_VC_TIMER0 BCM_IRQ_VC(0)
 #define BCM_IRQ_VC_TIMER1 BCM_IRQ_VC(1)
 #define BCM_IRQ_VC_TIMER2 BCM_IRQ_VC(2)
