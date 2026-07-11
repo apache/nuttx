@@ -211,6 +211,16 @@ SECTIONS
         *(.data*)
         *(.sdata*)
 
+        /* GOT/PLT must live INSIDE the copied .data range so a flat
+         * -fPIC object (e.g. a PIC static library linked into an app)
+         * gets an initialised GOT in RAM at boot; otherwise an orphan
+         * .got lands after _edata, is never copied, and every GOT-
+         * indirected access reads a NULL pointer (hardfault). */
+        . = ALIGN(4);
+        *(.got)
+        *(.got.plt)
+        *(.got*)
+
         . = ALIGN(4);
         *(.after_data.*)
         . = ALIGN(4);
