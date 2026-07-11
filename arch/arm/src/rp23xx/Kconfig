@@ -811,6 +811,17 @@ endif # ADC
 
 endif # RP23XX_ADC
 
+config RP23XX_TRNG
+	bool "Enable TRNG (hardware true random number generator)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		Enable the RP2350 on-chip true random number generator.  It serves
+		conditioned hardware entropy as /dev/random and /dev/urandom
+		(overriding the software /dev/urandom), which backs getrandom() and
+		therefore the mbedtls entropy source.  Enable this for any workload
+		that mints keys or signs on the device.
+
 #####################################################################
 #  CLK_GPOUT Configuration
 #####################################################################

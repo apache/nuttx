@@ -68,6 +68,10 @@ ifeq ($(CONFIG_RP23XX_I2C_SLAVE),y)
 CHIP_CSRCS += rp23xx_i2c_slave.c
 endif
 
+ifeq ($(CONFIG_RP23XX_TRNG),y)
+CHIP_CSRCS += rp23xx_rng.c
+endif
+
 ifeq ($(CONFIG_RP23XX_I2S),y)
 CHIP_CSRCS += rp23xx_i2s.c
 CHIP_CSRCS += rp23xx_i2s_pio.c
