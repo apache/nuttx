@@ -1863,7 +1863,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   dev->priv = upper;
 
   audinfo("Registering %s\n", path);
-  return register_driver(path, &g_audioops, 0666, upper);
+  return register_driver(path, &g_audioops, 0660, upper);
 }
 
 #endif /* CONFIG_AUDIO */

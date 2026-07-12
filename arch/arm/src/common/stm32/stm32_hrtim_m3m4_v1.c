@@ -6037,7 +6037,7 @@ int hrtim_register(const char *path, struct hrtim_dev_s *dev)
 
   /* Register the HRTIM character driver */
 
-  return register_driver(path, &g_hrtim_fops, 0444, dev);
+  return register_driver(path, &g_hrtim_fops, 0440, dev);
 }
 #endif /* CONFIG_STM32_HRTIM_DISABLE_CHARDRV */
 

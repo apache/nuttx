@@ -567,7 +567,7 @@ int i2c_slave_register(FAR struct i2c_slave_s *dev, int bus, int addr,
     }
 
   snprintf(devname, sizeof(devname), DEVNAME_FMT, bus);
-  ret = register_driver(devname, &g_i2cslavefops, 0666, priv);
+  ret = register_driver(devname, &g_i2cslavefops, 0600, priv);
   if (ret < 0)
     {
       kmm_free(priv);

@@ -306,7 +306,7 @@ void spi_console_init(void)
 
   /* Driver register */
 
-  ret = register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  ret = register_driver("/dev/console", &g_consoleops, 0600, NULL);
   if (ret < 0)
     {
       syslog(LOG_DEBUG, "register spi_console failed\n");

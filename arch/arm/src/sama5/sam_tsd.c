@@ -1818,7 +1818,7 @@ int sam_tsd_register(struct sam_adc_s *adc, int minor)
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &g_tsdops, 0666, priv);
+  ret = register_driver(devname, &g_tsdops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

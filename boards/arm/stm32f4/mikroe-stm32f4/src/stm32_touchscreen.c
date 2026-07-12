@@ -1508,7 +1508,7 @@ int stm32_tsc_setup(int minor)
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &g_tc_fops, 0666, priv);
+  ret = register_driver(devname, &g_tc_fops, 0660, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

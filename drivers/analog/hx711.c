@@ -949,7 +949,7 @@ int hx711_register(unsigned char minor, FAR struct hx711_lower_s *lower)
     }
 
   snprintf(devname, sizeof(devname), DEVNAME_FMT, minor);
-  ret = register_driver(devname, &g_hx711_fops, 0666, dev);
+  ret = register_driver(devname, &g_hx711_fops, 0600, dev);
   if (ret)
     {
       kmm_free(dev);

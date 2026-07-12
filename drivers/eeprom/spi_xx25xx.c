@@ -1520,7 +1520,7 @@ int ee25xx_initialize(FAR struct spi_dev_s *dev, uint16_t spi_devid,
       "readonly %d\n", devname, eedev->size, eedev->pgsize,
       eedev->addrlen, eedev->readonly);
 
-  return register_driver(devname, &g_ee25xx_fops, 0666, eedev);
+  return register_driver(devname, &g_ee25xx_fops, 0600, eedev);
 }
 
 /****************************************************************************

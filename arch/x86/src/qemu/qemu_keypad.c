@@ -303,5 +303,5 @@ static ssize_t keypad_read(struct file *filep, char *buf, size_t buflen)
 
 void qemu_keypad(void)
 {
-  register_driver("/dev/keypad", &g_keypadops, 0444, NULL);
+  register_driver("/dev/keypad", &g_keypadops, 0440, NULL);
 }

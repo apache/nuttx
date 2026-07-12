@@ -974,7 +974,7 @@ int apds9930als_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_apds9930alsfops, 0666, priv);
+  ret = register_driver(path, &g_apds9930alsfops, 0660, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
@@ -1028,7 +1028,7 @@ int apds9930ps_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_apds9930psfops, 0666, priv);
+  ret = register_driver(path, &g_apds9930psfops, 0660, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

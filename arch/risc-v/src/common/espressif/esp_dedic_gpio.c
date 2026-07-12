@@ -403,7 +403,7 @@ struct file *esp_dedic_gpio_new_bundle(
   dedic_gpio_common.refs++;
 
   register_driver(config->path, &dedic_gpio_ops,
-                  0666, priv);
+                  0600, priv);
   return (struct file *)priv;
 }
 

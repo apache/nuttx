@@ -503,5 +503,5 @@ int dac_register(FAR const char *path, FAR struct dac_dev_s *dev)
 
   dev->ad_ops->ao_reset(dev);
 
-  return register_driver(path, &g_dac_fops, 0222, dev);
+  return register_driver(path, &g_dac_fops, 0200, dev);
 }

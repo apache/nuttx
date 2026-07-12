@@ -826,5 +826,5 @@ int ds2xxx_initialize(FAR struct onewire_dev_s *dev,
   priv->master->dev = dev;
   priv->devtype     = devtype;
 
-  return register_driver(devname, &g_ds2xxx_fops, 0666, priv);
+  return register_driver(devname, &g_ds2xxx_fops, 0600, priv);
 }

@@ -3207,7 +3207,7 @@ static int cxd56_gnss_register(const char *devpath)
       goto err0;
     }
 
-  ret = register_driver(devpath, &g_gnssfops, 0666, priv);
+  ret = register_driver(devpath, &g_gnssfops, 0600, priv);
   if (ret < 0)
     {
       gnsserr("Failed to register driver: %d\n", ret);

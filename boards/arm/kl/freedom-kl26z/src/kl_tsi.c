@@ -245,7 +245,7 @@ void kl_tsi_initialize(void)
 
   /* And finally register the TSI character driver */
 
-  register_driver("/dev/tsi", &g_tsi_ops, 0444, NULL);
+  register_driver("/dev/tsi", &g_tsi_ops, 0440, NULL);
 }
 
 #endif /* CONFIG_KL_TSI */

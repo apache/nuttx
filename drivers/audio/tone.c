@@ -966,7 +966,7 @@ int tone_register(FAR const char *path, FAR struct pwm_lowerhalf_s *tone,
   /* Register the PWM device */
 
   audinfo("Registering %s\n", path);
-  return register_driver(path, &g_toneops, 0666, upper);
+  return register_driver(path, &g_toneops, 0600, upper);
 }
 
 #endif /* CONFIG_AUDIO_TONE */

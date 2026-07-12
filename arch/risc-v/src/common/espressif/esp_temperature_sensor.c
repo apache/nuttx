@@ -417,7 +417,7 @@ static void esp_temp_sensor_register(struct esp_temp_priv_s *priv)
 {
 #ifndef CONFIG_ESPRESSIF_TEMP_UORB
   register_driver(CONFIG_ESPRESSIF_TEMP_PATH, &g_esp_temp_sensor_fops,
-                  0666, priv);
+                  0660, priv);
 #else
   priv->lower.type = SENSOR_TYPE_TEMPERATURE;
   sensor_register(&priv->lower, CONFIG_ESPRESSIF_TEMP_PATH_DEVNO);

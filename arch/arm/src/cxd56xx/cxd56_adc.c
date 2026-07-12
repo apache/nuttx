@@ -1105,7 +1105,7 @@ int cxd56_adcinitialize(void)
   int ret = OK;
 
 #if defined (CONFIG_CXD56_LPADC0) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)
-  ret = register_driver("/dev/lpadc0", &g_adcops, 0666, &g_lpadc0priv);
+  ret = register_driver("/dev/lpadc0", &g_adcops, 0600, &g_lpadc0priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(lpadc0): %d\n", ret);
@@ -1114,7 +1114,7 @@ int cxd56_adcinitialize(void)
 #endif
 
 #if defined (CONFIG_CXD56_LPADC1) || defined (CONFIG_CXD56_LPADC0_1) || defined (CONFIG_CXD56_LPADC_ALL)
-  ret = register_driver("/dev/lpadc1", &g_adcops, 0666, &g_lpadc1priv);
+  ret = register_driver("/dev/lpadc1", &g_adcops, 0600, &g_lpadc1priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(lpadc1): %d\n", ret);
@@ -1123,7 +1123,7 @@ int cxd56_adcinitialize(void)
 #endif
 
 #if defined (CONFIG_CXD56_LPADC2) || defined (CONFIG_CXD56_LPADC_ALL)
-  ret = register_driver("/dev/lpadc2", &g_adcops, 0666, &g_lpadc2priv);
+  ret = register_driver("/dev/lpadc2", &g_adcops, 0600, &g_lpadc2priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(lpadc2): %d\n", ret);
@@ -1132,7 +1132,7 @@ int cxd56_adcinitialize(void)
 #endif
 
 #if defined (CONFIG_CXD56_LPADC3) || defined (CONFIG_CXD56_LPADC_ALL)
-  ret = register_driver("/dev/lpadc3", &g_adcops, 0666, &g_lpadc3priv);
+  ret = register_driver("/dev/lpadc3", &g_adcops, 0600, &g_lpadc3priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(lpadc3): %d\n", ret);
@@ -1141,7 +1141,7 @@ int cxd56_adcinitialize(void)
 #endif
 
 #ifdef CONFIG_CXD56_HPADC0
-  ret = register_driver("/dev/hpadc0", &g_adcops, 0666, &g_hpadc0priv);
+  ret = register_driver("/dev/hpadc0", &g_adcops, 0600, &g_hpadc0priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(hpadc0): %d\n", ret);
@@ -1150,7 +1150,7 @@ int cxd56_adcinitialize(void)
 #endif
 
 #ifdef CONFIG_CXD56_HPADC1
-  ret = register_driver("/dev/hpadc1", &g_adcops, 0666, &g_hpadc1priv);
+  ret = register_driver("/dev/hpadc1", &g_adcops, 0600, &g_hpadc1priv);
   if (ret < 0)
     {
       aerr("Failed to register driver(hpadc1): %d\n", ret);

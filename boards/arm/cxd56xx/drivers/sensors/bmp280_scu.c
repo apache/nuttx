@@ -931,7 +931,7 @@ int bmp280press_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_bmp280pressfops, 0666, priv);
+  ret = register_driver(path, &g_bmp280pressfops, 0660, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
@@ -982,7 +982,7 @@ int bmp280temp_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_bmp280tempfops, 0666, priv);
+  ret = register_driver(path, &g_bmp280tempfops, 0660, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

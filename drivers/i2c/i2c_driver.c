@@ -416,7 +416,7 @@ int i2c_register(FAR struct i2c_master_s *i2c, int bus)
       /* Create the character device name */
 
       snprintf(devname, sizeof(devname), DEVNAME_FMT, bus);
-      ret = register_driver(devname, &g_i2cdrvr_fops, 0666, priv);
+      ret = register_driver(devname, &g_i2cdrvr_fops, 0600, priv);
       if (ret < 0)
         {
           /* Free the device structure if we failed to create the character
