@@ -359,7 +359,7 @@ int rng90_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_rng90_fops, 0666, priv);
+  ret = register_driver(devpath, &g_rng90_fops, 0600, priv);
   if (ret < 0)
     {
       crypterr("ERROR: Failed to register driver: %d\n", ret);

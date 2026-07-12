@@ -322,6 +322,6 @@ int esp_lp_mailbox_init(void)
     }
 
   register_driver("/dev/lp_mailbox", esp_lp_mailbox_priv.ops,
-                  0666, (void *)&esp_lp_mailbox_priv);
+                  0600, (void *)&esp_lp_mailbox_priv);
   return OK;
 }

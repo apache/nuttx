@@ -662,7 +662,7 @@ int rx65n_sbraminitialize(char *devpath, int *sizes)
   for (i = 0; i < fcnt && ret >= OK; i++)
     {
       snprintf(devname, sizeof(devname), "%s%d", devpath, i);
-      ret = register_driver(devname, &g_rx65n_sbram_fops, 0666, &g_sbram[i]);
+      ret = register_driver(devname, &g_rx65n_sbram_fops, 0660, &g_sbram[i]);
     }
 
   /* Disallow Access */

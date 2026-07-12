@@ -1267,7 +1267,7 @@ int sam_slcd_initialize(void)
 
       /* Register the LCD device driver */
 
-      ret = register_driver("/dev/slcd0", &g_slcdops, 0644, &g_slcdstate);
+      ret = register_driver("/dev/slcd0", &g_slcdops, 0640, &g_slcdstate);
       g_slcdstate.initialized = true;
 
       /* Turn on the backlight */

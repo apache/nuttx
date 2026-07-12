@@ -186,7 +186,7 @@ int cxd56_ge2dinitialize(const char *devname)
 {
   int ret;
 
-  ret = register_driver(devname, &g_ge2dfops, 0666, NULL);
+  ret = register_driver(devname, &g_ge2dfops, 0600, NULL);
   if (ret != 0)
     {
       return ERROR;

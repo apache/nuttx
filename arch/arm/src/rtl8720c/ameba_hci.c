@@ -507,6 +507,6 @@ static hci_dev_t g_hcidev =
 
 int amebaz_bt_hci_uart_register(const char *path)
 {
-  return register_driver(path, &g_hcidev.i_ops, 0666, &g_hcidev);
+  return register_driver(path, &g_hcidev.i_ops, 0600, &g_hcidev);
 }
 

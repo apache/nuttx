@@ -2268,7 +2268,7 @@ int cxd5610_gnss_register(const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_cxd5610fops, 0666, priv);
+  ret = register_driver(devpath, &g_cxd5610fops, 0660, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

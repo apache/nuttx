@@ -1291,7 +1291,7 @@ int can_register(FAR const char *path, FAR struct can_dev_s *dev)
   /* Register the CAN device */
 
   caninfo("Registering %s\n", path);
-  return register_driver(path, &g_canops, 0666, dev);
+  return register_driver(path, &g_canops, 0600, dev);
 }
 
 /****************************************************************************

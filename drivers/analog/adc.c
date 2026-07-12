@@ -803,7 +803,7 @@ int adc_register(FAR const char *path, FAR struct adc_dev_s *dev)
 
   /* Register the ADC character driver */
 
-  ret = register_driver(path, &g_adc_fops, 0444, dev);
+  ret = register_driver(path, &g_adc_fops, 0400, dev);
   if (ret < 0)
     {
       if (alloc_channel)

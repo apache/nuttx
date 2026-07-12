@@ -623,7 +623,7 @@ int cxd56_charger_initialize(const char *devpath)
 
   /* Register battery driver */
 
-  ret = register_driver(devpath, &g_chargerops, 0666, priv);
+  ret = register_driver(devpath, &g_chargerops, 0600, priv);
   if (ret < 0)
     {
       baterr("ERROR: register_driver failed: %d\n", ret);

@@ -1682,7 +1682,7 @@ int mfrc522_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_mfrc522fops, 0666, dev);
+  ret = register_driver(devpath, &g_mfrc522fops, 0600, dev);
   if (ret < 0)
     {
       ctlserr("ERROR: Failed to register driver: %d\n", ret);

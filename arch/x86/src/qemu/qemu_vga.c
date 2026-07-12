@@ -588,7 +588,7 @@ int qemu_vga(void)
       return ret;
     }
 
-  register_driver("/dev/lcd", &g_vgaops, 0666, NULL);
+  register_driver("/dev/lcd", &g_vgaops, 0660, NULL);
 
   return OK;
 }

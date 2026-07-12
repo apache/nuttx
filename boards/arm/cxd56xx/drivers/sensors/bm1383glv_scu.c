@@ -541,7 +541,7 @@ int bm1383glv_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_bm1383glvfops, 0666, priv);
+  ret = register_driver(path, &g_bm1383glvfops, 0660, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

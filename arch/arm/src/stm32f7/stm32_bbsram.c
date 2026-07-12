@@ -757,7 +757,7 @@ int stm32_bbsraminitialize(char *devpath, int *sizes)
     {
       snprintf(devname, sizeof(devname), "%s%d", devpath, i);
       ret = register_driver(devname, &g_stm32_bbsram_fops,
-                            0666, &g_bbsram[i]);
+                            0600, &g_bbsram[i]);
     }
 
   /* Disallow Access */

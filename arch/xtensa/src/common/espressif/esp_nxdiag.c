@@ -313,7 +313,7 @@ static ssize_t esp_nxdiag_read(struct file *filep,
 
 static int esp_nxdiag_register(void)
 {
-  return register_driver("/dev/nxdiag", &g_nxdiagops, 0444, NULL);
+  return register_driver("/dev/nxdiag", &g_nxdiagops, 0440, NULL);
 }
 
 /****************************************************************************

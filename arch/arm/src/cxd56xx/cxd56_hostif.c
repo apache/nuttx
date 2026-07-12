@@ -416,7 +416,7 @@ static int hif_initialize(struct hostif_buff_s *buffer)
       snprintf(devpath, sizeof(devpath), "/dev/hostif%c%d",
                (priv->flags & HOSTIF_BUFF_ATTR_READ) ? 'r' : 'w', num);
 
-      ret = register_driver(devpath, &g_hif_fops, 0666, priv);
+      ret = register_driver(devpath, &g_hif_fops, 0600, priv);
       if (ret < 0)
         {
           hiferr("ERROR: Failed to register %s (%d)\n", devpath, ret);

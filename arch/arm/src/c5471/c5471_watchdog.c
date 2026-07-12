@@ -359,7 +359,7 @@ int arm_wdtinit(void)
 
   /* Register as /dev/wdt */
 
-  ret = register_driver("/dev/wdt", &g_wdtops, 0666, NULL);
+  ret = register_driver("/dev/wdt", &g_wdtops, 0600, NULL);
   if (ret)
     {
       return ERROR;

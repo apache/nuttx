@@ -649,7 +649,7 @@ static int cxd56_geofence_register(const char *devpath)
       goto err0;
     }
 
-  ret = register_driver(devpath, &g_geofencefops, 0666, priv);
+  ret = register_driver(devpath, &g_geofencefops, 0600, priv);
   if (ret < 0)
     {
       gnsserr("Failed to register driver: %d\n", ret);
