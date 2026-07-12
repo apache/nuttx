@@ -194,13 +194,16 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   FAR struct aio_container_s *aioc;
   int ret;
 
-  if (op != O_SYNC)
+  /* SUSv2 / POSIX Issue 5 specified that a NULL aiocbp produces no
+   * status through aiocbp and no completion signal. POSIX Issue 6 removed
+   * that special case, so reject NULL defensively.
+   */
+
+  if (op != O_SYNC || aiocbp == NULL)
     {
       set_errno(EINVAL);
       return ERROR;
     }
-
-  DEBUGASSERT(aiocbp);
 
   /* The result -EINPROGRESS means that the transfer has not yet completed */
 
