@@ -119,3 +119,9 @@ Related Subdirectories
 
 * ``drivers/audio`` - Contains the lower-level device specific drivers.
 * ``apps/system/nxplayer`` - User-mode audio subsystem interface library.
+
+Related Pages
+=============
+
+* :doc:`/components/drivers/special/audio`
+* :doc:`/applications/audioutils/index`
