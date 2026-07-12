@@ -269,7 +269,7 @@ ice40_endwrite(FAR struct ice40_dev_s *dev)
 
   dev->ops->select(dev, false);
 
-  for (size_t i = 0; i < ICE40_SPI_FINAL_CLK_CYCLES + 7 / 8; i++)
+  for (size_t i = 0; i < (ICE40_SPI_FINAL_CLK_CYCLES + 7) / 8; i++)
     {
       SPI_SEND(dev->spi, 0xff);
     }
