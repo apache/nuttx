@@ -188,6 +188,15 @@ elf_toolchain() {
 gen_romfs() {
   if ! type genromfs > /dev/null 2>&1; then
     brew tap PX4/px4
+
+    # Trust each tap non-interactively before installing from it. Without this,
+    # `brew install` aborts before pouring any package (including ccache).
+    # `brew trust` only exists on Homebrew 6.0+; guard it so older versions,
+    # which don't gate untrusted taps, skip it silently.
+    if brew trust --help &> /dev/null; then
+      brew trust PX4/px4
+    fi
+
     brew install genromfs
   fi
 }
