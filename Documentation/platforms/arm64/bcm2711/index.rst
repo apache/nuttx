@@ -52,23 +52,17 @@ PCM                      No
 
    The EMMC2 peripheral connects to the microSD card slot on the :doc:`Raspberry
    Pi 4B </platforms/arm64/bcm2711/boards/raspberrypi-4b/index>`. Currently, it
-   has been tested using a 32GB Samsung microSD card and it has passed testing
-   with that. The only quirks are:
+   has passed testing with a few different uSD cards. The only quirks are:
 
    * No card insertion/removal interrupts work, so hotswapping isn't possible
-   * The :doc:`sdstress </applications/testing/sd_stress/index>` example works
-     unless the 'number of bytes' option is greater than 1023. I suspect this is
-     something to do with the FIFO depth being only 1023 bytes.
+   * Multi-block transfers must be restricted to 1 block at a time
+     (``CONFIG_MMCSD_MULTIBLOCK_LIMIT=1``), since the upper-half driver's method
+     of doing block setup is not immediately compatible with the BCM2711 EMMC
+     controller. Changes to the common-upperhalf would require extensive
+     testing, so this performance sacrifice is done for correct behaviour in the
+     short-term.
 
-   However, the 64GB microSD card exhibits very strange behaviour. There are
-   often data CRC errors that prevent the boot filesystem from mounting. When
-   that somehow passes (intermittent), running ``ls`` on the filesystem repeatedly
-   sometimes causes certain files to disappear from the listing (they are not
-   deleted and appear again on next boot), or causes their filenames to be shown
-   in all caps. Writing to the card with ``echo`` often fails with data CRC
-   error or timeout, and then the card is buggy for the remainder of the
-   session. **It is not recommended to use 64GB cards with this implementation
-   for the time being.**
+   All in all, be aware of issues with the SD card implementation.
 
 Supported Boards
 ================
