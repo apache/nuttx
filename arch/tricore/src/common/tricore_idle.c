@@ -33,6 +33,16 @@
 #include "tricore_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if defined(__TASKING__)
+#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1p")
+#else
+#  define tricore_idle_loop() __asm__ volatile ("1: loopu 1b")
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -67,10 +77,7 @@ void up_idle(void)
   board_autoled_off(LED_CPU);
 #endif
 
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
+  tricore_idle_loop();
 
-  Ifx_Ssw_infiniteLoop();
 #endif
 }
