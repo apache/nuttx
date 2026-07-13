@@ -191,6 +191,7 @@ static int rpmsg_port_create_queue(FAR struct rpmsg_port_queue_s *queue,
     }
 
   queue->len = len;
+  queue->num = count;
   queue->buf = buf;
 
   /* Init free list */
@@ -819,13 +820,30 @@ void rpmsg_port_retx_process_ack(FAR struct rpmsg_port_s *port,
             atomic_read(&port->retx.ackdup_count));
   port->retx.last_ackno = ackno;
 
-  /* Advance rx_next based on peer's min_seq to skip abandoned frames */
+  /* Advance rx_next based on peer's min_seq to skip abandoned frames.
+   * A valid min_seq only advances rx_next within the peer's in-flight
+   * window, bounded by the rx queue depth. A larger jump means the
+   * min_seq is corrupt (e.g. a torn frame carrying min_seq==0 that
+   * SEQ_LT misreads as a huge forward wrap), so drop it instead of
+   * dragging rx_next backwards and stalling the rx channel.
+   */
 
   if (RPMSG_PORT_SEQ_LT(port->retx.rx_next, min_seq))
     {
-      rpmsgerr("Peer abandoned seqno [%u, %u), advancing rx_next\n",
-               port->retx.rx_next, min_seq);
-      port->retx.rx_next = min_seq;
+      uint16_t gap = min_seq - port->retx.rx_next;
+
+      if (gap <= port->rxq.num)
+        {
+          rpmsgerr("Peer abandoned seqno [%u, %u), advancing rx_next\n",
+                   port->retx.rx_next, min_seq);
+          port->retx.rx_next = min_seq;
+        }
+      else
+        {
+          rpmsgerr("drop bogus min_seq %u: gap %u exceeds window %u, "
+                   "rx_next %u\n",
+                   min_seq, gap, port->rxq.num, port->retx.rx_next);
+        }
     }
 
   spin_unlock_irqrestore(&port->retx.lock, flags);
