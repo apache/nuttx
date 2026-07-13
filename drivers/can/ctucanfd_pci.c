@@ -30,6 +30,8 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include <nuttx/arch.h>
@@ -261,7 +263,7 @@ static struct pci_driver_s g_ctucanfd_drv =
 };
 #endif
 
-#ifdef CONFIG_CAN_CTUCANFD_CHARDEV
+#if defined(CONFIG_PCI) && defined(CONFIG_CAN_CTUCANFD_CHARDEV)
 static uint8_t g_ctucanfd_count = 0;
 #endif
 
@@ -1924,19 +1926,19 @@ int pci_ctucanfd_init(void)
  * Input Parameters:
  *   base - MMIO base address of the CTU CAN FD controller
  *   irq  - IRQ number
+ *   id   - CAN channel number assigned by the caller
  *
  * Returned Value:
  *   Zero on success; a negated errno on failure
  *
  *****************************************************************************/
 
-int ctucanfd_register(uintptr_t base, int irq)
+int ctucanfd_register(uintptr_t base, int irq, uint32_t id)
 {
   FAR struct ctucanfd_driver_s *priv;
   FAR struct ctucanfd_can_s    *dev;
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
   char                          devpath[16];
-  uint8_t                       canid = g_ctucanfd_count++;
 #endif
   int                           ret;
 
@@ -1976,7 +1978,7 @@ int ctucanfd_register(uintptr_t base, int irq)
   /* Register the CAN interface */
 
 #ifdef CONFIG_CAN_CTUCANFD_CHARDEV
-  snprintf(devpath, sizeof(devpath), "/dev/can%d", canid);
+  snprintf(devpath, sizeof(devpath), "/dev/can%" PRIu32, id);
 
   dev->dev.cd_ops  = &g_ctucanfd_can_ops;
   dev->dev.cd_priv = dev;
@@ -1993,6 +1995,8 @@ int ctucanfd_register(uintptr_t base, int irq)
   dev->dev.quota[NETPKT_TX] = CTUCANFD_TX_QUOTA;
   dev->dev.quota[NETPKT_RX] = CTUCANFD_RX_QUOTA;
   dev->dev.ops              = &g_ctucanfd_net_ops;
+
+  snprintf(dev->dev.netdev.d_ifname, IFNAMSIZ, "can%" PRIu32, id);
 
   ret = netdev_lower_register(&dev->dev, NET_LL_CAN);
   if (ret < 0)
