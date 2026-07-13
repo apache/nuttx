@@ -482,6 +482,11 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 
   rpmsginfo("received cmd:%u avail:%u\n",
             rpspi->rxhdr->cmd, rpspi->rxhdr->avail);
+#ifdef CONFIG_RPMSG_PORT_RETX
+  rpmsginfo("received retx state: seq=%u ack=%u min_seq=%u\n",
+            rpspi->rxhdr->seqno, rpspi->rxhdr->ackno,
+            rpspi->rxhdr->min_seq);
+#endif
 
   if (rpspi->txhdr != NULL)
     {
@@ -498,8 +503,15 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
   if (rpspi->rxhdr->len < sizeof(struct rpmsg_port_header_s) ||
       rpspi->rxhdr->len > rpspi->port.rxq.len)
     {
-      rpmsgerr("drop malformed rx: len=%u crc=%u cmd=%u\n",
-               rpspi->rxhdr->len, rpspi->rxhdr->crc, rpspi->rxhdr->cmd);
+      rpmsgerr("drop malformed rx: len=%u crc=%u cmd=%u avail=%u\n",
+               rpspi->rxhdr->len, rpspi->rxhdr->crc, rpspi->rxhdr->cmd,
+               rpspi->rxhdr->avail);
+#ifdef CONFIG_RPMSG_PORT_RETX
+      rpmsgerr("malformed rx retx state: seq=%u ack=%u min_seq=%u "
+               "rx_next=%u\n",
+               rpspi->rxhdr->seqno, rpspi->rxhdr->ackno,
+               rpspi->rxhdr->min_seq, rpspi->port.retx.rx_next);
+#endif
       goto out;
     }
 
@@ -509,8 +521,14 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
 
       if (crc != 0 && rpspi->rxhdr->crc != crc)
         {
-          rpmsgerr("crc check fail received: %u calculated: %u\n",
-                   rpspi->rxhdr->crc, crc);
+          rpmsgerr("crc check fail received: %u calculated: %u "
+                   "len=%u cmd=%u\n",
+                   rpspi->rxhdr->crc, crc, rpspi->rxhdr->len,
+                   rpspi->rxhdr->cmd);
+#ifdef CONFIG_RPMSG_PORT_RETX
+          rpmsgerr("retx crc check fail received: seq=%u\n",
+                   rpspi->rxhdr->seqno);
+#endif
           goto out;
         }
     }
