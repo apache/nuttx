@@ -32,6 +32,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/virtio/virtio-config.h>
 #include <openamp/open_amp.h>
 
@@ -108,6 +109,25 @@ int vhost_get_vq_buffers(FAR struct virtqueue *vq,
 int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
                             FAR struct vhost_buf_s *vb, size_t vbsize,
                             FAR size_t *vbcnt);
+
+/****************************************************************************
+ * Name: vhost_get_vq_buffers_lock
+ ****************************************************************************/
+
+static inline_function int
+vhost_get_vq_buffers_lock(FAR struct virtqueue *vq,
+                          FAR struct virtqueue_buf *vb, size_t vbsize,
+                          FAR size_t *vbcnt, FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  int ret;
+
+  flags = spin_lock_irqsave_notrace(lock);
+  ret = vhost_get_vq_buffers(vq, vb, vbsize, vbcnt);
+  spin_unlock_irqrestore_notrace(lock, flags);
+
+  return ret;
+}
 
 #ifdef CONFIG_ARCH_HAVE_VHOST_IOMAP
 /* Arch-provided: map a peer 64-bit physical address into CPU-reachable
