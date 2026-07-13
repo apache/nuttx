@@ -264,7 +264,7 @@ void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb);
  *
  ****************************************************************************/
 
-void watchdog_automonitor_timeout(void);
+void watchdog_automonitor_timeout(unsigned long action, FAR void *data);
 
 #endif /* CONFIG_WATCHDOG_TIMEOUT_NOTIFIER */
 

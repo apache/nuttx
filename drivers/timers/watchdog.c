@@ -760,7 +760,7 @@ void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb)
  *
  ****************************************************************************/
 
-void watchdog_automonitor_timeout(void)
+void watchdog_automonitor_timeout(unsigned long action, FAR void *data)
 {
   atomic_notifier_call_chain(&g_watchdog_notifier_list, action, data);
 }
