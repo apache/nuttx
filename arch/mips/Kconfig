@@ -30,6 +30,21 @@ config ARCH_CHIP_PIC32MZ
 	---help---
 		Microchip PIC32MZ (MIPS32)
 
+config ARCH_CHIP_JZ4780
+	bool "JZ4780"
+	select ARCH_MIPS32
+	select ARCH_MIPS_XBURST1
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select MIPS32_HAVE_DCACHE
+	select MIPS32_HAVE_ICACHE
+	select MIPS32_USE_WAIT_INSTRUCTION
+	select MIPS32_USE_SYSCALL_INSTRUCTION
+	---help---
+		Ingenic JZ4780 (MIPS32)
+
 config ARCH_CHIP_MIPS_CUSTOM
 	bool "Custom MIPS chip"
 	select ARCH_CHIP_CUSTOM
@@ -57,6 +72,10 @@ config ARCH_MIPS_M5150
 	default n
 	select ARCH_HAVE_MICROMIPS
 
+config ARCH_MIPS_XBURST1
+	bool
+	default n
+
 config ARCH_HAVE_EIC
 	bool
 	default n
@@ -82,10 +101,12 @@ config ARCH_CHIP
 	string
 	default "pic32mx"	if ARCH_CHIP_PIC32MX
 	default "pic32mz"	if ARCH_CHIP_PIC32MZ
+	default "jz4780"	if ARCH_CHIP_JZ4780
 
 source "arch/mips/src/common/Kconfig"
 source "arch/mips/src/mips32/Kconfig"
 source "arch/mips/src/pic32mx/Kconfig"
 source "arch/mips/src/pic32mz/Kconfig"
+source "arch/mips/src/jz4780/Kconfig"
 
 endif

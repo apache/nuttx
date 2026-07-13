@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/common/mips_idle.c
+ * boards/mips/jz4780/ci20/src/jz4780_bringup.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,54 +25,58 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
 
-#include "mips_internal.h"
+#include <stdio.h>
+#include <unistd.h>
+#include <syslog.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/signal.h>
+#include <nuttx/irq.h>
+
+#include <arch/board/board.h>
+
+#include "ci20.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
+ * Name: jz4780_bringup
  *
  * Description:
- *   up_idle() is the logic that will be executed when there is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
+ *   Bring up board features
  *
  ****************************************************************************/
 
-void up_idle(void)
+int jz4780_bringup(void)
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
+  int ret = OK;
 
-  nxsched_process_timer();
-#else
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
 
-#  if defined(CONFIG_MIPS32_USE_WAIT_INSTRUCTION)
-
-    __asm__ __volatile__
-      (
-        ".set push\n"
-        ".set noreorder\n"
-        "wait\n"
-        "nop\n"
-        ".set pop"
-        : : : "memory"
-      );
-
-#  endif
-
+  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n",
+            ret);
+    }
 #endif
+
+  return ret;
 }

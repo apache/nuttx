@@ -260,6 +260,7 @@ failure:
 int gran_search(const gran_t *gran, size_t size)
 {
   int ret = -EINVAL;
+  size_t i;
 
   if (gran == NULL || gran->ngranules < size)
     {
@@ -267,7 +268,7 @@ int gran_search(const gran_t *gran, size_t size)
     }
 
   ret = -ENOMEM;
-  for (size_t i = 0; i <= gran->ngranules - size; i++)
+  for (i = 0; i <= gran->ngranules - size; i++)
     {
       if (gran_match(gran, i, size, 0, &i))
         {

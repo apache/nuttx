@@ -1583,7 +1583,8 @@ static void u16550_send(struct uart_dev_s *dev, int ch)
 static ssize_t u16550_sendbuf(struct uart_dev_s *dev,
                               const void *buffer, size_t size)
 {
-  for (size_t i = 0; i < size; i++)
+  size_t i;
+  for (i = 0; i < size; i++)
     {
       while (!u16550_txready(dev));
       u16550_send(dev, ((const unsigned char *)buffer)[i]);

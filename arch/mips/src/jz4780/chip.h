@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/mips/src/common/mips_idle.c
+ * arch/mips/src/jz4780/chip.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,59 +20,46 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MIPS_SRC_JZ4780_CHIP_H
+#define __ARCH_MIPS_SRC_JZ4780_CHIP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-
-#include "mips_internal.h"
+#include <arch/jz4780/chip.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idle
- *
- * Description:
- *   up_idle() is the logic that will be executed when there is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
- *
+ * Public Types
  ****************************************************************************/
 
-void up_idle(void)
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
-
-  nxsched_process_timer();
 #else
-  /* This would be an appropriate place to put some MCU-specific logic to
-   * sleep in a reduced power mode until an interrupt occurs to save power
-   */
-
-#  if defined(CONFIG_MIPS32_USE_WAIT_INSTRUCTION)
-
-    __asm__ __volatile__
-      (
-        ".set push\n"
-        ".set noreorder\n"
-        "wait\n"
-        "nop\n"
-        ".set pop"
-        : : : "memory"
-      );
-
-#  endif
-
+#define EXTERN extern
 #endif
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_MIPS_SRC_JZ4780_CHIP_H */

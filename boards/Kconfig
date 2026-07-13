@@ -127,6 +127,13 @@ config ARCH_BOARD_C5471EVM
 		NuttX runs on the ARM core and is built with a GNU arm-nuttx-elf toolchain*.
 		This port is complete and verified.
 
+config ARCH_BOARD_CI20
+	bool "MIPS Creator CI20"
+	depends on ARCH_CHIP_JZ4780
+	select BOARDCTL_RESET
+	---help---
+		This MIPS Creator CI20 port is incomplete.
+
 config ARCH_BOARD_CIRCUIT_EXPRESS
 	bool "Adafruit Circuit Express"
 	depends on ARCH_CHIP_SAMD21G18A
@@ -3693,6 +3700,7 @@ config ARCH_BOARD
 	default "bambino-200e"                 if ARCH_BOARD_BAMBINO_200E
 	default "bl602evb"                     if ARCH_BOARD_BL602EVB
 	default "c5471evm"                     if ARCH_BOARD_C5471EVM
+	default "ci20"                         if ARCH_BOARD_CI20
 	default "circuit-express"              if ARCH_BOARD_CIRCUIT_EXPRESS
 	default "clicker2-stm32"               if ARCH_BOARD_CLICKER2_STM32
 	default "cloudctrl"                    if ARCH_BOARD_CLOUDCTRL
@@ -4118,6 +4126,9 @@ source "boards/arm/am67/t3-gem-o1/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "boards/arm/c5471/c5471evm/Kconfig"
+endif
+if ARCH_BOARD_CI20
+source "boards/mips/jz4780/ci20/Kconfig"
 endif
 if ARCH_BOARD_SPRESENSE
 source "boards/arm/cxd56xx/spresense/Kconfig"
@@ -5651,7 +5662,7 @@ config BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 		Application Configuration -> File System Utilities ->
 		Password file support.
 
-comment "  If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
+comment "If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
 	depends on !BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 
 config BOARD_ETC_ROMFS_PASSWD_UID
