@@ -65,6 +65,10 @@
 
 #define BWAIT_TIMEOUT_US (50000)
 
+#if CONFIG_MMCSD_MULTIBLOCK_LIMIT > 1
+#warning "This driver experiences issues with multi-block transfers"
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -1196,12 +1200,16 @@ static int bcm2711_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
       cmdtm_val |= (BCM_SDIO_CMDTM_CMD_ISDATA | BCM_SDIO_CMDTM_TM_DAT_DIR);
     }
 
-  /* Set multi-block transfer flag */
+  /* Set multi-block transfer flag. Also, we automatically send CMD12 at the
+   * end of the transfer in order to stop it. The upper-half driver does not
+   * do this.
+   */
 
   if (cmd & MMCSD_MULTIBLOCK)
     {
       cmdtm_val |=
           (BCM_SDIO_CMDTM_TM_MULTI_BLOCK | BCM_SDIO_CMDTM_TM_BLKCNT_EN);
+      cmdtm_val |= BCM_SDIO_CMDTM_TM_AUTO_CMD_EN_CMD12;
     }
 
   /* Set index of command */
@@ -1240,6 +1248,14 @@ static void bcm2711_blocksetup(FAR struct sdio_dev_s *dev,
 
   DEBUGASSERT(nblocks <= 0xffff); /* Maximum transfer count */
   DEBUGASSERT(blocklen <= 1023);  /* Maximum block size (limited by FIFO) */
+
+  /* WARNING: if we attempt to set the block count while either DAT/CMD
+   * inhibit statuses are high in the STATUS register, it will fail. I've
+   * determined this happens during multi-block transfers because the MMCSD
+   * upper-half driver configures the block size _after_ sending CMD25. If I
+   * reverse the order, block count is set properly. For now, my strategy is
+   * to limit transfers to 1 block.
+   */
 
   regval |= (blocklen & BCM_SDIO_BLKSIZECNT_BLKSIZE_MASK);
   regval |= ((nblocks & BCM_SDIO_BLKSIZECNT_BLKCNT_MASK)
@@ -2124,7 +2140,7 @@ struct sdio_dev_s *bcm2711_sdio_initialize(int slotno)
    * 0x80000008 response code, not sure why that happens though.
    */
 
-  err = bcm2711_mbox_getclkrate(priv->clkid, &priv->baseclk, false);
+  err = bcm2711_mbox_getclkrate(priv->clkid, &priv->baseclk, true);
   if (err != -EAGAIN && err != 0)
     {
       mcerr("Couldn't determine base clock rate for EMMC%d: %d\n",
