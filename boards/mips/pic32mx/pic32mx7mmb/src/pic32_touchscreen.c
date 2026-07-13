@@ -1355,7 +1355,7 @@ int pic32mx_tsc_setup(int minor)
   priv = kmm_malloc(sizeof(struct tc_dev_s));
   if (!priv)
     {
-      ierr("ERROR: kmm_malloc(%d) failed\n", sizeof(struct tc_dev_s));
+      ierr("ERROR: kmm_malloc(%zu) failed\n", sizeof(struct tc_dev_s));
       return -ENOMEM;
     }
 #endif
