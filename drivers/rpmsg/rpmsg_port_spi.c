@@ -403,6 +403,7 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
 {
   FAR struct rpmsg_port_spi_s *rpspi = arg;
   irqstate_t flags;
+  uint16_t crc;
 
   SPI_SELECT(rpspi->spi, rpspi->devid, false);
 
@@ -446,27 +447,28 @@ static void rpmsg_port_spi_complete_handler(FAR void *arg)
       goto out;
     }
 
-  if (rpspi->rxhdr->crc != 0)
+  /* When RETX is enabled the CRC is compiled in and a valid frame's CRC is
+   * never zero (the crc16 macro folds a zero result to 1), so validate
+   * unconditionally: a torn frame carrying crc==0 would otherwise bypass
+   * the check and poison the retx state machine.
+   */
+
+  crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
+  if (crc != 0 && rpspi->rxhdr->crc != crc)
     {
-      uint16_t crc = rpmsg_port_spi_crc16(rpspi->rxhdr);
-
-      if (crc != 0 && rpspi->rxhdr->crc != crc)
-        {
-          rpmsgerr("crc check fail received: %u calculated: %u "
-                   "len=%u cmd=%u\n",
-                   rpspi->rxhdr->crc, crc, rpspi->rxhdr->len,
-                   rpspi->rxhdr->cmd);
+      rpmsgerr("crc check fail received: %u calculated: %u "
+               "len=%u cmd=%u\n",
+               rpspi->rxhdr->crc, crc, rpspi->rxhdr->len,
+               rpspi->rxhdr->cmd);
 #ifdef CONFIG_RPMSG_PORT_RETX
-          rpmsgerr("retx crc check fail received: seq=%u\n",
-                   rpspi->rxhdr->seqno);
+      rpmsgerr("crc check fail retx state: seq=%u\n", rpspi->rxhdr->seqno);
 #endif
-          if (rpspi->rxerr_count != UINT16_MAX)
-            {
-              rpspi->rxerr_count++;
-            }
-
-          goto out;
+      if (rpspi->rxerr_count != UINT16_MAX)
+        {
+          rpspi->rxerr_count++;
         }
+
+      goto out;
     }
 
   if (rpspi->rxerr_count != 0)
