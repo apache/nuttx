@@ -116,6 +116,10 @@ struct rpmsg_port_queue_s
 
   uint16_t                     len;
 
+  /* Total number of buffers, fixed at init time */
+
+  uint16_t                     num;
+
   /* Free list of buffers which have not been occupied data yet */
 
   struct rpmsg_port_list_s     free;

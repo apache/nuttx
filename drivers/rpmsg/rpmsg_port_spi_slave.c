@@ -506,7 +506,9 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
     }
 
   if (rpspi->rxhdr->len < sizeof(struct rpmsg_port_header_s) ||
-      rpspi->rxhdr->len > rpspi->port.rxq.len)
+      rpspi->rxhdr->len > rpspi->port.rxq.len ||
+      rpspi->rxhdr->cmd < RPMSG_PORT_SPI_CMD_CONNECT ||
+      rpspi->rxhdr->cmd > RPMSG_PORT_SPI_CMD_SHUTDOWN)
     {
       rpmsgerr("drop malformed rx: len=%u crc=%u cmd=%u avail=%u\n",
                rpspi->rxhdr->len, rpspi->rxhdr->crc, rpspi->rxhdr->cmd,
