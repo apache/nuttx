@@ -282,6 +282,8 @@ static int bcm2711_mbox_sendreq(FAR uint32_t *buf, uint8_t n)
    * docs).
    */
 
+  up_invalidate_dcache(bufptr, bufptr + n); /* So we read fresh data */
+
   if (retbuf != bufptr)
     {
       ipcerr("Expected %08x, got %08x", bufptr, res);
