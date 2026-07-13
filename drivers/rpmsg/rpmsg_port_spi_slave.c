@@ -118,6 +118,10 @@ struct rpmsg_port_spi_s
   uint16_t                       rxavail;
   uint16_t                       rxthres;
 
+  /* Count of consecutive rx errors, latched for recovery logging */
+
+  uint16_t                       rxerr_count;
+
   atomic_t                       transferring;
 };
 
@@ -512,6 +516,11 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
                rpspi->rxhdr->seqno, rpspi->rxhdr->ackno,
                rpspi->rxhdr->min_seq, rpspi->port.retx.rx_next);
 #endif
+      if (rpspi->rxerr_count != UINT16_MAX)
+        {
+          rpspi->rxerr_count++;
+        }
+
       goto out;
     }
 
@@ -529,8 +538,20 @@ static void rpmsg_port_spi_slave_notify(FAR struct spi_slave_dev_s *dev,
           rpmsgerr("retx crc check fail received: seq=%u\n",
                    rpspi->rxhdr->seqno);
 #endif
+          if (rpspi->rxerr_count != UINT16_MAX)
+            {
+              rpspi->rxerr_count++;
+            }
+
           goto out;
         }
+    }
+
+  if (rpspi->rxerr_count != 0)
+    {
+      rpmsgerr("rx recovered after %u errors, cmd=%u\n",
+               rpspi->rxerr_count, rpspi->rxhdr->cmd);
+      rpspi->rxerr_count = 0;
     }
 
   rpmsg_port_update_timestamp(&rpspi->port.rxq, rpspi->rxhdr, false);

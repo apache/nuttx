@@ -165,6 +165,7 @@ struct rpmsg_port_retx_s
   uint16_t                          rx_next;
   uint16_t                          last_ackno;
   uint16_t                          retx_max_retry;
+  uint16_t                          rx_valid_fail;
 };
 #endif
 

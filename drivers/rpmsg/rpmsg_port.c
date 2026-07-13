@@ -844,11 +844,23 @@ bool rpmsg_port_retx_rx_valid(FAR struct rpmsg_port_s *port,
   flags = spin_lock_irqsave(&port->retx.lock);
   if (hdr->seqno == port->retx.rx_next)
     {
+      if (port->retx.rx_valid_fail != 0)
+        {
+          rpmsgerr("rx_validate recovered after %u fails, seq:%u\n",
+                   port->retx.rx_valid_fail, hdr->seqno);
+          port->retx.rx_valid_fail = 0;
+        }
+
       port->retx.rx_next++;
       valid = true;
     }
   else
     {
+      if (port->retx.rx_valid_fail != UINT16_MAX)
+        {
+          port->retx.rx_valid_fail++;
+        }
+
       rpmsgerr("rx_validate FAIL got seq:%u expect:%u cmd:%u\n",
                hdr->seqno, port->retx.rx_next, hdr->cmd);
     }
