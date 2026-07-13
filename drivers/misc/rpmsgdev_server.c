@@ -298,6 +298,17 @@ static void rpmsgdev_read_cb(FAR struct pollfd_s *fds)
 
   DEBUGASSERT(fds != NULL);
 
+  /* Prevent subsequent poll_notify from re-triggering this callback.
+   * Without this guard, if the device IRQ fires again before
+   * rpmsgdev_read_work executes file_poll(teardown), the work will be
+   * queued a second time (NuttX work_queue allows re-queue when
+   * worker==NULL during execution), causing the same READ response
+   * cookie to be sent twice and leading to a use-after-free crash
+   * on the remote side.
+   */
+
+  fds->cb = NULL;
+
   work_queue_wq(g_rpmsgdev_wqueue, &pend->work,
                 rpmsgdev_read_work, fds, 0);
 }
