@@ -10,11 +10,24 @@ config TRICORE_STRING_FUNCTION
 	select TRICORE_MEMSET
 	select TRICORE_MEMMOVE
 	select TRICORE_MEMCMP
+	select TRICORE_MEMCHR
 	select TRICORE_STRCMP
+	select TRICORE_STRCPY
+	select TRICORE_STRLEN
+	select TRICORE_STRCHR
+	select TRICORE_STRCHRNUL
+	select TRICORE_STRNCMP
+	select TRICORE_STRNLEN
+	select TRICORE_STRNCPY
+	select TRICORE_STPCPY
+	select TRICORE_STRRCHR
 	---help---
-		Enable the confirmed-win TriCore assembly library functions as a
-		group: memcpy/memset/memmove/memcmp/strcmp.  Real on-board
-		benchmarks (lzcu B2, TC4Z9) show them ahead of the BSD C versions.
+		Enable the full set of TriCore assembly library functions as a
+		group: memcpy/memset/memmove/memcmp/memchr and the string ops
+		strcmp/strcpy/strlen/strchr/strchrnul/strncmp/strnlen/strncpy/
+		stpcpy/strrchr.  Real on-board benchmarks (rzcu/lzcu B2, TC4Z9)
+		show the group ahead of the BSD C versions overall, most functions
+		substantially so.
 		The block-move routines (memcpy/memset/memmove) align to an 8-byte
 		boundary before issuing quad ld.dd/st.dd so that stores to DLMU
 		shared memory (0xB0/0x90, 64-bit ECC granularity) always write whole
