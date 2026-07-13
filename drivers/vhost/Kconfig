@@ -50,3 +50,13 @@ config DRIVERS_VHOST_RPMSG
 	default n
 	select RPMSG_VIRTIO
 	select DRIVERS_VHOST
+
+config DRIVERS_VHOST_CAN
+	bool "Virtual Host CAN Device Support"
+	depends on NET_CAN
+	default n
+	select DRIVERS_VHOST
+	---help---
+		Enable the vhost CAN backend.  It bridges a VirtIO CAN device
+		(device ID 36) to a local SocketCAN interface, forwarding frames
+		between the peer's tx/rx/control virtqueues and the local bus.

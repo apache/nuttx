@@ -35,6 +35,7 @@
 #  include "vhost-net.h"
 #endif
 
+#include "vhost-can.h"
 #include "vhost-rng.h"
 #include "vhost-rpmsg.h"
 
@@ -516,6 +517,14 @@ void vhost_register_drivers(void)
   if (ret < 0)
     {
       vhosterr("vhost_register_net_driver failed, ret=%d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_DRIVERS_VHOST_CAN
+  ret = vhost_register_can_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_can_driver failed, ret=%d\n", ret);
     }
 #endif
 
