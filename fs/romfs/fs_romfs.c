@@ -563,6 +563,13 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
        goto errout_with_lock;
     }
 
+  if (position < 0)
+    {
+      ferr("ERROR: Invalid position: %jd\n", (intmax_t)position);
+      ret = -EINVAL;
+      goto errout_with_lock;
+    }
+
   /* Limit positions to the end of the file. */
 
   if (position > rf->rf_size)
