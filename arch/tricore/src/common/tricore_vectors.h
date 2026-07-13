@@ -125,14 +125,21 @@ enum tricore_trap_assert_id_e
   TRICORE_TRAP_ASSERT_SOVF     = 2,  /* Sticky arithmetic overflow */
 };
 
+/* Non-maskable interrupt trap identification numbers */
+
+enum tricore_trap_nmi_id_e
+{
+  TRICORE_TRAP_NMI_NMI         = 0,  /* Non-maskable interrupt */
+};
+
 /* Trap information record. */
 
 struct tricore_trap_s
 {
-  uintptr_t tAddr;
-  uint32_t  tId    : 8;
-  uint32_t  tClass : 8;
-  uint32_t  tCpu   : 3;
+  uintptr_t taddr;
+  uint32_t  tid    : 8;
+  uint32_t  tclass : 8;
+  uint32_t  tcpu   : 3;
   uint32_t  tpstr;    /* Program Synchronous Trap Register */
   uint32_t  tdstr;    /* Data Synchronous Trap Register    */
   uint32_t  tdatr;    /* Data Asynchronous Trap Register   */
