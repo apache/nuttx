@@ -253,7 +253,6 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
    */
 
   dev->d_len    -= udpiplen;
-  dev->d_appdata = IPBUF(udpiplen);
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS
   if ((dev->d_features & NETDEV_RX_CSUM) == 0)
@@ -336,6 +335,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     }
 
                   netdev_iob_replace(dev, iob);
+                  dev->d_len -= udpiplen;
                   udp  = IPBUF(iplen);
                   conn = nextconn;
                 }
