@@ -606,6 +606,14 @@ static int ameba_wlan_ioctl(struct netdev_lowerhalf_s *dev, int cmd,
 
           if (iwr->u.essid.flags == 0)
             {
+              /* Explicit disconnect: clear the stored passphrase so a later
+               * open-AP connect is not mis-driven as WPA2 by a stale psk.
+               * The psk is kept across normal (auto) reconnects and cleared
+               * only here, matching standard wapi disconnect semantics.
+               */
+
+              priv->psk_len = 0;
+              priv->psk[0]  = 0;
               return ameba_wifi_disconnect();
             }
 

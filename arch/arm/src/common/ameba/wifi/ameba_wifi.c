@@ -243,6 +243,8 @@ int ameba_wifi_connect(const unsigned char *ssid, int ssid_len,
   memcpy(info.ssid.val, ssid, ssid_len);
   info.channel = 0;   /* full scan to find the AP */
 
+  info.key_id = -1;
+
   if (pw != NULL && pw_len > 0)
     {
       info.password       = (u8 *)pw;
@@ -254,7 +256,8 @@ int ameba_wifi_connect(const unsigned char *ssid, int ssid_len,
       info.security_type  = RTW_SECURITY_OPEN;
     }
 
-  DiagPrintf("[ameba-wifi] connecting to \"%s\" ...\n", info.ssid.val);
+  DiagPrintf("[ameba-wifi] connecting to \"%s\" (security=0x%x) ...\n",
+             info.ssid.val, (unsigned)info.security_type);
   ret = wifi_connect(&info, 1);
   if (ret != RTK_SUCCESS)
     {
