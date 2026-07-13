@@ -88,6 +88,43 @@ Here is a guide to do so:
        this replied packet will always be put into ``transmit``, which may
        exceed the TX quota temporarily.
 
+Performance tuning
+==================
+
+The following knobs matter most for throughput, especially for Wi-Fi drivers
+where the MAC runs on a companion core and packets are delivered to the host
+over an IPC:
+
+-  **RX quota as backpressure.** The RX quota bounds how many received packets
+   the driver holds before the upper half drains them.  It matters most for
+   traffic without transport flow control (e.g. UDP): when the peer sends
+   faster than the socket is drained, a large quota lets the driver copy many
+   packets into the stack only to drop them at the bounded socket receive
+   buffer -- wasted work that also steals CPU from the packets that do get
+   delivered.  A smaller quota drops the excess earlier and cheaply, at
+   ``netpkt_alloc``.  For TCP the advertised window already throttles the peer,
+   so the quota rarely fills.
+
+-  **RX thread priority.** With ``NETDEV_RX_THREAD``, keep ``priority`` at or
+   below the vendor task that moves packets from the device (companion core)
+   into the driver.  A higher priority (e.g. ``HPWORK``) starves that task,
+   the device-to-host ring backs up, and packets are dropped upstream of the
+   driver before ``receive`` ever sees them.
+
+-  **Socket receive buffer.** ``CONFIG_NET_RECV_BUFSIZE`` is the default
+   SO_RCVBUF: it both caps the advertised TCP window and bounds the UDP
+   read-ahead, both drawn from the shared IOB pool (``CONFIG_IOB_NBUFFERS`` x
+   ``CONFIG_IOB_BUFSIZE``).  On a lossy wireless path a large TCP window lets
+   the peer put more in flight than the link can smooth (bursty loss and RTO
+   stalls), so cap it near the out-of-order reassembly capacity and bound TX
+   with ``CONFIG_NET_SEND_BUFSIZE``.  That same cap limits UDP read-ahead, so a
+   UDP-throughput-critical socket should raise its own buffer via
+   ``setsockopt(SO_RCVBUF)`` rather than changing the TCP-safe default.
+   Enlarging the buffer helps only up to the rate the socket can be drained;
+   sustained overload is dropped regardless.  Keeping out-of-order reassembly
+   (``CONFIG_NET_TCP_OUT_OF_ORDER``) enabled lets a single loss recover in one
+   round trip.
+
 "Lower Half" Example
 ====================
 
