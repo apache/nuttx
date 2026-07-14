@@ -30,6 +30,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -123,6 +124,32 @@
 /* Determine if any DMA is enabled (for common code) */
 #if defined(CONFIG_STM32_DAC1CH1_DMA) || defined(CONFIG_STM32_DAC1CH2_DMA)
 #  define HAVE_DMA 1
+#endif
+
+/* DMA priority macros from per-channel Kconfig choices */
+
+#ifdef CONFIG_STM32_DAC1CH1_DMA
+#  if defined(CONFIG_STM32_DAC1CH1_DMA_PRIORITY_LOW)
+#    define DAC1CH1_DMA_PRI  0
+#  elif defined(CONFIG_STM32_DAC1CH1_DMA_PRIORITY_MEDIUM)
+#    define DAC1CH1_DMA_PRI  1
+#  elif defined(CONFIG_STM32_DAC1CH1_DMA_PRIORITY_HIGH)
+#    define DAC1CH1_DMA_PRI  2
+#  else
+#    define DAC1CH1_DMA_PRI  3
+#  endif
+#endif
+
+#ifdef CONFIG_STM32_DAC1CH2_DMA
+#  if defined(CONFIG_STM32_DAC1CH2_DMA_PRIORITY_LOW)
+#    define DAC1CH2_DMA_PRI  0
+#  elif defined(CONFIG_STM32_DAC1CH2_DMA_PRIORITY_MEDIUM)
+#    define DAC1CH2_DMA_PRI  1
+#  elif defined(CONFIG_STM32_DAC1CH2_DMA_PRIORITY_HIGH)
+#    define DAC1CH2_DMA_PRI  2
+#  else
+#    define DAC1CH2_DMA_PRI  3
+#  endif
 #endif
 
 /* Timer trigger selection for DAC1 channels.
@@ -346,17 +373,23 @@ struct stm32_chan_s
   uint32_t dro;         /* Data output register address */
   uint32_t tsel;        /* CR trigger select value */
 #ifdef HAVE_DMA
-  uint8_t hasdma    : 1;   /* True, this channel supports DMA */
-  uint8_t dma_active : 1;  /* True, DMA transfer is running */
-  uint8_t timer;           /* Timer number for DMA trigger */
-  uint16_t dmachan;        /* DMA channel */
-  uint16_t buffer_len;     /* DMA buffer length */
-  DMA_HANDLE dma;          /* Allocated DMA channel */
-  uint32_t   tbase;        /* Timer base address */
-  uint32_t tfrequency;     /* Desired timer frequency */
-  int result;              /* DMA result */
-  uint16_t buffer_pos;     /* Position in dmabuffer */
-  uint16_t *dmabuffer;     /* DMA transfer buffer */
+  uint8_t hasdma        : 1;   /* True, this channel supports DMA */
+  uint8_t dma_active    : 1;   /* True, DMA transfer is running */
+  uint8_t halfint        : 1;  /* True, HT interrupt enabled */
+  uint8_t dma_priority   : 2;  /* DMA PL field (DMA_SCR_PRI*) */
+  uint8_t timer;               /* Timer number for DMA trigger */
+  uint16_t dmachan;            /* DMA channel */
+  uint16_t buffer_len;         /* DMA buffer length */
+  DMA_HANDLE dma;              /* Allocated DMA channel */
+  uint32_t   tbase;            /* Timer base address */
+  uint32_t tfrequency;         /* Desired timer frequency */
+  int result;                  /* DMA result */
+  uint16_t buffer_pos;         /* Position in dmabuffer */
+  uint16_t *dmabuffer;         /* DMA transfer buffer */
+  sem_t dma_halfsem;           /* Stream half-completion sem */
+  uint8_t dma_half_q[16];      /* Ring of completed half indices */
+  uint8_t dma_half_q_head;
+  uint8_t dma_half_q_tail;
 #endif
 };
 
@@ -385,7 +418,7 @@ static int  stm32_dac_ioctl(struct dac_dev_s *dev, int cmd,
 #ifdef HAVE_DMA
 static int  stm32_dac_timinit(struct stm32_chan_s *chan);
 static void stm32_dac_timstart(struct stm32_chan_s *chan);
-static void stm32_dac_dma_start(struct stm32_chan_s *chan);
+static void stm32_dac_dma_start(struct stm32_chan_s *chan, bool halfint);
 static void stm32_dac_dma_stop(struct stm32_chan_s *chan);
 static int stm32_dac_dmainit(struct stm32_chan_s *chan);
 #endif
@@ -459,6 +492,7 @@ static struct stm32_chan_s g_dac1ch1priv =
   .timer      = CONFIG_STM32_DAC1CH1_TIMER,
   .tbase      = DAC1_CH1_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH1_TIMER_FREQUENCY,
+  .dma_priority = DAC1CH1_DMA_PRI,
 #endif
 };
 
@@ -497,6 +531,7 @@ static struct stm32_chan_s g_dac1ch2priv =
   .timer      = CONFIG_STM32_DAC1CH2_TIMER,
   .tbase      = DAC1_CH2_TIMER_BASE,
   .tfrequency = CONFIG_STM32_DAC1CH2_TIMER_FREQUENCY,
+  .dma_priority = DAC1CH2_DMA_PRI,
 #endif
 };
 
@@ -629,6 +664,10 @@ static int stm32_dac_setup(struct dac_dev_s *dev)
 
 #ifdef HAVE_DMA
   chan->buffer_pos = 0;
+  chan->halfint = 0;
+  nxsem_init(&chan->dma_halfsem, 0, 0);
+  chan->dma_half_q_head = 0;
+  chan->dma_half_q_tail = 0;
 #endif
 
   return OK;
@@ -644,6 +683,7 @@ static void stm32_dac_shutdown(struct dac_dev_s *dev)
 
 #ifdef HAVE_DMA
   stm32_dac_dma_stop(chan);
+  nxsem_destroy(&chan->dma_halfsem);
 #endif
 
   stm32_dac_modify_cr(chan, DAC_CR_EN(chan->ch), 0);
@@ -667,28 +707,37 @@ static void stm32_dac_dmatxcallback(DMA_HANDLE handle, uint8_t isr,
                                     void *arg)
 {
   struct stm32_chan_s *chan = (struct stm32_chan_s *)arg;
-  struct dac_dev_s *dev;
 
   DEBUGASSERT(chan);
 
-#ifdef CONFIG_STM32_DAC1CH1
-  if (chan->ch == 1)
-    dev = &g_dac1ch1dev;
-  else
-#endif
-#ifdef CONFIG_STM32_DAC1CH2
-  if (chan->ch == 2)
-    dev = &g_dac1ch2dev;
-  else
-#endif
-    DEBUGPANIC();
-
-  DEBUGASSERT(dev->ad_priv == chan);
-
   if (chan->result == -EBUSY)
     {
-      chan->result = (isr & DMA_STREAM_TEIF_BIT) ? -EIO : OK;
-      dac_txdone(dev);
+      if (isr & DMA_STREAM_TEIF_BIT)
+        {
+          chan->result = -EIO;
+        }
+      else if (chan->halfint)
+        {
+          uint8_t h;
+
+          if (isr & DMA_STREAM_HTIF_BIT)
+            {
+              h = 0;
+            }
+          else
+            {
+              h = 1;
+            }
+
+          chan->dma_half_q[chan->dma_half_q_head] = h;
+          chan->dma_half_q_head =
+            (chan->dma_half_q_head + 1) & 15;
+          nxsem_post(&chan->dma_halfsem);
+        }
+      else
+        {
+          chan->result = OK;
+        }
     }
 }
 #endif
@@ -701,24 +750,9 @@ static int stm32_dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 {
   struct stm32_chan_s *chan = dev->ad_priv;
 
-#ifdef HAVE_DMA
-  if (chan->hasdma)
-    {
-      chan->dmabuffer[chan->buffer_pos++] = (uint16_t)msg->am_data;
-      dac_txdone(dev);
-
-      if (chan->buffer_pos >= chan->buffer_len && !chan->dma_active)
-        {
-          stm32_dac_dma_start(chan);
-        }
-    }
-  else
-#endif
-    {
-      stm32_dac_modify_cr(chan, 0, DAC_CR_EN(chan->ch));
-      putreg16(msg->am_data, chan->dro);
-      dac_txdone(dev);
-    }
+  stm32_dac_modify_cr(chan, 0, DAC_CR_EN(chan->ch));
+  putreg16(msg->am_data, chan->dro);
+  dac_txdone(dev);
 
   return OK;
 }
@@ -729,7 +763,105 @@ static int stm32_dac_send(struct dac_dev_s *dev, struct dac_msg_s *msg)
 
 static int stm32_dac_ioctl(struct dac_dev_s *dev, int cmd, unsigned long arg)
 {
-  return -ENOTTY;
+  int ret = -ENOTTY;
+  struct stm32_chan_s *chan = dev->ad_priv;
+
+  switch (cmd)
+    {
+#ifdef HAVE_DMA
+    case ANIOC_DAC_DMABUFF_INIT:
+      {
+        uint16_t *buffer = (uint16_t *)arg;
+
+        /* The caller is responsible for providing buffer with
+         * suitable length equal to CONFIG_STM32_DACxCHy_DMA_BUFFER_SIZE
+         */
+
+        uint32_t len = chan->buffer_len * sizeof(uint16_t);
+        memcpy(chan->dmabuffer, buffer, len);
+#ifdef CONFIG_ARMV7M_DCACHE
+        up_clean_dcache((uintptr_t)chan->dmabuffer,
+                        (uintptr_t)chan->dmabuffer + len);
+#endif
+        ret = OK;
+      }
+      break;
+
+    case ANIOC_DAC_DMA_START:
+      {
+        struct dac_dma_start_s *req =
+          (struct dac_dma_start_s *)arg;
+
+        chan->halfint = req->halfint;
+        stm32_dac_dma_start(chan, req->halfint);
+        ret = OK;
+      }
+      break;
+
+    case ANIOC_DAC_DMA_STOP:
+      stm32_dac_dma_stop(chan);
+      chan->halfint = 0;
+      ret = OK;
+      break;
+
+    case ANIOC_DAC_DMA_GET_EVENT:
+      {
+        struct dac_dma_event_s *req =
+          (struct dac_dma_event_s *)arg;
+
+        ret = nxsem_wait(&chan->dma_halfsem);
+        if (ret == OK)
+          {
+            req->half =
+              chan->dma_half_q[chan->dma_half_q_tail];
+            chan->dma_half_q_tail =
+              (chan->dma_half_q_tail + 1) & 15;
+          }
+      }
+      break;
+
+    case ANIOC_DAC_DMAHBUF_WRITE:
+      {
+        struct dac_dma_event_s *req =
+          (struct dac_dma_event_s *)arg;
+        uint32_t half_len = chan->buffer_len / 2;
+        uint16_t *dst = chan->dmabuffer + req->half * half_len;
+
+        memcpy(dst, req->buffer, half_len * sizeof(uint16_t));
+#ifdef CONFIG_ARMV7M_DCACHE
+        up_clean_dcache((uintptr_t)dst,
+                        (uintptr_t)dst + half_len * sizeof(uint16_t));
+#endif
+        ret = OK;
+      }
+      break;
+#endif
+
+    case ANIOC_DAC_INFO:
+      {
+        struct dac_info_s *info = (struct dac_info_s *)arg;
+
+        info->sample_bits  = 12;
+#ifdef HAVE_DMA
+        info->dma_enabled  = chan->dma_active;
+        info->halfint_enabled = chan->halfint;
+        info->dma_buffer_size  = chan->buffer_len;
+        info->dma_timer_frequency = chan->tfrequency;
+#else
+        info->dma_enabled  = false;
+        info->halfint_enabled = 0;
+        info->dma_buffer_size  = 0;
+        info->dma_timer_frequency = 0;
+#endif
+        ret = OK;
+      }
+      break;
+
+    default:
+      break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -849,7 +981,7 @@ static void stm32_dac_timstart(struct stm32_chan_s *chan)
  ****************************************************************************/
 
 #ifdef HAVE_DMA
-static void stm32_dac_dma_start(struct stm32_chan_s *chan)
+static void stm32_dac_dma_start(struct stm32_chan_s *chan, bool halfint)
 {
   if (chan->dma_active)
     return;
@@ -862,7 +994,7 @@ static void stm32_dac_dma_start(struct stm32_chan_s *chan)
                   chan->buffer_len * sizeof(uint16_t));
 #endif
 
-  stm32_dmastart(chan->dma, stm32_dac_dmatxcallback, chan, false);
+  stm32_dmastart(chan->dma, stm32_dac_dmatxcallback, chan, halfint);
   stm32_dac_modify_cr(chan, 0, DAC_CR_EN(chan->ch) |
                                 DAC_CR_TEN(chan->ch) |
                                 DAC_CR_DMAEN(chan->ch));
@@ -908,7 +1040,8 @@ static int stm32_dac_dmainit(struct stm32_chan_s *chan)
       dmacfg.paddr  = chan->dro;
       dmacfg.maddr  = (uint32_t)chan->dmabuffer;
       dmacfg.ndata  = chan->buffer_len;
-      dmacfg.cfg1   = DAC_DMA_CONTROL_WORD;
+      dmacfg.cfg1   = DAC_DMA_CONTROL_WORD |
+                       (chan->dma_priority << DMA_SCR_PL_SHIFT);
       dmacfg.cfg2   = 0;
       stm32_dmasetup(chan->dma, &dmacfg);
 
@@ -1064,7 +1197,7 @@ static void stm32_dac_llops_writedro(struct stm32_dac_dev_s *dev,
 static void stm32_dac_llops_startdma(struct stm32_dac_dev_s *dev)
 {
   struct stm32_chan_s *priv = (struct stm32_chan_s *)dev;
-  stm32_dac_dma_start(priv);
+  stm32_dac_dma_start(priv, false);
 }
 
 /****************************************************************************

@@ -65,9 +65,29 @@
                                                  * IN: None
                                                  * OUT: Number of samples
                                                  * waiting to be read */
+#define ANIOC_DAC_DMABUFF_INIT  _ANIOC(0x0007)  /* Copy full buffer to DAC DMA
+                                                 * IN: uint16_t * (buffer to copy)
+                                                 * Caller must provide buffer of
+                                                 * CONFIG_STM32_DACxCHy_DMA_BUFFER_SIZE
+                                                 * OUT: None */
+#define ANIOC_DAC_DMA_START     _ANIOC(0x0008)  /* Start DAC DMA transfer
+                                                 * IN: struct dac_dma_start_s *
+                                                 * OUT: None */
+#define ANIOC_DAC_DMA_STOP      _ANIOC(0x0009)  /* Stop DAC DMA transfer
+                                                 * IN: None
+                                                 * OUT: None */
+#define ANIOC_DAC_DMA_GET_EVENT _ANIOC(0x000a)  /* Wait for half-transfer DMA event
+                                                 * IN: None
+                                                 * OUT: struct dac_dma_event_s * */
+#define ANIOC_DAC_DMAHBUF_WRITE _ANIOC(0x000b)  /* Write half-buffer to DMA
+                                                 * IN: struct dac_dma_event_s *
+                                                 * OUT: None */
+#define ANIOC_DAC_INFO          _ANIOC(0x000c)  /* Get DAC info
+                                                 * IN: None
+                                                 * OUT: struct dac_info_s * */
 
 #define AN_FIRST          0x0001          /* First common command */
-#define AN_NCMDS          6               /* Number of common commands */
+#define AN_NCMDS          12              /* Number of common commands */
 
 /* User defined ioctl commands are also supported. These will be forwarded
  * by the upper-half driver to the lower-half driver via the ioctl()
