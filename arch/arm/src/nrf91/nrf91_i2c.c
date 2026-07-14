@@ -408,10 +408,12 @@ static int nrf91_i2c_transfer(struct i2c_master_s *dev,
             }
 #endif
 
-          /* Write TXD data pointer */
+          /* Write TXD data pointer. Zero-length transfers (used for bus
+           * scanning) never access the buffer, so any pointer is valid.
+           */
 
           regval = (uint32_t)priv->ptr;
-          DEBUGASSERT(nrf91_easydma_valid(regval));
+          DEBUGASSERT(priv->dcnt == 0 || nrf91_easydma_valid(regval));
           nrf91_i2c_putreg(priv, NRF91_TWIM_TXDPTR_OFFSET, regval);
 
           /* Write number of bytes in TXD buffer */
@@ -430,10 +432,12 @@ static int nrf91_i2c_transfer(struct i2c_master_s *dev,
         }
       else
         {
-          /* Write RXD data pointer */
+          /* Write RXD data pointer. Zero-length transfers (used for bus
+           * scanning) never access the buffer, so any pointer is valid.
+           */
 
           regval = (uint32_t)priv->ptr;
-          DEBUGASSERT(nrf91_easydma_valid(regval));
+          DEBUGASSERT(priv->dcnt == 0 || nrf91_easydma_valid(regval));
           nrf91_i2c_putreg(priv, NRF91_TWIM_RXDPTR_OFFSET, regval);
 
           /* Write number of bytes in RXD buffer */
