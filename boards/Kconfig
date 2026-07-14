@@ -1993,6 +1993,15 @@ config ARCH_BOARD_WEACT_STM32H743
 	---help---
 		This is WeAct MiniSTM32H7xx (STM32H743VIT6) board.
 
+config ARCH_BOARD_DEVEBOX_STM32H743
+	bool "DevEbox Studio STM32H743"
+	depends on ARCH_CHIP_STM32H743VI
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This is DevEbox MiniSTM32H7xx (STM32H743VIT6) board.
+
 config ARCH_BOARD_WEACT_STM32H750
 	bool "WeAct Studio STM32H750"
 	depends on ARCH_CHIP_STM32H750VB
@@ -4108,6 +4117,7 @@ config ARCH_BOARD
 	default "esk32"                        if ARCH_BOARD_ESK32
 	default "csk6011a-nano"                if ARCH_BOARD_CSK6011A_NANO
 	default "frdm-mcxn236"                 if ARCH_BOARD_FRDM_MCXN236
+	default "devebox-stm32h743"            if ARCH_BOARD_DEVEBOX_STM32H743
 
 comment "Common Board Options"
 
