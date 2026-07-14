@@ -486,6 +486,16 @@ config MCP48XX_SPI_FREQUENCY
 
 endif # DAC
 
+config POT
+	bool "Digital Potentiometer"
+	default n
+	---help---
+		Select to enable support for digital potentiometers.
+
+if POT
+
+endif # POT
+
 config OPAMP
 	bool "Operational Amplifier"
 	default n

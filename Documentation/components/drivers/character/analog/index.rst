@@ -26,4 +26,5 @@ The NuttX analog drivers are split into two parts:
 
   adc/index.rst
   dac/index.rst
+  pot/index.rst
 

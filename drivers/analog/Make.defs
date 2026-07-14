@@ -74,6 +74,16 @@ CSRCS += opamp.c
 
 endif
 
+# Check for POT devices
+
+ifeq ($(CONFIG_POT),y)
+
+# Include the common POT character driver
+
+CSRCS += pot.c
+
+endif
+
 # Check for ADC devices
 
 ifeq ($(CONFIG_ADC),y)
@@ -152,6 +162,12 @@ ifeq ($(CONFIG_OPAMP),y)
   DEPPATH += --dep-path analog
   VPATH += :analog
   CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
+else
+ifeq ($(CONFIG_POT),y)
+  DEPPATH += --dep-path analog
+  VPATH += :analog
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)analog
+endif
 endif
 endif
 endif
