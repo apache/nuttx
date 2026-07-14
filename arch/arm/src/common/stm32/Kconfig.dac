@@ -101,6 +101,26 @@ config STM32_DAC1CH1_DMA_EXTERNAL
 	bool "DAC1CH1 DMA External Trigger"
 	default n
 
+choice
+	prompt "DAC1CH1 DMA priority"
+	default STM32_DAC1CH1_DMA_PRIORITY_MEDIUM
+	---help---
+		DMA stream priority for DAC1 channel 1.
+
+config STM32_DAC1CH1_DMA_PRIORITY_LOW
+	bool "Low"
+
+config STM32_DAC1CH1_DMA_PRIORITY_MEDIUM
+	bool "Medium"
+
+config STM32_DAC1CH1_DMA_PRIORITY_HIGH
+	bool "High"
+
+config STM32_DAC1CH1_DMA_PRIORITY_VERYHIGH
+	bool "Very High"
+
+endchoice
+
 if STM32_HRTIM_DAC
 
 config STM32_DAC1CH1_HRTIM_TRG1
@@ -162,6 +182,26 @@ config STM32_DAC1CH2_DMA_BUFFER_SIZE
 config STM32_DAC1CH2_DMA_EXTERNAL
 	bool "DAC1CH2 DMA External Trigger"
 	default n
+
+choice
+	prompt "DAC1CH2 DMA priority"
+	default STM32_DAC1CH2_DMA_PRIORITY_MEDIUM
+	---help---
+		DMA stream priority for DAC1 channel 2.
+
+config STM32_DAC1CH2_DMA_PRIORITY_LOW
+	bool "Low"
+
+config STM32_DAC1CH2_DMA_PRIORITY_MEDIUM
+	bool "Medium"
+
+config STM32_DAC1CH2_DMA_PRIORITY_HIGH
+	bool "High"
+
+config STM32_DAC1CH2_DMA_PRIORITY_VERYHIGH
+	bool "Very High"
+
+endchoice
 
 if STM32_HRTIM_DAC
 
