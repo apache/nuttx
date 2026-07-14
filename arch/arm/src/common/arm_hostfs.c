@@ -31,6 +31,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
+#include <sys/param.h>
 #include <syscall.h>
 #include <unistd.h>
 
@@ -94,11 +95,10 @@ static int host_flags_to_mode(int flags)
     O_WRONLY | O_CREAT | O_APPEND,
     O_RDWR | O_CREAT | O_APPEND | O_TEXT,
     O_RDWR | O_CREAT | O_APPEND,
-    0,
   };
 
   int i;
-  for (i = 0; modeflags[i] != 0; i++)
+  for (i = 0; i < nitems(modeflags); i++)
     {
       if ((modemasks & flags) == modeflags[i])
         {
