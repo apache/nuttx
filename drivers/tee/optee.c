@@ -936,11 +936,11 @@ optee_ioctl_close_session(FAR struct optee_priv_data *priv,
 static int optee_ioctl_version(FAR struct optee_priv_data *priv,
                                FAR struct tee_ioctl_version_data *vers)
 {
-  vers->gen_caps |= priv->capabilities;
   vers->impl_id = TEE_IMPL_ID_OPTEE;
   vers->impl_caps = TEE_OPTEE_CAP_TZ;
   vers->gen_caps = TEE_GEN_CAP_GP |
                    TEE_GEN_CAP_MEMREF_NULL;
+  vers->gen_caps |= priv->capabilities;
 
   return 0;
 }
