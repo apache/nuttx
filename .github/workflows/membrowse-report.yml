@@ -41,6 +41,7 @@ jobs:
         env:
           BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           # On the very first push to a branch, github.event.before is all-zeros.
           if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
@@ -48,15 +49,35 @@ jobs:
             echo "No usable base SHA; treating as source change."
             exit 0
           fi
-          # The shallow checkout may not contain BASE_SHA (multi-commit pushes,
-          # long-lived PR branches). Fetch just that commit; fall back to a full
-          # unshallow only if the targeted fetch fails.
-          if ! git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
-            git fetch --depth=1 origin "$BASE_SHA" 2>/dev/null \
-              || git fetch --unshallow origin 2>/dev/null \
-              || git fetch --unshallow 2>/dev/null || true
+          # Diff from the merge-base (fork point) so only this PR/push's own
+          # commits count. For pull_request events BASE_SHA is the current base
+          # branch tip, which drifts ahead of the fork point as the base branch
+          # advances; diffing from the merge-base isolates the PR's real changes
+          # (e.g. keeps a docs-only PR classified as docs-only).
+          #
+          # GitHub's compare API uses 3-dot semantics, so .merge_base_commit.sha
+          # is the fork point. gh is pre-installed on the runner.
+          MERGE_BASE=$(gh api \
+            "repos/$GITHUB_REPOSITORY/compare/$BASE_SHA...$HEAD_SHA" \
+            --jq '.merge_base_commit.sha' 2>/dev/null || true)
+          if [ -z "$MERGE_BASE" ]; then
+            # API unavailable/unexpected: fail safe toward building.
+            echo "source=true" >> "$GITHUB_OUTPUT"
+            echo "Could not resolve merge-base via API; treating as source change."
+            exit 0
           fi
-          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
+          echo "Merge-base: $MERGE_BASE"
+          # The shallow checkout has HEAD but may lack the merge-base commit;
+          # fetch just that one commit so the local diff can read its tree.
+          git cat-file -e "$MERGE_BASE^{commit}" 2>/dev/null \
+            || git fetch --depth=1 origin "$MERGE_BASE" 2>/dev/null || true
+          # MERGE_BASE is an ancestor of HEAD, so this diff yields the PR/push's
+          # own changes.
+          if ! changed=$(git diff --name-only "$MERGE_BASE" "$HEAD_SHA" 2>/dev/null); then
+            echo "source=true" >> "$GITHUB_OUTPUT"
+            echo "git diff against merge-base failed; treating as source change."
+            exit 0
+          fi
           echo "Changed files:"
           echo "$changed"
           # Drop paths that should NOT count as source changes; if anything
