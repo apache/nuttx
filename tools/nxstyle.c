@@ -278,10 +278,13 @@ static const char *g_white_prefix[] =
   "OSC2M_",
   "OSC4M_",
   "OSC131K_",
+  "PAD_",
+  "Pinmux_",
   "RCC_",
   "RTCIO_",
   "SYSCFG_",
   "SYSTIMER_",
+  "UART_",
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
   "MQTTErrors",       /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */

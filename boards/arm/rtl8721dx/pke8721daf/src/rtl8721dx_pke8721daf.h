@@ -81,6 +81,20 @@ int rtl8721dx_wifi_initialize(void);
 int rtl8721dx_gpio_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_UART
+/****************************************************************************
+ * Name: rtl8721dx_uart_initialize
+ *
+ * Description:
+ *   Register the board's general-purpose UART ports with the NuttX serial
+ *   upper half
+ *   (boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_uart.c).
+ *
+ ****************************************************************************/
+
+int rtl8721dx_uart_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721DX_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

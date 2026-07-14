@@ -54,6 +54,10 @@ ifeq ($(CONFIG_AMEBA_GPIO),y)
 CHIP_CSRCS += ameba_gpio.c
 endif
 
+ifeq ($(CONFIG_AMEBA_UART),y)
+CHIP_CSRCS += ameba_uart.c
+endif
+
 ############################################################################
 # Realtek RTL8721Dx SDK integration
 #

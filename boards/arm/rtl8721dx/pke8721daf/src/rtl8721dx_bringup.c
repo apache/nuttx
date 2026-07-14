@@ -118,6 +118,16 @@ int rtl8721dx_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_UART
+  /* Register the board's general-purpose UART ports at /dev/ttySN. */
+
+  ret = rtl8721dx_uart_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8721dx_uart_initialize failed: %d\n", ret);
+    }
+#endif
+
   /* Install the inter-core HW IPC-semaphore RTOS hooks LAST -- after all the
    * flash / WHC bring-up above, and just before this (board_late_initialize)
    * path returns and nx_start() hands off to the init task.
