@@ -1,5 +1,5 @@
 /*********************************************************************************
- * libs/libc/machine/x86_64/arch_memset_sse2.S
+ * libs/libc/machine/x86_64/arch_memset.S
  *
  * SPDX-License-Identifier: BSD-3-Clause
  * SPDX-FileCopyrightText: 2014, Intel Corporation

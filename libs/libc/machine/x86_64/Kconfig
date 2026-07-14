@@ -99,13 +99,6 @@ config X86_64_STRLEN
 	---help---
 		Enable optimized X86_64 specific strlen() library function
 
-config X86_64_STRNLEN
-	bool "Enable optimized strnlen() for X86_64"
-	default n
-	select LIBC_ARCH_STRNLEN
-	---help---
-		Enable optimized X86_64 specific strnlen() library function
-
 config X86_64_STRNCPY
 	bool "Enable optimized strncpy() for X86_64"
 	default n
@@ -113,11 +106,45 @@ config X86_64_STRNCPY
 	---help---
 		Enable optimized X86_64 specific strncpy() library function
 
-config X86_64_STRNCMP
-	bool "Enable optimized strncmp() for X86_64"
+config X86_64_STRCHR
+	bool "Enable optimized strchr() for X86_64"
 	default n
-	select LIBC_ARCH_STRNCMP
+	select LIBC_ARCH_STRCHR
 	---help---
-		Enable optimized X86_64 specific strncmp() library function
+		Enable optimized X86_64 specific strchr() library function.
+		Uses AVX2 when ARCH_X86_64_AVX2 is set, otherwise an SSE2
+		implementation (x86_64 baseline).
+
+config X86_64_STRCHRNUL
+	bool "Enable optimized strchrnul() for X86_64"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	---help---
+		Enable optimized X86_64 specific strchrnul() library function.
+		Uses AVX2 when ARCH_X86_64_AVX2 is set, otherwise SSE2.
+
+config X86_64_STRRCHR
+	bool "Enable optimized strrchr() for X86_64"
+	default n
+	select LIBC_ARCH_STRRCHR
+	---help---
+		Enable optimized X86_64 specific strrchr() library function.
+		Uses AVX2 when ARCH_X86_64_AVX2 is set, otherwise SSE2.
+
+config X86_64_STRNLEN
+	bool "Enable optimized strnlen() for X86_64"
+	default n
+	select LIBC_ARCH_STRNLEN
+	---help---
+		Enable optimized X86_64 specific strnlen() library function.
+		Uses AVX2 when ARCH_X86_64_AVX2 is set, otherwise SSE2.
+
+config X86_64_MEMCHR
+	bool "Enable optimized memchr() for X86_64"
+	default n
+	select LIBC_ARCH_MEMCHR
+	---help---
+		Enable optimized X86_64 specific memchr() library function.
+		Uses AVX2 when ARCH_X86_64_AVX2 is set, otherwise SSE2.
 
 endif # ARCH_TOOLCHAIN_GNU && ALLOW_BSD_COMPONENTS
