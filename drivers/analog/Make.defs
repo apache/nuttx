@@ -82,6 +82,12 @@ ifeq ($(CONFIG_POT),y)
 
 CSRCS += pot.c
 
+# Include POT device drivers
+
+ifeq ($(CONFIG_POT_MCP445X),y)
+  CSRCS += mcp445x.c
+endif
+
 endif
 
 # Check for ADC devices

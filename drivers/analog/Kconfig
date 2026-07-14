@@ -494,6 +494,19 @@ config POT
 
 if POT
 
+config POT_MCP445X
+	bool "MCP445X support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the Microchip MCP4451 quad digital
+		potentiometer.
+
+config POT_MCP445X_I2C_FREQUENCY
+	int "MCP445X I2C frequency"
+	default 400000
+	depends on POT_MCP445X
+
 endif # POT
 
 config OPAMP

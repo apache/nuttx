@@ -69,6 +69,13 @@ endif()
 if(CONFIG_POT)
   # Include the common POT character driver
   list(APPEND SRCS pot.c)
+
+  # Include POT device drivers
+
+  if(CONFIG_POT_MCP445X)
+    list(APPEND SRCS mcp445x.c)
+  endif()
+
 endif()
 
 # Check for ADC devices

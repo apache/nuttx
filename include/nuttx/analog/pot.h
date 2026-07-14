@@ -215,6 +215,28 @@ extern "C"
 
 int pot_register(FAR const char *path, FAR struct pot_dev_s *dev);
 
+/****************************************************************************
+ * Name: mcp445x_initialize
+ *
+ * Description:
+ *   Initialize a MCP445X potentiometer.
+ *
+ * Input Parameters:
+ *   i2c  - An instance of the I2C interface to communicate with the device
+ *   addr - The I2C address of the MCP445X
+ *   rab  - Terminal A-B resistance in ohms, 0 if unknown
+ *
+ * Returned Value:
+ *   Valid MCP445X device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_POT_MCP445X
+struct i2c_master_s;
+FAR struct pot_dev_s *mcp445x_initialize(FAR struct i2c_master_s *i2c,
+                                         uint8_t addr, uint32_t rab);
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
