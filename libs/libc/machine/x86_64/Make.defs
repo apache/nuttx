@@ -29,55 +29,134 @@ ASRCS += arch_setjmp_x86_64.S
 endif
 
 ifeq ($(CONFIG_X86_64_MEMCMP),y)
-ASRCS += arch_memcmp.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memcmp_avx2.S
+  else
+    ASRCS += arch_memcmp.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_MEMMOVE),y)
-ASRCS += arch_memmove.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memmove_avx2.S
+  else
+    ASRCS += arch_memmove.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_MEMSET),y)
   ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
     ASRCS += arch_memset_avx2.S
   else
-    ASRCS += arch_memset_sse2.S
+    ASRCS += arch_memset.S
   endif
 endif
 
 ifeq ($(CONFIG_X86_64_STPCPY),y)
-ASRCS += arch_stpcpy.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_stpcpy_avx2.S
+  else
+    ASRCS += arch_stpcpy.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STPNCPY),y)
-ASRCS += arch_stpncpy.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_stpncpy_avx2.S
+  else
+    ASRCS += arch_stpncpy.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRCAT),y)
-ASRCS += arch_strcat.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strcat_avx2.S
+  else
+    ASRCS += arch_strcat.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRCMP),y)
-ASRCS += arch_strcmp.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strcmp_avx2.S
+  else
+    ASRCS += arch_strcmp.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRCPY),y)
-ASRCS += arch_strcpy.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strcpy_avx2.S
+  else
+    ASRCS += arch_strcpy.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRLEN),y)
-ASRCS += arch_strlen.S
-endif
-
-ifeq ($(CONFIG_X86_64_STRNLEN),y)
-ASRCS += arch_strnlen.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strlen_avx2.S
+  else
+    ASRCS += arch_strlen.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRNCPY),y)
-ASRCS += arch_strncpy.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strncpy_avx2.S
+  else
+    ASRCS += arch_strncpy.S
+  endif
 endif
 
 ifeq ($(CONFIG_X86_64_STRNCMP),y)
-ASRCS += arch_strncmp.S
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strncmp_avx2.S
+  else
+    ASRCS += arch_strncmp.S
+  endif
+endif
+
+# Scan functions: AVX2 when enabled, else SSE2 (x86_64 baseline). No legacy
+# non-SIMD asm; generic C libc is the final fallback when the switch is off.
+
+ifeq ($(CONFIG_X86_64_STRCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strchr_avx2.S
+  else
+    ASRCS += arch_strchr.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STRCHRNUL),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strchrnul_avx2.S
+  else
+    ASRCS += arch_strchrnul.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STRRCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strrchr_avx2.S
+  else
+    ASRCS += arch_strrchr.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_STRNLEN),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_strnlen_avx2.S
+  else
+    ASRCS += arch_strnlen.S
+  endif
+endif
+
+ifeq ($(CONFIG_X86_64_MEMCHR),y)
+  ifeq ($(CONFIG_ARCH_X86_64_AVX),y)
+    ASRCS += arch_memchr_avx2.S
+  else
+    ASRCS += arch_memchr.S
+  endif
 endif
 
 ifeq ($(CONFIG_PROFILE_MINI),y)

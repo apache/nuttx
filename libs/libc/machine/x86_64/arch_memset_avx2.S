@@ -112,13 +112,15 @@ L(16bytesormore):
 	movdqu	%xmm0, -32(%rdi, %rdx)
 	cmpq	$64, %rdx
 	jbe	L(done)
-	movdqu	%xmm0, 32(%rdi)
-	movdqu	%xmm0, 48(%rdi)
-	movdqu	%xmm0, -64(%rdi, %rdx)
-	movdqu	%xmm0, -48(%rdi, %rdx)
+	/* 65..128 bytes: fill [32,64) head and [len-64,len-32) tail with a
+	 * single 256-bit ymm store each (2 stores instead of 4 xmm stores).
+	 * Broadcast to ymm here since every path from now on uses ymm.
+	 */
+	vpbroadcastb %xmm0, %ymm0
+	vmovdqu	%ymm0, 32(%rdi)
+	vmovdqu	%ymm0, -64(%rdi, %rdx)
 	cmpq	$128, %rdx
 	jbe	L(done)
-	vpbroadcastb %xmm0, %ymm0
 	vmovdqu	%ymm0, 64(%rdi)
 	vmovdqu	%ymm0, 96(%rdi)
 	vmovdqu	%ymm0, -128(%rdi, %rdx)
@@ -155,14 +157,15 @@ L(normal_loop):
 
 	ALIGN (4)
 L(non_temporal_loop):
-	movntdq	 %xmm0, (%rcx)
-	movntdq	 %xmm0, 16(%rcx)
-	movntdq	 %xmm0, 32(%rcx)
-	movntdq	 %xmm0, 48(%rcx)
-	movntdq	 %xmm0, 64(%rcx)
-	movntdq	 %xmm0, 80(%rcx)
-	movntdq	 %xmm0, 96(%rcx)
-	movntdq	 %xmm0, 112(%rcx)
+	/* rcx is 128-byte aligned here, so it satisfies the 32-byte alignment
+	 * required by vmovntdq. Use 256-bit non-temporal stores: 4 stores of
+	 * 32 bytes cover the same 128 bytes/iteration as the previous 8 xmm
+	 * stores, halving the store-instruction count on the streaming path.
+	 */
+	vmovntdq %ymm0, (%rcx)
+	vmovntdq %ymm0, 32(%rcx)
+	vmovntdq %ymm0, 64(%rcx)
+	vmovntdq %ymm0, 96(%rcx)
 	leaq	128(%rcx), %rcx
 	cmpq	%rcx, %rdx
 	jne	L(non_temporal_loop)
