@@ -156,6 +156,11 @@
 #define AN_POT_FIRST      (AN_ADS7046_FIRST + AN_ADS7046_NCMDS)
 #define AN_POT_NCMDS      16
 
+/* See include/nuttx/analog/mcp445x.h */
+
+#define AN_MCP445X_FIRST  (AN_POT_FIRST + AN_POT_NCMDS)
+#define AN_MCP445X_NCMDS  2
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
