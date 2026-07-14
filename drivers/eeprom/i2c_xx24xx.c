@@ -41,6 +41,11 @@
  *              24xx1025  131072    128   2     1010PAA Special case: address
  *                                                      bit is shifted.
  *              24xx1026  131072    128   2     1010AAP
+ *              24CM02    262144    256   2     1010APP
+ *              24CW160     2048     32   2     1010AAA Not a 24xx16
+ *                                                      variant: 24CW uses
+ *                                                      2-byte addressing
+ *                                                      and 32-byte pages.
  *
  * Atmel
  *              AT24C01      128     8    1     1010AAA
@@ -214,6 +219,9 @@ static const struct ee24xx_geom_s g_ee24xx_devices[] =
   {
     11, 5, 2, 2, 0
   }, /* AT24CM02  262144  256     2 */
+  {
+    4, 2, 2, 0, 0
+  }, /* 24CW160     2048   32     2 */
 
   /* STM devices */
 

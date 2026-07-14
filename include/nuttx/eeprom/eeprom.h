@@ -132,6 +132,7 @@ enum eeprom_24xx_e
   EEPROM_24XX1025,
   EEPROM_24XX1026,
   EEPROM_24CM02,
+  EEPROM_24CW160,
 
   /* Atmel geometries - none... */
 
