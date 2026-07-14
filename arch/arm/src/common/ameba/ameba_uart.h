@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/ameba/ameba_gpio.h
+ * arch/arm/src/common/ameba/ameba_uart.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_GPIO_H
-#define __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_GPIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_UART_H
+#define __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_UART_H
 
 /****************************************************************************
  * Included Files
@@ -31,27 +31,19 @@
 
 #include <stdint.h>
 
-#include <nuttx/ioexpander/gpio.h>
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* A pin is identified with the same encoding the Ameba SDK uses for its
- * "PinName": bits[7:5] select the GPIO port and bits[4:0] the pin within
- * the port.  Boards build their pin table from these helpers so the shared
- * driver never needs to know a board's wiring.
+/* The Ameba high-speed UART controllers exposed to NuttX.  UART2 is shared
+ * with Bluetooth on this family and is not wired for general serial use, so
+ * only UART0 and UART1 are registered by boards.  TX/RX pins are given with
+ * the same AMEBA_PA()/AMEBA_PB() PinName encoding used by the GPIO driver
+ * (see ameba_gpio.h); any pad can be routed to a UART through the pin mux.
  */
 
-#define AMEBA_PORT_A          0
-#define AMEBA_PORT_B          1
-
-#define AMEBA_PIN(port, num)  ((uint8_t)(((port) << 5) | ((num) & 0x1f)))
-
-/* Convenience: the RTL8721Dx / RTL8720F break out ports A and B. */
-
-#define AMEBA_PA(num)         AMEBA_PIN(AMEBA_PORT_A, (num))
-#define AMEBA_PB(num)         AMEBA_PIN(AMEBA_PORT_B, (num))
+#define AMEBA_UART0           0
+#define AMEBA_UART1           1
 
 /****************************************************************************
  * Public Function Prototypes
@@ -66,30 +58,33 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: ameba_gpio_register
+ * Name: ameba_uart_register
  *
  * Description:
- *   Configure a single Ameba GPIO pin and register it with the NuttX GPIO
- *   (ioexpander) upper half at /dev/gpioN, where N is the given minor.
+ *   Configure one Ameba high-speed UART and register it with the NuttX
+ *   serial upper half at the given device path (e.g. "/dev/ttyS1").  The
+ *   LOG-UART console is owned separately (arch/.../ameba_loguart.c) and
+ *   already occupies /dev/ttyS0, so boards register the general-purpose
+ *   UARTs starting at /dev/ttyS1.
  *
  * Input Parameters:
- *   minor   - The /dev/gpioN minor number.
- *   pin     - The pin, encoded with AMEBA_PIN() / AMEBA_PA() / AMEBA_PB().
- *   pintype - One of enum gpio_pintype_e (input, output or one of the
- *             interrupt pin types).
+ *   path  - The serial device path to register (e.g. "/dev/ttyS1").
+ *   uart  - The controller index, AMEBA_UART0 or AMEBA_UART1.
+ *   txpin - The TX pad, encoded with AMEBA_PA()/AMEBA_PB().
+ *   rxpin - The RX pad, encoded with AMEBA_PA()/AMEBA_PB().
+ *   baud  - The initial baud rate.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_DEV_GPIO
-int ameba_gpio_register(int minor, uint8_t pin, enum gpio_pintype_e pintype);
-#endif
+int ameba_uart_register(const char *path, int uart, uint8_t txpin,
+                        uint8_t rxpin, uint32_t baud);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_GPIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_AMEBA_AMEBA_UART_H */

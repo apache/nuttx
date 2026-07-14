@@ -22,4 +22,37 @@ config AMEBA_GPIO
         fwlib register layer and dispatches pin interrupts through the ROM
         GPIO interrupt handler.
 
+config AMEBA_UART
+	bool "UART"
+	default n
+	select SERIAL
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Expose the Ameba high-speed UARTs (UART0/UART1) through the NuttX
+		serial upper half.  The LOG-UART owns the console and /dev/ttyS0, so
+		the board registers these general-purpose ports at /dev/ttyS1 and up
+		in its bring-up code, giving the TX/RX pads and baud for each.
+
+		The driver (arch/arm/src/common/ameba/ameba_uart.c) sits on the SDK
+		fwlib register layer and dispatches RX/TX through NuttX-native
+		interrupts.
+
+if AMEBA_UART
+
+config AMEBA_UART_RXBUFSIZE
+	int "UART receive buffer size"
+	default 256
+	---help---
+		Size, in bytes, of the receive buffer allocated for each registered
+		Ameba UART port.
+
+config AMEBA_UART_TXBUFSIZE
+	int "UART transmit buffer size"
+	default 256
+	---help---
+		Size, in bytes, of the transmit buffer allocated for each registered
+		Ameba UART port.
+
+endif # AMEBA_UART
+
 endmenu # Ameba Peripheral Support
