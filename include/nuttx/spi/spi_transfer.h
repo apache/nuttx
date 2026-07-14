@@ -101,6 +101,7 @@ struct spi_sequence_s
   uint8_t mode;                /* See enum spi_mode_e */
   uint8_t nbits;               /* Number of bits */
   uint8_t ntrans;              /* Number of transactions */
+  uint8_t keepcs;              /* Keep CS asserted after the sequence */
   uint32_t frequency;          /* SPI frequency (Hz) */
 #ifdef CONFIG_SPI_DELAY_CONTROL
   uint32_t a;                  /* Arguments to setdelay() */
