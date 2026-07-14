@@ -64,7 +64,11 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
   DEBUGASSERT(spi != NULL && seq != NULL && seq->trans != NULL);
 
-  if (spi->ops->exchangeseqs)
+  /* Lower-half exchangeseqs implementations de-select at the end of the
+   * sequence, so a sequence that keeps CS must use the generic loop.
+   */
+
+  if (spi->ops->exchangeseqs && !seq->keepcs)
     {
       /* -ENOTSUP means: not handled, use the generic loop below */
 
@@ -149,7 +153,13 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
       /* Perform the transfer */
 
-      SPI_EXCHANGE(spi, trans->txbuffer, trans->rxbuffer, trans->nwords);
+      ret = SPI_EXCHANGE(spi, trans->txbuffer, trans->rxbuffer,
+                         trans->nwords);
+      if (ret < 0)
+        {
+          spierr("ERROR: SPI_EXCHANGE failed: %d\n", ret);
+          break;
+        }
 
       /* Possibly de-select the SPI device after the transfer */
 
