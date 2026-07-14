@@ -64,6 +64,13 @@ if(CONFIG_OPAMP)
   list(APPEND SRCS opamp.c)
 endif()
 
+# Check for POT devices
+
+if(CONFIG_POT)
+  # Include the common POT character driver
+  list(APPEND SRCS pot.c)
+endif()
+
 # Check for ADC devices
 
 if(CONFIG_ADC)
