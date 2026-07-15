@@ -407,12 +407,6 @@ config STM32_HAVE_ETH_RGMII
 config STM32_HAVE_ETH_AXI
 	bool
 
-config STM32_HAVE_ETHRNET
-	bool
-
-config STM32_HAVE_ETHERNET
-	bool
-
 # FDCAN capabilities
 
 config STM32_HAVE_FDCAN_H7

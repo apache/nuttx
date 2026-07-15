@@ -178,7 +178,7 @@ config STM32_STM32H56XXX
 config STM32_STM32H57XXX
 	bool
 	default n
-	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_ETHMAC
 	select STM32_HAVE_IP_ETHMAC_V2
 
 config STM32_H56_H57_PERIPHERALS
@@ -237,7 +237,7 @@ config STM32_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
 	bool
 	default n
-	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_ETHMAC
 	select STM32_HAVE_IP_ETHMAC_V2
 
 # Pin/package configurations
