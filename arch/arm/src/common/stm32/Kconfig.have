@@ -1069,6 +1069,99 @@ config STM32_HAVE_PWM_MULTICHAN
 	default y if (ARCH_CHIP_STM32L4 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32U5) && STM32_PWM
 	default y if ARCH_CHIP_STM32L5 && STM32_PWM_MULTICHAN_L5_TIMERS
 
+config STM32_HAVE_PULSECOUNT
+	bool
+	default y if STM32_HAVE_IP_TIMERS
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_ONESHOT
+	bool
+	default y if STM32_HAVE_IP_TIMERS && STM32_TIM
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32WB
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_TIM_FREERUN
+	bool
+	default y if STM32_HAVE_IP_TIMERS && STM32_TIM
+	default y if ARCH_CHIP_STM32WB
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_TICKLESS_ONESHOT
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_PWM_LL_OPS
+	bool
+	default y if STM32_HAVE_IP_TIMERS && STM32_TIM
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_POLARITY
+	bool
+	default y if STM32_HAVE_IP_TIMERS
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_TIM12_14
+	bool
+	default y if STM32_HAVE_IP_TIMERS
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_TIM15_17
+	bool
+	default y if STM32_HAVE_IP_TIMERS
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_TIM_PWM_CHANNEL5
+	bool
+	default y if STM32_HAVE_IP_TIMERS_M3M4_V2
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_TIM_PWM_CHANNEL6
+	bool
+	default y if STM32_HAVE_IP_TIMERS_M3M4_V2
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_PWM_CHMODE_GP_EXTENDED
+	bool
+	default y if STM32_HAVE_IP_TIMERS_M3M4_V2
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_TIM_CAP
+	bool
+	default y if STM32_HAVE_IP_TIMERS
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
 config STM32_HAVE_QENCODER_MAIN
 	bool
 	default y if STM32_HAVE_IP_TIMERS || STM32_COMMON_F7_H7
