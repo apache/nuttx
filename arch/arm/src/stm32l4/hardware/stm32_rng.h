@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/hardware/stm32l4_rng.h
+ * arch/arm/src/stm32l4/hardware/stm32_rng.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RNG_H
-#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RNG_H
+#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_RNG_H
+#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_RNG_H
 
 /****************************************************************************
  * Included Files
@@ -61,4 +61,4 @@
 #define RNG_SR_CEIS               (1 << 5) /* Bit 5: Clock error interrupt status */
 #define RNG_SR_SEIS               (1 << 6) /* Bit 6: Seed error interrupt status */
 
-#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_RNG_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_RNG_H */

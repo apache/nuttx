@@ -157,8 +157,30 @@ static int stm32_rng_interrupt(int irq, void *context, void *arg)
 
   rngsr = getreg32(STM32_RNG_SR);
 
-  if ((rngsr & (RNG_SR_SEIS | RNG_SR_CEIS)) /* Check for error bits */
-      || !(rngsr & RNG_SR_DRDY))            /* Data ready must be set */
+  if (rngsr & RNG_SR_CEIS) /* Check for clock error int stat */
+    {
+      /* Clear it, we will try again. */
+
+      putreg32(rngsr & ~RNG_SR_CEIS, STM32_RNG_SR);
+      return OK;
+    }
+
+  if (rngsr & RNG_SR_SEIS) /* Check for seed error in int stat */
+    {
+      uint32_t crval;
+
+      /* Clear seed error, then disable/enable the rng and try again. */
+
+      putreg32(rngsr & ~RNG_SR_SEIS, STM32_RNG_SR);
+      crval = getreg32(STM32_RNG_CR);
+      crval &= ~RNG_CR_RNGEN;
+      putreg32(crval, STM32_RNG_CR);
+      crval |= RNG_CR_RNGEN;
+      putreg32(crval, STM32_RNG_CR);
+      return OK;
+    }
+
+  if (!(rngsr & RNG_SR_DRDY)) /* Data ready must be set */
     {
       /* This random value is not valid, we will try again. */
 

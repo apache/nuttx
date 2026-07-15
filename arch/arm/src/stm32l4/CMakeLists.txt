@@ -132,10 +132,6 @@ if(CONFIG_STM32_COMP)
   list(APPEND SRCS stm32l4_comp.c stm32l4_exti_comp.c)
 endif()
 
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32l4_rng.c)
-endif()
-
 if(CONFIG_STM32_SAI)
   list(APPEND SRCS stm32l4_sai.c)
 endif()
