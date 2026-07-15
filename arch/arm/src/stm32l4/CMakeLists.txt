@@ -156,10 +156,6 @@ if(CONFIG_STM32_FIREWALL)
   list(APPEND SRCS stm32l4_firewall.c)
 endif()
 
-if(CONFIG_STM32_IWDG)
-  list(APPEND SRCS stm32l4_iwdg.c)
-endif()
-
 if(CONFIG_STM32_SDMMC1)
   list(APPEND SRCS stm32l4_sdmmc.c)
 endif()

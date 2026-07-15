@@ -54,7 +54,7 @@
 #include "stm32l4_spi.h"
 #include "stm32l4_uart.h"
 #include "stm32l4_usbdev.h"
-#include "stm32l4_wdg.h"
+#include "stm32_wdg.h"
 #include "stm32l4_lowputc.h"
 
 /****************************************************************************
