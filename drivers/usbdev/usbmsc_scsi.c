@@ -2614,6 +2614,8 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
     case USBMSC_FLAGS_DIRDEVICE2HOST:
       if (priv->cbwlen > 0)
         {
+          bool terminated = false;
+
           /* On most commands (the exception is outgoing, write commands),
            * the data has not yet been sent.
            */
@@ -2645,11 +2647,35 @@ static int usbmsc_cmdfinishstate(FAR struct usbmsc_dev_s *priv)
                   usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHSUBMIT),
                            (uint16_t)-ret);
                 }
+              else
+                {
+                  /* The request was submitted with USBDEV_REQFLAGS_NULLPKT,
+                   * so the transfer ends with a short packet (or a ZLP if
+                   * the response length is an exact multiple of the packet
+                   * size).  Either way the host's Data-In phase terminates
+                   * cleanly when this request completes.
+                   */
+
+                  terminated = true;
+                }
              }
 
-          /* Stall the BULK In endpoint if there is a residue */
+          /* If there is a residue, the host expected more data than we
+           * sent.  If the data phase was already terminated by a short
+           * packet (or ZLP), nothing more is needed: the host's transfer
+           * has completed and the residue is reported in the CSW
+           * (dCSWDataResidue).  Stalling here as well is permitted by BOT
+           * (USB MSC BOT 6.7.2), but it is gratuitous and some hosts
+           * (macOS) respond with a full Bulk-Only reset sequence to any
+           * bulk-IN halt during device probing, which costs seconds per
+           * command or aborts the probe entirely.
+           *
+           * Only halt the endpoint when nothing terminated the data
+           * phase - otherwise the host would mistake the following CSW
+           * for transfer data.
+           */
 
-          if (priv->residue > 0)
+          if (priv->residue > 0 && !terminated)
             {
 #ifndef CONFIG_USBMSC_NOT_STALL_BULKEP
               usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_CMDFINISHRESIDUE),
@@ -2975,8 +3001,20 @@ int usbmsc_scsi_main(int argc, FAR char *argv[])
            * response
            */
 
+#ifdef CONFIG_USBMSC_COMPOSITE
+          /* In composite mode the composite driver itself responds to
+           * SETCONFIGURATION (see composite_ep0submit); only the deferred
+           * responses to MSRESET and SETINTERFACE are owed by this class.
+           * Submitting a second response for SETCONFIGURATION would corrupt
+           * the EP0 state.
+           */
+
+          if ((eventset & (USBMSC_EVENT_RESET |
+                           USBMSC_EVENT_IFCHANGE)) != 0)
+#else
           if ((eventset & (USBMSC_EVENT_RESET | USBMSC_EVENT_CFGCHANGE |
                            USBMSC_EVENT_IFCHANGE)) != 0)
+#endif
             {
               usbmsc_deferredresponse(priv, false);
             }
