@@ -180,12 +180,13 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
       else
         {
 #ifdef CONFIG_ARCH_KERNEL_STACK
-          if (rtcb->xcp.ustkptr != NULL)
+          if ((rtcb->flags & TCB_FLAG_SYSCALL) != 0)
             {
               ret = backtrace(rtcb->stack_base_ptr, (uintptr_t *)
                               ((uintptr_t)rtcb->stack_base_ptr +
                                rtcb->adj_stack_size),
-                              (void *)*(rtcb->xcp.ustkptr + 1), NULL,
+                              (void *)rtcb->xcp.sregs[REG_FP],
+                              (void *)rtcb->xcp.sregs[REG_EPC],
                               buffer, size, &skip);
             }
           else
@@ -201,12 +202,13 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
   else
     {
 #ifdef CONFIG_ARCH_KERNEL_STACK
-      if (tcb->xcp.ustkptr != NULL)
+      if ((tcb->flags & TCB_FLAG_SYSCALL) != 0)
         {
           ret = backtrace(tcb->stack_base_ptr,
                           (uintptr_t *)((uintptr_t)tcb->stack_base_ptr +
                                         tcb->adj_stack_size),
-                          (void *)*(tcb->xcp.ustkptr + 1), NULL,
+                          (void *)tcb->xcp.sregs[REG_FP],
+                          (void *)tcb->xcp.sregs[REG_EPC],
                           buffer, size, &skip);
         }
       else
