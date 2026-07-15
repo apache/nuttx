@@ -64,7 +64,7 @@ endchoice # SAI2 synchronization enable
 
 config STM32_SAI1PLL
 	bool "SAI1PLL"
-	depends on STM32_COMMON_L4_L5_U5
+	depends on STM32_HAVE_SAI1PLL
 	---help---
 		The STM32L4 has a separate PLL for the SAI1 block.
 		Set this true and provide configuration parameters in
@@ -72,7 +72,7 @@ config STM32_SAI1PLL
 
 config STM32_SAI2PLL
 	bool "SAI2PLL"
-	depends on STM32_COMMON_L4_L5_U5 && STM32_HAVE_SAI2
+	depends on STM32_HAVE_SAI2PLL
 	---help---
 		The STM32L4 has a separate PLL for the SAI2 block.
 		Set this true and provide configuration parameters in
