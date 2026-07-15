@@ -301,10 +301,6 @@ ifeq ($(CONFIG_STM32_HCIUART),y)
 CHIP_CSRCS += stm32_hciuart_m3m4_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
-CHIP_CSRCS += stm32_rng_v1.c
-endif
-
 ifeq ($(CONFIG_STM32_LTDC),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_LTDC_M3M4_V1),y)
 CHIP_CSRCS += stm32_ltdc_m3m4_v1.c
@@ -396,6 +392,10 @@ ifeq ($(CONFIG_STM32_CORDIC)$(CONFIG_STM32_HAVE_IP_CORDIC_M3M4_V1),yy)
 CHIP_CSRCS += stm32_cordic_m3m4_v1.c
 endif
 
+endif
+
+ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
+CHIP_CSRCS += stm32_rng_v1.c
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM0),y)
