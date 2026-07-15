@@ -2184,8 +2184,17 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
   /* Enable interrupt */
 
-  putreg32(RP2040_USBCTRL_REGS_SIE_CTRL_EP0_INT_1BUF,
-           RP2040_USBCTRL_REGS_SIE_CTRL);
+  /* Use setbits, NOT putreg32: CLASS_BIND above ends with DEV_CONNECT
+   * (composite_bind/cdcacm_bind), which sets SIE_CTRL.PULLUP_EN.  A
+   * wholesale write here clobbers that pull-up microseconds after it was
+   * asserted; enumeration then only succeeds if the host happened to
+   * latch the short pull-up blip and issues a bus reset (whose handler
+   * re-arms the pull-up).  A cold-plugged host port misses the blip and
+   * the device stays disconnected forever.
+   */
+
+  setbits_reg32(RP2040_USBCTRL_REGS_SIE_CTRL_EP0_INT_1BUF,
+                RP2040_USBCTRL_REGS_SIE_CTRL);
   putreg32(RP2040_USBCTRL_REGS_INTR_BUFF_STATUS |
            RP2040_USBCTRL_REGS_INTR_BUS_RESET |
            RP2040_USBCTRL_REGS_INTR_SETUP_REQ,
