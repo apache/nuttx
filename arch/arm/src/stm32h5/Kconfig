@@ -103,7 +103,7 @@ config STM32_STM32H563XX
 	# STM32H552 and STM32H562 devices documented in RM0439
 	bool
 	default n
-	select STM32_HAVE_ETHERNET
+	select STM32_HAVE_ETHMAC
 
 # Pin/package configurations
 
