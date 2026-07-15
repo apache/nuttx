@@ -232,6 +232,7 @@ static int cryptof_ioctl(FAR struct file *filep,
             case CRYPTO_AES_256_CBC:
             case CRYPTO_AES_CMAC:
             case CRYPTO_AES_CTR:
+            case CRYPTO_AES_CTR_SSH:
             case CRYPTO_AES_XTS:
             case CRYPTO_AES_OFB:
             case CRYPTO_AES_CFB_8:

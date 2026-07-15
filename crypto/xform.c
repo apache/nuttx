@@ -108,6 +108,7 @@ int blf_setkey(FAR void *, FAR uint8_t *, int);
 int cast5_setkey(FAR void *, FAR uint8_t *, int);
 int aes_setkey_xform(FAR void *, FAR uint8_t *, int);
 int aes_ctr_setkey(FAR void *, FAR uint8_t *, int);
+int aes_ctr_ssh_setkey(FAR void *, FAR uint8_t *, int);
 int aes_xts_setkey(FAR void *, FAR uint8_t *, int);
 int aes_ofb_setkey(FAR void *, FAR uint8_t *, int);
 int null_setkey(FAR void *, FAR uint8_t *, int);
@@ -132,8 +133,10 @@ void aes_cfb8_decrypt(caddr_t, FAR uint8_t *, size_t);
 void aes_cfb128_decrypt(caddr_t, FAR uint8_t *, size_t);
 
 void aes_ctr_crypt(caddr_t, FAR uint8_t *, size_t);
+void aes_ctr_ssh_crypt(caddr_t, FAR uint8_t *, size_t);
 
 void aes_ctr_reinit(caddr_t, FAR uint8_t *);
+void aes_ctr_ssh_reinit(caddr_t, FAR uint8_t *);
 void aes_xts_reinit(caddr_t, FAR uint8_t *);
 void aes_gcm_reinit(caddr_t, FAR uint8_t *);
 void aes_ofb_reinit(caddr_t, FAR uint8_t *);
@@ -230,6 +233,17 @@ const struct enc_xform enc_xform_aes_ctr =
   aes_ctr_crypt,
   aes_ctr_setkey,
   aes_ctr_reinit
+};
+
+const struct enc_xform enc_xform_aes_ctr_ssh =
+{
+  CRYPTO_AES_CTR_SSH, "AES-CTR-SSH",
+  16, 16, 16, 32,
+  sizeof(struct aes_ctr_ctx),
+  aes_ctr_ssh_crypt,
+  aes_ctr_ssh_crypt,
+  aes_ctr_ssh_setkey,
+  aes_ctr_ssh_reinit
 };
 
 const struct enc_xform enc_xform_aes_gcm =
@@ -695,6 +709,60 @@ int aes_ctr_setkey(FAR void *sched, FAR uint8_t *key, int len)
 
   bcopy(key + len - AESCTR_NONCESIZE, ctx->ac_block, AESCTR_NONCESIZE);
   return 0;
+}
+
+/* SSH AES-CTR (RFC 4344). Unlike the RFC 3686 variant above, the key holds
+ * no embedded nonce and the whole 16-byte IV is the initial counter block,
+ * incremented as a 128-bit big-endian integer. The counter is encrypted
+ * before it is incremented so the first block keystream is E(IV).
+ */
+
+void aes_ctr_ssh_crypt(caddr_t key, FAR uint8_t *data, size_t len)
+{
+  FAR struct aes_ctr_ctx *ctx;
+  uint8_t keystream[AESCTR_BLOCKSIZE];
+  int i;
+
+  ctx = (FAR struct aes_ctr_ctx *)key;
+
+  aes_encrypt(&ctx->ac_key, ctx->ac_block, keystream);
+  for (i = 0; i < AESCTR_BLOCKSIZE; i++)
+    {
+      data[i] ^= keystream[i];
+    }
+
+  /* increment the 128-bit big-endian counter */
+
+  for (i = AESCTR_BLOCKSIZE - 1; i >= 0; i--)
+    {
+      if (++ctx->ac_block[i])
+        {
+          break;
+        }
+    }
+
+  explicit_bzero(keystream, sizeof(keystream));
+}
+
+int aes_ctr_ssh_setkey(FAR void *sched, FAR uint8_t *key, int len)
+{
+  FAR struct aes_ctr_ctx *ctx;
+
+  ctx = (FAR struct aes_ctr_ctx *)sched;
+  if (aes_setkey(&ctx->ac_key, key, len) != 0)
+    {
+      return -1;
+    }
+
+  return 0;
+}
+
+void aes_ctr_ssh_reinit(caddr_t key, FAR uint8_t *iv)
+{
+  FAR struct aes_ctr_ctx *ctx;
+
+  ctx = (FAR struct aes_ctr_ctx *)key;
+  bcopy(iv, ctx->ac_block, AESCTR_BLOCKSIZE);
 }
 
 void aes_xts_reinit(caddr_t key, FAR uint8_t *iv)

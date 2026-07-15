@@ -1619,6 +1619,9 @@ int swcr_newsession(FAR uint32_t *sid, FAR struct cryptoini *cri)
           case CRYPTO_AES_CTR:
             txf = &enc_xform_aes_ctr;
             goto enccommon;
+          case CRYPTO_AES_CTR_SSH:
+            txf = &enc_xform_aes_ctr_ssh;
+            goto enccommon;
           case CRYPTO_AES_XTS:
             txf = &enc_xform_aes_xts;
             goto enccommon;
@@ -1903,6 +1906,7 @@ int swcr_freesession(uint64_t tid)
           case CRYPTO_CAST_CBC:
           case CRYPTO_RIJNDAEL128_CBC:
           case CRYPTO_AES_CTR:
+          case CRYPTO_AES_CTR_SSH:
           case CRYPTO_AES_XTS:
           case CRYPTO_AES_GCM_16:
           case CRYPTO_AES_GMAC:
@@ -2046,6 +2050,7 @@ int swcr_process(struct cryptop *crp)
           case CRYPTO_CAST_CBC:
           case CRYPTO_RIJNDAEL128_CBC:
           case CRYPTO_AES_CTR:
+          case CRYPTO_AES_CTR_SSH:
           case CRYPTO_AES_XTS:
           case CRYPTO_AES_OFB:
           case CRYPTO_AES_CFB_8:
@@ -2442,6 +2447,7 @@ void swcr_init(void)
   algs[CRYPTO_RIPEMD160_HMAC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_RIJNDAEL128_CBC] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_CTR] = CRYPTO_ALG_FLAG_SUPPORTED;
+  algs[CRYPTO_AES_CTR_SSH] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_XTS] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_GCM_16] = CRYPTO_ALG_FLAG_SUPPORTED;
   algs[CRYPTO_AES_GMAC] = CRYPTO_ALG_FLAG_SUPPORTED;

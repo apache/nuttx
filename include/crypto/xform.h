@@ -105,6 +105,7 @@ extern const struct enc_xform enc_xform_blf;
 extern const struct enc_xform enc_xform_cast5;
 extern const struct enc_xform enc_xform_aes;
 extern const struct enc_xform enc_xform_aes_ctr;
+extern const struct enc_xform enc_xform_aes_ctr_ssh;
 extern const struct enc_xform enc_xform_aes_gcm;
 extern const struct enc_xform enc_xform_aes_gmac;
 extern const struct enc_xform enc_xform_aes_cmac;
