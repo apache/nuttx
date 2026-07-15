@@ -2591,7 +2591,7 @@ static int mmcsd_geometry(FAR struct inode *inode, struct geometry *geometry)
           finfo("available: true mediachanged: %s writeenabled: %s\n",
                  geometry->geo_mediachanged ? "true" : "false",
                  geometry->geo_writeenabled ? "true" : "false");
-          finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIi16 "\n",
+          finfo("nsectors: %" PRIuOFF " sectorsize: %" PRId32 "\n",
                  geometry->geo_nsectors,
                  geometry->geo_sectorsize);
 

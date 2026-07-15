@@ -304,7 +304,7 @@ static int eeed_geometry(struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIu16 "\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize: %" PRId32 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

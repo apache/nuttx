@@ -126,7 +126,7 @@ static int merge_open(FAR struct inode *inode)
           goto err_with_inode;
         }
 
-      finfo("[%s] nsectors: %" PRIuOFF " sectorsize:%u\n",
+      finfo("[%s] nsectors: %" PRIuOFF " sectorsize:%" PRId32 "\n",
             priv->part[i].path, priv->part[i].geo.geo_nsectors,
             priv->part[i].geo.geo_sectorsize);
     }
@@ -260,7 +260,7 @@ static int merge_geometry(FAR struct inode *inode,
           geometry->geo_nsectors += priv->part[i].geo.geo_nsectors;
         }
 
-      finfo("nsectors: %" PRIuOFF " sectorsize:%u\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize:%" PRId32 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
       return OK;
     }
