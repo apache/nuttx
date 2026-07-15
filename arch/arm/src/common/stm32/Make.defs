@@ -32,8 +32,8 @@ ARCHXXINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
 #    plus a "driver-variant" symbol that picks the .c file below (e.g. FLASH:
 #    STM32_HAVE_IP_FLASH_M3M4_V1 header + STM32_HAVE_IP_FLASH_M3M4_F2F4 driver).
 #  - This file is split into a legacy Cortex-M3/M4 block (the F1/F2/F3/F4/G4/L1
-#    families, STM32_COMMON_LEGACY) and a Cortex-M0 block (F0/L0/G0/C0,
-#    ARCH_CORTEXM0).  STM32_COMMON_LEGACY -- not a plain Cortex symbol -- gates
+#    families, STM32_HAVE_IP_SYSCORE_M3M4_V1) and a Cortex-M0 block (F0/L0/G0/C0,
+#    ARCH_CORTEXM0).  STM32_HAVE_IP_SYSCORE_M3M4_V1 -- not a plain Cortex symbol -- gates
 #    the M3/M4 block because the other Cortex-M4 families (L4/WB/WL5) include
 #    this file too but provide their own implementation.
 
@@ -68,7 +68,7 @@ ifeq ($(CONFIG_STM32_1WIREDRIVER),y)
 CHIP_CSRCS += stm32_1wire_m3m4_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_COMMON_LEGACY),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1),y)
 
 CHIP_CSRCS += stm32_allocateheap_m3m4_v1.c
 CHIP_CSRCS += stm32_start_m3m4_v1.c

@@ -996,18 +996,16 @@ Boards
 Kconfig simplification
 ----------------------
 
-Many Kconfig conditions are still long, mix normalized ``STM32_HAVE_IP_*``
-flags with family names, and rely on composite family-group symbols
-(``STM32_COMMON_LEGACY``, ``STM32_COMMON_F7_H7``, ``STM32_COMMON_L4_L5_U5``,
-``STM32_COMMON_L4_H5_L5_U5``, …) that the naming rules forbid.  These are the
-most likely to need rework and should be reduced to depend on capability flags
-only:
+The composite ``STM32_COMMON_*`` family-group symbols have been removed:
+user-visible options now depend on ``STM32_HAVE_*`` capability flags or
+``STM32_HAVE_IP_*`` selectors, and the legacy M3/M4 system-core source block
+in ``Make.defs``/``CMakeLists.txt`` is gated by
+``STM32_HAVE_IP_SYSCORE_M3M4_V1``.  Remaining cleanup:
 
-* ``Kconfig.tim`` and ``Kconfig.uart`` hold the bulk of the family-name
-  conditions (hundreds of lines each) and are the biggest cleanup.
-* ``Kconfig.adc``, ``Kconfig.periph`` and ``Kconfig.have`` carry many mixed
-  family/IP ``||`` chains (for example ``(STM32_HAVE_IP_ADC_M3M4_V1 ||
-  STM32_HAVE_IP_ADC_M3M4_V2) || ARCH_CHIP_STM32F7``), where F7/H5/L4 are patched
-  in by family name only because they have no IP flag yet.
-* Replace the composite ``STM32_COMMON_*`` family-group symbols with per-IP-core
-  or per-feature flags.
+* Some conditions still patch F7/H7/H5/L4/L5/U5 in by explicit
+  ``ARCH_CHIP_*`` family name because those families' drivers (ADC, PWM,
+  capture, LPTIM, QSPI, serial, …) are not unified yet and have no IP flag.
+  These references die naturally as each driver moves to ``common/stm32``.
+* Capability-flag family lists in ``Kconfig.have`` still use
+  ``ARCH_CHIP_*`` chains; long term each family Kconfig should ``select``
+  the flags instead.
