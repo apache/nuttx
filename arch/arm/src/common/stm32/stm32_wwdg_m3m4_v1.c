@@ -40,6 +40,10 @@
 #include "hardware/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
+#if !defined(STM32_IRQ_WWDG) && defined(STM32_IRQ_WWDG1)
+#  define STM32_IRQ_WWDG STM32_IRQ_WWDG1
+#endif
+
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
 
 /****************************************************************************
@@ -62,7 +66,8 @@
  *   1000 * 64 / Fmin = 49.93 msec
  */
 
-#define WWDG_FMIN       (STM32_PCLK1_FREQUENCY / 4096 / 8)
+#define WWDG_FMIN       (STM32_PCLK1_FREQUENCY / 4096 / \
+                         (1 << WWDG_CFR_WDGTB_MAX))
 #define WWDG_MAXTIMEOUT (1000 * (WWDG_CR_T_MAX+1) / WWDG_FMIN)
 
 /* Configuration ************************************************************/
@@ -455,7 +460,7 @@ static int stm32_getstatus(struct watchdog_lowerhalf_s *lower,
   /* Get the time remaining until the watchdog expires (in milliseconds) */
 
   reload = (stm32_getreg(STM32_WWDG_CR) >> WWDG_CR_T_SHIFT) & 0x7f;
-  elapsed = priv->reload - reload;
+  elapsed = (WWDG_CR_T_RESET | priv->reload) - reload;
   status->timeleft = (priv->timeout * elapsed) / (priv->reload + 1);
 
   wdinfo("Status     :\n");
@@ -508,7 +513,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
    *
    * Where
    *  Fwwwdg is the frequency of the WWDG clock
-   *  wdgtb is one of {1, 2, 4, or 8}
+   *  prescaler is 1 << wdgtb, wdgtb = 0..WWDG_CFR_WDGTB_MAX
    */
 
   /* Select the smallest prescaler that will result in a reload field value
@@ -517,11 +522,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
 
   for (wdgtb = 0; ; wdgtb++)
     {
-      /* WDGTB = 0 -> Divider = 1  = 1 << 0
-       * WDGTB = 1 -> Divider = 2  = 1 << 1
-       * WDGTB = 2 -> Divider = 4  = 1 << 2
-       * WDGTB = 3 -> Divider = 8  = 1 << 3
-       */
+      /* WDGTB = n -> Divider = 1 << n */
 
       /* Get the WWDG counter frequency in Hz. */
 
@@ -538,7 +539,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
        *  Fwwdg is the frequency of the WWDG clock
        */
 
-       reload = timeout * fwwdg / 1000 - 1;
+      reload = timeout * fwwdg / 1000 - 1;
 
       /* If this reload valid is less than the maximum or we are not ready
        * at the prescaler value, then break out of the loop to use these
@@ -549,7 +550,7 @@ static int stm32_settimeout(struct watchdog_lowerhalf_s *lower,
       wdinfo("wdgtb=%d fwwdg=%d reload=%d timeout=%d\n",
              wdgtb, fwwdg, reload,  1000 * (reload + 1) / fwwdg);
 #endif
-      if (reload <= WWDG_CR_T_MAX || wdgtb == 3)
+      if (reload <= WWDG_CR_T_MAX || wdgtb == WWDG_CFR_WDGTB_MAX)
         {
           /* Note that we explicitly break out of the loop rather than using
            * the 'for' loop termination logic because we do not want the
@@ -712,6 +713,7 @@ static int stm32_ioctl(struct watchdog_lowerhalf_s *lower, int cmd,
         {
           uint32_t window = (priv->timeout - mintime) * priv->fwwdg /
                             1000 - 1;
+
           DEBUGASSERT(window < priv->reload);
           stm32_setwindow(priv, window | WWDG_CR_T_RESET);
           ret = OK;
@@ -783,11 +785,9 @@ void stm32_wwdginitialize(const char *devpath)
 #if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
-    {
-#ifdef DBGMCU_WWDG_STOP
-      modifyreg32(STM32_DBGMCU_WWDG_FZ, 0, DBGMCU_WWDG_STOP);
-#endif
-    }
+#  ifdef DBGMCU_WWDG_STOP
+  modifyreg32(STM32_DBGMCU_WWDG_FZ, 0, DBGMCU_WWDG_STOP);
+#  endif
 #endif
 }
 

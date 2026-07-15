@@ -685,11 +685,9 @@ void stm32_iwdginitialize(const char *devpath, uint32_t lsifreq)
 #if defined(CONFIG_STM32_JTAG_FULL_ENABLE) || \
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
-    {
-#ifdef DBGMCU_IWDG_STOP
-      modifyreg32(STM32_DBGMCU_IWDG_FZ, 0, DBGMCU_IWDG_STOP);
-#endif
-    }
+#  ifdef DBGMCU_IWDG_STOP
+  modifyreg32(STM32_DBGMCU_IWDG_FZ, 0, DBGMCU_IWDG_STOP);
+#  endif
 #endif
 }
 
