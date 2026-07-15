@@ -24,12 +24,12 @@ endmenu
 
 config STM32_OTG_SOFOUTPUT
 	bool "OTG SOF output"
-	depends on STM32_HAVE_OTG_H7
+	depends on STM32_HAVE_IP_OTG_M7_V1
 	default n
 
 config STM32_OTG_USBREGEN
 	bool "Enable USB voltage regulator"
-	depends on STM32_HAVE_OTG_H7
+	depends on STM32_HAVE_IP_OTG_M7_V1
 	default n
 
 config STM32_USBHOST_HAVE_DEBUG
