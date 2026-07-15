@@ -256,14 +256,6 @@ Or for a single invocation::
 
 .. _esp32c6_debug:
 
-CMake limitations
-^^^^^^^^^^^^^^^^^^
-
-The following is **not** supported when building with CMake yet; use the Make-based build instead:
-
-* **ULP / LP core** — Low-power coprocessor support (``CONFIG_ESPRESSIF_USE_LP_CORE``) is
-  not wired up for CMake (ULP/LP integration is TODO).
-
 Debugging
 =========
 
@@ -835,13 +827,14 @@ using build system has some dependencies on example side.
 Both methods requires ``CONFIG_ESPRESSIF_USE_LP_CORE`` variable to enable ULP core
 and it can be set using ``make menuconfig`` or ``kconfig-tweak`` commands.
 
-Additionally, a Makefile needs to be provided to specify the ULP application name,
+Additionally, a Makefile or CMake file must be provided to specify the ULP application name,
 source path of the ULP application, and either the binary (for prebuilt) or the source files (for internal build).
-This Makefile must include the ULP makefile after the variable set process on ``arch/risc-v/src/common/espressif/esp_ulp.mk`` integration script.
-For more information please refer to :ref:`ulp example Makefile. <ulp_makefile>`
+This file must include either ULP makefile after the variable set process on ``arch/risc-v/src/common/espressif/esp_ulp.mk``
+or ``arch/risc-v/src/common/espressif/esp_ulp.cmake`` integration script depending on build system preference.
+For more information please refer to :ref:`ulp example Makefile. <ulp_makefile>` or :ref:`ulp example CMake. <ulp_cmake>`
 
-Makefile Variables for ULP Core Build:
---------------------------------------
+Makefile/CMake Variables for ULP Core Build:
+--------------------------------------------
 
 - ``ULP_APP_NAME``: Sets name for the ULP application. This variable also be used as prefix (e.g. ULP application bin variable name)
 - ``ULP_APP_FOLDER``: Specifies the directory containing the ULP application's source codes.
@@ -856,12 +849,12 @@ Here is an Makefile example when using prebuilt binary for ULP core:
 
    ULP_APP_NAME = esp_ulp
    ULP_APP_FOLDER = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)$(CHIP_SERIES)
-   ULP_APP_BIN = $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)ulp_riscv_blink.bin
+   ULP_APP_BIN = $(TOPDIR)$(DELIM)Documentation$(DELIM)platforms$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)boards$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)ulp_blink.bin
 
    include $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)common$(DELIM)espressif$(DELIM)esp_ulp.mk
 
 
-Here is an example for enabling ULP and using the prebuilt test binary for ULP core::
+Here is an example for enabling ULP and using the prebuilt test binary for ULP core using make build system::
 
     make distclean
     ./tools/configure.sh esp32c6-devkitc:nsh
@@ -869,6 +862,26 @@ Here is an example for enabling ULP and using the prebuilt test binary for ULP c
     kconfig-tweak -e CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
     make olddefconfig
     make -j
+
+Here is an CMake file example when using prebuilt binary for ULP core:
+
+.. code-block:: cmake
+
+   set(ULP_APP_USE_TEST_BIN TRUE)
+   set(ULP_APP_NAME esp_ulp)
+   set(ULP_APP_FOLDER ${NUTTX_CHIP_ABS_DIR})
+   set(ULP_APP_BIN ${NUTTX_DIR}/Documentation/platforms/risc-v/${CONFIG_ARCH_CHIP}/boards/${CONFIG_ARCH_BOARD}/ulp_blink.bin)
+
+   include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/esp_ulp.cmake)
+
+
+Here is an example for enabling ULP and using the prebuilt test binary for ULP core using CMake build system::
+
+    cmake -B build -DBOARD_CONFIG=esp32c6-devkitc:nsh -GNinja
+    kconfig-tweak --file build/.config -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak --file build/.config -e CONFIG_ESPRESSIF_ULP_USE_TEST_BIN
+    cmake --build build -t olddefconfig
+    cmake --build build
 
 Creating an ULP LP-Core Application
 -----------------------------------
@@ -878,7 +891,7 @@ To use NuttX's internal build system to compile the bare-metal LP binary, check 
 First, create a folder for the ULP source and header files into your NuttX example.
 This folder is just for ULP project and it is an independent project. Therefore, the NuttX example guide should not be followed
 for ULP example (folder location is irrelevant. It can be the same of the `nuttx-apps` repository, for instance).
-To include the ULP folder in the build system, don't forget to include the ULP Makefile in the NuttX example Makefile. Lastly, configuration variables
+To include the ULP folder in the build system, don't forget to include the ULP Makefile or Cmake integration in the NuttX example build file. Lastly, configuration variables
 needed to enable ULP core instructions can be found above.
 
 NuttX's internal functions or POSIX calls are not supported.
@@ -929,12 +942,36 @@ this example will demonstrate how to add ULP code into a custom application:
    ├── nuttx/
    └── apps/
    └── ulp_example/
+       └── CMakeLists.txt
        └── Makefile
        └── Kconfig
        └── ulp_example.c
        └── ulp/
+           └── CMakeLists.txt
            └── Makefile
            └── ulp_main.c
+
+
+- Contents in CMakeLists.txt:
+
+.. code-block:: cmake
+
+   include(ulp/CMakeLists.txt)
+   nuttx_add_application(
+      NAME
+      ${CONFIG_EXAMPLES_ULP_EXAMPLE_PROGNAME}
+      PRIORITY
+      ${SCHED_PRIORITY_DEFAULT}
+      STACKSIZE
+      ${CONFIG_DEFAULT_TASK_STACKSIZE}
+      MODULE
+      ${CONFIG_EXAMPLES_ULP_EXAMPLE}
+      INCLUDE_DIRECTORIES
+      ${CMAKE_CURRENT_BINARY_DIR}
+      SRCS
+      ulp_example.c
+      DEPENDS
+      ${_ulp_example_deps})
 
 
 - Contents in Makefile:
@@ -995,6 +1032,19 @@ this example will demonstrate how to add ULP code into a custom application:
       return 0;
     }
 
+.. _ulp_cmake:
+
+- Contents in ulp/CMakeLists.txt:
+
+.. code-block:: cmake
+
+    set(_ulp_example_deps)
+    set(ULP_APP_NAME ulp_example)
+    set(ULP_APP_FOLDER ${CMAKE_CURRENT_LIST_DIR}/ulp)
+    set(ULP_APP_C_SRCS ulp_main.c)
+    include(${NUTTX_DIR}/arch/risc-v/src/common/espressif/esp_ulp.cmake)
+    list(APPEND _ulp_example_deps ulp_example_ulp_bin)
+
 .. _ulp_makefile:
 
 - Contents in ulp/Makefile:
@@ -1036,7 +1086,7 @@ this example will demonstrate how to add ULP code into a custom application:
        return 0;
     }
 
-- Command to build::
+- Command to build using make build system::
 
     make distclean
     ./tools/configure.sh esp32c6-devkitc:nsh
@@ -1047,6 +1097,16 @@ this example will demonstrate how to add ULP code into a custom application:
     make olddefconfig
     make -j
 
+- Command to build using CMake build system::
+
+    cmake -B build -DBOARD_CONFIG=esp32c6-devkitc:nsh -GNinja
+    kconfig-tweak --file build/.config -e CONFIG_ESPRESSIF_GPIO_IRQ
+    kconfig-tweak --file build/.config -e CONFIG_DEV_GPIO
+    kconfig-tweak --file build/.config -e CONFIG_ESPRESSIF_USE_LP_CORE
+    kconfig-tweak --file build/.config -e CONFIG_EXAMPLES_ULP_EXAMPLE
+    cmake --build build -t olddefconfig
+    cmake --build build
+
 Here is an example of a single ULP application. However, support is not limited to just
 one application. Multiple ULP applications are also supported.
 By following the same guideline, multiple ULP applications can be created and loaded using ``write`` POSIX call.
@@ -1056,7 +1116,7 @@ build multiple ULP applications; it does not affect the ability to load multiple
 
 ULP binary can be included in NuttX application by adding
 ``#include "ulp/ulp/ulp_code.h"`` line. Then, the ULP binary is accessible by using the ULP application
-prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) with the ``bin`` keyword to
+prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile or CMake file) with the ``bin`` keyword to
 access the binary data (e.g., if ``ULP_APP_NAME`` is ``ulp_test``, the binary variable will be ``ulp_test_bin``)
 and ``bin_len`` keyword to access its length (e.g., ``ulp_test_bin_len`` for ``ULP_APP_NAME`` is ``ulp_test``).
 
@@ -1065,8 +1125,8 @@ Accessing the ULP LP-Core Program Variables
 
 Global symbols defined in the ULP application are available to the HP core through a shared memory region. To read or write ULP variables,
 direct reading/writing to such memory positions are not allowed. POSIX calls are needed instead. To access the ULP variable through the HP core,
-consider that its name is defined by the ULP application prefix (defined by the ``ULP_APP_NAME`` variable in the ULP application Makefile) + the ULP application variable.
-For example if HP core tries to access a ULP application variable named ``result`` and ``ULP_APP_NAME`` in the ULP application Makefile set as ``ulp_app``, required name for
+consider that its name is defined by the ULP application prefix (defined by the ``ULP_APP_NAME`` variable in the ULP Makefile or CMake integration) + the ULP application variable.
+For example if HP core tries to access a ULP application variable named ``result`` and ``ULP_APP_NAME`` in the ULP application build file set as ``ulp_app``, required name for
 that variable will be ``ulp_app_result``.
 ``FIONREAD`` or ``FIONWRITE`` ioctl calls are, then, performed with the address of a ``struct symtab_s`` previously defined with the name of the variable to be read or written.
 
