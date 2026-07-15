@@ -283,7 +283,7 @@ static const char *g_white_prefix[] =
   "SYSTIMER_",
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
-  "MQTTErrors",	      /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */
+  "MQTTErrors",       /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */
   NULL
 };
 
@@ -811,6 +811,18 @@ static const char *g_white_files[] =
   "Ifx_Cfg_Ssw.c",
   "Ifx_Cfg_Ssw.h",
   "Ifx_Cfg.h",
+
+  /* Skip the GigaDevice GD32VW55x Wi-Fi/BLE SDK glue: the vendor config
+   * headers, the lwIP-compat shims and the OS-facade files reference vendor
+   * symbol names (mixed case) and vendor header layout that are not NuttX
+   * style.  Ref: arch/risc-v/src/gd32vw55x/gdwifi and gdble.
+   */
+
+  "gd32vw55x/gdwifi/config/",
+  "gd32vw55x/gdwifi/net_compat/",
+  "gd32vw55x/gdwifi/gdwifi_glue.c",
+  "gd32vw55x/gdwifi/gdwifi_newlib_compat.c",
+  "gd32vw55x/gdble/gd32_ble.c",
   NULL
 };
 

@@ -54,6 +54,22 @@ config ARCH_CHIP_LITEX
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA or RV64GC).
 
+config ARCH_CHIP_GD32VW55X
+	bool "GigaDevice GD32VW55x"
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MISALIGN_EXCEPTION
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
+	select ALARM_ARCH
+	---help---
+		GigaDevice GD32VW55x Wi-Fi/BLE SoC (Nuclei N307 rv32imafc,
+		ECLIC interrupt controller, 160 MHz, 320 KB SRAM).
+
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
 	select ARCH_RV32
@@ -630,6 +646,7 @@ config ARCH_CHIP
 	default "fe310"                 if ARCH_CHIP_FE310
 	default "k210"                  if ARCH_CHIP_K210
 	default "litex"                 if ARCH_CHIP_LITEX
+	default "gd32vw55x"             if ARCH_CHIP_GD32VW55X
 	default "bl602"                 if ARCH_CHIP_BL602
 	default "esp32c3-legacy"        if ARCH_CHIP_ESP32C3_LEGACY
 	default "esp32c3"               if ARCH_CHIP_ESP32C3
@@ -860,6 +877,9 @@ source "arch/risc-v/src/k210/Kconfig"
 endif
 if ARCH_CHIP_LITEX
 source "arch/risc-v/src/litex/Kconfig"
+endif
+if ARCH_CHIP_GD32VW55X
+source "arch/risc-v/src/gd32vw55x/Kconfig"
 endif
 if ARCH_CHIP_BL602
 source "arch/risc-v/src/bl602/Kconfig"

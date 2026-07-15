@@ -1,0 +1,59 @@
+diff --git a/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h b/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h
+index f4e200e..c9189ca 100644
+--- a/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h
++++ b/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h
+@@ -248,7 +248,17 @@ typedef enum EXCn {
+ /* enum definitions */
+ typedef enum {DISABLE = 0, ENABLE = !DISABLE} EventStatus, ControlStatus;
+ typedef enum {RESET = 0, SET = !RESET} FlagStatus;
++#ifdef GDWIFI_NUTTX
++/* port NuttX: NuttX <sys/types.h> ja define o enumerador ERROR; macros
++ * preservam a semantica da SPL (ERROR==0, SUCCESS==1) sem colidir. */
++typedef int ErrStatus;
++#undef ERROR
++#undef SUCCESS
++#define ERROR   0
++#define SUCCESS 1
++#else
+ typedef enum {ERROR = 0, SUCCESS = !ERROR} ErrStatus;
++#endif
+ 
+ /* bit operations */
+ #define REG32(addr)                  (*(volatile uint32_t *)(uint32_t)(addr))
+diff --git a/MSDK/wifi_manager/wifi_init.c b/MSDK/wifi_manager/wifi_init.c
+index e7f393f..8731cb8 100644
+--- a/MSDK/wifi_manager/wifi_init.c
++++ b/MSDK/wifi_manager/wifi_init.c
+@@ -279,7 +279,12 @@ int wifi_init(void)
+ 
+     /* 1. Initialize the TCP/IP stack */
+     wifi_pending_task = CO_BIT(IP_TASK);
++#ifdef GDWIFI_NUTTX_NET
++    /* port NuttX: a pilha de rede ja subiu no boot (netdev). */
++    wifi_task_ready(IP_TASK);
++#else
+     tcpip_init(tcpip_init_done, NULL);
++#endif
+ 
+     /* 2. wifi power on */
+     wifi_exist_flag = 1;
+diff --git a/MSDK/wifi_manager/wifi_netlink.c b/MSDK/wifi_manager/wifi_netlink.c
+index aec26cc..445c109 100644
+--- a/MSDK/wifi_manager/wifi_netlink.c
++++ b/MSDK/wifi_manager/wifi_netlink.c
+@@ -2192,8 +2192,15 @@ int wifi_netlink_start(void)
+     if (macif_control_start(WIFI_VIF_INDEX_DEFAULT, VIF_STA)) {
+         netlink_printf("%s: macif control start failed!!!\r\n", __func__);
+     }
++#ifdef GDWIFI_NUTTX
++    /* port NuttX: power save desligado no bring-up (LPS doze/wake ainda
++     * nao suportado no wrapper NuttX). */
++    wifi_vif_tab[WIFI_VIF_INDEX_DEFAULT].sta.psmode = WIFI_STA_PS_MODE_OFF;
++    wifi_netlink_ps_mode_set(WIFI_VIF_INDEX_DEFAULT, WIFI_STA_PS_MODE_OFF);
++#else
+     wifi_vif_tab[WIFI_VIF_INDEX_DEFAULT].sta.psmode = WIFI_STA_PS_MODE_BASED_ON_TD;
+     wifi_netlink_ps_mode_set(WIFI_VIF_INDEX_DEFAULT, WIFI_STA_PS_MODE_BASED_ON_TD);
++#endif
+ 
+ #endif /* CONFIG_RF_TEST_SUPPORT */
+ 

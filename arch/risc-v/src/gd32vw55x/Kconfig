@@ -1,0 +1,562 @@
+# ##############################################################################
+# arch/risc-v/src/gd32vw55x/Kconfig
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+# ##############################################################################
+
+comment "GD32VW55x Configuration Options"
+
+choice
+	prompt "GD32VW55x Chip Selection"
+	default ARCH_CHIP_GD32VW553KM
+	depends on ARCH_CHIP_GD32VW55X
+
+config ARCH_CHIP_GD32VW553KI
+	bool "GD32VW553KIQ"
+	---help---
+		QFN32 package, 22 GPIO, 2048 KB flash, 320 KB SRAM.
+
+config ARCH_CHIP_GD32VW553KM
+	bool "GD32VW553KMQ"
+	---help---
+		QFN32 package, 22 GPIO, 4096 KB flash, 320 KB SRAM.
+		Chip used on the GD32VW553K-START devkit.
+
+config ARCH_CHIP_GD32VW553HI
+	bool "GD32VW553HIQ"
+	---help---
+		QFN40 package, 29 GPIO, 2048 KB flash, 320 KB SRAM.
+
+config ARCH_CHIP_GD32VW553HM
+	bool "GD32VW553HMQ"
+	---help---
+		QFN40 package, 29 GPIO, 4096 KB flash, 320 KB SRAM.
+
+endchoice # GD32VW55x Chip Selection
+
+menu "GD32VW55x Peripheral Support"
+
+config GD32VW55X_USART0
+	bool "USART0"
+	default n
+	select USART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		USART0 on APB1 (80 MHz kernel clock).  Supports hardware flow
+		control.  On the START board pins PA0/PA1 (AF0) are shared with
+		UART1 flow-control pins.
+
+config GD32VW55X_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART1 on APB1 (80 MHz kernel clock).  TX=PB15 (AF7), RX=PA8 (AF3).
+
+config GD32VW55X_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		UART2 on APB2 (160 MHz kernel clock).  TX=PA6 (AF10), RX=PA7 (AF8).
+		This UART is wired to the GD-Link VCP on the START board.
+
+config GD32VW55X_DMA
+	bool "DMA"
+	default n
+	select ARCH_DMA
+	---help---
+		Single DMA controller with 8 channels.  Each channel selects one
+		of 8 peripheral request lines and supports circular mode, burst
+		transfers, a FIFO and memory-to-memory transfers.
+
+		The Wi-Fi and BLE data paths use DMA inside the prebuilt vendor
+		libraries; this driver is for the peripherals.
+
+config GD32VW55X_GPIO_IRQ
+	bool "GPIO interrupts (EXTI)"
+	default n
+	---help---
+		Enable interrupt support on GPIO pins through the EXTI block
+		(16 lines; 5..9 and 10..15 are shared vectors).
+
+config GD32VW55X_SPI
+	bool "SPI"
+	default n
+	select SPI
+	---help---
+		The family has a single SPI instance.
+
+config GD32VW55X_I2C0
+	bool "I2C0"
+	default n
+	select GD32VW55X_I2C
+	select I2C
+
+config GD32VW55X_I2C1
+	bool "I2C1"
+	default n
+	select GD32VW55X_I2C
+	select I2C
+
+config GD32VW55X_I2C
+	bool
+	default n
+
+config GD32VW55X_ADC
+	bool "ADC"
+	default n
+	select ANALOG
+	select ADC
+	---help---
+		Single ADC, 11 channels (0..10), 6/8/10/12-bit resolution.
+
+config GD32VW55X_TIMER0
+	bool "TIMER0 (advanced)"
+	default n
+	select GD32VW55X_TIMER
+	---help---
+		Advanced-control timer: 4 channels, complementary outputs with
+		dead-time insertion and a break input.
+
+config GD32VW55X_TIMER1
+	bool "TIMER1"
+	default n
+	select GD32VW55X_TIMER
+
+config GD32VW55X_TIMER2
+	bool "TIMER2"
+	default n
+	select GD32VW55X_TIMER
+
+config GD32VW55X_TIMER15
+	bool "TIMER15"
+	default n
+	select GD32VW55X_TIMER
+
+config GD32VW55X_TIMER16
+	bool "TIMER16"
+	default n
+	select GD32VW55X_TIMER
+
+config GD32VW55X_TIMER
+	bool
+	default n
+
+config GD32VW55X_FWDGT
+	bool "Independent watchdog (FWDGT)"
+	default n
+	select WATCHDOG
+	---help---
+		Free watchdog timer, clocked from the IRC32K.  It keeps running
+		in the low-power modes.
+
+config GD32VW55X_WWDGT
+	bool "Window watchdog (WWDGT)"
+	default n
+	select WATCHDOG
+	---help---
+		Window watchdog, clocked from APB1.
+
+config GD32VW55X_PROGMEM
+	bool "Program memory (internal flash)"
+	default n
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_PROGMEM_READ
+	---help---
+		Expose part of the internal flash through the up_progmem
+		interface.
+
+		Take care: the internal flash also holds the firmware itself and
+		the Wi-Fi NVDS.  Only the region configured below is touched.
+
+config GD32VW55X_RNG
+	bool "True random number generator (TRNG)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		Hardware TRNG, registered as /dev/random.  Note that its
+		interrupt is shared with the hash accelerator (HAU).
+
+config GD32VW55X_CRC
+	bool "Hardware CRC unit"
+	default n
+	---help---
+		CRC-32 calculation unit.
+
+endmenu # GD32VW55x Peripheral Support
+
+menu "SPI Configuration"
+	depends on GD32VW55X_SPI
+
+config GD32VW55X_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on GD32VW55X_DMA
+	---help---
+		Use DMA for SPI transfers instead of interrupt-driven
+		byte-by-byte exchanges.
+
+config GD32VW55X_SPI_DMATHRESHOLD
+	int "SPI DMA threshold (bytes)"
+	default 4
+	depends on GD32VW55X_SPI_DMA
+	---help---
+		Transfers shorter than this are done by polling: setting up DMA
+		costs more than moving a few bytes.
+
+endmenu # SPI Configuration
+
+menu "I2C Configuration"
+	depends on GD32VW55X_I2C
+
+config GD32VW55X_I2C_TIMEOSEC
+	int "Transfer timeout, seconds"
+	default 0
+
+config GD32VW55X_I2C_TIMEOMS
+	int "Transfer timeout, milliseconds"
+	default 500
+
+config GD32VW55X_I2C_TIMEOTICKS
+	int "Transfer timeout, system ticks"
+	default 0
+	---help---
+		Overrides the seconds/milliseconds pair when non-zero.
+
+endmenu # I2C Configuration
+
+menu "ADC Configuration"
+	depends on GD32VW55X_ADC
+
+config GD32VW55X_ADC_RESOLUTION
+	int "ADC resolution (bits)"
+	default 12
+	range 6 12
+	---help---
+		Valid values are 6, 8, 10 and 12.
+
+config GD32VW55X_ADC_CLOCK
+	int "ADC clock (Hz)"
+	default 20000000
+	---help---
+		Derived from PCLK2 (160 MHz) by a prescaler of 2/4/6/8.  The
+		default is PCLK2/8 = 20 MHz, a conservative choice: the maximum
+		ADC clock is not stated in the vendor documentation.
+
+config GD32VW55X_ADC_SAMPLETIME
+	int "ADC sample time selector"
+	default 4
+	range 0 7
+	---help---
+		Sample time per channel, as the ADC_SAMPTx field encoding:
+		0=3, 1=15, 2=28, 3=56, 4=84, 5=112, 6=144, 7=480 cycles.
+
+		Note: a routine sequence takes at most 9 channels on this chip,
+		not 16.
+
+endmenu # ADC Configuration
+
+menu "Timer Configuration"
+	depends on GD32VW55X_TIMER
+
+config GD32VW55X_PWM
+	bool "PWM output"
+	default n
+	select PWM
+	---help---
+		Drive PWM through the timer output channels.  TIMER5 has no
+		output channel and cannot be used.
+
+config GD32VW55X_CAPTURE
+	bool "Input capture"
+	default n
+	select CAPTURE
+	---help---
+		Measure frequency and duty cycle on a timer input channel.
+
+endmenu # Timer Configuration
+
+menu "Watchdog Configuration"
+	depends on GD32VW55X_FWDGT || GD32VW55X_WWDGT
+
+config GD32VW55X_FWDGT_DEFTIMOUT
+	int "FWDGT default timeout (ms)"
+	default 32760
+	depends on GD32VW55X_FWDGT
+	---help---
+		Clocked from the IRC32K; the longest timeout is about 32760 ms.
+
+config GD32VW55X_WWDGT_DEFTIMOUT
+	int "WWDGT default timeout (ms)"
+	default 26
+	depends on GD32VW55X_WWDGT
+	---help---
+		Clocked from APB1 (80 MHz); the longest timeout is about 26 ms.
+
+endmenu # Watchdog Configuration
+
+menu "Program memory Configuration"
+	depends on GD32VW55X_PROGMEM
+
+config GD32VW55X_PROGMEM_START_ADDR
+	hex "Start address of the progmem region"
+	default 0x083db000
+	---help---
+		Absolute address of the first flash page handed to progmem.  It
+		must be 4 KiB aligned (the erase page size).
+
+		Nothing outside the region configured here is ever erased or
+		written.  Mind the two neighbours on a 4 MiB part:
+
+		  0x08000000  the firmware itself
+		  0x083fb000  the Wi-Fi NVDS (16 KiB): RF calibration and the
+		              MAC address.  Erasing it breaks the radio.
+
+		The split of the flash below the NVDS is a board decision.  The
+		default here is the one the GD32VW553K-START board uses: 128 KiB
+		immediately below the NVDS.  Another board is free to place the
+		region anywhere below 0x083fb000, and to size it differently --
+		mind the board linker script, which must not hand the same pages
+		to the firmware.
+
+config GD32VW55X_PROGMEM_SIZE
+	int "Size of the progmem region (bytes)"
+	default 131072
+	---help---
+		Must be a multiple of 4096 (the erase page size).
+
+endmenu # Program memory Configuration
+
+menuconfig GD32VW55X_WIFI
+	bool "Wi-Fi 802.11ax support"
+	default n
+	select NET
+	select NETDEVICES
+	select NET_ETHERNET
+	select ARCH_PHY_INTERRUPT
+	select NETDEV_WIRELESS_IOCTL
+	select DRIVERS_IEEE80211
+	select WIRELESS
+	select DRIVERS_WIRELESS
+	select SCHED_HPWORK
+	select SCHED_LPWORK
+	---help---
+		Enable the GD32VW55x Wi-Fi subsystem (802.11 b/g/n/ax 1x1).
+		The 802.11 MAC/PHY and RF firmware are linked as prebuilt
+		BSD-3-licensed libraries from the GigaDevice SDK (libwifi*.a,
+		librf.a); the OS binding is provided by wrapper_nuttx.c (the
+		sys_* facade), and the IP stack is lwIP with the vendor pbuf
+		data path (348-byte TX headroom, scatter-gather DMA).
+
+		The interface shows up as wlan0 in the NuttX network stack and
+		is controlled by the standard commands (ifconfig, wapi, renew,
+		ping) -- the lwIP that comes with the SDK is not used.
+
+		The open layers of the SDK (wifi_manager, wpa_supplicant) are
+		recompiled from source.
+
+if GD32VW55X_WIFI
+
+config GD32VW55X_WIFI_SDK_PATH
+	string "Path to a local GD32VW55x Wi-Fi/BLE SDK checkout (optional)"
+	default ""
+	---help---
+		Leave EMPTY (the default) so that the build clones the SDK by
+		itself, pinned to the validated commit, and applies the port
+		patches -- that is how the CI builds, with nothing pre-installed.
+		Fill it in only to point at a local, already patched checkout,
+		during development.
+
+		VERSION VALIDATED IN THIS PORT: SDK V1.0.3g (2026-04-23), commit
+		945c6e2 of github.com/GigaDeviceSemiconductor/GD32VW55x_WiFi_BLE_SDK.
+
+		The blobs are prebuilt and the port depends on their ABI (struct
+		layout, sys_* facade).  When changing the version, revalidate as
+		described in gigadevice_port/SDK_VERSION.md.
+
+choice
+	prompt "Wi-Fi MAC library variant"
+	default GD32VW55X_WIFI_LIB_DEFAULT
+	---help---
+		The SDK ships several prebuilt MAC firmware builds tuned for
+		different use cases.  All export the same macif API.
+
+config GD32VW55X_WIFI_LIB_DEFAULT
+	bool "Standard (libwifi.a)"
+	---help---
+		Default STA + SoftAP firmware.  Best all-around choice.
+
+config GD32VW55X_WIFI_LIB_MINSRAM
+	bool "Minimum SRAM (libwifi_minsram.a)"
+	---help---
+		Reduced buffer pools to free SRAM for the application at the
+		cost of throughput.  Use when RAM pressure is high (e.g. with
+		BLE max stack enabled at the same time).
+
+config GD32VW55X_WIFI_LIB_MESH_SMART
+	bool "Smart Mesh (libwifi_mesh_smart.a)"
+	---help---
+		Adds the Wi-Fi Smart Mesh feature (requires the mesh code of
+		wifi_manager/wifi_mesh_smart).
+
+config GD32VW55X_WIFI_LIB_MULTISTREAM
+	bool "Multi-stream (libwifi_multistream.a)"
+	---help---
+		Optimized for multiple simultaneous TCP/UDP streams.
+
+config GD32VW55X_WIFI_LIB_SOFTAP_MANY
+	bool "SoftAP with many clients (libwifi_softap_many_clients.a)"
+	---help---
+		Raises the SoftAP association limit (CFG_SOFTAP_MANY_CLIENTS).
+
+endchoice # Wi-Fi MAC library variant
+
+config GD32VW55X_WIFI_SOFTAP
+	bool "SoftAP mode"
+	default y
+	---help---
+		Enable Access-Point mode (CFG_SOFTAP) in addition to station
+		mode in the wifi_manager glue.
+
+config GD32VW55X_WIFI_WPA3
+	bool "WPA3 (SAE) support"
+	default y
+	---help---
+		Build the wpa_supplicant with SAE for WPA3-Personal.  Uses the
+		mbedTLS-based crypto shims (wifi_manager/wpas).
+
+config GD32VW55X_WIFI_WPS_EAP_TLS
+	bool "WPS and EAP-TLS (enterprise)"
+	default n
+	---help---
+		Link libwpas_wps_eap-tls.a instead of libwpas.a to add WPS and
+		WPA2/WPA3-Enterprise (EAP-TLS) support.  Larger flash/RAM use.
+
+config GD32VW55X_WIFI_PS
+	bool "Wi-Fi power save"
+	default n
+	---help---
+		Enable the MAC power-save hooks (wifi_wakelock_*, LPDS entry).
+		Leave disabled until the PM phase of the port is complete.
+
+config GD32VW55X_WIFI_COEX
+	bool "BLE coexistence"
+	default n
+	depends on GD32VW55X_BLE
+	---help---
+		Wire the ble_coex_evt_notify_register() callback so the BLE
+		controller reports its activity windows to the Wi-Fi scheduler
+		(CFG_COEX).  The PTI arbiter itself lives inside the prebuilt
+		Wi-Fi/RF libraries.  Required whenever Wi-Fi and BLE radios
+		are used simultaneously.
+
+config GD32VW55X_WIFI_SHARED_SRAM_HEAP
+	bool "Add the 32 KB shared SRAM to the Wi-Fi heap"
+	default y
+	---help---
+		The vendor wifi_init adds the shared SRAM region at 0x20048000
+		(32 KB above the 288 KB application SRAM) as an extra heap for
+		Wi-Fi buffers via sys_add_heap_region().  Disable only if that
+		region is needed for the logic analyzer (LA) debug feature.
+
+		This needs CONFIG_MM_REGIONS >= 2: with the default of 1 the
+		kernel silently ignores the region and the radio runs without
+		the memory the vendor gives it.
+
+config GD32VW55X_WIFI_MGMT_STACKSIZE
+	int "wifi_mgmt task stack size (bytes)"
+	default 6000
+	---help---
+		Stack of the wifi_manager management task.  The SDK default is
+		1500 stack words (6000 bytes).
+
+config GD32VW55X_WIFI_MGMT_PRIORITY
+	int "wifi_mgmt task priority"
+	default 105
+	range 1 255
+	---help---
+		NuttX priority of the wifi_manager task.  The MAC core task
+		created by the blob through sys_task_create() runs 2 levels
+		above this; keep both below the BLE stack task when
+		coexistence is enabled.
+
+config GD32VW55X_WIFI_NVDS_PATH
+	string "NVDS storage path"
+	default "/data/wifi_nvds.bin"
+	---help---
+		File backing the Non-Volatile Data Storage used by the RF
+		calibration and MAC firmware (nvds_data_get/put/del).  The
+		vendor layout reserves 20 KB of flash; on NuttX it maps to a
+		file on a mounted filesystem (e.g. littlefs over FMC progmem).
+
+config GD32VW55X_WIFI_TX_HEADROOM
+	int
+	default 348
+	---help---
+		Fixed headroom (bytes) the MAC blob requires in front of every
+		TX pbuf (NET_AL_TX_HEADROOM).  Not user-adjustable: it must
+		match the prebuilt library.
+
+endif # GD32VW55X_WIFI
+
+config GD32VW55X_BLE
+	bool "BLE 5.3 (experimental)"
+	default n
+	depends on GD32VW55X_WIFI
+	depends on EXPERIMENTAL
+	---help---
+		Bring up the BLE 5.3 stack (RivieraWaves, in libble_max.a) and
+		start advertising.  The prebuilt library is an all-in-one
+		controller + host: GAP/GATT/SMP live inside the blob and the
+		controller talks to them internally, not over HCI (the library
+		is built without any HCI transport -- its h4tl.o is empty).  So
+		this port drives the vendor host directly (ble_adp_*, ble_adv_*,
+		ble_gap_*), the way every GigaDevice BLE example does; it does
+		not register a NuttX bt_driver_s and does not pull in the NuttX
+		Bluetooth host.
+
+		Depends on Wi-Fi: clocks, RF, TRNG, NVDS and the sys_* facade are
+		shared, and the coexistence lives inside the blobs.  Validate it
+		from outside with a BLE scanner -- the device advertises as
+		"NuttX" and is connectable (see tools/ble_test_tool in the port
+		notes).
+
+config GD32VW55X_BLE_GATT_DEMO
+	bool "BLE demo GATT service (transparent UART)"
+	default n
+	depends on GD32VW55X_BLE
+	---help---
+		Register a minimal "transparent UART" GATT service (16-bit
+		UUIDs 0xffe0/0xffe1/0xffe2): the central writes bytes to the RX
+		characteristic and the board logs them and echoes them back
+		through a TX notification.  This turns the advertising-only
+		bring-up into an end-to-end demo that a phone (nRF Connect) or
+		the ble_test_tool can exercise, proving the BLE data path works,
+		not just advertising.
+
+config GD32VW55X_WIFI_TRACE
+	bool "Wi-Fi bring-up trace"
+	default n
+	depends on GD32VW55X_WIFI
+	---help---
+		Verbose syslog trace of the OS-wrapper mailbox operations during
+		Wi-Fi bring-up.  Development aid only.

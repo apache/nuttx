@@ -1,0 +1,101 @@
+############################################################################
+# arch/risc-v/src/gd32vw55x/Make.defs
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include common/Make.defs
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0x08000000
+
+HEAD_ASRC = gd32vw55x_head.S
+
+# Specify our C code within this directory to be included
+
+CHIP_CSRCS  = gd32vw55x_allocateheap.c gd32vw55x_clockconfig.c
+CHIP_CSRCS += gd32vw55x_irq.c gd32vw55x_irq_dispatch.c
+CHIP_CSRCS += gd32vw55x_lowputc.c gd32vw55x_serial.c
+CHIP_CSRCS += gd32vw55x_start.c gd32vw55x_timerisr.c
+
+ifeq ($(CONFIG_RTC),y)
+CHIP_CSRCS += gd32vw55x_rtc.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_DMA),y)
+CHIP_CSRCS += gd32vw55x_dma.c
+endif
+
+CHIP_CSRCS += gd32vw55x_gpio.c
+
+ifeq ($(CONFIG_GD32VW55X_GPIO_IRQ),y)
+CHIP_CSRCS += gd32vw55x_exti.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_SPI),y)
+CHIP_CSRCS += gd32vw55x_spi.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_I2C),y)
+CHIP_CSRCS += gd32vw55x_i2c.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_ADC),y)
+CHIP_CSRCS += gd32vw55x_adc.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_PWM),y)
+CHIP_CSRCS += gd32vw55x_pwm.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_CAPTURE),y)
+CHIP_CSRCS += gd32vw55x_capture.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_FWDGT),y)
+CHIP_CSRCS += gd32vw55x_fwdgt.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_WWDGT),y)
+CHIP_CSRCS += gd32vw55x_wwdgt.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_PROGMEM),y)
+CHIP_CSRCS += gd32vw55x_progmem.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_RNG),y)
+CHIP_CSRCS += gd32vw55x_rng.c
+endif
+
+ifeq ($(CONFIG_GD32VW55X_CRC),y)
+CHIP_CSRCS += gd32vw55x_crc.c
+endif
+
+ifneq ($(CONFIG_GD32VW55X_WIFI)$(CONFIG_GD32VW55X_BLE)$(CONFIG_GD32VW55X_PROGMEM),)
+include chip/Sdk.mk
+endif
+
+ifeq ($(CONFIG_GD32VW55X_BLE),y)
+include chip/gdble/Bluetooth.mk
+endif
+
+ifeq ($(CONFIG_GD32VW55X_WIFI),y)
+include chip/gdwifi/Wireless.mk
+endif

@@ -1,0 +1,122 @@
+/****************************************************************************
+ * boards/risc-v/gd32vw55x/gd32vw553k-start/scripts/ld.script
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* NuttX is flashed directly at the start of the SIP flash (MBL bypassed).
+ *
+ * FLASH: the part has 4096K, but this board does not give all of it to the
+ * firmware.  Two regions sit at the top and must survive a firmware update,
+ * so the linker only gets what is left below them:
+ *
+ *   0x083db000  progmem (128K): the MTD device / LittleFS.  This split is a
+ *               DECISION OF THIS BOARD, not a property of the chip -- another
+ *               board may size it differently, or not carve it out at all.
+ *               It must match CONFIG_GD32VW55X_PROGMEM_START_ADDR/_SIZE.
+ *   0x083fb000  Wi-Fi NVDS (20K): RF calibration data and the MAC address.
+ *               This one IS fixed by the chip's radio firmware.
+ *
+ * That leaves 3948K (0x3db000) for the firmware.  Overflowing it is a link
+ * error, which is the point: a firmware that grew over these regions would
+ * take the filesystem, or the radio calibration, with it at the next flash.
+ *
+ * SRAM: the first 0x200 bytes belong to the boot ROM runtime data (the
+ * ROM mbedtls/IBL state) and must stay untouched - the vendor SDK links
+ * applications at 0x20000200 for the same reason.  The top 32 KB shared
+ * SRAM is reserved for the Wi-Fi firmware RX buffers, so the region has to
+ * end at 0x20048000: the origin goes up by 0x200 and the length goes down
+ * by the same 0x200.
+ */
+
+MEMORY
+{
+  flash (rx) : ORIGIN = 0x08000000, LENGTH = 3948K
+  sram (rwx) : ORIGIN = 0x20000200, LENGTH = 288K - 0x200
+}
+
+OUTPUT_ARCH("riscv")
+
+ENTRY(_stext)
+SECTIONS
+{
+    .text : {
+        _stext = ABSOLUTE(.);
+        *(.text .text.*)
+        *(.fixup)
+        *(.gnu.warning)
+        *(.rodata .rodata.*)
+        *(.srodata .srodata.*)
+        *(.gnu.linkonce.t.*)
+        *(.glue_7)
+        *(.glue_7t)
+        *(.got)
+        *(.gcc_except_table)
+        *(.gnu.linkonce.r.*)
+        _etext = ABSOLUTE(.);
+    } > flash
+
+    .init_section : ALIGN(4) {
+        _sinit = ABSOLUTE(.);
+        KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+        KEEP(*(.init_array EXCLUDE_FILE(*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o) .ctors))
+        _einit = ABSOLUTE(.);
+    } > flash
+
+    _eronly = ABSOLUTE(.);
+
+    .data : ALIGN(4) {
+        _sdata = ABSOLUTE(.);
+        *(.data .data.*)
+        *(.sdata .sdata.* .sdata2.*)
+        *(.gnu.linkonce.d.*)
+        *(.gnu.linkonce.s.*)
+        CONSTRUCTORS
+        . = ALIGN(4);
+        _edata = ABSOLUTE(.);
+    } > sram AT > flash
+
+    PROVIDE(__global_pointer$ = _sdata + ((_edata - _sdata) / 2));
+
+    .bss : ALIGN(4) {
+        _sbss = ABSOLUTE(.);
+        *(.bss .bss.*)
+        *(.sbss .sbss.*)
+        *(.gnu.linkonce.b.*)
+        *(.gnu.linkonce.sb.*)
+        *(COMMON)
+        . = ALIGN(32);
+        _ebss = ABSOLUTE(.);
+    } > sram
+
+    /* Stabs debugging sections. */
+
+    .stab 0 : { *(.stab) }
+    .stabstr 0 : { *(.stabstr) }
+    .stab.excl 0 : { *(.stab.excl) }
+    .stab.exclstr 0 : { *(.stab.exclstr) }
+    .stab.index 0 : { *(.stab.index) }
+    .stab.indexstr 0 : { *(.stab.indexstr) }
+    .comment 0 : { *(.comment) }
+    .debug_abbrev 0 : { *(.debug_abbrev) }
+    .debug_info 0 : { *(.debug_info) }
+    .debug_line 0 : { *(.debug_line) }
+    .debug_pubnames 0 : { *(.debug_pubnames) }
+    .debug_aranges 0 : { *(.debug_aranges) }
+}
