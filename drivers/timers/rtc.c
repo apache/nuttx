@@ -854,7 +854,7 @@ int rtc_initialize(int minor, FAR struct rtc_lowerhalf_s *lower)
 
   /* And, finally, register the new RTC driver */
 
-  ret = register_driver(devpath, &g_rtc_fops, 0666, upper);
+  ret = register_driver(devpath, &g_rtc_fops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

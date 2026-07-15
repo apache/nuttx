@@ -1920,7 +1920,7 @@ int fusb302_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_fusb302ops, 0666, priv);
+  ret = register_driver(devpath, &g_fusb302ops, 0600, priv);
   if (ret < 0)
     {
       fusb302_err("ERROR: Failed to register driver: %d\n", ret);

@@ -1359,7 +1359,7 @@ int noteram_register(void)
 #ifdef CONFIG_DRIVERS_NOTERAM_CRASH_DUMP
   noteram_crash_dump_register(&g_noteram_driver);
 #endif
-  return register_driver("/dev/note/ram", &g_noteram_fops, 0666,
+  return register_driver("/dev/note/ram", &g_noteram_fops, 0400,
                          &g_noteram_driver);
 }
 
@@ -1438,7 +1438,7 @@ noteram_initialize(FAR const char *devpath, size_t bufsize,
       return &drv->driver;
     }
 
-  ret = register_driver(devpath, &g_noteram_fops, 0666, drv);
+  ret = register_driver(devpath, &g_noteram_fops, 0400, drv);
   if (ret < 0)
     {
       kmm_free(drv);

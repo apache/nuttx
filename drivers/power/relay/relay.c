@@ -158,5 +158,5 @@ int relay_register(FAR struct relay_dev_s *dev, FAR const char *devname)
 
   nxmutex_init(&dev->lock);
 
-  return register_driver(devname, &g_relay_ops, 0666, dev);
+  return register_driver(devname, &g_relay_ops, 0600, dev);
 }

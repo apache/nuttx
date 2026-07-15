@@ -475,7 +475,7 @@ int uart_bth4_register(FAR const char *path, FAR struct bt_driver_s *drv)
   nxmutex_init(&dev->openlock);
   nxsem_init(&dev->recvsem, 0, 0);
 
-  ret = register_driver(path, &g_uart_bth4_ops, 0666, dev);
+  ret = register_driver(path, &g_uart_bth4_ops, 0600, dev);
   if (ret < 0)
     {
       nxmutex_destroy(&dev->sendlock);

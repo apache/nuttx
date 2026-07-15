@@ -2489,7 +2489,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
       goto mutex_err;
     }
 
-  rc = register_driver(path, &g_mtdnvs_fops, 0666, fs);
+  rc = register_driver(path, &g_mtdnvs_fops, 0600, fs);
   if (rc < 0)
     {
       ferr("ERROR: register mtd config failed: %d\n", rc);

@@ -442,7 +442,7 @@ int ptp_clock_register(FAR struct ptp_lowerhalf_s *lower, int32_t max_adj,
 
   snprintf(path, sizeof(path), "/dev/ptp%d", devno);
   ptpinfo("Registering %s\n", path);
-  ret = register_driver(path, &g_ptp_clock_file_ops, 0666, upper);
+  ret = register_driver(path, &g_ptp_clock_file_ops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

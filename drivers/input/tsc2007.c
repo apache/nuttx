@@ -1247,7 +1247,7 @@ int tsc2007_register(FAR struct i2c_master_s *dev,
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
-  ret = register_driver(devname, &g_tsc2007_fops, 0666, priv);
+  ret = register_driver(devname, &g_tsc2007_fops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver() failed: %d\n", ret);

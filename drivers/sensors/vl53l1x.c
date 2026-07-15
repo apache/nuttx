@@ -1156,7 +1156,7 @@ int vl53l1x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
       return 0;
     }
 
-  register_driver(devpath, &g_vl53l1xfops, 0666, priv);
+  register_driver(devpath, &g_vl53l1xfops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

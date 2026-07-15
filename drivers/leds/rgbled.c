@@ -496,7 +496,7 @@ int rgbled_register(FAR const char *path, FAR struct pwm_lowerhalf_s *ledr,
   /* Register the PWM device */
 
   lcdinfo("Registering %s\n", path);
-  return register_driver(path, &g_rgbledops, 0666, upper);
+  return register_driver(path, &g_rgbledops, 0600, upper);
 }
 
 #endif /* CONFIG_RGBLED */

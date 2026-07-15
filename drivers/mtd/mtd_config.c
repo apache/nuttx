@@ -1784,7 +1784,7 @@ int mtdconfig_register_by_path(FAR struct mtd_dev_s *mtd,
         }
 
       nxmutex_init(&dev->lock);
-      register_driver(path, &g_mtdconfig_fops, 0666, dev);
+      register_driver(path, &g_mtdconfig_fops, 0600, dev);
     }
 
 errout:

@@ -2354,7 +2354,7 @@ uint8_t pci_bus_find_capability(FAR struct pci_bus_s *bus,
 
 int pci_dev_register(void)
 {
-  return register_driver("/dev/pci", &g_pci_fops, 0666, NULL);
+  return register_driver("/dev/pci", &g_pci_fops, 0600, NULL);
 }
 
 /****************************************************************************

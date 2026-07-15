@@ -1094,7 +1094,7 @@ int ht16k33_register(int devno, FAR struct i2c_master_s *i2c)
 
   /* Register the driver */
 
-  ret = register_driver(devname, &g_ht16k33fops, 0666, priv);
+  ret = register_driver(devname, &g_ht16k33fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

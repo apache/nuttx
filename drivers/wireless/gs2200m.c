@@ -3519,7 +3519,7 @@ FAR void *gs2200m_register(FAR const char *devpath,
       goto errout;
     }
 
-  ret = register_driver(devpath, &g_gs2200m_fops, 0666, dev);
+  ret = register_driver(devpath, &g_gs2200m_fops, 0600, dev);
   if (ret < 0)
     {
       wlerr("Failed to register driver: %d\n", ret);

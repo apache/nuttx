@@ -947,7 +947,7 @@ int lp503x_register(const char *devpath, struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_lp503x_fileops, 0222, priv);
+  ret = register_driver(devpath, &g_lp503x_fileops, 0200, priv);
   if (ret != OK)
     {
       lederr("ERROR: Failed to register driver: %d\n", ret);

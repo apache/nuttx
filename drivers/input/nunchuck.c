@@ -564,7 +564,7 @@ int nunchuck_register(FAR const char *devname, FAR struct i2c_master_s *i2c)
 
   /* And register the nunchuck driver */
 
-  ret = register_driver(devname, &g_nunchuck_fops, 0666, priv);
+  ret = register_driver(devname, &g_nunchuck_fops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

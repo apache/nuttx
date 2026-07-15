@@ -2506,7 +2506,7 @@ int apds9922_register(FAR const char *devpath_als,
 
   if (devpath_als != NULL)
     {
-      ret = register_driver(devpath_als, &g_apds9922_alsfops, 0666, priv);
+      ret = register_driver(devpath_als, &g_apds9922_alsfops, 0600, priv);
       if (ret < 0)
         {
           snerr("ERROR: Failed to register driver %s: %d\n",
@@ -2518,7 +2518,7 @@ int apds9922_register(FAR const char *devpath_als,
 
   if (devpath_ps != NULL)
     {
-      ret = register_driver(devpath_ps, &g_apds9922_psfops, 0666, priv);
+      ret = register_driver(devpath_ps, &g_apds9922_psfops, 0600, priv);
       if (ret < 0)
         {
           snerr("ERROR: Failed to register driver %s: %d\n",

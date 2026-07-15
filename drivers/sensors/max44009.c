@@ -899,7 +899,7 @@ int max44009_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->config = config;
   nxmutex_init(&priv->dev_lock);
 
-  ret = register_driver(devpath, &g_alsops, 0666, priv);
+  ret = register_driver(devpath, &g_alsops, 0600, priv);
   max44009_dbg("Registered with %d\n", ret);
   if (ret < 0)
     {

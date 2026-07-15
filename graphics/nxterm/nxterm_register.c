@@ -139,7 +139,7 @@ FAR struct nxterm_state_s *
   /* Register the driver */
 
   snprintf(devname, sizeof(devname), NX_DEVNAME_FORMAT, minor);
-  ret = register_driver(devname, &g_nxterm_drvrops, 0666, priv);
+  ret = register_driver(devname, &g_nxterm_drvrops, 0600, priv);
   if (ret < 0)
     {
       gerr("ERROR: Failed to register %s\n", devname);

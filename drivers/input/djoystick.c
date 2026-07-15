@@ -721,7 +721,7 @@ int djoy_register(FAR const char *devname,
 
   /* And register the djoystick driver */
 
-  ret = register_driver(devname, &g_djoy_fops, 0666, priv);
+  ret = register_driver(devname, &g_djoy_fops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

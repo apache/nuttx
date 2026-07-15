@@ -862,7 +862,7 @@ int gnss_register(FAR struct gnss_lowerhalf_s *lower, int devno,
     }
 
   snprintf(path, PATH_MAX, GNSS_PATH_FMT, devno);
-  ret = register_driver(path, &g_gnss_fops, 0666, upper);
+  ret = register_driver(path, &g_gnss_fops, 0600, upper);
   if (ret < 0)
     {
       goto driver_err;

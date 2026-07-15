@@ -558,7 +558,7 @@ FAR void *timer_register(FAR const char *path,
 
   /* Register the timer device */
 
-  ret = register_driver(path, &g_timerops, 0666, upper);
+  ret = register_driver(path, &g_timerops, 0600, upper);
   if (ret < 0)
     {
       tmrerr("ERROR: register_driver failed: %d\n", ret);

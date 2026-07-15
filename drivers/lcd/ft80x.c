@@ -1575,7 +1575,7 @@ int ft80x_register(FAR struct i2c_master_s *i2c,
 
   /* Register the FT80x character driver */
 
-  ret = register_driver(DEVNAME, &g_ft80x_fops, 0666, priv);
+  ret = register_driver(DEVNAME, &g_ft80x_fops, 0600, priv);
   if (ret < 0)
     {
       goto errout_with_interrupts;

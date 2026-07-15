@@ -1196,7 +1196,7 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
       localpath = remotepath;
     }
 
-  ret = register_driver(localpath, &g_rpmsgdev_ops, 0666, dev);
+  ret = register_driver(localpath, &g_rpmsgdev_ops, 0600, dev);
   if (ret < 0)
     {
       rpmsgdeverr("register driver failed, ret=%d\n", ret);

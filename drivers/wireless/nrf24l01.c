@@ -1582,7 +1582,7 @@ int nrf24l01_register(FAR struct spi_dev_s *spi,
 
   wlinfo("Registering " DEV_NAME "\n");
 
-  ret = register_driver(DEV_NAME, &g_nrf24l01_fops, 0666, dev);
+  ret = register_driver(DEV_NAME, &g_nrf24l01_fops, 0600, dev);
   if (ret < 0)
     {
       wlerr("ERROR: register_driver() failed: %d\n", ret);

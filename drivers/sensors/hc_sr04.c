@@ -433,7 +433,7 @@ int hcsr04_register(FAR const char *devpath,
   nxmutex_init(&priv->devlock);
   nxsem_init(&priv->conv_donesem, 0, 0);
 
-  ret = register_driver(devpath, &g_hcsr04ops, 0666, priv);
+  ret = register_driver(devpath, &g_hcsr04ops, 0600, priv);
   if (ret < 0)
     {
       nxmutex_destroy(&priv->devlock);

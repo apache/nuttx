@@ -234,7 +234,7 @@ int bmi270_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
 
   /* Register driver */
 
-  ret = register_driver(devpath, &g_bmi270fops, 0666, priv);
+  ret = register_driver(devpath, &g_bmi270fops, 0600, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

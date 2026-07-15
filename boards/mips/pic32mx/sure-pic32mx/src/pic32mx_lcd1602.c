@@ -1076,7 +1076,7 @@ int up_lcd1602_initialize(void)
 
       /* Register the LCD device driver */
 
-      ret = register_driver("/dev/lcd1602", &g_lcdops, 0644, &g_lcd1602);
+      ret = register_driver("/dev/lcd1602", &g_lcdops, 0640, &g_lcd1602);
       g_lcd1602.initialized = true;
     }
 

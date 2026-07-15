@@ -1357,7 +1357,7 @@ int lsm330_register(FAR const char *devpath_acl,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath_acl, &g_lsm330a_fops, 0666, priv);
+  ret = register_driver(devpath_acl, &g_lsm330a_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register accelerometer driver: %d\n", ret);
@@ -1396,7 +1396,7 @@ int lsm330_register(FAR const char *devpath_acl,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath_gyro, &g_lsm330g_fops, 0666, priv);
+  ret = register_driver(devpath_gyro, &g_lsm330g_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register gyroscope driver: %d\n", ret);

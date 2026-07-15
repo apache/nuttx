@@ -266,7 +266,7 @@ int usensor_initialize(void)
   nxmutex_init(&usensor->lock);
   list_initialize(&usensor->list);
 
-  ret = register_driver(USENSOR_PATH, &g_usensor_fops, 0666, usensor);
+  ret = register_driver(USENSOR_PATH, &g_usensor_fops, 0600, usensor);
   if (ret < 0)
     {
       goto errout_with_lock;

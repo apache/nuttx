@@ -349,7 +349,7 @@ int max7219_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_max7219fops, 0666, priv);
+  ret = register_driver(devpath, &g_max7219fops, 0600, priv);
   if (ret < 0)
     {
       lederr("ERROR: Failed to register driver: %d\n", ret);

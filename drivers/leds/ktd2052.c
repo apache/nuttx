@@ -741,7 +741,7 @@ int ktd2052_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_ktd2052_fops, 0666, priv);
+  ret = register_driver(devpath, &g_ktd2052_fops, 0600, priv);
   if (ret < 0)
     {
       kmm_free(priv);

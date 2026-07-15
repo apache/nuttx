@@ -1097,7 +1097,7 @@ int pty_register2(int minor, bool susv1)
 
   snprintf(devname, sizeof(devname), "/dev/pty%d", minor);
 
-  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
+  ret = register_driver(devname, &g_pty_fops, 0600, &devpair->pp_master);
   if (ret < 0)
     {
       goto errout_with_devpair;
@@ -1120,7 +1120,7 @@ int pty_register2(int minor, bool susv1)
       snprintf(devname, sizeof(devname), "/dev/ttyp%d", minor);
     }
 
-  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
+  ret = register_driver(devname, &g_pty_fops, 0600, &devpair->pp_slave);
   if (ret < 0)
     {
       goto errout_with_master;

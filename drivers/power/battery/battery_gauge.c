@@ -519,7 +519,7 @@ int battery_gauge_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_batteryops, 0666, dev);
+  ret = register_driver(devpath, &g_batteryops, 0600, dev);
   if (ret < 0)
     {
       baterr("ERROR: Failed to register driver: %d\n", ret);

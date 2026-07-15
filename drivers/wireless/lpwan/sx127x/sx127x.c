@@ -4720,7 +4720,7 @@ int sx127x_register(FAR struct spi_dev_s *spi,
 
   wlinfo("Registering " SX127X_DEV_NAME "\n");
 
-  ret = register_driver(SX127X_DEV_NAME, &g_sx127x_fops, 0666, dev);
+  ret = register_driver(SX127X_DEV_NAME, &g_sx127x_fops, 0600, dev);
   if (ret < 0)
     {
       wlerr("ERROR: register_driver() failed: %d\n", ret);

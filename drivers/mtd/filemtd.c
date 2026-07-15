@@ -948,6 +948,6 @@ bool filemtd_isfilemtd(FAR struct mtd_dev_s *dev)
 #ifdef CONFIG_MTD_LOOP
 int mtd_loop_register(void)
 {
-  return register_driver("/dev/loopmtd", &g_fops, 0666, NULL);
+  return register_driver("/dev/loopmtd", &g_fops, 0600, NULL);
 }
 #endif

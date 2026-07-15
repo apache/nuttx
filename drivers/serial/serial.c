@@ -2152,7 +2152,7 @@ int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 #endif
 
   sinfo("Registering %s\n", path);
-  return register_driver(path, &g_serialops, 0666, dev);
+  return register_driver(path, &g_serialops, 0600, dev);
 }
 
 /****************************************************************************

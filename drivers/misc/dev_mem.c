@@ -198,5 +198,5 @@ static int devmem_mmap(FAR struct file *filep,
 int devmem_register(void)
 {
   return register_driver("/dev/mem", &g_devmem_fops,
-                         0666, (FAR void *)g_memory_region);
+                         0600, (FAR void *)g_memory_region);
 }

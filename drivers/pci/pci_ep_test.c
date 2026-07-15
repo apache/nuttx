@@ -827,7 +827,7 @@ static int pci_ep_test_probe(FAR struct pci_device_s *dev)
 
   snprintf(test->name, sizeof(test->name),
            PCI_EP_TEST_DEVICE_NAME ".%d", g_pci_ep_idr++);
-  register_driver(test->name, &g_pci_ep_test_fops, 0666, test);
+  register_driver(test->name, &g_pci_ep_test_fops, 0600, test);
   pciinfo("pci ep test device register success.\n");
 
   return 0;

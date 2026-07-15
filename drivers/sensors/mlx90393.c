@@ -593,7 +593,7 @@ int mlx90393_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_mlx90393_fops, 0666, priv);
+  ret = register_driver(devpath, &g_mlx90393_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

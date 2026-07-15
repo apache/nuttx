@@ -2041,7 +2041,7 @@ int lis2dh_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
   priv->addr = addr;
   priv->config = config;
 
-  ret = register_driver(devpath, &g_lis2dhops, 0666, priv);
+  ret = register_driver(devpath, &g_lis2dhops, 0600, priv);
   if (ret < 0)
     {
       lis2dh_dbg("lis2dh: Failed to register driver: %d\n", ret);

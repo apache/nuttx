@@ -975,7 +975,7 @@ int fusb303_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_fusb303ops, 0666, priv);
+  ret = register_driver(devpath, &g_fusb303ops, 0600, priv);
   if (ret < 0)
     {
       fusb303_err("ERROR: Failed to register driver: %d\n", ret);

@@ -525,7 +525,7 @@ int bm1422gmv_register(const char *devpath, int minor,
   /* Register the character driver */
 
   snprintf(path, sizeof(path), "%s%d", devpath, minor);
-  ret = register_driver(path, &g_bm1422gmvfops, 0660, priv);
+  ret = register_driver(path, &g_bm1422gmvfops, 0640, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

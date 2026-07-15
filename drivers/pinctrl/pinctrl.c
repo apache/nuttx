@@ -227,7 +227,7 @@ int pinctrl_register(FAR struct pinctrl_dev_s *dev, int minor)
   char devname[32];
 
   snprintf(devname, 16, "/dev/pinctrl%u", (unsigned int)minor);
-  return register_driver(devname, &g_pinctrl_drvrops, 0666, dev);
+  return register_driver(devname, &g_pinctrl_drvrops, 0600, dev);
 }
 
 /****************************************************************************

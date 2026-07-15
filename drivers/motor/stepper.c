@@ -338,7 +338,7 @@ int stepper_register(FAR const char *path,
 
   /* Register the stepper character driver */
 
-  ret = register_driver(path, &g_stepper_fops, 0666, stepper);
+  ret = register_driver(path, &g_stepper_fops, 0600, stepper);
   if (ret < 0)
     {
       nxmutex_destroy(&stepper->lock);

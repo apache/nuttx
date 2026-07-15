@@ -786,7 +786,7 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 
       /* Register the character driver */
 
-      ret = register_driver(devpath, &g_ramlogfops, 0666, priv);
+      ret = register_driver(devpath, &g_ramlogfops, 0600, priv);
       if (ret < 0)
         {
           kmm_free(priv);
@@ -810,7 +810,7 @@ void ramlog_syslog_register(void)
 {
   /* Register the syslog character driver */
 
-  register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0666, &g_sysdev);
+  register_driver(CONFIG_SYSLOG_DEVPATH, &g_ramlogfops, 0600, &g_sysdev);
 }
 #endif
 

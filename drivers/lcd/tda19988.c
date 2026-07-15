@@ -1682,7 +1682,7 @@ TDA19988_HANDLE tda19988_register(FAR const char *devpath,
 
   /* Register the driver */
 
-  ret = register_driver(devpath, &g_tda19988_fops, 0666, NULL);
+  ret = register_driver(devpath, &g_tda19988_fops, 0600, NULL);
   if (ret < 0)
     {
       lcderr("ERROR: register_driver() failed: %d\n", ret);

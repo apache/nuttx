@@ -814,7 +814,7 @@ int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus)
 
   /* Register the character driver */
 
-  ret = register_driver(devname, &g_spislavefops, 0666, priv);
+  ret = register_driver(devname, &g_spislavefops, 0600, priv);
   if (ret < 0)
     {
       spierr("ERROR: Failed to register driver: %d\n", ret);

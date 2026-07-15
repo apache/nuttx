@@ -1226,7 +1226,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
   snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
-  ret = register_driver(name, &g_rptun_fops, 0222, priv);
+  ret = register_driver(name, &g_rptun_fops, 0200, priv);
   if (ret < 0)
     {
       rptunerr("rptun register driver failed %d\n", ret);

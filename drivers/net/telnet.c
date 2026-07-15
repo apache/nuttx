@@ -1023,7 +1023,7 @@ static int telnet_session(FAR struct telnet_session_s *session)
 
   /* Register the driver */
 
-  ret = register_driver(session->ts_devpath, &g_telnet_fops, 0666, priv);
+  ret = register_driver(session->ts_devpath, &g_telnet_fops, 0600, priv);
   if (ret < 0)
     {
       nerr("ERROR: Failed to register the driver %s: %d\n",
@@ -1274,7 +1274,7 @@ static int factory_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int telnet_initialize(void)
 {
-  return register_driver("/dev/telnet", &g_factory_fops, 0666, NULL);
+  return register_driver("/dev/telnet", &g_factory_fops, 0600, NULL);
 }
 
 #endif /* CONFIG_NETDEV_TELNET */

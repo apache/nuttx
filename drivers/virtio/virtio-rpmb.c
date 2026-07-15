@@ -261,7 +261,7 @@ static int virtio_rpmb_probe(FAR struct virtio_device *vdev)
       goto err_with_priv;
     }
 
-  ret = register_driver(VIRTIO_RPMB_DEVNAME, &g_virtio_rpmb_ops, 0666,
+  ret = register_driver(VIRTIO_RPMB_DEVNAME, &g_virtio_rpmb_ops, 0600,
                         priv);
   if (ret < 0)
     {

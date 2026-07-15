@@ -1187,7 +1187,7 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
 
   /* Register the device node. */
 
-  ret = register_driver(path, &g_mpu_fops, 0666, priv);
+  ret = register_driver(path, &g_mpu_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register mpu60x0 interface: %d\n", ret);

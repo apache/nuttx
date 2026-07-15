@@ -523,7 +523,7 @@ int usrsock_request(FAR struct iovec *iov, unsigned int iovcnt)
 
 void usrsock_register(void)
 {
-  register_driver("/dev/usrsock", &g_usrsockdevops, 0666,
+  register_driver("/dev/usrsock", &g_usrsockdevops, 0600,
                   &g_usrsockdev);
 }
 

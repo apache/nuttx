@@ -622,7 +622,7 @@ int amg88xx_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_amg88xx_fops, 0666, priv);
+  ret = register_driver(devpath, &g_amg88xx_fops, 0600, priv);
 
   if (ret < 0)
     {

@@ -443,7 +443,7 @@ int lcddev_register(int devno)
     }
 
   snprintf(devname, sizeof(devname), "/dev/lcd%i", devno);
-  ret = register_driver(devname, &g_lcddev_fops, 0666, priv);
+  ret = register_driver(devname, &g_lcddev_fops, 0600, priv);
   if (ret < 0)
     {
       goto err;

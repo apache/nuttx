@@ -299,7 +299,7 @@ int syslog_rpmsg_server_init(void)
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER_CHARDEV
   int ret;
 
-  ret = register_driver("/dev/logrpmsg", &g_syslog_rpmsg_fops, 0666, NULL);
+  ret = register_driver("/dev/logrpmsg", &g_syslog_rpmsg_fops, 0600, NULL);
   if (ret < 0)
     {
       return ret;
