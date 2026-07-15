@@ -41,6 +41,8 @@
 #  else
 #    error "Unknown chip for AES"
 #  endif
+#elif defined(CONFIG_STM32_HAVE_IP_CRYP_V1)
+#  include "hardware/stm32_cryp_v1.h"
 #endif
 
 /****************************************************************************

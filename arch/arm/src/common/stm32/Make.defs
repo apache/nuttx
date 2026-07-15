@@ -348,10 +348,6 @@ ifeq ($(CONFIG_STM32_AES)$(CONFIG_STM32_HAVE_IP_AES_M3M4_V1),yy)
 CHIP_CSRCS += stm32_aes_m3m4_v1.c
 endif
 
-ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)$(CONFIG_STM32_HAVE_IP_CRYPTO_M3M4_V1),yy)
-CHIP_CSRCS += stm32_crypto_m3m4_v1.c
-endif
-
 ifeq ($(CONFIG_STM32_BBSRAM),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_BBSRAM_M3M4_V1),y)
 CHIP_CSRCS += stm32_bbsram_m3m4_v1.c
@@ -396,6 +392,14 @@ ifeq ($(CONFIG_STM32_DMA2D),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_V1),y)
 CHIP_CSRCS += stm32_dma2d_v1.c
 endif
+endif
+
+ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)$(CONFIG_STM32_HAVE_IP_CRYPTO_M3M4_V1),yy)
+CHIP_CSRCS += stm32_crypto_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_CRYP)$(CONFIG_STM32_HAVE_IP_CRYP_V1),yy)
+CHIP_CSRCS += stm32_aes_cryp_v1.c
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM0),y)
