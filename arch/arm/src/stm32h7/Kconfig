@@ -10,6 +10,7 @@ comment "STM32 H7 Configuration Options"
 config STM32_H7_PERIPHERALS
 	bool
 	default ARCH_CHIP_STM32H7
+	select STM32_HAVE_IP_RNG_V1 if STM32_HAVE_RNG
 	select STM32_HAVE_DMA1
 	select STM32_HAVE_DMA2
 	select STM32_HAVE_I2C1
