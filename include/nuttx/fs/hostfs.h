@@ -123,7 +123,7 @@
 
 /* These must match the definitions in include/sys/types.h */
 
-typedef int16_t      nuttx_blksize_t;
+typedef int32_t      nuttx_blksize_t;
 
 #  ifdef CONFIG_SMALL_MEMORY
 typedef uint16_t     nuttx_size_t;
