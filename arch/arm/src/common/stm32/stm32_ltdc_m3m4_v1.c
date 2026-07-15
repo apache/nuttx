@@ -50,7 +50,7 @@
 #include "hardware/stm32_ltdc.h"
 #include "hardware/stm32_dma2d.h"
 #include "stm32_ltdc_m3m4_v1.h"
-#include "stm32_dma2d_m3m4_v1.h"
+#include "stm32_dma2d_v1.h"
 
 /****************************************************************************
  * Pre-processor Definitions

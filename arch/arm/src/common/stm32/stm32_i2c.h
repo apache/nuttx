@@ -88,7 +88,7 @@ struct i2c_master_s *stm32_i2cbus_initialize(int port);
 
 int stm32_i2cbus_uninitialize(struct i2c_master_s *dev);
 
-#if defined(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1) || defined(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2)
+#if defined(CONFIG_STM32_HAVE_IP_I2C_M3M4_V1) || defined(CONFIG_STM32_HAVE_IP_I2C_V2)
 /****************************************************************************
  * Name: stm32_i2cbus_slaveinitialize
  *

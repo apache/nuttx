@@ -86,7 +86,7 @@ config STM32_H7_PERIPHERALS
 	select STM32_HAVE_ETHMAC
 	select STM32_HAVE_FMC
 	select STM32_HAVE_RNG
-	select STM32_HAVE_IP_WDG_M3M4_V1
+	select STM32_HAVE_IP_WDG_V1
 choice
 	prompt "STM32 H7 Chip Selection"
 	default ARCH_CHIP_STM32H743ZI

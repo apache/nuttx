@@ -28,13 +28,13 @@
  ****************************************************************************/
 
 #if (defined(CONFIG_STM32_HAVE_IP_WDG_M0_V1) + \
-     defined(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)) > 1
+     defined(CONFIG_STM32_HAVE_IP_WDG_V1)) > 1
 #  error Only one STM32 WDG IP version must be selected
 #endif
 
 #if defined(CONFIG_STM32_HAVE_IP_WDG_M0_V1)
 #  include "hardware/stm32_wdg_m0.h"
-#elif defined(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1)
+#elif defined(CONFIG_STM32_HAVE_IP_WDG_V1)
 #  include "hardware/stm32_wdg_v1v2.h"
 #else
 #  error "Unsupported STM32 WDG"
