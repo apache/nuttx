@@ -343,7 +343,7 @@ config STM32_HAVE_IP_DMA_V1_8CH_DMAMUX
 config STM32_HAVE_IP_DMA_V2_STREAM
 	bool
 
-config STM32_HAVE_IP_DMA2D_M3M4_V1
+config STM32_HAVE_IP_DMA2D_V1
 	bool
 
 config STM32_HAVE_DMACAPABLE
@@ -511,7 +511,7 @@ config STM32_HAVE_I2C6
 config STM32_HAVE_IP_I2C_M3M4_V1
 	bool
 
-config STM32_HAVE_IP_I2C_M3M4_V2
+config STM32_HAVE_IP_I2C_V2
 	bool
 
 config STM32_HAVE_IP_I2C_M0_V1
@@ -776,7 +776,7 @@ config STM32_HAVE_RNG
 config STM32_HAVE_IP_RNG_M0_V1
 	bool
 
-config STM32_HAVE_IP_RNG_M3M4_V1
+config STM32_HAVE_IP_RNG_V1
 	bool
 
 # RTC capabilities
@@ -1474,5 +1474,5 @@ config STM32_HAVE_USB
 config STM32_HAVE_IP_WDG_M0_V1
 	bool
 
-config STM32_HAVE_IP_WDG_M3M4_V1
+config STM32_HAVE_IP_WDG_V1
 	bool

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_dma2d_m3m4_v1.h
+ * arch/arm/src/common/stm32/stm32_dma2d_v1.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *

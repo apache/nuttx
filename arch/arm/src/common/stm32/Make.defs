@@ -176,10 +176,10 @@ CHIP_CSRCS += stm32_i2c_m3m4_v1_f40xxx.c
 else
 CHIP_CSRCS += stm32_i2c_m3m4_v1.c
 endif
-else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_M3M4_V2),y)
-CHIP_CSRCS += stm32_i2c_m3m4_v2.c
+else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
+CHIP_CSRCS += stm32_i2c_v2.c
 ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
-CHIP_CSRCS += stm32_i2c_m3m4_v2_slave.c
+CHIP_CSRCS += stm32_i2c_v2_slave.c
 endif
 endif
 
@@ -301,8 +301,8 @@ ifeq ($(CONFIG_STM32_HCIUART),y)
 CHIP_CSRCS += stm32_hciuart_m3m4_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_rng_m3m4_v1.c
+ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
+CHIP_CSRCS += stm32_rng_v1.c
 endif
 
 ifeq ($(CONFIG_STM32_LTDC),y)
@@ -312,8 +312,8 @@ endif
 endif
 
 ifeq ($(CONFIG_STM32_DMA2D),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_M3M4_V1),y)
-CHIP_CSRCS += stm32_dma2d_m3m4_v1.c
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_V1),y)
+CHIP_CSRCS += stm32_dma2d_v1.c
 endif
 endif
 
@@ -346,12 +346,12 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
+ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
+CHIP_CSRCS += stm32_iwdg_v1.c
 endif
 
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
+ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
+CHIP_CSRCS += stm32_wwdg_v1.c
 endif
 
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
