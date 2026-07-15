@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 
 #if defined(CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1)
-#  include "stm32_dma2d_m3m4_v1.h"
+#  include "stm32_dma2d_v1.h"
 #else
 #  error "Unsupported STM32 stm32_dma2d"
 #endif
