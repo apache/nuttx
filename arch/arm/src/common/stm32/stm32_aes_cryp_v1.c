@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32h7/stm32_aes.c
+ * arch/arm/src/common/stm32/stm32_aes_cryp_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
