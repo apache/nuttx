@@ -35,7 +35,7 @@ list(APPEND SRCS stm32_waste.c)
 list(APPEND SRCS stm32_uid.c)
 list(APPEND SRCS stm32_lsi.c)
 
-if(NOT CONFIG_ARCH_CUSTOM_PMINIT AND (CONFIG_STM32_COMMON_LEGACY
+if(NOT CONFIG_ARCH_CUSTOM_PMINIT AND (CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1
                                       OR CONFIG_ARCH_CORTEXM33))
   list(APPEND SRCS stm32_pminitialize_default.c)
 endif()
@@ -52,7 +52,11 @@ if(CONFIG_STM32_HAVE_IP_EXTI_M33_V1)
   list(APPEND SRCS stm32_exti_gpio_m33_v1.c)
 endif()
 
-if(CONFIG_STM32_COMMON_M33)
+if(CONFIG_ARCH_CHIP_STM32C5
+   OR CONFIG_ARCH_CHIP_STM32H5
+   OR CONFIG_ARCH_CHIP_STM32L5
+   OR CONFIG_ARCH_CHIP_STM32U3
+   OR CONFIG_ARCH_CHIP_STM32U5)
   list(APPEND SRCS stm32_allocateheap_m33_v1.c stm32_irq_m33_v1.c
        stm32_start_m33_v1.c stm32_timerisr_m33_v1.c)
 
@@ -92,7 +96,7 @@ if(CONFIG_STM32_1WIREDRIVER)
   list(APPEND SRCS stm32_1wire_m3m4_v1.c)
 endif()
 
-if(CONFIG_STM32_COMMON_LEGACY)
+if(CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1)
   list(
     APPEND
     SRCS
