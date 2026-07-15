@@ -34,6 +34,10 @@
 
 #include "espressif/esp_start.h"
 
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+#  include "esp_board_spiflash.h"
+#endif
+
 #ifdef CONFIG_I2C_DRIVER
 #  include "esp_board_i2c.h"
 #endif
@@ -73,6 +77,14 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESPRESSIF_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
+    }
+#endif
+
 #ifdef CONFIG_I2C_DRIVER
   /* Configure I2C peripheral interfaces */
 
@@ -80,6 +92,16 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_FS_TMPFS
+  /* Mount the tmpfs file system */
+
+  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+  if (ret < 0)
+    {
+      _err("Failed to mount tmpfs at %s: %d\n", CONFIG_LIBC_TMPDIR, ret);
     }
 #endif
 

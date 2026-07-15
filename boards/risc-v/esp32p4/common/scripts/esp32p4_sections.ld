@@ -338,9 +338,9 @@ SECTIONS
     _dram_start = ABSOLUTE(.);
     _sdata = ABSOLUTE(.);
     _data_start_low = ABSOLUTE(.);
-    *(.data)
-    *(.data.*)
-    *(.gnu.linkonce.d.*)
+    EXCLUDE_FILE(*libpython3.13.a) *(.data)
+    EXCLUDE_FILE(*libpython3.13.a) *(.data.*)
+    EXCLUDE_FILE(*libpython3.13.a) *(.gnu.linkonce.d.*)
     *(.data1)
     __global_pointer$ = . + 0x800;
     *(.sdata)
@@ -465,7 +465,7 @@ SECTIONS
   .dram1.data :
   {
     _data_start_high = ABSOLUTE(.);
-    *(.data .data.*)
+    *libpython3.13.a:(.data .data.* .gnu.linkonce.d.*)
     *(.dram1 .dram1.*)
     _data_end_high = ABSOLUTE(.);
   } > sram_high
@@ -661,11 +661,11 @@ SECTIONS
     *(.sbss2.*)
     *(.gnu.linkonce.sb2.*)
     *(.dynbss)
-    *(.bss)
-    *(.bss.*)
+    EXCLUDE_FILE(*libpython3.13.a) *(.bss)
+    EXCLUDE_FILE(*libpython3.13.a) *(.bss.*)
     *(.share.mem)
-    *(.gnu.linkonce.b.*)
-    *(COMMON)
+    EXCLUDE_FILE(*libpython3.13.a) *(.gnu.linkonce.b.*)
+    EXCLUDE_FILE(*libpython3.13.a) *(COMMON)
 
     . = ALIGN(4);
     _ebss = ABSOLUTE(.);
@@ -683,12 +683,12 @@ SECTIONS
      * ldgen places all bss-related data to mapping[dram0_bss]
      * (See components/esp_system/app.lf).
      */
-    *(.bss .bss.*)
+    EXCLUDE_FILE(*libpython3.13.a) *(.bss .bss.*)
     *(.dynbss .dynsbss .gnu.linkonce.b .gnu.linkonce.b.* .gnu.linkonce.sb .gnu.linkonce.sb.* .gnu.linkonce.sb2 .gnu.linkonce.sb2.* .sbss .sbss.* .sbss2 .sbss2.* .scommon .share.mem)
 #ifndef CONFIG_ESPRESSIF_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY
     *(.ext_ram.bss .ext_ram.bss.*)
 #endif
-    *(COMMON)
+    EXCLUDE_FILE(*libpython3.13.a) *(COMMON)
 
  . = ALIGN(4);
  _bss_end_high = ABSOLUTE(.);
@@ -699,7 +699,10 @@ SECTIONS
   .ext_ram.bss (NOLOAD) :
   {
     _ext_ram_bss_start = ABSOLUTE(.);
+    *(.PyRuntime)
     *(.ext_ram.bss .ext_ram.bss.*)
+    *libpython3.13.a:(*.PyRuntime)
+    *libpython3.13.a:(.bss .bss.*)
     . = ALIGN(4);
     _ext_ram_bss_end = ABSOLUTE(.);
   } > ext_ram_seg
