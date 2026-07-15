@@ -29,7 +29,7 @@
 
 #include <nuttx/config.h>
 
-#if defined(CONFIG_STM32_COMMON_LEGACY)
+#if defined(CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1)
 #  include "stm32_exti_pwr_m3m4_v1.h"
 #else
 #  error "Unsupported STM32 stm32_exti_pwr"
