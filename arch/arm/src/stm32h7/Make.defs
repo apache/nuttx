@@ -95,10 +95,6 @@ ifeq ($(CONFIG_STM32_RTC_LSECLOCK),y)
 CHIP_CSRCS += stm32_lse.c
 endif
 
-ifeq ($(CONFIG_STM32_I2C),y)
-CHIP_CSRCS += stm32_i2c.c
-endif
-
 ifeq ($(CONFIG_STM32_PWR),y)
 CHIP_CSRCS += stm32_pwr.c
 endif

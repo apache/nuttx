@@ -238,7 +238,7 @@
 #include "arm_internal.h"
 #include "stm32_rcc.h"
 #include "stm32_i2c.h"
-#include "stm32_gpio.h"
+#include "stm32.h"
 
 /* At least one I2C peripheral must be enabled */
 
@@ -252,7 +252,24 @@
 #warning TODO: check I2C clock source. It must be HSI!
 #undef INVALID_CLOCK_SOURCE
 
-#if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
+#if defined(CONFIG_ARCH_CHIP_STM32H7)
+#  if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || \
+      defined(CONFIG_STM32_I2C3)
+#    if STM32_RCC_D2CCIP2R_I2C123SRC != RCC_D2CCIP2R_I2C123SEL_HSI
+#      warning "Clock Source STM32_RCC_D2CCIP2R_I2C123SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  ifdef CONFIG_STM32_I2C4
+#    if STM32_RCC_D3CCIPR_I2C4SRC != RCC_D3CCIPR_I2C4SEL_HSI
+#      warning "Clock Source STM32_RCC_D3CCIPR_I2C4SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
+#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
+#  endif
+#elif defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX) || \
     defined(CONFIG_STM32_STM32F37XX)
 #  if STM32_HSI_FREQUENCY != 8000000 || defined(INVALID_CLOCK_SOURCE)
 #    error STM32_I2C: Peripheral clock is HSI and it must be 8MHz or the speed/timing calculations need to be redone.
@@ -263,6 +280,40 @@
 #  endif
 #else
 #  error STM32_I2C: Device not Supported.
+#endif
+
+/* The I2C peripherals sit on different RCC buses depending on the family.
+ * Dispatch on the RCC register macros the family header provides.
+ */
+
+#if defined(RCC_APB1LENR_I2C1EN)
+#  define STM32_I2C123_CLK_REG    STM32_RCC_APB1LENR
+#  define STM32_I2C123_RST_REG    STM32_RCC_APB1LRSTR
+#  define STM32_I2C1_CLK_BIT      RCC_APB1LENR_I2C1EN
+#  define STM32_I2C1_RST_BIT      RCC_APB1LRSTR_I2C1RST
+#  define STM32_I2C2_CLK_BIT      RCC_APB1LENR_I2C2EN
+#  define STM32_I2C2_RST_BIT      RCC_APB1LRSTR_I2C2RST
+#  define STM32_I2C3_CLK_BIT      RCC_APB1LENR_I2C3EN
+#  define STM32_I2C3_RST_BIT      RCC_APB1LRSTR_I2C3RST
+#  define STM32_I2C4_CLK_REG      STM32_RCC_APB4ENR
+#  define STM32_I2C4_RST_REG      STM32_RCC_APB4RSTR
+#  define STM32_I2C4_CLK_BIT      RCC_APB4ENR_I2C4EN
+#  define STM32_I2C4_RST_BIT      RCC_APB4RSTR_I2C4RST
+#else
+#  define STM32_I2C123_CLK_REG    STM32_RCC_APB1ENR
+#  define STM32_I2C123_RST_REG    STM32_RCC_APB1RSTR
+#  define STM32_I2C1_CLK_BIT      RCC_APB1ENR_I2C1EN
+#  define STM32_I2C1_RST_BIT      RCC_APB1RSTR_I2C1RST
+#  define STM32_I2C2_CLK_BIT      RCC_APB1ENR_I2C2EN
+#  define STM32_I2C2_RST_BIT      RCC_APB1RSTR_I2C2RST
+#  define STM32_I2C3_CLK_BIT      RCC_APB1ENR_I2C3EN
+#  define STM32_I2C3_RST_BIT      RCC_APB1RSTR_I2C3RST
+#  ifdef CONFIG_STM32_I2C4
+#    define STM32_I2C4_CLK_REG    STM32_RCC_APB1ENR
+#    define STM32_I2C4_RST_REG    STM32_RCC_APB1RSTR
+#    define STM32_I2C4_CLK_BIT    RCC_APB1ENR_I2C4EN
+#    define STM32_I2C4_RST_BIT    RCC_APB1RSTR_I2C4RST
+#  endif
 #endif
 
 /* CONFIG_I2C_POLLED may be set so that I2C interrupts will not be used.
@@ -387,7 +438,9 @@ struct stm32_trace_s
 struct stm32_i2c_config_s
 {
   uint32_t base;              /* I2C base address */
+  uint32_t clk_reg;           /* Clock enable register */
   uint32_t clk_bit;           /* Clock enable bit */
+  uint32_t reset_reg;         /* Reset register */
   uint32_t reset_bit;         /* Reset bit */
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
@@ -505,8 +558,10 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
   .base          = STM32_I2C1_BASE,
-  .clk_bit       = RCC_APB1ENR_I2C1EN,
-  .reset_bit     = RCC_APB1RSTR_I2C1RST,
+  .clk_reg       = STM32_I2C123_CLK_REG,
+  .clk_bit       = STM32_I2C1_CLK_BIT,
+  .reset_reg     = STM32_I2C123_RST_REG,
+  .reset_bit     = STM32_I2C1_RST_BIT,
   .scl_pin       = GPIO_I2C1_SCL,
   .sda_pin       = GPIO_I2C1_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -541,8 +596,10 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
 static const struct stm32_i2c_config_s stm32_i2c2_config =
 {
   .base          = STM32_I2C2_BASE,
-  .clk_bit       = RCC_APB1ENR_I2C2EN,
-  .reset_bit     = RCC_APB1RSTR_I2C2RST,
+  .clk_reg       = STM32_I2C123_CLK_REG,
+  .clk_bit       = STM32_I2C2_CLK_BIT,
+  .reset_reg     = STM32_I2C123_RST_REG,
+  .reset_bit     = STM32_I2C2_RST_BIT,
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -577,8 +634,10 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
 static const struct stm32_i2c_config_s stm32_i2c3_config =
 {
   .base          = STM32_I2C3_BASE,
-  .clk_bit       = RCC_APB1ENR_I2C3EN,
-  .reset_bit     = RCC_APB1RSTR_I2C3RST,
+  .clk_reg       = STM32_I2C123_CLK_REG,
+  .clk_bit       = STM32_I2C3_CLK_BIT,
+  .reset_reg     = STM32_I2C123_RST_REG,
+  .reset_bit     = STM32_I2C3_RST_BIT,
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -613,8 +672,10 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 static const struct stm32_i2c_config_s stm32_i2c4_config =
 {
   .base          = STM32_I2C4_BASE,
-  .clk_bit       = RCC_APB1ENR_I2C4EN,
-  .reset_bit     = RCC_APB1RSTR_I2C4RST,
+  .clk_reg       = STM32_I2C4_CLK_REG,
+  .clk_bit       = STM32_I2C4_CLK_BIT,
+  .reset_reg     = STM32_I2C4_RST_REG,
+  .reset_bit     = STM32_I2C4_RST_BIT,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
 #ifndef CONFIG_I2C_POLLED
@@ -2154,9 +2215,9 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  modifyreg32(STM32_RCC_APB1ENR, 0, priv->config->clk_bit);
-  modifyreg32(STM32_RCC_APB1RSTR, 0, priv->config->reset_bit);
-  modifyreg32(STM32_RCC_APB1RSTR, priv->config->reset_bit, 0);
+  modifyreg32(priv->config->clk_reg, 0, priv->config->clk_bit);
+  modifyreg32(priv->config->reset_reg, 0, priv->config->reset_bit);
+  modifyreg32(priv->config->reset_reg, priv->config->reset_bit, 0);
 
   /* Configure pins */
 
@@ -2224,7 +2285,7 @@ static int stm32_i2c_deinit(struct stm32_i2c_priv_s *priv)
 
   /* Disable clocking */
 
-  modifyreg32(STM32_RCC_APB1ENR, priv->config->clk_bit, 0);
+  modifyreg32(priv->config->clk_reg, priv->config->clk_bit, 0);
 
   return OK;
 }

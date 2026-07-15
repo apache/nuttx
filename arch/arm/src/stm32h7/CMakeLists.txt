@@ -92,10 +92,6 @@ if(CONFIG_STM32_RTC_LSECLOCK)
   list(APPEND SRCS stm32_lse.c)
 endif()
 
-if(CONFIG_STM32_I2C)
-  list(APPEND SRCS stm32_i2c.c)
-endif()
-
 if(CONFIG_STM32_PWR)
   list(APPEND SRCS stm32_pwr.c)
 endif()
