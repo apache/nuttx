@@ -40,6 +40,10 @@
 #include "hardware/stm32_dbgmcu.h"
 #include "stm32_wdg.h"
 
+#if !defined(STM32_IRQ_WWDG) && defined(STM32_IRQ_WWDG1)
+#  define STM32_IRQ_WWDG STM32_IRQ_WWDG1
+#endif
+
 #if defined(CONFIG_WATCHDOG) && defined(CONFIG_STM32_WWDG)
 
 /****************************************************************************
@@ -784,12 +788,19 @@ void stm32_wwdginitialize(const char *devpath)
     defined(CONFIG_STM32_JTAG_NOJNTRST_ENABLE) || \
     defined(CONFIG_STM32_JTAG_SW_ENABLE)
     {
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F4XXX) || defined(CONFIG_STM32_STM32L15XX)
+#if defined(STM32_DBGMCU_APB3FZ1)
+      uint32_t cr = getreg32(STM32_DBGMCU_APB3FZ1);
+      cr |= DBGMCU_APB3_WWDOG;
+      putreg32(cr, STM32_DBGMCU_APB3FZ1);
+#elif defined(STM32_DBGMCU_APB1_FZ1)
+      uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ1);
+      cr |= DBGMCU_APB1FZ1_WWDGSTOP;
+      putreg32(cr, STM32_DBGMCU_APB1_FZ1);
+#elif defined(STM32_DBGMCU_APB1_FZ)
       uint32_t cr = getreg32(STM32_DBGMCU_APB1_FZ);
       cr |= DBGMCU_APB1_WWDGSTOP;
       putreg32(cr, STM32_DBGMCU_APB1_FZ);
-#else /* if defined(CONFIG_STM32_STM32F10XX) */
+#else
       uint32_t cr = getreg32(STM32_DBGMCU_CR);
       cr |= DBGMCU_CR_WWDGSTOP;
       putreg32(cr, STM32_DBGMCU_CR);

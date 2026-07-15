@@ -40,6 +40,8 @@
       defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) || \
       defined(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V3)
 #  include "hardware/stm32_dbgmcu_v1.h"
+#elif defined(CONFIG_STM32_HAVE_IP_DBGMCU_M7_V1)
+#  include "hardware/stm32_dbgmcu_m7_v1.h"
 #else
 #  error "Unsupported STM32 DBGMCU"
 #endif

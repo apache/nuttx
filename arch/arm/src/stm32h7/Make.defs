@@ -183,14 +183,6 @@ CHIP_CSRCS += stm32_pminitialize.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32_IWDG),y)
-CHIP_CSRCS += stm32_iwdg.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG),y)
-CHIP_CSRCS += stm32_wwdg.c
-endif
-
 ifeq ($(CONFIG_STM32_CRYP),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_CRYPTO_H7),y)
 CHIP_CSRCS += stm32_aes.c

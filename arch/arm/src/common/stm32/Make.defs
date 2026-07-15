@@ -342,14 +342,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
-CHIP_CSRCS += stm32_iwdg_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
-CHIP_CSRCS += stm32_wwdg_v1.c
-endif
-
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 ifneq ($(filter y,$(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V1) \
             $(CONFIG_STM32_HAVE_IP_DBGMCU_M3M4_V2) \
@@ -396,6 +388,14 @@ endif
 
 ifeq ($(CONFIG_STM32_RNG)$(CONFIG_STM32_HAVE_IP_RNG_V1),yy)
 CHIP_CSRCS += stm32_rng_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
+CHIP_CSRCS += stm32_iwdg_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_V1),yy)
+CHIP_CSRCS += stm32_wwdg_v1.c
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM0),y)

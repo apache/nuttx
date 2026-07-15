@@ -179,14 +179,6 @@ if(CONFIG_PM)
   endif()
 endif()
 
-if(CONFIG_STM32_IWDG)
-  list(APPEND SRCS stm32_iwdg.c)
-endif()
-
-if(CONFIG_STM32_WWDG)
-  list(APPEND SRCS stm32_wwdg.c)
-endif()
-
 if(CONFIG_STM32_CRYP AND CONFIG_STM32_HAVE_IP_CRYPTO_H7)
   list(APPEND SRCS stm32_aes.c)
 endif()

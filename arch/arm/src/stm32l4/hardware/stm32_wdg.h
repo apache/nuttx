@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32l4/hardware/stm32l4_wdg.h
+ * arch/arm/src/stm32l4/hardware/stm32_wdg.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_WDG_H
-#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_WDG_H
+#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_WDG_H
 
 /****************************************************************************
  * Included Files
@@ -138,4 +138,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4_WDG_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32_WDG_H */
