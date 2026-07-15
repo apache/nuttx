@@ -19,7 +19,7 @@
 # Usage:
 #   update_romfs_password.sh <path-to-.config>
 #
-# When CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y and the admin password is not
+# When CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y and the root password is not
 # set in .config, copy NUTTX_ROMFS_PASSWD_PASSWORD into .config.  This is the
 # supported way to supply build-time credentials that must not live in defconfig
 # (CI, automation, local scripts).  No-op when the password is already set or
