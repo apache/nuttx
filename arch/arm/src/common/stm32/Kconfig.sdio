@@ -6,9 +6,25 @@ config STM32_SDMMC2_HAVE_DMAPRIO
 	bool
 	default y if ARCH_CHIP_STM32F7
 
+config STM32_SDMMC_HAVE_DMA
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_SDMMC_HAVE_IDMA
+	bool
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_SDMMC_HAVE_SDIO_MODE
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
 config STM32_SDIO_CARD
 	bool "SDIO Card support"
-	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_SDIO
 	default n
 	---help---
 		Build in additional support needed only for SDIO cards (vs. SD
@@ -16,7 +32,7 @@ config STM32_SDIO_CARD
 
 config STM32_SDIO_PULLUP
 	bool "Enable internal Pull-Ups"
-	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_SDIO
 	default n
 	---help---
 		If you are using an external SDCard module that does not have the
@@ -28,7 +44,7 @@ config STM32_SDIO_DMA
 	bool "Support DMA data transfers"
 	default STM32_DMA2
 	select SDIO_DMA
-	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_SDIO
 	depends on STM32_DMA2
 	---help---
 		Support DMA data transfers.  Requires STM32_SDIO and config STM32_DMA2.
@@ -37,7 +53,7 @@ config STM32_SDIO_DMAPRIO
 	hex "SDIO DMA priority"
 	default 0x00001000 if STM32_STM32F10XX
 	default 0x00010000 if !STM32_STM32F10XX
-	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_SDIO
 	---help---
 		Select SDIO DMA priority.
 
@@ -49,14 +65,14 @@ config STM32_SDIO_DMAPRIO
 
 config STM32_SDIO_WIDTH_D1_ONLY
 	bool "Use D1 only"
-	depends on STM32_COMMON_LEGACY && STM32_SDIO
+	depends on STM32_SDIO
 	default n
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 config STM32_SDMMC_IDMA
 	bool "Support IDMA data transfers"
-	depends on ARCH_CHIP_STM32H7 && STM32_SDMMC
+	depends on STM32_SDMMC_HAVE_IDMA && STM32_SDMMC
 	default y
 	select SDIO_DMA
 	---help---
@@ -77,14 +93,14 @@ config STM32_SDMMC_XFRDEBUG
 
 config STM32_SDMMC_DMA
 	bool "Support DMA data transfers"
-	depends on (ARCH_CHIP_STM32F7 || STM32_COMMON_L4_L5_U5) && STM32_SDMMC && STM32_DMA
+	depends on STM32_SDMMC_HAVE_DMA && STM32_SDMMC && STM32_DMA
 	select SDIO_DMA
 	---help---
 		Support DMA data transfers.
 
 config STM32_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
-	depends on (ARCH_CHIP_STM32F7 || STM32_COMMON_L4_L5_U5) && STM32_SDMMC1
+	depends on STM32_SDMMC_HAVE_DMA && STM32_SDMMC1
 	default 0x00010000 if ARCH_CHIP_STM32F7
 	default 0x00001000
 	---help---
@@ -101,14 +117,14 @@ config SDMMC1_WIDTH_D1_ONLY
 
 config SDMMC1_SDIO_MODE
 	bool "SDIO Card Support"
-	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC1
+	depends on STM32_SDMMC_HAVE_SDIO_MODE && STM32_SDMMC && STM32_SDMMC1
 	---help---
 		Build in additional support needed only for SDIO cards (vs. SD
 		memory cards)
 
 config SDMMC1_SDIO_PULLUP
 	bool "Enable internal Pull-Ups"
-	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC1
+	depends on STM32_SDMMC_HAVE_SDIO_MODE && STM32_SDMMC && STM32_SDMMC1
 	---help---
 		If you are using an external SDCard module that does not have the
 		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
@@ -117,20 +133,20 @@ config SDMMC1_SDIO_PULLUP
 
 config SDMMC2_WIDTH_D1_ONLY
 	bool "Use D1 only on SDMMC2"
-	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	depends on STM32_SDMMC_HAVE_SDIO_MODE && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
 
 config SDMMC2_SDIO_MODE
 	bool "SDIO Card Support"
-	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	depends on STM32_SDMMC_HAVE_SDIO_MODE && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		Build in additional support needed only for SDIO cards (vs. SD
 		memory cards)
 
 config SDMMC2_SDIO_PULLUP
 	bool "Enable internal Pull-Ups"
-	depends on STM32_COMMON_F7_H7 && STM32_SDMMC && STM32_SDMMC2
+	depends on STM32_SDMMC_HAVE_SDIO_MODE && STM32_SDMMC && STM32_SDMMC2
 	---help---
 		If you are using an external SDCard module that does not have the
 		pull-up resistors for the SDIO interface (like the Gadgeteer SD Card
