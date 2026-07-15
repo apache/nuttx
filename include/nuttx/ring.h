@@ -1631,6 +1631,18 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
       count = r->capacity;
     }
 
+  if (count == 0)
+    {
+      /* Nothing to reserve.  Bumping prod_head.cnt here without a
+       * matching prod_tail.cnt bump (ring_mp_finish() returns early on
+       * buf->cnt == 0) would leave a permanent cnt mismatch that
+       * deadlocks the RTS tail sync.  Return an empty buf instead.
+       */
+
+      ring_buf_init(buf, r, 0, 0, elem_size);
+      return all_discard;
+    }
+
   old_prod = atomic_read(&r->prod_head);
   for (; ; )
     {
