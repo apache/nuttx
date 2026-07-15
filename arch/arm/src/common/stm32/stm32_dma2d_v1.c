@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_dma2d_m3m4_v1.c
+ * arch/arm/src/common/stm32/stm32_dma2d_v1.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -48,8 +48,8 @@
 #include "stm32.h"
 #include "hardware/stm32_ltdc.h"
 #include "hardware/stm32_dma2d.h"
-#include "stm32_dma2d_m3m4_v1.h"
-#include "stm32_dma2d_m3m4_v1.h"
+#include "stm32_dma2d_v1.h"
+#include "stm32_dma2d_v1.h"
 
 /****************************************************************************
  * Pre-processor Definitions
