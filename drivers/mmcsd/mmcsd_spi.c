@@ -1649,7 +1649,7 @@ static int mmcsd_geometry(FAR struct inode *inode,
   finfo("geo_mediachanged:  %d\n", geometry->geo_mediachanged);
   finfo("geo_writeenabled:  %d\n", geometry->geo_writeenabled);
   finfo("geo_nsectors:      %" PRIuOFF "\n", geometry->geo_nsectors);
-  finfo("geo_sectorsize:    %" PRIi16 "\n", geometry->geo_sectorsize);
+  finfo("geo_sectorsize:    %" PRId32 "\n", geometry->geo_sectorsize);
 
   return OK;
 }

@@ -2235,7 +2235,7 @@ static int usbhost_geometry(FAR struct inode *inode,
           geometry->geo_sectorsize    = priv->blocksize;
           nxmutex_unlock(&priv->lock);
 
-          uinfo("nsectors: %" PRIdOFF " sectorsize: %" PRIi16 "\n",
+          uinfo("nsectors: %" PRIdOFF " sectorsize: %" PRId32 "\n",
                 geometry->geo_nsectors, geometry->geo_sectorsize);
         }
     }
