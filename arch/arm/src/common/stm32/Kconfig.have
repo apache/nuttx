@@ -44,6 +44,12 @@ config STM32_HAVE_ADC_TIMTRIG_TRGO
 config STM32_HAVE_TIM_ADC_CHANNEL
 	bool
 
+config STM32_HAVE_DAC_DMA_TIMER
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
 config STM32_HAVE_ADC_L4
 	bool
 
@@ -616,6 +622,12 @@ config STM32_HAVE_IP_FSMC_M3M4_V1
 
 config STM32_HAVE_IP_BBSRAM_M3M4_V1
 	bool
+
+config STM32_HAVE_BBSRAM
+	bool
+	default y if STM32_HAVE_IP_BBSRAM_M3M4_V1
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
 
 config STM32_HAVE_IP_BKP_M3M4_V1
 	bool
@@ -1207,6 +1219,11 @@ config STM32_HAVE_TSC
 	bool
 
 # UART capabilities
+
+config STM32_HAVE_USART_SERIALDRIVER
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
 
 config STM32_HAVE_SWPMI
 	bool
