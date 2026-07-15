@@ -35,6 +35,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* H7 numbers its watchdog instances (IWDG1/WWDG1 belong to CPU1); alias
+ * them to the unnumbered names used by the common drivers.
+ */
+
+#if !defined(STM32_IWDG_BASE) && defined(STM32_IWDG1_BASE)
+#  define STM32_IWDG_BASE        STM32_IWDG1_BASE
+#endif
+
+#if !defined(STM32_WWDG_BASE) && defined(STM32_WWDG1_BASE)
+#  define STM32_WWDG_BASE        STM32_WWDG1_BASE
+#endif
+
 /* Register Offsets *********************************************************/
 
 #define STM32_IWDG_KR_OFFSET     0x0000  /* Key register (32-bit) */

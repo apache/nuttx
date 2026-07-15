@@ -155,10 +155,6 @@ ifeq ($(CONFIG_STM32_FIREWALL),y)
 CHIP_CSRCS += stm32l4_firewall.c
 endif
 
-ifeq ($(CONFIG_STM32_IWDG),y)
-CHIP_CSRCS += stm32l4_iwdg.c
-endif
-
 ifeq ($(CONFIG_STM32_SDMMC1),y)
 CHIP_CSRCS += stm32l4_sdmmc.c
 endif
