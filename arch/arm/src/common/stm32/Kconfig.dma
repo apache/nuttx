@@ -12,8 +12,8 @@ config STM32_DMA2_HAVE_CHAN678
 
 config STM32_DMACAPABLE
 	bool "Workaround non-DMA capable memory"
-	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F7_H7) && ARCH_DMA
-	default STM32_STM32F4XXX && !STM32_CCMEXCLUDE if STM32_COMMON_LEGACY && ARCH_DMA
+	depends on STM32_HAVE_DMACAPABLE && ARCH_DMA
+	default STM32_STM32F4XXX && !STM32_CCMEXCLUDE
 	---help---
 		This option enables the DMA interface stm32_dmacapable that can be
 		used to check if it is possible to do DMA from the selected address.
@@ -108,7 +108,7 @@ endif # STM32_DMA2D
 
 config STM32_DMACAPABLE_ASSUME_CACHE_ALIGNED
 	bool "Do not disqualify DMA capability based on cache alignment"
-	depends on STM32_COMMON_F7_H7 && STM32_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
+	depends on STM32_DMACAPABLE && ARMV7M_DCACHE && !ARMV7M_DCACHE_WRITETHROUGH
 	---help---
 		This option configures the stm32_dmacapable to not disqualify
 		DMA operations on memory that is not dcache aligned based solely
