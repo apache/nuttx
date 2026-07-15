@@ -400,12 +400,6 @@ CHIP_CSRCS += stm32_ltdc_v1v2.c
 endif
 endif
 
-ifeq ($(CONFIG_STM32_DMA2D),y)
-ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_V1),y)
-CHIP_CSRCS += stm32_dma2d_v1.c
-endif
-endif
-
 ifeq ($(CONFIG_STM32_PWM),y)
 CHIP_CSRCS += stm32_pwm_m3m4_v1v2v3.c
 endif
@@ -489,6 +483,12 @@ else ifeq ($(CONFIG_STM32_HAVE_IP_I2C_V2),y)
 CHIP_CSRCS += stm32_i2c_v2.c
 ifeq ($(CONFIG_STM32_I2C_SLAVE),y)
 CHIP_CSRCS += stm32_i2c_v2_slave.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_DMA2D),y)
+ifeq ($(CONFIG_STM32_HAVE_IP_DMA2D_V1),y)
+CHIP_CSRCS += stm32_dma2d_v1.c
 endif
 endif
 
