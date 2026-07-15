@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
+#include <nuttx/addrenv.h>
 #include "sched/sched.h"
 #include "riscv_internal.h"
 
@@ -65,9 +66,14 @@ static inline uintptr_t getfp(void)
 nosanitize_address
 static int backtrace(uintptr_t *base, uintptr_t *limit,
                      uintptr_t *fp, uintptr_t *ra,
-                     void **buffer, int size, int *skip)
+                     void **buffer, int size, int *skip
+#ifdef CONFIG_ARCH_ADDRENV
+                     , FAR struct addrenv_s *addrenv
+#endif
+                     )
 {
   int i = 0;
+  uintptr_t *next_fp;
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   int cpu = up_cpu_index();
   uintptr_t *intstack_limit =
@@ -76,6 +82,9 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
 
   uintptr_t *intstack_base =
     (uintptr_t *)((uintptr_t)intstack_limit - CONFIG_ARCH_INTERRUPTSTACK);
+#endif
+#ifdef CONFIG_ARCH_ADDRENV
+  FAR struct addrenv_s *oldenv;
 #endif
 
   if (ra)
@@ -86,7 +95,7 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
         }
     }
 
-  for (; i < size; fp = (uintptr_t *)*(fp - 2))
+  for (; i < size; fp = next_fp)
     {
       if ((fp > limit || fp < base)
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -97,7 +106,30 @@ static int backtrace(uintptr_t *base, uintptr_t *limit,
           break;
         }
 
+      /* fp/fp-1/fp-2 are addresses in the *target* tcb's stack.  If that
+       * tcb has its own address environment, switch to it only for these
+       * two dereferences.  buffer belongs to the caller, not the target,
+       * and must always be written using the caller's own address
+       * environment.
+       */
+
+#ifdef CONFIG_ARCH_ADDRENV
+      if (addrenv != NULL)
+        {
+          addrenv_select(addrenv, &oldenv);
+        }
+#endif
+
       ra = (uintptr_t *)*(fp - 1);
+      next_fp = (uintptr_t *)*(fp - 2);
+
+#ifdef CONFIG_ARCH_ADDRENV
+      if (addrenv != NULL)
+        {
+          addrenv_restore(oldenv);
+        }
+#endif
+
       if (ra == NULL)
         {
           break;
@@ -166,7 +198,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
           ret = backtrace(rtcb->stack_base_ptr,
                           (uintptr_t *)((uintptr_t)rtcb->stack_base_ptr +
                                         rtcb->adj_stack_size),
-                          (void *)getfp(), NULL, buffer, size, &skip);
+                          (void *)getfp(), NULL, buffer, size, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                          , NULL
+#endif
+                          );
           if (ret < size)
             {
               ret += backtrace(rtcb->stack_base_ptr, (uintptr_t *)
@@ -174,7 +210,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                 rtcb->adj_stack_size),
                                running_regs()[REG_FP],
                                running_regs()[REG_EPC],
-                               &buffer[ret], size - ret, &skip);
+                               &buffer[ret], size - ret, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                               , NULL
+#endif
+                               );
             }
         }
       else
@@ -187,7 +227,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                rtcb->adj_stack_size),
                               (void *)rtcb->xcp.sregs[REG_FP],
                               (void *)rtcb->xcp.sregs[REG_EPC],
-                              buffer, size, &skip);
+                              buffer, size, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                              , NULL
+#endif
+                              );
             }
           else
 #endif
@@ -195,7 +239,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
               ret = backtrace(rtcb->stack_base_ptr, (uintptr_t *)
                               ((uintptr_t)rtcb->stack_base_ptr +
                                rtcb->adj_stack_size),
-                              (void *)getfp(), NULL, buffer, size, &skip);
+                              (void *)getfp(), NULL, buffer, size, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                              , NULL
+#endif
+                              );
             }
         }
     }
@@ -209,7 +257,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                         tcb->adj_stack_size),
                           (void *)tcb->xcp.sregs[REG_FP],
                           (void *)tcb->xcp.sregs[REG_EPC],
-                          buffer, size, &skip);
+                          buffer, size, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                          , tcb->addrenv_own
+#endif
+                          );
         }
       else
 #endif
@@ -219,7 +271,11 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
                                         tcb->adj_stack_size),
                           (void *)tcb->xcp.regs[REG_FP],
                           (void *)tcb->xcp.regs[REG_EPC],
-                          buffer, size, &skip);
+                          buffer, size, &skip
+#ifdef CONFIG_ARCH_ADDRENV
+                          , tcb->addrenv_own
+#endif
+                          );
         }
     }
 
