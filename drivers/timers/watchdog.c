@@ -42,6 +42,7 @@
 #include <nuttx/panic_notifier.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/mutex.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/timers/oneshot.h>
@@ -99,6 +100,9 @@ struct watchdog_upperhalf_s
   struct notifier_block nb;
 #endif
 #ifdef CONFIG_WATCHDOG_AUTOMONITOR
+#  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
+  FAR struct watchdog_upperhalf_s *capture_next;
+#  endif
 #  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
   FAR struct oneshot_lowerhalf_s *oneshot;
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
@@ -153,24 +157,129 @@ static const struct file_operations g_wdogops =
 static ATOMIC_NOTIFIER_HEAD(g_watchdog_notifier_list);
 #endif
 
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE
+/* Active capture automonitor instances.  Lower halves that pass an argument
+ * can identify their upper-half directly or through the lower-half pointer.
+ * A NULL argument is accepted only when this list contains one instance.
+ */
+
+static FAR struct watchdog_upperhalf_s *g_watchdog_capture_list;
+static spinlock_t g_watchdog_capture_lock = SP_UNLOCKED;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
+#ifdef CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE
+static void watchdog_capture_add(FAR struct watchdog_upperhalf_s *upper)
+{
+  irqstate_t flags = spin_lock_irqsave(&g_watchdog_capture_lock);
+
+  upper->capture_next = g_watchdog_capture_list;
+  g_watchdog_capture_list = upper;
+  spin_unlock_irqrestore(&g_watchdog_capture_lock, flags);
+}
+
+static void watchdog_capture_remove(FAR struct watchdog_upperhalf_s *upper)
+{
+  FAR struct watchdog_upperhalf_s **cursor;
+  irqstate_t flags = spin_lock_irqsave(&g_watchdog_capture_lock);
+
+  cursor = &g_watchdog_capture_list;
+  while (*cursor != NULL)
+    {
+      if (*cursor == upper)
+        {
+          *cursor = upper->capture_next;
+          upper->capture_next = NULL;
+          break;
+        }
+
+      cursor = &(*cursor)->capture_next;
+    }
+
+  spin_unlock_irqrestore(&g_watchdog_capture_lock, flags);
+}
+
+static FAR struct watchdog_upperhalf_s *
+watchdog_capture_find(FAR void *arg)
+{
+  FAR struct watchdog_upperhalf_s *upper;
+  FAR struct watchdog_upperhalf_s *match = NULL;
+  irqstate_t flags = spin_lock_irqsave(&g_watchdog_capture_lock);
+
+  if (arg == NULL)
+    {
+      for (upper = g_watchdog_capture_list; upper != NULL;
+           upper = upper->capture_next)
+        {
+          if (match != NULL)
+            {
+              /* More than one NULL-context instance cannot be identified. */
+
+              match = NULL;
+              break;
+            }
+
+          match = upper;
+        }
+    }
+  else
+    {
+      for (upper = g_watchdog_capture_list; upper != NULL;
+           upper = upper->capture_next)
+        {
+          if (arg == upper || arg == upper->lower)
+            {
+              match = upper;
+              break;
+            }
+        }
+    }
+
+  spin_unlock_irqrestore(&g_watchdog_capture_lock, flags);
+  return match;
+}
+
 static int watchdog_automonitor_capture(int irq, FAR void *context,
                                         FAR void *arg)
 {
-  FAR struct watchdog_upperhalf_s *upper = arg;
-  FAR struct watchdog_lowerhalf_s *lower = upper->lower;
+  FAR struct watchdog_upperhalf_s *upper = watchdog_capture_find(arg);
+  FAR struct watchdog_lowerhalf_s *lower;
+
+  /* A stop operation can race with a pending interrupt.  Do not dereference
+   * a removed association after automonitor has been stopped.
+   */
+
+  if (upper == NULL)
+    {
+      return 0;
+    }
+
+  lower = upper->lower;
 
   if (upper->monitor)
     {
+      /* Reload the hardware watchdog before dispatching optional
+       * notifications.  The EWI-to-reset interval is short, and notifier
+       * callbacks must not delay the keepalive operation.
+       */
+
       lower->ops->keepalive(lower);
+
+#ifdef CONFIG_WATCHDOG_TIMEOUT_NOTIFIER
+      /* The capture callback is entered from the watchdog timeout
+       * interrupt.  Notifier callbacks must be safe in interrupt context.
+       */
+
+      watchdog_automonitor_timeout();
+#endif
     }
 
   return 0;
 }
+
 #elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
 static void
 watchdog_automonitor_oneshot(FAR struct oneshot_lowerhalf_s *oneshot,
@@ -267,6 +376,7 @@ watchdog_automonitor_start(FAR struct watchdog_upperhalf_s *upper)
   if (!upper->monitor)
     {
 #  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
+      watchdog_capture_add(upper);
       lower->ops->capture(lower, watchdog_automonitor_capture);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
       struct timespec ts =
@@ -311,6 +421,7 @@ static void watchdog_automonitor_stop(FAR struct watchdog_upperhalf_s *upper)
       lower->ops->stop(lower);
 #  if defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_CAPTURE)
       lower->ops->capture(lower, NULL);
+      watchdog_capture_remove(upper);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_ONESHOT)
       ONESHOT_CANCEL(upper->oneshot, NULL);
 #  elif defined(CONFIG_WATCHDOG_AUTOMONITOR_BY_TIMER)
@@ -762,7 +873,12 @@ void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb)
 
 void watchdog_automonitor_timeout(void)
 {
-  atomic_notifier_call_chain(&g_watchdog_notifier_list, action, data);
+  /* The action identifies the automonitor keepalive mechanism selected at
+   * build time.  There is no source-specific payload for this event.
+   */
+
+  atomic_notifier_call_chain(&g_watchdog_notifier_list,
+                             WATCHDOG_NOTIFIER_ACTION, NULL);
 }
 #endif /* CONFIG_WATCHDOG_TIMEOUT_NOTIFIER */
 
