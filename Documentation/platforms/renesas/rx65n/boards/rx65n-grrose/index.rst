@@ -495,34 +495,39 @@ start-up script; ``/etc/passwd`` is the password file.
 
 The ``/etc/passwd`` file is auto-generated at build time when
 ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` is set.  See :ref:`mkpasswd_autogen`
-for the full setup (admin password, TEA keys, NSH encrypted-password login).
+for the full setup (root password, NSH encrypted-password login).
 
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``
 * ``CONFIG_BOARD_ETC_ROMFS_PASSWD_USER`` (default: ``root``)
-* Admin password and TEA keys — set in menuconfig (not saved in defconfig)
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` (required; minimum 8 characters
+  with uppercase, lowercase, digit, and special character.  See
+  :ref:`mkpasswd_autogen`)
 
-The password is hashed with TEA by ``tools/mkpasswd``; the plaintext is **not**
-stored in the firmware.
+The password is hashed with PBKDF2-HMAC-SHA256 at build time by the host tool
+``tools/mkpasswd``; the plaintext is **not** stored in the firmware.
+
+For the full description of the mechanism, file format, and verification
+steps, see :ref:`mkpasswd_autogen`.
 
 The format of the password file is:
 
 .. code:: text
 
-   user:encrypted_hash:uid:gid:home
+   user:x:uid:gid:home
 
    Where:
    user:  User name
-   encrypted_hash:  TEA-encrypted password (base64)
-   uid:   User ID
-   gid:   Group ID
-   home:  Login directory
+   x:     PBKDF2-HMAC-SHA256 hash (modular crypt format)
+   uid:   User ID (0 for now)
+   gid:   Group ID (0 for now)
+   home:  Login directory (/ for now)
 
 ``/etc/group`` is a group file. It is not currently used.
 
 .. code:: console
 
    nsh> cat /etc/group
-   root:*:0:root,admin
+   root:*:0:root
 
 The format of the group file is:
 
