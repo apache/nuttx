@@ -1307,7 +1307,7 @@ int rpmsgblk_register(FAR const char *remotecpu, FAR const char *remotepath,
       localpath = remotepath;
     }
 
-  ret = register_blockdriver(localpath, &dev->blk, 0750, dev);
+  ret = register_blockdriver(localpath, &dev->blk, 0600, dev);
   if (ret < 0)
     {
       ferr("ERROR: register driver failed, ret=%d\n", ret);

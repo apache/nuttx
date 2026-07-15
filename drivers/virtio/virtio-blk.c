@@ -596,7 +596,7 @@ static int virtio_blk_probe(FAR struct virtio_device *vdev)
   /* Register block driver */
 
   snprintf(priv->name, NAME_MAX, "/dev/virtblk%d", g_virtio_blk_idx);
-  ret = register_blockdriver(priv->name, &g_virtio_blk_bops, 0660, priv);
+  ret = register_blockdriver(priv->name, &g_virtio_blk_bops, 0600, priv);
   if (ret < 0)
     {
       vrterr("Register block driver failed, ret=%d\n", ret);

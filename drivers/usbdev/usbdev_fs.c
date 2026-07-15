@@ -1244,7 +1244,7 @@ static void usbdev_fs_register_driver(FAR void *arg)
     {
       snprintf(devname, sizeof(devname), "%s/ep%d",
                devinfo->name, i);
-      ret = register_driver(devname, &g_usbdev_fs_fops, 0666, &fs->eps[i]);
+      ret = register_driver(devname, &g_usbdev_fs_fops, 0600, &fs->eps[i]);
       if (ret < 0)
         {
           uerr("Failed to register driver:%s, ret:%d\n", devname, ret);
