@@ -59,6 +59,7 @@ ignore-words-list =
   ser,
   servent,
   synopsys,
+  TBE,
   TE,
   TIMOUT,
   THRE,
