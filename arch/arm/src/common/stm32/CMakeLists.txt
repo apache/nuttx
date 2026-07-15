@@ -276,10 +276,6 @@ if(CONFIG_STM32_HAVE_IP_SYSCORE_M3M4_V1)
     list(APPEND SRCS stm32_ltdc_m3m4_v1.c)
   endif()
 
-  if(CONFIG_STM32_DMA2D AND CONFIG_STM32_HAVE_IP_DMA2D_V1)
-    list(APPEND SRCS stm32_dma2d_v1.c)
-  endif()
-
   if(CONFIG_STM32_PWM)
     list(APPEND SRCS stm32_pwm_m3m4_v1v2v3.c)
   endif()
@@ -352,6 +348,10 @@ endif()
 
 if(CONFIG_STM32_WWDG AND CONFIG_STM32_HAVE_IP_WDG_V1)
   list(APPEND SRCS stm32_wwdg_v1.c)
+endif()
+
+if(CONFIG_STM32_DMA2D AND CONFIG_STM32_HAVE_IP_DMA2D_V1)
+  list(APPEND SRCS stm32_dma2d_v1.c)
 endif()
 
 if(CONFIG_ARCH_CORTEXM0)
