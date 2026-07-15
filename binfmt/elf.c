@@ -98,6 +98,7 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           int nexports)
 {
   struct mod_loadinfo_s loadinfo;
+  Elf_Sym sym;
   int ret;
 
   binfo("Loading file: %s\n", filename);
@@ -173,7 +174,57 @@ static int elf_loadbinary(FAR struct binary_s *binp,
 
   /* Return the load information */
 
-  binp->stacksize = CONFIG_ELF_STACKSIZE;
+  ret = libelf_findsymbol(&loadinfo, "nx_stacksize", &sym);
+  if (ret == 0)
+    {
+      binp->stacksize = sym.st_value;
+    }
+  else
+    {
+      binp->stacksize = CONFIG_ELF_STACKSIZE;
+    }
+
+  ret = libelf_findsymbol(&loadinfo, "nx_priority", &sym);
+  if (ret == 0)
+    {
+      binp->priority = sym.st_value;
+    }
+  else
+    {
+      binp->priority = SCHED_PRIORITY_DEFAULT;
+    }
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  ret = libelf_findsymbol(&loadinfo, "nx_uid", &sym);
+  if (ret == 0)
+    {
+      binp->uid = sym.st_value;
+    }
+  else
+    {
+      binp->uid = 0;
+    }
+
+  ret = libelf_findsymbol(&loadinfo, "nx_gid", &sym);
+  if (ret == 0)
+    {
+      binp->gid = sym.st_value;
+    }
+  else
+    {
+      binp->gid = 0;
+    }
+
+  ret = libelf_findsymbol(&loadinfo, "nx_mode", &sym);
+  if (ret == 0)
+    {
+      binp->mode = sym.st_value;
+    }
+  else
+    {
+      binp->mode = 0;
+    }
+#endif
 
   /* Add the ELF allocation to the alloc[] only if there is no address
    * environment.  If there is an address environment, it will automatically
