@@ -142,6 +142,12 @@ nsh
 Basic NuttShell configuration (console enabled over the USB Serial/JTAG port,
 exposed as ``/dev/ttyACM0`` on the host).  Brings up the I2C0 bus.
 
+python
+------
+
+This configuration enables the Python for ESP32-P4 on Tab5.
+Please refer to the :doc:`Python Interpreter </applications/interpreters/python/index>` page.
+
 Building and flashing
 =====================
 
