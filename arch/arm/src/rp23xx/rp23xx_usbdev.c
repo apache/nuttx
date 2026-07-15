@@ -318,9 +318,6 @@ static void rp23xx_update_buffer_control(struct rp23xx_ep_s *privep,
 static int rp23xx_epwrite(struct rp23xx_ep_s *privep, uint8_t *buf,
                           uint16_t nbytes);
 static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes);
-static void rp23xx_abortrequest(struct rp23xx_ep_s *privep,
-                                struct rp23xx_req_s *privreq,
-                                int16_t result);
 static void rp23xx_reqcomplete(struct rp23xx_ep_s *privep, int16_t result);
 static void rp23xx_txcomplete(struct rp23xx_ep_s *privep);
 static int rp23xx_wrrequest(struct rp23xx_ep_s *privep);
@@ -583,30 +580,6 @@ static int rp23xx_epread(struct rp23xx_ep_s *privep, uint16_t nbytes)
   spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
   return OK;
-}
-
-/****************************************************************************
- * Name: rp23xx_abortrequest
- *
- * Description:
- *   Discard a request
- *
- ****************************************************************************/
-
-static void rp23xx_abortrequest(struct rp23xx_ep_s *privep,
-                                struct rp23xx_req_s *privreq,
-                                int16_t result)
-{
-  usbtrace(TRACE_DEVERROR(RP23XX_TRACEERR_REQABORTED),
-          (uint16_t)privep->epphy);
-
-  /* Save the result in the request structure */
-
-  privreq->req.result = result;
-
-  /* Callback to the request completion handler */
-
-  privreq->req.callback(&privep->ep, &privreq->req);
 }
 
 /****************************************************************************
@@ -1051,6 +1024,11 @@ static void rp23xx_ep0setup(struct rp23xx_usbdev_s *priv)
                 }
               else
                 {
+                  uint8_t response[2];
+
+                  response[0] = 0;
+                  response[1] = 0;
+
                   switch (priv->ctrl.type & USB_REQ_RECIPIENT_MASK)
                     {
                       case USB_REQ_RECIPIENT_ENDPOINT:
@@ -1067,10 +1045,23 @@ static void rp23xx_ep0setup(struct rp23xx_usbdev_s *priv)
                                 priv->ctrl.type);
                               priv->stalled = true;
                             }
+                          else if (privep->stalled)
+                            {
+                              response[0] = 1; /* Endpoint HALTed */
+                            }
                         }
                         break;
 
                       case USB_REQ_RECIPIENT_DEVICE:
+                        usbtrace(TRACE_INTDECODE(
+                                 RP23XX_TRACEINTID_GETIFDEV),
+                                 0);
+                        if (priv->selfpowered)
+                          {
+                            response[0] = 1 << USB_FEATURE_SELFPOWERED;
+                          }
+                        break;
+
                       case USB_REQ_RECIPIENT_INTERFACE:
                         usbtrace(TRACE_INTDECODE(
                                  RP23XX_TRACEINTID_GETIFDEV),
@@ -1085,6 +1076,17 @@ static void rp23xx_ep0setup(struct rp23xx_usbdev_s *priv)
                           priv->stalled = true;
                         }
                         break;
+                    }
+
+                  /* Send the two-byte endpoint status.  Without a data
+                   * stage EP0 NAKs the host's IN forever; macOS queries
+                   * GET_STATUS on a halted bulk pipe during Bulk-Only reset
+                   * recovery, so this is required for MSC error recovery.
+                   */
+
+                  if (!priv->stalled)
+                    {
+                      rp23xx_epwrite(ep0, response, 2);
                     }
                 }
             }
@@ -1394,7 +1396,15 @@ static bool rp23xx_usbintr_buffstat(struct rp23xx_usbdev_s *priv)
 
               if (privep->in)
                 {
-                  if (!rp23xx_rqempty(privep))
+                  if (privep->epphy != 0 && privep->stalled)
+                    {
+                      /* Completion latched for a transfer the halt already
+                       * aborted (canceled by rp23xx_epstall); don't
+                       * attribute the stale buffer event to post-halt
+                       * requests.
+                       */
+                    }
+                  else if (!rp23xx_rqempty(privep))
                     {
                       rp23xx_txcomplete(privep);
                     }
@@ -1696,24 +1706,22 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
 
   flags = enter_critical_section();
 
-  if (privep->stalled && privep->in)
-    {
-      rp23xx_abortrequest(privep, privreq, -EBUSY);
-      ret = -EBUSY;
-    }
-
   /* Handle IN (device-to-host) requests */
 
-  else if (privep->in)
+  if (privep->in)
     {
-      /* Add the new request to the request queue for the IN endpoint */
+      /* Queue the request on the IN endpoint.  If halted, only queue it;
+       * it is armed when the halt clears (rp23xx_epstall).  MSC relies on
+       * this: the CSW is submitted while the bulk IN is still halted
+       * (ARCH_USBDEV_STALLQUEUE).
+       */
 
       bool empty = rp23xx_rqempty(privep);
 
       rp23xx_rqenqueue(privep, privreq);
       usbtrace(TRACE_INREQQUEUED(privep->epphy), privreq->req.len);
 
-      if (empty)
+      if (empty && !privep->stalled)
         {
           rp23xx_wrrequest(privep);
         }
@@ -1723,7 +1731,9 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
 
   else
     {
-      /* Add the new request to the request queue for the OUT endpoint */
+      /* Queue on the OUT endpoint.  As for IN, don't arm while halted:
+       * arming rewrites the buffer control word and clears the STALL bit.
+       */
 
       bool empty = rp23xx_rqempty(privep);
 
@@ -1733,7 +1743,7 @@ static int rp23xx_epsubmit(struct usbdev_ep_s *ep,
 
       /* This there a incoming data pending the availability of a request? */
 
-      if (empty)
+      if (empty && !privep->stalled)
         {
           ret = rp23xx_rdrequest(privep);
         }
@@ -1818,14 +1828,17 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
 {
   struct rp23xx_ep_s *privep = (struct rp23xx_ep_s *)ep;
   struct rp23xx_usbdev_s *priv = privep->dev;
+  irqstate_t irqflags;
   irqstate_t flags;
 
+  irqflags = enter_critical_section();
   flags = spin_lock_irqsave(&g_usbdev.lock);
 
   if (resume)
     {
       usbtrace(TRACE_EPRESUME, privep->epphy);
       privep->stalled = false;
+      privep->pending_stall = false;
       if (privep->epphy == 0)
         {
           clrbits_reg32(privep->in ?
@@ -1838,8 +1851,29 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
                         ~(RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_STALL),
                         0);
 
+      /* Halt clearing resets the data toggle to DATA0 (USB 2.0 9.4.5) */
+
       privep->next_pid = 0;
       priv->zlp_stat = RP23XX_ZLP_NONE;
+
+      spin_unlock_irqrestore(&g_usbdev.lock, flags);
+
+      /* Restart any requests that were queued (but not armed) while the
+       * endpoint was halted -- e.g. the mass storage CSW that concludes
+       * a failed command (ARCH_USBDEV_STALLQUEUE).
+       */
+
+      if (privep->epphy != 0 && !rp23xx_rqempty(privep))
+        {
+          if (privep->in)
+            {
+              rp23xx_wrrequest(privep);
+            }
+          else
+            {
+              rp23xx_rdrequest(privep);
+            }
+        }
     }
   else
     {
@@ -1850,18 +1884,31 @@ static int rp23xx_epstall(struct usbdev_ep_s *ep, bool resume)
           /* EP0 IN Transfer ongoing : postpone the stall until the end */
 
           privep->pending_stall = true;
+          priv->zlp_stat = RP23XX_ZLP_NONE;
+          spin_unlock_irqrestore(&g_usbdev.lock, flags);
         }
       else
         {
           /* Stall immediately */
 
           rp23xx_epstall_exec(ep);
-        }
+          priv->zlp_stat = RP23XX_ZLP_NONE;
+          spin_unlock_irqrestore(&g_usbdev.lock, flags);
 
-      priv->zlp_stat = RP23XX_ZLP_NONE;
+          /* Terminate the IN transfer the halt aborted: its buffer was
+           * disarmed by the STALL write above and would never complete.
+           * Anything the class resubmits stays queued until the halt
+           * clears.
+           */
+
+          if (privep->epphy != 0 && privep->in && !rp23xx_rqempty(privep))
+            {
+              rp23xx_cancelrequests(privep);
+            }
+        }
     }
 
-  spin_unlock_irqrestore(&g_usbdev.lock, flags);
+  leave_critical_section(irqflags);
 
   return OK;
 }
