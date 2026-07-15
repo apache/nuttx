@@ -5628,78 +5628,67 @@ config BOARD_ETC_ROMFS_PASSWD_ENABLE
 	default n
 	depends on ETC_ROMFS
 	---help---
-		Generate /etc/passwd at build time. The password is hashed with TEA
-		by tools/mkpasswd; the plaintext is not stored in the firmware.
+		Generate /etc/passwd at build time. The password is hashed with
+		PBKDF2-HMAC-SHA256 by tools/mkpasswd; the plaintext is not stored
+		in the firmware.
 
-		Before building, set:
-		  1. Admin password (below)
-		  2. TEA keys — enable random generation below, or set
-		     CONFIG_FSUTILS_PASSWD_KEY1..4 in Application Configuration ->
-		     File System Utilities -> Password file support
+		The password is hashed at build time by the host tool
+		tools/mkpasswd (compiled from tools/mkpasswd.c) using
+		PBKDF2-HMAC-SHA256 — the same algorithm used at runtime in
+		apps/fsutils/passwd/passwd_encrypt.c.  The plaintext password is
+		never stored in the firmware image.
+
+		The iteration count is taken from
+		CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS (default 10000).  Higher
+		values slow brute-force attacks but increase login latency on
+		low-MHz MCUs.
+
+		Before building, set the root password (below) or export
+		NUTTX_ROMFS_PASSWD_PASSWORD for CI and scripted builds (see
+		tools/update_romfs_password.sh).
 
 		Also enable NSH login with "Encrypted password file" verification.
 
-		Password and keys are not saved in defconfig. Do not commit them.
+		Password is not saved in defconfig. Do not commit it.
+
+		See Documentation/components/tools/index.rst (mkpasswd section) for
+		details.
 
 if BOARD_ETC_ROMFS_PASSWD_ENABLE
 
-comment "--- Step 1: set the admin password below ---"
+comment "--- Set the root password below ---"
 
 config BOARD_ETC_ROMFS_PASSWD_USER
-	string "Admin username"
+	string "Root username"
 	default "root"
 	---help---
 		The username for the auto-generated /etc/passwd entry.
 
 config BOARD_ETC_ROMFS_PASSWD_PASSWORD
-	string "Admin password (required, no default)"
+	string "Root password (required, no default)"
 	---help---
-		The plaintext password for the /etc/passwd entry. No default is
-		provided. The build fails if this is empty or shorter than 8
-		characters.
+		The plaintext password for the auto-generated /etc/passwd entry.
+		This value is hashed with PBKDF2-HMAC-SHA256 at build time; the
+		plaintext is NOT stored in the firmware image.  There is no default;
+		set CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD in the board defconfig,
+		via menuconfig, or enter it when prompted during an interactive
+		build.  Password must be at least 8 characters and contain:
+		uppercase letter, lowercase letter, digit, and special character.
 
 		Not saved in defconfig.  For CI or scripted builds, set the
 		environment variable NUTTX_ROMFS_PASSWD_PASSWORD instead (see
 		tools/update_romfs_password.sh).
 
-comment "--- Step 2: choose how to supply the TEA encryption keys ---"
-
-config BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
-	bool "Generate random TEA encryption keys automatically"
-	default n
-	---help---
-		Generate four random TEA keys from /dev/urandom and write them
-		to .config on the first build. The same keys are used for the
-		/etc/passwd hash and the firmware.
-
-		  make menuconfig   # set password, enable this option
-		  make
-
-		Key values are not printed in the build log. Search .config for
-		CONFIG_FSUTILS_PASSWD_KEY to view them. A build warning is printed
-		when keys are first generated.
-
-		Do not copy keys or the password into a defconfig or commit
-		them to version control. CONFIG_BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
-		may remain in defconfig; the password and KEY1..4 may not.
-
-		If disabled, set CONFIG_FSUTILS_PASSWD_KEY1..4 manually under
-		Application Configuration -> File System Utilities ->
-		Password file support.
-
-comment "If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
-	depends on !BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
-
 config BOARD_ETC_ROMFS_PASSWD_UID
-	int "Admin user ID"
+	int "Root user ID"
 	default 0
 
 config BOARD_ETC_ROMFS_PASSWD_GID
-	int "Admin group ID"
+	int "Root group ID"
 	default 0
 
 config BOARD_ETC_ROMFS_PASSWD_HOME
-	string "Admin home directory"
+	string "Root home directory"
 	default "/"
 
 endif # BOARD_ETC_ROMFS_PASSWD_ENABLE

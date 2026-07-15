@@ -18,12 +18,32 @@ Logins for Telnet sessions can be enabled separately with::
 Logins can be enabled for either or both session types. On a successful
 login, the user will have access to the NSH session::
 
-  login: admin
+  login: root
   password:
   User Logged-in!
 
   NuttShell (NSH)
   nsh>
+
+ROMFS password file (recommended)
+==================================
+
+Boards with ROMFS ``/etc`` should auto-generate ``/etc/passwd`` at build time::
+
+  CONFIG_ETC_ROMFS=y
+  CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y
+  CONFIG_CRYPTO_CRYPTODEV=y
+  CONFIG_FSUTILS_PASSWD=y
+  CONFIG_FSUTILS_PASSWD_READONLY=y
+  CONFIG_NSH_CONSOLE_LOGIN=y
+
+``CONFIG_FSUTILS_PASSWD`` depends on ``CONFIG_CRYPTO_CRYPTODEV``.  The
+``sim:login`` defconfig also enables software cryptodev
+(``CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO`` and ``CONFIG_CRYPTO_SW_AES``).
+
+Set **Board Selection → Auto-generate /etc/passwd at build time → Root password**
+in menuconfig, in a local defconfig, or at the ``make`` prompt
+(:ref:`mkpasswd_autogen`).  Only a PBKDF2-HMAC-SHA256 hash is stored in flash.
 
 When ``CONFIG_NSH_LOGIN_SETUID`` is enabled (the default when
 ``CONFIG_SCHED_USER_IDENTITY`` is selected), NSH looks up the
@@ -90,66 +110,43 @@ will be closed. That number is controlled by::
 
   CONFIG_NSH_LOGIN_FAILCOUNT=3
 
+.. _nsh_login_verification:
+
 Verification of Credentials
 ===========================
 
-There are three ways that NSH can be configured to verify user
-credentials at login time:
+There are two ways to verify credentials at login:
 
-  #. The simplest implementation simply uses fixed login credentials and
-     is selected with::
+.. list-table:: NSH credential verification methods
+   :header-rows: 1
+   :widths: 20 15 65
 
-      CONFIG_NSH_LOGIN_FIXED=y
+   * - Method
+     - Kconfig
+     - Summary
+   * - Password file (recommended)
+     - ``CONFIG_NSH_LOGIN_PASSWD=y``
+     - Verifies against ``/etc/passwd`` using PBKDF2-HMAC-SHA256 hashes.
+       Use with ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE`` for ROMFS boards.
+   * - Platform callback
+     - ``CONFIG_NSH_LOGIN_PLATFORM=y``
+     - Board-specific ``platform_user_verify()`` function.
 
-     The fixed login credentials are selected via::
+When ``CONFIG_FSUTILS_PASSWD=y`` is enabled, NSH defaults to
+``CONFIG_NSH_LOGIN_PASSWD=y`` automatically.  Console and telnet login
+require ``CONFIG_FSUTILS_PASSWD``; the removed fixed-login options
+``CONFIG_NSH_LOGIN_FIXED`` and ``CONFIG_NSH_LOGIN_PASSWORD`` are rejected
+at build time if still present in ``.config``.
 
-      CONFIG_NSH_LOGIN_USERNAME=admin
-      CONFIG_NSH_LOGIN_PASSWORD="Administrator"
-
-     This is not very flexible since there can be only one user and the
-     password is fixed in the FLASH image. This option is also not very
-     secure because a malicious user could get the password by just
-     looking at the ``.text`` strings in the flash image.
-
-  #. NSH can also be configured to defer the entire user credential
-     verification to platform-specific logic with this setting::
-
-      CONFIG_NSH_LOGIN_PLATFORM=y
-
-     In this case, NSH will call a platform-specific function to perform
-     the verification of user credentials. The platform-specific logic
-     must provide a function with the following prototype:
-
-     .. code-block:: c
-
-       int platform_user_verify(FAR const char *username, FAR const char *password);
-
-     which is prototyped an described in ``apps/include/nsh.h`` and which
-     may be included like:
-
-     .. code-block:: c
-
-      #include <apps/nsh.h>
-
-     An appropriate place to implement this function might be in the
-     directory ``apps/platform/<board>``.
-
-  #. A final option is to use a password file contained encrypted password
-     information. This final option is selected with the following and
-     described in more detail in the following paragraph::
-
-       CONFIG_NSH_LOGIN_PASSWD=y
+  #. **Platform-specific verification.**  NSH calls ``platform_user_verify()``
+     when ``CONFIG_NSH_LOGIN_PLATFORM=y``.  Prototype in ``apps/include/nsh.h``.
 
 Password Files
 ==============
 
-NuttX can also be configured to support a password file, by default at
-``/etc/passwd``. This option enables support for a password file::
-
-  CONFIG_NSH_LOGIN_PASSWD=y
-
-This options requires that you have selected ``CONFIG_FSUTILS_PASSWD=y``
-to enable the access methods of ``apps/fsutils/passwd``::
+When ``CONFIG_NSH_LOGIN_PASSWD=y`` is selected, NSH reads user names and
+password hashes from a passwd file (default ``/etc/passwd``).  Enable the
+file-access layer with::
 
   CONFIG_FSUTILS_PASSWD=y
 
@@ -176,33 +173,126 @@ specifically disabled.
 
 The password file logic requires a few additional settings:
 
-  #. The size of dynamically allocated and freed buffer that is used for
+  #. **Kernel cryptodev**: ``CONFIG_FSUTILS_PASSWD`` requires
+     ``CONFIG_CRYPTO_CRYPTODEV`` (PBKDF2 via ``/dev/crypto`` at runtime).
+
+  #. **I/O buffer size**: size of the dynamically allocated buffer used for
      file access::
 
        CONFIG_FSUTILS_PASSWD_IOBUFFER_SIZE=512
 
-  #. And the 128-bit encryption key. The password file currently uses the
-     Tiny Encryption Algorithm (TEA), but could be extended to use
-     something more powerful.
+  #. **PBKDF2 iteration count**: applied when **setting** new passwords
+     (via ``useradd``, ``passwd``, or build-time ``mkpasswd``)::
 
-        CONFIG_FSUTILS_PASSWD_KEY1=0x12345678
-        CONFIG_FSUTILS_PASSWD_KEY2=0x9abcdef0
-        CONFIG_FSUTILS_PASSWD_KEY3=0x12345678
-        CONFIG_FSUTILS_PASSWD_KEY4=0x9abcdef0
+       CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS=10000
 
-Password can only be decrypted with access to this key. Note that this
-key could potentially be fished out of your FLASH image, but without any
-symbolic information, that would be a difficult job since the TEA KEY is
-binary data and not distinguishable from other binary data in the FLASH
-image.
+     Valid range: 1000 to 200000.  Higher values resist brute-force attacks
+     but increase login latency on low-MHz MCUs.  The iteration count is
+     stored inside each hash string, so changing this option only affects
+     newly-created passwords.
 
-If the password file is enabled (``CONFIG_NSH_LOGIN_PASSWD=y``), then
-the fixed user credentials will not be used for the NSH session login.
-Instead, the password file will be consulted to verify the user
-credentials.
+  #. **Random salt source**: new salts require random bytes.  Enable a
+     platform random source such as::
+
+       CONFIG_DEV_URANDOM=y
+
+     ``passwd_encrypt()`` uses ``getrandom()`` or ``/dev/urandom`` when
+     generating salts for ``useradd`` and ``passwd``.
+
+Password complexity rules
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The same rules are enforced everywhere a **new** password is set:
+
+* Build-time ``tools/mkpasswd`` (ROMFS autogen)
+* NSH commands ``useradd`` and ``passwd``
+* Runtime API ``passwd_encrypt()`` in ``apps/fsutils/passwd``
+
+Rules:
+
+* At least **8** characters
+* At least one **uppercase** letter (``A`` to ``Z``)
+* At least one **lowercase** letter (``a`` to ``z``)
+* At least one **digit** (``0`` to ``9``)
+* At least one **special** character from::
+
+     ! @ # $ % ^ & * ( ) _ + - = [ ] { } | ; : , . < > ?
+
+If ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` is missing or does not meet
+these rules, an interactive ``make`` prompts via ``tools/promptpasswd.sh``
+(root password, then confirm password).  Non-interactive builds must set the
+password in menuconfig or export ``NUTTX_ROMFS_PASSWD_PASSWORD`` first.
+
+Password hash format
+~~~~~~~~~~~~~~~~~~~~
+
+Each password field uses **PBKDF2-HMAC-SHA256** in modular crypt format
+(MCF).  The hash string is self-contained: it stores the iteration count
+and salt, so verification does not depend on separate key material in
+firmware::
+
+  $pbkdf2-sha256$<iterations>$<base64url-salt>$<base64url-hash>
+
+Where:
+
+* ``<iterations>``: PBKDF2 round count (parsed at verify time)
+* ``<base64url-salt>``: 16-byte random salt (RFC 4648 section 5, no padding)
+* ``<base64url-hash>``: 32-byte PBKDF2-HMAC-SHA256 output (same encoding)
+
+Example ``/etc/passwd`` line::
+
+  root:$pbkdf2-sha256$10000$zhoo4phwEzyNFUAkB7asfw$P8qsjd9RQmZBLfM5zugiJeE5gKjI-CmTxyaVyOX2mE4:0:0:/
+
+Full ``/etc/passwd`` record format::
+
+  user:hash:uid:gid:home
+
+.. note::
+
+   **Breaking change:** this replaces the former TEA-based password storage.
+   Existing TEA-encoded entries will **not** verify.  Regenerate every entry
+   with ``mkpasswd``, NSH ``passwd``, or ``useradd`` after upgrading.
+
+``passwd_verify()`` returns ``0`` on match, ``-1`` on mismatch or invalid
+hash format, and a negated ``errno`` on I/O errors.
+
+When ``CONFIG_NSH_LOGIN_PASSWD=y`` is enabled, NSH verifies logins against
+the password file rather than compile-time credentials.
+
+Notes on ``savedefconfig``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To avoid leaking credentials into board defconfigs, ``make savedefconfig``
+**omits** these options from the generated defconfig:
+
+* ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD``
+* ``CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS``
+
+Add them manually to a local defconfig after ``make savedefconfig`` if
+needed for development.
 
 Creating a Password File for a ROMFS File System
 ================================================
+
+Boards with ``CONFIG_ETC_ROMFS`` can auto-generate ``/etc/passwd`` at
+**build time** when ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``.
+
+Build-time flow
+~~~~~~~~~~~~~~~
+
+1. You configure the root password in menuconfig, at the interactive
+   ``make`` prompt, or via ``NUTTX_ROMFS_PASSWD_PASSWORD``.
+2. The build runs ``tools/mkpasswd`` (Makefile builds use
+   ``tools/board_romfs_mkpasswd.sh`` as a wrapper).
+3. Only the **hash** is written into the ROMFS image at ``/etc/passwd``.
+4. At boot, NSH login verifies the password through kernel cryptodev
+   (``/dev/crypto``).
+
+See :ref:`mkpasswd_autogen` in :doc:`/components/tools/index` for the full
+tool description, Kconfig list, and verification steps.
+
+The following describes the **manual** approach for creating or updating a
+password file when build-time autogen is **not** used.
 
 What we want to accomplish is a ROMFS file system, mounted at ``/etc``
 and containing the password file, ``passwd`` like::
@@ -220,10 +310,10 @@ and containing the password file, ``passwd`` like::
   nsh>
 
 Where ``/etc/init.d/rc.sysinit`` is the system init script and
-``/etc/init.d/rcS`` is the start-up script; ``/etc/passwd`` is a
-the password file. Note that here we assume that you are already using a
+``/etc/init.d/rcS`` is the start-up script; ``/etc/passwd`` is the
+password file. Note that here we assume that you are already using a
 start-up script. We can then piggyback the passwd file into the ``/etc``
-file system already mounted for the NSH start up file as described above
+file system already mounted for the NSH start up file as described
 `above <#custinit>`__.
 
 The sim/nsh configuration can be used to create a new password file, but other
@@ -267,7 +357,7 @@ new user passwords like::
   nsh> useradd <username> <password>
 
 Do this as many times as you would like. Each time that you do this a
-new entry with an encrypted password will be added to the ``passwd``
+new entry with a hashed password will be added to the ``passwd``
 file at ``/tmp/passwd``. You can see the content of the password file
 like::
 
@@ -286,9 +376,10 @@ Then create/re-create the ``nsh_romfsimg.h`` file as described below.
       mkdir etc
       mkdir etc/init.d
 
-     And copy your existing startup script into ``etc/init.c`` as ``rcS``.
+     And copy your existing startup script into ``etc/init.d/`` as ``rcS``.
 
   #. Save your new password file in the ``etc/`` directory as ``passwd``.
+     Each line must use the PBKDF2 MCF format described above.
 
   #. Create the new ROMFS image::
 
@@ -298,11 +389,8 @@ Then create/re-create the ``nsh_romfsimg.h`` file as described below.
 
       xxd -i romfs_img >nsh_romfsimg.h
 
-  #. Edit ``nsh_romfsimg.h``: Mark both data definitions as ``const`` so
+  #. Edit ``nsh_romfsimg.h``: mark both data definitions as ``const`` so
      that the data will be stored in FLASH.
-
-  #. Edit nsh_romfsimg.h, mark both data definitions as ``const`` so that
-     that will be stored in FLASH.
 
 There is a good example of how to do this in the NSH simulation
 configuration at
