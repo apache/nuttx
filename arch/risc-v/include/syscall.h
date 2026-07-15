@@ -139,6 +139,23 @@ uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
                     uintptr_t parm3, uintptr_t parm4, uintptr_t parm5,
                     uintptr_t parm6);
 #else
+
+/* ecall is a leaf "call" as far as the compiler can tell: sys_callN()
+ * itself never calls another function, so with frame pointers enabled
+ * the compiler stores the caller's saved fp (s0) at what up_backtrace()
+ * assumes is ra's slot, leaving ra's own slot never written.  Clobbering
+ * "ra" forces it to be spilled/reloaded around the ecall so the fp-chain
+ * backtrace sched_backtrace() relies on can find it.  Only worth the
+ * extra spill when both frame pointers and backtrace support are built
+ * in; otherwise there is no fp-chain consumer to fix up for.
+ */
+
+#if defined(CONFIG_FRAME_POINTER) && defined(CONFIG_SCHED_BACKTRACE)
+#  define RISCV_ECALL_CLOBBERS "memory", "ra"
+#else
+#  define RISCV_ECALL_CLOBBERS "memory"
+#endif
+
 /****************************************************************************
  * Name: sys_call0
  *
@@ -155,7 +172,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
     (
      "ecall"
      :: "r"(r0)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -180,7 +197,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
     (
      "ecall"
      :: "r"(r0), "r"(r1)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -207,7 +224,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
     (
      "ecall"
      :: "r"(r0), "r"(r1), "r"(r2)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -235,7 +252,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
     (
      "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -265,7 +282,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
     (
      "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -296,7 +313,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
     (
      "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
@@ -329,7 +346,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
     (
      "ecall"
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6)
-     : "memory"
+     : RISCV_ECALL_CLOBBERS
      );
 
   asm volatile("nop" : "=r"(r0));
