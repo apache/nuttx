@@ -61,16 +61,6 @@ FAR struct inode *g_root_inode = NULL;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _inode_isdotdot
- ****************************************************************************/
-
-static inline bool _inode_isdotdot(FAR const char *name)
-{
-  return name[0] == '.' && name[1] == '.' &&
-         (name[2] == '\0' || name[2] == '/');
-}
-
-/****************************************************************************
  * Name: _inode_isdot
  ****************************************************************************/
 
@@ -221,20 +211,13 @@ static int _compute_path_depth(FAR const char *path)
   FAR const char *name = path;
   int depth = 0;
 
+  /* After _inode_canonicalize(), path never contains ".." segments,
+   * so we only need to count path components.
+   */
+
   while (*name != '\0')
     {
-      if (_inode_isdotdot(name))
-        {
-          if (--depth < 0)
-            {
-              break;
-            }
-        }
-      else
-        {
-          depth++;
-        }
-
+      depth++;
       name = inode_nextname(name);
     }
 
@@ -511,31 +494,6 @@ static int _inode_search(FAR struct inode_search_s *desc)
               relpath = name;
               ret = OK;
               break;
-            }
-          else if (_inode_isdotdot(name))
-            {
-              do
-                {
-                  if (above != NULL)
-                    {
-                      inode = above;
-                      above = above->i_parent;
-                    }
-
-                  name = inode_nextname(name);
-                }
-              while (_inode_isdotdot(name));
-
-              if (*name == '\0')
-                {
-                  relpath = name;
-                  ret = OK;
-                  break;
-                }
-
-              above = inode;
-              left  = NULL;
-              inode = inode->i_child;
             }
           else
             {
