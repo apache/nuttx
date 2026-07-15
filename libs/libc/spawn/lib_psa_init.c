@@ -75,7 +75,10 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
       return _SCHED_ERRNO(ret);
     }
 
-  attr->priority            = param.sched_priority;
+  /* attr->priority left at 0: callers that do not set a priority will have
+   * it filled in from the loaded binary (binp->priority) by the binary
+   * loader, or from the parent task by task_spawn().
+   */
 
   /* Set the default scheduler policy to the policy of this task */
 
@@ -104,13 +107,11 @@ int posix_spawnattr_init(posix_spawnattr_t *attr)
   attr->budget.tv_nsec      = param.sched_ss_init_budget.tv_nsec;
 #endif
 
-  /* Default stack size */
-
-  attr->stacksize           = CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE;
-
-#ifndef CONFIG_BUILD_KERNEL
-  attr->stackaddr           = NULL;
-#endif
+  /* attr->stacksize and attr->stackaddr left at 0 (memset above): callers
+   * that do not set a stack size will have it filled in from the loaded
+   * binary (binp->stacksize) by the binary loader, or from
+   * CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE by task_spawn().
+   */
 
   return OK;
 }

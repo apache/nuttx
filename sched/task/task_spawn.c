@@ -219,6 +219,26 @@ static int nxtask_spawn_exec(FAR pid_t *pidp, FAR const char *name,
       stacksize = CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE;
     }
 
+  /* A zero priority/stacksize means "use the default": inherit the parent
+   * task's priority and fall back to CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE.
+   * This lets posix_spawnattr_init() leave these fields zero so that the
+   * binary loader can supply them from the loaded ELF (binp->priority /
+   * binp->stacksize) instead.
+   */
+
+  if (priority == 0)
+    {
+      struct sched_param param;
+
+      nxsched_get_param(0, &param);
+      priority = param.sched_priority;
+    }
+
+  if (stacksize == 0)
+    {
+      stacksize = CONFIG_POSIX_SPAWN_DEFAULT_STACKSIZE;
+    }
+
   /* Start the task */
 
   pid = nxtask_spawn_create(name, priority, stackaddr,
