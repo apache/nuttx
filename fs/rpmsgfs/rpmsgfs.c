@@ -232,54 +232,14 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
                            FAR const char *relpath,
                            FAR char *path, int pathlen)
 {
-  int depth = 0;
-  int first;
-  int x;
-
-  /* Copy base host path to output */
-
-  strlcpy(path, fs->fs_root, pathlen);
-
-  /* Be sure we aren't trying to use ".." to display outside of our
-   * mounted path.
+  /* Copy base host path to output and append relative path directly.
+   * Note: Both ".." segments and leading slashes are already resolved
+   * by the VFS layer (_inode_canonicalize + inode_nextname) before
+   * relpath reaches here.
    */
 
-  x = 0;
-  while (relpath[x] == '/')
-    {
-      x++;
-    }
-
-  first = x;
-
-  while (relpath[x] != '\0')
-    {
-      /* Test for ".." occurrence */
-
-      if (strncmp(&relpath[x], "..", 2) == 0)
-        {
-          /* Reduce depth by 1 */
-
-          depth--;
-          x += 2;
-        }
-
-      else if (relpath[x] == '/' && relpath[x + 1] != '/' &&
-               relpath[x + 1] != '\0')
-        {
-          depth++;
-          x++;
-        }
-      else
-        {
-          x++;
-        }
-    }
-
-  if (depth >= 0)
-    {
-      strlcat(path, &relpath[first], pathlen - strlen(path));
-    }
+  strlcpy(path, fs->fs_root, pathlen);
+  strlcat(path, relpath, pathlen);
 
   while (fs->timeout > 0)
     {
