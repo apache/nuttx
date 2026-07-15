@@ -381,6 +381,7 @@ config ARCH_CHIP_RP2040
 	select ARM_HAVE_WFE_SEV
 	select ARCH_BOARD_COMMON
 	select ARCH_HAVE_CUSTOM_TESTSET
+	select ARCH_USBDEV_STALLQUEUE if USBDEV
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 
@@ -396,6 +397,7 @@ config ARCH_CHIP_RP23XX
 	select ARCH_HAVE_CUSTOM_TESTSET
 	select ARCH_HAVE_TICKLESS
 	select ARCH_BOARD_COMMON
+	select ARCH_USBDEV_STALLQUEUE if USBDEV
 	---help---
 		Raspberry Pi RP23XX architectures (ARM dual Cortex-M33 or RISC-V).
 
