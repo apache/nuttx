@@ -545,7 +545,7 @@ EXTI          to be done    arch/arm/src/stm32f7/stm32_exti_gpio.c
 FLASH         to be done    arch/arm/src/stm32f7/stm32_flash.c     
 FMC/FSMC      to be done    arch/arm/src/stm32f7/stm32_fmc.c       
 GPIO          to be done    arch/arm/src/stm32f7/stm32_gpio.c      
-I2C           to be done    arch/arm/src/stm32f7/stm32_i2c.c       
+I2C           v2            arch/arm/src/common/stm32/stm32_i2c_v2.c
 IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg.c
 LPTIM         v1            arch/arm/src/common/stm32/stm32_lptim.c
 LTDC          to be done    arch/arm/src/stm32f7/stm32_ltdc.c      
