@@ -32,27 +32,57 @@ config STM32_OTG_USBREGEN
 	depends on STM32_HAVE_OTG_H7
 	default n
 
+config STM32_USBHOST_HAVE_DEBUG
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_USBFS_HAVE_REGDEBUG
+	bool
+	default y if ARCH_CHIP_STM32G4
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_USBDEV_HAVE_REGDEBUG
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_OTGFS_HAVE_ID_GPIO_DISABLE
+	bool
+	default y if ARCH_CHIP_STM32F1
+	default y if ARCH_CHIP_STM32F2
+	default y if ARCH_CHIP_STM32F3
+	default y if ARCH_CHIP_STM32F4
+	default y if ARCH_CHIP_STM32G4
+	default y if ARCH_CHIP_STM32L1
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
+config STM32_OTGHS_HAVE_ID_GPIO_DISABLE
+	bool
+	default y if ARCH_CHIP_STM32H7
+
 config STM32_USBHOST_REGDEBUG
 	bool "Register-Level Debug"
-	depends on STM32_COMMON_LEGACY && STM32_USBHOST && STM32_USBHOST && DEBUG_USB_INFO || STM32_COMMON_F7_H7 && USBHOST
+	depends on (STM32_USBHOST && DEBUG_USB_INFO) || (STM32_USBHOST_HAVE_DEBUG && USBHOST)
 	---help---
 		Enable very low-level register access debug.
 
 config STM32_USBHOST_PKTDUMP
 	bool "Packet Dump Debug"
-	depends on STM32_COMMON_LEGACY && STM32_USBHOST && STM32_USBHOST && DEBUG_USB_INFO || STM32_COMMON_F7_H7 && USBHOST
+	depends on (STM32_USBHOST && DEBUG_USB_INFO) || (STM32_USBHOST_HAVE_DEBUG && USBHOST)
 	---help---
 		Dump all incoming and outgoing USB packets.
 
 config STM32_USBFS_REGDEBUG
 	bool "Register-Level Debug"
-	depends on (STM32_COMMON_LEGACY || ARCH_CHIP_STM32H5) && STM32_USBFS && STM32_USBFS && DEBUG_USB_INFO
+	depends on STM32_USBFS_HAVE_REGDEBUG && STM32_USBFS && DEBUG_USB_INFO
 	---help---
 		Enable very low-level register access debug.
 
 config OTG_ID_GPIO_DISABLE
 	bool "Disable the use of GPIO_OTG_ID pin."
-	depends on (STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7) && STM32_OTGFS || ARCH_CHIP_STM32H7 && (STM32_OTGFS || STM32_OTGHS)
+	depends on (STM32_OTGFS_HAVE_ID_GPIO_DISABLE && STM32_OTGFS) || (STM32_OTGHS_HAVE_ID_GPIO_DISABLE && STM32_OTGHS)
 	---help---
 		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
 		cases to reuse this GPIO pin and ensure it is not set incorrectlty
@@ -146,7 +176,7 @@ endchoice # "STM32H7 OTGHS role"
 endmenu # OTG Configuration
 
 menu "USB FS Host Configuration"
-	depends on STM32_COMMON_LEGACY && STM32_OTGFS && STM32_USBHOST
+	depends on STM32_OTGFS && STM32_USBHOST
 
 config STM32_OTGFS_RXFIFO_SIZE
 	int "Rx Packet Size"
@@ -189,7 +219,7 @@ config STM32_OTGFS_VBUS_CONTROL
 endmenu # USB FS Host Configuration
 
 menu "USB HS Host Configuration"
-	depends on STM32_COMMON_LEGACY && STM32_OTGHS && STM32_USBHOST
+	depends on STM32_OTGHS && STM32_USBHOST
 
 config STM32_OTGHS_RXFIFO_SIZE
 	int "Rx Packet Size"
@@ -233,7 +263,7 @@ endmenu # USB HS Host Configuration
 
 config STM32_USBDEV_REGDEBUG
 	bool "OTG USBDEV REGDEBUG"
-	depends on STM32_COMMON_F7_H7 && USBDEV
+	depends on STM32_USBDEV_HAVE_REGDEBUG && USBDEV
 
 comment "USB Device Configuration"
 

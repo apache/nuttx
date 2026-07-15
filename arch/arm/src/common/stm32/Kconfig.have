@@ -394,6 +394,40 @@ config STM32_HAVE_IP_FDCAN_MCAN_M3M4_V1
 config STM32_HAVE_FLASH_ART_ACCELERATOR
 	bool
 
+config STM32_HAVE_FLASH_OVERRIDE
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+	default y if ARCH_CHIP_STM32WB
+	default y if ARCH_CHIP_STM32WL5
+
+config STM32_HAVE_FLASH_PREFETCH
+	bool
+	default y if STM32_STM32F20XX
+	default y if STM32_STM32F4XXX
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+	default y if ARCH_CHIP_STM32WB
+
+config STM32_HAVE_FLASH_PROGMEM
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_FLASH_PROGMEM_MTD
+	bool
+	default y if ARCH_CHIP_STM32F0
+	default y if ARCH_CHIP_STM32L0
+	default y if ARCH_CHIP_STM32G0
+	default y if ARCH_CHIP_STM32C0
+
 config STM32_HAVE_FLASH
 	bool
 
@@ -599,6 +633,43 @@ config STM32_HAVE_COMMON_WASTE
 config STM32_HAVE_IP_DFUMODE_M3M4_V1
 	bool
 
+config STM32_HAVE_IP_DFUMODE_M0_V1
+	bool
+	default y if ARCH_CHIP_STM32F0
+	default y if ARCH_CHIP_STM32L0
+	default y if ARCH_CHIP_STM32G0
+	default y if ARCH_CHIP_STM32C0
+
+config STM32_HAVE_DISABLE_IDLE_SLEEP
+	bool
+	default y if ARCH_CHIP_STM32F1
+	default y if ARCH_CHIP_STM32F2
+	default y if ARCH_CHIP_STM32F3
+	default y if ARCH_CHIP_STM32F4
+	default y if ARCH_CHIP_STM32G4
+	default y if ARCH_CHIP_STM32L1
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+	default y if ARCH_CHIP_STM32WB
+
+config STM32_HAVE_TICKLESS_UPTO_TIM14
+	bool
+	default y if ARCH_CHIP_STM32F1 && STM32_TIM
+	default y if ARCH_CHIP_STM32F2 && STM32_TIM
+	default y if ARCH_CHIP_STM32F3 && STM32_TIM
+	default y if ARCH_CHIP_STM32F4 && STM32_TIM
+	default y if ARCH_CHIP_STM32G4 && STM32_TIM
+	default y if ARCH_CHIP_STM32L1 && STM32_TIM
+	default y if ARCH_CHIP_STM32F7
+
+config STM32_HAVE_TICKLESS_UPTO_TIM17
+	bool
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32WB
+
 config STM32_HAVE_SRAM2A
 	bool
 
@@ -731,6 +802,24 @@ config STM32_HAVE_IP_RTC_M3M4_V1
 config STM32_HAVE_RTC_SUBSECONDS
 	bool
 	select ARCH_HAVE_RTC_SUBSECONDS
+
+config STM32_HAVE_RTC_LSE_AUTO_DRV
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_RTC_LSE_DRV
+	bool
+	default y if STM32_HAVE_RTC_LSE_AUTO_DRV
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32WB
+
+config STM32_HAVE_RTC_LSE_DRV_LOWER
+	bool
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
 
 # SAI capabilities
 
