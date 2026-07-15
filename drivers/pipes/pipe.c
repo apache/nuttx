@@ -149,7 +149,7 @@ static int pipe_register(size_t bufsize, int flags,
 
   /* Register the pipe device */
 
-  ret = register_pipedriver(devname, &g_pipe_fops, 0666, (FAR void *)dev);
+  ret = register_pipedriver(devname, &g_pipe_fops, 0600, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);

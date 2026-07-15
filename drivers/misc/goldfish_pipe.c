@@ -681,7 +681,7 @@ int goldfish_pipe_register(FAR void *base, int irq)
   /* Register the pipe device */
 
   return register_driver("/dev/goldfish_pipe",
-                         &g_goldfish_pipe_fops, 0666, dev);
+                         &g_goldfish_pipe_fops, 0600, dev);
 
 out:
   kmm_free(dev);

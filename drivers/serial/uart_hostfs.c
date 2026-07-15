@@ -131,7 +131,7 @@ static int uart_hostfs_setup(FAR struct uart_dev_s *dev)
   FAR struct uart_hostfs_priv_s *priv = dev->priv;
 
   priv->fd = host_open(CONFIG_UART_HOSTFS_DEVPATH, O_RDWR | O_NONBLOCK,
-                       0666);
+                       0600);
   return priv->fd;
 }
 
