@@ -148,7 +148,7 @@ jobs:
       # Documented sim/login CI test credential (not a production secret).
       # Used when CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y and defconfig omits
       # the password.  See tools/update_romfs_password.sh.
-      NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSimLogin1
+      NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSim1!
 
     strategy:
       max-parallel: 12
@@ -316,7 +316,7 @@ jobs:
     needs: macOS-Arch
     if: ${{ needs.macOS-Arch.outputs.skip_all_builds != '1' }}
     env:
-      NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSimLogin1
+      NUTTX_ROMFS_PASSWD_PASSWORD: NuttXSim1!
     strategy:
       max-parallel: 2
       matrix:

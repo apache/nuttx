@@ -1745,8 +1745,7 @@ This command is available only when ``CONFIG_SCHED_USER_IDENTITY`` is
 enabled. It may be disabled with ``CONFIG_NSH_DISABLE_SU``. User names
 are looked up from the passwd database when ``CONFIG_LIBC_PASSWD_FILE``
 is enabled. Password verification requires one of the NSH login options
-(``CONFIG_NSH_LOGIN_PASSWD``, ``CONFIG_NSH_LOGIN_PLATFORM``, or
-``CONFIG_NSH_LOGIN_FIXED``).
+(``CONFIG_NSH_LOGIN_PASSWD`` or ``CONFIG_NSH_LOGIN_PLATFORM``).
 
 **Related configuration**
 
