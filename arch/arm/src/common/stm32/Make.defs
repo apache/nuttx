@@ -381,14 +381,6 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
-endif
-
-ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
-CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
-endif
-
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
 ifeq ($(CONFIG_STM32_HAVE_IP_GPIO_M3M4_V1),y)
 CHIP_CSRCS += stm32_dumpgpio_m3m4_v1.c
@@ -429,6 +421,16 @@ ifeq ($(CONFIG_STM32_CORDIC)$(CONFIG_STM32_HAVE_IP_CORDIC_M3M4_V1),yy)
 CHIP_CSRCS += stm32_cordic_m3m4_v1.c
 endif
 
+endif
+
+ifneq ($(CONFIG_STM32_COMMON_LEGACY)$(CONFIG_ARCH_CHIP_STM32H7)$(CONFIG_ARCH_CHIP_STM32L4),)
+ifeq ($(CONFIG_STM32_IWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
+CHIP_CSRCS += stm32_iwdg_m3m4_v1.c
+endif
+
+ifeq ($(CONFIG_STM32_WWDG)$(CONFIG_STM32_HAVE_IP_WDG_M3M4_V1),yy)
+CHIP_CSRCS += stm32_wwdg_m3m4_v1.c
+endif
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM0),y)
