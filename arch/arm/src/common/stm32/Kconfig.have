@@ -149,6 +149,22 @@ config STM32_HAVE_HSI48
 config STM32_HAVE_IP_HSI48_M0_V1
 	bool
 
+config STM32_HAVE_MCO1
+	bool
+	default y if STM32_STM32F20XX
+	default y if STM32_STM32F4XXX
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
+config STM32_HAVE_MCO2
+	bool
+	default y if STM32_STM32F20XX
+	default y if STM32_STM32F4XXX
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
+
 # COMP capabilities
 
 config STM32_HAVE_COMP1
@@ -347,6 +363,11 @@ config STM32_HAVE_ETHMAC
 
 config STM32_HAVE_IP_ETHMAC_M3M4_V1
 	bool
+
+config STM32_HAVE_IP_ETHMAC_V2
+	bool
+	default y if ARCH_CHIP_STM32H7
+	default y if ARCH_CHIP_STM32H5
 
 config STM32_HAVE_ETHRNET
 	bool
