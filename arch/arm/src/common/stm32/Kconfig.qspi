@@ -109,14 +109,14 @@ config STM32_QSPI_FLASH_SIZE
 	int "Size of attached serial flash, bytes"
 	default 16777216
 	range 1 2147483647 if ARCH_CHIP_STM32L4 && STM32_QSPI
-	range 1 2147483648 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32H5 && STM32_QSPI1
+	range 1 2147483648 if (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32H7) && STM32_QSPI || ARCH_CHIP_STM32H5 && STM32_QSPI1
 	---help---
 		The STM32F7 QSPI peripheral requires the size of the Flash be specified
 
 config STM32_QSPI_FIFO_THESHOLD
 	int "Number of bytes before asserting FIFO threshold flag"
 	default 4
-	range 1 16 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
+	range 1 16 if (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32H7) && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
 	range 1 32 if ARCH_CHIP_STM32H5 && STM32_QSPI1
 	---help---
 		The STM32F7 QSPI peripheral requires that the FIFO threshold be specified
@@ -126,7 +126,7 @@ config STM32_QSPI_CSHT
 	int "Number of cycles Chip Select must be inactive between transactions"
 	default 5 if ARCH_CHIP_STM32H5 && STM32_QSPI1
 	default 1
-	range 1 8 if STM32_COMMON_F7_H7 && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
+	range 1 8 if (ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32H7) && STM32_QSPI || ARCH_CHIP_STM32L4 && STM32_QSPI
 	range 1 64 if ARCH_CHIP_STM32H5 && STM32_QSPI1
 	---help---
 		The STM32F7 QSPI peripheral requires that it be specified the minimum number
