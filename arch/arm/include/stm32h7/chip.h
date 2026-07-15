@@ -262,7 +262,7 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */

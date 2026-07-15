@@ -369,12 +369,6 @@ config STM32_HAVE_IP_ETHMAC_V2
 	default y if ARCH_CHIP_STM32H7
 	default y if ARCH_CHIP_STM32H5
 
-config STM32_HAVE_ETHRNET
-	bool
-
-config STM32_HAVE_ETHERNET
-	bool
-
 # FDCAN capabilities
 
 config STM32_HAVE_FDCAN_H7
