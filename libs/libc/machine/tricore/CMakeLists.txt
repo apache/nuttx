@@ -26,16 +26,16 @@ if(CONFIG_LIBC_ATOMIC_ARCH)
   list(APPEND SRCS arch_atomic.c)
 endif()
 
-if(CONFIG_ARCH_SETJMP_H)
-  list(APPEND SRCS arch_setjmp.c)
-endif()
-
 if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   set(TRICORE_SUBDIR tasking)
   set(ASM_EXT asm)
 else()
   set(TRICORE_SUBDIR gnu)
   set(ASM_EXT S)
+endif()
+
+if(CONFIG_ARCH_SETJMP_H)
+  list(APPEND SRCS ${TRICORE_SUBDIR}/arch_setjmp.${ASM_EXT})
 endif()
 
 if(CONFIG_LIBC_ARCH_MEMCPY)
