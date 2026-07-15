@@ -252,7 +252,35 @@
 #warning TODO: check I2C clock source. It must be HSI!
 #undef INVALID_CLOCK_SOURCE
 
-#if defined(CONFIG_ARCH_CHIP_STM32H7)
+#if defined(CONFIG_ARCH_CHIP_STM32F7)
+#  ifdef CONFIG_STM32_I2C1
+#    if STM32_RCC_DCKCFGR2_I2C1SRC != RCC_DCKCFGR2_I2C1SEL_HSI
+#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C1SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  ifdef CONFIG_STM32_I2C2
+#    if STM32_RCC_DCKCFGR2_I2C2SRC != RCC_DCKCFGR2_I2C2SEL_HSI
+#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C2SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  ifdef CONFIG_STM32_I2C3
+#    if STM32_RCC_DCKCFGR2_I2C3SRC != RCC_DCKCFGR2_I2C3SEL_HSI
+#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C3SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  ifdef CONFIG_STM32_I2C4
+#    if STM32_RCC_DCKCFGR2_I2C4SRC != RCC_DCKCFGR2_I2C4SEL_HSI
+#      warning "Clock Source STM32_RCC_DCKCFGR2_I2C4SRC must be HSI"
+#      define INVALID_CLOCK_SOURCE
+#    endif
+#  endif
+#  if STM32_HSI_FREQUENCY != 16000000 || defined(INVALID_CLOCK_SOURCE)
+#    error STM32_I2C: Peripheral clock is HSI and it must be 16MHz or the speed/timing calculations need to be redone.
+#  endif
+#elif defined(CONFIG_ARCH_CHIP_STM32H7)
 #  if defined(CONFIG_STM32_I2C1) || defined(CONFIG_STM32_I2C2) || \
       defined(CONFIG_STM32_I2C3)
 #    if STM32_RCC_D2CCIP2R_I2C123SRC != RCC_D2CCIP2R_I2C123SEL_HSI
