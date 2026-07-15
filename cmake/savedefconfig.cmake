@@ -76,7 +76,7 @@ list(SORT LINES)
 foreach(LINE IN LISTS LINES)
   decode_brackets(LINE)
   decode_semicolon(LINE)
-  if(NOT "${LINE}" MATCHES "^CONFIG_FSUTILS_PASSWD_KEY[0-9]"
+  if(NOT "${LINE}" MATCHES "^CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS="
      AND NOT "${LINE}" MATCHES "^CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD=")
     file(APPEND ${OUTPUT_FILE} "${LINE}\n")
   endif()
@@ -85,7 +85,8 @@ endforeach()
 if(PASSWD_AUTOGEN_ENABLED)
   message(
     WARNING
-      "CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD and CONFIG_FSUTILS_PASSWD_KEY1-4 "
+      "CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD and "
+      "CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS "
       "were intentionally excluded from defconfig by savedefconfig. Add them "
       "manually in local defconfig if needed.")
 endif()

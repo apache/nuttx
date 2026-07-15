@@ -22,57 +22,34 @@
 
 /****************************************************************************
  * Description:
- *   Host tool that writes one NuttX /etc/passwd line with a TEA-encrypted
- *   password hash.  The plaintext password is never stored in the output.
+ *   Host build tool that generates a NuttX /etc/passwd entry with a
+ *   PBKDF2-HMAC-SHA256 password hash.  This is a pure C replacement for the
+ *   former tools/mkpasswd.py, removing the Python dependency from the build.
  *
- *   Build integration:
- *     When ``CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y``, ``boards/Board.mk``
- *     invokes this program during the ROMFS etc/ image build.  The password
- *     and TEA keys are taken from ``.config`` (see ``tools/passwd_keys.mk``,
- *     ``tools/update_romfs_password.sh``, and
- *     Documentation/components/tools/index.rst).
+ *   The hash format is identical to that used at runtime by:
+ *     apps/fsutils/passwd/passwd_encrypt.c
+ *     apps/fsutils/passwd/passwd_verify.c
  *
- *   Runtime compatibility:
- *     The encryption algorithm and base64 encoding match:
- *       libs/libc/misc/lib_tea_encrypt.c
- *       apps/fsutils/passwd/passwd_encrypt.c
- *
- *   Security (enforced before writing output):
- *     - Password must be non-empty and at least 8 characters.
- *     - Password ``Administrator`` is rejected (legacy insecure default).
- *     - The published default TEA key set (0x12345678 / 0x9abcdef0)
- *       is rejected.  Use Kconfig keys or explicit --key options.
- *
- * Standalone usage (advanced / debugging only):
- *   mkpasswd --user <name> --password <pass> \\
- *            --key1 <hex> --key2 <hex> --key3 <hex> --key4 <hex> \\
- *            [-o <output>]
+ * Usage:
+ *   mkpasswd --user <name> --password <pass> [options] [-o <output>]
  *
  * Options:
- *   --user     <str>  Username (required)
- *   --password <str>  Plaintext password (required, min 8 characters)
- *   --uid      <int>  User ID          (default: 0)
- *   --gid      <int>  Group ID         (default: 0)
- *   --home     <str>  Home directory   (default: /)
- *   --key1     <hex>  TEA key word 1   (required for standalone use)
- *   --key2     <hex>  TEA key word 2   (required for standalone use)
- *   --key3     <hex>  TEA key word 3   (required for standalone use)
- *   --key4     <hex>  TEA key word 4   (required for standalone use)
- *   -o         <path> Output file      (default: stdout)
+ *   --user       <str>  Username (required)
+ *   --password   <str>  Plaintext password (required, not stored in output)
+ *   --uid        <int>  User ID          (default: 0)
+ *   --gid        <int>  Group ID         (default: 0)
+ *   --home       <str>  Home directory   (default: /)
+ *   --iterations <int>  PBKDF2 iterations (default: 10000)
+ *   -o           <path> Output file      (default: stdout)
  *
- * Output format:
- *   username:encrypted_hash:uid:gid:home
+ * Output format (matches NuttX passwd file format):
+ *   username:$pbkdf2-sha256$<iter>$<salt>$<hash>:uid:gid:home
  *
  ****************************************************************************/
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-/* Expose strdup(), mkdir() and other POSIX.1-2008 extensions when
- * compiling with strict C99 mode (-std=c99). Has no effect on C11/GNU
- * builds or MSVC.
- */
 
 #ifndef _POSIX_C_SOURCE
 #  define _POSIX_C_SOURCE 200809L
@@ -82,9 +59,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #ifndef CONFIG_WINDOWS_NATIVE
+#  include <fcntl.h>
+#  include <sys/random.h>
 #  include <sys/stat.h>
+#  include <unistd.h>
 #else
 #  include <direct.h>
 #endif
@@ -93,266 +74,503 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* TEA key schedule constant (derived from the golden ratio) */
+#define MKPASSWD_NL              "\n\n"
+#define PASSWD_MCF_PREFIX        "$pbkdf2-sha256$"
+#define PASSWD_SALT_BYTES        16
+#define PASSWD_HASH_BYTES        32
+#define MAX_ENCRYPTED            96
+#define MAX_PASSWORD             256
+#define MIN_PASSWORD             8
+#define DEFAULT_ITERATIONS       10000
+#define MIN_ITERATIONS           1000
+#define MAX_ITERATIONS           200000
 
-#define TEA_KEY_SCHEDULE_CONSTANT  0x9e3779b9u
-
-/* Password size limits - must match apps/fsutils/passwd/passwd.h */
-
-#define MAX_ENCRYPTED  48                      /* Max size of encrypted password (ASCII) */
-#define MAX_PASSWORD   (3 * MAX_ENCRYPTED / 4) /* Max plaintext length */
-#define MIN_PASSWORD   8                       /* Minimum plaintext length for security */
-
-/* Known-insecure TEA key values from legacy NuttX releases.  Used only to
- * detect and reject the published default set in main(); normal builds pass
- * keys from CONFIG_FSUTILS_PASSWD_KEY1..4 via boards/Board.mk.
- */
-
-#define DEFAULT_KEY1   0x12345678u
-#define DEFAULT_KEY2   0x9abcdef0u
-#define DEFAULT_KEY3   0x12345678u
-#define DEFAULT_KEY4   0x9abcdef0u
+static const char g_base64url[] =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 /****************************************************************************
- * Private Types
+ * Private Types (minimal SHA-256)
  ****************************************************************************/
 
-/* 8-byte block interpreted as bytes, 16-bit halves, or 32-bit words */
-
-union block_u
+struct sha256_ctx
 {
-  char     b[8];
-  uint16_t h[4];
-  uint32_t l[2];
+  uint32_t state[8];
+  uint64_t bitlen;
+  uint8_t  data[64];
+  uint32_t datalen;
 };
 
 /****************************************************************************
- * Private Functions
+ * Private Functions (SHA-256 + HMAC-SHA256 + PBKDF2)
  ****************************************************************************/
 
-/****************************************************************************
- * Name: tea_encrypt
- *
- * Description:
- *   Encrypt two 32-bit words in-place using the Tiny Encryption Algorithm.
- *   This is an exact copy of the algorithm in
- *   libs/libc/misc/lib_tea_encrypt.c (public-domain TEA by Wheeler &
- *   Needham), inlined here so that the host tool has no NuttX dependencies.
- *
- * Input Parameters:
- *   value - Two-element array [v0, v1] to encrypt (modified in-place)
- *   key   - Four-element 128-bit key array
- *
- ****************************************************************************/
-
-static void tea_encrypt(uint32_t *value, const uint32_t *key)
+static uint32_t rotr32(uint32_t x, uint32_t n)
 {
-  uint32_t v0  = value[0];
-  uint32_t v1  = value[1];
-  uint32_t sum = 0;
+  return (x >> n) | (x << (32 - n));
+}
+
+static void sha256_transform(struct sha256_ctx *ctx,
+                             const uint8_t data[64])
+{
+  static const uint32_t k[64] =
+  {
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+    0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+    0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+    0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+    0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+    0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+    0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+    0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  };
+
+  uint32_t m[64];
+  uint32_t a;
+  uint32_t b;
+  uint32_t c;
+  uint32_t d;
+  uint32_t e;
+  uint32_t f;
+  uint32_t g;
+  uint32_t h;
+  uint32_t t1;
+  uint32_t t2;
+  uint32_t s0;
+  uint32_t s1;
   int i;
 
-  for (i = 0; i < 32; i++)
+  for (i = 0; i < 16; i++)
     {
-      sum += TEA_KEY_SCHEDULE_CONSTANT;
-      v0  += ((v1 << 4) + key[0]) ^ (v1 + sum) ^ ((v1 >> 5) + key[1]);
-      v1  += ((v0 << 4) + key[2]) ^ (v0 + sum) ^ ((v0 >> 5) + key[3]);
+      m[i] = ((uint32_t)data[i * 4] << 24) |
+             ((uint32_t)data[i * 4 + 1] << 16) |
+             ((uint32_t)data[i * 4 + 2] << 8) |
+             ((uint32_t)data[i * 4 + 3]);
     }
 
-  value[0] = v0;
-  value[1] = v1;
+  for (i = 16; i < 64; i++)
+    {
+      s0 = rotr32(m[i - 15], 7) ^ rotr32(m[i - 15], 18) ^
+           (m[i - 15] >> 3);
+      s1 = rotr32(m[i - 2], 17) ^ rotr32(m[i - 2], 19) ^
+           (m[i - 2] >> 10);
+
+      m[i] = m[i - 16] + s0 + m[i - 7] + s1;
+    }
+
+  a = ctx->state[0];
+  b = ctx->state[1];
+  c = ctx->state[2];
+  d = ctx->state[3];
+  e = ctx->state[4];
+  f = ctx->state[5];
+  g = ctx->state[6];
+  h = ctx->state[7];
+
+  for (i = 0; i < 64; i++)
+    {
+      t1 = h + (rotr32(e, 6) ^ rotr32(e, 11) ^ rotr32(e, 25)) +
+           ((e & f) ^ ((~e) & g)) + k[i] + m[i];
+      t2 = (rotr32(a, 2) ^ rotr32(a, 13) ^ rotr32(a, 22)) +
+           ((a & b) ^ (a & c) ^ (b & c));
+      h = g;
+      g = f;
+      f = e;
+      e = d + t1;
+      d = c;
+      c = b;
+      b = a;
+      a = t1 + t2;
+    }
+
+  ctx->state[0] += a;
+  ctx->state[1] += b;
+  ctx->state[2] += c;
+  ctx->state[3] += d;
+  ctx->state[4] += e;
+  ctx->state[5] += f;
+  ctx->state[6] += g;
+  ctx->state[7] += h;
 }
 
-/****************************************************************************
- * Name: passwd_base64
- *
- * Description:
- *   Encode the low 6 bits of a byte as a custom base64 character.
- *   Alphabet: A-Z (0-25), a-z (26-51), 0-9 (52-61), + (62), / (63).
- *   The colon ':' is deliberately absent so it never collides with the
- *   passwd field separator.
- *
- *   This matches passwd_base64() in apps/fsutils/passwd/passwd_encrypt.c.
- *
- ****************************************************************************/
-
-static char passwd_base64(uint8_t binary)
+static void sha256_init(struct sha256_ctx *ctx)
 {
-  binary &= 63;
-
-  if (binary < 26)
-    {
-      return (char)('A' + binary);
-    }
-
-  binary -= 26;
-  if (binary < 26)
-    {
-      return (char)('a' + binary);
-    }
-
-  binary -= 26;
-  if (binary < 10)
-    {
-      return (char)('0' + binary);
-    }
-
-  binary -= 10;
-  if (binary == 0)
-    {
-      return '+';
-    }
-
-  return '/';
+  ctx->datalen = 0;
+  ctx->bitlen  = 0;
+  ctx->state[0] = 0x6a09e667;
+  ctx->state[1] = 0xbb67ae85;
+  ctx->state[2] = 0x3c6ef372;
+  ctx->state[3] = 0xa54ff53a;
+  ctx->state[4] = 0x510e527f;
+  ctx->state[5] = 0x9b05688c;
+  ctx->state[6] = 0x1f83d9ab;
+  ctx->state[7] = 0x5be0cd19;
 }
 
-/****************************************************************************
- * Name: passwd_encrypt
- *
- * Description:
- *   Encrypt a plaintext password string and store the result as a
- *   NUL-terminated base64 string in `encrypted`.
- *
- *   Algorithm (identical to apps/fsutils/passwd/passwd_encrypt.c):
- *     1. Process the password in 8-byte gulps, padding short gulps with
- *        ASCII spaces.
- *     2. TEA-encrypt each 8-byte gulp as two uint32_t words.
- *     3. Interpret the result as four uint16_t half-words.
- *     4. Stream-encode those half-words 6 bits at a time using the custom
- *        base64 alphabet above.
- *
- * Input Parameters:
- *   password  - NUL-terminated plaintext password
- *   key       - Four-element 128-bit TEA key
- *   encrypted - Output buffer (at least MAX_ENCRYPTED + 1 bytes)
- *
- * Returned Value:
- *   0 on success, -1 on error (password too long).
- *
- ****************************************************************************/
-
-static int passwd_encrypt(const char *password,
-                          const uint32_t *key,
-                          char encrypted[MAX_ENCRYPTED + 1])
+static void sha256_update(struct sha256_ctx *ctx,
+                          const uint8_t *data, size_t len)
 {
-  union block_u value;
-  const char   *src;
-  char         *dest;
-  uint32_t      tmp;
-  uint8_t       remainder;
-  int           remaining;
-  int           gulpsize;
-  int           nbits;
-  int           i;
+  size_t i;
 
-  remaining = (int)strlen(password);
-  if (remaining > MAX_PASSWORD)
+  for (i = 0; i < len; i++)
     {
-      fprintf(stderr, "mkpasswd: password too long (max %d characters)\n",
+      ctx->data[ctx->datalen] = data[i];
+      ctx->datalen++;
+      if (ctx->datalen == 64)
+        {
+          sha256_transform(ctx, ctx->data);
+          ctx->bitlen += 512;
+          ctx->datalen = 0;
+        }
+    }
+}
+
+static void sha256_final(struct sha256_ctx *ctx, uint8_t hash[32])
+{
+  uint32_t i;
+  uint32_t j;
+
+  i = ctx->datalen;
+
+  if (ctx->datalen < 56)
+    {
+      ctx->data[i++] = 0x80;
+      while (i < 56)
+        {
+          ctx->data[i++] = 0x00;
+        }
+    }
+  else
+    {
+      ctx->data[i++] = 0x80;
+      while (i < 64)
+        {
+          ctx->data[i++] = 0x00;
+        }
+
+      sha256_transform(ctx, ctx->data);
+      memset(ctx->data, 0, 56);
+    }
+
+  ctx->bitlen += (uint64_t)ctx->datalen * 8;
+  ctx->data[63] = (uint8_t)(ctx->bitlen);
+  ctx->data[62] = (uint8_t)(ctx->bitlen >> 8);
+  ctx->data[61] = (uint8_t)(ctx->bitlen >> 16);
+  ctx->data[60] = (uint8_t)(ctx->bitlen >> 24);
+  ctx->data[59] = (uint8_t)(ctx->bitlen >> 32);
+  ctx->data[58] = (uint8_t)(ctx->bitlen >> 40);
+  ctx->data[57] = (uint8_t)(ctx->bitlen >> 48);
+  ctx->data[56] = (uint8_t)(ctx->bitlen >> 56);
+  sha256_transform(ctx, ctx->data);
+
+  for (i = 0; i < 4; i++)
+    {
+      for (j = 0; j < 8; j++)
+        {
+          hash[i + (j * 4)] = (uint8_t)((ctx->state[j] >>
+                                         (24 - i * 8)) & 0xff);
+        }
+    }
+}
+
+static void hmac_sha256(const uint8_t *key, size_t keylen,
+                        const uint8_t *data, size_t datalen,
+                        uint8_t mac[32])
+{
+  struct sha256_ctx ctx;
+  uint8_t k_ipad[64];
+  uint8_t k_opad[64];
+  uint8_t tk[32];
+  size_t i;
+
+  if (keylen > 64)
+    {
+      sha256_init(&ctx);
+      sha256_update(&ctx, key, keylen);
+      sha256_final(&ctx, tk);
+      key    = tk;
+      keylen = 32;
+    }
+
+  memset(k_ipad, 0, sizeof(k_ipad));
+  memset(k_opad, 0, sizeof(k_opad));
+  memcpy(k_ipad, key, keylen);
+  memcpy(k_opad, key, keylen);
+
+  for (i = 0; i < 64; i++)
+    {
+      k_ipad[i] ^= 0x36;
+      k_opad[i] ^= 0x5c;
+    }
+
+  sha256_init(&ctx);
+  sha256_update(&ctx, k_ipad, 64);
+  sha256_update(&ctx, data, datalen);
+  sha256_final(&ctx, mac);
+
+  sha256_init(&ctx);
+  sha256_update(&ctx, k_opad, 64);
+  sha256_update(&ctx, mac, 32);
+  sha256_final(&ctx, mac);
+}
+
+static int pbkdf2_hmac_sha256(const uint8_t *pass, size_t passlen,
+                              const uint8_t *salt, size_t saltlen,
+                              uint32_t iterations,
+                              uint8_t *out, size_t outlen)
+{
+  uint8_t u[32];
+  uint8_t t[32];
+  uint8_t saltblk[64];
+  size_t generated = 0;
+  uint32_t block;
+  uint32_t i;
+  uint32_t j;
+
+  if (iterations == 0 || outlen == 0 || saltlen + 4 > sizeof(saltblk))
+    {
+      return -1;
+    }
+
+  for (block = 1; generated < outlen; block++)
+    {
+      memcpy(saltblk, salt, saltlen);
+      saltblk[saltlen + 0] = (uint8_t)((block >> 24) & 0xff);
+      saltblk[saltlen + 1] = (uint8_t)((block >> 16) & 0xff);
+      saltblk[saltlen + 2] = (uint8_t)((block >> 8) & 0xff);
+      saltblk[saltlen + 3] = (uint8_t)(block & 0xff);
+
+      hmac_sha256(pass, passlen, saltblk, saltlen + 4, u);
+      memcpy(t, u, sizeof(t));
+
+      for (i = 1; i < iterations; i++)
+        {
+          hmac_sha256(pass, passlen, u, sizeof(u), u);
+          for (j = 0; j < 32; j++)
+            {
+              t[j] ^= u[j];
+            }
+        }
+
+      if (outlen - generated >= 32)
+        {
+          memcpy(out + generated, t, 32);
+          generated += 32;
+        }
+      else
+        {
+          memcpy(out + generated, t, outlen - generated);
+          generated = outlen;
+        }
+    }
+
+  return 0;
+}
+
+static int fill_random(uint8_t *buf, size_t len)
+{
+#ifndef CONFIG_WINDOWS_NATIVE
+  ssize_t nread;
+  int fd;
+
+#  ifdef SYS_getrandom
+  nread = getrandom(buf, len, 0);
+  if (nread == (ssize_t)len)
+    {
+      return 0;
+    }
+#  endif
+
+  fd = open("/dev/urandom", O_RDONLY);
+  if (fd < 0)
+    {
+      return -1;
+    }
+
+  nread = read(fd, buf, len);
+  close(fd);
+
+  return nread == (ssize_t)len ? 0 : -1;
+#else
+  (void)buf;
+  (void)len;
+  return -1;
+#endif
+}
+
+static int base64url_encode(const uint8_t *in, size_t inlen,
+                            char *out, size_t outlen)
+{
+  uint32_t acc = 0;
+  size_t i;
+  size_t o = 0;
+  int bits = 0;
+
+  for (i = 0; i < inlen; i++)
+    {
+      acc = (acc << 8) | in[i];
+      bits += 8;
+
+      while (bits >= 6)
+        {
+          if (o + 1 >= outlen)
+            {
+              return -1;
+            }
+
+          bits -= 6;
+          out[o++] = g_base64url[(acc >> bits) & 0x3f];
+        }
+    }
+
+  if (bits > 0)
+    {
+      if (o + 1 >= outlen)
+        {
+          return -1;
+        }
+
+      out[o++] = g_base64url[(acc << (6 - bits)) & 0x3f];
+    }
+
+  if (o >= outlen)
+    {
+      return -1;
+    }
+
+  out[o] = '\0';
+  return 0;
+}
+
+static int validate_password_complexity(const char *password)
+{
+  const char *specials = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+  const char *p;
+  int has_upper   = 0;
+  int has_lower   = 0;
+  int has_digit   = 0;
+  int has_special = 0;
+
+  if (strlen(password) < MIN_PASSWORD)
+    {
+      fprintf(stderr, "\nError: password must be at least 8 characters\n\n");
+      return -1;
+    }
+
+  if (strlen(password) > MAX_PASSWORD)
+    {
+      fprintf(stderr, "\nError: password must be at most %d characters\n\n",
               MAX_PASSWORD);
       return -1;
     }
 
-  src       = password;
-  dest      = encrypted;
-  *dest     = '\0';
-  remainder = 0;
-  nbits     = 0;
-
-  for (; remaining > 0; remaining -= gulpsize)
+  for (p = password; *p; p++)
     {
-      /* Copy up to 8 bytes into the block, padding the rest with spaces */
-
-      gulpsize = 8;
-      if (gulpsize > remaining)
+      if (isupper((unsigned char)*p))
         {
-          gulpsize = remaining;
+          has_upper = 1;
         }
-
-      for (i = 0; i < gulpsize; i++)
+      else if (islower((unsigned char)*p))
         {
-          value.b[i] = *src++;
+          has_lower = 1;
         }
-
-      for (; i < 8; i++)
+      else if (isdigit((unsigned char)*p))
         {
-          value.b[i] = ' ';
+          has_digit = 1;
         }
-
-      /* TEA-encrypt the block in-place */
-
-      tea_encrypt(value.l, key);
-
-      /* Stream-encode the four 16-bit half-words into base64 */
-
-      tmp = remainder;
-
-      for (i = 0; i < 4; i++)
+      else if (strchr(specials, *p))
         {
-          tmp    = ((uint32_t)value.h[i] << nbits) | tmp;
-          nbits += 16;
-
-          while (nbits >= 6)
-            {
-              *dest++ = passwd_base64((uint8_t)(tmp & 0x3f));
-              tmp   >>= 6;
-              nbits  -= 6;
-            }
+          has_special = 1;
         }
-
-      remainder = (uint8_t)tmp;
-      *dest     = '\0';
     }
 
-  /* Flush any remaining bits */
-
-  if (nbits > 0)
+  if (!has_upper)
     {
-      *dest++ = passwd_base64(remainder);
-      *dest   = '\0';
+      fprintf(stderr,
+              "\nError: password must contain at least one uppercase "
+              "letter (A-Z)\n\n");
+      return -1;
+    }
+
+  if (!has_lower)
+    {
+      fprintf(stderr,
+              "\nError: password must contain at least one lowercase "
+              "letter (a-z)\n\n");
+      return -1;
+    }
+
+  if (!has_digit)
+    {
+      fprintf(stderr,
+              "\nError: password must contain at least one digit "
+              "(0-9)\n\n");
+      return -1;
+    }
+
+  if (!has_special)
+    {
+      fprintf(stderr,
+              "\nError: password must contain at least one special "
+              "character (!@#$%%^&*()_+-=[]{}|;:,.<>?)\n\n");
+      return -1;
     }
 
   return 0;
 }
 
-/****************************************************************************
- * Name: parse_uint32_hex
- *
- * Description:
- *   Parse a hex string (with or without leading "0x"/"0X") into a uint32_t.
- *   Returns 0 on success, -1 on parse error.
- *
- ****************************************************************************/
-
-static int parse_uint32_hex(const char *str, uint32_t *out)
+static int passwd_hash(const char *password,
+                       uint32_t iterations,
+                       char encrypted[MAX_ENCRYPTED + 1])
 {
-  char *endptr;
-  unsigned long val;
+  uint8_t salt[PASSWD_SALT_BYTES];
+  uint8_t hash[PASSWD_HASH_BYTES];
+  char salt_b64[32];
+  char hash_b64[48];
+  size_t passlen;
+  int ret;
 
-  if (str == NULL || *str == '\0')
+  passlen = strlen(password);
+
+  if (fill_random(salt, sizeof(salt)) < 0)
+    {
+      fputs(MKPASSWD_NL, stderr);
+      fprintf(stderr, "mkpasswd: cannot obtain random salt\n");
+      return -1;
+    }
+
+  if (pbkdf2_hmac_sha256((const uint8_t *)password, passlen,
+                         salt, sizeof(salt), iterations,
+                         hash, sizeof(hash)) < 0)
     {
       return -1;
     }
 
-  errno = 0;
-  val   = strtoul(str, &endptr, 0);  /* base 0: auto-detect 0x prefix */
-  if (errno != 0 || *endptr != '\0')
+  if (base64url_encode(salt, sizeof(salt), salt_b64,
+                       sizeof(salt_b64)) < 0 ||
+      base64url_encode(hash, sizeof(hash), hash_b64,
+                       sizeof(hash_b64)) < 0)
     {
       return -1;
     }
 
-  *out = (uint32_t)val;
+  ret = snprintf(encrypted, MAX_ENCRYPTED + 1,
+                 PASSWD_MCF_PREFIX "%u$%s$%s",
+                 iterations, salt_b64, hash_b64);
+  if (ret < 0 || (size_t)ret > MAX_ENCRYPTED)
+    {
+      return -1;
+    }
+
   return 0;
 }
-
-/****************************************************************************
- * Name: mkdir_p
- *
- * Description:
- *   Create all directory components in `path`, like "mkdir -p".
- *   Returns 0 on success, -1 on error.
- *
- ****************************************************************************/
 
 static int mkdir_p(const char *path)
 {
@@ -367,8 +585,6 @@ static int mkdir_p(const char *path)
     }
 
   len = strlen(tmp);
-
-  /* Strip trailing slash */
 
   if (len > 0 && tmp[len - 1] == '/')
     {
@@ -398,35 +614,22 @@ static int mkdir_p(const char *path)
   return 0;
 }
 
-/****************************************************************************
- * Name: show_usage
- ****************************************************************************/
-
 static void show_usage(const char *progname)
 {
   fprintf(stderr,
-          "Usage: %s --user <name> --password <pass>\n"
-          "          --key1 <hex> --key2 <hex> --key3 <hex> --key4 <hex>\n"
-          "          [options] [-o <file>]\n"
+          "Usage: %s --user <name> --password <pass> [options] [-o <file>]\n"
           "\n"
           "Options:\n"
-          "  --user     <str>  Username (required)\n"
-          "  --password <str>  Plaintext password (required, min %d chars)\n"
-          "  --uid      <int>  User ID          (default: 0)\n"
-          "  --gid      <int>  Group ID         (default: 0)\n"
-          "  --home     <str>  Home directory   (default: /)\n"
-          "  --key1     <hex>  TEA key word 1\n"
-          "  --key2     <hex>  TEA key word 2   (all four required;\n"
-          "  --key3     <hex>  TEA key word 3    legacy defaults rejected)\n"
-          "  --key4     <hex>  TEA key word 4\n"
-          "  -o         <path> Output file      (default: stdout)\n"
+          "  --user       <str>  Username (required)\n"
+          "  --password   <str>  Plaintext password (required)\n"
+          "  --uid        <int>  User ID          (default: 0)\n"
+          "  --gid        <int>  Group ID         (default: 0)\n"
+          "  --home       <str>  Home directory   (default: /)\n"
+          "  --iterations <int>  PBKDF2 iterations (default: %d)\n"
+          "  -o           <path> Output file      (default: stdout)\n"
           "\n"
-          "Rejected: empty password, \"Administrator\", default TEA keys.\n"
-          "See Documentation/components/tools/index.rst for normal builds.\n"
-          "\n"
-          "Output format:  username:encrypted_hash:uid:gid:home\n",
-          progname,
-          MIN_PASSWORD);
+          "Output format:  username:$pbkdf2-sha256$...:uid:gid:home\n",
+          progname, DEFAULT_ITERATIONS);
 }
 
 /****************************************************************************
@@ -435,23 +638,25 @@ static void show_usage(const char *progname)
 
 int main(int argc, char **argv)
 {
-  const char *user     = NULL;
-  const char *password = NULL;
-  const char *home     = "/";
-  const char *outpath  = NULL;
-  int         uid      = 0;
-  int         gid      = 0;
-  uint32_t    key[4]   =
-    {
-      DEFAULT_KEY1, DEFAULT_KEY2, DEFAULT_KEY3, DEFAULT_KEY4
-    };
-
-  char encrypted[MAX_ENCRYPTED + 1];
+  const char *user;
+  const char *password;
+  const char *home;
+  const char *outpath;
   FILE *out;
-  int   i;
-  int   ret;
+  char encrypted[MAX_ENCRYPTED + 1];
+  int uid;
+  int gid;
+  uint32_t iterations;
+  int i;
+  int ret;
 
-  /* Simple long-option parser (avoids getopt_long portability concerns) */
+  user       = NULL;
+  password   = NULL;
+  home       = "/";
+  outpath    = NULL;
+  uid        = 0;
+  gid        = 0;
+  iterations = DEFAULT_ITERATIONS;
 
   for (i = 1; i < argc; i++)
     {
@@ -475,41 +680,9 @@ int main(int argc, char **argv)
         {
           home = argv[++i];
         }
-      else if (strcmp(argv[i], "--key1") == 0 && i + 1 < argc)
+      else if (strcmp(argv[i], "--iterations") == 0 && i + 1 < argc)
         {
-          if (parse_uint32_hex(argv[++i], &key[0]) < 0)
-            {
-                    fprintf(stderr, "mkpasswd: invalid --key1 value: %s\n",
-                      argv[i]);
-              return 1;
-            }
-        }
-      else if (strcmp(argv[i], "--key2") == 0 && i + 1 < argc)
-        {
-          if (parse_uint32_hex(argv[++i], &key[1]) < 0)
-            {
-                    fprintf(stderr, "mkpasswd: invalid --key2 value: %s\n",
-                      argv[i]);
-              return 1;
-            }
-        }
-      else if (strcmp(argv[i], "--key3") == 0 && i + 1 < argc)
-        {
-          if (parse_uint32_hex(argv[++i], &key[2]) < 0)
-            {
-                    fprintf(stderr, "mkpasswd: invalid --key3 value: %s\n",
-                      argv[i]);
-              return 1;
-            }
-        }
-      else if (strcmp(argv[i], "--key4") == 0 && i + 1 < argc)
-        {
-          if (parse_uint32_hex(argv[++i], &key[3]) < 0)
-            {
-                    fprintf(stderr, "mkpasswd: invalid --key4 value: %s\n",
-                      argv[i]);
-              return 1;
-            }
+          iterations = (uint32_t)strtoul(argv[++i], NULL, 10);
         }
       else if ((strcmp(argv[i], "-o") == 0 ||
                 strcmp(argv[i], "--output") == 0) && i + 1 < argc)
@@ -524,16 +697,16 @@ int main(int argc, char **argv)
         }
       else
         {
+          fputs(MKPASSWD_NL, stderr);
           fprintf(stderr, "mkpasswd: unknown option: %s\n", argv[i]);
           show_usage(argv[0]);
           return 1;
         }
     }
 
-  /* Validate required arguments */
-
   if (user == NULL)
     {
+      fputs(MKPASSWD_NL, stderr);
       fprintf(stderr, "mkpasswd: --user is required\n");
       show_usage(argv[0]);
       return 1;
@@ -541,78 +714,39 @@ int main(int argc, char **argv)
 
   if (password == NULL)
     {
+      fputs(MKPASSWD_NL, stderr);
       fprintf(stderr, "mkpasswd: --password is required\n");
       show_usage(argv[0]);
       return 1;
     }
 
-  if (password[0] == '\0')
+  if (validate_password_complexity(password) < 0)
     {
-      fprintf(stderr,
-              "mkpasswd: ERROR: password must not be empty.\n"
-              "  Set it in menuconfig: Board Selection -> "
-              "Auto-generate /etc/passwd -> Admin password\n");
       return 1;
     }
 
-  if (strlen(password) < MIN_PASSWORD)
+  if (iterations < MIN_ITERATIONS || iterations > MAX_ITERATIONS)
     {
+      fputs(MKPASSWD_NL, stderr);
       fprintf(stderr,
-              "mkpasswd: --password must be at least %d characters\n",
-              MIN_PASSWORD);
+              "mkpasswd: --iterations must be between %d and %d\n",
+              MIN_ITERATIONS, MAX_ITERATIONS);
       return 1;
     }
 
-  /* Reject the well-known default password.  The build system should have
-   * caught this already; mkpasswd is the last line of defence.
-   */
-
-  if (strcmp(password, "Administrator") == 0)
-    {
-      fprintf(stderr,
-              "mkpasswd: ERROR: password \"Administrator\" is not allowed.\n"
-              "  Set a unique password in menuconfig: Board Selection -> "
-              "Auto-generate /etc/passwd -> Admin password\n");
-      return 1;
-    }
-
-  /* Reject the default TEA keys.  Using the published defaults means any
-   * attacker who has a copy of the NuttX source can decrypt the password
-   * hash directly from the firmware image (CWE-321).
-   */
-
-  if (key[0] == DEFAULT_KEY1 && key[1] == DEFAULT_KEY2 &&
-      key[2] == DEFAULT_KEY3 && key[3] == DEFAULT_KEY4)
-    {
-      fprintf(stderr,
-              "mkpasswd: ERROR: default TEA encryption keys "
-              "are not allowed.\n"
-              "  Set keys in menuconfig: Application Configuration -> "
-              "File System Utilities -> Password file support\n"
-              "  Or enable random key generation under Board Selection -> "
-              "Auto-generate /etc/passwd\n");
-      return 1;
-    }
-
-  /* Encrypt the password using TEA + custom base64.
-   * Only the hash is written to the output file; the plaintext is never
-   * stored in firmware.
-   */
-
-  ret = passwd_encrypt(password, key, encrypted);
+  ret = passwd_hash(password, iterations, encrypted);
   if (ret < 0)
     {
       return 1;
     }
 
-  /* Open the output stream */
-
   if (outpath != NULL)
     {
-      /* Create parent directory if it does not exist */
+      char *dir;
+      char *last;
 
-      char *dir  = strdup(outpath);
-      char *last = strrchr(dir, '/');
+      dir  = strdup(outpath);
+      last = strrchr(dir, '/');
 
       if (last != NULL && last != dir)
         {
@@ -625,6 +759,7 @@ int main(int argc, char **argv)
       out = fopen(outpath, "w");
       if (out == NULL)
         {
+          fputs(MKPASSWD_NL, stderr);
           fprintf(stderr, "mkpasswd: cannot open output file '%s': %s\n",
                   outpath, strerror(errno));
           return 1;
@@ -634,12 +769,6 @@ int main(int argc, char **argv)
     {
       out = stdout;
     }
-
-  /* Write the passwd entry.
-   * Format: username:encrypted_hash:uid:gid:home
-   * This matches the format expected by apps/fsutils/passwd/passwd_find.c
-   * and the existing NuttX /etc/passwd files.
-   */
 
   fprintf(out, "%s:%s:%d:%d:%s\n", user, encrypted, uid, gid, home);
 

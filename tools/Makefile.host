@@ -107,7 +107,7 @@ ifdef HOSTEXEEXT
 mkversion: mkversion$(HOSTEXEEXT)
 endif
 
-# mkpasswd - Generate a NuttX /etc/passwd entry with TEA-encrypted password
+# mkpasswd - Generate a NuttX /etc/passwd entry with PBKDF2-HMAC-SHA256 hash
 
 mkpasswd$(HOSTEXEEXT): mkpasswd.c
 	$(Q) $(HOSTCC) $(HOSTCFLAGS) -o mkpasswd$(HOSTEXEEXT) mkpasswd.c
