@@ -258,9 +258,12 @@ void watchdog_notifier_chain_unregister(FAR struct notifier_block *nb);
  * Name: watchdog_automonitor_timeout
  *
  * Description:
- *   This function can be called in the watchdog timeout interrupt handler.
- *   If so, callbacks on the watchdog timer notify chain are called when the
- *   watchdog timer times out.
+ *   Notify callbacks registered on the watchdog timeout notifier chain.
+ *   The action identifies the automonitor keepalive mechanism selected by
+ *   CONFIG_WATCHDOG_AUTOMONITOR_BY_*.  The callback data argument is NULL.
+ *
+ *   This function is intended to be called from a watchdog timeout interrupt
+ *   handler.  Callback functions must obey interrupt-context restrictions.
  *
  ****************************************************************************/
 

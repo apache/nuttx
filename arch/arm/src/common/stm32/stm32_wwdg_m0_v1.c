@@ -299,7 +299,7 @@ static int stm32_interrupt(int irq, void *context, void *arg)
            * upon return.
            */
 
-          priv->handler(irq, context, arg);
+          priv->handler(irq, context, priv);
         }
 
       /* The EWI interrupt is cleared by writing '0' to the EWIF bit in the
