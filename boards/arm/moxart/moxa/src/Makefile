@@ -28,4 +28,9 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += moxart_reset.c
 endif
 
+ifeq ($(CONFIG_ETC_ROMFS),y)
+  RCSRCS = etc/init.d/rc.sysinit etc/init.d/rcS
+  RCRAWS = etc/group
+endif
+
 include $(TOPDIR)/boards/Board.mk
