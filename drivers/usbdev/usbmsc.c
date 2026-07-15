@@ -741,7 +741,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
             if (ctrl->type == USB_REQ_RECIPIENT_INTERFACE)
               {
                 if (priv->config == USBMSC_CONFIGID &&
-                    index == USBMSC_INTERFACEID &&
+                    index == priv->devinfo.ifnobase &&
                     value == USBMSC_ALTINTERFACEID)
                   {
                     /* Signal to instantiate the interface change */
@@ -764,7 +764,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
             if (ctrl->type == (USB_DIR_IN | USB_REQ_RECIPIENT_INTERFACE) &&
                 priv->config == USBMSC_CONFIGIDNONE)
               {
-                if (index != USBMSC_INTERFACEID)
+                if (index != priv->devinfo.ifnobase)
                   {
                     ret = -EDOM;
                   }
@@ -805,7 +805,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 /* Only one interface is supported */
 
-                if (index != USBMSC_INTERFACEID)
+                if (index != priv->devinfo.ifnobase)
                   {
                     usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_MSRESETNDX),
                              index);
@@ -836,7 +836,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
               {
                 /* Only one interface is supported */
 
-                if (index != USBMSC_INTERFACEID)
+                if (index != priv->devinfo.ifnobase)
                   {
                     usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_GETMAXLUNNDX),
                              index);
@@ -1280,7 +1280,6 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep,
 
 void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
 {
-#ifndef CONFIG_USBMSC_COMPOSITE
   FAR struct usbdev_s *dev;
   FAR struct usbdev_req_s *ctrlreq;
   int ret;
@@ -1322,7 +1321,6 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DEFERREDRESPSTALLED), 0);
       EP_STALL(dev->ep0);
     }
-#endif
 }
 
 /****************************************************************************
