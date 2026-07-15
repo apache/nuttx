@@ -268,6 +268,12 @@ config STM32_HAVE_ADF1
 config STM32_HAVE_DFSDM1
 	bool
 
+config STM32_HAVE_IP_DFSDM_V1
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
 # DMA capabilities
 
 config STM32_HAVE_MDMA
@@ -317,6 +323,17 @@ config STM32_HAVE_IP_DMA_V2_STREAM
 
 config STM32_HAVE_IP_DMA2D_M3M4_V1
 	bool
+
+config STM32_HAVE_DMACAPABLE
+	bool
+	default y if ARCH_CHIP_STM32F1
+	default y if ARCH_CHIP_STM32F2
+	default y if ARCH_CHIP_STM32F3
+	default y if ARCH_CHIP_STM32F4
+	default y if ARCH_CHIP_STM32G4
+	default y if ARCH_CHIP_STM32L1
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
 
 # DTS capabilities
 
@@ -495,6 +512,11 @@ config STM32_HAVE_LTDC
 config STM32_HAVE_IP_LTDC_M3M4_V1
 	bool
 
+config STM32_HAVE_IP_LTDC_M7_V1
+	bool
+	default y if ARCH_CHIP_STM32F7
+	default y if ARCH_CHIP_STM32H7
+
 config STM32_HAVE_DSIHOST
 	bool
 
@@ -511,6 +533,13 @@ config STM32_HAVE_SRAM1
 
 config STM32_HAVE_SRAM2
 	bool
+
+config STM32_HAVE_SRAM2_HEAP
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32H5
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5 && STM32_SRAM2
 
 config STM32_HAVE_SRAM3
 	bool
@@ -692,6 +721,16 @@ config STM32_HAVE_RTC_SUBSECONDS
 
 config STM32_HAVE_SAIPLL
 	bool
+
+config STM32_HAVE_SAI1PLL
+	bool
+	default y if ARCH_CHIP_STM32L4
+	default y if ARCH_CHIP_STM32L5
+	default y if ARCH_CHIP_STM32U5
+
+config STM32_HAVE_SAI2PLL
+	bool
+	default y if STM32_HAVE_SAI1PLL && STM32_HAVE_SAI2
 
 config STM32_HAVE_SAI
 	bool
