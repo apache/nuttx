@@ -316,5 +316,5 @@ void up_putc(int ch)
 
 void lwlconsole_init(void)
 {
-  register_driver("/dev/console", &g_consoleops, 0666, NULL);
+  register_driver("/dev/console", &g_consoleops, 0620, NULL);
 }

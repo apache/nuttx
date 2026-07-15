@@ -542,7 +542,7 @@ int nvblk_initialize(FAR const char *path,
    * NVBLK_MTDBLOCK device structure
    */
 
-  ret = register_blockdriver(path, &g_nvblk_bops, 0666, dev);
+  ret = register_blockdriver(path, &g_nvblk_bops, 0660, dev);
   if (ret < 0)
     {
       ferr("register_blockdriver failed: %d\n", ret);

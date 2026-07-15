@@ -618,7 +618,7 @@ int adt7320_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_adt7320fops, 0666, priv);
+  ret = register_driver(devpath, &g_adt7320fops, 0440, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

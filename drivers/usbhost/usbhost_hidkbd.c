@@ -1991,7 +1991,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uinfo("Register driver\n");
   usbhost_mkdevname(priv, devname);
-  ret = register_driver(devname, &g_hidkbd_fops, 0666, priv);
+  ret = register_driver(devname, &g_hidkbd_fops, 0600, priv);
 
   /* We now have to be concerned about asynchronous modification of crefs
    * because the driver has been registered.

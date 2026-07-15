@@ -338,7 +338,7 @@ int pulsecount_register(FAR const char *path,
   upper->dev = dev;
 
   _info("Registering %s\n", path);
-  return register_driver(path, &g_pulsecount_fops, 0666, upper);
+  return register_driver(path, &g_pulsecount_fops, 0600, upper);
 }
 
 void pulsecount_expired(FAR void *handle)

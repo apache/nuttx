@@ -1032,7 +1032,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
 
   snprintf(kbddevname, sizeof(kbddevname), DEV_FORMAT, kbdminor);
   iinfo("Registering %s\n", kbddevname);
-  ret = register_driver(kbddevname, &g_hidkbd_fops, 0666, priv);
+  ret = register_driver(kbddevname, &g_hidkbd_fops, 0600, priv);
 
 #ifdef CONFIG_SPQ10KBD_DJOY
   iinfo("Registering %s\n", joydevname);

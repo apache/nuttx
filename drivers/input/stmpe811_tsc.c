@@ -904,7 +904,7 @@ int stmpe811_register(STMPE811_HANDLE handle, int minor)
   /* Register the character driver */
 
   snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
-  ret = register_driver(devname, &g_stmpe811fops, 0666, priv);
+  ret = register_driver(devname, &g_stmpe811fops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: Failed to register driver %s: %d\n", devname, ret);

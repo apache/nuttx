@@ -407,7 +407,7 @@ int qe_register(FAR const char *devpath, FAR struct qe_lowerhalf_s *lower)
   /* Register the QEncoder device */
 
   sninfo("Registering %s\n", devpath);
-  return register_driver(devpath, &g_qeops, 0666, upper);
+  return register_driver(devpath, &g_qeops, 0600, upper);
 }
 
 #endif /* CONFIG_SENSORS_QENCODER */

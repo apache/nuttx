@@ -791,7 +791,7 @@ int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
 
   gpioinfo("Registering %s\n", devname);
 
-  return register_driver(devname, &g_gpio_drvrops, 0666, dev);
+  return register_driver(devname, &g_gpio_drvrops, 0600, dev);
 }
 
 /****************************************************************************

@@ -858,7 +858,7 @@ FAR void *automount_initialize(FAR const struct automount_lower_s *lower)
   snprintf(devpath, PATH_MAX,
            CONFIG_FS_AUTOMOUNTER_VFS_PATH "%s", lower->mountpoint);
 
-  ret = register_driver(devpath, &g_automount_fops, 0444, priv);
+  ret = register_driver(devpath, &g_automount_fops, 0400, priv);
   lib_put_pathbuffer(devpath);
   if (ret < 0)
     {

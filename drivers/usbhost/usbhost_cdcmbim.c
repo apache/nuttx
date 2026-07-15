@@ -1581,7 +1581,7 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcmbim_s *priv)
 
       uinfo("Register character driver\n");
       usbhost_mkdevname(priv, devname);
-      ret = register_driver(devname, &g_cdcwdm_fops, 0666, priv);
+      ret = register_driver(devname, &g_cdcwdm_fops, 0600, priv);
     }
 
   if (priv->intin)

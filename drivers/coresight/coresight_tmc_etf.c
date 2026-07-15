@@ -511,7 +511,7 @@ int tmc_etf_register(FAR struct coresight_tmc_dev_s * tmcdev,
         }
 
       snprintf(pathname, sizeof(pathname), "/dev/%s", desc->name);
-      ret = register_driver(pathname, &g_tmc_fops, 0444, tmcdev);
+      ret = register_driver(pathname, &g_tmc_fops, 0400, tmcdev);
       if (ret < 0)
         {
           cserr("%s:driver register failed\n", desc->name);

@@ -1913,7 +1913,7 @@ int rn2xx3_register(FAR const char *devpath, FAR const char *uartpath)
 
   /* Register driver */
 
-  err = register_driver(devpath, &g_rn2xx3fops, 0666, priv);
+  err = register_driver(devpath, &g_rn2xx3fops, 0600, priv);
   if (err < 0)
     {
       wlerr("Failed to register RN2xx3 driver: %d\n", err);

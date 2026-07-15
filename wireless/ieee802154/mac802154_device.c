@@ -865,7 +865,7 @@ int mac802154dev_register(MACHANDLE mac, int minor)
 
   /* Register the mac character driver */
 
-  ret = register_driver(devname, &g_mac802154dev_fops, 0666, dev);
+  ret = register_driver(devname, &g_mac802154dev_fops, 0600, dev);
   if (ret < 0)
     {
       wlerr("ERROR: register_driver failed: %d\n", ret);

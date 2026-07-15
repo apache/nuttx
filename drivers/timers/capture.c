@@ -581,7 +581,7 @@ int cap_register(FAR const char *devpath, FAR struct cap_lowerhalf_s *lower)
 
   /* Register the PWM Capture device */
 
-  return register_driver(devpath, &g_capops, 0666, upper);
+  return register_driver(devpath, &g_capops, 0600, upper);
 }
 
 int cap_register_multiple(FAR const char *devpath,

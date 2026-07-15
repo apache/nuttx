@@ -730,7 +730,7 @@ int ajoy_register(FAR const char *devname,
 
   /* And register the ajoystick driver */
 
-  ret = register_driver(devname, &g_ajoy_fops, 0666, priv);
+  ret = register_driver(devname, &g_ajoy_fops, 0600, priv);
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);

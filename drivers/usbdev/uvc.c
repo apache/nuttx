@@ -1521,7 +1521,7 @@ int usbdev_uvc_classobject(int minor,
 
   /* Register the character device */
 
-  ret = register_driver(USBUVC_CHARDEV_PATH, &g_uvc_fops, 0666, priv);
+  ret = register_driver(USBUVC_CHARDEV_PATH, &g_uvc_fops, 0600, priv);
   if (ret < 0)
     {
       uerr("register_driver failed: %d\n", ret);

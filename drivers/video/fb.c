@@ -2017,7 +2017,7 @@ int fb_register_device(int display, int plane,
       snprintf(devname, sizeof(devname), "/dev/fb%d.%d", display, plane);
     }
 
-  ret = register_driver(devname, &g_fb_fops, 0666, fb);
+  ret = register_driver(devname, &g_fb_fops, 0600, fb);
 
   if (ret < 0)
     {

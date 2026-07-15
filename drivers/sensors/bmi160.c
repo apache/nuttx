@@ -296,7 +296,7 @@ int bmi160_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
 
   bmi160_putreg8(priv, BMI160_PMU_TRIGGER, 0);
 
-  ret = register_driver(devpath, &g_bmi160fops, 0666, priv);
+  ret = register_driver(devpath, &g_bmi160fops, 0600, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

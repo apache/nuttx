@@ -574,7 +574,7 @@ int dhtxx_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_dhtxxfops, 0666, priv);
+  ret = register_driver(devpath, &g_dhtxxfops, 0600, priv);
   if (ret < 0)
     {
       nxmutex_destroy(&priv->devlock);

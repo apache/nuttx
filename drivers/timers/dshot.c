@@ -624,7 +624,7 @@ int dshot_register(FAR const char *path, FAR struct dshot_lowerhalf_s *dev)
   nxmutex_init(&upper->lock);
   upper->dev = dev;
 
-  ret = register_driver(path, &g_dshotops, 0666, upper);
+  ret = register_driver(path, &g_dshotops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

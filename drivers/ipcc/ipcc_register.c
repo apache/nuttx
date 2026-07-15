@@ -167,7 +167,7 @@ int ipcc_register(FAR struct ipcc_lower_s *ipcc)
   /* Create the character device name */
 
   snprintf(devname, sizeof(devname), DEVNAME_FMT, ipcc->chan);
-  if ((ret = register_driver(devname, &g_ipcc_fops, 0666, priv)))
+  if ((ret = register_driver(devname, &g_ipcc_fops, 0600, priv)))
     {
       goto error;
     }

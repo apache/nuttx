@@ -796,7 +796,7 @@ int lirc_register(FAR struct lirc_lowerhalf_s *lower, int devno)
   /* Register remote control character device */
 
   snprintf(path, DEVNAME_MAX, DEVNAME_FMT, devno);
-  ret = register_driver(path, &g_lirc_fops, 0666, upper);
+  ret = register_driver(path, &g_lirc_fops, 0600, upper);
   if (ret < 0)
     {
       goto drv_err;

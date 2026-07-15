@@ -507,7 +507,7 @@ int zc_register(FAR const char *devname, FAR struct zc_lowerhalf_s *lower)
 
   /* And register the zero cross driver */
 
-  ret = register_driver(devname, &g_zcops, 0666, priv);
+  ret = register_driver(devname, &g_zcops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: register_driver failed: %d\n", ret);

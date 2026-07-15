@@ -375,7 +375,7 @@ int bmi088_acc_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
       return ret;
     }
 
-  ret = register_driver(devpath, &g_bmi088_acc_fops, 0666, priv);
+  ret = register_driver(devpath, &g_bmi088_acc_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);
@@ -437,7 +437,7 @@ int bmi088_gyro_register(FAR const char *devpath, FAR struct spi_dev_s *dev)
       return ret;
     }
 
-  ret = register_driver(devpath, &g_bmi088_gyro_fops, 0666, priv);
+  ret = register_driver(devpath, &g_bmi088_gyro_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

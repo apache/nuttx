@@ -769,7 +769,7 @@ int lps25h_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       dev->config->irq_clear(dev->config);
     }
 
-  ret = register_driver(devpath, &g_lps25hops, 0666, dev);
+  ret = register_driver(devpath, &g_lps25hops, 0600, dev);
 
   lps25h_dbg("Registered with %d\n", ret);
 

@@ -1813,7 +1813,7 @@ int cxd5602pwbimu_register(FAR const char *devpath,
   nxsem_init(&priv->dataready, 0, 0);
   nxsem_init(&priv->bufsem, 0, 1);
 
-  ret = register_driver(devpath, &g_cxd5602pwbimufops, 0666, priv);
+  ret = register_driver(devpath, &g_cxd5602pwbimufops, 0600, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

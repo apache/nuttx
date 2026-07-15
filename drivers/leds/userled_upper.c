@@ -550,7 +550,7 @@ int userled_register(FAR const char *devname,
 
   /* And register the LED driver */
 
-  ret = register_driver(devname, &g_userled_fops, 0666, priv);
+  ret = register_driver(devname, &g_userled_fops, 0600, priv);
   if (ret < 0)
     {
       lederr("ERROR: register_driver failed: %d\n", ret);

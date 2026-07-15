@@ -681,7 +681,7 @@ int sht21_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_sht21fops, 0666, priv);
+  ret = register_driver(devpath, &g_sht21fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

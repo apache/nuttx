@@ -1194,7 +1194,7 @@ static int lsm303agr_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_fops, 0666, priv);
+  ret = register_driver(devpath, &g_fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

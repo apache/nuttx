@@ -521,7 +521,7 @@ int rpmsg_register(FAR const char *path, FAR struct rpmsg_s *rpmsg,
       return ret;
     }
 
-  ret = register_driver(path, &g_rpmsg_dev_ops, 0222, rpmsg);
+  ret = register_driver(path, &g_rpmsg_dev_ops, 0200, rpmsg);
   if (ret < 0)
     {
       metal_finish();

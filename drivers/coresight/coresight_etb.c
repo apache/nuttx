@@ -463,7 +463,7 @@ etb_register(FAR const struct coresight_desc_s *desc)
     }
 
   snprintf(pathname, sizeof(pathname), "/dev/%s", desc->name);
-  ret = register_driver(pathname, &g_etb_fops, 0444, etbdev);
+  ret = register_driver(pathname, &g_etb_fops, 0400, etbdev);
   if (ret < 0)
     {
       cserr("%s:driver register failed\n", desc->name);

@@ -488,7 +488,7 @@ int syslog_rpmsg_init(void)
   int ret;
 
   ret = register_driver(CONFIG_SYSLOG_DEVPATH, &g_syslog_rpmsgfops,
-                        0666, &g_syslog_rpmsg);
+                        0600, &g_syslog_rpmsg);
   if (ret < 0)
     {
       return ret;

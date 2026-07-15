@@ -161,7 +161,7 @@ static int syslog_chardev_ioctl(FAR struct file *filep,
 
 void syslog_register(void)
 {
-  register_driver("/dev/log", &g_syslog_fops, 0222, NULL);
+  register_driver("/dev/log", &g_syslog_fops, 0220, NULL);
 }
 
 #endif /* CONFIG_SYSLOG_CHARDEV */

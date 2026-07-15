@@ -4407,7 +4407,7 @@ static int mmcsd_probe(FAR struct mmcsd_state_s *priv)
                 {
                   snprintf(devname, sizeof(devname), "/dev/mmcsd%d%s",
                            priv->minor, g_partname[i]);
-                  register_blockdriver(devname, &g_bops, 0666,
+                  register_blockdriver(devname, &g_bops, 0660,
                                        &priv->part[i]);
                 }
             }

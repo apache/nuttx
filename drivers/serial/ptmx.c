@@ -267,7 +267,7 @@ int ptmx_register(void)
 {
   /* Register the PTMX driver */
 
-  return register_driver("/dev/ptmx", &g_ptmx_fops, 0666, NULL);
+  return register_driver("/dev/ptmx", &g_ptmx_fops, 0600, NULL);
 }
 
 /****************************************************************************

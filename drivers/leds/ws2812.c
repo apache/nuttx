@@ -614,7 +614,7 @@ int ws2812_register(FAR const char          *dev_path,
 {
   /* Register the character driver */
 
-  int ret = register_driver(dev_path, &g_ws2812fops, 0666, dev_data);
+  int ret = register_driver(dev_path, &g_ws2812fops, 0600, dev_data);
   if (ret < 0)
     {
       lederr("ERROR: Failed to register ws2812 driver: %d\n", ret);
@@ -685,7 +685,7 @@ int ws2812_leds_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_ws2812fops, 0666, priv);
+  ret = register_driver(devpath, &g_ws2812fops, 0600, priv);
   if (ret < 0)
     {
       lederr("ERROR: Failed to register driver: %d\n", ret);

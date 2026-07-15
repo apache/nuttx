@@ -294,7 +294,7 @@ FAR void *ubxmdm_register(FAR const char *path,
       goto errout_with_upper;
     }
 
-  ret = register_driver(path, &g_ubxmdm_fops, 0666, upper);
+  ret = register_driver(path, &g_ubxmdm_fops, 0600, upper);
   if (ret < 0)
     {
       m_err("ERROR: register_driver failed: %d\n", ret);

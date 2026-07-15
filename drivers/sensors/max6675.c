@@ -272,7 +272,7 @@ int max6675_register(FAR const char *devpath, FAR struct spi_dev_s *spi)
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_max6675fops, 0666, priv);
+  ret = register_driver(devpath, &g_max6675fops, 0600, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);

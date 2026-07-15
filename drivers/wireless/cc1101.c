@@ -1740,7 +1740,7 @@ int cc1101_register(FAR const char *path, FAR struct cc1101_dev_s *dev)
       return -ENODEV;
     }
 
-  return register_driver(path, &g_cc1101ops, 0666, dev);
+  return register_driver(path, &g_cc1101ops, 0600, dev);
 }
 
 /****************************************************************************

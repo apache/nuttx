@@ -587,7 +587,7 @@ int motor_register(FAR const char *path,
 
   /* Register the motor character driver */
 
-  ret = register_driver(path, &g_motor_fops, 0666, upper);
+  ret = register_driver(path, &g_motor_fops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->closelock);

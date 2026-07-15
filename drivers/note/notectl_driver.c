@@ -237,5 +237,5 @@ static int notectl_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 int notectl_register(void)
 {
-  return register_driver("/dev/notectl", &g_notectl_fops, 0666, NULL);
+  return register_driver("/dev/notectl", &g_notectl_fops, 0600, NULL);
 }

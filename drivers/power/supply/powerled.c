@@ -414,7 +414,7 @@ int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev,
 
   /* Register the POWERLED character driver */
 
-  ret = register_driver(path, &g_powerled_fops, 0666, dev);
+  ret = register_driver(path, &g_powerled_fops, 0600, dev);
   if (ret < 0)
     {
       nxmutex_destroy(&dev->closelock);

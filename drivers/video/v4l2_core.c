@@ -560,7 +560,7 @@ int video_register(FAR const char *devpath, FAR struct v4l2_s *v4l2)
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_v4l2_fops, 0666, v4l2);
+  ret = register_driver(devpath, &g_v4l2_fops, 0600, v4l2);
   if (ret < 0)
     {
       verr("Failed to register driver: %d\n", ret);

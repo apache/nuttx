@@ -501,7 +501,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
   /* Register the PWM device */
 
   pwminfo("Registering %s\n", path);
-  return register_driver(path, &g_pwmops, 0666, upper);
+  return register_driver(path, &g_pwmops, 0600, upper);
 }
 
 #endif /* CONFIG_PWM */

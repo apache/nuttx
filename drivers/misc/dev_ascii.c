@@ -137,5 +137,5 @@ static int devascii_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 void devascii_register(void)
 {
-  register_driver("/dev/ascii", &g_devascii_fops, 0666, NULL);
+  register_driver("/dev/ascii", &g_devascii_fops, 0644, NULL);
 }

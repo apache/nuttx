@@ -492,7 +492,7 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
   list_initialize(&upper->head);
   nxmutex_init(&upper->lock);
 
-  ret = register_driver(path, &g_touch_fops, 0666, upper);
+  ret = register_driver(path, &g_touch_fops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

@@ -876,7 +876,7 @@ int adxl372_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_adxl372_fops, 0666, priv);
+  ret = register_driver(devpath, &g_adxl372_fops, 0440, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register accelerometer driver: %d\n", ret);

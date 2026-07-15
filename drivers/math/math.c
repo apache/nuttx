@@ -220,7 +220,7 @@ int math_register(FAR const char *path,
 
   /* Register the math timer device */
 
-  ret = register_driver(path, &g_math_ops, 0666, upper);
+  ret = register_driver(path, &g_math_ops, 0600, upper);
   if (ret < 0)
     {
       _err("register math driver failed: %d\n", ret);

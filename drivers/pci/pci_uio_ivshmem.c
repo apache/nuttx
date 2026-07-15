@@ -483,7 +483,7 @@ static int uio_ivshmem_probe(FAR struct ivshmem_device_s *dev)
   ivshmem_control_irq(dev, true);
 
   snprintf(udev->name, sizeof(udev->name), "/dev/uio%d", udev->drv.id);
-  ret = register_driver(udev->name, &g_uio_ivshmem_fops, 0666, udev);
+  ret = register_driver(udev->name, &g_uio_ivshmem_fops, 0600, udev);
   if (ret < 0)
     {
       pcierr("ERROR: Ivshmem register_driver failed, ret=%d\n", ret);

@@ -3022,7 +3022,7 @@ static int cdcmbim_classobject(int minor,
       index = self->ncmdriver.dev.netdev.d_ifindex;
 #endif
       snprintf(devname, sizeof(devname), CDC_MBIM_DEVFORMAT, index);
-      ret = register_driver(devname, &g_usbdevfops, 0666, self);
+      ret = register_driver(devname, &g_usbdevfops, 0600, self);
       if (ret < 0)
         {
           nerr("register_driver failed. ret: %d\n", ret);

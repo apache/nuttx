@@ -543,7 +543,7 @@ int ff_register(FAR struct ff_lowerhalf_s *lower, FAR const char *path,
   upper->effects     = (FAR struct ff_effect_s *)(upper + 1);
   nxmutex_init(&upper->lock);
 
-  ret = register_driver(path, &g_ff_fops, 0666, upper);
+  ret = register_driver(path, &g_ff_fops, 0600, upper);
   if (ret < 0)
     {
       nxmutex_destroy(&upper->lock);

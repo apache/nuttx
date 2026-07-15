@@ -328,7 +328,7 @@ int oneshot_register(FAR const char *devname,
 
   /* And register the oneshot timer driver */
 
-  ret = register_driver(devname, &g_oneshot_ops, 0666, priv);
+  ret = register_driver(devname, &g_oneshot_ops, 0600, priv);
   if (ret < 0)
     {
       tmrerr("ERROR: register_driver failed: %d\n", ret);

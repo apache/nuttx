@@ -840,7 +840,7 @@ FAR void *watchdog_register(FAR const char *path,
 
   /* Register the watchdog timer device */
 
-  ret = register_driver(path, &g_wdogops, 0666, upper);
+  ret = register_driver(path, &g_wdogops, 0600, upper);
   if (ret < 0)
     {
       wderr("register_driver failed: %d\n", ret);

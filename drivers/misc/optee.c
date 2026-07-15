@@ -1501,7 +1501,7 @@ int optee_register(void)
     }
 
 #ifdef CONFIG_DEV_OPTEE_SUPPLICANT
-  ret = register_driver(OPTEE_SUPPLICANT_DEV_PATH, &g_optee_ops, 0666,
+  ret = register_driver(OPTEE_SUPPLICANT_DEV_PATH, &g_optee_ops, 0600,
                         (FAR void *)OPTEE_ROLE_SUPPLICANT);
   if (ret < 0)
     {
@@ -1509,7 +1509,7 @@ int optee_register(void)
     }
 #endif
 
-  return register_driver(OPTEE_DEV_PATH, &g_optee_ops, 0666,
+  return register_driver(OPTEE_DEV_PATH, &g_optee_ops, 0600,
                          (FAR void *)OPTEE_ROLE_CA);
 }
 

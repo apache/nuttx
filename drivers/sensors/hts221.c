@@ -1192,7 +1192,7 @@ int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
       return ret;
     }
 
-  ret = register_driver(devpath, &g_humidityops, 0666, priv);
+  ret = register_driver(devpath, &g_humidityops, 0600, priv);
 
   hts221_dbg("Registered with %d\n", ret);
 
