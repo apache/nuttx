@@ -50,10 +50,10 @@ config STM32_HAVE_DAC_DMA_TIMER
 	default y if ARCH_CHIP_STM32L5
 	default y if ARCH_CHIP_STM32U5
 
-config STM32_HAVE_ADC_L4
+config STM32_HAVE_IP_ADC_M3M4_V3
 	bool
 
-config STM32_HAVE_ADC_H5
+config STM32_HAVE_IP_ADC_M33_V1
 	bool
 
 config STM32_HAVE_ADC2
@@ -377,7 +377,7 @@ config STM32_HAVE_IP_ETHMAC_V2
 
 # FDCAN capabilities
 
-config STM32_HAVE_FDCAN_H7
+config STM32_HAVE_IP_FDCAN_M7_V1
 	bool
 
 config STM32_HAVE_FDCAN1
@@ -1417,7 +1417,7 @@ config STM32_HAVE_USBFS_MODE
 config STM32_HAVE_USBDRD_HOST
 	bool
 
-config STM32_HAVE_OTG_H7
+config STM32_HAVE_IP_OTG_M7_V1
 	bool
 
 config STM32_HAVE_INTERNAL_ULPI
