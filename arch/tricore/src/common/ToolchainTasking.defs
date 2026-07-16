@@ -57,6 +57,7 @@ UNAR              = artc -x
 NM                = nm
 OBJCOPY           = echo
 OBJDUMP           = elfdump
+ASMEXT            = asm
 
 ARCHOPTIMIZATION += --lsl-core=vtc
 LDFLAGS          += --lsl-core=vtc

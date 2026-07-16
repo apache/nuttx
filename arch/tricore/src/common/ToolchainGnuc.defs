@@ -117,6 +117,7 @@ UNAR    = $(CROSSDEV)tricore-elf-gcc-ar x
 NM      = $(CROSSDEV)tricore-elf-gcc-nm
 OBJCOPY = $(CROSSDEV)tricore-elf-objcopy
 OBJDUMP = $(CROSSDEV)tricore-elf-objdump
+ASMEXT  = S
 
 ARCHOPTIMIZATION += -fno-builtin
 
