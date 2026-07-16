@@ -24,4 +24,5 @@ set(SRCS rtl8721dx_boot.c rtl8721dx_bringup.c)
 
 target_sources(board PRIVATE ${SRCS})
 
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/ld.script")
+# LD_SCRIPT is not set here: the Ameba image2 linker script is generated
+# (prebuilt/ld.script.gen) and published by the shared ameba_board.cmake.

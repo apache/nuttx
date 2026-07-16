@@ -49,7 +49,10 @@ if [ ! -d "$DEST/component/soc" ]; then
   # init + fetch <sha> is used to land an arbitrary pinned commit.)
   git init --quiet "$DEST"
   git -C "$DEST" remote add origin "$URL"
-  git -C "$DEST" fetch --quiet --depth 1 origin "$VERSION"
+  # --progress (not --quiet): the shallow fetch still pulls hundreds of MB, so
+  # show git's "Receiving objects" bar -- otherwise it looks hung.  --progress
+  # forces the bar even when stderr is not a TTY (e.g. CI logs).
+  git -C "$DEST" fetch --progress --depth 1 origin "$VERSION"
   git -C "$DEST" checkout --quiet FETCH_HEAD
 
   # Apply the NuttX build patches on top of the pinned commit.  Done only on a

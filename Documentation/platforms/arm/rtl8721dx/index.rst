@@ -41,24 +41,93 @@ NOR accessed through the SDK XIP path. The exact flash / PSRAM size depends on
 the part number — for example the RTL8721DAF has 4 MB of NOR flash and no
 PSRAM.
 
-Vendor SDK Dependency
+Vendor SDK and Toolchain
+========================
+
+The build depends on Realtek's open ``ameba-rtos`` SDK and its matching
+``arm-none-eabi`` toolchain (from the Realtek asdk release), neither of which is
+part of the NuttX tree.  The SDK provides the Wi-Fi / Bluetooth firmware and the
+low-level chip libraries; NuttX links its own libc / libm and reuses the SDK's
+``app_start()`` as the image entry point.
+
+Both are fetched automatically — there is nothing to install by hand:
+
+- **make** fetches them on the first ``make`` (from its ``PREBUILD`` step).
+- **CMake** fetches them when you source ``. tools/ameba/env.sh <board>``, which
+  must run before ``cmake`` (CMake probes the compiler at configure time).  The
+  make build resolves everything on demand, so it needs no sourcing.
+
+The SDK is a shallow ``git clone`` of the pinned revision of
+``https://github.com/Ameba-AIoT/ameba-rtos.git`` into
+``arch/arm/src/common/ameba/ameba-rtos`` (git-ignored) and is built unmodified;
+export ``AMEBA_SDK`` to use a local checkout instead.  The asdk version is
+pinned **per IC** by the SDK, so different Ameba ICs may use different toolchain
+versions — the build selects the matching one automatically.
+
+Building and Flashing
 =====================
 
-The build depends on Realtek's open ``ameba-rtos`` SDK, which is **not** part
-of the NuttX tree. It provides the Wi-Fi / Bluetooth firmware and the
-low-level chip libraries. The first build auto-fetches the pinned revision (a
-shallow ``git clone`` of ``https://github.com/Ameba-AIoT/ameba-rtos.git``) into
-``arch/arm/src/common/ameba/ameba-rtos`` (git-ignored) and builds against it
-unmodified. To use a local checkout instead of auto-fetching, export
-``AMEBA_SDK`` to its path.
+Replace ``<board>`` below with an actual board (e.g. ``pke8721daf``) and
+``<config>`` with one of its configurations.  The first build fetches the SDK
+and toolchain (see `Vendor SDK and Toolchain`_).
 
-Toolchain
-=========
+With make
+---------
 
-A matching Realtek ARM toolchain (``arm-none-eabi`` from the Realtek asdk
-release) is required and is fetched automatically by the board build. NuttX
-links its own libc / libm and reuses the SDK's ``app_start()`` as the image
-entry point.
+.. code:: console
+
+   $ ./tools/configure.sh <board>:<config>
+   $ make
+
+With CMake
+----------
+
+CMake probes the compiler at configure time, so source the Ameba environment
+once first, **passing the board** so the asdk version that IC pins is on
+``PATH``:
+
+.. code:: console
+
+   $ . tools/ameba/env.sh <board>
+   $ cmake -B build -DBOARD_CONFIG=<board>:<config> -GNinja
+   $ cmake --build build
+
+make writes ``nuttx.bin`` to the top-level directory; CMake writes it under
+``build/``.  The bootloader ``boot.bin`` is a prebuilt binary under the board's
+``prebuilt/`` directory; the flash step writes both at the offsets taken from
+the generated flash layout, so none are entered by hand.
+
+Flashing
+--------
+
+**CLI (Linux/macOS)** — connect a USB-UART adapter and use the built-in flash
+target (the baud defaults to 1500000; override with ``AMEBA_BAUD``)::
+
+  $ make flash AMEBA_PORT=/dev/ttyUSB0                            # make build
+  $ AMEBA_PORT=/dev/ttyUSB0 cmake --build build --target flash    # CMake build
+
+**GUI (Windows)** — use the Realtek AmebaImageTool (``AmebaImageTool.exe`` under
+``tools/ameba/ImageTool/`` in the SDK tree) to select ``boot.bin`` (from the
+board's ``prebuilt/`` directory) and ``nuttx.bin``.  See the `Realtek Ameba
+ImageTool guide <https://aiot.realmcu.com/en/latest/tools/image_tool/index.html>`_
+for the Windows GUI tool and download-mode entry (hold the download button /
+power-cycle with the ``UART_LOG_TX`` line asserted).
+
+**Serial console** — after flashing, connect to the LOG-UART at 1500000 8N1::
+
+  $ picocom -b 1500000 /dev/ttyUSB0
+
+Configuration
+=============
+
+The build-time options are the same for make and CMake (both edit the one
+Kconfig for the selected board); only the command that launches the menuconfig
+UI differs:
+
+.. code:: console
+
+   $ make menuconfig                       # make build
+   $ cmake --build build -t menuconfig     # CMake build
 
 Supported Features
 ==================

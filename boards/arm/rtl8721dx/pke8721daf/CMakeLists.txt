@@ -20,17 +20,9 @@
 #
 # ##############################################################################
 
-# The RTL8721Dx (Ameba WHC) port currently builds via the make-based build only.
-# The CMake path does not yet wire up the vendor-SDK machinery (SDK fetch,
-# libameba_fwlib.a/libameba_wifi.a, the image2 entry ameba_app_start.c, the SDK
-# image2 linker-script generation, the NP-image build and the nuttx.bin
-# packaging) that boards/.../scripts/Make.defs -> arch/.../ameba_board.mk
-# provides, so a CMake configure would not produce a flashable image.  Fail fast
-# with a clear message instead of half-building.
-message(
-  FATAL_ERROR
-    "pke8721daf (RTL8721Dx, Ameba WHC) currently supports the make build "
-    "only; CMake is not yet supported.  Build with:\n"
-    "  ./tools/configure.sh pke8721daf:nsh && make")
+# The vendor-SDK build machinery (SDK libs, image2 ld script, link flags and the
+# nuttx.bin packaging POSTBUILD / nuttx_post_build target) is wired up from the
+# shared arch/arm/src/common/ameba/cmake/ameba_board.cmake, included by this
+# IC's arch CMakeLists.  Nothing IC- or board-specific is needed here.
 
 add_subdirectory(src)

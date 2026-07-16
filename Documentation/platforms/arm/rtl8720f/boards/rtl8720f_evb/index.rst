@@ -40,6 +40,10 @@ This NuttX port does not wire any user buttons or LEDs.
 Configurations
 ==============
 
+Build and flash any of these per the :doc:`RTL8720F build instructions
+<../../index>`; for the CMake build, source ``. tools/ameba/env.sh
+rtl8720f_evb`` first (the make build needs no sourcing).
+
 .. code:: console
 
    $ ./tools/configure.sh rtl8720f_evb:<config-name>
@@ -70,50 +74,6 @@ SoftAP (become an access point, with a DHCP server for clients)::
     nsh> dhcpd_start wlan0
 
 Stop the SoftAP with ``wapi essid wlan0 <ssid> 0``.
-
-Building and Flashing
-=====================
-
-The build auto-fetches the Realtek ``ameba-rtos`` SDK on first use and a
-Realtek ``arm-none-eabi`` toolchain must be on ``PATH``; see the
-:doc:`chip documentation <../../index>` for both.
-
-.. code:: console
-
-   $ ./tools/configure.sh rtl8720f_evb:nsh
-   $ make
-
-This produces ``nuttx.bin`` in the top-level build directory: the NuttX
-application image, which also bundles the prebuilt Wi-Fi firmware.  The
-bootloader ``boot.bin`` is a prebuilt binary kept under the board's
-``prebuilt/`` directory; ``make flash`` writes both at the flash offsets
-taken from the generated flash layout, so no offsets are entered by hand.
-
-After a successful build, flash via one of these methods:
-
-**CLI (Linux/macOS)** — connect a USB-UART adapter (PL2303) and use the
-built-in ``make flash`` target:
-
-.. code:: console
-
-   $ make flash AMEBA_PORT=/dev/ttyUSB0
-
-The baud rate defaults to 1500000; override with ``AMEBA_BAUD`` if needed.
-
-**GUI (Windows)** — use the Realtek AmebaImageTool (``AmebaImageTool.exe``
-under ``tools/ameba/ImageTool/`` in the SDK tree) to select ``boot.bin`` (from
-the board's ``prebuilt/`` directory) and ``nuttx.bin``.
-
-See the `Realtek Ameba ImageTool guide
-<https://aiot.realmcu.com/en/latest/tools/image_tool/index.html>`_ for the
-Windows GUI tool and download-mode entry (hold the download button /
-power-cycle with the ``UART_LOG_TX`` line asserted).
-
-**Serial console** — after flashing, connect to the LOG-UART at 1500000 8N1::
-
-    $ picocom -b 1500000 /dev/ttyUSB0
-
-Other tools: ``screen /dev/ttyUSB0 1500000`` or ``minicom -b 1500000 -D /dev/ttyUSB0``.
 
 License Exceptions
 ==================
