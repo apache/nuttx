@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_setregid.c
+ * sched/group/group_getresgid.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,24 +27,25 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <errno.h>
+#include <assert.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setregid
+ * Name: getresgid
  *
  * Description:
- *   The setregid() function sets the real group ID and/or the effective
- *   group ID of the calling task group to rgid and/or egid.
+ *   The getresgid() function gets the real, effective, and saved set-group
+ *   IDs of the calling process.
  *
  * Input Parameters:
- *   rgid - Real group identity to set.  The special value (gid_t)-1
- *          indicates that the real group ID should not be changed.
- *   egid - Effective group identity to set.  The special value (gid_t)-1
- *          indicates that the effective group ID should not be changed.
+ *   rgid - Location to return the real group ID, or NULL.
+ *   egid - Location to return the effective group ID, or NULL.
+ *   sgid - Location to return the saved set-group ID, or NULL.
  *
  * Returned Value:
  *   Zero if successful and -1 in case of failure, in which case errno is set
@@ -52,20 +53,27 @@
  *
  ****************************************************************************/
 
-int setregid(gid_t rgid, gid_t egid)
+int getresgid(FAR gid_t *rgid, FAR gid_t *egid, FAR gid_t *sgid)
 {
-  /* NuttX only supports the group identity 'root' with a gid value of 0. */
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
 
-  if ((rgid == (gid_t)-1 || rgid == 0) &&
-      (egid == (gid_t)-1 || egid == 0))
+  DEBUGASSERT(rgroup != NULL);
+
+  if (rgid != NULL)
     {
-      return 0;
+      *rgid = rgroup->tg_gid;
     }
 
-  /* All other gid values are considered invalid and not supported by the
-   * implementation.
-   */
+  if (egid != NULL)
+    {
+      *egid = rgroup->tg_egid;
+    }
 
-  set_errno(EINVAL);
-  return -1;
+  if (sgid != NULL)
+    {
+      *sgid = rgroup->tg_sgid;
+    }
+
+  return OK;
 }

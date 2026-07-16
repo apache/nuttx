@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_setregid.c
+ * sched/group/group_setregid.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,7 +27,10 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -38,7 +41,7 @@
  *
  * Description:
  *   The setregid() function sets the real group ID and/or the effective
- *   group ID of the calling task group to rgid and/or egid.
+ *   group ID of the calling process.
  *
  * Input Parameters:
  *   rgid - Real group identity to set.  The special value (gid_t)-1
@@ -54,18 +57,98 @@
 
 int setregid(gid_t rgid, gid_t egid)
 {
-  /* NuttX only supports the group identity 'root' with a gid value of 0. */
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
+  gid_t old_rgid;
+  gid_t old_egid;
+  gid_t old_sgid;
 
-  if ((rgid == (gid_t)-1 || rgid == 0) &&
-      (egid == (gid_t)-1 || egid == 0))
+  if (rgid != (gid_t)-1 && (uint16_t)rgid > INT16_MAX)
     {
-      return 0;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
-  /* All other gid values are considered invalid and not supported by the
-   * implementation.
+  if (egid != (gid_t)-1 && (uint16_t)egid > INT16_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (rgid == (gid_t)-1 && egid == (gid_t)-1)
+    {
+      return OK;
+    }
+
+  rtcb   = this_task();
+  rgroup = rtcb->group;
+
+  DEBUGASSERT(rgroup != NULL);
+
+  old_rgid = rgroup->tg_gid;
+  old_egid = rgroup->tg_egid;
+  old_sgid = rgroup->tg_sgid;
+
+  if (old_egid == 0)
+    {
+      /* Super-user: may set any combination of real and effective IDs. */
+
+      if (rgid != (gid_t)-1)
+        {
+          rgroup->tg_gid = rgid;
+
+          if (egid == (gid_t)-1)
+            {
+              rgroup->tg_egid = rgid;
+              rgroup->tg_sgid = rgid;
+            }
+        }
+
+      if (egid != (gid_t)-1)
+        {
+          rgroup->tg_egid = egid;
+          rgroup->tg_sgid = egid;
+        }
+
+      return OK;
+    }
+
+  /* Non-super-user */
+
+  if (rgid != (gid_t)-1 &&
+      rgid != old_egid && rgid != old_sgid)
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
+  if (egid != (gid_t)-1 &&
+      egid != old_egid && egid != old_sgid && egid != old_rgid)
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
+  if (rgid != (gid_t)-1)
+    {
+      rgroup->tg_gid = rgid;
+    }
+
+  if (egid != (gid_t)-1)
+    {
+      rgroup->tg_egid = egid;
+    }
+
+  /* If the real group ID is being set, or the effective group ID is being
+   * changed to a value not equal to the real group ID, update the saved
+   * set-group-ID to the new effective group ID.
    */
 
-  set_errno(EINVAL);
-  return -1;
+  if ((rgid != (gid_t)-1 && rgroup->tg_gid != old_rgid) ||
+      (egid != (gid_t)-1 && rgroup->tg_egid != old_rgid))
+    {
+      rgroup->tg_sgid = rgroup->tg_egid;
+    }
+
+  return OK;
 }
