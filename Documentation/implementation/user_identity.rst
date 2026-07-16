@@ -59,6 +59,24 @@ the saved ID. Otherwise the function returns ``-1`` with ``errno`` set to
 This implements the standard POSIX pattern of temporarily dropping privileges
 with ``seteuid()`` or ``setegid()`` and later restoring them to the saved value.
 
+``setreuid()`` and ``setregid()``
+---------------------------------
+
+These functions set the real and/or effective IDs in a single call. When the
+effective ID is zero, any requested real and effective values may be assigned
+and the saved set-ID is updated accordingly. When the effective ID is
+non-zero, each requested value must equal the current effective ID, saved
+set-ID, or (for the effective argument only) the real ID; otherwise the call
+returns ``-1`` with ``errno`` set to ``EPERM``. When the real ID is changed,
+or the effective ID is changed to a value not equal to the real ID, the saved
+set-ID is set to the new effective ID.
+
+``getresuid()`` and ``getresgid()``
+-----------------------------------
+
+These functions return the real, effective, and saved set-IDs for the calling
+task group. Any output pointer may be ``NULL`` if that ID is not needed.
+
 Configuration
 =============
 
@@ -69,3 +87,14 @@ Configuration
 ``CONFIG_FS_PERMISSION``
   Enables filesystem ownership and permission enforcement. Requires
   ``CONFIG_SCHED_USER_IDENTITY``.
+
+Pseudo-Filesystem Ownership
+===========================
+
+When ``CONFIG_PSEUDOFS_ATTRIBUTES`` and ``CONFIG_SCHED_USER_IDENTITY`` are both
+enabled, ``inode_alloc()`` assigns ``i_owner`` and ``i_group`` from the
+caller's effective credentials. This covers
+message queues (``mq_open()``), named semaphores (``sem_open()``), shared
+memory objects (``shm_open()``), FIFOs (``mkfifo()``), and pseudo-files
+created through the same inode reservation path. Open-time permission checks
+use ``inode_checkopenperm()`` (or ``inode_checkperm()`` for message queues).
