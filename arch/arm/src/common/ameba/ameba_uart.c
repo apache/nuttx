@@ -30,17 +30,14 @@
  * driver registers the general-purpose UARTs from board bring-up, so they
  * appear as /dev/ttyS1 and up.
  *
- * The controller is programmed through the SDK fwlib UART API.  NuttX runs
- * on the KM4 core in the SECURE state, so the fwlib routines resolve to the
- * secure register aliases via TrustZone_IsSecure() and reach the UART, the
- * PINMUX pad mux and the pull control without stall.  Every symbol used here
- * (UART_Init, UART_SetBaud, UART_CharPut/Get, Pinmux_Config, PAD_PullCtrl,
- * RCC_PeriphClockCmd, ...) resolves to the on-chip ROM symbol table; the
- * fwlib data tables that ROM code indexes (UART_DEV_TABLE, APBPeriph_UARTx)
- * are compiled into libameba_fwlib.a (see AMEBA_FWLIB_SRCS).  To keep the
- * vendor headers out of the NuttX include world, the few fwlib symbols and
- * the UART_InitTypeDef layout used here are declared locally below rather
- * than pulled in from <ameba_uart.h>.
+ * The controller is programmed through the SDK fwlib UART API.  Every symbol
+ * used here (UART_Init, UART_SetBaud, UART_CharPut/Get, Pinmux_Config,
+ * PAD_PullCtrl, RCC_PeriphClockCmd, ...) resolves to the on-chip ROM symbol
+ * table; the fwlib data tables that ROM code indexes (UART_DEV_TABLE,
+ * APBPeriph_UARTx) are compiled into libameba_fwlib.a (see
+ * AMEBA_FWLIB_SRCS).  To keep the vendor headers out of the NuttX include
+ * world, the few fwlib symbols and the UART_InitTypeDef layout used here are
+ * declared locally below rather than pulled in from <ameba_uart.h>.
  *
  * Interrupt dispatch stays NuttX-native: each UART's NVIC vector is owned by
  * NuttX (irq_attach), and the ISR drains RX / refills TX through the stock
@@ -66,46 +63,24 @@
 
 #include "arm_internal.h"
 #include "ameba_uart.h"
+#include "ameba_uart_chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Per-controller register base, peripheral clock mask and NuttX IRQ number.
- * The driver source is shared by every Ameba ARM chip; each chip's
- * <arch/irq.h> (pulled in by <nuttx/irq.h>) names its own vectors, so map
- * them onto chip-agnostic aliases here.
- */
-
-#if defined(CONFIG_ARCH_CHIP_RTL8721DX)
-#  define AMEBA_IRQ_UART0       RTL8721DX_IRQ_UART0
-#  define AMEBA_IRQ_UART1       RTL8721DX_IRQ_UART1
-#else
-#  error "Ameba UART: controller IRQ numbers not defined for this chip"
-#endif
-
-#define AMEBA_UART0_BASE        0x4100c000ul
-#define AMEBA_UART1_BASE        0x4100d000ul
-
-/* APBPeriph_UARTx / APBPeriph_UARTx_CLOCK (sysreg_lsys.h). */
-
-#define AMEBA_APBPERIPH_UART0   (((uint32_t)1 << 30) | ((uint32_t)1 << 6))
-#define AMEBA_APBPERIPH_UART1   (((uint32_t)1 << 30) | ((uint32_t)1 << 7))
-
-/* Pin mux function (ameba_pinmux.h) and pull control (ameba_gpio.h).  RX is
- * held high while idle so a floating line is not read as a start bit.
+/* The per-chip UART wiring -- controller count, register bases, peripheral
+ * clock masks, NVIC vectors and crossbar pad-mux codes -- comes from
+ * <ameba_uart_chip.h> on the chip include path (arch/arm/src/chip ->
+ * rtl8721dx).  Everything below this point (the fwlib register-bit and line
+ * format values) is identical across the Ameba ARM chips and stays here.
  *
- * On this SoC (amebadplus) the pad mux is a crossbar: the generic
- * PINMUX_FUNCTION_UART code is not enough -- each pad must be routed with a
- * direction-specific function code so the crossbar knows which internal UART
- * signal to drive onto it (see the SDK's per-chip branch in the raw UART
- * example).  The codes are indexed by controller in g_uart_txfid/rxfid.
+ * The pad mux is a crossbar: each pad is routed with a direction-specific
+ * function code (AMEBA_UART_TXFID / AMEBA_UART_RXFID from the chip header)
+ * so the crossbar knows which internal UART signal to drive onto it.  RX is
+ * held high while idle so a floating line is not read as a start bit.
  */
 
-#define AMEBA_PINMUX_UART0_TXD  19    /* PINMUX_FUNCTION_UART0_TXD          */
-#define AMEBA_PINMUX_UART0_RXD  20    /* PINMUX_FUNCTION_UART0_RXD          */
-#define AMEBA_PINMUX_UART1_TXD  23    /* PINMUX_FUNCTION_UART1_TXD          */
-#define AMEBA_PINMUX_UART1_RXD  24    /* PINMUX_FUNCTION_UART1_RXD          */
 #define AMEBA_GPIO_PUPD_UP      0x2   /* GPIO_PuPd_UP                       */
 
 /* Mirror of the fwlib UART_InitTypeDef field values (ameba_uart.h). */
@@ -138,10 +113,6 @@
 
 #define AMEBA_DISABLE           0x0
 #define AMEBA_ENABLE            0x1
-
-/* Number of general-purpose controllers this driver can address. */
-
-#define AMEBA_NUART             2
 
 /* Local parity encoding (priv->parity). */
 
@@ -176,7 +147,8 @@ struct ameba_uart_dev_s
   struct uart_dev_s dev;       /* Serial upper-half device (must be first) */
   uintptr_t base;              /* UART register base address */
   int       irq;               /* NuttX interrupt vector */
-  uint32_t  clk;               /* APBPeriph mask for RCC_PeriphClockCmd() */
+  uint32_t  periph;            /* APBPeriph function mask (RCC arg 1) */
+  uint32_t  clk;               /* APBPeriph clock mask (RCC arg 2) */
   uint32_t  baud;              /* Baud rate */
   uint8_t   txpin;             /* TX pad (AMEBA_PA()/AMEBA_PB() encoding) */
   uint8_t   rxpin;             /* RX pad (AMEBA_PA()/AMEBA_PB() encoding) */
@@ -251,37 +223,19 @@ static const struct uart_ops_s g_ameba_uart_ops =
  * AMEBA_UART0/AMEBA_UART1 controller number.
  */
 
-static const uintptr_t g_uart_base[AMEBA_NUART] =
-{
-  AMEBA_UART0_BASE,
-  AMEBA_UART1_BASE,
-};
+static const uintptr_t g_uart_base[AMEBA_NUART] = AMEBA_UART_PORT_BASES;
 
-static const uint32_t g_uart_clk[AMEBA_NUART] =
-{
-  AMEBA_APBPERIPH_UART0,
-  AMEBA_APBPERIPH_UART1,
-};
+static const uint32_t g_uart_periph[AMEBA_NUART] = AMEBA_UART_APBPERIPH;
 
-static const int g_uart_irq[AMEBA_NUART] =
-{
-  AMEBA_IRQ_UART0,
-  AMEBA_IRQ_UART1,
-};
+static const uint32_t g_uart_clk[AMEBA_NUART] = AMEBA_UART_APBPERIPH_CLK;
+
+static const int g_uart_irq[AMEBA_NUART] = AMEBA_UART_PORT_IRQS;
 
 /* Direction-specific pad mux function codes, indexed by controller. */
 
-static const uint8_t g_uart_txfid[AMEBA_NUART] =
-{
-  AMEBA_PINMUX_UART0_TXD,
-  AMEBA_PINMUX_UART1_TXD,
-};
+static const uint8_t g_uart_txfid[AMEBA_NUART] = AMEBA_UART_TXFID;
 
-static const uint8_t g_uart_rxfid[AMEBA_NUART] =
-{
-  AMEBA_PINMUX_UART0_RXD,
-  AMEBA_PINMUX_UART1_RXD,
-};
+static const uint8_t g_uart_rxfid[AMEBA_NUART] = AMEBA_UART_RXFID;
 
 /****************************************************************************
  * Private Functions
@@ -304,7 +258,7 @@ static void ameba_uart_configure(struct ameba_uart_dev_s *priv)
 
   /* Gate on the UART peripheral clock (idempotent). */
 
-  RCC_PeriphClockCmd(priv->clk, priv->clk, AMEBA_ENABLE);
+  RCC_PeriphClockCmd(priv->periph, priv->clk, AMEBA_ENABLE);
 
   /* Route the pads to this controller's TX/RX signals through the crossbar;
    * hold RX high while idle.
@@ -665,6 +619,7 @@ int ameba_uart_register(const char *path, int uart, uint8_t txpin,
     }
 
   priv->base   = g_uart_base[uart];
+  priv->periph = g_uart_periph[uart];
   priv->clk    = g_uart_clk[uart];
   priv->irq    = g_uart_irq[uart];
   priv->txpin  = txpin;
