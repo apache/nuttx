@@ -72,6 +72,7 @@ static int gplh_handler(FAR struct ioexpander_dev_s *ioe,
 
 static int gplh_read(FAR struct gpio_dev_s *gpio, FAR bool *value);
 static int gplh_write(FAR struct gpio_dev_s *gpio, bool value);
+static int gplh_toggle(FAR struct gpio_dev_s *gpio, FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int gplh_attach(FAR struct gpio_dev_s *gpio,
                        pin_interrupt_t callback);
@@ -104,6 +105,7 @@ static const struct gpio_operations_s g_gplh_ops =
   gplh_setpintype,
   gplh_setdebounce,
   gplh_setmask,
+  gplh_toggle,
 };
 
 /* Identifies the type of the GPIO pin */
@@ -221,6 +223,25 @@ static int gplh_write(FAR struct gpio_dev_s *gpio, bool value)
   /* Write the value using the I/O expander */
 
   return IOEXP_WRITEPIN(priv->ioe, priv->pin, value);
+}
+
+/****************************************************************************
+ * Name: gplh_toggle
+ *
+ * Description:
+ *   Atomically toggle the value of an I/O expander output pin.
+ *
+ ****************************************************************************/
+
+static int gplh_toggle(FAR struct gpio_dev_s *gpio, FAR bool *value)
+{
+  FAR struct gplh_dev_s *priv = (FAR struct gplh_dev_s *)gpio;
+
+  DEBUGASSERT(priv != NULL && priv->ioe != NULL && value != NULL);
+
+  gpioinfo("pin%u: toggle\n", priv->pin);
+
+  return IOEXP_TOGGLE(priv->ioe, priv->pin, value);
 }
 
 /****************************************************************************
