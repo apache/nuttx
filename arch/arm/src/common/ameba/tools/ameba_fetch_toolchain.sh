@@ -12,9 +12,11 @@
 #   tar -jxf  $NAME                    ->  $TOOLCHAIN_DIR/asdk-<ver>
 #   rename    asdk-<ver>               ->  asdk-<ver>-<build>
 #
-# Usage: ameba_fetch_toolchain.sh <sdk_dir> [toolchain_dir]
+# Usage: ameba_fetch_toolchain.sh <sdk_dir> [toolchain_dir] [soc_name]
 #   <sdk_dir>        ameba-rtos checkout (has cmake/global_define.cmake)
 #   [toolchain_dir]  install root (default: $HOME/rtk-toolchain)
+#   [soc_name]       SDK soc dir (e.g. RTL8720F); selects the
+#                    per-IC asdk version.  Omitted -> the global default.
 #
 # No-op when the matching toolchain is already present, so it is safe to call
 # at the start of every build.
@@ -24,16 +26,16 @@ set -e
 
 SDK="$1"
 TOOLCHAIN_DIR="${2:-$HOME/rtk-toolchain}"
+SOC="$3"
 
 if [ -z "$SDK" ] || [ ! -f "$SDK/cmake/global_define.cmake" ]; then
   echo "ameba_fetch_toolchain.sh: bad SDK dir '$SDK'" >&2
   exit 1
 fi
 
-# --- Read the pinned version from the SDK (the single source of truth) ------
+# --- Resolve the version this SoC pins (SDK is the single source of truth) --
 
-VER=$(sed -n 's/.*v_ASDK_VER[ \t][ \t]*\([0-9.][0-9.]*\).*/\1/p' \
-      "$SDK/cmake/global_define.cmake")
+VER=$(sh "$(dirname "$0")/ameba_asdk_version.sh" "$SDK" "$SOC")
 TC_CMAKE="$SDK/cmake/toolchain/ameba-toolchain-asdk-$VER.cmake"
 if [ -z "$VER" ] || [ ! -f "$TC_CMAKE" ]; then
   echo "ameba_fetch_toolchain.sh: cannot resolve ASDK version from SDK" >&2
@@ -49,9 +51,20 @@ if [ -x "$DEST/linux/newlib/bin/arm-none-eabi-gcc" ]; then
   exit 0
 fi
 
-# Archive name + candidate URLs, read from the SDK toolchain cmake.  The cmake
-# offers an Aliyun (default) and a GitHub (USE_SECOND_SOURCE) mirror; try both.
-NAME="$MAJOR-linux-newlib-build-$BUILD-x86_64_with_small_reent.tar.bz2"
+# Archive name + candidate URLs, read from the SDK toolchain cmake.  The Linux
+# TOOLCHAINNAME suffix differs by version (10.3.1 has _with_small_reent, 12.3.1
+# does not), so read it from the SDK rather than hard-coding, expanding the
+# ${ToolChainVerMajor}/${ToolChainVerMinor} it references.  The cmake offers an
+# Aliyun (default) and a GitHub (USE_SECOND_SOURCE) mirror; try both.
+NAME=$(sed -n \
+  's/.*set(TOOLCHAINNAME[ \t][ \t]*\([^ )]*x86_64[^ )]*\.tar\.bz2\).*/\1/p' \
+  "$TC_CMAKE" | head -1)
+NAME=$(echo "$NAME" | sed -e "s/\${ToolChainVerMajor}/$MAJOR/g" \
+                          -e "s/\${ToolChainVerMinor}/$BUILD/g")
+if [ -z "$NAME" ]; then
+  echo "ameba_fetch_toolchain.sh: no Linux TOOLCHAINNAME found in $TC_CMAKE" >&2
+  exit 1
+fi
 URLS=$(sed -n 's/.*set(TOOLCHAINURL[ \t][ \t]*\(http[^ )]*\).*/\1/p' "$TC_CMAKE")
 if [ -z "$URLS" ]; then
   echo "ameba_fetch_toolchain.sh: no TOOLCHAINURL found in $TC_CMAKE" >&2

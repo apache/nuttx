@@ -60,5 +60,28 @@ if(NOT "${CMAKE_C_COMPILER}" MATCHES "${AMEBA_TOOLCHAIN_DIR}")
     FATAL_ERROR
       "C compiler '${CMAKE_C_COMPILER}' is not the ameba asdk toolchain.\n"
       "Source the build environment before configuring:\n"
-      "  . tools/ameba/env.sh")
+      "  . tools/ameba/env.sh ${CONFIG_ARCH_BOARD}")
+endif()
+
+# ...and it must be the asdk version THIS IC pins (RTL8720F -> 12.3.1, RTL8721Dx
+# -> 10.3.1).  Both versions share the same arm-none-eabi triple and differ only
+# by directory, so a PATH left over from another board (env.sh not re-sourced)
+# would silently build NuttX with the wrong compiler.  Catch it at configure
+# time and say exactly how to fix it.
+execute_process(
+  COMMAND sh ${_ameba_common_dir}/tools/ameba_asdk_version.sh ${AMEBA_SDK}
+          ${AMEBA_SOC_NAME}
+  OUTPUT_VARIABLE _ameba_want_ver
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(_ameba_want_ver AND NOT "${CMAKE_C_COMPILER}" MATCHES
+                       "asdk-${_ameba_want_ver}-")
+  message(
+    FATAL_ERROR
+      "compiler '${CMAKE_C_COMPILER}'\n"
+      "  is not asdk-${_ameba_want_ver}, which ${CONFIG_ARCH_CHIP} requires.  The "
+      "environment is likely still set for another board.  Re-source it for "
+      "this board (a fresh build dir per board):\n"
+      "  . tools/ameba/env.sh ${CONFIG_ARCH_BOARD}\n"
+      "  cmake -B build-${CONFIG_ARCH_BOARD} -DBOARD_CONFIG=${CONFIG_ARCH_BOARD}:<config> -GNinja"
+  )
 endif()

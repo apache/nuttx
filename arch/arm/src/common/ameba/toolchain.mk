@@ -5,8 +5,14 @@
 # SDK requires, by reading the SDK's own declaration -- the SDK is the single
 # source of truth, so the toolchain can never drift from the pinned SDK commit:
 #
-#   cmake/global_define.cmake                      -> v_ASDK_VER       (10.3.1)
+#   component/soc/<soc>/project/CMakeLists.txt     -> v_ASDK_VER (per-IC pin)
+#   cmake/global_define.cmake                      -> v_ASDK_VER (default)
 #   cmake/toolchain/ameba-toolchain-asdk-<ver>.cmake -> ToolChainVerMinor (4602)
+#
+# The version is resolved per-IC (ameba_asdk_version.sh, keyed by
+# AMEBA_SOC_NAME) so a chip pinning a newer asdk -- e.g. RTL8720F -> 12.3.1 --
+# builds the NuttX objects with the SAME toolchain as its SDK archives, not the
+# RTL8721Dx 10.3.1 default.
 #
 # When the SDK is bumped to a commit that needs a different toolchain, those
 # cmake values change and this picks the new toolchain up automatically -- no
@@ -24,9 +30,9 @@
 
 AMEBA_TOOLCHAIN_DIR ?= $(HOME)/rtk-toolchain
 
-AMEBA_ASDK_VER := $(strip $(shell sed -n \
-  's/.*v_ASDK_VER[ \t][ \t]*\([0-9.][0-9.]*\).*/\1/p' \
-  $(AMEBA_SDK)/cmake/global_define.cmake 2>/dev/null))
+AMEBA_ASDK_VER := $(strip $(shell sh \
+  $(AMEBA_COMMON_DIR)$(DELIM)tools$(DELIM)ameba_asdk_version.sh \
+  $(AMEBA_SDK) $(AMEBA_SOC_NAME) 2>/dev/null))
 
 ifneq ($(AMEBA_ASDK_VER),)
   AMEBA_ASDK_BUILD := $(strip $(shell sed -n \
