@@ -46,6 +46,10 @@
 
 const struct services_db_s g_services_db[] =
 {
+  { "http", 80,  IP_PROTO_TCP },
+  { "http", 80,  IP_PROTO_UDP },
+  { "https", 443, IP_PROTO_TCP },
+  { "https", 443, IP_PROTO_UDP },
   { "ntp", 123, IP_PROTO_TCP },
   { "ntp", 123, IP_PROTO_UDP },
   { NULL,  0,   0            }
