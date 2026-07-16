@@ -8,6 +8,19 @@
 
 #include_next "build_config.h"
 
+/* The port is WPA2-only: the SAE (WPA3) handshake faults inside the
+ * prebuilt supplicant (load access fault in the elliptic-curve math).
+ * Undefining CONFIG_WPA3_SAE activates the vendor's own fallback in
+ * wifi_netlink.c: the SAE/OWE AKMs are stripped from the connection
+ * config and the SAE auth algorithm is never selected, so a
+ * WPA3-transition AP associates through WPA2-PSK and an SAE-only AP is
+ * rejected by the AP instead of crashing the supplicant.  (The glue also
+ * refuses SAE-only networks up front with a clear error -- see
+ * gdwifi_netdev.c.)
+ */
+
+#undef CONFIG_WPA3_SAE
+
 #ifndef __LITTLE_ENDIAN
 #define __LITTLE_ENDIAN 1234
 #endif

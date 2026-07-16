@@ -173,6 +173,13 @@ network tools::
    Use ``ifup wlan0``, not ``ifconfig wlan0 up``: ``ifconfig`` interprets its
    second argument as an IP address.
 
+.. note::
+   The station is WPA2-only. A WPA3-transition network (WPA2/WPA3 mixed
+   mode) associates through WPA2-PSK; a WPA3(SAE)-only network is refused
+   up front with ``ENOTSUP`` and a console message naming the unsupported
+   AKM, instead of letting the prebuilt supplicant attempt the SAE
+   handshake (which faults).
+
 The RTC and the SNTP client are enabled, so the clock can be set from the
 network::
 

@@ -57,6 +57,7 @@
 #include <stddef.h>
 #include <net/if_arp.h>
 #include <debug.h>
+#include <syslog.h>
 #include <netinet/in.h>
 
 #include <nuttx/kmalloc.h>
@@ -599,6 +600,74 @@ static int  g_mode = IW_MODE_INFRA;   /* INFRA = station, MASTER = softAP */
 #define GDWIFI_AUTH_WPA2  3   /* AUTH_MODE_WPA2 (SAE/WPA3 no AP estoura o crypto) */
 #define GDWIFI_AP_CHANNEL 11
 
+/****************************************************************************
+ * Name: gdwifi_target_supported
+ *
+ * Description:
+ *   The port is WPA2-only (the SAE handshake faults inside the prebuilt
+ *   supplicant), so refuse a network that offers no AKM we can complete --
+ *   WPA3(SAE)-only being the common case -- with a clear error instead of
+ *   letting the association fail obscurely.  A targeted blocking scan
+ *   fetches the AKM bitmap of the AP; if the network cannot be found the
+ *   decision is left to the vendor connect path (same behavior as today).
+ *
+ ****************************************************************************/
+
+static int gdwifi_target_supported(void)
+{
+  struct macif_scan_results *results;
+  size_t ssid_len = strlen(g_essid);
+  uint32_t supported = CO_BIT(MAC_AKM_NONE) | CO_BIT(MAC_AKM_PRE_RSN) |
+                       CO_BIT(MAC_AKM_PSK) | CO_BIT(MAC_AKM_PSK_SHA256);
+  int ret = OK;
+  uint32_t i;
+
+  if (wifi_management_scan(1, g_essid) != 0)
+    {
+      return OK;
+    }
+
+  results = sys_malloc(sizeof(*results));
+  if (results == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  if (wifi_netlink_scan_results_get(GDWIFI_VIF_STA, results) != 0)
+    {
+      sys_mfree(results);
+      return OK;
+    }
+
+  for (i = 0; i < results->result_cnt; i++)
+    {
+      struct mac_scan_result *ap = &results->result[i];
+
+      if (!ap->valid_flag || ap->ssid.length != ssid_len ||
+          memcmp(ap->ssid.array, g_essid, ssid_len) != 0)
+        {
+          continue;
+        }
+
+      if ((ap->akm & supported) == 0)
+        {
+          /* syslog, not nerr: the rejection must be visible in release
+           * configs too, or the refused connect looks like a silent no-op.
+           */
+
+          syslog(LOG_ERR, "gdwifi: '%s' offers no supported AKM (bitmap "
+                 "0x%lx): WPA3/SAE, OWE and 802.1X are not supported, "
+                 "WPA2-PSK only\n", g_essid, (unsigned long)ap->akm);
+          ret = -ENOTSUP;
+        }
+
+      break;
+    }
+
+  sys_mfree(results);
+  return ret;
+}
+
 static int gdwifi_connect(struct netdev_lowerhalf_s *dev)
 {
   int ret;
@@ -621,6 +690,12 @@ static int gdwifi_connect(struct netdev_lowerhalf_s *dev)
                                      g_passwd[0] ? g_passwd : NULL,
                                      GDWIFI_AP_CHANNEL, auth, 0);
       return ret == 0 ? OK : -EAGAIN;
+    }
+
+  ret = gdwifi_target_supported();
+  if (ret < 0)
+    {
+      return ret;
     }
 
   ninfo("connect '%s'\n", g_essid);
