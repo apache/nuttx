@@ -43,8 +43,6 @@ set(SRCS
     lib_statvfs.c
     lib_sleep.c
     lib_nice.c
-    lib_setreuid.c
-    lib_setregid.c
     lib_getrusage.c
     lib_utime.c
     lib_utimes.c
@@ -87,7 +85,11 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
     lib_seteuid.c
     lib_setegid.c
     lib_geteuid.c
-    lib_getegid.c)
+    lib_getegid.c
+    lib_setreuid.c
+    lib_setregid.c
+    lib_getresuid.c
+    lib_getresgid.c)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)

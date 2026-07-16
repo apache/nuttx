@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_setreuid.c
+ * sched/group/group_setreuid.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,8 +26,12 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
 #include <errno.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
@@ -38,7 +42,7 @@
  *
  * Description:
  *   The setreuid() function sets the real user ID and/or the effective user
- *   ID of the calling task group to ruid and/or euid.
+ *   ID of the calling process.
  *
  * Input Parameters:
  *   ruid - Real user identity to set.  The special value (uid_t)-1
@@ -54,18 +58,98 @@
 
 int setreuid(uid_t ruid, uid_t euid)
 {
-  /* NuttX only supports the user identity 'root' with a uid value of 0. */
+  FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
+  uid_t old_ruid;
+  uid_t old_euid;
+  uid_t old_suid;
 
-  if ((ruid == (uid_t)-1 || ruid == 0) &&
-      (euid == (uid_t)-1 || euid == 0))
+  if (ruid != (uid_t)-1 && (uint16_t)ruid > INT16_MAX)
     {
-      return 0;
+      set_errno(EINVAL);
+      return ERROR;
     }
 
-  /* All other uid values are considered invalid and not supported by the
-   * implementation.
+  if (euid != (uid_t)-1 && (uint16_t)euid > INT16_MAX)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (ruid == (uid_t)-1 && euid == (uid_t)-1)
+    {
+      return OK;
+    }
+
+  rtcb   = this_task();
+  rgroup = rtcb->group;
+
+  DEBUGASSERT(rgroup != NULL);
+
+  old_ruid = rgroup->tg_uid;
+  old_euid = rgroup->tg_euid;
+  old_suid = rgroup->tg_suid;
+
+  if (old_euid == 0)
+    {
+      /* Super-user: may set any combination of real and effective IDs. */
+
+      if (ruid != (uid_t)-1)
+        {
+          rgroup->tg_uid = ruid;
+
+          if (euid == (uid_t)-1)
+            {
+              rgroup->tg_euid = ruid;
+              rgroup->tg_suid = ruid;
+            }
+        }
+
+      if (euid != (uid_t)-1)
+        {
+          rgroup->tg_euid = euid;
+          rgroup->tg_suid = euid;
+        }
+
+      return OK;
+    }
+
+  /* Non-super-user */
+
+  if (ruid != (uid_t)-1 &&
+      ruid != old_euid && ruid != old_suid)
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
+  if (euid != (uid_t)-1 &&
+      euid != old_euid && euid != old_suid && euid != old_ruid)
+    {
+      set_errno(EPERM);
+      return ERROR;
+    }
+
+  if (ruid != (uid_t)-1)
+    {
+      rgroup->tg_uid = ruid;
+    }
+
+  if (euid != (uid_t)-1)
+    {
+      rgroup->tg_euid = euid;
+    }
+
+  /* If the real user ID is being set, or the effective user ID is being
+   * changed to a value not equal to the real user ID, update the saved
+   * set-user-ID to the new effective user ID.
    */
 
-  set_errno(EINVAL);
-  return -1;
+  if ((ruid != (uid_t)-1 && rgroup->tg_uid != old_ruid) ||
+      (euid != (uid_t)-1 && rgroup->tg_euid != old_ruid))
+    {
+      rgroup->tg_suid = rgroup->tg_euid;
+    }
+
+  return OK;
 }

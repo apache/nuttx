@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/unistd/lib_setregid.c
+ * sched/group/group_getresuid.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -27,24 +27,25 @@
 #include <nuttx/config.h>
 
 #include <unistd.h>
-#include <errno.h>
+#include <assert.h>
+
+#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setregid
+ * Name: getresuid
  *
  * Description:
- *   The setregid() function sets the real group ID and/or the effective
- *   group ID of the calling task group to rgid and/or egid.
+ *   The getresuid() function gets the real, effective, and saved set-user
+ *   IDs of the calling process.
  *
  * Input Parameters:
- *   rgid - Real group identity to set.  The special value (gid_t)-1
- *          indicates that the real group ID should not be changed.
- *   egid - Effective group identity to set.  The special value (gid_t)-1
- *          indicates that the effective group ID should not be changed.
+ *   ruid - Location to return the real user ID, or NULL.
+ *   euid - Location to return the effective user ID, or NULL.
+ *   suid - Location to return the saved set-user ID, or NULL.
  *
  * Returned Value:
  *   Zero if successful and -1 in case of failure, in which case errno is set
@@ -52,20 +53,27 @@
  *
  ****************************************************************************/
 
-int setregid(gid_t rgid, gid_t egid)
+int getresuid(FAR uid_t *ruid, FAR uid_t *euid, FAR uid_t *suid)
 {
-  /* NuttX only supports the group identity 'root' with a gid value of 0. */
+  FAR struct tcb_s *rtcb          = this_task();
+  FAR struct task_group_s *rgroup = rtcb->group;
 
-  if ((rgid == (gid_t)-1 || rgid == 0) &&
-      (egid == (gid_t)-1 || egid == 0))
+  DEBUGASSERT(rgroup != NULL);
+
+  if (ruid != NULL)
     {
-      return 0;
+      *ruid = rgroup->tg_uid;
     }
 
-  /* All other gid values are considered invalid and not supported by the
-   * implementation.
-   */
+  if (euid != NULL)
+    {
+      *euid = rgroup->tg_euid;
+    }
 
-  set_errno(EINVAL);
-  return -1;
+  if (suid != NULL)
+    {
+      *suid = rgroup->tg_suid;
+    }
+
+  return OK;
 }
