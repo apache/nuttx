@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/jz4780/ci20/include/board.h
+ * include/nuttx/net/dm90x0.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,34 +20,14 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H
+#ifndef __INCLUDE_NUTTX_NET_DM90X0_H
+#define __INCLUDE_NUTTX_NET_DM90X0_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#ifndef __ASSEMBLY__
-#  include <stdbool.h>
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define BOARD_ETH_FLG (1 << 19)
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -61,11 +41,19 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: dm9x_initialize
+ *
+ * Description:
+ *   Register a dm9x driver
+ *
+ ****************************************************************************/
+
+int dm9x_initialize(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H */
-
+#endif /* __INCLUDE_NUTTX_NET_DM90X0_H */

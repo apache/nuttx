@@ -15,8 +15,9 @@ Supported Features
 ==================
 
 * Single 1.2GHz MIPS32 processor
-* UART0 on Raspberry PI connector
 * 256MiB DRAM
+* UART0 on Raspberry PI connector
+* Fast Ethernet (DM9000)
 
 Configurations
 ==============
@@ -56,3 +57,12 @@ Basic serial console access to the NSH shell.
 
    Then use some serial console client (minicom, picocom, teraterm, etc)
    configured to 115200 8n1 without software or hardware flow control.
+
+net
+---
+
+* Basic serial console access to the NSH shell.
+* Networking support through the RJ45 connector.
+
+The telnet daemon is included, so the CI20 board can be connected to through telnet.
+

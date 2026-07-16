@@ -46,4 +46,4 @@ endif
 
 CHIP_ASRCS  =
 CHIP_CSRCS  = jz4780_lowinit.c jz4780_exception.c jz4780_decodeirq.c
-CHIP_CSRCS += jz4780_irq.c jz4780_timerisr.c
+CHIP_CSRCS += jz4780_irq.c jz4780_timerisr.c jz4780_gpio.c

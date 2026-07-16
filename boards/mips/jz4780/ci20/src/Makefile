@@ -23,6 +23,6 @@
 -include $(TOPDIR)/Make.defs
 
 ASRCS =
-CSRCS = jz4780_boot.c jz4780_bringup.c
+CSRCS = jz4780_boot.c jz4780_bringup.c ci20_network.c
 
 include $(TOPDIR)/boards/Board.mk

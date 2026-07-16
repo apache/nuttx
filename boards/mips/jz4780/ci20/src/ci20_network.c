@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/jz4780/ci20/include/board.h
+ * boards/mips/jz4780/ci20/src/ci20_network.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,52 +20,41 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H
-#define __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_DM90x0)
 
-#ifndef __ASSEMBLY__
-#  include <stdbool.h>
-#endif
+#include <debug.h>
+#include <arch/board/board.h>
+
+#include <nuttx/net/dm90x0.h>
+
+#include "chip.h"
+#include "mips_internal.h"
+
+#include "jz4780_gpio.h"
+#include "ci20.h"
+
+/* PE19 is the ethernet interrupt input pin (ETHNET_INT in schematic) */
+
+#define ETHNET_INT   (GPIO_MODE_INTR_RISE | GPIO_PORTE | GPIO_PIN19)
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Public Functions
  ****************************************************************************/
-
-#define BOARD_ETH_FLG (1 << 19)
 
 /****************************************************************************
- * Public Types
+ * Name: up_netinitialize
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
+void mips_netinitialize(void)
 {
-#else
-#define EXTERN extern
-#endif
+  jz4780_configgpio(ETHNET_INT);
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#ifdef __cplusplus
+  (void)dm9x_initialize();
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MIPS_JZ4780_CI20_INCLUDE_BOARD_H */
-
+#endif /* CONFIG_NET && CONFIG_NET_DM90x0 */
