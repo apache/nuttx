@@ -34,7 +34,6 @@ set(SRCS
     lib_getopt_common.c
     lib_getopt.c
     lib_getopt_long.c
-    lib_getopt_longonly.c
     lib_getoptvars.c
     lib_getoptargp.c
     lib_getopterrp.c
