@@ -46,6 +46,10 @@ set(CMAKE_AR ${TOOLCHAIN_PREFIX}artc -r)
 set(CMAKE_NM nm)
 set(CMAKE_RANLIB ranlib)
 
+set(ASMEXT
+    asm
+    CACHE INTERNAL "")
+
 # override the ARCHIVE command
 
 set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
