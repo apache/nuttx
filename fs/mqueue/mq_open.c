@@ -262,6 +262,26 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
           goto errout_with_inode;
         }
 
+#ifdef CONFIG_FS_PERMISSION
+      ret = inode_checkopenperm(inode, oflags);
+      if (ret < 0)
+        {
+          goto errout_with_inode;
+        }
+#endif
+
+      if (inode->i_private == NULL)
+        {
+          ret = nxmq_alloc_msgq(NULL, &msgq);
+          if (ret < 0)
+            {
+              goto errout_with_inode;
+            }
+
+          inode->i_private = msgq;
+          msgq->inode      = inode;
+        }
+
       /* Associate the inode with a file structure */
 
       mq->f_oflags = oflags;
