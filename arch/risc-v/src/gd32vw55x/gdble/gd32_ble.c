@@ -60,6 +60,7 @@
 #include "ble_gap.h"
 #include "ble_adapter.h"
 #include "ble_adv.h"
+#include "ble_conn.h"
 #include "wrapper_os.h"
 #include "gd32vw55x_platform.h"
 
@@ -217,6 +218,8 @@ static void gd32_ble_adv_start(uint8_t adv_idx)
  *
  ****************************************************************************/
 
+static uint8_t g_adv_idx = 0xff;   /* 0xff = no advertising set yet */
+
 static void gd32_ble_adv_evt_handler(ble_adv_evt_t adv_evt, void *p_data,
                                      void *p_context)
 {
@@ -231,11 +234,36 @@ static void gd32_ble_adv_evt_handler(ble_adv_evt_t adv_evt, void *p_data,
 
   if (chg->state == BLE_ADV_STATE_CREATE)
     {
+      g_adv_idx = chg->adv_idx;
       gd32_ble_adv_start(chg->adv_idx);
     }
   else if (chg->state == BLE_ADV_STATE_START)
     {
       wlinfo("BLE advertising '%s'\n", GD32_BLE_ADV_NAME);
+    }
+}
+
+/****************************************************************************
+ * Name: gd32_ble_conn_evt_handler
+ *
+ * Description:
+ *   A connection stops the legacy advertising set and the stack leaves it
+ *   stopped, so after the first central connects (or aborts the attempt)
+ *   the device would never be discoverable again until a reset.  Restart
+ *   the set on every disconnection.
+ *
+ ****************************************************************************/
+
+static void gd32_ble_conn_evt_handler(ble_conn_evt_t event,
+                                      ble_conn_data_u *p_data)
+{
+  if (event == BLE_CONN_EVT_STATE_CHG &&
+      p_data->conn_state.state == BLE_CONN_STATE_DISCONNECTD &&
+      g_adv_idx != 0xff)
+    {
+      wlinfo("BLE disconnected (reason 0x%x), restarting advertising\n",
+             p_data->conn_state.info.discon_info.reason);
+      ble_adv_restart(g_adv_idx);
     }
 }
 
@@ -482,6 +510,10 @@ int gd32_ble_initialize(void)
     }
 
   ble_adp_callback_register(gd32_ble_adp_evt_handler);
+
+  /* Restart advertising when a central disconnects */
+
+  ble_conn_callback_register(gd32_ble_conn_evt_handler);
 
 #ifdef CONFIG_GD32VW55X_BLE_GATT_DEMO
   /* Register the demo GATT service (RX write / TX notify) */

@@ -303,9 +303,10 @@ ble
 ``wapi`` plus BLE (``CONFIG_GD32VW55X_BLE``) and the demo GATT service
 (``CONFIG_GD32VW55X_BLE_GATT_DEMO``).  The board advertises a connectable set
 named ``NuttX`` and registers a minimal "transparent UART" service (16-bit
-UUIDs ``0xffe0`` / RX ``0xffe1`` / TX ``0xffe2``).  A central connects,
-discovers the service, and a write to the RX characteristic is logged on the
-board console::
+UUIDs ``0xffe0`` / RX ``0xffe1`` / TX ``0xffe2``). Advertising restarts on
+every disconnection, so the device stays discoverable across connections. A
+central connects, discovers the service, and a write to the RX characteristic
+is logged on the board console::
 
   nsh> BLE RX (11): Hello world
 
