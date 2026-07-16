@@ -28,7 +28,7 @@ config LIBC_PASSWD_FILEPATH
 
 config LIBC_PASSWD_LINESIZE
 	int "Maximum line size"
-	default 80
+	default 256
 	---help---
 		The maximum length of one line in the passwd file.  This determines
 		the size of the I/O buffer used to access the passwd file.
