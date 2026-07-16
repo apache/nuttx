@@ -695,6 +695,31 @@ config NRF52_SAADC_TIMER_CC
 	default 0
 	range 80 2047
 
+config NRF52_SAADC_CONTINUOUS
+	bool "SAADC continuous mode"
+	select NRF52_PPI
+	default n
+	---help---
+		Continuous timer-triggered sampling with double-buffered EasyDMA.
+		The SAADC is restarted directly from the END event through a PPI
+		channel and completed buffers are passed to the upper-half with
+		the batch interface.
+
+if NRF52_SAADC_CONTINUOUS
+
+config NRF52_SAADC_CONTINUOUS_BUFLEN
+	int "SAADC continuous mode DMA buffer length"
+	default 32
+	---help---
+		Number of samples in each of the two EasyDMA buffers.
+
+config NRF52_SAADC_CONTINUOUS_PPI_CH
+	int "SAADC continuous mode PPI channel"
+	range 0 19
+	default 0
+
+endif # NRF52_SAADC_CONTINUOUS
+
 endif # NRF52_SAADC_TIMER
 
 config NRF52_SAADC_OVERSAMPLE
