@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 
 #include "inode/inode.h"
@@ -82,6 +83,9 @@ static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
 {
   FAR struct inode *inode;
   int namelen;
+#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && defined(CONFIG_SCHED_USER_IDENTITY)
+  FAR struct tcb_s *rtcb;
+#endif
 
   namelen = inode_namelen(name);
   inode   = fs_heap_zalloc(FSNODE_SIZE(namelen));
@@ -94,6 +98,15 @@ static FAR struct inode *inode_alloc(FAR const char *name, mode_t mode)
       clock_gettime(CLOCK_REALTIME, &inode->i_atime);
       inode->i_mtime = inode->i_atime;
       inode->i_ctime = inode->i_atime;
+#  if defined(CONFIG_SCHED_USER_IDENTITY)
+      rtcb = nxsched_self();
+      if (rtcb != NULL && rtcb->group != NULL)
+        {
+          inode->i_owner = rtcb->group->tg_euid;
+          inode->i_group = rtcb->group->tg_egid;
+        }
+
+#  endif
 #endif
       inode_namecpy(inode->i_name, name);
     }
