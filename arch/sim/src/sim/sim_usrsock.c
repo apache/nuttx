@@ -415,6 +415,7 @@ static const usrsock_handler_t g_usrsock_handler[] =
 
 static void sim_usrsock_work(void *arg)
 {
+  host_usrsock_loop();
   work_queue_next_wq(g_work_queue, &g_usrsock.work, sim_usrsock_work,
                      NULL, SIM_USRSOCK_PERIOD);
 }

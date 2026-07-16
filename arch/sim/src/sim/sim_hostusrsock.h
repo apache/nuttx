@@ -83,6 +83,8 @@
 #define NUTTX_PF_PKTRADIO           64
 #define NUTTX_PF_RPMSG              65
 
+#define NUTTX_UNIX_PATH_MAX         108
+
 #define NUTTX_AF_UNSPEC             NUTTX_PF_UNSPEC
 #define NUTTX_AF_UNIX               NUTTX_PF_UNIX
 #define NUTTX_AF_LOCAL              NUTTX_PF_LOCAL
@@ -217,6 +219,12 @@ struct nuttx_sockaddr
 {
   sa_family_t sa_family;       /* Address family: See AF_* definitions */
   char        sa_data[14];     /* 14-bytes data (actually variable length) */
+};
+
+struct nuttx_sockaddr_un
+{
+  sa_family_t sun_family;      /* Address family: AF_LOCAL */
+  char        sun_path[NUTTX_UNIX_PATH_MAX];
 };
 
 struct nuttx_linger
