@@ -113,6 +113,18 @@
 #define NUTTX_CH_STAT_ATIME     (1 << 3)
 #define NUTTX_CH_STAT_MTIME     (1 << 4)
 
+/* These must exactly match the definitions from include/nuttx/fs/ioctl.h: */
+
+#define NUTTX_FIOC_SETLK        0x0312
+#define NUTTX_FIOC_GETLK        0x0313
+#define NUTTX_FIOC_SETLKW       0x0314
+
+/* These must exactly match the definitions from include/fcntl.h: */
+
+#define NUTTX_F_RDLCK           0
+#define NUTTX_F_WRLCK           1
+#define NUTTX_F_UNLCK           2
+
 #endif /* __SIM__ */
 
 /****************************************************************************
@@ -201,6 +213,15 @@ struct nuttx_stat_s
   struct nuttx_timespec st_ctim;    /* Time of last status change */
   nuttx_blksize_t       st_blksize; /* Block size used for filesystem I/O */
   nuttx_blkcnt_t        st_blocks;  /* Number of blocks allocated */
+};
+
+struct nuttx_flock_s
+{
+  int16_t      l_type;
+  int16_t      l_whence;
+  nuttx_off_t  l_start;
+  nuttx_off_t  l_len;
+  int32_t      l_pid;
 };
 
 #endif /* __SIM__ */

@@ -40,8 +40,189 @@
 #include "sim_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define HOSTFS_RETRY_DELAY_US 10000
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: host_oflags_convert
+ ****************************************************************************/
+
+static int host_oflags_convert(int flags)
+{
+  int mapflags = 0;
+
+  switch (flags & NUTTX_O_ACCMODE)
+    {
+      case NUTTX_O_RDONLY:
+        mapflags = O_RDONLY;
+        break;
+
+      case NUTTX_O_WRONLY:
+        mapflags = O_WRONLY;
+        break;
+
+      case NUTTX_O_RDWR:
+        mapflags = O_RDWR;
+        break;
+    }
+
+  if (flags & NUTTX_O_APPEND)
+    {
+      mapflags |= O_APPEND;
+    }
+
+  if (flags & NUTTX_O_CREAT)
+    {
+      mapflags |= O_CREAT;
+    }
+
+  if (flags & NUTTX_O_EXCL)
+    {
+      mapflags |= O_EXCL;
+    }
+
+  if (flags & NUTTX_O_TRUNC)
+    {
+      mapflags |= O_TRUNC;
+    }
+
+  if (flags & NUTTX_O_NONBLOCK)
+    {
+      mapflags |= O_NONBLOCK;
+    }
+
+  if (flags & NUTTX_O_SYNC)
+    {
+      mapflags |= O_SYNC;
+    }
+
+#ifdef O_DIRECT
+  if (flags & NUTTX_O_DIRECT)
+    {
+      mapflags |= O_DIRECT;
+    }
+#endif
+
+  if (flags & NUTTX_O_CLOEXEC)
+    {
+      mapflags |= O_CLOEXEC;
+    }
+
+  if (flags & NUTTX_O_DIRECTORY)
+    {
+      mapflags |= O_DIRECTORY;
+    }
+
+  return mapflags;
+}
+
+/****************************************************************************
+ * Name: host_flock_type_convert
+ ****************************************************************************/
+
+static int host_flock_type_convert(int type)
+{
+  switch (type)
+    {
+      case NUTTX_F_RDLCK:
+        return F_RDLCK;
+
+      case NUTTX_F_WRLCK:
+        return F_WRLCK;
+
+      case NUTTX_F_UNLCK:
+        return F_UNLCK;
+
+      default:
+        return -EINVAL;
+    }
+}
+
+/****************************************************************************
+ * Name: host_flock_type_revert
+ ****************************************************************************/
+
+static int host_flock_type_revert(int type)
+{
+  switch (type)
+    {
+      case F_RDLCK:
+        return NUTTX_F_RDLCK;
+
+      case F_WRLCK:
+        return NUTTX_F_WRLCK;
+
+      case F_UNLCK:
+        return NUTTX_F_UNLCK;
+
+      default:
+        return -EINVAL;
+    }
+}
+
+/****************************************************************************
+ * Name: host_ioctl_fcntl
+ ****************************************************************************/
+
+static int host_ioctl_fcntl(int fd, int request, unsigned long arg)
+{
+  struct nuttx_flock_s *lock = (struct nuttx_flock_s *)(uintptr_t)arg;
+  struct flock hostlock;
+  int ret;
+
+  if (lock == NULL)
+    {
+      return -EINVAL;
+    }
+
+  hostlock.l_type = host_flock_type_convert(lock->l_type);
+  if (hostlock.l_type < 0)
+    {
+      return hostlock.l_type;
+    }
+
+  hostlock.l_whence = lock->l_whence;
+  hostlock.l_start = lock->l_start;
+  hostlock.l_len = lock->l_len;
+  hostlock.l_pid = lock->l_pid;
+
+  for (; ; )
+    {
+      ret = fcntl(fd, request == NUTTX_FIOC_GETLK ? F_GETLK : F_SETLK,
+                  &hostlock);
+      if (ret >= 0 || request != NUTTX_FIOC_SETLKW ||
+          (errno != EAGAIN && errno != EACCES))
+        {
+          break;
+        }
+
+      usleep(HOSTFS_RETRY_DELAY_US);
+    }
+
+  if (ret < 0)
+    {
+      return host_errno_convert(-errno);
+    }
+
+  lock->l_type = host_flock_type_revert(hostlock.l_type);
+  if (lock->l_type < 0)
+    {
+      return lock->l_type;
+    }
+
+  lock->l_whence = hostlock.l_whence;
+  lock->l_start = hostlock.l_start;
+  lock->l_len = hostlock.l_len;
+  lock->l_pid = hostlock.l_pid;
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: host_stat_convert
@@ -130,71 +311,7 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
 
 int host_open(const char *pathname, int flags, int mode)
 {
-  int mapflags = 0;
-
-  /* Perform flag mapping */
-
-  switch (flags & NUTTX_O_ACCMODE)
-    {
-      case NUTTX_O_RDONLY:
-        mapflags = O_RDONLY;
-        break;
-
-      case NUTTX_O_WRONLY:
-        mapflags = O_WRONLY;
-        break;
-
-      case NUTTX_O_RDWR:
-        mapflags = O_RDWR;
-        break;
-    }
-
-  if (flags & NUTTX_O_APPEND)
-    {
-      mapflags |= O_APPEND;
-    }
-
-  if (flags & NUTTX_O_CREAT)
-    {
-      mapflags |= O_CREAT;
-    }
-
-  if (flags & NUTTX_O_EXCL)
-    {
-      mapflags |= O_EXCL;
-    }
-
-  if (flags & NUTTX_O_TRUNC)
-    {
-      mapflags |= O_TRUNC;
-    }
-
-  if (flags & NUTTX_O_NONBLOCK)
-    {
-      mapflags |= O_NONBLOCK;
-    }
-
-  if (flags & NUTTX_O_SYNC)
-    {
-      mapflags |= O_SYNC;
-    }
-
-#ifdef O_DIRECT
-  if (flags & NUTTX_O_DIRECT)
-    {
-      mapflags |= O_DIRECT;
-    }
-#endif
-
-  if (flags & NUTTX_O_CLOEXEC)
-    {
-      mapflags |= O_CLOEXEC;
-    }
-
-  if (flags & NUTTX_O_DIRECTORY)
-    {
-      mapflags |= O_DIRECTORY;
-    }
+  int mapflags = host_oflags_convert(flags);
 
   int ret = open(pathname, mapflags, mode);
   if (ret == -1)
@@ -280,9 +397,22 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
 
 int host_ioctl(int fd, int request, unsigned long arg)
 {
+  int ret;
+
+  switch (request)
+    {
+      case NUTTX_FIOC_GETLK:
+      case NUTTX_FIOC_SETLK:
+      case NUTTX_FIOC_SETLKW:
+        return host_ioctl_fcntl(fd, request, arg);
+
+      default:
+        break;
+    }
+
   /* Just call the ioctl routine */
 
-  int ret = ioctl(fd, request, arg);
+  ret = ioctl(fd, request, arg);
   if (ret < 0)
     {
       ret = host_errno_convert(-errno);
