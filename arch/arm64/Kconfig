@@ -66,6 +66,22 @@ config ARCH_CHIP_RK3399
 	---help---
 		Rockchip RK3399 SoC
 
+config ARCH_CHIP_RK3588
+	bool "Rockchip RK3588 / RK3588S"
+	select ARCH_CORTEX_A55
+	select ARCH_HAVE_ADDRENV
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_HAVE_IRQTRIGGER
+	select ARCH_HAVE_LOWPUTC
+	select ARCH_HAVE_RESET
+	select ARCH_NEED_ADDRENV_MAPPING
+	select ARCH_USE_MMU
+	select ARM64_HAVE_PSCI
+	select ARMV8A_HAVE_GICv3
+	---help---
+		Rockchip RK3588 and RK3588S SoCs with GICv3, PSCI and early
+		UART support.
+
 config ARCH_CHIP_QEMU
 	bool "QEMU virt platform (ARMv8a)"
 	select ARCH_HAVE_ADDRENV
@@ -383,6 +399,7 @@ config ARCH_CHIP
 	default "a64"       if ARCH_CHIP_A64
 	default "a527"      if ARCH_CHIP_SUNXI_A527
 	default "rk3399"    if ARCH_CHIP_RK3399
+	default "rk3588"    if ARCH_CHIP_RK3588
 	default "zynq-mpsoc" if ARCH_CHIP_ZYNQ_MPSOC
 	default "qemu"      if ARCH_CHIP_QEMU
 	default "goldfish"  if ARCH_CHIP_GOLDFISH
@@ -534,6 +551,10 @@ endif
 
 if ARCH_CHIP_RK3399
 source "arch/arm64/src/rk3399/Kconfig"
+endif
+
+if ARCH_CHIP_RK3588
+source "arch/arm64/src/rk3588/Kconfig"
 endif
 
 if ARCH_CHIP_QEMU
