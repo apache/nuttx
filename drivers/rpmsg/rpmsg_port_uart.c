@@ -120,6 +120,10 @@ struct rpmsg_port_uart_s
   uint8_t                         rx_dbg_buf[RPMSG_PORT_UART_DBG_BUFLEN];
   int                             rx_dbg_idx;
   nxevent_t                       event;
+
+  /* Serialize the connect handshake */
+
+  mutex_t                         conn_lock;
   struct notifier_block           nb;       /* Reboot notifier block */
   pid_t                           tx_tid;
   uint8_t                         tx_staywake;
@@ -538,10 +542,21 @@ static void
 rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
                                 uint8_t ch)
 {
+  bool conned;
+
+  /* Only the EVT_CONNED update is serialized against the tx thread's
+   * check-and-send; register/unregister below may re-enter this function
+   * on the same thread through the rx worker.
+   */
+
+  nxmutex_lock(&rpuart->conn_lock);
+  conned = rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_CONNED);
+  nxmutex_unlock(&rpuart->conn_lock);
+
   if (ch == RPMSG_PORT_UART_CONNREQ)
     {
       rpmsgvbs("Connect Request Command 0x%lx\n", rpuart->event.events);
-      if (rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+      if (conned)
         {
           rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_TXQ);
           rpmsg_port_unregister(&rpuart->port);
@@ -554,7 +569,7 @@ rpmsg_port_uart_process_rx_conn(FAR struct rpmsg_port_uart_s *rpuart,
   else if (ch == RPMSG_PORT_UART_CONNACK)
     {
       rpmsgvbs("Connect Ack Command 0x%lx\n", rpuart->event.events);
-      if (!rpmsg_port_uart_set(rpuart, RPMSG_PORT_UART_EVT_CONNED))
+      if (!conned)
         {
           rpmsg_port_drop_packets(&rpuart->port, RPMSG_PORT_DROP_ALL);
           rpmsg_port_register(&rpuart->port, rpuart->localcpu);
@@ -914,6 +929,12 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
   rpuart->tx_tid = nxsched_gettid();
 
   rpmsg_port_uart_staywake(rpuart);
+
+  /* A CONNREQ sent after the rx thread has already answered CONNACK
+   * makes the peer register twice.
+   */
+
+  nxmutex_lock(&rpuart->conn_lock);
   if (!rpmsg_port_uart_check(rpuart, RPMSG_PORT_UART_EVT_CONNED))
     {
       rpmsgvbs("Not Connected, Send Conn Req\n");
@@ -923,6 +944,8 @@ static int rpmsg_port_uart_tx_thread(int argc, FAR char *argv[])
     {
       rpmsgvbs("Connected, no need Send Conn Req\n");
     }
+
+  nxmutex_unlock(&rpuart->conn_lock);
 
   for (; ; )
     {
@@ -1011,6 +1034,7 @@ int rpmsg_port_uart_initialize(FAR const struct rpmsg_port_config_s *cfg,
   rpuart->rx_state = RPMSG_PORT_UART_RX_WAIT_START;
   rpuart->tx_staywake = RPMSG_PORT_UART_STAYWAKE1;
   nxevent_init(&rpuart->event, 0);
+  nxmutex_init(&rpuart->conn_lock);
 
   /* Hardware initialize */
 
@@ -1100,6 +1124,7 @@ err_lzf:
 err_rpmsg_port:
   file_close(&rpuart->file);
 err_file:
+  nxmutex_destroy(&rpuart->conn_lock);
   nxevent_destroy(&rpuart->event);
   kmm_free(rpuart);
   return ret;
