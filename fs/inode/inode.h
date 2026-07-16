@@ -461,12 +461,6 @@ int fs_open_amode(int oflags);
 int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
 #endif
 
-#ifdef CONFIG_FS_PERMISSION
-int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode);
-int fs_open_amode(int oflags);
-int fs_checkopenperm(uid_t owner, gid_t group, mode_t mode, int oflags);
-#endif
-
 /****************************************************************************
  * Name: foreach_inode
  *

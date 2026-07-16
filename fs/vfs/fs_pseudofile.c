@@ -33,7 +33,6 @@
 #include <fcntl.h>
 #include <sys/param.h>
 
-#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -468,10 +467,6 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
                       mode_t mode)
 {
   FAR struct fs_pseudofile_s *pf;
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && \
-    defined(CONFIG_SCHED_USER_IDENTITY)
-  FAR struct tcb_s *rtcb;
-#endif
   int ret;
 
   if (node == NULL || path == NULL)
@@ -497,17 +492,6 @@ int pseudofile_create(FAR struct inode **node, FAR const char *path,
   (*node)->i_flags = 1;
   (*node)->u.i_ops = &g_pseudofile_ops;
   (*node)->i_private = pf;
-
-#if defined(CONFIG_PSEUDOFS_ATTRIBUTES) && \
-    defined(CONFIG_SCHED_USER_IDENTITY)
-
-  rtcb = nxsched_self();
-  if (rtcb != NULL && rtcb->group != NULL)
-    {
-      (*node)->i_owner = rtcb->group->tg_euid;
-      (*node)->i_group = rtcb->group->tg_egid;
-    }
-#endif
 
   atomic_fetch_add(&(*node)->i_crefs, 1);
 
