@@ -230,7 +230,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   if (depth >= 0)
     {
-      strlcat(path, &relpath[first], pathlen - strlen(path));
+      strlcat(path, &relpath[first], pathlen);
     }
 }
 
