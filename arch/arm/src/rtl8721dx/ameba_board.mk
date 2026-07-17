@@ -268,7 +268,7 @@ define PREBUILD
 	$(Q) $(AMEBA_NP_PREBUILD)
 	$(Q) echo "GEN: libameba_fwlib.a (fwlib from SDK source)"
 	$(Q) mkdir -p $(AMEBA_PREBUILT_LIBS)$(DELIM)fwlib_obj
-	$(Q) rebuild_fwlib=0; \
+	$(Q) rebuild_fwlib=0; fwlib_objs=""; \
 	     for src in $(AMEBA_FWLIB_SRCS); do \
 	       obj=$(AMEBA_PREBUILT_LIBS)/fwlib_obj/`basename $$src .c`.o; \
 	       if [ "$$src" -nt "$$obj" ] 2>/dev/null || [ ! -f "$$obj" ]; then \
@@ -276,14 +276,16 @@ define PREBUILD
 	           $(AMEBA_FWLIB_INC) -c $$src -o $$obj || exit 1; \
 	         rebuild_fwlib=1; \
 	       fi; \
+	       fwlib_objs="$$fwlib_objs $$obj"; \
 	     done; \
 	     if [ "$$rebuild_fwlib" = "1" ] || [ ! -f "$(AMEBA_FWLIB_A)" ]; then \
-	       $(CROSSDEV)ar crs $(AMEBA_FWLIB_A) $(AMEBA_PREBUILT_LIBS)/fwlib_obj/*.o; \
+	       rm -f $(AMEBA_FWLIB_A); \
+	       $(CROSSDEV)ar crs $(AMEBA_FWLIB_A) $$fwlib_objs; \
 	     fi
 	$(Q) if [ "$(CONFIG_RTL8721DX_WIFI)" = "y" ]; then \
 	       echo "GEN: libameba_wifi.a (WHC host glue from SDK source + NuttX shim)"; \
 	       mkdir -p $(AMEBA_PREBUILT_LIBS)$(DELIM)wifi_obj; \
-	       rebuild_wifi=0; \
+	       rebuild_wifi=0; wifi_objs=""; \
 	       for src in $(AMEBA_WIFI_SRCS); do \
 	         obj=$(AMEBA_PREBUILT_LIBS)/wifi_obj/`basename $$src .c`.o; \
 	         if [ "$$src" -nt "$$obj" ] 2>/dev/null || [ ! -f "$$obj" ]; then \
@@ -291,9 +293,11 @@ define PREBUILD
 	             $(AMEBA_WIFI_INC) -c $$src -o $$obj || exit 1; \
 	           rebuild_wifi=1; \
 	         fi; \
+	         wifi_objs="$$wifi_objs $$obj"; \
 	       done; \
 	       if [ "$$rebuild_wifi" = "1" ] || [ ! -f "$(AMEBA_WIFI_A)" ]; then \
-	         $(CROSSDEV)ar crs $(AMEBA_WIFI_A) $(AMEBA_PREBUILT_LIBS)/wifi_obj/*.o; \
+	         rm -f $(AMEBA_WIFI_A); \
+	         $(CROSSDEV)ar crs $(AMEBA_WIFI_A) $$wifi_objs; \
 	       fi; \
 	     fi
 	$(Q) echo "GEN: ld.script.gen (Ameba AP km4 image2)"
