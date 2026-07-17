@@ -174,6 +174,19 @@ jobs:
           path: sources/apps
           fetch-depth: 1
 
+      # Free space before pulling the large NuttX CI image; ubuntu-latest ships
+      # only ~14 GB free on / and the image otherwise fails to unpack with
+      # "no space left on device". Mirrors the cleanup in .github/workflows/build.yml.
+      - name: Show Disk Space
+        run: df -h
+
+      - name: Free Disk Space (Ubuntu)
+        run: |
+          sudo rm -rf /usr/local/lib/android
+
+      - name: After CLEAN-UP Disk Space
+        run: df -h
+
       - name: Docker Login
         uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0  # v4.4.0
         with:
