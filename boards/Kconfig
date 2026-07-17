@@ -2580,6 +2580,13 @@ config ARCH_BOARD_PINEPHONE_PRO
 		This options selects support for NuttX on PINE64 PinePhone based
 		on Rockchip RK3399 SoC with ARM Cortex-A53
 
+config ARCH_BOARD_ORANGEPI_5_PRO
+	bool "Orange Pi 5 Pro"
+	depends on ARCH_CHIP_RK3588
+	---help---
+		This option selects support for NuttX on the Orange Pi 5 Pro
+		based on Rockchip RK3588S SoC with ARM Cortex-A76/Cortex-A55.
+
 config ARCH_BOARD_NANOPI_M4
 	bool "FriendlyElec NanoPi M4"
 	depends on ARCH_CHIP_RK3399
@@ -3963,6 +3970,7 @@ config ARCH_BOARD
 	default "qemu-armv8a"                  if ARCH_BOARD_QEMU_ARMV8A
 	default "pinephone"                    if ARCH_BOARD_PINEPHONE
 	default "pinephonepro"                 if ARCH_BOARD_PINEPHONE_PRO
+	default "orangepi-5-pro"               if ARCH_BOARD_ORANGEPI_5_PRO
 	default "pocketbeagle2"                if ARCH_BOARD_POCKETBEAGLE2
 	default "beagleplay"                   if ARCH_BOARD_BEAGLEPLAY
 	default "nanopi_m4"                    if ARCH_BOARD_NANOPI_M4
@@ -4212,6 +4220,9 @@ source "boards/arm64/a64/pinephone/Kconfig"
 endif
 if ARCH_BOARD_PINEPHONE_PRO
 source "boards/arm64/rk3399/pinephonepro/Kconfig"
+endif
+if ARCH_BOARD_ORANGEPI_5_PRO
+source "boards/arm64/rk3588/orangepi-5-pro/Kconfig"
 endif
 if ARCH_BOARD_POCKETBEAGLE2
 source "boards/arm64/am62x/pocketbeagle2/Kconfig"
