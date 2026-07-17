@@ -202,7 +202,9 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
   list(APPEND SRCS esp_ulp.c)
 endif()
 
-# if(CONFIG_ESPRESSIF_LP_MAILBOX) list(APPEND SRCS esp_lp_mailbox.c) endif()
+if(CONFIG_ESPRESSIF_LP_MAILBOX)
+  list(APPEND SRCS esp_lp_mailbox.c)
+endif()
 
 if(CONFIG_PM)
   if(NOT CONFIG_ARCH_CUSTOM_PMINIT)

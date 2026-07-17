@@ -434,6 +434,8 @@ list(
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_i2c.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_spi.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_mailbox.c
+  ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/lp_core_mailbox_impl_hw.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_memory_shared.c
   ${ESP_HAL_3RDPARTY_REPO}/components/ulp/lp_core/shared/ulp_lp_core_lp_timer_shared.c
   ${ESP_HAL_3RDPARTY_REPO}/components/upper_hal_ana_cmpr/ana_cmpr.c

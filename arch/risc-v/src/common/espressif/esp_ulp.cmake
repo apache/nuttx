@@ -378,6 +378,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
     target_compile_options(
       ${ULP_FIRMWARE_TARGET}
       PRIVATE ${ULP_COMPILE_OPTS}
+              -U__NuttX__
               -include
               ${HAL}/nuttx/${CHIP_SERIES}/include/sdkconfig.h
               -Wno-shadow
