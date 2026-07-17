@@ -111,6 +111,8 @@ function(nuttx_add_application)
     return()
   endif()
 
+  string(REPLACE "-" "_" NAME_SYM "${NAME}")
+
   # check if SRCS exist
   if(SRCS)
     file(GLOB SRCS_EXIST ${SRCS})
@@ -231,7 +233,7 @@ function(nuttx_add_application)
         set_property(
           SOURCE ${MAIN_SRC}
           APPEND
-          PROPERTY COMPILE_DEFINITIONS main=${NAME}_main)
+          PROPERTY COMPILE_DEFINITIONS main=${NAME_SYM}_main)
       endif()
     endif()
 
@@ -249,7 +251,7 @@ function(nuttx_add_application)
 
   # store parameters into properties (used during builtin list generation)
 
-  set_target_properties(${TARGET} PROPERTIES APP_MAIN ${NAME}_main)
+  set_target_properties(${TARGET} PROPERTIES APP_MAIN ${NAME_SYM}_main)
   set_target_properties(${TARGET} PROPERTIES APP_NAME ${NAME})
 
   if(PRIORITY)
