@@ -1,3 +1,53 @@
+diff --git a/MSDK/plf/riscv/NMSIS/Core/Include/riscv_encoding.h b/MSDK/plf/riscv/NMSIS/Core/Include/riscv_encoding.h
+index 8b87225..51cb931 100644
+--- a/MSDK/plf/riscv/NMSIS/Core/Include/riscv_encoding.h
++++ b/MSDK/plf/riscv/NMSIS/Core/Include/riscv_encoding.h
+@@ -31,6 +31,45 @@
+  * The following macros are used for CSR encodings
+  *   @{
+  */
++/* NuttX port: the NuttX <arch/csr.h> (pulled in through <nuttx/irq.h>)
++ * already defines several of these names with its own encodings; undefine
++ * them so this header provides the NMSIS values to the SDK sources without
++ * macro redefinition warnings.
++ */
++
++#undef CSR_FCSR
++#undef CSR_FFLAGS
++#undef CSR_FRM
++#undef CSR_MINTSTATUS
++#undef CSR_USTATUS
++#undef MIE_MEIE
++#undef MIE_MSIE
++#undef MIE_MTIE
++#undef MIE_SEIE
++#undef MIE_SSIE
++#undef MIE_STIE
++#undef MIP_MEIP
++#undef MIP_MSIP
++#undef MIP_MTIP
++#undef MIP_SEIP
++#undef MIP_SSIP
++#undef MIP_STIP
++#undef MSTATUS_FS
++#undef MSTATUS_FS_CLEAN
++#undef MSTATUS_FS_DIRTY
++#undef MSTATUS_MIE
++#undef MSTATUS_MPIE
++#undef MSTATUS_MPRV
++#undef MSTATUS_MXR
++#undef MSTATUS_SIE
++#undef MSTATUS_SPIE
++#undef MSTATUS_UIE
++#undef MSTATUS_XS
++#undef SSTATUS_FS
++#undef SSTATUS_SIE
++#undef SSTATUS_SPIE
++#undef SSTATUS_XS
++
+ /* === Standard CSR bit mask === */
+ #define MSTATUS_UIE         0x00000001
+ #define MSTATUS_SIE         0x00000002
 diff --git a/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h b/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h
 index f4e200e..c9189ca 100644
 --- a/MSDK/plf/riscv/gd32vw55x/gd32vw55x.h
@@ -37,6 +87,24 @@ index e7f393f..8731cb8 100644
  
      /* 2. wifi power on */
      wifi_exist_flag = 1;
+diff --git a/MSDK/wifi_manager/wifi_management.h b/MSDK/wifi_manager/wifi_management.h
+index 3a108f9..3923f02 100644
+--- a/MSDK/wifi_manager/wifi_management.h
++++ b/MSDK/wifi_manager/wifi_management.h
+@@ -94,6 +94,13 @@ extern "C" {
+ #define wifi_sm_printf(...)
+ #endif
+ 
++/* NuttX port: <nuttx/compiler.h> also defines COMPILE_TIME_ASSERT; use the
++ * SDK's own definition here without redefining the other one.
++ */
++#ifdef COMPILE_TIME_ASSERT
++#undef COMPILE_TIME_ASSERT
++#endif
++
+ #define COMPILE_TIME_ASSERT(constant_expr)    \
+ do {                        \
+     switch(0) {             \
 diff --git a/MSDK/wifi_manager/wifi_netlink.c b/MSDK/wifi_manager/wifi_netlink.c
 index aec26cc..445c109 100644
 --- a/MSDK/wifi_manager/wifi_netlink.c

@@ -529,7 +529,6 @@ static int gdwifi_ifdown(struct netdev_lowerhalf_s *dev)
 
 static int gdwifi_transmit(struct netdev_lowerhalf_s *dev, netpkt_t *pkt)
 {
-  struct gdwifi_dev_s *priv = (struct gdwifi_dev_s *)dev;
   unsigned int len = netpkt_getdatalen(dev, pkt);
   struct pbuf *p;
 

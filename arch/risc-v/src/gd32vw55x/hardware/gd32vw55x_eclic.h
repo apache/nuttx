@@ -86,10 +86,14 @@
 
 #define ECLIC_INTCTL_LEVEL(l)        ((((l) & 0xf) << 4) | 0x0f)
 
-/* Nuclei-specific CSRs used with the ECLIC */
+/* Nuclei-specific CSRs used with the ECLIC.  Note: the Nuclei interrupt
+ * level status CSR lives at 0x346, not at the standard CLIC MINTSTATUS
+ * address that arch/risc-v/include/csr.h names CSR_MINTSTATUS (0xfb1); a
+ * distinct name avoids redefining it.
+ */
 
 #define CSR_MTVT                     0x307  /* Vector table base */
-#define CSR_MINTSTATUS               0x346  /* Interrupt level status */
+#define CSR_NUCLEI_MINTSTATUS        0x346  /* Interrupt level status */
 #define CSR_MCACHE_CTL               0x7ca  /* I-cache control */
 #define CSR_MMISC_CTL                0x7d0  /* Misc control (NMI base) */
 #define CSR_MTVT2                    0x7ec  /* Non-vectored irq entry */

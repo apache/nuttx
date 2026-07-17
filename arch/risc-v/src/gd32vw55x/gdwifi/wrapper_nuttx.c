@@ -1033,28 +1033,6 @@ void sys_sched_unlock(void)
  * Public Functions - timers
  ****************************************************************************/
 
-static void timer_worker_fixed(void *arg)
-{
-  struct nx_timer_s *t = arg;
-
-  if (!t->active)
-    {
-      return;
-    }
-
-  if (t->periodic)
-    {
-      wd_start(&t->wdog, MSEC2TICK(t->delay_ms), timer_wdog_handler,
-               (wdparm_t)(uintptr_t)t);
-    }
-  else
-    {
-      t->active = 0;
-    }
-
-  t->func(t, t->arg);
-}
-
 void sys_timer_init(os_timer_t *timer, const uint8_t *name, uint32_t delay,
                     uint8_t periodic, timer_func_t func, void *arg)
 {

@@ -33,6 +33,14 @@
 # not use: WPA comes from the lightweight libwpas.a, via wifi_wpa.c.
 CFLAGS += -DCFG_RTOS -DEXEC_USING_STD_PRINTF -DGDWIFI_NUTTX
 
+# The vendor SDK sources are not NuttX-warning-clean (undefined macros in
+# #if, %d for uint32_t, shadowed locals, K&R prototypes, ...).  These
+# suppressions are scoped to this chip's build; the macro redefinitions
+# that no -Wno flag covers are fixed in the SDK patch instead
+# (riscv_encoding.h, wifi_management.h).
+CFLAGS += -Wno-undef -Wno-format -Wno-shadow -Wno-address
+CFLAGS += -Wno-unused-function -Wno-strict-prototypes -Wno-array-parameter
+
 # Include paths: our patched config dir must come first
 
 INCLUDES += $(INCDIR_PREFIX)$(ARCH_SRCDIR)$(DELIM)gd32vw55x$(DELIM)gdwifi$(DELIM)config
