@@ -55,4 +55,18 @@ config AMEBA_UART_TXBUFSIZE
 
 endif # AMEBA_UART
 
+config AMEBA_I2C
+	bool "I2C"
+	default n
+	select I2C
+	select I2C_DRIVER
+	---help---
+		Expose the Ameba I2C controllers (I2C0/I2C1) as NuttX I2C master
+		buses at /dev/i2cN.  The board selects which controller is used and
+		its SCL/SDA pads in its bring-up code.
+
+		The driver (arch/arm/src/common/ameba/ameba_i2c.c) sits on the SDK
+		fwlib register layer and drives the DesignWare I2C block in polling
+		mode.
+
 endmenu # Ameba Peripheral Support

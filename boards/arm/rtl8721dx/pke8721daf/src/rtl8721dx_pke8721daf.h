@@ -95,6 +95,19 @@ int rtl8721dx_gpio_initialize(void);
 int rtl8721dx_uart_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_I2C
+/****************************************************************************
+ * Name: rtl8721dx_i2c_initialize
+ *
+ * Description:
+ *   Register the board's I2C master buses at /dev/i2cN
+ *   (boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_i2c.c).
+ *
+ ****************************************************************************/
+
+int rtl8721dx_i2c_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721DX_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

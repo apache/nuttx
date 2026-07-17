@@ -48,6 +48,10 @@ if(CONFIG_AMEBA_UART)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_uart.c)
 endif()
 
+if(CONFIG_AMEBA_I2C)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_i2c.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
