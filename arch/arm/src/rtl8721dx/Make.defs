@@ -58,6 +58,10 @@ ifeq ($(CONFIG_AMEBA_UART),y)
 CHIP_CSRCS += ameba_uart.c
 endif
 
+ifeq ($(CONFIG_AMEBA_I2C),y)
+CHIP_CSRCS += ameba_i2c.c
+endif
+
 ############################################################################
 # Realtek RTL8721Dx SDK integration
 #

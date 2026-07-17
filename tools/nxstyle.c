@@ -275,6 +275,7 @@ static const char *g_white_prefix[] =
   "FLASH_",
   "GPIO_",
   "Get_OSC131_",      /* Get_OSC131_STATE — Ameba SDK RTC accessor */
+  "I2C_",             /* I2C_Init, I2C_MasterWrite, I2C_InitTypeDef, etc. */
   "IPC_",
   "LOGUART_",
   "OSC2M_",

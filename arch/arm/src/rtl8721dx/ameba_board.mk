@@ -137,6 +137,15 @@ ifeq ($(CONFIG_AMEBA_UART),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_uart.c
 endif
 
+# I2C register layer.  Unlike UART, the fwlib I2C API is NOT in ROM: the I2C
+# driver (arch/.../common/ameba/ameba_i2c.c) calls I2C_Init/StructInit/Cmd and
+# I2C_MasterWrite/Read/RepeatRead, all of which are compiled from this RAM
+# source and must be linked in (--gc-sections drops the unused DMA/interrupt
+# helpers).
+ifeq ($(CONFIG_AMEBA_I2C),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_i2c.c
+endif
+
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources
