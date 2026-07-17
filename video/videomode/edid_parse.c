@@ -125,6 +125,7 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
   unsigned x;
   unsigned y;
   unsigned f;
+  uint8_t info;
 
   if ((stdtim[0] == 1 && stdtim[1] == 1) ||
       (stdtim[0] == 0 && stdtim[1] == 0) ||
@@ -133,8 +134,9 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
       return false;
     }
 
-  x = stdtim[EDID_STDTIMING_XRES_OFFSET];
-  switch (x & EDID_STDTIMING_ASPECT_MASK)
+  x = (stdtim[EDID_STDTIMING_XRES_OFFSET] + 31) * 8;
+  info = stdtim[EDID_STDTIMING_INFO_OFFSET];
+  switch (info & EDID_STDTIMING_ASPECT_MASK)
     {
     case EDID_STDTIMING_ASPECT_16_10:
       y = x * 10 / 16;
@@ -154,7 +156,7 @@ static bool edid_std_timing(FAR const uint8_t *stdtim,
       break;
     }
 
-  f = stdtim[EDID_STDTIMING_INFO_OFFSET];
+  f = (info & ~EDID_STDTIMING_ASPECT_MASK) + 60;
 
   /* First try to lookup the mode as a DMT timing */
 
@@ -499,7 +501,7 @@ int edid_parse(FAR const uint8_t *data, FAR struct edid_info_s *edid)
   edid->edid_features         = data[EDID_DISPLAY_FEATURES_OFFSET];
 
   edid->edid_chroma.ec_redx   = EDID_CHROMA_RED_X(data);
-  edid->edid_chroma.ec_redy   = EDID_CHROMA_RED_X(data);
+  edid->edid_chroma.ec_redy   = EDID_CHROMA_RED_Y(data);
   edid->edid_chroma.ec_greenx = EDID_CHROMA_GREEN_X(data);
   edid->edid_chroma.ec_greeny = EDID_CHROMA_GREEN_Y(data);
   edid->edid_chroma.ec_bluex  = EDID_CHROMA_BLUE_X(data);
