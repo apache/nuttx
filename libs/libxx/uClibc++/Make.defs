@@ -31,8 +31,8 @@ uClibc++/uClibc++: uClibc++-$(UCLIBCXX_VERSION).tar.bz2
 	$(Q) tar -xf $<
 	$(Q) $(DELFILE) $<
 	$(Q) mv uClibc++-$(UCLIBCXX_VERSION) $@
-	$(Q) patch -p0 < uClibc++/0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch -d uClibc++
-	$(Q) patch -p0 < uClibc++/0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch -d uClibc++
+	$(Q) patch -p1 < uClibc++/0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch -d uClibc++
+	$(Q) patch -p1 < uClibc++/0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch -d uClibc++
 endif
 
 $(TOPDIR)/include/uClibc++: uClibc++/uClibc++
