@@ -178,15 +178,13 @@ ssize_t file_readv(FAR struct file *filep,
 
   /* Are all iov_base accessible? */
 
-#if !defined(CONFIG_BUILD_KERNEL) || CONFIG_ARCH_TEXT_VBASE != 0
   for (ret = 0; ret < iovcnt; ret++)
     {
-      if (iov[ret].iov_base == NULL && iov[ret].iov_len != 0)
+      if (iov[ret].iov_base == NULL)
         {
           return -EFAULT;
         }
     }
-#endif
 
   ret = -EBADF;
 
