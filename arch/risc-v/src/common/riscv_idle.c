@@ -71,7 +71,18 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
-  asm("WFI");
+  /* up_idle() never calls another function, so with frame pointers
+   * enabled the compiler has no need to spill ra and skips it, leaving
+   * its slot in the fp-chain holding whatever was on the stack before.
+   * Clobbering "ra" forces it to be spilled/reloaded around WFI so the
+   * fp-chain backtrace sched_backtrace() relies on can find it.
+   */
+
+#if defined(CONFIG_FRAME_POINTER) && defined(CONFIG_SCHED_BACKTRACE)
+  asm volatile ("WFI" : : : "ra");
+#else
+  asm volatile ("WFI");
+#endif
 
 #endif
 }
