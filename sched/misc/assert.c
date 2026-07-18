@@ -325,7 +325,11 @@ static void dump_stacks(FAR struct tcb_s *rtcb, uintptr_t sp)
 #endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-  if (kernelstack_sp != 0 || force)
+  /* kernelstack_base is NULL for tasks with no kernel stack (e.g. idle).
+   * dump_stackinfo() would then dump raw memory starting at address 0.
+   */
+
+  if (kernelstack_base != 0 && (kernelstack_sp != 0 || force))
     {
       dump_stackinfo("Kernel",
                      kernelstack_sp,
