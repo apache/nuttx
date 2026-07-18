@@ -1302,8 +1302,13 @@ static int cdcncm_send(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt)
     }
   else
     {
-      work_queue(ETHWORK, &self->delaywork, cdcncm_transmit_work, self,
-                 MSEC2TICK(CDCNCM_DGRAM_COMBINE_PERIOD));
+      /* Defer to the work thread with zero delay.  A non-zero delay is
+       * rounded up to a full tick (10ms at 100Hz), which dominated the
+       * USB-NIC round-trip; delay 0 wakes the worker immediately while
+       * still coalescing datagrams appended in the same TX burst.
+       */
+
+      work_queue(ETHWORK, &self->delaywork, cdcncm_transmit_work, self, 0);
     }
 
   return OK;
