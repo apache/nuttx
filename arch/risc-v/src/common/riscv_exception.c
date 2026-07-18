@@ -87,10 +87,11 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
  *
  * Description:
  *   Handle a fault caused by the running task. If the task is a user task
- *   not currently in a syscall, kill it with SIGSEGV instead of
- *   taking down the whole system. Otherwise (kernel thread, or a fault
- *   while already in kernel context on behalf of a syscall) there is no
- *   safe task to kill, so panic.
+ *   not currently in a syscall or interrupt context, kill it with SIGSEGV
+ *   instead of taking down the whole system. Otherwise (kernel thread, a
+ *   fault while already in kernel context on behalf of a syscall, or a
+ *   fault while handling an interrupt) there is no safe task to kill, so
+ *   panic.
  *
  * Input Parameters:
  *   cause - The (masked) machine cause of the exception, used for the
@@ -104,8 +105,14 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
 #ifdef CONFIG_ARCH_KERNEL_STACK
   struct tcb_s *tcb = this_task();
 
+  /* The STATUS_PPP check alone is enough: any kernel-mode fault (kernel
+   * thread, syscall body, or interrupt) has STATUS_PPP != 0.  The other
+   * two checks are kept as defensive redundancy.
+   */
+
   if (((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL) &&
-      ((tcb->flags & TCB_FLAG_SYSCALL) == false))
+      ((tcb->flags & TCB_FLAG_SYSCALL) == false) &&
+      !(((uintreg_t *)regs)[REG_INT_CTX] & STATUS_PPP))
     {
       struct tcb_s *ptcb = nxsched_get_tcb(tcb->group->tg_pid);
 
