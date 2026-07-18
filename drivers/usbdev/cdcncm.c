@@ -918,13 +918,25 @@ static void cdcncm_transmit_work(FAR void *arg)
   int ndpindex;
   int totallen;
 
-  /* Wait until the USB device request for Ethernet frame transmissions
-   * becomes available.
+  /* Serialise against cdcncm_send() and any other transmit_work: they share
+   * the single wrreq buffer and run under the recursive netdev_lock.
+   * Without it, delay-0 scheduling can submit the same wrreq twice and
+   * wedge TX.
    */
 
-  while (nxsem_wait(&self->wrreq_idle) != OK)
+  netdev_lock(&self->dev.netdev);
+
+  /* Empty batch: a previous flush already submitted it.  Don't resubmit. */
+
+  if (self->dgramcount == 0)
     {
+      netdev_unlock(&self->dev.netdev);
+      return;
     }
+
+  /* cdcncm_send() already holds the wrreq_idle token for this batch, so we
+   * must not wait for it again here (wrcomplete reposts it after EP_SUBMIT).
+   */
 
   ncblen   = opts->nthsize;
   ndpindex = NCM_ALIGN(ncblen, ndpalign);
@@ -950,6 +962,8 @@ static void cdcncm_transmit_work(FAR void *arg)
   self->wrreq->len = totallen;
 
   EP_SUBMIT(self->epbulkin, self->wrreq);
+
+  netdev_unlock(&self->dev.netdev);
 }
 
 /****************************************************************************
@@ -1291,6 +1305,21 @@ static int cdcncm_send(FAR struct netdev_lowerhalf_s *dev, FAR netpkt_t *pkt)
   FAR struct cdcncm_driver_s *self;
 
   self = container_of(dev, struct cdcncm_driver_s, dev);
+
+  /* At the start of a new NTB batch, wait for the previous transfer to
+   * finish before reusing wrreq->buf (the USB controller transmits straight
+   * out of it).  With TCP write buffers, cdcncm_send() drains many segments
+   * back-to-back, so batches overlap; waiting only just before EP_SUBMIT let
+   * the in-flight buffer be overwritten and wedged TX.
+   */
+
+  if (self->dgramcount == 0)
+    {
+      while (nxsem_wait(&self->wrreq_idle) != OK)
+        {
+        }
+    }
+
   cdcncm_transmit_format(self, pkt);
   netpkt_free(dev, pkt, NETPKT_TX);
 
