@@ -702,6 +702,8 @@ static char *read_line(FILE *stream)
           g_line[len] = '\0';
         }
 
+      /* A blank line has no continuation marker to inspect. */
+
       if (len == 0)
         {
           g_lnptr = g_line;
