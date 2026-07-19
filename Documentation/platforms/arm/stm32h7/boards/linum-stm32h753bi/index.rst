@@ -802,6 +802,92 @@ This configuration is focused on network testing using the ethernet periferal::
       10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
       rtt min/avg/max/mdev = 0.000/1.000/10.000/3.000 ms
 
+curl
+----
+
+Based on the ``netnsh`` configuration (ethernet + DHCP), this configuration adds
+the ``curl`` HTTP client command (``system/curl`` on top of
+``netutils/webclient``), SD card support (same as the ``sdcard`` configuration,
+mounted manually) and a larger console line buffer (``CONFIG_LINE_MAX=256``) so
+long URLs and JSON bodies are not truncated when typed at the NSH prompt.
+
+It implements a subset of the real ``curl`` options: ``-X`` (method), ``-H``
+(header), ``-d`` (request body, also ``-d @file``), ``-F name=@file``
+(multipart/form-data upload), ``-o`` (save the response to a file) and ``-v``
+(verbose). It is HTTP only (no HTTPS). For the full option semantics see the
+curl manual page: https://curl.se/docs/manpage.html
+
+Mount the SD card (destination for downloads) and bring up the network::
+
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
+    nsh> ifconfig
+    eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at RUNNING mtu 1486
+            inet addr:192.168.15.3 DRaddr:192.168.15.1 Mask:255.255.255.0
+
+Download a file and save it on the SD card with ``-o`` (a public HTTP test
+service such as ``httpbin.org`` requires the gateway to have internet access)::
+
+    nsh> curl -o /mnt/dl.json http://httpbin.org/json
+    curl: HTTP 200
+    nsh> cat /mnt/dl.json
+    {
+      "slideshow": {
+        "author": "Yours Truly",
+        "title": "Sample Slide Show",
+        ...
+      }
+    }
+
+    nsh> curl -o /mnt/1kb.bin http://httpbin.org/bytes/1024
+    curl: HTTP 200
+    nsh> curl -o /mnt/img.png http://httpbin.org/image/png
+    curl: HTTP 200
+    nsh> ls -l /mnt/img.png
+     -rw-rw-rw-        8090 /mnt/img.png
+
+Send a JSON body with POST (``-d`` selects POST automatically; ``-H`` sets the
+content type). The ``httpbin.org/post`` endpoint echoes back what it received::
+
+    nsh> curl -H Content-Type:application/json -d '{"temp":25.3,"hum":60}' http://httpbin.org/post
+    {
+      "data": "{\"temp\":25.3,\"hum\":60}",
+      "headers": {
+        "Content-Type": "application/json",
+        "Host": "httpbin.org",
+        ...
+      },
+      "json": {
+        "hum": 60,
+        "temp": 25.3
+      },
+      "url": "http://httpbin.org/post"
+    }
+    curl: HTTP 200
+
+Select a different HTTP method with ``-X``::
+
+    nsh> curl -X PUT -d '{"x":1}' http://httpbin.org/put
+    curl: HTTP 200
+
+Upload a file with multipart/form-data (``-F name=@file``) and download it back
+with ``-o`` (this example targets a local server that stores the file and serves
+it again)::
+
+    nsh> curl -F file=@/mnt/nuttx_logo.png "http://192.168.15.12:8000/api/projects/default/ota/upload?version=logo1"
+    {"id":3,"version":"logo1","filename":"nuttx_logo.png","sha256":"ca278dcb...abed1ba","size_bytes":40343}curl: HTTP 201
+    nsh> curl -o /mnt/logo_back.png http://192.168.15.12:8000/api/api/ota/default/logo1/nuttx_logo.png
+    curl: HTTP 200
+    nsh> ls -l /mnt
+     -rw-rw-rw-       40343 nuttx_logo.png
+     -rw-rw-rw-       40343 logo_back.png
+
+.. note::
+
+   The webclient transfer buffer is small and the request has a ~10 s timeout,
+   so prefer small files (a few KB up to ~100 KB). HTTPS is not supported; use
+   plain ``http://`` URLs only. When there is no internet on the bench, point
+   ``curl`` at a server on the local network instead of a public test service.
+
 qencoder
 --------
 
