@@ -587,6 +587,23 @@ We only need to select the appropriate audio device to playback this file:
    nxplayer> device /dev/audio/pcm1p
    nxplayer> play /host/mother.mp3
 
+baromonitor
+-----------
+
+This configuration includes LVGL graphics over the X11 frame buffer interface,
+and includes the :doc:`baromonitor </applications/examples/baromonitor/index>`
+example. It also includes the ``uorb_generator`` (see
+:doc:`/applications/system/uorb/index`) for generation of fake barometer data to
+test with.
+
+You may wish to test the example by doing the following (this will only show
+static data):
+
+.. code:: console
+
+   nsh> uorb_generator -n 10000 -r 1 -s -t sensor_baro0 timestamp:23191100,pressure:999.12,temperature:26.34 &
+   nsh> baromonitor
+
 bluetooth
 ---------
 
