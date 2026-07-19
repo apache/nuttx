@@ -327,6 +327,15 @@ This configuration has the same warnings and limitations as those in the ``fb``
 configuration, with the exception of the pixel gaps. This is because LVGL uses
 the dual-buffer approach to rendering.
 
+baromonitor
+-----------
+
+This configuration includes LVGL graphics over the HDMI frame buffer interface,
+and includes the :doc:`baromonitor </applications/examples/baromonitor/index>`
+example. It also includes the features from the ``bmp280`` configuration so that
+the ``baromonitor`` example can display values read from the connected BMP280
+barometer.
+
 cgol
 ----
 
