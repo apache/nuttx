@@ -36,7 +36,13 @@ else ifeq ($(CONFIG_ARCH_RISCV),y)
   ZIGFLAGS += -mcmodel=medium
 
 else 
-  ZIGFLAGS := -target $(LLVM_ARCHTYPE)-freestanding-$(LLVM_ABITYPE)
+  ifeq ($(LLVM_ABITYPE),sysv)
+    ZIG_ABITYPE := gnu
+  else
+    ZIG_ABITYPE := $(LLVM_ABITYPE)
+  endif
+
+  ZIGFLAGS := -target $(LLVM_ARCHTYPE)-freestanding-$(ZIG_ABITYPE)
 endif
 
 # Convert cortex-xxx/sifive-exx to cortex_xxx/sifive_exx
@@ -44,3 +50,5 @@ endif
 ifneq ($(LLVM_CPUTYPE),)
 ZIGFLAGS += -mcpu $(subst -,_,$(LLVM_CPUTYPE))
 endif
+
+ZIGFLAGS += -fcompiler-rt
