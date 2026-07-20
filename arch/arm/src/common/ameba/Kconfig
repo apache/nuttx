@@ -117,4 +117,21 @@ config AMEBA_ADC
 		polling in task context (the chip does not enable a hardware
 		software-trigger path).
 
+config AMEBA_RTC
+	bool "RTC"
+	default n
+	select RTC
+	select RTC_DRIVER
+	select RTC_DATETIME
+	---help---
+		Expose the Ameba on-chip real-time clock as a NuttX date/time RTC
+		at /dev/rtc0 (rdtime/settime).  Enable RTC_ALARM as well to get a
+		single one-shot alarm whose expiry fires the RTC interrupt and the
+		registered upper-half callback.
+
+		The driver (arch/arm/src/common/ameba/ameba_rtc.c) sits on the SDK
+		fwlib RTC register layer.  The hardware keeps a year plus a
+		day-of-year (no month/day register); the driver bridges that to the
+		NuttX month/day calendar with the libc UTC calendar routines.
+
 endmenu # Ameba Peripheral Support

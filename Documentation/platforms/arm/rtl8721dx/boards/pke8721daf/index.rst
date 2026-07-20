@@ -45,6 +45,8 @@ Supported in this NuttX port:
   the SDK fwlib timer register layer
 * ADC channels exposed as an ``/dev/adc0`` character device, driven directly
   on the SDK fwlib register layer
+* On-chip RTC exposed as a ``/dev/rtc0`` date/time character device with
+  alarm support, driven directly on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -169,6 +171,20 @@ channel is sampled, in order, on each trigger. Read the channels with the
 example::
 
     nsh> adc -n 1                        # one sweep of /dev/adc0
+
+rtc
+---
+
+Minimal NSH with the on-chip RTC driver and the ``alarm`` example enabled
+(no Wi-Fi). The RTC is registered at ``/dev/rtc0`` from the board bring-up
+(``boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_rtc.c``); it has no board
+wiring (it is an internal clock). The hardware stores year + day-of-year, so
+the shared driver bridges to a full calendar. Read and set the clock with the
+NSH ``date`` command, and arm a one-shot wakeup with the example::
+
+    nsh> date                            # read /dev/rtc0
+    nsh> date -s "Jun 16 12:00:00 2026"  # set the RTC
+    nsh> alarm 10                        # fire an alarm in 10 seconds
 
 Wi-Fi
 =====
