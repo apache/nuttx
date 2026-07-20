@@ -39,6 +39,8 @@ Supported in this NuttX port:
   directly on the SDK fwlib register layer
 * I2C master buses exposed as ``/dev/i2cN`` character devices, driven directly
   on the SDK fwlib register layer
+* SPI master buses exposed as ``/dev/spiN`` character devices, driven directly
+  on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -115,6 +117,22 @@ to the I2C function through the SDK ROM. The I2C bus is open-drain, so fit
 external pull-ups on SCL/SDA. Probe a bus with the tool::
 
     nsh> i2c dev -b 0 0x03 0x77     # scan /dev/i2c0 for devices
+
+spi
+---
+
+Minimal NSH with the SPI master driver and the ``spi`` tool
+(``system/spi``) enabled (no Wi-Fi). The board registers two buses from its
+table (see ``boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_spi.c``): SPI0 at
+``/dev/spi0`` with CLK/MOSI/MISO/CS on PA14/PA15/PA16/PA17 and SPI1 at
+``/dev/spi1`` with CLK/MOSI/MISO on PB18/PB19/PB20 and a software chip-select
+on PB21. Edit that table -- controller, CLK/MOSI/MISO pads and CS pad -- to
+match a board's wiring; the pads use the same ``AMEBA_PA()`` / ``AMEBA_PB()``
+encoding as the GPIO table and are muxed to the SPI function through the SDK
+ROM, while the chip-select is driven as a plain GPIO. Exercise a bus with the
+tool::
+
+    nsh> spi exch -b 1 -x 4 deadbeef     # full-duplex transfer on /dev/spi1
 
 Wi-Fi
 =====

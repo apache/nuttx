@@ -275,6 +275,7 @@ static const char *g_white_prefix[] =
   "FLASH_",
   "GPIO_",
   "Get_OSC131_",      /* Get_OSC131_STATE — Ameba SDK RTC accessor */
+  "HPERI_",           /* HPERI_ClkGet — amebagreen2 SPI ip_clk query */
   "I2C_",             /* I2C_Init, I2C_MasterWrite, I2C_InitTypeDef, etc. */
   "IPC_",
   "LOGUART_",
@@ -282,14 +283,17 @@ static const char *g_white_prefix[] =
   "OSC4M_",
   "OSC131K_",
   "PAD_",
+  "PLL_",             /* PLL_ClkGet — amebadplus SPI ip_clk query */
   "Pinmux_",
   "RCC_",
   "RTC_",             /* RTC_InitTypeDef, RTC_Enable, RTC_SetTime, etc. */
   "RTCIO_",
   "SDM32K_",          /* SDM32K_Enable */
+  "SSI_",             /* SSI_Init, SSI_SetRole, SSI_WriteData, etc. */
   "Set_OSC131_",      /* Set_OSC131_STATE — Ameba SDK RTC accessor */
   "SYSCFG_",
   "SYSTIMER_",
+  "SYS_PLL_",         /* SYS_PLL_ClkGet — RTL8720F SPI ip_clk query */
   "UART_",
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
