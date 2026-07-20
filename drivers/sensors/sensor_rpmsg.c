@@ -541,6 +541,25 @@ static int sensor_rpmsg_ioctl(FAR struct sensor_rpmsg_dev_s *dev,
   return ret;
 }
 
+static void sensor_rpmsg_free_proxy(FAR struct sensor_rpmsg_dev_s *dev,
+                                    FAR struct sensor_rpmsg_proxy_s *proxy)
+{
+  sminfo(dev->name, "free proxy:%p name:%s", proxy, proxy->ept->name);
+  list_delete(&proxy->node);
+  kmm_free(proxy);
+  if (list_is_empty(&dev->proxylist))
+    {
+      nxsem_reset(&dev->proxysem, 0);
+    }
+}
+
+static void sensor_rpmsg_free_stub(FAR struct sensor_rpmsg_stub_s *stub)
+{
+  list_delete(&stub->node);
+  file_close(&stub->file);
+  kmm_free(stub);
+}
+
 static FAR struct sensor_rpmsg_proxy_s *
 sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
                          FAR struct rpmsg_endpoint *ept,
@@ -548,18 +567,37 @@ sensor_rpmsg_alloc_proxy(FAR struct sensor_rpmsg_dev_s *dev,
                          FAR struct sensor_state_s *state)
 {
   FAR struct sensor_rpmsg_proxy_s *proxy;
+  FAR struct sensor_rpmsg_proxy_s *ptmp;
   struct file file;
   int ret;
 
   sensor_rpmsg_lock(dev);
-  list_for_every_entry(&dev->proxylist, proxy,
-                       struct sensor_rpmsg_proxy_s, node)
+  list_for_every_entry_safe(&dev->proxylist, proxy, ptmp,
+                            struct sensor_rpmsg_proxy_s, node)
     {
-      if (proxy->ept == ept && proxy->cookie == msg->cookie)
+      if (proxy->ept != ept)
+        {
+          continue;
+        }
+
+      /* Same remote ept. An exact (ept, cookie) match is the same
+       * advertiser instance re-advertising, so reuse it. A different
+       * cookie belongs to a previous advertiser instance that has gone
+       * away (its UNADVERTISE is not acted on by this side); release it so
+       * that at most one proxy per ept is ever kept. This bounds memory
+       * across advertiser re-registration and keeps the single free per
+       * ept in sensor_rpmsg_ept_release() sufficient (no leak on remote
+       * disconnect).
+       */
+
+      if (proxy->cookie == msg->cookie)
         {
           sensor_rpmsg_unlock(dev);
           return proxy;
         }
+
+      sminfo(dev->name, "release stale proxy:%p", proxy);
+      sensor_rpmsg_free_proxy(dev, proxy);
     }
 
   sensor_rpmsg_unlock(dev);
@@ -733,25 +771,6 @@ sensor_rpmsg_alloc_stub(FAR struct sensor_rpmsg_dev_s *dev,
   sminfo(dev->name, "create stub:%p", stub);
 
   return stub;
-}
-
-static void sensor_rpmsg_free_proxy(FAR struct sensor_rpmsg_dev_s *dev,
-                                    FAR struct sensor_rpmsg_proxy_s *proxy)
-{
-  sminfo(dev->name, "free proxy:%p name:%s", proxy, proxy->ept->name);
-  list_delete(&proxy->node);
-  kmm_free(proxy);
-  if (list_is_empty(&dev->proxylist))
-    {
-      nxsem_reset(&dev->proxysem, 0);
-    }
-}
-
-static void sensor_rpmsg_free_stub(FAR struct sensor_rpmsg_stub_s *stub)
-{
-  list_delete(&stub->node);
-  file_close(&stub->file);
-  kmm_free(stub);
 }
 
 static int sensor_rpmsg_open(FAR struct sensor_lowerhalf_s *lower,
