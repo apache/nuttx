@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include <nuttx/arch.h>
+#include <tls/tls.h>
 #include <arch/armv8-m/nvicpri.h>
 
 #include "arm_internal.h"
@@ -106,9 +107,13 @@ void up_initial_state(struct tcb_s *tcb)
 #endif
 
 #ifdef CONFIG_ARMV8M_STACKCHECK_HARDWARE
-  /* Save the stack limit value, will be used in context switch. */
+  /* Save the stack limit (restored on context switch) at the top of the
+   * TLS region. The stack grows downward and TLS occupies the bottom of
+   * the allocation, so an overflow faults here before it clobbers TLS
+   * data instead of silently corrupting it first.
+   */
 
-  xcp->regs[REG_SPLIM]   = (uint32_t)tcb->stack_alloc_ptr;
+  xcp->regs[REG_SPLIM]   = (uint32_t)tcb->stack_alloc_ptr + tls_info_size();
 #endif
 
   /* Save the task entry point (stripping off the thumb bit) */
