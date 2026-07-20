@@ -942,9 +942,10 @@ enum sdio_clock_e
 {
   CLOCK_SDIO_DISABLED = 0, /* Clock is disabled */
   CLOCK_IDMODE,            /* Initial ID mode clocking (<400KHz) */
-  CLOCK_MMC_TRANSFER,      /* MMC normal operation clocking */
+  CLOCK_MMC_TRANSFER,      /* MMC normal operation clocking (narrow 1-bit mode) */
   CLOCK_SD_TRANSFER_1BIT,  /* SD normal operation clocking (narrow 1-bit mode) */
-  CLOCK_SD_TRANSFER_4BIT   /* SD normal operation clocking (wide 4-bit mode) */
+  CLOCK_SD_TRANSFER_4BIT,  /* SD normal operation clocking (wide 4-bit mode) */
+  CLOCK_MMC_TRANSFER_4BIT  /* MMC normal operation clocking (wide 4-bit mode) */
 };
 
 /* Event set.  A uint8_t is big enough to hold a set of 8-events.  If more

@@ -210,6 +210,10 @@
                                      STM32_SDMMC_CLKCR_EDGE       |     \
                                      STM32_SDMMC_CLKCR_PWRSAV     |     \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
+#define STM32_SDMMC_CLKCR_MMCXFR4   (STM32_SDMMC_MMCXFR_CLKDIV    |     \
+                                     STM32_SDMMC_CLKCR_EDGE       |     \
+                                     STM32_SDMMC_CLKCR_PWRSAV     |     \
+                                     STM32_SDMMC_CLKCR_WIDBUS_D4)
 #define STM32_SDMMC_CLCKR_SDXFR     (STM32_SDMMC_SDXFR_CLKDIV     |     \
                                      STM32_SDMMC_CLKCR_EDGE       |     \
                                      STM32_SDMMC_CLKCR_PWRSAV     |     \
@@ -2045,7 +2049,24 @@ static sdio_statset_t stm32_status(struct sdio_dev_s *dev)
 static void stm32_widebus(struct sdio_dev_s *dev, bool wide)
 {
   struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+  uint32_t regval;
+
   priv->widebus = wide;
+
+  regval  = sdmmc_getreg32(priv, STM32_SDMMC_CLKCR_OFFSET);
+  regval &= ~STM32_SDMMC_CLKCR_WIDBUS_MASK;
+
+  if (wide)
+    {
+      regval |= STM32_SDMMC_CLKCR_WIDBUS_D4;
+      regval &= ~STM32_SDMMC_CLKCR_PWRSAV;
+    }
+  else
+    {
+      regval |= STM32_SDMMC_CLKCR_WIDBUS_D1;
+    }
+
+  sdmmc_putreg32(priv, regval, STM32_SDMMC_CLKCR_OFFSET);
 }
 
 /****************************************************************************
@@ -2087,6 +2108,12 @@ static void stm32_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
     case CLOCK_MMC_TRANSFER:
       clckr = STM32_SDMMC_CLKCR_MMCXFR;
+      break;
+
+    /* Enable in MMC wide (4-bit) operation clocking */
+
+    case CLOCK_MMC_TRANSFER_4BIT:
+      clckr = STM32_SDMMC_CLKCR_MMCXFR4;
       break;
 
     /* SD normal operation clocking (wide 4-bit mode) */
