@@ -100,4 +100,21 @@ config AMEBA_PWM
 		The driver (arch/arm/src/common/ameba/ameba_pwm.c) sits on the SDK
 		fwlib RTIM register layer and runs in polling task context.
 
+config AMEBA_ADC
+	bool "ADC"
+	default n
+	select ANALOG
+	select ADC
+	---help---
+		Expose the Ameba SAR ADC as a NuttX ADC input at /dev/adc0.  The
+		converter has one channel-switch list; the board selects which
+		channels are sampled and which analog pad each external channel is
+		wired to in its bring-up code.  Every channel is sampled, in list
+		order, on each ANIOC_TRIGGER.
+
+		The driver (arch/arm/src/common/ameba/ameba_adc.c) sits on the SDK
+		fwlib register layer and reads the auto channel-switch FIFO by
+		polling in task context (the chip does not enable a hardware
+		software-trigger path).
+
 endmenu # Ameba Peripheral Support
