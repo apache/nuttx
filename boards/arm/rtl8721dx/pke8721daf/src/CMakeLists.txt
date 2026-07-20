@@ -38,12 +38,17 @@ if(CONFIG_AMEBA_SPI)
   list(APPEND SRCS rtl8721dx_spi.c)
 endif()
 
+if(CONFIG_AMEBA_PWM)
+  list(APPEND SRCS rtl8721dx_pwm.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_UART
    OR CONFIG_AMEBA_I2C
-   OR CONFIG_AMEBA_SPI)
+   OR CONFIG_AMEBA_SPI
+   OR CONFIG_AMEBA_PWM)
   # The board pin/UART tables pull in the shared driver's public headers from
   # arch/arm/src/common/ameba/, not on the default board include path.
   target_include_directories(board

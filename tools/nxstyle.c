@@ -288,6 +288,7 @@ static const char *g_white_prefix[] =
   "RCC_",
   "RTC_",             /* RTC_InitTypeDef, RTC_Enable, RTC_SetTime, etc. */
   "RTCIO_",
+  "RTIM_",            /* RTIM_TimeBaseInit, RTIM_Cmd, RTIM_CCxCmd, etc. */
   "SDM32K_",          /* SDM32K_Enable */
   "SSI_",             /* SSI_Init, SSI_SetRole, SSI_WriteData, etc. */
   "Set_OSC131_",      /* Set_OSC131_STATE — Ameba SDK RTC accessor */

@@ -85,4 +85,19 @@ config AMEBA_SPI
 		fwlib register layer and drives the DesignWare SSI block in polling
 		mode.
 
+config AMEBA_PWM
+	bool "PWM"
+	default n
+	select PWM
+	---help---
+		Expose the Ameba PWM timer as a NuttX PWM output at /dev/pwm0.  The
+		chip has a single PWM-capable timer whose one time base feeds several
+		compare channels, so every channel shares one frequency and each
+		carries its own duty cycle (set CONFIG_PWM_NCHANNELS to the number of
+		channels used).  The board selects which channel is routed to which
+		pad in its bring-up code.
+
+		The driver (arch/arm/src/common/ameba/ameba_pwm.c) sits on the SDK
+		fwlib RTIM register layer and runs in polling task context.
+
 endmenu # Ameba Peripheral Support
