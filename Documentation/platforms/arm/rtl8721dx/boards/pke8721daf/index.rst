@@ -41,6 +41,8 @@ Supported in this NuttX port:
   on the SDK fwlib register layer
 * SPI master buses exposed as ``/dev/spiN`` character devices, driven directly
   on the SDK fwlib register layer
+* PWM output exposed as a ``/dev/pwm0`` character device, driven directly on
+  the SDK fwlib timer register layer
 
 Buttons and LEDs
 ================
@@ -133,6 +135,23 @@ ROM, while the chip-select is driven as a plain GPIO. Exercise a bus with the
 tool::
 
     nsh> spi exch -b 1 -x 4 deadbeef     # full-duplex transfer on /dev/spi1
+
+pwm
+---
+
+Minimal NSH with the PWM driver and the ``pwm`` example
+(``examples/pwm``) enabled (no Wi-Fi). The board registers one timer at
+``/dev/pwm0`` (see ``boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_pwm.c``):
+TIM8 drives up to eight compare channels off one shared time base, so every
+channel shares one frequency and each carries its own duty cycle. The example
+table routes channel 1 to PB18 and channel 2 to PB19; edit it -- one pad per
+channel, ``AMEBA_PWM_PIN_NC`` for the unused ones -- to match a board's
+wiring. The pads use the same ``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the
+GPIO table and are muxed to the PWM function through the crossbar. Set
+``CONFIG_PWM_NCHANNELS`` to the number of channels used. Exercise it with the
+example::
+
+    nsh> pwm -d 25 -f 1000     # 1 kHz, 25% duty on /dev/pwm0
 
 Wi-Fi
 =====
