@@ -56,7 +56,9 @@
 
 #include "stm32_qspi.h"
 
-#define HAVE_N25QXXX_NXFFS
+#if defined(CONFIG_FS_NXFFS) && !defined(CONFIG_FS_LITTLEFS)
+#  define HAVE_N25QXXX_NXFFS
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -113,6 +115,31 @@ int stm32_n25qxxx_setup(void)
       return ret;
     }
 
+#endif
+
+#if !defined(CONFIG_FS_NXFFS) && defined(CONFIG_FS_LITTLEFS)
+  /* Register the MTD driver so that it can be accessed from the
+   * VFS.
+   */
+
+  ret = register_mtddriver("/dev/n25q", mtd_dev, 0755, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n",
+             ret);
+      return ret;
+    }
+
+  /* Mount the LittleFS file system */
+
+  ret = nx_mount("/dev/n25q", "/data", "littlefs", 0, "autoformat");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount LittleFS at /data: %d\n",
+             ret);
+      return ret;
+    }
 #endif
 
   return 0;
