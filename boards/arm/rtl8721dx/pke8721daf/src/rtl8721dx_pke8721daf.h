@@ -134,6 +134,19 @@ int rtl8721dx_spi_initialize(void);
 int rtl8721dx_pwm_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_ADC
+/****************************************************************************
+ * Name: rtl8721dx_adc_initialize
+ *
+ * Description:
+ *   Register the board's ADC channels at /dev/adc0
+ *   (boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_adc.c).
+ *
+ ****************************************************************************/
+
+int rtl8721dx_adc_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721DX_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

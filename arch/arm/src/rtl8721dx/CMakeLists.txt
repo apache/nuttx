@@ -60,6 +60,10 @@ if(CONFIG_AMEBA_PWM)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_pwm.c)
 endif()
 
+if(CONFIG_AMEBA_ADC)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_adc.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 

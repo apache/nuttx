@@ -70,6 +70,10 @@ ifeq ($(CONFIG_AMEBA_PWM),y)
 CHIP_CSRCS += ameba_pwm.c
 endif
 
+ifeq ($(CONFIG_AMEBA_ADC),y)
+CHIP_CSRCS += ameba_adc.c
+endif
+
 ############################################################################
 # Realtek RTL8721Dx SDK integration
 #
