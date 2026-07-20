@@ -211,54 +211,6 @@ should look like this::
     hmac sha256 success
     hmac sha256 success
 
-dropbear
---------
-
-This configuration brings up the `Dropbear <https://matt.ucc.asn.au/dropbear/dropbear.html>`__
-SSH server so that an NSH session can be reached over the network. It pulls in
-Wi-Fi station mode, the DHCP client, the WAPI tooling and ``/dev/urandom`` so the
-link is configured automatically at boot, and it persists the SSH host key and
-the user database on the SPIFFS partition mounted at ``/data``.
-
-The Wi-Fi credentials shipped in the defconfig are placeholders. Set your own
-SSID and passphrase before flashing::
-
-    $ make menuconfig
-    -> Application Configuration
-        -> Network Utilities
-            -> Network initialization (NETUTILS_NETINIT [=y])
-                -> WAPI Configuration
-
-
-When the board boots it joins the configured network, requests an address over
-DHCP and starts the Dropbear daemon. Check the assigned address with::
-
-    nsh> ifconfig
-    wlan0   Link encap:Ethernet HWaddr 84:f7:03:xx:xx:xx at RUNNING mtu 1504
-            inet addr:192.168.1.xx DRaddr:192.168.1.x Mask:255.255.255.0
-
-The first time the daemon runs it generates an ECDSA host key and stores it at
-``/data/dropbear_ecdsa_host_key`` (``CONFIG_NETUTILS_DROPBEAR_HOSTKEY_PATH``), and
-the user accounts are read from ``/data/passwd`` (``CONFIG_FSUTILS_PASSWD_PATH``).
-Because both files live on the persistent ``/data`` partition, the host key and
-the credentials survive reboots, so clients do not see a changing host key.
-
-Add a user from the board before connecting (the password file is created on the
-first ``useradd``)::
-
-    nsh> useradd admin mypassword
-
-From a host on the same network, open an SSH session and run NSH commands
-remotely::
-
-    $ ssh admin@192.168.1.xx
-    admin@192.168.1.xx's password:
-    nsh>
-
-Each session runs over a pseudo-terminal (``CONFIG_PSEUDOTERM``), and ``Ctrl-C``
-is forwarded to the remote NSH (``CONFIG_TTY_SIGINT``). The daemon keeps running
-after a session ends, so multiple clients can connect over time.
-
 efuse
 -----
 
