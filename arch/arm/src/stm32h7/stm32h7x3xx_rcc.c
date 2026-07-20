@@ -332,6 +332,12 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_CRYPTEN;
 #endif
 
+#ifdef CONFIG_STM32_HASH
+  /* Hash clock enable */
+
+  regval |= RCC_AHB2ENR_HASHEN;
+#endif
+
   putreg32(regval, STM32_RCC_AHB2ENR);   /* Enable peripherals */
 }
 
