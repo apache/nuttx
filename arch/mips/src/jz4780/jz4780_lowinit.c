@@ -37,6 +37,7 @@
 #include "mips_internal.h"
 
 #include "jz4780_lowinit.h"
+#include "jz4780_cache.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -95,6 +96,8 @@ static inline void jz4780_pbclk(void)
 
 void jz4780_lowinit(void)
 {
+  m32_size_cache();
+
   /* Configure peripheral clocking */
 
   jz4780_pbclk();

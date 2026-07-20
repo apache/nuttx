@@ -61,7 +61,7 @@ static void reboot_s(int sec)
 }
 
 /****************************************************************************
- * Function:  jzjz_timerisr
+ * Function:  jz_timerisr
  *
  * Description:
  *   The timer ISR will perform a variety of services for various portions

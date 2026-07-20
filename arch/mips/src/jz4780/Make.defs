@@ -26,7 +26,7 @@ HEAD_ASRC = jz4780_head.S
 
 # Common MIPS files
 
-CMN_ASRCS  = mips_syscall0.S fork.S mips_cache.S
+CMN_ASRCS  = mips_syscall0.S fork.S
 CMN_CSRCS += mips_allocateheap.c mips_copystate.c mips_createstack.c
 CMN_CSRCS += mips_doirq.c mips_exit.c mips_getintstack.c mips_initialize.c
 CMN_CSRCS += mips_initialstate.c mips_irq.c mips_lowputs.c
@@ -44,6 +44,10 @@ endif
 
 # Required JZ4780 files
 
-CHIP_ASRCS  =
+ifeq ($(CONFIG_ALLOW_BSD_COMPONENTS),y)
+CHIP_ASRCS  = mti_cache.S
+endif
+
 CHIP_CSRCS  = jz4780_lowinit.c jz4780_exception.c jz4780_decodeirq.c
 CHIP_CSRCS += jz4780_irq.c jz4780_timerisr.c jz4780_gpio.c
+CHIP_CSRCS += jz4780_cache.c
