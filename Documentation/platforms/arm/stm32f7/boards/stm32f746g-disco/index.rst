@@ -177,6 +177,60 @@ configuration. This configuration uses USART1 for the serial console.
 USART1 is connected to the ST-link virtual com inside board.h to remove
 the need of a extra serial connection to use this board.
 
+dropbear
+--------
+
+This configuration brings up the `Dropbear <https://matt.ucc.asn.au/dropbear/dropbear.html>`__
+SSH server so that an NSH session can be reached over the network. It pulls in
+the on-board Ethernet MAC, the DHCP client and ``/dev/urandom`` so the link is
+configured automatically at boot, and it persists the SSH host key and the
+user database on the board's on-board Micron N25Q QSPI NOR flash, mounted as
+LittleFS at ``/data``.
+
+Connect an Ethernet cable to a router/switch before powering on the board.
+When it boots it requests an address over DHCP and starts the Dropbear
+daemon. Check the assigned address with::
+
+    nsh> ifconfig
+    eth0    Link encap:Ethernet HWaddr 00:e0:de:ad:be:ef at RUNNING mtu 1486
+            inet addr:192.168.1.xx DRaddr:192.168.1.x Mask:255.255.255.0
+
+The first time the daemon runs it generates an ECDSA host key and stores it at
+``/data/dropbear_ecdsa_host_key`` (``CONFIG_NETUTILS_DROPBEAR_HOSTKEY_PATH``), and
+the user accounts are read from ``/data/passwd`` (``CONFIG_FSUTILS_PASSWD_PATH``).
+Because both files live on the persistent ``/data`` partition, the host key and
+the credentials survive reboots, so clients do not see a changing host key.
+
+Add a user from the board before connecting (the password file is created on the
+first ``useradd``)::
+
+    nsh> useradd admin mypassword
+
+From a host on the same network, open an SSH session and run NSH commands
+remotely::
+
+    $ ssh admin@192.168.1.xx
+    admin@192.168.1.xx's password:
+    nsh>
+
+Each session runs over a pseudo-terminal (``CONFIG_PSEUDOTERM``). The daemon
+keeps running after a session ends, so multiple clients can connect over time.
+
+This configuration also enables Dropbear's ``scp`` helper
+(``CONFIG_NETUTILS_DROPBEAR_SCP``), so files can be copied to and from the
+board from a host on the same network::
+
+    $ scp -O localfile.txt admin@192.168.1.xx:/data/localfile.txt
+    $ scp -O admin@192.168.1.xx:/data/localfile.txt .
+
+Only the legacy scp protocol is supported (no SFTP), so with OpenSSH 9.0 or
+newer the ``-O`` flag is required to force the client to use it.
+
+.. note:: This board's serial console (USART1, ``/dev/ttyACM0`` over the
+  on-board ST-LINK/V2-1 virtual COM port) remains available at the same time
+  as the SSH sessions and is useful for the initial ``useradd`` and for
+  recovery if the network is unreachable.
+
 lgvl
 ----
 
