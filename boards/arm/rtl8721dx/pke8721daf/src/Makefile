@@ -51,4 +51,13 @@ CSRCS += rtl8721dx_i2c.c
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
 endif
 
+ifeq ($(CONFIG_AMEBA_SPI),y)
+CSRCS += rtl8721dx_spi.c
+
+# The board SPI table pulls in the shared driver's public header from
+# arch/arm/src/common/ameba/, which is not on the default board include path.
+
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -69,4 +69,20 @@ config AMEBA_I2C
 		fwlib register layer and drives the DesignWare I2C block in polling
 		mode.
 
+config AMEBA_SPI
+	bool "SPI"
+	default n
+	select SPI
+	select SPI_DRIVER
+	select SPI_EXCHANGE
+	---help---
+		Expose the Ameba SPI controllers (SPI0/SPI1) as NuttX SPI master
+		buses at /dev/spiN.  The board selects which controller is used and
+		its CLK/MOSI/MISO/CS pads in its bring-up code; the chip select is
+		driven as a plain GPIO (software CS).
+
+		The driver (arch/arm/src/common/ameba/ameba_spi.c) sits on the SDK
+		fwlib register layer and drives the DesignWare SSI block in polling
+		mode.
+
 endmenu # Ameba Peripheral Support
