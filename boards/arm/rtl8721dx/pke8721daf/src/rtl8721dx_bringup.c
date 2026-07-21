@@ -178,6 +178,16 @@ int rtl8721dx_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_AMEBA_WDG
+  /* Register the board's watchdog at /dev/watchdog0. */
+
+  ret = rtl8721dx_wdg_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8721dx_wdg_initialize failed: %d\n", ret);
+    }
+#endif
+
   /* Install the inter-core HW IPC-semaphore RTOS hooks LAST -- after all the
    * flash / WHC bring-up above, and just before this (board_late_initialize)
    * path returns and nx_start() hands off to the init task.

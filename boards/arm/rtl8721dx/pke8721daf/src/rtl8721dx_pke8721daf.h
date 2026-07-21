@@ -160,6 +160,19 @@ int rtl8721dx_adc_initialize(void);
 int rtl8721dx_rtc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_WDG
+/****************************************************************************
+ * Name: rtl8721dx_wdg_initialize
+ *
+ * Description:
+ *   Register the board's watchdog at /dev/watchdog0
+ *   (boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_wdg.c).
+ *
+ ****************************************************************************/
+
+int rtl8721dx_wdg_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721DX_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

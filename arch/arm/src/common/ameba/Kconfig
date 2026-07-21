@@ -134,4 +134,19 @@ config AMEBA_RTC
 		day-of-year (no month/day register); the driver bridges that to the
 		NuttX month/day calendar with the libc UTC calendar routines.
 
+config AMEBA_WDG
+	bool "Watchdog"
+	default n
+	select WATCHDOG
+	---help---
+		Expose the Ameba system watchdog as a NuttX watchdog at
+		/dev/watchdog0 (start/stop/keepalive/settimeout, plus a capture
+		pre-timeout callback).  The timeout is programmed directly in
+		milliseconds.
+
+		The driver (arch/arm/src/common/ameba/ameba_wdg.c) sits on the SDK
+		fwlib WDG register layer.  The hardware cannot be halted once
+		enabled, so stop() arms the WDG early interrupt and refreshes the
+		counter from its handler to inhibit the reset.
+
 endmenu # Ameba Peripheral Support

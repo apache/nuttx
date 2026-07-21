@@ -299,6 +299,7 @@ static const char *g_white_prefix[] =
   "SYSTIMER_",
   "SYS_PLL_",         /* SYS_PLL_ClkGet — RTL8720F SPI ip_clk query */
   "UART_",
+  "WDG_",             /* WDG_Init, WDG_Refresh, WDG_INTConfig, etc. */
   "SystemCoreClock",  /* SystemCoreClock, SystemCoreClockUpdate */
   "cmse_",            /* ARM CMSE TrustZone intrinsics (arm_cmse.h) */
   "MQTTErrors",       /* apps/tools/netutils/mqttc/MQTT-C/include/mqtt.h */
