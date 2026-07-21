@@ -1837,7 +1837,8 @@ static int rpmsg_socket_ioctl(FAR struct socket *psock,
 static int rpmsg_socket_shutdown(FAR struct socket *psock, int how)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-  struct rpmsg_socket_shutdown_s msg;
+  FAR struct rpmsg_socket_shutdown_s *msg;
+  uint32_t len = sizeof(*msg);
   int ret;
 
   if (!conn->ept.rdev || atomic_read(&conn->unbind))
@@ -1847,16 +1848,36 @@ static int rpmsg_socket_shutdown(FAR struct socket *psock, int how)
 
   conn->how |= how;
 
-  msg.cmd = RPMSG_SOCKET_CMD_SHUTDOWN;
-  msg.how = how;
+  /* Reserve the tx buffer without holding recvlock, since it may block
+   * waiting for a free vring buffer.
+   */
 
-  ret = rpmsg_send(&conn->ept, &msg, sizeof(msg));
-  if (ret < 0)
+  msg = rpmsg_get_tx_payload_buffer(&conn->ept, &len, true);
+  if (msg == NULL)
     {
-      return ret;
+      return -ENOMEM;
     }
 
-  return OK;
+  DEBUGASSERT(len >= sizeof(*msg));
+  nxmutex_lock(&conn->recvlock);
+
+  /* See rpmsg_socket_wakeup() */
+
+  if (!is_rpmsg_ept_ready(&conn->ept) || atomic_read(&conn->unbind))
+    {
+      nxmutex_unlock(&conn->recvlock);
+      rpmsg_release_tx_buffer(&conn->ept, msg);
+      return -ENOTCONN;
+    }
+
+  msg->cmd = RPMSG_SOCKET_CMD_SHUTDOWN;
+  msg->how = how;
+  ret = rpmsg_send_offchannel_nocopy(&conn->ept, conn->ept.addr,
+                                     conn->ept.dest_addr, msg,
+                                     sizeof(*msg));
+
+  nxmutex_unlock(&conn->recvlock);
+  return ret < 0 ? ret : OK;
 }
 
 #ifdef CONFIG_NET_SOCKOPTS
