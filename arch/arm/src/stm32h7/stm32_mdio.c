@@ -179,7 +179,7 @@ static int stm32_c22_write(struct mdio_lowerhalf_s *dev, uint8_t phydev,
 
   regval |= (((uint32_t)phydev << ETH_MACMDIOAR_PA_SHIFT) &
             ETH_MACMDIOAR_PA_MASK);
-  regval |= (((uint32_t)phydev << ETH_MACMDIOAR_RDA_SHIFT) &
+  regval |= (((uint32_t)regaddr << ETH_MACMDIOAR_RDA_SHIFT) &
             ETH_MACMDIOAR_RDA_MASK);
   regval |= (ETH_MACMDIOAR_MB | ETH_MACMDIOAR_GOC_WRITE);
 
