@@ -14,6 +14,7 @@ name: Build
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
     paths-ignore:
       - "AUTHORS"
       - "CONTRIBUTING.md"
@@ -35,16 +36,104 @@ permissions:
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Edited runs do not request cancellation of an active code build.
+  # GitHub may still replace an older pending run in this concurrency group.
+  cancel-in-progress: ${{ github.event.action != 'edited' }}
 
 jobs:
+  # Gate heavy CI on dependency-changing edits.
+  Changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.gate.outputs.should_build }}
+    steps:
+      # Do not let PR code control its own edit gate.
+      - name: Checkout base-branch CI scripts
+        if: ${{ github.event_name == 'pull_request' && github.event.action == 'edited' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+          path: base-ci
+        continue-on-error: true
+      - name: Checkout PR CI scripts (fallback)
+        if: ${{ github.event_name == 'pull_request' && github.event.action == 'edited' }}
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+          path: pr-ci
+      - name: Decide whether to run CI
+        id: gate
+        shell: bash
+        env:
+          ACTION: ${{ github.event.action }}
+          NEW_BODY: ${{ github.event.pull_request.body }}
+          OLD_BODY: ${{ github.event.changes.body.from }}
+          BODY_CHANGE: ${{ toJSON(github.event.changes.body) }}
+          BASE_CHANGE: ${{ toJSON(github.event.changes.base) }}
+        run: |
+          set -euo pipefail
+
+          if [ "${ACTION:-}" != "edited" ]; then
+            echo "Event '${ACTION:-push}': running CI."
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$BASE_CHANGE" != "null" ]; then
+            echo "::notice::PR base branch changed; running CI."
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ "$BODY_CHANGE" = "null" ]; then
+            echo "::notice::PR edited but body unchanged; no code/dependency change, skipping CI."
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          PARSER="pr-ci/.github/scripts/depends_on.py"
+          if [ -f "base-ci/.github/scripts/depends_on.py" ]; then
+            PARSER="base-ci/.github/scripts/depends_on.py"
+            echo "Using base-branch parser for the gate."
+          else
+            echo "::notice::Base branch has no depends_on.py yet; using PR parser for the gate (bootstrap)."
+          fi
+
+          # Include status so invalid declarations also retrigger reporting.
+          NEW_STATE="$(PR_BODY="$NEW_BODY" python3 "$PARSER" --print-state)"
+          OLD_STATE="$(PR_BODY="$OLD_BODY" python3 "$PARSER" --print-state)"
+          if [ "$NEW_STATE" != "$OLD_STATE" ]; then
+            echo "depends-on state changed; running CI."
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No depends-on change on this edit; no code change, skipping CI."
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # Fetch the source from nuttx and nuttx-apps repos
   Fetch-Source:
+    needs: Changes
+    if: ${{ needs.Changes.outputs.should_build == 'true' }}
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout CI scripts
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
       - name: Determine Target Branches
         id: gittargets
         shell: bash
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REPORT_PATH: depends-on-report/result.json
         run: |
           OS_REF=""
           APPS_REF=""
@@ -91,6 +180,11 @@ jobs:
             esac
           fi
 
+          # Release and backport PRs ignore dependencies.
+          if [ -n "$PR_BODY" ] && [ "$GITHUB_BASE_REF" = "master" ]; then
+            python3 .github/scripts/depends_on.py --github-output
+          fi
+
           echo "os_ref=$OS_REF" >> $GITHUB_OUTPUT
           echo "apps_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
@@ -111,6 +205,126 @@ jobs:
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
+
+      - name: Apply depends-on PRs
+        if: ${{ steps.gittargets.outputs.depends_on != '' }}
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+
+          # Pass only fixed error codes to the trusted comment workflow.
+          mark_failed() {
+          echo "::error::could not apply $1 ($2)"
+          python3 - "$2" <<'PY'
+          import json, sys
+          p = "depends-on-report/result.json"
+          try:
+              d = json.load(open(p))
+          except Exception:
+              d = {"version": 1, "pr_number": None, "head_sha": None, "dependencies": [], "warnings": []}
+          d["status"] = "failed"
+          d["error_code"] = sys.argv[1]
+          open(p, "w").write(json.dumps(d))
+          PY
+          }
+
+          # Parse before the loop so process substitution cannot hide errors.
+          if ! python3 - > depends-on-report/deps.tsv <<'PY'
+          import json
+          with open("depends-on-report/result.json", encoding="utf-8") as f:
+              d = json.load(f)
+          for x in d["dependencies"]:
+              print("%s\t%d" % (x["repo"], x["number"]))
+          PY
+          then
+            echo "::error::could not read the dependency report"
+            mark_failed "depends-on" "report_parse_failed"; exit 1
+          fi
+
+          : > depends-on-report/applied.tsv
+
+          while IFS=$'\t' read -r DEP_REPO DEP_PR_NUM; do
+            [ -n "$DEP_REPO" ] || continue
+            DEP="${DEP_REPO}/pull/${DEP_PR_NUM}"
+
+            case "$DEP_REPO" in
+              "apache/nuttx") REPO_PATH="sources/nuttx" ;;
+              "apache/nuttx-apps")  REPO_PATH="sources/apps" ;;
+              *)
+                echo "::error::Unsupported dependency repo: $DEP_REPO"
+                mark_failed "$DEP" "unsupported_repo"; exit 1 ;;
+            esac
+
+            echo "Applying dependency ${DEP}"
+            if [ -f "$REPO_PATH/.git/shallow" ]; then
+              git -C "$REPO_PATH" fetch --unshallow origin || true
+            fi
+            if ! git -C "$REPO_PATH" fetch origin "pull/${DEP_PR_NUM}/head:dep-${DEP_PR_NUM}"; then
+              echo "::error::Could not fetch ${DEP} (the PR may not exist)."
+              mark_failed "$DEP" "fetch_failed"; exit 1
+            fi
+
+            DEP_SHA=$(git -C "$REPO_PATH" rev-parse "dep-${DEP_PR_NUM}")
+            printf '%s\t%s\t%s\n' "$DEP_REPO" "$DEP_PR_NUM" "$DEP_SHA" >> depends-on-report/applied.tsv
+
+            # Stop on unrelated histories; HEAD..dep would otherwise include
+            # every dependency commit and could cherry-pick unrelated changes.
+            COMMON_BASE=$(git -C "$REPO_PATH" merge-base "dep-${DEP_PR_NUM}" HEAD || true)
+            if [ -z "$COMMON_BASE" ]; then
+              echo "::error::Could not find common base for ${DEP}"
+              mark_failed "$DEP" "no_common_base"; exit 1
+            fi
+
+            COMMITS=$(git -C "$REPO_PATH" rev-list --reverse "HEAD..dep-${DEP_PR_NUM}") || {
+              echo "::error::Could not list commits for ${DEP}"
+              mark_failed "$DEP" "rev_list_failed"; exit 1
+            }
+
+            if [ -z "$COMMITS" ]; then
+              echo "Dependency ${DEP} is already included"
+              continue
+            fi
+
+            # shellcheck disable=SC2086
+            if ! git -C "$REPO_PATH" cherry-pick $COMMITS; then
+              echo "::error::cherry-pick failed for ${DEP}."
+              echo "::error::If your PR contains merge commits, please rebase instead of merge."
+              git -C "$REPO_PATH" cherry-pick --abort || true
+              mark_failed "$DEP" "cherry_pick_conflict"; exit 1
+            fi
+          done < depends-on-report/deps.tsv
+
+          python3 - <<'PY'
+          import json
+          shas = {}
+          try:
+              with open("depends-on-report/applied.tsv", encoding="utf-8") as f:
+                  for line in f:
+                      p = line.rstrip("\n").split("\t")
+                      if len(p) == 3:
+                          shas[(p[0], p[1])] = p[2]
+          except FileNotFoundError:
+              pass
+          with open("depends-on-report/result.json", encoding="utf-8") as f:
+              d = json.load(f)
+          for dep in d.get("dependencies", []):
+              key = (dep.get("repo"), str(dep.get("number")))
+              if key in shas:
+                  dep["head_sha"] = shas[key]
+          with open("depends-on-report/result.json", "w", encoding="utf-8") as f:
+              json.dump(d, f)
+          PY
+
+      # Apply failures rewrite the report file; the step output remains "ok".
+      - name: Upload depends-on report
+        if: ${{ always() && (steps.gittargets.outputs.status == 'ok' || steps.gittargets.outputs.status == 'invalid') }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: depends-on-report
+          path: depends-on-report/
 
       - name: Tar sources
         run: tar zcf sources.tar.gz sources

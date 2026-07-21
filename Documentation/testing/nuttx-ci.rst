@@ -108,6 +108,80 @@ The name of this workflow is deceiving, as it does not only build
 configurations, but also normalizes them and runs :doc:`NTFC </testing/ntfc>`
 tests on architectures that support it.
 
+Pull Request Dependencies
+-------------------------
+
+NuttX and ``nuttx-apps`` are built together. A change that spans both
+repositories may therefore need to test two pull requests together before
+either one is merged. A pull request targeting ``master`` can declare same- or
+cross-repository dependencies in its description.
+
+The recommended form is one dependency per line:
+
+.. code-block:: text
+
+   Depends-On: https://github.com/apache/nuttx-apps/pull/1234
+   Depends-On: https://github.com/apache/nuttx/pull/5678
+
+Alternatively, multiple dependencies can use a single bracket list:
+
+.. code-block:: text
+
+   Depends-On: [apache/nuttx-apps/pull/1234 https://github.com/apache/nuttx/pull/5678]
+
+The ``Depends-On:`` marker is case-insensitive; ``Depends-On:``,
+``depends-on:``, and mixed-case spellings are equivalent. This documentation
+uses ``Depends-On:`` as the canonical form.
+
+References may use either a complete ``https://github.com/...`` URL or the
+short ``owner/repository/pull/number`` form, and the forms may be mixed. Each
+accepted reference must identify a pull request in ``apache/nuttx`` or
+``apache/nuttx-apps``. Other tokens are ignored; a declaration is invalid only
+when a ``Depends-On:`` marker is present but no valid dependency can be parsed.
+Multiple declarations are applied in their listed order, and duplicate
+references are applied only once. Each declaration must remain on one line;
+Markdown bullet-list continuations are not supported. Pull requests without a
+``Depends-On:`` declaration retain the normal CI source selection.
+Declarations in release and backport pull requests are ignored because
+dependencies are applied only when the target branch is ``master``.
+
+The ``Fetch-Source`` job fetches each valid dependency's exact head SHA and
+cherry-picks its commits into the corresponding checkout before the existing
+build matrix runs. Invalid declarations are not applied: CI continues with the
+normal source selection and posts a warning that the declaration could not be
+parsed. If a valid dependency cannot be fetched, has no common history, its
+commit list cannot be determined, or it causes a cherry-pick conflict,
+``Fetch-Source`` fails instead of silently testing without the requested
+dependency.
+
+When a valid dependency report is available, the follow-up comment reports one
+of three outcomes:
+
+* successfully applied dependencies and their fetched head SHAs (abbreviated in
+  the comment)
+* a declaration from which no valid dependency could be parsed
+* valid dependencies that could not be applied and the failure reason
+
+The write-capable follow-up workflow does not execute fork code. It validates
+the untrusted report's structure, repository allow-list, run and current PR
+head binding, and fixed rendering fields before commenting. These checks make
+posting the report safe, but do not independently attest that the dependency
+was applied; the comment reflects the result produced by the read-only Build
+workflow.
+
+Editing the pull request description triggers the CI dependency gate. The
+resource-intensive build jobs run again when the base branch or ordered parsed
+dependency state changes, so reordering dependencies also triggers a build.
+Unrelated description edits run only the gate and do not request cancellation
+of an already-running Build. GitHub may still replace an older pending run in
+the same concurrency group. Updating a dependency pull request does not
+automatically trigger the initiating pull request, so its CI must be rerun to
+test the new dependency head.
+
+The combined result belongs to the initiating pull request. It does not set a
+status on dependency pull requests, merge them automatically, or replace the
+need to coordinate their merge order.
+
 The steps executed in the build workflow are:
 
 1. Fetch source: checks out ``nuttx`` and ``nuttx-apps`` repos. The source files

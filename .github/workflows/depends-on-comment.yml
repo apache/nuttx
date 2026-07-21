@@ -1,0 +1,208 @@
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Posts validated dependency reports without checking out PR code.
+# workflow_run isolates write permission and uses the default-branch workflow.
+
+name: Depends-On Comment
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types: [completed]
+
+permissions:
+  actions: read          # download an artifact from the triggering run
+  pull-requests: write
+
+# Keep this artifact allow-list in sync with build.yml.
+env:
+  NUTTX_REPO: apache/nuttx
+  APPS_REPO: apache/nuttx-apps
+
+jobs:
+  comment:
+    if: ${{ github.event.workflow_run.event == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download depends-on report
+        id: dl
+        uses: actions/download-artifact@v8
+        with:
+          name: depends-on-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: report
+        continue-on-error: true
+
+      - name: Comment on the PR
+        if: ${{ steps.dl.outcome == 'success' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const allow = [process.env.NUTTX_REPO, process.env.APPS_REPO].filter(Boolean);
+
+            // Validate the untrusted Build artifact's structure and safe
+            // rendering fields without executing fork code.
+            let report;
+            try {
+              report = JSON.parse(fs.readFileSync('report/result.json', 'utf8'));
+            } catch (e) {
+              core.info('No valid depends-on report; nothing to comment.');
+              return;
+            }
+
+            if (report.version !== 1) {
+              core.info('Unexpected report version; skipping.');
+              return;
+            }
+            const status = report.status;
+            if (status !== 'ok' && status !== 'invalid' && status !== 'failed') {
+              core.info(`Report status='${status}'; nothing to comment.`);
+              return;
+            }
+
+            // Match the Python parser's numeric and repository limits. Reject
+            // the whole report instead of silently dropping unsafe entries.
+            const isSafeNumber = (n) => Number.isSafeInteger(n) && n > 0;
+            const rawDeps = Array.isArray(report.dependencies) ? report.dependencies : null;
+            if (rawDeps === null) {
+              core.info('Report dependencies are not an array; skipping.');
+              return;
+            }
+            const deps = rawDeps.filter((d) => d && typeof d.repo === 'string'
+              && allow.includes(d.repo) && isSafeNumber(d.number));
+            if (deps.length !== rawDeps.length) {
+              core.info('Report contains an invalid dependency entry; skipping.');
+              return;
+            }
+            const keys = deps.map((d) => `${d.repo}#${d.number}`);
+            if (new Set(keys).size !== keys.length) {
+              core.info('Report contains duplicate dependencies; skipping.');
+              return;
+            }
+            if (status === 'invalid' && deps.length !== 0) {
+              core.info('status=invalid but dependencies are present; skipping.');
+              return;
+            }
+            const isFullSha = (s) => typeof s === 'string' && /^[0-9a-f]{40}$/i.test(s);
+            if (status === 'ok' && !deps.every((d) => isFullSha(d.head_sha))) {
+              core.info('status=ok but a full dependency head SHA is missing; skipping.');
+              return;
+            }
+
+            // Bind the report to both the triggering run and the PR's current
+            // head. Stale, cancelled, or mismatched reports must not comment.
+            const headSha = context.payload.workflow_run.head_sha;
+            if (report.head_sha !== headSha) {
+              core.info('Report head_sha does not match workflow_run head_sha; skipping.');
+              return;
+            }
+            const claimed = Number(report.pr_number);
+
+            let prNum = null;
+            if (Number.isSafeInteger(claimed) && claimed > 0) {
+              try {
+                const { data: pr } = await github.rest.pulls.get({
+                  owner, repo, pull_number: claimed });
+                if (pr.head.sha === headSha) prNum = claimed;
+              } catch (e) {
+                prNum = null;
+              }
+            }
+            if (prNum === null) {
+              core.info(
+                "workflow_run head_sha does not match the claimed PR's current " +
+                'head (stale/cancelled run, or artifact mismatch); skipping comment.');
+              return;
+            }
+
+            // Preserve one idempotent comment per Build run.
+            const runId = context.payload.workflow_run.id;
+            const marker = `<!-- nuttx-depends-on-bot run-${runId} -->`;
+            const runUrl = context.payload.workflow_run.html_url;
+            const shortSha = (s) =>
+              (typeof s === 'string' && /^[0-9a-f]{7,40}$/i.test(s)) ? ` @ ${s.slice(0, 10)}` : '';
+
+            let body;
+            if (status === 'ok') {
+              if (deps.length === 0) {
+                core.info('status=ok but no valid dependencies after validation; skipping.');
+                return;
+              }
+              const list = deps
+                .map((d) => `- https://github.com/${d.repo}/pull/${d.number}${shortSha(d.head_sha)}`)
+                .join('\n');
+              body =
+                `${marker}\n` +
+                `### 🔗 Cross-repo PR dependencies\n\n` +
+                `The read-only Build run reported the following dependent ` +
+                `PR(s) and fetched head SHA(s):\n\n` +
+                `${list}\n\n` +
+                `CI run: ${runUrl}`;
+            } else if (status === 'failed') {
+              if (deps.length === 0) {
+                core.info('status=failed but no valid dependencies after validation; skipping.');
+                return;
+              }
+              const list = deps
+                .map((d) => `- https://github.com/${d.repo}/pull/${d.number}${shortSha(d.head_sha)}`)
+                .join('\n');
+              // Render only fixed text selected by an allowed error code.
+              const REASONS = {
+                fetch_failed: 'the dependency PR could not be fetched (it may not exist)',
+                no_common_base: 'no common base with the dependency PR',
+                rev_list_failed: 'could not determine the dependency commits',
+                cherry_pick_conflict: 'cherry-pick failed (if your PR has merge commits, rebase instead)',
+                unsupported_repo: 'the dependency repository is not supported',
+                report_parse_failed: 'the dependency report could not be read',
+              };
+              const code = typeof report.error_code === 'string' ? report.error_code : '';
+              const reason = REASONS[code] ? `\n\nReason: ${REASONS[code]}` : '';
+              body =
+                `${marker}\n` +
+                `### ❌ Cross-repo dependency could not be applied\n\n` +
+                `The Build report says the declared dependency PR(s) could not ` +
+                `be applied, so CI did **not** run against the combined code:\n\n` +
+                `${list}${reason}\n\n` +
+                `CI run: ${runUrl}`;
+            } else {
+              const example = `depends-on: [${allow[0] || 'owner/repo'}/pull/<N> ` +
+                `${allow[1] || 'owner/repo'}/pull/<M>]`;
+              body =
+                `${marker}\n` +
+                `### ⚠️ \`depends-on\` could not be parsed\n\n` +
+                `A \`depends-on:\` line was found in the PR description, but no ` +
+                `valid dependency was parsed. Supported repositories: ` +
+                `\`${allow.join('`, `')}\`; the PR id must be numeric.\n\n` +
+                `Expected format:\n\n\`\`\`\n${example}\n\`\`\`\n\n` +
+                `CI run: ${runUrl}`;
+            }
+
+            // Update only this run's bot comment; otherwise create one.
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number: prNum, per_page: 100 });
+            const existing = comments.find((c) =>
+              c.user && c.user.type === 'Bot' && c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body });
+              core.info(`Updated this run's comment on PR #${prNum}.`);
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: prNum, body });
+              core.info(`Created a new comment on PR #${prNum}.`);
+            }
