@@ -326,7 +326,11 @@ struct uart_dev_s
   /* State data */
 
   uint8_t              open_count;   /* Number of times the device has been opened */
-  uint8_t              escape;       /* Number of the character to be escaped */
+  uint8_t              escape;       /* VT100/ANSI escape sequence echo-
+                                       * suppression state (see the
+                                       * UART_ESCAPE_* values used in
+                                       * uart_readv())
+                                       */
 #ifdef CONFIG_SERIAL_REMOVABLE
   volatile bool        disconnected; /* true: Removable device is not connected */
 #endif

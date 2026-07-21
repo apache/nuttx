@@ -55,6 +55,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* States for the local-echo VT100/ANSI escape sequence detector used by
+ * pty_read() below (dev->pd_escape).  This mirrors the equivalent state
+ * machine in drivers/serial/serial.c (uart_readv()) -- see the comment
+ * there for the full rationale.  It does not interpret the sequence, it
+ * only decides how many bytes to swallow from the local echo; the
+ * sequence bytes themselves are still delivered to the reader
+ * unmodified either way.
+ */
+
+#define UART_ESCAPE_NONE  0  /* Not in an escape sequence */
+#define UART_ESCAPE_START 1  /* Saw ESC, waiting for '[', 'O', or other */
+#define UART_ESCAPE_CSI   2  /* Saw "ESC [", consuming CSI bytes */
+#define UART_ESCAPE_SS3   3  /* Saw "ESC O", waiting for the final byte */
+
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_DEV_PTY_NPOLLWAITERS
@@ -80,7 +94,10 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
-  uint8_t pd_escape;            /* Number of the character to be escaped */
+  uint8_t pd_escape;            /* Escape sequence echo-suppression state
+                                  * (see the UART_ESCAPE_* values used in
+                                  * pty_read())
+                                  */
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   pid_t pd_pid;                 /* Thread PID to receive signals (-1 if none) */
 #endif
@@ -480,29 +497,58 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
         {
           ch = buffer[i];
 
-          /* Check for the beginning of a VT100 escape sequence, 3 byte */
+          /* Detect a VT100/ANSI escape sequence (CSI "ESC [ ... <final>"
+           * or SS3 "ESC O <final>") so it can be swallowed from the
+           * local echo below.  See the UART_ESCAPE_* comment above.
+           */
 
           if (ch == ASCII_ESC)
             {
-              /* Mark that we should skip 2 more bytes */
-
-              dev->pd_escape = 2;
+              dev->pd_escape = UART_ESCAPE_START;
               continue;
             }
-          else if (dev->pd_escape == 2 && ch != ASCII_LBRACKET)
+          else if (dev->pd_escape == UART_ESCAPE_START)
             {
-              /* It's not an <esc>[x 3 byte sequence, show it */
-
-              dev->pd_escape = 0;
-            }
-          else if (dev->pd_escape > 0)
-            {
-              /* Skipping character count down */
-
-              if (--dev->pd_escape > 0)
+              if (ch == ASCII_LBRACKET)
                 {
+                  dev->pd_escape = UART_ESCAPE_CSI;
                   continue;
                 }
+              else if (ch == ASCII_O)
+                {
+                  dev->pd_escape = UART_ESCAPE_SS3;
+                  continue;
+                }
+
+              /* Not CSI or SS3 -- an unrecognized two-byte "ESC x"
+               * sequence.  Fall through and consider 'x' for the echo
+               * batch normally, as before.
+               */
+
+              dev->pd_escape = UART_ESCAPE_NONE;
+            }
+          else if (dev->pd_escape == UART_ESCAPE_CSI)
+            {
+              /* Consuming CSI parameter/intermediate bytes (0x20-0x3f);
+               * the sequence ends with exactly one final byte in
+               * 0x40-0x7e.
+               */
+
+              if (ch >= 0x40 && ch <= 0x7e)
+                {
+                  dev->pd_escape = UART_ESCAPE_NONE;
+                }
+
+              continue;
+            }
+          else if (dev->pd_escape == UART_ESCAPE_SS3)
+            {
+              /* The byte following "ESC O" is always the final (and
+               * only) byte.
+               */
+
+              dev->pd_escape = UART_ESCAPE_NONE;
+              continue;
             }
 
           /* Echo if the character in batch */
