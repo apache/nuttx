@@ -1459,6 +1459,19 @@ An example usage:
    hello
    nsh>
 
+txmorse
+-------
+
+This is a configuration with :doc:`the Morse transmitter example
+</applications/examples/txmorse/index>` using the :doc:`Morsey library
+</applications/audioutils/morsey/index>`.
+
+.. code:: console
+
+   nsh> txmorse "sos sos sos"
+    ... --- .../... --- .../... --- ...
+   nsh>
+
 udgram
 ------
 
