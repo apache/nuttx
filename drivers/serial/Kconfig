@@ -314,6 +314,17 @@ config SERIAL_TERMIOS
 		Note: other software settings (echo, \r\n<->\n, break, tcflush)
 		are always supported.
 
+config SERIAL_TXBULK
+	bool "Bulk TX buffer copy"
+	default !DEFAULT_SMALL
+	---help---
+		Copy whole runs of raw output into the TX buffer with memcpy()
+		instead of one byte at a time.  Roughly doubles the write()
+		throughput on slow cores at the cost of about 150 bytes of
+		code.  Only used on non-console ports with no output
+		post-processing and no echo; every other case keeps the
+		byte-wise path.
+
 config TTY_LAUNCH
 	bool "Enable feature TTY launch program"
 	depends on SCHED_HPWORK
