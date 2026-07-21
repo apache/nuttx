@@ -1480,6 +1480,9 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
 {
   FAR struct inode *inode    = filep->f_inode;
   FAR uart_dev_t   *dev      = inode->i_private;
+  FAR const char   *segbuf   = NULL;
+  size_t            seglen   = 0;
+  size_t            nseg     = 0;
   ssize_t           nwritten;
   ssize_t           buflen;
   bool              oktoblock;
@@ -1554,9 +1557,22 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
    */
 
   uart_disabletxint(dev);
-  for (; buflen; uio_advance(uio, 1), buflen--)
+  for (; buflen; buflen--, nseg++)
     {
-      uio_copyto(uio, 0, &ch, 1);
+      if (nseg >= seglen)
+        {
+          /* Consume the current segment and take a pointer to the next.
+           * uio_advance() steps over any zero-length iovec.
+           */
+
+          uio_advance(uio, nseg);
+          segbuf = (FAR const char *)uio->uio_iov->iov_base +
+                   uio->uio_offset_in_iov;
+          seglen = uio->uio_iov->iov_len - uio->uio_offset_in_iov;
+          nseg   = 0;
+        }
+
+      ch  = segbuf[nseg];
       ret = OK;
 
       /* Do output post-processing */
@@ -1630,6 +1646,10 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
           break;
         }
     }
+
+  /* Consume the bytes that were successfully queued */
+
+  uio_advance(uio, nseg);
 
   if (dev->xmit.head != dev->xmit.tail)
     {
