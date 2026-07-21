@@ -173,6 +173,19 @@ int rtl8721dx_rtc_initialize(void);
 int rtl8721dx_wdg_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_TIMER
+/****************************************************************************
+ * Name: rtl8721dx_timer_initialize
+ *
+ * Description:
+ *   Register the board's timers at /dev/timer0 (TIM1) and /dev/timer1
+ *   (TIM2) (boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_timer.c).
+ *
+ ****************************************************************************/
+
+int rtl8721dx_timer_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721DX_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize
