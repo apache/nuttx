@@ -82,6 +82,10 @@ ifeq ($(CONFIG_AMEBA_WDG),y)
 CHIP_CSRCS += ameba_wdg.c
 endif
 
+ifeq ($(CONFIG_AMEBA_TIMER),y)
+CHIP_CSRCS += ameba_timer.c
+endif
+
 ############################################################################
 # Realtek RTL8721Dx SDK integration
 #

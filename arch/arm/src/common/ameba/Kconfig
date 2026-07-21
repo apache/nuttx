@@ -149,4 +149,21 @@ config AMEBA_WDG
 		enabled, so stop() arms the WDG early interrupt and refreshes the
 		counter from its handler to inhibit the reset.
 
+config AMEBA_TIMER
+	bool "Timer"
+	default n
+	select TIMER
+	---help---
+		Expose the Ameba general-purpose timers as NuttX timer devices at
+		/dev/timerN (start/stop/settimeout/getstatus, plus a periodic
+		expiration callback).  The timeout is programmed directly in
+		microseconds.
+
+		The driver (arch/arm/src/common/ameba/ameba_timer.c) is a
+		parameterised lower half sitting on the SDK fwlib RTIM register
+		layer; the board picks which of the twelve on-chip timers to expose
+		via the per-chip instance table.  On the pke8721daf /dev/timer0 is
+		TIM1 and /dev/timer1 is TIM2, both 32.768 kHz basic timers.  TIM0
+		is reserved by the ROM as the system timer and is not exposed.
+
 endmenu # Ameba Peripheral Support

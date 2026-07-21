@@ -54,6 +54,10 @@ if(CONFIG_AMEBA_WDG)
   list(APPEND SRCS rtl8721dx_wdg.c)
 endif()
 
+if(CONFIG_AMEBA_TIMER)
+  list(APPEND SRCS rtl8721dx_timer.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 if(CONFIG_AMEBA_GPIO
@@ -63,7 +67,8 @@ if(CONFIG_AMEBA_GPIO
    OR CONFIG_AMEBA_PWM
    OR CONFIG_AMEBA_ADC
    OR CONFIG_AMEBA_RTC
-   OR CONFIG_AMEBA_WDG)
+   OR CONFIG_AMEBA_WDG
+   OR CONFIG_AMEBA_TIMER)
   # The board pin/UART tables pull in the shared driver's public headers from
   # arch/arm/src/common/ameba/, not on the default board include path.
   target_include_directories(board

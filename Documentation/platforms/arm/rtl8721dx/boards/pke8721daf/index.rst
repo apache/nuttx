@@ -49,6 +49,8 @@ Supported in this NuttX port:
   alarm support, driven directly on the SDK fwlib register layer
 * On-chip watchdog exposed as a ``/dev/watchdog0`` character device, driven
   directly on the SDK fwlib register layer
+* General-purpose timers exposed as ``/dev/timer0`` and ``/dev/timer1``
+  character devices, driven directly on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -198,6 +200,20 @@ has no board wiring (it is an internal timer). Exercise it with the example,
 which opens the device, sets a timeout, and pings it::
 
     nsh> wdog                            # run the watchdog example
+
+timer
+-----
+
+Minimal NSH with the on-chip general-purpose timer driver and the ``timer``
+example enabled (no Wi-Fi). Two 32-bit basic timers clocked at 32.768 kHz are
+registered from the board bring-up
+(``boards/arm/rtl8721dx/pke8721daf/src/rtl8721dx_timer.c``) as ``/dev/timer0``
+(TIM1) and ``/dev/timer1`` (TIM2); they have no board wiring (they are
+internal). TIM0 is reserved by the boot ROM as the system timer and is not
+exposed. Exercise a device with the example, which sets an interval and counts
+the update interrupts::
+
+    nsh> timer -d /dev/timer0            # run the timer example on TIM1
 
 Wi-Fi
 =====
