@@ -278,6 +278,8 @@ struct nrf52_usbdev_s
   bool                    dmanow;        /* DMA transfer pending */
   uint16_t                dmaepinwait;   /* EP IN waiting for DMA */
   uint16_t                dmaepoutwait;  /* EP OUT waitning for DMA */
+  uint16_t                epinflight;    /* EP IN packet armed, awaiting
+                                          * host read (EPDATASTATUS) */
 
   /* E0 SETUP data buffering.
    *
@@ -1054,6 +1056,22 @@ static void nrf52_epin_transfer(struct nrf52_ep_s *privep, uint8_t *buf,
 
   while (nrf52_getreg(NRF52_USBD_EVENTS_ENDEPIN(privep->epphy)) == 0 &&
          nrf52_getreg(NRF52_USBD_EVENTS_USBRESET) == 0);
+
+  /* For data endpoints the EasyDMA transfer into the endpoint buffer is now
+   * complete (busy-wait above), so errata 199 no longer applies. Clear the
+   * ENDEPIN event and release the DMA lock right away so that transfers on
+   * other endpoints can start without waiting for a separate ENDEPIN
+   * interrupt round-trip. Re-arming of this endpoint is prevented
+   * separately by priv->epinflight until the host reads the packet. EP0 is
+   * left to the normal interrupt flow (its control state machine depends on
+   * the ENDEPIN interrupt).
+   */
+
+  if (privep->epphy != EP0)
+    {
+      nrf52_putreg(0, NRF52_USBD_EVENTS_ENDEPIN(privep->epphy));
+      nrf52_startdma_ack(priv);
+    }
 }
 
 /****************************************************************************
@@ -1146,6 +1164,18 @@ static void nrf52_epin_request(struct nrf52_usbdev_s *priv,
       return;
     }
 
+  /* If a packet is already armed on this data endpoint and is still waiting
+   * to be read by the host, do not overwrite the endpoint buffer. The next
+   * packet is sent from nrf52_epdatainterrupt() once the host has read this
+   * one (EPDATASTATUS).
+   */
+
+  if (privep->epphy != EP0 &&
+      (priv->epinflight & (1 << privep->epphy)) != 0)
+    {
+      return;
+    }
+
   /* Check the request from the head of the endpoint request queue */
 
   privreq = nrf52_rqpeek(privep);
@@ -1188,6 +1218,16 @@ static void nrf52_epin_request(struct nrf52_usbdev_s *priv,
       buf = privreq->req.buf + privreq->req.xfrd;
       nrf52_epin_transfer(privep, buf, nbytes);
 
+      /* Mark the endpoint as having a packet awaiting host read. This must
+       * be set before nrf52_req_complete() below, which may re-enter this
+       * function through the class driver's completion callback.
+       */
+
+      if (privep->epphy != EP0)
+        {
+          priv->epinflight |= (1 << privep->epphy);
+        }
+
       /* Update for the next time through the loop */
 
       privreq->req.xfrd += nbytes;
@@ -1198,9 +1238,16 @@ static void nrf52_epin_request(struct nrf52_usbdev_s *priv,
 
       nrf52_epin_transfer(privep, NULL, 0);
 
-      /* ACK zero-length DMA transfer right away */
+      if (privep->epphy != EP0)
+        {
+          priv->epinflight |= (1 << privep->epphy);
+        }
+      else
+        {
+          /* ACK zero-length DMA transfer right away */
 
-      nrf52_startdma_ack(priv);
+          nrf52_startdma_ack(priv);
+        }
     }
 
   /* Has all the request data been sent? */
@@ -1610,6 +1657,13 @@ static void nrf52_usbreset(struct nrf52_usbdev_s *priv)
   priv->epavail[0] = NRF52_EP_AVAILABLE;
   priv->epavail[1] = NRF52_EP_AVAILABLE;
 
+  /* Reset DMA and endpoint in-flight state */
+
+  priv->dmanow      = false;
+  priv->dmaepinwait = 0;
+  priv->dmaepoutwait = 0;
+  priv->epinflight  = 0;
+
   /* Disable all end points */
 
   for (i = 0; i < NRF52_NENDPOINTS ; i++)
@@ -1893,6 +1947,12 @@ static void nrf52_epdatainterrupt(struct nrf52_usbdev_s *priv)
 
       if (datastatus & USBD_EPDATASTATUS_EPIN(epno))
         {
+          /* The host has read the armed packet, so the endpoint buffer can
+           * be refilled with the next packet.
+           */
+
+          priv->epinflight &= ~(1 << epno);
+
           privep = &priv->epin[epno];
           nrf52_epin_request(priv, privep);
         }
