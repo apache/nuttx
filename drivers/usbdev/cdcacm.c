@@ -424,9 +424,9 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
   FAR struct uart_dev_s *dev = &priv->serdev;
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct usbdev_req_s *req;
-  irqstate_t flags;
   int ret;
 #endif
+  irqstate_t flags;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (priv == NULL)
@@ -485,10 +485,17 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
 
   spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
 #else
+  /* Serialize against the write completion callback, which may call
+   * this from interrupt context.
+   */
+
+  flags = spin_lock_irqsave(&priv->lock);
   if (!sq_empty(&priv->txfree))
     {
       uart_xmitchars_dma(&priv->serdev);
     }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
 #endif
 
 out:
@@ -3003,6 +3010,8 @@ static int cdcuart_release(FAR struct uart_dev_s *dev)
  * Description:
  *   Set up to transfer bytes from the TX circular buffer.
  *
+ *   Called from cdcacm_sndpacket() with priv->lock held.
+ *
  ****************************************************************************/
 
 static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
@@ -3012,7 +3021,6 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
   FAR struct usbdev_ep_s *ep = priv->epbulkin;
   FAR struct cdcacm_wrreq_s *wrcontainer;
   FAR struct usbdev_req_s *req;
-  irqstate_t flags;
   size_t nbytes;
   size_t reqlen;
   int ret;
@@ -3023,11 +3031,9 @@ static void cdcuart_dmasend(FAR struct uart_dev_s *dev)
 
   /* Peek at the request in the container at the head of the list */
 
-  flags = spin_lock_irqsave(&priv->lock);
   wrcontainer = (FAR struct cdcacm_wrreq_s *)sq_remfirst(&priv->txfree);
   req = wrcontainer->req;
   priv->nwrq--;
-  spin_unlock_irqrestore(&priv->lock, flags);
 
   /* Fill the request with serial TX data */
 
