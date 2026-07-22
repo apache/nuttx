@@ -37,6 +37,7 @@
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
 #include <nuttx/panic_notifier.h>
+#include <nuttx/reboot_notifier.h>
 #include <nuttx/power/pm.h>
 #include <arch/chip/chip.h>
 
@@ -54,6 +55,11 @@
 
 #ifdef CONFIG_ARCH_FPU
 static struct notifier_block g_fpu_panic_block;
+#endif
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+static DEFINE_PER_CPU_BSS(struct notifier_block, g_panic_switch_nsec_nb);
+#define g_panic_switch_nsec_nb this_cpu_var(g_panic_switch_nsec_nb)
 #endif
 
 /****************************************************************************
@@ -88,6 +94,53 @@ static int arm64_panic_disable_fpu(struct notifier_block *block,
 {
   arm64_fpu_disable();
   return 0;
+}
+#endif
+
+/****************************************************************************
+ * Name: arm64_panic_switch_nsec
+ *
+ * Description:
+ *   Reboot notifier callback for TrustZone Secure world. On SYS_HALT
+ *   (panic), issue an SMC to yield CPU back to the non-secure world so
+ *   the REE can finish its coredump or recovery sequence.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+static int arm64_panic_switch_nsec(struct notifier_block *block,
+                                   unsigned long action, void *data)
+{
+  if (action == SYS_HALT)
+    {
+      struct arm_smccc_res res;
+
+      /* Yield CPU to non-secure world via EL3. This is the same SMC
+       * used in idle; EL3 will switch context to the REE.
+       */
+
+      arm_smccc_smc(ARM_SMCCC_NUTTX_TEE_IDLE,
+                    0, 0, 0, 0, 0, 0, 0, &res);
+    }
+
+  return 0;
+}
+
+/****************************************************************************
+ * Name: arm64_panic_switch_nsec_register
+ *
+ * Description:
+ *   Register a reboot notifier that switches to the non-secure world
+ *   when the secure world panics, so the REE can finish its coredump
+ *   or recovery sequence.
+ *
+ ****************************************************************************/
+
+void arm64_panic_switch_nsec_register(void)
+{
+  g_panic_switch_nsec_nb.notifier_call = arm64_panic_switch_nsec;
+  g_panic_switch_nsec_nb.priority = INT_MIN;
+  register_reboot_notifier(&g_panic_switch_nsec_nb);
 }
 #endif
 
@@ -170,4 +223,10 @@ void up_initialize(void)
 #endif
 
 #endif
+
+  /* Register the panic notifier that switches to the non-secure world on a
+   * secure-world crash, so the REE can finish coredump / recovery.
+   */
+
+  arm64_panic_switch_nsec_register();
 }
