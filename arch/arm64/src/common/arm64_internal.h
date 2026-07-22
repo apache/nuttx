@@ -389,6 +389,12 @@ void arm64_stack_color(void *stackbase, size_t nbytes);
 int arm64_enable_dbgmonitor(void);
 #endif
 
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+void arm64_panic_switch_nsec_register(void);
+#else
+#  define arm64_panic_switch_nsec_register()
+#endif
+
 #ifdef CONFIG_SMP
 void arm64_timer_secondary_init(void);
 #endif
