@@ -133,6 +133,10 @@ struct tricore_trap_s
   uint32_t  tId    : 8;
   uint32_t  tClass : 8;
   uint32_t  tCpu   : 3;
+  uint32_t  tpstr;    /* Program Synchronous Trap Register */
+  uint32_t  tdstr;    /* Data Synchronous Trap Register    */
+  uint32_t  tdatr;    /* Data Asynchronous Trap Register   */
+  uint32_t  tdeadd;   /* Data Error Address Register       */
 };
 
 /****************************************************************************

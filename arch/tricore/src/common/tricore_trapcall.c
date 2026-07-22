@@ -104,6 +104,11 @@ static inline_function void tricore_trapinfo(volatile void *trap)
   g_trapinfo.tClass = ctrap->tClass;
   g_trapinfo.tId    = ctrap->tId;
   g_trapinfo.tAddr  = ctrap->tAddr;
+
+  g_trapinfo.tpstr  = tricore_mfcr(CPU_PSTR);
+  g_trapinfo.tdstr  = tricore_mfcr(CPU_DSTR);
+  g_trapinfo.tdatr  = tricore_mfcr(CPU_DATR);
+  g_trapinfo.tdeadd = tricore_mfcr(CPU_DEADD);
 }
 
 /****************************************************************************
