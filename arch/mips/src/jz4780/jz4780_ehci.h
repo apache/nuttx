@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/mips/jz4780/ci20/src/jz4780_bringup.c
+ * arch/mips/src/jz4780/jz4780_ehci.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,86 +20,61 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_MIPS_SRC_JZ4780_JZ_EHCI_H
+#define __ARCH_MIPS_SRC_JZ4780_JZ_EHCI_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/usb/ohci.h>
 
-#include <stdio.h>
-#include <unistd.h>
-#include <errno.h>
-#include <nuttx/debug.h>
-
-#include <nuttx/signal.h>
-#include <nuttx/irq.h>
-
-#include <arch/board/board.h>
-
-#ifdef CONFIG_VIDEO_FB
-#  include <nuttx/video/fb.h>
-#endif
-
-#include "ci20.h"
+#include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#define JZ_UHPEHCI_VSECTION   0xb3490000
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+/* The JZ4780 supports 3 root hub ports */
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+#define JZ_EHCI_NRHPORT 3
 
-/****************************************************************************
- * Name: jz4780_bringup
+/* Registers ****************************************************************/
+
+/* Traditionally, NuttX specifies register locations using individual
+ * register offsets from a base address.  That tradition is broken here and,
+ * instead, register blocks are represented as structures.  This is done here
+ * because, in principle, EHCI operational register address may not be known
+ * at compile time; the operational registers lie at an offset specified in
+ * the 'caplength' byte of the Host Controller Capability Registers.
  *
- * Description:
- *   Bring up board features
- *
+ * However, for the case of the JZ4780 EHCI, we know apriori that the value
+ * of 'caplength' is 0x10.  We keep this structure, however, to facilitate
+ * porting this driver to other environments where, perhaps, such knowledge
+ * is not available.
+ */
+
+/* Host Controller Capability Registers */
+
+#define HCCR ((struct ehci_hccr_s *)JZ_UHPEHCI_VSECTION)
+
+/* Host Controller Operational Registers */
+
+#define HCOR ((volatile struct ehci_hcor_s *)(JZ_UHPEHCI_VSECTION + 0x10))
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
-int jz4780_bringup(void)
-{
-  int ret = OK;
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      _err("ERROR: Failed to mount procfs at /proc: %d\n",
-            ret);
-    }
-#endif
-
-#if defined(CONFIG_USBHOST)
-
-  ret = jz_usbhost_initialize();
-  if (ret != OK)
-    {
-      _err("ERROR: Failed to start USB host services: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_VIDEO_FB
-  /* Initialize and register the framebuffer driver */
-
-  ret = fb_register(0, 0);
-  if (ret < 0)
-    {
-      _err("ERROR: fb_register() failed: %d\n", ret);
-    }
-#endif
-
-  return ret;
-}
+#endif /* __ARCH_MIPS_SRC_JZ4780_JZ_EHCI_H */

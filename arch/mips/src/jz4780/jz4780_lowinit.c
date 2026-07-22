@@ -37,6 +37,7 @@
 #include "mips_internal.h"
 
 #include "jz4780_lowinit.h"
+#include "jz4780_gpio.h"
 #include "jz4780_cache.h"
 
 /****************************************************************************
@@ -62,6 +63,36 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+static void usb_preinit(void)
+{
+  uint32_t reg;
+  jz4780_configgpio(POWER_LED);
+
+  jz4780_gpiowrite(POWER_LED, true);
+
+  reg = getreg32(USBPCR1_REG);
+  reg &= REFCLK_DIV_MSK;
+  reg |= REFCLK_DIV_48MHZ;
+  reg |= WORD_IF_16BIT;
+  putreg32(reg, USBPCR1_REG);
+
+  putreg32(OPCR_SPENDN1 | getreg32(OPCR_REG), OPCR_REG);
+
+  /* PHY power on reset. */
+
+  reg = getreg32(USBPCR_REG);
+  putreg32(reg | USBPCR_POR, USBPCR_REG);
+  up_mdelay(1);
+  putreg32(reg & ~USBPCR_POR, USBPCR_REG);
+
+  /* UHC soft reset */
+
+  reg = getreg32(SRBC_REG);
+  putreg32(reg | SRBC_UHC_SR, SRBC_REG);
+  up_mdelay(30);
+  putreg32(reg & ~SRBC_UHC_SR, SRBC_REG);
+}
 
 /****************************************************************************
  * Name: jz4780_pbclk
@@ -109,6 +140,11 @@ void jz4780_lowinit(void)
 #ifdef USE_EARLYSERIALINIT
   u16550_earlyserialinit();
 #endif
+  uint32_t val = getreg32(CLKGR0_REG);
+  val &= ~CLKGR0_UHC;
+  val &= ~CLKGR0_OTG0;
+  putreg32(val, CLKGR0_REG);
+  usb_preinit();
 
   /* Perform board-level initialization */
 

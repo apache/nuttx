@@ -51,3 +51,21 @@ endif
 CHIP_CSRCS  = jz4780_lowinit.c jz4780_exception.c jz4780_decodeirq.c
 CHIP_CSRCS += jz4780_irq.c jz4780_timerisr.c jz4780_gpio.c
 CHIP_CSRCS += jz4780_cache.c
+
+ifeq ($(CONFIG_USBHOST),y)
+CHIP_CSRCS += jz_usbhost.c
+
+ifeq ($(CONFIG_JZ4780_OHCI),y)
+CHIP_CSRCS += jz4780_ohci.c
+endif
+
+ifeq ($(CONFIG_JZ4780_EHCI),y)
+CHIP_CSRCS += jz4780_ehci.c
+endif
+endif
+
+ifeq ($(CONFIG_ALLOW_BSD_COMPONENTS),y)
+ifeq ($(CONFIG_JZ4780_LCD),y)
+CHIP_CSRCS += jz4780_lcd.c
+endif
+endif

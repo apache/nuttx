@@ -66,3 +66,10 @@ net
 
 The telnet daemon is included, so the CI20 board can be connected to through telnet.
 
+jumbo
+-----
+
+* Basic serial console access to the NSH shell.
+* Networking support through the RJ45 connector.
+* USB host support: mass storage, hub, keyboard and mouse.
+* Builtin Apps: dd, hidkbd, ping, tc, fb, nsh, sh, telnetd

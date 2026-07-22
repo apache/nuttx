@@ -24,7 +24,7 @@
 
 MEMORY
 {
-    kseg0_progmem  (rx) : ORIGIN = 0x80020000, LENGTH = 32M
+    kseg0_progmem  (rx) : ORIGIN = 0x80020000, LENGTH = 0x0F7E0000
 
     kseg0_genexcpt (rx) : ORIGIN = 0x80000180, LENGTH = 128
     kseg0_ebexcpt0 (rx) : ORIGIN = 0x80000200, LENGTH = 32

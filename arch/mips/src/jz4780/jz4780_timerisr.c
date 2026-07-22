@@ -36,7 +36,6 @@
 #include "clock/clock.h"
 #include "mips_internal.h"
 
-#include "mips_internal.h"
 #include "jz4780_lowinit.h"
 
 /****************************************************************************

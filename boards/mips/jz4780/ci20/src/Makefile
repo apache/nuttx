@@ -25,4 +25,8 @@
 ASRCS =
 CSRCS = jz4780_boot.c jz4780_bringup.c ci20_network.c
 
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += jz4780_usb.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
