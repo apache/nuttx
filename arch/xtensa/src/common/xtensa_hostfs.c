@@ -140,7 +140,9 @@ off_t host_lseek(int fd, off_t pos, off_t offset, int whence)
 
 int host_ioctl(int fd, int request, unsigned long arg)
 {
-  return -ENOSYS;
+  /* Unsupported ioctl requests use ENOTTY so VFS can apply fallbacks. */
+
+  return -ENOTTY;
 }
 
 void host_sync(int fd)

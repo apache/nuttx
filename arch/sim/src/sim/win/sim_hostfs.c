@@ -224,7 +224,9 @@ nuttx_off_t host_lseek(int fd, nuttx_off_t pos, nuttx_off_t offset,
 
 int host_ioctl(int fd, int request, unsigned long arg)
 {
-  return -ENOSYS;
+  /* Unsupported ioctl requests use ENOTTY so VFS can apply fallbacks. */
+
+  return -ENOTTY;
 }
 
 /****************************************************************************
