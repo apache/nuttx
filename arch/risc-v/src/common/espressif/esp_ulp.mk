@@ -63,6 +63,8 @@ ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)c
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)hal$(DELIM)include
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)hal$(DELIM)include
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)hal$(DELIM)platform_port$(DELIM)include
+ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_hal_wdt$(DELIM)include
+ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)esp_hal_wdt$(DELIM)$(CHIP_SERIES)$(DELIM)include
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)log
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)log$(DELIM)include
 ULP_INCLUDES += $(INCDIR_PREFIX)$(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)riscv$(DELIM)include
@@ -159,8 +161,8 @@ else
 	ULP_BIN_FILE = $(ULP_FOLDER)$(DELIM)ulp.bin
 	ULP_BIN_FILE_PATH = $(ULP_BIN_FILE)
 
-	ULP_C_SRCS = $(addprefix $(ULP_APP_FOLDER)/,$(sort $(ULP_APP_C_SRCS)))
-	ULP_ASM_SRCS = $(addprefix $(ULP_APP_FOLDER)/,$(sort $(ULP_APP_ASM_SRCS)))
+	ULP_C_SRCS = $(foreach s,$(sort $(ULP_APP_C_SRCS)),$(if $(filter /%,$(s)),$(s),$(ULP_APP_FOLDER)/$(s)))
+	ULP_ASM_SRCS = $(foreach s,$(sort $(ULP_APP_ASM_SRCS)),$(if $(filter /%,$(s)),$(s),$(ULP_APP_FOLDER)/$(s)))
 
 	ULP_APP_OBJS = $(ULP_ASM_SRCS:.S=_ulp.o)
 	ULP_APP_OBJS += $(ULP_C_SRCS:.c=_ulp.o)
@@ -250,6 +252,17 @@ ULP_LDFLAGS :=										\
 	-Xlinker -Map=$(ULP_MAP_FILE)		\
 	$(ULP_LDINCLUDES)
 
+# Optional compile defines (e.g. -DNUTTX_ESP_BIST_MODULE) — after := above
+ULP_CFLAGS += $(ULP_EXTRA_DEFINES)
+ULP_ASFLAGS += $(ULP_EXTRA_DEFINES)
+
+# Default LP sections linker template; apps may override with ULP_CUSTOM_SECTIONS_LD
+ifeq ($(ULP_CUSTOM_SECTIONS_LD),)
+	ULP_SECTIONS_TEMPLATE = $(BOARD)$(DELIM)scripts$(DELIM)${CHIP_SERIES}_lpcore_sections.ld
+else
+	ULP_SECTIONS_TEMPLATE = $(ULP_CUSTOM_SECTIONS_LD)
+endif
+
 # Build rules
 
 .PHONY: context depend
@@ -261,14 +274,17 @@ checkpython3:
 		exit 1; \
 	fi
 
-%_ulp.o: %.c $(ULP_NUTTX_CONFIG)
+%_ulp.o: %.c $(ULP_NUTTX_CONFIG) $(ULP_FOLDER)$(DELIM)ulp_sections.ld
 	$(Q) echo "Compiling $< for ULP"
 	$(Q) $(CC) $(ULP_CFLAGS) -c $< -o $@
-	$(Q) $(CC) $(ULP_INCLUDES) -E -P -xc -o $(ULP_FOLDER)$(DELIM)ulp_sections.ld $(BOARD)$(DELIM)scripts$(DELIM)${CHIP_SERIES}_lpcore_sections.ld
 
 %_ulp.o: %.S $(ULP_NUTTX_CONFIG)
 	$(Q) echo "Compiling $< for ULP"
 	$(Q) $(CC) $(ULP_ASFLAGS) -c $< -o $@
+
+$(ULP_FOLDER)$(DELIM)ulp_sections.ld: $(ULP_NUTTX_CONFIG) $(ULP_SECTIONS_TEMPLATE)
+	$(Q) echo "Preprocessing ULP linker sections from $(ULP_SECTIONS_TEMPLATE)"
+	$(Q) $(CC) $(ULP_INCLUDES) -E -P -xc -o $@ $(ULP_SECTIONS_TEMPLATE)
 
 $(ULP_NUTTX_CONFIG): $(ULP_FOLDER)
 	$(Q) echo "Copying nuttx$(DELIM)config.h into $(ULP_FOLDER)$(DELIM)nuttx"
@@ -277,6 +293,7 @@ $(ULP_NUTTX_CONFIG): $(ULP_FOLDER)
 $(ULP_ELF_FILE): $(ULP_OBJS)
 	$(Q) echo "Linking for ULP"
 	$(Q) $(CC) $(ULP_LDFLAGS) $(ULP_OBJS) -o $@
+	$(ULP_POST_LINK)
 
 $(ULP_BIN_FILE): $(ULP_ELF_FILE) checkpython3
 	$(Q) \
@@ -317,7 +334,7 @@ ifneq ($(suffix $(ULP_APP_BIN)),.bin)
 								size=4; \
 				fi; \
 					sed -i "s/ };//" $(ULP_VAR_MAP_HEADER); \
-					echo -ne "  { .sym.sym_name = \"$${var}\", .sym.sym_value = &$${var}, .size = $${size}},\n };" >> $(ULP_VAR_MAP_HEADER); \
+					printf "  { .sym.sym_name = \"%s\", .sym.sym_value = &%s, .size = %s},\n };" "$${var}" "$${var}" "$${size}" >> $(ULP_VAR_MAP_HEADER); \
 			fi; \
 		done'
 endif
