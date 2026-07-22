@@ -31,21 +31,26 @@
  *
  * 1. Declaration and Initialization:
  *
- *   Static (compile-time):
- *     RING_DEFINE(g_ring, uint32_t, 64);
+ *   Declare the blob and the handle as plain variables; storage, alignment
+ *   and section are the caller's to choose.  Neither takes an initializer -
+ *   init fills the handle in, and a located or shared blob would not get one
+ *   loaded anyway.  The size given is the whole blob, its header included,
+ *   so the usable capacity is what is left after that header:
+ *     static char g_blob[4096] aligned_data(RING_BLOB_ALIGN);
+ *     static struct ring_s g_ring;
  *
- *   Dynamic (runtime):
- *     struct ring_s *r = ring_alloc(64, sizeof(uint32_t));
+ *   Init takes the blob and its total size, and derives the geometry:
+ *     ring_mpmc_init(&g_ring, g_blob, sizeof(g_blob));  // SMP/BMP, CAS
+ *     ring_mpsc_init(&g_ring, g_blob, sizeof(g_blob));  // alias of mpmc
+ *     ring_spmc_init(&g_ring, g_blob, sizeof(g_blob));  // alias of mpmc
+ *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob));  // AMP, no atomics
+ *
+ *   Under SPSC each side inits its own handle on the shared blob; the one
+ *   that did not reset it polls ring_is_ready(&g_ring) before using it.
+ *
+ *   Dynamic - one allocation holds handle and blob, already initialized:
+ *     struct ring_s *r = ring_alloc(256);
  *     ring_free(r);
- *
- *   Multi-core safe init (SMP, uses atomic CAS).
- *     ring_mpmc_init(&g_ring, 64);
- *     ring_mpsc_init(&g_ring, 64);
- *     ring_spmc_init(&g_ring, 64);
- *
- *   Single-side init (AMP/SPSC, no atomic needed):
- *     ring_spsc_init(&g_ring, 64);
- *     // Other side polls: while (!ring_is_ready(&g_ring));
  *
  * 2. Mode Selection:
  *
@@ -148,25 +153,17 @@
 
 #define RING_IDX_MASK    0xffffff
 
-/* Maximum ring capacity (fits in 24-bit index space) */
-
-#define RING_SIZE_MAX    RING_IDX_MASK
-
-/* RING_WRAPPOINT - logical index wrap period: the largest multiple of the
- * capacity not exceeding 2^24, i.e. ALIGN_DOWN(2^24, cap). Power-of-2
- * capacities divide 2^24 exactly and so yield 2^24 (RING_IDX_MASK + 1),
- * keeping the fast bitmask path; other capacities yield a smaller
- * capacity multiple to keep ring_idx continuous across the wrap.
- *
- * Macro form (vs the former inline helper) evaluates cap multiple times;
- * all callers pass side-effect-free capacities.
+/* Sentinel *index value for the peek helpers: a real index never exceeds
+ * RTS_IDX_MASK (24 bits), so this out-of-range value asks the peek to start
+ * from the oldest readable position (the live cons_tail) instead of clamping
+ * a caller-supplied index.
  */
 
-#define RING_WRAPPOINT(cap) ALIGN_DOWN(RING_IDX_MASK + 1, (cap))
+#define RING_IDX_OLDEST  UINT32_MAX
 
-/* Extract data capacity from total buffer size (total - header) */
+/* Maximum ring capacity (fits in 24-bit index space) */
 
-#define RING_CAPACITY(l) ((l) - sizeof(struct ring_s))
+#define RING_SIZE_MAX    0x1000000
 
 /* 32-bit RTS packed type: {cnt:8, idx:24} in a single atomic_t.
  *
@@ -187,16 +184,8 @@
 #define RTS_PACK(cnt, idx) \
   ((((uint32_t)(cnt) & 0xff) << RTS_CNT_SHIFT) | ((uint32_t)(idx) & RTS_IDX_MASK))
 
-/* Sentinel *index value for the peek helpers: a real index never exceeds
- * RTS_IDX_MASK (24 bits), so this out-of-range value asks the peek to start
- * from the oldest readable position (the live cons_tail) instead of clamping
- * a caller-supplied index.
- */
-
-#define RING_IDX_OLDEST  UINT32_MAX
-
-#ifndef CACHELINE_SIZE
-#  define CACHELINE_SIZE 64
+#ifndef RING_BLOB_ALIGN
+#  define RING_BLOB_ALIGN 64
 #endif
 
 /* Magic values for warm-restart detection.
@@ -206,115 +195,32 @@
  * to perform a fresh initialization or recover the previous state.
  *
  * Three-state protocol (multi-core safe):
- *   0                -> uninitialized (or garbage != READY/INIT)
- *   RING_MAGIC_INIT  -> one core is initializing; others spin-wait
- *   RING_MAGIC_READY -> init complete; ring is usable
+ *   0                     -> uninitialized (or garbage != READY/INIT)
+ *   RING_BLOB_MAGIC_INIT  -> one core is initializing; others spin-wait
+ *   RING_BLOB_MAGIC_READY -> init complete; ring is usable
  */
 
-#define RING_MAGIC_INIT   ((int32_t)0x52494e49)   /* "RINI" */
-#define RING_MAGIC_READY  ((int32_t)0x52494e47)   /* "RING" */
+#define RING_BLOB_MAGIC_INIT   ((int32_t)0x52494e49)   /* "RINI" */
+#define RING_BLOB_MAGIC_READY  ((int32_t)0x52494e47)   /* "RING" */
 
-/* RING_INIT - static initialize a ring
- *
- * buflen - total buffer size in bytes (header + data)
- *
- * Usage:
- *   RING_DECLARE(g_my_ring, uint32_t, 64) = RING_INIT(64);
+/* Handle magic values, stored in struct ring_s::magic.  Separate from the
+ * blob magic above because the handle lives in ordinary RAM cleared on every
+ * reboot - hence "boot-scoped", with RING_MAGIC_UNINIT being that zero.
  */
 
-#define RING_INIT(buflen)                                     \
-  {                                                           \
-    .base.magic     = RING_MAGIC_READY,                       \
-    .base.capacity  = RING_CAPACITY(buflen),                  \
-    .base.wrappoint = RING_WRAPPOINT(RING_CAPACITY(buflen)),  \
-  }
+#define RING_MAGIC_UNINIT     0   /* Zero-init: no caller yet this boot   */
+#define RING_MAGIC_INIT       1   /* A caller is running the init body    */
+#define RING_MAGIC_READY      2   /* Init complete; ring usable this boot */
 
-/* RING_DECLARE - declare a ring variable (uninitialized).
- * Must call ring_mpmc_init() or RING_INIT() before use.
- *
- * Usage:
- *   RING_DECLARE(g_my_ring, uint32_t, 64);
- *   ring_mpmc_init(g_my_ring, 64);
- *   or
- *   RING_DECLARE(g_my_ring, uint32_t, 64) = RING_INIT(64);
- *
- *   then:
- *   ring_spsc_enqueue(&g_my_ring, &val, 1);
- */
+/* Public API macros - accept a struct ring_s * handle */
 
-#define RING_DECLARE(name, type, buflen)                 \
-  struct ring_##name##_s                                 \
-  {                                                      \
-    static_assert(RING_CAPACITY(buflen) <= RING_SIZE_MAX,\
-                  "ring capacity exceeds RING_SIZE_MAX");\
-    struct ring_s base;                                  \
-    type          buf[RING_CAPACITY(buflen)];            \
-  } name aligned_data(CACHELINE_SIZE)
+#define ring_mpsc_init(r, buf, buflen) ring_mpmc_init(r, buf, buflen)
+#define ring_spmc_init(r, buf, buflen) ring_mpmc_init(r, buf, buflen)
 
-/* RING_DEFINE - define and initialise a ring (no init call needed).
- *
- * name   - variable name
- * type   - element type
- * buflen - total buffer size in bytes (header + data)
- *
- * Usage:
- *   RING_DEFINE(g_my_ring, uint32_t, 64);
- *   ring_spsc_enqueue(&my_ring, &val, 1);
- */
-
-#define RING_DEFINE(name, type, buflen)                  \
-  RING_DECLARE(name, type, buflen) = RING_INIT(buflen)
-
-/* Public API macros - accept RING_DECLARE/RING_DEFINE structs */
-
-/* ring_data - return pointer to the embedded data buffer that immediately
- * follows the ring_s header in memory.
- */
-
-#define ring_data(r)  ((FAR char *)((FAR struct ring_s *)(r) + 1))
-
-/* ring_spsc_init - lightweight initialization for SPSC mode.
- *
- * Unlike ring_mpmc_init (which uses atomic CAS for multi-core safe
- * concurrent initialization), ring_spsc_init uses only volatile
- * writes. It can be called by either the producer or consumer
- * side, but NOT concurrently from both — the caller must ensure
- * only one side calls init. The other side polls
- * ring_is_ready() before accessing the ring.
- *
- * Use ring_spsc_init for AMP/SHM scenarios where atomic
- * instructions are unavailable on shared memory.
- * Use ring_mpmc_init for SMP/BMP scenarios where multiple cores may
- * race to initialize the same ring.
- */
-
-#define ring_spsc_init(r, cap)                  \
-  do                                            \
-    {                                           \
-      irqstate_t flags = irq_save();            \
-      if ((r)->magic != RING_MAGIC_READY)       \
-        {                                       \
-          (r)->magic = RING_MAGIC_INIT;         \
-          UP_WMB();                             \
-          (r)->capacity = (cap);                \
-          (r)->wrappoint = RING_WRAPPOINT(cap); \
-          ring_reset(r);                        \
-          UP_WMB();                             \
-          (r)->magic = RING_MAGIC_READY;        \
-        }                                       \
-      irq_restore(flags);                       \
-    }                                           \
-  while (0)
-
-#define ring_mpsc_init(r, cap) ring_mpmc_init(r, cap)
-#define ring_spmc_init(r, cap) ring_mpmc_init(r, cap)
-
-#define ring_is_ready(r) \
-  (atomic_read_acquire(&(r)->magic) == RING_MAGIC_READY)
-
-#define ring_count(r)    ring_dist(r, RTS_IDX((r)->prod_tail), \
-                                   RTS_IDX((r)->cons_tail))
-#define ring_capacity(r) ((r)->capacity)
+#define ring_is_ready(r) ((r)->magic == RING_MAGIC_READY)
+#define ring_count(r)    ring_dist(r, RTS_IDX((r)->blob->prod_tail), \
+                                   RTS_IDX((r)->blob->cons_tail))
+#define ring_capacity(r) ((r)->blob->capacity)
 #define ring_space(r)    (ring_capacity(r) - ring_count(r))
 
 #define ring_spsc_enqueue(r, items, count) \
@@ -455,38 +361,70 @@
  * Public Types
  ****************************************************************************/
 
-/* NOTE: The cache-line isolation between the metadata / producer /
- * consumer regions is provided by the explicit pad0/pad1/pad2 arrays,
- * not by a type-level aligned attribute.  The aligned_data(CACHELINE_SIZE)
- * attribute is applied at each declaration/definition site instead (see
- * RING_DECLARE and ring_alloc), so that it binds to the
- * variable rather than the type.  Binding it to the type makes some
- * compilers (e.g. TASKING) propagate the alignment to every member,
- * inflating sizeof(struct ring_s) and breaking the cross-core shared
- * memory layout.
+/* struct ring_blob_s - the blob header.
+ *
+ * The state living in the (possibly cross-core) ring memory: magic and
+ * geometry, plus the producer and consumer indices, each on its own cache
+ * line, followed immediately by the element data region, the data[] member.
+ * Callers reach it only through a struct ring_s handle.
+ *
+ * The geometry is kept here rather than in the handle so that the ring
+ * length can be recovered from the shared memory alone - by a peer image, a
+ * debugger or a crash dump - without access to any handle.  The init call
+ * writes it, deriving it from buflen.
+ *
+ * NOTE: cache-line isolation comes from the explicit pad0/pad1/pad2 arrays,
+ * and aligned_data(RING_BLOB_ALIGN) is applied at each definition site
+ * rather than to the type: binding it to the type makes some compilers (e.g.
+ * TASKING) propagate the alignment to every member, inflating sizeof() and
+ * breaking the shared memory layout.
  */
 
-struct ring_s
+struct ring_blob_s
 {
   /* Read-only metadata - cache-line aligned */
 
   atomic_t     magic;             /* Warm-restart detection */
-  uint32_t     capacity;          /* Max 16777215 */
+  uint32_t     capacity;          /* Data capacity in bytes (<= 16777215) */
   uint32_t     wrappoint;         /* Largest multiple of capacity <= 2^24 */
-  uint8_t      pad0[CACHELINE_SIZE - sizeof(atomic_t) -
+  uint8_t      pad0[RING_BLOB_ALIGN - sizeof(atomic_t) -
                     sizeof(uint32_t) * 2];
 
   /* Producer side - cache-line aligned */
 
   atomic_t     prod_head;         /* SP: unused; MP: RTS CAS */
   atomic_t     prod_tail;         /* SP: store_release; MP: RTS CAS */
-  uint8_t      pad1[CACHELINE_SIZE - sizeof(atomic_t) * 2];
+  uint8_t      pad1[RING_BLOB_ALIGN - sizeof(atomic_t) * 2];
 
   /* Consumer side - cache-line aligned */
 
   atomic_t     cons_head;         /* SC: unused; MC: RTS CAS */
   atomic_t     cons_tail;         /* SC: store_release; MC: RTS CAS */
-  uint8_t      pad2[CACHELINE_SIZE - sizeof(atomic_t) * 2];
+  uint8_t      pad2[RING_BLOB_ALIGN - sizeof(atomic_t) * 2];
+
+  /* Element data region, capacity bytes of it. */
+
+  uint8_t      data[];
+};
+
+/* struct ring_s - lightweight ring handle.
+ *
+ * Callers hold this handle rather than the blob header itself.  Keeping it
+ * separate lets one blob be reached from several images / owners, each with
+ * its own handle in ordinary memory.
+ *
+ *   magic    - boot-scoped tri-state init guard, also the "initialized this
+ *              boot" flag.  Living in reboot-cleared memory is what makes
+ *              it boot-scoped, unlike the blob magic which may survive a
+ *              reboot.
+ *   blob     - the blob header this handle operates on.  The geometry lives
+ *              there, not here, so every owner of the blob sees one copy.
+ */
+
+struct ring_s
+{
+  atomic_t                magic;    /* Boot-scoped init guard (tri-state) */
+  FAR struct ring_blob_s *blob;     /* Ring blob (header + data) */
 };
 
 struct ring_buf_s
@@ -504,32 +442,21 @@ struct ring_buf_s
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ring_is_pow2
- *
- * Description:
- *   True when the capacity is a power of two.  Such capacities divide 2^24
- *   exactly, so RING_WRAPPOINT() yields the full 2^24 wrap period; any
- *   other capacity yields a strictly smaller wrap.
- *
- ****************************************************************************/
-
-static inline_function bool ring_is_pow2(FAR struct ring_s *r)
-{
-  return r->wrappoint == RING_IDX_MASK + 1;
-}
-
-/****************************************************************************
  * Name: ring_idx
  *
  * Description:
- *   Convert a logical index to a physical buffer position. Uses
+ *   Convert a logical index to a physical position in the blob data. Uses
  *   bitmask when capacity is power-of-2, modulo otherwise.
  *
  ****************************************************************************/
 
-static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
+static inline_function uint32_t ring_idx(FAR struct ring_s *r,
+                                         uint32_t idx)
 {
-  return ring_is_pow2(r) ? (idx & (r->capacity - 1)) : (idx % r->capacity);
+  FAR struct ring_blob_s *blob = r->blob;
+
+  return blob->wrappoint == RING_SIZE_MAX ?
+         (idx & (blob->capacity - 1)) : (idx % blob->capacity);
 }
 
 /****************************************************************************
@@ -537,16 +464,18 @@ static inline_function uint32_t ring_idx(FAR struct ring_s *r, uint32_t idx)
  *
  * Description:
  *   Advance a logical index by n, wrapping at the ring's wrap period.
- *   Power-of-2 rings use the fast 24-bit mask; others wrap modulo
- *   r->wrappoint so the physical mapping stays continuous.
+ *   Power-of-2 rings use the fast 24-bit mask; others wrap modulo the
+ *   wrap period so the physical mapping stays continuous.
  *
  ****************************************************************************/
 
 static inline_function uint32_t
 ring_advance(FAR struct ring_s *r, uint32_t idx, uint32_t n)
 {
-  return ring_is_pow2(r) ? ((idx + n) & RING_IDX_MASK) :
-                           ((idx + n) % r->wrappoint);
+  uint32_t wrappoint = r->blob->wrappoint;
+
+  return wrappoint == RING_SIZE_MAX ? ((idx + n) & RING_IDX_MASK) :
+                                      ((idx + n) % wrappoint);
 }
 
 /****************************************************************************
@@ -555,15 +484,17 @@ ring_advance(FAR struct ring_s *r, uint32_t idx, uint32_t n)
  * Description:
  *   Compute the forward distance from b to a in logical index space,
  *   respecting the ring's wrap period. Power-of-2 rings use the fast
- *   24-bit mask; others reduce modulo r->wrappoint.
+ *   24-bit mask; others reduce modulo the wrap period.
  *
  ****************************************************************************/
 
 static inline_function uint32_t
 ring_dist(FAR struct ring_s *r, uint32_t a, uint32_t b)
 {
-  return ring_is_pow2(r) ? ((a - b) & RING_IDX_MASK) :
-                           ((a + r->wrappoint - b) % r->wrappoint);
+  uint32_t wrappoint = r->blob->wrappoint;
+
+  return wrappoint == RING_SIZE_MAX ? ((a - b) & RING_IDX_MASK) :
+                                      ((a + wrappoint - b) % wrappoint);
 }
 
 /****************************************************************************
@@ -581,9 +512,11 @@ static inline_function bool
 ring_is_valid_cons(FAR struct ring_s *r, uint32_t cons_index,
                    uint32_t cons_tail)
 {
-  return ring_is_pow2(r) ?
+  uint32_t wrappoint = r->blob->wrappoint;
+
+  return wrappoint == RING_SIZE_MAX ?
          ((int32_t)((cons_index - cons_tail) << 8) >= 0) :
-         (ring_dist(r, cons_index, cons_tail) < (r->wrappoint >> 1));
+         (ring_dist(r, cons_index, cons_tail) < (wrappoint >> 1));
 }
 
 /****************************************************************************
@@ -621,79 +554,158 @@ ring_clamp_cons(FAR struct ring_s *r, uint32_t cons_index,
 
 static inline_function uint32_t ring_reset(FAR struct ring_s *r)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t dropped = ring_count(r);
 
-  if (dropped > r->capacity)
+  if (dropped > blob->capacity)
     {
-      dropped = r->capacity;
+      dropped = blob->capacity;
     }
 
-  r->prod_head = 0;
-  r->prod_tail = 0;
-  r->cons_head = 0;
-  r->cons_tail = 0;
+  blob->prod_head = 0;
+  blob->prod_tail = 0;
+  blob->cons_head = 0;
+  blob->cons_tail = 0;
 
   return dropped;
+}
+
+/****************************************************************************
+ * Name: ring_spsc_init
+ *
+ * Description:
+ *   Lightweight initialization for SPSC mode.
+ *
+ *   Unlike ring_mpmc_init (which uses atomic CAS for multi-core safe
+ *   concurrent initialization), ring_spsc_init uses only volatile writes.
+ *   It can be called by either the producer or consumer side, but NOT
+ *   concurrently from both - the caller must ensure only one side calls it
+ *   first.  The other side then calls it too, to bind its own handle, and
+ *   polls ring_is_ready() before touching the ring: the reset is guarded by
+ *   the blob magic, so a later call only binds and stamps the same geometry.
+ *
+ *   Use ring_spsc_init for AMP/SHM scenarios where atomic instructions are
+ *   unavailable on shared memory.  Use ring_mpmc_init for SMP/BMP scenarios
+ *   where multiple cores may race to initialize the same ring.
+ *
+ *   buf    - the blob to operate on
+ *   buflen - total blob size in bytes (header + data)
+ *
+ * Returned Value:
+ *   true if this caller ran the init body (the first one this boot), false
+ *   if the blob was already initialized by another caller.  The ring is
+ *   usable either way.
+ *
+ ****************************************************************************/
+
+static inline_function bool
+ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
+{
+  FAR struct ring_blob_s *blob = buf;
+  uint32_t cap = buflen - sizeof(*blob);
+  irqstate_t flags;
+  bool first;
+
+  DEBUGASSERT(buf != NULL && cap <= RING_SIZE_MAX &&
+              buflen > sizeof(*blob) &&
+              IS_ALIGNED((uintptr_t)buf, RING_BLOB_ALIGN));
+
+  if (ring_is_ready(r))
+    {
+      return false;
+    }
+
+  flags = irq_save();
+
+  r->blob = blob;
+
+  first = (blob->magic != RING_BLOB_MAGIC_READY);
+  if (first)
+    {
+      blob->magic = RING_BLOB_MAGIC_INIT;
+      blob->capacity = cap;
+      blob->wrappoint = ALIGN_DOWN(RING_SIZE_MAX, cap);
+      ring_reset(r);
+      UP_WMB();
+      blob->magic = RING_BLOB_MAGIC_READY;
+    }
+
+  UP_WMB();
+  r->magic = RING_MAGIC_READY;
+  irq_restore(flags);
+  return first;
 }
 
 /****************************************************************************
  * Name: ring_mpmc_init
  *
  * Description:
- *   Runtime initialization with warm-restart recovery and multi-core
- *   safety.  This is the unified init entry point; the ring_mpmc_init /
- *   ring_mpsc_init / ring_spmc_init macros are thin wrappers around it.
+ *   Runtime initialization with warm-restart recovery, safe against
+ *   concurrent callers.  The unified entry point for all multi-core rings;
+ *   ring_mpsc_init / ring_spmc_init alias it, SPSC rings use ring_spsc_init.
  *
- *   Three outcomes based on the magic field:
- *     1. Uninitialized (magic != READY and != INIT):
- *        Winner CAS to INIT, zeroes indices, sets READY.
- *        Losers spin until READY.
- *     2. Already READY (warm restart):
- *        Winner CAS to INIT, validates/recovers indices, sets READY.
- *        Losers spin until READY.
- *     3. INIT in progress:
- *        Another core is initializing; spin until READY.
+ *   Binds the handle to the blob, stamps the blob geometry derived from
+ *   buflen, then seeds the indices - recovering the previous contents on a
+ *   warm restart - and marks the handle initialized for this boot.
+ *
+ *   buf    - the blob to operate on
+ *   buflen - total blob size in bytes (header + data)
+ *
+ * Returned Value:
+ *   true if this caller ran the init body (the first one this boot), false
+ *   if another caller had already done it and this one only waited for
+ *   completion.  The ring is usable either way.
  *
  ****************************************************************************/
 
-static inline_function FAR struct ring_s *
-ring_mpmc_init(FAR void *buf, uint32_t buflen)
+static inline_function bool
+ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
 {
-  FAR struct ring_s *r = (FAR struct ring_s *)buf;
-  irqstate_t flags;
+  FAR struct ring_blob_s *blob = buf;
+  uint32_t cap = buflen - sizeof(*blob);
   int32_t old_magic;
+  irqstate_t flags;
 
-  DEBUGASSERT(buf != NULL && buflen > sizeof(struct ring_s) &&
-              RING_CAPACITY(buflen) <= RING_SIZE_MAX);
+  DEBUGASSERT(buf != NULL && cap <= RING_SIZE_MAX &&
+              buflen > sizeof(*blob) &&
+              IS_ALIGNED((uintptr_t)buf, RING_BLOB_ALIGN));
 
-  buflen = RING_CAPACITY(buflen);
+  if (atomic_read(&r->magic) == RING_MAGIC_READY)
+    {
+      return false;
+    }
 
   flags = irq_save();
 
   do
     {
-      old_magic = atomic_read(&r->magic);
+      old_magic = atomic_read(&blob->magic);
 
-      if (old_magic == RING_MAGIC_INIT)
+      if (old_magic == RING_BLOB_MAGIC_INIT)
         {
           irq_restore(flags);
 
           /* Another core is initializing - spin until READY */
 
-          while (atomic_read_acquire(&r->magic) != RING_MAGIC_READY)
+          while (atomic_read_acquire(&blob->magic) != RING_BLOB_MAGIC_READY)
             {
               UP_WFE();
             }
 
-          return r;
+          r->blob = blob;
+          atomic_set(&r->magic, RING_MAGIC_READY);
+          return false;
         }
     }
-  while (!atomic_cmpxchg(&r->magic, &old_magic, RING_MAGIC_INIT));
+  while (!atomic_cmpxchg(&blob->magic, &old_magic, RING_BLOB_MAGIC_INIT));
 
-  r->capacity = buflen;
-  r->wrappoint = RING_WRAPPOINT(buflen);
+  /* The blob is ours until READY is published below, so the geometry can be
+   * stamped before anything that depends on it (ring_reset, ring_count).
+   */
 
-  if (old_magic == RING_MAGIC_READY)
+  r->blob = blob;
+
+  if (old_magic == RING_BLOB_MAGIC_READY)
     {
       /* Warm restart: validate indices.
        *
@@ -702,11 +714,11 @@ ring_mpmc_init(FAR void *buf, uint32_t buflen)
        * and we fall back to a fresh reset.
        */
 
-      uint32_t prod_index = RTS_IDX(atomic_read(&r->prod_tail));
-      uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
+      uint32_t prod_index = RTS_IDX(atomic_read(&blob->prod_tail));
+      uint32_t cons_index = RTS_IDX(atomic_read(&blob->cons_tail));
       uint32_t count = ring_dist(r, prod_index, cons_index);
 
-      if (count > r->capacity)
+      if (count > blob->capacity)
         {
           ring_reset(r);
         }
@@ -722,25 +734,26 @@ ring_mpmc_init(FAR void *buf, uint32_t buflen)
           uint32_t prod_tail = RTS_PACK(0, prod_index);
           uint32_t cons_tail = RTS_PACK(0, cons_index);
 
-          atomic_set(&r->prod_tail, prod_tail);
-          atomic_set(&r->prod_head, prod_tail);
-          atomic_set(&r->cons_tail, cons_tail);
-          atomic_set(&r->cons_head, cons_tail);
+          atomic_set(&blob->prod_tail, prod_tail);
+          atomic_set(&blob->prod_head, prod_tail);
+          atomic_set(&blob->cons_tail, cons_tail);
+          atomic_set(&blob->cons_head, cons_tail);
         }
     }
   else
     {
       /* First-time init: zero everything */
 
+      blob->capacity = cap;
+      blob->wrappoint = ALIGN_DOWN(RING_SIZE_MAX, cap);
       ring_reset(r);
     }
 
-  /* Publish: all stores above are visible before magic becomes READY */
-
-  atomic_set_release(&r->magic, RING_MAGIC_READY);
+  atomic_set_release(&blob->magic, RING_BLOB_MAGIC_READY);
+  atomic_set(&r->magic, RING_MAGIC_READY);
   UP_SEV();
   irq_restore(flags);
-  return r;
+  return old_magic != RING_BLOB_MAGIC_READY;
 }
 
 /****************************************************************************
@@ -751,23 +764,31 @@ ring_mpmc_init(FAR void *buf, uint32_t buflen)
  *
  ****************************************************************************/
 
-static inline_function FAR struct ring_s *ring_alloc(uint32_t cap,
-                                                     size_t elem_size)
+static inline_function FAR struct ring_s *ring_alloc(size_t buflen)
 {
+  FAR struct ring_blob_s *blob;
   FAR struct ring_s *r;
 
-  if (cap == 0)
+  if (buflen == 0)
     {
       return NULL;
     }
 
-  r = lib_memalign(CACHELINE_SIZE, sizeof(*r) + cap * elem_size);
+  r = lib_memalign(RING_BLOB_ALIGN, RING_BLOB_ALIGN + buflen);
   if (r == NULL)
     {
       return NULL;
     }
 
-  ring_spsc_init(r, cap);
+  blob = (FAR struct ring_blob_s *)((FAR char *)r + RING_BLOB_ALIGN);
+
+  /* Fresh memory holds garbage, and init reads the blob magic to tell a cold
+   * start from a warm restart; clear it so this one is seen as cold.
+   */
+
+  blob->magic = ~RING_BLOB_MAGIC_INIT;
+  r->magic = RING_MAGIC_UNINIT;
+  ring_spsc_init(r, blob, buflen);
   return r;
 }
 
@@ -798,6 +819,7 @@ static inline_function void
 ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
               uint32_t idx, uint32_t count, size_t elem_size)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t first;
 
   buf->cnt = count;
@@ -815,20 +837,20 @@ ring_buf_init(FAR struct ring_buf_s *buf, FAR struct ring_s *r,
   buf->idx = idx;
 
   idx   = ring_idx(r, idx);
-  first = r->capacity - idx;
+  first = blob->capacity - idx;
 
   if (first >= count)
     {
-      buf->ptr1 = ring_data(r) + idx * elem_size;
+      buf->ptr1 = blob->data + idx * elem_size;
       buf->len1 = count;
       buf->ptr2 = NULL;
       buf->len2 = 0;
     }
   else
     {
-      buf->ptr1 = ring_data(r) + idx * elem_size;
+      buf->ptr1 = blob->data + idx * elem_size;
       buf->len1 = first;
-      buf->ptr2 = ring_data(r);
+      buf->ptr2 = blob->data;
       buf->len2 = count - first;
     }
 }
@@ -936,14 +958,15 @@ static inline_function void
 ring_sp_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t prod_index = RTS_IDX(r->prod_tail);
+  FAR struct ring_blob_s *blob = r->blob;
+  uint32_t prod_index = RTS_IDX(blob->prod_tail);
   uint32_t cons_index;
   uint32_t free_space;
   uint32_t n;
 
   UP_RMB();
-  cons_index = RTS_IDX(r->cons_tail);
-  free_space = r->capacity - ring_dist(r, prod_index, cons_index);
+  cons_index = RTS_IDX(blob->cons_tail);
+  free_space = blob->capacity - ring_dist(r, prod_index, cons_index);
   n = count < free_space ? count : free_space;
 
   ring_buf_init(buf, r, prod_index, n, elem_size);
@@ -962,15 +985,16 @@ static inline_function void
 ring_mp_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
   uint32_t new_head;
   uint32_t n;
 
-  old_head = atomic_read(&r->prod_head);
+  old_head = atomic_read(&blob->prod_head);
   do
     {
-      uint32_t cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
-      uint32_t free_space = r->capacity -
+      uint32_t cons_index = RTS_IDX(atomic_read_acquire(&blob->cons_tail));
+      uint32_t free_space = blob->capacity -
         ring_dist(r, RTS_IDX(old_head), cons_index);
 
       n = count < free_space ? count : free_space;
@@ -982,7 +1006,7 @@ ring_mp_start(FAR struct ring_s *r, uint32_t count,
       new_head = RTS_PACK(RTS_CNT(old_head) + 1,
                           ring_advance(r, RTS_IDX(old_head), n));
     }
-  while (!atomic_cmpxchg_relaxed(&r->prod_head, &old_head, new_head));
+  while (!atomic_cmpxchg_relaxed(&blob->prod_head, &old_head, new_head));
 
   ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
 }
@@ -1000,13 +1024,14 @@ static inline_function void
 ring_sc_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t cons_index = RTS_IDX(r->cons_tail);
+  FAR struct ring_blob_s *blob = r->blob;
+  uint32_t cons_index = RTS_IDX(blob->cons_tail);
   uint32_t prod_index;
   uint32_t available;
   uint32_t n = 0;
 
   UP_RMB();
-  prod_index = RTS_IDX(r->prod_tail);
+  prod_index = RTS_IDX(blob->prod_tail);
   available = ring_dist(r, prod_index, cons_index);
 
   /* available > capacity is physically impossible for a consistent ring;
@@ -1016,7 +1041,7 @@ ring_sc_start(FAR struct ring_s *r, uint32_t count,
    * snapshot without losing entries.
    */
 
-  if (available <= r->capacity)
+  if (available <= blob->capacity)
     {
       n = count < available ? count : available;
     }
@@ -1037,16 +1062,16 @@ static inline_function void
 ring_mc_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_head;
   uint32_t new_head;
   uint32_t n;
 
-  old_head = atomic_read(&r->cons_head);
+  old_head = atomic_read(&blob->cons_head);
   do
     {
-      uint32_t prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
-      uint32_t available =
-        ring_dist(r, prod_index, RTS_IDX(old_head));
+      uint32_t prod_index = RTS_IDX(atomic_read_acquire(&blob->prod_tail));
+      uint32_t available = ring_dist(r, prod_index, RTS_IDX(old_head));
 
       /* available > capacity is physically impossible for a consistent
        * ring; it can only result from a torn snapshot where prod_tail is
@@ -1055,7 +1080,7 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
        * re-reads a coherent snapshot without losing entries.
        */
 
-      if (available > r->capacity)
+      if (available > blob->capacity)
         {
           n = 0;
           break;
@@ -1070,7 +1095,7 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
       new_head = RTS_PACK(RTS_CNT(old_head) + 1,
                           ring_advance(r, RTS_IDX(old_head), n));
     }
-  while (!atomic_cmpxchg_relaxed(&r->cons_head, &old_head, new_head));
+  while (!atomic_cmpxchg_relaxed(&blob->cons_head, &old_head, new_head));
 
   ring_buf_init(buf, r, RTS_IDX(old_head), n, elem_size);
 }
@@ -1086,12 +1111,14 @@ ring_mc_start(FAR struct ring_s *r, uint32_t count,
 static inline_function void
 ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
+
   if (buf->cnt != 0)
     {
       uint32_t prod_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
-      r->prod_tail = RTS_PACK(0, prod_index);
+      blob->prod_tail = RTS_PACK(0, prod_index);
     }
 }
 
@@ -1107,6 +1134,7 @@ ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 static inline_function void
 ring_mp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_tail;
   uint32_t new_head;
   uint32_t new_tail;
@@ -1116,13 +1144,13 @@ ring_mp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
       return;
     }
 
-  old_tail = atomic_read_acquire(&r->prod_tail);
+  old_tail = atomic_read_acquire(&blob->prod_tail);
   do
     {
       uint8_t cnt = RTS_CNT(old_tail) + 1;
       uint32_t idx = RTS_IDX(old_tail);
 
-      new_head = atomic_read(&r->prod_head);
+      new_head = atomic_read(&blob->prod_head);
       if (cnt == RTS_CNT(new_head))
         {
           idx = RTS_IDX(new_head);
@@ -1130,7 +1158,7 @@ ring_mp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 
       new_tail = RTS_PACK(cnt, idx);
     }
-  while (!atomic_cmpxchg_release_acquire(&r->prod_tail, &old_tail,
+  while (!atomic_cmpxchg_release_acquire(&blob->prod_tail, &old_tail,
                                          new_tail));
 }
 
@@ -1145,12 +1173,14 @@ ring_mp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 static inline_function void
 ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
+
   if (buf->cnt != 0)
     {
       uint32_t cons_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
-      r->cons_tail = RTS_PACK(0, cons_index);
+      blob->cons_tail = RTS_PACK(0, cons_index);
     }
 }
 
@@ -1171,19 +1201,20 @@ static inline_function uint32_t
 ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
              size_t elem_size, FAR uint32_t *index)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index;
   uint32_t prod_index;
   uint32_t available;
   uint32_t n;
 
-  cons_index = RTS_IDX(r->cons_tail);
+  cons_index = RTS_IDX(blob->cons_tail);
   if (index)
     {
       cons_index = ring_clamp_cons(r, *index, cons_index);
     }
 
   UP_RMB();
-  prod_index = RTS_IDX(r->prod_tail);
+  prod_index = RTS_IDX(blob->prod_tail);
   available = ring_dist(r, prod_index, cons_index);
   n = count < available ? count : available;
 
@@ -1221,6 +1252,7 @@ static inline_function uint32_t
 ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
              size_t elem_size, FAR uint32_t *index)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t cons_index;
   uint32_t n;
 
@@ -1230,13 +1262,13 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
       uint32_t prod_index;
       uint32_t available;
 
-      cons_index = RTS_IDX(atomic_read_acquire(&r->cons_tail));
+      cons_index = RTS_IDX(atomic_read_acquire(&blob->cons_tail));
       if (index && *index != RING_IDX_OLDEST)
         {
           cons_index = ring_clamp_cons(r, *index, cons_index);
         }
 
-      prod_index = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+      prod_index = RTS_IDX(atomic_read_acquire(&blob->prod_tail));
       available = ring_dist(r, prod_index, cons_index);
       n = count < available ? count : available;
 
@@ -1253,7 +1285,7 @@ ring_mc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
        */
     }
   while (!ring_is_valid_cons(r, cons_index,
-                             RTS_IDX(atomic_read_acquire(&r->cons_tail))));
+             RTS_IDX(atomic_read_acquire(&blob->cons_tail))));
 
   if (items)
     {
@@ -1285,6 +1317,7 @@ static inline_function uint32_t
 ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
                 size_t elem_size, uint32_t offset)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t index;
 
   if (offset >= ring_count(r))
@@ -1292,7 +1325,7 @@ ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
       return 0;
     }
 
-  index = ring_advance(r, offset, RTS_IDX(r->cons_tail));
+  index = ring_advance(r, offset, RTS_IDX(blob->cons_tail));
   return ring_sc_peek(r, items, count, elem_size, &index);
 }
 
@@ -1312,6 +1345,7 @@ static inline_function uint32_t
 ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
                 size_t elem_size, uint32_t offset)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t index;
 
   if (offset >= ring_count(r))
@@ -1320,7 +1354,7 @@ ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
     }
 
   index = ring_advance(r, offset,
-                       RTS_IDX(atomic_read_acquire(&r->cons_tail)));
+                       RTS_IDX(atomic_read_acquire(&blob->cons_tail)));
   return ring_mc_peek(r, items, count, elem_size, &index);
 }
 
@@ -1336,6 +1370,7 @@ ring_mc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
 static inline_function void
 ring_mc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_tail;
   uint32_t new_head;
   uint32_t new_tail;
@@ -1345,13 +1380,13 @@ ring_mc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
       return;
     }
 
-  old_tail = atomic_read_acquire(&r->cons_tail);
+  old_tail = atomic_read_acquire(&blob->cons_tail);
   do
     {
       uint8_t cnt = RTS_CNT(old_tail) + 1;
       uint32_t idx = RTS_IDX(old_tail);
 
-      new_head = atomic_read(&r->cons_head);
+      new_head = atomic_read(&blob->cons_head);
       if (cnt == RTS_CNT(new_head))
         {
           idx = RTS_IDX(new_head);
@@ -1359,7 +1394,7 @@ ring_mc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
 
       new_tail = RTS_PACK(cnt, idx);
     }
-  while (!atomic_cmpxchg_release_acquire(&r->cons_tail, &old_tail,
+  while (!atomic_cmpxchg_release_acquire(&blob->cons_tail, &old_tail,
                                          new_tail));
 }
 
@@ -1489,7 +1524,8 @@ ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 static inline_function uint32_t
 ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
 {
-  uint32_t cons_index = RTS_IDX(r->cons_tail);
+  FAR struct ring_blob_s *blob = r->blob;
+  uint32_t cons_index = RTS_IDX(blob->cons_tail);
   uint32_t count = ring_dist(r, target, cons_index);
 
   if (count != 0)
@@ -1534,7 +1570,8 @@ ring_mc_skip(FAR struct ring_s *r, uint32_t count)
 static inline_function uint32_t
 ring_mc_skipto(FAR struct ring_s *r, uint32_t target)
 {
-  uint32_t cons_index = RTS_IDX(atomic_read(&r->cons_tail));
+  FAR struct ring_blob_s *blob = r->blob;
+  uint32_t cons_index = RTS_IDX(atomic_read(&blob->cons_tail));
   uint32_t count = ring_dist(r, target, cons_index);
 
   if (count != 0)
@@ -1562,6 +1599,7 @@ static inline_function uint32_t
 ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
                         size_t elem_size, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t prod_idx;
   uint32_t cons_idx;
   uint32_t free_space;
@@ -1570,19 +1608,19 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
   uint32_t old_cons;
   uint32_t new_cons;
 
-  if (count > r->capacity)
+  if (count > blob->capacity)
     {
-      all_discard = count - r->capacity;
-      count = r->capacity;
+      all_discard = count - blob->capacity;
+      count = blob->capacity;
     }
 
-  prod_idx = RTS_IDX(atomic_read(&r->prod_tail));
+  prod_idx = RTS_IDX(atomic_read(&blob->prod_tail));
 
   for (; ; )
     {
-      old_cons = atomic_read_acquire(&r->cons_head);
+      old_cons = atomic_read_acquire(&blob->cons_head);
       cons_idx = RTS_IDX(old_cons);
-      free_space = r->capacity - ring_dist(r, prod_idx, cons_idx);
+      free_space = blob->capacity - ring_dist(r, prod_idx, cons_idx);
 
       if (free_space >= count)
         {
@@ -1592,7 +1630,7 @@ ring_sp_overwrite_start(FAR struct ring_s *r, uint32_t count,
       discard = count - free_space;
       new_cons = RTS_PACK(RTS_CNT(old_cons) + 1,
                           ring_advance(r, cons_idx, discard));
-      if (atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
+      if (atomic_cmpxchg_relaxed(&blob->cons_head, &old_cons, new_cons))
         {
           ring_buf_init(buf, r, cons_idx, discard, elem_size);
           ring_mc_finish(r, buf);
@@ -1649,6 +1687,7 @@ static inline_function uint32_t
 ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
                         size_t elem_size, FAR struct ring_buf_s *buf)
 {
+  FAR struct ring_blob_s *blob = r->blob;
   uint32_t old_prod;
   uint32_t new_prod;
   uint32_t prod_idx;
@@ -1659,10 +1698,10 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
   uint32_t old_cons;
   uint32_t new_cons;
 
-  if (count > r->capacity)
+  if (count > blob->capacity)
     {
-      all_discard = count - r->capacity;
-      count = r->capacity;
+      all_discard = count - blob->capacity;
+      count = blob->capacity;
     }
 
   if (count == 0)
@@ -1677,19 +1716,19 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
       return all_discard;
     }
 
-  old_prod = atomic_read(&r->prod_head);
+  old_prod = atomic_read(&blob->prod_head);
   for (; ; )
     {
       uint32_t prod_tail_idx;
 
-      old_cons = atomic_read_acquire(&r->cons_head);
-      prod_tail_idx = RTS_IDX(atomic_read_acquire(&r->prod_tail));
+      old_cons = atomic_read_acquire(&blob->cons_head);
+      prod_tail_idx = RTS_IDX(atomic_read_acquire(&blob->prod_tail));
       prod_idx = RTS_IDX(old_prod);
       cons_idx = RTS_IDX(old_cons);
 
       free_space = ring_dist(r, prod_idx, cons_idx);
-      free_space = free_space < r->capacity ?
-                   r->capacity - free_space : 0;
+      free_space = free_space < blob->capacity ?
+                   blob->capacity - free_space : 0;
 
       if (free_space < count)
         {
@@ -1699,15 +1738,15 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
           discard = count - free_space;
           if (discard > committed)
             {
-              old_prod = atomic_read(&r->prod_head);
+              old_prod = atomic_read(&blob->prod_head);
               continue;
             }
 
           new_cons = RTS_PACK(RTS_CNT(old_cons) + 1,
                               ring_advance(r, cons_idx, discard));
-          if (!atomic_cmpxchg_relaxed(&r->cons_head, &old_cons, new_cons))
+          if (!atomic_cmpxchg_relaxed(&blob->cons_head, &old_cons, new_cons))
             {
-              old_prod = atomic_read(&r->prod_head);
+              old_prod = atomic_read(&blob->prod_head);
               continue;
             }
 
@@ -1715,13 +1754,13 @@ ring_mp_overwrite_start(FAR struct ring_s *r, uint32_t count,
           ring_mc_finish(r, buf);
           all_discard += discard;
 
-          old_prod = atomic_read(&r->prod_head);
+          old_prod = atomic_read(&blob->prod_head);
           prod_idx = RTS_IDX(old_prod);
         }
 
       new_prod = RTS_PACK(RTS_CNT(old_prod) + 1,
                           ring_advance(r, prod_idx, count));
-      if (atomic_cmpxchg_relaxed(&r->prod_head, &old_prod, new_prod))
+      if (atomic_cmpxchg_relaxed(&blob->prod_head, &old_prod, new_prod))
         {
           break;
         }
