@@ -2848,7 +2848,16 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
     {
       /* Configuring MMC - Use MMC_SWITCH access modes.
        * Select 8-bit if host supports it, otherwise 4-bit.
+       *
+       * Switch the host to wide bus operation before issuing the
+       * SWITCH command: on hosts that program the bus width in the
+       * widebus callback, switching the card first leaves the switch
+       * unfinished and all following transfers fail.
        */
+
+      SDIO_WIDEBUS(priv->dev, true);
+      priv->widebus = true;
+      MMCSD_USLEEP(MMCSD_CLK_DELAY);
 
       if (priv->caps & SDIO_CAPS_8BIT)
         {
@@ -2936,7 +2945,13 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
           priv->mode = EXT_CSD_HS_TIMING_HS;
         }
 
-      SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
+      /* Select the MMC transfer clocking according to the negotiated
+       * bus width, mirroring the SD card path above, so that a later
+       * clock selection cannot revert the host to 1-bit operation.
+       */
+
+      SDIO_CLOCK(priv->dev, priv->widebus ? CLOCK_MMC_TRANSFER_4BIT :
+                                            CLOCK_MMC_TRANSFER);
     }
 #endif /* #ifdef CONFIG_MMCSD_MMCSUPPORT */
 
@@ -3170,6 +3185,15 @@ static int mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv)
     }
 
   mmcsd_decode_csd(priv, priv->csd);
+
+  /* Select high speed MMC clocking (which may depend on the DSR setting)
+   * before switching the bus width: on hosts that program the bus width
+   * in the clock callback, the transfer clock must already be in place
+   * before the switch sequence starts.
+   */
+
+  SDIO_CLOCK(priv->dev, CLOCK_MMC_TRANSFER);
+  MMCSD_USLEEP(MMCSD_CLK_DELAY);
 
   /* It's up to the driver to act on the widebus request.  mmcsd_widebus()
    * enables the CLOCK_MMC_TRANSFER, so call it here always.
