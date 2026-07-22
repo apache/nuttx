@@ -74,6 +74,9 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
 
   set(ULP_LPCORE_SECTIONS_LD
       ${ULP_BOARD_SCRIPTS_DIR}/${CHIP_SERIES}_lpcore_sections.ld)
+  if(ULP_CUSTOM_SECTIONS_LD)
+    set(ULP_LPCORE_SECTIONS_LD ${ULP_CUSTOM_SECTIONS_LD})
+  endif()
   set(ULP_SECTIONS_LD ${ULP_FOLDER}/ulp_sections.ld)
   set(ULP_MAPGEN_TOOL ${HAL}/components/ulp/esp32ulp_mapgen.py)
 
@@ -116,6 +119,8 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
       ${HAL}/components/esp_rom/${CHIP_SERIES}/include/${CHIP_SERIES}
       ${HAL}/components/hal/include
       ${HAL}/components/hal/platform_port/include
+      ${HAL}/components/esp_hal_wdt/include
+      ${HAL}/components/esp_hal_wdt/${CHIP_SERIES}/include
       ${HAL}/components/log
       ${HAL}/components/log/include
       ${HAL}/components/riscv/include
@@ -311,17 +316,29 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
     set(ULP_NUTTX_CONFIG_COPY ${ULP_FOLDER}/nuttx/config.h)
 
     foreach(_ulp_csrc ${ULP_APP_C_SRCS})
-      list(APPEND ULP_APP_C_SOURCES ${ULP_APP_FOLDER}/${_ulp_csrc})
+      if(IS_ABSOLUTE "${_ulp_csrc}")
+        list(APPEND ULP_APP_C_SOURCES ${_ulp_csrc})
+      else()
+        list(APPEND ULP_APP_C_SOURCES ${ULP_APP_FOLDER}/${_ulp_csrc})
+      endif()
     endforeach()
 
     foreach(_ulp_asrc ${ULP_APP_ASM_SRCS})
-      list(APPEND ULP_APP_ASM_SOURCES ${ULP_APP_FOLDER}/${_ulp_asrc})
+      if(IS_ABSOLUTE "${_ulp_asrc}")
+        list(APPEND ULP_APP_ASM_SOURCES ${_ulp_asrc})
+      else()
+        list(APPEND ULP_APP_ASM_SOURCES ${ULP_APP_FOLDER}/${_ulp_asrc})
+      endif()
     endforeach()
 
     if(ULP_APP_INCLUDES)
       foreach(_ulp_incl ${ULP_APP_INCLUDES})
-        get_filename_component(_ulp_incl_dir ${_ulp_incl} DIRECTORY)
-        list(APPEND ULP_APP_INCLUDE_DIRS ${_ulp_incl_dir})
+        if(IS_DIRECTORY "${_ulp_incl}")
+          list(APPEND ULP_APP_INCLUDE_DIRS ${_ulp_incl})
+        else()
+          get_filename_component(_ulp_incl_dir ${_ulp_incl} DIRECTORY)
+          list(APPEND ULP_APP_INCLUDE_DIRS ${_ulp_incl_dir})
+        endif()
       endforeach()
       list(REMOVE_DUPLICATES ULP_APP_INCLUDE_DIRS)
       list(APPEND ULP_INCLUDE_DIRS ${ULP_APP_INCLUDE_DIRS})
@@ -375,6 +392,10 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
     target_include_directories(${ULP_FIRMWARE_TARGET}
                                PRIVATE ${ULP_INCLUDE_DIRS})
     target_compile_definitions(${ULP_FIRMWARE_TARGET} PRIVATE IS_ULP_COCPU)
+    if(ULP_EXTRA_DEFINES)
+      target_compile_definitions(${ULP_FIRMWARE_TARGET}
+                                 PRIVATE ${ULP_EXTRA_DEFINES})
+    endif()
     target_compile_options(
       ${ULP_FIRMWARE_TARGET}
       PRIVATE ${ULP_COMPILE_OPTS}
@@ -408,7 +429,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
                    _ulp_postprocess_aliases "${_ulp_postprocess_aliases}")
 
     set(_ulp_postprocess_var_map
-        [=[if ! grep -q "struct ulp_var_map_s ulp_var_map" "@ULP_VAR_MAP_HEADER@"; then printf '%s\n' '#include "nuttx/symtab.h"' '#include "ulp/ulp_vars.h"' '' 'struct ulp_var_map_s' '{' '  struct symtab_s sym;' '  size_t size;' '};' '' 'struct ulp_var_map_s ulp_var_map[] =' '{ };' > "@ULP_VAR_MAP_HEADER@"; fi; sed -i "/@ULP_PREFIX@/d" "@ULP_VAR_MAP_HEADER@"; flock -x "@ULP_LOCKFILE@" -c 'grep "@ULP_PREFIX@" "@ULP_MAIN_HEADER@" | while IFS= read -r line; do var=$(echo "$line" | grep -oP "@ULP_PREFIX@\w+(?=[;\[])" ); if [ -n "$var" ]; then size=$(echo "$line" | grep -oP "\[\d+\]" | grep -oP "\d+"); if [ -n "$size" ]; then size=$(( size * 4 )); else size=4; fi; sed -i "s/ };//" "@ULP_VAR_MAP_HEADER@"; echo -ne "  { .sym.sym_name = \"${var}\", .sym.sym_value = &${var}, .size = ${size}},\n };" >> "@ULP_VAR_MAP_HEADER@"; fi; done']=]
+        [=[if ! grep -q "struct ulp_var_map_s ulp_var_map" "@ULP_VAR_MAP_HEADER@"; then printf '%s\n' '#include "nuttx/symtab.h"' '#include "ulp/ulp_vars.h"' '' 'struct ulp_var_map_s' '{' '  struct symtab_s sym;' '  size_t size;' '};' '' 'struct ulp_var_map_s ulp_var_map[] =' '{ };' > "@ULP_VAR_MAP_HEADER@"; fi; sed -i "/@ULP_PREFIX@/d" "@ULP_VAR_MAP_HEADER@"; flock -x "@ULP_LOCKFILE@" -c 'grep "@ULP_PREFIX@" "@ULP_MAIN_HEADER@" | while IFS= read -r line; do var=$(echo "$line" | grep -oP "@ULP_PREFIX@\w+(?=[;\[])" ); if [ -n "$var" ]; then size=$(echo "$line" | grep -oP "\[\d+\]" | grep -oP "\d+"); if [ -n "$size" ]; then size=$(( size * 4 )); else size=4; fi; sed -i "s/ };//" "@ULP_VAR_MAP_HEADER@"; printf "  { .sym.sym_name = \"%s\", .sym.sym_value = &%s, .size = %s},\n };" "${var}" "${var}" "${size}" >> "@ULP_VAR_MAP_HEADER@"; fi; done']=]
     )
     string(REPLACE "@ULP_VAR_MAP_HEADER@" "${ULP_VAR_MAP_HEADER}"
                    _ulp_postprocess_var_map "${_ulp_postprocess_var_map}")
