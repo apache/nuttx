@@ -102,6 +102,17 @@
 
 #define FDPIC_THUMB_BIT       1
 
+/* Calling into a module from the loader -- which is what running its
+ * constructors amounts to -- needs the object's data base installed in the
+ * FDPIC register first, and that takes a little assembly.  Where it cannot
+ * be done, a module carrying constructors is refused rather than run with
+ * whatever the register happened to hold.
+ */
+
+#if defined(CONFIG_ARCH_ARM) && defined(__thumb__)
+#  define FDPIC_HAVE_CALLFN   1
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -266,6 +277,7 @@ static int fdpic_readdynamic(FAR struct fdpic_loadinfo_s *loadinfo,
                              FAR const Elf32_Phdr *phdr)
 {
   FAR Elf32_Dyn *dyn;
+  uint32_t pltreltype = DT_REL;
   size_t ndyn;
   size_t i;
   int ret;
@@ -316,6 +328,34 @@ static int fdpic_readdynamic(FAR struct fdpic_loadinfo_s *loadinfo,
             loadinfo->gotaddr = dyn[i].d_un.d_ptr;
             break;
 
+          case DT_JMPREL:
+            loadinfo->pltrelvaddr = dyn[i].d_un.d_ptr;
+            break;
+
+          case DT_PLTRELSZ:
+            loadinfo->pltrelsize = dyn[i].d_un.d_val;
+            break;
+
+          case DT_PLTREL:
+            pltreltype = dyn[i].d_un.d_val;
+            break;
+
+          case DT_INIT_ARRAY:
+            loadinfo->initvaddr = dyn[i].d_un.d_ptr;
+            break;
+
+          case DT_INIT_ARRAYSZ:
+            loadinfo->initsize = dyn[i].d_un.d_val;
+            break;
+
+          case DT_FINI_ARRAY:
+            loadinfo->finivaddr = dyn[i].d_un.d_ptr;
+            break;
+
+          case DT_FINI_ARRAYSZ:
+            loadinfo->finisize = dyn[i].d_un.d_val;
+            break;
+
           case DT_NEEDED:
             /* An offset into DT_STRTAB.  The string itself lives in the
              * read-only segment, which is not mapped yet, so only the
@@ -341,6 +381,19 @@ static int fdpic_readdynamic(FAR struct fdpic_loadinfo_s *loadinfo,
     }
 
   kmm_free(dyn);
+
+  /* DT_PLTREL says which format the PLT table is in.  Nothing anywhere in
+   * this loader reads RELA, so an object claiming that layout must be
+   * refused rather than walked as if it were REL: the entries are 12 bytes,
+   * not 8, and misreading them would apply garbage relocations.
+   */
+
+  if (loadinfo->pltrelsize != 0 && pltreltype != DT_REL)
+    {
+      berr("ERROR: %s has RELA PLT relocations, which are not supported\n",
+           loadinfo->name);
+      return -ENOEXEC;
+    }
 
   if (loadinfo->gotaddr == 0)
     {
@@ -495,9 +548,15 @@ static int fdpic_load(FAR struct fdpic_loadinfo_s *loadinfo)
    * the relocations ask us to manufacture.  Bounding that by the total
    * relocation count costs a few bytes and avoids a second pass over the
    * relocation table.
+   *
+   * Both tables have to be counted.  An R_ARM_FUNCDESC in the PLT table
+   * draws from the same pool, so sizing this from DT_RELSZ alone would let
+   * a module carrying DT_JMPREL entries run off the end of the allocation
+   * and corrupt the heap.
    */
 
-  loadinfo->ndesc     = loadinfo->relsize / sizeof(Elf32_Rel);
+  loadinfo->ndesc     = (loadinfo->relsize + loadinfo->pltrelsize) /
+                        sizeof(Elf32_Rel);
   loadinfo->dataalloc = loadinfo->datamemsz +
                         (size_t)loadinfo->ndesc *
                         sizeof(struct fdpic_desc_s);
@@ -902,35 +961,41 @@ static int fdpic_symvalue(FAR struct fdpic_loadinfo_s *obj,
 }
 
 /****************************************************************************
- * Name: fdpic_bind
+ * Name: fdpic_reltable
  *
  * Description:
- *   Apply the module's dynamic relocations.
+ *   Apply one REL relocation table.
+ *
+ * Input Parameters:
+ *   pltrel - This is the DT_JMPREL table, so the words being overwritten
+ *            are not addends.  See the addend handling below.
  *
  ****************************************************************************/
 
-static int fdpic_bind(FAR struct fdpic_loadinfo_s *loadinfo,
-                      FAR struct fdpic_loadinfo_s *head,
-                      FAR const struct symtab_s *exports, int nexports)
+static int fdpic_reltable(FAR struct fdpic_loadinfo_s *loadinfo,
+                          FAR struct fdpic_loadinfo_s *head,
+                          FAR const struct symtab_s *exports, int nexports,
+                          uintptr_t relvaddr, size_t relsize,
+                          bool pltrel, FAR const char *what)
 {
   FAR const Elf32_Rel *rels;
   size_t nrels;
   size_t i;
   int ret;
 
-  if (loadinfo->relsize == 0)
+  if (relsize == 0)
     {
       return OK;
     }
 
-  rels = (FAR const Elf32_Rel *)fdpic_addr(loadinfo, loadinfo->relvaddr);
+  rels = (FAR const Elf32_Rel *)fdpic_addr(loadinfo, relvaddr);
   if (rels == NULL)
     {
-      berr("ERROR: Relocations outside any segment\n");
+      berr("ERROR: %s of %s is outside any segment\n", what, loadinfo->name);
       return -ENOEXEC;
     }
 
-  nrels = loadinfo->relsize / sizeof(Elf32_Rel);
+  nrels = relsize / sizeof(Elf32_Rel);
 
   for (i = 0; i < nrels; i++)
     {
@@ -1015,9 +1080,20 @@ static int fdpic_bind(FAR struct fdpic_loadinfo_s *loadinfo,
                * Thumb bit -- carried entirely by the addend.  Dropping it
                * yields an even address and the core faults trying to
                * execute it as ARM code.
+               *
+               * Except in the DT_JMPREL table, where that word is not an
+               * addend at all.  A lazy descriptor is pre-loaded with the
+               * address of its PLT resolution stub and a GOT half of -1,
+               * for a resolver to overwrite on first call.  Adding that
+               * stub address to the symbol value produces an arbitrary
+               * address, and the module faults on its first call exactly as
+               * if the relocation had never been applied -- which is a
+               * remarkably good imitation of the bug this table support was
+               * added to fix.  An eager binder overwrites the descriptor
+               * outright.
                */
 
-              addend = desc->entry;
+              addend = pltrel ? 0 : desc->entry;
 
               desc->entry = value + addend;
 
@@ -1060,7 +1136,7 @@ static int fdpic_bind(FAR struct fdpic_loadinfo_s *loadinfo,
               desc = (FAR struct fdpic_desc_s *)loadinfo->descpool +
                      loadinfo->usedesc++;
 
-              desc->entry = value + *where;   /* addend, as above */
+              desc->entry = value + (pltrel ? 0 : *where);  /* as above */
               desc->got   = (owner != NULL) ? owner->gotaddr
                                             : loadinfo->gotaddr;
 
@@ -1074,10 +1150,242 @@ static int fdpic_bind(FAR struct fdpic_loadinfo_s *loadinfo,
         }
     }
 
-  binfo("fdpic: applied %zu relocations, %u descriptors created\n",
-        nrels, loadinfo->usedesc);
+  binfo("fdpic: %s: applied %zu %s relocations, %u descriptors created\n",
+        loadinfo->name, nrels, what, loadinfo->usedesc);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: fdpic_bind
+ *
+ * Description:
+ *   Apply the module's dynamic relocations.
+ *
+ *   Both relocation tables are walked, and both eagerly.  Which one an
+ *   imported function's descriptor lands in is purely a linker decision --
+ *   -z now puts it in DT_REL, and without it the same entry goes to
+ *   DT_JMPREL for a lazy resolver to fill in later.  There is no resolver
+ *   here, so a table left unwalked is not deferred work, it is a descriptor
+ *   that stays unrelocated until the module branches through it.  Binding
+ *   both is what makes the layout stop mattering.
+ *
+ *   Nothing is lost by binding the PLT table early: a module carries a
+ *   handful of relocations, so there is no load time worth deferring.
+ *
+ *   The two tables are not handled identically, though.  A lazy descriptor
+ *   arrives pre-loaded with its resolution stub rather than with an addend,
+ *   so the PLT table is bound with that word ignored.
+ *
+ ****************************************************************************/
+
+static int fdpic_bind(FAR struct fdpic_loadinfo_s *loadinfo,
+                      FAR struct fdpic_loadinfo_s *head,
+                      FAR const struct symtab_s *exports, int nexports)
+{
+  int ret;
+
+  ret = fdpic_reltable(loadinfo, head, exports, nexports,
+                       loadinfo->relvaddr, loadinfo->relsize,
+                       false, "DT_REL");
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return fdpic_reltable(loadinfo, head, exports, nexports,
+                        loadinfo->pltrelvaddr, loadinfo->pltrelsize,
+                        true, "DT_JMPREL");
+}
+
+/****************************************************************************
+ * Name: fdpic_callfn
+ *
+ * Description:
+ *   Call a function in a loaded object with that object's data base in the
+ *   FDPIC register.
+ *
+ *   A module's own code normally runs with the register already correct,
+ *   because the scheduler installs it from the task's D-Space on every
+ *   switch.  Constructors do not get that: they run here, in whichever task
+ *   called the loader, before the module's task exists.  So the register has
+ *   to be installed by hand around the call, and the function entered
+ *   directly rather than through a descriptor.
+ *
+ *   The base firmware is built with the register reserved, so nothing of the
+ *   loader's own is being displaced; saving and restoring it covers the case
+ *   where the loader was itself called from module code.  Being preempted
+ *   in the middle is harmless -- the register is part of the saved context,
+ *   so it travels with whichever task is holding it.
+ *
+ ****************************************************************************/
+
+#ifdef FDPIC_HAVE_CALLFN
+static void fdpic_callfn(uintptr_t entry, uintptr_t got)
+{
+  __asm__ __volatile__
+  (
+    "mov r4, r9\n"        /* Save whatever the caller had there  */
+    "mov r9, %1\n"        /* This object's data base             */
+    "blx %0\n"
+    "mov r9, r4\n"
+    :
+    : "r" (entry), "r" (got)
+    : "r0", "r1", "r2", "r3", "r4", "r12", "lr", "cc", "memory"
+  );
+}
+#endif
+
+/****************************************************************************
+ * Name: fdpic_callarray
+ *
+ * Description:
+ *   Run one of the DT_INIT_ARRAY / DT_FINI_ARRAY tables of an object.
+ *
+ *   The array lives in the writable segment and each entry carries an
+ *   R_ARM_RELATIVE relocation, so by the time this runs the entries are
+ *   already run-time code addresses with their Thumb bit intact.  Nothing
+ *   further has to be translated.
+ *
+ * Input Parameters:
+ *   reverse - Walk the array backwards.  Destructors run in the opposite
+ *             order to constructors, which is the only reason the two
+ *             directions exist.
+ *
+ ****************************************************************************/
+
+static int fdpic_callarray(FAR struct fdpic_loadinfo_s *obj,
+                           uintptr_t vaddr, size_t size, bool reverse,
+                           FAR const char *what)
+{
+  FAR const uintptr_t *array;
+#ifdef FDPIC_HAVE_CALLFN
+  size_t n;
+  size_t i;
+#endif
+
+  if (vaddr == 0 || size == 0)
+    {
+      return OK;
+    }
+
+  array = (FAR const uintptr_t *)fdpic_addr(obj, vaddr);
+  if (array == NULL)
+    {
+      berr("ERROR: %s of %s is outside any segment\n", what, obj->name);
+      return -ENOEXEC;
+    }
+
+#ifndef FDPIC_HAVE_CALLFN
+  berr("ERROR: %s has a %s, which this architecture cannot run\n",
+       obj->name, what);
+  return -ENOSYS;
+#else
+  n = size / sizeof(uintptr_t);
+
+  binfo("fdpic: %s: %zu entries in %s\n", obj->name, n, what);
+
+  for (i = 0; i < n; i++)
+    {
+      uintptr_t entry = array[reverse ? n - 1 - i : i];
+      uintptr_t code  = entry & ~FDPIC_THUMB_BIT;
+
+      /* 0 and ~0 are the conventional "no function here" fillers */
+
+      if (entry == 0 || entry == (uintptr_t)-1)
+        {
+          continue;
+        }
+
+      /* The entry must point into this object's text.  Left unchecked, a
+       * relocation that did not happen -- the failure this loader is most
+       * prone to -- becomes a branch to an arbitrary address, which on this
+       * class of target means a HardFault with no console and no clue.
+       */
+
+      if (code < obj->textaddr || code >= obj->textaddr + obj->textsize)
+        {
+          berr("ERROR: %s entry %zu of %s is %08lx, outside its text\n",
+               what, i, obj->name, (unsigned long)entry);
+          return -ENOEXEC;
+        }
+
+      fdpic_callfn(entry, obj->gotaddr);
+    }
+
+  return OK;
+#endif
+}
+
+/****************************************************************************
+ * Name: fdpic_runinit
+ *
+ * Description:
+ *   Run every object's constructors, dependencies first.
+ *
+ *   An object joins the list before the DT_NEEDED walk appends its own
+ *   dependencies, so a library always sits behind whatever needed it.
+ *   Walking the list backwards therefore constructs a library before the
+ *   object that uses it, which is the ordering that matters: a module's
+ *   constructor may well touch a library object that has to exist already.
+ *
+ ****************************************************************************/
+
+static int fdpic_runinit(FAR struct fdpic_loadinfo_s *head)
+{
+  FAR struct fdpic_loadinfo_s *done = NULL;
+  FAR struct fdpic_loadinfo_s *obj;
+  int ret;
+
+  for (; ; )
+    {
+      /* The object just ahead of the one done last time.  The list is
+       * singly linked and short -- a handful of entries at most -- so
+       * rescanning it beats carrying a back pointer around.
+       */
+
+      for (obj = head; obj != NULL && obj->flink != done; obj = obj->flink)
+        {
+        }
+
+      if (obj == NULL)
+        {
+          return OK;
+        }
+
+      ret = fdpic_callarray(obj, obj->initvaddr, obj->initsize, false,
+                            "DT_INIT_ARRAY");
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      done = obj;
+    }
+}
+
+/****************************************************************************
+ * Name: fdpic_runfini
+ *
+ * Description:
+ *   Run every object's destructors, in the mirror of the construction
+ *   order: the module first, then the libraries it was built on.
+ *
+ *   Errors are not propagated.  This runs on the teardown path, where there
+ *   is nothing left to abandon and reporting a failure would only turn an
+ *   incomplete teardown into a leaked one.
+ *
+ ****************************************************************************/
+
+static void fdpic_runfini(FAR struct fdpic_loadinfo_s *head)
+{
+  FAR struct fdpic_loadinfo_s *obj;
+
+  for (obj = head; obj != NULL; obj = obj->flink)
+    {
+      fdpic_callarray(obj, obj->finivaddr, obj->finisize, true,
+                      "DT_FINI_ARRAY");
+    }
 }
 
 /****************************************************************************
@@ -1130,6 +1438,24 @@ static int fdpic_loadbinary(FAR struct binary_s *binp,
         }
     }
 
+  /* Constructors, now that every object can reach its own data.
+   *
+   * fdpic_release() can undo a load but cannot undo a constructor, so this
+   * sits ahead of the D-Space allocation rather than after it: the only way
+   * left to discard a load with constructors already run is a constructor
+   * list that fails partway through, and such a module is unusable anyway.
+   * Destructors are not run for the entries that did succeed -- a table this
+   * loader has just found malformed is not one to branch into on the way
+   * out.
+   */
+
+  ret = fdpic_runinit(head);
+  if (ret < 0)
+    {
+      berr("ERROR: Constructors of %s failed: %d\n", main_obj->name, ret);
+      goto errout;
+    }
+
   binp->entrypt   = (main_t)main_obj->entry;
   binp->mapsize   = 0;
   binp->stacksize = CONFIG_FDPIC_STACKSIZE;
@@ -1172,14 +1498,16 @@ errout:
  * Name: fdpic_unloadbinary
  *
  * Description:
- *   Release the module.  Unmapping the text drops the filesystem's pin on
- *   it, which is what allows a compacting filesystem to move those blocks
- *   again once no instance is executing from them.
+ *   Release the module.  Destructors run first, while the writable segment
+ *   they operate on is still there.  Unmapping the text then drops the
+ *   filesystem's pin on it, which is what allows a compacting filesystem to
+ *   move those blocks again once no instance is executing from them.
  *
  ****************************************************************************/
 
 static int fdpic_unloadbinary(FAR struct binary_s *binp)
 {
+  fdpic_runfini(binp->mapped);
   fdpic_release(binp->mapped);
   binp->mapped = NULL;
   return OK;

@@ -138,6 +138,27 @@ struct fdpic_loadinfo_s
 
   uintptr_t relvaddr;
   size_t    relsize;
+
+  /* The PLT relocation table.  Separate from DT_REL only by where the
+   * linker chose to put an entry: without -z now the imported function
+   * descriptors land here instead, and the loader binds both tables
+   * eagerly rather than requiring one particular layout.
+   */
+
+  uintptr_t pltrelvaddr;
+  size_t    pltrelsize;
+
+  /* Constructors and destructors.  Both arrays live in the writable
+   * segment and their entries arrive as link-time addresses carrying an
+   * R_ARM_RELATIVE relocation, so they are real code addresses -- Thumb
+   * bit included -- only after fdpic_bind() has run.
+   */
+
+  uintptr_t initvaddr;
+  size_t    initsize;
+  uintptr_t finivaddr;
+  size_t    finisize;
+
   uintptr_t symtabvaddr;
   uintptr_t strtabvaddr;
 };
