@@ -502,10 +502,43 @@ belonging to a unified interface:
 
   This works like ``sync()`` but instead of the file, it syncs the entire
   filesystem's metadata.
-  
+
   :param FAR struct inode * mountpt: Mount point inode of the file system.
   :returns: Status of syncing file system metadata operation.
   :retval OK (0): Success.
+  :retval < 0: Error.
+
+.. c:function:: int ioctldir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir, int cmd, unsigned long arg)
+
+  Carries out an ioctl command issued on a descriptor for the mountpoint
+  directory rather than on a file inside the volume. It takes the same
+  ``(mountpt, dir)`` pair as the other directory operations. Typical commands
+  act on the volume as a whole rather than on any one open file, such as
+  ``FIOC_REFORMAT``, ``FIOC_OPTIMIZE`` or ``FIOC_INTEGRITY``.
+
+  The command reaches this method when it is issued on a descriptor for the
+  mountpoint directory, which the caller obtains with
+  ``open(mountpoint, O_RDONLY | O_DIRECTORY)``. No file inside the volume
+  needs to be open, which matters for commands that a file system refuses to
+  perform while one is.
+
+  The method is consulted before the VFS acts on the command, so it must
+  answer ``-ENOTTY`` for anything it does not recognize; the VFS then applies
+  its own handling.
+
+  This method is optional. A file system that leaves it ``NULL`` behaves as
+  before: the VFS answers ``-ENOTTY`` for any command on a directory
+  descriptor that it does not handle itself.
+
+  :param FAR struct inode * mountpt: Mount point inode of the file system.
+  :param FAR struct fs_dirent_s * dir: The open mountpoint directory the
+    command was issued on.
+  :param int cmd: The command to carry out, as defined in
+    ``include/nuttx/fs/ioctl.h``.
+  :param unsigned long arg: Additional argument, if the command requires one.
+  :returns: Status of the ioctl operation.
+  :retval OK (0): Success.
+  :retval -ENOTTY: The file system does not recognize the command.
   :retval < 0: Error.
 
 

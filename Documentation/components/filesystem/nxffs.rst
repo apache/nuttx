@@ -143,6 +143,18 @@ The file system supports to ioctls:
   file system will increase the amount of wear on the FLASH if you use this
   frequently!
 
+Both act on the volume rather than on any one file, so issue them on a
+descriptor for the mountpoint directory::
+
+    int fd = open("/mnt/nxffs", O_RDONLY | O_DIRECTORY);
+    ioctl(fd, FIOC_REFORMAT, 0);
+    close(fd);
+
+``FIOC_REFORMAT`` in particular is only reachable this way.  It refuses to
+run while any file on the volume is open, so issuing it on a descriptor for
+a file *inside* the volume can never succeed -- that descriptor is itself
+such a file, and the request returns ``-EBUSY``.
+
 Things to Do
 ============
 

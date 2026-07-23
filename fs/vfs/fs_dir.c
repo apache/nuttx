@@ -556,15 +556,34 @@ static off_t dir_seek(FAR struct file *filep, off_t offset, int whence)
 static int dir_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct fs_dirent_s *dir = filep->f_priv;
-  int ret = OK;
+  int ret = -ENOTTY;
 
-  if (cmd == FIOC_FILEPATH)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  /* If this directory belongs to a mounted volume whose file system offers
+   * volume-wide commands, give it the first chance:  it is the one route to
+   * them that does not require an unrelated file to be open.  Anything the
+   * file system does not recognize falls through to the VFS defaults.
+   */
+
+  if (INODE_IS_MOUNTPT(dir->fd_root) &&
+      dir->fd_root->u.i_mops != NULL &&
+      dir->fd_root->u.i_mops->ioctldir != NULL)
     {
-      strlcpy((FAR char *)(uintptr_t)arg, dir->fd_path, PATH_MAX);
+      ret = dir->fd_root->u.i_mops->ioctldir(dir->fd_root, dir, cmd, arg);
     }
-  else if (cmd != BIOC_FLUSH)
+#endif
+
+  if (ret == -ENOTTY)
     {
-      ret = -ENOTTY;
+      if (cmd == FIOC_FILEPATH)
+        {
+          strlcpy((FAR char *)(uintptr_t)arg, dir->fd_path, PATH_MAX);
+          ret = OK;
+        }
+      else if (cmd == BIOC_FLUSH)
+        {
+          ret = OK;
+        }
     }
 
   return ret;
