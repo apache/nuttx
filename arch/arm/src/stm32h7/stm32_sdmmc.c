@@ -1359,7 +1359,22 @@ static void stm32_recvdma(struct stm32_dev_s *priv)
     }
   else
     {
-      /* In an aligned case, we have always received all blocks */
+      /* In an aligned case, we have always received all blocks.
+       *
+       * The destination buffer was invalidated before the DMA in
+       * stm32_dmarecvsetup(), but on the Cortex-M7 the cache can
+       * speculatively prefetch into this (cacheable) buffer between that
+       * point and DMA completion, leaving stale lines that shadow the
+       * data just written by the IDMA.  Invalidate again now that the
+       * transfer is complete, before the buffer is consumed, so the CPU
+       * reads the freshly received data instead of a previously cached
+       * sector.  The buffer and length are cache-line aligned here (that
+       * is why this aligned path was taken), so no adjacent memory is
+       * affected.
+       */
+
+      up_invalidate_dcache((uintptr_t)priv->buffer,
+                           (uintptr_t)priv->buffer + priv->receivecnt);
 
       priv->remaining = 0;
     }
