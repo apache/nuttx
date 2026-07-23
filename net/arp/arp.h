@@ -458,14 +458,17 @@ int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev);
  *   Clear the ARP table on the network device
  *
  * Input Parameters:
- *   dev  - The device driver structure
+ *   dev       - The device driver structure
+ *   skip_perm - When true, preserve permanent (static, ATF_PERM) entries
+ *               and only flush dynamic ones (carrier-loss semantics).  When
+ *               false, flush every entry on the device.
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-void arp_cleanup(FAR struct net_driver_s *dev);
+void arp_cleanup(FAR struct net_driver_s *dev, bool skip_perm);
 
 /****************************************************************************
  * Name: arp_update
@@ -656,7 +659,7 @@ int arp_queue_iob(FAR struct net_driver_s *dev, in_addr_t ipaddr,
 #  define arp_notify(i)
 #  define arp_find(i,e,d) (-ENOSYS)
 #  define arp_delete(i,d) (-ENOSYS)
-#  define arp_cleanup(d)
+#  define arp_cleanup(d,s)
 #  define arp_update(d,i,m,f);
 #  define arp_hdr_update(d,i,m);
 #  define arp_snapshot(s,n) (0)
