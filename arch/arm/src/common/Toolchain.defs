@@ -584,6 +584,25 @@ CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS)-fvisibility=hidden -mlong-calls
 
 ifeq ($(CONFIG_PIC),y)
+  # NOTE: nearly every board Make.defs includes this file and then assigns
+  #
+  #   CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) ...
+  #
+  # with ':=', which silently discards this flag.  A board enabling
+  # CONFIG_PIC has to re-apply it after that assignment, and then filter it
+  # back out of CPICFLAGS and CELFFLAGS, because GCC rejects --fixed-r10
+  # alongside the -mpic-register=r10 those carry.  See
+  # boards/arm/mps/mps3-an547/scripts/Make.defs for the pattern.
+  #
+  # The flag cannot simply move to ARCHCPUFLAGS to survive the ':=', because
+  # the module flags derive from CFLAGS and would then hit exactly that
+  # rejected combination.
+  #
+  # Losing it is silent and the symptom is remote from the cause: the build
+  # succeeds, and only a callback from base firmware into module code
+  # misbehaves, reading its data through a register the firmware has since
+  # felt free to reuse.
+
   CFLAGS += --fixed-r10
   CELFFLAGS += $(PICFLAGS) -mpic-register=r10
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r10

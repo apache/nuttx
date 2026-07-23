@@ -28,7 +28,27 @@ LDSCRIPT = flash.ld
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+
+ifeq ($(CONFIG_PIC),y)
+  # Toolchain.defs adds this, but the ':=' above discards it.
+  #
+  # A PIC module reaches its own data through r10, and that register has to
+  # survive a call into the base firmware: a base firmware routine that
+  # calls back into module code -- qsort() with a module comparison function
+  # is the standard case -- must arrive there with the module's data base
+  # still in r10, which it will not if the compiler was free to allocate r10
+  # while building the base firmware.
+
+  CFLAGS += --fixed-r10
+endif
+
+# The module itself already reserves r10 via -mpic-register=r10, and GCC
+# rejects a command line carrying both that and --fixed-r10 ("unable to use
+# 'r10' for PIC register").  Since both of these derive from CFLAGS, the
+# flag has to be filtered back out of them.
+
+CPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CFLAGS))
+CELFFLAGS := $(filter-out --fixed-r10,$(CELFFLAGS))
 CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
