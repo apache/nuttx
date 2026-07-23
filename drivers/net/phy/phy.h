@@ -97,6 +97,29 @@ struct phy_driver_s
 
   CODE int (*config_intr)(FAR struct phy_device_s *phydev, bool enable);
   CODE int (*handle_interrupt)(FAR struct phy_device_s *phydev);
+
+  /* Paged register access (optional).
+   *
+   * Some PHYs place most registers behind a vendor-specific page-select
+   * register, and the register number / switching mechanism differs per
+   * vendor (e.g. Realtek reg 0x1f, Marvell reg 22, Realtek extended pages
+   * needing a two-step 0x1e/0x1f write).  These callbacks let the phylib
+   * core switch pages without hardcoding any vendor detail:
+   *
+   * read_page  - Return the currently selected page (>= 0), or a negated
+   *              errno on failure.
+   * write_page - Select 'page'.  Return OK, or a negated errno on failure.
+   *
+   * Both are invoked by the phylib core with the MDIO bus lock already held
+   * (see phy_select_page()), so the driver MUST use the lockless bus
+   * primitives (mdio_read_nolock() / mdio_write_nolock()) inside them.
+   *
+   * Both NULL => the PHY has no pages; the phy_*_paged() helpers return
+   * -ENOTSUP.
+   */
+
+  CODE int (*read_page)(FAR struct phy_device_s *phydev);
+  CODE int (*write_page)(FAR struct phy_device_s *phydev, int page);
 };
 
 /****************************************************************************
@@ -149,6 +172,28 @@ int phy_modify_mmd(FAR struct phy_device_s *phydev,
                    uint8_t devad, uint16_t regaddr,
                    uint16_t mask, uint16_t set);
 #endif
+
+/* Paged register access (phy_core.c).
+ *
+ * Some PHYs place most registers behind a page-select register.  Accessing
+ * them requires "select page -> read/write target -> restore page", which
+ * must be atomic against other bus users (MII ioctl).  These helpers hold
+ * the MDIO bus lock across the whole sequence.
+ *
+ * The page-select register and switching mechanism are vendor specific and
+ * are never hardcoded in the core: page switching is delegated to the PHY
+ * driver's read_page/write_page callbacks (see struct phy_driver_s).  A PHY
+ * driver that leaves both callbacks NULL has no pages, and these helpers
+ * return -ENOTSUP.
+ */
+
+int phy_read_paged(FAR struct phy_device_s *phydev,
+                   int page, uint8_t regaddr, FAR uint16_t *value);
+int phy_write_paged(FAR struct phy_device_s *phydev,
+                    int page, uint8_t regaddr, uint16_t value);
+int phy_modify_paged(FAR struct phy_device_s *phydev,
+                     int page, uint8_t regaddr,
+                     uint16_t mask, uint16_t set);
 
 #ifdef __cplusplus
 }
