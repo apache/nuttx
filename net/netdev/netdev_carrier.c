@@ -95,6 +95,12 @@ void netdev_carrier_off(FAR struct net_driver_s *dev)
       /* Notify clients that the network has been taken down */
 
       devif_dev_event(dev, NETDEV_DOWN);
-      arp_cleanup(dev);
+
+      /* Carrier loss is a physical-link event, not an administrative
+       * down.  Preserve permanent (static) ARP entries and flush only
+       * the dynamic ones.
+       */
+
+      arp_cleanup(dev, true);
     }
 }

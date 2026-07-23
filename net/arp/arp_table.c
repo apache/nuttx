@@ -602,13 +602,16 @@ int arp_delete(in_addr_t ipaddr, FAR struct net_driver_s *dev)
  *
  * Input Parameters:
  *   dev  - The device driver structure
+ *   skip_perm - When true, preserve permanent (static, ATF_PERM) entries
+ *               and only flush dynamic ones (carrier-loss semantics).  When
+ *               false, flush every entry on the device.
  *
  * Assumptions
  *   The network is locked to assure exclusive access to the ARP table.
  *
  ****************************************************************************/
 
-void arp_cleanup(FAR struct net_driver_s *dev)
+void arp_cleanup(FAR struct net_driver_s *dev, bool skip_perm)
 {
   int i;
 
@@ -616,6 +619,16 @@ void arp_cleanup(FAR struct net_driver_s *dev)
     {
       if (dev == g_arptable[i].at_dev)
         {
+          /* On a carrier-loss cleanup (skip_perm == true) preserve static
+           * (permanent) entries.  Only an administrative down (skip_perm
+           * == false) flushes them too.
+           */
+
+          if (skip_perm && (g_arptable[i].at_flags & ATF_PERM) != 0)
+            {
+              continue;
+            }
+
 #ifdef CONFIG_NET_ARP_SEND_QUEUE
           work_cancel_sync(LPWORK, &g_arptable[i].at_work);
           iob_free_queue(&g_arptable[i].at_queue);
