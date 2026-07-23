@@ -38,32 +38,22 @@
 #include "nxffs.h"
 
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxffs_ioctl
+ * Name: nxffs_volume_cmd
  *
  * Description:
- *   Standard mountpoint ioctl method.
+ *   Carry out an ioctl against the volume.  Shared by the per-file and the
+ *   per-volume entry points, which differ only in how they name the volume.
  *
  ****************************************************************************/
 
-int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int nxffs_volume_cmd(FAR struct nxffs_volume_s *volume, int cmd,
+                            unsigned long arg)
 {
-  FAR struct nxffs_volume_s *volume;
   int ret;
-
-  finfo("cmd: %d arg: %08lx\n", cmd, arg);
-
-  /* Sanity checks */
-
-  DEBUGASSERT(filep->f_priv != NULL);
-
-  /* Recover the file system state from the open file */
-
-  volume = filep->f_inode->i_private;
-  DEBUGASSERT(volume != NULL);
 
   /* Get exclusive access to the volume.  Note that the volume lock
    * protects the open file list.
@@ -73,7 +63,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (ret < 0)
     {
       ferr("ERROR: nxmutex_lock failed: %d\n", ret);
-      goto errout;
+      return ret;
     }
 
   /* Only a reformat and optimize commands are supported */
@@ -113,6 +103,62 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
 errout_with_lock:
   nxmutex_unlock(&volume->lock);
-errout:
   return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxffs_ioctl
+ *
+ * Description:
+ *   Standard mountpoint ioctl method.
+ *
+ ****************************************************************************/
+
+int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+{
+  FAR struct nxffs_volume_s *volume;
+
+  finfo("cmd: %d arg: %08lx\n", cmd, arg);
+
+  /* Sanity checks */
+
+  DEBUGASSERT(filep->f_priv != NULL);
+
+  /* Recover the file system state from the open file */
+
+  volume = filep->f_inode->i_private;
+  DEBUGASSERT(volume != NULL);
+
+  return nxffs_volume_cmd(volume, cmd, arg);
+}
+
+/****************************************************************************
+ * Name: nxffs_ioctldir
+ *
+ * Description:
+ *   ioctl method for a descriptor on the mountpoint directory.
+ *   FIOC_REFORMAT is only reachable this way: it refuses to run while any
+ *   file on the volume is open, and the per-file method is itself such a
+ *   file.  The open directory is not needed -- the volume is recovered from
+ *   the mountpoint inode -- so dir is unused.
+ *
+ ****************************************************************************/
+
+int nxffs_ioctldir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir,
+                   int cmd, unsigned long arg)
+{
+  FAR struct nxffs_volume_s *volume;
+
+  UNUSED(dir);
+
+  finfo("cmd: %d arg: %08lx\n", cmd, arg);
+
+  volume = mountpt->i_private;
+  DEBUGASSERT(volume != NULL);
+
+  return nxffs_volume_cmd(volume, cmd, arg);
 }

@@ -360,6 +360,33 @@ struct mountpt_operations
   CODE int     (*chstat)(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR const struct stat *buf, int flags);
   CODE int     (*syncfs)(FAR struct inode *mountpt);
+
+  /* ioctl issued on a descriptor for the mountpoint directory rather than
+   * on a file inside the volume.  It belongs with the directory operations
+   * above -- it takes the same (mountpt, dir) pair as opendir/readdir -- but
+   * is placed here at the end so the positional initialisers every file
+   * system uses stay unchanged; a file system that does not implement it
+   * simply leaves the slot NULL.
+   *
+   * Commands such as FIOC_REFORMAT, FIOC_OPTIMIZE and FIOC_INTEGRITY act on
+   * the volume, not on any one file, but the only route to a file system
+   * has historically been the per-file ioctl method.  That forces a caller
+   * to open an unrelated file just to name the volume, and a file system
+   * whose volume operation is incompatible with an open file then cannot
+   * implement the command at all.
+   *
+   * A file system that has such commands implements this method; the ioctl
+   * arrives with the mountpoint inode and the open directory, and no open
+   * file in sight.  It is consulted before the VFS acts on the command, so
+   * it must answer -ENOTTY for anything it does not recognise; the VFS then
+   * applies its own handling.  Leaving it NULL keeps the previous behaviour,
+   * in which the VFS answers -ENOTTY for any command it does not handle
+   * itself.
+   */
+
+  CODE int     (*ioctldir)(FAR struct inode *mountpt,
+                           FAR struct fs_dirent_s *dir,
+                           int cmd, unsigned long arg);
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 

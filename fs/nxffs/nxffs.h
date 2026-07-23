@@ -1094,6 +1094,8 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer,
                     size_t buflen);
 int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+int nxffs_ioctldir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir,
+                   int cmd, unsigned long arg);
 
 int nxffs_dup(FAR const struct file *oldp, FAR struct file *newp);
 int nxffs_fstat(FAR const struct file *filep, FAR struct stat *buf);
