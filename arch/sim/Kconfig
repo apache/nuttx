@@ -180,6 +180,48 @@ config SIM_WALLTIME_RATIO
 		twice as fast as real time.  50 means half speed.
 		This can also be overridden at runtime with --sim-rt-ratio=<percent>.
 
+config SIM_BSIM_TIME
+	bool "Enable BabbleSim PHY time support"
+	default n
+	depends on HOST_LINUX
+	depends on SIM_WALLTIME_SLEEP
+	depends on !SMP
+	---help---
+		Build support for using the BabbleSim PHY wait protocol as the SIM
+		monotonic time source.  When this option is enabled, the SIM target
+		participates in the PHY discrete-time barrier as a device, and
+		host_sleepuntil() advances by sending PB_MSG_WAIT requests instead
+		of sleeping on Linux wall time.
+
+		This is intended for tests where the host stack and controller need
+		to share the same simulated time domain.  The signal-driven walltime
+		timer mode is intentionally not supported.
+
+		The build must be given the BabbleSim paths through the environment:
+		BSIM_COMPONENTS_PATH for headers and either BSIM_OUT_PATH or
+		BSIM_LIBS_DIR for libraries.
+
+config SIM_BSIM_SIM_ID
+	string "BabbleSim simulation ID"
+	default "default"
+	depends on SIM_BSIM_TIME
+	---help---
+		The BabbleSim simulation ID passed to the PHY with -s.
+
+config SIM_BSIM_PHY_ID
+	string "BabbleSim PHY ID"
+	default "2G4"
+	depends on SIM_BSIM_TIME
+	---help---
+		The BabbleSim PHY ID.  This must match the PHY process ID.
+
+config SIM_BSIM_DEVICE_NBR
+	int "BabbleSim device number for this SIM host"
+	default 0
+	depends on SIM_BSIM_TIME
+	---help---
+		The BabbleSim device number reserved for this SIM host.
+
 config SIM_LOOP_INTERVAL
 	int "loop interval in ms"
 	default 10

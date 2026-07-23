@@ -41,6 +41,43 @@ Timing Fidelity
    Another option is to use ``CONFIG_SIM_WALLTIME_SLEEP`` which will enable the
    tick events to be delayed from the Idle task by using a host sleep call.
 
+BabbleSim Discrete Time
+-----------------------
+
+The Linux ``sim`` target can optionally use a BabbleSim PHY process as the
+monotonic time source.  This is useful for tests where a NuttX host-side stack
+and other BabbleSim devices need to advance in the same discrete-time domain.
+
+Enable ``CONFIG_SIM_BSIM_TIME`` together with ``CONFIG_SIM_WALLTIME_SLEEP``.
+This mode is available only on Linux hosts and is not supported with SMP or
+``CONFIG_SIM_WALLTIME_SIGNAL``.
+
+When ``CONFIG_SIM_BSIM_TIME`` is enabled, the build needs the BabbleSim
+component headers and libraries:
+
+.. code:: console
+
+   $ export BSIM_OUT_PATH=/path/to/bsim
+   $ export BSIM_COMPONENTS_PATH=${BSIM_OUT_PATH}/components
+
+``BSIM_LIBS_DIR`` may be used instead of ``BSIM_OUT_PATH`` when the BabbleSim
+shared libraries are installed in a non-default directory.
+
+When ``CONFIG_SIM_BSIM_TIME`` is enabled, the simulator connects to the
+BabbleSim PHY at startup:
+
+.. code:: console
+
+   $ ./nuttx --sim-bsim-sid=default \
+       --sim-bsim-pid=2G4 \
+       --sim-bsim-dev=0
+
+The BabbleSim PHY process must be started separately by the test runner before
+launching the NuttX simulator.
+
+The runtime options override ``CONFIG_SIM_BSIM_SIM_ID``,
+``CONFIG_SIM_BSIM_PHY_ID``, and ``CONFIG_SIM_BSIM_DEVICE_NBR``.
+
 Debugging
 =========
 
