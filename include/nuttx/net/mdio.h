@@ -190,6 +190,54 @@ int mdio_write(FAR struct mdio_bus_s *dev, uint8_t phyaddr, uint8_t regaddr,
                uint16_t value);
 
 /****************************************************************************
+ * Name: mdio_lock
+ *
+ * Description:
+ *   Acquire the MDIO bus mutex explicitly, so a caller can perform an atomic
+ *   multi-transaction sequence on the bus (e.g. paged register access) using
+ *   the lockless primitives below.  Must be balanced with mdio_unlock().
+ *
+ ****************************************************************************/
+
+int mdio_lock(FAR struct mdio_bus_s *dev);
+
+/****************************************************************************
+ * Name: mdio_unlock
+ *
+ * Description:
+ *   Release the MDIO bus mutex previously acquired with mdio_lock().
+ *
+ ****************************************************************************/
+
+void mdio_unlock(FAR struct mdio_bus_s *dev);
+
+/****************************************************************************
+ * Name: mdio_read_nolock
+ *
+ * Description:
+ *   Clause 22 read WITHOUT taking the bus mutex.  The caller must already
+ *   hold the bus lock via mdio_lock().  Returns zero (OK) on success; a
+ *   negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_read_nolock(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                     uint8_t regaddr, FAR uint16_t *value);
+
+/****************************************************************************
+ * Name: mdio_write_nolock
+ *
+ * Description:
+ *   Clause 22 write WITHOUT taking the bus mutex.  The caller must already
+ *   hold the bus lock via mdio_lock().  Returns zero (OK) on success; a
+ *   negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int mdio_write_nolock(FAR struct mdio_bus_s *dev, uint8_t phyaddr,
+                      uint8_t regaddr, uint16_t value);
+
+/****************************************************************************
  * Name: mdio_c45_read / mdio_c45_write
  *
  * Description:
