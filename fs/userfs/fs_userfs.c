@@ -48,6 +48,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <nuttx/mutex.h>
+#include <nuttx/signal.h>
 
 #include "fs_heap.h"
 
@@ -56,6 +57,10 @@
  ****************************************************************************/
 
 #define IOBUFFER_SIZE(p) (USERFS_REQ_MAXSIZE + (p)->mxwrite)
+
+/* FIOC_SETLKW retry period (microseconds) */
+
+#define USERFS_SETLK_RETRY_USEC 20000
 
 /****************************************************************************
  * Private Types
@@ -106,6 +111,10 @@ static ssize_t userfs_write(FAR struct file *filep, FAR const char *buffer,
 static off_t   userfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int     userfs_ioctl(FAR struct file *filep, int cmd,
                  unsigned long arg);
+#ifdef CONFIG_FS_NOTIFY
+static int     userfs_notify(FAR struct inode *mountpt, int wd,
+                 FAR const char *relpath, int action, uint32_t mask);
+#endif
 
 static int     userfs_sync(FAR struct file *filep);
 static int     userfs_dup(FAR const struct file *oldp,
@@ -189,7 +198,19 @@ const struct mountpt_operations g_userfs_operations =
   userfs_rmdir,      /* rmdir */
   userfs_rename,     /* rename */
   userfs_stat,       /* stat */
-  userfs_chstat      /* chstat */
+  userfs_chstat,     /* chstat */
+  NULL,              /* syncfs */
+  NULL,              /* ioctldir */
+  NULL,              /* permission */
+#ifdef CONFIG_FS_LINKS
+  NULL,              /* link */
+  NULL,              /* symlink */
+  NULL,              /* readlink */
+  NULL,              /* lstat */
+#endif
+#ifdef CONFIG_FS_NOTIFY
+  userfs_notify,     /* notify */
+#endif
 };
 
 /****************************************************************************
@@ -662,6 +683,100 @@ static off_t userfs_seek(FAR struct file *filep, off_t offset, int whence)
 }
 
 /****************************************************************************
+ * Name: userfs_flock
+ ****************************************************************************/
+
+static int userfs_flock(FAR struct file *filep, int request,
+                        FAR struct flock *fl)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_flock_request_s *req;
+  FAR struct userfs_flock_response_s *resp;
+  uint8_t expected;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int ret;
+
+  DEBUGASSERT(filep->f_inode != NULL &&
+              filep->f_inode->i_private != NULL);
+  priv = filep->f_inode->i_private;
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request (FIOC_SETLKW is sent as a
+   * non-blocking set; the caller retries on -EAGAIN).
+   */
+
+  req           = (FAR struct userfs_flock_request_s *)priv->iobuffer;
+  req->openinfo = filep->f_priv;
+  memcpy(&req->lock, fl, sizeof(req->lock));
+
+  if (request == FIOC_GETLK)
+    {
+      req->req = USERFS_REQ_GETLK;
+      expected = USERFS_RESP_GETLK;
+    }
+  else
+    {
+      req->req = USERFS_REQ_SETLK;
+      expected = USERFS_RESP_SETLK;
+    }
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       sizeof(*req), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(priv->server));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return nrecvd;
+    }
+
+  if (nrecvd != sizeof(*resp))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_flock_response_s *)priv->iobuffer;
+  if (resp->resp != expected)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  if (request == FIOC_GETLK && resp->ret >= 0)
+    {
+      memcpy(fl, &resp->lock, sizeof(*fl));
+    }
+
+  /* A daemon without the lock methods answers -ENOSYS: report -ENOTTY
+   * so the VFS falls back to the local lock table.
+   */
+
+  return resp->ret == -ENOSYS ? -ENOTTY : resp->ret;
+}
+
+/****************************************************************************
  * Name: userfs_ioctl
  ****************************************************************************/
 
@@ -675,6 +790,30 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   int ret;
 
   finfo("cmd: %d arg: %08lx\n", cmd, arg);
+
+  /* Advisory locks are marshaled explicitly: the daemon cannot
+   * dereference the struct flock pointer in arg.
+   */
+
+  if (cmd == FIOC_GETLK || cmd == FIOC_SETLK || cmd == FIOC_SETLKW)
+    {
+      FAR struct flock *fl = (FAR struct flock *)(uintptr_t)arg;
+
+      for (; ; )
+        {
+          ret = userfs_flock(filep, cmd, fl);
+          if (cmd != FIOC_SETLKW || ret != -EAGAIN)
+            {
+              return ret;
+            }
+
+          ret = nxsig_usleep(USERFS_SETLK_RETRY_USEC);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+    }
 
   DEBUGASSERT(
               filep->f_inode != NULL &&
@@ -741,6 +880,94 @@ static int userfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   return ret;
 }
+
+#ifdef CONFIG_FS_NOTIFY
+
+/****************************************************************************
+ * Name: userfs_notify
+ ****************************************************************************/
+
+static int userfs_notify(FAR struct inode *mountpt, int wd,
+                         FAR const char *relpath, int action,
+                         uint32_t mask)
+{
+  FAR struct userfs_state_s *priv;
+  FAR struct userfs_notify_request_s *req;
+  FAR struct userfs_notify_response_s *resp;
+  ssize_t nsent;
+  ssize_t nrecvd;
+  int pathlen;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+  priv = mountpt->i_private;
+
+  /* Check the path length */
+
+  DEBUGASSERT(relpath != NULL);
+  pathlen = strlen(relpath) + 1;
+  if (pathlen > priv->mxwrite)
+    {
+      return -E2BIG;
+    }
+
+  /* Get exclusive access */
+
+  ret = nxmutex_lock(&priv->lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Construct and send the request to the server */
+
+  req         = (FAR struct userfs_notify_request_s *)priv->iobuffer;
+  req->req    = USERFS_REQ_NOTIFY;
+  req->action = action;
+  req->wd     = wd;
+  req->mask   = mask;
+
+  memcpy(req->relpath, relpath, pathlen);
+
+  nsent = psock_sendto(&priv->psock, priv->iobuffer,
+                       SIZEOF_USERFS_NOTIFY_REQUEST_S(pathlen), 0,
+                       (FAR struct sockaddr *)&priv->server,
+                       sizeof(priv->server));
+  if (nsent < 0)
+    {
+      ferr("ERROR: psock_sendto failed: %zd\n", nsent);
+      nxmutex_unlock(&priv->lock);
+      return nsent;
+    }
+
+  /* Then get the response from the server */
+
+  nrecvd = psock_recvfrom(&priv->psock, priv->iobuffer, IOBUFFER_SIZE(priv),
+                          0, NULL, NULL);
+  nxmutex_unlock(&priv->lock);
+
+  if (nrecvd < 0)
+    {
+      ferr("ERROR: psock_recvfrom failed: %zd\n", nrecvd);
+      return nrecvd;
+    }
+
+  if (nrecvd != sizeof(*resp))
+    {
+      ferr("ERROR: Response size incorrect: %zd\n", nrecvd);
+      return -EIO;
+    }
+
+  resp = (FAR struct userfs_notify_response_s *)priv->iobuffer;
+  if (resp->resp != USERFS_RESP_NOTIFY)
+    {
+      ferr("ERROR: Incorrect response: %u\n", resp->resp);
+      return -EIO;
+    }
+
+  return resp->ret;
+}
+#endif /* CONFIG_FS_NOTIFY */
 
 /****************************************************************************
  * Name: userfs_sync
