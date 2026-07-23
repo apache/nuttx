@@ -475,6 +475,19 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake)
 set(CMAKE_TOOLCHAIN_FILE
     "${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
 
+# Compiler detection must not try to link a full executable.  CMake validates a
+# compiler by building and linking a test program, but a bare metal cross
+# toolchain has no start files, default linker script or libc, and the link
+# flags NuttX supplies assume a newlib toolchain (--specs=nosys.specs).  A
+# usable cross gcc without those specs then fails configuration before any NuttX
+# source is considered.  Building a static library instead exercises the
+# compiler and stops short of the link.  sim is hosted and links normally, so it
+# keeps the usual executable-based detection.
+
+if(NOT CONFIG_ARCH STREQUAL "sim")
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 # Define project #############################################################
 # This triggers configuration
 
