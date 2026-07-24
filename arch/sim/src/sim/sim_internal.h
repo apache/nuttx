@@ -284,6 +284,7 @@ void sim_uartinit(void);
 
 void host_uart_start(void);
 int  host_uart_open(const char *pathname);
+int  host_uart_openpty(const char *name);
 void host_uart_close(int fd);
 int  host_uart_puts(int fd, const char *buf, size_t size);
 int  host_uart_gets(int fd, char *buf, size_t size);

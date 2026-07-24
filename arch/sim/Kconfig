@@ -774,6 +774,11 @@ config SIM_UART_NUMBER
 		Anything sent to the one of these ports will be relayed
 		automatically to the other, and vice-versa.
 
+		If SIM_UART_PTY is enabled, NuttX creates the simulated
+		host pseudoterminal itself.  In that mode SIM_UARTx_NAME is
+		only the NuttX device name, and the host pseudoterminal path
+		is printed when the port is opened.
+
 config SIM_UART_BUFFER_SIZE
 	int "UART buffer size"
 	default 256
@@ -784,16 +789,41 @@ config SIM_UART_BUFFER_SIZE
 
 		Note that all ports will have the same buffer size.
 
+config SIM_UART_PTY
+	bool "Create host pseudoterminals for simulated UART ports"
+	default n
+	depends on HOST_LINUX && SIM_UART_NUMBER >= 1
+	---help---
+		Open a new host pseudoterminal for each simulated UART
+		instead of opening an existing host serial device.  The
+		UART remains registered in NuttX using SIM_UARTx_NAME, and
+		the host PTY slave path is printed when the port is opened.
+
+		The existing behavior requires the host endpoint named by
+		SIM_UARTx_NAME to exist before the simulated UART is opened.
+		This makes automated tests awkward when the peer endpoint is
+		a generated PTY with a host-dependent path, because the host
+		path must be prepared up front and encoded in the NuttX
+		configuration.  With this option enabled, the sim UART
+		backend owns the host PTY allocation and reports the actual
+		slave path at runtime, while keeping the NuttX device name
+		stable for applications.
+
+		If disabled, SIM UART keeps the existing behavior and opens
+		the host device path specified by SIM_UARTx_NAME directly.
+
 config SIM_UART0_NAME
 	string "UART port 0 name"
 	default "/dev/ttySIM0"
 	depends on SIM_UART_NUMBER >= 1
 	---help---
 		This is the name of the simulated UART port.
-		The port will be mounted in NuttX under this name.
+		The port will be registered in NuttX under this name.
 
-		A UART port must also exist on the host system
-		with the exact same name specified here.
+		If SIM_UART_PTY is disabled, a UART port must also exist on
+		the host system with the exact same name specified here.  If
+		SIM_UART_PTY is enabled, the host pseudoterminal is allocated
+		automatically and printed when this port is opened.
 
 config SIM_UART1_NAME
 	string "UART port 1 name"
@@ -801,10 +831,12 @@ config SIM_UART1_NAME
 	depends on SIM_UART_NUMBER >= 2
 	---help---
 		This is the name of the simulated UART port.
-		The port will be mounted in NuttX under this name.
+		The port will be registered in NuttX under this name.
 
-		A UART port must also exist on the host system
-		with the exact same name specified here.
+		If SIM_UART_PTY is disabled, a UART port must also exist on
+		the host system with the exact same name specified here.  If
+		SIM_UART_PTY is enabled, the host pseudoterminal is allocated
+		automatically and printed when this port is opened.
 
 config SIM_UART2_NAME
 	string "UART port 2 name"
@@ -812,10 +844,12 @@ config SIM_UART2_NAME
 	depends on SIM_UART_NUMBER >= 3
 	---help---
 		This is the name of the simulated UART port.
-		The port will be mounted in NuttX under this name.
+		The port will be registered in NuttX under this name.
 
-		A UART port must also exist on the host system
-		with the exact same name specified here.
+		If SIM_UART_PTY is disabled, a UART port must also exist on
+		the host system with the exact same name specified here.  If
+		SIM_UART_PTY is enabled, the host pseudoterminal is allocated
+		automatically and printed when this port is opened.
 
 config SIM_UART3_NAME
 	string "UART port 3 name"
@@ -823,10 +857,12 @@ config SIM_UART3_NAME
 	depends on SIM_UART_NUMBER >= 4
 	---help---
 		This is the name of the simulated UART port.
-		The port will be mounted in NuttX under this name.
+		The port will be registered in NuttX under this name.
 
-		A UART port must also exist on the host system
-		with the exact same name specified here.
+		If SIM_UART_PTY is disabled, a UART port must also exist on
+		the host system with the exact same name specified here.  If
+		SIM_UART_PTY is enabled, the host pseudoterminal is allocated
+		automatically and printed when this port is opened.
 
 config SIM_RAM_UART
 	bool "SIM RAM UART Device"
