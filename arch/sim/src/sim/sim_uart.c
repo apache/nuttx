@@ -307,9 +307,8 @@ static void uart_nputs(int fd, const char *buf, size_t size)
  * Name: tty_setup
  *
  * Description:
- *   Configure the UART baud, bits, parity, fifos, etc. This
- *   method is called the first time that the serial port is
- *   opened.
+ *   Open and configure the host endpoint for the simulated UART.
+ *   This method is called the first time that the serial port is opened.
  *
  ****************************************************************************/
 
@@ -317,7 +316,17 @@ static int tty_setup(struct uart_dev_s *dev)
 {
   struct tty_priv_s *priv = dev->priv;
 
-  priv->fd = host_uart_open(priv->path);
+#ifdef CONFIG_SIM_UART_PTY
+  if (!dev->isconsole)
+    {
+      priv->fd = host_uart_openpty(priv->path);
+    }
+  else
+#endif
+    {
+      priv->fd = host_uart_open(priv->path);
+    }
+
   return priv->fd;
 }
 

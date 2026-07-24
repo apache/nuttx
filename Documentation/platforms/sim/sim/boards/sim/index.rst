@@ -2186,9 +2186,22 @@ nxscope
 
 Configuration demonstrating NxScope stream over simulated UART interface.
 
-The simulated UART must be created on host before running NuttX::
+If ``CONFIG_SIM_UART_PTY`` is disabled, the simulated UART peer must be
+created on the host before running NuttX::
 
   socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
+
+In that mode ``CONFIG_SIM_UART0_NAME`` is both the NuttX device name and
+the host path that the sim UART backend opens.  This works when the host
+path is stable, but it is inconvenient for automated tests and generated
+PTYs: the peer device must exist before the UART is opened, and changing
+the host path requires changing the NuttX configuration.
+
+If ``CONFIG_SIM_UART_PTY`` is enabled, NuttX creates the host
+pseudoterminal when the simulated UART is opened and prints the host
+PTY slave path.  The configured ``SIM_UARTx_NAME`` remains the NuttX
+device name, while the host PTY path is allocated at runtime and can be
+passed to the external simulator or test program.
 
 See :doc:`/applications/examples/nxscope/index` and
 :doc:`/applications/logging/nxscope/index` for more details.

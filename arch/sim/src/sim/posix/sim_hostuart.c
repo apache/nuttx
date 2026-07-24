@@ -24,6 +24,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -131,6 +132,58 @@ int host_uart_open(const char *pathname)
 }
 
 /****************************************************************************
+ * Name: host_uart_openpty
+ ****************************************************************************/
+
+int host_uart_openpty(const char *name)
+{
+#ifdef CONFIG_HOST_LINUX
+  unsigned int ptyno;
+  int lock = 0;
+  int oflags;
+  int ret;
+  int fd;
+
+  oflags = O_RDWR | O_NOCTTY | O_NONBLOCK;
+#ifdef O_CLOEXEC
+  oflags |= O_CLOEXEC;
+#endif
+  fd = open("/dev/ptmx", oflags);
+  if (fd < 0)
+    {
+      return -errno;
+    }
+
+  ret = ioctl(fd, TIOCGPTN, &ptyno);
+  if (ret < 0)
+    {
+      ret = -errno;
+      goto errout;
+    }
+
+  ret = ioctl(fd, TIOCSPTLCK, &lock);
+  if (ret < 0)
+    {
+      ret = -errno;
+      goto errout;
+    }
+
+  setrawmode(fd);
+
+  printf("%s connected to pseudotty: /dev/pts/%u\n", name, ptyno);
+
+  return fd;
+
+errout:
+  close(fd);
+  return ret;
+#else
+  (void)name;
+  return -ENOSYS;
+#endif
+}
+
+/****************************************************************************
  * Name: host_uart_close
  ****************************************************************************/
 
@@ -229,7 +282,7 @@ bool host_uart_checkin(int fd)
 
   pfd.fd     = fd;
   pfd.events = POLLIN;
-  return poll(&pfd, 1, 0) == 1;
+  return poll(&pfd, 1, 0) == 1 && (pfd.revents & POLLIN) != 0;
 }
 
 /****************************************************************************
@@ -242,7 +295,7 @@ bool host_uart_checkout(int fd)
 
   pfd.fd     = fd;
   pfd.events = POLLOUT;
-  return poll(&pfd, 1, 0) == 1;
+  return poll(&pfd, 1, 0) == 1 && (pfd.revents & POLLOUT) != 0;
 }
 
 /****************************************************************************
