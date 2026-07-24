@@ -92,3 +92,7 @@ endif
 ifeq ($(CONFIG_CRYPTO_CRYPTODEV_HARDWARE),y)
 CHIP_CSRCS += rp23xx_crypto.c
 endif
+
+ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
+CHIP_CSRCS += rp23xx_cyw43439.c
+endif
