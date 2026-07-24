@@ -286,7 +286,8 @@ CFLAGS must be provided. First, the option ``-fpic`` is required to tell
 the compiler to generate position independent code (other GCC options,
 like ``-fno-jump-tables`` might also be desirable). For ARM compilers,
 two additional compilation options are required: ``-msingle-pic-base``
-and ``-mpic-register=r10``.
+and ``-mpic-register=r10``.  On ARM these are supplied centrally rather
+than per board; see `Where the ARM PIC flags come from`_ below.
 
 **Target 2**. Given the ``hello.r1`` relocatable object, this target
 will invoke ```mknxflat`` <#mknxflat>`__ to make the *thunk* file,
@@ -325,6 +326,50 @@ object to create the final, NXFLAT module ``hello`` by executing
 
 **binfmt Registration** NXFLAT calls :c:func:`register_binfmt` to
 incorporate itself into the system.
+
+Where the ARM PIC flags come from
+---------------------------------
+
+On ARM the compilation flags described under **Target 1** are supplied by
+``arch/arm/src/common/Toolchain.defs``, not by each board.  A board only has
+to say something when it differs from the default::
+
+  ARCHPICFLAGS ?= -fpic -msingle-pic-base -mpic-register=r10
+
+  CPICFLAGS   = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CFLAGS))
+  CXXPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CXXFLAGS))
+
+``ARCHPICFLAGS`` uses ``?=``, and the two derived variables use deferred
+``=``, so a board that includes this file may still override
+``ARCHPICFLAGS`` afterwards or append to it, and ``CFLAGS`` is whatever the
+board finally set it to.  A few boards do differ: one adds ``-ffixed-r10``
+and one conditionally adds ``-mno-pic-data-is-text-relative``.
+
+Reserving r10 in the base firmware
+----------------------------------
+
+A module reaches its data through r10, and the base firmware has to leave
+that register alone -- otherwise a call *back* from the firmware into module
+code arrives with the wrong data base.  ``qsort()`` with a comparison
+function inside the module is the usual way to meet this.  Under
+``CONFIG_PIC`` the firmware is therefore built with ``--fixed-r10``.
+
+That flag goes into ``ARCHCFLAGS`` rather than ``CFLAGS``, because nearly
+every board ``Make.defs`` includes ``Toolchain.defs`` and then assigns::
+
+  CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) ...
+
+with ``:=``, which discards anything added to ``CFLAGS`` beforehand while
+re-expanding ``ARCHCFLAGS``.  Losing the flag is silent, and the symptom is
+remote from the cause: everything builds, and only a callback into module
+code misbehaves.
+
+The two sides of that contract cannot both appear on one command line.  A
+module gets r10 through ``-mpic-register=r10``, and GCC rejects it alongside
+``--fixed-r10`` with *"unable to use 'r10' for PIC register"*.  Since
+``CPICFLAGS``, ``CXXPICFLAGS``, ``CELFFLAGS`` and ``CXXELFFLAGS`` all derive
+from ``CFLAGS``, the flag is filtered back out where they are defined,
+rather than in every board that builds modules.
 
 Appendix A: No GOT Operation
 ============================

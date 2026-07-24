@@ -179,3 +179,4 @@ libs/libc/tre-mem.c
   /* Followed by one or more ND options */
    *    message using the Neighbor Discovery (ND) protocol. It then listens
 PIO   DUE SCHEM. PIN MAPPING    SAM3X       DUE SCHEM. BOARD LABEL
+    # instruct the gsize to generate a "*.siz" file that contains the detailed section size

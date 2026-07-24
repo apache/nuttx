@@ -567,6 +567,29 @@ endif
 
 PICFLAGS = -fpic -fPIE -mno-pic-data-is-text-relative -msingle-pic-base
 
+# Flags for building PIC modules (NXFLAT).  These were repeated verbatim in
+# every ARM board Make.defs; they live here so a board only has to say
+# something when it differs, and so the interaction with --fixed-r10 below
+# can be handled in one place instead of 260.
+#
+# A board that needs to differ can still assign ARCHPICFLAGS after including
+# this file, which overrides the default, or append to it.
+
+ARCHPICFLAGS ?= -fpic -msingle-pic-base -mpic-register=r10
+
+# --fixed-r10 reserves r10 across the base firmware so a callback into
+# module code arrives with the module's data base intact.  A module is the
+# other side of that contract: it gets r10 via -mpic-register=r10, and GCC
+# rejects a command line carrying both with "unable to use 'r10' for PIC
+# register".  Since these derive from CFLAGS, the flag has to come back out
+# here.
+#
+# Both are deferred assignments, so CFLAGS and CXXFLAGS are whatever the
+# board finally set them to, even though this file is included first.
+
+CPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CFLAGS))
+CXXPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CXXFLAGS))
+
 ifneq ($(CONFIG_BUILD_PIC),)
   ARCHCFLAGS += $(PICFLAGS) -mpic-register=r9
   ARCHCXXFLAGS += $(PICFLAGS) -mpic-register=r9
@@ -580,11 +603,20 @@ LDMODULEFLAGS = -r -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/elf/gnu-elf.ld)
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -fvisibility=hidden -mlong-calls # --target1-abs
-CXXELFFLAGS = $(CXXFLAGS)-fvisibility=hidden -mlong-calls
+# --fixed-r10 is filtered out for the same reason as in CPICFLAGS above:
+# under CONFIG_PIC these gain -mpic-register=r10, which GCC will not
+# accept alongside it.
+
+CELFFLAGS = $(filter-out --fixed-r10,$(CFLAGS)) -fvisibility=hidden \
+            -mlong-calls # --target1-abs
+CXXELFFLAGS = $(filter-out --fixed-r10,$(CXXFLAGS)) -fvisibility=hidden \
+              -mlong-calls
 
 ifeq ($(CONFIG_PIC),y)
-  CFLAGS += --fixed-r10
+  # ARCHCFLAGS, not CFLAGS: board Make.defs reassign CFLAGS with ':='
+  # after including this file, which would discard the flag.
+
+  ARCHCFLAGS += --fixed-r10
   CELFFLAGS += $(PICFLAGS) -mpic-register=r10
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r10
 
