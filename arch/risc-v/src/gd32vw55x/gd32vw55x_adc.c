@@ -419,6 +419,15 @@ static int adc_setup(struct adc_dev_s *dev)
       return ret;
     }
 
+  /* Re-enable the ADC clock.  adc_shutdown() gates it on close, and the
+   * one-shot adc_reset() that first turned it on only runs at registration;
+   * without this a second open would drive a clock-gated peripheral and its
+   * conversions would never complete.  Clock gating preserves the register
+   * configuration set up by adc_reset(), so nothing has to be re-programmed.
+   */
+
+  modifyreg32(GD32VW55X_RCU_APB2EN, 0, RCU_APB2EN_ADCEN);
+
   /* Make sure that the interrupts are disabled and power up the ADC */
 
   modifyreg32(GD32VW55X_ADC_CTL0,
