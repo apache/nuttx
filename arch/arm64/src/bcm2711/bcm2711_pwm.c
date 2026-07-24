@@ -44,6 +44,7 @@
 
 /* PWM0 has several options for the channels. */
 
+#ifdef CONFIG_BCM2711_PWM0
 #if CONFIG_BCM2711_PWM0_CHAN1_PIN == 12
 #define BCM2711_PWM0_CHAN1_PIN_ALT BCM_GPIO_FUNC0
 #elif CONFIG_BCM2711_PWM0_CHAN1_PIN == 18
@@ -61,6 +62,7 @@
 #else
 #error "Invalid pin selection for PWM0 channel 2!"
 #endif
+#endif /* CONFIG_BCM2711_PWM0 */
 
 /* PWM1 only has one option for the channels */
 
