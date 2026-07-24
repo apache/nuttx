@@ -26,6 +26,7 @@ ignore-words-list =
   BU,
   DAA,
   dout,
+  ehr,
   emac,
   eeeprom,
   extint,

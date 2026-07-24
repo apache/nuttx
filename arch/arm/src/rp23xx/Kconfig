@@ -740,6 +740,15 @@ endif # SPISD Configuration
 #  ADC Configuration
 #####################################################################
 
+config RP23XX_RNG
+	bool "Enable hardware TRNG (/dev/random)"
+	default n
+	select ARCH_HAVE_RNG
+	---help---
+		Enable the RP2350 hardware true random number generator.  Provides
+		/dev/random (and /dev/urandom when CONFIG_DEV_URANDOM selects the
+		architecture source) via the TRNG entropy register (EHR).
+
 config RP23XX_ADC
 	bool "Enable ADC Support"
 	default n
