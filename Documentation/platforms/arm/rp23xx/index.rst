@@ -41,6 +41,7 @@ Flash ROM Boot   Working       Does not require boot2 from pico-sdk
                                If picotool is available a nuttx.uf2 file will be created
 SRAM Boot        Working       Requires external SWD debugger
 PSRAM            Working       Three modes of heap allocation described below
+TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 ==============   ============  =====
 
 Installation
@@ -202,6 +203,24 @@ GPIO 0 and 1 pins must be connected to the device such as USB-serial converter.
 
 The `usbnsh` configuration provides the console access by USB CDC/ACM serial
 device.  The console is available by using a terminal software on the USB host.
+
+TRNG
+====
+
+The rp2350 has a hardware true random number generator (TRNG).  Enabling
+``RP23XX_RNG`` builds the driver and selects ``ARCH_HAVE_RNG``, which in turn
+makes ``DEV_RANDOM`` available.
+
+With ``DEV_RANDOM`` enabled the driver registers ``/dev/random``.  Enabling
+``DEV_URANDOM`` additionally registers ``/dev/urandom``; when a hardware RNG is
+present the architecture source (``DEV_URANDOM_ARCH``) is selected by default,
+so ``/dev/urandom`` is served from the same TRNG rather than a software PRNG.
+
+Each read collects entropy from the TRNG's 192-bit entropy holding register
+(EHR): the source is enabled, the driver waits for ``TRNG_VALID``, reads the
+six 32-bit EHR words, and repeats until the request is satisfied.  For example::
+
+    nsh> dd if=/dev/random of=/dev/console bs=16 count=1
 
 Supported Boards
 ================

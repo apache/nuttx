@@ -60,6 +60,10 @@ if(CONFIG_RP23XX_I2C)
   list(APPEND SRCS rp23xx_i2c.c)
 endif()
 
+if(CONFIG_RP23XX_RNG)
+  list(APPEND SRCS rp23xx_rng.c)
+endif()
+
 if(CONFIG_RP23XX_I2C_SLAVE)
   list(APPEND SRCS rp23xx_i2c_slave.c)
 endif()
