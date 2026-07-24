@@ -80,8 +80,16 @@
 #  define CONFIG_GD32VW55X_I2C_TIMEOMS    (500)
 #endif
 
-#ifndef CONFIG_GD32VW55X_I2C_TIMEOTICKS
-#  define CONFIG_GD32VW55X_I2C_TIMEOTICKS \
+/* CONFIG_GD32VW55X_I2C_TIMEOTICKS overrides the seconds/milliseconds pair
+ * only when non-zero (its Kconfig default is 0); otherwise the timeout is
+ * derived from the seconds/milliseconds values.  Note the Kconfig symbol is
+ * always defined, so a plain #ifndef would leave it at the useless 0.
+ */
+
+#if CONFIG_GD32VW55X_I2C_TIMEOTICKS != 0
+#  define I2C_TIMEOUT_TICKS  CONFIG_GD32VW55X_I2C_TIMEOTICKS
+#else
+#  define I2C_TIMEOUT_TICKS \
      (SEC2TICK(CONFIG_GD32VW55X_I2C_TIMEOSEC) + \
       MSEC2TICK(CONFIG_GD32VW55X_I2C_TIMEOMS))
 #endif
@@ -112,6 +120,15 @@
 
 #define I2C_SCLDELY_VALUE     (4)
 #define I2C_SDADELY_VALUE     (2)
+
+/* Lower bound for the prescaled clock (4 MHz -> 250 ns period).  The
+ * prescaler is never allowed below this, so the SDADEL/SCLDEL setup and hold
+ * times stay above the analog-filter minimum of the IP; otherwise the master
+ * hangs before the first clock.  At the 16 MHz kernel clock this forces
+ * PSC = 3, as in the vendor BSP.
+ */
+
+#define I2C_PRESC_FREQ_MAX    (4000000)
 
 /****************************************************************************
  * Private Types
@@ -218,7 +235,7 @@ static const struct i2c_ops_s g_i2c_ops =
 static const struct gd32_i2c_config_s g_i2c0_config =
 {
   .i2c_base   = GD32VW55X_I2C0_BASE,
-  .clk_freq   = GD32VW55X_PCLK1_FREQ,
+  .clk_freq   = 16000000,      /* IRC16M kernel clock */
   .scl_pin    = GPIO_I2C0_SCL,
   .sda_pin    = GPIO_I2C0_SDA,
   .rcu_en     = RCU_APB1EN_I2C0EN,
@@ -252,7 +269,7 @@ static struct gd32_i2c_priv_s g_i2c0_priv =
 static const struct gd32_i2c_config_s g_i2c1_config =
 {
   .i2c_base   = GD32VW55X_I2C1_BASE,
-  .clk_freq   = GD32VW55X_PCLK1_FREQ,
+  .clk_freq   = GD32VW55X_PCLK1_FREQ,  /* I2C1 has no clock mux: CK_APB1 */
   .scl_pin    = GPIO_I2C1_SCL,
   .sda_pin    = GPIO_I2C1_SDA,
   .rcu_en     = RCU_APB1EN_I2C1EN,
@@ -352,23 +369,30 @@ static int gd32_i2c_sem_waitdone(struct gd32_i2c_priv_s *priv)
 
   /* Signal the interrupt handler that we are waiting.  Interrupts are
    * currently disabled but will be re-enabled while
-   * nxsem_tickwait_uninterruptible() sleeps.
+   * nxsem_tickwait_uninterruptible() sleeps.  Only arm the wait if the ISR
+   * has not already completed the transfer between startmsg() and here --
+   * otherwise WAITING would clobber a DONE that was already posted and the
+   * wait would block until the timeout.
    */
 
-  priv->intstate = INTSTATE_WAITING;
-
-  do
+  ret = OK;
+  if (priv->intstate != INTSTATE_DONE)
     {
-      ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
-                                           CONFIG_GD32VW55X_I2C_TIMEOTICKS);
-      if (ret < 0)
-        {
-          /* Break out of the loop on irrecoverable errors */
+      priv->intstate = INTSTATE_WAITING;
 
-          break;
+      do
+        {
+          ret = nxsem_tickwait_uninterruptible(&priv->sem_isr,
+                                             I2C_TIMEOUT_TICKS);
+          if (ret < 0)
+            {
+              /* Break out of the loop on irrecoverable errors */
+
+              break;
+            }
         }
+      while (priv->intstate != INTSTATE_DONE);
     }
-  while (priv->intstate != INTSTATE_DONE);
 
   /* Disable the I2C interrupts */
 
@@ -386,17 +410,19 @@ static int gd32_i2c_sem_waitdone(struct gd32_i2c_priv_s *priv)
   clock_t start;
   clock_t elapsed;
 
-  timeout  = CONFIG_GD32VW55X_I2C_TIMEOTICKS;
+  timeout  = I2C_TIMEOUT_TICKS;
   start    = clock_systime_ticks();
   priv->intstate = INTSTATE_WAITING;
 
   do
     {
-      /* Poll by simply calling the timer interrupt handler with the
-       * interrupts disabled.
+      /* Poll by simply calling the interrupt handler.  A short pause keeps
+       * the polling from hammering the status register faster than the bus
+       * can advance between events.
        */
 
       gd32_i2c_isr_process(priv);
+      up_udelay(2);
 
       elapsed = clock_systime_ticks() - start;
     }
@@ -479,9 +505,18 @@ static void gd32_i2c_setclock(struct gd32_i2c_priv_s *priv,
 
   i2cclk = priv->config->clk_freq;
 
-  /* Find the smallest prescaler that keeps SCLL and SCLH in range */
+  /* Find the smallest prescaler that keeps SCLL and SCLH in range, but never
+   * below the one that bounds the prescaled clock to I2C_PRESC_FREQ_MAX (see
+   * that definition for why).
+   */
 
-  for (psc = 0; psc < 16; psc++)
+  psc = 0;
+  if (i2cclk > I2C_PRESC_FREQ_MAX)
+    {
+      psc = (i2cclk + I2C_PRESC_FREQ_MAX - 1) / I2C_PRESC_FREQ_MAX - 1;
+    }
+
+  for (; psc < 16; psc++)
     {
       cycles = (i2cclk / (psc + 1)) / frequency;
 
@@ -742,9 +777,8 @@ static int gd32_i2c_isr_process(struct gd32_i2c_priv_s *priv)
 
   if ((status & I2C_STAT_RBNE) != 0 && priv->dcnt > 0)
     {
-      *priv->ptr++ = (uint8_t)(gd32_i2c_getreg(priv,
-                                               GD32VW55X_I2C_RDATA_OFFSET) &
-                               I2C_RDATA_MASK);
+      *priv->ptr++ = gd32_i2c_getreg(priv, GD32VW55X_I2C_RDATA_OFFSET) &
+                     I2C_RDATA_MASK;
       priv->dcnt--;
     }
 
@@ -856,6 +890,22 @@ static int gd32_i2c_init(struct gd32_i2c_priv_s *priv)
   /* Enable the I2C clock */
 
   modifyreg32(GD32VW55X_RCU_APB1EN, 0, config->rcu_en);
+
+  /* Source the I2C0 kernel clock from IRC16M (16 MHz).  The protocol state
+   * machine is clocked by this kernel clock (not the APB1 bus clock that
+   * feeds the register interface).  With the APB1 default the prescaled
+   * period is so short that the SDADEL/SCLDEL setup and hold times fall
+   * below the analog-filter minimum of this I2C v2 IP, and the master hangs
+   * with the START bit set and BUSY never asserting.  IRC16M gives a fixed,
+   * in-spec 16 MHz reference (matching the vendor BSP), which is why
+   * clk_freq is 16 MHz.
+   */
+
+  if (config->i2c_base == GD32VW55X_I2C0_BASE)
+    {
+      modifyreg32(GD32VW55X_RCU_CFG1, RCU_CFG1_I2C0SEL_MASK,
+                  RCU_CFG1_I2C0SEL_IRC16M);
+    }
 
   /* Reset the peripheral to be sure that it is in a known state */
 

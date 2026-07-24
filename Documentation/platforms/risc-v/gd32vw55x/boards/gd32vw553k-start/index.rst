@@ -194,6 +194,50 @@ capture, both watchdogs, progmem, TRNG and CRC), registered as ``/dev/i2c0``,
 ``/dev/spi0``, ``/dev/adc0``, ``/dev/pwm0``, ``/dev/capture0``,
 ``/dev/watchdog0`` and ``/dev/watchdog1``.  No radio.
 
+sht3x
+-----
+
+NSH plus I2C0, the i2ctool and the Sensirion SHT3x temperature/humidity
+driver -- a small example to validate the I2C master port against a real
+device. Because SPI is *off* here, I2C0 is routed to the J1 header on
+**PA2 (SCL)** and **PA3 (SDA)** (adjacent pins on the second row of J1, both
+AF4); with SPI on (the ``periph`` case) it falls back to PB0/PB1, whose SDA
+pin is not broken out. See the pin-header tables above.
+
+Wire the sensor to J1: SCL -> PA2, SDA -> PA3, VCC -> +3V3 (J2) or the module
+3.3 V, GND -> GND. A breakout with its own pull-ups is assumed; the pins are
+configured with the internal pull-ups as a fallback.
+
+The bus is registered as ``/dev/i2c0`` and the sensor as ``/dev/temp0``
+(``gd32_bringup()`` registers it at address 0x44). Confirm the address with
+the i2ctool using a zero-byte write probe (``-z``); the SHT3x NACKs the
+default one-byte read probe when it has no measurement pending, so plain
+``i2c dev`` would not show it::
+
+  nsh> i2c dev -z 0x03 0x77
+       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+  00:          -- -- -- -- -- -- -- -- -- -- -- --
+  10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+  20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+  30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+  40: -- -- -- -- 44 -- -- -- -- -- -- -- -- -- -- --
+  50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+  60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+  70: -- -- -- -- -- -- -- --
+
+The ``44`` above is the SHT3x acknowledging. Then read it through the
+driver::
+
+  nsh> sht3x
+  Converting...
+  Temperature = 26.530098
+  Humidity    = 47.998001
+
+.. note::
+   If the sensor sits at 0x45, change the address passed to
+   ``sht3x_register()`` in ``gd32_bringup.c`` (the i2ctool still finds it at
+   its real address regardless).
+
 littlefs
 --------
 

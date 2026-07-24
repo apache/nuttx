@@ -49,6 +49,9 @@
 #ifdef CONFIG_USERLED_LOWER
 #  include <nuttx/leds/userled.h>
 #endif
+#ifdef CONFIG_SENSORS_SHT3X
+#  include <nuttx/sensors/sht3x.h>
+#endif
 #ifdef CONFIG_MTD_PROGMEM
 #  include <nuttx/mtd/mtd.h>
 #endif
@@ -142,13 +145,29 @@ int gd32_bringup(void)
     {
       ferr("ERROR: failed to initialize I2C0\n");
     }
-#ifdef CONFIG_I2C_DRIVER
-  else if (i2c_register(i2c, 0) < 0)
+  else
     {
-      ferr("ERROR: failed to register /dev/i2c0\n");
-      gd32_i2cbus_uninitialize(i2c);
-    }
+#ifdef CONFIG_I2C_DRIVER
+      /* Expose the bus as /dev/i2c0 for the i2ctool (i2c dev/get/set...) */
+
+      if (i2c_register(i2c, 0) < 0)
+        {
+          ferr("ERROR: failed to register /dev/i2c0\n");
+        }
 #endif
+
+#ifdef CONFIG_SENSORS_SHT3X
+      /* Sensirion SHT3x on I2C0 -> /dev/temp0.  The default I2C address is
+       * 0x44 (0x45 with ADDR tied high); confirm it first with
+       * "i2c dev 0x44 0x45" from NSH.
+       */
+
+      if (sht3x_register("/dev/temp0", i2c, 0x44) < 0)
+        {
+          ferr("ERROR: failed to register SHT3x at 0x44 on I2C0\n");
+        }
+#endif
+    }
 #endif
 
 #ifdef CONFIG_GD32VW55X_SPI
