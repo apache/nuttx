@@ -7,6 +7,14 @@ packages in the synchronized catalog, installs a selected package on a worker
 thread, launches installed Dynamic ELF applications, and supervises the one
 application currently using the display.
 
+.. figure:: nxstore-esp32s3.jpg
+   :figwidth: 80%
+   :align: center
+   :alt: NXStore package catalog running on an ESP32-S3 touchscreen board
+
+   NXStore package catalog running on a Waveshare
+   ESP32-S3-Touch-LCD-7 board.
+
 Configuration
 =============
 
