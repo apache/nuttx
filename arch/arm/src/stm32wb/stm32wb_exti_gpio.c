@@ -260,6 +260,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   xcpt_t   handler;
   int      nshared;
   int      i;
+  int      ret;
 
   /* Select the interrupt handler for this EXTI pin */
 
@@ -334,6 +335,16 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
 
       if (i == nshared)
         {
+          /* remove any leftover callback */
+
+          ret = irq_detach(irq);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          /* disable the interrupt */
+
           up_disable_irq(irq);
         }
     }
