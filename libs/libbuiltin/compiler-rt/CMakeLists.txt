@@ -114,6 +114,45 @@ if(CONFIG_BUILTIN_COMPILER_RT)
     list(REMOVE_ITEM RT_BUILTINS_SRCS ${x86_80_BIT_SOURCES})
   endif()
 
+  # The Arm builtins ship hand-written VFP assembly whose FPU requirements the
+  # globs above ignore, so assemble only the files the configured FPU supports
+  # (upstream compiler-rt selects them conditionally).  chkstk.S and chkstk2.S
+  # are Windows/MinGW-only stack probes; every *vfp.S needs a hardware FPU; and
+  # the double-precision *df*vfp.S routines additionally need a double-precision
+  # FPU.  Without this, single-precision-FPU targets such as Cortex-M33
+  # (fpv5-sp-d16) fail with "selected FPU does not support instruction".  See
+  # apache/nuttx#17386.
+  if(CONFIG_ARCH_ARM)
+    set(RT_BUILTINS_ARM_EXCLUDE ${BUILTINS_DIR}/arm/chkstk.S
+                                ${BUILTINS_DIR}/arm/chkstk2.S)
+    if(NOT CONFIG_ARCH_FPU)
+      file(GLOB RT_BUILTINS_ARM_VFP ${BUILTINS_DIR}/arm/*vfp.S)
+      list(APPEND RT_BUILTINS_ARM_EXCLUDE ${RT_BUILTINS_ARM_VFP})
+    elseif(NOT CONFIG_ARCH_DPFPU)
+      list(
+        APPEND
+        RT_BUILTINS_ARM_EXCLUDE
+        ${BUILTINS_DIR}/arm/adddf3vfp.S
+        ${BUILTINS_DIR}/arm/divdf3vfp.S
+        ${BUILTINS_DIR}/arm/eqdf2vfp.S
+        ${BUILTINS_DIR}/arm/extendsfdf2vfp.S
+        ${BUILTINS_DIR}/arm/fixdfsivfp.S
+        ${BUILTINS_DIR}/arm/fixunsdfsivfp.S
+        ${BUILTINS_DIR}/arm/floatsidfvfp.S
+        ${BUILTINS_DIR}/arm/floatunssidfvfp.S
+        ${BUILTINS_DIR}/arm/gedf2vfp.S
+        ${BUILTINS_DIR}/arm/gtdf2vfp.S
+        ${BUILTINS_DIR}/arm/ledf2vfp.S
+        ${BUILTINS_DIR}/arm/ltdf2vfp.S
+        ${BUILTINS_DIR}/arm/muldf3vfp.S
+        ${BUILTINS_DIR}/arm/nedf2vfp.S
+        ${BUILTINS_DIR}/arm/subdf3vfp.S
+        ${BUILTINS_DIR}/arm/truncdfsf2vfp.S
+        ${BUILTINS_DIR}/arm/unorddf2vfp.S)
+    endif()
+    list(REMOVE_ITEM RT_BUILTINS_SRCS ${RT_BUILTINS_ARM_EXCLUDE})
+  endif()
+
   if(NOT CONFIG_COVERAGE_NONE)
     target_compile_options(rt.builtins PRIVATE -fno-profile-instr-generate
                                                -fno-coverage-mapping)
