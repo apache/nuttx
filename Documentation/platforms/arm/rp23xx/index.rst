@@ -45,6 +45,7 @@ TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_XIPBASE
 Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
 Tickless         Working       Optional, RP2350 TIMER via the alarm/oneshot
+RTC              Working       POWMAN always-on timer, backs the system clock
 ==============   ============  =====
 
 Installation
@@ -217,6 +218,44 @@ exclusive with `RP23XX_SYSTIMER_SYSTICK`.
 The block chosen here is claimed exclusively by the scheduler and is removed
 from the `/dev/timer` driver's choices (see the Timer section), so the tickless
 clock and a `/dev/timer` device can run at the same time on different blocks.
+
+RTC
+===
+
+The RP2350 has no dedicated RTC block -- the one on the RP2040 was removed --
+so NuttX drives the real-time clock from the POWMAN *always-on timer*
+instead. This is a 64-bit millisecond counter that can be clocked from the
+low-power oscillator (LPOSC, nominally 32.768 kHz), so it keeps counting
+across warm resets and through the low-power states managed by POWMAN.
+
+Enable it with `RP23XX_RTC` (which selects `RTC`). The driver
+(`rp23xx_rtc.c`) implements the lightweight `up_rtc_initialize()`,
+`up_rtc_time()` and `up_rtc_settime()` interface that backs the NuttX system
+clock at one-second resolution. `up_rtc_initialize()` sources the timer from
+the low-power oscillator at a 1 kHz tick and starts it, but preserves the
+current value if the bootrom (or a previous boot) already left it running, so
+the wall-clock time survives a warm reset.
+
+Two POWMAN details the driver has to honour:
+
+* Every POWMAN register write must carry the `0x5afe` password in its top 16
+  bits or it is silently ignored, so only the low 16 bits of each register
+  hold data. The 64-bit time is therefore written and read through four
+  16-bit registers, and bit operations use the atomic `SET`/`CLR` register
+  aliases.
+* The counter must be stopped (`TIMER.RUN` cleared) while a new value is
+  loaded and then restarted, otherwise the write is not latched cleanly.
+
+The implementation follows the POWMAN "Always-on Timer" description in the
+Power chapter of the `RP2350 datasheet
+<https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf>`_ and the
+reference `pico-sdk hardware_powman
+<https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2_common/hardware_powman>`_
+library (`powman_timer_start_lposc()`, `powman_timer_set_ms()` and
+`powman_timer_get_ms()`), which the pico-sdk in turn exposes through its
+`pico_aon_timer
+<https://github.com/raspberrypi/pico-sdk/tree/master/src/rp2_common/pico_aon_timer>`_
+wrapper.
 
 Programming
 ============

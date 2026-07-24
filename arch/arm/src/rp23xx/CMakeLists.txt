@@ -109,4 +109,8 @@ if(CONFIG_RP23XX_PSRAM)
   list(APPEND SRCS rp23xx_psram.c rp23xx_heaps.c)
 endif()
 
+if(CONFIG_RP23XX_RTC)
+  list(APPEND SRCS rp23xx_rtc.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

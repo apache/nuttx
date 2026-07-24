@@ -868,6 +868,16 @@ config RP23XX_RNG
 		/dev/random (and /dev/urandom when CONFIG_DEV_URANDOM selects the
 		architecture source) via the TRNG entropy register (EHR).
 
+config RP23XX_RTC
+	bool "Enable RTC (POWMAN always-on timer)"
+	default n
+	select RTC
+	---help---
+		Use the RP2350 POWMAN always-on timer as the real-time clock backing
+		the system clock.  The RP2350 has no dedicated RTC block; the POWMAN
+		timer is a 64-bit millisecond counter clocked from the low-power
+		oscillator, so it keeps running across warm resets.
+
 config RP23XX_ADC
 	bool "Enable ADC Support"
 	default n
