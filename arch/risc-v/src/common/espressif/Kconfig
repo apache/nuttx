@@ -1732,7 +1732,7 @@ config ESPRESSIF_ANA_COMPR1
 config ESPRESSIF_LP_MAILBOX
 	bool "LP Mailbox"
 	default n
-	depends on ARCH_CHIP_ESP32P4 && ESPRESSIF_USE_LP_CORE
+	depends on ESPRESSIF_USE_LP_CORE
 	---help---
 		Enable lp mailbox support for data passing between cores.
 

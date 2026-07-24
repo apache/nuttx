@@ -30,6 +30,7 @@
 #include <nuttx/debug.h>
 
 #include "lp_core_mailbox.h"
+#include "soc/soc_caps.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -52,6 +53,7 @@ struct esp_lp_mailbox_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static int esp_lp_mailbox_open(struct file *filep);
 static int esp_lp_mailbox_read(struct file *filep,
                                char *buffer,
                                size_t buflen);
@@ -68,7 +70,7 @@ static int esp_lp_mailbox_ioctl(struct file *filep,
 
 static const struct file_operations g_esp_lp_mailbox_fops =
 {
-  .open = NULL,                       /* open */
+  .open = esp_lp_mailbox_open,        /* open */
   .close = NULL,                      /* close */
   .read = esp_lp_mailbox_read,        /* read */
   .write = esp_lp_mailbox_write,      /* write */
@@ -90,6 +92,31 @@ struct esp_lp_mailbox_priv_s esp_lp_mailbox_priv =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_lp_mailbox_open
+ *
+ * Description:
+ *   Handler for the LP Mailbox initializer.
+ *
+ * Input Parameters:
+ *   filep - Pointer to the file structure.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int esp_lp_mailbox_open(struct file *filep)
+{
+  int ret = OK;
+#ifndef SOC_LP_MAILBOX_SUPPORTED
+  ret = lp_core_mailbox_init(&esp_lp_mailbox_priv.mailbox,
+                             &esp_lp_mailbox_priv.config);
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: esp_lp_mailbox_rcv_callback
@@ -312,6 +339,7 @@ static int esp_lp_mailbox_ioctl(struct file *filep,
 
 int esp_lp_mailbox_init(void)
 {
+#ifdef SOC_LP_MAILBOX_SUPPORTED
   int ret = lp_core_mailbox_init(&esp_lp_mailbox_priv.mailbox,
                                  &esp_lp_mailbox_priv.config);
 
@@ -320,6 +348,7 @@ int esp_lp_mailbox_init(void)
       ferr("Failed to initialize LP Mailbox driver: %d\n", ret);
       return ret;
     }
+#endif
 
   register_driver("/dev/lp_mailbox", esp_lp_mailbox_priv.ops,
                   0600, (void *)&esp_lp_mailbox_priv);
