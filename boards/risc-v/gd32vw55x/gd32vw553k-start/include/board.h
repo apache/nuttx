@@ -115,6 +115,18 @@
                               GPIO_CFG_AF_1 | GPIO_CFG_PORT_A | GPIO_CFG_PIN_0)
 #endif
 
+/* ADC.  Route ADC channel 8 (ADC_IN8) to PB0 on the J1 header (datasheet
+ * Table 2-5) so an analog signal can be applied there.  When SPI is enabled
+ * PB0 is instead claimed by the I2C0 fallback (see above), so the analog pin
+ * is only routed when SPI is off.  The board bringup samples this channel
+ * when the macro is defined.
+ */
+
+#if defined(CONFIG_GD32VW55X_ADC) && !defined(CONFIG_GD32VW55X_SPI)
+#  define GPIO_ADC_IN8 (GPIO_CFG_MODE_ANALOG | GPIO_CFG_PUPD_NONE | \
+                        GPIO_CFG_PORT_B | GPIO_CFG_PIN_0)
+#endif
+
 /* LEDs *********************************************************************/
 
 /* The GD32VW553K-START has three LEDs on GPIOC, driven push-pull and

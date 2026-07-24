@@ -300,6 +300,33 @@ on ``/mnt/sd``, so no manual ``mount`` is needed::
   GD32 on NuttX
   nsh> ls -l /mnt/sd
 
+adc
+---
+
+NSH plus the ADC driver, registered as ``/dev/adc0`` and read by the ``adc``
+example. Channel 8 (ADC_IN8) is routed to **PB0** on the J1 header, so an
+analog voltage applied there is sampled.
+
+The ADC converts on demand rather than continuously, so the example is built
+with ``CONFIG_EXAMPLES_ADC_SWTRIG``: it issues a software trigger and then
+reads a group of samples. It is bounded to 20 groups
+(``CONFIG_EXAMPLES_ADC_NSAMPLES``) so it returns to the prompt::
+
+  nsh> adc
+  adc_main: g_adcstate.count: 20
+  adc_main: Hardware initialized. Opening the ADC device: /dev/adc0
+  Sample:
+  1: channel: 8 value: 2108
+  Sample:
+  1: channel: 8 value: 2115
+  Sample:
+  1: channel: 8 value: 2112
+  ...
+
+The reported ``value`` is the 12-bit conversion (0..4095) spanning 0..3.3 V; a
+1.65 V input (half of the reference) reads about 2048, and tying PB0 to GND or
+3.3 V drives it to the rails.
+
 littlefs
 --------
 

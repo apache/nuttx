@@ -103,7 +103,11 @@ int gd32_bringup(void)
 #ifdef CONFIG_GD32VW55X_ADC
   static const uint8_t chanlist[1] =
   {
-    0
+#ifdef GPIO_ADC_IN8
+    8   /* ADC_IN8 (PB0) on J1, routed by the adc example */
+#else
+    0   /* ADC_IN0 (PA0); no analog pin routed, registers the device only */
+#endif
   };
 
   struct adc_dev_s *adc;
