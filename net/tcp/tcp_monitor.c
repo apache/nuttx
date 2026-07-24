@@ -272,13 +272,25 @@ int tcp_start_monitor(FAR struct socket *psock)
 
       tcp_shutdown_monitor(conn, TCP_ABORT);
 
-      /* If the peer close the connection before we call accept,
-       * in order to allow user to read the readahead data,
-       * return OK.
+      /* If the peer closed the connection before we called accept, and
+       * there is buffered read-ahead data, return OK so that the caller
+       * still gets a socket from which the pending data can be drained
+       * (followed by EOF).
+       *
+       * If there is no buffered data, however, the connection is dead:
+       * presenting it to the caller as a successfully-accepted socket
+       * makes accept() mark it _SF_CONNECTED (see net/socket/accept.c),
+       * and a subsequent blocking send() would then wait forever on a
+       * connection that will never post another event.  This happens when
+       * a peer resets the connection immediately after the handshake (for
+       * example a close with SO_LINGER {1, 0}).  Report it as not-connected
+       * instead so accept() fails cleanly rather than handing back a wedged
+       * socket.
        */
 
-      if (conn->tcpstateflags == TCP_CLOSED ||
-          conn->tcpstateflags == TCP_LAST_ACK)
+      if ((conn->tcpstateflags == TCP_CLOSED ||
+           conn->tcpstateflags == TCP_LAST_ACK) &&
+          conn->readahead != NULL)
         {
           return OK;
         }
