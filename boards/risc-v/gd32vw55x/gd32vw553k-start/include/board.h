@@ -95,6 +95,17 @@
 #  define GPIO_I2C1_SDA  GPIO_I2C1_SDA_4   /* PB13, AF6 */
 #endif
 
+/* PWM.  The board bringup registers /dev/pwm0 on TIMER1.  Route its channel
+ * 0 (TIMER1_CH0) to PA0 on the J1 header (AF1; TIMER1 lives on AF1) so the
+ * output can be probed there.  The other channels stay unrouted.
+ */
+
+#ifdef CONFIG_GD32VW55X_PWM
+#  define GPIO_TIMER1_CH0OUT (GPIO_CFG_MODE_AF | GPIO_CFG_PUPD_NONE | \
+                              GPIO_CFG_PP | GPIO_CFG_SPEED_MAX | \
+                              GPIO_CFG_AF_1 | GPIO_CFG_PORT_A | GPIO_CFG_PIN_0)
+#endif
+
 /* LEDs *********************************************************************/
 
 /* The GD32VW553K-START has three LEDs on GPIOC, driven push-pull and
