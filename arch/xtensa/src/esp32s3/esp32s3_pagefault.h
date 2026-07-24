@@ -59,4 +59,18 @@
 
 int esp32s3_pagefault_dispatch(int exccause, uint32_t *regs);
 
+#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+/****************************************************************************
+ * Name: esp32s3_pagefault_abort
+ *
+ * Description:
+ *   Terminate just the faulting unprivileged (WORLD1) task via a fatal
+ *   SIGSEGV instead of panicking the whole system.  Returns the register
+ *   frame to resume (the signal trampoline for the faulting task).
+ *
+ ****************************************************************************/
+
+uint32_t *esp32s3_pagefault_abort(int exccause, uint32_t *regs);
+#endif
+
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PAGEFAULT_H */

@@ -98,6 +98,19 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
         {
           return regs;
         }
+
+#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+      /* Unrecoverable, but a WORLD1 (user-mode) fault need not take down the
+       * whole system: terminate just the faulting task with SIGSEGV.  The
+       * User Mode bit in the interruptee's saved PS distinguishes a user
+       * fault from a privileged one (which still panics below).
+       */
+
+      if ((regs[REG_PS] & PS_UM) != 0)
+        {
+          return esp32s3_pagefault_abort(exccause, regs);
+        }
+#endif
     }
 #endif
 
