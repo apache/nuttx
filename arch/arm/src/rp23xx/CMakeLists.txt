@@ -97,4 +97,8 @@ if(CONFIG_RP23XX_FLASH_MTD)
   list(APPEND SRCS rp23xx_flash_mtd.c)
 endif()
 
+if(CONFIG_RP23XX_PSRAM)
+  list(APPEND SRCS rp23xx_psram.c rp23xx_heaps.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

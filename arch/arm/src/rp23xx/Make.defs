@@ -100,3 +100,8 @@ endif
 ifeq ($(CONFIG_RP23XX_FLASH_MTD),y)
 CHIP_CSRCS += rp23xx_flash_mtd.c
 endif
+
+ifeq ($(CONFIG_RP23XX_PSRAM),y)
+CHIP_CSRCS += rp23xx_psram.c
+CHIP_CSRCS += rp23xx_heaps.c
+endif
