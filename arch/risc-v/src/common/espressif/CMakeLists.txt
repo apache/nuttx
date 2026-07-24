@@ -104,6 +104,14 @@ if(CONFIG_ESP_RMT)
   endif()
 endif()
 
+if(CONFIG_ESPRESSIF_LDO)
+  list(APPEND SRCS esp_ldo.c)
+endif()
+
+if(CONFIG_ESPRESSIF_MIPI_DSI)
+  list(APPEND SRCS esp_mipi_dsi.c)
+endif()
+
 if(CONFIG_ESP_SDM)
   list(APPEND SRCS esp_sdm.c)
 endif()
@@ -225,7 +233,7 @@ if(DEFINED ENV{ESP_HAL_3RDPARTY_VERSION})
       CACHE STRING "ESP HAL 3rdparty version")
 else()
   set(ESP_HAL_3RDPARTY_VERSION
-      0eb59f7e02a4735f2b9a78797e691b66740fcadb
+      8d0a898910084206721a0892ab093021bca1496a
       CACHE STRING "ESP HAL 3rdparty version")
 endif()
 
