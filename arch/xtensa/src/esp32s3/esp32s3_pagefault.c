@@ -29,12 +29,20 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 #include <arch/xtensa/xtensa_corebits.h>
 
+#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#include <signal.h>
+#endif
+
 #include "xtensa.h"
 #include "sched/sched.h"
+#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#include "signal/signal.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -133,3 +141,50 @@ int esp32s3_pagefault_dispatch(int exccause, uint32_t *regs)
 
   return -EFAULT;
 }
+
+#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+/****************************************************************************
+ * Name: esp32s3_pagefault_abort
+ *
+ * Description:
+ *   Terminate just the faulting unprivileged (WORLD1) task by delivering a
+ *   fatal SIGSEGV, instead of panicking the whole system.  Called from
+ *   xtensa_user() for an unrecoverable user-mode cache-attribute fault.
+ *
+ *   Mirrors the interrupt-dispatch handshake: record the exception frame as
+ *   the task context, dispatch the signal -- which redirects the task to the
+ *   signal trampoline via up_schedule_sigaction() -- then return the
+ *   redirected frame so the vector's RFE resumes the task in the trampoline,
+ *   whose SIGSEGV default action (_exit) tears the task down and resumes.
+ *
+ * Returned Value:
+ *   The register frame to resume (the signal trampoline for the faulting
+ *   task).
+ *
+ ****************************************************************************/
+
+uint32_t *esp32s3_pagefault_abort(int exccause, uint32_t *regs)
+{
+  struct tcb_s *tcb = this_task();
+  siginfo_t     info;
+
+  _alert("SIGSEGV task %s: EXCCAUSE=%d EXCVADDR=%08x PC=%08x\n",
+         get_task_name(tcb), exccause, (unsigned)regs[REG_EXCVADDR],
+         (unsigned)regs[REG_PC]);
+
+  up_set_interrupt_context(true);
+  tcb->xcp.regs = regs;
+
+  info.si_signo           = SIGSEGV;
+  info.si_code            = SI_USER;
+  info.si_errno           = 0;
+  info.si_value.sival_ptr = (FAR void *)regs[REG_EXCVADDR];
+
+  nxsig_tcbdispatch(tcb, &info, false);
+
+  regs          = tcb->xcp.regs;
+  tcb->xcp.regs = NULL;
+  up_set_interrupt_context(false);
+  return regs;
+}
+#endif /* CONFIG_ESP32S3_PAGEFAULT_ABORT */

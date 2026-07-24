@@ -958,6 +958,17 @@ config ESP32S3_PAGEFAULT
 
 if ESP32S3_PAGEFAULT
 
+config ESP32S3_PAGEFAULT_ABORT
+	bool "Abort the faulting task instead of panicking"
+	default y
+	select SIG_DEFAULT
+	select SIG_SIGKILL_ACTION
+	---help---
+		When an unprivileged (WORLD1) task takes an unrecoverable
+		cache-attribute fault, deliver SIGSEGV to it so its default action
+		terminates only that task and the rest of the system keeps running,
+		instead of a whole-system panic.  Kernel-mode faults still panic.
+
 config ESP32S3_PAGEFAULT_SELFTEST
 	bool "Recoverable-fault self-test"
 	default n
