@@ -206,6 +206,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_startup.c
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_utils.c
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_uart.c
+      ${HAL}/components/ulp/lp_core/lp_core/lp_core_mailbox.c
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_print.c
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_panic.c
       ${HAL}/components/ulp/lp_core/lp_core/lp_core_interrupt.c
@@ -216,10 +217,14 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
   )
 
   if(CONFIG_ARCH_CHIP_ESP32P4)
-    list(
-      APPEND ULP_CSOURCES ${HAL}/components/ulp/lp_core/lp_core/lp_core_touch.c
-      ${HAL}/components/ulp/lp_core/lp_core/port/lp_core_mailbox_impl_hw.c
-      ${HAL}/components/ulp/lp_core/lp_core/lp_core_mailbox.c)
+    list(APPEND ULP_CSOURCES
+         ${HAL}/components/ulp/lp_core/lp_core/lp_core_touch.c
+         ${HAL}/components/ulp/lp_core/lp_core/port/lp_core_mailbox_impl_hw.c)
+  endif()
+
+  if(CONFIG_ARCH_CHIP_ESP32C6)
+    list(APPEND ULP_CSOURCES
+         ${HAL}/components/ulp/lp_core/lp_core/port/lp_core_mailbox_impl_sw.c)
   endif()
 
   # ############################################################################
@@ -420,6 +425,13 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
       COMMENT "Linking ULP firmware"
       VERBATIM)
 
+    set(_ulp_postprocess_sw_mailbox_alias
+        [=[if grep -q 'g_lp_core_mailbox_impl_sw_ctx' "@ULP_MAIN_LD@"; then addr=$(grep 'g_lp_core_mailbox_impl_sw_ctx' "@ULP_MAIN_LD@" | head -1 | sed -E 's/.*=[[:space:]]*([0x0-9a-fA-F]+);.*/\1/'); if ! grep -qE '^[[:space:]]*ulp_g_lp_core_mailbox_impl_sw_ctx[[:space:]]*=' "@ULP_MAIN_LD@"; then echo "ulp_g_lp_core_mailbox_impl_sw_ctx = ${addr};" >> "@ULP_MAIN_LD@"; fi; fi]=]
+    )
+    string(REPLACE "@ULP_MAIN_LD@" "${ULP_MAIN_LD}"
+                   _ulp_postprocess_sw_mailbox_alias
+                   "${_ulp_postprocess_sw_mailbox_alias}")
+
     set(_ulp_postprocess_aliases
         [=[grep -E '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*=[[:space:]]*[0x]*[0-9a-fA-F]+;' "@ULP_MAIN_LD@" | while IFS= read -r line; do var_name=$(echo "$line" | sed -E 's/^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*).*/\1/'); existing_line=$(grep -E "^[[:space:]]*${var_name}[[:space:]]*=" "@ULP_ALIASES_LD@" 2>/dev/null || true); if [ -n "$existing_line" ]; then if [ "$existing_line" != "$line" ]; then sed -i "/${existing_line}/c\\${line}" "@ULP_ALIASES_LD@"; fi; else echo "$line" >> "@ULP_ALIASES_LD@"; fi; done]=]
     )
@@ -448,6 +460,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
       COMMAND ${ULP_READELF} -sW ${ULP_ELF_FILE} > ${ULP_SYM_FILE}
       COMMAND ${Python3_EXECUTABLE} ${ULP_MAPGEN_TOOL} -s ${ULP_SYM_FILE} -o
               ${ULP_FOLDER}/ulp_main --base ${ULP_BASE} --prefix ${ULP_PREFIX}
+      COMMAND bash -c "${_ulp_postprocess_sw_mailbox_alias}"
       COMMAND bash -c "${_ulp_postprocess_aliases}"
       COMMAND sed -i "/${ULP_PREFIX}/d" ${ULP_VARS_HEADER}
       COMMAND

@@ -143,10 +143,12 @@ ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM
 ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)shared$(DELIM)ulp_lp_core_lp_adc_shared.c
 ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)shared$(DELIM)ulp_lp_core_lp_vad_shared.c
 ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)shared$(DELIM)ulp_lp_core_critical_section_shared.c
+ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)lp_core$(DELIM)lp_core_mailbox.c
 ifeq ($(CONFIG_ARCH_CHIP_ESP32P4),y)
 	ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)lp_core$(DELIM)lp_core_touch.c
 	ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)lp_core$(DELIM)port$(DELIM)lp_core_mailbox_impl_hw.c
-	ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)lp_core$(DELIM)lp_core_mailbox.c
+else
+	ULP_CSOURCES += $(CHIP)$(DELIM)$(ESP_HAL_3RDPARTY_REPO)$(DELIM)components$(DELIM)ulp$(DELIM)lp_core$(DELIM)lp_core$(DELIM)port$(DELIM)lp_core_mailbox_impl_sw.c
 endif
 
 # Add ULP app source files and directories
@@ -305,6 +307,13 @@ ifneq ($(suffix $(ULP_APP_BIN)),.bin)
 	$(Q) $(OBJCOPY) -O binary $(ULP_ELF_FILE) $(ULP_BIN_FILE)
 	$(Q) $(ULP_READELF) -sW $(ULP_ELF_FILE) > $(ULP_SYM_FILE)
 	$(Q) python3 $(ULP_MAPGEN_TOOL_PATH) -s $(ULP_SYM_FILE) -o $(ULP_FOLDER)$(DELIM)ulp_main --base $(ULP_BASE) --prefix $(ULP_PREFIX)
+	$(Q) if grep -q 'g_lp_core_mailbox_impl_sw_ctx' $(ULP_FOLDER)$(DELIM)ulp_main.ld; then \
+		addr=$$(grep 'g_lp_core_mailbox_impl_sw_ctx' $(ULP_FOLDER)$(DELIM)ulp_main.ld | head -1 | \
+			sed -E 's/.*=[[:space:]]*([0x0-9a-fA-F]+);.*/\1/'); \
+		if ! grep -qE '^[[:space:]]*ulp_g_lp_core_mailbox_impl_sw_ctx[[:space:]]*=' $(ULP_FOLDER)$(DELIM)ulp_main.ld; then \
+			echo "ulp_g_lp_core_mailbox_impl_sw_ctx = $$addr;" >> $(ULP_FOLDER)$(DELIM)ulp_main.ld; \
+		fi; \
+	fi
 # Checking ULP linker script output and adding/changing related lines on common linker for HP core to access ULP core variables on HP core.
 	$(Q) grep -E '^[[:space:]]*[a-zA-Z_][a-zA-Z0-9_]*[[:space:]]*=[[:space:]]*[0x]*[0-9a-fA-F]+;' $(ULP_FOLDER)$(DELIM)ulp_main.ld | while IFS= read -r line; do \
 		out_file=$(BOARD)$(DELIM)scripts$(DELIM)ulp_aliases.ld; \
