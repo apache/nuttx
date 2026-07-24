@@ -238,6 +238,24 @@ driver::
    ``sht3x_register()`` in ``gd32_bringup.c`` (the i2ctool still finds it at
    its real address regardless).
 
+pwm
+---
+
+NSH plus the PWM driver on TIMER1, registered as ``/dev/pwm0`` and driven by
+the ``pwm`` example. Channel 0 (TIMER1_CH0) is routed to **PA0** on the J1
+header (AF1), so the waveform can be probed there.
+
+Run the example -- it drives a 5 s pulse train at the configured frequency and
+duty (100 Hz, 50 % by default)::
+
+  nsh> pwm
+  pwm_main: starting output with frequency: 100 channel: 1 duty: 00007fff
+  pwm_main: stopping output
+
+``pwm -f <hz> -d <pct> -t <seconds>`` overrides the frequency, duty and
+duration for a single run. Put an LED (with a series resistor) or a scope on
+PA0 to see it.
+
 littlefs
 --------
 
