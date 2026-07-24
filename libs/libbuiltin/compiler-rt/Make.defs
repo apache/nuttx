@@ -108,6 +108,33 @@ ifeq ($(CONFIG_ARCH_X86_64),)
   CSRCS := $(filter-out $(x86_80_BIT_SOURCES), $(CSRCS))
 endif
 
+# The Arm builtins ship hand-written VFP assembly whose FPU requirements the
+# wildcard glob above ignores.  Upstream compiler-rt selects these files
+# conditionally, so assemble only the ones the configured FPU supports;
+# otherwise single-precision-FPU targets (e.g. Cortex-M33, fpv5-sp-d16) fail
+# with "selected FPU does not support instruction".  See apache/nuttx#17386.
+#   - chkstk.S / chkstk2.S are Windows/MinGW-only stack probes;
+#   - every *vfp.S needs a hardware FPU;
+#   - the double-precision *df*vfp.S routines additionally need a
+#     double-precision FPU.
+
+ifeq ($(CONFIG_ARCH_ARM),y)
+  COMPILER_RT_ARM_EXCLUDE := chkstk.S chkstk2.S
+ifneq ($(CONFIG_ARCH_FPU),y)
+  COMPILER_RT_ARM_EXCLUDE += $(notdir \
+    $(wildcard compiler-rt/compiler-rt/lib/builtins/arm/*vfp.S))
+else ifneq ($(CONFIG_ARCH_DPFPU),y)
+  COMPILER_RT_ARM_EXCLUDE += adddf3vfp.S divdf3vfp.S eqdf2vfp.S extendsfdf2vfp.S
+  COMPILER_RT_ARM_EXCLUDE += fixdfsivfp.S fixunsdfsivfp.S floatsidfvfp.S
+  COMPILER_RT_ARM_EXCLUDE += floatunssidfvfp.S gedf2vfp.S gtdf2vfp.S ledf2vfp.S
+  COMPILER_RT_ARM_EXCLUDE += ltdf2vfp.S muldf3vfp.S nedf2vfp.S subdf3vfp.S
+  COMPILER_RT_ARM_EXCLUDE += truncdfsf2vfp.S unorddf2vfp.S
+endif
+  ASRCS := $(filter-out $(addprefix \
+    compiler-rt/compiler-rt/lib/builtins/arm/, $(COMPILER_RT_ARM_EXCLUDE)), \
+    $(ASRCS))
+endif
+
 endif
 
 ################# Profile Library #################
