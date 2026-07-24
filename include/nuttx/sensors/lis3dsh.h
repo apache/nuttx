@@ -32,7 +32,8 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/spi/spi.h>
 
-#if defined(CONFIG_SPI) && defined(CONFIG_LIS3DSH)
+#if defined(CONFIG_SPI) && (defined(CONFIG_LIS3DSH) || \
+                            defined(CONFIG_SENSORS_LIS3DSH_UORB))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -253,6 +254,27 @@ extern "C"
 
 int lis3dsh_register(FAR const char *devpath, FAR struct spi_dev_s *spi,
                      FAR struct lis3dsh_config_s *config);
+
+/****************************************************************************
+ * Name: lis3dsh_register_uorb
+ *
+ * Description:
+ *   Register the LIS3DSH accelerometer as a uORB sensor
+ *   (/dev/uorb/sensor_accel<devno>).
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the character device path.
+ *   spi   - An instance of the SPI interface to use to communicate with
+ *           the LIS3DSH.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SENSORS_LIS3DSH_UORB
+int lis3dsh_register_uorb(int devno, FAR struct spi_dev_s *spi);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

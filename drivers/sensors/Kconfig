@@ -947,6 +947,39 @@ config LIS3DSH
 	---help---
 		Enable driver support for the STMicro LIS3DSH 3-Axis accelerometer.
 
+config SENSORS_LIS3DSH_UORB
+	bool "STMicro LIS3DSH 3-Axis accelerometer support (UORB)"
+	default n
+	select SPI
+	---help---
+		Enable UORB driver support for the STMicro LIS3DSH 3-Axis
+		accelerometer.  Registers /dev/uorb/sensor_accelN.
+
+if SENSORS_LIS3DSH_UORB
+
+config SENSORS_LIS3DSH_UORB_POLL
+	bool "Enable polling worker thread"
+	default n
+	---help---
+		Enables polling of sensor.
+
+config SENSORS_LIS3DSH_UORB_POLL_INTERVAL
+	int "Polling interval in microseconds"
+	depends on SENSORS_LIS3DSH_UORB_POLL
+	default 100000
+	range 0 4294967295
+	---help---
+		The interval until a new sensor measurement will be triggered.
+
+config SENSORS_LIS3DSH_UORB_STACKSIZE
+	int "Worker thread stack size"
+	depends on SENSORS_LIS3DSH_UORB_POLL
+	default 1024
+	---help---
+		The stack size for the worker thread.
+
+endif # SENSORS_LIS3DSH_UORB
+
 config LIS3DH
 	bool "STMicro LIS3DH 3-Axis accelerometer support"
 	default n

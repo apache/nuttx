@@ -380,6 +380,10 @@ if(CONFIG_SENSORS)
       endif()
     endif()
 
+    if(CONFIG_SENSORS_LIS3DSH_UORB)
+      list(APPEND SRCS lis3dsh_uorb.c)
+    endif()
+
     if(CONFIG_LIS3DSH)
       list(APPEND SRCS lis3dsh.c)
     endif()
