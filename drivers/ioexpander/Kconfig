@@ -312,6 +312,34 @@ config PCA9538_RETRY
 
 endif # IOEXPANDER_PCA9538
 
+config IOEXPANDER_PI4IOE5V6408
+	bool "PI4IOE5V6408 I2C IO expander"
+	default n
+	depends on I2C
+	---help---
+		Enable support for the Diodes Incorporated PI4IOE5V6408
+		8-bit I2C I/O expander.
+
+if IOEXPANDER_PI4IOE5V6408
+
+config PI4IOE5V6408_INT_ENABLE
+	bool "Enable PI4IOE5V6408 interrupt support"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	select SCHED_HPWORK
+	---help---
+		Enable the PI4IOE5V6408 interrupt callback interface.  The board
+		must provide hooks for the device's active-low interrupt pin.
+
+config PI4IOE5V6408_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	depends on PI4IOE5V6408_INT_ENABLE
+	---help---
+		This is the maximum number of interrupt callbacks supported.
+
+endif # IOEXPANDER_PI4IOE5V6408
+
 config IOEXPANDER_PCA9557
 	bool "PCA9557 I2C IO expander"
 	default n
