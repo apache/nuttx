@@ -65,6 +65,69 @@ struct mpu_region_s
 };
 
 /****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: mpu_control
+ *
+ * Description:
+ *   Configure and enable (or disable) the MPU.
+ *
+ ****************************************************************************/
+
+static inline_function void mpu_control(bool enable)
+{
+  uint32_t corecon_value = tricore_mfcr(TRICORE_CPU_CORECON);
+
+  corecon_value = enable ?
+                  corecon_value | (1 << 1) :
+                  corecon_value & ~(1 << 1);
+  tricore_mtcr(TRICORE_CPU_CORECON, corecon_value);
+
+  UP_ISB();
+}
+
+/****************************************************************************
+ * Name: mpu_get_active_set
+ *
+ * Description:
+ *   Get the active protection set.
+ *
+ ****************************************************************************/
+
+static inline_function unsigned int mpu_get_active_set(void)
+{
+  uint32_t psw_value = tricore_mfcr(TRICORE_CPU_PSW);
+
+  return ((psw_value & (0x1 << 15)) >> 15) << 2 |
+         ((psw_value & (0x3 << 12)) >> 12);
+}
+
+/****************************************************************************
+ * Name: mpu_set_active_set
+ *
+ * Description:
+ *   Set the active protection set.
+ *
+ ****************************************************************************/
+
+static inline_function void mpu_set_active_set(unsigned int set)
+{
+  uint32_t psw_value;
+
+  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
+
+  psw_value = tricore_mfcr(TRICORE_CPU_PSW);
+  psw_value &= ~((0x3 << 12) | (0x1 << 15));
+  psw_value |= (set >> 2) << 15;
+  psw_value |= (set & 0x03) << 12;
+  tricore_mtcr(TRICORE_CPU_PSW, psw_value);
+
+  UP_ISB();
+}
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -246,22 +309,6 @@ unsigned int mpu_alloc_set(void);
 void mpu_free_set(unsigned int set);
 
 /****************************************************************************
- * Name: mpu_control
- *
- * Description:
- *   Configure and enable (or disable) the MPU
- *
- * Input Parameters:
- *   enable - Flag indicating whether to enable the MPU.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void mpu_control(bool enable);
-
-/****************************************************************************
  * Name: mpu_dump_set
  *
  * Description:
@@ -333,51 +380,6 @@ void mpu_modify_region(unsigned int set, unsigned int region,
 
 unsigned int mpu_configure_region(unsigned int set, uintptr_t base,
                                   size_t size, int flags);
-
-/****************************************************************************
- * Name: mpu_get_active_set
- *
- * Description:
- *   Get the active protection set.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   The active protection set.
- *
- ****************************************************************************/
-
-unsigned int mpu_get_active_set(void);
-
-/****************************************************************************
- * Name: mpu_set_active_set
- *
- * Description:
- *   Set the active protection set.
- *
- * Input Parameters:
- *   set - The protection set to activate.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static inline void mpu_set_active_set(unsigned int set)
-{
-  uint32_t psw_value;
-
-  DEBUGASSERT(set < CONFIG_ARCH_MPU_NSETS);
-
-  psw_value = tricore_mfcr(TRICORE_CPU_PSW);
-  psw_value &= ~((0x3 << 12) | (0x1 << 15));
-  psw_value |= (set >> 2) << 15;
-  psw_value |= (set & 0x03) << 12;
-  tricore_mtcr(TRICORE_CPU_PSW, psw_value);
-
-  UP_ISB();
-}
 
 /****************************************************************************
  * Name: mpu_initialize

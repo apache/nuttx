@@ -431,7 +431,6 @@ int up_addrenv_kstackswitch(struct tcb_s *tcb)
   conf.size = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size -
               (uintptr_t)tcb->stack_alloc_ptr;
   conf.flags[PSW_PRS_KERNEL_SET] = REGION_TYPE_DATA | REGION_ATTR_RW;
-  conf.flags[PSW_PRS_USER_SET] = REGION_TYPE_DATA | REGION_ATTR_RO;
 
   if (g_addrenv_stack_region == 0)
     {
