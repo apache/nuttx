@@ -422,10 +422,10 @@ ssize_t mipi_dsi_dcs_write_buffer(FAR struct mipi_dsi_device *device,
 {
   struct mipi_dsi_msg msg;
 
+  memset(&msg, 0, sizeof(msg));
   msg.channel = device->channel;
   msg.tx_buf = data;
   msg.tx_len = len;
-  msg.flags = 0;
 
   switch (len)
     {
