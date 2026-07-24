@@ -30,15 +30,21 @@
 #include <nuttx/mm/mm.h>
 
 #include "arm_internal.h"
+#include "rp23xx_psram.h"
 
 #if defined(CONFIG_RP23XX_PSRAM)
 
 /****************************************************************************
- * Private Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-static void * const psram_start = (void *)0x11000000ul;
-static const size_t psram_size = 8 * 1024 * 1024;
+/* The PSRAM base address is fixed; the size is whatever rp23xx_psramconfig()
+ * detected at boot (0 if no PSRAM is fitted).  psramconfig() runs from
+ * rp23xx_boardinitialize(), before any of the heap hooks below, so the
+ * detected size is always available here.
+ */
+
+#define PSRAM_START ((void *)RP23XX_PSRAM_BASE)
 
 /****************************************************************************
  * Public Functions
@@ -56,9 +62,14 @@ static struct mm_heap_s *g_psramheap;
 #if CONFIG_MM_REGIONS > 1
 void arm_addregion(void)
 {
-  /* Add the PSRAM region to main heap */
+  size_t psram_size = rp23xx_psram_size();
 
-  kumm_addregion(psram_start, psram_size);
+  /* Add the detected PSRAM region to the main heap */
+
+  if (psram_size > 0)
+    {
+      kumm_addregion(PSRAM_START, psram_size);
+    }
 }
 #endif
 
@@ -85,8 +96,8 @@ void up_allocate_kheap(void **heap_start, size_t *heap_size)
 
 void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = psram_start;
-  *heap_size = psram_size;
+  *heap_start = PSRAM_START;
+  *heap_size  = rp23xx_psram_size();
 }
 
 #elif defined (CONFIG_RP23XX_PSRAM_HEAP_SEPARATE)
@@ -97,7 +108,12 @@ void up_allocate_heap(void **heap_start, size_t *heap_size)
 
 void up_extraheaps_init(void)
 {
-    g_psramheap = mm_initialize("psram", psram_start, psram_size);
+  size_t psram_size = rp23xx_psram_size();
+
+  if (psram_size > 0)
+    {
+      g_psramheap = mm_initialize("psram", PSRAM_START, psram_size);
+    }
 }
 #endif
 

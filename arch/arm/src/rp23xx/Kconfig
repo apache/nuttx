@@ -9,6 +9,51 @@ config RP23XX_RP2350B
 	bool "Use RP2350B variant (QFN-80)"
 	default n
 
+config RP23XX_PSRAM
+	bool "External QSPI PSRAM"
+	default n
+	---help---
+		Enable support for external QSPI PSRAM connected to QMI chip
+		select 1, such as the 8 MiB APS6404 fitted on the Pimoroni Pico
+		Plus 2.  The chip is detected and switched to quad mode at boot,
+		after which it is directly addressable and writable at
+		0x11000000.  Configure the chip-select pin under the Board
+		Selection menu (RP23XX_PSRAM_CS1_GPIO).
+
+if RP23XX_PSRAM
+
+choice
+	prompt "PSRAM heap usage"
+	default RP23XX_PSRAM_HEAP_SINGLE
+	---help---
+		How the detected PSRAM is exposed to the memory manager.
+
+config RP23XX_PSRAM_HEAP_SINGLE
+	bool "Add PSRAM to the main heap"
+	depends on !MM_KERNEL_HEAP
+	---help---
+		Add the PSRAM region to the main heap.  Requires
+		CONFIG_MM_REGIONS greater than 1 so the extra region can be
+		registered.
+
+config RP23XX_PSRAM_HEAP_USER
+	bool "PSRAM as the user heap"
+	depends on MM_KERNEL_HEAP
+	---help---
+		Use the PSRAM as the (user) heap and the internal SRAM as the
+		kernel heap.
+
+config RP23XX_PSRAM_HEAP_SEPARATE
+	bool "Separate PSRAM heap"
+	select ARCH_HAVE_EXTRA_HEAPS
+	---help---
+		Expose the PSRAM as a separate named heap ("psram") rather than
+		adding it to the main heap.
+
+endchoice
+
+endif # RP23XX_PSRAM
+
 config RP23XX_DMAC
 	bool "DMAC support"
 	default y

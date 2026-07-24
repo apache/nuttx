@@ -33,6 +33,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* The QMI registers share the XIP-QMI peripheral base. */
+
+#define RP23XX_QMI_BASE                 RP23XX_XIP_QMI_BASE
+
 /* Register offsets *********************************************************/
 
 #define RP23XX_QMI_DIRECT_CSR_OFFSET    0x00000000
