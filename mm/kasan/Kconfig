@@ -111,7 +111,7 @@ config MM_KASAN_DISABLE_NULL_POINTER_CHECK
 
 config MM_KASAN_DISABLE_READS_CHECK
 	bool "Disable reads check"
-	default n
+	default y
 	---help---
 		This option disables kasan reads check. It speeds up performance
 		compared with default read/write check. Only disable it when you are
