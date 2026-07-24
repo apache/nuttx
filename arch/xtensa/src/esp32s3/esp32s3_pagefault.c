@@ -30,6 +30,7 @@
 #include <debug.h>
 #include <errno.h>
 
+#include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 #include <arch/xtensa/xtensa_corebits.h>
