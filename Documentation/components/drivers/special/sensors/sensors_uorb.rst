@@ -548,6 +548,7 @@ Implemented Drivers
 - hyt271
 - l3gd20
 - :doc:`lis2mdl`
+- lis3dsh
 - lsm9ds1
 - ltr308
 - :doc:`mpu6050`
