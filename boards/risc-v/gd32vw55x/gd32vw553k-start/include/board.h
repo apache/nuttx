@@ -71,6 +71,15 @@
 #  define GPIO_SPI_SCK   GPIO_SPI_SCK_1    /* PA2, AF5 */
 #  define GPIO_SPI_MISO  GPIO_SPI_MISO_1   /* PA1, AF5 */
 #  define GPIO_SPI_MOSI  GPIO_SPI_MOSI_1   /* PA0, AF5 */
+
+/* SPI0 chip select for the SD card: a plain GPIO output on PA4 (J1),
+ * driven by gd32_spi0select().  Active low, idles high.
+ */
+
+#  define GPIO_SPI0_CSPIN (GPIO_CFG_MODE_OUTPUT | GPIO_CFG_PUPD_NONE | \
+                           GPIO_CFG_PP | GPIO_CFG_SPEED_MAX | \
+                           GPIO_CFG_OUTPUT_SET | GPIO_CFG_PORT_A | \
+                           GPIO_CFG_PIN_4)
 #endif
 
 /* I2C0 uses PA2 (SCL) / PA3 (SDA) on AF4, the pins broken out on the J1

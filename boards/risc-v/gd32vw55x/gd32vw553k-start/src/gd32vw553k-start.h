@@ -37,4 +37,16 @@
 
 int gd32_bringup(void);
 
+/****************************************************************************
+ * Name: gd32_spidev_initialize
+ *
+ * Description:
+ *   Configure the SPI chip select GPIO(s) used by the board.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GD32VW55X_SPI
+void gd32_spidev_initialize(void);
+#endif
+
 #endif /* __BOARDS_RISCV_GD32VW55X_GD32VW553K_START_SRC_GD32VW553K_START_H */

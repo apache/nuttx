@@ -256,6 +256,50 @@ duty (100 Hz, 50 % by default)::
 duration for a single run. Put an LED (with a series resistor) or a scope on
 PA0 to see it.
 
+sdcard
+------
+
+NSH plus an SD card on SPI0 with a FAT filesystem. The card is registered as
+``/dev/mmcsd0`` and ``gd32_bringup()`` mounts it on ``/mnt/sd``.
+
+Wire the card (or a microSD-over-SPI breakout) to the J1 header:
+
+======== ==========
+Signal   Pin
+======== ==========
+SCK      PA2
+MISO     PA1
+MOSI     PA0
+CS       PA4
+======== ==========
+
+.. note::
+   Power the breakout from **5 V**, not 3.3 V. These breakouts carry their
+   own 3.3 V regulator, and the SD card draws current bursts while it powers
+   up; feeding 3.3 V directly leaves the card stuck in the ACMD41 init loop
+   (it answers CMD0/CMD8 but never leaves the idle state). A decoupling
+   capacitor close to the card and short leads help too.
+
+The SPI runs its initialisation at ~625 kHz (PCLK2 / 256), slightly above the
+400 kHz of the SD spec, which the vast majority of cards tolerate.
+
+The block device shows up as ``/dev/mmcsd0`` and the bringup already mounts it
+on ``/mnt/sd``, so no manual ``mount`` is needed::
+
+  nsh> ls /dev/
+  /dev:
+   console
+   mmcsd0
+   null
+   ttyS0
+   zero
+  nsh> mount
+    /mnt/sd type vfat
+  nsh> echo "GD32 on NuttX" > /mnt/sd/hello.txt
+  nsh> cat /mnt/sd/hello.txt
+  GD32 on NuttX
+  nsh> ls -l /mnt/sd
+
 littlefs
 --------
 

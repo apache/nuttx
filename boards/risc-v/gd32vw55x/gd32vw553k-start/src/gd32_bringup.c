@@ -37,6 +37,9 @@
 #ifdef CONFIG_SPI_DRIVER
 #  include <nuttx/spi/spi_transfer.h>
 #endif
+#ifdef CONFIG_MMCSD_SPI
+#  include <nuttx/mmcsd.h>
+#endif
 #ifdef CONFIG_GD32VW55X_ADC
 #  include <nuttx/analog/adc.h>
 #endif
@@ -171,19 +174,47 @@ int gd32_bringup(void)
 #endif
 
 #ifdef CONFIG_GD32VW55X_SPI
-  /* The family has a single SPI instance: bus 0 */
+  /* The family has a single SPI instance: bus 0.  Configure the chip select
+   * GPIOs first, then bring the bus up.
+   */
+
+  gd32_spidev_initialize();
 
   spi = gd32_spibus_initialize(0);
   if (spi == NULL)
     {
       ferr("ERROR: failed to initialize SPI0\n");
     }
-#ifdef CONFIG_SPI_DRIVER
-  else if (spi_register(spi, 0) < 0)
+  else
     {
-      ferr("ERROR: failed to register /dev/spi0\n");
-    }
+#ifdef CONFIG_SPI_DRIVER
+      if (spi_register(spi, 0) < 0)
+        {
+          ferr("ERROR: failed to register /dev/spi0\n");
+        }
 #endif
+
+#ifdef CONFIG_MMCSD_SPI
+      /* Bind SPI0 to the MMC/SD SPI slot (/dev/mmcsd0) and mount it as FAT.
+       * The SD card is wired to SPI0 (SCK PA2, MISO PA1, MOSI PA0) with the
+       * chip select on PA4 -- all on the J1 header.
+       */
+
+      ret = mmcsd_spislotinitialize(0, 0, spi);
+      if (ret < 0)
+        {
+          ferr("ERROR: failed to bind SPI0 to the MMC/SD slot: %d\n", ret);
+        }
+      else
+        {
+          ret = nx_mount("/dev/mmcsd0", "/mnt/sd", "vfat", 0, NULL);
+          if (ret < 0)
+            {
+              ferr("ERROR: failed to mount /mnt/sd: %d\n", ret);
+            }
+        }
+#endif
+    }
 #endif
 
 #ifdef CONFIG_GD32VW55X_ADC
