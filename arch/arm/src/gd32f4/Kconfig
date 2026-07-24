@@ -192,6 +192,79 @@ config GD32F4_DFU
 		Configure and position code for use with the GD MCU DFU bootloader.  Do
 		not select this option if you will load code using JTAG/SWM.
 
+config GD32F4_HAVE_OTA_PARTITION
+	bool
+	default n
+
+choice
+	prompt "Application Image Format"
+	depends on ARCH_CHIP_GD32F4
+	default GD32F4_APP_FORMAT_LEGACY
+
+config GD32F4_APP_FORMAT_LEGACY
+	bool "Legacy format"
+
+config GD32F4_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select GD32F4_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+
+endchoice # Application Image Format
+
+if GD32F4_HAVE_OTA_PARTITION
+
+config GD32F4_MCUBOOT_HEADER_SIZE
+	hex "MCUboot image header size"
+	default 0x200
+	depends on GD32F4_APP_FORMAT_MCUBOOT
+
+menuconfig GD32F4_PROGMEM_OTA_PARTITION
+	bool "MTD driver for OTA partition"
+	default n
+	depends on GD32F4_APP_FORMAT_MCUBOOT
+	select BCH
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	select MTD_PROGMEM
+	select GD32F4_PROGMEM
+
+if GD32F4_PROGMEM_OTA_PARTITION
+
+config GD32F4_OTA_PRIMARY_SLOT_DEVPATH
+	string "Primary slot device path"
+	default "/dev/ota0"
+
+config GD32F4_OTA_SECONDARY_SLOT_DEVPATH
+	string "Secondary slot device path"
+	default "/dev/ota1"
+
+config GD32F4_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+config GD32F4_OTA_PRIMARY_SLOT_OFFSET
+	hex "Primary slot offset"
+	default 0x20000
+
+config GD32F4_OTA_SECONDARY_SLOT_OFFSET
+	hex "Secondary slot offset"
+	default 0x100000
+
+config GD32F4_OTA_SCRATCH_OFFSET
+	hex "Scratch partition offset"
+	default 0x1e0000
+
+config GD32F4_OTA_SLOT_SIZE
+	hex "Application image slot size (in bytes)"
+	default 0xe0000
+
+config GD32F4_OTA_SCRATCH_SIZE
+	hex "Scratch partition size (in bytes)"
+	default 0x20000
+
+endif # GD32F4_PROGMEM_OTA_PARTITION
+endif # GD32F4_HAVE_OTA_PARTITION
 
 menu "GD32 Peripheral Support"
 
