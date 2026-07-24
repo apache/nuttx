@@ -276,6 +276,12 @@ int sim_init_func_call_ipi(int irq);
 void sim_timer_update(void);
 #endif
 
+/* sim_rtc.c ****************************************************************/
+
+#ifdef CONFIG_RTC_DRIVER
+int sim_rtc_initialize(void);
+#endif
+
 /* sim_uart.c ***************************************************************/
 
 void sim_uartinit(void);

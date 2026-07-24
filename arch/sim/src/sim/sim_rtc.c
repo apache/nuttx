@@ -59,6 +59,7 @@ static struct rtc_lowerhalf_s g_sim_rtc =
   .ops         = &g_sim_rtc_ops,
 };
 
+static struct rtc_lowerhalf_s *g_sim_rtc_lower;
 static int64_t g_sim_delta;
 
 /****************************************************************************
@@ -134,6 +135,28 @@ int up_rtc_initialize(void)
   rtc = rpmsg_rtc_initialize();
   sync = false;
 #endif
+
+  g_sim_rtc_lower = rtc;
   up_rtc_set_lowerhalf(rtc, sync);
-  return rtc_initialize(0, rtc);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sim_rtc_initialize
+ *
+ * Description:
+ *   Register the SIM RTC driver after the system clock has been initialized.
+ *   This ensures that the /dev/rtc0 inode receives a valid timestamp.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int sim_rtc_initialize(void)
+{
+  return rtc_initialize(0, g_sim_rtc_lower);
 }
