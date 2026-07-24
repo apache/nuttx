@@ -113,3 +113,7 @@ ifeq ($(CONFIG_RP23XX_PSRAM),y)
 CHIP_CSRCS += rp23xx_psram.c
 CHIP_CSRCS += rp23xx_heaps.c
 endif
+
+ifeq ($(CONFIG_RP23XX_RTC),y)
+CHIP_CSRCS += rp23xx_rtc.c
+endif
