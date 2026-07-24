@@ -266,6 +266,14 @@ void up_initialize(void)
   sim_init_cmdline();
 #endif
 
+#ifdef CONFIG_RTC_DRIVER
+  /* Register the RTC after clock_initialize() has synchronized system
+   * time.
+   */
+
+  sim_rtc_initialize();
+#endif
+
   /* Register some tty-port to access tty-port on sim platform */
 
   sim_uartinit();
