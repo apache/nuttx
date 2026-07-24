@@ -470,6 +470,9 @@ Makefile/CMake Variables for ULP Core Build:
 - ``ULP_APP_C_SRCS``: Lists all C source files (.c) that need to be compiled for the ULP application.
 - ``ULP_APP_ASM_SRCS``: Lists all assembly source files (.S or .s) to be assembled.
 - ``ULP_APP_INCLUDES``: Specifies additional include directories for the compiler and assembler.
+- ``ULP_CUSTOM_SECTIONS_LD``: Optional. Replaces the default ``${CHIP_SERIES}_lpcore_sections.ld`` linker template.
+- ``ULP_EXTRA_DEFINES``: Optional. Extra compile definitions for the ULP firmware
+- ``ULP_POST_LINK``: Optional (Make only). Commands run after linking.
 
 Here is an Makefile example when using prebuilt binary for ULP core:
 
