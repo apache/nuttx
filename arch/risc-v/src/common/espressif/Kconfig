@@ -2087,6 +2087,55 @@ config ESPRESSIF_EMAC
 	---help---
 		Enable Ethernet MAC support.
 
+config ESPRESSIF_LDO
+	bool
+	default n
+
+menuconfig ESPRESSIF_MIPI_DSI
+	bool "MIPI DSI Host"
+	depends on ARCH_CHIP_ESP32P4
+	default n
+	select ESPRESSIF_LDO
+	select DRIVERS_VIDEO
+	select MIPI_DSI
+	---help---
+		Enable the Espressif MIPI-DSI host driver behind NuttX's
+		generic mipi_dsi_host_ops API.  Board- and panel-agnostic: LP
+		DCS/generic transfers, DPI timing configure, optional DW-GDMA
+		framebuffer bind (esp_mipi_dsi_bind_framebuffer), and video
+		start/stop.  Panel init sequences, reset/power, and /dev/fb0
+		registration belong in board or panel drivers.
+
+		Board code must power VDD_MIPI_DPHY (often on-chip LDO channel
+		3 @ 2500 mV) before calling esp_mipi_dsi_initialize().
+
+if ESPRESSIF_MIPI_DSI
+
+config ESPRESSIF_MIPI_DSI_BUS
+	int "DSI host bus number"
+	default 0
+	range 0 0
+	---help---
+		ESP32-P4 has a single MIPI-DSI controller (bus 0).
+
+config ESPRESSIF_MIPI_DSI_LANES
+	int "Default number of DSI data lanes"
+	default 2
+	range 1 2
+	---help---
+		Default lane count when esp_mipi_dsi_initialize(NULL) is
+		used.  Boards may override via esp_mipi_dsi_bus_config_s.
+
+config ESPRESSIF_MIPI_DSI_LANE_BITRATE_MBPS
+	int "Default DSI lane bit rate (Mbps)"
+	default 1000
+	range 80 1500
+	---help---
+		Default per-lane HS bit rate for initialize(NULL).  Override
+		per board/panel with esp_mipi_dsi_bus_config_s.
+
+endif # ESPRESSIF_MIPI_DSI
+
 config ESP_COEX_SW_COEXIST_ENABLE
 	bool "Software WiFi/Bluetooth/IEEE 802.15.4 coexistence"
 	depends on (ESPRESSIF_WIFI && ESPRESSIF_BLE) || \

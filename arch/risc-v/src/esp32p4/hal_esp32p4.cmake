@@ -532,6 +532,15 @@ if(CONFIG_ESPRESSIF_SPIRAM)
   endif()
 endif()
 
+if(CONFIG_ESPRESSIF_MIPI_DSI)
+  list(
+    APPEND
+    HAL_SRCS
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_lcd/mipi_dsi_hal.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_lcd/${CHIP_SERIES}/mipi_dsi_periph.c
+    ${ESP_HAL_3RDPARTY_REPO}/components/esp_hal_dma/dw_gdma_hal.c)
+endif()
+
 if(CONFIG_ESPRESSIF_IDF_ENV_FPGA)
   list(APPEND HAL_SRCS
        ${ESP_HAL_3RDPARTY_REPO}/components/esp_system/fpga_overrides_clk.c
