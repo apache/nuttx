@@ -144,7 +144,7 @@ if(CONFIG_SENSORS_AMG88XX)
   list(APPEND SRCS stm32_amg88xx.c)
 endif()
 
-if(CONFIG_LIS3DSH)
+if(CONFIG_LIS3DSH OR CONFIG_SENSORS_LIS3DSH_UORB)
   list(APPEND SRCS stm32_lis3dsh.c)
 endif()
 

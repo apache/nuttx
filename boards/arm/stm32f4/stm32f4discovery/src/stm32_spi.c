@@ -69,7 +69,8 @@ void weak_function stm32_spidev_initialize(void)
   stm32_configgpio(GPIO_W5500_INTR);
 #endif
 
-#if defined(CONFIG_STM32_SPI1) && defined(CONFIG_SENSORS_LIS3MDL)
+#if defined(CONFIG_STM32_SPI1) && (defined(CONFIG_SENSORS_LIS3MDL) || \
+    defined(CONFIG_SENSORS_LIS3DSH_UORB) || defined(CONFIG_LIS3DSH))
   stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
 #endif
 
@@ -189,7 +190,8 @@ void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid,
     }
 #endif
 
-#if defined (CONFIG_SENSORS_LIS3MDL)
+#if defined(CONFIG_SENSORS_LIS3MDL) || defined(CONFIG_SENSORS_LIS3DSH_UORB) || \
+    defined(CONFIG_LIS3DSH)
   if (devid == SPIDEV_ACCELEROMETER(0))
     {
       stm32_gpiowrite(GPIO_CS_MEMS, !selected);

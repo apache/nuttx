@@ -2448,3 +2448,26 @@ nxscope_cdcacm
 Configuration demonstrating NxScope stream over CDC-ACM interface.
 See :doc:`/applications/examples/nxscope/index` and
 :doc:`/applications/logging/nxscope/index` for more details.
+
+sensorscope
+-----------
+
+Streams the on-board LIS3DSH accelerometer (registered as a uORB sensor at
+``/dev/uorb/sensor_accel0``) over the USB CDC/ACM virtual serial port using the
+SensorScope application on top of the NxScope logging protocol. The stream is
+read on the host with Nxscli (https://github.com/railab/nxscli).
+
+Read it with Nxscli::
+
+  # List the available channels: expect one FLOAT channel of dimension 3
+  # named "sensor_accel0" (the accelerometer X/Y/Z axes).
+  nxscli serial /dev/ttyACM1 pdevinfo
+
+  # Print samples of channel 0 to stdout.
+  nxscli serial /dev/ttyACM1 chan 0 pprinter 100
+
+  # Plot samples with nxscli-pqg plugin.
+  nxscli serial /dev/ttyACM1 chan 0 q_roll 100
+
+See :doc:`/applications/system/sensorscope/index` and
+:doc:`/applications/logging/nxscope/index` for more details.

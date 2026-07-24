@@ -62,12 +62,14 @@
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SENSORS_LIS3DSH_UORB
 int attach_disc_lis3dsh(struct lis3dsh_config_s *config,
                         xcpt_t interrupt_handler)
 {
   return stm32_gpiosetevent(BOARD_LIS3DSH_GPIO_EXT0, true, false, false,
                             interrupt_handler, NULL);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -77,10 +79,12 @@ int attach_disc_lis3dsh(struct lis3dsh_config_s *config,
  * Name: board_lis3dsh_initialize
  *
  * Description:
- *   Initialize and register the LIS3DSH 3-axis accelerometer.
+ *   Initialize and register the LIS3DSH 3-axis accelerometer as a legacy
+ *   character device (/dev/accN), or as a uORB sensor when
+ *   CONFIG_SENSORS_LIS3DSH_UORB is selected.
  *
  * Input Parameters:
- *   devno - The device number, used to build the device path as /dev/accN
+ *   devno - The device number
  *   busno - The SPI bus number
  *
  * Returned Value:
@@ -90,28 +94,28 @@ int attach_disc_lis3dsh(struct lis3dsh_config_s *config,
 
 int board_lis3dsh_initialize(int devno, int busno)
 {
-  static struct lis3dsh_config_s acc0_config;
-  char devpath[12];
   struct spi_dev_s *spi;
-  int ret;
 
   sninfo("Initializing LIS3DSH\n");
+
+  spi = stm32_spibus_initialize(busno);
+  if (spi == NULL)
+    {
+      spiinfo("Failed to initialize SPI port\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_SENSORS_LIS3DSH_UORB
+  return lis3dsh_register_uorb(devno, spi);
+#else
+  static struct lis3dsh_config_s acc0_config;
+  char devpath[12];
 
   acc0_config.irq = 22;
   acc0_config.spi_devid = 0;
   acc0_config.attach = &attach_disc_lis3dsh;
 
-  spi = stm32_spibus_initialize(1);
-  if (!spi)
-    {
-      spiinfo("Failed to initialize SPI port\n");
-      ret = -ENODEV;
-    }
-  else
-    {
-      snprintf(devpath, sizeof(devpath), "/dev/acc%d", devno);
-      ret = lis3dsh_register(devpath, spi, &acc0_config);
-    }
-
-  return ret;
+  snprintf(devpath, sizeof(devpath), "/dev/acc%d", devno);
+  return lis3dsh_register(devpath, spi, &acc0_config);
+#endif
 }
