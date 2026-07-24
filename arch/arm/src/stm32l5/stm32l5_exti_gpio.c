@@ -126,6 +126,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
   uint32_t pin = pinset & GPIO_PIN_MASK;
   uint32_t exti = 1 << pin;
   int      irq = STM32_IRQ_EXTI0 + pin;
+  int      ret;
 
   g_gpio_handlers[pin].callback = func;
   g_gpio_handlers[pin].arg      = arg;
@@ -139,6 +140,16 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
     }
   else
     {
+      /* remove any leftover callback */
+
+      ret = irq_detach(irq);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
+      /* disable the interrupt */
+
       up_disable_irq(irq);
     }
 
