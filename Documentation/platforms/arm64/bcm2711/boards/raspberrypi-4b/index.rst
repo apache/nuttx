@@ -298,6 +298,11 @@ nxdoom
 
 This configuration combines features from the ``sd`` and ``fb`` configurations,
 and includes the NuttX port of DOOM, :doc:`/applications/games/nxdoom/index`.
+This configuration for DOOM also plays the DOOM theme song over the audio jack
+using an RTTL adaptation of the theme song. See
+:doc:`/applications/audioutils/rtttl-c/index`. Right now, other songs are
+ignored until better RTTL integration can be made.
+
 Place the WAD file you wish to play on the SD card partition with the NuttX
 kernel and other files. You can then play via
 
@@ -313,6 +318,16 @@ kernel and other files. You can then play via
    The Pi's framebuffer rendering causes some small artifacts in the player
    window. This would need DMA-based rendering or double-buffered rendering to
    improve most likely. Patches also welcome!
+
+.. warning::
+
+   The RTTL audio over the headphone jack is quite loud. Be careful putting
+   earbuds in until you assess the volume level.
+
+.. note::
+
+   Due to the SD card support's current implementation, loading DOOM initially
+   is quite slow.
 
 lvgl
 ----
