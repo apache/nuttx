@@ -45,6 +45,7 @@
 #include <nuttx/ascii.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/init.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
@@ -1698,6 +1699,28 @@ static ssize_t uart_writev(FAR struct file *filep, FAR struct uio *uio)
 #endif
 
       flags = uart_spinlock(dev, false);
+
+      /* In panic state, drain xmit buffer first to preserve log order.
+       * Earlier buffered output must appear before new direct-write data.
+       * Skip in normal interrupt context to avoid excessive latency.
+       */
+
+      if (OSINIT_IS_PANIC())
+        {
+          while (dev->xmit.tail != dev->xmit.head)
+            {
+              while (!uart_txready(dev))
+                {
+                }
+
+              uart_send(dev, dev->xmit.buffer[dev->xmit.tail]);
+              if (++(dev->xmit.tail) >= dev->xmit.size)
+                {
+                  dev->xmit.tail = 0;
+                }
+            }
+        }
+
       ret = uart_irqwritev(dev, uio, oktoblock);
       uart_spinunlock(dev, false, flags);
 
