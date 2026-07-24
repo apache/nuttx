@@ -34,6 +34,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
@@ -552,16 +553,62 @@ errout:
  * Name: wdog_read
  *
  * Description:
- *   A dummy read method.  This is provided only to satisfy the VFS layer.
+ *   Return the current status of the watchdog timer. Mimics what an `ioctl`
+ *   with `WDIOC_GETSTATUS` would do. This is useful for userspace to get the
+ *   current status of the watchdog timer by just reading from the device.
+ *
+ * Returns:
+ *   The number of bytes read on success, or a negated errno value on failure
  *
  ****************************************************************************/
 
 static ssize_t wdog_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen)
 {
-  /* Return zero -- usually meaning end-of-file */
+  /* simulate a "get status" on the userspace */
 
-  return 0;
+  ssize_t ret;
+  FAR struct watchdog_status_s status;
+
+  /* the f_pos is not used along this driver.
+   * Use it as a marker to know if the status has been read already.
+   */
+
+  if (filep->f_pos)
+    {
+      filep->f_pos = 0;
+      return 0;
+    }
+
+  ret = wdog_ioctl(filep, WDIOC_GETSTATUS, (uintptr_t)&status);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Copy the watchdog status into the user buffer */
+
+  ret = snprintf(
+          buffer,
+          buflen,
+          "Status       :\n"
+          "  flags      : 0x%08" PRIx32 "\n"
+          "  timeout    : %" PRId32 "\n"
+          "  timeleft   : %" PRId32 "\n",
+          status.flags, status.timeout, status.timeleft
+        );
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (ret >= buflen)
+    {
+      return -ENOSPC;
+    }
+
+  filep->f_pos++;
+  return ret;
 }
 
 /****************************************************************************
