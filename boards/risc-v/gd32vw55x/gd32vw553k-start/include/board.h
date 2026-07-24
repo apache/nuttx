@@ -73,9 +73,21 @@
 #  define GPIO_SPI_MOSI  GPIO_SPI_MOSI_1   /* PA0, AF5 */
 #endif
 
+/* I2C0 uses PA2 (SCL) / PA3 (SDA) on AF4, the pins broken out on the J1
+ * header (datasheet Table 2-5), so a sensor such as the SHT3x can be wired
+ * there directly.  When SPI is enabled it claims PA2 (SPI SCK), so I2C0
+ * falls back to PB0/PB1 (AF6); PB1 (SDA) is not broken out on J1/J2, so that
+ * pairing only registers the bus (the periph case).
+ */
+
 #ifdef CONFIG_GD32VW55X_I2C0
-#  define GPIO_I2C0_SCL  GPIO_I2C0_SCL_3   /* PB0, AF6 */
-#  define GPIO_I2C0_SDA  GPIO_I2C0_SDA_3   /* PB1, AF6 */
+#  ifdef CONFIG_GD32VW55X_SPI
+#    define GPIO_I2C0_SCL  GPIO_I2C0_SCL_3   /* PB0, AF6 */
+#    define GPIO_I2C0_SDA  GPIO_I2C0_SDA_3   /* PB1, AF6 (not on a header) */
+#  else
+#    define GPIO_I2C0_SCL  GPIO_I2C0_SCL_1   /* PA2, AF4 (J1) */
+#    define GPIO_I2C0_SDA  GPIO_I2C0_SDA_1   /* PA3, AF4 (J1) */
+#  endif
 #endif
 
 #ifdef CONFIG_GD32VW55X_I2C1
