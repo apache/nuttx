@@ -38,4 +38,8 @@ ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += gd32_reset.c
 endif
 
+ifeq ($(CONFIG_GD32VW55X_SPI),y)
+CSRCS += gd32_spi.c
+endif
+
 include $(TOPDIR)/boards/Board.mk
