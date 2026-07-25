@@ -184,8 +184,19 @@ static int elf_loadbinary(FAR struct binary_s *binp,
       binp->stacksize = CONFIG_ELF_STACKSIZE;
     }
 
+  /* A zero nx_priority means "use the default", not "priority zero".  That
+   * is how apps/Application.mk encodes PRIORITY = SCHED_PRIORITY_DEFAULT:
+   *
+   *   SYM_PRIORITY = $(if $(filter SCHED_PRIORITY_DEFAULT,\
+   *                       $(PRIORITY_$@)),0,$(PRIORITY_$@))
+   *
+   * Taking it literally gives the task the idle task's priority, so it is
+   * queued behind the idle task and never runs -- the program loads, reports
+   * no error, and simply never executes an instruction.
+   */
+
   ret = libelf_findsymbol(&loadinfo, "nx_priority", &sym);
-  if (ret == 0)
+  if (ret == 0 && sym.st_value != 0)
     {
       binp->priority = sym.st_value;
     }
