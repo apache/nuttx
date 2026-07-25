@@ -44,8 +44,10 @@
   .section .start, "ax"
 #ifdef CONFIG_NUTTSBI
   .global __start_s
+  .type   __start_s, function
 #else
   .global __start
+  .type   __start, function
 #endif
 
 /****************************************************************************

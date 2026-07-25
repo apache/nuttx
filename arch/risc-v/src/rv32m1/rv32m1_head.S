@@ -38,6 +38,7 @@
   .global exception_common
   .global return_from_exception
   .global __start
+  .type   __start, function
 
   .section .text
 

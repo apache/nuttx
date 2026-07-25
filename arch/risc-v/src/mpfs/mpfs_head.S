@@ -44,6 +44,7 @@
 
   .section .start, "ax"
   .global __start
+  .type   __start, function
 
 __start:
 

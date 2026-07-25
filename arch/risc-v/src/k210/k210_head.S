@@ -42,6 +42,7 @@
 
   .section .text
   .global __start
+  .type   __start, function
 
 __start:
 
