@@ -31,9 +31,19 @@
 
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_RAMMTD
+#  include <nuttx/drivers/drivers.h>
+#  include <nuttx/kmalloc.h>
+#  include <nuttx/mtd/mtd.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_RAMMTD
+#  define MPS2_RAMMTD_SIZE (256 * 1024)
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -70,6 +80,54 @@ static int mps2_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at /tmp: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RAMMTD
+  /* A RAM backed MTD device standing in for memory mapped NOR.  rammtd
+   * answers BIOC_XIPBASE with the base of its buffer, so xipfs layered on it
+   * can hand out real, directly executable pointers -- which is what lets a
+   * module be executed in place rather than copied.  This gives the xipfs
+   * test suite a target with no real flash.
+   */
+
+    {
+      FAR uint8_t *ramstart = kmm_malloc(MPS2_RAMMTD_SIZE);
+      FAR struct mtd_dev_s *mtd;
+
+      if (ramstart == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to allocate RAM MTD\n");
+        }
+      else if ((mtd = rammtd_initialize(ramstart, MPS2_RAMMTD_SIZE)) == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");
+          kmm_free(ramstart);
+        }
+      else
+        {
+          mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+
+          ret = register_mtddriver("/dev/rammtd", mtd, 0755, NULL);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: register_mtddriver failed: %d\n", ret);
+            }
+
+#ifdef CONFIG_FS_XIPFS
+          else
+            {
+              ret = nx_mount("/dev/rammtd", "/mnt/xipfs", "xipfs", 0,
+                             "autoformat");
+              if (ret < 0)
+                {
+                  syslog(LOG_ERR,
+                         "ERROR: Failed to mount xipfs at /mnt/xipfs: %d\n",
+                         ret);
+                }
+            }
+#endif
+        }
     }
 #endif
 
