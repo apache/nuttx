@@ -61,6 +61,18 @@ allsyms_lookup(FAR const char *name, FAR void *value,
   else if (value)
     {
       symbol = symtab_findbyvalue(g_allsyms, value, g_nallsyms);
+
+      /* g_allsyms[0] and g_allsyms[g_nallsyms - 1] are boundary sentinels,
+       * not real symbols.  A match against either one means 'value' falls
+       * outside the range covered by real symbols, so treat it as not
+       * found instead of reporting a bogus name/offset.
+       */
+
+      if (symbol == &g_allsyms[0] ||
+          symbol == &g_allsyms[g_nallsyms - 1])
+        {
+          symbol = NULL;
+        }
     }
 
   if (symbol && symbol != &g_allsyms[g_nallsyms - 1])
