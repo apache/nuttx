@@ -1068,3 +1068,60 @@ config RP23XX_BOARD_HAS_WS2812
 	---help---
 		See the Board Selection menu to configure the pins used
 		by ws2812.
+
+#####################################################################
+#  Flash MTD Configuration
+#####################################################################
+
+config RP23XX_FLASH_MTD
+	bool "MTD driver over unused QSPI flash"
+	default n
+	depends on MTD
+	---help---
+		Expose the part of the QSPI flash that the NuttX image does not
+		occupy as an MTD device.
+
+		This driver answers the BIOC_XIPBASE ioctl, because the RP2350 maps
+		its QSPI flash into the address space at 0x10000000 and executes
+		from it directly.  That allows a filesystem such as XIPFS to hand
+		out real flash pointers so that code can be executed in place.
+
+		Note that erasing or programming this flash stalls all instruction
+		fetches from it.  The driver therefore runs those operations from
+		SRAM with interrupts disabled and the other core parked, which will
+		visibly affect interrupt latency for the duration.
+
+if RP23XX_FLASH_MTD
+
+config RP23XX_FLASH_MTD_OFFSET
+	hex "Offset of the MTD region from the start of flash"
+	default 0x100000
+	---help---
+		Byte offset from 0x10000000 at which the MTD region begins.  Must
+		be a multiple of the 4096 byte erase sector, and must lie beyond
+		the end of the NuttX image; the driver refuses to initialize if it
+		would overlap __flash_binary_end.
+
+config RP23XX_FLASH_MTD_SIZE
+	hex "Size of the MTD region in bytes"
+	default 0x100000
+	---help---
+		Size of the MTD region in bytes.  Must be a multiple of the 4096
+		byte erase sector, and must fit within the flash fitted to the
+		board.
+
+config RP23XX_FLASH_MTD_SAFE_XIP
+	bool "Always restore XIP with the bootrom command mode"
+	default n
+	---help---
+		After each erase or program the QSPI interface must be put back
+		into execute-in-place mode.  By default the driver restores the
+		fast read mode the bootrom configured at boot, which is what code
+		executing in place from this flash needs.
+
+		Enable this to always use the bootrom flash_enter_cmd_xip routine
+		instead.  That is slower to execute from, but depends on nothing
+		beyond the documented bootrom entry point, so it is the safe
+		choice when bringing up a new board.
+
+endif # RP23XX_FLASH_MTD
