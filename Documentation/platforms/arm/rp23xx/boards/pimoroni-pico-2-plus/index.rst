@@ -177,6 +177,14 @@ xipfs
 XIPFS mounted on the on-board flash, with the ``xipfs`` command and the
 XIPFS test suite.
 
+xipfs-fdpic
+-----------
+
+Same as ``xipfs``, plus the FDPIC module loader, the FDPIC half of the test
+suite and the ``fdpicxip`` demo.  The modules it runs are prebuilt blobs, so
+this configuration builds with a plain toolchain; rebuilding them from source
+needs an ``arm-uclinuxfdpiceabi`` toolchain.
+
 xipfs-nxflat
 ------------
 
