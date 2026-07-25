@@ -251,6 +251,37 @@
                                            * OUT: None
                                            */
 
+/* XIPFS specific commands.  See include/nuttx/fs/xipfs.h for the argument
+ * structures.
+ */
+
+#define XIPFSIOC_DEFRAG     _FIOC(0x0019) /* IN:  FAR struct
+                                           *      xipfs_defrag_arg_s *
+                                           * OUT: Defragmentation result
+                                           */
+#define XIPFSIOC_LISTPINNED _FIOC(0x001a) /* IN:  FAR struct
+                                           *      xipfs_pinned_arg_s *
+                                           * OUT: Extents holding XIP pins
+                                           */
+#define XIPFSIOC_EXTENTINFO _FIOC(0x001b) /* IN:  FAR struct
+                                           *      xipfs_extent_info_s *
+                                           * OUT: Physical extent placement
+                                           */
+
+/* IN:  FAR struct xipfs_fault_s * (op countdown and tear mode)
+ * OUT: None
+ */
+
+#define XIPFSIOC_FAULTINJECT _FIOC(0x001c)
+
+#define XIPFSIOC_PIN        _FIOC(0x001d) /* IN:  FAR uintptr_t *
+                                           * OUT: Flash address; pins the
+                                           *      extent in place
+                                           */
+#define XIPFSIOC_UNPIN      _FIOC(0x001e) /* IN:  None
+                                           * OUT: Releases one pin
+                                           */
+
 /* NuttX character driver ioctl definitions *********************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)
