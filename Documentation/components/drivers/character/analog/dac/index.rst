@@ -83,3 +83,11 @@ SPI-based DACs:
 
   dac7554/index.rst
   mcp48xx/index.rst
+
+On-Chip DAC Drivers
+===================
+
+.. toctree::
+  :maxdepth: 1
+
+  stm32h7/index.rst
