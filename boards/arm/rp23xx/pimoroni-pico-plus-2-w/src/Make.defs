@@ -1,0 +1,95 @@
+############################################################################
+# boards/arm/rp23xx/pimoroni-pico-plus-2-w/src/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/Make.defs
+
+CSRCS = rp23xx_boardinitialize.c
+CSRCS += rp23xx_bringup.c
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += rp23xx_gpio.c
+endif
+
+# This board has no LED on an RP2350 pin -- its only LED hangs off the
+# CYW43439, and reaching it means a gSPI bus transaction.  That rules out
+# CONFIG_ARCH_LEDS, whose board_autoled_on() is called from interrupt handlers
+# and from assertion handling, so there is no rp23xx_autoleds.c.  It also
+# means there is no LED at all without the wireless chip.
+# See src/rp23xx_userleds.c.
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+$(error CONFIG_ARCH_LEDS is not supported on this board: the LED hangs off \
+        the CYW43439 and cannot be driven from interrupt context. \
+        Use CONFIG_USERLED instead)
+endif
+
+ifeq ($(CONFIG_RP23XX_INFINEON_CYW43439),y)
+CSRCS += rp23xx_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+  CSRCS += rp23xx_buttons.c
+endif
+
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board
+
+############################################################################
+# The rules below stage the cyw43439 blob out of pico_sdk so that the
+# .incbin in rp23xx_firmware.c can pick it up.
+#
+# rp23xx_firmware.c lives in the *common* src directory, which is both on the
+# include path (added by common/src/Make.defs) and reachable via VPATH, so the
+# blob is staged next to it there.  This mirrors what rp2040 does for the
+# Raspberry Pi Pico W.
+############################################################################
+
+ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
+
+FIRMWARE = src$(DELIM)cyw43439.firmware.image
+
+# --- If PICO_SDK_PATH is not defined set a dummy path. --------------------
+#     See comment below.
+
+ifeq ($(PICO_SDK_PATH),)
+	PICO_SDK_PATH = /tmp
+endif
+
+FIRMWARE_SRC := $(patsubst "%",%,$(CONFIG_CYW43439_FIRMWARE_BIN_PATH))
+
+# --- If the firmware source does not exist create a dummy file. -----------
+#     NuttX built with the cyw43439 driver will not talk to the wireless
+#     chip when built with this dummy file.  The sole purpose of adding
+#     this dummy is so the CI build tests will not fail.
+
+$(FIRMWARE_SRC):
+	$(Q) mkdir -p `dirname $(FIRMWARE_SRC)`
+	$(Q) echo "dummy" >$(FIRMWARE_SRC)
+
+$(FIRMWARE): $(FIRMWARE_SRC)
+	$(call CATFILE, $(FIRMWARE), $(FIRMWARE_SRC))
+
+src$(DELIM)rp23xx_firmware.c: $(FIRMWARE)
+
+distclean::
+	$(call DELFILE, $(FIRMWARE))
+
+endif
