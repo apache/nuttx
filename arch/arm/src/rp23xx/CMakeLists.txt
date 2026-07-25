@@ -93,4 +93,8 @@ if(CONFIG_CRYPTO_CRYPTODEV_HARDWARE)
   list(APPEND SRCS rp23xx_crypto.c)
 endif()
 
+if(CONFIG_RP23XX_FLASH_MTD)
+  list(APPEND SRCS rp23xx_flash_mtd.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

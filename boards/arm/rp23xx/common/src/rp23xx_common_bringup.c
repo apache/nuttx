@@ -49,6 +49,11 @@
 #  include "rp23xx_wdt.h"
 #endif
 
+#ifdef CONFIG_RP23XX_FLASH_MTD
+#  include <nuttx/mtd/mtd.h>
+#  include "rp23xx_flash_mtd.h"
+#endif
+
 #if defined(CONFIG_RP23XX_ROMFS_ROMDISK_DEVNAME)
 #  include <rp23xx_romfsimg.h>
 #endif
@@ -402,6 +407,30 @@ int rp23xx_common_bringup(void)
   if (ret < 0)
     {
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_FLASH_MTD
+  /* Expose the unused tail of the QSPI flash as an MTD device.  This one
+   * answers BIOC_XIPBASE, so a filesystem layered on it can serve
+   * execute-in-place mappings straight out of flash.
+   */
+
+    {
+      struct mtd_dev_s *mtd = rp23xx_flash_mtd_initialize();
+
+      if (mtd == NULL)
+        {
+          serr("ERROR: Failed to initialize the flash MTD device\n");
+        }
+      else
+        {
+          ret = register_mtddriver("/dev/rpflash", mtd, 0755, NULL);
+          if (ret < 0)
+            {
+              serr("ERROR: Failed to register /dev/rpflash: %d\n", ret);
+            }
+        }
     }
 #endif
 
