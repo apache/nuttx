@@ -43,6 +43,7 @@ SRAM Boot        Working       Requires external SWD debugger
 PSRAM            Working       Three modes of heap allocation described below
 TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_XIPBASE
+Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
 ==============   ============  =====
 
 Installation
@@ -170,6 +171,29 @@ applications, as if there was no PSRAM configured. The
 external PSRAM is configured as a separate user heap called
 `psram` and can be used through the global variable
 `g_psramheap` after including `rp23xx_heaps.h`
+
+Timer
+=====
+
+The RP2350 has two system timer blocks, TIMER0 and TIMER1, each a
+free-running 64-bit counter incremented once per microsecond.  They are
+independent of the ARM SysTick that drives the OS tick, so they are
+available for application timers.
+
+Enable the driver with `RP23XX_TIMER` (which selects `TIMER`), then turn on
+each block you want: `RP23XX_TIMER0` registers `/dev/timer0` (TIMER0) and
+`RP23XX_TIMER1` registers `/dev/timer1` (TIMER1).  Each device implements the
+standard NuttX timer lower-half: single-shot or periodic timeouts with 1 us
+resolution and a maximum interval of 2^32 - 1 us (about 71.5 minutes), driven
+by ALARM0 of the block.
+
+A block claimed by the tickless-OS oneshot
+(`RP23XX_SYSTIMER_TICKLESS`) is removed from the choices above, so a
+`/dev/timer` device and the tickless OS time source never collide on the same
+block -- you can run both at once (e.g. tickless on TIMER0, `/dev/timer1` on
+TIMER1).  With tickless disabled, both `/dev/timer0` and
+`/dev/timer1` are available.  The `examples/timer` application can exercise a
+device; point `CONFIG_EXAMPLES_TIMER_DEVNAME` at the block you enabled.
 
 Programming
 ============

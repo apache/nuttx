@@ -60,6 +60,10 @@ ifeq ($(CONFIG_RP23XX_PWM),y)
 CHIP_CSRCS += rp23xx_pwm.c
 endif
 
+ifeq ($(CONFIG_RP23XX_TIMER),y)
+CHIP_CSRCS += rp23xx_timer.c
+endif
+
 ifeq ($(CONFIG_RP23XX_I2C),y)
 CHIP_CSRCS += rp23xx_i2c.c
 endif
