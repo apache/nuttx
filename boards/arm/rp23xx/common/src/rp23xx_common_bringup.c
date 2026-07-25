@@ -58,6 +58,10 @@
 #  include "rp23xx_flash_mtd.h"
 #endif
 
+#ifdef CONFIG_RP23XX_OTP
+#  include "rp23xx_otp.h"
+#endif
+
 #if defined(CONFIG_RP23XX_ROMFS_ROMDISK_DEVNAME)
 #  include <rp23xx_romfsimg.h>
 #endif
@@ -435,6 +439,14 @@ int rp23xx_common_bringup(void)
               serr("ERROR: Failed to register /dev/rpflash: %d\n", ret);
             }
         }
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_OTP
+  ret = rp23xx_otp_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize the OTP: %d\n", ret);
     }
 #endif
 
