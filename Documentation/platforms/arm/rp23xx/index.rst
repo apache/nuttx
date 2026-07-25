@@ -44,6 +44,7 @@ PSRAM            Working       Three modes of heap allocation described below
 TRNG             Working       Hardware RNG at /dev/random and /dev/urandom
 Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_XIPBASE
 Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
+Tickless         Working       Optional, RP2350 TIMER via the alarm/oneshot
 ==============   ============  =====
 
 Installation
@@ -194,6 +195,28 @@ block -- you can run both at once (e.g. tickless on TIMER0, `/dev/timer1` on
 TIMER1).  With tickless disabled, both `/dev/timer0` and
 `/dev/timer1` are available.  The `examples/timer` application can exercise a
 device; point `CONFIG_EXAMPLES_TIMER_DEVNAME` at the block you enabled.
+
+Tickless OS
+===========
+
+By default the OS tick is a periodic ARM SysTick interrupt.  The RP2350 can
+instead run tickless, driving the scheduler from a hardware alarm so the CPU
+is only interrupted when a timer actually expires.
+
+Enable `RP23XX_SYSTIMER_TICKLESS` together with `SCHED_TICKLESS` and
+`SCHED_TICKLESS_ALARM`.  Choose the timer block with the "Tickless timer
+block" option (`RP23XX_SYSTIMER_TICKLESS_TIMER0`, the default, or
+`RP23XX_SYSTIMER_TICKLESS_TIMER1`).  The system time is then taken from that
+block -- a free-running 64-bit microsecond counter -- and its ALARM0 provides
+the next-event interrupt through the alarm/oneshot lower-half
+(`rp23xx_oneshot.c`).  Because the 64-bit counter is the monotonic time base,
+timekeeping is exact to 1 us, and a single alarm can schedule up to ~71
+minutes ahead, so long idle periods need no wake-ups.  This is mutually
+exclusive with `RP23XX_SYSTIMER_SYSTICK`.
+
+The block chosen here is claimed exclusively by the scheduler and is removed
+from the `/dev/timer` driver's choices (see the Timer section), so the tickless
+clock and a `/dev/timer` device can run at the same time on different blocks.
 
 Programming
 ============
