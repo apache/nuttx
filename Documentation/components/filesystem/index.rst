@@ -587,6 +587,7 @@ NuttX provides support for a variety of file systems out of the box.
   tmpfs.rst
   unionfs.rst
   userfs.rst
+  xipfs.rst
   zipfs.rst
   inotify.rst
   nuttxfs.rst
@@ -603,7 +604,7 @@ they require:
 
 1. They require a block device driver. They include vfat, romfs, smartfs, and
    littlefs.
-2. They require MTD drivers. They include romfs, spiffs, littlefs.
+2. They require MTD drivers. They include romfs, spiffs, littlefs, xipfs.
 3. They require neither block nor MTD drivers. They include nxffs, tmpfs, nfs
    binfs, procfs, userfs, hostfs, cromfs, unionfs, rpmsgfs, and zipfs.
 

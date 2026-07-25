@@ -59,18 +59,22 @@ module to the base code.
 Limitations
 -----------
 
-  - **ROMFS (or RAM mapping) Only**:
+  - **XIP-Capable File System (or RAM mapping) Only**:
     The current NXFLAT release will work only with either (1) NXFLAT
-    executable modules residing on a ROMFS file system, or (2) executables
-    residing on other file systems provided that CONFIG_FS_RAMMAP is
-    defined. This limitation is because the loader depends on the capability
-    to mmap() the code segment. See the NuttX User Guide for further information.
+    executable modules residing on a file system that supports execute in
+    place, or (2) executables residing on other file systems provided that
+    CONFIG_FS_RAMMAP is defined. This limitation is because the loader depends
+    on the capability to mmap() the code segment. See the NuttX User Guide for
+    further information.
 
     NUTTX does not provide any general kind of file mapping capability.
     In fact, true file mapping is only possible with MCUs that provide an MMU1.
     Without an MMU, file system may support eXecution In Place (XIP) to mimic
-    file mapping. Only the ROMFS file system supports that kind of XIP execution
-    need by NXFLAT.
+    file mapping. Two file systems support that kind of XIP execution needed
+    by NXFLAT: :doc:`ROMFS <filesystem/romfs>`, whose image is built on the
+    host and is read-only, and :doc:`XIPFS <filesystem/xipfs>`, which is
+    writable, so a module can be downloaded onto the board at run time and
+    still be executed out of flash.
 
     It is also possible to simulate file mapping by allocating memory, copying
     the NXFLAT binary file into memory, and executing from the copy of the
