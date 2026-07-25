@@ -55,7 +55,7 @@
 
 /* Register bit definitions *************************************************/
 
-#define RP23XX_PADS_QSPI_VOLTAGE_SELECT             (1 << 0)
+#define RP23XX_PADS_QSPI_VOLTAGE_SELECT_MASK        0x00000001
 #define RP23XX_PADS_QSPI_GPIO_QSPI_SCLK_MASK        0x000001ff
 #define RP23XX_PADS_QSPI_GPIO_QSPI_SCLK_ISO         (1 << 8)
 #define RP23XX_PADS_QSPI_GPIO_QSPI_SCLK_OD          (1 << 7)
