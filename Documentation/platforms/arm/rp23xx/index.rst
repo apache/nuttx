@@ -46,6 +46,7 @@ Flash MTD        Working       Unused flash tail as an MTD device, answers BIOC_
 Timer            Working       /dev/timerN on TIMER0/TIMER1, 1 us resolution
 Tickless         Working       Optional, RP2350 TIMER via the alarm/oneshot
 RTC              Working       POWMAN always-on timer, backs the system clock
+OTP              Working       Reads via /dev/efuse; programming is opt-in
 ==============   ============  =====
 
 Installation
@@ -341,6 +342,49 @@ Any MTD-based filesystem can be layered on the device, for example::
 
     nsh> mksmartfs /dev/rpflash
     nsh> mount -t smartfs /dev/rpflash /mnt
+
+OTP
+===
+
+The rp2350 has 4096 rows of 24 bit one-time-programmable memory.  Enabling
+``RP23XX_OTP`` exposes it through the NuttX efuse interface, registered by the
+common board bringup as ``/dev/efuse``.
+
+The driver uses the ECC interpretation of a row, in which 16 bits carry data
+and the remaining 8 carry a Hamming code.  The OTP therefore appears as a flat
+space of 4096 * 16 bits, which is what the efuse field descriptors index: a
+descriptor at bit offset N refers to bit ``N % 16`` of row ``N / 16``.  The
+row numbers of the predefined fields are in
+``arch/arm/src/rp23xx/hardware/rp23xx_otp_data.h``.
+
+Reads use the chip's ECC-translated window and have no side effects.  Single
+bit errors are corrected in hardware.  Rows live in pages of 64, each of which
+can be locked; a page locked against reads is reported as ``EPERM`` rather than
+being allowed to raise a bus fault.
+
+To read a field, fill in a ``struct efuse_param_s`` with a NULL terminated list
+of field descriptors and call ``EFUSEIOC_READ_FIELD``.  The bits are returned
+packed from bit 0 of the first byte.  For example, reading the 64 bit chip
+identifier held in rows 0 to 3::
+
+    static const efuse_desc_t chipid = { 0, 64 };   /* row 0, 4 * 16 bits */
+    static const efuse_desc_t *chipid_field[] = { &chipid, NULL };
+
+    uint8_t data[8];
+    struct efuse_param_s param =
+      {
+        .field = chipid_field, .size = 64, .data = data
+      };
+
+    ioctl(fd, EFUSEIOC_READ_FIELD, (unsigned long)&param);
+
+Programming requires the separate ``RP23XX_OTP_WRITE`` option, which is off by
+default; without it ``EFUSEIOC_WRITE_FIELD`` fails with ``EPERM``.  Programming
+is **irreversible**: a bit can only go from zero to one, and since the ECC bits
+cover the whole row, a row can only be programmed once -- the driver rejects a
+write to a row that already holds data rather than corrupting its ECC.  Note
+that some rows control boot and debug behaviour, so an incorrect write can make
+a board unbootable or permanently lock out the debugger.
 
 Supported Boards
 ================

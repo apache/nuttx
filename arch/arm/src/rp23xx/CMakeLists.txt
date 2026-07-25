@@ -113,4 +113,8 @@ if(CONFIG_RP23XX_RTC)
   list(APPEND SRCS rp23xx_rtc.c)
 endif()
 
+if(CONFIG_RP23XX_OTP)
+  list(APPEND SRCS rp23xx_otp.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

@@ -1254,3 +1254,48 @@ config RP23XX_FLASH_MTD_SAFE_XIP
 		choice when bringing up a new board.
 
 endif # RP23XX_FLASH_MTD
+
+#####################################################################
+#  OTP Configuration
+#####################################################################
+
+config RP23XX_OTP
+	bool "OTP (one-time-programmable memory) driver"
+	default n
+	select EFUSE
+	---help---
+		Expose the RP2350 OTP through the NuttX efuse interface as a
+		character device, by default /dev/efuse.
+
+		The OTP is an array of 4096 rows of 24 bits.  This driver uses the
+		ECC interpretation of a row, where 16 bits carry data and the rest
+		carry a Hamming code, so it presents a flat space of 4096 * 16 bits
+		that the efuse field descriptors index into: a field at bit offset
+		N refers to bit N % 16 of row N / 16.
+
+		Reads come straight from the chip's ECC-translated window, and are
+		free of side effects.  A page locked against reads is reported as
+		an error rather than being allowed to raise a bus fault.
+
+		Programming is a separate option below, and is off by default.
+
+if RP23XX_OTP
+
+config RP23XX_OTP_WRITE
+	bool "Allow programming the OTP"
+	default n
+	---help---
+		Build the code that programs OTP rows, through the bootrom.
+
+		Leave this off unless the application really has to burn fuses.
+		Programming is IRREVERSIBLE: a bit can only ever go from zero to
+		one, and because the ECC bits are computed over the whole row, a
+		row can only be programmed once.  A mistake here permanently
+		damages the part, and some rows control boot and debug behaviour,
+		so a wrong write can make a board unbootable or lock out the
+		debugger for good.
+
+		With this option off, EFUSEIOC_WRITE_FIELD fails with EPERM and
+		reads still work normally.
+
+endif # RP23XX_OTP
