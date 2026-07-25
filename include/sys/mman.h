@@ -70,6 +70,16 @@
 
 #define MAP_UNINITIALIZED (1 << 26)     /* Bit 26: Do not clear the anonymous pages */
 
+/* NuttX specific.  Requests a strict execute-in-place mapping: the file
+ * system must resolve the mapping directly onto the memory mapped media or
+ * fail with ENXIO.  It must never fall back to copying the file into RAM,
+ * even when CONFIG_FS_RAMMAP is enabled for the benefit of other consumers.
+ * This is what an XIP module loader must use: a silent RAM copy would
+ * defeat the entire purpose of executing in place.
+ */
+
+#define MAP_XIP_STRICT  (1 << 27)       /* Bit 27: In-place or fail */
+
 /* Failure return */
 
 #define MAP_FAILED      ((FAR void*)-1)

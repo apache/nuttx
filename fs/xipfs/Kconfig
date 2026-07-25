@@ -1,0 +1,42 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_XIPFS
+	bool "XIPFS contiguous execute-in-place file system"
+	default n
+	depends on !DISABLE_MOUNTPOINT && MTD
+	---help---
+		Enable support for XIPFS, a file system that stores each file as a
+		single physically contiguous, erase-block aligned extent on memory
+		mapped flash.
+
+		Because files are contiguous and the media is directly addressable,
+		XIPFS can return a real pointer into flash from mmap(), so a module
+		can be executed in place without its read-only text and rodata ever
+		being copied into RAM.  This requires the underlying MTD driver to
+		implement the BIOC_XIPBASE ioctl.
+
+		Files are write once: a file is created at a known size, written
+		sequentially, closed, and is immutable thereafter until it is
+		deleted.  Random writes, appends and growth are not supported.
+
+		Directories are supported.  They are records in the same metadata
+		generation the files are, not objects in the data region, so an
+		empty one costs one entry out of the volume's fixed supply and no
+		flash blocks at all.
+
+if FS_XIPFS
+
+config FS_XIPFS_FAULT_INJECT
+	bool "XIPFS flash fault injection"
+	default n
+	---help---
+		Add a countdown to the XIPFS flash write and erase paths so that a
+		test can fail an arbitrary flash operation and then remount, which
+		models a power loss at that exact point.
+
+		This is a test-only facility.  Do not enable it in production.
+
+endif # FS_XIPFS

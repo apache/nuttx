@@ -65,6 +65,7 @@ include littlefs/Make.defs
 include rpmsgfs/Make.defs
 include zipfs/Make.defs
 include mnemofs/Make.defs
+include xipfs/Make.defs
 include v9fs/Make.defs
 endif
 
