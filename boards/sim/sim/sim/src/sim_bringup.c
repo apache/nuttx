@@ -212,6 +212,22 @@ int sim_bringup(void)
 
           smart_initialize(0, mtd, NULL);
 
+#elif defined(CONFIG_FS_XIPFS)
+          /* Mount the XIPFS file system.  rammtd answers BIOC_XIPBASE with
+           * the base of its RAM buffer, which makes it a usable stand-in
+           * for memory mapped NOR: extents are directly addressable, so
+           * the XIP mmap path can be exercised end to end.
+           */
+
+          ret = nx_mount("/dev/rammtd", "/mnt/xipfs", "xipfs", 0,
+                         "autoformat");
+          if (ret < 0)
+            {
+              syslog(LOG_ERR,
+                     "ERROR: Failed to mount XIPFS at /mnt/xipfs: %d\n",
+                     ret);
+            }
+
 #elif defined(CONFIG_FS_SPIFFS)
           /* Mount the SPIFFS file system */
 
