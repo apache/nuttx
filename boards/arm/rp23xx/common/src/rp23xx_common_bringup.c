@@ -45,6 +45,10 @@
 #include "rp23xx_adc.h"
 #endif
 
+#ifdef CONFIG_RP23XX_TIMER
+#include "rp23xx_timer.h"
+#endif
+
 #ifdef CONFIG_WATCHDOG
 #  include "rp23xx_wdt.h"
 #endif
@@ -491,6 +495,27 @@ int rp23xx_common_bringup(void)
     }
 
 #endif /* defined(CONFIG_ADC) && defined(CONFIG_RP23XX_ADC) */
+
+  /* Initialize the system timer blocks as /dev/timerN.  Each enabled block
+   * is independent; a block claimed by the tickless oneshot is excluded in
+   * Kconfig, so the two features can be enabled together.
+   */
+
+#ifdef CONFIG_RP23XX_TIMER0
+  ret = rp23xx_timer_initialize("/dev/timer0", 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize /dev/timer0: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_RP23XX_TIMER1
+  ret = rp23xx_timer_initialize("/dev/timer1", 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize /dev/timer1: %d\n", ret);
+    }
+#endif
 
   /* Initialize board neo-pixel */
 

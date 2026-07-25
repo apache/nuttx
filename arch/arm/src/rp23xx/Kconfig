@@ -737,6 +737,46 @@ config RP23XX_SPISD_SPI_CH
 endif # SPISD Configuration
 
 #####################################################################
+#  Timer Configuration
+#####################################################################
+
+menuconfig RP23XX_TIMER
+	bool "System timer (/dev/timer) support"
+	default n
+	select TIMER
+	---help---
+		Build the /dev/timerN driver on top of the RP2350 system timer
+		blocks (TIMER0 and TIMER1).  Each block is a free-running 64-bit
+		microsecond counter, independent of the ARM SysTick that drives
+		the OS tick, so it is available for application timers.  The
+		driver uses ALARM0 of a block for a single-shot or periodic
+		timeout with 1 us resolution.
+
+		Enable one or both blocks below.  A block claimed by the tickless
+		oneshot (CONFIG_RP23XX_SYSTIMER_TICKLESS) is removed from the list
+		so the two features never collide on the same block.
+
+if RP23XX_TIMER
+
+config RP23XX_TIMER0
+	bool "Register TIMER0 as /dev/timer0"
+	default y
+	depends on !RP23XX_SYSTIMER_TICKLESS_TIMER0
+	---help---
+		Bind the TIMER0 block to /dev/timer0.  Unavailable when the
+		tickless oneshot is configured to use TIMER0.
+
+config RP23XX_TIMER1
+	bool "Register TIMER1 as /dev/timer1"
+	default n
+	depends on !RP23XX_SYSTIMER_TICKLESS_TIMER1
+	---help---
+		Bind the TIMER1 block to /dev/timer1.  Unavailable when the
+		tickless oneshot is configured to use TIMER1.
+
+endif # RP23XX_TIMER
+
+#####################################################################
 #  ADC Configuration
 #####################################################################
 
