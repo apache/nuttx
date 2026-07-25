@@ -31,6 +31,8 @@
  * Public Data
  ****************************************************************************/
 
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+
 extern const struct symtab_s g_allsyms[];
 extern const int             g_nallsyms;
 
@@ -115,3 +117,21 @@ FAR const struct symtab_s *allsyms_findbyvalue(FAR void *value,
 {
   return allsyms_lookup(NULL, value, size);
 }
+
+#else
+
+FAR const struct symtab_s *allsyms_findbyname(FAR const char *name,
+                                              FAR size_t *size)
+{
+  *size = 0;
+  return NULL;
+}
+
+FAR const struct symtab_s *allsyms_findbyvalue(FAR void *value,
+                                               FAR size_t *size)
+{
+  *size = 0;
+  return NULL;
+}
+
+#endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
