@@ -1,0 +1,54 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_PIMORONI_PICO_PLUS_2_W
+
+# The board's only LED hangs off a GPIO of the CYW43439, so setting it means a
+# transaction on the gSPI bus.  board_autoled_on() is called from interrupt
+# handlers and from assertion handling, where that is not permissible, so this
+# board supports the CONFIG_USERLED interface only.  Override the generic
+# "default y" so that a fresh configuration does not select something this
+# board cannot implement.
+
+config ARCH_LEDS
+	default n
+
+menuconfig RP23XX_INFINEON_CYW43439
+	bool "Has Infineon cyw43439 WiFi chip"
+	depends on IEEE80211_INFINEON_CYW43439
+	default y
+
+endif
+
+if RP23XX_INFINEON_CYW43439
+
+config CYW43439_FIRMWARE_BIN_PATH
+	string "Path to Infineon 43439 firmware file"
+	default "${PICO_SDK_PATH}/lib/cyw43-driver/firmware/43439A0-7.95.49.00.combined"
+	---help---
+		This should be a path to a file containing both the cyw43439 firmware and
+		the CLM blob.  The firmware should be padded to a 256 byte boundary and
+		then the CLM blob should be appended.
+
+		If this file is updated, check the CYW43439_FIRMWARE_LEN below to make sure
+		it reflects the un-padded length of the firmware part.
+
+		pico-sdk 2.x no longer ships this blob as a binary, only as the C header
+		lib/cyw43-driver/firmware/w43439A0_7_95_49_00_combined.h.  If that is all
+		you have, convert the byte array in that header back to a binary and point
+		this option at the result.
+
+config CYW43439_FIRMWARE_LEN
+	int "Infineon 43439 firmware length (bytes)"
+	default 224190
+	---help---
+		This is the length of just the base firmware in the firmware file specified
+		by the "Path to Infineon 43439 firmware file" configuration option.
+
+		This length does not include the length of any padding nor the length of
+		the appended clm_blob. If a clm_blob is present in the firmware file, this
+		length will be less than the length of the whole file.
+
+endif

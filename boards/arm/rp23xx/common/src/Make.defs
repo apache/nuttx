@@ -110,6 +110,13 @@ ifeq ($(CONFIG_SENSORS_MAX6675),y)
  CSRCS += rp23xx_max6675.c
 endif
 
+# Firmware blob for the Infineon CYW43439 WiFi chip.  The board that carries
+# the chip stages the blob itself, see its src/Make.defs.
+
+ifeq ($(CONFIG_IEEE80211_INFINEON_CYW43439),y)
+ CSRCS += rp23xx_firmware.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src

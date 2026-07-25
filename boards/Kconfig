@@ -2266,6 +2266,23 @@ config ARCH_BOARD_PIMORONI_PICO_2_PLUS
 	---help---
 		This is a port to the Pimoroni Pico 2 Plus board.
 
+config ARCH_BOARD_PIMORONI_PICO_PLUS_2_W
+	bool "Pimoroni Pico Plus 2 W"
+	depends on ARCH_CHIP_RP23XX
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	select RP23XX_RP2350B
+	---help---
+		This is a port to the Pimoroni Pico Plus 2 W board, which adds an
+		Infineon CYW43439 WiFi/Bluetooth chip to the Pico Plus 2.
+
+		The board's only LED is wired to a GPIO of the CYW43439 rather than
+		to a pin of the RP2350, so driving it means a transaction on the gSPI
+		bus.  That works for the CONFIG_USERLED interface but not for
+		CONFIG_ARCH_LEDS, which is called from interrupt context, so
+		CONFIG_ARCH_LEDS is rejected at build time on this board.
+
 config ARCH_BOARD_WAVESHARE_RP2040_LCD_1_28
 	bool "Waveshare RP2040 LCD 1.28 board"
 	depends on ARCH_CHIP_RP2040
@@ -3936,6 +3953,7 @@ config ARCH_BOARD
 	default "raspberrypi-pico-2-rv"        if ARCH_BOARD_RASPBERRYPI_PICO_2_RV
 	default "xiao-rp2350"                  if ARCH_BOARD_XIAO_RP2350
 	default "pimoroni-pico-2-plus"         if ARCH_BOARD_PIMORONI_PICO_2_PLUS
+	default "pimoroni-pico-plus-2-w"       if ARCH_BOARD_PIMORONI_PICO_PLUS_2_W
 	default "w5500-evb-pico"               if ARCH_BOARD_W5500_EVB_PICO
 	default "waveshare-rp2040-zero"        if ARCH_BOARD_WAVESHARE_RP2040_ZERO
 	default "rx65n"                        if ARCH_BOARD_RX65N
@@ -4472,6 +4490,9 @@ source "boards/arm/rp23xx/xiao-rp2350/Kconfig"
 endif
 if ARCH_BOARD_PIMORONI_PICO_2_PLUS
 source "boards/arm/rp23xx/pimoroni-pico-2-plus/Kconfig"
+endif
+if ARCH_BOARD_PIMORONI_PICO_PLUS_2_W
+source "boards/arm/rp23xx/pimoroni-pico-plus-2-w/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"

@@ -110,6 +110,38 @@ if(CONFIG_ARCH_BOARD_COMMON)
     list(APPEND SRCS rp23xx_max6675.c)
   endif()
 
+  # Firmware blob for the Infineon CYW43439 WiFi chip.  rp23xx_firmware.c
+  # .incbin's it, so it has to be staged somewhere on the include path.
+  if(CONFIG_IEEE80211_INFINEON_CYW43439)
+    list(APPEND SRCS rp23xx_firmware.c)
+
+    string(REPLACE "\"" "" CYW43439_FIRMWARE_SRC
+                   "${CONFIG_CYW43439_FIRMWARE_BIN_PATH}")
+    string(CONFIGURE "${CYW43439_FIRMWARE_SRC}" CYW43439_FIRMWARE_SRC)
+
+    set(CYW43439_FIRMWARE "${CMAKE_CURRENT_BINARY_DIR}/cyw43439.firmware.image")
+
+    if(EXISTS "${CYW43439_FIRMWARE_SRC}")
+      configure_file("${CYW43439_FIRMWARE_SRC}" "${CYW43439_FIRMWARE}" COPYONLY)
+    else()
+      # NuttX built with this dummy will not talk to the wireless chip.  It only
+      # exists so that a tree without a pico-sdk checkout still compiles.
+      message(
+        WARNING "cyw43439 firmware not found at ${CYW43439_FIRMWARE_SRC}; "
+                "the wireless chip will not work.  See the board Kconfig help.")
+      file(WRITE "${CYW43439_FIRMWARE}" "dummy\n")
+    endif()
+
+    set_property(
+      SOURCE rp23xx_firmware.c
+      APPEND
+      PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}")
+    set_property(
+      SOURCE rp23xx_firmware.c
+      APPEND
+      PROPERTY OBJECT_DEPENDS "${CYW43439_FIRMWARE}")
+  endif()
+
 endif()
 target_sources(board PRIVATE ${SRCS})
 target_compile_options(board PRIVATE ${RP23XXFLAGS})
