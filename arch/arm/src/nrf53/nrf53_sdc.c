@@ -182,10 +182,10 @@
 struct nrf53_sdc_dev_s
 {
   uint8_t *mempool;  /* Must be 8 bytes aligned */
-  uint8_t msg_buffer[HCI_MSG_BUFFER_MAX_SIZE];
 
   mutex_t lock;
   struct work_s work;
+  struct work_s hci_work;
 };
 
 begin_packed_struct struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s
@@ -309,7 +309,7 @@ static int bt_hci_send(struct bt_driver_s *btdev,
         {
           ret = len;
 
-          work_queue(LPWORK, &g_sdc_dev.work, on_hci_worker, NULL, 0);
+          work_queue(LPWORK, &g_sdc_dev.hci_work, on_hci_worker, NULL, 0);
         }
     }
 
@@ -355,22 +355,7 @@ static void low_prio_worker(void *arg)
 
 static void on_hci_worker(void *arg)
 {
-  /* We use this worker to force a call to on_hci() right after sending
-   * an HCI command as MPSL/SDC does not always signal the low priority
-   * worker
-   */
-
-  nxmutex_lock(&g_sdc_dev.lock);
-  on_hci();
-  nxmutex_unlock(&g_sdc_dev.lock);
-}
-
-/****************************************************************************
- * Name: on_hci
- ****************************************************************************/
-
-static void on_hci(void)
-{
+  uint8_t msg_buffer[HCI_MSG_BUFFER_MAX_SIZE];
   sdc_hci_msg_type_t type;
   bool check_again;
   size_t len;
@@ -384,13 +369,16 @@ static void on_hci(void)
        * buffer and then create an actual bt_buf_s, depending on msg length
        */
 
-      ret = sdc_hci_get(g_sdc_dev.msg_buffer, &type);
+      nxmutex_lock(&g_sdc_dev.lock);
+      ret = sdc_hci_get(msg_buffer, &type);
+      nxmutex_unlock(&g_sdc_dev.lock);
+
       if (ret == 0)
         {
           if (type == SDC_HCI_MSG_TYPE_EVT)
             {
               struct bt_hci_evt_hdr_s *hdr =
-                (struct bt_hci_evt_hdr_s *)g_sdc_dev.msg_buffer;
+                (struct bt_hci_evt_hdr_s *)msg_buffer;
 
               len = sizeof(*hdr) + hdr->len;
 
@@ -399,7 +387,7 @@ static void on_hci(void)
                 {
                   struct hci_evt_cmd_complete_s *cmd_complete =
                     (struct hci_evt_cmd_complete_s *)
-                    (g_sdc_dev.msg_buffer + sizeof(*hdr));
+                    (msg_buffer + sizeof(*hdr));
                   uint8_t *status = (uint8_t *)cmd_complete + 3;
 
                   wlinfo("received CMD_COMPLETE from softdevice "
@@ -414,14 +402,14 @@ static void on_hci(void)
 #endif
 
               bt_netdev_receive(&g_bt_driver, BT_EVT,
-                                g_sdc_dev.msg_buffer, len);
+                                msg_buffer, len);
               check_again = true;
             }
 
           if (type == SDC_HCI_MSG_TYPE_DATA)
             {
               struct bt_hci_acl_hdr_s *hdr =
-                (struct bt_hci_acl_hdr_s *)g_sdc_dev.msg_buffer;
+                (struct bt_hci_acl_hdr_s *)msg_buffer;
 
               wlinfo("received HCI ACL from softdevice (handle: %d)\n",
                      hdr->handle);
@@ -429,12 +417,25 @@ static void on_hci(void)
               len = sizeof(*hdr) + hdr->len;
 
               bt_netdev_receive(&g_bt_driver, BT_ACL_IN,
-                                g_sdc_dev.msg_buffer, len);
+                                msg_buffer, len);
               check_again = true;
             }
         }
     }
   while (check_again);
+}
+
+/****************************************************************************
+ * Name: on_hci
+ *
+ * Description:
+ *   SDC message callback.
+ *
+ ****************************************************************************/
+
+static void on_hci(void)
+{
+  work_queue(LPWORK, &g_sdc_dev.hci_work, on_hci_worker, NULL, 0);
 }
 
 /****************************************************************************
