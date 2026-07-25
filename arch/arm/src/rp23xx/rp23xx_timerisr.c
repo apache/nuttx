@@ -40,6 +40,11 @@
 #include "chip.h"
 #include "systick.h"
 
+#ifdef CONFIG_RP23XX_SYSTIMER_TICKLESS
+#  include <nuttx/timers/arch_alarm.h>
+#  include "rp23xx_oneshot.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -76,7 +81,8 @@
  *   of the systems.
  *
  ****************************************************************************/
-#ifndef CONFIG_RP23XX_SYSTIMER_SYSTICK
+#if !defined(CONFIG_RP23XX_SYSTIMER_SYSTICK) && \
+    !defined(CONFIG_RP23XX_SYSTIMER_TICKLESS)
 static int rp23xx_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
@@ -110,7 +116,11 @@ void up_timer_initialize(void)
   regval |= (NVIC_SYSH_PRIORITY_DEFAULT << NVIC_SYSH_PRIORITY_PR15_SHIFT);
   putreg32(regval, NVIC_SYSH12_15_PRIORITY);
 
-#ifdef CONFIG_RP23XX_SYSTIMER_SYSTICK
+#if defined(CONFIG_RP23XX_SYSTIMER_TICKLESS)
+  /* Drive the tickless scheduler from the selected RP2350 hardware TIMER. */
+
+  up_alarm_set_lowerhalf(rp23xx_oneshot_initialize());
+#elif defined(CONFIG_RP23XX_SYSTIMER_SYSTICK)
   up_timer_set_lowerhalf(systick_initialize(true, SYSTICK_CLOCK, -1));
 #else
 

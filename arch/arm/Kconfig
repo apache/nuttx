@@ -394,6 +394,7 @@ config ARCH_CHIP_RP23XX
 	select ARM_HAVE_DSP
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_CUSTOM_TESTSET
+	select ARCH_HAVE_TICKLESS
 	select ARCH_BOARD_COMMON
 	---help---
 		Raspberry Pi RP23XX architectures (ARM dual Cortex-M33 or RISC-V).

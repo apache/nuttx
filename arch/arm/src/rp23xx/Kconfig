@@ -23,6 +23,40 @@ config RP23XX_SYSTIMER_SYSTICK
 	---help---
 		Use ARM SysTick.
 
+config RP23XX_SYSTIMER_TICKLESS
+	bool "Tickless OS using the RP2350 hardware TIMER"
+	default n
+	depends on !RP23XX_SYSTIMER_SYSTICK
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ALARM_ARCH
+	---help---
+		Use an RP2350 system timer block (TIMER0 or TIMER1, chosen below)
+		as the OS time source and drive the scheduler through the
+		alarm/oneshot interface.  Each block is a free-running 64-bit
+		microsecond counter, independent of the ARM SysTick.  This is the
+		arch-side support required by CONFIG_SCHED_TICKLESS (with
+		CONFIG_SCHED_TICKLESS_ALARM) and gives long tickless idle intervals
+		-- up to ~71 minutes per alarm -- with 1 us resolution.
+
+choice
+	prompt "Tickless timer block"
+	default RP23XX_SYSTIMER_TICKLESS_TIMER0
+	depends on RP23XX_SYSTIMER_TICKLESS
+	---help---
+		Which RP2350 system timer block drives the tickless OS clock.  The
+		block used here is claimed exclusively by the scheduler; the other
+		block stays available for the /dev/timer driver (CONFIG_RP23XX_TIMER),
+		so both features can be enabled at once.
+
+config RP23XX_SYSTIMER_TICKLESS_TIMER0
+	bool "TIMER0"
+
+config RP23XX_SYSTIMER_TICKLESS_TIMER1
+	bool "TIMER1"
+
+endchoice
+
 #####################################################################
 #  UART Configuration
 #####################################################################
