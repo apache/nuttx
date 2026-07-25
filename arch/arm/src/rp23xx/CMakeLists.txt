@@ -117,4 +117,8 @@ if(CONFIG_RP23XX_OTP)
   list(APPEND SRCS rp23xx_otp.c)
 endif()
 
+if(CONFIG_IEEE80211_INFINEON_CYW43439)
+  list(APPEND SRCS rp23xx_cyw43439.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})
