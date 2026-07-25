@@ -10,16 +10,16 @@
 menu "Ameba Peripheral Support"
 
 config AMEBA_GPIO
-    bool "GPIO"
-    default n
-    select DEV_GPIO
-    ---help---
-        Expose Ameba GPIO pins through the NuttX GPIO (ioexpander) upper
-        half at /dev/gpioN.  The board selects which pins are registered
-        and their type (input, output or interrupt) in its bring-up code.
+	bool "GPIO"
+	default n
+	select DEV_GPIO
+	---help---
+		Expose Ameba GPIO pins through the NuttX GPIO (ioexpander) upper
+		half at /dev/gpioN. The board selects which pins are registered
+		and their type (input, output or interrupt) in its bring-up code.
 
-        The driver (arch/arm/src/common/ameba/ameba_gpio.c) sits on the SDK
-        fwlib register layer and dispatches pin interrupts through the ROM
-        GPIO interrupt handler.
+		The driver (arch/arm/src/common/ameba/ameba_gpio.c) sits on the SDK
+		fwlib register layer and dispatches pin interrupts through the ROM
+		GPIO interrupt handler.
 
 endmenu # Ameba Peripheral Support
