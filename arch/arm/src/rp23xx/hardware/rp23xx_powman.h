@@ -161,7 +161,7 @@
 
 /* Register bit definitions *************************************************/
 
-#define RP23XX_POWMAN_BADPASSWD                         (1 << 0)
+#define RP23XX_POWMAN_BADPASSWD_MASK                    0x00000001
 
 #define RP23XX_POWMAN_VREG_CTRL_RST_N                   (1 << 15)
 #define RP23XX_POWMAN_VREG_CTRL_UNLOCK                  (1 << 13)
@@ -183,7 +183,7 @@
 #define RP23XX_POWMAN_VREG_LP_EXIT_VSEL_MASK            0x000001f0
 #define RP23XX_POWMAN_VREG_LP_EXIT_MODE                 (1 << 2)
 #define RP23XX_POWMAN_VREG_LP_EXIT_HIZ                  (1 << 1)
-#define RP23XX_POWMAN_BOD_CTRL                          (1 << 12)
+
 #define RP23XX_POWMAN_BOD_CTRL_ISOLATE                  (1 << 12)
 
 #define RP23XX_POWMAN_BOD_VSEL_MASK                     0x000001f0
@@ -317,7 +317,6 @@
 #define RP23XX_POWMAN_PWRUP3_SOURCE_MASK                0x0000003f
 #define RP23XX_POWMAN_CURRENT_PWRUP_REQ_MASK            0x0000007f
 #define RP23XX_POWMAN_LAST_SWCORE_PWRUP_MASK            0x0000007f
-#define RP23XX_POWMAN_DBG_PWRCFG                        (1 << 0)
 #define RP23XX_POWMAN_DBG_PWRCFG_IGNORE                 (1 << 0)
 #define RP23XX_POWMAN_BOOTDIS_MASK                      0x00000003
 #define RP23XX_POWMAN_BOOTDIS_NEXT                      (1 << 1)
