@@ -438,6 +438,18 @@ int rp23xx_common_bringup(void)
             {
               serr("ERROR: Failed to register /dev/rpflash: %d\n", ret);
             }
+#ifdef CONFIG_FS_XIPFS
+          else
+            {
+              ret = nx_mount("/dev/rpflash", "/mnt/xipfs", "xipfs", 0,
+                             "autoformat");
+              if (ret < 0)
+                {
+                  serr("ERROR: Failed to mount xipfs at /mnt/xipfs: %d\n",
+                       ret);
+                }
+            }
+#endif
         }
     }
 #endif
