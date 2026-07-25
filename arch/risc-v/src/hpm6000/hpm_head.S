@@ -41,6 +41,7 @@
 
   .section .text
   .global __start
+  .type   __start, function
 
 __start:
   /* reset mstatus to 0*/

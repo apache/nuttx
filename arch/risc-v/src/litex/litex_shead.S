@@ -43,6 +43,7 @@
 
   .section .text
   .global __start
+  .type   __start, function
 
 /****************************************************************************
  * Name: __start

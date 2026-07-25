@@ -48,12 +48,14 @@
 #ifdef CONFIG_NUTTSBI
 
   .global __start_s
+  .type   __start_s, function
 
 __start_s:
 
 #else
 
   .global __start
+  .type   __start, function
 
 __start:
 

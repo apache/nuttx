@@ -42,10 +42,12 @@
   .section .text
 #ifndef CONFIG_NUTTSBI
   .global __start
+  .type   __start, function
 
 __start:
 #else
   .global __start_s
+  .type   __start_s, function
 
 __start_s:
 #endif

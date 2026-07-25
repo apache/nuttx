@@ -108,6 +108,8 @@
   .global exception_common
   .global return_from_exception
   .global return_from_syscall
+  .type   exception_common, function
+  .type   return_from_exception, function
   .align  8
 
 exception_common:
@@ -337,6 +339,7 @@ return_from_exception:
 
   .section EXCEPTION_SECTION
   .global riscv_jump_to_user
+  .type   riscv_jump_to_user, function
 
 riscv_jump_to_user:
 
