@@ -343,12 +343,14 @@ config GD32F4_BKPSRAM
 config GD32F4_CAN0
 	bool "CAN0"
 	select CAN
+	select ARCH_HAVE_CAN_ERRORS
 	select GD32F4_CAN
 	default n
 
 config GD32F4_CAN1
 	bool "CAN1"
 	select CAN
+	select ARCH_HAVE_CAN_ERRORS
 	select GD32F4_CAN
 	default n
 
@@ -1893,7 +1895,7 @@ config USART5_RS485_DIR_POLARITY
 	int "Configure USART5 RS-485 DIR pin polarity"
 	default 1
 	range 0 1
-	depends on USART1_RS485
+	depends on USART5_RS485
 	---help---
 		Polarity of GPIO_USART5_RS485_DIR pin for RS-485 on USART5.
 		The state on DIR pin: 0 - receive , 1 - transmit.
@@ -2654,6 +2656,44 @@ config GD32F4_USB_ITRMP
 
 menu "CAN driver configuration"
 	depends on GD32F4_CAN
+
+config GD32F4_CAN0_BAUD
+	int "CAN0 BAUD"
+	depends on GD32F4_CAN0
+	default 500000
+	---help---
+		CAN0 BAUD rate.  Required if CONFIG_GD32F4_CAN0 is defined.
+		Default 500000 for Board1 Power CAN MVP.
+
+config GD32F4_CAN1_BAUD
+	int "CAN1 BAUD"
+	depends on GD32F4_CAN1
+	default 500000
+	---help---
+		CAN1 BAUD rate.  Required if CONFIG_GD32F4_CAN1 is defined.
+
+config GD32F4_CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+		(bit time = TSEG1 + TSEG2 + 1 = 14 quanta with default TSEG2).
+
+config GD32F4_CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+
+config GD32F4_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+comment "Loopback mode uses Device Drivers -> CAN Driver Support -> CONFIG_CAN_LOOPBACK"
 
 endmenu # "CAN driver configuration"
 

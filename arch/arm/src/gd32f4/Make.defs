@@ -64,3 +64,7 @@ endif
 ifeq ($(CONFIG_GD32F4_SDIO),y)
 CHIP_CSRCS += gd32f4xx_sdio.c
 endif
+
+ifeq ($(CONFIG_GD32F4_CAN),y)
+CHIP_CSRCS += gd32f4xx_can.c
+endif

@@ -66,4 +66,8 @@ if(CONFIG_GD32F4_SDIO)
   list(APPEND SRCS gd32f4xx_sdio.c)
 endif()
 
+if(CONFIG_GD32F4_CAN)
+  list(APPEND SRCS gd32f4xx_can.c)
+endif()
+
 target_sources(arch PRIVATE ${SRCS})

@@ -101,7 +101,9 @@
 #define GD32_SPI_BASE        (GD32_APB1_BUS_BASE + 0x00003800U)     /* SPI base address */
 #define GD32_USART_BASE      (GD32_APB1_BUS_BASE + 0x00004400U)     /* USART base address */
 #define GD32_I2C_BASE        (GD32_APB1_BUS_BASE + 0x00005400U)     /* I2C base address */
-#define GD32_CAN_BASE        (GD32_APB1_BUS_BASE + 0x00006400U)     /* CAN base address */
+#define GD32_CAN0_BASE       (GD32_APB1_BUS_BASE + 0x00006400U)     /* CAN0 base address */
+#define GD32_CAN1_BASE       (GD32_APB1_BUS_BASE + 0x00006800U)     /* CAN1 base address */
+#define GD32_CAN_BASE        GD32_CAN0_BASE                         /* Alias: CAN0 */
 #define GD32_CTC_BASE        (GD32_APB1_BUS_BASE + 0x00006C00U)     /* CTC base address */
 #define GD32_PMU_BASE        (GD32_APB1_BUS_BASE + 0x00007000U)     /* PMU base address */
 #define GD32_DAC_BASE        (GD32_APB1_BUS_BASE + 0x00007400U)     /* DAC base address */

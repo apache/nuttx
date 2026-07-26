@@ -158,7 +158,6 @@ struct up_dev_s
   const uint8_t   stop_2bits;    /* True: Configure with 2 stop bits instead of 1 */
   const uint32_t  tx_gpio;       /* USART TX GPIO pin configuration */
   const uint32_t  rx_gpio;       /* USART RX GPIO pin configuration */
-  spinlock_t      lock;          /* Spinlock */
 
 #  ifdef CONFIG_SERIAL_IFLOWCONTROL
   const uint32_t  rts_gpio;      /* UART RTS GPIO pin configuration */
@@ -169,6 +168,7 @@ struct up_dev_s
 
 #endif /* CONFIG_SERIAL_TERMIOS */
 
+  spinlock_t      lock;          /* Spinlock */
   uint32_t        ie;            /* USART enabled interrupts */
   uint16_t        sr;            /* Save USART status */
 
@@ -467,7 +467,7 @@ static struct up_dev_s g_usart0priv =
 
 static struct uart_dev_s g_usart0port =
 {
-#if CONSOLE_UART == 0
+#if defined(CONSOLE_UART) && CONSOLE_UART == 0
   .isconsole = true,
 #endif
   .recv      =
@@ -540,7 +540,7 @@ static struct up_dev_s g_usart1priv =
 
 static struct uart_dev_s g_usart1port =
 {
-#if CONSOLE_UART == 1
+#if defined(CONSOLE_UART) && CONSOLE_UART == 1
   .isconsole = true,
 #endif
   .recv      =
@@ -613,7 +613,7 @@ static struct up_dev_s g_usart2priv =
 
 static struct uart_dev_s g_usart2port =
 {
-#if CONSOLE_UART == 2
+#if defined(CONSOLE_UART) && CONSOLE_UART == 2
   .isconsole = true,
 #endif
   .recv      =
@@ -686,7 +686,7 @@ static struct up_dev_s g_usart5priv =
 
 static struct uart_dev_s g_usart5port =
 {
-#if CONSOLE_UART == 5
+#if defined(CONSOLE_UART) && CONSOLE_UART == 5
   .isconsole = true,
 #endif
   .recv      =
@@ -759,7 +759,7 @@ static struct up_dev_s g_uart3priv =
 
 static struct uart_dev_s g_uart3port =
 {
-#if CONSOLE_UART == 3
+#if defined(CONSOLE_UART) && CONSOLE_UART == 3
   .isconsole = true,
 #endif
   .recv      =
@@ -832,7 +832,7 @@ static struct up_dev_s g_uart4priv =
 
 static struct uart_dev_s g_uart4port =
 {
-#if CONSOLE_UART == 3
+#if defined(CONSOLE_UART) && CONSOLE_UART == 4
   .isconsole = true,
 #endif
   .recv      =
@@ -905,7 +905,7 @@ static struct up_dev_s g_uart6priv =
 
 static struct uart_dev_s g_uart6port =
 {
-#if CONSOLE_UART == 3
+#if defined(CONSOLE_UART) && CONSOLE_UART == 6
   .isconsole = true,
 #endif
   .recv      =
@@ -978,7 +978,7 @@ static struct up_dev_s g_uart7priv =
 
 static struct uart_dev_s g_uart7port =
 {
-#if CONSOLE_UART == 3
+#if defined(CONSOLE_UART) && CONSOLE_UART == 7
   .isconsole = true,
 #endif
   .recv      =
@@ -2793,7 +2793,9 @@ void arm_earlyserialinit(void)
 
   /* Configure whichever one is the console */
 
+#ifdef CONSOLE_UART
   up_setup(g_uart_devs[CONSOLE_UART]);
+#endif
 #endif /* HAVE UART */
 }
 #endif
