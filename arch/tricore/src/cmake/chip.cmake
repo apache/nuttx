@@ -1,5 +1,5 @@
 # ##############################################################################
-# arch/tricore/src/cmake/tc3xx.cmake
+# arch/tricore/src/cmake/chip.cmake
 #
 # SPDX-License-Identifier: Apache-2.0
 #
