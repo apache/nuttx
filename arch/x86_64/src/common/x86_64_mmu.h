@@ -57,6 +57,10 @@
 #define X86_MMU_VADDR_INDEX(vaddr, ptlevel) \
   ((vaddr >> X86_MMU_VADDR_SHIFT(ptlevel)) & X86_MMU_VPN_MASK)
 
+/* Number of PDPT entries in the boot low-memory identity mapping. */
+
+#define X86_MMU_LOWMEM_PDPTS    4
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
