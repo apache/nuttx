@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm64/am62x/pocketbeagle2/CMakeLists.txt
+# boards/arm64/am62x/beagleplay/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
