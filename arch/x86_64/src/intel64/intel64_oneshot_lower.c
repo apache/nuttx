@@ -149,9 +149,13 @@ static void intel64_timer_start_absolute(struct oneshot_lowerhalf_s *lower,
     (struct intel64_oneshot_lowerhalf_s *)lower;
   irqstate_t flags    = spin_lock_irqsave(&g_oneshotlow_spin);
   int        ret      = intel64_oneshot_current(&priv->oneshot, &current_us);
-  uint64_t   delta_us = expected - current_us;
+  uint64_t   delta_us;
 
   DEBUGASSERT(ret == OK);
+
+  /* Use the shortest delay when the deadline has passed. */
+
+  delta_us = expected > current_us ? expected - current_us : 0;
 
   ts.tv_sec  = delta_us / USEC_PER_SEC;
   ts.tv_nsec = delta_us % USEC_PER_SEC * 1000ull;
