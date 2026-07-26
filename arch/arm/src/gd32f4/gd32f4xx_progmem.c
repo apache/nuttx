@@ -68,11 +68,23 @@
 #    define FMC_PROGMEM_SECTOR_EADDR     (0x080FFFFF)
 
 #  elif defined(CONFIG_GD32F4_FLASH_CONFIG_I)
+#    if defined(CONFIG_GD32F4_GD32F470)
+/* GD32F470xI: 2048 KiB main flash @ 0x08000000, 4 KiB page erase.
+ * Expose full array so MCUboot OTA slots (loader/primary/secondary/scratch)
+ * can be partitioned via MTD progmem.
+ */
 
-#    define FMC_PROGMEM_SECTOR_SIZES     {_K(16), _K(16), _K(16), _K(16)}
-#    define FMC_PROGMEM_SECTOR_NUM       (4)
-#    define FMC_PROGMEM_SECTOR_SADDR     (0x08100000)
-#    define FMC_PROGMEM_SECTOR_EADDR     (0x0810FFFF)
+#      define FMC_PROGMEM_SECTOR_SIZES   {_K(256), _K(256), _K(256), _K(256)}
+#      define FMC_PROGMEM_SECTOR_NUM     (512)
+#      define FMC_PROGMEM_SECTOR_SADDR   (0x08000000)
+#      define FMC_PROGMEM_SECTOR_EADDR   (0x081FFFFF)
+#      define FMC_PROGMEM_PAGESIZE       4096
+#    else
+#      define FMC_PROGMEM_SECTOR_SIZES   {_K(16), _K(16), _K(16), _K(16)}
+#      define FMC_PROGMEM_SECTOR_NUM     (4)
+#      define FMC_PROGMEM_SECTOR_SADDR   (0x08100000)
+#      define FMC_PROGMEM_SECTOR_EADDR   (0x0810FFFF)
+#    endif
 
 #  elif defined(CONFIG_GD32F4_FLASH_CONFIG_K)
 #if defined(CONFIG_GD32F4_GD32F450)
