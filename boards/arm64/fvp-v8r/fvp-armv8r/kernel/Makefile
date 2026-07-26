@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/qemu/qemu-armv7r/kernel/Makefile
+# boards/arm64/fvp-v8r/fvp-armv8r/kernel/Makefile
 #
 # SPDX-License-Identifier: Apache-2.0
 #
