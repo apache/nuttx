@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/stm32l476-mdk/src/Makefile
+# boards/arm/stm32l4/stm32l476-mdk/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
