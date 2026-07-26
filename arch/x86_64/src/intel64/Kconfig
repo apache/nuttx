@@ -70,6 +70,10 @@ config ARCH_INTEL64_TSC
 
 config ARCH_INTEL64_HPET_ALARM
 	bool "HPET timer alarm support"
+	select INTEL64_ONESHOT
+	select ONESHOT
+	select ONESHOT_COUNT
+	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
 	---help---
 		With this option you can enable ALARM_ARCH features that works on top of
