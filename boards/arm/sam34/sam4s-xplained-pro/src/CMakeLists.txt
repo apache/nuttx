@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/sam34/sam4s-xplained/src/CMakeLists.txt
+# boards/arm/sam34/sam4s-xplained-pro/src/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
