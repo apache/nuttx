@@ -151,6 +151,7 @@ config ARCH_X86_64
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_POWEROFF
+	select ARCH_HAVE_SYSCALL if LIB_SYSCALL
 	---help---
 		x86-64 architectures.
 
@@ -610,6 +611,12 @@ config ARCH_HAVE_FETCHADD
 config ARCH_HAVE_RTC_SUBSECONDS
 	bool
 	default n
+
+config ARCH_HAVE_SYSCALL
+	bool
+	default n
+	---help---
+		Indicates that the architecture provides the system call interface.
 
 config ARCH_HAVE_SYSCALL_HOOKS
 	bool
