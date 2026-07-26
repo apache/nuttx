@@ -139,9 +139,9 @@ static syslog_channel_t g_rtt_channel =
 #  ifdef CONFIG_SYSLOG_IOCTL
   , "rtt"
 #  endif
-#  ifdef CONFIG_SYSLOG_CRLF
-  , SYSLOG_CHANNEL_DISABLE_CRLF
-#  endif
+  /* sc_state defaults to 0: CRLF conversion ON when CONFIG_SYSLOG_CRLF=y.
+   * Needed for MobaXterm / Windows RTT (LF-only causes staircase wrap).
+   */
 };
 #endif
 
