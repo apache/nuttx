@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm64/am62x/pocketbeagle2/scripts/Make.defs
+# boards/arm64/am62x/beagleplay/scripts/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
