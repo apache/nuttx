@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm64/qemu/qemu-armv8a/scripts/ld.script
+ * boards/arm64/qemu/qemu-armv8a/scripts/ld-kernel.script
  *
  * SPDX-License-Identifier: Apache-2.0
  *
