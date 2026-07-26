@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/nucleo-l496zg/src/Makefile
+# boards/arm/stm32l4/nucleo-l496zg/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
