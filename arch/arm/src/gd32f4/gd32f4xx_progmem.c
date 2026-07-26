@@ -47,6 +47,7 @@
 
 #  define FMC_PROGMEM_SECTOR_SIZES       {_K(128), _K(128)}
 #  define FMC_PROGMEM_SECTOR_NUM         (2)
+#  define FMC_PROGMEM_PAGESIZE         4096
 #  define FMC_PROGMEM_SECTOR_SADDR       (0x08040000)
 #  define FMC_PROGMEM_SECTOR_EADDR       (0x0807FFFF)
 
