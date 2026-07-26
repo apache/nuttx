@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/stm32l4/stm32l4r9ai-disco/src/Makefile
+# boards/arm/stm32l4/stm32l4r9ai-disco/src/Make.defs
 #
 # SPDX-License-Identifier: Apache-2.0
 #
