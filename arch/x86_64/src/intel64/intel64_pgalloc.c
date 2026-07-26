@@ -61,15 +61,17 @@ void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
   DEBUGASSERT(heap_start && heap_size);
 
+  /* The page allocator uses physical addresses. */
+
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
   /* pgheap at the end of RAM */
 
-  *heap_start = (void *)(X86_64_PGPOOL_BASE + X86_64_LOAD_OFFSET);
+  *heap_start = (void *)X86_64_PGPOOL_BASE;
   *heap_size  = (size_t)X86_64_PGPOOL_SIZE;
 #else
   /* pgheap defined with Kconfig options */
 
-  *heap_start = (void *)CONFIG_ARCH_PGPOOL_VBASE;
+  *heap_start = (void *)CONFIG_ARCH_PGPOOL_PBASE;
   *heap_size  = (size_t)CONFIG_ARCH_PGPOOL_SIZE;
 #endif
 }
