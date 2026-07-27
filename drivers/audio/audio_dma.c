@@ -162,22 +162,22 @@ static int audio_dma_getcaps(struct audio_lowerhalf_s *dev, int type,
 
         if (caps->ac_subtype == AUDIO_TYPE_QUERY)
           {
-              /* We don't decode any formats!  Only something above us in
-               * the audio stream can perform decoding on our behalf.
-               */
+            /* We don't decode any formats!  Only something above us in
+             * the audio stream can perform decoding on our behalf.
+             */
 
-              /* The types of audio units we implement */
+            /* The types of audio units we implement */
 
-              if (audio_dma->playback)
+            if (audio_dma->playback)
               {
                 caps->ac_controls.b[0] = AUDIO_TYPE_OUTPUT;
               }
-              else
+            else
               {
                 caps->ac_controls.b[0] = AUDIO_TYPE_INPUT;
               }
 
-              caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
+            caps->ac_format.hw = 1 << (AUDIO_FMT_PCM - 1);
           }
 
         caps->ac_controls.b[0] = AUDIO_SUBFMT_END;
@@ -194,11 +194,11 @@ static int audio_dma_getcaps(struct audio_lowerhalf_s *dev, int type,
           {
             /* Report the Sample rates we support */
 
-              caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
+            caps->ac_controls.hw[0] = AUDIO_SAMP_RATE_DEF_ALL;
           }
 
         break;
-   }
+    }
 
   /* Return the length of the audio_caps_s struct for validation of
    * proper Audio device type.
@@ -233,9 +233,14 @@ static int audio_dma_configure(struct audio_lowerhalf_s *dev,
             memset(&cfg, 0, sizeof(struct dma_config_s));
             cfg.direction = DMA_MEM_TO_DEV;
             if (audio_dma->fifo_width)
-              cfg.dst_width = audio_dma->fifo_width;
+              {
+                cfg.dst_width = audio_dma->fifo_width;
+              }
             else
-              cfg.dst_width = caps->ac_controls.b[2] / 8;
+              {
+                cfg.dst_width = caps->ac_controls.b[2] / 8;
+              }
+
             ret = DMA_CONFIG(audio_dma->chan, &cfg);
           }
         break;
@@ -245,9 +250,14 @@ static int audio_dma_configure(struct audio_lowerhalf_s *dev,
             memset(&cfg, 0, sizeof(struct dma_config_s));
             cfg.direction = DMA_DEV_TO_MEM;
             if (audio_dma->fifo_width)
-              cfg.src_width = audio_dma->fifo_width;
+              {
+                cfg.src_width = audio_dma->fifo_width;
+              }
             else
-              cfg.src_width = caps->ac_controls.b[2] / 8;
+              {
+                cfg.src_width = caps->ac_controls.b[2] / 8;
+              }
+
             ret = DMA_CONFIG(audio_dma->chan, &cfg);
           }
         break;
@@ -382,9 +392,13 @@ static int audio_dma_allocbuffer(struct audio_lowerhalf_s *dev,
         }
 
       if (audio_dma->playback)
-        audio_dma->src_addr = up_addrenv_va_to_pa(audio_dma->alloc_addr);
+        {
+          audio_dma->src_addr = up_addrenv_va_to_pa(audio_dma->alloc_addr);
+        }
       else
-        audio_dma->dst_addr = up_addrenv_va_to_pa(audio_dma->alloc_addr);
+        {
+          audio_dma->dst_addr = up_addrenv_va_to_pa(audio_dma->alloc_addr);
+        }
     }
 
   apb = kumm_zalloc(sizeof(struct ap_buffer_s));
@@ -438,8 +452,10 @@ static int audio_dma_enqueuebuffer(struct audio_lowerhalf_s *dev,
   irqstate_t flags;
 
   if (audio_dma->playback)
-    up_clean_dcache((uintptr_t)apb->samp,
-                    (uintptr_t)apb->samp + apb->nbytes);
+    {
+      up_clean_dcache((uintptr_t)apb->samp,
+                      (uintptr_t)apb->samp + apb->nbytes);
+    }
 
   apb->flags |= AUDIO_APB_OUTPUT_ENQUEUED;
 
@@ -525,18 +541,22 @@ static void audio_dma_callback(struct dma_chan_s *chan,
     }
 
   if (!audio_dma->playback)
-    up_invalidate_dcache((uintptr_t)apb->samp,
-                         (uintptr_t)apb->samp + apb->nbytes);
+    {
+      up_invalidate_dcache((uintptr_t)apb->samp,
+                           (uintptr_t)apb->samp + apb->nbytes);
+    }
 
   if ((apb->flags & AUDIO_APB_FINAL) != 0)
-    final = true;
+    {
+      final = true;
+    }
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-    audio_dma->dev.upper(audio_dma->dev.priv, AUDIO_CALLBACK_DEQUEUE,
-                         apb, OK, NULL);
+  audio_dma->dev.upper(audio_dma->dev.priv, AUDIO_CALLBACK_DEQUEUE,
+                       apb, OK, NULL);
 #else
-    audio_dma->dev.upper(audio_dma->dev.priv, AUDIO_CALLBACK_DEQUEUE,
-                         apb, OK);
+  audio_dma->dev.upper(audio_dma->dev.priv, AUDIO_CALLBACK_DEQUEUE,
+                       apb, OK);
 #endif
   if (final)
     {
@@ -589,9 +609,13 @@ struct audio_lowerhalf_s *audio_dma_initialize(struct dma_dev_s *dma_dev,
   audio_dma->fifo_width = fifo_width;
 
   if (audio_dma->playback)
-    audio_dma->dst_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
+    {
+      audio_dma->dst_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
+    }
   else
-    audio_dma->src_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
+    {
+      audio_dma->src_addr = up_addrenv_va_to_pa((FAR void *)fifo_addr);
+    }
 
   audio_dma->buffer_size = CONFIG_AUDIO_BUFFER_NUMBYTES;
   audio_dma->buffer_num  = CONFIG_AUDIO_NUM_BUFFERS;

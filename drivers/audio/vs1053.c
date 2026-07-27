@@ -1402,8 +1402,7 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
       /* Get the next buffer from the queue */
 
       while ((apb = (FAR struct ap_buffer_s *)dq_remfirst(&dev->apbq))
-               != NULL)
-        ;
+               != NULL);
     }
 
   nxmutex_unlock(&dev->apbq_lock);
@@ -1727,7 +1726,7 @@ static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
         vs1053_hardreset((FAR struct vs1053_struct_s *)lower);
         break;
 
-       /* Report our preferred buffer size and quantity */
+        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
