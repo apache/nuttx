@@ -35,6 +35,7 @@ Command                Depends on Configuration                    Can Be Disabl
 :ref:`cmdbase64enc`    ``CONFIG_NETUTILS_CODECS`` &&               ``CONFIG_NSH_DISABLE_BASE64ENC``
                        ``CONFIG_CODECS_BASE64``
 :ref:`cmdbasename`     .                                           ``CONFIG_NSH_DISABLE_BASENAME``
+:ref:`cmdboot`         ``CONFIG_BOARDCTL_BOOT_IMAGE``              ``CONFIG_NSH_DISABLE_BOOT``
 :ref:`cmdbreak`        ! ``CONFIG_NSH_DISABLESCRIPT`` &&           .
                        ! ``CONFIG_NSH_DISABLE_LOOPS``  
 :ref:`cmdcat`          ``CONFIG_NSH_DISABLE_CAT``                  .
