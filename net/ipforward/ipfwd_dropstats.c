@@ -60,25 +60,25 @@ static int proto_dropstats(int proto)
   switch (proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      g_netstats.tcp.drop++;
-      break;
+      case IP_PROTO_TCP:
+        g_netstats.tcp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      g_netstats.udp.drop++;
-      break;
+      case IP_PROTO_UDP:
+        g_netstats.udp.drop++;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      g_netstats.icmpv6.drop++;
-      break;
+      case IP_PROTO_ICMP6:
+        g_netstats.icmpv6.drop++;
+        break;
 #endif
 
-    default:
-      return -EPROTONOSUPPORT;
+      default:
+        return -EPROTONOSUPPORT;
     }
 
   return OK;

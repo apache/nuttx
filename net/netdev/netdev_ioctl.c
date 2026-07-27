@@ -270,6 +270,7 @@ static void ioctl_get_ipv4addr(FAR struct sockaddr *outaddr,
                                in_addr_t inaddr)
 {
   FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
+
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
   dest->sin_addr.s_addr         = inaddr;
@@ -295,6 +296,7 @@ static void ioctl_get_ipv4broadcast(FAR struct sockaddr *outaddr,
                                     in_addr_t inaddr, in_addr_t netmask)
 {
   FAR struct sockaddr_in *dest  = (FAR struct sockaddr_in *)outaddr;
+
   dest->sin_family              = AF_INET;
   dest->sin_port                = 0;
   dest->sin_addr.s_addr         = net_ipv4addr_broadcast(inaddr, netmask);
@@ -319,6 +321,7 @@ static void ioctl_get_ipv6addr(FAR struct sockaddr_storage *outaddr,
                                FAR const net_ipv6addr_t inaddr)
 {
   FAR struct sockaddr_in6 *dest = (FAR struct sockaddr_in6 *)outaddr;
+
   dest->sin6_family             = AF_INET6;
   dest->sin6_port               = 0;
   memcpy(dest->sin6_addr.in6_u.u6_addr8, inaddr, 16);
@@ -343,6 +346,7 @@ static void ioctl_set_ipv4addr(FAR in_addr_t *outaddr,
                                FAR const struct sockaddr *inaddr)
 {
   FAR const struct sockaddr_in *src = (FAR const struct sockaddr_in *)inaddr;
+
   *outaddr = src->sin_addr.s_addr;
 }
 #endif
@@ -366,6 +370,7 @@ static void ioctl_set_ipv6addr(FAR net_ipv6addr_t outaddr,
 {
   FAR const struct sockaddr_in6 *src =
     (FAR const struct sockaddr_in6 *)inaddr;
+
   memcpy(outaddr, src->sin6_addr.in6_u.u6_addr8, 16);
 }
 #endif
@@ -853,6 +858,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSIFNAME:   /* Set interface name */
         {
           FAR struct net_driver_s *tmpdev;
+
           tmpdev = netdev_findbyindex(req->ifr_ifindex);
           if (tmpdev != NULL)
             {
@@ -868,6 +874,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGIFNAME:  /* Get interface name */
         {
           FAR struct net_driver_s *tmpdev;
+
           tmpdev = netdev_findbyindex(req->ifr_ifindex);
           if (tmpdev != NULL)
             {
@@ -897,6 +904,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
                  == (ssize_t)sizeof(struct in6_ifreq))
           {
             FAR struct in6_ifreq *ifr6 = (FAR struct in6_ifreq *)req;
+
             dev = netdev_findbyindex(ifr6->ifr6_ifindex);
           }
 
@@ -953,6 +961,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGLIFADDR:  /* Get IP address */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           idx = MIN(idx, CONFIG_NETDEV_MAX_IPv6_ADDR - 1);
           ioctl_get_ipv6addr(&lreq->lifr_addr, dev->d_ipv6[idx].addr);
         }
@@ -961,6 +970,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSLIFADDR:  /* Set IP address */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           idx = MIN(idx, CONFIG_NETDEV_MAX_IPv6_ADDR - 1);
 
           netdev_ipv6_removemcastmac(dev, dev->d_ipv6[idx].addr);
@@ -975,6 +985,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGLIFDSTADDR:  /* Get P-to-P address */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           ioctl_get_ipv6addr(&lreq->lifr_dstaddr, dev->d_ipv6draddr);
         }
         break;
@@ -982,6 +993,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSLIFDSTADDR:  /* Set P-to-P address */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           ioctl_set_ipv6addr(dev->d_ipv6draddr, &lreq->lifr_dstaddr);
         }
         break;
@@ -994,6 +1006,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCGLIFNETMASK:  /* Get network mask */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           idx = MIN(idx, CONFIG_NETDEV_MAX_IPv6_ADDR - 1);
           ioctl_get_ipv6addr(&lreq->lifr_addr, dev->d_ipv6[idx].mask);
         }
@@ -1002,6 +1015,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
       case SIOCSLIFNETMASK:  /* Set network mask */
         {
           FAR struct lifreq *lreq = (FAR struct lifreq *)req;
+
           idx = MIN(idx, CONFIG_NETDEV_MAX_IPv6_ADDR - 1);
           ioctl_set_ipv6addr(dev->d_ipv6[idx].mask, &lreq->lifr_addr);
         }
@@ -1175,6 +1189,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         if (psock->s_domain == PF_INET6)
           {
             FAR struct in6_ifreq *ifr6 = (FAR struct in6_ifreq *)req;
+
             ret = netdev_ipv6_add(dev, ifr6->ifr6_addr.in6_u.u6_addr16,
                                   ifr6->ifr6_prefixlen);
             if (ret == OK)
@@ -1200,6 +1215,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
         if (psock->s_domain == PF_INET6)
           {
             FAR struct in6_ifreq *ifr6 = (FAR struct in6_ifreq *)req;
+
             ret = netdev_ipv6_del(dev, ifr6->ifr6_addr.in6_u.u6_addr16,
                                   ifr6->ifr6_prefixlen);
             if (ret == OK)
@@ -1218,6 +1234,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           {
             FAR struct mii_ioctl_notify_s *notify =
               &req->ifr_ifru.ifru_mii_notify;
+
             ret = dev->d_ioctl(dev, cmd, (unsigned long)(uintptr_t)notify);
           }
         else
@@ -1234,6 +1251,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           {
             FAR struct mii_ioctl_data_s *mii_data =
               &req->ifr_ifru.ifru_mii_data;
+
             ret = dev->d_ioctl(dev, cmd,
                                (unsigned long)(uintptr_t)mii_data);
           }
@@ -1261,6 +1279,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           {
             FAR struct can_ioctl_data_s *can_bitrate_data =
               &req->ifr_ifru.ifru_can_data;
+
             ret = dev->d_ioctl(dev, cmd,
                           (unsigned long)(uintptr_t)can_bitrate_data);
           }
@@ -1281,6 +1300,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           {
             FAR struct can_ioctl_filter_s *can_filter =
               &req->ifr_ifru.ifru_can_filter;
+
             ret = dev->d_ioctl(dev, cmd,
                           (unsigned long)(uintptr_t)can_filter);
           }
@@ -1298,6 +1318,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           {
             FAR struct can_ioctl_state_s *can_state =
               &req->ifr_ifru.ifru_can_state;
+
             ret = dev->d_ioctl(dev, cmd,
                           (unsigned long)(uintptr_t)can_state);
           }
@@ -1740,7 +1761,7 @@ static int netdev_ioctl(FAR struct socket *psock, int cmd,
 
         break;
 
-    default:
+      default:
         break;
     }
 

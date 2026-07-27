@@ -95,7 +95,9 @@ ssize_t psock_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   ret = psock_recvmsg(psock, &msg, flags);
   if (ret >= 0 && fromlen != NULL)
-    *fromlen = msg.msg_namelen;
+    {
+      *fromlen = msg.msg_namelen;
+    }
 
   return ret;
 }

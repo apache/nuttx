@@ -98,6 +98,7 @@ int pkt_getsockopt(FAR struct socket *psock, int level, int option,
       case SO_SNDBUF:
         {
           FAR struct pkt_conn_s *conn;
+
           conn = psock->s_conn;
           /* Verify that option is the size of an 'int'.  Should also check
            * that 'value' is properly aligned for an 'int'
@@ -108,9 +109,9 @@ int pkt_getsockopt(FAR struct socket *psock, int level, int option,
               return -EINVAL;
             }
 
-            *(FAR int *)value = conn->sndbufs;
-            break;
-          }
+          *(FAR int *)value = conn->sndbufs;
+          break;
+        }
 #endif
 
       default:

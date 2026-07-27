@@ -244,45 +244,45 @@ int psock_local_connect(FAR struct socket *psock,
 
       switch (conn->lc_type)
         {
-        case LOCAL_TYPE_UNNAMED:   /* A Unix socket that is not bound to any name */
-          break;
+          case LOCAL_TYPE_UNNAMED:   /* A Unix socket that is not bound to any name */
+            break;
 
-        case LOCAL_TYPE_ABSTRACT:  /* lc_path is length zero */
-        case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
+          case LOCAL_TYPE_ABSTRACT:  /* lc_path is length zero */
+          case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
 
-          /* Anything in the listener list should be a stream socket in the
-           * listening state
-           */
+            /* Anything in the listener list should be a stream socket in the
+             * listening state
+             */
 
-          if (conn->lc_state == LOCAL_STATE_LISTENING &&
-              conn->lc_type == type && conn->lc_proto == SOCK_STREAM &&
-              strncmp(conn->lc_path, unpath, UNIX_PATH_MAX - 1) == 0)
-            {
-              /* Bind the address and protocol */
+            if (conn->lc_state == LOCAL_STATE_LISTENING &&
+                conn->lc_type == type && conn->lc_proto == SOCK_STREAM &&
+                strncmp(conn->lc_path, unpath, UNIX_PATH_MAX - 1) == 0)
+              {
+                /* Bind the address and protocol */
 
-              client->lc_type  = conn->lc_type;
-              client->lc_proto = conn->lc_proto;
-              client->lc_instance_id = local_generate_instance_id();
+                client->lc_type  = conn->lc_type;
+                client->lc_proto = conn->lc_proto;
+                client->lc_instance_id = local_generate_instance_id();
 
-              /* The client is now bound to an address */
+                /* The client is now bound to an address */
 
-              client->lc_state = LOCAL_STATE_BOUND;
+                client->lc_state = LOCAL_STATE_BOUND;
 
-              /* We have to do more for the SOCK_STREAM family */
+                /* We have to do more for the SOCK_STREAM family */
 
-              ret = local_stream_connect(client, conn,
-                          _SS_ISNONBLOCK(client->lc_conn.s_flags));
+                ret = local_stream_connect(client, conn,
+                            _SS_ISNONBLOCK(client->lc_conn.s_flags));
 
-              local_unlock();
-              return ret;
-            }
+                local_unlock();
+                return ret;
+              }
 
-          break;
+            break;
 
-        default:        /* Bad, memory must be corrupted */
-          DEBUGPANIC(); /* PANIC if debug on */
-          local_unlock();
-          return -EINVAL;
+          default:        /* Bad, memory must be corrupted */
+            DEBUGPANIC(); /* PANIC if debug on */
+            local_unlock();
+            return -EINVAL;
         }
     }
 

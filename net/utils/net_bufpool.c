@@ -69,6 +69,7 @@ static void net_bufpool_init(FAR struct net_bufpool_s *pool)
     {
       FAR struct net_bufnode_s *node = (FAR struct net_bufnode_s *)
                                       (pool->pool + i * pool->nodesize);
+
       sq_addlast(&node->node, &pool->freebuffers);
     }
 }

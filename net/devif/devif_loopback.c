@@ -102,13 +102,13 @@ int devif_loopback(FAR struct net_driver_s *dev)
 
   do
     {
-       NETDEV_TXPACKETS(dev);
-       NETDEV_RXPACKETS(dev);
+      NETDEV_TXPACKETS(dev);
+      NETDEV_RXPACKETS(dev);
 
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
-       pkt_input(dev);
+      pkt_input(dev);
 #endif
 
       /* We only accept IP packets of the configured type */

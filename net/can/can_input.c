@@ -311,7 +311,7 @@ int can_input(FAR struct net_driver_s *dev)
   if (ret < 0)
     {
 #ifdef CONFIG_NET_STATISTICS
-    g_netstats.can.drop++;
+      g_netstats.can.drop++;
 #endif
     }
 
