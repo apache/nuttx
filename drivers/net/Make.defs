@@ -143,6 +143,10 @@ ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8221B),y)
   CSRCS += rtl8221b.c rtl8221b_fw.c
 endif
 
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL9000B),y)
+  CSRCS += rtl9000b.c rtl9000b_fw.c
+endif
+
   DEPPATH += --dep-path net/phy/realtek
   VPATH += :net/phy/realtek
 endif
