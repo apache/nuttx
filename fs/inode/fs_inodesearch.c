@@ -398,25 +398,50 @@ static int _inode_search(FAR struct inode_search_s *desc)
 
   if (desc->buffer == NULL)
     {
-      desc->buffer = lib_get_tempbuffer(PATH_MAX);
+      FAR const char *cwd = NULL;
+      size_t buflen;
+
+      /* For a relative path the absolute form is "<cwd>/<path>".  That
+       * concatenation can exceed PATH_MAX even when the relative path
+       * itself is within PATH_MAX: a relative path of PATH_MAX-1 bytes
+       * is legal per pathconf(_PC_PATH_MAX), but the prefix added by the
+       * cwd pushes the uncanonicalized form past the limit.  Size the
+       * buffer to hold the full absolute form so that ".." segments are
+       * collapsed against the correct suffix; truncating first could
+       * drop the trailing component and let ".." collapse the path onto
+       * a directory (yielding the wrong errno, e.g. EISDIR, instead of
+       * resolving the file).  _inode_canonicalize() still rejects any
+       * result whose canonicalized length reaches PATH_MAX.
+       */
+
+      if (*desc->path != '/')
+        {
+          cwd = _inode_getcwd();
+          buflen = strlen(cwd) + 1 + strlen(desc->path) + 1;
+        }
+      else
+        {
+          buflen = strlen(desc->path) + 1;
+        }
+
+      if (buflen < PATH_MAX)
+        {
+          buflen = PATH_MAX;
+        }
+
+      desc->buffer = lib_get_tempbuffer(buflen);
       if (desc->buffer == NULL)
         {
           return -ENOMEM;
         }
 
-      /* Convert relative path to absolute, or just copy absolute path.
-       * Use desc->path directly (points to caller's string) as source
-       * to avoid overlap with desc->buffer.
-       */
-
-      if (*desc->path != '/')
+      if (cwd != NULL)
         {
-          snprintf(desc->buffer, PATH_MAX, "%s/%s",
-                   _inode_getcwd(), desc->path);
+          snprintf(desc->buffer, buflen, "%s/%s", cwd, desc->path);
         }
       else
         {
-          strlcpy(desc->buffer, desc->path, PATH_MAX);
+          strlcpy(desc->buffer, desc->path, buflen);
         }
 
       desc->path = desc->buffer;
