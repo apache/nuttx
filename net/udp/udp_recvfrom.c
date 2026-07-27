@@ -163,7 +163,7 @@ static inline void udp_readahead(struct udp_recvfrom_s *pstate)
       int recvlen;
       int offset = 0;
       int pos;
-      uint16_t datalen;
+      uint16_t datalen = 0;
       uint8_t src_addr_size;
       uint8_t ifindex;
       uint8_t meta[UDP_READAHEAD_META_SIZE];
