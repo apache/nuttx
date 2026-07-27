@@ -1540,6 +1540,7 @@ int main(int argc, char **argv, char **envp)
   int dnest;            /* Data declaration nesting level on this line */
   int prevdnest;        /* Data declaration nesting level on the previous line */
   int pnest;            /* Parenthesis nesting level on this line */
+  int prevpnest;        /* Parenthesis nesting level on the previous line */
   int ppifnest;         /* #if nesting level on this line */
   int inasm;            /* > 0: Within #ifdef __ASSEMBLY__ */
   int comment_lineno;   /* Line on which the last comment was closed */
@@ -1710,6 +1711,7 @@ int main(int argc, char **argv, char **envp)
   bnest          = 0;           /* Brace nesting level on this line */
   dnest          = 0;           /* Data declaration nesting level on this line */
   pnest          = 0;           /* Parenthesis nesting level on this line */
+  prevpnest      = 0;           /* Parenthesis nesting on the previous line */
   ppifnest       = 0;           /* #if nesting level on this line */
   inasm          = 0;           /* > 0: Within #ifdef __ASSEMBLY__ */
   comment_lineno = -1;          /* Line on which the last comment was closed */
@@ -1726,6 +1728,7 @@ int main(int argc, char **argv, char **envp)
       lineno++;
       indent       = 0;
       prevbnest    = bnest;    /* Brace nesting level on the previous line */
+      prevpnest    = pnest;    /* Parenthesis nesting on the previous line */
       prevdnest    = dnest;    /* Data declaration nesting level on the
                                 * previous line */
       prevncomment = ncomment; /* Comment nesting level on the previous line */
@@ -3929,7 +3932,7 @@ int main(int argc, char **argv, char **envp)
             }
         }
 
-      bexact = bnest > 0 && dnest == 0 && pnest == 0 && stmt_indent > 0 &&
+      bexact = bnest > 0 && dnest == 0 && prevpnest == 0 && stmt_indent > 0 &&
                bfunctions && bfuncbody;
 
       /* A line after one ending in ';', '{', '}' or a label begins a new
