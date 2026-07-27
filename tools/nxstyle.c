@@ -1558,6 +1558,7 @@ int main(int argc, char **argv, char **envp)
   bool bstmtstart;      /* True: A new statement begins on this line */
   bool bprevstmtend;    /* True: The preceding line of code ended a statement */
   bool bctrlline;       /* True: A control statement starts on this line */
+  bool bppalt;          /* True: In an alternative branch awaiting braces */
   char lastcode;        /* Last code character seen on this line */
   char prevlastcode;    /* Last code character on the preceding line */
   int prevcodeindent;   /* Indentation of the preceding line of code */
@@ -1692,6 +1693,7 @@ int main(int argc, char **argv, char **envp)
   bstmtstart     = true;        /* True: A statement begins on this line */
   bprevstmtend   = true;        /* True: The preceding code ended a statement */
   bctrlline      = false;       /* True: A control statement starts here */
+  bppalt         = false;       /* True: Alternative branch awaiting braces */
   lastcode       = '\0';        /* Last code character seen on this line */
   prevlastcode   = '\0';        /* Last code character on the preceding line */
   prevcodeindent = 0;           /* Indentation of the preceding line of code */
@@ -2074,6 +2076,17 @@ int main(int argc, char **argv, char **envp)
           int ii;
 
           bppline = true;
+
+          /* Alternative branches share the braces that close the construct,
+           * and may hold statements of their own before reaching them.
+           */
+
+          if (brace_kw != NULL &&
+              (strncmp(&line[indent], "#else", 5) == 0 ||
+               strncmp(&line[indent], "#elif", 5) == 0))
+            {
+              bppalt = true;
+            }
 
           /* Suppress error for comment following conditional compilation */
 
@@ -3859,13 +3872,20 @@ int main(int argc, char **argv, char **envp)
                * an 'else if', or alternatives sharing the braces that follow.
                */
 
-              else if (!bctrlline)
+              else if (!bctrlline && !bppalt)
                 {
                   snprintf(buffer, sizeof(buffer),
                            "Missing braces after '%s'", brace_kw);
                   ERROR(buffer, lineno, indent);
                 }
-              brace_kw = NULL;
+
+              /* An alternative branch may hold statements first */
+
+              if (line[indent] == '{' || bctrlline || !bppalt)
+                {
+                  brace_kw = NULL;
+                  bppalt   = false;
+                }
             }
 
           /* Has the header ended on this line?  If so, see what follows */
