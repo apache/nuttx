@@ -133,6 +133,10 @@ if(CONFIG_NET)
     if(CONFIG_NET_PHY_REALTEK_RTL8221B)
       list(APPEND SRCS phy/realtek/rtl8221b.c phy/realtek/rtl8221b_fw.c)
     endif()
+
+    if(CONFIG_NET_PHY_REALTEK_RTL9000B)
+      list(APPEND SRCS phy/realtek/rtl9000b.c phy/realtek/rtl9000b_fw.c)
+    endif()
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

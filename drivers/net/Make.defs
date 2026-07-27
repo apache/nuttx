@@ -141,6 +141,10 @@ ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8221B),y)
   DEPPATH += --dep-path net/phy/realtek
   VPATH += :net/phy/realtek
 endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL9000B),y)
+  CSRCS += realtek/rtl9000b.c realtek/rtl9000b_fw.c
+endif
 endif
 
 # Include network build support
