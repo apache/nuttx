@@ -1356,6 +1356,27 @@ static bool white_content_list(const char *ident, int lineno)
 }
 
 /********************************************************************************
+ * Name: check_type_name
+ *
+ * Description:
+ *   Return true if the identifier at line[ndx] ends in '_t'.
+ *
+ ********************************************************************************/
+
+static bool check_type_name(const char *line, int ndx)
+{
+  int i = ndx;
+
+  while (isalnum((int)line[i]) != 0 || line[i] == '_')
+    {
+      i++;
+    }
+
+  return i >= ndx + 3 && line[i] == ' ' &&
+         line[i - 1] == 't' && line[i - 2] == '_';
+}
+
+/********************************************************************************
  * Name: check_keyword
  *
  * Description:
@@ -2251,7 +2272,8 @@ int main(int argc, char **argv, char **envp)
 
       else if (inasm == 0)
         {
-          if (strncmp(&line[indent], "auto ", 5) == 0 ||
+          if (check_type_name(line, indent) ||
+                   strncmp(&line[indent], "auto ", 5) == 0 ||
                    strncmp(&line[indent], "bool ", 5) == 0 ||
                    strncmp(&line[indent], "char ", 5) == 0 ||
                    strncmp(&line[indent], "CODE ", 5) == 0 ||
