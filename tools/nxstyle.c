@@ -1393,26 +1393,26 @@ int main(int argc, char **argv, char **envp)
   bool bstatm;          /* True: This line is beginning of a statement */
   bool bfor;            /* True: This line is beginning of a 'for' statement */
   bool bif;             /* True: This line is beginning of a 'if' statement */
-  bool bswitch;         /* True: Within a switch statement */
   bool bcase;           /* True: Within a case statement of a switch */
-  bool bstring;         /* True: Within a string */
-  bool bquote;          /* True: Backslash quoted character next */
-  bool bblank;          /* Used to verify block comment terminator */
-  bool bexternc;        /* True: Within 'extern "C"' */
-  bool bppline;         /* True: This line is a pre-processor line */
-  bool bctrlline;       /* True: A control statement starts on this line */
+  bool bcaseline;       /* True: This line begins with 'case' or 'default' */
   const char *ctrl_kw;  /* Control keyword whose header is being parsed */
   const char *brace_kw; /* Control keyword still waiting for its left brace */
   int ctrl_hdrend;      /* Index of the last character of that header */
   int ctrl_indent;      /* Indentation of that control keyword */
   int brace_indent;     /* Indentation of the keyword awaiting a brace */
   int ctrl_brace;       /* Alignment required of a brace on this line, or -1 */
+  bool ctrl_bswitch;    /* True: That brace opens the body of a switch */
   int rbrace_match;     /* Alignment of the left brace closed on this line */
 
-  /* Indentation of each open left brace */
+  /* Indentation of each open left brace, and whether it opens a switch */
 
   int lbrace_indent[MAX_BRACE];
+  bool lbrace_switch[MAX_BRACE];
 
+  bool bstring;         /* True: Within a string */
+  bool bquote;          /* True: Backslash quoted character next */
+  bool bblank;          /* Used to verify block comment terminator */
+  bool bexternc;        /* True: Within 'extern "C"' */
   enum pptype_e ppline; /* > 0: The next line the continuation of a
                          * pre-processor command */
   int rhcomment;        /* Indentation of Comment to the right of code
@@ -1428,6 +1428,7 @@ int main(int argc, char **argv, char **envp)
   int dnest;            /* Data declaration nesting level on this line */
   int prevdnest;        /* Data declaration nesting level on the previous line */
   int pnest;            /* Parenthesis nesting level on this line */
+  int prevpnest;        /* Parenthesis nesting level on the previous line */
   int ppifnest;         /* #if nesting level on this line */
   int inasm;            /* > 0: Within #ifdef __ASSEMBLY__ */
   int comment_lineno;   /* Line on which the last comment was closed */
@@ -1436,6 +1437,15 @@ int main(int argc, char **argv, char **envp)
   int lbrace_lineno;    /* Line number of last left brace */
   int rbrace_lineno;    /* Last line containing a right brace */
   int externc_lineno;   /* Last line where 'extern "C"' declared */
+  bool bexact;          /* True: The expected indentation below is exact */
+  bool bppline;         /* True: This line is a pre-processor line */
+  bool bctrlline;       /* True: A control statement starts on this line */
+  char lastcode;        /* Last code character seen on this line */
+  char prevlastcode;    /* Last code character on the preceding line */
+  int prevcodeindent;   /* Indentation of the preceding line of code */
+  bool bfuncbody;       /* True: The outermost brace opened a function body */
+  int stmt_indent;      /* Expected indentation of a statement, or -1 */
+  int case_indent;      /* Expected indentation of a 'case' label, or -1 */
   int linelen;          /* Length of the line */
   int excess;
   int n;
@@ -1547,17 +1557,24 @@ int main(int argc, char **argv, char **envp)
   btabs          = false;       /* True: TAB characters found on the line */
   bcrs           = false;       /* True: Carriage return found on the line */
   bfunctions     = false;       /* True: In private or public functions */
-  bswitch        = false;       /* True: Within a switch statement */
   bcase          = false;       /* True: Within a case statement of a switch */
-  bstring        = false;       /* True: Within a string */
-  bexternc       = false;       /* True: Within 'extern "C"' */
-  bppline        = false;       /* True: This line is a pre-processor line */
-  bctrlline      = false;       /* True: A control statement starts here */
+  bcaseline      = false;       /* True: This line begins with 'case' */
   ctrl_kw        = NULL;        /* Control keyword being parsed */
   brace_kw       = NULL;        /* Control keyword waiting for a brace */
   ctrl_hdrend    = -1;          /* Index of the end of that header */
   ctrl_indent    = 0;           /* Indentation of that control keyword */
   brace_indent   = 0;           /* Indentation of the awaiting keyword */
+  bexact         = false;       /* True: Expected indentation is exact */
+  bppline        = false;       /* True: This line is a pre-processor line */
+  bctrlline      = false;       /* True: A control statement starts here */
+  lastcode       = '\0';        /* Last code character seen on this line */
+  prevlastcode   = '\0';        /* Last code character on the preceding line */
+  prevcodeindent = 0;           /* Indentation of the preceding line of code */
+  bfuncbody      = false;       /* True: Inside the body of a function */
+  stmt_indent    = 0;           /* Expected indentation of a statement */
+  case_indent    = -1;          /* Expected indentation of a 'case' label */
+  bstring        = false;       /* True: Within a string */
+  bexternc       = false;       /* True: Within 'extern "C"' */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
   ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
                                  * pre-processor command */
@@ -1570,6 +1587,7 @@ int main(int argc, char **argv, char **envp)
   bnest          = 0;           /* Brace nesting level on this line */
   dnest          = 0;           /* Data declaration nesting level on this line */
   pnest          = 0;           /* Parenthesis nesting level on this line */
+  prevpnest      = 0;           /* Parenthesis nesting on the previous line */
   ppifnest       = 0;           /* #if nesting level on this line */
   inasm          = 0;           /* > 0: Within #ifdef __ASSEMBLY__ */
   comment_lineno = -1;          /* Line on which the last comment was closed */
@@ -1586,17 +1604,48 @@ int main(int argc, char **argv, char **envp)
       lineno++;
       indent       = 0;
       prevbnest    = bnest;    /* Brace nesting level on the previous line */
+      prevpnest    = pnest;    /* Parenthesis nesting on the previous line */
       prevdnest    = dnest;    /* Data declaration nesting level on the
                                 * previous line */
       prevncomment = ncomment; /* Comment nesting level on the previous line */
       bstatm       = false;    /* True: This line is beginning of a
                                 * statement */
       bfor         = false;    /* REVISIT: Implies for() is all on one line */
-      bppline      = false;    /* True: This line is a pre-processor line */
-      bctrlline    = false;    /* No control statement starts on this line */
+      bcaseline    = false;    /* True: This line begins a case of a switch */
       ctrl_hdrend  = -1;       /* The header has not ended on this line yet */
       ctrl_brace   = -1;       /* No brace is required on this line */
+      bctrlline    = false;    /* No control statement starts on this line */
+      ctrl_bswitch = false;    /* That brace does not open a switch body */
+      bppline      = false;    /* True: This line is a pre-processor line */
+      lastcode     = '\0';     /* No code has been seen on this line yet */
       rbrace_match = -1;       /* No left brace is closed on this line */
+
+      /* Where a statement on this line is expected to begin: two columns in
+       * from the enclosing brace, or four within a switch, where the 'case'
+       * labels take the first position.  Negative if the enclosing brace did
+       * not begin its line, leaving nothing to align against.
+       */
+
+      case_indent = -1;
+
+      if (bnest == 0)
+        {
+          stmt_indent = 0;
+        }
+      else if (bnest <= MAX_BRACE && lbrace_indent[bnest - 1] >= 0)
+        {
+          stmt_indent = lbrace_indent[bnest - 1] + 2;
+
+          if (lbrace_switch[bnest - 1])
+            {
+              case_indent  = stmt_indent;
+              stmt_indent += 2;
+            }
+        }
+      else
+        {
+          stmt_indent = -1;
+        }
 
       /* If we are not in a comment, then this certainly is not a right-hand
        * comment.
@@ -2322,32 +2371,31 @@ int main(int argc, char **argv, char **envp)
               bfor   = true;
               bstatm = true;
             }
-          else if (strncmp(&line[indent], "switch ", 7) == 0)
-            {
-              bswitch = true;
-            }
           else if (strncmp(&line[indent], "switch(", 7) == 0)
             {
               ERROR("Missing whitespace after keyword", lineno, n);
-              bswitch = true;
             }
           else if (strncmp(&line[indent], "case ", 5) == 0)
             {
               bcase = true;
+              bcaseline = true;
             }
           else if (strncmp(&line[indent], "case(", 5) == 0)
             {
               ERROR("Missing whitespace after keyword", lineno, n);
               bcase = true;
+              bcaseline = true;
             }
           else if (strncmp(&line[indent], "default ", 8) == 0)
             {
               ERROR("Missing whitespace after keyword", lineno, n);
               bcase = true;
+              bcaseline = true;
             }
           else if (strncmp(&line[indent], "default:", 8) == 0)
             {
               bcase = true;
+              bcaseline = true;
             }
 
           /* Also check for C keywords with missing white space */
@@ -2377,8 +2425,8 @@ int main(int argc, char **argv, char **envp)
 
           if (bnest > 0 && dnest == 0 && ctrl_kw == NULL)
             {
-              bctrlline   = true;
               ctrl_indent = indent;
+              bctrlline   = true;
 
               if (check_keyword(line, indent, "else"))
                 {
@@ -2845,6 +2893,16 @@ int main(int argc, char **argv, char **envp)
                       if (bnest >= 1 && bnest <= MAX_BRACE)
                         {
                           lbrace_indent[bnest - 1] = n == indent ? indent : -1;
+                          lbrace_switch[bnest - 1] = false;
+                        }
+
+                      /* An outermost brace follows a parameter list for a
+                       * function, or '=' for data, which indents differently.
+                       */
+
+                      if (bnest == 1)
+                        {
+                          bfuncbody = prevlastcode == ')';
                         }
 
                       if (dnest > 0)
@@ -2883,8 +2941,8 @@ int main(int argc, char **argv, char **envp)
                           bnest--;
                           if (bnest < 1)
                             {
-                              bnest   = 0;
-                              bswitch = false;
+                              bnest     = 0;
+                              bfuncbody = false;
                             }
 
                           /* Recover the alignment of the matching left brace */
@@ -3643,16 +3701,18 @@ int main(int argc, char **argv, char **envp)
 
           if (brace_kw != NULL && !bcommentline)
             {
-              /* A control statement may stand where the brace was expected:
-               * an 'else if', or alternatives sharing the braces that follow.
-               */
-
               if (line[indent] == '{')
                 {
                   /* The brace sits one level in from the keyword */
 
-                  ctrl_brace = brace_indent + 2;
+                  ctrl_brace   = brace_indent + 2;
+                  ctrl_bswitch = strcmp(brace_kw, "switch") == 0;
                 }
+
+              /* A control statement may stand where the brace was expected:
+               * an 'else if', or alternatives sharing the braces that follow.
+               */
+
               else if (!bctrlline)
                 {
                   snprintf(buffer, sizeof(buffer),
@@ -3702,6 +3762,43 @@ int main(int argc, char **argv, char **envp)
             }
         }
 
+      /* Alignment is only exact inside a function body, where the enclosing
+       * brace began its line.  Elsewhere fall back to a multiple of the
+       * indentation unit.
+       */
+
+      /* Last character of code on the line, skipping any comment to the
+       * right of it.  A comment-only line leaves this at '\0'.
+       */
+
+      lastcode = '\0';
+
+      if (prevncomment == 0 && !bstring && inasm == 0 &&
+          !(line[indent] == '/' &&
+            (line[indent + 1] == '*' || line[indent + 1] == '/')))
+        {
+          int e = rhcomment > 0 ? rhcomment : n;
+
+          while (--e >= indent && isspace((int)line[e]))
+            {
+            }
+
+          if (e >= indent)
+            {
+              lastcode = line[e];
+            }
+        }
+
+      bexact = bnest > 0 && dnest == 0 && prevpnest == 0 && stmt_indent > 0 &&
+               bfunctions && bfuncbody;
+
+      /* A line that follows one ending in ';', '{', '}' or ':' begins a new
+       * statement.  Anything else is the continuation of the statement on the
+       * preceding line and may be aligned freely.  Pre-processor lines are
+       * ignored so that a macro definition does not hide the statement that
+       * precedes it.
+       */
+
       /* STEP 4: Check alignment */
 
       /* Within a comment block, we need only check on the alignment of the
@@ -3743,16 +3840,20 @@ int main(int argc, char **argv, char **envp)
                   ERROR("Expected indentation line", lineno, indent);
                 }
             }
-          else if (indent > 0 && !bswitch)
+          else if (indent > 0)
             {
               if (line[indent] == '/')
                 {
-                  /* Comments should like at offsets 2, 6, 10, ...
-                   * This rule is not followed, however, if the comments are
-                   * aligned to the right of the code.
+                  /* Comments align with the code that they describe, or with
+                   * the 'case' label when they introduce one.  This rule is
+                   * not followed, however, if the comments are aligned to the
+                   * right of the code.
                    */
 
-                  if ((indent & 3) != 2 && rhcomment == 0)
+                  if (rhcomment == 0 &&
+                      (bexact ? (indent != stmt_indent &&
+                                 indent != case_indent)
+                              : (indent & 3) != 2))
                     {
                       ERROR("Bad comment alignment", lineno, indent);
                     }
@@ -3778,8 +3879,11 @@ int main(int argc, char **argv, char **envp)
                    * Those may be unaligned.
                    */
 
-                  if ((indent & 3) != 3 && bfunctions && dnest == 0 &&
-                      rhcomment == 0)
+                  if (bfunctions && dnest == 0 && rhcomment == 0 &&
+                      (bexact ? (indent != stmt_indent + 1 &&
+                                 (case_indent < 0 ||
+                                  indent != case_indent + 1))
+                              : (indent & 3) != 3))
                     {
                       ERROR("Bad comment block alignment", lineno, indent);
                     }
@@ -3854,11 +3958,6 @@ int main(int argc, char **argv, char **envp)
                   ERROR("Blank line before opening left brace", lineno, indent);
                 }
 
-              /* REVISIT:  Possible false alarms in compound statements
-               * without a preceding conditional.  That usage often violates
-               * the coding standard.
-               */
-
               /* A brace opening the body of a control statement must be
                * indented exactly one level from its keyword.
                */
@@ -3877,24 +3976,36 @@ int main(int argc, char **argv, char **envp)
                   if (bnest >= 1 && bnest <= MAX_BRACE)
                     {
                       lbrace_indent[bnest - 1] = ctrl_brace;
+                      lbrace_switch[bnest - 1] = ctrl_bswitch;
                     }
                 }
               else if (!bfunctions && (indent & 1) != 0)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
                 }
-              else if ((indent & 3) != 0 && !bswitch && dnest == 0)
+
+              /* Any other brace opens a compound statement, a function body
+               * or a definition.  Those align with the surrounding code
+               * rather than one level in from it.
+               */
+
+              /* A macro that takes a block of code behaves like a control
+               * statement, so the brace following it is indented one level
+               * from it.  Iterator and critical section macros are written
+               * that way.
+               */
+
+              else if (prevlastcode == ')' && indent == prevcodeindent + 2)
+                {
+                }
+              else if (indent > 0 && dnest == 0 &&
+                       (bexact ? indent != stmt_indent : (indent & 3) != 0))
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
                 }
             }
           else if (line[indent] == '}')
             {
-              /* REVISIT:  Possible false alarms in compound statements
-               * without a preceding conditional.  That usage often violates
-               * the coding standard.
-               */
-
               /* A right brace must line up with the left brace it closes */
 
               if (rbrace_match >= 0)
@@ -3908,7 +4019,8 @@ int main(int argc, char **argv, char **envp)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
                 }
-              else if ((indent & 3) != 0 && !bswitch && prevdnest == 0)
+              else if (indent > 0 && prevdnest == 0 &&
+                       (bexact ? indent != stmt_indent : (indent & 3) != 0))
                 {
                   ERROR("Bad right brace alignment", lineno, indent);
                 }
@@ -3926,14 +4038,32 @@ int main(int argc, char **argv, char **envp)
                * comments before beginning of function definitions.
                */
 
-              if ((bstatm ||                              /* Begins with C keyword */
+              /* 'case' and 'default' labels sit one level in from the brace
+               * that opens the switch body, not with the case logic.
+               */
+
+              if (bcaseline)
+                {
+                  if (case_indent >= 0 && indent != case_indent)
+                    {
+                      ERROR("Bad alignment", lineno, indent);
+                    }
+                }
+              else if ((bstatm ||                         /* Begins with C keyword */
                   (line[indent] == '/' &&
                   bfunctions &&
                   line[indent + 1] == '*')) &&            /* Comment in functions */
-                  !bswitch &&                             /* Not in a switch */
                   dnest == 0)                             /* Not a data definition */
                 {
-                  if ((indent & 3) != 2)
+                  /* A comment that describes a 'case' label is aligned with
+                   * the label rather than with the case logic.
+                   */
+
+                  bool bcasecmt = line[indent] == '/' && case_indent >= 0 &&
+                                  indent == case_indent;
+
+                  if (bexact ? (indent != stmt_indent && !bcasecmt)
+                             : (indent & 3) != 2)
                     {
                       ERROR("Bad alignment", lineno, indent);
                     }
@@ -3949,6 +4079,14 @@ int main(int argc, char **argv, char **envp)
                   ERROR("Small odd alignment", lineno, indent);
                 }
             }
+        }
+
+      /* Remember this line for the checks made on the line that follows it */
+
+      if (lastcode != '\0')
+        {
+          prevlastcode   = lastcode;
+          prevcodeindent = indent;
         }
     }
 
