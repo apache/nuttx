@@ -65,6 +65,7 @@
 int timer_delete(timer_t timerid)
 {
   int ret = timer_release(timer_gethandle(timerid));
+
   if (ret < 0)
     {
       set_errno(-ret);

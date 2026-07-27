@@ -306,6 +306,7 @@ errout_with_lock:
 int task_restart(pid_t pid)
 {
   int ret = nxtask_restart(pid);
+
   if (ret < 0)
     {
       set_errno(-ret);

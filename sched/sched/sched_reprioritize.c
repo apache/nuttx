@@ -73,6 +73,7 @@ int nxsched_reprioritize(FAR struct tcb_s *tcb, int sched_priority)
    */
 
   int ret = nxsched_set_priority(tcb, sched_priority);
+
   if (ret == 0)
     {
       /* Reset the base_priority -- the priority that the thread would return

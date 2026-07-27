@@ -73,6 +73,7 @@
 irqstate_t read_lock_irqsave(FAR rwlock_t *lock)
 {
   irqstate_t ret;
+
   ret = up_irq_save();
 
   read_lock(lock);
@@ -137,6 +138,7 @@ void read_unlock_irqrestore(rwlock_t *lock, irqstate_t flags)
 irqstate_t write_lock_irqsave(rwlock_t *lock)
 {
   irqstate_t ret;
+
   ret = up_irq_save();
 
   write_lock(lock);

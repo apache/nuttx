@@ -135,6 +135,7 @@ static FAR void *sysv_msgblockinit(FAR struct list_node *list,
                                    FAR struct msgbuf_s *msg, uint16_t nmsgs)
 {
   int i;
+
   for (i = 0; i < nmsgs; i++)
     {
       list_add_tail(list, &msg->node);

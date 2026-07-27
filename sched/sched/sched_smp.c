@@ -244,6 +244,7 @@ int nxsched_smp_call(cpu_set_t cpuset, nxsched_smp_call_t func,
   for (i = 0; i < cpucnt; i++)
     {
       int rc = nxsem_wait_uninterruptible(&cookie.sem);
+
       if (rc < 0)
         {
           ret = rc;

@@ -141,7 +141,7 @@ int hrtimer_cancel_sync(FAR hrtimer_t *hrtimer)
     {
       /* Wait until all the timer callbacks finish. */
 
-       hrtimer_wait(hrtimer);
+      hrtimer_wait(hrtimer);
     }
 
   return ret;
