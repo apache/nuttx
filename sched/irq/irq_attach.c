@@ -74,9 +74,11 @@ int irq_to_ndx(int irq)
   DEBUGASSERT(g_irqmap_count < CONFIG_ARCH_NUSER_INTERRUPTS);
 
   irqstate_t flags = spin_lock_irqsave(&g_irqlock);
+
   if (g_irqmap[irq] == 0)
     {
       int ndx = g_irqmap_count++;
+
       g_irqmap[irq] = ndx;
       g_irqrevmap[ndx] = irq;
     }
@@ -116,6 +118,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
   int ret = OK;
 #if NR_IRQS > 0
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;
@@ -128,6 +131,7 @@ int irq_attach(int irq, xcpt_t isr, FAR void *arg)
        */
 
       irqstate_t flags = spin_lock_irqsave(&g_irqlock);
+
       if (isr == NULL)
         {
           /* Disable the interrupt if we can before detaching it.  We might

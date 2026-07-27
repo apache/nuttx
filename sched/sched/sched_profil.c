@@ -96,6 +96,7 @@ static void profil_timer_handler(wdparm_t arg)
 
 #ifdef CONFIG_SMP
   cpu_set_t cpus = (1 << CONFIG_SMP_NCPUS) - 1;
+
   CPU_CLR(this_cpu(), &cpus);
   nxsched_smp_call_async(cpus, &g_call_data);
 #endif

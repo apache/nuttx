@@ -204,6 +204,7 @@ int task_create_with_stack(FAR const char *name, int priority,
 {
   int ret = nxtask_create(name, priority, stack_addr,
                           stack_size, entry, argv, NULL);
+
   if (ret < 0)
     {
       set_errno(-ret);
