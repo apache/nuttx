@@ -44,11 +44,16 @@ ARCHCPUFLAGS += -m32
 LDFLAGS += -m elf_i386
 endif
 
-# We have to use a cross-development toolchain under Cygwin because the native
-# Cygwin toolchains don't generate ELF binaries.
+# A cross-development toolchain is required under Cygwin, whose native
+# toolchains don't generate ELF binaries, and on macOS, which has no i386 host
+# compiler at all -- Apple clang cannot target i386 on Apple Silicon.
+# arch/x86_64 defaults CROSSDEV the same way.  Note that a 64-bit toolchain
+# with -m32 is not a substitute unless it was built with multilib.
 
 ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-CROSSDEV = i486-nuttx-elf-
+CROSSDEV ?= i486-nuttx-elf-
+else ifeq ($(CONFIG_HOST_MACOS),y)
+CROSSDEV ?= i686-elf-
 endif
 
 CC = $(CROSSDEV)gcc
