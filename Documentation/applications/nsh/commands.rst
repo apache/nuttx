@@ -143,6 +143,23 @@ default gateway.
 removing the preceding path segments and (optionally) removing any
 trailing ``<suffix>``.
 
+.. _cmdboot:
+
+``boot`` Boot an Application Image
+==================================
+
+**Command Syntax**::
+
+  boot [<image path> [<header size>]]
+
+**Synopsis**. Boot a new application firmware image by invoking
+``boardctl(BOARDIOC_BOOT_IMAGE)``. The ``<image path>`` may be
+absolute or relative; relative paths are resolved against the NSH
+current working directory, consistent with ``cp``, ``cat``, and
+``rm``. This command depends on ``CONFIG_BOARDCTL_BOOT_IMAGE``; if
+the boot image cannot be started, ``boardctl()`` returns and an
+error is reported.
+
 .. _cmdbreak:
 
 ``break`` Terminate a Loop
