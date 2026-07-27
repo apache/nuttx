@@ -493,7 +493,7 @@ static void pcm_subsample_configure(FAR struct pcm_decode_s *priv,
        * next audio buffer that we receive.
        */
 
-       priv->subsample = subsample;
+      priv->subsample = subsample;
     }
 }
 #endif
@@ -1089,9 +1089,11 @@ static int pcm_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
 #ifndef CONFIG_AUDIO_FORMAT_RAW
   ssize_t headersize = pcm_parsewav(priv, &apb->samp[apb->curbyte],
                                     bytesleft);
+
   if (headersize > 0)
     {
       struct audio_caps_s caps;
+
       memset(&caps, 0, sizeof(caps));
 
       /* Configure the lower level for the number of channels, bitrate,

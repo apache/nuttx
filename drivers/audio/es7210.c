@@ -774,6 +774,7 @@ static int es7210_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         {
           FAR struct ap_buffer_info_s *bufinfo =
             (FAR struct ap_buffer_info_s *)arg;
+
           bufinfo->buffer_size = CONFIG_ES7210_BUFFER_SIZE;
           bufinfo->nbuffers    = CONFIG_ES7210_NUM_BUFFERS;
         }
@@ -900,6 +901,7 @@ static void es7210_worker(FAR void *arg)
   for (; ; )
     {
       irqstate_t flags = enter_critical_section();
+
       apb = (FAR struct ap_buffer_s *)dq_remfirst(&priv->doneq);
       leave_critical_section(flags);
 

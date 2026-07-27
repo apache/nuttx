@@ -938,172 +938,177 @@ static int es8388_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
-        {
-#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
-        case AUDIO_FU_VOLUME:
+        switch (caps->ac_format.hw)
           {
-            /* Set the volume */
-
-            uint16_t volume = caps->ac_controls.hw[0];
-            audinfo("    Volume: %d\n", volume);
-
-            if (volume >= 0 && volume <= 1000)
+#ifndef CONFIG_AUDIO_EXCLUDE_VOLUME
+            case AUDIO_FU_VOLUME:
               {
-                es8388_setvolume(priv, priv->audio_mode, volume);
+                /* Set the volume */
+
+                uint16_t volume = caps->ac_controls.hw[0];
+
+                audinfo("    Volume: %d\n", volume);
+
+                if (volume >= 0 && volume <= 1000)
+                  {
+                    es8388_setvolume(priv, priv->audio_mode, volume);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_MUTE
-        case AUDIO_FU_MUTE:
-          {
-            /* Mute/Unmute */
+            case AUDIO_FU_MUTE:
+              {
+                /* Mute/Unmute */
 
-            bool mute = (bool)caps->ac_controls.hw[0];
-            audinfo("    Mute: %d\n", mute);
+                bool mute = (bool)caps->ac_controls.hw[0];
 
-            es8388_setmute(priv, ES_MODULE_DAC, mute);
-          }
-          break;
+                audinfo("    Mute: %d\n", mute);
+
+                es8388_setmute(priv, ES_MODULE_DAC, mute);
+              }
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_MUTE */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
-        case AUDIO_FU_BALANCE:
-          {
-            /* Set the Balance */
+            case AUDIO_FU_BALANCE:
+              {
+                /* Set the Balance */
 
-            uint16_t balance = caps->ac_controls.hw[0];
-            audinfo("    Balance: %d\n", balance);
-            if (balance >= 0 && balance <= 1000)
-              {
-                priv->balance = balance;
-                es8388_setvolume(priv, priv->audio_mode, priv->volume_out);
+                uint16_t balance = caps->ac_controls.hw[0];
+
+                audinfo("    Balance: %d\n", balance);
+                if (balance >= 0 && balance <= 1000)
+                  {
+                    priv->balance = balance;
+                    es8388_setvolume(priv, priv->audio_mode,
+                                     priv->volume_out);
+                  }
+                else
+                  {
+                    ret = -EDOM;
+                  }
               }
-            else
-              {
-                ret = -EDOM;
-              }
-          }
-          break;
+              break;
 #endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
 
-        case AUDIO_FU_INP_GAIN:
-          {
-            /* Set the mic gain */
+            case AUDIO_FU_INP_GAIN:
+              {
+                /* Set the mic gain */
 
-            uint32_t mic_gain = caps->ac_controls.hw[0];
-            audinfo("    Mic gain: %" PRIu32 "\n", mic_gain);
+                uint32_t mic_gain = caps->ac_controls.hw[0];
 
-            es8388_setmicgain(priv, mic_gain);
+                audinfo("    Mic gain: %" PRIu32 "\n", mic_gain);
+
+                es8388_setmicgain(priv, mic_gain);
+              }
+              break;
+
+            default:
+              auderr("    Unrecognized feature unit\n");
+              ret = -ENOTTY;
+              break;
           }
-          break;
+        break;
 
-        default:
-          auderr("    Unrecognized feature unit\n");
-          ret = -ENOTTY;
-          break;
+      case AUDIO_TYPE_OUTPUT:
+        {
+          audinfo("  AUDIO_TYPE_OUTPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+          /* Verify that all of the requested values are supported */
+
+          ret = -ERANGE;
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
+
+          if (caps->ac_controls.b[2] != 16 &&
+              caps->ac_controls.b[2] != 18 &&
+              caps->ac_controls.b[2] != 20 &&
+              caps->ac_controls.b[2] != 24 &&
+              caps->ac_controls.b[2] != 32)
+            {
+              auderr("Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
+
+          /* Save the current stream configuration */
+
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->nchannels = caps->ac_channels;
+          priv->bpsamp    = caps->ac_controls.b[2];
+
+          es8388_audio_output(priv);
+          es8388_reset(priv);
+          es8388_setsamplerate(priv);
+          es8388_setbitspersample(priv);
+
+          ret = OK;
         }
         break;
 
-    case AUDIO_TYPE_OUTPUT:
-      {
-        audinfo("  AUDIO_TYPE_OUTPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+      case AUDIO_TYPE_INPUT:
+        {
+          audinfo("  AUDIO_TYPE_INPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
 
-        /* Verify that all of the requested values are supported */
+          /* Verify that all of the requested values are supported */
 
-        ret = -ERANGE;
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
+          ret = -ERANGE;
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              break;
+            }
 
-        if (caps->ac_controls.b[2] != 16 &&
-            caps->ac_controls.b[2] != 18 &&
-            caps->ac_controls.b[2] != 20 &&
-            caps->ac_controls.b[2] != 24 &&
-            caps->ac_controls.b[2] != 32)
-          {
-            auderr("Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
+          if (caps->ac_controls.b[2] != 16 &&
+              caps->ac_controls.b[2] != 18 &&
+              caps->ac_controls.b[2] != 20 &&
+              caps->ac_controls.b[2] != 24 &&
+              caps->ac_controls.b[2] != 32)
+            {
+              auderr("Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              break;
+            }
 
-        /* Save the current stream configuration */
+          /* Save the current stream configuration */
 
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchannels = caps->ac_channels;
-        priv->bpsamp    = caps->ac_controls.b[2];
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->nchannels = caps->ac_channels;
+          priv->bpsamp    = caps->ac_controls.b[2];
 
-        es8388_audio_output(priv);
-        es8388_reset(priv);
-        es8388_setsamplerate(priv);
-        es8388_setbitspersample(priv);
+          es8388_audio_input(priv);
+          es8388_reset(priv);
+          es8388_setsamplerate(priv);
+          es8388_setbitspersample(priv);
 
-        ret = OK;
-      }
-      break;
+          ret = OK;
+        }
+        break;
 
-        case AUDIO_TYPE_INPUT:
-      {
-        audinfo("  AUDIO_TYPE_INPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-
-        /* Verify that all of the requested values are supported */
-
-        ret = -ERANGE;
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            break;
-          }
-
-        if (caps->ac_controls.b[2] != 16 &&
-            caps->ac_controls.b[2] != 18 &&
-            caps->ac_controls.b[2] != 20 &&
-            caps->ac_controls.b[2] != 24 &&
-            caps->ac_controls.b[2] != 32)
-          {
-            auderr("Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            break;
-          }
-
-        /* Save the current stream configuration */
-
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchannels = caps->ac_channels;
-        priv->bpsamp    = caps->ac_controls.b[2];
-
-        es8388_audio_input(priv);
-        es8388_reset(priv);
-        es8388_setsamplerate(priv);
-        es8388_setbitspersample(priv);
-
-        ret = OK;
-      }
-      break;
-
-    case AUDIO_TYPE_PROCESSING:
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        break;
     }
 
   return ret;
@@ -1938,7 +1943,7 @@ static int es8388_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-     *session           = NULL;
+      *session           = NULL;
 #endif
       priv->inflight    = 0;
       priv->running     = false;
