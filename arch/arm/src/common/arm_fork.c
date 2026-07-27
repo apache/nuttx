@@ -228,6 +228,14 @@ pid_t arm_fork(const struct fork_s *context)
 
           child->xcp.syscall[index].excreturn =
             parent->xcp.syscall[index].excreturn;
+
+          /* CONTROL too:  SYS_syscall_return restores it from ctrlreturn,
+           * and the child's zeroed TCB would return it to user space with
+           * CONTROL == 0 -- nPRIV clear, i.e. privileged.
+           */
+
+          child->xcp.syscall[index].ctrlreturn =
+            parent->xcp.syscall[index].ctrlreturn;
 #else
 #  error Missing logic
 #endif
