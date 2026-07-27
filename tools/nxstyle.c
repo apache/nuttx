@@ -1434,6 +1434,9 @@ int main(int argc, char **argv, char **envp)
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   bool bexact;          /* True: The expected indentation below is exact */
   bool bppline;         /* True: This line is a pre-processor line */
+  bool blabelline;      /* True: This line holds nothing but a label */
+  bool bstmtstart;      /* True: A new statement begins on this line */
+  bool bprevstmtend;    /* True: The preceding line of code ended a statement */
   bool bctrlline;       /* True: A control statement starts on this line */
   char lastcode;        /* Last code character seen on this line */
   char prevlastcode;    /* Last code character on the preceding line */
@@ -1561,6 +1564,9 @@ int main(int argc, char **argv, char **envp)
   brace_indent   = 0;           /* Indentation of the awaiting keyword */
   bexact         = false;       /* True: Expected indentation is exact */
   bppline        = false;       /* True: This line is a pre-processor line */
+  blabelline     = false;       /* True: This line holds nothing but a label */
+  bstmtstart     = true;        /* True: A statement begins on this line */
+  bprevstmtend   = true;        /* True: The preceding code ended a statement */
   bctrlline      = false;       /* True: A control statement starts here */
   lastcode       = '\0';        /* Last code character seen on this line */
   prevlastcode   = '\0';        /* Last code character on the preceding line */
@@ -1610,7 +1616,25 @@ int main(int argc, char **argv, char **envp)
       bctrlline    = false;    /* No control statement starts on this line */
       ctrl_bswitch = false;    /* That brace does not open a switch body */
       bppline      = false;    /* True: This line is a pre-processor line */
+
+      /* A label ends the preceding statement, like a 'case' does */
+
+      blabelline = false;
+
+      if (isalpha((int)line[indent]) != 0 || line[indent] == '_')
+        {
+          int ii = indent;
+
+          while (isalnum((int)line[ii]) != 0 || line[ii] == '_')
+            {
+              ii++;
+            }
+
+          blabelline = line[ii] == ':' && line[ii + 1] != ':';
+        }
+
       lastcode     = '\0';     /* No code has been seen on this line yet */
+      bstmtstart   = bprevstmtend;
       rbrace_match = -1;       /* No left brace is closed on this line */
 
       /* Where a statement on this line is expected to begin: two columns in
@@ -3775,6 +3799,22 @@ int main(int argc, char **argv, char **envp)
       bexact = bnest > 0 && dnest == 0 && pnest == 0 && stmt_indent > 0 &&
                bfunctions && bfuncbody;
 
+      /* A line after one ending in ';', '{', '}' or a label begins a new
+       * statement; anything else continues the previous one.
+       */
+
+      if (lastcode != '\0' && !bppline)
+        {
+          /* A colon ends a statement only in a label, and a line left inside
+           * parentheses is always continued, so a 'for' clause does not.
+           */
+
+          bprevstmtend = pnest == 0 &&
+                         (lastcode == ';' || lastcode == '{' ||
+                          lastcode == '}' ||
+                          (lastcode == ':' && (bcaseline || blabelline)));
+        }
+
       /* A line that follows one ending in ';', '{', '}' or ':' begins a new
        * statement.  Anything else is the continuation of the statement on the
        * preceding line and may be aligned freely.  Pre-processor lines are
@@ -4033,6 +4073,7 @@ int main(int argc, char **argv, char **envp)
                     }
                 }
               else if ((bstatm ||                         /* Begins with C keyword */
+                  (bstmtstart && bexact) ||               /* Begins a statement */
                   (line[indent] == '/' &&
                   bfunctions &&
                   line[indent + 1] == '*')) &&            /* Comment in functions */
