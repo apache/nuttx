@@ -599,6 +599,7 @@ int netdev_ipv6_foreach(FAR struct net_driver_s *dev,
       if (!net_ipv6addr_cmp(ifaddr->addr, g_ipv6_unspecaddr))
         {
           int ret = callback(dev, ifaddr, arg);
+
           if (ret != 0) /* Stop on any error and return it */
             {
               return ret;

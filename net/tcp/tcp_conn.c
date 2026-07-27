@@ -1024,6 +1024,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   bool ipv6 = IFF_IS_IPv6(dev->d_flags);
+
   domain = ipv6 ? PF_INET6 : PF_INET;
 #elif defined(CONFIG_NET_IPv4)
   domain = PF_INET;
@@ -1377,6 +1378,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
       if (net_ipv6addr_cmp(addr, g_ipv6_unspecaddr))
         {
           struct in6_addr loopback_sin6_addr = IN6ADDR_LOOPBACK_INIT;
+
           net_ipv6addr_copy(conn->u.ipv6.raddr,
                             loopback_sin6_addr.s6_addr16);
         }

@@ -96,6 +96,7 @@ static uint8_t hardware_chksum_get_proto(FAR struct net_driver_s *dev)
 #  endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
       proto = ipv6->proto;
     }
 #endif
@@ -105,6 +106,7 @@ static uint8_t hardware_chksum_get_proto(FAR struct net_driver_s *dev)
 #  endif
     {
       FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
+
       proto = ipv4->proto;
     }
 #endif

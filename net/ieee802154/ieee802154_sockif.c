@@ -104,6 +104,7 @@ static int ieee802154_sockif_alloc(FAR struct socket *psock)
    */
 
   FAR struct ieee802154_conn_s *conn = ieee802154_conn_alloc();
+
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */

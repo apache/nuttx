@@ -408,8 +408,8 @@ static uint8_t compress_laddr(FAR const net_ipv6addr_t srcipaddr,
               macaddr->nv_addr[6], macaddr->nv_addr[7]);
         break;
 
-       default:
-         ninfo("           Unsupported addrlen %u\n", macaddr->nv_addrlen);
+      default:
+        ninfo("           Unsupported addrlen %u\n", macaddr->nv_addrlen);
     }
 #endif
 
@@ -880,22 +880,22 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
 
   switch (ipv6->ttl)
     {
-    case 1:
-      iphc0 |= SIXLOWPAN_IPHC_HLIM_1;
-      break;
+      case 1:
+        iphc0 |= SIXLOWPAN_IPHC_HLIM_1;
+        break;
 
-    case 64:
-      iphc0 |= SIXLOWPAN_IPHC_HLIM_64;
-      break;
+      case 64:
+        iphc0 |= SIXLOWPAN_IPHC_HLIM_64;
+        break;
 
-    case 255:
-      iphc0 |= SIXLOWPAN_IPHC_HLIM_255;
-      break;
+      case 255:
+        iphc0 |= SIXLOWPAN_IPHC_HLIM_255;
+        break;
 
-    default:
-      *g_hc06ptr = ipv6->ttl;
-      g_hc06ptr += 1;
-      break;
+      default:
+        *g_hc06ptr = ipv6->ttl;
+        g_hc06ptr += 1;
+        break;
     }
 
   /* Source address - cannot be multicast */
@@ -1487,83 +1487,83 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
           switch (*g_hc06ptr & SIXLOWPAN_NHC_UDP_CS_P_11)
             {
-            case SIXLOWPAN_NHC_UDP_CS_P_00:
+              case SIXLOWPAN_NHC_UDP_CS_P_00:
 
-              HC06_CHECK(g_hc06ptr, 5, endofframe);
+                HC06_CHECK(g_hc06ptr, 5, endofframe);
 
-              /* 1 byte for NHC, 4 byte for ports, 2 bytes chksum */
+                /* 1 byte for NHC, 4 byte for ports, 2 bytes chksum */
 
-              memcpy(&udp->srcport, g_hc06ptr + 1, 2);
-              memcpy(&udp->destport, g_hc06ptr + 3, 2);
+                memcpy(&udp->srcport, g_hc06ptr + 1, 2);
+                memcpy(&udp->destport, g_hc06ptr + 3, 2);
 
-              ninfo("Uncompressed UDP ports (ptr+5): %x, %x\n",
-                    HTONS(udp->srcport), HTONS(udp->destport));
+                ninfo("Uncompressed UDP ports (ptr+5): %x, %x\n",
+                      HTONS(udp->srcport), HTONS(udp->destport));
 
-              g_hc06ptr += 5;
-              break;
+                g_hc06ptr += 5;
+                break;
 
-            case SIXLOWPAN_NHC_UDP_CS_P_01:
+              case SIXLOWPAN_NHC_UDP_CS_P_01:
 
-              HC06_CHECK(g_hc06ptr, 4, endofframe);
+                HC06_CHECK(g_hc06ptr, 4, endofframe);
 
-              /* 1 byte for NHC + source 16bit inline, dest = 0xF0 + 8 bit
-               * inline
-               */
+                /* 1 byte for NHC + source 16bit inline, dest = 0xF0 + 8 bit
+                 * inline
+                 */
 
-              ninfo("Decompressing destination\n");
+                ninfo("Decompressing destination\n");
 
-              memcpy(&udp->srcport, g_hc06ptr + 1, 2);
-              udp->destport =
-                HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 3)));
+                memcpy(&udp->srcport, g_hc06ptr + 1, 2);
+                udp->destport =
+                  HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 3)));
 
-              ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
-                    HTONS(udp->srcport), HTONS(udp->destport));
+                ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
+                      HTONS(udp->srcport), HTONS(udp->destport));
 
-              g_hc06ptr += 4;
-              break;
+                g_hc06ptr += 4;
+                break;
 
-            case SIXLOWPAN_NHC_UDP_CS_P_10:
+              case SIXLOWPAN_NHC_UDP_CS_P_10:
 
-              HC06_CHECK(g_hc06ptr, 4, endofframe);
+                HC06_CHECK(g_hc06ptr, 4, endofframe);
 
-              /* 1 byte for NHC + source = 0xF0 + 8bit inline, dest = 16 bit
-               * inline
-               */
+                /* 1 byte for NHC + source = 0xF0 + 8bit inline,
+                 * dest = 16 bit inline
+                 */
 
-              ninfo("Decompressing source\n");
+                ninfo("Decompressing source\n");
 
-              udp->srcport =
-                HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 1)));
-              memcpy(&udp->destport, g_hc06ptr + 2, 2);
+                udp->srcport =
+                  HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 1)));
+                memcpy(&udp->destport, g_hc06ptr + 2, 2);
 
-              ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
-                    HTONS(udp->srcport), HTONS(udp->destport));
+                ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
+                      HTONS(udp->srcport), HTONS(udp->destport));
 
-              g_hc06ptr += 4;
-              break;
+                g_hc06ptr += 4;
+                break;
 
-            case SIXLOWPAN_NHC_UDP_CS_P_11:
+              case SIXLOWPAN_NHC_UDP_CS_P_11:
 
-              HC06_CHECK(g_hc06ptr, 2, endofframe);
+                HC06_CHECK(g_hc06ptr, 2, endofframe);
 
-              /* 1 byte for NHC, 1 byte for ports */
+                /* 1 byte for NHC, 1 byte for ports */
 
-              udp->srcport =
-                HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
-                          (*(g_hc06ptr + 1) >> 4));
-              udp->destport =
-                HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
-                          ((*(g_hc06ptr + 1)) & 0x0f));
+                udp->srcport =
+                  HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
+                            (*(g_hc06ptr + 1) >> 4));
+                udp->destport =
+                  HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
+                            ((*(g_hc06ptr + 1)) & 0x0f));
 
-              ninfo("Uncompressed UDP ports (ptr+2): %x, %x\n",
-                    HTONS(udp->srcport), HTONS(udp->destport));
+                ninfo("Uncompressed UDP ports (ptr+2): %x, %x\n",
+                      HTONS(udp->srcport), HTONS(udp->destport));
 
-              g_hc06ptr += 2;
-              break;
+                g_hc06ptr += 2;
+                break;
 
-            default:
-              nerr("ERROR: Error unsupported UDP compression\n");
-              return -EINVAL;
+              default:
+                nerr("ERROR: Error unsupported UDP compression\n");
+                return -EINVAL;
             }
 
           if (!checksum_compressed)
@@ -1610,6 +1610,7 @@ int sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
     {
       FAR struct udp_hdr_s *udp =
                           (FAR struct udp_hdr_s *)(bptr + IPv6_HDRLEN);
+
       memcpy(&udp->udplen, &ipv6->len[0], 2);
     }
 

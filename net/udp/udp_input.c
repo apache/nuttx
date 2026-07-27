@@ -103,6 +103,7 @@ static bool udp_is_broadcast(FAR struct net_driver_s *dev)
 #  endif
     {
       FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
+
       return net_is_addr_mcast(ipv6->destipaddr);
     }
 #endif
@@ -381,7 +382,7 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
 #  endif /* CONFIG_NET_IPv4 */
 #  ifdef CONFIG_NET_IPv6
 #    ifdef CONFIG_NET_IPv4
-           else
+          else
 #    endif
             {
 #    ifdef CONFIG_NET_ICMPv6

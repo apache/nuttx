@@ -192,6 +192,7 @@ int mld_report_v2(FAR struct net_driver_s *dev,
       /* Handle this mcast address in the list */
 
       int status = mld_report(dev, report->addrec[i].mcast);
+
       if (status == OK)
         {
           /* Return success if any address in the listed was processed */

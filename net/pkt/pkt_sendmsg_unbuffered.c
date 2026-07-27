@@ -134,6 +134,7 @@ static uint32_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           if (pstate->snd_sock->s_type == SOCK_DGRAM)
             {
               FAR struct eth_hdr_s *ethhdr = NETLLBUF;
+
               memcpy(ethhdr->dest, pstate->addr->sll_addr, ETHER_ADDR_LEN);
               memcpy(ethhdr->src, &dev->d_mac.ether, ETHER_ADDR_LEN);
               ethhdr->type = pstate->addr->sll_protocol;

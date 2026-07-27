@@ -201,6 +201,7 @@ static void tcp_xmit_probe(FAR struct net_driver_s *dev,
 
   uint16_t hdrlen = tcpip_hdrsize(conn);
   uint32_t saveseq = tcp_getsequence(conn->sndseq);
+
   tcp_setsequence(conn->sndseq, saveseq - 1);
 
   tcp_send(dev, conn, TCP_ACK, hdrlen);
