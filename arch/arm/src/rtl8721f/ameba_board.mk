@@ -51,10 +51,10 @@ include $(TOPDIR)/arch/arm/src/armv8-m/Toolchain.defs
 #
 #   ameba_layout.ld  (included by ameba_img2_all.ld)
 #   ameba_img2_all.ld
-#   ameba_rom_symbol_acut_s.ld   (CONFIG_LINK_ROM_SYMB)
+#   ameba_rom_symbol_bcut_s.ld   (CONFIG_LINK_ROM_SYMB; B-cut silicon)
 #
 # ameba_img2_all.ld is C-preprocessed (it #includes ameba_layout.ld and the
-# generated platform_autoconf.h), then ameba_rom_symbol_acut_s.ld is appended.
+# generated platform_autoconf.h), then ameba_rom_symbol_bcut_s.ld is appended.
 # Finally NuttX's own .vectors orphan section is folded into the loadable SRAM
 # data region so the (large power-of-two aligned) vector table does not land in
 # and overflow the tiny fixed KM4_IMG2_ENTRY region.  This reproduces the
@@ -73,16 +73,24 @@ AMEBA_PROJ      = $(AMEBA_SOC)/project
 AMEBA_KM4_LD    = $(AMEBA_PROJ)/project_km4tz/ld
 AMEBA_LAYOUT_LD = $(AMEBA_PROJ)/ameba_layout.ld
 AMEBA_IMG2_LD   = $(AMEBA_KM4_LD)/ameba_img2_all.ld
-AMEBA_ROM_LD    = $(AMEBA_KM4_LD)/ameba_rom_symbol_acut_s.ld
+# The EVB silicon is a B-cut part (the SDK autoconf sets
+# CONFIG_AMEBAGREEN2_B_CUT=y and the NP/km4ns image is linked against the
+# bcut ROM maps), so the AP image must use the *bcut* ROM symbol tables too.
+# The two cuts have a different ROM layout: e.g. rtw_init_listhead is at
+# 0x13796d on A-cut but 0x137df9 on B-cut.  Linking the AP against acut
+# addresses on this B-cut chip jumps WiFi ROM calls into the wrong ROM code
+# and faults (the base-ROM funcs used by early bring-up happen to match
+# across cuts, which is why this only surfaced once WiFi ROM was exercised).
+AMEBA_ROM_LD    = $(AMEBA_KM4_LD)/ameba_rom_symbol_bcut_s.ld
 # Green2's image2 link appends the non-secure base, WiFi and OS ROM symbol maps
 # on top of the secure one (RTL8720F pulled these from lib_rom.a, which
 # amebagreen2 does not ship).  All entries are PROVIDE() (weak), so the secure
 # map keeps priority for any overlapping symbol and these only supply what it
 # lacks -- the WiFi ROM funcs (rtw_*/wifi_rom_*) and the non-secure ROM BSS
 # bounds (__rom_bss_*_ns__), etc.
-AMEBA_ROM_LD_NS   = $(AMEBA_KM4_LD)/ameba_rom_symbol_acut.ld
-AMEBA_ROM_LD_WIFI = $(AMEBA_KM4_LD)/ameba_rom_symbol_acut_wifi.ld
-AMEBA_ROM_LD_OS   = $(AMEBA_KM4_LD)/ameba_rom_symbol_acut_os.ld
+AMEBA_ROM_LD_NS   = $(AMEBA_KM4_LD)/ameba_rom_symbol_bcut.ld
+AMEBA_ROM_LD_WIFI = $(AMEBA_KM4_LD)/ameba_rom_symbol_bcut_wifi.ld
+AMEBA_ROM_LD_OS   = $(AMEBA_KM4_LD)/ameba_rom_symbol_bcut_os.ld
 
 AMEBA_PREBUILT      = $(BOARD_DIR)$(DELIM)prebuilt
 AMEBA_PREBUILT_LIBS = $(AMEBA_PREBUILT)$(DELIM)libs
