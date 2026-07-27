@@ -28,6 +28,7 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -54,6 +55,20 @@
 
 #define RP23XX_TRNG_EHR_VALID  (1 << 0)
 
+/* RNG_ISR health-test error bits: a sample that failed the on-chip
+ * von-Neumann, CRNGT or autocorrelation test must be discarded.
+ */
+
+#define RP23XX_TRNG_ISR_ERRORS (RP23XX_TRNG_RNG_ISR_VN_ERR |     \
+                                RP23XX_TRNG_RNG_ISR_CRNGT_ERR |  \
+                                RP23XX_TRNG_RNG_ISR_AUTOCORR_ERR)
+
+/* Startup self-test: draw this many blocks and reject an obviously broken
+ * source (stuck or all-constant) before the RNG is trusted.
+ */
+
+#define RP23XX_TRNG_SELFTEST_BLOCKS  4
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -66,6 +81,8 @@ static ssize_t rp23xx_rng_read(struct file *filep, char *buffer,
  ****************************************************************************/
 
 static mutex_t g_rng_lock = NXMUTEX_INITIALIZER;
+static bool    g_rng_healthy;   /* startup self-test passed */
+static bool    g_rng_inited;
 
 static const struct file_operations g_rngops =
 {
@@ -82,12 +99,89 @@ static const struct file_operations g_rngops =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rp23xx_rng_collect
+ *
+ * Description:
+ *   Wait for one fresh 192-bit block into 'ehr', discarding any block the
+ *   on-chip health tests rejected (re-arming the source each time).  The
+ *   entropy source must already be enabled.
+ *
+ ****************************************************************************/
+
+static void rp23xx_rng_collect(uint32_t ehr[RP23XX_TRNG_EHR_WORDS])
+{
+  int i;
+
+  for (; ; )
+    {
+      uint32_t isr = getreg32(RP23XX_TRNG_RNG_ISR);
+
+      if ((isr & RP23XX_TRNG_ISR_ERRORS) != 0)
+        {
+          /* Health test failed: drop the block and restart the source. */
+
+          putreg32(0xffffffff, RP23XX_TRNG_RNG_ICR);
+          putreg32(0, RP23XX_TRNG_RND_SOURCE_ENABLE);
+          putreg32(1, RP23XX_TRNG_RND_SOURCE_ENABLE);
+          continue;
+        }
+
+      if ((isr & RP23XX_TRNG_RNG_ISR_EHR_VALID) != 0)
+        {
+          break;
+        }
+    }
+
+  for (i = 0; i < RP23XX_TRNG_EHR_WORDS; i++)
+    {
+      ehr[i] = getreg32(RP23XX_TRNG_EHR_DATA(i));
+    }
+
+  putreg32(0xffffffff, RP23XX_TRNG_RNG_ICR);
+}
+
+/****************************************************************************
+ * Name: rp23xx_rng_selftest
+ *
+ * Description:
+ *   Draw a few conditioned blocks at startup and reject an obviously broken
+ *   source (a stuck source emitting identical blocks).  The on-chip tests
+ *   cover statistical quality; this only catches a dead source before any
+ *   key is derived from it.  Returns true if the source looks healthy.
+ *
+ ****************************************************************************/
+
+static bool rp23xx_rng_selftest(void)
+{
+  uint32_t block[RP23XX_TRNG_SELFTEST_BLOCKS][RP23XX_TRNG_EHR_WORDS];
+  bool ok = true;
+  int i;
+
+  putreg32(1, RP23XX_TRNG_RND_SOURCE_ENABLE);
+
+  for (i = 0; i < RP23XX_TRNG_SELFTEST_BLOCKS; i++)
+    {
+      rp23xx_rng_collect(block[i]);
+
+      if (i > 0 && memcmp(block[i], block[i - 1],
+                          RP23XX_TRNG_EHR_BYTES) == 0)
+        {
+          ok = false;
+          break;
+        }
+    }
+
+  putreg32(0, RP23XX_TRNG_RND_SOURCE_ENABLE);
+  return ok;
+}
+
+/****************************************************************************
  * Name: rp23xx_rng_read
  *
  * Description:
- *   Fill 'buffer' with 'buflen' bytes of hardware entropy.  Enables the ring
- *   -oscillator source, then repeatedly waits for a valid 192-bit EHR and
- *   copies it out until the request is satisfied.
+ *   Fill 'buffer' with 'buflen' bytes of hardware entropy, discarding any
+ *   block the on-chip health tests reject.  Fails with -EIO if the startup
+ *   self-test found the source broken.
  *
  ****************************************************************************/
 
@@ -103,6 +197,12 @@ static ssize_t rp23xx_rng_read(struct file *filep, char *buffer,
       return ret;
     }
 
+  if (!g_rng_healthy)
+    {
+      nxmutex_unlock(&g_rng_lock);
+      return -EIO;
+    }
+
   /* Enable the entropy source. */
 
   putreg32(1, RP23XX_TRNG_RND_SOURCE_ENABLE);
@@ -111,22 +211,8 @@ static ssize_t rp23xx_rng_read(struct file *filep, char *buffer,
     {
       uint32_t ehr[RP23XX_TRNG_EHR_WORDS];
       size_t chunk;
-      int i;
 
-      /* Wait for the next 192-bit sample to become valid. */
-
-      while ((getreg32(RP23XX_TRNG_TRNG_VALID) & RP23XX_TRNG_EHR_VALID) == 0)
-        {
-        }
-
-      for (i = 0; i < RP23XX_TRNG_EHR_WORDS; i++)
-        {
-          ehr[i] = getreg32(RP23XX_TRNG_EHR_DATA(i));
-        }
-
-      /* Acknowledge the sample so the engine collects the next one. */
-
-      putreg32(0xffffffff, RP23XX_TRNG_RNG_ICR);
+      rp23xx_rng_collect(ehr);
 
       chunk = buflen - nread;
       if (chunk > RP23XX_TRNG_EHR_BYTES)
@@ -147,6 +233,23 @@ static ssize_t rp23xx_rng_read(struct file *filep, char *buffer,
 }
 
 /****************************************************************************
+ * Name: rp23xx_rng_init
+ *
+ * Description:
+ *   Run the startup self-test once and latch the result.  Idempotent.
+ *
+ ****************************************************************************/
+
+static void rp23xx_rng_init(void)
+{
+  if (!g_rng_inited)
+    {
+      g_rng_healthy = rp23xx_rng_selftest();
+      g_rng_inited  = true;
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -162,6 +265,7 @@ static ssize_t rp23xx_rng_read(struct file *filep, char *buffer,
 #ifdef CONFIG_DEV_RANDOM
 void devrandom_register(void)
 {
+  rp23xx_rng_init();
   register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
@@ -178,6 +282,7 @@ void devrandom_register(void)
 #ifdef CONFIG_DEV_URANDOM_ARCH
 void devurandom_register(void)
 {
+  rp23xx_rng_init();
   register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
