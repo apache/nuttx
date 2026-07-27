@@ -109,6 +109,8 @@ enum netdev_rx_e
 
 struct netdev_ops_s;
 struct wireless_ops_s;
+struct phy_device_s;
+
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
@@ -133,6 +135,10 @@ struct netdev_lowerhalf_s
    * Fields that lowerhalf should never touch (used by upper half):
    *   d_ifup, d_ifdown, d_txavail, d_addmac, d_rmmac, d_ioctl, d_private
    */
+
+#ifdef CONFIG_NET_PHYLIB
+  FAR struct phy_device_s *phydev;
+#endif
 
   struct net_driver_s netdev;
 };
