@@ -2522,6 +2522,14 @@ config ARCH_BOARD_RTL8720F_EVB
 		board featuring the Realtek RTL8720F (km4tz application/host
 		core, Cortex-M33).
 
+config ARCH_BOARD_RTL8721F_EVB
+	bool "Realtek RTL8721F_EVB"
+	depends on ARCH_CHIP_RTL8721F
+	---help---
+		This options selects support for NuttX on the RTL8721F_EVB
+		board featuring the Realtek RTL8721F (SDK codename Green2;
+		km4tz application/host core, Cortex-M33).
+
 config ARCH_BOARD_SABRE_6QUAD
 	bool "NXP/Freescale i.MX6 Sabre-6Quad board"
 	depends on ARCH_CHIP_IMX6_6QUAD
@@ -3982,6 +3990,7 @@ config ARCH_BOARD
 	default "mps3-an547"                   if ARCH_BOARD_MPS3_AN547
 	default "pke8721daf"                   if ARCH_BOARD_PKE8721DAF
 	default "rtl8720f_evb"                 if ARCH_BOARD_RTL8720F_EVB
+	default "rtl8721f_evb"                 if ARCH_BOARD_RTL8721F_EVB
 	default "rv32m1-vega"                  if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                      if ARCH_BOARD_QEMU_RV_VIRT
 	default "star64"                       if ARCH_BOARD_JH7110_STAR64
@@ -4236,6 +4245,9 @@ source "boards/arm/rtl8721dx/pke8721daf/Kconfig"
 endif
 if ARCH_BOARD_RTL8720F_EVB
 source "boards/arm/rtl8720f/rtl8720f_evb/Kconfig"
+endif
+if ARCH_BOARD_RTL8721F_EVB
+source "boards/arm/rtl8721f/rtl8721f_evb/Kconfig"
 endif
 if ARCH_BOARD_QEMU_ARMV7A
 source "boards/arm/qemu/qemu-armv7a/Kconfig"
