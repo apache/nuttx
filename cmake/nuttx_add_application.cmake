@@ -153,10 +153,7 @@ function(nuttx_add_application)
           set(SYMBOL_STACKSIZE $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--defsym
                                nx_stacksize=${STACKSIZE})
         endif()
-        if(PRIORITY)
-          if(PRIORITY STREQUAL "SCHED_PRIORITY_DEFAULT")
-            set(PRIORITY "0")
-          endif()
+        if(PRIORITY AND NOT PRIORITY STREQUAL "SCHED_PRIORITY_DEFAULT")
           set(SYMBOL_PRIORITY $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--defsym
                               nx_priority=${PRIORITY})
         endif()
