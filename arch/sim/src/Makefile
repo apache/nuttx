@@ -57,7 +57,8 @@ NUTTX = $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx$(EXEEXT))
 # there are a fews that must be included because they
 # are called only from the host OS-specific logic(HOSTOBJS)
 
-LINKOBJS = sim_head$(OBJEXT)
+LINKSRCS = sim_head.c
+LINKOBJS = $(LINKSRCS:.c=$(OBJEXT))
 REQUIREDOBJS = $(LINKOBJS) sim_doirq$(OBJEXT)
 ifeq ($(CONFIG_SIM_NETUSRSOCK),y)
   REQUIREDOBJS += sim_usrsock$(OBJEXT)
@@ -346,7 +347,7 @@ NUTTXOBJS = $(AOBJS) $(COBJS)
 HOSTOBJS = $(HOSTCOBJS) $(HOSTMOBJS)
 HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 
-SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS) $(HOSTMSRCS)
+SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS) $(HOSTMSRCS) $(LINKSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 $(foreach lib,$(notdir $(wildcard $(APPDIR)$(DELIM)staging$(DELIM)*$(LIBEXT))), \
@@ -529,7 +530,8 @@ export_startup: sim_head.o $(HOSTOBJS) nuttx-names.dat
 
 # Dependencies
 
-makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(HOSTSRCS:.c=.ddh)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) \
+             $(HOSTSRCS:.c=.ddh) $(LINKSRCS:.c=.ddc)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
 
@@ -565,7 +567,8 @@ distclean:: clean
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board distclean ; \
 	fi
-	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(HOSTSRCS:.c=.ddh))
+	$(call DELFILE, $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) \
+	                   $(HOSTSRCS:.c=.ddh) $(LINKSRCS:.c=.ddc))
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 	$(call DELFILE, config.h)
