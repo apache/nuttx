@@ -125,6 +125,18 @@ endif
 
 include net/oa_tc6/Make.defs
 
+ifeq ($(CONFIG_NET_PHYLIB),y)
+  CSRCS += phy_core.c phy_access.c phy_device.c
+  CSRCS += phy_gen.c
+  DEPPATH += --dep-path net/phy
+  VPATH += :net/phy
+  CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)drivers$(DELIM)net$(DELIM)phy
+
+ifeq ($(CONFIG_MDIO_CLAUSE_45),y)
+  CSRCS += phy_genc45.c
+endif
+endif
+
 # Include network build support
 
 DEPPATH += --dep-path net
