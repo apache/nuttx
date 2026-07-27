@@ -134,6 +134,56 @@
 #define DUPLEX_FULL           0x01
 #define DUPLEX_UNKNOWN        0xff
 
+/* Which connector port, for the port field of struct ethtool_link_settings.
+ * Values match the userspace ethtool PORT_* ABI.
+ */
+
+#define PORT_TP               0x00
+#define PORT_AUI              0x01
+#define PORT_MII              0x02
+#define PORT_FIBRE            0x03
+#define PORT_BNC              0x04
+#define PORT_DA               0x05
+#define PORT_NONE             0xef
+#define PORT_OTHER            0xff
+
+/* Enable or disable autonegotiation, for the autoneg field of
+ * struct ethtool_link_settings.  Values match the userspace ethtool ABI.
+ */
+
+#define AUTONEG_DISABLE       0x00
+#define AUTONEG_ENABLE        0x01
+
+/* MDIO protocols supported by the interface, for the mdio_support field of
+ * struct ethtool_link_settings.  Values match the userspace ethtool ABI.
+ */
+
+#define ETH_MDIO_SUPPORTS_C22 1
+#define ETH_MDIO_SUPPORTS_C45 2
+
+/* Link mode bitmasks stored in
+ * struct ethtool_link_settings::link_mode_masks.  These are PHYLIB-internal
+ * capability flags shared between the kernel and applications built into the
+ * same image; the bit positions are assigned locally (packed, no gaps) and
+ * are NOT guaranteed to match the userspace ethtool ABI bit ordering.
+ */
+
+#define SUPPORTED_10BASET_HALF    (1 << 0)
+#define SUPPORTED_10BASET_FULL    (1 << 1)
+#define SUPPORTED_100BASET_HALF   (1 << 2)
+#define SUPPORTED_100BASET_FULL   (1 << 3)
+#define SUPPORTED_1000BASET_HALF  (1 << 4)
+#define SUPPORTED_1000BASET_FULL  (1 << 5)
+#define SUPPORTED_AUTONEG         (1 << 6)
+#define SUPPORTED_TP              (1 << 7)
+#define SUPPORTED_AUI             (1 << 8)
+#define SUPPORTED_MII             (1 << 9)
+#define SUPPORTED_FIBRE           (1 << 10)
+#define SUPPORTED_BNC             (1 << 11)
+#define SUPPORTED_10000BASET_FULL (1 << 12)
+#define SUPPORTED_100BASET1_FULL  (1 << 13)
+#define SUPPORTED_1000BASET1_FULL (1 << 14)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -252,4 +302,147 @@ struct ethtool_ts_info
   uint32_t rx_reserved[3];
 };
 
-#endif
+/* struct ethtool_chns - configuring number of network channel
+ * cmd: ETHTOOL_{G,S}CHANNELS
+ * max_rx: Read only. Maximum number of receive channel the driver support.
+ * max_tx: Read only. Maximum number of transmit channel the driver support.
+ * max_other: Read only. Maximum number of other channel the driver support.
+ * max_combined: Read only. Maximum number of combined channel the driver
+ *    support. Set of queues RX, TX or other.
+ * rx_count: Valid values are in the range 1 to the max_rx.
+ * tx_count: Valid values are in the range 1 to the max_tx.
+ * other_count: Valid values are in the range 1 to the max_other.
+ * combined_count: Valid values are in the range 1 to the max_combined.
+ *
+ * This can be used to configure RX, TX and other channels.
+ */
+
+struct ethtool_chns
+{
+  uint32_t cmd;
+  uint32_t max_rx;
+  uint32_t max_tx;
+  uint32_t max_other;
+  uint32_t max_combined;
+  uint32_t rx_count;
+  uint32_t tx_count;
+  uint32_t other_count;
+  uint32_t combined_count;
+};
+
+/* struct ethtool_chns2 - Configure the network channels in the form of
+ *      bitmask.
+ * cmd: ETHTOOL_{G,S}CHANNELS2
+ * rx_chns_map: Bitmask of receive channels. For example: 0x05 means channel
+ *      0 and channel 2 is enabled for receiving, other channels are disabled
+ *      for receiving.
+ * tx_chns_map: Bitmask of receive channels.
+ * combined_chns_map: Bitmask of combined channels.
+ *
+ * This can be used to configure RX, TX and other channels.
+ */
+
+struct ethtool_chns2
+{
+  uint32_t cmd;
+  uint32_t rx_chns_map;
+  uint32_t tx_chns_map;
+  uint32_t combined_chns_map;
+};
+
+/* struct ethtool_sset_info - String set size query
+ * cmd: ETHTOOL_GSSET_INFO
+ * reserved: Reserved, must be zero
+ * sset_mask: On entry, bitmask of string sets to query (e.g.
+ *            1 << ETH_SS_STATS). On return, bitmask of supported sets.
+ * data: On return, the count of strings in each queried set
+ */
+
+struct ethtool_sset_info
+{
+  uint32_t cmd;
+  uint32_t reserved;
+  uint64_t sset_mask;
+  uint32_t data[];
+};
+
+/* struct ethtool_gstrings - String set data
+ * cmd: ETHTOOL_GSTRINGS
+ * string_set: String set ID (e.g. ETH_SS_STATS)
+ * len: On return, number of strings
+ * data: Buffer for strings, each null-padded to ETH_GSTRING_LEN bytes
+ */
+
+struct ethtool_gstrings
+{
+  uint32_t cmd;
+  uint32_t string_set;
+  uint32_t len;
+  uint8_t  data[];
+};
+
+/* struct ethtool_stats - Device statistics
+ * cmd: ETHTOOL_GSTATS
+ * n_stats: Number of statistics entries
+ * data: Array of uint32 statistic values, indexed same as
+ *       the string array returned by ETHTOOL_GSTRINGS
+ */
+
+struct ethtool_stats
+{
+  uint32_t cmd;
+  uint32_t n_stats;
+  uint32_t data[];
+};
+
+/* struct ethtool_link_settings - link settings for ethtool
+ * cmd: ETHTOOL_GLINKSETTINGS or ETHTOOL_SLINKSETTINGS
+ * speed: Link speed in Mbps
+ * duplex: Duplex mode (DUPLEX_HALF, DUPLEX_FULL, DUPLEX_UNKNOWN)
+ * port: Physical connector type (PORT_* in this header)
+ * phy_address: MDIO address of PHY
+ * autoneg: Auto-negotiation enable/disable (AUTONEG_* in this header)
+ * mdio_support: MDIO protocols supported by the interface
+ *               (ETH_MDIO_SUPPORTS_* in this header); read-only
+ * link_mode_masks_nwords: Number of 32-bit words in each link mode mask
+ * link_mode_masks: Supported, advertising and link partner advertising
+ *                  masks, in that order
+ */
+
+struct ethtool_link_settings
+{
+  uint32_t cmd;
+  uint32_t speed;
+  uint8_t  duplex;
+  uint8_t  port;
+  uint8_t  phy_address;
+  uint8_t  autoneg;
+  uint8_t  mdio_support;
+  uint8_t  eth_tp_mdix;
+  uint8_t  eth_tp_mdix_ctrl;
+  int8_t   link_mode_masks_nwords;
+  uint8_t  transceiver;
+  uint8_t  master_slave_cfg;
+  uint8_t  master_slave_state;
+  uint8_t  rate_matching;
+  uint32_t reserved[7];
+
+  /* supported / advertising / lp_advertising, one 32-bit word each
+   * (link_mode_masks_nwords == 1).
+   */
+
+  uint32_t link_mode_masks[3];
+};
+
+/* struct ethtool_value - simple value container for ethtool
+ * cmd: Command number
+ * data: Value
+ */
+
+struct ethtool_value
+{
+  uint32_t cmd;
+  uint32_t data;
+};
+
+#endif /* __INCLUDE_NUTTX_ETHTOOL_H */

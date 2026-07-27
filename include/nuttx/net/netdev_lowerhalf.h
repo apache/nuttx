@@ -109,6 +109,9 @@ enum netdev_rx_e
 
 struct netdev_ops_s;
 struct wireless_ops_s;
+struct ethtool_ops_s;
+struct phy_device_s;
+
 struct netdev_lowerhalf_s
 {
   FAR const struct netdev_ops_s *ops;
@@ -133,6 +136,10 @@ struct netdev_lowerhalf_s
    * Fields that lowerhalf should never touch (used by upper half):
    *   d_ifup, d_ifdown, d_txavail, d_addmac, d_rmmac, d_ioctl, d_private
    */
+
+#ifdef CONFIG_NET_PHYLIB
+  FAR struct phy_device_s *phydev;
+#endif
 
   struct net_driver_s netdev;
 };
@@ -219,6 +226,54 @@ struct wireless_ops_s
   /* Get-only attributes. */
 
   iw_handler_ro range;
+};
+#endif
+
+#ifdef CONFIG_NETDEV_ETHTOOL_IOCTL
+
+/* This structure is a set of callback functions used to call from the lower-
+ * half, support ethtool tools. Driver can get/set parameter of hardware
+ * through these api. At present, only some apis are supported in the
+ * framework layer, and others need to be improved.
+ *
+ * get_channels: Get number of channels.
+ * set_channels: Set number of channels.  Returns a negative error code or
+ *               zero.
+ * get_channels2: Get channels status, and return in form of bitmap.
+ * set_channels2: Turn on/off channels, and input parameter in the form of
+ *                bitmap.
+ * get_sset_count: Get number of strings in a string set
+ *                 (ETHTOOL_GSSET_INFO).
+ * get_strings: Get string set data (ETHTOOL_GSTRINGS).
+ *              Driver fills strs->data with null-padded names.
+ * get_ethtool_stats: Get device statistics (ETHTOOL_GSTATS).
+ *                    Driver fills stats->data with uint64 values.
+ */
+
+struct ethtool_ops_s
+{
+  CODE int (*get_channels)(FAR struct netdev_lowerhalf_s *dev,
+                           FAR struct ethtool_chns *chns);
+  CODE int (*set_channels)(FAR struct netdev_lowerhalf_s *dev,
+                           FAR struct ethtool_chns *chns);
+  CODE int (*get_channels2)(FAR struct netdev_lowerhalf_s *dev,
+                            FAR struct ethtool_chns2 *chns);
+  CODE int (*set_channels2)(FAR struct netdev_lowerhalf_s *dev,
+                            FAR struct ethtool_chns2 *chns);
+  CODE int (*get_sset_count)(FAR struct netdev_lowerhalf_s *dev,
+                             int sset);
+  CODE int (*get_strings)(FAR struct netdev_lowerhalf_s *dev,
+                          FAR struct ethtool_gstrings *strs);
+  CODE int (*get_ethtool_stats)(FAR struct netdev_lowerhalf_s *dev,
+                                FAR struct ethtool_stats *stats);
+
+#ifdef CONFIG_NET_PHYLIB
+  CODE int (*get_link_settings)(FAR struct netdev_lowerhalf_s *dev,
+                                FAR struct ethtool_link_settings *cmd);
+  CODE int (*set_link_settings)(FAR struct netdev_lowerhalf_s *dev,
+                                FAR const struct
+                                ethtool_link_settings *cmd);
+#endif
 };
 #endif
 

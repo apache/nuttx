@@ -837,4 +837,42 @@ endif # NET_IGC
 
 source "drivers/net/oa_tc6/Kconfig"
 
+comment "PHY Support"
+
+menuconfig NET_PHYLIB
+	bool "PHY Abstraction Layer (PHYLIB)"
+	default n
+	depends on NET
+	depends on MDIO_BUS
+	---help---
+		Enable the PHY Abstraction Layer (PHYLIB) which provides a
+		standardized MDIO bus abstraction, PHY device model, PHY driver
+		framework, and PHY state machine. This decouples PHY management
+		from individual MAC drivers.
+
+if NET_PHYLIB
+
+config NET_PHYLIB_POLL_INTERVAL
+	int "PHY state machine poll interval (ms)"
+	default 1000
+	---help---
+		The interval in milliseconds at which the PHY state machine
+		polls the PHY link status.
+
+config NET_PHYLIB_MAX_DRIVERS
+	int "Maximum number of PHY drivers"
+	default 8
+	---help---
+		Maximum number of PHY drivers that can be registered
+		simultaneously.
+
+config NET_PHYLIB_MAX_PHYS
+	int "Maximum number of PHY devices"
+	default 8
+	---help---
+		Maximum number of PHY devices that can be tracked
+		simultaneously.
+
+endif # NET_PHYLIB
+
 endif # NETDEVICES
