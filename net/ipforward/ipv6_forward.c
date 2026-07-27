@@ -83,43 +83,43 @@ static int ipv6_hdrsize(FAR struct ipv6_hdr_s *ipv6)
   switch (ipv6->proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
-        unsigned int tcpsize;
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
+          unsigned int tcpsize;
 
-        /* The TCP header length is encoded in the top 4 bits of the
-         * tcpoffset field (in units of 32-bit words).
-         */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-        tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-        return IPv6_HDRLEN + tcpsize;
-      }
-      break;
+          tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          return IPv6_HDRLEN + tcpsize;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      return IPv6_HDRLEN + UDP_HDRLEN;
-      break;
+      case IP_PROTO_UDP:
+        return IPv6_HDRLEN + UDP_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
-    case IP_PROTO_ICMP6:
-      return IPv6_HDRLEN + ICMPv6_HDRLEN;
-      break;
+      case IP_PROTO_ICMP6:
+        return IPv6_HDRLEN + ICMPv6_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_IPFRAG
-    case NEXT_FRAGMENT_EH:
-      return IPv6_HDRLEN + EXTHDR_FRAG_LEN;
-      break;
+      case NEXT_FRAGMENT_EH:
+        return IPv6_HDRLEN + EXTHDR_FRAG_LEN;
+        break;
 #endif
 
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
-      return -EPROTONOSUPPORT;
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv6->proto);
+        return -EPROTONOSUPPORT;
     }
 }
 #endif
@@ -697,12 +697,12 @@ int ipv6_forward(FAR struct net_driver_s *dev, FAR struct ipv6_hdr_s *ipv6)
     }
 
 #else /* CONFIG_NET_6LOWPAN */
-    {
-      nwarn(
-         "WARNING: Packet forwarding not supported in this configuration\n");
-      ret = -ENOSYS;
-      goto drop;
-    }
+  {
+    nwarn(
+       "WARNING: Packet forwarding not supported in this configuration\n");
+    ret = -ENOSYS;
+    goto drop;
+  }
 #endif /* CONFIG_NET_6LOWPAN */
 
   /* Return success.  ipv6_input will return to the network driver with

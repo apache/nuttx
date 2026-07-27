@@ -233,6 +233,7 @@ static uint32_t compute_crc32c_hash(FAR uint8_t *packet, uint32_t len)
     {
       uint8_t b = packet[i];
       uint8_t index = (crc32 ^ b) & 0xff;
+
       crc32 = ((crc32 >> 8) & 0xffffff) ^ g_crc32c_table[index];
     }
 

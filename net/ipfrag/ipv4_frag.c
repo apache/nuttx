@@ -222,6 +222,7 @@ ipv4_fragout_buildipv4header(FAR struct ipv4_hdr_s *ref,
   if (ref != ipv4)
     {
       uint32_t iphdrlen = (ref->vhl & IPv4_HLMASK) << 2;
+
       memcpy(ipv4, ref, iphdrlen);
     }
 

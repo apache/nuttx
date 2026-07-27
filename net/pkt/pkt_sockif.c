@@ -108,6 +108,7 @@ static int pkt_sockif_alloc(FAR struct socket *psock)
    */
 
   FAR struct pkt_conn_s *conn = pkt_alloc();
+
   if (conn == NULL)
     {
       /* Failed to reserve a connection structure */

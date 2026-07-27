@@ -89,6 +89,7 @@ static uint32_t tcp_isn_rfc6528(FAR struct tcp_conn_s *conn)
 {
   const size_t addrlen = net_ip_domain_select(conn->domain,
                                   sizeof(in_addr_t), sizeof(net_ipv6addr_t));
+
   MD5_CTX ctx;
   uint32_t digest[MD5_DIGEST_LENGTH / 4];
   uint32_t m;

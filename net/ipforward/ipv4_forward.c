@@ -87,37 +87,37 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
   switch (ipv4->proto)
     {
 #ifdef CONFIG_NET_TCP
-    case IP_PROTO_TCP:
-      {
-        FAR struct tcp_hdr_s *tcp =
-          (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
-        unsigned int tcpsize;
+      case IP_PROTO_TCP:
+        {
+          FAR struct tcp_hdr_s *tcp =
+            (FAR struct tcp_hdr_s *)((FAR uint8_t *)ipv4 + iphdrlen);
+          unsigned int tcpsize;
 
-        /* The TCP header length is encoded in the top 4 bits of the
-         * tcpoffset field (in units of 32-bit words).
-         */
+          /* The TCP header length is encoded in the top 4 bits of the
+           * tcpoffset field (in units of 32-bit words).
+           */
 
-        tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
-        return iphdrlen + tcpsize;
-      }
-      break;
+          tcpsize = ((uint16_t)tcp->tcpoffset >> 4) << 2;
+          return iphdrlen + tcpsize;
+        }
+        break;
 #endif
 
 #ifdef CONFIG_NET_UDP
-    case IP_PROTO_UDP:
-      return iphdrlen + UDP_HDRLEN;
-      break;
+      case IP_PROTO_UDP:
+        return iphdrlen + UDP_HDRLEN;
+        break;
 #endif
 
 #ifdef CONFIG_NET_ICMP
-    case IP_PROTO_ICMP:
-      return iphdrlen + ICMP_HDRLEN;
-      break;
+      case IP_PROTO_ICMP:
+        return iphdrlen + ICMP_HDRLEN;
+        break;
 #endif
 
-    default:
-      nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
-      return -EPROTONOSUPPORT;
+      default:
+        nwarn("WARNING: Unrecognized proto: %u\n", ipv4->proto);
+        return -EPROTONOSUPPORT;
     }
 }
 #endif

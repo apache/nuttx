@@ -399,7 +399,7 @@ ssize_t icmp_sendmsg(FAR struct socket *psock, FAR const struct msghdr *msg,
           conn->id = icmp->id;
         }
 
-        conn->dev = dev;
+      conn->dev = dev;
 
       /* Notify the device driver of the availability of TX data */
 

@@ -556,6 +556,7 @@ errout_locked:
       /* Use lseek to get the current file position */
 
       off_t curpos = file_seek(infile, 0, SEEK_CUR);
+
       if (curpos < 0)
         {
           return curpos;

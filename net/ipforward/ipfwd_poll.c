@@ -180,6 +180,7 @@ void ipfwd_poll(FAR struct net_driver_s *dev)
       /* Get the L2 protocol of packet in the device's d_buf */
 
       int proto = ipfwd_packet_proto(dev);
+
       if (proto >= 0)
         {
           /* Perform any necessary conversions on the forwarded packet */

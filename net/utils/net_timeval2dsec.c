@@ -61,17 +61,17 @@ unsigned int net_timeval2dsec(FAR struct timeval *tv,
 
   switch (remainder)
     {
-    default:
-    case TV2DS_TRUNC: /* Truncate microsecond remainder */
-      break;
+      default:
+      case TV2DS_TRUNC: /* Truncate microsecond remainder */
+        break;
 
-    case TV2DS_ROUND: /* Round to the nearest full decisecond */
-      adjust = (USEC_PER_DSEC / 2);
-      break;
+      case TV2DS_ROUND: /* Round to the nearest full decisecond */
+        adjust = (USEC_PER_DSEC / 2);
+        break;
 
-    case TV2DS_CEIL:  /* Force to next larger full decisecond */
-      adjust = (USEC_PER_DSEC - 1);
-      break;
+      case TV2DS_CEIL:  /* Force to next larger full decisecond */
+        adjust = (USEC_PER_DSEC - 1);
+        break;
     }
 
   return (unsigned int)(tv->tv_sec * DSEC_PER_SEC +

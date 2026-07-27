@@ -197,6 +197,7 @@ ipv4_nat_inbound_tcp(FAR struct ipv4_hdr_s *ipv4,
                                              *external_port,
                                              net_ip4addr_conv32(peer_ip),
                                              *peer_port, true);
+
   if (!entry)
     {
       return NULL;
@@ -791,6 +792,7 @@ int ipv4_nat_outbound(FAR struct net_driver_s *dev,
 
       FAR ipv4_nat_entry_t *entry =
           ipv4_nat_outbound_internal(dev, ipv4, manip_type);
+
       if (manip_type == NAT_MANIP_SRC && !entry)
         {
           /* Outbound entry creation failed, should have entry. */

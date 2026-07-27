@@ -364,7 +364,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
       /* MSG_DONTWAIT is only use in usrsock. */
 
-       flags &= ~MSG_DONTWAIT;
+      flags &= ~MSG_DONTWAIT;
 
       /* Request user-space daemon to close socket. */
 

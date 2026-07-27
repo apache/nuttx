@@ -141,14 +141,14 @@ int netdev_lladdrsize(FAR struct net_driver_s *dev)
       case NET_LL_BLUETOOTH:
 #endif
         {
-           /* Return the size of the packet radio address */
+          /* Return the size of the packet radio address */
 
-           return netdev_pktradio_addrlen(dev);
+          return netdev_pktradio_addrlen(dev);
         }
 #endif /* CONFIG_WIRELESS_PKTRADIO || CONFIG_WIRELESS_BLUETOOTH */
 #endif /* CONFIG_NET_6LOWPAN */
 
-       default:
+      default:
         {
           /* The link layer type associated has no address */
 

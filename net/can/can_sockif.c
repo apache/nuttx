@@ -208,6 +208,7 @@ static int can_setup(FAR struct socket *psock)
        */
 
       FAR struct can_conn_s *conn = can_alloc();
+
       if (conn == NULL)
         {
           /* Failed to reserve a connection structure */
@@ -327,6 +328,7 @@ static int can_bind(FAR struct socket *psock,
 {
   FAR struct sockaddr_can *canaddr;
   FAR struct can_conn_s *conn;
+
   DEBUGASSERT(addr != NULL &&
               addrlen >= sizeof(struct sockaddr_can));
 
@@ -341,6 +343,7 @@ static int can_bind(FAR struct socket *psock,
   conn->dev = netdev_findbyindex(canaddr->can_ifindex);
 #else
   char netdev_name[5] = "can0";
+
   netdev_name[3] += canaddr->can_ifindex;
   conn->dev = netdev_findbyname((const char *)&netdev_name);
 #endif

@@ -273,6 +273,7 @@ static void arp_get_arpreq(FAR struct arpreq *output,
 static void arp_unreach_work(FAR void *param)
 {
   FAR struct arp_entry_s *tabptr = (FAR struct arp_entry_s *)param;
+
   iob_free_queue(&tabptr->at_queue);
 }
 #endif
@@ -502,6 +503,7 @@ int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
                  sizeof(tabptr->at_ethaddr)) == 0)
         {
           clock_t elapsed;
+
           elapsed = clock_systime_ticks() - tabptr->at_time;
           if (elapsed <= ARP_INPROGRESS_TICK)
             {

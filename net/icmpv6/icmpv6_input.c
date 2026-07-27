@@ -290,386 +290,394 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
   switch (icmpv6->type)
     {
-    /* If we get a neighbor solicitation for our address we should send
-     * a neighbor advertisement message back.
-     */
+      /* If we get a neighbor solicitation for our address we should send
+       * a neighbor advertisement message back.
+       */
 
-    case ICMPv6_NEIGHBOR_SOLICIT:
-      {
-        FAR struct icmpv6_neighbor_solicit_s *sol;
+      case ICMPv6_NEIGHBOR_SOLICIT:
+        {
+          FAR struct icmpv6_neighbor_solicit_s *sol;
 
-        /* Check if we are the target of the solicitation */
+          /* Check if we are the target of the solicitation */
 
-        sol = ICMPv6SOLICIT;
-        if (NETDEV_IS_MY_V6ADDR(dev, sol->tgtaddr))
-          {
-            if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
-              {
-                /* Save the sender's address mapping in our Neighbor Table. */
+          sol = ICMPv6SOLICIT;
+          if (NETDEV_IS_MY_V6ADDR(dev, sol->tgtaddr))
+            {
+              if (sol->opttype == ICMPv6_OPT_SRCLLADDR)
+                {
+                  /* Save the sender's address mapping in our Neighbor
+                   * Table.
+                   */
 
-                neighbor_add(dev, ipv6->srcipaddr, sol->srclladdr);
-              }
+                  neighbor_add(dev, ipv6->srcipaddr, sol->srclladdr);
+                }
 
-            /* Yes.. Send a neighbor advertisement back to where the neighbor
-             * solicitation came from.
-             */
+              /* Yes.. Send a neighbor advertisement back to where the
+               * neighbor solicitation came from.
+               */
 
-            icmpv6_advertise(dev, sol->tgtaddr, ipv6->srcipaddr);
+              icmpv6_advertise(dev, sol->tgtaddr, ipv6->srcipaddr);
 
-            /* All statistics have been updated.  Nothing to do but exit. */
+              /* All statistics have been updated.  Nothing to do but exit. */
 
-            return;
-          }
-        else
-          {
-            goto icmpv6_drop_packet;
-          }
-      }
-      break;
+              return;
+            }
+          else
+            {
+              goto icmpv6_drop_packet;
+            }
+        }
+        break;
 
-    /* Check if we received a Neighbor Advertisement */
+      /* Check if we received a Neighbor Advertisement */
 
-    case ICMPv6_NEIGHBOR_ADVERTISE:
-      {
-        FAR struct icmpv6_neighbor_advertise_s *adv;
+      case ICMPv6_NEIGHBOR_ADVERTISE:
+        {
+          FAR struct icmpv6_neighbor_advertise_s *adv;
 
-        /* If the IPv6 destination address matches our address, and if so,
-         * add the neighbor address mapping to the list of neighbors.
-         *
-         * Missing checks:
-         *   optlen = 1 (8 octets)
-         *   Should only update Neighbor Table if
-         *     [O]verride bit is set in flags
-         */
+          /* If the IPv6 destination address matches our address, and if so,
+           * add the neighbor address mapping to the list of neighbors.
+           *
+           * Missing checks:
+           *   optlen = 1 (8 octets)
+           *   Should only update Neighbor Table if
+           *     [O]verride bit is set in flags
+           */
 
-        adv = ICMPv6ADVERTISE;
-        if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
-          {
-            /* This message is required to support the Target link-layer
-             * address option.
-             */
+          adv = ICMPv6ADVERTISE;
+          if (NETDEV_IS_MY_V6ADDR(dev, ipv6->destipaddr))
+            {
+              /* This message is required to support the Target link-layer
+               * address option.
+               */
 
-            if (adv->opttype == ICMPv6_OPT_TGTLLADDR)
-              {
-                /* Save the sender's address mapping in our Neighbor Table. */
+              if (adv->opttype == ICMPv6_OPT_TGTLLADDR)
+                {
+                  /* Save the sender's address mapping in our Neighbor
+                   * Table.
+                   */
 
-                neighbor_add(dev, ipv6->srcipaddr, adv->tgtlladdr);
-              }
+                  neighbor_add(dev, ipv6->srcipaddr, adv->tgtlladdr);
+                }
 
 #ifdef CONFIG_NET_ICMPv6_NEIGHBOR
-            /* Then notify any logic waiting for the Neighbor Advertisement */
+              /* Then notify any logic waiting for the Neighbor
+               * Advertisement
+               */
 
-            icmpv6_notify(ipv6->srcipaddr);
+              icmpv6_notify(ipv6->srcipaddr);
 #endif
 
-            /* We consumed the packet but we don't send anything in
-             * response.
-             */
+              /* We consumed the packet but we don't send anything in
+               * response.
+               */
 
-            goto icmpv6_send_nothing;
-          }
+              goto icmpv6_send_nothing;
+            }
 
-        goto icmpv6_drop_packet;
-      }
-      break;
+          goto icmpv6_drop_packet;
+        }
+        break;
 
 #ifdef CONFIG_NET_ICMPv6_ROUTER
-    /* Check if we received a Router Solicitation */
+      /* Check if we received a Router Solicitation */
 
-    case ICMPV6_ROUTER_SOLICIT:
-      {
-        /* Just give a knee-jerk Router Advertisement in respond with no
-         * further examination of the Router Solicitation.
-         */
+      case ICMPV6_ROUTER_SOLICIT:
+        {
+          /* Just give a knee-jerk Router Advertisement in respond with no
+           * further examination of the Router Solicitation.
+           */
 
-        icmpv6_radvertise(dev);
+          icmpv6_radvertise(dev);
 
-        /* All statistics have been updated.  Nothing to do but exit. */
+          /* All statistics have been updated.  Nothing to do but exit. */
 
-        return;
-      }
+          return;
+        }
 #endif
 
 #ifdef CONFIG_NET_ICMPv6_AUTOCONF
-    /* Check if we received a Router Advertisement */
+      /* Check if we received a Router Advertisement */
 
-    case ICMPV6_ROUTER_ADVERTISE:
-      {
-        FAR struct icmpv6_router_advertise_s *adv;
-        FAR uint8_t *options;
-        bool prefix = false;
-        uint16_t pktlen;
-        uint16_t optlen;
-        int ndx;
+      case ICMPV6_ROUTER_ADVERTISE:
+        {
+          FAR struct icmpv6_router_advertise_s *adv;
+          FAR uint8_t *options;
+          bool prefix = false;
+          uint16_t pktlen;
+          uint16_t optlen;
+          int ndx;
 
-        /* Get the length of the option data */
+          /* Get the length of the option data */
 
-        pktlen = (uint16_t)ipv6->len[0] << 8 | ipv6->len[1];
-        if (pktlen <= ICMPv6_RADV_MINLEN)
-          {
-            /* Too small to contain any options */
+          pktlen = (uint16_t)ipv6->len[0] << 8 | ipv6->len[1];
+          if (pktlen <= ICMPv6_RADV_MINLEN)
+            {
+              /* Too small to contain any options */
 
-            goto icmpv6_drop_packet;
-          }
+              goto icmpv6_drop_packet;
+            }
 
-        optlen = ICMPv6_RADV_OPTLEN(pktlen);
+          optlen = ICMPv6_RADV_OPTLEN(pktlen);
 
-        /* We need to have a valid router advertisement with a Prefix and
-         * with the "A" bit set in the flags.  Options immediately follow
-         * the ICMPv6 router advertisement.
-         */
+          /* We need to have a valid router advertisement with a Prefix and
+           * with the "A" bit set in the flags.  Options immediately follow
+           * the ICMPv6 router advertisement.
+           */
 
-        adv     = ICMPv6RADVERTISE;
-        options = (FAR uint8_t *)adv +
-                   sizeof(struct icmpv6_router_advertise_s);
+          adv     = ICMPv6RADVERTISE;
+          options = (FAR uint8_t *)adv +
+                     sizeof(struct icmpv6_router_advertise_s);
 
-        for (ndx = 0; ndx < optlen; )
-          {
-           FAR struct icmpv6_generic_s *opt =
-                                (FAR struct icmpv6_generic_s *)&options[ndx];
+          for (ndx = 0; ndx < optlen; )
+            {
+             FAR struct icmpv6_generic_s *opt =
+               (FAR struct icmpv6_generic_s *)&options[ndx];
 
-            /* RFC 4861 4.6: "The value 0 is invalid. Nodes MUST silently
-             * discard a packet that contains an option with length zero."
-             */
+              /* RFC 4861 4.6: "The value 0 is invalid. Nodes MUST silently
+               * discard a packet that contains an option with length zero."
+               */
 
-            if (opt->optlen == 0)
-              {
-                goto icmpv6_drop_packet;
-              }
+              if (opt->optlen == 0)
+                {
+                  goto icmpv6_drop_packet;
+                }
 
-            switch (opt->opttype)
-              {
-                case ICMPv6_OPT_SRCLLADDR:
-                  {
-                    FAR struct icmpv6_srclladdr_s *sllopt =
-                                      (FAR struct icmpv6_srclladdr_s *)opt;
-                    neighbor_add(dev, ipv6->srcipaddr, sllopt->srclladdr);
-                  }
-                  break;
+              switch (opt->opttype)
+                {
+                  case ICMPv6_OPT_SRCLLADDR:
+                    {
+                      FAR struct icmpv6_srclladdr_s *sllopt =
+                                        (FAR struct icmpv6_srclladdr_s *)opt;
 
-                case ICMPv6_OPT_PREFIX:
-                  {
-                    FAR struct icmpv6_prefixinfo_s *prefixopt =
-                                      (FAR struct icmpv6_prefixinfo_s *)opt;
+                      neighbor_add(dev, ipv6->srcipaddr, sllopt->srclladdr);
+                    }
+                    break;
 
-                   /* Is the "A" flag set? */
+                  case ICMPv6_OPT_PREFIX:
+                    {
+                      FAR struct icmpv6_prefixinfo_s *prefixopt =
+                        (FAR struct icmpv6_prefixinfo_s *)opt;
 
-                    if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
-                      {
-                        /* Yes.. Set the new network addresses. */
+                      /* Is the "A" flag set? */
 
-                        icmpv6_setaddresses(dev, ipv6->srcipaddr,
-                                    prefixopt->prefix, prefixopt->preflen);
-                        netlink_ipv6_prefix_notify(dev, RTM_NEWPREFIX,
-                                                   prefixopt);
-                      }
-                    else if ((adv->flags & ICMPv6_RADV_FLAG_M) != 0)
-                      {
-                        net_ipv6addr_copy(dev->d_ipv6draddr,
-                                          ipv6->srcipaddr);
-                      }
+                      if ((prefixopt->flags & ICMPv6_PRFX_FLAG_A) != 0)
+                        {
+                          /* Yes.. Set the new network addresses. */
+
+                          icmpv6_setaddresses(dev, ipv6->srcipaddr,
+                                      prefixopt->prefix, prefixopt->preflen);
+                          netlink_ipv6_prefix_notify(dev, RTM_NEWPREFIX,
+                                                     prefixopt);
+                        }
+                      else if ((adv->flags & ICMPv6_RADV_FLAG_M) != 0)
+                        {
+                          net_ipv6addr_copy(dev->d_ipv6draddr,
+                                            ipv6->srcipaddr);
+                        }
 
                       /* Notify any waiting threads */
 
                       icmpv6_rnotify(dev, (adv->flags & ICMPv6_RADV_FLAG_M) ?
                                           -EADDRNOTAVAIL : OK);
                       prefix = true;
-                  }
-                  break;
+                    }
+                    break;
 
-                case ICMPv6_OPT_MTU:
-                  {
-                    FAR struct icmpv6_mtu_s *mtuopt =
-                                        (FAR struct icmpv6_mtu_s *)opt;
-                    dev->d_pktsize = MIN(dev->d_pktsize,
-                        NTOHS(mtuopt->mtu[1]) + dev->d_llhdrlen);
-                  }
-                  break;
+                  case ICMPv6_OPT_MTU:
+                    {
+                      FAR struct icmpv6_mtu_s *mtuopt =
+                                          (FAR struct icmpv6_mtu_s *)opt;
+
+                      dev->d_pktsize = MIN(dev->d_pktsize,
+                          NTOHS(mtuopt->mtu[1]) + dev->d_llhdrlen);
+                    }
+                    break;
 
 #ifdef CONFIG_ICMPv6_AUTOCONF_RDNSS
-                case ICMPv6_OPT_RDNSS:
-                  {
-                    FAR struct icmpv6_rdnss_s *rdnss =
-                                          (FAR struct icmpv6_rdnss_s *)opt;
-                    FAR struct in6_addr *servers;
-                    struct sockaddr_in6 addr;
-                    int nservers;
-                    int ret;
+                  case ICMPv6_OPT_RDNSS:
+                    {
+                      FAR struct icmpv6_rdnss_s *rdnss =
+                                            (FAR struct icmpv6_rdnss_s *)opt;
+                      FAR struct in6_addr *servers;
+                      struct sockaddr_in6 addr;
+                      int nservers;
+                      int ret;
 
-                    if (rdnss->optlen < 3)
-                      {
-                        nerr("rdnss error length %d\n", rdnss->optlen);
-                        break;
-                      }
+                      if (rdnss->optlen < 3)
+                        {
+                          nerr("rdnss error length %d\n", rdnss->optlen);
+                          break;
+                        }
 
-                    /* optlen is in units of 8 bytes. The header is 1 unit
-                     * (8 bytes) and each address is another 2 units
-                     * (16 bytes). So the number of addresses is equal to
-                     * (optlen - 1) / 2.
-                     */
+                      /* optlen is in units of 8 bytes. The header is 1 unit
+                       * (8 bytes) and each address is another 2 units
+                       * (16 bytes). So the number of addresses is equal to
+                       * (optlen - 1) / 2.
+                       */
 
-                    servers  = (FAR struct in6_addr *)rdnss->servers;
-                    nservers = (rdnss->optlen - 1) / 2;
+                      servers  = (FAR struct in6_addr *)rdnss->servers;
+                      nservers = (rdnss->optlen - 1) / 2;
 
-                    if (nservers > 0)
-                      {
-                        /* Set the IPv6 DNS server address */
+                      if (nservers > 0)
+                        {
+                          /* Set the IPv6 DNS server address */
 
-                        memset(&addr, 0, sizeof(addr));
-                        addr.sin6_family = AF_INET6;
-                        net_ipv6addr_copy(&addr.sin6_addr, servers);
-                        ret = dns_add_nameserver(
-                                          (FAR const struct sockaddr *)&addr,
-                                          sizeof(struct sockaddr_in6));
-                        if (ret < 0 && ret != -EEXIST)
-                          {
-                            nerr("dns add nameserver failed %d", ret);
-                          }
-                      }
-                  }
-                  break;
+                          memset(&addr, 0, sizeof(addr));
+                          addr.sin6_family = AF_INET6;
+                          net_ipv6addr_copy(&addr.sin6_addr, servers);
+                          ret = dns_add_nameserver(
+                            (FAR const struct sockaddr *)&addr,
+                            sizeof(struct sockaddr_in6));
+                          if (ret < 0 && ret != -EEXIST)
+                            {
+                              nerr("dns add nameserver failed %d", ret);
+                            }
+                        }
+                    }
+                    break;
 #endif
 
-                default:
-                  break;
-              }
+                  default:
+                    break;
+                }
 
-            /* Skip to the next option (units of octets) */
+              /* Skip to the next option (units of octets) */
 
-            ndx += (opt->optlen << 3);
-          }
+              ndx += (opt->optlen << 3);
+            }
 
-        if (prefix)
-          {
-            goto icmpv6_send_nothing;
-          }
+          if (prefix)
+            {
+              goto icmpv6_send_nothing;
+            }
 
-        goto icmpv6_drop_packet;
-      }
-      break;
+          goto icmpv6_drop_packet;
+        }
+        break;
 #endif
 
-    /* Handle the ICMPv6 Echo Request */
+      /* Handle the ICMPv6 Echo Request */
 
-    case ICMPv6_ECHO_REQUEST:
-      {
-        /* ICMPv6 echo (i.e., ping) processing. This is simple, we only
-         * change the ICMPv6 type from ECHO to ECHO_REPLY and update the
-         * ICMPv6 checksum before we return the packet.
-         */
+      case ICMPv6_ECHO_REQUEST:
+        {
+          /* ICMPv6 echo (i.e., ping) processing. This is simple, we only
+           * change the ICMPv6 type from ECHO to ECHO_REPLY and update the
+           * ICMPv6 checksum before we return the packet.
+           */
 
-        FAR const uint16_t *srcaddr;
+          FAR const uint16_t *srcaddr;
 
-        icmpv6->type = ICMPv6_ECHO_REPLY;
+          icmpv6->type = ICMPv6_ECHO_REPLY;
 
-        srcaddr = netdev_ipv6_srcaddr(dev, ipv6->destipaddr);
-        net_ipv6addr_copy(ipv6->destipaddr, ipv6->srcipaddr);
-        net_ipv6addr_copy(ipv6->srcipaddr, srcaddr);
+          srcaddr = netdev_ipv6_srcaddr(dev, ipv6->destipaddr);
+          net_ipv6addr_copy(ipv6->destipaddr, ipv6->srcipaddr);
+          net_ipv6addr_copy(ipv6->srcipaddr, srcaddr);
 
-        icmpv6->chksum = 0;
+          icmpv6->chksum = 0;
 
 #ifdef CONFIG_NET_ICMPv6_CHECKSUMS
-        icmpv6->chksum = ~icmpv6_chksum(dev, iplen);
+          icmpv6->chksum = ~icmpv6_chksum(dev, iplen);
 #endif
-      }
-      break;
+        }
+        break;
 
 #if (CONFIG_NET_ICMPv6_PMTU_ENTRIES > 0)
-    case ICMPv6_PACKET_TOO_BIG:
-      {
-        FAR struct icmpv6_pmtu_entry *entry;
-        FAR struct ipv6_hdr_s *inner;
-        int mtu;
+      case ICMPv6_PACKET_TOO_BIG:
+        {
+          FAR struct icmpv6_pmtu_entry *entry;
+          FAR struct ipv6_hdr_s *inner;
+          int mtu;
 
-        mtu = (ntohs(icmpv6->data[0]) << 16) | (ntohs(icmpv6->data[1]));
-        if (mtu <= 0)
-          {
-            goto icmpv6_type_error;
-          }
+          mtu = (ntohs(icmpv6->data[0]) << 16) | (ntohs(icmpv6->data[1]));
+          if (mtu <= 0)
+            {
+              goto icmpv6_type_error;
+            }
 
-        inner = (FAR struct ipv6_hdr_s *)(icmpv6 + 1);
-        entry = icmpv6_find_pmtu_entry(inner->destipaddr);
-        if (entry == NULL)
-          {
-            icmpv6_add_pmtu_entry(inner->destipaddr, mtu);
-          }
-        else
-          {
-            entry->pmtu = mtu;
-          }
+          inner = (FAR struct ipv6_hdr_s *)(icmpv6 + 1);
+          entry = icmpv6_find_pmtu_entry(inner->destipaddr);
+          if (entry == NULL)
+            {
+              icmpv6_add_pmtu_entry(inner->destipaddr, mtu);
+            }
+          else
+            {
+              entry->pmtu = mtu;
+            }
 
-        goto icmpv6_send_nothing;
-      }
+          goto icmpv6_send_nothing;
+        }
 #endif
 
 #ifdef CONFIG_NET_MLD
-    /* Dispatch received Multicast Listener Discovery (MLD) packets. */
+      /* Dispatch received Multicast Listener Discovery (MLD) packets. */
 
-    case ICMPV6_MCAST_LISTEN_QUERY:      /* Multicast Listener Query, RFC 2710 and RFC 3810 */
-      {
-        FAR struct mld_mcast_listen_query_s *query = MLDQUERY;
-        int ret;
+      case ICMPV6_MCAST_LISTEN_QUERY:      /* Multicast Listener Query, RFC 2710 and RFC 3810 */
+        {
+          FAR struct mld_mcast_listen_query_s *query = MLDQUERY;
+          int ret;
 
-        ret = mld_query(dev, query);
-        if (ret < 0)
-          {
-            goto icmpv6_drop_packet;
-          }
-      }
-      break;
+          ret = mld_query(dev, query);
+          if (ret < 0)
+            {
+              goto icmpv6_drop_packet;
+            }
+        }
+        break;
 
-    case ICMPV6_MCAST_LISTEN_REPORT_V1:  /* Version 1 Multicast Listener Report, RFC 2710 */
-      {
-        FAR struct mld_mcast_listen_report_v1_s *report = MLDREPORT_V1;
-        int ret;
+      case ICMPV6_MCAST_LISTEN_REPORT_V1:  /* Version 1 Multicast Listener Report, RFC 2710 */
+        {
+          FAR struct mld_mcast_listen_report_v1_s *report = MLDREPORT_V1;
+          int ret;
 
-        ret = mld_report_v1(dev, report);
-        if (ret < 0)
-          {
-            goto icmpv6_drop_packet;
-          }
-      }
-      break;
+          ret = mld_report_v1(dev, report);
+          if (ret < 0)
+            {
+              goto icmpv6_drop_packet;
+            }
+        }
+        break;
 
-    case ICMPV6_MCAST_LISTEN_REPORT_V2:  /* Version 2 Multicast Listener Report, RFC 3810 */
-      {
-        FAR struct mld_mcast_listen_report_v2_s *report = MLDREPORT_V2;
-        int ret;
+      case ICMPV6_MCAST_LISTEN_REPORT_V2:  /* Version 2 Multicast Listener Report, RFC 3810 */
+        {
+          FAR struct mld_mcast_listen_report_v2_s *report = MLDREPORT_V2;
+          int ret;
 
-        ret = mld_report_v2(dev, report);
-        if (ret < 0)
-          {
-            goto icmpv6_drop_packet;
-          }
-      }
-      break;
+          ret = mld_report_v2(dev, report);
+          if (ret < 0)
+            {
+              goto icmpv6_drop_packet;
+            }
+        }
+        break;
 
-    case ICMPV6_MCAST_LISTEN_DONE:       /* Multicast Listener Done, RFC 2710 */
-      {
-        FAR struct mld_mcast_listen_done_s *done = MLDDONE;
-        int ret;
+      case ICMPV6_MCAST_LISTEN_DONE:       /* Multicast Listener Done, RFC 2710 */
+        {
+          FAR struct mld_mcast_listen_done_s *done = MLDDONE;
+          int ret;
 
-        ret = mld_done(dev, done);
-        if (ret < 0)
-          {
-            goto icmpv6_drop_packet;
-          }
-      }
-      break;
+          ret = mld_done(dev, done);
+          if (ret < 0)
+            {
+              goto icmpv6_drop_packet;
+            }
+        }
+        break;
 #endif
 
-    default:
-      {
+      default:
+        {
 #ifdef CONFIG_NET_ICMPv6_SOCKET
-        if (delivered)
-          {
-            goto icmpv6_send_nothing;
-          }
+          if (delivered)
+            {
+              goto icmpv6_send_nothing;
+            }
 #endif
 
-        nwarn("WARNING: Unknown ICMPv6 type: %d\n", icmpv6->type);
-        goto icmpv6_type_error;
-      }
+          nwarn("WARNING: Unknown ICMPv6 type: %d\n", icmpv6->type);
+          goto icmpv6_type_error;
+        }
     }
 
 #ifdef CONFIG_NET_STATISTICS
