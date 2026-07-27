@@ -102,7 +102,6 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 
 static void riscv_fault_handler(uintreg_t cause, void *regs)
 {
-#ifdef CONFIG_ARCH_KERNEL_STACK
   struct tcb_s *tcb = this_task();
 
   /* The STATUS_PPP check alone is enough: any kernel-mode fault (kernel
@@ -131,14 +130,26 @@ static void riscv_fault_handler(uintreg_t cause, void *regs)
       running_regs()[REG_A0] = (void *)SIGSEGV;
       ((uintreg_t *)running_regs())[REG_INT_CTX] |= STATUS_PPP;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
       /* Continue with kernel stack in use. The frame(s) in kernel stack
        * are no longer needed, so just set it to top
        */
 
       running_regs()[REG_SP] = tcb->xcp.ktopstk;
+#endif
+
+      /* Without a per-process kernel stack REG_SP is left alone, and _exit
+       * runs on the user stack the task faulted on.  That is the same stack
+       * exception_common already pushed this frame onto, and the same one
+       * dispatch_syscall uses for this task's system calls, so it is no new
+       * exposure -- see the CONFIG_ARCH_KERNEL_STACK blocks in
+       * riscv_exception_common.S.  Such a configuration cannot have
+       * CONFIG_ARCH_ADDRENV either, so the stack stays mapped until the
+       * scheduler switches away from the dying task.
+       */
+
       return;
     }
-#endif
 
   _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
   up_irq_save();
