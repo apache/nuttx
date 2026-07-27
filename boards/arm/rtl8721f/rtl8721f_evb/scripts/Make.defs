@@ -29,5 +29,5 @@ include $(TOPDIR)/arch/arm/src/rtl8721f/ameba_board.mk
 
 # Flashing via the SDK AmebaFlash.py (make flash AMEBA_PORT=/dev/ttyUSB0)
 
-AMEBA_FLASH_PROFILE = RTL8721F
+AMEBA_FLASH_PROFILE = RTL8721F_NOR
 include $(TOPDIR)/tools/ameba/Config.mk

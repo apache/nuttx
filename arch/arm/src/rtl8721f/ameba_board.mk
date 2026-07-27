@@ -114,6 +114,7 @@ AMEBA_FWLIB_SRCS = $(AMEBA_SOC)/fwlib/ram_common/ameba_arch.c \
 # so the fwlib sources it pulls in are listed alongside it.
 AMEBA_FWLIB_SRCS += $(TOPDIR)/arch/arm/src/rtl8721f/ameba_app_start.c \
                     $(AMEBA_SOC)/fwlib/ram_common/ameba_mpu_ram.c \
+                    $(AMEBA_SOC)/fwlib/ram_common/ameba_rtc.c \
                     $(AMEBA_SOC)/fwlib/ram_km4tz/ameba_data_flashclk.c \
                     $(AMEBA_SOC)/fwlib/ram_km4tz/ameba_flashclk.c \
                     $(AMEBA_SOC)/fwlib/ram_km4tz/ameba_pinmap.c \
