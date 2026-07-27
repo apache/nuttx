@@ -48,6 +48,7 @@
 #define LINE_SIZE      512
 #define RANGE_NUMBER   4096
 #define DEFAULT_WIDTH  78
+#define MAX_BRACE      64
 
 #define FIRST_SECTION  INCLUDED_FILES
 #define LAST_SECTION   PUBLIC_FUNCTION_PROTOTYPES
@@ -1403,6 +1404,11 @@ int main(int argc, char **argv, char **envp)
   const char *ctrl_kw;  /* Control keyword whose header is being parsed */
   const char *brace_kw; /* Control keyword still waiting for its left brace */
   int ctrl_hdrend;      /* Index of the last character of that header */
+  int ctrl_indent;      /* Indentation of that control keyword */
+  int brace_indent;     /* Indentation of the keyword awaiting a brace */
+  int ctrl_brace;       /* Alignment required of a brace on this line, or -1 */
+  int rbrace_match;     /* Alignment of the left brace closed on this line */
+  int lbrace_indent[MAX_BRACE]; /* Indentation of each open left brace */
   enum pptype_e ppline; /* > 0: The next line the continuation of a
                          * pre-processor command */
   int rhcomment;        /* Indentation of Comment to the right of code
@@ -1546,6 +1552,8 @@ int main(int argc, char **argv, char **envp)
   ctrl_kw        = NULL;        /* Control keyword being parsed */
   brace_kw       = NULL;        /* Control keyword waiting for a brace */
   ctrl_hdrend    = -1;          /* Index of the end of that header */
+  ctrl_indent    = 0;           /* Indentation of that control keyword */
+  brace_indent   = 0;           /* Indentation of the awaiting keyword */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
   ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
                                  * pre-processor command */
@@ -1583,6 +1591,8 @@ int main(int argc, char **argv, char **envp)
       bppline      = false;    /* True: This line is a pre-processor line */
       bctrlline    = false;    /* No control statement starts on this line */
       ctrl_hdrend  = -1;       /* The header has not ended on this line yet */
+      ctrl_brace   = -1;       /* No brace is required on this line */
+      rbrace_match = -1;       /* No left brace is closed on this line */
 
       /* If we are not in a comment, then this certainly is not a right-hand
        * comment.
@@ -2362,7 +2372,8 @@ int main(int argc, char **argv, char **envp)
 
           if (bnest > 0 && dnest == 0 && ctrl_kw == NULL)
             {
-              bctrlline = true;
+              bctrlline   = true;
+              ctrl_indent = indent;
 
               if (check_keyword(line, indent, "else"))
                 {
@@ -2820,6 +2831,16 @@ int main(int argc, char **argv, char **envp)
                       }
 
                     bnest++;
+
+                    /* Remember where a brace beginning a line sits, so the
+                     * brace closing it can be checked.  -1 for any other.
+                     */
+
+                    if (bnest >= 1 && bnest <= MAX_BRACE)
+                      {
+                        lbrace_indent[bnest - 1] = n == indent ? indent : -1;
+                      }
+
                     if (dnest > 0)
                       {
                         dnest++;
@@ -2858,6 +2879,13 @@ int main(int argc, char **argv, char **envp)
                          {
                            bnest = 0;
                            bswitch = false;
+                         }
+
+                       /* Recover the alignment of the matching left brace */
+
+                       if (n == indent && bnest < MAX_BRACE)
+                         {
+                           rbrace_match = lbrace_indent[bnest];
                          }
                      }
 
@@ -3606,7 +3634,13 @@ int main(int argc, char **argv, char **envp)
                * an 'else if', or alternatives sharing the braces that follow.
                */
 
-              if (line[indent] != '{' && !bctrlline)
+              if (line[indent] == '{')
+                {
+                  /* The brace sits one level in from the keyword */
+
+                  ctrl_brace = brace_indent + 2;
+                }
+              else if (!bctrlline)
                 {
                   snprintf(buffer, sizeof(buffer),
                            "Missing braces after '%s'", brace_kw);
@@ -3633,7 +3667,8 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* The brace must appear on a following line */
 
-                  brace_kw = ctrl_kw;
+                  brace_kw     = ctrl_kw;
+                  brace_indent = ctrl_indent;
                 }
               else if (line[ndx] == ';' &&
                        (strcmp(ctrl_kw, "while") == 0 ||
@@ -3811,6 +3846,26 @@ int main(int argc, char **argv, char **envp)
                * the coding standard.
                */
 
+              /* A brace opening the body of a control statement must be
+               * indented exactly one level from its keyword.
+               */
+
+              else if (ctrl_brace >= 0)
+                {
+                  if (indent != ctrl_brace)
+                    {
+                      ERROR("Bad left brace alignment", lineno, indent);
+                    }
+
+                  /* Record what the brace should have been so that the brace
+                   * closing it is held to the same alignment.
+                   */
+
+                  if (bnest >= 1 && bnest <= MAX_BRACE)
+                    {
+                      lbrace_indent[bnest - 1] = ctrl_brace;
+                    }
+                }
               else if (!bfunctions && (indent & 1) != 0)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
@@ -3827,7 +3882,16 @@ int main(int argc, char **argv, char **envp)
                * the coding standard.
                */
 
-              if (!bfunctions && (indent & 1) != 0)
+              /* A right brace must line up with the left brace it closes */
+
+              if (rbrace_match >= 0)
+                {
+                  if (indent != rbrace_match)
+                    {
+                      ERROR("Bad right brace alignment", lineno, indent);
+                    }
+                }
+              else if (!bfunctions && (indent & 1) != 0)
                 {
                   ERROR("Bad left brace alignment", lineno, indent);
                 }
