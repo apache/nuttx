@@ -885,6 +885,13 @@ config NET_PHY_REALTEK_RTL8221B
 		(ramcode) blob, which consumes a few KB of flash, so leaving this
 		disabled keeps flash/RAM usage minimal on embedded targets.
 
+config NET_PHY_REALTEK_RTL9000B
+	bool "Realtek RTL9000B 100BASE-T1 PHY"
+	default n
+	---help---
+		Support for the Realtek RTL9000B 100BASE-T1 automotive PHY.
+		Enable only on boards that use an RTL9000B.
+
 endif # NET_PHYLIB
 
 endif # NETDEVICES
