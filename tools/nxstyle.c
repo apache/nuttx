@@ -1571,6 +1571,7 @@ int main(int argc, char **argv, char **envp)
   char lastcode;        /* Last code character seen on this line */
   char prevlastcode;    /* Last code character on the preceding line */
   int prevcodeindent;   /* Indentation of the preceding line of code */
+  int stmt_lineindent;  /* Indentation of the line starting that statement */
   bool bfuncbody;       /* True: The outermost brace opened a function body */
   int stmt_indent;      /* Expected indentation of a statement, or -1 */
   int case_indent;      /* Expected indentation of a 'case' label, or -1 */
@@ -1704,6 +1705,7 @@ int main(int argc, char **argv, char **envp)
   lastcode       = '\0';        /* Last code character seen on this line */
   prevlastcode   = '\0';        /* Last code character on the preceding line */
   prevcodeindent = 0;           /* Indentation of the preceding line of code */
+  stmt_lineindent = 0;          /* Indentation where that statement began */
   bfuncbody      = false;       /* True: Inside the body of a function */
   stmt_indent    = 0;           /* Expected indentation of a statement */
   case_indent    = -1;          /* Expected indentation of a 'case' label */
@@ -4183,7 +4185,9 @@ int main(int argc, char **argv, char **envp)
                * that way.
                */
 
-              else if (prevlastcode == ')' && indent == prevcodeindent + 2)
+              else if (prevlastcode == ')' &&
+                       (indent == prevcodeindent + 2 ||
+                        indent == stmt_lineindent + 2))
                 {
                 }
               else if (indent > 0 && dnest == 0 &&
@@ -4276,6 +4280,11 @@ int main(int argc, char **argv, char **envp)
         {
           prevlastcode   = lastcode;
           prevcodeindent = indent;
+
+          if (bstmtstart)
+            {
+              stmt_lineindent = indent;
+            }
         }
     }
 
