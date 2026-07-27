@@ -42,6 +42,102 @@ expanders the typical sequence is:
    ``boards/sim/sim/sim/src/sim_ioexpander.c``,
    ``boards/arm/nrf52/thingy52/src/nrf52_sx1509.c`` etc.
 
+Supported devices
+=================
+
+The following IO expander drivers are available under
+``drivers/ioexpander/``. Each is enabled by its own Kconfig option (all
+of them depend on ``CONFIG_IOEXPANDER``) and declares its initialization
+routine in the header of the same name under
+``include/nuttx/ioexpander/``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 10 14 36
+
+   * - Device
+     - Bus
+     - Pins
+     - Kconfig option
+   * - Awinic AW9523B
+     - I2C
+     - 16
+     - ``IOEXPANDER_AW9523B``
+   * - iC-Haus iC-JX
+     - SPI
+     - 16
+     - ``IOEXPANDER_ICJX``
+   * - ISO1H812G
+     - SPI
+     - 8
+     - ``IOEXPANDER_ISO1H812G``
+   * - ISO1I813T
+     - SPI
+     - 8
+     - ``IOEXPANDER_ISO1I813T``
+   * - Microchip MCP23008 / MCP23S08
+     - I2C
+     - 8
+     - ``IOEXPANDER_MCP23X08``
+   * - Microchip MCP23017 / MCP23S17
+     - I2C
+     - 16
+     - ``IOEXPANDER_MCP23X17``
+   * - NXP PCA9538
+     - I2C
+     - 8
+     - ``IOEXPANDER_PCA9538``
+   * - NXP PCA9555
+     - I2C
+     - 16
+     - ``IOEXPANDER_PCA9555``
+   * - NXP PCA9557
+     - I2C
+     - 8
+     - ``IOEXPANDER_PCA9557``
+   * - PCF8574
+     - I2C
+     - 8
+     - ``IOEXPANDER_PCF8574``
+   * - PCF8575
+     - I2C
+     - 16
+     - ``IOEXPANDER_PCF8575``
+   * - Diodes PI4IOE5V6408
+     - I2C
+     - 8
+     - ``IOEXPANDER_PI4IOE5V6408``
+   * - Semtech SX1509
+     - I2C
+     - 16
+     - ``IOEXPANDER_SX1509``
+   * - TCA6408 / TCA6416 / TCA6424 / PCAL6416A
+     - I2C
+     - 8 / 16 / 24 / 16
+     - ``IOEXPANDER_TCA64XX``
+
+Notes on individual drivers:
+
+- ``IOEXPANDER_TCA64XX`` and ``IOEXPANDER_PCF8574`` additionally depend on
+  ``CONFIG_EXPERIMENTAL``.
+- Drivers with a ``<device>_MULTIPLE`` option support more than one
+  instance of the same chip on a board.
+- Drivers with a ``<device>_SHADOW_MODE`` option keep the output and
+  configuration registers cached in RAM instead of performing
+  read-modify-write cycles over the bus, and those with a
+  ``<device>_RETRY`` option retransmit on I2C errors.
+- Per-device interrupt support is enabled with ``<device>_INT_ENABLE``,
+  which selects ``CONFIG_IOEXPANDER_INT_ENABLE``. Some drivers also
+  offer ``<device>_INT_POLL`` and ``<device>_INT_POLLDELAY`` to poll for
+  missed interrupts.
+
+In addition to the physical devices, the following drivers implement the
+same lower-half interface without directly driving a chip:
+
+Note that ``CONFIG_IOEXPANDER_NPINS`` determines the width of
+``ioe_pinset_t`` and must be at least as large as the pin count of the
+device in use.
+
 Further details
 ===============
 
@@ -251,3 +347,4 @@ See the following drivers and board examples for concrete usage:
 - ``drivers/ioexpander/pca9555.c`` — I2C IO expander implementation.
 - ``drivers/ioexpander/ioe_rpmsg.c`` — RPMSG-based IO expander.
 - ``boards/arm/nrf52/thingy52/src/nrf52_sx1509.c`` — binding example.
+- ``drivers/ioexpander/pi4ioe5v6408.c`` — PI4IOE5V6408 I2C I/O expander.
