@@ -71,7 +71,7 @@ config RTL8721F_FLASH_FS
 	select MTD_BYTE_WRITE
 	select FS_LITTLEFS
 	---help---
-		Expose the SDK "VFS1" data partition (the last 128 KiB of the
+		Expose the SDK "VFS1" data partition (a dedicated region of the
 		on-chip SPI NOR flash, which does not overlap the NP/AP firmware
 		images) as a NuttX MTD device and mount a littlefs filesystem on it
 		at /data.  This provides persistent storage for application data and

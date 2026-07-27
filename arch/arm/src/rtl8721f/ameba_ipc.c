@@ -68,13 +68,17 @@
 
 /* AP (km4tz) IPC device register base = IPCAP_DEV / IPC0_REG_BASE, from the
  * SDK RTL8721F hal_platform.h.  This matches the SDK km4tz main(), which
- * calls ipc_table_init(IPCAP_DEV) with the NON-secure alias 0x40804000
- * (the secure alias 0x50804000 is NOT what the AP uses).
+ * calls ipc_table_init(IPCAP_DEV) with the NON-secure alias 0x40815000
+ * (the secure alias 0x50815000 is NOT what the AP uses).  NOTE: this base
+ * differs from the RTL8720F template (0x40804000); using the 8720F address
+ * here silently configures the wrong register block, so ipc_table_init()
+ * never unmasks the real IPC RX channels and the NP->AP interrupt never
+ * fires (WiFi bring-up then hangs waiting for the device to answer).
  * RTL8721F_IRQ_IPC_KM4 maps to APIRQn IPC_CPU0_IRQ (external vector 5) --
  * see arch/.../irq.h.
  */
 
-#define IPCAP_DEV  ((void *)0x40804000)
+#define IPCAP_DEV  ((void *)0x40815000)
 
 /****************************************************************************
  * External Function Prototypes
