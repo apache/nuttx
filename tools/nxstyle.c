@@ -1404,6 +1404,107 @@ static bool check_keyword(const char *line, int ndx, const char *kw)
 }
 
 /********************************************************************************
+ * Name: check_declaration
+ *
+ * Description:
+ *   Return true if the line has the shape of a declaration: two or more names
+ *   in a row, ending in '=', ';', '[', ',' or a parameter list.  No list of
+ *   type names can be complete, so the shape is used instead.
+ *
+ ********************************************************************************/
+
+static bool check_declaration(const char *line, int ndx)
+{
+  static const char *const nondecl[] =
+  {
+    "return", "if", "else", "while", "for", "do", "switch", "case",
+    "default", "break", "continue", "goto", "sizeof", "asm", "__asm",
+    "__asm__", NULL
+  };
+
+  const char *const *kw;
+  int nident = 0;
+  int i = ndx;
+
+  /* Must open with a type name; keeps out '*ptr = x;' and comment lines */
+
+  if (isalpha((int)line[ndx]) == 0 && line[ndx] != '_')
+    {
+      return false;
+    }
+
+  for (kw = nondecl; *kw != NULL; kw++)
+    {
+      if (check_keyword(line, ndx, *kw))
+        {
+          return false;
+        }
+    }
+
+  while (line[i] != '\0' && line[i] != '\n')
+    {
+      if (isalpha((int)line[i]) != 0 || line[i] == '_')
+        {
+          nident++;
+          while (isalnum((int)line[i]) != 0 || line[i] == '_')
+            {
+              i++;
+            }
+        }
+      else if (line[i] == ' ' || line[i] == '*')
+        {
+          i++;
+        }
+      else
+        {
+          /* Only a terminator that can follow the declared name counts */
+
+          /* '<type> (*<name>)(...)' declares a pointer to a function.  The
+           * second parameter list tells it from a call like 'foo(*ptr)'.
+           */
+
+          if (line[i] == '(' && nident == 1)
+            {
+              int j = i + 1;
+
+              while (line[j] == ' ')
+                {
+                  j++;
+                }
+
+              if (line[j] == '*')
+                {
+                  j++;
+                  while (line[j] == ' ')
+                    {
+                      j++;
+                    }
+
+                  while (isalnum((int)line[j]) != 0 || line[j] == '_')
+                    {
+                      j++;
+                    }
+
+                  while (line[j] == ' ')
+                    {
+                      j++;
+                    }
+
+                  if (line[j] == ')' && line[j + 1] == '(')
+                    {
+                      return true;
+                    }
+                }
+            }
+
+          return nident >= 2 && strchr("=;[(,", line[i]) != NULL;
+        }
+    }
+
+  return false;
+}
+
+/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
@@ -1466,7 +1567,10 @@ int main(int argc, char **argv, char **envp)
   int externc_lineno;   /* Last line where 'extern "C"' declared */
   bool bexact;          /* True: The expected indentation below is exact */
   bool bppline;         /* True: This line is a pre-processor line */
+  bool bdeclline;       /* True: This line begins a local declaration */
   bool blabelline;      /* True: This line holds nothing but a label */
+  bool bindecl;         /* True: A local declaration is being continued */
+  int decl_lineno;      /* Line on which the last declaration ended */
   bool bstmtstart;      /* True: A new statement begins on this line */
   bool bprevstmtend;    /* True: The preceding line of code ended a statement */
   bool bctrlline;       /* True: A control statement starts on this line */
@@ -1598,7 +1702,10 @@ int main(int argc, char **argv, char **envp)
   brace_indent   = 0;           /* Indentation of the awaiting keyword */
   bexact         = false;       /* True: Expected indentation is exact */
   bppline        = false;       /* True: This line is a pre-processor line */
+  bdeclline      = false;       /* True: This line begins a declaration */
   blabelline     = false;       /* True: This line holds nothing but a label */
+  bindecl        = false;       /* True: A declaration is being continued */
+  decl_lineno    = -1;          /* Line on which a declaration last ended */
   bstmtstart     = true;        /* True: A statement begins on this line */
   bprevstmtend   = true;        /* True: The preceding code ended a statement */
   bctrlline      = false;       /* True: A control statement starts here */
@@ -1654,6 +1761,7 @@ int main(int argc, char **argv, char **envp)
       bctrlline    = false;    /* No control statement starts on this line */
       ctrl_bswitch = false;    /* That brace does not open a switch body */
       bppline      = false;    /* True: This line is a pre-processor line */
+      bdeclline    = false;    /* True: This line begins a declaration */
 
       /* A label ends the preceding statement, like a 'case' does */
 
@@ -2285,7 +2393,6 @@ int main(int argc, char **argv, char **envp)
         }
 
       /* Check for some kind of declaration.
-       * REVISIT: The following logic fails for any non-standard types.
        * REVISIT: Terminator after keyword might not be a space.  Might be
        * a newline, for example.  struct and unions are often unnamed, for
        * example.
@@ -2293,6 +2400,16 @@ int main(int argc, char **argv, char **envp)
 
       else if (inasm == 0)
         {
+          /* Note a local declaration, for the blank line that must follow */
+
+          if (bfunctions && bnest > 0 && pnest == 0 && dnest == 0 &&
+              ncomment == 0 && prevncomment == 0 && !bstring && bstmtstart &&
+              check_declaration(line, indent))
+            {
+              bdeclline = true;
+              bindecl   = true;
+            }
+
           if (check_type_name(line, indent) ||
                    strncmp(&line[indent], "auto ", 5) == 0 ||
                    strncmp(&line[indent], "bool ", 5) == 0 ||
@@ -3881,12 +3998,21 @@ int main(int argc, char **argv, char **envp)
                           (lastcode == ':' && (bcaseline || blabelline)));
         }
 
-      /* A line that follows one ending in ';', '{', '}' or ':' begins a new
-       * statement.  Anything else is the continuation of the statement on the
-       * preceding line and may be aligned freely.  Pre-processor lines are
-       * ignored so that a macro definition does not hide the statement that
-       * precedes it.
-       */
+      /* Remember the line on which the last declaration ended */
+
+      if (bindecl && lastcode == ';' && pnest == 0)
+        {
+          decl_lineno = lineno;
+          bindecl     = false;
+        }
+
+      /* A blank line must separate the declarations from the code */
+
+      if (bexact && prevdnest == 0 && !bppline && !bdeclline && !bindecl &&
+          bstmtstart && lineno == decl_lineno + 1 && lastcode != '\0')
+        {
+          ERROR("Missing blank line after declarations", lineno, indent);
+        }
 
       /* STEP 4: Check alignment */
 
