@@ -1355,6 +1355,27 @@ static bool white_content_list(const char *ident, int lineno)
 }
 
 /********************************************************************************
+ * Name: check_keyword
+ *
+ * Description:
+ *   Return true if line[ndx] holds the keyword 'kw', delimited by a character
+ *   that cannot be part of an identifier.
+ *
+ ********************************************************************************/
+
+static bool check_keyword(const char *line, int ndx, const char *kw)
+{
+  size_t len = strlen(kw);
+
+  if (strncmp(&line[ndx], kw, len) != 0)
+    {
+      return false;
+    }
+
+  return isalnum((int)line[ndx + len]) == 0 && line[ndx + len] != '_';
+}
+
+/********************************************************************************
  * Public Functions
  ********************************************************************************/
 
@@ -1377,6 +1398,11 @@ int main(int argc, char **argv, char **envp)
   bool bquote;          /* True: Backslash quoted character next */
   bool bblank;          /* Used to verify block comment terminator */
   bool bexternc;        /* True: Within 'extern "C"' */
+  bool bppline;         /* True: This line is a pre-processor line */
+  bool bctrlline;       /* True: A control statement starts on this line */
+  const char *ctrl_kw;  /* Control keyword whose header is being parsed */
+  const char *brace_kw; /* Control keyword still waiting for its left brace */
+  int ctrl_hdrend;      /* Index of the last character of that header */
   enum pptype_e ppline; /* > 0: The next line the continuation of a
                          * pre-processor command */
   int rhcomment;        /* Indentation of Comment to the right of code
@@ -1515,6 +1541,11 @@ int main(int argc, char **argv, char **envp)
   bcase          = false;       /* True: Within a case statement of a switch */
   bstring        = false;       /* True: Within a string */
   bexternc       = false;       /* True: Within 'extern "C"' */
+  bppline        = false;       /* True: This line is a pre-processor line */
+  bctrlline      = false;       /* True: A control statement starts here */
+  ctrl_kw        = NULL;        /* Control keyword being parsed */
+  brace_kw       = NULL;        /* Control keyword waiting for a brace */
+  ctrl_hdrend    = -1;          /* Index of the end of that header */
   bif            = false;       /* True: This line is beginning of a 'if' statement */
   ppline         = PPLINE_NONE; /* > 0: The next line the continuation of a
                                  * pre-processor command */
@@ -1549,6 +1580,9 @@ int main(int argc, char **argv, char **envp)
       bstatm       = false;    /* True: This line is beginning of a
                                 * statement */
       bfor         = false;    /* REVISIT: Implies for() is all on one line */
+      bppline      = false;    /* True: This line is a pre-processor line */
+      bctrlline    = false;    /* No control statement starts on this line */
+      ctrl_hdrend  = -1;       /* The header has not ended on this line yet */
 
       /* If we are not in a comment, then this certainly is not a right-hand
        * comment.
@@ -1830,6 +1864,8 @@ int main(int argc, char **argv, char **envp)
         {
           int len;
           int ii;
+
+          bppline = true;
 
           /* Suppress error for comment following conditional compilation */
 
@@ -2318,6 +2354,60 @@ int main(int argc, char **argv, char **envp)
               ERROR("Missing whitespace after keyword", lineno, n);
               bfor   = true;
               bstatm = true;
+            }
+
+          /* A control statement whose body must be braced.  ctrl_kw stays
+           * set while the condition continues over several lines.
+           */
+
+          if (bnest > 0 && dnest == 0 && ctrl_kw == NULL)
+            {
+              bctrlline = true;
+
+              if (check_keyword(line, indent, "else"))
+                {
+                  int ndx = indent + 4;
+
+                  while (line[ndx] == ' ')
+                    {
+                      ndx++;
+                    }
+
+                  if (check_keyword(line, ndx, "if"))
+                    {
+                      ctrl_kw = "else if";
+                    }
+                  else
+                    {
+                      ctrl_kw     = "else";
+                      ctrl_hdrend = indent + 3;
+                    }
+                }
+              else if (check_keyword(line, indent, "do"))
+                {
+                  ctrl_kw     = "do";
+                  ctrl_hdrend = indent + 1;
+                }
+              else if (check_keyword(line, indent, "if"))
+                {
+                  ctrl_kw = "if";
+                }
+              else if (check_keyword(line, indent, "while"))
+                {
+                  ctrl_kw = "while";
+                }
+              else if (check_keyword(line, indent, "for"))
+                {
+                  ctrl_kw = "for";
+                }
+              else if (check_keyword(line, indent, "switch"))
+                {
+                  ctrl_kw = "switch";
+                }
+              else
+                {
+                  bctrlline = false;
+                }
             }
         }
 
@@ -2940,6 +3030,13 @@ int main(int argc, char **argv, char **envp)
                       {
                         bif = false;
                       }
+
+                    /* Remember where the header ends, to see what follows */
+
+                    if (ctrl_kw != NULL && pnest == 0 && ctrl_hdrend < 0)
+                      {
+                        ctrl_hdrend = n;
+                      }
                   }
                   break;
 
@@ -3485,6 +3582,75 @@ int main(int argc, char **argv, char **envp)
                 {
                   ERROR("Long line found", lineno, m);
                 }
+            }
+        }
+
+      /* STEP 3b: The body of a control statement must be braced, even when
+       * it is a single statement or is empty.
+       */
+
+      if (ncomment == 0 && prevncomment == 0 && !bstring && inasm == 0 &&
+          !bppline)
+        {
+          bool bcommentline = line[indent] == '/' &&
+                              (line[indent + 1] == '*' ||
+                               line[indent + 1] == '/');
+
+          /* Does this line supply a brace an earlier statement promised?
+           * A comment between the two is tolerated.
+           */
+
+          if (brace_kw != NULL && !bcommentline)
+            {
+              /* A control statement may stand where the brace was expected:
+               * an 'else if', or alternatives sharing the braces that follow.
+               */
+
+              if (line[indent] != '{' && !bctrlline)
+                {
+                  snprintf(buffer, sizeof(buffer),
+                           "Missing braces after '%s'", brace_kw);
+                  ERROR(buffer, lineno, indent);
+                }
+
+              brace_kw = NULL;
+            }
+
+          /* Has the header ended on this line?  If so, see what follows */
+
+          if (ctrl_kw != NULL && pnest == 0 && ctrl_hdrend >= 0)
+            {
+              int ndx = ctrl_hdrend + 1;
+
+              while (line[ndx] == ' ' || line[ndx] == '\t')
+                {
+                  ndx++;
+                }
+
+              if (line[ndx] == '\n' || line[ndx] == '\0' ||
+                  (line[ndx] == '/' &&
+                   (line[ndx + 1] == '*' || line[ndx + 1] == '/')))
+                {
+                  /* The brace must appear on a following line */
+
+                  brace_kw = ctrl_kw;
+                }
+              else if (line[ndx] == ';' &&
+                       (strcmp(ctrl_kw, "while") == 0 ||
+                        strcmp(ctrl_kw, "for") == 0))
+                {
+                  /* A null statement needs no braces; also the 'while' of
+                   * a 'do .. while'.
+                   */
+                }
+              else
+                {
+                  snprintf(buffer, sizeof(buffer),
+                           "Statement on same line as '%s'", ctrl_kw);
+                  ERROR(buffer, lineno, ndx);
+                }
+
+              ctrl_kw = NULL;
             }
         }
 
