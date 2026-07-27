@@ -77,16 +77,16 @@
 #define AMEBA_ENABLE               1
 #define AMEBA_DISABLE              0
 
-/* LOG-UART device base (UARTLOG_REG_BASE, from SDK RTL8721F
- * hal_platform.h).  NOTE: this is the RTL8721F address (0x401C6000) -- it
- * differs from the RTL8721Dx LOG-UART (0x4100F000).  Only
- * LOGUART_INTConfig()/INTCoreConfig() take this base explicitly; the TX
- * path (DiagPrintf/LOGUART_PutChar) is a ROM call with its own internal
- * base, which is why TX worked even when this was wrong but configuring
- * the RX interrupt bus-faulted.
+/* LOG-UART device base (UARTLOG_REG_BASE, from SDK amebagreen2
+ * hal_platform.h).  Only LOGUART_INTConfig()/INTCoreConfig()/RxCmd() take
+ * this base explicitly; the TX path (DiagPrintf/LOGUART_PutChar) is a ROM
+ * call with its own internal base.  Using the wrong base (e.g. the
+ * RTL8721Dx 0x401C6000) leaves TX working -- because PutChar ignores it --
+ * while writing the RX interrupt-enable register bus-faults, since the
+ * bogus IER address decodes to no bus slave on green2.
  */
 
-#define LOGUART_DEV                ((void *)0x401C6000)
+#define LOGUART_DEV                ((void *)0x40810000)
 
 /***************************************************************************
  * External ROM/SDK Function Prototypes

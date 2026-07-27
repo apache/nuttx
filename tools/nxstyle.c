@@ -259,7 +259,7 @@ static const char *g_white_prefix[] =
   "uxrCustom",           /* uxrCustomTransport */
 
   /* Ref:  arch/arm/src/common/ameba, arch/arm/src/rtl8721dx,
-   * arch/arm/src/rtl8720f and the matching boards.
+   * arch/arm/src/rtl8720f, arch/arm/src/rtl8721f and the matching boards.
    * Realtek Ameba SDK ROM/HAL symbols and ARM CMSE intrinsics referenced
    * by the port; renaming them would break linkage against the vendor blob.
    */
@@ -271,8 +271,10 @@ static const char *g_white_prefix[] =
   "Cache_",
   "DCache_",
   "ChipInfo_",
+  "EFUSE_",
   "FLASH_",
   "GPIO_",
+  "Get_OSC131_",      /* Get_OSC131_STATE — Ameba SDK RTC accessor */
   "IPC_",
   "LOGUART_",
   "OSC2M_",
@@ -281,7 +283,10 @@ static const char *g_white_prefix[] =
   "PAD_",
   "Pinmux_",
   "RCC_",
+  "RTC_",             /* RTC_InitTypeDef, RTC_Enable, RTC_SetTime, etc. */
   "RTCIO_",
+  "SDM32K_",          /* SDM32K_Enable */
+  "Set_OSC131_",      /* Set_OSC131_STATE — Ameba SDK RTC accessor */
   "SYSCFG_",
   "SYSTIMER_",
   "UART_",

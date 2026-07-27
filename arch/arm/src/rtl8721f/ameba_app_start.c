@@ -95,7 +95,7 @@ u32 app_mpu_nocache_init(void)
 
   mpu_entry = mpu_entry_alloc();
   mpu_cfg.region_base = 0;
-  mpu_cfg.region_size = 0x000F0000;
+  mpu_cfg.region_size = 0x000f0000;
   mpu_cfg.xn = MPU_EXEC_ALLOW;
   mpu_cfg.ap = MPU_UN_PRIV_RO;
   mpu_cfg.sh = MPU_NON_SHAREABLE;
@@ -177,6 +177,25 @@ void os_init(void)
   rtos_mem_init();
 }
 
+/* Seed the RTC on first power-on (mirrors the SDK app_rtc_init). */
+
+void app_rtc_init(void)
+{
+  RTC_InitTypeDef rtc_initstruct;
+  RTC_TimeTypeDef rtc_timestruct;
+
+  RTC_TimeStructInit(&rtc_timestruct);
+  rtc_timestruct.RTC_Year = 2021;
+  rtc_timestruct.RTC_Hours = 10;
+  rtc_timestruct.RTC_Minutes = 20;
+  rtc_timestruct.RTC_Seconds = 30;
+
+  RTC_StructInit(&rtc_initstruct);
+  RTC_Enable(ENABLE);
+  RTC_Init(&rtc_initstruct);
+  RTC_SetTime(RTC_Format_BIN, &rtc_timestruct);
+}
+
 /* The image2 application entry point. */
 
 void app_start(void)
@@ -226,14 +245,42 @@ void app_start(void)
         }
     }
 
-  SYSTIMER_Init();
-
   /* Low-power pins do not need pinmap init again after wake from dslp. */
 
   pinmap_init();
 
   mpu_init();
   app_mpu_nocache_init();
+
+  /* Green2's system timer is clocked from SDM32K and needs the RTC
+   * brought up first.  The SDK does the first-power-on half of this
+   * asynchronously from
+   * the RTC_DET_IRQ handler (rtc_irq_init), but NuttX replaces the vector
+   * table immediately after app_start so that deferred handler would never
+   * run -- do the whole sequence synchronously here instead.
+   */
+
+  RTC_ClearDetINT();
+  SDM32K_Enable();
+  SYSTIMER_Init();
+  RCC_PeriphClockCmd(NULL, APBPeriph_RTC_CLOCK, ENABLE);
+
+  if ((Get_OSC131_STATE() & RTC_BIT_FIRST_PON) == 0)
+    {
+      app_rtc_init();
+      Set_OSC131_STATE(Get_OSC131_STATE() | RTC_BIT_FIRST_PON);
+
+      /* Only ASIC needs OSC131K calibration (cke_rtc enabled just above). */
+
+      if (SYSCFG_CHIPType_Get() == CHIP_TYPE_ASIC_POSTSIM)
+        {
+          OSC131K_Calibration(30000);
+        }
+    }
+
+  /* SDM32K clock-source switch must be done after rtc_fen is enabled. */
+
+  RTC_ClkSource_Select(SDM32K);
 
   main();
 }

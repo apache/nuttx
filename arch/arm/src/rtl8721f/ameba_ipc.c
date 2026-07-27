@@ -70,7 +70,7 @@
  * SDK RTL8721F hal_platform.h.  This matches the SDK km4tz main(), which
  * calls ipc_table_init(IPCAP_DEV) with the NON-secure alias 0x40804000
  * (the secure alias 0x50804000 is NOT what the AP uses).
- * RTL8721F_IRQ_IPC_KM4 maps to APIRQn IPC_KM4TZ_IRQ (external vector 3) --
+ * RTL8721F_IRQ_IPC_KM4 maps to APIRQn IPC_CPU0_IRQ (external vector 5) --
  * see arch/.../irq.h.
  */
 
