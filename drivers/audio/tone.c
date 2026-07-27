@@ -217,23 +217,23 @@ static uint32_t note_duration(FAR uint32_t *silence, uint32_t note_length,
   note_period = whole_note_period / note_length;
 
   switch (g_note_mode)
-  {
-    case MODE_NORMAL:
-      *silence = note_period / 8;
-      break;
+    {
+      case MODE_NORMAL:
+        *silence = note_period / 8;
+        break;
 
-    case MODE_STACCATO:
-      *silence = note_period / 4;
-      break;
+      case MODE_STACCATO:
+        *silence = note_period / 4;
+        break;
 
-    case MODE_LEGATO:
-      *silence = 0;
-      break;
+      case MODE_LEGATO:
+        *silence = 0;
+        break;
 
-    default:
-      auderr("Mode undefined!\n");
-      break;
-  }
+      default:
+        auderr("Mode undefined!\n");
+        break;
+    }
 
   note_period -= *silence;
   dot_extension = note_period / 2;
@@ -417,210 +417,210 @@ static void next_note(FAR struct tone_upperhalf_s *upper)
 
       switch (c)
         {
-          uint8_t nt;
+            uint8_t nt;
 
-          /* Select note length */
+            /* Select note length */
 
-        case 'L':
-          g_note_length = next_number();
-          if (g_note_length < 1)
-            {
-              auderr("note length too short!\n");
-              goto tune_error;
-            }
-          break;
+          case 'L':
+            g_note_length = next_number();
+            if (g_note_length < 1)
+              {
+                auderr("note length too short!\n");
+                goto tune_error;
+              }
+            break;
 
-          /* Select octave */
+            /* Select octave */
 
-        case 'O':
-          g_octave = next_number();
-          if (g_octave > 6)
-            {
-              g_octave = 6;
-            }
-          break;
+          case 'O':
+            g_octave = next_number();
+            if (g_octave > 6)
+              {
+                g_octave = 6;
+              }
+            break;
 
-          /* Decrease octave */
+            /* Decrease octave */
 
-        case '<':
-          if (g_octave > 0)
-            {
-              g_octave--;
-            }
-          break;
+          case '<':
+            if (g_octave > 0)
+              {
+                g_octave--;
+              }
+            break;
 
-          /* Increase octave */
+            /* Increase octave */
 
-        case '>':
-          if (g_octave < 6)
-            {
-              g_octave++;
-            }
-          break;
+          case '>':
+            if (g_octave < 6)
+              {
+                g_octave++;
+              }
+            break;
 
-          /* Select inter-note gap */
+            /* Select inter-note gap */
 
-        case 'M':
-          c = next_char();
+          case 'M':
+            c = next_char();
 
-          if (c == 0)
-            {
-              auderr("no character after M!\n");
-              goto tune_error;
-            }
+            if (c == 0)
+              {
+                auderr("no character after M!\n");
+                goto tune_error;
+              }
 
-          g_next++;
+            g_next++;
 
-          switch (c)
-            {
-            case 'N':
-              g_note_mode = MODE_NORMAL;
-              break;
+            switch (c)
+              {
+                case 'N':
+                  g_note_mode = MODE_NORMAL;
+                  break;
 
-            case 'L':
-              g_note_mode = MODE_LEGATO;
-              break;
+                case 'L':
+                  g_note_mode = MODE_LEGATO;
+                  break;
 
-            case 'S':
-              g_note_mode = MODE_STACCATO;
-              break;
+                case 'S':
+                  g_note_mode = MODE_STACCATO;
+                  break;
 
-            case 'F':
-              g_repeat = false;
-              break;
+                case 'F':
+                  g_repeat = false;
+                  break;
 
-            case 'B':
-              g_repeat = true;
-              break;
+                case 'B':
+                  g_repeat = true;
+                  break;
 
-            default:
-              auderr("unknown symbol: %c!\n", c);
-              goto tune_error;
-              break;
-            }
+                default:
+                  auderr("unknown symbol: %c!\n", c);
+                  goto tune_error;
+                  break;
+              }
 
-          /* Pause for a note length */
+            /* Pause for a note length */
 
-        case 'P':
+          case 'P':
 
-          stop_note(upper);
+            stop_note(upper);
 
-          duration = rest_duration(next_number(), next_dots());
+            duration = rest_duration(next_number(), next_dots());
 
-          /* Setup the time duration */
+            /* Setup the time duration */
 
-          sec = duration / USEC_PER_SEC;
-          nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+            sec = duration / USEC_PER_SEC;
+            nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-          ts.tv_sec = sec;
-          ts.tv_nsec = nsec;
+            ts.tv_sec = sec;
+            ts.tv_nsec = nsec;
 
-          ONESHOT_START(upper->oneshot, &ts);
-          return;
+            ONESHOT_START(upper->oneshot, &ts);
+            return;
 
-          /* Change tempo */
+            /* Change tempo */
 
-        case 'T':
-          nt = next_number();
+          case 'T':
+            nt = next_number();
 
-          if ((nt >= 32) && (nt <= 255))
-            {
-              g_tempo = nt;
-            }
-          else
-            {
-              auderr("T is out of range 32-255!\n");
-              goto tune_error;
-            }
-          break;
+            if ((nt >= 32) && (nt <= 255))
+              {
+                g_tempo = nt;
+              }
+            else
+              {
+                auderr("T is out of range 32-255!\n");
+                goto tune_error;
+              }
+            break;
 
-          /* Play an arbitrary note */
+            /* Play an arbitrary note */
 
-        case 'N':
-          note = next_number();
-          if (note > 84)
-            {
-              auderr("Note higher than 84!\n");
-              goto tune_error;
-            }
+          case 'N':
+            note = next_number();
+            if (note > 84)
+              {
+                auderr("Note higher than 84!\n");
+                goto tune_error;
+              }
 
-          /* This is a rest - pause for the current note length */
+            /* This is a rest - pause for the current note length */
 
-          if (note == 0)
-            {
-              duration = rest_duration(g_note_length, next_dots());
+            if (note == 0)
+              {
+                duration = rest_duration(g_note_length, next_dots());
 
-              /* Setup the time duration */
+                /* Setup the time duration */
 
-              sec = duration / USEC_PER_SEC;
-              nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
+                sec = duration / USEC_PER_SEC;
+                nsec = ((duration) - (sec * USEC_PER_SEC)) * NSEC_PER_USEC;
 
-              ts.tv_sec = sec;
-              ts.tv_nsec = nsec;
+                ts.tv_sec = sec;
+                ts.tv_nsec = nsec;
 
-              ONESHOT_START(upper->oneshot, &ts);
+                ONESHOT_START(upper->oneshot, &ts);
 
-              return;
-            }
-          break;
+                return;
+              }
+            break;
 
-          /* Play a note in the current octave */
+            /* Play a note in the current octave */
 
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-        case 'G':
-          note = g_note_tab[c - 'A'] + (g_octave * 12) + 1;
+          case 'A':
+          case 'B':
+          case 'C':
+          case 'D':
+          case 'E':
+          case 'F':
+          case 'G':
+            note = g_note_tab[c - 'A'] + (g_octave * 12) + 1;
 
-          c = next_char();
+            c = next_char();
 
-          switch (c)
-            {
-              /* Up a semitone */
+            switch (c)
+              {
+                /* Up a semitone */
 
-            case '#':
-            case '+':
-              if (note < 84)
-                {
-                  note++;
-                }
+                case '#':
+                case '+':
+                  if (note < 84)
+                    {
+                      note++;
+                    }
 
-              g_next++;
-              break;
+                  g_next++;
+                  break;
 
-              /* Down a semitone */
+                /* Down a semitone */
 
-            case '-':
-              if (note > 1)
-                {
-                  note--;
-                }
+                case '-':
+                  if (note > 1)
+                    {
+                      note--;
+                    }
 
-              g_next++;
-              break;
+                  g_next++;
+                  break;
 
-              /* No next char here is OK */
+                /* No next char here is OK */
 
-            default:
-              break;
-            }
+                default:
+                  break;
+              }
 
-          /* Shorthand length notation */
+            /* Shorthand length notation */
 
-          note_length = next_number();
+            note_length = next_number();
 
-          if (note_length == 0)
-            {
-              note_length = g_note_length;
-            }
+            if (note_length == 0)
+              {
+                note_length = g_note_length;
+              }
 
-          break;
+            break;
 
-        default:
-          goto tune_error;
+          default:
+            goto tune_error;
         }
     }
 

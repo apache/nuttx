@@ -538,84 +538,85 @@ cs4344_configure(FAR struct audio_lowerhalf_s *dev,
 
   switch (caps->ac_type)
     {
-    case AUDIO_TYPE_FEATURE:
-      audinfo("  AUDIO_TYPE_FEATURE\n");
+      case AUDIO_TYPE_FEATURE:
+        audinfo("  AUDIO_TYPE_FEATURE\n");
 
-      /* Process based on Feature Unit */
+        /* Process based on Feature Unit */
 
-      switch (caps->ac_format.hw)
+        switch (caps->ac_format.hw)
+          {
+            default:
+              auderr("    ERROR: Unrecognized feature unit\n");
+              ret = -ENOTTY;
+              break;
+          }
+        break;
+
+      case AUDIO_TYPE_OUTPUT:
         {
-        default:
-          auderr("    ERROR: Unrecognized feature unit\n");
-          ret = -ENOTTY;
-          break;
+          ret = OK;
+
+          audinfo("  AUDIO_TYPE_OUTPUT:\n");
+          audinfo("    Number of channels: %u\n", caps->ac_channels);
+          audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
+          audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
+
+          /* Verify that all of the requested values are supported */
+
+          if (caps->ac_channels != 1 && caps->ac_channels != 2)
+            {
+              auderr("ERROR: Unsupported number of channels: %d\n",
+                     caps->ac_channels);
+              ret = -ERANGE;
+              break;
+            }
+
+          if (caps->ac_controls.b[2] != 16 && caps->ac_controls.b[2] != 24)
+            {
+              auderr("ERROR: Unsupported bits per sample: %d\n",
+                     caps->ac_controls.b[2]);
+              ret = -ERANGE;
+              break;
+            }
+
+          /* Save the current stream configuration */
+
+          priv->samprate  = caps->ac_controls.hw[0];
+          priv->nchannels = caps->ac_channels;
+          priv->bpsamp    = caps->ac_controls.b[2];
+
+          /* Reconfigure the master clock to support the resulting number
+           * of channels, data width, and sample rate. However, if I2S lower
+           * half doesn't provide support for setting the master clock,
+           * execution goes on and try just to set the data width and sample
+           * rate.
+           */
+
+          ret = cs4344_setmclkfrequency(priv);
+          if (ret != OK)
+            {
+              if (ret != -ENOTTY)
+                {
+                  auderr("ERROR: Unsupported combination of sample rate and"
+                         "data width\n");
+                  break;
+                }
+              else
+                {
+                  audwarn("WARNING: MCLK could not be set on lower half\n");
+                  priv->mclk_freq = 0;
+                  ret = OK;
+                }
+            }
+
+          cs4344_settxchannels(priv);
+          cs4344_setdatawidth(priv);
+          cs4344_setbitrate(priv);
         }
         break;
 
-    case AUDIO_TYPE_OUTPUT:
-      {
-        ret = OK;
-
-        audinfo("  AUDIO_TYPE_OUTPUT:\n");
-        audinfo("    Number of channels: %u\n", caps->ac_channels);
-        audinfo("    Sample rate:        %u\n", caps->ac_controls.hw[0]);
-        audinfo("    Sample width:       %u\n", caps->ac_controls.b[2]);
-
-        /* Verify that all of the requested values are supported */
-
-        if (caps->ac_channels != 1 && caps->ac_channels != 2)
-          {
-            auderr("ERROR: Unsupported number of channels: %d\n",
-                   caps->ac_channels);
-            ret = -ERANGE;
-            break;
-          }
-
-        if (caps->ac_controls.b[2] != 16 && caps->ac_controls.b[2] != 24)
-          {
-            auderr("ERROR: Unsupported bits per sample: %d\n",
-                   caps->ac_controls.b[2]);
-            ret = -ERANGE;
-            break;
-          }
-
-        /* Save the current stream configuration */
-
-        priv->samprate  = caps->ac_controls.hw[0];
-        priv->nchannels = caps->ac_channels;
-        priv->bpsamp    = caps->ac_controls.b[2];
-
-        /* Reconfigure the master clock to support the resulting number of
-         * channels, data width, and sample rate. However, if I2S lower half
-         * doesn't provide support for setting the master clock, execution
-         * goes on and try just to set the data width and sample rate.
-         */
-
-        ret = cs4344_setmclkfrequency(priv);
-        if (ret != OK)
-          {
-            if (ret != -ENOTTY)
-              {
-                auderr("ERROR: Unsupported combination of sample rate and"
-                       "data width\n");
-                break;
-              }
-            else
-              {
-                audwarn("WARNING: MCLK could not be set on lower half\n");
-                priv->mclk_freq = 0;
-                ret = OK;
-              }
-          }
-
-        cs4344_settxchannels(priv);
-        cs4344_setdatawidth(priv);
-        cs4344_setbitrate(priv);
-      }
-      break;
-
-    case AUDIO_TYPE_PROCESSING:
-      break;
+      case AUDIO_TYPE_PROCESSING:
+        break;
     }
 
   return ret;
@@ -1137,7 +1138,7 @@ static int cs4344_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
         }
         break;
 
-       /* Report our preferred buffer size and quantity */
+        /* Report our preferred buffer size and quantity */
 
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
       case AUDIOIOC_GETBUFFERINFO:
@@ -1194,7 +1195,7 @@ static int cs4344_reserve(FAR struct audio_lowerhalf_s *dev)
       /* Initialize the session context */
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-     *session           = NULL;
+      *session           = NULL;
 #endif
       priv->inflight    = 0;
       priv->running     = false;

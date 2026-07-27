@@ -895,6 +895,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR struct audio_caps_s *caps =
                      (FAR struct audio_caps_s *)((uintptr_t)arg);
+
           DEBUGASSERT(lower->ops->getcaps != NULL);
 
           audinfo("AUDIOIOC_GETCAPS: Device=%d\n", caps->ac_type);
@@ -1342,6 +1343,7 @@ static int audio_poll(FAR struct file *filep,
       /* This is a request to tear down the poll. */
 
       FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
+
       *slot = NULL;
       fds->priv = NULL;
     }
