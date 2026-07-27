@@ -193,6 +193,11 @@ int iob_clone_partial(FAR struct iob_s *iob1, unsigned int len,
        * copy to that address.
        */
 
+      if (iob2 == NULL)
+        {
+          return -ENOMEM;
+        }
+
       dest   = &iob2->io_data[iob2->io_offset + offset2];
       avail2 = IOB_BUFSIZE(iob2) - iob2->io_offset - offset2;
 
