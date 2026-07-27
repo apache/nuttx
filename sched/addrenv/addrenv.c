@@ -349,6 +349,7 @@ int addrenv_select(FAR struct addrenv_s *addrenv,
                    FAR struct addrenv_s **oldenv)
 {
   FAR struct tcb_s *tcb = this_task();
+
   addrenv_take(addrenv);
   *oldenv = tcb->addrenv_curr;
   tcb->addrenv_curr = addrenv;
@@ -374,6 +375,7 @@ int addrenv_select(FAR struct addrenv_s *addrenv,
 int addrenv_restore(FAR struct addrenv_s *addrenv)
 {
   FAR struct tcb_s *tcb = this_task();
+
   addrenv_give(tcb->addrenv_curr);
   tcb->addrenv_curr = addrenv;
   return addrenv_switch(tcb);

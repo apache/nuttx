@@ -113,6 +113,7 @@ void nxsem_recover(FAR struct tcb_s *tcb)
             {
               uint32_t mholder =
                 atomic_fetch_and(NXSEM_MHOLDER(sem), ~NXSEM_MBLOCKING_BIT);
+
               DEBUGASSERT(NXSEM_MBLOCKING(mholder));
             }
         }

@@ -374,7 +374,7 @@ static void elf_emit_note(FAR struct elf_dumpinfo_s *cinfo)
 
   if (cinfo->pid == INVALID_PROCESS_ID)
     {
-     FAR struct tcb_s *rtcb = running_task();
+      FAR struct tcb_s *rtcb = running_task();
 
       /* Emit the current (typically crashing) task first so that GDB's
        * default thread selection shows the crashing backtrace on the initial
@@ -650,6 +650,7 @@ static void elf_emit_phdr(FAR struct elf_dumpinfo_s *cinfo,
 {
   off_t offset = cinfo->stream->nput +
                  (stksegs + memsegs + 1 + 1) * sizeof(Elf_Phdr);
+
   Elf_Phdr phdr;
   int i;
 

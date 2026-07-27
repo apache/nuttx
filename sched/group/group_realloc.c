@@ -60,6 +60,7 @@ FAR void *group_realloc(FAR struct task_group_s *group, FAR void *oldmem,
   if (group == NULL)
     {
       FAR struct tcb_s *tcb = this_task();
+
       DEBUGASSERT(tcb && tcb->group);
       group = tcb->group;
     }

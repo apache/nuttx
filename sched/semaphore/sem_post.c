@@ -206,6 +206,7 @@ int nxsem_post_slow(FAR sem_t *sem)
                 {
                   uint32_t blocking_bit = dq_empty(SEM_WAITLIST(sem)) ?
                     0 : NXSEM_MBLOCKING_BIT;
+
                   atomic_set(NXSEM_MHOLDER(sem),
                             ((uint32_t)stcb->pid) | blocking_bit);
                 }

@@ -248,6 +248,7 @@ void clock_update_wall_time(void)
   if (g_clock_adjust != 0 && sec > 0)
     {
       long adjust = NTP_MAX_ADJUST * (long)sec;
+
       if (g_clock_adjust < adjust && g_clock_adjust > -adjust)
         {
           adjust = g_clock_adjust;

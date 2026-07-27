@@ -108,6 +108,7 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
           do
             {
               bool check = nxsched_remove_readytorun(nxttcb);
+
               DEBUGASSERT(check == false);
               UNUSED(check);
 
@@ -311,7 +312,7 @@ int nxsched_set_priority(FAR struct tcb_s *tcb, int sched_priority)
         }
 
       leave_critical_section(flags);
-   }
+    }
 
   return ret;
 }

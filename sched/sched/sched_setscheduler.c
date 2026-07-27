@@ -314,6 +314,7 @@ int sched_setscheduler(pid_t pid, int policy,
                        FAR const struct sched_param *param)
 {
   int ret = nxsched_set_scheduler(pid, policy, param);
+
   if (ret < 0)
     {
       set_errno(-ret);
