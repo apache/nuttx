@@ -127,18 +127,26 @@
 #endif
 
 /* Verify whether SPI has been assigned IOMUX pins.
- * Otherwise, SPI signals will be routed via GPIO Matrix.
+ * Otherwise, SPI signals will be routed via GPIO Matrix.  Chips without
+ * SPI2_IOMUX_* definitions (e.g. ESP32-P4) have no IOMUX pins for SPI and
+ * are always routed via GPIO Matrix.
  */
 
-#define SPI_IS_CS_IOMUX   (CONFIG_ESPRESSIF_SPI2_CSPIN == SPI2_IOMUX_CSPIN)
-#define SPI_IS_CLK_IOMUX  (CONFIG_ESPRESSIF_SPI2_CLKPIN == SPI2_IOMUX_CLKPIN)
-#define SPI_IS_MOSI_IOMUX (CONFIG_ESPRESSIF_SPI2_MOSIPIN == SPI2_IOMUX_MOSIPIN)
-#define SPI_IS_MISO_IOMUX (CONFIG_ESPRESSIF_SPI2_MISOPIN == SPI2_IOMUX_MISOPIN)
+#if defined(CONFIG_ESPRESSIF_SPI2) && defined(SPI2_IOMUX_CSPIN)
+#  define SPI_IS_CS_IOMUX   (CONFIG_ESPRESSIF_SPI2_CSPIN == SPI2_IOMUX_CSPIN)
+#  define SPI_IS_CLK_IOMUX  (CONFIG_ESPRESSIF_SPI2_CLKPIN == SPI2_IOMUX_CLKPIN)
+#  define SPI_IS_MOSI_IOMUX (CONFIG_ESPRESSIF_SPI2_MOSIPIN == \
+                             SPI2_IOMUX_MOSIPIN)
+#  define SPI_IS_MISO_IOMUX (CONFIG_ESPRESSIF_SPI2_MISOPIN == \
+                             SPI2_IOMUX_MISOPIN)
 
-#define SPI_VIA_IOMUX     ((SPI_IS_CS_IOMUX || SPI_HAVE_SWCS) && \
-                           (SPI_IS_CLK_IOMUX) &&                 \
-                           (SPI_IS_MOSI_IOMUX) &&                \
-                           (SPI_IS_MISO_IOMUX)) ? 1 : 0
+#  define SPI_VIA_IOMUX     ((SPI_IS_CS_IOMUX || SPI_HAVE_SWCS) && \
+                             (SPI_IS_CLK_IOMUX) &&                 \
+                             (SPI_IS_MOSI_IOMUX) &&                \
+                             (SPI_IS_MISO_IOMUX)) ? 1 : 0
+#else
+#  define SPI_VIA_IOMUX     0
+#endif
 
 /* SPI default frequency (limited by clock divider) */
 
