@@ -454,18 +454,6 @@ void nxsched_switch_critmon(FAR struct tcb_s *from, FAR struct tcb_s *to)
     }
 
 #endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_CSECTION */
-
-#if CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION >= 0
-
-  /* Did this task disable pre-emption? */
-
-  if (to->lockcount > 0)
-    {
-      /* Yes.. Save the start time */
-
-      to->premp_start = current;
-    }
-#endif /* CONFIG_SCHED_CRITMONITOR_MAXTIME_PREEMPTION */
 }
 
 void nxsched_update_critmon(FAR struct tcb_s *tcb)
