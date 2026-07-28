@@ -21,7 +21,15 @@
 # ##############################################################################
 
 if(CONFIG_MTD)
-  set(SRCS ftl.c)
+  set(SRCS)
+
+  # ftl.c turns an MTD device into a block driver via register_blockdriver() and
+  # the block_operations vtable, so it additionally requires the block driver
+  # inode helpers.
+
+  if(CONFIG_FS_BLOCK_DRIVER)
+    list(APPEND SRCS ftl.c)
+  endif()
 
   if(CONFIG_MTD_CONFIG_NVS)
     list(APPEND SRCS mtd_config_nvs.c)

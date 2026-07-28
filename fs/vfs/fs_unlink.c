@@ -144,7 +144,7 @@ int nx_unlink(FAR const char *pathname)
               goto errout_with_inode;
             }
         }
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
       else if (INODE_IS_BLOCK(inode) && inode->u.i_bops->unlink)
         {
           /* Notify the block driver that it has been unlinked */

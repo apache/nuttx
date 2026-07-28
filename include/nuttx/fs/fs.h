@@ -262,7 +262,7 @@ struct file_operations
 
 /* This structure provides information about the state of a block driver */
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
 /* This structure is provided by block devices when they register with the
  * system.  It is used by file systems to perform filesystem transfers.  It
  * differs from the normal driver vtable in several ways -- most notably in
@@ -286,7 +286,9 @@ struct block_operations
   CODE int     (*unlink)(FAR struct inode *inode);
 #endif
 };
+#endif /* CONFIG_FS_BLOCK_DRIVER */
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 /* This structure is provided by a filesystem to describe a mount point.
  * Note that this structure differs from file_operations ONLY in the form of
  * the open method.  Once the file is opened, it can be accessed either as a
@@ -465,9 +467,13 @@ struct mountpt_operations
 union inode_ops_u
 {
   FAR const struct file_operations     *i_ops;    /* Driver operations for inode */
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
   FAR const struct block_operations    *i_bops;   /* Block driver operations */
+#endif
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) || defined(CONFIG_MTD)
   FAR struct mtd_dev_s                 *i_mtd;    /* MTD device driver */
+#endif
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   FAR const struct mountpt_operations  *i_mops;   /* Operations on a mountpoint */
 #endif
 #ifdef CONFIG_FS_NAMED_SEMAPHORES
@@ -680,7 +686,7 @@ int register_driver_with_size(FAR const char *path,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int register_blockdriver(FAR const char *path,
                          FAR const struct block_operations *bops,
                          mode_t mode, FAR void *priv);
@@ -710,7 +716,7 @@ int register_blockdriver(FAR const char *path,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int register_merge_blockdriver(FAR const char *merge, ...);
 #endif
 
@@ -737,7 +743,7 @@ int register_merge_blockdriver(FAR const char *merge, ...);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int register_blockpartition(FAR const char *partition,
                             mode_t mode, FAR const char *parent,
                             off_t firstsector, off_t nsectors);
@@ -761,7 +767,9 @@ int unregister_driver(FAR const char *path);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int unregister_blockdriver(FAR const char *path);
+#endif
 
 /****************************************************************************
  * Name: register_mtddriver
@@ -1426,8 +1434,10 @@ FAR void *find_driver(FAR const char *pathname);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int open_blockdriver(FAR const char *pathname, int mountflags,
                      FAR struct inode **ppinode);
+#endif
 
 /****************************************************************************
  * Name: close_blockdriver
@@ -1447,7 +1457,9 @@ int open_blockdriver(FAR const char *pathname, int mountflags,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int close_blockdriver(FAR struct inode *inode);
+#endif
 
 /****************************************************************************
  * Name: find_blockdriver
@@ -1471,8 +1483,10 @@ int close_blockdriver(FAR struct inode *inode);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_FS_BLOCK_DRIVER
 int find_blockdriver(FAR const char *pathname, int mountflags,
                      FAR struct inode **ppinode);
+#endif
 
 /****************************************************************************
  * Name: find_mtddriver

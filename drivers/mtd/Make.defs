@@ -29,7 +29,13 @@
 
 ifeq ($(CONFIG_MTD),y)
 
+# ftl.c turns an MTD device into a block driver via register_blockdriver()
+# and the block_operations vtable, so it additionally requires the block
+# driver inode helpers.
+
+ifeq ($(CONFIG_FS_BLOCK_DRIVER),y)
 CSRCS += ftl.c
+endif
 
 ifeq ($(CONFIG_MTD_CONFIG_NVS),y)
 CSRCS += mtd_config_nvs.c

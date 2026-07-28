@@ -35,8 +35,6 @@
 #include "inode/inode.h"
 #include "vfs/vfs.h"
 
-#if defined(CONFIG_MTD) && !defined(CONFIG_DISABLE_MOUNTPOINT)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -98,5 +96,3 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
   inode_unlock();
   return ret;
 }
-
-#endif /* CONFIG_MTD && !CONFIG_DISABLE_MOUNTPOINT */

@@ -41,6 +41,16 @@ config DISABLE_MOUNTPOINT
 config FS_UIO
 	bool
 
+config FS_BLOCK_DRIVER
+	bool "Block driver support without mount points" if DISABLE_MOUNTPOINT
+	default !DISABLE_MOUNTPOINT
+	---help---
+		Build the block driver inode helpers (register_blockdriver(),
+		open_blockdriver(), ...) and the FTL layer over MTD.  Always
+		enabled with mount points.  With DISABLE_MOUNTPOINT, enable this
+		to use block drivers (e.g. an FTL over MTD) for raw access
+		without mounting them.
+
 config FS_LARGEFILE
 	bool "Large File Support"
 	default n
@@ -227,7 +237,8 @@ config FS_HEAPBUF_SECTION
 config FS_MTD_PROXY
 	bool "Auto-create FTL block device when mounting MTD"
 	default y
-	depends on MTD
+	depends on MTD && FS_BLOCK_DRIVER
+	depends on !DISABLE_MOUNTPOINT || !DISABLE_PSEUDOFS_OPERATIONS
 	---help---
 		When enabled, mount() and open_blockdriver() will automatically
 		create a temporary FTL block device for an MTD device that is

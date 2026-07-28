@@ -468,7 +468,7 @@ int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve)
 
           buf->st_mode |= S_IFBLK;
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#ifdef CONFIG_FS_BLOCK_DRIVER
           if ((inode->u.i_bops != NULL) &&
               (inode->u.i_bops->geometry != NULL))
             {
