@@ -107,7 +107,7 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
   FAR sigpendq_t *sigpend;
   irqstate_t flags;
   siginfo_t unbinfo;
-  int ret;
+  int ret = ERROR;
 
   DEBUGASSERT(set != NULL && up_interrupt_context() == false);
 
@@ -126,7 +126,15 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
   intersection = nxsig_pendingset(rtcb);
   sigandset(&intersection, &intersection, set);
-  if (!sigisemptyset(&intersection))
+
+  /* Loop because the pending-set snapshot may be stale: nxsig_pendingset()
+   * releases tg_lock before nxsig_remove_pendingsignal() re-acquires it.
+   * On SMP, another CPU may consume the signal in that window, causing
+   * remove() to return NULL even though the snapshot was non-empty.
+   * Re-read and retry.  Bounded because pending signals are finite.
+   */
+
+  while (!sigisemptyset(&intersection))
     {
       /* One or more of the signals in intersections is sufficient to cause
        * us to not wait.  Pick the lowest numbered signal and mark it not
@@ -135,7 +143,16 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
       sigpend = nxsig_remove_pendingsignal(rtcb,
                                            nxsig_lowest(&intersection));
-      DEBUGASSERT(sigpend);
+      if (sigpend == NULL)
+        {
+          /* Snapshot was stale on SMP: another CPU consumed the signal
+           * between pendingset() and remove().  Re-read and retry.
+           */
+
+          intersection = nxsig_pendingset(rtcb);
+          sigandset(&intersection, &intersection, set);
+          continue;
+        }
 
       /* Return the signal info to the caller if so requested */
 
@@ -151,11 +168,12 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
       /* Then dispose of the pending signal structure properly */
 
       nxsig_release_pendingsignal(sigpend);
+      break;
     }
 
   /* We will have to wait for a signal to be posted to this task. */
 
-  else
+  if (ret < 0)
     {
       /* Always unblock into the stack local, never into the caller's
        * buffer.  The poster writes it from its own context (another
