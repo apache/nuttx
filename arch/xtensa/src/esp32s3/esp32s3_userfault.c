@@ -41,6 +41,9 @@
 #include "signal/signal.h"
 
 #include "esp32s3_userfault.h"
+#ifdef CONFIG_ESP32S3_PAGEFAULT
+#include "esp32s3_pagefault.h"
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -81,6 +84,17 @@ uint32_t *esp32s3_userfault_abort(int exccause, uint32_t *regs)
 {
   struct tcb_s *tcb = this_task();
   siginfo_t     info;
+
+#ifdef CONFIG_ESP32S3_PAGEFAULT
+  /* Reaching here means the fault was contained and the system carried on,
+   * so the dispatcher's repeat counter has served its purpose.  Clear it, or
+   * a probe run three times at one address would trip that guard and halt a
+   * perfectly healthy system.  Only *unbroken* recursion -- a report that
+   * faults before the abort can happen -- should stop the machine.
+   */
+
+  esp32s3_pagefault_clear_repeat();
+#endif
 
   _alert("SIGSEGV task %s: EXCCAUSE=%d EXCVADDR=%08x PC=%08x\n",
          get_task_name(tcb), exccause, (unsigned)regs[REG_EXCVADDR],

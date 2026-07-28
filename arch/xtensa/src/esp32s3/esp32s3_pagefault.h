@@ -59,4 +59,15 @@
 
 int esp32s3_pagefault_dispatch(int exccause, uint32_t *regs);
 
+/****************************************************************************
+ * Name: esp32s3_pagefault_clear_repeat
+ *
+ * Description:
+ *   Forget the last serviced fault, so that later faults at the same address
+ *   are not mistaken for runaway recursion.
+ *
+ ****************************************************************************/
+
+void esp32s3_pagefault_clear_repeat(void);
+
 #endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PAGEFAULT_H */
