@@ -106,7 +106,7 @@ ssize_t syslog_write_foreach(FAR const char *buffer,
 {
   syslog_write_t write;
   syslog_putc_t  putc;
-  size_t nwritten = 0;
+  ssize_t nwritten = 0;
   ssize_t nwritten_max = -EIO;
   ssize_t ret;
   int i;
