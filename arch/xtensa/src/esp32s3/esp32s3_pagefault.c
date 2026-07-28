@@ -72,6 +72,18 @@
 static volatile int g_pf_selftest_hits;
 #endif
 
+/* How many times to let the same fault be reported before giving up on
+ * reporting it.  Note the report may not survive even once -- see the
+ * comment in the dispatcher -- so this bounds the damage rather than
+ * guaranteeing a legible message.
+ */
+
+#define PF_REPEAT_LIMIT 3
+
+static uintptr_t g_pf_last_vaddr;
+static uintptr_t g_pf_last_pc;
+static int       g_pf_repeats;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -131,6 +143,36 @@ int esp32s3_pagefault_dispatch(int exccause, uint32_t *regs)
     }
 #endif
 
+  /* Reporting a fault can itself fault.  syslog reaches memory that the
+   * very fault being reported may have made unreachable -- PSRAM that never
+   * initialised, say -- and then this handler is re-entered from inside its
+   * own _alert().  The console fills with the same line severed part-way
+   * through EXCVADDR, forever, and nothing legible ever reaches it.
+   *
+   * A fault repeating at the same address and PC is not going to be helped
+   * by reporting it again.  Try a few times, then stop and halt.  The lines
+   * may still be truncated -- the print is what faults, so it cannot be made
+   * to complete from here -- but a handful of severed lines followed by
+   * silence is diagnosable, and an endless stream of them is not.
+   */
+
+  if (vaddr == g_pf_last_vaddr && pc == g_pf_last_pc)
+    {
+      if (++g_pf_repeats >= PF_REPEAT_LIMIT)
+        {
+          up_irq_save();
+          for (; ; )
+            {
+            }
+        }
+    }
+  else
+    {
+      g_pf_last_vaddr = vaddr;
+      g_pf_last_pc    = pc;
+      g_pf_repeats    = 0;
+    }
+
   /* Report the precise fault (with its tracking EXCVADDR) and decline to
    * service it, so the caller falls through to the panic / abort path.
    */
@@ -167,6 +209,17 @@ uint32_t *esp32s3_pagefault_abort(int exccause, uint32_t *regs)
 {
   struct tcb_s *tcb = this_task();
   siginfo_t     info;
+
+  /* Reaching here means the fault was contained and the system carried on,
+   * so the repeat counter has served its purpose.  Clear it, or a probe run
+   * three times at one address would trip the guard in the dispatcher and
+   * halt a perfectly healthy system.  Only *unbroken* recursion -- a report
+   * that faults before the abort can happen -- should stop the machine.
+   */
+
+  g_pf_last_vaddr = 0;
+  g_pf_last_pc    = 0;
+  g_pf_repeats    = 0;
 
   _alert("SIGSEGV task %s: EXCCAUSE=%d EXCVADDR=%08x PC=%08x\n",
          get_task_name(tcb), exccause, (unsigned)regs[REG_EXCVADDR],
