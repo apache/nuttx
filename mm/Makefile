@@ -80,7 +80,7 @@ $(COBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %.c
 # the user phase of the two-pass kernel build
 
 $(BIN):	$(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 
 # Memory manager for the kernel phase of the two-pass kernel build
 

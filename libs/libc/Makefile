@@ -161,7 +161,7 @@ $(COBJS): $(BINDIR)$(DELIMS)%$(OBJEXT): %.c
 # the user phase of the two-pass kernel build
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 	$(Q) $(MAKE) -C zoneinfo all BIN=$(BIN)
 endif
