@@ -23,45 +23,48 @@
 set(SRCS fs_registerdriver.c fs_unregisterdriver.c fs_registerpipedriver.c
          fs_unregisterpipedriver.c fs_registerpseudodir.c)
 
-# Don't built-in block driver support if there are no mountpoints
-
 if(NOT CONFIG_DISABLE_MOUNTPOINT)
+  list(APPEND SRCS fs_finddriver.c)
+endif()
+
+if(NOT CONFIG_DISABLE_MOUNTPOINT OR CONFIG_MTD)
+  list(APPEND SRCS fs_findmtddriver.c fs_closemtddriver.c)
+endif()
+
+if(CONFIG_FS_BLOCK_DRIVER)
   list(
     APPEND
     SRCS
     fs_registerblockdriver.c
     fs_unregisterblockdriver.c
-    fs_finddriver.c
     fs_findblockdriver.c
     fs_openblockdriver.c
     fs_closeblockdriver.c
     fs_blockpartition.c
-    fs_findmtddriver.c
-    fs_blockmerge.c
-    fs_closemtddriver.c)
+    fs_blockmerge.c)
 
-  if(CONFIG_MTD)
-    list(APPEND SRCS fs_registermtddriver.c fs_unregistermtddriver.c)
+  if(CONFIG_BCH AND NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
+    list(APPEND SRCS fs_blockproxy.c)
+  endif()
+endif()
 
-    if(CONFIG_FS_MTD_PROXY)
-      list(APPEND SRCS fs_mtdproxy.c)
-    endif()
+if(CONFIG_MTD)
+  list(APPEND SRCS fs_registermtddriver.c fs_unregistermtddriver.c)
 
-    if(CONFIG_MTD_PARTITION)
-      list(APPEND SRCS fs_mtdpartition.c)
-    endif()
+  if(CONFIG_FS_MTD_PROXY)
+    list(APPEND SRCS fs_mtdproxy.c)
   endif()
 
-  if(CONFIG_BCH)
-    if(NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
-      list(APPEND SRCS fs_blockproxy.c)
-    endif()
+  if(CONFIG_MTD_PARTITION)
+    list(APPEND SRCS fs_mtdpartition.c)
   endif()
+endif()
 
-  if(CONFIG_FS_MTD_PROXY OR (CONFIG_BCH AND NOT
-                                            CONFIG_DISABLE_PSEUDOFS_OPERATIONS))
-    list(APPEND SRCS fs_uniquedevname.c)
-  endif()
+if(CONFIG_FS_MTD_PROXY
+   OR (CONFIG_FS_BLOCK_DRIVER
+       AND CONFIG_BCH
+       AND NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS))
+  list(APPEND SRCS fs_uniquedevname.c)
 endif()
 
 target_sources(fs PRIVATE ${SRCS})

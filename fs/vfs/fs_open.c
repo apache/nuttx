@@ -197,8 +197,7 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
       goto errout_with_inode;
     }
 
-#if defined(CONFIG_BCH) && \
-    !defined(CONFIG_DISABLE_MOUNTPOINT) && \
+#if defined(CONFIG_BCH) && defined(CONFIG_FS_BLOCK_DRIVER) && \
     !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
   /* If the inode is block driver, then we may return a character driver
    * proxy for the block driver.  block_proxy() will instantiate a BCH

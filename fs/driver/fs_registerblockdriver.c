@@ -34,8 +34,6 @@
 #include "inode/inode.h"
 #include "vfs/vfs.h"
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -98,5 +96,3 @@ int register_blockdriver(FAR const char *path,
   inode_unlock();
   return ret;
 }
-
-#endif /* !CONFIG_DISABLE_MOUNTPOINT */

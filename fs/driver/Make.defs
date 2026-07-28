@@ -23,34 +23,39 @@
 CSRCS += fs_registerdriver.c fs_unregisterdriver.c fs_registerpseudodir.c
 CSRCS += fs_registerpipedriver.c fs_unregisterpipedriver.c
 
-# Don't built-in block driver support if there are no mountpoints
-
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
+CSRCS += fs_finddriver.c fs_findmtddriver.c fs_closemtddriver.c
+else ifeq ($(CONFIG_MTD),y)
+CSRCS += fs_findmtddriver.c fs_closemtddriver.c
+endif
+
+ifeq ($(CONFIG_FS_BLOCK_DRIVER),y)
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
-CSRCS += fs_blockpartition.c fs_findmtddriver.c fs_closemtddriver.c
-CSRCS += fs_blockmerge.c fs_finddriver.c
-
-ifeq ($(CONFIG_MTD),y)
-CSRCS += fs_registermtddriver.c fs_unregistermtddriver.c
-ifeq ($(CONFIG_FS_MTD_PROXY),y)
-CSRCS += fs_mtdproxy.c
-endif
-ifeq ($(CONFIG_MTD_PARTITION),y)
-CSRCS += fs_mtdpartition.c
-endif
-endif
+CSRCS += fs_blockpartition.c fs_blockmerge.c
 
 ifeq ($(CONFIG_BCH),y)
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)
 CSRCS += fs_blockproxy.c
 endif
 endif # CONFIG_BCH
+endif # CONFIG_FS_BLOCK_DRIVER
+
+ifeq ($(CONFIG_MTD),y)
+CSRCS += fs_registermtddriver.c fs_unregistermtddriver.c
+
+ifeq ($(CONFIG_FS_MTD_PROXY),y)
+CSRCS += fs_mtdproxy.c
+endif
+
+ifeq ($(CONFIG_MTD_PARTITION),y)
+CSRCS += fs_mtdpartition.c
+endif
+endif # CONFIG_MTD
 
 ifneq ($(filter fs_blockproxy.c fs_mtdproxy.c,$(CSRCS)),)
 CSRCS += fs_uniquedevname.c
 endif
-endif # CONFIG_DISABLE_MOUNTPOINT
 
 # Include driver build support
 
