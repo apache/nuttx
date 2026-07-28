@@ -77,7 +77,15 @@ int getgrbuf_r(gid_t gid, FAR const char *name, FAR const char *passwd,
 
   namesize = strlen(name) + 1;
   passwdsize = strlen(passwd) + 1;
-  padlen  = sizeof(FAR void *) - ((uintptr_t)buf % sizeof(FAR char *));
+
+  /* Bytes needed to round 'buf' up to the next pointer-aligned address.
+   * The two's-complement modulo trick below yields 0 when 'buf' is
+   * already aligned; "sizeof(void *) - (addr % sizeof(void *))" (the
+   * previous formula) does not, always returning a full alignment unit
+   * in that case, which made the buflen check below always fail.
+   */
+
+  padlen  = (-(uintptr_t)buf) % sizeof(FAR void *);
   reqdlen = sizeof(FAR void *) + namesize + passwdsize;
 
   if (buflen < padlen + reqdlen)
