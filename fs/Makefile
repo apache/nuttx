@@ -41,13 +41,13 @@ include mqueue/Make.defs
 include shm/Make.defs
 include socket/Make.defs
 include event/Make.defs
+include partition/Make.defs
 
 # Additional files required is mount-able file systems are supported
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
 include mount/Make.defs
-include partition/Make.defs
 include fat/Make.defs
 include romfs/Make.defs
 include cromfs/Make.defs

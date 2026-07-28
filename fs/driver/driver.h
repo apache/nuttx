@@ -138,7 +138,7 @@ int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD
+#ifdef CONFIG_MTD_PARTITION
 int register_partition_with_mtd(FAR const char *partition,
                                 mode_t mode, FAR struct mtd_dev_s *parent,
                                 off_t firstblock, off_t nblocks);

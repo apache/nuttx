@@ -32,8 +32,6 @@
 #include <limits.h>
 #include <sys/types.h>
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -75,9 +73,11 @@ typedef CODE void
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BLOCK_PARTITION
 int parse_block_partition(FAR const char *path,
                           partition_handler_t handler,
                           FAR void *arg);
+#endif
 
 /****************************************************************************
  * Name: parse_mtd_partition
@@ -95,15 +95,15 @@ int parse_block_partition(FAR const char *path,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MTD_PARTITION
 struct mtd_dev_s;
 int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
                         partition_handler_t handler,
                         FAR void *arg);
+#endif
 
 #if defined(__cplusplus)
 }
 #endif
-
-#endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 #endif /* __INCLUDE_NUTTX_FS_PARTITION_H */

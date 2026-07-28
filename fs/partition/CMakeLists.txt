@@ -20,9 +20,10 @@
 #
 # ##############################################################################
 
-# Don't build anything if mountpoint doesn't support
+# Build the partition table support whenever block or MTD partitions are
+# available, independent of mountpoint support.
 
-if(NOT CONFIG_DISABLE_MOUNTPOINT)
+if(CONFIG_BLOCK_PARTITION OR CONFIG_MTD_PARTITION)
 
   set(SRCS fs_partition.c)
 
