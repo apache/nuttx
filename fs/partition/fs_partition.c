@@ -27,6 +27,7 @@
 #include <sys/mount.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 
 #include <nuttx/fs/fs.h>
@@ -105,13 +106,16 @@ static void register_partition(FAR struct partition_s *part, FAR void *arg)
         }
 
       snprintf(path, PATH_MAX, "%s/%s", reg->dir, part->name);
+#ifdef CONFIG_BLOCK_PARTITION
       if (state->blk != NULL)
         {
           register_partition_with_inode(path, 0660, state->blk,
                                         part->firstblock, part->nblocks);
         }
-#ifdef CONFIG_MTD
-      else
+#endif
+
+#ifdef CONFIG_MTD_PARTITION
+      if (state->mtd != NULL)
         {
           register_partition_with_mtd(path, 0660, state->mtd,
                                       part->firstblock, part->nblocks);
@@ -175,15 +179,22 @@ int read_partition_block(FAR struct partition_state_s *state,
                          FAR void *buffer, size_t startblock,
                          size_t nblocks)
 {
+#ifdef CONFIG_BLOCK_PARTITION
   if (state->blk)
     {
       return state->blk->u.i_bops->read(state->blk,
                                         buffer, startblock, nblocks);
     }
-  else
+#endif
+
+#ifdef CONFIG_MTD_PARTITION
+  if (state->mtd)
     {
       return state->mtd->bread(state->mtd, startblock, nblocks, buffer);
     }
+#endif
+
+  return -ENODEV;
 }
 
 /****************************************************************************
@@ -202,6 +213,7 @@ int read_partition_block(FAR struct partition_state_s *state,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_BLOCK_PARTITION
 int parse_block_partition(FAR const char *path,
                           partition_handler_t handler,
                           FAR void *arg)
@@ -258,6 +270,7 @@ int parse_block_partition(FAR const char *path,
   close_blockdriver(state.blk);
   return ret;
 }
+#endif /* CONFIG_BLOCK_PARTITION */
 
 /****************************************************************************
  * Name: parse_mtd_partition
@@ -275,6 +288,7 @@ int parse_block_partition(FAR const char *path,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MTD_PARTITION
 int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
                         partition_handler_t handler,
                         FAR void *arg)
@@ -303,3 +317,4 @@ int parse_mtd_partition(FAR struct mtd_dev_s *mtd,
 
   return parse_partition(&state, handler, arg);
 }
+#endif /* CONFIG_MTD_PARTITION */

@@ -31,7 +31,7 @@
 #include <nuttx/fs/partition.h>
 #include <nuttx/mtd/mtd.h>
 
-#ifndef CONFIG_DISABLE_MOUNTPOINT
+#if defined(CONFIG_BLOCK_PARTITION) || defined(CONFIG_MTD_PARTITION)
 
 /****************************************************************************
  * Public Types
@@ -78,6 +78,6 @@ int parse_txtable_partition(FAR struct partition_state_s *state,
                             FAR void *arg);
 #endif
 
-#endif /* CONFIG_DISABLE_MOUNTPOINT */
+#endif /* CONFIG_BLOCK_PARTITION || CONFIG_MTD_PARTITION */
 
 #endif /* __FS_PARTITION_PARTITION_H */
