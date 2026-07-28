@@ -51,6 +51,28 @@ config FS_BLOCK_DRIVER
 		to use block drivers (e.g. an FTL over MTD) for raw access
 		without mounting them.
 
+config BLOCK_PARTITION
+	bool "Block partition inode helpers" if DISABLE_MOUNTPOINT
+	depends on FS_BLOCK_DRIVER
+	default FS_BLOCK_DRIVER
+	---help---
+		Register block partition driver inodes (register_blockpartition /
+		register_partition_with_inode) built on top of the block driver
+		inode helpers.  Always enabled with mount points.  With
+		DISABLE_MOUNTPOINT, disable to drop fs_blockpartition.c when
+		block partitions are not needed.
+
+config BLOCK_MERGE
+	bool "Block merge inode helpers" if DISABLE_MOUNTPOINT
+	depends on FS_BLOCK_DRIVER
+	default FS_BLOCK_DRIVER
+	---help---
+		Register a merged block driver inode (register_merge_blockdriver)
+		that presents multiple non-contiguous partitions as one contiguous
+		block device.  Always enabled with mount points.  With
+		DISABLE_MOUNTPOINT, disable to drop fs_blockmerge.c when the
+		merge helper is not needed.
+
 config FS_LARGEFILE
 	bool "Large File Support"
 	default n

@@ -32,7 +32,14 @@ endif
 ifeq ($(CONFIG_FS_BLOCK_DRIVER),y)
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
 CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
-CSRCS += fs_blockpartition.c fs_blockmerge.c
+
+ifeq ($(CONFIG_BLOCK_PARTITION),y)
+CSRCS += fs_blockpartition.c
+endif
+
+ifeq ($(CONFIG_BLOCK_MERGE),y)
+CSRCS += fs_blockmerge.c
+endif
 
 ifeq ($(CONFIG_BCH),y)
 ifneq ($(CONFIG_DISABLE_PSEUDOFS_OPERATIONS),y)

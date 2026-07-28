@@ -69,7 +69,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_BLOCK_DRIVER
+#ifdef CONFIG_BLOCK_PARTITION
 int register_partition_with_inode(FAR const char *partition,
                                   mode_t mode, FAR struct inode *parent,
                                   off_t firstsector, off_t nsectors);

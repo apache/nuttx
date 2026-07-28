@@ -39,9 +39,15 @@ if(CONFIG_FS_BLOCK_DRIVER)
     fs_unregisterblockdriver.c
     fs_findblockdriver.c
     fs_openblockdriver.c
-    fs_closeblockdriver.c
-    fs_blockpartition.c
-    fs_blockmerge.c)
+    fs_closeblockdriver.c)
+
+  if(CONFIG_BLOCK_PARTITION)
+    list(APPEND SRCS fs_blockpartition.c)
+  endif()
+
+  if(CONFIG_BLOCK_MERGE)
+    list(APPEND SRCS fs_blockmerge.c)
+  endif()
 
   if(CONFIG_BCH AND NOT CONFIG_DISABLE_PSEUDOFS_OPERATIONS)
     list(APPEND SRCS fs_blockproxy.c)
