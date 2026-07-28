@@ -852,7 +852,8 @@ static void rpmsg_socket_ns_accept(FAR struct rpmsg_socket_conn_s *server,
        * first, this connection never joins the listener's pending list.
        */
 
-      nerr("Reject the connection, Max listen %d\n", server->backlog);
+      nerr("Reject the connection from %s (ept:%s), max listen %d\n",
+           rpmsg_get_cpuname(rdev), name, server->backlog);
       nxmutex_unlock(&server->recvlock);
 
       new->server = NULL;
