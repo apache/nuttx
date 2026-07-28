@@ -43,6 +43,11 @@
  *
  ****************************************************************************/
 
+/* Only referenced from inline asm in __aeabi_read_tp(); LTO does not scan
+ * asm strings, so mark it "used" to keep LTO from eliminating it.
+ */
+
+used_code
 void *arm_read_tp(void)
 {
   return (void *)(tls_get_info() + 1);
