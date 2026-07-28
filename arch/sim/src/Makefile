@@ -417,7 +417,7 @@ $(HOSTMOBJS): %$(OBJEXT): %.m
 # The architecture-specific library
 
 libarch$(LIBEXT): $(NUTTXOBJS)
-	$(call ARCHIVE, $@, $(NUTTXOBJS))
+	$(call ARCHIVE_REBUILD, $@, $(NUTTXOBJS))
 
 # The "board"-specific library. Of course, there really are no boards in
 # the simulation.  However, this is a good place to keep parts of the simulation

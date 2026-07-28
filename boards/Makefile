@@ -64,7 +64,7 @@ $(CXXOBJS): %$(OBJEXT): %.cxx
 	$(call COMPILEXX, $<, $@)
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
 	$(call CATFILE, Make.dep, $^)

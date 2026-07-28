@@ -147,14 +147,14 @@ $(STARTUP_OBJS): %$(OBJEXT): %.c
 
 ifeq ($(CONFIG_BUILD_FLAT),y)
 $(BIN): $(OBJS) $(STARTUP_OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 else
 $(BIN): $(UOBJS) $(STARTUP_OBJS)
-	$(call ARCHIVE, $@, $(UOBJS))
+	$(call ARCHIVE_REBUILD, $@, $(UOBJS))
 endif
 
 $(KBIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 
 board$(DELIM)libboard$(LIBEXT): FORCE
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"

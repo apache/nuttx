@@ -443,6 +443,21 @@ endef
 # Note: The fileN strings may not contain spaces or  characters that may be
 # interpreted strangely by the shell
 #
+# Purely additive: $(AR) only adds or replaces the members it's given, it
+# never removes anything already in the archive. That's exactly right for
+# a target that many independent callers each contribute a partial object
+# list to over the life of a build (apps/libapps.a, built up one
+# subdirectory's objects at a time via apps/Make.defs' ARLOCK, which wraps
+# this same macro as `flock $1.lock $(call ARCHIVE, $1, $2)` to serialize
+# concurrent contributions under -j) -- rebuilding from scratch on every
+# call would only ever leave the last contributor's objects behind. Use
+# ARCHIVE_REBUILD instead for the other shape: a single Makefile archiving
+# its own complete, self-contained object list in one call.
+#
+# This has to stay a single command, not two separate recipe lines: flock
+# execs its argument directly rather than handing it to a shell, so a
+# second recipe line here would run outside the lock entirely.
+#
 # Depends on these settings defined in board-specific Make.defs file
 # installed at $(TOPDIR)/Make.defs:
 #
@@ -454,6 +469,41 @@ endef
 #   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
 
 define ARCHIVE
+	$(AR) $1  $2
+endef
+
+# ARCHIVE_REBUILD - Replace an archive's entire contents with a list of files
+# Example: $(call ARCHIVE_REBUILD, archive-file, "file1 file2 file3 ...")
+#
+# For the common case ARCHIVE itself doesn't cover: a single Makefile
+# archiving its own complete object list ($(OBJS), derived from CSRCS/
+# ASRCS) in one call, as nearly every "$(BIN): $(OBJS)" rule in the tree
+# does (libs/libc, libs/libm, sched, drivers, fs, mm, net, graphics,
+# video, binfmt, crypto, boards, arch/*/src, ...). There, $2 is meant to
+# be the archive's entire, authoritative contents, not one contribution
+# among several -- so remove any pre-existing archive-file first. Without
+# that, a Kconfig change that alters which files CSRCS puts in $2 (e.g.
+# one implementation of a function replacing another under a different
+# filename) leaves whatever was archived under the old configuration
+# lingering in the .a indefinitely across an incremental build: best case
+# dead weight, worst case a stale, outdated definition the linker picks up
+# instead of the current one, silently or as a "multiple definition" error
+# if the two coexist. Rebuilding the archive from scratch every time this
+# rule fires costs a few milliseconds even for a large (700+ member)
+# library, which is worth paying to not carry that risk.
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   AR - The command to invoke the archiver (includes any options)
+#
+# Depends on this settings defined in board-specific defconfig file installed
+# at $(TOPDIR)/.config:
+#
+#   CONFIG_WINDOWS_NATIVE - Defined for a Windows native build
+
+define ARCHIVE_REBUILD
+	$(Q) rm -f $1
 	$(AR) $1  $2
 endef
 
