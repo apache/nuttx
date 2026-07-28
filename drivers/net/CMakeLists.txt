@@ -129,6 +129,10 @@ if(CONFIG_NET)
     if(CONFIG_MDIO_CLAUSE_45)
       list(APPEND SRCS phy/phy_genc45.c)
     endif()
+
+    if(CONFIG_NET_PHY_REALTEK_RTL8221B)
+      list(APPEND SRCS phy/realtek/rtl8221b.c phy/realtek/rtl8221b_fw.c)
+    endif()
   endif()
 
   target_sources(drivers PRIVATE ${SRCS})

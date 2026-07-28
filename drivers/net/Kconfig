@@ -873,6 +873,17 @@ config NET_PHYLIB_MAX_PHYS
 		Maximum number of PHY devices that can be tracked
 		simultaneously.
 
+comment "PHY Device Drivers"
+
+config NET_PHY_REALTEK_RTL8221B
+	bool "Realtek RTL8221B 2.5Gbps PHY"
+	default n
+	---help---
+		Support for the Realtek RTL8221B 2.5Gbps Ethernet PHY.  Enable
+		only on boards that use an RTL8221B.  Includes the firmware patch
+		(ramcode) blob, which consumes a few KB of flash, so leaving this
+		disabled keeps flash/RAM usage minimal on embedded targets.
+
 endif # NET_PHYLIB
 
 endif # NETDEVICES
