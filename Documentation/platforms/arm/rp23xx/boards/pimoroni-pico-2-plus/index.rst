@@ -170,3 +170,16 @@ userled
 -------
 
 Configuration demonstrating user-controlled LED access.
+
+xipfs
+-----
+
+XIPFS mounted on the on-board flash, with the ``xipfs`` command and the
+XIPFS test suite.
+
+xipfs-nxflat
+------------
+
+Same as ``xipfs``, plus the NXFLAT execute-in-place demo.  Building this
+configuration requires the NXFLAT tools (``mknxflat`` and ``ldnxflat``),
+which are not part of a standard toolchain installation.
