@@ -56,7 +56,7 @@ $(COBJS): $(BINDIR)$(DELIM)$(DELIM)%$(OBJEXT): %.c
 # the user phase of the two-pass kernel build
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 
 # math library for the kernel phase of the two-pass kernel build
 

@@ -48,7 +48,7 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 .built: .tzbuilt romfs $(OBJS)
-	$(call ARCHIVE, ..$(DELIM)$(BIN), $(OBJS))
+	$(call ARCHIVE_REBUILD, ..$(DELIM)$(BIN), $(OBJS))
 	$(Q) touch .built
 
 # ROMFS file system containing the TZ database
