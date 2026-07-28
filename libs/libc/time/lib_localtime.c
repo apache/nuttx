@@ -2850,15 +2850,25 @@ static int zoneinit(FAR const char *name)
       int err;
 
       err = tzload(name, g_lcl_ptr, TRUE);
-      if (err != 0 && name != NULL && name[0] != ':' &&
-          tzparse(name, g_lcl_ptr, NULL) == 0)
-        {
-          err = 0;
-        }
-
       if (err == 0)
         {
+          /* Data came from a zoneinfo binary file: scrub bogus abbreviation
+           * characters that could originate from an untrusted file.
+           */
+
           scrub_abbrs(g_lcl_ptr);
+        }
+      else if (name != NULL && name[0] != ':' &&
+               tzparse(name, g_lcl_ptr, NULL) == 0)
+        {
+          /* Data came from the TZ environment string.  POSIX allows a wider
+           * character set (e.g. ! # $ % / ; = >) in unquoted zone names
+           * than TZ_ABBR_CHAR_SET permits, so preserve the original chars
+           * instead of scrubbing them (otherwise mktime()/tzname report
+           * "___" for inputs like TZ="!!!0").
+           */
+
+          err = 0;
         }
 
       return err;
