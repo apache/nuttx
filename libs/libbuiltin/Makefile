@@ -66,7 +66,7 @@ context:: bin kbin
 depend:: .depend
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(OBJS))
 
 # C library for the kernel phase of the two-pass kernel build
 

@@ -72,13 +72,13 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(BIN1): $(PROXY_OBJS)
-	$(call ARCHIVE, $@, $(PROXY_OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(PROXY_OBJS))
 
 $(BIN2): $(STUB_OBJS)
-	$(call ARCHIVE, $@, $(STUB_OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(STUB_OBJS))
 
 $(BIN3): $(WRAP_OBJS)
-	$(call ARCHIVE, $@, $(WRAP_OBJS))
+	$(call ARCHIVE_REBUILD, $@, $(WRAP_OBJS))
 
 $(SYSCALLWRAPS): .context
 
