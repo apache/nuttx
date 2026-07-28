@@ -114,6 +114,28 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
     }
 #endif
 
+#if defined(CONFIG_ESP32S3_PAGEFAULT) && defined(CONFIG_ESP32S3_PAGEFAULT_ABORT)
+  /* A *denied* external-memory access does not trap on this chip.  TRM v1.8
+   * p.699: an access without permission is "responded with 0 (for internal
+   * memory) or 0xdeadbeaf (for external memory)".  So an unprivileged branch
+   * into kernel text in flash or PSRAM is refused silently, the CPU executes
+   * the dummy word it was handed instead, and the refusal surfaces here as
+   * EXCCAUSE_ILLEGAL at the address that was branched to -- never as
+   * EXCCAUSE_INSTR_PROHIBITED.
+   *
+   * Re-executing cannot help: the instruction genuinely is not there, so
+   * this is not offered to the dispatcher above.  Terminate just the task.
+   * That is the right answer whichever way the illegal instruction arose --
+   * a refused fetch or simply a corrupt user binary -- because a user task
+   * running garbage must not take the system down with it.
+   */
+
+  if (exccause == EXCCAUSE_ILLEGAL && (regs[REG_PS] & PS_UM) != 0)
+    {
+      return esp32s3_pagefault_abort(exccause, regs);
+    }
+#endif
+
   /* xtensa_user_panic never returns. */
 
   xtensa_user_panic(exccause, regs);
