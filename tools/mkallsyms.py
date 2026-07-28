@@ -23,7 +23,6 @@
 
 import argparse
 import errno
-import os
 import re
 import sys
 
@@ -36,7 +35,7 @@ try:
 except ModuleNotFoundError:
     print("Please execute the following command to install dependencies:")
     print("pip install pyelftools cxxfilt")
-    os._exit(errno.EINVAL)
+    sys.exit(errno.EINVAL)
 
 
 class SymbolTables(object):
@@ -126,7 +125,7 @@ def usage():
     print(
         "Usage: mkallsyms.py [noconst] <ELFBIN> [output file] [order symbols by name]"
     )
-    os._exit(errno.ENOENT)
+    sys.exit(errno.ENOENT)
 
 
 if __name__ == "__main__":
