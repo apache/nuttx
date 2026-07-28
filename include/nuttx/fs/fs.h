@@ -716,7 +716,7 @@ int register_blockdriver(FAR const char *path,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_BLOCK_DRIVER
+#ifdef CONFIG_BLOCK_MERGE
 int register_merge_blockdriver(FAR const char *merge, ...);
 #endif
 
@@ -743,7 +743,7 @@ int register_merge_blockdriver(FAR const char *merge, ...);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_BLOCK_DRIVER
+#ifdef CONFIG_BLOCK_PARTITION
 int register_blockpartition(FAR const char *partition,
                             mode_t mode, FAR const char *parent,
                             off_t firstsector, off_t nsectors);
