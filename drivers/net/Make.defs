@@ -138,6 +138,13 @@ ifeq ($(CONFIG_NET_PHYLIB),y)
 ifeq ($(CONFIG_MDIO_CLAUSE_45),y)
   CSRCS += phy_genc45.c
 endif
+
+ifeq ($(CONFIG_NET_PHY_REALTEK_RTL8221B),y)
+  CSRCS += rtl8221b.c rtl8221b_fw.c
+endif
+
+  DEPPATH += --dep-path net/phy/realtek
+  VPATH += :net/phy/realtek
 endif
 
 # Include network build support
