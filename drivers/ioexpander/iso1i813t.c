@@ -511,6 +511,7 @@ FAR struct ioexpander_dev_s *iso1i813t_initialize(FAR struct spi_dev_s *spi,
                                       FAR struct iso1i813t_config_s *config)
 {
   FAR struct iso1i813t_dev_s *priv;
+  uint8_t txdata;
 
 #ifdef CONFIG_ISO1I813T_MULTIPLE
   /* Allocate the device state structure */
@@ -534,6 +535,21 @@ FAR struct ioexpander_dev_s *iso1i813t_initialize(FAR struct spi_dev_s *spi,
   priv->config   = config;
 
   nxmutex_init(&priv->lock);
+
+  /* Read GLERR and INTERR registers to clear their status bits
+   * and release ERR pin after the startup sequence. This is a required
+   * step if external power supply is used.
+   */
+
+  txdata = ISO1I813T_GLERR;
+  iso1i813t_select(priv->spi, priv->config, 8);
+  SPI_EXCHANGE(priv->spi, &txdata, NULL, 1);
+  iso1i813t_deselect(priv->spi, priv->config);
+
+  txdata = ISO1I813T_INTERR;
+  iso1i813t_select(priv->spi, priv->config, 8);
+  SPI_EXCHANGE(priv->spi, &txdata, NULL, 1);
+  iso1i813t_deselect(priv->spi, priv->config);
 
   return &priv->dev;
 }
