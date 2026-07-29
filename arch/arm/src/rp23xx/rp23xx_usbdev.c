@@ -38,6 +38,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
+#include <arch/barriers.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev.h>
 #include <nuttx/usb/usbdev_trace.h>
@@ -483,6 +484,18 @@ static void rp23xx_update_buffer_control(struct rp23xx_ep_s *privep,
 
       if (or_mask & RP23XX_USBCTRL_DPSRAM_EP_BUFF_CTRL_AVAIL)
         {
+          /* Order the preceding BUFF_STATUS clear (in the USB controller
+           * register block) ahead of the AVAILABLE re-arm (in DPSRAM):
+           * these are two different peripheral regions whose stores the
+           * Cortex-M33 bus fabric may reorder.  Without the barrier the
+           * controller can observe the re-arm before the clear, transmit
+           * the next IN packet and latch its completion in BUFF_STATUS,
+           * then have that bit wiped by the late-landing clear -- the lost
+           * completion stops all further buffer interrupts and TX wedges.
+           */
+
+          UP_DMB();
+
           /* The AVAILABLE bit must be set after the rest of the buffer
            * control register has been written and had time to settle
            * across the clock domain crossing, or the controller may act
