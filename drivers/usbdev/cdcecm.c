@@ -1916,6 +1916,17 @@ static void cdcecm_disconnect(FAR struct usbdevclass_driver_s *driver,
                               FAR struct usbdev_s *dev)
 {
   uinfo("\n");
+
+  /* Perform the soft connect function so that we will we can be
+   * re-enumerated (unless we are part of a composite device).  The USB
+   * device controller calls CLASS_DISCONNECT() on every bus reset, which
+   * is the first step of any enumeration, so without this the device is
+   * left soft-disconnected and never enumerates on the host.
+   */
+
+#ifndef CONFIG_CDCECM_COMPOSITE
+  DEV_CONNECT(dev);
+#endif
 }
 
 /****************************************************************************
