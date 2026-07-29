@@ -246,3 +246,43 @@ fb
 ---
 
 Configuration that enables NuttX framebuffer examples.
+
+mw
+--
+
+Microwindows demo configuration using framebuffer, USB HID keyboard in event
+mode (``/dev/kbda``), and USB HID mouse.
+
+Build the demo with::
+
+   cd nuttx
+   tools/configure.sh qemu-intel64:mw
+   make -j$(nproc)
+
+The build produces a flat ``nuttx.elf`` image.  To run it on QEMU you need a
+bootable ISO with GRUB2:
+
+#. Create the ISO directory structure::
+
+      mkdir -p iso/boot/grub
+
+#. Write ``grub.cfg``::
+
+      echo 'set timeout=0'          > iso/boot/grub/grub.cfg
+      echo 'set default=0'         >> iso/boot/grub/grub.cfg
+      echo 'menuentry "kernel" {'  >> iso/boot/grub/grub.cfg
+      echo '  multiboot2 /boot/nuttx.elf' >> iso/boot/grub/grub.cfg
+      echo '}'                     >> iso/boot/grub/grub.cfg
+
+#. Copy ``nuttx.elf`` and create the ISO::
+
+      cp nuttx.elf iso/boot/
+      grub-mkrescue -o boot.iso iso
+
+#. Run QEMU (omit ``-nographic`` so the framebuffer window opens)::
+
+      qemu-system-x86_64 -cpu host -enable-kvm -m 2G -cdrom boot.iso
+
+The pre-built config sets ``CONFIG_INIT_ENTRYPOINT="mwdemo_main"`` so the
+demo starts immediately.  See
+:doc:`/applications/graphics/microwindows/index` for Microwindows details.
