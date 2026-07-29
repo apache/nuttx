@@ -204,7 +204,7 @@ static uint32_t translate_x11_key(uint32_t code)
       return KEYCODE_F24;
 
     default:
-      return code;
+      return KEYCODE_NORMAL;
     }
 }
 
@@ -246,10 +246,16 @@ int sim_kbd_initialize(void)
 void sim_kbdevent(uint32_t key, bool is_press)
 {
   uint32_t trans_key;
+  bool is_special;
   struct sim_dev_s *priv = (struct sim_dev_s *) &g_simkeyboard;
-  uint32_t types[2] =
+  static const uint32_t types[2][2] =
     {
-      KEYBOARD_RELEASE, KEYBOARD_PRESS
+      {
+        KEYBOARD_RELEASE, KEYBOARD_PRESS
+      },
+      {
+        KBD_SPECREL, KBD_SPECPRESS
+      }
     };
 
   if (priv->eventloop == 0)
@@ -258,9 +264,11 @@ void sim_kbdevent(uint32_t key, bool is_press)
     }
 
   trans_key = translate_x11_key(key);
+  is_special = trans_key != KEYCODE_NORMAL;
+  trans_key = is_special ? trans_key : key;
   iinfo("key=%04x\n", key);
 
   /* Report data changes */
 
-  keyboard_event(&priv->lower, trans_key, types[is_press]);
+  keyboard_event(&priv->lower, trans_key, types[is_special][is_press]);
 }

@@ -104,6 +104,7 @@ endif
 
 ifeq ($(CONFIG_INPUT_KEYBOARD),y)
   CSRCS += keyboard_upper.c
+  CSRCS += virtio_key_decode.c
 endif
 
 ifeq ($(CONFIG_INPUT_DJOYSTICK),y)
