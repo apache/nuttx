@@ -27,8 +27,11 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <inttypes.h>
+#include <signal.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
@@ -505,6 +508,117 @@ static int x86_64_fault_panic_isr(int irq, void *c, void *arg)
 }
 
 /****************************************************************************
+ * Name: x86_64_fault_user_isr
+ *
+ * Description:
+ *   A fault that an unprivileged task raised is that task's own doing -- a
+ *   bad pointer, a jump into nothing, or a deliberate reach across the
+ *   kernel/user boundary.  Killing just that task is the whole point of a
+ *   kernel build, so the system carries on and only the offender dies.
+ *   Taken from ring 0 the same fault is the kernel's own and still panics.
+ *
+ *   The CPL in the saved CS is the whole test.  Everything that runs on
+ *   behalf of a user task inside the kernel -- a system call body, an
+ *   interrupt handler, a kernel thread -- runs in ring 0, so a fault there
+ *   is correctly refused recovery.  That is the same discriminator RISC-V
+ *   uses in STATUS_PPP and arm64 in SPSR_MODE_EL0T; x86_64 cannot use
+ *   TCB_FLAG_SYSCALL, which it has never set (see x86_64_syscall()).
+ *
+ ****************************************************************************/
+
+static int x86_64_fault_user_isr(int irq, void *c, void *arg)
+{
+  /* The frame irq_common() saved for this exception, which is also what
+   * x86_64_fullcontextrestore() is going to iretq from.  It arrives as the
+   * dispatch context rather than through running_regs() so that the frame
+   * being tested is certainly the one being rewritten.
+   */
+
+  uint64_t     *regs = (uint64_t *)c;
+  struct tcb_s *tcb  = this_task();
+  struct tcb_s *ptcb;
+  uint64_t      cr2;
+
+  /* The CPL check is the one that decides this.  The task type is checked
+   * as well, as RISC-V does, so that a frame that cannot be trusted -- an
+   * early-boot fault, before any user task exists -- cannot talk its way
+   * into the recovery path with a stale selector.
+   */
+
+  if (((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL) ||
+      ((regs[REG_CS] & X86_GDT_PL_MASK) != X86_GDT_RPL_USER))
+    {
+      return x86_64_fault_panic_isr(irq, c, arg);
+    }
+
+  ptcb = nxsched_get_tcb(tcb->group->tg_pid);
+
+  _alert("Segmentation fault in %s (PID %d: %s)\n",
+         ptcb != NULL ? get_task_name(ptcb) : "<gone>",
+         tcb->pid, get_task_name(tcb));
+
+  /* Only a page fault sets CR2; for the others it is stale */
+
+  if (irq == ISR14)
+    {
+      __asm__ volatile ("mov %%cr2, %%rax; mov %%rax, %0"
+                        : "=m"(cr2) :: "memory", "rax");
+
+      _alert("Exception %d at RIP=%016" PRIx64 " accessing %016" PRIx64
+             ", error code %" PRId64 "\n",
+             irq, regs[REG_RIP], cr2, regs[REG_ERRCODE]);
+    }
+  else
+    {
+      _alert("Exception %d at RIP=%016" PRIx64 ", error code %" PRId64 "\n",
+             irq, regs[REG_RIP], regs[REG_ERRCODE]);
+    }
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(tcb->pid);
+#endif
+
+  tcb->flags |= TCB_FLAG_FORCED_CANCEL;
+
+  /* Return to _exit(SIGSEGV) in ring 0 instead of to the instruction that
+   * faulted, which would only fault again.  The frame this rewrites is the
+   * one x86_64_fullcontextrestore() is about to iretq from, so CS and SS
+   * have to move to the kernel selectors together with RIP:  iretq takes
+   * the target privilege level from the CS it pops and, in long mode, pops
+   * SS with it even when the level does not change.
+   */
+
+  regs[REG_RIP] = (uint64_t)_exit;
+  regs[REG_RDI] = SIGSEGV;
+  regs[REG_CS]  = X86_GDT_CODE_SEL;
+  regs[REG_SS]  = X86_GDT_DATA_SEL;
+  regs[REG_DS]  = X86_GDT_DATA_SEL;
+  regs[REG_ES]  = X86_GDT_DATA_SEL;
+
+  /* RFLAGS is reset rather than carried over.  The faulting task's flags are
+   * its own to set, and DF in particular must be clear on entry to any C
+   * function.  This is the value up_initial_state() gives a new thread.
+   */
+
+  regs[REG_RFLAGS] = X86_64_RFLAGS_IF;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* _exit() must not run on the user stack the fault came from:  the address
+   * environment it belongs to is torn down while _exit() is still running on
+   * it.  The task's kernel stack is unused -- the fault was taken in user
+   * mode, so no system call of this task is in flight -- so start from its
+   * top.  The -8 reproduces the offset a call instruction would have left,
+   * which is what the SysV ABI's 16-byte alignment rule is stated against
+   * and what up_initial_state() sets up for the same reason.
+   */
+
+  regs[REG_RSP] = (uint64_t)tcb->xcp.ktopstk - 8;
+#endif
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: x86_64_fault_kill_isr
  ****************************************************************************/
 
@@ -565,13 +679,19 @@ void up_irqinitialize(void)
   up_irq_restore(X86_64_RFLAGS_IF);
 #endif
 
-  /* Attach default handlers for faults */
+  /* Attach default handlers for faults.
+   *
+   * ISR6, ISR13 and ISR14 are attributable to the instruction that raised
+   * them, so an unprivileged task that raises one is killed on its own and
+   * the system runs on.  The double fault is not:  it says an exception
+   * could not be delivered at all, and there is nothing left to trust.
+   */
 
   irq_attach(ISR0, x86_64_fault_kill_isr, NULL);
-  irq_attach(ISR6, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR6, x86_64_fault_user_isr, NULL);
   irq_attach(ISR8, x86_64_fault_panic_isr, NULL);
-  irq_attach(ISR13, x86_64_fault_panic_isr, NULL);
-  irq_attach(ISR14, x86_64_fault_panic_isr, NULL);
+  irq_attach(ISR13, x86_64_fault_user_isr, NULL);
+  irq_attach(ISR14, x86_64_fault_user_isr, NULL);
   irq_attach(ISR16, x86_64_fault_kill_isr, NULL);
 
 #ifdef CONFIG_SMP
