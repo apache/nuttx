@@ -108,11 +108,24 @@ static bool
 goldfish_events_send_keyboard_event(FAR struct goldfish_events_s *events,
                                     FAR struct goldfish_input_event *evt)
 {
+  uint32_t trans_key;
+  bool is_special;
+  static const uint32_t types[2][2] =
+    {
+      {
+        KEYBOARD_RELEASE, KEYBOARD_PRESS
+      },
+      {
+        KBD_SPECREL, KBD_SPECPRESS
+      }
+    };
+
   if (evt->type == EV_KEY)
     {
+      trans_key = keyboard_translate_virtio_code(evt->code, &is_special);
       keyboard_event(&(events->keyboardlower),
-                     keyboard_translate_virtio_code(evt->code),
-                     !evt->value);
+                     trans_key,
+                     types[is_special][evt->value & 1]);
       return true;
     }
 

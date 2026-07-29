@@ -104,6 +104,7 @@ if(CONFIG_INPUT)
 
   if(CONFIG_INPUT_KEYBOARD)
     list(APPEND SRCS keyboard_upper.c)
+    list(APPEND SRCS virtio_key_decode.c)
   endif()
 
   if(CONFIG_INPUT_KMATRIX)
