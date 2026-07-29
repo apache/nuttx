@@ -323,6 +323,54 @@ static int rpmsg_create_wqueues(FAR struct rpmsg_wqueue_s *wqueues,
 }
 
 /****************************************************************************
+ * Name: rpmsg_bind_alloc / rpmsg_bind_free
+ *
+ * Description:
+ *   Allocate/free a name-service bind record.  When the rpmsg pool is
+ *   enabled (RPMSG_POOL_COUNT > 0) and its block size is large enough to
+ *   hold a struct rpmsg_bind_s, the record is taken from the rpmsg pool to
+ *   avoid heap allocation.  Otherwise it falls back to the heap.
+ *
+ *   The choice is a compile-time constant, so alloc and free always use the
+ *   same allocator within a build.  When RPMSG_POOL_COUNT <= 0 the rpmsg
+ *   pool degenerates into alloca() and must not be used for these long-lived
+ *   list nodes, so the heap is used unconditionally.
+ *
+ ****************************************************************************/
+
+static inline_function FAR void *rpmsg_bind_alloc(void)
+{
+  FAR void *bind;
+
+#if CONFIG_RPMSG_POOL_COUNT > 0
+  if (CONFIG_RPMSG_POOL_SIZE >= sizeof(struct rpmsg_bind_s))
+    {
+      bind = rpmsg_pool_alloc(sizeof(struct rpmsg_bind_s));
+    }
+  else
+#endif
+    {
+      bind = kmm_malloc(sizeof(struct rpmsg_bind_s));
+    }
+
+  return bind;
+}
+
+static inline_function void rpmsg_bind_free(FAR void *bind)
+{
+#if CONFIG_RPMSG_POOL_COUNT > 0
+  if (CONFIG_RPMSG_POOL_SIZE >= sizeof(struct rpmsg_bind_s))
+    {
+      rpmsg_pool_free(bind);
+    }
+  else
+#endif
+    {
+      kmm_free(bind);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -589,7 +637,7 @@ int rpmsg_register_callback(FAR void *priv,
                       nxrmutex_unlock(&rpmsg->lock);
                       ns_bind(rdev, priv, bind->name, bind->dest);
 
-                      kmm_free(bind);
+                      rpmsg_bind_free(bind);
                       again = true;
 
                       nxrmutex_lock(&rpmsg->lock);
@@ -675,7 +723,7 @@ void rpmsg_ns_bind(FAR struct rpmsg_device *rdev,
 
   if (!matched)
     {
-      bind = kmm_malloc(sizeof(struct rpmsg_bind_s));
+      bind = rpmsg_bind_alloc();
       if (bind != NULL)
         {
           bind->dest = dest;
@@ -702,7 +750,7 @@ void rpmsg_ns_unbind(FAR struct rpmsg_device *rdev,
       if (bind->dest == dest && !strncmp(bind->name, name, RPMSG_NAME_SIZE))
         {
           list_delete(&bind->node);
-          kmm_free(bind);
+          rpmsg_bind_free(bind);
           break;
         }
     }
@@ -774,7 +822,7 @@ void rpmsg_device_destroy(FAR struct rpmsg_s *rpmsg)
                             struct rpmsg_bind_s, node)
     {
       list_delete(&bind->node);
-      kmm_free(bind);
+      rpmsg_bind_free(bind);
     }
 
   nxrmutex_unlock(&rpmsg->lock);
