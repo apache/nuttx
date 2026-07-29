@@ -177,6 +177,7 @@
 #define AUDIO_FMT_APE               0x19
 #define AUDIO_FMT_LC3               0x1a
 #define AUDIO_FMT_SPEEX             0x1b
+#define AUDIO_FMT_SILK              0x1c
 
 #define AUDIO_SUBFMT_END            0x00
 
