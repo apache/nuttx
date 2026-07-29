@@ -28,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <assert.h>
 #include <fcntl.h>
@@ -64,24 +65,34 @@
  * Private Types
  ****************************************************************************/
 
+/* The private data slots are preallocated in the device instance and the
+ * unused ones are kept on the 'free' list.  A slot is claimed by removing it
+ * from that list under the lock, which is atomic with respect to any other
+ * open(), so no in-use flag is needed.  The opened slots are reachable from
+ * filep->f_priv and therefore do not need to be linked anywhere.
+ */
+
 struct rpmsgdev_priv_s
 {
-  uint64_t filep;    /* store server file pointer */
-  bool     nonblock; /* true: open with O_NONBLOCK */
-  mutex_t  lock;     /* Mutex used to protect the file operation */
+  uint64_t         filep;    /* store server file pointer */
+  bool             nonblock; /* true: open with O_NONBLOCK */
+  struct list_node node;     /* Free list node, unlinked while in use */
+  mutex_t          lock;     /* Mutex used to protect the file operation */
 };
 
 struct rpmsgdev_s
 {
-  struct rpmsg_endpoint ept;         /* Rpmsg endpoint */
-  FAR const char       *remotecpu;   /* The server cpu name */
-  FAR const char       *remotepath;  /* The device path in the server cpu */
-  sem_t                 wait;        /* Wait sem, used for preventing any
-                                      * operation until the connection
-                                      * between two cpu established.
-                                      */
-  struct list_node      cookies;     /* Requests waiting for a reply */
-  spinlock_t            lock;        /* Protect the cookie list */
+  struct rpmsg_endpoint  ept;         /* Rpmsg endpoint */
+  FAR const char         *remotecpu;  /* The server cpu name */
+  FAR const char         *remotepath; /* The device path in the server cpu */
+  sem_t                  wait;        /* Wait sem, used for preventing any
+                                       * operation until the connection
+                                       * between two cpu established.
+                                       */
+  struct list_node       free;        /* List head of the free slots */
+  struct list_node       cookies;     /* Requests waiting for a reply */
+  spinlock_t             lock;        /* Protect the free and cookie lists */
+  struct rpmsgdev_priv_s priv[CONFIG_DEV_RPMSG_OPEN_MAX];
 };
 
 /* Rpmsg device cookie used to handle the response from the remote cpu */
@@ -209,6 +220,7 @@ static int rpmsgdev_open(FAR struct file *filep)
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_open_s msg;
+  irqstate_t flags;
   int ret;
 
   /* Get the mountpoint inode reference from the file structure and the
@@ -218,7 +230,12 @@ static int rpmsgdev_open(FAR struct file *filep)
   dev = filep->f_inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-  priv = kmm_zalloc(sizeof(*priv));
+  /* Claim a free private data slot by removing it from the free list */
+
+  flags = spin_lock_irqsave(&dev->lock);
+  priv = list_remove_head_type(&dev->free, struct rpmsgdev_priv_s, node);
+  spin_unlock_irqrestore(&dev->lock, flags);
+
   if (priv == NULL)
     {
       return -ENOMEM;
@@ -235,7 +252,9 @@ static int rpmsgdev_open(FAR struct file *filep)
   if (ret < 0)
     {
       rpmsgdeverr("open failed, ret=%d\n", ret);
-      kmm_free(priv);
+      flags = spin_lock_irqsave(&dev->lock);
+      list_add_tail(&dev->free, &priv->node);
+      spin_unlock_irqrestore(&dev->lock, flags);
       return ret;
     }
 
@@ -268,6 +287,7 @@ static int rpmsgdev_close(FAR struct file *filep)
   FAR struct rpmsgdev_s *dev;
   FAR struct rpmsgdev_priv_s *priv;
   struct rpmsgdev_close_s msg;
+  irqstate_t flags;
   int ret;
 
   /* Recover our private data from the struct file instance */
@@ -289,7 +309,9 @@ static int rpmsgdev_close(FAR struct file *filep)
 
   filep->f_priv = NULL;
   nxmutex_destroy(&priv->lock);
-  kmm_free(priv);
+  flags = spin_lock_irqsave(&dev->lock);
+  list_add_tail(&dev->free, &priv->node);
+  spin_unlock_irqrestore(&dev->lock, flags);
 
   return ret;
 }
@@ -1286,6 +1308,7 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
 {
   FAR struct rpmsgdev_s *dev;
   int ret;
+  int i;
 
   /* Arguments check */
 
@@ -1310,7 +1333,13 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
 
   nxsem_init(&dev->wait, 0, 0);
   spin_lock_init(&dev->lock);
+
+  list_initialize(&dev->free);
   list_initialize(&dev->cookies);
+  for (i = 0; i < CONFIG_DEV_RPMSG_OPEN_MAX; i++)
+    {
+      list_add_tail(&dev->free, &dev->priv[i].node);
+    }
 
   /* Register the rpmsg callback */
 

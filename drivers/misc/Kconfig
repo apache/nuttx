@@ -60,6 +60,18 @@ config DEV_RPMSG_SERVER
 	default n
 	depends on RPMSG
 
+config DEV_RPMSG_OPEN_MAX
+	int "Rpmsg Device max concurrent opens per device"
+	default 4
+	depends on DEV_RPMSG || DEV_RPMSG_SERVER
+	---help---
+		Maximum number of concurrent open() instances supported per rpmsg
+		device.  The per-open data blocks (client: struct rpmsgdev_priv_s,
+		server: struct rpmsgdev_device_s) are preallocated as a fixed-size
+		array inside each device/endpoint instance to avoid dynamic
+		allocation.  open() is rejected with -ENOMEM once all slots are in
+		use.
+
 if DEV_RPMSG_SERVER
 
 config DEV_RPMSG_SERVER_WORK_PRIORITY
