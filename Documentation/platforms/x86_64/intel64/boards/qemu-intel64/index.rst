@@ -228,3 +228,9 @@ fb
 ---
 
 Configuration that enables NuttX framebuffer examples.
+
+mw
+--
+
+Microwindows demo configuration using framebuffer, USB HID keyboard (raw byte stream), and USB HID mouse.  See
+:doc:`/applications/graphics/microwindows/index` for details.
