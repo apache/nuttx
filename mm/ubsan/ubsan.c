@@ -158,10 +158,11 @@ static int64_t get_signed_val(FAR struct type_descriptor *type,
   if (is_inline_int(type))
     {
       unsigned bits = type_bit_width(type);
-      uint64_t mask = (1llu << bits) - 1;
+      uint64_t mask = UINT64_MAX >> (sizeof(uint64_t) * 8 - bits);
       uint64_t ret = (uintptr_t)val & mask;
 
-      return ret & (1llu << (bits - 1)) != 0 ? ret | ~mask : ret;
+      return (int64_t)(((ret & (1llu << (bits - 1))) != 0) ?
+             ret | ~mask : ret);
     }
 
   return *(FAR int64_t *)val;
