@@ -43,22 +43,6 @@
 #include "sched/sched.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifdef CONFIG_LIB_SYSCALL
-
-/* Requested privilege level 3 in a segment selector.  A caller that reached
- * here through the `syscall' instruction was in user mode, and SYSRETQ is
- * going to put it back there with the selectors IA32_STAR describes -- see
- * x86_64_fork_syscall().
- */
-
-#  define X86_GDT_RPL_USER 3
-
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
