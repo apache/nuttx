@@ -27,6 +27,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdbool.h>
+
 #include <nuttx/config.h>
 
 #include <nuttx/input/x11_keysym.h>
@@ -95,7 +97,7 @@ int keyboard_unregister(FAR struct keyboard_lowerhalf_s *lower,
  * Name: keyboard_translate_virtio_code
  ****************************************************************************/
 
-uint32_t keyboard_translate_virtio_code(uint16_t keycode);
+uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special);
 
 #undef EXTERN
 #ifdef __cplusplus

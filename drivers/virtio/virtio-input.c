@@ -117,11 +117,23 @@ static void
 virtio_input_send_keyboard_event(FAR struct virtio_input_priv *priv,
                                  FAR struct virtio_input_event *event)
 {
+  static const uint32_t types[2][2] =
+    {
+      {
+        KEYBOARD_RELEASE, KEYBOARD_PRESS
+      },
+      {
+        KBD_SPECREL, KBD_SPECPRESS
+      }
+    };
+
   if (event->type == EV_KEY)
     {
-      priv->keyboardsample.code =
-        keyboard_translate_virtio_code(event->code);
-      priv->keyboardsample.type = event->value;
+      uint32_t trans_key;
+      bool is_special;
+      trans_key = keyboard_translate_virtio_code(event->code, &is_special);
+      priv->keyboardsample.code = trans_key;
+      priv->keyboardsample.type = types[is_special][event->value & 1];
     }
   else if (event->type == EV_SYN && event->code == SYN_REPORT)
     {
