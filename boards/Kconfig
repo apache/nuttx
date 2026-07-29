@@ -5658,10 +5658,16 @@ config BOARD_ETC_ROMFS_PASSWD_ENABLE
 	bool "Auto-generate /etc/passwd at build time"
 	default n
 	depends on ETC_ROMFS
+	depends on FSUTILS_PASSWD
+	depends on CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO || CRYPTO_CRYPTODEV_HARDWARE
 	---help---
 		Generate /etc/passwd at build time. The password is hashed with
 		PBKDF2-HMAC-SHA256 by tools/mkpasswd; the plaintext is not stored
 		in the firmware.
+
+		Requires CONFIG_FSUTILS_PASSWD (nuttx-apps) and a cryptodev
+		backend (CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO on sim, or
+		CONFIG_CRYPTO_CRYPTODEV_HARDWARE on targets with hardware crypto).
 
 		The password is hashed at build time by the host tool
 		tools/mkpasswd (compiled from tools/mkpasswd.c) using
@@ -5678,7 +5684,8 @@ config BOARD_ETC_ROMFS_PASSWD_ENABLE
 		NUTTX_ROMFS_PASSWD_PASSWORD for CI and scripted builds (see
 		tools/update_romfs_password.sh).
 
-		Also enable NSH login with "Encrypted password file" verification.
+		When using CONFIG_NSH_CONSOLE_LOGIN with ETC_ROMFS, enable this
+		option so /etc/passwd is present at runtime.
 
 		Password is not saved in defconfig. Do not commit it.
 
