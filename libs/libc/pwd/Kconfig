@@ -22,9 +22,11 @@ if LIBC_PASSWD_FILE
 
 config LIBC_PASSWD_FILEPATH
 	string "Path to passwd file"
+	default "/tmp/ostest_passwd" if TESTING_OSTEST_MULTIUSER
 	default "/etc/passwd"
 	---help---
 		Provides the location of the passwd file.  The default is /etc/passwd
+		(/tmp/ostest_passwd when CONFIG_TESTING_OSTEST_MULTIUSER is enabled).
 
 config LIBC_PASSWD_LINESIZE
 	int "Maximum line size"
