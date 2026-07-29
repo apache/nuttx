@@ -36,6 +36,10 @@ CSRCS += lib_getsid.c lib_setpgid.c lib_setsid.c
 CSRCS += lib_lockf.c lib_flock.c lib_getpass.c
 CSRCS += lib_chdir.c lib_fchdir.c lib_confstr.c lib_ulimit.c
 
+ifeq ($(CONFIG_SCHED_WAITPID),y)
+CSRCS += lib_wait4.c
+endif
+
 ifneq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += lib_setuid.c lib_setgid.c lib_getuid.c lib_getgid.c
 CSRCS += lib_seteuid.c lib_setegid.c lib_geteuid.c lib_getegid.c
