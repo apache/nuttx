@@ -734,6 +734,13 @@ mtdrwb
 This is the ``apps/examples/mtdrwb`` test using a MTD RAM driver to simulate the
 FLASH part.
 
+mw
+--
+
+Microwindows demo configuration using virtual keyboard (event mode),
+touchscreen, and framebuffer.  See
+:doc:`/applications/graphics/microwindows/index` for details.
+
 nettest
 -------
 
