@@ -956,18 +956,28 @@ config ESP32S3_PAGEFAULT
 		This is the foundation for guard pages, lazy stack/heap growth and,
 		ultimately, demand paging / copy-on-write on the ESP32-S3.
 
-if ESP32S3_PAGEFAULT
-
-config ESP32S3_PAGEFAULT_ABORT
-	bool "Abort the faulting task instead of panicking"
+config ESP32S3_USERFAULT_ABORT
+	bool "Abort a faulting user task instead of panicking"
 	default y
+	depends on !BUILD_FLAT
 	select SIG_DEFAULT
 	select SIG_SIGKILL_ACTION
 	---help---
-		When an unprivileged (WORLD1) task takes an unrecoverable
-		cache-attribute fault, deliver SIGSEGV to it so its default action
-		terminates only that task and the rest of the system keeps running,
-		instead of a whole-system panic.  Kernel-mode faults still panic.
+		When an unprivileged task takes a fault that cannot be serviced,
+		deliver SIGSEGV to it so its default action terminates only that task
+		and the rest of the system keeps running, instead of a whole-system
+		panic.  Kernel-mode faults still panic:  a kernel thread, a fault
+		inside a system call, and a fault while handling an interrupt all run
+		with PS.UM clear and there is no safe task to kill.
+
+		This is deliberately independent of ESP32S3_PAGEFAULT.  Servicing a
+		fault so the instruction can be re-executed and refusing to let a
+		rogue task halt the machine are separate capabilities, and the second
+		is one you always want:  a user task can raise an unaligned load, a
+		divide by zero, a privileged instruction or a corrupt opcode, none of
+		which any dispatcher can service.
+
+if ESP32S3_PAGEFAULT
 
 config ESP32S3_PAGEFAULT_SELFTEST
 	bool "Recoverable-fault self-test"

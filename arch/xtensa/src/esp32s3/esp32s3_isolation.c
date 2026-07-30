@@ -37,7 +37,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/sched.h>
 
-#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
 #include <signal.h>
 #include <arch/irq.h>
 #include <arch/xtensa/xtensa_corebits.h>
@@ -61,7 +61,7 @@
 
 #include "soc/extmem_reg.h"
 
-#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
 #include "sched/sched.h"
 #include "signal/signal.h"
 #endif
@@ -109,7 +109,7 @@ extern void _xtensa_level3_vector(void);
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
 
 /****************************************************************************
  * Name: pms_clear_violations
@@ -171,7 +171,7 @@ static void IRAM_ATTR pms_clear_violations(void)
 
 static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
 {
-#ifdef CONFIG_ESP32S3_PAGEFAULT_ABORT
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
   uint32_t *regs = (uint32_t *)context;
 
   /* Acknowledge and re-arm the monitors first so the level-triggered
