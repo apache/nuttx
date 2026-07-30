@@ -1118,6 +1118,160 @@ console hands over a whole line at once. The keyboard upper half overwrites
 the oldest event when the buffer is full, so a line typed at the console
 would arrive with its beginning silently missing.
 
+nxdoom
+------
+
+**Purpose:** runs ``NXDoom``, the NuttX port of Chocolate DOOM, on the board's
+LCD, played with a USB HID keyboard and reading the game data from the microSD
+card. It brings together the LTDC framebuffer, the OTG FS USB host and the
+SDMMC peripheral, and uses the external SDRAM for the game's zone memory.
+
+.. figure:: linum-stm32h753bi-nxdoom.jpg
+   :figwidth: 60%
+   :align: center
+   :alt: DOOM running on the LINUM-STM32H753BI LCD
+
+   DOOM running on the board's 1024x600 LCD
+
+DOOM renders to a 320x200 8-bit paletted buffer. This configuration stretches
+that over the whole 1024x600 panel (``CONFIG_GAMES_NXDOOM_FILLSCREEN``) and
+runs the LTDC layer in L8 (``CONFIG_STM32_LTDC_L1_L8`` with
+``CONFIG_GAMES_NXDOOM_FB_CMAP``), so the palette indices are written to the
+framebuffer unconverted and the display applies the palette from its colour
+map as it scans out. That keeps the conversion off the CPU and
+halves the amount of data written per frame.
+
+Two further options matter on this board, both because the framebuffer and the
+heap are in external SDRAM:  ``CONFIG_GAMES_NXDOOM_ROWSTAGE`` builds each row
+in internal RAM so the SDRAM only sees burst copies, and
+``CONFIG_GAMES_NXDOOM_STATIC_SCRNBUF`` keeps the buffer DOOM renders into out
+of the SDRAM altogether. Between them they are worth 2.7 times the frame rate.
+
+The game needs about 4 MiB of contiguous memory for its zone. That comes from
+the SDRAM region, which is 6 MiB when the LTDC is enabled (the last 2 MiB of
+the 8 MiB SDRAM is reserved for the framebuffer).
+
+**Requirements:**
+
+* A microSD card, formatted as FAT, holding a DOOM IWAD. The shareware
+  ``doom1.wad`` and ``freedoom1.wad`` both work, as do the commercial IWADs.
+* A USB HID keyboard on the OTG FS service connector.
+
+**Build and flash:**
+
+.. code-block:: console
+
+   $ ./tools/configure.sh linum-stm32h753bi:nxdoom
+   $ make -j
+
+Flash the resulting ``nuttx.bin`` to the board.
+
+**How to test:** copy the IWAD to the SD card, plug the card and the keyboard,
+reset the board and check that all three devices came up::
+
+  nsh> ls /dev
+  /dev:
+   console
+   fb0
+   kbda
+   mmcsd0
+   null
+   rtc0
+   ttyS0
+   zero
+
+Mount the card and start the game. ``nxdoom`` looks for the IWAD in the
+current directory, so either ``cd`` to the mount point first or point it at the
+file with ``-iwad``::
+
+  nsh> mount -t vfat /dev/mmcsd0 /mnt
+  nsh> nxdoom -iwad /mnt/doom1.wad
+                               NXDoom v0.0.0
+  z_init: Init zone memory allocation daemon.
+  zone memory: Using native C allocator.
+  Using /mnt/ for configuration and saves
+  v_init: allocate screens.
+  m_load_defaults: Load system defaults.
+  saving config in /mnt/default.cfg
+  W_Init: Init WADfiles.
+   adding /mnt/doom1.wad
+  =========================================================================
+                              DOOM Shareware
+  =========================================================================
+   NXDoom is free software, covered by the GNU General Public
+   License.  There is NO warranty; not even for MERCHANTABILITY or FITNESS
+   FOR A PARTICULAR PURPOSE. You are welcome to change and distribute
+   copies under certain conditions. See the source for more information.
+  =========================================================================
+  i_init: Setting up machine state.
+  m_init: Init miscellaneous info.
+  r_init: Init DOOM refresh daemon - [...................]
+  p_init: Init Playloop state.
+  d_check_net_game: Checking network game status.
+  startskill 2  deathmatch: 0  startmap: 1  startepisode: 1
+  player 1 of 1 (1 nodes)
+  Emulating the behavior of the 'Doom 1.9' executable.
+  hu_init: Setting up heads up display.
+  st_init: Init status bar.
+
+**Copying the IWAD with zmodem:** the configuration also enables the ``rz`` and
+``sz`` commands, so the IWAD can be copied over the serial console instead of
+moving the SD card to a card reader. ``CONFIG_SYSTEM_ZMODEM_MOUNTPOINT`` is
+set to ``/mnt``, so a received file lands on the SD card::
+
+  nsh> mount -t vfat /dev/mmcsd0 /mnt
+  nsh> rz
+
+and, from the host, with the console closed in any terminal program::
+
+  $ sz -b --zmodem -w 1024 doom1.wad < /dev/ttyACM0 > /dev/ttyACM0
+
+Note that USART1 has no RTS/CTS on this board, so there is no hardware flow
+control to throttle the sender. ``CONFIG_USART1_RXBUFSIZE`` is raised to 4096
+to compensate, and the ``-w`` window above makes the host wait for
+acknowledgements. Even so this runs at roughly 10 KiB/s, so a 4 MiB IWAD takes
+about seven minutes; a card reader is much faster if one is available.
+
+The game runs on the LCD and is played from the USB keyboard: arrow keys to
+move, Ctrl to fire, Shift to run, Alt to strafe, Space to open doors and Esc
+for the menu. Configuration and saved games are written to ``/mnt``, so the
+card must be mounted read/write.
+
+.. note::
+   The game needs key *release* events, without which a movement key would
+   never stop being held down. A keyboard device reports them by default,
+   so nothing has to be enabled for it.
+
+   Do not turn on ``CONFIG_INPUT_KEYBOARD_BYTESTREAM`` for this
+   configuration. That makes the device deliver the codec byte stream
+   instead of events, and the byte stream encodes presses only: every
+   release is dropped, and the player would keep walking after the key is
+   let go.
+
+.. note::
+   ``CONFIG_HIDKBD_NOGETREPORT`` (and the ``CONFIG_USBHOST_ASYNCH`` it needs)
+   is required. By default the HID keyboard driver asks the keyboard for its
+   input report over the control pipe with GET_REPORT. Many keyboards accept
+   that request but always answer with an empty report, and only ever deliver
+   key data on their interrupt IN endpoint. The symptom is a keyboard that
+   enumerates as ``/dev/kbda`` and reports no error at all, while no key is
+   ever seen. With this option the driver reads the interrupt endpoint
+   instead.
+
+.. note::
+   ``CONFIG_FAT_FORCE_INDIRECT`` is required. Without it the FAT layer reads
+   whole sectors straight into the caller's buffer, and the SDMMC IDMA cannot
+   reach the caller's buffer when it lives in external SDRAM. DOOM reads its
+   lumps into ``malloc()``\ ed memory, and once the internal SRAM regions fill
+   up those allocations come from SDRAM, so the failure appears part way
+   through startup rather than immediately::
+
+     r_init: Init DOOM refresh daemon - [                   ]w_read_lump: only read 0 of 5192 on lump 1070
+
+   Forcing indirect transfers routes every read through the DMA-capable
+   sector buffer that ``CONFIG_FAT_DMAMEMORY`` allocates, at the cost of one
+   extra copy per sector.
+
 tone
 ----
 
