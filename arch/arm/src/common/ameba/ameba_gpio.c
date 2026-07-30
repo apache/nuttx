@@ -146,10 +146,12 @@ struct ameba_gpio_dev_s
  * at link time either by the on-chip ROM symbol table or by a fwlib object
  * compiled into libameba_fwlib.a.  Which source applies is per-chip:
  *
- * RCC_PeriphClockCmd, GPIO_Init, GPIO_WriteBit, GPIO_ReadDataBit and
- * GPIO_INTConfig are in ROM on every Ameba ARM chip.  (GPIO_Init also
- * reaches Pinmux_Config, GPIO_Direction, GPIO_INTMode and PAD_PullCtrl
- * internally, resolved inside ROM, so the driver never names them.)
+ * RCC_PeriphClockCmd, GPIO_Init, GPIO_WriteBit, GPIO_ReadDataBit,
+ * GPIO_INTConfig and GPIO_INTMode are in ROM on every Ameba ARM chip.
+ * GPIO_Init calls Pinmux_Config and GPIO_Direction internally.  On
+ * RTL8721Dx its ram_common override also calls PAD_PullCtrl and (for
+ * INT mode) GPIO_INTMode; on amebagreen2 the ROM version does neither,
+ * so the driver calls both explicitly after GPIO_Init.
  *
  * GPIO_INTStatusGet and GPIO_INTStatusClearEdge are the gap.  On RTL8721Dx
  * they come from fwlib ram_common/ameba_gpio.c, compiled in via
@@ -164,9 +166,12 @@ struct ameba_gpio_dev_s
 extern void RCC_PeriphClockCmd(uint32_t periph, uint32_t clock,
                                uint8_t newstate);
 extern void GPIO_Init(struct ameba_gpio_init_s *init);
+extern void GPIO_INTMode(uint32_t pin, uint32_t newstate, uint32_t trigger,
+                         uint32_t polarity, uint32_t debounce);
 extern void GPIO_WriteBit(uint32_t pin, uint32_t state);
 extern uint32_t GPIO_ReadDataBit(uint32_t pin);
 extern void GPIO_INTConfig(uint32_t pin, uint32_t newstate);
+extern void PAD_PullCtrl(uint32_t pin, uint32_t pupd);
 extern uint32_t GPIO_INTStatusGet(uint32_t port);
 extern void GPIO_INTStatusClearEdge(uint32_t port);
 
@@ -279,18 +284,21 @@ static void ameba_gpio_configure(struct ameba_gpio_dev_s *priv,
         init.mode       = AMEBA_GPIO_MODE_INT;
         init.ittrigger  = AMEBA_GPIO_IT_LEVEL;
         init.itpolarity = AMEBA_GPIO_POL_HIGH;
+        init.pupd       = AMEBA_GPIO_PUPD_DOWN;
         break;
 
       case GPIO_INTERRUPT_LOW_PIN:
         init.mode       = AMEBA_GPIO_MODE_INT;
         init.ittrigger  = AMEBA_GPIO_IT_LEVEL;
         init.itpolarity = AMEBA_GPIO_POL_LOW;
+        init.pupd       = AMEBA_GPIO_PUPD_UP;
         break;
 
       case GPIO_INTERRUPT_RISING_PIN:
         init.mode       = AMEBA_GPIO_MODE_INT;
         init.ittrigger  = AMEBA_GPIO_IT_EDGE;
         init.itpolarity = AMEBA_GPIO_POL_HIGH;
+        init.pupd       = AMEBA_GPIO_PUPD_DOWN;
         break;
 
       case GPIO_INTERRUPT_BOTH_PIN:
@@ -305,6 +313,7 @@ static void ameba_gpio_configure(struct ameba_gpio_dev_s *priv,
         init.mode       = AMEBA_GPIO_MODE_INT;
         init.ittrigger  = AMEBA_GPIO_IT_EDGE;
         init.itpolarity = AMEBA_GPIO_POL_LOW;
+        init.pupd       = AMEBA_GPIO_PUPD_UP;
         break;
     }
 
@@ -320,21 +329,33 @@ static void ameba_gpio_configure(struct ameba_gpio_dev_s *priv,
 
   GPIO_Init(&init);
 
-  /* GPIO_Init() leaves the interrupt source enabled, and setting up the
-   * trigger can latch a stale edge.  While the pin is still unmasked, clear
-   * that latch, then mask the pin until the application enables it.  Order
-   * matters: GPIO_INTStatusClearEdge() acts through the masked
-   * GPIO_INT_STATUS, so it clears only a currently-unmasked pin --
-   * clearing after masking would miss this pin.  The clear+mask pair runs
-   * under the port lock so the ISR cannot dispatch a stale edge in between;
-   * clearing the whole port's edge latches is safe during registration, as
-   * no interrupt pin is application-enabled yet.
+  /* On amebagreen2 (and similar), the ROM GPIO_Init does not call
+   * PAD_PullCtrl for interrupt or input modes.  Call it explicitly here so
+   * the pad pull always matches init.pupd.  On RTL8721Dx whose ram_common
+   * GPIO_Init already calls it this is a harmless redundant write.
+   */
+
+  PAD_PullCtrl(init.pin, init.pupd);
+
+  /* On chips whose ROM GPIO_Init does not call GPIO_INTMode internally
+   * (confirmed for amebagreen2; harmless double-call on RTL8721Dx where
+   * ram_common already does it), explicitly programme the trigger/polarity
+   * into the GPIO interrupt controller now.  GPIO_INTMode with ENABLE
+   * also unmasks the pin in the controller, so immediately follow with
+   * GPIO_INTConfig(DISABLE) to keep it masked until the application
+   * calls go_enable().  Clear stale edge latches first while the pin is
+   * still unmasked; GPIO_INTStatusClearEdge operates on the unmasked
+   * status so clearing after masking would miss this pin.  The whole
+   * sequence runs under the port lock to prevent the ISR from dispatching
+   * a stale edge between the clear and the mask.
    */
 
   if (init.mode == AMEBA_GPIO_MODE_INT)
     {
       irqstate_t flags = spin_lock_irqsave(&g_ameba_gpio.lock);
 
+      GPIO_INTMode(priv->pin, AMEBA_ENABLE, init.ittrigger,
+                   init.itpolarity, init.itdebounce);
       GPIO_INTStatusClearEdge(AMEBA_PIN_PORT(priv->pin));
       GPIO_INTConfig(priv->pin, AMEBA_DISABLE);
 

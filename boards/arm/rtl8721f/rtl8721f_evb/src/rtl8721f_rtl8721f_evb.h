@@ -82,6 +82,19 @@ int rtl8721f_wifi_initialize(void);
 void ameba_ipc_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_GPIO
+/****************************************************************************
+ * Name: rtl8721f_gpio_initialize
+ *
+ * Description:
+ *   Register the board's GPIO pins with the NuttX GPIO upper half
+ *   (boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_gpio.c).
+ *
+ ****************************************************************************/
+
+int rtl8721f_gpio_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721F_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

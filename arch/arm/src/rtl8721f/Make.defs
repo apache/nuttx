@@ -56,6 +56,10 @@ ifeq ($(CONFIG_RTL8721F_FLASH_FS),y)
 CHIP_CSRCS += ameba_flash_mtd.c
 endif
 
+ifeq ($(CONFIG_AMEBA_GPIO),y)
+CHIP_CSRCS += ameba_gpio.c
+endif
+
 ############################################################################
 # Realtek RTL8721F SDK integration
 #

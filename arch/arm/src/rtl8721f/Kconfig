@@ -82,4 +82,9 @@ config RTL8721F_FLASH_FS
 
 endmenu # RTL8721F Storage
 
+# Shared Ameba peripheral drivers (GPIO, ...) live in the common IC-agnostic
+# tree and are configured through one Kconfig reused by every Ameba chip.
+
+source "arch/arm/src/common/ameba/Kconfig"
+
 endif # ARCH_CHIP_RTL8721F

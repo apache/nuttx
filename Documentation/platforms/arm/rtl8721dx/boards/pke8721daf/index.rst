@@ -74,7 +74,7 @@ the example::
 
     nsh> gpio -o 1 /dev/gpio0     # drive the output high
     nsh> gpio /dev/gpio1          # read the input
-    nsh> gpio -w 1 /dev/gpio2     # wait for a rising-edge interrupt
+    nsh> gpio -w 1 /dev/gpio2     # wait for a falling-edge interrupt
 
 Pins are encoded with the ``AMEBA_PA()`` / ``AMEBA_PB()`` helpers from
 ``arch/arm/src/common/ameba/ameba_gpio.h`` (port A/B, pin 0-31), matching the

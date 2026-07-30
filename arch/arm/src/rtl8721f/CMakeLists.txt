@@ -46,6 +46,10 @@ if(CONFIG_RTL8721F_FLASH_FS)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_flash_mtd.c)
 endif()
 
+if(CONFIG_AMEBA_GPIO)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_gpio.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
