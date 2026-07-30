@@ -33,6 +33,7 @@
 
 #include <nuttx/input/keyboard.h>
 #include <nuttx/input/kbd_codec.h>
+#include <nuttx/streams.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/list.h>
 #include <nuttx/circbuf.h>
@@ -41,6 +42,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_INPUT_KEYBOARD_BYTESTREAM
+
+/* The longest sequence that one event can produce in the byte stream.  A
+ * normal key is a single byte; a special key is the four byte escape
+ * sequence emitted by kbd_specpress().
+ */
+
+#  define KEYBOARD_BYTESTREAM_MAX 4
+#endif
 
 /****************************************************************************
  * Private Types
@@ -385,6 +396,66 @@ int keyboard_unregister(FAR struct keyboard_lowerhalf_s *lower,
 }
 
 /****************************************************************************
+ * Name: keyboard_encode
+ *
+ * Description:
+ *   Render one keyboard event as the byte stream that the keyboard codec
+ *   defines, for applications that consume characters rather than events.
+ *
+ *   Only the press events are rendered.  A byte stream has no way to say
+ *   that a key came up:  a normal key contributes its character and nothing
+ *   more, which is what a keyboard reporting through a character device has
+ *   always delivered.  An application that needs key releases has to read
+ *   the events instead.
+ *
+ * Input Parameters:
+ *   stream  - Memory stream to render into
+ *   buf     - Buffer of KEYBOARD_BYTESTREAM_MAX bytes backing the stream
+ *   keycode - The key
+ *   type    - The event type
+ *
+ * Returned Value:
+ *   The number of bytes rendered, zero if this event has no representation
+ *   in the byte stream.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_KEYBOARD_BYTESTREAM
+static size_t keyboard_encode(FAR struct lib_memoutstream_s *stream,
+                              FAR char *buf, uint32_t keycode, uint32_t type)
+{
+  lib_memoutstream(stream, buf, KEYBOARD_BYTESTREAM_MAX);
+
+  switch (type)
+    {
+      case KEYBOARD_PRESS:
+        kbd_press(keycode, &stream->common);
+        break;
+
+      case KEYBOARD_SPECPRESS:
+
+        /* Out of range keycodes would trip an assertion in the codec.  A
+         * lower half that reports something the codec does not know about
+         * simply does not appear in the byte stream.
+         */
+
+        if (keycode < FIRST_KEYCODE || keycode > LAST_KEYCODE)
+          {
+            return 0;
+          }
+
+        kbd_specpress(keycode, &stream->common);
+        break;
+
+      default:
+        return 0;
+    }
+
+  return stream->common.nput;
+}
+#endif
+
+/****************************************************************************
  * keyboard_event
  ****************************************************************************/
 
@@ -393,22 +464,42 @@ void keyboard_event(FAR struct keyboard_lowerhalf_s *lower, uint32_t keycode,
 {
   FAR struct keyboard_upperhalf_s *upper = lower->priv;
   FAR struct keyboard_opriv_s     *opriv;
-  struct keyboard_event_s          key;
   int semcount;
+
+#ifdef CONFIG_INPUT_KEYBOARD_BYTESTREAM
+  struct lib_memoutstream_s stream;
+  char buf[KEYBOARD_BYTESTREAM_MAX];
+  size_t buflen;
+
+  buflen = keyboard_encode(&stream, buf, keycode, type);
+  if (buflen == 0)
+    {
+      /* This event has no representation in the byte stream */
+
+      return;
+    }
+#else
+  struct keyboard_event_s key;
+
+  key.code = keycode;
+  key.type = type;
+#endif
 
   if (nxmutex_lock(&upper->lock) < 0)
     {
       return;
     }
 
-  key.code = keycode;
-  key.type = type;
   list_for_every_entry(&upper->head, opriv, struct keyboard_opriv_s, node)
     {
       if (nxmutex_lock(&opriv->lock) == 0)
         {
+#ifdef CONFIG_INPUT_KEYBOARD_BYTESTREAM
+          circbuf_overwrite(&opriv->circ, buf, buflen);
+#else
           circbuf_overwrite(&opriv->circ, &key,
                             sizeof(struct keyboard_event_s));
+#endif
           nxsem_get_value(&opriv->waitsem, &semcount);
           if (semcount < 1)
             {

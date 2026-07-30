@@ -89,6 +89,25 @@ config INPUT_KEYBOARD
 	bool
 	default n
 
+config INPUT_KEYBOARD_BYTESTREAM
+	bool "Deliver a byte stream instead of keyboard events"
+	default n
+	depends on INPUT_KEYBOARD && LIBC_KBDCODEC
+	---help---
+		By default a keyboard device delivers struct keyboard_event_s
+		events on read().  Select this to make it deliver the byte stream
+		defined by include/nuttx/input/kbd_codec.h instead, which is what
+		the USB HID keyboard driver provided before it moved to the
+		keyboard upper half.
+
+		This is meant for applications that have not been converted yet.
+		The byte stream cannot express a key release, so an application
+		that needs one has to read the events.
+
+		This applies to every keyboard in the build, so it cannot be used
+		to mix a byte stream consumer and an event consumer in the same
+		configuration.
+
 config INPUT_UINPUT
 	bool
 	default n
@@ -723,7 +742,7 @@ config INPUT_SPQ10KBD
 	select I2C
 	---help---
 		Enable the Solder Party Q10 BlackBerry Keyboard support.  This
-		exposes itself as a standard keyboard at /dev/keypadN.
+		exposes itself as a standard keyboard at /dev/kbdN.
 		This keyboard exists both as a standalone module and integrated
 		into the Solder Party Keyboard FeatherWing.  Information on this
 		can be found at https://www.solder.party/docs/keyboard-pmod/
@@ -783,9 +802,12 @@ config INPUT_KMATRIX_DEBOUNCE
 
 config INPUT_KMATRIX_DEVPATH
 	string "Device path"
-	default "/dev/keypad0"
+	default "/dev/kbd0"
 	---help---
-		Path where the keyboard matrix device will be registered. Default: /dev/keypad0
+		Path where the keyboard matrix device will be registered.  This is
+		the name that applications expect a keyboard to have, so keep the
+		/dev/kbdN form unless the board has a reason to differ.
+		Default: /dev/kbd0
 
 config INPUT_KMATRIX_I2C
 	bool "Keyboard Matrix via I2C GPIO Expander"
