@@ -28,6 +28,7 @@
 #include <sys/types.h>
 
 #include <assert.h>
+#include <nuttx/ascii.h>
 #include <nuttx/debug.h>
 #include <string.h>
 
@@ -65,6 +66,31 @@ static struct sim_dev_s g_simkeyboard;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: translate_x11_ascii
+ *
+ * Description:
+ *   Translate the X11 key codes that stand for an ASCII control character
+ *   rather than for a special key.  Escape and Tab have no keycode in
+ *   enum kbd_keycode_e because they need none:  they are characters, and
+ *   an application looks for them as such.
+ *
+ * Returns: The character, or zero if this key is not one of them.
+ ****************************************************************************/
+
+static uint32_t translate_x11_ascii(uint32_t code)
+{
+  switch (code)
+    {
+    case XK_Escape:
+      return ASCII_ESC;
+    case XK_Tab:
+      return ASCII_TAB;
+    default:
+      return 0;
+    }
+}
 
 /****************************************************************************
  * Name: translate_x11_key
@@ -153,6 +179,28 @@ static uint32_t translate_x11_key(uint32_t code)
       return KEYCODE_SYSREQ;
 
       /* Context-specific function keys */
+
+      /* Modifier keys.  These produce no character of their own, so an
+       * application that wants to know that one is held down has no other
+       * way to find out.
+       */
+
+    case XK_Shift_L:
+      return KEYCODE_LSHIFT;
+    case XK_Shift_R:
+      return KEYCODE_RSHIFT;
+    case XK_Control_L:
+      return KEYCODE_LCTRL;
+    case XK_Control_R:
+      return KEYCODE_RCTRL;
+    case XK_Alt_L:
+      return KEYCODE_LALT;
+    case XK_Alt_R:
+      return KEYCODE_RALT;
+    case XK_Super_L:
+      return KEYCODE_LGUI;
+    case XK_Super_R:
+      return KEYCODE_RGUI;
 
     case XK_F1:
       return KEYCODE_F1;
@@ -263,10 +311,33 @@ void sim_kbdevent(uint32_t key, bool is_press)
       return;
     }
 
+  iinfo("key=%04x\n", key);
+
+  /* A few keysyms are control characters rather than special keys, and an
+   * application expects them as the character.
+   */
+
+  trans_key = translate_x11_ascii(key);
+  if (trans_key != 0)
+    {
+      keyboard_event(&priv->lower, trans_key, types[0][is_press]);
+      return;
+    }
+
   trans_key = translate_x11_key(key);
   is_special = trans_key != KEYCODE_NORMAL;
+
+  /* A keysym outside the Latin-1 range that no table knows about is not a
+   * character.  Reporting it as one would hand the application a value
+   * such as 65307 where it expects a byte of text.
+   */
+
+  if (!is_special && key > 0xff)
+    {
+      return;
+    }
+
   trans_key = is_special ? trans_key : key;
-  iinfo("key=%04x\n", key);
 
   /* Report data changes */
 
