@@ -101,14 +101,17 @@
                                    MPU_RACR_AP_RWRW)
 
 /* DDR REGION
- *   Shareable
+ *   Non-shareable (do not add MPU_RACR_S)
  *   Cacheable
  *   Bufferable
  *   P:RW   U:RW
+ *
+ * NOTE: if DDR is marked Shareable, LDREX/STREX to it take an external data
+ * abort on this R5F; Non-shareable uses the core-local monitor instead.
+ * Observed with ldrex-based code (e.g. C++ std::atomic).
  */
 #define am67_ddr_region(base,size) \
   mpu_configure_region(base, size, MPU_RACR_TEX(1)  | \
-                                   MPU_RACR_S       | \
                                    MPU_RACR_C       | \
                                    MPU_RACR_B       | \
                                    MPU_RACR_AP_RWRW)
