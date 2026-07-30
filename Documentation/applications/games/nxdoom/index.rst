@@ -46,16 +46,22 @@ apply).
    Sound support, multiplayer support, support for any of the wide array of
    input devices NuttX can provide are also highly welcomed.
 
-.. warning::
+.. note::
 
-   Currently, the only supported input device is keyboard input. However,
-   NuttX's keyboard codec is highly non-standard and therefore some things do
-   not work as intended. For instance, pressing CTRL to fire does nothing since
-   NuttX's codec has no concept of CTRL. The keyboard codec will need to be
-   amended before this works properly, but the port is upstreamed in the hopes
-   of encouraging those changes or getting more contributors to add different
-   input devices. The keyboard codec needs to be treated delicately since other
-   things in the kernel depend on it.
+   Keyboard input is the only input device supported so far, and other ones
+   are welcome.
+
+   The game binds fire, run and strafe to Ctrl, Shift and Alt. Those reach
+   an application only if the keyboard driver reports a modifier as a key in
+   its own right, which the codec keycodes ``KEYCODE_LCTRL`` through
+   ``KEYCODE_RGUI`` exist for.
+
+   The simulator always reports them. A USB HID keyboard reports them when
+   ``CONFIG_HIDKBD_REPORT_MODIFIERS`` is enabled, which is off by default,
+   so a configuration that plays the game over USB has to turn it on. A
+   driver that reports no modifiers at all, a matrix keyboard for instance,
+   leaves those three actions on keys the game cannot see, and they have to
+   be rebound to play.
 
 Minimum requirements
 --------------------
@@ -92,6 +98,49 @@ To launch the game, just run:
    nsh> nxdoom -iwad /path/to/my/iwadfile.wad
 
 and replace the path with your WAD file's path.
+
+Tuning the display for a board
+------------------------------
+
+DOOM renders a 320x200 image with 8 bits per pixel and a palette, and the port
+scales that up and converts it to whatever the frame buffer wants. How much
+that costs depends a great deal on the board, so the following options are
+available. All of them are disabled by default, which leaves the behaviour
+unchanged, and each is worth enabling only where it pays.
+
+``CONFIG_GAMES_NXDOOM_FB_CMAP``
+  Load the DOOM palette into the frame buffer's colour map and blit the
+  palette indices unconverted, letting the display convert them while it scans
+  out. This needs a frame buffer that is 8 bits per pixel and supports
+  ``FBIOPUT_CMAP``, such as an STM32 LTDC layer configured for L8. It removes
+  the conversion from the blit and halves the amount of data written per
+  frame.
+
+``CONFIG_GAMES_NXDOOM_FILLSCREEN``
+  Stretch the image over the whole display instead of scaling it by the
+  largest whole number that fits. This fills a display whose size is not an
+  exact multiple of 320x200, at the cost of a scale factor that is not uniform
+  across the image. Without it the image is scaled by a whole number and
+  centred, leaving a border.
+
+``CONFIG_GAMES_NXDOOM_ROWSTAGE``
+  Build each output row in a staging buffer and copy it out, rather than
+  writing the frame buffer a pixel at a time, so that the frame buffer only
+  ever sees burst-friendly copies. Costs a few kilobytes of ``.bss``. This is
+  worth a lot when the frame buffer is external memory and the data cache is
+  in write-through mode, and little otherwise.
+
+``CONFIG_GAMES_NXDOOM_STATIC_SCRNBUF``
+  Place the buffer DOOM renders into in ``.bss`` rather than taking it from the
+  heap, which puts it in internal RAM on a board whose heap is mostly external
+  memory. The renderer draws in vertical columns, so consecutive writes are
+  one screen width apart and none of them coalesce, which makes external memory
+  close to the worst case for it. Costs 64000 bytes of RAM whether the game
+  runs or not.
+
+As an illustration of the effect, on an STM32H753 driving a 1024x600 panel
+whose frame buffer lives in SDRAM, ``ROWSTAGE`` and ``STATIC_SCRNBUF`` are
+worth 2.7 times the frame rate between them.
 
 Other Notes
 -----------

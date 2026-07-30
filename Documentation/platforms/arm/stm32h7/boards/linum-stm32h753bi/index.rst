@@ -1181,8 +1181,8 @@ reset the board and check that all three devices came up::
    zero
 
 Mount the card and start the game. ``nxdoom`` looks for the IWAD in the
-current directory, so either ``cd`` to the mount point first or point it at the
-file with ``-iwad``::
+current directory, so either ``cd`` to the mount point first or point it at
+the file with ``-iwad``::
 
   nsh> mount -t vfat /dev/mmcsd0 /mnt
   nsh> nxdoom -iwad /mnt/doom1.wad
@@ -1214,10 +1214,11 @@ file with ``-iwad``::
   hu_init: Setting up heads up display.
   st_init: Init status bar.
 
-**Copying the IWAD with zmodem:** the configuration also enables the ``rz`` and
-``sz`` commands, so the IWAD can be copied over the serial console instead of
-moving the SD card to a card reader. ``CONFIG_SYSTEM_ZMODEM_MOUNTPOINT`` is
-set to ``/mnt``, so a received file lands on the SD card::
+**Copying the IWAD with zmodem:** the configuration also enables the ``rz``
+and ``sz`` commands, so the IWAD can be copied over the serial console
+instead of moving the SD card to a card reader.
+``CONFIG_SYSTEM_ZMODEM_MOUNTPOINT`` is set to ``/mnt``, so a received file
+lands on the SD card::
 
   nsh> mount -t vfat /dev/mmcsd0 /mnt
   nsh> rz
