@@ -1,5 +1,7 @@
 /****************************************************************************
- * arch/xtensa/src/esp32s3/esp32s3_pagefault.h
+ * arch/xtensa/src/esp32s3/esp32s3_userfault.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PAGEFAULT_H
-#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PAGEFAULT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H
 
 /****************************************************************************
  * Included Files
@@ -29,45 +31,29 @@
 
 #include <stdint.h>
 
+#ifdef CONFIG_ESP32S3_USERFAULT_ABORT
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_pagefault_dispatch
+ * Name: esp32s3_userfault_abort
  *
  * Description:
- *   Service a precise PMS permission fault (EXCCAUSE Load/Store/InstrFetch
- *   Prohibited).  This is the recoverable-fault entry point invoked from the
- *   Xtensa user exception handler (xtensa_user()).
- *
- *   The faulting data address is read from the register save area
- *   (regs[REG_EXCVADDR]).  If the fault is serviced, the handler leaves the
- *   saved PC (regs[REG_PC] == EPC1) unchanged so that, upon return, the RFE
- *   in the exception vector re-executes the faulting instruction.
+ *   Terminate the faulting unprivileged task with SIGSEGV rather than
+ *   panicking the system.  Cause-agnostic; the caller decides eligibility.
  *
  * Input Parameters:
- *   exccause - The EXCCAUSE value (20/28/29).
- *   regs     - Pointer to the register save area.
+ *   exccause - The EXCCAUSE of the user exception, for reporting
+ *   regs     - The register save area at the time of the exception
  *
  * Returned Value:
- *   OK if the fault was serviced and the instruction should be retried via
- *   RFE; a negated errno value if the fault is not recoverable (the caller
- *   then panics / terminates the faulting task).
+ *   The register frame to resume.
  *
  ****************************************************************************/
 
-int esp32s3_pagefault_dispatch(int exccause, uint32_t *regs);
+uint32_t *esp32s3_userfault_abort(int exccause, uint32_t *regs);
 
-/****************************************************************************
- * Name: esp32s3_pagefault_clear_repeat
- *
- * Description:
- *   Forget the last serviced fault, so that later faults at the same address
- *   are not mistaken for runaway recursion.
- *
- ****************************************************************************/
-
-void esp32s3_pagefault_clear_repeat(void);
-
-#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_PAGEFAULT_H */
+#endif /* CONFIG_ESP32S3_USERFAULT_ABORT */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_USERFAULT_H */

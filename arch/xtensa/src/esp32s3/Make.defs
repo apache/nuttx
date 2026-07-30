@@ -50,6 +50,14 @@ ifneq ($(CONFIG_BUILD_FLAT),y)
 CHIP_CSRCS += esp32s3_isolation.c
 endif
 
+# Terminating a faulting user task rather than panicking is independent of
+# the recoverable-fault dispatcher, so it is built whenever there is an
+# unprivileged world at all.
+
+ifeq ($(CONFIG_ESP32S3_USERFAULT_ABORT),y)
+CHIP_CSRCS += esp32s3_userfault.c
+endif
+
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CHIP_ASRCS += esp32s3_world1_vectors.S
 endif
