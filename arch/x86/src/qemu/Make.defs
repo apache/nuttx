@@ -37,6 +37,11 @@ CMN_CSRCS += i486_irq.c i486_regdump.c i486_releasestack.c
 CMN_CSRCS += i486_savestate.c i486_stackframe.c
 CMN_CSRCS += i486_usestack.c
 
+ifneq ($(filter y,$(CONFIG_ARCH_HAVE_TASK_FORK) $(CONFIG_ARCH_HAVE_VFORK)),)
+CMN_ASRCS += fork.S
+CMN_CSRCS += x86_fork.c
+endif
+
 ifeq ($(CONFIG_ENABLE_ALL_SIGNALS),y)
 CMN_CSRCS += i486_schedulesigaction.c i486_sigdeliver.c
 endif
