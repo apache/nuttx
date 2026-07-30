@@ -36,6 +36,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/input/kbd_codec.h>
 #include <nuttx/input/keyboard.h>
 
 #include <arch/board/board.h>
@@ -79,16 +80,6 @@
 #define KBD_FN_Y        2
 #define KBD_FN_X        0
 
-/* Codes emitted for the Fn + navigation cluster (cursor keys).  They are
- * placed above the printable ASCII range so applications reading /dev/kbd0
- * can tell them apart from regular characters.
- */
-
-#define KBD_CODE_UP     0x80
-#define KBD_CODE_DOWN   0x81
-#define KBD_CODE_LEFT   0x82
-#define KBD_CODE_RIGHT  0x83
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -102,6 +93,7 @@ struct esp32s3_kbd_s
 
   bool pressed[KBD_NROW_PHYS][KBD_NCOL_PHYS];
   uint8_t code[KBD_NROW_PHYS][KBD_NCOL_PHYS];
+  bool special[KBD_NROW_PHYS][KBD_NCOL_PHYS];
 };
 
 /****************************************************************************
@@ -174,35 +166,42 @@ static void esp32s3_kbd_select(uint8_t row)
  ****************************************************************************/
 
 static uint8_t esp32s3_kbd_resolve(int y, int x, bool shift, bool ctrl,
-                                   bool fn)
+                                   bool fn, FAR bool *special)
 {
   char ch;
 
-  /* FN layer: the ; . , / cluster becomes the cursor (arrow) keys, reported
-   * as out-of-band codes so applications can act on them (e.g. scrolling).
+  *special = false;
+
+  /* FN layer: the ; . , / cluster becomes the cursor (arrow) keys.  They
+   * produce no character, so they are reported as special keys carrying a
+   * keycode:  the caller turns *special into a SPEC event type.
    */
 
   if (fn)
     {
+      *special = true;
+
       if (y == 2 && x == 11)
         {
-          return KBD_CODE_UP;                        /* Fn + ';' */
+          return KEYCODE_UP;                         /* Fn + ';' */
         }
 
       if (y == 3 && x == 11)
         {
-          return KBD_CODE_DOWN;                      /* Fn + '.' */
+          return KEYCODE_DOWN;                       /* Fn + '.' */
         }
 
       if (y == 3 && x == 10)
         {
-          return KBD_CODE_LEFT;                      /* Fn + ',' */
+          return KEYCODE_LEFT;                       /* Fn + ',' */
         }
 
       if (y == 3 && x == 12)
         {
-          return KBD_CODE_RIGHT;                     /* Fn + '/' */
+          return KEYCODE_RIGHT;                      /* Fn + '/' */
         }
+
+      *special = false;
     }
 
   ch = shift ? g_shift[y][x] : g_normal[y][x];
@@ -289,21 +288,27 @@ static void esp32s3_kbd_worker(FAR void *arg)
 
           if (scan[y][x])
             {
-              uint8_t code = esp32s3_kbd_resolve(y, x, shift, ctrl, fn);
+              bool special;
+              uint8_t code = esp32s3_kbd_resolve(y, x, shift, ctrl, fn,
+                                                 &special);
 #ifdef CONFIG_ESP32S3_M5_CARDPUTER_KBD_DEBUG
               syslog(LOG_INFO, "kbd: press y=%d x=%d code=0x%02x '%c'\n",
                      y, x, code, (code >= 0x20 && code < 0x7f) ? code : '.');
 #endif
               if (code != 0)
                 {
-                  priv->code[y][x] = code;
-                  keyboard_event(&priv->lower, code, KEYBOARD_PRESS);
+                  priv->code[y][x]    = code;
+                  priv->special[y][x] = special;
+                  keyboard_event(&priv->lower, code,
+                                 special ? KEYBOARD_SPECPRESS :
+                                           KEYBOARD_PRESS);
                 }
             }
           else if (priv->code[y][x] != 0)
             {
               keyboard_event(&priv->lower, priv->code[y][x],
-                             KEYBOARD_RELEASE);
+                             priv->special[y][x] ? KEYBOARD_SPECREL :
+                                                   KEYBOARD_RELEASE);
               priv->code[y][x] = 0;
             }
         }
