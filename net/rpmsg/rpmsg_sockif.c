@@ -690,6 +690,13 @@ static void rpmsg_socket_ept_release(FAR struct rpmsg_endpoint *ept)
 {
   FAR struct rpmsg_socket_conn_s *conn = ept->priv;
 
+  /* Detach the ept from its rpmsg device: the conn may outlive the device
+   * when a file descriptor is still open, and a stale rdev would keep all
+   * the "if (conn->ept.rdev)" guards passing on freed memory.
+   */
+
+  ept->rdev = NULL;
+
   /* Release conn only when close is called */
 
   if (!conn->crefs)
