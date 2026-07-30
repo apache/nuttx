@@ -175,6 +175,7 @@ static void kmatrix_scan_worker(FAR void *arg)
   bool pressed;
   bool old_state;
   uint32_t keycode;
+  uint32_t type;
   int ret;
 
   ret = nxmutex_lock(&priv->lock);
@@ -212,13 +213,28 @@ static void kmatrix_scan_worker(FAR void *arg)
                   kmatrix_set_state(priv, row, col, pressed);
                   kmatrix_reset_debounce(priv, row, col);
 
-                  /* Generate keyboard event */
+                  /* Generate keyboard event.  A keymap entry wrapped in
+                   * KMATRIX_SPECIAL() is a keycode rather than a character,
+                   * and has to be reported with a SPEC event type:  the two
+                   * ranges overlap, so the type is the only way the
+                   * application can tell them apart.
+                   */
 
                   keycode = priv->config->keymap[
                     row * priv->config->ncols + col];
-                  keyboard_event(&priv->lower, (uint16_t)keycode,
-                                 pressed ? KEYBOARD_PRESS :
-                                           KEYBOARD_RELEASE);
+
+                  if ((keycode & KMATRIX_SPECIAL_FLAG) != 0)
+                    {
+                      keycode &= ~KMATRIX_SPECIAL_FLAG;
+                      type = pressed ? KEYBOARD_SPECPRESS :
+                                       KEYBOARD_SPECREL;
+                    }
+                  else
+                    {
+                      type = pressed ? KEYBOARD_PRESS : KEYBOARD_RELEASE;
+                    }
+
+                  keyboard_event(&priv->lower, keycode, type);
 
                   iinfo("Key [%d,%d]: %s (code %lu)\n", row, col,
                         pressed ? "PRESS" : "RELEASE",

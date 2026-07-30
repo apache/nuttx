@@ -35,6 +35,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* A keymap entry is normally the character that the key produces.  Wrap it
+ * in KMATRIX_SPECIAL() instead to declare that the entry is a value from
+ * enum kbd_keycode_e, so that the key is reported as a special key rather
+ * than as the character that happens to share its value:
+ *
+ *   static const uint32_t g_keymap[] =
+ *   {
+ *     '1', '2', '3',
+ *     KMATRIX_SPECIAL(KEYCODE_UP), KMATRIX_SPECIAL(KEYCODE_DOWN), '0',
+ *   };
+ */
+
+#define KMATRIX_SPECIAL_FLAG (UINT32_C(1) << 31)
+#define KMATRIX_SPECIAL(k)   ((k) | KMATRIX_SPECIAL_FLAG)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -91,12 +106,12 @@ extern "C"
  *
  * Description:
  *   Configure and register a keyboard matrix device.  This will create the
- *   /dev/keypadN device node and enable keyboard scanning.
+ *   /dev/kbdN device node and enable keyboard scanning.
  *
  * Input Parameters:
  *   config - The keyboard matrix configuration.  This structure is not
  *            copied; it must persist for the lifetime of the driver.
- *   devpath - The device path for the /dev/keypadN device.
+ *   devpath - The device path for the /dev/kbdN device.
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -125,7 +140,7 @@ struct ioexpander_dev_s;
  *   ioe_dev  - IO expander device (from mcp23x08_initialize or
  *              pca9538_initialize)
  *   config   - The keyboard matrix configuration (with callbacks set)
- *   devpath  - The device path for the /dev/keypadN device
+ *   devpath  - The device path for the /dev/kbdN device
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
