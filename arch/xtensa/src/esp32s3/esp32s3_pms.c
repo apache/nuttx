@@ -205,6 +205,17 @@ static void set_dram_split_line(uintptr_t addr, const uint32_t sensitive_reg)
 
 /****************************************************************************
  * Name: esp32s3_pms_set_sram_main_split_line
+ *
+ * Description:
+ *   Set the boundary that divides Internal SRAM1 between the instruction
+ *   bus and the data bus.
+ *
+ * Input Parameters:
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_sram_main_split_line(uintptr_t addr)
@@ -215,6 +226,18 @@ void esp32s3_pms_set_sram_main_split_line(uintptr_t addr)
 
 /****************************************************************************
  * Name: esp32s3_pms_set_iram_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide the instruction bus into the
+ *   areas a permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_iram_split_line(enum pms_split_line_e line,
@@ -244,6 +267,18 @@ void esp32s3_pms_set_iram_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_set_dram_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide the data bus into the areas a
+ *   permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_dram_split_line(enum pms_split_line_e line,
@@ -273,6 +308,19 @@ void esp32s3_pms_set_dram_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_set_flash_cache_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide cached external flash into the
+ *   areas a permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The start of the area.
+ *   length   - The length of the area in bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_flash_cache_split_line(enum pms_split_line_e line,
@@ -346,6 +394,18 @@ void esp32s3_pms_set_flash_cache_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_iram_region
+ *
+ * Description:
+ *   Give a world its permission on one area of the instruction bus.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_iram_region(enum pms_area_e area,
@@ -375,6 +435,18 @@ void esp32s3_pms_configure_iram_region(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_icache
+ *
+ * Description:
+ *   Give a world its permission on one area of the instruction cache.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_icache(enum pms_area_e area,
@@ -404,6 +476,17 @@ void esp32s3_pms_configure_icache(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_dcache
+ *
+ * Description:
+ *   Give a world its permission on the data cache.
+ *
+ * Input Parameters:
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_dcache(enum esp32s3_pms_world_e world,
@@ -443,6 +526,18 @@ void esp32s3_pms_configure_dcache(enum esp32s3_pms_world_e world,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_dram_region
+ *
+ * Description:
+ *   Give a world its permission on one area of the data bus.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_dram_region(enum pms_area_e area,
@@ -469,7 +564,39 @@ void esp32s3_pms_configure_dram_region(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_flash_cache_region
+ *
+ * Description:
+ *   Give a world its permission on one area of cached external flash.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pms_ace_attr
+ *
+ * Description:
+ *   Convert PMS_ACCESS_* flags to the 3-bit field the external-memory ACE
+ *   registers use.  TRM Table 15.5-2 (p.697): the field is ordered W/R/X
+ *   with X in the least significant bit, which is the reverse of the order
+ *   in enum pms_flags_e, and the reverse again of the IRAM0/DRAM0 constraint
+ *   fields.  Footnote C settles it: 0b010 grants read and neither write nor
+ *   execute.
+ *
+ ****************************************************************************/
+
+static uint32_t pms_ace_attr(enum pms_flags_e flags)
+{
+  return (((flags & PMS_ACCESS_W) != 0) << 2) |
+         (((flags & PMS_ACCESS_R) != 0) << 1) |
+         (((flags & PMS_ACCESS_X) != 0) << 0);
+}
 
 void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
                                               enum esp32s3_pms_world_e world,
@@ -477,26 +604,7 @@ void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
 {
   const uint32_t shift = (FLASH_CACHE_S * world);
   const uint32_t mask = FLASH_CACHE_V << shift;
-  uint32_t attr;
-
-  if (flags == PMS_ACCESS_ALL)
-    {
-      attr = 0b11;
-    }
-  else if ((flags & PMS_ACCESS_W) != 0)
-    {
-      PANIC();
-    }
-  else if ((flags & PMS_ACCESS_X) != 0)
-    {
-      attr = flags | 0b1;
-    }
-  else
-    {
-      attr = flags;
-    }
-
-  uint32_t val = 0x40 | (attr & FLASH_CACHE_V) << shift;
+  const uint32_t val = pms_ace_attr(flags) << shift;
 
   switch (area)
     {
@@ -529,7 +637,127 @@ void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
 }
 
 /****************************************************************************
+ * Name: esp32s3_pms_set_sram_split_line
+ *
+ * Description:
+ *   Place one of the four external-SRAM (PSRAM) split regions.  Address and
+ *   length are physical -- a zero-based offset into the PSRAM device, the
+ *   same space mm_pgalloc() hands out -- and both must be 64 KB aligned
+ *   (TRM 15.5.1 p.696).  Regions must not overlap.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_set_sram_split_line(enum pms_split_line_e line,
+                                     uintptr_t addr, size_t length)
+{
+  uintptr_t aligned_addr = ALIGN_DOWN(addr, MMU_PAGE_SIZE);
+  size_t length_pages = length / MMU_PAGE_SIZE;
+
+  switch (line)
+    {
+      case PMS_SPLIT_LINE_0:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE0_ADDR_REG,
+                      APB_CTRL_SRAM_ACE0_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE0_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE0_SIZE_REG,
+                      APB_CTRL_SRAM_ACE0_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE0_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_1:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE1_ADDR_REG,
+                      APB_CTRL_SRAM_ACE1_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE1_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE1_SIZE_REG,
+                      APB_CTRL_SRAM_ACE1_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE1_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_2:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE2_ADDR_REG,
+                      APB_CTRL_SRAM_ACE2_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE2_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE2_SIZE_REG,
+                      APB_CTRL_SRAM_ACE2_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE2_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_3:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE3_ADDR_REG,
+                      APB_CTRL_SRAM_ACE3_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE3_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE3_SIZE_REG,
+                      APB_CTRL_SRAM_ACE3_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE3_SIZE));
+        }
+        break;
+      default:
+        {
+          PANIC();
+        }
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_pms_configure_sram_region
+ *
+ * Description:
+ *   Set a world's permissions on one external-SRAM split region.  Same
+ *   field layout as the flash regions, TRM Table 15.5-2.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_configure_sram_region(enum pms_area_e area,
+                                       enum esp32s3_pms_world_e world,
+                                       enum pms_flags_e flags)
+{
+  const uint32_t shift = (FLASH_CACHE_S * world);
+  const uint32_t mask = FLASH_CACHE_V << shift;
+  const uint32_t val = pms_ace_attr(flags) << shift;
+
+  switch (area)
+    {
+      case PMS_AREA_0:
+        modifyreg32(APB_CTRL_SRAM_ACE0_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_1:
+        modifyreg32(APB_CTRL_SRAM_ACE1_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_2:
+        modifyreg32(APB_CTRL_SRAM_ACE2_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_3:
+        modifyreg32(APB_CTRL_SRAM_ACE3_ATTR_REG, mask, val);
+        break;
+      default:
+        PANIC();
+        break;
+    }
+}
+
+/****************************************************************************
  * Name: esp32s3_pms_configure_peripheral
+ *
+ * Description:
+ *   Give a world its permission on one peripheral.
+ *
+ * Input Parameters:
+ *   periph   - The peripheral.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_peripheral(enum pms_peripheral_e periph,
@@ -567,6 +795,14 @@ void esp32s3_pms_configure_peripheral(enum pms_peripheral_e periph,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_irom_access
+ *
+ * Description:
+ *   Allow both worlds to read the instruction ROM.  The ROM holds code that
+ *   a user process still calls, so neither world can be refused it.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_irom_access(void)
@@ -588,6 +824,14 @@ void esp32s3_pms_configure_irom_access(void)
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_drom_access
+ *
+ * Description:
+ *   Allow both worlds to read the data ROM.  The ROM holds constants that a
+ *   user process still reads, so neither world can be refused it.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_drom_access(void)
