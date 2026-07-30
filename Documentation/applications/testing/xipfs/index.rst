@@ -79,6 +79,20 @@ Sections
   power loss mid-program leaves behind. These need
   ``CONFIG_FS_XIPFS_FAULT_INJECT``.
 
+``fdpic``
+  That a module staged into the volume loads and runs from flash: global
+  constructors in dependency order, per-instance data, manufactured
+  descriptors, both relocation tables, the GOT fallback for a library with no
+  PLT, and every firmware entry point that has to resolve a module callback.
+  Each module reports its own invariants through its exit status. Needs
+  :doc:`CONFIG_FDPIC </components/fdpic>`.
+
+``reject``
+  That the loader refuses a module it cannot honour rather than loading
+  something broken -- a mutated header, an absent dependency, a missing
+  import, more ``DT_NEEDED`` entries than the walk will follow. Needs
+  ``CONFIG_FDPIC``.
+
 Configuration
 =============
 
