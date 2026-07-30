@@ -208,7 +208,7 @@
 #define ARG_MAX        _POSIX_ARG_MAX
 #define CHILD_MAX      _POSIX_CHILD_MAX
 #define LINE_MAX       _POSIX2_LINE_MAX
-#define LINK_MAX       _POSIX_LINK_MAX
+#define LINK_MAX       128
 #define MAX_CANON      _POSIX_MAX_CANON
 #define MAX_INPUT      _POSIX_MAX_INPUT
 #define NAME_MAX       _POSIX_NAME_MAX
