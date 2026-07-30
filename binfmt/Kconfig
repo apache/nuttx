@@ -46,6 +46,55 @@ if NXFLAT
 source "binfmt/libnxflat/Kconfig"
 endif
 
+config FDPIC
+	bool "Enable the FDPIC ELF Binary Format"
+	default n
+	select BINFMT_LOADABLE
+	select PIC
+	depends on ARCH_ARM
+	---help---
+		Enable support for FDPIC ELF modules.
+
+		An FDPIC module has independently placeable read-only and writable
+		segments, so its text can be mapped and executed directly out of
+		flash while only the writable segment is copied to RAM -- once per
+		running instance.  This requires a filesystem that can expose the
+		media, such as XIPFS or ROMFS, and an arm-uclinuxfdpiceabi
+		toolchain to build the modules.
+
+		The base firmware must reserve the FDPIC register (r9 on ARM) or
+		callbacks from the base firmware into module code will fail.
+
+if FDPIC
+
+config FDPIC_LIBPATH
+	string "Directory searched for shared libraries"
+	default "/mnt/xipfs"
+	---help---
+		Where the loader looks for the objects a module names in its
+		DT_NEEDED entries.  For execute-in-place this should be a
+		filesystem that can expose its media, so a library's code is
+		mapped rather than copied.
+
+config FDPIC_STACKSIZE
+	int "FDPIC module stack size"
+	default 2048
+	---help---
+		Size of the stack given to a task created from an FDPIC module.
+
+config FDPIC_ALLOW_COPY
+	bool "Allow copying text to RAM when execute-in-place is impossible"
+	default n
+	---help---
+		By default a module whose text cannot be mapped directly onto the
+		media fails to load, because copying it to RAM silently forfeits
+		the memory saving that FDPIC was chosen for.
+
+		Enable this during board bring-up to keep modules loading from a
+		filesystem that does not support execute-in-place.
+
+endif # FDPIC
+
 config ELF
 	bool "Enable the ELF Binary Format"
 	default n

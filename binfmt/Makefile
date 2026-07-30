@@ -58,6 +58,10 @@ ifeq ($(CONFIG_NXFLAT),y)
 CSRCS += nxflat.c
 endif
 
+ifeq ($(CONFIG_FDPIC),y)
+CSRCS += fdpic.c
+endif
+
 # Add configured binary modules
 
 include libnxflat/Make.defs

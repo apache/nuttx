@@ -74,6 +74,14 @@ void binfmt_initialize(void)
     }
 #endif
 
+#ifdef CONFIG_FDPIC
+  ret = fdpic_initialize();
+  if (ret < 0)
+    {
+      berr("ERROR: fdpic_initialize failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
 }
 

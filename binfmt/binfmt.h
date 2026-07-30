@@ -327,6 +327,38 @@ int nxflat_initialize(void);
 void nxflat_uninitialize(void);
 #endif
 
+#ifdef CONFIG_FDPIC
+/****************************************************************************
+ * Name: fdpic_initialize
+ *
+ * Description:
+ *   FDPIC support is built unconditionally.  However, in order to
+ *   use this binary format, this function must be called during system
+ *   initialization in order to register the FDPIC binary format.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int fdpic_initialize(void);
+
+/****************************************************************************
+ * Name: fdpic_uninitialize
+ *
+ * Description:
+ *   Unregister the FDPIC binary loader
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void fdpic_uninitialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

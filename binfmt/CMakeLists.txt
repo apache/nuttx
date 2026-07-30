@@ -61,6 +61,10 @@ if(CONFIG_NXFLAT)
   list(APPEND SRCS nxflat.c)
 endif()
 
+if(CONFIG_FDPIC)
+  list(APPEND SRCS fdpic.c)
+endif()
+
 # Builtin application interfaces
 
 if(CONFIG_BUILTIN)

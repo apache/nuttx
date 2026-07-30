@@ -182,9 +182,16 @@
 
 /* The PIC register is usually R10. It can be R9 is stack checking is enabled
  * or if the user changes it with -mpic-register on the GCC command line.
+ *
+ * The ARM FDPIC ABI mandates R9, and GCC hardcodes it for -mfdpic, so an
+ * FDPIC build has no choice in the matter.
  */
 
-#define REG_PIC             REG_R10
+#ifdef CONFIG_FDPIC
+#  define REG_PIC           REG_R9
+#else
+#  define REG_PIC           REG_R10
+#endif
 
 /* CONTROL register */
 

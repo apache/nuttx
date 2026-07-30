@@ -206,6 +206,24 @@
 #define R_ARM_THM_TLS_DESCSEQ16  129           /* Thumb16 */
 #define R_ARM_THM_TLS_DESCSEQ32  130           /* Thumb32 */
 
+/* FDPIC relocations.
+ *
+ * Under the FDPIC ABI each PT_LOAD segment is placed independently, so a
+ * function pointer cannot be a bare code address: it has to carry the data
+ * base its callee will need.  A "function descriptor" is that pair, and
+ * these relocations are how the loader is asked to build and reference
+ * them.  Values are from the ARM FDPIC ABI as implemented by binutils
+ * (include/elf/arm.h).
+ */
+
+#define R_ARM_GOTFUNCDESC        161           /* Data      GOT entry holding a descriptor */
+#define R_ARM_GOTOFFFUNCDESC     162           /* Data      GOT-relative descriptor */
+#define R_ARM_FUNCDESC           163           /* Data      Address of a descriptor */
+#define R_ARM_FUNCDESC_VALUE     164           /* Data      The descriptor itself: {code, GOT} */
+#define R_ARM_TLS_GD32_FDPIC     165           /* Data */
+#define R_ARM_TLS_LDM32_FDPIC    166           /* Data */
+#define R_ARM_TLS_IE32_FDPIC     167           /* Data */
+
 /* Processor specific values for the Phdr p_type field.  */
 
 #define PT_ARM_EXIDX             (PT_LOPROC + 1) /* ARM unwind segment.  */

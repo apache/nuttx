@@ -612,11 +612,42 @@ CELFFLAGS = $(filter-out --fixed-r10,$(CFLAGS)) -fvisibility=hidden \
 CXXELFFLAGS = $(filter-out --fixed-r10,$(CXXFLAGS)) -fvisibility=hidden \
               -mlong-calls
 
+ifeq ($(CONFIG_FDPIC),y)
+  # An FDPIC module reaches its own data through r9, and that register has
+  # to survive a call into the base firmware.  A base firmware routine that
+  # calls back into module code -- qsort() with a module comparison
+  # function is the standard case -- must arrive there with the module's
+  # GOT still in r9, which it will not if the compiler was free to allocate
+  # r9 here.
+  #
+  # This goes in ARCHCPUFLAGS rather than CFLAGS because almost every board
+  # Make.defs assigns
+  #
+  #   CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) ...
+  #
+  # with ':=' after including this file, which discards anything added to
+  # CFLAGS here but re-expands ARCHCPUFLAGS.  The failure is silent and the
+  # symptom is remote from the cause: the build succeeds and only a callback
+  # from firmware into module code misbehaves, reading its data through a
+  # register the firmware has since reused.
+  #
+  # CPICFLAGS derives from CFLAGS, so this reaches module compiles too.
+  # That is harmless: GCC only rejects --fixed-rN when it names the same
+  # register as -mpic-register, and PIC modules use r10.
+
+  ARCHCPUFLAGS += --fixed-r9
+endif
+
 ifeq ($(CONFIG_PIC),y)
+ifneq ($(CONFIG_FDPIC),y)
   # ARCHCFLAGS, not CFLAGS: board Make.defs reassign CFLAGS with ':='
   # after including this file, which would discard the flag.
+  #
+  # FDPIC reserves r9 above instead; reserving both would cost a register
+  # for nothing.
 
   ARCHCFLAGS += --fixed-r10
+endif
   CELFFLAGS += $(PICFLAGS) -mpic-register=r10
   CXXELFFLAGS += $(PICFLAGS) -mpic-register=r10
 
