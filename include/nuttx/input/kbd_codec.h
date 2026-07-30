@@ -166,11 +166,28 @@ enum kbd_keycode_e
   KEYCODE_F21,                 /* Function key 21 */
   KEYCODE_F22,                 /* Function key 22 */
   KEYCODE_F23,                 /* Function key 23 */
-  KEYCODE_F24                  /* Function key 24 */
+  KEYCODE_F24,                 /* Function key 24 */
+
+  /* Modifier keys.  Drivers that are able to track modifier state (a USB
+   * HID keyboard, for example) may report these as key press and key
+   * release events in their own right.  That allows an application to bind
+   * an action to a modifier, or to know that a modifier is being held down,
+   * which cannot be expressed by folding the modifier into the character
+   * that it produces.
+   */
+
+  KEYCODE_LCTRL,               /* Left Ctrl */
+  KEYCODE_RCTRL,               /* Right Ctrl */
+  KEYCODE_LSHIFT,              /* Left Shift */
+  KEYCODE_RSHIFT,              /* Right Shift */
+  KEYCODE_LALT,                /* Left Alt */
+  KEYCODE_RALT,                /* Right Alt */
+  KEYCODE_LGUI,                /* Left GUI (Windows/Command) */
+  KEYCODE_RGUI                 /* Right GUI (Windows/Command) */
 };
 
 #define FIRST_KEYCODE KEYCODE_FWDDEL
-#define LAST_KEYCODE  KEYCODE_F24
+#define LAST_KEYCODE  KEYCODE_RGUI
 
 /* kbd_decode() return values */
 
