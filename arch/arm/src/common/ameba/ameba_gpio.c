@@ -133,6 +133,7 @@ struct ameba_gpio_dev_s
 {
   struct gpio_dev_s gpio;      /* Lower-half GPIO device (must be first) */
   uint8_t pin;                 /* SDK pin encoding (port[7:5] | num[4:0]) */
+  bool leveltrig;              /* Level-triggered interrupt (not edge) */
   pin_interrupt_t callback;    /* Interrupt callback (interrupt pins only) */
 };
 
@@ -307,6 +308,16 @@ static void ameba_gpio_configure(struct ameba_gpio_dev_s *priv,
         break;
     }
 
+  /* Remember whether this is a level-triggered interrupt.  The port ISR
+   * masks such pins after dispatch: GPIO_INTStatusClearEdge() clears only
+   * edge latches, so a still-active level would otherwise re-enter the ISR
+   * forever (an interrupt storm).  Edge pins are left unmasked so a single
+   * attach/enable keeps receiving edges as before.
+   */
+
+  priv->leveltrig = (init.mode == AMEBA_GPIO_MODE_INT &&
+                     init.ittrigger == AMEBA_GPIO_IT_LEVEL);
+
   GPIO_Init(&init);
 
   /* GPIO_Init() leaves the interrupt source enabled, and setting up the
@@ -365,6 +376,18 @@ static int ameba_gpio_interrupt(int irq, void *context, void *arg)
 
       if (priv != NULL && priv->callback != NULL)
         {
+          /* A level-triggered pin keeps its interrupt status asserted for
+           * as long as the level is active; GPIO_INTStatusClearEdge() above
+           * cannot clear it, so mask the pin now to stop it re-entering the
+           * ISR forever.  The application re-enables it (go_enable) once it
+           * has serviced the event.  Edge pins are left unmasked.
+           */
+
+          if (priv->leveltrig)
+            {
+              GPIO_INTConfig(priv->pin, AMEBA_DISABLE);
+            }
+
           priv->callback(&priv->gpio, num);
         }
     }
