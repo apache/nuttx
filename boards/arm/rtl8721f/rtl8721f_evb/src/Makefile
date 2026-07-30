@@ -24,4 +24,13 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = rtl8721f_boot.c rtl8721f_bringup.c
 
+ifeq ($(CONFIG_AMEBA_GPIO),y)
+CSRCS += rtl8721f_gpio.c
+
+# The board pin table pulls in the shared driver's public header from
+# arch/arm/src/common/ameba/, which is not on the default board include path.
+
+CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
+endif
+
 include $(TOPDIR)/boards/Board.mk

@@ -134,6 +134,16 @@ int rtl8721f_bringup(void)
    * follows runs in a task and yields properly.
    */
 
+#ifdef CONFIG_AMEBA_GPIO
+  /* Register the board's GPIO pins at /dev/gpioN. */
+
+  ret = rtl8721f_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: rtl8721f_gpio_initialize failed: %d\n", ret);
+    }
+#endif
+
   IPC_patch_function(rtos_critical_enter, rtos_critical_exit,
                      AMEBA_RTOS_CRITICAL_SEMA);
   IPC_SEMDelayStub(rtos_time_delay_ms);

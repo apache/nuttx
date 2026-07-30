@@ -135,6 +135,11 @@ AMEBA_FWLIB_SRCS += $(TOPDIR)/arch/arm/src/rtl8721f/ameba_app_start.c \
 ifeq ($(CONFIG_RTL8721F_FLASH_FS),y)
 AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_flash_ram.c
 endif
+
+# GPIO register layer.  The GPIO driver (arch/.../common/ameba/ameba_gpio.c)
+# calls the fwlib GPIO API.  On RTL8721F (amebagreen2) GPIO_INTStatusGet and
+# GPIO_INTStatusClearEdge ARE in the ROM symbol table (ameba_rom_symbol_bcut.ld),
+# so unlike RTL8721Dx no fwlib ram_common source needs to be compiled in here.
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources
