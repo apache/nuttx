@@ -252,6 +252,30 @@ void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
                                               enum pms_flags_e flags);
 
 /****************************************************************************
+ * Name: esp32s3_pms_set_sram_split_line
+ *
+ * Description:
+ *   Place one of the four external-SRAM (PSRAM) split regions.  Address and
+ *   length are physical offsets into the PSRAM device, both 64 KB aligned.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_set_sram_split_line(enum pms_split_line_e line,
+                                     uintptr_t addr, size_t length);
+
+/****************************************************************************
+ * Name: esp32s3_pms_configure_sram_region
+ *
+ * Description:
+ *   Configure a world's access permissions to one external-SRAM region.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_configure_sram_region(enum pms_area_e area,
+                                       enum esp32s3_pms_world_e world,
+                                       enum pms_flags_e flags);
+
+/****************************************************************************
  * Name: esp32s3_pms_configure_peripheral
  *
  * Description:
