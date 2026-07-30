@@ -42,6 +42,7 @@
 
 #include <nuttx/debug.h>
 #include <nuttx/irq.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/arch.h>
@@ -56,10 +57,8 @@
 #include <nuttx/usb/hid.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
-#ifdef CONFIG_HIDKBD_ENCODED
-#  include <nuttx/streams.h>
-#  include <nuttx/input/kbd_codec.h>
-#endif
+#include <nuttx/input/kbd_codec.h>
+#include <nuttx/input/keyboard.h>
 
 /* Don't compile if prerequisites are not met */
 
@@ -101,10 +100,6 @@
 #  define CONFIG_HIDKBD_BUFSIZE 64
 #endif
 
-#ifndef CONFIG_HIDKBD_NPOLLWAITERS
-#  define CONFIG_HIDKBD_NPOLLWAITERS 2
-#endif
-
 /* The default is to support scancode mapping for the standard 104 key
  * keyboard.  Setting CONFIG_HIDKBD_RAWSCANCODES will disable all scancode
  * mapping; Setting CONFIG_HIDKBD_ALLSCANCODES will enable mapping of all
@@ -119,20 +114,14 @@
 #  endif
 #endif
 
-/* We can't support encoding of special characters of unless the Keyboard
- * CODEC is enabled.
+/* Special keys are reported as KEYBOARD_SPECPRESS/KEYBOARD_SPECREL events
+ * carrying a value from enum kbd_keycode_e.  That translation is driven by
+ * a scancode table, so it is not available when raw scancodes are being
+ * passed through untranslated.
  */
 
-#ifndef CONFIG_LIBC_KBDCODEC
-#  undef CONFIG_HIDKBD_ENCODED
-#endif
-
-/* If we are using raw scancodes, then we cannot support encoding of
- * special characters either.
- */
-
-#ifdef CONFIG_HIDKBD_RAWSCANCODES
-#  undef CONFIG_HIDKBD_ENCODED
+#ifndef CONFIG_HIDKBD_RAWSCANCODES
+#  define HAVE_SPECIAL_KEYS 1
 #endif
 
 /* Driver support ***********************************************************/
@@ -182,18 +171,23 @@ struct usbhost_state_s
 
   struct usbhost_class_s  usbclass;
 
+  /* The keyboard is reported through the keyboard upper half, which owns
+   * the character device and the buffering.  This must not be moved: the
+   * lower half callbacks recover this structure with container_of().
+   */
+
+  struct keyboard_lowerhalf_s lower;
+
   /* The remainder of the fields are provided to the keyboard class driver */
 
   char                    devchar;      /* Character identifying the /dev/kbd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   volatile bool           polling;      /* TRUE: Poll thread is running */
   volatile bool           open;         /* TRUE: The keyboard device is open */
-  volatile bool           waiting;      /* TRUE: waiting for keyboard data */
   uint8_t                 ifno;         /* Interface number */
   int16_t                 crefs;        /* Reference count on the driver instance */
   spinlock_t              spinlock;     /* Used to protect critical section */
   mutex_t                 lock;         /* Used to maintain mutual exclusive access */
-  sem_t                   waitsem;      /* Used to wait for keyboard data */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   pid_t                   pollpid;      /* PID of the poll task */
@@ -214,44 +208,26 @@ struct usbhost_state_s
   usbhost_ep_t            epin;         /* Interrupt IN endpoint */
   usbhost_ep_t            epout;        /* Optional interrupt OUT endpoint */
 
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-  FAR struct pollfd      *fds[CONFIG_HIDKBD_NPOLLWAITERS];
-
-  /* Buffer used to collect and buffer incoming keyboard characters */
-
-  volatile uint16_t       headndx;      /* Buffer head index */
-  volatile uint16_t       tailndx;      /* Buffer tail index */
-  uint8_t                 kbdbuffer[CONFIG_HIDKBD_BUFSIZE];
-
   FAR uint8_t            *ctrlreq;      /* Allocated ctrl request structure */
   size_t                  ctrllen;      /* Size of the allocated control buffer */
   bool                    caps_lock;    /* Private caps lock status */
   bool                    sync_led;     /* For LED update */
-  bool                    empty;        /* Keep track of data availability */
   sem_t                   syncsem;      /* Semaphore to wait for a poll thread */
 
 #ifdef CONFIG_HIDKBD_NOGETREPORT
   struct work_s           rwork;        /* For interrupt transfer work */
   int16_t                 nbytes;       /* # of bytes actually transferred */
 #endif
-#ifndef CONFIG_HIDKBD_NODEBOUNCE
-  uint8_t                 lastkey[6];   /* For debouncing */
-#endif
-};
 
-/* This type is used for encoding special characters */
+  /* The previous report.  A HID keyboard reports the set of keys that are
+   * currently down, not the transitions, so the previous report is what
+   * tells a newly pressed key from one that is still being held, and what
+   * tells that a key that is gone from the report has been released.
+   */
 
-#ifdef CONFIG_HIDKBD_ENCODED
-struct usbhost_outstream_s
-{
-  struct lib_outstream_s stream;
-  FAR struct usbhost_state_s *priv;
+  uint8_t                 lastkey[6];   /* Scancodes in the last report */
+  uint8_t                 lastmod;      /* Modifiers in the last report */
 };
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -272,17 +248,10 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
 /* Keyboard polling thread */
 
 static void usbhost_destroy(FAR void *arg);
-static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
-                              uint8_t keycode);
-#ifdef CONFIG_HIDKBD_ENCODED
-static void usbhost_putstream(FAR struct lib_outstream_s *self, int ch);
-#endif
 static inline uint8_t usbhost_mapscancode(uint8_t scancode,
                                           uint8_t modifier);
-#ifdef CONFIG_HIDKBD_ENCODED
-static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
-                                          uint8_t scancode,
-                                          uint8_t modifier);
+#ifdef HAVE_SPECIAL_KEYS
+static inline uint8_t usbhost_mapspeckey(uint8_t scancode);
 #endif
 static int  usbhost_kbdpoll(int argc, FAR char *argv[]);
 
@@ -335,16 +304,13 @@ static int  usbhost_connect(FAR struct usbhost_class_s *usbclass,
                             FAR const uint8_t *configdesc, int desclen);
 static int  usbhost_disconnected(FAR struct usbhost_class_s *usbclass);
 
-/* Driver methods.  We export the keyboard as a standard character driver */
+/* Keyboard lower half methods.  The upper half owns the character device,
+ * so all this driver has to do is to start and stop the polling of the
+ * device as the character device is opened and closed.
+ */
 
-static int  usbhost_open(FAR struct file *filep);
-static int  usbhost_close(FAR struct file *filep);
-static ssize_t usbhost_read(FAR struct file *filep,
-                            FAR char *buffer, size_t len);
-static ssize_t usbhost_write(FAR struct file *filep,
-                             FAR const char *buffer, size_t len);
-static int  usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                         bool setup);
+static int usbhost_kbd_open(FAR struct keyboard_lowerhalf_s *lower);
+static int usbhost_kbd_close(FAR struct keyboard_lowerhalf_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -374,19 +340,6 @@ static struct usbhost_registry_s g_hidkbd =
   &g_hidkbd_id              /* id[] */
 };
 
-static const struct file_operations g_hidkbd_fops =
-{
-  usbhost_open,             /* open */
-  usbhost_close,            /* close */
-  usbhost_read,             /* read */
-  usbhost_write,            /* write */
-  NULL,                     /* seek */
-  NULL,                     /* ioctl */
-  NULL,                     /* mmap */
-  NULL,                     /* truncate */
-  usbhost_poll              /* poll */
-};
-
 /* This is a bitmap that is used to allocate device names /dev/kbda-z. */
 
 static uint32_t g_devinuse;
@@ -403,7 +356,6 @@ static bool g_caps_lock = false;
  */
 
 #ifndef CONFIG_HIDKBD_RAWSCANCODES
-#ifdef CONFIG_HIDKBD_ENCODED
 
 /* The first and last scancode values with encode-able values */
 
@@ -588,8 +540,6 @@ static const uint8_t encoding[USBHID_NUMENCODINGS] =
 #endif
 };
 
-#endif
-
 static const uint8_t ucmap[USBHID_NUMSCANCODES] =
 {
   0,    0,      0,      0,       'A',  'B',  'C',    'D',  /* 0x00-0x07: Reserved, errors, A-D */
@@ -660,6 +610,24 @@ static const uint8_t lcmap[USBHID_NUMSCANCODES] =
 #endif
 };
 #endif /* CONFIG_HIDKBD_RAWSCANCODES */
+
+#ifdef CONFIG_HIDKBD_REPORT_MODIFIERS
+
+/* Map the bits of the HID report modifier byte to keycodes, so that a
+ * modifier can be reported as a key in its own right.  The order follows
+ * the bit order of the report, not the order of enum kbd_keycode_e.
+ */
+
+#define USBHID_NMODIFIERS 8
+
+static const uint8_t g_modkeycode[USBHID_NMODIFIERS] =
+{
+  KEYCODE_LCTRL,        KEYCODE_LSHIFT,
+  KEYCODE_LALT,         KEYCODE_LGUI,
+  KEYCODE_RCTRL,        KEYCODE_RSHIFT,
+  KEYCODE_RALT,         KEYCODE_RGUI
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -800,7 +768,7 @@ static void usbhost_destroy(FAR void *arg)
 
   uinfo("Unregister driver\n");
   usbhost_mkdevname(priv, devname);
-  unregister_driver(devname);
+  keyboard_unregister(&priv->lower, devname);
 
   /* Release the device name used by this connection */
 
@@ -829,7 +797,6 @@ static void usbhost_destroy(FAR void *arg)
   /* Destroy the mutex & semaphores */
 
   nxmutex_destroy(&priv->lock);
-  nxsem_destroy(&priv->waitsem);
 
   /* Disconnect the USB host device */
 
@@ -844,89 +811,6 @@ static void usbhost_destroy(FAR void *arg)
 
   usbhost_freeclass(priv);
 }
-
-/****************************************************************************
- * Name: usbhost_putbuffer
- *
- * Description:
- *   Add one character to the user buffer.
- *
- * Input Parameters:
- *   priv - Driver internal state
- *   keycode - The value to add to the user buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void usbhost_putbuffer(FAR struct usbhost_state_s *priv,
-                              uint8_t keycode)
-{
-  register unsigned int head;
-  register unsigned int tail;
-
-  /* Copy the next keyboard character into the user buffer. */
-
-  head = priv->headndx;
-  priv->kbdbuffer[head] = keycode;
-
-  /* Increment the head index */
-
-  if (++head >= CONFIG_HIDKBD_BUFSIZE)
-    {
-      head = 0;
-    }
-
-  /* If the buffer is full, then increment the tail index to make space.  Is
-   * it better to lose old keystrokes or new?
-   */
-
-  tail = priv->tailndx;
-  if (tail == head)
-    {
-      if (++tail >= CONFIG_HIDKBD_BUFSIZE)
-        {
-          tail = 0;
-        }
-
-      /* Save the updated tail index */
-
-      priv->tailndx = tail;
-    }
-
-  /* Save the updated head index */
-
-  priv->headndx = head;
-}
-
-/****************************************************************************
- * Name: usbhost_putstream
- *
- * Description:
- *   A wrapper for usbhost_putc that is compatible with the lib_outstream_s
- *   putc methods.
- *
- * Input Parameters:
- *   stream - The struct lib_outstream_s reference
- *   ch - The character to add to the user buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_HIDKBD_ENCODED
-static void usbhost_putstream(FAR struct lib_outstream_s *stream, int ch)
-{
-  FAR struct usbhost_outstream_s *privstream =
-    (FAR struct usbhost_outstream_s *)stream;
-
-  DEBUGASSERT(privstream && privstream->priv);
-  usbhost_putbuffer(privstream->priv, (uint8_t)ch);
-  stream->nput++;
-}
-#endif
 
 /****************************************************************************
  * Name: usbhost_mapscancode
@@ -976,54 +860,30 @@ static inline uint8_t usbhost_mapscancode(uint8_t scancode, uint8_t modifier)
 }
 
 /****************************************************************************
- * Name: usbhost_encodescancode
+ * Name: usbhost_mapspeckey
  *
  * Description:
- *  Check if the key has a special function encoding and, if it does, add
- *  the encoded value to the user buffer.
+ *  Map a scancode to a special function keycode from enum kbd_keycode_e.
  *
  * Input Parameters:
- *   priv - Driver internal state
  *   scancode - Scan code to be mapped.
- *   modifier - Ctrl, Alt, Shift, GUI modifier bits
  *
  * Returned Value:
- *   None
+ *   The keycode, or zero if the scancode is not a special function key.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HIDKBD_ENCODED
-static inline void usbhost_encodescancode(FAR struct usbhost_state_s *priv,
-                                          uint8_t scancode, uint8_t modifier)
+#ifdef HAVE_SPECIAL_KEYS
+static inline uint8_t usbhost_mapspeckey(uint8_t scancode)
 {
-  uint8_t encoded;
-
   /* Check if the raw scancode is in a valid range */
 
-  if (scancode >= FIRST_ENCODING && scancode <= LAST_ENCODING)
+  if (scancode < FIRST_ENCODING || scancode > LAST_ENCODING)
     {
-      /* Yes the value is within range */
-
-      encoded = encoding[scancode - FIRST_ENCODING];
-      iinfo("  scancode: %02x modifier: %02x encoded: %d\n",
-            scancode, modifier, encoded);
-
-      if (encoded)
-        {
-          struct usbhost_outstream_s usbstream;
-
-          /* And it does correspond to a special function key */
-
-          usbstream.stream.putc = usbhost_putstream;
-          usbstream.stream.nput = 0;
-          usbstream.priv        = priv;
-
-          /* Add the special function value to the user buffer */
-
-          kbd_specpress((enum kbd_keycode_e)encoded,
-                        (FAR struct lib_outstream_s *)&usbstream);
-        }
+      return 0;
     }
+
+  return encoding[scancode - FIRST_ENCODING];
 }
 #endif
 
@@ -1077,32 +937,103 @@ static inline void usbhost_toggle_capslock(void)
 }
 
 /****************************************************************************
- * Name: usbhost_extract_keys
+ * Name: usbhost_report_key
  *
  * Description:
- *  Check if the key has a special function encoding and, if it does, add
- *  the encoded value to the user buffer.
+ *   Report one key transition to the keyboard upper half.
  *
  * Input Parameters:
  *   priv - Driver internal state
- *   scancode - Scan code to be mapped.
+ *   scancode - The scancode of the key that changed state
  *   modifier - Ctrl, Alt, Shift, GUI modifier bits
+ *   press - True if the key went down, false if it came up
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
+static void usbhost_report_key(FAR struct usbhost_state_s *priv,
+                               uint8_t scancode, uint8_t modifier,
+                               bool press)
+{
+  uint8_t keycode;
+
+  /* Caps lock is a keyboard mode rather than a character, so it is applied
+   * here and never reported.  The state is toggled on the press only.
+   */
+
+  if (scancode == USBHID_KBDUSE_CAPSLOCK)
+    {
+      if (press)
+        {
+          usbhost_toggle_capslock();
+        }
+
+      return;
+    }
+
+  /* Does the scancode map to a printable character? */
+
+  keycode = usbhost_mapscancode(scancode, modifier);
+  if (keycode != 0)
+    {
+      /* Yes.  Ctrl turns it into the matching control character. */
+
+      if ((modifier & (USBHID_MODIFER_LCTRL |
+                       USBHID_MODIFER_RCTRL)) != 0)
+        {
+          keycode &= 0x1f;
+        }
+
+      iinfo("Key %02x: %c %s\n", scancode, keycode,
+            press ? "press" : "release");
+
+      keyboard_event(&priv->lower, keycode,
+                     press ? KEYBOARD_PRESS : KEYBOARD_RELEASE);
+      return;
+    }
+
+  /* No.  It might still be a special function key, which is reported with
+   * a keycode from enum kbd_keycode_e and one of the SPEC event types.
+   * The two ranges overlap, so the type is what tells them apart.
+   */
+
+#ifdef HAVE_SPECIAL_KEYS
+  keycode = usbhost_mapspeckey(scancode);
+  if (keycode != 0)
+    {
+      iinfo("Key %02x: keycode %d %s\n", scancode, keycode,
+            press ? "specpress" : "specrel");
+
+      keyboard_event(&priv->lower, keycode,
+                     press ? KEYBOARD_SPECPRESS : KEYBOARD_SPECREL);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: usbhost_extract_keys
+ *
+ * Description:
+ *  Compare the report just received against the previous one and report
+ *  every key that changed state to the keyboard upper half.
+ *
+ * Input Parameters:
+ *   priv - Driver internal state
+ *
+ * Returned Value:
+ *   Zero on success, a negated errno value on failure.
+ *
+ ****************************************************************************/
+
 static int usbhost_extract_keys(FAR struct usbhost_state_s *priv)
 {
-  struct usbhid_kbdreport_s *rpt =
-    (struct usbhid_kbdreport_s *)priv->tbuffer;
-  uint8_t keycode;
+  FAR struct usbhid_kbdreport_s *rpt =
+    (FAR struct usbhid_kbdreport_s *)priv->tbuffer;
   int i;
+  int j;
   int ret;
-  bool newstate;
-
-  /* Add the newly received keystrokes to our internal buffer */
 
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
@@ -1110,129 +1041,99 @@ static int usbhost_extract_keys(FAR struct usbhost_state_s *priv)
       return ret;
     }
 
+  /* A HID keyboard reports the set of keys that are currently down, in no
+   * particular order, rather than the transitions.  So a key is newly
+   * pressed if it is in this report but was in no slot of the previous
+   * one, and it has been released if it was in the previous report but is
+   * in no slot of this one.
+   */
+
+#ifdef CONFIG_HIDKBD_REPORT_MODIFIERS
+
+  /* Modifiers are a bitmap rather than slots, so they are diffed first and
+   * separately.  A modifier is reported as a key in its own right, which
+   * lets an application bind an action to it or know that it is being held
+   * down.  Presses are reported before the keys that they modify and
+   * releases after, so that the application sees a consistent state.
+   */
+
+  for (i = 0; i < USBHID_NMODIFIERS; i++)
+    {
+      uint8_t bit = 1 << i;
+
+      if ((rpt->modifier & bit) != 0 && (priv->lastmod & bit) == 0)
+        {
+          keyboard_event(&priv->lower, g_modkeycode[i],
+                         KEYBOARD_SPECPRESS);
+        }
+    }
+#endif
+
+  /* Report the keys that came up */
+
   for (i = 0; i < 6; i++)
     {
-      /* Is this key pressed?  But not pressed last time?
-       * HID spec: "The order of keycodes in array fields has no
-       * significance. Order determination is done by the host
-       * software comparing the contents of the previous report to
-       * the current report. If two or more keys are reported in
-       * one report, their order is indeterminate. Keyboards may
-       * buffer events that would have otherwise resulted in
-       * multiple event in a single report.
-       *
-       * "'Repeat Rate' and 'Delay Before First Repeat' are
-       * implemented by the host and not in the keyboard (this
-       * means the BIOS in legacy mode). The host may use the
-       * device report rate and the number of reports to determine
-       * how long a key is being held down. Alternatively, the host
-       * may use its own clock or the idle request for the timing
-       * of these features."
-       */
-
-      if (rpt->key[i] != USBHID_KBDUSE_NONE
-#ifndef CONFIG_HIDKBD_NODEBOUNCE
-        && rpt->key[i] != priv->lastkey[0]
-        && rpt->key[i] != priv->lastkey[1]
-        && rpt->key[i] != priv->lastkey[2]
-        && rpt->key[i] != priv->lastkey[3]
-        && rpt->key[i] != priv->lastkey[4]
-        && rpt->key[i] != priv->lastkey[5]
-#endif
-         )
+      if (priv->lastkey[i] == USBHID_KBDUSE_NONE)
         {
-          /* Yes.. Add it to the buffer. */
-
-          /* Map the keyboard scancode to a printable ASCII
-           * character.  There is no support here for function keys
-           * or cursor controls in this version of the driver.
-           */
-
-          keycode = usbhost_mapscancode(rpt->key[i], rpt->modifier);
-          iinfo("Key %d: %02x keycode:%c modifier: %02x\n",
-                 i, rpt->key[i], keycode ? keycode : ' ',
-                 rpt->modifier);
-
-          if (rpt->key[i] == 57)
-            {
-              usbhost_toggle_capslock();
-            }
-
-          /* Zero at this point means that the key does not map to a
-           * printable character.
-           */
-
-          if (keycode != 0)
-            {
-              /* Handle control characters.  Zero after this means
-               * a valid, NUL character.
-               */
-
-              if ((rpt->modifier & (USBHID_MODIFER_LCTRL |
-                                    USBHID_MODIFER_RCTRL)) != 0)
-                {
-                  keycode &= 0x1f;
-                }
-
-              /* Copy the next keyboard character into the user
-               * buffer.
-               */
-
-              usbhost_putbuffer(priv, keycode);
-            }
-
-          /* The zero might, however, map to a special keyboard
-           * action (such as a cursor movement or function key).
-           * Attempt to encode the special key.
-           */
-
-#ifdef CONFIG_HIDKBD_ENCODED
-          else
-            {
-              usbhost_encodescancode(priv, rpt->key[i],
-                                     rpt->modifier);
-            }
-#endif
+          continue;
         }
 
-      /* Save the scancode (or lack thereof) for key debouncing on
-       * next keyboard report.
-       */
+      for (j = 0; j < 6; j++)
+        {
+          if (rpt->key[j] == priv->lastkey[i])
+            {
+              break;
+            }
+        }
 
-#ifndef CONFIG_HIDKBD_NODEBOUNCE
-      priv->lastkey[i] = rpt->key[i];
-#endif
+      if (j >= 6)
+        {
+          usbhost_report_key(priv, priv->lastkey[i], rpt->modifier, false);
+        }
     }
 
-  /* Is there data available? */
+  /* Report the keys that went down */
 
-  newstate = (priv->headndx == priv->tailndx);
-  if (!newstate)
+  for (i = 0; i < 6; i++)
     {
-      /* Did we just transition from no data available to data
-       * available?  If so, wake up any threads waiting for the
-       * POLLIN event.
-       */
-
-      if (priv->empty)
+      if (rpt->key[i] == USBHID_KBDUSE_NONE)
         {
-          poll_notify(priv->fds, CONFIG_HIDKBD_NPOLLWAITERS, POLLIN);
+          continue;
         }
 
-      /* Yes.. Is there a thread waiting for keyboard data now? */
-
-      if (priv->waiting)
+      for (j = 0; j < 6; j++)
         {
-          /* Yes.. wake it up */
+          if (priv->lastkey[j] == rpt->key[i])
+            {
+              break;
+            }
+        }
 
-          nxsem_post(&priv->waitsem);
-          priv->waiting = false;
+      if (j >= 6)
+        {
+          usbhost_report_key(priv, rpt->key[i], rpt->modifier, true);
         }
     }
 
-  priv->empty = newstate;
-  nxmutex_unlock(&priv->lock);
+#ifdef CONFIG_HIDKBD_REPORT_MODIFIERS
+  for (i = 0; i < USBHID_NMODIFIERS; i++)
+    {
+      uint8_t bit = 1 << i;
 
+      if ((rpt->modifier & bit) == 0 && (priv->lastmod & bit) != 0)
+        {
+          keyboard_event(&priv->lower, g_modkeycode[i],
+                         KEYBOARD_SPECREL);
+        }
+    }
+#endif
+
+  /* Remember this report so that the next one can be diffed against it */
+
+  memcpy(priv->lastkey, rpt->key, sizeof(priv->lastkey));
+  priv->lastmod = rpt->modifier;
+
+  nxmutex_unlock(&priv->lock);
   return 0;
 }
 
@@ -1987,11 +1888,19 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
       goto errout;
     }
 
-  /* Register the driver */
+  /* Register the driver with the keyboard upper half.  Note that priv is
+   * not passed as the lower half private data:  keyboard_register()
+   * overwrites that field with its own state, so the lower half callbacks
+   * recover priv with container_of() instead.
+   */
 
   uinfo("Register driver\n");
   usbhost_mkdevname(priv, devname);
-  ret = register_driver(devname, &g_hidkbd_fops, 0600, priv);
+
+  priv->lower.open  = usbhost_kbd_open;
+  priv->lower.close = usbhost_kbd_close;
+
+  ret = keyboard_register(&priv->lower, devname, CONFIG_HIDKBD_BUFSIZE);
 
   /* We now have to be concerned about asynchronous modification of crefs
    * because the driver has been registered.
@@ -2295,11 +2204,8 @@ usbhost_create(FAR struct usbhost_hubport_s *hport,
           /* Initialize mutex & semaphores */
 
           nxmutex_init(&priv->lock);
-          nxsem_init(&priv->waitsem, 0, 0);
           nxsem_init(&priv->syncsem, 0, 0);
           spin_lock_init(&priv->spinlock);
-
-          priv->empty = true;
 
           /* Return the instance of the USB keyboard class driver */
 
@@ -2424,15 +2330,9 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
   priv->disconnected = true;
   uinfo("Disconnected\n");
 
-  /* Is there a thread waiting for keyboard data that will never come? */
-
-  if (priv->waiting)
-    {
-      /* Yes.. wake it up */
-
-      nxsem_post(&priv->waitsem);
-      priv->waiting = false;
-    }
+  /* Any thread blocked reading the character device is woken by the upper
+   * half when the device is unregistered from usbhost_destroy().
+   */
 
   /* Possibilities:
    *
@@ -2468,27 +2368,30 @@ static int usbhost_disconnected(FAR struct usbhost_class_s *usbclass)
 }
 
 /****************************************************************************
- * Name: usbhost_open
+ * Name: usbhost_kbd_open
  *
  * Description:
- *   Standard character driver open method.
+ *   Keyboard lower half open method.  Takes a reference on the driver
+ *   instance.
  *
  ****************************************************************************/
 
-static int usbhost_open(FAR struct file *filep)
+static int usbhost_kbd_open(FAR struct keyboard_lowerhalf_s *lower)
 {
-  FAR struct inode           *inode;
-  FAR struct usbhost_state_s *priv;
+  /* Note that lower->priv cannot be used to find our state:  it belongs to
+   * the upper half, which overwrites it in keyboard_register().
+   */
+
+  FAR struct usbhost_state_s *priv =
+    container_of(lower, struct usbhost_state_s, lower);
   irqstate_t flags;
   int ret;
 
   uinfo("Entry\n");
-  inode = filep->f_inode;
-  priv  = inode->i_private;
 
   /* Make sure that we have exclusive access to the private data structure */
 
-  DEBUGASSERT(priv && priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
+  DEBUGASSERT(priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
@@ -2526,23 +2429,23 @@ static int usbhost_open(FAR struct file *filep)
 }
 
 /****************************************************************************
- * Name: usbhost_close
+ * Name: usbhost_kbd_close
  *
  * Description:
- *   Standard character driver close method.
+ *   Keyboard lower half close method.  Drops a reference on the driver
+ *   instance and, if this was the last one and the device is gone,
+ *   destroys it.
  *
  ****************************************************************************/
 
-static int usbhost_close(FAR struct file *filep)
+static int usbhost_kbd_close(FAR struct keyboard_lowerhalf_s *lower)
 {
-  FAR struct inode *inode;
-  FAR struct usbhost_state_s *priv;
+  FAR struct usbhost_state_s *priv =
+    container_of(lower, struct usbhost_state_s, lower);
   irqstate_t flags;
   int ret;
 
   uinfo("Entry\n");
-  inode = filep->f_inode;
-  priv  = inode->i_private;
 
   /* Decrement the reference count on the driver */
 
@@ -2560,7 +2463,7 @@ static int usbhost_close(FAR struct file *filep)
   flags = spin_lock_irqsave(&priv->spinlock);
   priv->crefs--;
 
-  /* Check if the USB mouse device is still connected.  If the device is
+  /* Check if the USB keyboard device is still connected.  If the device is
    * no longer connected, then unregister the driver and free the driver
    * class instance.
    */
@@ -2581,9 +2484,7 @@ static int usbhost_close(FAR struct file *filep)
         {
           /* Yes.. In either case, then the driver is no longer open */
 
-          priv->open    = false;
-          priv->headndx = 0;
-          priv->tailndx = 0;
+          priv->open = false;
 
           /* Check if the USB keyboard device is still connected. */
 
@@ -2619,236 +2520,6 @@ static int usbhost_close(FAR struct file *filep)
   spin_unlock_irqrestore(&priv->spinlock, flags);
   nxmutex_unlock(&priv->lock);
   return OK;
-}
-
-/****************************************************************************
- * Name: usbhost_read
- *
- * Description:
- *   Standard character driver read method.
- *
- ****************************************************************************/
-
-static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len)
-{
-  FAR struct inode           *inode;
-  FAR struct usbhost_state_s *priv;
-  size_t                      nbytes;
-  unsigned int                tail;
-  int                         ret;
-
-  uinfo("Entry\n");
-  DEBUGASSERT(buffer);
-  inode = filep->f_inode;
-  priv  = inode->i_private;
-
-  /* Make sure that we have exclusive access to the private data structure */
-
-  DEBUGASSERT(priv && priv->crefs > 0 && priv->crefs < USBHOST_MAX_CREFS);
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Check if the keyboard is still connected.  We need to disable interrupts
-   * momentarily to assure that there are no asynchronous disconnect events.
-   */
-
-  if (priv->disconnected)
-    {
-      /* No... the driver is no longer bound to the class.  That means that
-       * the USB keyboard is no longer connected.  Refuse any further
-       * attempts to access the driver.
-       */
-
-      ret = -ENODEV;
-    }
-  else
-    {
-      /* Is there keyboard data now? */
-
-      while (priv->tailndx == priv->headndx)
-        {
-          /* No.. were we open non-blocking? */
-
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              /* Yes.. then return a failure */
-
-              ret = -EAGAIN;
-              goto errout;
-            }
-
-          /* Wait for data to be available */
-
-          uinfo("Waiting...\n");
-
-          priv->waiting = true;
-          nxmutex_unlock(&priv->lock);
-          ret = nxsem_wait_uninterruptible(&priv->waitsem);
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          ret = nxmutex_lock(&priv->lock);
-          if (ret < 0)
-            {
-              return ret;
-            }
-
-          /* Did the keyboard become disconnected while we were waiting */
-
-          if (priv->disconnected)
-            {
-              ret = -ENODEV;
-              goto errout;
-            }
-        }
-
-      /* Read data from our internal buffer of received characters */
-
-      for (tail  = priv->tailndx, nbytes = 0;
-           tail != priv->headndx && nbytes < len;
-           nbytes++)
-        {
-          /* Copy the next keyboard character into the user buffer */
-
-          *buffer++ = priv->kbdbuffer[tail];
-
-          /* Handle wrap-around of the tail index */
-
-          if (++tail >= CONFIG_HIDKBD_BUFSIZE)
-            {
-              tail = 0;
-            }
-        }
-
-      ret = nbytes;
-
-      /* Update the tail index (perhaps marking the buffer empty) */
-
-      priv->tailndx = tail;
-    }
-
-errout:
-  nxmutex_unlock(&priv->lock);
-  return (ssize_t)ret;
-}
-
-/****************************************************************************
- * Name: usbhost_write
- *
- * Description:
- *   Standard character driver write method.
- *
- ****************************************************************************/
-
-static ssize_t usbhost_write(FAR struct file *filep, FAR const char *buffer,
-                             size_t len)
-{
-  /* We won't try to write to the keyboard */
-
-  return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: usbhost_poll
- *
- * Description:
- *   Standard character driver poll method.
- *
- ****************************************************************************/
-
-static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
-{
-  FAR struct inode           *inode;
-  FAR struct usbhost_state_s *priv;
-  int                         ret;
-  int                         i;
-
-  uinfo("Entry\n");
-  DEBUGASSERT(fds);
-  inode = filep->f_inode;
-  priv  = inode->i_private;
-
-  /* Make sure that we have exclusive access to the private data structure */
-
-  DEBUGASSERT(priv);
-  ret = nxmutex_lock(&priv->lock);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Check if the keyboard is still connected.  We need to disable interrupts
-   * momentarily to assure that there are no asynchronous disconnect events.
-   */
-
-  if (priv->disconnected)
-    {
-      /* No... the driver is no longer bound to the class.  That means that
-       * the USB keyboard is no longer connected.  Refuse any further
-       * attempts to access the driver.
-       */
-
-      ret = -ENODEV;
-    }
-  else if (setup)
-    {
-      /* This is a request to set up the poll.  Find an available slot for
-       * the poll structure reference
-       */
-
-      for (i = 0; i < CONFIG_HIDKBD_NPOLLWAITERS; i++)
-        {
-          /* Find an available slot */
-
-          if (!priv->fds[i])
-            {
-              /* Bind the poll structure and this slot */
-
-              priv->fds[i] = fds;
-              fds->priv    = &priv->fds[i];
-              break;
-            }
-        }
-
-      if (i >= CONFIG_HIDKBD_NPOLLWAITERS)
-        {
-          fds->priv = NULL;
-          ret       = -EBUSY;
-          goto errout;
-        }
-
-      /* Should we immediately notify on any of the requested events? Notify
-       * the POLLIN event if there is buffered keyboard data.
-       */
-
-      if (priv->headndx != priv->tailndx)
-        {
-          poll_notify(&fds, 1, POLLIN);
-        }
-    }
-  else
-    {
-      /* This is a request to tear down the poll. */
-
-      FAR struct pollfd **slot = (FAR struct pollfd **)fds->priv;
-      DEBUGASSERT(slot);
-
-      /* Remove all memory of the poll setup */
-
-      *slot     = NULL;
-      fds->priv = NULL;
-    }
-
-errout:
-  nxmutex_unlock(&priv->lock);
-  return ret;
 }
 
 /****************************************************************************

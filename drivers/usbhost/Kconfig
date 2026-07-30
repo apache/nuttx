@@ -344,8 +344,15 @@ config USBHOST_HIDKBD
 	bool "HID Keyboard Class Support"
 	default n
 	depends on !INT_DISABLE
+	select INPUT
+	select INPUT_KEYBOARD
 	---help---
 		Enable support for the keyboard class driver.
+
+		The keyboard is reported through the keyboard upper half, so it
+		delivers struct keyboard_event_s events on read() just like any
+		other keyboard.  Set INPUT_KEYBOARD_BYTESTREAM if the application
+		expects the plain byte stream that this driver used to provide.
 
 if USBHOST_HIDKBD
 
@@ -368,17 +375,11 @@ config HIDKBD_STACKSIZE
 		Stack size for polling thread.  Default: 1024
 
 config HIDKBD_BUFSIZE
-	int "Scancode Buffer Size"
+	int "Event Buffer Size"
 	default 64
 	---help---
-		Scancode buffer size.  Default: 64.
-
-config HIDKBD_NPOLLWAITERS
-	int "Max Number of Waiters for Poll Event"
-	default 2
-	---help---
-		If the poll() method is enabled, this defines the maximum number
-		of threads that can be waiting for keyboard events.  Default: 2.
+		Number of keyboard events buffered by the upper half for each
+		open file description.  Default: 64.
 
 config HIDKBD_RAWSCANCODES
 	bool "Use Raw Scan Codes"
@@ -387,18 +388,6 @@ config HIDKBD_RAWSCANCODES
 		If set to y no conversions will be made on the raw keyboard scan
 		codes.  This option is useful during testing. Default: ASCII conversion.
 
-config HIDKBD_ENCODED
-	bool "Encode Special Keys"
-	default n
-	depends on !HIDKBD_RAWSCANCODES && LIBC_KBDCODEC
-	---help---
-		Encode special key press events in the user buffer.  In this case,
-		the user end must decode the encoded special key values using the
-		interfaces defined in include/nuttx/input/kbd_codec.h.  These
-		special keys include such things as up/down arrows, home and end
-		keys, etc.  If this not defined, only 7-bit print-able and control
-		ASCII characters will be provided to the user.
-
 config HIDKBD_ALLSCANCODES
 	bool "Use All Scancodes"
 	default n
@@ -406,12 +395,19 @@ config HIDKBD_ALLSCANCODES
 		If set to y all 231 possible scancodes will be converted to
 		something.  Default:  104 key US keyboard.
 
-config HIDKBD_NODEBOUNCE
-	bool "Disable Debounce"
+config HIDKBD_REPORT_MODIFIERS
+	bool "Report modifier keys"
 	default n
+	depends on !HIDKBD_RAWSCANCODES
 	---help---
-		If set to y normal debouncing is disabled.  Default:
-		Debounce enabled (No repeat keys).
+		Report Ctrl, Shift, Alt and GUI as keys in their own right, using
+		the KEYCODE_LCTRL..KEYCODE_RGUI keycodes, in addition to applying
+		them to the character that they modify.  This lets an application
+		bind an action to a modifier or know that one is being held down,
+		which a game needs and a terminal does not.
+
+		Presses are reported before the keys that they modify and
+		releases after.
 
 config HIDKBD_NOGETREPORT
 	bool "Use Interrupt pipe to get keys"
