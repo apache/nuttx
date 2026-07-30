@@ -30,6 +30,7 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -2712,7 +2713,8 @@ static int stm32_setchromakey(struct fb_vtable_s *vtable,
 #  ifdef CONFIG_STM32_FB_CMAP
       if (oinfo->chromakey >= g_vtable.cmap.len)
         {
-          lcderr("ERROR: Clut index %d is out of range\n", oinfo->chromakey);
+          lcderr("ERROR: Clut index %" PRIu32 " is out of range\n",
+                 oinfo->chromakey);
           ret = -EINVAL;
         }
       else
