@@ -31,6 +31,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/input/kbd_codec.h>
 #include <nuttx/input/x11_keysym.h>
 #include <nuttx/input/x11_xf86keysym.h>
 
@@ -38,8 +39,22 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define KEYBOARD_PRESS   0 /* Key press event */
-#define KEYBOARD_RELEASE 1 /* Key release event */
+/* Values for the type field of struct keyboard_event_s.
+ *
+ * A normal key carries its character in the code field.  A special key
+ * carries a value from enum kbd_keycode_e instead, and must be reported
+ * with one of the SPEC types:  the two ranges overlap, so the type is the
+ * only way a consumer can tell an arrow key from the character that shares
+ * its value.
+ *
+ * These are aliases of the kbd_decode() return values so that a driver can
+ * feed both this interface and the byte stream codec from a single source.
+ */
+
+#define KEYBOARD_PRESS     KBD_PRESS     /* Normal key press event */
+#define KEYBOARD_RELEASE   KBD_RELEASE   /* Normal key release event */
+#define KEYBOARD_SPECPRESS KBD_SPECPRESS /* Special key press event */
+#define KEYBOARD_SPECREL   KBD_SPECREL   /* Special key release event */
 
 /****************************************************************************
  * Public Types
