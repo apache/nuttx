@@ -135,6 +135,34 @@ SECTIONS
     *libkarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libkarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
 
+    /* __start() reconfigures the MSPI before any flash mapping exists, so the
+     * flash, MMU and efuse helpers it reaches must be IRAM-resident whatever
+     * the flash mode is.  Without this, bootloader_flash_read() sits in mapped
+     * flash and returns 0xff, and map_rom_segments() finds no segments.
+     */
+
+    *libkarch.a:*esp_rom_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*mmu_hal.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*flash_qio_mode.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*bootloader_flash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*bootloader_flash_config_esp32s3.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*bootloader_efuse.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*efuse_hal.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*efuse_utility.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*esp_mmu_map.*(.literal .text .literal.* .text.*)
+
+#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
+    /* Octal (OPI) bring-up only.  A quad board never runs these, and pinning
+     * them would cost it IRAM for nothing.
+     */
+
+    *libkarch.a:*mspi_timing_tuning.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*mspi_timing_config.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp32s3_spi_timing.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*spi_flash_oct_flash_init.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*spi_flash_hpm_enable.*(.literal .text .literal.* .text.*)
+#endif
+
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
