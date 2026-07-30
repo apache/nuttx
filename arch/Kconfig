@@ -130,6 +130,7 @@ config ARCH_SIM
 config ARCH_X86
 	bool "x86"
 	select ARCH_HAVE_TCBINFO
+	select ARCH_HAVE_VFORK
 	---help---
 		Intel x86 architectures.
 
