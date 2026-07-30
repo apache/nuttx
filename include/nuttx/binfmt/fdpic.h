@@ -212,8 +212,85 @@ static inline FAR void *fdpic_callback(FAR void *fn)
 
   return fn;
 }
+
+/****************************************************************************
+ * Name: fdpic_base
+ *
+ * Description:
+ *   The FDPIC data base of the calling context, taken from the FDPIC
+ *   register.  Non-zero means the caller is an FDPIC module; zero means base
+ *   firmware.  This is the same test fdpic_callback() makes, exposed for a
+ *   caller that must decide whether a pointer it was handed is a descriptor
+ *   before it stores it somewhere the register will no longer be correct --
+ *   a callback that will run on a work-queue thread, for instance.
+ *
+ ****************************************************************************/
+
+static inline uintptr_t fdpic_base(void)
+{
+  uintptr_t base;
+
+  __asm__ __volatile__ ("mov %0, r9" : "=r"(base));
+
+  return base;
+}
+
+/****************************************************************************
+ * Name: fdpic_invoke
+ *
+ * Description:
+ *   Call a resolved module entry point with the module's data base installed
+ *   in the FDPIC register, and restore the caller's base afterwards.
+ *
+ *   This is for the one case the register cannot already be correct: a
+ *   callback that a module registered but that runs on a shared thread --
+ *   the signal-notification work queue -- which carries no module's base.
+ *   The base is captured at registration (fdpic_base(), in the module's
+ *   context) and installed here around the call.  Everywhere else the
+ *   callback runs in a task that inherited the module's data space and only
+ *   the entry point has to be resolved; there fdpic_callback() is enough.
+ *
+ *   A context switch or interrupt during the call is safe: the FDPIC
+ *   register is REG_PIC in the saved register context, so it is preserved
+ *   and restored across a switch, and base firmware is built with it
+ *   reserved so no interrupt handler disturbs it.
+ *
+ * Input Parameters:
+ *   entry - The code address to enter (already resolved from the
+ *           descriptor).
+ *   arg   - The single word argument, passed in r0.
+ *   got   - The module data base to install in the FDPIC register.
+ *
+ ****************************************************************************/
+
+static inline void fdpic_invoke(uintptr_t entry, uintptr_t arg,
+                                uintptr_t got)
+{
+  register uintptr_t r0v __asm__ ("r0") = arg;
+
+  /* arg is pinned in r0 (the first argument and the call's scratch), so the
+   * asm needs registers only for entry and got -- kept deliberately few so
+   * the allocator has room on builds that reserve a frame pointer.  r9 is
+   * saved on the stack rather than in a scratch register; r4 rides along
+   * only to keep the push 8-byte aligned and is restored untouched.
+   */
+
+  __asm__ __volatile__
+  (
+    "push {r4, r9}\n"     /* Save the caller's FDPIC register            */
+    "mov r9, %[got]\n"    /* Install the module's data base             */
+    "blx %[entry]\n"      /* Enter the module                           */
+    "pop {r4, r9}\n"      /* Restore the caller's FDPIC register        */
+    : "+r" (r0v)
+    : [entry] "r" (entry), [got] "r" (got)
+    : "r1", "r2", "r3", "r12", "lr", "cc", "memory"
+  );
+}
 #else
 #  define fdpic_callback(fn) (fn)
+#  define fdpic_base()       (0)
+#  define fdpic_invoke(entry, arg, got) \
+          ((void)(got), (((CODE void (*)(uintptr_t))(uintptr_t)(entry))(arg)))
 #endif
 
 #endif /* __INCLUDE_NUTTX_BINFMT_FDPIC_H */
