@@ -38,7 +38,7 @@
 #include "chip.h"
 #include "xtensa.h"
 #include "esp_attr.h"
-#include "esp_irq.h"
+#include "esp32s3_isolation.h"
 #include "esp32s3_userspace.h"
 #include "esp32s3_mmu.h"
 #include "esp32s3_pms.h"
@@ -293,31 +293,6 @@ static void initialize_iram(void)
     {
       *dest++ = *src++;
     }
-}
-
-/****************************************************************************
- * Name: pms_violation_isr
- *
- * Description:
- *   This is the common PMS interrupt handler. It will be invoked the PMS
- *   detects an access violation.
- *
- * Parameters:
- *   cpuint        - CPU interrupt index
- *   context       - Context data from the ISR
- *   arg           - Opaque pointer to the internal driver state structure.
- *
- * Returned Value:
- *   Zero (OK) is returned on success. A negated errno value is returned on
- *   failure.
- *
- ****************************************************************************/
-
-static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
-{
-  PANIC();
-
-  return OK;
 }
 
 /****************************************************************************
@@ -618,102 +593,6 @@ static IRAM_ATTR void pms_configure_flash_cache_access(void)
 }
 
 /****************************************************************************
- * Name: pms_configure_peripheral_access
- *
- * Description:
- *   Configure Kernel and Userspace permissions for accessing the chip's
- *   peripherals.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-static void pms_configure_peripheral_access(void)
-{
-  /* Revoke User access permission to every peripheral */
-
-  esp32s3_pms_configure_peripheral(PMS_UART1, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_I2C, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_MISC, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_IO_MUX, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_RTC, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_FE, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_FE2, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_GPIO, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_G0SPI_0, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_G0SPI_1, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_UART, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SYSTIMER, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_TIMERGROUP1, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_TIMERGROUP, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_BB, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_LEDC, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_RMT, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_UHCI0, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_I2C_EXT0, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_BT, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_PWR, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_WIFIMAC, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_RWBT, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_I2S1, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_CAN, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_APB_CTRL, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SPI_2, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_WORLD_CONTROLLER, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_DIO, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_AD, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_CACHE_CONFIG, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_DMA_COPY, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_INTERRUPT, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SENSITIVE, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SYSTEM, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_BT_PWR, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_APB_ADC, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_CRYPTO_DMA, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_CRYPTO_PERI, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_USB_WRAP, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_USB_DEVICE, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_I2S0, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_HINF, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_PWM0, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_BACKUP, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SLC, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_PCNT, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SLCHOST, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_UART2, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_PWM1, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SDIO_HOST, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_I2C_EXT1, PMS_WORLD_1,
-                                   PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_SPI_3, PMS_WORLD_1, PMS_ACCESS_NONE);
-  esp32s3_pms_configure_peripheral(PMS_USB, PMS_WORLD_1, PMS_ACCESS_NONE);
-}
-
-/****************************************************************************
  * Name: configure_mpu
  *
  * Description:
@@ -767,7 +646,7 @@ static void configure_mpu(void)
    * peripherals.
    */
 
-  pms_configure_peripheral_access();
+  esp32s3_isolation_revoke_peripherals();
 }
 
 /****************************************************************************
@@ -812,37 +691,6 @@ void esp32s3_userspace(void)
   /* Configure MPU to grant access to the userspace */
 
   configure_mpu();
-}
-
-/****************************************************************************
- * Name: esp32s3_pmsirqinitialize
- *
- * Description:
- *   Initialize interrupt handler for the PMS violation ISR.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void esp32s3_pmsirqinitialize(void)
-{
-  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_IRAM0_PMS_MONITOR_VIOLATE,
-                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
-  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_DRAM0_PMS_MONITOR_VIOLATE,
-                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
-  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CACHE_CORE0_ACS,
-                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
-  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_PIF_PMS_MONITOR_VIOLATE,
-                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
-
-  up_enable_irq(ESP32S3_IRQ_CORE_0_IRAM0_PMS_MONITOR_VIOLATE);
-  up_enable_irq(ESP32S3_IRQ_CORE_0_DRAM0_PMS_MONITOR_VIOLATE);
-  up_enable_irq(ESP32S3_IRQ_CACHE_CORE0_ACS);
-  up_enable_irq(ESP32S3_IRQ_CORE_0_PIF_PMS_MONITOR_VIOLATE);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

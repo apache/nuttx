@@ -471,32 +471,33 @@ void esp32s3_pms_configure_dram_region(enum pms_area_e area,
  * Name: esp32s3_pms_configure_flash_cache_region
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: pms_ace_attr
+ *
+ * Description:
+ *   Convert PMS_ACCESS_* flags to the 3-bit field the external-memory ACE
+ *   registers use.  TRM Table 15.5-2 (p.697): the field is ordered W/R/X
+ *   with X in the least significant bit, which is the reverse of the order
+ *   in enum pms_flags_e, and the reverse again of the IRAM0/DRAM0 constraint
+ *   fields.  Footnote C settles it: 0b010 grants read and neither write nor
+ *   execute.
+ *
+ ****************************************************************************/
+
+static uint32_t pms_ace_attr(enum pms_flags_e flags)
+{
+  return (((flags & PMS_ACCESS_W) != 0) << 2) |
+         (((flags & PMS_ACCESS_R) != 0) << 1) |
+         (((flags & PMS_ACCESS_X) != 0) << 0);
+}
+
 void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
                                               enum esp32s3_pms_world_e world,
                                               enum pms_flags_e flags)
 {
   const uint32_t shift = (FLASH_CACHE_S * world);
   const uint32_t mask = FLASH_CACHE_V << shift;
-  uint32_t attr;
-
-  if (flags == PMS_ACCESS_ALL)
-    {
-      attr = 0b11;
-    }
-  else if ((flags & PMS_ACCESS_W) != 0)
-    {
-      PANIC();
-    }
-  else if ((flags & PMS_ACCESS_X) != 0)
-    {
-      attr = flags | 0b1;
-    }
-  else
-    {
-      attr = flags;
-    }
-
-  uint32_t val = 0x40 | (attr & FLASH_CACHE_V) << shift;
+  const uint32_t val = pms_ace_attr(flags) << shift;
 
   switch (area)
     {
@@ -524,6 +525,114 @@ void esp32s3_pms_configure_flash_cache_region(enum pms_area_e area,
         {
           PANIC();
         }
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_pms_set_sram_split_line
+ *
+ * Description:
+ *   Place one of the four external-SRAM (PSRAM) split regions.  Address and
+ *   length are physical -- a zero-based offset into the PSRAM device, the
+ *   same space mm_pgalloc() hands out -- and both must be 64 KB aligned
+ *   (TRM 15.5.1 p.696).  Regions must not overlap.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_set_sram_split_line(enum pms_split_line_e line,
+                                     uintptr_t addr, size_t length)
+{
+  uintptr_t aligned_addr = ALIGN_DOWN(addr, MMU_PAGE_SIZE);
+  size_t length_pages = length / MMU_PAGE_SIZE;
+
+  switch (line)
+    {
+      case PMS_SPLIT_LINE_0:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE0_ADDR_REG,
+                      APB_CTRL_SRAM_ACE0_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE0_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE0_SIZE_REG,
+                      APB_CTRL_SRAM_ACE0_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE0_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_1:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE1_ADDR_REG,
+                      APB_CTRL_SRAM_ACE1_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE1_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE1_SIZE_REG,
+                      APB_CTRL_SRAM_ACE1_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE1_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_2:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE2_ADDR_REG,
+                      APB_CTRL_SRAM_ACE2_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE2_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE2_SIZE_REG,
+                      APB_CTRL_SRAM_ACE2_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE2_SIZE));
+        }
+        break;
+      case PMS_SPLIT_LINE_3:
+        {
+          modifyreg32(APB_CTRL_SRAM_ACE3_ADDR_REG,
+                      APB_CTRL_SRAM_ACE3_ADDR_S_M,
+                      VALUE_TO_FIELD(aligned_addr,
+                                     APB_CTRL_SRAM_ACE3_ADDR_S));
+          modifyreg32(APB_CTRL_SRAM_ACE3_SIZE_REG,
+                      APB_CTRL_SRAM_ACE3_SIZE_M,
+                      VALUE_TO_FIELD(length_pages, APB_CTRL_SRAM_ACE3_SIZE));
+        }
+        break;
+      default:
+        {
+          PANIC();
+        }
+        break;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_pms_configure_sram_region
+ *
+ * Description:
+ *   Set a world's permissions on one external-SRAM split region.  Same
+ *   field layout as the flash regions, TRM Table 15.5-2.
+ *
+ ****************************************************************************/
+
+void esp32s3_pms_configure_sram_region(enum pms_area_e area,
+                                       enum esp32s3_pms_world_e world,
+                                       enum pms_flags_e flags)
+{
+  const uint32_t shift = (FLASH_CACHE_S * world);
+  const uint32_t mask = FLASH_CACHE_V << shift;
+  const uint32_t val = pms_ace_attr(flags) << shift;
+
+  switch (area)
+    {
+      case PMS_AREA_0:
+        modifyreg32(APB_CTRL_SRAM_ACE0_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_1:
+        modifyreg32(APB_CTRL_SRAM_ACE1_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_2:
+        modifyreg32(APB_CTRL_SRAM_ACE2_ATTR_REG, mask, val);
+        break;
+      case PMS_AREA_3:
+        modifyreg32(APB_CTRL_SRAM_ACE3_ATTR_REG, mask, val);
+        break;
+      default:
+        PANIC();
         break;
     }
 }
