@@ -364,9 +364,9 @@ static FAR struct tm *localsub(FAR const time_t *timep, int_fast32_t offset,
               FAR struct tm *tmp);
 static int  increment_overflow(FAR int *number, int delta);
 static time_t leaps_thru_end_of(time_t y);
-static int  increment_overflow32(FAR int_fast32_t *number, int delta);
+static int  increment_overflow64(FAR int_fast64_t *number, int delta);
 static int  increment_overflow_time(FAR time_t *t, int_fast32_t delta);
-static int  normalize_overflow32(FAR int_fast32_t *tensptr,
+static int  normalize_overflow64(FAR int_fast64_t *tensptr,
               FAR int *unitsptr, int base);
 static int  normalize_overflow(FAR int *tensptr, FAR int *unitsptr,
               int base);
@@ -2328,11 +2328,11 @@ static int increment_overflow(FAR int *ip, int j)
   return FALSE;
 }
 
-static int increment_overflow32(FAR int_fast32_t *lp, int m)
+static int increment_overflow64(FAR int_fast64_t *lp, int m)
 {
-  const int_fast32_t l = *lp;
+  const int_fast64_t l = *lp;
 
-  if ((l >= 0) ? (m > INT_FAST32_MAX - l) : (m < INT_FAST32_MIN - l))
+  if ((l >= 0) ? (m > INT_FAST64_MAX - l) : (m < INT_FAST64_MIN - l))
     {
       return TRUE;
     }
@@ -2370,7 +2370,7 @@ static int normalize_overflow(FAR int *tensptr,
   return increment_overflow(tensptr, tensdelta);
 }
 
-static int normalize_overflow32(FAR int_fast32_t *tensptr,
+static int normalize_overflow64(FAR int_fast64_t *tensptr,
                                 FAR int *unitsptr, int base)
 {
   int tensdelta;
@@ -2378,7 +2378,7 @@ static int normalize_overflow32(FAR int_fast32_t *tensptr,
   tensdelta = (*unitsptr >= 0) ?
     (*unitsptr / base) : (-1 - (-1 - *unitsptr) / base);
   *unitsptr -= tensdelta * base;
-  return increment_overflow32(tensptr, tensdelta);
+  return increment_overflow64(tensptr, tensdelta);
 }
 
 static int tmcomp(FAR const struct tm *atmp, FAR const struct tm *btmp)
@@ -2412,10 +2412,10 @@ static time_t time2sub(FAR struct tm *tmp,
   int i;
   int j;
   int saved_seconds;
-  int_fast32_t li;
+  int_fast64_t li;
   time_t lo;
   time_t hi;
-  int_fast32_t y;
+  int_fast64_t y;
   time_t newt;
   time_t t;
   struct tm yourtm;
@@ -2442,7 +2442,7 @@ static time_t time2sub(FAR struct tm *tmp,
     }
 
   y = yourtm.tm_year;
-  if (normalize_overflow32(&y, &yourtm.tm_mon, MONSPERYEAR))
+  if (normalize_overflow64(&y, &yourtm.tm_mon, MONSPERYEAR))
     {
       return -1;
     }
@@ -2451,14 +2451,14 @@ static time_t time2sub(FAR struct tm *tmp,
    * It is converted back to an offset from TM_YEAR_BASE later.
    */
 
-  if (increment_overflow32(&y, TM_YEAR_BASE))
+  if (increment_overflow64(&y, TM_YEAR_BASE))
     {
       return -1;
     }
 
   while (yourtm.tm_mday <= 0)
     {
-      if (increment_overflow32(&y, -1))
+      if (increment_overflow64(&y, -1))
         {
           return -1;
         }
@@ -2471,7 +2471,7 @@ static time_t time2sub(FAR struct tm *tmp,
     {
       li = y + (1 < yourtm.tm_mon);
       yourtm.tm_mday -= g_year_lengths[isleap(li)];
-      if (increment_overflow32(&y, 1))
+      if (increment_overflow64(&y, 1))
         {
           return -1;
         }
@@ -2489,14 +2489,14 @@ static time_t time2sub(FAR struct tm *tmp,
       if (++yourtm.tm_mon >= MONSPERYEAR)
         {
           yourtm.tm_mon = 0;
-          if (increment_overflow32(&y, 1))
+          if (increment_overflow64(&y, 1))
             {
               return -1;
             }
         }
     }
 
-  if (increment_overflow32(&y, -TM_YEAR_BASE))
+  if (increment_overflow64(&y, -TM_YEAR_BASE))
     {
       return -1;
     }
