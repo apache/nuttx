@@ -180,12 +180,23 @@ int link(FAR const char *path1, FAR const char *path2)
 
   else
     {
+      /* If inode_find for path2 failed for a reason other than "path does
+       * not exist" (e.g. ENAMETOOLONG, ELOOP), propagate that error
+       * directly instead of falling through to the EXDEV check.
+       */
+
+      if (ret != -ENOENT && ret != -ENOTDIR)
+        {
+          errcode = -ret;
+          goto errout_with_newinode;
+        }
+
       /* Cannot link between pseudofs and other mountpoints */
 
       if (INODE_IS_MOUNTPT(target))
         {
           errcode = EXDEV;
-          goto errout_with_target;
+          goto errout_with_newinode;
         }
 
       /* Create an inode in the pseudo-filesystem at this path. */
