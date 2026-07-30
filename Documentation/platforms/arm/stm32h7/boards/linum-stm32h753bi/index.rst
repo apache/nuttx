@@ -1087,6 +1087,37 @@ that the USB host and the SDMMC peripheral coexist::
   nsh> mount -t vfat /dev/mmcsd0 /data
   nsh> ls /data
 
+**Typing from the serial console instead.** The terminal reads a keyboard
+device, and it does not care which one, so it can be driven from the serial
+console with no keyboard plugged in at all. This configuration enables
+``UINPUT_KEYBOARD``, which registers a virtual keyboard on
+``/dev/ukeyboard``, and ``system/kbd``, which injects into it.
+
+Point the terminal at the virtual keyboard and bridge the console into it::
+
+  nsh> lvglterm /dev/ukeyboard &
+  nsh> kbd -i /dev/ukeyboard
+
+Everything typed on the serial console from that point on appears on the
+display. This is how to work on the terminal without the keyboard at hand,
+and how to reach the board over a serial link from another machine.
+
+To use both at once, forward the USB keyboard into the same virtual
+keyboard before starting the terminal::
+
+  nsh> kbd -i /dev/ukeyboard /dev/kbda &
+  nsh> lvglterm /dev/ukeyboard &
+  nsh> kbd -i /dev/ukeyboard
+
+The USB keyboard and the serial console now feed the same terminal, which
+an application cannot do on its own since it opens a single device.
+
+``UINPUT_KEYBOARD_BUFNUMBER`` is raised to 128 here. It counts events
+rather than keys, so the default of eight holds four keystrokes, and a
+console hands over a whole line at once. The keyboard upper half overwrites
+the oldest event when the buffer is full, so a line typed at the console
+would arrive with its beginning silently missing.
+
 tone
 ----
 
