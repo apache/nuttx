@@ -22,6 +22,33 @@
 
 CSRCS = esp32s3_boot.c esp32s3_bringup.c
 
+# A kernel build boots its init process out of a ROMFS image built from
+# apps/bin by apps/tools/mkromfsimg.sh.  Until that has been generated,
+# romfs_stub.c supplies an empty placeholder so the kernel still builds.
+#
+# The placeholder is always compiled, and defines the image away once the
+# real one exists, rather than being swapped out for it:  both define
+# romfs_img, so an object left behind by an earlier build would otherwise
+# still satisfy the link and quietly produce a kernel with no init process.
+
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+CSRCS += romfs_stub.c
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)src$(DELIM)romfs_boot.c),)
+CSRCS += romfs_boot.c
+CFLAGS += -DHAVE_ROMFS_BOOT
+
+# Defining the placeholder away is a change in CFLAGS, and make cannot see
+# one:  an object compiled before the image was generated is newer than its
+# source and is not rebuilt.  It still defines romfs_img, and being the
+# earlier member of libboard.a it is the one that satisfies the link -- so
+# the kernel boots with a one-byte ROMFS and cannot start init, in a build
+# where nothing failed.  Tie the placeholder to the generated image so that
+# it is recompiled whenever the image is regenerated.
+
+romfs_stub$(OBJEXT): $(BOARD_DIR)$(DELIM)src$(DELIM)romfs_boot.c
+endif
+endif
+
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += esp32s3_reset.c
 endif
