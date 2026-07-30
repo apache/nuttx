@@ -558,15 +558,32 @@ FAR const char *inode_nextname(FAR const char *name)
       name++;
     }
 
-  /* Skip single '.' path segment, but not '..' */
+  /* Skip single '.' path segment, but not '..'. This includes a lone
+   * trailing '.' as the final path component (e.g. "/foo/."), which
+   * refers to "foo" itself the same way "/foo/./" would -- without this,
+   * a trailing '.' is instead treated as a literal child name to look up
+   * under "foo" and fails to resolve, since no real node is ever named
+   * ".", rather than resolving to the node the search already reached.
+   */
 
-  if (*name == '.' && *(name + 1) == '/')
+  if (*name == '.' && (*(name + 1) == '/' || *(name + 1) == '\0'))
     {
-      /* If there is a '/' after '.',
-       * continue searching from the next character
-       */
+      if (*(name + 1) == '/')
+        {
+          /* If there is a '/' after '.',
+           * continue searching from the next character
+           */
 
-      name = inode_nextname(name);
+          name = inode_nextname(name);
+        }
+      else
+        {
+          /* Lone trailing '.': point past it, at the terminating NUL,
+           * the same as if the path had ended one character earlier.
+           */
+
+          name++;
+        }
     }
 
   return name;
