@@ -114,6 +114,9 @@ endif
 
 ifeq ($(CONFIG_RP23XX_RTC),y)
 CHIP_CSRCS += rp23xx_rtc.c
+ifeq ($(CONFIG_RTC_DRIVER),y)
+CHIP_CSRCS += rp23xx_rtc_lowerhalf.c
+endif
 endif
 
 ifeq ($(CONFIG_RP23XX_OTP),y)
