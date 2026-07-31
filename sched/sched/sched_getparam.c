@@ -37,6 +37,51 @@
 #include "sched/sched.h"
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsched_get_sporadic_param
+ *
+ * Description:
+ *   Fill in the SCHED_SPORADIC related members of param from the TCB.
+ *   Must be called within a critical section since the sporadic scheduler
+ *   state may be modified concurrently.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_SPORADIC
+static void nxsched_get_sporadic_param(FAR struct tcb_s *tcb,
+                                       FAR struct sched_param *param)
+{
+  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
+    {
+      FAR struct sporadic_s *sporadic = tcb->sporadic;
+      DEBUGASSERT(sporadic != NULL);
+
+      /* Return parameters associated with SCHED_SPORADIC */
+
+      param->sched_ss_low_priority = (int)sporadic->low_priority;
+      param->sched_ss_max_repl     = (int)sporadic->max_repl;
+
+      clock_ticks2time(&param->sched_ss_repl_period,
+                       sporadic->repl_period);
+      clock_ticks2time(&param->sched_ss_init_budget,
+                       sporadic->budget);
+    }
+  else
+    {
+      param->sched_ss_low_priority        = 0;
+      param->sched_ss_max_repl            = 0;
+      param->sched_ss_repl_period.tv_sec  = 0;
+      param->sched_ss_repl_period.tv_nsec = 0;
+      param->sched_ss_init_budget.tv_sec  = 0;
+      param->sched_ss_init_budget.tv_nsec = 0;
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -81,14 +126,24 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
     }
   else
     {
-      /* Check if the task to restart is the calling task */
+      /* Check if the PID is that of the calling task */
 
       rtcb = this_task();
       if (pid == 0 || pid == rtcb->pid)
         {
-          /* Return the priority if the calling task. */
+          /* Return the priority of the calling task. */
 
           param->sched_priority = (int)rtcb->sched_priority;
+
+#ifdef CONFIG_SCHED_SPORADIC
+          /* The sporadic state may be modified concurrently, e.g. by
+           * sched_setparam() from another CPU, so it must be protected.
+           */
+
+          flags = enter_critical_section();
+          nxsched_get_sporadic_param(rtcb, param);
+          leave_critical_section(flags);
+#endif
         }
 
       /* This PID is not for the calling task, we will have to look it up */
@@ -112,31 +167,7 @@ int nxsched_get_param(pid_t pid, FAR struct sched_param *param)
               param->sched_priority = (int)tcb->sched_priority;
 
 #ifdef CONFIG_SCHED_SPORADIC
-              if ((tcb->flags & TCB_FLAG_POLICY_MASK) ==
-                  TCB_FLAG_SCHED_SPORADIC)
-                {
-                  FAR struct sporadic_s *sporadic = tcb->sporadic;
-                  DEBUGASSERT(sporadic != NULL);
-
-                  /* Return parameters associated with SCHED_SPORADIC */
-
-                  param->sched_ss_low_priority = (int)sporadic->low_priority;
-                  param->sched_ss_max_repl     = (int)sporadic->max_repl;
-
-                  clock_ticks2time(&param->sched_ss_repl_period,
-                                  sporadic->repl_period);
-                  clock_ticks2time(&param->sched_ss_init_budget,
-                                  sporadic->budget);
-                }
-              else
-                {
-                  param->sched_ss_low_priority        = 0;
-                  param->sched_ss_max_repl            = 0;
-                  param->sched_ss_repl_period.tv_sec  = 0;
-                  param->sched_ss_repl_period.tv_nsec = 0;
-                  param->sched_ss_init_budget.tv_sec  = 0;
-                  param->sched_ss_init_budget.tv_nsec = 0;
-                }
+              nxsched_get_sporadic_param(tcb, param);
 #endif
             }
 
