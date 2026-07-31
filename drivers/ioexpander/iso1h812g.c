@@ -181,8 +181,8 @@ static void iso1h812g_deselect(FAR struct spi_dev_s *spi,
  * Name: iso1h812g_direction
  *
  * Description:
- *   ISO1H812G is only input pin. However interface is provided in order
- *   to avoid system falls if called.
+ *   ISO1H812G is only output expander. However interface is provided in
+ *   order to avoid system falls if called.
  *
  * Input Parameters:
  *   dev - Device-specific state data
@@ -201,7 +201,12 @@ static int iso1h812g_direction(FAR struct ioexpander_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
-  gpiowarn("WARNING: ISO1H812G is only input expander!\n");
+  if (IOEXPANDER_DIRECTION_IN == direction
+      || IOEXPANDER_DIRECTION_IN_PULLUP == direction
+      || IOEXPANDER_DIRECTION_IN_PULLDOWN == direction)
+    {
+      gpiowarn("WARNING: ISO1H812G is only output expander!\n");
+    }
 
   return OK;
 }
