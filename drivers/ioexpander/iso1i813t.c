@@ -180,7 +180,7 @@ static void iso1i813t_deselect(FAR struct spi_dev_s *spi,
  * Name: iso1i813t_direction
  *
  * Description:
- *   ISO1I813T is only input pin. However interface is provided in order
+ *   ISO1I813T is only input expander. However interface is provided in order
  *   to avoid system falls if called.
  *
  * Input Parameters:
@@ -200,7 +200,11 @@ static int iso1i813t_direction(FAR struct ioexpander_dev_s *dev,
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
-  gpiowarn("WARNING: ISO1I813T is only input expander!\n");
+  if (IOEXPANDER_DIRECTION_OUT == direction
+      || IOEXPANDER_DIRECTION_OUT_OPENDRAIN == direction)
+    {
+      gpiowarn("WARNING: ISO1I813T is only input expander!\n");
+    }
 
   return OK;
 }
