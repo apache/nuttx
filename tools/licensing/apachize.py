@@ -34,7 +34,7 @@ def apachize(path, header):
 
     with open(path) as f:
         s = f.read()
-        s = re.sub("(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/", header, s, 1, re.DOTALL)
+        s = re.sub(r"(?i)/\*\*\*.+?(?:Copyright).+?\*\*\*+/", header, s, 1, re.DOTALL)
         print(s)
 
 

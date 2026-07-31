@@ -474,7 +474,7 @@ class IARProject(IdeProject):
         IAR sample including nodes
             <option>
               <name>CCIncludePath2</name>
-              <state>$PROJ_DIR$\nuttx\include\</state>
+              <state>$PROJ_DIR$\\nuttx\\include\\</state>
             </option>
         Args:
             sources: list of SourceInfo
