@@ -284,7 +284,8 @@ class connectNuttx(object):
 
             if self.method != "minicom":
                 time.sleep(0.5)
-            return ret
+
+        return ret
 
     def switch_to_original_core(self):
         if self.target == "target":
