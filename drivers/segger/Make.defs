@@ -24,8 +24,8 @@ TARGET_ZIP =
 SGDIR      = segger
 
 ifeq ($(CONFIG_SEGGER_RTT),y)
-  CSRCS += segger/segger.c
-  CSRCS += segger/SystemView/SEGGER/SEGGER_RTT.c
+  CSRCS += segger.c
+  CSRCS += SEGGER_RTT.c
 
   CFLAGS += -Wno-shadow -Wno-pointer-to-int-cast
 
@@ -41,36 +41,42 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
 
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
     AFLAGS += ${INCDIR_PREFIX}segger$(DELIM)config
-    ASRCS += segger/SystemView/SEGGER/SEGGER_RTT_ASM_ARMv7M.S
+    ASRCS += SEGGER_RTT_ASM_ARMv7M.S
   endif
 endif
 
 ifeq ($(CONFIG_STREAM_RTT),y)
-  CSRCS += segger/stream_rtt.c
+  CSRCS += stream_rtt.c
 endif
 
 ifeq ($(CONFIG_SYSLOG_RTT),y)
-  CSRCS += segger/syslog_rtt.c
+  CSRCS += syslog_rtt.c
 endif
 
 ifeq ($(CONFIG_NOTE_RTT),y)
-  CSRCS += segger/note_rtt.c
+  CSRCS += note_rtt.c
 endif
 
 ifeq ($(CONFIG_SERIAL_RTT),y)
-  CSRCS += segger/serial_rtt.c
+  CSRCS += serial_rtt.c
 endif
 
 ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
-  CSRCS += segger/note_sysview.c
-  CSRCS += segger/SystemView/SEGGER/SEGGER_SYSVIEW.c
+  CSRCS += note_sysview.c
+  CSRCS += SEGGER_SYSVIEW.c
 
   CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)sched
 endif
 
+DEPPATH += --dep-path segger
+VPATH += :segger
+
 # Common settings for RTT and SYSTEMVIEW
 ifneq ($(CONFIG_SEGGER_RTT)$(CONFIG_SEGGER_SYSVIEW),)
   CFLAGS += ${INCDIR_PREFIX}segger$(DELIM)SystemView$(DELIM)SEGGER
+
+  DEPPATH += --dep-path segger/SystemView/SEGGER
+  VPATH += :segger/SystemView/SEGGER
 
   SYSVIEW_VERSION ?= $(CONFIG_SEGGER_SYSVIEW_TARGET_SOURCE)
   SYSVIEW_ZIP = SystemView_Src_V$(SYSVIEW_VERSION).zip
