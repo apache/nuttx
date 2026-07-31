@@ -313,10 +313,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->state(dev, ptr);
+              break;
             }
+
+          if (dev->ops->state == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->state(dev, ptr);
         }
         break;
 
@@ -324,10 +332,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR bool *ptr = (FAR bool *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->online(dev, ptr);
+              break;
             }
+
+          if (dev->ops->online == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->online(dev, ptr);
         }
         break;
 
@@ -335,10 +351,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->voltage(dev, ptr);
+              break;
             }
+
+          if (dev->ops->voltage == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->voltage(dev, ptr);
         }
         break;
 
@@ -346,10 +370,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->capacity(dev, ptr);
+              break;
             }
+
+          if (dev->ops->capacity == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->capacity(dev, ptr);
         }
         break;
 
@@ -357,10 +389,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->current(dev, ptr);
+              break;
             }
+
+          if (dev->ops->current == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->current(dev, ptr);
         }
         break;
 
@@ -368,10 +408,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->temp(dev, ptr);
+              break;
             }
+
+          if (dev->ops->temp == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->temp(dev, ptr);
         }
         break;
 
@@ -379,10 +427,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->chipid(dev, ptr);
+              break;
             }
+
+          if (dev->ops->chipid == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->chipid(dev, ptr);
         }
         break;
 
@@ -390,10 +446,18 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         {
           FAR int *ptr = (FAR int *)((uintptr_t)arg);
 
-          if (ptr)
+          if (ptr == NULL)
             {
-              ret = dev->ops->operate(dev, ptr);
+              break;
             }
+
+          if (dev->ops->operate == NULL)
+            {
+              ret = -ENOTTY;
+              break;
+            }
+
+          ret = dev->ops->operate(dev, ptr);
         }
         break;
 
