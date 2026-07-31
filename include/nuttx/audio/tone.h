@@ -32,6 +32,7 @@
 
 #include <fixedmath.h>
 
+#include <nuttx/timers/oneshot.h>
 #include <nuttx/timers/pwm.h>
 #include <nuttx/fs/ioctl.h>
 
