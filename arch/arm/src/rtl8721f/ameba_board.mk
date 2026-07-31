@@ -140,6 +140,15 @@ endif
 # calls the fwlib GPIO API.  On RTL8721F (amebagreen2) GPIO_INTStatusGet and
 # GPIO_INTStatusClearEdge ARE in the ROM symbol table (ameba_rom_symbol_bcut.ld),
 # so unlike RTL8721Dx no fwlib ram_common source needs to be compiled in here.
+
+# UART register layer.  The UART driver (arch/.../common/ameba/ameba_uart.c)
+# calls the fwlib UART API, all of which resolves to the ROM symbol table; but
+# the ROM routines index the fwlib data tables (UART_DEV_TABLE, APBPeriph_UARTx)
+# which live in this RAM source and must be compiled in (--gc-sections drops
+# the unused DMA/monitor helpers).
+ifeq ($(CONFIG_AMEBA_UART),y)
+AMEBA_FWLIB_SRCS += $(AMEBA_SOC)/fwlib/ram_common/ameba_uart.c
+endif
 # -Wno-int-conversion: the vendored SDK passes NULL to irq_register()'s u32
 # "Data" (interrupt context) argument in many places -- an intentional
 # NULL-as-context idiom.  Silence -Wint-conversion for the SDK fwlib sources

@@ -50,6 +50,10 @@ if(CONFIG_AMEBA_GPIO)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_gpio.c)
 endif()
 
+if(CONFIG_AMEBA_UART)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_uart.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -94,6 +98,14 @@ set(AMEBA_FWLIB_SRCS
 
 if(CONFIG_RTL8721F_FLASH_FS)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_flash_ram.c)
+endif()
+
+# UART register layer.  The UART driver (arch/.../common/ameba/ameba_uart.c)
+# calls the fwlib UART API, all of which resolves to the ROM symbol table; but
+# the ROM routines index the fwlib data tables (UART_DEV_TABLE, APBPeriph_UARTx)
+# which live in this RAM source and must be compiled in.
+if(CONFIG_AMEBA_UART)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_uart.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
