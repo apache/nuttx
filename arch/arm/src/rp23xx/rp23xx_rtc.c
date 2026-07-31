@@ -49,6 +49,7 @@
 #include <nuttx/irq.h>
 
 #include "arm_internal.h"
+#include "rp23xx_rtc.h"
 #include "hardware/rp23xx_powman.h"
 
 #ifdef CONFIG_RTC
@@ -72,6 +73,18 @@
 /* Nominal low-power oscillator frequency. */
 
 #define LPOSC_FREQ_HZ     32768
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_RTC_ALARM
+
+/* The always-on timer has one alarm comparator */
+
+static struct rp23xx_alarm_state_s g_alarm;
+
+#endif
 
 /****************************************************************************
  * Public Data
@@ -151,9 +164,168 @@ static void powman_set_ms(uint64_t ms)
     }
 }
 
+#ifdef CONFIG_RTC_ALARM
+
+/* Disarm the comparator, mask its interrupt and clear its status.  The
+ * comparator asserts while the time is past the alarm, so it must be
+ * disabled, not only acknowledged.
+ */
+
+static void powman_alarm_disable(void)
+{
+  powman_clrbits(RP23XX_POWMAN_INTE, RP23XX_POWMAN_INTE_TIMER);
+  powman_clrbits(RP23XX_POWMAN_TIMER, RP23XX_POWMAN_TIMER_ALARM_ENAB);
+  powman_clrbits(RP23XX_POWMAN_TIMER, RP23XX_POWMAN_TIMER_ALARM);
+}
+
+/* Program the comparator, disabled while the time is written, as
+ * powman_timer_enable_alarm_at_ms() in the Pico SDK does.
+ */
+
+static void powman_set_alarm_ms(uint64_t ms)
+{
+  powman_setbits(RP23XX_POWMAN_INTE, RP23XX_POWMAN_INTE_TIMER);
+  powman_clrbits(RP23XX_POWMAN_TIMER, RP23XX_POWMAN_TIMER_ALARM_ENAB);
+
+  powman_write(RP23XX_POWMAN_ALARM_TIME_15TO0,  (uint32_t)(ms));
+  powman_write(RP23XX_POWMAN_ALARM_TIME_31TO16, (uint32_t)(ms >> 16));
+  powman_write(RP23XX_POWMAN_ALARM_TIME_47TO32, (uint32_t)(ms >> 32));
+  powman_write(RP23XX_POWMAN_ALARM_TIME_63TO48, (uint32_t)(ms >> 48));
+
+  /* Drop any status latched from a previous alarm before re-enabling. */
+
+  powman_clrbits(RP23XX_POWMAN_TIMER, RP23XX_POWMAN_TIMER_ALARM);
+  powman_setbits(RP23XX_POWMAN_TIMER, RP23XX_POWMAN_TIMER_ALARM_ENAB);
+}
+
+/****************************************************************************
+ * Name: rp23xx_alarm_interrupt
+ *
+ * Description:
+ *   POWMAN timer interrupt handler.  Fires when the always-on timer reaches
+ *   the programmed alarm time.
+ *
+ ****************************************************************************/
+
+static int rp23xx_alarm_interrupt(int irq, FAR void *context, FAR void *arg)
+{
+  rp23xx_alarm_callback_t cb;
+  FAR void *cbarg;
+
+  /* Disarm first, so that the callback can arm a new alarm */
+
+  powman_alarm_disable();
+
+  cb    = g_alarm.cb;
+  cbarg = g_alarm.arg;
+
+  g_alarm.active = false;
+  g_alarm.cb     = NULL;
+  g_alarm.arg    = NULL;
+
+  if (cb != NULL)
+    {
+      cb(cbarg);
+    }
+
+  return OK;
+}
+
+#endif /* CONFIG_RTC_ALARM */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: rp23xx_rtc_getms
+ *
+ * Description:
+ *   Read the POWMAN always-on timer, in milliseconds since the epoch.
+ *
+ ****************************************************************************/
+
+uint64_t rp23xx_rtc_getms(void)
+{
+  return powman_get_ms();
+}
+
+#ifdef CONFIG_RTC_ALARM
+
+/****************************************************************************
+ * Name: rp23xx_rtc_setalarm
+ *
+ * Description:
+ *   Arm the POWMAN alarm at an absolute time in milliseconds.
+ *
+ ****************************************************************************/
+
+int rp23xx_rtc_setalarm(uint64_t time, rp23xx_alarm_callback_t cb,
+                        FAR void *arg)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (time <= powman_get_ms())
+    {
+      leave_critical_section(flags);
+      return -EINVAL;
+    }
+
+  g_alarm.time   = time;
+  g_alarm.cb     = cb;
+  g_alarm.arg    = arg;
+  g_alarm.active = true;
+
+  powman_set_alarm_ms(time);
+
+  leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rp23xx_rtc_cancelalarm
+ ****************************************************************************/
+
+int rp23xx_rtc_cancelalarm(void)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  powman_alarm_disable();
+
+  g_alarm.active = false;
+  g_alarm.cb     = NULL;
+  g_alarm.arg    = NULL;
+
+  leave_critical_section(flags);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: rp23xx_rtc_rdalarm
+ ****************************************************************************/
+
+int rp23xx_rtc_rdalarm(FAR uint64_t *time)
+{
+  irqstate_t flags;
+  int ret = -ENODATA;
+
+  flags = enter_critical_section();
+
+  if (g_alarm.active)
+    {
+      *time = g_alarm.time;
+      ret   = OK;
+    }
+
+  leave_critical_section(flags);
+  return ret;
+}
+
+#endif /* CONFIG_RTC_ALARM */
 
 /****************************************************************************
  * Name: up_rtc_initialize
@@ -188,6 +360,15 @@ int up_rtc_initialize(void)
         {
         }
     }
+
+#ifdef CONFIG_RTC_ALARM
+  /* The alarm stays disarmed until it is set */
+
+  powman_alarm_disable();
+
+  irq_attach(RP23XX_POWMAN_IRQ_TIMER, rp23xx_alarm_interrupt, NULL);
+  up_enable_irq(RP23XX_POWMAN_IRQ_TIMER);
+#endif
 
   g_rtc_enabled = true;
   return OK;

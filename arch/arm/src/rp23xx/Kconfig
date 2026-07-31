@@ -878,6 +878,9 @@ config RP23XX_RTC
 		timer is a 64-bit millisecond counter clocked from the low-power
 		oscillator, so it keeps running across warm resets.
 
+		The always-on timer also has one alarm comparator.  Select
+		RTC_ALARM to expose it through /dev/rtc0.
+
 config RP23XX_ADC
 	bool "Enable ADC Support"
 	default n
