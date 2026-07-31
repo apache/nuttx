@@ -50,6 +50,7 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
                       bool throttled)
 {
   FAR struct iob_s *penultimate;
+  FAR struct iob_s *newnext;
   FAR struct iob_s *next;
   int remain = pktlen;
   int ninqueue = 0;
@@ -127,9 +128,36 @@ int iob_update_pktlen(FAR struct iob_s *iob, unsigned int pktlen,
 
       while (next != NULL && nrequire > ninqueue)
         {
-          next->io_flink = iob_tryalloc(throttled);
-          next = IOB_LINK_GET(next);
-          ninqueue++;
+          newnext = iob_tryalloc(throttled);
+
+          /* Add the new, empty I/O buffer to the end of the buffer chain.
+           * Carry over any queue flags (e.g. IOB_CHAIN_END) from the
+           * current tail to the new tail so that the chain boundary is
+           * preserved, then clear the flags on the old tail since it is
+           * no longer the last buffer in the chain.  This mirrors the
+           * chain-extension logic in iob_copyin(); without it, extending
+           * a chain that also sits in an iob_queue loses the IOB_CHAIN_END
+           * marker and corrupts the queue's chain boundaries, which can
+           * later make iob_add_queue()/iob_remove_queue() walk past the
+           * real chain end and dereference stale/freed IOB pointers.
+           */
+
+          if (newnext != NULL)
+            {
+              IOB_FLAG_SET(newnext, NULL, IOB_FLAG_GET(next));
+              next->io_flink = newnext;
+              next = newnext;
+              ninqueue++;
+            }
+          else
+            {
+              /* No more buffers available; stop extending.  The pktlen
+               * adjustment below accounts for the shortfall.
+               */
+
+              next->io_flink = NULL;
+              break;
+            }
         }
     }
 
