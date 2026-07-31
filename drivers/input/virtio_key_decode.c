@@ -143,6 +143,7 @@ uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special)
       case KEY_F24:
         return KEYCODE_F24;
       default:
+        break;
     }
 
   *special = false;
@@ -275,6 +276,7 @@ uint32_t keyboard_translate_virtio_code(uint16_t keycode, bool *special)
       case KEY_KPDOT:
         return '.';
       default:
+        break;
     }
 
   return 0;
