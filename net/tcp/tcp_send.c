@@ -149,7 +149,7 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
     }
   else
     {
-      if (work_available(&conn->work) && conn->tx_unacked != 0)
+      if (conn->tx_unacked != 0)
         {
           conn->timeout = false;
           tcp_update_retrantimer(conn, conn->rto);
