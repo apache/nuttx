@@ -353,10 +353,10 @@ struct sensor_ops_s
    * If fetch isn't NULL, upper half driver will disable intermediate
    * buffer and userspace can't set buffer size by ioctl.
    *
-   * You can call this function to read sensor register data by I2C/SPI bus
-   * when open mode is non-block, and poll are always successful.
-   * When you call this function and open mode is block, you will wait
-   * until sensor data ready, then read sensor data.
+   * You can call this function to read sensor register data by I2C/SPI
+   * bus. The data is read from the device on demand, so it is always
+   * available: poll() always reports POLLIN and read() never blocks,
+   * whether or not the open mode is non-block.
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.

@@ -101,7 +101,6 @@ struct sensor_user_s
                                 */
   unsigned int     event;      /* The event of this sensor, eg: SENSOR_EVENT_FLUSH_COMPLETE. */
   bool             flushing;   /* The is used to indicate user is flushing */
-  sem_t            buffersem;  /* Wakeup user waiting for data in circular buffer */
   size_t           bufferpos;  /* The index of user generation in buffer */
 
   /* The subscriber info
@@ -774,7 +773,6 @@ static int sensor_open(FAR struct file *filep)
   user->state.interval = UINT32_MAX;
   user->state.esize = upper->state.esize;
   user->state.nonwakeup = true;
-  nxsem_init(&user->buffersem, 0, 0);
   list_add_tail(&upper->userlist, &user->node);
 
   /* The new user generation, notify to other users */
@@ -835,7 +833,6 @@ static int sensor_close(FAR struct file *filep)
     }
 
   list_delete(&user->node);
-  nxsem_destroy(&user->buffersem);
 
   /* The user is closed, notify to other users */
 
@@ -871,24 +868,18 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
           return -EINVAL;
         }
 
-      if (!(filep->f_oflags & O_NONBLOCK))
-        {
-          nxrmutex_unlock(&upper->lock);
-          ret = nxsem_wait_uninterruptible(&user->buffersem);
-          if (ret < 0)
-            {
-              return ret;
-            }
+      /* Fetch the data from the device directly, there is nothing to wait
+       * for. This matches the POLLIN sensor_poll() always reports for a
+       * fetch only sensor.
+       */
 
-          nxrmutex_lock(&upper->lock);
-        }
-      else if (!upper->state.nsubscribers)
+      if (!upper->state.nsubscribers)
         {
           ret = -EAGAIN;
           goto out;
         }
 
-        ret = lower->ops->fetch(lower, filep, buffer, len);
+      ret = lower->ops->fetch(lower, filep, buffer, len);
     }
   else if (circbuf_is_empty(&upper->buffer))
     {
@@ -1166,7 +1157,6 @@ static int sensor_poll(FAR struct file *filep,
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
   pollevent_t eventset = 0;
-  int semcount;
   int ret = 0;
 
   nxrmutex_lock(&upper->lock);
@@ -1184,20 +1174,12 @@ static int sensor_poll(FAR struct file *filep,
       fds->priv = filep;
       if (lower->ops->fetch)
         {
-          /* Always return POLLIN for fetch data directly(non-block) */
+          /* Always return POLLIN for fetch only sensor: the data is read
+           * from the device on demand by sensor_read(), so there is never
+           * anything to wait for.
+           */
 
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              eventset |= POLLIN;
-            }
-          else
-            {
-              nxsem_get_value(&user->buffersem, &semcount);
-              if (semcount > 0)
-                {
-                  eventset |= POLLIN;
-                }
-            }
+          eventset |= POLLIN;
         }
       else if (sensor_is_updated(upper, user))
         {
@@ -1229,7 +1211,6 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user;
   unsigned long envcount;
-  int semcount;
   int ret;
 
   nxrmutex_lock(&upper->lock);
@@ -1287,12 +1268,6 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
     {
       if (sensor_is_updated(upper, user))
         {
-          nxsem_get_value(&user->buffersem, &semcount);
-          if (semcount < 1)
-            {
-              nxsem_post(&user->buffersem);
-            }
-
           sensor_pollnotify_one(user, POLLIN, SENSOR_ROLE_RD);
         }
     }
@@ -1305,17 +1280,10 @@ static void sensor_notify_event(FAR void *priv)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
   FAR struct sensor_user_s *user;
-  int semcount;
 
   nxrmutex_lock(&upper->lock);
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s, node)
     {
-      nxsem_get_value(&user->buffersem, &semcount);
-      if (semcount < 1)
-        {
-          nxsem_post(&user->buffersem);
-        }
-
       sensor_pollnotify_one(user, POLLIN, SENSOR_ROLE_RD);
     }
 
