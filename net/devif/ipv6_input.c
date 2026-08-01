@@ -151,7 +151,7 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
   return false;
 }
 
-#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66) || defined(CONFIG_NET_IPFILTER)
 /****************************************************************************
  * Name: ipv6_fragin_or_drop
  *
@@ -225,7 +225,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFORWARD
   int ret;
 #endif
-#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66) || defined(CONFIG_NET_IPFILTER)
   bool isfrag = false;
 #endif
 
@@ -317,7 +317,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
       if (nxthdr == NEXT_FRAGMENT_EH)
         {
           extlen    = EXTHDR_FRAG_LEN;
-#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66) || defined(CONFIG_NET_IPFILTER)
           isfrag    = true;
 #endif
         }
@@ -331,12 +331,14 @@ static int ipv6_in(FAR struct net_driver_s *dev)
       nxthdr    = exthdr->nxthdr;
     }
 
-#ifdef CONFIG_NET_NAT66
+#if defined(CONFIG_NET_NAT66) || defined(CONFIG_NET_IPFILTER)
   if (isfrag)
     {
       return ipv6_fragin_or_drop(dev);
     }
+#endif
 
+#ifdef CONFIG_NET_NAT66
   /* Try NAT inbound, rule matching will be performed in NAT module. */
 
   ipv6_nat_inbound(dev, ipv6);
