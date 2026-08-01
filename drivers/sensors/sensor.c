@@ -43,6 +43,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -96,6 +97,8 @@ struct sensor_user_s
   struct list_node node;       /* Node of users list */
   struct pollfd   *fds;        /* The poll structure of thread waiting events */
   sensor_role_t    role;       /* The is used to indicate user's role based on open flags */
+  struct wdog_s    wdog;       /* Paces POLLIN at the requested interval */
+  uint64_t         fetched;    /* When POLLIN was last reported, in usec */
   bool             changed;    /* This is used to indicate event happens and need to
                                 * asynchronous notify other users
                                 */
@@ -142,6 +145,7 @@ static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
 static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
                                  size_t bytes);
+static void    sensor_fetch_expired(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -687,6 +691,23 @@ static void sensor_pollnotify_one(FAR struct sensor_user_s *user,
   poll_notify(&user->fds, 1, eventset);
 }
 
+static void sensor_fetch_expired(wdparm_t arg)
+{
+  FAR struct sensor_user_s *user = (FAR struct sensor_user_s *)arg;
+
+  /* Timer context, so no lock: a teardown that raced us cleared fds, which
+   * makes both the notify and the re-arm below no-ops.
+   */
+
+  if (user->fds != NULL)
+    {
+      user->fetched = sensor_get_timestamp();
+      sensor_pollnotify_one(user, POLLIN, SENSOR_ROLE_RD);
+      wd_start(&user->wdog, USEC2TICK(user->state.interval),
+               sensor_fetch_expired, arg);
+    }
+}
+
 static void sensor_pollnotify(FAR struct sensor_upperhalf_s *upper,
                               pollevent_t eventset, sensor_role_t role)
 {
@@ -868,10 +889,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
           return -EINVAL;
         }
 
-      /* Fetch the data from the device directly, there is nothing to wait
-       * for. This matches the POLLIN sensor_poll() always reports for a
-       * fetch only sensor.
-       */
+      /* Read the device directly, there is nothing to wait for */
 
       if (!upper->state.nsubscribers)
         {
@@ -1174,12 +1192,31 @@ static int sensor_poll(FAR struct file *filep,
       fds->priv = filep;
       if (lower->ops->fetch)
         {
-          /* Always return POLLIN for fetch only sensor: the data is read
-           * from the device on demand by sensor_read(), so there is never
-           * anything to wait for.
+          /* Always ready, unless a rate was requested: then once per
+           * interval, woken by sensor_fetch_expired().
            */
 
-          eventset |= POLLIN;
+          if (user->state.interval == UINT32_MAX)
+            {
+              eventset |= POLLIN;
+            }
+          else
+            {
+              uint64_t now = sensor_get_timestamp();
+              uint64_t elapsed = now - user->fetched;
+
+              if (elapsed >= user->state.interval)
+                {
+                  user->fetched = now;
+                  eventset |= POLLIN;
+                }
+              else
+                {
+                  wd_start(&user->wdog,
+                           USEC2TICK(user->state.interval - elapsed),
+                           sensor_fetch_expired, (wdparm_t)user);
+                }
+            }
         }
       else if (sensor_is_updated(upper, user))
         {
@@ -1197,6 +1234,7 @@ static int sensor_poll(FAR struct file *filep,
     {
       user->fds = NULL;
       fds->priv = NULL;
+      wd_cancel(&user->wdog);
     }
 
 errout:
