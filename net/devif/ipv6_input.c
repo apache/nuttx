@@ -151,6 +151,36 @@ static bool check_destipaddr(FAR struct net_driver_s *dev,
   return false;
 }
 
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
+/****************************************************************************
+ * Name: ipv6_fragin_or_drop
+ *
+ * Description:
+ *   Reassemble an incoming IPv6 fragment for NAT or local processing or drop
+ *   it if fragment reassembly is not available.
+ *
+ ****************************************************************************/
+
+static int ipv6_fragin_or_drop(FAR struct net_driver_s *dev)
+{
+#ifdef CONFIG_NET_IPFRAG
+  if (ipv6_fragin(dev) == OK)
+    {
+      return OK;
+    }
+#endif
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv6.drop++;
+  g_netstats.ipv6.fragerr++;
+#endif
+  nwarn("WARNING: IPv6 fragment dropped\n");
+
+  dev->d_len = 0;
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: ipv6_in
  *
@@ -195,7 +225,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFORWARD
   int ret;
 #endif
-#ifdef CONFIG_NET_IPFRAG
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
   bool isfrag = false;
 #endif
 
@@ -287,7 +317,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
       if (nxthdr == NEXT_FRAGMENT_EH)
         {
           extlen    = EXTHDR_FRAG_LEN;
-#ifdef CONFIG_NET_IPFRAG
+#if defined(CONFIG_NET_IPFRAG) || defined(CONFIG_NET_NAT66)
           isfrag    = true;
 #endif
         }
@@ -302,6 +332,11 @@ static int ipv6_in(FAR struct net_driver_s *dev)
     }
 
 #ifdef CONFIG_NET_NAT66
+  if (isfrag)
+    {
+      return ipv6_fragin_or_drop(dev);
+    }
+
   /* Try NAT inbound, rule matching will be performed in NAT module. */
 
   ipv6_nat_inbound(dev, ipv6);
@@ -410,17 +445,7 @@ static int ipv6_in(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFRAG
   if (isfrag)
     {
-      if (ipv6_fragin(dev) == OK)
-        {
-          return OK;
-        }
-      else
-        {
-#ifdef CONFIG_NET_STATISTICS
-          g_netstats.ipv6.fragerr++;
-#endif
-          goto drop;
-        }
+      return ipv6_fragin_or_drop(dev);
     }
 #endif
 
