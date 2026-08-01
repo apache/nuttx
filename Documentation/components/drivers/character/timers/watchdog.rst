@@ -120,6 +120,18 @@ a parameter (where x is the timer number):
 
   nsh> wdog -i /dev/watchdogx
 
+Additionally, the watchdog driver can be read by using standard commands such as ``cat``.
+It will emit relevant information about the watchdog and its current status, including the
+flags bitset, timeout and timeleft from the current slice as milliseconds:
+
+.. code-block:: console
+
+  nsh> cat /dev/watchdogx
+  Status     :
+  flags      : 0x00000000
+  timeout    : 30000
+  timeleft   : 9889
+
 Application Level Interface
 ----------------------------
 
