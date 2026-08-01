@@ -104,7 +104,7 @@ int lib_checkbase(int base, FAR const char **pptr)
 
   /* Check for incorrect bases. */
 
-  else if (base < 2 || base > 26)
+  else if (base < 2 || base > 36)
     {
       return -1; /* Means incorrect base */
     }
