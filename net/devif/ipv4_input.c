@@ -84,6 +84,7 @@
 
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <nuttx/debug.h>
 #include <string.h>
 
@@ -167,6 +168,34 @@ static int ipv4_check_opt(FAR struct ipv4_hdr_s *ipv4)
 #endif
 
 /****************************************************************************
+ * Name: ipv4_fragin_or_drop
+ *
+ * Description:
+ *   Reassemble an incoming IPv4 fragment for local processing or drop it if
+ *   fragment reassembly is not available.
+ *
+ ****************************************************************************/
+
+static int ipv4_fragin_or_drop(FAR struct net_driver_s *dev)
+{
+#ifdef CONFIG_NET_IPFRAG
+  if (ipv4_fragin(dev) == OK)
+    {
+      return OK;
+    }
+#endif
+
+#ifdef CONFIG_NET_STATISTICS
+  g_netstats.ipv4.drop++;
+  g_netstats.ipv4.fragerr++;
+#endif
+  nwarn("WARNING: IP fragment dropped\n");
+
+  dev->d_len = 0;
+  return OK;
+}
+
+/****************************************************************************
  * Name: ipv4_in
  *
  * Description:
@@ -199,6 +228,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
   in_addr_t destipaddr;
   uint16_t totlen;
+  bool isfrag;
   int ret = OK;
 
   /* Handle ARP on input then give the IPv4 packet to the network layer */
@@ -273,22 +303,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 
   /* Check the fragment flag. */
 
-  if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
-    {
-#ifdef CONFIG_NET_IPFRAG
-      if (ipv4_fragin(dev) == OK)
-        {
-          return OK;
-        }
-
-#endif
-#ifdef CONFIG_NET_STATISTICS
-      g_netstats.ipv4.drop++;
-      g_netstats.ipv4.fragerr++;
-#endif
-      nwarn("WARNING: IP fragment dropped\n");
-      goto drop;
-    }
+  isfrag = (ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0;
 
 #ifdef CONFIG_DEBUG_FEATURES
   if (ipv4_check_opt(ipv4) != OK)
@@ -298,6 +313,13 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
       nwarn("WARNING: IP options error\n");
       goto drop;
+    }
+#endif
+
+#if defined(CONFIG_NET_NAT44) || defined(CONFIG_NET_IPFILTER)
+  if (isfrag)
+    {
+      return ipv4_fragin_or_drop(dev);
     }
 #endif
 
@@ -333,6 +355,11 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_IPFORWARD_BROADCAST
       ipv4_forward_broadcast(dev, ipv4);
 #endif
+
+      if (isfrag)
+        {
+          return ipv4_fragin_or_drop(dev);
+        }
 
 #if defined(CONFIG_NET_BROADCAST) && defined(NET_UDP_HAVE_STACK)
       if (ipv4->proto == IP_PROTO_UDP)
@@ -404,6 +431,16 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
           goto drop;
         }
+    }
+
+  /* Forwarding has already had a chance to consume non-local unicast
+   * fragments.  Any remaining fragments are for local input and must be
+   * reassembled before the transport layer sees them.
+   */
+
+  if (isfrag)
+    {
+      return ipv4_fragin_or_drop(dev);
     }
 
 #ifdef CONFIG_NET_IPV4_CHECKSUMS

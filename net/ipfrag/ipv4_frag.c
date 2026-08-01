@@ -360,6 +360,8 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
   uint32_t iter;
   uint32_t nfrags;
   uint16_t offset = 0;
+  uint16_t fragoff;
+  uint16_t morefrags;
   uint16_t hdrlen;
   FAR struct iob_s *frag = NULL;
   FAR struct ipv4_hdr_s *ref = NULL;
@@ -373,6 +375,14 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
    */
 
   hdrlen = (IPv4BUF->vhl & IPv4_HLMASK) << 2;
+
+  /* Preserve the original fragment offset when splitting an
+   * already-fragmented packet for a smaller egress MTU.
+   */
+
+  fragoff = (IPv4BUF->ipoffset[0] << 8) + IPv4BUF->ipoffset[1];
+  morefrags = fragoff & IP_FLAG_MOREFRAGS;
+  fragoff &= 0x1fff;
 
   /* Reconstruct I/O Buffer according to MTU, which will reserve
    * the space for the L3 header
@@ -401,13 +411,13 @@ int32_t ipv4_fragout(FAR struct net_driver_s *dev, uint16_t mtu)
           /* Update the IPv4 header of the first fragment */
 
           ipv4_fragout_buildipv4header(ref, ref, frag->io_pktlen,
-                                       IP_FLAG_MOREFRAGS);
+                                       fragoff | IP_FLAG_MOREFRAGS);
         }
       else
         {
-          uint16_t ipoff = (offset - iter * hdrlen) >> 3;
+          uint16_t ipoff = fragoff + ((offset - iter * hdrlen) >> 3);
 
-          if (iter < nfrags - 1)
+          if (iter < nfrags - 1 || morefrags)
             {
               ipoff |= IP_FLAG_MOREFRAGS;
             }
