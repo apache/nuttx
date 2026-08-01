@@ -56,7 +56,8 @@ if(CONFIG_SCHED_USER_IDENTITY)
     group_setreuid.c
     group_setregid.c
     group_getresuid.c
-    group_getresgid.c)
+    group_getresgid.c
+    group_issetugid.c)
 endif()
 
 if(CONFIG_SIG_SIGSTOP_ACTION)

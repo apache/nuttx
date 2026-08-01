@@ -45,6 +45,7 @@
 #include <nuttx/binfmt/binfmt.h>
 
 #include "binfmt.h"
+#include "environ/environ.h"
 
 #ifndef CONFIG_BINFMT_DISABLE
 
@@ -301,14 +302,29 @@ int exec_module(FAR struct binary_s *binp,
 #endif
 
 #ifdef CONFIG_SCHED_USER_IDENTITY
-  if (binp->mode & S_ISUID)
-    {
-      tcb->group->tg_euid = binp->uid;
-    }
+  /* Apply set-user-ID / set-group-ID credentials for the new image. */
 
-  if (binp->mode & S_ISGID)
+  if ((binp->mode & (S_ISUID | S_ISGID)) != 0)
     {
-      tcb->group->tg_egid = binp->gid;
+      FAR struct task_group_s *group = tcb->group;
+
+      if ((binp->mode & S_ISUID) != 0)
+        {
+          group->tg_euid = binp->uid;
+          group->tg_suid = binp->uid;
+        }
+
+      if ((binp->mode & S_ISGID) != 0)
+        {
+          group->tg_egid = binp->gid;
+          group->tg_sgid = binp->gid;
+        }
+
+      group->tg_flags |= GROUP_FLAG_SECURE_EXEC;
+      group->tg_flags &= ~(GROUP_FLAG_FD_BACKTRACE | GROUP_FLAG_DUMPABLE);
+#ifndef CONFIG_DISABLE_ENVIRON
+      env_sanitize_secure(group);
+#endif
     }
 #endif
 

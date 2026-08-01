@@ -172,7 +172,19 @@ static int file_vopen(FAR struct file *filep, FAR const char *path,
 
   /* Validate operation support and pseudo-filesystem permissions */
 
-  ret = inode_checkopenperm(inode, oflags);
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      ret = inode_checkopenperm(inode, oflags);
+    }
+  else
+#endif
+    {
+      inode_rlock();
+      ret = inode_checkopenperm(inode, oflags);
+      inode_runlock();
+    }
+
   if (ret < 0)
     {
       goto errout_with_inode;

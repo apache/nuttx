@@ -173,6 +173,7 @@ uint32_t  arc4random(void);
 
 FAR char **get_environ_ptr(void);
 FAR char *getenv(FAR const char *name);
+FAR char *secure_getenv(FAR const char *name);
 int       putenv(FAR const char *string);
 int       clearenv(void);
 int       setenv(FAR const char *name, FAR const char *value, int overwrite);

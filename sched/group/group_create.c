@@ -171,6 +171,8 @@ int group_allocate(FAR struct tcb_s *tcb, uint8_t ttype)
   group->tg_flags |= GROUP_FLAG_FD_BACKTRACE;
 #endif
 
+  group->tg_flags |= GROUP_FLAG_DUMPABLE;
+
   /* Attach the group to the TCB */
 
   tcb->group = group;

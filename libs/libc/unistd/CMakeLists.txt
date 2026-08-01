@@ -89,7 +89,8 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
     lib_setreuid.c
     lib_setregid.c
     lib_getresuid.c
-    lib_getresgid.c)
+    lib_getresgid.c
+    lib_issetugid.c)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)

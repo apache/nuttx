@@ -374,6 +374,7 @@ void inode_root_reserve(void);
  *
  *   EINVAL - 'path' is invalid for this operation
  *   EEXIST - An inode already exists at 'path'
+ *   EACCES - Caller lacks permission on the parent directory
  *   ENOMEM - Failed to allocate in-memory resources for the operation
  *
  ****************************************************************************/
@@ -389,6 +390,10 @@ int inode_reserve(FAR const char *path,
  *   path refers to and free all resources related to the inode.  If the
  *   inode is in-use, then it will be unlinked, but will not be freed until
  *   the last reference to the inode is released.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure, including
+ *   -EACCES if the caller lacks write permission on the parent directory.
  *
  * Assumptions/Limitations:
  *   The caller must hold the inode semaphore
