@@ -69,12 +69,10 @@ struct l3gd20_dev_s
                                        * L3GD20 sensor */
   uint64_t timestamp;                 /* Units is microseconds */
   struct sensor_lowerhalf_s lower;    /* The struct of lower half driver */
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
   struct work_s work;                 /* The work queue is responsible for
                                        * retrieving the data from the sensor
                                        * after the arrival of new data was
                                        * signalled in an interrupt */
-#endif
 };
 
 /****************************************************************************
@@ -100,13 +98,7 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
                                     FAR void *arg);
 static int l3gd20_activate(FAR struct sensor_lowerhalf_s *lower,
                            FAR struct file *filep, bool enable);
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
 static void l3gd20_worker(FAR void *arg);
-#else
-static int l3gd20_fetch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR struct file *filep,
-                        FAR char *buffer, size_t buflen);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -119,11 +111,7 @@ static const struct sensor_ops_s g_l2gd20_ops =
   .activate = l3gd20_activate,
   .set_interval = NULL,
   .batch = NULL,
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
   .fetch = NULL,
-#else
-  .fetch = l3gd20_fetch,
-#endif
   .control = NULL
 };
 
@@ -359,7 +347,6 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
 
   priv->timestamp = sensor_get_timestamp();
 
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
   /* Task the worker with retrieving the latest sensor data. We should not do
    * this in a interrupt since it might take too long. Also we cannot lock
    * the SPI bus from within an interrupt.
@@ -373,17 +360,10 @@ static int l3gd20_interrupt_handler(int irq, FAR void *context,
       snerr("ERROR: Failed to queue work: %d\n", ret);
       return ret;
     }
-#else
 
-  /* notify event to upper half driver */
-
-  priv->lower.notify_event(priv->lower.priv);
-
-#endif
   return OK;
 }
 
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
 /****************************************************************************
  * Name: l3gd20_worker
  ****************************************************************************/
@@ -404,33 +384,6 @@ static void l3gd20_worker(FAR void *arg)
   priv->lower.push_event(priv->lower.priv, &temp,
                          sizeof(struct sensor_gyro_uncal));
 }
-
-#else
-
-/****************************************************************************
- * Name: l3gd20_fetch
- ****************************************************************************/
-
-static int l3gd20_fetch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR struct file *filep,
-                        FAR char *buffer, size_t buflen)
-{
-  FAR struct l3gd20_dev_s *priv = container_of(lower,
-                                               FAR struct l3gd20_dev_s,
-                                               lower);
-
-  if (buflen != sizeof(struct sensor_gyro_uncal))
-      return 0;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Read out the latest sensor data */
-
-  l3gd20_read_measurement_data(priv, (FAR struct sensor_gyro_uncal *)buffer);
-
-  return sizeof(struct sensor_gyro_uncal);
-}
-#endif
 
 /****************************************************************************
  * Name: l3gd20_activate
@@ -563,9 +516,7 @@ int l3gd20_register(int devno, FAR struct spi_dev_s *spi,
 
   priv->spi              = spi;
   priv->config           = config;
-#if CONFIG_SENSORS_L3GD20_BUFFER_SIZE > 0
   priv->work.worker      = NULL;
-#endif
   priv->timestamp        = 0;
 
   priv->lower.type = SENSOR_TYPE_GYROSCOPE_UNCALIBRATED;
