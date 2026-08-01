@@ -540,7 +540,7 @@ ipv6_nat_inbound_internal(FAR struct ipv6_hdr_s *ipv6,
   uint8_t proto;
   FAR void *l4hdr = net_ipv6_payload(ipv6, &proto);
 
-  switch (ipv6->proto)
+  switch (proto)
     {
 #ifdef CONFIG_NET_TCP
       case IP_PROTO_TCP:
