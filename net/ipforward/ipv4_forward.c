@@ -77,6 +77,11 @@ static int ipv4_hdrsize(FAR struct ipv4_hdr_s *ipv4)
 
   iphdrlen = (ipv4->vhl & IPv4_HLMASK) << 2;
 
+  if ((ipv4->ipoffset[0] & 0x3f) != 0 || ipv4->ipoffset[1] != 0)
+    {
+      return iphdrlen;
+    }
+
   /* Size is also determined by the following protocol header, */
 
   switch (ipv4->proto)
