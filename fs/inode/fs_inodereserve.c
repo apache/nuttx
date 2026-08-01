@@ -226,6 +226,17 @@ int inode_reserve(FAR const char *path,
   left   = desc.peer;
   parent = desc.parent;
 
+#ifdef CONFIG_FS_PERMISSION
+  if (parent != NULL)
+    {
+      ret = inode_checkperm(parent, W_OK | X_OK);
+      if (ret < 0)
+        {
+          goto errout_with_search;
+        }
+    }
+#endif
+
   for (; ; )
     {
       FAR struct inode *node;

@@ -148,6 +148,46 @@ int prctl(int option, ...)
         goto errout;
 #endif
 
+      case PR_SET_DUMPABLE:
+      case PR_GET_DUMPABLE:
+#ifdef CONFIG_SCHED_USER_IDENTITY
+        {
+          FAR struct tcb_s *tcb = this_task();
+
+          if (tcb == NULL || tcb->group == NULL)
+            {
+              errcode = ESRCH;
+              goto errout;
+            }
+
+          if (option == PR_GET_DUMPABLE)
+            {
+              va_end(ap);
+              return (tcb->group->tg_flags & GROUP_FLAG_DUMPABLE) != 0;
+            }
+
+          if (va_arg(ap, int) != 0)
+            {
+              if (tcb->group->tg_euid != 0)
+                {
+                  errcode = EPERM;
+                  goto errout;
+                }
+
+              tcb->group->tg_flags |= GROUP_FLAG_DUMPABLE;
+            }
+          else
+            {
+              tcb->group->tg_flags &= ~GROUP_FLAG_DUMPABLE;
+            }
+        }
+        break;
+#else
+        serr("ERROR: Option not enabled: %d\n", option);
+        errcode = ENOSYS;
+        goto errout;
+#endif
+
       default:
         serr("ERROR: Unrecognized option: %d\n", option);
         errcode = EINVAL;
