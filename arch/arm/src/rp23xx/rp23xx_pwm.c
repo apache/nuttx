@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <inttypes.h>
+
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -527,7 +529,7 @@ void setup_period(struct rp23xx_pwm_lowerhalf_s *priv)
   priv->top     = top;
   priv->divisor = div16;
 
-  pwminfo("PWM%d freq=%lu top=%lu div=%lu\n",
+  pwminfo("PWM%u freq=%" PRIu32 " top=%u div=%" PRIu32 "\n",
          priv->num,
          priv->frequency,
          priv->top,
