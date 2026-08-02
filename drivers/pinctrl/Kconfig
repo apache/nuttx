@@ -12,4 +12,17 @@ config PINCTRL
 		This selection enables selection of common PINCTRL options.  This option
 		should be enabled by all platforms that support PINCTRL interfaces.
 		See include/nuttx/pinctrl/pinctrl.h for further PINCTRL driver information.
+
+config PINCTRL_PROCFS
+	bool "PINCTRL procfs entry"
+	default n
+	depends on PINCTRL && FS_PROCFS && FS_PROCFS_REGISTER
+	---help---
+		Create /proc/pinctrl, listing every registered pin controller and,
+		for those that supply a get_pad method, one line per pad describing
+		its current configuration in key:value form.
+
+		The rest of the pinctrl interface only writes, so without this there
+		is no way to ask a controller what a pin is configured as.
+
 endmenu
