@@ -87,7 +87,7 @@ static const char import_name_strtab_format[] =
   "\t.size\t__dynimport%04d, .-__dynimport%04d\n";
 
 /*******************************************************************
- * Dyanamic Call Information
+ * Dynamic Call Information
  *******************************************************************/
 
 static const char dynimport_decl_prologue[] =
@@ -144,7 +144,7 @@ static const char dyncall_format[] =
   "\t.thumb_func\n\n"
   "%s:\n"
   "\tldr\tip,.Ldyn%04d\n"
-  "\tadd\tip,ip,sl\n"
+  "\tadd\tip,ip," NXFLAT_PIC_REG "\n"
   "\tldr\tip,[ip,#4]\n"
   "\tbx\tip\n"
   ".Ldyn%04d:\n"
@@ -158,7 +158,7 @@ static const char nonreturning_dyncall_format[] =
   "\t.thumb_func\n\n"
   "%s:\n"
   "\tldr\tip,.Ldyn%04d\n"
-  "\tadd\tip,ip,sl\n"
+  "\tadd\tip,ip," NXFLAT_PIC_REG "\n"
   "\tldr\tip,[ip,#4]\n"
   "\tbx\tip\n"
   ".Ldyn%04d:\n"
@@ -174,7 +174,7 @@ static const char dyncall_format[] =
   "\t.thumb_func\n\n"
   "%s:\n"
   "\tldr\tip,.Ldyn%04d\n"
-  "\tadd\tip,ip,sl\n"
+  "\tadd\tip,ip," NXFLAT_PIC_REG "\n"
   "\tldr\tip,[ip,#4]\n"
   "\tbx\tip\n"
   ".Ldyn%04d:\n"
@@ -188,7 +188,7 @@ static const char nonreturning_dyncall_format[] =
   "\t.thumb_func\n\n"
   "%s:\n"
   "\tldr\tip,.Ldyn%04d\n"
-  "\tadd\tip,ip,sl\n"
+  "\tadd\tip,ip," NXFLAT_PIC_REG "\n"
   "\tldr\tip,[ip,#4]\n"
   "\tbx\tip\n"
   ".Ldyn%04d:\n"

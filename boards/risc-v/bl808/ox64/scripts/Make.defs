@@ -26,7 +26,6 @@ include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 LDSCRIPT = ld.script
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-ARCHPICFLAGS = -fpic -msingle-pic-base
 
 CFLAGS := $(ARCHCFLAGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 

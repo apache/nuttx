@@ -138,7 +138,7 @@ struct elf32_sym_s
 
 struct import_s
 {
-  char *name;
+  const char *name;
   int   is_object;
   int   is_weak;
 };
@@ -299,6 +299,9 @@ static void load_imports(void)
   size_t nsyms;
   size_t strsize;
   size_t i;
+  uint16_t probe;
+  int host_le;
+  int obj_le;
   int fd;
 
   fd = open(elf_filename, O_RDONLY);
@@ -325,13 +328,11 @@ static void load_imports(void)
 
   /* Decide whether the host and the object disagree about byte order */
 
-  {
-    const uint16_t probe = 1;
-    int host_le = *(const unsigned char *)&probe;
-    int obj_le  = (ehdr.e_ident[5] == ELFDATA2LSB);
+  probe   = 1;
+  host_le = *(const unsigned char *)&probe;
+  obj_le  = (ehdr.e_ident[5] == ELFDATA2LSB);
 
-    need_swap = (host_le != obj_le);
-  }
+  need_swap = (host_le != obj_le);
 
   /* Re-read the fields that mattered now that byte order is known */
 
@@ -415,12 +416,23 @@ static void load_imports(void)
 
   close(fd);
 
-  imports = calloc(nsyms, sizeof(struct import_s));
+  imports = calloc(nsyms + 1, sizeof(struct import_s));
   if (imports == NULL)
     {
       fprintf(stderr, "Failed to allocate import table\n");
       exit(3);
     }
+
+  /* The ABI marker goes first, so that every module has at least one
+   * import and the loader can tell what it was built for.  It is a marker
+   * rather than a real import: nothing calls it and no board exports it --
+   * the loader matches it by name and skips resolution.
+   */
+
+  imports[0].name      = NXFLAT_ABI_SYMBOL;
+  imports[0].is_object = 0;
+  imports[0].is_weak   = 0;
+  number_undefined     = 1;
 
   for (i = 0; i < nsyms; i++)
     {
@@ -614,8 +626,8 @@ static void show_usage(void)
 {
   fprintf(stderr, "Usage: %s [options] <elf-filename>\n\n", program_name);
   fprintf(stderr, "Where options are one or more of the following.  Note\n");
-  fprintf(stderr, "that a space is always required between the option and\n");
-  fprintf(stderr, "any following arguments.\n\n");
+  fprintf(stderr, "that a space is always required between the\n");
+  fprintf(stderr, "option and any following arguments.\n\n");
   fprintf(stderr, "  -a <arch>\n");
   fprintf(stderr, "     Instruction set of the module: arm or thumb2\n");
   fprintf(stderr, "     [thumb2]\n");
@@ -624,8 +636,8 @@ static void show_usage(void)
   fprintf(stderr, "     Output to <out-filename> [stdout]\n");
   fprintf(stderr, "  -v Verbose output [no output]\n");
   fprintf(stderr, "  -w Import weakly declared functions, i.e., weakly\n");
-  fprintf(stderr, "     declared functions are expected to be provided at\n");
-  fprintf(stderr, "     load-time [not imported]\n");
+  fprintf(stderr, "     declared functions are expected to be\n");
+  fprintf(stderr, "     provided at load-time [not imported]\n");
   fprintf(stderr, "\n");
   exit(1);
 }

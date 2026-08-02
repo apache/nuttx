@@ -32,7 +32,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS = -m1
-ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld
 

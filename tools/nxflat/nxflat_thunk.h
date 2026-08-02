@@ -24,6 +24,33 @@
 #define __TOOLS_NXFLAT_NXFLAT_THUNK_H
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The register a module reaches its own data through, named here once so
+ * the thunk stubs and arch/arm cannot drift apart.  It must agree with
+ * PIC_REG in arch/arm/include/arch.h and with -mpic-register in
+ * arch/arm/src/common/Toolchain.defs: a module whose data accesses use one
+ * register and whose import thunks add another will load, and then branch
+ * to a wild address on its first call out.
+ */
+
+#define NXFLAT_PIC_REG "r9"
+
+/* Every module declares the module ABI it was built for by importing this
+ * name, and the loader refuses a module that does not.  That is the only
+ * version channel available: the NXFLAT header has no version field, and
+ * h_magic is written by ldnxflat, which is GPL and stays out of the
+ * repository, so it can never be changed in step with the loader.  The
+ * import table can, because mknxflat emits it and nxflat_bindimports()
+ * reads it, and ldnxflat passes it through untouched.
+ *
+ * Must match NXFLAT_ABI_SYMBOL in include/nxflat.h.
+ */
+
+#define NXFLAT_ABI_SYMBOL "__nxflat_abi_v2"
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 

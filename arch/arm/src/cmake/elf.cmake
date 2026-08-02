@@ -27,7 +27,12 @@ nuttx_mod_compile_options(-fvisibility=hidden -mlong-calls)
 nuttx_elf_compile_options_ifdef(CONFIG_UNWINDER_ARM -fno-unwind-tables
                                 -fno-asynchronous-unwind-tables)
 
-nuttx_elf_compile_options_ifdef(CONFIG_PIC --fixed-r10 -mpic-register=r10)
+# An ELF module needs r9 as its PIC base, so it must not also have the register
+# fixed: GCC rejects that pair with "unable to use 'r9' for PIC register".  This
+# mirrors CELFFLAGS in common/Toolchain.defs, which filters --fixed-r9 back out
+# of the inherited CFLAGS for the same reason.
+
+nuttx_elf_compile_options_ifdef(CONFIG_PIC -mpic-register=r9)
 
 nuttx_elf_link_options_ifdef(
   CONFIG_PIC --unresolved-symbols=ignore-in-object-files --emit-relocs)

@@ -115,8 +115,8 @@ void up_initial_state(struct tcb_s *tcb)
 #ifdef CONFIG_PIC
   if (tcb->dspace != NULL)
     {
-      /* Set the PIC base register (probably R10) to the address of the
-       * alloacated D-Space region.
+      /* Set the PIC base register (R9) to the address of the allocated
+       * D-Space region.
        */
 
       xcp->regs[REG_PIC] = (uint32_t)tcb->dspace->region;
