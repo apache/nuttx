@@ -442,6 +442,7 @@ struct net_driver_s
   /* Remember the outgoing fragments waiting to be sent */
 
 #ifdef CONFIG_NET_IPFRAG
+  uint8_t d_ipfrag_reassembled; /* Current packet is reassembled by IPFRAG */
   struct iob_queue_s d_fragout;
 #endif
 
