@@ -48,6 +48,7 @@ config EIC7700X_CPU_FREQ_MHZ
 		so in the log.
 
 endif 
+
 config EIC7700X_RESET
 	bool "CRG reset provider"
 	default y
