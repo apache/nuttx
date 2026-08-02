@@ -57,3 +57,6 @@ target directory.
 Files created before permission support was enabled, or without stored
 attributes, default to mode ``0777`` until ``chmod``/``chown`` sets explicit
 metadata.
+
+Path components above the littlefs mountpoint are enforced by the VFS; see
+:ref:`file-permission`.
