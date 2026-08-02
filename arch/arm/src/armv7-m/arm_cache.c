@@ -520,13 +520,12 @@ void up_enable_dcache(void)
   do
     {
       int32_t tmpways = ways;
-
       do
         {
           sw = ((tmpways << wshift) | (sets << sshift));
           putreg32(sw, NVIC_DCISW);
         }
-      while (tmpways--);
+      while (tmpways > 0 && tmpways--)
     }
   while (sets--);
 
