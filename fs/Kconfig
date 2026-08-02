@@ -94,6 +94,17 @@ config PSEUDOFS_ATTRIBUTES
 		Enable support for attributes(e.g. mode, uid, gid and time)
 		in the pseudo file system.
 
+config FS_PIN
+	bool
+	default n
+	---help---
+		Selected by a file system that can pin a file's blocks in place and
+		hand out their media address, so that a module's read-only segment
+		can be executed where it already lies instead of being copied.
+
+		The pin is held for as long as the module is loaded and given back
+		when it is unloaded.
+
 config FS_PERMISSION
 	bool "Enable UNIX Filesystem Permission Support"
 	default n

@@ -59,6 +59,17 @@ int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 
   libelf_freebuffers(loadinfo);
 
+#ifdef HAVE_LIBC_ELF_PIN
+  /* Give the pin back if the loader took one, so the filesystem can
+   * reclaim the extent.
+   */
+
+  if (loadinfo->pinfile != NULL)
+    {
+      libelf_pinrelease(&loadinfo->pinfile);
+    }
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
   if (loadinfo->addrenv != NULL)
     {
@@ -68,9 +79,35 @@ int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 #endif
   /* Release memory holding the relocated ELF image */
 
-  /* ET_DYN has a single allocation so we only free textalloc */
+  /* An FDPIC object placed its two segments separately.  Free each one.  If
+   * the text stayed on the media, it was never allocated, thus leave it.
+   */
 
-  if (loadinfo->ehdr.e_type != ET_DYN)
+  if (loadinfo->fdpic)
+    {
+      if (loadinfo->textalloc != 0 && loadinfo->xipbase == 0)
+        {
+#ifdef CONFIG_ARCH_USE_TEXT_HEAP
+          up_textheap_free((FAR void *)loadinfo->textalloc);
+#else
+          lib_free((FAR void *)loadinfo->textalloc);
+#endif
+        }
+
+      if (loadinfo->datastart != 0)
+        {
+          lib_free((FAR void *)loadinfo->datastart);
+          loadinfo->datastart = 0;
+        }
+
+      loadinfo->textalloc = 0;
+      loadinfo->textsize  = 0;
+      loadinfo->datasize  = 0;
+    }
+
+  /* Any other ET_DYN has a single allocation so we only free textalloc */
+
+  else if (loadinfo->ehdr.e_type != ET_DYN)
     {
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
       int i;

@@ -37,6 +37,12 @@
 
 #define ELF_PRARGSZ    (80)  /* Number of chars for args */
 
+/* An architecture that has no FDPIC ABI recognises no FDPIC object. */
+
+#ifndef ELF_IS_FDPIC
+#  define ELF_IS_FDPIC(ehdr) false
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
