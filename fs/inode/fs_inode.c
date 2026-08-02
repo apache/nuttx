@@ -213,61 +213,107 @@ void inode_runlock(void)
   up_read(&g_inode_lock);
 }
 
+#ifdef CONFIG_FS_PERMISSION
 /****************************************************************************
  * Name: inode_checkperm
  *
  * Description:
- *   Check 'inode' for 'amode' access on pseudo-filesystem inodes.
- *   NULL 'inode' (root) and mountpoints are exempt.
+ *   Check 'inode' for 'amode' access against stored owner/group/mode.
+ *   Applies to pseudoFS nodes and to mountpoint inodes (whose i_mode gates
+ *   traversal into the mounted filesystem).  Optional mountpt_operations
+ *   .permission may expose the same policy for in-volume paths; the VFS
+ *   does not call that hook for mount-crossing.
  *
- * Input Parameters:
- *   inode - Inode to check, or NULL for a root-level path
- *   amode - Access mode bitmask (R_OK / W_OK / X_OK)
- *
- * Returned Value:
- *   Zero (OK) on success, or -EACCES if permission is denied.
- *
- ****************************************************************************/
-
-/****************************************************************************
- * Name: inode_checkperm
  ****************************************************************************/
 
 int inode_checkperm(FAR struct inode *inode, int amode)
 {
-#ifdef CONFIG_FS_PERMISSION
+  if (inode == NULL)
+    {
+      return OK;
+    }
+
+  return fs_checkmode(inode->i_owner, inode->i_group, inode->i_mode, amode);
+}
+
+/****************************************************************************
+ * Name: inode_checkpathperm
+ *
+ * Description:
+ *   Require X_OK on every ancestor of 'inode', and on 'inode' itself when
+ *   it is a directory or mountpoint that must be traversed.  If 'amode' is
+ *   non-zero, also require that access on 'inode'.  Takes the inode tree
+ *   read lock unless INODE_CHECK_LOCKED is set in 'flags'.
+ *
+ ****************************************************************************/
+
+int inode_checkpathperm(FAR struct inode *inode, int amode, int flags)
+{
+  FAR struct inode *node;
+  int locked = (flags & INODE_CHECK_LOCKED) != 0;
+  int ret;
 
   if (inode == NULL)
     {
       return OK;
     }
 
-  if (INODE_IS_MOUNTPT(inode))
+  if (!locked)
     {
-      return OK;
+      inode_rlock();
     }
 
-  return fs_checkmode(inode->i_owner, inode->i_group, inode->i_mode, amode);
+  if (INODE_IS_PSEUDODIR(inode)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+      || INODE_IS_MOUNTPT(inode)
+#endif
+     )
+    {
+      ret = inode_checkperm(inode, X_OK);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
 
-#else
-  return OK;
-#endif /* CONFIG_FS_PERMISSION */
+  for (node = inode->i_parent; node != NULL; node = node->i_parent)
+    {
+      ret = inode_checkperm(node, X_OK);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+
+  if (amode != 0)
+    {
+      ret = inode_checkperm(inode, amode);
+      if (ret < 0)
+        {
+          goto errout;
+        }
+    }
+
+  ret = OK;
+
+errout:
+  if (!locked)
+    {
+      inode_runlock();
+    }
+
+  return ret;
 }
+#endif /* CONFIG_FS_PERMISSION */
 
 /****************************************************************************
  * Name: inode_checkopenperm
  *
  * Description:
  *   Validate open access to 'inode' for 'oflags'.  Checks driver operation
- *   support, then pseudo-filesystem mode bits when enabled.  Mountpoints
- *   are exempt from mode checks.
- *
- * Input Parameters:
- *   inode  - The inode to check
- *   oflags - Open flags (O_RDONLY / O_WRONLY / O_RDWR)
- *
- * Returned Value:
- *   Zero (OK) on success, or a negated errno on failure.
+ *   support, then mode bits for non-mountpoint inodes.  Mountpoints are not
+ *   mode-checked here for R/W (that would confuse directory bits with file
+ *   open modes); callers use inode_checkpathperm() for traversal.
  *
  ****************************************************************************/
 
@@ -275,22 +321,31 @@ int inode_checkopenperm(FAR struct inode *inode, int oflags)
 {
   FAR const struct file_operations *ops;
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  /* Mountpoints: only verify that open exists.  Path search / DAC for the
+   * mount directory is handled by inode_checkpathperm(); per-file DAC is
+   * the filesystem's responsibility.
+   */
+
+  if (INODE_IS_MOUNTPT(inode))
+    {
+      if (inode->u.i_mops == NULL || inode->u.i_mops->open == NULL)
+        {
+          return -ENXIO;
+        }
+
+      return OK;
+    }
+#endif
+
   if (INODE_IS_NAMEDSEM(inode))
     {
-#ifdef CONFIG_FS_PERMISSION
       return inode_checkperm(inode, R_OK | W_OK);
-#else
-      return OK;
-#endif
     }
 
   if (INODE_IS_MQUEUE(inode) || INODE_IS_PSEUDODIR(inode))
     {
-#ifdef CONFIG_FS_PERMISSION
       return inode_checkperm(inode, fs_open_amode(oflags));
-#else
-      return OK;
-#endif
     }
 
   ops = inode->u.i_ops;
@@ -307,11 +362,5 @@ int inode_checkopenperm(FAR struct inode *inode, int oflags)
       return -EACCES;
     }
 
-#ifdef CONFIG_FS_PERMISSION
-
   return inode_checkperm(inode, fs_open_amode(oflags));
-
-#else
-  return OK;
-#endif /* CONFIG_FS_PERMISSION */
 }

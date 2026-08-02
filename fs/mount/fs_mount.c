@@ -403,6 +403,15 @@ int nx_mount(FAR const char *source, FAR const char *target,
           inode_release(mountpt_inode);
           goto errout_with_lock;
         }
+
+      /* Require search on ancestors and write on the mount target. */
+
+      ret = inode_checkpathperm(mountpt_inode, W_OK, INODE_CHECK_LOCKED);
+      if (ret < 0)
+        {
+          inode_release(mountpt_inode);
+          goto errout_with_lock;
+        }
     }
 #endif
 
