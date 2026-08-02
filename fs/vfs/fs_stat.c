@@ -105,6 +105,13 @@ static int stat_recursive(FAR const char *path,
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
+  ret = inode_checkpathperm(inode, 0, 0);
+  if (ret < 0)
+    {
+      inode_release(inode);
+      goto errout_with_search;
+    }
+
   /* The way we handle the stat depends on the type of inode that we
    * are dealing with.
    */

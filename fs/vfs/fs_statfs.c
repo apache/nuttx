@@ -110,6 +110,13 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
   inode = desc.node;
   DEBUGASSERT(inode != NULL);
 
+  ret = inode_checkpathperm(inode, 0, 0);
+  if (ret < 0)
+    {
+      inode_release(inode);
+      goto errout_with_search;
+    }
+
   /* The way we handle the statfs depends on the type of inode that we
    * are dealing with.
    */

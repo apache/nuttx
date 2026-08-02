@@ -180,6 +180,10 @@ static int  tmpfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
               FAR struct stat *buf);
 static int  tmpfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
               FAR const struct stat *buf, int flags);
+#ifdef CONFIG_FS_PERMISSION
+static int  tmpfs_permission(FAR struct inode *mountpt,
+              FAR const char *relpath, int amode);
+#endif
 
 /****************************************************************************
  * Public Data
@@ -218,7 +222,14 @@ const struct mountpt_operations g_tmpfs_operations =
   tmpfs_rmdir,      /* rmdir */
   tmpfs_rename,     /* rename */
   tmpfs_stat,       /* stat */
-  tmpfs_chstat      /* chstat */
+  tmpfs_chstat,     /* chstat */
+  NULL,             /* syncfs */
+  NULL,             /* ioctldir */
+#ifdef CONFIG_FS_PERMISSION
+  tmpfs_permission  /* permission */
+#else
+  NULL              /* permission */
+#endif
 };
 
 /****************************************************************************
@@ -3131,6 +3142,34 @@ errout_with_fslock:
   return -ENOSYS;
 #endif
 }
+
+/****************************************************************************
+ * Name: tmpfs_permission
+ ****************************************************************************/
+
+#ifdef CONFIG_FS_PERMISSION
+static int tmpfs_permission(FAR struct inode *mountpt,
+                            FAR const char *relpath, int amode)
+{
+  FAR struct tmpfs_s *fs;
+  int ret;
+
+  DEBUGASSERT(mountpt != NULL && relpath != NULL);
+
+  fs = mountpt->i_private;
+  DEBUGASSERT(fs != NULL);
+
+  ret = tmpfs_lock(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = tmpfs_check_pathperm(fs, relpath, strlen(relpath), amode);
+  tmpfs_unlock(fs);
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Public Functions

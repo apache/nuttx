@@ -79,17 +79,17 @@ static FAR struct inode *inode_unlink(FAR const char *path)
       inode = desc.node;
       DEBUGASSERT(inode != NULL);
 
-#ifdef CONFIG_FS_PERMISSION
       if (desc.parent != NULL)
         {
-          ret = inode_checkperm(desc.parent, W_OK);
+          /* Caller holds the inode tree lock. */
+
+          ret = inode_checkpathperm(desc.parent, W_OK, INODE_CHECK_LOCKED);
           if (ret < 0)
             {
               inode = NULL;
               goto errout;
             }
         }
-#endif
 
       /* If peer is non-null, then remove the node from the right of
        * of that peer node.

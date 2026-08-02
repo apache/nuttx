@@ -387,6 +387,18 @@ struct mountpt_operations
   CODE int     (*ioctldir)(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir,
                            int cmd, unsigned long arg);
+
+  /* Optional DAC check for a path relative to this mountpoint.
+   * Filesystems may implement this for a common in-volume permission
+   * entry point.  The VFS mount-crossing gate does not call it; entry
+   * into a volume uses inode_checkpathperm() on the mountpoint inode.
+   * Filesystems without Unix permissions leave it NULL.
+   *
+   * Placed at the end so existing positional initialisers stay valid.
+   */
+
+  CODE int     (*permission)(FAR struct inode *mountpt,
+                             FAR const char *relpath, int amode);
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 

@@ -110,9 +110,18 @@ int nx_umount2(FAR const char *target, unsigned int flags)
    * performed, or a negated error code on a failure.
    */
 
-  /* Hold the semaphore through the unbind logic */
+  /* Hold the inode tree lock across permission checks and unbind,
+   * matching mount()'s check-under-lock pattern.
+   */
 
   inode_lock();
+
+  ret = inode_checkpathperm(mountpt_inode, W_OK, INODE_CHECK_LOCKED);
+  if (ret < 0)
+    {
+      goto errout_with_lock;
+    }
+
   ret = mountpt_inode->u.i_mops->unbind(mountpt_inode->i_private,
                                        &blkdrvr_inode, flags);
   if (ret < 0)

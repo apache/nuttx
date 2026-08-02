@@ -226,16 +226,18 @@ int inode_reserve(FAR const char *path,
   left   = desc.peer;
   parent = desc.parent;
 
-#ifdef CONFIG_FS_PERMISSION
   if (parent != NULL)
     {
-      ret = inode_checkperm(parent, W_OK | X_OK);
+      /* Traverse ancestors (X_OK), then require write on the parent.
+       * Caller holds the inode tree lock.
+       */
+
+      ret = inode_checkpathperm(parent, W_OK, INODE_CHECK_LOCKED);
       if (ret < 0)
         {
           goto errout_with_search;
         }
     }
-#endif
 
   for (; ; )
     {
