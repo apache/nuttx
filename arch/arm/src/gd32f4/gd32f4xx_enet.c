@@ -50,6 +50,7 @@
 #include <nuttx/net/phy.h>
 #include <nuttx/net/mii.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/ethernet.h>
 #include <nuttx/net/netdev.h>
 
 #if defined(CONFIG_NET_PKT)
@@ -216,12 +217,13 @@
 #endif
 
 /* This driver does not use enhanced descriptors.  Enhanced descriptors must
- * be used, however, if time stamping or and/or IPv4 checksum offload is
- * supported.
+ * be used if time stamping and/or IPv4 checksum offload is supported.
+ * Forcing HWCHECKSUM without enhanced descriptors breaks RX (TX can still
+ * increment MSC); keep offload disabled until enhanced desc are implemented.
  */
 
 #undef CONFIG_GD32F4_ENET_ENHANCEDDESC
-#define CONFIG_GD32_ENET_HWCHECKSUM
+#undef CONFIG_GD32_ENET_HWCHECKSUM
 
 /* Add 4 to the configured buffer size to account for the 2 byte checksum
  * memory needed at the end of the maximum size packet.  Buffer sizes must
@@ -424,8 +426,14 @@
  * ENET_MAC_FRMF_FAR     receive all frames        0 (disabled)
  */
 
-#ifdef CONFIG_NET_PROMISCUOUS
-  #define ENET_MAC_FRMF_SET_BITS (ENET_PCFRM_PREVENT_PAUSEFRAME | ENET_MAC_FRMF_PM)
+/* PHY_SWITCH bring-up: FAR so unicast ARP replies are not dropped if
+ * ADDR0/filter is wrong; still count MSC rx + CRC to see wire RX.
+ */
+
+#if defined(CONFIG_NET_PROMISCUOUS) || defined(CONFIG_GD32F4_PHY_SWITCH)
+  #define ENET_MAC_FRMF_SET_BITS (ENET_PCFRM_PREVENT_PAUSEFRAME | \
+                                  ENET_MAC_FRMF_PM | \
+                                  ENET_MAC_FRMF_FAR)
 #else
   #define ENET_MAC_FRMF_SET_BITS (ENET_PCFRM_PREVENT_PAUSEFRAME)
 #endif
@@ -537,9 +545,12 @@
                                  ENET_DMA_CTL_TSFD | \
                                  ENET_DMA_CTL_RSFD)
 #else
-  #define DMAOMR_SET_MASK (ENET_RX_THRESHOLD_64BYTES | \
-                           ENET_TX_THRESHOLD_64BYTES | \
-                           ENET_DMA_CTL_DTCERFD)
+  /* Store-and-forward RX still helps with short/ARP frames; no IPCO. */
+
+  #define ENET_DMA_CTL_SET_MASK (ENET_RX_THRESHOLD_64BYTES | \
+                                 ENET_TX_THRESHOLD_64BYTES | \
+                                 ENET_DMA_CTL_RSFD | \
+                                 ENET_DMA_CTL_FUF)
 #endif
 
 /* Clear the DMA_BCTL bits that will be setup during MAC initialization (or
@@ -741,6 +752,10 @@ static void gd32_free_segment(struct gd32_enet_mac_s *priv,
                              int segments);
 static int  gd32_receive_frame(struct gd32_enet_mac_s *priv);
 static void gd32_receive(struct gd32_enet_mac_s *priv);
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+static int  gd32_rxdesc_cpu_count(struct gd32_enet_mac_s *priv);
+static void gd32_mac_loopback_selftest(struct gd32_enet_mac_s *priv);
+#endif
 static void gd32_freeframe(struct gd32_enet_mac_s *priv);
 static void gd32_tx_done(struct gd32_enet_mac_s *priv);
 
@@ -784,12 +799,15 @@ static void gd32_rxdes_chain_init(struct gd32_enet_mac_s *priv);
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
 static int  gd32_phy_interrupt_enable(struct gd32_enet_mac_s *priv);
 #endif
-#if defined(CONFIG_GD32F4_AUTO_NEGOTIATION) || defined(CONFIG_NETDEV_PHY_IOCTL)
+#ifndef CONFIG_GD32F4_PHY_SWITCH
 static int  gd32_phy_read(uint16_t phydevaddr, uint16_t phyregaddr,
                           uint16_t *value);
-#endif
 static int  gd32_phy_write(uint16_t phydevaddr, uint16_t phyregaddr,
                            uint16_t value);
+#endif
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+void gd32_enet_diag_snapshot(FAR const char *tag);
+#endif
 static int  gd32_phy_init(struct gd32_enet_mac_s *priv);
 
 /* MAC/DMA Initialization */
@@ -1113,6 +1131,8 @@ static int gd32_transmit(struct gd32_enet_mac_s *priv)
 
   priv->txhead = txdesc;
 
+  NETDEV_TXPACKETS(&priv->dev);
+
   /* Detach the buffer from priv->dev structure.  That buffer is now
    * "in-flight".
    */
@@ -1147,18 +1167,17 @@ static int gd32_transmit(struct gd32_enet_mac_s *priv)
       gd32_interrupt_disable(priv, ENET_DMA_INTEN_RIE);
     }
 
-  /* Check if the TX Buffer unavailable flag is set */
+  /* Clear TX buffer unavailable and always poke transmit poll demand.
+   * After STE starts with empty TX ring, DMA often suspends (TBU); without
+   * TPEN the descriptor OWN/DAV bit stays set forever and MSC never moves.
+   */
 
-  if ((gd32_reg_read(GD32_ENET_DMA_STAT) & ENET_DMA_INTEN_TBUIE) != 0)
+  if ((gd32_reg_read(GD32_ENET_DMA_STAT) & ENET_DMA_STAT_TBU) != 0)
     {
-      /* Clear TX Buffer unavailable flag */
-
-      gd32_reg_write(ENET_DMA_INTEN_TBUIE, GD32_ENET_DMA_STAT);
-
-      /* Resume DMA transmission */
-
-      gd32_reg_write(1, GD32_ENET_DMA_TPEN);
+      gd32_reg_write(ENET_DMA_STAT_TBU, GD32_ENET_DMA_STAT);
     }
+
+  gd32_reg_write(1, GD32_ENET_DMA_TPEN);
 
   /* Enable TX interrupts */
 
@@ -1168,6 +1187,30 @@ static int gd32_transmit(struct gd32_enet_mac_s *priv)
 
   wd_start(&priv->txtimeout, GD32_TXTIMEOUT,
            gd32_tx_timeout_expiry, (wdparm_t)priv);
+
+  /* Bring-up: after TPEN, check DMA consumed descriptor (first 2 frames). */
+
+  {
+    static int s_txlog;
+    uint32_t msc_before;
+    uint16_t txlen;
+
+    if (s_txlog < 2)
+      {
+        txlen = (uint16_t)txfirst->tdes1; /* buffer size programmed above */
+        msc_before = gd32_reg_read(GD32_ENET_MSC_TGFCNT);
+        up_mdelay(2);
+        _warn("ENET TX#%d len=%u DAV=%d MSC %lu->%lu DMA_STAT=0x%08"
+              PRIx32 "\n",
+              s_txlog, (unsigned)txlen,
+              (txfirst->tdes0 & ENET_TDES0_DAV) != 0,
+              (unsigned long)msc_before,
+              (unsigned long)gd32_reg_read(GD32_ENET_MSC_TGFCNT),
+              gd32_reg_read(GD32_ENET_DMA_STAT));
+        s_txlog++;
+      }
+  }
+
   return OK;
 }
 
@@ -1314,6 +1357,29 @@ static void gd32_do_poll(struct gd32_enet_mac_s *priv)
               dev->d_buf = NULL;
             }
         }
+      else
+        {
+          static bool s_nobuf;
+
+          if (!s_nobuf)
+            {
+              s_nobuf = true;
+              _warn("ENET: TX poll skipped (no free buffers, inflight=%d)\n",
+                    priv->inflight);
+            }
+        }
+    }
+  else
+    {
+      static bool s_busy;
+
+      if (!s_busy)
+        {
+          s_busy = true;
+          _warn("ENET: TX poll skipped (desc busy tdes0=0x%08" PRIx32
+                " inflight=%d)\n",
+                priv->txhead->tdes0, priv->inflight);
+        }
     }
 }
 
@@ -1426,18 +1492,14 @@ static void gd32_free_segment(struct gd32_enet_mac_s *priv,
   priv->rxcurr   = NULL;
   priv->segments = 0;
 
-  /* Check if the RX Buffer unavailable flag is set */
+  /* Clear RBU if set and always poke receive poll demand (same as TX/TPEN). */
 
-  if ((gd32_reg_read(GD32_ENET_DMA_STAT) & ENET_DMA_INTEN_RBUIE) != 0)
+  if ((gd32_reg_read(GD32_ENET_DMA_STAT) & ENET_DMA_STAT_RBU) != 0)
     {
-      /* Clear RBUS Ethernet DMA flag */
-
-      gd32_reg_write(ENET_DMA_INTEN_RBUIE, GD32_ENET_DMA_STAT);
-
-      /* Resume DMA reception */
-
-      gd32_reg_write(1, GD32_ENET_DMA_RPEN);
+      gd32_reg_write(ENET_DMA_STAT_RBU, GD32_ENET_DMA_STAT);
     }
+
+  gd32_reg_write(1, GD32_ENET_DMA_RPEN);
 }
 
 /****************************************************************************
@@ -1650,6 +1712,24 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
 
   while (gd32_receive_frame(priv) == OK)
     {
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+      {
+        static int s_rxlog;
+
+        if (s_rxlog < 4 && dev->d_buf && dev->d_len >= 14)
+          {
+            FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
+
+            _warn("ENET RX#%d len=%u type=0x%04x "
+                  "dst=%02x:%02x:%02x:%02x:%02x:%02x\n",
+                  s_rxlog, (unsigned)dev->d_len, ntohs(eth->type),
+                  eth->dest[0], eth->dest[1], eth->dest[2],
+                  eth->dest[3], eth->dest[4], eth->dest[5]);
+            s_rxlog++;
+          }
+      }
+#endif
+
 #ifdef CONFIG_NET_PKT
       /* When packet sockets are enabled, feed the frame into the tap */
 
@@ -1683,6 +1763,9 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
         {
           ninfo("IPv4 frame\n");
 
+          NETDEV_RXPACKETS(dev);
+          NETDEV_RXIPV4(dev);
+
           /* Receive an IPv4 packet from the network device */
 
           ipv4_input(&priv->dev);
@@ -1705,6 +1788,9 @@ static void gd32_receive(struct gd32_enet_mac_s *priv)
       if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP frame\n");
+
+          NETDEV_RXPACKETS(dev);
+          NETDEV_RXARP(dev);
 
           /* Handle ARP packet */
 
@@ -1805,6 +1891,7 @@ static void gd32_freeframe(struct gd32_enet_mac_s *priv)
               /* Yes.. Decrement the number of frames "in-flight". */
 
               priv->inflight--;
+              NETDEV_TXDONE(&priv->dev);
 
               /* If all of the TX descriptors were in-flight,
                * then RX interrupts may have been disabled...
@@ -2359,6 +2446,16 @@ static void gd32_txavail_work(void *arg)
 
       gd32_do_poll(priv);
     }
+  else
+    {
+      static bool s_down;
+
+      if (!s_down)
+        {
+          s_down = true;
+          _warn("ENET: txavail while ifup=0 (TX dropped)\n");
+        }
+    }
 
   net_unlock();
 }
@@ -2882,7 +2979,7 @@ static int gd32_phy_interrupt_enable(struct gd32_enet_mac_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_GD32F4_AUTO_NEGOTIATION) || defined(CONFIG_NETDEV_PHY_IOCTL)
+#ifndef CONFIG_GD32F4_PHY_SWITCH
 static int gd32_phy_read(uint16_t phydevaddr,
                          uint16_t phyregaddr, uint16_t *value)
 {
@@ -2924,7 +3021,6 @@ static int gd32_phy_read(uint16_t phydevaddr,
 
   return -ETIMEDOUT;
 }
-#endif
 
 /****************************************************************************
  * Function: gd32_phy_write
@@ -2990,6 +3086,191 @@ static int gd32_phy_write(uint16_t phydevaddr,
 
   return -ETIMEDOUT;
 }
+#endif /* !CONFIG_GD32F4_PHY_SWITCH */
+
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+/****************************************************************************
+ * Name: gd32_rxdesc_cpu_count
+ *
+ * Description:
+ *   Count RX descriptors owned by CPU (DAV clear). MSC rx_ucast only counts
+ *   unicast ！ ARP requests are broadcast and would not move RGUFCNT.
+ *
+ ****************************************************************************/
+
+static int gd32_rxdesc_cpu_count(struct gd32_enet_mac_s *priv)
+{
+  int n = 0;
+  int i;
+
+  for (i = 0; i < CONFIG_GD32F4_ENET_NRXDESC; i++)
+    {
+      if ((priv->rxtable[i].rdes0 & ENET_RDES0_DAV) == 0)
+        {
+          n++;
+        }
+    }
+
+  return n;
+}
+
+/****************************************************************************
+ * Name: gd32_mac_loopback_selftest
+ *
+ * Description:
+ *   Brief MAC internal loopback: if this PASSes, GD32 RX DMA/filter is OK
+ *   and silence on the wire is Port3 RMII / KSZ / PCB. If FAIL, RX path is
+ *   still broken inside the MCU MAC/DMA.
+ *
+ ****************************************************************************/
+
+static void gd32_mac_loopback_selftest(struct gd32_enet_mac_s *priv)
+{
+  uint32_t cfg;
+  uint8_t *buf;
+  FAR struct eth_hdr_s *eth;
+  int before;
+  int after = 0;
+  int i;
+
+  before = gd32_rxdesc_cpu_count(priv);
+
+  cfg = gd32_reg_read(GD32_ENET_MAC_CFG);
+  gd32_reg_write(cfg | ENET_MAC_CFG_LBM, GD32_ENET_MAC_CFG);
+
+  buf = gd32_buf_alloc(priv);
+  if (buf == NULL)
+    {
+      gd32_reg_write(cfg, GD32_ENET_MAC_CFG);
+      _warn("ENET LB: no free buffer\n");
+      return;
+    }
+
+  memset(buf, 0, 64);
+  eth = (FAR struct eth_hdr_s *)buf;
+  memcpy(eth->dest, priv->dev.d_mac.ether.ether_addr_octet, 6);
+  memcpy(eth->src, priv->dev.d_mac.ether.ether_addr_octet, 6);
+  eth->type = HTONS(0x88b5);
+
+  priv->dev.d_buf = buf;
+  priv->dev.d_len = 64;
+  if (gd32_transmit(priv) < 0)
+    {
+      gd32_buf_free(priv, buf);
+      priv->dev.d_buf = NULL;
+      priv->dev.d_len = 0;
+      gd32_reg_write(cfg, GD32_ENET_MAC_CFG);
+      _warn("ENET LB: TX submit failed\n");
+      return;
+    }
+
+  for (i = 0; i < 30; i++)
+    {
+      up_mdelay(1);
+
+      /* TX complete may need a poll before IRQ is enabled at ifup */
+
+      gd32_freeframe(priv);
+      gd32_receive(priv);
+
+      after = gd32_rxdesc_cpu_count(priv);
+      if (after > before)
+        {
+          break;
+        }
+    }
+
+  gd32_reg_write(cfg, GD32_ENET_MAC_CFG);
+
+  /* Drain leftover loopback frames (unknown ethertype is dropped) */
+
+  gd32_freeframe(priv);
+  gd32_receive(priv);
+
+  _err("ENET LB: %s (cpu-rxdesc %d->%d) ！ "
+       "PASS=MCU RX DMA ok (check Port3/PCB RX); "
+       "FAIL=MCU MAC/DMA RX broken\n",
+       (after > before) ? "PASS" : "FAIL",
+       before, after);
+
+  /* Reset MSC so later arp-fail rx_u is not polluted by loopback. */
+
+  gd32_reg_write(ENET_MSC_CTL_CTR, GD32_ENET_MSC_CTL);
+  gd32_reg_write(0, GD32_ENET_MSC_CTL);
+}
+
+/****************************************************************************
+ * Name: gd32_enet_diag_snapshot
+ *
+ * Description:
+ *   Dump KSZ8863 via soft-I2C (chip id, reg198, port status) + MAC MSC.
+ *
+ ****************************************************************************/
+
+void gd32_enet_diag_snapshot(FAR const char *tag)
+{
+  uint8_t id0 = 0;
+  uint8_t id1 = 0;
+  uint8_t reg198 = 0;
+  uint8_t p1st = 0;
+  uint8_t p2st = 0;
+  int r0;
+  int r1;
+  int rr;
+  int rp1;
+  int rp2;
+  bool crs;
+  uint32_t dma_stat;
+  uint32_t rp;
+  struct gd32_enet_mac_s *priv = &g_enet_mac[0];
+
+  r0 = gd32_ksz8863_reg_read(0x00, &id0);
+  r1 = gd32_ksz8863_reg_read(0x01, &id1);
+  rr = gd32_ksz8863_reg_read(0xc6, &reg198);
+  rp1 = gd32_ksz8863_reg_read(0x1e, &p1st); /* Port1 Status 0 */
+  rp2 = gd32_ksz8863_reg_read(0x2e, &p2st); /* Port2 Status 0 */
+
+  _warn("KSZ8863 %s I2C chipid=%02x:%02x reg198=0x%02x "
+        "i2c_ok=%d intclk=%d\n",
+        tag, id0, id1, reg198,
+        (r0 == OK && r1 == OK && id0 == 0x88) ? 1 : 0,
+        (rr == OK && (reg198 & 0x08)) ? 1 : 0);
+
+  _warn("KSZ8863 %s P1stat=0x%02x link=%d  P2stat=0x%02x link=%d "
+        "(status bit5=link)\n",
+        tag,
+        p1st, (rp1 == OK) ? ((p1st >> 5) & 1) : -1,
+        p2st, (rp2 == OK) ? ((p2st >> 5) & 1) : -1);
+
+  if (r0 < 0 || id0 != 0x88)
+    {
+      _warn("KSZ8863 %s I2C fail ！ check PA2=SDA PC1=SCL soft-I2C "
+            "(not ETH AF), addr 0x5f, PHY_RST PC2\n", tag);
+    }
+
+  crs = gd32_gpio_read(GPIO_ENET_RMII_CRS_DV);
+  dma_stat = gd32_reg_read(GD32_ENET_DMA_STAT);
+  rp = (dma_stat & ENET_DMA_STAT_RP_MASK) >> ENET_DMA_STAT_RP_SHIFT;
+
+  _warn("KSZ8863 %s MSC tx=%" PRIu32 " rx_u=%" PRIu32
+        " rx_crc=%" PRIu32 " rx_align=%" PRIu32 " CRS_DV=%d\n",
+        tag,
+        gd32_reg_read(GD32_ENET_MSC_TGFCNT),
+        gd32_reg_read(GD32_ENET_MSC_RGUFCNT),
+        gd32_reg_read(GD32_ENET_MSC_RFCECNT),
+        gd32_reg_read(GD32_ENET_MSC_RFAECNT),
+        crs ? 1 : 0);
+  _warn("KSZ8863 %s FRMF=0x%08" PRIx32 " ADDR0L=0x%08" PRIx32
+        " DMA_STAT=0x%08" PRIx32 " RPstate=%" PRIu32
+        " rdes0=0x%08" PRIx32 " cpu_rx=%d\n",
+        tag,
+        gd32_reg_read(GD32_ENET_MAC_FRMF),
+        gd32_reg_read(GD32_ENET_MAC_ADDR0L),
+        dma_stat, rp,
+        priv->rxhead ? priv->rxhead->rdes0 : 0,
+        gd32_rxdesc_cpu_count(priv));
+}
+#endif /* CONFIG_GD32F4_PHY_SWITCH */
 
 /****************************************************************************
  * Function: gd32_phy_init
@@ -3031,6 +3312,39 @@ static int gd32_phy_init(struct gd32_enet_mac_s *priv)
   regval |= ENET_MAC_PHY_CTL_CLR;
   gd32_reg_write(regval, GD32_ENET_MAC_PHY_CTL);
 
+  /* Board hard-reset (CONFIG_GD32F4_PHY_INIT) is done in gd32_enet_config()
+   * before DMA software reset so RMII REF_CLK is present.
+   */
+
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+  /* KSZ8863: management is soft-I2C (board phyinit). Port3 MCU RMII is
+   * forced 100FD; copper Port1/2 keep strap AN. Do not use ENET MIIM.
+   */
+
+#ifdef CONFIG_GD32F4_ENET_MODE_FULLDUPLEX
+  priv->fduplex = 1;
+#endif
+#ifdef CONFIG_GD32F4_ENET_SPEEDMODE_100M
+  priv->mbps100 = 1;
+#endif
+
+  up_mdelay(100);
+  gd32_enet_diag_snapshot("post-init");
+
+  UNUSED(phyval);
+  UNUSED(ret);
+
+#else /* !CONFIG_GD32F4_PHY_SWITCH */
+
+#ifdef CONFIG_GD32F4_PHY_INIT
+  ret = gd32_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
+
   /* Put the PHY in reset mode */
 
   ret = gd32_phy_write(CONFIG_GD32F4_PHY_ADDR, MII_MCR, MII_MCR_RESET);
@@ -3041,17 +3355,6 @@ static int gd32_phy_init(struct gd32_enet_mac_s *priv)
     }
 
   up_mdelay(PHY_RESET_DELAY);
-
-  /* Perform any necessary, board-specific PHY initialization */
-
-#ifdef CONFIG_GD32F4_PHY_INIT
-  ret = gd32_phy_boardinitialize(0);
-  if (ret < 0)
-    {
-      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
-#endif
 
   /* Perform auto-negotiation if so configured */
 
@@ -3199,7 +3502,9 @@ static int gd32_phy_init(struct gd32_enet_mac_s *priv)
 #ifdef CONFIG_GD32F4_ENET_SPEEDMODE_100M
   priv->mbps100 = 1;
 #endif
-#endif
+#endif /* CONFIG_GD32F4_AUTO_NEGOTIATION */
+
+#endif /* CONFIG_GD32F4_PHY_SWITCH */
 
   ninfo("Duplex: %s Speed: %d MBps\n",
         priv->fduplex ? "FULL" : "HALF",
@@ -3275,10 +3580,16 @@ static inline void gd32_enet_gpio_config(struct gd32_enet_mac_s *priv)
 
 #if defined(CONFIG_GD32F4_MII) || defined(CONFIG_GD32F4_RMII)
 
-  /* MDC and MDIO are common to both modes */
+  /* MDC/MDIO: standard PHY boards use ETH AF11 on PC1/PA2.
+   * Board1 KSZ8863 (PHY_SWITCH) uses those pins as soft-I2C SCL/SDA ！
+   * must NOT remux to Ethernet AF or I2C management dies (id=ffff).
+   */
 
+#ifndef CONFIG_GD32F4_PHY_SWITCH
   gd32_gpio_config(GPIO_ENET_MDC);
-  gd32_gpio_config(GPIO_ENET_MDIO);
+  gd32_gpio_config((GPIO_ENET_MDIO & ~GPIO_CFG_PUPD_MASK) |
+                   GPIO_CFG_PUPD_PULLUP);
+#endif
 
   /* Set up the MII interface */
 
@@ -3569,10 +3880,11 @@ static void gd32_mac_address(struct gd32_enet_mac_s *priv)
         dev->d_mac.ether.ether_addr_octet[4],
         dev->d_mac.ether.ether_addr_octet[5]);
 
-  /* Set the MAC address high register */
+  /* Set the MAC address high register (MO bit must stay set on GD32). */
 
   regval = ((uint32_t)dev->d_mac.ether.ether_addr_octet[5] << 8) |
-            (uint32_t)dev->d_mac.ether.ether_addr_octet[4];
+            (uint32_t)dev->d_mac.ether.ether_addr_octet[4] |
+            ENET_MAC_ADDR0H_MO;
   gd32_reg_write(regval, GD32_ENET_MAC_ADDR0H);
 
   /* Set the MAC address low register */
@@ -3640,6 +3952,10 @@ static int gd32_mac_enable(struct gd32_enet_mac_s *priv)
   regval |= ENET_DMA_CTL_SRE;
   gd32_reg_write(regval, GD32_ENET_DMA_CTL);
 
+  /* Kick RX DMA poll ！ after SRE the receiver may sit suspended until RPEN. */
+
+  gd32_reg_write(1, GD32_ENET_DMA_RPEN);
+
   /* Enable ENET DMA interrupts.
    *
    * The gd32 hardware supports two interrupts: (1) one dedicated to normal
@@ -3662,6 +3978,12 @@ static int gd32_mac_enable(struct gd32_enet_mac_s *priv)
 
   gd32_reg_write(ENET_DMA_INTEN_RECV_ENABLE | ENET_DMA_INTEN_ERROR_ENABLE,
                GD32_ENET_DMA_INTEN);
+
+  /* Enable MAC management counters (TX/RX good frame counts). */
+
+  gd32_reg_write(ENET_MSC_CTL_CTR, GD32_ENET_MSC_CTL); /* reset counters */
+  gd32_reg_write(0, GD32_ENET_MSC_CTL);                /* run */
+
   return OK;
 }
 
@@ -3692,6 +4014,20 @@ static int gd32_enet_config(struct gd32_enet_mac_s *priv)
   /* Enable ENET clocks */
 
   gd32_enet_clock_enable();
+
+#ifdef CONFIG_GD32F4_PHY_INIT
+  /* KSZ8863 (and similar RMII_EXTCLK boards): hard-reset the switch so
+   * REF_CLK is running BEFORE DMA software reset. SWR may hang/fail if
+   * PA1 has no 50MHz clock yet.
+   */
+
+  ret = gd32_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to initialize the PHY: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Reset the ENET block */
 
@@ -3736,7 +4072,31 @@ static int gd32_enet_config(struct gd32_enet_mac_s *priv)
   /* Enable normal MAC operation */
 
   ninfo("Enable normal operation\n");
-  return gd32_mac_enable(priv);
+  ret = gd32_mac_enable(priv);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  _warn("ENET MAC_CFG=0x%08" PRIx32 " DMA_CTL=0x%08" PRIx32
+        " FRMF=0x%08" PRIx32 " duplex=%d speed=%d MAC=%02x:%02x:%02x:%02x:%02x:%02x\n",
+        gd32_reg_read(GD32_ENET_MAC_CFG),
+        gd32_reg_read(GD32_ENET_DMA_CTL),
+        gd32_reg_read(GD32_ENET_MAC_FRMF),
+        priv->fduplex, priv->mbps100 ? 100 : 10,
+        priv->dev.d_mac.ether.ether_addr_octet[0],
+        priv->dev.d_mac.ether.ether_addr_octet[1],
+        priv->dev.d_mac.ether.ether_addr_octet[2],
+        priv->dev.d_mac.ether.ether_addr_octet[3],
+        priv->dev.d_mac.ether.ether_addr_octet[4],
+        priv->dev.d_mac.ether.ether_addr_octet[5]);
+
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+  gd32_mac_loopback_selftest(priv);
+  gd32_enet_diag_snapshot("ifup");
+#endif
+
+  return OK;
 }
 
 /****************************************************************************
@@ -3796,6 +4156,17 @@ int gd32_enet_init(int intf)
   /* Configure GPIO pins to support ENET */
 
   gd32_enet_gpio_config(priv);
+
+#ifdef CONFIG_GD32F4_PHY_INIT
+  /* Ensure switch REF_CLK before the early ifdown DMA software reset. */
+
+  ret = gd32_phy_boardinitialize(0);
+  if (ret < 0)
+    {
+      nerr("ERROR: PHY board init failed: %d\n", ret);
+      return ret;
+    }
+#endif
 
   /* Attach the IRQ to the driver */
 

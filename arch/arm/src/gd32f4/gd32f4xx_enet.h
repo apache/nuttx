@@ -29,6 +29,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
 #include "chip.h"
 
 #if GD32_NETHERNET > 0
@@ -60,6 +62,23 @@
 
 #ifdef CONFIG_GD32F4_PHY_INIT
 int gd32_phy_boardinitialize(int intf);
+#endif
+
+/****************************************************************************
+ * Name: gd32_ksz8863_reg_read / gd32_ksz8863_reg_write
+ *
+ * Description:
+ *   Board1 KSZ8863 management via software I2C (PA2=SDA, PC1=SCL),
+ *   7-bit address 0x5F. Not ETH MDIO.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+int gd32_ksz8863_reg_read(uint8_t reg, uint8_t *value);
+int gd32_ksz8863_reg_write(uint8_t reg, uint8_t value);
+void gd32_enet_diag_snapshot(FAR const char *tag);
+#else
+#  define gd32_enet_diag_snapshot(tag) ((void)(tag))
 #endif
 
 #endif /* __ASSEMBLY__ */

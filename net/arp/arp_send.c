@@ -43,6 +43,10 @@
 #include "route/route.h"
 #include "arp/arp.h"
 
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+void gd32_enet_diag_snapshot(FAR const char *tag);
+#endif
+
 #ifdef CONFIG_NET_ARP_SEND
 
 /****************************************************************************
@@ -133,6 +137,15 @@ static uint32_t arp_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       arp_format(dev, state->snd_ipaddr);
+
+      if (dev->d_len == 0)
+        {
+          _err("ARP: format failed for %u.%u.%u.%u\n",
+               ip4_addr1(state->snd_ipaddr), ip4_addr2(state->snd_ipaddr),
+               ip4_addr3(state->snd_ipaddr), ip4_addr4(state->snd_ipaddr));
+          arp_send_terminate(dev, state, -ENOMEM);
+          return flags;
+        }
 
       /* Don't allow any further call backs. */
 
@@ -320,6 +333,21 @@ int arp_send(in_addr_t ipaddr)
           break;
         }
 
+      /* One link/MSC snapshot at the start of resolve (not every try). */
+
+      if (state.snd_retries == 0)
+        {
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+          gd32_enet_diag_snapshot("arp-begin");
+#endif
+          _warn("ARP: resolving %u.%u.%u.%u on %s "
+                "(max %u tries, %u ms)\n",
+                ip4_addr1(ipaddr), ip4_addr2(ipaddr),
+                ip4_addr3(ipaddr), ip4_addr4(ipaddr),
+                (FAR const char *)dev->d_ifname,
+                CONFIG_ARP_SEND_MAXTRIES, CONFIG_ARP_SEND_DELAYMSEC);
+        }
+
       /* Set up the ARP response wait BEFORE we send the ARP request */
 
       arp_wait_setup(ipaddr, &notify);
@@ -424,13 +452,24 @@ timeout:
       /* Increment the retry count */
 
       state.snd_retries++;
-      nerr("ERROR: arp_wait failed: %d, ipaddr: %u.%u.%u.%u\n", ret,
-           ip4_addr1(ipaddr), ip4_addr2(ipaddr),
-           ip4_addr3(ipaddr), ip4_addr4(ipaddr));
+      ninfo("arp_wait failed: %d try %u\n", ret, state.snd_retries);
     }
 
   nxsem_destroy(&state.snd_sem);
   arp_callback_free(dev, state.snd_cb);
+
+#ifdef CONFIG_GD32F4_PHY_SWITCH
+  gd32_enet_diag_snapshot(ret >= 0 ? "arp-ok" : "arp-fail");
+#endif
+
+  if (ret < 0)
+    {
+      _warn("ARP: %u.%u.%u.%u failed ret=%d "
+            "(ETIMEDOUT=-110 no reply; ENETUNREACH=-101)\n",
+            ip4_addr1(ipaddr), ip4_addr2(ipaddr),
+            ip4_addr3(ipaddr), ip4_addr4(ipaddr), ret);
+    }
+
   return ret;
 }
 

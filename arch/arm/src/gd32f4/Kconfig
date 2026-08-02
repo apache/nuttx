@@ -398,6 +398,7 @@ config GD32F4_ENETMAC
 	depends on GD32F4_HAVE_ENETMAC
 	select NETDEVICES
 	select ARCH_HAVE_PHY
+	select ARCH_HAVE_NETDEV_STATISTICS
 
 config GD32F4_EXMC
 	bool "EXMC"
@@ -2437,6 +2438,18 @@ config GD32F4_PHY_INIT
 		If GD32F4_PHY_INIT is defined in the configuration then the board specific logic must
 		provide the function of phyinitialize();  Before first uses the PHY, the GD32F4 Ethernet
 		driver will call this function one time .
+
+config GD32F4_PHY_SWITCH
+	bool "Ethernet PHY is an unmanaged switch (e.g. KSZ8863)"
+	default n
+	depends on GD32F4_PHY_INIT
+	---help---
+		Select when the RMII MAC attaches to a switch MAC port (e.g. KSZ8863
+		Port3), not a copper PHY. Board logic hard-resets the switch; Port1/2
+		copper keep strap autoneg. Skip MIIM soft-reset and MCR force at
+		GD32F4_PHY_ADDR (those target copper Port1 and can disable AN). MAC
+		speed/duplex still follow GD32F4_ENET_MODE_* / SPEEDMODE_* when
+		autoneg is disabled.
 
 config GD32F4_MII
 	bool "Use the media-independent interface (MII) interface"
