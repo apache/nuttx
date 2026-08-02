@@ -39,14 +39,15 @@ all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
     initialconfig$(HOSTEXEEXT) gencromfs$(HOSTEXEEXT) \
     convert-comments$(HOSTEXEEXT) lowhex$(HOSTEXEEXT) \
     detab$(HOSTEXEEXT) rmcr$(HOSTEXEEXT) incdir$(HOSTEXEEXT) \
-    jlink-nuttx$(HOSTDYNEXT)
+    mknxflat$(HOSTEXEEXT) jlink-nuttx$(HOSTDYNEXT)
 default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
     cnvwindeps$(HOSTEXEEXT) incdir$(HOSTEXEEXT)
 
 ifdef HOSTEXEEXT
 .PHONY: b16 bdf-converter cmpconfig clean configure kconfig2html mkconfig \
     mkdeps mksymtab mksyscall mkversion mkpasswd cnvwindeps nxstyle \
-    initialconfig gencromfs convert-comments lowhex detab rmcr incdir
+    initialconfig gencromfs convert-comments lowhex detab rmcr incdir \
+    mknxflat
 endif
 ifdef HOSTDYNEXT
 .PHONY: jlink-nuttx
@@ -132,6 +133,18 @@ mksymtab$(HOSTEXEEXT): mksymtab.c csvparser.c
 
 ifdef HOSTEXEEXT
 mksymtab: mksymtab$(HOSTEXEEXT)
+endif
+
+# mknxflat - Generate the thunk file for an NXFLAT module
+
+MKNXFLAT_SRCS = nxflat/mknxflat.c nxflat/thunk_arm.c nxflat/thunk_thumb2.c
+
+mknxflat$(HOSTEXEEXT): $(MKNXFLAT_SRCS)
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -Inxflat -o mknxflat$(HOSTEXEEXT) \
+	  $(MKNXFLAT_SRCS)
+
+ifdef HOSTEXEEXT
+mknxflat: mknxflat$(HOSTEXEEXT)
 endif
 
 # bdf-converter - Converts a BDF font to the NuttX font format
@@ -270,6 +283,8 @@ clean:
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, mkconfig)
 	$(call DELFILE, mkconfig.exe)
+	$(call DELFILE, mknxflat)
+	$(call DELFILE, mknxflat.exe)
 	$(call DELFILE, mkdeps)
 	$(call DELFILE, mkdeps.exe)
 	$(call DELFILE, mksymtab)
