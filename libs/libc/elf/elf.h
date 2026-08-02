@@ -356,4 +356,24 @@ int libelf_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
 void libelf_addrenv_free(FAR struct mod_loadinfo_s *loadinfo);
 
 #endif /* CONFIG_ARCH_ADDRENV */
+
+#ifdef HAVE_LIBC_ELF_PIN
+/****************************************************************************
+ * Name: libelf_pinrelease
+ *
+ * Description:
+ *   Give back an XIP pin taken while loading, and the file it was held
+ *   through.  Does nothing if no pin was taken.
+ *
+ * Input Parameters:
+ *   pinfile - The held file, cleared on return.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void libelf_pinrelease(FAR struct file **pinfile);
+#endif
+
 #endif /* __LIBS_LIBC_LIBC_ELF_LIBC_ELF_H */

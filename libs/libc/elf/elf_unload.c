@@ -30,6 +30,8 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <sys/ioctl.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/lib/elf.h>
 
 #include "libc.h"
@@ -68,9 +70,42 @@ int libelf_unload(FAR struct mod_loadinfo_s *loadinfo)
 #endif
   /* Release memory holding the relocated ELF image */
 
-  /* ET_DYN has a single allocation so we only free textalloc */
+  /* An FDPIC object placed its two segments separately, and its text was
+   * never allocated at all -- it is media the filesystem lent us.  Free
+   * the data on its own and leave the text alone.
+   */
 
-  if (loadinfo->ehdr.e_type != ET_DYN)
+  if (loadinfo->fdpic)
+    {
+      /* Give the pin back if one was taken.  A compacting filesystem
+       * cannot reclaim the extent until every instance executing from it
+       * has let go, so this is not merely tidiness.
+       */
+
+      if (loadinfo->textpin)
+        {
+#ifdef HAVE_LIBC_ELF_PIN
+          libelf_pinrelease(&loadinfo->pinfile);
+#else
+          ioctl(loadinfo->filfd, XIPFSIOC_UNPIN, 0);
+#endif
+          loadinfo->textpin = false;
+        }
+
+      if (loadinfo->datastart != 0)
+        {
+          lib_free((FAR void *)loadinfo->datastart);
+          loadinfo->datastart = 0;
+        }
+
+      loadinfo->textalloc = 0;
+      loadinfo->textsize  = 0;
+      loadinfo->datasize  = 0;
+    }
+
+  /* Any other ET_DYN has a single allocation so we only free textalloc */
+
+  else if (loadinfo->ehdr.e_type != ET_DYN)
     {
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
       int i;

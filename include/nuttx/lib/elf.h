@@ -44,6 +44,17 @@
 #  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
+/* Holding an XIP pin past the load means holding the file itself: the pin is
+ * released when the module is unloaded, which happens on a task other than
+ * the one that loaded it, so a descriptor from that task's group cannot
+ * serve.  That needs the file interface, which is why CONFIG_FDPIC depends
+ * on the flat build.
+ */
+
+#ifdef CONFIG_FDPIC
+#  define HAVE_LIBC_ELF_PIN 1
+#endif
+
 #ifndef CONFIG_LIBC_ELF_ALIGN_LOG2
 #  define CONFIG_LIBC_ELF_ALIGN_LOG2 2
 #endif
@@ -123,6 +134,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct file;
 struct symtab_s;
 struct mod_info_s
 {
@@ -251,6 +263,28 @@ struct mod_loadinfo_s
                               * romfs/tmps, we can try get xipbase,
                               * skip the copy.
                               */
+
+  /* FDPIC state.
+   *
+   * An FDPIC object places its two PT_LOAD segments independently: the
+   * read-only one is mapped where it already sits on the media and the
+   * writable one is copied to RAM, once per running instance.  That is
+   * what lets several instances share one copy of the text.
+   *
+   * fdpic    - True if e_ident[EI_OSABI] marked this an FDPIC object.
+   * textpin  - True if the read-only segment is held by a filesystem pin
+   *            that has to be dropped at unload, rather than by an
+   *            address the filesystem simply handed over.
+   */
+
+  bool          fdpic;
+  bool          textpin;
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* The file the pin is held through, handed to the module once it loads. */
+
+  FAR struct file *pinfile;
+#endif
 
   /* Address environment.
    *
