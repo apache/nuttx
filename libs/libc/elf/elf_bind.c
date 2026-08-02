@@ -831,7 +831,7 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                         return ret;
                       }
 
-                    addr = rel->r_offset + loadinfo->textalloc;
+                    addr = libelf_addr(loadinfo, rel->r_offset);
 
                     if (reldata.relrela[idx_rel] == 1)
                       {
@@ -848,23 +848,15 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                   0
                 };
 
-              addr = rel->r_offset - loadinfo->datasec + loadinfo->datastart;
+              addr = libelf_addr(loadinfo, rel->r_offset);
 
               if (reldata.relrela[idx_rel] == 1)
                 {
                   addr += rela->r_addend;
                 }
 
-              if ((*(FAR uint32_t *)addr) < loadinfo->datasec)
-                {
-                  dynsym.st_value = *(FAR uint32_t *)addr +
-                                    loadinfo->textalloc;
-                }
-              else
-                {
-                  dynsym.st_value = *(FAR uint32_t *)addr -
-                                    loadinfo->datasec + loadinfo->datastart;
-                }
+              dynsym.st_value = libelf_addr(loadinfo,
+                                            *(FAR uint32_t *)addr);
 
               ret = up_relocate(rel, &dynsym, addr, ARCH_ELFDATA_PARM);
             }
@@ -968,23 +960,20 @@ int libelf_bind(FAR struct module_s *modp,
                 loadinfo->dsymtabidx = i;
                 break;
               case SHT_INIT_ARRAY:
-                loadinfo->initarr = loadinfo->shdr[i].sh_addr -
-                                    loadinfo->datasec +
-                                    loadinfo->datastart;
+                loadinfo->initarr = libelf_addr(loadinfo,
+                                                loadinfo->shdr[i].sh_addr);
                 loadinfo->ninit = loadinfo->shdr[i].sh_size /
                                   sizeof(uintptr_t);
                 break;
               case SHT_FINI_ARRAY:
-                loadinfo->finiarr = loadinfo->shdr[i].sh_addr -
-                                    loadinfo->datasec +
-                                    loadinfo->datastart;
+                loadinfo->finiarr = libelf_addr(loadinfo,
+                                                loadinfo->shdr[i].sh_addr);
                 loadinfo->nfini = loadinfo->shdr[i].sh_size /
                                   sizeof(uintptr_t);
                 break;
               case SHT_PREINIT_ARRAY:
-                loadinfo->preiarr = loadinfo->shdr[i].sh_addr -
-                                    loadinfo->datasec +
-                                    loadinfo->datastart;
+                loadinfo->preiarr = libelf_addr(loadinfo,
+                                                loadinfo->shdr[i].sh_addr);
                 loadinfo->nprei = loadinfo->shdr[i].sh_size /
                                   sizeof(uintptr_t);
                 break;
