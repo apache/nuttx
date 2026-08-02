@@ -110,6 +110,29 @@ int eic7700x_reset_initialize(void);
 
 unsigned int eic7700x_reset_count(FAR unsigned int *held);
 
+#ifdef CONFIG_RESET_PROCFS
+/****************************************************************************
+ * Name: eic7700x_reset_getline
+ *
+ * Description:
+ *   Describe one reset line for /proc/reset.  Lives beside the name table
+ *   rather than beside the operations, since that is what it reads.
+ *
+ * Input Parameters:
+ *   rcdev - The reset controller
+ *   id    - The reset line id
+ *   info  - Receives the name, and the register and bit as extra text
+ *
+ * Returned Value:
+ *   OK, or -ENODEV if the id names no line.
+ *
+ ****************************************************************************/
+
+int eic7700x_reset_getline(FAR struct reset_controller_dev *rcdev,
+                           unsigned int id,
+                           FAR struct reset_lineinfo_s *info);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

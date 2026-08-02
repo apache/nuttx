@@ -287,4 +287,7 @@ const struct reset_control_ops g_eic7700x_reset_ops =
   .assert   = eic7700x_reset_assert,
   .deassert = eic7700x_reset_deassert,
   .status   = eic7700x_reset_status,
+#ifdef CONFIG_RESET_PROCFS
+  .get_line = eic7700x_reset_getline,
+#endif
 };
