@@ -66,6 +66,25 @@ int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
 
   /* Verify that there are sections */
 
+  /* An FDPIC object announces itself in the OS/ABI byte.  Note it once,
+   * here, so that placement and relocation do not each have to re-derive
+   * it from the header.
+   */
+
+  loadinfo->fdpic = (loadinfo->ehdr.e_ident[EI_OSABI] == ELFOSABI_ARM_FDPIC);
+
+  /* A module is a shared object.  An object that claims the FDPIC ABI and
+   * is anything else would be placed and entered through the paths meant
+   * for a relocatable object, which is not what its relocations expect.
+   */
+
+  if (loadinfo->fdpic && loadinfo->ehdr.e_type != ET_DYN)
+    {
+      berr("ERROR: FDPIC object is not a shared object: e_type=%u\n",
+           loadinfo->ehdr.e_type);
+      return -ENOEXEC;
+    }
+
   if (loadinfo->ehdr.e_shnum < 1)
     {
       berr("ERROR: No sections(?)\n");

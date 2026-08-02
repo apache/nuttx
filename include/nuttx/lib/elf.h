@@ -44,6 +44,21 @@
 #  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
+/* A compacting filesystem can move the blocks of a file, thus it gives its
+ * media address together with a pin that holds the blocks in place.  XIPFS
+ * is the one in tree.  The loader gives the pin back when it unloads the
+ * module, on a task other than the task that loaded it, thus a descriptor
+ * from the group of that task cannot serve.  The loader holds a reference to
+ * the file instead, and only the flat build can do this.
+ *
+ * Any module that executes in place needs the pin, not only an FDPIC module.
+ * If the loader cannot hold a pin, it does not ask for one.
+ */
+
+#if defined(CONFIG_FS_XIPFS) && defined(CONFIG_BUILD_FLAT)
+#  define HAVE_LIBC_ELF_PIN 1
+#endif
+
 #ifndef CONFIG_LIBC_ELF_ALIGN_LOG2
 #  define CONFIG_LIBC_ELF_ALIGN_LOG2 2
 #endif
@@ -123,6 +138,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct file;
 struct symtab_s;
 struct mod_info_s
 {
@@ -251,6 +267,28 @@ struct mod_loadinfo_s
                               * romfs/tmps, we can try get xipbase,
                               * skip the copy.
                               */
+
+  /* FDPIC state.
+   *
+   * An FDPIC object places its two PT_LOAD segments independently: the
+   * read-only one is mapped where it already sits on the media and the
+   * writable one is copied to RAM, once per running instance.  That is
+   * what lets several instances share one copy of the text.
+   *
+   * fdpic    - True if e_ident[EI_OSABI] marked this an FDPIC object.
+   * textpin  - True if a filesystem pin holds the read-only segment, and the
+   *            loader must give the pin back at unload.  False if the
+   *            filesystem gave only an address.
+   */
+
+  bool          fdpic;
+  bool          textpin;
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* The file the pin is held through, handed to the module once it loads. */
+
+  FAR struct file *pinfile;
+#endif
 
   /* Address environment.
    *
