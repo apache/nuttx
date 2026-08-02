@@ -238,6 +238,34 @@ int libelf_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 
 int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
+/****************************************************************************
+ * Name: libelf_addr
+ *
+ * Description:
+ *   Translate a link-time address in a loaded object to the address it
+ *   occupies now.  An address below the data segment's link-time base
+ *   belongs to text, anything at or above it to data.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   vaddr    - The link-time address to translate
+ *
+ * Returned Value:
+ *   The run-time address.
+ *
+ ****************************************************************************/
+
+static inline uintptr_t libelf_addr(FAR struct mod_loadinfo_s *loadinfo,
+                                    uintptr_t vaddr)
+{
+  if (loadinfo->datasec != 0 && vaddr >= loadinfo->datasec)
+    {
+      return loadinfo->datastart + (vaddr - loadinfo->datasec);
+    }
+
+  return loadinfo->textalloc + vaddr;
+}
+
 #ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
