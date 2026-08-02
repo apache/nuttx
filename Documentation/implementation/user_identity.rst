@@ -86,7 +86,9 @@ Configuration
 
 ``CONFIG_FS_PERMISSION``
   Enables filesystem ownership and permission enforcement. Requires
-  ``CONFIG_SCHED_USER_IDENTITY``.
+  ``CONFIG_SCHED_USER_IDENTITY`` and ``CONFIG_PSEUDOFS_ATTRIBUTES``.
+  See :ref:`file-permission` for the VFS helpers, mount-crossing
+  traverse rules, and testing notes.
 
 Pseudo-Filesystem Ownership
 ===========================
@@ -96,5 +98,10 @@ enabled, ``inode_alloc()`` assigns ``i_owner`` and ``i_group`` from the
 caller's effective credentials. This covers
 message queues (``mq_open()``), named semaphores (``sem_open()``), shared
 memory objects (``shm_open()``), FIFOs (``mkfifo()``), and pseudo-files
-created through the same inode reservation path. Open-time permission checks
-use ``inode_checkopenperm()`` (or ``inode_checkperm()`` for message queues).
+created through the same inode reservation path.
+
+Path resolution requires directory search permission (``X_OK``) on ancestors
+via ``inode_checkpathperm()``.  Open-time checks on the final node use
+``inode_checkopenperm()`` (or ``inode_checkperm()`` for named IPC
+objects).  Full details, including mounts under private pseudoFS parents,
+are in :ref:`file-permission`.

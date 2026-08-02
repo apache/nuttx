@@ -211,3 +211,7 @@ will also fail. You cannot do this, for example:
 
 See also NxFileSystem in 
 `Porting Guide <https://cwiki.apache.org/confluence/display/NUTTX/Porting+Guide>`_
+
+When ``CONFIG_FS_PERMISSION`` is enabled, pseudoFS directory modes also gate
+access into mounted volumes beneath them.  See
+:ref:`file-permission`.
