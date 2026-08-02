@@ -7,6 +7,7 @@
 /gencromfs
 /initialconfig
 /mkconfig
+/mknxflat
 /mkdeps
 /cnvwindeps
 /logparser
