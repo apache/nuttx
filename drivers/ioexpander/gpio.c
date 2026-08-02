@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -40,7 +41,42 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/ioexpander/gpio.h>
 
+#ifdef CONFIG_GPIO_PROCFS
+#  include <sys/stat.h>
+#  include <sys/param.h>
+#  include <fcntl.h>
+#  include <nuttx/kmalloc.h>
+#  include <nuttx/list.h>
+#  include <nuttx/mutex.h>
+#  include <nuttx/fs/procfs.h>
+#endif
+
 #ifdef CONFIG_DEV_GPIO
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_GPIO_PROCFS
+
+/* One registered pin.  struct gpio_dev_s belongs to the lower half, which
+ * usually embeds it in a larger private structure of its own, so the list
+ * node lives here rather than being added to it.
+ */
+
+/* Long enough for any name gpio_pin_register() accepts: it builds
+ * "/dev/" plus the name in a 32 byte buffer.
+ */
+
+#define GPIO_PROCFS_NAMELEN 28
+
+struct gpio_entry_s
+{
+  struct list_node node;
+  FAR struct gpio_dev_s *dev;
+  char name[GPIO_PROCFS_NAMELEN];
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -55,6 +91,21 @@ static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
 static off_t   gpio_seek(FAR struct file *filep, off_t offset, int whence);
 static int     gpio_ioctl(FAR struct file *filep, int cmd,
                           unsigned long arg);
+#ifdef CONFIG_GPIO_PROCFS
+static int     gpio_procfs_open(FAR struct file *filep,
+                                FAR const char *relpath,
+                                int oflags, mode_t mode);
+static int     gpio_procfs_close(FAR struct file *filep);
+static ssize_t gpio_procfs_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen);
+static int     gpio_procfs_dup(FAR const struct file *oldp,
+                               FAR struct file *newp);
+static int     gpio_procfs_stat(FAR const char *relpath,
+                                FAR struct stat *buf);
+static void    gpio_procfs_add(FAR struct gpio_dev_s *dev,
+                               FAR const char *pinname);
+static void    gpio_procfs_remove(FAR struct gpio_dev_s *dev);
+#endif
 static int     gpio_poll(FAR struct file *filep,
                          FAR struct pollfd *fds, bool setup);
 
@@ -75,9 +126,389 @@ static const struct file_operations g_gpio_drvrops =
   gpio_poll,   /* poll */
 };
 
+#ifdef CONFIG_GPIO_PROCFS
+
+static struct list_node g_gpio_list = LIST_INITIAL_VALUE(g_gpio_list);
+static mutex_t g_gpio_lock = NXMUTEX_INITIALIZER;
+static bool g_gpio_procfs_added;
+
+/* Indexed by enum gpio_pintype_e.  The enum's own comment warns that a
+ * table like this has to be extended with it; the assertion below turns
+ * forgetting into a build error rather than a pin type with no name.
+ */
+
+static const FAR char *g_gpio_typename[] =
+{
+  "INPUT",            /* GPIO_INPUT_PIN                  */
+  "INPUT_PU",         /* GPIO_INPUT_PIN_PULLUP           */
+  "INPUT_PD",         /* GPIO_INPUT_PIN_PULLDOWN         */
+  "OUTPUT",           /* GPIO_OUTPUT_PIN                 */
+  "OUTPUT_OD",        /* GPIO_OUTPUT_PIN_OPENDRAIN       */
+  "INT",              /* GPIO_INTERRUPT_PIN              */
+  "INT_HIGH",         /* GPIO_INTERRUPT_HIGH_PIN         */
+  "INT_LOW",          /* GPIO_INTERRUPT_LOW_PIN          */
+  "INT_RISING",       /* GPIO_INTERRUPT_RISING_PIN       */
+  "INT_FALLING",      /* GPIO_INTERRUPT_FALLING_PIN      */
+  "INT_BOTH",         /* GPIO_INTERRUPT_BOTH_PIN         */
+  "INT_WAKE",         /* GPIO_INTERRUPT_PIN_WAKEUP       */
+  "INT_HIGH_WAKE",    /* GPIO_INTERRUPT_HIGH_PIN_WAKEUP  */
+  "INT_LOW_WAKE",     /* GPIO_INTERRUPT_LOW_PIN_WAKEUP   */
+  "INT_RISING_WAKE",  /* GPIO_INTERRUPT_RISING_PIN_WAKEUP */
+  "INT_FALLING_WAKE", /* GPIO_INTERRUPT_FALLING_PIN_WAKEUP */
+  "INT_BOTH_WAKE",    /* GPIO_INTERRUPT_BOTH_PIN_WAKEUP  */
+};
+
+static_assert(nitems(g_gpio_typename) == GPIO_NPINTYPES,
+              "pin type name table does not match enum gpio_pintype_e");
+
+static const struct procfs_operations g_gpio_procfs_ops =
+{
+  gpio_procfs_open,   /* open */
+  gpio_procfs_close,  /* close */
+  gpio_procfs_read,   /* read */
+  NULL,               /* write */
+  NULL,               /* poll */
+
+  gpio_procfs_dup,    /* dup */
+
+  NULL,               /* opendir */
+  NULL,               /* closedir */
+  NULL,               /* readdir */
+  NULL,               /* rewinddir */
+
+  gpio_procfs_stat,   /* stat */
+};
+
+static const struct procfs_entry_s g_gpio_procfs =
+{
+  "gpio", &g_gpio_procfs_ops, PROCFS_FILE_TYPE
+};
+
+#endif /* CONFIG_GPIO_PROCFS */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_GPIO_PROCFS
+
+/****************************************************************************
+ * Name: gpio_procfs_open
+ *
+ * Description:
+ *   Open /proc/gpio.  The entry is read only, and holds no state of its
+ *   own beyond the position accounting procfs does for every file.
+ *
+ * Input Parameters:
+ *   filep   - The file structure to attach the open file to
+ *   relpath - The path below /proc being opened
+ *   oflags  - Open flags; anything but read only is refused
+ *   mode    - Ignored, the entry cannot be created
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int gpio_procfs_open(FAR struct file *filep, FAR const char *relpath,
+                            int oflags, mode_t mode)
+{
+  FAR struct procfs_file_s *priv;
+
+  if ((oflags & O_ACCMODE) != O_RDONLY)
+    {
+      return -EACCES;
+    }
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  filep->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_close
+ *
+ * Description:
+ *   Close /proc/gpio and free what open() allocated.
+ *
+ * Input Parameters:
+ *   filep - The open file
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int gpio_procfs_close(FAR struct file *filep)
+{
+  kmm_free(filep->f_priv);
+  filep->f_priv = NULL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_read
+ *
+ * Description:
+ *   List every registered pin, in registration order, with what the upper
+ *   half knows about it.  A lower half that supplies go_describe adds its
+ *   own fields to the same line.
+ *
+ *   Each read renders from the start and skips what earlier reads already
+ *   returned, so a file longer than the caller's buffer still comes out
+ *   whole across successive reads.
+ *
+ * Input Parameters:
+ *   filep  - The open file, carrying the offset reached so far
+ *   buffer - Where to return the text
+ *   buflen - Size of buffer
+ *
+ * Returned Value:
+ *   The number of bytes returned, zero at end of file, or a negated errno
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static ssize_t gpio_procfs_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen)
+{
+  FAR struct gpio_entry_s *entry;
+  size_t remaining = buflen;
+  FAR char *dest = buffer;
+  off_t pos = filep->f_pos;
+  char extra[48];
+  char line[128];
+  bool value;
+  size_t n;
+  int ret;
+
+  ret = nxmutex_lock(&g_gpio_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  list_for_every_entry(&g_gpio_list, entry, struct gpio_entry_s, node)
+    {
+      FAR const char *type = "-";
+
+      if (remaining == 0)
+        {
+          break;
+        }
+
+      /* A lower half is free to invent a pin type this table has never
+       * heard of, so the index is bounded here rather than trusted.
+       */
+
+      if (entry->dev->gp_pintype < nitems(g_gpio_typename))
+        {
+          type = g_gpio_typename[entry->dev->gp_pintype];
+        }
+
+      /* A pin that cannot be read reports -, so that a failed read is
+       * not shown as a low level.
+       */
+
+      if (entry->dev->gp_ops->go_read != NULL &&
+          entry->dev->gp_ops->go_read(entry->dev, &value) >= 0)
+        {
+          n = snprintf(line, sizeof(line), "%-12s type:%-18s val:%u",
+                       entry->name, type, value);
+        }
+      else
+        {
+          n = snprintf(line, sizeof(line), "%-12s type:%-18s val:-",
+                       entry->name, type);
+        }
+
+      n += snprintf(line + n, sizeof(line) - n,
+                    " regs:%u ints:%" PRIuPTR,
+                    entry->dev->register_count, entry->dev->int_count);
+
+      extra[0] = '\0';
+      if (entry->dev->gp_ops->go_describe != NULL)
+        {
+          entry->dev->gp_ops->go_describe(entry->dev, extra, sizeof(extra));
+          extra[sizeof(extra) - 1] = '\0';
+        }
+
+      if (extra[0] != '\0')
+        {
+          n += snprintf(line + n, sizeof(line) - n, " %s", extra);
+        }
+
+      n += snprintf(line + n, sizeof(line) - n, "\n");
+
+      /* snprintf() reports the length it wanted, so a line longer than the
+       * buffer would otherwise carry n past it.
+       */
+
+      if (n >= sizeof(line))
+        {
+          n = sizeof(line) - 1;
+          line[n - 1] = '\n';
+        }
+
+      n = procfs_memcpy(line, n, dest, remaining, &pos);
+      dest += n;
+      remaining -= n;
+    }
+
+  nxmutex_unlock(&g_gpio_lock);
+
+  filep->f_pos += (dest - buffer);
+  return dest - buffer;
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_dup
+ *
+ * Description:
+ *   Duplicate an open /proc/gpio, copying the position reached so that the
+ *   new file continues where the old one had got to.
+ *
+ * Input Parameters:
+ *   oldp - The open file being duplicated
+ *   newp - The file structure to attach the duplicate to
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int gpio_procfs_dup(FAR const struct file *oldp,
+                           FAR struct file *newp)
+{
+  FAR struct procfs_file_s *priv;
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memcpy(priv, oldp->f_priv, sizeof(struct procfs_file_s));
+  newp->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_stat
+ *
+ * Description:
+ *   Report /proc/gpio as a read only regular file.
+ *
+ * Input Parameters:
+ *   relpath - The path below /proc being queried
+ *   buf     - Where to return the status
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int gpio_procfs_stat(FAR const char *relpath, FAR struct stat *buf)
+{
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_add
+ *
+ * Description:
+ *   Remember a pin, and create /proc/gpio when the first one appears.
+ *   procfs_register() has to run before procfs is mounted, which holds
+ *   for the pins a board registers during start up.  The entry is claimed
+ *   once for the lifetime of the system, since procfs_register() appends
+ *   without checking for duplicates.
+ *
+ * Input Parameters:
+ *   dev     - The pin being registered
+ *   pinname - The name it was registered under, used as the /proc/gpio
+ *             label; the caller's string must outlive the pin
+ *
+ * Returned Value:
+ *   None.  A pin that cannot be listed is still a working pin, so a
+ *   failure here does not fail the registration.
+ *
+ ****************************************************************************/
+
+static void gpio_procfs_add(FAR struct gpio_dev_s *dev,
+                            FAR const char *pinname)
+{
+  FAR struct gpio_entry_s *entry;
+
+  entry = kmm_zalloc(sizeof(struct gpio_entry_s));
+  if (entry == NULL)
+    {
+      return;
+    }
+
+  entry->dev = dev;
+  strlcpy(entry->name, pinname, sizeof(entry->name));
+
+  nxmutex_lock(&g_gpio_lock);
+
+  /* procfs_register() appends without checking for a duplicate, so the
+   * entry is claimed once for the lifetime of the system rather than
+   * whenever the list is empty.  Pins come and go at run time.
+   */
+
+  if (!g_gpio_procfs_added)
+    {
+      procfs_register(&g_gpio_procfs);
+      g_gpio_procfs_added = true;
+    }
+
+  list_add_tail(&g_gpio_list, &entry->node);
+  nxmutex_unlock(&g_gpio_lock);
+}
+
+/****************************************************************************
+ * Name: gpio_procfs_remove
+ *
+ * Description:
+ *   Forget a pin.  /proc/gpio stays, since procfs has no way to withdraw
+ *   an entry, and lists nothing once the last pin has gone.
+ *
+ * Input Parameters:
+ *   dev - The pin being unregistered
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void gpio_procfs_remove(FAR struct gpio_dev_s *dev)
+{
+  FAR struct gpio_entry_s *entry;
+
+  nxmutex_lock(&g_gpio_lock);
+
+  list_for_every_entry(&g_gpio_list, entry, struct gpio_entry_s, node)
+    {
+      if (entry->dev == dev)
+        {
+          list_delete(&entry->node);
+          kmm_free(entry);
+          break;
+        }
+    }
+
+  nxmutex_unlock(&g_gpio_lock);
+}
+
+#endif /* CONFIG_GPIO_PROCFS */
 
 /****************************************************************************
  * Name: gpio_handler
@@ -791,7 +1222,16 @@ int gpio_pin_register_byname(FAR struct gpio_dev_s *dev,
 
   gpioinfo("Registering %s\n", devname);
 
-  return register_driver(devname, &g_gpio_drvrops, 0600, dev);
+  ret = register_driver(devname, &g_gpio_drvrops, 0600, dev);
+
+#ifdef CONFIG_GPIO_PROCFS
+  if (ret >= 0)
+    {
+      gpio_procfs_add(dev, pinname);
+    }
+#endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -850,6 +1290,10 @@ int gpio_pin_unregister_byname(FAR struct gpio_dev_s *dev,
   snprintf(devname, sizeof(devname), "/dev/%s", pinname);
 
   gpioinfo("Unregistering %s\n", devname);
+
+#ifdef CONFIG_GPIO_PROCFS
+  gpio_procfs_remove(dev);
+#endif
 
   return unregister_driver(devname);
 }

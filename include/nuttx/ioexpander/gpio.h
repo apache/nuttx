@@ -156,6 +156,23 @@ struct gpio_operations_s
   CODE int (*go_setdebounce)(FAR struct gpio_dev_s *gpio,
                              unsigned long duration);
   CODE int (*go_setmask)(FAR struct gpio_dev_s *dev, bool enable);
+
+  /* Describe whatever only this pin's controller can say, for
+   * /proc/gpio: which pad carries the line, how its trigger is
+   * configured, anything the upper half has no way to ask for.
+   *
+   * Optional.  A pin whose lower half omits it is still listed with
+   * everything the upper half knows: its type, its value, and how many
+   * times it has been registered for signals and taken an interrupt.
+   *
+   * Write at most len bytes into extra as further key:value fields, in
+   * the form the renderer uses, and return OK.  The renderer owns the
+   * line and appends this to it, so a lower half needs no procfs
+   * knowledge of its own.
+   */
+
+  CODE int (*go_describe)(FAR struct gpio_dev_s *dev, FAR char *extra,
+                          size_t len);
 };
 
 /* Signal information */

@@ -615,6 +615,23 @@ config DEV_GPIO
 		Enables a simple GPIO input/output driver to support application-
 		space testing of hardware.
 
+config GPIO_PROCFS
+	bool "GPIO procfs entry"
+	default n
+	depends on DEV_GPIO && FS_PROCFS && FS_PROCFS_REGISTER
+	---help---
+		Create /proc/gpio, listing every registered pin with its type,
+		its current value, and how many times it has been registered for
+		signals and taken an interrupt.
+
+		The pins are visible in /dev and each can be read through its own
+		node, but surveying a board that way means an open and two ioctls
+		per pin, and the counters are not reachable through any of them.
+
+		A lower half that supplies the optional go_describe method also
+		contributes whatever only it can say, such as which pad carries
+		the line.
+
 config DEV_GPIO_NPOLLWAITERS
 	int "Max number of polls"
 	default 1
