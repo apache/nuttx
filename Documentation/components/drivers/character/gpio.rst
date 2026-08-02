@@ -166,6 +166,62 @@ An example application can be found in ``nuttx-apps`` repository under
 path ``examples/gpio``. It is an example application that allows you
 to read, write or configure GPIO pins.
 
+/proc/gpio
+==========
+
+The pins are visible in ``/dev`` and each can be read through its own node
+with the commands above, but doing that for a whole board means an open and
+two ioctls per pin, and the signal and interrupt counters are not exposed
+that way at all.  ``CONFIG_GPIO_PROCFS`` adds ``/proc/gpio``, which puts
+every registered pin in one place:
+
+.. code-block:: text
+
+   gpio0        type:INPUT             val:1 regs:0 ints:0 pad:GPIO27 port:A.27
+   gpio1        type:OUTPUT            val:0 regs:0 ints:0 pad:GPIO28 port:A.28
+   gpio2        type:INT_BOTH          val:1 regs:1 ints:42 pad:GPIO29 port:A.29 armed:both
+
+Every line carries the same ``key:value`` tokens in the same order, so the
+file can be parsed as well as read:
+
+   ========== =============================================================
+   Token      Meaning
+   ========== =============================================================
+   ``type``   The pin type, from ``enum gpio_pintype_e``
+   ``val``    The pin's current value, or ``-`` if it cannot be read
+   ``regs``   How many times the pin has been registered for signals
+   ``ints``   How many interrupts the pin has taken
+   ========== =============================================================
+
+Anything after those comes from the pin's lower half.
+
+Describing a pin from the lower half
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The upper half already knows a pin's type, value and counters, so a lower
+half only supplies what it alone can say: which pad carries the line, how
+the trigger is configured, and so on. That is the optional
+``go_describe`` method, which writes further ``key:value`` fields and
+leaves the rest of the line to the renderer:
+
+.. code-block:: c
+
+   static int mychip_describe(FAR struct gpio_dev_s *dev, FAR char *extra,
+                              size_t len)
+   {
+     FAR struct mychip_gpio_s *priv = (FAR struct mychip_gpio_s *)dev;
+
+     snprintf(extra, len, "pad:%u port:%c.%u", priv->pad,
+              'A' + priv->port, priv->pin);
+     return OK;
+   }
+
+It is optional: a pin whose lower half omits it is listed with the common
+tokens and nothing more. A lower half needs no procfs knowledge of its
+own, since the renderer owns the line.
+
+The option depends on ``FS_PROCFS_REGISTER`` and is off by default.
+
 Configuration
 =============
 
@@ -176,7 +232,8 @@ GPIO peripheral is enabled by ``CONFIG_DEV_GPIO``. Option
 ``CONFIG_DEV_NPOLLWAITERS`` is used to specify the maximum number of threads
 that can be waiting on poll with default set to one. It is also possible
 to register signals with the GPIO driver. The number of allowed signals
-is configured with ``CONFIG_DEV_NSIGNALS``.
+is configured with ``CONFIG_DEV_NSIGNALS``. ``CONFIG_GPIO_PROCFS`` adds
+``/proc/gpio``, described above.
 
 IO Expander Device Drivers
 ==========================
