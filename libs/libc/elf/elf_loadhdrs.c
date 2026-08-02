@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <nuttx/debug.h>
+#include <nuttx/elf.h>
 
 #include <nuttx/lib/elf.h>
 
@@ -65,6 +66,23 @@ int libelf_loadhdrs(FAR struct mod_loadinfo_s *loadinfo)
   DEBUGASSERT(loadinfo->phdr == NULL);
 
   /* Verify that there are sections */
+
+  /* The architecture knows how an FDPIC object announces itself.  Ask it
+   * once.
+   */
+
+  loadinfo->fdpic = ELF_IS_FDPIC(&loadinfo->ehdr);
+
+  /* A module is a shared object.  An FDPIC object that is anything else
+   * would be placed through the wrong path.
+   */
+
+  if (loadinfo->fdpic && loadinfo->ehdr.e_type != ET_DYN)
+    {
+      berr("ERROR: FDPIC object is not a shared object: e_type=%u\n",
+           loadinfo->ehdr.e_type);
+      return -ENOEXEC;
+    }
 
   if (loadinfo->ehdr.e_shnum < 1)
     {

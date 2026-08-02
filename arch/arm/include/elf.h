@@ -41,6 +41,11 @@
 
 #define EM_ARCH                  EM_ARM
 
+/* An object built for the FDPIC ABI says so in the OS/ABI byte. */
+
+#define ELF_IS_FDPIC(ehdr) \
+  ((ehdr)->e_ident[EI_OSABI] == ELFOSABI_ARM_FDPIC)
+
 /* Table 4-2, ARM-specific e_flags */
 
 #define EF_ARM_EABI_MASK         0xff000000
@@ -205,6 +210,18 @@
 #define R_ARM_ME_TOO             128           /* Obsolete */
 #define R_ARM_THM_TLS_DESCSEQ16  129           /* Thumb16 */
 #define R_ARM_THM_TLS_DESCSEQ32  130           /* Thumb32 */
+
+/* FDPIC relocations.  Values from the ARM FDPIC ABI as implemented by
+ * binutils (include/elf/arm.h).
+ */
+
+#define R_ARM_GOTFUNCDESC        161           /* Data      GOT entry holding a descriptor */
+#define R_ARM_GOTOFFFUNCDESC     162           /* Data      GOT-relative descriptor */
+#define R_ARM_FUNCDESC           163           /* Data      Address of a descriptor */
+#define R_ARM_FUNCDESC_VALUE     164           /* Data      The descriptor itself: {code, GOT} */
+#define R_ARM_TLS_GD32_FDPIC     165           /* Data */
+#define R_ARM_TLS_LDM32_FDPIC    166           /* Data */
+#define R_ARM_TLS_IE32_FDPIC     167           /* Data */
 
 /* Processor specific values for the Phdr p_type field.  */
 

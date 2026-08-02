@@ -44,6 +44,19 @@
 #  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
+/* A compacting filesystem gives its media address with a pin that holds the
+ * blocks in place.  The loader holds the pin through a file reference,
+ * because the unload runs on another task.
+ *
+ * That reference is taken with file_get() and file_dup2(), which are kernel
+ * side, so this is for the copy of libc that runs there.
+ */
+
+#if defined(CONFIG_FS_PIN) && \
+    (defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__))
+#  define HAVE_LIBC_ELF_PIN 1
+#endif
+
 #ifndef CONFIG_LIBC_ELF_ALIGN_LOG2
 #  define CONFIG_LIBC_ELF_ALIGN_LOG2 2
 #endif
@@ -123,6 +136,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct file;
 struct symtab_s;
 struct mod_info_s
 {
@@ -251,6 +265,16 @@ struct mod_loadinfo_s
                               * romfs/tmps, we can try get xipbase,
                               * skip the copy.
                               */
+
+  /* True if e_ident[EI_OSABI] marked this an FDPIC object. */
+
+  bool          fdpic;
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* The file the pin is held through, handed to the module once it loads. */
+
+  FAR struct file *pinfile;
+#endif
 
   /* Address environment.
    *
