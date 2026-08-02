@@ -33,6 +33,15 @@
 #include <nuttx/reset/reset.h>
 #include <nuttx/reset/reset-controller.h>
 
+#ifdef CONFIG_RESET_PROCFS
+#  include <sys/stat.h>
+#  include <fcntl.h>
+#  include <stdarg.h>
+#  include <stdio.h>
+#  include <string.h>
+#  include <nuttx/fs/procfs.h>
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -418,6 +427,328 @@ reset_controller_get_by_name(FAR const char *name)
 
   return NULL;
 }
+
+#ifdef CONFIG_RESET_PROCFS
+
+/****************************************************************************
+ * Name: reset_procfs_open
+ *
+ * Description:
+ *   Open /proc/reset.  The entry is read only, and holds no state of
+ *   its own beyond the position accounting procfs does for every
+ *   file.
+ *
+ * Input Parameters:
+ *   filep   - The file structure to attach the open file to
+ *   relpath - The path below /proc being opened
+ *   oflags  - Open flags; anything but read only is refused
+ *   mode    - Ignored, the entry cannot be created
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int reset_procfs_open(FAR struct file *filep,
+                             FAR const char *relpath,
+                             int oflags, mode_t mode)
+{
+  FAR struct procfs_file_s *priv;
+
+  if ((oflags & O_ACCMODE) != O_RDONLY)
+    {
+      return -EACCES;
+    }
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  filep->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_close
+ *
+ * Description:
+ *   Close /proc/reset and free what open() allocated.
+ *
+ * Input Parameters:
+ *   filep - The open file
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int reset_procfs_close(FAR struct file *filep)
+{
+  kmm_free(filep->f_priv);
+  filep->f_priv = NULL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_append
+ *
+ * Description:
+ *   Append formatted text at offset n, clamping to the buffer.  snprintf
+ *   returns the length it wanted, so an unclamped sum would carry the
+ *   offset past the buffer and wrap the remaining size.  The offset
+ *   returned never exceeds len - 1.
+ *
+ * Input Parameters:
+ *   line - The line being built
+ *   len  - Size of line
+ *   n    - Offset to append at
+ *   fmt  - Format string, followed by its arguments
+ *
+ * Returned Value:
+ *   The offset after the text, never more than len - 1.
+ *
+ ****************************************************************************/
+
+static size_t reset_procfs_append(FAR char *line, size_t len, size_t n,
+                                  FAR const char *fmt, ...)
+{
+  va_list ap;
+
+  va_start(ap, fmt);
+  n += vsnprintf(line + n, len - n, fmt, ap);
+  va_end(ap);
+
+  return n < len ? n : len - 1;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_line
+ *
+ * Description:
+ *   Render one reset line as key:value tokens, every line the same tokens
+ *   in the same order, then the controller's extra fields.  The state
+ *   comes from status(), which a controller need not implement either; it
+ *   renders as - when absent or when the call fails.
+ *
+ * Input Parameters:
+ *   line  - Where to render the line
+ *   len   - Size of line
+ *   rcdev - The controller owning the line
+ *   id    - The line's id within that controller
+ *   info  - What the controller reported for it
+ *
+ * Returned Value:
+ *   The length of the rendered line.
+ *
+ ****************************************************************************/
+
+static size_t reset_procfs_line(FAR char *line, size_t len,
+                                FAR struct reset_controller_dev *rcdev,
+                                unsigned int id,
+                                FAR const struct reset_lineinfo_s *info)
+{
+  FAR const char *state = "-";
+  size_t n;
+  int ret;
+
+  if (rcdev->ops->status != NULL)
+    {
+      ret = rcdev->ops->status(rcdev, id);
+      if (ret >= 0)
+        {
+          state = ret > 0 ? "asserted" : "released";
+        }
+    }
+
+  n = reset_procfs_append(line, len, 0, "%-4u %-24s state:%-8s", id,
+                          info->name[0] != '\0' ? info->name : "-", state);
+
+  if (info->extra[0] != '\0')
+    {
+      n = reset_procfs_append(line, len, n, " %s", info->extra);
+    }
+
+  n = reset_procfs_append(line, len, n, "\n");
+
+  /* A truncated line still has to end the record */
+
+  if (line[n - 1] != '\n')
+    {
+      line[n - 1] = '\n';
+    }
+
+  return n;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_read
+ *
+ * Description:
+ *   Describe every registered controller's lines, in registration order.
+ *   A controller with no get_line method contributes its name and a note.
+ *
+ * Input Parameters:
+ *   filep  - The open file, carrying the offset reached so far
+ *   buffer - Where to return the text
+ *   buflen - Size of buffer
+ *
+ * Returned Value:
+ *   The number of bytes returned, zero at end of file, or a negated errno
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static ssize_t reset_procfs_read(FAR struct file *filep,
+                                 FAR char *buffer, size_t buflen)
+{
+  FAR struct reset_controller_dev *rcdev;
+  struct reset_lineinfo_s info;
+  size_t remaining = buflen;
+  FAR char *dest = buffer;
+  off_t pos = filep->f_pos;
+  char line[96];
+  unsigned int id;
+  size_t n;
+  int ret;
+
+  ret = nxmutex_lock(&g_reset_list_mutex);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  list_for_every_entry(&g_reset_controller_list, rcdev,
+                       struct reset_controller_dev, list)
+    {
+      if (remaining == 0)
+        {
+          break;
+        }
+
+      /* The name alone: nlines is an id space rather than a count of
+       * real lines, so reporting it here would overstate what follows.
+       */
+
+      n = snprintf(line, sizeof(line), "%s:\n", rcdev->name);
+      n = procfs_memcpy(line, n, dest, remaining, &pos);
+      dest += n;
+      remaining -= n;
+
+      if (rcdev->ops->get_line == NULL)
+        {
+          n = snprintf(line, sizeof(line),
+                       "  no detail, lines are not enumerable\n");
+          n = procfs_memcpy(line, n, dest, remaining, &pos);
+          dest += n;
+          remaining -= n;
+          continue;
+        }
+
+      for (id = 0; id < rcdev->nlines && remaining > 0; id++)
+        {
+          memset(&info, 0, sizeof(info));
+          if (rcdev->ops->get_line(rcdev, id, &info) < 0)
+            {
+              continue;
+            }
+
+          n = reset_procfs_line(line, sizeof(line), rcdev, id, &info);
+          n = procfs_memcpy(line, n, dest, remaining, &pos);
+          dest += n;
+          remaining -= n;
+        }
+    }
+
+  nxmutex_unlock(&g_reset_list_mutex);
+
+  filep->f_pos += (dest - buffer);
+  return dest - buffer;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_dup
+ *
+ * Description:
+ *   Duplicate an open /proc/reset, copying the position reached so
+ *   that the new file continues where the old one had got to.
+ *
+ * Input Parameters:
+ *   oldp - The open file being duplicated
+ *   newp - The file structure to attach the duplicate to
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int reset_procfs_dup(FAR const struct file *oldp,
+                            FAR struct file *newp)
+{
+  FAR struct procfs_file_s *priv;
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memcpy(priv, oldp->f_priv, sizeof(struct procfs_file_s));
+  newp->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: reset_procfs_stat
+ *
+ * Description:
+ *   Report /proc/reset as a read only regular file.
+ *
+ * Input Parameters:
+ *   relpath - The path below /proc being queried
+ *   buf     - Where to return the status
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int reset_procfs_stat(FAR const char *relpath, FAR struct stat *buf)
+{
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
+}
+
+static const struct procfs_operations g_reset_procfs_ops =
+{
+  reset_procfs_open,     /* open */
+  reset_procfs_close,    /* close */
+  reset_procfs_read,     /* read */
+  NULL,                  /* write */
+  NULL,                  /* poll */
+
+  reset_procfs_dup,      /* dup */
+
+  NULL,                  /* opendir */
+  NULL,                  /* closedir */
+  NULL,                  /* readdir */
+  NULL,                  /* rewinddir */
+
+  reset_procfs_stat,     /* stat */
+};
+
+static const struct procfs_entry_s g_reset_procfs =
+{
+  "reset", &g_reset_procfs_ops, PROCFS_FILE_TYPE
+};
+
+static bool g_reset_procfs_added;
+
+#endif /* CONFIG_RESET_PROCFS */
 
 /****************************************************************************
  * Public Functions
@@ -1005,6 +1336,21 @@ int reset_controller_register(FAR struct reset_controller_dev *rcdev)
   list_initialize(&rcdev->reset_control_head);
 
   nxmutex_lock(&g_reset_list_mutex);
+
+#ifdef CONFIG_RESET_PROCFS
+  /* procfs_register() wants to run before procfs is mounted, which holds:
+   * controllers register during board or architecture start up.  It
+   * appends without checking for a duplicate, so the entry is claimed once
+   * for the lifetime of the system rather than whenever the list is empty.
+   */
+
+  if (!g_reset_procfs_added)
+    {
+      procfs_register(&g_reset_procfs);
+      g_reset_procfs_added = true;
+    }
+#endif
+
   list_add_after(&g_reset_controller_list, &rcdev->list);
   nxmutex_unlock(&g_reset_list_mutex);
 

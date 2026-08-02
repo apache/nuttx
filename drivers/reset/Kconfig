@@ -15,3 +15,17 @@ config RESET_RPMSG
 	default n
 	---help---
 		This selection enables rpmsg support for reset.
+
+config RESET_PROCFS
+	bool "Reset procfs entry"
+	depends on RESET && FS_PROCFS && FS_PROCFS_REGISTER
+	default n
+	---help---
+		Create /proc/reset, listing every registered reset controller and,
+		for those that supply a get_line method, one line per reset line
+		in key:value form.
+
+		status() reads one line at a time, but nothing else in the
+		interface says how many lines a controller has or what any of them
+		is called, so without this the only way to see which peripherals
+		are held is a program that knows the numbering already.
