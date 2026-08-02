@@ -153,6 +153,9 @@ static void ip_fragin_check(FAR struct ip_fragsnode_s *fragsnode);
 static void ip_fragin_cachemonitor(FAR struct ip_fragsnode_s *curnode);
 static inline FAR struct iob_s *
 ip_fragout_allocfragbuf(FAR struct iob_queue_s *fragq);
+static bool ip_fragin_match(FAR struct net_driver_s *dev,
+                            FAR struct ip_fragsnode_s *node,
+                            FAR struct ip_fraglink_s *fraglink);
 
 /****************************************************************************
  * Private Functions
@@ -507,6 +510,35 @@ ip_fragout_allocfragbuf(FAR struct iob_queue_s *fragq)
 }
 
 /****************************************************************************
+ * Name: ip_fragin_match
+ *
+ * Description:
+ *   Check whether a fragment belongs to an existing reassembly node.
+ *
+ ****************************************************************************/
+
+static bool ip_fragin_match(FAR struct net_driver_s *dev,
+                            FAR struct ip_fragsnode_s *node,
+                            FAR struct ip_fraglink_s *fraglink)
+{
+  if (dev != node->dev || fraglink->isipv4 != node->isipv4 ||
+      fraglink->ipid != node->ipid)
+    {
+      return false;
+    }
+
+#ifdef CONFIG_NET_IPv6
+  if (!fraglink->isipv4)
+    {
+      return net_ipv6addr_cmp(fraglink->srcipaddr, node->srcipaddr) &&
+             net_ipv6addr_cmp(fraglink->destipaddr, node->destipaddr);
+    }
+#endif
+
+  return true;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -575,9 +607,13 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
     {
       node = (struct ip_fragsnode_s *)entry;
 
-      if (dev == node->dev && curfraglink->ipid <= node->ipid)
+      if (dev == node->dev)
         {
-          break;
+          if (ip_fragin_match(dev, node, curfraglink) ||
+              curfraglink->ipid < node->ipid)
+            {
+              break;
+            }
         }
 
       entrylast = entry;
@@ -586,7 +622,7 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
 
   node = (FAR struct ip_fragsnode_s *)entry;
 
-  if (node != NULL && curfraglink->ipid == node->ipid)
+  if (node != NULL && ip_fragin_match(dev, node, curfraglink))
     {
       FAR struct ip_fraglink_s *fraglink;
       FAR struct ip_fraglink_s *lastlink = NULL;
@@ -688,6 +724,7 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
       node->flink      = NULL;
       node->flinkat    = NULL;
       node->dev        = dev;
+      node->isipv4     = curfraglink->isipv4;
       node->ipid       = curfraglink->ipid;
       node->frags      = curfraglink;
       node->tick       = clock_systime_ticks();
@@ -695,6 +732,14 @@ bool ip_fragin_enqueue(FAR struct net_driver_s *dev,
       g_bufoccupy     += IOBUF_CNT(curfraglink->frag);
       node->verifyflag = 0;
       node->outgoframe = NULL;
+
+#ifdef CONFIG_NET_IPv6
+      if (!curfraglink->isipv4)
+        {
+          net_ipv6addr_copy(node->srcipaddr, curfraglink->srcipaddr);
+          net_ipv6addr_copy(node->destipaddr, curfraglink->destipaddr);
+        }
+#endif
 
       /* Insert this new node into linked list identified by
        * g_assemblyhead_ipid with correct position
