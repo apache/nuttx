@@ -189,7 +189,6 @@ else ifeq ($(CONFIG_HOST_MACOS),y)
   LLVM_ABITYPE := sysv
 endif
 
-ARCHPICFLAGS = -fpic
 
 CC = $(CROSSDEV)cc
 CXX = $(CROSSDEV)c++

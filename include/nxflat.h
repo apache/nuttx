@@ -39,6 +39,26 @@
 #define NXFLAT_MAX_STRING_SIZE 64     /* Largest size of string (w/zterminator) */
 #define NXFLAT_MAGIC          "NxFT"  /* NXFLAT magic number */
 
+/* Every module built by tools/nxflat/mknxflat imports this name, and the
+ * loader refuses a module that does not.
+ *
+ * The header cannot carry a version: h_magic is written by ldnxflat, which
+ * is GPL and stays out of this repository, so it can never be changed in
+ * step with the loader.  The import table can, because both ends of it are
+ * in-tree -- mknxflat emits it and nxflat_bindimports() reads it -- and
+ * ldnxflat passes it through untouched.
+ *
+ * Bump the generation when the module ABI changes.  v2 is the move of the
+ * PIC base register from r10 to r9; a v1 module's import thunks add the
+ * wrong register and would branch to a wild address on their first call
+ * into the base firmware.
+ *
+ * Must match NXFLAT_ABI_SYMBOL in tools/nxflat/nxflat_thunk.h.
+ */
+
+#define NXFLAT_ABI_SYMBOL     "__nxflat_abi_v2"
+#define NXFLAT_ABI_MARKER     __nxflat_abi_v2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

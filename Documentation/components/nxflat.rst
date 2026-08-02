@@ -290,7 +290,7 @@ CFLAGS must be provided. First, the option ``-fpic`` is required to tell
 the compiler to generate position independent code (other GCC options,
 like ``-fno-jump-tables`` might also be desirable). For ARM compilers,
 two additional compilation options are required: ``-msingle-pic-base``
-and ``-mpic-register=r10``.  On ARM these are supplied centrally rather
+and ``-mpic-register=r9``.  On ARM these are supplied centrally rather
 than per board; see `Where the ARM PIC flags come from`_ below.
 
 **Target 2**. Given the ``hello.r1`` relocatable object, this target
@@ -338,25 +338,25 @@ On ARM the compilation flags described under **Target 1** are supplied by
 ``arch/arm/src/common/Toolchain.defs``, not by each board.  A board only has
 to say something when it differs from the default::
 
-  ARCHPICFLAGS ?= -fpic -msingle-pic-base -mpic-register=r10
+  ARCHPICFLAGS ?= -fpic -msingle-pic-base -mpic-register=r9
 
-  CPICFLAGS   = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CFLAGS))
-  CXXPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r10,$(CXXFLAGS))
+  CPICFLAGS   = $(ARCHPICFLAGS) $(filter-out --fixed-r9,$(CFLAGS))
+  CXXPICFLAGS = $(ARCHPICFLAGS) $(filter-out --fixed-r9,$(CXXFLAGS))
 
 ``ARCHPICFLAGS`` uses ``?=``, and the two derived variables use deferred
 ``=``, so a board that includes this file may still override
 ``ARCHPICFLAGS`` afterwards or append to it, and ``CFLAGS`` is whatever the
-board finally set it to.  A few boards do differ: one adds ``-ffixed-r10``
+board finally set it to.  A few boards do differ: one adds ``-ffixed-r9``
 and one conditionally adds ``-mno-pic-data-is-text-relative``.
 
-Reserving r10 in the base firmware
-----------------------------------
+Reserving r9 in the base firmware
+---------------------------------
 
-A module reaches its data through r10, and the base firmware has to leave
+A module reaches its data through r9, and the base firmware has to leave
 that register alone -- otherwise a call *back* from the firmware into module
 code arrives with the wrong data base.  ``qsort()`` with a comparison
 function inside the module is the usual way to meet this.  Under
-``CONFIG_PIC`` the firmware is therefore built with ``--fixed-r10``.
+``CONFIG_PIC`` the firmware is therefore built with ``--fixed-r9``.
 
 That flag goes into ``ARCHCFLAGS`` rather than ``CFLAGS``, because nearly
 every board ``Make.defs`` includes ``Toolchain.defs`` and then assigns::
@@ -369,8 +369,8 @@ remote from the cause: everything builds, and only a callback into module
 code misbehaves.
 
 The two sides of that contract cannot both appear on one command line.  A
-module gets r10 through ``-mpic-register=r10``, and GCC rejects it alongside
-``--fixed-r10`` with *"unable to use 'r10' for PIC register"*.  Since
+module gets r9 through ``-mpic-register=r9``, and GCC rejects it alongside
+``--fixed-r9`` with *"unable to use 'r9' for PIC register"*.  Since
 ``CPICFLAGS``, ``CXXPICFLAGS``, ``CELFFLAGS`` and ``CXXELFFLAGS`` all derive
 from ``CFLAGS``, the flag is filtered back out where they are defined,
 rather than in every board that builds modules.
@@ -429,7 +429,7 @@ contiguous (virtual) address space like::
   .data
   .bss
 
-It assumes that the PIC base register (usually r10 for ARM) points to
+It assumes that the PIC base register (r9 for ARM) points to
 the base of ``.text`` so that any address in ``.text``, ``.got``,
 ``.data``, ``.bss`` can be found with an offset from the same base
 address. But that is not the memory arrangement that we need in the XIP

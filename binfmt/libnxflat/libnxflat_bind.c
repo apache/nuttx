@@ -29,6 +29,7 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <nxflat.h>
 #include <errno.h>
@@ -59,6 +60,22 @@
 #else
 #  define nxflat_dumpbuffer(m,b,n)
 #endif
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/* The module ABI marker.  Every module built by tools/nxflat/mknxflat
+ * imports this, and a board's exported symbol table picks it up the same
+ * way it picks up any other imported name, so nothing has to special-case
+ * it in the build.  Its value is never used; only its presence matters.
+ *
+ * A module built against a newer ABI than the firmware therefore fails
+ * with "Exported symbol __nxflat_abi_vN not found", which names the
+ * problem, and a module built against an older one is caught below.
+ */
+
+void *NXFLAT_ABI_MARKER;
 
 /****************************************************************************
  * Private Functions
@@ -384,6 +401,7 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
   FAR char *symname;
   uint32_t offset;
   uint16_t nimports;
+  bool     abi_ok = false;
 #ifdef CONFIG_ARCH_ADDRENV
   int      ret;
 #endif
@@ -461,6 +479,17 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
           symname = (FAR char *)
             (offset + loadinfo->ispace + sizeof(struct nxflat_hdr_s));
 
+          /* Note the ABI marker as it goes past.  It resolves like any
+           * other import -- the base firmware defines it below -- so the
+           * only thing special about it is that its absence means the
+           * module was built before the ABI it names.
+           */
+
+          if (strcmp(symname, NXFLAT_ABI_SYMBOL) == 0)
+            {
+              abi_ok = true;
+            }
+
           /* Find the exported symbol value for this symbol name. */
 
           symbol = symtab_findbyname(exports, symname, nexports);
@@ -483,6 +512,24 @@ static inline int nxflat_bindimports(FAR struct nxflat_loadinfo_s *loadinfo,
     }
 
   /* Dump the relocation import table */
+
+  /* A module that never declared the ABI was built by a toolchain older
+   * than the move of the PIC base register to r9.  Its import thunks add
+   * r10, so it would load here and then branch to a wild address on its
+   * first call into the base firmware.  Refuse it while there is still
+   * something useful to say about it.
+   */
+
+  if (!abi_ok)
+    {
+      berr("ERROR: Module does not declare " NXFLAT_ABI_SYMBOL ": it was "
+           "built by a toolchain predating the r9 PIC base register.  "
+           "Rebuild it.\n");
+#ifdef CONFIG_ARCH_ADDRENV
+      nxflat_addrenv_restore(loadinfo);
+#endif
+      return -ENOEXEC;
+    }
 
 #ifdef CONFIG_NXFLAT_DUMPBUFFER
   if (nimports > 0)

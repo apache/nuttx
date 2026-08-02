@@ -160,14 +160,14 @@ indeed, a solution to the above NXFLAT problem in newer
 compilers. You simply need to modify the board Make.defs 
 file like:
 
-1. ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
+1. ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r9
 
 .. code-block:: bash
 
-    +ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10 -mno-pic-data-is-text-relative
+    +ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r9 -mno-pic-data-is-text-relative
 
-NOTE the minor difference from the post: NuttX uses ``r10`` as 
-the PIC base register by default in all configurations.
+NuttX uses ``r9`` as the PIC base register in all configurations,
+which matches the register named in the post above.
 
 See this `thread <https://groups.google.com/forum/>`_ for additional information.
 

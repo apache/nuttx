@@ -26,12 +26,20 @@
 
 #include "nxflat_thunk.h"
 
-/* The format strings are file-scope statics inside the .def, so each
+/* The format strings have file scope inside the .def, so each
  * architecture gets its own translation unit and the two sets cannot
- * collide.  The .def is byte-for-byte the upstream file.
+ * collide.  The .def is the upstream file, less one comment typo.
  */
 
 #include "dyncall_skeleton_thumb2.def"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/* None: this translation unit exists only to give one architecture's
+ * format strings a scope of their own.
+ */
 
 /****************************************************************************
  * Public Data

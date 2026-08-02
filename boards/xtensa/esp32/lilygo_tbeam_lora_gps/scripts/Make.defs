@@ -41,7 +41,6 @@ else
   endif
 endif
 
-ARCHPICFLAGS = -fpic
 
 # if SPIRAM/PSRAM is used then we need to include a workaround
 

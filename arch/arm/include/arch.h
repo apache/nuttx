@@ -43,12 +43,14 @@
 
 #ifdef CONFIG_PIC
 
-/* This identifies the register the is used by the processor as the PIC base
- * register.  It is usually r9 or r10
+/* This identifies the register that is used by the processor as the PIC base
+ * register.  r9 is the AAPCS platform register (the "static base"), which is
+ * also what GCC picks for -msingle-pic-base on an EABI target, so the whole
+ * of PIC uses it: NXFLAT, ELF PIC, and CONFIG_BUILD_PIC alike.
  */
 
-#define PIC_REG         r10
-#define PIC_REG_STRING "r10"
+#define PIC_REG         r9
+#define PIC_REG_STRING "r9"
 
 /* Macros to get and set the PIC base register.  picbase is assumed to be
  * of type (void*) and that it will fit into a uint32_t.  These must be

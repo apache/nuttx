@@ -182,7 +182,7 @@ set_property(
 
 # TODO: see where to put pic flags set_property(TARGET nuttx APPEND PROPERTY
 # NUTTX_COMPILE_OPTIONS $<$<NOT:$<COMPILE_LANGUAGE:ASM>>:-fpic -msingle-pic-base
-# -mpic-register=r10>)
+# -mpic-register=r9>)
 
 # ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y) ARCHCFLAGS += -nostdlib
 # -ffreestanding ARCHCXXFLAGS += -nostdlib -ffreestanding else ARCHCFLAGS +=

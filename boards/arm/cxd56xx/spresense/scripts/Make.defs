@@ -35,8 +35,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-MKNXFLAT = mknxflat
-LDNXFLAT = ldnxflat
 
 ARCHCFLAGS += -mabi=aapcs
 
