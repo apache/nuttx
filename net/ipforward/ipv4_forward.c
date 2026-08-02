@@ -549,6 +549,17 @@ drop:
   ipv4_dropstats(ipv4);
 
 #if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
+  /* ICMP errors are only generated for unfragmented packets or fragment
+   * zero.  Non-initial fragments do not carry enough context for a useful
+   * ICMP error payload.
+   */
+
+  if ((ipv4->ipoffset[0] & 0x1f) != 0 || ipv4->ipoffset[1] != 0)
+    {
+      dev->d_len = 0;
+      return ret;
+    }
+
   /* Reply ICMP to the sender for particular errors. */
 
   switch (ret)
