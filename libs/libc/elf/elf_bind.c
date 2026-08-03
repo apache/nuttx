@@ -35,6 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/cache.h>
 #include <nuttx/elf.h>
+#include <nuttx/symtab.h>
 #include <nuttx/lib/elf.h>
 
 #include "libc.h"
@@ -637,7 +638,9 @@ static int libelf_relocateadd(FAR struct module_s *modp,
 
 static int libelf_relocatedyn(FAR struct module_s *modp,
                               FAR struct mod_loadinfo_s *loadinfo,
-                              int relidx)
+                              int relidx,
+                              FAR const struct symtab_s *exports,
+                              int nexports)
 {
   FAR Elf_Shdr *shdr = &loadinfo->shdr[relidx];
   FAR Elf_Shdr *symhdr;
@@ -868,6 +871,26 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
 
                   ep = libelf_findglobal(modp, loadinfo, symhdr,
                                          &sym[idx_sym]);
+
+                  /* libelf_findglobal() searches only the registered
+                   * symbols.  A module from exec() has its own export
+                   * table, and an FDPIC module imports its libc there.
+                   */
+
+                  if (ep == NULL && exports != NULL)
+                    {
+                      FAR const struct symtab_s *sm;
+
+                      sm = symtab_findbyname(exports,
+                                             (FAR char *)
+                                             loadinfo->iobuffer,
+                                             nexports);
+                      if (sm != NULL)
+                        {
+                          ep = (FAR void *)sm->sym_value;
+                        }
+                    }
+
                   if ((ep == NULL) && (ELF_ST_BIND(sym[idx_sym].st_info)
                       != STB_WEAK))
                     {
@@ -888,6 +911,37 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                     }
 
                   *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                }
+              else if (loadinfo->fdpic)
+                {
+                  /* A relocation naming a symbol inside this object.  A
+                   * pointer to a static function is emitted against the
+                   * section symbol, so the offset, Thumb bit included, is
+                   * the addend and must not come from the patched word.
+                   */
+
+                  Elf_Sym defsym = sym[idx_sym];
+
+                  defsym.st_value = libelf_addr(loadinfo,
+                                                sym[idx_sym].st_value);
+
+                  addr = libelf_addr(loadinfo, rel->r_offset);
+
+                  if (reldata.relrela[idx_rel] == 1)
+                    {
+                      addr += rela->r_addend;
+                    }
+
+                  ret = up_relocate(rel, &defsym, addr, ARCH_ELFDATA_PARM);
+                  if (ret < 0)
+                    {
+                      berr("ERROR: Section %d reloc %d: "
+                           "Relocation failed: %d\n", relidx, i, ret);
+                      lib_free(sym);
+                      lib_free(rels);
+                      lib_free(dyn);
+                      return ret;
+                    }
                 }
             }
           else
@@ -1004,7 +1058,8 @@ int libelf_bind(FAR struct module_s *modp,
           switch (loadinfo->shdr[i].sh_type)
             {
               case SHT_DYNAMIC:
-                ret = libelf_relocatedyn(modp, loadinfo, i);
+                ret = libelf_relocatedyn(modp, loadinfo, i,
+                                         exports, nexports);
                 break;
               case SHT_DYNSYM:
                 loadinfo->dsymtabidx = i;

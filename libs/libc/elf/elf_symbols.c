@@ -107,7 +107,11 @@ static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
 
   if (sym->st_name == 0)
     {
-      berr("ERROR: Symbol has no name\n");
+      /* Not a failure.  A section symbol has no name, and
+       * libelf_findsymbol() meets these routinely and checks for -ESRCH.
+       */
+
+      binfo("Symbol has no name\n");
       return -ESRCH;
     }
 
