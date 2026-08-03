@@ -299,6 +299,7 @@
 #define MMC_CMD5        (MMC_CMDIDX5   |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define SDIO_CMD5       (SDIO_CMDIDX5  |MMCSD_R4_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD6      (MMCSD_CMDIDX6 |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
+#define SD_CMD6         (MMCSD_CMDIDX6 |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)  /* SWITCH_FUNC: 64-byte status follows */
 #define MMCSD_CMD7S     (MMCSD_CMDIDX7 |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD7D     (MMCSD_CMDIDX7 |MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)  /* No response when de-selecting card */
 #define MMC_CMD8        (MMC_CMDIDX8   |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
@@ -482,6 +483,7 @@
 #define SDIO_CAPS_8BIT            0x10 /* Bit 4=1: Supports 8 bit operation */
 #define SDIO_CAPS_4BIT_ONLY       0x20 /* Bit 5=1: Supports 4-bit only operation */
 #define SDIO_CAPS_MMC_HS_MODE     0x40 /* Bit 6=1: Supports eMMC high speed mode */
+#define SDIO_CAPS_SD_HS_MODE      0x80 /* Bit 7=1: Supports SD card high speed mode */
 
 /****************************************************************************
  * Name: SDIO_STATUS
@@ -945,7 +947,14 @@ enum sdio_clock_e
   CLOCK_MMC_TRANSFER,      /* MMC normal operation clocking (narrow 1-bit mode) */
   CLOCK_SD_TRANSFER_1BIT,  /* SD normal operation clocking (narrow 1-bit mode) */
   CLOCK_SD_TRANSFER_4BIT,  /* SD normal operation clocking (wide 4-bit mode) */
-  CLOCK_MMC_TRANSFER_4BIT  /* MMC normal operation clocking (wide 4-bit mode) */
+  CLOCK_MMC_TRANSFER_4BIT, /* MMC normal operation clocking (wide 4-bit mode) */
+
+  /* SD high speed clocking (wide 4-bit mode).  Sent only to a host that
+   * reported SDIO_CAPS_SD_HS_MODE, and only once the card has confirmed
+   * the switch.
+   */
+
+  CLOCK_SD_TRANSFER_4BIT_HS
 };
 
 /* Event set.  A uint8_t is big enough to hold a set of 8-events.  If more
