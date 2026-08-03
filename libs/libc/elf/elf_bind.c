@@ -48,6 +48,22 @@
 #define I_PLT   1    /* ... for PLTs */
 #define N_RELS  2    /* Number of relxxx[] indexes */
 
+/* Relocation types that only an FDPIC object may use.  An architecture
+ * that has none leaves this alone.
+ */
+
+#ifdef ARCH_ELF_RELOC_ISFDPIC
+
+/* An architecture that has FDPIC relocations also carries the fields they
+ * need in its arch_elfdata_t.  Everyone else has neither, so the code that
+ * fills those fields has to go with them.
+ */
+
+#  define HAVE_ARCH_ELF_FDPIC 1
+#else
+#  define ARCH_ELF_RELOC_ISFDPIC(t) 0
+#endif
+
 #ifdef ARCH_ELFDATA
 #  define ARCH_ELFDATA_DEF  arch_elfdata_t arch_data; \
                             memset(&arch_data, 0, sizeof(arch_elfdata_t))
@@ -55,6 +71,20 @@
 #else
 #  define ARCH_ELFDATA_DEF
 #  define ARCH_ELFDATA_PARM NULL
+#endif
+
+/* Some relocations need state the loader holds rather than state a single
+ * relocation carries.  An architecture that has such relocations defines
+ * these to move it in and out of the arch_data block; for everyone else
+ * they are nothing.
+ */
+
+#if defined(ARCH_ELFDATA) && defined(ARCH_ELFDATA_INIT)
+#  define ARCH_ELFDATA_SETUP(l)    ARCH_ELFDATA_INIT(&arch_data, l)
+#  define ARCH_ELFDATA_TEARDOWN(l) ARCH_ELFDATA_FINI(&arch_data, l)
+#else
+#  define ARCH_ELFDATA_SETUP(l)
+#  define ARCH_ELFDATA_TEARDOWN(l)
 #endif
 
 /****************************************************************************
@@ -720,7 +750,8 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
              * callee should run with.
              */
 
-            loadinfo->gotaddr = dyn[i].d_un.d_ptr;
+            loadinfo->gotaddr = libelf_addr(loadinfo,
+                                            dyn[i].d_un.d_ptr);
             break;
 
           /* The constructor and destructor tables.  These are also
@@ -782,6 +813,17 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
         }
     }
 
+  /* Hand the loader's per-object state to the relocations that need it.
+   * This has to follow the loop above, not precede it: DT_PLTGOT is read
+   * there, and a descriptor built with a data base of zero would fault on
+   * the module's first call through it.
+   *
+   * Both relocation tables are then walked under this one arch_data, so a
+   * cursor kept in it survives from one table to the next.
+   */
+
+  ARCH_ELFDATA_SETUP(loadinfo);
+
   symhdr = &loadinfo->shdr[loadinfo->dsymtabidx];
   sym = lib_malloc(symhdr->sh_size);
   if (!sym)
@@ -818,6 +860,15 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
 
       ret = OK;
       lrelent = reldata.relsz[idx_rel] / reldata.relentsz[idx_rel];
+
+#ifdef HAVE_ARCH_ELF_FDPIC
+      /* Say which table this is.  A relocation out of DT_JMPREL overwrites
+       * a word the linker pre-loaded with a lazy binding stub, which is not
+       * an addend and must not be added to.
+       */
+
+      arch_data.pltrel = (idx_rel == I_PLT);
+#endif
 
       for (i = 0; i < lrelent; i++)
         {
@@ -862,6 +913,25 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                 }
             }
 
+          /* An object that uses FDPIC relocations but does not say it is
+           * FDPIC cannot be run: nothing would place its segments apart or
+           * install its data base, and the relocations below would write
+           * plain addresses where descriptors belong.  The OS/ABI byte is
+           * the only thing that says so, so a cleared one has to be an
+           * error rather than something to march past.
+           */
+
+          if (!loadinfo->fdpic &&
+              ARCH_ELF_RELOC_ISFDPIC(ELF_R_TYPE(rel->r_info)))
+            {
+              berr("ERROR: FDPIC relocation %d in an object that is not "
+                   "marked FDPIC\n", (int)ELF_R_TYPE(rel->r_info));
+              lib_free(sym);
+              lib_free(rels);
+              lib_free(dyn);
+              return -ENOEXEC;
+            }
+
           /* Now perform the architecture-specific relocation */
 
           if ((idx_sym = ELF_R_SYM(rel->r_info)) != 0)
@@ -893,7 +963,40 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
                         addr += rela->r_addend;
                       }
 
-                    *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                    if (loadinfo->fdpic)
+                      {
+                        /* An imported symbol is not always a plain
+                         * address to be stored.  Under FDPIC it may be a
+                         * function descriptor, which is two words and has
+                         * to be built rather than assigned, so hand the
+                         * resolved value to up_relocate() and let the
+                         * relocation type decide what to write.
+                         */
+
+                        Elf_Sym extsym =
+                          {
+                            0
+                          };
+
+                        extsym.st_value = (uintptr_t)ep;
+
+                        ret = up_relocate(rel, &extsym, addr,
+                                          ARCH_ELFDATA_PARM);
+                        if (ret < 0)
+                          {
+                            berr("ERROR: Section %d reloc %d: "
+                                 "Relocation failed: %d\n",
+                                 relidx, i, ret);
+                            lib_free(sym);
+                            lib_free(rels);
+                            lib_free(dyn);
+                            return ret;
+                          }
+                      }
+                    else
+                      {
+                        *(FAR uintptr_t *)addr = (uintptr_t)ep;
+                      }
                 }
             }
           else
@@ -927,6 +1030,12 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
             }
         }
     }
+
+  /* Hand back what the relocations consumed.  The error paths above do
+   * not bother: the load is being abandoned, so the cursor has no reader.
+   */
+
+  ARCH_ELFDATA_TEARDOWN(loadinfo);
 
   lib_free(sym);
   lib_free(rels);
