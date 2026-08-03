@@ -166,6 +166,30 @@ config UINPUT_KEYBOARD_BUFNUMBER
 
 endif
 
+config INPUT_ST7123
+	bool "ST7123 Touch Screen Controller"
+	default n
+	select I2C
+	select INPUT_TOUCHSCREEN
+	---help---
+		Enable support for the ST7123 touchscreen controller.
+
+if INPUT_ST7123
+
+config INPUT_ST7123_I2C_FREQUENCY
+	int "I2C frequency"
+	default 400000
+	---help---
+		Select the I2C frequency for the ST7123 touchscreen controller.
+
+config INPUT_ST7123_I2C_ADDRESS
+	hex "I2C address"
+	default 0x55
+	---help---
+		Select the I2C address for the ST7123 touchscreen controller.
+
+endif # INPUT_ST7123
+
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
 	default n
