@@ -243,8 +243,9 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
     }
 
   /* Reserve the descriptor pool.  R_ARM_FUNCDESC asks the loader to
-   * manufacture a descriptor after the segment is placed, and the
-   * relocation count bounds how many.
+   * manufacture a descriptor after the segment is placed, and a library
+   * publishes one per exported function for dlsym().  The relocation and
+   * dynamic symbol counts bound how many.
    */
 
   if (loadinfo->fdpic)
@@ -255,7 +256,8 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
 
-          if (shdr->sh_type == SHT_REL && shdr->sh_entsize != 0)
+          if ((shdr->sh_type == SHT_REL || shdr->sh_type == SHT_DYNSYM) &&
+              shdr->sh_entsize != 0)
             {
               nrels += shdr->sh_size / shdr->sh_entsize;
             }

@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/symtab.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
 
 #include "libc.h"
@@ -542,6 +543,25 @@ int libelf_insertsymtab(FAR struct module_s *modp,
                       strdup((FAR char *)loadinfo->iobuffer);
                   symbol[j].sym_value =
                       (FAR const void *)(uintptr_t)sym[i].st_value;
+
+                  /* Publish an FDPIC function as a descriptor, so dlsym()
+                   * hands back something callable.  Only here does st_info
+                   * still say what is a function.
+                   */
+
+                  if (loadinfo->fdpic &&
+                      ELF_ST_TYPE(sym[i].st_info) == STT_FUNC &&
+                      loadinfo->usedesc < loadinfo->ndesc)
+                    {
+                      FAR struct fdpic_desc_s *desc =
+                        loadinfo->descpool + loadinfo->usedesc++;
+
+                      desc->entry = sym[i].st_value;
+                      desc->got   = loadinfo->gotbase;
+
+                      symbol[j].sym_value = (FAR const void *)desc;
+                    }
+
                   j++;
                 }
             }

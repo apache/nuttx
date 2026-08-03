@@ -247,9 +247,21 @@ static int libelf_loadsymtab(FAR struct module_s *modp,
       if (sym[i].st_shndx != SHN_UNDEF &&
           sym[i].st_shndx < loadinfo->ehdr.e_shnum)
         {
-          FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+          if (loadinfo->ehdr.e_type == ET_DYN)
+            {
+              /* A shared object's symbol value is already the full
+               * link-time address.  It only needs translating onto where
+               * the object was placed.
+               */
 
-          sym[i].st_value = sym[i].st_value + s->sh_addr;
+              sym[i].st_value = libelf_addr(loadinfo, sym[i].st_value);
+            }
+          else
+            {
+              FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+
+              sym[i].st_value = sym[i].st_value + s->sh_addr;
+            }
         }
     }
 
