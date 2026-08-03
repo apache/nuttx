@@ -46,6 +46,18 @@
 
 struct i2c_master_s;
 
+/* Board specific configuration.  With CONFIG_SENSORS_MPU6050_INT the board
+ * must supply attach(), which wires the MPU6050 INT pin to the given
+ * handler; the driver then delivers samples from that interrupt instead of
+ * reading the device on demand.
+ */
+
+struct mpu6050_config_s
+{
+  CODE int (*attach)(FAR const struct mpu6050_config_s *config,
+                     xcpt_t isr, FAR void *arg);
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -63,17 +75,19 @@ extern "C"
  *   sensor framework.
  *
  * Input Parameters:
- *   devno - Device number for sensor registration (e.g. 0)
- *   i2c   - Pointer to the I2C master interface
- *   addr  - I2C slave address of the MPU6050 device
+ *   devno  - Device number for sensor registration (e.g. 0)
+ *   i2c    - Pointer to the I2C master interface
+ *   addr   - I2C slave address of the MPU6050 device
+ *   config - Board configuration, required with CONFIG_SENSORS_MPU6050_INT
+ *            and otherwise unused; may be NULL
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-int mpu6050_register(int devno, FAR struct i2c_master_s *i2c,
-                     uint8_t addr);
+int mpu6050_register(int devno, FAR struct i2c_master_s *i2c, uint8_t addr,
+                     FAR const struct mpu6050_config_s *config);
 
 #ifdef __cplusplus
 }
