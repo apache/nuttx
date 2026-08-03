@@ -221,7 +221,22 @@ static void generate_proxy(int nfixed, int nparms)
 
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
+      /* Guard the module header with the same condition as the syscall body
+       * so that a conditional syscall does not force its (possibly absent)
+       * header onto builds where the owning module is disabled.
+       */
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#if %s\n", g_parm[COND_INDEX]);
+        }
+
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#endif\n");
+        }
     }
 
   fprintf(stream, "#include <syscall.h>\n\n");
@@ -457,7 +472,22 @@ static void generate_stub(int nfixed, int nparms)
 
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
+      /* Guard the module header with the same condition as the syscall body
+       * so that a conditional syscall does not force its (possibly absent)
+       * header onto builds where the owning module is disabled.
+       */
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#if %s\n", g_parm[COND_INDEX]);
+        }
+
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#endif\n");
+        }
     }
 
   putc('\n', stream);
@@ -683,7 +713,22 @@ static void generate_wrapper(int nfixed, int nparms)
 
   if (strlen(g_parm[HEADER_INDEX]) > 0)
     {
+      /* Guard the module header with the same condition as the syscall body
+       * so that a conditional syscall does not force its (possibly absent)
+       * header onto builds where the owning module is disabled.
+       */
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#if %s\n", g_parm[COND_INDEX]);
+        }
+
       fprintf(stream, "#include <%s>\n", g_parm[HEADER_INDEX]);
+
+      if (g_parm[COND_INDEX][0] != '\0')
+        {
+          fprintf(stream, "#endif\n");
+        }
     }
 
   /* Define macros to get wrapper symbol */
