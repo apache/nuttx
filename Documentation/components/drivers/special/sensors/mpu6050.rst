@@ -33,24 +33,62 @@ Where ``n`` is the device number passed during device registration (e.g., 0).
 
    /* Example uORB sensor registration on I2C bus 0 at default address 0x68 */
 
-   int err = mpu6050_register(0, i2c_master, MPU6050_ADDR_LOW);
+   int err = mpu6050_register(0, i2c_master, MPU6050_ADDR_LOW, NULL);
    if (err < 0)
      {
        syslog(LOG_ERR, "Failed to register MPU6050: %d\n", err);
      }
 
+The device samples at 100 Hz.
+
+Acquisition Modes
+=================
+
+The driver reads the device on demand by default: a sample is taken when the
+application reads the topic, and is timestamped at that moment.
+
+With ``CONFIG_SENSORS_MPU6050_INT`` the device drives the acquisition instead,
+through its data ready interrupt. Samples are then timestamped when they were
+measured rather than when they were asked for, and both topics are published
+from a single read, so accelerometer and gyroscope share one timestamp. This
+requires the INT pin to be wired, and the board to pass a
+``struct mpu6050_config_s`` whose ``attach`` member connects that pin to the
+driver:
+
+.. code-block:: c
+
+   static int board_mpu6050_attach(FAR const struct mpu6050_config_s *config,
+                                   xcpt_t isr, FAR void *arg)
+   {
+     /* Configure the GPIO for a rising edge and attach isr to it */
+   }
+
+   static const struct mpu6050_config_s g_mpu6050_config =
+   {
+     .attach = board_mpu6050_attach,
+   };
+
+   int err = mpu6050_register(0, i2c_master, MPU6050_ADDR_LOW,
+                              &g_mpu6050_config);
+
+Registration fails with ``-EINVAL`` if the option is enabled and no ``attach``
+is supplied, since the interrupt is the only source of samples in that build.
+
 Configuration Options
 =====================
 
 - ``CONFIG_SENSORS_MPU6050`` - Enables uORB driver support for the InvenSense MPU6050 6-axis MotionTracker over I2C.
+- ``CONFIG_SENSORS_MPU6050_INT`` - Takes samples from the data ready interrupt instead of reading the device on demand. Requires board support, see `Acquisition Modes`_.
 
 Supported Operations
 ====================
 
-The MPU6050 uORB driver supports standard sensor operations (`activate`, `fetch`,
-`set_interval`, `batch`, and `control`). It acquires simultaneous 3-axis accelerometer
-and 3-axis gyroscope samples, applies appropriate scale conversions, and publishes them
-to their respective uORB topics.
+The MPU6050 uORB driver supports standard sensor operations (`activate`,
+`set_interval`, `batch`, and `control`), plus `fetch` when reading on demand.
+An instance provides either `fetch` or interrupt driven delivery, never both.
+It acquires simultaneous 3-axis accelerometer and 3-axis gyroscope samples,
+applies appropriate scale conversions, and publishes them to their respective
+uORB topics.
 
 Example Usage (`uorb_listener`)
 -------------------------------
