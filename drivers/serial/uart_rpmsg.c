@@ -477,6 +477,7 @@ static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
 {
   FAR struct uart_dev_s *dev = priv_;
   FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  irqstate_t flags;
 
   if (priv->ept.priv != NULL &&
       strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
@@ -492,10 +493,12 @@ static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
       priv->ackpos   = 0;
       rpmsg_destroy_ept(&priv->ept);
       uart_rpmsg_post(&priv->sendsem);
-    }
 
-  dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
-  uart_xmitchars_done(dev);
+      flags = uart_spinlock(dev, true);
+      dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
+      uart_xmitchars_done(dev);
+      uart_spinunlock(dev, true, flags);
+    }
 }
 
 static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
