@@ -5600,7 +5600,7 @@ config BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 		Application Configuration -> File System Utilities ->
 		Password file support.
 
-comment "  If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
+comment "If not randomizing: set KEY1..4 at App Config -> File System Utilities -> Password file support"
 	depends on !BOARD_ETC_ROMFS_PASSWD_RANDOMIZE_KEYS
 
 config BOARD_ETC_ROMFS_PASSWD_UID
