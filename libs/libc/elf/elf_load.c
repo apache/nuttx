@@ -240,16 +240,9 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
         }
     }
 
-  /* An FDPIC object may ask the loader to manufacture function
-   * descriptors -- that is what R_ARM_FUNCDESC means -- and hand back
-   * their addresses.  They have to live somewhere the module can reach
-   * through its data base, and the space has to be reserved now, because
-   * by the time the relocation is applied the segment has been placed.
-   *
-   * One relocation cannot ask for more than one descriptor, so the
-   * relocation count bounds the pool.  Modules are small and a descriptor
-   * is two words, so the slack in that bound is cheaper than walking the
-   * relocations twice.
+  /* Reserve the descriptor pool now: a relocation may ask the loader to
+   * manufacture one, and by then the segment has been placed.  Bounded by
+   * the relocation and symbol counts, which is loose but cheap.
    */
 
   if (loadinfo->fdpic)
@@ -266,10 +259,7 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
             }
         }
 
-      /* A library also publishes a descriptor for each function it
-       * exports, so that dlsym() can hand back something callable.  The
-       * dynamic symbol table bounds how many that can be.
-       */
+      /* Exported functions get one each, for dlsym(). */
 
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
@@ -417,10 +407,7 @@ static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                 {
                   if (loadinfo->fdpic && loadinfo->xipbase != 0)
                     {
-                      /* Mapped, not copied.  Copying it here would put the
-                       * text in RAM and forfeit the only thing this format
-                       * was chosen for.
-                       */
+                      /* Mapped, not copied. */
 
                       continue;
                     }

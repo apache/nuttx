@@ -262,6 +262,17 @@ int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: libelf_symname
+ *
+ * Description:
+ *   Read a name out of a string table into the I/O buffer.
+ *
+ ****************************************************************************/
+
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset);
+
 static inline uintptr_t libelf_addr(FAR struct mod_loadinfo_s *loadinfo,
                                     uintptr_t vaddr)
 {

@@ -93,8 +93,8 @@ extern int nglobals;
  *
  ****************************************************************************/
 
-static int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
-                          FAR const Elf_Sym *sym, Elf_Off sh_offset)
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset)
 {
   FAR uint8_t *buffer;
   off_t  offset;
@@ -547,17 +547,10 @@ int libelf_insertsymtab(FAR struct module_s *modp,
                   symbol[j].sym_value =
                       (FAR const void *)(uintptr_t)sym[i].st_value;
 
-                  /* An FDPIC caller cannot branch to a bare code address:
-                   * it needs the callee's data base too.  So a function
-                   * exported by an FDPIC object is published as the
-                   * address of a descriptor rather than of its code, and
-                   * dlsym() hands back something that can simply be
-                   * called.
-                   *
-                   * This is the only point that can do it.  The exported
-                   * table carries no type information, so by the time
-                   * dlsym() is asked there is no way to tell a function
-                   * from an object; here st_info still says.
+                  /* Publish a function as a descriptor, not a code
+                   * address, so dlsym() returns something an FDPIC caller
+                   * can branch through.  Only here does st_info still say
+                   * which symbols are functions.
                    */
 
                   if (loadinfo->fdpic &&
