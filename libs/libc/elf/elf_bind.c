@@ -712,11 +712,60 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
             break;
+          case DT_PLTGOT:
+
+            /* The object's data base.  Every function descriptor built
+             * for it names this base.
+             */
+
+            loadinfo->gotbase = dyn[i].d_un.d_ptr;
+            break;
+
+          /* The constructor and destructor tables.  Section headers are
+           * optional, so the dynamic tags are the authoritative copy.
+           */
+
+          case DT_INIT_ARRAY:
+            loadinfo->initarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_INIT_ARRAYSZ:
+            loadinfo->ninit = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
+          case DT_FINI_ARRAY:
+            loadinfo->finiarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_FINI_ARRAYSZ:
+            loadinfo->nfini = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
+          case DT_PREINIT_ARRAY:
+            loadinfo->preiarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_PREINIT_ARRAYSZ:
+            loadinfo->nprei = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
           case DT_PLTREL:
             if (dyn[i].d_un.d_val == DT_REL)
               {
                 reldata.relentsz[I_PLT] = sizeof(Elf_Rel);
                 reldata.relrela[I_PLT] = 0;
+              }
+            else if (loadinfo->fdpic)
+              {
+                /* The ARM FDPIC ABI is REL throughout.  RELA entries are
+                 * longer, so walking them as REL reads the wrong place.
+                 */
+
+                berr("ERROR: FDPIC object claims RELA PLT relocations\n");
+                lib_free(sym);
+                lib_free(rels);
+                lib_free(dyn);
+                return -ENOEXEC;
               }
             else
               {

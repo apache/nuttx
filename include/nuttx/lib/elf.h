@@ -168,6 +168,8 @@ typedef CODE int (*mod_initializer_t)(FAR struct mod_info_s *modinfo);
 struct module_s;
 typedef CODE int (*mod_callback_t)(FAR struct module_s *modp, FAR void *arg);
 
+struct fdpic_desc_s;
+
 /* This describes the file to be loaded. */
 
 struct module_s
@@ -275,6 +277,20 @@ struct mod_loadinfo_s
 
   FAR struct file *pinfile;
 #endif
+
+  /* The object's data base, from DT_PLTGOT.  An FDPIC module runs with this
+   * in the PIC base register.
+   */
+
+  uintptr_t     gotbase;
+
+  /* Pool of function descriptors behind the writable segment.  Reserved
+   * when the segment is sized, and bounded by the relocation count.
+   */
+
+  FAR struct fdpic_desc_s *descpool;
+  uint16_t      ndesc;       /* Capacity */
+  uint16_t      usedesc;     /* Next free slot */
 
   /* Address environment.
    *

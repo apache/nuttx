@@ -279,6 +279,12 @@
 #define DT_TEXTREL         22         /* d_un=ignored */
 #define DT_JMPREL          23         /* d_un=d_ptr */
 #define DT_BINDNOW         24         /* d_un=ignored */
+#define DT_INIT_ARRAY      25         /* d_un=d_ptr */
+#define DT_FINI_ARRAY      26         /* d_un=d_ptr */
+#define DT_INIT_ARRAYSZ    27         /* d_un=d_val */
+#define DT_FINI_ARRAYSZ    28         /* d_un=d_val */
+#define DT_PREINIT_ARRAY   32         /* d_un=d_ptr */
+#define DT_PREINIT_ARRAYSZ 33         /* d_un=d_val */
 #define DT_LOPROC          0x70000000 /* d_un=unspecified */
 #define DT_HIPROC          0x7fffffff /* d_un= unspecified */
 
