@@ -67,12 +67,15 @@ of a shared library in that environment.
 In this case kernel modules really only differ from shared
 libraries in their usage semantics:
 
-For the FLAT build, I have added the standard ``include/dllfcn.h``
-and have implemented the FLAT shared library support as a thin wrapper
-around the kernel module support:
+For the FLAT build, the standard ``include/dlfcn.h`` interfaces are
+implemented as a thin wrapper around the same module library that the kernel
+module support uses:
 
-* ``dlopen()`` maps to ``insmod()``.
-* ``dlclose()`` maps to ``rmmod()``.
+* ``dlopen()`` loads the library, or takes an additional reference on it if
+  it is already loaded, and returns a handle to it. See
+  `Opening a Library More Than Once`_.
+* ``dlclose()`` releases one reference. The library is unloaded, as
+  ``rmmod()`` would, only when the last handle is closed.
 * ``dlsym()`` maps to ``modsym()``.
 * ``dlerror()`` is only a stub at the present time.
 
@@ -101,6 +104,43 @@ The shared library functions no longer call the kernel module logic but rather
 implement their one top-level management logic using the lower-level routines
 in the module library.
 
+The user space copy of the module library keeps the name of each loaded
+library whenever ``CONFIG_LIBC_DLFCN`` is enabled, since the name is the only
+way to tell that a library is already loaded. This costs ``NAME_MAX`` bytes
+per loaded library, but it makes ``dlopen()`` behave exactly as it does in the
+FLAT build.
+
+
+Opening a Library More Than Once
+================================
+
+In the FLAT and PROTECTED builds, ``dlopen()`` of a library that is already
+loaded does not load a second copy and does not fail. It returns a handle to
+the library that is already loaded and takes an additional reference on it.
+Each successful ``dlopen()`` must be matched by a ``dlclose()``; the library
+is unloaded only when the last handle is closed. Up to 255 handles may be
+outstanding on one library; beyond that ``dlopen()`` fails with ``EMFILE``.
+
+Some consequences worth keeping in mind:
+
+* A library is identified by the *basename* of the path passed to
+  ``dlopen()``. Two files with the same basename in different directories
+  are treated as the same library, and the second ``dlopen()`` will return
+  the first one.
+* There is only one instance of the library's ``.data`` and ``.bss``. Global
+  and static data are shared by every user of the library, and by every task
+  group in the system.
+* Constructors in ``.init_array`` run once, when the library is first loaded,
+  and destructors in ``.fini_array`` run once, when the last handle is
+  closed. They do not run per ``dlopen()``/``dlclose()`` pair.
+* Symbols obtained with ``dlsym()`` remain valid until the last handle is
+  closed, not until the caller's own handle is closed.
+
+Kernel modules deliberately behave differently: ``insmod()`` fails with
+``EEXIST`` if a module of that name is already installed, and ``rmmod()``
+removes it immediately. A kernel module is a singleton and is not reference
+counted.
+
 
 Better FLAT and PROTECTED Mode Shared Libraries
 ===============================================
@@ -112,7 +152,7 @@ for each NuttX task group.
 A task group is the moral equivalent of a Unix process.
 That is how a shared library would have to work in uClinux, for example.
 But that would be a substantial effort! For example, since each
-``.bss``/``.data`` would lie at a different physical addres,
+``.bss``/``.data`` would lie at a different physical address,
 the ``.text`` section logic would need support
 Position-Independent-Data (PID).
 Embedded PID support, however, is pretty much broken on all current GCC
@@ -174,3 +214,6 @@ are loaded into memory before the programs ``main()`` logic is called.
 .. note:: There is not yet any shared library support in the KERNEL build mode.
           This would be quite a large effort and not on the plan of record
           at the present time.
+          ``dlopen()`` always fails and returns ``NULL`` in the KERNEL build,
+          so none of the reference counting behaviour described above applies
+          there.
