@@ -60,6 +60,38 @@ config ELF_STACKSIZE
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		This is the default stack size that will be used when starting ELF binaries.
+
+config FDPIC
+	bool "FDPIC modules"
+	default n
+	select PIC
+	depends on ARCH_HAVE_ELF_FDPIC
+	---help---
+		Load ELF modules built for the FDPIC ABI.
+
+		An FDPIC module places its read-only and writable segments
+		independently, so its text can be executed directly out of flash
+		while only the writable segment is copied to RAM, once per running
+		instance.  A filesystem that can show its media, such as XIPFS or
+		ROMFS, gives that result.  On any other filesystem the loader copies
+		the text to RAM, and the module runs but shares nothing.
+
+		Building a module needs an arm-uclinuxfdpiceabi linker.  The stock
+		arm-none-eabi compiler emits correct FDPIC objects for both C and
+		C++, so only the link needs it.
+
+		What this adds over the position independent ELF support already
+		present is a function pointer that carries its own data base, as a
+		two word descriptor rather than a bare code address.  That is what
+		lets a module be called back on a thread it did not create, such as
+		the work queue worker that runs a SIGEV_THREAD notification.
+
+		Selecting this makes ten libc and sched entry points that can
+		accept a callback from a module resolve such a descriptor before
+		storing or branching to it.  Each costs a register read and a
+		branch on a path that is not hot.
+
+		FDPIC is specified only for ARM Thumb-2.
 endif
 endif
 

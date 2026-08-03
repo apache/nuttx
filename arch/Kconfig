@@ -692,6 +692,13 @@ config ARCH_HAVE_ELF_EXECUTABLE
 	bool
 	default n
 
+config ARCH_HAVE_ELF_FDPIC
+	bool
+	default n
+	---help---
+		The architecture has a PIC base register and the ELF relocations
+		that an FDPIC object uses.
+
 config ARCH_HAVE_TRUSTZONE
 	bool
 	default n

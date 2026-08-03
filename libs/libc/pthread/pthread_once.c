@@ -33,6 +33,10 @@
 #include <nuttx/mutex.h>
 #include <nuttx/debug.h>
 
+#ifdef CONFIG_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -72,6 +76,21 @@ int pthread_once(FAR pthread_once_t *once_control,
     {
       return EINVAL;
     }
+
+#ifdef CONFIG_FDPIC
+  /* An FDPIC module passes the address of a function descriptor, not a code
+   * address.  Resolve it here, in the public entry point.
+   *
+   * init_routine() runs on this thread, so the module's data base is
+   * already in the FDPIC register and only the code address is needed.  The
+   * resolved value is a local copy and is never stored, so a later call
+   * through the same once_control resolves the caller's descriptor afresh
+   * rather than re-resolving a code address.
+   */
+
+  init_routine = (CODE void (*)(void))
+                 fdpic_callback((FAR void *)init_routine);
+#endif
 
   if (!once_control->done)
     {
