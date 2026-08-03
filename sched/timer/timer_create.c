@@ -37,6 +37,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
+#if defined(CONFIG_ELF_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "timer/timer.h"
 
@@ -196,6 +200,19 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
               /* Yes, copy the entire struct sigevent content */
 
               memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
+
+#if defined(CONFIG_ELF_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+              /* If a module registered a SIGEV_THREAD callback, capture its
+               * data base now, while this runs in the module's context.  The
+               * callback fires later on a work-queue worker with no base of
+               * its own; nxsig_notification() installs this around the call.
+               */
+
+              ret->pt_work.got =
+                (fdpic_base() != 0 &&
+                 (evp->sigev_notify & SIGEV_THREAD) != 0) ?
+                fdpic_base() : 0;
+#endif
             }
           else
             {

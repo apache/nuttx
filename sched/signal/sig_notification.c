@@ -34,6 +34,10 @@
 
 #include <nuttx/signal.h>
 
+#ifdef CONFIG_ELF_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "signal/signal.h"
 
@@ -70,7 +74,24 @@ static void nxsig_notification_worker(FAR void *arg)
 
   /* Perform the callback */
 
-  work->func(work->value);
+#ifdef CONFIG_ELF_FDPIC
+  /* A module's callback runs here on a shared worker thread, which does not
+   * carry the module's data base.  Install the base captured at
+   * registration around the call so the callback can reach its own globals;
+   * work->func has already been resolved to the code address.  A non-module
+   * callback has a zero base and is called directly.
+   */
+
+  if (work->got != 0)
+    {
+      fdpic_invoke((uintptr_t)work->func, (uintptr_t)work->value.sival_ptr,
+                   work->got);
+    }
+  else
+#endif
+    {
+      work->func(work->value);
+    }
 }
 
 #endif /* CONFIG_SIG_EVTHREAD */
@@ -156,6 +177,22 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
 
       work->value = event->sigev_value;
       work->func  = event->sigev_notify_function;
+
+#ifdef CONFIG_ELF_FDPIC
+      /* When the callback is a module's, work->got was set at registration
+       * to the module's data base (this runs at send or expiry time, whose
+       * context is not the module's, so it cannot be read here).  The
+       * callback is a descriptor: resolve it to the code address now --
+       * reading the descriptor is just a memory access and needs no base --
+       * and the worker installs the base around the call.
+       */
+
+      if (work->got != 0)
+        {
+          work->func = (sigev_notify_function_t)
+            ((FAR struct fdpic_desc_s *)event->sigev_notify_function)->entry;
+        }
+#endif
 
       /* Then queue the work */
 

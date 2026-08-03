@@ -45,6 +45,10 @@
 #include <sys/param.h>
 #include <stdlib.h>
 
+#ifdef CONFIG_ELF_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -156,8 +160,9 @@ static inline FAR char *med3(FAR char *a, FAR char *b, FAR char *c,
  *
  ****************************************************************************/
 
-void qsort(FAR void *base, size_t nel, size_t width,
-           CODE int(*compar)(FAR const void *, FAR const void *))
+static void qsort_internal(FAR void *base, size_t nel, size_t width,
+                           CODE int(*compar)(FAR const void *,
+                                             FAR const void *))
 {
   FAR char *pa;
   FAR char *pb;
@@ -277,7 +282,7 @@ loop:
 
   if ((r = pb - pa) > width)
     {
-      qsort(base, r / width, width, compar);
+      qsort_internal(base, r / width, width, compar);
     }
 
   if ((r = pd - pc) > width)
@@ -288,4 +293,32 @@ loop:
       nel = r / width;
       goto loop;
     }
+}
+
+/****************************************************************************
+ * Name: qsort
+ *
+ * Description:
+ *   Public entry point.  Resolves the comparison function once and then
+ *   hands an ordinary pointer to the implementation.
+ *
+ *   The split matters: qsort_internal() recurses, and resolving on every
+ *   entry would treat an already-resolved code address as a descriptor the
+ *   second time round and branch somewhere meaningless.
+ *
+ ****************************************************************************/
+
+void qsort(FAR void *base, size_t nel, size_t width,
+           CODE int(*compar)(FAR const void *, FAR const void *))
+{
+#ifdef CONFIG_ELF_FDPIC
+  /* An FDPIC module passes the address of a function descriptor, not a
+   * code address.
+   */
+
+  compar = (CODE int (*)(FAR const void *, FAR const void *))
+           fdpic_callback((FAR void *)compar);
+#endif
+
+  qsort_internal(base, nel, width, compar);
 }

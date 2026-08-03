@@ -31,6 +31,10 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#ifdef CONFIG_ELF_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "libc.h"
 
 /* The scandir() function is not appropriate for use within the kernel in its
@@ -90,6 +94,19 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
    * functions that it is calling to figure if it was successful.  We save
    * the original errno value to be able to restore it in case of success.
    */
+
+#ifdef CONFIG_ELF_FDPIC
+  /* An FDPIC module passes the address of a function descriptor, not a code
+   * address.  Resolve the filter, which is called from the loop below.
+   *
+   * compar is deliberately NOT resolved here.  It is handed to qsort(),
+   * whose public entry point resolves it, and resolving it twice would
+   * treat an already-resolved code address as a descriptor.
+   */
+
+  filter = (CODE int (*)(FAR const struct dirent *))
+           fdpic_callback((FAR void *)filter);
+#endif
 
   errsv = get_errno();
 

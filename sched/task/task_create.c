@@ -37,6 +37,10 @@
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_ELF_FDPIC
+#  include <nuttx/fdpic.h>
+#endif
+
 #include "sched/sched.h"
 #include "group/group.h"
 #include "task/task.h"
@@ -202,8 +206,23 @@ int task_create_with_stack(FAR const char *name, int priority,
                            FAR void *stack_addr, int stack_size,
                            main_t entry, FAR char * const argv[])
 {
-  int ret = nxtask_create(name, priority, stack_addr,
-                          stack_size, entry, argv, NULL);
+  int ret;
+
+#ifdef CONFIG_ELF_FDPIC
+  /* An FDPIC module passes the address of a function descriptor, not a code
+   * address.  Resolving it here covers task_create() too, which is a plain
+   * forwarder -- and covers it exactly once, which matters: resolving twice
+   * would treat an already-resolved code address as a descriptor.
+   *
+   * The new task inherits the creator's D-Space, so it starts with the
+   * module's own data base installed and needs only the code address.
+   */
+
+  entry = (main_t)fdpic_callback((FAR void *)entry);
+#endif
+
+  ret = nxtask_create(name, priority, stack_addr,
+                      stack_size, entry, argv, NULL);
   if (ret < 0)
     {
       set_errno(-ret);
