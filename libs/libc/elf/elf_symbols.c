@@ -34,6 +34,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/symtab.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
 
 #include "libc.h"
@@ -545,6 +546,34 @@ int libelf_insertsymtab(FAR struct module_s *modp,
                       strdup((FAR char *)loadinfo->iobuffer);
                   symbol[j].sym_value =
                       (FAR const void *)(uintptr_t)sym[i].st_value;
+
+                  /* An FDPIC caller cannot branch to a bare code address:
+                   * it needs the callee's data base too.  So a function
+                   * exported by an FDPIC object is published as the
+                   * address of a descriptor rather than of its code, and
+                   * dlsym() hands back something that can simply be
+                   * called.
+                   *
+                   * This is the only point that can do it.  The exported
+                   * table carries no type information, so by the time
+                   * dlsym() is asked there is no way to tell a function
+                   * from an object; here st_info still says.
+                   */
+
+                  if (loadinfo->fdpic &&
+                      ELF_ST_TYPE(sym[i].st_info) == STT_FUNC &&
+                      loadinfo->usedesc < loadinfo->ndesc)
+                    {
+                      FAR struct fdpic_desc_s *desc =
+                        (FAR struct fdpic_desc_s *)loadinfo->descpool +
+                        loadinfo->usedesc++;
+
+                      desc->entry = sym[i].st_value;
+                      desc->got   = loadinfo->gotaddr;
+
+                      symbol[j].sym_value = (FAR const void *)desc;
+                    }
+
                   j++;
                 }
             }
