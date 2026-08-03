@@ -591,8 +591,16 @@ static int lib_hostfile_lookup(FAR const char *name,
     {
       int errcode = -get_errno();
 
-      nerr("ERROR:  Failed to open the hosts file %s: %d\n",
-           CONFIG_NETDB_HOSTCONF_PATH, errcode);
+      /* ENOENT just means no static host table is present; fall back
+       * to DNS silently.  Only log unexpected open failures so that
+       * repeated name lookups do not spam the console.
+       */
+
+      if (errcode != -ENOENT)
+        {
+          nerr("ERROR:  Failed to open the hosts file %s: %d\n",
+               CONFIG_NETDB_HOSTCONF_PATH, errcode);
+        }
 
       return errcode;
     }
