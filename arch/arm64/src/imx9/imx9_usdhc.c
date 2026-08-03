@@ -1477,6 +1477,11 @@ static void imx9_reset(struct sdio_dev_s *dev)
 
   mcinfo("Reset complete\n");
 
+  /* Set PROCTL to select SDMA or no DMA. */
+
+  modifyreg32(priv->addr + IMX9_USDHC_PROCTL_OFFSET,
+              USDHC_PROCTL_DMAS_MASK, USDHC_PROCTL_DMAS_NODMA);
+
   /* Make sure that all clocking is disabled */
 
   imx9_clock(dev, CLOCK_SDIO_DISABLED);
