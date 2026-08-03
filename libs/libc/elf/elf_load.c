@@ -266,6 +266,21 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
             }
         }
 
+      /* A library also publishes a descriptor for each function it
+       * exports, so that dlsym() can hand back something callable.  The
+       * dynamic symbol table bounds how many that can be.
+       */
+
+      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+        {
+          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+          if (shdr->sh_type == SHT_DYNSYM && shdr->sh_entsize != 0)
+            {
+              nrels += shdr->sh_size / shdr->sh_entsize;
+            }
+        }
+
       loadinfo->ndesc    = nrels;
       loadinfo->descpool = datasize;
       datasize          += nrels * 2 * sizeof(uintptr_t);
