@@ -41,14 +41,14 @@ Application Programming Interface
 =================================
 
 The first thing to be done in order to use the touchscreen driver from an
-application is to include the correct header filer. It contains the 
+application is to include the correct header filer. It contains the
 Application Programming Interface to the driver. To do so, include
 
 .. code-block:: c
 
   #include <nuttx/input/touchscreen.h>
 
-Touchscreen driver is registered as a POSIX character device file into 
+Touchscreen driver is registered as a POSIX character device file into
 ``/dev`` namespace. It is necessary to open the device to get a file descriptor
 for further operations. This can be done with standard POSIX ``open()`` call.
 
@@ -63,4 +63,11 @@ This command let the current handle has the device grabbed. When a handle grabs
 a device it becomes sole recipient for all touchscreen events coming from the
 device. An argument is an ``int32_t`` variable to enable or disable the grab.
 
+Supported Controllers
+=====================
 
+Individual touchscreen controller drivers are documented under
+:doc:`input/index`.  Controllers currently covered there include:
+
+- :doc:`input/st7123` — ST7123 (and related ST7121) capacitive multi-touch
+  controller over I2C

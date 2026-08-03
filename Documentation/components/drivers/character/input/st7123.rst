@@ -1,0 +1,127 @@
+==============================
+ST7123 Capacitive Touchscreen
+==============================
+
+**What is the ST7123**. The ST7123 is an I2C capacitive multi-touch
+controller used on TDDI (Touch and Display Driver Integration) panels.
+It reports up to ten simultaneous contacts, optional gesture codes, and
+contact intensity.  The same I2C register map is also used by related
+parts such as the ST7121.
+
+**Purpose**. The ST7123 driver is a touchscreen lower-half that probes
+the controller over I2C, reads complete touch frames on interrupt, and
+delivers multi-touch samples through the common touchscreen upper-half.
+Once registered, the device appears as ``/dev/inputN`` and applications
+read ``struct touch_sample_s`` samples as described in
+:doc:`../touchscreen`.
+
+**Driver Overview**. The board supplies a persistent
+``struct st7123_config_s`` whose ``attach`` member wires the controller
+INT pin to the driver interrupt handler.  ``st7123_register()`` probes
+the part, registers ``/dev/inputN``, then calls ``config->attach()`` with
+the driver ISR and the allocated device instance as ``arg``.  On each
+falling edge of INT the ISR queues ``st7123_data_worker()`` on the
+high-priority work queue.  The worker fetches one full touch frame
+(advanced-touch header plus every touch area) in a single I2C
+transaction, converts per-area *valid* bits into ``TOUCH_DOWN`` /
+``TOUCH_MOVE`` / ``TOUCH_UP`` transitions, and pushes the sample with
+``touch_event()``.  The upper half stores the sample in a circular
+buffer for ``read()`` / ``poll()`` clients.
+
+**Configuration**. Enable the driver with:
+
+- ``CONFIG_INPUT=y``
+- ``CONFIG_INPUT_TOUCHSCREEN=y``
+- ``CONFIG_INPUT_ST7123=y``
+- ``CONFIG_SCHED_HPWORK=y`` (required; frame processing runs on HPWORK)
+- ``CONFIG_INPUT_ST7123_I2C_FREQUENCY`` (default ``400000``)
+- ``CONFIG_INPUT_ST7123_I2C_ADDRESS`` (default ``0x55``)
+
+**Board Support**. To support the ST7123 a board must provide:
+
+#. **I2C Bus**
+
+   - An initialized ``struct i2c_master_s`` instance that can reach the
+     controller at ``CONFIG_INPUT_ST7123_I2C_ADDRESS``.
+
+#. **Board Configuration / Interrupt Attach**
+
+   - A persistent ``struct st7123_config_s`` whose ``attach`` member
+     configures the INT GPIO (typically active-low / falling edge with
+     pull-up) and connects it to the given ``xcpt_t`` handler, passing
+     through the opaque ``arg`` provided by the driver.
+   - ``attach`` must remain valid for the lifetime of the driver; the
+     structure is not copied.
+   - Registration fails with ``-EINVAL`` if ``config`` or
+     ``config->attach`` is ``NULL``.
+
+#. **Registration Hook**
+
+   - Call ``st7123_register(i2c, minor, &config)`` during board
+     bring-up.  The driver attaches and may enable the interrupt only
+     after ``touch_register()`` succeeds, so an early edge cannot reach
+     an uninitialized device.
+
+Example board wiring:
+
+.. code-block:: c
+
+   static int board_st7123_attach(FAR const struct st7123_config_s *config,
+                                  xcpt_t isr, FAR void *arg)
+   {
+     /* Configure the INT GPIO and attach isr(arg) to it */
+   }
+
+   static const struct st7123_config_s g_st7123_config =
+   {
+     .attach = board_st7123_attach,
+   };
+
+   int err = st7123_register(i2c, 0, &g_st7123_config);
+
+**Data Path Summary**.
+
+- Board obtains the I2C master and calls
+  ``st7123_register(i2c, 0, &g_st7123_config)``
+- ``st7123_register()`` allocates the device instance, probes firmware /
+  resolution / touch count, fills ``struct touch_lowerhalf_s``, and
+  calls ``touch_register(..., "/dev/input0", maxpoint)``
+- ``config->attach()`` wires the INT pin to the driver ISR with the
+  device instance as ``arg``
+- Each INT schedules ``st7123_data_worker()`` on HPWORK
+- The worker reads the frame starting at register ``0x10`` and reports
+  contacts through ``touch_event()``
+- Applications open ``/dev/input0`` and read
+  ``struct touch_sample_s`` (sized with ``SIZEOF_TOUCH_SAMPLE_S(n)``)
+
+**Open / Close Behavior**.
+
+- ``open()`` powers the controller up (clears ``DEV_CTRL``), disables
+  smart-wakeup with a read-modify-write of ``MISC_CTRL`` when the part
+  advertises that feature, and waits until ``STATUS`` reports
+  ``NORMAL``.
+- ``close()`` sets the power-down bit in ``DEV_CTRL`` and verifies that
+  ``STATUS`` reports ``POWER_DOWN``.
+
+**Touch Samples**. Each reported contact uses the touch-area index as
+its stable ``id``.  Flags follow the common touchscreen conventions:
+
+- First contact: ``TOUCH_DOWN | TOUCH_ID_VALID | TOUCH_POS_VALID | TOUCH_PRESSURE_VALID``
+- Continued contact: ``TOUCH_MOVE`` with the same validity bits
+- Lost contact: ``TOUCH_UP | TOUCH_ID_VALID | TOUCH_POS_VALID`` at the
+  last known coordinates
+
+Supported gesture codes from the controller are mapped onto the common
+``TOUCH_*`` gesture values (double-click and slide directions).
+
+**Application Notes**.
+
+- ``read()`` returns a variable-length sample.  Buffers must be at least
+  ``SIZEOF_TOUCH_SAMPLE_S(maxpoint)`` bytes; reading only
+  ``sizeof(struct touch_sample_s)`` (one contact) desynchronizes the
+  stream when multiple fingers are down.
+- The example under ``apps/examples/touchscreen`` currently assumes a
+  single-point sample size and is not suitable for multi-touch testing
+  without a larger read buffer.
+- Header: ``include/nuttx/input/st7123.h``
+- Driver: ``drivers/input/st7123.c``
