@@ -82,6 +82,7 @@
 int dlclose(FAR void *handle)
 {
 #if defined(CONFIG_BUILD_FLAT) || defined(CONFIG_BUILD_PROTECTED)
+
   /* In the FLAT build, a shared library is essentially the same as a kernel
    * module.
    *
@@ -91,6 +92,10 @@ int dlclose(FAR void *handle)
    * using the user space symbol table.
    *
    * dlremove() is essentially a clone of rmmod().
+   */
+
+  /* libelf_remove() gives back a reference and unloads only when the last
+   * one goes, so closing one of two handles leaves the other usable.
    */
 
   return libelf_remove(handle);

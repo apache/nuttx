@@ -79,7 +79,12 @@
  *   portion of the build
  */
 
-#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+/* dlopen() needs a name too: it is the only way to tell that a library is
+ * already loaded.
+ */
+
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__) || \
+    defined(CONFIG_LIBC_DLFCN)
 #  define HAVE_LIBC_ELF_NAMES
 #  define LIBC_ELF_NAMEMAX NAME_MAX
 #endif
@@ -173,6 +178,12 @@ struct module_s
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
 #endif
+
+  uint8_t nopen;                       /* Outstanding references: insmod()
+                                        * and dlopen() each take one, rmmod()
+                                        * and dlclose() give one back, and the
+                                        * module goes when the last does
+                                        */
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */

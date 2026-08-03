@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
+
 #include <nuttx/module.h>
 #include <nuttx/lib/elf.h>
 
@@ -63,6 +65,17 @@
 
 FAR void *insmod(FAR const char *filename, FAR const char *modname)
 {
+  /* A duplicate name is an error here, where it has always been.
+   * libelf_insert() would take a reference instead, which is what
+   * dlopen() wants and insmod() does not.
+   */
+
+  if (libelf_gethandle(modname) != NULL)
+    {
+      set_errno(EEXIST);
+      return NULL;
+    }
+
   return libelf_insert(filename, modname);
 }
 
