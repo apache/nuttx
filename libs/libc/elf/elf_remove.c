@@ -29,7 +29,10 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
+
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
@@ -64,7 +67,19 @@ int libelf_uninit(FAR struct module_s *modp)
   array = (FAR void (**)(void))modp->finiarr;
   for (i = 0; i < modp->nfini; i++)
     {
-      array[i]();
+      /* Like the constructors, an FDPIC object's destructors reach its
+       * globals through its own data base, which the unloading thread does
+       * not carry.
+       */
+
+      if (modp->fdpic)
+        {
+          fdpic_invoke((uintptr_t)array[i], 0, modp->gotaddr);
+        }
+      else
+        {
+          array[i]();
+        }
     }
 
   if (modp->modinfo.uninitializer != NULL)
@@ -147,6 +162,21 @@ int libelf_uninit(FAR struct module_s *modp)
           lib_free((FAR void *)modp->dataalloc);
 #  endif
 #endif
+        }
+      else if (modp->fdpic)
+        {
+#ifdef HAVE_LIBC_ELF_PIN
+          /* Give the pin back before the text goes out of use. */
+
+          libelf_pinrelease(&modp->pinfile);
+#endif
+
+          /* An FDPIC object placed its two segments separately, and its
+           * text was never allocated at all -- it is media the filesystem
+           * lent us.  Free the data on its own and leave the text alone.
+           */
+
+          lib_free((FAR void *)modp->dataalloc);
         }
       else
         {
