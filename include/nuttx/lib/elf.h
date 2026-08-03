@@ -286,6 +286,25 @@ struct mod_loadinfo_s
   FAR struct file *pinfile;
 #endif
 
+  /* Where the object's data base lives, from DT_PLTGOT.  An FDPIC module
+   * runs with this in the PIC base register, and it is the base every
+   * function descriptor built for the module names.
+   */
+
+  uintptr_t     gotaddr;
+
+  /* Pool of function descriptors, carved out behind the writable segment.
+   *
+   * R_ARM_FUNCDESC asks the loader to manufacture a descriptor and hand
+   * back its address, so the space has to be reserved when the segment is
+   * sized, before any relocation is applied.  Sized from the relocation
+   * count, which bounds how many can be asked for.
+   */
+
+  uintptr_t     descpool;
+  uint16_t      ndesc;       /* Capacity */
+  uint16_t      usedesc;     /* Next free slot */
+
   /* Address environment.
    *
    * addrenv - This is the handle created by addrenv_allocate() that can be
