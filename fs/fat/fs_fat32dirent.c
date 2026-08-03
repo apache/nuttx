@@ -1165,7 +1165,19 @@ static int fat_path2dirname(FAR const char **path,
           char name[DIR_MAXFNAME];
           memcpy(name, dirinfo->fd_lfname, DIR_MAXFNAME);
           FAR const char *tmp = (FAR const char *)name;
-          fat_parsesfname(&tmp, dirinfo, NULL);
+          if (fat_parsesfname(&tmp, dirinfo, NULL) != OK)
+            {
+              /* The name fits the short form's length but cannot be
+               * expressed as one (lower case, for example).  The failed
+               * parse has already filled the short name buffer with
+               * spaces, and fat_dirnamewrite() writes long name entries
+               * only while the buffer holds its empty marker.  Without
+               * the marker the file gets eleven spaces for a name, and
+               * every such file aliases to every other.
+               */
+
+              dirinfo->fd_name[0] = '\0';
+            }
         }
     }
 
