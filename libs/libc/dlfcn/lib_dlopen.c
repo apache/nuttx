@@ -26,8 +26,10 @@
 
 #include <nuttx/config.h>
 
-#include <libgen.h>
 #include <dlfcn.h>
+#include <errno.h>
+#include <stdint.h>
+#include <string.h>
 
 #include <nuttx/envpath.h>
 #include <nuttx/lib/elf.h>
@@ -82,24 +84,21 @@
 
 static inline FAR void *dlinsert(FAR const char *filename)
 {
-  FAR void *handle;
-  FAR char *name;
+  FAR const char *modname;
 
   DEBUGASSERT(filename != NULL);
 
-  name = strdup(filename);
-  if (name == NULL)
-    {
-      return NULL;
-    }
+  /* The module name is the basename of the file */
 
-  /* Then install the file using the basename of the file as the module
-   * name.
+  modname = strrchr(filename, '/');
+  modname = modname != NULL ? modname + 1 : filename;
+
+  /* libelf_insert() returns the module already loaded under this name,
+   * with another reference taken, so a library opened twice is one
+   * instance shared by both callers.
    */
 
-  handle = libelf_insert(filename, basename(name));
-  lib_free(name);
-  return handle;
+  return libelf_insert(filename, modname);
 }
 #else /* if defined(CONFIG_BUILD_KERNEL) */
 /* The KERNEL build is considerably more complex:  In order to be shared,
