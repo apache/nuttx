@@ -40,6 +40,7 @@
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
@@ -239,6 +240,31 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
                 }
             }
         }
+    }
+
+  /* Reserve the descriptor pool.  R_ARM_FUNCDESC asks the loader to
+   * manufacture a descriptor after the segment is placed, and the
+   * relocation count bounds how many.
+   */
+
+  if (loadinfo->fdpic)
+    {
+      size_t nrels = 0;
+
+      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+        {
+          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+          if (shdr->sh_type == SHT_REL && shdr->sh_entsize != 0)
+            {
+              nrels += shdr->sh_size / shdr->sh_entsize;
+            }
+        }
+
+      loadinfo->ndesc = nrels;
+      datasize += nrels * sizeof(struct fdpic_desc_s);
+
+      binfo("fdpic: reserving %zu descriptors behind the data\n", nrels);
     }
 
   /* An ET_DYN object is sized from its program headers, which give no
@@ -822,6 +848,14 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
                   goto errout_with_buffers;
                 }
             }
+
+          /* The pool was reserved at the end of the segment when it was
+           * sized, so it starts that many descriptors back from the end.
+           */
+
+          loadinfo->descpool = (FAR struct fdpic_desc_s *)
+                               (loadinfo->datastart + loadinfo->datasize) -
+                               loadinfo->ndesc;
         }
       else
         {
