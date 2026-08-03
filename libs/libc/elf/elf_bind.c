@@ -742,6 +742,27 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
             break;
+          case DT_NEEDED:
+
+            /* Shared libraries belong to dlopen(), not to a loader that
+             * walks dependencies itself.  Nothing in the tree loads
+             * DT_NEEDED today, so rather than resolve it badly, refuse
+             * the module and say why -- otherwise it would load and then
+             * fault on its first call into the library that is not there.
+             */
+
+            if (loadinfo->fdpic)
+              {
+                berr("ERROR: FDPIC module has a DT_NEEDED entry.  Shared "
+                     "libraries are not supported; link it statically.\n");
+                lib_free(sym);
+                lib_free(rels);
+                lib_free(dyn);
+                return -ENOEXEC;
+              }
+
+            break;
+
           case DT_PLTGOT:
 
             /* Where the object's data base lives.  An FDPIC module is
