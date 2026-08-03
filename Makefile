@@ -31,7 +31,6 @@ ifeq ($(wildcard .config),)
 	@echo "  tools/configure.sh -L"
 else
 include .config
-include tools/passwd_keys.mk
 
 # Include the correct Makefile for the selected architecture.
 
