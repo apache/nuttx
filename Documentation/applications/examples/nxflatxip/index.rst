@@ -61,9 +61,9 @@ Building the module
 ===================
 
 The module is built from ``module/xipmod.c`` at build time, exactly the way
-:doc:`../nxflat/index` builds its test programs, so it needs the same two
-host tools from the NuttX toolchain, ``mknxflat`` and ``ldnxflat``, and the
-board's ``Make.defs`` must name them.
+:doc:`../nxflat/index` builds its test programs, so it needs the same host
+tools: ``mknxflat``, which NuttX builds itself, and ``ldnxflat``, which has
+to come from the buildroot toolchain.  See :doc:`/components/nxflat`.
 
 The module has no static data and no string constants, and reports through a
 callback into the firmware rather than formatting its own output. The comment

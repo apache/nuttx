@@ -181,5 +181,5 @@ xipfs-nxflat
 ------------
 
 Same as ``xipfs``, plus the NXFLAT execute-in-place demo.  Building this
-configuration requires the NXFLAT tools (``mknxflat`` and ``ldnxflat``),
-which are not part of a standard toolchain installation.
+configuration requires ``ldnxflat``, which is not part of a standard
+toolchain installation; see :doc:`/components/nxflat`.
