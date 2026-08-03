@@ -1024,9 +1024,9 @@ static void mmcsd_decode_cid(FAR struct mmcsd_state_s *priv, uint32_t cid[4])
   decoded.mdt    = (cid[3] >> 8) & 0xff;
   decoded.crc    = (cid[3] >> 1) & 0x7f;
 
-  finfo("mid: %02x cbx: %01x oid: %01x pnm: %s prv: %d psn: %08x mdt: %02x\
-         crc: %02x\n", decoded.mid, decoded.cbx, decoded.oid, decoded.pnm,
-         decoded.prv, (unsigned long)decoded.psn, decoded.mdt, decoded.crc);
+  finfo("mid: %02x cbx: %01x oid: %01x pnm: %s prv: %d psn: %08" PRIx32
+        " mdt: %02x crc: %02x\n", decoded.mid, decoded.cbx, decoded.oid,
+        decoded.pnm, decoded.prv, decoded.psn, decoded.mdt, decoded.crc);
 }
 #endif
 
