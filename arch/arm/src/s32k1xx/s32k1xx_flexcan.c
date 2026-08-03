@@ -685,6 +685,7 @@ static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
     (peak_tx_mailbox_index_ > mbi ? peak_tx_mailbox_index_ : mbi);
 
   union cs_e cs;
+  cs.cs = 0;
   cs.code = CAN_TXMB_DATAORREMOTE;
   struct mb_s *mb = &priv->tx[mbi];
   mb->cs.code = CAN_TXMB_INACTIVE;
@@ -729,6 +730,7 @@ static int s32k1xx_transmit(struct s32k1xx_driver_s *priv)
         }
 
       cs.rtr = frame->can_id & FLAGRTR ? 1 : 0;
+      cs.brs = frame->flags & CANFD_BRS ? 1 : 0;
 
       cs.dlc = g_len_to_can_dlc[frame->len];
 
