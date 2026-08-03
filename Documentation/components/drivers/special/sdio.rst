@@ -38,6 +38,32 @@ Implementing an SDIO lower-half
 When implementing a new SDMMC controller driver (SDIO lower-half), it must
 provide the interface defined in ``struct sdio_dev_s``.
 
+High speed timing
+-----------------
+
+A lower-half that can clock a card above the default rate says so in the
+capabilities it reports from ``SDIO_CAPSET``:
+
+* ``SDIO_CAPS_MMC_HS_MODE`` for eMMC, and
+* ``SDIO_CAPS_SD_HS_MODE`` for SD cards.
+
+The upper-half only performs the CMD6 switch that puts a card into high
+speed timing if the corresponding capability is reported, so a host that
+cannot clock 50MHz simply omits it and its cards stay at the default rate.
+
+``SDIO_CLOCK`` is then called with one of two additional rates once the
+card has confirmed the switch:
+
+* ``CLOCK_MMC_TRANSFER_4BIT`` and ``CLOCK_SD_TRANSFER_4BIT`` are the
+  default speed rates, up to 25MHz for SD and 26MHz for eMMC.
+* ``CLOCK_SD_TRANSFER_4BIT_HS`` is high speed, up to 50MHz.
+
+A lower-half reporting ``SDIO_CAPS_SD_HS_MODE`` must handle the high speed
+rate in its clock method.  The card is clocked twice during
+initialization, once before the switch can have happened, so a driver that
+treats the two rates alike would run a card in default speed past the
+25MHz it is rated for.
+
 Call-flow (simplified example)
 ------------------------------
 

@@ -90,6 +90,33 @@
  */
 
 #define MMCSD_SCR_DATADELAY     (100)      /* Wait up to 100MS to get SCR */
+#define MMCSD_SWITCH_DATADELAY  (100)      /* Wait up to 100MS for switch status */
+
+/* CMD6, SWITCH_FUNC.  The card answers with a sixty four byte status block
+ * describing what it did.  Bit 31 makes the command a switch rather than a
+ * query, the nibble per function group selects the function wanted, and
+ * the group's own value of fifteen leaves that group alone.  So: switch,
+ * everything unchanged except access mode, which becomes function one,
+ * high speed.
+ */
+
+#define MMCSD_SWITCH_BLOCKLEN   (64)
+#define MMCSD_SWITCH_HIGHSPEED  (0x80fffff1)
+
+/* The status block reports the function actually selected for each group,
+ * a nibble each, most significant byte first.  Access mode is group one,
+ * bits 379:376 of the block, which is the low nibble of byte sixteen.  A
+ * card that could not do what was asked reports fifteen there instead.
+ */
+
+#define MMCSD_SWITCH_STATUS_MODE     (16)
+#define MMCSD_SWITCH_MODE_HIGHSPEED  (1)
+
+/* CMD6 was introduced by version 1.10 of the physical layer specification.
+ * Earlier cards answer it as an illegal command, so they are not asked.
+ */
+
+#define MMCSD_SCR_SPEC_1_10          (1)
 #define MMCSD_BLOCK_RDATADELAY  (100)      /* Wait up to 100MS to get one data block */
 
 /* Wait timeout to write one data block */
@@ -1058,9 +1085,11 @@ static void mmcsd_decode_scr(FAR struct mmcsd_state_s *priv, uint32_t scr[2])
 #ifdef CONFIG_ENDIAN_BIG  /* Card transfers SCR in big-endian order */
   priv->buswidth     = (scr[0] >> 16) & 15;
   priv->cmd23support = (scr[0] >> 1)  & 1;
+  priv->sdversion    = (scr[0] >> 24) & 15;
 #else
   priv->buswidth     = (scr[0] >> 8)  & 15;
   priv->cmd23support = (scr[0] >> 25) & 1;
+  priv->sdversion    =  scr[0]        & 15;
 #endif
 
 #ifdef CONFIG_DEBUG_FS_INFO
@@ -2761,6 +2790,92 @@ static void mmcsd_mediachange(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: mmcsd_sd_highspeed
+ *
+ * Description:
+ *   Switch an SD card from default speed into high speed timing with CMD6,
+ *   doubling the rate the bus may then be clocked at.
+ *
+ *   The card's answer is believed rather than the command's: the status
+ *   block it returns reports the function it actually selected, and a card
+ *   that cannot do what was asked says so there instead of failing the
+ *   command.  Only a card that confirms the switch is reported switched,
+ *   because the caller raises the clock on the strength of this and a card
+ *   still in default speed is out of specification above twenty five
+ *   megahertz.
+ *
+ * Assumptions:
+ *   Called once per card, from the initialization sequence, with the card
+ *   selected and the bus already at the default transfer clock.  The
+ *   sixty four byte status block is read through the interrupt path rather
+ *   than by DMA: it is smaller than the setup it would take, and it keeps
+ *   the caller's stack off the requirements a DMA capable buffer has.
+ *
+ * Returned Value:
+ *   OK if the card confirms the switch, a negated errno otherwise.  Every
+ *   failure is survivable: the caller stays at the default rate.
+ *
+ ****************************************************************************/
+
+static int mmcsd_sd_highspeed(FAR struct mmcsd_state_s *priv)
+{
+  uint8_t status[MMCSD_SWITCH_BLOCKLEN];
+  int ret;
+
+  if (priv->sdversion < MMCSD_SCR_SPEC_1_10)
+    {
+      finfo("Card predates CMD6, staying at default speed\n");
+      return -ENOTSUP;
+    }
+
+  ret = mmcsd_setblocklen(priv, MMCSD_SWITCH_BLOCKLEN);
+  if (ret != OK)
+    {
+      ferr("ERROR: mmcsd_setblocklen failed: %d\n", ret);
+      return ret;
+    }
+
+  SDIO_BLOCKSETUP(priv->dev, MMCSD_SWITCH_BLOCKLEN, 1);
+  SDIO_RECVSETUP(priv->dev, status, MMCSD_SWITCH_BLOCKLEN);
+  SDIO_WAITENABLE(priv->dev,
+                  SDIOWAIT_TRANSFERDONE | SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR,
+                  MMCSD_SWITCH_DATADELAY);
+
+  mmcsd_sendcmdpoll(priv, SD_CMD6, MMCSD_SWITCH_HIGHSPEED);
+  ret = mmcsd_recv_r1(priv, SD_CMD6);
+  if (ret != OK)
+    {
+      ferr("ERROR: RECVR1 for CMD6 failed: %d\n", ret);
+      SDIO_CANCEL(priv->dev);
+      return ret;
+    }
+
+  ret = mmcsd_eventwait(priv, SDIOWAIT_TIMEOUT | SDIOWAIT_ERROR);
+  if (ret != OK)
+    {
+      ferr("ERROR: mmcsd_eventwait for switch status failed: %d\n", ret);
+      return ret;
+    }
+
+  if ((status[MMCSD_SWITCH_STATUS_MODE] & 15) !=
+      MMCSD_SWITCH_MODE_HIGHSPEED)
+    {
+      finfo("Card declined high speed, staying at default speed\n");
+      return -EIO;
+    }
+
+  /* The specification asks for eight clocks after the switch before the
+   * card is spoken to again.  This reuses the driver's clock change delay,
+   * which is far longer than that.
+   */
+
+  MMCSD_USLEEP(MMCSD_CLK_DELAY);
+
+  finfo("Card switched to high speed\n");
+  return OK;
+}
+
+/****************************************************************************
  * Name: mmcsd_widebus
  *
  * Description:
@@ -2921,7 +3036,22 @@ static int mmcsd_widebus(FAR struct mmcsd_state_s *priv)
     {
       if ((priv->buswidth & MMCSD_SCR_BUSWIDTH_4BIT) != 0)
         {
-          SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT);
+          /* Switch the card into high speed before the host is told to
+           * clock it there, and only if the host asked for high speed by
+           * its capabilities.  High speed is offered on the wide bus
+           * alone: a card narrow enough to want the other path predates
+           * the switch command anyway.
+           */
+
+          if ((priv->caps & SDIO_CAPS_SD_HS_MODE) != 0 &&
+              mmcsd_sd_highspeed(priv) == OK)
+            {
+              SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT_HS);
+            }
+          else
+            {
+              SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_4BIT);
+            }
         }
       else
         {
@@ -3928,11 +4058,6 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
           ferr("ERROR: Failed to set wide bus operation: %d\n", ret);
         }
     }
-
-  /* TODO: If wide-bus selected, then send CMD6 to see if the card supports
-   * high speed mode.  A new SDIO method will be needed to set high speed
-   * mode.
-   */
 
   return OK;
 }
