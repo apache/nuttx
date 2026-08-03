@@ -240,6 +240,39 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
         }
     }
 
+  /* An FDPIC object may ask the loader to manufacture function
+   * descriptors -- that is what R_ARM_FUNCDESC means -- and hand back
+   * their addresses.  They have to live somewhere the module can reach
+   * through its data base, and the space has to be reserved now, because
+   * by the time the relocation is applied the segment has been placed.
+   *
+   * One relocation cannot ask for more than one descriptor, so the
+   * relocation count bounds the pool.  Modules are small and a descriptor
+   * is two words, so the slack in that bound is cheaper than walking the
+   * relocations twice.
+   */
+
+  if (loadinfo->fdpic)
+    {
+      size_t nrels = 0;
+
+      for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
+        {
+          FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
+
+          if (shdr->sh_type == SHT_REL && shdr->sh_entsize != 0)
+            {
+              nrels += shdr->sh_size / shdr->sh_entsize;
+            }
+        }
+
+      loadinfo->ndesc    = nrels;
+      loadinfo->descpool = datasize;
+      datasize          += nrels * 2 * sizeof(uintptr_t);
+
+      binfo("fdpic: reserving %zu descriptors behind the data\n", nrels);
+    }
+
   /* A shared object is sized from its program headers, which carry no
    * per-section alignment to take: p_align is the linker's page
    * granularity, and honouring it would cost a page per module for nothing.
@@ -836,6 +869,12 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
                   goto errout_with_buffers;
                 }
             }
+
+          /* The pool was sized as an offset past the end of the real
+           * data; now that the segment has an address, make it one.
+           */
+
+          loadinfo->descpool += loadinfo->datastart;
         }
       else
         {

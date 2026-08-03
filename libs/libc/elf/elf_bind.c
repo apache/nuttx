@@ -712,11 +712,66 @@ static int libelf_relocatedyn(FAR struct module_s *modp,
           case DT_PLTRELSZ:
             reldata.relsz[I_PLT] = dyn[i].d_un.d_val;
             break;
+          case DT_PLTGOT:
+
+            /* Where the object's data base lives.  An FDPIC module is
+             * entered with this in the PIC base register, and every
+             * function descriptor built for it names it as the base its
+             * callee should run with.
+             */
+
+            loadinfo->gotaddr = dyn[i].d_un.d_ptr;
+            break;
+
+          /* The constructor and destructor tables.  These are also
+           * reachable through the section headers, and are read from
+           * there below, but an object is not obliged to carry section
+           * headers and the dynamic tags are the authoritative copy.
+           */
+
+          case DT_INIT_ARRAY:
+            loadinfo->initarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_INIT_ARRAYSZ:
+            loadinfo->ninit = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
+          case DT_FINI_ARRAY:
+            loadinfo->finiarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_FINI_ARRAYSZ:
+            loadinfo->nfini = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
+          case DT_PREINIT_ARRAY:
+            loadinfo->preiarr = libelf_addr(loadinfo, dyn[i].d_un.d_ptr);
+            break;
+
+          case DT_PREINIT_ARRAYSZ:
+            loadinfo->nprei = dyn[i].d_un.d_val / sizeof(uintptr_t);
+            break;
+
           case DT_PLTREL:
             if (dyn[i].d_un.d_val == DT_REL)
               {
                 reldata.relentsz[I_PLT] = sizeof(Elf_Rel);
                 reldata.relrela[I_PLT] = 0;
+              }
+            else if (loadinfo->fdpic)
+              {
+                /* The ARM FDPIC ABI is REL throughout.  An object claiming
+                 * RELA for its PLT has to be refused rather than walked as
+                 * REL: the entries are half as long again, so every one
+                 * after the first would be read from the wrong place.
+                 */
+
+                berr("ERROR: FDPIC object claims RELA PLT relocations\n");
+                lib_free(sym);
+                lib_free(rels);
+                lib_free(dyn);
+                return -ENOEXEC;
               }
             else
               {
