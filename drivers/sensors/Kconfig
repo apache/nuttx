@@ -1573,6 +1573,20 @@ config SENSORS_MPU6050
 	---help---
 		Enable uORB driver support for Invensense MPU6050 6-axis MotionTracker device over I2C.
 
+if SENSORS_MPU6050
+
+config SENSORS_MPU6050_INT
+	bool "Deliver samples from the data ready interrupt"
+	default n
+	select SCHED_HPWORK
+	---help---
+		Take samples from the MPU6050 INT pin instead of reading the device
+		on demand, which timestamps them when they were actually measured.
+		The board must wire that pin and supply mpu6050_config_s::attach;
+		registration fails with -EINVAL otherwise.
+
+endif # SENSORS_MPU6050
+
 config SENSORS_MPU9250
 	bool "Invensense MPU9250 Sensor support"
 	default n
