@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -95,7 +95,7 @@ int scandir(FAR const char *path, FAR struct dirent ***namelist,
    * the original errno value to be able to restore it in case of success.
    */
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolve the filter, which is called from the loop below.
    *

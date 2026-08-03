@@ -30,7 +30,7 @@
 
 #include <nuttx/pthread.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -92,7 +92,7 @@ static void pthread_startup(pthread_startroutine_t entry,
 int pthread_create(FAR pthread_t *thread, FAR const pthread_attr_t *attr,
                    pthread_startroutine_t pthread_entry, pthread_addr_t arg)
 {
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolve it here, once, in the public entry point.
    *

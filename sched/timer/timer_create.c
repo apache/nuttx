@@ -37,7 +37,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 
-#if defined(CONFIG_ELF_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -201,7 +201,7 @@ int timer_create(clockid_t clockid, FAR struct sigevent *evp,
 
               memcpy(&ret->pt_event, evp, sizeof(struct sigevent));
 
-#if defined(CONFIG_ELF_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
+#if defined(CONFIG_FDPIC) && defined(CONFIG_SIG_EVTHREAD)
               /* If a module registered a SIGEV_THREAD callback, capture its
                * data base now, while this runs in the module's context.  The
                * callback fires later on a work-queue worker with no base of

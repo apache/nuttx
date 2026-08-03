@@ -38,7 +38,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/spawn.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -339,7 +339,7 @@ int task_spawn(FAR const char *name, main_t entry,
   pid_t pid = INVALID_PROCESS_ID;
   int ret;
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolve it here, once, in the public entry point.
    *

@@ -177,22 +177,9 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
 
     case R_ARM_FUNCDESC_VALUE:
       {
-        /* The target is the descriptor: two words, the entry point and
-         * the data base to install before branching to it.
-         *
-         * REL format keeps the addend in place, in the word that is about
-         * to become the entry point, and it matters.  A pointer to a
-         * static function is referenced through its *section* symbol,
-         * whose value is the section base, with the offset -- and the
-         * Thumb bit -- carried entirely by the addend.  Dropping it
-         * yields an even address and the core faults trying to execute it
-         * as ARM code.
-         *
-         * The GOT written here is this object's own, even for an imported
-         * function.  That is deliberate and is what makes a callback
-         * work: when the base firmware's qsort() calls back into the
-         * module's comparison function, the module needs its own data
-         * base in the PIC register.
+        /* The target is the descriptor itself.  REL keeps the addend in
+         * the word about to become the entry point, and it carries the
+         * Thumb bit, so it must be added rather than dropped.
          */
 
         FAR struct arm_fdpic_desc_s *desc =
@@ -220,7 +207,16 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
               "at addr=%08" PRIxPTR " to sym=%p st_value=%08" PRIx32 "\n",
               addr, sym, sym->st_value);
 
-        if (data->pltrel)
+        if (data->symisdesc)
+          {
+            /* Resolved to a function in another object, which published a
+             * descriptor of its own.  Take both words: the callee has to
+             * run with its own data base, not ours.
+             */
+
+            *desc = *(FAR struct arm_fdpic_desc_s *)sym->st_value;
+          }
+        else if (data->pltrel)
           {
             /* A lazy descriptor holds the address of its own PLT resolution
              * stub and a data base of -1, for a resolver to overwrite on
@@ -229,21 +225,20 @@ int up_relocate(const Elf32_Rel *rel, const Elf32_Sym *sym, uintptr_t addr,
              */
 
             desc->entry = sym->st_value;
+            desc->got   = data->gotaddr;
           }
         else
           {
             desc->entry = sym->st_value + desc->entry;
+            desc->got   = data->gotaddr;
           }
-
-        desc->got = data->gotaddr;
       }
       break;
 
     case R_ARM_FUNCDESC:
       {
-        /* A pointer to a descriptor, which the loader has to supply.
-         * Carve one out of the pool reserved behind the writable segment
-         * and store its address.
+        /* A pointer to a descriptor the loader must supply.  Carve one
+         * from the pool and store its address.
          */
 
         FAR struct arm_fdpic_desc_s *desc;

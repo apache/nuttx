@@ -57,7 +57,7 @@ struct fdpic_desc_s
  * Inline Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 
 /****************************************************************************
  * Name: fdpic_base
@@ -173,6 +173,6 @@ static inline void fdpic_invoke(uintptr_t entry, uintptr_t arg,
 #  define fdpic_invoke(entry, arg, got) \
           ((void)(got), (((CODE void (*)(uintptr_t))(uintptr_t)(entry))(arg)))
 
-#endif /* CONFIG_ELF_FDPIC */
+#endif /* CONFIG_FDPIC */
 
 #endif /* __INCLUDE_NUTTX_FDPIC_H */

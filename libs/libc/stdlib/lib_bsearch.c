@@ -38,7 +38,7 @@
 
 #include <stdlib.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 #include <assert.h>
@@ -118,7 +118,7 @@ FAR void *bsearch(FAR const void *key, FAR const void *base, size_t nel,
   DEBUGASSERT(base != NULL || nel == 0);
   DEBUGASSERT(compar != NULL);
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* See qsort(): an FDPIC caller passes a descriptor, not a code address */
 
   compar = (CODE int (*)(FAR const void *, FAR const void *))

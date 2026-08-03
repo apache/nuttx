@@ -45,7 +45,7 @@
 #include <sys/param.h>
 #include <stdlib.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -311,7 +311,7 @@ loop:
 void qsort(FAR void *base, size_t nel, size_t width,
            CODE int(*compar)(FAR const void *, FAR const void *))
 {
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a
    * code address.
    */

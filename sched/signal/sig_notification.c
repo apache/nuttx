@@ -34,7 +34,7 @@
 
 #include <nuttx/signal.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -74,7 +74,7 @@ static void nxsig_notification_worker(FAR void *arg)
 
   /* Perform the callback */
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* A module's callback runs here on a shared worker thread, which does not
    * carry the module's data base.  Install the base captured at
    * registration around the call so the callback can reach its own globals;
@@ -178,7 +178,7 @@ int nxsig_notification(pid_t pid, FAR struct sigevent *event,
       work->value = event->sigev_value;
       work->func  = event->sigev_notify_function;
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
       /* When the callback is a module's, work->got was set at registration
        * to the module's data base (this runs at send or expiry time, whose
        * context is not the module's, so it cannot be read here).  The

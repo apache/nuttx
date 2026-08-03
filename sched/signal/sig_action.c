@@ -38,7 +38,7 @@
 #include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -330,7 +330,7 @@ int nxsig_action(int signo, FAR const struct sigaction *act,
 
   handler = act->sa_handler;
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolve it here, in the innermost common code, so a module
    * that calls sigaction() directly is covered as well as one that goes

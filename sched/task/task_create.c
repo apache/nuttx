@@ -37,7 +37,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/fs/fs.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -208,7 +208,7 @@ int task_create_with_stack(FAR const char *name, int priority,
 {
   int ret;
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolving it here covers task_create() too, which is a plain
    * forwarder -- and covers it exactly once, which matters: resolving twice

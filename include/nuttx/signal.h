@@ -68,7 +68,7 @@ struct sigwork_s
   struct work_s work;           /* Work queue structure */
   union sigval value;           /* Data passed with notification */
   sigev_notify_function_t func; /* Notification function */
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   uintptr_t got;                /* FDPIC data base of a module callback, or
                                  * zero.  Captured at registration, installed
                                  * around the call on the worker thread. */

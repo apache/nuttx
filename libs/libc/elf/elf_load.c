@@ -240,16 +240,9 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
         }
     }
 
-  /* An FDPIC object may ask the loader to manufacture function
-   * descriptors -- that is what R_ARM_FUNCDESC means -- and hand back
-   * their addresses.  They have to live somewhere the module can reach
-   * through its data base, and the space has to be reserved now, because
-   * by the time the relocation is applied the segment has been placed.
-   *
-   * One relocation cannot ask for more than one descriptor, so the
-   * relocation count bounds the pool.  Modules are small and a descriptor
-   * is two words, so the slack in that bound is cheaper than walking the
-   * relocations twice.
+  /* Reserve the descriptor pool now: a relocation may ask the loader to
+   * manufacture one, and by then the segment has been placed.  Bounded by
+   * the relocation and symbol counts, which is loose but cheap.
    */
 
   if (loadinfo->fdpic)
@@ -266,10 +259,7 @@ static void libelf_elfsize(FAR struct mod_loadinfo_s *loadinfo, bool alloc)
             }
         }
 
-      /* A library also publishes a descriptor for each function it
-       * exports, so that dlsym() can hand back something callable.  The
-       * dynamic symbol table bounds how many that can be.
-       */
+      /* Exported functions get one each, for dlsym(). */
 
       for (i = 0; i < loadinfo->ehdr.e_shnum; i++)
         {
@@ -417,10 +407,7 @@ static inline int libelf_loadfile(FAR struct mod_loadinfo_s *loadinfo)
                 {
                   if (loadinfo->fdpic)
                     {
-                      /* Mapped, not copied.  Copying it here would put the
-                       * text in RAM and forfeit the only thing this format
-                       * was chosen for.
-                       */
+                      /* Mapped, not copied. */
 
                       continue;
                     }
@@ -824,12 +811,8 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
     {
       if (loadinfo->fdpic)
         {
-          /* An FDPIC object reaches its data through the GOT rather than
-           * at a fixed distance from its code, so the two segments do not
-           * have to stay adjacent -- which is the entire point.  The
-           * read-only one is mapped where it already lies on the media
-           * and never copied; only the writable one is allocated, and
-           * that happens once per running instance.
+          /* Text is mapped where it lies on the media and never copied;
+           * only the writable segment is allocated, once per instance.
            */
 
           if (loadinfo->xipbase == 0)
@@ -839,9 +822,8 @@ int libelf_load(FAR struct mod_loadinfo_s *loadinfo)
               goto errout_with_buffers;
             }
 
-          /* The media address is the base of the file, so the segment's
-           * own file offset still has to be added -- the same arithmetic
-           * the ET_REL path does with sh_offset.
+          /* The media address is the base of the file, so add the
+           * segment's own file offset.
            */
 
           for (i = 0; i < loadinfo->ehdr.e_phnum; i++)

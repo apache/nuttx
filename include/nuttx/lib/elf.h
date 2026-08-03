@@ -44,6 +44,10 @@
 #  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
+#ifndef CONFIG_LIBC_ELF_MAXNEEDED
+#  define CONFIG_LIBC_ELF_MAXNEEDED  0
+#endif
+
 /* Holding an XIP pin past the load means holding the file itself: the pin is
  * released when the module is unloaded, which happens on a task other than
  * the one that loaded it, so a descriptor from that task's group cannot
@@ -208,6 +212,16 @@ struct module_s
                                         * and dlclose() give one back, and the
                                         * module goes when the last does
                                         */
+
+#ifdef CONFIG_LIBC_DLFCN
+  /* Libraries opened with dlopen() for this module's DT_NEEDED entries.
+   * These are references this module holds on others, where nopen above
+   * counts the references others hold on this one.
+   */
+
+  FAR void *libs[CONFIG_LIBC_ELF_MAXNEEDED];
+  uint8_t nlibs;
+#endif
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
@@ -808,7 +822,11 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  This gives up everything the module
+ *   holds, including any libraries it opened for its DT_NEEDED entries, so
+ *   the caller must be releasing the last reference to it: libelf_remove()
+ *   calls this only once nopen reaches zero, and the copy binfmt keeps
+ *   belongs to a single exec'd binary and is never shared.
  *
  ****************************************************************************/
 

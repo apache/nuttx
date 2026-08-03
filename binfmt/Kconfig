@@ -61,11 +61,12 @@ config ELF_STACKSIZE
 	---help---
 		This is the default stack size that will be used when starting ELF binaries.
 
-config ELF_FDPIC
+config FDPIC
 	bool "FDPIC modules"
 	default n
 	select PIC
 	depends on ARCH_ARMV7M || ARCH_ARMV8M
+	depends on BUILD_FLAT
 	---help---
 		Load ELF modules built for the FDPIC ABI.
 

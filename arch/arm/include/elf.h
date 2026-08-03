@@ -265,16 +265,9 @@
 #define DT_ARM_PREEMPTMAP        0x70000002
 #define DT_ARM_RESERVED2         0x70000003
 
-/* Per-object state that the FDPIC relocations need and that a relocation's
- * own arguments cannot supply.
- *
- * up_relocate() is handed a relocation, a resolved symbol and the address
- * to patch, which is enough for every other ARM relocation.  The two
- * FDPIC ones need more: a function descriptor's second word is the
- * *object's* data base, and R_ARM_FUNCDESC has to manufacture descriptors
- * from a pool whose cursor must survive from one relocation to the next.
- * Both are loader state, so they arrive through the arch_data channel,
- * seeded by libelf_bind() before the relocation loop and read back after.
+/* Loader state the FDPIC relocations need but a relocation cannot carry:
+ * the object's data base, and a descriptor pool cursor that has to survive
+ * from one relocation to the next.
  */
 
 /* The relocations that only an FDPIC object may use.  Seeing one in an
@@ -310,12 +303,8 @@
 
 #ifndef __ASSEMBLY__
 
-/* A function descriptor: what an FDPIC function pointer actually is.
- *
- * Base firmware is not built FDPIC, so to it a function pointer is a code
- * address.  A module passes the address of one of these instead, and the
- * callee is entered with got in the PIC base register so that it can
- * reach its own data.
+/* An FDPIC function pointer: the code, plus the data base to enter it
+ * with.
  */
 
 struct arm_fdpic_desc_s
@@ -331,6 +320,7 @@ struct arch_elfdata_s
   uintptr_t descpool;      /* Base of the descriptor pool */
   uint16_t  ndesc;         /* Capacity, in descriptors */
   uint16_t  usedesc;       /* Next free slot */
+  uint8_t   symisdesc;     /* Symbol value is a descriptor, not code */
   uint8_t   pltrel;        /* Relocation comes from DT_JMPREL, so the word
                             * it overwrites is a lazy binding stub and not
                             * an addend

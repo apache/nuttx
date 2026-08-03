@@ -33,7 +33,7 @@
 #include <nuttx/mutex.h>
 #include <nuttx/debug.h>
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
 #  include <nuttx/fdpic.h>
 #endif
 
@@ -77,7 +77,7 @@ int pthread_once(FAR pthread_once_t *once_control,
       return EINVAL;
     }
 
-#ifdef CONFIG_ELF_FDPIC
+#ifdef CONFIG_FDPIC
   /* An FDPIC module passes the address of a function descriptor, not a code
    * address.  Resolve it here, in the public entry point.
    *
