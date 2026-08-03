@@ -609,7 +609,11 @@ static int audio_start(FAR struct file *filep)
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
   else if (upper->status->state == AUDIO_STATE_PAUSED)
     {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      return audio_resume(filep, session);
+#else
       return audio_resume(filep);
+#endif
     }
 #endif /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
 
@@ -691,7 +695,11 @@ static int audio_stop(FAR struct file *filep)
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
   else if (nstate == AUDIO_STATE_PAUSED)
     {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      ret = audio_pause(filep, session);
+#else
       ret = audio_pause(filep);
+#endif
       if (ret != OK)
         {
           return ret;
