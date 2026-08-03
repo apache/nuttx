@@ -118,6 +118,11 @@ static_assert((CONFIG_NET_LL_GUARDSIZE % 4) == 2,
 #define RNDIS_CTRLREQ_LEN       (256)
 #define RNDIS_RESP_QUEUE_WORDS  (64)
 
+/* NDIS maximum frame size excludes the Ethernet header. */
+
+#define RNDIS_MAX_FRAME_SIZE    (CONFIG_NET_ETH_PKTSIZE - ETH_HDRLEN)
+#define RNDIS_MAX_TOTAL_SIZE    CONFIG_NET_ETH_PKTSIZE
+
 #define RNDIS_BUFFER_SIZE       CONFIG_NET_ETH_PKTSIZE
 #define RNDIS_BUFFER_COUNT      4
 
@@ -520,7 +525,7 @@ static const struct rndis_oid_value_s g_rndis_oid_values[] =
     sizeof(g_rndis_supported_oids), 0,
     g_rndis_supported_oids
   },
-  {RNDIS_OID_GEN_MAXIMUM_FRAME_SIZE,    4, CONFIG_NET_ETH_PKTSIZE,  NULL},
+  {RNDIS_OID_GEN_MAXIMUM_FRAME_SIZE,    4, RNDIS_MAX_FRAME_SIZE,    NULL},
 #if defined(CONFIG_USBDEV_DUALSPEED) || defined(CONFIG_USBDEV_SUPERSPEED)
   {RNDIS_OID_GEN_LINK_SPEED,            4, 100000,              NULL},
 #else
@@ -531,7 +536,7 @@ static const struct rndis_oid_value_s g_rndis_oid_values[] =
   {RNDIS_OID_GEN_VENDOR_ID,             4, 0x00ffffff,          NULL},
   {RNDIS_OID_GEN_VENDOR_DESCRIPTION,    6, 0,                   "RNDIS"},
   {RNDIS_OID_GEN_CURRENT_PACKET_FILTER, 4, 0,                   NULL},
-  {RNDIS_OID_GEN_MAXIMUM_TOTAL_SIZE,    4, 2048,                NULL},
+  {RNDIS_OID_GEN_MAXIMUM_TOTAL_SIZE,    4, RNDIS_MAX_TOTAL_SIZE,    NULL},
   {RNDIS_OID_GEN_XMIT_OK,               4, 0,                   NULL},
   {RNDIS_OID_GEN_RCV_OK,                4, 0,                   NULL},
   {RNDIS_OID_802_3_PERMANENT_ADDRESS,   6, 0,                   NULL},
