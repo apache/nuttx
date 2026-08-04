@@ -31,6 +31,10 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/vhost/vhost.h>
 
+#ifdef CONFIG_DRIVERS_VHOST_NET
+#  include "vhost-net.h"
+#endif
+
 #include "vhost-rng.h"
 #include "vhost-rpmsg.h"
 
@@ -204,6 +208,77 @@ int vhost_get_vq_buffers(FAR struct virtqueue *vq,
 
       vb[i].buf = buf;
       vb[i].len = len;
+    }
+
+  *vbcnt = i;
+  return head;
+}
+
+/****************************************************************************
+ * Name: vhost_get_vq_buffers_pa
+ *
+ * Description:
+ *   Like vhost_get_vq_buffers(), but returns the untranslated 64-bit
+ *   descriptor addresses instead of CPU pointers.  Needed when the peer
+ *   driver posts buffers beyond the CPU's directly addressable range
+ *   (the pointer-based API would silently truncate the address).
+ *
+ *   The caller completes the chain with virtqueue_add_consumed_buffer()
+ *   using the returned head index, exactly as with the pointer API.
+ *
+ ****************************************************************************/
+
+int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
+                            FAR struct vhost_buf_s *vb, size_t vbsize,
+                            FAR size_t *vbcnt)
+{
+  uint16_t head;
+  uint16_t idx;
+  size_t i = 0;
+
+  DEBUGASSERT(vb != NULL && vbsize >= 1 && vbcnt != NULL);
+
+  atomic_thread_fence(memory_order_acquire);
+
+  /* The avail ring is written by the peer driver.  On systems without
+   * hardware coherency between the two sides the vring memory must be
+   * mapped non-cacheable (or otherwise synchronized) for these reads to
+   * observe the peer's updates.
+   */
+
+  if (vq->vq_available_idx == vq->vq_ring.avail->idx)
+    {
+      return -ENOMEM;
+    }
+
+  head = vq->vq_ring.avail->ring[vq->vq_available_idx++ &
+                                 (vq->vq_nentries - 1)];
+
+  for (idx = head; ; )
+    {
+      if (i >= vbsize || i >= vq->vq_nentries)
+        {
+          /* Chain longer than the caller's array (or malformed and
+           * looping): complete it untouched so the ring slot returns to
+           * the peer rather than leaking, and report the drop.
+           */
+
+          vhosterr("descriptor chain exceeds vbsize %zu, dropped\n",
+                   vbsize);
+          virtqueue_add_consumed_buffer(vq, head, 0);
+          return -EINVAL;
+        }
+
+      vb[i].addr = vq->vq_ring.desc[idx].addr;
+      vb[i].len  = vq->vq_ring.desc[idx].len;
+      i++;
+
+      if (!(vq->vq_ring.desc[idx].flags & VRING_DESC_F_NEXT))
+        {
+          break;
+        }
+
+      idx = vq->vq_ring.desc[idx].next;
     }
 
   *vbcnt = i;
@@ -435,6 +510,14 @@ void vhost_register_drivers(void)
     {
       vhosterr("metal_init failed, ret=%d\n", ret);
     }
+
+#ifdef CONFIG_DRIVERS_VHOST_NET
+  ret = vhost_register_net_driver();
+  if (ret < 0)
+    {
+      vhosterr("vhost_register_net_driver failed, ret=%d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_DRIVERS_VHOST_RNG
   ret = vhost_register_rng_driver();
