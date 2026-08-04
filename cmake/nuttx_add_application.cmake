@@ -199,7 +199,15 @@ function(nuttx_add_application)
           COMMAND
             ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
             ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
-          COMMAND ${CMAKE_STRIP} ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+            # keep the application attribute symbols through strip so the binary
+            # loader can still read them, see NX_KEEP in Application.mk
+          COMMAND
+            ${CMAKE_STRIP} -K nx_stacksize -K nx_priority -K nx_uid -K nx_gid -K
+            nx_mode ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+            # match the Application.mk install rule: ld -r output is not marked
+            # executable, but filesystem images built from bin/ must carry the
+            # execute permission
+          COMMAND chmod +x ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
           COMMENT "Building ELF:${ELF_NAME}"
           COMMAND_EXPAND_LISTS)
       else()
