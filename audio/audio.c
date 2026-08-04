@@ -769,13 +769,13 @@ static int audio_allocbuffer(FAR struct audio_upperhalf_s *upper,
   FAR void *newaddr;
   int ret;
 
-  if (upper->periods >= upper->nbuffers)
-    {
-      return 0;
-    }
-
   if (bufdesc->u.pbuffer == NULL)
     {
+      if (upper->periods >= upper->nbuffers)
+        {
+          return 0;
+        }
+
       bufdesc->u.pbuffer = &apb;
       share = true;
     }
