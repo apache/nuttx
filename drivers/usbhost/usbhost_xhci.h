@@ -510,6 +510,22 @@
 #define XHCI_ST_CTX0_RTSTR_MASK      (0xfffff << XHCI_ST_CTX0_RTSTR_SHIFT)
 #define XHCI_ST_CTX0_SPEED_SHIFT     (20)                  /* Bits 20:23: Speed */
 #define XHCI_ST_CTX0_SPEED_MASK      (0xf << XHCI_ST_CTX0_SPEED_SHIFT)
+#define XHCI_ST_CTX0_SPEED_SET(x)    (((x) << XHCI_ST_CTX0_SPEED_SHIFT) & \
+                                      XHCI_ST_CTX0_SPEED_MASK)
+
+/* Port Speed IDs, which xHCI numbers its own way rather than USB's.  These
+ * are the values every controller reports in PORTSC and expects back in a
+ * slot context; a device is described to the controller with one of them
+ * and with nothing else, so zero is not a default but an invalid context.
+ *
+ * Reference: Table 7-13: Default USB Speed ID Mapping
+ */
+
+#define XHCI_SPEED_FULL              (1)
+#define XHCI_SPEED_LOW               (2)
+#define XHCI_SPEED_HIGH              (3)
+#define XHCI_SPEED_SUPER             (4)
+#define XHCI_SPEED_SUPER_PLUS        (5)
 #define XHCI_ST_CTX0_MTT             (1 << 25)             /* Bit 25: Multi-TT */
                                                            /* Bit 24: Reserved */
 #define XHCI_ST_CTX0_HUB             (1 << 26)             /* Bit 26: Hub */

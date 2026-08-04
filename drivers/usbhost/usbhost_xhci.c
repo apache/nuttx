@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <string.h>
 
 #include <sys/endian.h>
@@ -81,6 +82,14 @@
  */
 
 #define XHCI_PORT_RESET_MS       (500)
+
+/* How much memory a context occupies, which depends on the stride the
+ * controller asked for.  One entry for the slot and one per endpoint, and
+ * the input context carries its control entry in front of both.
+ */
+
+#define XHCI_DEVCTX_SIZE(priv)   ((1 + XHCI_MAX_ENDPOINTS) * (priv)->ctxsize)
+#define XHCI_INCTX_SIZE(priv)    ((2 + XHCI_MAX_ENDPOINTS) * (priv)->ctxsize)
 #define XHCI_BUFSIZE             (512)
 
 /* Port numbers macros */
@@ -146,6 +155,8 @@ struct xhci_epinfo_s
   size_t             buflen;       /* Buffer length used for transfer */
   FAR uint8_t       *buffer;       /* The caller's buffer, for cache maintenance */
   FAR uint8_t       *bounce;       /* Aligned stand-in for it, or NULL */
+  size_t             dmalen;       /* Length the cache is maintained over */
+  size_t             dmacopy;      /* Length to copy back out of a stand-in */
   bool               dmain;        /* Direction this buffer was prepared for */
   sem_t              iocsem;       /* Semaphore used to wait for transfer completion */
 #ifdef CONFIG_USBHOST_ASYNCH
@@ -251,6 +262,7 @@ struct usbhost_xhci_s
   FAR const struct xhci_bus_ops_s *ops;     /* Bus operations */
   FAR void                     *arg;        /* Bus private data */
   FAR const char               *name;       /* What to call this controller */
+  uint8_t                       ctxsize;    /* Context stride, 32 or 64 bytes */
   uint32_t                      pending;    /* IRQ pending status */
   struct work_s                 work;       /* IRQ work */
   struct work_s                 pscwork;    /* Port status change work */
@@ -418,7 +430,17 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
                                   FAR struct xhci_epinfo_s *epinfo);
 static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
                             FAR uint8_t *buffer, size_t buflen);
-static FAR uint8_t *xhci_dma_prepare(FAR struct xhci_epinfo_s *epinfo,
+static uint32_t xhci_speed_id(uint8_t speed);
+static inline FAR struct xhci_slot_ctx_s *
+xhci_in_slot(FAR struct usbhost_xhci_s *priv,
+             FAR struct xhci_input_dev_ctx_s *input);
+static inline FAR struct xhci_ep_ctx_s *
+xhci_in_ep(FAR struct usbhost_xhci_s *priv,
+           FAR struct xhci_input_dev_ctx_s *input, int epidx);
+static inline FAR struct xhci_slot_ctx_s *
+xhci_out_slot(FAR struct xhci_dev_ctx_s *ctx);
+static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
+                                     FAR struct xhci_epinfo_s *epinfo,
                                      FAR uint8_t *buffer, size_t buflen,
                                      bool dirin);
 static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo);
@@ -733,8 +755,17 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
   uinfo("Dump xHCI registers: %s\n", msg);
 
   uinfo("=== Host Controller Capability Registers ===\n");
-  xhci_dump_capa_reg(priv, "CAPLENGTH   ", XHCI_CAPLENGTH);
-  xhci_dump_capa_reg(priv, "HCIVERSION  ", XHCI_HCIVERSION);
+
+  /* CAPLENGTH and HCIVERSION share one word, and a register block reached
+   * over a bus that only answers aligned accesses cannot be read at the
+   * odd offset the second one has.  Read the word once and take both from
+   * it.
+   */
+
+  uinfo("\tCAPLENGTH   :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) & 0xff);
+  uinfo("\tHCIVERSION  :\t\t0x%" PRIx32 "\n",
+        xhci_capa_getreg(priv, XHCI_CAPLENGTH) >> 16);
   xhci_dump_capa_reg(priv, "HCSPARAMS1  ", XHCI_HCSPARAMS1);
   xhci_dump_capa_reg(priv, "HCSPARAMS2  ", XHCI_HCSPARAMS2);
   xhci_dump_capa_reg(priv, "HCSPARAMS3  ", XHCI_HCSPARAMS3);
@@ -1609,7 +1640,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    * Initialize all fields to 0.
    */
 
-  memset(dev->input, 0, sizeof(struct xhci_input_dev_ctx_s));
+  memset(dev->input, 0, XHCI_INCTX_SIZE(priv));
 
   /* Step 2. Initialize the Input Control Context by setting the A0 and
    * A1 flags to 1 (Slot flag and EP0 flag).
@@ -1619,9 +1650,16 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
            XHCI_IN_CTX1_A(XHCI_EP0_FLAG);
   xhci_context_ctrl(priv, dev, 0, regval);
 
-  /* Step 3. Initialize the Input Slot Context */
+  /* Step 3. Initialize the Input Slot Context.
+   *
+   * The speed field has no valid zero.  This is the only place the
+   * controller learns the device's speed, and one that checks refuses
+   * Address Device with a parameter error without it.
+   */
 
-  regval = XHCI_ST_CTX0_CTXENT_SET(1);
+  regval = XHCI_ST_CTX0_CTXENT_SET(1) |
+           XHCI_ST_CTX0_SPEED_SET(
+             xhci_speed_id(dev->rhport->hport.hport.speed));
 
 #ifdef CONFIG_USBHOST_HUB
   /* TODO:
@@ -1633,7 +1671,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
 #  warning missing logic
 #endif
 
-  dev->input->slot.ctx[0] = htole32(regval);
+  xhci_in_slot(priv, dev->input)->ctx[0] = htole32(regval);
 
   /* Configure Root Hub Port Number (starts from 1) */
 
@@ -1642,7 +1680,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
   /* TODO: configure number of ports */
 
   regval |= XHCI_ST_CTX1_PORTS_SET(0);
-  dev->input->slot.ctx[1] = htole32(regval);
+  xhci_in_slot(priv, dev->input)->ctx[1] = htole32(regval);
 
   /* Step 4. the Transfer Ring for the Default Control Endpoint is already
    * allocated.
@@ -1668,7 +1706,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
 
   DEBUGASSERT(drdp != 0);
   xhci_ep_configure(priv,
-                    &dev->input->ep[0],
+                    xhci_in_ep(priv, dev->input, 0),
                     XHCI_EPTYPE_CTRL, maxpkt,
                     0, drdp,
                     0, 0);
@@ -1677,13 +1715,22 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    * Initialize all fields to 0.
    */
 
-  memset(dev->ctx, 0, sizeof(struct xhci_dev_ctx_s));
+  memset(dev->ctx, 0, XHCI_DEVCTX_SIZE(priv));
 
-  /* Flush Device input context */
+  /* Flush both contexts.
+   *
+   * The output context is the controller's to write, so clearing it must
+   * reach memory: the dirty zeros left in cache are written back later, on
+   * top of what the controller has put there.  The slot state lives in
+   * that context, and losing it fails the next command against the slot.
+   */
+
+  up_flush_dcache((uintptr_t)dev->ctx,
+                  (uintptr_t)dev->ctx + XHCI_DEVCTX_SIZE(priv));
 
   up_flush_dcache((uintptr_t)dev->input,
                   (uintptr_t)dev->input +
-                  sizeof(struct xhci_input_dev_ctx_s));
+                  XHCI_INCTX_SIZE(priv));
 
   /* Step 7. Load the appropriate (Device Slot ID) entry in the Device
    * Context Base Address Array with a pointer to the Output Device
@@ -1821,8 +1868,15 @@ static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
 
   rhport->dev->state = XHCI_SLOT_DISABLED;
 
-  memset(rhport->dev->ctx, 0, sizeof(struct xhci_dev_ctx_s));
-  memset(rhport->dev->input, 0, sizeof(struct xhci_input_dev_ctx_s));
+  memset(rhport->dev->ctx, 0, XHCI_DEVCTX_SIZE(priv));
+  memset(rhport->dev->input, 0, XHCI_INCTX_SIZE(priv));
+
+  /* And push both, so nothing is left to be written back later */
+
+  up_flush_dcache((uintptr_t)rhport->dev->ctx,
+                  (uintptr_t)rhport->dev->ctx + XHCI_DEVCTX_SIZE(priv));
+  up_flush_dcache((uintptr_t)rhport->dev->input,
+                  (uintptr_t)rhport->dev->input + XHCI_INCTX_SIZE(priv));
 
   /* Remove reference to a device slot */
 
@@ -1891,8 +1945,8 @@ static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
         }
     }
 
-  dev->input->slot.ctx[0] &= ~XHCI_ST_CTX0_CTXENT_MASK;
-  dev->input->slot.ctx[0] |= XHCI_ST_CTX0_CTXENT_SET(i);
+  xhci_in_slot(priv, dev->input)->ctx[0] &= ~XHCI_ST_CTX0_CTXENT_MASK;
+  xhci_in_slot(priv, dev->input)->ctx[0] |= XHCI_ST_CTX0_CTXENT_SET(i);
 }
 
 /****************************************************************************
@@ -1910,7 +1964,8 @@ static void xhci_context_ctrl(FAR struct usbhost_xhci_s *priv,
 static int xhci_command(FAR struct usbhost_xhci_s *priv,
                         FAR struct xhci_trb_s *trb, uint16_t timeout_ms)
 {
-  int ret;
+  uint32_t cmdtype;
+  int      ret;
 
   /* Lock bus */
 
@@ -1919,6 +1974,10 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     {
       return ret;
     }
+
+  /* Remember what this was before the result overwrites it */
+
+  cmdtype = XHCI_TRB_D2_TYPE_GET(trb->d2);
 
   /* Add command to ring */
 
@@ -1955,7 +2014,8 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     }
   else
     {
-      uerr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
+      uerr("command type %d failed, CC = %d\n", cmdtype,
+           XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
     }
 
@@ -2313,7 +2373,7 @@ static int xhci_control_setup(FAR struct xhci_rhport_s *rhport,
 
   if (buffer)
     {
-      buffer = xhci_dma_prepare(epinfo, buffer, buflen,
+      buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
                                 (req->type & USB_REQ_DIR_IN) != 0);
       if (buffer == NULL)
         {
@@ -2394,7 +2454,8 @@ static int xhci_normal_setup(FAR struct xhci_rhport_s *rhport,
 
   /* Make the buffer safe for the controller to reach */
 
-  buffer = xhci_dma_prepare(epinfo, buffer, buflen, epinfo->dirin != 0);
+  buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
+                            epinfo->dirin != 0);
   if (buffer == NULL)
     {
       return -ENOMEM;
@@ -2420,8 +2481,8 @@ static int xhci_normal_setup(FAR struct xhci_rhport_s *rhport,
 
       if (++n >= XHCI_TD_MAX)
         {
-          uerr("transfer of %zu needs more TRBs than the ring holds\n",
-               buflen);
+          uerr("transfer of %zu from pa %" PRIxPTR " needs more than %d "
+               "TRBs\n", buflen, pa, XHCI_TD_MAX);
           return -EINVAL;
         }
 
@@ -2478,7 +2539,8 @@ static int xhci_isoc_setup(FAR struct xhci_rhport_s *rhport,
 
   /* Make the buffer safe for the controller to reach */
 
-  buffer = xhci_dma_prepare(epinfo, buffer, buflen, epinfo->dirin != 0);
+  buffer = xhci_dma_prepare(priv, epinfo, buffer, buflen,
+                            epinfo->dirin != 0);
   if (buffer == NULL)
     {
       return -ENOMEM;
@@ -2778,6 +2840,82 @@ static void xhci_portsc_work(FAR void *arg)
 }
 
 /****************************************************************************
+ * Name: xhci_in_slot / xhci_in_ep / xhci_out_slot
+ *
+ * Description:
+ *   Reach into a device context.
+ *
+ *   A context is an array of equally sized entries, and how big they are is
+ *   a property of the controller rather than of the specification: it
+ *   reports either thirty-two or sixty-four bytes, and the wider form is
+ *   the same fields with reserved space after them.  So these are the same
+ *   structures at a different stride, and only the arithmetic to find the
+ *   n'th one has to know which.
+ *
+ *   Output context:  slot, then endpoints 1 upward.
+ *   Input context:   input control, then slot, then endpoints.
+ *
+ *   The first entry of either is at offset zero, so only the ones after it
+ *   need this.
+ *
+ ****************************************************************************/
+
+static inline FAR struct xhci_slot_ctx_s *
+xhci_in_slot(FAR struct usbhost_xhci_s *priv,
+             FAR struct xhci_input_dev_ctx_s *input)
+{
+  return (FAR struct xhci_slot_ctx_s *)((uintptr_t)input + priv->ctxsize);
+}
+
+static inline FAR struct xhci_ep_ctx_s *
+xhci_in_ep(FAR struct usbhost_xhci_s *priv,
+           FAR struct xhci_input_dev_ctx_s *input, int epidx)
+{
+  return (FAR struct xhci_ep_ctx_s *)((uintptr_t)input +
+                                      (epidx + 2) * priv->ctxsize);
+}
+
+static inline FAR struct xhci_slot_ctx_s *
+xhci_out_slot(FAR struct xhci_dev_ctx_s *ctx)
+{
+  return (FAR struct xhci_slot_ctx_s *)ctx;
+}
+
+/****************************************************************************
+ * Name: xhci_speed_id
+ *
+ * Description:
+ *   Turn the speed the USB host stack uses into the one a slot context
+ *   wants, which is a different numbering with no relation to it.
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_speed_id(uint8_t speed)
+{
+  switch (speed)
+    {
+      case USB_SPEED_LOW:
+        return XHCI_SPEED_LOW;
+      case USB_SPEED_FULL:
+        return XHCI_SPEED_FULL;
+      case USB_SPEED_HIGH:
+        return XHCI_SPEED_HIGH;
+      case USB_SPEED_SUPER:
+        return XHCI_SPEED_SUPER;
+      case USB_SPEED_SUPER_PLUS:
+        return XHCI_SPEED_SUPER_PLUS;
+      default:
+
+        /* Nothing else can be described to a controller, and full speed
+         * is the safe answer.
+         */
+
+        uwarn("no speed ID for USB speed %d\n", speed);
+        return XHCI_SPEED_FULL;
+    }
+}
+
+/****************************************************************************
  * Name: xhci_dmacapable
  *
  * Description:
@@ -2831,30 +2969,53 @@ static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
  *
  ****************************************************************************/
 
-static FAR uint8_t *xhci_dma_prepare(FAR struct xhci_epinfo_s *epinfo,
+static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
+                                     FAR struct xhci_epinfo_s *epinfo,
                                      FAR uint8_t *buffer, size_t buflen,
                                      bool dirin)
 {
-  size_t line = up_get_dcache_linesize();
+  size_t line      = up_get_dcache_linesize();
+  bool   reachable = xhci_dmacapable(priv, buffer, buflen);
 
-  epinfo->buffer = buffer;
-  epinfo->bounce = NULL;
-  epinfo->dmain  = dirin;
+  epinfo->buffer  = buffer;
+  epinfo->bounce  = NULL;
+  epinfo->dmalen  = buflen;
 
-  /* No cache to maintain, so nothing to arrange */
+  /* How much to bring back afterwards.  This cannot be taken from buflen
+   * at completion time: that field means the length of a data transfer and
+   * control transfers deliberately leave it zero, so a descriptor read
+   * would copy nothing back and the caller would see whatever its buffer
+   * held before.
+   */
 
-  if (line == 0)
+  epinfo->dmacopy = buflen;
+  epinfo->dmain   = dirin;
+
+  /* Nothing to arrange: no cache to maintain, and an address the
+   * controller can be pointed at as it stands.
+   */
+
+  if (line == 0 && reachable)
     {
       return buffer;
     }
 
-  if (((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
+  if (!reachable ||
+      ((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
     {
       /* The buffer shares a line with something else.  Work in a stand-in
        * that does not.
        */
 
-      epinfo->bounce = kmm_memalign(line, (buflen + line - 1) & ~(line - 1));
+      /* Maintain the whole stand-in, not just the part in use: cache
+       * operations work a line at a time and this chip rejects a partial
+       * range.
+       */
+
+      epinfo->dmalen = line ? ((buflen + line - 1) & ~(line - 1)) : buflen;
+
+      epinfo->bounce = kmm_memalign(line ? line : sizeof(uintptr_t),
+                                    epinfo->dmalen);
       if (epinfo->bounce == NULL)
         {
           return NULL;
@@ -2875,11 +3036,13 @@ static FAR uint8_t *xhci_dma_prepare(FAR struct xhci_epinfo_s *epinfo,
 
   if (dirin)
     {
-      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      up_invalidate_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + epinfo->dmalen);
     }
   else
     {
-      up_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      up_clean_dcache((uintptr_t)buffer,
+                      (uintptr_t)buffer + epinfo->dmalen);
     }
 
   return buffer;
@@ -2906,11 +3069,12 @@ static void xhci_dma_finish(FAR struct xhci_epinfo_s *epinfo)
 
   if (dirin)
     {
-      up_invalidate_dcache((uintptr_t)dma, (uintptr_t)dma + epinfo->buflen);
+      up_invalidate_dcache((uintptr_t)dma,
+                           (uintptr_t)dma + epinfo->dmalen);
 
       if (epinfo->bounce != NULL && epinfo->buffer != NULL)
         {
-          memcpy(epinfo->buffer, epinfo->bounce, epinfo->buflen);
+          memcpy(epinfo->buffer, epinfo->bounce, epinfo->dmacopy);
         }
     }
 
@@ -3546,8 +3710,11 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
     {
       /* Update max packet size */
 
-      rhport->dev->input->ep[0].ctx1 &= ~XHCI_EP_CTX1_MAXPKT_MASK;
-      rhport->dev->input->ep[0].ctx1 |= XHCI_EP_CTX1_MAXPKT(maxpacketsize);
+      FAR struct xhci_ep_ctx_s *ep0ctx =
+        xhci_in_ep(priv, rhport->dev->input, 0);
+
+      ep0ctx->ctx1 &= ~XHCI_EP_CTX1_MAXPKT_MASK;
+      ep0ctx->ctx1 |= XHCI_EP_CTX1_MAXPKT(maxpacketsize);
 
       /* Add Slot Context and EP0 Context */
 
@@ -3559,13 +3726,17 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
 
       up_flush_dcache((uintptr_t)rhport->dev->input,
                       (uintptr_t)rhport->dev->input +
-                      sizeof(struct xhci_input_dev_ctx_s));
+                      XHCI_INCTX_SIZE(priv));
 
       /* Free mutex before command execution */
 
       nxmutex_unlock(&priv->lock);
 
       ctx = up_addrenv_va_to_pa(rhport->dev->input);
+
+      uinfo("slot %d funcaddr %d speed %d maxpacket %d\n",
+            epinfo->slot, funcaddr, speed, maxpacketsize);
+
       ret = xhci_cmd_evalctx(priv, epinfo->slot, ctx);
     }
 
@@ -3615,6 +3786,12 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   DEBUGASSERT(drvr != 0 && epdesc != NULL && epdesc->hport != NULL
               && ep != NULL);
   hport = epdesc->hport;
+
+  /* Only the tracing alternative below and the hub logic further down use
+   * this, and a configuration may have neither.
+   */
+
+  UNUSED(hport);
 
   /* Terse output only if we are tracing */
 
@@ -3736,7 +3913,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
    * Max Burst Size set for 0 for now (USB3.0 specific)
    */
 
-  xhci_ep_configure(priv, &dev->input->ep[idx - 1],
+  xhci_ep_configure(priv, xhci_in_ep(priv, dev->input, idx - 1),
                     eptype, epdesc->mxpacketsize, 0,
                     up_addrenv_va_to_pa(epinfo->td.ring),
                     0, epinfo->interval);
@@ -3747,7 +3924,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 
   up_flush_dcache((uintptr_t)dev->input,
                   (uintptr_t)dev->input +
-                  sizeof(struct xhci_input_dev_ctx_s));
+                  XHCI_INCTX_SIZE(priv));
 
   /* Configure EP */
 
@@ -4047,13 +4224,6 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
   len = xhci_getle16(req->len);
 
-  /* Refuse a buffer the controller cannot reach, as for bulk transfers */
-
-  if (buffer != NULL && len > 0 && !xhci_dmacapable(priv, buffer, len))
-    {
-      return -EFAULT;
-    }
-
   /* Terse output only if we are tracing */
 
 #ifdef CONFIG_USBHOST_TRACE
@@ -4084,13 +4254,14 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
           up_invalidate_dcache((uintptr_t)rhport->dev->ctx,
                                (uintptr_t)rhport->dev->ctx +
-                               sizeof(struct xhci_dev_ctx_s));
+                               XHCI_DEVCTX_SIZE(priv));
 
           /* Store USB Device Address assigned by xHCI */
 
           ep0info->devaddr =
-            XHCI_ST_CTX3_ADDR_GET(rhport->dev->ctx->slot.ctx[3]);
-          rhport->dev->input->slot.ctx[3] = rhport->dev->ctx->slot.ctx[3];
+            XHCI_ST_CTX3_ADDR_GET(xhci_out_slot(rhport->dev->ctx)->ctx[3]);
+          xhci_in_slot(priv, rhport->dev->input)->ctx[3] =
+            xhci_out_slot(rhport->dev->ctx)->ctx[3];
         }
 
       return OK;
@@ -4225,16 +4396,6 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   int                        ret;
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
-
-  /* Refuse a buffer the controller cannot reach rather than pointing it at
-   * the wrong memory.  A caller that has somewhere better to put the data
-   * will try again with it; the FAT filesystem does exactly that.
-   */
-
-  if (!xhci_dmacapable(priv, buffer, buflen))
-    {
-      return -EFAULT;
-    }
 
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
@@ -4600,15 +4761,18 @@ static void xhci_disconnect(FAR struct usbhost_driver_s *drvr,
 static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 {
   uint32_t regval;
+  uint32_t erst;
 
   /* Get data form Host Controller Capability 1 Parameters */
 
+  /* Context entry stride, 32 or 64 bytes as the controller reports.  The
+   * wider form is the same fields with padding.
+   */
+
   regval = xhci_capa_getreg(priv, XHCI_HCCPARAMS1);
-  if (regval & XHCI_HCCPARAMS1_CSZ)
-    {
-      uerr("Only 32 byte Context data structures supported!\n");
-      return -EIO;
-    }
+  priv->ctxsize = (regval & XHCI_HCCPARAMS1_CSZ) ? 64 : 32;
+
+  uinfo("context size = %d\n", priv->ctxsize);
 
   /* Get data from Structural Parameters 1 register */
 
@@ -4640,16 +4804,21 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
 
   uinfo("no scratch = %d\n", priv->no_scratch);
 
-  priv->no_erst = 1 << XHCI_HCSPARAMS2_ERST(regval);
+  /* How many event ring segments the controller will allow, which is a
+   * power of two and can reach 32768, so it is worked out at full width
+   * and only then narrowed to what this driver actually uses.  Computed
+   * into the field directly it would wrap to zero on any controller
+   * offering more than 128 segments, and a table declared to hold no
+   * entries gives a controller with nowhere to report anything.
+   */
 
-  uinfo("no_erst = %d\n", priv->no_erst);
+  erst = 1ul << XHCI_HCSPARAMS2_ERST(regval);
+
+  uinfo("erst max = %" PRIu32 "\n", erst);
 
   /* Limit event ring segment table to 1 */
 
-  if (priv->no_erst > XHCI_MAX_ERST)
-    {
-      priv->no_erst = XHCI_MAX_ERST;
-    }
+  priv->no_erst = (erst > XHCI_MAX_ERST) ? XHCI_MAX_ERST : erst;
 
   uinfo("no erst = %d\n", priv->no_erst);
 
@@ -4773,7 +4942,12 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
     {
       /* Allocate Device Context */
 
-      priv->devs[i].ctx = kmm_zalloc(sizeof(struct xhci_dev_ctx_s));
+      /* The base address array holds these, and every entry in it must be
+       * 64 byte aligned, so the allocation has to be too.
+       */
+
+      priv->devs[i].ctx = kmm_memalign(XHCI_CTX_ALIGN,
+                                       XHCI_DEVCTX_SIZE(priv));
       if (!priv->devs[i].ctx)
         {
           uerr("dev ctx zalloc failed!\n");
@@ -4785,7 +4959,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
        */
 
       priv->devs[i].input = kmm_memalign((XHCI_PAGE_SIZE / 2),
-                            sizeof(struct xhci_input_dev_ctx_s));
+                            XHCI_INCTX_SIZE(priv));
       if (!priv->devs[i].input)
         {
           uerr("dev input zalloc failed!\n");
