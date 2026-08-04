@@ -5,6 +5,15 @@
 
 comment "AM67 Configuration Options"
 
+config ARCH_LOWPUTC
+	bool
+	default y
+	---help---
+		The AM67 serial console (16550) provides up_putc(), polled
+		low-level character output that works even from panic/assert
+		context with interrupts disabled.  Declaring ARCH_LOWPUTC lets
+		SYSLOG_DEFAULT and the assert dump use it.
+
 config AM67_GPIO
 	bool "AM67 padconfig GPIO driver"
 	default y
