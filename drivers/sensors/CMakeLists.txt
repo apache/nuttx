@@ -293,7 +293,11 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_INA226)
-      list(APPEND SRCS ina226.c)
+      if(CONFIG_SENSORS_INA226_UORB)
+        list(APPEND SRCS ina226_uorb.c)
+      else()
+        list(APPEND SRCS ina226.c)
+      endif()
     endif()
 
     if(CONFIG_SENSORS_INA3221)
