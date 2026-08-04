@@ -288,6 +288,7 @@ static int rpmsgmtd_write_handler(FAR struct rpmsg_endpoint *ept,
       rpmsg_send(ept, msg, sizeof(*msg) - 1);
     }
 
+  UNUSED(server);
   return 0;
 }
 
