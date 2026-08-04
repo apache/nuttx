@@ -50,7 +50,7 @@
 
 /* Last PGT level */
 
-#define PGT_LAST    (X86_MMU_PT_LEVELS)
+#define PGT_LAST    (X86_MMU_PT_LEVELS - 1)
 
 /****************************************************************************
  * Private Functions
@@ -82,7 +82,7 @@ uintptr_t x86_64_get_pgtable(arch_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
 
-  ptlevel = ARCH_SPGTS;
+  ptlevel = ARCH_SPGTS - 1;
   ptprev  = x86_64_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (!ptprev)
     {
