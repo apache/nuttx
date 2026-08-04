@@ -29,7 +29,7 @@ add_subdirectory(common)
 target_include_directories(arch BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR} common
                                               ${ARCH_SUBDIR})
 
-if(NOT CONFIG_BUILD_FLAT)
+if(CONFIG_BUILD_PROTECTED)
   target_include_directories(arch_interface BEFORE PUBLIC ${NUTTX_CHIP_ABS_DIR}
                                                           common ${ARCH_SUBDIR})
 endif()
