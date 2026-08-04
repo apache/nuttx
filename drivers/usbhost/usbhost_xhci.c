@@ -1145,6 +1145,10 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   xhci_oper_putreg_8b(priv, XHCI_CRCR,
                       up_addrenv_va_to_pa(priv->cmd.ring) | XHCI_CRCR_RCS);
 
+  /* Do not sit on completions; see XHCI_IMOD_INTERVAL */
+
+  xhci_runt_putreg(priv, XHCI_IMOD(0), XHCI_IMOD_DEFAULT);
+
   /* Enable interrupts */
 
   regval = xhci_runt_getreg(priv, XHCI_IMAN(0));
@@ -1295,8 +1299,13 @@ static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv)
       portsc = xhci_oper_getreg(priv, XHCI_PORTSC(i));
       priv->rhport[i].connected = ((portsc & XHCI_PORTSC_CCS) != 0);
 
-      /* Clear status change */
+      /* Clear status change, but not PED.  Port Enabled/Disabled is
+       * write-one-to-clear, so writing back what was read disables any
+       * port that came up enabled, which is what a device attached at
+       * power up does.
+       */
 
+      portsc &= ~XHCI_PORTSC_PED;
       xhci_oper_putreg(priv, XHCI_PORTSC(i), portsc);
     }
 }
@@ -2803,6 +2812,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   uintptr_t              addr;
   uint8_t                type;
   uint32_t               d2;
+  int                    count = 0;
 
   /* Invalidate event ring */
 
@@ -2874,6 +2884,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
 
       /* Next event */
 
+      count++;
       priv->evnt.i++;
 
       /* Handle ring wrap */
@@ -2890,7 +2901,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
   addr |= XHCI_ERDP_EHB;
   xhci_runt_putreg_8b(priv, XHCI_ERDP(0), addr);
 
-  return OK;
+  return count;
 }
 
 /****************************************************************************
@@ -2905,6 +2916,20 @@ static void xhci_interrupt_work(FAR void *arg)
 {
   FAR struct usbhost_xhci_s *priv = arg;
   uint32_t                   iman;
+
+  /* Acknowledge before walking the ring, not after.  An event arriving
+   * during the walk sets the pending bit again, and clearing after the
+   * walk discards it.  Transfers have no timeout, so the one it belonged
+   * to would wait forever.
+   */
+
+  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  if (iman & XHCI_IMAN_IP)
+    {
+      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
+    }
 
   xhci_events_poll(priv);
 
@@ -2938,21 +2963,32 @@ static void xhci_interrupt_work(FAR void *arg)
       uinfo("Host Controller Error\n");
     }
 
-  /* ACK interrupts */
-
-  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
-
-  /* Clear interrupter pending bit */
-
-  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
-  if (iman & XHCI_IMAN_IP)
-    {
-      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
-    }
-
   /* Clear pending bits */
 
   priv->pending = 0;
+
+  /* Let interrupts back in, which the handler masked on its way out, and
+   * clear the pending flag in the same write.
+   *
+   * A message signalled interrupt is sent on the flag's clear to set
+   * transition; a wire stays asserted while it is set.  Events that
+   * arrived while this interrupter was masked have already set the flag,
+   * so enabling without clearing leaves a message with nothing to
+   * transition on, and transfers have no timeout.
+   *
+   * Clearing opens its own window: an event delivered between the ring
+   * going empty and this write is discarded.  So drain again, and repeat
+   * if that drain found anything.  A drain that finds nothing is the only
+   * state in which no event can have been lost.
+   */
+
+  do
+    {
+      iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+      xhci_runt_putreg(priv, XHCI_IMAN(0),
+                       iman | XHCI_IMAN_IE | XHCI_IMAN_IP);
+    }
+  while (xhci_events_poll(priv) > 0);
 }
 
 /****************************************************************************
@@ -2966,10 +3002,22 @@ static void xhci_interrupt_work(FAR void *arg)
 static int xhci_interrupt(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct usbhost_xhci_s *priv = arg;
+  uint32_t                   iman;
 
   /* Get pending interrupts */
 
   priv->pending = xhci_oper_getreg(priv, XHCI_USBSTS);
+
+  /* Silence the interrupter before returning.
+   *
+   * Nothing here clears the condition that raised the interrupt; the work
+   * runs later on a work queue.  On a level triggered line the source is
+   * still asserted on return, so the interrupt re-raises immediately and
+   * the worker never runs.  The worker clears the status and unmasks.
+   */
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), iman & ~XHCI_IMAN_IE);
 
   /* Handle interrupts in worker */
 
@@ -4552,14 +4600,6 @@ static int xhci_hw_initialize(FAR struct usbhost_xhci_s *priv)
       goto errout;
     }
 
-  /* Configure interrupts */
-
-  ret = xhci_irq_initialize(priv);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
   /* Halt controller */
 
   ret = xhci_ctrl_halt(priv);
@@ -4704,6 +4744,7 @@ xhci_initialize(FAR const char *name, uintptr_t base,
 {
   FAR struct usbhost_conn_xhci_s *conn = NULL;
   FAR struct usbhost_xhci_s      *priv = NULL;
+  uint32_t                        regval;
   int                             ret;
 
   DEBUGASSERT(name != NULL && base != 0 && ops != NULL &&
@@ -4762,6 +4803,34 @@ xhci_initialize(FAR const char *name, uintptr_t base,
       usbhost_trace1(XHCI_TRACE1_START_FAILED, 0);
       goto errout;
     }
+
+  /* Take the interrupt only now.
+   *
+   * The handler defers to a worker that walks the event ring, and the ring
+   * does not exist until the controller has been started.  A controller
+   * left running by a boot loader can have an interrupt pending the moment
+   * the line is enabled, so attaching any earlier is a race with nothing
+   * to answer it.
+   */
+
+  ret = xhci_irq_initialize(priv);
+  if (ret < 0)
+    {
+      uerr("failed to attach interrupt: %d\n", ret);
+      goto errout;
+    }
+
+  /* Acknowledge anything the controller raised before the handler was
+   * attached.  A message is sent once, on the transition, so a bit set in
+   * that window would never produce another.  Clear them, so the next
+   * event is a fresh assertion.
+   */
+
+  regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+  xhci_oper_putreg(priv, XHCI_USBSTS, regval);
+
+  regval = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  xhci_runt_putreg(priv, XHCI_IMAN(0), regval | XHCI_IMAN_IP);
 
 #ifdef CONFIG_DEBUG_USB_INFO
   xhci_dump_mem(priv, "after init");
