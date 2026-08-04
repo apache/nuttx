@@ -26,6 +26,30 @@ if(CONFIG_BOARDCTL_RESET)
   list(APPEND SRCS qemu_reset.c)
 endif()
 
+if(CONFIG_BUILD_KERNEL)
+  # Pack the standalone application binaries into the ROMFS image registered by
+  # qemu_boardinit.c. The application targets are not known yet when this
+  # directory is configured, so the dependency is resolved at generation time
+  # from the nuttx target property. The nuttx_add_romfs helper cannot be used
+  # here: its library is added to apps_post, which the application targets
+  # depend on (cycle).
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c
+    COMMAND genromfs -f romfs.img -d ${CMAKE_BINARY_DIR}/bin -V NuttXBootVol
+    COMMAND xxd -i romfs.img romfs_boot.c
+    DEPENDS $<TARGET_PROPERTY:nuttx,NUTTX_LOADABLE_APPS>
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  # the board target is defined in a parent directory: anchor the generated
+  # source with a local target so the build rule is emitted
+  add_custom_target(board_romfs
+                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c)
+  add_dependencies(board board_romfs)
+  list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c)
+elseif(CONFIG_BOARD_LATE_INITIALIZE)
+  # empty ROMFS placeholder, see Makefile
+  list(APPEND SRCS romfs_stub.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
 
 set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/qemu.ld")
