@@ -38,6 +38,13 @@
 #include <nuttx/power/consumer.h>
 #include <nuttx/signal.h>
 
+#ifdef CONFIG_REGULATOR_PROCFS
+#  include <sys/stat.h>
+#  include <fcntl.h>
+#  include <nuttx/fs/fs.h>
+#  include <nuttx/fs/procfs.h>
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -72,6 +79,291 @@ static rmutex_t g_reg_lock         = NXRMUTEX_INITIALIZER;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_REGULATOR_PROCFS
+
+/****************************************************************************
+ * Name: regulator_procfs_open
+ *
+ * Description:
+ *   Read only.  A rail is not something to move by writing to a file: the
+ *   consumers hold the knowledge of what a voltage may be, and the ordering
+ *   between them is the whole point of the framework.  Reporting is what
+ *   this entry is for.
+ *
+ * Input Parameters:
+ *   filep   - The file structure to attach the open file to
+ *   relpath - The path below /proc being opened
+ *   oflags  - Open flags; anything but read only is refused
+ *   mode    - Ignored, the entry cannot be created
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int regulator_procfs_open(FAR struct file *filep,
+                                 FAR const char *relpath,
+                                 int oflags, mode_t mode)
+{
+  FAR struct procfs_file_s *priv;
+
+  if ((oflags & O_ACCMODE) != O_RDONLY)
+    {
+      return -EACCES;
+    }
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  filep->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: regulator_procfs_close
+ *
+ * Description:
+ *   Close /proc/regulator and free what open() allocated.
+ *
+ * Input Parameters:
+ *   filep - The open file
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int regulator_procfs_close(FAR struct file *filep)
+{
+  kmm_free(filep->f_priv);
+  filep->f_priv = NULL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: regulator_procfs_read
+ *
+ * Description:
+ *   Describe every registered regulator: what it is called, what it is
+ *   putting out, the range it will accept, whether it is on and how many
+ *   consumers are holding it.
+ *
+ *   The voltage is read from the hardware rather than remembered, so a rail
+ *   moved by something other than this framework, which is the usual state
+ *   of affairs at start up, is reported as it is rather than as this
+ *   software last left it.
+ *
+ *   That is why this takes the list mutex directly rather than calling
+ *   regulator_list_lock(), which also disables interrupts for the benefit
+ *   of callers that may run in interrupt or idle context.  Asking a
+ *   regulator on a bus what it is doing means bus traffic, and bus traffic
+ *   waits; a reader of this file is always a task and can afford to.
+ *
+ * Input Parameters:
+ *   filep  - The open file, carrying the offset reached so far
+ *   buffer - Where to return the text
+ *   buflen - Size of buffer
+ *
+ * Returned Value:
+ *   The number of bytes returned, zero at end of file, or a negated errno
+ *   on failure.
+ *
+ ****************************************************************************/
+
+static ssize_t regulator_procfs_read(FAR struct file *filep,
+                                     FAR char *buffer, size_t buflen)
+{
+  FAR struct regulator_dev_s *rdev;
+  size_t remaining = buflen;
+  FAR char *dest = buffer;
+  off_t pos = filep->f_pos;
+  char line[192];
+  char extra[48];
+  size_t n;
+  int ret;
+
+  ret = nxrmutex_lock(&g_reg_lock);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  list_for_every_entry(&g_reg_list, rdev, struct regulator_dev_s, list)
+    {
+      FAR const struct regulator_desc_s *desc = rdev->desc;
+      int enabled;
+      int uv;
+
+      if (remaining == 0)
+        {
+          break;
+        }
+
+      n = snprintf(line, sizeof(line), "%-20s",
+                   desc->name != NULL ? desc->name : "-");
+
+      /* Both of these reach the hardware and can fail; a failure reports
+       * - rather than an errno formatted as a voltage, or as a rail that
+       * is switched on.
+       */
+
+      uv = _regulator_get_voltage(rdev);
+      if (uv >= 0)
+        {
+          n += snprintf(line + n, sizeof(line) - n, " uv:%d", uv);
+        }
+      else
+        {
+          n += snprintf(line + n, sizeof(line) - n, " uv:-");
+        }
+
+      n += snprintf(line + n, sizeof(line) - n, " min:%u max:%u",
+                    desc->min_uv, desc->max_uv);
+
+      enabled = _regulator_is_enabled(rdev);
+      if (enabled >= 0)
+        {
+          n += snprintf(line + n, sizeof(line) - n, " enabled:%d",
+                        enabled != 0);
+        }
+      else
+        {
+          n += snprintf(line + n, sizeof(line) - n, " enabled:-");
+        }
+
+      n += snprintf(line + n, sizeof(line) - n,
+                    " users:%" PRIu32 " opens:%" PRIu32
+                    " supply:%s always_on:%u boot_on:%u",
+                    rdev->use_count, rdev->open_count,
+                    desc->supply_name != NULL ? desc->supply_name : "-",
+                    desc->always_on, desc->boot_on);
+
+      /* Whatever the driver has that the fields above cannot hold.  The
+       * lock this runs under is the list mutex rather than the framework's
+       * own, so a driver reading its part over a bus is allowed to wait.
+       */
+
+      extra[0] = '\0';
+      if (rdev->ops->describe != NULL &&
+          rdev->ops->describe(rdev, extra, sizeof(extra)) >= 0)
+        {
+          extra[sizeof(extra) - 1] = '\0';
+          if (extra[0] != '\0')
+            {
+              n += snprintf(line + n, sizeof(line) - n, " %s", extra);
+            }
+        }
+
+      n += snprintf(line + n, sizeof(line) - n, "\n");
+
+      /* snprintf() reports the length it wanted, so a line longer than
+       * the buffer would otherwise carry n past it.
+       */
+
+      if (n >= sizeof(line))
+        {
+          n = sizeof(line) - 1;
+          line[n - 1] = '\n';
+        }
+
+      n = procfs_memcpy(line, n, dest, remaining, &pos);
+      dest      += n;
+      remaining -= n;
+    }
+
+  nxrmutex_unlock(&g_reg_lock);
+
+  filep->f_pos += dest - buffer;
+  return dest - buffer;
+}
+
+/****************************************************************************
+ * Name: regulator_procfs_dup
+ *
+ * Description:
+ *   Duplicate an open /proc/regulator, copying the position reached
+ *   so that the new file continues where the old one had got to.
+ *
+ * Input Parameters:
+ *   oldp - The open file being duplicated
+ *   newp - The file structure to attach the duplicate to
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int regulator_procfs_dup(FAR const struct file *oldp,
+                                FAR struct file *newp)
+{
+  FAR struct procfs_file_s *priv;
+
+  priv = kmm_zalloc(sizeof(struct procfs_file_s));
+  if (priv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  memcpy(priv, oldp->f_priv, sizeof(struct procfs_file_s));
+  newp->f_priv = priv;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: regulator_procfs_stat
+ *
+ * Description:
+ *   Report /proc/regulator as a read only regular file.
+ *
+ * Input Parameters:
+ *   relpath - The path below /proc being queried
+ *   buf     - Where to return the status
+ *
+ * Returned Value:
+ *   Zero on success, or a negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int regulator_procfs_stat(FAR const char *relpath,
+                                 FAR struct stat *buf)
+{
+  buf->st_mode    = S_IFREG | S_IROTH | S_IRGRP | S_IRUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
+}
+
+static const struct procfs_operations g_regulator_procfs_ops =
+{
+  regulator_procfs_open,   /* open */
+  regulator_procfs_close,  /* close */
+  regulator_procfs_read,   /* read */
+  NULL,                    /* write */
+  NULL,                    /* poll */
+
+  regulator_procfs_dup,    /* dup */
+
+  NULL,                    /* opendir */
+  NULL,                    /* closedir */
+  NULL,                    /* readdir */
+  NULL,                    /* rewinddir */
+
+  regulator_procfs_stat,   /* stat */
+};
+
+static const struct procfs_entry_s g_regulator_procfs =
+{
+  "regulator", &g_regulator_procfs_ops, PROCFS_FILE_TYPE
+};
+
+static bool g_regulator_procfs_added;
+
+#endif /* CONFIG_REGULATOR_PROCFS */
 
 static int _regulator_is_enabled(FAR struct regulator_dev_s *rdev)
 {
@@ -1089,6 +1381,24 @@ bypass:
       rdev->pm_cb.prepare = NULL;
       rdev->pm_cb.notify = regulator_pm_notify;
       pm_register(&rdev->pm_cb);
+    }
+#endif
+
+#ifdef CONFIG_REGULATOR_PROCFS
+  /* procfs_register() has to run before procfs is mounted, which holds
+   * here: regulators register during board or architecture start up.  The
+   * first one to arrive publishes the entry for all of them.
+   */
+
+  /* procfs_register() appends without checking for a duplicate, so the
+   * entry is claimed once for the lifetime of the system rather than
+   * whenever the list is empty.
+   */
+
+  if (!g_regulator_procfs_added)
+    {
+      procfs_register(&g_regulator_procfs);
+      g_regulator_procfs_added = true;
     }
 #endif
 

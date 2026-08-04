@@ -93,6 +93,24 @@ struct regulator_ops_s
                                enum regulator_mode_e mode);
   CODE int (*set_suspend_voltage)(FAR struct regulator_dev_s *, int uv);
   CODE int (*resume)(FAR struct regulator_dev_s *rdev);
+
+  /* Report what this regulator can say about itself that the upper half
+   * has no field for: what a particular part measures or latches, such as
+   * its input voltage, output current, temperature or fault status.
+   *
+   * Optional.  A regulator whose driver omits it is still listed with
+   * everything the upper half knows: its voltage, its range, whether it
+   * is enabled and how many consumers hold it.
+   *
+   * Write at most len bytes into extra as further key:value fields, in
+   * the form the renderer uses, and return OK.  The renderer owns the
+   * line and appends this to it, so a driver needs no procfs knowledge
+   * of its own.  Called with the framework's list lock held and not from
+   * interrupt context, so reading a part over a bus is allowed.
+   */
+
+  CODE int (*describe)(FAR struct regulator_dev_s *rdev, FAR char *extra,
+                       size_t len);
 };
 
 /* This structure describes the regulators capabilities */
