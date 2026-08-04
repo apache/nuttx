@@ -59,6 +59,25 @@ config REGULATOR
 
 if REGULATOR
 
+config REGULATOR_PROCFS
+	bool "Describe the regulators through procfs"
+	default n
+	depends on FS_PROCFS && FS_PROCFS_REGISTER
+	---help---
+		Report every registered regulator through /proc/regulator: its
+		name, the voltage it is putting out, the range it will accept,
+		whether it is enabled, how many consumers hold it, its supply
+		and whether it is always on or enabled at boot.
+
+		The voltage is read back from the hardware rather than recalled,
+		so a rail left somewhere by the boot loader reads as it actually
+		is rather than as this software last set it.
+
+		The entry is read only.  A rail is not something to move by
+		writing to a file: what a voltage may be is knowledge the
+		consumers hold, and the ordering between them is what the
+		framework exists to arrange.
+
 config REGULATOR_GPIO
 	bool "Regulator gpio driver support"
 	default n

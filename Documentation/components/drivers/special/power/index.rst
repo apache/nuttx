@@ -6,4 +6,5 @@ Power-related Drivers
   :caption: Supported Drivers
 
   pm/index.rst
+  regulator.rst
   battery/fakegauge.rst
