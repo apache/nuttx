@@ -31,6 +31,7 @@
 #include <sys/param.h>
 
 #include "am67_mpuinit.h"
+#include "am67_rat.h"
 #include "mpu.h"
 
 /****************************************************************************
@@ -84,6 +85,12 @@ void am67_mpu_init(void)
 
   am67_ipc_shm_region(AM67_IPC_SHM0_START_ADDR, AM67_IPC_SHM0_SIZE);
   am67_ipc_shm_region(AM67_IPC_SHM1_START_ADDR, AM67_IPC_SHM1_SIZE);
+
+  /* RAT sliding window (am67_rat.c): retargeted at runtime onto arbitrary
+   * 36-bit physical blocks, so it must never be cached.
+   */
+
+  am67_ipc_shm_region(AM67_RAT_WIN_BASE, AM67_RAT_WIN_SIZE);
 
   mpu_control(true);
 }
