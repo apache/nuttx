@@ -1254,6 +1254,25 @@ config SENSORS_INA226
 	---help---
 		Enable driver support for the Texas Instruments INA226/INA230 power monitor.
 
+config SENSORS_INA226_UORB
+	bool "INA226 UORB Interface"
+	default n
+	depends on SENSORS_INA226 && UORB
+	---help---
+		Build the sensor framework version of this driver rather than
+		the character device one.  The part then publishes voltage,
+		current and power as uORB topics that the common sensor tools
+		can read, instead of a node returning a structure only code
+		written for this part understands.
+
+		All three come from one reading and share its timestamp, so
+		the power is the product of a voltage and a current measured
+		at the same instant rather than at three different ones.
+
+		The two versions cannot be built together and take different
+		arguments, so a board choosing this must call
+		ina226_register_uorb() rather than ina226_register().
+
 config INA226_I2C_FREQUENCY
 	int "INA226 I2C frequency"
 	default 400000
