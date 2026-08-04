@@ -105,8 +105,30 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SENSORS_TMP112_UORB
 int tmp112_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr);
+#else
+/****************************************************************************
+ * Name: tmp112_register_uorb
+ *
+ * Description:
+ *   Register the part as a uORB temperature sensor, appearing as
+ *   /dev/uorb/sensor_temp<devno>.
+ *
+ * Input Parameters:
+ *   devno - The topic number
+ *   i2c   - The bus the part is on
+ *   addr  - The bus address, 0x48 to 0x4b as the pin straps say
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int tmp112_register_uorb(int devno, FAR struct i2c_master_s *i2c,
+                         uint8_t addr);
+#endif /* CONFIG_SENSORS_TMP112_UORB */
 
 #undef EXTERN
 #ifdef __cplusplus

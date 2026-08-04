@@ -1,0 +1,59 @@
+======
+TMP112
+======
+
+The TMP112 is a Texas Instruments I2C temperature sensor, specified from
+-40°C to +125°C, with a twelve bit reading of 0.0625°C a count. Two address
+pins select one of four bus addresses, 0x48 through 0x4b, so four parts can
+share a bus.
+
+Two drivers exist for this part. This one uses the :doc:`uorb
+</components/drivers/special/sensors/sensors_uorb>` interface, so the reading
+appears as a topic the common sensor tools can read. The older driver presents
+a character device instead. Only one of the two is built:
+``CONFIG_SENSORS_TMP112_UORB`` selects this one, and the board must then call
+``tmp112_register_uorb()`` rather than ``tmp112_register()``, since the
+registration interfaces differ.
+
+The uORB driver sign extends the reading. The character device driver does
+not, so it reports anything below freezing as a large positive number, and
+this part is specified down to -40°C.
+
+Application Programming Interface
+=================================
+
+The header file for the TMP112 driver interface can be included using:
+
+.. code-block:: c
+
+   #include <nuttx/sensors/tmp112.h>
+
+Registering the driver creates one topic, ``sensor_temp<n>``, where ``n`` is
+the ``devno`` passed in:
+
+.. code-block:: c
+
+   int tmp112_register_uorb(int devno, FAR struct i2c_master_s *i2c,
+                            uint8_t addr);
+
+For example, a part strapped to 0x48 on I2C bus 0, published as
+``sensor_temp0``:
+
+.. code-block:: c
+
+   struct i2c_master_s *i2c = board_i2cbus_initialize(0);
+
+   tmp112_register_uorb(0, i2c, 0x48);
+
+Reading
+=======
+
+The part converts continuously out of reset, so the driver configures nothing
+and the temperature register always holds the last completed conversion. A
+read is therefore one bus transaction with no wait, and the driver polls on
+the low priority work queue at whatever interval a consumer asks for.
+
+Asking for samples faster than the part produces them returns the same value
+again, so the driver reports back the interval it will really use rather than
+the one requested. A consumer that wants to know what it is getting should
+read the interval back after setting it.

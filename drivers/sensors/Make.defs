@@ -343,7 +343,11 @@ ifeq ($(CONFIG_SENSORS_AMG88XX),y)
 endif
 
 ifeq ($(CONFIG_SENSORS_TMP112),y)
+ifeq ($(CONFIG_SENSORS_TMP112_UORB),y)
+  CSRCS += tmp112_uorb.c
+else
   CSRCS += tmp112.c
+endif
 endif
 
 endif # CONFIG_I2C
