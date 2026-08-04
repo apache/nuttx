@@ -694,13 +694,13 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
           break;
         }
 
-      /* Verify that a complete answer header (10 bytes: type, class,
-       * ttl[2], len) is available before casting to dns_answer_s.
-       * Without this check, accessing ans->ttl and ans->type/class/len
-       * would be an OOB read if fewer than 10 bytes remain.
+      /* Verify that a complete answer header is available before casting
+       * to dns_answer_s.  Without this check, accessing ans->ttl and
+       * ans->type/class/len would be an OOB read if fewer than
+       * DNS_ANSWER_HEADER_SIZE bytes remain.
        */
 
-      if (nameptr + sizeof(struct dns_answer_s) > endofbuffer)
+      if (nameptr + DNS_ANSWER_HEADER_SIZE > endofbuffer)
         {
           ret = -EILSEQ;
           nwarn("DNS answer header truncated\n");
@@ -726,11 +726,11 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
       if (ans->type  == HTONS(DNS_RECTYPE_A) &&
           ans->class == HTONS(DNS_CLASS_IN) &&
           ans->len   == HTONS(4) &&
-          nameptr + 10 + 4 <= endofbuffer)
+          nameptr + DNS_ANSWER_HEADER_SIZE + 4 <= endofbuffer)
         {
           FAR struct sockaddr_in *inaddr;
 
-          nameptr += 10 + 4;
+          nameptr += DNS_ANSWER_HEADER_SIZE + 4;
 
           ninfo("IPv4 address: %u.%u.%u.%u\n",
                 ip4_addr1(ans->u.ipv4.s_addr),
@@ -755,11 +755,11 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
       if (ans->type  == HTONS(DNS_RECTYPE_AAAA) &&
           ans->class == HTONS(DNS_CLASS_IN) &&
           ans->len   == HTONS(16) &&
-          nameptr + 10 + 16 <= endofbuffer)
+          nameptr + DNS_ANSWER_HEADER_SIZE + 16 <= endofbuffer)
         {
           FAR struct sockaddr_in6 *inaddr;
 
-          nameptr += 10 + 16;
+          nameptr += DNS_ANSWER_HEADER_SIZE + 16;
 
           ninfo("IPv6 address: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
                 NTOHS(ans->u.ipv6.s6_addr16[0]),
@@ -785,7 +785,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
       else
 #endif
         {
-          nameptr = nameptr + 10 + NTOHS(ans->len);
+          nameptr = nameptr + DNS_ANSWER_HEADER_SIZE + NTOHS(ans->len);
         }
     }
 
