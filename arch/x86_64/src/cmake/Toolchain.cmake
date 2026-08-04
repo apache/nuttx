@@ -27,6 +27,12 @@ set(CMAKE_SYSTEM_VERSION 1)
 
 set(ARCH_SUBDIR intel64)
 
+# host toolchain linker and strip, used for standalone ELF applications;
+# --strip-unneeded keeps the symbols required for relocation processing
+# (CONFIG_BINFMT_ELF_RELOCATABLE binaries are loaded from ET_REL objects)
+set(CMAKE_LD ld)
+set(CMAKE_STRIP strip --strip-unneeded)
+
 # override the ARCHIVE command
 set(CMAKE_ARCHIVE_COMMAND "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_RANLIB_COMMAND "<CMAKE_RANLIB> <TARGET>")
