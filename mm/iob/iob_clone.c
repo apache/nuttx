@@ -73,6 +73,19 @@ static int iob_next(FAR struct iob_s *iob, bool throttled, bool block)
           return -ENOMEM;
         }
 
+      /* Add the new, empty I/O buffer to the end of the buffer chain.
+       * Carry over any queue flags (e.g. IOB_CHAIN_END) from the
+       * current tail to the new tail so that the chain boundary is
+       * preserved, then clear the flags on the old tail since it is
+       * no longer the last buffer in the chain.  Without this, extending
+       * a chain that also resides in an iob_queue loses the IOB_CHAIN_END
+       * marker and can later make iob_add_queue()/iob_remove_queue() walk
+       * past the real chain end and dereference stale/freed IOB pointers.
+       * Mirrors the chain-extension logic in iob_copyin() and
+       * iob_update_pktlen().
+       */
+
+      IOB_FLAG_SET(next, NULL, IOB_FLAG_GET(iob));
       iob->io_flink = next;
     }
   else
