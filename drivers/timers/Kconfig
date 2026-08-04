@@ -371,6 +371,39 @@ config PCF85263_I2C_FREQUENCY
 
 endif # RTC_PCF85263
 
+config RTC_PCF8563
+	bool "PCF8563 RTC Driver"
+	default n
+	select I2C
+	select RTC_DATETIME
+	depends on RTC_EXTERNAL
+	---help---
+		Enables support for the NXP PCF8563 I2C RTC timer, a battery
+		backed clock at the fixed address 0x51.
+
+		The part counts two digits of year and a century rollover bit
+		whose meaning is not settled between manufacturers, so this
+		driver treats it as a clock for the years 2000 to 2099 and
+		writes that bit back exactly as it found it.  Setting a date
+		outside that span is refused rather than stored as a year that
+		would read back as a different one.
+
+		A read fails while the part says its oscillator has stopped,
+		which is what a flat backup cell or a board that has never had
+		its clock set looks like.  Being told the time is not known is
+		more useful than being told a wrong one.
+
+		The alarm and the countdown timer are not implemented.
+
+if RTC_PCF8563
+
+config PCF8563_I2C_FREQUENCY
+	int "PCF8563 I2C frequency"
+	default 100000
+	range 1 400000
+
+endif # RTC_PCF8563
+
 config RTC_PL031
 	bool "PL031 RTC Support"
 	default n
