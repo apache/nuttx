@@ -216,8 +216,12 @@ function(nuttx_olddefconfig)
         "nuttx_olddefconfig: Failed to initialize Kconfig configuration: ${KCONFIG_OUTPUT}"
     )
   endif()
+endfunction()
 
-  # save the orig compressed formatted defconfig at the very beginning
+# save the orig compressed formatted defconfig at the very beginning; only valid
+# during the initial configure while .config.compressed exists
+
+function(nuttx_save_defconfig_orig)
   execute_process(COMMAND savedefconfig --out ${NUTTX_BINARY_DIR}/defconfig.tmp
                   WORKING_DIRECTORY ${NUTTX_DIR})
 
@@ -227,7 +231,6 @@ function(nuttx_olddefconfig)
       ${NUTTX_BINARY_DIR}/.config.compressed ${NUTTX_BINARY_DIR}/defconfig.tmp
       ${NUTTX_BINARY_DIR}/defconfig.orig
     WORKING_DIRECTORY ${NUTTX_DIR})
-
 endfunction()
 
 function(nuttx_setconfig)
