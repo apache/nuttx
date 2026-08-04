@@ -88,7 +88,7 @@ int nxsem_trywait_slow(FAR sem_t *sem)
               break;
             }
 
-          new = nxsched_gettid();
+          new = NXSEM_MAKE_MHOLDER(nxsched_gettid());
         }
       else
         {

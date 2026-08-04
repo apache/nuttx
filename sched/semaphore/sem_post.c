@@ -99,11 +99,14 @@ int nxsem_post_slow(FAR sem_t *sem)
       mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
 
       /* Mutex post from another thread is not allowed, unless
-       * called from nxsem_reset
+       * called from nxsem_reset.  The comparison uses the same encoding
+       * as the lock side so that a context whose id is -ESRCH, which is
+       * what a task being torn down reports, still matches its own lock.
        */
 
       DEBUGASSERT(mholder == (NXSEM_MBLOCKING_BIT | NXSEM_MRESET) ||
-                  (mholder & (~NXSEM_MBLOCKING_BIT)) == nxsched_gettid());
+                  (mholder & (~NXSEM_MBLOCKING_BIT)) ==
+                  NXSEM_MAKE_MHOLDER(nxsched_gettid()));
 
       blocking = NXSEM_MBLOCKING(mholder);
 
