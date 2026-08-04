@@ -2262,6 +2262,24 @@ config TMP112_I2C_FREQUENCY
 	int "TMP112 I2C frequency"
 	default 400000
 
+config SENSORS_TMP112_UORB
+	bool "TMP112 UORB Interface"
+	default n
+	depends on UORB
+	---help---
+		Build the sensor framework version of this driver rather than
+		the character device one.  The part then appears as a uORB
+		temperature topic, which the common sensor tools can read,
+		instead of as a node returning a bare float.
+
+		The two cannot be built together, and the register interface
+		differs, so a board choosing this must call
+		tmp112_register_uorb() rather than tmp112_register().
+
+		This version also sign extends the reading, which the
+		character device one does not, so temperatures below freezing
+		are reported correctly rather than as large positive ones.
+
 endif #SENSORS_TMP112
 
 config SENSORS_QMI8658

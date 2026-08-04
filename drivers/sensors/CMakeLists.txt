@@ -349,7 +349,11 @@ if(CONFIG_SENSORS)
     endif()
 
     if(CONFIG_SENSORS_TMP112)
-      list(APPEND SRCS tmp112.c)
+      if(CONFIG_SENSORS_TMP112_UORB)
+        list(APPEND SRCS tmp112_uorb.c)
+      else()
+        list(APPEND SRCS tmp112.c)
+      endif()
     endif()
 
     # QMI8658 6-axis IMU
