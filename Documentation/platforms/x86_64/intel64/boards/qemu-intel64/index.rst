@@ -201,7 +201,7 @@ are built separately. It uses ROMFS to load the user-space applications.
 This is intended to run on QEMU with COM serial port support.
 
 Steps to build kernel image with user-space apps in ROMFS::
-    
+
     ./tools/configure.sh qemu-intel64/knsh_romfs
     make -j
     make export -j
@@ -212,6 +212,24 @@ Steps to build kernel image with user-space apps in ROMFS::
     mv boot_romfsimg.h ../nuttx/arch/x86_64/src/board/romfs_boot.c
     popd
     make -j
+
+With CMake the user-space applications and the ROMFS image are built as
+part of the normal build (``genromfs`` and ``xxd`` must be available on
+the host)::
+
+    cmake -B build -GNinja -DBOARD_CONFIG=qemu-intel64/knsh_romfs .
+    cmake --build build
+
+Then run the image with::
+
+    qemu-system-x86_64 -cpu host -enable-kvm -m 2G -kernel build/nuttx \
+        -nographic -serial mon:stdio
+
+The applications are installed to ``build/bin`` and mounted from ROMFS
+at ``/system/bin``. The configuration does not set ``CONFIG_PATH_INITIAL``,
+so start applications with an absolute path (``/system/bin/hello``) or
+enable ``CONFIG_LIBC_ENVPATH`` and ``CONFIG_PATH_INITIAL="/system/bin"``
+to resolve bare command names.
 
 knsh_romfs_pci
 --------------
