@@ -1,0 +1,132 @@
+.. _sx127x:
+
+=================
+SX127x LoRa radio
+=================
+
+The SX127x family, which includes the SX1272 and the SX1276 found on most
+modules and development boards, is a sub-GHz transceiver doing LoRa as well
+as FSK and OOK. Unlike a concentrator it demodulates one channel at a time,
+so frequency, spreading factor and bandwidth are settings of the radio and
+not attributes of each packet.
+
+The driver is enabled with ``CONFIG_LPWAN_SX127X`` and registers a character
+device, ``/dev/sx127x`` by convention.
+
+Userspace API
+=============
+
+Reading and writing
+-------------------
+
+``write`` transmits the given bytes with the parameters currently configured.
+``read`` returns one received packet, blocking until one arrives; with
+``CONFIG_LPWAN_SX127X_RXFIFO_LEN`` the driver keeps a small queue of them, so
+a reader that falls behind loses the oldest rather than the newest.
+
+Each packet is preceded by a ``struct sx127x_read_hdr_s``, which carries the
+payload length together with the received power and, in LoRa mode, the signal
+to noise ratio of that packet.
+
+IOCTL commands
+--------------
+
+The basic radio parameters use the common commands of
+``nuttx/wireless/ioctl.h``: ``WLIOC_SETRADIOFREQ`` and ``WLIOC_GETRADIOFREQ``
+for the frequency in Hz, ``WLIOC_SETTXPOWER`` and ``WLIOC_GETTXPOWER`` for
+the output power in dBm. Both may be further limited by the board logic.
+
+The rest is in ``nuttx/wireless/lpwan/sx127x.h``:
+
+* ``SX127XIOC_MODULATIONSET`` and ``SX127XIOC_MODULATIONGET`` choose between
+  LoRa, FSK and OOK.
+
+* ``SX127XIOC_OPMODESET`` and ``SX127XIOC_OPMODEGET`` move the radio between
+  sleep, standby, transmit, receive and channel activity detection.
+
+* ``SX127XIOC_SYNCWORDSET`` and ``SX127XIOC_SYNCWORDGET`` change the sync
+  word, and ``SX127XIOC_PREAMBLESET`` and ``SX127XIOC_PREAMBLEGET`` the
+  preamble length.
+
+* ``SX127XIOC_RSSIGET`` reads the current RSSI, ``SX127XIOC_CHANSCAN`` scans
+  a channel and ``SX127XIOC_RANDOMGET`` returns a random number taken from
+  the noise of the receiver.
+
+Note that the spreading factor, the bandwidth and the coding rate have no
+ioctl of their own yet: they come from the configuration below.
+
+Configuration
+=============
+
+============================================ ==================================
+Option                                       Meaning
+============================================ ==================================
+``LPWAN_SX127X_RFFREQ_DEFAULT``              Frequency, in Hz, at registration
+``LPWAN_SX127X_TXPOWER_DEFAULT``             Output power in dBm
+``LPWAN_SX127X_MODULATION_DEFAULT``          1 for FSK, 2 for OOK, 3 for LoRa
+``LPWAN_SX127X_RXSUPPORT``                   Build the receive path
+``LPWAN_SX127X_TXSUPPORT``                   Build the transmit path
+``LPWAN_SX127X_LORA``                        Build the LoRa modem
+``LPWAN_SX127X_FSKOOK``                      Build the FSK and OOK modem
+``LPWAN_SX127X_LORA_SYNCWORD``               Sync word, see below
+``LPWAN_SX127X_LORA_BW_DEFAULT``             Bandwidth, 7 selects 125 kHz
+``LPWAN_SX127X_LORA_SF_DEFAULT``             Spreading factor, 6 to 12
+``LPWAN_SX127X_CRCON``                       Append and check a CRC
+``LPWAN_SX127X_RXFIFO_LEN``                  Packets buffered by the driver
+============================================ ==================================
+
+Talking to another radio
+========================
+
+Two settings decide whether two devices hear each other at all, and both are
+silent failures when they disagree:
+
+* **Band.** The chip has separate low and high frequency front ends and the
+  modem has to be told which one is in use. The driver derives that from the
+  configured frequency, using the high band above 525 MHz.
+
+* **Sync word.** ``CONFIG_LPWAN_SX127X_LORA_SYNCWORD`` defaults to 0x12, the
+  private network value. A public LoRaWAN network uses 0x34, and a receiver
+  configured for the other value never even detects the frame.
+
+Beyond those, the spreading factor, the bandwidth and the coding rate have to
+match on both sides.
+
+Two boards reach each other with the ``sx127x`` example of
+``apps/examples/sx127x_demo``. Start the receiver first, since the example
+gives up after the time given with ``-d``::
+
+  board A> sx127x -m 0 -f 917200000 -r -d 60
+  board B> sx127x -m 0 -f 917200000 -t -p 0 -l 32 -d 30
+
+The receiver prints the payload of every packet along with its signal to
+noise ratio and its received power. Keep the boards a metre or so apart: at a
+few centimetres a transmitter saturates the other receiver and the packets
+arrive with a broken CRC.
+
+The same commands work against a gateway. A concentrator running the ``lora``
+command of ``apps/wireless/lora_pkt_fwd`` sends a packet with
+``lora tx 917200000 7 hello``, which any board listening on that frequency
+receives; and a board transmitting as above shows up on the gateway as an
+ordinary uplink. See :ref:`lora_gw` for the gateway side.
+
+Board implementation
+====================
+
+The driver is registered with ``sx127x_register``, which takes an SPI bus and
+a ``struct sx127x_lower_s``. That structure carries what the chip needs from
+the board: attaching the DIO0 interrupt, which signals the end of a
+transmission or a reception, a ``reset`` hook, and the optional
+``opmode_change``, ``freq_select`` and ``pa_select`` hooks used by boards
+whose antenna switch or power amplifier path depends on the operating mode,
+the frequency or the requested power. See
+``nuttx/wireless/lpwan/sx127x.h``.
+
+Boards
+======
+
+* :ref:`ST B-L072Z-LRWAN1 <b-l072z-lrwan1>`
+* :ref:`Nucleo L073RZ <nucleo-l073rz>`
+* :ref:`Nucleo F091RC <nucleo-f091rc>`
+* :ref:`nRF52840-DK <nrf52840-dk>`
+* :ref:`Heltec WiFi LoRa 32 <heltec_wifi_lora32>`

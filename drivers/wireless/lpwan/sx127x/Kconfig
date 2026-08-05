@@ -79,6 +79,29 @@ config LPWAN_SX127X_LORA_IMPHEADER
 	range 0 1
 	default 0
 
+config LPWAN_SX127X_LORA_SYNCWORD
+	hex "SX127X LORA sync word"
+	default 0x12
+	---help---
+		Sync word written to the modem: 0x12 for a private network, 0x34
+		for the public LoRaWAN network.  A gateway configured for the
+		public network does not even detect a frame sent with the private
+		sync word, so this has to match the other end.
+
+config LPWAN_SX127X_LORA_BW_DEFAULT
+	int "SX127X LORA default bandwidth"
+	default 0
+	range 0 9
+	---help---
+		Bandwidth used until it is changed: 0 = 7.8 kHz, 1 = 10.4 kHz,
+		2 = 15.6 kHz, 3 = 20.8 kHz, 4 = 31.2 kHz, 5 = 41.4 kHz,
+		6 = 62.5 kHz, 7 = 125 kHz, 9 = 250 kHz.  LoRaWAN uses 125 kHz.
+
+config LPWAN_SX127X_LORA_SF_DEFAULT
+	int "SX127X LORA default spreading factor"
+	default 7
+	range 6 12
+
 endif # LPWAN_SX127X_LORA
 
 config LPWAN_SX127X_FSKOOK
