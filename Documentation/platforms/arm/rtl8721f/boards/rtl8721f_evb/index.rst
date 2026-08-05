@@ -4,10 +4,12 @@ RTL8721F EVB
 
 .. tags:: chip:rtl8721f, arch:arm, vendor:realtek
 
-.. todo::
+.. figure:: rtl8721f_evb.png
+   :scale: 50 %
+   :align: center
+   :alt: Realtek RTL8721F EVB development board
 
-   Add a photo of the RTL8721F EVB board here as ``rtl8721f_evb.png`` in this
-   directory, referenced with a ``.. figure::`` directive.
+   The RTL8721F EVB development board.
 
 The RTL8721F EVB is a Realtek RTL8721F evaluation board. NuttX runs on the
 KM4TZ application core — an Arm Cortex-M55-compatible core running at up to
