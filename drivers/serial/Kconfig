@@ -203,10 +203,19 @@ config RPMSG_UART
 	default n
 	depends on RPMSG
 	select ARCH_HAVE_SERIAL_TERMIOS
-	select SERIAL_RXDMA
-	select SERIAL_TXDMA
-	select SERIAL_REMOVABLE
-	select SERIAL_IFLOWCONTROL
+	---help---
+		RPMsg-PTY: a minimal, message-oriented character device that carries
+		a cross-core byte stream directly over an RPMsg endpoint.  It exposes
+		POSIX terminal semantics through file_operations (open/read/write/
+		ioctl/poll) and no longer depends on the serial upper half.
+
+config RPMSG_UART_NPOLLWAITERS
+	int "RPMSG UART poll waiters"
+	default 2
+	depends on RPMSG_UART
+	---help---
+		Maximum number of threads that can be waiting for POLL events on a
+		single RPMsg-PTY device.
 
 config RPMSG_UART_CONSOLE
 	bool "UART RPMSG console support"

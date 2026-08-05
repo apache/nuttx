@@ -27,23 +27,29 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
-#include <limits.h>
-#include <stdio.h>
+#include <inttypes.h>
+#include <fcntl.h>
+#include <poll.h>
 #include <string.h>
 #include <sys/param.h>
+#include <sys/types.h>
+#include <termios.h>
 
 #include <nuttx/debug.h>
-#include <nuttx/irq.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/signal.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/ring.h>
 #include <nuttx/rpmsg/rpmsg.h>
-#include <nuttx/serial/serial.h>
+#include <nuttx/serial/tioctl.h>
 #include <nuttx/serial/uart_rpmsg.h>
 
 /****************************************************************************
- * Pre-processor definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define UART_RPMSG_DEV_CONSOLE          "/dev/console"
@@ -75,7 +81,7 @@ begin_packed_struct struct uart_rpmsg_msg_s
   uint32_t pos;                  /* recvpos (piggyback ack); for SYNC:
                                   * local recv buffer capacity */
   uint32_t len;                  /* Payload length; 0 means position-only */
-  char     data[0];
+  char     data[];
 } end_packed_struct;
 
 struct uart_rpmsg_priv_s
@@ -83,60 +89,68 @@ struct uart_rpmsg_priv_s
   struct rpmsg_endpoint ept;
   char                  devname[UART_RPMSG_NAME_SIZE];
   char                  cpuname[UART_RPMSG_NAME_SIZE];
-  FAR void              *recv_data;     /* Bridge ept_cb -> dmareceive */
 
   uint32_t              sendsize;       /* Peer recv capacity; 0 means not
                                          * connected */
+  spinlock_t            lock;           /* Flow-control counters / TX path lock */
+  uint16_t              crefs;          /* open()/close() reference count */
+
   uint32_t              sendpos;        /* Cumulative bytes we have sent */
   uint32_t              ackpos;         /* Cumulative bytes the peer consumed */
   uint32_t              received;       /* Cumulative bytes written to recv */
   uint32_t              lastpos;        /* recvpos at the last ack we sent */
   sem_t                 sendsem;        /* dmasend waits, ept_cb posts */
+  sem_t                 recvsem;        /* read() blocks here; ept_cb posts */
+
+  tcflag_t              iflag;          /* termios input flags  (c_iflag) */
+  tcflag_t              oflag;          /* termios output flags (c_oflag) */
+  tcflag_t              lflag;          /* termios local flags  (c_lflag) */
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  pid_t                 pid;            /* Foreground task PID for iob control */
+#endif
+  FAR struct pollfd_s   *fds[CONFIG_RPMSG_UART_NPOLLWAITERS];
+  struct ring_s         ring;           /* Ring handle */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int  uart_rpmsg_setup(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_shutdown(FAR struct uart_dev_s *dev);
-static int  uart_rpmsg_attach(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_detach(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_rxint(FAR struct uart_dev_s *dev, bool enable);
-static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_dmarxfree(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_dmatxavail(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_send(FAR struct uart_dev_s *dev, int ch);
-static void uart_rpmsg_txint(FAR struct uart_dev_s *dev, bool enable);
-static bool uart_rpmsg_txready(FAR struct uart_dev_s *dev);
-static bool uart_rpmsg_txempty(FAR struct uart_dev_s *dev);
-static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
-                                      FAR void *priv_);
-static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
-                                      FAR void *priv_);
-static int  uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                              size_t len, uint32_t src, FAR void *priv_);
+static int     uart_rpmsg_open(FAR struct file *filep);
+static int     uart_rpmsg_close(FAR struct file *filep);
+static ssize_t uart_rpmsg_read(FAR struct file *filep, FAR char *buffer,
+                               size_t buflen);
+static ssize_t uart_rpmsg_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen);
+static int     uart_rpmsg_ioctl(FAR struct file *filep, int cmd,
+                                unsigned long arg);
+static int     uart_rpmsg_poll(FAR struct file *filep,
+                               FAR struct pollfd_s *fds, bool setup);
+
+static void    uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv_);
+static void    uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
+                                         FAR void *priv_);
+static int     uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                 FAR void *data, size_t len, uint32_t src,
+                                 FAR void *priv_);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct uart_ops_s g_uart_rpmsg_ops =
+static const struct file_operations g_uart_rpmsg_fops =
 {
-  .setup         = uart_rpmsg_setup,
-  .shutdown      = uart_rpmsg_shutdown,
-  .attach        = uart_rpmsg_attach,
-  .detach        = uart_rpmsg_detach,
-  .rxint         = uart_rpmsg_rxint,
-  .dmasend       = uart_rpmsg_dmasend,
-  .dmareceive    = uart_rpmsg_dmareceive,
-  .dmarxfree     = uart_rpmsg_dmarxfree,
-  .dmatxavail    = uart_rpmsg_dmatxavail,
-  .send          = uart_rpmsg_send,
-  .txint         = uart_rpmsg_txint,
-  .txready       = uart_rpmsg_txready,
-  .txempty       = uart_rpmsg_txempty,
+  uart_rpmsg_open,
+  uart_rpmsg_close,
+  uart_rpmsg_read,
+  uart_rpmsg_write,
+  NULL,               /* seek */
+  uart_rpmsg_ioctl,
+  NULL,               /* mmap */
+  NULL,               /* truncate */
+  uart_rpmsg_poll,
 };
 
 /****************************************************************************
@@ -156,23 +170,6 @@ static void uart_rpmsg_post(FAR sem_t *sem)
     }
 }
 
-/* Cumulative number of bytes the application has consumed from the recv
- * ring.  recvpos = bytes received - bytes still buffered.  Must be called
- * with dev->lock held.
- */
-
-static inline_function
-uint32_t uart_rpmsg_get_recvpos(FAR struct uart_dev_s *dev)
-{
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  sbuf_size_t head = dev->recv.head;
-  sbuf_size_t tail = dev->recv.tail;
-  sbuf_size_t nbuffered;
-
-  nbuffered = head >= tail ? head - tail : dev->recv.size - tail + head;
-  return priv->received - nbuffered;
-}
-
 /* Bytes we may still send before the peer recv ring is full.  Returns 0 when
  * not connected: sendsize, sendpos and ackpos are all reset to 0 on
  * disconnect, so the subtraction naturally yields 0.  Must be called with
@@ -185,263 +182,631 @@ uint32_t uart_rpmsg_get_space(FAR struct uart_rpmsg_priv_s *priv)
   return priv->sendsize - (priv->sendpos - priv->ackpos);
 }
 
-static int uart_rpmsg_setup(FAR struct uart_dev_s *dev)
+/* Send a payload-less ACK so the peer can advance its send window.  Thread
+ * context only; must be called without priv->lock held, since rpmsg_send
+ * may block.  Returns rpmsg_send status, -ENOTCONN if down.
+ */
+
+static int uart_rpmsg_send_ack(FAR struct uart_rpmsg_priv_s *priv)
 {
-  return OK;
-}
+  struct uart_rpmsg_msg_s msg;
+  uint32_t received;
+  irqstate_t flags;
+  int ret;
 
-static void uart_rpmsg_shutdown(FAR struct uart_dev_s *dev)
-{
-}
-
-static int uart_rpmsg_attach(FAR struct uart_dev_s *dev)
-{
-  return OK;
-}
-
-static void uart_rpmsg_detach(FAR struct uart_dev_s *dev)
-{
-}
-
-static void uart_rpmsg_rxint(FAR struct uart_dev_s *dev, bool enable)
-{
-}
-
-static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
-{
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  FAR struct uart_dmaxfer_s *xfer = &dev->dmatx;
-  FAR struct uart_rpmsg_msg_s *msg;
-  size_t total = xfer->length + xfer->nlength;
-  size_t sent = 0;
-
-  /* Send the whole transfer, blocking on the send semaphore whenever the
-   * peer window is exhausted.  ept_cb posts the semaphore when the peer
-   * advances its consumed position (ackpos) or the handshake completes.
-   * Runs in the writer thread, so blocking here is allowed.
-   */
-
-  while (sent < total)
+  if (!is_rpmsg_ept_ready(&priv->ept))
     {
-      uint32_t space;
-      uint16_t count;
+      return -ENOTCONN;
+    }
+
+  flags = spin_lock_irqsave(&priv->lock);
+  received = priv->received;
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  msg.cmd = UART_RPMSG_DATA;
+  msg.pos = received;
+  msg.len = 0;
+
+  ret = rpmsg_send(&priv->ept, &msg, sizeof(msg));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  if ((int32_t)(received - priv->lastpos) > 0)
+    {
+      priv->lastpos = received;
+    }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  return ret;
+}
+
+static inline_function
+bool uart_rpmsg_in_process(FAR char *ch, tcflag_t iflag)
+{
+  if (*ch == '\r')
+    {
+      if (iflag & IGNCR)
+        {
+          return false;
+        }
+
+      if (iflag & ICRNL)
+        {
+          *ch = '\n';
+        }
+    }
+  else if (*ch == '\n' && (iflag & INLCR))
+    {
+      *ch = '\r';
+    }
+
+  return true;
+}
+
+static inline_function
+size_t uart_rpmsg_out_process(char ch, FAR char *dst, size_t dstlen,
+                              tcflag_t oflag)
+{
+  if (ch == '\n' && (oflag & ONLCR))
+    {
+      if (dstlen < 2)
+        {
+          return 0;
+        }
+
+      dst[0] = '\r';
+      dst[1] = '\n';
+      return 2;
+    }
+
+  if (ch == '\r' && (oflag & OCRNL))
+    {
+      dst[0] = '\n';
+    }
+  else
+    {
+      dst[0] = ch;
+    }
+
+  return 1;
+}
+
+static size_t uart_rpmsg_out_copy(FAR char *dst, size_t dstlen,
+                                  FAR const char *src, size_t srclen,
+                                  tcflag_t oflag, FAR size_t *consumed)
+{
+  FAR const char *osrc = src;
+  FAR char *odst = dst;
+
+  while (srclen > 0 && dstlen > 0)
+    {
+      FAR const char *special = NULL;
       size_t len;
 
-      while (uart_rpmsg_get_space(priv) == 0)
+      if ((oflag & OCRNL) != 0)
         {
-          /* Window full or not connected yet.  Release the recursive lock
-           * and wait until ept_cb opens the window.  Bail out if the
-           * endpoint is torn down while we wait.
-           */
+          special = memchr(src, '\r', srclen);
+        }
 
-          count = rspin_breaklock(&dev->lock);
-          rpmsg_wait(&priv->ept, &priv->sendsem);
-          rspin_restorelock(&dev->lock, count);
+      if ((oflag & ONLCR) != 0)
+        {
+          FAR const char *nl;
 
-          if (!is_rpmsg_ept_ready(&priv->ept))
+          nl = memchr(src, '\n', srclen);
+          if (nl != NULL && (special == NULL || nl < special))
             {
-              goto out;
+              special = nl;
             }
         }
 
-      /* Getting a TX buffer may block, so release the lock first */
+      len = special != NULL ? special - src : srclen;
+      len = MIN(len, dstlen);
+      if (len != 0)
+        {
+          memcpy(dst, src, len);
+          dst    += len;
+          dstlen -= len;
+          src    += len;
+          srclen -= len;
+        }
 
-      count = rspin_breaklock(&dev->lock);
-      msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
-      rspin_restorelock(&dev->lock, count);
-
-      if (msg == NULL)
+      if (special == NULL || dstlen == 0)
         {
           break;
         }
 
-      space -= sizeof(*msg);
-      len = MIN3(total - sent, uart_rpmsg_get_space(priv), space);
-
-      /* Copy from the (possibly wrapped) xmit ring at logical offset sent */
-
-      if (sent < xfer->length)
+      len = uart_rpmsg_out_process(*src, dst, dstlen, oflag);
+      if (len == 0)
         {
-          size_t first = xfer->length - sent;
+          break;
+        }
 
-          if (first >= len)
+      dst    += len;
+      dstlen -= len;
+      src++;
+      srclen--;
+    }
+
+  *consumed = src - osrc;
+  return dst - odst;
+}
+
+static int uart_rpmsg_open(FAR struct file *filep)
+{
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  /* Reference count only: the endpoint is owned by the rpmsg framework, so
+   * opening never brings the link up.
+   */
+
+  DEBUGASSERT(priv->crefs < UINT16_MAX);
+  priv->crefs++;
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+  return OK;
+}
+
+static int uart_rpmsg_close(FAR struct file *filep)
+{
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  uint32_t dropped = 0;
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  DEBUGASSERT(priv->crefs > 0);
+  if (--priv->crefs == 0)
+    {
+      /* Last close: drop unread bytes so a fresh session starts clean, but
+       * count them as consumed or the peer window shrinks for good.
+       */
+
+      dropped = ring_reset(&priv->ring);
+      priv->received += dropped;
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+      priv->pid = INVALID_PROCESS_ID;
+#endif
+    }
+
+  spin_unlock_irqrestore(&priv->lock, flags);
+
+  if (dropped > 0)
+    {
+      uart_rpmsg_send_ack(priv);
+    }
+
+  return OK;
+}
+
+static size_t uart_rpmsg_in_copy(FAR char *dst, FAR const char *src,
+                                 size_t len, tcflag_t iflag)
+{
+  FAR char *odst = dst;
+
+  while (len > 0)
+    {
+      FAR const char *special = NULL;
+      size_t ncopy;
+      char ch;
+
+      if ((iflag & (IGNCR | ICRNL)) != 0)
+        {
+          special = memchr(src, '\r', len);
+        }
+
+      if ((iflag & INLCR) != 0)
+        {
+          FAR const char *nl;
+
+          nl = memchr(src, '\n', len);
+          if (nl != NULL && (special == NULL || nl < special))
             {
-              memcpy(msg->data, xfer->buffer + sent, len);
+              special = nl;
             }
-          else
-            {
-              memcpy(msg->data, xfer->buffer + sent, first);
-              memcpy(msg->data + first, xfer->nbuffer, len - first);
-            }
+        }
+
+      ncopy = special != NULL ? special - src : len;
+      if (ncopy != 0)
+        {
+          memcpy(dst, src, ncopy);
+          dst += ncopy;
+          src += ncopy;
+          len -= ncopy;
+        }
+
+      if (special == NULL)
+        {
+          break;
+        }
+
+      ch = *src++;
+      len--;
+      if (uart_rpmsg_in_process(&ch, iflag))
+        {
+          *dst++ = ch;
+        }
+    }
+
+  return dst - odst;
+}
+
+static ssize_t uart_rpmsg_read(FAR struct file *filep, FAR char *buffer,
+                               size_t buflen)
+{
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  struct ring_buf_s rbuf;
+  ssize_t ret = 0;
+  irqstate_t flags;
+
+  if (buflen == 0)
+    {
+      return 0;
+    }
+
+  flags = spin_lock_irqsave(&priv->lock);
+
+  for (; ; )
+    {
+      ring_spsc_dequeue_start(&priv->ring, buflen, &rbuf);
+
+      ret = 0;
+      if (rbuf.len1 != 0)
+        {
+          ret += uart_rpmsg_in_copy(buffer, rbuf.ptr1, rbuf.len1,
+                                    priv->iflag);
+        }
+
+      if (rbuf.len2 != 0)
+        {
+          ret += uart_rpmsg_in_copy(&buffer[ret], rbuf.ptr2, rbuf.len2,
+                                    priv->iflag);
+        }
+
+      priv->received += rbuf.cnt;
+      ring_spsc_dequeue_finish(&priv->ring, &rbuf);
+
+      if (ret > 0)
+        {
+          break;
+        }
+      else if (filep->f_oflags & O_NONBLOCK)
+        {
+          ret = -EAGAIN;
+          break;
         }
       else
         {
-          memcpy(msg->data, xfer->nbuffer + (sent - xfer->length), len);
+          spin_unlock_irqrestore(&priv->lock, flags);
+          ret = nxsem_wait(&priv->recvsem);
+          flags = spin_lock_irqsave(&priv->lock);
+          if (ret < 0)
+            {
+              break;
+            }
+        }
+    }
+
+  if ((priv->lflag & ECHO) && ret > 0)
+    {
+      spin_unlock_irqrestore(&priv->lock, flags);
+      uart_rpmsg_write(filep, buffer, ret);
+    }
+  else if (priv->received - priv->lastpos > ring_capacity(&priv->ring) / 2)
+    {
+      spin_unlock_irqrestore(&priv->lock, flags);
+      uart_rpmsg_send_ack(priv);
+    }
+  else
+    {
+      spin_unlock_irqrestore(&priv->lock, flags);
+    }
+
+  return ret;
+}
+
+static int uart_rpmsg_wait_space(FAR struct file *filep,
+                                 FAR struct uart_rpmsg_priv_s *priv)
+{
+  if (filep->f_oflags & O_NONBLOCK)
+    {
+      return -EAGAIN;
+    }
+
+  return rpmsg_wait(&priv->ept, &priv->sendsem);
+}
+
+static ssize_t uart_rpmsg_write(FAR struct file *filep,
+                                FAR const char *buffer, size_t buflen)
+{
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  size_t nwritten = 0;
+  irqstate_t flags;
+  ssize_t ret = 0;
+
+  if (buflen == 0)
+    {
+      return 0;
+    }
+
+  while (nwritten < buflen)
+    {
+      FAR struct uart_rpmsg_msg_s *msg;
+      uint32_t received;
+      uint32_t space;
+      size_t used;
+      size_t len;
+
+      flags = spin_lock_irqsave(&priv->lock);
+
+      /* Drop data until the peer SYNC arrives: waiting here deadlocks a core
+       * that writes this tty before booting the peer it is connected to.
+       */
+
+      if (priv->sendsize == 0)
+        {
+          spin_unlock_irqrestore(&priv->lock, flags);
+          ret = -ENOTCONN;
+          break;
         }
 
-      /* Piggyback our consumed position so the peer can free its window */
+      space = uart_rpmsg_get_space(priv);
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      if (space == 0)
+        {
+          ret = uart_rpmsg_wait_space(filep, priv);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          continue;
+        }
+
+      msg = rpmsg_get_tx_payload_buffer(&priv->ept, &space, true);
+      if (msg == NULL)
+        {
+          ret = -ENOMEM;
+          break;
+        }
+
+      flags = spin_lock_irqsave(&priv->lock);
+
+      space -= sizeof(*msg);
+      space = MIN(uart_rpmsg_get_space(priv), space);
+
+      if ((priv->oflag & OPOST) == 0)
+        {
+          len = used = MIN(buflen - nwritten, space);
+          memcpy(msg->data, &buffer[nwritten], len);
+        }
+      else
+        {
+          len = uart_rpmsg_out_copy(msg->data, space, &buffer[nwritten],
+                                    buflen - nwritten, priv->oflag, &used);
+        }
+
+      received = priv->received;
+      priv->sendpos += len;
+
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      if (len == 0)
+        {
+          rpmsg_release_tx_buffer(&priv->ept, msg);
+          ret = uart_rpmsg_wait_space(filep, priv);
+          if (ret < 0)
+            {
+              break;
+            }
+
+          continue;
+        }
 
       msg->cmd = UART_RPMSG_DATA;
-      msg->pos = uart_rpmsg_get_recvpos(dev);
+      msg->pos = received;
       msg->len = len;
 
-      if (rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len) < 0)
+      ret = rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
+
+      flags = spin_lock_irqsave(&priv->lock);
+
+      if (ret < 0)
+        {
+          /* Nothing reached the wire, so the peer will never ack these bytes
+           * and the reservation has to be given back.
+           */
+
+          priv->sendpos -= len;
+        }
+      else if ((int32_t)(received - priv->lastpos) > 0)
+        {
+          priv->lastpos = received;
+        }
+
+      spin_unlock_irqrestore(&priv->lock, flags);
+
+      if (ret < 0)
         {
           rpmsg_release_tx_buffer(&priv->ept, msg);
           break;
         }
 
-      /* Advance the position counters only after the frame is on the wire */
-
-      priv->lastpos  = msg->pos;
-      priv->sendpos += len;
-      sent          += len;
+      nwritten += used;
     }
 
-out:
-  dev->dmatx.nbytes = sent;
-  uart_xmitchars_done(dev);
+  return nwritten > 0 ? nwritten : ret;
 }
 
-static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
+static int uart_rpmsg_ioctl(FAR struct file *filep, int cmd,
+                            unsigned long arg)
 {
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
-  FAR struct uart_rpmsg_msg_s *msg = priv->recv_data;
-  uint32_t len = msg->len;
-  size_t space = xfer->length + xfer->nlength;
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  irqstate_t flags;
+  int ret = OK;
 
-  if (len > space)
+  switch (cmd)
     {
-      len = space;
+      case TCGETS:
+        {
+          FAR struct termios *termiosp =
+            (FAR struct termios *)(uintptr_t)arg;
+
+          if (termiosp == NULL)
+            {
+              return -EINVAL;
+            }
+
+          flags = spin_lock_irqsave(&priv->lock);
+
+          termiosp->c_iflag = priv->iflag;
+          termiosp->c_oflag = priv->oflag;
+          termiosp->c_lflag = priv->lflag;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
+
+      case TCSETS:
+      case TCSETSW:
+      case TCSETSF:
+        {
+          FAR struct termios *termiosp =
+            (FAR struct termios *)(uintptr_t)arg;
+
+          if (termiosp == NULL)
+            {
+              return -EINVAL;
+            }
+
+          flags = spin_lock_irqsave(&priv->lock);
+
+          priv->iflag = termiosp->c_iflag;
+          priv->oflag = termiosp->c_oflag;
+          priv->lflag = termiosp->c_lflag;
+          spin_unlock_irqrestore(&priv->lock, flags);
+        }
+        break;
+
+      case FIONREAD:
+        {
+          FAR int *nbytes = (FAR int *)(uintptr_t)arg;
+
+          if (nbytes == NULL)
+            {
+              return -EINVAL;
+            }
+
+          *nbytes = ring_count(&priv->ring);
+        }
+        break;
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+      case TIOCSCTTY:
+        {
+          if (arg < 0)
+            {
+              return -EINVAL;
+            }
+
+          priv->pid = (pid_t)arg;
+        }
+        break;
+
+      case TIOCNOTTY:
+        {
+          priv->pid = INVALID_PROCESS_ID;
+        }
+        break;
+#endif
+
+      default:
+        ret = -ENOTTY;
+        break;
     }
 
-  if (len > xfer->length)
+  return ret;
+}
+
+static int uart_rpmsg_poll(FAR struct file *filep, FAR struct pollfd_s *fds,
+                           bool setup)
+{
+  FAR struct uart_rpmsg_priv_s *priv = filep->f_inode->i_private;
+  pollevent_t eventset = 0;
+  irqstate_t flags;
+  int ret = OK;
+  int i;
+
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
+
+  if (setup)
     {
-      memcpy(xfer->buffer, msg->data, xfer->length);
-      memcpy(xfer->nbuffer, msg->data + xfer->length, len - xfer->length);
+      for (i = 0; i < CONFIG_RPMSG_UART_NPOLLWAITERS; i++)
+        {
+          if (priv->fds[i] == NULL)
+            {
+              priv->fds[i] = fds;
+              fds->priv    = &priv->fds[i];
+              break;
+            }
+        }
+
+      if (i >= CONFIG_RPMSG_UART_NPOLLWAITERS)
+        {
+          ret = -EBUSY;
+          goto errout;
+        }
+
+      if (ring_count(&priv->ring) > 0)
+        {
+          eventset |= POLLIN;
+        }
+
+      if (uart_rpmsg_get_space(priv) > 0)
+        {
+          eventset |= POLLOUT;
+        }
+
+      if (eventset != 0)
+        {
+          poll_notify(&fds, 1, eventset);
+        }
     }
   else
     {
-      memcpy(xfer->buffer, msg->data, len);
-    }
+      FAR struct pollfd_s **slot = (FAR struct pollfd_s **)fds->priv;
 
-  xfer->nbytes = len;
-  uart_recvchars_done(dev);
-}
-
-static void uart_rpmsg_dmarxfree(FAR struct uart_dev_s *dev)
-{
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-  FAR struct uart_rpmsg_msg_s msg;
-  uint32_t recvpos;
-  uint16_t count;
-  int ret;
-
-  /* Return credit to the peer based on what the reader has consumed.
-   * Only emit an ACK once at least half of the recv buffer has been freed,
-   * to limit the ACK rate.  Runs in thread (uart_read) context.
-   */
-
-  recvpos = uart_rpmsg_get_recvpos(dev);
-  if (is_rpmsg_ept_ready(&priv->ept) &&
-      recvpos - priv->lastpos > dev->recv.size / 2)
-    {
-      msg.cmd = UART_RPMSG_DATA;
-      msg.pos = recvpos;
-      msg.len = 0;
-
-      /* rpmsg_send may block waiting for a TX buffer, so release the
-       * recursive lock first (msg is a stack copy and stays valid).
-       */
-
-      count = rspin_breaklock(&dev->lock);
-      ret = rpmsg_send(&priv->ept, &msg, sizeof(msg));
-      rspin_restorelock(&dev->lock, count);
-
-      /* Advance lastpos only after the ack is on the wire; otherwise a
-       * failed send would suppress the next ack and stall the peer window.
-       * Never let it regress: dmasend may have advanced lastpos
-       * (piggybacking a newer recvpos) while the lock was released for
-       * rpmsg_send.
-       */
-
-      if (ret >= 0 && (int32_t)(recvpos - priv->lastpos) > 0)
+      if (slot != NULL)
         {
-          priv->lastpos = recvpos;
+          *slot     = NULL;
+          fds->priv = NULL;
         }
     }
+
+errout:
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
+  return ret;
 }
 
-static void uart_rpmsg_dmatxavail(FAR struct uart_dev_s *dev)
-{
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
-
-  /* Caller must hold dev->lock.  Kick a transfer once the endpoint is ready
-   * and no DMA is already in flight.  dmasend itself blocks on sendsem if
-   * the peer window is not yet open.
-   */
-
-  if (is_rpmsg_ept_ready(&priv->ept) && dev->dmatx.length == 0)
-    {
-      uart_xmitchars_dma(dev);
-    }
-}
-
-static void uart_rpmsg_send(FAR struct uart_dev_s *dev, int ch)
-{
-  int nexthead;
-
-  nexthead = dev->xmit.head + 1;
-  if (nexthead >= dev->xmit.size)
-    {
-      nexthead = 0;
-    }
-
-  if (nexthead != dev->xmit.tail)
-    {
-      /* No.. not full.  Add the character to the TX buffer and return. */
-
-      dev->xmit.buffer[dev->xmit.head] = ch;
-      dev->xmit.head = nexthead;
-    }
-
-  uart_rpmsg_dmatxavail(dev);
-}
-
-static void uart_rpmsg_txint(FAR struct uart_dev_s *dev, bool enable)
-{
-}
-
-static bool uart_rpmsg_txready(FAR struct uart_dev_s *dev)
-{
-  int nexthead;
-
-  nexthead = dev->xmit.head + 1;
-  if (nexthead >= dev->xmit.size)
-    {
-      nexthead = 0;
-    }
-
-  return nexthead != dev->xmit.tail;
-}
-
-static bool uart_rpmsg_txempty(FAR struct uart_dev_s *dev)
-{
-  return true;
-}
+/****************************************************************************
+ * RPMsg endpoint callbacks
+ ****************************************************************************/
 
 static void uart_rpmsg_ns_bound(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct uart_dev_s *dev = ept->priv;
-  FAR struct uart_rpmsg_msg_s msg;
-
-  /* SYNC: announce our recv ring capacity so the peer can size its send
-   * window.  The serial recv ring can hold at most (size - 1) bytes.
-   */
+  FAR struct uart_rpmsg_priv_s *priv = ept->priv;
+  struct uart_rpmsg_msg_s msg;
 
   msg.cmd = UART_RPMSG_SYNC;
-  msg.pos = dev->recv.size - 1;
+  msg.pos = ring_capacity(&priv->ring);
   msg.len = 0;
 
   rpmsg_send(ept, &msg, sizeof(msg));
@@ -450,8 +815,7 @@ static void uart_rpmsg_ns_bound(FAR struct rpmsg_endpoint *ept)
 static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
                                       FAR void *priv_)
 {
-  FAR struct uart_dev_s *dev = priv_;
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  FAR struct uart_rpmsg_priv_s *priv = priv_;
   char eptname[RPMSG_NAME_SIZE];
 
   if (strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
@@ -462,7 +826,7 @@ static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
        * RT once the initial backlog is drained.
        */
 
-      priv->ept.priv = dev;
+      priv->ept.priv = priv;
       priv->ept.ns_bound_cb = uart_rpmsg_ns_bound;
       snprintf(eptname, sizeof(eptname), "%s%s",
                UART_RPMSG_EPT_PREFIX, priv->devname);
@@ -475,41 +839,97 @@ static void uart_rpmsg_device_created(FAR struct rpmsg_device *rdev,
 static void uart_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
                                       FAR void *priv_)
 {
-  FAR struct uart_dev_s *dev = priv_;
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  FAR struct uart_rpmsg_priv_s *priv = priv_;
   irqstate_t flags;
 
   if (priv->ept.priv != NULL &&
       strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
     {
-      /* Mark not connected and wake a possibly blocked dmasend, which will
-       * see the ept is no longer ready and abort, before tearing it down.
-       * Reset all window counters so uart_rpmsg_get_space() returns 0 while
-       * disconnected.
+      /* Zero the counters before destroying so a woken writer cannot mistake
+       * stale state for an open window, then wake it to let it bail out.
        */
 
+      flags = spin_lock_irqsave(&priv->lock);
       priv->sendsize = 0;
       priv->sendpos  = 0;
       priv->ackpos   = 0;
-      rpmsg_destroy_ept(&priv->ept);
-      uart_rpmsg_post(&priv->sendsem);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
-      flags = uart_spinlock(dev, true);
-      dev->dmatx.nbytes = dev->dmatx.length + dev->dmatx.nlength;
-      uart_xmitchars_done(dev);
-      uart_spinunlock(dev, true, flags);
+      /* Destroying may wait on the endpoint refcount, so it stays outside */
+
+      rpmsg_destroy_ept(&priv->ept);
+
+      /* Kick both wait mechanisms so nobody is left blocked on a link that
+       * is gone.  POLLHUP reaches every waiter, subscribed or not.  Same
+       * reason as ept_cb for holding the lock across poll_notify.
+       */
+
+      flags = spin_lock_irqsave_nopreempt(&priv->lock);
+      uart_rpmsg_post(&priv->sendsem);
+      uart_rpmsg_post(&priv->recvsem);
+      poll_notify(priv->fds, CONFIG_RPMSG_UART_NPOLLWAITERS, POLLHUP);
+      spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
     }
 }
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+static void uart_rpmsg_signal_check(FAR struct uart_rpmsg_priv_s *priv,
+                                    FAR const char *data, size_t len)
+{
+  pid_t pid = priv->pid;
+
+  if (pid <= 0)
+    {
+      return;
+    }
+
+  while (len > 0)
+    {
+      FAR const char *special = NULL;
+      FAR const char *tmp;
+      int signo = 0;
+
+#ifdef CONFIG_TTY_SIGINT
+      tmp = memchr(data, CONFIG_TTY_SIGINT_CHAR, len);
+      if (tmp != NULL)
+        {
+          special = tmp;
+          signo   = SIGINT;
+        }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+      tmp = memchr(data, CONFIG_TTY_SIGTSTP_CHAR, len);
+      if (tmp != NULL && (special == NULL || tmp < special))
+        {
+          special = tmp;
+          signo   = SIGTSTP;
+        }
+#endif
+
+      if (special == NULL)
+        {
+          break;
+        }
+
+      nxsig_kill(pid, signo);
+
+      len -= special - data + 1;
+      data = special + 1;
+    }
+}
+#else
+#  define uart_rpmsg_signal_check(priv, data, len)
+#endif
 
 static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                              size_t len, uint32_t src, FAR void *priv_)
 {
-  FAR struct uart_dev_s *dev = ept->priv;
-  FAR struct uart_rpmsg_priv_s *priv = dev->priv;
+  FAR struct uart_rpmsg_priv_s *priv = ept->priv;
   FAR struct uart_rpmsg_msg_s *msg = data;
   irqstate_t flags;
 
-  flags = uart_spinlock(dev, true);
+  flags = spin_lock_irqsave_nopreempt(&priv->lock);
 
   if (msg->cmd == UART_RPMSG_SYNC)
     {
@@ -528,42 +948,35 @@ static int uart_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
       priv->sendsize = msg->pos;
       priv->sendpos  = 0;
       priv->ackpos   = 0;
-
-      uart_rpmsg_dmatxavail(dev);
+      priv->received = 0;
+      priv->lastpos  = 0;
       rpmsg_set_priority(&priv->ept, RPMSG_PRIO_RT);
     }
   else
     {
-      /* DATA: the peer always piggybacks its consumed position (our
-       * ackpos).  len > 0 also carries payload for the recv ring; len == 0
-       * is a pure position sync.
+      /* The peer position always arrives; payload is optional.  Only DATA
+       * frames carry a payload (SYNC is always len 0), so the whole receive
+       * path lives in this branch.
        */
 
       priv->ackpos = msg->pos;
 
       if (msg->len > 0)
         {
-          priv->recv_data  = data;
-          uart_recvchars_dma(dev);
-          priv->recv_data  = NULL;
-          priv->received  += msg->len;
+          ring_spsc_enqueue(&priv->ring, msg->data, msg->len);
+          uart_rpmsg_signal_check(priv, msg->data, msg->len);
+          uart_rpmsg_post(&priv->recvsem);
+          poll_notify(priv->fds, CONFIG_RPMSG_UART_NPOLLWAITERS, POLLIN);
         }
     }
-
-  /* Wake a blocked dmasend only when the send window is actually open.
-   * dmasend blocks solely because get_space() == 0, and the only way the
-   * window opens is here (SYNC sets sendsize, DATA advances ackpos), so this
-   * avoids spurious wakeups that would just re-check and sleep again.  The
-   * shared dev->lock serializes this evaluation with dmasend's own check, so
-   * no wakeup is lost.
-   */
 
   if (uart_rpmsg_get_space(priv) > 0)
     {
       uart_rpmsg_post(&priv->sendsem);
+      poll_notify(priv->fds, CONFIG_RPMSG_UART_NPOLLWAITERS, POLLOUT);
     }
 
-  uart_spinunlock(dev, true, flags);
+  spin_unlock_irqrestore_nopreempt(&priv->lock, flags);
   return 0;
 }
 
@@ -575,61 +988,88 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
                     int buf_size, bool isconsole)
 {
   FAR struct uart_rpmsg_priv_s *priv;
-  FAR struct uart_dev_s *dev;
-  char name[32];
+  char dev_name[32];
+  FAR char *buf;
   int ret;
 
-  dev = kmm_zalloc(sizeof(struct uart_dev_s) +
-                   sizeof(struct uart_rpmsg_priv_s) +
-                   buf_size * 2);
-  if (dev == NULL)
+  if (buf_size <= 0)
+    {
+      return -EINVAL;
+    }
+
+  /* One allocation backs both the ring blob and priv.  The blob needs a
+   * RING_BLOB_ALIGN base (cache-line isolation + init assert), so it goes
+   * first and kmm_memalign covers it with no padding.  priv follows the
+   * blob, whose size is the requested capacity plus the blob header, rounded
+   * up just enough to keep priv aligned; those few bytes only add ring
+   * capacity.
+   */
+
+  buf_size = ALIGN_UP(sizeof(struct ring_blob_s) + buf_size,
+                      sizeof(uintptr_t));
+
+  buf = kmm_memalign(RING_BLOB_ALIGN, buf_size + sizeof(*priv));
+  if (buf == NULL)
     {
       return -ENOMEM;
     }
 
-  dev->ops         = &g_uart_rpmsg_ops;
-  dev->isconsole   = isconsole;
-  dev->recv.size   = buf_size;
-  dev->xmit.size   = buf_size;
-  dev->priv        = dev + 1;
-  dev->recv.buffer = (FAR char *)dev->priv +
-                     sizeof(struct uart_rpmsg_priv_s);
-  dev->xmit.buffer = dev->recv.buffer + buf_size;
-  priv             = dev->priv;
+  priv = (FAR struct uart_rpmsg_priv_s *)(buf + buf_size);
+  memset(priv, 0, sizeof(*priv));
+  memset(buf, 0, sizeof(struct ring_blob_s));
 
+  ring_spsc_init(&priv->ring, buf, buf_size, 0, false);
+
+  spin_lock_init(&priv->lock);
+  nxsem_init(&priv->recvsem, 0, 0);
   nxsem_init(&priv->sendsem, 0, 0);
+
+  /* Only the console side cooks and echoes; the cu side stays raw to avoid
+   * echoing back what the console already echoed across cores.  cu sets its
+   * own OPOST|ONLCR via ioctl.
+   */
+
+  if (isconsole)
+    {
+      priv->iflag = ICRNL;
+      priv->oflag = OPOST | ONLCR;
+      priv->lflag = ECHO;
+    }
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  priv->pid = INVALID_PROCESS_ID;
+#endif
 
   strlcpy(priv->cpuname, cpuname, sizeof(priv->cpuname));
   strlcpy(priv->devname, devname, sizeof(priv->devname));
 
-  ret = rpmsg_register_callback(dev,
+  ret = rpmsg_register_callback(priv,
                                 uart_rpmsg_device_created,
                                 uart_rpmsg_device_destroy,
                                 NULL,
                                 NULL);
   if (ret < 0)
     {
-      nxsem_destroy(&priv->sendsem);
-      kmm_free(dev);
-      return ret;
+      goto fail_with_priv;
     }
 
-  snprintf(name, sizeof(name), "%s%s",
+  snprintf(dev_name, sizeof(dev_name), "%s%s",
            UART_RPMSG_DEV_PREFIX, devname);
-  ret = uart_register(name, dev);
+  ret = register_driver(dev_name, &g_uart_rpmsg_fops, 0666, priv);
   if (ret < 0)
     {
-      rpmsgerr("uart register failed, ret=%d\n", ret);
+      rpmsgerr("register %s failed, ret=%d\n", dev_name, ret);
       goto fail_with_rpmsg;
     }
 
-  if (dev->isconsole)
+  if (isconsole)
     {
-      ret = uart_register(UART_RPMSG_DEV_CONSOLE, dev);
+      ret = register_driver(UART_RPMSG_DEV_CONSOLE, &g_uart_rpmsg_fops,
+                            0666, priv);
       if (ret < 0)
         {
-          rpmsgerr("uart register console failed, ret=%d\n", ret);
-          unregister_driver(name);
+          rpmsgerr("register console failed, ret=%d\n", ret);
+          unregister_driver(dev_name);
           goto fail_with_rpmsg;
         }
     }
@@ -637,12 +1077,14 @@ int uart_rpmsg_init(FAR const char *cpuname, FAR const char *devname,
   return OK;
 
 fail_with_rpmsg:
-  rpmsg_unregister_callback(dev,
+  rpmsg_unregister_callback(priv,
                             uart_rpmsg_device_created,
                             uart_rpmsg_device_destroy,
                             NULL,
                             NULL);
+fail_with_priv:
+  nxsem_destroy(&priv->recvsem);
   nxsem_destroy(&priv->sendsem);
-  kmm_free(dev);
+  kmm_free(buf);
   return ret;
 }
