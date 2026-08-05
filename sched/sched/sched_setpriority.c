@@ -92,7 +92,26 @@ static inline void nxsched_running_setpriority(FAR struct tcb_s *tcb,
     {
 #ifdef CONFIG_SMP
       tcb->sched_priority = (uint8_t)sched_priority;
-      if (nxsched_deliver_task(this_cpu(), tcb->cpu, SWITCH_EQUAL))
+
+      /* If the task no longer is eligible to run on this CPU, then
+       * we need to perform the context switch unconditionally.
+       */
+
+      if ((tcb == this_task()) && (tcb->affinity & (1 << tcb->cpu)) == 0)
+        {
+          bool switch_needed;
+
+          switch_needed = nxsched_remove_readytorun(tcb);
+          DEBUGASSERT(switch_needed == true);
+
+          switch_needed = nxsched_add_readytorun(tcb);
+          DEBUGASSERT(switch_needed == false);
+
+          DEBUGASSERT(tcb != this_task());
+          up_switch_context(this_task(), tcb);
+          UNUSED(switch_needed);
+        }
+      else if (nxsched_deliver_task(this_cpu(), tcb->cpu, SWITCH_EQUAL))
         {
           up_switch_context(this_task(), tcb);
         }
