@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
 #include <nuttx/wireless/lpwan/sx127x.h>
@@ -248,6 +249,12 @@ int stm32_lpwaninitialize(void)
   int ret = OK;
 
   wlinfo("Register the sx127x module\n");
+
+  /* Power the TCXO that clocks the radio, and give it time to settle */
+
+  stm32_configgpio(GPIO_SX127X_TCXO);
+  stm32_gpiowrite(GPIO_SX127X_TCXO, true);
+  up_mdelay(10);
 
   /* Setup DIO0 */
 

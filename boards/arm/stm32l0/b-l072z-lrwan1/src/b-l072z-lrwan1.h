@@ -65,21 +65,20 @@
 
 /* Button definitions *******************************************************/
 
-/* The Nucleo L073RZ supports two buttons; only one button is controllable
- * by software:
+/* The board has two buttons, only one of which is controllable by software:
  *
- *   B1 USER:  user button connected to the I/O PC13 of the STM32L073RZT6.
- *   B2 RESET: push button connected to NRST is used to RESET the
- *             STM32L073RZT6.
+ *   B1 USER:  user button connected to PB2, pulled up, active low.
+ *   B2 RESET: push button connected to NRST.
  *
- * NOTE that EXTI interrupts are configured.
+ * NOTE that EXTI interrupts are configured.  PC13 is not a button here: on
+ * this board it carries DIO3 of the radio.
  */
 
 #define MIN_IRQBUTTON  BUTTON_USER
 #define MAX_IRQBUTTON  BUTTON_USER
 #define NUM_IRQBUTTONS 1
 
-#define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN13)
+#define GPIO_BTN_USER  (GPIO_INPUT|GPIO_PULLUP|GPIO_EXTI|GPIO_PORTB|GPIO_PIN2)
 
 /* SX1276
  * RESET - PC0 (active low)
@@ -102,6 +101,13 @@
 #define GPIO_SX127X_CRF1  (GPIO_SPEED_HIGH | GPIO_PORTA | GPIO_PIN1)
 #define GPIO_SX127X_CRF2  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN2)
 #define GPIO_SX127X_CRF3  (GPIO_SPEED_HIGH | GPIO_PORTC | GPIO_PIN1)
+
+/* The 32 MHz TCXO of the module is powered from PA12.  The radio has no
+ * clock at all until this is driven high.
+ */
+
+#define GPIO_SX127X_TCXO  (GPIO_OUTPUT | GPIO_SPEED_HIGH | \
+                           GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN12)
 
 /* Oled configuration */
 
