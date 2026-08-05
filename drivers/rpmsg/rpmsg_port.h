@@ -472,6 +472,29 @@ bool rpmsg_port_retx_is_pending(FAR struct rpmsg_port_s *port)
 }
 
 /****************************************************************************
+ * Name: rpmsg_port_retx_is_empty
+ *
+ * Description:
+ *   Check whether all sent frames have been acknowledged. Unlike
+ *   rpmsg_port_retx_is_pending(), which reports whether fast retransmit
+ *   has been triggered, this tells the caller whether the link still has
+ *   unacknowledged frames and must keep exchanging to collect their acks.
+ *
+ ****************************************************************************/
+
+static inline_function
+bool rpmsg_port_retx_is_empty(FAR struct rpmsg_port_s *port)
+{
+  irqstate_t flags;
+  bool ret;
+
+  flags = spin_lock_irqsave(&port->retx.lock);
+  ret = list_is_empty(&port->retx.queue);
+  spin_unlock_irqrestore(&port->retx.lock, flags);
+  return ret;
+}
+
+/****************************************************************************
  * Name: rpmsg_port_retx_tx_fill
  *
  * Description:
@@ -513,6 +536,7 @@ void rpmsg_port_retx_tx_fill(FAR struct rpmsg_port_s *port,
 #  define rpmsg_port_retx_del(port, node)
 #  define rpmsg_port_retx_get(port)                         NULL
 #  define rpmsg_port_retx_is_pending(port)                  false
+#  define rpmsg_port_retx_is_empty(port)                    true
 #  define rpmsg_port_retx_tx_fill(port, txhdr)
 #  define rpmsg_port_retx_process_ack(port, ackno, min_seq)
 #  define rpmsg_port_retx_rx_valid(port, hdr)               true
