@@ -68,6 +68,19 @@
 #define XHCI_CMD_MAX             (16)
 #define XHCI_EVENT_MAX           (232)
 #define XHCI_TD_MAX              (8)
+
+/* How long to give the controller to stop, in milliseconds.  The
+ * specification asks for it within 16; this is generous.
+ */
+
+#define XHCI_HALT_TIMEOUT_MS     (100)
+
+/* How long to give a port to come up after being reset, in milliseconds.
+ * USB 2.0 asks for the reset to be held 10ms and the port to be usable
+ * shortly after; this is generous.
+ */
+
+#define XHCI_PORT_RESET_MS       (500)
 #define XHCI_BUFSIZE             (512)
 
 /* Port numbers macros */
@@ -519,6 +532,16 @@ static struct pci_driver_s g_pci_xhci_drv =
  * Private Functions
  ****************************************************************************/
 
+/* Every register accessor below forces the value through a register with
+ * an empty asm.  Access width is part of the register interface: xHCI
+ * requires aligned accesses of the register's own size, and a controller
+ * may ignore anything narrower (QEMU's does).  A volatile load does not
+ * pin the width; GCC 16 at -Os narrows "load 32, test bit 0" to a byte
+ * load.  A value demanded in a register can only come from the full-width
+ * access.  The same constraint on stores stops a load-modify-store being
+ * folded back into one instruction.
+ */
+
 /****************************************************************************
  * Name: xhci_capa_getreg
  *
@@ -530,8 +553,11 @@ static struct pci_driver_s g_pci_xhci_drv =
 static uint32_t xhci_capa_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->capa_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->capa_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -545,8 +571,11 @@ static uint32_t xhci_capa_getreg(FAR struct usbhost_xhci_s *priv,
 static uint8_t xhci_capa_getreg_1b(FAR struct usbhost_xhci_s *priv,
                                    unsigned int offset)
 {
-  uintptr_t addr = priv->capa_base + offset;
-  return *((FAR volatile uint8_t *)addr);
+  uintptr_t addr   = priv->capa_base + offset;
+  uint8_t   regval = *((FAR volatile uint8_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -562,6 +591,8 @@ static void xhci_capa_putreg_1b(FAR struct usbhost_xhci_s *priv,
                                 uint8_t value)
 {
   uintptr_t addr = priv->capa_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint8_t *)addr) = value;
 }
 
@@ -576,8 +607,11 @@ static void xhci_capa_putreg_1b(FAR struct usbhost_xhci_s *priv,
 static uint32_t xhci_oper_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->oper_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->oper_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -593,6 +627,8 @@ static void xhci_oper_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->oper_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
@@ -609,6 +645,8 @@ static void xhci_oper_putreg_8b(FAR struct usbhost_xhci_s *priv,
                                 uint64_t value)
 {
   uintptr_t addr = priv->oper_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint64_t *)addr) = value;
 }
 
@@ -623,8 +661,11 @@ static void xhci_oper_putreg_8b(FAR struct usbhost_xhci_s *priv,
 static uint32_t xhci_runt_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->runt_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->runt_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -640,6 +681,8 @@ static void xhci_runt_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->runt_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
@@ -656,6 +699,8 @@ static void xhci_runt_putreg_8b(FAR struct usbhost_xhci_s *priv,
                                 uint64_t value)
 {
   uintptr_t addr = priv->runt_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint64_t *)addr) = value;
 }
 
@@ -672,6 +717,8 @@ static void xhci_door_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->door_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
@@ -1074,9 +1121,12 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
 
   xhci_oper_putreg(priv, XHCI_CONFIG, priv->no_slots);
 
-  /* Slot 0 in Device Context is reserved for Scratchpad Buffer Array */
+  /* Slot 0 of the Device Context array points at the Scratchpad Buffer
+   * Array, or is zero when the controller asked for none.
+   */
 
-  priv->pg_ctx[0] = htole64(up_addrenv_va_to_pa(priv->pg_sb));
+  priv->pg_ctx[0] = priv->pg_sb ?
+                    htole64(up_addrenv_va_to_pa(priv->pg_sb)) : 0;
 
   /* Device Context Base Address Array Pointer */
 
@@ -1197,27 +1247,41 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
 
 static int xhci_ctrl_halt(FAR struct usbhost_xhci_s *priv)
 {
-  int ret = -EAGAIN;
-  int i;
+  uint32_t regval;
+  int      i;
 
-  /* Halt controller */
+  /* A controller that was never started is already halted and says so.
+   * There is no transition to wait for, so check before waiting.
+   */
 
-  xhci_oper_putreg(priv, XHCI_USBCMD, 0);
-
-  /* Wait for controller halted */
-
-  for (i = 0; i < 10; i++)
+  regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+  if ((regval & XHCI_USBSTS_HCH) != 0)
     {
-      up_mdelay(100);
-
-      if (xhci_oper_getreg(priv, XHCI_USBSTS) & XHCI_USBSTS_HCH)
-        {
-          ret = OK;
-          break;
-        }
+      return OK;
     }
 
-  return ret;
+  /* Clear Run/Stop and leave the rest of the register alone.  Writing the
+   * whole of it zero would clear the interrupt and host system error
+   * enables along with it.
+   */
+
+  regval  = xhci_oper_getreg(priv, XHCI_USBCMD);
+  regval &= ~XHCI_USBCMD_RS;
+  xhci_oper_putreg(priv, XHCI_USBCMD, regval);
+
+  for (i = 0; i < XHCI_HALT_TIMEOUT_MS; i++)
+    {
+      regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+      if ((regval & XHCI_USBSTS_HCH) != 0)
+        {
+          return OK;
+        }
+
+      up_udelay(1000);
+    }
+
+  pcierr("controller will not halt, USBSTS %08" PRIx32 "\n", regval);
+  return -EAGAIN;
 }
 
 /****************************************************************************
@@ -1307,9 +1371,12 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
   if (!(regval & XHCI_PORTSC_PED))
     {
-      /* Reset the port */
+      /* Reset the port, masking the write-one-to-clear bits out of the
+       * value first.  See XHCI_PORTSC_RW1C.
+       */
 
-      regval = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+      regval  = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+      regval &= ~XHCI_PORTSC_RW1C;
       regval |= XHCI_PORTSC_PR;
       xhci_oper_putreg(priv, XHCI_PORTSC(rhpndx), regval);
 
@@ -1317,16 +1384,25 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
       /* Wait for Enabled state for port */
 
-      retries = 10;
-      while (!(xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx))
-               & XHCI_PORTSC_PED) && retries > 0)
+      for (retries = XHCI_PORT_RESET_MS; retries > 0; retries--)
         {
-          retries--;
-          up_mdelay(100);
+          regval = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+          if ((regval & XHCI_PORTSC_PED) != 0)
+            {
+              break;
+            }
+
+          up_mdelay(1);
         }
 
-      if (retries == 0)
+      /* Test the port, not the counter: a port that comes up on the last
+       * attempt leaves the loop with the count exhausted too.
+       */
+
+      if ((regval & XHCI_PORTSC_PED) == 0)
         {
+          pcierr("port %d will not enable, PORTSC %08" PRIx32 "\n", rhpndx,
+                 regval);
           return -ETIMEDOUT;
         }
     }
@@ -1869,7 +1945,15 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
   trb->d1 = priv->cmdres.d1;
   trb->d2 = priv->cmdres.d2;
 
-  if (XHCI_TRB_D1_CC_GET(trb->d1) != XHCI_TRB_CC_SUCCESS)
+  if (XHCI_TRB_D1_CC_GET(trb->d1) == XHCI_TRB_CC_SUCCESS)
+    {
+      /* The result is the completion event's, not whether we were woken
+       * for it.  A completion found by the poll above still counts.
+       */
+
+      ret = OK;
+    }
+  else
     {
       pcierr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
@@ -4335,17 +4419,25 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   size_t tmp;
   int    i;
 
-  /* Allocate Scratchpad Buffer Array */
+  /* Allocate the Scratchpad Buffer Array, if the controller wants one.
+   *
+   * A controller may ask for no scratch space at all (QEMU's does).  A
+   * zero byte allocation returns NULL, indistinguishable from out of
+   * memory, so test the count first.
+   */
 
-  tmp = priv->no_scratch * sizeof(uint64_t);
-  priv->pg_sb = kmm_memalign(XHCI_BUF_ALIGN, tmp);
-  if (!priv->pg_sb)
+  if (priv->no_scratch > 0)
     {
-      pcierr("pg_sb malloc failed\n");
-      return -ENOMEM;
-    }
+      tmp = priv->no_scratch * sizeof(uint64_t);
+      priv->pg_sb = kmm_memalign(XHCI_BUF_ALIGN, tmp);
+      if (!priv->pg_sb)
+        {
+          pcierr("pg_sb malloc failed\n");
+          return -ENOMEM;
+        }
 
-  memset(priv->pg_sb, 0, tmp);
+      memset(priv->pg_sb, 0, tmp);
+    }
 
   for (i = 0; i < priv->no_scratch; i++)
     {
