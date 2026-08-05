@@ -130,11 +130,11 @@
 
 /* Default LORA bandwidth */
 
-#define SX127X_LRM_BW_DEFAULT         LORA_BANDWIDTH_7P8KHZ
+#define SX127X_LRM_BW_DEFAULT         CONFIG_LPWAN_SX127X_LORA_BW_DEFAULT
 
 /* Default SF for LORA */
 
-#define SX127X_LRM_SF_DEFAULT         (7)
+#define SX127X_LRM_SF_DEFAULT         CONFIG_LPWAN_SX127X_LORA_SF_DEFAULT
 
 /* FSK/OOK RX/TX FIFO size (two separate FIFOs) */
 
@@ -1286,7 +1286,12 @@ errout:
  *
  ****************************************************************************/
 
+/* The stall watchdog is only wired into the FSK and OOK receive path, so a
+ * configuration with LoRa alone must not compile it.
+ */
+
 #if defined(CONFIG_LPWAN_SX127X_RXSUPPORT) && \
+    defined(CONFIG_LPWAN_SX127X_FSKOOK) && \
     CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0
 static void sx127x_rx_watchdog(FAR void *arg)
 {
@@ -1321,7 +1326,7 @@ static void sx127x_rx_watchdog(FAR void *arg)
              sx127x_rx_watchdog, dev,
              MSEC2TICK(dev->rx_timeout));
 }
-#endif /* CONFIG_LPWAN_SX127X_RXSUPPORT && CONFIG_LPWAN_SX127X_RX_TIMEOUT > 0 */
+#endif /* RXSUPPORT && FSKOOK && RX_TIMEOUT > 0 */
 
 /****************************************************************************
  * Name: sx127x_lora_isr0_process
@@ -3874,6 +3879,22 @@ static int sx127x_frequency_set(FAR struct sx127x_dev_s *dev, uint32_t freq)
   /* Write FRF LSB */
 
   sx127x_writeregbyte(dev, SX127X_CMN_FRFLSB, SX127X_CMN_FRF_LSB(frf));
+
+  /* Tell the modem which of the two front ends the frequency belongs to.
+   * The chip comes up in low frequency mode, and a board wired for the high
+   * band (868 or 915 MHz) then neither transmits nor receives anything.
+   */
+
+  if (freq > SX127X_HFBAND_THR)
+    {
+      sx127x_modregbyte(dev, SX127X_CMN_OPMODE, 0,
+                        SX127X_CMN_OPMODE_LFMODEON);
+    }
+  else
+    {
+      sx127x_modregbyte(dev, SX127X_CMN_OPMODE,
+                        SX127X_CMN_OPMODE_LFMODEON, 0);
+    }
 
   /* Unlock SPI */
 
