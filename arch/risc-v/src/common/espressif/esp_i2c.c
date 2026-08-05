@@ -563,19 +563,24 @@ static void esp_i2c_sendstart(struct esp_i2c_priv_s *priv)
 {
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
   uint32_t fifo_val = 0;
-  i2c_ll_hw_cmd_t restart_cmd;
-  i2c_ll_hw_cmd_t write_cmd;
-  i2c_ll_hw_cmd_t end_cmd;
+  i2c_ll_hw_cmd_t restart_cmd =
+    {
+      .op_code = I2C_LL_CMD_RESTART
+    };
+
+  i2c_ll_hw_cmd_t write_cmd =
+    {
+      .byte_num = 1,
+      .ack_en = 1,
+      .op_code = I2C_LL_CMD_WRITE
+    };
+
+  i2c_ll_hw_cmd_t end_cmd =
+    {
+      .op_code = I2C_LL_CMD_END
+    };
 
   /* Write I2C command registers */
-
-  restart_cmd.op_code = I2C_LL_CMD_RESTART;
-
-  write_cmd.byte_num = 1;
-  write_cmd.ack_en = 1;
-  write_cmd.op_code = I2C_LL_CMD_WRITE;
-
-  end_cmd.op_code = I2C_LL_CMD_END;
 
   i2c_ll_master_write_cmd_reg(priv->ctx->dev, restart_cmd, 0);
   i2c_ll_master_write_cmd_reg(priv->ctx->dev, write_cmd, 1);
@@ -688,8 +693,15 @@ static void esp_i2c_startrecv(struct esp_i2c_priv_s *priv)
   int ack_value = 0;
   struct i2c_msg_s *msg = &priv->msgv[priv->msgid];
   int n = msg->length - priv->bytes;
-  i2c_ll_hw_cmd_t read_cmd;
-  i2c_ll_hw_cmd_t end_cmd;
+  i2c_ll_hw_cmd_t read_cmd =
+    {
+      0
+    };
+
+  i2c_ll_hw_cmd_t end_cmd =
+    {
+      0
+    };
 
   if (n > 1)
     {
@@ -780,7 +792,7 @@ static void esp_i2c_init_clock(struct esp_i2c_priv_s *priv,
 
   I2C_CLOCK_SRC_ATOMIC()
     {
-      i2c_hal_set_bus_timing(priv->ctx, priv->config->clk_freq,
+      i2c_hal_set_bus_timing(priv->ctx, bus_freq,
                              priv->clk_src, src_clk_frequency);
     }
 
