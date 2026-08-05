@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <syslog.h>
 #include <inttypes.h>
 #include <string.h>
 
@@ -358,6 +359,7 @@ static int xhci_ctrl_reset(FAR struct usbhost_xhci_s *priv);
 /* Port management **********************************************************/
 
 static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv);
+static FAR const char *xhci_speed_str(uint32_t portsc);
 static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
                             FAR struct usbhost_hubport_s *hport);
 
@@ -431,6 +433,10 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
 static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
                             FAR uint8_t *buffer, size_t buflen);
 static uint32_t xhci_speed_id(uint8_t speed);
+#ifdef CONFIG_USBHOST_ASYNCH
+static bool xhci_dma_direct(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen);
+#endif
 static inline FAR struct xhci_slot_ctx_s *
 xhci_in_slot(FAR struct usbhost_xhci_s *priv,
              FAR struct xhci_input_dev_ctx_s *input);
@@ -994,6 +1000,19 @@ static void xhci_add_trb(FAR struct usbhost_xhci_s *priv,
                    XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_LINK);
             }
 
+          /* Carry the chain forward across the join.
+           *
+           * A multi-TRB transfer can reach the end of the ring part way
+           * through, putting the link inside it.  A link without the
+           * chain bit ends the transfer where it stands, and the TRB that
+           * asked for the completion interrupt is never reached.
+           */
+
+          if ((trb[i].d2 & XHCI_TRB_D2_CH) != 0)
+            {
+              d2 |= XHCI_TRB_D2_CH;
+            }
+
           /* Other parameters are already correct for this TRB */
 
           ring->ring[ring->i].d2 = htole32(d2);
@@ -1486,6 +1505,16 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
           return -EINVAL;
         }
     }
+
+  /* Say what turned up, now that the port can answer.
+   *
+   * The speed field only means anything once the port has been reset and
+   * enabled.  A USB2 port reports the reset default, full speed, until
+   * then.
+   */
+
+  syslog(LOG_INFO, "%s: port %d: device attached at %s\n",
+         priv->name, rhpndx + 1, xhci_speed_str(regval));
 
   return OK;
 }
@@ -2724,6 +2753,36 @@ static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
 #endif
 
 /****************************************************************************
+ * Name: xhci_speed_str
+ *
+ * Description:
+ *   What a port negotiated, in words.  PORTSC reports a speed ID, not a
+ *   speed.
+ *
+ ****************************************************************************/
+
+static FAR const char *xhci_speed_str(uint32_t portsc)
+{
+  switch (XHCI_PORTSC_PS(portsc))
+    {
+      case XHCI_PORTSC_PS_FULL:
+        return "full speed, 12Mbps";
+      case XHCI_PORTSC_PS_LOW:
+        return "low speed, 1.5Mbps";
+      case XHCI_PORTSC_PS_HIGH:
+        return "high speed, 480Mbps";
+      case XHCI_PORTSC_PS_SUPPER11:
+        return "SuperSpeed, 5Gbps";
+      case XHCI_PORTSC_PS_SUPPER21:
+      case XHCI_PORTSC_PS_SUPPER12:
+      case XHCI_PORTSC_PS_SUPPER22:
+        return "SuperSpeed+, 10Gbps";
+      default:
+        return "an unknown speed";
+    }
+}
+
+/****************************************************************************
  * Name: xhci_portsc_work
  *
  * Description:
@@ -2801,6 +2860,9 @@ static void xhci_portsc_work(FAR void *arg)
 
                   usbhost_vtrace2(XHCI_VTRACE2_PORTSC_DISCONND,
                                   rhpndx + 1, priv->pscwait);
+
+                  syslog(LOG_INFO, "%s: port %d: device removed\n",
+                         priv->name, rhpndx + 1);
 
                   rhport->connected = false;
 
@@ -2941,6 +3003,32 @@ static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
   return priv->ops->dmacapable(priv->arg, buffer, buflen);
 }
 
+#ifdef CONFIG_USBHOST_ASYNCH
+/****************************************************************************
+ * Name: xhci_dma_direct
+ *
+ * Description:
+ *   Whether the controller can be pointed straight at this buffer, with no
+ *   stand-in needed: an address it can reach, owning whole cache lines.
+ *
+ ****************************************************************************/
+
+static bool xhci_dma_direct(FAR struct usbhost_xhci_s *priv,
+                            FAR uint8_t *buffer, size_t buflen)
+{
+  size_t line = up_get_dcache_linesize();
+
+  if (!xhci_dmacapable(priv, buffer, buflen))
+    {
+      return false;
+    }
+
+  return line == 0 ||
+         (((uintptr_t)buffer & (line - 1)) == 0 &&
+          (buflen & (line - 1)) == 0);
+}
+#endif
+
 /****************************************************************************
  * Name: xhci_dma_prepare
  *
@@ -3003,6 +3091,8 @@ static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
   if (!reachable ||
       ((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
     {
+      /* A stand-in is needed; see xhci_dma_direct() for the same test */
+
       /* The buffer shares a line with something else.  Work in a stand-in
        * that does not.
        */
@@ -3053,7 +3143,13 @@ static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
  *
  * Description:
  *   Read back what the controller wrote, and give up any stand-in buffer.
- *   Called on completion, before whoever is waiting is woken.
+ *
+ *   This must run in the context of whoever asked for the transfer, not in
+ *   the completion handler.  The buffer being copied back into may belong
+ *   to a user process, and its address means nothing in the work queue
+ *   thread that handles the completion event, where the write would fault
+ *   or corrupt another process.  The caller is blocked until the transfer
+ *   finishes anyway.
  *
  ****************************************************************************/
 
@@ -3109,10 +3205,6 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
 
   epinfo = priv->devs[slot - 1].epinfo[ep - 1];
   DEBUGASSERT(epinfo != NULL);
-
-  /* Read back what the controller wrote before anyone looks at it */
-
-  xhci_dma_finish(epinfo);
 
   flags = spin_lock_irqsave(&priv->spinlock);
 
@@ -4299,6 +4391,11 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   /* And wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, ep0info);
+
+  /* As for bulk: the copy back belongs in the caller's context */
+
+  xhci_dma_finish(ep0info);
+
   return nbytes >= 0 ? OK : (int)nbytes;
 
 errout_with_iocwait:
@@ -4458,6 +4555,13 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   /* Then wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, epinfo);
+
+  /* And bring back what it produced, here rather than in the completion,
+   * because this is the context the caller's buffer belongs to.
+   */
+
+  xhci_dma_finish(epinfo);
+
   return nbytes;
 
 errout_with_iocwait:
@@ -4514,6 +4618,19 @@ static int xhci_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   int                        ret;
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
+
+  /* An asynchronous transfer has no caller to come back to, so a buffer
+   * needing a stand-in cannot be used: the copy back out of it would have
+   * to happen in the completion handler, which runs in a work queue thread
+   * where a caller's address means nothing.  The callers of this are class
+   * drivers using kernel memory, which needs no stand-in.
+   */
+
+  if (!xhci_dma_direct(priv, buffer, buflen))
+    {
+      uerr("ERROR: asynchronous transfer needs a directly usable buffer\n");
+      return -EFAULT;
+    }
 
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
