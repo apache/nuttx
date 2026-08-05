@@ -43,6 +43,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/scsi.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/partition.h>
 #include <nuttx/mutex.h>
 
 #include <nuttx/usb/usb.h>
@@ -870,6 +871,41 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
   return nbytes < 0 ? (int)nbytes : OK;
 }
 
+#ifdef CONFIG_USBHOST_MSC_PARTITIONS
+/****************************************************************************
+ * Name: usbhost_part_handler
+ *
+ * Description:
+ *   Give one partition found on a drive a block device of its own, named
+ *   after the drive it came from with the partition number after it, which
+ *   is the convention every other system uses.
+ *
+ ****************************************************************************/
+
+static void usbhost_part_handler(FAR struct partition_s *part, FAR void *arg)
+{
+  FAR const char *devname = arg;
+  char            partname[DEV_NAMELEN + 4];
+
+  if (part->nblocks == 0)
+    {
+      return;
+    }
+
+  snprintf(partname, sizeof(partname), "%s%zu", devname, part->index + 1);
+
+  if (register_blockpartition(partname, 0, devname, part->firstblock,
+                              part->nblocks) < 0)
+    {
+      uerr("ERROR: cannot register %s\n", partname);
+      return;
+    }
+
+  uinfo("%s: %zu blocks from %zu\n", partname, part->nblocks,
+        part->firstblock);
+}
+#endif
+
 /****************************************************************************
  * Name: usbhost_destroy
  *
@@ -1331,6 +1367,18 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
       uinfo("Register block driver\n");
       usbhost_mkdevname(priv, devname);
       ret = register_blockdriver(devname, &g_bops, 0, priv);
+
+#ifdef CONFIG_USBHOST_MSC_PARTITIONS
+      /* Such a drive is usually partitioned rather than holding a
+       * filesystem outright.  Give each partition a block device beside
+       * the whole drive, which stays available.
+       */
+
+      if (ret >= 0)
+        {
+          parse_block_partition(devname, usbhost_part_handler, devname);
+        }
+#endif
     }
 
   /* Decrement the reference count.  We incremented the reference count
