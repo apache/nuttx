@@ -309,6 +309,25 @@ FAR struct mm_map_entry_s *mm_map_find(FAR struct mm_map_s *mm,
                                        size_t length);
 
 /****************************************************************************
+ * Name: mm_map_exist
+ *
+ * Description:
+ *   Return whether any existing mapping overlaps the given address range.
+ *
+ * Input Parameters:
+ *   mm     - A pointer to mm_map_s, which describes the virtual memory area
+ *   vaddr  - Start address of the range to test
+ *   length - Length of the range to test
+ *
+ * Returned Value:
+ *   true if an overlapping mapping exists, false otherwise
+ *
+ ****************************************************************************/
+
+bool mm_map_exist(FAR struct mm_map_s *mm, FAR const void *vaddr,
+                  size_t length);
+
+/****************************************************************************
  * Name: mm_map_remove
  *
  * Description:

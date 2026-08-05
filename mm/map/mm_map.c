@@ -304,6 +304,45 @@ FAR struct mm_map_entry_s *mm_map_find(FAR struct mm_map_s *mm,
 }
 
 /****************************************************************************
+ * Name: mm_map_exist
+ *
+ * Description:
+ *   Return whether any existing mapping overlaps the address range
+ *   [vaddr, vaddr + length).
+ *
+ ****************************************************************************/
+
+bool mm_map_exist(FAR struct mm_map_s *mm, FAR const void *vaddr,
+                  size_t length)
+{
+  FAR struct mm_map_entry_s *entry;
+  FAR const char *start = vaddr;
+  FAR const char *end = start + length;
+  bool exist = false;
+
+  if (nxrmutex_lock(&mm->mm_map_mutex) == OK)
+    {
+      for (entry = (FAR struct mm_map_entry_s *)sq_peek(&mm->mm_map_sq);
+           entry != NULL;
+           entry = (FAR struct mm_map_entry_s *)sq_next((sq_entry_t *)entry))
+        {
+          FAR const char *e_start = entry->vaddr;
+          FAR const char *e_end = e_start + entry->length;
+
+          if (start < e_end && e_start < end)
+            {
+              exist = true;
+              break;
+            }
+        }
+
+      nxrmutex_unlock(&mm->mm_map_mutex);
+    }
+
+  return exist;
+}
+
+/****************************************************************************
  * Name: mm_map_remove
  *
  * Description:
