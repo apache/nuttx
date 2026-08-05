@@ -412,9 +412,11 @@ static int xhci_ioc_wait(FAR struct xhci_epinfo_s *epinfo);
 #ifdef CONFIG_USBHOST_ASYNCH
 static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
                                        FAR struct xhci_epinfo_s *epinfo,
+                                       size_t buflen,
                                        usbhost_asynch_t callback,
                                        FAR void *arg);
-static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo);
+static void xhci_asynch_completion(FAR struct usbhost_xhci_s *priv,
+                                   FAR struct xhci_epinfo_s *epinfo);
 #endif
 static int xhci_control_setup(FAR struct xhci_rhport_s *rhport,
                               FAR struct xhci_epinfo_s *epinfo,
@@ -433,10 +435,6 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
 static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
                             FAR uint8_t *buffer, size_t buflen);
 static uint32_t xhci_speed_id(uint8_t speed);
-#ifdef CONFIG_USBHOST_ASYNCH
-static bool xhci_dma_direct(FAR struct usbhost_xhci_s *priv,
-                            FAR uint8_t *buffer, size_t buflen);
-#endif
 static inline FAR struct xhci_slot_ctx_s *
 xhci_in_slot(FAR struct usbhost_xhci_s *priv,
              FAR struct xhci_input_dev_ctx_s *input);
@@ -2649,6 +2647,8 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
  * Input Parameters:
  *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
  *      which the transfer will be performed.
+ *   buflen - The length of the transfer, from which the completion works
+ *      out how much was transferred.
  *   callback - The function to be called when the transfer completes
  *   arg - An arbitrary argument that will be provided with the callback.
  *
@@ -2662,6 +2662,7 @@ static ssize_t xhci_transfer_wait(FAR struct usbhost_xhci_s *priv,
 
 static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
                                        FAR struct xhci_epinfo_s *epinfo,
+                                       size_t buflen,
                                        usbhost_asynch_t callback,
                                        FAR void *arg)
 {
@@ -2684,6 +2685,7 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
       epinfo->iocwait  = false;    /* No synchronous wakeup */
       epinfo->status   = 0;        /* No status yet */
       epinfo->xfrd     = 0;        /* Nothing transferred yet */
+      epinfo->buflen   = buflen;   /* Buffer length */
       epinfo->result   = -EBUSY;   /* Transfer in progress */
       epinfo->callback = callback; /* Asynchronous callback */
       epinfo->arg      = arg;      /* Argument that accompanies the callback */
@@ -2698,10 +2700,11 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
  * Name: xhci_asynch_completion
  *
  * Description:
- *   This function is called at the interrupt level when an asynchronous
- *   transfer completes.  It performs the pending callback.
+ *   This function is called from the interrupt work queue when an
+ *   asynchronous transfer completes.  It performs the pending callback.
  *
  * Input Parameters:
+ *   priv - xHCI private state
  *   epinfo - The IN or OUT endpoint descriptor for the device endpoint on
  *      which the transfer was performed.
  *
@@ -2709,21 +2712,26 @@ static inline int xhci_ioc_async_setup(FAR struct xhci_rhport_s *rhport,
  *   None
  *
  * Assumptions:
- *   - Called from the interrupt level
+ *   - Called from the work queue, without the spinlock held
  *
  ****************************************************************************/
 
-static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
+static void xhci_asynch_completion(FAR struct usbhost_xhci_s *priv,
+                                   FAR struct xhci_epinfo_s *epinfo)
 {
   usbhost_asynch_t callback;
   ssize_t nbytes;
   FAR void *arg;
+  irqstate_t flags;
   int result;
 
-  DEBUGASSERT(epinfo != NULL && epinfo->iocwait == false &&
-              epinfo->callback != NULL);
+  DEBUGASSERT(epinfo != NULL && epinfo->iocwait == false);
 
-  /* Extract and reset the callback info */
+  /* Extract and reset the callback info, atomically against a concurrent
+   * cancellation.
+   */
+
+  flags = spin_lock_irqsave(&priv->spinlock);
 
   callback         = epinfo->callback;
   arg              = epinfo->arg;
@@ -2734,6 +2742,23 @@ static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
   epinfo->arg      = NULL;
   epinfo->result   = OK;
   epinfo->iocwait  = false;
+
+  spin_unlock_irqrestore(&priv->spinlock, flags);
+
+  /* A cancellation that got in first has already done the callback */
+
+  if (callback == NULL)
+    {
+      return;
+    }
+
+  /* Bring back what the controller wrote before anyone reads it.  The
+   * addresses are usable here: a transfer given to DRVR_ASYNCH must use
+   * memory from DRVR_ALLOC, and that is kernel memory, which this work
+   * queue thread can reach.
+   */
+
+  xhci_dma_finish(epinfo);
 
   /* Then perform the callback.  Provide the number of bytes successfully
    * transferred or the negated errno value in the event of a failure.
@@ -2999,32 +3024,6 @@ static bool xhci_dmacapable(FAR struct usbhost_xhci_s *priv,
   return priv->ops->dmacapable(priv->arg, buffer, buflen);
 }
 
-#ifdef CONFIG_USBHOST_ASYNCH
-/****************************************************************************
- * Name: xhci_dma_direct
- *
- * Description:
- *   Whether the controller can be pointed straight at this buffer, with no
- *   stand-in needed: an address it can reach, owning whole cache lines.
- *
- ****************************************************************************/
-
-static bool xhci_dma_direct(FAR struct usbhost_xhci_s *priv,
-                            FAR uint8_t *buffer, size_t buflen)
-{
-  size_t line = up_get_dcache_linesize();
-
-  if (!xhci_dmacapable(priv, buffer, buflen))
-    {
-      return false;
-    }
-
-  return line == 0 ||
-         (((uintptr_t)buffer & (line - 1)) == 0 &&
-          (buflen & (line - 1)) == 0);
-}
-#endif
-
 /****************************************************************************
  * Name: xhci_dma_prepare
  *
@@ -3196,6 +3195,9 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
   uint8_t                   ep   = XHCI_TRB_D2_EP_GET(evt->d2);
   uint8_t                   ret  = XHCI_TRB_D1_CC_GET(evt->d1);
   irqstate_t                flags;
+#ifdef CONFIG_USBHOST_ASYNCH
+  bool                      asynch = false;
+#endif
 
   /* Get EP associated with this transfer */
 
@@ -3257,17 +3259,32 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
     }
 
 #ifdef CONFIG_USBHOST_ASYNCH
-  /* No.. Is there a pending asynchronous transfer? */
+  /* No.. Is there a pending asynchronous transfer instead?  Decide while
+   * still holding the lock: the moment the waiter above is posted, the
+   * endpoint may be given a new transfer, and that one is not complete.
+   */
 
-  else if (epinfo->callback != NULL)
+  else
     {
-      /* Yes.. perform the callback */
-
-      xhci_asynch_completion(epinfo);
+      asynch = epinfo->callback != NULL;
     }
 #endif
 
   spin_unlock_irqrestore(&priv->spinlock, flags);
+
+#ifdef CONFIG_USBHOST_ASYNCH
+  /* The callback runs outside the spinlock: it is class driver code, and
+   * what it does (queue work, take its own locks) has no business running
+   * with interrupts masked.
+   */
+
+  if (asynch)
+    {
+      /* Perform the callback */
+
+      xhci_asynch_completion(priv, epinfo);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -4692,19 +4709,6 @@ static int xhci_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
 
-  /* An asynchronous transfer has no caller to come back to, so a buffer
-   * needing a stand-in cannot be used: the copy back out of it would have
-   * to happen in the completion handler, which runs in a work queue thread
-   * where a caller's address means nothing.  The callers of this are class
-   * drivers using kernel memory, which needs no stand-in.
-   */
-
-  if (!xhci_dma_direct(priv, buffer, buflen))
-    {
-      uerr("ERROR: asynchronous transfer needs a directly usable buffer\n");
-      return -EFAULT;
-    }
-
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
    */
@@ -4717,7 +4721,7 @@ static int xhci_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 
   /* Set the request for the callback well BEFORE initiating the transfer. */
 
-  ret = xhci_ioc_async_setup(rhport, epinfo, callback, arg);
+  ret = xhci_ioc_async_setup(rhport, epinfo, buflen, callback, arg);
   if (ret != OK)
     {
       goto errout_with_lock;
@@ -4857,9 +4861,13 @@ static int xhci_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   else
     {
-      /* Yes.. perform the callback */
+      /* Yes.. give back any stand-in buffer, then perform the callback.
+       * The endpoint has been stopped, so the controller is no longer
+       * writing into it.
+       */
 
       DEBUGASSERT(callback != NULL);
+      xhci_dma_finish(epinfo);
       callback(arg, -ESHUTDOWN);
     }
 #endif
