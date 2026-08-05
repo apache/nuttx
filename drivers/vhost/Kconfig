@@ -3,16 +3,46 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-config DRIVERS_VHOST
+config ARCH_HAVE_VHOST_IOMAP
 	bool
+	default n
+
+config DRIVERS_VHOST
+	bool "Virtual Host (device-role virtio) support"
 	select OPENAMP
 	select SCHED_WORKQUEUE
 	default n
+	---help---
+		Framework for implementing the DEVICE side of virtio links
+		(the peer's driver uses us as the device, e.g. a remoteproc
+		master like Linux).  rptun registers device-role vdevs from the
+		resource table through this bus; without it such vdevs are
+		rejected with -ENODEV.
 
 config DRIVERS_VHOST_RNG
 	bool "Virtual Host Rng Device Support"
 	default n
 	select DRIVERS_VHOST
+
+config DRIVERS_VHOST_NET
+	bool "Virtual Host Network Device Support"
+	default n
+	depends on NETDEVICES
+	select DRIVERS_VHOST
+	---help---
+		Device-role virtio-net: expose this side as a network card to a
+		peer processor running a standard virtio-net driver (e.g. Linux
+		via remoteproc), providing a NuttX ethN interface.
+
+config DRIVERS_VHOST_NET_MACADDR
+	hex "vhost-net MAC address"
+	default 0x025433000001
+	depends on DRIVERS_VHOST_NET
+	---help---
+		No virtio-net features are negotiated on this link, so there is
+		no MAC config space to read; this fixed, software-assigned,
+		locally administered address is presented to the network stack
+		instead.
 
 config DRIVERS_VHOST_RPMSG
 	bool "Virtual Host Rpmsg Device Support"

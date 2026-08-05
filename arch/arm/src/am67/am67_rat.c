@@ -53,6 +53,7 @@
 
 #include "arm_internal.h"
 #include "am67_rat.h"
+#include <nuttx/vhost/vhost.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -112,3 +113,19 @@ FAR void *am67_rat_map(uint64_t pa, FAR size_t *avail)
 
   return (FAR void *)(AM67_RAT_WIN_BASE + offset);
 }
+
+/****************************************************************************
+ * Name: up_vhost_iomap
+ *
+ * Description:
+ *   Arch hook used by the vhost drivers to reach peer buffers by 64-bit
+ *   physical address (see ARCH_HAVE_VHOST_IOMAP).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DRIVERS_VHOST
+FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail)
+{
+  return am67_rat_map(pa, avail);
+}
+#endif
