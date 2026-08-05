@@ -109,6 +109,17 @@ int vhost_get_vq_buffers_pa(FAR struct virtqueue *vq,
                             FAR struct vhost_buf_s *vb, size_t vbsize,
                             FAR size_t *vbcnt);
 
+#ifdef CONFIG_ARCH_HAVE_VHOST_IOMAP
+/* Arch-provided: map a peer 64-bit physical address into CPU-reachable
+ * memory.  Returns the mapped VA; *avail (if non-NULL) receives the number
+ * of contiguous bytes reachable from it.  The mapping may be invalidated
+ * by the next call (e.g. a sliding hardware window), so callers must
+ * serialize use.
+ */
+
+FAR void *up_vhost_iomap(uint64_t pa, FAR size_t *avail);
+#endif
+
 /****************************************************************************
  * Name: vhost_register_drivers
  ****************************************************************************/
