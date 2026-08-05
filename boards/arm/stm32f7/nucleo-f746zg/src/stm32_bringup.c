@@ -56,6 +56,10 @@
 #  include "stm32_spitest.h"
 #endif
 
+#ifdef CONFIG_LPWAN_SX1301
+#  include <nuttx/wireless/lpwan/sx1301.h>
+#endif
+
 #ifdef CONFIG_SYSTEMTICK_HOOK
 #  include <semaphore.h>
 #endif
@@ -290,6 +294,16 @@ int stm32_bringup(void)
 #endif
 
   UNUSED(ret);
+#ifdef CONFIG_LPWAN_SX1301
+  /* Register the LoRa concentrator of the gateway shield */
+
+  ret = stm32_sx1301_initialize("/dev/lora0");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_sx1301_initialize failed: %d\n", ret);
+    }
+#endif
+
   return OK;
 }
 

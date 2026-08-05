@@ -1,5 +1,5 @@
 # ##############################################################################
-# boards/arm/stm32f7/nucleo-f746zg/src/CMakeLists.txt
+# drivers/wireless/lpwan/sx1301/CMakeLists.txt
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -19,59 +19,8 @@
 # the License.
 #
 # ##############################################################################
-
-set(SRCS stm32_boot.c stm32_bringup.c)
-
-if(CONFIG_ARCH_LEDS)
-  list(APPEND SRCS stm32_autoleds.c)
-else()
-  list(APPEND SRCS stm32_userleds.c)
-endif()
-
-if(CONFIG_ARCH_BUTTONS)
-  list(APPEND SRCS stm32_buttons.c)
-endif()
-
-if(CONFIG_DEV_GPIO)
-  list(APPEND SRCS stm32_gpio.c)
-endif()
-
-if(CONFIG_SPI)
-  list(APPEND SRCS stm32_spi.c)
-endif()
-
-if(CONFIG_ADC)
-  list(APPEND SRCS stm32_adc.c)
-endif()
-
-if(CONFIG_PWM)
-  list(APPEND SRCS stm32_pwm.c)
-endif()
-
-if(CONFIG_MMCSD)
-  list(APPEND SRCS stm32_sdio.c)
-endif()
-
-if(CONFIG_STM32_OTGFS)
-  list(APPEND SRCS stm32_usb.c)
-endif()
-
-if(CONFIG_STM32_BBSRAM)
-  list(APPEND SRCS stm32_bbsram.c)
-endif()
-
-if(CONFIG_SENSORS_QENCODER)
-  list(APPEND SRCS stm32_qencoder.c)
-endif()
-
-if(CONFIG_USBDEV_COMPOSITE)
-  list(APPEND SRCS stm32_composite.c)
-endif()
-
 if(CONFIG_LPWAN_SX1301)
-  list(APPEND SRCS stm32_sx1301.c)
+  target_sources(drivers PRIVATE sx1301.c sx1301_reg.c sx1301_region.c
+                                 sx1301_fw.c)
+  target_include_directories(drivers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
-
-target_sources(board PRIVATE ${SRCS})
-
-set_property(GLOBAL PROPERTY LD_SCRIPT "${NUTTX_BOARD_DIR}/scripts/flash.ld")
