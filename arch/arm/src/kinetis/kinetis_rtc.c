@@ -63,9 +63,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_RTC_HIRES
 static spinlock_t g_rtc_lock = SP_UNLOCKED;
-#endif
 
 #ifdef CONFIG_RTC_ALARM
 static alarmcb_t g_alarmcb;
