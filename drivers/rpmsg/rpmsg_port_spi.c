@@ -182,7 +182,7 @@ static void rpmsg_port_spi_pm_callback(wdparm_t arg)
   if (count > 0 && atomic_read(&rpspi->transferring) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.txq) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.rxq) == 0 &&
-      !rpmsg_port_retx_is_pending(&rpspi->port))
+      rpmsg_port_retx_is_empty(&rpspi->port))
     {
       pm_wakelock_relax(&rpspi->wakelock);
     }
@@ -575,7 +575,7 @@ out:
     {
       rpmsg_port_spi_exchange(rpspi);
     }
-  else if (rpmsg_port_retx_is_pending(&rpspi->port) ||
+  else if (!rpmsg_port_retx_is_empty(&rpspi->port) ||
       (rpspi->state == RPMSG_PORT_SPI_STATE_CONNECTED &&
       rpspi->txavail > 0 && rpmsg_port_queue_nused(&rpspi->port.txq) > 0))
     {
