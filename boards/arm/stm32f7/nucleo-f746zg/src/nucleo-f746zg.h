@@ -329,4 +329,17 @@ int stm32_gpio_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
+/****************************************************************************
+ * Name: stm32_sx1301_initialize
+ *
+ * Description:
+ *   Initialise SPI4 and register the SX1301 LoRa concentrator driver at
+ *   'devpath'.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LPWAN_SX1301
+int stm32_sx1301_initialize(FAR const char *devpath);
+#endif
+
 #endif /* __BOARDS_ARM_STM32F7_NUCLEO_F746ZG_SRC_NUCLEO_F746ZG_H */

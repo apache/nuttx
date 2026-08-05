@@ -131,6 +131,58 @@ static const uint32_t g_spi3gpio[] =
 };
 #endif
 
+#if defined(CONFIG_STM32_SPI4)
+static const uint32_t g_spi4gpio[] =
+{
+#  if defined(GPIO_SPI4_CS0)
+  GPIO_SPI4_CS0,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI4_CS1)
+  GPIO_SPI4_CS1,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI4_CS2)
+  GPIO_SPI4_CS2,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI4_CS3)
+  GPIO_SPI4_CS3
+#  else
+  0
+#  endif
+};
+#endif
+
+#if defined(CONFIG_STM32_SPI5)
+static const uint32_t g_spi5gpio[] =
+{
+#  if defined(GPIO_SPI5_CS0)
+  GPIO_SPI5_CS0,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI5_CS1)
+  GPIO_SPI5_CS1,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI5_CS2)
+  GPIO_SPI5_CS2,
+#  else
+  0,
+#  endif
+#  if defined(GPIO_SPI5_CS3)
+  GPIO_SPI5_CS3
+#  else
+  0
+#  endif
+};
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -174,6 +226,26 @@ void weak_function stm32_spidev_initialize(void)
       if (g_spi3gpio[i] != 0)
         {
           stm32_configgpio(g_spi3gpio[i]);
+        }
+    }
+#endif
+
+#if defined(CONFIG_STM32_SPI4)
+  for (int i = 0; i < nitems(g_spi4gpio); i++)
+    {
+      if (g_spi4gpio[i] != 0)
+        {
+          stm32_configgpio(g_spi4gpio[i]);
+        }
+    }
+#endif
+
+#if defined(CONFIG_STM32_SPI5)
+  for (int i = 0; i < nitems(g_spi5gpio); i++)
+    {
+      if (g_spi5gpio[i] != 0)
+        {
+          stm32_configgpio(g_spi5gpio[i]);
         }
     }
 #endif
@@ -273,8 +345,17 @@ uint8_t stm32_spi3status(struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi4select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
+  uint32_t index = SPIDEVID_INDEX(devid);
+
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
+
+  /* The chip select of the LoRa concentrator is a plain output, active low */
+
+  if (index < nitems(g_spi4gpio) && g_spi4gpio[index] != 0)
+    {
+      stm32_gpiowrite(g_spi4gpio[index], !selected);
+    }
 }
 
 uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
@@ -287,8 +368,17 @@ uint8_t stm32_spi4status(struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi5select(struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
+  uint32_t index = SPIDEVID_INDEX(devid);
+
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
+
+  /* The chip select of the serial NOR flash is a plain output, active low */
+
+  if (index < nitems(g_spi5gpio) && g_spi5gpio[index] != 0)
+    {
+      stm32_gpiowrite(g_spi5gpio[index], !selected);
+    }
 }
 
 uint8_t stm32_spi5status(struct spi_dev_s *dev, uint32_t devid)

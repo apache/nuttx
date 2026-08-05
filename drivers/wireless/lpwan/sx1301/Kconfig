@@ -1,0 +1,57 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if LPWAN_SX1301
+
+config LPWAN_SX1301_SPIFREQ
+	int "SX1301 SPI frequency"
+	default 8000000
+	---help---
+		SPI clock frequency used to talk to the concentrator.  The SX1301
+		accepts up to 10 MHz.
+
+config LPWAN_SX1301_DEFAULT_REGION
+	string "Default channel plan"
+	default "AU915"
+	---help---
+		Channel plan selected when the driver is registered.  One of AU915,
+		AU915-1, US915, US915-1, EU868, AS923, KR920 or IN866, and it can be
+		changed at runtime with WLIOC_GW_SETREGION.
+
+		AU915 and US915 default to the second sub-band (channels 8 to 15 plus
+		the 500 kHz channel 65), which is what The Things Network and the
+		Brazilian deployments use.  The "-1" variants select the first
+		sub-band (channels 0 to 7 plus channel 64).
+
+config LPWAN_SX1301_PRIVATE_NETWORK
+	bool "Private network sync word"
+	default n
+	---help---
+		Use the sync word of a private LoRa network (frame synchronisation
+		peaks at 1 and 2, matching 0x12 on an SX127x) instead of the public
+		LoRaWAN one (peaks at 3 and 4, matching 0x34).  A gateway that does
+		not match the end devices never detects a frame.
+
+config LPWAN_SX1301_RXBADCRC
+	bool "Report packets with a bad CRC"
+	default n
+	---help---
+		By default a packet whose CRC failed is counted and dropped, since
+		most of them are correlator false triggers and a gateway must not
+		forward them to the network server.  Enable this to have them
+		returned by read() with status LORA_GW_STAT_CRC_BAD, which is useful
+		when debugging the receive chain.
+
+config LPWAN_SX1301_RXNOCRC
+	bool "Report packets received without CRC"
+	default n
+	---help---
+		A LoRaWAN uplink always carries a CRC, so a packet arriving without
+		one is either a correlator false trigger or the downlink of another
+		gateway nearby.  Both are counted and dropped by default, as the
+		reference packet forwarder does.  Enable this to have them returned
+		by read() with status LORA_GW_STAT_NO_CRC.
+
+endif # LPWAN_SX1301

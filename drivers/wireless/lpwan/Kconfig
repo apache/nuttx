@@ -5,6 +5,15 @@
 
 if DRIVERS_LPWAN
 
+config LPWAN_LORA_GW
+	bool
+	default n
+	---help---
+		Selected by the driver of a LoRa gateway, that is, of a concentrator
+		registering the character device described by
+		include/nuttx/wireless/lpwan/lora_gw.h.  An application driving a
+		gateway depends on this symbol rather than on one particular chip.
+
 config LPWAN_RN2XX3
 	bool "Microchip RN2xx3 driver support"
 	default n
@@ -29,5 +38,18 @@ config LPWAN_SX127X
 		This options adds driver support for the Samtech SX127X chip.
 
 source "drivers/wireless/lpwan/sx127x/Kconfig"
+
+config LPWAN_SX1301
+	bool "SX1301 LoRa concentrator (gateway) support"
+	default n
+	select SPI
+	select LPWAN_LORA_GW
+	---help---
+		This option adds driver support for the Semtech SX1301 LoRa
+		concentrator, the baseband processor of a LoRaWAN gateway, together
+		with its two SX125x radio front-ends.  Registers a character device
+		delivering received packets and accepting downlinks.
+
+source "drivers/wireless/lpwan/sx1301/Kconfig"
 
 endif # DRIVERS_LPWAN

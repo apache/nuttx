@@ -183,6 +183,46 @@
                                      * ! Equal to the amount of commands above. */
 
 /****************************************************************************
+ * LoRa gateway common IOCTL commands
+ ****************************************************************************/
+
+/* A LoRa gateway receives on several channels at once, so the frequency, the
+ * spreading factor and the coding rate belong to each packet rather than
+ * being settings of one radio: the commands above have nothing to act upon.
+ * What such a concentrator needs is a channel plan, a way to be started and
+ * stopped, and the counter its timestamps are taken from.  The types these
+ * commands take are in include/nuttx/wireless/lpwan/lora_gw.h.
+ */
+
+/* Offsets. Must follow WLIOC_OOK */
+
+#define _WLIOC_GW_OFFS          _WLIOC_OOK_OFFS+_WLIOC_OOK_COMMANDS
+#define _WLIOC_GW(x)            _WLCIOC(_WLIOC_GW_OFFS+x)
+
+/* Commands */
+
+#define WLIOC_GW_START      _WLIOC_GW(0) /* arg: none. Load the firmware, */
+                                         /* calibrate and start receiving */
+#define WLIOC_GW_STOP       _WLIOC_GW(1) /* arg: none */
+#define WLIOC_GW_RESET      _WLIOC_GW(2) /* arg: none. Stop then start */
+
+#define WLIOC_GW_SETREGION  _WLIOC_GW(3) /* arg: Pointer to a NUL */
+                                         /* terminated channel plan name */
+#define WLIOC_GW_GETREGION  _WLIOC_GW(4) /* arg: Pointer to */
+                                         /* struct lora_gw_regionreq_s */
+
+#define WLIOC_GW_GETSTATUS  _WLIOC_GW(5) /* arg: Pointer to */
+                                         /* struct lora_gw_status_s */
+
+#define WLIOC_GW_GETTRIGCNT _WLIOC_GW(6) /* arg: Pointer to uint32_t, */
+                                         /* concentrator counter in us */
+
+/* Number of commands */
+
+#define _WLIOC_GW_COMMANDS  7 /* ! Must be corrected after changes to cmds.
+                               * ! Equal to the amount of commands above. */
+
+/****************************************************************************
  * Device-specific IOCTL commands
  ****************************************************************************/
 
@@ -191,9 +231,9 @@
  * LoRa API. These commands are currently only used by the RN2XX3 driver.
  */
 
-/* Offsets. Must follow WLIOC_OOK */
+/* Offsets. Must follow WLIOC_GW */
 
-#define _WLIOC_RN2XX3_OFFS  _WLIOC_OOK_OFFS+_WLIOC_OOK_COMMANDS
+#define _WLIOC_RN2XX3_OFFS  _WLIOC_GW_OFFS+_WLIOC_GW_COMMANDS
 #define _WLIOC_RN2XX3(x)    _WLCIOC(_WLIOC_RN2XX3_OFFS+x)
 
 /* Commands */

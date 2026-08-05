@@ -483,6 +483,49 @@
 #define GPIO_SPI3_MOSI   (GPIO_SPI3_MOSI_2|GPIO_SPEED_50MHz)
 #define GPIO_SPI3_SCK    (GPIO_SPI3_SCK_1|GPIO_SPEED_50MHz)
 
+/* SPI4 is wired to the LoRa concentrator of the LRWAN_GS_HF1 class of
+ * shields, on the Morpho connector:
+ *
+ *  PE12  SPI4_SCK  CN11-49
+ *  PE13  SPI4_MISO CN11-47
+ *  PE14  SPI4_MOSI CN11-45
+ *  PE11  SPI4_CS   CN11-53, driven as a plain output
+ */
+
+#define GPIO_SPI4_MISO   (GPIO_SPI4_MISO_2|GPIO_SPEED_50MHz)
+#define GPIO_SPI4_MOSI   (GPIO_SPI4_MOSI_2|GPIO_SPEED_50MHz)
+#define GPIO_SPI4_SCK    (GPIO_SPI4_SCK_2|GPIO_SPEED_50MHz)
+
+#define GPIO_SPI4_CS0    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
+
+/* SPI5 is wired to the serial NOR flash of the same shields, on CN11:
+ *
+ *  PF7   SPI5_SCK  CN11-11
+ *  PF8   SPI5_MISO CN11-54
+ *  PF9   SPI5_MOSI CN11-56
+ *  PF6   SPI5_CS   CN11-9, driven as a plain output
+ */
+
+#define GPIO_SPI5_MISO   (GPIO_SPI5_MISO_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI5_MOSI   (GPIO_SPI5_MOSI_1|GPIO_SPEED_50MHz)
+#define GPIO_SPI5_SCK    (GPIO_SPI5_SCK_1|GPIO_SPEED_50MHz)
+
+#define GPIO_SPI5_CS0    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz| \
+                          GPIO_OUTPUT_SET|GPIO_PORTF|GPIO_PIN6)
+
+/* LoRa concentrator control lines of the shield.  The reset line is active
+ * high, and the two band selection lines drive the front-end filter bank:
+ * 915 MHz needs SET1 low and SET2 high, 868 MHz the other way around.
+ */
+
+#define GPIO_SX1301_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz| \
+                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN15)
+#define GPIO_SX1301_BAND1 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTD|GPIO_PIN15)
+#define GPIO_SX1301_BAND2 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz| \
+                           GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN9)
+
 /* I2C
  *
  *
