@@ -33,7 +33,8 @@ Features
 
 * ESP32-P4 (dual RISC-V @ 360 MHz), 16 MB flash, 32 MB Octal PSRAM
 * ESP32-C6-MINI-1U companion (Wi-Fi 6 / BLE / Thread) over SDIO2
-* 5" MIPI-DSI IPS display, 1280x720 (ILI9881C), GT911 capacitive touch
+* 5" MIPI-DSI IPS display, 720x1280 (ST7121 or ST7123 on supported
+  units; older revisions use ILI9881C + GT911)
 * ES8388 audio codec + NS4150B speaker amp, ES7210 microphone array
 * SC2356 2 MP MIPI-CSI camera
 * BMI270 6-axis IMU, RX8130CE RTC, INA226 power monitor
@@ -55,10 +56,15 @@ Supported features
 +------------------------+--------------------------------------------------+
 | GPIO / BOOT button     | Yes                                              |
 +------------------------+--------------------------------------------------+
+| IO Expander (both)     | Yes                                              |
++------------------------+--------------------------------------------------+
+| MIPI-DSI host          | Yes                                              |
++------------------------+--------------------------------------------------+
+| ST7121/ST7123          | Yes                                              |
++------------------------+--------------------------------------------------+
 
 Not yet implemented (pins and I2C addresses documented below):
 
-* MIPI-DSI display (ILI9881C) and GT911 touch
 * Audio (ES8388 / ES7210), camera (SC2356)
 * INA226 power monitor — battery rail, 5 mOhm shunt (bus voltage = battery
   voltage; positive current = discharging, negative = charging)
@@ -80,7 +86,7 @@ GPIO         Function
 20           RS485 TX
 21           RS485 RX
 22           LCD backlight enable (LEDA, via ME2212 boost)
-23           Touch interrupt (TP_INT, GT911)
+23           Touch interrupt (TP_INT; ST7121/ST7123 or GT911)
 26           I2S DSDIN (audio data to ES8388)
 27           I2S SCLK (audio bit clock)
 29           I2S LRCK (audio word clock)
@@ -117,12 +123,13 @@ I2C device address map
 Address Device
 ======= ====================================================
 0x10    ES8388 audio codec
-0x14    GT911 touch controller
+0x14    GT911 touch (older ILI9881 units)
 0x32    RX8130CE RTC
 0x40    ES7210 microphone array
 0x41    INA226 power monitor
 0x43    PI4IOE5V6408-1 IO expander (LCD_EN / TOUCH_EN)
 0x44    PI4IOE5V6408-2 IO expander (USB / Wi-Fi enables)
+0x55    ST7123 touch controller
 0x68    BMI270 IMU
 ======= ====================================================
 
@@ -135,6 +142,38 @@ is printed because the upstream default targets rev >= 3.0.
 
 Configurations
 ==============
+
+lvgl_demo
+---------
+
+LVGL demo configuration with touch support.
+Requires the ST7123 touch controller version.
+
+.. note::
+   This configuration redirects the console to UART0 instead of the USB Serial/JTAG port
+   and sets a custom entry point to open LVGL demo on screen.
+
+.. code-block:: console
+
+   $ ./tools/configure.sh esp32p4-tab5:lvgl_demo
+   $ make -j
+
+
+lvgl_term
+---------
+
+LVGL terminal configuration with touch support.
+Requires the ST7123 touch controller version.
+
+.. note::
+   This configuration redirects the console to UART0 instead of the USB Serial/JTAG port
+   and sets a custom entry point to open LVGL terminal on screen.
+
+.. code-block:: console
+
+   $ ./tools/configure.sh esp32p4-tab5:lvgl_term
+   $ make -j
+
 
 nsh
 ---
