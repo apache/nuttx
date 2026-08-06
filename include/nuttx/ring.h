@@ -39,11 +39,13 @@
  *     static char g_blob[4096] aligned_data(RING_BLOB_ALIGN);
  *     static struct ring_s g_ring;
  *
- *   Init takes the blob and its total size, and derives the geometry:
- *     ring_mpmc_init(&g_ring, g_blob, sizeof(g_blob));  // SMP/BMP, CAS
- *     ring_mpsc_init(&g_ring, g_blob, sizeof(g_blob));  // alias of mpmc
- *     ring_spmc_init(&g_ring, g_blob, sizeof(g_blob));  // alias of mpmc
- *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob));  // AMP, no atomics
+ *   Init takes the blob and its total size, and derives the geometry.  The
+ *   multi-core calls also take a rewind count, replaying that many
+ *   already-consumed elements across a warm restart, 0 to disable:
+ *     ring_mpmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // SMP/BMP, CAS
+ *     ring_mpsc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
+ *     ring_spmc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // alias of mpmc
+ *     ring_spsc_init(&g_ring, g_blob, sizeof(g_blob), 0);  // AMP, no atomic
  *
  *   Under SPSC each side inits its own handle on the shared blob; the one
  *   that did not reset it polls ring_is_ready(&g_ring) before using it.
@@ -214,8 +216,8 @@
 
 /* Public API macros - accept a struct ring_s * handle */
 
-#define ring_mpsc_init(r, buf, buflen) ring_mpmc_init(r, buf, buflen)
-#define ring_spmc_init(r, buf, buflen) ring_mpmc_init(r, buf, buflen)
+#define ring_mpsc_init(r, buf, buflen, rewind) ring_mpmc_init(r, buf, buflen, rewind)
+#define ring_spmc_init(r, buf, buflen, rewind) ring_mpmc_init(r, buf, buflen, rewind)
 
 #define ring_is_ready(r) ((r)->magic == RING_MAGIC_READY)
 #define ring_count(r)    ring_dist(r, RTS_IDX((r)->blob->prod_tail), \
@@ -590,6 +592,7 @@ static inline_function uint32_t ring_reset(FAR struct ring_s *r)
  *
  *   buf    - the blob to operate on
  *   buflen - total blob size in bytes (header + data)
+ *   rewind - elements to replay on a warm restart, 0 for none
  *
  * Returned Value:
  *   true if this caller ran the init body (the first one this boot), false
@@ -599,7 +602,8 @@ static inline_function uint32_t ring_reset(FAR struct ring_s *r)
  ****************************************************************************/
 
 static inline_function bool
-ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
+ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
+               uint32_t rewind)
 {
   FAR struct ring_blob_s *blob = buf;
   uint32_t cap = buflen - sizeof(*blob);
@@ -629,6 +633,27 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
       UP_WMB();
       blob->magic = RING_BLOB_MAGIC_READY;
     }
+  else if (rewind != 0)
+    {
+      uint32_t prod_index = RTS_IDX(blob->prod_tail);
+      uint32_t cons_index = RTS_IDX(blob->cons_tail);
+      uint32_t count = ring_dist(r, prod_index, cons_index);
+
+      if (count > cap)
+        {
+          ring_reset(r);
+        }
+      else
+        {
+          if (rewind > cap - count)
+            {
+              rewind = cap - count;
+            }
+
+          cons_index = ring_dist(r, cons_index, rewind);
+          blob->cons_tail = RTS_PACK(0, cons_index);
+        }
+    }
 
   UP_WMB();
   r->magic = RING_MAGIC_READY;
@@ -648,8 +673,27 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
  *   buflen, then seeds the indices - recovering the previous contents on a
  *   warm restart - and marks the handle initialized for this boot.
  *
+ *   Warm restart (blob magic already READY) keeps the indices where the
+ *   previous run left them, so whatever had been produced but not consumed
+ *   is still readable.  Only the RTS thread counters are cleared: no thread
+ *   from the previous run is still in flight, and a stale non-zero counter
+ *   would make every later CAS wait for a producer/consumer that no longer
+ *   exists.
+ *
+ *   rewind additionally replays elements the previous run had already
+ *   consumed, by pulling cons_tail back that many elements.  It is a count
+ *   of elements, not bytes, and it is clamped to the free space
+ *   (capacity - count): the live data occupies count slots and the whole
+ *   remaining area is exactly the window of already-consumed-but-still-
+ *   present data.  It only makes sense for a blob that survives reboot (a
+ *   located .noinit section or shared SRAM); pass 0 otherwise.  A cold
+ *   start has nothing to replay, and a blob with corrupted indices
+ *   (count > capacity) is reset - neither path applies rewind.
+ *
  *   buf    - the blob to operate on
  *   buflen - total blob size in bytes (header + data)
+ *   rewind - elements of already-consumed data to replay on a warm restart,
+ *            0 to disable
  *
  * Returned Value:
  *   true if this caller ran the init body (the first one this boot), false
@@ -659,7 +703,8 @@ ring_spsc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
  ****************************************************************************/
 
 static inline_function bool
-ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
+ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen,
+               uint32_t rewind)
 {
   FAR struct ring_blob_s *blob = buf;
   uint32_t cap = buflen - sizeof(*blob);
@@ -724,15 +769,22 @@ ring_mpmc_init(FAR struct ring_s *r, FAR void *buf, uint32_t buflen)
         }
       else
         {
-          /* Indices are valid - rebuild with cnt=0.
-           *
-           * A reboot mid-enqueue/dequeue can leave head.cnt != tail.cnt,
-           * which deadlocks the RTS commit (tail can never catch head).
-           * Reset cnt to 0 on all four atomics, keeping only the idx.
+          uint32_t prod_tail;
+          uint32_t cons_tail;
+
+          /* Replay already-consumed elements still physically present.  The
+           * free space is the whole recoverable window, so clamp to it.
            */
 
-          uint32_t prod_tail = RTS_PACK(0, prod_index);
-          uint32_t cons_tail = RTS_PACK(0, cons_index);
+          if (rewind > blob->capacity - count)
+            {
+              rewind = blob->capacity - count;
+            }
+
+          cons_index = ring_dist(r, cons_index, rewind);
+
+          prod_tail = RTS_PACK(0, prod_index);
+          cons_tail = RTS_PACK(0, cons_index);
 
           atomic_set(&blob->prod_tail, prod_tail);
           atomic_set(&blob->prod_head, prod_tail);
@@ -788,7 +840,7 @@ static inline_function FAR struct ring_s *ring_alloc(size_t buflen)
 
   blob->magic = ~RING_BLOB_MAGIC_INIT;
   r->magic = RING_MAGIC_UNINIT;
-  ring_spsc_init(r, blob, buflen);
+  ring_spsc_init(r, blob, buflen, 0);
   return r;
 }
 
