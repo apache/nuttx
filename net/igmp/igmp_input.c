@@ -131,7 +131,7 @@ void igmp_input(struct net_driver_s *dev)
 
   /* Verify the message length */
 
-  if (dev->d_len < NET_LL_HDRLEN(dev) + (iphdrlen + IGMP_HDRLEN))
+  if (dev->d_len < iphdrlen + IGMP_HDRLEN)
     {
       IGMP_STATINCR(g_netstats.igmp.length_errors);
       nwarn("WARNING: Length error\n");
