@@ -5,4 +5,30 @@
 
 if ARCH_BOARD_ESP32P4_TAB5
 
+config ESP32P4_TAB5_IOEXPANDER
+	bool "Enable the Tab5 board IO Expander"
+	default n
+	select ESPRESSIF_I2C0
+	select IOEXPANDER
+	select IOEXPANDER_PI4IOE5V6408
+	---help---
+		Enable support for the Tab5 board IO Expander.
+		There are two IO Expanders on the this board.
+		The first IO Expander is at address 0x43 (address pin low) and
+		the second is at address 0x44 (address pin high).
+
+if ESP32P4_TAB5_IOEXPANDER
+	config ESP32P4_TAB5_IOEXPANDER_LOW
+		bool "Enable the first IO Expander"
+		default y
+		---help---
+			Enable the first IO Expander.
+
+	config ESP32P4_TAB5_IOEXPANDER_HIGH
+		bool "Enable the second IO Expander"
+		default n
+		---help---
+			Enable the second IO Expander.
+endif
+
 endif # ARCH_BOARD_ESP32P4_TAB5

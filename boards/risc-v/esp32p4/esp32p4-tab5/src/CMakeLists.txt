@@ -22,6 +22,10 @@
 
 set(SRCS esp32p4_boot.c esp32p4_bringup.c)
 
+if(CONFIG_ESP32P4_TAB5_IOEXPANDER)
+  list(APPEND SRCS esp32p4_ioexpander.c)
+endif
+
 if(CONFIG_BOARDCTL)
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS esp32p4_reset.c)
