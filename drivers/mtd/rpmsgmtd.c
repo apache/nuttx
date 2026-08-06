@@ -49,8 +49,13 @@ struct rpmsgmtd_s
 {
   struct mtd_dev_s      mtd;         /* MTD device */
   struct rpmsg_endpoint ept;         /* Rpmsg endpoint */
-  FAR const char       *remotecpu;   /* The server cpu name */
-  FAR const char       *remotepath;  /* The device path in the server cpu */
+
+  /* The server cpu name and the device path in the server cpu */
+
+  char                  remotecpu[RPMSG_NAME_SIZE];
+  char                  remotepath[RPMSG_NAME_SIZE -
+                                   RPMSGMTD_NAME_PREFIX_LEN];
+
   sem_t                 wait;        /* Wait sem, used for preventing any
                                       * operation until the connection
                                       * between two cpu established.
@@ -1156,8 +1161,8 @@ int rpmsgmtd_register(FAR const char *remotecpu, FAR const char *remotepath,
 
   /* Initialize the rpmsg device */
 
-  dev->remotecpu  = remotecpu;
-  dev->remotepath = remotepath;
+  strlcpy(dev->remotecpu, remotecpu, sizeof(dev->remotecpu));
+  strlcpy(dev->remotepath, remotepath, sizeof(dev->remotepath));
 
   nxsem_init(&dev->wait, 0, 0);
   nxmutex_init(&dev->geolock);
