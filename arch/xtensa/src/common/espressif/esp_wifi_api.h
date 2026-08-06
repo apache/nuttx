@@ -36,6 +36,18 @@
 #include "esp_wlan_netdev.h"
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
+
+/* Whether the station should reconnect after an unsolicited disconnection */
+
+extern volatile bool g_sta_reconnect;
+
+#endif /* ESP_WLAN_HAS_STA */
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
