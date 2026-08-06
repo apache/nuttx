@@ -347,7 +347,7 @@ LED PWM            Yes
 MCPWM              Yes     Motor control and capture
 Parallel IO        No
 LCD Interface      No
-MIPI DSI           No
+MIPI DSI           Yes
 Timers             Yes
 SPIRAM / PSRAM     Yes
 Watchdog           Yes     MWDT0/1 and RWDT
@@ -966,7 +966,7 @@ ESP32-P4 Chip Revisions
 =======================
 
 .. attention:: NuttX by default supports ESP32-P4 chip revisions starting
-               from v3.0. 
+               from v3.0.
 
 Different ESP32-P4 chip revisions contain internal hardware breaking
 changes. Revisions 3.0 and higher are not compatible with 0.x and 1.x.
