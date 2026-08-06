@@ -280,6 +280,8 @@ struct nrf52_usbdev_s
   uint16_t                dmaepoutwait;  /* EP OUT waitning for DMA */
   uint16_t                epinflight;    /* EP IN packet armed, awaiting
                                           * host read (EPDATASTATUS) */
+  uint16_t                epoutpending;  /* EP OUT packet held in endpoint
+                                          * buffer, no read request yet */
 
   /* E0 SETUP data buffering.
    *
@@ -1464,8 +1466,14 @@ static void nrf52_epout_handle(struct nrf52_usbdev_s *priv,
       privreq = nrf52_rqpeek(privep);
       if (!privreq)
         {
+          /* The packet is already ACKed and held in the endpoint buffer.
+           * The host will not retransmit it, so keep it pending until the
+           * class driver submits a read request.
+           */
+
           usbtrace(TRACE_DEVERROR(NRF52_TRACEERR_EPOUTQEMPTY),
                    privep->epphy);
+          priv->epoutpending |= (1 << privep->epphy);
           return;
         }
 
@@ -1663,6 +1671,7 @@ static void nrf52_usbreset(struct nrf52_usbdev_s *priv)
   priv->dmaepinwait = 0;
   priv->dmaepoutwait = 0;
   priv->epinflight  = 0;
+  priv->epoutpending = 0;
 
   /* Disable all end points */
 
@@ -2632,9 +2641,20 @@ static int nrf52_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
             {
               usbtrace(TRACE_OUTREQQUEUED(privep->epphy), privreq->req.len);
 
-              /* Allow OUT traffic on this endpoint */
+              if (privep->epphy != EP0 &&
+                  (priv->epoutpending & (1 << privep->epphy)) != 0)
+                {
+                  /* Consume the packet held in the endpoint buffer */
 
-              nrf52_epout_allow(privep);
+                  priv->epoutpending &= ~(1 << privep->epphy);
+                  nrf52_epout_handle(priv, privep);
+                }
+              else
+                {
+                  /* Allow OUT traffic on this endpoint */
+
+                  nrf52_epout_allow(privep);
+                }
             }
         }
     }
