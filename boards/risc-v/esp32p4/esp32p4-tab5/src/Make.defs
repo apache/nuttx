@@ -41,6 +41,10 @@ ifeq ($(CONFIG_ESP32P4_TAB5_LCD),y)
   endif
 endif
 
+ifeq ($(CONFIG_ESP32P4_TAB5_TOUCHSCREEN),y)
+  CSRCS += esp32p4_touch.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL),y)
   ifeq ($(CONFIG_BOARDCTL_RESET),y)
     CSRCS += esp32p4_reset.c

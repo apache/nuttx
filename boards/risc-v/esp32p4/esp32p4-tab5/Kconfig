@@ -98,4 +98,13 @@ config ESP32P4_TAB5_LCD_ST7123
 
 endchoice
 
+config ESP32P4_TAB5_TOUCHSCREEN
+	bool "Touch Screen Controller"
+	default n
+	select INPUT
+	select INPUT_ST7123
+	select ESP32P4_TAB5_HMI_POWER
+	---help---
+		Initialize the ST7123 touch screen controller.
+
 endif # ARCH_BOARD_ESP32P4_TAB5
