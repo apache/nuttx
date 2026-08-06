@@ -117,13 +117,6 @@ if(CONFIG_ARCH_ADDRENV)
   endif()
 endif()
 
-if(CONFIG_MM_PGALLOC)
-  list(APPEND SRCS arm64_physpgaddr.c)
-  if(CONFIG_ARCH_PGPOOL_MAPPING)
-    list(APPEND SRCS arm64_virtpgaddr.c)
-  endif()
-endif()
-
 if(CONFIG_ARCH_FPU)
   list(APPEND SRCS arm64_fpu.c)
   list(APPEND SRCS arm64_fpu_func.S)
