@@ -86,11 +86,8 @@ static bool g_wifi_handler_registered;
  * Name: esp_reconnect_work_cb
  *
  * Description:
- *   Function called by a work queue to reconnect to Wi-Fi in case of
- *   a disconnection event and WIFI_REASON_ASSOC_LEAVE reason.
- *   Must check if the failure_retry_cnt is not 0, otherwise it may
- *   reconnect when not desired, such as when the user has actually
- *   asked to disconnect from the AP.
+ *   Function called by a work queue to reconnect the Wi-Fi station after an
+ *   unsolicited disconnection.
  *
  * Input Parameters:
  *   arg - Unused work queue argument.
@@ -104,12 +101,9 @@ static void esp_reconnect_work_cb(void *arg)
 {
   UNUSED(arg);
   int ret;
-  wifi_config_t wifi_config;
 
-  esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-  if (wifi_config.sta.failure_retry_cnt == 0)
+  if (!g_sta_reconnect)
     {
-      wlinfo("Reconnect to Wi-Fi on callback: failure_retry_cnt is 0\n");
       return;
     }
 
@@ -206,7 +200,7 @@ static void esp_wifi_event_handler(void *arg, esp_event_base_t event_base,
 
           wlinfo("Wi-Fi station disconnected, reason: %u\n", reason);
           esp_wlan_sta_disconnect_hook();
-          if (reason == WIFI_REASON_ASSOC_LEAVE)
+          if (g_sta_reconnect)
             {
               work_queue(LPWORK, &g_wifi_reconnect_work,
                          esp_reconnect_work_cb, NULL, 0);

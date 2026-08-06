@@ -60,6 +60,18 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef ESP_WLAN_HAS_STA
+
+/* Whether the station should reconnect after an unsolicited disconnection */
+
+volatile bool g_sta_reconnect;
+
+#endif /* ESP_WLAN_HAS_STA */
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -527,6 +539,8 @@ int esp_wifi_sta_connect(void)
 
   esp_wifi_lock(true);
 
+  g_sta_reconnect = true;
+
   ret = esp_wifi_connect();
   if (ret)
     {
@@ -563,6 +577,12 @@ int esp_wifi_sta_disconnect(bool allow_reconnect)
   wifi_config_t wifi_config;
 
   esp_wifi_lock(true);
+
+  /* WARNING: failure_retry_cnt has no documented effect unless scan_method
+   * is WIFI_ALL_CHANNEL_SCAN, which NuttX never selects.  Reconnection is
+   * gated by g_sta_reconnect.
+   */
+
   esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
   if (allow_reconnect)
@@ -575,6 +595,8 @@ int esp_wifi_sta_disconnect(bool allow_reconnect)
     }
 
   esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+
+  g_sta_reconnect = allow_reconnect;
 
   ret = esp_wifi_disconnect();
   if (ret)
