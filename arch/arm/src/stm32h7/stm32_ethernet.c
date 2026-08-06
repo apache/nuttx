@@ -33,6 +33,7 @@
 #include <string.h>
 #include <assert.h>
 #include <nuttx/debug.h>
+#include <syslog.h>
 #include <errno.h>
 
 #include <sys/param.h>
@@ -3370,10 +3371,26 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
       return -ETIMEDOUT;
     }
 
-  /* Enable auto-negotiation */
+#ifdef CONFIG_STM32_AUTONEG_10FD_ONLY
+  /* Advertise only 10BASE-T full duplex, so that negotiation lands
+   * there on both ends.  See the help text of the option for why a
+   * board would want a slower link on purpose.
+   */
+
+  ret = mdio_write(priv->mdio, CONFIG_STM32_PHYADDR, MII_ADVERTISE,
+                   MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_CSMA);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to write the PHY ANAR: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  /* Enable and restart auto-negotiation */
 
   ret = mdio_write(priv->mdio,
-    CONFIG_STM32_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
+    CONFIG_STM32_PHYADDR, MII_MCR,
+    MII_MCR_ANENABLE | MII_MCR_ANRESTART);
   if (ret < 0)
     {
       nerr("ERROR: Failed to enable auto-negotiation: %d\n", ret);
@@ -3483,7 +3500,12 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
   phyval |= MII_MCR_SPEED100;
 #endif
 
-  ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_MCR, phyval, 0xffff);
+  /* mdio_write, not stm32_phywrite:  this driver never had the latter.
+   * The call was carried over from the F7 driver and nothing had ever
+   * built this path.
+   */
+
+  ret = mdio_write(priv->mdio, CONFIG_STM32_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
       nerr("ERROR: Failed to write the PHY MCR: %d\n", ret);
@@ -3502,9 +3524,14 @@ static int stm32_phyinit(struct stm32_ethmac_s *priv)
 #endif
 #endif
 
-  ninfo("Duplex: %s Speed: %d MBps\n",
-        priv->fduplex ? "FULL" : "HALF",
-        priv->mbps100 ? 100 : 10);
+  /* Diagnostic: say what was negotiated even without net debug.  A
+   * duplex mismatch looks exactly like a bad cable and nothing else
+   * says which of the two it is.
+   */
+
+  syslog(LOG_INFO, "stm32_eth: link %s-duplex %d Mbps\n",
+         priv->fduplex ? "full" : "half",
+         priv->mbps100 ? 100 : 10);
 
   return OK;
 }
