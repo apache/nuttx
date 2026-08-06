@@ -83,8 +83,13 @@ struct rpmsgdev_priv_s
 struct rpmsgdev_s
 {
   struct rpmsg_endpoint  ept;         /* Rpmsg endpoint */
-  FAR const char         *remotecpu;  /* The server cpu name */
-  FAR const char         *remotepath; /* The device path in the server cpu */
+
+  /* The server cpu name and the device path in the server cpu */
+
+  char                   remotecpu[RPMSG_NAME_SIZE];
+  char                   remotepath[RPMSG_NAME_SIZE -
+                                    RPMSGDEV_NAME_PREFIX_LEN];
+
   sem_t                  wait;        /* Wait sem, used for preventing any
                                        * operation until the connection
                                        * between two cpu established.
@@ -1317,7 +1322,7 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
       return -EINVAL;
     }
 
-  DEBUGASSERT(strlen(remotepath) + RPMSGDEV_NAME_PREFIX_LEN <=
+  DEBUGASSERT(strlen(remotepath) + RPMSGDEV_NAME_PREFIX_LEN <
               RPMSG_NAME_SIZE);
 
   dev = kmm_zalloc(sizeof(*dev));
@@ -1328,8 +1333,8 @@ int rpmsgdev_register(FAR const char *remotecpu, FAR const char *remotepath,
 
   /* Initialize the rpmsg device */
 
-  dev->remotecpu  = remotecpu;
-  dev->remotepath = remotepath;
+  strlcpy(dev->remotecpu, remotecpu, sizeof(dev->remotecpu));
+  strlcpy(dev->remotepath, remotepath, sizeof(dev->remotepath));
 
   nxsem_init(&dev->wait, 0, 0);
   spin_lock_init(&dev->lock);
