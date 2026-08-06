@@ -141,7 +141,7 @@ void igmp_input(struct net_driver_s *dev)
 #ifdef CONFIG_NET_IGMP_CHECKSUMS
   /* Calculate and check the IGMP checksum */
 
-  if (net_chksum((FAR uint16_t *)igmp, IGMP_HDRLEN) != 0)
+  if (net_chksum((FAR uint16_t *)igmp, IGMP_HDRLEN) != 0xffff)
     {
       IGMP_STATINCR(g_netstats.igmp.chksum_errors);
       nwarn("WARNING: Checksum error\n");
