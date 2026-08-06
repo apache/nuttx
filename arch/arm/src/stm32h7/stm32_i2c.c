@@ -374,7 +374,9 @@ struct stm32_trace_s
 struct stm32_i2c_config_s
 {
   uint32_t base;              /* I2C base address */
+  uint32_t clk_reg;           /* Clock enable register */
   uint32_t clk_bit;           /* Clock enable bit */
+  uint32_t rst_reg;           /* Peripheral reset register */
   uint32_t reset_bit;         /* Reset bit */
   uint32_t scl_pin;           /* GPIO configuration for SCL as SCL */
   uint32_t sda_pin;           /* GPIO configuration for SDA as SDA */
@@ -492,7 +494,9 @@ static int stm32_i2c_pm_prepare(struct pm_callback_s *cb, int domain,
 static const struct stm32_i2c_config_s stm32_i2c1_config =
 {
   .base          = STM32_I2C1_BASE,
+  .clk_reg       = STM32_RCC_APB1LENR,
   .clk_bit       = RCC_APB1LENR_I2C1EN,
+  .rst_reg       = STM32_RCC_APB1LRSTR,
   .reset_bit     = RCC_APB1LRSTR_I2C1RST,
   .scl_pin       = GPIO_I2C1_SCL,
   .sda_pin       = GPIO_I2C1_SDA,
@@ -528,7 +532,9 @@ static struct stm32_i2c_priv_s stm32_i2c1_priv =
 static const struct stm32_i2c_config_s stm32_i2c2_config =
 {
   .base          = STM32_I2C2_BASE,
+  .clk_reg       = STM32_RCC_APB1LENR,
   .clk_bit       = RCC_APB1LENR_I2C2EN,
+  .rst_reg       = STM32_RCC_APB1LRSTR,
   .reset_bit     = RCC_APB1LRSTR_I2C2RST,
   .scl_pin       = GPIO_I2C2_SCL,
   .sda_pin       = GPIO_I2C2_SDA,
@@ -564,7 +570,9 @@ static struct stm32_i2c_priv_s stm32_i2c2_priv =
 static const struct stm32_i2c_config_s stm32_i2c3_config =
 {
   .base          = STM32_I2C3_BASE,
+  .clk_reg       = STM32_RCC_APB1LENR,
   .clk_bit       = RCC_APB1LENR_I2C3EN,
+  .rst_reg       = STM32_RCC_APB1LRSTR,
   .reset_bit     = RCC_APB1LRSTR_I2C3RST,
   .scl_pin       = GPIO_I2C3_SCL,
   .sda_pin       = GPIO_I2C3_SDA,
@@ -600,7 +608,9 @@ static struct stm32_i2c_priv_s stm32_i2c3_priv =
 static const struct stm32_i2c_config_s stm32_i2c4_config =
 {
   .base          = STM32_I2C4_BASE,
+  .clk_reg       = STM32_RCC_APB4ENR,
   .clk_bit       = RCC_APB4ENR_I2C4EN,
+  .rst_reg       = STM32_RCC_APB4RSTR,
   .reset_bit     = RCC_APB4RSTR_I2C4RST,
   .scl_pin       = GPIO_I2C4_SCL,
   .sda_pin       = GPIO_I2C4_SDA,
@@ -2143,9 +2153,9 @@ static int stm32_i2c_init(struct stm32_i2c_priv_s *priv)
 
   /* Enable power and reset the peripheral */
 
-  modifyreg32(STM32_RCC_APB1LENR, 0, priv->config->clk_bit);
-  modifyreg32(STM32_RCC_APB1LRSTR, 0, priv->config->reset_bit);
-  modifyreg32(STM32_RCC_APB1LRSTR, priv->config->reset_bit, 0);
+  modifyreg32(priv->config->clk_reg, 0, priv->config->clk_bit);
+  modifyreg32(priv->config->rst_reg, 0, priv->config->reset_bit);
+  modifyreg32(priv->config->rst_reg, priv->config->reset_bit, 0);
 
   /* Configure pins */
 
@@ -2213,7 +2223,7 @@ static int stm32_i2c_deinit(struct stm32_i2c_priv_s *priv)
 
   /* Disable clocking */
 
-  modifyreg32(STM32_RCC_APB1LENR, priv->config->clk_bit, 0);
+  modifyreg32(priv->config->clk_reg, priv->config->clk_bit, 0);
 
   return OK;
 }
