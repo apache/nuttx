@@ -1149,6 +1149,17 @@ static struct eth_desc_s *stm32_get_next_txdesc(struct stm32_ethmac_s *priv,
  *
  ****************************************************************************/
 
+static bool stm32_txringfull(FAR struct stm32_ethmac_s *priv)
+{
+  /* The ring is full when the head descriptor still belongs to the DMA.
+   * Transmitting into it anyway corrupts a frame in flight;  with
+   * assertions built in it panics from the RX work queue instead.
+   */
+
+  return (priv->txhead->des3 & ETH_TDES3_RD_OWN) != 0 ||
+         priv->txhead->des0 != 0;
+}
+
 static int stm32_transmit(struct stm32_ethmac_s *priv)
 {
   struct eth_desc_s *txdesc;
@@ -1990,9 +2001,20 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              /* And send the packet */
+              /* Send the reply, unless the TX ring is full. The reply
+               * to received data is almost always an acknowledgement, and
+               * a peer that misses one retransmits;  overwriting a frame
+               * the DMA still owns recovers from nothing.
+               */
 
-              stm32_transmit(priv);
+              if (!stm32_txringfull(priv))
+                {
+                  stm32_transmit(priv);
+                }
+              else
+                {
+                  priv->dev.d_len = 0;
+                }
             }
         }
       else
@@ -2013,9 +2035,20 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              /* And send the packet */
+              /* Send the reply, unless the TX ring is full. The reply
+               * to received data is almost always an acknowledgement, and
+               * a peer that misses one retransmits;  overwriting a frame
+               * the DMA still owns recovers from nothing.
+               */
 
-              stm32_transmit(priv);
+              if (!stm32_txringfull(priv))
+                {
+                  stm32_transmit(priv);
+                }
+              else
+                {
+                  priv->dev.d_len = 0;
+                }
             }
         }
       else
@@ -2036,7 +2069,19 @@ static void stm32_receive(struct stm32_ethmac_s *priv)
 
           if (priv->dev.d_len > 0)
             {
-              stm32_transmit(priv);
+              /* Send the reply, unless the TX ring is full. A peer
+               * that misses an ARP reply asks again;  overwriting a
+               * frame the DMA still owns recovers from nothing.
+               */
+
+              if (!stm32_txringfull(priv))
+                {
+                  stm32_transmit(priv);
+                }
+              else
+                {
+                  priv->dev.d_len = 0;
+                }
             }
         }
       else
