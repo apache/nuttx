@@ -52,6 +52,27 @@ endif # !STM32_AUTONEG
 
 if STM32_AUTONEG
 
+config STM32_AUTONEG_10FD_ONLY
+	bool "Advertise only 10BASE-T full duplex"
+	default n
+	---help---
+		Restrict the autonegotiation advertisement to 10BASE-T full
+		duplex, so that both ends negotiate that and nothing else.
+
+		The reason to want this is electrical, not economic.  100BASE-TX
+		signalling sits at about 1 V with MLT-3 coding; 10BASE-T uses
+		2.5 V Manchester at a tenth of the frequency, and shrugs off
+		interference that corrupts 100BASE-TX outright.  On a board
+		where another subsystem couples noise into the PHY -- a parallel
+		RGB display sharing the board with the magnetics, say -- a
+		clean 10 Mbps link outperforms a 100 Mbps one that is losing
+		frames to bit errors.
+
+		Restricting the advertisement is not the same as disabling
+		autonegotiation:  a forced MCR leaves the partner to parallel
+		detection, which cannot detect duplex and will pick half --
+		a genuine mismatch that stalls bulk traffic completely.
+
 config STM32_PHYSR
 	int "PHY Status Register Address (decimal)"
 	---help---
