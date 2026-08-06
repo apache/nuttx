@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32p4/esp32p4-tab5/src/esp32p4-tab5.h
+ * boards/risc-v/esp32p4/esp32p4-tab5/src/esp32p4_ioexpander.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,77 +20,102 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ESP32P4_ESP32P4_TAB5_SRC_ESP32P4_TAB5_H
-#define __BOARDS_RISCV_ESP32P4_ESP32P4_TAB5_SRC_ESP32P4_TAB5_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <syslog.h>
+
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/ioexpander/pi4ioe5v6408.h>
+
+#include "espressif/esp_i2c.h"
+
+#include <arch/board/board.h>
+
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
+#define TAB5_PI4IOE_FREQUENCY       400000
 
 /****************************************************************************
- * Public Function Prototypes
+ * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_LOW
+static struct pi4ioe5v6408_config_s g_pi4ioe_config_low =
+{
+  .address   = PI4IOE5V6408_I2C_ADDRESS_LOW,
+  .frequency = TAB5_PI4IOE_FREQUENCY,
+};
+static FAR struct ioexpander_dev_s *g_pi4ioe_low;
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_HIGH
+static struct pi4ioe5v6408_config_s g_pi4ioe_config_high =
+{
+  .address   = PI4IOE5V6408_I2C_ADDRESS_HIGH,
+  .frequency = TAB5_PI4IOE_FREQUENCY,
+};
+static FAR struct ioexpander_dev_s *g_pi4ioe_high;
+#endif
 
 /****************************************************************************
- * Name: esp_bringup
- *
- * Description:
- *   Perform architecture-specific initialization.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; A negated errno value is returned on
- *   any failure.
- *
+ * Public Functions
  ****************************************************************************/
 
-int esp_bringup(void);
-
-#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER
 /****************************************************************************
  * Name: tab5_pi4ioe_init
  *
  * Description:
  *   Initialize the IO expanders.
  *
- * Input Parameters:
- *   None.
- *
  * Returned Value:
  *   Zero on success, -1 on failure.
  *
  ****************************************************************************/
 
-int tab5_pi4ioe_init(void);
+int tab5_pi4ioe_init(void)
+{
+  FAR struct i2c_master_s *i2c;
 
-/****************************************************************************
- * Name: tab5_pi4ioe_high_write_pin
- *
- * Description:
- *   Write a pin on the IO expander (high).
- *
- * Input Parameters:
- *   pin - The pin to write on the IO expander (high).
- *   enable - True to set the pin high, false to set the pin low.
- *
- * Returned Value:
- *   Zero on success, -1 on failure.
- *
- ****************************************************************************/
+  i2c = esp_i2cbus_initialize(ESPRESSIF_I2C0);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "tab5_pi4ioe_init: failed to get I2C0\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_LOW
+  g_pi4ioe_low = pi4ioe5v6408_initialize(i2c, &g_pi4ioe_config_low);
+  if (g_pi4ioe_low == NULL)
+    {
+      syslog(LOG_ERR, "tab5_pi4ioe_init: expander (low) init failed\n");
+      return -ENODEV;
+    }
+
+  syslog(LOG_INFO, "tab5_pi4ioe_init: PI4IOE5V6408 (low) initialized\n");
+  #endif
 
 #ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_HIGH
-int tab5_pi4ioe_high_write_pin(uint8_t pin, bool enable);
+  g_pi4ioe_high = pi4ioe5v6408_initialize(i2c, &g_pi4ioe_config_high);
+  if (g_pi4ioe_high == NULL)
+    {
+      syslog(LOG_ERR, "tab5_pi4ioe_init: expander (high) init failed\n");
+      return -ENODEV;
+    }
+
+  syslog(LOG_INFO, "tab5_pi4ioe_init: PI4IOE5V6408 (high) initialized\n");
 #endif
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: tab5_pi4ioe_low_write_pin
@@ -108,9 +133,31 @@ int tab5_pi4ioe_high_write_pin(uint8_t pin, bool enable);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_LOW
-int tab5_pi4ioe_low_write_pin(uint8_t pin, bool enable);
+int tab5_pi4ioe_low_write_pin(uint8_t pin, bool enable)
+{
+  IOEXP_SETDIRECTION(g_pi4ioe_low, pin, IOEXPANDER_DIRECTION_OUT);
+  return IOEXP_WRITEPIN(g_pi4ioe_low, pin, enable);
+}
 #endif
-#endif /* CONFIG_ESP32P4_TAB5_IOEXPANDER */
 
-#endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ESP32P4_ESP32P4_TAB5_SRC_ESP32P4_TAB5_H */
+/****************************************************************************
+ * Name: tab5_pi4ioe_high_write_pin
+ *
+ * Description:
+ *   Write a pin on the IO expander (high).
+ *
+ * Input Parameters:
+ *   pin - The pin to write on the IO expander (high).
+ *   enable - True to set the pin high, false to set the pin low.
+ *
+ * Returned Value:
+ *   Zero on success, -1 on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER_HIGH
+int tab5_pi4ioe_high_write_pin(uint8_t pin, bool enable)
+{
+  return IOEXP_WRITEPIN(g_pi4ioe_high, pin, enable);
+}
+#endif

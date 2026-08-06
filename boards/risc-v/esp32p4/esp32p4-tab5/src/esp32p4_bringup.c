@@ -42,6 +42,8 @@
 #  include "esp_board_i2c.h"
 #endif
 
+#include <arch/board/board.h>
+
 #include "esp32p4-tab5.h"
 
 /****************************************************************************
@@ -92,6 +94,17 @@ int esp_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_IOEXPANDER
+  /* Initialize the IO expanders */
+
+  ret = tab5_pi4ioe_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize Tab5 IO expanders: %d\n", ret);
+      return ret;
     }
 #endif
 

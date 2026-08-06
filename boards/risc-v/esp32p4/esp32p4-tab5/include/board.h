@@ -108,6 +108,25 @@
 #define TAB5_GPIO_M5_RXD0      38
 #define TAB5_GPIO_M5_PB_OUT    52
 
+/* PI4IOE5V6408 (1st) IO Expander (address pin low). */
+
+#define TAB5_RF_PTH_L_INT_H_EXT_PIN  0
+#define TAB5_SPK_EN_PIN              1
+#define TAB5_EXT_5V_EN_PIN           2
+#define TAB5_LCD_EN_PIN              4
+#define TAB5_TOUCH_EN_PIN            5
+#define TAB5_CAM_EN_PIN              6
+#define TAB5_HP_DET_PIN              7
+
+/* PI4IOE5V6408 (2nd) IO Expander (address pin high). */
+
+#define TAB5_WLAN_PWR_EN_PIN         0
+#define TAB5_USB_5V_EN_PIN           3
+#define TAB5_PWROFF_PULSE_PIN        4
+#define TAB5_nCHG_QC_EN_PIN          5
+#define TAB5_CHG_STAT_PIN            6
+#define TAB5_CHG_EN_PIN              7
+
 /* ESP32-C6 (Wi-Fi/BT companion) - SDIO2 bus GPIO8..15 (pins only)
  *
  * GPIO8-15 carry D3..D0, IO2, RST, CK, CMD of the SDIO2 link to the C6.
