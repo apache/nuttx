@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig CPUFREQ
+	bool "CPU frequency scaling"
+	default n
+	---help---
+		A single-policy CPU frequency framework.  A platform provides a
+		lower half (a frequency table and a way to move between its
+		entries).  Each requester (a thermal cooling device, an
+		application, a power manager) installs a [min, max] request,
+		and the resolved frequency is the highest table entry under
+		the lowest ceiling.
+
+if CPUFREQ
+
+config CPUFREQ_CHARDEV
+	bool "/dev/cpufreq character device"
+	default y
+	---help---
+		Expose the policy as /dev/cpufreq.  Each open descriptor owns
+		at most one frequency request, installed by ioctl and released
+		on close, including on task exit.
+
+endif # CPUFREQ
