@@ -37,8 +37,7 @@ You can use the following command to configure the NuttX build:
   ./tools/configure.sh -l ci20/nsh
 
    make CROSSDEV=mips-mti-elf-
-   mkimage -A mips -O linux -T kernel -C none -a 0x80000180 -e 0x800004ac \
-    -n "nx" -d nuttx.bin <tftp_dir>/nuttx.umg
+   cp uImage <tftp_dir>/nuttx.umg
 
 Run this from U-Boot prompt:
 
