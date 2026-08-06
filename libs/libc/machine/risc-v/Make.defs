@@ -32,6 +32,34 @@ ifeq ($(CONFIG_RISCV_STRCMP),y)
 ASRCS += arch_strcmp.S
 endif
 
+ifeq ($(CONFIG_RISCV_MEMCHR),y)
+CSRCS += arch_memchr.c
+endif
+
+ifeq ($(CONFIG_RISCV_MEMCMP),y)
+CSRCS += arch_memcmp.c
+endif
+
+ifeq ($(CONFIG_RISCV_MEMMOVE),y)
+CSRCS += arch_memmove.c
+endif
+
+
+
+ifeq ($(CONFIG_RISCV_STRCPY),y)
+CSRCS += arch_strcpy.c
+endif
+
+
+ifeq ($(CONFIG_RISCV_STRNCMP),y)
+CSRCS += arch_strncmp.c
+endif
+
+ifeq ($(CONFIG_RISCV_STRNLEN),y)
+CSRCS += arch_strnlen.c
+endif
+
+
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
 endif
