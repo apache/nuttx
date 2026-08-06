@@ -442,8 +442,13 @@ config HIDKBD_REPORT_MODIFIERS
 config HIDKBD_NOGETREPORT
 	bool "Use Interrupt pipe to get keys"
 	default n
+	select USBHOST_ASYNCH
 	---help---
 		Use the INTERRUPT IN pipe to get keyboard input reports.
+
+		This reads the pipe with DRVR_ASYNCH(), which only exists when
+		USBHOST_ASYNCH is set, so it is selected here rather than left
+		for a configuration to discover as a link failure.
 
 endif
 
