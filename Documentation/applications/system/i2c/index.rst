@@ -83,6 +83,7 @@ and a more detailed summary of the command I2C command options::
       [-s|n], send/don't send start between command and data.  Default: -n Current: -n
       [-i|j], Auto increment|don't increment regaddr on repetitions.  Default: NO Current: NO
       [-f freq] I2C frequency.  Default: 100000 Current: 100000
+      [-z] instructs the 'dev' command to scan the I2C bus by sending zero-byte write headers (if the architecture supports it)
 
 **Notes**:
 
