@@ -24,6 +24,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <debug.h>
+
 #include <nuttx/cpufreq.h>
 #include <nuttx/kmalloc.h>
 
