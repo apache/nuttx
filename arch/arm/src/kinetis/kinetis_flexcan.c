@@ -268,11 +268,11 @@ static const struct flexcan_config_s kinetis_flexcan2_config =
   .tx_pin    = PIN_CAN2_TX,
   .rx_pin    = PIN_CAN2_RX,
 #ifdef PIN_CAN2_ENABLE
-  .enable_pin = PIN_CAN2_ENABLE,
-  .rx_pin     = CAN2_ENABLE_HIGH,
+  .enable_pin  = PIN_CAN2_ENABLE,
+  .rx_pin      = CAN2_ENABLE_OUT,
 #else
-  .enable_pin = 0,
-  .rx_pin     = 0,
+  .enable_pin  = 0,
+  .enable_high = 0,
 #endif
   .bus_irq   = KINETIS_IRQ_CAN2_BUS,
   .error_irq = KINETIS_IRQ_CAN2_ERROR,
