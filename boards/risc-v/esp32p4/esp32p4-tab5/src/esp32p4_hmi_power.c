@@ -64,6 +64,41 @@ static struct esp_ldo_config_t g_mipi_phy_ldo_config =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: tab5_touchscreen_power_init
+ *
+ * Description:
+ *   Reset the touchscreen by pulsing the TOUCH_EN pin
+ *   via PI4IOE P5 (BSP_TOUCH_EN). Datasheet suggests 2 ms low pulse to
+ *   reset the controller and at least 20 ms in high state to stabilize the
+ *   controller.
+ *
+ * Returned Value:
+ *   Zero on success, -1 on failure.
+ *
+ ****************************************************************************/
+
+int tab5_touchscreen_power_init(void)
+{
+  int ret;
+
+  ret = tab5_pi4ioe_low_write_pin(TAB5_TOUCH_EN_PIN, true);
+  nxsched_msleep(10);
+  ret |= tab5_pi4ioe_low_write_pin(TAB5_TOUCH_EN_PIN, false);
+  nxsched_msleep(30);
+  ret |= tab5_pi4ioe_low_write_pin(TAB5_TOUCH_EN_PIN, true);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: failed to reset touchscreen: %d\n", ret);
+      return ret;
+    }
+
+  nxsched_msleep(100);
+
+  syslog(LOG_INFO, "Touchscreen reset complete\n");
+  return OK;
+}
+
+/****************************************************************************
  * Name: tab5_mipi_phy_power
  *
  * Description:

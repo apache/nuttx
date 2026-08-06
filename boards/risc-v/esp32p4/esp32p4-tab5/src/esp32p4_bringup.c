@@ -127,6 +127,17 @@ int esp_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32P4_TAB5_TOUCHSCREEN
+  /* Reset the touchscreen by pulsing the TOUCH_EN pin */
+
+  ret = tab5_touchscreen_power_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to reset touchscreen: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_ESP32P4_TAB5_MIPI_DSI
   /* Tab5 ST712x bus: 2 lanes @ board.h bitrate. */
 
@@ -168,6 +179,16 @@ int esp_bringup(void)
 
       syslog(LOG_INFO, "/dev/fb0 registered (%s)\n",
               TAB5_LCD_PANEL_NAME);
+    }
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_TOUCHSCREEN
+  /* Touch screen controller init. Must come after LCD and power init. */
+
+  ret = tab5_touchscreen_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to initialize touchscreen: %d\n", ret);
     }
 #endif
 

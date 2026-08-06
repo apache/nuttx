@@ -221,5 +221,39 @@ int tab5_pi4ioe_low_write_pin(uint8_t pin, bool enable);
 #endif
 #endif /* CONFIG_ESP32P4_TAB5_IOEXPANDER */
 
+#ifdef CONFIG_ESP32P4_TAB5_TOUCHSCREEN
+/****************************************************************************
+ * Name: tab5_touchscreen_power_init
+ *
+ * Description:
+ *   Enable or disable the Touch Screen Controller rail.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success, -1 on failure.
+ *
+ ****************************************************************************/
+
+int tab5_touchscreen_power_init(void);
+
+/****************************************************************************
+ * Name: tab5_touchscreen_init
+ *
+ * Description:
+ *   Initialize the touch screen controller.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success, -1 on failure.
+ *
+ ****************************************************************************/
+
+int tab5_touchscreen_init(void);
+#endif /* CONFIG_ESP32P4_TAB5_TOUCHSCREEN */
+
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_RISCV_ESP32P4_ESP32P4_TAB5_SRC_ESP32P4_TAB5_H */

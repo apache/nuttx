@@ -39,6 +39,10 @@ if(CONFIG_ESP32P4_TAB5_LCD)
   endif()
 endif()
 
+if(CONFIG_ESP32P4_TAB5_TOUCHSCREEN)
+  list(APPEND SRCS esp32p4_touch.c)
+endif()
+
 if(CONFIG_BOARDCTL)
   if(CONFIG_BOARDCTL_RESET)
     list(APPEND SRCS esp32p4_reset.c)
