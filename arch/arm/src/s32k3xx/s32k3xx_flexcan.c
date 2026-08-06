@@ -305,11 +305,11 @@ static const struct flexcan_config_s s32k3xx_flexcan2_config =
   .rx_pin    = PIN_CAN2_RX,
   .no_buffers  = 64,
 #ifdef PIN_CAN2_ENABLE
-  .enable_pin = PIN_CAN2_ENABLE,
+  .enable_pin  = PIN_CAN2_ENABLE,
   .enable_high = CAN2_ENABLE_OUT,
 #else
-  .enable_pin = 0,
-  .rx_pin     = 0,
+  .enable_pin  = 0,
+  .enable_high = 0,
 #endif
 #ifdef PIN_CAN2_STB
   .stb_pin  = PIN_CAN2_STB,
