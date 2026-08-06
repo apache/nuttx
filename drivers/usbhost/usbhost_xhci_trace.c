@@ -92,6 +92,8 @@ static const struct xhci_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
           "XHCI Hub port%d connected: %d\n"),
   TRENTRY(XHCI_VTRACE2_CTRLINOUT,
           "HXCI CTRLIN/OUT: RHPort%d req: %02x\n"),
+  TRENTRY(XHCI_VTRACE2_EPALLOC,
+          "XHCI EP%d allocated, type: %d\n"),
 };
 
 /****************************************************************************

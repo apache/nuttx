@@ -64,6 +64,7 @@ enum usbhost_trace1codes_e
   XHCI_VTRACE2_PORTSC_DISCONND,     /* XHCI RHport disconnected */
   XHCI_VTRACE2_MONWAKEUP,           /* XHCI RHPort connected wakeup */
   XHCI_VTRACE2_CTRLINOUT,           /* XHCI CTRLIN/OUT */
+  XHCI_VTRACE2_EPALLOC,             /* XHCI Endpoint allocated */
   __TRACE2_NSTRINGS                 /* Total number of enumeration values */
 };
 
