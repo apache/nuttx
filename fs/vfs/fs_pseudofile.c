@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
@@ -36,7 +37,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/lib/math32.h>
 
 #include "inode/inode.h"
 #include "fs_heap.h"
@@ -169,25 +169,67 @@ static int pseudofile_close(FAR struct file *filep)
   return OK;
 }
 
+/* Grow allocation by doubling until it covers the requested size. */
+
+static size_t pseudofile_buffersize(FAR struct fs_pseudofile_s *pf,
+                                    size_t size)
+{
+  size_t alloc = 0;
+
+  if (pf->content != NULL)
+    {
+      alloc = fs_heap_malloc_size(pf->content);
+    }
+
+  if (alloc == 0)
+    {
+      alloc = 1;
+    }
+
+  while (alloc < size)
+    {
+      if (alloc > (SIZE_MAX >> 1))
+        {
+          return size;
+        }
+
+      alloc <<= 1;
+    }
+
+  return alloc;
+}
+
 static int pseudofile_expand(FAR struct inode *node,
                              size_t size)
 {
   FAR struct fs_pseudofile_s *pf = node->i_private;
   FAR void *tmp;
+  size_t oldsize = node->i_size;
 
-  if (pf->content && fs_heap_malloc_size(pf->content) >= size)
+  if (pf->content != NULL && fs_heap_malloc_size(pf->content) >= size)
     {
+      if (size > oldsize)
+        {
+          memset(pf->content + oldsize, 0, size - oldsize);
+        }
+
       node->i_size = size;
       return 0;
     }
 
-  tmp = fs_heap_realloc(pf->content, 1 << LOG2_CEIL(size));
+  tmp = fs_heap_realloc(pf->content, pseudofile_buffersize(pf, size));
   if (tmp == NULL)
     {
       return -ENOMEM;
     }
 
   pf->content = tmp;
+
+  if (size > oldsize)
+    {
+      memset(pf->content + oldsize, 0, size - oldsize);
+    }
+
   node->i_size = size;
   return 0;
 }
@@ -207,6 +249,12 @@ static ssize_t pseudofile_write(FAR struct file *filep,
 
   if (filep->f_oflags & O_APPEND)
     {
+      if (buflen > SIZE_MAX - node->i_size)
+        {
+          nxmutex_unlock(&pf->lock);
+          return -EFBIG;
+        }
+
       ret = pseudofile_expand(node, node->i_size + buflen);
       if (ret < 0)
         {
@@ -218,6 +266,12 @@ static ssize_t pseudofile_write(FAR struct file *filep,
     }
   else
     {
+      if (filep->f_pos > SIZE_MAX - buflen)
+        {
+          nxmutex_unlock(&pf->lock);
+          return -EFBIG;
+        }
+
       ret = pseudofile_expand(node, filep->f_pos + buflen);
       if (ret < 0)
         {
@@ -392,6 +446,12 @@ static int pseudofile_truncate(FAR struct file *filep, off_t length)
       return ret;
     }
 
+  if (length < 0)
+    {
+      ret = -EINVAL;
+      goto out;
+    }
+
   if (length < node->i_size)
     {
       FAR void *tmp;
@@ -413,8 +473,6 @@ static int pseudofile_truncate(FAR struct file *filep, off_t length)
         {
           goto out;
         }
-
-      memset(pf->content + node->i_size, 0, length - node->i_size);
     }
 
 #ifdef CONFIG_PSEUDOFS_ATTRIBUTES
