@@ -55,18 +55,46 @@
 
 #define BUTTON_BOOT            35
 
-/* Display - MIPI-DSI ILI9881C (NOT implemented; pins documented only)
+/* Display - MIPI-DSI ST7121/ST7123 (M5Stack Tab5 reference timings)
  *
  * The DSI data/clock lanes are dedicated MIPI pins (not GPIO-muxed) powered
- * by VDD_MIPI_DPHY; only the backlight enable is a GPIO.  Panel reset is the
- * board power-on reset (BSP_LCD_RST = NC) driven by IO expander 0x43 P4.
+ * by VDD_MIPI_DPHY (LDO ch3 @ 2500 mV).  Backlight enable is GPIO22.
+ * BSP_LCD_RST is NC; LCD_EN / reset control is PI4IOE5V6408 @0x43 P4.
+ *
+ * Enable /dev/fb0 with CONFIG_ESP32P4_TAB5_LCD (see configs/lcd), which
+ * selects power + MIPI host + VIDEO_FB.  Select the matching panel with
+ * CONFIG_ESP32P4_TAB5_LCD_ST7121 or CONFIG_ESP32P4_TAB5_LCD_ST7123.
  */
 
 #define TAB5_GPIO_LCD_BL_EN    22  /* Backlight enable -> ME2212 boost EN */
 
-/* Touch - GT911 (NOT implemented; pins documented only) */
+#define TAB5_MIPI_DSI_H_RES              720
+#define TAB5_MIPI_DSI_V_RES              1280
+#define TAB5_MIPI_DSI_DPI_CLK_MHZ        70
+#define TAB5_MIPI_DSI_HSYNC_PULSE_WIDTH  2
+#define TAB5_MIPI_DSI_HSYNC_BACK_PORCH   40
+#define TAB5_MIPI_DSI_HSYNC_FRONT_PORCH  40
+#define TAB5_MIPI_DSI_LANES              2
 
-#define TAB5_GPIO_TP_INT       23  /* GT911 touch interrupt */
+#ifdef CONFIG_ESP32P4_TAB5_LCD_ST7123
+#  define TAB5_LCD_PANEL_NAME             "ST7123"
+#  define TAB5_MIPI_DSI_VSYNC_PULSE_WIDTH  2
+#  define TAB5_MIPI_DSI_VSYNC_BACK_PORCH   8
+#  define TAB5_MIPI_DSI_VSYNC_FRONT_PORCH  220
+#  define TAB5_MIPI_DSI_LANE_BITRATE_MBPS  1000
+#else
+#  define TAB5_LCD_PANEL_NAME             "ST7121"
+#  define TAB5_MIPI_DSI_VSYNC_PULSE_WIDTH  20
+#  define TAB5_MIPI_DSI_VSYNC_BACK_PORCH   24
+#  define TAB5_MIPI_DSI_VSYNC_FRONT_PORCH  200
+#  define TAB5_MIPI_DSI_LANE_BITRATE_MBPS  965
+#endif
+
+/* Touch - ST7121/ST7123 TDDI @0x55 (NOT implemented; INT GPIO23).  Older
+ * ILI9881 units used GT911 @0x14 on the same INT pin.
+ */
+
+#define TAB5_GPIO_TP_INT       23  /* Touch interrupt */
 
 /* Audio - ES8388 codec (out) + ES7210 mic array (in), I2S (pins only) */
 

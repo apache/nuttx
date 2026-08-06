@@ -5,6 +5,10 @@
 
 if ARCH_BOARD_ESP32P4_TAB5
 
+config ESP32P4_TAB5_HMI_POWER
+	bool
+	default n
+
 config ESP32P4_TAB5_IOEXPANDER
 	bool "Enable the Tab5 board IO Expander"
 	default n
@@ -30,5 +34,68 @@ if ESP32P4_TAB5_IOEXPANDER
 		---help---
 			Enable the second IO Expander.
 endif
+
+config ESP32P4_TAB5_LCD_POWER
+	bool "LCD / MIPI PHY power and reset path"
+	default n
+	select ESP32P4_TAB5_IOEXPANDER
+	select ESP32P4_TAB5_HMI_POWER
+	---help---
+		At board bring-up (after I2C0 init), enable on-chip LDO channel 3
+		at 2500 mV for VDD_MIPI_DPHY and raise LCD_EN on expander pin P4.
+
+		This does NOT initialize the MIPI-DSI host, the LCD panel, or
+		/dev/fb0 by itself.  Enable ESP32P4_TAB5_MIPI_DSI (and
+		ESPRESSIF_MIPI_DSI) to register the host after this power path.
+		Enable ESP32P4_TAB5_LCD for panel initialization + /dev/fb0.
+
+config ESP32P4_TAB5_MIPI_DSI
+	bool "Register MIPI-DSI host at bring-up"
+	default n
+	depends on ESP32P4_TAB5_LCD_POWER && ESPRESSIF_MIPI_DSI
+	---help---
+		After the LCD power path succeeds, call
+		esp_mipi_dsi_initialize() so the generic MIPI-DSI host is
+		registered (LP DCS/generic transfer ready).
+
+		Does NOT run panel initialization or create /dev/fb0 by itself;
+		enable ESP32P4_TAB5_LCD for that.
+
+config ESP32P4_TAB5_LCD
+	bool "LCD panel and /dev/fb0"
+	default n
+	depends on ESP32P4_TAB5_MIPI_DSI
+	select DRIVERS_VIDEO
+	select VIDEO_FB
+	select FB_UPDATE
+	---help---
+		Bring up the selected Tab5 MIPI-DSI panel (M5Stack init table and
+		720×1280 RGB565 timings), allocate a PSRAM framebuffer, bind it
+		to the DSI bridge via DW-GDMA, and register /dev/fb0.
+
+config ESP32P4_TAB5_LCD_APO_TEST
+	bool "All-Pixels-On flash after FB bring-up"
+	default y
+	depends on ESP32P4_TAB5_LCD
+	---help---
+		After /dev/fb0 is ready, force All-Pixels-On for ~1 s, then
+		All-Pixels-Off and restore the solid red test fill.
+
+choice
+	prompt "Tab5 LCD panel controller"
+	default ESP32P4_TAB5_LCD_ST7121
+	depends on ESP32P4_TAB5_LCD
+
+config ESP32P4_TAB5_LCD_ST7121
+	bool "ST7121"
+	---help---
+		Use the ST7121 initialization table and display timings.
+
+config ESP32P4_TAB5_LCD_ST7123
+	bool "ST7123"
+	---help---
+		Use the ST7123 initialization table and display timings.
+
+endchoice
 
 endif # ARCH_BOARD_ESP32P4_TAB5

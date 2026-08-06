@@ -42,6 +42,14 @@
 #  include "esp_board_i2c.h"
 #endif
 
+#ifdef CONFIG_ESP32P4_TAB5_MIPI_DSI
+#  include "espressif/esp_mipi_dsi.h"
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_LCD
+#  include <nuttx/video/fb.h>
+#endif
+
 #include <arch/board/board.h>
 
 #include "esp32p4-tab5.h"
@@ -103,8 +111,63 @@ int esp_bringup(void)
   ret = tab5_pi4ioe_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize Tab5 IO expanders: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: failed to init IO expanders: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_LCD_POWER
+  /* MIPI PHY LDO + PI4IOE LCD_EN (before optional DSI host) */
+
+  ret = tab5_lcd_power_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init LCD power path: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_MIPI_DSI
+  /* Tab5 ST712x bus: 2 lanes @ board.h bitrate. */
+
+  struct esp_mipi_dsi_bus_config_s bus_cfg =
+    {
+      .num_data_lanes = TAB5_MIPI_DSI_LANES,
+      .lane_bit_rate_mbps = TAB5_MIPI_DSI_LANE_BITRATE_MBPS,
+    };
+
+  ret = esp_mipi_dsi_initialize(&bus_cfg);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to init MIPI-DSI host: %d\n",
+              ret);
+      return ret;
+    }
+
+  syslog(LOG_INFO, "Tab5: MIPI-DSI host registered\n");
+#endif
+
+#ifdef CONFIG_ESP32P4_TAB5_LCD
+  /* Selected panel DCS + DPI + DW-GDMA FB → /dev/fb0 */
+
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: failed to register /dev/fb0: %d\n", ret);
+    }
+  else
+    {
+      /* fb_register() clears the plane; restore test red for DMA. */
+
+      ret = tab5_fb_reload_test_pattern();
+      if (ret < 0)
+        {
+          syslog(LOG_ERR,
+                  "ERROR: failed to reload FB test pattern: %d\n", ret);
+        }
+
+      syslog(LOG_INFO, "/dev/fb0 registered (%s)\n",
+              TAB5_LCD_PANEL_NAME);
     }
 #endif
 

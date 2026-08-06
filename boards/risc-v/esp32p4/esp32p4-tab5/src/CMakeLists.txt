@@ -24,7 +24,20 @@ set(SRCS esp32p4_boot.c esp32p4_bringup.c)
 
 if(CONFIG_ESP32P4_TAB5_IOEXPANDER)
   list(APPEND SRCS esp32p4_ioexpander.c)
-endif
+endif()
+
+if(CONFIG_ESP32P4_TAB5_HMI_POWER)
+  list(APPEND SRCS esp32p4_hmi_power.c)
+endif()
+
+if(CONFIG_ESP32P4_TAB5_LCD)
+  list(APPEND SRCS esp32p4_display.c esp32p4_mipi_dpi.c)
+  if(CONFIG_ESP32P4_TAB5_LCD_ST7121)
+    list(APPEND SRCS esp32p4_lcd_st7121.c)
+  elseif(CONFIG_ESP32P4_TAB5_LCD_ST7123)
+    list(APPEND SRCS esp32p4_lcd_st7123.c)
+  endif()
+endif()
 
 if(CONFIG_BOARDCTL)
   if(CONFIG_BOARDCTL_RESET)
