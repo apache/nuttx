@@ -84,8 +84,12 @@ ifeq ($(CONFIG_USBHOST_BTHCI),y)
 CSRCS += usbhost_bthci.c
 endif
 
+ifeq ($(CONFIG_USBHOST_XHCI),y)
+CSRCS += usbhost_xhci.c usbhost_xhci_trace.c
+endif
+
 ifeq ($(CONFIG_USBHOST_XHCI_PCI),y)
-CSRCS += usbhost_xhci_pci.c usbhost_xhci_trace.c
+CSRCS += usbhost_xhci_pci.c
 endif
 
 # HCD debug/trace logic

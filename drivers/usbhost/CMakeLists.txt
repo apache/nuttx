@@ -83,8 +83,12 @@ if(CONFIG_USBHOST)
     list(APPEND SRCS usbhost_bthci.c)
   endif()
 
+  if(CONFIG_USBHOST_XHCI)
+    list(APPEND SRCS usbhost_xhci.c usbhost_xhci_trace.c)
+  endif()
+
   if(CONFIG_USBHOST_XHCI_PCI)
-    list(APPEND SRCS usbhost_xhci_pci.c usbhost_xhci_trace.c)
+    list(APPEND SRCS usbhost_xhci_pci.c)
   endif()
 
   # HCD debug/trace logic
