@@ -158,6 +158,19 @@ begin_packed_struct struct dns_question_s
 
 /* The DNS answer message structure */
 
+/* The fixed part of an answer: type, class, ttl and length, before the
+ * address itself.
+ *
+ * Use this rather than sizeof(struct dns_answer_s) to test whether a
+ * response holds a whole answer header.  That structure also carries the
+ * union below, sixteen bytes once IPv6 is built, so its sizeof demands far
+ * more of the response than the header needs and wrongly rejects a
+ * trailing answer as truncated.  The address that follows is bounds
+ * checked separately, against its len field.
+ */
+
+#define DNS_ANSWER_HEADER_SIZE 10
+
 begin_packed_struct struct dns_answer_s
 {
   uint16_t type;
