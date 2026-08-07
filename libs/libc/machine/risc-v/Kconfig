@@ -14,6 +14,7 @@ config RISCV_STRING_FUNCTION
 	select RISCV_MEMSET
 	select RISCV_STRCMP
 	select RISCV_STRCPY
+	select RISCV_STRLCPY
 	select RISCV_STRNCMP
 	select RISCV_STRNLEN
 
@@ -81,3 +82,10 @@ config RISCV_STRNLEN
 	select LIBC_ARCH_STRNLEN
 	---help---
 		Enable optimized RISC-V specific strnlen() library function
+
+config RISCV_STRLCPY
+	bool "Enable optimized strlcpy() for RISC-V"
+	default n
+	select LIBC_ARCH_STRLCPY
+	---help---
+		Enable optimized RISC-V specific strlcpy() library function

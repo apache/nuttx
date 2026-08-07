@@ -50,6 +50,9 @@ ifeq ($(CONFIG_RISCV_STRCPY),y)
 CSRCS += arch_strcpy.c
 endif
 
+ifeq ($(CONFIG_RISCV_STRLCPY),y)
+CSRCS += arch_strlcpy.c
+endif
 
 ifeq ($(CONFIG_RISCV_STRNCMP),y)
 CSRCS += arch_strncmp.c

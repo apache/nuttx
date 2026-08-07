@@ -57,16 +57,27 @@ int strncmp(FAR const char *cs, FAR const char *ct, size_t nb)
 
       /* A word is passed over only while the two agree and neither
        * holds the terminator, so whatever the loop stops on can be
-       * settled by the byte loop below inside one word.
+       * settled by the byte loop below inside two words.  Differences
+       * and terminators are OR-ed into one value so each pair of words
+       * costs a single branch.
        */
 
-      while (nb >= WORD_BYTES &&
-             *(FAR const WORD_T *)a == *(FAR const WORD_T *)b &&
-             !WORD_HASZERO(*(FAR const WORD_T *)a))
+      while (nb >= 2 * WORD_BYTES)
         {
-          a += WORD_BYTES;
-          b += WORD_BYTES;
-          nb -= WORD_BYTES;
+          WORD_T w0 = ((FAR const WORD_T *)a)[0];
+          WORD_T w1 = ((FAR const WORD_T *)a)[1];
+          WORD_T x  = (w0 ^ ((FAR const WORD_T *)b)[0]) |
+                      (w1 ^ ((FAR const WORD_T *)b)[1]) |
+                      WORD_HASZERO(w0) | WORD_HASZERO(w1);
+
+          if (x != 0)
+            {
+              break;
+            }
+
+          a += 2 * WORD_BYTES;
+          b += 2 * WORD_BYTES;
+          nb -= 2 * WORD_BYTES;
         }
     }
 

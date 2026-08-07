@@ -61,6 +61,32 @@ int memcmp(FAR const void *s1, FAR const void *s2, size_t n)
           n--;
         }
 
+      /* Four words a turn, their differences OR-ed together so the
+       * loop carries a single branch.  On a difference, fall out and
+       * let the byte loop find it: it is within four words of here.
+       */
+
+      while (n >= 4 * WORD_BYTES)
+        {
+          WORD_T x = (((FAR const WORD_T *)a)[0] ^
+                      ((FAR const WORD_T *)b)[0]) |
+                     (((FAR const WORD_T *)a)[1] ^
+                      ((FAR const WORD_T *)b)[1]) |
+                     (((FAR const WORD_T *)a)[2] ^
+                      ((FAR const WORD_T *)b)[2]) |
+                     (((FAR const WORD_T *)a)[3] ^
+                      ((FAR const WORD_T *)b)[3]);
+
+          if (x != 0)
+            {
+              break;
+            }
+
+          a += 4 * WORD_BYTES;
+          b += 4 * WORD_BYTES;
+          n -= 4 * WORD_BYTES;
+        }
+
       while (n >= WORD_BYTES &&
              *(FAR const WORD_T *)a == *(FAR const WORD_T *)b)
         {
