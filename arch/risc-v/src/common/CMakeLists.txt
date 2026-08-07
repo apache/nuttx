@@ -86,7 +86,7 @@ if(CONFIG_STACK_COLORATION)
   list(APPEND SRCS riscv_checkstack.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_FORK)
+if(CONFIG_ARCH_HAVE_VFORK OR CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS fork.S riscv_fork.c)
 endif()
 

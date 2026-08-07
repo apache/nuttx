@@ -55,21 +55,20 @@
  * Name: up_fork
  *
  * Description:
- *   The up_fork() function is the base of fork() function that provided in
- *   libc, and fork() is implemented as a wrapper of up_fork() function.
- *   The fork() function has the same effect as posix fork(), except that the
- *   behavior is undefined if the process created by fork() either modifies
- *   any data other than a variable of type pid_t used to store the return
- *   value from fork(), or returns from the function in which fork() was
- *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions.
+ *   The architecture-specific entry point of both of NuttX's cloning
+ *   primitives, vfork() and fork().  The caller says which one it is, and
+ *   the flag is passed straight through to sim_fork().
  *
- *   This thin layer implements fork by simply calling sim_fork() with the
- *   fork() context as an argument.  The overall sequence is:
+ *   On the simulator the caller's context is captured with setjmp() rather
+ *   than by hand, and the child re-enters through longjmp() -- which is why
+ *   the entry point tests setjmp()'s return value to tell which of the two
+ *   returns it is on.
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up sim_fork().
- *   2) sim_fork() and calls nxtask_setup_fork().
+ *   The overall sequence is:
+ *
+ *   1) User code calls vfork() or fork().  Both are libc wrappers around
+ *      this entry point, which collects context information and
+ *   2) calls sim_fork(), which calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
@@ -85,7 +84,7 @@
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   None
+ *   x0 - true for vfork(), false for fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -96,27 +95,35 @@
  ***************************************************************************/
 
 	.text
-	.globl	SYMBOL(up_fork)
 	.align	4
+
+	.globl	SYMBOL(up_fork)
 
 SYMBOL(up_fork):
 
 	stp		x29, x30, [sp]				/* save FP/LR register */
-	sub		sp, sp, #XCPTCONTEXT_SIZE	/* area from stack for setjmp() */
 
-	mov		x0, sp						/* pass stack area to setjmp() */
+	/* Area from stack for setjmp(), plus a slot below it holding the vfork
+	 * flag:  setjmp() is allowed to clobber every argument register, so the
+	 * flag cannot simply stay in one.
+	 */
+
+	sub		sp, sp, #XCPTCONTEXT_SIZE+16
+	str		x0, [sp]
+
+	add		x0, sp, #16					/* pass stack area to setjmp() */
 	bl		SYMBOL(setjmp)				/* save register for longjmp() */
 
 	subs	x0, x0, #1					/* 0: parent / 1: child */
 	cbz		x0, 1f						/* child --> return */
 
-	mov		x0, sp						/* pass stack area to sim_fork() */
+	ldr		x0, [sp]					/* the vfork flag */
+	add		x1, sp, #16					/* pass stack area to sim_fork() */
 	bl		SYMBOL(sim_fork)			/* further process task creation */
 
 1:
-	add		sp, sp, #XCPTCONTEXT_SIZE	/* release area from stack */
+	add		sp, sp, #XCPTCONTEXT_SIZE+16	/* release area from stack */
 	ldp		x29, x30, [sp]				/* restore FP/LR register */
 
 	ret
-
 	.end
