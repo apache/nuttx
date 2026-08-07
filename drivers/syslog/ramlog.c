@@ -43,6 +43,7 @@
 #include <sys/boardctl.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/init.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
@@ -365,13 +366,34 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
   size_t buflen = len;
   irqstate_t flags;
 
-  /* Disable interrupts (in case we are NOT called from interrupt handler) */
+  /* Disable interrupts (in case we are NOT called from interrupt handler).
+   *
+   * Not enter_critical_section(): it consults the current task, and on
+   * some ports this channel takes syslog output before the task lists
+   * exist.  Masking interrupts protects the buffer just as well while
+   * there is only one thread of control.
+   */
 
-  flags = enter_critical_section();
+  if (OSINIT_TASK_READY())
+    {
+      flags = enter_critical_section();
+    }
+  else
+    {
+      flags = up_irq_save();
+    }
 
   if (ramlog_ratelimit(priv))
     {
-      leave_critical_section(flags);
+      if (OSINIT_TASK_READY())
+        {
+          leave_critical_section(flags);
+        }
+      else
+        {
+          up_irq_restore(flags);
+        }
+
       return len;
     }
 
@@ -391,9 +413,13 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
 
   ramlog_copybuf(priv, buffer, buflen);
 
-  /* Was anything written? */
+  /* Was anything written?  Notify only once the scheduler exists; early
+   * boot output reaches here long before it does, and locking a scheduler
+   * that is not there yet faults.  The bytes land in the buffer either
+   * way.
+   */
 
-  if (len > 0)
+  if (len > 0 && OSINIT_OS_READY())
     {
       /* Lock the scheduler do NOT switch out */
 
@@ -424,7 +450,15 @@ static ssize_t ramlog_addbuf(FAR struct ramlog_dev_s *priv,
    * probably retry, causing same error condition again.
    */
 
-  leave_critical_section(flags);
+  if (OSINIT_TASK_READY())
+    {
+      leave_critical_section(flags);
+    }
+  else
+    {
+      up_irq_restore(flags);
+    }
+
   return len;
 }
 
