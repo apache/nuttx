@@ -151,6 +151,14 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           regs[REG_RSI] = arg3;
           regs[REG_RCX] = arg1;
 
+          /* Align the user stack pointer: the entry point is entered as
+           * if it was called, so the stack must be 16 byte aligned with
+           * the return address slot accounted for. Otherwise the SSE
+           * accesses generated for variadic functions fault.
+           */
+
+          regs[REG_RSP] = (regs[REG_RSP] & ~0x0f) - 8;
+
           break;
         }
 
@@ -180,6 +188,10 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           regs[REG_RDI] = arg2;
           regs[REG_RSI] = arg3;
           regs[REG_RCX] = arg1;
+
+          /* Align the user stack pointer, see SYS_task_start */
+
+          regs[REG_RSP] = (regs[REG_RSP] & ~0x0f) - 8;
 
           break;
         }
