@@ -45,9 +45,6 @@ SECTIONS
     KEEP (*(.data..LASAN0))
     KEEP (*(.data.rel.local..LASAN0))
   }
-  .kasan.shadows : {
-    *(.kasan.shadows)
-  }
 #endif
 
   _start = .;
@@ -127,6 +124,13 @@ SECTIONS
   . = ALIGN(4096);
   _ebss = .;
   _szbss = _ebss - _sbss;
+
+#ifdef CONFIG_MM_KASAN_GLOBAL
+  .kasan.shadows : {
+    KEEP(*(.kasan.shadows))
+  } :text
+  . = ALIGN(4096);
+#endif
 
   .initstack : {             /* INIT STACK */
        _s_initstack = .;

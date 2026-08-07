@@ -47,31 +47,13 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/serial/uart_pl011.h>
+#include <nuttx/kmalloc.h>
 
 #ifdef CONFIG_UART_PL011
 
 /***************************************************************************
  * Pre-processor Definitions
  ***************************************************************************/
-
-/* Which UART with be tty0/console and which tty1-4?  The console will
- * always be ttyS0.  If there is no console then will use the lowest
- * numbered UART.
- */
-
-/* First pick the console and ttys0.  This could be any of UART1-5 */
-
-#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_UART0_PL011)
-#  define HAVE_PL011_CONSOLE 1
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_UART1_PL011)
-#  define HAVE_PL011_CONSOLE 1
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE) && defined(CONFIG_UART2_PL011)
-#  define HAVE_PL011_CONSOLE 1
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE) && defined(CONFIG_UART3_PL011)
-#  define HAVE_PL011_CONSOLE 1
-#else
-#  undef HAVE_PL011_CONSOLE 1
-#endif
 
 #define PL011_BIT_MASK(x, y)  (((2 << (x)) - 1) << (y))
 
@@ -209,28 +191,6 @@ struct pl011_regs
   uint32_t dmacr;
 };
 
-struct pl011_config
-{
-  FAR volatile struct pl011_regs *uart;
-  uint32_t sys_clk_freq;
-};
-
-/* Device data structure */
-
-struct pl011_data
-{
-  uint32_t baud_rate;
-  bool sbsa;
-};
-
-struct pl011_uart_port_s
-{
-  struct pl011_data data;
-  struct pl011_config config;
-  unsigned int irq_num;
-  spinlock_t lock;
-};
-
 static int pl011_setup(FAR struct uart_dev_s *dev);
 static void pl011_shutdown(FAR struct uart_dev_s *dev);
 static int pl011_attach(FAR struct uart_dev_s *dev);
@@ -270,227 +230,6 @@ static const struct uart_ops_s g_uart_ops =
   .txempty  = pl011_txempty,
 };
 
-/* I/O buffers */
-
-#ifdef CONFIG_UART0_PL011
-static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
-static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
-#endif
-#ifdef CONFIG_UART1_PL011
-static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
-static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
-#endif
-#ifdef CONFIG_UART2_PL011
-static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
-static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
-#endif
-#ifdef CONFIG_UART3_PL011
-static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
-static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
-#endif
-
-/* This describes the state of the uart0 port. */
-
-#ifdef CONFIG_UART0_PL011
-
-static struct pl011_uart_port_s g_uart0priv =
-{
-  .data =
-    {
-      .baud_rate = CONFIG_UART0_BAUD,
-      .sbsa      = false,
-    },
-
-  .config =
-    {
-      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART0_BASE,
-      .sys_clk_freq = CONFIG_UART0_CLK_FREQ,
-    },
-
-    .irq_num    = CONFIG_UART0_IRQ,
-    .lock       = SP_UNLOCKED,
-};
-
-/* I/O buffers */
-
-static struct uart_dev_s g_uart0port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART0_RXBUFSIZE,
-      .buffer = g_uart0rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART0_TXBUFSIZE,
-      .buffer = g_uart0txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart0priv,
-};
-
-#endif /* CONFIG_UART0_PL011 */
-
-/* This describes the state of the uart1 port. */
-
-#ifdef CONFIG_UART1_PL011
-
-static struct pl011_uart_port_s g_uart1priv =
-{
-  .data =
-    {
-      .baud_rate = CONFIG_UART1_BAUD,
-      .sbsa      = false,
-    },
-
-  .config =
-    {
-      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART1_BASE,
-      .sys_clk_freq = CONFIG_UART1_CLK_FREQ,
-    },
-
-    .irq_num    = CONFIG_UART1_IRQ,
-    .lock       = SP_UNLOCKED,
-};
-
-/* I/O buffers */
-
-static struct uart_dev_s g_uart1port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART1_RXBUFSIZE,
-      .buffer = g_uart1rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART1_TXBUFSIZE,
-      .buffer = g_uart1txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart1priv,
-};
-
-#endif /* CONFIG_UART1_PL011 */
-
-/* This describes the state of the uart2 port. */
-
-#ifdef CONFIG_UART2_PL011
-
-static struct pl011_uart_port_s g_uart2priv =
-{
-  .data =
-    {
-      .baud_rate = CONFIG_UART2_BAUD,
-      .sbsa      = false,
-    },
-
-  .config =
-    {
-      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART2_BASE,
-      .sys_clk_freq = CONFIG_UART2_CLK_FREQ,
-    },
-
-    .irq_num    = CONFIG_UART2_IRQ,
-    .lock       = SP_UNLOCKED,
-};
-
-/* I/O buffers */
-
-static struct uart_dev_s g_uart2port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART2_RXBUFSIZE,
-      .buffer = g_uart2rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART2_TXBUFSIZE,
-      .buffer = g_uart2txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart2priv,
-};
-
-#endif /* CONFIG_UART2_PL011 */
-
-/* This describes the state of the uart3 port. */
-
-#ifdef CONFIG_UART3_PL011
-
-static struct pl011_uart_port_s g_uart3priv =
-{
-  .data =
-    {
-      .baud_rate = CONFIG_UART3_BAUD,
-      .sbsa      = false,
-    },
-
-  .config =
-    {
-      .uart         = (FAR volatile struct pl011_regs *)CONFIG_UART3_BASE,
-      .sys_clk_freq = CONFIG_UART3_CLK_FREQ,
-    },
-
-    .irq_num    = CONFIG_UART3_IRQ,
-    .lock       = SP_UNLOCKED,
-};
-
-/* I/O buffers */
-
-static struct uart_dev_s g_uart3port =
-{
-  .recv =
-    {
-      .size   = CONFIG_UART3_RXBUFSIZE,
-      .buffer = g_uart3rxbuffer,
-    },
-
-  .xmit =
-    {
-      .size   = CONFIG_UART3_TXBUFSIZE,
-      .buffer = g_uart3txbuffer,
-    },
-
-  .ops  = &g_uart_ops,
-  .priv = &g_uart3priv,
-};
-
-#endif /* CONFIG_UART3_PL011 */
-
-#if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart0port         /* UART0 is console */
-#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart1port         /* UART1 is console */
-#elif defined(CONFIG_UART2_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart2port         /* UART2 is console */
-#elif defined(CONFIG_UART3_SERIAL_CONSOLE)
-#  define CONSOLE_DEV     g_uart3port         /* UART3 is console */
-#endif
-
-#ifdef CONFIG_UART0_PL011
-#  define TTYS0_DEV       g_uart0port
-#endif
-
-#ifdef CONFIG_UART1_PL011
-#  define TTYS1_DEV       g_uart1port
-#endif
-
-#ifdef CONFIG_UART2_PL011
-#  define TTYS2_DEV       g_uart2port
-#endif
-
-#ifdef CONFIG_UART3_PL011
-#  define TTYS3_DEV       g_uart3port
-#endif
-
 /***************************************************************************
  * Private Functions
  ***************************************************************************/
@@ -499,28 +238,28 @@ static void pl011_enable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->cr |= PL011_CR_UARTEN;
+  config->baseaddr->cr |= PL011_CR_UARTEN;
 }
 
 static void pl011_disable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->cr &= ~PL011_CR_UARTEN;
+  config->baseaddr->cr &= ~PL011_CR_UARTEN;
 }
 
 static void pl011_enable_fifo(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->lcr_h |= PL011_LCRH_FEN;
+  config->baseaddr->lcr_h |= PL011_LCRH_FEN;
 }
 
 static void pl011_disable_fifo(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->lcr_h &= ~PL011_LCRH_FEN;
+  config->baseaddr->lcr_h &= ~PL011_LCRH_FEN;
 }
 
 static int pl011_set_baudrate(FAR const struct pl011_uart_port_s *sport,
@@ -544,15 +283,15 @@ static int pl011_set_baudrate(FAR const struct pl011_uart_port_s *sport,
       return -EINVAL;
     }
 
-  config->uart->ibrd    = bauddiv >> PL011_FBRD_WIDTH;
-  config->uart->fbrd    = bauddiv & ((1U << PL011_FBRD_WIDTH) - 1U);
+  config->baseaddr->ibrd    = bauddiv >> PL011_FBRD_WIDTH;
+  config->baseaddr->fbrd    = bauddiv & ((1U << PL011_FBRD_WIDTH) - 1U);
 
   /* In order to internally update the contents of ibrd or fbrd, a
    * lcr_h write must always be performed at the end
    * ARM DDI 0183F, Pg 3-13
    */
 
-  config->uart->lcr_h = config->uart->lcr_h;
+  config->baseaddr->lcr_h = config->baseaddr->lcr_h;
 
   return 0;
 }
@@ -561,28 +300,28 @@ static void pl011_irq_tx_enable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->imsc |= PL011_IMSC_TXIM;
+  config->baseaddr->imsc |= PL011_IMSC_TXIM;
 }
 
 static void pl011_irq_tx_disable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->imsc &= ~PL011_IMSC_TXIM;
+  config->baseaddr->imsc &= ~PL011_IMSC_TXIM;
 }
 
 static void pl011_irq_rx_enable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->imsc |= PL011_IMSC_RXIM | PL011_IMSC_RTIM;
+  config->baseaddr->imsc |= PL011_IMSC_RXIM | PL011_IMSC_RTIM;
 }
 
 static void pl011_irq_rx_disable(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
 
-  config->uart->imsc &= ~(PL011_IMSC_RXIM | PL011_IMSC_RTIM);
+  config->baseaddr->imsc &= ~(PL011_IMSC_RXIM | PL011_IMSC_RTIM);
 }
 
 static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
@@ -591,35 +330,33 @@ static int pl011_irq_tx_complete(FAR const struct pl011_uart_port_s *sport)
 
   /* check for TX FIFO empty */
 
-  return config->uart->fr & PL011_FR_TXFE;
+  return config->baseaddr->fr & PL011_FR_TXFE;
 }
 
 static int pl011_irq_tx_ready(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
-  FAR const struct pl011_data   *data   = &sport->data;
 
-  if (!data->sbsa && !(config->uart->cr & PL011_CR_TXE))
+  if (!config->sbsa && !(config->baseaddr->cr & PL011_CR_TXE))
     {
       return false;
     }
 
-  return (config->uart->imsc & PL011_IMSC_TXIM) &&
-         (!(config->uart->fr & PL011_FR_TXFF));
+  return (config->baseaddr->imsc & PL011_IMSC_TXIM) &&
+         (!(config->baseaddr->fr & PL011_FR_TXFF));
 }
 
 static int pl011_irq_rx_ready(FAR const struct pl011_uart_port_s *sport)
 {
   FAR const struct pl011_config *config = &sport->config;
-  FAR const struct pl011_data   *data   = &sport->data;
 
-  if (!data->sbsa && !(config->uart->cr & PL011_CR_RXE))
+  if (!config->sbsa && !(config->baseaddr->cr & PL011_CR_RXE))
     {
       return false;
     }
 
-  return (config->uart->imsc & PL011_IMSC_RXIM) &&
-         (!(config->uart->fr & PL011_FR_RXFE));
+  return (config->baseaddr->imsc & PL011_IMSC_RXIM) &&
+         (!(config->baseaddr->fr & PL011_FR_RXFE));
 }
 
 /***************************************************************************
@@ -637,7 +374,7 @@ static bool pl011_txready(FAR struct uart_dev_s *dev)
 
   /* check for TX FIFO not full */
 
-  return ((config->uart->fr & PL011_FR_TXFF) == 0);
+  return ((config->baseaddr->fr & PL011_FR_TXFF) == 0);
 }
 
 /***************************************************************************
@@ -670,10 +407,10 @@ static void pl011_send(FAR struct uart_dev_s *dev, int ch)
 
   while (!pl011_txready(dev));
 
-  config->uart->dr = ch;
+  config->baseaddr->dr = ch;
 }
 
-static void pl011_putc(struct uart_dev_s *dev, int ch)
+void pl011_putc(struct uart_dev_s *dev, int ch)
 {
   FAR struct pl011_uart_port_s *sport = dev->priv;
   irqstate_t flags;
@@ -696,16 +433,15 @@ static bool pl011_rxavailable(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
-  FAR struct pl011_data         *data   = &sport->data;
 
-  if (!data->sbsa &&
-      (!(config->uart->cr & PL011_CR_UARTEN) ||
-       !(config->uart->cr & PL011_CR_RXE)))
+  if (!config->sbsa &&
+      (!(config->baseaddr->cr & PL011_CR_UARTEN) ||
+       !(config->baseaddr->cr & PL011_CR_RXE)))
     {
       return false;
     }
 
-  return (config->uart->fr & PL011_FR_RXFE) == 0U;
+  return (config->baseaddr->fr & PL011_FR_RXFE) == 0U;
 }
 
 /***************************************************************************
@@ -776,7 +512,7 @@ static int pl011_receive(FAR struct uart_dev_s *dev,
   FAR const struct pl011_config *config = &sport->config;
   unsigned int              rx;
 
-  rx = config->uart->dr;
+  rx = config->baseaddr->dr;
 
   *status = rx & 0xf00;
 
@@ -859,8 +595,8 @@ static void pl011_detach(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s *sport = dev->priv;
 
-  up_disable_irq(sport->irq_num);
-  irq_detach(sport->irq_num);
+  up_disable_irq(sport->config.irq_num);
+  irq_detach(sport->config.irq_num);
 }
 
 /***************************************************************************
@@ -883,24 +619,22 @@ static void pl011_detach(FAR struct uart_dev_s *dev)
 static int pl011_attach(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s  *sport;
-  FAR struct pl011_data         *data;
   int                       ret;
 
   sport = dev->priv;
-  data  = &sport->data;
 
-  ret = irq_attach(sport->irq_num, pl011_irq_handler, dev);
+  ret = irq_attach(sport->config.irq_num, pl011_irq_handler, dev);
 
   if (ret == OK)
     {
-      up_enable_irq(sport->irq_num);
+      up_enable_irq(sport->config.irq_num);
     }
   else
     {
       sinfo("error ret=%d\n", ret);
     }
 
-  if (!data->sbsa)
+  if (!sport->config.sbsa)
     {
       pl011_enable(sport);
     }
@@ -919,37 +653,17 @@ static int pl011_attach(FAR struct uart_dev_s *dev)
 
 static void pl011_shutdown(FAR struct uart_dev_s *dev)
 {
-#ifdef CONFIG_UART_PL011_PLATFORMIF
-  struct pl011_uart_port_s  *sport  = (struct pl011_uart_port_s *)dev->priv;
-  const struct pl011_config *config = &sport->config;
-
-  /* If needed, implement platform specific process such as disabling pl011
-   * to reduce power consumption.
-   */
-
-  pl011_platform_shutdown((uint32_t)config->uart);
-#else
   UNUSED(dev);
   sinfo("%s: call unexpected\n", __func__);
-#endif
 }
 
 static int pl011_setup(FAR struct uart_dev_s *dev)
 {
   FAR struct pl011_uart_port_s  *sport  = dev->priv;
   FAR const struct pl011_config *config = &sport->config;
-  FAR struct pl011_data         *data   = &sport->data;
   int                            ret;
   uint32_t                       lcrh;
   irqstate_t                     i_flags;
-
-#ifdef CONFIG_UART_PL011_PLATFORMIF
-  /* If needed, implement platform specific process such as enabling pl011
-   * to reduce power consumption.
-   */
-
-  pl011_platform_setup((uint32_t)config->uart);
-#endif
 
   i_flags = up_irq_save();
 
@@ -958,7 +672,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
    * virtualization software).
    */
 
-  if (!data->sbsa)
+  if (!config->sbsa)
     {
       /* disable the uart */
 
@@ -968,7 +682,7 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
       /* Set baud rate */
 
       ret = pl011_set_baudrate(sport, config->sys_clk_freq,
-                               data->baud_rate);
+                               config->baud_rate);
       if (ret != 0)
         {
           up_irq_restore(i_flags);
@@ -977,10 +691,10 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
 
       /* Setting the default character format */
 
-      lcrh  = config->uart->lcr_h & ~(PL011_LCRH_FORMAT_MASK);
+      lcrh  = config->baseaddr->lcr_h & ~(PL011_LCRH_FORMAT_MASK);
       lcrh  &= ~(BIT(0) | BIT(7));
       lcrh  |= PL011_LCRH_WLEN_SIZE(8) << PL011_LCRH_WLEN_SHIFT;
-      config->uart->lcr_h = lcrh;
+      config->baseaddr->lcr_h = lcrh;
 
       /* Enabling the FIFOs */
 
@@ -989,14 +703,14 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
 
   /* initialize all IRQs as masked */
 
-  config->uart->imsc    = 0U;
-  config->uart->icr     = PL011_IMSC_MASK_ALL;
+  config->baseaddr->imsc    = 0U;
+  config->baseaddr->icr     = PL011_IMSC_MASK_ALL;
 
-  if (!data->sbsa)
+  if (!config->sbsa)
     {
-      config->uart->dmacr = 0U;
-      config->uart->cr  &= ~(BIT(14) | BIT(15) | BIT(1));
-      config->uart->cr  |= PL011_CR_RXE | PL011_CR_TXE;
+      config->baseaddr->dmacr = 0U;
+      config->baseaddr->cr  &= ~(BIT(14) | BIT(15) | BIT(1));
+      config->baseaddr->cr  |= PL011_CR_RXE | PL011_CR_TXE;
     }
 
   up_irq_restore(i_flags);
@@ -1010,67 +724,43 @@ static int pl011_setup(FAR struct uart_dev_s *dev)
  ***************************************************************************/
 
 /***************************************************************************
- * Name: pl011_earlyserialinit
+ * Name: pl011_dev_init
  *
  * Description:
- *   see nuttx/serial/uart_pl011.h
+ *   Initialize a PL011 device with its configuration settings.
+ *
+ * Arguments:
+ *   - dev      The PL011 device struct to initialize
+ *
+ * Return:
+ *   The `struct uart_dev_s` for registering this PL011 device, or NULL on
+ *   failure.
  *
  ***************************************************************************/
 
-void pl011_earlyserialinit(void)
+void pl011_dev_init(FAR struct pl011_uart_port_s *priv)
 {
-  /* Enable the console UART.  The other UARTs will be initialized if and
-   * when they are first opened.
-   */
-#ifdef CONSOLE_DEV
-  CONSOLE_DEV.isconsole = true;
-  pl011_setup(&CONSOLE_DEV);
-#endif
+  DEBUGASSERT(priv != NULL);
+
+  /* Do not re-initialize */
+
+  if (priv->inited)
+    {
+      return;
+    }
+
+  /* Private setup */
+
+  priv->lock = SP_UNLOCKED;
+
+  /* UART setup */
+
+  priv->uart.priv = priv;
+  priv->uart.ops = &g_uart_ops;
+  DEBUGASSERT(priv->uart.recv.buffer != NULL);
+  DEBUGASSERT(priv->uart.xmit.buffer != NULL);
+
+  priv->inited = true;
 }
-
-/***************************************************************************
- * Name: pl011_serialinit
- *
- * Description:
- *   Register serial console and serial ports.  This assumes that
- *   pl011_earlyserialinit was called previously.
- *
- ***************************************************************************/
-
-void pl011_serialinit(void)
-{
-#ifdef CONSOLE_DEV
-  uart_register("/dev/console", &CONSOLE_DEV);
-#endif
-#ifdef TTYS0_DEV
-  uart_register("/dev/ttyS0", &TTYS0_DEV);
-#endif
-#ifdef TTYS1_DEV
-  uart_register("/dev/ttyS1", &TTYS1_DEV);
-#endif
-#ifdef TTYS2_DEV
-  uart_register("/dev/ttyS2", &TTYS2_DEV);
-#endif
-#ifdef TTYS3_DEV
-  uart_register("/dev/ttyS3", &TTYS3_DEV);
-#endif
-}
-
-/***************************************************************************
- * Name: up_putc
- *
- * Description:
- *   Provide priority, low-level access to support OS debug writes
- *
- ***************************************************************************/
-
-#ifdef HAVE_PL011_CONSOLE
-void up_putc(int ch)
-{
-  FAR struct uart_dev_s *dev = &CONSOLE_DEV;
-
-  pl011_putc(dev, ch);
-}
-#endif
 
 #endif /* CONFIG_UART_PL011 */

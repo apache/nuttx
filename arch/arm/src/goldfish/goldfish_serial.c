@@ -48,7 +48,7 @@ void arm_earlyserialinit(void)
    * when they are first opened.
    */
 
-  pl011_earlyserialinit();
+  #error "Not implemented"
 }
 
 /***************************************************************************
@@ -61,7 +61,7 @@ void arm_earlyserialinit(void)
 
 void arm_serialinit(void)
 {
-  pl011_serialinit();
+  #error "Not implemented"
 }
 
 #endif /* CONFIG_UART_PL011 */
