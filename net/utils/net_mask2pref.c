@@ -150,6 +150,7 @@ uint8_t net_ipv4_mask2pref(in_addr_t mask)
 {
   uint32_t hmask = NTOHL(mask);
   uint8_t ones = net_msbits16((uint16_t)(hmask >> 16));
+
   if (ones == 16)
     {
       ones += net_msbits16((uint16_t)(hmask & 0xffff));

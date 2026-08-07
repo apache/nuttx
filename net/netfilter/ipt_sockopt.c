@@ -120,6 +120,7 @@ static void ipt_table_init(FAR struct ipt_table_s *table)
 static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 {
   int i;
+
   for (i = 0; i < nitems(g_tables); i++)
     {
       ipt_table_init(&g_tables[i]);
@@ -144,6 +145,7 @@ static FAR struct ipt_table_s *ipt_table(FAR const char *name)
 static FAR struct ipt_replace *ipt_table_repl(FAR const char *name)
 {
   FAR struct ipt_table_s *table = ipt_table(name);
+
   if (table)
     {
       return table->repl;

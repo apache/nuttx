@@ -537,20 +537,20 @@ static ssize_t route_read(FAR struct file *filep, FAR char *buffer,
   switch (procfile->node)
     {
 #ifdef CONFIG_NET_IPv4
-    case PROC_ROUTE_IPv4: /* IPv4 routing table */
-      ret = route_ipv4_table(procfile, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_ROUTE_IPv4: /* IPv4 routing table */
+        ret = route_ipv4_table(procfile, buffer, buflen, filep->f_pos);
+        break;
 #endif
 
 #ifdef CONFIG_NET_IPv6
-    case PROC_ROUTE_IPv6: /* IPv6 routing table */
-      ret = route_ipv6_table(procfile, buffer, buflen, filep->f_pos);
-      break;
+      case PROC_ROUTE_IPv6: /* IPv6 routing table */
+        ret = route_ipv6_table(procfile, buffer, buflen, filep->f_pos);
+        break;
 #endif
 
-     default:
-      ret = -EINVAL;
-      break;
+      default:
+        ret = -EINVAL;
+        break;
     }
 
   /* Update the file offset */

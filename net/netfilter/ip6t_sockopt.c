@@ -119,6 +119,7 @@ static void ip6t_table_init(FAR struct ip6t_table_s *table)
 static FAR struct ip6t_table_s *ip6t_table(FAR const char *name)
 {
   int i;
+
   for (i = 0; i < nitems(g_tables); i++)
     {
       ip6t_table_init(&g_tables[i]);
@@ -143,6 +144,7 @@ static FAR struct ip6t_table_s *ip6t_table(FAR const char *name)
 static FAR struct ip6t_replace *ip6t_table_repl(FAR const char *name)
 {
   FAR struct ip6t_table_s *table = ip6t_table(name);
+
   if (table)
     {
       return table->repl;

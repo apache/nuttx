@@ -126,6 +126,7 @@ int nxsched_get_scheduler(pid_t pid)
 int sched_getscheduler(pid_t pid)
 {
   int ret = nxsched_get_scheduler(pid);
+
   if (ret < 0)
     {
       set_errno(-ret);

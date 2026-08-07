@@ -503,6 +503,7 @@ static void rpmsg_socket_format_name(FAR struct rpmsg_socket_conn_s *conn,
     {
       uint32_t crc = crc32((const uint8_t *)conn->rpaddr.rp_name,
                            strlen(conn->rpaddr.rp_name));
+
       snprintf(namebuf, RPMSG_NAME_SIZE, "%s%.2s%08" PRIx32 "%s",
                RPMSG_SOCKET_NAME_PREFIX, conn->rpaddr.rp_name,
                crc, conn->nameid);
@@ -991,6 +992,7 @@ static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
                                         size_t iovcnt)
 {
   uint32_t len = 0;
+
   while (iovcnt--)
     {
       len += (buf++)->iov_len;
@@ -1060,6 +1062,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       while (block_written < block)
         {
           uint32_t chunk = MIN(block - block_written, buf->iov_len - offset);
+
           memcpy(msg->data + block_written,
                  (FAR const uint8_t *)buf->iov_base + offset, chunk);
           offset += chunk;
@@ -1451,7 +1454,9 @@ static int rpmsg_socket_shutdown(FAR struct socket *psock, int how)
 
   ret = rpmsg_send(&conn->ept, &msg, sizeof(msg));
   if (ret < 0)
+    {
       return ret;
+    }
 
   return OK;
 }

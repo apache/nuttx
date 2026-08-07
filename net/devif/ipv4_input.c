@@ -149,6 +149,7 @@ static int ipv4_check_opt(FAR struct ipv4_hdr_s *ipv4)
       else if (optlen > 1)
         {
           int len = opt[1];
+
           if (len > optlen)
             {
               return -EINVAL;
@@ -483,7 +484,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #ifdef NET_ICMP_HAVE_STACK
-  /* Check for ICMP input */
+        /* Check for ICMP input */
 
       case IP_PROTO_ICMP:  /* ICMP input */
         icmp_input(dev);
@@ -491,7 +492,7 @@ static int ipv4_in(FAR struct net_driver_s *dev)
 #endif
 
 #ifdef CONFIG_NET_IGMP
-  /* Check for IGMP input */
+        /* Check for IGMP input */
 
       case IP_PROTO_IGMP:  /* IGMP input */
         igmp_input(dev);

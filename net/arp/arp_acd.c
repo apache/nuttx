@@ -82,6 +82,7 @@ static void arp_acd_arrange_announce(FAR struct net_driver_s *dev)
 
   int ret = work_queue(LPWORK, &dev->d_acd.work, arp_acd_try_announce,
                        (FAR void *)dev, DSEC2TICK(dev->d_acd.ttw));
+
   if (ret != OK)
     {
       nerr("ERROR ret %d \n", ret);

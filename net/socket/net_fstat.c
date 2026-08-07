@@ -108,64 +108,64 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
   switch (psock->s_type)
     {
 #if defined(NET_TCP_HAVE_STACK)
-       case SOCK_STREAM:
-         {
-           FAR struct tcp_conn_s *tcp_conn = psock->s_conn;
+      case SOCK_STREAM:
+        {
+          FAR struct tcp_conn_s *tcp_conn = psock->s_conn;
 
-           /* For TCP, the MSS is a dynamic value that maintained in the
-            * connection structure.
-            */
+          /* For TCP, the MSS is a dynamic value that maintained in the
+           * connection structure.
+           */
 
-           buf->st_blksize = tcp_conn->mss;
-         }
-         break;
+          buf->st_blksize = tcp_conn->mss;
+        }
+        break;
 #endif
 
 #if defined(NET_UDP_HAVE_STACK)
-       case SOCK_DGRAM:
-         {
-           FAR struct udp_conn_s *udp_conn = psock->s_conn;
-           FAR struct net_driver_s *dev;
-           uint16_t iplen;
+      case SOCK_DGRAM:
+        {
+          FAR struct udp_conn_s *udp_conn = psock->s_conn;
+          FAR struct net_driver_s *dev;
+          uint16_t iplen;
 
-           /* For a connected UDP socket, we have do do a little more work:
-            *
-            *   MSS = MTU - LL_HDRLEN - UDP_HDRLEN - IP_HDRLEN
-            *
-            * We need to have the device that services the connection in
-            * order to get the MTU and LL_HDRLEN:
-            */
+          /* For a connected UDP socket, we have do do a little more work:
+           *
+           *   MSS = MTU - LL_HDRLEN - UDP_HDRLEN - IP_HDRLEN
+           *
+           * We need to have the device that services the connection in
+           * order to get the MTU and LL_HDRLEN:
+           */
 
-           dev = udp_find_raddr_device(udp_conn, NULL);
-           if (dev == NULL)
-             {
-               /* This should never happen except perhaps in some rare race
-                * condition.  If the UDP socket is connected, then the device
-                * service the network that it is connected to should always
-                * exist.
-                */
+          dev = udp_find_raddr_device(udp_conn, NULL);
+          if (dev == NULL)
+            {
+              /* This should never happen except perhaps in some rare race
+               * condition.  If the UDP socket is connected, then the device
+               * service the network that it is connected to should always
+               * exist.
+               */
 
-               nerr("ERROR:  Could not find network device\n");
-               ret = -ENODEV;
-             }
-           else
-             {
-               /* We need the length of the IP header */
+              nerr("ERROR:  Could not find network device\n");
+              ret = -ENODEV;
+            }
+          else
+            {
+              /* We need the length of the IP header */
 
-               iplen = net_ip_domain_select(udp_conn->domain,
-                                            IPv4_HDRLEN, IPv6_HDRLEN);
+              iplen = net_ip_domain_select(udp_conn->domain,
+                                           IPv4_HDRLEN, IPv6_HDRLEN);
 
-               /* Now we can calculate the MSS */
+              /* Now we can calculate the MSS */
 
-               buf->st_blksize = UDP_MSS(dev, iplen);
-             }
-         }
-         break;
+              buf->st_blksize = UDP_MSS(dev, iplen);
+            }
+        }
+        break;
 #endif
-       default:
-         nwarn("WARNING:  Unhandled socket type: %u\n", psock->s_type);
-         break;
-     }
+      default:
+        nwarn("WARNING:  Unhandled socket type: %u\n", psock->s_type);
+        break;
+    }
 
   return ret;
 }

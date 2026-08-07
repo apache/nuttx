@@ -96,6 +96,7 @@ int pkt_setsockopt(FAR struct socket *psock, int level, int option,
       case SO_SNDBUF:
         {
           FAR struct pkt_conn_s *conn;
+
           conn = psock->s_conn;
           int buffersize;
 

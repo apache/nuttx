@@ -217,6 +217,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg)
   FAR struct irqchain_s *curr;
   FAR struct irqchain_s *first;
   int ndx = IRQ_TO_NDX(irq);
+
   if (ndx < 0)
     {
       ret = ndx;

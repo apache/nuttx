@@ -101,6 +101,7 @@ int netdev_iob_prepare(FAR struct net_driver_s *dev, bool throttled,
 void netdev_iob_prepare_dynamic(FAR struct net_driver_s *dev, uint16_t size)
 {
   FAR struct iob_s *iob;
+
   size += CONFIG_NET_LL_GUARDSIZE;
 
   if (dev->d_iob && size <= IOB_BUFSIZE(dev->d_iob))

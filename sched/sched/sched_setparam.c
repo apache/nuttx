@@ -271,6 +271,7 @@ int nxsched_set_param(pid_t pid, FAR const struct sched_param *param)
 int sched_setparam(pid_t pid, FAR const struct sched_param *param)
 {
   int ret = nxsched_set_param(pid, param);
+
   if (ret < 0)
     {
       set_errno(-ret);

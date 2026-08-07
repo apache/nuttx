@@ -393,6 +393,7 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
           _SO_GETOPT(conn->sconn.s_options, SO_TIMESTAMPNS))
         {
           struct timespec ts;
+
           recvlen = iob_copyout((FAR uint8_t *)&ts, iob,
                                 sizeof(struct timespec),
                                 -sizeof(struct timespec));
@@ -407,6 +408,7 @@ static inline void pkt_readahead(FAR struct pkt_recvfrom_s *pstate)
       if (pstate->pr_type == SOCK_DGRAM)
         {
           FAR struct net_driver_s *dev = pkt_find_device(conn);
+
           if (dev != NULL)
             {
               /* For SOCK_DGRAM, we need skip the l2 header */

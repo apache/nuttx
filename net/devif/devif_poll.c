@@ -120,8 +120,8 @@ static void devif_packet_conversion(FAR struct net_driver_s *dev,
 #ifdef CONFIG_NET_IPv4
           if ((ipv6->vtc & IP_VERSION_MASK) != IPv6_VERSION)
             {
-               nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
-                    ipv6->vtc);
+              nerr("ERROR: IPv6 version error: %02x...  Packet dropped\n",
+                   ipv6->vtc);
             }
           else
 #endif
