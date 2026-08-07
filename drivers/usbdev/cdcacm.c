@@ -2945,6 +2945,8 @@ static bool cdcuart_txempty(FAR struct uart_dev_s *dev)
       return true;
     }
 
+  spin_unlock_irqrestore(&priv->lock, flags);
+
   priv->ispolling = true;
   EP_POLL(ep);
   priv->ispolling = false;
