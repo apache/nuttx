@@ -900,6 +900,20 @@ config ARCH_CHIP_QEMU_ARM
 	---help---
 		QEMU virt platform (ARMv7a)
 
+config ARCH_CHIP_RK3506
+	bool "Rockchip RK3506 (ARMv7a, Cortex-A7)"
+	select ARCH_CORTEXA7
+	select ARCH_HAVE_MULTICPU
+	select ARMV7A_HAVE_GICv2
+	select ARMV7A_HAVE_PTM
+	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_ADDRENV
+	select ARCH_NEED_ADDRENV_MAPPING
+	---help---
+		Rockchip RK3506 SoC. NuttX runs as an AMP subsystem on one of the
+		Cortex-A7 cores (CPU2), alongside Linux on the other cores. Brought
+		up by U-Boot via PSCI.
+
 config ARCH_CHIP_GOLDFISH_ARM
 	bool "GOLDFISH virt platform (ARMv7a)"
 	select ARCH_HAVE_POWEROFF
@@ -1381,6 +1395,7 @@ config ARCH_CHIP
 	default "phy62xx"	if ARCH_CHIP_PHY62XX
 	default "tlsr82"	if ARCH_CHIP_TLSR82
 	default "qemu"		if ARCH_CHIP_QEMU_ARM
+	default "rk3506"	if ARCH_CHIP_RK3506
 	default "mps"		if ARCH_CHIP_MPS
 	default "rtl8721dx"	if ARCH_CHIP_RTL8721DX
 	default "rtl8720f"	if ARCH_CHIP_RTL8720F
@@ -1950,6 +1965,9 @@ source "arch/arm/src/tlsr82/Kconfig"
 endif
 if ARCH_CHIP_QEMU_ARM
 source "arch/arm/src/qemu/Kconfig"
+endif
+if ARCH_CHIP_RK3506
+source "arch/arm/src/rk3506/Kconfig"
 endif
 if ARCH_CHIP_MPS
 source "arch/arm/src/mps/Kconfig"
