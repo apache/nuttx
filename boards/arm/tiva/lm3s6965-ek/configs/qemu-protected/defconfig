@@ -6,7 +6,6 @@
 # modifications.
 #
 # CONFIG_NSH_DISABLE_DATE is not set
-# CONFIG_READLINE_EDIT is not set
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="lm3s6965-ek"
 CONFIG_ARCH_BOARD_LM3S6965EK=y
