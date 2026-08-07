@@ -1,0 +1,399 @@
+/****************************************************************************
+ * arch/tricore/src/tc4x/hardware/tc4x_clock.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_TRICORE_SRC_TC4X_HARDWARE_TC4X_CLOCK_H
+#define __ARCH_TRICORE_SRC_TC4X_HARDWARE_TC4X_CLOCK_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdint.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Base + 32-bit accessor */
+
+#define TC4X_CLOCK_BASE       0xf0064000u  /* CCU base */
+
+#define TC4X_REG32(off)       (*(volatile uint32_t *)(TC4X_CLOCK_BASE + (off)))
+
+#define TC4X_CLOCK_OSCCON_OFFSET      0x0100u
+#define TC4X_CLOCK_OSCMON1_OFFSET     0x0508u
+
+#define TC4X_CLOCK_RAMPCON0_OFFSET    0x0200u
+#define TC4X_CLOCK_RAMPSTAT_OFFSET    0x020cu
+
+#define TC4X_CLOCK_SYSPLLCON0_OFFSET  0x0300u
+#define TC4X_CLOCK_SYSPLLCON1_OFFSET  0x0304u
+#define TC4X_CLOCK_SYSPLLSTAT_OFFSET  0x030cu
+
+#define TC4X_CLOCK_PERPLLCON0_OFFSET  0x0380u
+#define TC4X_CLOCK_PERPLLCON1_OFFSET  0x0384u
+#define TC4X_CLOCK_PERPLLSTAT_OFFSET  0x038cu
+
+#define TC4X_CLOCK_CCUCON_OFFSET      0x0400u
+#define TC4X_CLOCK_CCUSTAT_OFFSET     0x0404u
+
+#define TC4X_CLOCK_SYSCCUCON0_OFFSET  0x0410u
+#define TC4X_CLOCK_SYSCCUCON1_OFFSET  0x0414u
+#define TC4X_CLOCK_PERCCUCON0_OFFSET  0x0420u
+#define TC4X_CLOCK_PERCCUCON1_OFFSET  0x0424u
+
+#define TC4X_CLOCK_OSCCON      TC4X_REG32(TC4X_CLOCK_OSCCON_OFFSET)
+#define TC4X_CLOCK_OSCMON1     TC4X_REG32(TC4X_CLOCK_OSCMON1_OFFSET)
+
+#define TC4X_CLOCK_RAMPCON0    TC4X_REG32(TC4X_CLOCK_RAMPCON0_OFFSET)
+#define TC4X_CLOCK_RAMPSTAT    TC4X_REG32(TC4X_CLOCK_RAMPSTAT_OFFSET)
+
+#define TC4X_CLOCK_SYSPLLCON0  TC4X_REG32(TC4X_CLOCK_SYSPLLCON0_OFFSET)
+#define TC4X_CLOCK_SYSPLLCON1  TC4X_REG32(TC4X_CLOCK_SYSPLLCON1_OFFSET)
+#define TC4X_CLOCK_SYSPLLSTAT  TC4X_REG32(TC4X_CLOCK_SYSPLLSTAT_OFFSET)
+
+#define TC4X_CLOCK_PERPLLCON0  TC4X_REG32(TC4X_CLOCK_PERPLLCON0_OFFSET)
+#define TC4X_CLOCK_PERPLLCON1  TC4X_REG32(TC4X_CLOCK_PERPLLCON1_OFFSET)
+#define TC4X_CLOCK_PERPLLSTAT  TC4X_REG32(TC4X_CLOCK_PERPLLSTAT_OFFSET)
+
+#define TC4X_CLOCK_CCUCON      TC4X_REG32(TC4X_CLOCK_CCUCON_OFFSET)
+#define TC4X_CLOCK_CCUSTAT     TC4X_REG32(TC4X_CLOCK_CCUSTAT_OFFSET)
+
+#define TC4X_CLOCK_SYSCCUCON0  TC4X_REG32(TC4X_CLOCK_SYSCCUCON0_OFFSET)
+#define TC4X_CLOCK_SYSCCUCON1  TC4X_REG32(TC4X_CLOCK_SYSCCUCON1_OFFSET)
+#define TC4X_CLOCK_PERCCUCON0  TC4X_REG32(TC4X_CLOCK_PERCCUCON0_OFFSET)
+#define TC4X_CLOCK_PERCCUCON1  TC4X_REG32(TC4X_CLOCK_PERCCUCON1_OFFSET)
+
+/* OSCCON fields */
+
+#define TC4X_OSCCON_MODE_SHIFT    8
+#define TC4X_OSCCON_MODE_MASK     GENMASK(10, 8)
+#define TC4X_OSCCON_INSEL_SHIFT   24
+#define TC4X_OSCCON_INSEL_MASK    GENMASK(25, 24)
+
+/* Convenient mode / input encodings */
+
+#define TC4X_OSCCON_MODE_EXTCLK   (0u << TC4X_OSCCON_MODE_SHIFT)
+#define TC4X_OSCCON_MODE_XTAL     (1u << TC4X_OSCCON_MODE_SHIFT)
+#define TC4X_OSCCON_INSEL_XTAL    (1u << TC4X_OSCCON_INSEL_SHIFT)
+
+/* OSCMON1 fields */
+
+#define TC4X_OSCMON1_OSCVAL_SHIFT 0
+#define TC4X_OSCMON1_OSCVAL_MASK  GENMASK(6, 0)
+#define TC4X_OSCMON1_SMONEN       BIT(8)   /* sys PLL osc monitor enable */
+#define TC4X_OSCMON1_PMONEN       BIT(24)  /* per PLL osc monitor enable */
+
+/* RAMPCON0 fields */
+
+#define TC4X_RAMPCON0_UFL_SHIFT   0
+#define TC4X_RAMPCON0_UFL_MASK    GENMASK(9, 0)
+#define TC4X_RAMPCON0_CMD_SHIFT   16
+#define TC4X_RAMPCON0_CMD_MASK    GENMASK(18, 16)
+#define TC4X_RAMPCON0_PWR         BIT(19)
+
+/* Command encodings */
+
+#define TC4X_RAMPCON0_CMD_NONE    (0u << TC4X_RAMPCON0_CMD_SHIFT)
+#define TC4X_RAMPCON0_CMD_TOP     (1u << TC4X_RAMPCON0_CMD_SHIFT)
+#define TC4X_RAMPCON0_CMD_BOTTOM  (2u << TC4X_RAMPCON0_CMD_SHIFT)
+
+/* RAMPSTAT fields */
+
+#define TC4X_RAMPSTAT_FSTAT_SHIFT 16
+#define TC4X_RAMPSTAT_FSTAT       GENMASK(17, 16)
+#define TC4X_RAMPSTAT_SSTAT       GENMASK(21, 20)
+#define TC4X_RAMPSTAT_ACTIVE_SHIFT 23
+#define TC4X_RAMPSTAT_ACTIVE      BIT(23)
+#define TC4X_RAMPSTAT_FLLLOCK_SHIFT 24
+#define TC4X_RAMPSTAT_FLLLOCK     BIT(24)
+
+/* SYSPLLCON0 fields */
+
+#define TC4X_SYSPLLCON0_PLLPWR    BIT(0)
+#define TC4X_SYSPLLCON0_RESLD     BIT(1)
+#define TC4X_SYSPLLCON0_NDIV_SHIFT 8
+#define TC4X_SYSPLLCON0_NDIV_MASK GENMASK(14, 8)
+#define TC4X_SYSPLLCON0_PDIV_SHIFT 16
+#define TC4X_SYSPLLCON0_PDIV_MASK GENMASK(18, 16)
+
+/* SYSPLLCON1 fields */
+
+#define TC4X_SYSPLLCON1_K2DIV_SHIFT    0
+#define TC4X_SYSPLLCON1_K2DIV_MASK     GENMASK(3, 0)
+#define TC4X_SYSPLLCON1_K2PREDIV_SHIFT 4
+#define TC4X_SYSPLLCON1_K2PREDIV_MASK  GENMASK(5, 4)
+#define TC4X_SYSPLLCON1_K3DIV_SHIFT    8
+#define TC4X_SYSPLLCON1_K3DIV_MASK     GENMASK(10, 8)
+#define TC4X_SYSPLLCON1_K3PREDIV_SHIFT 12
+#define TC4X_SYSPLLCON1_K3PREDIV_MASK  GENMASK(15, 12)
+
+/* PERPLLCON0 fields */
+
+#define TC4X_PERPLLCON0_PLLPWR    BIT(0)
+#define TC4X_PERPLLCON0_RESLD     BIT(1)
+#define TC4X_PERPLLCON0_NDIV_SHIFT 8
+#define TC4X_PERPLLCON0_NDIV_MASK GENMASK(14, 8)
+#define TC4X_PERPLLCON0_PDIV_SHIFT 16
+#define TC4X_PERPLLCON0_PDIV_MASK GENMASK(18, 16)
+
+/* PERPLLCON1 fields */
+
+#define TC4X_PERPLLCON1_K2DIV_SHIFT    0
+#define TC4X_PERPLLCON1_K2DIV_MASK     GENMASK(3, 0)
+#define TC4X_PERPLLCON1_K2PREDIV_SHIFT 4
+#define TC4X_PERPLLCON1_K2PREDIV_MASK  GENMASK(5, 4)
+#define TC4X_PERPLLCON1_K3DIV_SHIFT    8
+#define TC4X_PERPLLCON1_K3DIV_MASK     GENMASK(10, 8)
+#define TC4X_PERPLLCON1_K3PREDIV_SHIFT 12
+#define TC4X_PERPLLCON1_K3PREDIV_MASK  GENMASK(15, 12)
+#define TC4X_PERPLLCON1_K4DIV_SHIFT    16
+#define TC4X_PERPLLCON1_K4DIV_MASK     GENMASK(18, 16)
+#define TC4X_PERPLLCON1_K4PREDIV_SHIFT 20
+#define TC4X_PERPLLCON1_K4PREDIV_MASK  GENMASK(21, 20)
+
+/* SYSPLLSTAT / PERPLLSTAT common bits */
+
+#define TC4X_PLLSTAT_PWRSTAT      BIT(0)
+#define TC4X_PLLSTAT_PLLLOCK_SHIFT     1
+#define TC4X_PLLSTAT_PLLLOCK      BIT(1)
+
+/* CCUCON fields */
+
+#define TC4X_CCUCON_CLKSELS_SHIFT 0
+#define TC4X_CCUCON_CLKSELS_MASK  GENMASK(1, 0)
+#define TC4X_CCUCON_CLKSELP_SHIFT 16
+#define TC4X_CCUCON_CLKSELP_MASK  GENMASK(16, 16)
+
+/* Common source encodings (same for SYSCLK and PERCLK) */
+
+enum tc4x_clk_source
+{
+  TC4X_CLK_SOURCE_PLL   = 0,  /* SYS: PLL0, PER: PERPLL */
+
+  TC4X_CLK_SOURCE_FBACK = 1,  /* backup clock */
+
+  TC4X_CLK_SOURCE_FRAMP = 2,  /* ramp oscillator */
+};
+
+enum tc4x_rootclk_domain
+{
+  TC4X_ROOTCLK_SYS,
+  TC4X_ROOTCLK_PER,
+};
+
+/* CCUSTAT fields */
+
+#define TC4X_CCUSTAT_LCK          BIT(31)
+
+/* SYSCCUCON0 fields */
+
+#define TC4X_SYSCCUCON0_SPBDIV_SHIFT  0
+#define TC4X_SYSCCUCON0_SPBDIV_MASK   GENMASK(3, 0)
+#define TC4X_SYSCCUCON0_CPBDIV_SHIFT  4
+#define TC4X_SYSCCUCON0_CPBDIV_MASK   GENMASK(7, 4)
+#define TC4X_SYSCCUCON0_TPBDIV_SHIFT  8
+#define TC4X_SYSCCUCON0_TPBDIV_MASK   GENMASK(11, 8)
+#define TC4X_SYSCCUCON0_SRIDIV_SHIFT  12
+#define TC4X_SYSCCUCON0_SRIDIV_MASK   GENMASK(15, 12)
+#define TC4X_SYSCCUCON0_FSIDIV_SHIFT  16
+#define TC4X_SYSCCUCON0_FSIDIV_MASK   GENMASK(19, 16)
+#define TC4X_SYSCCUCON0_FSI2DIV       BIT(20)
+#define TC4X_SYSCCUCON0_STMDIV_SHIFT  24
+#define TC4X_SYSCCUCON0_STMDIV_MASK   GENMASK(27, 24)
+#define TC4X_SYSCCUCON0_LPDIV         BIT(28)
+#define TC4X_SYSCCUCON0_UP            BIT(30)
+
+/* SYSCCUCON1 fields */
+
+#define TC4X_SYSCCUCON1_GETHDIV_SHIFT    0
+#define TC4X_SYSCCUCON1_GETHDIV_MASK     GENMASK(3, 0)
+#define TC4X_SYSCCUCON1_EGTMDIV_SHIFT    12
+#define TC4X_SYSCCUCON1_EGTMDIV_MASK     GENMASK(15, 12)
+#define TC4X_SYSCCUCON1_MCANHDIV_SHIFT   16
+#define TC4X_SYSCCUCON1_MCANHDIV_MASK    GENMASK(19, 16)
+#define TC4X_SYSCCUCON1_LETHDIV_SHIFT    20
+#define TC4X_SYSCCUCON1_LETHDIV_MASK     GENMASK(23, 20)
+#define TC4X_SYSCCUCON1_CANXLHDIV_SHIFT  24
+#define TC4X_SYSCCUCON1_CANXLHDIV_MASK   GENMASK(27, 24)
+#define TC4X_SYSCCUCON1_UP               BIT(30)
+
+/* PERCCUCON0 fields */
+
+#define TC4X_PERCCUCON0_MCANDIV_SHIFT    0
+#define TC4X_PERCCUCON0_MCANDIV_MASK     GENMASK(3, 0)
+#define TC4X_PERCCUCON0_CLKSELMCAN_SHIFT 4
+#define TC4X_PERCCUCON0_CLKSELMCAN_MASK  GENMASK(5, 4)
+#define TC4X_PERCCUCON0_MSCDIV_SHIFT     8
+#define TC4X_PERCCUCON0_MSCDIV_MASK      GENMASK(11, 8)
+#define TC4X_PERCCUCON0_CLKSELMSC_SHIFT  12
+#define TC4X_PERCCUCON0_CLKSELMSC_MASK   GENMASK(13, 12)
+#define TC4X_PERCCUCON0_QSPIDIV_SHIFT    16
+#define TC4X_PERCCUCON0_QSPIDIV_MASK     GENMASK(19, 16)
+#define TC4X_PERCCUCON0_CLKSELQSPI_SHIFT 20
+#define TC4X_PERCCUCON0_CLKSELQSPI_MASK  GENMASK(21, 20)
+#define TC4X_PERCCUCON0_I2CDIV_SHIFT     24
+#define TC4X_PERCCUCON0_I2CDIV_MASK      GENMASK(27, 24)
+#define TC4X_PERCCUCON0_PPUDIV_SHIFT     28
+#define TC4X_PERCCUCON0_PPUDIV_MASK      GENMASK(31, 28)
+
+/* PERCCUCON1 fields */
+
+/* CLKSEL encodings for PERCCUCON0/PERCCUCON1 (TC4Dx TRM, table SCU.CCU) */
+
+#define TC4X_CLKSEL_MCAN_FOSC0      0u
+#define TC4X_CLKSEL_MCAN_FSYS       1u
+#define TC4X_CLKSEL_MCAN_FXBAR      2u
+#define TC4X_CLKSEL_MCAN_FPLL1_K1   3u
+
+#define TC4X_CLKSEL_QSPI_FSPB       0u
+#define TC4X_CLKSEL_QSPI_FSOURCE3   1u
+
+#define TC4X_CLKSEL_ASCLINS_FOSC0   1u
+
+#define TC4X_PERCCUCON1_ASCLINFDIV_SHIFT    0
+#define TC4X_PERCCUCON1_ASCLINFDIV_MASK     GENMASK(3, 0)
+#define TC4X_PERCCUCON1_XSPISLDIV_SHIFT     4
+#define TC4X_PERCCUCON1_XSPISLDIV_MASK      GENMASK(7, 4)
+#define TC4X_PERCCUCON1_ASCLINSDIV_SHIFT    8
+#define TC4X_PERCCUCON1_ASCLINSDIV_MASK     GENMASK(11, 8)
+#define TC4X_PERCCUCON1_CLKSELASCLINS_SHIFT 12
+#define TC4X_PERCCUCON1_CLKSELASCLINS_MASK  GENMASK(13, 12)
+#define TC4X_PERCCUCON1_CLKSELCANXL_SHIFT   14
+#define TC4X_PERCCUCON1_CLKSELCANXL_MASK    GENMASK(15, 14)
+#define TC4X_PERCCUCON1_ADCPERON            BIT(16)
+#define TC4X_PERCCUCON1_CANXLDIV_SHIFT      20
+#define TC4X_PERCCUCON1_CANXLDIV_MASK       GENMASK(23, 20)
+#define TC4X_PERCCUCON1_ERAYPERON           BIT(24)
+#define TC4X_PERCCUCON1_XSPIPERON           BIT(25)
+#define TC4X_PERCCUCON1_SDMMCPERON          BIT(26)
+#define TC4X_PERCCUCON1_HSCTPERON           BIT(27)
+#define TC4X_PERCCUCON1_LETH100PERON        BIT(28)
+#define TC4X_PERCCUCON1_UP                  BIT(30)
+
+#define TC4X_FBACK_HZ           100000000u   /* 100 MHz backup clock */
+#define TC4X_FOSC_HZ            25000000u    /* 25 MHz external crystal */
+
+/* SYSPLL:  fVCO = 25 MHz * 20 / 1 = 500 MHz, K2=1 => 500 MHz core */
+
+#define TC4X_SYSPLL_PDIV        1u
+#define TC4X_SYSPLL_NDIV        20u
+#define TC4X_SYSPLL_K2DIV       1u
+#define TC4X_SYSPLL_K2PREDIV    1u
+#define TC4X_SYSPLL_K3DIV       1u
+#define TC4X_SYSPLL_K3PREDIV    1u
+
+#define TC4X_SYSPLL_K2DIV_DEF       1u
+#define TC4X_SYSPLL_K3DIV_DEF       1u
+#define TC4X_SYSPLL_K3PREDIV_DEF    10u
+
+/* PERPLL: fVCO = 25 MHz * 32 / 1 = 800 MHz, K2=5 => 160 MHz */
+
+#define TC4X_PERPLL_PDIV        1u
+#define TC4X_PERPLL_NDIV        32u
+#define TC4X_PERPLL_K2DIV       5u
+#define TC4X_PERPLL_K2PREDIV    1u
+#define TC4X_PERPLL_K3DIV       2u
+#define TC4X_PERPLL_K3PREDIV    2u
+#define TC4X_PERPLL_K4DIV       1u
+#define TC4X_PERPLL_K4PREDIV    2u
+
+#define TC4X_PERPLL_K2DIV_DEF       1u
+#define TC4X_PERPLL_K3DIV_DEF       1u
+#define TC4X_PERPLL_K4DIV_DEF       1u
+
+#define TC4X_PERPLL_K2PREDIV_DEF    1u
+#define TC4X_PERPLL_K3PREDIV_DEF    10u
+#define TC4X_PERPLL_K4PREDIV_DEF    1u
+
+/* Target frequencies for key domains (unchanged) */
+
+#define TC4X_EGTM_TARGET_HZ     500000000u /* 500 MHz */
+#define TC4X_FSRI_TARGET_HZ     500000000u /* 500 MHz */
+#define TC4X_FFSI_TARGET_HZ     100000000u /* 100 MHz */
+#define TC4X_FSPB_TARGET_HZ     100000000u /* 100 MHz */
+#define TC4X_FTPB_TARGET_HZ     250000000u /* 250 MHz */
+#define TC4X_FSTM_TARGET_HZ     500000000u /* 500 MHz */
+#define TC4X_FLETH_TARGET_HZ    125000000u /* 125 MHz */
+#define TC4X_FGETH_TARGET_HZ    250000000u /* 250 MHz */
+#define TC4X_CANXL_TARGET_HZ    250000000u /* 250 MHz */
+#define TC4X_MCANH_TARGET_HZ    100000000u /* 100 MHz */
+#define TC4X_MCANI_TARGET_HZ    80000000u  /* 80 MHz */
+#define TC4X_ASCLINSI_TARGET_HZ 80000000u  /* 80 MHz */
+#define TC4X_ASCLINF_TARGET_HZ  200000000u /* 200 MHz */
+#define TC4X_QSPI_TARGET_HZ     200000000u /* 200 MHz */
+#define TC4X_I2C_TARGET_HZ      66666667u  /* 66.6 MHz */
+#define TC4X_PPU_TARGET_HZ      454545454u /* 45.45 MHz */
+
+/* External clock control register (EXTCON) */
+
+#define TC4X_CLOCK_EXTCON_OFFSET   0x0430u
+
+/* Accessor */
+
+#define TC4X_CLOCK_EXTCON          TC4X_REG32(TC4X_CLOCK_EXTCON_OFFSET)
+
+/* EXTCON bits */
+
+#define TC4X_EXTCON_EN0            BIT(0)
+
+#define TC4X_EXTCON_SEL0_SHIFT     2
+#define TC4X_EXTCON_SEL0_MASK      GENMASK(6, 2)
+
+/* SEL0 sources for EXTCLK0 (from UM) */
+
+enum tc4x_extclk0_sel
+{
+  TC4X_EXTCLK0_FBACK   = 0x00,
+  TC4X_EXTCLK0_FRAMP   = 0x01,
+  TC4X_EXTCLK0_FOSC    = 0x02,
+  TC4X_EXTCLK0_FPLL0   = 0x03,
+  TC4X_EXTCLK0_FPLL1   = 0x04,
+  TC4X_EXTCLK0_FPLL2   = 0x05,
+  TC4X_EXTCLK0_FPLL3   = 0x06,  /* only if present */
+
+  TC4X_EXTCLK0_FFRAC   = 0x07,
+  TC4X_EXTCLK0_FSPB    = 0x08,
+  TC4X_EXTCLK0_FCPB    = 0x09,  /* if available */
+
+  TC4X_EXTCLK0_FTPB    = 0x0a,
+  TC4X_EXTCLK0_FSRI    = 0x0b,
+  TC4X_EXTCLK0_FFSI    = 0x0c,
+  TC4X_EXTCLK0_FSTM    = 0x0e,
+  TC4X_EXTCLK0_FGTM    = 0x0f,  /* if available */
+
+  TC4X_EXTCLK0_FEGTM   = 0x10,  /* if available */
+
+  TC4X_EXTCLK0_FGETH   = 0x11,  /* if available */
+
+  TC4X_EXTCLK0_FMCANH  = 0x12,  /* if available */
+
+  TC4X_EXTCLK0_FRCB    = 0x15,  /* if available */
+
+  TC4X_EXTCLK0_FLETH   = 0x16,  /* if available */
+
+  TC4X_EXTCLK0_FPPU    = 0x17,  /* async PPU only */
+
+  TC4X_EXTCLK0_FCANXLH = 0x18,  /* if available */
+};
+
+#endif /* __ARCH_TRICORE_SRC_TC4X_HARDWARE_TC4X_CLOCK_H */

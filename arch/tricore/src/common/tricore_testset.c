@@ -35,6 +35,24 @@
  * Public Functions
  ****************************************************************************/
 
+/* Atomic compare-and-swap helper using the TriCore cmpswap.w instruction.
+ * If *address equals condition, the swap happens; in either case the
+ * previous value of *address is returned.
+ */
+
+inline unsigned int tricore_cmpswap(unsigned int volatile *address,
+                                    unsigned int value,
+                                    unsigned int condition)
+{
+  unsigned long long reg64 = value | (unsigned long long)condition << 32;
+
+  __asm__ __volatile__ ("cmpswap.w [%[addr]]0, %A[reg]"
+                        : [reg] "+d" (reg64)
+                        : [addr] "a" (address)
+                        : "memory");
+  return reg64;
+}
+
 /****************************************************************************
  * Name: up_testset
  *
@@ -58,6 +76,5 @@ spinlock_t up_testset(volatile spinlock_t *lock)
 {
   /* Perform the compare and set operation */
 
-  return Ifx__cmpAndSwap((volatile void *)lock, SP_LOCKED, SP_UNLOCKED);
+  return tricore_cmpswap((volatile void *)lock, SP_LOCKED, SP_UNLOCKED);
 }
-

@@ -66,7 +66,7 @@ void up_initial_state(struct tcb_s *tcb)
 
   if (tcb->pid == IDLE_PROCESS_ID)
     {
-      tcb->stack_alloc_ptr = (void *)((uintptr_t)g_idle_topstack -
+      tcb->stack_alloc_ptr = (void *)((uint8_t *)__USTACK -
                                       CONFIG_IDLETHREAD_STACKSIZE);
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
       tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
@@ -79,6 +79,7 @@ void up_initial_state(struct tcb_s *tcb)
 
       tricore_stack_color(tcb->stack_alloc_ptr, 0);
 #endif /* CONFIG_STACK_COLORATION */
+
       return;
     }
 

@@ -1,0 +1,315 @@
+/****************************************************************************
+ * arch/tricore/src/tc3x/hardware/tc3x_clock.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_TRICORE_SRC_TC3X_HARDWARE_TC3X_CLOCK_H
+#define __ARCH_TRICORE_SRC_TC3X_HARDWARE_TC3X_CLOCK_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stdint.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define TC3X_SCU_BASE         0xf0036000
+#define TC3X_REG32(off)       (*(volatile uint32_t *)(TC3X_SCU_BASE + (off)))
+
+#define TC3X_CLOCK_OSCCON_OFFSET      0x0010
+#define TC3X_CLOCK_SYSPLLSTAT_OFFSET  0x0014
+#define TC3X_CLOCK_SYSPLLCON0_OFFSET  0x0018
+#define TC3X_CLOCK_SYSPLLCON1_OFFSET  0x001c
+#define TC3X_CLOCK_SYSPLLCON2_OFFSET  0x0020
+#define TC3X_CLOCK_PERPLLSTAT_OFFSET  0x0024
+#define TC3X_CLOCK_PERPLLCON0_OFFSET  0x0028
+#define TC3X_CLOCK_PERPLLCON1_OFFSET  0x002c
+#define TC3X_CLOCK_CCUCON0_OFFSET     0x0030
+#define TC3X_CLOCK_CCUCON1_OFFSET     0x0034
+#define TC3X_CLOCK_FDR_OFFSET         0x0038
+#define TC3X_CLOCK_EXTCON_OFFSET      0x003c
+#define TC3X_CLOCK_CCUCON2_OFFSET     0x0040
+#define TC3X_CLOCK_CCUCON3_OFFSET     0x0044
+#define TC3X_CLOCK_CCUCON4_OFFSET     0x0048
+#define TC3X_CLOCK_CCUCON5_OFFSET     0x004c
+
+/* Per-CPU dividers */
+
+#define TC3X_CLOCK_CCUCON6_OFFSET     0x0080  /* CPU0DIV */
+#define TC3X_CLOCK_CCUCON7_OFFSET     0x0084  /* CPU1DIV */
+#define TC3X_CLOCK_CCUCON8_OFFSET     0x0088  /* CPU2DIV */
+#define TC3X_CLOCK_CCUCON9_OFFSET     0x008c  /* CPU3DIV */
+#define TC3X_CLOCK_CCUCON10_OFFSET    0x0090  /* CPU4DIV */
+#define TC3X_CLOCK_CCUCON11_OFFSET    0x0094  /* CPU5DIV */
+
+#define TC3X_CLOCK_OSCCON      TC3X_REG32(TC3X_CLOCK_OSCCON_OFFSET)
+#define TC3X_CLOCK_SYSPLLSTAT  TC3X_REG32(TC3X_CLOCK_SYSPLLSTAT_OFFSET)
+#define TC3X_CLOCK_SYSPLLCON0  TC3X_REG32(TC3X_CLOCK_SYSPLLCON0_OFFSET)
+#define TC3X_CLOCK_SYSPLLCON1  TC3X_REG32(TC3X_CLOCK_SYSPLLCON1_OFFSET)
+#define TC3X_CLOCK_SYSPLLCON2  TC3X_REG32(TC3X_CLOCK_SYSPLLCON2_OFFSET)
+#define TC3X_CLOCK_PERPLLSTAT  TC3X_REG32(TC3X_CLOCK_PERPLLSTAT_OFFSET)
+#define TC3X_CLOCK_PERPLLCON0  TC3X_REG32(TC3X_CLOCK_PERPLLCON0_OFFSET)
+#define TC3X_CLOCK_PERPLLCON1  TC3X_REG32(TC3X_CLOCK_PERPLLCON1_OFFSET)
+#define TC3X_CLOCK_CCUCON0     TC3X_REG32(TC3X_CLOCK_CCUCON0_OFFSET)
+#define TC3X_CLOCK_CCUCON1     TC3X_REG32(TC3X_CLOCK_CCUCON1_OFFSET)
+#define TC3X_CLOCK_FDR         TC3X_REG32(TC3X_CLOCK_FDR_OFFSET)
+#define TC3X_CLOCK_EXTCON      TC3X_REG32(TC3X_CLOCK_EXTCON_OFFSET)
+#define TC3X_CLOCK_CCUCON2     TC3X_REG32(TC3X_CLOCK_CCUCON2_OFFSET)
+#define TC3X_CLOCK_CCUCON3     TC3X_REG32(TC3X_CLOCK_CCUCON3_OFFSET)
+#define TC3X_CLOCK_CCUCON4     TC3X_REG32(TC3X_CLOCK_CCUCON4_OFFSET)
+#define TC3X_CLOCK_CCUCON5     TC3X_REG32(TC3X_CLOCK_CCUCON5_OFFSET)
+#define TC3X_CLOCK_CCUCON6     TC3X_REG32(TC3X_CLOCK_CCUCON6_OFFSET)
+
+#define TC3X_OSCCON_PLLLV         BIT(1)
+#define TC3X_OSCCON_OSCRES        BIT(2)
+#define TC3X_OSCCON_GAINSEL_SHIFT 3
+#define TC3X_OSCCON_GAINSEL_MASK  GENMASK(4, 3)
+#define TC3X_OSCCON_MODE_SHIFT    5
+#define TC3X_OSCCON_MODE_MASK     GENMASK(6, 5)
+#define TC3X_OSCCON_SHBY          BIT(7)
+#define TC3X_OSCCON_PLLHV         BIT(8)
+#define TC3X_OSCCON_HYSEN         BIT(9)
+#define TC3X_OSCCON_HYSCTL_SHIFT  10
+#define TC3X_OSCCON_HYSCTL_MASK   GENMASK(11, 10)
+#define TC3X_OSCCON_AMPCTL_SHIFT  12
+#define TC3X_OSCCON_AMPCTL_MASK   GENMASK(13, 12)
+#define TC3X_OSCCON_OSCVAL_SHIFT  16
+#define TC3X_OSCCON_OSCVAL_MASK   GENMASK(20, 16)
+#define TC3X_OSCCON_APREN         BIT(23)
+#define TC3X_OSCCON_CAP0EN        BIT(24)
+#define TC3X_OSCCON_CAP1EN        BIT(25)
+#define TC3X_OSCCON_CAP2EN        BIT(26)
+#define TC3X_OSCCON_CAP3EN        BIT(27)
+
+/* MODE encodings */
+
+#define TC3X_OSCCON_MODE_XTAL     (0u << TC3X_OSCCON_MODE_SHIFT)
+#define TC3X_OSCCON_MODE_DISABLED (1u << TC3X_OSCCON_MODE_SHIFT)
+#define TC3X_OSCCON_MODE_EXTCLK   (2u << TC3X_OSCCON_MODE_SHIFT)
+#define TC3X_OSCCON_MODE_OFF      (3u << TC3X_OSCCON_MODE_SHIFT)
+
+#define TC3X_SYSPLLSTAT_PWDSTAT   BIT(1)
+#define TC3X_SYSPLLSTAT_LOCK      BIT(2)
+#define TC3X_SYSPLLSTAT_K2RDY     BIT(5)
+#define TC3X_SYSPLLSTAT_MODRUN    BIT(7)
+
+#define TC3X_SYSPLLCON0_MODEN         BIT(2)
+#define TC3X_SYSPLLCON0_NDIV_SHIFT    9
+#define TC3X_SYSPLLCON0_NDIV_MASK     GENMASK(15, 9)
+#define TC3X_SYSPLLCON0_PLLPWD        BIT(16)
+#define TC3X_SYSPLLCON0_RESLD         BIT(18)
+#define TC3X_SYSPLLCON0_PDIV_SHIFT    24
+#define TC3X_SYSPLLCON0_PDIV_MASK     GENMASK(26, 24)
+#define TC3X_SYSPLLCON0_INSEL_SHIFT   30
+#define TC3X_SYSPLLCON0_INSEL_MASK    GENMASK(31, 30)
+
+/* INSEL encodings */
+
+#define TC3X_SYSPLLCON0_INSEL_FBACK   (0 << TC3X_SYSPLLCON0_INSEL_SHIFT)
+#define TC3X_SYSPLLCON0_INSEL_FOSC    (1 << TC3X_SYSPLLCON0_INSEL_SHIFT)
+#define TC3X_SYSPLLCON0_INSEL_SYSCLK  (2 << TC3X_SYSPLLCON0_INSEL_SHIFT)
+
+#define TC3X_SYSPLLCON1_K2DIV_SHIFT   0
+#define TC3X_SYSPLLCON1_K2DIV_MASK    GENMASK(2, 0)
+
+#define TC3X_PERPLLSTAT_PWDSTAT       BIT(1)
+#define TC3X_PERPLLSTAT_LOCK          BIT(2)
+#define TC3X_PERPLLSTAT_K3RDY         BIT(4)
+#define TC3X_PERPLLSTAT_K2RDY         BIT(5)
+
+#define TC3X_PERPLLCON0_DIVBY         BIT(0)
+#define TC3X_PERPLLCON0_NDIV_SHIFT    9
+#define TC3X_PERPLLCON0_NDIV_MASK     GENMASK(15, 9)
+#define TC3X_PERPLLCON0_PLLPWD        BIT(16)
+#define TC3X_PERPLLCON0_RESLD         BIT(18)
+#define TC3X_PERPLLCON0_PDIV_SHIFT    24
+#define TC3X_PERPLLCON0_PDIV_MASK     GENMASK(26, 24)
+
+#define TC3X_PERPLLCON1_K2DIV_SHIFT   0
+#define TC3X_PERPLLCON1_K2DIV_MASK    GENMASK(2, 0)
+#define TC3X_PERPLLCON1_K3DIV_SHIFT   8
+#define TC3X_PERPLLCON1_K3DIV_MASK    GENMASK(10, 8)
+
+#define TC3X_CCUCON0_STMDIV_SHIFT     0
+#define TC3X_CCUCON0_STMDIV_MASK      GENMASK(3, 0)
+#define TC3X_CCUCON0_GTMDIV_SHIFT     4
+#define TC3X_CCUCON0_GTMDIV_MASK      GENMASK(7, 4)
+#define TC3X_CCUCON0_SRIDIV_SHIFT     8
+#define TC3X_CCUCON0_SRIDIV_MASK      GENMASK(11, 8)
+#define TC3X_CCUCON0_LPDIV_SHIFT      12
+#define TC3X_CCUCON0_LPDIV_MASK       GENMASK(14, 12)
+#define TC3X_CCUCON0_SPBDIV_SHIFT     16
+#define TC3X_CCUCON0_SPBDIV_MASK      GENMASK(19, 16)
+#define TC3X_CCUCON0_BBBDIV_SHIFT     20
+#define TC3X_CCUCON0_BBBDIV_MASK      GENMASK(23, 20)
+#define TC3X_CCUCON0_FSIDIV_SHIFT     24
+#define TC3X_CCUCON0_FSIDIV_MASK      GENMASK(25, 24)
+#define TC3X_CCUCON0_FSI2DIV_SHIFT    26
+#define TC3X_CCUCON0_FSI2DIV_MASK     GENMASK(27, 26)
+#define TC3X_CCUCON0_CLKSEL_SHIFT     28
+#define TC3X_CCUCON0_CLKSEL_MASK      GENMASK(29, 28)
+#define TC3X_CCUCON0_UP               BIT(30)
+#define TC3X_CCUCON0_LCK              BIT(31)
+
+/* CLKSEL encodings */
+
+#define TC3X_CCUCON0_CLKSEL_FBACK     (0 << TC3X_CCUCON0_CLKSEL_SHIFT)
+#define TC3X_CCUCON0_CLKSEL_PLL       (1 << TC3X_CCUCON0_CLKSEL_SHIFT)
+
+#define TC3X_CCUCON1_MCANDIV_SHIFT    0
+#define TC3X_CCUCON1_MCANDIV_MASK     GENMASK(3, 0)
+#define TC3X_CCUCON1_CLKSELMCAN_SHIFT 4
+#define TC3X_CCUCON1_CLKSELMCAN_MASK  GENMASK(5, 4)
+#define TC3X_CCUCON1_PLL1DIVDIS       BIT(7)
+#define TC3X_CCUCON1_I2CDIV_SHIFT     8
+#define TC3X_CCUCON1_I2CDIV_MASK      GENMASK(11, 8)
+#define TC3X_CCUCON1_MSCDIV_SHIFT     16
+#define TC3X_CCUCON1_MSCDIV_MASK      GENMASK(19, 16)
+#define TC3X_CCUCON1_CLKSELMSC_SHIFT  20
+#define TC3X_CCUCON1_CLKSELMSC_MASK   GENMASK(21, 20)
+#define TC3X_CCUCON1_QSPIDIV_SHIFT    24
+#define TC3X_CCUCON1_QSPIDIV_MASK     GENMASK(27, 24)
+#define TC3X_CCUCON1_CLKSELQSPI_SHIFT 28
+#define TC3X_CCUCON1_CLKSELQSPI_MASK  GENMASK(29, 28)
+#define TC3X_CCUCON1_LCK              BIT(31)
+
+/* CLKSELMCAN encodings */
+
+#define TC3X_CLKSEL_MCAN_OFF          0
+#define TC3X_CLKSEL_MCAN_FMCANI       1
+#define TC3X_CLKSEL_MCAN_FOSC         2
+
+/* CLKSELMSC / CLKSELQSPI encodings */
+
+#define TC3X_CLKSEL_OFF               0
+#define TC3X_CLKSEL_SRC1              1
+#define TC3X_CLKSEL_SRC2              2
+
+/* CLKSELASCLINS encodings (in CCUCON2) */
+
+#define TC3X_CLKSEL_ASCLINS_OFF       0
+#define TC3X_CLKSEL_ASCLINS_FASCLINSI 1
+#define TC3X_CLKSEL_ASCLINS_FOSC      2
+
+#define TC3X_CCUCON2_ASCLINFDIV_SHIFT     0
+#define TC3X_CCUCON2_ASCLINFDIV_MASK      GENMASK(3, 0)
+#define TC3X_CCUCON2_ASCLINSDIV_SHIFT     8
+#define TC3X_CCUCON2_ASCLINSDIV_MASK      GENMASK(11, 8)
+#define TC3X_CCUCON2_CLKSELASCLINS_SHIFT  12
+#define TC3X_CCUCON2_CLKSELASCLINS_MASK   GENMASK(13, 12)
+#define TC3X_CCUCON2_EBUPERON             BIT(24)
+#define TC3X_CCUCON2_ERAYPERON            BIT(25)
+#define TC3X_CCUCON2_HSPDMPERON           BIT(26)
+#define TC3X_CCUCON2_LCK                  BIT(31)
+
+#define TC3X_CCUCON5_GETHDIV_SHIFT    0
+#define TC3X_CCUCON5_GETHDIV_MASK     GENMASK(3, 0)
+#define TC3X_CCUCON5_MCANHDIV_SHIFT   4
+#define TC3X_CCUCON5_MCANHDIV_MASK    GENMASK(7, 4)
+#define TC3X_CCUCON5_ADASDIV_SHIFT    8
+#define TC3X_CCUCON5_ADASDIV_MASK     GENMASK(11, 8)
+#define TC3X_CCUCON5_UP               BIT(30)
+#define TC3X_CCUCON5_LCK              BIT(31)
+
+#define TC3X_CCUCONx_CPUDIV_SHIFT     0
+#define TC3X_CCUCONx_CPUDIV_MASK      GENMASK(5, 0)
+
+#define TC3X_EXTCON_EN0               BIT(0)
+#define TC3X_EXTCON_SEL0_SHIFT        2
+#define TC3X_EXTCON_SEL0_MASK         GENMASK(5, 2)
+#define TC3X_EXTCON_EN1               BIT(16)
+#define TC3X_EXTCON_NSEL              BIT(17)
+#define TC3X_EXTCON_SEL1_SHIFT        18
+#define TC3X_EXTCON_SEL1_MASK         GENMASK(21, 18)
+#define TC3X_EXTCON_DIV1_SHIFT        24
+#define TC3X_EXTCON_DIV1_MASK         GENMASK(31, 24)
+
+/* EXTCLK0 SEL0 source encodings */
+
+enum tc3x_extclk0_sel
+{
+  TC3X_EXTCLK0_FOUT   = 0x0,
+  TC3X_EXTCLK0_FPLL0  = 0x1,
+  TC3X_EXTCLK0_FPLL1  = 0x2,
+  TC3X_EXTCLK0_FOSC   = 0x3,
+  TC3X_EXTCLK0_FBACK  = 0x4,
+  TC3X_EXTCLK0_FPLL2  = 0x5,
+  TC3X_EXTCLK0_FBBB   = 0x6,
+  TC3X_EXTCLK0_FSRI   = 0x8,
+  TC3X_EXTCLK0_FSPB   = 0x9,
+  TC3X_EXTCLK0_FFSI   = 0xa,
+  TC3X_EXTCLK0_FSTM   = 0xb,
+  TC3X_EXTCLK0_FGTM   = 0xc,
+  TC3X_EXTCLK0_FFSI2  = 0xe,
+};
+
+#define TC3X_FBACK_HZ           100000000u   /* 100 MHz backup clock */
+#define TC3X_FOSC_HZ            20000000u    /* 20 MHz external crystal */
+
+/* SYSPLL: fDCO = 20 * 30 / 1 = 600 MHz */
+
+#define TC3X_SYSPLL_PDIV        1u
+#define TC3X_SYSPLL_NDIV        30u
+#define TC3X_SYSPLL_K2DIV       2u
+#define TC3X_SYSPLL_K2DIV_INIT  6u
+
+/* PERPLL: fDCO = 20 * 32 / 1 = 640 MHz */
+
+#define TC3X_PERPLL_PDIV        1u
+#define TC3X_PERPLL_NDIV        32u
+#define TC3X_PERPLL_K2DIV       2u
+#define TC3X_PERPLL_K3DIV       2u
+#define TC3X_PERPLL_DIVBY       0u
+
+/* PLL1DIVDIS: 0 -> fsource1 = fPLL1/2 = 160 MHz */
+
+#define TC3X_PLL1DIVDIS         0u
+
+#define TC3X_FSOURCE0_HZ       300000000
+#define TC3X_FSOURCE1_HZ       160000000
+#define TC3X_FSOURCE2_HZ       200000000
+
+#define TC3X_FSRI_TARGET_HZ     300000000
+#define TC3X_FSPB_TARGET_HZ     100000000
+#define TC3X_FBBB_TARGET_HZ     150000000
+#define TC3X_FSTM_TARGET_HZ     100000000
+#define TC3X_FFSI_TARGET_HZ     100000000
+#define TC3X_FFSI2_TARGET_HZ    300000000
+
+#define TC3X_FGETH_TARGET_HZ    150000000
+#define TC3X_FMCANH_TARGET_HZ   100000000
+#define TC3X_FADAS_TARGET_HZ    300000000
+
+#define TC3X_FMCANI_TARGET_HZ   80000000
+
+#define TC3X_FQSPI_TARGET_HZ    200000000
+#define TC3X_FMSC_TARGET_HZ     200000000
+#define TC3X_FI2C_TARGET_HZ     66666667
+
+#define TC3X_FASCLINF_TARGET_HZ 200000000   /* 200 MHz */
+
+#define TC3X_FASCLINS_TARGET_HZ 80000000    /* 80 MHz */
+
+#define TC3X_FGTM_TARGET_HZ     200000000   /* 200 MHz */
+
+#endif /* __ARCH_TRICORE_SRC_TC3X_HARDWARE_TC3X_CLOCK_H */

@@ -34,7 +34,6 @@
 #include <sys/types.h>
 #ifndef __ASSEMBLY__
 #  include <stdbool.h>
-#  include <syscall.h>
 #endif
 
 /* Include NuttX-specific IRQ definitions */
@@ -43,106 +42,22 @@
 
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
-#include <arch/chip/irq.h>
 #include <arch/arch.h>
-#include <IfxCpu_Intrinsics.h>
+#include <arch/chip/irq.h>
+
+#if defined(CONFIG_ARCH_CHIP_FAMILY_TC3X)
+#  include <arch/tc3x/irq.h>
+#elif defined(CONFIG_ARCH_CHIP_FAMILY_TC4X)
+#  include <arch/tc4x/irq.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
 
-/* Address <--> Context Save Areas */
-
-#define tricore_csa2addr(csa) ((uintptr_t *)((((csa) & 0x000F0000) << 12) \
-                                             | (((csa) & 0x0000FFFF) << 6)))
-#define tricore_addr2csa(addr) ((uintptr_t)(((((uintptr_t)(addr)) & 0xF0000000) >> 12) \
-                                            | (((uintptr_t)(addr) & 0x003FFFC0) >> 6)))
-
-/* Upper CSA */
-
-#define REG_UPCXI        0
-#define REG_PSW          1
-#define REG_A10          2
-#define REG_UA11         3
-#define REG_D8           4
-#define REG_D9           5
-#define REG_D10          6
-#define REG_D11          7
-#define REG_A12          8
-#define REG_A13          9
-#define REG_A14          10
-#define REG_A15          11
-#define REG_D12          12
-#define REG_D13          13
-#define REG_D14          14
-#define REG_D15          15
-
-/* Lower CSA */
-
-#define REG_LPCXI        0
-#define REG_LA11         1
-#define REG_A2           2
-#define REG_A3           3
-#define REG_D0           4
-#define REG_D1           5
-#define REG_D2           6
-#define REG_D3           7
-#define REG_A4           8
-#define REG_A5           9
-#define REG_A6           10
-#define REG_A7           11
-#define REG_D4           12
-#define REG_D5           13
-#define REG_D6           14
-#define REG_D7           15
-
-#define REG_RA           REG_UA11
-#define REG_SP           REG_A10
-#define REG_UPC          REG_UA11
-
-#define REG_LPC          REG_LA11
-
-#define TC_CONTEXT_REGS  (16)
-#define TC_CONTEXT_SIZE  (sizeof(void *) * TC_CONTEXT_REGS)
-
-#define XCPTCONTEXT_REGS (TC_CONTEXT_REGS * 2)
-#define XCPTCONTEXT_SIZE (sizeof(void *) * XCPTCONTEXT_REGS)
-
-#define NR_IRQS          (2048)
-
-/* PSW: Program Status Word Register */
-
-#define PSW_CDE         (1 << 7) /* Bits 7: Call Depth Count Enable */
-#define PSW_IS          (1 << 9) /* Bits 9: Interrupt Stack Control */
-#define PSW_IO          (10)     /* Bits 10-11: Access Privilege Level Control (I/O Privilege) */
-#  define PSW_IO_USER0      (0 << PSW_IO)
-#  define PSW_IO_USER1      (1 << PSW_IO)
-#  define PSW_IO_SUPERVISOR (2 << PSW_IO)
-
-/* PCXI: Previous Context Information and Pointer Register */
-
-#define PCXI_UL         (1 << 20) /* Bits 20: Upper or Lower Context Tag */
-#define PCXI_PIE        (1 << 21) /* Bits 21: Previous Interrupt Enable */
-
-/* FCX: Free CSA List Head Pointer Register */
-
-#define FCX_FCXO        (0)       /* Bits 0-15: FCX Offset Address */
-#define FCX_FCXS        (16)      /* Bits 16-19: FCX Segment Address */
-#define FCX_FCXO_MASK   (0xffff << FCX_FCXO)
-#define FCX_FCXS_MASK   (0xf    << FCX_FCXS)
-#define FCX_FREE        (FCX_FCXS_MASK | FCX_FCXO_MASK) /* Free CSA manipulation */
-
-#define TRICORE_SRCNUM_PER_GPSR  8
-#define TRICORE_SRC2IRQ(src_addr) \
-  (((uintptr_t)(src_addr) - (uintptr_t)&MODULE_SRC) / 4)
-#define TRICORE_GPSR_IRQNUM(src_cpu, dest_cpu)  \
-  TRICORE_SRC2IRQ(&SRC_GPSR00 + src_cpu * 8 + dest_cpu)
-
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define STACKFRAME_ALIGN 8
+#ifndef STACKFRAME_ALIGN
+#  define STACKFRAME_ALIGN 8
+#endif
 
 /* FPU registers */
 
@@ -159,6 +74,11 @@
 #ifndef __ASSEMBLY__
 
 #ifdef __cplusplus
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #define EXTERN extern "C"
 extern "C"
 {
@@ -167,50 +87,24 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-struct xcptcontext
-{
-#ifdef CONFIG_ENABLE_ALL_SIGNALS
-  /* These are saved copies of the context used during
-   * signal processing.
-   */
-
-  uintptr_t *saved_regs;
-#endif
-  /* Register save area with XCPTCONTEXT_SIZE, only valid when:
-   * 1.The task isn't running or
-   * 2.The task is interrupted
-   * otherwise task is running, and regs contain the stale value.
-   */
-
-  uintptr_t *regs;
-};
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* g_interrupt_context store irq status */
+/* g_current_regs[] holds a references to the current interrupt level
+ * register storage structure.  If is non-NULL only during interrupt
+ * processing.  Access to g_current_regs[] must be through the macro
+ * g_current_regs for portability.
+ */
 
-EXTERN volatile bool g_interrupt_context[CONFIG_SMP_NCPUS];
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_cpu_index
- *
- * Description:
- *   Return the real core number regardless CONFIG_SMP setting
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_HAVE_MULTICPU
-int up_cpu_index(void) noinstrument_function;
-#endif /* CONFIG_ARCH_HAVE_MULTICPU */
 
 /****************************************************************************
  * Name: up_irq_enable
@@ -223,65 +117,60 @@ int up_cpu_index(void) noinstrument_function;
 void up_irq_enable(void);
 
 /****************************************************************************
- * Inline functions
+ * Inline Functions
  ****************************************************************************/
 
 noinstrument_function static inline_function uintptr_t up_getsp(void)
 {
-#ifdef CONFIG_TRICORE_TOOLCHAIN_TASKING
-  return (uintptr_t)__get_sp();
-#else
-  return (uintptr_t)__builtin_frame_address(0);
-#endif
+  return __builtin_frame_address(0);
 }
 
 /****************************************************************************
  * Name: up_irq_save
  *
  * Description:
- *   Disable interrupts and return the previous value of the mstatus register
+ *   Disable interrupts and return the previous PSW.IE state.
  *
  ****************************************************************************/
 
+#define TRICORE_IRQ_DISABLE_AND_SAVE(x) \
+  __asm__ __volatile__("disable %0":"=d"(x))
+#define TRICORE_IRQ_RESTORE(x) \
+  __asm__ __volatile__("restore %0"::"d"(x))
+
 noinstrument_function static inline_function irqstate_t up_irq_save(void)
 {
-  return __disable_and_save();
+  irqstate_t state;
+  TRICORE_IRQ_DISABLE_AND_SAVE(state);
+  return state;
 }
 
 /****************************************************************************
  * Name: up_irq_restore
  *
  * Description:
- *   Restore the value of the mstatus register
+ *   Restore the previous PSW.IE state from up_irq_save().
  *
  ****************************************************************************/
 
 noinstrument_function static inline_function
 void up_irq_restore(irqstate_t flags)
 {
-  __restore(flags);
+  TRICORE_IRQ_RESTORE(flags);
 }
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_set_interrupt_context
- *
- * Description:
- *   Set the interrupt handler context.
- *
- ****************************************************************************/
-
-noinstrument_function
-static inline_function void up_set_interrupt_context(bool flag)
+static inline_function uintptr_t *up_current_regs(void)
 {
-#ifdef CONFIG_SMP
-  g_interrupt_context[up_this_cpu()] = flag;
-#else
-  g_interrupt_context[0] = flag;
-#endif
+  return (uintptr_t *)g_current_regs[0];
+}
+
+static inline_function void up_set_current_regs(uintptr_t *regs)
+{
+  g_current_regs[0] = regs;
 }
 
 /****************************************************************************
@@ -296,16 +185,9 @@ static inline_function void up_set_interrupt_context(bool flag)
 noinstrument_function
 static inline_function bool up_interrupt_context(void)
 {
-#ifdef CONFIG_SMP
-  irqstate_t flags = up_irq_save();
-  bool ret = g_interrupt_context[up_this_cpu()];
-
-  up_irq_restore(flags);
+  bool ret = up_current_regs() != NULL;
 
   return ret;
-#else
-  return g_interrupt_context[0];
-#endif
 }
 
 /****************************************************************************
@@ -314,41 +196,27 @@ static inline_function bool up_interrupt_context(void)
 
 static inline_function uintptr_t up_getusrsp(void *regs)
 {
-  uintptr_t *csaregs = (uintptr_t *)regs;
+  uintptr_t *csa = regs;
 
-  if (csaregs[REG_LPCXI] & PCXI_UL)
+  while (((uintptr_t)csa & PCXI_UL) == 0)
     {
-      csaregs = tricore_csa2addr(csaregs[REG_LPCXI]);
-    }
-  else
-    {
-       csaregs += TC_CONTEXT_REGS;
+      csa = tricore_csa2addr((uintptr_t)csa);
+      csa = (uintptr_t *)csa[0];
     }
 
-  return csaregs[REG_SP];
+  csa = tricore_csa2addr((uintptr_t)csa);
+
+  return csa[REG_SP];
 }
-
-#endif /* __ASSEMBLY__ */
-
-/****************************************************************************
- * Name: up_switch_context
- ****************************************************************************/
-
-#define up_switch_context(tcb, rtcb)                              \
-  do {                                                            \
-    if (!up_interrupt_context())                                  \
-      {                                                           \
-        sys_call0(SYS_switch_context);                            \
-      }                                                           \
-      UNUSED(rtcb);                                               \
-  } while (0)
 
 /****************************************************************************
  * Name: up_getusrpc
  ****************************************************************************/
 
 #define up_getusrpc(regs) \
-    (((uint32_t *)((regs) ? (regs) : running_regs()))[REG_UPC])
+    (((uintptr_t *)((regs) ? (regs) : running_regs()))[REG_PC])
+
+#endif /* __ASSEMBLY__ */
 
 #undef EXTERN
 #ifdef __cplusplus

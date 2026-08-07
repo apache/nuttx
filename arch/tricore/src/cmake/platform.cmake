@@ -39,7 +39,7 @@ endforeach()
 
 separate_arguments(CMAKE_C_FLAG_ARGS NATIVE_COMMAND ${CMAKE_C_FLAGS})
 
-if(CONFIG_TRICORE_TOOLCHAIN_GNU)
+if(CONFIG_TRICORE_TOOLCHAIN_GNUC)
   nuttx_find_toolchain_lib()
   if(CONFIG_LIBM_TOOLCHAIN)
     nuttx_find_toolchain_lib(libm.a)
@@ -56,14 +56,6 @@ if(CONFIG_TRICORE_TOOLCHAIN_GNU)
   if(CONFIG_COVERAGE_TOOLCHAIN)
     nuttx_find_toolchain_lib(libgcov.a)
   endif()
-
-  set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)
 endif()
 
-if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
-  find_program(TASKING_COMPILER_PATH ctc)
-  get_filename_component(C_COMPILER_DIR ${TASKING_COMPILER_PATH} DIRECTORY)
-  set(PREPROCESS
-      ${TOOLCHAIN_PREFIX}ctc ${CMAKE_C_FLAG_ARGS} -E
-      -I${TOOLCHAIN_PREFIX}/../include.lsl -I${C_COMPILER_DIR}/../include.lsl)
-endif()
+set(PREPROCESS ${CMAKE_C_COMPILER} ${CMAKE_C_FLAG_ARGS} -E -P -x c)

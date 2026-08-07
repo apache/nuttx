@@ -30,12 +30,7 @@
 #include <stdint.h>
 #include <sched.h>
 #include <assert.h>
-#include <nuttx/debug.h>
 
-#include <nuttx/addrenv.h>
-#include <nuttx/arch.h>
-
-#include "sched/sched.h"
 #include "tricore_internal.h"
 
 #ifdef CONFIG_STACK_COLORATION
@@ -79,21 +74,20 @@ size_t tricore_stack_check(uintptr_t alloc, size_t size)
 
   /* Get aligned addresses of the top and bottom of the stack */
 
-  start = STACKFRAME_ALIGN_UP((uintptr_t)alloc);
-  end   = STACKFRAME_ALIGN_DOWN((uintptr_t)alloc + size);
+  start = STACK_ALIGN_UP((uintptr_t)alloc);
+  end   = STACK_ALIGN_DOWN((uintptr_t)alloc + size);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
   size  = end - start;
 
-  /* RISC-V uses a push-down stack:  the stack grows toward lower addresses
-   * in memory.  We need to start at the lowest address in the stack memory
-   * allocation and search to higher addresses.  The first word we encounter
-   * that does not have the magic value is the high water mark.
+  /* TriCore uses a push-down stack: the stack grows toward lower addresses
+   * in memory.  Search from the lowest address upward; the first word that
+   * does not have the magic value is the high-water mark.
    */
 
   for (ptr = (uint32_t *)start, mark = (size >> 2);
-       mark > 0 && *ptr == STACK_COLOR;
+       *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
   /* Return our guess about how much stack space was used */
