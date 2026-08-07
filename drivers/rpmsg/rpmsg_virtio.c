@@ -624,6 +624,16 @@ static void rpmsg_virtio_rx_dispatch(FAR struct rpmsg_virtio_priv_s *priv)
                 }
               else
                 {
+                  /* Unbound RT endpoint: its NS message was queued with
+                   * ns_ept's priority, use the same one to keep order.
+                   */
+
+                  if (priority == RPMSG_PRIO_RT &&
+                      ept->dest_addr == RPMSG_ADDR_ANY)
+                    {
+                      priority = rdev->ns_ept.priority;
+                    }
+
                   rpmsg_queue_rx_work(&priv->rpmsg, priority,
                                       rpmsg_virtio_rx_worker, hdr);
                   status = RPMSG_SUCCESS_BUFFER_RELEASED;
