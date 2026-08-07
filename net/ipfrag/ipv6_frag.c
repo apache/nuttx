@@ -145,6 +145,8 @@ static int32_t ipv6_fragin_getinfo(FAR struct iob_s *iob,
       fraglink->ipid      = NTOHL(
         ((uint32_t)(*(FAR uint16_t *)(&fraghdr->id[0])) << 16) +
          (uint32_t)(*(FAR uint16_t *)(&fraghdr->id[2])));
+      net_ipv6addr_copy(fraglink->srcipaddr, ipv6->srcipaddr);
+      net_ipv6addr_copy(fraglink->destipaddr, ipv6->destipaddr);
 
       fraglink->frag      = iob;
 
