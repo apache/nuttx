@@ -157,7 +157,15 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
 
   else
     {
-      rtcb->sigunbinfo = (info == NULL) ? &unbinfo : info;
+      /* Always unblock into the stack local, never into the caller's
+       * buffer.  The poster writes it from its own context (another
+       * task, a kernel thread, an interrupt), and in a kernel build the
+       * caller's buffer belongs to an address space the poster does not
+       * share.  The stack local is kernel memory, mapped everywhere, and
+       * is copied out below in the caller's own context.
+       */
+
+      rtcb->sigunbinfo = &unbinfo;
 
       /* Save the set of pending signals to wait for */
 
@@ -182,19 +190,19 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
        * or timeout) that awakened us.
        */
 
-      if (GOOD_SIGNO(rtcb->sigunbinfo->si_signo))
+      if (GOOD_SIGNO(unbinfo.si_signo))
         {
           /* We were awakened by a signal... but is it one of the signals
            * that we were waiting for?
            */
 
-          if (nxsig_ismember(set, rtcb->sigunbinfo->si_signo) == 1)
+          if (nxsig_ismember(set, unbinfo.si_signo) == 1)
             {
               /* Yes.. the return value is the number of the signal that
                * awakened us.
                */
 
-              ret = rtcb->sigunbinfo->si_signo;
+              ret = unbinfo.si_signo;
             }
           else
             {
@@ -210,11 +218,11 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
            */
 
 #ifdef CONFIG_CANCELLATION_POINTS
-          if (rtcb->sigunbinfo->si_signo == SIG_CANCEL_TIMEOUT)
+          if (unbinfo.si_signo == SIG_CANCEL_TIMEOUT)
             {
               /* The wait was canceled */
 
-              ret = -rtcb->sigunbinfo->si_errno;
+              ret = -unbinfo.si_errno;
               DEBUGASSERT(ret < 0);
             }
           else
@@ -224,12 +232,17 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
                * error.
                */
 
-              DEBUGASSERT(rtcb->sigunbinfo->si_signo == SIG_WAIT_TIMEOUT);
+              DEBUGASSERT(unbinfo.si_signo == SIG_WAIT_TIMEOUT);
               ret = -EAGAIN;
             }
         }
 
       rtcb->sigunbinfo = NULL;
+
+      if (info != NULL)
+        {
+          memcpy(info, &unbinfo, sizeof(struct siginfo));
+        }
     }
 
   leave_critical_section(flags);
