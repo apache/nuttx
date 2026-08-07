@@ -34,8 +34,6 @@
 #include <errno.h>
 #include <nuttx/debug.h>
 
-#if defined(CONFIG_ARCH_HAVE_FORK)
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -137,55 +135,20 @@ static void atfork_parent(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: fork
- *
- * Description:
- *   The fork() function is a wrapper of up_fork() syscall
- *
- * Returned Value:
- *   Upon successful completion, fork() returns 0 to the child process and
- *   returns the process ID of the child process to the parent process.
- *   Otherwise, -1 is returned to the parent, no child process is created,
- *   and errno is set to indicate the error.
- *
- ****************************************************************************/
-
-pid_t fork(void)
-{
-  pid_t pid;
-
-#ifdef CONFIG_PTHREAD_ATFORK
-  atfork_prepare();
-#endif
-  pid = up_fork();
-
-#ifdef CONFIG_PTHREAD_ATFORK
-  if (pid == 0)
-    {
-      atfork_child();
-    }
-  else
-    {
-      atfork_parent();
-    }
-#endif
-
-  return pid;
-}
-
-#if defined(CONFIG_SCHED_WAITPID)
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Name: vfork
  *
  * Description:
- *   The vfork() function is implemented based on fork() function, on
- *   vfork(), the parent task need to wait until the child task is performing
- *   exec or running finished.
+ *   The vfork() function is equivalent to fork(), except that the behavior
+ *   is undefined if the process created by vfork() either modifies any data
+ *   other than a variable of type pid_t used to store the return value from
+ *   vfork(), or returns from the function in which vfork() was called, or
+ *   calls any other function before successfully calling _exit() or one of
+ *   the exec family of functions.
+ *
+ *   The child shares the parent's memory and the parent is suspended until
+ *   the child _exit()s or exec()s.  The suspension lives in the kernel, so
+ *   vfork() does not depend on CONFIG_SCHED_WAITPID.  Wrapper of the
+ *   up_fork() syscall.
  *
  * Returned Value:
  *   Upon successful completion, vfork() returns 0 to the child process and
@@ -195,16 +158,15 @@ pid_t fork(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_VFORK
 pid_t vfork(void)
 {
-  int status = 0;
-  int ret;
   pid_t pid;
 
 #ifdef CONFIG_PTHREAD_ATFORK
   atfork_prepare();
 #endif
-  pid = up_fork();
+  pid = up_fork(true);
 
 #ifdef CONFIG_PTHREAD_ATFORK
   if (pid == 0)
@@ -217,22 +179,52 @@ pid_t vfork(void)
     }
 #endif
 
-  if (pid != 0)
-    {
-      /* we are in parent task, and we need to wait the child task
-       * until running finished or performing exec
-       */
+  return pid;
+}
+#endif /* CONFIG_ARCH_HAVE_VFORK */
 
-      ret = waitpid(pid, &status, WNOWAIT);
-      if (ret < 0)
-        {
-          serr("ERROR: waitpid failed: %d\n", get_errno());
-        }
+/****************************************************************************
+ * Name: fork
+ *
+ * Description:
+ *   POSIX fork().  The child receives its own copy of the parent's memory,
+ *   at the same virtual addresses.  It may modify anything, call anything,
+ *   return from the function that called fork(), and it runs concurrently
+ *   with the parent.  None of vfork()'s restrictions apply.
+ *
+ *   Provided only where CONFIG_ARCH_HAVE_FORK is selected; elsewhere fork()
+ *   is not declared at all, so calling it is a build error.  Wrapper of the
+ *   up_fork() syscall.
+ *
+ * Returned Value:
+ *   Upon successful completion, fork() returns 0 to the child process and
+ *   returns the process ID of the child process to the parent process.
+ *   Otherwise, -1 is returned to the parent, no child process is created,
+ *   and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FORK
+pid_t fork(void)
+{
+  pid_t pid;
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  atfork_prepare();
+#endif
+  pid = up_fork(false);
+
+#ifdef CONFIG_PTHREAD_ATFORK
+  if (pid == 0)
+    {
+      atfork_child();
     }
+  else
+    {
+      atfork_parent();
+    }
+#endif
 
   return pid;
 }
-
-#endif /* CONFIG_SCHED_WAITPID */
-
 #endif /* CONFIG_ARCH_HAVE_FORK */

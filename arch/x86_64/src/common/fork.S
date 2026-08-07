@@ -39,21 +39,18 @@
  * Name: up_fork
  *
  * Description:
- *   The up_fork() function is the base of fork() function that provided in
- *   libc, and fork() is implemented as a wrapper of up_fork() function.
- *   The fork() function has the same effect as posix fork(), except that the
- *   behavior is undefined if the process created by fork() either modifies
- *   any data other than a variable of type pid_t used to store the return
- *   value from fork(), or returns from the function in which fork() was
- *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions.
+ *   The architecture-specific entry point of both of NuttX's cloning
+ *   primitives, vfork() and fork().  Both need exactly the same thing from
+ *   assembly -- a snapshot of the caller's registers, stack pointer and
+ *   return address -- and differ only in what the C code then does with it,
+ *   so there is one entry point and the caller's %rdi says which primitive
+ *   was called.  It is passed straight through to x86_64_fork().
  *
- *   This thin layer implements fork by simply calling up_fork() with the
- *   fork() context as an argument.  The overall sequence is:
+ *   The overall sequence is:
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) x86_64_fork() and calls nxtask_setup_fork().
+ *   1) User code calls vfork() or fork().  Both are libc wrappers around
+ *      this entry point, which collects context information and
+ *   2) calls x86_64_fork(), which calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
@@ -69,7 +66,7 @@
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   None
+ *   %rdi - true for vfork(), false for fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -91,7 +88,7 @@
  * | [r15]     | i
  * | [r14]     | n
  * | [r13]     | g
- * | [r12]     | <- rsp before calling x86_64_fork, rdi = rsp
+ * | [r12]     | <- rsp before calling x86_64_fork, rsi = rsp
  * | ......... |
  */
 
@@ -99,13 +96,17 @@
     .type   up_fork, @function
 
 up_fork:
+    /* %rdi still holds the vfork flag on entry and is left alone;  %rdx is
+     * the scratch used to push %ss and %cs.
+     */
+
     movq    %rsp, %rax
     addq    $8, %rax
-    movq    %ss, %rdi
-    pushq   %rdi
+    movq    %ss, %rdx
+    pushq   %rdx
     pushfq
-    movq    %cs, %rdi
-    pushq   %rdi
+    movq    %cs, %rdx
+    pushq   %rdx
 
     /* push %rsp */
 
@@ -116,7 +117,7 @@ up_fork:
     pushq   %r14
     pushq   %r13
     pushq   %r12
-    movq    %rsp, %rdi
+    movq    %rsp, %rsi
 
     subq    $8, %rsp
 

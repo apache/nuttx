@@ -30,7 +30,7 @@ ifeq ($(CONFIG_SCHED_HAVE_PARENT),y)
 CSRCS += task_getppid.c task_reparent.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+ifneq ($(CONFIG_ARCH_HAVE_VFORK)$(CONFIG_ARCH_HAVE_FORK),)
 CSRCS += task_fork.c
 endif
 

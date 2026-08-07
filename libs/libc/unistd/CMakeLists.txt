@@ -105,7 +105,7 @@ if(NOT CONFIG_DISABLE_MOUNTPOINTS)
   list(APPEND SRCS lib_truncate.c lib_posix_fallocate.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_FORK)
+if(CONFIG_ARCH_HAVE_VFORK OR CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS lib_fork.c)
 endif()
 

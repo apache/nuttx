@@ -55,7 +55,7 @@ ifneq ($(CONFIG_DISABLE_MOUNTPOINTS),y)
 CSRCS += lib_truncate.c lib_posix_fallocate.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+ifneq ($(CONFIG_ARCH_HAVE_VFORK)$(CONFIG_ARCH_HAVE_FORK),)
 CSRCS += lib_fork.c
 endif
 

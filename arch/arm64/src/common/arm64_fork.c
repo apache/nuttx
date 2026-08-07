@@ -69,20 +69,18 @@ void arm64_fork_fpureg_save(struct fork_s *context)
 #endif
 
 /****************************************************************************
- * Name: fork
+ * Name: arm64_fork
  *
  * Description:
- *   The fork() function has the same effect as posix fork(), except that the
- *   behavior is undefined if the process created by fork() either modifies
- *   any data other than a variable of type pid_t used to store the return
- *   value from fork(), or returns from the function in which fork() was
- *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions.
+ *   The common ARM64 worker behind up_fork().  vfork() and fork() snapshot
+ *   the caller's registers identically; `vfork' says which primitive was
+ *   called, and is passed straight through to nxtask_setup_fork(), which is
+ *   where the memory semantics are decided.
  *
  *   The overall sequence is:
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up arm64_fork().
+ *   1) User code calls vfork() or fork().  up_fork() collects context
+ *      information and transfers control to arm64_fork().
  *   2) arm64_fork() and calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
@@ -103,7 +101,8 @@ void arm64_fork_fpureg_save(struct fork_s *context)
  * 6.
  *
  * Input Parameters:
- *   context - Caller context information saved by fork()
+ *   vfork   - true for vfork(), false for fork()
+ *   context - Caller context information saved by up_fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -113,7 +112,7 @@ void arm64_fork_fpureg_save(struct fork_s *context)
  *
  ****************************************************************************/
 
-pid_t arm64_fork(const struct fork_s *context)
+pid_t arm64_fork(bool vfork, const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct tcb_s *child;
@@ -125,7 +124,7 @@ pid_t arm64_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)context->lr);
+  child = nxtask_setup_fork((start_t)context->lr, vfork);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");
@@ -143,28 +142,45 @@ pid_t arm64_fork(const struct fork_s *context)
   DEBUGASSERT(stacktop > context->sp);
   stackutil = stacktop - context->sp;
 
-  /* Make some feeble effort to preserve the stack contents.  This is
-   * feeble because the stack surely contains invalid pointers and other
-   * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of fork() usage, even this feeble
-   * effort is overkill.
-   */
-
-  newtop = (uint64_t)child->stack_base_ptr +
-                     child->adj_stack_size;
-  newsp = newtop - stackutil;
-  memcpy((void *)newsp, (const void *)context->sp, stackutil);
-
-  /* Was there a frame pointer in place before? */
-
-  if (context->fp >= context->sp && context->fp < stacktop)
+  if (child->stack_base_ptr == parent->stack_base_ptr)
     {
-      uint64_t frameutil = stacktop - context->fp;
-      newfp = newtop - frameutil;
+      /* The child is running at the parent's stack addresses, inside its
+       * own duplicated address environment.  There is nothing to relocate:
+       * every stack address the child inherits is still the address it
+       * names.
+       */
+
+      newsp = context->sp;
+      newfp = context->fp;
     }
   else
     {
-      newfp = context->fp;
+      /* Make some feeble effort to preserve the stack contents.  This is
+       * feeble because the stack surely contains invalid pointers and other
+       * content that will not work in the child context.  However, if the
+       * user follows all of the caveats of vfork() usage, even this feeble
+       * effort is overkill.
+       *
+       * For a POSIX fork() child the stack contents are not merely a feeble
+       * effort:  the child is entitled to use them, and it does.
+       */
+
+      newtop = (uint64_t)child->stack_base_ptr +
+                         child->adj_stack_size;
+      newsp = newtop - stackutil;
+      memcpy((void *)newsp, (const void *)context->sp, stackutil);
+
+      /* Was there a frame pointer in place before? */
+
+      if (context->fp >= context->sp && context->fp < stacktop)
+        {
+          uint64_t frameutil = stacktop - context->fp;
+          newfp = newtop - frameutil;
+        }
+      else
+        {
+          newfp = context->fp;
+        }
     }
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When
@@ -235,5 +251,5 @@ pid_t arm64_fork(const struct fork_s *context)
    * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, vfork);
 }

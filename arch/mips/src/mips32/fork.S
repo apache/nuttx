@@ -47,20 +47,17 @@
  * Name: up_fork
  *
  * Description:
- *   The up_fork() function is the base of fork() function that provided in
- *   libc, and fork() is implemented as a wrapper of up_fork() function.
- *   The fork() function has the same effect as posix fork(), except that the behavior is
- *   undefined if the process created by fork() either modifies any data other than
- *   a variable of type pid_t used to store the return value from fork(), or returns
- *   from the function in which fork() was called, or calls any other function before
- *   successfully calling _exit() or one of the exec family of functions.
+ *   The architecture-specific entry point of both of NuttX's cloning
+ *   primitives, vfork() and fork().  Both need exactly the same snapshot from
+ *   assembly and differ only in what the C code then does with it, so there
+ *   is one entry point and the caller's $a0 says which primitive was called.
+ *   It is passed straight through to mips_fork().
  *
- *   This thin layer implements fork by simply calling up_fork() with the fork()
- *   context as an argument.  The overall sequence is:
+ *   The overall sequence is:
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) mips_fork() and calls nxtask_setup_fork().
+ *   1) User code calls vfork() or fork().  Both are libc wrappers around
+ *      this entry point, which collects context information and
+ *   2) calls mips_fork(), which calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.  This
  *      consists of:
  *      - Allocation of the child task's TCB.
@@ -76,7 +73,7 @@
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   None
+ *   $a0 - true for vfork(), false for fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and returns
@@ -88,16 +85,19 @@
 
 	.text
 	.align  2
-	.globl	up_fork
-	.type	up_fork, function
 	.set	nomips16
 #ifdef CONFIG_MIPS_MICROMIPS
 	.set	micromips
 #endif
+
+	.globl	up_fork
+	.type	up_fork, function
 	.ent	up_fork
 
 up_fork:
-	/* Create a stack frame */
+	/* Create a stack frame.  $a0 holds the vfork flag and is not part of the
+	 * snapshot, so it is still there when mips_fork() is called below.
+	 */
 
 	move	$t0, $sp					/* Save the value of the stack on entry */
 	addiu	$sp, $sp, -FORK_SIZEOF		/* Allocate the structure on the stack */
@@ -130,9 +130,11 @@ up_fork:
 
 	/* Floating point registers (not yet) */
 
-	/* Then, call mips_fork(), passing it a pointer to the stack structure */
+	/* Then, call mips_fork(), passing it a pointer to the stack structure.
+	 * $a0 already holds the vfork flag.
+	 */
 
-	move	$a0, $sp
+	move	$a1, $sp
 	jal		mips_fork
 	nop
 

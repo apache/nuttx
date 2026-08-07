@@ -79,7 +79,8 @@
  * 6.
  *
  * Input Parameters:
- *   context - Caller context information saved by fork()
+ *   vfork   - true for vfork(), false for fork()
+ *   context - Caller context information saved by up_fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -89,7 +90,7 @@
  *
  ****************************************************************************/
 
-pid_t x86_64_fork(const struct fork_s *context)
+pid_t x86_64_fork(bool vfork, const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct tcb_s *child;
@@ -110,7 +111,7 @@ pid_t x86_64_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)context->rip);
+  child = nxtask_setup_fork((start_t)context->rip, vfork);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");
@@ -133,43 +134,58 @@ pid_t x86_64_fork(const struct fork_s *context)
 
   sinfo("Parent: stackutil:%" PRIu64 "\n", stackutil);
 
-  /* Make some feeble effort to preserve the stack contents.  This is
-   * feeble because the stack surely contains invalid pointers and other
-   * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of fork() usage, even this feeble
-   * effort is overkill.
-   */
-
-  newtop = (uint64_t)XCP_ALIGN_DOWN((uintptr_t)child->stack_base_ptr +
-                                    child->adj_stack_size -
-                                    XCPTCONTEXT_SIZE);
-
-  newsp = newtop - stackutil;
-
-  /* Move the register context (from parent) to newtop. */
+  /* Move the register context (from parent) to the child. */
 
   memcpy(child->xcp.regs, parent->xcp.regs, XCPTCONTEXT_SIZE);
 
-  memcpy((void *)newsp, (const void *)context->rsp, stackutil);
-
-  /* Was there a frame pointer in place before? */
-
-  if (context->rbp >= context->rsp && context->rbp < stacktop)
+  if (child->stack_base_ptr == parent->stack_base_ptr)
     {
-      uint32_t frameutil = stacktop - context->rbp;
-      newfp = newtop - frameutil;
+      /* The child is running at the parent's stack addresses, inside its
+       * own duplicated address environment.  There is nothing to relocate:
+       * every stack address the child inherits is still the address it
+       * names.
+       */
+
+      newsp = context->rsp;
+      newfp = context->rbp;
     }
   else
     {
-      newfp = context->rbp;
+      /* Make some feeble effort to preserve the stack contents.  This is
+       * feeble because the stack surely contains invalid pointers and other
+       * content that will not work in the child context.  However, if the
+       * user follows all of the caveats of vfork() usage, even this feeble
+       * effort is overkill.
+       *
+       * For a POSIX fork() child the stack contents are not merely a feeble
+       * effort:  the child is entitled to use them, and it does.
+       */
+
+      newtop = (uint64_t)XCP_ALIGN_DOWN((uintptr_t)child->stack_base_ptr +
+                                        child->adj_stack_size -
+                                        XCPTCONTEXT_SIZE);
+
+      newsp = newtop - stackutil;
+
+      memcpy((void *)newsp, (const void *)context->rsp, stackutil);
+
+      /* Was there a frame pointer in place before? */
+
+      if (context->rbp >= context->rsp && context->rbp < stacktop)
+        {
+          uint32_t frameutil = stacktop - context->rbp;
+          newfp = newtop - frameutil;
+        }
+      else
+        {
+          newfp = context->rbp;
+        }
+
+      sinfo("Old stack top:%08" PRIx64 " RSP:%08" PRIx64
+            " RBP:%08" PRIx64 "\n", stacktop, context->rsp, context->rbp);
+      sinfo("New stack top:%08" PRIx64 " RSP:%08" PRIx64 "\n",
+            newtop, newsp);
     }
-
-  /* We do not need to update the frame-pointer */
-
-  sinfo("Old stack top:%08" PRIx64 " RSP:%08" PRIx64 " RBP:%08" PRIx64 "\n",
-        stacktop, context->rsp, context->rbp);
-  sinfo("New stack top:%08" PRIx64 " RSP:%08" PRIx64 "\n",
-        newtop, newsp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When
    * the child TCB was initialized, all of the values were set to zero.
@@ -195,5 +211,5 @@ pid_t x86_64_fork(const struct fork_s *context)
    * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, vfork);
 }

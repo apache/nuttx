@@ -11,7 +11,7 @@ config ARCH_ARM
 	bool "ARM"
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
-	select ARCH_HAVE_FORK
+	select ARCH_HAVE_VFORK if !BUILD_KERNEL
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -29,7 +29,7 @@ config ARCH_ARM64
 	select ARCH_64BIT
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
-	select ARCH_HAVE_FORK if !BUILD_KERNEL && !BUILD_PROTECTED
+	select ARCH_HAVE_VFORK if !BUILD_KERNEL && !BUILD_PROTECTED
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
@@ -87,7 +87,7 @@ config ARCH_RISCV
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
-	select ARCH_HAVE_FORK
+	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_STDARG_H
@@ -111,7 +111,7 @@ config ARCH_SIM
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_POWEROFF
 	select ARCH_HAVE_TESTSET
-	select ARCH_HAVE_FORK if !HOST_WINDOWS
+	select ARCH_HAVE_VFORK if !HOST_WINDOWS
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TCBINFO
@@ -147,7 +147,7 @@ config ARCH_X86_64
 	select PCI_LATE_DRIVERS_REGISTER if PCI
 	select ARCH_TOOLCHAIN_GNU
 	select ARCH_HAVE_BACKTRACE
-	select ARCH_HAVE_FORK if !BUILD_KERNEL
+	select ARCH_HAVE_VFORK if !BUILD_KERNEL
 	select ARCH_HAVE_SETJMP
 	select ARCH_HAVE_PERF_EVENTS
 	select ARCH_HAVE_POWEROFF
@@ -482,9 +482,39 @@ config ARCH_HAVE_CPUID_MAPPING
 	default n
 	depends on ARCH_HAVE_MULTICPU
 
+config ARCH_HAVE_VFORK
+	bool
+	default n
+	---help---
+		The architecture can implement POSIX vfork():  the child shares the
+		parent's memory and the parent is suspended until the child calls
+		_exit() or one of the exec family of functions.
+
 config ARCH_HAVE_FORK
 	bool
 	default n
+	depends on ARCH_ADDRENV
+	---help---
+		The architecture can implement POSIX fork():  the child receives its
+		own copy of the parent's memory at the same virtual addresses, may
+		modify anything, may return from the function that called fork(), and
+		runs concurrently with the parent.
+
+		This requires an address environment to duplicate, and an
+		up_addrenv_fork() to duplicate it with:  the copy is backed by freshly
+		allocated pages holding a copy of the parent's contents, mapped at the
+		same virtual addresses.
+
+		No architecture selects this yet.  Two things are needed.  First,
+		up_addrenv_fork() itself.  Second, the architecture must build the
+		child's register context from the *user's* saved system call frame:
+		in a kernel build fork() is reached through a system call, so the
+		return address and stack pointer the architecture's fork entry point
+		can see for itself are the kernel's, not the caller's, and a child
+		built from those resumes at a kernel address.
+
+		Where this is not selected fork() is not provided at all, and code
+		that calls it fails to build.
 
 config ARCH_HAVE_CRC32
 	bool

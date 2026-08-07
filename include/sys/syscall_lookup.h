@@ -116,8 +116,8 @@ SYSCALL_LOOKUP(nxsem_wait_slow,            1)
 
 /* The following can be individually enabled */
 
-#ifdef CONFIG_ARCH_HAVE_FORK
-  SYSCALL_LOOKUP(up_fork,                  0)
+#if defined(CONFIG_ARCH_HAVE_VFORK) || defined(CONFIG_ARCH_HAVE_FORK)
+  SYSCALL_LOOKUP(up_fork,                  1)
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID

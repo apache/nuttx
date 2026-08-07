@@ -321,6 +321,16 @@ void nxsched_remove_self(FAR struct tcb_s *rtrtcb);
 void nxsched_add_blocked(FAR struct tcb_s *btcb, tstate_t task_state);
 void nxsched_remove_blocked(FAR struct tcb_s *btcb);
 int  nxsched_set_priority(FAR struct tcb_s *tcb, int sched_priority);
+
+/* Release the vfork() parent suspended on this child, if there is one.
+ * Called from nxsched_release_tcb(), the last point in the child's life --
+ * by which time an exec()ing child has already handed its pid to the
+ * program it loaded.
+ */
+
+#ifdef CONFIG_ARCH_HAVE_VFORK
+void nxtask_resume_vfork(FAR struct tcb_s *child);
+#endif
 #ifndef CONFIG_SMP
 bool nxsched_merge_pending(void);
 bool nxsched_reprioritize_rtr(FAR struct tcb_s *tcb, int priority);

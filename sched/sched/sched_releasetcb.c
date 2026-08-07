@@ -174,6 +174,15 @@ int nxsched_release_tcb(FAR struct tcb_s *tcb, uint8_t ttype)
       nxtask_joindestroy(tcb);
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_VFORK
+      /* Release a suspended vfork() parent here, the last point in the
+       * child's life:  exec_swap() has already handed its pid to any
+       * program it loaded.
+       */
+
+      nxtask_resume_vfork(tcb);
+#endif
+
       /* And, finally, release the TCB itself */
 
       if (tcb->flags & TCB_FLAG_FREE_TCB)
