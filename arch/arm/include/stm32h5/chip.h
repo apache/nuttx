@@ -87,7 +87,7 @@
 #endif
 
 #define STM32_NDMA                     (2)   /* DMA1-2 */
-#define STM32_NPORTS                   (8)   /* 8 GPIO ports, GPIOA-GPIOI */
+#define STM32_NPORTS                   (9)   /* 9 GPIO ports, GPIOA-GPIOI */
 #define STM32_NADC                     (2)   /* 12-bit ADC1, up to 20 channels */
 #define STM32_NDAC                     (1)   /* 12-bit DAC1 */
 #define STM32_NCRC                     (1)   /* CRC */
