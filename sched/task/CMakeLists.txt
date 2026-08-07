@@ -46,7 +46,7 @@ if(CONFIG_SCHED_HAVE_PARENT)
   list(APPEND SRCS task_getppid.c task_reparent.c)
 endif()
 
-if(CONFIG_ARCH_HAVE_FORK)
+if(CONFIG_ARCH_HAVE_VFORK OR CONFIG_ARCH_HAVE_FORK)
   list(APPEND SRCS task_fork.c)
 endif()
 

@@ -79,7 +79,8 @@
  * and 6
  *
  * Input Parameters:
- *   context - Caller context information saved by fork()
+ *   vfork   - true for vfork(), false for fork()
+ *   context - Caller context information saved by up_fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -89,7 +90,7 @@
  *
  ****************************************************************************/
 
-pid_t mips_fork(const struct fork_s *context)
+pid_t mips_fork(bool vfork, const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct tcb_s *child;
@@ -113,7 +114,7 @@ pid_t mips_fork(const struct fork_s *context)
         context->fp, context->sp, context->ra, context->gp);
 #else
   sinfo("fp:%08" PRIx32 " sp:%08" PRIx32 " ra:%08" PRIx32 "\n",
-        context->fp context->sp, context->ra);
+        context->fp, context->sp, context->ra);
 #endif
 #else
   sinfo("s5:%08" PRIx32 " s6:%08" PRIx32 " s7:%08" PRIx32
@@ -130,7 +131,7 @@ pid_t mips_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)context->ra);
+  child = nxtask_setup_fork((start_t)context->ra, vfork);
   if (!child)
     {
       sinfo("nxtask_setup_fork failed\n");
@@ -217,5 +218,5 @@ pid_t mips_fork(const struct fork_s *context)
    * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, vfork);
 }

@@ -468,10 +468,16 @@ void __gcov_execle(void)
 {
 }
 
+/* GCC redirects fork() in instrumented code to __gcov_fork(), so this is
+ * reachable only where unistd.h declares fork() at all.
+ */
+
+#ifdef CONFIG_ARCH_HAVE_FORK
 pid_t __gcov_fork(void)
 {
   return fork();
 }
+#endif
 
 void __gcov_dump(void)
 {

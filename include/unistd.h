@@ -347,8 +347,17 @@ extern "C"
 
 /* Task Control Interfaces */
 
+/* fork() is declared only where POSIX fork() semantics can be provided, so
+ * that calling it elsewhere is a build error rather than a silent change of
+ * meaning.
+ */
+
+#ifdef CONFIG_ARCH_HAVE_FORK
 pid_t   fork(void);
+#endif
+#ifdef CONFIG_ARCH_HAVE_VFORK
 pid_t   vfork(void);
+#endif
 pid_t   getpid(void);
 pid_t   getpgid(pid_t pid);
 pid_t   getpgrp(void);

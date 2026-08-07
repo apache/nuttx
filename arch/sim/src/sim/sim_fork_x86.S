@@ -54,20 +54,20 @@
  * Name: up_fork
  *
  * Description:
- *   The up_fork() function is the base of fork() function that provided in
- *   libc, and fork() is implemented as a wrapper of up_fork() function.
- *   The fork() function has the same effect as posix fork(), except that the behavior is
- *   undefined if the process created by fork() either modifies any data other than
- *   a variable of type pid_t used to store the return value from fork(), or returns
- *   from the function in which fork() was called, or calls any other function before
- *   successfully calling _exit() or one of the exec family of functions.
+ *   The architecture-specific entry point of both of NuttX's cloning
+ *   primitives, vfork() and fork().  The caller says which one it is, and
+ *   the flag is passed straight through to sim_fork().
  *
- *   This thin layer implements fork by simply calling up_fork() with the fork()
- *   context as an argument.  The overall sequence is:
+ *   On the simulator the caller's context is captured with setjmp() rather
+ *   than by hand, and the child re-enters through longjmp() -- which is why
+ *   the entry point tests setjmp()'s return value to tell which of the two
+ *   returns it is on.
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up up_fork().
- *   2) sim_fork() and calls nxtask_setup_fork().
+ *   The overall sequence is:
+ *
+ *   1) User code calls vfork() or fork().  Both are libc wrappers around
+ *      this entry point, which collects context information and
+ *   2) calls sim_fork(), which calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.  This
  *      consists of:
  *      - Allocation of the child task's TCB.
@@ -83,7 +83,7 @@
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   None
+ *   arg0 - true for vfork(), false for fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and returns
@@ -94,21 +94,35 @@
  ************************************************************************************/
 
 	.text
+
 	.globl	SYMBOL(up_fork)
 #ifdef __ELF__
 	.type	SYMBOL(up_fork), @function
 #endif
 
 SYMBOL(up_fork):
+	/* %ebx is callee-saved, so it carries the vfork flag across setjmp() */
+
+	push	%ebx
+	mov	8(%esp), %ebx
+
 	sub	$XCPTCONTEXT_SIZE, %esp
 	push	%esp
 	call	SYMBOL(setjmp)
 
 	sub	$1, %eax
-	jz	child
+	jz	1f
+
+	/* sim_fork(vfork, context).  The context pointer pushed for setjmp()
+	 * is still in place, and is the second argument.
+	 */
+
+	push	%ebx
 	call	SYMBOL(sim_fork)
-child:
+	add	$4, %esp
+1:
 	add	$XCPTCONTEXT_SIZE+4, %esp
+	pop	%ebx
 	ret
 #ifdef __ELF__
 	.size	SYMBOL(up_fork), . - SYMBOL(up_fork)

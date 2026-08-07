@@ -395,6 +395,31 @@ int addrenv_attach(FAR struct tcb_s *tcb, FAR struct addrenv_s *addrenv);
 int addrenv_join(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb);
 
 /****************************************************************************
+ * Name: addrenv_fork
+ *
+ * Description:
+ *   Duplicate the parent's address environment for a POSIX fork() child and
+ *   attach it:  the child gets its own pages holding a copy of the parent's
+ *   contents, mapped at the same virtual addresses.  Contrast
+ *   addrenv_join(), which gives the child the parent's memory.
+ *
+ * Input Parameters:
+ *   ptcb - The tcb of the parent process.
+ *   tcb  - The tcb of the child process.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.  -ENOMEM is returned if there is not enough free memory to
+ *   hold a copy of the parent.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FORK
+int addrenv_fork(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
  * Name: addrenv_leave
  *
  * Description:

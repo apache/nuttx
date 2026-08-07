@@ -46,20 +46,20 @@
  * Name: up_fork
  *
  * Description:
- *   The up_fork() function is the base of fork() function that provided in
- *   libc, and fork() is implemented as a wrapper of up_fork() function.
- *   The fork() function has the same effect as posix fork(), except that the behavior is
- *   undefined if the process created by fork() either modifies any data other than
- *   a variable of type pid_t used to store the return value from fork(), or returns
- *   from the function in which fork() was called, or calls any other function before
- *   successfully calling _exit() or one of the exec family of functions.
+ *   The architecture-specific entry point of both of NuttX's cloning
+ *   primitives, vfork() and fork().  The caller says which one it is, and
+ *   the flag is passed straight through to sim_fork().
  *
- *   This thin layer implements fork by simply calling up_fork() with the fork()
- *   context as an argument.  The overall sequence is:
+ *   On the simulator the caller's context is captured with setjmp() rather
+ *   than by hand, and the child re-enters through longjmp() -- which is why
+ *   the entry point tests setjmp()'s return value to tell which of the two
+ *   returns it is on.
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up sim_fork().
- *   2) sim_fork() and calls nxtask_setup_fork().
+ *   The overall sequence is:
+ *
+ *   1) User code calls vfork() or fork().  Both are libc wrappers around
+ *      this entry point, which collects context information and
+ *   2) calls sim_fork(), which calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.  This
  *      consists of:
  *      - Allocation of the child task's TCB.
@@ -75,7 +75,7 @@
  *   6) nxtask_start_fork() then executes the child thread.
  *
  * Input Parameters:
- *   None
+ *   r0 - true for vfork(), false for fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and returns
@@ -86,18 +86,28 @@
  ************************************************************************************/
 
 	.text
+
 	.globl	up_fork
 	.type	up_fork, @function
 up_fork:
+	/* r4 is callee-saved, so it carries the vfork flag across setjmp() */
+
+	push	{r4, lr}
+	mov	r4, r0
+
 	sub	sp, sp, #XCPTCONTEXT_SIZE
 	mov	r0, sp
 	bl	setjmp
 
 	subs	r0, #1
-	jz	child
+	beq	1f
+
+	mov	r0, r4
+	mov	r1, sp
 	bl	sim_fork
-child:
+1:
 	add	sp, sp, #XCPTCONTEXT_SIZE
-	ret
+	pop	{r4, lr}
+	bx	lr
 	.size	up_fork, . - up_fork
 	.end

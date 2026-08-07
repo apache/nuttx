@@ -95,7 +95,7 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sim_backtrace.c
 endif
 
-ifeq ($(CONFIG_ARCH_HAVE_FORK),y)
+ifneq ($(CONFIG_ARCH_HAVE_VFORK)$(CONFIG_ARCH_HAVE_FORK),)
 CSRCS += sim_fork.c
 endif
 

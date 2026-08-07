@@ -348,6 +348,7 @@
 "usleep","unistd.h","","int","useconds_t"
 "vasprintf","stdio.h","","int","FAR char **","FAR const IPTR char *","va_list"
 "versionsort","dirent.h","","int","FAR const struct dirent **","FAR const struct dirent **"
+"vfork","unistd.h","!defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_ARCH_HAVE_VFORK)","pid_t"
 "vfprintf","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *","FAR const IPTR char *","va_list"
 "vprintf","stdio.h","","int","FAR const IPTR char *","va_list"
 "vscanf","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR const IPTR char *","va_list"

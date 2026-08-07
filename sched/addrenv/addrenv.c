@@ -27,6 +27,7 @@
 #include <nuttx/config.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <nuttx/debug.h>
 
 #include <nuttx/addrenv.h>
@@ -291,6 +292,70 @@ int addrenv_join(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb)
 
   return OK;
 }
+
+#ifdef CONFIG_ARCH_HAVE_FORK
+/****************************************************************************
+ * Name: addrenv_fork
+ *
+ * Description:
+ *   Duplicate the parent process's address environment for a POSIX fork()
+ *   child, and attach the duplicate to the child.
+ *
+ *   This is the counterpart of addrenv_join():  where join gives the child
+ *   the parent's memory, fork gives it a copy -- its own pages, holding a
+ *   snapshot of the parent's contents, mapped at the same virtual addresses.
+ *   Mapping at the same addresses is what lets the copy be exact: every
+ *   pointer the parent held into its own memory remains valid in the child,
+ *   including the pointers inside the copied heap's own metadata.
+ *
+ *   The copy is eager -- there is no copy-on-write, because NuttX has no
+ *   demand paging to build it on -- so forking a large process needs as much
+ *   free memory as the process occupies, and fails with -ENOMEM if that is
+ *   not available.  That is the nature of the primitive on this class of
+ *   system, not a defect of this implementation; spawn-heavy code should
+ *   prefer posix_spawn() or vfork().
+ *
+ * Input Parameters:
+ *   ptcb - The tcb of the parent process
+ *   tcb  - The tcb of the child process
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int addrenv_fork(FAR struct tcb_s *ptcb, FAR struct tcb_s *tcb)
+{
+  FAR struct addrenv_s *addrenv;
+  int ret;
+
+  DEBUGASSERT(ptcb->addrenv_own != NULL);
+
+  addrenv = addrenv_allocate();
+  if (addrenv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  /* Duplicate the parent's regions into freshly allocated pages, mapped at
+   * the same virtual addresses.
+   */
+
+  ret = up_addrenv_fork(&ptcb->addrenv_own->addrenv, &addrenv->addrenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_fork failed: %d\n", ret);
+      addrenv_drop(addrenv, false);
+      return ret;
+    }
+
+  /* Hand the reference taken by addrenv_allocate() to the child */
+
+  return addrenv_attach(tcb, addrenv);
+}
+#endif /* CONFIG_ARCH_HAVE_FORK */
 
 /****************************************************************************
  * Name: addrenv_leave
