@@ -59,8 +59,9 @@ Standard interfaces
   - :c:func:`exit`
   - :c:func:`getpid`
 
-Standard ``vfork`` and ``exec[v|l]`` interfaces:
+Standard ``fork``/``vfork`` and ``exec[v|l]`` interfaces:
 
+  - :c:func:`fork`
   - :c:func:`vfork`
   - :c:func:`exec`
   - :c:func:`execv`
@@ -347,6 +348,46 @@ Functions
   **POSIX Compatibility:** Compatible with the POSIX interface of the same
   name.
 
+.. c:function:: pid_t fork(void)
+
+  ``fork()`` creates a new process.  The child process is an exact copy of
+  the calling process:  it receives **its own copy** of the parent's memory,
+  at the same virtual addresses.  Writes by the child are invisible to the
+  parent and writes by the parent are invisible to the child.  The child may
+  modify anything, call any function, return from the function in which
+  ``fork()`` was called, and run indefinitely; it runs concurrently with the
+  parent.  None of ``vfork()``'s restrictions apply.
+
+     NOTE: ``fork()`` requires an address environment that can be
+     duplicated, and so it is available only where ``CONFIG_ARCH_HAVE_FORK``
+     is selected -- which in turn requires ``CONFIG_ARCH_ADDRENV`` and an
+     architecture that implements ``up_addrenv_fork()``.  **Where it cannot
+     be provided it is not provided at all**:  the declaration is
+     absent from ``unistd.h`` and code that calls it fails to build.  That
+     is deliberate.  A build error naming the function is strictly better
+     than a ``fork()`` that silently gives the child the parent's memory.
+     See :doc:`/guides/fork_vfork_migration` for how to move code that
+     relied on the previous behaviour.
+
+     There is no copy-on-write, because NuttX has no demand paging to build
+     it on, so the copy is eager:  forking a large process needs as much free
+     memory as the process occupies and fails with ``ENOMEM`` otherwise.
+     Spawn-heavy code should prefer :c:func:`posix_spawn` or
+     :c:func:`vfork`, on NuttX as anywhere.
+
+     Applications that relied on the historical NuttX ``fork()`` behaviour --
+     shared memory, private stack, both running -- want
+     :c:func:`pthread_create`, which is that memory relationship spelled
+     clearly, or :c:func:`posix_spawn`.
+
+  :return: Upon successful completion, ``fork()`` returns 0 to the child
+    process and returns the process ID of the child process to the parent
+    process. Otherwise, -1 is returned to the parent, no child process is
+    created, and ``errno`` is set to indicate the error.
+
+  **POSIX Compatibility:** Compatible with the POSIX interface of the same
+  name.
+
 .. c:function:: pid_t vfork(void)
 
   The ``vfork()`` function has the same effect as
@@ -357,12 +398,18 @@ Functions
   function before successfully calling ``_exit()`` or one of the ``exec``
   family of functions.
 
-     NOTE: ``vfork()`` is not an independent NuttX feature, but is
-     implemented in architecture-specific logic (using only helper
-     functions from the NuttX core logic). As a result, ``vfork()`` may
-     not be available on all architectures. The current implementation in
-     NuttX arm64 only guarantees that ``vfork()`` works when
-     CONFIG_BUILD_FLAT=y.
+  The child **shares** the parent's memory -- nothing is copied, which is the
+  entire point of ``vfork()`` and the reason a caller chooses it -- and the
+  parent is **suspended** until the child calls ``_exit()`` or one of the
+  ``exec`` family.  That suspension is what makes the sharing safe, and it is
+  also the price:  the restrictions above exist because the child is running
+  in the parent's address space on borrowed time.
+
+     NOTE: ``vfork()`` is implementable with or without an MMU and is
+     available wherever ``CONFIG_ARCH_HAVE_VFORK`` is selected.  The
+     suspension lives in the kernel primitive rather than in a libc
+     ``waitpid()``, so the parent is resumed at ``exec()`` as POSIX requires,
+     and ``vfork()`` does not depend on ``CONFIG_SCHED_WAITPID``.
 
   :return: Upon successful completion, ``vfork()`` returns 0 to
     the child process and returns the process ID of the child process to the
@@ -449,7 +496,15 @@ Functions
   thread, then (2) call ``execv()`` or ``execl()`` to replace the new
   thread with a program from the file system. Since the new thread will be
   terminated by the ``execv()`` or ``execl()`` call, it really served no
-  purpose other than to support POSIX compatibility.
+  purpose other than to support POSIX compatibility. :c:func:`posix_spawn`
+  does the same job in one step and should be preferred.
+
+  Note also that ``exec()`` does not overlay the calling process: it starts
+  the new program as a separate task. ``exec_swap()`` then exchanges the two
+  pids, so that from the parent's point of view the pid ``vfork()`` returned
+  does name the running program -- but the ``vfork()`` stub itself exits, and
+  it is that exit which releases the suspended ``vfork()`` parent. The parent
+  therefore resumes at ``exec()``, as POSIX requires.
 
   The non-standard binfmt function ``exec()`` needs to have (1) a symbol
   table that provides the list of symbols exported by the base code, and

@@ -30,7 +30,7 @@ On-Demand Paging
 
 NuttX also supports on-demand paging via ``CONFIG_PAGING``.
 On-demand paging is a method of virtual memory management and requires
-the the CPU architecutre support a MMU.
+the the CPU architecture support a MMU.
 
 In a system that uses on-demand paging, the OS responds to a page fault
 by copying data from some storage media into physical memory and setting up
@@ -410,7 +410,7 @@ of functions that:
 
 1. Have only one ``.text`` space in RAM, but
 2. Separate ``.data`` and ``.bass`` space, and are
-3. Separately linked into with the program in each address environmnet.
+3. Separately linked into with the program in each address environment.
 
 (not implemented).
 
@@ -484,7 +484,7 @@ at least in its current form.
 That full implementation of ``mmap()`` plus the minor changes
 to the NuttX ELF loader are all that are required to support fully
 share-able ``.text`` sections – as well as the memory savings
-from not carrying aroung the relocation and symbol information
+from not carrying around the relocation and symbol information
 
 (Not implemented).
 
@@ -632,10 +632,13 @@ the contemplate in any real detail:
   and swap the state into physical memory as needed?(not implemented).
 * ``mmap()``. True shared memory and true file mapping could be supported.
   I am repeating myself (not implemented).
-* ``fork()``. The ``fork()`` interface could be supported. NuttX currently
-  supports the "crippled" version, ``vfork()`` but with these process address
-  environments, the real ``fork()`` interface could be supported.
-  (not implemented).
+* ``fork()``. The real ``fork()`` interface can be supported on configurations
+  with a duplicable process address environment: an architecture implements
+  ``up_addrenv_fork()`` and selects ``CONFIG_ARCH_HAVE_FORK``. What is not
+  implemented is
+  copy-on-write:  the duplication copies the parent's pages eagerly, which
+  needs as much free memory as the parent occupies. Demand paging would fix
+  that.
 * Dynamic Stack Allocation. Completely eliminate the need for constant tuning
   of static stack sizes.(not implemented).
 * Shared Libraries. Am I repeating myself again?(not implemented).
@@ -688,8 +691,8 @@ There are two problems here:
 So how do you create new tasks/processes in such a context.
 There is only one way possible; by using an interface that takes a file name
 as an argument (rather than absolute address).
-New processes started with ``vfork()`` and ``exec()`` or with
-``posix_spawn()`` should not have any of these issues.
+New processes started with ``fork()`` or ``vfork()`` and ``exec()``, or with
+``posix_spawn()``, should not have any of these issues.
 
 
 ARM Memory Management
