@@ -1810,7 +1810,15 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   ret = xhci_cmd_sloten(priv, &slot);
   if (ret < 0 || slot > priv->no_slots)
     {
-      /* Something goes wrong ! */
+      /* A slot the controller cannot address is no more usable than no
+       * slot at all, and the command itself succeeds in that case, so the
+       * caller needs an error either way.
+       */
+
+      if (ret >= 0)
+        {
+          ret = -EINVAL;
+        }
 
       usbhost_vtrace1(XHCI_TRACE1_SLOTEN_FAILED, ret);
       return ret;
@@ -1834,7 +1842,7 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   if (ret < 0)
     {
       uerr("ep0 ring init failed\n");
-      return ret;
+      goto errout_with_slot;
     }
 
   rhport->ep0.slot = slot;
@@ -1845,7 +1853,7 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   ret = xhci_slot_init(priv, dev);
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_slot;
     }
 
   /* Step 6: Assign and address to the device and enable its Default
@@ -1860,12 +1868,21 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   if (ret < 0)
     {
       uerr("failed to set address %d\n", ret);
-      return ret;
+      goto errout_with_slot;
     }
 
   /* Steps 7-12 don't belong here! */
 
   return OK;
+
+errout_with_slot:
+
+  /* Nothing else gives the slot back, and the controller has a fixed
+   * number of them.
+   */
+
+  xhci_device_deinit(priv, rhport);
+  return ret;
 }
 
 /****************************************************************************
@@ -3769,6 +3786,23 @@ static int xhci_enumerate(FAR struct usbhost_connection_s *conn,
   if (ret < 0)
     {
       /* Failed to enumerate */
+
+      /* The device is addressed by now, so it holds a slot, and the retry
+       * below asks for another.
+       */
+
+#ifdef CONFIG_USBHOST_HUB
+      if (ROOTHUB(hport))
+#endif
+        {
+          FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_CONN(conn);
+          FAR struct xhci_rhport_s  *rhport = &priv->rhport[hport->port];
+
+          if (rhport->dev != NULL)
+            {
+              xhci_device_deinit(priv, rhport);
+            }
+        }
 
       /* If this is a root hub port, then marking the hub port not connected
        * will cause xhci_wait() to return and we will try the connection
