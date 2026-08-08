@@ -95,7 +95,7 @@ struct xhci_bus_ops_s
  ****************************************************************************/
 
 FAR struct usbhost_connection_s *
-xhci_initialize(FAR const char *name, uintptr_t base,
+xhci_initialize(FAR const char *name, uint8_t bus, uintptr_t base,
                 FAR const struct xhci_bus_ops_s *ops, FAR void *arg);
 
 /****************************************************************************
