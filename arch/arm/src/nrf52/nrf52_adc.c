@@ -40,6 +40,9 @@
 #include "arm_internal.h"
 #include "nrf52_gpio.h"
 #include "nrf52_adc.h"
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+#  include "nrf52_ppi.h"
+#endif
 
 #include "hardware/nrf52_saadc.h"
 #include "hardware/nrf52_utils.h"
@@ -65,6 +68,18 @@ struct nrf52_adc_s
   /* Samples buffer */
 
   int16_t                    buffer[CONFIG_NRF52_SAADC_CHANNELS];
+
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+  /* Double-buffered EasyDMA for gapless continuous sampling. The SAADC
+   * fills one dmabuf while the driver processes the other; the PPI channel
+   * auto-restarts the SAADC on END and the STARTED interrupt reloads the
+   * DMA pointer to the free buffer. 'next' is the buffer being filled.
+   */
+
+  int16_t                    dmabuf[2][CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN];
+  uint32_t                   batch[CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN];
+  uint8_t                    next;
+#endif
 
   uint8_t                    chan_len;   /* Configured channels */
   uint32_t                   base;       /* Base address of ADC register */
@@ -198,6 +213,65 @@ static int nrf52_adc_isr(int irq, void *context, void *arg)
 
   ainfo("nrf52_adc_isr\n");
 
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+  /* END event: the current DMA buffer is full. Hand it to the upper half
+   * as a batch. The PPI channel has already retriggered START (into the
+   * buffer the STARTED handler preloaded). END must be handled before
+   * STARTED - both can be pending at once: END consumes priv->next and
+   * advances it, then STARTED uses the advanced value to reload the free
+   * buffer's DMA pointer.
+   */
+
+  if (nrf52_adc_getreg(priv, NRF52_SAADC_EVENTS_END_OFFSET) == 1)
+    {
+      DEBUGASSERT(priv->cb != NULL);
+      DEBUGASSERT(priv->cb->au_receive_batch != NULL);
+
+      /* Give the completed buffer to the ADC driver */
+
+      for (i = 0; i < CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN; i += 1)
+        {
+          priv->batch[i] = (uint32_t)priv->dmabuf[priv->next][i];
+        }
+
+      ret = priv->cb->au_receive_batch(dev, NULL, priv->batch,
+                                       CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN);
+      if (ret == -ENOMEM)
+        {
+          /* Receive FIFO overrun */
+
+          DEBUGASSERT(priv->cb->au_reset != NULL);
+          priv->cb->au_reset(dev);
+        }
+
+      /* The next END completes the other buffer */
+
+      priv->next ^= 1;
+
+      /* Clear event (read back to flush the write so the IRQ does not
+       * spuriously re-fire before the clear takes effect).
+       */
+
+      nrf52_adc_putreg(priv, NRF52_SAADC_EVENTS_END_OFFSET, 0);
+      (void)nrf52_adc_getreg(priv, NRF52_SAADC_EVENTS_END_OFFSET);
+    }
+
+  /* STARTED event: the SAADC latched the preloaded pointer and began
+   * sampling. Point the DMA pointer at the other (now free) buffer so the
+   * PPI END->START restart fills it next.
+   */
+
+  if (nrf52_adc_getreg(priv, NRF52_SAADC_EVENTS_STARTED_OFFSET) == 1)
+    {
+      nrf52_adc_putreg(priv, NRF52_SAADC_PTR_OFFSET,
+                       (uint32_t)&priv->dmabuf[priv->next ^ 1]);
+
+      /* Clear event (read back to flush the write) */
+
+      nrf52_adc_putreg(priv, NRF52_SAADC_EVENTS_STARTED_OFFSET, 0);
+      (void)nrf52_adc_getreg(priv, NRF52_SAADC_EVENTS_STARTED_OFFSET);
+    }
+#else
   /* END event */
 
   if (nrf52_adc_getreg(priv, NRF52_SAADC_EVENTS_END_OFFSET) == 1)
@@ -216,6 +290,7 @@ static int nrf52_adc_isr(int irq, void *context, void *arg)
 
       nrf52_adc_putreg(priv, NRF52_SAADC_EVENTS_END_OFFSET, 0);
     }
+#endif
 
   return ret;
 }
@@ -264,12 +339,34 @@ static int nrf52_adc_configure(struct nrf52_adc_s *priv)
 
   /* Configure ADC buffer */
 
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+  /* Continuous mode: gapless double-buffered DMA auto-restarted by PPI.
+   * Only the single measurement channel is sampled (requires SAADC_TIMER).
+   */
+
+  priv->next = 0;
+
+  regval = (uint32_t)&priv->dmabuf[0];
+  DEBUGASSERT(nrf52_easydma_valid(regval));
+  nrf52_adc_putreg(priv, NRF52_SAADC_PTR_OFFSET, regval);
+
+  regval = CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN;
+  nrf52_adc_putreg(priv, NRF52_SAADC_MAXCNT_OFFSET, regval);
+
+  /* Auto-restart the SAADC: END event -> START task via PPI */
+
+  nrf52_ppi_set_event_ep(CONFIG_NRF52_SAADC_CONTINUOUS_PPI_CH,
+                         priv->base + NRF52_SAADC_EVENTS_END_OFFSET);
+  nrf52_ppi_set_task_ep(CONFIG_NRF52_SAADC_CONTINUOUS_PPI_CH,
+                        priv->base + NRF52_SAADC_TASKS_START_OFFSET);
+#else
   regval = (uint32_t)&priv->buffer;
   DEBUGASSERT(nrf52_easydma_valid(regval));
   nrf52_adc_putreg(priv, NRF52_SAADC_PTR_OFFSET, regval);
 
   regval = priv->chan_len;
   nrf52_adc_putreg(priv, NRF52_SAADC_MAXCNT_OFFSET, regval);
+#endif
 
   return OK;
 }
@@ -811,6 +908,12 @@ static void nrf52_adc_shutdown(struct adc_dev_s *dev)
   DEBUGASSERT(dev);
   DEBUGASSERT(priv);
 
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+  /* Stop the auto-restart PPI channel so STOP actually halts the SAADC */
+
+  nrf52_ppi_channel_enable(CONFIG_NRF52_SAADC_CONTINUOUS_PPI_CH, false);
+#endif
+
   /* Stop SAADC */
 
   nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_STOP_OFFSET, 1);
@@ -842,7 +945,13 @@ static void nrf52_adc_rxint(struct adc_dev_s *dev, bool enable)
 
   ainfo("RXINT enable: %d\n", enable ? 1 : 0);
 
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+  /* STARTED reloads the double-buffer DMA pointer; END delivers batches */
+
+  regval = SAADC_INT_END | SAADC_INT_STARTED;
+#else
   regval = SAADC_INT_END;
+#endif
 
   if (enable)
     {
@@ -875,6 +984,23 @@ static int nrf52_adc_ioctl(struct adc_dev_s *dev, int cmd,
     {
       case ANIOC_TRIGGER:
         {
+#ifdef CONFIG_NRF52_SAADC_CONTINUOUS
+          /* Enable the auto-restart PPI channel, then start. The local
+           * timer drives sampling and the PPI keeps the SAADC running,
+           * so no manual SAMPLE trigger is needed.
+           */
+
+          nrf52_ppi_channel_enable(CONFIG_NRF52_SAADC_CONTINUOUS_PPI_CH,
+                                   true);
+
+          nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_START_OFFSET, 1);
+
+          /* Kick the first conversion; the local timer and PPI keep it
+           * running from there.
+           */
+
+          nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_SAMPLE_OFFSET, 1);
+#else
           /* Start ADC */
 
           nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_START_OFFSET, 1);
@@ -882,6 +1008,7 @@ static int nrf52_adc_ioctl(struct adc_dev_s *dev, int cmd,
           /* Trigger first sample */
 
           nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_SAMPLE_OFFSET, 1);
+#endif
         }
         break;
 
