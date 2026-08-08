@@ -248,6 +248,7 @@ struct usbhost_xhci_s
   /* xHCI parameters */
 
   uint8_t                       no_ports;   /* Number of USB Ports */
+  uint8_t                       bus;        /* Which controller this is */
   uint8_t                       no_slots;   /* Maximum number of Device Slots (one per USB device) */
   uint8_t                       no_scratch; /* Number of scratch buffers */
   uint8_t                       no_erst;    /* Event Ring Segment Table size */
@@ -5830,6 +5831,7 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
       rhport->ep0.epno            = 0;
       rhport->ep0.devaddr         = 0;
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
+      rhport->hport.bus           = priv->bus;
       nxmutex_init(&rhport->ep0.exclsem);
 
       /* Initialize the public port representation */
@@ -5874,7 +5876,7 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
  ****************************************************************************/
 
 FAR struct usbhost_connection_s *
-xhci_initialize(FAR const char *name, uintptr_t base,
+xhci_initialize(FAR const char *name, uint8_t bus, uintptr_t base,
                 FAR const struct xhci_bus_ops_s *ops, FAR void *arg)
 {
   FAR struct usbhost_conn_xhci_s *conn = NULL;
@@ -5903,6 +5905,13 @@ xhci_initialize(FAR const char *name, uintptr_t base,
   conn->priv           = priv;
 
   priv->name           = name;
+
+  /* The bus is what the controller calls itself, so that a port reported
+   * through the generic host stack and a message from this driver name the
+   * same thing.  Numbering them here instead would agree only by accident.
+   */
+
+  priv->bus            = bus;
   priv->ops            = ops;
   priv->arg            = arg;
   priv->base           = base;
