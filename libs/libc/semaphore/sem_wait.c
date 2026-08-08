@@ -180,7 +180,7 @@ int nxsem_wait(FAR sem_t *sem)
               break;
             }
 
-          new = _SCHED_GETTID();
+          new = NXSEM_MAKE_MHOLDER(_SCHED_GETTID());
         }
       else
         {

@@ -119,9 +119,13 @@ int nxsem_wait_slow(FAR sem_t *sem)
 
       mholder = atomic_fetch_or(NXSEM_MHOLDER(sem), NXSEM_MBLOCKING_BIT);
 
-      /* Avoid mutex recursion, which is not allowed. */
+      /* Avoid mutex recursion, which is not allowed.  The comparison uses
+       * the lock side's encoding so that ids of either sign compare the
+       * way they were stored.
+       */
 
-      DEBUGASSERT((mholder & (~NXSEM_MBLOCKING_BIT)) != nxsched_gettid());
+      DEBUGASSERT((mholder & (~NXSEM_MBLOCKING_BIT)) !=
+                  NXSEM_MAKE_MHOLDER(nxsched_gettid()));
 
       if (NXSEM_MACQUIRED(mholder))
         {

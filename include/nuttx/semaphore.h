@@ -74,6 +74,22 @@
 
 #define NXSEM_MHOLDER(s)      ((FAR atomic_t *)&((s)->val.mholder))
 
+/* Make a mutex holder value from a task id.  The holder field keeps it in
+ * the low 31 bits because bit 31 is the blocking flag, and a task id can
+ * be negative here: nxsched_gettid() reports -ESRCH for a context that no
+ * longer maps to a task, which is exactly the state a task is in while
+ * nxtask_exit() tears it down and its group's mutexes get their final
+ * lock and unlock.  Storing such an id unmasked would raise the blocking
+ * flag by accident, and an unlock would then try to wake waiters that do
+ * not exist.  Masking keeps a lock and unlock from the same context
+ * consistent with each other, whatever the id's sign.
+ *
+ * The ids -1 and -2 would alias NXSEM_MRESET and NXSEM_NO_MHOLDER, but
+ * nxsched_gettid() produces only valid ids and -ESRCH, which is -3.
+ */
+
+#define NXSEM_MAKE_MHOLDER(tid) ((uint32_t)(tid) & ~NXSEM_MBLOCKING_BIT)
+
 /* Check if holder value (TID) is not NO_HOLDER or RESET */
 
 #define NXSEM_MACQUIRED(h)    (((h) & NXSEM_NO_MHOLDER) != NXSEM_NO_MHOLDER)
