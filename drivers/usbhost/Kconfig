@@ -141,6 +141,21 @@ config USBHOST_MSC
 	---help---
 		Enable support for the mass storage class driver.
 
+config USBHOST_MSC_PARTITIONS
+	bool "Register partitions found on a drive"
+	default y
+	depends on USBHOST_MSC && !DISABLE_MOUNTPOINT
+	depends on MBR_PARTITION || GPT_PARTITION
+	---help---
+		Read the partition table of a mass storage device and register a
+		block device for each partition, /dev/sda1 beside /dev/sda and so
+		on.
+
+		Most drives that have been anywhere near another operating system
+		carry a partition table rather than a filesystem at sector zero,
+		so without this a perfectly good drive cannot be mounted.  The
+		whole-drive node stays where it was.
+
 config USBHOST_MSC_NOTIFIER
 	bool "Support USB Mass Storage notifications"
 	default n
