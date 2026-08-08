@@ -427,6 +427,10 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       dev->d_polltype = 0;
 
+#ifdef CONFIG_NET_IPFRAG
+      dev->d_ipfrag_reassembled = false;
+#endif
+
       nxrmutex_init(&dev->d_lock);
 
       /* We need exclusive access for the following operations */

@@ -390,11 +390,17 @@ static int ipv6_dev_forward(FAR struct net_driver_s *dev,
     }
   else if (ret == PACKET_NOT_FORWARDED)
     {
-      /* Verify that the full packet will fit within the forwarding devices
-       * MTU.  We provide no support for fragmenting forwarded packets.
+      /* Verify that the full packet will fit within the forwarding device's
+       * MTU.  Normal IPv6 forwarding does not fragment oversized packets,
+       * but packets reassembled locally for NAT66/IPFILTER may be split
+       * again by the egress IPFRAG path.
        */
 
-      if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev))
+      if (NET_LL_HDRLEN(fwddev) + dev->d_len > NETDEV_PKTSIZE(fwddev)
+#ifdef CONFIG_NET_IPFRAG
+          && !dev->d_ipfrag_reassembled
+#endif
+         )
         {
           nwarn("WARNING: Packet > MTU... Dropping\n");
           ret = -EFBIG;
