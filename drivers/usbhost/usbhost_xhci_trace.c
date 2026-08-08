@@ -87,11 +87,13 @@ static const struct xhci_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(XHCI_VTRACE2_PORTSC_CONNECTED,
           "XHCI RHPort%d connected, pscwait: %d\n"),
   TRENTRY(XHCI_VTRACE2_PORTSC_DISCONND,
-          "XHCI RHport%d disconnected, pscwait: %d\n"),
+          "XHCI RHPort%d disconnected, pscwait: %d\n"),
   TRENTRY(XHCI_VTRACE2_MONWAKEUP,
           "XHCI Hub port%d connected: %d\n"),
   TRENTRY(XHCI_VTRACE2_CTRLINOUT,
-          "HXCI CTRLIN/OUT: RHPort%d req: %02x\n"),
+          "XHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
+  TRENTRY(XHCI_VTRACE2_EPALLOC,
+          "XHCI EP%d allocated, type: %d\n"),
 };
 
 /****************************************************************************
