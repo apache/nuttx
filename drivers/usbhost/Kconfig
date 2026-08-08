@@ -62,6 +62,21 @@ config USBHOST_CONFIGURATION_SELECTION
 		choose by VID/PID or any other info it can acquire from a USB descriptor.
 		Board file must supply board_usbhost_select_configuration().
 
+config USBHOST_ANNOUNCE
+	bool "Report enumerated devices"
+	default n
+	---help---
+		Report every device the host enumerates with one syslog line,
+		naming the hub port it was found on, what it is, its vendor and
+		product, and whether a class driver claimed it.
+
+		A device that no driver claims is reported too.  That is the case
+		a user most needs to be told about and the one that otherwise
+		passes in silence.
+
+		The same information is available through CONFIG_DEBUG_USB_INFO,
+		among a great deal else.  This is the one line on its own.
+
 config USBHOST_WAITER
 	bool "USB Host Waiter Support"
 	default n
