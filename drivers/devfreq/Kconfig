@@ -1,0 +1,53 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config DEVFREQ
+	bool "devfreq"
+	default n
+	---help---
+		devfreq framework, dynamic voltage frequency scaling(DVFS)
+		for device
+
+if DEVFREQ
+
+config DEVFREQ_PROCFS
+	bool "devfreq_procfs"
+	default n
+	depends on FS_PROCFS
+	select FS_PROCFS_REGISTER
+	---help---
+		devfreq procfs support
+
+config DEVFREQ_PROCFS_QOS
+	bool "devfreq_procfs_qos"
+	default n
+	depends on DEVFREQ_PROCFS
+	---help---
+		devfreq procfs show qos requests and their callers
+
+config DEVFREQ_GOV_ONDEMAND
+	bool "devfreq_gov_ondemand"
+	default n
+	depends on !SCHED_CPULOAD_NONE
+	---help---
+		devfreq_ondemand governor
+
+if DEVFREQ_GOV_ONDEMAND
+
+config DEVFREQ_SAMPLE_RATE
+	int "the default sample rate (us) to get the cpuload"
+	default 1000000
+	---help---
+		Ondemand sample rate
+
+config DEVFREQ_LOAD_THRESHOLD
+	int "the default cpu load threshold up to max cpu freq"
+	default 80
+	---help---
+		Ondemand cpu load threshold
+
+endif
+
+endif
