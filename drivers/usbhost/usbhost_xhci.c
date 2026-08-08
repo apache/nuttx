@@ -199,6 +199,7 @@ struct xhci_rhport_s
   /* Root hub port status */
 
   bool                          connected;  /* Connected to device */
+  uint8_t                       enumfail;   /* Consecutive failed enumerations */
   int8_t                        slot;       /* Slot ID associated with this port */
   struct xhci_epinfo_s          ep0;        /* EP0 endpoint info */
   struct usbhost_roothubport_s  hport;      /* This is the hub port description understood
@@ -2882,6 +2883,12 @@ static void xhci_portsc_work(FAR void *arg)
 
                   rhport->connected = true;
 
+                  /* A new device gets the full allowance of attempts,
+                   * whatever the last one that sat here managed.
+                   */
+
+                  rhport->enumfail = 0;
+
                   usbhost_vtrace2(XHCI_VTRACE2_PORTSC_CONNECTED,
                                   rhpndx + 1, priv->pscwait);
 
@@ -3802,6 +3809,18 @@ static int xhci_enumerate(FAR struct usbhost_connection_s *conn,
             {
               xhci_device_deinit(priv, rhport);
             }
+
+          /* Clearing connected below is what makes xhci_wait() return,
+           * so it is also what repeats the attempt.  Leave the port alone
+           * past the limit; a new connection clears the count.
+           */
+
+          if (++rhport->enumfail >= CONFIG_USBHOST_XHCI_ENUM_RETRIES)
+            {
+              syslog(LOG_ERR, "%s: port %d: giving up after %d attempts\n",
+                     priv->name, hport->port + 1, rhport->enumfail);
+              return ret;
+            }
         }
 
       /* If this is a root hub port, then marking the hub port not connected
@@ -3810,6 +3829,17 @@ static int xhci_enumerate(FAR struct usbhost_connection_s *conn,
        */
 
       hport->connected = false;
+    }
+  else
+    {
+#ifdef CONFIG_USBHOST_HUB
+      if (ROOTHUB(hport))
+#endif
+        {
+          FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_CONN(conn);
+
+          priv->rhport[hport->port].enumfail = 0;
+        }
     }
 
   return ret;
