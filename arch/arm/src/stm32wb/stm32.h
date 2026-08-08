@@ -37,6 +37,8 @@
 /* Peripherals **************************************************************/
 
 #include "chip.h"
+#include "stm32wb_rcc.h"
+#include "stm32wb_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions

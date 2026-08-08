@@ -52,10 +52,9 @@
 #include "stm32l4_rtc.h"
 #include "stm32l4_sdmmc.h"
 #include "stm32l4_spi.h"
-#include "stm32l4_tim.h"
 #include "stm32l4_uart.h"
 #include "stm32l4_usbdev.h"
-#include "stm32l4_wdg.h"
+#include "stm32_wdg.h"
 #include "stm32l4_lowputc.h"
 
 /****************************************************************************

@@ -145,20 +145,20 @@
 #define STM32_IRQ_I3C1_ER         (STM32_IRQ_FIRST + 109) /* 109: I3C1 error interrupt */
 #define STM32_IRQ_I3C2_EV         (STM32_IRQ_FIRST + 110) /* 110: I3C2 event interrupt */
 #define STM32_IRQ_I3C2_ER         (STM32_IRQ_FIRST + 111) /* 111: I3C2 error interrupt */
-#define STM32_IRQ_TIM1_BRK        (STM32_IRQ_FIRST + 112) /* 112: TIM1 Break interrupt */
-#define STM32_IRQ_TIM1_UP         (STM32_IRQ_FIRST + 113) /* 113: TIM1 Update interrupt */
-#define STM32_IRQ_TIM1_TRG_COM    (STM32_IRQ_FIRST + 114) /* 114: TIM1 Trigger and Commutation interrupt */
-#define STM32_IRQ_TIM1_CC         (STM32_IRQ_FIRST + 115) /* 115: TIM1 Capture Compare interrupt */
+#define STM32_IRQ_TIM1BRK         (STM32_IRQ_FIRST + 112) /* 112: TIM1 Break interrupt */
+#define STM32_IRQ_TIM1UP          (STM32_IRQ_FIRST + 113) /* 113: TIM1 Update interrupt */
+#define STM32_IRQ_TIM1TRGCOM      (STM32_IRQ_FIRST + 114) /* 114: TIM1 Trigger and Commutation interrupt */
+#define STM32_IRQ_TIM1CC          (STM32_IRQ_FIRST + 115) /* 115: TIM1 Capture Compare interrupt */
 #define STM32_IRQ_TIM2            (STM32_IRQ_FIRST + 116) /* 116: TIM2 global interrupt */
 #define STM32_IRQ_TIM3            (STM32_IRQ_FIRST + 117) /* 117: TIM3 global interrupt */
 #define STM32_IRQ_TIM4            (STM32_IRQ_FIRST + 118) /* 118: TIM4 global interrupt */
 #define STM32_IRQ_TIM5            (STM32_IRQ_FIRST + 119) /* 119: TIM5 global interrupt */
 #define STM32_IRQ_TIM6            (STM32_IRQ_FIRST + 120) /* 120: TIM6 global interrupt */
 #define STM32_IRQ_TIM7            (STM32_IRQ_FIRST + 121) /* 121: TIM7 global interrupt */
-#define STM32_IRQ_TIM8_BRK        (STM32_IRQ_FIRST + 122) /* 122: TIM8 Break interrupt */
-#define STM32_IRQ_TIM8_UP         (STM32_IRQ_FIRST + 123) /* 123: TIM8 Update interrupt */
-#define STM32_IRQ_TIM8_TRG_COM    (STM32_IRQ_FIRST + 124) /* 124: TIM8 Trigger and Commutation interrupt */
-#define STM32_IRQ_TIM8_CC         (STM32_IRQ_FIRST + 125) /* 125: TIM8 Capture Compare interrupt */
+#define STM32_IRQ_TIM8BRK         (STM32_IRQ_FIRST + 122) /* 122: TIM8 Break interrupt */
+#define STM32_IRQ_TIM8UP          (STM32_IRQ_FIRST + 123) /* 123: TIM8 Update interrupt */
+#define STM32_IRQ_TIM8TRGCOM      (STM32_IRQ_FIRST + 124) /* 124: TIM8 Trigger and Commutation interrupt */
+#define STM32_IRQ_TIM8CC          (STM32_IRQ_FIRST + 125) /* 125: TIM8 Capture Compare interrupt */
 #define STM32_IRQ_TIM9            (STM32_IRQ_FIRST + 126) /* 126: TIM9 global interrupt */
 #define STM32_IRQ_TIM10           (STM32_IRQ_FIRST + 127) /* 127: TIM10 global interrupt */
 #define STM32_IRQ_TIM11           (STM32_IRQ_FIRST + 128) /* 128: TIM11 global interrupt */

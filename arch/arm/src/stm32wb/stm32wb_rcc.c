@@ -789,7 +789,7 @@ static void stm32_stdclockconfig(void)
 #if defined(CONFIG_STM32_IWDG) || defined(CONFIG_STM32_RTC_LSICLOCK)
       /* Low speed internal clock source LSI */
 
-      stm32_rcc_enable_lsi();
+      stm32_rcc_enablelsi();
 #endif
 
 #if defined(STM32_USE_LSE)

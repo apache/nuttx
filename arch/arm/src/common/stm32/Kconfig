@@ -5,67 +5,6 @@
 menu "STM32 Configuration Options"
 	depends on ARCH_CHIP_STM32
 
-config STM32_COMMON_LEGACY
-	bool
-	default y if ARCH_CHIP_STM32F1
-	default y if ARCH_CHIP_STM32F2
-	default y if ARCH_CHIP_STM32F3
-	default y if ARCH_CHIP_STM32F4
-	default y if ARCH_CHIP_STM32G4
-	default y if ARCH_CHIP_STM32L1
-
-config STM32_COMMON_F0_L0_G0_C0
-	bool
-	default y if ARCH_CHIP_STM32F0
-	default y if ARCH_CHIP_STM32L0
-	default y if ARCH_CHIP_STM32G0
-	default y if ARCH_CHIP_STM32C0
-
-config STM32_COMMON_F7_H7
-	bool
-	default y if ARCH_CHIP_STM32F7
-	default y if ARCH_CHIP_STM32H7
-
-config STM32_COMMON_H7_H5
-	bool
-	default y if ARCH_CHIP_STM32H7
-	default y if ARCH_CHIP_STM32H5
-
-config STM32_COMMON_F7_H7_H5
-	bool
-	default y if STM32_COMMON_F7_H7
-	default y if ARCH_CHIP_STM32H5
-
-config STM32_COMMON_L4_L5_U5
-	bool
-	default y if ARCH_CHIP_STM32L4
-	default y if ARCH_CHIP_STM32L5
-	default y if ARCH_CHIP_STM32U5
-
-config STM32_COMMON_L5_U5
-	bool
-	default y if ARCH_CHIP_STM32L5
-	default y if ARCH_CHIP_STM32U5
-
-config STM32_COMMON_L4_H5_L5_U5
-	bool
-	default y if STM32_COMMON_L4_L5_U5
-	default y if ARCH_CHIP_STM32H5
-
-config STM32_COMMON_FULL_FEATURED
-	bool
-	default y if STM32_COMMON_LEGACY
-	default y if STM32_COMMON_F0_L0_G0_C0
-	default y if STM32_COMMON_F7_H7_H5
-	default y if STM32_COMMON_L4_L5_U5
-
-config STM32_COMMON_SRAM2_OPTIONS
-	bool
-	default y if ARCH_CHIP_STM32L4
-	default y if ARCH_CHIP_STM32H5
-	default y if ARCH_CHIP_STM32L5
-	default y if ARCH_CHIP_STM32U5 && STM32_SRAM2
-
 source "arch/arm/src/common/stm32/Kconfig.have"
 
 source "arch/arm/src/common/stm32/Kconfig.periph"

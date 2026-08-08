@@ -103,7 +103,7 @@
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP    0x10 /* Four bits of interrupt priority used */
 
-#if defined(CONFIG_STM32_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET             1   /* Ethernet MAC */
 #else
 #  define STM32_NETHERNET               0   /* No Ethernet MAC */

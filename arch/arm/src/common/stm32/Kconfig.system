@@ -4,7 +4,7 @@
 
 config STM32_DISABLE_IDLE_SLEEP_DURING_DEBUG
 	bool "Disable IDLE Sleep (WFI) in debug mode"
-	depends on STM32_COMMON_LEGACY || STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
+	depends on STM32_HAVE_DISABLE_IDLE_SLEEP
 	---help---
 		In debug configuration, disables the WFI instruction in the IDLE loop
 		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
@@ -33,7 +33,7 @@ endchoice
 
 config STM32_DFU
 	bool "DFU bootloader"
-	depends on (STM32_COMMON_LEGACY || STM32_COMMON_F0_L0_G0_C0) && !(STM32F1_VALUELINE || STM32F0_VALUELINE)
+	depends on (STM32_HAVE_IP_DFUMODE_M3M4_V1 || STM32_HAVE_IP_DFUMODE_M0_V1) && !(STM32F1_VALUELINE || STM32F0_VALUELINE)
 	---help---
 		Configure and position code for use with the STMicro DFU bootloader.  Do
 		not select this option if you will load code using JTAG/SWM.
@@ -41,10 +41,10 @@ config STM32_DFU
 config STM32_TICKLESS_TIMER
 	int "Tickless hardware timer"
 	depends on SCHED_TICKLESS
-	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	depends on STM32_HAVE_TICKLESS_UPTO_TIM14 || STM32_HAVE_TICKLESS_UPTO_TIM17
 	default 2
-	range 1 14 if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
-	range 1 17 if STM32_COMMON_H7_H5 || ARCH_CHIP_STM32WB
+	range 1 14 if STM32_HAVE_TICKLESS_UPTO_TIM14
+	range 1 17 if STM32_HAVE_TICKLESS_UPTO_TIM17
 	---help---
 		If the Tickless OS feature is enabled, then one clock must be
 		assigned to provided the timer needed by the OS.
@@ -52,7 +52,7 @@ config STM32_TICKLESS_TIMER
 config STM32_TICKLESS_CHANNEL
 	int "Tickless timer channel"
 	depends on SCHED_TICKLESS
-	depends on (STM32_COMMON_LEGACY && STM32_TIM) || STM32_COMMON_F7_H7_H5 || ARCH_CHIP_STM32WB
+	depends on STM32_HAVE_TICKLESS_UPTO_TIM14 || STM32_HAVE_TICKLESS_UPTO_TIM17
 	default 1
 	range 1 4
 	---help---
@@ -71,7 +71,7 @@ config STM32_NOEXT_VECTORS
 
 choice
 	prompt "SysTick clock source"
-	depends on STM32_COMMON_F0_L0_G0_C0
+	depends on ARCH_CORTEXM0
 	default STM32_SYSTICK_CORECLK
 
 config STM32_SYSTICK_CORECLK

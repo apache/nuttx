@@ -43,6 +43,7 @@
 #include "chip.h"
 #include "arm_internal.h"
 #include "stm32.h"
+#include "stm32_tim.h"
 #include "maple.h"
 
 /****************************************************************************

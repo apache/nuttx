@@ -199,7 +199,7 @@ config STM32_FB_TRANSPARENCY
 
 config STM32_LTDC_REGDEBUG
 	bool "LTDC Register level debug"
-	depends on (STM32_COMMON_LEGACY && DEBUG_INFO && DEBUG_LCD) || STM32_COMMON_F7_H7
+	depends on (STM32_HAVE_IP_LTDC_M3M4_V1 && DEBUG_INFO && DEBUG_LCD) || STM32_HAVE_IP_LTDC_M7_V1
 	---help---
 		Output detailed register-level LTDC device debug information.
 
@@ -207,7 +207,7 @@ endif # STM32_LTDC
 
 config STM32_LTDC_USE_DSI
 	bool "Use DSI as display connection"
-	depends on STM32_COMMON_F7_H7 && STM32_LTDC && STM32_DSIHOST
+	depends on STM32_LTDC && STM32_DSIHOST
 	---help---
 		Select this if your display is connected via DSI.
 		Deselect option if your display is connected via digital

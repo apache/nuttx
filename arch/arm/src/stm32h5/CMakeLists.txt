@@ -40,8 +40,7 @@ list(
   stm32_start.c
   stm32_pwr.c
   stm32_timerisr.c
-  stm32_lse.c
-  stm32_lsi.c)
+  stm32_lse.c)
 
 if(CONFIG_STM32_USART)
   list(APPEND SRCS stm32_serial.c)
@@ -49,10 +48,6 @@ endif()
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32_tim_lowerhalf.c)
 endif()
 
 if(CONFIG_STM32_I2C)
@@ -67,10 +62,6 @@ if(CONFIG_STM32_FDCAN_CHARDRIVER)
   list(APPEND SRCS stm32_fdcan.c)
 endif()
 
-if(CONFIG_STM32_RNG)
-  list(APPEND SRCS stm32_rng.c)
-endif()
-
 if(CONFIG_STM32_ICACHE)
   list(APPEND SRCS stm32_icache.c)
 endif()
@@ -81,10 +72,6 @@ endif()
 
 if(CONFIG_STM32_QSPI1)
   list(APPEND SRCS stm32_qspi.c)
-endif()
-
-if(CONFIG_STM32_TIM)
-  list(APPEND SRCS stm32_tim.c)
 endif()
 
 if(CONFIG_STM32_HAVE_HSI48)

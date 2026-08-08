@@ -91,20 +91,20 @@
 #define STM32_IRQ_DAC           (STM32_IRQ_FIRST + 38)  /* 38:  DAC global interrupt */
 #define STM32_IRQ_FDCAN1_IT0    (STM32_IRQ_FIRST + 39)  /* 39:  FDCAN1_IT0: FDCAN1 Interrupt 0 */
 #define STM32_IRQ_FDCAN1_IT1    (STM32_IRQ_FIRST + 40)  /* 40:  FDCAN1_IT0: FDCAN1 Interrupt 1 */
-#define STM32_IRQ_TIM1_BRK      (STM32_IRQ_FIRST + 41)  /* 41:  TIM1 break */
-#define STM32_IRQ_TIM1_UP       (STM32_IRQ_FIRST + 42)  /* 42:  TIM1 update */
-#define STM32_IRQ_TIM1_TRG_COM  (STM32_IRQ_FIRST + 43)  /* 43:  TIM1 trigger and communication */
-#define STM32_IRQ_TIM1_CC       (STM32_IRQ_FIRST + 44)  /* 44:  TIM1 capture compare interrupt */
+#define STM32_IRQ_TIM1BRK       (STM32_IRQ_FIRST + 41)  /* 41:  TIM1 break */
+#define STM32_IRQ_TIM1UP        (STM32_IRQ_FIRST + 42)  /* 42:  TIM1 update */
+#define STM32_IRQ_TIM1TRGCOM    (STM32_IRQ_FIRST + 43)  /* 43:  TIM1 trigger and communication */
+#define STM32_IRQ_TIM1CC        (STM32_IRQ_FIRST + 44)  /* 44:  TIM1 capture compare interrupt */
 #define STM32_IRQ_TIM2          (STM32_IRQ_FIRST + 45)  /* 45:  TIM2 global interrupt */
 #define STM32_IRQ_TIM3          (STM32_IRQ_FIRST + 46)  /* 46:  TIM3 global interrupt */
 #define STM32_IRQ_TIM4          (STM32_IRQ_FIRST + 47)  /* 47:  TIM4 global interrupt */
 #define STM32_IRQ_TIM5          (STM32_IRQ_FIRST + 48)  /* 48:  TIM5 global interrupt */
 #define STM32_IRQ_TIM6          (STM32_IRQ_FIRST + 49)  /* 49:  TIM6 global interrupt */
 #define STM32_IRQ_TIM7          (STM32_IRQ_FIRST + 50)  /* 50:  TIM7 global interrupt */
-#define STM32_IRQ_TIM8_BRK      (STM32_IRQ_FIRST + 51)  /* 51:  TIM8 break */
-#define STM32_IRQ_TIM8_UP       (STM32_IRQ_FIRST + 52)  /* 52:  TIM8 update */
-#define STM32_IRQ_TIM8_TRG_COM  (STM32_IRQ_FIRST + 53)  /* 53:  TIM8 trigger and communication */
-#define STM32_IRQ_TIM8_CC       (STM32_IRQ_FIRST + 54)  /* 54:  TIM8 capture compare interrupt */
+#define STM32_IRQ_TIM8BRK       (STM32_IRQ_FIRST + 51)  /* 51:  TIM8 break */
+#define STM32_IRQ_TIM8UP        (STM32_IRQ_FIRST + 52)  /* 52:  TIM8 update */
+#define STM32_IRQ_TIM8TRGCOM    (STM32_IRQ_FIRST + 53)  /* 53:  TIM8 trigger and communication */
+#define STM32_IRQ_TIM8CC        (STM32_IRQ_FIRST + 54)  /* 54:  TIM8 capture compare interrupt */
 #define STM32_IRQ_I2C1_EV       (STM32_IRQ_FIRST + 55)  /* 55:  I2C1 event interrupt */
 #define STM32_IRQ_I2C1_ER       (STM32_IRQ_FIRST + 56)  /* 56:  I2C1 error interrupt */
 #define STM32_IRQ_I2C2_EV       (STM32_IRQ_FIRST + 57)  /* 57:  I2C2 event interrupt */

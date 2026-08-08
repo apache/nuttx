@@ -35,18 +35,12 @@ list(
   stm32l5_start.c
   stm32l5_spi.c
   stm32l5_lse.c
-  stm32l5_lsi.c
   stm32l5_pwr.c
-  stm32l5_tim.c
   stm32l5_flash.c
   stm32l5_timerisr.c)
 
 if(NOT CONFIG_ARCH_IDLE_CUSTOM)
   list(APPEND SRCS stm32l5_idle.c)
-endif()
-
-if(CONFIG_TIMER)
-  list(APPEND SRCS stm32l5_tim_lowerhalf.c)
 endif()
 
 if(CONFIG_BUILD_PROTECTED)

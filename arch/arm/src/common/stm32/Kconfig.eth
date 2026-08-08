@@ -9,8 +9,8 @@ if STM32_ETHMAC
 
 config STM32_PHYADDR
 	int "PHY address"
-	default 1 if STM32_COMMON_LEGACY || ARCH_CHIP_STM32F7
-	default 0
+	default 0 if STM32_HAVE_IP_ETHMAC_V2
+	default 1
 	---help---
 		The 5-bit address of the PHY on the board.  Default: 1
 
@@ -140,7 +140,7 @@ config STM32_ETH_PTP
 
 config STM32_ETH_ENHANCEDDESC
 	bool "Enable enhanced RX/TX descriptors"
-	depends on STM32_COMMON_LEGACY
+	depends on STM32_HAVE_IP_ETHMAC_M3M4_V1
 	default n
 	---help---
 		Enables double-length DMA descriptors that have space for packet
@@ -148,14 +148,14 @@ config STM32_ETH_ENHANCEDDESC
 
 config STM32_ETH_PTP_GPIO
 	bool "PTP pulse-per-second output signal"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP
+	depends on STM32_HAVE_IP_ETHMAC_M3M4_V1 && STM32_ETH_PTP
 	default n
 	---help---
 		Enables pulse-per-second output on GPIO pin.
 
 config STM32_ETH_PTP_RTC_HIRES
 	bool "Use PTP timer as system high-resolution RTC"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP
+	depends on STM32_HAVE_IP_ETHMAC_M3M4_V1 && STM32_ETH_PTP
 	default n
 	---help---
 		Uses the Ethernet peripheral PTP timer as the CONFIG_RTC_HIRES source.
@@ -166,7 +166,7 @@ config STM32_ETH_PTP_RTC_HIRES
 
 config STM32_ETH_TIMESTAMP_RX
 	bool "Hardware timestamping of received packets"
-	depends on STM32_COMMON_LEGACY && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
+	depends on STM32_HAVE_IP_ETHMAC_M3M4_V1 && STM32_ETH_PTP && NET_TIMESTAMP && STM32_ETH_ENHANCEDDESC
 	select ARCH_HAVE_NETDEV_TIMESTAMP
 	default n
 	---help---
@@ -200,13 +200,13 @@ config STM32_MII_MCO
 
 config STM32_MII_MCO1
 	bool "Use MC01 as MII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	depends on STM32_HAVE_MCO1
 	---help---
 		Use MCO1 to clock the MII interface.  Default:  Use MC01
 
 config STM32_MII_MCO2
 	bool "Use MC02 as MII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	depends on STM32_HAVE_MCO2
 	---help---
 		Use MCO2 to clock the MII interface.  Default:  Use MC01
 
@@ -233,13 +233,13 @@ config STM32_RMII_MCO
 
 config STM32_RMII_MCO1
 	bool "Use MC01 as RMII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	depends on STM32_HAVE_MCO1
 	---help---
 		Use MCO1 to clock the RMII interface.  Default:  Use MC01
 
 config STM32_RMII_MCO2
 	bool "Use MC02 as RMII clock"
-	depends on (STM32_STM32F20XX || STM32_STM32F4XXX || STM32_COMMON_F7_H7_H5)
+	depends on STM32_HAVE_MCO2
 	---help---
 		Use MCO2 to clock the RMII interface.  Default:  Use MC01
 
@@ -253,7 +253,7 @@ endchoice
 
 config STM32_PHY_POLLING
 	bool "Support network monitoring by polling the PHY"
-	depends on (STM32_COMMON_F7_H7_H5) && STM32_ETHMAC && STM32_PHY_HAVE_POLLED
+	depends on STM32_ETHMAC && STM32_PHY_HAVE_POLLED
 	select ARCH_PHY_POLLED
 	---help---
 		Some boards may not have an interrupt connected to the PHY.
@@ -273,18 +273,18 @@ config STM32_ETH_HWCHECKSUM
 
 config STM32_NO_PHY
 	bool "MAC has no PHY"
-	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 
 config STM32_ETH_NRXDESC
 	int "Number of RX descriptors"
-	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 	default 8
 	---help---
 		Number of RX DMA descriptors to use.
 
 config STM32_ETH_NTXDESC
 	int "Number of TX descriptors"
-	depends on STM32_COMMON_H7_H5 && STM32_ETHMAC
+	depends on STM32_HAVE_IP_ETHMAC_V2 && STM32_ETHMAC
 	default 4
 	---help---
 		Number of TX DMA descriptors to use.

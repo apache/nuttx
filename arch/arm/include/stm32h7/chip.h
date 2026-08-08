@@ -247,6 +247,9 @@
 #  error STM32 H7 chip Family not identified
 #endif
 
+#define STM32_NATIM                      2   /* Advanced timers TIM1 and TIM8 */
+#define STM32_NBTIM                      2   /* Basic timers TIM6 and TIM7 */
+
 /* TBD FPU Configuration */
 
 #if defined(CONFIG_ARCH_HAVE_FPU)
@@ -259,7 +262,7 @@
 
 /* Diversification based on Family and package */
 
-#if defined(CONFIG_STM32_HAVE_ETHERNET)
+#if defined(CONFIG_STM32_HAVE_ETHMAC)
 #  define STM32_NETHERNET                1   /* 100/100 Ethernet MAC */
 #else
 #  define STM32_NETHERNET                0   /* No 100/100 Ethernet MAC */
