@@ -778,15 +778,17 @@ config USBHOST_BTHCI
 	---help---
 		Select this option to build in support for USB Bluetooth HCI devices.
 
-menuconfig USBHOST_XHCI_PCI
-	bool "USB xHCI PCI Host Driver Support"
+config USBHOST_XHCI
+	bool
 	default n
-	depends on PCI && PCI_MSIX && USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
+	depends on USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
 	select USBHOST_HAVE_ASYNCH
 	---help---
-		USB xHCI PCI host driver support.
+		The xHCI controller driver itself, which is the same wherever the
+		controller is fitted.  Selected by whichever bus found one: PCI
+		below, or an SoC that wires one in.
 
-if USBHOST_XHCI_PCI
+if USBHOST_XHCI
 
 config USBHOST_XHCI_MAX_DEVS
 	int "xHCI maximum supported devices"
@@ -795,6 +797,30 @@ config USBHOST_XHCI_MAX_DEVS
 	---help---
 		How many USB devices will be supported by xHCI driver.
 
-endif # USBHOST_XHCI_PCI
+config USBHOST_XHCI_ENUM_RETRIES
+	int "xHCI enumeration attempts per port"
+	default 3
+	range 1 255
+	---help---
+		How many times to attempt enumeration of a newly connected device
+		before leaving the port alone until the device is unplugged.
+
+		A device whose descriptors cannot be read, or that no class driver
+		claims, fails enumeration every time.  Each failure marks the port
+		disconnected so the attempt repeats, so without a limit such a
+		device is retried for as long as it stays plugged in, logging and
+		taking a device slot on every pass.
+
+		The count is per root hub port and is cleared by a new connection.
+
+endif # USBHOST_XHCI
+
+menuconfig USBHOST_XHCI_PCI
+	bool "USB xHCI PCI Host Driver Support"
+	default n
+	depends on PCI && PCI_MSIX && USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
+	select USBHOST_XHCI
+	---help---
+		USB xHCI PCI host driver support.
 
 endif # USBHOST

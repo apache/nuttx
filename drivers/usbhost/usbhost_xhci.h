@@ -27,6 +27,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+
+#include <nuttx/usb/xhci.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -268,6 +272,19 @@
 #define XHCI_PORTSC_DR               (1 << 30)             /* Bit 30: Device Removable */
 #define XHCI_PORTSC_WPR              (1 << 31)             /* Bit 31: Warm Port Reset */
 
+/* The bits of PORTSC that are write-one-to-clear.
+ *
+ * A read-modify-write of this register acts on every one of these bits
+ * that happened to be set, disabling the port and discarding the changes
+ * it was reporting.  Mask them out of the value first, unless clearing
+ * them is the intent.
+ */
+
+#define XHCI_PORTSC_RW1C             (XHCI_PORTSC_PED | XHCI_PORTSC_CSC | \
+                                      XHCI_PORTSC_PEC | XHCI_PORTSC_WRC | \
+                                      XHCI_PORTSC_OCC | XHCI_PORTSC_PRC | \
+                                      XHCI_PORTSC_PLC | XHCI_PORTSC_CEC)
+
 /* Port Power Management Status and Control (USB3) */
 
 #define XHCI_PORTPMSC_U1TO_SHIFT     (0)                   /* Bits 0-7: U1 Timeout */
@@ -301,6 +318,17 @@
 
 #define XHCI_IMOD_IMODI_SHIFT        (0)                   /* Bits 0-15: Interrupt Moderation Interval */
 #define XHCI_IMOD_IMODC_SHIFT        (16)                  /* Bits 16-31: Interrupt Moderation Counter */
+
+/* What to set the moderation interval to, in 250ns units.
+ *
+ * The reset default is 4000, a millisecond, which is far too long to wait
+ * to be told a transfer finished.  Zero is too short: it puts no bound on
+ * how often a controller may interrupt, and a polled device such as a
+ * keyboard on an interrupt endpoint will then occupy a processor.  160 is
+ * 40us, which is what Linux uses.
+ */
+
+#define XHCI_IMOD_DEFAULT            (160)
 
 /* Event Ring Segment Table Size */
 
@@ -480,8 +508,26 @@
 
 #define XHCI_ST_CTX0_RTSTR_SHIFT     (0)                   /* Bits 0:19: Route String */
 #define XHCI_ST_CTX0_RTSTR_MASK      (0xfffff << XHCI_ST_CTX0_RTSTR_SHIFT)
+#define XHCI_ST_CTX0_RTSTR_SET(x)    (((x) << XHCI_ST_CTX0_RTSTR_SHIFT) & \
+                                      XHCI_ST_CTX0_RTSTR_MASK)
 #define XHCI_ST_CTX0_SPEED_SHIFT     (20)                  /* Bits 20:23: Speed */
 #define XHCI_ST_CTX0_SPEED_MASK      (0xf << XHCI_ST_CTX0_SPEED_SHIFT)
+#define XHCI_ST_CTX0_SPEED_SET(x)    (((x) << XHCI_ST_CTX0_SPEED_SHIFT) & \
+                                      XHCI_ST_CTX0_SPEED_MASK)
+
+/* Port Speed IDs, which xHCI numbers its own way rather than USB's.  These
+ * are the values every controller reports in PORTSC and expects back in a
+ * slot context; a device is described to the controller with one of them
+ * and with nothing else, so zero is not a default but an invalid context.
+ *
+ * Reference: Table 7-13: Default USB Speed ID Mapping
+ */
+
+#define XHCI_SPEED_FULL              (1)
+#define XHCI_SPEED_LOW               (2)
+#define XHCI_SPEED_HIGH              (3)
+#define XHCI_SPEED_SUPER             (4)
+#define XHCI_SPEED_SUPER_PLUS        (5)
 #define XHCI_ST_CTX0_MTT             (1 << 25)             /* Bit 25: Multi-TT */
                                                            /* Bit 24: Reserved */
 #define XHCI_ST_CTX0_HUB             (1 << 26)             /* Bit 26: Hub */
@@ -494,6 +540,25 @@
 #define XHCI_ST_CTX1_PORTS_SHIFT     (24)                  /* Bit 24-31: Number of Ports */
 #define XHCI_ST_CTX1_PORTS_MASK      (0xff << XHCI_ST_CTX1_PORTS_SHIFT)
 #define XHCI_ST_CTX1_PORTS_SET(x)    (((x) << XHCI_ST_CTX1_PORTS_SHIFT) & XHCI_ST_CTX1_PORTS_MASK)
+
+/* Slot Context dword 2 describes the transaction translator that carries a
+ * low or full speed device sitting behind a high speed hub.  It names the
+ * nearest high speed ancestor, which is the hub whose TT does the work, and
+ * not the hub the device is plugged into if those differ.
+ */
+
+#define XHCI_ST_CTX2_TTHSID_SHIFT    (0)                  /* Bit 0-7: TT Hub Slot ID */
+#define XHCI_ST_CTX2_TTHSID_MASK     (0xff << XHCI_ST_CTX2_TTHSID_SHIFT)
+#define XHCI_ST_CTX2_TTHSID_SET(x)   (((x) << XHCI_ST_CTX2_TTHSID_SHIFT) & \
+                                      XHCI_ST_CTX2_TTHSID_MASK)
+#define XHCI_ST_CTX2_TTPORT_SHIFT    (8)                  /* Bit 8-15: TT Port Number */
+#define XHCI_ST_CTX2_TTPORT_MASK     (0xff << XHCI_ST_CTX2_TTPORT_SHIFT)
+#define XHCI_ST_CTX2_TTPORT_SET(x)   (((x) << XHCI_ST_CTX2_TTPORT_SHIFT) & \
+                                      XHCI_ST_CTX2_TTPORT_MASK)
+#define XHCI_ST_CTX2_TTT_SHIFT       (16)                 /* Bit 16-17: TT Think Time */
+#define XHCI_ST_CTX2_TTT_MASK        (0x3 << XHCI_ST_CTX2_TTT_SHIFT)
+#define XHCI_ST_CTX2_TTT_SET(x)      (((x) << XHCI_ST_CTX2_TTT_SHIFT) & \
+                                      XHCI_ST_CTX2_TTT_MASK)
 
 #define XHCI_ST_CTX3_ADDR_SHIFT      (0)                  /* Bit 0-7: USB Device Address */
 #define XHCI_ST_CTX3_ADDR_MASK       (0xff << XHCI_ST_CTX3_ADDR_SHIFT)
