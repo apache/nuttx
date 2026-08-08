@@ -176,13 +176,6 @@ struct xhci_epinfo_s
 #endif
   struct xhci_ring_s td;           /* TD ring for this endpoint */
   uint8_t            slot;         /* Slot where this EP resides */
-
-  /* These fields are used in the split-transaction protocol. */
-
-  uint8_t           hubaddr;      /* USB device address of the high-speed hub below
-                                   * which a full/low-speed device is attached.
-                                   */
-  uint8_t           hubport;      /* The port on the above high-speed hub. */
 };
 
 /* This structure retains the state of one root hub port */
@@ -394,6 +387,11 @@ static int xhci_address_set(FAR struct usbhost_xhci_s *priv,
                             FAR struct xhci_rhport_s *rhport, bool setaddr);
 static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
                           FAR struct xhci_dev_s *dev);
+#ifdef CONFIG_USBHOST_HUB
+static uint32_t xhci_route_string(FAR struct usbhost_hubport_s *hport);
+static uint32_t xhci_slot_tt(FAR struct usbhost_xhci_s *priv,
+                             FAR struct xhci_dev_s *dev);
+#endif
 static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
                             FAR struct xhci_rhport_s *rhport);
 static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
@@ -1706,10 +1704,11 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
            XHCI_ST_CTX0_SPEED_SET(xhci_speed_id(dev->hport->speed));
 
 #ifdef CONFIG_USBHOST_HUB
+  regval |= XHCI_ST_CTX0_RTSTR_SET(xhci_route_string(dev->hport));
+
   /* TODO:
    *   1. Activate the transaction translator if required
    *   2. Configure hub bit in slot context if hub
-   *   3. configure route string
    */
 
 #  warning missing logic
@@ -1725,6 +1724,10 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
 
   regval |= XHCI_ST_CTX1_PORTS_SET(0);
   xhci_in_slot(priv, dev->input)->ctx[1] = htole32(regval);
+
+#ifdef CONFIG_USBHOST_HUB
+  xhci_in_slot(priv, dev->input)->ctx[2] = htole32(xhci_slot_tt(priv, dev));
+#endif
 
   /* Step 4. the Transfer Ring for the Default Control Endpoint is already
    * allocated.
@@ -3043,6 +3046,58 @@ xhci_dev_from_ep(FAR struct usbhost_xhci_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: xhci_route_string
+ *
+ * Description:
+ *   The route string for a device, which is how the controller finds it.
+ *
+ *   Each hub between the root and the device contributes one nibble holding
+ *   the number of the port the next thing down is plugged into, with the
+ *   tier nearest the root in the lowest nibble.  A device on a root hub port
+ *   routes to zero, which is what the field means for "no hubs in between".
+ *
+ *   Reference:
+ *     - 8.9: Route String Field
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_route_string(FAR struct usbhost_hubport_s *hport)
+{
+  uint32_t route = 0;
+  int      tier  = 0;
+
+  /* Walking up reaches the deepest tier first, and shifting what is already
+   * there left by a nibble each time leaves the tier nearest the root in the
+   * lowest one.  USB allows five tiers of hubs and the field holds exactly
+   * that many, so a chain longer than the bus permits stops here rather than
+   * writing over the speed field above it.
+   */
+
+  while (hport->parent != NULL && tier < 5)
+    {
+      uint8_t portno = hport->port + 1;
+
+      /* The nibble cannot express a port above fifteen.  A hub that large
+       * is legal, so clamp rather than let the number wrap into the tier
+       * below it.
+       */
+
+      if (portno > 15)
+        {
+          portno = 15;
+        }
+
+      route = (route << 4) | portno;
+      hport = hport->parent;
+      tier++;
+    }
+
+  return route;
+}
+#endif
+
 static FAR struct xhci_dev_s *
 xhci_dev_from_hport(FAR struct usbhost_xhci_s *priv,
                     FAR struct usbhost_hubport_s *hport)
@@ -3060,6 +3115,71 @@ xhci_dev_from_hport(FAR struct usbhost_xhci_s *priv,
 
   return NULL;
 }
+
+#ifdef CONFIG_USBHOST_HUB
+/****************************************************************************
+ * Name: xhci_slot_tt
+ *
+ * Description:
+ *   Slot context dword 2, naming the transaction translator that carries a
+ *   low or full speed device behind a high speed hub.  Zero when no
+ *   translator is involved, which is what the field means.
+ *
+ *   Reference:
+ *     - 6.2.2: Slot Context
+ *
+ ****************************************************************************/
+
+static uint32_t xhci_slot_tt(FAR struct usbhost_xhci_s *priv,
+                             FAR struct xhci_dev_s *dev)
+{
+  FAR struct usbhost_hubport_s *hport = dev->hport;
+  FAR struct xhci_dev_s        *tthub;
+
+  /* Only a low or full speed device is translated for. */
+
+  if (hport->speed == USB_SPEED_HIGH)
+    {
+      return 0;
+    }
+
+  /* The translator lives in the nearest high speed ancestor, which need not
+   * be the hub the device is plugged into: a full speed hub below a high
+   * speed one is itself carried by the translator above it.
+   */
+
+  while (hport->parent != NULL && hport->parent->speed != USB_SPEED_HIGH)
+    {
+      hport = hport->parent;
+    }
+
+  if (hport->parent == NULL)
+    {
+      /* Nothing high speed above, so the device is on a root hub port or
+       * the whole chain runs at its speed.  Either way there is no
+       * translator to name.
+       */
+
+      return 0;
+    }
+
+  tthub = xhci_dev_from_hport(priv, hport->parent);
+  if (tthub == NULL)
+    {
+      uerr("no device for the hub carrying port %d\n", hport->port);
+      return 0;
+    }
+
+  /* Think time is the hub's, reported by the hub class driver from the hub
+   * descriptor.  Both fields count in the same units, so the value carries
+   * across unchanged.
+   */
+
+  return XHCI_ST_CTX2_TTHSID_SET(tthub->slot) |
+         XHCI_ST_CTX2_TTPORT_SET(hport->port + 1) |
+         XHCI_ST_CTX2_TTT_SET(hport->parent->ttt);
+}
+#endif
 
 /****************************************************************************
  * Name: xhci_speed_id
@@ -4161,32 +4281,6 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   /* Store slot ID for later */
 
   epinfo->slot = dev->slot;
-
-#ifdef CONFIG_USBHOST_HUB
-  if (hport->speed != USB_SPEED_HIGH)
-    {
-      /* A high speed hub exists between this device and the root hub
-       * otherwise we would not get here.
-       */
-
-      FAR struct usbhost_hubport_s *parent = hport->parent;
-
-      for (; parent->speed != USB_SPEED_HIGH; parent = hport->parent)
-        {
-          hport = parent;
-        }
-
-      if (parent->speed == USB_SPEED_HIGH)
-        {
-          epinfo->hubport = HPORT(hport);
-          epinfo->hubaddr = hport->parent->funcaddr;
-        }
-      else
-        {
-          return -EINVAL;
-        }
-    }
-#endif
 
   /* Get EP type */
 
