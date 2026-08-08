@@ -42,6 +42,7 @@ include i2c/Make.defs
 include i2s/Make.defs
 include i3c/Make.defs
 include ipcc/Make.defs
+include mbox/Make.defs
 include input/Make.defs
 include ioexpander/Make.defs
 include lcd/Make.defs
