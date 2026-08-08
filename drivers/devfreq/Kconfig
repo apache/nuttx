@@ -27,4 +27,27 @@ config DEVFREQ_PROCFS_QOS
 	---help---
 		devfreq procfs show qos requests and their callers
 
+config DEVFREQ_GOV_ONDEMAND
+	bool "devfreq_gov_ondemand"
+	default n
+	depends on !SCHED_CPULOAD_NONE
+	---help---
+		devfreq_ondemand governor
+
+if DEVFREQ_GOV_ONDEMAND
+
+config DEVFREQ_SAMPLE_RATE
+	int "the default sample rate (us) to get the cpuload"
+	default 1000000
+	---help---
+		Ondemand sample rate
+
+config DEVFREQ_LOAD_THRESHOLD
+	int "the default cpu load threshold up to max cpu freq"
+	default 80
+	---help---
+		Ondemand cpu load threshold
+
+endif
+
 endif
