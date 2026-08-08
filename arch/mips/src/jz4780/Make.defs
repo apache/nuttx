@@ -52,6 +52,10 @@ CHIP_CSRCS  = jz4780_lowinit.c jz4780_exception.c jz4780_decodeirq.c
 CHIP_CSRCS += jz4780_irq.c jz4780_timerisr.c jz4780_gpio.c
 CHIP_CSRCS += jz4780_cache.c
 
+ifeq ($(CONFIG_JZ4780_RNG),y)
+CHIP_CSRCS += jz4780_rng.c
+endif
+
 ifeq ($(CONFIG_USBHOST),y)
 CHIP_CSRCS += jz_usbhost.c
 

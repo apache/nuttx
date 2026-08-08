@@ -7,6 +7,12 @@ if ARCH_CHIP_JZ4780
 comment "JZ4780 Configuration Options"
 
 menu "JZ4780 Peripheral Support"
+
+config JZ4780_RNG
+	bool "Random Number Generator (RNG)"
+	default y
+	select ARCH_HAVE_RNG
+
 config JZ4780_LCD
 	bool "LCD controller"
 	default n
