@@ -122,5 +122,14 @@ config IOB_DEBUG
 		NOTE that this selection is not available if IOBs are being used
 		to syslog buffering logic (CONFIG_SYSLOG_BUFFER=y)!
 
+config IOB_OWNER_TRACKING
+	bool "Track task/ISR owner of each IOB (for debugging)"
+	default n
+	help
+		When enabled, each IOB carries small metadata indicating the
+		allocating context (task PID or ISR). This helps debug leaks,
+		starvation and ownership bugs without changing the IOB API.
+		Disabled by default to avoid extra RAM on small targets.
+
 endif # MM_IOB
 endmenu # Common I/O buffer support
