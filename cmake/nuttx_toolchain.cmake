@@ -113,7 +113,7 @@ if(NOT NUTTX_TOOLCHAIN_PREPROCESS_DEFINED)
       OUTPUT ${TARGET_FILE}
       COMMAND
         ${PREPROCESS} ${DEFINES} ${preprocess_depflags}
-        -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
+        -I${NUTTX_BINARY_DIR}/include -I${NUTTX_DIR}/include
         -I${NUTTX_CHIP_ABS_DIR} ${SOURCE_FILE} > ${TARGET_FILE}
       DEPENDS ${SOURCE_FILE} ${DEPENDS} ${depfile_args}
       COMMAND_EXPAND_LISTS)

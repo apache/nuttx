@@ -312,7 +312,7 @@ list(APPEND HOSTSRCS sim_errno.c)
 
 configure_file(${NUTTX_DIR}/include/nuttx/fs/hostfs.h
                ${CMAKE_CURRENT_BINARY_DIR}/hostfs.h COPYONLY)
-configure_file(${CMAKE_BINARY_DIR}/include/nuttx/config.h
+configure_file(${NUTTX_BINARY_DIR}/include/nuttx/config.h
                ${CMAKE_CURRENT_BINARY_DIR}/config.h COPYONLY)
 target_include_directories(nuttx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

@@ -25,7 +25,7 @@ add_subdirectory(src)
 add_custom_target(
   nuttx_post_build
   DEPENDS nuttx
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
   COMMENT "Regenerate nuttx.uf2")
 
 # The uf2 command to convert ELF/BIN to UF2
@@ -35,6 +35,6 @@ add_custom_command(
   COMMAND picotool ARGS uf2 convert --quiet -t elf nuttx nuttx.uf2
   COMMAND_EXPAND_LISTS
   COMMAND ${CMAKE_COMMAND} -E echo "nuttx.uf2" >>
-          ${CMAKE_BINARY_DIR}/nuttx.manifest
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+          ${NUTTX_BINARY_DIR}/nuttx.manifest
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
   COMMENT "Regenerate nuttx.uf2")

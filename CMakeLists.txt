@@ -89,6 +89,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE
 # Process board config & directory locations #################################
 
 set(NUTTX_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(NUTTX_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 # uncleaned previous make build can cause various types of cmake error
 if(EXISTS "${NUTTX_DIR}/.config")
@@ -211,7 +212,7 @@ endif()
 
 get_filename_component(NUTTX_APPS_DIR ${NUTTX_APPS_DIR} ABSOLUTE)
 get_filename_component(apps_dir ${NUTTX_APPS_DIR} NAME)
-set(NUTTX_APPS_BINDIR "${CMAKE_BINARY_DIR}/${apps_dir}")
+set(NUTTX_APPS_BINDIR "${NUTTX_BINARY_DIR}/${apps_dir}")
 
 # Support not having application directory
 
@@ -220,10 +221,10 @@ if("${apps_dir}" STREQUAL "dummy")
   file(TOUCH ${NUTTX_APPS_BINDIR}/Kconfig)
 endif()
 
-set(ENV{PYTHONPYCACHEPREFIX} ${CMAKE_BINARY_DIR})
+set(ENV{PYTHONPYCACHEPREFIX} ${NUTTX_BINARY_DIR})
 set(ENV{APPSDIR} ${NUTTX_APPS_DIR}) # TODO: support not having apps/
 set(ENV{APPSBINDIR} ${NUTTX_APPS_BINDIR}) # TODO: support not having apps/
-set(ENV{BINDIR} ${CMAKE_BINARY_DIR}) # TODO: support not having apps/
+set(ENV{BINDIR} ${NUTTX_BINARY_DIR}) # TODO: support not having apps/
 set(ENV{EXTERNALDIR} dummy) # TODO
 set(ENV{DRIVERS_PLATFORM_DIR} dummy) # TODO
 
@@ -273,7 +274,7 @@ endif()
 
 # Custom board ###################################################
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/boards/dummy)
+file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/boards/dummy)
 if(CONFIG_ARCH_BOARD_CUSTOM)
   get_filename_component(NUTTX_BOARD_ABS_DIR ${CONFIG_ARCH_BOARD_CUSTOM_DIR}
                          ABSOLUTE BASE_DIR ${NUTTX_DIR})
@@ -291,22 +292,22 @@ if(CONFIG_ARCH_BOARD_CUSTOM
    AND EXISTS ${NUTTX_BOARD_ABS_DIR}/Kconfig
    AND NOT (IS_NUTTX_BOARD EQUAL 0))
   nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/Kconfig
-                       ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
+                       ${NUTTX_BINARY_DIR}/boards/dummy/Kconfig)
 else()
-  file(TOUCH ${CMAKE_BINARY_DIR}/boards/dummy/Kconfig)
+  file(TOUCH ${NUTTX_BINARY_DIR}/boards/dummy/Kconfig)
 endif()
 
 # board platform driver
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/drivers)
+file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/drivers)
 
 if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers
    AND EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/Kconfig)
   nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/../drivers
-                       ${CMAKE_BINARY_DIR}/drivers/platform)
+                       ${NUTTX_BINARY_DIR}/drivers/platform)
 else()
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/drivers/platform)
-  file(TOUCH ${CMAKE_BINARY_DIR}/drivers/platform/Kconfig)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/drivers/platform)
+  file(TOUCH ${NUTTX_BINARY_DIR}/drivers/platform/Kconfig)
 endif()
 
 # Custom chip ###################################################
@@ -320,25 +321,25 @@ else()
       "${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/${CONFIG_ARCH_CHIP}")
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/dummy)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/arch/dummy)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/arch/dummy)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/arch/dummy)
 endif()
 
 if(CONFIG_ARCH_CHIP_CUSTOM AND EXISTS ${NUTTX_CHIP_ABS_DIR}/Kconfig)
   nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}/Kconfig
-                       ${CMAKE_BINARY_DIR}/arch/dummy/Kconfig)
+                       ${NUTTX_BINARY_DIR}/arch/dummy/Kconfig)
 else()
-  file(TOUCH ${CMAKE_BINARY_DIR}/arch/dummy/Kconfig)
+  file(TOUCH ${NUTTX_BINARY_DIR}/arch/dummy/Kconfig)
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH})
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH})
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH})
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH})
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src)
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
   nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}
-                       ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
+                       ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
 endif()
 
 # Unsupported custom board/chips yet, workaround
@@ -351,28 +352,28 @@ endif()
 # Copy board defconfig into main directory and expand TODO: do also for changes
 # in board/config (by comparing stored defconfig to specified one)
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
                                              "${NUTTX_DEFCONFIG_SAVED}")
 
   message(STATUS "Initializing NuttX")
   configure_file(${NUTTX_DEFCONFIG} defconfig COPYONLY)
   configure_file(${NUTTX_DEFCONFIG} .config.compressed COPYONLY)
 
-  set(ENV{KCONFIG_CONFIG} ${CMAKE_BINARY_DIR}/.config.compressed)
+  set(ENV{KCONFIG_CONFIG} ${NUTTX_BINARY_DIR}/.config.compressed)
 
   # Define host before the first olddefconfig so host-dependent defaults, such
   # as the sim toolchain choice on macOS, resolve the same way as configure.sh.
-  nuttx_sethost(CONFIG_FILE ${CMAKE_BINARY_DIR}/.config.compressed)
+  nuttx_sethost(CONFIG_FILE ${NUTTX_BINARY_DIR}/.config.compressed)
 
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
   nuttx_olddefconfig()
 
-  file(RENAME ${CMAKE_BINARY_DIR}/.config.compressed
-       ${CMAKE_BINARY_DIR}/.config)
-  set(ENV{KCONFIG_CONFIG} ${CMAKE_BINARY_DIR}/.config)
+  file(RENAME ${NUTTX_BINARY_DIR}/.config.compressed
+       ${NUTTX_BINARY_DIR}/.config)
+  set(ENV{KCONFIG_CONFIG} ${NUTTX_BINARY_DIR}/.config)
 
   # Set CONFIG_BASE_DEFCONFIG so .config matches Make behavior (configure.sh)
-  file(READ ${CMAKE_BINARY_DIR}/.config _config_init_content)
+  file(READ ${NUTTX_BINARY_DIR}/.config _config_init_content)
   string(
     REGEX
     REPLACE "CONFIG_BASE_DEFCONFIG=\"[^\"]*\""
@@ -382,10 +383,10 @@ if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
     string(APPEND _config_init_content
            "\nCONFIG_BASE_DEFCONFIG=\"${NUTTX_BOARD}/${NUTTX_CONFIG}\"\n")
   endif()
-  file(WRITE ${CMAKE_BINARY_DIR}/.config "${_config_init_content}")
+  file(WRITE ${NUTTX_BINARY_DIR}/.config "${_config_init_content}")
 
   # store original expanded .config
-  configure_file(${CMAKE_BINARY_DIR}/.config ${CMAKE_BINARY_DIR}/.config.orig
+  configure_file(${NUTTX_BINARY_DIR}/.config ${NUTTX_BINARY_DIR}/.config.orig
                  COPYONLY)
 
   set(NUTTX_DEFCONFIG_SAVED
@@ -422,7 +423,7 @@ add_custom_target(nuttx_global)
 
 # this exposes all Kconfig vars to CMake
 
-nuttx_export_kconfig(${CMAKE_BINARY_DIR}/.config)
+nuttx_export_kconfig(${NUTTX_BINARY_DIR}/.config)
 
 include(nuttx_generate_headers)
 include(nuttx_generate_outputs)
@@ -471,9 +472,9 @@ endif()
 
 # This needs to happen before project() when binaries are searched for
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake)
+list(APPEND CMAKE_MODULE_PATH ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake)
 set(CMAKE_TOOLCHAIN_FILE
-    "${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
+    "${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/Toolchain.cmake")
 
 # Compiler detection must not try to link a full executable.  CMake validates a
 # compiler by building and linking a test program, but a bare metal cross
@@ -511,8 +512,8 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/cmake
 endif()
 
 # Support loadable and kernel options by specific arch
-if(EXISTS ${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
-  include(${CMAKE_SOURCE_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
+if(EXISTS ${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
+  include(${NUTTX_DIR}/arch/${CONFIG_ARCH}/src/cmake/elf.cmake)
 endif()
 
 include(platform)
@@ -598,7 +599,7 @@ if(CONFIG_ARCH_SIM)
   # linked against final nuttx binary
 
   if(NOT WIN32)
-    target_link_libraries(nuttx PRIVATE ${CMAKE_BINARY_DIR}/nuttx.rel)
+    target_link_libraries(nuttx PRIVATE ${NUTTX_BINARY_DIR}/nuttx.rel)
   endif()
 else()
   # These flags apply to source files not part of the library. In sim build this
@@ -620,7 +621,7 @@ set_property(
 # Each subdirectory will generate a static library
 
 if(CONFIG_OPENAMP)
-  include_directories(${CMAKE_SOURCE_DIR}/openamp/open-amp/lib/include)
+  include_directories(${NUTTX_DIR}/openamp/open-amp/lib/include)
 endif()
 
 add_subdirectory(openamp)
@@ -678,7 +679,7 @@ if(NOT CONFIG_ARCH_SIM)
   set(ldscript_tmp_list)
   foreach(ld ${ldscript})
     get_filename_component(LD_SCRIPT_NAME ${ld} NAME)
-    set(LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
+    set(LD_SCRIPT_TMP "${NUTTX_BINARY_DIR}/${LD_SCRIPT_NAME}.tmp")
 
     nuttx_generate_preprocess_target(SOURCE_FILE ${ld} TARGET_FILE
                                      ${LD_SCRIPT_TMP})
@@ -705,7 +706,7 @@ else()
 endif()
 
 # initialize manifest to hold all generated files
-file(TOUCH ${CMAKE_BINARY_DIR}/nuttx.manifest)
+file(TOUCH ${NUTTX_BINARY_DIR}/nuttx.manifest)
 
 get_property(nuttx_kernel_libs GLOBAL PROPERTY NUTTX_KERNEL_LIBRARIES)
 get_property(nuttx_extra_libs GLOBAL PROPERTY NUTTX_EXTRA_LIBRARIES)
@@ -749,7 +750,7 @@ if(NOT CONFIG_ARCH_SIM)
 
     # TODO: install? $(Q) if [ -w /tftpboot ] ; then \ cp -f uImage
     # /tftpboot/uImage; \ fi
-    file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest uImage)
+    file(APPEND ${NUTTX_BINARY_DIR}/nuttx.manifest uImage)
   endif()
 elseif(WIN32)
   target_link_options(nuttx PUBLIC /SAFESEH:NO)
@@ -766,15 +767,15 @@ elseif(WIN32)
   endforeach()
 
   add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/nuttx_all.lib
-    COMMAND ${CMAKE_AR} /OUT:${CMAKE_BINARY_DIR}/nuttx_all.lib
+    OUTPUT ${NUTTX_BINARY_DIR}/nuttx_all.lib
+    COMMAND ${CMAKE_AR} /OUT:${NUTTX_BINARY_DIR}/nuttx_all.lib
             ${nuttx_libs_paths}
     DEPENDS ${nuttx_libs}
     VERBATIM)
-  add_custom_target(nuttx_all-lib DEPENDS ${CMAKE_BINARY_DIR}/nuttx_all.lib)
+  add_custom_target(nuttx_all-lib DEPENDS ${NUTTX_BINARY_DIR}/nuttx_all.lib)
   add_dependencies(nuttx nuttx_all-lib)
   target_link_libraries(nuttx PRIVATE $<TARGET_OBJECTS:sim_head>
-                                      ${CMAKE_BINARY_DIR}/nuttx_all.lib)
+                                      ${NUTTX_BINARY_DIR}/nuttx_all.lib)
 else()
 
   if(NOT APPLE)
@@ -828,7 +829,7 @@ endif()
 
 # TODO: if we use an install target a manifest may not be needed
 if(CONFIG_ARCH_SIM)
-  file(APPEND ${CMAKE_BINARY_DIR}/nuttx.manifest "nuttx\n")
+  file(APPEND ${NUTTX_BINARY_DIR}/nuttx.manifest "nuttx\n")
 endif()
 
 # Generate system map using the compiler toolchain. Conventionally, the tool
@@ -862,7 +863,7 @@ if(CONFIG_BUILD_PROTECTED)
   set(user_ldscript_tmp_list)
   foreach(ldscript ${user_ldscript})
     get_filename_component(LD_SCRIPT_USER_NAME ${ldscript} NAME)
-    set(LD_SCRIPT_USER_TMP "${CMAKE_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
+    set(LD_SCRIPT_USER_TMP "${NUTTX_BINARY_DIR}/${LD_SCRIPT_USER_NAME}.tmp")
     nuttx_generate_preprocess_target(SOURCE_FILE ${ldscript} TARGET_FILE
                                      ${LD_SCRIPT_USER_TMP})
     add_custom_target(user_ldscript_tmp_${LD_SCRIPT_USER_NAME}
@@ -909,9 +910,8 @@ if(CONFIG_BUILD_PROTECTED)
             $<$<NOT:$<BOOL:${DISABLE_LINK_GROUP}>>:-Wl,--end-group>)
 
   target_include_directories(
-    nuttx_user SYSTEM
-    PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
-            ${CMAKE_BINARY_DIR}/include_arch)
+    nuttx_user SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
+                              ${NUTTX_BINARY_DIR}/include_arch)
 
   add_custom_command(
     OUTPUT User.map

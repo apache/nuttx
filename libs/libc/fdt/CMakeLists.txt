@@ -29,7 +29,7 @@ if(CONFIG_LIBC_FDT)
       dtc
       URL https://github.com/dgibson/dtc/archive/v${VERSION}.zip SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/dtc BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/fdt/dtc)
+          ${NUTTX_BINARY_DIR}/libs/libc/fdt/dtc)
     FetchContent_GetProperties(dtc)
     if(NOT dtc_POPULATED)
       FetchContent_Populate(dtc)

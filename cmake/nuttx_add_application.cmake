@@ -30,12 +30,12 @@ define_property(
 
 # Create a directories for the application binaries `bin` for stripped binaries
 # `bin_debug` for debug binaries
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/bin)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/bin)
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/bin_debug)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin_debug)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/bin_debug)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/bin_debug)
 endif()
 
 # ~~~
@@ -176,7 +176,7 @@ function(nuttx_add_application)
           POST_BUILD
           COMMAND
             # add default link option
-            ${CMAKE_LD} -T ${CMAKE_BINARY_DIR}/gnu-elf.ld
+            ${CMAKE_LD} -T ${NUTTX_BINARY_DIR}/gnu-elf.ld
             # add global MOD link option if dynlib link
             $<$<BOOL:${DYNLIB_ELF_MODE}>:$<TARGET_PROPERTY:nuttx_global,NUTTX_MOD_APP_LINK_OPTIONS>>
             # add global ELF link option if m&kernel link
@@ -195,19 +195,19 @@ function(nuttx_add_application)
             $<TARGET_FILE:${TARGET}>
             $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--no-whole-archive
             $<$<NOT:$<BOOL:${USE_LINKER}>>:-Wl,>--end-group -o
-            ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
+            ${NUTTX_BINARY_DIR}/bin_debug/${ELF_NAME}
           COMMAND
-            ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bin_debug/${ELF_NAME}
-            ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+            ${CMAKE_COMMAND} -E copy ${NUTTX_BINARY_DIR}/bin_debug/${ELF_NAME}
+            ${NUTTX_BINARY_DIR}/bin/${ELF_NAME}
             # keep the application attribute symbols through strip so the binary
             # loader can still read them, see NX_KEEP in Application.mk
           COMMAND
             ${CMAKE_STRIP} -K nx_stacksize -K nx_priority -K nx_uid -K nx_gid -K
-            nx_mode ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+            nx_mode ${NUTTX_BINARY_DIR}/bin/${ELF_NAME}
             # match the Application.mk install rule: ld -r output is not marked
             # executable, but filesystem images built from bin/ must carry the
             # execute permission
-          COMMAND chmod +x ${CMAKE_BINARY_DIR}/bin/${ELF_NAME}
+          COMMAND chmod +x ${NUTTX_BINARY_DIR}/bin/${ELF_NAME}
           COMMENT "Building ELF:${ELF_NAME}"
           COMMAND_EXPAND_LISTS)
       else()

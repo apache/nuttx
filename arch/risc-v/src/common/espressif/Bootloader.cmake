@@ -312,7 +312,7 @@ ExternalProject_Add(
 
 # Add bootloader files to clean list
 set_property(
-  DIRECTORY ${CMAKE_SOURCE_DIR}
+  DIRECTORY ${NUTTX_DIR}
   APPEND
   PROPERTY ADDITIONAL_CLEAN_FILES ${HALDIR} ${BOOTLOADER_SRCDIR}
            ${BOOTLOADER_BIN})

@@ -28,7 +28,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/open-amp)
         SOURCE_DIR
         ${CMAKE_CURRENT_LIST_DIR}/open-amp
         BINARY_DIR
-        ${CMAKE_BINARY_DIR}/openamp/open-amp
+        ${NUTTX_BINARY_DIR}/openamp/open-amp
         CONFIGURE_COMMAND
         ""
         BUILD_COMMAND
@@ -120,7 +120,7 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/open-amp
                  ${CMAKE_CURRENT_BINARY_DIR}/open-amp EXCLUDE_FROM_ALL)
 
 # install nuttx openamp binary dir headers
-set(OPENAMP_HEADER_DIR ${CMAKE_BINARY_DIR}/include/openamp)
+set(OPENAMP_HEADER_DIR ${NUTTX_BINARY_DIR}/include/openamp)
 file(GLOB headers open-amp/lib/include/openamp/*.h open-amp/lib/remoteproc/*.h
      open-amp/lib/rpmsg/*h)
 file(MAKE_DIRECTORY ${OPENAMP_HEADER_DIR})

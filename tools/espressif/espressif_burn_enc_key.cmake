@@ -22,7 +22,7 @@
 #
 # Include() from the main NuttX CMake configure when
 # CONFIG_ESPRESSIF_SECURE_FLASH_ENC_ENABLED. Defines the ``burn_enc_key`` target
-# (no cmake -P). Expects NUTTX_DIR, CMAKE_BINARY_DIR, CMAKE_SOURCE_DIR.
+# (no cmake -P). Expects NUTTX_DIR, NUTTX_BINARY_DIR, NUTTX_DIR.
 #
 # Serial port: ESPTOOL_PORT in the environment at build time (e.g.
 # ESPTOOL_PORT=/dev/ttyUSB0). NOCHECK must also be set so the burn is explicit
@@ -40,8 +40,8 @@ if(NOT PYTHON3)
   message(FATAL_ERROR "python3 not found (required for burn_enc_key)")
 endif()
 
-set(BINARY_DIR "${CMAKE_BINARY_DIR}")
-set(SOURCE_DIR "${CMAKE_SOURCE_DIR}")
+set(BINARY_DIR "${NUTTX_BINARY_DIR}")
+set(SOURCE_DIR "${NUTTX_DIR}")
 include(${NUTTX_DIR}/tools/espressif/espressif_esptool_common.cmake)
 
 if(NOT EXISTS "${FLASH_ENC_KEY_PATH}")
@@ -88,7 +88,7 @@ else()
       ${CMAKE_COMMAND} -E env "NUTTX_ESPEFUSE=${ESPEFUSE}"
       "NUTTX_KEY=${FLASH_ENC_KEY_PATH}" -- ${PYTHON3}
       "${NUTTX_DIR}/tools/espressif/burn_flash_enc_key.py"
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
     COMMENT "Burn flash encryption key to eFuses (espefuse.py)"
     VERBATIM)
   unset(_nuttx_burn_key_msg)

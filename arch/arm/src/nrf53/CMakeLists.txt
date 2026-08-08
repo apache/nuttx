@@ -129,7 +129,7 @@ if(CONFIG_NRF53_SOFTDEVICE_CONTROLLER)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/sdk-nrfxlib
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/arch/sdk-nrfxlib
+          ${NUTTX_BINARY_DIR}/arch/sdk-nrfxlib
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND

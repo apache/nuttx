@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
+get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${NUTTX_DIR}
                                                      COMPILE_OPTIONS)
 
 set(CMAKE_C_FLAG_ARGS)

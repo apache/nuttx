@@ -25,7 +25,7 @@ list(TRANSFORM SYSCALLS REPLACE "^\"([^,]+)\",.+" "\\1")
 list(TRANSFORM SYSCALLS APPEND ".c")
 
 # generate the host tool
-nuttx_build_host_target(mksyscall ${CMAKE_SOURCE_DIR}/tools/mksyscall.c)
+nuttx_build_host_target(mksyscall ${NUTTX_DIR}/tools/mksyscall.c)
 
 if(CONFIG_LIB_SYSCALL)
   add_subdirectory(proxies)

@@ -188,7 +188,7 @@ if(CONFIG_MTD)
         dhara
         URL https://github.com/dlbeer/dhara/archive/refs/heads/master.zip
             SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/dhara BINARY_DIR
-            ${CMAKE_BINARY_DIR}/drivers/mtd/dhara
+            ${NUTTX_BINARY_DIR}/drivers/mtd/dhara
         DOWNLOAD_NO_PROGRESS true)
       FetchContent_Populate(dhara)
     endif()
@@ -204,7 +204,7 @@ if(CONFIG_MTD)
         nvblk
         URL https://github.com/Laczen/nvblk/archive/refs/heads/main.zip
             SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/nvblk BINARY_DIR
-            ${CMAKE_BINARY_DIR}/drivers/mtd/nvblk
+            ${NUTTX_BINARY_DIR}/drivers/mtd/nvblk
         DOWNLOAD_NO_PROGRESS true)
       FetchContent_Populate(nvblk)
     endif()

@@ -32,7 +32,7 @@ if(CONFIG_GNSSUTILS_MINMEA_LIB)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/minmea
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/gnssutils/minmea
+          ${NUTTX_BINARY_DIR}/libs/libc/gnssutils/minmea
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND
@@ -51,12 +51,12 @@ if(CONFIG_GNSSUTILS_MINMEA_LIB)
     endif()
   endif()
 
-  if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/minmea)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/minmea)
+  if(NOT EXISTS ${NUTTX_BINARY_DIR}/include/minmea)
+    file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/include/minmea)
   endif()
 
   configure_file(${CMAKE_CURRENT_LIST_DIR}/minmea/minmea.h
-                 ${CMAKE_BINARY_DIR}/include/minmea/minmea.h COPYONLY)
+                 ${NUTTX_BINARY_DIR}/include/minmea/minmea.h COPYONLY)
 
   target_sources(c PRIVATE minmea/minmea.c)
 

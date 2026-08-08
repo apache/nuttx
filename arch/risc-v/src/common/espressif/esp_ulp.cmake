@@ -66,7 +66,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
   if(NOT ESP_HAL_3RDPARTY_REPO)
     get_filename_component(
       ESP_HAL_3RDPARTY_REPO
-      "${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/common/espressif/esp-hal-3rdparty"
+      "${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/common/espressif/esp-hal-3rdparty"
       REALPATH)
   endif()
 
@@ -367,7 +367,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
       OUTPUT ${ULP_NUTTX_CONFIG_COPY}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${ULP_FOLDER}/nuttx
       COMMAND
-        ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/include/nuttx/config.h
+        ${CMAKE_COMMAND} -E copy ${NUTTX_BINARY_DIR}/include/nuttx/config.h
         ${ULP_NUTTX_CONFIG_COPY}
       DEPENDS nuttx_context ${ULP_VAR_MAP_HEADER}
       COMMENT "Copying nuttx/config.h for ULP build"
@@ -512,7 +512,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
   get_property(_esp_ulp_defer GLOBAL PROPERTY ESP_ULP_LINK_DEFER_REGISTERED)
   if(NOT _esp_ulp_defer)
     set_property(GLOBAL PROPERTY ESP_ULP_LINK_DEFER_REGISTERED TRUE)
-    cmake_language(DEFER DIRECTORY ${CMAKE_SOURCE_DIR} CALL
+    cmake_language(DEFER DIRECTORY ${NUTTX_DIR} CALL
                    _esp_ulp_add_nuttx_link_deps)
   endif()
 
@@ -521,7 +521,7 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
   # ############################################################################
 
   set_property(
-    DIRECTORY ${CMAKE_SOURCE_DIR}
+    DIRECTORY ${NUTTX_DIR}
     APPEND
     PROPERTY ADDITIONAL_CLEAN_FILES ${ULP_FOLDER} ${ULP_ARCH_FOLDER}
              ${ULP_ALIASES_LD} ${ULP_ARCH_FOLDER}/.ulp_shared_stubs_stamp)

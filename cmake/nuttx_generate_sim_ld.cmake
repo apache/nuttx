@@ -46,11 +46,11 @@ set(PROCESS_SIM_LD_SCRIPT
 ]])
 # cmake-format: on
 
-file(WRITE ${CMAKE_BINARY_DIR}/process_sim_ld_script.sh
+file(WRITE ${NUTTX_BINARY_DIR}/process_sim_ld_script.sh
      "${PROCESS_SIM_LD_SCRIPT}")
 file(
-  COPY ${CMAKE_BINARY_DIR}/process_sim_ld_script.sh
-  DESTINATION ${CMAKE_BINARY_DIR}
+  COPY ${NUTTX_BINARY_DIR}/process_sim_ld_script.sh
+  DESTINATION ${NUTTX_BINARY_DIR}
   FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
 add_custom_command(
@@ -62,4 +62,4 @@ add_custom_command(
   COMMAND sh process_sim_ld_script.sh nuttx-orig.ld nuttx.ld
   COMMAND sed -i '/\\.data *:/i " ${CONFIG_SIM_CUSTOM_DATA_SECTION} " ' nuttx.ld
   COMMENT "Generating sim linker script nuttx.ld"
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR})

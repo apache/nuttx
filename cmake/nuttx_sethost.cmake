@@ -23,7 +23,7 @@
 include(nuttx_kconfig)
 
 function(nuttx_sethost)
-  set(config_file ${CMAKE_BINARY_DIR}/.config)
+  set(config_file ${NUTTX_BINARY_DIR}/.config)
   cmake_parse_arguments(SETHOST "" "CONFIG_FILE" "" ${ARGN})
 
   if(SETHOST_UNPARSED_ARGUMENTS)
