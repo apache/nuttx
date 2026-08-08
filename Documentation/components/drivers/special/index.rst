@@ -24,6 +24,7 @@ following section.
 
   audio.rst
   clk.rst
+  cpufreq.rst
   devicetree.rst
   devmem.rst
   dma.rst

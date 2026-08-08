@@ -115,6 +115,7 @@
 #define _PTPBASE        (0x4700) /* PTP ioctl commands */
 #define _DSHOTIOCBASE   (0x4800) /* Dshot device ioctl commands */
 #define _PULSECOUNTBASE (0x4900) /* Pulse count driver ioctl commands */
+#define _CPUFREQIOCBASE (0x4a00) /* CPU frequency ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -851,6 +852,11 @@
 
 #define _PULSECOUNTIOCVALID(c) (_IOC_TYPE(c)==_PULSECOUNTBASE)
 #define _PULSECOUNTIOC(nr)     _IOC(_PULSECOUNTBASE,nr)
+
+/* CPU frequency driver ioctl definitions ***********************************/
+
+#define _CPUFREQIOCVALID(c) (_IOC_TYPE(c)==_CPUFREQIOCBASE)
+#define _CPUFREQIOC(nr)     _IOC(_CPUFREQIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

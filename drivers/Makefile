@@ -63,6 +63,7 @@ include rpmsg/Make.defs
 include rptun/Make.defs
 include sensors/Make.defs
 include serial/Make.defs
+include cpufreq/Make.defs
 include spi/Make.defs
 include syslog/Make.defs
 include thermal/Make.defs
