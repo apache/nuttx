@@ -219,6 +219,13 @@ struct xhci_dev_s
   FAR struct xhci_input_dev_ctx_s *input;   /* Input Device Context. Input to xHC */
   FAR struct xhci_rhport_s        *rhport;  /* Root Hub Port associated with this device */
 
+  /* The port this device is attached to.  Several devices can share a root
+   * hub port once a hub is in between, so this, and not the port above, is
+   * what identifies a device to the class drivers.
+   */
+
+  FAR struct usbhost_hubport_s    *hport;
+
   /* Reference to allocated endpoints */
 
   FAR struct xhci_epinfo_s *epinfo[XHCI_MAX_ENDPOINTS];
@@ -1696,8 +1703,7 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    */
 
   regval = XHCI_ST_CTX0_CTXENT_SET(1) |
-           XHCI_ST_CTX0_SPEED_SET(
-             xhci_speed_id(dev->rhport->hport.hport.speed));
+           XHCI_ST_CTX0_SPEED_SET(xhci_speed_id(dev->hport->speed));
 
 #ifdef CONFIG_USBHOST_HUB
   /* TODO:
@@ -1724,12 +1730,13 @@ static int xhci_slot_init(FAR struct usbhost_xhci_s *priv,
    * allocated.
    */
 
-  drdp = up_addrenv_va_to_pa(dev->rhport->ep0.td.ring);
+  DEBUGASSERT(dev->epinfo[0] != NULL);
+  drdp = up_addrenv_va_to_pa(dev->epinfo[0]->td.ring);
 
   /* Step 5. Initialize the Input default control Endpoint 0 Context */
 
-  DEBUGASSERT(dev->rhport != NULL);
-  if (dev->rhport->hport.hport.speed == USB_SPEED_HIGH)
+  DEBUGASSERT(dev->hport != NULL);
+  if (dev->hport->speed == USB_SPEED_HIGH)
     {
       /* For high-speed, we must use 64 bytes */
 
@@ -1852,6 +1859,7 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
 
   rhport->ep0.slot = slot;
   dev->rhport      = rhport;
+  dev->hport       = &rhport->hport.hport;
   dev->slot        = slot;
   dev->epinfo[0]   = &rhport->ep0;
 
@@ -1935,6 +1943,7 @@ static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
 
   /* Remove reference to a device slot */
 
+  rhport->dev->hport = NULL;
   rhport->dev = NULL;
 
   return OK;
@@ -3003,6 +3012,56 @@ xhci_out_slot(FAR struct xhci_dev_ctx_s *ctx)
 }
 
 /****************************************************************************
+ * Name: xhci_dev_from_ep
+ *
+ * Description:
+ *   The device an endpoint belongs to.
+ *
+ *   An endpoint records the slot it was opened on, and the slot indexes the
+ *   device table, so this holds wherever the device sits.  The root hub port
+ *   does not: a class driver reaches the controller through the port it
+ *   descends from, and a hub puts several devices behind one such port.
+ *
+ ****************************************************************************/
+
+static inline FAR struct xhci_dev_s *
+xhci_dev_from_ep(FAR struct usbhost_xhci_s *priv,
+                 FAR struct xhci_epinfo_s *epinfo)
+{
+  DEBUGASSERT(epinfo->slot > 0 && epinfo->slot <= priv->no_slots);
+  return &priv->devs[epinfo->slot - 1];
+}
+
+/****************************************************************************
+ * Name: xhci_dev_from_hport
+ *
+ * Description:
+ *   The device attached to a hub port, or NULL if there is none.
+ *
+ *   Used where there is no endpoint to ask yet, which is the case when the
+ *   first one is being allocated.
+ *
+ ****************************************************************************/
+
+static FAR struct xhci_dev_s *
+xhci_dev_from_hport(FAR struct usbhost_xhci_s *priv,
+                    FAR struct usbhost_hubport_s *hport)
+{
+  uint8_t i;
+
+  for (i = 0; i < priv->no_slots; i++)
+    {
+      if (priv->devs[i].state != XHCI_SLOT_DISABLED &&
+          priv->devs[i].hport == hport)
+        {
+          return &priv->devs[i];
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
  * Name: xhci_speed_id
  *
  * Description:
@@ -3880,13 +3939,15 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
                              usbhost_ep_t ep0, uint8_t funcaddr,
                              uint8_t speed, uint16_t maxpacketsize)
 {
-  FAR struct xhci_rhport_s  *rhport = (FAR struct xhci_rhport_s *)drvr;
   FAR struct xhci_epinfo_s  *epinfo = (FAR struct xhci_epinfo_s *)ep0;
   FAR struct usbhost_xhci_s *priv   = XHCI_PRIV_FROM_DRVR(drvr);
+  FAR struct xhci_dev_s     *dev;
   uint64_t                   ctx;
   int                        ret;
 
   DEBUGASSERT(drvr != NULL && epinfo != NULL && maxpacketsize < 2048);
+
+  dev = xhci_dev_from_ep(priv, epinfo);
 
   ret = nxmutex_lock(&priv->lock);
   if (ret >= 0)
@@ -3894,28 +3955,28 @@ static int xhci_ep0configure(FAR struct usbhost_driver_s *drvr,
       /* Update max packet size */
 
       FAR struct xhci_ep_ctx_s *ep0ctx =
-        xhci_in_ep(priv, rhport->dev->input, 0);
+        xhci_in_ep(priv, dev->input, 0);
 
       ep0ctx->ctx1 &= ~XHCI_EP_CTX1_MAXPKT_MASK;
       ep0ctx->ctx1 |= XHCI_EP_CTX1_MAXPKT(maxpacketsize);
 
       /* Add Slot Context and EP0 Context */
 
-      xhci_context_ctrl(priv, rhport->dev, 0,
+      xhci_context_ctrl(priv, dev, 0,
                         XHCI_IN_CTX1_A(XHCI_SLOT_FLAG) |
                         XHCI_IN_CTX1_A(XHCI_EP0_FLAG));
 
       /* Flush Device input context */
 
-      up_flush_dcache((uintptr_t)rhport->dev->input,
-                      (uintptr_t)rhport->dev->input +
+      up_flush_dcache((uintptr_t)dev->input,
+                      (uintptr_t)dev->input +
                       XHCI_INCTX_SIZE(priv));
 
       /* Free mutex before command execution */
 
       nxmutex_unlock(&priv->lock);
 
-      ctx = up_addrenv_va_to_pa(rhport->dev->input);
+      ctx = up_addrenv_va_to_pa(dev->input);
 
       uinfo("slot %d funcaddr %d speed %d maxpacket %d\n",
             epinfo->slot, funcaddr, speed, maxpacketsize);
@@ -4015,7 +4076,6 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
                         FAR usbhost_ep_t *ep)
 {
   FAR struct usbhost_xhci_s    *priv   = XHCI_PRIV_FROM_DRVR(drvr);
-  FAR struct xhci_rhport_s     *rhport = (FAR struct xhci_rhport_s *)drvr;
   FAR struct usbhost_hubport_s *hport;
   FAR struct xhci_epinfo_s     *epinfo;
   FAR struct xhci_dev_s        *dev;
@@ -4031,12 +4091,6 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   DEBUGASSERT(drvr != 0 && epdesc != NULL && epdesc->hport != NULL
               && ep != NULL);
   hport = epdesc->hport;
-
-  /* Only the tracing alternative below and the hub logic further down use
-   * this, and a configuration may have neither.
-   */
-
-  UNUSED(hport);
 
   /* Terse output only if we are tracing */
 
@@ -4077,16 +4131,16 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 
   idx  = xhci_epno_get(epinfo);
   mask = XHCI_IN_CTX1_A(XHCI_EP_FLAG(idx));
-  dev  = rhport->dev;
+  dev  = xhci_dev_from_hport(priv, hport);
 
   /* There has to be a device to hang the endpoint off.  A port whose
    * enumeration failed is retried after its slot has been given back, so
-   * this can run for a root hub port with nothing behind it.
+   * this can run for a port with nothing behind it.
    */
 
   if (dev == NULL)
     {
-      uerr("no device on port %d\n", RHPNDX(rhport));
+      uerr("no device on port %d\n", hport->port);
       nxmutex_destroy(&epinfo->exclsem);
       nxsem_destroy(&epinfo->iocsem);
       kmm_free(epinfo);
@@ -4106,7 +4160,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Store slot ID for later */
 
-  epinfo->slot = rhport->slot;
+  epinfo->slot = dev->slot;
 
 #ifdef CONFIG_USBHOST_HUB
   if (hport->speed != USB_SPEED_HIGH)
@@ -4515,28 +4569,30 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
        * on control EP.
        */
 
-      xhci_ring_init(&rhport->dev->rhport->ep0.td, 0);
+      xhci_ring_init(&ep0info->td, 0);
 
       /* Issue SET_ADDRESS request */
 
       ret = xhci_address_set(priv, rhport, true);
       if (ret == OK)
         {
+          FAR struct xhci_dev_s *dev = xhci_dev_from_ep(priv, ep0info);
+
           /* The controller chose this address and wrote it into the
            * output context.  Invalidate before reading, or the stale
            * copy is used.
            */
 
-          up_invalidate_dcache((uintptr_t)rhport->dev->ctx,
-                               (uintptr_t)rhport->dev->ctx +
+          up_invalidate_dcache((uintptr_t)dev->ctx,
+                               (uintptr_t)dev->ctx +
                                XHCI_DEVCTX_SIZE(priv));
 
           /* Store USB Device Address assigned by xHCI */
 
           ep0info->devaddr =
-            XHCI_ST_CTX3_ADDR_GET(xhci_out_slot(rhport->dev->ctx)->ctx[3]);
-          xhci_in_slot(priv, rhport->dev->input)->ctx[3] =
-            xhci_out_slot(rhport->dev->ctx)->ctx[3];
+            XHCI_ST_CTX3_ADDR_GET(xhci_out_slot(dev->ctx)->ctx[3]);
+          xhci_in_slot(priv, dev->input)->ctx[3] =
+            xhci_out_slot(dev->ctx)->ctx[3];
         }
 
       nxmutex_unlock(&ep0info->exclsem);
