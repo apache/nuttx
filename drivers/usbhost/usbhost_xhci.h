@@ -504,6 +504,8 @@
 
 #define XHCI_ST_CTX0_RTSTR_SHIFT     (0)                   /* Bits 0:19: Route String */
 #define XHCI_ST_CTX0_RTSTR_MASK      (0xfffff << XHCI_ST_CTX0_RTSTR_SHIFT)
+#define XHCI_ST_CTX0_RTSTR_SET(x)    (((x) << XHCI_ST_CTX0_RTSTR_SHIFT) & \
+                                      XHCI_ST_CTX0_RTSTR_MASK)
 #define XHCI_ST_CTX0_SPEED_SHIFT     (20)                  /* Bits 20:23: Speed */
 #define XHCI_ST_CTX0_SPEED_MASK      (0xf << XHCI_ST_CTX0_SPEED_SHIFT)
 #define XHCI_ST_CTX0_SPEED_SET(x)    (((x) << XHCI_ST_CTX0_SPEED_SHIFT) & \
@@ -534,6 +536,25 @@
 #define XHCI_ST_CTX1_PORTS_SHIFT     (24)                  /* Bit 24-31: Number of Ports */
 #define XHCI_ST_CTX1_PORTS_MASK      (0xff << XHCI_ST_CTX1_PORTS_SHIFT)
 #define XHCI_ST_CTX1_PORTS_SET(x)    (((x) << XHCI_ST_CTX1_PORTS_SHIFT) & XHCI_ST_CTX1_PORTS_MASK)
+
+/* Slot Context dword 2 describes the transaction translator that carries a
+ * low or full speed device sitting behind a high speed hub.  It names the
+ * nearest high speed ancestor, which is the hub whose TT does the work, and
+ * not the hub the device is plugged into if those differ.
+ */
+
+#define XHCI_ST_CTX2_TTHSID_SHIFT    (0)                  /* Bit 0-7: TT Hub Slot ID */
+#define XHCI_ST_CTX2_TTHSID_MASK     (0xff << XHCI_ST_CTX2_TTHSID_SHIFT)
+#define XHCI_ST_CTX2_TTHSID_SET(x)   (((x) << XHCI_ST_CTX2_TTHSID_SHIFT) & \
+                                      XHCI_ST_CTX2_TTHSID_MASK)
+#define XHCI_ST_CTX2_TTPORT_SHIFT    (8)                  /* Bit 8-15: TT Port Number */
+#define XHCI_ST_CTX2_TTPORT_MASK     (0xff << XHCI_ST_CTX2_TTPORT_SHIFT)
+#define XHCI_ST_CTX2_TTPORT_SET(x)   (((x) << XHCI_ST_CTX2_TTPORT_SHIFT) & \
+                                      XHCI_ST_CTX2_TTPORT_MASK)
+#define XHCI_ST_CTX2_TTT_SHIFT       (16)                 /* Bit 16-17: TT Think Time */
+#define XHCI_ST_CTX2_TTT_MASK        (0x3 << XHCI_ST_CTX2_TTT_SHIFT)
+#define XHCI_ST_CTX2_TTT_SET(x)      (((x) << XHCI_ST_CTX2_TTT_SHIFT) & \
+                                      XHCI_ST_CTX2_TTT_MASK)
 
 #define XHCI_ST_CTX3_ADDR_SHIFT      (0)                  /* Bit 0-7: USB Device Address */
 #define XHCI_ST_CTX3_ADDR_MASK       (0xff << XHCI_ST_CTX3_ADDR_SHIFT)
