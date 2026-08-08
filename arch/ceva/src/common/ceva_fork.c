@@ -50,11 +50,16 @@
  *   called, or calls any other function before successfully calling _exit()
  *   or one of the exec family of functions.
  *
+ *   Those are vfork()'s semantics, and vfork() is all this architecture can
+ *   provide:  POSIX fork() needs an address environment to duplicate and
+ *   CEVA has none.  So up_fork()'s argument is always true here, and the
+ *   entry point does not carry it through the context-saving trap.
+ *
  *   The overall sequence is:
  *
  *   1) User code calls fork().  fork() collects context information and
  *      transfers control up ceva_fork().
- *   2) ceva_fork()and calls nxtask_forksetup().
+ *   2) ceva_fork() and calls nxtask_forksetup().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
@@ -73,7 +78,7 @@
  * nxtask_abort_fork() may be called if an error occurs between steps 3 & 6.
  *
  * Input Parameters:
- *   regs - Caller context information saved by fork()
+ *   regs - Caller context information saved by up_fork()
  *
  * Return:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -97,9 +102,14 @@ pid_t ceva_fork(const uint32_t *regs)
   void *argv;
   int ret;
 
+  /* How large is the parent's stack argument area? */
+
+  argsize = (uintptr_t)parent->stack_base_ptr -
+            (uintptr_t)parent->stack_alloc_ptr;
+
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork(parent->start, &argsize);
+  child = nxtask_setup_fork(parent->start, true);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");
@@ -204,7 +214,7 @@ pid_t ceva_fork(const uint32_t *regs)
    * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, true);
 #else /* CONFIG_SCHED_WAITPID */
   return (pid_t)ERROR;
 #endif

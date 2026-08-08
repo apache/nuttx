@@ -79,7 +79,8 @@
  * 6.
  *
  * Input Parameters:
- *   context - Caller context information saved by fork()
+ *   vfork   - true for vfork(), false for fork()
+ *   context - Caller context information saved by up_fork()
  *
  * Returned Value:
  *   Upon successful completion, fork() returns 0 to the child process and
@@ -89,7 +90,7 @@
  *
  ****************************************************************************/
 
-pid_t x86_64_fork(const struct fork_s *context)
+pid_t x86_64_fork(bool vfork, const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct tcb_s *child;
@@ -110,7 +111,7 @@ pid_t x86_64_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)context->rip);
+  child = nxtask_setup_fork((start_t)context->rip, vfork);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");
@@ -195,5 +196,5 @@ pid_t x86_64_fork(const struct fork_s *context)
    * will discard the TCB by calling nxtask_abort_fork().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, vfork);
 }

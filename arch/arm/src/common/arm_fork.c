@@ -49,47 +49,56 @@
  * Name: arm_fork
  *
  * Description:
- *   The fork() function has the same effect as posix fork(), except that the
- *   behavior is undefined if the process created by fork() either modifies
- *   any data other than a variable of type pid_t used to store the return
- *   value from fork(), or returns from the function in which fork() was
- *   called, or calls any other function before successfully calling _exit()
- *   or one of the exec family of functions.
+ *   The common ARM worker behind up_fork().  vfork() and fork() snapshot
+ *   the caller's registers identically; `vfork' says which primitive was
+ *   called, and is passed straight through to nxtask_setup_fork(), which is
+ *   where the memory semantics are decided.
+ *
+ *   What differs here is only the stack.  Normally the child has a stack of
+ *   its own, and this function fills it with a relocated copy of the
+ *   parent's, rebasing the stack and frame pointers to match.  When the
+ *   child shares the parent's stack addresses -- a fork() child, inside its
+ *   duplicated address environment -- there is nothing to relocate and the
+ *   pointers are carried over unchanged.
  *
  *   The overall sequence is:
  *
- *   1) User code calls fork().  fork() collects context information and
- *      transfers control up arm_fork().
- *   2) arm_fork() and calls nxtask_setup_fork().
+ *   1) User code calls vfork() or fork().  The libc wrapper enters
+ *      up_fork(), which collects context information and transfers control
+ *      to arm_fork().
+ *   2) arm_fork() calls nxtask_setup_fork().
  *   3) nxtask_setup_fork() allocates and configures the child task's TCB.
  *      This consists of:
  *      - Allocation of the child task's TCB.
  *      - Initialization of file descriptors and streams
  *      - Configuration of environment variables
- *      - Allocate and initialize the stack
+ *      - Establishing the child's address environment:  joined to the
+ *        parent's for vfork(), duplicated from it for fork()
+ *      - Allocating the stack, or inheriting the parent's for fork()
  *      - Setup the input parameters for the task.
  *      - Initialization of the TCB (including call to up_initial_state())
  *   4) arm_fork() provides any additional operating context. arm_fork must:
  *      - Initialize special values in any CPU registers that were not
  *        already configured by up_initial_state()
- *   5) arm_fork() then calls nxtask_start_fork()
- *   6) nxtask_start_fork() then executes the child thread.
+ *   5) arm_fork() then calls nxtask_start_fork(), which for vfork()
+ *      additionally suspends the caller.
+ *   6) which executes the child thread.
  *
  * nxtask_abort_fork() may be called if an error occurs between steps 3 and
  * 6.
  *
  * Input Parameters:
- *   context - Caller context information saved by fork()
+ *   vfork   - true for vfork(), false for fork()
+ *   context - Caller context information saved by the entry point
  *
  * Returned Value:
- *   Upon successful completion, fork() returns 0 to the child process and
- *   returns the process ID of the child process to the parent process.
- *   Otherwise, -1 is returned to the parent, no child process is created,
- *   and errno is set to indicate the error.
+ *   Upon successful completion, 0 is returned to the child and the process
+ *   ID of the child is returned to the parent.  Otherwise, -1 is returned to
+ *   the parent, no child is created, and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-pid_t arm_fork(const struct fork_s *context)
+pid_t arm_fork(bool vfork, const struct fork_s *context)
 {
   struct tcb_s *parent = this_task();
   struct tcb_s *child;
@@ -115,7 +124,7 @@ pid_t arm_fork(const struct fork_s *context)
 
   /* Allocate and initialize a TCB for the child task. */
 
-  child = nxtask_setup_fork((start_t)(context->lr & ~1));
+  child = nxtask_setup_fork((start_t)(context->lr & ~1), vfork);
   if (!child)
     {
       serr("ERROR: nxtask_setup_fork failed\n");
@@ -137,43 +146,60 @@ pid_t arm_fork(const struct fork_s *context)
 
   sinfo("Parent: stackutil:%" PRIu32 "\n", stackutil);
 
-  /* Make some feeble effort to preserve the stack contents.  This is
-   * feeble because the stack surely contains invalid pointers and other
-   * content that will not work in the child context.  However, if the
-   * user follows all of the caveats of fork() usage, even this feeble
-   * effort is overkill.
-   */
-
-  newtop = (uint32_t)child->stack_base_ptr +
-                     child->adj_stack_size;
-
-  newsp = newtop - stackutil;
-
-  /* Move the register context to newtop. */
-
-  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
-         child->xcp.regs, XCPTCONTEXT_SIZE);
-
-  child->xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
-
-  memcpy((void *)newsp, (const void *)oldsp, stackutil);
-
-  /* Was there a frame pointer in place before? */
-
-  if (context->fp >= oldsp && context->fp < stacktop)
+  if (child->stack_base_ptr == parent->stack_base_ptr)
     {
-      uint32_t frameutil = stacktop - context->fp;
-      newfp = newtop - frameutil;
+      /* The child is running at the parent's stack addresses, inside its
+       * own duplicated address environment.  There is nothing to relocate:
+       * every stack address the child inherits is still the address it
+       * names.
+       */
+
+      newsp = oldsp;
+      newfp = context->fp;
     }
   else
     {
-      newfp = context->fp;
-    }
+      /* Make some feeble effort to preserve the stack contents.  This is
+       * feeble because the stack surely contains invalid pointers and other
+       * content that will not work in the child context.  However, if the
+       * user follows all of the caveats of vfork() usage, even this feeble
+       * effort is overkill.
+       *
+       * For a POSIX fork() child the stack contents are not merely a feeble
+       * effort:  the child is entitled to use them, and it does.
+       */
 
-  sinfo("Old stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        stacktop, oldsp, context->fp);
-  sinfo("New stack top:%08" PRIx32 " SP:%08" PRIx32 " FP:%08" PRIx32 "\n",
-        newtop, newsp, newfp);
+      newtop = (uint32_t)child->stack_base_ptr +
+                         child->adj_stack_size;
+
+      newsp = newtop - stackutil;
+
+      /* Move the register context to newtop. */
+
+      memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
+             child->xcp.regs, XCPTCONTEXT_SIZE);
+
+      child->xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
+
+      memcpy((void *)newsp, (const void *)oldsp, stackutil);
+
+      /* Was there a frame pointer in place before? */
+
+      if (context->fp >= oldsp && context->fp < stacktop)
+        {
+          uint32_t frameutil = stacktop - context->fp;
+          newfp = newtop - frameutil;
+        }
+      else
+        {
+          newfp = context->fp;
+        }
+
+      sinfo("Old stack top:%08" PRIx32 " SP:%08" PRIx32
+            " FP:%08" PRIx32 "\n", stacktop, oldsp, context->fp);
+      sinfo("New stack top:%08" PRIx32 " SP:%08" PRIx32
+            " FP:%08" PRIx32 "\n", newtop, newsp, newfp);
+    }
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When
    * the child TCB was initialized, all of the values were set to zero.
@@ -245,9 +271,9 @@ pid_t arm_fork(const struct fork_s *context)
     }
 #endif
 
-  /* And, finally, start the child task.  On a failure, nxtask_start_fork()
-   * will discard the TCB by calling nxtask_abort_fork().
+  /* And, finally, start the child task.  A vfork() additionally suspends us
+   * until the child calls _exit() or exec().
    */
 
-  return nxtask_start_fork(child);
+  return nxtask_start_fork(child, vfork);
 }

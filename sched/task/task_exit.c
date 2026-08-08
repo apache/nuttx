@@ -157,5 +157,19 @@ int nxtask_exit(void)
 
   rtcb->lockcount--;
 
+  /* Publish anything woken while the TCB was being released.  lockcount was
+   * raised directly rather than through sched_lock(), so the matching
+   * decrement above does not publish the way sched_unlock() would, and a
+   * vfork() parent released by nxsched_release_tcb() would be stranded --
+   * in g_pendingtasks, or in g_readytorun on SMP.  This mirrors what
+   * sched_unlock() does for each case.
+   */
+
+#ifdef CONFIG_SMP
+  nxsched_deliver_task(this_cpu(), rtcb->cpu, SWITCH_HIGHER);
+#else
+  nxsched_merge_pending();
+#endif
+
   return ret;
 }
