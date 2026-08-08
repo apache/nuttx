@@ -764,11 +764,20 @@ static void usbhost_destroy(FAR void *arg)
 
   uinfo("crefs: %d\n", priv->crefs);
 
-  /* Unregister the driver */
+  /* Unregister the driver, but only if it was ever registered.
+   *
+   * This runs for a device that never got that far as well: an enumeration
+   * that failed part way through, or a device unplugged while it was still
+   * being set up.  The upper half has nothing to undo in that case, and
+   * asserts rather than tolerating the call.
+   */
 
-  uinfo("Unregister driver\n");
-  usbhost_mkdevname(priv, devname);
-  keyboard_unregister(&priv->lower, devname);
+  if (priv->lower.priv != NULL)
+    {
+      uinfo("Unregister driver\n");
+      usbhost_mkdevname(priv, devname);
+      keyboard_unregister(&priv->lower, devname);
+    }
 
   /* Release the device name used by this connection */
 
