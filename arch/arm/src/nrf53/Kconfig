@@ -424,6 +424,13 @@ config NRF53_SYSTIMER_RTC
 
 endchoice # System Timer Source
 
+config NRF53_DCDC
+	bool "Enable DC/DC regulator"
+	default n
+	---help---
+		This option enables the DC/DC regulator, which reduces
+		current consumption. This requires extra circuitry (inductors).
+
 if NRF53_SYSTIMER_RTC
 
 config NRF53_SYSTIMER_RTC_INSTANCE
