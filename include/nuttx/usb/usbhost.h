@@ -736,6 +736,14 @@ struct usbhost_roothubport_s
 
   struct usbhost_hubport_s hport;        /* Common hub port definitions */
   FAR struct usbhost_devaddr_s *pdevgen; /* Address generation data pointer */
+
+  /* The host controller this root port belongs to.  Each controller numbers
+   * its own ports from the same start, so a port number alone does not
+   * identify a port on a system with more than one.  Zero is the only bus a
+   * driver that does not set it has.
+   */
+
+  uint8_t bus;
 };
 
 /* struct usbhost_class_s provides access from the USB host driver to the
