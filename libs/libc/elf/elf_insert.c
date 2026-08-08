@@ -29,6 +29,7 @@
 #include <sys/param.h>
 
 #include <nuttx/lib/lib.h>
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
 
 #include "elf.h"
@@ -247,9 +248,22 @@ static int libelf_loadsymtab(FAR struct module_s *modp,
       if (sym[i].st_shndx != SHN_UNDEF &&
           sym[i].st_shndx < loadinfo->ehdr.e_shnum)
         {
-          FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+          if (loadinfo->ehdr.e_type == ET_DYN)
+            {
+              /* A shared object's symbol value is already the full
+               * link-time address, and so is its section's, so adding
+               * the two would count the section twice.  What it needs is
+               * translating onto wherever the object was placed.
+               */
 
-          sym[i].st_value = sym[i].st_value + s->sh_addr;
+              sym[i].st_value = libelf_addr(loadinfo, sym[i].st_value);
+            }
+          else
+            {
+              FAR Elf_Shdr *s = &loadinfo->shdr[sym[i].st_shndx];
+
+              sym[i].st_value = sym[i].st_value + s->sh_addr;
+            }
         }
     }
 
@@ -391,6 +405,12 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
 
   modp->textalloc = (FAR void *)loadinfo.textalloc;
   modp->dataalloc = (FAR void *)loadinfo.datastart;
+  modp->fdpic     = loadinfo.fdpic;
+  modp->gotaddr   = loadinfo.gotaddr;
+#ifdef HAVE_LIBC_ELF_PIN
+  modp->pinfile     = loadinfo.pinfile;
+  loadinfo.pinfile  = NULL;
+#endif
 #ifdef CONFIG_ARCH_USE_SEPARATED_SECTION
   modp->sectalloc = (FAR void **)loadinfo.sectalloc;
   modp->nsect = loadinfo.ehdr.e_shnum;
@@ -408,12 +428,25 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
       case ET_REL :
       case ET_DYN :
 
-          /* Process any preinit_array entries */
+          /* Process any preinit_array entries.
+           *
+           * An FDPIC object's constructors touch its globals, so they have
+           * to run with its own data base rather than with whatever the
+           * loading thread happens to carry -- which for a DT_NEEDED
+           * library is the importing module's.
+           */
 
           array = (FAR void (**)(void))loadinfo.preiarr;
           for (i = 0; i < loadinfo.nprei; i++)
             {
-              array[i]();
+              if (loadinfo.fdpic)
+                {
+                  fdpic_invoke((uintptr_t)array[i], 0, loadinfo.gotaddr);
+                }
+              else
+                {
+                  array[i]();
+                }
             }
 
           /* Process any init_array entries */
@@ -421,7 +454,14 @@ FAR void *libelf_insert(FAR const char *filename, FAR const char *modname)
           array = (FAR void (**)(void))loadinfo.initarr;
           for (i = 0; i < loadinfo.ninit; i++)
             {
-              array[i]();
+              if (loadinfo.fdpic)
+                {
+                  fdpic_invoke((uintptr_t)array[i], 0, loadinfo.gotaddr);
+                }
+              else
+                {
+                  array[i]();
+                }
             }
 
           modp->initarr = loadinfo.initarr;

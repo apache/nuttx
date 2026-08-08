@@ -44,6 +44,21 @@
 #  define CONFIG_LIBC_ELF_MAXDEPEND  0
 #endif
 
+#ifndef CONFIG_LIBC_ELF_MAXNEEDED
+#  define CONFIG_LIBC_ELF_MAXNEEDED  0
+#endif
+
+/* Holding an XIP pin past the load means holding the file itself: the pin is
+ * released when the module is unloaded, which happens on a task other than
+ * the one that loaded it, so a descriptor from that task's group cannot
+ * serve.  That needs the file interface, which is why CONFIG_FDPIC depends
+ * on the flat build.
+ */
+
+#ifdef CONFIG_FDPIC
+#  define HAVE_LIBC_ELF_PIN 1
+#endif
+
 #ifndef CONFIG_LIBC_ELF_ALIGN_LOG2
 #  define CONFIG_LIBC_ELF_ALIGN_LOG2 2
 #endif
@@ -123,6 +138,7 @@ typedef CODE int (*mod_uninitializer_t)(FAR void *arg);
  *   nexports      - The number of symbols in the exported symbol table.
  */
 
+struct file;
 struct symtab_s;
 struct mod_info_s
 {
@@ -174,6 +190,18 @@ struct module_s
   uint16_t nsect;                      /* Number of entries in sectalloc array */
 #endif
   int dynamic;                         /* Module is a dynamic shared object */
+  bool fdpic;                          /* Module is an FDPIC object: its two
+                                        * segments were placed separately and
+                                        * the text is media, not an allocation
+                                        */
+  uintptr_t gotaddr;                   /* An FDPIC object's data base, to
+                                        * enter its destructors with
+                                        */
+#ifdef HAVE_LIBC_ELF_PIN
+  FAR struct file *pinfile;            /* Holds the XIP pin on the text until
+                                        * the module is unloaded
+                                        */
+#endif
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MODULE)
   size_t textsize;                     /* Size of the kernel .text memory allocation */
   size_t datasize;                     /* Size of the kernel .bss/.data memory allocation */
@@ -184,6 +212,16 @@ struct module_s
                                         * and dlclose() give one back, and the
                                         * module goes when the last does
                                         */
+
+#ifdef CONFIG_LIBC_DLFCN
+  /* Libraries opened with dlopen() for this module's DT_NEEDED entries.
+   * These are references this module holds on others, where nopen above
+   * counts the references others hold on this one.
+   */
+
+  FAR void *libs[CONFIG_LIBC_ELF_MAXNEEDED];
+  uint8_t nlibs;
+#endif
 
 #if CONFIG_LIBC_ELF_MAXDEPEND > 0
   uint8_t dependents;                  /* Number of modules that depend on this module */
@@ -251,6 +289,47 @@ struct mod_loadinfo_s
                               * romfs/tmps, we can try get xipbase,
                               * skip the copy.
                               */
+
+  /* FDPIC state.
+   *
+   * An FDPIC object places its two PT_LOAD segments independently: the
+   * read-only one is mapped where it already sits on the media and the
+   * writable one is copied to RAM, once per running instance.  That is
+   * what lets several instances share one copy of the text.
+   *
+   * fdpic    - True if e_ident[EI_OSABI] marked this an FDPIC object.
+   * textpin  - True if the read-only segment is held by a filesystem pin
+   *            that has to be dropped at unload, rather than by an
+   *            address the filesystem simply handed over.
+   */
+
+  bool          fdpic;
+  bool          textpin;
+
+#ifdef HAVE_LIBC_ELF_PIN
+  /* The file the pin is held through, handed to the module once it loads. */
+
+  FAR struct file *pinfile;
+#endif
+
+  /* Where the object's data base lives, from DT_PLTGOT.  An FDPIC module
+   * runs with this in the PIC base register, and it is the base every
+   * function descriptor built for the module names.
+   */
+
+  uintptr_t     gotaddr;
+
+  /* Pool of function descriptors, carved out behind the writable segment.
+   *
+   * R_ARM_FUNCDESC asks the loader to manufacture a descriptor and hand
+   * back its address, so the space has to be reserved when the segment is
+   * sized, before any relocation is applied.  Sized from the relocation
+   * count, which bounds how many can be asked for.
+   */
+
+  uintptr_t     descpool;
+  uint16_t      ndesc;       /* Capacity */
+  uint16_t      usedesc;     /* Next free slot */
 
   /* Address environment.
    *
@@ -743,7 +822,11 @@ FAR const void *libelf_getsymbol(FAR void *handle, FAR const char *name);
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  This gives up everything the module
+ *   holds, including any libraries it opened for its DT_NEEDED entries, so
+ *   the caller must be releasing the last reference to it: libelf_remove()
+ *   calls this only once nopen reaches zero, and the copy binfmt keeps
+ *   belongs to a single exec'd binary and is never shared.
  *
  ****************************************************************************/
 

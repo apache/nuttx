@@ -29,7 +29,12 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/lib/lib.h>
+#include <dlfcn.h>
+
+#include <nuttx/fdpic.h>
 #include <nuttx/lib/elf.h>
+
+#include "elf/elf.h"
 
 /****************************************************************************
  * Public Functions
@@ -39,7 +44,11 @@
  * Name: libelf_uninit
  *
  * Description:
- *   Uninitialize module resources.
+ *   Uninitialize module resources.  This gives up everything the module
+ *   holds, including any libraries it opened for its DT_NEEDED entries, so
+ *   the caller must be releasing the last reference to it: libelf_remove()
+ *   calls this only once nopen reaches zero, and the copy binfmt keeps
+ *   belongs to a single exec'd binary and is never shared.
  *
  ****************************************************************************/
 
@@ -59,12 +68,33 @@ int libelf_uninit(FAR struct module_s *modp)
     }
 #endif
 
+#ifdef CONFIG_LIBC_DLFCN
+  /* Let go of anything opened for DT_NEEDED. */
+
+  while (modp->nlibs > 0)
+    {
+      dlclose(modp->libs[--modp->nlibs]);
+    }
+#endif
+
   /* Is there an uninitializer? */
 
   array = (FAR void (**)(void))modp->finiarr;
   for (i = 0; i < modp->nfini; i++)
     {
-      array[i]();
+      /* Like the constructors, an FDPIC object's destructors reach its
+       * globals through its own data base, which the unloading thread does
+       * not carry.
+       */
+
+      if (modp->fdpic)
+        {
+          fdpic_invoke((uintptr_t)array[i], 0, modp->gotaddr);
+        }
+      else
+        {
+          array[i]();
+        }
     }
 
   if (modp->modinfo.uninitializer != NULL)
@@ -147,6 +177,21 @@ int libelf_uninit(FAR struct module_s *modp)
           lib_free((FAR void *)modp->dataalloc);
 #  endif
 #endif
+        }
+      else if (modp->fdpic)
+        {
+#ifdef HAVE_LIBC_ELF_PIN
+          /* Give the pin back before the text goes out of use. */
+
+          libelf_pinrelease(&modp->pinfile);
+#endif
+
+          /* An FDPIC object placed its two segments separately, and its
+           * text was never allocated at all -- it is media the filesystem
+           * lent us.  Free the data on its own and leave the text alone.
+           */
+
+          lib_free((FAR void *)modp->dataalloc);
         }
       else
         {

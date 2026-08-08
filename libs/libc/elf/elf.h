@@ -238,6 +238,52 @@ int libelf_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 
 int libelf_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
+/****************************************************************************
+ * Name: libelf_addr
+ *
+ * Description:
+ *   Translate a link-time address in a loaded object to the address it
+ *   actually occupies now.
+ *
+ *   An object is placed as two pieces, text and data, and this is the one
+ *   place that knows how to get from one space to the other.  The split is
+ *   the data segment's link-time base: anything below it belongs to text,
+ *   anything at or above it to data.  For ET_REL the two pieces are already
+ *   placed independently; for ET_DYN they are, today, adjacent in a single
+ *   allocation, in which case this returns exactly what adding a single
+ *   load bias would have.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *   vaddr    - The link-time address to translate
+ *
+ * Returned Value:
+ *   The run-time address.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: libelf_symname
+ *
+ * Description:
+ *   Read a name out of a string table into the I/O buffer.
+ *
+ ****************************************************************************/
+
+int libelf_symname(FAR struct mod_loadinfo_s *loadinfo,
+                   FAR const Elf_Sym *sym, Elf_Off sh_offset);
+
+static inline uintptr_t libelf_addr(FAR struct mod_loadinfo_s *loadinfo,
+                                    uintptr_t vaddr)
+{
+  if (loadinfo->datasec != 0 && vaddr >= loadinfo->datasec)
+    {
+      return loadinfo->datastart + (vaddr - loadinfo->datasec);
+    }
+
+  return loadinfo->textalloc + vaddr;
+}
+
 #ifdef CONFIG_ARCH_ADDRENV
 
 /****************************************************************************
@@ -321,4 +367,24 @@ int libelf_addrenv_restore(FAR struct mod_loadinfo_s *loadinfo);
 void libelf_addrenv_free(FAR struct mod_loadinfo_s *loadinfo);
 
 #endif /* CONFIG_ARCH_ADDRENV */
+
+#ifdef HAVE_LIBC_ELF_PIN
+/****************************************************************************
+ * Name: libelf_pinrelease
+ *
+ * Description:
+ *   Give back an XIP pin taken while loading, and the file it was held
+ *   through.  Does nothing if no pin was taken.
+ *
+ * Input Parameters:
+ *   pinfile - The held file, cleared on return.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void libelf_pinrelease(FAR struct file **pinfile);
+#endif
+
 #endif /* __LIBS_LIBC_LIBC_ELF_LIBC_ELF_H */
