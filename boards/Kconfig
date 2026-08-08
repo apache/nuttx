@@ -1050,6 +1050,14 @@ config ARCH_BOARD_LAUNCHXL_TMS57004
 		TI Hercules TMS570LS04x/03x LaunchPad Evaluation Kit (LAUNCHXL-
 		TMS57004) featuring the Hercules TMS570LS0432PZ chip.
 
+config ARCH_BOARD_RM57L843_LAUNCHXL2
+	bool "TI Hercules RM57L LaunchXL2"
+	depends on ARCH_CHIP_RM57L843
+	select ARCH_HAVE_LEDS
+	---help---
+		TI Hercules RM57L LaunchPad Development Kit (LAUNCHXL2-RM57L)
+		featuring the Hercules RM57L843 chip.
+
 config ARCH_BOARD_LM3S6432S2E
 	bool "Stellaris RDK-S2E Reference Design Kit"
 	depends on ARCH_CHIP_LM3S6432
@@ -3837,6 +3845,7 @@ config ARCH_BOARD
 	default "launchxl-cc1310"              if ARCH_BOARD_LAUNCHXL_CC1310
 	default "launchxl-cc1312r1"            if ARCH_BOARD_LAUNCHXL_CC1312R1
 	default "launchxl-tms57004"            if ARCH_BOARD_LAUNCHXL_TMS57004
+	default "rm57l843-launchxl2"           if ARCH_BOARD_RM57L843_LAUNCHXL2
 	default "lc823450-xgevk"               if ARCH_BOARD_LC823450_XGEVK
 	default "lincoln60"                    if ARCH_BOARD_LINCOLN60
 	default "lm3s6432-s2e"                 if ARCH_BOARD_LM3S6432S2E
@@ -4962,6 +4971,9 @@ source "boards/arm/tms570/launchxl-tms57004/Kconfig"
 endif
 if ARCH_BOARD_TMS570LS31X_USB_KIT
 source "boards/arm/tms570/tms570ls31x-usb-kit/Kconfig"
+endif
+if ARCH_BOARD_RM57L843_LAUNCHXL2
+source "boards/arm/rm57/rm57l843-launchxl2/Kconfig"
 endif
 if ARCH_BOARD_XMC4500RELAX
 source "boards/arm/xmc4/xmc4500-relax/Kconfig"
