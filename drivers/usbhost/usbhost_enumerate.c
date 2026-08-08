@@ -32,12 +32,16 @@
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
+#include <stdio.h>
+#include <syslog.h>
+
 #include <nuttx/debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/signal.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
+#include <nuttx/usb/hid.h>
 #include <nuttx/usb/hub.h>
 #include <nuttx/usb/usbhost_devaddr.h>
 
@@ -208,6 +212,258 @@ static inline int usbhost_configdesc(const uint8_t *configdesc, int cfglen,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_USBHOST_ANNOUNCE
+/****************************************************************************
+ * Name: usbhost_portpath
+ *
+ * Description:
+ *   The path to a device, as bus number and the port at each tier below it.
+ *
+ ****************************************************************************/
+
+static void usbhost_portpath(FAR struct usbhost_hubport_s *hport,
+                             FAR char *path, size_t pathlen)
+{
+  FAR struct usbhost_hubport_s *root = hport;
+  uint8_t ports[8];
+  size_t  used = 0;
+  size_t  n    = 0;
+  size_t  i;
+
+  /* Port numbers repeat at every tier, so the path needs all of them.
+   * Walking up collects them backwards.
+   */
+
+  while (n < sizeof(ports) && hport != NULL)
+    {
+      ports[n++] = hport->port + 1;
+      root       = hport;
+
+#ifdef CONFIG_USBHOST_HUB
+      hport = hport->parent;
+#else
+      break;
+#endif
+    }
+
+  /* The bus first, as the port numbers below it repeat on every other one */
+
+  used = snprintf(path, pathlen, "%d-",
+                  ((FAR struct usbhost_roothubport_s *)root)->bus);
+
+  for (i = n; i > 0 && used < pathlen - 1; i--)
+    {
+      used += snprintf(path + used, pathlen - used, "%s%d",
+                       i == n ? "" : ".", ports[i - 1]);
+    }
+}
+
+/****************************************************************************
+ * Name: usbhost_classname
+ *
+ * Description:
+ *   A readable name for a USB class code.  Classes a host is unlikely to
+ *   meet are left to be reported by number.
+ *
+ ****************************************************************************/
+
+static FAR const char *usbhost_classname(FAR const struct usbhost_id_s *id)
+{
+  switch (id->base)
+    {
+      case USB_CLASS_PER_INTERFACE:
+        return "composite";
+      case USB_CLASS_AUDIO:
+        return "audio";
+      case USB_CLASS_CDC:
+        return "CDC";
+      case USB_CLASS_HID:
+        /* The boot protocol names the device before its report
+         * descriptor has been read.
+         */
+
+        if (id->subclass == USBHID_SUBCLASS_BOOTIF)
+          {
+            if (id->proto == USBHID_PROTOCOL_KEYBOARD)
+              {
+                return "keyboard";
+              }
+            else if (id->proto == USBHID_PROTOCOL_MOUSE)
+              {
+                return "mouse";
+              }
+          }
+
+        return "HID";
+      case USB_CLASS_PRINTER:
+        return "printer";
+      case USB_CLASS_MASS_STORAGE:
+        return "mass storage";
+      case USB_CLASS_HUB:
+        return "hub";
+      case USB_CLASS_CDC_DATA:
+        return "CDC data";
+      case USB_CLASS_WIRELESS_CONTROLLER:
+        return "wireless";
+      case USB_CLASS_MISC:
+        return "misc";
+      case USB_CLASS_VENDOR_SPEC:
+        return "vendor specific";
+      default:
+        return NULL;
+    }
+}
+
+/****************************************************************************
+ * Name: usbhost_getstring
+ *
+ * Description:
+ *   Fetch one string descriptor and render it as plain text.
+ *
+ *   String descriptors are UTF-16.  Anything outside ASCII is replaced
+ *   rather than dropped, so the rendered length matches the descriptor.
+ *   Index zero means the device has no such string.
+ *
+ ****************************************************************************/
+
+static int usbhost_getstring(FAR struct usbhost_hubport_s *hport,
+                             FAR struct usb_ctrlreq_s *ctrlreq,
+                             FAR uint8_t *buffer, uint8_t index,
+                             uint16_t langid, FAR char *out, size_t outlen)
+{
+  size_t len;
+  size_t i;
+  int    ret;
+
+  out[0] = '\0';
+
+  if (index == 0)
+    {
+      return -ENOENT;
+    }
+
+  ctrlreq->type = USB_REQ_DIR_IN | USB_REQ_RECIPIENT_DEVICE;
+  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_STRING << 8) | index);
+  usbhost_putle16(ctrlreq->index, langid);
+  usbhost_putle16(ctrlreq->len, 255);
+
+  ret = DRVR_CTRLIN(hport->drvr, hport->ep0, ctrlreq, buffer);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* buffer[0] is the whole descriptor including its own two byte header, so
+   * anything shorter than that header is not a descriptor.
+   */
+
+  if (buffer[0] < 2)
+    {
+      return -EIO;
+    }
+
+  len = (buffer[0] - 2) / 2;
+  if (len > outlen - 1)
+    {
+      len = outlen - 1;
+    }
+
+  for (i = 0; i < len; i++)
+    {
+      uint16_t ch = buffer[2 + i * 2] | (buffer[3 + i * 2] << 8);
+
+      out[i] = (ch >= 0x20 && ch < 0x7f) ? (char)ch : '?';
+    }
+
+  while (len > 0 && out[len - 1] == ' ')
+    {
+      len--;
+    }
+
+  out[len] = '\0';
+  return OK;
+}
+
+/****************************************************************************
+ * Name: usbhost_announce
+ *
+ * Description:
+ *   Report one enumerated device.
+ *
+ *   Called once per device, after binding, because the binding paths are
+ *   alternatives: a composite device never reaches the class lookup.
+ *
+ ****************************************************************************/
+
+static void usbhost_announce(FAR struct usbhost_hubport_s *hport,
+                             FAR const struct usbhost_id_s *id, bool bound,
+                             FAR struct usb_ctrlreq_s *ctrlreq,
+                             FAR uint8_t *buffer, uint16_t bcd,
+                             uint8_t imfgr, uint8_t iprod, uint8_t iserno)
+{
+  FAR const char *name = usbhost_classname(id);
+  char            unnamed[16];
+  char            path[24];
+
+  if (name == NULL)
+    {
+      snprintf(unnamed, sizeof(unnamed), "class %d", id->base);
+      name = unnamed;
+    }
+
+  /* Reported whether or not anything drives it; an unclaimed device is
+   * the case worth knowing about.
+   */
+
+  usbhost_portpath(hport, path, sizeof(path));
+
+  syslog(LOG_INFO,
+         "usb %s: new device, idVendor=%04x, idProduct=%04x, "
+         "bcdDevice=%d.%02d\n",
+         path, id->vid, id->pid, bcd >> 8, bcd & 0xff);
+  syslog(LOG_INFO, "usb %s: %s, %s\n",
+         path, name, bound ? "driver attached" : "no driver");
+
+  /* A control transfer each, so read only when a report was asked for. */
+
+  if (ctrlreq != NULL)
+    {
+      char     str[40];
+      uint16_t langid = 0x0409;
+
+      /* String zero is the list of languages the device has.  Ask for the
+       * first rather than assuming, since a device with none has nothing
+       * to report either.
+       */
+
+      if (usbhost_getstring(hport, ctrlreq, buffer, 0, 0,
+                            str, sizeof(str)) >= 0 && buffer[0] >= 4)
+        {
+          langid = buffer[2] | (buffer[3] << 8);
+        }
+
+      if (usbhost_getstring(hport, ctrlreq, buffer, iprod, langid,
+                            str, sizeof(str)) >= 0)
+        {
+          syslog(LOG_INFO, "usb %s: Product: %s\n", path, str);
+        }
+
+      if (usbhost_getstring(hport, ctrlreq, buffer, imfgr, langid,
+                            str, sizeof(str)) >= 0)
+        {
+          syslog(LOG_INFO, "usb %s: Manufacturer: %s\n", path, str);
+        }
+
+      if (usbhost_getstring(hport, ctrlreq, buffer, iserno, langid,
+                            str, sizeof(str)) >= 0)
+        {
+          syslog(LOG_INFO, "usb %s: SerialNumber: %s\n", path, str);
+        }
+    }
+}
+#endif
+
 static inline int usbhost_classbind(FAR struct usbhost_hubport_s *hport,
                                     const uint8_t *configdesc, int desclen,
                                     struct usbhost_id_s *id,
@@ -302,6 +558,13 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   uint8_t cfgidx = 0;
   FAR uint8_t *buffer = NULL;
   int ret;
+#ifdef CONFIG_USBHOST_ANNOUNCE
+  bool bound = false;
+  uint16_t bcd = 0;
+  uint8_t imfgr = 0;
+  uint8_t iprod = 0;
+  uint8_t iserno = 0;
+#endif
 
   DEBUGASSERT(hport != NULL && hport->drvr != NULL);
 
@@ -454,6 +717,17 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
   DEBUGASSERT(hport->funcaddr == 0 && funcaddr != 0);
   hport->funcaddr = funcaddr;
 
+#ifdef CONFIG_USBHOST_ANNOUNCE
+  /* Keep what is needed to describe the device before the buffer holding
+   * its descriptor is reused for the configuration descriptor.
+   */
+
+  bcd    = usbhost_getle16(((FAR struct usb_devdesc_s *)buffer)->device);
+  imfgr  = ((FAR struct usb_devdesc_s *)buffer)->imfgr;
+  iprod  = ((FAR struct usb_devdesc_s *)buffer)->iproduct;
+  iserno = ((FAR struct usb_devdesc_s *)buffer)->serno;
+#endif
+
   /* And reconfigure EP0 with the correct address */
 
   DRVR_EP0CONFIGURE(hport->drvr, hport->ep0, hport->funcaddr,
@@ -564,6 +838,12 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
             {
               uerr("ERROR: usbhost_classbind failed %d\n", ret);
             }
+#ifdef CONFIG_USBHOST_ANNOUNCE
+          else
+            {
+              bound = true;
+            }
+#endif
 
           ret = OK;
         }
@@ -585,6 +865,9 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
       if (ret >= 0)
         {
           uinfo("usbhost_composite has bound the composite device\n");
+#ifdef CONFIG_USBHOST_ANNOUNCE
+          bound = true;
+#endif
         }
 
       /* Apparently this is not a composite device */
@@ -603,8 +886,23 @@ int usbhost_enumerate(FAR struct usbhost_hubport_s *hport,
             {
               uerr("ERROR: usbhost_classbind failed %d\n", ret);
             }
+#ifdef CONFIG_USBHOST_ANNOUNCE
+          else
+            {
+              bound = true;
+            }
+#endif
         }
     }
+
+  /* Report the device now that every path has had its turn at binding one,
+   * and now that the descriptor buffer is free to be used for the strings.
+   */
+
+#ifdef CONFIG_USBHOST_ANNOUNCE
+  usbhost_announce(hport, &id, bound, ctrlreq, buffer, bcd,
+                   imfgr, iprod, iserno);
+#endif
 
 errout:
   if (ret < 0)
