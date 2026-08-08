@@ -30,6 +30,12 @@ CSRCS += devfreq_procfs.c
 
 endif
 
+ifeq ($(CONFIG_DEVFREQ_GOV_ONDEMAND),y)
+
+CSRCS += devfreq_ondemand.c
+
+endif
+
 DEPPATH += --dep-path devfreq
 VPATH += devfreq
 

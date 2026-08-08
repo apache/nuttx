@@ -25,5 +25,9 @@ if(CONFIG_DEVFREQ)
     list(APPEND SRCS devfreq_procfs.c)
   endif()
 
+  if(CONFIG_DEVFREQ_GOV_ONDEMAND)
+    list(APPEND SRCS devfreq_ondemand.c)
+  endif()
+
   target_sources(drivers PRIVATE ${SRCS})
 endif()
