@@ -160,6 +160,16 @@ struct xhci_epinfo_s
   size_t             dmacopy;      /* Length to copy back out of a stand-in */
   bool               dmain;        /* Direction this buffer was prepared for */
   sem_t              iocsem;       /* Semaphore used to wait for transfer completion */
+
+  /* One transfer at a time on an endpoint.  The controller lock below is
+   * released while a transfer is in flight, so it cannot serve this: two
+   * threads would each set up a transfer on the same endpoint and the
+   * second would find iocwait already set.  A device's default control
+   * endpoint is the one that meets this, since every interface driver on
+   * a composite device speaks through it.
+   */
+
+  mutex_t            exclsem;      /* Serialises transfers on this endpoint */
 #ifdef CONFIG_USBHOST_ASYNCH
   usbhost_asynch_t   callback;     /* Transfer complete callback */
   FAR void          *arg;          /* Argument that accompanies the callback */
@@ -3993,6 +4003,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 #endif
   epinfo->xfrtype   = epdesc->xfrtype;
   nxsem_init(&epinfo->iocsem, 0, 0);
+  nxmutex_init(&epinfo->exclsem);
 
   /* xhci_epno_get() returns Device Context Index (DCI) */
 
@@ -4008,6 +4019,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   if (dev == NULL)
     {
       uerr("no device on port %d\n", RHPNDX(rhport));
+      nxmutex_destroy(&epinfo->exclsem);
       nxsem_destroy(&epinfo->iocsem);
       kmm_free(epinfo);
       return -ENODEV;
@@ -4160,6 +4172,8 @@ static int xhci_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 
   /* Free the container */
 
+  nxmutex_destroy(&epinfo->exclsem);
+  nxsem_destroy(&epinfo->iocsem);
   kmm_free(epinfo);
   return OK;
 }
@@ -4404,6 +4418,17 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(rhport != NULL && ep0info != NULL && req != NULL);
 
+  /* One request at a time on this endpoint.  Taken before the controller
+   * lock and held across the wait, so the ordering is always endpoint then
+   * controller and never the reverse.
+   */
+
+  ret = nxmutex_lock(&ep0info->exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   len = xhci_getle16(req->len);
 
   /* Terse output only if we are tracing */
@@ -4446,6 +4471,7 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
             xhci_out_slot(rhport->dev->ctx)->ctx[3];
         }
 
+      nxmutex_unlock(&ep0info->exclsem);
       return OK;
     }
 
@@ -4456,6 +4482,7 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
+      nxmutex_unlock(&ep0info->exclsem);
       return ret;
     }
 
@@ -4486,12 +4513,14 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
 
   xhci_dma_finish(ep0info);
 
+  nxmutex_unlock(&ep0info->exclsem);
   return nbytes >= 0 ? OK : (int)nbytes;
 
 errout_with_iocwait:
   ep0info->iocwait = false;
 errout_with_lock:
   nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&ep0info->exclsem);
   return ret;
 }
 
@@ -4584,6 +4613,16 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
 
   DEBUGASSERT(priv && rhport && epinfo && buffer && buflen > 0);
 
+  /* One transfer at a time on this endpoint, taken before the controller
+   * lock and held across the wait.  See the note beside exclsem.
+   */
+
+  ret = nxmutex_lock(&epinfo->exclsem);
+  if (ret < 0)
+    {
+      return (ssize_t)ret;
+    }
+
   /* We must have exclusive access to the xHCI hardware and data
    * structures.
    */
@@ -4591,6 +4630,7 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   ret = nxmutex_lock(&priv->lock);
   if (ret < 0)
     {
+      nxmutex_unlock(&epinfo->exclsem);
       return (ssize_t)ret;
     }
 
@@ -4652,12 +4692,14 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
 
   xhci_dma_finish(epinfo);
 
+  nxmutex_unlock(&epinfo->exclsem);
   return nbytes;
 
 errout_with_iocwait:
   epinfo->iocwait = false;
 errout_with_lock:
   nxmutex_unlock(&priv->lock);
+  nxmutex_unlock(&epinfo->exclsem);
   return (ssize_t)ret;
 }
 
@@ -5351,6 +5393,7 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
       rhport->ep0.epno            = 0;
       rhport->ep0.devaddr         = 0;
       nxsem_init(&rhport->ep0.iocsem, 0, 0);
+      nxmutex_init(&rhport->ep0.exclsem);
 
       /* Initialize the public port representation */
 
