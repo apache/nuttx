@@ -797,6 +797,22 @@ config USBHOST_XHCI_MAX_DEVS
 	---help---
 		How many USB devices will be supported by xHCI driver.
 
+config USBHOST_XHCI_ENUM_RETRIES
+	int "xHCI enumeration attempts per port"
+	default 3
+	range 1 255
+	---help---
+		How many times to attempt enumeration of a newly connected device
+		before leaving the port alone until the device is unplugged.
+
+		A device whose descriptors cannot be read, or that no class driver
+		claims, fails enumeration every time.  Each failure marks the port
+		disconnected so the attempt repeats, so without a limit such a
+		device is retried for as long as it stays plugged in, logging and
+		taking a device slot on every pass.
+
+		The count is per root hub port and is cleared by a new connection.
+
 endif # USBHOST_XHCI
 
 menuconfig USBHOST_XHCI_PCI
