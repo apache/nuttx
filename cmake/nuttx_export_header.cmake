@@ -111,7 +111,7 @@ function(nuttx_export_header)
     ${ARGN})
 
   # destination directory to be exported by install
-  set(EXPORT_PATH_PREFIX ${CMAKE_BINARY_DIR}/staging/include/${TARGET})
+  set(EXPORT_PATH_PREFIX ${NUTTX_BINARY_DIR}/staging/include/${TARGET})
   # destination directory origin compile
   set(INCLUDE_PATH_PREFIX ${NUTTX_APPS_BINDIR}/include/${TARGET})
 

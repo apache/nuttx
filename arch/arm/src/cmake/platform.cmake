@@ -58,7 +58,7 @@ else()
   message(FATAL_ERROR "CMAKE_SYSTEM_PROCESSOR not set")
 endif()
 
-get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${CMAKE_SOURCE_DIR}
+get_directory_property(TOOLCHAIN_DIR_FLAGS DIRECTORY ${NUTTX_DIR}
                                                      COMPILE_OPTIONS)
 
 set(NUTTX_EXTRA_FLAGS "")

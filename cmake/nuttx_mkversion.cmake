@@ -20,7 +20,7 @@
 #
 # ##############################################################################
 
-set(VERSION_H ${CMAKE_BINARY_DIR}/include/nuttx/version.h)
+set(VERSION_H ${NUTTX_BINARY_DIR}/include/nuttx/version.h)
 if(EXISTS ${VERSION_H})
   return()
 endif()

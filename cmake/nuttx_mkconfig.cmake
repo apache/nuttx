@@ -20,32 +20,32 @@
 #
 # ##############################################################################
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config)
   return()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/.config.prev)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config.prev)
   execute_process(
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/.config
-            ${CMAKE_BINARY_DIR}/.config.prev
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    COMMAND ${CMAKE_COMMAND} -E copy ${NUTTX_BINARY_DIR}/.config
+            ${NUTTX_BINARY_DIR}/.config.prev
+    WORKING_DIRECTORY ${NUTTX_BINARY_DIR})
 endif()
 
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
-          ${CMAKE_BINARY_DIR}/.config.prev
+  COMMAND ${CMAKE_COMMAND} -E compare_files ${NUTTX_BINARY_DIR}/.config
+          ${NUTTX_BINARY_DIR}/.config.prev
   RESULT_VARIABLE COMPARE_RESULT
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR})
 
-set(CONFIG_H ${CMAKE_BINARY_DIR}/include/nuttx/config.h)
+set(CONFIG_H ${NUTTX_BINARY_DIR}/include/nuttx/config.h)
 if(COMPARE_RESULT EQUAL 0 AND EXISTS ${CONFIG_H})
   return()
 endif()
 
 set(BASE_DEFCONFIG "${NUTTX_BOARD}/${NUTTX_CONFIG}")
 execute_process(
-  COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_BINARY_DIR}/.config
-          ${CMAKE_BINARY_DIR}/.config.orig RESULT_VARIABLE COMPARE_RESULT)
+  COMMAND ${CMAKE_COMMAND} -E compare_files ${NUTTX_BINARY_DIR}/.config
+          ${NUTTX_BINARY_DIR}/.config.orig RESULT_VARIABLE COMPARE_RESULT)
 if(COMPARE_RESULT)
   string(APPEND BASE_DEFCONFIG "-dirty")
 endif()
@@ -95,7 +95,7 @@ file(APPEND ${CONFIG_H}
      "/* General Definitions ***********************************/\n")
 file(APPEND ${CONFIG_H} "#define CONFIG_BASE_DEFCONFIG \"${BASE_DEFCONFIG}\"\n")
 
-file(STRINGS ${CMAKE_BINARY_DIR}/.config ConfigContents)
+file(STRINGS ${NUTTX_BINARY_DIR}/.config ConfigContents)
 encode_brackets(ConfigContents)
 foreach(NameAndValue ${ConfigContents})
   decode_brackets(NameAndValue)

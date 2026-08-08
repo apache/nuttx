@@ -107,7 +107,7 @@ if(CONFIG_RP2040_FLASH_BOOT)
     set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
     include(${CMAKE_CURRENT_SOURCE_DIR}/boot2/rp2040_boot_stage2.cmake)
 
-    set(PATH_CHIP_RP2040 ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
+    set(PATH_CHIP_RP2040 ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/chip)
     pico_define_boot_stage2(rp2040_boot_stage2 ${PATH_CHIP_RP2040})
 
     if(EXISTS ${PATH_CHIP_RP2040}/rp2040_boot_stage2.S)

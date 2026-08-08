@@ -35,7 +35,7 @@ if(CONFIG_BUILD_KERNEL)
   # depend on (cycle).
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/romfs_boot.c
-    COMMAND genromfs -f romfs.img -d ${CMAKE_BINARY_DIR}/bin -V NuttXBootVol
+    COMMAND genromfs -f romfs.img -d ${NUTTX_BINARY_DIR}/bin -V NuttXBootVol
     COMMAND xxd -i romfs.img romfs_boot.c
     DEPENDS $<TARGET_PROPERTY:nuttx,NUTTX_LOADABLE_APPS>
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

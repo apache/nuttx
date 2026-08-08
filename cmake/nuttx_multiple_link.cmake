@@ -22,35 +22,34 @@
 
 # create an empty allsyms source file for `nuttx`
 if(CONFIG_ALLSYMS)
-  set(ALLSYMS_SOURCE ${CMAKE_BINARY_DIR}/allsyms_empty.c)
+  set(ALLSYMS_SOURCE ${NUTTX_BINARY_DIR}/allsyms_empty.c)
   add_custom_command(
     OUTPUT ${ALLSYMS_SOURCE}
     COMMAND ${NUTTX_DIR}/tools/mkallsyms.py nuttx.empty ${ALLSYMS_SOURCE}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
     COMMENT "Generating allsyms_empty.c")
   add_custom_target(generate_empty_allsyms DEPENDS ${ALLSYMS_SOURCE})
   add_dependencies(nuttx generate_empty_allsyms)
 
   target_sources(nuttx PRIVATE ${ALLSYMS_SOURCE})
-  set(ALLSYMS_INCDIR ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include)
+  set(ALLSYMS_INCDIR ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include)
   set_source_files_properties(${ALLSYMS_SOURCE} PROPERTIES INCLUDE_DIRECTORIES
                                                            "${ALLSYMS_INCDIR}")
 endif()
 
 if(CONFIG_MM_KASAN_GLOBAL)
-  set(KASAN_GLOBAL_SOURCE ${CMAKE_BINARY_DIR}/kasan_global.c)
+  set(KASAN_GLOBAL_SOURCE ${NUTTX_BINARY_DIR}/kasan_global.c)
   add_custom_command(
     OUTPUT ${KASAN_GLOBAL_SOURCE}
     COMMAND ${NUTTX_DIR}/tools/kasan_global.py -e nuttx.empty -o
             ${KASAN_GLOBAL_SOURCE} -a ${CONFIG_MM_KASAN_GLOBAL_ALIGN}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
     COMMENT "Generating kasan_global.c")
   add_custom_target(generate_empty_kasan_global DEPENDS ${KASAN_GLOBAL_SOURCE})
   add_dependencies(nuttx generate_empty_kasan_global)
 
   target_sources(nuttx PRIVATE ${KASAN_GLOBAL_SOURCE})
-  set(KASAN_GLOBAL_INCDIR ${CMAKE_SOURCE_DIR}/include
-                          ${CMAKE_BINARY_DIR}/include)
+  set(KASAN_GLOBAL_INCDIR ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include)
   set_source_files_properties(
     ${KASAN_GLOBAL_SOURCE} PROPERTIES INCLUDE_DIRECTORIES
                                       "${KASAN_GLOBAL_INCDIR}")
@@ -82,10 +81,10 @@ macro(define_multiple_link_target inter_target dep_target linktimes)
     list(APPEND MULTIPLE_LINK_SOURCES_${linktimes} ${LINK_ALLSYMS_SOURCE})
     add_custom_command(
       OUTPUT ${LINK_ALLSYMS_SOURCE} POST_BUILD
-      COMMAND ${NUTTX_DIR}/tools/mkallsyms.py ${CMAKE_BINARY_DIR}/${dep_target}
+      COMMAND ${NUTTX_DIR}/tools/mkallsyms.py ${NUTTX_BINARY_DIR}/${dep_target}
               ${LINK_ALLSYMS_SOURCE}
       DEPENDS ${dep_target}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
       COMMAND_EXPAND_LISTS)
   endif()
 
@@ -95,10 +94,10 @@ macro(define_multiple_link_target inter_target dep_target linktimes)
     add_custom_command(
       OUTPUT ${LINK_KASAN_GLOBAL_SOURCE} POST_BUILD
       COMMAND
-        ${NUTTX_DIR}/tools/kasan_global.py -e ${CMAKE_BINARY_DIR}/${dep_target}
+        ${NUTTX_DIR}/tools/kasan_global.py -e ${NUTTX_BINARY_DIR}/${dep_target}
         -o ${LINK_KASAN_GLOBAL_SOURCE} -a ${CONFIG_MM_KASAN_GLOBAL_ALIGN}
       DEPENDS ${dep_target}
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
       COMMAND_EXPAND_LISTS)
   endif()
 
@@ -111,8 +110,8 @@ macro(define_multiple_link_target inter_target dep_target linktimes)
 
   # relink target and nuttx have exactly the same configuration
   target_include_directories(
-    ${inter_target} SYSTEM PUBLIC ${CMAKE_SOURCE_DIR}/include
-                                  ${CMAKE_BINARY_DIR}/include)
+    ${inter_target} SYSTEM PUBLIC ${NUTTX_DIR}/include
+                                  ${NUTTX_BINARY_DIR}/include)
   target_compile_definitions(
     ${inter_target} PRIVATE $<TARGET_PROPERTY:nuttx,NUTTX_KERNEL_DEFINITIONS>)
   target_compile_options(

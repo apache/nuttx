@@ -31,9 +31,9 @@ endif()
 
 ExternalProject_Add(
   nuttx_post_build
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools/cxd56
-  INSTALL_DIR ${CMAKE_BINARY_DIR}/tools/cxd56
-  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+  SOURCE_DIR ${NUTTX_DIR}/tools/cxd56
+  INSTALL_DIR ${NUTTX_BINARY_DIR}/tools/cxd56
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${NUTTX_BINARY_DIR}
   USES_TERMINAL_CONFIGURE true
   USES_TERMINAL_BUILD true
   USES_TERMINAL_INSTALL true
@@ -43,5 +43,5 @@ add_custom_command(
   TARGET nuttx_post_build
   POST_BUILD
   BYPRODUCTS nuttx.spk
-  COMMAND ${CMAKE_BINARY_DIR}/bin/mkspk -c2 nuttx nuttx nuttx.spk
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  COMMAND ${NUTTX_BINARY_DIR}/bin/mkspk -c2 nuttx nuttx nuttx.spk
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR})

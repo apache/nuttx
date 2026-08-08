@@ -35,7 +35,7 @@ if(CONFIG_UCLIBCXX)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/uClibc++
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/uClibc++
+          ${NUTTX_BINARY_DIR}/libs/libc/uClibc++
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND
@@ -61,16 +61,16 @@ if(CONFIG_UCLIBCXX)
   endif()
 
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/uClibc++/include
-                       ${CMAKE_BINARY_DIR}/include/uClibc++)
+                       ${NUTTX_BINARY_DIR}/include/uClibc++)
 
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/system_configuration.h
-    ${CMAKE_BINARY_DIR}/include/uClibc++/system_configuration.h COPYONLY)
+    ${NUTTX_BINARY_DIR}/include/uClibc++/system_configuration.h COPYONLY)
 
   set_property(
     TARGET nuttx
     APPEND
-    PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${CMAKE_BINARY_DIR}/include/uClibc++)
+    PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES ${NUTTX_BINARY_DIR}/include/uClibc++)
 
   set(SRCS
       algorithm.cpp

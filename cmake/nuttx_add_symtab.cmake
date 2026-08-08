@@ -87,7 +87,7 @@ function(nuttx_add_symtab)
     DEPENDS symtab_${NAME}_dat)
 
   # generate code which instantiates the symbol table
-  configure_file(${CMAKE_SOURCE_DIR}/cmake/symtab.c.in symtab_${NAME}.c @ONLY)
+  configure_file(${NUTTX_DIR}/cmake/symtab.c.in symtab_${NAME}.c @ONLY)
 
   # define an internal library to build the symtab file on its own
   add_library(symtab_${NAME} OBJECT

@@ -591,7 +591,7 @@ function(nuttx_generate_preprocess_target)
   add_custom_command(
     OUTPUT ${TARGET_FILE}
     COMMAND
-      ${PREPROCESS} -I${CMAKE_BINARY_DIR}/include -I${NUTTX_DIR}/include
+      ${PREPROCESS} -I${NUTTX_BINARY_DIR}/include -I${NUTTX_DIR}/include
       -I${NUTTX_CHIP_ABS_DIR} ${LD_SCRIPT_HAL_INCLUDE}
       ${LD_SCRIPT_ADDITIONAL_INCLUDE} -D__NuttX__ ${SOURCE_FILE} >
       ${TARGET_FILE}

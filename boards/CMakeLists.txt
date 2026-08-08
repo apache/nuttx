@@ -32,8 +32,8 @@
 # ifeq ($(CUSTOM_KCONFIG),y) BOARD_KCONFIG = $(CUSTOM_KPATH) else BOARD_KCONFIG
 # = $(TOPDIR)$(DELIM)configs$(DELIM)dummy$(DELIM)dummy_kconfig endif
 
-file(WRITE ${CMAKE_BINARY_DIR}/dummy.c "")
-nuttx_add_kernel_library(board ${CMAKE_BINARY_DIR}/dummy.c)
+file(WRITE ${NUTTX_BINARY_DIR}/dummy.c "")
+nuttx_add_kernel_library(board ${NUTTX_BINARY_DIR}/dummy.c)
 
 # boardctl support
 
@@ -54,9 +54,9 @@ if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../common/CMakeLists.txt)
 
   # Create link ARCH_SRC_BOARD_BOARD_SYMLINK
 
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board)
   nuttx_create_symlink(${NUTTX_BOARD_ABS_DIR}/src
-                       ${CMAKE_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board/board)
+                       ${NUTTX_BINARY_DIR}/arch/${CONFIG_ARCH}/src/board/board)
 endif()
 
 if(EXISTS ${NUTTX_BOARD_ABS_DIR}/../drivers/CMakeLists.txt)

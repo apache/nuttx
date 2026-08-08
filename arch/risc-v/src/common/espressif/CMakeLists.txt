@@ -254,7 +254,7 @@ option(
 
 get_filename_component(
   ESP_HAL_3RDPARTY_CHIP_DIR
-  "${CMAKE_BINARY_DIR}/arch/risc-v/src/common/espressif/${ESP_HAL_3RDPARTY_REPO_NAME}"
+  "${NUTTX_BINARY_DIR}/arch/risc-v/src/common/espressif/${ESP_HAL_3RDPARTY_REPO_NAME}"
   REALPATH)
 
 set(EXECUTE_CLONE_ESP_HAL_3RDPARTY_REPO TRUE)
@@ -321,10 +321,10 @@ if(NOT IS_DIRECTORY "${ESP_HAL_3RDPARTY_REPO}")
 
   # Copy gpio_sig_map.h and irq.h from the esp-hal-3rdparty repository to the NuttX directory
   file(COPY ${ESP_HAL_3RDPARTY_REPO}/components/soc/${CHIP_SERIES}/include/soc/gpio_sig_map.h
-       DESTINATION ${CMAKE_BINARY_DIR}/include/arch/chip/)
+       DESTINATION ${NUTTX_BINARY_DIR}/include/arch/chip/)
 
   file(COPY ${ESP_HAL_3RDPARTY_REPO}/nuttx/${CHIP_SERIES}/include/irq.h
-       DESTINATION ${CMAKE_BINARY_DIR}/include/arch/chip/)
+       DESTINATION ${NUTTX_BINARY_DIR}/include/arch/chip/)
 
   if(CONFIG_ESPRESSIF_WIRELESS)
     message(
@@ -350,8 +350,8 @@ endif()
 
 # This is done previously on configure time but must be done again if a 'clean'
 # is executed.
-set(_gpio_sig_map ${CMAKE_BINARY_DIR}/include/arch/chip/gpio_sig_map.h)
-set(_irq ${CMAKE_BINARY_DIR}/include/arch/chip/irq.h)
+set(_gpio_sig_map ${NUTTX_BINARY_DIR}/include/arch/chip/gpio_sig_map.h)
+set(_irq ${NUTTX_BINARY_DIR}/include/arch/chip/irq.h)
 
 add_custom_command(
   OUTPUT ${_gpio_sig_map} ${_irq}
@@ -446,10 +446,9 @@ add_custom_command(
   TARGET nuttx_post_build
   POST_BUILD
   COMMAND
-    ${CMAKE_COMMAND} -DBINARY_DIR=${CMAKE_BINARY_DIR}
-    -DSOURCE_DIR=${CMAKE_SOURCE_DIR} -P
-    ${NUTTX_DIR}/tools/espressif/espressif_mkimage.cmake
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    ${CMAKE_COMMAND} -DBINARY_DIR=${NUTTX_BINARY_DIR} -DSOURCE_DIR=${NUTTX_DIR}
+    -P ${NUTTX_DIR}/tools/espressif/espressif_mkimage.cmake
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
   COMMENT "Generating ESP-compatible binary"
   VERBATIM)
 
@@ -471,10 +470,10 @@ add_custom_target(
   flash
   DEPENDS nuttx_post_build
   COMMAND
-    ${CMAKE_COMMAND} -DBINARY_DIR=${CMAKE_BINARY_DIR}
-    -DSOURCE_DIR=${CMAKE_SOURCE_DIR} -DNUTTX_DIR=${NUTTX_DIR} -P
+    ${CMAKE_COMMAND} -DBINARY_DIR=${NUTTX_BINARY_DIR} -DSOURCE_DIR=${NUTTX_DIR}
+    -DNUTTX_DIR=${NUTTX_DIR} -P
     ${NUTTX_DIR}/tools/espressif/espressif_flash.cmake
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+  WORKING_DIRECTORY ${NUTTX_BINARY_DIR}
   COMMENT "Flashing firmware via esptool to $ENV{ESPTOOL_PORT}"
   VERBATIM)
 
@@ -497,6 +496,6 @@ if(CONFIG_ESPRESSIF_USE_LP_CORE)
 endif()
 
 set_property(
-  DIRECTORY ${CMAKE_SOURCE_DIR}
+  DIRECTORY ${NUTTX_DIR}
   APPEND
   PROPERTY ADDITIONAL_CLEAN_FILES ${ESP_CLEAN_FILES})

@@ -21,11 +21,11 @@
 # ##############################################################################
 
 set(REDEFINE_INPUT_FILE ${NUTTX_DIR}/arch/sim/src/nuttx-names.in)
-set(REDEFINE_OUTPUT_FILE ${CMAKE_BINARY_DIR}/nuttx-names.dat)
+set(REDEFINE_OUTPUT_FILE ${NUTTX_BINARY_DIR}/nuttx-names.dat)
 
 add_custom_command(
   OUTPUT ${REDEFINE_OUTPUT_FILE}
-  COMMAND ${CMAKE_C_COMPILER} -E -P -x c -I${CMAKE_BINARY_DIR}/include
+  COMMAND ${CMAKE_C_COMPILER} -E -P -x c -I${NUTTX_BINARY_DIR}/include
           ${REDEFINE_INPUT_FILE} > ${REDEFINE_OUTPUT_FILE}
   DEPENDS nuttx_context ${REDEFINE_INPUT_FILE})
 

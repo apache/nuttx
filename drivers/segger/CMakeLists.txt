@@ -31,7 +31,7 @@ if(CONFIG_SEGGER_RTT OR CONFIG_SEGGER_SYSVIEW)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/SystemView
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/SystemView
+          ${NUTTX_BINARY_DIR}/SystemView
       DOWNLOAD_NO_PROGRESS true
       TIMEOUT 30)
 

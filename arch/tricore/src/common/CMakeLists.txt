@@ -76,5 +76,5 @@ target_sources(nuttx PRIVATE tricore_doirq.c)
 target_compile_options(arch PRIVATE ${IFXFLAGS})
 target_compile_options(nuttx PRIVATE ${IFXFLAGS})
 target_include_directories(
-  nuttx SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/include
-                       ${CMAKE_BINARY_DIR}/include_arch)
+  nuttx SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include
+                       ${NUTTX_BINARY_DIR}/include_arch)

@@ -235,7 +235,7 @@ function(nuttx_add_cromfs)
             copy_directory ${PATH} cromfs_${NAME} \; fi
     COMMAND if \[ \"${FILES}\" != \"\" \]; then ${CMAKE_COMMAND} -E copy
             ${FILES} cromfs_${NAME} \; fi
-    COMMAND ${CMAKE_BINARY_DIR}/bin_host/gencromfs cromfs_${NAME}
+    COMMAND ${NUTTX_BINARY_DIR}/bin_host/gencromfs cromfs_${NAME}
             cromfs_${NAME}.c
     DEPENDS ${DEPENDS})
 
@@ -353,12 +353,12 @@ function(process_all_directory_romfs)
     # Build mkpasswd.c as a host binary in the CMake build directory and keep
     # the source tree clean.
     set(MKPASSWD_SRC ${NUTTX_DIR}/tools/mkpasswd.c)
-    set(MKPASSWD_BIN ${CMAKE_BINARY_DIR}/tools/mkpasswd${HOST_EXE_SUFFIX})
+    set(MKPASSWD_BIN ${NUTTX_BINARY_DIR}/tools/mkpasswd${HOST_EXE_SUFFIX})
 
     if(NOT TARGET build_host_mkpasswd)
       add_custom_command(
         OUTPUT ${MKPASSWD_BIN}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/tools
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${NUTTX_BINARY_DIR}/tools
         COMMAND ${HOST_CC} -o ${MKPASSWD_BIN} ${MKPASSWD_SRC}
         DEPENDS ${MKPASSWD_SRC}
         COMMENT "Building host tool: mkpasswd")

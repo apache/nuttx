@@ -218,14 +218,14 @@ function(nuttx_olddefconfig)
   endif()
 
   # save the orig compressed formatted defconfig at the very beginning
-  execute_process(COMMAND savedefconfig --out ${CMAKE_BINARY_DIR}/defconfig.tmp
+  execute_process(COMMAND savedefconfig --out ${NUTTX_BINARY_DIR}/defconfig.tmp
                   WORKING_DIRECTORY ${NUTTX_DIR})
 
   execute_process(
     COMMAND
       ${CMAKE_COMMAND} -P ${NUTTX_DIR}/cmake/savedefconfig.cmake
-      ${CMAKE_BINARY_DIR}/.config.compressed ${CMAKE_BINARY_DIR}/defconfig.tmp
-      ${CMAKE_BINARY_DIR}/defconfig.orig
+      ${NUTTX_BINARY_DIR}/.config.compressed ${NUTTX_BINARY_DIR}/defconfig.tmp
+      ${NUTTX_BINARY_DIR}/defconfig.orig
     WORKING_DIRECTORY ${NUTTX_DIR})
 
 endfunction()
@@ -244,7 +244,7 @@ function(nuttx_setconfig)
   endif()
 
   if(NOT SETCONFIG_CONFIG_FILE)
-    set(SETCONFIG_CONFIG_FILE ${CMAKE_BINARY_DIR}/.config)
+    set(SETCONFIG_CONFIG_FILE ${NUTTX_BINARY_DIR}/.config)
   endif()
 
   set(ENV{KCONFIG_CONFIG} ${SETCONFIG_CONFIG_FILE})

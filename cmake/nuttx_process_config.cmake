@@ -41,8 +41,8 @@ function(process_config OUTPUT INPUT TREE_FILE)
   message(STATUS "Processing includes: ${INPUT} → ${OUTPUT}")
   execute_process(
     COMMAND
-      ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/process_config.py
-      preprocess ${OUTPUT} ${INPUT} ${include_args} ${TREE_OPTION} ${TREE_FILE}
+      ${Python3_EXECUTABLE} ${NUTTX_DIR}/tools/process_config.py preprocess
+      ${OUTPUT} ${INPUT} ${include_args} ${TREE_OPTION} ${TREE_FILE}
     RESULT_VARIABLE result
     OUTPUT_VARIABLE out
     ERROR_VARIABLE err)
@@ -56,16 +56,16 @@ endfunction()
 file(READ "${NUTTX_DEFCONFIG}" FILE_CONTENTS)
 string(FIND "${FILE_CONTENTS}" "#include" INCLUDE_FOUND)
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/.defconfig.processed)
-  set(TREE_FILE ${CMAKE_BINARY_DIR}/config_tree.json)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/.defconfig.processed)
+  set(TREE_FILE ${NUTTX_BINARY_DIR}/config_tree.json)
 else()
-  set(TREE_FILE ${CMAKE_BINARY_DIR}/config_tree_dirty.json)
+  set(TREE_FILE ${NUTTX_BINARY_DIR}/config_tree_dirty.json)
 endif()
 # Should we preprocess defconfig?
 if(INCLUDE_FOUND GREATER -1)
   get_filename_component(NUTTX_DEFCONFIG_DIR "${NUTTX_DEFCONFIG}" DIRECTORY)
   process_config(
-    ${CMAKE_BINARY_DIR}/.defconfig.processed
+    ${NUTTX_BINARY_DIR}/.defconfig.processed
     ${NUTTX_DEFCONFIG}
     ${TREE_FILE}
     INCLUDE_PATHS
@@ -74,5 +74,5 @@ if(INCLUDE_FOUND GREATER -1)
     ${NUTTX_DEFCONFIG_DIR}
     ${NUTTX_DIR}/../apps
     ${NUTTX_DIR}/../nuttx-apps)
-  set(NUTTX_DEFCONFIG ${CMAKE_BINARY_DIR}/.defconfig.processed)
+  set(NUTTX_DEFCONFIG ${NUTTX_BINARY_DIR}/.defconfig.processed)
 endif()

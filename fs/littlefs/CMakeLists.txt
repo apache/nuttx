@@ -29,7 +29,7 @@ if(CONFIG_FS_LITTLEFS)
             SOURCE_DIR
             ${CMAKE_CURRENT_LIST_DIR}/littlefs
             BINARY_DIR
-            ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs
+            ${NUTTX_BINARY_DIR}/fs/littlefs/littlefs
         PATCH_COMMAND
           patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
           ${CMAKE_CURRENT_LIST_DIR}/lfs_util.patch && patch -p2 -d
@@ -44,7 +44,7 @@ if(CONFIG_FS_LITTLEFS)
             SOURCE_DIR
             ${CMAKE_CURRENT_LIST_DIR}/littlefs
             BINARY_DIR
-            ${CMAKE_BINARY_DIR}/fs/littlefs/littlefs)
+            ${NUTTX_BINARY_DIR}/fs/littlefs/littlefs)
     endif()
     FetchContent_MakeAvailable(littlefs)
   endif()

@@ -22,12 +22,12 @@
 
 # setup target to generate config.h and version.h from mkconfig and mkversion
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/include)
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/nuttx)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/nuttx)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include/nuttx)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/include/nuttx)
 endif()
 
 include(nuttx_mkconfig)
@@ -35,40 +35,40 @@ include(nuttx_mkversion)
 
 # Setup symbolic link generation
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include_apps)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include_apps)
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-                          ${CMAKE_BINARY_DIR}/include_apps)
+                          ${NUTTX_BINARY_DIR}/include_apps)
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include/arch)
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory
-                          ${CMAKE_BINARY_DIR}/include/arch)
+                          ${NUTTX_BINARY_DIR}/include/arch)
   file(GLOB CONTENTS ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/*)
   foreach(ARCH_INCDIR ${CONTENTS})
     get_filename_component(SUB_ELEMENT ${ARCH_INCDIR} NAME)
     nuttx_create_symlink(${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${SUB_ELEMENT}
-                         ${CMAKE_BINARY_DIR}/include/arch/${SUB_ELEMENT})
+                         ${NUTTX_BINARY_DIR}/include/arch/${SUB_ELEMENT})
   endforeach()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/board)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include/arch/board)
   if(EXISTS ${NUTTX_BOARD_DIR}/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/include
-                         ${CMAKE_BINARY_DIR}/include/arch/board)
+                         ${NUTTX_BINARY_DIR}/include/arch/board)
   elseif(EXISTS ${NUTTX_BOARD_DIR}/../common/include)
     nuttx_create_symlink(${NUTTX_BOARD_DIR}/../common/include
-                         ${CMAKE_BINARY_DIR}/include/arch/board)
+                         ${NUTTX_BINARY_DIR}/include/arch/board)
   endif()
 endif()
 
-if(NOT EXISTS ${CMAKE_BINARY_DIR}/include/arch/chip)
+if(NOT EXISTS ${NUTTX_BINARY_DIR}/include/arch/chip)
   if(CONFIG_ARCH_CHIP_CUSTOM)
     nuttx_create_symlink(${NUTTX_CHIP_ABS_DIR}/include
-                         ${CMAKE_BINARY_DIR}/include/arch/chip)
+                         ${NUTTX_BINARY_DIR}/include/arch/chip)
   else()
     nuttx_create_symlink(
       ${NUTTX_DIR}/arch/${CONFIG_ARCH}/include/${CONFIG_ARCH_CHIP}
-      ${CMAKE_BINARY_DIR}/include/arch/chip)
+      ${NUTTX_BINARY_DIR}/include/arch/chip)
   endif()
 endif()
 
@@ -81,9 +81,9 @@ endif()
 
 if(CONFIG_ARCH_STDARG_H)
   nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/stdarg.h
-                       ${CMAKE_BINARY_DIR}/include/stdarg.h)
+                       ${NUTTX_BINARY_DIR}/include/stdarg.h)
 else()
-  file(REMOVE ${CMAKE_BINARY_DIR}/include/stdarg.h)
+  file(REMOVE ${NUTTX_BINARY_DIR}/include/stdarg.h)
 endif()
 
 # Target used to copy include/nuttx/lib/math.h.  If CONFIG_ARCH_MATH_H is
@@ -107,9 +107,9 @@ endif()
 
 if(NEED_MATH_H)
   nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/math.h
-                       ${CMAKE_BINARY_DIR}/include/math.h)
+                       ${NUTTX_BINARY_DIR}/include/math.h)
 else()
-  file(REMOVE ${CMAKE_BINARY_DIR}/include/math.h)
+  file(REMOVE ${NUTTX_BINARY_DIR}/include/math.h)
 endif()
 
 # The float.h header file defines the properties of your floating point
@@ -120,9 +120,9 @@ endif()
 
 if(CONFIG_ARCH_FLOAT_H)
   nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/float.h
-                       ${CMAKE_BINARY_DIR}/include/float.h)
+                       ${NUTTX_BINARY_DIR}/include/float.h)
 else()
-  file(REMOVE ${CMAKE_BINARY_DIR}/include/float.h)
+  file(REMOVE ${NUTTX_BINARY_DIR}/include/float.h)
 endif()
 
 # Target used to copy include/nuttx/lib/setjmp.h.  If CONFIG_ARCH_SETJMP_H is
@@ -132,9 +132,9 @@ endif()
 
 if(CONFIG_ARCH_SETJMP_H)
   nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/setjmp.h
-                       ${CMAKE_BINARY_DIR}/include/setjmp.h)
+                       ${NUTTX_BINARY_DIR}/include/setjmp.h)
 else()
-  file(REMOVE ${CMAKE_BINARY_DIR}/include/setjmp.h)
+  file(REMOVE ${NUTTX_BINARY_DIR}/include/setjmp.h)
 endif()
 
 # Target used to copy include/nuttx/lib/stdbit.h.  If CONFIG_ARCH_STDBIT_H or
@@ -143,9 +143,9 @@ endif()
 
 if(CONFIG_ARCH_STDBIT_H OR CONFIG_LIBC_STDBIT_GENERIC)
   nuttx_create_symlink(${NUTTX_DIR}/include/nuttx/lib/stdbit.h
-                       ${CMAKE_BINARY_DIR}/include/stdbit.h)
+                       ${NUTTX_BINARY_DIR}/include/stdbit.h)
 else()
-  file(REMOVE ${CMAKE_BINARY_DIR}/include/stdbit.h)
+  file(REMOVE ${NUTTX_BINARY_DIR}/include/stdbit.h)
 endif()
 
 # Add final context target that ties together all of the above The context
@@ -157,14 +157,14 @@ endif()
 add_custom_target(
   nuttx_context
   DEPENDS
-    ${CMAKE_BINARY_DIR}/include/nuttx/config.h
-    ${CMAKE_BINARY_DIR}/include/nuttx/version.h
-    $<$<BOOL:${CONFIG_ARCH_STDARG_H}>:${CMAKE_BINARY_DIR}/include/stdarg.h>
-    $<$<BOOL:${NEED_MATH_H}>:${CMAKE_BINARY_DIR}/include/math.h>
-    $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${CMAKE_BINARY_DIR}/include/float.h>
-    $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${CMAKE_BINARY_DIR}/include/setjmp.h>
-    $<$<BOOL:${CONFIG_ARCH_STDBIT_H}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
-    $<$<BOOL:${CONFIG_LIBC_STDBIT_GENERIC}>:${CMAKE_BINARY_DIR}/include/stdbit.h>
+    ${NUTTX_BINARY_DIR}/include/nuttx/config.h
+    ${NUTTX_BINARY_DIR}/include/nuttx/version.h
+    $<$<BOOL:${CONFIG_ARCH_STDARG_H}>:${NUTTX_BINARY_DIR}/include/stdarg.h>
+    $<$<BOOL:${NEED_MATH_H}>:${NUTTX_BINARY_DIR}/include/math.h>
+    $<$<BOOL:${CONFIG_ARCH_FLOAT_H}>:${NUTTX_BINARY_DIR}/include/float.h>
+    $<$<BOOL:${CONFIG_ARCH_SETJMP_H}>:${NUTTX_BINARY_DIR}/include/setjmp.h>
+    $<$<BOOL:${CONFIG_ARCH_STDBIT_H}>:${NUTTX_BINARY_DIR}/include/stdbit.h>
+    $<$<BOOL:${CONFIG_LIBC_STDBIT_GENERIC}>:${NUTTX_BINARY_DIR}/include/stdbit.h>
 )
 
 # apps_context is a PHONY target used as an intermediate process to control the

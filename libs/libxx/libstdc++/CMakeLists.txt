@@ -36,7 +36,7 @@ if(CONFIG_LIBSUPCXX)
             SOURCE_DIR
             ${CMAKE_CURRENT_LIST_DIR}/libstdc++
             BINARY_DIR
-            ${CMAKE_BINARY_DIR}/libs/libxx/libstdc++
+            ${NUTTX_BINARY_DIR}/libs/libxx/libstdc++
             CONFIGURE_COMMAND
             ""
             BUILD_COMMAND
@@ -70,12 +70,12 @@ if(CONFIG_LIBSUPCXX)
   endif()
 
   # Create include directories
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/c++)
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include/c++/bits)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/include/c++)
+  file(MAKE_DIRECTORY ${NUTTX_BINARY_DIR}/include/c++/bits)
 
   # Copy headers to c++ include directory
-  set(CXXDIR ${CMAKE_BINARY_DIR}/include/c++)
-  set(BITSDIR ${CMAKE_BINARY_DIR}/include/c++/bits)
+  set(CXXDIR ${NUTTX_BINARY_DIR}/include/c++)
+  set(BITSDIR ${NUTTX_BINARY_DIR}/include/c++/bits)
 
   # Copy libsupc++ headers
   file(COPY ${CMAKE_CURRENT_LIST_DIR}/c++config.h DESTINATION ${INCDIR}/bits)
@@ -143,8 +143,7 @@ if(CONFIG_LIBSUPCXX)
 
   # Add system include directories
   target_include_directories(
-    libsupcxx SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/include
-                             ${CMAKE_BINARY_DIR}/include)
+    libsupcxx SYSTEM PRIVATE ${NUTTX_DIR}/include ${NUTTX_BINARY_DIR}/include)
 
   # Set global compile options & definitions from nuttx target
   target_compile_options(

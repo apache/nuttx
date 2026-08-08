@@ -29,7 +29,7 @@ if(CONFIG_TRICORE_TOOLCHAIN_TASKING)
   target_sources(c_fpu PRIVATE tc3xx_libc.c)
   target_link_options(
     nuttx PRIVATE
-    --library-directory=${CMAKE_BINARY_DIR}/arch/tricore/src/exclude_chip)
+    --library-directory=${NUTTX_BINARY_DIR}/arch/tricore/src/exclude_chip)
 endif()
 
 set(ILLD_UNPACK "${CMAKE_CURRENT_SOURCE_DIR}/../illd/tc3xx")
@@ -75,8 +75,8 @@ file(GLOB PATCH_FILES "${PATCHES_DIR}/*.patch")
 foreach(PATCH ${PATCH_FILES})
   execute_process(
     COMMAND git apply --reverse --check ${PATCH}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} # Patches are applied from the repo
-                                          # root
+    WORKING_DIRECTORY ${NUTTX_DIR} # Patches are applied from the repo
+                      # root
     RESULT_VARIABLE PATCH_NEEDED
     OUTPUT_QUIET ERROR_QUIET)
 
@@ -85,8 +85,8 @@ foreach(PATCH ${PATCH_FILES})
   else()
     execute_process(
       COMMAND git apply --whitespace=nowarn ${PATCH}
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} # Patches are applied from the repo
-                                            # root
+      WORKING_DIRECTORY ${NUTTX_DIR} # Patches are applied from the repo
+                        # root
       RESULT_VARIABLE APPLY_RESULT)
     if(NOT APPLY_RESULT EQUAL 0)
       message(FATAL_ERROR "Failed to apply patch ${PATCH}!")

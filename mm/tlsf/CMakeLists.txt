@@ -33,7 +33,7 @@ if(CONFIG_MM_TLSF_MANAGER)
       tlsf_fetch
       GIT_REPOSITORY https://github.com/mattconte/tlsf.git
       SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/tlsf BINARY_DIR
-      ${CMAKE_BINARY_DIR}/mm/tlsf/tlsf
+      ${NUTTX_BINARY_DIR}/mm/tlsf/tlsf
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
         ${CMAKE_CURRENT_LIST_DIR}/0001-Add-TLSF_API-and-tlsf_printf.patch &&

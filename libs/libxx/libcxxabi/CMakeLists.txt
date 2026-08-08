@@ -32,7 +32,7 @@ if(CONFIG_LIBCXXABI)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/libcxxabi
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/libcxxabi
+          ${NUTTX_BINARY_DIR}/libs/libc/libcxxabi
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND
@@ -53,13 +53,13 @@ if(CONFIG_LIBCXXABI)
   endif()
 
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxxabi/include
-                       ${CMAKE_BINARY_DIR}/include/libcxxabi)
+                       ${NUTTX_BINARY_DIR}/include/libcxxabi)
 
   set_property(
     TARGET nuttx
     APPEND
     PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES
-             ${CMAKE_BINARY_DIR}/include/libcxxabi)
+             ${NUTTX_BINARY_DIR}/include/libcxxabi)
 
   nuttx_add_system_library(libcxxabi)
 

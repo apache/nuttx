@@ -36,7 +36,7 @@ if(CONFIG_LIBM_LIBMCS)
     FetchContent_Declare(
       libmcs_fetch
       URL ${LIBMCS_URL} SOURCE_DIR ${LIBMCS_URL}/libmcs BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libm/libmcs/libmcs
+          ${NUTTX_BINARY_DIR}/libs/libm/libmcs/libmcs
       PATCH_COMMAND
         patch -p2 -d ${CMAKE_CURRENT_LIST_DIR} <
         ${CMAKE_CURRENT_LIST_DIR}/0001-fix-build-error-remove-unused-file-fenv.h.patch
@@ -111,6 +111,6 @@ if(CONFIG_LIBM_LIBMCS)
   target_compile_options(m PRIVATE ${CFLAGS})
 
   nuttx_create_symlink(${LIBMCS_DIR}/libm/include
-                       ${CMAKE_BINARY_DIR}/include/libmcs)
+                       ${NUTTX_BINARY_DIR}/include/libmcs)
 
 endif()

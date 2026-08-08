@@ -32,7 +32,7 @@ if(CONFIG_LIB_COMPILER_RT)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/compiler-rt
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libbuiltin/compiler-rt
+          ${NUTTX_BINARY_DIR}/libs/libbuiltin/compiler-rt
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND

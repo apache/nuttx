@@ -49,7 +49,7 @@ if(CONFIG_LIBC_ELF)
 
   target_sources(c PRIVATE ${SRCS})
 
-  set(ELF_LD_SCRIPT_TMP "${CMAKE_BINARY_DIR}/gnu-elf.ld")
+  set(ELF_LD_SCRIPT_TMP "${NUTTX_BINARY_DIR}/gnu-elf.ld")
 
   nuttx_generate_preprocess_target(
     SOURCE_FILE ${NUTTX_DIR}/libs/libc/elf/gnu-elf.ld.in TARGET_FILE

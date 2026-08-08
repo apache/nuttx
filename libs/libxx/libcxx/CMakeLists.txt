@@ -33,7 +33,7 @@ if(CONFIG_LIBCXX)
           SOURCE_DIR
           ${CMAKE_CURRENT_LIST_DIR}/libcxx
           BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libc/libcxx
+          ${NUTTX_BINARY_DIR}/libs/libc/libcxx
           CONFIGURE_COMMAND
           ""
           BUILD_COMMAND
@@ -67,17 +67,17 @@ if(CONFIG_LIBCXX)
   endif()
 
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/libcxx/include
-                       ${CMAKE_BINARY_DIR}/include/libcxx)
+                       ${NUTTX_BINARY_DIR}/include/libcxx)
 
   nuttx_create_symlink(${CMAKE_CURRENT_LIST_DIR}/../__config_site
-                       ${CMAKE_BINARY_DIR}/include/libcxx_config/__config_site)
+                       ${NUTTX_BINARY_DIR}/include/libcxx_config/__config_site)
 
   set_property(
     TARGET nuttx
     APPEND
     PROPERTY NUTTX_CXX_INCLUDE_DIRECTORIES
-             ${CMAKE_BINARY_DIR}/include/libcxx
-             ${CMAKE_BINARY_DIR}/include/libcxx_config
+             ${NUTTX_BINARY_DIR}/include/libcxx
+             ${NUTTX_BINARY_DIR}/include/libcxx_config
              ${CMAKE_CURRENT_LIST_DIR}/libcxx/test/support
              ${CMAKE_CURRENT_LIST_DIR}/libcxx/src)
 

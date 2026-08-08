@@ -37,7 +37,7 @@ if(CONFIG_LIBM_NEWLIB)
     FetchContent_Declare(
       newlib_fetch
       URL ${NEWLIB_URL} SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/newlib BINARY_DIR
-          ${CMAKE_BINARY_DIR}/libs/libm/newlib/newlib
+          ${NUTTX_BINARY_DIR}/libs/libm/newlib/newlib
       PATCH_COMMAND
         patch -p1 -d ${CMAKE_CURRENT_LIST_DIR} <
         ${CMAKE_CURRENT_LIST_DIR}/0001-newlib-libm-fix-__RCSID-build-error.patch
