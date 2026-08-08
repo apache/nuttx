@@ -43,6 +43,8 @@
 #define BOARD_SYSTICK_CLOCK         (64000000)
 #define BOARD_OSC_XOSC32KI_INTCAP   (OSC_XOSC32KI_INTCAP_C7PF)
 
+#define BOARD_OSC_XOSC32MCAPS_CAP   (8)
+
 /* Button definitions *******************************************************/
 
 /* Board supports four buttons. */
