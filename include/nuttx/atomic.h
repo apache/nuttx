@@ -207,6 +207,125 @@ typedef volatile int64_t atomic64_t;
 #define atomic64_try_cmpxchg_relaxed(obj, expected, desired) \
   ATOMIC_FUNC(compare_exchange_weak, 8)(obj, (FAR int64_t *)expected, desired, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
 
+#elif defined(__cplusplus)
+/* Store Operations */
+#define atomic_set(obj, val)                  __atomic_store_n(obj, val, __ATOMIC_RELAXED)
+#define atomic_set_release(obj, val)          __atomic_store_n(obj, val, __ATOMIC_RELEASE)
+#define atomic64_set(obj, val)                __atomic_store_n(obj, val, __ATOMIC_RELAXED)
+#define atomic64_set_release(obj, val)        __atomic_store_n(obj, val, __ATOMIC_RELEASE)
+
+/* Load Operations */
+#define atomic_read(obj)                      __atomic_load_n(obj, __ATOMIC_RELAXED)
+#define atomic_read_acquire(obj)              __atomic_load_n(obj, __ATOMIC_ACQUIRE)
+#define atomic64_read(obj)                    __atomic_load_n(obj, __ATOMIC_RELAXED)
+#define atomic64_read_acquire(obj)            __atomic_load_n(obj, __ATOMIC_ACQUIRE)
+
+/* Fetch Add Operations */
+#define atomic_fetch_add(obj, val)            __atomic_fetch_add(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_fetch_add_acquire(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_add_release(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_add_relaxed(obj, val)    __atomic_fetch_add(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_add(obj, val)          __atomic_fetch_add(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_add_acquire(obj, val)  __atomic_fetch_add(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_add_release(obj, val)  __atomic_fetch_add(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_add_relaxed(obj, val)  __atomic_fetch_add(obj, val, __ATOMIC_RELAXED)
+
+/* Fetch Sub Operations */
+#define atomic_fetch_sub(obj, val)            __atomic_fetch_sub(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_fetch_sub_acquire(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_sub_release(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_sub_relaxed(obj, val)    __atomic_fetch_sub(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_sub(obj, val)          __atomic_fetch_sub(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_sub_acquire(obj, val)  __atomic_fetch_sub(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_sub_release(obj, val)  __atomic_fetch_sub(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_sub_relaxed(obj, val)  __atomic_fetch_sub(obj, val, __ATOMIC_RELAXED)
+
+/* Fetch AND Operations */
+#define atomic_fetch_and(obj, val)            __atomic_fetch_and(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_fetch_and_acquire(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_and_release(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_and_relaxed(obj, val)    __atomic_fetch_and(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_and(obj, val)          __atomic_fetch_and(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_and_acquire(obj, val)  __atomic_fetch_and(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_and_release(obj, val)  __atomic_fetch_and(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_and_relaxed(obj, val)  __atomic_fetch_and(obj, val, __ATOMIC_RELAXED)
+
+/* Fetch OR Operations */
+#define atomic_fetch_or(obj, val)             __atomic_fetch_or(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_fetch_or_acquire(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_or_release(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_or_relaxed(obj, val)     __atomic_fetch_or(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_or(obj, val)           __atomic_fetch_or(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_or_acquire(obj, val)   __atomic_fetch_or(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_or_release(obj, val)   __atomic_fetch_or(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_or_relaxed(obj, val)   __atomic_fetch_or(obj, val, __ATOMIC_RELAXED)
+
+/* Fetch XOR Operations */
+#define atomic_fetch_xor(obj, val)            __atomic_fetch_xor(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_fetch_xor_acquire(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_fetch_xor_release(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_RELEASE)
+#define atomic_fetch_xor_relaxed(obj, val)    __atomic_fetch_xor(obj, val, __ATOMIC_RELAXED)
+#define atomic64_fetch_xor(obj, val)          __atomic_fetch_xor(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_fetch_xor_acquire(obj, val)  __atomic_fetch_xor(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_fetch_xor_release(obj, val)  __atomic_fetch_xor(obj, val, __ATOMIC_RELEASE)
+#define atomic64_fetch_xor_relaxed(obj, val)  __atomic_fetch_xor(obj, val, __ATOMIC_RELAXED)
+
+/* Exchange Operations */
+#define atomic_xchg(obj, val)                 __atomic_exchange_n(obj, val, __ATOMIC_ACQ_REL)
+#define atomic_xchg_acquire(obj, val)         __atomic_exchange_n(obj, val, __ATOMIC_ACQUIRE)
+#define atomic_xchg_release(obj, val)         __atomic_exchange_n(obj, val, __ATOMIC_RELEASE)
+#define atomic_xchg_relaxed(obj, val)         __atomic_exchange_n(obj, val, __ATOMIC_RELAXED)
+#define atomic64_xchg(obj, val)               __atomic_exchange_n(obj, val, __ATOMIC_ACQ_REL)
+#define atomic64_xchg_acquire(obj, val)       __atomic_exchange_n(obj, val, __ATOMIC_ACQUIRE)
+#define atomic64_xchg_release(obj, val)       __atomic_exchange_n(obj, val, __ATOMIC_RELEASE)
+#define atomic64_xchg_relaxed(obj, val)       __atomic_exchange_n(obj, val, __ATOMIC_RELAXED)
+
+/* Compare and Exchange (Strong) - 32-bit */
+#define atomic_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+
+#define atomic_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+
+#define atomic_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), false, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+
+#define atomic_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+
+/* Try Compare and Exchange (Weak) - 32-bit */
+#define atomic_try_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), true, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+
+#define atomic_try_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+
+#define atomic_try_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+
+#define atomic_try_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+  
+/* Compare and Exchange (Strong) - 64-bit */
+#define atomic64_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, false, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, false, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, false, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+
+/* Try Compare and Exchange (Weak) - 64-bit */
+#define atomic64_try_cmpxchg(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, true, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_acquire(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, true, __ATOMIC_ACQUIRE, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_release(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, true, __ATOMIC_RELEASE, __ATOMIC_RELAXED)
+#define atomic64_try_cmpxchg_relaxed(obj, expected, desired) \
+  __atomic_compare_exchange_n(obj, expected, desired, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
+
 #endif
 
 /****************************************************************************
