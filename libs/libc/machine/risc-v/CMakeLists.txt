@@ -32,6 +32,34 @@ if(CONFIG_RISCV_STRCMP)
   list(APPEND SRCS arch_strcmp.S)
 endif()
 
+if(CONFIG_RISCV_MEMCHR)
+  list(APPEND SRCS arch_memchr.c)
+endif()
+
+if(CONFIG_RISCV_MEMCMP)
+  list(APPEND SRCS arch_memcmp.c)
+endif()
+
+if(CONFIG_RISCV_MEMMOVE)
+  list(APPEND SRCS arch_memmove.c)
+endif()
+
+if(CONFIG_RISCV_STRCPY)
+  list(APPEND SRCS arch_strcpy.c)
+endif()
+
+if(CONFIG_RISCV_STRLCPY)
+  list(APPEND SRCS arch_strlcpy.c)
+endif()
+
+if(CONFIG_RISCV_STRNCMP)
+  list(APPEND SRCS arch_strncmp.c)
+endif()
+
+if(CONFIG_RISCV_STRNLEN)
+  list(APPEND SRCS arch_strnlen.c)
+endif()
+
 if(CONFIG_ARCH_SETJMP_H)
   list(APPEND SRCS arch_setjmp.S)
 endif()
