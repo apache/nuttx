@@ -153,10 +153,15 @@ exception frame when it traps -- ``xcp.sregs`` is the field that exists for
 this -- and build the child from that instead, while a kernel thread that calls
 the entry point directly still takes the ordinary path.
 
-Two architectures do it, and they are worth copying:
+Three architectures do it, and they are worth copying:
 
 * RISC-V: ``riscv_swint.c`` stores the frame in ``xcp.sregs``, and
   ``riscv_fork.c`` rebuilds the child from it.
+* arm64: ``arm64_vectors.S`` hands the frame to ``dispatch_syscall()``, which
+  stores it in ``xcp.sregs``; ``arm64_fork()`` then dispatches to
+  ``arm64_fork_syscall()`` or ``arm64_fork_direct()`` according to whether
+  ``TCB_FLAG_SYSCALL`` is set, so a kernel thread that calls the entry point
+  directly still works.
 * armv7-a: ``arm_syscall.c`` stores the frame in ``xcp.sregs``, and
   ``arm_fork()`` dispatches to ``arm_fork_syscall()`` or
   ``arm_fork_direct()``.  The discriminator here is a saved user stack

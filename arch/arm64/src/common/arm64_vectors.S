@@ -172,6 +172,13 @@ SECTION_FUNC(text, arm64_sync_exc)
     msr    daifclr, #IRQ_DAIF_MASK /* Re-enable interrupts */
 
 1:
+    /* Pass the caller's exception frame as the last argument.  x0-x6 hold
+     * the system call number and its six parameters, so x7 is free.  The
+     * cloning primitives need this frame to build the child's context; see
+     * dispatch_syscall() and arm64_fork().
+     */
+
+    mov    x7, sp
     bl     dispatch_syscall
     msr    daifset, #IRQ_DAIF_MASK /* Disable interrupts */
 
