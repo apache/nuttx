@@ -313,14 +313,41 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 #ifdef CONFIG_LIB_SYSCALL
           int             nbr  = cmd - CONFIG_SYS_RESERVED;
           syscall_stub_t  stub = (syscall_stub_t)g_stublookup[nbr];
+          struct tcb_s   *rtcb = nxsched_self();
+          uint64_t       *sregs;
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
-          struct tcb_s   *rtcb = nxsched_self();
-
           /* Store reference to user RSP for signals */
 
           rtcb->xcp.saved_ursp = regs[REG_RSP];
 #endif
+
+          /* Publish the caller's register context.  up_fork() has to clone
+           * the caller rather than the stub that is about to invoke it, and
+           * this frame is the only description of it -- see
+           * x86_64_fork_syscall(), which also takes a non-NULL xcp.sregs as
+           * its "reached here through a system call" discriminator.
+           *
+           * It is saved and restored rather than simply set and cleared:
+           * x86_64_syscall_entry() has an explicit path for a nested system
+           * call, and when the inner one returns the outer one must still be
+           * described by its own frame.
+           *
+           * Note what is deliberately *not* done here.  arm64 and RISC-V
+           * also raise TCB_FLAG_SYSCALL across the stub call, which defers
+           * any signal action until the system call returns.  x86_64 has
+           * never set it, and making it do so is not free:  the deferred
+           * action then has to be picked up by nxsig_unmask_pendingsignal()
+           * on the way out, and the signal dispatch path of an x86_64 kernel
+           * build does not survive that today -- it faults in
+           * x86_64_syscall_entry()'s return path with RSP == 0.  That is a
+           * pre-existing bug in a configuration nothing has exercised, and
+           * fixing it does not belong to the fork/vfork work; so this
+           * records the frame and changes nothing else.
+           */
+
+          sregs           = rtcb->xcp.sregs;
+          rtcb->xcp.sregs = regs;
 
           /* Re-enable interrupts if enabled before.
            * Current task RFLAGS are stored in R11.
@@ -334,6 +361,10 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           /* Call syscall function and store return value in RAX register */
 
           regs[REG_RAX] = stub(nbr, arg1, arg2, arg3, arg4, arg5, arg6);
+
+          /* The system call is now done */
+
+          rtcb->xcp.sregs = sregs;
 #else
           svcerr("ERROR: Bad SYS call: %" PRId32 "\n", cmd);
 #endif

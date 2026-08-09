@@ -544,6 +544,18 @@ struct xcptcontext
 
   uint64_t *regs;
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* The register context of the user code that is currently in a system
+   * call, as x86_64_syscall_entry() saved it on the kernel stack.  This is
+   * what the caller of a system call was doing, as opposed to xcp.regs,
+   * which during a system call describes the kernel side of it.
+   * x86_64_fork() needs it to build a child from the caller rather than
+   * from the stub.
+   */
+
+  uint64_t *sregs;
+#endif
+
 #ifdef CONFIG_ARCH_ADDRENV
 #  ifdef CONFIG_ARCH_KERNEL_STACK
   /* In this configuration, all syscalls execute from an internal kernel
