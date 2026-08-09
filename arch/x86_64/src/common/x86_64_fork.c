@@ -399,7 +399,17 @@ static pid_t x86_64_fork_syscall(bool vfork, struct tcb_s *parent)
   newsp  = newtop - stackutil;
   offset = newtop - stacktop;
 
-  memcpy((void *)newsp, (const void *)rsp, stackutil);
+  /* A zero offset means the child is running on the parent's stack
+   * addresses:  a fork() child, which inherited them and whose duplicated
+   * address environment already holds a copy of the contents.  There is then
+   * nothing to copy -- source and destination would be the same region --
+   * and nothing to relocate.
+   */
+
+  if (offset != 0)
+    {
+      memcpy((void *)newsp, (const void *)rsp, stackutil);
+    }
 
   sinfo("Old stack top:%08" PRIx64 " RSP:%08" PRIx64 "\n", stacktop, rsp);
   sinfo("New stack top:%08" PRIx64 " RSP:%08" PRIx64 "\n", newtop, newsp);
@@ -430,11 +440,19 @@ static pid_t x86_64_fork_syscall(bool vfork, struct tcb_s *parent)
   child->xcp.regs[REG_RSI] = sregs[REG_RSI];
   child->xcp.regs[REG_RDI] = sregs[REG_RDI];
 
-  /* The frame pointer moves with the stack it points into */
+  /* The frame pointer moves with the stack it points into.  With a zero
+   * offset it does not move at all, and neither does the saved chain it
+   * heads:  see the note above the copy.
+   */
 
-  child->xcp.regs[REG_RBP] = x86_64_fork_reloc(sregs[REG_RBP], rsp,
-                                               stacktop, offset);
-  x86_64_fork_relocfp(sregs[REG_RBP], rsp, stacktop, offset);
+  child->xcp.regs[REG_RBP] = sregs[REG_RBP];
+
+  if (offset != 0)
+    {
+      child->xcp.regs[REG_RBP] = x86_64_fork_reloc(sregs[REG_RBP], rsp,
+                                                   stacktop, offset);
+      x86_64_fork_relocfp(sregs[REG_RBP], rsp, stacktop, offset);
+    }
 
   /* Build the interrupt frame the child is resumed from.  RIP and RFLAGS
    * come out of RCX and R11, and the selectors are the ones SYSRETQ derives
