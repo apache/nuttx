@@ -301,6 +301,22 @@ struct xcptcontext
 
   uint8_t nsyscalls;
   struct xcpt_syscall_s syscall[CONFIG_SYS_NNEST];
+
+  /* Where the register save area of the caller of the outermost system call
+   * is, which is the exception frame arm_vectorsvc built on the caller's own
+   * stack.  It is recorded by arm_syscall() and is what the cloning
+   * primitives build the child's context from:  a fork() or vfork() reached
+   * through a system call has to give the child the registers of the task
+   * that trapped, not those of the kernel-side stub that arm_fork() is
+   * called from.  See arm_fork().
+   *
+   * The frame is the one arm_syscall() has already re-pointed at
+   * dispatch_syscall():  its PC, CPSR, R0 and SP are the kernel's.  The
+   * caller's own values are in syscall[0].sysreturn, syscall[0].cpsr and
+   * ustkptr respectively; R0 is the return value and belongs to neither.
+   */
+
+  uint32_t *sregs;
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV

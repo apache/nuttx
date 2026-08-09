@@ -153,6 +153,26 @@ exception frame when it traps -- ``xcp.sregs`` is the field that exists for
 this -- and build the child from that instead, while a kernel thread that calls
 the entry point directly still takes the ordinary path.
 
+Two architectures do it, and they are worth copying:
+
+* RISC-V: ``riscv_swint.c`` stores the frame in ``xcp.sregs``, and
+  ``riscv_fork.c`` rebuilds the child from it.
+* armv7-a: ``arm_syscall.c`` stores the frame in ``xcp.sregs``, and
+  ``arm_fork()`` dispatches to ``arm_fork_syscall()`` or
+  ``arm_fork_direct()``.  The discriminator here is a saved user stack
+  pointer, ``xcp.ustkptr``, rather than ``TCB_FLAG_SYSCALL``:  armv7-a
+  dispatches a system call by re-pointing the caller's own exception frame at
+  ``dispatch_syscall()``, so the caller *is* the task that runs the kernel
+  side of the call.  What makes its snapshot useless is not the system call
+  as such but the switch to the kernel stack, which leaves the kernel-side
+  frames on a stack the child gets no copy of.  A build without a kernel
+  stack dispatches on the caller's own stack, so there the frames are copied
+  along with the caller's and ``arm_fork_direct()`` remains correct.  Because
+  ``arm_syscall()`` has already re-pointed the frame by the time
+  ``arm_fork()`` runs, its PC, CPSR and SP are the kernel's; the caller's are
+  read from where ``arm_syscall()`` put them -- ``syscall[0].sysreturn``,
+  ``syscall[0].cpsr`` and ``ustkptr``.
+
 Nothing else is required:  the ``up_fork()`` entry point and the libc wrapper
 are already there and become live automatically.
 
