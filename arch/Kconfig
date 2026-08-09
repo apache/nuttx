@@ -492,8 +492,9 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
+	default y if ARCH_RISCV
 	default n
-	depends on ARCH_ADDRENV
+	depends on ARCH_ADDRENV && !ARCH_STACK_DYNAMIC
 	---help---
 		The architecture can implement POSIX fork():  the child receives its
 		own copy of the parent's memory at the same virtual addresses, may
@@ -505,13 +506,19 @@ config ARCH_HAVE_FORK
 		allocated pages holding a copy of the parent's contents, mapped at the
 		same virtual addresses.
 
-		No architecture selects this yet.  Two things are needed.  First,
-		up_addrenv_fork() itself.  Second, the architecture must build the
-		child's register context from the *user's* saved system call frame:
-		in a kernel build fork() is reached through a system call, so the
-		return address and stack pointer the architecture's fork entry point
-		can see for itself are the kernel's, not the caller's, and a child
-		built from those resumes at a kernel address.
+		It also requires the architecture to build the child's register
+		context from the *user's* saved system call frame:  in a kernel build
+		fork() is reached through a system call, so the return address and
+		stack pointer the architecture's fork entry point can see for itself
+		are the kernel's, not the caller's, and a child built from those
+		resumes at a kernel address.
+
+		The protected configurations are excluded, MPU and MMU alike.  A
+		protected build has one address space protected by a fixed set of
+		regions, and its up_addrenv_*() are stubs; there is no per-process
+		mapping to duplicate at the same virtual addresses, so POSIX fork()
+		semantics cannot be provided.  vfork(), which shares the parent's
+		memory, works there as everywhere else.
 
 		Where this is not selected fork() is not provided at all, and code
 		that calls it fails to build.
