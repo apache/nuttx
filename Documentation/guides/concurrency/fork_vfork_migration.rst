@@ -59,8 +59,8 @@ environment no longer builds.**  ``fork()`` is not declared in ``unistd.h``
 there, so you get a compile error naming the function.  That is the intended
 outcome:  a build error is strictly better than the silent wrongness it
 replaces.  Today that is every target except a kernel build on arm64,
-armv7-a, x86_64 or Xtensa (ESP32-S3), so every caller of ``fork()`` has to
-be looked at.
+armv7-a, RISC-V, x86_64 or Xtensa (ESP32-S3), so every caller of ``fork()``
+has to be looked at.
 
 **Code calling** ``fork()`` **on a target that does have real** ``fork()``
 **changes behaviour** -- from sharing to copying.  Code that (perhaps
@@ -225,7 +225,7 @@ Known gaps
 complete -- ``addrenv_fork()``, the ``up_addrenv_fork()`` hook, the syscall, the
 libc wrapper and the ``ostest`` case -- so an architecture provides ``fork()``
 by implementing ``up_addrenv_fork()`` and selecting ``CONFIG_ARCH_HAVE_FORK``,
-with no further generic work.  x86_64, arm64, armv7-a and Xtensa (the
+with no further generic work.  x86_64, arm64, armv7-a, RISC-V and Xtensa (the
 ESP32-S3 kernel build) select it today.
 
 Note also on ``waitpid()`` after ``vfork()``
