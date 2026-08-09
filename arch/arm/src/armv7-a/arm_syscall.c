@@ -513,6 +513,20 @@ uint32_t *arm_syscall(uint32_t *regs)
           rtcb->xcp.syscall[index].cpsr      = regs[REG_CPSR];
 #endif
 
+          /* Remember where the caller's registers are.  The cloning
+           * primitives need them:  the child of a fork() or vfork() made
+           * from user space resumes from this very SVC, so it is built from
+           * this frame and not from the registers the kernel-side stub
+           * happens to be running with.  Only the outermost system call is
+           * of interest, since that is the one the caller made.  See
+           * arm_fork().
+           */
+
+          if (index == 0)
+            {
+              rtcb->xcp.sregs = regs;
+            }
+
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
 #ifdef CONFIG_BUILD_KERNEL
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
