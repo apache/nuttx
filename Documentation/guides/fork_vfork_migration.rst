@@ -153,7 +153,7 @@ exception frame when it traps -- ``xcp.sregs`` is the field that exists for
 this -- and build the child from that instead, while a kernel thread that calls
 the entry point directly still takes the ordinary path.
 
-Three architectures do it, and they are worth copying:
+Four architectures do it, and they are worth copying:
 
 * RISC-V: ``riscv_swint.c`` stores the frame in ``xcp.sregs``, and
   ``riscv_fork.c`` rebuilds the child from it.
@@ -177,6 +177,21 @@ Three architectures do it, and they are worth copying:
   ``arm_fork()`` runs, its PC, CPSR and SP are the kernel's; the caller's are
   read from where ``arm_syscall()`` put them -- ``syscall[0].sysreturn``,
   ``syscall[0].cpsr`` and ``ustkptr``.
+* x86_64: ``x86_64_syscall()`` stores the frame in ``xcp.sregs``, and
+  ``x86_64_fork()`` dispatches to ``x86_64_fork_syscall()`` or
+  ``x86_64_fork_direct()``.  The discriminator here is ``xcp.sregs`` itself
+  being non-NULL, because raising ``TCB_FLAG_SYSCALL`` would also defer signal
+  actions -- something x86_64 has never done and its kernel-build signal path
+  does not currently survive.  Two properties of ``SYSCALL``/``SYSRET`` shape
+  the child's frame:  the instruction leaves the caller's RIP and RFLAGS in
+  RCX and R11 rather than on a stack, so they have to be moved into the RIP
+  and RFLAGS slots of the interrupt frame the child is resumed from; and the
+  hardware never records the caller's CS and SS at all -- ``SYSRETQ``
+  reconstructs them from ``IA32_STAR`` -- so the child's have to be filled in
+  with the user code and data selectors at RPL 3.  For the same reason the
+  saved frame is not copied wholesale:  only the extended state and the
+  general registers are inherited, and the segment registers and thread
+  pointer come from the frame ``up_initial_state()`` built for the child.
 
 Nothing else is required:  the ``up_fork()`` entry point and the libc wrapper
 are already there and become live automatically.
