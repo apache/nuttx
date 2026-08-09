@@ -492,6 +492,7 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
+	default y if ARCH_ARMV7A && ARCH_USE_MMU && !BUILD_PROTECTED
 	default n
 	depends on ARCH_ADDRENV
 	---help---
