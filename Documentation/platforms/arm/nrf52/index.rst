@@ -109,6 +109,59 @@ ADC
 The SAADC peripheral is exposed via standard ADC driver. The lower-half of this driver
 is initialized by calling :c:func:`nrf52_adcinitialize`.
 
+Three sampling trigger modes are available:
+
+* ``CONFIG_NRF52_SAADC_TASK``: each ``ANIOC_TRIGGER`` starts one scan of
+  all configured channels.
+* ``CONFIG_NRF52_SAADC_TIMER``: the internal SAADC timer supports one
+  channel only. The sample rate is ``16000000 / CONFIG_NRF52_SAADC_TIMER_CC``
+  Hz, with a compare value from 80 to 2047 (about 7.8 kHz to 200 kHz).
+* ``CONFIG_NRF52_SAADC_TIMER_PPI``: a general-purpose TIMER compare event
+  triggers a scan over PPI. This supports up to eight channels and lower
+  scan rates through the TIMER prescaler.
+
+For TIMER/PPI sampling, enable the TIMER instance selected by
+``CONFIG_NRF52_SAADC_PPI_TIMER`` and reserve it for the ADC. Select an unused
+PPI channel with ``CONFIG_NRF52_SAADC_PPI_CHANNEL``. The scan rate is
+``16000000 / (2^CONFIG_NRF52_SAADC_PPI_PRE * CONFIG_NRF52_SAADC_PPI_CC)`` Hz.
+For example, these settings select TIMER2 and a 1 kHz scan rate:
+
+.. code-block:: ini
+
+   CONFIG_NRF52_SAADC=y
+   CONFIG_NRF52_TIMER2=y
+   CONFIG_NRF52_SAADC_TIMER_PPI=y
+   CONFIG_NRF52_SAADC_PPI_TIMER=2
+   CONFIG_NRF52_SAADC_PPI_CHANNEL=0
+   CONFIG_NRF52_SAADC_PPI_PRE=4
+   CONFIG_NRF52_SAADC_PPI_CC=1000
+   CONFIG_NRF52_SAADC_CHANNELS=2
+
+The board must pass the channel configuration to ``nrf52_adcinitialize``;
+``CONFIG_NRF52_SAADC_CHANNELS`` sets the maximum number of channels.
+With either timer source, issue ``ANIOC_TRIGGER`` once to start sampling.
+
+``CONFIG_NRF52_SAADC_CONTINUOUS`` enables double-buffered EasyDMA with
+either timer source. A second PPI channel restarts the SAADC on each END
+event. For example, add:
+
+.. code-block:: ini
+
+   CONFIG_NRF52_SAADC_CONTINUOUS=y
+   CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN=32
+   CONFIG_NRF52_SAADC_CONTINUOUS_PPI_CH=1
+
+``CONFIG_NRF52_SAADC_CONTINUOUS_BUFLEN`` counts whole scans per buffer.
+With two configured channels and a buffer length of 32, each buffer holds
+64 samples in channel order: ``0, 1, 0, 1, ...``. Completed buffers are
+delivered to the ADC upper half with a per-sample channel map. The number
+of channels multiplied by the buffer length must not exceed 32767.
+Single-channel buffer sizing is unchanged.
+
+The sampling and restart PPI channels must differ and must be unused by
+other drivers. Both channel selections are restricted to 0--15 when
+``CONFIG_NRF52_SOFTDEVICE_CONTROLLER`` is enabled, or 0--19 otherwise.
+
 I2C
 ---
 
