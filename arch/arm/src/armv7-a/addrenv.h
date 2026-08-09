@@ -86,6 +86,26 @@ int arm_addrenv_create_region(uintptr_t *l1table, unsigned int listlen,
                               uint32_t mmuflags);
 
 /****************************************************************************
+ * Name: arm_addrenv_fork_region
+ *
+ * Description:
+ *   Duplicate one memory region of an address environment for fork().  The
+ *   destination gets its own page tables and, unless `share' is requested,
+ *   its own copy of the source's pages, mapped at the same virtual
+ *   addresses.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_FORK
+int arm_addrenv_fork_region(uintptr_t *srcl1, uintptr_t *destl1,
+                            unsigned int listlen, uintptr_t vaddr,
+                            uint32_t mmuflags, bool share);
+#endif
+
+/****************************************************************************
  * Name: arm_addrenv_destroy_region
  *
  * Description:

@@ -55,6 +55,7 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
+  uintptr_t topstack;
   uint32_t cpsr;
 #ifdef CONFIG_ARCH_KERNEL_STACK
   uint32_t *kstack = xcp->kstack;
@@ -85,21 +86,47 @@ void up_initial_state(struct tcb_s *tcb)
       return;
     }
 
+  topstack = (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size;
+
 #ifdef CONFIG_ARCH_KERNEL_STACK
   xcp->kstack = kstack;
+
+  /* A user process in a kernel build keeps its register save area on its own
+   * kernel stack, not at the top of its user stack.  Two reasons:
+   *
+   *   - The area must not be user-writable.  It holds the CPSR the thread is
+   *     resumed with, so a task that could scribble on it could resume
+   *     itself in a privileged mode.
+   *   - The kernel must be able to write it without regard to which address
+   *     environment is current, and without regard to what the user stack
+   *     already contains.  A fork() child inherits the parent's stack
+   *     address, so the top of "its" stack is occupied by the parent's live
+   *     frames -- including the exception frame the child is built from,
+   *     which sits just below the caller's stack pointer.  Zeroing
+   *     XCPTCONTEXT_SIZE bytes there would destroy both.
+   *
+   * This is what risc-v and arm64 already do; see riscv_initialstate.c.
+   */
+
+  if (kstack != NULL)
+    {
+      topstack = (uintptr_t)kstack + ARCH_KERNEL_STACKSIZE;
+    }
 #endif
 
-  /* Initialize the context registers to stack top */
+  /* Initialize the context registers to the top of whichever stack holds the
+   * save area
+   */
 
-  xcp->regs = (void *)((uint32_t)tcb->stack_base_ptr +
-                                 tcb->adj_stack_size -
-                                 XCPTCONTEXT_SIZE);
+  xcp->regs = (void *)(topstack - XCPTCONTEXT_SIZE);
 
   /* Initialize the xcp registers */
 
   memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
-  /* Save the initial stack pointer */
+  /* Save the initial stack pointer.  The thread itself always starts on its
+   * user stack, whichever stack the save area came off.
+   */
 
   xcp->regs[REG_SP] = (uint32_t)tcb->stack_base_ptr +
                                 tcb->adj_stack_size;
