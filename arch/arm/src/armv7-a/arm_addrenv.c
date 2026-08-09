@@ -255,6 +255,125 @@ errout:
   return ret;
 }
 
+#ifdef CONFIG_ARCH_HAVE_FORK
+/****************************************************************************
+ * Name: up_addrenv_fork
+ *
+ * Description:
+ *   Duplicate an address environment for POSIX fork().  The destination is
+ *   backed by fresh pages holding a copy of the source's contents, mapped at
+ *   the same virtual addresses.
+ *
+ *   Only the pages the source actually has mapped are duplicated, so the
+ *   cost is the size of the process, not the size of its address space.
+ *   There is no copy-on-write, so this needs as much free page memory as
+ *   the parent occupies and returns -ENOMEM when that is not available.
+ *
+ * Input Parameters:
+ *   src  - The address environment to be duplicated.
+ *   dest - The location to receive the duplicate.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int up_addrenv_fork(FAR const arch_addrenv_t *src, FAR arch_addrenv_t *dest)
+{
+  size_t npage = MM_NPAGES(PGTABLE_SIZE);
+  int ret;
+
+  binfo("src=%p dest=%p\n", src, dest);
+
+  DEBUGASSERT(src && dest && src->l1table);
+
+  memset(dest, 0, sizeof(arch_addrenv_t));
+
+  /* Give the child its own L1 page table, seeded from the kernel's, exactly
+   * as up_addrenv_create() does.
+   */
+
+  dest->l1table = (uintptr_t *)mm_pgalloc_align(npage, npage);
+  if (dest->l1table == NULL)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
+
+  memcpy(dest->l1table, (void *)PGTABLE_BASE_VADDR, PGTABLE_SIZE);
+
+  /* The duplicate lives at the same virtual addresses as the original --
+   * that is the whole point -- so the bases are simply carried over.
+   */
+
+  dest->textvbase = src->textvbase;
+  dest->datavbase = src->datavbase;
+  dest->heapvbase = src->heapvbase;
+  dest->heapsize  = src->heapsize;
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  dest->shmvbase  = src->shmvbase;
+#endif
+
+  ret = arm_addrenv_fork_region(src->l1table, dest->l1table,
+                                ARCH_TEXT_NSECTS, CONFIG_ARCH_TEXT_VBASE,
+                                MMU_L2_UTEXTFLAGS, false);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to duplicate .text region: %d\n", ret);
+      goto errout;
+    }
+
+  ret = arm_addrenv_fork_region(src->l1table, dest->l1table,
+                                ARCH_DATA_NSECTS, CONFIG_ARCH_DATA_VBASE,
+                                MMU_L2_UDATAFLAGS, false);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to duplicate .bss/.data region: %d\n", ret);
+      goto errout;
+    }
+
+#ifdef CONFIG_BUILD_KERNEL
+  ret = arm_addrenv_fork_region(src->l1table, dest->l1table,
+                                ARCH_HEAP_NSECTS, CONFIG_ARCH_HEAP_VBASE,
+                                MMU_L2_UDATAFLAGS, false);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to duplicate heap region: %d\n", ret);
+      goto errout;
+    }
+
+  /* Note that the stack region is deliberately not duplicated here.  The
+   * child's stack is allocated separately by nxtask_setup_fork() and filled
+   * in by arm_fork(), and up_addrenv_destroy() does not own the stack region
+   * either -- up_addrenv_ustackfree() does.  Duplicating it here would leak
+   * it.  CONFIG_ARCH_HAVE_FORK therefore depends on
+   * !CONFIG_ARCH_STACK_DYNAMIC.
+   */
+
+#ifdef CONFIG_ARCH_VMA_MAPPING
+  /* Shared memory stays shared across fork(), so the child is given the
+   * parent's own pages rather than copies of them.
+   */
+
+  ret = arm_addrenv_fork_region(src->l1table, dest->l1table,
+                                ARCH_SHM_NSECTS, CONFIG_ARCH_SHM_VBASE,
+                                MMU_L2_UDATAFLAGS, true);
+  if (ret < 0)
+    {
+      berr("ERROR: Failed to share SHM region: %d\n", ret);
+      goto errout;
+    }
+#endif
+#endif /* CONFIG_BUILD_KERNEL */
+
+  return OK;
+
+errout:
+  up_addrenv_destroy(dest);
+  return ret;
+}
+#endif /* CONFIG_ARCH_HAVE_FORK */
+
 /****************************************************************************
  * Name: up_addrenv_destroy
  *
