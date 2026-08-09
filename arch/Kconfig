@@ -492,6 +492,7 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
+	default y if ARCH_X86_64 && !BUILD_PROTECTED
 	default n
 	depends on ARCH_ADDRENV
 	---help---
