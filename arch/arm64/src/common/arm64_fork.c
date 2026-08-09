@@ -86,6 +86,17 @@ static uint64_t arm64_fork_stack(struct tcb_s *parent, struct tcb_s *child,
   uint64_t stackutil;
   uint64_t newtop;
 
+  if (child->stack_base_ptr == parent->stack_base_ptr)
+    {
+      /* The child is running on the parent's stack addresses:  a fork()
+       * child, which inherited them and already has its own copy of the
+       * contents in its duplicated address environment.  There is nothing to
+       * copy and no offset to apply.
+       */
+
+      return 0;
+    }
+
   /* How much of the parent's stack was utilized?  The ARM uses a push-down
    * stack so that the current stack pointer should be lower than the
    * initial, adjusted stack pointer.  The stack usage should be the
