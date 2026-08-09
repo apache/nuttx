@@ -284,6 +284,21 @@ struct xcptcontext
   uint64_t *initregs;
 #endif
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* The caller's register context, as saved by the SVC exception entry, for
+   * the duration of a system call.  This is what the *user* was doing when
+   * it trapped, as opposed to `regs' above, which during a system call
+   * describes the kernel.
+   *
+   * vfork() and fork() need it:  they are reached through a system call, so
+   * the return address and stack pointer their architecture entry point can
+   * see for itself are the kernel's, and a child built from those would
+   * resume at a kernel address on a kernel stack.
+   */
+
+  uint64_t *sregs;
+#endif
+
 #ifdef CONFIG_ARCH_FPU
   uint64_t *fpu_regs;
   uint64_t *saved_fpu_regs;
