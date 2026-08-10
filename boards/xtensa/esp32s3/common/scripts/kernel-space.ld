@@ -135,6 +135,104 @@ SECTIONS
     *libkarch.a:cache_utils.*(.literal .literal.* .text .text.*)
     *libkarch.a:memspi_host_driver.*(.literal .literal.* .text .text.*)
 
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+    /* Simple boot runs bootloader_init() and map_rom_segments() before any
+     * flash mapping exists, so everything they reach has to be resident.
+     */
+
+    *libkarch.a:*esp_loader.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*brownout_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*cpu.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*gpio_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*periph_ctrl.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*clk.*(.text .text.* .literal .literal.*)
+    *libkarch.a:critical_section.*(.literal .literal.* .text .text.*)
+    *libkarch.a:os.*(.literal.nuttx_enter_critical .text.nuttx_enter_critical)
+    *libkarch.a:os.*(.literal.nuttx_exit_critical .text.nuttx_exit_critical)
+    *libkarch.a:*sleep_modes.*(.literal.esp_sleep_sub_mode_force_disable* .text.esp_sleep_sub_mode_force_disable*)
+    *libkarch.a:*efuse_hal.*(.literal.is_eco0 .text.is_eco0)
+    *libkarch.a:*efuse_utility.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_clk.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_clk_tree.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_clk_tree_common.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*clk_tree_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*rtc_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*rtc_clk.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*rtc_clk_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*rtc_sleep.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*rtc_time.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*regi2c_ctrl.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*uart_hal_iram.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*wdt_hal_iram.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_banner_wrap.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_common.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_common_loader.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_console.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_console_loader.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_esp32s3.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_flash.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_flash_config_esp32s3.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_clock_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_clock_loader.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_efuse.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_panic.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_mem.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_random.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_random*.*(.literal.bootloader_random_disable .text.bootloader_random_disable)
+    *libkarch.a:*bootloader_random*.*(.literal.bootloader_random_enable .text.bootloader_random_enable)
+    *libkarch.a:*bootloader_random_esp32s3.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_image_format.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_soc.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*bootloader_sha.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*flash_encrypt.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*cache_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*uart_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*mpu_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*mmu_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*efuse_hal.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*uart_periph.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_uart.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_sys.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_spiflash.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_wdt.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*log.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*log_lock.*(.literal .literal.* .text .text.*)
+    *libkarch.a:*log_print.*(.literal .literal.* .text .text.*)
+    *libkarch.a:*log_timestamp.*(.literal.esp_log_early_timestamp .text.esp_log_early_timestamp)
+    *libkarch.a:*log_timestamp.*(.literal.esp_log_timestamp .text.esp_log_timestamp)
+    *libkarch.a:*log_timestamp_common.*(.literal .literal.* .text .text.*)
+    *libkarch.a:*log_write.*(.literal.esp_log_write .text.esp_log_write)
+    *libkarch.a:*log_write.*(.literal.esp_log_writev .text.esp_log_writev)
+    *libkarch.a:*cpu_region_protect.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.literal .text .literal.* .text.*)
+    *libkarch.a:*flash_qio_mode.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*spi_flash_wrap.*(.text .text.* .literal .literal.*)
+
+#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
+    /* Octal (OPI) bring-up only.  A board with quad flash never runs these,
+     * and pinning them would cost it IRAM for nothing.
+     */
+
+    *libkarch.a:*mspi_timing_tuning.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*mspi_timing_config.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*spi_flash_oct_flash_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:*spi_flash_hpm_enable.*(.text .text.* .literal .literal.*)
+#endif
+
+    *libkarch.a:esp_spiflash.*(.literal .text .literal.* .text.*)
+    *libkarch.a:esp_flash_api.*(.text .text.* .literal .literal.*)
+    *libkarch.a:esp_flash_spi_init.*(.text .text.* .literal .literal.*)
+    *libkarch.a:spi_flash_hal_iram.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_encrypt_hal_iram.*(.text .text.* .literal .literal.*)
+    *libkarch.a:spi_flash_hal_gpspi.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_chip*.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_wrap.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_os_func_noos.*(.literal .literal.* .text .text.*)
+    *libkarch.a:spi_flash_os_func_app.*(.literal .literal.* .text .text.*)
+#endif
+
     *libsched.a:sched_suspendscheduler.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_note.*(.literal .text .literal.* .text.*)
     *libsched.a:sched_thistask.*(.literal .text .literal.* .text.*)
@@ -249,6 +347,63 @@ SECTIONS
     *libkarch.a:memspi_host_driver.*(.rodata .rodata.*)
     *libkarch.a:esp_mmu_map.*(.rodata .rodata.*)
     *libkarch.a:ext_mem_layout.*(.rodata .rodata.*)
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+    *libkarch.a:*esp_loader.*(.rodata .rodata.*)
+    *libkarch.a:*brownout.*(.rodata .rodata.*)
+    *libkarch.a:*cpu.*(.rodata .rodata.*)
+    *libkarch.a:*gpio_hal.*(.rodata .rodata.*)
+    *libkarch.a:*periph_ctrl.*(.rodata .rodata.*)
+    *libkarch.a:*clk.*(.rodata .rodata.*)
+    *libkarch.a:*efuse_utility.*(.rodata .rodata.*)
+    *libkarch.a:critical_section.*(.rodata .rodata.*)
+    *libkarch.a:os.*(.rodata.g_int_flags_count .rodata.g_int_flags)
+    *libkarch.a:*sleep_modes.*(.rodata.esp_sleep_sub_mode_force_disable*)
+    *libkarch.a:*rtc_time.*(.rodata .rodata.*)
+    *libkarch.a:*regi2c_ctrl.*(.rodata .rodata.*)
+    *libkarch.a:*uart_hal_iram.*(.rodata .rodata.*)
+    *libkarch.a:*wdt_hal_iram.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_banner_wrap.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_init.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_common.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_common_loader.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_console.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_console_loader.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_esp32s3.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_flash.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_flash_config_esp32s3.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_clock_init.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_clock_loader.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_efuse.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_panic.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_mem.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_random.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_random_esp32s3.*(.rodata .rodata.*)
+    *libkarch.a:*esp_image_format.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_soc.*(.rodata .rodata.*)
+    *libkarch.a:*bootloader_sha.*(.rodata .rodata.*)
+    *libkarch.a:*flash_encrypt.*(.rodata .rodata.*)
+    *libkarch.a:*cache_hal.*(.rodata .rodata.*)
+    *libkarch.a:*uart_hal.*(.rodata .rodata.*)
+    *libkarch.a:*mpu_hal.*(.rodata .rodata.*)
+    *libkarch.a:*mmu_hal.*(.rodata .rodata.*)
+    *libkarch.a:*uart_periph.*(.rodata .rodata.*)
+    *libkarch.a:*esp_rom_uart.*(.rodata .rodata.*)
+    *libkarch.a:*esp_rom_sys.*(.rodata .rodata.*)
+    *libkarch.a:*esp_rom_spiflash.*(.rodata .rodata.*)
+    *libkarch.a:*esp_rom_cache_esp32s2_esp32s3.*(.rodata .rodata.*)
+    *libkarch.a:*esp_rom_wdt.*(.rodata .rodata.*)
+    *libkarch.a:*efuse_hal.*(.rodata .rodata.*)
+    *libkarch.a:*log.*(.rodata .rodata.*)
+    *libkarch.a:*log_noos.*(.rodata .rodata.*)
+    *libkarch.a:*cpu_region_protect.*(.rodata .rodata.*)
+#ifdef CONFIG_ESP32S3_FLASH_MODE_OCT
+    *libkarch.a:*mspi_timing_tuning.*(.rodata .rodata.*)
+    *libkarch.a:*mspi_timing_config.*(.rodata .rodata.*)
+#endif
+    *libkarch.a:esp32s3_psram_quad.*(.rodata .rodata.*)
+    *libkarch.a:esp32s3_psram_octal.*(.rodata .rodata.*)
+#endif
 
     *libsched.a:sched_suspendscheduler.*(.rodata  .rodata.*)
     *libsched.a:sched_thistask.*(.rodata  .rodata.*)
@@ -390,6 +545,25 @@ SECTIONS
 
     . = ALIGN(4);
   } >KDROM
+
+#ifdef CONFIG_ESPRESSIF_SIMPLE_BOOT
+  /* Simple boot has no second-stage bootloader:  __start() maps the flash
+   * itself, from these, and bootloader_init() clears the BSS.
+   */
+
+  _image_irom_vma = ADDR(.flash.text);
+  _image_irom_lma = LOADADDR(.flash.text);
+  _image_irom_size = LOADADDR(.flash.text) + SIZEOF(.flash.text) -
+                     _image_irom_lma;
+
+  _image_drom_vma = ADDR(.flash.rodata);
+  _image_drom_lma = LOADADDR(.flash.rodata);
+  _image_drom_size = LOADADDR(.flash.rodata) + SIZEOF(.flash.rodata) -
+                     _image_drom_lma;
+
+  _bss_start = _sbss;
+  _bss_end = _ebss;
+#endif
 
   /*
    * This section holds RTC data that should have fixed addresses.
