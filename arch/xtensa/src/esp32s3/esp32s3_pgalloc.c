@@ -29,21 +29,147 @@
 #include <assert.h>
 #include <debug.h>
 #include <inttypes.h>
+#include <sys/param.h>
 
 #include <nuttx/addrenv.h>
 #include <nuttx/arch.h>
+#include <nuttx/nuttx.h>
 #include <nuttx/pgalloc.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
 
 #include "esp32s3_addrenv.h"
+#include "esp32s3_mmu.h"
 
 #ifdef CONFIG_ESP32S3_SPIRAM
 #  include "esp32s3_spiram.h"
 #endif
 
 #ifdef CONFIG_MM_PGALLOC
+
+#if defined(CONFIG_ESP32S3_SPIRAM) && defined(CONFIG_ARCH_ADDRENV)
+
+/* The page pool and a PSRAM kernel heap cannot coexist.  xtensa_add_region()
+ * hands the *whole* allocable PSRAM window to the kernel heap, which
+ * necessarily includes the pool -- and a kernel heap that contains pool
+ * pages is a permanently mapped view of every process's memory, arriving
+ * from the other side of the same problem esp32s3_pgmap() exists to solve.
+ *
+ * This is not hypothetical: up_textheap_memalign() falls back to the kernel
+ * heap and derives an instruction-bus alias for anything it finds outside
+ * internal RAM, which is the path a dlopen()ed shared library would take.
+ * Kernel-side PSRAM has to come from outside the pool.
+ */
+
+#ifdef CONFIG_ESP32S3_SPIRAM_COMMON_HEAP
+#  error "the page pool cannot be shared with a PSRAM kernel heap"
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct window_s
+{
+  FAR const char *name;
+  uintptr_t       vbase;
+  uint32_t        npages;
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Every cache-MMU window this configuration uses, checked against each other
+ * and against the kernel's PSRAM window at boot.  The scratch region is one
+ * of them: it is a real window now, and the heap window growing into it
+ * would be as silent as every other mapping mistake in this port.
+ */
+
+static const struct window_s g_windows[] =
+{
+  {
+    .name   = "text",
+    .vbase  = ESP32S3_TEXT_VBASE,
+    .npages = CONFIG_ARCH_TEXT_NPAGES
+  },
+  {
+    .name   = "data",
+    .vbase  = ESP32S3_DATA_VBASE,
+    .npages = CONFIG_ARCH_DATA_NPAGES
+  },
+  {
+    .name   = "heap",
+    .vbase  = ESP32S3_HEAP_VBASE,
+    .npages = CONFIG_ARCH_HEAP_NPAGES
+  },
+  {
+    .name   = "scratch",
+    .vbase  = ESP32S3_KMAP_VBASE,
+    .npages = ESP32S3_KMAP_NPAGES
+  }
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: check_windows_clear
+ *
+ * Description:
+ *   Panic if any two cache-MMU windows overlap, or if one of them overlaps
+ *   the kernel's PSRAM window.  They would otherwise do it silently: the
+ *   instruction and the data bus share one entry per 64 KB, so two windows
+ *   64 MB apart are the same entries, and mapping one over another simply
+ *   takes the first one's pages away.
+ *
+ *   The comparison is by entry, since that is what actually collides, and it
+ *   belongs at run time because the kernel PSRAM window starts wherever the
+ *   flash mappings end and so moves as the image grows.
+ *
+ * Input Parameters:
+ *   kfirst - First cache-MMU entry of the kernel's PSRAM window.
+ *   klast  - Last cache-MMU entry of the kernel's PSRAM window.
+ *
+ ****************************************************************************/
+
+static void check_windows_clear(uint32_t kfirst, uint32_t klast)
+{
+  size_t i;
+  size_t j;
+
+  for (i = 0; i < nitems(g_windows); i++)
+    {
+      uint32_t first = MMU_ENTRY_OF(g_windows[i].vbase);
+      uint32_t last  = first + g_windows[i].npages - 1;
+
+      if (first <= klast && last >= kfirst)
+        {
+          _err("ERROR: %s window (MMU entries %" PRIu32 "-%" PRIu32 ") "
+               "overlaps the kernel PSRAM window (entries %" PRIu32 "-%"
+               PRIu32 ")\n", g_windows[i].name, first, last, kfirst, klast);
+          PANIC();
+        }
+
+      for (j = 0; j < i; j++)
+        {
+          uint32_t ofirst = MMU_ENTRY_OF(g_windows[j].vbase);
+          uint32_t olast  = ofirst + g_windows[j].npages - 1;
+
+          if (first <= olast && last >= ofirst)
+            {
+              _err("ERROR: %s window (MMU entries %" PRIu32 "-%" PRIu32 ") "
+                   "overlaps the %s window (entries %" PRIu32 "-%" PRIu32
+                   ")\n", g_windows[i].name, first, last, g_windows[j].name,
+                   ofirst, olast);
+              PANIC();
+            }
+        }
+    }
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -61,10 +187,14 @@
  *   On the ESP32-S3 the page pool is a slice of the external octal PSRAM.
  *   The pool is described by its *physical* base -- for the cache MMU that
  *   is the zero-based offset into the PSRAM device -- because mm_pgalloc()
- *   hands out physical page addresses.  The whole pool is also permanently
- *   mapped into the kernel (WORLD0) data-bus window at
- *   CONFIG_ARCH_PGPOOL_VBASE so the kernel can reach any page it allocates
- *   (see esp32s3_pgvaddr()).
+ *   hands out physical page addresses.
+ *
+ *   It is deliberately not mapped into the kernel.  esp32s3_spiram.c maps
+ *   the whole PSRAM device at boot, and this function is where the pool's
+ *   share of that mapping is withdrawn again, after the checks that need it.
+ *   The kernel reaches a pool page one at a time through esp32s3_pgmap();
+ *   see esp32s3_addrenv.h for why a permanent window cannot be allowed to
+ *   stand.
  *
  * Input Parameters:
  *   heap_start - Receives the physical base address of the page pool.
@@ -76,40 +206,62 @@ void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
   DEBUGASSERT(heap_start && heap_size);
 
-#ifdef CONFIG_ESP32S3_SPIRAM
+#if defined(CONFIG_ESP32S3_SPIRAM) && defined(CONFIG_ARCH_ADDRENV)
   /* Where the kernel's PSRAM window lands is decided at run time:
    * esp32s3_spiram.c maps PSRAM immediately after the last cache-MMU entry
    * the flash mappings occupy, so it moves as the kernel image grows.  The
-   * page pool is described to the OS by compile-time constants, so the two
-   * have to be checked against each other -- and loudly, because getting it
-   * wrong is otherwise silent: an unmapped cache window swallows writes and
-   * reads back as zero without faulting, so a misplaced pool would simply
-   * lose every page handed out of it.
+   * pool is described by a compile-time *physical* base, so ask the cache
+   * MMU where that physical page currently is rather than deriving it from
+   * a constant -- which is how CONFIG_ARCH_PGPOOL_PBASE went stale twice,
+   * and the second time by exactly one page, which left one unwiped page in
+   * every region of every new process.
    */
 
     {
       uintptr_t ramstart = (uintptr_t)esp_spiram_allocable_vaddr_start();
       uintptr_t ramend   = (uintptr_t)esp_spiram_allocable_vaddr_end();
+      uintptr_t poolvbase;
+      uint32_t  rampbase;
 
-      _info("PSRAM window %08" PRIxPTR "-%08" PRIxPTR ", "
-            "page pool %08x-%08x\n",
-            ramstart, ramend,
-            CONFIG_ARCH_PGPOOL_VBASE, CONFIG_ARCH_PGPOOL_VEND);
-
-      if ((uintptr_t)CONFIG_ARCH_PGPOOL_VBASE < ramstart ||
-          (uintptr_t)CONFIG_ARCH_PGPOOL_VEND > ramend)
+      if (!esp32s3_mmu_paddr(ramstart, &rampbase))
         {
-          _err("ERROR: page pool %08x-%08x is outside the mapped PSRAM "
-               "window %08" PRIxPTR "-%08" PRIxPTR "\n",
-               CONFIG_ARCH_PGPOOL_VBASE, CONFIG_ARCH_PGPOOL_VEND,
-               ramstart, ramend);
+          _err("ERROR: PSRAM window base %08" PRIxPTR " maps nothing\n",
+               ramstart);
           PANIC();
         }
+
+      if (ESP32S3_PGPOOL_PBASE < rampbase ||
+          ESP32S3_PGPOOL_PEND > rampbase + (ramend - ramstart))
+        {
+          _err("ERROR: page pool %08x-%08x is outside the mapped PSRAM "
+               "%08" PRIx32 "-%08" PRIxPTR "\n",
+               ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND,
+               rampbase, rampbase + (ramend - ramstart));
+          PANIC();
+        }
+
+      poolvbase = ramstart + (ESP32S3_PGPOOL_PBASE - rampbase);
+
+      _info("PSRAM window %08" PRIxPTR "-%08" PRIxPTR " (phys %08" PRIx32
+            "), page pool phys %08x-%08x at %08" PRIxPTR "\n",
+            ramstart, ramend, rampbase,
+            ESP32S3_PGPOOL_PBASE, ESP32S3_PGPOOL_PEND, poolvbase);
+
+      check_windows_clear(MMU_ENTRY_OF(ramstart), MMU_ENTRY_OF(ramend - 1));
+
+      /* Everything above has been established while the pool was still
+       * mapped, which is the only time it can be.  Now take that mapping
+       * away: from here the kernel reaches a pool page only through
+       * esp32s3_pgmap(), and an unprivileged task reaches one only if it is
+       * its own.
+       */
+
+      esp32s3_pgpool_unmap(poolvbase, ESP32S3_PGPOOL_SIZE);
     }
 #endif
 
-  *heap_start = (void *)CONFIG_ARCH_PGPOOL_PBASE;
-  *heap_size  = (size_t)CONFIG_ARCH_PGPOOL_SIZE;
+  *heap_start = (void *)ESP32S3_PGPOOL_PBASE;
+  *heap_size  = (size_t)ESP32S3_PGPOOL_SIZE;
 }
 
 #ifdef CONFIG_BUILD_KERNEL
