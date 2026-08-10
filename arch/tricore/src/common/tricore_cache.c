@@ -24,14 +24,45 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <arch/arch.h>
+#include <arch/barriers.h>
 
-#include "tricore_internal.h"
-#include "IfxCpu_cfg.h"
+#include <nuttx/cache.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define CPU_DCON0        0x9040  /* Data Memory Configuration 0 */
+#define CPU_DCON1        0x9008  /* Data Memory Configuration 1 */
+#define CPU_DCON2        0x9000  /* Data Memory Configuration 2 */
+#define CPU_PCON0        0x920C  /* Program Memory Configuration 0 */
+#define CPU_PCON1        0x9204  /* Program Memory Configuration 1 */
+#define CPU_PCON2        0x9208  /* Program Memory Configuration 2 */
+
+/* I/D-cache line size in bits. */
+
+#define ICACHE_LINE_SIZE 256
+#define DCACHE_LINE_SIZE 256
+
+/* PCON0/DCON0 bit 1: cache enable/disable. */
+
+#define PCON0_ENABLE     (0 << 1)
+#define PCON0_DISABLE    (1 << 1)
+#define DCON0_ENABLE     (0 << 1)
+#define DCON0_DISABLE    (1 << 1)
+
+/* PCON1/DCON1 bit 0: invalidate. */
+
+#define PCON1_INVALIDATE (1 << 0)
+#define DCON1_INVALIDATE (1 << 0)
+
+/* PCON2/DCON2 bits 15:0: cache size field. */
+
+#define ICACHE_SIZE_MASK (0xffff << 0)
+#define DCACHE_SIZE_MASK (0xffff << 0)
+
+/* Cache instructions. */
 
 #define tc_invalidate_cache_byaddr(addr) \
   __asm__ __volatile__("cachea.i [%0]0"::"a"(addr))
@@ -67,7 +98,7 @@
 
 size_t up_get_icache_linesize(void)
 {
-  return IFXCPU_PCACHE_LINE_SIZE / 8;
+  return ICACHE_LINE_SIZE / 8;
 }
 
 /****************************************************************************
@@ -86,10 +117,7 @@ size_t up_get_icache_linesize(void)
 
 size_t up_get_icache_size(void)
 {
-  Ifx_CPU_PCON2 pcon2;
-
-  pcon2.U = __mfcr(CPU_PCON2);
-  return pcon2.B.PCACHE_SZE * 1000;
+  return (tricore_mfcr(CPU_PCON2) & ICACHE_SIZE_MASK) * 1000;
 }
 
 /****************************************************************************
@@ -111,12 +139,9 @@ size_t up_get_icache_size(void)
 
 void up_enable_icache(void)
 {
-  Ifx_CPU_PCON0 pcon0;
+  tricore_mtcr(CPU_PCON0, PCON0_ENABLE);
 
-  pcon0.B.PCBYP = 0;
-  __mtcr(CPU_PCON0, pcon0.U);
-
-  __isync();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -135,13 +160,9 @@ void up_enable_icache(void)
 
 void up_disable_icache(void)
 {
-  Ifx_CPU_PCON0 pcon0;
+  tricore_mtcr(CPU_PCON0, PCON0_DISABLE);
 
-  pcon0.U       = 0;
-  pcon0.B.PCBYP = 1;
-  __mtcr(CPU_PCON0, pcon0.U);
-
-  __isync();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -180,13 +201,9 @@ void up_invalidate_icache(uintptr_t start, uintptr_t end)
 
 void up_invalidate_icache_all(void)
 {
-  Ifx_CPU_PCON1 pcon1;
+  tricore_mtcr(CPU_PCON1, PCON1_INVALIDATE);
 
-  pcon1.U       = 0;
-  pcon1.B.PCINV = 1;
-  __mtcr(CPU_PCON1, pcon1.U);
-
-  __isync();
+  UP_ISB();
 }
 #endif
 
@@ -207,7 +224,7 @@ void up_invalidate_icache_all(void)
 
 size_t up_get_dcache_linesize(void)
 {
-  return IFXCPU_DCACHE_LINE_SIZE / 8;
+  return DCACHE_LINE_SIZE / 8;
 }
 
 /****************************************************************************
@@ -226,10 +243,7 @@ size_t up_get_dcache_linesize(void)
 
 size_t up_get_dcache_size(void)
 {
-  Ifx_CPU_DCON2 dcon2;
-
-  dcon2.U = __mfcr(CPU_DCON2);
-  return dcon2.B.DCACHE_SZE * 1000;
+  return (tricore_mfcr(CPU_DCON2) & DCACHE_SIZE_MASK) * 1000;
 }
 
 /****************************************************************************
@@ -251,24 +265,19 @@ size_t up_get_dcache_size(void)
 
 void up_enable_dcache(void)
 {
-  Ifx_CPU_DCON0 dcon0;
-
   /* Check if the D-Cache is enabled */
 
-  dcon0.U = __mfcr(CPU_DCON0);
-  if (dcon0.B.DCBYP == 0)
+  if ((tricore_mfcr(CPU_DCON0) & DCON0_DISABLE) == 0)
     {
       return;
     }
 
   up_invalidate_dcache_all();
 
-  dcon0.U       = 0;
-  dcon0.B.DCBYP = 0;
-  __mtcr(CPU_DCON0, dcon0.U);
+  tricore_mtcr(CPU_DCON0, DCON0_ENABLE);
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -287,13 +296,10 @@ void up_enable_dcache(void)
 
 void up_disable_dcache(void)
 {
-  Ifx_CPU_DCON0 dcon0;
+  tricore_mtcr(CPU_DCON0, DCON0_DISABLE);
 
-  dcon0.B.DCBYP = 1;
-  __mtcr(CPU_DCON0, dcon0.U);
-
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -338,8 +344,8 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
       start += line_size;
     }
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -358,14 +364,10 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
 void up_invalidate_dcache_all(void)
 {
-  Ifx_CPU_DCON1 dcon1;
+  tricore_mtcr(CPU_DCON1, DCON1_INVALIDATE);
 
-  dcon1.U       = 0;
-  dcon1.B.DCINV = 1;
-  __mtcr(CPU_DCON1, dcon1.U);
-
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -396,8 +398,8 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
       start += line_size;
     }
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -428,8 +430,8 @@ void up_clean_dcache_all(void)
       cache_addr += line_size;
     }
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -460,8 +462,8 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
       start += line_size;
     }
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
@@ -491,8 +493,8 @@ void up_flush_dcache_all(void)
       cache_addr += line_size;
     }
 
-  __dsync();
-  __isync();
+  UP_DSB();
+  UP_ISB();
 }
 
 /****************************************************************************
