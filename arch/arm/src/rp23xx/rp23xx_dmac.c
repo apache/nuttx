@@ -103,6 +103,8 @@ static struct dma_channel_s g_dmach[RP23XX_DMA_NCHANNELS];
 static int rp23xx_dmac_interrupt(int irq, void *context, void *arg)
 {
   struct dma_channel_s *dmach;
+  dma_callback_t callback;
+  void *cbarg;
   int result = OK;
   unsigned int ch;
   uint32_t stat;
@@ -130,15 +132,22 @@ static int rp23xx_dmac_interrupt(int irq, void *context, void *arg)
 
       dmach = &g_dmach[ch];
 
+      /* Clear the registration before the call, so that the callback can
+       * register itself again.
+       */
+
+      callback = dmach->callback;
+      cbarg    = dmach->arg;
+
+      dmach->callback = NULL;
+      dmach->arg      = NULL;
+
       /* Call the DMA completion callback */
 
-      if (dmach->callback)
+      if (callback)
         {
-          dmach->callback((DMA_HANDLE)dmach, result, dmach->arg);
-          dmach->callback = NULL;
+          callback((DMA_HANDLE)dmach, result, cbarg);
         }
-
-      dmach->arg = NULL;
     }
 
   return OK;
