@@ -81,10 +81,23 @@ void up_initial_state(struct tcb_s *tcb)
   const uint32_t base = ALIGN_UP((uint32_t)&_rodata_reserved_align,
                                  TCB_SIZE);
 #endif
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* The kernel stack is allocated before the thread's initial state is set
+   * up, so hold on to it across the wipe below.
+   */
+
+  uint32_t *kstack  = xcp->kstack;
+  uint32_t *ktopstk = xcp->ktopstk;
+#endif
 
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  xcp->kstack  = kstack;
+  xcp->ktopstk = ktopstk;
+#endif
 
   /* Initialize the idle thread stack */
 

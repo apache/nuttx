@@ -55,6 +55,56 @@ int main(int argc, char *argv[]);
  * Private Functions
  ****************************************************************************/
 
+#ifdef CONFIG_BUILD_KERNEL
+
+/****************************************************************************
+ * Name: sig_trampoline
+ *
+ * Description:
+ *   The user-space signal handler trampoline.  A kernel build cannot reach
+ *   the one in xtensa_signal_handler.S -- that lives in libarch, which user
+ *   programs do not link -- so it is carried here in crt0 instead, and
+ *   _start() publishes it to the kernel through ARCH_DATA_RESERVE.  The
+ *   kernel enters it from the SYS_signal_handler case of xtensa_swint().
+ *
+ *   Written as file-scope assembly rather than as a naked function because
+ *   GCC does not implement the naked attribute on Xtensa: it would emit a
+ *   window-rotating prologue and quietly invalidate the register assignments
+ *   below.
+ *
+ * Input Parameters:
+ *   a2 = sighand, the user-space signal handling function
+ *   a3, a4, a5 = signo, info and ucontext, its arguments
+ *
+ * Returned Value:
+ *   None.  This function does not return in the normal sense; it returns
+ *   via the SYS_signal_handler_return syscall.
+ *
+ ****************************************************************************/
+
+#define _SIGTRAMP_STR(x)  #x
+#define _SIGTRAMP_XSTR(x) _SIGTRAMP_STR(x)
+
+__asm__
+(
+  "  .text\n"
+  "  .global sig_trampoline\n"
+  "  .type   sig_trampoline, @function\n"
+  "  .align  4\n"
+  "sig_trampoline:\n"
+  "  mov    a6, a3\n"          /* Move signo into the callee's a2 */
+  "  mov    a7, a4\n"          /* Move info into the callee's a3 */
+  "  mov    a8, a5\n"          /* Move ucontext into the callee's a4 */
+  "  callx4 a2\n"              /* Call the signal handler */
+  "  movi   a2, " _SIGTRAMP_XSTR(SYS_signal_handler_return) "\n"
+  "  syscall\n"                /* Will not return */
+  "  .size sig_trampoline, .-sig_trampoline\n"
+);
+
+void sig_trampoline(void);
+
+#endif /* CONFIG_BUILD_KERNEL */
+
 #ifdef CONFIG_HAVE_CXXINITIALIZE
 
 /****************************************************************************
