@@ -437,6 +437,8 @@ void up_disable_dcache(void)
 
 void up_coherent_dcache(uintptr_t addr, size_t len)
 {
+  m32_dcache_clean(addr, len);
+  m32_clean_icache(addr, len);
 }
 
 #endif /* CONFIG_ARCH_DCACHE */
