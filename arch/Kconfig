@@ -493,6 +493,7 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
+	default y if ARCH_XTENSA && BUILD_KERNEL
 	default n
 	depends on ARCH_ADDRENV
 	---help---
