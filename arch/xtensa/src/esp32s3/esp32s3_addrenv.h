@@ -42,9 +42,55 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_PGPOOL_MAPPING
-#  error "ESP32-S3 address environments need CONFIG_ARCH_PGPOOL_MAPPING"
+/* The page pool must NOT be statically mapped into the kernel.  It is carved
+ * out of the same PSRAM the user processes run from, and the external memory
+ * permissions (APB_CTRL_SRAM_ACEn_*) are indexed by physical address, so a
+ * permanent kernel window onto the pool is a window onto every process's
+ * memory that no permission setting can close: a process's own pages are
+ * pool pages.  This was measured, not assumed -- a user task read another
+ * process's .bss through it.  The kernel uses the scratch region below
+ * instead.
+ */
+
+#ifdef CONFIG_ARCH_PGPOOL_MAPPING
+#  error "ESP32-S3 must not map the page pool; see esp32s3_pgmap()"
 #endif
+
+#ifndef CONFIG_ARCH_KMAP_VBASE
+#  error "ESP32-S3 address environments need CONFIG_ARCH_KMAP_VBASE"
+#endif
+
+#if CONFIG_ARCH_KMAP_NPAGES < 2
+#  error "CONFIG_ARCH_KMAP_NPAGES must be at least 2 (fork() copies "        \
+         "a source and a destination page at once)"
+#endif
+
+/* CONFIG_MM_KMAP cannot work here.  kmm_map()'s single-page path is
+ * up_addrenv_page_vaddr(), which asks for a kernel address that stays valid
+ * after the call returns -- exactly what a scratch mapping cannot promise.
+ */
+
+#ifdef CONFIG_MM_KMAP
+#  error "CONFIG_MM_KMAP needs a permanently mapped page pool"
+#endif
+
+/* The kernel's scratch region.  ARCH_KMAP_VEND is only defined by
+ * <nuttx/addrenv.h> when CONFIG_MM_KMAP is set, which it is not.
+ */
+
+#define ESP32S3_KMAP_VBASE  (CONFIG_ARCH_KMAP_VBASE)
+#define ESP32S3_KMAP_NPAGES (CONFIG_ARCH_KMAP_NPAGES)
+#define ESP32S3_KMAP_VEND   (CONFIG_ARCH_KMAP_VBASE + \
+                             CONFIG_ARCH_KMAP_NPAGES * MM_PGSIZE)
+
+/* The page pool, described physically.  mm_pgalloc() hands out physical page
+ * addresses; only the virtual mapping went away, not the pool.
+ */
+
+#define ESP32S3_PGPOOL_PBASE (CONFIG_ESP32S3_PGPOOL_PBASE)
+#define ESP32S3_PGPOOL_SIZE  (CONFIG_ESP32S3_PGPOOL_SIZE)
+#define ESP32S3_PGPOOL_PEND  (CONFIG_ESP32S3_PGPOOL_PBASE + \
+                              CONFIG_ESP32S3_PGPOOL_SIZE)
 
 /* The user address space is split across two disjoint cache-MMU windows:
  * .text lives in the instruction-bus window, .data/.bss and the heap in the
@@ -66,45 +112,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_pgvaddr
+ * Name: esp32s3_pgpool_page
  *
  * Description:
- *   Get the kernel-addressable virtual address of a page-pool physical
- *   address.  The page pool (PSRAM) is permanently mapped into the kernel
- *   (WORLD0) address space, so a page allocated by mm_pgalloc() can be
- *   reached directly through this fixed offset.  Returns 0 if the physical
- *   address is not inside the page pool.
+ *   Return true if paddr is a page-pool physical address.
  *
  ****************************************************************************/
 
-static inline uintptr_t esp32s3_pgvaddr(uintptr_t paddr)
+static inline bool esp32s3_pgpool_page(uintptr_t paddr)
 {
-  if (paddr >= CONFIG_ARCH_PGPOOL_PBASE && paddr < CONFIG_ARCH_PGPOOL_PEND)
-    {
-      return paddr - CONFIG_ARCH_PGPOOL_PBASE + CONFIG_ARCH_PGPOOL_VBASE;
-    }
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: esp32s3_pgpaddr
- *
- * Description:
- *   Inverse of esp32s3_pgvaddr(): translate a kernel page-pool virtual
- *   address back to its physical address.  Returns 0 if the virtual address
- *   is not inside the mapped page pool.
- *
- ****************************************************************************/
-
-static inline uintptr_t esp32s3_pgpaddr(uintptr_t vaddr)
-{
-  if (vaddr >= CONFIG_ARCH_PGPOOL_VBASE && vaddr < CONFIG_ARCH_PGPOOL_VEND)
-    {
-      return vaddr - CONFIG_ARCH_PGPOOL_VBASE + CONFIG_ARCH_PGPOOL_PBASE;
-    }
-
-  return 0;
+  return (paddr >= ESP32S3_PGPOOL_PBASE && paddr < ESP32S3_PGPOOL_PEND);
 }
 
 /****************************************************************************
@@ -124,25 +141,84 @@ static inline bool esp32s3_uservaddr(uintptr_t vaddr)
 }
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_pgmap
+ *
+ * Description:
+ *   Map a page-pool physical page into the kernel's scratch region and
+ *   return the virtual address it can be reached at.
+ *
+ *   This replaces the arithmetic esp32s3_pgvaddr() the port used while the
+ *   whole pool was mapped, and unlike it the result has a *lifetime*: it is
+ *   valid until the matching esp32s3_pgunmap(), and not one instruction
+ *   longer.  It must not be stored anywhere that outlives the operation.
+ *
+ *   The caller must hold sched_lock() across the whole map/use/unmap
+ *   sequence.  A scratch address is ordinary external memory as far as the
+ *   permission control is concerned, so an unprivileged task that ran while
+ *   the mapping was live could read the page through it -- which is the leak
+ *   this whole arrangement exists to close.  Interrupts do not need to be
+ *   disabled: no interrupt handler reaches these paths.
+ *
+ * Input Parameters:
+ *   paddr - Physical (page pool) address of the page, page-aligned.
+ *
+ * Returned Value:
+ *   The kernel virtual address of the page, or 0 if 'paddr' is not a pool
+ *   page or no scratch slot is free.
+ *
+ ****************************************************************************/
+
+uintptr_t esp32s3_pgmap(uintptr_t paddr);
+
+/****************************************************************************
+ * Name: esp32s3_pgunmap
+ *
+ * Description:
+ *   Release a mapping made by esp32s3_pgmap(), writing back anything written
+ *   through it and leaving the scratch entry invalid.
+ *
+ * Input Parameters:
+ *   vaddr - The address esp32s3_pgmap() returned.
+ *
+ ****************************************************************************/
+
+void esp32s3_pgunmap(uintptr_t vaddr);
+
+/****************************************************************************
  * Name: esp32s3_pgwipe
  *
  * Description:
- *   Zero a page-pool physical page through its kernel virtual mapping.
+ *   Zero a page-pool physical page, mapping it into the kernel's scratch
+ *   region for as long as that takes.
+ *
+ * Input Parameters:
+ *   paddr - Physical (page pool) address of the page.
  *
  ****************************************************************************/
 
-static inline void esp32s3_pgwipe(uintptr_t paddr)
-{
-  uintptr_t vaddr = esp32s3_pgvaddr(paddr);
-  if (vaddr)
-    {
-      memset((void *)vaddr, 0, MM_PGSIZE);
-    }
-}
+void esp32s3_pgwipe(uintptr_t paddr);
 
 /****************************************************************************
- * Public Function Prototypes
+ * Name: esp32s3_pgpool_unmap
+ *
+ * Description:
+ *   Tear down the boot-time cache-MMU mapping of the page pool, leaving the
+ *   pool reachable only a page at a time through esp32s3_pgmap().  Called
+ *   once, from up_allocate_pgheap(), after its consistency checks -- which
+ *   have to run first, since they ask the cache MMU where the pool actually
+ *   is rather than deriving it.
+ *
+ * Input Parameters:
+ *   vbase - Virtual base the boot-time mapping put the pool at.
+ *   size  - Size of the pool in bytes.
+ *
  ****************************************************************************/
+
+void esp32s3_pgpool_unmap(uintptr_t vbase, size_t size);
 
 /****************************************************************************
  * Name: esp32s3_addrenv_mapnew
