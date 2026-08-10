@@ -342,7 +342,25 @@ SECTIONS
     _iram_text = ABSOLUTE(.);
   } >iram0_0_seg
 
-    /* Marks the end of IRAM code segment */
+  #ifdef CONFIG_BUILD_KERNEL
+  /* The vector table the World Controller gives to WORLD1, the unprivileged
+   * world.  It needs the 1 KB alignment a vector base requires, and it is
+   * kept in a region of its own so that the permission control can make it
+   * the only instruction memory a user task may fetch.
+   *
+   * It has to land in Internal SRAM1, past 0x40378000: the permission control
+   * splits SRAM0 into two 16 KB blocks and can say nothing finer, while SRAM1
+   * is divided by split lines at 256-byte granularity.  Following the IRAM
+   * code puts it there; esp32s3_isolation_permissions() checks that it did.
+   */
+
+  .world1.vectors : ALIGN(1024)
+  {
+    KEEP (*(.world1_vectors.text));
+  } >iram0_0_seg AT>ROM
+#endif
+
+  /* Marks the end of IRAM code segment */
 
   .iram0.text_end (NOLOAD) :
   {
