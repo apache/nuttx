@@ -271,8 +271,6 @@
 
 #define RING_BASE(ring)       ((FAR struct ring_s *)(ring))
 
-#define RING_FIELD(ptr)       (*(FAR volatile int32_t *)(ptr))
-
 /* Public API macros - accept RING_DECLARE/RING_DEFINE structs */
 
 /* ring_reset - clear all indices and return the count of elements that
@@ -309,35 +307,35 @@
  * race to initialize the same ring.
  */
 
-#define ring_spsc_init(r, cap)                           \
-  do                                                     \
-    {                                                    \
-      FAR struct ring_s *ring = RING_BASE(r);            \
-      irqstate_t flags = irq_save();                     \
-      if (RING_FIELD(&ring->magic) != RING_MAGIC_READY)  \
-        {                                                \
-          RING_FIELD(&ring->magic) = RING_MAGIC_INIT;    \
-          UP_WMB();                                      \
-          ring->capacity = (cap);                        \
-          ring->wrappoint = RING_WRAPPOINT(cap);         \
-          ring_reset(r);                                 \
-          UP_WMB();                                      \
-          RING_FIELD(&ring->magic) = RING_MAGIC_READY;   \
-        }                                                \
-      irq_restore(flags);                                \
-    }                                                    \
+#define ring_spsc_init(r, cap)                   \
+  do                                             \
+    {                                            \
+      FAR struct ring_s *ring = RING_BASE(r);    \
+      irqstate_t flags = irq_save();             \
+      if (ring->magic != RING_MAGIC_READY)       \
+        {                                        \
+          ring->magic = RING_MAGIC_INIT;         \
+          UP_WMB();                              \
+          ring->capacity = (cap);                \
+          ring->wrappoint = RING_WRAPPOINT(cap); \
+          ring_reset(r);                         \
+          UP_WMB();                              \
+          ring->magic = RING_MAGIC_READY;        \
+        }                                        \
+      irq_restore(flags);                        \
+    }                                            \
   while (0)
 
 #define ring_mpsc_init(r, cap)  ring_mpmc_init(r, cap)
 #define ring_spmc_init(r, cap)  ring_mpmc_init(r, cap)
 
 #define ring_is_ready(r) \
-  (RING_FIELD(&RING_BASE(r)->magic) == RING_MAGIC_READY)
+  (atomic_read_acquire(&RING_BASE(r)->magic) == RING_MAGIC_READY)
 
 #define ring_count(r)                                     \
   ring_dist(RING_BASE(r),                                 \
-            RTS_IDX(RING_FIELD(&RING_BASE(r)->prod_tail)),\
-            RTS_IDX(RING_FIELD(&RING_BASE(r)->cons_tail)))
+            RTS_IDX(RING_BASE(r)->prod_tail),\
+            RTS_IDX(RING_BASE(r)->cons_tail))
 
 #define ring_capacity(r)    (RING_BASE(r)->capacity)
 #define ring_space(r)       (ring_capacity(r) - ring_count(r))
@@ -678,10 +676,10 @@ static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
       dropped = r->capacity;
     }
 
-  RING_FIELD(&r->prod_head) = 0;
-  RING_FIELD(&r->prod_tail) = 0;
-  RING_FIELD(&r->cons_head) = 0;
-  RING_FIELD(&r->cons_tail) = 0;
+  r->prod_head = 0;
+  r->prod_tail = 0;
+  r->cons_head = 0;
+  r->cons_tail = 0;
 
   return dropped;
 }
@@ -986,13 +984,13 @@ static inline_function void
 ring_sp_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  uint32_t prod_index = RTS_IDX(r->prod_tail);
   uint32_t cons_index;
   uint32_t free_space;
   uint32_t n;
 
   UP_RMB();
-  cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  cons_index = RTS_IDX(r->cons_tail);
   free_space = r->capacity - ring_dist(r, prod_index, cons_index);
   n = count < free_space ? count : free_space;
 
@@ -1050,13 +1048,13 @@ static inline_function void
 ring_sc_start(FAR struct ring_s *r, uint32_t count,
               size_t elem_size, FAR struct ring_buf_s *buf)
 {
-  uint32_t cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  uint32_t cons_index = RTS_IDX(r->cons_tail);
   uint32_t prod_index;
   uint32_t available;
   uint32_t n = 0;
 
   UP_RMB();
-  prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  prod_index = RTS_IDX(r->prod_tail);
   available = ring_dist(r, prod_index, cons_index);
 
   /* available > capacity is physically impossible for a consistent ring;
@@ -1141,7 +1139,7 @@ ring_sp_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
       uint32_t prod_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
-      RING_FIELD(&r->prod_tail) = RTS_PACK(0, prod_index);
+      r->prod_tail = RTS_PACK(0, prod_index);
     }
 }
 
@@ -1200,7 +1198,7 @@ ring_sc_finish(FAR struct ring_s *r, FAR struct ring_buf_s *buf)
       uint32_t cons_index = ring_advance(r, buf->idx, buf->cnt);
 
       UP_WMB();
-      RING_FIELD(&r->cons_tail) = RTS_PACK(0, cons_index);
+      r->cons_tail = RTS_PACK(0, cons_index);
     }
 }
 
@@ -1226,14 +1224,14 @@ ring_sc_peek(FAR struct ring_s *r, FAR void *items, uint32_t count,
   uint32_t available;
   uint32_t n;
 
-  cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  cons_index = RTS_IDX(r->cons_tail);
   if (index)
     {
       cons_index = ring_clamp_cons(r, *index, cons_index);
     }
 
   UP_RMB();
-  prod_index = RTS_IDX(RING_FIELD(&r->prod_tail));
+  prod_index = RTS_IDX(r->prod_tail);
   available = ring_dist(r, prod_index, cons_index);
   n = count < available ? count : available;
 
@@ -1342,7 +1340,7 @@ ring_sc_peek_at(FAR struct ring_s *r, FAR void *items, uint32_t count,
       return 0;
     }
 
-  index = ring_advance(r, offset, RTS_IDX(RING_FIELD(&r->cons_tail)));
+  index = ring_advance(r, offset, RTS_IDX(r->cons_tail));
   return ring_sc_peek(r, items, count, elem_size, &index);
 }
 
@@ -1539,7 +1537,7 @@ ring_sc_skip(FAR struct ring_s *r, uint32_t count)
 static inline_function uint32_t
 ring_sc_skipto(FAR struct ring_s *r, uint32_t target)
 {
-  uint32_t cons_index = RTS_IDX(RING_FIELD(&r->cons_tail));
+  uint32_t cons_index = RTS_IDX(r->cons_tail);
   uint32_t count = ring_dist(r, target, cons_index);
 
   if (count != 0)
