@@ -235,6 +235,12 @@ uint64_t *x86_64_syscall(uint64_t *regs)
             {
               uint64_t usp;
 
+              /* Save the kernel stack pointer to restore on handler
+               * return
+               */
+
+              rtcb->xcp.kstkptr = (uintptr_t *)regs[REG_RSP];
+
               /* Copy "info" into user stack */
 
               usp = rtcb->xcp.saved_ursp - 8;
@@ -278,12 +284,21 @@ uint64_t *x86_64_syscall(uint64_t *regs)
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
 
           regs[REG_RCX]       = rtcb->xcp.sigreturn;
-          regs[REG_RSP]       = rtcb->xcp.saved_rsp;
           rtcb->xcp.sigreturn = 0;
 
-          /* For kernel mode, we should be already on a correct kernel stack
-           * which was recovered in x86_64_syscall_entry.
-           */
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          if (rtcb->xcp.kstack != NULL)
+            {
+              /* Return to the kernel stack saved at dispatch */
+
+              regs[REG_RSP]     = (uint64_t)rtcb->xcp.kstkptr;
+              rtcb->xcp.kstkptr = rtcb->xcp.ktopstk;
+            }
+          else
+#endif
+            {
+              regs[REG_RSP] = rtcb->xcp.saved_rsp;
+            }
 
           break;
         }
