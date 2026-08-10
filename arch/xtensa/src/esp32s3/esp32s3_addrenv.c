@@ -317,9 +317,16 @@ ssize_t up_addrenv_heapsize(const arch_addrenv_t *addrenv)
  *   is no page-table-base register to load; instead the shared user
  *   cache-MMU windows (.text on the instruction bus, .data/.bss and heap on
  *   the data bus) are reprogrammed to point at this environment's PSRAM
- *   pages.  Only one user environment can be resident at a time, so
- *   isolation between groups is provided by this remap: while a group runs,
- *   only its own pages are visible in the windows.
+ *   pages.  Only one user environment can be resident at a time, so while a
+ *   group runs only its own pages are visible *in the windows*: the entries
+ *   it uses are pointed at its pages and the rest are invalidated.
+ *
+ *   That is not by itself isolation between groups.  Every user page comes
+ *   from the one page pool, which the kernel keeps permanently mapped at
+ *   CONFIG_ARCH_PGPOOL_VBASE, and the external-memory permissions are
+ *   indexed by physical address, so they cannot deny the unprivileged world
+ *   that window without also denying it its own pages.  Closing that is a
+ *   separate piece of work on the kernel's side of the map.
  *
  *   The remap is skipped when 'addrenv' is already the resident environment
  *   (thread<->thread within a group, ISRs, syscalls), which pays nothing.
@@ -356,17 +363,6 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
 
   cache_state = esp32s3_dcache_suspend(false);
 
-  /* TODO(Unit F hardening): only the pages this group actually uses are
-   * remapped below.  Window entries beyond ntext/ndata/nheap still point at
-   * the previously-resident group's pages, so a buggy or malicious task that
-   * touches its window above its own allocation could reach stale mappings.
-   * A well-behaved task never does, and the guard-page/SIGSEGV abort
-   * (CONFIG_ESP32S3_PAGEFAULT_ABORT) is the backstop, but full isolation
-   * needs the unused window entries invalidated here.  Deferred to on-target
-   * bring-up because invalidating cache-MMU entries has documented sharp
-   * edges (an invalid in-window entry reads 0 silently, it does not fault).
-   */
-
   /* Point the instruction-bus (.text) window at this group's pages */
 
   for (i = 0; i < addrenv->ntext; i++)
@@ -393,6 +389,23 @@ int up_addrenv_select(const arch_addrenv_t *addrenv)
                            ESP32S3_HEAP_VBASE + i * MM_PGSIZE,
                            addrenv->heappages[i], 1);
     }
+
+  /* Take away what this group does not use.  Only as many entries as the
+   * incoming group has pages were rewritten above; the rest of each window
+   * would otherwise still point at the pages of whoever was resident before,
+   * which a task that ran off the end of its own allocation could read.
+   *
+   * A group's page count only ever grows (the heap window, through
+   * pgalloc()), so this cannot invalidate an entry that is about to be
+   * needed again without a select in between.
+   */
+
+  esp32s3_mmu_unmap(ESP32S3_TEXT_VBASE + addrenv->ntext * MM_PGSIZE,
+                    CONFIG_ARCH_TEXT_NPAGES - addrenv->ntext);
+  esp32s3_mmu_unmap(ESP32S3_DATA_VBASE + addrenv->ndata * MM_PGSIZE,
+                    CONFIG_ARCH_DATA_NPAGES - addrenv->ndata);
+  esp32s3_mmu_unmap(ESP32S3_HEAP_VBASE + addrenv->nheap * MM_PGSIZE,
+                    CONFIG_ARCH_HEAP_NPAGES - addrenv->nheap);
 
   /* Drop stale instruction lines from the previous mapping and resume */
 

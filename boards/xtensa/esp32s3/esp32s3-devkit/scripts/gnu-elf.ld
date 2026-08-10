@@ -32,6 +32,13 @@
  *          heap bookkeeping and the signal trampoline pointer).  The window
  *          is a slot of the data-bus range (0x3C000000-0x3E000000).
  *
+ * Both windows have to sit above the kernel's own PSRAM window, which the
+ * two buses share entry for entry: 0x42C00000 and 0x3C000000+0xC00000 are
+ * the same cache-MMU entry, so a user window that overlapped it would take
+ * away the kernel's view of the pages underneath.  The kernel window starts
+ * wherever the flash mappings end, so it moves as the image grows;
+ * up_allocate_pgheap() checks the two against each other at boot.
+ *
  * .rodata sits with the data, not with the text: the ESP32-S3 selects
  * CONFIG_ARCH_HAVE_TEXT_HEAP_WORD_ALIGNED_READ, so the loader places every
  * section that is not executable into the data region, and unaligned reads
@@ -47,7 +54,7 @@
 
 SECTIONS
 {
-  . = 0x42800000;
+  . = 0x42c00000;
 
   .text :
     {
