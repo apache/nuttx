@@ -372,6 +372,63 @@ After successfully built and flashed, run on the boards's terminal::
 
 The corresponding output should show related debug information.
 
+kernel_n8r2
+-----------
+
+A KERNEL build for a module with 2 MB of PSRAM, such as the
+ESP32-S3-WROOM-1-N8R2.  The flash is quad and runs in DIO mode.
+
+The page pool is smaller than in ``kernel_oct``, and each of the text, data
+and heap regions of a process is 2 pages of 64 KiB.  A process therefore takes
+384 KiB, and a ``fork()`` needs 768 KiB while the parent and the child both
+exist.
+
+This is tight on purpose.  ``ostest`` has 115 KiB of text against a 128 KiB
+text region.  A larger program needs a module with more PSRAM, not a larger
+page pool.
+
+kernel_oct
+----------
+
+A KERNEL build for a module with octal flash and 8 MB of PSRAM, such as the
+ESP32-S3-WROOM-2-N32R8V.
+
+A KERNEL build gives each process its own address environment.  This is the
+only build mode in which ``fork()`` is available on this chip:  the child
+receives its own copy of the memory of the parent, at the same virtual
+addresses.  ``vfork()`` is available in every build mode.
+
+The page pool holds the pages of every process.  It is carved out of the
+PSRAM, and it is not kept mapped into the kernel address space.  The kernel
+reaches a page of the pool through a small scratch region, mapped for one
+operation and invalidated afterwards.
+
+Build the kernel first, then the applications, then the boot ROMFS, and then
+link the kernel again.  The ROMFS is linked into the kernel image, so a change
+to an application needs the whole chain::
+
+    make -j
+    make export
+    cd ../apps
+    ./tools/mkimport.sh -z -x ../nuttx/nuttx-export-*.tar.gz
+    make import -j
+    ./tools/mkromfsimg.sh ../nuttx/arch/xtensa/src/board/board/romfs_boot.c
+    cd ../nuttx
+    make -j
+
+Confirm that the ROMFS is in the image.  ``romfs_img`` must be a strong symbol
+of a few hundred kilobytes::
+
+    xtensa-esp32s3-elf-nm -S nuttx | grep " romfs_img$"
+
+A one byte symbol means that the linker took the stub.  Delete
+``boards/xtensa/esp32s3/esp32s3-devkit/src/romfs_stub.o`` and ``libboard.a``,
+then link again.
+
+The shell needs the full path of a program in this build mode::
+
+    nsh> /system/bin/ostest
+
 knsh
 ----
 
