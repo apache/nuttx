@@ -66,6 +66,15 @@ int xtensa_swint(int irq, void *context, void *arg)
 
   cmd = regs[REG_A2];
 
+#ifdef CONFIG_LIB_SYSCALL
+  /* Record the caller's register context for the duration of the call.  A
+   * system call body runs as C code after this exception has returned, so
+   * this is how it reaches the registers of the thread that called it.
+   */
+
+  tcb->xcp.sregs = regs;
+#endif
+
   /* The syscall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
    */
