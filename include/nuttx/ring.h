@@ -265,26 +265,7 @@
 #define RING_DEFINE(name, type, buflen)                  \
   RING_DECLARE(name, type, buflen) = RING_INIT(buflen)
 
-/* RING_BASE - convert a RING_DECLARE/RING_DEFINE variable to
- * struct ring_s pointer for use with internal APIs.
- */
-
-#define RING_BASE(ring)       ((FAR struct ring_s *)(ring))
-
 /* Public API macros - accept RING_DECLARE/RING_DEFINE structs */
-
-/* ring_reset - clear all indices and return the count of elements that
- * were present before the reset (i.e. the number of elements discarded
- * by the reset operation).
- *
- * Callers may either use the return value (e.g. to bump a "dropped"
- * counter) or discard it.  Safe to call on a freshly-zeroed ring whose
- * indices have not been written yet: reading the volatile fields yields
- * whatever happens to be in memory and the caller is expected to discard
- * the value in that case.
- */
-
-#define ring_reset(r)       ring_reset_indices(RING_BASE(r))
 
 /* ring_data - return pointer to the embedded data buffer that immediately
  * follows the ring_s header in memory.
@@ -307,89 +288,72 @@
  * race to initialize the same ring.
  */
 
-#define ring_spsc_init(r, cap)                   \
-  do                                             \
-    {                                            \
-      FAR struct ring_s *ring = RING_BASE(r);    \
-      irqstate_t flags = irq_save();             \
-      if (ring->magic != RING_MAGIC_READY)       \
-        {                                        \
-          ring->magic = RING_MAGIC_INIT;         \
-          UP_WMB();                              \
-          ring->capacity = (cap);                \
-          ring->wrappoint = RING_WRAPPOINT(cap); \
-          ring_reset(r);                         \
-          UP_WMB();                              \
-          ring->magic = RING_MAGIC_READY;        \
-        }                                        \
-      irq_restore(flags);                        \
-    }                                            \
+#define ring_spsc_init(r, cap)                  \
+  do                                            \
+    {                                           \
+      irqstate_t flags = irq_save();            \
+      if ((r)->magic != RING_MAGIC_READY)       \
+        {                                       \
+          (r)->magic = RING_MAGIC_INIT;         \
+          UP_WMB();                             \
+          (r)->capacity = (cap);                \
+          (r)->wrappoint = RING_WRAPPOINT(cap); \
+          ring_reset(r);                        \
+          UP_WMB();                             \
+          (r)->magic = RING_MAGIC_READY;        \
+        }                                       \
+      irq_restore(flags);                       \
+    }                                           \
   while (0)
 
-#define ring_mpsc_init(r, cap)  ring_mpmc_init(r, cap)
-#define ring_spmc_init(r, cap)  ring_mpmc_init(r, cap)
+#define ring_mpsc_init(r, cap) ring_mpmc_init(r, cap)
+#define ring_spmc_init(r, cap) ring_mpmc_init(r, cap)
 
 #define ring_is_ready(r) \
-  (atomic_read_acquire(&RING_BASE(r)->magic) == RING_MAGIC_READY)
+  (atomic_read_acquire(&(r)->magic) == RING_MAGIC_READY)
 
-#define ring_count(r)                                     \
-  ring_dist(RING_BASE(r),                                 \
-            RTS_IDX(RING_BASE(r)->prod_tail),\
-            RTS_IDX(RING_BASE(r)->cons_tail))
+#define ring_count(r)    ring_dist(r, RTS_IDX((r)->prod_tail), \
+                                   RTS_IDX((r)->cons_tail))
+#define ring_capacity(r) ((r)->capacity)
+#define ring_space(r)    (ring_capacity(r) - ring_count(r))
 
-#define ring_capacity(r)    (RING_BASE(r)->capacity)
-#define ring_space(r)       (ring_capacity(r) - ring_count(r))
+#define ring_spsc_enqueue(r, items, count) \
+  (ring_is_ready(r) ? \
+   ring_sp_enqueue(r, items, count, sizeof(*(items))) : 0)
 
-#define ring_spsc_enqueue(r, items, count)               \
-  (ring_is_ready(r) ?                                    \
-   ring_sp_enqueue(RING_BASE(r), items, count, sizeof(*(items))) : 0)
+#define ring_spsc_dequeue(r, items, count) \
+  (ring_is_ready(r) ? \
+   ring_sc_dequeue(r, items, count, sizeof(*(items))) : 0)
 
-#define ring_spsc_dequeue(r, items, count)               \
-  (ring_is_ready(r) ?                                    \
-   ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items))) : 0)
-
-#define ring_spsc_skip(r, count)                         \
-  (ring_is_ready(r) ?                                    \
-   ring_sc_skip(RING_BASE(r), count) : 0)
+#define ring_spsc_skip(r, count) \
+  (ring_is_ready(r) ? ring_sc_skip(r, count) : 0)
 
 #define ring_mpmc_enqueue(r, items, count) \
-  ring_mp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_mp_enqueue(r, items, count, sizeof(*(items)))
 
 #define ring_mpmc_dequeue(r, items, count) \
-  ring_mc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_mc_dequeue(r, items, count, sizeof(*(items)))
 
 #define ring_spmc_enqueue(r, items, count) \
-  ring_sp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_sp_enqueue(r, items, count, sizeof(*(items)))
 
 #define ring_spmc_dequeue(r, items, count) \
-  ring_mc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_mc_dequeue(r, items, count, sizeof(*(items)))
 
 #define ring_mpsc_enqueue(r, items, count) \
-  ring_mp_enqueue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_mp_enqueue(r, items, count, sizeof(*(items)))
 
 #define ring_mpsc_dequeue(r, items, count) \
-  ring_sc_dequeue(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_sc_dequeue(r, items, count, sizeof(*(items)))
 
-#define ring_mpmc_skip(r, count) \
-  ring_mc_skip(RING_BASE(r), count)
+#define ring_mpmc_skip(r, count) ring_mc_skip(r, count)
+#define ring_spmc_skip(r, count) ring_mc_skip(r, count)
+#define ring_mpsc_skip(r, count) ring_sc_skip(r, count)
 
-#define ring_spmc_skip(r, count) \
-  ring_mc_skip(RING_BASE(r), count)
-
-#define ring_mpsc_skip(r, count) \
-  ring_sc_skip(RING_BASE(r), count)
-
-#define ring_mpsc_skipto(r, target) \
-  ring_sc_skipto(RING_BASE(r), target)
-
-#define ring_spsc_skipto(r, target) \
-  ring_sc_skipto(RING_BASE(r), target)
-
-#define ring_spmc_skipto(r, target) \
-  ring_mc_skipto(RING_BASE(r), target)
-
-#define ring_mpmc_skipto(r, target) \
-  ring_mc_skipto(RING_BASE(r), target)
+#define ring_mpsc_skipto(r, target) ring_sc_skipto(r, target)
+#define ring_spsc_skipto(r, target) ring_sc_skipto(r, target)
+#define ring_spmc_skipto(r, target) ring_mc_skipto(r, target)
+#define ring_mpmc_skipto(r, target) ring_mc_skipto(r, target)
 
 /* Overwrite: when the ring is full, discard oldest data to
  * make room.  The discard path acts as a virtual multi-consumer,
@@ -402,82 +366,72 @@
  */
 
 #define ring_spmc_overwrite(r, items, count) \
-  ring_sp_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_sp_overwrite(r, items, count, sizeof(*(items)))
 
 #define ring_mpmc_overwrite(r, items, count) \
-  ring_mp_overwrite(RING_BASE(r), items, count, sizeof(*(items)))
+  ring_mp_overwrite(r, items, count, sizeof(*(items)))
 
 #define ring_spmc_overwrite_start(r, count, elem_size, b) \
-  ring_sp_overwrite_start(RING_BASE(r), count, elem_size, b)
+  ring_sp_overwrite_start(r, count, elem_size, b)
 
-#define ring_spmc_overwrite_finish(r, b) \
-  ring_sp_finish(RING_BASE(r), b)
+#define ring_spmc_overwrite_finish(r, b) ring_sp_finish(r, b)
 
 #define ring_mpmc_overwrite_start(r, count, elem_size, b) \
-  ring_mp_overwrite_start(RING_BASE(r), count, elem_size, b)
+  ring_mp_overwrite_start(r, count, elem_size, b)
 
-#define ring_mpmc_overwrite_finish(r, b) \
-  ring_mp_finish(RING_BASE(r), b)
+#define ring_mpmc_overwrite_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_spsc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(RING_BASE(r), count, elem_size, b)
+  ring_sp_start(r, count, elem_size, b)
 
-#define ring_spsc_enqueue_finish(r, b) \
-  ring_sp_finish(RING_BASE(r), b)
+#define ring_spsc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
 #define ring_spsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(RING_BASE(r), count, elem_size, b)
+  ring_sc_start(r, count, elem_size, b)
 
-#define ring_spsc_dequeue_finish(r, b) \
-  ring_sc_finish(RING_BASE(r), b)
+#define ring_spsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
 #define ring_mpmc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(RING_BASE(r), count, elem_size, b)
+  ring_mp_start(r, count, elem_size, b)
 
-#define ring_mpmc_enqueue_finish(r, b) \
-  ring_mp_finish(RING_BASE(r), b)
+#define ring_mpmc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_mpmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(RING_BASE(r), count, elem_size, b)
+  ring_mc_start(r, count, elem_size, b)
 
-#define ring_mpmc_dequeue_finish(r, b) \
-  ring_mc_finish(RING_BASE(r), b)
+#define ring_mpmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
 #define ring_spmc_enqueue_start(r, count, elem_size, b) \
-  ring_sp_start(RING_BASE(r), count, elem_size, b)
+  ring_sp_start(r, count, elem_size, b)
 
-#define ring_spmc_enqueue_finish(r, b) \
-  ring_sp_finish(RING_BASE(r), b)
+#define ring_spmc_enqueue_finish(r, b) ring_sp_finish(r, b)
 
 #define ring_spmc_dequeue_start(r, count, elem_size, b) \
-  ring_mc_start(RING_BASE(r), count, elem_size, b)
+  ring_mc_start(r, count, elem_size, b)
 
-#define ring_spmc_dequeue_finish(r, b) \
-  ring_mc_finish(RING_BASE(r), b)
+#define ring_spmc_dequeue_finish(r, b) ring_mc_finish(r, b)
 
 #define ring_mpsc_enqueue_start(r, count, elem_size, b) \
-  ring_mp_start(RING_BASE(r), count, elem_size, b)
+  ring_mp_start(r, count, elem_size, b)
 
-#define ring_mpsc_enqueue_finish(r, b) \
-  ring_mp_finish(RING_BASE(r), b)
+#define ring_mpsc_enqueue_finish(r, b) ring_mp_finish(r, b)
 
 #define ring_mpsc_dequeue_start(r, count, elem_size, b) \
-  ring_sc_start(RING_BASE(r), count, elem_size, b)
+  ring_sc_start(r, count, elem_size, b)
 
-#define ring_mpsc_dequeue_finish(r, b) \
-  ring_sc_finish(RING_BASE(r), b)
+#define ring_mpsc_dequeue_finish(r, b) ring_sc_finish(r, b)
 
 #define ring_mpsc_peek(r, items, count, index) \
-  ring_sc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+  ring_sc_peek(r, items, count, sizeof(*(items)), index)
 
 #define ring_spsc_peek(r, items, count, index) \
-  ring_sc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+  ring_sc_peek(r, items, count, sizeof(*(items)), index)
 
 #define ring_mpmc_peek(r, items, count, index) \
-  ring_mc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+  ring_mc_peek(r, items, count, sizeof(*(items)), index)
 
 #define ring_spmc_peek(r, items, count, index) \
-  ring_mc_peek(RING_BASE(r), items, count, sizeof(*(items)), index)
+  ring_mc_peek(r, items, count, sizeof(*(items)), index)
 
 /* Peek at a fixed offset from the oldest element (cons_tail), without
  * advancing.  Unlike the external-index peek above, the read position is
@@ -486,16 +440,16 @@
  */
 
 #define ring_mpsc_peek_at(r, items, count, offset) \
-  ring_sc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+  ring_sc_peek_at(r, items, count, sizeof(*(items)), offset)
 
 #define ring_spsc_peek_at(r, items, count, offset) \
-  ring_sc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+  ring_sc_peek_at(r, items, count, sizeof(*(items)), offset)
 
 #define ring_mpmc_peek_at(r, items, count, offset) \
-  ring_mc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+  ring_mc_peek_at(r, items, count, sizeof(*(items)), offset)
 
 #define ring_spmc_peek_at(r, items, count, offset) \
-  ring_mc_peek_at(RING_BASE(r), items, count, sizeof(*(items)), offset)
+  ring_mc_peek_at(r, items, count, sizeof(*(items)), offset)
 
 /****************************************************************************
  * Public Types
@@ -650,14 +604,12 @@ ring_clamp_cons(FAR struct ring_s *r, uint32_t cons_index,
 }
 
 /****************************************************************************
- * Name: ring_reset_indices
+ * Name: ring_reset
  *
  * Description:
  *   Clear all indices and return the count of elements that were present
  *   before the reset (i.e. the number of elements discarded by the reset
- *   operation).  Called by the ring_reset() macro after RING_BASE()
- *   conversion, and may also be invoked directly when the caller already
- *   holds a FAR struct ring_s *.
+ *   operation).
  *
  *   Callers may either use the return value (e.g. to bump a "dropped"
  *   counter) or discard it.  Safe to call on a freshly-zeroed ring whose
@@ -667,7 +619,7 @@ ring_clamp_cons(FAR struct ring_s *r, uint32_t cons_index,
  *
  ****************************************************************************/
 
-static inline_function uint32_t ring_reset_indices(FAR struct ring_s *r)
+static inline_function uint32_t ring_reset(FAR struct ring_s *r)
 {
   uint32_t dropped = ring_count(r);
 
