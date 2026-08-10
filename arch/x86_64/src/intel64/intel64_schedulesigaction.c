@@ -74,6 +74,8 @@
 
 void up_schedule_sigaction(struct tcb_s *tcb)
 {
+  uint64_t sp = tcb->xcp.regs[REG_RSP];
+
   sinfo("tcb=%p, rtcb=%p current_regs=%p\n", tcb,
         this_task(), this_task()->xcp.regs);
 
@@ -83,7 +85,7 @@ void up_schedule_sigaction(struct tcb_s *tcb)
    */
 
   tcb->xcp.saved_rip        = tcb->xcp.regs[REG_RIP];
-  tcb->xcp.saved_rsp        = tcb->xcp.regs[REG_RSP];
+  tcb->xcp.saved_rsp        = sp;
   tcb->xcp.saved_rflags     = tcb->xcp.regs[REG_RFLAGS];
 
   /* Then set up to vector to the trampoline with interrupts
@@ -91,6 +93,21 @@ void up_schedule_sigaction(struct tcb_s *tcb)
    */
 
   tcb->xcp.regs[REG_RIP]    = (uint64_t)x86_64_sigdeliver;
-  tcb->xcp.regs[REG_RSP]    = tcb->xcp.regs[REG_RSP] - 8;
   tcb->xcp.regs[REG_RFLAGS] = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* Run the trampoline on the thread kernel stack when the thread was
+   * interrupted in user mode: the signal handler runs on the user
+   * stack and would overwrite the trampoline frame there.
+   */
+
+  if (tcb->xcp.kstack != NULL &&
+      (sp < (uint64_t)tcb->xcp.kstack || sp > (uint64_t)tcb->xcp.ktopstk))
+    {
+      tcb->xcp.saved_ursp = sp;
+      sp                  = (uint64_t)tcb->xcp.ktopstk;
+    }
+#endif
+
+  tcb->xcp.regs[REG_RSP]    = sp - 8;
 }
