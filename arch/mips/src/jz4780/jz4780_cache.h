@@ -66,6 +66,7 @@ void m32_size_cache(void);
 void m32_flush_dcache(void);
 void m32_flush_icache(void);
 void m32_clean_cache(uint32_t kva, size_t n);
+void m32_clean_icache(uint32_t kva, size_t n);
 void m32_sync_icache(uint32_t kva, size_t n);
 void m32_dcache_clean_invalidate(uint32_t kva, size_t n);
 void m32_dcache_invalidate(uint32_t kva, size_t n);
