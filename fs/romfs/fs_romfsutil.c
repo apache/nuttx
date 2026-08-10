@@ -417,7 +417,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
   char childname[NAME_MAX + 1];
   uint32_t linkoffset;
   uint32_t info;
-  uint8_t num = 0;
+  size_t num = 0;
   size_t nsize;
   int ret;
 
