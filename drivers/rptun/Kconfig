@@ -110,6 +110,31 @@ config RPTUN_IVSHMEM_RPMB_PATH
 
 endif
 
+config RPTUN_START_SYNC
+	bool "rptun start devices synchronously"
+	default n
+	---help---
+		By default rptun spawns a short lived "rptun" kernel thread on every
+		start to bring the remote proc up and to wait for the peer to publish
+		VIRTIO_CONFIG_STATUS_DRIVER_OK.  Each start/stop cycle therefore
+		allocates and releases a TCB and a stack, and the stop path has to
+		SIGKILL the thread out of its peer wait.
+
+		Enable this option to run the whole sequence inline in the caller's
+		context instead.  No thread is created and a start/stop cycle performs
+		no dynamic allocation at all.
+
+		Be aware of the trade-off: the caller blocks until the peer has
+		driven every virtio device in the resource table, forever if the
+		peer has no driver for one of them.
+		With RPTUN_IS_AUTOSTART this stalls board bring-up, and when entered
+		through RPTUNIOC_START (rptun_boot()) the global rptun lock is held for
+		the whole wait, which blocks rptun_reset()/rptun_poweroff() on every
+		rptun instance, including from the panic notifier.
+
+		Only select this when the peer is known to be up before this side
+		starts, or when stalling the caller is acceptable.
+
 config RPTUN_PRIORITY
 	int "rptun thread priority"
 	default 224

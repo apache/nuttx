@@ -1185,7 +1185,7 @@ static int rptun_do_start(FAR struct remoteproc *rproc)
 static int rptun_start_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv =
-  (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 16));
+  (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[argc - 1], NULL, 16));
   int ret;
 
   ret = rptun_do_start(&priv->rproc);
@@ -1212,12 +1212,19 @@ static int rptun_dev_start(FAR struct rptun_priv_s *priv)
   FAR char *argv[3];
   char arg1[32];
 
-  /* Create a thread to register the virtio and vhost devices */
-
   snprintf(arg1, sizeof(arg1), "%p", priv);
   argv[0] = (FAR char *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
+
+#ifdef CONFIG_RPTUN_START_SYNC
+  /* Leave priv->pid unset: rptun_dev_stop() kills that pid, and here it
+   * would be the caller.
+   */
+
+  return rptun_start_thread(2, argv);
+#else
+  /* Create a thread to register the virtio and vhost devices */
 
   if (dev->stack != NULL && dev->stack_size != 0u)
     {
@@ -1237,6 +1244,7 @@ static int rptun_dev_start(FAR struct rptun_priv_s *priv)
     }
 
   return priv->pid;
+#endif
 }
 
 static int rptun_dev_stop(FAR struct remoteproc *rproc)
