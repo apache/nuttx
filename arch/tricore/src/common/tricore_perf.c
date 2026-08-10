@@ -28,7 +28,16 @@
 #include <nuttx/clock.h>
 #include <nuttx/lib/math32.h>
 
-#include "tricore_internal.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define CPU_CCTRL        0xFC00  /* Counter Control */
+#define CPU_CCNT         0xFC04  /* CPU Clock Cycle Count */
+
+/* CPU_CCTRL Count Enable bit. */
+
+#define CCTRL_COUNT_ENABLE (1 << 1)
 
 #ifdef CONFIG_ARCH_PERF_EVENTS
 
@@ -40,6 +49,28 @@ static unsigned long g_cpu_freq = ULONG_MAX;
 static invdiv_param64_t g_invdiv_param;
 
 /****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void tricore_reset_ccnt(void)
+{
+  uint32_t cctrl = tricore_mfcr(CPU_CCTRL);
+
+  /* Disable and clear the CPU cycle counter */
+
+  cctrl &= ~CCTRL_COUNT_ENABLE;
+  tricore_mtcr(CPU_CCTRL, cctrl);
+  tricore_mtcr(CPU_CCNT, 0);
+  UP_ISB();
+
+  /* Re-enable the CPU cycle counter */
+
+  cctrl |= CCTRL_COUNT_ENABLE;
+  tricore_mtcr(CPU_CCTRL, cctrl);
+  UP_ISB();
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -48,7 +79,8 @@ void up_perf_init(void *arg)
   g_cpu_freq = (unsigned long)(uintptr_t)arg;
 
   invdiv_init_param64(g_cpu_freq, &g_invdiv_param);
-  IfxCpu_resetAndStartCounters(IfxCpu_CounterMode_normal);
+
+  tricore_reset_ccnt();
 }
 
 unsigned long up_perf_getfreq(void)
@@ -58,7 +90,7 @@ unsigned long up_perf_getfreq(void)
 
 clock_t up_perf_gettime(void)
 {
-  return (clock_t)IfxCpu_getClockCounter();
+  return (clock_t)tricore_mfcr(CPU_CCNT);
 }
 
 void up_perf_convert(clock_t elapsed, struct timespec *ts)
