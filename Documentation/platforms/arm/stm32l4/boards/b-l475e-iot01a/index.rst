@@ -257,6 +257,38 @@ nsh:
 Configures the NuttShell (nsh) located at examples/nsh.  This
 configuration is focused on low level, command-line driver testing.
 
+qemu:
+-----
+
+The same NuttShell configuration as 'nsh', but targeted at the QEMU
+``b-l475e-iot01a`` machine instead of real hardware.  QEMU models the
+STM32L4x5 core peripherals (RCC, GPIO, EXTI, SYSCFG, USART) but does
+not model the QUADSPI controller or the on-board MX25R6435F flash, so
+this configuration drops the external flash stack that 'nsh' enables::
+
+    CONFIG_B_L475E_IOT01A_MTD_FLASH  (and the QSPI/MTD/SMARTFS chain it selects)
+
+Without that change the 'nsh' image panics during board bring-up, inside
+``stm32_qspi_initialize()`` -> ``mx25rxx_initialize()``, before the console
+ever produces output.
+
+Build and run it with::
+
+    tools/configure.sh b-l475e-iot01a:qemu
+    make
+    qemu-system-arm -M b-l475e-iot01a -nographic -kernel nuttx
+
+Console output appears on USART1, which the machine wires to the first
+serial port.  Exit QEMU with :kbd:`Ctrl-a x`.
+
+NOTE: QEMU's STM32L4x5 USART model never calls
+``qemu_chr_fe_accept_input()`` after the guest reads RDR.  Once a byte
+arrives while RXNE is still set, the chardev front end throttles and does
+not resume, so pasting or piping a line of input into the console stalls
+after the first character or two.  Typing at human speed works normally;
+scripted input needs a delay of a few hundred milliseconds between
+characters.
+
 spirit-6lowpan
 --------------
 
