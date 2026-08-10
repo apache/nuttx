@@ -40,6 +40,14 @@
 #include "x86_64_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Red zone the System V AMD64 ABI reserves below the user stack pointer */
+
+#define X86_64_ABI_RED_ZONE 128
+
+/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -253,16 +261,18 @@ uint64_t *x86_64_syscall(uint64_t *regs)
 
               rtcb->xcp.kstkptr = (uintptr_t *)regs[REG_RSP];
 
-              /* Copy "info" into user stack */
+              /* Create a 16 byte aligned frame for info below the red
+               * zone of the interrupted user code
+               */
 
-              usp = rtcb->xcp.saved_ursp - 8;
-
-              /* Create a frame for info and copy the kernel info */
-
-              usp = usp - sizeof(siginfo_t);
+              usp = (rtcb->xcp.saved_ursp - X86_64_ABI_RED_ZONE -
+                     sizeof(siginfo_t)) & ~0x0f;
               memcpy((void *)usp, (void *)regs[REG_RSI], sizeof(siginfo_t));
 
-              /* Now set the updated SP and user copy of "info" to RSI */
+              /* Set the new SP and the user copy of "info" to RSI.
+               * The naked trampoline is entered with SP 16 byte
+               * aligned; its call provides the return address slot.
+               */
 
               regs[REG_RSP] = usp;
               regs[REG_RSI] = usp;
