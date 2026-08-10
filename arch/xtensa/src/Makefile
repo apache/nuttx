@@ -199,10 +199,20 @@ ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 endif
 
 # This is part of the top-level export target
+#
+# A kernel build links its user programs outside this tree, against the
+# export package, so crt0 has to travel with it:  apps/import expects to
+# find it as startup/crt0.o.
 
-export_startup: $(STARTUP_OBJS)
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+EXPORT_STARTUP_OBJS = $(STARTUP_OBJS) $(STARTUP_ELF_OBJS)
+else
+EXPORT_STARTUP_OBJS = $(STARTUP_OBJS)
+endif
+
+export_startup: $(EXPORT_STARTUP_OBJS)
 	$(Q) if [ -d "$(EXPORT_DIR)/startup" ]; then \
-		cp -f $(STARTUP_OBJS) "$(EXPORT_DIR)/startup"; \
+		cp -f $(EXPORT_STARTUP_OBJS) "$(EXPORT_DIR)/startup"; \
 	 else \
 		echo "$(EXPORT_DIR)/startup does not exist"; \
 		exit 1; \

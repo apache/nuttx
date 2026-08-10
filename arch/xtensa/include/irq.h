@@ -216,6 +216,23 @@ struct xcptcontext
 
   uint32_t *regs;
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In a kernel build the kernel cannot run on the stack of the process it
+   * is working for.  That stack lives in a cache-MMU window which
+   * up_addrenv_select() reprograms, so it would move out from under the
+   * kernel the moment it touched another process's address environment --
+   * taking the exception frame and every spilled register window with it.
+   * Each thread therefore gets a small stack of its own in kernel memory,
+   * which no address environment change can disturb.
+   */
+
+  uint32_t *kstack;    /* Allocated base of the kernel stack */
+  uint32_t *ktopstk;   /* Top of the kernel stack (initial stack pointer) */
+  uint32_t *ustkptr;   /* Saved user stack pointer, while in a system call */
+  uint32_t *kstkptr;   /* Saved kernel stack pointer, while a user signal
+                        * handler runs on the user stack */
+#endif
+
 #ifdef CONFIG_LIB_SYSCALL
   /* The exception frame of the system call currently in progress, i.e. the
    * caller's register context as the vector saved it.  A system call body
