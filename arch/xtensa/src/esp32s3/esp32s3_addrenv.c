@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <errno.h>
+#include <sched.h>
 #include <string.h>
 
 #include <nuttx/addrenv.h>
@@ -103,6 +104,7 @@ static int alloc_region(uintptr_t *pages, unsigned int maxpages, size_t size,
       uintptr_t paddr = mm_pgalloc(1);
       if (paddr == 0)
         {
+          berr("ERROR: page pool exhausted at page %u of %u\n", i, npages);
           *count = i;
           return -ENOMEM;
         }
@@ -575,6 +577,153 @@ int up_addrenv_clone(const arch_addrenv_t *src, arch_addrenv_t *dest)
   DEBUGASSERT(src && dest);
   memcpy(dest, src, sizeof(arch_addrenv_t));
   return OK;
+}
+
+/****************************************************************************
+ * Name: copy_region
+ *
+ * Description:
+ *   Copy one region's pages from a parent environment into a child's.  Both
+ *   sides are reached through the kernel's scratch region, which is why it
+ *   has two slots: source and destination are mapped at the same time so
+ *   this is one memcpy rather than a bounce through kernel memory.
+ *
+ *   sched_lock() is held across each page pair for the reason every scratch
+ *   mapping is: those addresses are ordinary external memory to the
+ *   permission control, so no unprivileged task may run while a page of
+ *   somebody's memory is parked at one.
+ *
+ ****************************************************************************/
+
+static int copy_region(const uintptr_t *src, uintptr_t *dest, uint16_t count)
+{
+  uint16_t i;
+
+  for (i = 0; i < count; i++)
+    {
+      uintptr_t svaddr;
+      uintptr_t dvaddr;
+
+      sched_lock();
+
+      svaddr = esp32s3_pgmap(src[i]);
+      dvaddr = esp32s3_pgmap(dest[i]);
+
+      if (svaddr == 0 || dvaddr == 0)
+        {
+          if (svaddr != 0)
+            {
+              esp32s3_pgunmap(svaddr);
+            }
+
+          if (dvaddr != 0)
+            {
+              esp32s3_pgunmap(dvaddr);
+            }
+
+          sched_unlock();
+          berr("ERROR: no scratch mapping for page %u\n", i);
+          return -EFAULT;
+        }
+
+      memcpy((void *)dvaddr, (const void *)svaddr, MM_PGSIZE);
+
+      esp32s3_pgunmap(dvaddr);
+      esp32s3_pgunmap(svaddr);
+
+      sched_unlock();
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: up_addrenv_fork
+ *
+ * Description:
+ *   Duplicate an address environment for fork():  allocate the child pages
+ *   to match the parent's regions and copy the parent's contents into them.
+ *
+ *   The copy is eager and complete.  There is no copy-on-write and no demand
+ *   fill, because this chip provides no synchronous restartable write fault
+ *   to build them on -- proven, not assumed.  So a fork costs a full copy of
+ *   the process image.
+ *
+ *   The child's pages land at the same *virtual* addresses as the parent's,
+ *   which is the property the whole thing rests on: a copied stack is full
+ *   of pointers into itself, and they are only still correct because the
+ *   copy is addressed identically.
+ *
+ ****************************************************************************/
+
+int up_addrenv_fork(const arch_addrenv_t *src, arch_addrenv_t *dest)
+{
+  int ret;
+
+  DEBUGASSERT(src && dest);
+
+  memset(dest, 0, sizeof(arch_addrenv_t));
+
+  dest->textvbase = src->textvbase;
+  dest->datavbase = src->datavbase;
+  dest->heapvbase = src->heapvbase;
+  dest->heapsize  = src->heapsize;
+
+  /* Allocate the child's pages.  alloc_region() takes a size, and the
+   * parent's page counts are the exact sizes wanted.
+   */
+
+  ret = alloc_region(dest->textpages, CONFIG_ARCH_TEXT_NPAGES,
+                     (size_t)src->ntext * MM_PGSIZE, &dest->ntext);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = alloc_region(dest->datapages, CONFIG_ARCH_DATA_NPAGES,
+                     (size_t)src->ndata * MM_PGSIZE, &dest->ndata);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = alloc_region(dest->heappages, CONFIG_ARCH_HEAP_NPAGES,
+                     (size_t)src->nheap * MM_PGSIZE, &dest->nheap);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Then fill them from the parent */
+
+  ret = copy_region(src->textpages, dest->textpages, dest->ntext);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = copy_region(src->datapages, dest->datapages, dest->ndata);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  ret = copy_region(src->heappages, dest->heappages, dest->nheap);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* The text pages were written through the data bus.  Make them visible to
+   * instruction fetch before anything runs from them.
+   */
+
+  esp32s3_addrenv_coherent();
+  return OK;
+
+errout:
+  up_addrenv_destroy(dest);
+  return ret;
 }
 
 /****************************************************************************
