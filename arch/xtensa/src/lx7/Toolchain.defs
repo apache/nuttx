@@ -244,7 +244,16 @@ CXXELFFLAGS = $(CXXFLAGS) -fvisibility=hidden -mtext-section-literals
 
 CXXELFFLAGS += -fno-use-cxa-atexit
 
-LDELFFLAGS = -r -e _start
+LDELFFLAGS = -e _start
+
+# A relocatable object is the default for loadable modules.  A kernel build
+# instead needs each user program fully linked at the addresses of its
+# address environment, so the partial link is dropped there.
+
+ifeq ($(CONFIG_BINFMT_ELF_RELOCATABLE),y)
+  LDELFFLAGS += -r
+endif
+
 LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)elf$(DELIM)gnu-elf.ld)
 ifneq ($(CONFIG_BUILD_KERNEL),y)
   # Flat build and protected elf entry point use crt0,
