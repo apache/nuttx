@@ -974,7 +974,7 @@ static int rpmsgmtd_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0 && rsp->arglen > 0)
     {
-      memcpy(cookie->data, (FAR void *)(uintptr_t)rsp->buf, rsp->arglen);
+      memcpy(cookie->data, (FAR void *)rsp->buf, rsp->arglen);
     }
 
   rpmsg_post(ept, &cookie->sem);
