@@ -18,98 +18,114 @@
 
 #ifdef LIBC_BUILD_MEMSET
 
+#include "asm.h"
+
 .text
 .global ARCH_LIBCFUN(memset)
 .type	ARCH_LIBCFUN(memset), @function
+.align	2
+
+/************************************************************************************
+ * Name: memset
+ *
+ * void *memset(void *s, int c, size_t n)
+ *
+ * Optimized with 32xSZREG unrolled loop and .option norvc.
+ ************************************************************************************/
 ARCH_LIBCFUN(memset):
 	.cfi_sections .debug_frame
 	.cfi_startproc
-	li t1, 15
-	move a4, a0
-	bleu a2, t1, .Ltiny
-	and a5, a4, 15
-	bnez a5, .Lmisaligned
+
+	mv	t0, a0
+
+	li	t1, 2*SZREG
+	bleu	a2, t1, .Lbyte_tail
+
+	andi	a1, a1, 0xff
+	slli	t1, a1, 8
+	or	a1, a1, t1
+	slli	t1, a1, 16
+	or	a1, a1, t1
+#ifdef CONFIG_ARCH_RV64
+	slli	t1, a1, 32
+	or	a1, a1, t1
+#endif
+
+	andi	t1, t0, SZREG-1
+	beqz	t1, .Laligned
+	sub	t2, zero, t1
+	addi	t2, t2, SZREG
+	sub	a2, a2, t2
+.Lalign_head:
+	sb	a1, 0(t0)
+	addi	t0, t0, 1
+	addi	t2, t2, -1
+	bnez	t2, .Lalign_head
 
 .Laligned:
-	bnez a1, .Lwordify
+	li	t3, 32*SZREG
+	bltu	a2, t3, .Lword_tail
 
-.Lwordified:
-	and a3, a2, ~15
-	and a2, a2, 15
-	add a3, a3, a4
+	.align	3
+.Lblock_loop:
+	.option push
+	.option norvc
+	REG_S	a1,  0*SZREG(t0)
+	REG_S	a1,  1*SZREG(t0)
+	REG_S	a1,  2*SZREG(t0)
+	REG_S	a1,  3*SZREG(t0)
+	REG_S	a1,  4*SZREG(t0)
+	REG_S	a1,  5*SZREG(t0)
+	REG_S	a1,  6*SZREG(t0)
+	REG_S	a1,  7*SZREG(t0)
+	REG_S	a1,  8*SZREG(t0)
+	REG_S	a1,  9*SZREG(t0)
+	REG_S	a1, 10*SZREG(t0)
+	REG_S	a1, 11*SZREG(t0)
+	REG_S	a1, 12*SZREG(t0)
+	REG_S	a1, 13*SZREG(t0)
+	REG_S	a1, 14*SZREG(t0)
+	REG_S	a1, 15*SZREG(t0)
+	REG_S	a1, 16*SZREG(t0)
+	REG_S	a1, 17*SZREG(t0)
+	REG_S	a1, 18*SZREG(t0)
+	REG_S	a1, 19*SZREG(t0)
+	REG_S	a1, 20*SZREG(t0)
+	REG_S	a1, 21*SZREG(t0)
+	REG_S	a1, 22*SZREG(t0)
+	REG_S	a1, 23*SZREG(t0)
+	REG_S	a1, 24*SZREG(t0)
+	REG_S	a1, 25*SZREG(t0)
+	REG_S	a1, 26*SZREG(t0)
+	REG_S	a1, 27*SZREG(t0)
+	REG_S	a1, 28*SZREG(t0)
+	REG_S	a1, 29*SZREG(t0)
+	REG_S	a1, 30*SZREG(t0)
+	REG_S	a1, 31*SZREG(t0)
+	.option pop
+	addi	t0, t0, 32*SZREG
+	sub	a2, a2, t3
+	bgeu	a2, t3, .Lblock_loop
 
-#if __riscv_xlen == 64
-1:
-	sd a1, 0(a4)
-	sd a1, 8(a4)
-#else
-1:
-	sw a1, 0(a4)
-	sw a1, 4(a4)
-	sw a1, 8(a4)
-	sw a1, 12(a4)
-#endif
-	add a4, a4, 16
-	bltu a4, a3, 1b
+.Lword_tail:
+	andi	t1, a2, ~(SZREG-1)
+	beqz	t1, .Lbyte_tail
+	add	t2, t0, t1
+.Lword_loop:
+	REG_S	a1, 0(t0)
+	addi	t0, t0, SZREG
+	bltu	t0, t2, .Lword_loop
+	andi	a2, a2, SZREG-1
 
-	bnez a2, .Ltiny
+.Lbyte_tail:
+	beqz	a2, .Ldone
+.Lbyte_fill:
+	sb	a1, 0(t0)
+	addi	t0, t0, 1
+	addi	a2, a2, -1
+	bnez	a2, .Lbyte_fill
+.Ldone:
 	ret
-
-.Ltiny:
-	sub a3, t1, a2
-	sll a3, a3, 2
-1:
-	auipc t0, %pcrel_hi(.Ltable)
-	add a3, a3, t0
-.option push
-.option norvc
-.Ltable_misaligned:
-	jr a3, %pcrel_lo(1b)
-.Ltable:
-	sb a1,14(a4)
-	sb a1,13(a4)
-	sb a1,12(a4)
-	sb a1,11(a4)
-	sb a1,10(a4)
-	sb a1, 9(a4)
-	sb a1, 8(a4)
-	sb a1, 7(a4)
-	sb a1, 6(a4)
-	sb a1, 5(a4)
-	sb a1, 4(a4)
-	sb a1, 3(a4)
-	sb a1, 2(a4)
-	sb a1, 1(a4)
-	sb a1, 0(a4)
-.option pop
-	ret
-
-.Lwordify:
-	and a1, a1, 0xFF
-	sll a3, a1, 8
-	or  a1, a1, a3
-	sll a3, a1, 16
-	or  a1, a1, a3
-#if __riscv_xlen == 64
-	sll a3, a1, 32
-	or  a1, a1, a3
-#endif
-	j .Lwordified
-
-.Lmisaligned:
-	sll a3, a5, 2
-1:
-	auipc t0, %pcrel_hi(.Ltable_misaligned)
-	add a3, a3, t0
-	mv t0, ra
-	jalr a3, %pcrel_lo(1b)
-	mv ra, t0
-
-	add a5, a5, -16
-	sub a4, a4, a5
-	add a2, a2, a5
-	bleu a2, t1, .Ltiny
-	j .Laligned
 	.cfi_endproc
 	.size	ARCH_LIBCFUN(memset), .-ARCH_LIBCFUN(memset)
 
