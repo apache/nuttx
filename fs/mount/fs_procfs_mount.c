@@ -515,7 +515,7 @@ static ssize_t mount_read(FAR struct file *filep, FAR char *buffer,
 
   /* Generate each entry in the routing table */
 
-  foreach_mountpoint(handler, &info);
+  foreach_mountpoint(handler, &info, true);
   ret = info.totalsize;
 
   /* Update the file offset */

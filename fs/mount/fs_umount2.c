@@ -27,15 +27,67 @@
 #include <nuttx/config.h>
 
 #include <sys/mount.h>
+#include <sys/statfs.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <assert.h>
+#include <nuttx/debug.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
 
 #include "inode/inode.h"
+#include "mount/mount.h"
 #include "vfs/vfs.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
+/****************************************************************************
+ * Name: umount_all_handler
+ *
+ * Description:
+ *   foreach_mountpoint() callback for umount_all() (readonly=false).
+ *   Flushes and force-unmounts the mountpoint it is handed, then returns 0
+ *   so the single traversal continues to the next one.
+ *
+ *   This is safe even though nx_umount2() may remove (and free) this very
+ *   inode: the traversal core snapshots each inode's sibling/child links
+ *   before invoking the callback, so it never dereferences the freed node.
+ *   A mountpoint that cannot be unmounted (e.g. a read-only or proxy fs
+ *   whose unbind returns an error) is simply left in the tree; returning 0
+ *   moves on without revisiting it, so the traversal always terminates.
+ *
+ ****************************************************************************/
+
+static int umount_all_handler(FAR const char *mountpoint,
+                              FAR struct statfs *statbuf, FAR void *arg)
+{
+  int ret;
+
+  UNUSED(arg);
+  UNUSED(statbuf);
+
+  /* Force-unmount the mountpoint.  nx_umount2() re-resolves the path and
+   * flushes (syncfs) before unbind under the inode write lock that
+   * foreach_mountpoint() holds for the whole traversal (readonly=false);
+   * the NuttX rwsem is recursive for the current holder, so the nested
+   * acquisition is safe.
+   */
+
+  ret = nx_umount2(mountpoint, MNT_FORCE);
+  if (ret < 0)
+    {
+      ferr("Failed to unmount %s during reboot: %d\n", mountpoint, ret);
+    }
+
+  return 0;
+}
+
+#endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 /****************************************************************************
  * Public Functions
@@ -134,6 +186,11 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       goto errout_with_lock;
     }
 
+  if (mountpt_inode->u.i_mops->syncfs)
+    {
+      mountpt_inode->u.i_mops->syncfs(mountpt_inode);
+    }
+
   ret = mountpt_inode->u.i_mops->unbind(mountpt_inode->i_private,
                                        &blkdrvr_inode, flags);
   if (ret < 0)
@@ -148,7 +205,7 @@ int nx_umount2(FAR const char *target, unsigned int flags)
       goto errout_with_lock;
     }
 
-  /* Successfully unbound.  Convert the mountpoint inode to regular
+  /* Successfully unbound.  Convert the mountpoint inode to a regular
    * pseudo-file inode.
    */
 
@@ -257,3 +314,36 @@ int umount2(FAR const char *target, unsigned int flags)
 
   return ret;
 }
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+
+/****************************************************************************
+ * Name: umount_all
+ *
+ * Description:
+ *   Flush (syncfs) and force-unmount every mountpoint.  Intended for the
+ *   reboot/poweroff path so that every filesystem's unbind() logic runs
+ *   (e.g. metadata a filesystem only writes at unmount), which a bare
+ *   sync() does not reach.
+ *
+ *   foreach_mountpoint() with readonly=false holds the inode write lock for
+ *   whole traversal; nx_umount2() then re-takes the write lock inside the
+ *   callback, which is safe because the NuttX rwsem is recursive for the
+ *   current writer (holder == tid).  Holding one lock across the (now
+ *   bounded) filesystem operations also serializes the whole teardown, which
+ *   is exactly what the reboot path wants.
+ *
+ *   A single traversal unmounts every mountpoint: the handler unmounts the
+ *   inode it is handed and returns 0 to continue.  The traversal core
+ *   snapshots each inode's sibling/child links before the callback, so
+ *   freeing the current inode from nx_umount2() is safe, and a mountpoint
+ *   that cannot be unmounted is simply left in the tree and stepped over.
+ *
+ ****************************************************************************/
+
+void umount_all(void)
+{
+  foreach_mountpoint(umount_all_handler, NULL, false);
+}
+
+#endif /* CONFIG_DISABLE_MOUNTPOINT */

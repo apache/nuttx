@@ -142,7 +142,8 @@ static int mountpoint_filter(FAR struct inode *node,
  *
  ****************************************************************************/
 
-int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg)
+int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg,
+                       bool readonly)
 {
   struct enum_mountpoint_s info;
 
@@ -151,7 +152,7 @@ int foreach_mountpoint(foreach_mountpoint_t handler, FAR void *arg)
   info.handler = handler;
   info.arg     = arg;
 
-  return foreach_inode(mountpoint_filter, (FAR void *)&info);
+  return foreach_inode(mountpoint_filter, (FAR void *)&info, readonly);
 }
 
 #endif
