@@ -49,7 +49,6 @@
  * 16 bytes below one as the base save area of the frame that owns it.
  */
 
-#  define SIGTRAMP_STACK_ALIGN  16
 #  define SIGTRAMP_SAVE_AREA    16
 #endif
 
@@ -386,7 +385,7 @@ int xtensa_swint(int irq, void *context, void *arg)
                */
 
               usp = (usp - SIGTRAMP_SAVE_AREA - sizeof(siginfo_t)) &
-                    ~(SIGTRAMP_STACK_ALIGN - 1);
+                    ~(STACKFRAME_ALIGN - 1);
 
               memcpy((void *)usp, (void *)regs[REG_A4], sizeof(siginfo_t));
 
