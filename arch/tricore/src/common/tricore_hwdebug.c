@@ -27,10 +27,6 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
-#include <arch/irq.h>
-
-#include <IfxCpu_bf.h>
-#include <IfxCbs_reg.h>
 
 #include "tricore_internal.h"
 
@@ -38,40 +34,93 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Core Special Function Register (CSFR) numbers used below.  These were
+ * previously pulled in from the iLLD SFR headers; define them locally so
+ * this file no longer depends on iLLD.
+ */
+
+#define TC_DBGSR                      0xfd00  /* Debug Status Register */
+#define TC_DBGACT                     0xfd14  /* Debug Action Register */
+#define TC_DMS                        0xfd40  /* Debug Monitor Start Addr */
+#define TC_DCX                        0xfd44  /* Debug Context Save Addr */
+#define TC_DBGTCR                     0xfd48  /* Debug Trap Control Register */
+#define TC_DBGCFG                     0xfd4c  /* Debug Configuration Register */
+
+/* Trigger event registers TR0..TR7: EVT at 0xf000 + n * 8, ADR at + 4 */
+
+#define TC_TR0_EVT                    0xf000
+#define TC_TR1_EVT                    0xf008
+#define TC_TR2_EVT                    0xf010
+#define TC_TR3_EVT                    0xf018
+#define TC_TR4_EVT                    0xf020
+#define TC_TR5_EVT                    0xf028
+#define TC_TR6_EVT                    0xf030
+#define TC_TR7_EVT                    0xf038
+
+#define TC_TR0_ADR                    0xf004
+#define TC_TR1_ADR                    0xf00c
+#define TC_TR2_ADR                    0xf014
+#define TC_TR3_ADR                    0xf01c
+#define TC_TR4_ADR                    0xf024
+#define TC_TR5_ADR                    0xf02c
+#define TC_TR6_ADR                    0xf034
+#define TC_TR7_ADR                    0xf03c
+
+/* CBS_OEC (OCDS Enable Control) memory-mapped register address */
+
+#ifdef CONFIG_ARCH_TC1V6
+#  define CBS_OEC_ADDR                0xf0000478
+#elif defined(CONFIG_ARCH_TC1V8)
+#  define CBS_OEC_ADDR                0xfa180068
+#endif
+
+/* Trigger event register (TREVT) bit field offsets/masks.  The address
+ * match/type bits share the same layout on TC1V6 and TC1V8; only the
+ * enable field differs (see TREVT_CFG_REG_EN_* below).
+ */
+
+#define TREVT_BBM_OFF                 3       /* Break Before Make */
+#define TREVT_TYP_OFF                 12      /* 0: watchpoint 1: breakpoint */
+#define TREVT_AST_OFF                 27      /* Address store trigger */
+#define TREVT_ALD_OFF                 28      /* Address load trigger */
+
+/* Debug Status Register (DBGSR) event source field */
+
+#define DBGSR_EVTSRC_OFF              8
+#define DBGSR_EVTSRC_MSK              0x1f
+
+/* Debug Configuration Register (DBGCFG) - TC1V8 only */
+
+#define DBGCFG_EN_OFF                 15      /* Debug enable */
+
 /* Watchpoint and breakpoint share a set of trigger events */
 
 #define TREVT_DEBUG_NUM               8
 #define TREVT_DEBUG_REGS              4
 #define TREVT_DEBUG_MATCH_TRAPMODE    0x03
 #define TREVT_DEBUG_EVTSRC_BASE       0x10
-#ifdef CONFIG_ARCH_TC1V8
-#  define IFX_CPU_TR_EVT_BBM_OFF      IFX_CPU_TREVT_BBM_OFF
-#  define IFX_CPU_TR_EVT_TYP_OFF      IFX_CPU_TREVT_TYP_OFF
-#  define IFX_CPU_TR_EVT_AST_OFF      IFX_CPU_TREVT_AST_OFF
-#  define IFX_CPU_TR_EVT_ALD_OFF      IFX_CPU_TREVT_ALD_OFF
-#endif
 
-#define TREVT_DEBUG_BBM               (1 << IFX_CPU_TR_EVT_BBM_OFF)
-#define TREVT_DEBUG_WP                (0 << IFX_CPU_TR_EVT_TYP_OFF)
-#define TREVT_DEBUG_BP                (1 << IFX_CPU_TR_EVT_TYP_OFF)
-#define TREVT_DEBUG_WP_AST            (1 << IFX_CPU_TR_EVT_AST_OFF)
-#define TREVT_DEBUG_WP_ALD            (1 << IFX_CPU_TR_EVT_ALD_OFF)
+#define TREVT_DEBUG_BBM               (1 << TREVT_BBM_OFF)
+#define TREVT_DEBUG_WP                (0 << TREVT_TYP_OFF)
+#define TREVT_DEBUG_BP                (1 << TREVT_TYP_OFF)
+#define TREVT_DEBUG_WP_AST            (1 << TREVT_AST_OFF)
+#define TREVT_DEBUG_WP_ALD            (1 << TREVT_ALD_OFF)
 #define TREVT_DEBUG_WP_ASTLD          (TREVT_DEBUG_WP_AST | TREVT_DEBUG_WP_ALD)
 
 /* Register TREVT[2:0] have difference between tc3xx and tc4xx */
 
 #ifdef CONFIG_ARCH_TC1V6
-#  define TREVT_CFG_REG_EN_MASK       IFX_CPU_TR_EVT_EVTA_MSK
+#  define TREVT_CFG_REG_EN_MASK       0x7     /* EVTA field mask */
 #  define TREVT_CFG_REG_EN_VALUE      TREVT_DEBUG_MATCH_TRAPMODE
 #elif defined(CONFIG_ARCH_TC1V8)
-#  define TREVT_CFG_REG_EN_MASK       IFX_CPU_TREVT_EN_MSK
+#  define TREVT_CFG_REG_EN_MASK       0x1     /* EN bit mask */
 #  define TREVT_CFG_REG_EN_VALUE      0x01
 #endif
 
 #define TREVT_SET_CASE(reg, n, val) \
-  case n: __mtcr(CPU_TR##n##_##reg, val); break;
+  case n: tricore_mtcr(TC_TR##n##_##reg, val); break;
 #define TREVT_GET_CASE(reg, n, val) \
-  case n: val = __mfcr(CPU_TR##n##_##reg); break;
+  case n: val = tricore_mfcr(TC_TR##n##_##reg); break;
 
 #define TREVT_GET_CFG_REG(n)          TREVT_GET(EVT, n)
 #define TREVT_SET_CFG_REG(n, val)     TREVT_SET(EVT, n, val)
@@ -123,9 +172,17 @@ struct tricore_debugpoint_s
   void *arg;
 };
 
+/* The debug context save area pointed to by DCX must be aligned to a full
+ * context (upper + lower CSA = 32 registers).  This matches the value that
+ * arch/irq.h exports as XCPTCONTEXT_SIZE, defined locally to avoid pulling
+ * in the iLLD-tainted header.
+ */
+
+#define TRICORE_DBG_CTX_SIZE (sizeof(uintptr_t) * 32)
+
 struct tricore_debug_s
 {
-  uintptr_t aligned_data(XCPTCONTEXT_SIZE) dcx[TREVT_DEBUG_REGS];
+  uintptr_t aligned_data(TRICORE_DBG_CTX_SIZE) dcx[TREVT_DEBUG_REGS];
   struct tricore_debugpoint_s dp[TREVT_DEBUG_NUM];
 };
 
@@ -259,8 +316,8 @@ void tricore_trevt_match(void)
 
   dp = g_trevt_debug.dp;
 
-  evtsrc = ((__mfcr(CPU_DBGSR) >> IFX_CPU_DBGSR_EVTSRC_OFF) &
-            IFX_CPU_DBGSR_EVTSRC_MSK) - TREVT_DEBUG_EVTSRC_BASE;
+  evtsrc = ((tricore_mfcr(TC_DBGSR) >> DBGSR_EVTSRC_OFF) &
+            DBGSR_EVTSRC_MSK) - TREVT_DEBUG_EVTSRC_BASE;
 
   dp[evtsrc].callback(dp[evtsrc].type, dp[evtsrc].addr,
                       dp[evtsrc].size, dp[evtsrc].arg);
@@ -276,47 +333,49 @@ void tricore_trevt_match(void)
 
 int tricore_init_dbgmonitor(void)
 {
-  Ifx_CPU_DBGTCR dbgtcr;
+  /* DBGTCR: DTA (bit 0) = 0, all other fields cleared */
 
-  dbgtcr.B.DTA = 0;
+  uint32_t dbgtcr = 0;
+#ifdef CONFIG_ARCH_TC1V8
+  /* DBGCFG: EN (bit 15) = 1, TC (bit 0) = 0, TCP (bit 1) = 0.
+   * DBGACT: EVTA (bits 2:0) = trap mode.
+   */
 
-  if (!(__mfcr(CPU_DBGSR) & 0x1))
+  uint32_t dbgcfg = 1 << DBGCFG_EN_OFF;
+  uint32_t dbgact = TREVT_DEBUG_MATCH_TRAPMODE;
+#endif
+
+  if (!(tricore_mfcr(TC_DBGSR) & 0x1))
     {
-      CBS_OEC.U = 0xa1;
-      CBS_OEC.U = 0x5e;
-      CBS_OEC.U = 0xa1;
-      CBS_OEC.U = 0x5e;
+      /* Unlock sequence for the OCDS Enable Control register */
+
+      putreg32(0xa1, CBS_OEC_ADDR);
+      putreg32(0x5e, CBS_OEC_ADDR);
+      putreg32(0xa1, CBS_OEC_ADDR);
+      putreg32(0x5e, CBS_OEC_ADDR);
     }
 
 #ifdef CONFIG_ARCH_TC1V8
-  Ifx_CPU_DBGCFG dbgcfg;
-  Ifx_CPU_DBGACT dbgact;
-
-  dbgcfg.B.EN = 1;
-  dbgcfg.B.TC = 0;
-  dbgcfg.B.TCP = 0;
-  dbgact.B.EVTA = TREVT_DEBUG_MATCH_TRAPMODE;
-
   /* Set debug configuration register */
 
-  __mtcr(CPU_DBGCFG, dbgcfg.U);
+  tricore_mtcr(TC_DBGCFG, dbgcfg);
 
   /* Set debug action configuration register */
 
-  __mtcr(CPU_DBGACT, dbgact.U);
+  tricore_mtcr(TC_DBGACT, dbgact);
 #endif
 
   /* Set debug trap control register */
 
-  __mtcr(CPU_DBGTCR, dbgtcr.U);
+  tricore_mtcr(TC_DBGTCR, dbgtcr);
 
   /* Set trevt trap handler */
 
-  __mtcr(CPU_DMS, (uintptr_t)tricore_dbgmonitor);
+  tricore_mtcr(TC_DMS, (uintptr_t)tricore_dbgmonitor);
 
   /* Set dcx register */
 
-  __mtcr(CPU_DCX, (uintptr_t)g_trevt_debug.dcx);
+  tricore_mtcr(TC_DCX, (uintptr_t)g_trevt_debug.dcx);
 
   return OK;
 }
