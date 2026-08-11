@@ -2045,6 +2045,7 @@ config ESPRESSIF_WIRELESS
 	select ESP32_RNG if ARCH_CHIP_ESP32
 	select ESP32_RT_TIMER if ARCH_CHIP_ESP32
 	select ESP32_TIMER0 if ARCH_CHIP_ESP32
+	select ESPRESSIF_HR_TIMER
 	---help---
 		Enable Wireless support
 
