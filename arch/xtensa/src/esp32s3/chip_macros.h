@@ -33,7 +33,7 @@
 #endif
 #endif
 
-#if defined(CONFIG_ESP32S3_WCL) && defined(CONFIG_BUILD_PROTECTED)
+#if defined(CONFIG_ESP32S3_WCL) && !defined(CONFIG_BUILD_FLAT)
 #include "hardware/esp32s3_wcl_core.h"
 #endif
 
@@ -47,7 +47,7 @@
 
 #define HANDLER_SECTION .iram1
 
-#if defined(CONFIG_ESP32S3_WCL) && defined(CONFIG_BUILD_PROTECTED)
+#if defined(CONFIG_ESP32S3_WCL) && !defined(CONFIG_BUILD_FLAT)
 
 /* Definitions for the Worlds reserved for Kernel and Userspace */
 
