@@ -136,6 +136,7 @@ config ARCH_X86
 config ARCH_X86_64
 	bool "x86_64"
 	select ARCH_64BIT
+	select ARCH_HAVE_FORK if BUILD_KERNEL && ARCH_ADDRENV
 	select ARCH_HAVE_TCBINFO
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
@@ -492,7 +493,6 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
-	default y if ARCH_X86_64 && !BUILD_PROTECTED
 	default n
 	depends on ARCH_ADDRENV
 	---help---
