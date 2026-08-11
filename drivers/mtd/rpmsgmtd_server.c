@@ -337,7 +337,8 @@ static int rpmsgmtd_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct rpmsgmtd_ioctl_s *msg = data;
 
   msg->header.result = MTD_IOCTL(server->dev, msg->request,
-                                 msg->arglen > 0 ? (unsigned long)msg->buf :
+                                 msg->arglen > 0 ?
+                                 (unsigned long)(FAR void *)msg->buf :
                                  msg->arg);
 
   return rpmsg_send(ept, msg, len);
