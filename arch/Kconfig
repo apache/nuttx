@@ -26,6 +26,7 @@ config ARCH_ARM
 config ARCH_ARM64
 	bool "ARM64"
 	select ALARM_ARCH
+	select ARCH_HAVE_FORK if BUILD_KERNEL && ARCH_ADDRENV
 	select ARCH_64BIT
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
@@ -492,7 +493,6 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
-	default y if ARCH_ARM64 && ARCH_USE_MMU && !BUILD_PROTECTED
 	default n
 	depends on ARCH_ADDRENV
 	---help---
