@@ -57,6 +57,18 @@
 
 /****************************************************************************
  * Name: esp32s3_wcl_set_vecbase
+ *
+ * Description:
+ *   Set the vector table a world uses, and make the World Controller take
+ *      the value from these registers instead of the reset default.
+ *
+ * Input Parameters:
+ *   world    - The world the table belongs to.
+ *   vecbase  - The address of the table.  It must be aligned to 1 KB.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_wcl_set_vecbase(enum esp32s3_pms_world_e world,
@@ -97,6 +109,18 @@ void esp32s3_wcl_set_vecbase(enum esp32s3_pms_world_e world,
 
 /****************************************************************************
  * Name: esp32s3_wcl_set_world0_entry
+ *
+ * Description:
+ *   Register an address that returns the CPU to World 0 when it is fetched.
+ *      This is how an exception taken in World 1 reaches a kernel handler.
+ *
+ * Input Parameters:
+ *   entry    - Which entry to set, from 1 to WCL_ENTRY_MAX.
+ *   addr     - The address that switches the world.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_wcl_set_world0_entry(uint32_t entry, uintptr_t addr)

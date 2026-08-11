@@ -238,6 +238,14 @@ static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
 
 /****************************************************************************
  * Name: esp32s3_isolation_revoke_peripherals
+ *
+ * Description:
+ *   Refuse World 1 every peripheral.  A user process reaches a device
+ *      through the kernel, so it needs none of them directly.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_isolation_revoke_peripherals(void)
@@ -325,6 +333,14 @@ void esp32s3_isolation_revoke_peripherals(void)
 
 /****************************************************************************
  * Name: esp32s3_isolation_worlds
+ *
+ * Description:
+ *   Give World 1 its own vector table and register the kernel entry points
+ *      that return the CPU to World 0.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_isolation_worlds(void)
@@ -483,6 +499,14 @@ static void isolation_configure_dram(void)
 
 /****************************************************************************
  * Name: esp32s3_isolation_permissions
+ *
+ * Description:
+ *   Give World 1 its permissions:  its own pages of the page pool, and
+ *      nothing else.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_isolation_permissions(void)
@@ -597,6 +621,14 @@ void esp32s3_isolation_permissions(void)
 
 /****************************************************************************
  * Name: esp32s3_pmsirqinitialize
+ *
+ * Description:
+ *   Install the handlers that report a permission violation and an access
+ *      that no MMU entry translates.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pmsirqinitialize(void)
