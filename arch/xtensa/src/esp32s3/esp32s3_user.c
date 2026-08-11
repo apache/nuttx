@@ -86,9 +86,12 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
    * these to the dispatcher; if serviced, return the register frame so that
    * the RFE in the exception vector re-executes the faulting instruction.
    *
-   * Note: ESP32-S3 PMS (World Controller) memory-protection violations are
-   * NOT delivered as these precise causes; they raise the asynchronous
-   * DRAM0/IRAM0 PMS-monitor interrupt instead (handled elsewhere).
+   * A PMS permission violation does not arrive as one of these causes.  It
+   * raises the asynchronous DRAM0/IRAM0 PMS monitor interrupt, which
+   * pms_violation_isr() in esp32s3_isolation.c serves.  So does an access
+   * that no MMU entry translates, which the cache reports separately.  Both
+   * are installed by esp32s3_pmsirqinitialize(), in a protected build and in
+   * a kernel build alike.
    */
 
   if (exccause == EXCCAUSE_LOAD_PROHIBITED  ||
