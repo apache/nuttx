@@ -28,8 +28,64 @@ ifeq ($(CONFIG_RISCV_MEMSET),y)
 ASRCS += arch_memset.S
 endif
 
+ifeq ($(CONFIG_RISCV_MEMMOVE),y)
+ASRCS += arch_memmove.S
+endif
+
+ifeq ($(CONFIG_RISCV_MEMCMP),y)
+ASRCS += arch_memcmp.S
+endif
+
+ifeq ($(CONFIG_RISCV_MEMCHR),y)
+ASRCS += arch_memchr.S
+endif
+
 ifeq ($(CONFIG_RISCV_STRCMP),y)
 ASRCS += arch_strcmp.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRLEN),y)
+ASRCS += arch_strlen.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRNLEN),y)
+ASRCS += arch_strnlen.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRCPY),y)
+ASRCS += arch_strcpy.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRNCPY),y)
+ASRCS += arch_strncpy.S
+endif
+
+ifeq ($(CONFIG_RISCV_STPCPY),y)
+ASRCS += arch_stpcpy.S
+endif
+
+ifeq ($(CONFIG_RISCV_STPNCPY),y)
+ASRCS += arch_stpncpy.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRCHR),y)
+ASRCS += arch_strchr.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRCHRNUL),y)
+ASRCS += arch_strchrnul.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRRCHR),y)
+ASRCS += arch_strrchr.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRNCMP),y)
+ASRCS += arch_strncmp.S
+endif
+
+ifeq ($(CONFIG_RISCV_STRCAT),y)
+ASRCS += arch_strcat.S
 endif
 
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)

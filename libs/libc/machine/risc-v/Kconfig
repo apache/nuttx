@@ -9,7 +9,21 @@ config RISCV_STRING_FUNCTION
 	depends on ARCH_TOOLCHAIN_GNU
 	select RISCV_MEMCPY
 	select RISCV_MEMSET
+	select RISCV_MEMMOVE
+	select RISCV_MEMCMP
+	select RISCV_MEMCHR
 	select RISCV_STRCMP
+	select RISCV_STRLEN
+	select RISCV_STRNLEN
+	select RISCV_STRCPY
+	select RISCV_STRNCPY
+	select RISCV_STPCPY
+	select RISCV_STPNCPY
+	select RISCV_STRCHR
+	select RISCV_STRCHRNUL
+	select RISCV_STRRCHR
+	select RISCV_STRNCMP
+	select RISCV_STRCAT
 
 config RISCV_MEMCPY
 	bool "Enable optimized memcpy() for RISC-V"
@@ -26,6 +40,30 @@ config RISCV_MEMSET
 	---help---
 		Enable optimized RISC-V specific memset() library function
 
+config RISCV_MEMMOVE
+	bool "Enable optimized memmove() for RISC-V"
+	default n
+	select LIBC_ARCH_MEMMOVE
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific memmove() library function
+
+config RISCV_MEMCMP
+	bool "Enable optimized memcmp() for RISC-V"
+	default n
+	select LIBC_ARCH_MEMCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific memcmp() library function
+
+config RISCV_MEMCHR
+	bool "Enable optimized memchr() for RISC-V"
+	default n
+	select LIBC_ARCH_MEMCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific memchr() library function
+
 config RISCV_STRCMP
 	bool "Enable optimized strcmp() for RISC-V"
 	default n
@@ -34,3 +72,90 @@ config RISCV_STRCMP
 	---help---
 		Enable optimized RISC-V specific strcmp() library function
 
+config RISCV_STRLEN
+	bool "Enable optimized strlen() for RISC-V"
+	default n
+	select LIBC_ARCH_STRLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strlen() library function
+
+config RISCV_STRNLEN
+	bool "Enable optimized strnlen() for RISC-V"
+	default n
+	select LIBC_ARCH_STRNLEN
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strnlen() library function
+
+config RISCV_STRCPY
+	bool "Enable optimized strcpy() for RISC-V"
+	default n
+	select LIBC_ARCH_STRCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strcpy() library function
+
+config RISCV_STRNCPY
+	bool "Enable optimized strncpy() for RISC-V"
+	default n
+	select LIBC_ARCH_STRNCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strncpy() library function
+
+config RISCV_STPCPY
+	bool "Enable optimized stpcpy() for RISC-V"
+	default n
+	select LIBC_ARCH_STPCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific stpcpy() library function
+
+config RISCV_STPNCPY
+	bool "Enable optimized stpncpy() for RISC-V"
+	default n
+	select LIBC_ARCH_STPNCPY
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific stpncpy() library function
+
+config RISCV_STRCHR
+	bool "Enable optimized strchr() for RISC-V"
+	default n
+	select LIBC_ARCH_STRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strchr() library function
+
+config RISCV_STRCHRNUL
+	bool "Enable optimized strchrnul() for RISC-V"
+	default n
+	select LIBC_ARCH_STRCHRNUL
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strchrnul() library function
+
+config RISCV_STRRCHR
+	bool "Enable optimized strrchr() for RISC-V"
+	default n
+	select LIBC_ARCH_STRRCHR
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strrchr() library function
+
+config RISCV_STRNCMP
+	bool "Enable optimized strncmp() for RISC-V"
+	default n
+	select LIBC_ARCH_STRNCMP
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strncmp() library function
+
+config RISCV_STRCAT
+	bool "Enable optimized strcat() for RISC-V"
+	default n
+	select LIBC_ARCH_STRCAT
+	depends on ARCH_TOOLCHAIN_GNU
+	---help---
+		Enable optimized RISC-V specific strcat() library function
