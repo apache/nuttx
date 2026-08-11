@@ -1532,8 +1532,25 @@ endchoice
 
 menu "Boot Memory Configuration"
 
+config USE_BOOT_MEMORY_CFG
+	bool "Use boot memory configuration when supported"
+	default n
+	---help---
+		This option allows enforcing the boot memory configuration in
+		linker scripts. Linker scripts can use this option to determine
+		whether they need to apply the boot memory configuration.
+
+config APP_SET_BOOT_MEMORY_CFG
+	bool
+	default n
+	---help---
+		This option allows an application configuration to specify
+		the boot memory configuration. It is selected by an application
+		that uses it.
+
 config RAM_START
 	hex "Primary RAM start address (physical)"
+	default RAM_START_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0x0
 	---help---
 		The physical start address of primary installed RAM.  "Primary" RAM
@@ -1543,6 +1560,7 @@ config RAM_START
 
 config RAM_VSTART
 	hex "Primary RAM start address (virtual)"
+	default RAM_VSTART_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0x0
 	depends on ARCH_USE_MMU
 	---help---
@@ -1553,6 +1571,7 @@ config RAM_VSTART
 
 config RAM_SIZE
 	int "Primary RAM size"
+	default RAM_SIZE_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0
 	---help---
 		The size in bytes of the installed primary RAM. "Primary" RAM
@@ -1564,6 +1583,7 @@ if BOOT_RUNFROMFLASH
 
 config FLASH_START
 	hex "Boot FLASH start address (physical)"
+	default FLASH_START_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0x0
 	---help---
 		The physical start address of installed boot FLASH.  "Boot" FLASH
@@ -1571,6 +1591,7 @@ config FLASH_START
 
 config FLASH_VSTART
 	hex "Boot FLASH start address (virtual)"
+	default FLASH_VSTART_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0x0
 	depends on ARCH_USE_MMU
 	---help---
@@ -1579,6 +1600,7 @@ config FLASH_VSTART
 
 config FLASH_SIZE
 	int "Boot FLASH size"
+	default FLASH_SIZE_APP_SET if APP_SET_BOOT_MEMORY_CFG
 	default 0
 	---help---
 		The size in bytes of the installed boot FLASH.  "Boot" FLASH
