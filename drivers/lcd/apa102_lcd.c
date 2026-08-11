@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/lcd/apa102.c
+ * drivers/lcd/apa102_lcd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

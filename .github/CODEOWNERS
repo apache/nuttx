@@ -13025,7 +13025,7 @@ drivers/ipcc/ipcc_register.c michal.lyszczek@bofc.pl xiaoxiang@xiaomi.com anjiah
 drivers/ipcc/ipcc_unlink.c michal.lyszczek@bofc.pl devel@sumpfralle.de anjiahao@xiaomi.com alin.jerpelea@sony.com anchao@xiaomi.com
 drivers/ipcc/ipcc_write.c michal.lyszczek@bofc.pl anjiahao@xiaomi.com anchao@xiaomi.com dongjiuzhu1@xiaomi.com xiaoxiang@xiaomi.com
 drivers/lcd/Kconfig 101105604+simbit18@users.noreply.github.com acassis@gmail.com paul-a.patience@polymtl.ca
-drivers/lcd/apa102.c acassis@gmail.com tiago.medicci@espressif.com petro.karashchenko@gmail.com gustavo.nihei@espressif.com raiden00@railab.me
+drivers/lcd/apa102_lcd.c acassis@gmail.com tiago.medicci@espressif.com petro.karashchenko@gmail.com gustavo.nihei@espressif.com raiden00@railab.me
 drivers/lcd/ft80x.c xiaoxiang@xiaomi.com anjiahao@xiaomi.com anchao@xiaomi.com yamamoto@midokura.com
 drivers/lcd/ft80x.h alin.jerpelea@sony.com xiaoxiang@xiaomi.com anjiahao@xiaomi.com petro.karashchenko@gmail.com
 drivers/lcd/ft80x_spi.c alin.jerpelea@sony.com xiaoxiang@xiaomi.com yamamoto@midokura.com
@@ -13041,7 +13041,7 @@ drivers/lcd/lcd_dev.c matias@protobits.dev jianglianfang@xiaomi.com rongyichang@
 drivers/lcd/lcd_framebuffer.c xiaoxiang@xiaomi.com huangqi3@xiaomi.com jianglianfang@xiaomi.com akaliszan@altimetrik.com
 drivers/lcd/lcddrv_spiif.c dave@marples.net alin.jerpelea@sony.com petro.karashchenko@gmail.com raiden00@railab.me
 drivers/lcd/lpm013m091a.c alin.jerpelea@sony.com michael.jung@secore.ly xiaoxiang@xiaomi.com petro.karashchenko@gmail.com
-drivers/lcd/max7219.c acassis@gmail.com alin.jerpelea@sony.com liaoao@xiaomi.com matias@protobits.dev michael.jung@secore.ly
+drivers/lcd/max7219_lcd.c acassis@gmail.com alin.jerpelea@sony.com liaoao@xiaomi.com matias@protobits.dev michael.jung@secore.ly
 drivers/lcd/memlcd.c jernej.turnsek@gmail.com juha.niskanen@haltian.com alin.jerpelea@sony.com liaoao@xiaomi.com
 drivers/lcd/mio283qt2.c alin.jerpelea@sony.com yamamoto@midokura.com michael.jung@secore.ly
 drivers/lcd/mio283qt9a.c alin.jerpelea@sony.com yamamoto@midokura.com michael.jung@secore.ly raiden00@railab.me

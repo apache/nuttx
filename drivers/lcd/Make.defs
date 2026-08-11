@@ -48,7 +48,7 @@ ifeq ($(CONFIG_LCD_LPM013M091A),y)
 endif
 
 ifeq ($(CONFIG_LCD_APA102),y)
-  CSRCS += apa102.c
+  CSRCS += apa102_lcd.c
 endif
 
 ifeq ($(CONFIG_LCD_P14201),y)
@@ -92,7 +92,7 @@ ifeq ($(CONFIG_LCD_MIO283QT2),y)
 endif
 
 ifeq ($(CONFIG_LCD_MAX7219),y)
-  CSRCS += max7219.c
+  CSRCS += max7219_lcd.c
 endif
 
 ifeq ($(CONFIG_LCD_MIO283QT9A),y)
