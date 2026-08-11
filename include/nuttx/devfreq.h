@@ -63,6 +63,7 @@ struct devfreq_s
   FAR const struct devfreq_driver_s *driver;
 
   FAR const uint32_t *freq_table;
+  FAR void *governor_data;
 
   struct qos_constraints_s constraints;
 
@@ -353,6 +354,7 @@ void devfreq_procfs_initialize(void);
 
 FAR struct devfreq_governor_s *devfreq_performance(void);
 FAR struct devfreq_governor_s *devfreq_powersave(void);
+FAR struct devfreq_governor_s *devfreq_ondemand(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
