@@ -51,11 +51,13 @@
 
 /* APA102 Configuration Settings:
  *
- * CONFIG_APA102_XRES - Specifies the number of physical
+ * CONFIG_LCD_APA102_XRES - Specifies the number of physical
  *   APA102 devices that are connected together horizontally.
  *
- * CONFIG_APA102_YRES - Specifies the number of physical
+ * CONFIG_LCD_APA102_YRES - Specifies the number of physical
  *   APA102 devices that are connected together vertically.
+ *
+ * CONFIG_LCD_APA102_FREQUENCY - SPI frequency used to drive the chain.
  *
  * CONFIG_LCD_INTENSITY - Defines the default bright of LEDs.
  *
@@ -68,24 +70,24 @@
 
 /* SPI frequency */
 
-#ifndef CONFIG_APA102_FREQUENCY
-#  define CONFIG_APA102_FREQUENCY 10000000
+#ifndef CONFIG_LCD_APA102_FREQUENCY
+#  define CONFIG_LCD_APA102_FREQUENCY 1000000
 #endif
 
 /* APA102_COLUMNS determines the number of physical LEDs
  * matrices that are used connected horizontally.
  */
 
-#ifndef CONFIG_APA102_XRES
-#  define CONFIG_APA102_XRES 16
+#ifndef CONFIG_LCD_APA102_XRES
+#  define CONFIG_LCD_APA102_XRES 16
 #endif
 
 /* APA102_LINES determines the number of physical LEDs
  * matrices that are used connected vertically.
  */
 
-#ifndef CONFIG_APA102_YRES
-#  define CONFIG_APA102_YRES 16
+#ifndef CONFIG_LCD_APA102_YRES
+#  define CONFIG_LCD_APA102_YRES 16
 #endif
 
 /* Check contrast selection */
@@ -98,8 +100,8 @@
 
 /* Display Resolution */
 
-#define APA102_XRES         CONFIG_APA102_XRES
-#define APA102_YRES         CONFIG_APA102_YRES
+#define APA102_XRES         CONFIG_LCD_APA102_XRES
+#define APA102_YRES         CONFIG_LCD_APA102_YRES
 
 /* Color depth and format */
 
@@ -318,7 +320,7 @@ static inline void apa102_configspi(FAR struct spi_dev_s *spi)
   SPI_SETMODE(spi, SPIDEV_MODE0);
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
-  SPI_SETFREQUENCY(spi, APA102_SPI_MAXFREQUENCY);
+  SPI_SETFREQUENCY(spi, CONFIG_LCD_APA102_FREQUENCY);
 }
 
 /****************************************************************************
