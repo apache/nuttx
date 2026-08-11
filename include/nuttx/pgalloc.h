@@ -69,6 +69,12 @@
 #elif CONFIG_MM_PGSIZE == 16384
 #  define MM_PGSIZE       16384
 #  define MM_PGSHIFT      14
+#elif CONFIG_MM_PGSIZE == 32768
+#  define MM_PGSIZE       32768
+#  define MM_PGSHIFT      15
+#elif CONFIG_MM_PGSIZE == 65536
+#  define MM_PGSIZE       65536
+#  define MM_PGSHIFT      16
 #else
 #  error CONFIG_MM_PGSIZE not supported
 #endif

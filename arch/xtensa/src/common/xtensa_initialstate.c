@@ -81,10 +81,23 @@ void up_initial_state(struct tcb_s *tcb)
   const uint32_t base = ALIGN_UP((uint32_t)&_rodata_reserved_align,
                                  TCB_SIZE);
 #endif
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* The kernel stack is allocated before the thread's initial state is set
+   * up, so hold on to it across the wipe below.
+   */
+
+  uint32_t *kstack  = xcp->kstack;
+  uint32_t *ktopstk = xcp->ktopstk;
+#endif
 
   /* Initialize the initial exception register context structure */
 
   memset(xcp, 0, sizeof(struct xcptcontext));
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  xcp->kstack  = kstack;
+  xcp->ktopstk = ktopstk;
+#endif
 
   /* Initialize the idle thread stack */
 
@@ -107,9 +120,24 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Initialize the context registers to stack top */
 
-  xcp->regs = (void *)((uint32_t)tcb->stack_base_ptr +
-                                 tcb->adj_stack_size -
-                                 XCPTCONTEXT_SIZE);
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  if (xcp->kstack != NULL)
+    {
+      /* Put the frame on the thread's kernel stack rather than its user
+       * stack.  It is restored in kernel context, and leaving it in user
+       * memory means the thread can scribble on the register set it is
+       * about to be started with.
+       */
+
+      xcp->regs = (void *)((uint32_t)xcp->ktopstk - XCPTCONTEXT_SIZE);
+    }
+  else
+#endif
+    {
+      xcp->regs = (void *)((uint32_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size -
+                                     XCPTCONTEXT_SIZE);
+    }
 
   /* Initialize the xcp registers */
 
