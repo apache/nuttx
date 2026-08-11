@@ -54,6 +54,10 @@ if(CONFIG_AMEBA_UART)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_uart.c)
 endif()
 
+if(CONFIG_AMEBA_I2C)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_i2c.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -106,6 +110,14 @@ endif()
 # which live in this RAM source and must be compiled in.
 if(CONFIG_AMEBA_UART)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_uart.c)
+endif()
+
+# I2C register layer.  Unlike UART, the fwlib I2C API is NOT in ROM: the I2C
+# driver (arch/.../common/ameba/ameba_i2c.c) calls I2C_Init/StructInit/Cmd and
+# I2C_MasterWrite/Read/RepeatRead, all compiled from this RAM source and linked
+# in (--gc-sections drops the unused DMA/interrupt helpers).
+if(CONFIG_AMEBA_I2C)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_i2c.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
