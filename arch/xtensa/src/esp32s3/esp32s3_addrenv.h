@@ -87,10 +87,10 @@
  * addresses; only the virtual mapping went away, not the pool.
  */
 
-#define ESP32S3_PGPOOL_PBASE (CONFIG_ESP32S3_PGPOOL_PBASE)
-#define ESP32S3_PGPOOL_SIZE  (CONFIG_ESP32S3_PGPOOL_SIZE)
-#define ESP32S3_PGPOOL_PEND  (CONFIG_ESP32S3_PGPOOL_PBASE + \
-                              CONFIG_ESP32S3_PGPOOL_SIZE)
+#define ESP32S3_PGPOOL_PBASE (CONFIG_ARCH_PGPOOL_PBASE)
+#define ESP32S3_PGPOOL_SIZE  (CONFIG_ARCH_PGPOOL_SIZE)
+#define ESP32S3_PGPOOL_PEND  (CONFIG_ARCH_PGPOOL_PBASE + \
+                              CONFIG_ARCH_PGPOOL_SIZE)
 
 /* The user address space is split across two disjoint cache-MMU windows:
  * .text lives in the instruction-bus window, .data/.bss and the heap in the
