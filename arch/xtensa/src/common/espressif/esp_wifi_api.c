@@ -34,6 +34,7 @@
 #include "esp_wifi.h"
 #include "esp_private/wifi.h"
 
+#include "esp_hr_timer.h"
 #include "esp_wifi_utils.h"
 #include "esp_wifi_api.h"
 
@@ -123,6 +124,24 @@ int esp_wifi_api_adapter_init(void)
 {
   int ret;
   wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+  /* Make sure the HR Timer (and, with it, the underlying esp_timer
+   * subsystem) is running before the radio is brought up.  The first RF
+   * enable reaches phy_track_pll_init(), which calls esp_timer_create() and
+   * esp_timer_start_periodic() inside an ESP_ERROR_CHECK().  Those calls
+   * only work once esp_timer_init() has created the timer task and
+   * installed the timer ISR, and that only happens from
+   * esp_hr_timer_init().  Doing it here keeps the Wi-Fi stack independent
+   * of whether a particular board's bringup code happens to have
+   * initialized the HR Timer.  The call is idempotent.
+   */
+
+  ret = esp_hr_timer_init();
+  if (ret < 0)
+    {
+      wlerr("Failed to initialize HR Timer error=%d\n", ret);
+      return ret;
+    }
 
   esp_wifi_lock(true);
 
