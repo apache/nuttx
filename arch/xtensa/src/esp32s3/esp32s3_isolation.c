@@ -148,6 +148,16 @@ static void IRAM_ATTR pms_clear_violations(void)
   modifyreg32(EXTMEM_CORE0_ACS_CACHE_INT_CLR_REG,
               EXTMEM_CORE0_IBUS_REJECT_INT_CLR_M |
               EXTMEM_CORE0_DBUS_REJECT_INT_CLR_M, 0);
+
+  /* The invalid MMU entry monitor.  An access that no entry translates never
+   * reaches the PMS, which checks physical addresses, so without this the
+   * cache answers it with zeros and nothing is reported.
+   */
+
+  modifyreg32(EXTMEM_CACHE_ILG_INT_CLR_REG, 0,
+              EXTMEM_MMU_ENTRY_FAULT_INT_CLR_M);
+  modifyreg32(EXTMEM_CACHE_ILG_INT_CLR_REG,
+              EXTMEM_MMU_ENTRY_FAULT_INT_CLR_M, 0);
 }
 #endif
 
@@ -173,6 +183,16 @@ static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
 {
 #ifdef CONFIG_ESP32S3_USERFAULT_ABORT
   uint32_t *regs = (uint32_t *)context;
+  const char *cause;
+
+  /* Read why before acknowledging, because the clear below drops the latch.
+   * The two causes are answered the same way and are worth telling apart in
+   * the log:  a PMS violation is a refused translation, an MMU entry fault
+   * is an access that was never translated at all.
+   */
+
+  cause = (getreg32(EXTMEM_CACHE_ILG_INT_ST_REG) &
+           EXTMEM_MMU_ENTRY_FAULT_ST_M) != 0 ? "MMU entry" : "PMS";
 
   /* Acknowledge and re-arm the monitors first so the level-triggered
    * interrupt does not immediately re-fire while we handle it.
@@ -192,8 +212,8 @@ static int IRAM_ATTR pms_violation_isr(int cpuint, void *context, void *arg)
       struct tcb_s *tcb = this_task();
       siginfo_t     info;
 
-      _alert("SIGSEGV (PMS) task %s: PC=%08x\n",
-             get_task_name(tcb), (unsigned)regs[REG_PC]);
+      _alert("SIGSEGV (%s) task %s: PC=%08x\n",
+             cause, get_task_name(tcb), (unsigned)regs[REG_PC]);
 
       info.si_signo           = SIGSEGV;
       info.si_code            = SI_USER;
@@ -590,10 +610,23 @@ void esp32s3_pmsirqinitialize(void)
   VERIFY(esp_setup_irq(ESP32S3_PERIPH_CORE_0_PIF_PMS_MONITOR_VIOLATE,
                        1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
 
+  /* Report an access that no MMU entry translates.  The PMS grants and
+   * refuses physical addresses, so an untranslated access is invisible to
+   * it:  the cache returns zeros and the task carries on with a value it
+   * never should have had.  This monitor is what turns that into a fault.
+   */
+
+  VERIFY(esp_setup_irq(ESP32S3_PERIPH_CACHE_IA,
+                       1, ESP_IRQ_TRIGGER_LEVEL, pms_violation_isr, NULL));
+
+  modifyreg32(EXTMEM_CACHE_ILG_INT_ENA_REG, 0,
+              EXTMEM_MMU_ENTRY_FAULT_INT_ENA_M);
+
   up_enable_irq(ESP32S3_IRQ_CORE_0_IRAM0_PMS_MONITOR_VIOLATE);
   up_enable_irq(ESP32S3_IRQ_CORE_0_DRAM0_PMS_MONITOR_VIOLATE);
   up_enable_irq(ESP32S3_IRQ_CACHE_CORE0_ACS);
   up_enable_irq(ESP32S3_IRQ_CORE_0_PIF_PMS_MONITOR_VIOLATE);
+  up_enable_irq(ESP32S3_IRQ_CACHE_IA);
 }
 
 #endif /* !CONFIG_BUILD_FLAT */
