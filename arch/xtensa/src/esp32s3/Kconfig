@@ -359,27 +359,9 @@ config ESP32S3_PGPOOL_SCRATCH
 		instead, mapped for the duration of one operation and invalidated
 		afterwards.  ARCH_KMAP_VBASE and ARCH_KMAP_NPAGES describe it.
 
-if ESP32S3_PGPOOL_SCRATCH
-
-config ESP32S3_PGPOOL_PBASE
-	hex "Page pool physical address"
-	default 0x350000
-	---help---
-		The physical base address of the page pool.  For the cache MMU that
-		is a zero-based offset into the PSRAM device, not a CPU address.
-
-		This replaces ARCH_PGPOOL_PBASE, which only exists when the pool is
-		statically mapped.  The pool is still described physically because
-		mm_pgalloc() hands out physical page addresses; what goes away is
-		the permanent virtual mapping, not the pool itself.
-
-config ESP32S3_PGPOOL_SIZE
-	int "Page pool size (bytes)"
-	default 4194304
-	---help---
-		The size of the page pool in bytes.  Decimal, not hex.
-
-endif # ESP32S3_PGPOOL_SCRATCH
+		The pool itself is described by ARCH_PGPOOL_PBASE and
+		ARCH_PGPOOL_SIZE as usual.  Only ARCH_PGPOOL_VBASE does not apply,
+		because there is no permanent virtual mapping to name.
 
 menu "ESP32-S3 Peripheral Selection"
 
