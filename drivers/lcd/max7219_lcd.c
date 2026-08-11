@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/lcd/max7219.c
+ * drivers/lcd/max7219_lcd.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

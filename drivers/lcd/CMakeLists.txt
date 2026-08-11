@@ -50,7 +50,7 @@ if(CONFIG_LCD)
   endif()
 
   if(CONFIG_LCD_APA102)
-    list(APPEND SRCS apa102.c)
+    list(APPEND SRCS apa102_lcd.c)
   endif()
 
   if(CONFIG_LCD_P14201)
@@ -94,7 +94,7 @@ if(CONFIG_LCD)
   endif()
 
   if(CONFIG_LCD_MAX7219)
-    list(APPEND SRCS max7219.c)
+    list(APPEND SRCS max7219_lcd.c)
   endif()
 
   if(CONFIG_LCD_MIO283QT9A)
