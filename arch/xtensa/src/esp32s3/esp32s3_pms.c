@@ -205,6 +205,17 @@ static void set_dram_split_line(uintptr_t addr, const uint32_t sensitive_reg)
 
 /****************************************************************************
  * Name: esp32s3_pms_set_sram_main_split_line
+ *
+ * Description:
+ *   Set the boundary that divides Internal SRAM1 between the instruction
+ *      bus and the data bus.
+ *
+ * Input Parameters:
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_sram_main_split_line(uintptr_t addr)
@@ -215,6 +226,18 @@ void esp32s3_pms_set_sram_main_split_line(uintptr_t addr)
 
 /****************************************************************************
  * Name: esp32s3_pms_set_iram_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide the instruction bus into the
+ *      areas a permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_iram_split_line(enum pms_split_line_e line,
@@ -244,6 +267,18 @@ void esp32s3_pms_set_iram_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_set_dram_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide the data bus into the areas a
+ *      permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The boundary address.  It must be aligned to 256 bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_dram_split_line(enum pms_split_line_e line,
@@ -273,6 +308,19 @@ void esp32s3_pms_set_dram_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_set_flash_cache_split_line
+ *
+ * Description:
+ *   Set one of the boundaries that divide cached external flash into the
+ *      areas a permission is given to.
+ *
+ * Input Parameters:
+ *   line     - Which boundary to set.
+ *   addr     - The start of the area.
+ *   length   - The length of the area in bytes.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_set_flash_cache_split_line(enum pms_split_line_e line,
@@ -346,6 +394,18 @@ void esp32s3_pms_set_flash_cache_split_line(enum pms_split_line_e line,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_iram_region
+ *
+ * Description:
+ *   Give a world its permission on one area of the instruction bus.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_iram_region(enum pms_area_e area,
@@ -375,6 +435,18 @@ void esp32s3_pms_configure_iram_region(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_icache
+ *
+ * Description:
+ *   Give a world its permission on one area of the instruction cache.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_icache(enum pms_area_e area,
@@ -404,6 +476,17 @@ void esp32s3_pms_configure_icache(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_dcache
+ *
+ * Description:
+ *   Give a world its permission on the data cache.
+ *
+ * Input Parameters:
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_dcache(enum esp32s3_pms_world_e world,
@@ -443,6 +526,18 @@ void esp32s3_pms_configure_dcache(enum esp32s3_pms_world_e world,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_dram_region
+ *
+ * Description:
+ *   Give a world its permission on one area of the data bus.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_dram_region(enum pms_area_e area,
@@ -469,6 +564,18 @@ void esp32s3_pms_configure_dram_region(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_flash_cache_region
+ *
+ * Description:
+ *   Give a world its permission on one area of cached external flash.
+ *
+ * Input Parameters:
+ *   area     - Which area, as named by the split lines.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 /****************************************************************************
@@ -639,6 +746,18 @@ void esp32s3_pms_configure_sram_region(enum pms_area_e area,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_peripheral
+ *
+ * Description:
+ *   Give a world its permission on one peripheral.
+ *
+ * Input Parameters:
+ *   periph   - The peripheral.
+ *   world    - The world the permission applies to.
+ *   flags    - The access to allow.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_peripheral(enum pms_peripheral_e periph,
@@ -676,6 +795,14 @@ void esp32s3_pms_configure_peripheral(enum pms_peripheral_e periph,
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_irom_access
+ *
+ * Description:
+ *   Allow both worlds to read the instruction ROM.  The ROM holds code that
+ *      a user process still calls, so neither world can be refused it.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_irom_access(void)
@@ -697,6 +824,14 @@ void esp32s3_pms_configure_irom_access(void)
 
 /****************************************************************************
  * Name: esp32s3_pms_configure_drom_access
+ *
+ * Description:
+ *   Allow both worlds to read the data ROM.  The ROM holds constants that a
+ *      user process still reads, so neither world can be refused it.
+ *
+ * Returned Value:
+ *   None.
+ *
  ****************************************************************************/
 
 void esp32s3_pms_configure_drom_access(void)
