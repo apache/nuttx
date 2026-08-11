@@ -84,6 +84,10 @@ ifeq ($(CONFIG_RISCV_STRNCMP),y)
 ASRCS += arch_strncmp.S
 endif
 
+ifeq ($(CONFIG_RISCV_STRLCPY),y)
+ASRCS += arch_strlcpy.S
+endif
+
 ifeq ($(CONFIG_RISCV_STRCAT),y)
 ASRCS += arch_strcat.S
 endif
