@@ -39,15 +39,6 @@
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* The Xtensa windowed ABI requires 16-byte stack alignment */
-
-#define KSTACK_ALIGNMENT  16
-#define KSTACK_ALIGN_DOWN(a) ((a) & ~(KSTACK_ALIGNMENT - 1))
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -78,7 +69,7 @@ int up_addrenv_kstackalloc(struct tcb_s *tcb)
 {
   DEBUGASSERT(tcb && tcb->xcp.kstack == NULL);
 
-  tcb->xcp.kstack = kmm_memalign(KSTACK_ALIGNMENT, ARCH_KERNEL_STACKSIZE);
+  tcb->xcp.kstack = kmm_memalign(STACKFRAME_ALIGN, ARCH_KERNEL_STACKSIZE);
   if (tcb->xcp.kstack == NULL)
     {
       berr("ERROR: Failed to allocate the kernel stack\n");
@@ -89,8 +80,8 @@ int up_addrenv_kstackalloc(struct tcb_s *tcb)
    * far end of the allocation.
    */
 
-  tcb->xcp.ktopstk = (uint32_t *)
-    KSTACK_ALIGN_DOWN((uintptr_t)tcb->xcp.kstack + ARCH_KERNEL_STACKSIZE);
+  tcb->xcp.ktopstk = (uint32_t *)STACKFRAME_ALIGN_DOWN(
+    (uintptr_t)tcb->xcp.kstack + ARCH_KERNEL_STACKSIZE);
 
   return OK;
 }
