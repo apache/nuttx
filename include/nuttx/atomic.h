@@ -305,7 +305,7 @@ typedef volatile int64_t atomic64_t;
 
 #define atomic_try_cmpxchg_relaxed(obj, expected, desired) \
   __atomic_compare_exchange_n((uint32_t *)(obj), (uint32_t *)(expected), (uint32_t)(desired), true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)
-  
+
 /* Compare and Exchange (Strong) - 64-bit */
 #define atomic64_cmpxchg(obj, expected, desired) \
   __atomic_compare_exchange_n(obj, expected, desired, false, __ATOMIC_ACQ_REL, __ATOMIC_RELAXED)
