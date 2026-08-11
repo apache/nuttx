@@ -155,6 +155,16 @@
 #  define LIBC_BUILD_STRRCHR
 #endif
 
+#if ((!defined(CONFIG_LIBC_PREVENT_STPCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STPCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STPCPY
+#endif
+
+#if ((!defined(CONFIG_LIBC_PREVENT_STPNCPY_USER) && !defined(__KERNEL__))  || \
+     (!defined(CONFIG_LIBC_PREVENT_STPNCPY_KERNEL) && defined(__KERNEL__)))
+#  define LIBC_BUILD_STPNCPY
+#endif
+
 #ifdef CONFIG_MM_KASAN
 #  define ARCH_LIBCFUN(x)  arch_##x
 #else
