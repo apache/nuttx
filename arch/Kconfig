@@ -83,6 +83,7 @@ config ARCH_RENESAS
 
 config ARCH_RISCV
 	bool "RISC-V"
+	select ARCH_HAVE_FORK if BUILD_KERNEL && ARCH_ADDRENV && !ARCH_STACK_DYNAMIC
 	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_CPUINFO
 	select ARCH_HAVE_INTERRUPTSTACK
@@ -492,7 +493,6 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_FORK
 	bool
-	default y if ARCH_RISCV
 	default n
 	depends on ARCH_ADDRENV && !ARCH_STACK_DYNAMIC
 	---help---
