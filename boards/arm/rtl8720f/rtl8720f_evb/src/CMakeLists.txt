@@ -22,7 +22,18 @@
 
 set(SRCS rtl8720f_boot.c rtl8720f_bringup.c)
 
+if(CONFIG_AMEBA_GPIO)
+  list(APPEND SRCS rtl8720f_gpio.c)
+endif()
+
 target_sources(board PRIVATE ${SRCS})
+
+if(CONFIG_AMEBA_GPIO)
+  # The board pin tables pull in the shared drivers' public headers from
+  # arch/arm/src/common/ameba/, not on the default board include path.
+  target_include_directories(board
+                             PRIVATE ${NUTTX_DIR}/arch/arm/src/common/ameba)
+endif()
 
 # LD_SCRIPT is not set here: the Ameba image2 linker script is generated
 # (prebuilt/ld.script.gen) and published by the shared ameba_board.cmake.

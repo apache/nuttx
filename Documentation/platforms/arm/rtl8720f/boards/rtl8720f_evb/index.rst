@@ -31,6 +31,8 @@ Supported in this NuttX port:
   partition), backing the Wi-Fi key-value store
 * Wi-Fi station and SoftAP through the ``wapi`` tool
 * DHCP client (STA) and DHCP server (SoftAP)
+* GPIO pins exposed as ``/dev/gpioN`` character devices (input, output and
+  interrupt), driven directly on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -47,6 +49,25 @@ rtl8720f_evb`` first (the make build needs no sourcing).
 .. code:: console
 
    $ ./tools/configure.sh rtl8720f_evb:<config-name>
+
+gpio
+----
+
+Minimal NSH with the GPIO driver and the ``gpio`` example enabled (no Wi-Fi).
+The board registers three pins from its pin table (see
+``boards/arm/rtl8720f/rtl8720f_evb/src/rtl8720f_gpio.c``): an output at
+``/dev/gpio0``, an input at ``/dev/gpio1`` and an interrupt pin at
+``/dev/gpio2``. Edit that table to match a board's wiring. Exercise them with
+the example::
+
+    nsh> gpio -o 1 /dev/gpio0     # drive the output high
+    nsh> gpio /dev/gpio1          # read the input
+    nsh> gpio -w 1 /dev/gpio2     # wait for a falling-edge interrupt
+
+RTL8720F drives all GPIO through a single port A controller, so pins are
+encoded with the ``AMEBA_PA()`` helper from
+``arch/arm/src/common/ameba/ameba_gpio.h`` (pin 0-31), matching the Ameba SDK
+``PinName`` layout.
 
 nsh
 ---
