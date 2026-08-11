@@ -363,7 +363,11 @@ int lio_listio(int mode, FAR struct aiocb *restrict const list[restrict],
             }
           else
             {
-              list_initialize(&aiocbp->lio_link);
+              /* Not part of a lio_listio batch: clear lio_link so that
+               * aio_signal() skips the lio_listio completion path.
+               */
+
+              list_clear_node(&aiocbp->lio_link);
             }
         }
     }

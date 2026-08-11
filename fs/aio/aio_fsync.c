@@ -210,9 +210,13 @@ int aio_fsync(int op, FAR struct aiocb *aiocbp)
   sigwork_init(&aiocbp->aio_sigwork);
   aiocbp->aio_result = -EINPROGRESS;
 
-  /* Initialize list_node using aiocbp for the first time */
+  /* Clear lio_link so list_in_list() returns false and aio_signal() skips
+   * the lio_listio path; list_initialize() would leave prev non-NULL, so
+   * list_in_list() wrongly returns true and aio_signal() notifies through
+   * the uninitialized lio_sigevent/lio_sigwork.
+   */
 
-  list_initialize(&aiocbp->lio_link);
+  list_clear_node(&aiocbp->lio_link);
 
   /* Create a container for the AIO control block.  This may cause us to
    * block if there are insufficient resources to satisfy the request.
