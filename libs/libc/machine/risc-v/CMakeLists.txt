@@ -84,6 +84,10 @@ if(CONFIG_RISCV_STRNCMP)
   list(APPEND SRCS arch_strncmp.S)
 endif()
 
+if(CONFIG_RISCV_STRLCPY)
+  list(APPEND SRCS arch_strlcpy.S)
+endif()
+
 if(CONFIG_RISCV_STRCAT)
   list(APPEND SRCS arch_strcat.S)
 endif()
