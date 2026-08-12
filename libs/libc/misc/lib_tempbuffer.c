@@ -140,7 +140,7 @@ void lib_put_tempbuffer(FAR char *buffer)
     {
       DEBUGASSERT((atomic_read(&g_tempbuffer.free_bitmap) &
                   (1u << index)) == 0);
-      atomic_fetch_or_acquire(&g_tempbuffer.free_bitmap, 1u << index);
+      atomic_or_acquire(&g_tempbuffer.free_bitmap, 1u << index);
       return;
     }
 

@@ -329,7 +329,7 @@ static void rpmsg_port_hold_rx_buffer(FAR struct rpmsg_device *rdev,
 {
   FAR struct rpmsg_hdr *rphdr = RPMSG_LOCATE_HDR(rxbuf);
 
-  atomic_fetch_add(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
+  atomic_add(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
 }
 
 /****************************************************************************
@@ -345,7 +345,7 @@ static void rpmsg_port_release_rx_buffer(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_port_header_s *hdr =
     metal_container_of(rphdr, struct rpmsg_port_header_s, buf);
   uint32_t reserved =
-    atomic_fetch_sub(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
+    atomic_sub(&rphdr->reserved, 1 << RPMSG_BUF_HELD_SHIFT);
 
   if ((reserved & RPMSG_BUF_HELD_MASK) == (1 << RPMSG_BUF_HELD_SHIFT))
     {

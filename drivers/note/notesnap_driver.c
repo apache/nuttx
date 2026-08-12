@@ -219,7 +219,7 @@ static inline void notesnap_common(FAR struct note_driver_s *drv,
 
   /* Atomic operation, equivalent to snap.index++; */
 
-  index = atomic_fetch_add(&snap->index, 1);
+  index = atomic_add(&snap->index, 1);
   note = &snap->buffer[index % CONFIG_DRIVERS_NOTESNAP_NBUFFERS];
 
   note->type = type;

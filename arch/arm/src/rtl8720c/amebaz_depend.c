@@ -876,7 +876,7 @@ static void *device_mutex[5];
 static void device_mutex_init(uint32_t device)
 {
   irqstate_t status;
-  if (atomic_fetch_or(&mutex_init, (1 << device)) & (1 << device) == 0)
+  if (atomic_or(&mutex_init, (1 << device)) & (1 << device) == 0)
     {
       rtw_mutex_init(&device_mutex[device]);
     }

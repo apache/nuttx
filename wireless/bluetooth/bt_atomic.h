@@ -40,12 +40,12 @@
 #define bt_atomic_set(ptr, value)        atomic_set(ptr, value);
 #define bt_atomic_get(ptr)               atomic_read(ptr)
 #define bt_atomic_testbit(ptr, bitno)    ((atomic_read(ptr) & (1 << (bitno))) != 0)
-#define bt_atomic_incr(ptr)              atomic_fetch_add(ptr, 1)
-#define bt_atomic_decr(ptr)              atomic_fetch_sub(ptr, 1)
-#define bt_atomic_setbit(ptr, bitno)     atomic_fetch_or(ptr, (1 << (bitno)))
-#define bt_atomic_clrbit(ptr, bitno)     atomic_fetch_and(ptr, ~(1 << (bitno)))
-#define bt_atomic_testsetbit(ptr, bitno) ((atomic_fetch_or(ptr, (1 << (bitno))) & (1 << (bitno))) != 0)
-#define bt_atomic_testclrbit(ptr, bitno) ((atomic_fetch_and(ptr, ~(1 << (bitno))) & (1 << (bitno))) != 0)
+#define bt_atomic_incr(ptr)              atomic_add(ptr, 1)
+#define bt_atomic_decr(ptr)              atomic_sub(ptr, 1)
+#define bt_atomic_setbit(ptr, bitno)     atomic_or(ptr, (1 << (bitno)))
+#define bt_atomic_clrbit(ptr, bitno)     atomic_and(ptr, ~(1 << (bitno)))
+#define bt_atomic_testsetbit(ptr, bitno) ((atomic_or(ptr, (1 << (bitno))) & (1 << (bitno))) != 0)
+#define bt_atomic_testclrbit(ptr, bitno) ((atomic_and(ptr, ~(1 << (bitno))) & (1 << (bitno))) != 0)
 
 /****************************************************************************
  * Public Types

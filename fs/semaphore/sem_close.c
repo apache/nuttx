@@ -87,7 +87,7 @@ int nxsem_close(FAR sem_t *sem)
    * now.
    */
 
-  if (atomic_fetch_sub(&inode->i_crefs, 1) <= 1)
+  if (atomic_sub(&inode->i_crefs, 1) <= 1)
     {
       nxsem_destroy(&nsem->ns_sem);
       group_free(NULL, nsem);
