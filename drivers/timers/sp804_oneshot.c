@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/timers/sp804.c
+ * drivers/timers/sp804_oneshot.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,37 +25,11 @@
  ****************************************************************************/
 
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/sp804.h>
 
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* SP804 per-timer register offsets */
-
-#define SP804_LOAD          0x00  /* Load register */
-#define SP804_VALUE         0x04  /* Current value (RO) */
-#define SP804_CONTROL       0x08  /* Control register */
-#define SP804_INTCLR        0x0c  /* Interrupt clear (WO) */
-
-/* Timer 2 sits at base + 0x20 with the same layout */
-
-#define SP804_TIMER2_OFF    0x20
-
-/* Control register bits */
-
-#define SP804_CTRL_ONESHOT  (1 << 0)  /* One-shot mode */
-#define SP804_CTRL_32BIT    (1 << 1)  /* 32-bit counter */
-#define SP804_CTRL_IE       (1 << 5)  /* Interrupt enable */
-#define SP804_CTRL_ENABLE   (1 << 7)  /* Timer enable */
-
-/* Helper macros */
-
-#define sp804_getreg(b, o) \
-  (*(FAR volatile uint32_t *)((b) + (o)))
-#define sp804_putreg(v, b, o) \
-  (*((FAR volatile uint32_t *)((b) + (o))) = (v))
+#include "sp804.h"
 
 /****************************************************************************
  * Private Types

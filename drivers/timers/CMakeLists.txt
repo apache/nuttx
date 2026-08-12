@@ -62,7 +62,10 @@ if(CONFIG_RTC_PCF8563)
 endif()
 
 if(CONFIG_TIMER_SP804)
-  list(APPEND SRCS sp804.c)
+  list(APPEND SRCS sp804_oneshot.c)
+  if(CONFIG_TIMER)
+    list(APPEND SRCS sp804_timer.c)
+  endif()
 endif()
 
 if(CONFIG_RTC_PL031)

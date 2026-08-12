@@ -29,6 +29,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/timers/oneshot.h>
+#include <nuttx/timers/timer.h>
 
 /****************************************************************************
  * Public Function Prototypes
@@ -60,6 +61,33 @@ extern "C"
 
 FAR struct oneshot_lowerhalf_s *
 sp804_initialize(uintptr_t base, int irq, uint32_t freq);
+
+/****************************************************************************
+ * Name: sp804_timer_initialize
+ *
+ * Description:
+ *   Initialize the SP804 dual timer as a free-running periodic timer and
+ *   return a "timer" lowerhalf instance that can be bound to the timer
+ *   upper-half driver (timer_register()) and exposed as /dev/timerN.
+ *
+ *   This uses SP804 Timer 1 in 32-bit periodic mode: the counter reloads
+ *   from the programmed value on each expiry and raises the shared SP804
+ *   interrupt, giving the periodic-notification semantics expected by
+ *   apps/examples/timer.
+ *
+ * Input Parameters:
+ *   base - Physical base address of the SP804 timer block.
+ *   irq  - IRQ number associated with the timer interrupt.
+ *   freq - Input clock frequency in Hz.
+ *
+ * Returned Value:
+ *   On success, a non-NULL timer lowerhalf pointer is returned.
+ *   NULL is returned on any failure.
+ *
+ ****************************************************************************/
+
+FAR struct timer_lowerhalf_s *
+sp804_timer_initialize(uintptr_t base, int irq, uint32_t freq);
 
 #ifdef __cplusplus
 }
