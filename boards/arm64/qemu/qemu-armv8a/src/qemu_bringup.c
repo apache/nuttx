@@ -89,6 +89,10 @@ static void register_devices_from_fdt(void)
   fdt_cmsdk_wdt_devices_register(fdt, QEMU_SPI_IRQ_BASE);
 #endif
 
+#ifdef CONFIG_QEMU_FWCFG
+  fdt_qemu_fwcfg_register(fdt);
+#endif
+
   UNUSED(ret);
 }
 

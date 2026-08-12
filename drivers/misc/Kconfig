@@ -95,6 +95,19 @@ config GOLDFISH_PIPE
 	bool "Goldfish Pipe Support"
 	default n
 
+config QEMU_FWCFG
+	bool "QEMU fw_cfg Support"
+	default n
+	depends on MTD_CONFIG_NAMED
+	---help---
+		Enable a read-only driver for the QEMU fw_cfg device.  The MMIO
+		region is discovered from the "qemu,fw-cfg-mmio" node of the
+		flattened device tree and exposed as a character device
+		(/dev/qemufwcfg).  Named "file" items published by QEMU (e.g.
+		-fw_cfg name=opt/xxx,string=...) can be read from user space using
+		the configdata ioctl interface (CFGDIOC_GETCONFIG,
+		CFGDIOC_FINDCONFIG, CFGDIOC_FIRSTCONFIG, CFGDIOC_NEXTCONFIG).
+
 # ARCH needs to support memory access while CPU is running to be able to use
 # the LWL CONSOLE
 

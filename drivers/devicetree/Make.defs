@@ -46,6 +46,10 @@ ifeq ($(CONFIG_WATCHDOG_CMSDK),y)
   CSRCS += fdt_cmsdk_wdt.c
 endif
 
+ifeq ($(CONFIG_QEMU_FWCFG),y)
+  CSRCS += fdt_qemu_fwcfg.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree

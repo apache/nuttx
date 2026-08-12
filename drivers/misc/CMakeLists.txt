@@ -82,4 +82,8 @@ if(CONFIG_GOLDFISH_PIPE)
   list(APPEND SRCS goldfish_pipe.c)
 endif()
 
+if(CONFIG_QEMU_FWCFG)
+  list(APPEND SRCS qemu_fwcfg.c)
+endif()
+
 target_sources(drivers PRIVATE ${SRCS})
