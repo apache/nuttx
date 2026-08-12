@@ -28,10 +28,14 @@ ifeq ($(CONFIG_AMEBA_GPIO),y)
 CSRCS += rtl8720f_gpio.c
 endif
 
+ifeq ($(CONFIG_AMEBA_UART),y)
+CSRCS += rtl8720f_uart.c
+endif
+
 # The board pin tables pull in the shared drivers' public headers from
 # arch/arm/src/common/ameba/, which is not on the default board include path.
 
-ifneq ($(CONFIG_AMEBA_GPIO),)
+ifneq ($(CONFIG_AMEBA_GPIO)$(CONFIG_AMEBA_UART),)
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)common$(DELIM)ameba
 endif
 
