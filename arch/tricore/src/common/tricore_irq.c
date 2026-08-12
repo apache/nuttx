@@ -87,7 +87,7 @@ static const IfxSrc_Tos g_tricore_tos[] =
 #endif
 };
 
-static int g_srpn_to_irq[TRICORE_IRQ_MAX_PRIORITY + 1];
+static irq_t g_srpn_to_irq[TRICORE_IRQ_MAX_PRIORITY + 1];
 
 /****************************************************************************
  * Private Functions
