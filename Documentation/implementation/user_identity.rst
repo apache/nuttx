@@ -18,16 +18,37 @@ The full POSIX three-field credential model is stored in ``struct task_group_s``
 * ``tg_euid`` / ``tg_egid`` — effective IDs used for permission checks.
 * ``tg_suid`` / ``tg_sgid`` — saved set-IDs that allow a non-root process to
   restore a previously held effective ID.
+* ``tg_groups`` / ``tg_ngroups`` — supplementary group IDs (when
+  ``CONFIG_SCHED_NGROUPS`` is greater than zero).
 
-All six fields are zero-initialized at task creation, so the initial task runs
-as root (UID/GID 0) unless explicitly changed.
+All six primary credential fields are zero-initialized at task creation, so
+the initial task runs as root (UID/GID 0) unless explicitly changed.  The
+supplementary list starts empty.
+
+Supplementary Groups
+====================
+
+When ``CONFIG_SCHED_NGROUPS`` is greater than zero:
+
+* ``setgroups()`` replaces the calling task group's supplementary list
+  (requires effective UID 0).
+* ``getgroups()`` returns that list as stored (may be empty after
+  ``setgroups(0, NULL)``).  The effective GID is not invented into an
+  empty list; use ``getegid()`` for the effective GID.
+* ``initgroups()`` builds a membership list with ``getgrouplist()`` (from
+  ``/etc/group`` when ``CONFIG_LIBC_GROUP_FILE`` is enabled) and installs it
+  with ``setgroups()``.
+* ``NGROUPS_MAX`` equals ``CONFIG_SCHED_NGROUPS``.
+
+Filesystem DAC (``fs_checkmode()``) grants the group-class mode bits when the
+file's group matches ``tg_egid`` **or** any entry in ``tg_groups``.
 
 Inheritance
 ===========
 
 When a new task is created, ``group_inherit_identity()`` in
-``sched/group/group_create.c`` copies all six credential fields from the parent
-task group to the child task group.
+``sched/group/group_create.c`` copies all credential fields — including the
+supplementary group list — from the parent task group to the child.
 
 Privilege Transitions
 =====================
@@ -56,8 +77,8 @@ When the effective ID is non-zero, the requested value must equal the real or
 the saved ID. Otherwise the function returns ``-1`` with ``errno`` set to
 ``EPERM``.
 
-This implements the standard POSIX pattern of temporarily dropping privileges
-with ``seteuid()`` or ``setegid()`` and later restoring them to the saved value.
+This implements temporary privilege drop with ``seteuid()`` /
+``setegid()`` and later restore from the saved ID.
 
 ``setreuid()`` and ``setregid()``
 ---------------------------------
@@ -77,12 +98,41 @@ set-ID is set to the new effective ID.
 These functions return the real, effective, and saved set-IDs for the calling
 task group. Any output pointer may be ``NULL`` if that ID is not needed.
 
+``setresuid()`` and ``setresgid()``
+-----------------------------------
+
+These functions set the real, effective, and saved set-IDs in one call.
+Pass ``(uid_t)-1`` / ``(gid_t)-1`` to leave an ID unchanged.  When the
+effective UID is zero, any values may be assigned.  When the effective
+UID is non-zero, each new ID must equal the current real, effective, or
+saved ID.
+
+Soft drop (keep saved-root)::
+
+  setresgid(gid, gid, 0);
+  setresuid(uid, uid, 0);
+
+Hard drop (clear saved-root)::
+
+  setresgid(gid, gid, gid);
+  setresuid(uid, uid, uid);
+
+``setresgid()`` requires effective UID zero to assign arbitrary GIDs.
+Change group IDs before dropping the effective UID.
+
 Configuration
 =============
 
 ``CONFIG_SCHED_USER_IDENTITY``
   Enables per-task-group credential tracking. Without this option, stub
   root-only versions of all credential interfaces are provided.
+
+``CONFIG_SCHED_NGROUPS``
+  Maximum supplementary group IDs per task group (default 8).  Visible only
+  when ``CONFIG_SCHED_USER_IDENTITY`` is enabled.  Becomes ``NGROUPS_MAX``.
+  ``getgrouplist()`` / ``initgroups()`` return failure (they do **not**
+  silently truncate) when membership exceeds this limit; ``initgroups()``
+  also logs a warning.  Increase ``CONFIG_SCHED_NGROUPS`` if needed.
 
 ``CONFIG_FS_PERMISSION``
   Enables filesystem ownership and permission enforcement. Requires
