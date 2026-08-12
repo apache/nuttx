@@ -32,8 +32,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#include "libc.h"
+
 #ifndef STRNLEN
-# define STRNLEN	strnlen
+# define STRNLEN	ARCH_LIBCFUN(strnlen)
 #endif
 
 #ifndef L

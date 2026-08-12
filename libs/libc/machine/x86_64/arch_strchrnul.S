@@ -29,8 +29,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#include "libc.h"
+
 #ifndef STRCHRNUL
-# define STRCHRNUL	strchrnul
+# define STRCHRNUL	ARCH_LIBCFUN(strchrnul)
 #endif
 
 #ifndef L

@@ -34,8 +34,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#include "libc.h"
+
 #ifndef MEMCHR
-# define MEMCHR		memchr
+# define MEMCHR		ARCH_LIBCFUN(memchr)
 #endif
 
 #ifndef L

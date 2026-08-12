@@ -33,8 +33,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#include "libc.h"
+
 #ifndef STRCHR
-# define STRCHR		strchr
+# define STRCHR		ARCH_LIBCFUN(strchr)
 #endif
 
 #ifndef L
