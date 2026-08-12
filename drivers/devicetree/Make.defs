@@ -36,6 +36,16 @@ ifeq ($(CONFIG_MTD_CFI),y)
   CSRCS += fdt_cfi.c
 endif
 
+ifeq ($(CONFIG_TIMER_SP804),y)
+ifeq ($(CONFIG_TIMER),y)
+  CSRCS += fdt_sp804.c
+endif
+endif
+
+ifeq ($(CONFIG_WATCHDOG_CMSDK),y)
+  CSRCS += fdt_cmsdk_wdt.c
+endif
+
 CFLAGS += ${INCDIR_PREFIX}$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)fdt$(DELIM)dtc$(DELIM)libfdt
 
 DEPPATH += --dep-path devicetree

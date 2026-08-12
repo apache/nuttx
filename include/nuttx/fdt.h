@@ -508,4 +508,46 @@ int fdt_virtio_mmio_devices_register(FAR const void *fdt, int irqbase);
 #ifdef CONFIG_MTD_CFI
 int fdt_cfi_register(FAR const void *fdt);
 #endif
+
+/****************************************************************************
+ * Name: fdt_sp804_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "arm,sp804" and registers each as a periodic timer character device
+ *   (/dev/timerN).
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_TIMER_SP804)
+int fdt_sp804_devices_register(FAR const void *fdt, int irqbase);
+#endif
+
+/****************************************************************************
+ * Name: fdt_cmsdk_wdt_devices_register
+ *
+ * Description:
+ *   This function scans the device tree for nodes with compatible
+ *   "arm,cmsdk-wdt" and registers each as a watchdog character device
+ *   (/dev/watchdogN).
+ *
+ * Input Parameters:
+ *   fdt      - Device tree handle
+ *   irqbase  - Interrupt base number
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_WATCHDOG_CMSDK
+int fdt_cmsdk_wdt_devices_register(FAR const void *fdt, int irqbase);
+#endif
 #endif /* __INCLUDE_NUTTX_FDT_H */

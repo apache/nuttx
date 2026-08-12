@@ -81,6 +81,14 @@ static void register_devices_from_fdt(void)
     }
 #endif
 
+#if defined(CONFIG_TIMER) && defined(CONFIG_TIMER_SP804)
+  fdt_sp804_devices_register(fdt, QEMU_SPI_IRQ_BASE);
+#endif
+
+#ifdef CONFIG_WATCHDOG_CMSDK
+  fdt_cmsdk_wdt_devices_register(fdt, QEMU_SPI_IRQ_BASE);
+#endif
+
   UNUSED(ret);
 }
 
