@@ -365,6 +365,10 @@ static const char *g_white_content_list[] =
 
   "_Atomic",
 
+  /* Ref:  include/nuttx/atomic.h */
+
+  "__Atomic",
+
   /* Ref:  https://en.cppreference.com/w/c/keyword/_Thread_local */
 
   "_Thread_local",

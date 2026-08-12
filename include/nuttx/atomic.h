@@ -159,9 +159,8 @@
  * Public Types
  ****************************************************************************/
 
-typedef volatile int32_t atomic_t;
-typedef volatile int64_t atomic64_t;
-
+typedef __Atomic(int32_t) atomic_t;
+typedef __Atomic(int64_t) atomic64_t;
 
 /****************************************************************************
  * Public Function Prototypes
