@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
+#include <syslog.h>
 #include <nuttx/debug.h>
 
 #include <arch/board/board.h>
@@ -56,9 +57,13 @@
 
 /* Delays *******************************************************************/
 
-/* Time out for INAK bit */
+/* Time out for INAK / SLAK (bxCAN). A bare 65535 busy-loop is only a few
+ * hundred us at GD32F470 clocks and races sleep?¨²init; ST HAL uses ~10 ms.
+ * open(/dev/can0) ?¨² cellinit returns -ETIMEDOUT (errno 110) when this is
+ * too short or SLEEP leave is not waited.
+ */
 
-#define INAK_TIMEOUT 65535
+#define CAN_INIT_TIMEOUT_US  100000u  /* 100 ms */
 
 /* Bit timing ***************************************************************/
 
@@ -89,6 +94,7 @@ struct gd32_can_s
   uint8_t  cansce;   /* CAN SCE IRQ number */
 #endif
   uint8_t  filter;   /* Filter number */
+  uint8_t  harvesting; /* Nest guard for RQCP poll harvest */
   uint32_t base;     /* Base address of the CAN control registers */
   uint32_t fbase;    /* Base address of the CAN filter registers */
   uint32_t baud;     /* Configured baud */
@@ -160,6 +166,7 @@ static int  gd32can_rxinterrupt(struct can_dev_s *dev, int rxmb);
 static int  gd32can_rx0interrupt(int irq, void *context, void *arg);
 static int  gd32can_rx1interrupt(int irq, void *context, void *arg);
 static int  gd32can_txinterrupt(int irq, void *context, void *arg);
+static void gd32can_harvest_txdone(struct can_dev_s *dev);
 #ifdef CONFIG_CAN_ERRORS
 static int  gd32can_sceinterrupt(int irq, void *context, void *arg);
 #endif
@@ -833,14 +840,22 @@ static void gd32can_txint(struct can_dev_s *dev, bool enable)
 
   caninfo("CAN%" PRIu8 " txint enable: %d\n", priv->port, enable);
 
-  /* Support only disabling the transmit mailbox interrupt */
+  /* Enable/disable transmit-mailbox-empty (RQCP) interrupts.  Alone-on-bus
+   * NART completions set RQCP+TERR; without TMEIE the upper-half TX FIFO
+   * never drains and O_NONBLOCK write() returns EAGAIN forever.
+   */
 
-  if (!enable)
+  regval = gd32can_getreg(priv, GD32_CAN_IER_OFFSET);
+  if (enable)
     {
-      regval  = gd32can_getreg(priv, GD32_CAN_IER_OFFSET);
-      regval &= ~CAN_IER_TMEIE;
-      gd32can_putreg(priv, GD32_CAN_IER_OFFSET, regval);
+      regval |= CAN_IER_TMEIE;
     }
+  else
+    {
+      regval &= ~CAN_IER_TMEIE;
+    }
+
+  gd32can_putreg(priv, GD32_CAN_IER_OFFSET, regval);
 }
 
 #ifdef CONFIG_CAN_ERRORS
@@ -1196,14 +1211,21 @@ static int gd32can_ioctl(struct can_dev_s *dev, int cmd,
       case CANIOC_SET_NART:
         {
           uint32_t regval;
+          bool enabled;
 
-          ret = gd32can_enterinitmode(priv);
-          if (ret != 0)
+          /* NART is an MCR soft bit (bxCAN/GD32): may be written in normal
+           * mode. Do NOT enter/exit init here -- INAK wait often returns
+           * ETIMEDOUT on a noisy/stuck bus even when NART is already set
+           * at cellinit, which falsely breaks alone-on-bus HIL TX.
+           */
+
+          regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+          enabled = (regval & CAN_MCR_NART) != 0;
+          if ((arg == 1 && enabled) || (arg != 1 && !enabled))
             {
-              return ret;
+              return OK;
             }
 
-          regval = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_NART;
@@ -1214,21 +1236,36 @@ static int gd32can_ioctl(struct can_dev_s *dev, int cmd,
             }
 
           gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
-          return gd32can_exitinitmode(priv);
+
+          /* Read-back: alone-on-bus TX depends on this bit sticking. */
+
+          regval = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+          if (arg == 1 && (regval & CAN_MCR_NART) == 0)
+            {
+              canerr("ERROR: CAN%" PRIu8 " NART write did not stick "
+                     "(MCR=%08" PRIx32 ")\n",
+                     priv->port, regval);
+              return -EIO;
+            }
+
+          return OK;
         }
         break;
 
       case CANIOC_SET_ABOM:
         {
           uint32_t regval;
+          bool enabled;
 
-          ret = gd32can_enterinitmode(priv);
-          if (ret != 0)
+          /* Same as NART: ABOM is an MCR soft bit; skip init-mode dance. */
+
+          regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+          enabled = (regval & CAN_MCR_ABOM) != 0;
+          if ((arg == 1 && enabled) || (arg != 1 && !enabled))
             {
-              return ret;
+              return OK;
             }
 
-          regval = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
           if (arg == 1)
             {
               regval |= CAN_MCR_ABOM;
@@ -1239,7 +1276,7 @@ static int gd32can_ioctl(struct can_dev_s *dev, int cmd,
             }
 
           gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
-          return gd32can_exitinitmode(priv);
+          return OK;
         }
         break;
 
@@ -1309,9 +1346,78 @@ static int gd32can_send(struct can_dev_s *dev,
   caninfo("CAN%" PRIu8 " ID: %" PRIu32 " DLC: %" PRIu8 "\n",
           priv->port, (uint32_t)msg->cm_hdr.ch_id, msg->cm_hdr.ch_dlc);
 
-  /* Select one empty transmit mailbox */
+  /* Select one empty transmit mailbox.  RQCP may still be set after a
+   * NART TERR completion if the TX IRQ has not run (common while the
+   * upper half holds a critical section).  Hardware sets RQCP without
+   * needing the IRQ ¡ª harvest / short spin reclaim the mailbox.
+   */
 
   regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+  if (!gd32can_txmb0empty(regval) && !gd32can_txmb1empty(regval) &&
+      !gd32can_txmb2empty(regval))
+    {
+      int waited;
+
+      gd32can_harvest_txdone(dev);
+      regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+
+      /* ~3 ms @125 kbit is enough for one EXT frame (+NART TERR).  Do
+       * not spin in IRQ context ¡ª the handler already harvested.
+       */
+
+      if (!up_interrupt_context() &&
+          !gd32can_txmb0empty(regval) && !gd32can_txmb1empty(regval) &&
+          !gd32can_txmb2empty(regval))
+        {
+          for (waited = 0; waited < 3000; waited++)
+            {
+              regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+              if ((regval & (CAN_TSR_RQCP0 | CAN_TSR_RQCP1 |
+                             CAN_TSR_RQCP2)) != 0)
+                {
+                  gd32can_harvest_txdone(dev);
+                  regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+                }
+
+              if (gd32can_txmb0empty(regval) || gd32can_txmb1empty(regval) ||
+                  gd32can_txmb2empty(regval))
+                {
+                  break;
+                }
+
+              up_udelay(1);
+            }
+        }
+
+      if (!gd32can_txmb0empty(regval) && !gd32can_txmb1empty(regval) &&
+          !gd32can_txmb2empty(regval))
+        {
+          /* Still occupied (no NART / stuck dominant). Abort so RQCP
+           * asserts; harvest frees TME for the upper half.
+           */
+
+          gd32can_putreg(priv, GD32_CAN_TSR_OFFSET,
+                         CAN_TSR_ABRQ0 | CAN_TSR_ABRQ1 | CAN_TSR_ABRQ2);
+          if (!up_interrupt_context())
+            {
+              for (waited = 0; waited < 1000; waited++)
+                {
+                  regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+                  if ((regval & (CAN_TSR_RQCP0 | CAN_TSR_RQCP1 |
+                                 CAN_TSR_RQCP2)) != 0)
+                    {
+                      break;
+                    }
+
+                  up_udelay(1);
+                }
+            }
+
+          gd32can_harvest_txdone(dev);
+          regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+        }
+    }
+
   if (gd32can_txmb0empty(regval))
     {
       txmb = 0;
@@ -1326,7 +1432,7 @@ static int gd32can_send(struct can_dev_s *dev,
     }
   else
     {
-      canerr("ERROR: No available mailbox\n");
+      canerr("ERROR: No available mailbox TSR=%08" PRIx32 "\n", regval);
       return -EBUSY;
     }
 
@@ -1465,9 +1571,43 @@ static bool gd32can_txready(struct can_dev_s *dev)
   struct gd32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  /* Return true if any mailbox is available */
+  /* Drain any RQCP completions before judging emptiness.  txmb*empty()
+   * requires RQCP clear; with NART, TERR+RQCP can sit until IRQ runs.
+   * POLLOUT / O_NONBLOCK write() depend on this path when TMEIE is late.
+   */
+
+  gd32can_harvest_txdone(dev);
 
   regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+  if (!gd32can_txmb0empty(regval) && !gd32can_txmb1empty(regval) &&
+      !gd32can_txmb2empty(regval) && !up_interrupt_context())
+    {
+      /* One frame time: allow in-flight NART TERR to set RQCP while the
+       * caller holds the CAN critical section (TX IRQ masked).
+       */
+
+      int waited;
+
+      for (waited = 0; waited < 1500; waited++)
+        {
+          regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+          if ((regval & (CAN_TSR_RQCP0 | CAN_TSR_RQCP1 | CAN_TSR_RQCP2)) != 0)
+            {
+              gd32can_harvest_txdone(dev);
+              regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+              break;
+            }
+
+          if (gd32can_txmb0empty(regval) || gd32can_txmb1empty(regval) ||
+              gd32can_txmb2empty(regval))
+            {
+              break;
+            }
+
+          up_udelay(1);
+        }
+    }
+
   caninfo("CAN%" PRIu8 " TSR: %08" PRIx32 "\n", priv->port, regval);
 
   return gd32can_txmb0empty(regval) || gd32can_txmb1empty(regval) ||
@@ -1496,6 +1636,8 @@ static bool gd32can_txempty(struct can_dev_s *dev)
 {
   struct gd32_can_s *priv = dev->cd_priv;
   uint32_t regval;
+
+  gd32can_harvest_txdone(dev);
 
   /* Return true if all mailboxes are available */
 
@@ -1684,62 +1826,122 @@ static int gd32can_rx1interrupt(int irq, void *context, void *arg)
 static int gd32can_txinterrupt(int irq, void *context, void *arg)
 {
   struct can_dev_s *dev = (struct can_dev_s *)arg;
+
+  (void)irq;
+  (void)context;
+
+  gd32can_harvest_txdone(dev);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: gd32can_harvest_txdone
+ *
+ * Description:
+ *   Clear RQCP* and notify the upper half for each completed mailbox.
+ *   Safe to call from the TX IRQ or from the poll path (txready/send) when
+ *   NART completions have set RQCP but TMEIE/IRQ has not yet run. Nested
+ *   calls (can_txdone -> can_xmit -> txready) are ignored via harvesting.
+ *
+ ****************************************************************************/
+
+/* Rate-limited proof that mailboxes actually complete (TXOK or TERR). */
+
+static uint32_t g_gd32can_txdone_n;
+
+static void gd32can_log_txdone(struct gd32_can_s *priv, int mb,
+                               uint32_t tsr)
+{
+  uint32_t esr;
+  uint32_t mcr;
+  uint32_t shift = (uint32_t)mb * 8u;
+  int txok = (tsr & (CAN_TSR_TXOK0 << shift)) != 0;
+  int terr = (tsr & (CAN_TSR_TERR0 << shift)) != 0;
+  int alst = (tsr & (CAN_TSR_ALST0 << shift)) != 0;
+
+  g_gd32can_txdone_n++;
+
+  /* Never syslog from IRQ: RTT/printf paths can delay RQCP reclaim and
+   * starve the upper-half TX FIFO (EAGAIN storm). Thread/poll harvest
+   * may log; IRQ only bumps the counter.
+   */
+
+  if (up_interrupt_context())
+    {
+      return;
+    }
+
+  if (g_gd32can_txdone_n > 8 && (g_gd32can_txdone_n % 200) != 0)
+    {
+      return;
+    }
+
+  esr = gd32can_getreg(priv, GD32_CAN_ESR_OFFSET);
+  mcr = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+  syslog(LOG_INFO,
+         "gd32can: TX done n=%lu mb=%d TXOK=%d TERR=%d ALST=%d "
+         "ESR=0x%08" PRIx32 " TEC=%lu REC=%lu NART=%d "
+         "(alone-on-bus+NART => TXOK=0 TERR=1 is OK; "
+         "TXOK=1 => ACK/loopback)\n",
+         (unsigned long)g_gd32can_txdone_n, mb, txok, terr, alst,
+         esr,
+         (unsigned long)((esr >> 16) & 0xff),
+         (unsigned long)((esr >> 24) & 0xff),
+         (mcr & CAN_MCR_NART) != 0);
+}
+
+static void gd32can_harvest_txdone(struct can_dev_s *dev)
+{
   struct gd32_can_s *priv;
   uint32_t regval;
+  uint32_t rqcp;
+  int mb;
+  int pass;
 
   DEBUGASSERT(dev != NULL && dev->cd_priv != NULL);
   priv = dev->cd_priv;
 
-  /* Get the transmit status */
-
-  regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
-
-  /* Check for RQCP0: Request completed mailbox 0 */
-
-  if ((regval & CAN_TSR_RQCP0) != 0)
+  if (priv->harvesting)
     {
-      /* Writing '1' to RCP0 clears RCP0 and all the status bits (TXOK0,
-       * ALST0 and TERR0) for Mailbox 0.
-       */
-
-      gd32can_putreg(priv, GD32_CAN_TSR_OFFSET, CAN_TSR_RQCP0);
-
-      /* Tell the upper half that the transfer is finished. */
-
-      can_txdone(dev);
+      return;
     }
 
-  /* Check for RQCP1: Request completed mailbox 1 */
+  priv->harvesting = 1;
 
-  if ((regval & CAN_TSR_RQCP1) != 0)
+  /* Clear every RQCP and notify upper half.  Multiple passes cover:
+   *  (1) all three mailboxes completing together
+   *  (2) can_txdone -> can_xmit queuing a new frame that finishes early
+   * RQCP must be cleared even on TERR (alone-on-bus + NART) or TME stays
+   * masked by our txmb*empty() check and the S/W FIFO never drains.
+   */
+
+  for (pass = 0; pass < 8; pass++)
     {
-      /* Writing '1' to RCP1 clears RCP1 and all the status bits (TXOK1,
-       * ALST1 and TERR1) for Mailbox 1.
-       */
+      regval = gd32can_getreg(priv, GD32_CAN_TSR_OFFSET);
+      if ((regval & (CAN_TSR_RQCP0 | CAN_TSR_RQCP1 | CAN_TSR_RQCP2)) == 0)
+        {
+          break;
+        }
 
-      gd32can_putreg(priv, GD32_CAN_TSR_OFFSET, CAN_TSR_RQCP1);
+      for (mb = 0; mb < 3; mb++)
+        {
+          rqcp = (uint32_t)CAN_TSR_RQCP0 << (mb * 8);
+          if ((regval & rqcp) == 0)
+            {
+              continue;
+            }
 
-      /* Tell the upper half that the transfer is finished. */
+          /* Clear RQCP first (frees TME for txmb*empty), then log/notify.
+           * Status bits are taken from the pre-clear snapshot.
+           */
 
-      can_txdone(dev);
+          gd32can_putreg(priv, GD32_CAN_TSR_OFFSET, rqcp);
+          gd32can_log_txdone(priv, mb, regval);
+          can_txdone(dev);
+        }
     }
 
-  /* Check for RQCP2: Request completed mailbox 2 */
-
-  if ((regval & CAN_TSR_RQCP2) != 0)
-    {
-      /* Writing '1' to RCP2 clears RCP2 and all the status bits (TXOK2,
-       * ALST2 and TERR2) for Mailbox 2.
-       */
-
-      gd32can_putreg(priv, GD32_CAN_TSR_OFFSET, CAN_TSR_RQCP2);
-
-      /* Tell the upper half that the transfer is finished. */
-
-      can_txdone(dev);
-    }
-
-  return OK;
+  priv->harvesting = 0;
 }
 
 #ifdef CONFIG_CAN_ERRORS
@@ -2051,6 +2253,50 @@ static int gd32can_bittiming(struct gd32_can_s *priv)
 }
 
 /****************************************************************************
+ * Name: gd32can_wait_msr
+ *
+ * Description:
+ *   Poll CAN_MSR until (msr & mask) is set or clear, with a real-time budget.
+ *
+ ****************************************************************************/
+
+static int gd32can_wait_msr(struct gd32_can_s *priv, uint32_t mask,
+                            bool want_set, uint32_t timeout_us)
+{
+  uint32_t waited = 0;
+  uint32_t regval;
+
+  while (waited < timeout_us)
+    {
+      regval = gd32can_getreg(priv, GD32_CAN_MSR_OFFSET);
+      if (want_set)
+        {
+          if ((regval & mask) != 0)
+            {
+              return OK;
+            }
+        }
+      else if ((regval & mask) == 0)
+        {
+          return OK;
+        }
+
+      up_udelay(10);
+      waited += 10;
+    }
+
+  syslog(LOG_ERR,
+         "gd32can: CAN%" PRIu8 " wait MSR mask=0x%" PRIx32 " want=%d "
+         "timeout MCR=0x%08" PRIx32 " MSR=0x%08" PRIx32
+         " ESR=0x%08" PRIx32 "\n",
+         priv->port, mask, want_set ? 1 : 0,
+         gd32can_getreg(priv, GD32_CAN_MCR_OFFSET),
+         gd32can_getreg(priv, GD32_CAN_MSR_OFFSET),
+         gd32can_getreg(priv, GD32_CAN_ESR_OFFSET));
+  return -ETIMEDOUT;
+}
+
+/****************************************************************************
  * Name: gd32can_enterinitmode
  *
  * Description:
@@ -2069,9 +2315,17 @@ static int gd32can_bittiming(struct gd32_can_s *priv)
 static int gd32can_enterinitmode(struct gd32_can_s *priv)
 {
   uint32_t regval;
-  volatile uint32_t timeout;
+  int ret;
 
   caninfo("CAN%" PRIu8 "\n", priv->port);
+
+  /* Already in init? */
+
+  regval = gd32can_getreg(priv, GD32_CAN_MSR_OFFSET);
+  if ((regval & CAN_MSR_INAK) != 0)
+    {
+      return OK;
+    }
 
   /* Enter initialization mode */
 
@@ -2079,28 +2333,13 @@ static int gd32can_enterinitmode(struct gd32_can_s *priv)
   regval |= CAN_MCR_INRQ;
   gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
 
-  /* Wait until initialization mode is acknowledged */
-
-  for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
-    {
-      regval = gd32can_getreg(priv, GD32_CAN_MSR_OFFSET);
-      if ((regval & CAN_MSR_INAK) != 0)
-        {
-          /* We are in initialization mode */
-
-          break;
-        }
-    }
-
-  /* Check for a timeout */
-
-  if (timeout < 1)
+  ret = gd32can_wait_msr(priv, CAN_MSR_INAK, true, CAN_INIT_TIMEOUT_US);
+  if (ret < 0)
     {
       canerr("ERROR: Timed out waiting to enter initialization mode\n");
-      return -ETIMEDOUT;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -2120,7 +2359,7 @@ static int gd32can_enterinitmode(struct gd32_can_s *priv)
 static int gd32can_exitinitmode(struct gd32_can_s *priv)
 {
   uint32_t regval;
-  volatile uint32_t timeout;
+  int ret;
 
   /* Exit Initialization mode, enter Normal mode */
 
@@ -2128,29 +2367,45 @@ static int gd32can_exitinitmode(struct gd32_can_s *priv)
   regval &= ~CAN_MCR_INRQ;
   gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
 
-  /* Wait until the initialization mode exit is acknowledged */
-
-  for (timeout = INAK_TIMEOUT; timeout > 0; timeout--)
+  ret = gd32can_wait_msr(priv, CAN_MSR_INAK, false, CAN_INIT_TIMEOUT_US);
+  if (ret == OK)
     {
-      regval = gd32can_getreg(priv, GD32_CAN_MSR_OFFSET);
-      if ((regval & CAN_MSR_INAK) == 0)
-        {
-          /* We are out of initialization mode */
-
-          break;
-        }
+      return OK;
     }
 
-  /* Check for a timeout */
+  /* Leaving init needs 11 recessive bits on RX. Stuck-dominant / no
+   * transceiver blocks that. Enable LBKM while still in init so the cell
+   * can sync; bxCAN still drives CANTX (HIL analyzer can see TX).
+   */
 
-  if (timeout < 1)
+  canerr("ERROR: exit init timed out; retry with LBKM\n");
+
+  regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+  regval |= CAN_MCR_INRQ;
+  gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
+  if (gd32can_wait_msr(priv, CAN_MSR_INAK, true, CAN_INIT_TIMEOUT_US) < 0)
     {
-      canerr("ERROR: Timed out waiting to exit initialization mode: %08"
-                  PRIx32 "\n", regval);
       return -ETIMEDOUT;
     }
 
-  return OK;
+  regval  = gd32can_getreg(priv, GD32_CAN_BTR_OFFSET);
+  regval |= CAN_BTR_LBKM;
+  gd32can_putreg(priv, GD32_CAN_BTR_OFFSET, regval);
+
+  regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+  regval &= ~CAN_MCR_INRQ;
+  gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
+
+  ret = gd32can_wait_msr(priv, CAN_MSR_INAK, false, CAN_INIT_TIMEOUT_US);
+  if (ret == OK)
+    {
+      syslog(LOG_WARNING,
+             "gd32can: CAN%" PRIu8 " forced LBKM after exit-init timeout "
+             "(check CAN transceiver/bus idle; CANTX still driven)\n",
+             priv->port);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2174,11 +2429,21 @@ static int gd32can_cellinit(struct gd32_can_s *priv)
 
   caninfo("CAN%" PRIu8 "\n", priv->port);
 
-  /* Exit from sleep mode */
+  /* After RCU reset (can_register), the cell boots asleep. Clear SLEEP and
+   * wait for SLAK=0 before INRQ. Skipping the SLAK wait makes enter-init
+   * miss INAK within a short busy-loop ? open() errno=110 (ETIMEDOUT).
+   */
 
   regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
   regval &= ~CAN_MCR_SLEEP;
   gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
+
+  ret = gd32can_wait_msr(priv, CAN_MSR_SLAK, false, CAN_INIT_TIMEOUT_US);
+  if (ret < 0)
+    {
+      canerr("ERROR: Timed out leaving sleep mode (SLAK)\n");
+      return ret;
+    }
 
   ret = gd32can_enterinitmode(priv);
   if (ret != 0)
@@ -2189,20 +2454,21 @@ static int gd32can_cellinit(struct gd32_can_s *priv)
   /* Disable the following modes:
    *
    *  - Time triggered communication mode
-   *  - Automatic bus-off management
    *  - Automatic wake-up mode
-   *  - No automatic retransmission
    *  - Receive FIFO locked mode
    *
    * Enable:
    *
    *  - Transmit FIFO priority
+   *  - NART (no automatic retransmission): without a peer ACK the bxCAN
+   *    mailboxes never free and the upper-half TX queue sticks full.
+   *    HIL / alone-on-bus needs NART so each TX completes with TERR+RQCP.
+   *  - ABOM: recover from error-passive / bus-off after no-ACK TEC climb.
    */
 
   regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
-  regval &= ~(CAN_MCR_RFLM | CAN_MCR_NART | CAN_MCR_AWUM |
-              CAN_MCR_ABOM | CAN_MCR_TTCM);
-  regval |=  CAN_MCR_TXFP;
+  regval &= ~(CAN_MCR_RFLM | CAN_MCR_AWUM | CAN_MCR_TTCM);
+  regval |=  CAN_MCR_TXFP | CAN_MCR_NART | CAN_MCR_ABOM;
   gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
 
   /* Configure bit timing. */
@@ -2214,7 +2480,26 @@ static int gd32can_cellinit(struct gd32_can_s *priv)
       return ret;
     }
 
-  return gd32can_exitinitmode(priv);
+  ret = gd32can_exitinitmode(priv);
+  if (ret != 0)
+    {
+      return ret;
+    }
+
+  /* Soft bits are writable in normal mode; re-assert after leaving init so
+   * a bit-timing/BTR write path cannot leave NART cleared by accident.
+   */
+
+  regval  = gd32can_getreg(priv, GD32_CAN_MCR_OFFSET);
+  regval |= CAN_MCR_NART | CAN_MCR_ABOM | CAN_MCR_TXFP;
+  gd32can_putreg(priv, GD32_CAN_MCR_OFFSET, regval);
+
+  caninfo("CAN%" PRIu8 " MCR after cellinit: %08" PRIx32
+          " (NART=%d ABOM=%d)\n",
+          priv->port, regval,
+          (regval & CAN_MCR_NART) != 0,
+          (regval & CAN_MCR_ABOM) != 0);
+  return OK;
 }
 
 /****************************************************************************
@@ -2511,6 +2796,22 @@ struct can_dev_s *gd32_caninitialize(int port)
 
       gd32_gpio_config(GPIO_CAN0_RX);
       gd32_gpio_config(GPIO_CAN0_TX);
+
+      /* Prove PA11/PA12 are AF9 (CAN0), not USB/GPIO. */
+
+        {
+          uint32_t ctl = getreg32(GD32_GPIO_CTL(GD32_GPIOA));
+          uint32_t af1 = getreg32(GD32_GPIO_AFSEL1(GD32_GPIOA));
+          unsigned m11 = (ctl >> GPIO_MODE_SHIFT(11)) & 3u;
+          unsigned m12 = (ctl >> GPIO_MODE_SHIFT(12)) & 3u;
+          unsigned a11 = (af1 >> 12) & 0xfu; /* pin11 nibble in AFSEL1 */
+          unsigned a12 = (af1 >> 16) & 0xfu; /* pin12 */
+
+          syslog(LOG_INFO,
+                 "gd32can: CAN0 pins PA11/PA12 CTL mode=%u/%u "
+                 "(want AF=2) AFSEL=%u/%u (want 9)\n",
+                 m11, m12, a11, a12);
+        }
     }
   else
 #endif

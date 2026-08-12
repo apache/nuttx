@@ -736,16 +736,27 @@ static ssize_t can_write(FAR struct file *filep, FAR const char *buffer,
           /* The transmit sender is full. In order to resolve the Lower half
            * interrupt exception, attempt to release invalid unconfirm
            * messages and trigger can_xmit.
+           *
+           * IMPORTANT: lower-half txempty()/txready() may harvest RQCP and
+           * call can_txdone() as a side effect (alone-on-bus NART: TERR+RQCP).
+           * That frees S/W FIFO space even when H/W is not fully empty.
+           * Always re-check TX_FULL before returning -EAGAIN.
            */
 
           if (dev_txempty(dev))
             {
               can_send_done(sender);
+            }
+          else
+            {
+              /* Kick RQCP harvest via txready while some mailboxes busy. */
 
-              if (!TX_FULL(sender))
-                {
-                  break;
-                }
+              (void)dev_txready(dev);
+            }
+
+          if (!TX_FULL(sender))
+            {
+              break;
             }
 
           /* The transmit sender is full  -- non-blocking mode selected? */
