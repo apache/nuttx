@@ -80,7 +80,10 @@ ifeq ($(CONFIG_RTC_PCF8563),y)
 endif
 
 ifeq ($(CONFIG_TIMER_SP804),y)
-  CSRCS += sp804.c
+  CSRCS += sp804_oneshot.c
+ifeq ($(CONFIG_TIMER),y)
+  CSRCS += sp804_timer.c
+endif
   TMRDEPPATH = --dep-path timers
   TMRVPATH = :timers
 endif
