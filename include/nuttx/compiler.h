@@ -79,6 +79,15 @@
 #  define CONFIG_HAVE_CXX14 1
 #endif
 
+/* Keyword about _Atomic */
+
+#if defined(__cplusplus) || defined(__clang__) || \
+    !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
+#  define __Atomic(t) t
+#else
+#  define __Atomic(t) _Atomic(t)
+#endif
+
 /* Green Hills Software definitions *****************************************/
 
 #if defined(__ghs__)
@@ -1383,44 +1392,28 @@
 /* Atomic functions. */
 
 #  ifdef CONFIG_LIBC_ATOMIC_TOOLCHAIN
-#    define atomic_store_4(obj, val, memorder) \
-       __c11_atomic_store((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_store_8(obj, val, memorder) \
-       __c11_atomic_store((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_load_4(obj, memorder) \
-       __c11_atomic_load((FAR volatile _Atomic int32_t*)obj, memorder)
-#    define atomic_load_8(obj, memorder) \
-       __c11_atomic_load((FAR volatile _Atomic int64_t*)obj, memorder)
-#    define atomic_fetch_add_4(obj, val, memorder) \
-       __c11_atomic_fetch_add((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_fetch_add_8(obj, val, memorder) \
-       __c11_atomic_fetch_add((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_fetch_sub_4(obj, val, memorder) \
-       __c11_atomic_fetch_sub((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_fetch_sub_8(obj, val, memorder) \
-       __c11_atomic_fetch_sub((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_fetch_and_4(obj, val, memorder) \
-       __c11_atomic_fetch_and((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_fetch_and_8(obj, val, memorder) \
-       __c11_atomic_fetch_and((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_fetch_or_4(obj, val, memorder) \
-       __c11_atomic_fetch_or((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_fetch_or_8(obj, val, memorder) \
-       __c11_atomic_fetch_or((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_fetch_xor_4(obj, val, memorder) \
-       __c11_atomic_fetch_xor((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_fetch_xor_8(obj, val, memorder) \
-       __c11_atomic_fetch_xor((FAR volatile _Atomic int64_t*)obj, val, memorder)
-#    define atomic_exchange_4(obj, val, memorder) \
-       __c11_atomic_exchange((FAR volatile _Atomic int32_t*)obj, val, memorder)
-#    define atomic_exchange_8(obj, val, memorder) \
-       __c11_atomic_exchange((FAR volatile _Atomic int64_t*)obj, val, memorder)
+#    define atomic_store_4(obj, val, memorder)     __c11_atomic_store(obj, val, memorder)
+#    define atomic_store_8(obj, val, memorder)     __c11_atomic_store(obj, val, memorder)
+#    define atomic_load_4(obj, memorder)           __c11_atomic_load(obj, memorder)
+#    define atomic_load_8(obj, memorder)           __c11_atomic_load(obj, memorder)
+#    define atomic_fetch_add_4(obj, val, memorder) __c11_atomic_add(obj, val, memorder)
+#    define atomic_fetch_add_8(obj, val, memorder) __c11_atomic_add(obj, val, memorder)
+#    define atomic_fetch_sub_4(obj, val, memorder) __c11_atomic_sub(obj, val, memorder)
+#    define atomic_fetch_sub_8(obj, val, memorder) __c11_atomic_sub(obj, val, memorder)
+#    define atomic_fetch_and_4(obj, val, memorder) __c11_atomic_and(obj, val, memorder)
+#    define atomic_fetch_and_8(obj, val, memorder) __c11_atomic_and(obj, val, memorder)
+#    define atomic_fetch_or_4(obj, val, memorder)  __c11_atomic_or(obj, val, memorder)
+#    define atomic_fetch_or_8(obj, val, memorder)  __c11_atomic_or(obj, val, memorder)
+#    define atomic_fetch_xor_4(obj, val, memorder) __c11_atomic_xor(obj, val, memorder)
+#    define atomic_fetch_xor_8(obj, val, memorder) __c11_atomic_xor(obj, val, memorder)
+#    define atomic_exchange_4(obj, val, memorder)  __c11_atomic_exchange(obj, val, memorder)
+#    define atomic_exchange_8(obj, val, memorder)  __c11_atomic_exchange(obj, val, memorder)
 #    define atomic_compare_exchange_4(obj, expected, desired, weak, success, failure) \
-       ((weak) ? __c11_atomic_compare_exchange_weak((FAR volatile _Atomic int32_t*)obj, expected, desired, success, failure) \
-               : __c11_atomic_compare_exchange_strong((FAR volatile _Atomic int32_t*)obj, expected, desired, success, failure))
+       ((weak) ? __c11_atomic_compare_exchange_weak(obj, expected, desired, success, failure) \
+               : __c11_atomic_compare_exchange_strong(obj, expected, desired, success, failure))
 #    define atomic_compare_exchange_8(obj, expected, desired, weak, success, failure) \
-       ((weak) ? __c11_atomic_compare_exchange_weak((FAR volatile _Atomic int64_t*)obj, expected, desired, success, failure) \
-               : __c11_atomic_compare_exchange_strong((FAR volatile _Atomic int64_t*)obj, expected, desired, success, failure))
+       ((weak) ? __c11_atomic_compare_exchange_weak(obj, expected, desired, success, failure) \
+               : __c11_atomic_compare_exchange_strong(obj, expected, desired, success, failure))
 #  endif
 
 /* Unknown compiler *********************************************************/
