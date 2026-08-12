@@ -550,4 +550,23 @@ int fdt_sp804_devices_register(FAR const void *fdt, int irqbase);
 #ifdef CONFIG_WATCHDOG_CMSDK
 int fdt_cmsdk_wdt_devices_register(FAR const void *fdt, int irqbase);
 #endif
+
+/****************************************************************************
+ * Name: fdt_qemu_fwcfg_register
+ *
+ * Description:
+ *   This function is used to register the QEMU fw_cfg device from the
+ *   device tree
+ *
+ * Input Parameters:
+ *   fdt - Device tree handle
+ *
+ * Returned Value:
+ *   Return 0 if success, negative if failed
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_QEMU_FWCFG
+int fdt_qemu_fwcfg_register(FAR const void *fdt);
+#endif
 #endif /* __INCLUDE_NUTTX_FDT_H */

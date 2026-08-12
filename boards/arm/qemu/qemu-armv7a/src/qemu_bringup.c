@@ -93,6 +93,14 @@ static void register_devices_from_fdt(void)
     }
 #endif
 
+#ifdef CONFIG_QEMU_FWCFG
+  ret = fdt_qemu_fwcfg_register(fdt);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "fdt_qemu_fwcfg_register failed, ret=%d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
 }
 
