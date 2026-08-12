@@ -92,6 +92,64 @@ static int sim_buttonmap(int state, int button)
 #endif
 
 /****************************************************************************
+ * Name: sim_mousebuttonmap
+ *
+ * Description:
+ *   Same idea as sim_buttonmap() above, but producing a bitmap in
+ *   struct mouse_report_s's MOUSE_BUTTON_1/2/3 numbering (see
+ *   include/nuttx/input/mouse.h) instead of touch_sample_s's single
+ *   undifferentiated "pen down" bit -- the whole point of
+ *   CONFIG_SIM_MOUSE over CONFIG_SIM_TOUCHSCREEN is to keep which
+ *   physical button was pressed. Not including that header here since
+ *   it's the only thing that would pull NuttX input headers into this
+ *   host-compiled (HOSTSRCS) file; the three bit values are hand-rolled
+ *   instead, matching MOUSE_BUTTON_1=1, MOUSE_BUTTON_2=2, MOUSE_BUTTON_3=4.
+ *
+ *   Note X11's own button numbering has Button2 as the *middle* button
+ *   and Button3 as the *right* button (Button1 is left, same as
+ *   everywhere else) -- MOUSE_BUTTON_2/3 need the opposite assignment
+ *   (right, then middle) to match, so this cannot just reuse
+ *   sim_buttonmap()'s bit positions.
+ ****************************************************************************/
+
+#ifdef CONFIG_SIM_MOUSE
+static int sim_mousebuttonmap(int state, int button)
+{
+  int buttons = 0;
+
+  if ((state & Button1Mask) != 0)
+    {
+      buttons |= 1;   /* MOUSE_BUTTON_1: left */
+    }
+
+  if ((state & Button2Mask) != 0)
+    {
+      buttons |= 4;   /* MOUSE_BUTTON_3: middle */
+    }
+
+  if ((state & Button3Mask) != 0)
+    {
+      buttons |= 2;   /* MOUSE_BUTTON_2: right */
+    }
+
+  switch (button)
+    {
+      case Button1:
+        buttons ^= 1;
+        break;
+      case Button2:
+        buttons ^= 4;
+        break;
+      case Button3:
+        buttons ^= 2;
+        break;
+    }
+
+  return buttons;
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -144,6 +202,46 @@ void sim_x11events(void)
               sim_buttonevent(event.xbutton.x, event.xbutton.y,
                               sim_buttonmap(event.xbutton.state,
                                           event.xbutton.button));
+            }
+            break;
+          #endif
+
+          #ifdef CONFIG_SIM_MOUSE
+          case MotionNotify : /* Enabled by PointerMotionMask */
+            {
+              sim_mouseevent(event.xmotion.x, event.xmotion.y,
+                             sim_mousebuttonmap(event.xmotion.state, 0), 0);
+            }
+            break;
+
+          case ButtonPress  : /* Enabled by ButtonPressMask */
+          case ButtonRelease: /* Enabled by ButtonReleaseMask */
+            {
+              /* Buttons 4/5 are the traditional X11 scroll-wheel
+               * encoding: a Press/Release pair fires on every "click"
+               * of the wheel, with no held state of its own -- report
+               * the wheel delta on Press only (matching how a real
+               * mouse_report_s sample is consumed once, not polled as
+               * persistent state), and pass through the *other*
+               * buttons' current state unchanged either way.
+               */
+
+              int wheel = 0;
+
+              if (event.type == ButtonPress && event.xbutton.button == 4)
+                {
+                  wheel = 1;
+                }
+              else if (event.type == ButtonPress &&
+                       event.xbutton.button == 5)
+                {
+                  wheel = -1;
+                }
+
+              sim_mouseevent(event.xbutton.x, event.xbutton.y,
+                             sim_mousebuttonmap(event.xbutton.state,
+                                                event.xbutton.button),
+                             wheel);
             }
             break;
           #endif
