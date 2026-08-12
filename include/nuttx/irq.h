@@ -226,7 +226,7 @@ extern "C"
 #  if !defined(CONFIG_ARCH_IRQ_TO_NDX)
 extern irq_mapped_t g_irqmap[];
 #  endif
-extern int g_irqrevmap[];
+extern irq_t g_irqrevmap[];
 int irq_to_ndx(int irq);
 #elif defined(CONFIG_ARCH_MINIMAL_VECTORTABLE)
 extern const irq_mapped_t g_irqmap[];
