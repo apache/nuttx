@@ -29,6 +29,10 @@ if(CONFIG_WATCHDOG)
   endif()
 endif()
 
+if(CONFIG_WATCHDOG_CMSDK)
+  list(APPEND SRCS cmsdk_wdt.c)
+endif()
+
 if(CONFIG_TIMER)
   list(APPEND SRCS timer.c)
 endif()

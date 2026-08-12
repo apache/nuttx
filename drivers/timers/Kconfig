@@ -651,6 +651,17 @@ endif # WATCHDOG_AUTOMONITOR_TASKS
 
 endif # WATCHDOG_AUTOMONITOR
 
+config WATCHDOG_CMSDK
+	bool "ARM CMSDK APB Watchdog support"
+	default n
+	---help---
+		Enables the lower-half driver for the ARM CMSDK APB Watchdog
+		(the watchdog IP defined in the ARM Cortex-M System Design Kit
+		TRM, ARM DDI 0479), as modelled by QEMU's cmsdk-apb-watchdog.
+		The device implements a two-stage timeout: the first expiry
+		raises an early-warning interrupt and, if the counter is not
+		reloaded, the second expiry asserts a system reset.
+
 endif # WATCHDOG
 
 config TIMERS_CS2100CP
