@@ -208,6 +208,9 @@ endif
 ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
   CSRCS += sim_touchscreen.c
   HOSTSRCS += sim_x11eventloop.c
+else ifeq ($(CONFIG_SIM_MOUSE),y)
+  CSRCS += sim_mouse.c
+  HOSTSRCS += sim_x11eventloop.c
 else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
   CSRCS += sim_ajoystick.c
   HOSTSRCS += sim_x11eventloop.c

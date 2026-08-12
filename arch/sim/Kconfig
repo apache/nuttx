@@ -570,6 +570,21 @@ config SIM_TOUCHSCREEN
 	---help---
 		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
 
+config SIM_MOUSE
+	bool "X11 Mouse Emulation"
+	select INPUT_MOUSE
+	depends on SIM_X11FB
+	---help---
+		Support a full X11 mouse emulation, reporting left/right/middle
+		button identity and the scroll wheel via /dev/mouseN (struct
+		mouse_report_s). Unlike SIM_TOUCHSCREEN, which folds every X11
+		mouse button into one undifferentiated "pen down" contact
+		(matching real touchscreen hardware, which has no concept of a
+		second or third button), this preserves which physical button
+		was pressed -- needed by any GUI that distinguishes a right-click
+		context menu or middle-click from an ordinary left click.
+		Also needs INPUT=y
+
 config SIM_AJOYSTICK
 	bool "X11 mouse-based analog joystick emulation"
 	depends on SIM_X11FB

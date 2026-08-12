@@ -329,6 +329,14 @@ int sim_tsc_initialize(int minor);
 int sim_tsc_uninitialize(void);
 #endif
 
+/* sim_mouse.c **************************************************************/
+
+#ifdef CONFIG_SIM_MOUSE
+int sim_mouse_initialize(int minor);
+int sim_mouse_uninitialize(void);
+void sim_mouseevent(int x, int y, int buttons, int wheel);
+#endif
+
 /* sim_keyboard.c ***********************************************************/
 
 #ifdef CONFIG_SIM_KEYBOARD
@@ -339,7 +347,8 @@ void sim_kbdevent(uint32_t key, bool is_press);
 /* sim_eventloop.c **********************************************************/
 
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_ARCH_BUTTONS) || defined(CONFING_SIM_KEYBOARD)
+    defined(CONFIG_ARCH_BUTTONS) || defined(CONFIG_SIM_KEYBOARD) || \
+    defined(CONFIG_SIM_MOUSE)
 void sim_x11events(void);
 void sim_buttonevent(int x, int y, int buttons);
 #endif
