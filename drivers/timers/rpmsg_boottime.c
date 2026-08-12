@@ -393,6 +393,8 @@ static void rpmsg_boottime_client_created(FAR struct rpmsg_device *rdev,
       client->ept.priv = client;
       client->ept.release_cb = rpmsg_boottime_client_ept_release;
       client->ept.ns_bound_cb = rpmsg_boottime_client_ns_bound;
+
+      rpmsg_set_priority(&client->ept, RPMSG_PRIO_RT);
       rpmsg_create_ept(&client->ept, rdev, RPMSG_BOOTTIME_EPT_NAME,
                        RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                        rpmsg_boottime_ept_cb, NULL);
