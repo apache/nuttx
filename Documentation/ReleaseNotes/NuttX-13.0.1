@@ -1,0 +1,206 @@
+NuttX-13.0.1
+------------
+
+What's New In This Release
+Changes to Core OS
+
+Sched
+[#19479](https://github.com/apache/nuttx/pull/19479) sched/backtrace: fix cross-CPU buffer access under addrenv
+[#19487](https://github.com/apache/nuttx/pull/19487) sched: avoid dumping raw memory at address 0 for tasks without kstack
+[#19544](https://github.com/apache/nuttx/pull/19544) sched/addrenv: do not dereference a NULL address environment
+[#19563](https://github.com/apache/nuttx/pull/19563) sched/sched_critmonitor: remove duplicate preemption start block
+[#19587](https://github.com/apache/nuttx/pull/19587) sched/sched: Fix uninitialized sporadic params returned by nxsched_get_param()
+
+MM
+[#19581](https://github.com/apache/nuttx/pull/19581) mm/ubsan: fix signed inline value decoding
+
+libs
+[#19444](https://github.com/apache/nuttx/pull/19444) libs/libc: Fix divide-by-zero in stat() with large filesystem block sizes
+[#19497](https://github.com/apache/nuttx/pull/19497) lib/math32: Avoid __uint128_t casts for LDC ImportC
+[#19513](https://github.com/apache/nuttx/pull/19513) libs/libbuiltin/compiler-rt: skip unsupported Arm VFP builtins asm
+[#19516](https://github.com/apache/nuttx/pull/19516) libc/time: Fix POSIX timezone string parsing
+
+Tools
+[#19477](https://github.com/apache/nuttx/pull/19477) tools/Zig.defs: Fix Zig builds on sim:x86_64
+[#19566](https://github.com/apache/nuttx/pull/19566) tools/mkallsyms.py: let the dependency error actually reach the user
+[#19569](https://github.com/apache/nuttx/pull/19569) tools: fix stale archive members surviving a Kconfig-driven CSRCS change
+
+Various Improvements
+Audio
+[#19686](https://github.com/apache/nuttx/pull/19686) audio: fix private buffer allocation and document the upper half
+Crypto
+[#19294](https://github.com/apache/nuttx/pull/19294) crypto: Support SHA2_224_HMAC
+[#19396](https://github.com/apache/nuttx/pull/19396) crypto: Add standalone CHACHA20 stream cipher on the unified enc path
+[#19403](https://github.com/apache/nuttx/pull/19403) crypto: add CRYPTO_CHACHA20_DJB variant (64-bit counter/nonce)
+Syscall
+[#19727](https://github.com/apache/nuttx/pull/19727) syscall: add missing memory locking and clock_getres entries
+Video
+[#19053](https://github.com/apache/nuttx/pull/19053) video/fb: Handle case of multiple displays where some do not require update
+[#19466](https://github.com/apache/nuttx/pull/19466) video: fix EDID standard timing decode
+[#19685](https://github.com/apache/nuttx/pull/19685) video/rgbcolors: Fix RGBTO8 to use the high bits of each component
+
+Changes to the Build System
+Bug Fixes
+[#19464](https://github.com/apache/nuttx/pull/19464) cmake: Sanitize NAME for _main symbol generation
+[#19507](https://github.com/apache/nuttx/pull/19507) cmake: Do not link an executable to detect the compiler
+
+Architectural Support
+Bug Fixes
+[#19438](https://github.com/apache/nuttx/pull/19438) arch/common: fix host_flags_to_mode() O_RDONLY sentinel collision
+ARM
+[#19565](https://github.com/apache/nuttx/pull/19565) arch/arm: carry CONTROL over to the fork child on Cortex-M
+[#19486](https://github.com/apache/nuttx/pull/19486) arch/arm: set PSPLIM to top of TLS region to protect it from overflow
+[#19691](https://github.com/apache/nuttx/pull/19691) arch/arm/kinetis/rtc: Enable global lock for all
+[#19746](https://github.com/apache/nuttx/pull/19746) arch/arm/nrf53: fix I2C3 base
+[#19542](https://github.com/apache/nuttx/pull/19542) arch/arm/nrf52,nrf53: don't pass HCI messages under the lock
+[#19378](https://github.com/apache/nuttx/pull/19378) arch/arm/rp2040,rp23xx: fix CDC-NCM bulk/notify endpoint handling
+[#19452](https://github.com/apache/nuttx/pull/19452) arch/arm/rp2040/rp23xx: implement endpoint stall queueing and GET_STATUS responses
+[#19574](https://github.com/apache/nuttx/pull/19574) arch/arm/rp2040/rp23xx: order the USB BUFF_STATUS clear before the AVAILABLE re-arm
+[#19450](https://github.com/apache/nuttx/pull/19450) arch/arm/rp2040/rp23xx: preserve SIE_CTRL.PULLUP_EN in usbdev_register
+[#19535](https://github.com/apache/nuttx/pull/19535) arch/arm/rp23xx: Fix six register/bit macro name clashes
+[#19520](https://github.com/apache/nuttx/pull/19520) arch/arm/stm32: Detach GPIO IRQ callbacks upon clearing "setevent"
+[#19385](https://github.com/apache/nuttx/pull/19385) arch/arm/stm32: fix H5 I2C kernel-clock register names
+[#19383](https://github.com/apache/nuttx/pull/19383) arch/arm/stm32: make STM32_FOC depend on MOTOR_FOC
+[#19395](https://github.com/apache/nuttx/pull/19395) arch/arm/stm32: make STM32_ETHMAC depend on NET
+[#19382](https://github.com/apache/nuttx/pull/19382) arch/arm/stm32: STM32_DTS depends on SENSORS
+[#19519](https://github.com/apache/nuttx/pull/19519) arch/arm/stm32g0: Fix FLASHIF typo
+[#19495](https://github.com/apache/nuttx/pull/19495) arch/arm/stm32h7: fix MDIO RDA field in c22 write
+[#19769](https://github.com/apache/nuttx/pull/19769) arch/arm/stm32h5: Fix handling of GPIO port I
+[#19506](https://github.com/apache/nuttx/pull/19506) arch/arm/stm32h7: invalidate dcache after aligned SDMMC RX DMA
+[#19701](https://github.com/apache/nuttx/pull/19701) arch/arm/stm32h5/serial: fix UART8 buffer guard typo
+ARM64
+[#19676](https://github.com/apache/nuttx/pull/19676) arch/arm64/imx9: Fix imx9 usdhc DMA initialization
+MIPS
+[#19784](https://github.com/apache/nuttx/pull/19784) arch/mips/Makefile: Add nuttx build with CONFIG_ALLSYMS enabled
+RISC-V
+[#19768](https://github.com/apache/nuttx/pull/19768) arch/risc-v/espressif: fix SPI IOMUX false positive without SPI2
+[#19439](https://github.com/apache/nuttx/pull/19439) arch/riscv: Fix RISC-V backtrace
+[#19364](https://github.com/apache/nuttx/pull/19364) arch/risc-v: reject overlapping leaf PTE in riscv_fillpage
+[#19377](https://github.com/apache/nuttx/pull/19377) arch/risc-v: kill faulting user task instead of panicking kernel
+[#19468](https://github.com/apache/nuttx/pull/19468) arch/risc-v: qemu: don't rewind interrupt stack sp on nested trap
+[#19471](https://github.com/apache/nuttx/pull/19471) arch/risc-v: fix fault handler misattributing kernel faults to user
+[#19718](https://github.com/apache/nuttx/pull/19718) arch/risc-v: fix uninitialized HW cmds and bus clock
+X86
+[#19567](https://github.com/apache/nuttx/pull/19567) arch/x86: default CROSSDEV on a macOS host
+X86_64
+[#19559](https://github.com/apache/nuttx/pull/19559) arch/x86_64: six fixes to make BUILD_KERNEL and the HPET alarm work
+[#19692](https://github.com/apache/nuttx/pull/19692) arch/x86_64: fix page table levels in pgalloc
+[#19791](https://github.com/apache/nuttx/pull/19791) arch/x86_64: fix kernel build issues found with LTP
+
+Driver Support
+Bug Fixes
+[#19184](https://github.com/apache/nuttx/pull/19184) drivers/serial: add job-control TTY ioctls
+[#19371](https://github.com/apache/nuttx/pull/19371) drivers/usbdev: re-assert soft connect in cdcecm/cdcncm disconnect()
+[#19373](https://github.com/apache/nuttx/pull/19373) drivers/i2s/i2schar: Fix return types
+[#19386](https://github.com/apache/nuttx/pull/19386) drivers/i2c: I2C_SLAVE_DRIVER depends on I2C_SLAVE
+[#19391](https://github.com/apache/nuttx/pull/19391) drivers/serial: hold xmit.lock around echo in uart_readv()
+[#19411](https://github.com/apache/nuttx/pull/19411) drivers/net/w5500: fix variable names in receive error path and d_private
+[#19415](https://github.com/apache/nuttx/pull/19415) drivers/spi/ice40: fix operator precedence in final clock cycle count
+[#19416](https://github.com/apache/nuttx/pull/19416) drivers/efuse: Multiple Drivers Are Registered With World Writable
+[#19419](https://github.com/apache/nuttx/pull/19419) drivers/contactless: fix uninitialized uid leak in mfrc522_read
+[#19433](https://github.com/apache/nuttx/pull/19433) drivers/watchdog: fix capture automonitor notifier context
+[#19437](https://github.com/apache/nuttx/pull/19437) drivers: Multiple Drivers Are Registered With World Writable (2)
+[#19451](https://github.com/apache/nuttx/pull/19451) drivers/usbdev: fix composite-mode class requests and BOT short-response handling
+[#19453](https://github.com/apache/nuttx/pull/19453) drivers: Multiple Drivers Are Registered With World Writable (3)
+[#19470](https://github.com/apache/nuttx/pull/19470) drivers/usbdev/cdcncm: fix TX corruption/wedge under write buffers
+[#19476](https://github.com/apache/nuttx/pull/19476) drivers/eeprom: I2C EEPROM Read/Write Kernel Operations Crash
+[#19502](https://github.com/apache/nuttx/pull/19502) drivers/mmcsd: fix eMMC bus width switch sequencing
+[#19522](https://github.com/apache/nuttx/pull/19522) drivers/video: zero message on MIPI DSI driver
+[#19568](https://github.com/apache/nuttx/pull/19568) drivers/syslog: fix syslog_write() returning -EIO on every write
+[#19571](https://github.com/apache/nuttx/pull/19571) drivers/ioexpander/iso1i813t: fix error startup condition
+[#19577](https://github.com/apache/nuttx/pull/19577) drivers/input: partial fix of indistinguishable ASCII and special keycodes
+[#19590](https://github.com/apache/nuttx/pull/19590) drivers/ioexpander: Fix GPIO expanders warnings
+[#19604](https://github.com/apache/nuttx/pull/19604) drivers/mmcsd: Fix finfo print modifier
+[#19632](https://github.com/apache/nuttx/pull/19632) drivers/usbdev/rndis: Fix reported MTU OID sizes
+[#19740](https://github.com/apache/nuttx/pull/19740) drivers/usbdev/cdcacm: fix self-deadlock in cdcuart_txempty()
+[#19742](https://github.com/apache/nuttx/pull/19742} drivers/usbhost: Refuse to register the same class driver twice
+
+Board Support
+Bug Fixes
+[#19498](https://github.com/apache/nuttx/pull/19498) boards: Dropbear defconfig crypto deps
+[#19492](https://github.com/apache/nuttx/pull/19492) boards: Fix/dropbear cryptodev defconfigs
+[#19481](https://github.com/apache/nuttx/pull/19481) boards/dropbear: retain child exit status for NSH PTY session
+ARM
+[#19538](https://github.com/apache/nuttx/pull/19538) boards/arm/mps2-an521: Correct the swapped UART0 TX and RX interrupts
+[#19361](https://github.com/apache/nuttx/pull/19361) boards/arm/mps3-an547: Fix error caused by updating nsh Kconfig
+[#19561](https://github.com/apache/nuttx/pull/19561) boards/arm/rp23xx: add missing rp23xx_st7735.c LCD board glue
+[#19431](https://github.com/apache/nuttx/pull/19431) boards/arm/stm32{f1,f4}: drop duplicated reset.c/romfs
+[#19454](https://github.com/apache/nuttx/pull/19454) boards/arm/stm32f3: nucleo-f302r8:ihm07m1_b16: enable LTO to fit flash
+[#19483](https://github.com/apache/nuttx/pull/19483) boards/arm/stm32f746g-disco: Add Dropbear SSH server support
+[#19257](https://github.com/apache/nuttx/pull/19257) boards/arm/stm32f746g-disco: Add support for Winbond W25Q128JVEQ flash chip
+[#19389](https://github.com/apache/nuttx/pull/19389) boards/arm/stm32h7: switch board common to boards/arm/common/stm32
+ARM64
+[#19427](https://github.com/apache/nuttx/pull/19427) boards/arm64/raspberrypi-4b/sd: Fix SD card issues
+RISC-V
+[#19474](https://github.com/apache/nuttx/pull/19474) boards/risc-v/esp32c3-devkit/dropbear: enable SCHED_HAVE_PARENT
+SIM
+[#19405](https://github.com/apache/nuttx/pull/19405) boards/sim: add dropbear board configuration
+[#19576](https://github.com/apache/nuttx/pull/19576) boards/sim: add ROMFS passwd and crypto deps for NSH console login
+[#19583](https://github.com/apache/nuttx/pull/19583) boards/sim: drop unused FSUTILS_PASSWD from sim defconfigs
+
+File System
+Bug Fixes
+[#19179](https://github.com/apache/nuttx/pull/19179) fs: widen ino_t to uint32_t and add d_ino to struct dirent
+[#19212](https://github.com/apache/nuttx/pull/19212) fs/vfs: provide link fallback without softlinks - #19212
+[#19394](https://github.com/apache/nuttx/pull/19394) fs/procfs: fix  environ read for another task under CONFIG_A
+[#19704](https://github.com/apache/nuttx/pull/19704) fs/pseudofile: fix buffer sizing and sparse growth
+[#19770](https://github.com/apache/nuttx/pull/19770) fs/romfs: fix node cache overflow in directories with >256 entries
+Networking
+Bug Fixes
+[#18857](https://github.com/apache/nuttx/pull/18857) net/sixlowpan: Check if g_frame_hdrlen + IPv6_HDRLEN <= iob->io_len
+[#19436](https://github.com/apache/nuttx/pull/19436) net/igmp: restore General Query handling broken by pointer compare
+[#19564](https://github.com/apache/nuttx/pull/19564) net/tcp: don't accept a reset connection as connected
+[#19589](https://github.com/apache/nuttx/pull/19589) net/tcp: Remove work_available check when updating retransmit timer
+[#19595](https://github.com/apache/nuttx/pull/19595) net: Fix IP fragment forwarding and L4 handling
+[#19801](https://github.com/apache/nuttx/pull/19781) net/udp: fix d_len corruption for 2nd+ SO_REUSEADDR listener
+
+
+Compatibility Concerns
+
+[#19209](https://github.com/apache/nuttx/pull/19209) !boards/nsh: Replace TEA password storage with PBKDF2-HMAC-SHA256 hashing
+
+Replace reversible TEA password storage in /etc/passwd with one-way PBKDF2-HMAC-SHA256 hashing in modular crypt format (MCF):
+$pbkdf2-sha256$<iterations>$<base64url-salt>$<base64url-hash>
+
+BREAKING CHANGE: TEA-encoded /etc/passwd entries no longer verify.
+Regenerate with tools/mkpasswd or NSH passwd/useradd after upgrading nuttx-apps.
+
+Changes:
+
+    Add apps/crypto/pbkdf2 (PBKDF2-HMAC-SHA256; Mbed TLS backend when available, self-contained SHA-256 fallback otherwise)
+    Rewrite passwd_encrypt.c / passwd_verify.c to use PBKDF2 and timingsafe_bcmp() for verification
+    Add shared passwd_base64.c for base64url encode/decode
+    Enforce password complexity when setting passwords (min 8 chars, upper, lower, digit, special character)
+    Add testing/pbkdf2 (RFC 6070 vectors + passwd round-trip test)
+
+Companion nuttx PR (host mkpasswd tool and ROMFS build integration): apache/nuttx-apps#3557
+
+
+[#19297](https://github.com/apache/nuttx/pull/19297) !arch/arm/src/stm32: unify the timer input clock board options
+
+Replace the divergent board conventions for the timer input clock frequency with a single uniform convention provided by every board:
+
+    STM32_APBx_TIMn_CLKIN and BOARD_TIMn_FREQUENCY -> STM32_TIMn_CLKIN
+    STM32_APBx_LPTIMn_CLKIN, BOARD_LPTIMn_FREQUENCY and STM32_LPTIMn_FREQUENCY -> STM32_LPTIMn_CLKIN
+
+All STM32 consumers (tim/lptim/pwm/adc/dac/capture/sdadc/dfsdm/pulsecount) updated to match; the timer input clock is now bus-agnostic
+in the drivers.
+
+Boards that carried the same timer clock in more than one convention now define STM32_TIMn_CLKIN exactly once, derived from the APB bus
+clock (PCLKx with the x2 doubler when the APB prescaler is greater than 1), instead of redefining it with a second, sometimes different, value.
+
+BREAKING CHANGE: The timer input-clock board macros STM32_APBx_TIMn_CLKIN, BOARD_TIMn_FREQUENCY, STM32_APBx_LPTIMn_CLKIN, BOARD_LPTIMn_FREQUENCY
+and STM32_LPTIMn_FREQUENCY are removed in favor of STM32_TIMn_CLKIN and STM32_LPTIMn_CLKIN.
+Out-of-tree boards must define STM32_TIMn_CLKIN / STM32_LPTIMn_CLKIN (drop the APB bus from the name, keep the value),
+and out-of-tree drivers referencing the old names must be updated.
+
+
+[#19321](https://github.com/apache/nuttx/pull/19321) !boards: enforce secure ROMFS passwd and TEA key setup
+
+Remove implicit default credentials and add build-time validation. Add check_passwd_keys.sh and gen_passwd_keys.sh; run key setup via passwd_keys.mk
+ before config.h is generated. Mirror the same logic in cmake/nuttx_add_romfs.cmake for CMake builds.
+
+BREAKING CHANGE: Builds with CONFIG_BOARD_ETC_ROMFS_PASSWD_ENABLE=y now require an explicit admin password and non-default TEA keys.
+The Kconfig default password "Administrator" and default TEA keys are no longer accepted. Fix: run make menuconfig, set Admin password under
+Board Selection -> Auto-generate /etc/passwd, enable random TEA keys or
+set CONFIG_FSUTILS_PASSWD_KEY1..4 manually, and use NSH login with Encrypted password file verification.
