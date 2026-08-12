@@ -36,6 +36,8 @@ Supported in this NuttX port:
   interrupt), driven directly on the SDK fwlib register layer
 * General-purpose UARTs exposed as ``/dev/ttySN`` serial devices, driven
   directly on the SDK fwlib register layer
+* I2C master buses exposed as ``/dev/i2cN`` character devices, driven directly
+  on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -90,6 +92,20 @@ back to RX, or wire it to a host serial adapter)::
 The line format can be changed at runtime through ``tcsetattr()`` (the config
 enables ``CONFIG_SERIAL_TERMIOS``). UART3 is shared with Bluetooth and is not
 exposed by the driver.
+
+i2c
+---
+
+Minimal NSH with the I2C master driver and the ``i2ctool`` (``system/i2c``)
+enabled (no Wi-Fi). The board registers its I2C controllers from a table (see
+``boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_i2c.c``): I2C0 at ``/dev/i2c0``
+on PA22/PA23 and I2C1 at ``/dev/i2c1`` on PA24/PA25. Edit that table --
+controller and SCL/SDA pads -- to match a board's wiring; the pads use the
+same ``AMEBA_PA()`` / ``AMEBA_PB()`` encoding as the GPIO table and are muxed
+to the I2C function through the SDK ROM. The I2C bus is open-drain, so fit
+external pull-ups on SCL/SDA. Probe a bus with the tool::
+
+    nsh> i2c dev -b 0 0x03 0x77     # scan /dev/i2c0 for devices
 
 nsh
 ---
