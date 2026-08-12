@@ -179,16 +179,16 @@ void sim_x11events(void)
 
       switch (event.type)
         {
-          #ifdef CONFIG_SIM_KEYBOARD
+#ifdef CONFIG_SIM_KEYBOARD
           case KeyPress:
             sim_kbdevent(XLookupKeysym(&event.xkey, 0), true);
             break;
           case KeyRelease:
             sim_kbdevent(XLookupKeysym(&event.xkey, 0), false);
             break;
-          #endif
+#endif
 
-          #ifdef CONFIG_SIM_TOUCHSCREEN
+#ifdef CONFIG_SIM_TOUCHSCREEN
           case MotionNotify : /* Enabled by ButtonMotionMask */
             {
               sim_buttonevent(event.xmotion.x, event.xmotion.y,
@@ -204,9 +204,9 @@ void sim_x11events(void)
                                           event.xbutton.button));
             }
             break;
-          #endif
+#endif
 
-          #ifdef CONFIG_SIM_MOUSE
+#ifdef CONFIG_SIM_MOUSE
           case MotionNotify : /* Enabled by PointerMotionMask */
             {
               sim_mouseevent(event.xmotion.x, event.xmotion.y,
@@ -244,7 +244,7 @@ void sim_x11events(void)
                              wheel);
             }
             break;
-          #endif
+#endif
 
           default:
             break;
