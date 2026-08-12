@@ -336,6 +336,17 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
                     }
 
                   netdev_iob_replace(dev, iob);
+
+                  /* netdev_iob_replace() resets d_len to io_pktlen
+                   * (full L2+IP+UDP+payload). Restore d_len to UDP
+                   * payload length to match the semantics set earlier
+                   * in udp_input() where d_len was adjusted by
+                   * udpiplen. d_appdata is not restored here because
+                   * the next udp_input_conn() will reset it.
+                   */
+
+                  dev->d_len -= udpiplen;
+
                   udp  = IPBUF(iplen);
                   conn = nextconn;
                 }
