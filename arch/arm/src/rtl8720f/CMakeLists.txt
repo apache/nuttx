@@ -54,6 +54,10 @@ if(CONFIG_AMEBA_UART)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_uart.c)
 endif()
 
+if(CONFIG_AMEBA_I2C)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_i2c.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -107,6 +111,12 @@ endif()
 # unused DMA/monitor helpers).
 if(CONFIG_AMEBA_UART)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_uart.c)
+endif()
+
+# I2C register layer (same rationale as the UART block above): the fwlib I2C
+# data tables live in this RAM source and must be compiled in.
+if(CONFIG_AMEBA_I2C)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_i2c.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
