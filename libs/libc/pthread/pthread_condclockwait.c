@@ -113,7 +113,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
       sinfo("Give up mutex...\n");
 
-      atomic_fetch_add(COND_WAIT_COUNT(cond), 1);
+      atomic_add(COND_WAIT_COUNT(cond), 1);
 
       /* Give up the mutex */
 

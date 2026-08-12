@@ -605,8 +605,8 @@ void rpmsg_modify_signals(FAR struct rpmsg_s *rpmsg,
   FAR struct metal_list *node;
   bool needlock;
 
-  atomic_fetch_and_acquire(&rpmsg->signals, ~clrflags);
-  atomic_fetch_or_acquire(&rpmsg->signals, setflags);
+  atomic_and_acquire(&rpmsg->signals, ~clrflags);
+  atomic_or_acquire(&rpmsg->signals, setflags);
 
   /* Send signal to Router Hub */
 

@@ -243,7 +243,7 @@ static void rpmsg_port_spi_exchange(FAR struct rpmsg_port_spi_s *rpspi)
 {
   FAR struct rpmsg_port_header_s *txhdr;
 
-  if (atomic_fetch_add(&rpspi->transferring, 1))
+  if (atomic_add(&rpspi->transferring, 1))
     {
       return;
     }
