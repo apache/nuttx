@@ -42,7 +42,11 @@ ifeq ($(CONFIG_SCHED_USER_IDENTITY),y)
 CSRCS += group_setuid.c group_setgid.c group_getuid.c group_getgid.c
 CSRCS += group_seteuid.c group_setegid.c group_geteuid.c group_getegid.c
 CSRCS += group_setreuid.c group_setregid.c group_getresuid.c group_getresgid.c
+CSRCS += group_setresuid.c group_setresgid.c
 CSRCS += group_issetugid.c
+ifneq ($(CONFIG_SCHED_NGROUPS),0)
+CSRCS += group_setgroups.c group_getgroups.c
+endif
 endif
 
 ifeq ($(CONFIG_SIG_SIGSTOP_ACTION),y)

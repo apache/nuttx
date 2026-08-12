@@ -71,8 +71,14 @@ SYSCALL_LOOKUP(sethostname,                2)
   SYSCALL_LOOKUP(geteuid,                  0)
   SYSCALL_LOOKUP(setegid,                  1)
   SYSCALL_LOOKUP(getegid,                  0)
+#  if CONFIG_SCHED_NGROUPS > 0
+  SYSCALL_LOOKUP(setgroups,                2)
+  SYSCALL_LOOKUP(getgroups,                2)
+#  endif
   SYSCALL_LOOKUP(setreuid,                 2)
   SYSCALL_LOOKUP(setregid,                 2)
+  SYSCALL_LOOKUP(setresuid,                3)
+  SYSCALL_LOOKUP(setresgid,                3)
   SYSCALL_LOOKUP(getresuid,                3)
   SYSCALL_LOOKUP(getresgid,                3)
 #endif

@@ -66,9 +66,9 @@ static rw_semaphore_t g_inode_lock = RWSEM_INITIALIZER;
 int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode)
 {
   FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
   mode_t perm;
   uid_t uid;
-  gid_t gid;
 
   rtcb = nxsched_self();
   if ((rtcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
@@ -77,14 +77,14 @@ int fs_checkmode(uid_t owner, gid_t group, mode_t mode, int amode)
     }
 
   DEBUGASSERT(rtcb->group != NULL);
-  uid = rtcb->group->tg_euid;
-  gid = rtcb->group->tg_egid;
+  rgroup = rtcb->group;
+  uid = rgroup->tg_euid;
 
   if (uid == owner)
     {
       perm = (mode >> 6) & 7;
     }
-  else if (gid == group)
+  else if (nxsched_has_gid(rtcb, group))
     {
       perm = (mode >> 3) & 7;
     }

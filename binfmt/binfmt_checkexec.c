@@ -57,6 +57,7 @@
 int binfmt_checkexecperm(FAR struct binary_s *bin)
 {
   FAR struct tcb_s *rtcb;
+  FAR struct task_group_s *rgroup;
   mode_t xbits;
 
   rtcb = nxsched_self();
@@ -66,7 +67,9 @@ int binfmt_checkexecperm(FAR struct binary_s *bin)
       return OK;
     }
 
-  if (rtcb->group->tg_euid == 0)
+  rgroup = rtcb->group;
+
+  if (rgroup->tg_euid == 0)
     {
       /* Root can execute any file that has at least one execute bit set */
 
@@ -78,11 +81,11 @@ int binfmt_checkexecperm(FAR struct binary_s *bin)
       return OK;
     }
 
-  if (rtcb->group->tg_euid == bin->uid)
+  if (rgroup->tg_euid == bin->uid)
     {
       xbits = S_IXUSR;
     }
-  else if (rtcb->group->tg_egid == bin->gid)
+  else if (nxsched_has_gid(rtcb, bin->gid))
     {
       xbits = S_IXGRP;
     }

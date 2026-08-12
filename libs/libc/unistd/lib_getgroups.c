@@ -38,9 +38,10 @@
  *
  * Description:
  *   The getgroups() function returns the supplementary group IDs of the
- *   calling process in the array grouplist.  NuttX does not support
- *   supplementary group IDs, so the calling process is treated as belonging
- *   to a single group: its effective group ID.
+ *   calling process in the array grouplist.  Stub when
+ *   CONFIG_SCHED_USER_IDENTITY is disabled or CONFIG_SCHED_NGROUPS is 0:
+ *   there is no supplementary group list.  The effective group ID is not
+ *   synthesized; callers that need it should use getegid().
  *
  * Input Parameters:
  *   gidsetsize - The number of elements available in grouplist.
@@ -55,31 +56,15 @@
 
 int getgroups(int gidsetsize, gid_t grouplist[])
 {
+  UNUSED(grouplist);
+
   if (gidsetsize < 0)
     {
       set_errno(EINVAL);
-      return -1;
+      return ERROR;
     }
 
-  /* If gidsetsize is zero, return the number of group IDs without touching
-   * grouplist.
-   */
+  /* Empty supplementary list (do not synthesize egid). */
 
-  if (gidsetsize == 0)
-    {
-      return 1;
-    }
-
-  if (grouplist == NULL)
-    {
-      set_errno(EFAULT);
-      return -1;
-    }
-
-  /* NuttX has no notion of supplementary group IDs.  Report the single
-   * effective group ID of the calling process.
-   */
-
-  grouplist[0] = getegid();
-  return 1;
+  return 0;
 }

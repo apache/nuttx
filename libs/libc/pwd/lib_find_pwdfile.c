@@ -382,16 +382,6 @@ int pwd_findby_name(FAR const char *uname, FAR struct passwd *entry,
 int pwd_findby_uid(uid_t uid, FAR struct passwd *entry, FAR char *buffer,
                    size_t buflen)
 {
-  /* Verify that the UID is in the valid range of 0 through INT16_MAX.
-   * OpenGroup.org does not specify a UID_MAX or UID_MIN.  Instead we use a
-   * priori knowledge that uid_t is type int16_t.
-   */
-
-  if ((uint16_t)uid > INT16_MAX)
-    {
-      return -EINVAL;
-    }
-
   return pwd_foreach(pwd_match_uid, (uintptr_t)uid, entry, buffer, buflen);
 }
 

@@ -29,6 +29,7 @@
 #include <nuttx/atexit.h>
 
 #include <unistd.h>
+#include <limits.h>
 #include <sched.h>
 #include <errno.h>
 
@@ -240,6 +241,9 @@ long sysconf(int name)
 
       case _SC_OPEN_MAX:
         return OPEN_MAX;
+
+      case _SC_NGROUPS_MAX:
+        return NGROUPS_MAX;
 
       case _SC_ATEXIT_MAX:
         return ATEXIT_MAX;

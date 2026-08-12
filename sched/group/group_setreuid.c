@@ -64,18 +64,6 @@ int setreuid(uid_t ruid, uid_t euid)
   uid_t old_euid;
   uid_t old_suid;
 
-  if (ruid != (uid_t)-1 && (uint16_t)ruid > INT16_MAX)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (euid != (uid_t)-1 && (uint16_t)euid > INT16_MAX)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
   if (ruid == (uid_t)-1 && euid == (uid_t)-1)
     {
       return OK;

@@ -63,7 +63,6 @@ set(SRCS
     lib_getpgrp.c
     lib_getpgid.c
     lib_getsid.c
-    lib_getgroups.c
     lib_setpgid.c
     lib_setsid.c
     lib_lockf.c
@@ -90,7 +89,13 @@ if(NOT CONFIG_SCHED_USER_IDENTITY)
     lib_setregid.c
     lib_getresuid.c
     lib_getresgid.c
-    lib_issetugid.c)
+    lib_setresuid.c
+    lib_setresgid.c
+    lib_issetugid.c
+    lib_getgroups.c
+    lib_setgroups.c)
+elseif(NOT CONFIG_SCHED_NGROUPS)
+  list(APPEND SRCS lib_getgroups.c lib_setgroups.c)
 endif()
 
 if(NOT CONFIG_DISABLE_ENVIRON)

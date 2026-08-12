@@ -26,6 +26,7 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
 #include <sched.h>
 #include <assert.h>
 #include <errno.h>
@@ -84,6 +85,14 @@ static inline void group_inherit_identity(FAR struct task_group_s *group)
   group->tg_egid = rgroup->tg_egid;
   group->tg_suid = rgroup->tg_suid;
   group->tg_sgid = rgroup->tg_sgid;
+#if CONFIG_SCHED_NGROUPS > 0
+  group->tg_ngroups = rgroup->tg_ngroups;
+  if (rgroup->tg_ngroups > 0)
+    {
+      memcpy(group->tg_groups, rgroup->tg_groups,
+             rgroup->tg_ngroups * sizeof(gid_t));
+    }
+#endif
 }
 #else
 #  define group_inherit_identity(group)

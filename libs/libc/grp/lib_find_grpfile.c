@@ -36,7 +36,6 @@
 #include <nuttx/lib/lib.h>
 
 #include "grp/lib_grp.h"
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -396,16 +395,6 @@ int grp_findby_name(FAR const char *gname, FAR struct group *entry,
 int grp_findby_gid(gid_t gid, FAR struct group *entry, FAR char *buffer,
                    size_t buflen)
 {
-  /* Verify that the GID is in the valid range of 0 through INT16_MAX.
-   * OpenGroup.org does not specify a GID_MAX or GID_MIN.  Instead we use a
-   * priori knowledge that gid_t is type int16_t.
-   */
-
-  if ((uint16_t)gid > INT16_MAX)
-    {
-      return -EINVAL;
-    }
-
   return grp_foreach(grp_match_gid, (uintptr_t)gid, entry, buffer, buflen);
 }
 
