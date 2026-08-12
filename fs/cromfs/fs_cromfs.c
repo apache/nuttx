@@ -997,26 +997,30 @@ static ssize_t cromfs_read(FAR struct file *filep, FAR char *buffer,
 
               /* Get the address and offset in the CROMFS image to obtain
                * the data.  Check if we already have this offset in the
-               * cache.
+               * cache.  This path decompresses into the caller's buffer,
+               * not into ff_buffer, so it may only read the cache, never
+               * populate it.
                */
 
-              src     = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
+              src = (FAR const uint8_t *)currhdr + LZF_TYPE1_HDR_SIZE;
               voloffs = cromfs_addr2offset(fs, src);
-              if (voloffs != ff->ff_offset)
+              if (voloffs == ff->ff_offset)
+                {
+                  DEBUGASSERT(ff->ff_ulen >= copysize);
+                  memcpy(dest, ff->ff_buffer, copysize);
+                }
+              else
                 {
                   unsigned int decomplen;
 
                   decomplen = lzf_decompress(src, complen, dest,
                                              fs->cv_bsize);
-
-                  ff->ff_offset = voloffs;
-                  ff->ff_ulen   = decomplen;
+                  DEBUGASSERT(decomplen >= copysize);
                 }
 
               finfo("voloffs=%" PRIu32 " blkoffs=%" PRIu32
-                    " ulen=%" PRIu16 " ff_offset=%" PRIu32 " copysize=%u\n",
-                    voloffs, blkoffs, ulen, ff->ff_offset, copysize);
-              DEBUGASSERT(ff->ff_ulen >= copysize);
+                    " ulen=%" PRIu16 " copysize=%u\n",
+                    voloffs, blkoffs, ulen, copysize);
             }
           else
             {
