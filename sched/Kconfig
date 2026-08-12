@@ -803,6 +803,21 @@ config SCHED_USER_IDENTITY
 		If this option is not selected, stub root-only versions of these
 		interfaces are available instead.
 
+if SCHED_USER_IDENTITY
+
+config SCHED_NGROUPS
+	int "Maximum supplementary group IDs"
+	default 8
+	range 0 64
+	---help---
+		Maximum number of supplementary group IDs per task group.  This
+		value becomes NGROUPS_MAX and sizes the getgroups()/setgroups()
+		list stored in each task group.  Set to 0 to disable supplementary
+		group storage (getgroups then always returns an empty list).
+		The effective GID is separate and available via getegid().
+
+endif # SCHED_USER_IDENTITY
+
 config SCHED_THREAD_LOCAL
 	bool "Support __thread/thread_local keyword"
 	default n

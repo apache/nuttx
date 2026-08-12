@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_setuid.c
+ * sched/group/group_setgroups.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,8 +26,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <unistd.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -38,58 +38,55 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setuid
+ * Name: setgroups
  *
  * Description:
- *   The setuid() function sets the real user ID, effective user ID, and the
- *   saved set-user-ID of the calling process to uid, given appropriate
- *   privileges.
+ *   setgroups() sets the supplementary group IDs for the calling process.
+ *   Only a process with an effective user ID of 0 may change the list.
  *
  * Input Parameters:
- *   uid - User identity to set the various process's user ID attributes to.
+ *   size - Number of group IDs in list (0 to clear).
+ *   list - Array of supplementary group IDs, or NULL when size is 0.
  *
  * Returned Value:
- *   Zero if successful and -1 in case of failure, in which case errno is set
- *   to one of he following values:
- *
- *   EINVAL - The value of the uid argument is invalid and not supported by
- *            the implementation.
- *   EPERM  - The process does not have appropriate privileges and uid does
- *            not match the real user ID or the saved set-user-ID.
+ *   Zero on success; -1 on failure with errno set.
  *
  ****************************************************************************/
 
-int setuid(uid_t uid)
+int setgroups(int size, FAR const gid_t *list)
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *rgroup;
 
-  /* Get the currently executing thread's task group. */
+  if (size < 0 || size > CONFIG_SCHED_NGROUPS)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (size > 0 && list == NULL)
+    {
+      set_errno(EFAULT);
+      return ERROR;
+    }
 
   rtcb   = this_task();
   rgroup = rtcb->group;
-
   DEBUGASSERT(rgroup != NULL);
 
-  if (rgroup->tg_euid == 0)
-    {
-      /* Root: set real, effective, and saved set-user-ID. */
+  /* Only root (effective UID 0) may install a new supplementary set. */
 
-      rgroup->tg_uid  = uid;
-      rgroup->tg_euid = uid;
-      rgroup->tg_suid = uid;
-    }
-  else if (uid == rgroup->tg_uid || uid == rgroup->tg_suid)
-    {
-      /* Non-root: may only set effective UID to real or saved value. */
-
-      rgroup->tg_euid = uid;
-    }
-  else
+  if (rgroup->tg_euid != 0)
     {
       set_errno(EPERM);
       return ERROR;
     }
 
+  if (size > 0)
+    {
+      memcpy(rgroup->tg_groups, list, size * sizeof(gid_t));
+    }
+
+  rgroup->tg_ngroups = size;
   return OK;
 }

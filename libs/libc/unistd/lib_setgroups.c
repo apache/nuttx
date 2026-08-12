@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_setuid.c
+ * libs/libc/unistd/lib_setgroups.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,70 +26,26 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <unistd.h>
-#include <assert.h>
 #include <errno.h>
-
-#include <sched/sched.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setuid
+ * Name: setgroups
  *
  * Description:
- *   The setuid() function sets the real user ID, effective user ID, and the
- *   saved set-user-ID of the calling process to uid, given appropriate
- *   privileges.
- *
- * Input Parameters:
- *   uid - User identity to set the various process's user ID attributes to.
- *
- * Returned Value:
- *   Zero if successful and -1 in case of failure, in which case errno is set
- *   to one of he following values:
- *
- *   EINVAL - The value of the uid argument is invalid and not supported by
- *            the implementation.
- *   EPERM  - The process does not have appropriate privileges and uid does
- *            not match the real user ID or the saved set-user-ID.
+ *   Stub when CONFIG_SCHED_USER_IDENTITY is disabled or
+ *   CONFIG_SCHED_NGROUPS is 0.  Supplementary groups are not supported.
  *
  ****************************************************************************/
 
-int setuid(uid_t uid)
+int setgroups(int size, FAR const gid_t *list)
 {
-  FAR struct tcb_s *rtcb;
-  FAR struct task_group_s *rgroup;
-
-  /* Get the currently executing thread's task group. */
-
-  rtcb   = this_task();
-  rgroup = rtcb->group;
-
-  DEBUGASSERT(rgroup != NULL);
-
-  if (rgroup->tg_euid == 0)
-    {
-      /* Root: set real, effective, and saved set-user-ID. */
-
-      rgroup->tg_uid  = uid;
-      rgroup->tg_euid = uid;
-      rgroup->tg_suid = uid;
-    }
-  else if (uid == rgroup->tg_uid || uid == rgroup->tg_suid)
-    {
-      /* Non-root: may only set effective UID to real or saved value. */
-
-      rgroup->tg_euid = uid;
-    }
-  else
-    {
-      set_errno(EPERM);
-      return ERROR;
-    }
-
-  return OK;
+  UNUSED(size);
+  UNUSED(list);
+  set_errno(ENOSYS);
+  return ERROR;
 }

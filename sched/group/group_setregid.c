@@ -63,18 +63,6 @@ int setregid(gid_t rgid, gid_t egid)
   gid_t old_egid;
   gid_t old_sgid;
 
-  if (rgid != (gid_t)-1 && (uint16_t)rgid > INT16_MAX)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
-  if (egid != (gid_t)-1 && (uint16_t)egid > INT16_MAX)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-
   if (rgid == (gid_t)-1 && egid == (gid_t)-1)
     {
       return OK;

@@ -124,7 +124,11 @@
 #define _POSIX_MAX_CANON      255
 #define _POSIX_MAX_INPUT      255
 #define _POSIX_NAME_MAX       CONFIG_NAME_MAX
-#define _POSIX_NGROUPS_MAX    0
+#if defined(CONFIG_SCHED_NGROUPS) && CONFIG_SCHED_NGROUPS > 0
+#  define _POSIX_NGROUPS_MAX  CONFIG_SCHED_NGROUPS
+#else
+#  define _POSIX_NGROUPS_MAX  0
+#endif
 #define _POSIX_OPEN_MAX       16
 #define _POSIX_PATH_MAX       CONFIG_PATH_MAX
 #define _POSIX_PIPE_BUF       512

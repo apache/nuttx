@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/group/group_setuid.c
+ * sched/group/group_getgroups.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,8 +26,8 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
 #include <unistd.h>
+#include <string.h>
 #include <assert.h>
 #include <errno.h>
 
@@ -38,58 +38,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: setuid
+ * Name: getgroups
  *
  * Description:
- *   The setuid() function sets the real user ID, effective user ID, and the
- *   saved set-user-ID of the calling process to uid, given appropriate
- *   privileges.
+ *   getgroups() returns the supplementary group IDs of the calling
+ *   process.  The returned list is exactly the set installed by
+ *   setgroups()/initgroups() (may be empty).  The effective group ID is
+ *   not synthesized into an empty list; callers that need it should use
+ *   getegid().
  *
  * Input Parameters:
- *   uid - User identity to set the various process's user ID attributes to.
+ *   gidsetsize - Number of slots in grouplist, or 0 to query the count.
+ *   grouplist  - Buffer for group IDs (unused when gidsetsize is 0).
  *
  * Returned Value:
- *   Zero if successful and -1 in case of failure, in which case errno is set
- *   to one of he following values:
- *
- *   EINVAL - The value of the uid argument is invalid and not supported by
- *            the implementation.
- *   EPERM  - The process does not have appropriate privileges and uid does
- *            not match the real user ID or the saved set-user-ID.
+ *   Number of group IDs on success; -1 on failure with errno set.
  *
  ****************************************************************************/
 
-int setuid(uid_t uid)
+int getgroups(int gidsetsize, FAR gid_t grouplist[])
 {
   FAR struct tcb_s *rtcb;
   FAR struct task_group_s *rgroup;
+  int count;
 
-  /* Get the currently executing thread's task group. */
-
-  rtcb   = this_task();
-  rgroup = rtcb->group;
-
-  DEBUGASSERT(rgroup != NULL);
-
-  if (rgroup->tg_euid == 0)
+  if (gidsetsize < 0)
     {
-      /* Root: set real, effective, and saved set-user-ID. */
-
-      rgroup->tg_uid  = uid;
-      rgroup->tg_euid = uid;
-      rgroup->tg_suid = uid;
-    }
-  else if (uid == rgroup->tg_uid || uid == rgroup->tg_suid)
-    {
-      /* Non-root: may only set effective UID to real or saved value. */
-
-      rgroup->tg_euid = uid;
-    }
-  else
-    {
-      set_errno(EPERM);
+      set_errno(EINVAL);
       return ERROR;
     }
 
-  return OK;
+  rtcb   = this_task();
+  rgroup = rtcb->group;
+  DEBUGASSERT(rgroup != NULL);
+
+  count = rgroup->tg_ngroups;
+
+  if (gidsetsize == 0)
+    {
+      return count;
+    }
+
+  if (grouplist == NULL)
+    {
+      set_errno(EFAULT);
+      return ERROR;
+    }
+
+  if (gidsetsize < count)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (count > 0)
+    {
+      memcpy(grouplist, rgroup->tg_groups, count * sizeof(gid_t));
+    }
+
+  return count;
 }

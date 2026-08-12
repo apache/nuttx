@@ -27,6 +27,11 @@
 #include <nuttx/config.h>
 
 #include <grp.h>
+#include <limits.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <nuttx/debug.h>
 
 /****************************************************************************
  * Public Functions
@@ -36,28 +41,56 @@
  * Name: initgroups
  *
  * Description:
- *   The group database /etc/group is read to determine all groups of which
- *   user is a member.  The additional group group is also added to this set,
- *   which is then used to set the supplementary group IDs of the calling
- *   process.
+ *   The group database is read to determine all groups of which user is a
+ *   member.  The additional group 'group' is also included.  The resulting
+ *   set is installed as the calling process's supplementary group IDs via
+ *   setgroups().
  *
  * Input Parameters:
- *   user  - Name of the user to query the /etc/group database for.
+ *   user  - Name of the user to query the group database for.
  *   group - Additional gid to add to the list of group IDs.
  *
  * Returned Value:
- *   The initgroups() function returns zero if successful, and -1 in case of
- *   failure, in which case errno is set appropriately.
+ *   Zero if successful, and -1 on failure with errno set.
  *
  ****************************************************************************/
 
 int initgroups(FAR const char *user, gid_t group)
 {
-  /* There currently is no support for supplementary group IDs in NuttX.
-   * Thus, just ignore this request silently and report success.
-   */
+#if defined(CONFIG_SCHED_NGROUPS) && CONFIG_SCHED_NGROUPS > 0
+  gid_t groups[NGROUPS_MAX];
+  int ngroups = NGROUPS_MAX;
+  int ret;
+
+  if (user == NULL)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  ret = getgrouplist(user, group, groups, &ngroups);
+  if (ret < 0)
+    {
+      /* Buffer too small or lookup failure — errno already set by
+       * getgrouplist when applicable.
+       */
+
+      if (ngroups > NGROUPS_MAX)
+        {
+          swarn("initgroups: user '%s' has %d groups, NGROUPS_MAX=%d\n",
+                user, ngroups, NGROUPS_MAX);
+          set_errno(EINVAL);
+        }
+
+      return ERROR;
+    }
+
+  return setgroups(ret, groups);
+#else
+  /* Without supplementary group storage, succeed silently. */
 
   UNUSED(user);
   UNUSED(group);
   return 0;
+#endif
 }

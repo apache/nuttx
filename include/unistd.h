@@ -506,7 +506,11 @@ int     setregid(gid_t rgid, gid_t egid);
 int     getresuid(FAR uid_t *ruid, FAR uid_t *euid, FAR uid_t *suid);
 int     getresgid(FAR gid_t *rgid, FAR gid_t *egid, FAR gid_t *sgid);
 
-int     getgroups(int, gid_t[]);
+int     setresuid(uid_t ruid, uid_t euid, uid_t suid);
+int     setresgid(gid_t rgid, gid_t egid, gid_t sgid);
+
+int     getgroups(int, FAR gid_t[]);
+int     setgroups(int, FAR const gid_t *);
 
 int     getentropy(FAR void *buffer, size_t length);
 

@@ -466,6 +466,10 @@ struct task_group_s
   gid_t   tg_egid;                  /* Effective group identity                 */
   uid_t   tg_suid;                  /* Saved set-user identity                  */
   gid_t   tg_sgid;                  /* Saved set-group identity                 */
+#  if CONFIG_SCHED_NGROUPS > 0
+  int     tg_ngroups;               /* Number of supplementary group IDs        */
+  gid_t   tg_groups[CONFIG_SCHED_NGROUPS];
+#  endif
 #endif
 
   /* Group membership *******************************************************/
@@ -860,6 +864,43 @@ EXTERN const struct tcbinfo_s g_tcbinfo;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nxsched_has_gid
+ *
+ * Description:
+ *   Return true if the task's group matches 'gid' via the effective GID or
+ *   any supplementary group ID.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_USER_IDENTITY
+static inline_function bool nxsched_has_gid(FAR struct tcb_s *tcb,
+                                            gid_t gid)
+{
+  FAR struct task_group_s *group = tcb->group;
+#if CONFIG_SCHED_NGROUPS > 0
+  int i;
+#endif
+
+  if (group->tg_egid == gid)
+    {
+      return true;
+    }
+
+#if CONFIG_SCHED_NGROUPS > 0
+  for (i = 0; i < group->tg_ngroups; i++)
+    {
+      if (group->tg_groups[i] == gid)
+        {
+          return true;
+        }
+    }
+#endif
+
+  return false;
+}
+#endif
 
 /****************************************************************************
  * Name: nxsched_self
