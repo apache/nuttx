@@ -4,13 +4,19 @@ hpm6360evk
 
 1. Download and install toolchain::
 
-     curl https://github.com/hpmicro/riscv-gnu-toolchain/releases/tag/2022.05.15
+     $wget https://github.com/hpmicro/riscv-gnu-toolchain/releases/download/2022.05.15/riscv32-unknown-elf-newlib-multilib_2022.05.15_linux.tar.gz
 
-2. Download and install openocd.
+     $tar xf riscv32-unknown-elf-newlib-multilib_2022.05.15_linux.tar.gz
 
-  Download hpmicro sdk_env, openocd in the path: sdk_env/tools/openocd
+     $export PATH=$PATH:/<path to compiler>/riscv32-unknown-elf-newlib-multilib/bin/
 
-3. Configure and build NuttX::
+   Make sure HPMicro GNU riscv32 toolchain have been installed and be found in PATH.
+
+     $riscv32-unknown-elf-gcc -v
+
+     gcc version 11.1.0 (g5964b5cd727)
+
+2. Configure and build NuttX:
 
      mkdir ./nuttxspace
      cd ./nuttxspace
@@ -22,18 +28,12 @@ hpm6360evk
      make menuconfig
      make V=1
 
-Note: make menuconfig to config toolchain
+3. Download and install openocd::
 
-To switch GNU riscv64 toolchain to GNU riscv32 toolchain, the following option must be selected::
+    Download hpmicro sdk_env, openocd in the path: sdk_env/tools/openocd
 
-    System Type  --->
-        Toolchain Selection   --->
-            [ ] Generic GNU RV64 toolchain
-            [x] Generic GNU RV32 toolchain
 
-Make sure HPMicro GNU riscv32 toolchain have been installed and be found in PATH.
-
-4. Debug the nuttx with openocd and run::
+4. Debug the NuttX with openocd::
 
      picocom -b 115200 /dev/ttyACM0
 
