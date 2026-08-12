@@ -368,9 +368,6 @@ if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   # Do olddefconfig step to expand the abbreviated defconfig into normal config
   nuttx_olddefconfig()
 
-  # save the orig compressed formatted defconfig at the very beginning
-  nuttx_save_defconfig_orig()
-
   file(RENAME ${NUTTX_BINARY_DIR}/.config.compressed
        ${NUTTX_BINARY_DIR}/.config)
   set(ENV{KCONFIG_CONFIG} ${NUTTX_BINARY_DIR}/.config)
@@ -388,11 +385,9 @@ if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   endif()
   file(WRITE ${NUTTX_BINARY_DIR}/.config "${_config_init_content}")
 
-  # store original expanded .config; plain copy so .config does not become a
-  # configure dependency: the compiler cannot change after the first configure,
-  # so a modified .config must not reconfigure mid-build
-  execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${NUTTX_BINARY_DIR}/.config
-                          ${NUTTX_BINARY_DIR}/.config.orig)
+  # store original expanded .config
+  configure_file(${NUTTX_BINARY_DIR}/.config ${NUTTX_BINARY_DIR}/.config.orig
+                 COPYONLY)
 
   set(NUTTX_DEFCONFIG_SAVED
       ${NUTTX_DEFCONFIG}
@@ -416,11 +411,6 @@ if(NOT EXISTS ${NUTTX_BINARY_DIR}/.config OR NOT "${NUTTX_DEFCONFIG}" STREQUAL
   message(STATUS "  Board:  ${NUTTX_BOARD}")
   message(STATUS "  Config: ${NUTTX_CONFIG}")
   message(STATUS "  Appdir: ${NUTTX_APPS_DIR}")
-else()
-  # Normalize user modifications to .config (e.g. kconfig-tweak) so dependent
-  # defaults materialize, as the Make flow does on each build
-  set(ENV{KCONFIG_CONFIG} ${NUTTX_BINARY_DIR}/.config)
-  nuttx_olddefconfig()
 endif()
 
 # declare global custom targets at very beginning `nuttx_global` is used to hold
