@@ -291,6 +291,8 @@ static void rpmsg_rtc_device_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
 
   lower->ept.priv = lower;
+
+  rpmsg_set_priority(&lower->ept, RPMSG_PRIO_RT);
   rpmsg_create_ept(&lower->ept, rdev, RPMSG_RTC_EPT_NAME,
                    RPMSG_ADDR_ANY, dest,
                    rpmsg_rtc_ept_cb, rpmsg_destroy_ept);
