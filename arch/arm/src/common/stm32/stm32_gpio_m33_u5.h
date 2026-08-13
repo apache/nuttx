@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/stm32_gpio.h
+ * arch/arm/src/common/stm32/stm32_gpio_m33_u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_STM32_GPIO_H
-#define __ARCH_ARM_SRC_STM32U5_STM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U5_H
 
 /****************************************************************************
  * Included Files
@@ -35,12 +35,12 @@
 #endif
 
 #include <nuttx/irq.h>
-#include <arch/stm32u5/chip.h>
+#include <arch/chip/chip.h>
 
 #include "chip.h"
 
 #if defined(CONFIG_STM32_STM32U585XX) || defined(CONFIG_STM32_STM32U5A5XX)
-#  include "hardware/stm32_gpio.h"
+#  include "hardware/stm32_gpio_m33_u5.h"
 #else
 #  error "Unsupported STM32U5 chip"
 #endif
@@ -362,4 +362,4 @@ void stm32_gpioinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32U5_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_GPIO_M33_U5_H */

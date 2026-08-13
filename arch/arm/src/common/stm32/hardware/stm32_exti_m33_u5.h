@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32_exti.h
+ * arch/arm/src/common/stm32/hardware/stm32_exti_m33_u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_EXTI_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_EXTI_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_U5_H
 
 /****************************************************************************
  * Included Files
@@ -118,4 +118,4 @@
 #define EXTI2_UCPD1        (1 <<  9)  /* EXTI line 41: UCPD1 wakeup   */
 #define EXTI2_LPTIM3       (1 << 10)  /* EXTI line 42: LPTIM3 wakeup  */
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_EXTI_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_EXTI_M33_U5_H */

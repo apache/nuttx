@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/stm32_exti_gpio.c
+ * arch/arm/src/common/stm32/stm32_exti_gpio_m33_u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *

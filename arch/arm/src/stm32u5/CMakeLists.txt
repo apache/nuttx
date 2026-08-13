@@ -21,27 +21,15 @@
 # ##############################################################################
 
 set(SRCS
-    stm32_allocateheap.c
-    stm32_exti_gpio.c
-    stm32_gpio.c
-    stm32_irq.c
-    stm32_lowputc.c
     stm32_rcc.c
     stm32_i2c.c
-    stm32_serial.c
-    stm32_start.c
     stm32_spi.c
     stm32_lse.c
     stm32_lsi.c
     stm32u5xx_rcc.c
     stm32_pwr.c
     stm32_tim.c
-    stm32_flash.c
-    stm32_timerisr.c)
-
-if(NOT CONFIG_ARCH_IDLE_CUSTOM)
-  list(APPEND SRCS stm32_idle.c)
-endif()
+    stm32_flash.c)
 
 if(CONFIG_TIMER)
   list(APPEND SRCS stm32_tim_lowerhalf.c)
