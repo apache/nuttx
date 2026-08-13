@@ -36,7 +36,7 @@
 #  endif
 #endif
 
-#if defined(__has_include) && !defined(CONFIG_LIBC_ARCH_ATOMIC)
+#if !defined(CONFIG_LIBC_ARCH_ATOMIC)
 #  if __has_include(<atomic>) && defined(__cplusplus)
 extern "C++"
 {
@@ -57,8 +57,7 @@ extern "C++"
   typedef volatile int32_t atomic_t;
   typedef volatile int64_t atomic64_t;
 }
-#  elif __has_include(<stdatomic.h>) && \
-        ((defined(__cplusplus) && __cplusplus >= 201103L) || \
+#  elif ((defined(__cplusplus) && __cplusplus >= 201103L) || \
          (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L)) && \
          !defined(__STDC_NO_ATOMICS__)
 #    if !defined(__clang__) && defined(__cplusplus)
