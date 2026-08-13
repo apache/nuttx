@@ -68,13 +68,14 @@ static void nrf53_hfxo_intcap(void)
 
   trim = getreg32(NRF53_FICR_XOSC32MTRIM);
 
-  slope_field = (trim & FICR_XOSC32MTRIM_OFFSET_MASK);
-  slope_mask = FICR_XOSC32MTRIM_OFFSET_MASK;
+  slope_field = ((trim & FICR_XOSC32MTRIM_SLOPE_MASK) >>
+                 FICR_XOSC32MTRIM_SLOPE_SHIFT);
+  slope_mask = (FICR_XOSC32MTRIM_SLOPE_MASK >>
+                FICR_XOSC32MTRIM_SLOPE_SHIFT);
   slope_sign = (slope_mask - (slope_mask >> 1));
   slope = (int32_t)(slope_field ^ slope_sign) - (int32_t)slope_sign;
 
-  offset = ((trim & FICR_XOSC32MTRIM_SLOPE_MASK) >>
-            FICR_XOSC32MTRIM_SLOPE_SHIFT);
+  offset = trim & FICR_XOSC32MTRIM_OFFSET_MASK;
 
   /* CAPVALUE = (((FICR->XOSC32MTRIM.SLOPE+56)*(CAPACITANCE*2-14))
    *            +((FICR->XOSC32MTRIM.OFFSET-8)<<4)+32)>>6;
