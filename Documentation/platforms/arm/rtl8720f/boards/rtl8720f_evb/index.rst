@@ -37,6 +37,8 @@ Supported in this NuttX port:
   directly on the SDK fwlib register layer
 * I2C master buses exposed as ``/dev/i2cN`` character devices, driven directly
   on the SDK fwlib register layer
+* SPI master buses exposed as ``/dev/spiN`` character devices, driven directly
+  on the SDK fwlib register layer
 
 Buttons and LEDs
 ================
@@ -105,6 +107,23 @@ function through the SDK ROM. The I2C bus is open-drain, so fit external
 pull-ups on SCL/SDA. Probe a bus with the tool::
 
     nsh> i2c dev -b 0 0x03 0x77     # scan /dev/i2c0 for devices
+
+spi
+---
+
+Minimal NSH with the SPI master driver and the ``spi`` tool
+(``system/spi``) enabled (no Wi-Fi). The board registers SPI0 at
+``/dev/spi0`` from its table (see
+``boards/arm/rtl8720f/rtl8720f_evb/src/rtl8720f_spi.c``) with CLK/MOSI/MISO on
+PA14/PA15/PA16 and a software chip-select on PA17. Edit that table --
+controller, CLK/MOSI/MISO pads and CS pad -- to match a board's wiring; the
+pads use the same ``AMEBA_PA()`` encoding as the GPIO table (RTL8720F drives
+all GPIO through a single port A controller) and are muxed to the SPI function
+through the SDK ROM, while the chip-select is driven as a plain GPIO. Note
+that not every pad can carry every SPI signal -- pick pads the SDK pin mux
+actually routes to the controller. Exercise a bus with the tool::
+
+    nsh> spi exch -b 0 -x 4 deadbeef     # full-duplex transfer on /dev/spi0
 
 nsh
 ---

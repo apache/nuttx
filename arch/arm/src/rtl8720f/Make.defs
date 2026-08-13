@@ -68,6 +68,10 @@ ifeq ($(CONFIG_AMEBA_I2C),y)
 CHIP_CSRCS += ameba_i2c.c
 endif
 
+ifeq ($(CONFIG_AMEBA_SPI),y)
+CHIP_CSRCS += ameba_spi.c
+endif
+
 ############################################################################
 # Realtek RTL8720F SDK integration
 #

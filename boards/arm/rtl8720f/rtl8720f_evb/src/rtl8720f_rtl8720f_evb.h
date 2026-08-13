@@ -55,6 +55,18 @@ void rtl8720f_boardinitialize(void);
 
 int rtl8720f_bringup(void);
 
+#ifdef CONFIG_AMEBA_SPI
+/****************************************************************************
+ * Name: rtl8720f_spi_initialize
+ *
+ * Description:
+ *   Register the board's SPI master buses at /dev/spiN.
+ *
+ ****************************************************************************/
+
+int rtl8720f_spi_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8720F_WIFI
 /****************************************************************************
  * Name: rtl8720f_wifi_initialize
