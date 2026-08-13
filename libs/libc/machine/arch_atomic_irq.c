@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arch_atomic.c
+ * libs/libc/machine/arch_atomic_irq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -78,7 +78,7 @@
 #define CMP_EXCHANGE(fn, n, type)                                    \
                                                                      \
   bool weak_function CONCATENATE(fn, n)(FAR volatile void *mem,      \
-                                        FAR void *expect,            \
+                                        FAR volatile void *expect,   \
                                         type desired, bool weak,     \
                                         int success, int failure)    \
   {                                                                  \

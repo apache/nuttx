@@ -82,6 +82,7 @@ config ARCH_CHIP_BL602
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
+	select LIBC_ATOMIC_IRQ
 	---help---
 		BouffaloLab BL602(rv32imfc)
 
