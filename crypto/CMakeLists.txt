@@ -26,13 +26,17 @@ if(CONFIG_CRYPTO)
 
   # cryptodev support
 
-  if(CONFIG_CRYPTO_CRYPTODEV)
-    list(APPEND SRCS cryptodev.c)
+  if(CONFIG_CRYPTO_BACKENDS)
+    list(APPEND SRCS backends.c)
     if(CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO
        OR CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT)
       list(APPEND SRCS cryptosoft.c)
       list(APPEND SRCS xform.c)
     endif()
+  endif()
+
+  if(CONFIG_CRYPTO_CRYPTODEV)
+    list(APPEND SRCS cryptodev.c)
   endif()
 
   # Software crypto library

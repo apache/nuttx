@@ -143,6 +143,19 @@ void devurandom_register(void);
 void devcrypto_register(void);
 
 /****************************************************************************
+ * Name: crypto_backends_init
+ *
+ * Description:
+ *   Register the software and hardware crypto backends into the driver
+ *   table, making them reachable through the in-kernel crypto API.
+ *   Independent of devcrypto_register(), which only creates the
+ *   /dev/crypto interface.
+ *
+ ****************************************************************************/
+
+void crypto_backends_init(void);
+
+/****************************************************************************
  * Name: devmem_register
  *
  * Description:
