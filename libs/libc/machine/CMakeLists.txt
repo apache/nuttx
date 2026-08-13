@@ -22,7 +22,7 @@
 
 add_subdirectory(${CONFIG_ARCH})
 
-target_sources(c PRIVATE arch_atomic.c)
+target_sources(c PRIVATE arch_atomic_irq.c)
 
 if(CONFIG_MM_KASAN)
   target_sources(c PRIVATE arch_libc.c)

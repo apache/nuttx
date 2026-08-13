@@ -62,6 +62,7 @@ config ARCH_RENESAS_RX
 	default n
 	select ARCH_HAVE_SETJMP
 	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
+	select LIBC_ATOMIC_IRQ
 
 config ARCH_RX65N
 	bool
