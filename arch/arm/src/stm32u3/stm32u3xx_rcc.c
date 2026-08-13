@@ -26,6 +26,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
@@ -35,6 +37,25 @@
 #include "hardware/stm32u3xx_pwr.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+
+static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
+              "Configure BOARD_LOOPSPERMSEC to a non-default value");
+
+/* Allow up to 100 milliseconds for each clock or regulator transition. */
+
+#define CLOCK_READY_TIMEOUT (100 * CONFIG_BOARD_LOOPSPERMSEC)
+
+#ifndef STM32_BOARD_USEMSIS
+#  error stm32_stdclockconfig() requires MSIS board configuration
+#endif
+
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -42,68 +63,127 @@
  * Name: stm32_stdclockconfig
  *
  * Description:
- *   Configure the STM32U3 system clock from MSIRC0 at 96 MHz.
+ *   Configure the STM32U3 system clock from the settings in board.h.
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 void stm32_stdclockconfig(void)
 {
   uint32_t regval;
+  volatile int32_t timeout;
 
   /* The EPOD booster and voltage scaling control require the PWR clock. */
 
   modifyreg32(STM32_RCC_AHB1ENR2, 0, RCC_AHB1ENR2_PWREN);
 
-  /* Supply the EPOD booster from undivided MSIS. */
+  /* Select the board regulator and wait until the transition completes. */
+
+  modifyreg32(STM32_PWR_CR3, PWR_CR3_REGSEL, STM32_PWR_CR3_REGSEL);
+  for (timeout = CLOCK_READY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(STM32_PWR_SVMSR) & PWR_SVMSR_REGS) ==
+          STM32_PWR_CR3_REGSEL)
+        {
+          break;
+        }
+    }
+
+  if (timeout == 0)
+    {
+      return;
+    }
+
+  /* Configure and enable the EPOD booster. */
 
   regval  = getreg32(STM32_RCC_CFGR4);
   regval &= ~(RCC_CFGR4_BOOSTSEL_MASK | RCC_CFGR4_BOOSTDIV_MASK);
-  regval |= RCC_CFGR4_BOOSTSEL_MSIS;
+  regval |= STM32_RCC_CFGR4_BOOSTSEL | STM32_RCC_CFGR4_BOOSTDIV;
   putreg32(regval, STM32_RCC_CFGR4);
 
-  modifyreg32(STM32_PWR_VOSR, 0, PWR_VOSR_BOOSTEN);
-  while ((getreg32(STM32_PWR_VOSR) & PWR_VOSR_BOOSTRDY) == 0)
+  modifyreg32(STM32_PWR_VOSR, 0, STM32_PWR_VOSR_BOOST);
+  for (timeout = CLOCK_READY_TIMEOUT; timeout > 0; timeout--)
     {
+      if ((getreg32(STM32_PWR_VOSR) & PWR_VOSR_BOOSTRDY) != 0)
+        {
+          break;
+        }
     }
 
-  /* Select voltage scale 1 and wait until it is active. */
-
-  modifyreg32(STM32_PWR_VOSR, PWR_VOSR_R2EN, PWR_VOSR_R1EN);
-  while ((getreg32(STM32_PWR_VOSR) &
-          (PWR_VOSR_R1RDY | PWR_VOSR_R2RDY)) != PWR_VOSR_R1RDY)
+  if (timeout == 0)
     {
+      return;
     }
 
-  /* Three wait states are required before raising HCLK to 96 MHz. */
+  /* Select the board voltage scale and wait until it is active. */
+
+  modifyreg32(STM32_PWR_VOSR, PWR_VOSR_R1EN | PWR_VOSR_R2EN,
+              STM32_PWR_VOSR_RANGE);
+  for (timeout = CLOCK_READY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(STM32_PWR_VOSR) &
+           (PWR_VOSR_R1RDY | PWR_VOSR_R2RDY)) ==
+          STM32_PWR_VOSR_RANGERDY)
+        {
+          break;
+        }
+    }
+
+  if (timeout == 0)
+    {
+      return;
+    }
+
+  /* Configure FLASH before raising HCLK. */
 
   modifyreg32(STM32_FLASH_ACR, FLASH_ACR_LATENCY_MASK,
-              FLASH_ACR_LATENCY(3));
+              STM32_FLASH_ACR_LATENCY);
 
-  /* Select MSIRC0 divided by one and use it as the 96 MHz system clock. */
+  /* Configure and start MSIS. */
 
   regval  = getreg32(STM32_RCC_ICSCR1);
   regval &= ~(RCC_ICSCR1_MSISSEL | RCC_ICSCR1_MSISDIV_MASK);
-  regval |= RCC_ICSCR1_MSIRGSEL;
+  regval |= RCC_ICSCR1_MSIRGSEL | STM32_RCC_ICSCR1_MSISSEL |
+            STM32_RCC_ICSCR1_MSISDIV;
   putreg32(regval, STM32_RCC_ICSCR1);
 
   modifyreg32(STM32_RCC_CR, 0, RCC_CR_MSISON);
-  while ((getreg32(STM32_RCC_CR) & RCC_CR_MSISRDY) == 0)
+  for (timeout = CLOCK_READY_TIMEOUT; timeout > 0; timeout--)
     {
+      if ((getreg32(STM32_RCC_CR) & RCC_CR_MSISRDY) != 0)
+        {
+          break;
+        }
     }
 
-  modifyreg32(STM32_RCC_CFGR1, RCC_CFGR1_SW_MASK, RCC_CFGR1_SW_MSIS);
-  while ((getreg32(STM32_RCC_CFGR1) & RCC_CFGR1_SWS_MASK) !=
-         RCC_CFGR1_SWS_MSIS)
+  if (timeout == 0)
     {
+      return;
     }
 
-  /* Keep all bus clocks undivided. */
+  /* Configure the AHB and APB prescalers. */
 
   modifyreg32(STM32_RCC_CFGR2,
               RCC_CFGR2_HPRE_MASK | RCC_CFGR2_PPRE1_MASK |
-              RCC_CFGR2_PPRE2_MASK, 0);
-  modifyreg32(STM32_RCC_CFGR3, RCC_CFGR3_PPRE3_MASK, 0);
+              RCC_CFGR2_PPRE2_MASK,
+              STM32_RCC_CFGR2_HPRE | STM32_RCC_CFGR2_PPRE1 |
+              STM32_RCC_CFGR2_PPRE2);
+  modifyreg32(STM32_RCC_CFGR3, RCC_CFGR3_PPRE3_MASK,
+              STM32_RCC_CFGR3_PPRE3);
+
+  /* Use MSIS as the system clock and wait for the switch to complete. */
+
+  modifyreg32(STM32_RCC_CFGR1, RCC_CFGR1_SW_MASK, RCC_CFGR1_SW_MSIS);
+  for (timeout = CLOCK_READY_TIMEOUT; timeout > 0; timeout--)
+    {
+      if ((getreg32(STM32_RCC_CFGR1) & RCC_CFGR1_SWS_MASK) ==
+          RCC_CFGR1_SWS_MSIS)
+        {
+          break;
+        }
+    }
 }
+#endif
 
 /****************************************************************************
  * Name: stm32_rcc_enableperipherals
