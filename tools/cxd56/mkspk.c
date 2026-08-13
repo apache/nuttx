@@ -123,31 +123,35 @@ static struct args *parse_args(int argc, char **argv)
     {
       fprintf(stderr,
         "mkspk [-c <number>] <filename> <save name> [<output file>]\n");
-      exit(EXIT_FAILURE);
+      goto parse_args_error;
     }
 
   if (args->core < 0)
     {
       fprintf(stderr, "Core number is not set. Please use -c option.\n");
-      exit(EXIT_FAILURE);
+      goto parse_args_error;
     }
 
   if (strlen(args->savename) > 63)
     {
       fprintf(stderr, "savename too long.\n");
-      exit(EXIT_FAILURE);
+      goto parse_args_error;
     }
 
   return args;
+
+parse_args_error:
+  free(args->outputfile);
+  exit(EXIT_FAILURE);
 }
 
 static struct elf_file *load_elf(const char *filename)
 {
   size_t fsize;
   int pos;
-  char *buf;
-  FILE *fp;
-  struct elf_file *ef;
+  char *buf = NULL;
+  FILE *fp = NULL;
+  struct elf_file *ef = NULL;
   Elf32_Shdr *sh;
   uint16_t i;
   int ret;
@@ -155,13 +159,13 @@ static struct elf_file *load_elf(const char *filename)
   fp = fopen(filename, "rb");
   if (!fp)
     {
-      return NULL;
+      goto load_elf_error;
     }
 
   ef = malloc(sizeof(*ef));
   if (!ef)
     {
-      return NULL;
+      goto load_elf_error;
     }
 
   pos = fseek(fp, 0, SEEK_END);
@@ -171,14 +175,14 @@ static struct elf_file *load_elf(const char *filename)
   buf = malloc(fsize);
   if (!buf)
     {
-      return NULL;
+      goto load_elf_error;
     }
 
   ret = fread(buf, fsize, 1, fp);
   fclose(fp);
   if (ret != 1)
     {
-      return NULL;
+      goto load_elf_error;
     }
 
   ef->data = buf;
@@ -191,9 +195,7 @@ static struct elf_file *load_elf(const char *filename)
         h->e_ident[EI_MAG1] == 'E' &&
         h->e_ident[EI_MAG2] == 'L' && h->e_ident[EI_MAG3] == 'F'))
     {
-      free(ef);
-      free(buf);
-      return NULL;
+      goto load_elf_error;
     }
 
   ef->phdr = (Elf32_Phdr *) (buf + ef->ehdr->e_phoff);
@@ -219,6 +221,12 @@ static struct elf_file *load_elf(const char *filename)
     }
 
   return ef;
+
+load_elf_error:
+  if (fp) fclose(fp);
+  free(ef);
+  free(buf);
+  return NULL;
 }
 
 static void *create_image(struct elf_file *elf, int core, char *savename,
@@ -325,10 +333,11 @@ int main(int argc, char **argv)
   struct args *args;
   struct elf_file *elf;
   struct cipher *c;
-  uint8_t *spkimage;
+  uint8_t *spkimage = NULL;
   int size = 0;
-  FILE *fp;
+  FILE *fp = NULL;
   char footer[16];
+  int ret = EXIT_SUCCESS;
 
   args = parse_args(argc, argv);
 
@@ -336,7 +345,8 @@ int main(int argc, char **argv)
   if (!elf)
     {
       fprintf(stderr, "Loading ELF %s failure.\n", args->elffile);
-      exit(EXIT_FAILURE);
+      ret = EXIT_FAILURE;
+      goto main_exit;
     }
 
   spkimage = create_image(elf, args->core, args->savename, &size);
@@ -355,20 +365,21 @@ int main(int argc, char **argv)
   if (!fp)
     {
       fprintf(stderr, "Output file open error.\n");
-      free(spkimage);
-      exit(EXIT_FAILURE);
+      ret = EXIT_FAILURE;
+      goto main_exit;
     }
 
   fwrite(spkimage, size, 1, fp);
   fwrite(footer, 16, 1, fp);
+  memset(spkimage, 0, size);
 
-  fclose(fp);
+  goto main_exit;
 
   printf("File %s is successfully created.\n", args->outputfile);
+
+main_exit:
+  if (fp) fclose(fp);
   free(args->outputfile);
-
-  memset(spkimage, 0, size);
   free(spkimage);
-
-  exit(EXIT_SUCCESS);
+  exit(ret);
 }
