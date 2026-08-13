@@ -122,6 +122,19 @@ int rtl8721f_uart_initialize(void);
 int rtl8721f_i2c_initialize(void);
 #endif
 
+#ifdef CONFIG_AMEBA_SPI
+/****************************************************************************
+ * Name: rtl8721f_spi_initialize
+ *
+ * Description:
+ *   Register the board's SPI master buses at /dev/spiN
+ *   (boards/arm/rtl8721f/rtl8721f_evb/src/rtl8721f_spi.c).
+ *
+ ****************************************************************************/
+
+int rtl8721f_spi_initialize(void);
+#endif
+
 #ifdef CONFIG_RTL8721F_FLASH_FS
 /****************************************************************************
  * Name: ameba_flash_fs_initialize

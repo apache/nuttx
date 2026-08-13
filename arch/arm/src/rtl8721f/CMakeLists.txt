@@ -58,6 +58,10 @@ if(CONFIG_AMEBA_I2C)
   list(APPEND SRCS ${AMEBA_COMMON}/ameba_i2c.c)
 endif()
 
+if(CONFIG_AMEBA_SPI)
+  list(APPEND SRCS ${AMEBA_COMMON}/ameba_spi.c)
+endif()
+
 target_include_directories(arch PRIVATE ${AMEBA_COMMON})
 target_sources(arch PRIVATE ${SRCS})
 
@@ -118,6 +122,14 @@ endif()
 # in (--gc-sections drops the unused DMA/interrupt helpers).
 if(CONFIG_AMEBA_I2C)
   list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_i2c.c)
+endif()
+
+# SPI (DesignWare SSI) register layer.  The SPI driver
+# (arch/.../common/ameba/ameba_spi.c) calls the fwlib SSI API; the data tables
+# and helpers it indexes live in this RAM source and must be compiled in
+# (--gc-sections drops the unused DMA/interrupt helpers).
+if(CONFIG_AMEBA_SPI)
+  list(APPEND AMEBA_FWLIB_SRCS ${AMEBA_SOC}/fwlib/ram_common/ameba_spi.c)
 endif()
 
 # Silence a couple of warnings the vendored SDK sources trip under NuttX's
