@@ -20,6 +20,10 @@
 #
 ############################################################################
 
+ifeq ($(CONFIG_LIBC_ATOMIC_ARCH),y)
+CSRCS += arch_atomic.c
+endif
+
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 CSRCS += arch_setjmp.c
 endif

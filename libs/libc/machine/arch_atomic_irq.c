@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arch_atomic.c
+ * libs/libc/machine/arch_atomic_irq.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
