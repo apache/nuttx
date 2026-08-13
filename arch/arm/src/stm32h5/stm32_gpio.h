@@ -308,6 +308,29 @@ void stm32_gpiowrite(uint32_t pinset, bool value);
 bool stm32_gpioread(uint32_t pinset);
 
 /****************************************************************************
+ * Name: stm32_gpiosetevent
+ *
+ * Description:
+ *   Sets/clears GPIO based event and interrupt triggers.
+ *
+ * Input Parameters:
+ *  pinset      - GPIO pin configuration
+ *  risingedge  - Enables interrupt on rising edges
+ *  fallingedge - Enables interrupt on falling edges
+ *  event       - Generate event when set
+ *  func        - When non-NULL, generate interrupt
+ *  arg         - Argument passed to the interrupt callback
+ *
+ * Returned Value:
+ *  Zero (OK) is returned on success, otherwise a negated errno value is
+ *  returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
+                         bool event, xcpt_t func, void *arg);
+
+/****************************************************************************
  * Function:  stm32_gpioinit
  *
  * Description:
