@@ -98,6 +98,16 @@ config RPTUN_IVSHMEM_BUFFNUM
 		The rpmsg buffer number in resource table, the RX and TX buffer number
 		are same for now.
 
+config RPTUN_IVSHMEM_RPMB_PATH
+	string "rptun ivshmem backend eMMC RPMB device path"
+	depends on DRIVERS_VHOST_RPMB
+	default "/dev/mmcsd0rpmb"
+	---help---
+		Path of the backend eMMC RPMB partition opened by the vhost-rpmb
+		driver on the device side. It is published into the RPMB vdev
+		config space (struct vhost_rpmb_config_s) of the ivshmem resource
+		table so the vhost-rpmb probe can open the real RPMB block device.
+
 endif
 
 config RPTUN_PRIORITY

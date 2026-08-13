@@ -37,6 +37,7 @@
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/rptun/rptun_ivshmem.h>
 #include <nuttx/virtio/virtio-config.h>
+#include <nuttx/virtio/virtio-rpmb.h>
 #include <nuttx/virtio/virtio-spi.h>
 #include <nuttx/virtio/virtio-vsock.h>
 #include <nuttx/wdog.h>
@@ -88,12 +89,19 @@
 #  define RPTUN_IVSHMEM_SPI       0
 #endif
 
+#ifdef CONFIG_DRIVERS_VHOST_RPMB
+#  define RPTUN_IVSHMEM_RPMB      1
+#else
+#  define RPTUN_IVSHMEM_RPMB      0
+#endif
+
 #define RPTUN_IVSHMEM_VIRTIO_NUM  (RPTUN_IVSHMEM_RNG + \
                                    RPTUN_IVSHMEM_RPMSG + \
                                    RPTUN_IVSHMEM_VSOCK + \
                                    RPTUN_IVSHMEM_NET + \
                                    RPTUN_IVSHMEM_I2C + \
-                                   RPTUN_IVSHMEM_SPI)
+                                   RPTUN_IVSHMEM_SPI + \
+                                   RPTUN_IVSHMEM_RPMB)
 #define RPTUN_IVSHMEM_RSC_NUM     (2 * RPTUN_IVSHMEM_VIRTIO_NUM)
 
 /****************************************************************************
@@ -147,6 +155,13 @@ struct aligned_data(8) rptun_ivshmem_rsc_s
   struct vhost_spi_config_s    spi_config;
   struct fw_rsc_carveout       spi_carveout;
   char                         spi_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
+#endif
+#if RPTUN_IVSHMEM_RPMB
+  struct fw_rsc_vdev           rpmb;
+  struct fw_rsc_vdev_vring     rpmb_vring;
+  struct vhost_rpmb_config_s   rpmb_config;
+  struct fw_rsc_carveout       rpmb_carveout;
+  char                         rpmb_shm[RPTUN_IVSHMEM_SHMEM_SIZE];
 #endif
 };
 
@@ -253,6 +268,10 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
 #if RPTUN_IVSHMEM_SPI
       offsetof(struct rptun_ivshmem_rsc_s, spi),
       offsetof(struct rptun_ivshmem_rsc_s, spi_carveout),
+#endif
+#if RPTUN_IVSHMEM_RPMB
+      offsetof(struct rptun_ivshmem_rsc_s, rpmb),
+      offsetof(struct rptun_ivshmem_rsc_s, rpmb_carveout),
 #endif
     },
 
@@ -480,6 +499,40 @@ static const struct rptun_ivshmem_rsc_s g_rsc_table =
       .len  = sizeof(g_rsc_table.spi_shm),
     },
 #endif
+#if RPTUN_IVSHMEM_RPMB
+  .rpmb =
+    {
+      .type          = RSC_VDEV,
+      .id            = VIRTIO_ID_RPMB,
+      .notifyid      = RSC_NOTIFY_ID_ANY,
+      .dfeatures     = 0,
+      .config_len    = sizeof(struct vhost_rpmb_config_s),
+      .num_of_vrings = 1,
+      .reserved      =
+        {
+          VIRTIO_DEV_DRIVER, 0
+        },
+    },
+  .rpmb_vring =
+    {
+      .align     = 8,
+      .num       = 8,
+      .notifyid  = RSC_NOTIFY_ID_ANY,
+      .da        = FW_RSC_U32_ADDR_ANY,
+    },
+  .rpmb_config =
+    {
+      .path = CONFIG_RPTUN_IVSHMEM_RPMB_PATH,
+    },
+  .rpmb_carveout =
+    {
+      .type = RSC_CARVEOUT,
+      .da   = ALIGN_UP(offsetof(struct rptun_ivshmem_rsc_s, rpmb_shm) +
+                       offsetof(struct rptun_ivshmem_mem_s, rsc_table), 8),
+      .pa   = (uint32_t)METAL_BAD_PHYS,
+      .len  = sizeof(g_rsc_table.rpmb_shm),
+    },
+#endif
 };
 
 /****************************************************************************
@@ -557,6 +610,10 @@ rptun_ivshmem_get_resource(FAR struct rptun_dev_s *dev)
 #endif
 #ifdef CONFIG_DRIVERS_VHOST_SPI
           snprintf((FAR char *)rsc->spi_carveout.name, RPROC_MAX_NAME_LEN,
+                   "vdev%dbuffer", i++);
+#endif
+#ifdef CONFIG_DRIVERS_VHOST_RPMB
+          snprintf((FAR char *)rsc->rpmb_carveout.name, RPROC_MAX_NAME_LEN,
                    "vdev%dbuffer", i++);
 #endif
           UNUSED(rsc);
