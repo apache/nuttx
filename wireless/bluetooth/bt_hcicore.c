@@ -265,7 +265,9 @@ static void hci_acl(FAR struct bt_buf_s *buf)
       return;
     }
 
+  bt_buf_addref(buf);
   bt_conn_receive(conn, buf, flags);
+  bt_conn_release(conn);
 }
 
 /* HCI event processing */
