@@ -1176,16 +1176,4 @@ static int csefree(FAR struct csession *cse)
 void devcrypto_register(void)
 {
   register_driver("/dev/crypto", &g_cryptoops, 0660, NULL);
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_CRYPTO
-  swcr_init();
-#endif
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV_SOFTWARE_KEYMGMT
-  swkey_init();
-#endif
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV_HARDWARE
-  hwcr_init();
-#endif
 }
