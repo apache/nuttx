@@ -1607,3 +1607,19 @@ config BOOT_SDRAM_DATA
 		.data and .bss sections can be initialized.
 
 endmenu # Boot Memory Configuration
+
+menu "Image Options"
+
+config FLASH_HEADER_SIZE
+	hex "Image header size"
+	default 0x0
+	---help---
+		Bootloaders might require a image header that describes the image
+		or is used e.g. for image validation. This sets the size of this
+		header. Some devices might require strict alignment of the location
+		after the header (e.g. when the image starts with the vector table),
+		this alignment should be performed in the linker script. To avoid
+		a possible alignment issue it is best to extend the header size
+		to match the alignment.
+
+endmenu # Image Options

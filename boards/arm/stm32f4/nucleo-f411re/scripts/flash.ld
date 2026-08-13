@@ -27,10 +27,23 @@
  * range.
  */
 
+#include <nuttx/config.h>
+#if (CONFIG_FLASH_SIZE != 0)
+#define FLASH_START CONFIG_FLASH_START + CONFIG_FLASH_HEADER_SIZE
+#define FLASH_SIZE  CONFIG_FLASH_SIZE - CONFIG_FLASH_HEADER_SIZE
+#define RAM_START   CONFIG_RAM_START
+#define RAM_SIZE    CONFIG_RAM_SIZE
+#else
+#define FLASH_START 0x08000000
+#define FLASH_SIZE  512K
+#define RAM_START   0x20000000
+#define RAM_SIZE    128K
+#endif
+
 MEMORY
 {
-  flash (rx) : ORIGIN = 0x08000000, LENGTH = 512K
-  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+  flash (rx) : ORIGIN = FLASH_START, LENGTH = FLASH_SIZE
+  sram (rwx) : ORIGIN = RAM_START, LENGTH = RAM_SIZE
 }
 
 OUTPUT_ARCH(arm)
@@ -38,6 +51,10 @@ EXTERN(_vectors)
 ENTRY(_stext)
 SECTIONS
 {
+    /* Ensure that the vector table is correctly aligned */
+
+    . = ALIGN(0x200);
+
     .text : {
         _stext = ABSOLUTE(.);
         *(.vectors)
