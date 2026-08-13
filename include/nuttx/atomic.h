@@ -77,13 +77,31 @@ typedef volatile _Atomic int64_t atomic64_t;
 #  endif
 #endif
 
-#ifndef ATOMIC_FUNC
+#ifndef __ATOMIC_RELAXED
 #  define __ATOMIC_RELAXED 0
+#endif
+
+#ifndef __ATOMIC_CONSUME
 #  define __ATOMIC_CONSUME 1
+#endif
+
+#ifndef __ATOMIC_ACQUIRE
 #  define __ATOMIC_ACQUIRE 2
+#endif
+
+#ifndef __ATOMIC_RELEASE
 #  define __ATOMIC_RELEASE 3
+#endif
+
+#ifndef __ATOMIC_ACQ_REL
 #  define __ATOMIC_ACQ_REL 4
+#endif
+
+#ifndef __ATOMIC_SEQ_CST
 #  define __ATOMIC_SEQ_CST 5
+#endif
+
+#ifndef ATOMIC_FUNC
 
 #  define ATOMIC_FUNC(f, n) nx_atomic_##f##_##n
 
