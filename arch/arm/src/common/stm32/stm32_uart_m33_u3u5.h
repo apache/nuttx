@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_uart_m33_u5.h
+ * arch/arm/src/common/stm32/stm32_uart_m33_u3u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U5_H
-#define __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U5_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U3U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U3U5_H
 
 /****************************************************************************
  * Included Files
@@ -32,10 +32,12 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32U585XX) || defined(CONFIG_STM32_STM32U5A5XX)
-#  include "hardware/stm32_uart_m33_u5.h"
+#if defined(CONFIG_STM32_STM32U3C5XX) || \
+    defined(CONFIG_STM32_STM32U585XX) || \
+    defined(CONFIG_STM32_STM32U5A5XX)
+#  include "hardware/stm32_uart_m33_u3u5.h"
 #else
-#  error "Unsupported STM32U5 chip"
+#  error "Unsupported STM32U3/U5 chip"
 #endif
 
 /****************************************************************************
@@ -297,4 +299,4 @@ void stm32_serial_dma_poll(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U5_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_STM32_UART_M33_U3U5_H */

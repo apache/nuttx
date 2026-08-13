@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_pminitialize_m3m4_v1.c
+ * arch/arm/src/stm32u3/stm32_rcc_m33_u3.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,45 +20,60 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H
+#define __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/power/pm.h>
 
-#include "arm_internal.h"
-#include "stm32_pm.h"
+#include "hardware/stm32u3xx_rcc.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* LPUART1 is clocked from PCLK3 by default and is gated through APB3. */
+
+#define STM32_LPUART1_FREQUENCY  STM32_PCLK3_FREQUENCY
+#define STM32_LPUART1_RCC_REG    STM32_RCC_APB3ENR
+#define STM32_LPUART1_RCC_EN     RCC_APB3ENR_LPUART1EN
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+void stm32_clockconfig(void);
+
+#ifdef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+void stm32_board_clockconfig(void);
+#else
+void stm32_stdclockconfig(void);
+#endif
 
 #ifdef CONFIG_PM
+void stm32_clockenable(void);
+#endif
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
+void stm32_rcc_enableperipherals(void);
 
-/****************************************************************************
- * Name: arm_pminitialize
- *
- * Description:
- *   This function is called by MCU-specific logic at power-on reset in
- *   order to provide one-time initialization the power management subsystem.
- *   This function must be called *very* early in the initialization sequence
- *   *before* any other device drivers are initialized (since they may
- *   attempt to register with the power management subsystem).
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void arm_pminitialize(void)
-{
-  /* Initialize the NuttX power management subsystem proper */
-
-  pm_initialize();
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_PM */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_STM32U3_STM32_RCC_M33_U3_H */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_allocateheap_m33_u5.c
+ * arch/arm/src/common/stm32/stm32_allocateheap_m33_u3u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -47,13 +47,13 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Internal SRAM is available in all members of the STM32U5 family. The
- * following definitions must be provided to specify the size and
- * location of internal (system) SRAM1 and SRAM2:
+/* Internal SRAM is available in all members of the STM32U3 and STM32U5
+ * families.  The following definitions specify its family-specific size
+ * and location:
  *
- * SRAM1_START   0x20000000
+ * SRAM1_START   STM32_SRAM1_BASE
  * SRAM1_END
- * SRAM2_START   0x10000000
+ * SRAM2_START   STM32_SRAM2_BASE
  * SRAM2_END
  *
  * In addition to internal SRAM, memory may also be available through the
@@ -75,17 +75,17 @@
 #  undef CONFIG_STM32_FSMC_SRAM
 #endif
 
-/* STM32U5[7,8]6xx have 128 Kib in two banks, both accessible to DMA:
+/* STM32U5[7,8]6xx have 128 KiB in two banks, both accessible to DMA:
  *
  *   1) 96 KiB of System SRAM beginning at address 0x2000:0000 - 0x2001:8000
  *   2) 32 KiB of System SRAM beginning at address 0x1000:0000 - 0x1000:8000
  *
- * STM32U596xx have 320 Kib in two banks, both accessible to DMA:
+ * STM32U596xx have 320 KiB in two banks, both accessible to DMA:
  *
  *   1) 256 KiB of System SRAM beginning at address 0x2000:0000 - 0x2004:0000
  *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
  *
- * STM32U5Rxxx have 640 Kib in three banks:
+ * STM32U5Rxxx have 640 KiB in three banks:
  *
  *   1) 192 KiB of System SRAM beginning at address 0x2000:0000 - 0x2003:0000
  *   2) 64 KiB of System SRAM beginning at address 0x1000:0000 - 0x1001:0000
@@ -97,7 +97,11 @@
 /* Set the range of system SRAM */
 
 #define SRAM1_START  STM32_SRAM1_BASE
-#define SRAM1_END    (SRAM1_START + STM32_SRAM1_SIZE)
+#ifdef STM32_PRIMARY_SRAM_SIZE
+#  define SRAM1_END  (SRAM1_START + STM32_PRIMARY_SRAM_SIZE)
+#else
+#  define SRAM1_END  (SRAM1_START + STM32_SRAM1_SIZE)
+#endif
 
 /* Set the range of SRAM2 as well, requires a second memory region */
 
@@ -113,7 +117,7 @@
 
 #ifdef STM32_SRAM5_SIZE
 #  define SRAM5_START  STM32_SRAM5_BASE
-#  define SRAM5_END    (SRAM3_START + STM32_SRAM5_SIZE)
+#  define SRAM5_END    (SRAM5_START + STM32_SRAM5_SIZE)
 #endif
 
 /* Some sanity checking.  If multiple memory regions are defined, verify

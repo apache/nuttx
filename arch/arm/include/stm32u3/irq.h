@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_syscfg.h
+ * arch/arm/include/stm32u3/irq.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,30 +20,19 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H
+#ifndef __ARCH_ARM_INCLUDE_STM32U3_IRQ_H
+#define __ARCH_ARM_INCLUDE_STM32U3_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32U3)
-#  include "hardware/stm32u3xx_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U5)
-#  include "hardware/stm32_syscfg_m33_u5.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U0)
-#  include "hardware/stm32u0_syscfg.h"
+#if defined(CONFIG_STM32_STM32U3C5XX)
+#  include <arch/stm32u3/stm32u3c5xx_irq.h>
 #else
-#  error "Unsupported STM32 M0 SYSCFG"
+#  error "Unsupported STM32U3 chip"
 #endif
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H */
+#endif /* __ARCH_ARM_INCLUDE_STM32U3_IRQ_H */

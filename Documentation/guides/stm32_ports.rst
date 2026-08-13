@@ -35,7 +35,7 @@ STM32MP2      Cortex-A35        unsupported  none
 STM32MP2      Cortex-M33        unsupported  none
 STM32N6       Cortex-M55        supported    ``arch/arm/src/stm32n6``
 STM32U0       Cortex-M0+        supported    ``arch/arm/src/stm32u0``
-STM32U3       Cortex-M33        unsupported  none
+STM32U3       Cortex-M33        supported    ``arch/arm/src/stm32u3``
 STM32U5       Cortex-M33        supported    ``arch/arm/src/stm32u5``
 STM32WB       Cortex-M4         supported    ``arch/arm/src/stm32wb``
 STM32WB       Cortex-M0+        unsupported  none
@@ -730,6 +730,32 @@ USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c
 USB           device        not supported
 WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c
 ============  ============  ======================================================
+
+STM32U3
+-------
+
+============  ============  =============================================================
+Peripheral    Core version  Driver
+============  ============  =============================================================
+ADC           to be done    not supported
+DAC           to be done    not supported
+EXTI          U3/U5         arch/arm/src/common/stm32/stm32_exti_gpio_m33_u3u5.c
+FLASH         to be done    not supported
+GPIO          U3/U5         arch/arm/src/common/stm32/stm32_gpio_m33_u3u5.c
+GPDMA         to be done    not supported
+I2C/I3C       to be done    not supported
+ICACHE        to be done    not supported
+OCTOSPI       to be done    not supported
+PWR           to be done    not supported
+RCC           U3            arch/arm/src/stm32u3/stm32u3xx_rcc.c
+RNG           to be done    not supported
+RTC           to be done    not supported
+SAES/AES      to be done    not supported
+SPI/I2S       to be done    not supported
+TIM/LPTIM     to be done    not supported
+USART/LPUART  v3            arch/arm/src/common/stm32/stm32_serial_m33_u3u5.c
+USB           device        not supported
+============  ============  =============================================================
 
 STM32U5
 -------

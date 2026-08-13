@@ -42,6 +42,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* LPUART1 is clocked from PCLK3 by default and is gated through APB3. */
+
+#define STM32_LPUART1_FREQUENCY  STM32_PCLK3_FREQUENCY
+#define STM32_LPUART1_RCC_REG    STM32_RCC_APB3ENR
+#define STM32_LPUART1_RCC_EN     RCC_APB3ENR_LPUART1EN
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN

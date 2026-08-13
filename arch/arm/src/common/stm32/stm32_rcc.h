@@ -27,7 +27,11 @@
  * Included Files
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_STM32U5)
+#if defined(CONFIG_ARCH_CHIP_STM32U3)
+
+#  include "stm32_rcc_m33_u3.h"
+
+#elif defined(CONFIG_ARCH_CHIP_STM32U5)
 
 #  include "stm32_rcc_m33_u5.h"
 

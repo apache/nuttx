@@ -1,0 +1,543 @@
+/****************************************************************************
+ * arch/arm/src/stm32u3/hardware/stm32_memorymap.h
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_STM32U3_HARDWARE_STM32_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32U3_HARDWARE_STM32_MEMORYMAP_H
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* STM32U3 address blocks ***************************************************/
+
+#define STM32_CODE_BASE           0x00000000
+#define STM32_SRAM_BASE_NS        0x20000000
+#define STM32_SRAM_BASE_S         0x30000000
+#define STM32_PERIPH_BASE_NS      0x40000000
+#define STM32_PERIPH_BASE_S       0x50000000
+#define STM32_EXTRAM_BASE_NS      0x90000000
+#define STM32_EXTRAM_BASE         STM32_EXTRAM_BASE_NS
+#define STM32_OCTOSPI1_BANK       STM32_EXTRAM_BASE_NS
+#define STM32_EPPB_BASE           0xe0040000
+#define STM32_CORTEX_BASE         0xe0000000
+
+#define STM32_REGION_MASK         0xf0000000
+#define STM32_IS_SRAM(a) \
+  ((((uint32_t)(a)) & STM32_REGION_MASK) == STM32_SRAM_BASE)
+
+/* Code and SRAM base addresses *********************************************/
+
+#define STM32_BOOT_BASE           0x00000000
+#define STM32_FLASH_BASE_NS       0x08000000
+#define STM32_SYSMEM_BASE_NS      0x0bf80000
+#define STM32_SYSTEM_FLASH_BASE_NS STM32_SYSMEM_BASE_NS
+#define STM32_FLASH_BASE_S        0x0c000000
+#define STM32_SYSMEM_BASE_S       0x0ff80000
+#define STM32_SYSTEM_FLASH_BASE_S STM32_SYSMEM_BASE_S
+#define STM32_FLASH_OTP_BASE      0x0bfa0000
+#define STM32_FLASH_ENGY_BASE     0x0bfa0500
+#define STM32_SRAM1_BASE_NS       0x20000000
+#define STM32_SRAM2_BASE_NS       0x20030000
+#define STM32_SRAM3_BASE_NS       0x20040000
+#define STM32_SRAM4_BASE_NS       0x20090000
+#define STM32_SRAM1_BASE_S        0x30000000
+#define STM32_SRAM2_BASE_S        0x30030000
+#define STM32_SRAM3_BASE_S        0x30040000
+#define STM32_SRAM4_BASE_S        0x30090000
+
+/* System memory addresses **************************************************/
+
+#define STM32_SYSMEM_UID          0x0bfa0700
+#define STM32_SYSMEM_FSIZE        0x0bfa07a0
+#define STM32_SYSMEM_PACKAGE      0x0bfa0500
+#define STM32_SYSMEM_UID64        0x0bfa0a00
+#define STM32_PACKAGE_BASE        STM32_SYSMEM_PACKAGE
+#define STM32_UID_BASE            STM32_SYSMEM_UID
+#define STM32_FLASHSIZE_BASE      STM32_SYSMEM_FSIZE
+#define STM32_UID64_BASE          STM32_SYSMEM_UID64
+
+/* Non-secure peripheral bus base addresses *********************************/
+
+#define STM32_APB1_BASE_NS        0x40000000
+#define STM32_APB2_BASE_NS        0x40010000
+#define STM32_AHB1_BASE_NS        0x40020000
+#define STM32_APB3_BASE_NS        0x40040000
+#define STM32_AHB2_BASE_NS        0x42020000
+
+/* Secure peripheral bus base addresses *************************************/
+
+#define STM32_APB1_BASE_S         0x50000000
+#define STM32_APB2_BASE_S         0x50010000
+#define STM32_AHB1_BASE_S         0x50020000
+#define STM32_APB3_BASE_S         0x50040000
+#define STM32_AHB2_BASE_S         0x52020000
+
+/* APB1 non-secure peripheral base addresses ********************************/
+
+#define STM32_TIM2_BASE_NS        0x40000000
+#define STM32_TIM3_BASE_NS        0x40000400
+#define STM32_TIM4_BASE_NS        0x40000800
+#define STM32_TIM6_BASE_NS        0x40001000
+#define STM32_TIM7_BASE_NS        0x40001400
+#define STM32_SPI3_BASE_NS        0x40002000
+#define STM32_SPI4_BASE_NS        0x40002400
+#define STM32_WWDG_BASE_NS        0x40002c00
+#define STM32_IWDG_BASE_NS        0x40003000
+#define STM32_SPI2_BASE_NS        0x40003800
+#define STM32_USART2_BASE_NS      0x40004400
+#define STM32_USART3_BASE_NS      0x40004800
+#define STM32_UART4_BASE_NS       0x40004c00
+#define STM32_UART5_BASE_NS       0x40005000
+#define STM32_I2C1_BASE_NS        0x40005400
+#define STM32_I2C2_BASE_NS        0x40005800
+#define STM32_I3C1_BASE_NS        0x40005c00
+#define STM32_CRS_BASE_NS         0x40006000
+#define STM32_OPAMP1_BASE_NS      0x40007000
+#define STM32_OPAMP2_BASE_NS      0x40007010
+#define STM32_OPAMP12_COMMON_BASE_NS STM32_OPAMP1_BASE_NS
+#define STM32_VREFBUF_BASE_NS     0x40007400
+#define STM32_RTC_BASE_NS         0x40007800
+#define STM32_TAMP_BASE_NS        0x40007c00
+#define STM32_I2C4_BASE_NS        0x40008400
+#define STM32_LPTIM2_BASE_NS      0x40009400
+#define STM32_FDCAN1_BASE_NS      0x4000a400
+#define STM32_FDCAN_CONFIG_BASE_NS 0x4000a500
+#define STM32_FDCAN2_BASE_NS      0x4000a800
+#define STM32_FDCAN_RAM_BASE_NS   0x4000ac00
+#define STM32_SRAMCAN_BASE_NS     STM32_FDCAN_RAM_BASE_NS
+
+/* APB1 secure peripheral base addresses ************************************/
+
+#define STM32_TIM2_BASE_S         0x50000000
+#define STM32_TIM3_BASE_S         0x50000400
+#define STM32_TIM4_BASE_S         0x50000800
+#define STM32_TIM6_BASE_S         0x50001000
+#define STM32_TIM7_BASE_S         0x50001400
+#define STM32_SPI3_BASE_S         0x50002000
+#define STM32_SPI4_BASE_S         0x50002400
+#define STM32_WWDG_BASE_S         0x50002c00
+#define STM32_IWDG_BASE_S         0x50003000
+#define STM32_SPI2_BASE_S         0x50003800
+#define STM32_USART2_BASE_S       0x50004400
+#define STM32_USART3_BASE_S       0x50004800
+#define STM32_UART4_BASE_S        0x50004c00
+#define STM32_UART5_BASE_S        0x50005000
+#define STM32_I2C1_BASE_S         0x50005400
+#define STM32_I2C2_BASE_S         0x50005800
+#define STM32_I3C1_BASE_S         0x50005c00
+#define STM32_CRS_BASE_S          0x50006000
+#define STM32_OPAMP1_BASE_S       0x50007000
+#define STM32_OPAMP2_BASE_S       0x50007010
+#define STM32_OPAMP12_COMMON_BASE_S STM32_OPAMP1_BASE_S
+#define STM32_VREFBUF_BASE_S      0x50007400
+#define STM32_RTC_BASE_S          0x50007800
+#define STM32_TAMP_BASE_S         0x50007c00
+#define STM32_I2C4_BASE_S         0x50008400
+#define STM32_LPTIM2_BASE_S       0x50009400
+#define STM32_FDCAN1_BASE_S       0x5000a400
+#define STM32_FDCAN_CONFIG_BASE_S 0x5000a500
+#define STM32_FDCAN2_BASE_S       0x5000a800
+#define STM32_FDCAN_RAM_BASE_S    0x5000ac00
+#define STM32_SRAMCAN_BASE_S      STM32_FDCAN_RAM_BASE_S
+
+/* APB2 non-secure peripheral base addresses ********************************/
+
+#define STM32_TIM1_BASE_NS        0x40012c00
+#define STM32_SPI1_BASE_NS        0x40013000
+#define STM32_TIM8_BASE_NS        0x40013400
+#define STM32_USART1_BASE_NS      0x40013800
+#define STM32_TIM12_BASE_NS       0x40013c00
+#define STM32_TIM15_BASE_NS       0x40014000
+#define STM32_TIM16_BASE_NS       0x40014400
+#define STM32_TIM17_BASE_NS       0x40014800
+#define STM32_SAI1_BASE_NS        0x40015400
+#define STM32_SAI1_BLOCK_A_BASE_NS 0x40015404
+#define STM32_SAI1_BLOCK_B_BASE_NS 0x40015424
+#define STM32_USB_DRD_FS_BASE_NS  0x40016000
+#define STM32_USB_DRD_FS_RAM_BASE_NS 0x40016400
+#define STM32_USB_DRD_BASE_NS     STM32_USB_DRD_FS_BASE_NS
+#define STM32_USB_DRD_PMAADDR_NS  STM32_USB_DRD_FS_RAM_BASE_NS
+#define STM32_USB_DRD_RAM_BASE_NS STM32_USB_DRD_FS_RAM_BASE_NS
+#define STM32_USB_FS_BASE_NS      STM32_USB_DRD_FS_BASE_NS
+#define STM32_USB_FS_RAM_BASE_NS  STM32_USB_DRD_FS_RAM_BASE_NS
+#define STM32_I3C2_BASE_NS        0x40016c00
+
+/* APB2 secure peripheral base addresses ************************************/
+
+#define STM32_TIM1_BASE_S         0x50012c00
+#define STM32_SPI1_BASE_S         0x50013000
+#define STM32_TIM8_BASE_S         0x50013400
+#define STM32_USART1_BASE_S       0x50013800
+#define STM32_TIM12_BASE_S        0x50013c00
+#define STM32_TIM15_BASE_S        0x50014000
+#define STM32_TIM16_BASE_S        0x50014400
+#define STM32_TIM17_BASE_S        0x50014800
+#define STM32_SAI1_BASE_S         0x50015400
+#define STM32_SAI1_BLOCK_A_BASE_S 0x50015404
+#define STM32_SAI1_BLOCK_B_BASE_S 0x50015424
+#define STM32_USB_DRD_FS_BASE_S   0x50016000
+#define STM32_USB_DRD_FS_RAM_BASE_S 0x50016400
+#define STM32_USB_DRD_BASE_S      STM32_USB_DRD_FS_BASE_S
+#define STM32_USB_DRD_PMAADDR_S   STM32_USB_DRD_FS_RAM_BASE_S
+#define STM32_USB_DRD_RAM_BASE_S  STM32_USB_DRD_FS_RAM_BASE_S
+#define STM32_USB_FS_BASE_S       STM32_USB_DRD_FS_BASE_S
+#define STM32_USB_FS_RAM_BASE_S   STM32_USB_DRD_FS_RAM_BASE_S
+#define STM32_I3C2_BASE_S         0x50016c00
+
+/* AHB1 non-secure peripheral base addresses ********************************/
+
+#define STM32_GPDMA1_BASE_NS      0x40020000
+#define STM32_GPDMA1_CH0_BASE_NS  0x40020050
+#define STM32_GPDMA1_CH1_BASE_NS  0x400200d0
+#define STM32_GPDMA1_CH2_BASE_NS  0x40020150
+#define STM32_GPDMA1_CH3_BASE_NS  0x400201d0
+#define STM32_GPDMA1_CH4_BASE_NS  0x40020250
+#define STM32_GPDMA1_CH5_BASE_NS  0x400202d0
+#define STM32_GPDMA1_CH6_BASE_NS  0x40020350
+#define STM32_GPDMA1_CH7_BASE_NS  0x400203d0
+#define STM32_GPDMA1_CH8_BASE_NS  0x40020450
+#define STM32_GPDMA1_CH9_BASE_NS  0x400204d0
+#define STM32_GPDMA1_CH10_BASE_NS 0x40020550
+#define STM32_GPDMA1_CH11_BASE_NS 0x400205d0
+#define STM32_FLASHIF_BASE_NS     0x40022000
+#define STM32_FLASH_R_BASE_NS     STM32_FLASHIF_BASE_NS
+#define STM32_CRC_BASE_NS         0x40023000
+#define STM32_TSC_BASE_NS         0x40024000
+#define STM32_RAMCFG_BASE_NS      0x40026000
+#define STM32_RAMCFG_SRAM1_BASE_NS 0x40026000
+#define STM32_RAMCFG_SRAM2_BASE_NS 0x40026040
+#define STM32_RAMCFG_SRAM3_BASE_NS 0x40026080
+#define STM32_HSP1_BASE_NS        0x4002c000
+#define STM32_ICACHE_BASE_NS      0x40030400
+#define STM32_PWR_BASE_NS         0x40030800
+#define STM32_RCC_BASE_NS         0x40030c00
+#define STM32_EXTI_BASE_NS        0x40032000
+#define STM32_GTZC_TZSC1_BASE_NS  0x40032400
+#define STM32_GTZC_MPCBB1_BASE_NS 0x40032c00
+#define STM32_GTZC_MPCBB2_BASE_NS 0x40033000
+#define STM32_GTZC_MPCBB3_BASE_NS 0x40033400
+#define STM32_GTZC_MPCBB4_BASE_NS 0x40033800
+#define STM32_ADF1_BASE_NS        0x40034000
+#define STM32_ADF1_FILTER0_BASE_NS 0x40034080
+
+/* AHB1 secure peripheral base addresses ************************************/
+
+#define STM32_GPDMA1_BASE_S       0x50020000
+#define STM32_GPDMA1_CH0_BASE_S   0x50020050
+#define STM32_GPDMA1_CH1_BASE_S   0x500200d0
+#define STM32_GPDMA1_CH2_BASE_S   0x50020150
+#define STM32_GPDMA1_CH3_BASE_S   0x500201d0
+#define STM32_GPDMA1_CH4_BASE_S   0x50020250
+#define STM32_GPDMA1_CH5_BASE_S   0x500202d0
+#define STM32_GPDMA1_CH6_BASE_S   0x50020350
+#define STM32_GPDMA1_CH7_BASE_S   0x500203d0
+#define STM32_GPDMA1_CH8_BASE_S   0x50020450
+#define STM32_GPDMA1_CH9_BASE_S   0x500204d0
+#define STM32_GPDMA1_CH10_BASE_S  0x50020550
+#define STM32_GPDMA1_CH11_BASE_S  0x500205d0
+#define STM32_FLASHIF_BASE_S      0x50022000
+#define STM32_FLASH_R_BASE_S      STM32_FLASHIF_BASE_S
+#define STM32_CRC_BASE_S          0x50023000
+#define STM32_TSC_BASE_S          0x50024000
+#define STM32_RAMCFG_BASE_S       0x50026000
+#define STM32_RAMCFG_SRAM1_BASE_S 0x50026000
+#define STM32_RAMCFG_SRAM2_BASE_S 0x50026040
+#define STM32_RAMCFG_SRAM3_BASE_S 0x50026080
+#define STM32_HSP1_BASE_S         0x5002c000
+#define STM32_ICACHE_BASE_S       0x50030400
+#define STM32_PWR_BASE_S          0x50030800
+#define STM32_RCC_BASE_S          0x50030c00
+#define STM32_EXTI_BASE_S         0x50032000
+#define STM32_GTZC_TZSC1_BASE_S   0x50032400
+#define STM32_GTZC_TZIC1_BASE_S   0x50032800
+#define STM32_GTZC_MPCBB1_BASE_S  0x50032c00
+#define STM32_GTZC_MPCBB2_BASE_S  0x50033000
+#define STM32_GTZC_MPCBB3_BASE_S  0x50033400
+#define STM32_GTZC_MPCBB4_BASE_S  0x50033800
+#define STM32_ADF1_BASE_S         0x50034000
+#define STM32_ADF1_FILTER0_BASE_S 0x50034080
+
+/* APB3 non-secure peripheral base addresses ********************************/
+
+#define STM32_SYSCFG_BASE_NS      0x40040400
+#define STM32_LPUART1_BASE_NS     0x40042400
+#define STM32_I2C3_BASE_NS        0x40042800
+#define STM32_LPTIM1_BASE_NS      0x40044400
+#define STM32_LPTIM3_BASE_NS      0x40044800
+#define STM32_LPTIM4_BASE_NS      0x40044c00
+#define STM32_COMP1_BASE_NS       0x40045400
+#define STM32_COMP2_BASE_NS       0x40045404
+#define STM32_COMP12_COMMON_BASE_NS STM32_COMP1_BASE_NS
+
+/* APB3 secure peripheral base addresses ************************************/
+
+#define STM32_SYSCFG_BASE_S       0x50040400
+#define STM32_LPUART1_BASE_S      0x50042400
+#define STM32_I2C3_BASE_S         0x50042800
+#define STM32_LPTIM1_BASE_S       0x50044400
+#define STM32_LPTIM3_BASE_S       0x50044800
+#define STM32_LPTIM4_BASE_S       0x50044c00
+#define STM32_COMP1_BASE_S        0x50045400
+#define STM32_COMP2_BASE_S        0x50045404
+#define STM32_COMP12_COMMON_BASE_S STM32_COMP1_BASE_S
+
+/* AHB2 non-secure peripheral base addresses ********************************/
+
+#define STM32_GPIOA_BASE_NS       0x42020000
+#define STM32_GPIOB_BASE_NS       0x42020400
+#define STM32_GPIOC_BASE_NS       0x42020800
+#define STM32_GPIOD_BASE_NS       0x42020c00
+#define STM32_GPIOE_BASE_NS       0x42021000
+#define STM32_GPIOF_BASE_NS       0x42021400
+#define STM32_GPIOG_BASE_NS       0x42021800
+#define STM32_GPIOH_BASE_NS       0x42021c00
+#define STM32_ADC1_BASE_NS        0x42028000
+#define STM32_ADC2_BASE_NS        0x42028100
+#define STM32_ADC12_COMMON_BASE_NS 0x42028300
+#define STM32_ADC12_BASE_NS       STM32_ADC1_BASE_NS
+#define STM32_DAC1_BASE_NS        0x42028400
+#define STM32_AES_BASE_NS         0x420c0000
+#define STM32_HASH_BASE_NS        0x420c0400
+#define STM32_HASH_DIGEST_BASE_NS 0x420c0710
+#define STM32_RNG_BASE_NS         0x420c0800
+#define STM32_SAES_BASE_NS        0x420c0c00
+#define STM32_PKA_BASE_NS         0x420c2000
+#define STM32_PKA_RAM_BASE_NS     0x420c2400
+#define STM32_CCB_BASE_NS         0x420c7c00
+#define STM32_SDMMC1_BASE_NS      0x420c8000
+#define STM32_DLYB_SDMMC1_BASE_NS 0x420c8400
+#define STM32_DLYB_OCTOSPI1_BASE_NS 0x420cf000
+#define STM32_DLYB_OSPI1_BASE_NS  STM32_DLYB_OCTOSPI1_BASE_NS
+#define STM32_OCTOSPI1_BASE_NS    0x420d1400
+#define STM32_OCTOSPI1_R_BASE_NS  STM32_OCTOSPI1_BASE_NS
+
+/* AHB2 secure peripheral base addresses ************************************/
+
+#define STM32_GPIOA_BASE_S        0x52020000
+#define STM32_GPIOB_BASE_S        0x52020400
+#define STM32_GPIOC_BASE_S        0x52020800
+#define STM32_GPIOD_BASE_S        0x52020c00
+#define STM32_GPIOE_BASE_S        0x52021000
+#define STM32_GPIOF_BASE_S        0x52021400
+#define STM32_GPIOG_BASE_S        0x52021800
+#define STM32_GPIOH_BASE_S        0x52021c00
+#define STM32_ADC1_BASE_S         0x52028000
+#define STM32_ADC2_BASE_S         0x52028100
+#define STM32_ADC12_COMMON_BASE_S 0x52028300
+#define STM32_ADC12_BASE_S        STM32_ADC1_BASE_S
+#define STM32_DAC1_BASE_S         0x52028400
+#define STM32_AES_BASE_S          0x520c0000
+#define STM32_HASH_BASE_S         0x520c0400
+#define STM32_HASH_DIGEST_BASE_S  0x520c0710
+#define STM32_RNG_BASE_S          0x520c0800
+#define STM32_SAES_BASE_S         0x520c0c00
+#define STM32_PKA_BASE_S          0x520c2000
+#define STM32_PKA_RAM_BASE_S      0x520c2400
+#define STM32_CCB_BASE_S          0x520c7c00
+#define STM32_SDMMC1_BASE_S       0x520c8000
+#define STM32_DLYB_SDMMC1_BASE_S  0x520c8400
+#define STM32_DLYB_OCTOSPI1_BASE_S 0x520cf000
+#define STM32_DLYB_OSPI1_BASE_S   STM32_DLYB_OCTOSPI1_BASE_S
+#define STM32_OCTOSPI1_BASE_S     0x520d1400
+#define STM32_OCTOSPI1_R_BASE_S   STM32_OCTOSPI1_BASE_S
+
+/* Select the address view used by unqualified STM32 peripheral names. */
+
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define STM32_SRAM_BASE         STM32_SRAM_BASE_S
+#  define STM32_PERIPH_BASE       STM32_PERIPH_BASE_S
+#  define STM32_FLASH_BASE        STM32_FLASH_BASE_S
+#  define STM32_SYSMEM_BASE       STM32_SYSMEM_BASE_S
+#  define STM32_SYSTEM_FLASH_BASE STM32_SYSTEM_FLASH_BASE_S
+#  define STM32_SRAM1_BASE        STM32_SRAM1_BASE_S
+#  define STM32_SRAM2_BASE        STM32_SRAM2_BASE_S
+#  define STM32_SRAM3_BASE        STM32_SRAM3_BASE_S
+#  define STM32_SRAM4_BASE        STM32_SRAM4_BASE_S
+#  define STM32_APB1_BASE         STM32_APB1_BASE_S
+#  define STM32_APB2_BASE         STM32_APB2_BASE_S
+#  define STM32_AHB1_BASE         STM32_AHB1_BASE_S
+#  define STM32_APB3_BASE         STM32_APB3_BASE_S
+#  define STM32_AHB2_BASE         STM32_AHB2_BASE_S
+#else
+#  define STM32_SRAM_BASE         STM32_SRAM_BASE_NS
+#  define STM32_PERIPH_BASE       STM32_PERIPH_BASE_NS
+#  define STM32_FLASH_BASE        STM32_FLASH_BASE_NS
+#  define STM32_SYSMEM_BASE       STM32_SYSMEM_BASE_NS
+#  define STM32_SYSTEM_FLASH_BASE STM32_SYSTEM_FLASH_BASE_NS
+#  define STM32_SRAM1_BASE        STM32_SRAM1_BASE_NS
+#  define STM32_SRAM2_BASE        STM32_SRAM2_BASE_NS
+#  define STM32_SRAM3_BASE        STM32_SRAM3_BASE_NS
+#  define STM32_SRAM4_BASE        STM32_SRAM4_BASE_NS
+#  define STM32_APB1_BASE         STM32_APB1_BASE_NS
+#  define STM32_APB2_BASE         STM32_APB2_BASE_NS
+#  define STM32_AHB1_BASE         STM32_AHB1_BASE_NS
+#  define STM32_APB3_BASE         STM32_APB3_BASE_NS
+#  define STM32_AHB2_BASE         STM32_AHB2_BASE_NS
+#endif
+
+/* APB1 peripheral base addresses *******************************************/
+
+#define STM32_TIM2_BASE         (STM32_APB1_BASE + 0x00000000)
+#define STM32_TIM3_BASE         (STM32_APB1_BASE + 0x00000400)
+#define STM32_TIM4_BASE         (STM32_APB1_BASE + 0x00000800)
+#define STM32_TIM6_BASE         (STM32_APB1_BASE + 0x00001000)
+#define STM32_TIM7_BASE         (STM32_APB1_BASE + 0x00001400)
+#define STM32_SPI3_BASE         (STM32_APB1_BASE + 0x00002000)
+#define STM32_SPI4_BASE         (STM32_APB1_BASE + 0x00002400)
+#define STM32_WWDG_BASE         (STM32_APB1_BASE + 0x00002c00)
+#define STM32_IWDG_BASE         (STM32_APB1_BASE + 0x00003000)
+#define STM32_SPI2_BASE         (STM32_APB1_BASE + 0x00003800)
+#define STM32_USART2_BASE       (STM32_APB1_BASE + 0x00004400)
+#define STM32_USART3_BASE       (STM32_APB1_BASE + 0x00004800)
+#define STM32_UART4_BASE        (STM32_APB1_BASE + 0x00004c00)
+#define STM32_UART5_BASE        (STM32_APB1_BASE + 0x00005000)
+#define STM32_I2C1_BASE         (STM32_APB1_BASE + 0x00005400)
+#define STM32_I2C2_BASE         (STM32_APB1_BASE + 0x00005800)
+#define STM32_I3C1_BASE         (STM32_APB1_BASE + 0x00005c00)
+#define STM32_CRS_BASE          (STM32_APB1_BASE + 0x00006000)
+#define STM32_OPAMP1_BASE       (STM32_APB1_BASE + 0x00007000)
+#define STM32_OPAMP2_BASE       (STM32_APB1_BASE + 0x00007010)
+#define STM32_OPAMP12_COMMON_BASE STM32_OPAMP1_BASE
+#define STM32_VREFBUF_BASE      (STM32_APB1_BASE + 0x00007400)
+#define STM32_RTC_BASE          (STM32_APB1_BASE + 0x00007800)
+#define STM32_TAMP_BASE         (STM32_APB1_BASE + 0x00007c00)
+#define STM32_I2C4_BASE         (STM32_APB1_BASE + 0x00008400)
+#define STM32_LPTIM2_BASE       (STM32_APB1_BASE + 0x00009400)
+#define STM32_FDCAN1_BASE       (STM32_APB1_BASE + 0x0000a400)
+#define STM32_FDCAN_CONFIG_BASE (STM32_APB1_BASE + 0x0000a500)
+#define STM32_FDCAN2_BASE       (STM32_APB1_BASE + 0x0000a800)
+#define STM32_FDCAN_RAM_BASE    (STM32_APB1_BASE + 0x0000ac00)
+#define STM32_SRAMCAN_BASE      STM32_FDCAN_RAM_BASE
+
+/* APB2 peripheral base addresses *******************************************/
+
+#define STM32_TIM1_BASE         (STM32_APB2_BASE + 0x00002c00)
+#define STM32_SPI1_BASE         (STM32_APB2_BASE + 0x00003000)
+#define STM32_TIM8_BASE         (STM32_APB2_BASE + 0x00003400)
+#define STM32_USART1_BASE       (STM32_APB2_BASE + 0x00003800)
+#define STM32_TIM12_BASE        (STM32_APB2_BASE + 0x00003c00)
+#define STM32_TIM15_BASE        (STM32_APB2_BASE + 0x00004000)
+#define STM32_TIM16_BASE        (STM32_APB2_BASE + 0x00004400)
+#define STM32_TIM17_BASE        (STM32_APB2_BASE + 0x00004800)
+#define STM32_SAI1_BASE         (STM32_APB2_BASE + 0x00005400)
+#define STM32_SAI1_BLOCK_A_BASE (STM32_SAI1_BASE + 0x00000004)
+#define STM32_SAI1_BLOCK_B_BASE (STM32_SAI1_BASE + 0x00000024)
+#define STM32_USB_DRD_FS_BASE   (STM32_APB2_BASE + 0x00006000)
+#define STM32_USB_DRD_FS_RAM_BASE (STM32_APB2_BASE + 0x00006400)
+#define STM32_USB_DRD_BASE      STM32_USB_DRD_FS_BASE
+#define STM32_USB_DRD_RAM_BASE  STM32_USB_DRD_FS_RAM_BASE
+#define STM32_USB_FS_BASE       STM32_USB_DRD_FS_BASE
+#define STM32_USB_FS_RAM_BASE   STM32_USB_DRD_FS_RAM_BASE
+#define STM32_I3C2_BASE         (STM32_APB2_BASE + 0x00006c00)
+
+/* AHB1 peripheral base addresses *******************************************/
+
+#define STM32_GPDMA1_BASE       (STM32_AHB1_BASE + 0x00000000)
+#define STM32_GPDMA1_CH0_BASE   (STM32_AHB1_BASE + 0x00000050)
+#define STM32_GPDMA1_CH1_BASE   (STM32_AHB1_BASE + 0x000000d0)
+#define STM32_GPDMA1_CH2_BASE   (STM32_AHB1_BASE + 0x00000150)
+#define STM32_GPDMA1_CH3_BASE   (STM32_AHB1_BASE + 0x000001d0)
+#define STM32_GPDMA1_CH4_BASE   (STM32_AHB1_BASE + 0x00000250)
+#define STM32_GPDMA1_CH5_BASE   (STM32_AHB1_BASE + 0x000002d0)
+#define STM32_GPDMA1_CH6_BASE   (STM32_AHB1_BASE + 0x00000350)
+#define STM32_GPDMA1_CH7_BASE   (STM32_AHB1_BASE + 0x000003d0)
+#define STM32_GPDMA1_CH8_BASE   (STM32_AHB1_BASE + 0x00000450)
+#define STM32_GPDMA1_CH9_BASE   (STM32_AHB1_BASE + 0x000004d0)
+#define STM32_GPDMA1_CH10_BASE  (STM32_AHB1_BASE + 0x00000550)
+#define STM32_GPDMA1_CH11_BASE  (STM32_AHB1_BASE + 0x000005d0)
+#define STM32_FLASHIF_BASE      (STM32_AHB1_BASE + 0x00002000)
+#define STM32_FLASH_R_BASE      STM32_FLASHIF_BASE
+#define STM32_CRC_BASE          (STM32_AHB1_BASE + 0x00003000)
+#define STM32_TSC_BASE          (STM32_AHB1_BASE + 0x00004000)
+#define STM32_RAMCFG_BASE       (STM32_AHB1_BASE + 0x00006000)
+#define STM32_RAMCFG_SRAM1_BASE (STM32_AHB1_BASE + 0x00006000)
+#define STM32_RAMCFG_SRAM2_BASE (STM32_AHB1_BASE + 0x00006040)
+#define STM32_RAMCFG_SRAM3_BASE (STM32_AHB1_BASE + 0x00006080)
+#define STM32_HSP1_BASE         (STM32_AHB1_BASE + 0x0000c000)
+#define STM32_ICACHE_BASE       (STM32_AHB1_BASE + 0x00010400)
+#define STM32_PWR_BASE          (STM32_AHB1_BASE + 0x00010800)
+#define STM32_RCC_BASE          (STM32_AHB1_BASE + 0x00010c00)
+#define STM32_EXTI_BASE         (STM32_AHB1_BASE + 0x00012000)
+#define STM32_GTZC_TZSC1_BASE   (STM32_AHB1_BASE + 0x00012400)
+#ifdef CONFIG_ARCH_TRUSTZONE_SECURE
+#  define STM32_GTZC_TZIC1_BASE (STM32_AHB1_BASE + 0x00012800)
+#endif
+#define STM32_GTZC_MPCBB1_BASE  (STM32_AHB1_BASE + 0x00012c00)
+#define STM32_GTZC_MPCBB2_BASE  (STM32_AHB1_BASE + 0x00013000)
+#define STM32_GTZC_MPCBB3_BASE  (STM32_AHB1_BASE + 0x00013400)
+#define STM32_GTZC_MPCBB4_BASE  (STM32_AHB1_BASE + 0x00013800)
+#define STM32_ADF1_BASE         (STM32_AHB1_BASE + 0x00014000)
+#define STM32_ADF1_FILTER0_BASE (STM32_AHB1_BASE + 0x00014080)
+
+/* APB3 peripheral base addresses *******************************************/
+
+#define STM32_SYSCFG_BASE       (STM32_APB3_BASE + 0x00000400)
+#define STM32_LPUART1_BASE      (STM32_APB3_BASE + 0x00002400)
+#define STM32_I2C3_BASE         (STM32_APB3_BASE + 0x00002800)
+#define STM32_LPTIM1_BASE       (STM32_APB3_BASE + 0x00004400)
+#define STM32_LPTIM3_BASE       (STM32_APB3_BASE + 0x00004800)
+#define STM32_LPTIM4_BASE       (STM32_APB3_BASE + 0x00004c00)
+#define STM32_COMP1_BASE        (STM32_APB3_BASE + 0x00005400)
+#define STM32_COMP2_BASE        (STM32_APB3_BASE + 0x00005404)
+#define STM32_COMP12_COMMON_BASE STM32_COMP1_BASE
+
+/* AHB2 peripheral base addresses *******************************************/
+
+#define STM32_GPIOA_BASE        (STM32_AHB2_BASE + 0x00000000)
+#define STM32_GPIOB_BASE        (STM32_AHB2_BASE + 0x00000400)
+#define STM32_GPIOC_BASE        (STM32_AHB2_BASE + 0x00000800)
+#define STM32_GPIOD_BASE        (STM32_AHB2_BASE + 0x00000c00)
+#define STM32_GPIOE_BASE        (STM32_AHB2_BASE + 0x00001000)
+#define STM32_GPIOF_BASE        (STM32_AHB2_BASE + 0x00001400)
+#define STM32_GPIOG_BASE        (STM32_AHB2_BASE + 0x00001800)
+#define STM32_GPIOH_BASE        (STM32_AHB2_BASE + 0x00001c00)
+#define STM32_ADC1_BASE         (STM32_AHB2_BASE + 0x00008000)
+#define STM32_ADC2_BASE         (STM32_AHB2_BASE + 0x00008100)
+#define STM32_ADC12_COMMON_BASE (STM32_AHB2_BASE + 0x00008300)
+#define STM32_ADC12_BASE        STM32_ADC1_BASE
+#define STM32_DAC1_BASE         (STM32_AHB2_BASE + 0x00008400)
+#define STM32_AES_BASE          (STM32_AHB2_BASE + 0x000a0000)
+#define STM32_HASH_BASE         (STM32_AHB2_BASE + 0x000a0400)
+#define STM32_HASH_DIGEST_BASE  (STM32_AHB2_BASE + 0x000a0710)
+#define STM32_RNG_BASE          (STM32_AHB2_BASE + 0x000a0800)
+#define STM32_SAES_BASE         (STM32_AHB2_BASE + 0x000a0c00)
+#define STM32_PKA_BASE          (STM32_AHB2_BASE + 0x000a2000)
+#define STM32_PKA_RAM_BASE      (STM32_AHB2_BASE + 0x000a2400)
+#define STM32_CCB_BASE          (STM32_AHB2_BASE + 0x000a7c00)
+#define STM32_SDMMC1_BASE       (STM32_AHB2_BASE + 0x000a8000)
+#define STM32_DLYB_SDMMC1_BASE  (STM32_AHB2_BASE + 0x000a8400)
+#define STM32_DLYB_OCTOSPI1_BASE (STM32_AHB2_BASE + 0x000af000)
+#define STM32_DLYB_OSPI1_BASE   STM32_DLYB_OCTOSPI1_BASE
+#define STM32_OCTOSPI1_BASE     (STM32_AHB2_BASE + 0x000b1400)
+#define STM32_OCTOSPI1_R_BASE   STM32_OCTOSPI1_BASE
+
+/* External private peripheral bus ******************************************/
+
+#define STM32_DBGMCU_BASE       0xe0044000
+
+#endif /* __ARCH_ARM_SRC_STM32U3_HARDWARE_STM32_MEMORYMAP_H */
