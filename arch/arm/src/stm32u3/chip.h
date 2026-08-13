@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_syscfg.h
+ * arch/arm/src/stm32u3/chip.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,30 +20,34 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H
+#ifndef __ARCH_ARM_SRC_STM32U3_CHIP_H
+#define __ARCH_ARM_SRC_STM32U3_CHIP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32U3)
-#  include "hardware/stm32u3xx_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U5)
-#  include "hardware/stm32_syscfg_m33_u5.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_syscfg.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U0)
-#  include "hardware/stm32u0_syscfg.h"
-#else
-#  error "Unsupported STM32 M0 SYSCFG"
-#endif
+/* Include the memory map and the chip definitions file.  Other chip hardware
+ * files should then include this file for the proper setup.
+ */
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_SYSCFG_H */
+#include <arch/irq.h>
+#include <arch/stm32u3/chip.h>
+#include "hardware/stm32_pinmap.h"
+#include "hardware/stm32_memorymap.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* If the common ARMv8-M vector handling logic is used, then it expects the
+ * following definition in this file that provides the number of supported
+ * external interrupts which, for this architecture, is provided in the
+ * arch/stm32u3/chip.h header file.
+ */
+
+#define ARMV8M_PERIPHERAL_INTERRUPTS STM32_IRQ_NEXTINTS
+
+#endif /* __ARCH_ARM_SRC_STM32U3_CHIP_H */

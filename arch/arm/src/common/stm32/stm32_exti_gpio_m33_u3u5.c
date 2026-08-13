@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_exti_gpio_m33_u5.c
+ * arch/arm/src/common/stm32/stm32_exti_gpio_m33_u3u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -121,26 +121,52 @@ static int stm32_exti0_15_isr(int irq, void *context, void *arg)
  ****************************************************************************/
 
 int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
-                         bool event, xcpt_t func, void *arg)
+                       bool event, xcpt_t func, void *arg)
 {
-  uint32_t pin = pinset & GPIO_PIN_MASK;
-  uint32_t exti = 1 << pin;
-  int      irq = STM32_IRQ_EXTI0 + pin;
-  int      ret;
+  uint32_t exticr;
+  uint32_t exti;
+  uint32_t port;
+  uint32_t shift;
+  uint32_t pin;
+  int irq;
+  int ret;
+
+  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
+  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+
+  if (pin > 15 || port >= STM32_NPORTS || g_gpiobase[port] == 0)
+    {
+      return -EINVAL;
+    }
+
+  exti = 1u << pin;
+  irq  = STM32_IRQ_EXTI0 + pin;
 
   g_gpio_handlers[pin].callback = func;
   g_gpio_handlers[pin].arg      = arg;
+
+  /* Route the EXTI line to the selected GPIO port. */
+
+  exticr = STM32_EXTI_EXTICR1 + ((pin >> 2) << 2);
+  shift  = (pin & 3) << 3;
+  modifyreg32(exticr, STM32_EXTI_EXTICR_PORT_MASK << shift,
+              (event || func) ? port << shift : 0);
 
   /* Install external interrupt handlers */
 
   if (func)
     {
-      irq_attach(irq, stm32_exti0_15_isr, NULL);
+      ret = irq_attach(irq, stm32_exti0_15_isr, NULL);
+      if (ret < 0)
+        {
+          return ret;
+        }
+
       up_enable_irq(irq);
     }
   else
     {
-      /* remove any leftover callback */
+      /* Remove any leftover callback. */
 
       ret = irq_detach(irq);
       if (ret < 0)
@@ -148,7 +174,7 @@ int stm32_gpiosetevent(uint32_t pinset, bool risingedge, bool fallingedge,
           return ret;
         }
 
-      /* disable the interrupt */
+      /* Disable the interrupt. */
 
       up_disable_irq(irq);
     }

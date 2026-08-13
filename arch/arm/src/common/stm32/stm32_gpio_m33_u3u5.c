@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_gpio_m33_u5.c
+ * arch/arm/src/common/stm32/stm32_gpio_m33_u3u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,8 +40,6 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 
-#include "hardware/stm32_syscfg.h"
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -72,10 +70,18 @@ const uint32_t g_gpiobase[STM32_NPORTS] =
   STM32_GPIOE_BASE,
 #endif
 #if STM32_NPORTS > 5
+#  ifdef STM32_GPIOF_BASE
   STM32_GPIOF_BASE,
+#  else
+  0,
+#  endif
 #endif
 #if STM32_NPORTS > 6
+#  ifdef STM32_GPIOG_BASE
   STM32_GPIOG_BASE,
+#  else
+  0,
+#  endif
 #endif
 #if STM32_NPORTS > 7
   STM32_GPIOH_BASE,
@@ -144,7 +150,7 @@ int stm32_configgpio(uint32_t cfgset)
   /* Verify that this hardware supports the select GPIO port */
 
   port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port >= STM32_NPORTS)
+  if (port >= STM32_NPORTS || g_gpiobase[port] == 0)
     {
       return -EINVAL;
     }
@@ -355,7 +361,7 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NPORTS)
+  if (port < STM32_NPORTS && g_gpiobase[port] != 0)
     {
       /* Get the port base address */
 
@@ -395,7 +401,7 @@ bool stm32_gpioread(uint32_t pinset)
   unsigned int pin;
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  if (port < STM32_NPORTS)
+  if (port < STM32_NPORTS && g_gpiobase[port] != 0)
     {
       /* Get the port base address */
 

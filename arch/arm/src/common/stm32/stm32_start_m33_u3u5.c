@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/stm32_start_m33_u5.c
+ * arch/arm/src/common/stm32/stm32_start_m33_u3u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -45,21 +45,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Memory Map ***************************************************************/
+/* Memory map ***************************************************************/
 
-/* 0x0800:0000 - Beginning of the internal FLASH.   Address of vectors.
- *               Mapped as boot memory address 0x0000:0000 at reset.
- * 0x080f:ffff - End of flash region (assuming the max of 2MiB of FLASH).
- * 0x2000:0000 - Start of internal SRAM1 and start of .data (_sdata)
- *             - End of .data (_edata) and start of .bss (_sbss)
- *             - End of .bss (_ebss) and bottom of idle stack
- *             - _ebss + CONFIG_IDLETHREAD_STACKSIZE = end of idle stack,
- *               start of heap. NOTE that the ARM uses a decrement before
- *               store stack so that the correct initial value is the end of
- *               the stack + 4;
- * 0x2002:ffff - End of internal SRAM1
- * 0x2003:0000 - Start of internal SRAM2
- * 0x2003:ffff - End of internal SRAM2
+/* Internal flash begins at STM32_FLASH_BASE and contains the vector table.
+ * SRAM1 begins at STM32_SRAM1_BASE and contains .data, .bss, the idle stack,
+ * and the primary heap.  SRAM2 locations and sizes vary between the STM32U3
+ * and STM32U5 families and are provided by the chip header.
  */
 
 #define SRAM2_START  STM32_SRAM2_BASE
@@ -131,32 +122,6 @@ void __start(void)
     ("sub r10, sp, %0" : : "r" (CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
-#ifdef CONFIG_STM32_SRAM2_INIT
-  /* The SRAM2 region is parity checked, but upon power up, it will be in
-   * a random state and probably invalid with respect to parity, potentially
-   * generating faults if accessed.  If elected, we will write zeros to the
-   * memory, forcing the parity to be set to a valid state.
-   * NOTE:  this is optional because this may be inappropriate, especially
-   * if the memory is being used for it's battery backed purpose.  In that
-   * case, the first-time initialization needs to be performed by the board
-   * under application-specific circumstances.  On the other hand, if we're
-   * using this memory for, say, additional heap space, then this is handy.
-   */
-
-  for (dest = (uint32_t *)SRAM2_START; dest < (uint32_t *)SRAM2_END; )
-    {
-      *dest++ = 0;
-    }
-#endif
-
-  /* Configure the UART so that we can get debug output as soon as possible */
-
-  stm32_clockconfig();
-  arm_fpuconfig();
-  stm32_lowsetup();
-  stm32_gpioinit();
-  showprogress('A');
-
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -166,11 +131,9 @@ void __start(void)
       *dest++ = 0;
     }
 
-  showprogress('B');
-
-  /* Move the initialized data section from his temporary holding spot in
+  /* Move the initialized data section from its temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
-   * give by _sdata and _edata.  The temporary location is in FLASH at the
+   * given by _sdata and _edata.  The temporary location is in FLASH at the
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
@@ -181,7 +144,29 @@ void __start(void)
       *dest++ = *src++;
     }
 
-  showprogress('C');
+#ifdef CONFIG_STM32_SRAM2_INIT
+  /* The SRAM2 region is parity checked, but upon power up, it will be in
+   * a random state and probably invalid with respect to parity, potentially
+   * generating faults if accessed.  If elected, write zeros to the memory
+   * to force the parity to a valid state.  This is optional because SRAM2
+   * may be used for battery-backed data.
+   */
+
+  for (dest = (uint32_t *)SRAM2_START; dest < (uint32_t *)SRAM2_END; )
+    {
+      *dest++ = 0;
+    }
+#endif
+
+  /* Configure clocks, the FPU, GPIO and the debug UART only after .data and
+   * .bss are valid.  GPIO configuration uses a spinlock stored in .bss.
+   */
+
+  stm32_clockconfig();
+  arm_fpuconfig();
+  stm32_lowsetup();
+  stm32_gpioinit();
+  showprogress('A');
 
 #ifdef CONFIG_ARMV8M_STACKCHECK
   arm_stack_check_init();
@@ -196,7 +181,7 @@ void __start(void)
 #ifdef USE_EARLYSERIALINIT
   arm_earlyserialinit();
 #endif
-  showprogress('D');
+  showprogress('B');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -206,13 +191,13 @@ void __start(void)
 
 #ifdef CONFIG_BUILD_PROTECTED
   stm32_userspace();
-  showprogress('E');
+  showprogress('C');
 #endif
 
   /* Initialize onboard resources */
 
   stm32_board_initialize();
-  showprogress('F');
+  showprogress('D');
 
   /* Then start NuttX */
 
@@ -221,7 +206,7 @@ void __start(void)
 
   nx_start();
 
-  /* Shoulnd't get here */
+  /* Shouldn't get here */
 
   for (; ; );
 }
