@@ -1426,6 +1426,12 @@
 #  define osentry_function
 #endif
 
+/* Micro about __has_include */
+
+#ifndef __has_include
+#  define __has_include(x) 0
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
