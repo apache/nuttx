@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32_gpio.h
+ * arch/arm/src/common/stm32/hardware/stm32_gpio_m33_u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,15 +20,15 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_GPIO_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33_U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33_U5_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/stm32u5/chip.h>
+#include <arch/chip/chip.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -386,4 +386,4 @@
 
 #define GPIO_SECCFGR_SET(n)        (1 << (n))
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_GPIO_M33_U5_H */

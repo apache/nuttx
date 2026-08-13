@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/hardware/stm32_uart.h
+ * arch/arm/src/common/stm32/hardware/stm32_uart_m33_u5.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,8 +20,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_UART_H
-#define __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_UART_H
+#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U5_H
+#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U5_H
 
 /****************************************************************************
  * Included Files
@@ -307,4 +307,4 @@
  * Public Data
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32U5_HARDWARE_STM32_UART_H */
+#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_UART_M33_U5_H */

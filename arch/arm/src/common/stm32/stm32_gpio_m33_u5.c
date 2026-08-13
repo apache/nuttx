@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32u5/stm32_gpio.c
+ * arch/arm/src/common/stm32/stm32_gpio_m33_u5.c
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,7 +33,7 @@
 #include <nuttx/debug.h>
 
 #include <arch/irq.h>
-#include <arch/stm32u5/chip.h>
+#include <arch/chip/chip.h>
 #include <nuttx/spinlock.h>
 
 #include "arm_internal.h"

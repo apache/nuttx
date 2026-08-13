@@ -42,6 +42,20 @@ ARCHXXINCLUDES += ${INCDIR_PREFIX}$(STM32_COMMON_SRCDIR)
 CHIP_CSRCS += stm32_waste.c
 CHIP_CSRCS += stm32_uid.c
 
+ifeq ($(CONFIG_ARCH_CHIP_STM32U5),y)
+CHIP_CSRCS += stm32_allocateheap_m33_u5.c
+CHIP_CSRCS += stm32_exti_gpio_m33_u5.c
+CHIP_CSRCS += stm32_gpio_m33_u5.c
+CHIP_CSRCS += stm32_irq_m33_u5.c
+CHIP_CSRCS += stm32_lowputc_m33_u5.c
+CHIP_CSRCS += stm32_serial_m33_u5.c
+CHIP_CSRCS += stm32_start_m33_u5.c
+CHIP_CSRCS += stm32_timerisr_m33_u5.c
+ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
+CHIP_CSRCS += stm32_idle_m33_u5.c
+endif
+endif
+
 ifeq ($(CONFIG_STM32_PULSECOUNT),y)
 CHIP_CSRCS += stm32_pulsecount.c
 endif
