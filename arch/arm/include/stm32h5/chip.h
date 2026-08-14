@@ -33,26 +33,49 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_SRAM1_SIZE       (16*1024)   /* 16Kb  SRAM1 on AHB bus Matrix */
+#  define STM32_SRAM2_SIZE       (16*1024)   /* 16Kb  SRAM2 on AHB bus Matrix */
+#  define STM32_SRAM3_SIZE       (0)         /* No SRAM3 */
+#elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_SRAM1_SIZE       (128*1024)  /* 128Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (80*1024)   /* 80Kb  SRAM2 on AHB bus Matrix */
 #  define STM32_SRAM3_SIZE       (64*1024)   /* 64Kb  SRAM3 on AHB bus Matrix */
 #elif defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
-#  define STM32_SRAM1_SIZE       (256*1024)  /* 192Kb SRAM1 on AHB bus Matrix */
+#  define STM32_SRAM1_SIZE       (256*1024)  /* 256Kb SRAM1 on AHB bus Matrix */
 #  define STM32_SRAM2_SIZE       (64*1024)   /* 64Kb  SRAM2 on AHB bus Matrix */
 #  define STM32_SRAM3_SIZE       (320*1024)  /* 320Kb SRAM3 on AHB bus Matrix */
 #else
 #  error "Unsupported STM32H5 chip"
 #endif
 
-#define STM32_NFSMC                    (1)   /* Have FSMC memory controller */
-#define STM32_NATIM                    (2)   /* Two advanced timers TIM1 and TIM8 */
-#define STM32_NGTIM32                  (2)   /* 32-bit general timers TIM2 and 5 with DMA */
-#define STM32_NGTIM16                  (2)   /* 16-bit general timers TIM3 and 4 with DMA */
-#define STM32_NGTIMNDMA                (3)   /* 16-bit general timers TIM15-17 without DMA */
-#define STM32_NBTIM                    (2)   /* Two basic timers, TIM6-7 */
-#define STM32_NLPTIM                   (6)   /* Six low-power timers, LPTIM1-LPTIM6. */
 #define STM32_NRNG                     (1)   /* Random number generator (RNG) */
+
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NFSMC                  (0)   /* No FSMC memory controller */
+#  define STM32_NATIM                  (1)   /* One advanced timer TIM1 */
+#  define STM32_NGTIM32                (1)   /* 32-bit general timer TIM2 with DMA */
+#  define STM32_NGTIM16                (1)   /* 16-bit general timer TIM3 with DMA */
+#  define STM32_NGTIMNDMA              (0)   /* No 16-bit general timers without DMA */
+#  define STM32_NBTIM                  (2)   /* Two basic timers, TIM6-7 */
+#  define STM32_NLPTIM                 (2)   /* Two low-power timers, LPTIM1-LPTIM2 */
+#elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
+#  define STM32_NFSMC                  (1)   /* Have FSMC memory controller */
+#  define STM32_NATIM                  (2)   /* Two advanced timers TIM1 and TIM8 */
+#  define STM32_NGTIM32                (2)   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM16                (2)   /* 16-bit general timers TIM3 and 4 with DMA */
+#  define STM32_NGTIMNDMA              (2)   /* 16-bit general timers TIM12, 15 without DMA */
+#  define STM32_NBTIM                  (2)   /* Two basic timers, TIM6-7 */
+#  define STM32_NLPTIM                 (2)   /* Two low-power timers, LPTIM1-LPTIM2 */
+#else
+#  define STM32_NFSMC                  (1)   /* Have FSMC memory controller */
+#  define STM32_NATIM                  (2)   /* Two advanced timers TIM1 and TIM8 */
+#  define STM32_NGTIM32                (2)   /* 32-bit general timers TIM2 and 5 with DMA */
+#  define STM32_NGTIM16                (2)   /* 16-bit general timers TIM3 and 4 with DMA */
+#  define STM32_NGTIMNDMA              (3)   /* 16-bit general timers TIM15-17 without DMA */
+#  define STM32_NBTIM                  (2)   /* Two basic timers, TIM6-7 */
+#  define STM32_NLPTIM                 (6)   /* Six low-power timers, LPTIM1-LPTIM6. */
+#endif
 
 #if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_NUART                  (6)   /* UART 4-5, 7-8, 9, 12 */
@@ -60,11 +83,19 @@
 #elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_NUART                  (2)   /* UART 4-5 */
 #  define STM32_NUSART                 (4)   /* USART 1-3, 6*/
+#elif defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NUART                  (0)   /* No UARTs */
+#  define STM32_NUSART                 (3)   /* USART 1-3 */
 #endif
 
 #define STM32_NLPUART                  (1)   /* LPUART 1 */
 #define STM32_QSPI                     (0)   /* No QuadSPI1 */
-#define STM32_OCTOSPI                  (1)   /* OCTOSPI1*/
+
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_OCTOSPI                (0)   /* No OCTOSPI */
+#else
+#  define STM32_OCTOSPI                (1)   /* OCTOSPI1*/
+#endif
 
 #if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_NSPI                   (6)   /* SPI1-SPI6 */
@@ -72,23 +103,40 @@
 #elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_NSPI                   (4)   /* SPI1-SPI4 */
 #  define STM32_NI2C                   (3)   /* I2C1-3 */
+#elif defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NSPI                   (3)   /* SPI1-SPI3 */
+#  define STM32_NI2C                   (2)   /* I2C1-2 */
 #endif
 
 #define STM32_NSWPMI                   (0)   /* No SWPMI1 */
 #define STM32_NUSBOTGFS                (0)   /* USB OTG FS */
-#define STM32_NUSBFS                   (1)   /* No USB FS */
-#define STM32_NCAN                     (2)   /* CAN1 */
-#define STM32_NSAI                     (2)   /* SAI1-2 */
+#define STM32_NUSBFS                   (1)   /* USB FS */
+
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NCAN                   (1)   /* FDCAN1 */
+#  define STM32_NSAI                   (0)   /* No SAI */
+#else
+#  define STM32_NCAN                   (2)   /* FDCAN1-2 */
+#  define STM32_NSAI                   (2)   /* SAI1-2 */
+#endif
 
 #if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_NSDMMC                 (2)   /* SDMMC interface */
 #elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_NSDMMC                 (1)   /* SDMMC interface */
+#elif defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NSDMMC                 (0)   /* No SDMMC interface */
 #endif
 
 #define STM32_NDMA                     (2)   /* DMA1-2 */
-#define STM32_NPORTS                   (9)   /* 9 GPIO ports, GPIOA-GPIOI */
-#define STM32_NADC                     (2)   /* 12-bit ADC1, up to 20 channels */
+
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_NPORTS                 (8)   /* 5 GPIO ports, GPIOA-GPIOD, GPIOH */
+#  define STM32_NADC                   (1)   /* 12-bit ADC1 */
+#else
+#  define STM32_NPORTS                 (9)   /* 9 GPIO ports, GPIOA-GPIOI */
+#  define STM32_NADC                   (2)   /* 12-bit ADC1, up to 20 channels */
+#endif
 #define STM32_NDAC                     (1)   /* 12-bit DAC1 */
 #define STM32_NCRC                     (1)   /* CRC */
 #define STM32_NCOMP                    (0)   /* Comparators */

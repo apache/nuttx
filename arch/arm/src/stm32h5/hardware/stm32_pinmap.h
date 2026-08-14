@@ -30,7 +30,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H53XXX) || defined(CONFIG_STM32_STM32H56XXX)
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  include "hardware/stm32h50xxx_pinmap.h"
+#elif defined(CONFIG_STM32_STM32H53XXX) || defined(CONFIG_STM32_STM32H56XXX)
 #  include "hardware/stm32h56xxx_pinmap.h"
 #else
 #  error "Unsupported STM32 H5 pin map"

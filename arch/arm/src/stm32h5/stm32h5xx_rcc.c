@@ -214,13 +214,13 @@ static inline void rcc_enableahb2(void)
 #if STM32_NPORTS > 3
              | RCC_AHB2ENR_GPIODEN
 #endif
-#if STM32_NPORTS > 4
+#if STM32_NPORTS > 4 && !defined(CONFIG_STM32_STM32H50XXX)
              | RCC_AHB2ENR_GPIOEEN
 #endif
-#if STM32_NPORTS > 5
+#if STM32_NPORTS > 5 && !defined(CONFIG_STM32_STM32H50XXX)
              | RCC_AHB2ENR_GPIOFEN
 #endif
-#if STM32_NPORTS > 6
+#if STM32_NPORTS > 6 && !defined(CONFIG_STM32_STM32H50XXX)
              | RCC_AHB2ENR_GPIOGEN
 #endif
 #if STM32_NPORTS > 7

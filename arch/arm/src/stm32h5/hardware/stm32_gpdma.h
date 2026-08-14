@@ -30,7 +30,7 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H53XXX) || \
+#if defined(CONFIG_STM32_STM32H50XXX) || defined(CONFIG_STM32_STM32H53XXX) || \
     defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  include "stm32h56x_dmasigmap.h"
 #else
