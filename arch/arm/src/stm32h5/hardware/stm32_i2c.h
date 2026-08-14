@@ -30,8 +30,11 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX) || \
-    defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
+#if defined(CONFIG_STM32_STM32H50XXX) || \
+    defined(CONFIG_STM32_STM32H52XXX) || \
+    defined(CONFIG_STM32_STM32H53XXX) || \
+    defined(CONFIG_STM32_STM32H56XXX) || \
+    defined(CONFIG_STM32_STM32H57XXX)
 #  include "hardware/stm32h5xxx_i2c.h"
 #else
 #  error "Unsupported STM32 H5 I2C"

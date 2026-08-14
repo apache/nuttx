@@ -194,15 +194,21 @@
 #  define STM32_IRQ_LPTIM5        (STM32_IRQ_FIRST + 129) /* 129: LPTIM5 global interrupt */
 #  define STM32_IRQ_LPTIM6        (STM32_IRQ_FIRST + 130) /* 130: LPTIM6 global interrupt */
 #endif
-#if defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
+#if defined(CONFIG_STM32_STM32H50XXX) || \
+    defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_IRQ_I3C2_EV       (STM32_IRQ_FIRST + 131) /* 131: I3C2_EV global interrupt */
 #  define STM32_IRQ_I3C2_ER       (STM32_IRQ_FIRST + 132) /* 132: I3C2_ER global interrupt */
+#endif
+#if defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_IRQ_COMP1         (STM32_IRQ_FIRST + 133) /* 133: COMP1 global interrupt */
 #endif
 
 #if defined(CONFIG_STM32_STM32H56XXX) || defined(CONFIG_STM32_STM32H57XXX)
 #  define STM32_IRQ_NEXTINTS      131
 #elif defined(CONFIG_STM32_STM32H52XXX) || defined(CONFIG_STM32_STM32H53XXX)
 #  define STM32_IRQ_NEXTINTS      133
+#elif defined(CONFIG_STM32_STM32H50XXX)
+#  define STM32_IRQ_NEXTINTS      134
 #endif
 
 #define NR_IRQS                   (STM32_IRQ_FIRST + STM32_IRQ_NEXTINTS)
