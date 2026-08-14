@@ -64,7 +64,7 @@
  *                        ---- ---- ---- ---- ----
  * Inputs:                MMUU .... ...X PPPP BBBB
  * Outputs:               MMUU .... FFOV PPPP BBBB
- * Alternate Functions:   MMUU .AAA FFO. PPPP BBBB
+ * Alternate Functions:   MMUU AAAA FFO. PPPP BBBB
  * Analog:                MM.. .... .... PPPP BBBB
  */
 
@@ -102,11 +102,11 @@
  * 1111 1111 1100 0000 0000
  * 9876 5432 1098 7654 3210
  * ---- ---- ---- ---- ----
- * .... .AAA .... .... ....
+ * .... AAAA .... .... ....
  */
 
-#define GPIO_AF_SHIFT                 (12)                       /* Bits 12-14: Alternate function */
-#define GPIO_AF_MASK                  (7 << GPIO_AF_SHIFT)
+#define GPIO_AF_SHIFT                 (12)                       /* Bits 12-15: Alternate function */
+#define GPIO_AF_MASK                  (15 << GPIO_AF_SHIFT)
 #  define GPIO_AF(n)                  ((n) << GPIO_AF_SHIFT)
 #  define GPIO_AF0                    (0 << GPIO_AF_SHIFT)
 #  define GPIO_AF1                    (1 << GPIO_AF_SHIFT)
@@ -116,6 +116,14 @@
 #  define GPIO_AF5                    (5 << GPIO_AF_SHIFT)
 #  define GPIO_AF6                    (6 << GPIO_AF_SHIFT)
 #  define GPIO_AF7                    (7 << GPIO_AF_SHIFT)
+#  define GPIO_AF8                    (8 << GPIO_AF_SHIFT)
+#  define GPIO_AF9                    (9 << GPIO_AF_SHIFT)
+#  define GPIO_AF10                   (10 << GPIO_AF_SHIFT)
+#  define GPIO_AF11                   (11 << GPIO_AF_SHIFT)
+#  define GPIO_AF12                   (12 << GPIO_AF_SHIFT)
+#  define GPIO_AF13                   (13 << GPIO_AF_SHIFT)
+#  define GPIO_AF14                   (14 << GPIO_AF_SHIFT)
+#  define GPIO_AF15                   (15 << GPIO_AF_SHIFT)
 
 /* Output/Alt function frequency selection:
  *

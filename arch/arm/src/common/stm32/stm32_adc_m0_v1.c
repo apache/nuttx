@@ -88,21 +88,24 @@
 
 /* Sample time default configuration */
 
-/* C0 and G0 support additional sample time selection 2 */
+/* C0, G0 and U0 support additional sample time selection 2 */
 
-#if defined(CONFIG_STM32_STM32G0) || defined(CONFIG_STM32_STM32C0)
+#if defined(CONFIG_STM32_STM32G0) || defined(CONFIG_STM32_STM32C0) || \
+    defined(CONFIG_STM32_STM32U0)
 #  define ADC_HAVE_SMPR_SMP2
 #endif
 
 #if defined(ADC_HAVE_DMA) || (CONFIG_STM32_ADC_MAX_SAMPLES == 1)
-#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
+#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0) || \
+      defined(CONFIG_ARCH_CHIP_STM32U0)
 #    define ADC_SMP1_DEFAULT  ADC_SMPR_12p5
 #    define ADC_SMP2_DEFAULT  ADC_SMPR_12p5
 #  else
 #    define ADC_SMP1_DEFAULT  ADC_SMPR_13p5
 #  endif
 #else /* Slow down sampling frequency */
-#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
+#  if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0) || \
+      defined(CONFIG_ARCH_CHIP_STM32U0)
 #    define ADC_SMP1_DEFAULT  ADC_SMPR_160p5
 #    define ADC_SMP2_DEFAULT  ADC_SMPR_160p5
 #  else
@@ -124,7 +127,8 @@
 #if defined(CONFIG_STM32_STM32F0) || \
     defined(CONFIG_STM32_STM32L0) || \
     defined(CONFIG_STM32_STM32C0) || \
-    defined(CONFIG_STM32_STM32G0)
+    defined(CONFIG_STM32_STM32G0) || \
+    defined(CONFIG_STM32_STM32U0)
 #  define ADC_CHANNELS_NUMBER 19
 #else
 #  error "Not supported"
@@ -155,7 +159,8 @@
 
 #define ADC_HAVE_DMACFG 1
 
-#if defined(CONFIG_STM32_STM32G0) || defined(CONFIG_STM32_STM32L0)
+#if defined(CONFIG_STM32_STM32G0) || defined(CONFIG_STM32_STM32L0) || \
+    defined(CONFIG_STM32_STM32U0)
 #  ifndef ANIOC_SET_OVERSAMPLE
 #    define ANIOC_SET_OVERSAMPLE _ANIOC(0x0f)
 #  endif

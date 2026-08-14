@@ -61,7 +61,7 @@ config STM32_FLASH_CONFIG_Z
 	default n
 
 config STM32_FLASH_OVERRIDE
-	bool "Override Flash Designator" if ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0
+	bool "Override Flash Designator" if ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32U0
 	default y if ARCH_CHIP_STM32F7 || STM32_COMMON_F7_H7_H5
 	default y if STM32_COMMON_L4_H5_L5_U5 || ARCH_CHIP_STM32WB
 	default y if ARCH_CHIP_STM32WL5

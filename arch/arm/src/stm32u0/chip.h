@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_flash_m0.h
+ * arch/arm/src/stm32u0/chip.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,28 +20,25 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H
+#ifndef __ARCH_ARM_SRC_STM32U0_CHIP_H
+#define __ARCH_ARM_SRC_STM32U0_CHIP_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
+#include "nvic.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32C0)
-#  include "hardware/stm32c0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U0)
-#  include "hardware/stm32u0_flash.h"
-#else
-#  error "Unsupported STM32 M0 FLASH"
-#endif
+/* Include the chip capabilities file */
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H */
+#include <arch/stm32u0/chip.h>
+
+/* Include the memory map file.
+ * Other chip hardware files should then include this file for the proper
+ * setup.
+ */
+
+#include "hardware/stm32_memorymap.h"
+
+#endif /* __ARCH_ARM_SRC_STM32U0_CHIP_H */

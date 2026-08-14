@@ -63,7 +63,8 @@
 #    define DMA1_NCHAN        7
 #    define DMA2_NCHAN        0
 #  elif defined(CONFIG_STM32_STM32G0BX) || \
-        defined(CONFIG_STM32_STM32G0C1)
+        defined(CONFIG_STM32_STM32G0C1) || \
+        defined(CONFIG_STM32_STM32U0)
 #    define DMA1_NCHAN        7
 #    define DMA2_NCHAN        5
 #  else
@@ -95,7 +96,8 @@
       defined(CONFIG_STM32_STM32G081)
 #  define DMAMUX_NCHANNELS  7
 #elif defined(CONFIG_STM32_STM32G0BX) || \
-      defined(CONFIG_STM32_STM32G0C1)
+      defined(CONFIG_STM32_STM32G0C1) || \
+      defined(CONFIG_STM32_STM32U0)
 #  define DMAMUX_NCHANNELS  12
 #else
 #  error "Unknown chip for DMAMUX channel count"

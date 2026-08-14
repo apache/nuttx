@@ -211,7 +211,8 @@ void stm32_pwr_enablebreg(bool region);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_ENERGYLITE) || defined(CONFIG_STM32_STM32G0)
+#if defined(CONFIG_STM32_ENERGYLITE) || defined(CONFIG_STM32_STM32G0) || \
+    defined(CONFIG_STM32_STM32U0)
 void stm32_pwr_setvos(uint16_t vos);
 #endif
 

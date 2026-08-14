@@ -69,7 +69,7 @@ void stm32_rcc_enablelse(void)
     {
     }
 
-#elif defined(CONFIG_ARCH_CHIP_STM32F0)
+#elif defined(CONFIG_ARCH_CHIP_STM32F0) || defined(CONFIG_ARCH_CHIP_STM32U0)
   /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
    * the RCC BDCR register.
    */

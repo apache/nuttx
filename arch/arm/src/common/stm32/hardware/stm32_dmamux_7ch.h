@@ -155,6 +155,8 @@
 #  include "hardware/stm32g0_dmamux.h"
 #elif defined(CONFIG_STM32_STM32C0)
 #  include "hardware/stm32c0_dmamux.h"
+#elif defined(CONFIG_STM32_STM32U0)
+#  include "hardware/stm32u0_dmamux.h"
 #else
 #  error "Unsupported STM32 M0 sub family"
 #endif
