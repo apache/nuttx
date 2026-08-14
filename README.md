@@ -22,7 +22,7 @@ For brevity, many parts of the documentation will refer to Apache NuttX as simpl
 
 ## Getting Started
 First time on NuttX? Read the [Getting Started](https://nuttx.apache.org/docs/latest/quickstart/index.html) guide!
-If you don't have a board available, NuttX has its own simulator that you can run on terminal.
+If you don't have a board available, NuttX has its own simulator that you can run on terminal. For first-time contributors, building the simulator locally is a useful way to verify the development environment before submitting changes.
 
 ## Documentation
 You can find the current NuttX documentation on the [Documentation Page](https://nuttx.apache.org/docs/latest/).
