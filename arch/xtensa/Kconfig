@@ -70,6 +70,7 @@ config ARCH_CHIP_ESP32S2
 	select LIBC_ARCH_STRNCPY
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
+	select LIBC_ATOMIC_IRQ
 	---help---
 		ESP32-S2 is a truly secure, highly integrated, low-power, 2.4 GHz Wi-Fi
 		Microcontroller SoC supporting Wi-Fi HT40 and having 43 GPIOs.

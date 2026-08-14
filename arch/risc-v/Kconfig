@@ -296,6 +296,7 @@ config ARCH_CHIP_RV32M1
 	select ONESHOT_COUNT
 	select ONESHOT_FAST_DIVISION
 	select ALARM_ARCH
+	select LIBC_ATOMIC_IRQ
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
