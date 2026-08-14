@@ -22,6 +22,7 @@
 
 set(SRCS)
 
+list(APPEND SRCS arch_atomic.c)
 if(CONFIG_ARCH_SETJMP_H)
   list(APPEND SRCS arch_setjmp.c)
 endif()
