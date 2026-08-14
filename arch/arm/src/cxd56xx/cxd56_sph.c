@@ -272,7 +272,7 @@ int cxd56_sphinitialize(const char *devname)
 
   /* No. 0-2 and (14)-15 semaphores are reserved by other system. */
 
-#ifdef CONFIG_CXD56_TESTSET
+#ifdef CONFIG_CXD56_ATOMIC_WITH_HWSEM
   for (i = 3; i < 14; i++)
 #else
   for (i = 3; i < 15; i++)
