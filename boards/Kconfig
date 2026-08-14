@@ -3344,6 +3344,15 @@ config ARCH_BOARD_STM32L476_MDK
 		The STM32L476ME is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
 
+config ARCH_BOARD_NUCLEO_H503RB
+	bool "NUCLEO_H503RB"
+	depends on ARCH_CHIP_STM32H503RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro Nucleo-H503RB board based on the STMicro STM32H503RB MCU.
+
 config ARCH_BOARD_NUCLEO_H533RE
 	bool "STMicro NUCLEO_H533RE"
 	depends on ARCH_CHIP_STM32H533RE
@@ -4162,6 +4171,7 @@ config ARCH_BOARD
 	default "b-l072z-lrwan1"               if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"               if ARCH_BOARD_B_L475E_IOT01A
 	default "b-u585i-iot02a"               if ARCH_BOARD_B_U585I_IOT02A
+	default "nucleo-h503rb"                if ARCH_BOARD_NUCLEO_H503RB
 	default "nucleo-h533re"                if ARCH_BOARD_NUCLEO_H533RE
 	default "nucleo-h563zi"                if ARCH_BOARD_NUCLEO_H563ZI
 	default "nucleo-n657x0-q"              if ARCH_BOARD_NUCLEO_N657X0_Q
@@ -4854,6 +4864,9 @@ source "boards/arm/stm32l4/stm32l476vg-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L4R9AI_DISCO
 source "boards/arm/stm32l4/stm32l4r9ai-disco/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_H503RB
+source "boards/arm/stm32h5/nucleo-h503rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_H533RE
 source "boards/arm/stm32h5/nucleo-h533re/Kconfig"
