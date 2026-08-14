@@ -39,7 +39,8 @@ set(SRCS
     cxd56_icc.c
     cxd56_powermgr.c
     cxd56_farapi.c
-    cxd56_sysctl.c)
+    cxd56_sysctl.c
+    cxd56_hwspinlock.c)
 
 if(CONFIG_SMP)
   list(APPEND SRCS cxd56_cpuidlestack.c)

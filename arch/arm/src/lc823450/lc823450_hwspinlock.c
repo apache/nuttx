@@ -1,0 +1,78 @@
+/****************************************************************************
+ * arch/arm/src/lc823450/lc823450_hwspinlock.c
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/hwspinlock/hwspinlock.h>
+
+#include "arm_internal.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define LC823450_MUTEX_REG_BASE  0x40005000
+
+/* Public datasheet not find and assume reg address continuous and length 4 */
+
+#define LC823450_MUTEX_REG_LEN  4
+#define LC823450_MUTEX_REG_ADDR(id) \
+  (LC823450_MUTEX_REG_BASE + (id) * LC823450_MUTEX_REG_LEN)
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static bool lc823450_hwspinlock_trylock(struct hwspinlock_dev_s *dev);
+static void lc823450_hwspinlock_unlock(struct hwspinlock_dev_s *dev);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+const struct hwspinlock_ops_s g_lc823450_hwspinlock_ops =
+{
+  .trylock = lc823450_hwspinlock_trylock,
+  .unlock  = lc823450_hwspinlock_unlock
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static bool lc823450_hwspinlock_trylock(struct hwspinlock_dev_s *dev)
+{
+  uint32_t val;
+
+  val = (up_cpu_index() << 16) | 0x1;
+  putreg32(val, LC823450_MUTEX_REG_ADDR(dev->id));
+
+  return getreg32(LC823450_MUTEX_REG_ADDR(dev->id)) == val;
+}
+
+static void lc823450_hwspinlock_unlock(struct hwspinlock_dev_s *dev)
+{
+  uint32_t val;
+
+  val = (up_cpu_index() << 16) | 0x0;
+  putreg32(val, LC823450_MUTEX_REG_ADDR(dev->id));
+}
