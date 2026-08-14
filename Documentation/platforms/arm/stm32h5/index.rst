@@ -61,7 +61,7 @@ DBG         No
 DCACHE      No
 DCMI        No
 DLYB        No
-EXTI        No
+EXTI        Yes
 FMAC        No
 FSMC        No
 GTZC        No
