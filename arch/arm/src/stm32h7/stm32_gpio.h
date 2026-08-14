@@ -217,6 +217,18 @@
 #if STM32_NGPIO > 10
 #  define GPIO_PORTK                  (10 << GPIO_PORT_SHIFT)    /*   GPIOK */
 #endif
+#ifdef STM32_GPIOM_BASE
+#  define GPIO_PORTM                  (12 << GPIO_PORT_SHIFT)    /*   GPIOM */
+#endif
+#ifdef STM32_GPION_BASE
+#  define GPIO_PORTN                  (13 << GPIO_PORT_SHIFT)    /*   GPION */
+#endif
+#ifdef STM32_GPIOO_BASE
+#  define GPIO_PORTO                  (14 << GPIO_PORT_SHIFT)    /*   GPIOO */
+#endif
+#ifdef STM32_GPIOP_BASE
+#  define GPIO_PORTP                  (15 << GPIO_PORT_SHIFT)    /*   GPIOP */
+#endif
 
 /* This identifies the bit in the port:
  *

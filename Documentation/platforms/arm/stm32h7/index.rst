@@ -30,6 +30,10 @@ STM32H725    No
 STM32H735    No
 STM32H723    No
 STM32H733    No
+STM32H7R3    Yes
+STM32H7R7    Yes
+STM32H7S3    Yes
+STM32H7S7    Yes
 ===========  ======= ================
 
 Value lines:
@@ -103,6 +107,33 @@ OTG_HS      Yes
 ETH         Yes
 HDMI_CEC    No
 ==========  =======  =====
+
+STM32H7R/S peripherals
+----------------------
+
+The following peripherals are available only on the STM32H7R/S lines:
+
+==========  =======
+Peripheral  Support
+==========  =======
+XSPI        Yes
+SBS         Yes
+GPDMA       No
+HPDMA       No
+ADF         No
+CORDIC      No
+DCMIPP      No
+DTS         No
+GFXMMU      No
+GFXTIM      No
+GPU2D       No
+I3C         No
+MCE         No
+PKA         No
+PSSI        No
+SAES        No
+UCPD        No
+==========  =======
 
 Dual-core support
 =================

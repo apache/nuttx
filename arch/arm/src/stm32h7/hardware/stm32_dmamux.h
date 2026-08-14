@@ -203,7 +203,9 @@
 
 /* Import DMAMUX map */
 
-#if defined(CONFIG_STM32_STM32H7X0XX)
+#if defined(CONFIG_STM32_STM32H7RSXX)
+/* GPDMA/HPDMA support is not part of the initial H7S3 port. */
+#elif defined(CONFIG_STM32_STM32H7X0XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"
 #elif defined(CONFIG_STM32_STM32H7X3XX)
 #  include "hardware/stm32h7x3xx_dmamux.h"

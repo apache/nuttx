@@ -59,7 +59,9 @@ static_assert(CONFIG_BOARD_LOOPSPERMSEC != -1,
 
 /* Include chip-specific clocking initialization logic */
 
-#if defined(CONFIG_STM32_STM32H7X0XX)
+#if defined(CONFIG_STM32_STM32H7RSXX)
+#  include "stm32h7rsxx_rcc.c"
+#elif defined(CONFIG_STM32_STM32H7X0XX)
 #  include "stm32h7x3xx_rcc.c"
 #elif defined(CONFIG_STM32_STM32H7X3XX)
 #  include "stm32h7x3xx_rcc.c"

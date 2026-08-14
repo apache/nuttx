@@ -37,14 +37,40 @@
 #include <nuttx/spinlock.h>
 
 #include "arm_internal.h"
-#include "hardware/stm32_syscfg.h"
 #include "stm32_gpio.h"
+
+#ifdef CONFIG_STM32_HAVE_SBS
+#  include "hardware/stm32h7rsxx_sbs.h"
+#else
+#  include "hardware/stm32_syscfg.h"
+#endif
+
+/* The EXTI port selection and the I/O compensation cell live in SBS on the
+ * H7R/S and in SYSCFG everywhere else.  Only the names differ.
+ */
+
+#ifdef CONFIG_STM32_HAVE_SBS
+#  define GPIO_EXTICR(p)         STM32_SBS_EXTICR(p)
+#  define GPIO_EXTICR_SHIFT(p)   SBS_EXTICR_EXTI_SHIFT(p)
+#  define GPIO_EXTICR_PORT_MASK  SBS_EXTICR_PORT_MASK
+#  define GPIO_CCCSR             STM32_SBS_CCCSR
+#  define GPIO_CCCSR_EN          SBS_CCCSR_COMP_EN
+#  define GPIO_CCCSR_READY       SBS_CCCSR_COMP_RDY
+#else
+#  define GPIO_EXTICR(p)         STM32_SYSCFG_EXTICR(p)
+#  define GPIO_EXTICR_SHIFT(p)   SYSCFG_EXTICR_EXTI_SHIFT(p)
+#  define GPIO_EXTICR_PORT_MASK  SYSCFG_EXTICR_PORT_MASK
+#  define GPIO_CCCSR             STM32_SYSCFG_CCCSR
+#  define GPIO_CCCSR_EN          SYSCFG_CCCSR_EN
+#  define GPIO_CCCSR_READY       SYSCFG_CCCSR_READY
+#endif
 
 /* Content of this file requires verification before it is used with other
  * families
  */
 
-#if  defined(CONFIG_STM32_STM32H7X0XX) || \
+#if  defined(CONFIG_STM32_STM32H7RSXX) || \
+     defined(CONFIG_STM32_STM32H7X0XX) || \
      defined(CONFIG_STM32_STM32H7X3XX) || \
      defined(CONFIG_STM32_STM32H7B3XX) || \
      defined(CONFIG_STM32_STM32H7X5XX) || \
@@ -55,6 +81,71 @@
  ****************************************************************************/
 
 static spinlock_t g_configgpio_lock = SP_UNLOCKED;
+
+/* A port that occupies an index in g_gpiobase but that the chip does not
+ * have contributes a zero, which stm32_configgpio() rejects.  GPIOF and
+ * GPIOG are absent from some packages, and the H7R/S has no GPIOI-GPIOL.
+ */
+
+#ifdef CONFIG_STM32_HAVE_GPIOF
+#  define GPIOF_BASE  STM32_GPIOF_BASE
+#else
+#  define GPIOF_BASE  0
+#endif
+
+#ifdef CONFIG_STM32_HAVE_GPIOG
+#  define GPIOG_BASE  STM32_GPIOG_BASE
+#else
+#  define GPIOG_BASE  0
+#endif
+
+#ifdef STM32_GPIOI_BASE
+#  define GPIOI_BASE  STM32_GPIOI_BASE
+#else
+#  define GPIOI_BASE  0
+#endif
+
+#ifdef STM32_GPIOJ_BASE
+#  define GPIOJ_BASE  STM32_GPIOJ_BASE
+#else
+#  define GPIOJ_BASE  0
+#endif
+
+#ifdef STM32_GPIOK_BASE
+#  define GPIOK_BASE  STM32_GPIOK_BASE
+#else
+#  define GPIOK_BASE  0
+#endif
+
+#ifdef STM32_GPIOL_BASE
+#  define GPIOL_BASE  STM32_GPIOL_BASE
+#else
+#  define GPIOL_BASE  0
+#endif
+
+#ifdef STM32_GPIOM_BASE
+#  define GPIOM_BASE  STM32_GPIOM_BASE
+#else
+#  define GPIOM_BASE  0
+#endif
+
+#ifdef STM32_GPION_BASE
+#  define GPION_BASE  STM32_GPION_BASE
+#else
+#  define GPION_BASE  0
+#endif
+
+#ifdef STM32_GPIOO_BASE
+#  define GPIOO_BASE  STM32_GPIOO_BASE
+#else
+#  define GPIOO_BASE  0
+#endif
+
+#ifdef STM32_GPIOP_BASE
+#  define GPIOP_BASE  STM32_GPIOP_BASE
+#else
+#  define GPIOP_BASE  0
+#endif
 
 /****************************************************************************
  * Public Data
@@ -80,30 +171,37 @@ const uint32_t g_gpiobase[STM32_NGPIO] =
   STM32_GPIOE_BASE,
 #endif
 #if STM32_NGPIO > 5
-#  if defined(CONFIG_STM32_HAVE_GPIOF)
-  STM32_GPIOF_BASE,
-#  else
-  0,
-#  endif
+  GPIOF_BASE,
 #endif
 #if STM32_NGPIO > 6
-#  if defined(CONFIG_STM32_HAVE_GPIOG)
-  STM32_GPIOG_BASE,
-#  else
-  0,
-#  endif
+  GPIOG_BASE,
 #endif
 #if STM32_NGPIO > 7
   STM32_GPIOH_BASE,
 #endif
 #if STM32_NGPIO > 8
-  STM32_GPIOI_BASE,
+  GPIOI_BASE,
 #endif
 #if STM32_NGPIO > 9
-  STM32_GPIOJ_BASE,
+  GPIOJ_BASE,
 #endif
 #if STM32_NGPIO > 10
-  STM32_GPIOK_BASE,
+  GPIOK_BASE,
+#endif
+#if STM32_NGPIO > 11
+  GPIOL_BASE,
+#endif
+#if STM32_NGPIO > 12
+  GPIOM_BASE,
+#endif
+#if STM32_NGPIO > 13
+  GPION_BASE,
+#endif
+#if STM32_NGPIO > 14
+  GPIOO_BASE,
+#endif
+#if STM32_NGPIO > 15
+  GPIOP_BASE,
 #endif
 };
 
@@ -372,19 +470,16 @@ int stm32_configgpio(uint32_t cfgset)
 
   if (pinmode != GPIO_MODER_OUTPUT && (cfgset & GPIO_EXTI) != 0)
     {
-      /* Selection of the EXTI line source is performed through the EXTIx
-       * bits in the SYSCFG_EXTICRx registers.
-       */
-
       uint32_t regaddr;
       int shift;
 
-      /* Set the bits in the SYSCFG EXTICR register */
+      /* Set the port selection in the EXTI configuration register */
 
-      regaddr = STM32_SYSCFG_EXTICR(pin);
+      regaddr = GPIO_EXTICR(pin);
+      shift   = GPIO_EXTICR_SHIFT(pin);
+
       regval  = getreg32(regaddr);
-      shift   = SYSCFG_EXTICR_EXTI_SHIFT(pin);
-      regval &= ~(SYSCFG_EXTICR_PORT_MASK << shift);
+      regval &= ~(GPIO_EXTICR_PORT_MASK << shift);
       regval |= (((uint32_t)port) << shift);
 
       putreg32(regval, regaddr);
@@ -533,11 +628,11 @@ void stm32_iocompensation(void)
    * enables the I/O compensation cell.
    */
 
-  putreg32(SYSCFG_CCCSR_EN, STM32_SYSCFG_CCCSR);
+  putreg32(GPIO_CCCSR_EN, GPIO_CCCSR);
 
   /* Wait for compensation cell to become ready */
 
-  while ((getreg32(STM32_SYSCFG_CCCSR) & SYSCFG_CCCSR_READY) == 0)
+  while ((getreg32(GPIO_CCCSR) & GPIO_CCCSR_READY) == 0)
     {
     }
 }

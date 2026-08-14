@@ -30,18 +30,8 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32H7X0XX)
-#  include "hardware/stm32h7x3xx_uart.h"
-#elif defined(CONFIG_STM32_STM32H7X3XX)
-#  include "hardware/stm32h7x3xx_uart.h"
-#elif defined(CONFIG_STM32_STM32H7B3XX)
-#  include "hardware/stm32h7x3xx_uart.h"
-#elif defined(CONFIG_STM32_STM32H7X5XX)
-#  include "hardware/stm32h7x3xx_uart.h"
-#elif defined(CONFIG_STM32_STM32H7X7XX)
-#  include "hardware/stm32h7x3xx_uart.h"
-#else
-#  error "Unsupported STM32 H7 memory map"
-#endif
+/* All STM32 H7 families share the same USART IP */
+
+#include "hardware/stm32h7x3xx_uart.h"
 
 #endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_UART_H */
