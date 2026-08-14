@@ -17,7 +17,7 @@ Supported MCUs
 ===========  ======= ================
 MCU          Support Note
 ===========  ======= ================
-STM32H503     No
+STM32H503     Yes
 STM32H523     No
 STM32H533     Yes
 STM32H562     No
