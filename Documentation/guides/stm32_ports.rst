@@ -34,7 +34,7 @@ STM32MP1      Cortex-M4         unsupported  none
 STM32MP2      Cortex-A35        unsupported  none
 STM32MP2      Cortex-M33        unsupported  none
 STM32N6       Cortex-M55        supported    ``arch/arm/src/stm32n6``
-STM32U0       Cortex-M0+        unsupported  none
+STM32U0       Cortex-M0+        supported    ``arch/arm/src/stm32u0``
 STM32U3       Cortex-M33        unsupported  none
 STM32U5       Cortex-M33        supported    ``arch/arm/src/stm32u5``
 STM32WB       Cortex-M4         supported    ``arch/arm/src/stm32wb``
@@ -694,9 +694,41 @@ RCC           to be done    arch/arm/src/stm32n6/stm32_rcc.c
 SPI/I2S       to be done    not supported                      
 TIM           to be done    not supported                      
 USART/LPUART  v4            arch/arm/src/stm32n6/stm32_serial.c
-USB           device        not supported                      
-XSPI          to be done    not supported                      
+USB           device        not supported
+XSPI          to be done    not supported
 ============  ============  ===================================
+
+STM32U0
+-------
+
+============  ============  ======================================================
+Peripheral    Core version  Driver
+============  ============  ======================================================
+ADC           v1            arch/arm/src/common/stm32/stm32_adc_m0_v1.c
+AES           v1            arch/arm/src/common/stm32/stm32_aes_m0_v1.c
+COMP          v1            not supported
+DAC           v1            not supported
+DMA           v1            arch/arm/src/common/stm32/stm32_dma_m0_v1_7ch_dmamux.c
+DMAMUX        v1 12ch       arch/arm/src/common/stm32/stm32_dma_m0_v1_7ch_dmamux.c
+EXTI          v2            arch/arm/src/common/stm32/stm32_exti_gpio_m0_v1.c
+FLASH         U0            not supported
+GPIO          v1            arch/arm/src/common/stm32/stm32_gpio_m0_v1.c
+I2C           v1            arch/arm/src/common/stm32/stm32_i2c_m0_v1.c
+IWDG          v1            arch/arm/src/common/stm32/stm32_iwdg_m0_v1.c
+LCD           to be done    not supported
+LPTIM         to be done    not supported
+PWR           G0            arch/arm/src/common/stm32/stm32_pwr_m0_g0.c
+RCC           to be done    arch/arm/src/stm32u0/stm32_rcc.c
+RNG           v1            arch/arm/src/common/stm32/stm32_rng_m0_v1.c
+RTC           RTCC M0       not supported
+SPI/I2S       v2            arch/arm/src/common/stm32/stm32_spi_m0_v1.c
+SYSCFG        to be done    not supported
+TIM           v1            arch/arm/src/common/stm32/stm32_tim_m0_v1.c
+TSC           to be done    not supported
+USART/LPUART  v4            arch/arm/src/common/stm32/stm32_serial_m0_v4.c
+USB           device        not supported
+WWDG          v1            arch/arm/src/common/stm32/stm32_wwdg_m0_v1.c
+============  ============  ======================================================
 
 STM32U5
 -------

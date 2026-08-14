@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/stm32/hardware/stm32_flash_m0.h
+ * arch/arm/src/stm32u0/stm32.h
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,28 +20,36 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H
-#define __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H
+#ifndef __ARCH_ARM_SRC_STM32U0_STM32_H
+#define __ARCH_ARM_SRC_STM32U0_STM32_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "arm_internal.h"
+
+/* Peripherals **************************************************************/
+
 #include "chip.h"
+#include "stm32_dma.h"
+#include "stm32_gpio.h"
+#include "stm32_i2c.h"
+#include "stm32_pwr.h"
+#include "stm32_rcc.h"
+#include "stm32_spi.h"
+#include "stm32_tim.h"
+#include "stm32_uart.h"
+#include "stm32_lowputc.h"
+#include "stm32_adc.h"
 
-#if defined(CONFIG_ARCH_CHIP_STM32F0)
-#  include "hardware/stm32f0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32L0)
-#  include "hardware/stm32l0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32G0)
-#  include "hardware/stm32g0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32C0)
-#  include "hardware/stm32c0_flash.h"
-#elif defined(CONFIG_ARCH_CHIP_STM32U0)
-#  include "hardware/stm32u0_flash.h"
-#else
-#  error "Unsupported STM32 M0 FLASH"
-#endif
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_COMMON_STM32_HARDWARE_STM32_FLASH_M0_H */
+#endif /* __ARCH_ARM_SRC_STM32U0_STM32_H */

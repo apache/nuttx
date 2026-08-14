@@ -49,7 +49,8 @@
 
 /* Support for ADC clock prescaler */
 
-#if defined(CONFIG_STM32_STM32L0) || defined(CONFIG_STM32_STM32G0)
+#if defined(CONFIG_STM32_STM32L0) || defined(CONFIG_STM32_STM32G0) || \
+    defined(CONFIG_STM32_STM32U0)
 #  define HAVE_ADC_PRE
 #else
 #  undef HAVE_ADC_PRE
@@ -120,7 +121,7 @@
 #define STM32_ADC1_AWD2CR           (STM32_ADC1_BASE + STM32_ADC_AWD2CR_OFFSET)
 #define STM32_ADC1_AWD3CR           (STM32_ADC1_BASE + STM32_ADC_AWD3CR_OFFSET)
 #define STM32_ADC1_CALFACT          (STM32_ADC1_BASE + STM32_ADC_CALFACT_OFFSET)
-#if defined(CONFIG_ARCH_CHIP_STM32G0)
+#if defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_ARCH_CHIP_STM32U0)
 #  define STM32_ADC1_CCR            (STM32_ADC1_BASE + STM32_ADC_CCR_OFFSET)
 #endif
 
@@ -218,7 +219,8 @@
 
 /* ADC sample time register */
 
-#if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0)
+#if defined(CONFIG_ARCH_CHIP_STM32C0) || defined(CONFIG_ARCH_CHIP_STM32G0) || \
+    defined(CONFIG_ARCH_CHIP_STM32U0)
 #  define ADC_SMPR_1p5              (0)       /* 000: 1.5 cycles */
 #  define ADC_SMPR_3p5              (1)       /* 001: 3.5 cycles */
 #  define ADC_SMPR_7p5              (2)       /* 010: 7.5 cycles */
@@ -243,7 +245,8 @@
 #define ADC_SMPR_SMP2_SHIFT         (4)       /* Bits 4-6: Sampling time selection 2 */
 #define ADC_SMPR_SMP2_MASK          (7 << ADC_SMPR_SMP_SHIFT)
 #define ADC_SMPR_SMPSEL_SHIFT       (8)       /* Bits 8-26: channel-x sampling time selection */
-#if defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_ARCH_CHIP_STM32C0)
+#if defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_ARCH_CHIP_STM32C0) || \
+    defined(CONFIG_ARCH_CHIP_STM32U0)
 #  define ADC_SMPR_SMPSEL(ch, smp)  ((smp) << (ADC_SMPR_SMPSEL_SHIFT + ch)) /* ch = [0..22] and smp = 0 or 1 */
 #  define ADC_SMPSEL(ch, smp)       ((smp) << (ch))                         /* For use in adc_sampletime_set */
 #else
@@ -284,7 +287,7 @@
  * Enabled when CHSELRMOD = 1 in ADC_CFGR1
  */
 
-#if defined(CONFIG_ARCH_CHIP_STM32G0)
+#if defined(CONFIG_ARCH_CHIP_STM32G0) || defined(CONFIG_ARCH_CHIP_STM32U0)
 #  define ADC_CHSELR_ALT_SQN(sqn, ch) ((ch) << (((sqn) - 1) * 4)) /* sqn = [0..8], ch = [0..14] */
 #endif
 

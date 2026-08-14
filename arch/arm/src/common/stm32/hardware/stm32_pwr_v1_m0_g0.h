@@ -38,6 +38,8 @@
 #  include "hardware/stm32g0_pwr.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32C0)
 #  include "hardware/stm32c0_pwr.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32U0)
+#  include "hardware/stm32u0_pwr.h"
 #else
 #  error "Unsupported STM32 M0 PWR"
 #endif

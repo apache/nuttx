@@ -38,6 +38,8 @@
 #  include "hardware/stm32g0_rcc.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32C0)
 #  include "hardware/stm32c0_rcc.h"
+#elif defined(CONFIG_ARCH_CHIP_STM32U0)
+#  include "hardware/stm32u0_rcc.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F1)
 #  include "hardware/stm32f10xxx_rcc.h"
 #elif defined(CONFIG_ARCH_CHIP_STM32F2)

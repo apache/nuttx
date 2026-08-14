@@ -20,6 +20,7 @@ config STM32_COMMON_F0_L0_G0_C0
 	default y if ARCH_CHIP_STM32L0
 	default y if ARCH_CHIP_STM32G0
 	default y if ARCH_CHIP_STM32C0
+	default y if ARCH_CHIP_STM32U0
 
 config STM32_COMMON_F7_H7
 	bool
