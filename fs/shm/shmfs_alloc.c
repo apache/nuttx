@@ -53,7 +53,11 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
 
   size_t hdr_size = sizeof(struct shmfs_object_s);
   size_t alloc_size = length;
+#ifdef CONFIG_FS_SHMFS_NO_ALIGN
+  size_t cachesize = 0;
+#else
   size_t cachesize = up_get_dcache_linesize();
+#endif
 
   if (cachesize > 0)
     {
@@ -83,7 +87,11 @@ FAR struct shmfs_object_s *shmfs_alloc_object(size_t length)
   object = fs_heap_zalloc(sizeof(struct shmfs_object_s));
   if (object)
     {
+#ifdef CONFIG_FS_SHMFS_NO_ALIGN
+      size_t cachesize = 0;
+#else
       size_t cachesize = up_get_dcache_linesize();
+#endif
 
       if (cachesize > 0)
         {
