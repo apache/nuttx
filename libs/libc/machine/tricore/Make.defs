@@ -20,6 +20,7 @@
 #
 ############################################################################
 
+CSRCS += arch_atomic.c
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 CSRCS += arch_setjmp.c
 endif
