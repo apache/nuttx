@@ -181,6 +181,9 @@
 #define QSPICMD_WRITEDATA     (1 << 2)  /* Bit 2: Enable write data transfer */
 #define QSPICMD_IDUAL         (1 << 3)  /* Bit 3: Instruction on two lines */
 #define QSPICMD_IQUAD         (1 << 4)  /* Bit 4: Instruction on four lines */
+#define QSPICMD_IOCTAL        (1 << 8)  /* Bit 8: Instruction on eight lines */
+#define QSPICMD_OCTALIO       (1 << 9)  /* Bit 9: Octal address and data */
+#define QSPICMD_DTR           (1 << 10) /* Bit 10: Double transfer rate */
 
 #define QSPICMD_ISADDRESS(f)  (((f) & QSPICMD_ADDRESS) != 0)
 #define QSPICMD_ISDATA(f)     (((f) & (QSPICMD_READDATA | QSPICMD_WRITEDATA)) != 0)
@@ -188,6 +191,9 @@
 #define QSPICMD_ISWRITE(f)    (((f) & QSPICMD_WRITEDATA) != 0)
 #define QSPICMD_ISIDUAL(f)    (((f) & QSPICMD_IDUAL) != 0)
 #define QSPICMD_ISIQUAD(f)    (((f) & QSPICMD_IQUAD) != 0)
+#define QSPICMD_ISIOCTAL(f)   (((f) & QSPICMD_IOCTAL) != 0)
+#define QSPICMD_ISOCTALIO(f)  (((f) & QSPICMD_OCTALIO) != 0)
+#define QSPICMD_ISDTR(f)      (((f) & QSPICMD_DTR) != 0)
 
 /****************************************************************************
  * Name: QSPI_MEMORY
@@ -217,6 +223,9 @@
 #define QSPIMEM_IDUAL         (1 << 7)  /* Bit 7: Instruction on two lines     */
 #define QSPIMEM_IQUAD         (1 << 0)  /* Bit 0: Instruction on four lines    */
 #define QSPIMEM_QUADDATA      (1 << 1)  /* Bit 1: Quad data, single-line addr  */
+#define QSPIMEM_IOCTAL        (1 << 8)  /* Bit 8: Instruction on eight lines   */
+#define QSPIMEM_OCTALIO       (1 << 9)  /* Bit 9: Octal address and data       */
+#define QSPIMEM_DTR           (1 << 10) /* Bit 10: Double transfer rate        */
 
 #define QSPIMEM_ISREAD(f)     (((f) & QSPIMEM_WRITE) == 0)
 #define QSPIMEM_ISWRITE(f)    (((f) & QSPIMEM_WRITE) != 0)
@@ -226,6 +235,9 @@
 #define QSPIMEM_ISSCRAMBLE(f) (((f) & QSPIMEM_SCRAMBLE) != 0)
 #define QSPIMEM_ISIDUAL(f)    (((f) & QSPIMEM_IDUAL) != 0)
 #define QSPIMEM_ISIQUAD(f)    (((f) & QSPIMEM_IQUAD) != 0)
+#define QSPIMEM_ISIOCTAL(f)   (((f) & QSPIMEM_IOCTAL) != 0)
+#define QSPIMEM_ISOCTALIO(f)  (((f) & QSPIMEM_OCTALIO) != 0)
+#define QSPIMEM_ISDTR(f)      (((f) & QSPIMEM_DTR) != 0)
 
 #define QSPIMEM_ISRANDOM(f) \
   (((f) & (QSPIMEM_SCRAMBLE|QSPIMEM_RANDOM)) == \
@@ -284,7 +296,7 @@ enum qspi_mode_e
 
 struct qspi_cmdinfo_s
 {
-  uint8_t   flags;       /* See QSPICMD_* definitions */
+  uint16_t  flags;       /* See QSPICMD_* definitions */
   uint8_t   addrlen;     /* Address length in bytes (if QSPICMD_ADDRESS) */
   uint16_t  cmd;         /* Command */
   uint16_t  buflen;      /* Data buffer length in bytes (if QSPICMD_DATA) */
@@ -296,7 +308,7 @@ struct qspi_cmdinfo_s
 
 struct qspi_meminfo_s
 {
-  uint8_t   flags;       /* See QSPMEM_* definitions */
+  uint16_t  flags;       /* See QSPIMEM_* definitions */
   uint8_t   addrlen;     /* Address length in bytes */
   uint8_t   dummies;     /* Number of dummy read cycles (READ only) */
   uint16_t  cmd;         /* Memory access command */

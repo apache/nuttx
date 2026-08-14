@@ -738,6 +738,29 @@ config MX25L_DEBUG
 
 endif # MTD_MX25L
 
+config MTD_MX25UW25645G
+	bool "Macronix MX25UW25645G XSPI flash"
+	default n
+	---help---
+		Enable the MTD driver for the 256-Mbit Macronix MX25UW25645G
+		OctaBus flash memory.  The driver uses the QSPI interface.
+
+if MTD_MX25UW25645G
+
+config MX25UW25645G_QSPIMODE
+	int "MX25UW25645G QSPI mode"
+	default 0
+	---help---
+		The MX25UW25645G supports QSPI mode 0 or 3.
+
+config MX25UW25645G_QSPI_FREQUENCY
+	int "MX25UW25645G QSPI frequency"
+	default 75000000
+	---help---
+		Clock frequency used for MX25UW25645G transfers.
+
+endif # MTD_MX25UW25645G
+
 config MTD_MX35
 	bool "SPI-based MX35LF1GE4AB / MX35LF2GE4AB"
 	default n
