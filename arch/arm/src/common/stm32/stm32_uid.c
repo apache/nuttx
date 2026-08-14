@@ -40,6 +40,9 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_uid.h"
 
@@ -51,12 +54,19 @@
 
 void stm32_get_uniqueid(uint8_t uniqueid[12])
 {
+  uint32_t uid[3];
   int i;
 
-  for (i = 0; i < 12; i++)
+  /* Read the UID with 32-bit accesses. Some parts (STM32H5) store the UID
+   * in flash memory that does not support 8-bit reads.
+   */
+
+  for (i = 0; i < 3; i++)
     {
-      uniqueid[i] = *((uint8_t *)(STM32_SYSMEM_UID) + i);
+      uid[i] = getreg32(STM32_SYSMEM_UID + 4 * i);
     }
+
+  memcpy(uniqueid, uid, 12);
 }
 
 #endif /* STM32_SYSMEM_UID */
