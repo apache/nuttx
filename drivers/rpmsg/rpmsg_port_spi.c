@@ -162,7 +162,7 @@ static void rpmsg_port_spi_pm_callback(wdparm_t arg)
 
   flags = spin_lock_irqsave(&rpspi->pmlock);
   count = pm_wakelock_staycount(&rpspi->wakelock);
-  if (count > 0 && atomic_load(&rpspi->transferring) == 0 &&
+  if (count > 0 && atomic_read(&rpspi->transferring) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.txq) == 0 &&
       rpmsg_port_queue_nused(&rpspi->port.rxq) == 0)
     {
