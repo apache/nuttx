@@ -3063,6 +3063,14 @@ config ARCH_BOARD_NUCLEO_U083RC
 	---help---
 		STMicro NUCLEO U083RC board based on the STMicro STM32U083RC MCU.
 
+config ARCH_BOARD_STM32U083C_DK
+	bool "STMicro STM32U083C-DK board"
+	depends on ARCH_CHIP_STM32U083MC
+	select ARCH_HAVE_LEDS
+	---help---
+		STMicro STM32U083C-DK Discovery kit based on the STMicro
+		STM32U083MC MCU.
+
 config ARCH_BOARD_STM32F3_DISCOVERY
 	bool "STMicro STM32F3-Discovery board"
 	depends on ARCH_CHIP_STM32F303VC
@@ -4070,6 +4078,7 @@ config ARCH_BOARD
 	default "nucleo-c071rb"                if ARCH_BOARD_NUCLEO_C071RB
 	default "nucleo-c092rc"                if ARCH_BOARD_NUCLEO_C092RC
 	default "nucleo-u083rc"                if ARCH_BOARD_NUCLEO_U083RC
+	default "stm32u083c-dk"                if ARCH_BOARD_STM32U083C_DK
 	default "stm32f103-minimum"            if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm32f411-minimum"            if ARCH_BOARD_STM32F411_MINIMUM
 	default "stm3210e-eval"                if ARCH_BOARD_STM3210E_EVAL
@@ -4677,6 +4686,9 @@ source "boards/arm/stm32c0/nucleo-c092rc/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_U083RC
 source "boards/arm/stm32u0/nucleo-u083rc/Kconfig"
+endif
+if ARCH_BOARD_STM32U083C_DK
+source "boards/arm/stm32u0/stm32u083c-dk/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F722ZE
 source "boards/arm/stm32f7/nucleo-f722ze/Kconfig"
