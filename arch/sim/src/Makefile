@@ -42,7 +42,7 @@ INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/libmad/libmad
 endif
 
 ifeq ($(CONFIG_AUDIOUTILS_LAME),y)
-INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame/include
 endif
 
 CPPFLAGS += $(INCLUDES)
