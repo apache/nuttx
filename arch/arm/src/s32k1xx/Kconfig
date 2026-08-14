@@ -75,6 +75,7 @@ config ARCH_CHIP_S32K11X
 	bool
 	select ARCH_CORTEXM0
 	select S32K1XX_HAVE_FIRC_CMU
+	select LIBC_ATOMIC_IRQ
 
 config ARCH_CHIP_S32K14X
 	bool

@@ -965,6 +965,7 @@ config ARCH_ARM7TDMI
 	default n
 	select ARCH_DCACHE
 	select ARCH_ICACHE
+	select LIBC_ATOMIC_IRQ
 	---help---
 		The Arm7TDMI-S is an excellent workhorse processor capable of a wide
 		array of applications. Traditionally used in mobile handsets, the
@@ -994,6 +995,7 @@ config ARCH_ARM926EJS
 	select ARCH_ICACHE
 	select ARCH_HAVE_MMU
 	select ARCH_USE_MMU
+	select LIBC_ATOMIC_IRQ
 	---help---
 		Arm926EJ-S is the entry point processor capable of supporting full
 		Operating Systems including Linux, WindowsCE, and Symbian.
@@ -1049,6 +1051,7 @@ config ARCH_ARMV6M
 	bool
 	default n
 	select ARCH_HAVE_CPUINFO
+	select LIBC_ATOMIC_IRQ
 
 config ARCH_CORTEXM0
 	bool
