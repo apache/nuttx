@@ -531,7 +531,7 @@ CAN/FDCAN     FDCAN         arch/arm/src/stm32h5/stm32_fdcan.c
 DAC           to be done    not supported                          
 DTS           to be done    arch/arm/src/stm32h5/stm32_dts.c       
 ETH           to be done    arch/arm/src/stm32h5/stm32_ethernet.c  
-EXTI          to be done    not supported                          
+EXTI          to be done    arch/arm/src/stm32h5/stm32_exti_gpio.c 
 FLASH         to be done    arch/arm/src/stm32h5/stm32_flash.c     
 GPIO          to be done    arch/arm/src/stm32h5/stm32_gpio.c      
 GPDMA         to be done    arch/arm/src/stm32h5/stm32_dma.c       

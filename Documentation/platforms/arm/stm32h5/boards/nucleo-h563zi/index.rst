@@ -174,6 +174,13 @@ This configuration configures the digital temperature sensor (DTS)
 at /dev/uorb/sensor_temp0 and provides the test application 
 sensortest. E.g. sensortest -n 10 temp0
 
+buttons:
+---------
+
+This configuration registers a buttons device at /dev/buttons for the user
+button on the board. The buttons example app shows interrupt events from the
+button.
+
 usbmsc:
 --------
 
