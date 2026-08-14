@@ -726,6 +726,18 @@ FAR struct mtd_dev_s *mx25rxx_initialize(FAR struct qspi_dev_s *qspi,
                                          bool unprotect);
 
 /****************************************************************************
+ * Name: mx25uw25645g_initialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance for the QSPI-based
+ *   MX25UW25645G FLASH part.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *
+mx25uw25645g_initialize(FAR struct qspi_dev_s *qspi);
+
+/****************************************************************************
  * Name: n25qxxx_initialize
  *
  * Description:
