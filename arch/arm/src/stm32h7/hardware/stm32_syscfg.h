@@ -40,7 +40,7 @@
 #  include "hardware/stm32h7x3xx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32H7X7XX)
 #  include "hardware/stm32h7x3xx_syscfg.h"
-#else
+#elif !defined(CONFIG_STM32_STM32H7RSXX)
 #  error "Unsupported STM32 H7 part"
 #endif
 

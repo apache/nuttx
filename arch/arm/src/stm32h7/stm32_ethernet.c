@@ -58,9 +58,30 @@
 #include <nuttx/cache.h>
 #include "arm_internal.h"
 
-#include "hardware/stm32_syscfg.h"
 #include "hardware/stm32_pinmap.h"
 #include "stm32_gpio.h"
+
+#ifdef CONFIG_STM32_HAVE_SBS
+#  include "hardware/stm32h7rsxx_sbs.h"
+#else
+#  include "hardware/stm32_syscfg.h"
+#endif
+
+/* The PHY interface selection lives in SBS on the H7R/S and in SYSCFG
+ * everywhere else.  Only the names differ.
+ */
+
+#ifdef CONFIG_STM32_HAVE_SBS
+#  define ETH_PHYSEL_REG   STM32_SBS_PMCR
+#  define ETH_PHYSEL_MASK  SBS_PMCR_ETH_PHYSEL_MASK
+#  define ETH_PHYSEL_MII   SBS_PMCR_ETH_PHYSEL_GMII_MII
+#  define ETH_PHYSEL_RMII  SBS_PMCR_ETH_PHYSEL_RMII
+#else
+#  define ETH_PHYSEL_REG   STM32_SYSCFG_PMC
+#  define ETH_PHYSEL_MASK  SYSCFG_PMC_EPIS_MASK
+#  define ETH_PHYSEL_MII   SYSCFG_PMC_EPIS_MII
+#  define ETH_PHYSEL_RMII  SYSCFG_PMC_EPIS_RMII
+#endif
 #include "stm32_rcc.h"
 #include "stm32_ethernet.h"
 #include "stm32_uid.h"
@@ -3509,10 +3530,10 @@ static inline void stm32_selectmii(void)
 {
   uint32_t regval;
 
-  regval  = getreg32(STM32_SYSCFG_PMC);
-  regval &= ~SYSCFG_PMC_EPIS_MASK;
-  regval |= SYSCFG_PMC_EPIS_MII;
-  putreg32(regval, STM32_SYSCFG_PMC);
+  regval  = getreg32(ETH_PHYSEL_REG);
+  regval &= ~ETH_PHYSEL_MASK;
+  regval |= ETH_PHYSEL_MII;
+  putreg32(regval, ETH_PHYSEL_REG);
 }
 #endif
 
@@ -3535,10 +3556,10 @@ static inline void stm32_selectrmii(void)
 {
   uint32_t regval;
 
-  regval  = getreg32(STM32_SYSCFG_PMC);
-  regval &= ~SYSCFG_PMC_EPIS_MASK;
-  regval |= SYSCFG_PMC_EPIS_RMII;
-  putreg32(regval, STM32_SYSCFG_PMC);
+  regval  = getreg32(ETH_PHYSEL_REG);
+  regval &= ~ETH_PHYSEL_MASK;
+  regval |= ETH_PHYSEL_RMII;
+  putreg32(regval, ETH_PHYSEL_REG);
 }
 #endif
 
