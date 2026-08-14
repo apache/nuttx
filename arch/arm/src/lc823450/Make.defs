@@ -124,3 +124,4 @@ endif
 ifeq ($(CONFIG_ARM_MPU),y)
 CHIP_CSRCS += lc823450_mpuinit2.c
 endif
+CHIP_CSRCS += lc823450_atomic.c

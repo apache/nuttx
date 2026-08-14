@@ -104,3 +104,4 @@ ifneq ($(PICO_SDK_PATH),)
 include chip/boot2/Make.defs
 endif
 endif
+CHIP_CSRCS += rp2040_atomic.c
