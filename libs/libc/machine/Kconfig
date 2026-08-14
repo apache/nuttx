@@ -9,21 +9,27 @@
 
 menu "Architecture-Specific Support"
 
-config LIBC_ATOMIC_IRQ
-	bool
-	default n
-	---help---
-		atomic function by irq disable/enable
-
 config LIBC_ATOMIC_ARCH
 	bool
 	default n
 	---help---
 		arch_atomic by arch instruction
 
+config LIBC_ATOMIC_HWSPINLOCK
+	bool
+	default n
+	---help---
+		arch_atomic by chip hwspinlock
+
+config LIBC_ATOMIC_IRQ
+	bool
+	default n
+	---help---
+		atomic function by irq disable/enable
+
 config LIBC_ATOMIC_TOOLCHAIN
 	bool
-	default y if !LIBC_ATOMIC_IRQ && !LIBC_ATOMIC_ARCH
+	default y if !LIBC_ATOMIC_ARCH && !LIBC_ATOMIC_HWSPINLOCK && !LIBC_ATOMIC_IRQ
 	default n
 	---help---
 		atomic function from toolchain

@@ -22,8 +22,8 @@
 
 add_subdirectory(${CONFIG_ARCH})
 
-if(CONFIG_LIBC_ATOMIC_IRQ)
-  target_sources(c PRIVATE arch_atomic_irq.c)
+if(CONFIG_LIBC_ATOMIC_IRQ OR CONFIG_LIBC_ATOMIC_HWSPINLOCK)
+  target_sources(c PRIVATE arch_atomic.c)
 endif()
 
 if(CONFIG_MM_KASAN)
