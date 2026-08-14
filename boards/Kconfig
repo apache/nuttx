@@ -3054,6 +3054,15 @@ config ARCH_BOARD_NUCLEO_C092RC
 	---help---
 		STMicro NUCLEO C092RC board based on the STMicro STM32C092RC MCU.
 
+config ARCH_BOARD_NUCLEO_U083RC
+	bool "STMicro Nucleo U083RC board"
+	depends on ARCH_CHIP_STM32U083RC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro NUCLEO U083RC board based on the STMicro STM32U083RC MCU.
+
 config ARCH_BOARD_STM32F3_DISCOVERY
 	bool "STMicro STM32F3-Discovery board"
 	depends on ARCH_CHIP_STM32F303VC
@@ -4060,6 +4069,7 @@ config ARCH_BOARD
 	default "stm32f072-discovery"          if ARCH_BOARD_STM32F072_DISCOVERY
 	default "nucleo-c071rb"                if ARCH_BOARD_NUCLEO_C071RB
 	default "nucleo-c092rc"                if ARCH_BOARD_NUCLEO_C092RC
+	default "nucleo-u083rc"                if ARCH_BOARD_NUCLEO_U083RC
 	default "stm32f103-minimum"            if ARCH_BOARD_STM32F103_MINIMUM
 	default "stm32f411-minimum"            if ARCH_BOARD_STM32F411_MINIMUM
 	default "stm3210e-eval"                if ARCH_BOARD_STM3210E_EVAL
@@ -4664,6 +4674,9 @@ source "boards/arm/stm32c0/nucleo-c071rb/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_C092RC
 source "boards/arm/stm32c0/nucleo-c092rc/Kconfig"
+endif
+if ARCH_BOARD_NUCLEO_U083RC
+source "boards/arm/stm32u0/nucleo-u083rc/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_F722ZE
 source "boards/arm/stm32f7/nucleo-f722ze/Kconfig"
@@ -5350,7 +5363,7 @@ endif
 if ARCH_CHIP_SAMV7
 source "boards/arm/samv7/common/Kconfig"
 endif
-if ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32L1 || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32L5 || ARCH_CHIP_STM32U5 || ARCH_CHIP_STM32WB || ARCH_CHIP_STM32WL5 || ARCH_CHIP_STM32N6
+if ARCH_CHIP_STM32C0 || ARCH_CHIP_STM32F0 || ARCH_CHIP_STM32F1 || ARCH_CHIP_STM32F2 || ARCH_CHIP_STM32F3 || ARCH_CHIP_STM32F4 || ARCH_CHIP_STM32F7 || ARCH_CHIP_STM32G0 || ARCH_CHIP_STM32G4 || ARCH_CHIP_STM32L0 || ARCH_CHIP_STM32L1 || ARCH_CHIP_STM32H7 || ARCH_CHIP_STM32H5 || ARCH_CHIP_STM32L5 || ARCH_CHIP_STM32U0 || ARCH_CHIP_STM32U5 || ARCH_CHIP_STM32WB || ARCH_CHIP_STM32WL5 || ARCH_CHIP_STM32N6
 source "boards/arm/common/stm32/Kconfig"
 endif
 if ARCH_CHIP_RP2040
