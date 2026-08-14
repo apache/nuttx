@@ -1429,6 +1429,12 @@ config CXD56_TESTSET_WITH_HWSEM
 
 endif # CXD56_TESTSET
 
+config CXD56_ATOMIC_WITH_HWSEM
+	bool "Use atomic based on hardware semaphore"
+	default !CXD56_USE_SYSBUS
+	depends on SMP
+	select LIBC_ATOMIC_HWSPINLOCK
+
 config CXD56_USE_SYSBUS
 	bool "Use the system bus for the data section"
 	default y
