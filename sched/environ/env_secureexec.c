@@ -71,10 +71,15 @@ static bool env_is_unsafe(FAR const char *pair)
 
   for (name = names; *name != NULL; name++)
     {
-      if (strncmp(pair, *name, strlen(*name)) == 0)
+      if (pair != NULL && strncmp(pair, *name, strlen(*name)) == 0)
         {
           return true;
         }
+    }
+
+  if (pair == NULL)
+    {
+      return false;
     }
 
   return strncmp(pair, "LD_", 3) == 0 ||
@@ -102,7 +107,9 @@ void env_sanitize_secure(FAR struct task_group_s *group)
 
   for (index = group->tg_envc - 1; index >= 0; )
     {
-      if (env_is_unsafe(group->tg_envp[index]))
+      FAR char *pair = group->tg_envp[index];
+
+      if (pair != NULL && env_is_unsafe(pair))
         {
           env_removevar(group, index);
         }

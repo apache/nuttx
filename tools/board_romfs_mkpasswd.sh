@@ -60,3 +60,48 @@ PASSWORD=$(cat "${PASSFILE}")
   --iterations "${ITERATIONS}" \
   "$@" -o "${OUTPUT}"
 rm -f "${PASSFILE}"
+
+EXTRA_ENABLE=$(grep "^CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE=y" \
+  "${CONFIG_FILE}" 2>/dev/null || true)
+
+if [ -n "${EXTRA_ENABLE}" ]; then
+  EXTRA_USER=$(read_int_config CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_USER user)
+  EXTRA_UID=$(read_int_config CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_UID 1000)
+  EXTRA_GID=$(read_int_config CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_GID 1000)
+  EXTRA_HOME=$(read_int_config CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_HOME /)
+  EXTRA_LINE="${OUTPUT}.extra"
+  EXTRA_PASS="${PASSWORD}"
+
+  if ! grep -q "^CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_USE_ROOT_PASSWORD=y" \
+      "${CONFIG_FILE}" 2>/dev/null; then
+    "${TOPDIR}/tools/promptpasswd.sh" \
+      --min 8 \
+      --config CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_PASSWORD \
+      --config-file "${CONFIG_FILE}" \
+      --update-config \
+      --prompt "ROMFS extra user password (min 8 characters): " \
+      --output-file "${PASSFILE}"
+    EXTRA_PASS=$(cat "${PASSFILE}")
+    rm -f "${PASSFILE}"
+  fi
+
+  "${MKPASSWD}" --password "${EXTRA_PASS}" \
+    --iterations "${ITERATIONS}" \
+    --user "${EXTRA_USER}" \
+    --uid "${EXTRA_UID}" \
+    --gid "${EXTRA_GID}" \
+    --home "${EXTRA_HOME}" \
+    -o "${EXTRA_LINE}"
+  cat "${EXTRA_LINE}" >> "${OUTPUT}"
+  rm -f "${EXTRA_LINE}"
+
+  if grep -q "^CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_SUDOERS=y" \
+      "${CONFIG_FILE}" 2>/dev/null; then
+    SUDOERS="$(dirname "${OUTPUT}")/sudoers"
+    {
+      echo "# NuttX sudo allowlist: one username per line"
+      echo "root"
+      echo "${EXTRA_USER}"
+    } > "${SUDOERS}"
+  fi
+fi

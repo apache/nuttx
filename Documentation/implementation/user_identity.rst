@@ -120,6 +120,18 @@ Hard drop (clear saved-root)::
 ``setresgid()`` requires effective UID zero to assign arbitrary GIDs.
 Change group IDs before dropping the effective UID.
 
+Setuid-on-exec
+================
+
+When ``binfmt`` loads an executable with the set-user-ID bit set
+(``S_ISUID`` in ``nx_mode``), the new task group's effective and saved
+UIDs become the file owner's UID while the real UID remains the caller's.
+This is the mechanism used by the setuid-root ``sudo`` helper
+(``CONFIG_SYSTEM_SUDO``); see :ref:`cmdsudo`.  A valid test logs in as
+root, drops to an unprivileged sudoers account (``su user``), confirms
+that account cannot exec a root-only binary, then runs that binary
+through ``sudo``.
+
 Configuration
 =============
 

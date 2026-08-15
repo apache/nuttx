@@ -95,6 +95,9 @@ function(nuttx_add_application)
     STACKSIZE
     MODULE
     DYNLIB
+    UID
+    GID
+    MODE
     MULTI_VALUE
     COMPILE_FLAGS
     LINK_FLAGS

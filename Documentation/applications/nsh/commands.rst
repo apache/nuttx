@@ -1833,6 +1833,71 @@ Option                           Purpose
   nsh$ whoami
   testuser
 
+.. _cmdsudo:
+
+``sudo`` Run a Command as Root (setuid helper)
+==============================================
+
+**Command Syntax**::
+
+  sudo <command> [args...]
+
+**Synopsis**. Run a single command with root privileges using a
+Linux-style setuid-root helper program (``CONFIG_SYSTEM_SUDO``).  The
+kernel raises the effective UID to the file owner when the ``sudo`` ELF
+is loaded (``S_ISUID`` via ``nx_mode`` in the application build).
+``sudo`` then:
+
+1. Identifies the invoking user from the real UID (``getuid()``).
+2. Checks that user against the sudoers allowlist (``/etc/sudoers`` and/or
+   ``CONFIG_SYSTEM_SUDO_ALLOWED_USERS``).  Real UID 0 is always allowed.
+3. Verifies that user's password with ``passwd_verify()`` in userspace.
+4. Calls ``setresuid()`` / ``setresgid()`` / ``initgroups()`` to become
+   fully root.
+5. ``execvp()``s the requested command, replacing the ``sudo`` process.
+
+Unlike the NSH ``su`` builtin (which changes the shell session),
+``sudo`` runs one command and exits.  After a hard credential drop
+(``setuid()`` to a non-zero user), unprivileged code cannot call
+``seteuid(0)``; executing the setuid ``sudo`` binary is the supported
+way to regain root for a single command.
+
+**Requirements**
+
+.. list-table::
+   :header-rows: 1
+   :widths: 60 40
+
+   * - Option
+     - Purpose
+   * - ``CONFIG_SCHED_USER_IDENTITY``
+     - UID/GID tracking and setuid-on-exec
+   * - ``CONFIG_FSUTILS_PASSWD``
+     - ``passwd_verify()`` password check
+   * - ``CONFIG_LIBC_EXECFUNCS``
+     - Load the ``sudo`` ELF (not builtin main)
+   * - ``CONFIG_SYSTEM_SUDO``
+     - Build and install the setuid helper
+   * - ``CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE``
+     - Unprivileged ``user`` plus ``/etc/sudoers``
+   * - ``CONFIG_EXAMPLES_HELLO_RESTRICTED``
+     - ``/bin/hello`` as ``-rwxr--r--`` root
+
+**Example** (login as root, then drop to a sudoers user)::
+
+  nsh# id
+  uid=0(root) gid=0(root)
+  nsh# ls -l /bin/sudo
+   -rwsr-xr-x    root     root            0 /bin/sudo
+  nsh# ls -l /bin/hello
+   -rwxr--r--    root     root            0 /bin/hello
+  nsh# su user
+  nsh$ /bin/hello
+  nsh: /bin/hello: Permission denied
+  nsh$ sudo /bin/hello
+  [sudo] password for user:
+  Hello, World!!
+
 .. _cmdtelnetd:
 
 ``telnetd`` Time Start the Telnet Daemon
