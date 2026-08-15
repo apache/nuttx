@@ -366,22 +366,31 @@ function(process_all_directory_romfs)
     endif()
 
     set(GENPASSWD_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/passwd)
+    set(GENPASSWD_OUTPUTS ${GENPASSWD_OUTPUT})
+    if(CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE
+       AND CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_SUDOERS)
+      set(GENSUDOERS_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/etc/sudoers)
+      list(APPEND GENPASSWD_OUTPUTS ${GENSUDOERS_OUTPUT})
+    endif()
+
     add_custom_command(
-      OUTPUT ${GENPASSWD_OUTPUT}
+      OUTPUT ${GENPASSWD_OUTPUTS}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/etc
       COMMAND
-        ${MKPASSWD_BIN} --user "${CONFIG_BOARD_ETC_ROMFS_PASSWD_USER}"
-        --password "${CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD}" --uid
+        ${NUTTX_POSIX_SHELL} ${NUTTX_DIR}/tools/board_romfs_mkpasswd.sh
+        ${NUTTX_DIR} ${CMAKE_CURRENT_BINARY_DIR}/.romfs_passwd.txt
+        ${MKPASSWD_BIN} ${GENPASSWD_OUTPUT} --user
+        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_USER}" --uid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_UID} --gid
         ${CONFIG_BOARD_ETC_ROMFS_PASSWD_GID} --home
-        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}" --iterations
-        ${MKPASSWD_ITERATIONS} -o ${GENPASSWD_OUTPUT}
+        "${CONFIG_BOARD_ETC_ROMFS_PASSWD_HOME}"
       DEPENDS ${MKPASSWD_BIN} ${NUTTX_DIR}/.config
+              ${NUTTX_DIR}/tools/board_romfs_mkpasswd.sh
       COMMENT "Generating /etc/passwd with PBKDF2 hash")
 
-    add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUT})
+    add_custom_target(generate_passwd DEPENDS ${GENPASSWD_OUTPUTS})
     add_dependencies(generate_passwd build_host_mkpasswd)
-    list(APPEND RCRAWS ${GENPASSWD_OUTPUT})
+    list(APPEND RCRAWS ${GENPASSWD_OUTPUTS})
     list(APPEND dyn_deps generate_passwd)
   endif()
 

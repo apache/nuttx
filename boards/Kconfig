@@ -5741,4 +5741,55 @@ config BOARD_ETC_ROMFS_PASSWD_HOME
 	string "Root home directory"
 	default "/"
 
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE
+	bool "Add an unprivileged user to /etc/passwd"
+	default n
+	---help---
+		Append a second passwd entry (default name ``user``, UID/GID
+		1000) so ``su user`` works on ROMFS-backed /etc/passwd.
+		Needed for a valid setuid sudo test: drop to this user, then
+		run ``sudo``.
+
+if BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_USER
+	string "Extra username"
+	default "user"
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_UID
+	int "Extra user ID"
+	default 1000
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_GID
+	int "Extra group ID"
+	default 1000
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_HOME
+	string "Extra user home directory"
+	default "/"
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_USE_ROOT_PASSWORD
+	bool "Use the root password for the extra user"
+	default y
+	---help---
+		If enabled, the extra user gets the same password as root.
+		Disable to set CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_PASSWORD
+		or NUTTX_ROMFS_PASSWD_EXTRA_PASSWORD separately.
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_PASSWORD
+	string "Extra user password (required if not using the root password)"
+	depends on !BOARD_ETC_ROMFS_PASSWD_EXTRA_USE_ROOT_PASSWORD
+	---help---
+		Hashed at build time; not stored in firmware and not saved in
+		defconfig.  Same complexity rules as the root password.
+
+config BOARD_ETC_ROMFS_PASSWD_EXTRA_SUDOERS
+	bool "Install /etc/sudoers allowing the extra user"
+	default y
+	---help---
+		Write /etc/sudoers with ``root`` and the extra username so
+		``CONFIG_SYSTEM_SUDO`` can authorize that account.
+
+endif # BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE
+
 endif # BOARD_ETC_ROMFS_PASSWD_ENABLE

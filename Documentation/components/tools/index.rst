@@ -103,10 +103,17 @@ Kconfig
    CONFIG_CRYPTO_CRYPTODEV=y
    CONFIG_BOARD_ETC_ROMFS_PASSWD_USER="root"
    CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD="<secret>"
+   CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE=y
    CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS=10000
 
-``make savedefconfig`` omits ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD`` and
+``make savedefconfig`` omits ``CONFIG_BOARD_ETC_ROMFS_PASSWD_PASSWORD``,
+``CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_PASSWORD``, and
 ``CONFIG_FSUTILS_PASSWD_PBKDF2_ITERATIONS`` to avoid leaking credentials.
+
+With ``CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_ENABLE``, ``mkpasswd`` appends a
+second account (default ``user``, UID 1000).  By default that account
+reuses the root password.  ``CONFIG_BOARD_ETC_ROMFS_PASSWD_EXTRA_SUDOERS``
+also writes ``/etc/sudoers`` listing ``root`` and the extra user.
 
 Host files
 ~~~~~~~~~~

@@ -279,9 +279,16 @@ static int binfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 {
   DEBUGASSERT(buf != NULL);
 
-  /* It's a execute-only file system */
+#ifdef CONFIG_SCHED_USER_IDENTITY
+  int index = (int)((uintptr_t)filep->f_priv);
 
-  buf->st_mode    = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+  buf->st_uid  = builtin_getuid(index);
+  buf->st_gid  = builtin_getgid(index);
+  buf->st_mode = S_IFREG | (builtin_getmode(index) & ~S_IFMT);
+#else
+  buf->st_mode = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
+#endif
+
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
@@ -491,12 +498,12 @@ static int binfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
       /* It's a execute-only file name */
 
-      buf->st_mode = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
-
 #ifdef CONFIG_SCHED_USER_IDENTITY
-      buf->st_uid   = builtin_getuid(index);
-      buf->st_gid   = builtin_getgid(index);
-      buf->st_mode |= builtin_getmode(index);
+      buf->st_uid  = builtin_getuid(index);
+      buf->st_gid  = builtin_getgid(index);
+      buf->st_mode = S_IFREG | (builtin_getmode(index) & ~S_IFMT);
+#else
+      buf->st_mode = S_IFREG | S_IXOTH | S_IXGRP | S_IXUSR;
 #endif
     }
   else
