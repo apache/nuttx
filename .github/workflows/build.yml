@@ -14,7 +14,6 @@ name: Build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, edited]
     paths-ignore:
       - "AUTHORS"
       - "CONTRIBUTING.md"
@@ -31,93 +30,19 @@ on:
       - "releases/*"
     tags:
 
+# pull-requests read: Fetch-Source re-reads the PR description so that a
+# manual re-run picks up Depends-On lines edited after the run was created.
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
-  # Edited runs do not request cancellation of an active code build.
-  # GitHub may still replace an older pending run in this concurrency group.
-  cancel-in-progress: ${{ github.event.action != 'edited' }}
+  cancel-in-progress: true
 
 jobs:
-  # Gate heavy CI on dependency-changing edits.
-  Changes:
-    runs-on: ubuntu-latest
-    outputs:
-      should_build: ${{ steps.gate.outputs.should_build }}
-    steps:
-      # Do not let PR code control its own edit gate.
-      - name: Checkout base-branch CI scripts
-        if: ${{ github.event_name == 'pull_request' && github.event.action == 'edited' }}
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          sparse-checkout: .github/scripts
-          sparse-checkout-cone-mode: false
-          fetch-depth: 1
-          path: base-ci
-        continue-on-error: true
-      - name: Checkout PR CI scripts (fallback)
-        if: ${{ github.event_name == 'pull_request' && github.event.action == 'edited' }}
-        uses: actions/checkout@v7
-        with:
-          sparse-checkout: .github/scripts
-          sparse-checkout-cone-mode: false
-          fetch-depth: 1
-          path: pr-ci
-      - name: Decide whether to run CI
-        id: gate
-        shell: bash
-        env:
-          ACTION: ${{ github.event.action }}
-          NEW_BODY: ${{ github.event.pull_request.body }}
-          OLD_BODY: ${{ github.event.changes.body.from }}
-          BODY_CHANGE: ${{ toJSON(github.event.changes.body) }}
-          BASE_CHANGE: ${{ toJSON(github.event.changes.base) }}
-        run: |
-          set -euo pipefail
-
-          if [ "${ACTION:-}" != "edited" ]; then
-            echo "Event '${ACTION:-push}': running CI."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          if [ "$BASE_CHANGE" != "null" ]; then
-            echo "::notice::PR base branch changed; running CI."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ "$BODY_CHANGE" = "null" ]; then
-            echo "::notice::PR edited but body unchanged; no code/dependency change, skipping CI."
-            echo "should_build=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          PARSER="pr-ci/.github/scripts/depends_on.py"
-          if [ -f "base-ci/.github/scripts/depends_on.py" ]; then
-            PARSER="base-ci/.github/scripts/depends_on.py"
-            echo "Using base-branch parser for the gate."
-          else
-            echo "::notice::Base branch has no depends_on.py yet; using PR parser for the gate (bootstrap)."
-          fi
-
-          # Include status so invalid declarations also retrigger reporting.
-          NEW_STATE="$(PR_BODY="$NEW_BODY" python3 "$PARSER" --print-state)"
-          OLD_STATE="$(PR_BODY="$OLD_BODY" python3 "$PARSER" --print-state)"
-          if [ "$NEW_STATE" != "$OLD_STATE" ]; then
-            echo "depends-on state changed; running CI."
-            echo "should_build=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "::notice::No depends-on change on this edit; no code change, skipping CI."
-            echo "should_build=false" >> "$GITHUB_OUTPUT"
-          fi
-
   # Fetch the source from nuttx and nuttx-apps repos
   Fetch-Source:
-    needs: Changes
-    if: ${{ needs.Changes.outputs.should_build == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout CI scripts
@@ -130,6 +55,7 @@ jobs:
         id: gittargets
         shell: bash
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -137,6 +63,17 @@ jobs:
         run: |
           OS_REF=""
           APPS_REF=""
+
+          # The event payload keeps the PR description from when the run was
+          # created; re-read it so a manual re-run picks up an edited
+          # Depends-On line. Keep the payload copy if the API call fails.
+          if [ -n "${PR_NUMBER:-}" ]; then
+            if LIVE_BODY="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""')"; then
+              PR_BODY="$LIVE_BODY"
+            else
+              echo "::warning::Could not re-read the PR description; using the copy from the event payload."
+            fi
+          fi
 
           REF=$GITHUB_REF
 
