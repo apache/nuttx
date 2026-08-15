@@ -26,10 +26,45 @@
 ARCH_LIBCFUN(strcmp):
 	.cfi_sections .debug_frame
 	.cfi_startproc
-	or    a4, a0, a1
 	li    t2, -1
+
+	/* Two pointers the same distance past a boundary can be compared
+	 * a register at a time once both are walked up to it.  Only
+	 * pointers that disagree about where the boundary falls need the
+	 * byte loop, since no single aligned load serves both.  Test the
+	 * difference of the pointers, not their union.
+	 */
+
+	xor   a4, a0, a1
 	and   a4, a4, SZREG-1
 	bnez  a4, .Lmisaligned
+
+	/* Same offset: walk both up to the boundary a byte at a time,
+	 * stopping early on a difference or a terminator.
+	 */
+
+	and   a4, a0, SZREG-1
+	beqz  a4, .Laligned
+.Lhead:
+	lbu   a2, 0(a0)
+	lbu   a3, 0(a1)
+	bne   a2, a3, .Lheaddiff
+	addi  a0, a0, 1
+	addi  a1, a1, 1
+	beqz  a2, .Lheadeq
+	and   a4, a0, SZREG-1
+	bnez  a4, .Lhead
+	j     .Laligned
+
+.Lheaddiff:
+	sub   a0, a2, a3
+	ret
+
+.Lheadeq:
+	li    a0, 0
+	ret
+
+.Laligned:
 
 #if SZREG == 4
 	li a5, 0x7f7f7f7f

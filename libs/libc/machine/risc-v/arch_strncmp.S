@@ -44,13 +44,36 @@ ARCH_LIBCFUN(strncmp):
 
 	beqz	a2, .Lequal
 
-	/* Check alignment consistency */
+	/* The word loop below loads from both pointers at a boundary, which
+	 * asks that the two agree about where a boundary falls, not that
+	 * either is already on one.  Test the difference of the pointers,
+	 * not their union.
+	 */
 
-	or	t0, a0, a1
+	xor	t0, a0, a1
 	andi	t0, t0, SZREG-1
 	bnez	t0, .Lbyte_loop
 
-	/* Both aligned - load masks */
+	/* Same offset: walk both up to the boundary a byte at a time,
+	 * stopping early on a difference or a terminator.
+	 */
+
+.Lsnc_align_head:
+	andi	t0, a0, SZREG-1
+	beqz	t0, .Lsnc_aligned
+	lbu	t0, 0(a0)
+	lbu	t1, 0(a1)
+	bne	t0, t1, .Ldiff
+	beqz	t0, .Lequal
+	addi	a0, a0, 1
+	addi	a1, a1, 1
+	addi	a2, a2, -1
+	beqz	a2, .Lequal
+	j	.Lsnc_align_head
+
+.Lsnc_aligned:
+
+	/* Load masks */
 
 #if SZREG == 8
 	lla	t2, .Lsnc_mask01
