@@ -138,8 +138,10 @@ if(CONFIG_SIM_SOUND_ALSA)
   list(APPEND SRCS sim_offload.c)
   list(APPEND STDLIBS asound)
   target_include_directories(
-    arch PRIVATE ${NUTTX_APPS_DIR}/audioutils/lame/lame/include
-                 ${NUTTX_APPS_DIR}/audioutils/libmad/libmad)
+    arch
+    PRIVATE ${NUTTX_APPS_DIR}/audioutils/lame/lame/include
+            ${NUTTX_APPS_DIR}/audioutils/lame/lame/libmp3lame/vector
+            ${NUTTX_APPS_DIR}/audioutils/libmad/libmad)
 endif()
 
 # host sources ###############################################################
