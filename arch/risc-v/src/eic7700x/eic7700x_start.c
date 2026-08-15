@@ -42,6 +42,9 @@
 #ifdef CONFIG_EIC7700X_CLK
 #  include "eic7700x_clk.h"
 #endif
+#ifdef CONFIG_EIC7700X_PINCTRL
+#  include "eic7700x_pinctrl.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -476,5 +479,14 @@ void weak_function riscv_soc_initialize(void)
 {
 #ifdef CONFIG_EIC7700X_CLK
   eic7700x_clk_initialize();
+#endif
+
+  /* After the clocks.  A pad is only worth moving once the clock behind
+   * it can be moved too, and like the clock tree this call only reads:
+   * a pad moves when a driver asks it to, not before.
+   */
+
+#ifdef CONFIG_EIC7700X_PINCTRL
+  eic7700x_pinctrl_initialize();
 #endif
 }
