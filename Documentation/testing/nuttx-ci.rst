@@ -169,14 +169,17 @@ posting the report safe, but do not independently attest that the dependency
 was applied; the comment reflects the result produced by the read-only Build
 workflow.
 
-Editing the pull request description triggers the CI dependency gate. The
-resource-intensive build jobs run again when the base branch or ordered parsed
-dependency state changes, so reordering dependencies also triggers a build.
-Unrelated description edits run only the gate and do not request cancellation
-of an already-running Build. GitHub may still replace an older pending run in
-the same concurrency group. Updating a dependency pull request does not
-automatically trigger the initiating pull request, so its CI must be rerun to
-test the new dependency head.
+Editing the pull request description does not trigger CI. Every Build run
+reads the current description when it starts. After changing a
+``Depends-On:`` declaration, retrigger CI in one of these ways:
+
+* push new or rebased commits to the pull request branch
+* close and reopen the pull request
+* press "Re-run all jobs" on the existing Build run
+
+Updating a dependency pull request does not automatically trigger the
+initiating pull request either, so its CI must be rerun to test the new
+dependency head.
 
 The combined result belongs to the initiating pull request. It does not set a
 status on dependency pull requests, merge them automatically, or replace the
