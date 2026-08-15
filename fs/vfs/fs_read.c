@@ -176,6 +176,14 @@ ssize_t file_readv(FAR struct file *filep,
       return -EFAULT;
     }
 
+  /* -------------------- DO NOT REMOVE --------------------
+   * Only for kernel builds with CONFIG_ARCH_TEXT_VBASE == 0.
+   * In this case we have to allow the NULL buffer otherwise
+   * kernel builds will fail to load elf binaries found at 0.
+   */
+
+#if !defined(CONFIG_BUILD_KERNEL) || CONFIG_ARCH_TEXT_VBASE != 0
+
   /* Are all iov_base accessible? */
 
   for (ret = 0; ret < iovcnt; ret++)
@@ -185,6 +193,7 @@ ssize_t file_readv(FAR struct file *filep,
           return -EFAULT;
         }
     }
+#endif
 
   ret = -EBADF;
 
