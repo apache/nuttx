@@ -66,6 +66,18 @@
     .cflags = CLK_STATIC, .reg = _base, .bit = _out, .arg = _lock \
   }
 
+/* As above but never cached, for the one PLL something reprograms at run
+ * time behind the framework's back: the framework computes rates from the
+ * registers, so not caching them is all it takes to stay truthful.
+ */
+
+#define CLK_PLL_NOCACHE(_name, _parent, _base, _out, _lock) \
+  { \
+    .name = _name, .parent = _parent, .type = EIC7700X_CLKTYPE_PLL, \
+    .cflags = CLK_STATIC | CLK_GET_RATE_NOCACHE, \
+    .reg = _base, .bit = _out, .arg = _lock \
+  }
+
 #define CLK_FACTOR(_name, _parent, _mult, _div) \
   { \
     .name = _name, .parent = _parent, .type = EIC7700X_CLKTYPE_FACTOR, \
@@ -153,11 +165,23 @@ static const uint8_t g_syscfg_table[] =
 
 /* U84 core selector (TRM p135).  Resets to the crystal, like the rest of
  * the root selectors on this SoC.
+ *
+ * The manual's own description of this selector says its first choice is
+ * "cpu pll fout2", and that is a factor of two wrong.  Measured on the
+ * board: core cycles counted against the crystal-derived time counter --
+ * the cores run at the undivided output, the one the register map's
+ * postdiv1 pair scales, not the halved one that the manual's own reset
+ * annotations call fout2.  The vendor's code agrees: their table maps the
+ * boot firmware's feedback value to the undivided rate, and their names
+ * for every PLL's outputs are one off from the manual's throughout.  The
+ * enable field agrees too, since its reset value turns on outputs 1 and 3
+ * and never the one the selector claims to use.  So this entry follows
+ * the silicon rather than the sentence: the parent is fout1.
  */
 
 static const char * const g_u84_core_parents[] =
 {
-  "cpupll_fout2",
+  "cpupll_fout1",
   "clk_u84_core_lp",
   "xtal_24m",
 };
@@ -408,12 +432,12 @@ static const struct eic7700x_clkdesc_s g_eic7700x_clks[] =
    * leaves it to the enable state to say which are actually running.
    */
 
-  CLK_PLL("cpupll_fout1", "xtal_24m", EIC7700X_CPUPLL_BASE, 1,
-          PLL_STATUS_CPUPLL_LOCK),
-  CLK_PLL("cpupll_fout2", "xtal_24m", EIC7700X_CPUPLL_BASE, 2,
-          PLL_STATUS_CPUPLL_LOCK),
-  CLK_PLL("cpupll_fout3", "xtal_24m", EIC7700X_CPUPLL_BASE, 3,
-          PLL_STATUS_CPUPLL_LOCK),
+  CLK_PLL_NOCACHE("cpupll_fout1", "xtal_24m", EIC7700X_CPUPLL_BASE, 1,
+                  PLL_STATUS_CPUPLL_LOCK),
+  CLK_PLL_NOCACHE("cpupll_fout2", "xtal_24m", EIC7700X_CPUPLL_BASE, 2,
+                  PLL_STATUS_CPUPLL_LOCK),
+  CLK_PLL_NOCACHE("cpupll_fout3", "xtal_24m", EIC7700X_CPUPLL_BASE, 3,
+                  PLL_STATUS_CPUPLL_LOCK),
 
   CLK_PLL("ddrpll_fout1", "xtal_24m", EIC7700X_DDRPLL_BASE, 1,
           PLL_STATUS_DDRPLL_LOCK),

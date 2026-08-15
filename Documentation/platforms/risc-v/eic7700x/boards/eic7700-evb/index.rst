@@ -151,4 +151,5 @@ NuttX for the EIC7700 EVB supports these peripherals:
 Peripheral               Support NOTES
 ======================== ======= =====
 UART                     Yes
+CPU clock control        Yes     400 MHz to 1.4 GHz, measured not assumed
 ======================== ======= =====

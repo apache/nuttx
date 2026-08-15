@@ -38,6 +38,9 @@
 #include <arch/board/board_memorymap.h>
 
 #include "eic7700x_clk.h"
+#ifdef CONFIG_EIC7700X_CPUCLK
+#  include "eic7700x_cpuclk.h"
+#endif
 
 #include "board_config.h"
 
@@ -136,6 +139,16 @@ static void report_clocks(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
+#ifdef CONFIG_EIC7700X_CPUCLK
+  /* First, and worth a moment's spin: measure the cores against the
+   * crystal, say so, and move them to the configured speed if they are
+   * somewhere else.  The measurement is the referee in a place where the
+   * manual and the vendor's code disagree by a factor of two.
+   */
+
+  eic7700x_cpuclk_initialize();
+#endif
+
   /* Mount the RAM Disk */
 
   mount_ramdisk();

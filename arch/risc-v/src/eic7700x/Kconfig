@@ -21,3 +21,30 @@ config EIC7700X_CLK
 		clock the system is running on will speed up on request but
 		refuses to slow down, since that would change the timing every
 		driver downstream was configured for while they are using it.
+
+config EIC7700X_CPUCLK
+	bool "CPU core clock control"
+	default n
+	select EIC7700X_CLK
+	---help---
+		Measure and set the speed of the four application cores.
+
+		The measurement is real: it counts core cycles against the
+		crystal-derived time counter rather than decoding the PLL,
+		because the manual and the vendor disagree by a factor of two
+		about which PLL output the cores run from.
+
+if EIC7700X_CPUCLK
+
+config EIC7700X_CPU_FREQ_MHZ
+	int "CPU clock at boot (MHz)"
+	default 1400
+	---help---
+		Where to put the cores at boot, from the vendor's validated
+		set: 400, 500, 600, 700, 800, 1000, 1100, 1200, 1300 or 1400.
+		Every one of them runs at the same core voltage, so no
+		regulator is involved.  The boot firmware already leaves the
+		cores at 1400, so the default changes nothing and merely says
+		so in the log.
+
+endif 

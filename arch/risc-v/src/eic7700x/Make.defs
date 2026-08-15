@@ -34,3 +34,7 @@ CHIP_CSRCS += eic7700x_mm_init.c eic7700x_pgalloc.c
 ifeq ($(CONFIG_EIC7700X_CLK),y)
 CHIP_CSRCS += eic7700x_clk.c eic7700x_clk_ops.c
 endif
+
+ifeq ($(CONFIG_EIC7700X_CPUCLK),y)
+CHIP_CSRCS += eic7700x_cpuclk.c
+endif
