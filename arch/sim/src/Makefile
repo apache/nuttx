@@ -43,6 +43,7 @@ endif
 
 ifeq ($(CONFIG_AUDIOUTILS_LAME),y)
 INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame/include
+INCLUDES += ${INCDIR_PREFIX}$(APPSDIR)/audioutils/lame/lame/libmp3lame/vector
 endif
 
 CPPFLAGS += $(INCLUDES)
