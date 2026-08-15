@@ -42,6 +42,9 @@
 #ifdef CONFIG_EIC7700X_CLK
 #  include "eic7700x_clk.h"
 #endif
+#ifdef CONFIG_EIC7700X_RESET
+#  include "eic7700x_reset.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -476,5 +479,14 @@ void weak_function riscv_soc_initialize(void)
 {
 #ifdef CONFIG_EIC7700X_CLK
   eic7700x_clk_initialize();
+#endif
+
+  /* After the clocks, so that a driver holding both a clock and a reset
+   * finds them in the order section 3.1 of the manual asks for.  Neither
+   * call touches the hardware; both only publish what is already there.
+   */
+
+#ifdef CONFIG_EIC7700X_RESET
+  eic7700x_reset_initialize();
 #endif
 }

@@ -48,3 +48,16 @@ config EIC7700X_CPU_FREQ_MHZ
 		so in the log.
 
 endif 
+config EIC7700X_RESET
+	bool "CRG reset provider"
+	default y
+	select RESET
+	---help---
+		Register the reset lines of the Clock and Reset Generator (CRG)
+		with the NuttX reset framework.  Registration writes nothing to
+		the hardware: a line only moves when a driver asks it to.
+
+		Lines that carry the interconnect, the DDR path, the U84 cluster
+		or the configuration path back to the CRG are registered so that
+		they can be released and read, but refuse to be asserted, since
+		asserting one of them takes down the system doing the asserting.
