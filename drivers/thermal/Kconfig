@@ -24,12 +24,26 @@ config THERMAL_GOVERNOR_STEP_WISE
 	---help---
 		Enable step wise governor.
 
-config THERMAL_CDEV_CPUFREQ
-	bool "Thermal cpufreq cooling device"
+config THERMAL_CDEV_DEVFREQ
+	bool "Thermal devfreq cooling device"
 	default n
-	depends on CPUFREQ
+	depends on DEVFREQ
 	---help---
-		Enable thermal cpufreq cooling device.
+		Enable thermal devfreq cooling device, which cools a device by
+		capping the frequency of its devfreq instance.
+
+if THERMAL_CDEV_DEVFREQ
+
+config THERMAL_CDEV_DEVFREQ_NAME
+	string "Name of the devfreq device to cool"
+	default "cpu"
+	---help---
+		The devfreq device this cooling device caps, and the name the
+		cooling device itself takes, so that a zone's cooling map can
+		refer to it.  The devfreq device must be registered before
+		thermal_init() runs.
+
+endif # THERMAL_CDEV_DEVFREQ
 
 config THERMAL_PROCFS
 	bool "Thermal PROCFS support"
@@ -52,12 +66,14 @@ config THERMAL_DUMMY_POLLING_DELAY
 	---help---
 		Polling delay(tick).
 
-config THERMAL_DUMMY_CPUFREQ
-	bool "Dummy cpufreq driver"
+config THERMAL_DUMMY_DEVFREQ
+	bool "Dummy devfreq driver"
 	default n
-	depends on CPUFREQ
+	depends on DEVFREQ
+	select THERMAL_CDEV_DEVFREQ
 	---help---
-		Enable cpufreq dummy driver.
+		Enable devfreq dummy driver, giving the dummy zone a frequency
+		capped cooling device as well as its fan.
 
 endif # THERMAL_DUMMY
 

@@ -961,8 +961,10 @@ int thermal_init(void)
     }
 #endif
 
-#ifdef CONFIG_THERMAL_CDEV_CPUFREQ
-  if (NULL == thermal_cpufreq_cooling_register())
+#ifdef CONFIG_THERMAL_CDEV_DEVFREQ
+  if (NULL == thermal_devfreq_cooling_register(
+                                     CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
+                                     CONFIG_THERMAL_CDEV_DEVFREQ_NAME))
     {
       return -ENOTSUP;
     }

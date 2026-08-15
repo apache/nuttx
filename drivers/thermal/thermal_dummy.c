@@ -25,8 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-#include <nuttx/cpufreq.h>
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+#include <nuttx/devfreq.h>
 #endif
 #include <nuttx/thermal.h>
 
@@ -57,13 +57,13 @@ struct dummy_cooling_device_s
   unsigned int max_state;
 };
 
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-struct dummy_cpufreq_driver_s
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+struct dummy_devfreq_driver_s
 {
-  struct cpufreq_driver driver;
-  const struct cpufreq_frequency_table *table;
+  struct devfreq_driver_s driver;
+  FAR const uint32_t *table;
   size_t table_len;
-  struct cpufreq_frequency_table current;
+  uint32_t current;
 };
 #endif
 
@@ -90,17 +90,17 @@ static int
 dummy_cdev_set_state    (FAR struct thermal_cooling_device_s *cdev,
                          unsigned int state);
 
-/* CPU Freq */
+/* devfreq */
 
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-FAR static const struct cpufreq_frequency_table *
-dummy_cpufreq_get_table(FAR struct cpufreq_policy *driver);
-static int dummy_cpufreq_target_index(FAR struct cpufreq_policy *driver,
-                                      unsigned int index);
-static int dummy_cpufreq_get_frequency(FAR struct cpufreq_policy *driver);
-static int dummy_cpufreq_suspend(FAR struct cpufreq_policy *driver);
-static int dummy_cpufreq_resume (FAR struct cpufreq_policy *driver);
-#endif /* CONFIG_THERMAL_DUMMY_CPUFREQ */
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+static FAR const uint32_t *
+dummy_devfreq_get_table(FAR struct devfreq_s *devfreq);
+static int dummy_devfreq_target_index(FAR struct devfreq_s *devfreq,
+                                      size_t index);
+static uint32_t dummy_devfreq_get_frequency(FAR struct devfreq_s *devfreq);
+static int dummy_devfreq_suspend(FAR struct devfreq_s *devfreq);
+static int dummy_devfreq_resume (FAR struct devfreq_s *devfreq);
+#endif /* CONFIG_THERMAL_DUMMY_DEVFREQ */
 
 /****************************************************************************
  * Private Data
@@ -117,13 +117,15 @@ static const struct thermal_zone_trip_s g_dummy_trips[] =
 
 static const struct thermal_zone_map_s g_dummy_maps[] =
 {
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
   {
     .trip_name = "cpu_alert1",
-    .cdev_name = "cpufreq",
+    .cdev_name = CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
     .low    = 3,
     .high   = THERMAL_NO_LIMIT,
     .weight = 20
   },
+#endif
   {
     .trip_name = "cpu_alert1",
     .cdev_name = "fan0",
@@ -131,13 +133,15 @@ static const struct thermal_zone_map_s g_dummy_maps[] =
     .high   = THERMAL_NO_LIMIT,
     .weight = 20
   },
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
   {
     .trip_name = "cpu_alert0",
-    .cdev_name = "cpufreq",
+    .cdev_name = CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
     .low    = THERMAL_NO_LIMIT,
     .high   = 2,
     .weight = 20
   },
+#endif
   {
     .trip_name = "cpu_alert0",
     .cdev_name = "passive_dev",
@@ -188,30 +192,40 @@ static struct dummy_cooling_device_s g_dummy_fan0_data =
   .max_state = 16,
 };
 
-/* Cooling Device - cpufreq */
+/* Cooling Device - devfreq */
 
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-static const struct cpufreq_frequency_table g_dummy_cpufreq_table[] =
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+static const uint32_t g_dummy_devfreq_table[] =
 {
-  {100},
-  {300},
-  {500},
-  {700},
-  {900},
-  {CPUFREQ_TABLE_END},
+  100,
+  300,
+  500,
+  700,
+  900,
+  DEVFREQ_ENTRY_END,
 };
-static struct dummy_cpufreq_driver_s g_dummy_cpufreq_driver =
+static struct dummy_devfreq_driver_s g_dummy_devfreq_driver =
 {
   .driver =
     {
-      dummy_cpufreq_get_table,
-      dummy_cpufreq_target_index,
-      dummy_cpufreq_get_frequency,
-      dummy_cpufreq_suspend,
-      dummy_cpufreq_resume,
+      /* A ceiling from the cooling device must win over any floor, which
+       * is what a device defending a thermal budget wants.
+       */
+
+      .conflict_policy = DEVFREQ_CONFLICT_PREFER_LOW,
+      .get_table       = dummy_devfreq_get_table,
+      .target_index    = dummy_devfreq_target_index,
+      .get_frequency   = dummy_devfreq_get_frequency,
+      .suspend         = dummy_devfreq_suspend,
+      .resume          = dummy_devfreq_resume,
     },
-  .table = g_dummy_cpufreq_table,
-  .table_len = nitems(g_dummy_cpufreq_table),
+  .table = g_dummy_devfreq_table,
+
+  /* Frequencies only.  target_index is never called with the terminator's
+   * own index, so it is not counted here.
+   */
+
+  .table_len = nitems(g_dummy_devfreq_table) - 1,
 };
 #else
 static struct dummy_cooling_device_s g_dummy_passive =
@@ -219,7 +233,7 @@ static struct dummy_cooling_device_s g_dummy_passive =
   .cur_state = 0,
   .max_state = 1,
 };
-#endif /* CONFIG_THERMAL_DUMMY_CPUFREQ */
+#endif /* CONFIG_THERMAL_DUMMY_DEVFREQ */
 
 /****************************************************************************
  * Private Functions
@@ -291,46 +305,46 @@ static int dummy_zdev_set_trips(FAR struct thermal_zone_device_s *zdev,
   return OK;
 }
 
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-static FAR const struct cpufreq_frequency_table *dummy_cpufreq_get_table(
-                                           FAR struct cpufreq_policy *policy)
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+static FAR const uint32_t *dummy_devfreq_get_table(
+                                            FAR struct devfreq_s *devfreq)
 {
-  FAR struct dummy_cpufreq_driver_s *driver =
-                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
+  FAR struct dummy_devfreq_driver_s *driver =
+                        (FAR struct dummy_devfreq_driver_s *)devfreq->driver;
 
   return driver->table;
 }
 
-static int dummy_cpufreq_target_index(FAR struct cpufreq_policy *policy,
-                                      unsigned int index)
+static int dummy_devfreq_target_index(FAR struct devfreq_s *devfreq,
+                                      size_t index)
 {
-  FAR struct dummy_cpufreq_driver_s *driver =
-                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
+  FAR struct dummy_devfreq_driver_s *driver =
+                        (FAR struct dummy_devfreq_driver_s *)devfreq->driver;
 
   DEBUGASSERT(index < driver->table_len);
 
-  driver->current.frequency = driver->table[index].frequency;
+  driver->current = driver->table[index];
   return 0;
 }
 
-static int dummy_cpufreq_get_frequency(FAR struct cpufreq_policy *policy)
+static uint32_t dummy_devfreq_get_frequency(FAR struct devfreq_s *devfreq)
 {
-  FAR struct dummy_cpufreq_driver_s *driver =
-                         (FAR struct dummy_cpufreq_driver_s *)policy->driver;
+  FAR struct dummy_devfreq_driver_s *driver =
+                        (FAR struct dummy_devfreq_driver_s *)devfreq->driver;
 
-  return driver->current.frequency;
+  return driver->current;
 }
 
-static int dummy_cpufreq_suspend(FAR struct cpufreq_policy *driver)
-{
-  return 0;
-}
-
-static int dummy_cpufreq_resume(FAR struct cpufreq_policy *driver)
+static int dummy_devfreq_suspend(FAR struct devfreq_s *devfreq)
 {
   return 0;
 }
-#endif /* CONFIG_THERMAL_DUMMY_CPUFREQ */
+
+static int dummy_devfreq_resume(FAR struct devfreq_s *devfreq)
+{
+  return 0;
+}
+#endif /* CONFIG_THERMAL_DUMMY_DEVFREQ */
 
 int thermal_dummy_init(void)
 {
@@ -338,14 +352,17 @@ int thermal_dummy_init(void)
   FAR struct thermal_zone_device_s *zdev;
   int ret = OK;
 
-  /* Driver - CPUFreq */
+  /* Driver - devfreq.  The thermal core registers the cooling device over
+   * it once this returns, so it has to exist by then.
+   */
 
-#ifdef CONFIG_THERMAL_DUMMY_CPUFREQ
-  ret = cpufreq_init(&g_dummy_cpufreq_driver.driver);
-  if (ret < 0)
+#ifdef CONFIG_THERMAL_DUMMY_DEVFREQ
+  if (devfreq_register(CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
+                       devfreq_performance(),
+                       &g_dummy_devfreq_driver.driver, NULL) == NULL)
     {
-      therr("Dummy cpufreq driver init failed!\n");
-      return ret;
+      therr("Dummy devfreq driver init failed!\n");
+      return -ENOTSUP;
     }
 #else
   cdev = thermal_cooling_device_register("passive_dev", &g_dummy_passive,
@@ -355,7 +372,7 @@ int thermal_dummy_init(void)
       therr("Register cooling device passive_dev failed!\n");
       return -ENOTSUP;
     }
-#endif /* CONFIG_THERMAL_DUMMY_CPUFREQ */
+#endif /* CONFIG_THERMAL_DUMMY_DEVFREQ */
 
   /* Cooling Device */
 

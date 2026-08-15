@@ -30,8 +30,8 @@ ifeq ($(CONFIG_THERMAL_GOVERNOR_STEP_WISE),y)
 CSRCS += thermal_step_wise.c
 endif
 
-ifeq ($(CONFIG_THERMAL_CDEV_CPUFREQ),y)
-CSRCS += thermal_cpufreq_cooling.c
+ifeq ($(CONFIG_THERMAL_CDEV_DEVFREQ),y)
+CSRCS += thermal_devfreq_cooling.c
 endif
 
 ifeq ($(CONFIG_THERMAL_PROCFS),y)
