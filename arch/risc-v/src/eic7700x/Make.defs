@@ -39,3 +39,7 @@ endif
 ifeq ($(CONFIG_EIC7700X_CPUCLK),y)
 CHIP_CSRCS += eic7700x_cpuclk.c
 endif
+
+ifeq ($(CONFIG_EIC7700X_RESET),y)
+CHIP_CSRCS += eic7700x_reset.c eic7700x_reset_ops.c
+endif
