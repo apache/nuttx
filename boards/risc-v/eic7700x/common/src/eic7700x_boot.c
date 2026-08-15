@@ -41,6 +41,7 @@
 #ifdef CONFIG_EIC7700X_CPUCLK
 #  include "eic7700x_cpuclk.h"
 #endif
+#include "eic7700x_reset.h"
 
 #include "board_config.h"
 
@@ -118,6 +119,24 @@ static void report_clocks(void)
 }
 
 /****************************************************************************
+ * Name: report_resets
+ *
+ * Description:
+ *   Report the reset lines the architecture registered before this board
+ *   ran, and how many the boot loader left held.  Its own function for the
+ *   same reason as report_clocks().
+ *
+ ****************************************************************************/
+
+static void report_resets(void)
+{
+  unsigned int held;
+  unsigned int nline = eic7700x_reset_count(&held);
+
+  syslog(LOG_INFO, "reset: %u lines, %u held\n", nline, held);
+}
+
+/****************************************************************************
  * Name: board_late_initialize
  *
  * Description:
@@ -156,6 +175,7 @@ void board_late_initialize(void)
   mount(NULL, "/proc", "procfs", 0, NULL);
 
   report_clocks();
+  report_resets();
 
   /* Devices whose presence or order is this board's business */
 
