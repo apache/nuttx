@@ -72,7 +72,17 @@ ARCH_LIBCFUN(strlcpy):
 
 	addi	a2, a2, -1		/* reserve space for null terminator */
 
-	/* Bytewise copy head: align src to SZREG boundary */
+	/* The word loop below aligns src and then stores a register at a
+	 * time to dst, so it is safe only where the two pointers agree about
+	 * where a boundary falls.  Where they do not, no single boundary
+	 * serves both and the copy goes a byte at a time.
+	 */
+
+	xor	t0, a0, a1
+	andi	t0, t0, SZREG-1
+	bnez	t0, .Lcopy_tail
+
+	/* Bytewise copy head: align src, and with it dst */
 
 .Lcopy_head:
 	beqz	a2, .Ltruncated
