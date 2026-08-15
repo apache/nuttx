@@ -45,12 +45,33 @@ ARCH_LIBCFUN(memcmp):
 
 	beqz	a2, .Lequal
 
-	/* Check if both pointers share alignment */
+	/* The loops below load from both pointers at a boundary, which asks
+	 * that the two agree about where a boundary falls, not that either
+	 * is already on one.  Test the difference of the pointers, not their
+	 * union.
+	 */
 
-	or	t0, a0, a1
+	xor	t0, a0, a1
 	andi	t0, t0, SZREG-1
 	bnez	t0, .Lbyte_cmp
 
+	/* Same offset: walk both up to the boundary a byte at a time,
+	 * stopping early on a difference.
+	 */
+
+.Lalign_head:
+	andi	t0, a0, SZREG-1
+	beqz	t0, .Laligned
+	lbu	t1, 0(a0)
+	lbu	t2, 0(a1)
+	bne	t1, t2, .Ldiff
+	addi	a0, a0, 1
+	addi	a1, a1, 1
+	addi	a2, a2, -1
+	beqz	a2, .Lequal
+	j	.Lalign_head
+
+.Laligned:
 	li	t0, SZREG
 	bltu	a2, t0, .Lbyte_cmp
 
