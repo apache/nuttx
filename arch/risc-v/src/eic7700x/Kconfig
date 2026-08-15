@@ -48,3 +48,20 @@ config EIC7700X_CPU_FREQ_MHZ
 		so in the log.
 
 endif 
+
+config EIC7700X_PINCTRL
+	bool "CLMM pad multiplexing"
+	default y
+	select PINCTRL
+	---help---
+		Describe the pads of the Chip Level Mode Mux (CLMM) to the NuttX
+		pinctrl framework.  Initialisation writes nothing to the hardware:
+		a pad only moves when a driver asks it to.
+
+		Every pad on the SoC shares its ball with something else, so the
+		UARTs beyond the console, the GPIO block and the peripheral buses
+		all need a pad configured here before they reach a pin.
+
+		The board reports the pad count and how many differ from their
+		reset defaults once, at startup.  With DEBUG_PINCTRL_INFO the
+		driver also logs each pad as it is configured.
