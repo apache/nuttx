@@ -1,0 +1,23 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "EIC7700X Configuration Options"
+
+config EIC7700X_CLK
+	bool "CRG clock provider"
+	default y
+	select CLK
+	---help---
+		Register the Clock and Reset Generator (CRG) clock tree with the
+		NuttX clock framework.  Registration itself writes nothing: the
+		tree comes up describing the PLL, mux, divider and gate
+		configuration the boot loader left behind.  The tree is visible
+		through /proc/clk when procfs is enabled.
+
+		A clock moves only when a driver asks it to, by enabling a gate,
+		setting a divider, or reparenting a mux.  A mux that carries a
+		clock the system is running on will speed up on request but
+		refuses to slow down, since that would change the timing every
+		driver downstream was configured for while they are using it.
