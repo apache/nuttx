@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sbcd": {
+      "type": "http",
+      "url": "http://10.100.201.108:8321/mcp",
+      "headers": {
+        "Authorization": "Bearer 484fc5bac141abbea3c15b1b4ae39132f4ea7a0071ee0c41"
+      }
+    }
+  }
+}

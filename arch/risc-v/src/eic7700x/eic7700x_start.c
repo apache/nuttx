@@ -45,6 +45,9 @@
 #ifdef CONFIG_EIC7700X_RESET
 #  include "eic7700x_reset.h"
 #endif
+#ifdef CONFIG_EIC7700X_PINCTRL
+#  include "eic7700x_pinctrl.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -488,5 +491,15 @@ void weak_function riscv_soc_initialize(void)
 
 #ifdef CONFIG_EIC7700X_RESET
   eic7700x_reset_initialize();
+#endif
+
+  /* After the clocks and the reset lines.  A pad is only worth moving
+   * once the clock and the reset behind it can be moved too, and like
+   * both of those this call only reads: a pad moves when a driver asks
+   * it to, not before.
+   */
+
+#ifdef CONFIG_EIC7700X_PINCTRL
+  eic7700x_pinctrl_initialize();
 #endif
 }
