@@ -52,6 +52,20 @@ aggregate ``max``) the driver's ``conflict_policy`` decides who wins:
 - ``DEVFREQ_CONFLICT_PREFER_LOW`` clamps to the ceiling and chooses the lower
   frequency. A device protecting a thermal or power budget picks this.
 
+The thermal framework is one such requester. With
+``CONFIG_THERMAL_CDEV_DEVFREQ`` it registers a cooling device over the
+devfreq device named by ``CONFIG_THERMAL_CDEV_DEVFREQ_NAME``, and each
+cooling state installs a ceiling one entry further down the table. Drivers
+that expect to be throttled should carry ``DEVFREQ_CONFLICT_PREFER_LOW``, so
+that the ceiling wins against anything asking for more.
+
+A table of *n* usable frequencies gives the cooling device a maximum state of
+*n* - 1: state zero caps at the highest frequency, which leaves the device
+unthrottled, and the maximum state caps at the lowest. Entries of
+``DEVFREQ_ENTRY_INVALID`` are not frequencies the device can be held at, so
+they earn no state, and the ``low`` and ``high`` bounds of a thermal zone's
+cooling map therefore count usable frequencies rather than table positions.
+
 The resolved ``[min, max]`` is then snapped to the table: ``min`` rounds up to
 the lowest entry at or above it, ``max`` rounds down to the highest entry at
 or below it. The governor picks within that snapped range, and the lower half

@@ -8,7 +8,7 @@ Brief
 =====
 1. Support Zone, Cooling Device and Governor
     - ``Zone``: Responsible for monitoring the temperature of the specified area, obtains the temperature through the temperature sensor, and the sensor driver returns the temperature through callback function.
-    - ``Cooling Device``: A cooling device is a device that can reduce the temperature by using resources such as cpufreq, fan, etc. The cpufreq cooling device driver is preset to simplify CPU frequency modulation temperature control.
+    - ``Cooling Device``: A cooling device is a device that can reduce the temperature by using resources such as devfreq, fan, etc. The devfreq cooling device driver is preset to simplify frequency modulation temperature control: it caps the frequency of the devfreq device named by ``CONFIG_THERMAL_CDEV_DEVFREQ_NAME``, which must be registered before ``thermal_init()`` runs.
     - ``Governor``: For temperature control, you can use the preset or custom registered one, preset "step_wise" governor:
         - When the temperature of the "Zone" reaches the temperature trip point, and the temperature change trend rises or stabilizes ("step_wise" obtains the value of the corresponding "Zone" every 20ms [``CONFIG_THERMAL_DUMMY_POLLING_DELAY=200``, ``CONFIG_USEC_PER_TICK=100``]), the current temperature equals to OR greater than the last obtained temperature value), improve the state of the "Cooling Device" (trigger the cooling operation executed by the corresponding state, Through ``set_state``).
         - When the temperature of the zone is lower than the temperature trip point, and the temperature trend is steadily decreasing, the state of the "Cooling Device" is reduced.
@@ -80,8 +80,8 @@ Device Driver
 
         nsh> cat /proc/thermal/cpu-thermal
         z:cpu-thermal t:77 t:1 h:16 l:0 c:fan0 s:7|7
-        z:cpu-thermal t:77 t:1 h:3 l:3 c:cpufreq s:3|3
-        z:cpu-thermal t:77 t:2 h:2 l:0 c:cpufreq s:3|2
+        z:cpu-thermal t:77 t:1 h:3 l:3 c:cpu s:3|3
+        z:cpu-thermal t:77 t:2 h:2 l:0 c:cpu s:3|2
 
 Board Customization
 ===================
@@ -127,7 +127,7 @@ The binding relationship between Trip, Cooling Device, Governor and Zone is show
   {
     {
       .trip_name = "cpu_alert1",
-      .cdev_name = "cpufreq",
+      .cdev_name = CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
       .low    = 3,
       .high   = THERMAL_NO_LIMIT,
       .weight = 20
@@ -141,7 +141,7 @@ The binding relationship between Trip, Cooling Device, Governor and Zone is show
     },
     {
       .trip_name = "cpu_alert0",
-      .cdev_name = "cpufreq",
+      .cdev_name = CONFIG_THERMAL_CDEV_DEVFREQ_NAME,
       .low    = THERMAL_NO_LIMIT,
       .high   = 2,
       .weight = 20
