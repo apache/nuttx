@@ -30,8 +30,8 @@ if(CONFIG_THERMAL_GOVERNOR_STEP_WISE)
   list(APPEND SRCS thermal_step_wise.c)
 endif()
 
-if(CONFIG_THERMAL_CDEV_CPUFREQ)
-  list(APPEND SRCS thermal_cpufreq_cooling.c)
+if(CONFIG_THERMAL_CDEV_DEVFREQ)
+  list(APPEND SRCS thermal_devfreq_cooling.c)
 endif()
 
 if(CONFIG_THERMAL_PROCFS)
