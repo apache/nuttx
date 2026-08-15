@@ -30,3 +30,7 @@ HEAD_ASRC = eic7700x_head.S
 CHIP_CSRCS  = eic7700x_start.c eic7700x_irq_dispatch.c eic7700x_irq.c
 CHIP_CSRCS += eic7700x_timerisr.c eic7700x_allocateheap.c
 CHIP_CSRCS += eic7700x_mm_init.c eic7700x_pgalloc.c
+
+ifeq ($(CONFIG_EIC7700X_CLK),y)
+CHIP_CSRCS += eic7700x_clk.c eic7700x_clk_ops.c
+endif
