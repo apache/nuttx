@@ -33,14 +33,14 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_STM32U5_STM32U535XX) || defined(CONFIG_STM32U5_STM32U545XX)
+#if defined(CONFIG_STM32_STM32U535XX) || defined(CONFIG_STM32_STM32U545XX)
 #  define STM32_SRAM1_SIZE       (0x00030000)   /* 192Kb SRAM1 */
 #  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
-#elif defined(CONFIG_STM32U5_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX)
+#elif defined(CONFIG_STM32_STM32U575XX) || defined(CONFIG_STM32_STM32U585XX)
 #  define STM32_SRAM1_SIZE       (0x00030000)   /* 192Kb SRAM1 */
 #  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
 #  define STM32_SRAM3_SIZE       (0x00080000)   /* 512kB SRAM3 */
-#elif defined(CONFIG_STM32U5_STM32U59XX) || defined(CONFIG_STM32U5_STM32U59AXX) || defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32U5_STM32U5A9XX)
+#elif defined(CONFIG_STM32_STM32U59XX) || defined(CONFIG_STM32_STM32U59AXX) || defined(CONFIG_STM32_STM32U5A5XX) || defined(CONFIG_STM32_STM32U5A9XX)
 #  define STM32_SRAM1_SIZE       (0x000C0000)   /* 768Kb SRAM1 */
 #  define STM32_SRAM2_SIZE       (0x00010000)   /* 64kB  SRAM2 */
 #  define STM32_SRAM3_SIZE       (0x000d0000)   /* 832kB SRAM3 */
@@ -80,7 +80,7 @@
 #  define STM32_NOPAMP                   2   /* Operational Amplifiers */
 #endif /* CONFIG_STM32_STM32U585XX */
 
-#if defined(CONFIG_STM32U5_STM32U5A5ZJT)
+#if defined(CONFIG_ARCH_CHIP_STM32U5A5ZJT)
 #  define STM32_NUSBOTGHS                1   /* USB OTG HS */
 #endif
 
