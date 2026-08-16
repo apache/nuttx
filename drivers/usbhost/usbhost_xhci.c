@@ -990,6 +990,19 @@ static void xhci_add_trb(FAR struct usbhost_xhci_s *priv,
                    XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_LINK);
             }
 
+          /* Carry the chain forward across the join.
+           *
+           * A multi-TRB transfer can reach the end of the ring part way
+           * through, putting the link inside it.  A link without the
+           * chain bit ends the transfer where it stands, and the TRB that
+           * asked for the completion interrupt is never reached.
+           */
+
+          if ((trb[i].d2 & XHCI_TRB_D2_CH) != 0)
+            {
+              d2 |= XHCI_TRB_D2_CH;
+            }
+
           /* Other parameters are already correct for this TRB */
 
           ring->ring[ring->i].d2 = htole32(d2);
