@@ -63,10 +63,6 @@ if(CONFIG_SENSORS_QENCODER)
   list(APPEND SRCS stm32_qencoder.c)
 endif()
 
-if(CONFIG_SENSORS_HTS221)
-  list(APPEND SRCS stm32_hts221.c)
-endif()
-
 if(CONFIG_SENSORS_LSM6DSL)
   list(APPEND SRCS stm32_lsm6dsl.c)
 endif()
