@@ -3043,7 +3043,7 @@ int stm32_ltdcinitialize(void)
 #endif
   /* Enable the backlight */
 
-#ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LTDC_BACKLIGHT
   stm32_backlight(true);
 #endif
 
@@ -3129,7 +3129,7 @@ void stm32_ltdcuninitialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_STM32_LCD_BACKLIGHT
+#ifdef CONFIG_STM32_LTDC_BACKLIGHT
 void stm32_backlight(bool blon)
 {
   /* Set default backlight level CONFIG_STM32_LTDC_DEFBACKLIGHT */
