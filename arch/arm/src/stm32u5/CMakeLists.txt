@@ -49,10 +49,6 @@ if(CONFIG_DEBUG_FEATURES)
   list(APPEND SRCS stm32_dumpgpio.c)
 endif()
 
-if(CONFIG_USBDEV)
-  list(APPEND SRCS stm32_otgdev.c)
-endif()
-
 target_sources(arch PRIVATE ${SRCS})
 
 add_subdirectory(${NUTTX_DIR}/arch/arm/src/common/stm32 stm32_common)

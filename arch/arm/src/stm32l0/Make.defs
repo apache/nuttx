@@ -24,8 +24,4 @@ include armv6-m/Make.defs
 
 CHIP_CSRCS  = stm32_rcc.c
 
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CHIP_CSRCS += stm32_userspace.c
-endif
-
 include common/stm32/Make.defs
