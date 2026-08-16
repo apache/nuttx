@@ -2428,6 +2428,23 @@ config ARCH_BOARD_EIC7700X_STARPRO64
 		pad, drives the system state LED, GPIO63 is unconnected, the
 		UART3 pads carry I2C8, and the UART4 pads go nowhere.
 
+config ARCH_BOARD_EIC7700X_EVB
+	bool "ESWIN EIC7700 EVB"
+	depends on ARCH_CHIP_EIC7700X
+	---help---
+		ESWIN's own evaluation board for the EIC7700X, which U-Boot
+		identifies as "ESWIN EIC7700 EVB" and whose schematic calls it
+		ESWIN-EIC7700FG-LP4X-A1.
+
+		UART0 is the console, on the FT4232 USB-C serial bridge.  UART1
+		goes to the Bluetooth M.2 Key-E connector, CTS and RTS included,
+		and is also broken out on the six pin header J97.  UART2 goes to
+		the RS232 transceiver and its DB9 connector.  UART3 and UART4
+		are unused.
+
+		The four boot select pads, GPIO107 to GPIO110, each drive a
+		system LED once the straps have been sampled.
+
 config ARCH_BOARD_S32K118EVB
 	bool "NXP S32K118EVB"
 	depends on ARCH_CHIP_S32K118
@@ -4040,6 +4057,7 @@ config ARCH_BOARD
 	default "ox64"                         if ARCH_BOARD_BL808_OX64
 	default "milkv_duos"                   if ARCH_BOARD_SG2000_MILKV_DUOS
 	default "starpro64"                    if ARCH_BOARD_EIC7700X_STARPRO64
+	default "eic7700-evb"                  if ARCH_BOARD_EIC7700X_EVB
 	default "sabre-6quad"                  if ARCH_BOARD_SABRE_6QUAD
 	default "a2g-tc397-5v-tft"             if ARCH_BOARD_A2G_TC397_5V_TFT
 	default "triboard_tc4x9_com"           if ARCH_BOARD_TRIBOARD_TC4X9_COM
@@ -5138,6 +5156,9 @@ source "boards/risc-v/sg2000/milkv_duos/Kconfig"
 endif
 if ARCH_BOARD_EIC7700X_STARPRO64
 source "boards/risc-v/eic7700x/starpro64/Kconfig"
+endif
+if ARCH_BOARD_EIC7700X_EVB
+source "boards/risc-v/eic7700x/eic7700-evb/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_LEGACY_DEVKIT
 source "boards/risc-v/esp32c3-legacy/esp32c3-legacy-devkit/Kconfig"
