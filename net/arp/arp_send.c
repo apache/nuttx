@@ -328,8 +328,13 @@ int arp_send(in_addr_t ipaddr)
         {
           /* ARP request for the same destination is in progress, directly
            * wait arp response notify.
+           *
+           * Drop the device lock: this path skips the netdev_unlock()
+           * below, and the receive path needs that same lock to deliver
+           * the reply.  The waiter above is already installed.
            */
 
+          netdev_unlock(dev);
           goto wait;
         }
 
