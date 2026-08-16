@@ -29,6 +29,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <nuttx/debug.h>
 #include <nuttx/pinctrl/pinctrl.h>
@@ -52,6 +54,9 @@ static int eic7700x_pinctrl_setslewrate(FAR struct pinctrl_dev_s *dev,
                                         uint32_t pin, uint32_t slewrate);
 static int eic7700x_pinctrl_selectgpio(FAR struct pinctrl_dev_s *dev,
                                        uint32_t pin);
+static int eic7700x_pinctrl_getpad(FAR struct pinctrl_dev_s *dev,
+                                   uint32_t pin,
+                                   FAR struct pinctrl_padinfo_s *info);
 
 /****************************************************************************
  * Public Data
@@ -72,6 +77,7 @@ const struct pinctrl_ops_s g_eic7700x_pinctrl_ops =
   .set_driver   = eic7700x_pinctrl_setdriver,
   .set_slewrate = eic7700x_pinctrl_setslewrate,
   .select_gpio  = eic7700x_pinctrl_selectgpio,
+  .get_pad      = eic7700x_pinctrl_getpad,
 };
 
 /****************************************************************************
@@ -355,6 +361,106 @@ static int eic7700x_pinctrl_selectgpio(FAR struct pinctrl_dev_s *dev,
                                PINCTRL_GEN_FUNC_MASK | PINCTRL_GEN_IE,
                                PINCTRL_GEN_FUNC(desc->gpiofunc) |
                                PINCTRL_GEN_IE);
+}
+
+/****************************************************************************
+ * Name: eic7700x_pinctrl_getpad
+ *
+ * Description:
+ *   Describe one pad for the framework: the common fields the pad's
+ *   layout has, with their validity bits, and the layout's own fields as
+ *   key:value text.  The name helpers return NULL when the name tables
+ *   are not built, which leaves the strings empty as the contract asks.
+ *
+ * Input Parameters:
+ *   dev  - The pinctrl device
+ *   pin  - The pad id
+ *   info - Receives the pad description
+ *
+ * Returned Value:
+ *   OK, or -EINVAL if the id names no pad.
+ *
+ ****************************************************************************/
+
+static int eic7700x_pinctrl_getpad(FAR struct pinctrl_dev_s *dev,
+                                   uint32_t pin,
+                                   FAR struct pinctrl_padinfo_s *info)
+{
+  FAR const struct eic7700x_pad_s *desc;
+  FAR const char *name;
+  uint32_t val;
+
+  desc = eic7700x_pad_lookup(pin);
+  if (desc == NULL)
+    {
+      return -EINVAL;
+    }
+
+  val = getreg32(EIC7700X_PINCTRL_PAD(pin));
+
+  name = eic7700x_pad_name(pin);
+  if (name != NULL)
+    {
+      strlcpy(info->name, name, sizeof(info->name));
+    }
+
+  switch (desc->shape)
+    {
+      case EIC7700X_PADSHAPE_GENERAL:
+        info->have = PINCTRL_HAVE_FUNCTION | PINCTRL_HAVE_STRENGTH |
+                     PINCTRL_HAVE_PULL | PINCTRL_HAVE_INPUT |
+                     PINCTRL_HAVE_SCHMITT;
+        info->function = (val & PINCTRL_GEN_FUNC_MASK) >>
+                         PINCTRL_GEN_FUNC_SHIFT;
+        info->strength = (val & PINCTRL_GEN_DS_MASK) >>
+                         PINCTRL_GEN_DS_SHIFT;
+        info->pullup   = (val & PINCTRL_GEN_PU) != 0;
+        info->pulldown = (val & PINCTRL_GEN_PD) != 0;
+        info->input    = (val & PINCTRL_GEN_IE) != 0;
+        info->schmitt  = (val & PINCTRL_GEN_SMT) != 0;
+
+        name = eic7700x_pad_funcname(pin, info->function);
+        if (name != NULL)
+          {
+            strlcpy(info->funcname, name, sizeof(info->funcname));
+          }
+        break;
+
+      case EIC7700X_PADSHAPE_RGMII:
+        info->have = PINCTRL_HAVE_STRENGTH | PINCTRL_HAVE_PULL |
+                     PINCTRL_HAVE_INPUT | PINCTRL_HAVE_SCHMITT;
+        info->strength = (val & PINCTRL_RGMII_DS_MASK) >>
+                         PINCTRL_RGMII_DS_SHIFT;
+        info->pullup   = (val & PINCTRL_RGMII_PU) != 0;
+        info->pulldown = (val & PINCTRL_RGMII_PD) != 0;
+        info->input    = (val & PINCTRL_RGMII_IE) != 0;
+        info->schmitt  = (val & PINCTRL_RGMII_SMT) != 0;
+
+        snprintf(info->extra, sizeof(info->extra), "ms:%u",
+                 (unsigned int)((val &
+                  (PINCTRL_RGMII_MS2 | PINCTRL_RGMII_MS1)) >> 8));
+        break;
+
+      case EIC7700X_PADSHAPE_OSC:
+        info->have = PINCTRL_HAVE_STRENGTH;
+        info->strength = (val & PINCTRL_OSC_DS_MASK) >>
+                         PINCTRL_OSC_DS_SHIFT;
+
+        snprintf(info->extra, sizeof(info->extra), "frs:%u rd:%u",
+                 (unsigned int)((val & PINCTRL_OSC_FRS_MASK) >>
+                                PINCTRL_OSC_FRS_SHIFT),
+                 (unsigned int)((val & PINCTRL_OSC_RD_MASK) >>
+                                PINCTRL_OSC_RD_SHIFT));
+        break;
+
+      default:
+        snprintf(info->extra, sizeof(info->extra), "ms1:%u ms2:%u",
+                 (val & PINCTRL_MODESEL_MS1) != 0,
+                 (val & PINCTRL_MODESEL_MS2) != 0);
+        break;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
