@@ -68,6 +68,12 @@
 #define XHCI_CMD_MAX             (16)
 #define XHCI_EVENT_MAX           (232)
 #define XHCI_TD_MAX              (8)
+
+/* Milliseconds allowed for the controller to halt.  The specification
+ * asks for 16.
+ */
+
+#define XHCI_HALT_TIMEOUT_MS     (100)
 #define XHCI_BUFSIZE             (512)
 
 /* Port numbers macros */
@@ -1104,9 +1110,12 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
 
   xhci_oper_putreg(priv, XHCI_CONFIG, priv->no_slots);
 
-  /* Slot 0 in Device Context is reserved for Scratchpad Buffer Array */
+  /* Slot 0 of the Device Context array points at the Scratchpad Buffer
+   * Array, or is zero when the controller asked for none.
+   */
 
-  priv->pg_ctx[0] = htole64(up_addrenv_va_to_pa(priv->pg_sb));
+  priv->pg_ctx[0] = priv->pg_sb ?
+                    htole64(up_addrenv_va_to_pa(priv->pg_sb)) : 0;
 
   /* Device Context Base Address Array Pointer */
 
@@ -1227,27 +1236,41 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
 
 static int xhci_ctrl_halt(FAR struct usbhost_xhci_s *priv)
 {
-  int ret = -EAGAIN;
-  int i;
+  uint32_t regval;
+  int      i;
 
-  /* Halt controller */
+  /* A controller that was never started is already halted and says so.
+   * There is no transition to wait for, so check before waiting.
+   */
 
-  xhci_oper_putreg(priv, XHCI_USBCMD, 0);
-
-  /* Wait for controller halted */
-
-  for (i = 0; i < 10; i++)
+  regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+  if ((regval & XHCI_USBSTS_HCH) != 0)
     {
-      up_mdelay(100);
-
-      if (xhci_oper_getreg(priv, XHCI_USBSTS) & XHCI_USBSTS_HCH)
-        {
-          ret = OK;
-          break;
-        }
+      return OK;
     }
 
-  return ret;
+  /* Clear Run/Stop and leave the rest of the register alone.  Writing the
+   * whole of it zero would clear the interrupt and host system error
+   * enables along with it.
+   */
+
+  regval  = xhci_oper_getreg(priv, XHCI_USBCMD);
+  regval &= ~XHCI_USBCMD_RS;
+  xhci_oper_putreg(priv, XHCI_USBCMD, regval);
+
+  for (i = 0; i < XHCI_HALT_TIMEOUT_MS; i++)
+    {
+      regval = xhci_oper_getreg(priv, XHCI_USBSTS);
+      if ((regval & XHCI_USBSTS_HCH) != 0)
+        {
+          return OK;
+        }
+
+      up_udelay(1000);
+    }
+
+  pcierr("controller will not halt, USBSTS %08" PRIx32 "\n", regval);
+  return -EAGAIN;
 }
 
 /****************************************************************************
