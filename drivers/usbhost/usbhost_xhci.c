@@ -2365,15 +2365,56 @@ static int xhci_normal_setup(FAR struct xhci_rhport_s *rhport,
   FAR struct usbhost_xhci_s *priv = XHCI_PRIV_FROM_RHPORT(rhport);
   struct xhci_trb_s          trb;
 
-  /* Prepare TRB */
+  size_t                     left;
+  size_t                     chunk;
+  uintptr_t                  pa;
+  int                        n = 0;
 
-  trb.d0 = up_addrenv_va_to_pa(buffer);
-  trb.d1 = XHCI_TRB_D1_IRQ_SET(0) | XHCI_TRB_D1_TXLEN_SET(buflen);
-  trb.d2 = XHCI_TRB_D2_IOC | XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_NORMAL);
+  /* One TRB describes one run of memory, and that run may not cross a 64K
+   * boundary.  A longer transfer, or one starting near the wrong side of a
+   * boundary, becomes several TRBs chained into a single transfer, with
+   * the interrupt asked for only on the last so that one completion
+   * arrives for the whole of it.
+   */
 
-  /* Add TRBs to ring */
+  pa   = up_addrenv_va_to_pa(buffer);
+  left = buflen;
 
-  xhci_add_trb(priv, &epinfo->td, &trb, 1);
+  while (left > 0)
+    {
+      chunk = XHCI_TD_LEN_MAX - (pa & (XHCI_TD_LEN_MAX - 1));
+      if (chunk > left)
+        {
+          chunk = left;
+        }
+
+      if (++n >= XHCI_TD_MAX)
+        {
+          uerr("transfer of %zu needs more TRBs than the ring holds\n",
+               buflen);
+          return -EINVAL;
+        }
+
+      trb.d0 = pa;
+      trb.d1 = XHCI_TRB_D1_IRQ_SET(0) | XHCI_TRB_D1_TXLEN_SET(chunk);
+      trb.d2 = XHCI_TRB_D2_TYPE_SET(XHCI_TRB_TYPE_NORMAL);
+
+      left -= chunk;
+      pa   += chunk;
+
+      /* Chain everything but the last, and interrupt only on the last */
+
+      if (left > 0)
+        {
+          trb.d2 |= XHCI_TRB_D2_CH;
+        }
+      else
+        {
+          trb.d2 |= XHCI_TRB_D2_IOC;
+        }
+
+      xhci_add_trb(priv, &epinfo->td, &trb, 1);
+    }
 
   /* Trigger transfer */
 
