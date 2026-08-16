@@ -977,6 +977,24 @@
 #  define pinctrlinfo _none
 #endif
 
+#ifdef CONFIG_DEBUG_CLK_ERROR
+#  define clkerr      _err
+#else
+#  define clkerr      _none
+#endif
+
+#ifdef CONFIG_DEBUG_CLK_WARN
+#  define clkwarn     _warn
+#else
+#  define clkwarn     _none
+#endif
+
+#ifdef CONFIG_DEBUG_CLK_INFO
+#  define clkinfo     _info
+#else
+#  define clkinfo     _none
+#endif
+
 #ifdef CONFIG_DEBUG_IPC_ERROR
 #  define ipcerr       _err
 #else

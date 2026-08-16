@@ -2395,6 +2395,38 @@ config DEBUG_PINCTRL_INFO
 
 endif # DEBUG_PINCTRL
 
+config DEBUG_CLK
+	bool "CLK Debug Features"
+	default n
+	depends on CLK
+	---help---
+		Enable CLK debug features.
+
+if DEBUG_CLK
+
+config DEBUG_CLK_ERROR
+	bool "CLK Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable CLK driver error output to SYSLOG.
+
+config DEBUG_CLK_WARN
+	bool "CLK Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable CLK driver warning output to SYSLOG.
+
+config DEBUG_CLK_INFO
+	bool "CLK Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable CLK driver informational output to SYSLOG.
+
+endif # DEBUG_CLK
+
 config DEBUG_IPC
 	bool "IPC (Inter-Process Communication) Debug Features"
 	default n
