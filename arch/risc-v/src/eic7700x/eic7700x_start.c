@@ -50,11 +50,6 @@
 #define showprogress(c)
 #endif
 
-/* SBI Extension ID and Function ID for Hart Start */
-
-#define SBI_EXT_HSM 0x0048534D
-#define SBI_EXT_HSM_HART_START 0x0
-
 /****************************************************************************
  * Extern Function Declarations
  ****************************************************************************/
@@ -63,12 +58,20 @@ extern void __start(void);
 extern void __trap_vec(void);
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
-/* Hart ID that booted NuttX (0 to 3) */
+/* Hart the firmware handed control to, which is not necessarily the one
+ * NuttX ends up running on: OpenSBI picks it, and it does not pick the same
+ * one every time.  Recorded by whichever Hart arrives first, before it
+ * restarts on Hart 0.
+ *
+ * This lives in .data rather than .bss, and the non zero initialiser is what
+ * puts it there.  It is read before eic7700x_clear_bss() and has to survive
+ * it.
+ */
 
-int g_eic7700x_boot_hart = -1;
+static int g_eic7700x_handoff_hart = -1;
 
 /****************************************************************************
  * Private Functions
@@ -182,77 +185,75 @@ static void eic7700x_copy_ramdisk(void)
 }
 
 /****************************************************************************
- * Name: sbi_ecall
- *
- * Description:
- *   Make a RISC-V ECALL to OpenSBI.
- *
- * Input Parameters:
- *   extid          - Extension ID
- *   fid            - Function ID
- *   parm0 to parm5 - Parameters to be passed
- *
- * Returned Value:
- *   Error and Value returned by OpenSBI.
- *
- ****************************************************************************/
-
-static sbiret_t sbi_ecall(unsigned int extid, unsigned int fid,
-                          uintreg_t parm0, uintreg_t parm1,
-                          uintreg_t parm2, uintreg_t parm3,
-                          uintreg_t parm4, uintreg_t parm5)
-{
-  register long r0 asm("a0") = (long)(parm0);
-  register long r1 asm("a1") = (long)(parm1);
-  register long r2 asm("a2") = (long)(parm2);
-  register long r3 asm("a3") = (long)(parm3);
-  register long r4 asm("a4") = (long)(parm4);
-  register long r5 asm("a5") = (long)(parm5);
-  register long r6 asm("a6") = (long)(fid);
-  register long r7 asm("a7") = (long)(extid);
-  sbiret_t ret;
-
-  asm volatile
-    (
-     "ecall"
-     : "+r"(r0), "+r"(r1)
-     : "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6), "r"(r7)
-     : "memory"
-     );
-
-  ret.error = r0;
-  ret.value = (uintreg_t)r1;
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: boot_secondary
  *
  * Description:
- *   Call OpenSBI to boot the Hart, starting at the specified address.
+ *   Ask OpenSBI to start a Hart at the given address.  The opaque argument
+ *   the SBI call carries to the Hart is unused: eic7700x_start() takes only
+ *   the Hart ID, which SBI supplies itself.
  *
  * Input Parameters:
  *   hartid - Hart ID
  *   addr   - Start Address
  *
  * Returned Value:
- *   OK is always returned.
+ *   OK on success, or a negated errno on failure.
  *
  ****************************************************************************/
 
 static int boot_secondary(uintreg_t hartid, uintreg_t addr)
 {
-  sbiret_t ret = sbi_ecall(SBI_EXT_HSM, SBI_EXT_HSM_HART_START,
-                          hartid, addr, 0, 0, 0, 0);
+  int ret = riscv_sbi_boot_secondary(hartid, addr, 0);
 
-  if (ret.error < 0)
+  if (ret < 0)
     {
-      _err("Boot Hart %d failed\n", hartid);
-      PANIC();
+      _err("Boot Hart %d failed: %d\n", (int)hartid, ret);
     }
 
-  return 0;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: eic7700x_boot_harts
+ *
+ * Description:
+ *   Release every Hart other than this one, each entering at __start.
+ *
+ *   Hart 0 is always among them, unless this already is Hart 0.  NuttX runs
+ *   CPU0 on Hart 0 whichever Hart the firmware chose, because that is the
+ *   only Hart riscv_set_inital_sp() gives a whole idle stack to; the others
+ *   keep a frame back for the state up_initial_state() writes onto the stack
+ *   they are already running on.
+ *
+ *   The Harts released here reach riscv_cpu_boot() and wait there for the
+ *   IPI that nx_smp_start() sends much later, so this returning says only
+ *   that SBI accepted them, not that they have arrived.
+ *
+ * Input Parameters:
+ *   mhartid - The Hart calling this, which is not started again
+ *
+ ****************************************************************************/
+
+static void eic7700x_boot_harts(int mhartid)
+{
+#ifdef CONFIG_SMP
+  int hart;
+
+  for (hart = 0; hart < CONFIG_SMP_NCPUS; hart++)
+    {
+      if (hart != mhartid && boot_secondary(hart, (uintptr_t)&__start) < 0)
+        {
+          PANIC();
+        }
+    }
+#else
+  /* One CPU, so Hart 0 is the only one wanted, and only if this is not it */
+
+  if (mhartid != 0 && boot_secondary(0, (uintptr_t)&__start) < 0)
+    {
+      PANIC();
+    }
+#endif
 }
 
 /****************************************************************************
@@ -295,7 +296,9 @@ void eic7700x_start_s(int mhartid)
 
   riscv_fpuconfig();
 
-  if (mhartid != g_eic7700x_boot_hart)
+  /* CPU0 is Hart 0.  See eic7700x_boot_harts() for why it has to be. */
+
+  if (mhartid != 0)
     {
       goto cpux;
     }
@@ -307,6 +310,15 @@ void eic7700x_start_s(int mhartid)
 #ifdef USE_EARLYSERIALINIT
   riscv_earlyserialinit();
 #endif
+
+  /* The console only exists from here, so this is the earliest the Hart the
+   * firmware chose can be reported.  It is worth reporting because nothing
+   * else in NuttX depends on it today, while everything about bringing up
+   * the other Harts does.
+   */
+
+  _info("Firmware handed off on Hart %d, NuttX running on Hart %d\n",
+        g_eic7700x_handoff_hart, mhartid);
 
   /* Setup page tables for kernel and enable MMU */
 
@@ -345,33 +357,18 @@ cpux:
 
 void eic7700x_start(int mhartid)
 {
-  /* If Boot Hart is not 0, restart with Hart 0 */
+  /* Whichever Hart arrives first is the one the firmware chose, and it owns
+   * the one time setup.  Everything below that only Hart does has to happen
+   * before any other Hart is released, since the BSS clear would otherwise
+   * run underneath them.
+   *
+   * The guard is read before the BSS is cleared, which is why it lives in
+   * .data.
+   */
 
-  if (mhartid != 0)
+  if (g_eic7700x_handoff_hart < 0)
     {
-      /* Clear the BSS */
-
-      eic7700x_clear_bss();
-
-      /* Restart with Hart 0 */
-
-      boot_secondary(0, (uintptr_t)&__start);
-
-      /* Let this Hart idle forever */
-
-      while (true)
-        {
-          asm("WFI");
-        }
-
-      PANIC(); /* Should not come here */
-    }
-
-  /* Init the globals once only. Remember the Boot Hart. */
-
-  if (g_eic7700x_boot_hart < 0)
-    {
-      g_eic7700x_boot_hart = mhartid;
+      g_eic7700x_handoff_hart = mhartid;
 
       /* Clear the BSS */
 
@@ -381,8 +378,33 @@ void eic7700x_start(int mhartid)
 
       eic7700x_copy_ramdisk();
 
-      /* Initialize the per CPU areas */
+      /* Release the others, Hart 0 among them */
 
+      eic7700x_boot_harts(mhartid);
+    }
+
+#ifndef CONFIG_SMP
+  /* One CPU, and it is Hart 0.  A Hart that came here only to hand over has
+   * nothing further to do.  It borrowed Hart 0's idle stack to get this far,
+   * so the sooner it stops using that stack the better.
+   */
+
+  if (mhartid != 0)
+    {
+      while (true)
+        {
+          asm("WFI");
+        }
+    }
+#endif
+
+  /* Only the Hart that goes on to run CPU0 registers itself here.  The rest
+   * are registered by riscv_cpu_boot() once their IPI arrives, and a Hart
+   * that took a slot twice would exhaust a free list sized by the CPU count.
+   */
+
+  if (mhartid == 0)
+    {
       riscv_percpu_add_hart(mhartid);
     }
 

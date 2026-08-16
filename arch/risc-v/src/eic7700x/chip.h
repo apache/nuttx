@@ -40,13 +40,17 @@
 #include "riscv_percpu.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Hart ID that booted NuttX (0 to 3) */
+/* The firmware does not hand over on a fixed Hart, so every Hart needs an
+ * idle stack of its own.  With fewer than four, the Hart the firmware picked
+ * may have no slot and stops in __start before it can restart on Hart 0,
+ * which fails on some resets and not others.  Fail the build instead.
+ */
 
-#ifndef __ASSEMBLY__
-extern int g_eic7700x_boot_hart;
+#if defined(CONFIG_SMP) && CONFIG_SMP_NCPUS < 4
+#  error "CONFIG_SMP_NCPUS must be 4: the firmware may boot NuttX on any Hart"
 #endif
 
 /****************************************************************************
