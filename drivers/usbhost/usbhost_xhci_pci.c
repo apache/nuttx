@@ -74,6 +74,10 @@
  */
 
 #define XHCI_HALT_TIMEOUT_MS     (100)
+
+/* Milliseconds allowed for a port to enable after reset. */
+
+#define XHCI_PORT_RESET_MS       (500)
 #define XHCI_BUFSIZE             (512)
 
 /* Port numbers macros */
@@ -1360,9 +1364,12 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
   if (!(regval & XHCI_PORTSC_PED))
     {
-      /* Reset the port */
+      /* Reset the port, masking the write-one-to-clear bits out of the
+       * value first.  See XHCI_PORTSC_RW1C.
+       */
 
-      regval = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+      regval  = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+      regval &= ~XHCI_PORTSC_RW1C;
       regval |= XHCI_PORTSC_PR;
       xhci_oper_putreg(priv, XHCI_PORTSC(rhpndx), regval);
 
@@ -1370,16 +1377,25 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
       /* Wait for Enabled state for port */
 
-      retries = 10;
-      while (!(xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx))
-               & XHCI_PORTSC_PED) && retries > 0)
+      for (retries = XHCI_PORT_RESET_MS; retries > 0; retries--)
         {
-          retries--;
-          up_mdelay(100);
+          regval = xhci_oper_getreg(priv, XHCI_PORTSC(rhpndx));
+          if ((regval & XHCI_PORTSC_PED) != 0)
+            {
+              break;
+            }
+
+          up_mdelay(1);
         }
 
-      if (retries == 0)
+      /* Test the port, not the counter: a port that comes up on the last
+       * attempt leaves the loop with the count exhausted too.
+       */
+
+      if ((regval & XHCI_PORTSC_PED) == 0)
         {
+          pcierr("port %d will not enable, PORTSC %08" PRIx32 "\n", rhpndx,
+                 regval);
           return -ETIMEDOUT;
         }
     }

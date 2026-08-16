@@ -268,6 +268,15 @@
 #define XHCI_PORTSC_DR               (1 << 30)             /* Bit 30: Device Removable */
 #define XHCI_PORTSC_WPR              (1 << 31)             /* Bit 31: Warm Port Reset */
 
+/* The write-one-to-clear bits of PORTSC.  Mask these out of any
+ * read-modify-write of the register, unless clearing them is intended.
+ */
+
+#define XHCI_PORTSC_RW1C             (XHCI_PORTSC_PED | XHCI_PORTSC_CSC | \
+                                      XHCI_PORTSC_PEC | XHCI_PORTSC_WRC | \
+                                      XHCI_PORTSC_OCC | XHCI_PORTSC_PRC | \
+                                      XHCI_PORTSC_PLC | XHCI_PORTSC_CEC)
+
 /* Port Power Management Status and Control (USB3) */
 
 #define XHCI_PORTPMSC_U1TO_SHIFT     (0)                   /* Bits 0-7: U1 Timeout */
