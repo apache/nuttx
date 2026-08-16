@@ -959,6 +959,24 @@
 #  define rstinfo     _none
 #endif
 
+#ifdef CONFIG_DEBUG_PINCTRL_ERROR
+#  define pinctrlerr  _err
+#else
+#  define pinctrlerr  _none
+#endif
+
+#ifdef CONFIG_DEBUG_PINCTRL_WARN
+#  define pinctrlwarn _warn
+#else
+#  define pinctrlwarn _none
+#endif
+
+#ifdef CONFIG_DEBUG_PINCTRL_INFO
+#  define pinctrlinfo _info
+#else
+#  define pinctrlinfo _none
+#endif
+
 #ifdef CONFIG_DEBUG_IPC_ERROR
 #  define ipcerr       _err
 #else
