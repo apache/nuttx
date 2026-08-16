@@ -46,7 +46,3 @@ CHIP_CSRCS += stm32_dumpgpio.c
 endif
 
 # Required chip type specific files
-
-ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS += stm32_otgdev.c
-endif
