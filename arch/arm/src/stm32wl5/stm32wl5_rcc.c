@@ -289,7 +289,7 @@ static inline void stm32_rcc_enableahb3(void)
   regval |= RCC_AHB2ENR_RNGEN;
 #endif
 
-#ifdef CONFIG_STM32WL5_FLASHEN
+#ifdef CONFIG_STM32_FLASH
   /* Flash memory interface clock enable */
 
   regval |= RCC_AHB3ENR_FLASHEN;
