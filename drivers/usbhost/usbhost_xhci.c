@@ -3057,6 +3057,8 @@ static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
   if (!reachable ||
       ((uintptr_t)buffer & (line - 1)) != 0 || (buflen & (line - 1)) != 0)
     {
+      /* A stand-in is needed; see xhci_dmacapable() for the same test */
+
       /* The buffer shares a line with something else.  Work in a stand-in
        * that does not.
        */
@@ -3107,7 +3109,13 @@ static FAR uint8_t *xhci_dma_prepare(FAR struct usbhost_xhci_s *priv,
  *
  * Description:
  *   Read back what the controller wrote, and give up any stand-in buffer.
- *   Called on completion, before whoever is waiting is woken.
+ *
+ *   This must run in the context of whoever asked for the transfer, not in
+ *   the completion handler.  The buffer being copied back into may belong
+ *   to a user process, and its address means nothing in the work queue
+ *   thread that handles the completion event, where the write would fault
+ *   or corrupt another process.  The caller is blocked until the transfer
+ *   finishes anyway.
  *
  ****************************************************************************/
 
@@ -3163,10 +3171,6 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
 
   epinfo = priv->devs[slot - 1].epinfo[ep - 1];
   DEBUGASSERT(epinfo != NULL);
-
-  /* Read back what the controller wrote before anyone looks at it */
-
-  xhci_dma_finish(epinfo);
 
   flags = spin_lock_irqsave(&priv->spinlock);
 
@@ -4353,6 +4357,11 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   /* And wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, ep0info);
+
+  /* As for bulk: the copy back belongs in the caller's context */
+
+  xhci_dma_finish(ep0info);
+
   return nbytes >= 0 ? OK : (int)nbytes;
 
 errout_with_iocwait:
@@ -4512,6 +4521,13 @@ static ssize_t xhci_transfer(FAR struct usbhost_driver_s *drvr,
   /* Then wait for the transfer to complete */
 
   nbytes = xhci_transfer_wait(priv, epinfo);
+
+  /* And bring back what it produced, here rather than in the completion,
+   * because this is the context the caller's buffer belongs to.
+   */
+
+  xhci_dma_finish(epinfo);
+
   return nbytes;
 
 errout_with_iocwait:
