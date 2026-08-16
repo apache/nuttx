@@ -40,8 +40,8 @@
 /* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * to control periodic ADC sampling.  If CONFIG_STM32L4_TIMn is defined then
- * CONFIG_STM32L4_TIMn_ADC must also be defined to indicate that timer "n" is
+ * to control periodic ADC sampling.  If CONFIG_STM32_TIMn is defined then
+ * CONFIG_STM32_TIMn_ADC must also be defined to indicate that timer "n" is
  * intended to be used for that purpose. Timers 1,2,3,6 and 15 may be used on
  * STM32L4X3, while STM32L4X6 adds support for timers 4 and 8 as well.
  */

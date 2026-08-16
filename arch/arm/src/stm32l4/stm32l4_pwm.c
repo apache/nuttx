@@ -115,10 +115,10 @@
 
 /* Break support */
 
-#if defined(CONFIG_STM32L4_TIM1_BREAK1) || defined(CONFIG_STM32L4_TIM1_BREAK2) || \
-    defined(CONFIG_STM32L4_TIM8_BREAK1) || defined(CONFIG_STM32L4_TIM8_BREAK2) || \
-    defined(CONFIG_STM32L4_TIM15_BREAK1) || defined(CONFIG_STM32L4_TIM16_BREAK1) || \
-    defined(CONFIG_STM32L4_TIM17_BREAK1)
+#if defined(CONFIG_STM32_TIM1_BREAK1) || defined(CONFIG_STM32_TIM1_BREAK2) || \
+    defined(CONFIG_STM32_TIM8_BREAK1) || defined(CONFIG_STM32_TIM8_BREAK2) || \
+    defined(CONFIG_STM32_TIM15_BREAK1) || defined(CONFIG_STM32_TIM16_BREAK1) || \
+    defined(CONFIG_STM32_TIM17_BREAK1)
 #  defined HAVE_BREAK
 #endif
 
@@ -309,14 +309,14 @@ static struct stm32_pwmchan_s g_pwm1channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32L4_TIM1_BREAK1
+#ifdef CONFIG_STM32_TIM1_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32L4_TIM1_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM1_BRK1POL,
 #endif
-#ifdef CONFIG_STM32L4_TIM1_BREAK2
+#ifdef CONFIG_STM32_TIM1_BREAK2
       .en2 = 1,
-      .pol2 = CONFIG_STM32L4_TIM1_BRK2POL,
-      .flt2 = CONFIG_STM32L4_TIM1_BRK2FLT,
+      .pol2 = CONFIG_STM32_TIM1_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM1_BRK2FLT,
 #endif
     },
 #endif
@@ -855,14 +855,14 @@ static struct stm32_pwmchan_s g_pwm8channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32L4_TIM8_BREAK1
+#ifdef CONFIG_STM32_TIM8_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32L4_TIM8_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM8_BRK1POL,
 #endif
-#ifdef CONFIG_STM32L4_TIM8_BREAK2
+#ifdef CONFIG_STM32_TIM8_BREAK2
       .en2 = 1,
-      .pol2 = CONFIG_STM32L4_TIM8_BRK2POL,
-      .flt2 = CONFIG_STM32L4_TIM8_BRK2FLT,
+      .pol2 = CONFIG_STM32_TIM8_BRK2POL,
+      .flt2 = CONFIG_STM32_TIM8_BRK2FLT,
 #endif
     },
 #endif
@@ -1018,9 +1018,9 @@ static struct stm32_pwmchan_s g_pwm15channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32L4_TIM15_BREAK1
+#ifdef CONFIG_STM32_TIM15_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32L4_TIM15_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM15_BRK1POL,
 #endif
       /* No BREAK2 */
     },
@@ -1100,9 +1100,9 @@ static struct stm32_pwmchan_s g_pwm16channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32L4_TIM16_BREAK1
+#ifdef CONFIG_STM32_TIM16_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32L4_TIM16_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM16_BRK1POL,
 #endif
       /* No BREAK2 */
     },
@@ -1120,8 +1120,8 @@ static struct stm32_pwmchan_s g_pwm16channels[] =
     .out2    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM16_CH1NPOL,
-      .idle    = CONFIG_STM32L4_TIM16_CH1NIDLE,
+      .pol     = CONFIG_STM32_TIM16_CH1NPOL,
+      .idle    = CONFIG_STM32_TIM16_CH1NIDLE,
       .pincfg  = PWM_TIM16_CH2CFG,
     }
 #endif
@@ -1166,9 +1166,9 @@ static struct stm32_pwmchan_s g_pwm17channels[] =
 #ifdef HAVE_BREAK
     .brk =
     {
-#ifdef CONFIG_STM32L4_TIM17_BREAK1
+#ifdef CONFIG_STM32_TIM17_BREAK1
       .en1 = 1,
-      .pol1 = CONFIG_STM32L4_TIM17_BRK1POL,
+      .pol1 = CONFIG_STM32_TIM17_BRK1POL,
 #endif
       /* No BREAK2 */
     },
@@ -1186,8 +1186,8 @@ static struct stm32_pwmchan_s g_pwm17channels[] =
     .out2    =
     {
       .in_use  = 1,
-      .pol     = CONFIG_STM32L4_TIM17_CH1NPOL,
-      .idle    = CONFIG_STM32L4_TIM17_CH1NIDLE,
+      .pol     = CONFIG_STM32_TIM17_CH1NPOL,
+      .idle    = CONFIG_STM32_TIM17_CH1NIDLE,
       .pincfg  = PWM_TIM17_CH2CFG,
     }
 #endif
@@ -1233,7 +1233,7 @@ static struct stm32_pwmchan_s g_pwmlp1channels[] =
     .out1    =
     {
       .in_use  = 1,
-      .pol     = 0,             /* REVISIT: Configure using CONFIG_STM32L4_LPTIM1_CH1POL, */
+      .pol     = 0,             /* REVISIT: Configure using CONFIG_STM32_LPTIM1_CH1POL, */
       .idle    = 0,             /* No idle */
       .pincfg  = PWM_LPTIM1_CH1CFG,
     }
@@ -1289,7 +1289,7 @@ static struct stm32_pwmchan_s g_pwmlp2channels[] =
     .out1    =
     {
       .in_use  = 1,
-      .pol     = 0,             /* REVISIT: Configure using CONFIG_STM32L4_LPTIM2_CH1POL, */
+      .pol     = 0,             /* REVISIT: Configure using CONFIG_STM32_LPTIM2_CH1POL, */
       .idle    = 0,             /* No idle */
       .pincfg  = PWM_LPTIM2_CH1CFG,
     }
@@ -3820,4 +3820,4 @@ struct pwm_lowerhalf_s *stm32_lp_pwminitialize(int timer)
 }
 #endif /* HAVE_LPTIM */
 
-#endif /* CONFIG_STM32L4_TIMn_PWM, n = 1,...,17 */
+#endif /* CONFIG_STM32_TIMn_PWM, n = 1,...,17 */

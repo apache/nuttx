@@ -5352,7 +5352,7 @@ static inline int stm32_hw_initialize(struct stm32_usbhost_s *priv)
 #ifndef CONFIG_USBDEV_VBUSSENSING
   regval |= OTGFS_GCCFG_NOVBUSSENS;
 #endif
-#ifdef CONFIG_STM32L4_OTGFS_SOFOUTPUT
+#ifdef CONFIG_STM32_OTG_SOFOUTPUT
   regval |= OTGFS_GCCFG_SOFOUTEN;
 #endif
   stm32_putreg(STM32_OTGFS_GCCFG, regval);

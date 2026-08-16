@@ -282,11 +282,11 @@ static struct stm32_dev_s g_dfsdmpriv0 =
   .intf        = 0,
   .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
-  .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
+  .trigger     = CONFIG_STM32_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
   .extsel      = DFSDM_JEXTSEL_VALUE,
   .pclck       = DFSDM_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32L4_DFSDM_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_DFSDM_SAMPLE_FREQUENCY,
 #endif
 #ifdef DFSDM_HAVE_DMA
   .dmachan     = DMACHAN_DFSDM0,
@@ -311,11 +311,11 @@ static struct stm32_dev_s g_dfsdmpriv1 =
   .intf        = 1,
   .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
-  .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
+  .trigger     = CONFIG_STM32_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
   .extsel      = DFSDM_JEXTSEL_VALUE,
   .pclck       = DFSDM_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32L4_DFSDM_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_DFSDM_SAMPLE_FREQUENCY,
 #endif
 #ifdef DFSDM_HAVE_DMA
   .dmachan     = DMACHAN_DFSDM1,
@@ -340,11 +340,11 @@ static struct stm32_dev_s g_dfsdmpriv2 =
   .intf        = 0,
   .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
-  .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
+  .trigger     = CONFIG_STM32_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
   .extsel      = DFSDM_JEXTSEL_VALUE,
   .pclck       = DFSDM_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32L4_DFSDM_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_DFSDM_SAMPLE_FREQUENCY,
 #endif
 #ifdef DFSDM_HAVE_DMA
   .dmachan     = DMACHAN_DFSDM2,
@@ -369,11 +369,11 @@ static struct stm32_dev_s g_dfsdmpriv3 =
   .intf        = 0,
   .base        = STM32_DFSDM_BASE,
 #ifdef DFSDM_HAVE_TIMER
-  .trigger     = CONFIG_STM32L4_DFSDM_TIMTRIG,
+  .trigger     = CONFIG_STM32_DFSDM_TIMTRIG,
   .tbase       = DFSDM_TIMER_BASE,
   .extsel      = DFSDM_JEXTSEL_VALUE,
   .pclck       = DFSDM_TIMER_PCLK_FREQUENCY,
-  .freq        = CONFIG_STM32L4_DFSDM_SAMPLE_FREQUENCY,
+  .freq        = CONFIG_STM32_DFSDM_SAMPLE_FREQUENCY,
 #endif
 #ifdef DFSDM_HAVE_DMA
   .dmachan     = DMACHAN_DFSDM3,
