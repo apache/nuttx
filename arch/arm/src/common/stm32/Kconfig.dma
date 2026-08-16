@@ -85,7 +85,7 @@ config STM32_DMA2D_ARGB4444
 
 config STM32_DMA2D_ARGB1555
 	bool "16 bpp ARGB 1555"
-	depends on STM32_LTDC_L1_ARGB15555
+	depends on STM32_LTDC_L1_ARGB1555
 	default y
 
 config STM32_DMA2D_RGB888
