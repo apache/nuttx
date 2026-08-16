@@ -32,6 +32,21 @@
 #include <arch/board/board_memorymap.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* The granule allocator behind mm_pgalloc() counts its pages in a uint16_t,
+ * and gran_initialize() refuses a pool with more than UINT16_MAX of them,
+ * returning NULL.  mm_pginitialize() then asserts, so an oversized pool is a
+ * board that does not boot rather than a board with less memory than asked
+ * for.  See mm/mm_gran/mm_gran.h and mm/mm_gran/mm_graninit.c.
+ */
+
+#if (CONFIG_ARCH_PGPOOL_SIZE / CONFIG_MM_PGSIZE) > 65535
+#  error "Page pool has more pages than the granule allocator can count"
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -49,6 +64,18 @@
 void up_allocate_pgheap(void **heap_start, size_t *heap_size)
 {
   DEBUGASSERT(heap_start && heap_size);
+
+  /* The linker script and Kconfig describe this pool separately, and both
+   * descriptions are used: the size below comes from the linker, while
+   * riscv_pgvaddr() decides whether a page is in the pool using the Kconfig
+   * values.  If they disagree, pages outside the smaller of the two get a
+   * virtual address of zero and are then written through, which on this SoC
+   * lands on the identity mapped low memory rather than faulting.  Say so
+   * here instead of finding out that way.
+   */
+
+  DEBUGASSERT(PGPOOL_START == CONFIG_ARCH_PGPOOL_PBASE);
+  DEBUGASSERT(PGPOOL_SIZE  == CONFIG_ARCH_PGPOOL_SIZE);
 
   *heap_start = (void *)PGPOOL_START;
   *heap_size  = (size_t)PGPOOL_SIZE;
