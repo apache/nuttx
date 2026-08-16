@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/usbhost/usbhost_xhci_pci.c
+ * drivers/usbhost/usbhost_xhci.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,8 +36,6 @@
 #include <nuttx/addrenv.h>
 #include <nuttx/spinlock.h>
 
-#include <nuttx/pci/pci.h>
-
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbhost_devaddr.h>
@@ -69,13 +67,16 @@
 #define XHCI_EVENT_MAX           (232)
 #define XHCI_TD_MAX              (8)
 
-/* Milliseconds allowed for the controller to halt.  The specification
- * asks for 16.
+/* How long to give the controller to stop, in milliseconds.  The
+ * specification asks for it within 16; this is generous.
  */
 
 #define XHCI_HALT_TIMEOUT_MS     (100)
 
-/* Milliseconds allowed for a port to enable after reset. */
+/* How long to give a port to come up after being reset, in milliseconds.
+ * USB 2.0 asks for the reset to be held 10ms and the port to be usable
+ * shortly after; this is generous.
+ */
 
 #define XHCI_PORT_RESET_MS       (500)
 #define XHCI_BUFSIZE             (512)
@@ -240,10 +241,11 @@ struct usbhost_xhci_s
   struct xhci_trb_s             cmdres;     /* Command result */
   struct xhci_ring_s            cmd;        /* Command ring handler */
 
-  /* PCI data */
+  /* Bus hookup, supplied by whoever found this controller */
 
-  FAR struct pci_device_s      *pcidev;     /* PCI device reference */
-  int                           irq;        /* IRQ number used by the device */
+  FAR const struct xhci_bus_ops_s *ops;     /* Bus operations */
+  FAR void                     *arg;        /* Bus private data */
+  FAR const char               *name;       /* What to call this controller */
   uint32_t                      pending;    /* IRQ pending status */
   struct work_s                 work;       /* IRQ work */
   struct work_s                 pscwork;    /* Port status change work */
@@ -482,48 +484,6 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv);
 static int xhci_mem_free(FAR struct usbhost_xhci_s *priv);
 static int xhci_hw_initialize(FAR struct usbhost_xhci_s *priv);
 static int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv);
-static int pci_xhci_probe(FAR struct pci_device_s *dev);
-static void pci_xhci_remove(FAR struct pci_device_s *dev);
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/* PCI device table */
-
-static const struct pci_device_id_s g_pci_xhci_id_table[] =
-{
-  /* QEMU xHCI */
-
-  {
-    PCI_DEVICE(0x1b36, 0x000d),
-    .driver_data = 0
-  },
-
-  /* Intel Alder Lake USB 3.2 xHCI controller */
-
-  {
-    PCI_DEVICE(0x8086, 0x51ed),
-    .driver_data = 0
-  },
-
-  /* Intel Alder Lake-S USB 3.2 Gen 2x2 xHCI controller */
-
-  {
-    PCI_DEVICE(0x8086, 0x7ae0),
-    .driver_data = 0
-  },
-  { }
-};
-
-/* PCI driver */
-
-static struct pci_driver_s g_pci_xhci_drv =
-{
-  .id_table = g_pci_xhci_id_table,
-  .probe    = pci_xhci_probe,
-  .remove   = pci_xhci_remove,
-};
 
 /****************************************************************************
  * Private Functions
@@ -723,7 +683,7 @@ static void xhci_door_putreg(FAR struct usbhost_xhci_s *priv,
 static void xhci_dump_capa_reg(FAR struct usbhost_xhci_s *priv,
                                FAR const char *msg, unsigned int offset)
 {
-  pciinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_capa_getreg(priv, offset));
+  uinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_capa_getreg(priv, offset));
 }
 
 /****************************************************************************
@@ -733,7 +693,7 @@ static void xhci_dump_capa_reg(FAR struct usbhost_xhci_s *priv,
 static void xhci_dump_oper_reg(FAR struct usbhost_xhci_s *priv,
                                FAR const char *msg, unsigned int offset)
 {
-  pciinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_oper_getreg(priv, offset));
+  uinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_oper_getreg(priv, offset));
 }
 
 /****************************************************************************
@@ -743,7 +703,7 @@ static void xhci_dump_oper_reg(FAR struct usbhost_xhci_s *priv,
 static void xhci_dump_runt_reg(FAR struct usbhost_xhci_s *priv,
                                FAR const char *msg, unsigned int offset)
 {
-  pciinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_runt_getreg(priv, offset));
+  uinfo("\t%s:\t\t0x%" PRIx32 "\n", msg, xhci_runt_getreg(priv, offset));
 }
 
 /****************************************************************************
@@ -755,9 +715,9 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
 {
   int i;
 
-  pciinfo("Dump xHCI registers: %s\n", msg);
+  uinfo("Dump xHCI registers: %s\n", msg);
 
-  pciinfo("=== Host Controller Capability Registers ===\n");
+  uinfo("=== Host Controller Capability Registers ===\n");
   xhci_dump_capa_reg(priv, "CAPLENGTH   ", XHCI_CAPLENGTH);
   xhci_dump_capa_reg(priv, "HCIVERSION  ", XHCI_HCIVERSION);
   xhci_dump_capa_reg(priv, "HCSPARAMS1  ", XHCI_HCSPARAMS1);
@@ -768,7 +728,7 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
   xhci_dump_capa_reg(priv, "RTSOFF      ", XHCI_RTSOFF);
   xhci_dump_capa_reg(priv, "HCCPARAMS2  ", XHCI_HCCPARAMS2);
 
-  pciinfo("=== Host Controller Operational Registers ===\n");
+  uinfo("=== Host Controller Operational Registers ===\n");
   xhci_dump_oper_reg(priv, "USBCMD      ", XHCI_USBCMD);
   xhci_dump_oper_reg(priv, "USBSTS      ", XHCI_USBSTS);
   xhci_dump_oper_reg(priv, "PAGESIZE    ", XHCI_PAGESIZE);
@@ -779,7 +739,7 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
 
   for (i = 0; i < priv->no_ports; i++)
     {
-      pciinfo("port %d --------------------------------\n", i);
+      uinfo("port %d --------------------------------\n", i);
       xhci_dump_oper_reg(priv, "PORTSC      ", XHCI_PORTSC(i));
       xhci_dump_oper_reg(priv, "PORTPMSC    ", XHCI_PORTPMSC(i));
       xhci_dump_oper_reg(priv, "PORTLI      ", XHCI_PORTLI(i));
@@ -787,7 +747,7 @@ static void xhci_dump_mem(FAR struct usbhost_xhci_s *priv,
 
   /* Only one interrupter used */
 
-  pciinfo("=== Host Controller Runtime Registers ===\n");
+  uinfo("=== Host Controller Runtime Registers ===\n");
   xhci_dump_runt_reg(priv, "MFINDEX     ", XHCI_MFINDEX);
   xhci_dump_runt_reg(priv, "IMAN(0)     ", XHCI_IMAN(0));
   xhci_dump_runt_reg(priv, "IMOD(0)     ", XHCI_IMOD(0));
@@ -1097,7 +1057,7 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   int                           ret;
   int                           i;
 
-  pciinfo("Start controller\n");
+  uinfo("Start controller\n");
 
   /* Reset controller before writing any Operational or Runtime registers */
 
@@ -1134,14 +1094,14 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
   ret = xhci_ring_init(&priv->cmd, XHCI_CMD_MAX);
   if (ret < 0)
     {
-      pcierr("cmd ring init failed\n");
+      uerr("cmd ring init failed\n");
       return ret;
     }
 
   ret = xhci_ring_init(&priv->evnt, XHCI_EVENT_MAX);
   if (ret < 0)
     {
-      pcierr("event ring init failed\n");
+      uerr("event ring init failed\n");
       return ret;
     }
 
@@ -1216,7 +1176,7 @@ static int xhci_ctrl_start(FAR struct usbhost_xhci_s *priv)
 
   if (ret != OK)
     {
-      pcierr("Can't start controller!");
+      uerr("Can't start controller!");
       return ret;
     }
 
@@ -1273,7 +1233,7 @@ static int xhci_ctrl_halt(FAR struct usbhost_xhci_s *priv)
       up_udelay(1000);
     }
 
-  pcierr("controller will not halt, USBSTS %08" PRIx32 "\n", regval);
+  uerr("controller will not halt, USBSTS %08" PRIx32 "\n", regval);
   return -EAGAIN;
 }
 
@@ -1394,8 +1354,8 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
       if ((regval & XHCI_PORTSC_PED) == 0)
         {
-          pcierr("port %d will not enable, PORTSC %08" PRIx32 "\n", rhpndx,
-                 regval);
+          uerr("port %d will not enable, PORTSC %08" PRIx32 "\n", rhpndx,
+               regval);
           return -ETIMEDOUT;
         }
     }
@@ -1443,7 +1403,7 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
 
       default:
         {
-          pcierr("speed = 0x%x\n", speed);
+          uerr("speed = 0x%x\n", speed);
           hport->speed = USB_SPEED_UNKNOWN;
           return -EINVAL;
         }
@@ -1746,7 +1706,7 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   ret = xhci_ring_init(&rhport->ep0.td, XHCI_TD_MAX);
   if (ret < 0)
     {
-      pcierr("ep0 ring init failed\n");
+      uerr("ep0 ring init failed\n");
       return ret;
     }
 
@@ -1772,7 +1732,7 @@ static int xhci_device_init(FAR struct usbhost_xhci_s *priv,
   ret = xhci_address_set(priv, rhport, false);
   if (ret < 0)
     {
-      pcierr("failed to set address %d\n", ret);
+      uerr("failed to set address %d\n", ret);
       return ret;
     }
 
@@ -1803,7 +1763,7 @@ static int xhci_device_deinit(FAR struct usbhost_xhci_s *priv,
   ret = xhci_cmd_slotdis(priv, slot);
   if (ret < 0)
     {
-      pcierr("xhci_cmd_slotdis failed %d\n", ret);
+      uerr("xhci_cmd_slotdis failed %d\n", ret);
     }
 
   /* Clear DCBAA entry for this slot */
@@ -1948,7 +1908,7 @@ static int xhci_command(FAR struct usbhost_xhci_s *priv,
     }
   else
     {
-      pcierr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
+      uerr("event CC = %d\n", XHCI_TRB_D1_CC_GET(trb->d1));
       ret = -EIO;
     }
 
@@ -2768,7 +2728,7 @@ static void xhci_transfer_complete(FAR struct usbhost_xhci_s *priv,
     {
       /* Report error */
 
-      pcierr("transfer CC = %d\n", ret);
+      uerr("transfer CC = %d\n", ret);
       epinfo->status = ret;
       epinfo->result = -EIO;
     }
@@ -2903,7 +2863,7 @@ static int xhci_events_poll(FAR struct usbhost_xhci_s *priv)
 
           default:
             {
-              pciinfo("ignored event %d\n", type);
+              uinfo("ignored event %d\n", type);
               break;
             }
         }
@@ -2950,28 +2910,28 @@ static void xhci_interrupt_work(FAR void *arg)
     {
       /* Handled as event in xhci_events_poll() */
 
-      pciinfo("Port Change Detect\n");
+      uinfo("Port Change Detect\n");
     }
 
   /* Host Controller Halted */
 
   if (priv->pending & XHCI_USBSTS_HCH)
     {
-      pciinfo("Host Controller Halted\n");
+      uinfo("Host Controller Halted\n");
     }
 
   /* Host System Error */
 
   if (priv->pending & XHCI_USBSTS_HSE)
     {
-      pciinfo("Host System Error\n");
+      uinfo("Host System Error\n");
     }
 
   /* Host Controller Error */
 
   if (priv->pending & XHCI_USBSTS_HCE)
     {
-      pciinfo("Host Controller Error\n");
+      uinfo("Host Controller Error\n");
     }
 
   /* ACK interrupts */
@@ -3169,7 +3129,7 @@ static int xhci_rh_enumerate(FAR struct usbhost_connection_s *conn,
     {
       /* No, return an error */
 
-      pcierr("not connected\n");
+      uerr("not connected\n");
       return -ENODEV;
     }
 
@@ -3178,7 +3138,7 @@ static int xhci_rh_enumerate(FAR struct usbhost_connection_s *conn,
   ret = xhci_port_enable(priv, hport);
   if (ret < 0)
     {
-      pcierr("Failed to enable port %d\n", ret);
+      uerr("Failed to enable port %d\n", ret);
       return ret;
     }
 
@@ -3187,7 +3147,7 @@ static int xhci_rh_enumerate(FAR struct usbhost_connection_s *conn,
   ret = xhci_device_init(priv, rhport);
   if (ret < 0)
     {
-      pcierr("Failed to initialize device %d\n", ret);
+      uerr("Failed to initialize device %d\n", ret);
       return ret;
     }
 
@@ -3361,7 +3321,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
 #ifdef CONFIG_USBHOST_TRACE
   usbhost_vtrace2(XHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
 #else
-  pciinfo("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
+  uinfo("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
           epdesc->addr, epdesc->in ? "IN" : "OUT", hport->funcaddr,
           epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 #endif
@@ -3401,7 +3361,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   ret = xhci_ring_init(&epinfo->td, XHCI_TD_MAX);
   if (ret < 0)
     {
-      pcierr("ep ring init failed\n");
+      uerr("ep ring init failed\n");
       return ret;
     }
 
@@ -3495,7 +3455,7 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
                        up_addrenv_va_to_pa(dev->input), false);
   if (ret < 0)
     {
-      pcierr("failed to configure EP %d\n", ret);
+      uerr("failed to configure EP %d\n", ret);
       return ret;
     }
 
@@ -3831,7 +3791,7 @@ static int xhci_ctrl_xfer(FAR struct usbhost_driver_s *drvr,
   ret = xhci_control_setup(rhport, ep0info, req, buffer, len);
   if (ret < 0)
     {
-      pcierr("ERROR: xhci_control_setup failed: %d\n", ret);
+      uerr("ERROR: xhci_control_setup failed: %d\n", ret);
       goto errout_with_iocwait;
     }
 
@@ -4308,7 +4268,7 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
   regval = xhci_capa_getreg(priv, XHCI_HCCPARAMS1);
   if (regval & XHCI_HCCPARAMS1_CSZ)
     {
-      pcierr("Only 32 byte Context data structures supported!\n");
+      uerr("Only 32 byte Context data structures supported!\n");
       return -EIO;
     }
 
@@ -4325,7 +4285,7 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
       priv->no_slots = CONFIG_USBHOST_XHCI_MAX_DEVS;
     }
 
-  pciinfo("no slots = %d, no ports = %d\n",
+  uinfo("no slots = %d, no ports = %d\n",
           priv->no_slots, priv->no_ports);
 
   /* Check if valid */
@@ -4340,11 +4300,11 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
   regval = xhci_capa_getreg(priv, XHCI_HCSPARAMS2);
   priv->no_scratch = XHCI_HCSPARAMS2_MAXSPB(regval);
 
-  pciinfo("no scratch = %d\n", priv->no_scratch);
+  uinfo("no scratch = %d\n", priv->no_scratch);
 
   priv->no_erst = 1 << XHCI_HCSPARAMS2_ERST(regval);
 
-  pciinfo("no_erst = %d\n", priv->no_erst);
+  uinfo("no_erst = %d\n", priv->no_erst);
 
   /* Limit event ring segment table to 1 */
 
@@ -4353,7 +4313,7 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
       priv->no_erst = XHCI_MAX_ERST;
     }
 
-  pciinfo("no erst = %d\n", priv->no_erst);
+  uinfo("no erst = %d\n", priv->no_erst);
 
   return OK;
 }
@@ -4362,41 +4322,14 @@ static int xhci_hw_getparams(FAR struct usbhost_xhci_s *priv)
  * Name: xhci_irq_initialize
  *
  * Description:
- *   Initialize xHCI interrupts - require MSI-X support.
+ *   Ask the bus this controller was found on for its interrupt.  See
+ *   struct xhci_bus_ops_s in include/nuttx/usb/xhci.h.
  *
  ****************************************************************************/
 
 static int xhci_irq_initialize(FAR struct usbhost_xhci_s *priv)
 {
-  int ret;
-
-  /* Allocate MSI */
-
-  ret = pci_alloc_irq(priv->pcidev, &priv->irq, 1);
-  if (ret != 1)
-    {
-      pcierr("Failed to allocate MSI %d\n", ret);
-      return ret;
-    }
-
-  /* Attach IRQ */
-
-  irq_attach(priv->irq, xhci_interrupt, priv);
-
-  /* Connect MSI-X */
-
-  ret = pci_connect_irq(priv->pcidev, &priv->irq, 1);
-  if (ret != OK)
-    {
-      pcierr("Failed to connect MSI %d\n", ret);
-      pci_release_irq(priv->pcidev, &priv->irq, 1);
-
-      return -ENOTSUP;
-    }
-
-  up_enable_irq(priv->irq);
-
-  return OK;
+  return priv->ops->irq_attach(priv->arg, xhci_interrupt, priv);
 }
 
 /****************************************************************************
@@ -4422,7 +4355,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
       priv->pg_sb = kmm_memalign(XHCI_BUF_ALIGN, tmp);
       if (!priv->pg_sb)
         {
-          pcierr("pg_sb malloc failed\n");
+          uerr("pg_sb malloc failed\n");
           return -ENOMEM;
         }
 
@@ -4437,7 +4370,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
         kmm_memalign(XHCI_PAGE_SIZE, XHCI_PAGE_SIZE));
       if (!priv->pg_sb[i])
         {
-          pcierr("pg_sb[i] malloc failed\n");
+          uerr("pg_sb[i] malloc failed\n");
           return -ENOMEM;
         }
 
@@ -4455,7 +4388,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   priv->pg_ctx = kmm_memalign(XHCI_BUF_ALIGN, tmp);
   if (!priv->pg_ctx)
     {
-      pcierr("pg_ctx malloc failed\n");
+      uerr("pg_ctx malloc failed\n");
       return -ENOMEM;
     }
 
@@ -4469,7 +4402,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   priv->pg_erst = kmm_memalign(XHCI_BUF_ALIGN, tmp);
   if (!priv->pg_erst)
     {
-      pcierr("priv->pg_erst malloc failed\n");
+      uerr("priv->pg_erst malloc failed\n");
       return -ENOMEM;
     }
 
@@ -4480,7 +4413,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   priv->rhport = kmm_zalloc(priv->no_ports * sizeof(struct xhci_rhport_s));
   if (!priv->rhport)
     {
-      pcierr("rhport zalloc failed!\n");
+      uerr("rhport zalloc failed!\n");
       return -ENOMEM;
     }
 
@@ -4489,7 +4422,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   priv->devs = kmm_zalloc(priv->no_slots * sizeof(struct xhci_dev_s));
   if (!priv->devs)
     {
-      pcierr("devs zalloc failed!\n");
+      uerr("devs zalloc failed!\n");
       return -ENOMEM;
     }
 
@@ -4502,7 +4435,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
       priv->devs[i].ctx = kmm_zalloc(sizeof(struct xhci_dev_ctx_s));
       if (!priv->devs[i].ctx)
         {
-          pcierr("dev ctx zalloc failed!\n");
+          uerr("dev ctx zalloc failed!\n");
           return -ENOMEM;
         }
 
@@ -4514,7 +4447,7 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
                             sizeof(struct xhci_input_dev_ctx_s));
       if (!priv->devs[i].input)
         {
-          pcierr("dev input zalloc failed!\n");
+          uerr("dev input zalloc failed!\n");
           return -ENOMEM;
         }
 
@@ -4592,7 +4525,7 @@ static int xhci_hw_initialize(FAR struct usbhost_xhci_s *priv)
   ret = xhci_bios_wait(priv);
   if (ret < 0)
     {
-      pcierr("Failed to get xhci controller!\n");
+      uerr("Failed to get xhci controller!\n");
       goto errout;
     }
 
@@ -4733,66 +4666,67 @@ static inline int xhci_sw_initialize(FAR struct usbhost_xhci_s *priv)
 }
 
 /****************************************************************************
- * Name: pci_xhci_probe
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: xhci_initialize
  *
  * Description:
- *   Initialize PCI device.
+ *   Bring up an xHCI controller and start watching its root hub ports.
+ *
+ *   The caller has already found the controller and knows how to reach it;
+ *   everything this function does from here on is described by the xHCI
+ *   specification and is the same on any bus.
+ *
+ * Input Parameters:
+ *   base - Where the controller's register block starts.  The capability
+ *          registers are at the beginning of it and say where the rest are.
+ *   ops  - How to reach the interrupt this controller raises
+ *   arg  - Opaque value passed back to ops
+ *
+ * Returned Value:
+ *   A connection to hand to usbhost_waiter_initialize() or to drive
+ *   directly; NULL on failure.
  *
  ****************************************************************************/
 
-static int pci_xhci_probe(FAR struct pci_device_s *dev)
+FAR struct usbhost_connection_s *
+xhci_initialize(FAR const char *name, uintptr_t base,
+                FAR const struct xhci_bus_ops_s *ops, FAR void *arg)
 {
   FAR struct usbhost_conn_xhci_s *conn = NULL;
   FAR struct usbhost_xhci_s      *priv = NULL;
-  int                             ret  = -ENOMEM;
+  int                             ret;
 
-  /* Init PCI bus */
-
-  pci_set_master(dev);
-  pciinfo("Enabled bus mastering\n");
-  pci_enable_device(dev);
-  pciinfo("Enabled memory resources\n");
-
-  /* Allocate connection structure */
+  DEBUGASSERT(name != NULL && base != 0 && ops != NULL &&
+              ops->irq_attach != NULL);
 
   conn = kmm_zalloc(sizeof(struct usbhost_conn_xhci_s));
-  if (!conn)
+  if (conn == NULL)
     {
-      pcierr("zalloc failed!\n");
-      goto errout;
+      return NULL;
     }
-
-  /* Allocate the driver structure */
 
   priv = kmm_zalloc(sizeof(struct usbhost_xhci_s));
-  if (!priv)
+  if (priv == NULL)
     {
-      pcierr("zalloc failed!\n");
-      goto errout;
+      kmm_free(conn);
+      return NULL;
     }
-
-  /* Initialize connection data */
 
   conn->conn.wait      = xhci_wait;
   conn->conn.enumerate = xhci_enumerate;
   conn->priv           = priv;
 
-  /* Connect PCI handler */
+  priv->name           = name;
+  priv->ops            = ops;
+  priv->arg            = arg;
+  priv->base           = base;
 
-  priv->pcidev = dev;
-  dev->priv    = conn;
-
-  /* Get base address - BAR 0 */
-
-  priv->base = (uintptr_t)pci_map_bar(dev, 0);
-  if (!priv->base)
-    {
-      pcierr("Not found BAR 0!\n");
-      ret = -EIO;
-      goto errout;
-    }
-
-  /* Get register address */
+  /* The capability registers are the only ones at a known offset.  Every
+   * other block is where they say it is.
+   */
 
   priv->capa_base = priv->base;
   priv->oper_base = priv->base + xhci_capa_getreg_1b(priv, XHCI_CAPLENGTH);
@@ -4801,25 +4735,19 @@ static int pci_xhci_probe(FAR struct pci_device_s *dev)
 
   usbhost_vtrace1(XHCI_VTRACE1_INITIALIZING, 0);
 
-  /* Initialize HW */
-
   ret = xhci_hw_initialize(priv);
   if (ret < 0)
     {
-      pcierr("failed to initialize HW!\n");
+      uerr("failed to initialize HW: %d\n", ret);
       goto errout;
     }
-
-  /* Initialize SW */
 
   ret = xhci_sw_initialize(priv);
   if (ret < 0)
     {
-      pcierr("failed to initialize SW!\n");
+      uerr("failed to initialize SW: %d\n", ret);
       goto errout;
     }
-
-  /* Start controller */
 
   ret = xhci_ctrl_start(priv);
   if (ret < 0)
@@ -4829,106 +4757,59 @@ static int pci_xhci_probe(FAR struct pci_device_s *dev)
     }
 
 #ifdef CONFIG_DEBUG_USB_INFO
-  /* Dump xhci registers */
-
   xhci_dump_mem(priv, "after init");
 #endif
 
-  /* If there is a USB device in the slot at power up, then we will not
-   * get the status change interrupt to signal us that the device is
-   * connected.  We need to set the initial connected state accordingly.
+  /* A device already in a port at power up produces no status change
+   * interrupt to tell us it is there, so look for one.
    */
 
   xhci_probe_ports(priv);
 
-  usbhost_vtrace1(XHCI_VTRACE1_INITIALIZING, 0);
-
-  /* Initialize waiter */
-
   ret = usbhost_waiter_initialize(&conn->conn);
   if (ret < 0)
     {
-      pcierr("failed to initialize waiter!\n");
+      uerr("failed to initialize waiter: %d\n", ret);
       goto errout;
     }
 
-  /* Store waiter PID */
-
   conn->pid = ret;
 
-  return OK;
+  return &conn->conn;
 
 errout:
-
-  /* Free allocated xhci buffers */
-
   xhci_mem_free(priv);
-
-  /* Free allocated data */
-
   kmm_free(conn);
   kmm_free(priv);
 
-  return ret;
+  return NULL;
 }
 
 /****************************************************************************
- * Name: pci_xhci_remove
+ * Name: xhci_uninitialize
  *
  * Description:
- *   Remove PCI device.
+ *   Stop watching a controller's ports and give back everything
+ *   xhci_initialize() took.
  *
  ****************************************************************************/
 
-static void pci_xhci_remove(FAR struct pci_device_s *dev)
+void xhci_uninitialize(FAR struct usbhost_connection_s *conn)
 {
-  FAR struct usbhost_conn_xhci_s *conn = dev->priv;
-  FAR struct usbhost_xhci_s      *priv = conn->priv;
+  FAR struct usbhost_conn_xhci_s *xconn = XHCI_XCONN_FROM_CONN(conn);
+  FAR struct usbhost_xhci_s      *priv;
 
-  /* Free xhci interrupts */
+  DEBUGASSERT(conn != NULL);
+  priv = xconn->priv;
 
-  irq_detach(priv->irq);
-  pci_release_irq(dev, &priv->irq, 1);
+  /* Stop the waiter before the memory it walks goes away */
 
-  /* Disable PCI devicve */
+  kthread_delete(xconn->pid);
 
-  pci_clear_master(dev);
-  pci_disable_device(dev);
-
-  /* Delete waiter thread */
-
-  kthread_delete(conn->pid);
-
-  /* Free xhci buffers */
+  priv->ops->irq_detach(priv->arg);
 
   xhci_mem_free(priv);
 
-  /* Free driver data */
-
-  kmm_free(conn);
   kmm_free(priv);
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pci_xhci_init
- *
- * Description:
- *   Initialize the USB host xHCI as PCI device.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   On success this function will return zero (OK);  A negated errno value
- *   will be returned on failure.
- *
- ****************************************************************************/
-
-int pci_xhci_init(void)
-{
-  return pci_register_driver(&g_pci_xhci_drv);
+  kmm_free(xconn);
 }
