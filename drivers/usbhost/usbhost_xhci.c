@@ -2907,6 +2907,20 @@ static void xhci_interrupt_work(FAR void *arg)
   FAR struct usbhost_xhci_s *priv = arg;
   uint32_t                   iman;
 
+  /* Acknowledge before walking the ring, not after.  An event arriving
+   * during the walk sets the pending bit again, and clearing after the
+   * walk discards it.  Transfers have no timeout, so the one it belonged
+   * to would wait forever.
+   */
+
+  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
+
+  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
+  if (iman & XHCI_IMAN_IP)
+    {
+      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
+    }
+
   xhci_events_poll(priv);
 
   /* Port Change Detect */
@@ -2937,18 +2951,6 @@ static void xhci_interrupt_work(FAR void *arg)
   if (priv->pending & XHCI_USBSTS_HCE)
     {
       uinfo("Host Controller Error\n");
-    }
-
-  /* ACK interrupts */
-
-  xhci_oper_putreg(priv, XHCI_USBSTS, priv->pending);
-
-  /* Clear interrupter pending bit */
-
-  iman = xhci_runt_getreg(priv, XHCI_IMAN(0));
-  if (iman & XHCI_IMAN_IP)
-    {
-      xhci_runt_putreg(priv, XHCI_IMAN(0), iman);
     }
 
   /* Clear pending bits */
