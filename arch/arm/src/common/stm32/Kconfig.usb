@@ -24,7 +24,7 @@ endmenu
 
 config STM32_OTG_SOFOUTPUT
 	bool "OTG SOF output"
-	depends on STM32_HAVE_IP_OTG_M7_V1
+	depends on STM32_HAVE_OTGFS || STM32_HAVE_OTGHS || STM32_HAVE_IP_OTG_M7_V1
 	default n
 
 config STM32_OTG_USBREGEN
