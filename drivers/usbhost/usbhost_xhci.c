@@ -1291,8 +1291,13 @@ static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv)
       portsc = xhci_oper_getreg(priv, XHCI_PORTSC(i));
       priv->rhport[i].connected = ((portsc & XHCI_PORTSC_CCS) != 0);
 
-      /* Clear status change */
+      /* Clear status change, but not PED.  Port Enabled/Disabled is
+       * write-one-to-clear, so writing back what was read disables any
+       * port that came up enabled, which is what a device attached at
+       * power up does.
+       */
 
+      portsc &= ~XHCI_PORTSC_PED;
       xhci_oper_putreg(priv, XHCI_PORTSC(i), portsc);
     }
 }
