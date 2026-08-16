@@ -119,6 +119,9 @@ config STM32_HAVE_DCACHE1
 config STM32_HAVE_ICACHE
 	bool
 
+config STM32_HAVE_ICACHE_REMAP
+	bool
+
 # CAN capabilities
 
 config STM32_HAVE_CAN1
