@@ -4365,17 +4365,22 @@ static int xhci_mem_alloc(FAR struct usbhost_xhci_s *priv)
   size_t tmp;
   int    i;
 
-  /* Allocate Scratchpad Buffer Array */
+  /* Allocate the Scratchpad Buffer Array, if one is wanted.  no_scratch
+   * may be zero, and a zero byte allocation returns NULL.
+   */
 
-  tmp = priv->no_scratch * sizeof(uint64_t);
-  priv->pg_sb = kmm_memalign(XHCI_BUF_ALIGN, tmp);
-  if (!priv->pg_sb)
+  if (priv->no_scratch > 0)
     {
-      pcierr("pg_sb malloc failed\n");
-      return -ENOMEM;
-    }
+      tmp = priv->no_scratch * sizeof(uint64_t);
+      priv->pg_sb = kmm_memalign(XHCI_BUF_ALIGN, tmp);
+      if (!priv->pg_sb)
+        {
+          pcierr("pg_sb malloc failed\n");
+          return -ENOMEM;
+        }
 
-  memset(priv->pg_sb, 0, tmp);
+      memset(priv->pg_sb, 0, tmp);
+    }
 
   for (i = 0; i < priv->no_scratch; i++)
     {
