@@ -237,8 +237,16 @@ void eic7700x_kernel_mappings(void)
   binfo("map kernel text\n");
   map_region(KFLASH_START, KFLASH_START, KFLASH_SIZE, MMU_KTEXT_FLAGS);
 
+  /* The kernel data region is mapped with 2 MiB pages rather than through
+   * map_region()'s 4 KiB ones.  Everything in it, data, bss, the page
+   * tables, the idle stacks and the whole kernel heap, carries the same
+   * permissions, so the finer granularity buys nothing while costing one L3
+   * slab per 2 MiB from a pool of exactly two.
+   */
+
   binfo("map kernel data\n");
-  map_region(KSRAM_START, KSRAM_START, KSRAM_SIZE, MMU_KDATA_FLAGS);
+  mmu_ln_map_region(2, PGT_L2_VBASE, KSRAM_START, KSRAM_START,
+                    KSRAM_SIZE, MMU_KDATA_FLAGS);
 
   /* Connect the L1 and L2 page tables for the kernel text and data */
 
@@ -250,6 +258,14 @@ void eic7700x_kernel_mappings(void)
   binfo("map the page pool\n");
   mmu_ln_map_region(2, PGT_L2_VBASE, PGPOOL_START, PGPOOL_START,
                     PGPOOL_SIZE, MMU_KDATA_FLAGS);
+
+  /* Map the RAM disk.  The page pool no longer covers it, so it needs its
+   * own mapping or the first read of /dev/ram0 faults.
+   */
+
+  binfo("map the RAM disk\n");
+  mmu_ln_map_region(2, PGT_L2_VBASE, RAMDISK_START, RAMDISK_START,
+                    RAMDISK_SIZE, MMU_KDATA_FLAGS);
 }
 
 /****************************************************************************
