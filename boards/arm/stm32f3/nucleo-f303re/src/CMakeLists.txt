@@ -36,10 +36,6 @@ if(CONFIG_ADC)
   list(APPEND SRCS stm32_adc.c)
 endif()
 
-if(CONFIG_DAC)
-  list(APPEND SRCS stm32_dac.c)
-endif()
-
 if(CONFIG_PWM)
   list(APPEND SRCS stm32_pwm.c)
 endif()

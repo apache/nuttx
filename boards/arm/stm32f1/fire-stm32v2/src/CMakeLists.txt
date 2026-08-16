@@ -23,7 +23,7 @@
 set(SRCS stm32_boot.c stm32_spi.c stm32_usbdev.c stm32_mmcsd.c)
 
 if(CONFIG_STM32_FSMC)
-  list(APPEND SRCS stm32_lcd.c stm32_selectlcd.c)
+  list(APPEND SRCS stm32_selectlcd.c)
 endif()
 
 if(CONFIG_ARCH_LEDS)
