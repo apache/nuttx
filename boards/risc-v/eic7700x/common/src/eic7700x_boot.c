@@ -37,6 +37,8 @@
 #include <sys/boardctl.h>
 #include <arch/board/board_memorymap.h>
 
+#include "eic7700x_clk.h"
+
 #include "board_config.h"
 
 /****************************************************************************
@@ -95,6 +97,24 @@ static int mount_ramdisk(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: report_clocks
+ *
+ * Description:
+ *   Report the clock tree the architecture registered before this board
+ *   ran.  Its own function so that nothing it needs stays on the stack for
+ *   the bring up that follows.
+ *
+ ****************************************************************************/
+
+static void report_clocks(void)
+{
+  unsigned int nfail;
+  unsigned int nclk = eic7700x_clk_count(&nfail);
+
+  syslog(LOG_INFO, "clk: registered %u clocks, %u failed\n", nclk, nfail);
+}
+
+/****************************************************************************
  * Name: board_late_initialize
  *
  * Description:
@@ -121,6 +141,8 @@ void board_late_initialize(void)
   mount_ramdisk();
 
   mount(NULL, "/proc", "procfs", 0, NULL);
+
+  report_clocks();
 
   /* Devices whose presence or order is this board's business */
 
