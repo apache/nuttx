@@ -2363,6 +2363,38 @@ config DEBUG_RESET_INFO
 
 endif # DEBUG_RESET
 
+config DEBUG_PINCTRL
+	bool "PINCTRL Debug Features"
+	default n
+	depends on PINCTRL
+	---help---
+		Enable PINCTRL debug features.
+
+if DEBUG_PINCTRL
+
+config DEBUG_PINCTRL_ERROR
+	bool "PINCTRL Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable PINCTRL driver error output to SYSLOG.
+
+config DEBUG_PINCTRL_WARN
+	bool "PINCTRL Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable PINCTRL driver warning output to SYSLOG.
+
+config DEBUG_PINCTRL_INFO
+	bool "PINCTRL Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable PINCTRL driver informational output to SYSLOG.
+
+endif # DEBUG_PINCTRL
+
 config DEBUG_IPC
 	bool "IPC (Inter-Process Communication) Debug Features"
 	default n
