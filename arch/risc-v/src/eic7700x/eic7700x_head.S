@@ -72,18 +72,41 @@ __start:
 
 real_start:
 
-  /* Load the number of CPUs that the kernel supports */
+  /* Take an idle stack.  a0 holds the Hart ID, placed there by whoever
+   * entered us: the firmware on the first Hart in, and SBI on every Hart
+   * started afterwards.
+   */
 
 #ifdef CONFIG_SMP
-  li   t1, CONFIG_SMP_NCPUS
-#else
-  li   t1, 1
-#endif
 
-  /* Set stack pointer to the idle thread stack. Assume Hart 0. */
+  /* One slot per CPU, indexed by Hart ID.  A Hart outside the set NuttX
+   * knows about has no slot of its own and must not borrow one, so it stops
+   * here instead.  chip.h refuses to build a configuration in which that
+   * could be the Hart the firmware handed over on.
+   */
+
+  li   t1, CONFIG_SMP_NCPUS
+  blt  a0, t1, 1f
+
+2:
+  csrw CSR_SIE, zero
+  wfi
+  j    2b
+
+1:
+  riscv_set_inital_sp EIC7700X_IDLESTACK_BASE, SMP_STACK_SIZE, a0
+
+#else
+
+  /* One CPU, so one slot, and it belongs to Hart 0.  Any other Hart is here
+   * only to restart on Hart 0 and park, so it borrows the same slot; the two
+   * briefly overlap, which is why the SMP path above does not do this.
+   */
 
   li   a2, 0
   riscv_set_inital_sp EIC7700X_IDLESTACK_BASE, SMP_STACK_SIZE, a2
+
+#endif
 
   /* Disable all interrupts (i.e. timer, external) in sie */
 
