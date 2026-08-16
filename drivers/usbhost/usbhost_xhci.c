@@ -3971,16 +3971,31 @@ static int xhci_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->epno  = epdesc->addr;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
-  epinfo->interval  = epdesc->interval;
+  epinfo->interval  = xhci_interval(hport->speed, epdesc->xfrtype,
+                                    epdesc->interval);
 #endif
   epinfo->xfrtype   = epdesc->xfrtype;
   nxsem_init(&epinfo->iocsem, 0, 0);
 
   /* xhci_epno_get() returns Device Context Index (DCI) */
 
-  idx              = xhci_epno_get(epinfo);
-  mask             = XHCI_IN_CTX1_A(XHCI_EP_FLAG(idx));
-  dev              = rhport->dev;
+  idx  = xhci_epno_get(epinfo);
+  mask = XHCI_IN_CTX1_A(XHCI_EP_FLAG(idx));
+  dev  = rhport->dev;
+
+  /* There has to be a device to hang the endpoint off.  A port whose
+   * enumeration failed is retried after its slot has been given back, so
+   * this can run for a root hub port with nothing behind it.
+   */
+
+  if (dev == NULL)
+    {
+      uerr("no device on port %d\n", RHPNDX(rhport));
+      nxsem_destroy(&epinfo->iocsem);
+      kmm_free(epinfo);
+      return -ENODEV;
+    }
+
   dev->epinfo[idx - 1] = epinfo;
 
   /* TD rings already allocated but not connected yet. */
