@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <nuttx/debug.h>
 #include <errno.h>
+#include <syslog.h>
 #include <inttypes.h>
 #include <string.h>
 
@@ -358,6 +359,7 @@ static int xhci_ctrl_reset(FAR struct usbhost_xhci_s *priv);
 /* Port management **********************************************************/
 
 static void xhci_probe_ports(FAR struct usbhost_xhci_s *priv);
+static FAR const char *xhci_speed_str(uint32_t portsc);
 static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
                             FAR struct usbhost_hubport_s *hport);
 
@@ -1495,6 +1497,16 @@ static int xhci_port_enable(FAR struct usbhost_xhci_s *priv,
           return -EINVAL;
         }
     }
+
+  /* Say what turned up, now that the port can answer.
+   *
+   * The speed field only means anything once the port has been reset and
+   * enabled.  A USB2 port reports the reset default, full speed, until
+   * then.
+   */
+
+  syslog(LOG_INFO, "%s: port %d: device attached at %s\n",
+         priv->name, rhpndx + 1, xhci_speed_str(regval));
 
   return OK;
 }
@@ -2733,6 +2745,36 @@ static void xhci_asynch_completion(FAR struct xhci_epinfo_s *epinfo)
 #endif
 
 /****************************************************************************
+ * Name: xhci_speed_str
+ *
+ * Description:
+ *   What a port negotiated, in words.  PORTSC reports a speed ID, not a
+ *   speed.
+ *
+ ****************************************************************************/
+
+static FAR const char *xhci_speed_str(uint32_t portsc)
+{
+  switch (XHCI_PORTSC_PS(portsc))
+    {
+      case XHCI_PORTSC_PS_FULL:
+        return "full speed, 12Mbps";
+      case XHCI_PORTSC_PS_LOW:
+        return "low speed, 1.5Mbps";
+      case XHCI_PORTSC_PS_HIGH:
+        return "high speed, 480Mbps";
+      case XHCI_PORTSC_PS_SUPPER11:
+        return "SuperSpeed, 5Gbps";
+      case XHCI_PORTSC_PS_SUPPER21:
+      case XHCI_PORTSC_PS_SUPPER12:
+      case XHCI_PORTSC_PS_SUPPER22:
+        return "SuperSpeed+, 10Gbps";
+      default:
+        return "an unknown speed";
+    }
+}
+
+/****************************************************************************
  * Name: xhci_portsc_work
  *
  * Description:
@@ -2810,6 +2852,9 @@ static void xhci_portsc_work(FAR void *arg)
 
                   usbhost_vtrace2(XHCI_VTRACE2_PORTSC_DISCONND,
                                   rhpndx + 1, priv->pscwait);
+
+                  syslog(LOG_INFO, "%s: port %d: device removed\n",
+                         priv->name, rhpndx + 1);
 
                   rhport->connected = false;
 
