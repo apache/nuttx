@@ -66,14 +66,14 @@
  *     224-1).
  */
 
-#undef CONFIG_STM32H7_SYSTICK_HCLKd8
+#undef CONFIG_STM32_SYSTICK_HCLKd8
 
 /* REVISIT:
  *   It looks like SYSTICK for H7 is always clocked from CPUCLK and doesn't
  *   depend on the SYSTICK_CTRL_CLKSOURCE bit settings.
  */
 
-#ifdef CONFIG_STM32H7_SYSTICK_HCLKd8
+#ifdef CONFIG_STM32_SYSTICK_HCLKd8
 #  define STM32_SYSTICK_CLOCK  (STM32_HCLK_FREQUENCY / 8)
 #else
 #  define STM32_SYSTICK_CLOCK  (STM32_CPUCLK_FREQUENCY)
@@ -155,7 +155,7 @@ void up_timer_initialize(void)
    */
 
   regval  = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
-#ifndef CONFIG_STM32H7_SYSTICK_HCLKd8
+#ifndef CONFIG_STM32_SYSTICK_HCLKd8
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
 #else
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
