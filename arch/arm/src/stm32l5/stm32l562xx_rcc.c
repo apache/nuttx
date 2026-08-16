@@ -110,7 +110,7 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_DMAMUX1EN;
 #endif
 
-#ifdef CONFIG_STM32L5_FLASHEN
+#ifdef CONFIG_STM32_FLASH
   /* Flash memory interface clock enable */
 
   regval |= RCC_AHB1ENR_FLASHEN;
@@ -128,7 +128,7 @@ static inline void rcc_enableahb1(void)
   regval |= RCC_AHB1ENR_TSCEN;
 #endif
 
-#ifdef CONFIG_STM32L5_GTZCEN
+#ifdef CONFIG_STM32_GTZC1
   /* TSC clock enable */
 
   regval |= RCC_AHB1ENR_GTZEN;
@@ -207,19 +207,19 @@ static inline void rcc_enableahb2(void)
   regval |= RCC_AHB2ENR_RNGEN;
 #endif
 
-#ifdef CONFIG_STM32L5_PKAEN
+#ifdef CONFIG_STM32_PKA
   /* Public Key Accelerator clock enable */
 
   regval |= RCC_AHB2ENR_PKAEN;
 #endif
 
-#ifdef CONFIG_STM32L5_OTFDEC1EN
+#ifdef CONFIG_STM32_OTFDEC1
   /* On-the-fly-decryption module clock enable */
 
   regval |= RCC_AHB2ENR_OTFDEC1EN;
 #endif
 
-#ifdef CONFIG_STM32L5_SDMMC1EN
+#ifdef CONFIG_STM32_SDMMC1
   /* SDMMC1 clock enable */
 
   regval |= RCC_AHB2ENR_SDMMC1EN;
@@ -321,7 +321,7 @@ static inline void rcc_enableapb1(void)
   regval |= RCC_APB1ENR1_RTCAPBEN;
 #endif
 
-#ifdef CONFIG_STM32L5_WWDGEN
+#ifdef CONFIG_STM32_WWDG
   /* Windowed Watchdog clock enable */
 
   regval |= RCC_APB1ENR1_WWDGEN;
