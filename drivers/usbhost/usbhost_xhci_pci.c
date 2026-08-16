@@ -519,6 +519,12 @@ static struct pci_driver_s g_pci_xhci_drv =
  * Private Functions
  ****************************************************************************/
 
+/* xHCI requires aligned accesses of each register's own size, and
+ * narrower ones may be ignored.  volatile does not pin the access width,
+ * so every accessor below launders the value through a register with an
+ * empty asm, on loads and stores both, to force the full-width access.
+ */
+
 /****************************************************************************
  * Name: xhci_capa_getreg
  *
@@ -530,8 +536,11 @@ static struct pci_driver_s g_pci_xhci_drv =
 static uint32_t xhci_capa_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->capa_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->capa_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -545,8 +554,11 @@ static uint32_t xhci_capa_getreg(FAR struct usbhost_xhci_s *priv,
 static uint8_t xhci_capa_getreg_1b(FAR struct usbhost_xhci_s *priv,
                                    unsigned int offset)
 {
-  uintptr_t addr = priv->capa_base + offset;
-  return *((FAR volatile uint8_t *)addr);
+  uintptr_t addr   = priv->capa_base + offset;
+  uint8_t   regval = *((FAR volatile uint8_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -562,6 +574,8 @@ static void xhci_capa_putreg_1b(FAR struct usbhost_xhci_s *priv,
                                 uint8_t value)
 {
   uintptr_t addr = priv->capa_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint8_t *)addr) = value;
 }
 
@@ -576,8 +590,11 @@ static void xhci_capa_putreg_1b(FAR struct usbhost_xhci_s *priv,
 static uint32_t xhci_oper_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->oper_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->oper_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -593,6 +610,8 @@ static void xhci_oper_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->oper_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
@@ -609,6 +628,8 @@ static void xhci_oper_putreg_8b(FAR struct usbhost_xhci_s *priv,
                                 uint64_t value)
 {
   uintptr_t addr = priv->oper_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint64_t *)addr) = value;
 }
 
@@ -623,8 +644,11 @@ static void xhci_oper_putreg_8b(FAR struct usbhost_xhci_s *priv,
 static uint32_t xhci_runt_getreg(FAR struct usbhost_xhci_s *priv,
                                  unsigned int offset)
 {
-  uintptr_t addr = priv->runt_base + offset;
-  return *((FAR volatile uint32_t *)addr);
+  uintptr_t addr   = priv->runt_base + offset;
+  uint32_t  regval = *((FAR volatile uint32_t *)addr);
+
+  __asm__ __volatile__("" : "+r"(regval));
+  return regval;
 }
 
 /****************************************************************************
@@ -640,6 +664,8 @@ static void xhci_runt_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->runt_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
@@ -656,6 +682,8 @@ static void xhci_runt_putreg_8b(FAR struct usbhost_xhci_s *priv,
                                 uint64_t value)
 {
   uintptr_t addr = priv->runt_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint64_t *)addr) = value;
 }
 
@@ -672,6 +700,8 @@ static void xhci_door_putreg(FAR struct usbhost_xhci_s *priv,
                              uint32_t value)
 {
   uintptr_t addr = priv->door_base + offset;
+
+  __asm__ __volatile__("" : "+r"(value));
   *((FAR volatile uint32_t *)addr) = value;
 }
 
