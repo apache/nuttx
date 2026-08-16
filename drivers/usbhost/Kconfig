@@ -813,15 +813,17 @@ config USBHOST_BTHCI
 	---help---
 		Select this option to build in support for USB Bluetooth HCI devices.
 
-menuconfig USBHOST_XHCI_PCI
-	bool "USB xHCI PCI Host Driver Support"
+config USBHOST_XHCI
+	bool
 	default n
-	depends on PCI && PCI_MSIX && USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
+	depends on USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
 	select USBHOST_HAVE_ASYNCH
 	---help---
-		USB xHCI PCI host driver support.
+		The xHCI controller driver itself, which is the same wherever the
+		controller is fitted.  Selected by whichever bus found one: PCI
+		below, or an SoC that wires one in.
 
-if USBHOST_XHCI_PCI
+if USBHOST_XHCI
 
 config USBHOST_XHCI_MAX_DEVS
 	int "xHCI maximum supported devices"
@@ -830,6 +832,14 @@ config USBHOST_XHCI_MAX_DEVS
 	---help---
 		How many USB devices will be supported by xHCI driver.
 
-endif # USBHOST_XHCI_PCI
+endif # USBHOST_XHCI
+
+menuconfig USBHOST_XHCI_PCI
+	bool "USB xHCI PCI Host Driver Support"
+	default n
+	depends on PCI && PCI_MSIX && USBHOST_WAITER && SCHED_HPWORK && SCHED_LPWORK
+	select USBHOST_XHCI
+	---help---
+		USB xHCI PCI host driver support.
 
 endif # USBHOST
