@@ -41,8 +41,8 @@
 /* Configuration ************************************************************/
 
 /* Timer devices may be used for different purposes.  One special purpose is
- * to control periodic DAC outputs.  If CONFIG_STM32L4_TIMn is defined then
- * CONFIG_STM32L4_TIMn_DAC must also be defined to indicate that timer "n"
+ * to control periodic DAC outputs.  If CONFIG_STM32_TIMn is defined then
+ * CONFIG_STM32_TIMn_DAC must also be defined to indicate that timer "n"
  * is intended to be used for that purpose.
  */
 
@@ -71,13 +71,13 @@
 #  undef CONFIG_STM32_TIM8_DAC
 #endif
 #ifndef CONFIG_STM32_TIM15
-#  undef CONFIG_STM32L4_TIM15_DAC
+#  undef CONFIG_STM32_TIM15_DAC
 #endif
 #ifndef CONFIG_STM32_TIM16
-#  undef CONFIG_STM32L4_TIM16_DAC
+#  undef CONFIG_STM32_TIM16_DAC
 #endif
 #ifndef CONFIG_STM32_TIM17
-#  undef CONFIG_STM32L4_TIM17_DAC
+#  undef CONFIG_STM32_TIM17_DAC
 #endif
 
 /* Low-level ops helpers ****************************************************/

@@ -70,12 +70,12 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_STM32L4_IWDG_DEFTIMOUT
-#  define CONFIG_STM32L4_IWDG_DEFTIMOUT IWDG_MAXTIMEOUT
+#ifndef CONFIG_STM32_IWDG_DEFTIMOUT
+#  define CONFIG_STM32_IWDG_DEFTIMOUT IWDG_MAXTIMEOUT
 #endif
 
 #ifndef CONFIG_DEBUG_WATCHDOG_INFO
-#  undef CONFIG_STM32L4_IWDG_REGDEBUG
+#  undef CONFIG_STM32_IWDG_REGDEBUG
 #endif
 
 /****************************************************************************
