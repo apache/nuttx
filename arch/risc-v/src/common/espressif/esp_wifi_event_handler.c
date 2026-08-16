@@ -100,6 +100,7 @@ static bool g_wifi_handler_registered;
  *
  ****************************************************************************/
 
+#ifdef ESP_WLAN_HAS_STA
 static void esp_reconnect_work_cb(void *arg)
 {
   UNUSED(arg);
@@ -119,6 +120,7 @@ static void esp_reconnect_work_cb(void *arg)
       wlerr("Failed to reconnect to Wi-Fi on callback\n");
     }
 }
+#endif /* ESP_WLAN_HAS_STA */
 
 /****************************************************************************
  * Name: esp_wifi_event_handler
