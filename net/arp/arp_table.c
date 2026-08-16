@@ -81,8 +81,9 @@
 
 struct arp_table_info_s
 {
-  in_addr_t    ai_ipaddr;   /* IP address for lookup */
-  FAR uint8_t *ai_ethaddr;  /* Location to return the MAC address */
+  in_addr_t    ai_ipaddr;           /* IP address for lookup */
+  FAR uint8_t *ai_ethaddr;          /* Location to return the MAC address */
+  FAR struct net_driver_s *ai_dev;  /* The device the frame will be sent on */
 };
 
 /****************************************************************************
@@ -116,6 +117,16 @@ static const struct ether_addr g_zero_ethaddr =
 static int arp_match(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct arp_table_info_s *info = arg;
+
+  /* Only the egress device may answer for its own address.  Otherwise a
+   * frame sent on one interface takes the MAC of another that happens to
+   * hold the address, which breaks setups sharing a subnet.
+   */
+
+  if (info->ai_dev != NULL && dev != info->ai_dev)
+    {
+      return 0;
+    }
 
   /* Make sure that this is an Ethernet device (or an IEEE 802.11 device
    * which is also Ethernet)
@@ -529,6 +540,7 @@ int arp_find(in_addr_t ipaddr, FAR uint8_t *ethaddr,
 
   info.ai_ipaddr  = ipaddr;
   info.ai_ethaddr = ethaddr;
+  info.ai_dev     = dev;
 
   if (netdev_foreach(arp_match, &info) != 0)
     {
